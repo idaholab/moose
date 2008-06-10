@@ -37,10 +37,29 @@ target 	   := ./libstroma-$(METHOD).a
 all:: $(target)
 
 # Production rules:  how to make the target - depends on library configuration
-$(target): $(objects)
-	@echo "Linking "$@"..."
-	libtool -static -o $(target) $(objects)
+#	@echo "Linking "$@"..."
+#	libtool -static -o $(target) $(objects)
 #	$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
+
+
+ifeq ($(findstring darwin,$(hostos)),darwin)
+$(target): $(objects)
+	@echo "Linking "$@
+	@libtool -static -o $(target) $(objects)
+
+else
+$(target): $(objects)
+	@echo "Linking "$@
+	@$(AR) rv $(target) $(objects)
+endif
+# shared library
+#
+# (target): $(objects)
+# 	@$(shell mkdir -p $(mesh_library_dir))
+# 	@echo "Linking "$@
+# 	@$(libmesh_CXX) $(libmesh_CXXSHAREDFLAG) -o $(mesh_library) $(objects) $(libmesh_LDFLAGS)
+# 	@$(MAKE) -C contrib
+
 
 
 # Useful rules.
