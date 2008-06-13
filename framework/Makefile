@@ -33,14 +33,18 @@ objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 #
 target 	   := ./libstroma-$(METHOD).a
 
-
-all:: $(target)
+all:: Makefile.export $(target)
 
 # Production rules:  how to make the target - depends on library configuration
 #	@echo "Linking "$@"..."
 #	libtool -static -o $(target) $(objects)
 #	$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
 
+
+Makefile.export: exported_stuff
+	@echo "Creating Makefile.export"
+	@echo "STROMA_DIR := " $(PWD) > Makefile.export
+	@cat exported_stuff >> Makefile.export
 
 ifeq ($(findstring darwin,$(hostos)),darwin)
 $(target): $(objects)
@@ -66,7 +70,8 @@ endif
 clean:
 	@rm -f $(objects) *~
 	@rm -f $(target)
-
+	@rm -f .depend
+	@rm -f Makefile.export
 
 clobber:
 	@$(MAKE) clean
@@ -84,7 +89,7 @@ include .depend
 # Dependencies
 #
 .depend:
-	@$(perl) $(meshdir)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(meshdir)/include/*), -I$(i)) "-S\$$(obj-suffix)" $(srcfiles) > .depend
+	@$(perl) $(meshdir)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(meshdir)/include/*), -I$(i)) -Iinclude "-S\$$(obj-suffix)" $(srcfiles) > .depend
 	@echo "Updated .depend"
 
 ###############################################################################

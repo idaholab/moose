@@ -1,7 +1,7 @@
+STROMA_DIR :=  /Users/gastdr/projects/stroma
+
 # The location of the mesh library
 meshdir := $(LIBMESH_DIR)
-
-STROMA_DIR ?= ../stroma
 
 # include the library options determined by configure.  This will
 # set the variables INCLUDE and LIBS that we will need to build and
