@@ -41,9 +41,9 @@ all:: Makefile.export $(target)
 #	$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
 
 
+#@echo "STROMA_DIR := " $(PWD) > Makefile.export
 Makefile.export: exported_stuff
 	@echo "Creating Makefile.export"
-	@echo "STROMA_DIR := " $(PWD) > Makefile.export
 	@cat exported_stuff >> Makefile.export
 
 ifeq ($(findstring darwin,$(hostos)),darwin)
