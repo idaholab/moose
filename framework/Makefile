@@ -26,7 +26,7 @@ objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 
 
 
-.PHONY: clean clobber distclean
+.PHONY: clean clobber distclean doc
 
 ###############################################################################
 # Target:
@@ -64,6 +64,9 @@ endif
 # 	@$(libmesh_CXX) $(libmesh_CXXSHAREDFLAG) -o $(mesh_library) $(objects) $(libmesh_LDFLAGS)
 # 	@$(MAKE) -C contrib
 
+
+doc:
+	doxygen ./doc/Doxyfile
 
 
 # Useful rules.
