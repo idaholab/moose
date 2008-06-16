@@ -50,6 +50,7 @@ protected:
 
   NonlinearImplicitSystem & _system;
   const DofMap & _dof_map;
+  std::vector<unsigned int> _dof_indices;
 
   /**
    * FE Type to be used.

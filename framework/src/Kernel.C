@@ -1,9 +1,13 @@
-#include"Kernel.h"
+#include "Kernel.h"
+
+// libMesh includes
+#include "dof_map.h"
+#include "dense_vector.h"
 
 void
 Kernel::computeResidual(DenseVector<Number> & Re, Elem * elem)
 {
-  dof_map.dof_indices(elem, dof_indices);
-  fe->reinit(elem); 
-  Re.resize(dof_indices.size());
+  _dof_map.dof_indices(elem, _dof_indices);
+  _fe->reinit(elem); 
+  Re.resize(_dof_indices.size());
 }
