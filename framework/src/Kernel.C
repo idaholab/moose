@@ -3,6 +3,7 @@
 // libMesh includes
 #include "dof_map.h"
 #include "dense_vector.h"
+#include "numeric_vector.h"
 
 Kernel::Kernel(EquationSystems * es, std::string var_name)
   :_es(*es),
@@ -37,8 +38,8 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
   {
     for (_i=0; _i<_phi.size(); _i++)
     {
-      //      _u      +=  _phi[_i][_qp]*soln(_dof_indices[_i]);
-      //      _grad_u += _dphi[_i][_qp]*soln(_dof_indices[_i]);
+      _u      +=  _phi[_i][_qp]*soln(_dof_indices[_i]);
+      _grad_u += _dphi[_i][_qp]*soln(_dof_indices[_i]);
     }
 
     for (_i=0; _i<_phi.size(); _i++)
