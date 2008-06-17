@@ -4,7 +4,6 @@
 #include "nonlinear_implicit_system.h"
 #include "fe_base.h"
 #include "quadrature_gauss.h"
-#include "auto_ptr.h"
 
 //Forward Declarations
 class Elem;
@@ -41,7 +40,7 @@ protected:
   /** 
    * This is the virtual that derived classes should override.
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual()=0;
 
   /**
    * Holds the current solution at the current quadrature point.
