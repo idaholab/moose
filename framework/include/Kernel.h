@@ -25,7 +25,10 @@ public:
    */
   Kernel(EquationSystems * es, std::string var_name);
 
-  virtual ~Kernel(){};
+  virtual ~Kernel()
+  {
+    
+  };
 
   /** 
    * Computes the residual for the current element.
@@ -33,7 +36,8 @@ public:
    * @param Re Local residual vector.
    * @param elem Current element.
    */
-  void computeElemResidual(const NumericVector<Number>& soln, DenseVector<Number> & Re, Elem * elem);
+  void computeElemResidual(const NumericVector<Number>& soln, DenseVector<Number> & Re, const Elem * elem);
+
 
 protected:
   
@@ -59,9 +63,12 @@ protected:
   unsigned int _dim;
 
   NonlinearImplicitSystem & _system;
+
+public:
   const DofMap & _dof_map;
   std::vector<unsigned int> _dof_indices;
 
+protected:
   /**
    * FE Type to be used.
    */

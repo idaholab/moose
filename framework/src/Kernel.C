@@ -14,9 +14,9 @@ Kernel::Kernel(EquationSystems * es, std::string var_name)
    _dof_map(_system.get_dof_map()),
    _fe_type(_dof_map.variable_type(0)),
    _fe(FEBase::build(_dim, _fe_type)),
-   _qrule(_fe_type.default_quadrature_order()),
+   _qrule(_dim,_fe_type.default_quadrature_order()),
    _fe_face(FEBase::build(_dim, _fe_type)),
-   _qface(_fe_type.default_quadrature_order()),
+   _qface(_dim,_fe_type.default_quadrature_order()),
    _JxW(_fe->get_JxW()),
    _phi(_fe->get_phi()),
    _dphi(_fe->get_dphi())
@@ -28,7 +28,7 @@ Kernel::Kernel(EquationSystems * es, std::string var_name)
 void
 Kernel::computeElemResidual(const NumericVector<Number>& soln,
 			    DenseVector<Number> & Re,
-			    Elem * elem)
+			    const Elem * elem)
 {
   _dof_map.dof_indices(elem, _dof_indices);
   _fe->reinit(elem); 
