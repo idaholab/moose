@@ -43,6 +43,6 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
     }
 
     for (_i=0; _i<_phi.size(); _i++)
-      computeQpResidual(Re);
+      Re(_i) += computeQpResidual();
   }
 }
