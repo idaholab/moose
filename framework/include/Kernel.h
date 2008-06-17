@@ -6,7 +6,7 @@
 #include "quadrature_gauss.h"
 
 //Forward Declarations
-class Elem;
+class Elem; 
 
 /** 
  * The Kernel class is responsible for calculating the residuals for various
