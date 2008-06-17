@@ -33,7 +33,7 @@ public:
    * @param Re Local residual vector.
    * @param elem Current element.
    */
-  void computeResidual(DenseVector<Number> & Re, Elem * elem);
+  void computeElemResidual(const NumericVector<Number>& soln, DenseVector<Number> & Re, Elem * elem);
 
 protected:
   
@@ -42,11 +42,23 @@ protected:
    * 
    * @param Re 
    */
-  virtual void computeElemResidual(DenseVector<Number> & Re);
+  virtual void computeQpResidual(DenseVector<Number> & Re);
+
+  /**
+   * Holds the current solution at the current quadrature point.
+   */
+  Real _u;
+
+  /**
+   * Holds the current solution gradient at the current quadrature point.
+   */
+  RealGradient _grad_u;
 
   EquationSystems & _es;
+  std::string _var_name;
+
   MeshBase & _mesh;
-  unsigned int _dimension;
+  unsigned int _dim;
 
   NonlinearImplicitSystem & _system;
   const DofMap & _dof_map;
@@ -68,6 +80,11 @@ protected:
   QGauss _qrule;
 
   /**
+   * Current _qrule quadrature point.
+   */
+  unsigned int _qp;
+
+  /**
    * Boundary finite element. 
    */
   AutoPtr<FEBase> _fe_face;
@@ -78,7 +95,7 @@ protected:
   QGauss _qface;
 
   /**
-   * Interior Jacobian pre-multiplied by the weight at every quadrature point.
+   * Interior Jacobian pre-multiplied by the weight.
    */
   const std::vector<Real> & _JxW;
 
@@ -91,6 +108,10 @@ protected:
    * Gradient of interior shape function.
    */
   const std::vector<std::vector<RealGradient> > & _dphi;
-  
+
+  /**
+   * Current shape function.
+   */
+  unsigned int _i;  
 };
 
