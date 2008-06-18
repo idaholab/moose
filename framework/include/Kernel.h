@@ -8,6 +8,9 @@
 //Forward Declarations
 class Elem; 
 
+#ifndef KERNEL_H
+#define KERNEL_H
+
 /** 
  * The Kernel class is responsible for calculating the residuals for various
  * physics.
@@ -23,7 +26,7 @@ public:
    * @param system The system this variable is in
    * @param var_name The variable this Kernel is going to compute a residual for.
    */
-  Kernel(EquationSystems * es, std::string var_name);
+  Kernel(EquationSystems * es, std::string var_name, bool integrated=true);
 
   virtual ~Kernel()
   {
@@ -38,6 +41,15 @@ public:
    */
   void computeElemResidual(const NumericVector<Number>& soln, DenseVector<Number> & Re, const Elem * elem);
 
+  /** 
+   * Computes the residual for the current side.
+   * 
+   * @param Re Local residual vector.
+   * @param elem Current element.
+   * @param side Current side.
+   */
+  void computeSideResidual(const NumericVector<Number>& soln, DenseVector<Number> & Re, const Elem * elem, unsigned int side);
+
 
 protected:
   
@@ -45,6 +57,12 @@ protected:
    * This is the virtual that derived classes should override.
    */
   virtual Real computeQpResidual()=0;
+
+  /**
+   * If false the result of computeQpResidual() will overwrite the current Re entry instead of summing.
+   * Right now it's only really used for computeSideResidual so Derichlet BC's can be computed exactly.
+   */
+  bool _integrated;
 
   /**
    * Holds the current solution at the current quadrature point.
@@ -115,8 +133,24 @@ protected:
   const std::vector<std::vector<RealGradient> > & _dphi;
 
   /**
+   * Interior Jacobian pre-multiplied by the weight.
+   */
+  const std::vector<Real> & _JxW_face;
+
+  /**
+   * Side shape function.
+   */
+  const std::vector<std::vector<Real> > & _phi_face;
+
+  /**
+   * Gradient of side shape function.
+   */
+  const std::vector<std::vector<RealGradient> > & _dphi_face;
+
+  /**
    * Current shape function.
    */
   unsigned int _i;  
 };
 
+#endif //KERNEL_H

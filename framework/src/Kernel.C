@@ -5,8 +5,9 @@
 #include "dense_vector.h"
 #include "numeric_vector.h"
 
-Kernel::Kernel(EquationSystems * es, std::string var_name)
-  :_es(*es),
+Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated)
+  :_integrated(integrated),
+   _es(*es),
    _var_name(var_name),
    _mesh(_es.get_mesh()),
    _dim(_mesh.mesh_dimension()),
@@ -16,10 +17,13 @@ Kernel::Kernel(EquationSystems * es, std::string var_name)
    _fe(FEBase::build(_dim, _fe_type)),
    _qrule(_dim,_fe_type.default_quadrature_order()),
    _fe_face(FEBase::build(_dim, _fe_type)),
-   _qface(_dim,_fe_type.default_quadrature_order()),
+   _qface(_dim-1,_fe_type.default_quadrature_order()),
    _JxW(_fe->get_JxW()),
    _phi(_fe->get_phi()),
-   _dphi(_fe->get_dphi())
+   _dphi(_fe->get_dphi()),
+   _JxW_face(_fe_face->get_JxW()),
+   _phi_face(_fe_face->get_phi()),
+   _dphi_face(_fe_face->get_dphi())
 {
   _fe->attach_quadrature_rule(&_qrule);
   _fe_face->attach_quadrature_rule(&_qface);
@@ -36,6 +40,8 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
 
   for (_qp=0; _qp<_qrule.n_points(); _qp++)
   {
+    _u=0;
+    _grad_u=0;
     for (_i=0; _i<_phi.size(); _i++)
     {
       _u      +=  _phi[_i][_qp]*soln(_dof_indices[_i]);
@@ -45,4 +51,38 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
     for (_i=0; _i<_phi.size(); _i++)
       Re(_i) += computeQpResidual();
   }
+}
+
+void
+Kernel::computeSideResidual(const NumericVector<Number>& soln,
+			    DenseVector<Number> & Re,
+			    const Elem * elem,
+			    unsigned int side)
+{
+  _dof_map.dof_indices(elem, _dof_indices);
+  _fe_face->reinit(elem, side);
+
+  if(_integrated)
+    for (_qp=0; _qp<_qface.n_points(); _qp++)
+    {
+      _u=0;
+      _grad_u=0;
+      for (_i=0; _i<_phi_face.size(); _i++)
+      {
+        _u      +=  _phi_face[_i][_qp]*soln(_dof_indices[_i]);
+        _grad_u += _dphi_face[_i][_qp]*soln(_dof_indices[_i]);
+      }
+
+      for (_i=0; _i<_phi_face.size(); _i++)
+	Re(_i) += computeQpResidual();
+    }
+  else
+    for(_i=0; _i<_phi_face.size(); _i++)
+    {
+      if(elem->is_node_on_side(_i,side))
+      {
+	_u = soln(_dof_indices[_i]);
+	Re(_i) = computeQpResidual();
+      }
+    }
 }
