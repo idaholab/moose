@@ -10,6 +10,20 @@
 class BoundaryCondition : public Kernel
 {
 public:
+
+  /**
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
+   */
+  BoundaryCondition(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated, unsigned int boundary_id)
+    :Kernel(es,var_name, integrated),
+     _parameters(parameters),
+     _boundary_id(boundary_id)
+  {}
+
+  /**
+   * Standalone constructor.
+   */
   BoundaryCondition(EquationSystems * es, std::string var_name, bool integrated, unsigned int boundary_id)
     :Kernel(es,var_name, integrated),
      _boundary_id(boundary_id)
@@ -25,6 +39,10 @@ public:
   unsigned int boundaryID(){ return _boundary_id; }
 
 protected:
+  /**
+   * Holds parameters for derived classes so they can be built with common constructor.
+   */
+  Parameters _parameters;
 
   /**
    * Boundary ID this BC is active on.
