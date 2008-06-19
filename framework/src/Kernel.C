@@ -5,6 +5,31 @@
 #include "dense_vector.h"
 #include "numeric_vector.h"
 
+Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated)
+  :_parameters(parameters),
+   _integrated(integrated),
+   _es(*es),
+   _var_name(var_name),
+   _mesh(_es.get_mesh()),
+   _dim(_mesh.mesh_dimension()),
+   _system(_es.get_system<NonlinearImplicitSystem>("NonlinearSystem")),
+   _dof_map(_system.get_dof_map()),
+   _fe_type(_dof_map.variable_type(0)),
+   _fe(FEBase::build(_dim, _fe_type)),
+   _qrule(_dim,_fe_type.default_quadrature_order()),
+   _fe_face(FEBase::build(_dim, _fe_type)),
+   _qface(_dim-1,_fe_type.default_quadrature_order()),
+   _JxW(_fe->get_JxW()),
+   _phi(_fe->get_phi()),
+   _dphi(_fe->get_dphi()),
+   _JxW_face(_fe_face->get_JxW()),
+   _phi_face(_fe_face->get_phi()),
+   _dphi_face(_fe_face->get_dphi())
+{
+  _fe->attach_quadrature_rule(&_qrule);
+  _fe_face->attach_quadrature_rule(&_qface);
+}
+
 Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated)
   :_integrated(integrated),
    _es(*es),

@@ -14,7 +14,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef BoundaryCondition * (*buildPtr)(Parameters parameters, EquationSystems * es, std::string var_name, unsigned int boundary_id);
+typedef BoundaryCondition * (*BCBuildPtr)(Parameters parameters, EquationSystems * es, std::string var_name, unsigned int boundary_id);
 
 /**
  * Templated build function used for generating function pointers to build classes on demand.
@@ -57,7 +57,7 @@ private:
   BCFactory(){}
   virtual ~BCFactory(){}
 
-  std::map<std::string, buildPtr> name_to_build_pointer;
+  std::map<std::string, BCBuildPtr> name_to_build_pointer;
   std::vector<BoundaryCondition *> active_bcs;
 };
 

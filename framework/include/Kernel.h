@@ -19,12 +19,23 @@ class Elem;
 class Kernel
 {
 public:
+
   /** 
-   * This constructor should be used most often.  It initializes all internal
-   * references needed for residual computation.
+   * Factory constrcutor initializes all internal references needed for residual computation.
+   * 
    * 
    * @param system The system this variable is in
    * @param var_name The variable this Kernel is going to compute a residual for.
+   * @param integrated Whether or not the residual is integraded (used by BCs).
+   */
+  Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated=true);
+
+  /** 
+   * Standalone constructor initializes all internal references needed for residual computation.
+   * 
+   * @param system The system this variable is in
+   * @param var_name The variable this Kernel is going to compute a residual for.
+   * @param integrated Whether or not the residual is integraded (used by BCs).
    */
   Kernel(EquationSystems * es, std::string var_name, bool integrated=true);
 
@@ -52,7 +63,11 @@ public:
 
 
 protected:
-  
+  /**
+   * Holds parameters for derived classes so they can be built with common constructor.
+   */
+  Parameters _parameters;
+
   /** 
    * This is the virtual that derived classes should override.
    */

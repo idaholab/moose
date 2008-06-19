@@ -16,8 +16,7 @@ public:
    * constructor.
    */
   BoundaryCondition(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated, unsigned int boundary_id)
-    :Kernel(es,var_name, integrated),
-     _parameters(parameters),
+    :Kernel(parameters, es,var_name, integrated),
      _boundary_id(boundary_id)
   {}
 
@@ -39,10 +38,6 @@ public:
   unsigned int boundaryID(){ return _boundary_id; }
 
 protected:
-  /**
-   * Holds parameters for derived classes so they can be built with common constructor.
-   */
-  Parameters _parameters;
 
   /**
    * Boundary ID this BC is active on.
