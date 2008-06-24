@@ -22,6 +22,7 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
    _JxW(_fe->get_JxW()),
    _phi(_fe->get_phi()),
    _dphi(_fe->get_dphi()),
+   _q_point(_fe->get_xyz()),
    _JxW_face(_fe_face->get_JxW()),
    _phi_face(_fe_face->get_phi()),
    _dphi_face(_fe_face->get_dphi())
@@ -46,6 +47,7 @@ Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated)
    _JxW(_fe->get_JxW()),
    _phi(_fe->get_phi()),
    _dphi(_fe->get_dphi()),
+   _q_point(_fe->get_xyz()),
    _JxW_face(_fe_face->get_JxW()),
    _phi_face(_fe_face->get_phi()),
    _dphi_face(_fe_face->get_dphi())
@@ -60,8 +62,10 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
 			    const Elem * elem)
 {
   _dof_map.dof_indices(elem, _dof_indices);
-  _fe->reinit(elem); 
-  Re.resize(_dof_indices.size());
+  _fe->reinit(elem);
+
+  if(Re.size() != _dof_indices.size())
+    Re.resize(_dof_indices.size());
 
   for (_qp=0; _qp<_qrule.n_points(); _qp++)
   {

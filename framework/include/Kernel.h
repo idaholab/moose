@@ -148,6 +148,11 @@ protected:
   const std::vector<std::vector<RealGradient> > & _dphi;
 
   /**
+   * XYZ coordinates of quadrature points
+   */
+  const std::vector<Point>& _q_point;
+
+  /**
    * Interior Jacobian pre-multiplied by the weight.
    */
   const std::vector<Real> & _JxW_face;
