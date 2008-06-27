@@ -100,7 +100,12 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
     }
 
     for (_i=0; _i<_phi.size(); _i++)
+    {
       Re(_i) += computeQpResidual();
+
+      if(_is_transient)
+	Re(_i) += computeQpTransientResidual();
+    }
   }
 }
 

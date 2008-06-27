@@ -74,6 +74,11 @@ protected:
    */
   virtual Real computeQpResidual()=0;
 
+  /** 
+   * Piece of the residual that gets added for transient solves.
+   */
+  virtual Real computeQpTransientResidual(){}
+
   /**
    * If false the result of computeQpResidual() will overwrite the current Re entry instead of summing.
    * Right now it's only really used for computeSideResidual so Derichlet BC's can be computed exactly.
