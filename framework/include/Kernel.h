@@ -212,9 +212,29 @@ protected:
   bool _is_transient;
 
   /**
-   * The names of the variables this kernel is coupled to.
+   * Names of the variables this kernel is coupled to.
    */
   std::vector<std::string> _coupled_to;
+
+  /**
+   * Variable numbers of the coupled variables.
+   */
+  std::vector<unsigned int> _coupled_var_nums;
+
+  /**
+   * Dof Maps for coupled variables.
+   */
+  std::vector<std::vector<unsigned int> > _coupled_dof_indices;
+
+  /**
+   * Value of the coupled variables at the quadrature points.
+   */
+  std::map<std::string, Real> _coupled_vals;
+
+  /**
+   * Gradient of the coupled variables at the quadrature points.
+   */
+  std::map<std::string, RealGradient> _coupled_grads;
 
 private:
   /**
@@ -222,14 +242,14 @@ private:
    * 
    * @param soln The solution vector to pull the coefficients from.
    */
-  Real computeQpSolution(const NumericVector<Number>& soln);
+  Real computeQpSolution(const NumericVector<Number>& soln, const std::vector<unsigned int>& dof_indices);
 
   /**
    * Computes the value of the gradient of soln at the current quadrature point.
    * 
    * @param soln The solution vector to pull the coefficients from.
    */
-  RealGradient computeQpGradSolution(const NumericVector<Number>& soln);
+  RealGradient computeQpGradSolution(const NumericVector<Number>& soln, const std::vector<unsigned int>& dof_indices);
 
 };
 
