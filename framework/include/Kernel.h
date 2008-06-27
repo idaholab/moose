@@ -29,7 +29,7 @@ public:
    * @param var_name The variable this Kernel is going to compute a residual for.
    * @param integrated Whether or not the residual is integraded (used by BCs).
    */
-  Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated=true);
+  Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated=true, std::vector<std::string> coupled_to=0);
 
   /** 
    * Standalone constructor initializes all internal references needed for residual computation.
@@ -38,7 +38,7 @@ public:
    * @param var_name The variable this Kernel is going to compute a residual for.
    * @param integrated Whether or not the residual is integraded (used by BCs).
    */
-  Kernel(EquationSystems * es, std::string var_name, bool integrated=true);
+  Kernel(EquationSystems * es, std::string var_name, bool integrated=true, std::vector<std::string> coupled_to=0);
 
   virtual ~Kernel()
   {
@@ -113,11 +113,19 @@ protected:
 
   TransientNonlinearImplicitSystem & _system;
 
+  unsigned int _var_num;
+  unsigned int _var_num_dofs;
+
 public:
   const DofMap & _dof_map;
   std::vector<unsigned int> _dof_indices;
 
 protected:
+  /**
+   * This variable's dof_indices
+   */
+  std::vector<unsigned int> _var_dof_indices;
+
   /**
    * FE Type to be used.
    */
@@ -202,6 +210,11 @@ protected:
    * Whether or not the current simulation is transient.
    */
   bool _is_transient;
+
+  /**
+   * The names of the variables this kernel is coupled to.
+   */
+  std::vector<std::string> _coupled_to;
 
 private:
   /**

@@ -4,8 +4,9 @@
 #include "dof_map.h"
 #include "dense_vector.h"
 #include "numeric_vector.h"
+#include "dense_subvector.h"
 
-Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated)
+Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated, std::vector<std::string> coupled_to)
   :_parameters(parameters),
    _integrated(integrated),
    _es(*es),
@@ -13,6 +14,7 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
    _mesh(_es.get_mesh()),
    _dim(_mesh.mesh_dimension()),
    _system(_es.get_system<TransientNonlinearImplicitSystem>("NonlinearSystem")),
+   _var_num(_system.variable_number(_var_name)),
    _dof_map(_system.get_dof_map()),
    _fe_type(_dof_map.variable_type(0)),
    _fe(FEBase::build(_dim, _fe_type)),
@@ -28,8 +30,8 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
    _dphi_face(_fe_face->get_dphi()),
    _t(0),
    _dt(0),
-   _is_transient(false)
-
+   _is_transient(false),
+   _coupled_to(coupled_to)
 {
   _fe->attach_quadrature_rule(&_qrule);
   _fe_face->attach_quadrature_rule(&_qface);
@@ -42,13 +44,14 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
   }
 }
 
-Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated)
+Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated, std::vector<std::string> coupled_to)
   :_integrated(integrated),
    _es(*es),
    _var_name(var_name),
    _mesh(_es.get_mesh()),
    _dim(_mesh.mesh_dimension()),
    _system(_es.get_system<TransientNonlinearImplicitSystem>("NonlinearSystem")),
+   _var_num(_system.variable_number(_var_name)),
    _dof_map(_system.get_dof_map()),
    _fe_type(_dof_map.variable_type(0)),
    _fe(FEBase::build(_dim, _fe_type)),
@@ -64,7 +67,8 @@ Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated)
    _dphi_face(_fe_face->get_dphi()),
    _t(0),
    _dt(0),
-   _is_transient(false)
+   _is_transient(false),
+   _coupled_to(coupled_to)
 {
   _fe->attach_quadrature_rule(&_qrule);
   _fe_face->attach_quadrature_rule(&_qface);
@@ -83,10 +87,15 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
 			    const Elem * elem)
 {
   _dof_map.dof_indices(elem, _dof_indices);
+  _dof_map.dof_indices(elem, _var_dof_indices, _var_num);
   _fe->reinit(elem);
 
   if(Re.size() != _dof_indices.size())
     Re.resize(_dof_indices.size());
+
+  _var_num_dofs = _var_dof_indices.size();
+
+  DenseSubVector<Number> var_Re(Re,_var_num*_var_num_dofs,_var_num_dofs);
 
   for (_qp=0; _qp<_qrule.n_points(); _qp++)
   {
@@ -101,10 +110,10 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
 
     for (_i=0; _i<_phi.size(); _i++)
     {
-      Re(_i) += computeQpResidual();
+      var_Re(_i) += computeQpResidual();
 
       if(_is_transient)
-	Re(_i) += computeQpTransientResidual();
+	var_Re(_i) += computeQpTransientResidual();
     }
   }
 }
@@ -116,7 +125,12 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
 			    unsigned int side)
 {
   _dof_map.dof_indices(elem, _dof_indices);
+  _dof_map.dof_indices(elem, _var_dof_indices, _var_num);
   _fe_face->reinit(elem, side);
+
+  _var_num_dofs = _var_dof_indices.size();
+
+  DenseSubVector<Number> var_Re(Re,_var_num*_var_num_dofs,_var_num_dofs);
 
   if(_integrated)
     for (_qp=0; _qp<_qface.n_points(); _qp++)
@@ -125,12 +139,12 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
       _grad_u=0;
       for (_i=0; _i<_phi_face.size(); _i++)
       {
-        _u      +=  _phi_face[_i][_qp]*soln(_dof_indices[_i]);
-        _grad_u += _dphi_face[_i][_qp]*soln(_dof_indices[_i]);
+        _u      +=  _phi_face[_i][_qp]*soln(_var_dof_indices[_i]);
+        _grad_u += _dphi_face[_i][_qp]*soln(_var_dof_indices[_i]);
       }
 
       for (_i=0; _i<_phi_face.size(); _i++)
-	Re(_i) += computeQpResidual();
+	var_Re(_i) += computeQpResidual();
     } 
   else
     for(_i=0; _i<_phi_face.size(); _i++)
@@ -138,7 +152,7 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
       if(elem->is_node_on_side(_i,side))
       {
 	_u = soln(_dof_indices[_i]);
-	Re(_i) = computeQpResidual();
+	var_Re(_i) = computeQpResidual();
       }
     }
 }
@@ -150,7 +164,7 @@ Kernel::computeQpSolution(const NumericVector<Number>& soln)
 
   for (_i=0; _i<_phi.size(); _i++)
   {
-    u +=  _phi[_i][_qp]*soln(_dof_indices[_i]);
+    u +=  _phi[_i][_qp]*soln(_var_dof_indices[_i]);
   }
 
   return u;
@@ -163,7 +177,7 @@ Kernel::computeQpGradSolution(const NumericVector<Number>& soln)
 
   for (_i=0; _i<_dphi.size(); _i++) 
   {
-    grad_u += _dphi[_i][_qp]*soln(_dof_indices[_i]);
+    grad_u += _dphi[_i][_qp]*soln(_var_dof_indices[_i]);
   }
 
   return grad_u;
