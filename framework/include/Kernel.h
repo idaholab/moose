@@ -4,6 +4,7 @@
 #include "nonlinear_implicit_system.h"
 #include "fe_base.h"
 #include "quadrature_gauss.h"
+#include "transient_system.h"
 
 //Forward Declarations
 class Elem; 
@@ -89,13 +90,23 @@ protected:
    */
   RealGradient _grad_u;
 
+  /**
+   * Holds the previous solution at the current quadrature point.
+   */
+  Real _u_old;
+
+  /**
+   * Holds the previous solution gradient at the current quadrature point.
+   */
+  RealGradient _grad_u_old;
+
   EquationSystems & _es;
   std::string _var_name;
 
   MeshBase & _mesh;
   unsigned int _dim;
 
-  NonlinearImplicitSystem & _system;
+  TransientNonlinearImplicitSystem & _system;
 
 public:
   const DofMap & _dof_map;
@@ -170,7 +181,38 @@ protected:
   /**
    * Current shape function.
    */
-  unsigned int _i;  
+  unsigned int _i;
+
+  /**
+   * Current time.
+   */
+  Real _t;
+
+  /**
+   * Current dt.
+   */
+  Real _dt;
+
+  /**
+   * Whether or not the current simulation is transient.
+   */
+  bool _is_transient;
+
+private:
+  /**
+   * Computes the value of soln at the current quadrature point.
+   * 
+   * @param soln The solution vector to pull the coefficients from.
+   */
+  Real computeQpSolution(const NumericVector<Number>& soln);
+
+  /**
+   * Computes the value of the gradient of soln at the current quadrature point.
+   * 
+   * @param soln The solution vector to pull the coefficients from.
+   */
+  RealGradient computeQpGradSolution(const NumericVector<Number>& soln);
+
 };
 
 #endif //KERNEL_H

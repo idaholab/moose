@@ -12,7 +12,7 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
    _var_name(var_name),
    _mesh(_es.get_mesh()),
    _dim(_mesh.mesh_dimension()),
-   _system(_es.get_system<NonlinearImplicitSystem>("NonlinearSystem")),
+   _system(_es.get_system<TransientNonlinearImplicitSystem>("NonlinearSystem")),
    _dof_map(_system.get_dof_map()),
    _fe_type(_dof_map.variable_type(0)),
    _fe(FEBase::build(_dim, _fe_type)),
@@ -25,10 +25,21 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
    _q_point(_fe->get_xyz()),
    _JxW_face(_fe_face->get_JxW()),
    _phi_face(_fe_face->get_phi()),
-   _dphi_face(_fe_face->get_dphi())
+   _dphi_face(_fe_face->get_dphi()),
+   _t(0),
+   _dt(0),
+   _is_transient(false)
+
 {
   _fe->attach_quadrature_rule(&_qrule);
   _fe_face->attach_quadrature_rule(&_qface);
+
+  if(_es.parameters.have_parameter<Real>("time") && _es.parameters.have_parameter<Real>("dt"))
+  {
+    _is_transient = true;
+    _t = _es.parameters.get<Real>("time");
+    _dt = _es.parameters.get<Real>("dt");
+  }
 }
 
 Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated)
@@ -37,7 +48,7 @@ Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated)
    _var_name(var_name),
    _mesh(_es.get_mesh()),
    _dim(_mesh.mesh_dimension()),
-   _system(_es.get_system<NonlinearImplicitSystem>("NonlinearSystem")),
+   _system(_es.get_system<TransientNonlinearImplicitSystem>("NonlinearSystem")),
    _dof_map(_system.get_dof_map()),
    _fe_type(_dof_map.variable_type(0)),
    _fe(FEBase::build(_dim, _fe_type)),
@@ -50,10 +61,20 @@ Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated)
    _q_point(_fe->get_xyz()),
    _JxW_face(_fe_face->get_JxW()),
    _phi_face(_fe_face->get_phi()),
-   _dphi_face(_fe_face->get_dphi())
+   _dphi_face(_fe_face->get_dphi()),
+   _t(0),
+   _dt(0),
+   _is_transient(false)
 {
   _fe->attach_quadrature_rule(&_qrule);
   _fe_face->attach_quadrature_rule(&_qface);
+
+  if(_es.parameters.have_parameter<Real>("time") && _es.parameters.have_parameter<Real>("dt"))
+  {
+    _is_transient = true;
+    _t = _es.parameters.get<Real>("time");
+    _dt = _es.parameters.get<Real>("dt");
+  }
 }
 
 void
@@ -69,12 +90,13 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
 
   for (_qp=0; _qp<_qrule.n_points(); _qp++)
   {
-    _u=0;
-    _grad_u=0;
-    for (_i=0; _i<_phi.size(); _i++)
+    _u=computeQpSolution(soln);
+    _grad_u=computeQpGradSolution(soln);
+
+    if(_is_transient)
     {
-      _u      +=  _phi[_i][_qp]*soln(_dof_indices[_i]);
-      _grad_u += _dphi[_i][_qp]*soln(_dof_indices[_i]);
+      _u_old = computeQpSolution(*_system.old_local_solution);
+      _grad_u_old = computeQpGradSolution(*_system.old_local_solution);
     }
 
     for (_i=0; _i<_phi.size(); _i++)
@@ -104,7 +126,7 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
 
       for (_i=0; _i<_phi_face.size(); _i++)
 	Re(_i) += computeQpResidual();
-    }
+    } 
   else
     for(_i=0; _i<_phi_face.size(); _i++)
     {
@@ -114,4 +136,30 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
 	Re(_i) = computeQpResidual();
       }
     }
+}
+
+Real
+Kernel::computeQpSolution(const NumericVector<Number>& soln)
+{
+  Real u=0;
+
+  for (_i=0; _i<_phi.size(); _i++)
+  {
+    u +=  _phi[_i][_qp]*soln(_dof_indices[_i]);
+  }
+
+  return u;
+}
+
+RealGradient
+Kernel::computeQpGradSolution(const NumericVector<Number>& soln)
+{
+  RealGradient grad_u=0;
+
+  for (_i=0; _i<_dphi.size(); _i++) 
+  {
+    grad_u += _dphi[_i][_qp]*soln(_dof_indices[_i]);
+  }
+
+  return grad_u;
 }
