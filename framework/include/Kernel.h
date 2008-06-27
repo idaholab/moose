@@ -29,7 +29,7 @@ public:
    * @param var_name The variable this Kernel is going to compute a residual for.
    * @param integrated Whether or not the residual is integraded (used by BCs).
    */
-  Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated=true, std::vector<std::string> coupled_to=0);
+  Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated=true, std::vector<std::string> coupled_to=std::vector<std::string>(0));
 
   /** 
    * Standalone constructor initializes all internal references needed for residual computation.
@@ -38,7 +38,7 @@ public:
    * @param var_name The variable this Kernel is going to compute a residual for.
    * @param integrated Whether or not the residual is integraded (used by BCs).
    */
-  Kernel(EquationSystems * es, std::string var_name, bool integrated=true, std::vector<std::string> coupled_to=0);
+  Kernel(EquationSystems * es, std::string var_name, bool integrated=true, std::vector<std::string> coupled_to=std::vector<std::string>(0));
 
   virtual ~Kernel()
   {
