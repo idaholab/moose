@@ -77,7 +77,7 @@ protected:
   /** 
    * Piece of the residual that gets added for transient solves.
    */
-  virtual Real computeQpTransientResidual(){}
+  virtual Real computeQpTransientResidual(){ return 0; }
 
   /**
    * If false the result of computeQpResidual() will overwrite the current Re entry instead of summing.

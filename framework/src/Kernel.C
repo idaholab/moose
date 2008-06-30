@@ -47,10 +47,10 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
   {
     std::string coupled_var_name=_coupled_to[i];
 
-    _coupled_var_nums[i]=_system.variable_number(var_name);
-    _coupled_dof_indices[i];
-    _coupled_vals[coupled_var_name]=0;
+    _coupled_var_nums.push_back(_system.variable_number(coupled_var_name));
+    _coupled_dof_indices.push_back(std::vector<unsigned int>(0));
     _coupled_grads[coupled_var_name]=0;
+    _coupled_vals[coupled_var_name]=0;
   }
 }
 
@@ -94,8 +94,8 @@ Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated, std:
   {
     std::string coupled_var_name=_coupled_to[i];
 
-    _coupled_var_nums[i]=_system.variable_number(var_name);
-    _coupled_dof_indices[i];
+    _coupled_var_nums.push_back(_system.variable_number(coupled_var_name));
+    _coupled_dof_indices.push_back(std::vector<unsigned int>(0));
     _coupled_vals[coupled_var_name]=0;
     _coupled_grads[coupled_var_name]=0;
   }
@@ -141,9 +141,6 @@ Kernel::computeElemResidual(const NumericVector<Number>& soln,
       _coupled_grads[coupled_var_name]=computeQpGradSolution(soln, _coupled_dof_indices[i]);
     }
 
-    for(unsigned int i=0; i<_coupled_to.size(); i++)
-
-
     for (_i=0; _i<_phi.size(); _i++)
     {
       var_Re(_i) += computeQpResidual();
@@ -187,7 +184,7 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
     {
       if(elem->is_node_on_side(_i,side))
       {
-	_u = soln(_dof_indices[_i]);
+	_u = soln(_var_dof_indices[_i]);
 	var_Re(_i) = computeQpResidual();
       }
     }

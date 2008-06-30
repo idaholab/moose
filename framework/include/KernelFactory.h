@@ -14,15 +14,15 @@
 /**
  * Typedef to make things easier.
  */
-typedef Kernel * (*kernelBuildPtr)(Parameters parameters, EquationSystems * es, std::string var_name);
+typedef Kernel * (*kernelBuildPtr)(Parameters parameters, EquationSystems * es, std::string var_name, std::vector<std::string> coupled_to);
 
 /**
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename KernelType>
-Kernel * buildKernel(Parameters parameters, EquationSystems * es, std::string var_name)
+Kernel * buildKernel(Parameters parameters, EquationSystems * es, std::string var_name, std::vector<std::string> coupled_to)
 {
-  return new KernelType(parameters, es, var_name);
+  return new KernelType(parameters, es, var_name, coupled_to);
 }
 
 /**
@@ -45,9 +45,9 @@ public:
     name_to_build_pointer[name]=&buildKernel<KernelType>;
   }
 
-  void add(std::string name, Parameters parameters, EquationSystems * es, std::string var_name)
+  void add(std::string name, Parameters parameters, EquationSystems * es, std::string var_name, std::vector<std::string> coupled_to=std::vector<std::string>(0))
   {
-    active_kernels.push_back((*name_to_build_pointer[name])(parameters,es,var_name));
+    active_kernels.push_back((*name_to_build_pointer[name])(parameters,es,var_name,coupled_to));
   }
 
   std::vector<Kernel *>::iterator activeKernelsBegin(){ return active_kernels.begin(); };
