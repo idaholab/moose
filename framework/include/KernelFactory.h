@@ -17,6 +17,11 @@
 typedef Kernel * (*kernelBuildPtr)(Parameters parameters, EquationSystems * es, std::string var_name, std::vector<std::string> coupled_to);
 
 /**
+ * Typedef to make things easier.
+ */
+typedef Parameters (*kernelParamsPtr)();
+
+/**
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename KernelType>
@@ -43,11 +48,17 @@ public:
   void registerKernel(std::string name)
   {
     name_to_build_pointer[name]=&buildKernel<KernelType>;
+    name_to_params_pointer[name]=&valid_params<KernelType>;
   }
 
   void add(std::string name, Parameters parameters, EquationSystems * es, std::string var_name, std::vector<std::string> coupled_to=std::vector<std::string>(0))
   {
     active_kernels.push_back((*name_to_build_pointer[name])(parameters,es,var_name,coupled_to));
+  }
+
+  Parameters getValidParams(std::string name)
+  {
+    return name_to_params_pointer[name]();
   }
 
   std::vector<Kernel *>::iterator activeKernelsBegin(){ return active_kernels.begin(); };
@@ -58,6 +69,8 @@ private:
   virtual ~KernelFactory(){}
 
   std::map<std::string, kernelBuildPtr> name_to_build_pointer;
+  std::map<std::string, kernelParamsPtr> name_to_params_pointer;
+
   std::vector<Kernel *> active_kernels;
 };
 

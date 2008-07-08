@@ -3,6 +3,17 @@
 #ifndef NEUMANNBC_H
 #define NEUMANNBC_H
 
+//Forward Declarations
+class NeumannBC;
+
+template<>
+Parameters valid_params<NeumannBC>()
+{
+  Parameters params;
+  params.set<Real>("value")=0.0;
+  return params;
+}
+
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.

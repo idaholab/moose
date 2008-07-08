@@ -5,12 +5,20 @@
 #include "fe_base.h"
 #include "quadrature_gauss.h"
 #include "transient_system.h"
+#include "parameters.h"
 
 //Forward Declarations
 class Elem; 
 
 #ifndef KERNEL_H
 #define KERNEL_H
+
+template<class KernelType>
+Parameters valid_params()
+{
+  Parameters params;
+  return params;
+}
 
 /** 
  * The Kernel class is responsible for calculating the residuals for various

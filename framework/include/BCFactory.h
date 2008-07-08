@@ -17,6 +17,11 @@
 typedef BoundaryCondition * (*BCBuildPtr)(Parameters parameters, EquationSystems * es, std::string var_name, unsigned int boundary_id);
 
 /**
+ * Typedef to make things easier.
+ */
+typedef Parameters (*BCParamsPtr)();
+
+/**
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename BCType>
@@ -43,11 +48,17 @@ public:
   void registerBC(std::string name)
   {
     name_to_build_pointer[name]=&buildBC<BCType>;
+    name_to_params_pointer[name]=&valid_params<BCType>;
   }
 
   void add(std::string name, Parameters parameters, EquationSystems * es, std::string var_name, unsigned int boundary_id)
   {
     active_bcs.push_back((*name_to_build_pointer[name])(parameters,es,var_name,boundary_id));
+  }
+
+  Parameters getValidParams(std::string name)
+  {
+    return name_to_params_pointer[name]();
   }
 
   std::vector<BoundaryCondition *>::iterator activeBCsBegin(){ return active_bcs.begin(); };
@@ -58,6 +69,8 @@ private:
   virtual ~BCFactory(){}
 
   std::map<std::string, BCBuildPtr> name_to_build_pointer;
+  std::map<std::string, BCParamsPtr> name_to_params_pointer;
+
   std::vector<BoundaryCondition *> active_bcs;
 };
 

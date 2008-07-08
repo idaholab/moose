@@ -3,6 +3,17 @@
 #ifndef DIRICHLETBC_H
 #define DIRICHLETBC_H
 
+//Forward Declarations
+class DirichletBC;
+
+template<>
+Parameters valid_params<DirichletBC>()
+{
+  Parameters params;
+  params.set<Real>("value")=0.0;
+  return params;
+}
+
 /**
  * Implements a simple constant Dirichlet BC where u=value on the boundary.
  */
