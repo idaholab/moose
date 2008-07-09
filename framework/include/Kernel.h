@@ -209,6 +209,11 @@ protected:
   const std::vector<std::vector<RealGradient> > & _dphi_face;
 
   /**
+   * Normal vectors at the quadrature points.
+   */
+  const std::vector<Point>& _normals_face;
+
+  /**
    * Current shape function.
    */
   unsigned int _i;
