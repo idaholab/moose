@@ -215,3 +215,15 @@ Kernel::computeQpGradSolution(const NumericVector<Number>& soln, const std::vect
 
   return grad_u;
 }
+
+Real &
+Kernel::coupledVal(std::string name)
+{
+  return _coupled_vals[name];
+}
+
+RealGradient & 
+Kernel::coupledGrad(std::string name)
+{
+  return _coupled_grads[name];
+}

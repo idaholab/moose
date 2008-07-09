@@ -244,6 +244,20 @@ protected:
    */
   std::map<std::string, RealGradient> _coupled_grads;
 
+  /**
+   * Returns a reference (that can be stored) to a coupled variable's value.
+   * 
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  Real & coupledVal(std::string name);
+
+  /**
+   * Returns a reference (that can be stored) to a coupled variable's gradient.
+   * 
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  RealGradient & coupledGrad(std::string name);
+
 private:
   /**
    * Computes the value of soln at the current quadrature point.
