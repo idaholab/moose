@@ -37,7 +37,12 @@ public:
    * @param var_name The variable this Kernel is going to compute a residual for.
    * @param integrated Whether or not the residual is integraded (used by BCs).
    */
-  Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated=true, std::vector<std::string> coupled_to=std::vector<std::string>(0));
+  Kernel(Parameters parameters,
+         EquationSystems * es,
+         std::string var_name,
+         bool integrated=true,
+         std::vector<std::string> coupled_to=std::vector<std::string>(0),
+         std::vector<std::string> coupled_as=std::vector<std::string>(0));
 
   /** 
    * Standalone constructor initializes all internal references needed for residual computation.
@@ -46,7 +51,11 @@ public:
    * @param var_name The variable this Kernel is going to compute a residual for.
    * @param integrated Whether or not the residual is integraded (used by BCs).
    */
-  Kernel(EquationSystems * es, std::string var_name, bool integrated=true, std::vector<std::string> coupled_to=std::vector<std::string>(0));
+  Kernel(EquationSystems * es,
+         std::string var_name,
+         bool integrated=true,
+         std::vector<std::string> coupled_to=std::vector<std::string>(0),
+         std::vector<std::string> coupled_as=std::vector<std::string>(0));
 
   virtual ~Kernel()
   {
@@ -223,6 +232,16 @@ protected:
    * Names of the variables this kernel is coupled to.
    */
   std::vector<std::string> _coupled_to;
+
+  /**
+   * Names of the variables this kernel is coupled to.
+   */
+  std::vector<std::string> _coupled_as;
+
+  /**
+   * Map from _as_ to _to_
+   */
+  std::map<std::string, std::string> _coupled_as_to_to;
 
   /**
    * Variable numbers of the coupled variables.

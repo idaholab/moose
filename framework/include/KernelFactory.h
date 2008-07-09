@@ -14,8 +14,11 @@
 /**
  * Typedef to make things easier.
  */
-typedef Kernel * (*kernelBuildPtr)(Parameters parameters, EquationSystems * es, std::string var_name, std::vector<std::string> coupled_to);
-
+typedef Kernel * (*kernelBuildPtr)(Parameters parameters,
+                                   EquationSystems * es,
+                                   std::string var_name,
+                                   std::vector<std::string> coupled_to,
+                                   std::vector<std::string> coupled_as);
 /**
  * Typedef to make things easier.
  */
@@ -25,9 +28,13 @@ typedef Parameters (*kernelParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename KernelType>
-Kernel * buildKernel(Parameters parameters, EquationSystems * es, std::string var_name, std::vector<std::string> coupled_to)
+Kernel * buildKernel(Parameters parameters,
+                     EquationSystems * es,
+                     std::string var_name,
+                     std::vector<std::string> coupled_to,
+                     std::vector<std::string> coupled_as)
 {
-  return new KernelType(parameters, es, var_name, coupled_to);
+  return new KernelType(parameters, es, var_name, coupled_to, coupled_as);
 }
 
 /**
@@ -51,9 +58,14 @@ public:
     name_to_params_pointer[name]=&valid_params<KernelType>;
   }
 
-  void add(std::string name, Parameters parameters, EquationSystems * es, std::string var_name, std::vector<std::string> coupled_to=std::vector<std::string>(0))
+  void add(std::string name,
+           Parameters parameters,
+           EquationSystems * es,
+           std::string var_name,
+           std::vector<std::string> coupled_to=std::vector<std::string>(0),
+           std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    active_kernels.push_back((*name_to_build_pointer[name])(parameters,es,var_name,coupled_to));
+    active_kernels.push_back((*name_to_build_pointer[name])(parameters,es,var_name,coupled_to,coupled_as));
   }
 
   Parameters getValidParams(std::string name)

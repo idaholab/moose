@@ -6,7 +6,12 @@
 #include "numeric_vector.h"
 #include "dense_subvector.h"
 
-Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated, std::vector<std::string> coupled_to)
+Kernel::Kernel(Parameters parameters,
+               EquationSystems * es,
+               std::string var_name,
+               bool integrated,
+               std::vector<std::string> coupled_to,
+               std::vector<std::string> coupled_as)
   :_parameters(parameters),
    _integrated(integrated),
    _es(*es),
@@ -31,7 +36,8 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
    _t(0),
    _dt(0),
    _is_transient(false),
-   _coupled_to(coupled_to)
+   _coupled_to(coupled_to),
+   _coupled_as(coupled_as)
 {
   _fe->attach_quadrature_rule(&_qrule);
   _fe_face->attach_quadrature_rule(&_qface);
@@ -47,6 +53,8 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
   {
     std::string coupled_var_name=_coupled_to[i];
 
+    _coupled_as_to_to[coupled_as[i]] = coupled_var_name;
+
     _coupled_var_nums.push_back(_system.variable_number(coupled_var_name));
     _coupled_dof_indices.push_back(std::vector<unsigned int>(0));
     _coupled_grads[coupled_var_name]=0;
@@ -54,7 +62,11 @@ Kernel::Kernel(Parameters parameters, EquationSystems * es, std::string var_name
   }
 }
 
-Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated, std::vector<std::string> coupled_to)
+Kernel::Kernel(EquationSystems * es,
+               std::string var_name,
+               bool integrated,
+               std::vector<std::string> coupled_to,
+               std::vector<std::string> coupled_as)
   :_integrated(integrated),
    _es(*es),
    _var_name(var_name),
@@ -78,7 +90,8 @@ Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated, std:
    _t(0),
    _dt(0),
    _is_transient(false),
-   _coupled_to(coupled_to)
+   _coupled_to(coupled_to),
+   _coupled_as(coupled_as)
 {
   _fe->attach_quadrature_rule(&_qrule);
   _fe_face->attach_quadrature_rule(&_qface);
@@ -93,6 +106,8 @@ Kernel::Kernel(EquationSystems * es, std::string var_name, bool integrated, std:
   for(unsigned int i=0;i<_coupled_to.size();i++)
   {
     std::string coupled_var_name=_coupled_to[i];
+
+    _coupled_as_to_to[coupled_as[i]] = coupled_var_name;
 
     _coupled_var_nums.push_back(_system.variable_number(coupled_var_name));
     _coupled_dof_indices.push_back(std::vector<unsigned int>(0));
@@ -219,11 +234,11 @@ Kernel::computeQpGradSolution(const NumericVector<Number>& soln, const std::vect
 Real &
 Kernel::coupledVal(std::string name)
 {
-  return _coupled_vals[name];
+  return _coupled_vals[_coupled_as_to_to[name]];
 }
 
 RealGradient & 
 Kernel::coupledGrad(std::string name)
 {
-  return _coupled_grads[name];
+  return _coupled_grads[_coupled_as_to_to[name]];
 }
