@@ -15,7 +15,6 @@
  * Typedef to make things easier.
  */
 typedef Kernel * (*kernelBuildPtr)(Parameters parameters,
-                                   EquationSystems * es,
                                    std::string var_name,
                                    std::vector<std::string> coupled_to,
                                    std::vector<std::string> coupled_as);
@@ -29,12 +28,11 @@ typedef Parameters (*kernelParamsPtr)();
  */
 template<typename KernelType>
 Kernel * buildKernel(Parameters parameters,
-                     EquationSystems * es,
                      std::string var_name,
                      std::vector<std::string> coupled_to,
                      std::vector<std::string> coupled_as)
 {
-  return new KernelType(parameters, es, var_name, coupled_to, coupled_as);
+  return new KernelType(parameters, var_name, coupled_to, coupled_as);
 }
 
 /**
@@ -60,12 +58,11 @@ public:
 
   void add(std::string name,
            Parameters parameters,
-           EquationSystems * es,
            std::string var_name,
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
            std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    active_kernels.push_back((*name_to_build_pointer[name])(parameters,es,var_name,coupled_to,coupled_as));
+    active_kernels.push_back((*name_to_build_pointer[name])(parameters,var_name,coupled_to,coupled_as));
   }
 
   Parameters getValidParams(std::string name)

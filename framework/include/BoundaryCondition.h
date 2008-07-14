@@ -15,16 +15,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  BoundaryCondition(Parameters parameters, EquationSystems * es, std::string var_name, bool integrated, unsigned int boundary_id)
-    :Kernel(parameters, es,var_name, integrated),
-     _boundary_id(boundary_id)
-  {}
-
-  /**
-   * Standalone constructor.
-   */
-  BoundaryCondition(EquationSystems * es, std::string var_name, bool integrated, unsigned int boundary_id)
-    :Kernel(es,var_name, integrated),
+  BoundaryCondition(Parameters parameters, std::string var_name, bool integrated, unsigned int boundary_id)
+    :Kernel(parameters, var_name, integrated),
      _boundary_id(boundary_id)
   {}
 

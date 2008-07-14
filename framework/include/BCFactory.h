@@ -14,7 +14,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef BoundaryCondition * (*BCBuildPtr)(Parameters parameters, EquationSystems * es, std::string var_name, unsigned int boundary_id);
+typedef BoundaryCondition * (*BCBuildPtr)(Parameters parameters, std::string var_name, unsigned int boundary_id);
 
 /**
  * Typedef to make things easier.
@@ -25,9 +25,9 @@ typedef Parameters (*BCParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename BCType>
-BoundaryCondition * buildBC(Parameters parameters, EquationSystems * es, std::string var_name, unsigned int boundary_id)
+BoundaryCondition * buildBC(Parameters parameters, std::string var_name, unsigned int boundary_id)
 {
-  return new BCType(parameters, es, var_name, boundary_id);
+  return new BCType(parameters, var_name, boundary_id);
 }
 
 /**
@@ -51,9 +51,12 @@ public:
     name_to_params_pointer[name]=&valid_params<BCType>;
   }
 
-  void add(std::string name, Parameters parameters, EquationSystems * es, std::string var_name, unsigned int boundary_id)
+  void add(std::string name,
+           Parameters parameters,
+           std::string var_name,
+           unsigned int boundary_id)
   {
-    active_bcs.push_back((*name_to_build_pointer[name])(parameters,es,var_name,boundary_id));
+    active_bcs.push_back((*name_to_build_pointer[name])(parameters,var_name,boundary_id));
   }
 
   Parameters getValidParams(std::string name)

@@ -16,17 +16,12 @@ namespace Stroma
    * Perflog to be used by applications.
    * If the application prints this in the end they will get performance info.
    */
-  PerfLog perf_log("Application");
+  extern PerfLog perf_log;
 
   /**
    * Registers the Kernels and BCs provided by Stroma.
    */
-  void registerObjects()
-  {
-    BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
-    BCFactory::instance()->registerBC<NeumannBC>("NeumannBC");
-    BCFactory::instance()->registerBC<VectorNeumannBC>("VectorNeumannBC");
-  }
+  void registerObjects();
 }
 
 #endif //STROMA_H

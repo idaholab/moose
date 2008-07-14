@@ -10,14 +10,7 @@
 class VectorNeumannBC;
 
 template<>
-Parameters valid_params<VectorNeumannBC>()
-{
-  Parameters params;
-  params.set<Real>("value0")=0.0;
-  params.set<Real>("value1")=0.0;
-  params.set<Real>("value2")=0.0;
-  return params;
-}
+Parameters valid_params<VectorNeumannBC>();
 
 /**
  * Implements a simple constant VectorNeumann BC where grad(u)=value on the boundary.
@@ -31,8 +24,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  VectorNeumannBC(Parameters parameters, EquationSystems * es, std::string var_name, unsigned int boundary_id)
-    :BoundaryCondition(parameters, es, var_name, true, boundary_id)
+  VectorNeumannBC(Parameters parameters, std::string var_name, unsigned int boundary_id)
+    :BoundaryCondition(parameters, var_name, true, boundary_id)
   {
     _value(0)=_parameters.get<Real>("value0");
     _value(1)=_parameters.get<Real>("value1");
@@ -44,7 +37,7 @@ public:
 protected:
   virtual Real computeQpResidual()
   {
-    return -_JxW_face[_qp]*_phi_face[_i][_qp]*(_value*_normals_face[_qp]);
+    return -_phi_face[_i][_qp]*(_value*_normals_face[_qp]);
   }
 
 private:
