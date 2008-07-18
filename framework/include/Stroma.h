@@ -1,9 +1,3 @@
-#include "KernelFactory.h"
-#include "BCFactory.h"
-#include "DirichletBC.h"
-#include "NeumannBC.h"
-#include "VectorNeumannBC.h"
-
 //libMesh includes
 #include "perf_log.h"
 
