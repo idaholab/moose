@@ -88,7 +88,7 @@ Kernel::init(EquationSystems * es)
 }
 
 void
-Kernel::reinit(const NumericVector<Number>& soln, DenseVector<Number> & Re, const Elem * elem)
+Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
   Stroma::perf_log.push("reinit()","Kernel");
 
@@ -96,7 +96,11 @@ Kernel::reinit(const NumericVector<Number>& soln, DenseVector<Number> & Re, cons
 
   _fe->reinit(elem);
 
-  Re.resize(_dof_indices.size());
+  if(Re)
+    Re->resize(_dof_indices.size());
+
+  if(Ke)
+    Ke->resize(_dof_indices.size(),_dof_indices.size());
 
   std::vector<unsigned int>::iterator var_num_it = _var_nums.begin();
   std::vector<unsigned int>::iterator var_num_end = _var_nums.end();
@@ -109,11 +113,22 @@ Kernel::reinit(const NumericVector<Number>& soln, DenseVector<Number> & Re, cons
 
     unsigned int num_dofs = _var_dof_indices[var_num].size();
 
-    if(_var_Res[var_num])
-      delete _var_Res[var_num];
+    if(Re)
+    {
+      if(_var_Res[var_num])
+        delete _var_Res[var_num];
     
-    _var_Res[var_num] = new DenseSubVector<Number>(Re,var_num*num_dofs,num_dofs);
+      _var_Res[var_num] = new DenseSubVector<Number>(*Re,var_num*num_dofs,num_dofs);
+    }
 
+    if(Ke)
+    {
+      if(_var_Kes[var_num])
+        delete _var_Kes[var_num];
+    
+      _var_Kes[var_num] = new DenseSubMatrix<Number>(*Ke,var_num*num_dofs,var_num*num_dofs,num_dofs,num_dofs);
+    }
+    
     _var_vals[var_num].resize(_qrule->n_points());
     _var_grads[var_num].resize(_qrule->n_points());
 
@@ -139,7 +154,6 @@ Kernel::reinit(const NumericVector<Number>& soln, DenseVector<Number> & Re, cons
   Stroma::perf_log.pop("reinit()","Kernel");
 }
 
-
 void
 Kernel::computeElemResidual()
 {
@@ -159,6 +173,21 @@ Kernel::computeElemResidual()
   }
   
   Stroma::perf_log.pop("computeElemResidual()","Kernel");
+}
+
+void
+Kernel::computeElemJacobian()
+{
+  Stroma::perf_log.push("computeElemJacobian()","Kernel");
+
+  DenseSubMatrix<Number> & var_Ke = *_var_Kes[_var_num];
+
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    for (_i=0; _i<_phi.size(); _i++)
+      for (_j=0; _j<_phi.size(); _j++)
+        var_Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+  
+  Stroma::perf_log.pop("computeElemJacobian()","Kernel");
 }
 
 void
@@ -204,6 +233,52 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
   }
 
   Stroma::perf_log.pop("computeSideResidual()","Kernel");
+}
+
+void
+Kernel::computeSideJacobian(const NumericVector<Number>& soln,
+			    const Elem * elem,
+			    unsigned int side)
+{
+  Stroma::perf_log.push("computeSideJacobian()","Kernel");
+
+  _fe_face->reinit(elem, side);
+
+  std::vector<unsigned int> & var_dof_indices = _var_dof_indices[_var_num];
+  DenseSubMatrix<Number> & var_Ke = *_var_Kes[_var_num];
+
+  if(_integrated)
+    for (_qp=0; _qp<_qface->n_points(); _qp++)
+    {
+      _u[_qp]=0;
+      _grad_u[_qp]=0;
+      for (_i=0; _i<_phi_face.size(); _i++)
+      {
+        _u[_qp]      +=  _phi_face[_i][_qp]*soln(var_dof_indices[_i]);
+        _grad_u[_qp] += _dphi_face[_i][_qp]*soln(var_dof_indices[_i]);
+      }
+
+      for (_i=0; _i<_phi_face.size(); _i++)
+        for (_j=0; _j<_phi_face.size(); _j++)
+          var_Ke(_i,_j) += _JxW_face[_qp]*computeQpJacobian();
+    } 
+  else
+  {
+    // Do this because U is evaluated at the nodes
+    _u.resize(1);
+    _qp = 0;
+    
+    for(_i=0; _i<_phi_face.size(); _i++)
+    {
+      if(elem->is_node_on_side(_i,side))
+      {
+	_u[0] = soln(var_dof_indices[_i]);
+	var_Ke(_i,_i) = computeQpJacobian();
+      }
+    }
+  }
+
+  Stroma::perf_log.pop("computeSideJacobian()","Kernel");
 }
 
 void
@@ -266,6 +341,7 @@ const std::vector<Point> * Kernel::_static_normals_face;
 std::vector<unsigned int> Kernel::_var_nums;
 std::map<unsigned int, std::vector<unsigned int> > Kernel::_var_dof_indices;
 std::map<unsigned int, DenseSubVector<Number> * > Kernel::_var_Res;
+std::map<unsigned int, DenseSubMatrix<Number> * > Kernel::_var_Kes;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals;
 std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals_old;

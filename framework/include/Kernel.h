@@ -7,6 +7,7 @@
 #include "transient_system.h"
 #include "parameters.h"
 #include "dense_subvector.h"
+#include "dense_submatrix.h"
 
 //Forward Declarations
 class Elem;
@@ -57,12 +58,17 @@ public:
   /**
    * Re-Initializes common data structures for a specific element.
    */
-  static void reinit(const NumericVector<Number>& soln, DenseVector<Number> & Re, const Elem * elem);
-
+  static void reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
+  
   /** 
    * Computes the residual for the current element.
    */
   void computeElemResidual();
+
+  /** 
+   * Computes the jacobian for the current element.
+   */
+  void computeElemJacobian();
 
   /** 
    * Computes the residual for the current side.
@@ -71,6 +77,14 @@ public:
    * @param side Current side.
    */
   void computeSideResidual(const NumericVector<Number>& soln, const Elem * elem, unsigned int side);
+
+  /** 
+   * Computes the residual for the current side.
+   * 
+   * @param elem Current element.
+   * @param side Current side.
+   */
+  void computeSideJacobian(const NumericVector<Number>& soln, const Elem * elem, unsigned int side);
 
   static DofMap * _dof_map;
   static std::vector<unsigned int> _dof_indices;
@@ -82,9 +96,17 @@ protected:
   Parameters _parameters;
 
   /** 
-   * This is the virtual that derived classes should override.
+   * This is the virtual that derived classes should override for computing the residual.
    */
   virtual Real computeQpResidual()=0;
+
+  /** 
+   * This is the virtual that derived classes should override for computing the Jacobian.
+   */
+  virtual Real computeQpJacobian()
+  {
+    return 0;
+  }
 
   /** 
    * Piece of the residual that gets added for transient solves.
@@ -176,6 +198,13 @@ protected:
    * Current shape function.
    */
   unsigned int _i;
+
+  /**
+   * Current shape function while computing jacobians.
+   * This should be used for the variable's shape functions, while _i
+   * is used for the test function.
+   */
+  unsigned int _j;
 
   /**
    * Current _qrule quadrature point.
@@ -301,6 +330,11 @@ protected:
    * Residual vectors for all variables.
    */
   static std::map<unsigned int, DenseSubVector<Number> * > _var_Res;
+
+  /**
+   * Jacobian matrices for all variables.
+   */
+  static std::map<unsigned int, DenseSubMatrix<Number> * > _var_Kes;
 
   /**
    * Value of the variables at the quadrature points.
