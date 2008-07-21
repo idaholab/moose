@@ -7,7 +7,7 @@ meshdir := $(LIBMESH_DIR)
 # link with the library.
 include $(meshdir)/Make.common
 
-libmesh_INCLUDE += -I$(STROMA_DIR)/include
-libmesh_LIBS += -L$(STROMA_DIR) -lstroma-$(METHOD)
+libmesh_INCLUDE := -I$(STROMA_DIR)/include $(libmesh_INCLUDE)
+libmesh_LIBS := -L$(STROMA_DIR) -lstroma-$(METHOD) $(libmesh_LIBS)
 
 stroma_LIB := $(STROMA_DIR)/libstroma-$(METHOD).a
