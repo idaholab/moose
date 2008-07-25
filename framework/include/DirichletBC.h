@@ -33,11 +33,6 @@ protected:
     return _u[_qp]-_value;
   }
 
-  virtual Real computeQpJacobian()
-  {
-    return 1;
-  }
-
 private:
   /**
    * Value of u on the boundary.

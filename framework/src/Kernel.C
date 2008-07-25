@@ -272,8 +272,11 @@ Kernel::computeSideJacobian(const NumericVector<Number>& soln,
     {
       if(elem->is_node_on_side(_i,side))
       {
+        for(_j=0; _j<_phi_face.size(); _j++)
+          var_Ke(_i,_j) = 0;
+        
 	_u[0] = soln(var_dof_indices[_i]);
-	var_Ke(_i,_i) = computeQpJacobian();
+	var_Ke(_i,_i) = 1;
       }
     }
   }
