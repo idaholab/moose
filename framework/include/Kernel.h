@@ -150,9 +150,19 @@ protected:
   std::vector<Real> & _u_old;
 
   /**
+   * Holds the t-2 solution at the current quadrature point.
+   */
+  std::vector<Real> & _u_older;
+
+  /**
    * Holds the previous solution gradient at the current quadrature point.
    */
   std::vector<RealGradient> & _grad_u_old;
+
+  /**
+   * Holds the t-2 solution gradient at the current quadrature point.
+   */
+  std::vector<RealGradient> & _grad_u_older;
 
   /**
    * Interior Jacobian pre-multiplied by the weight.
@@ -352,9 +362,19 @@ protected:
   static std::map<unsigned int, std::vector<Real> > _var_vals_old;
 
   /**
+   * Value of the variables at the quadrature points at t-2.
+   */
+  static std::map<unsigned int, std::vector<Real> > _var_vals_older;
+
+  /**
    * Gradient of the variables at the quadrature points.
    */
   static std::map<unsigned int, std::vector<RealGradient> > _var_grads_old;
+
+  /**
+   * Gradient of the variables at the quadrature points.
+   */
+  static std::map<unsigned int, std::vector<RealGradient> > _var_grads_older;
 
   /**
    * Current time.

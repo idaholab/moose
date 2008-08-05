@@ -19,7 +19,9 @@ Kernel::Kernel(Parameters parameters,
    _u(_var_vals[_var_num]),
    _grad_u(_var_grads[_var_num]),
    _u_old(_var_vals_old[_var_num]),
+   _u_older(_var_vals_older[_var_num]),
    _grad_u_old(_var_grads_old[_var_num]),
+   _grad_u_older(_var_grads_older[_var_num]),
    _JxW(*_static_JxW),
    _phi(*_static_phi),
    _dphi(*_static_dphi),
@@ -136,6 +138,9 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     {
       _var_vals_old[var_num].resize(_qrule->n_points());
       _var_grads_old[var_num].resize(_qrule->n_points());
+
+      _var_vals_older[var_num].resize(_qrule->n_points());
+      _var_grads_older[var_num].resize(_qrule->n_points());
     }
 
     for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
@@ -147,6 +152,9 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
       {
         computeQpSolution(_var_vals_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp);
         computeQpGradSolution(_var_grads_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp);
+        
+        computeQpSolution(_var_vals_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp);
+        computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp);
       }
     }
   }
@@ -348,7 +356,9 @@ std::map<unsigned int, DenseSubMatrix<Number> * > Kernel::_var_Kes;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals;
 std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals_old;
+std::map<unsigned int, std::vector<Real> > Kernel::_var_vals_older;
 std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_old;
+std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_older;
 Real Kernel::_t;
 Real Kernel::_dt;
 bool Kernel::_is_transient;
