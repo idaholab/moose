@@ -11,6 +11,7 @@
 
 //Forward Declarations
 class Elem;
+class Material;
 
 #ifndef KERNEL_H
 #define KERNEL_H
@@ -249,7 +250,7 @@ protected:
    * @param name The name the kernel wants to refer to the variable as.
    */
   std::vector<RealGradient> & coupledGrad(std::string name);
-  
+
   /**
    * ***********************
    * All of the static stuff
@@ -390,6 +391,11 @@ protected:
    * Whether or not the current simulation is transient.
    */
   static bool _is_transient;
+
+  /**
+   * Pointer to the material that is valid for the current block.
+   */
+  static Material * _material;
 
 private:
   /**

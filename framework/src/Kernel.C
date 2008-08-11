@@ -1,5 +1,6 @@
 #include "Kernel.h"
 #include "Stroma.h"
+#include "MaterialFactory.h"
 
 // libMesh includes
 #include "dof_map.h"
@@ -158,6 +159,9 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
       }
     }
   }
+
+  _material = MaterialFactory::instance()->getMaterial(elem->subdomain_id());
+  _material->materialReinit();
   
   Stroma::perf_log.pop("reinit()","Kernel");
 }
@@ -362,3 +366,4 @@ std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_older;
 Real Kernel::_t;
 Real Kernel::_dt;
 bool Kernel::_is_transient;
+Material * Kernel::_material;
