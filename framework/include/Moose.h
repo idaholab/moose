@@ -1,10 +1,10 @@
 //libMesh includes
 #include "perf_log.h"
 
-#ifndef STROMA_H
-#define STROMA_H
+#ifndef MOOSE_H
+#define MOOSE_H
 
-namespace Stroma
+namespace Moose
 {
   /**
    * Perflog to be used by applications.
@@ -13,9 +13,9 @@ namespace Stroma
   extern PerfLog perf_log;
 
   /**
-   * Registers the Kernels and BCs provided by Stroma.
+   * Registers the Kernels and BCs provided by Moose.
    */
   void registerObjects();
 }
 
-#endif //STROMA_H
+#endif //MOOSE_H

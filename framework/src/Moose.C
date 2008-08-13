@@ -10,10 +10,10 @@
 #include "Constant.h"
 #include "UO2.h"
 
-#include "Stroma.h"
+#include "Moose.h"
 
 void
-Stroma::registerObjects()
+Moose::registerObjects()
 {
   KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
   

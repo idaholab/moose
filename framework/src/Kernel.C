@@ -1,5 +1,5 @@
 #include "Kernel.h"
-#include "Stroma.h"
+#include "Moose.h"
 #include "MaterialFactory.h"
 
 // libMesh includes
@@ -93,7 +93,7 @@ Kernel::init(EquationSystems * es)
 void
 Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
-  Stroma::perf_log.push("reinit()","Kernel");
+  Moose::perf_log.push("reinit()","Kernel");
 
   _dof_map->dof_indices(elem, _dof_indices);
 
@@ -163,13 +163,13 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
   _material = MaterialFactory::instance()->getMaterial(elem->subdomain_id());
   _material->materialReinit();
   
-  Stroma::perf_log.pop("reinit()","Kernel");
+  Moose::perf_log.pop("reinit()","Kernel");
 }
 
 void
 Kernel::computeElemResidual()
 {
-  Stroma::perf_log.push("computeElemResidual()","Kernel");
+  Moose::perf_log.push("computeElemResidual()","Kernel");
 
   DenseSubVector<Number> & var_Re = *_var_Res[_var_num];
 
@@ -184,13 +184,13 @@ Kernel::computeElemResidual()
     }
   }
   
-  Stroma::perf_log.pop("computeElemResidual()","Kernel");
+  Moose::perf_log.pop("computeElemResidual()","Kernel");
 }
 
 void
 Kernel::computeElemJacobian()
 {
-  Stroma::perf_log.push("computeElemJacobian()","Kernel");
+  Moose::perf_log.push("computeElemJacobian()","Kernel");
 
   DenseSubMatrix<Number> & var_Ke = *_var_Kes[_var_num];
 
@@ -199,7 +199,7 @@ Kernel::computeElemJacobian()
       for (_j=0; _j<_phi.size(); _j++)
         var_Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
   
-  Stroma::perf_log.pop("computeElemJacobian()","Kernel");
+  Moose::perf_log.pop("computeElemJacobian()","Kernel");
 }
 
 void
@@ -207,7 +207,7 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
 			    const Elem * elem,
 			    unsigned int side)
 {
-  Stroma::perf_log.push("computeSideResidual()","Kernel");
+  Moose::perf_log.push("computeSideResidual()","Kernel");
 
   _fe_face->reinit(elem, side);
 
@@ -244,7 +244,7 @@ Kernel::computeSideResidual(const NumericVector<Number>& soln,
     }
   }
 
-  Stroma::perf_log.pop("computeSideResidual()","Kernel");
+  Moose::perf_log.pop("computeSideResidual()","Kernel");
 }
 
 void
@@ -252,7 +252,7 @@ Kernel::computeSideJacobian(const NumericVector<Number>& soln,
 			    const Elem * elem,
 			    unsigned int side)
 {
-  Stroma::perf_log.push("computeSideJacobian()","Kernel");
+  Moose::perf_log.push("computeSideJacobian()","Kernel");
 
   _fe_face->reinit(elem, side);
 
@@ -293,7 +293,7 @@ Kernel::computeSideJacobian(const NumericVector<Number>& soln,
     }
   }
 
-  Stroma::perf_log.pop("computeSideJacobian()","Kernel");
+  Moose::perf_log.pop("computeSideJacobian()","Kernel");
 }
 
 void
