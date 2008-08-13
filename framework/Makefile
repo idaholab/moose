@@ -31,7 +31,7 @@ objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 ###############################################################################
 # Target:
 #
-target 	   := ./libstroma-$(METHOD).a
+target 	   := ./libmoose-$(METHOD).a
 
 all:: Makefile.export $(target)
 
@@ -41,7 +41,7 @@ all:: Makefile.export $(target)
 #	$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
 
 
-#@echo "STROMA_DIR := " $(PWD) > Makefile.export
+#@echo "MOOSE_DIR := " $(PWD) > Makefile.export
 Makefile.export: exported_stuff
 	@echo "Creating Makefile.export"
 	@cat exported_stuff >> Makefile.export
