@@ -27,7 +27,12 @@ UO2::computeProperties()
 
     double lambda0  = 1.0 / (3.24e-2 + 2.51e-4*_temp[qp]);
     double theta    = 3.67*exp(-4.73e-4*_temp[qp])*sqrt(2.0*_oxygen[qp]*lambda0);
-    _thermal_conductivity[qp] = lambda0*atan(theta)/theta + 5.95e-11*_temp[qp]*_temp[qp]*_temp[qp];
+    double atan_term = atan(theta)/theta;
+
+    if(!_has_oxygen)
+      atan_term = 1;
+
+    _thermal_conductivity[qp] = lambda0*atan_term + 5.95e-11*_temp[qp]*_temp[qp]*_temp[qp];
 
     _specific_heat[qp] = 264256.0 + 47.0*_temp[qp];
 

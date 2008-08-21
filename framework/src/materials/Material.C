@@ -3,6 +3,8 @@
 void
 Material::materialReinit()
 {
+  _zero.resize(_qrule->n_points(),0);
+  _grad_zero.resize(_qrule->n_points(),0);
   _thermal_conductivity.resize(_qrule->n_points(),1);
   _thermal_expansion.resize(_qrule->n_points(),1);
   _specific_heat.resize(_qrule->n_points(),1);
