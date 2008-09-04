@@ -169,7 +169,7 @@ protected:
    * Holds the t-2 solution gradient at the current quadrature point.
    */
   std::vector<RealGradient> & _grad_u_older;
-
+  
   /**
    * Interior Jacobian pre-multiplied by the weight.
    */
@@ -291,6 +291,11 @@ protected:
    * Boundary quadrature rule.
    */
   static QGauss * _qface;
+
+  /**
+   * Current element
+   */
+  static const Elem * _current_elem;
 
   /**
    * Interior Jacobian pre-multiplied by the weight.

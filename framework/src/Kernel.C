@@ -116,6 +116,8 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 {
   Moose::perf_log.push("reinit()","Kernel");
 
+  _current_elem = elem;
+
   _dof_map->dof_indices(elem, _dof_indices);
 
   _fe->reinit(elem);
@@ -355,6 +357,7 @@ Kernel::coupledGrad(std::string name)
   return _var_grads[_coupled_as_to_var_num[name]];
 }
 
+const Elem * Kernel::_current_elem;
 DofMap * Kernel::_dof_map;
 std::vector<unsigned int> Kernel::_dof_indices;
 EquationSystems * Kernel::_es;
