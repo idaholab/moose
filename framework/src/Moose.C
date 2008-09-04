@@ -5,6 +5,7 @@
 #include "DirichletBC.h"
 #include "NeumannBC.h"
 #include "VectorNeumannBC.h"
+#include "ImplicitEuler.h"
 
 #include "MaterialFactory.h"
 #include "Constant.h"
@@ -16,6 +17,7 @@ void
 Moose::registerObjects()
 {
   KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
+  KernelFactory::instance()->registerKernel<ImplicitEuler>("ImplicitEuler");
   
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<NeumannBC>("NeumannBC");
