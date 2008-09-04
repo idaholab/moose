@@ -87,7 +87,28 @@ Kernel::init(EquationSystems * es)
     _is_transient = true;
     _t = _es->parameters.get<Real>("time");
     _dt = _es->parameters.get<Real>("dt");
+    _t_step = 0;    
+    _dt_old = _dt;
+    _bdf2_wei[0] = 1.;
+    _bdf2_wei[1] =-1.;
+    _bdf2_wei[2] = 0.;    
   }
+}
+
+void
+Kernel::reinitDT()
+{
+   if(_is_transient)
+   {
+    _t = _es->parameters.get<Real>("time");
+    _t_step = _es->parameters.get<int>("t_step");
+    _dt_old = _dt;
+    _dt = _es->parameters.get<Real>("dt");
+    Real sum = _dt+_dt_old;
+    _bdf2_wei[2] = 1.+_dt/sum;
+    _bdf2_wei[1] =-sum/_dt_old;
+    _bdf2_wei[0] =_dt*_dt/_dt_old/sum;
+   }   
 }
 
 void
@@ -365,5 +386,8 @@ std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_old;
 std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_older;
 Real Kernel::_t;
 Real Kernel::_dt;
+Real Kernel::_dt_old;
+int Kernel::_t_step;
+Real Kernel::_bdf2_wei[3];
 bool Kernel::_is_transient;
 Material * Kernel::_material;

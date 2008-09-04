@@ -60,7 +60,12 @@ public:
    * Re-Initializes common data structures for a specific element.
    */
   static void reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
-  
+
+  /**
+   * Re-Initializes temporal discretization/transient control data.
+   */
+  static void reinitDT();
+
   /** 
    * Computes the residual for the current element.
    */
@@ -388,10 +393,25 @@ protected:
   static Real _dt;
 
   /**
+   * Old dt.
+   */
+  static Real _dt_old;
+
+  /**
    * Whether or not the current simulation is transient.
    */
   static bool _is_transient;
 
+  /**
+   * Current time step.
+   */
+  static int _t_step;
+
+  /**
+   * Coefficients (weights) for the BDF2 time discretization.
+   */
+  static Real _bdf2_wei[3];
+  
   /**
    * Pointer to the material that is valid for the current block.
    */
