@@ -11,6 +11,10 @@ Material::materialReinit()
   _density.resize(_qrule->n_points(),1);
   _youngs_modulus.resize(_qrule->n_points(),1);
   _poissons_ratio.resize(_qrule->n_points(),1);
+  _neutron_diffusion_coefficient.resize(_qrule->n_points(),1);
+  _neutron_absorption_xs.resize(_qrule->n_points(),1);
+  _neutron_fission_xs.resize(_qrule->n_points(),1);
+  _neutron_per_fission.resize(_qrule->n_points(),1);
 
   computeProperties();
 }

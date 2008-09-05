@@ -33,7 +33,11 @@ public:
     _specific_heat(1),
     _density(1),
     _youngs_modulus(1),
-    _poissons_ratio(1)
+    _poissons_ratio(1),
+    _neutron_diffusion_coefficient(1),
+    _neutron_absorption_xs(1),
+    _neutron_fission_xs(1),
+    _neutron_per_fission(1)
   {}
 
   virtual ~Material(){}
@@ -60,6 +64,13 @@ public:
   
   std::vector<Real> & youngsModulus(){ return _youngs_modulus; }
   std::vector<Real> & poissonsRatio(){ return _poissons_ratio; }
+
+  std::vector<Real> & neutronDiffusionCoefficient(){ return _neutron_diffusion_coefficient; }
+  std::vector<Real> & neutronAbsorptionXS(){ return _neutron_absorption_xs; }
+  std::vector<Real> & neutronFissionXS(){ return _neutron_fission_xs; }
+  std::vector<Real> & neutronPerFission(){ return _neutron_per_fission; }
+  
+  
   
 private:
   std::vector<Real> _zero;
@@ -97,6 +108,10 @@ protected:
   std::vector<Real> _density;
   std::vector<Real> _youngs_modulus;
   std::vector<Real> _poissons_ratio;
+  std::vector<Real> _neutron_diffusion_coefficient;
+  std::vector<Real> _neutron_absorption_xs;
+  std::vector<Real> _neutron_fission_xs;
+  std::vector<Real> _neutron_per_fission;
 };
 
 #endif //MATERIAL_H

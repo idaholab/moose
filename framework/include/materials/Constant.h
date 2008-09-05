@@ -25,7 +25,11 @@ public:
     _my_specific_heat(parameters.get<Real>("specific_heat")),
     _my_density(parameters.get<Real>("density")),
     _my_youngs_modulus(parameters.get<Real>("youngs_modulus")),
-    _my_poissons_ratio(parameters.get<Real>("poissons_ratio"))
+    _my_poissons_ratio(parameters.get<Real>("poissons_ratio")),
+    _my_neutron_diffusion_coefficient(parameters.get<Real>("neutron_diffusion_coefficient")),
+    _my_neutron_absorption_xs(parameters.get<Real>("neutron_absorption_xs")),
+    _my_neutron_fission_xs(parameters.get<Real>("neutron_fission_xs")),
+    _my_neutron_per_fission(parameters.get<Real>("neutron_per_fission"))
   {}
 
 protected:
@@ -38,6 +42,10 @@ private:
   Real _my_density;
   Real _my_youngs_modulus;
   Real _my_poissons_ratio;
+  Real _my_neutron_diffusion_coefficient;
+  Real _my_neutron_absorption_xs;
+  Real _my_neutron_fission_xs;
+  Real _my_neutron_per_fission;
 };
 
 #endif //CONSTANT_H

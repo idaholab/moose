@@ -5,6 +5,7 @@
 #include "DirichletBC.h"
 #include "NeumannBC.h"
 #include "VectorNeumannBC.h"
+#include "VacuumBC.h"
 #include "ImplicitEuler.h"
 
 #include "MaterialFactory.h"
@@ -22,6 +23,7 @@ Moose::registerObjects()
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<NeumannBC>("NeumannBC");
   BCFactory::instance()->registerBC<VectorNeumannBC>("VectorNeumannBC");
+  BCFactory::instance()->registerBC<VacuumBC>("VacuumBC");
 
   MaterialFactory::instance()->registerMaterial<Constant>("Constant");
   MaterialFactory::instance()->registerMaterial<UO2>("UO2");
