@@ -20,11 +20,11 @@ public:
 protected:
   virtual Real computeQpResidual()
   {
-    return -_phi[_i][_qp]*_u[_qp];
+    return _phi[_i][_qp]*_u[_qp];
   }
   virtual Real computeQpJacobian()
   {
-    return -_phi[_i][_qp]*_phi[_j][_qp];
+    return _phi[_i][_qp]*_phi[_j][_qp];
   }
 };
 #endif //REACTION_H
