@@ -1,6 +1,7 @@
 #include "KernelFactory.h"
 #include "BodyForce.h"
 #include "Diffusion.h"
+#include "Reaction.h"
 
 #include "BCFactory.h"
 #include "DirichletBC.h"
@@ -20,6 +21,7 @@ Moose::registerObjects()
 {
   KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
   KernelFactory::instance()->registerKernel<Diffusion>("Diffusion");
+  KernelFactory::instance()->registerKernel<Reaction>("Reaction");
   KernelFactory::instance()->registerKernel<ImplicitEuler>("ImplicitEuler");
   
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
