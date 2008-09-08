@@ -37,7 +37,8 @@ public:
     _neutron_diffusion_coefficient(1),
     _neutron_absorption_xs(1),
     _neutron_fission_xs(1),
-    _neutron_per_fission(1)
+    _neutron_per_fission(1),
+    _neutron_velocity(1)
   {}
 
   virtual ~Material(){}
@@ -69,6 +70,7 @@ public:
   std::vector<Real> & neutronAbsorptionXS(){ return _neutron_absorption_xs; }
   std::vector<Real> & neutronFissionXS(){ return _neutron_fission_xs; }
   std::vector<Real> & neutronPerFission(){ return _neutron_per_fission; }
+  std::vector<Real> & neutronVelocity(){ return _neutron_velocity; }
   
   
   
@@ -112,6 +114,7 @@ protected:
   std::vector<Real> _neutron_absorption_xs;
   std::vector<Real> _neutron_fission_xs;
   std::vector<Real> _neutron_per_fission;
+  std::vector<Real> _neutron_velocity;
 };
 
 #endif //MATERIAL_H

@@ -14,6 +14,7 @@ Parameters valid_params<Constant>()
   params.set<Real>("neutron_absorption_xs")=1.0;
   params.set<Real>("neutron_fission_xs")=1.0;
   params.set<Real>("neutron_per_fission")=1.0;
+  params.set<Real>("neutron_velocity")=1.0;
   
   return params;
 }
@@ -33,5 +34,6 @@ Constant::computeProperties()
     _neutron_absorption_xs[qp] = _my_neutron_absorption_xs;
     _neutron_fission_xs[qp]    = _my_neutron_fission_xs;
     _neutron_per_fission[qp]   = _my_neutron_per_fission;
+    _neutron_velocity[qp]      = _my_neutron_velocity;
   }
 }

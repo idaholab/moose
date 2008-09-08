@@ -15,6 +15,7 @@ Material::materialReinit()
   _neutron_absorption_xs.resize(_qrule->n_points(),1);
   _neutron_fission_xs.resize(_qrule->n_points(),1);
   _neutron_per_fission.resize(_qrule->n_points(),1);
-
+  _neutron_velocity.resize(_qrule->n_points(),1);
+  
   computeProperties();
 }

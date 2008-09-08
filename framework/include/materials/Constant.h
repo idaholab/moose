@@ -29,7 +29,8 @@ public:
     _my_neutron_diffusion_coefficient(parameters.get<Real>("neutron_diffusion_coefficient")),
     _my_neutron_absorption_xs(parameters.get<Real>("neutron_absorption_xs")),
     _my_neutron_fission_xs(parameters.get<Real>("neutron_fission_xs")),
-    _my_neutron_per_fission(parameters.get<Real>("neutron_per_fission"))
+    _my_neutron_per_fission(parameters.get<Real>("neutron_per_fission")),
+    _my_neutron_velocity(parameters.get<Real>("neutron_velocity"))
   {}
 
 protected:
@@ -46,6 +47,7 @@ private:
   Real _my_neutron_absorption_xs;
   Real _my_neutron_fission_xs;
   Real _my_neutron_per_fission;
+  Real _my_neutron_velocity;
 };
 
 #endif //CONSTANT_H
