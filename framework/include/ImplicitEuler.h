@@ -1,5 +1,8 @@
 #include "Kernel.h"
 
+#ifndef IMPLICITEULER
+#define IMPLICITEULER
+
 //Forward Declarations
 class ImplicitEuler;
 
@@ -29,3 +32,4 @@ protected:
   }
 
 };
+#endif //IMPLICITEULER
