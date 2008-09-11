@@ -81,17 +81,19 @@ Kernel::init(EquationSystems * es)
   _t = 0;
   _dt = 0;
   _is_transient = false;
+  _n_of_rk_stages = 1;
+  _t_scheme = 0;  
 
   if(_es->parameters.have_parameter<Real>("time") && _es->parameters.have_parameter<Real>("dt"))
   {
     _is_transient = true;
-    _t = _es->parameters.get<Real>("time");
-    _dt = _es->parameters.get<Real>("dt");
-    _t_step = 0;    
-    _dt_old = _dt;
-    _bdf2_wei[0] = 1.;
-    _bdf2_wei[1] =-1.;
-    _bdf2_wei[2] = 0.;    
+    _t            = _es->parameters.get<Real>("time");
+    _dt           = _es->parameters.get<Real>("dt");
+    _t_step       = 0;    
+    _dt_old       = _dt;
+    _bdf2_wei[0]  = 1.;
+    _bdf2_wei[1]  =-1.;
+    _bdf2_wei[2]  = 0.;    
   }
 }
 
@@ -384,6 +386,8 @@ Real Kernel::_t;
 Real Kernel::_dt;
 Real Kernel::_dt_old;
 int Kernel::_t_step;
+short Kernel::_t_scheme;
+short Kernel::_n_of_rk_stages;
 Real Kernel::_bdf2_wei[3];
 bool Kernel::_is_transient;
 Material * Kernel::_material;

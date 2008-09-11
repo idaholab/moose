@@ -14,9 +14,9 @@ class ImplicitEuler : public Kernel
 public:
 
   ImplicitEuler(Parameters parameters,
-                 std::string var_name,
-                 std::vector<std::string> coupled_to=std::vector<std::string>(0),
-                 std::vector<std::string> coupled_as=std::vector<std::string>(0))
+                std::string var_name,
+                std::vector<std::string> coupled_to=std::vector<std::string>(0),
+                std::vector<std::string> coupled_as=std::vector<std::string>(0))
     :Kernel(parameters,var_name,true,coupled_to,coupled_as)
   {}
 

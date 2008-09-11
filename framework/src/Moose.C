@@ -9,6 +9,7 @@
 #include "VectorNeumannBC.h"
 #include "VacuumBC.h"
 #include "ImplicitEuler.h"
+#include "ImplicitBackwardDifference2.h"
 
 #include "MaterialFactory.h"
 #include "Constant.h"
@@ -23,6 +24,7 @@ Moose::registerObjects()
   KernelFactory::instance()->registerKernel<Diffusion>("Diffusion");
   KernelFactory::instance()->registerKernel<Reaction>("Reaction");
   KernelFactory::instance()->registerKernel<ImplicitEuler>("ImplicitEuler");
+  KernelFactory::instance()->registerKernel<ImplicitBackwardDifference2>("ImplicitBackwardDifference2");
   
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<NeumannBC>("NeumannBC");

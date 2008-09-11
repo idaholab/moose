@@ -1,5 +1,4 @@
 #include "ImplicitEuler.h"
- 
 
 template<>
 Parameters valid_params<ImplicitEuler>()

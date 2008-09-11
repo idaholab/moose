@@ -411,6 +411,16 @@ protected:
    * Coefficients (weights) for the BDF2 time discretization.
    */
   static Real _bdf2_wei[3];
+
+  /**
+   * Time discretization scheme: 0 - Implicit Euler, 1 - 2nd-order Backward Difference
+   */
+  static short _t_scheme;
+
+  /**
+   * The total number of Runge-Kutta stages
+   */
+  static short _n_of_rk_stages;
   
   /**
    * Pointer to the material that is valid for the current block.
