@@ -114,11 +114,6 @@ protected:
     return 0;
   }
 
-  /** 
-   * Piece of the residual that gets added for transient solves.
-   */
-  virtual Real computeQpTransientResidual(){ return 0; }
-
   /**
    * Name of the variable being solved for.
    */

@@ -98,8 +98,8 @@ Kernel::init(EquationSystems * es)
 void
 Kernel::reinitDT()
 {
-   if(_is_transient)
-   {
+  if(_is_transient)
+  {
     _t = _es->parameters.get<Real>("time");
     _t_step = _es->parameters.get<int>("t_step");
     _dt_old = _dt;
@@ -108,7 +108,7 @@ Kernel::reinitDT()
     _bdf2_wei[2] = 1.+_dt/sum;
     _bdf2_wei[1] =-sum/_dt_old;
     _bdf2_wei[0] =_dt*_dt/_dt_old/sum;
-   }   
+  }   
 }
 
 void
@@ -197,15 +197,8 @@ Kernel::computeElemResidual()
   DenseSubVector<Number> & var_Re = *_var_Res[_var_num];
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
-  {
     for (_i=0; _i<_phi.size(); _i++)
-    {
       var_Re(_i) += _JxW[_qp]*computeQpResidual();
-
-      if(_is_transient)
-	var_Re(_i) += _JxW[_qp]*computeQpTransientResidual();
-    }
-  }
   
   Moose::perf_log.pop("computeElemResidual()","Kernel");
 }
