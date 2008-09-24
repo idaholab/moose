@@ -85,7 +85,6 @@ private:
   Real _my_gas_constant;
   Real _my_gravity;
   Real _my_porosity;
-  
 };
 
 #endif //POROUSMEDIA_H
