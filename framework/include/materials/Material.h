@@ -40,7 +40,11 @@ public:
     _neutron_absorption_xs(1),
     _neutron_fission_xs(1),
     _neutron_per_fission(1),
-    _neutron_velocity(1)
+    _neutron_velocity(1),
+    _neutron_per_power(1),
+    _heat_xfer_coefficient(1),
+    _temp0(1),
+    _temp_fluid(1)
   {}
 
   virtual ~Material(){}
@@ -73,9 +77,12 @@ public:
   std::vector<Real> & neutronFissionXS(){ return _neutron_fission_xs; }
   std::vector<Real> & neutronPerFission(){ return _neutron_per_fission; }
   std::vector<Real> & neutronVelocity(){ return _neutron_velocity; }
-  
-  
-  
+  std::vector<Real> & neutronPerPower(){ return _neutron_per_power; }
+
+  std::vector<Real> & heatXferCoefficient(){ return _heat_xfer_coefficient; }
+  std::vector<Real> & temp0(){ return _temp0; }
+  std::vector<Real> & tempFluid(){ return _temp_fluid; }
+    
 private:
   std::vector<Real> _zero;
   std::vector<RealGradient> _grad_zero;
@@ -122,6 +129,8 @@ protected:
   std::vector<Real> _neutron_velocity;
   std::vector<Real> _neutron_per_power;
   std::vector<Real> _heat_xfer_coefficient;
+  std::vector<Real> _temp0;
+  std::vector<Real> _temp_fluid;
   
 };
 
