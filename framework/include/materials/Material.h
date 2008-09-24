@@ -32,6 +32,9 @@ public:
     _neut(_has_neut ? coupledVal("neut") : _zero),
     _has_solid_temp(std::find(coupled_as.begin(),coupled_as.end(),"solid_temp") != coupled_as.end()),
     _solid_temp(_has_solid_temp ? coupledVal("solid_temp") : _zero),
+    _has_pre(std::find(coupled_as.begin(),coupled_as.end(),"pre") != coupled_as.end()),
+    _pre(_has_pre ? coupledVal("pre") : _zero),
+    _grad_pre(_has_pre ? coupledGrad("pre") : _grad_zero),
     _thermal_conductivity(1),
     _thermal_expansion(1),
     _specific_heat(1),
@@ -131,6 +134,10 @@ protected:
 
   bool _has_solid_temp;
   std::vector<Real> & _solid_temp;
+
+  bool _has_pre;
+  std::vector<Real> & _pre;
+  std::vector<RealGradient> & _grad_pre;
   
   std::vector<Real> _thermal_conductivity;
   std::vector<Real> _thermal_expansion;
