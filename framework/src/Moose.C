@@ -14,6 +14,7 @@
 #include "MaterialFactory.h"
 #include "Constant.h"
 #include "UO2.h"
+#include "PorousSolid.h"
 
 #include "Moose.h"
 
@@ -33,4 +34,6 @@ Moose::registerObjects()
 
   MaterialFactory::instance()->registerMaterial<Constant>("Constant");
   MaterialFactory::instance()->registerMaterial<UO2>("UO2");
+  MaterialFactory::instance()->registerMaterial<PorousSolid>("PorousSolid");
+ 
 }
