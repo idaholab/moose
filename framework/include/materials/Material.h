@@ -30,6 +30,8 @@ public:
     _grad_oxygen(_has_oxygen ? coupledGrad("oxygen") : _grad_zero),
     _has_neut(std::find(coupled_as.begin(),coupled_as.end(),"neut") != coupled_as.end()),
     _neut(_has_neut ? coupledVal("neut") : _zero),
+    _has_solid_temp(std::find(coupled_as.begin(),coupled_as.end(),"solid_temp") != coupled_as.end()),
+    _solid_temp(_has_solid_temp ? coupledVal("solid_temp") : _zero),
     _thermal_conductivity(1),
     _thermal_expansion(1),
     _specific_heat(1),
@@ -45,6 +47,11 @@ public:
     _heat_xfer_coefficient(1),
     _temp0(1),
     _temp_fluid(1)
+    _fluid_resistance_coefficient(1),
+    _fluid_specific_heat(1),
+    _gas_constant(1),
+    _gravity(1),
+    _porosity(1)
   {}
 
   virtual ~Material(){}
@@ -82,7 +89,13 @@ public:
   std::vector<Real> & heatXferCoefficient(){ return _heat_xfer_coefficient; }
   std::vector<Real> & temp0(){ return _temp0; }
   std::vector<Real> & tempFluid(){ return _temp_fluid; }
-    
+
+  std::vector<Real> & fluidResistanceCoefficient(){return _fluid_resistance_coefficient;}
+  std::vector<Real> & fluidConductivity(){return _fluid_conductivity;}
+  std::vector<Real> & gasConstant(){return _gas_constant;}
+  std::vector<Real> & gravity(){return _gravity;}
+  std::vector<Real> & porosity(){return _porosity;}
+
 private:
   std::vector<Real> _zero;
   std::vector<RealGradient> _grad_zero;
@@ -115,6 +128,9 @@ protected:
 
   bool _has_neut;
   std::vector<Real> & _neut;
+
+  bool _has_solid_temp;
+  std::vector<Real> & _solid_temp;
   
   std::vector<Real> _thermal_conductivity;
   std::vector<Real> _thermal_expansion;
@@ -131,7 +147,12 @@ protected:
   std::vector<Real> _heat_xfer_coefficient;
   std::vector<Real> _temp0;
   std::vector<Real> _temp_fluid;
-  
+  std::vector<Real> _fluid_resistance_coefficient;
+  std::vector<Real> _fluid_conductivity;
+  std::vector<Real> _fluid_specific_heat;
+  std::vector<Real> _gas_constant;
+  std::vector<Real> _gravity;
+  std::vector<Real> _porosity;
 };
 
 #endif //MATERIAL_H
