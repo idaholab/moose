@@ -28,6 +28,8 @@ public:
     _has_oxygen(std::find(coupled_as.begin(),coupled_as.end(),"oxygen") != coupled_as.end()),
     _oxygen(_has_oxygen ? coupledVal("oxygen") : _zero),
     _grad_oxygen(_has_oxygen ? coupledGrad("oxygen") : _grad_zero),
+    _has_neut(std::find(coupled_as.begin(),coupled_as.end(),"neut") != coupled_as.end()),
+    _neut(_has_neut ? coupledVal("neut") : _zero),
     _thermal_conductivity(1),
     _thermal_expansion(1),
     _specific_heat(1),
@@ -104,6 +106,9 @@ protected:
   std::vector<Real> & _oxygen;
   std::vector<RealGradient> & _grad_oxygen;
 
+  bool _has_neut;
+  std::vector<Real> & _neut;
+  
   std::vector<Real> _thermal_conductivity;
   std::vector<Real> _thermal_expansion;
   std::vector<Real> _specific_heat;
@@ -115,6 +120,9 @@ protected:
   std::vector<Real> _neutron_fission_xs;
   std::vector<Real> _neutron_per_fission;
   std::vector<Real> _neutron_velocity;
+  std::vector<Real> _neutron_per_power;
+  std::vector<Real> _heat_xfer_coefficient;
+  
 };
 
 #endif //MATERIAL_H

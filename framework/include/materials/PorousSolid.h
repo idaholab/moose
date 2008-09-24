@@ -34,6 +34,8 @@ public:
     _my_sigf1(parameters.get<Real>("sigf1")),
     _my_neutron_per_fission(parameters.get<Real>("neutron_per_fission")),
     _my_neutron_velocity(parameters.get<Real>("neutron_velocity")),
+    _my_neutron_per_power(parameters.get<Real>("neutron_per_power")),
+    _my_heat_xfer_coefficient(parameters.get<Real>("heat_xfer_coefficient")),
     _my_temp0(parameters.get<Real>("temp0"))
   {}
 
@@ -54,6 +56,8 @@ private:
   Real _my_sigf1;
   Real _my_neutron_per_fission;
   Real _my_neutron_velocity;
+  Real _my_neutron_per_power;
+  Real _my_heat_xfer_coefficient;
   Real _my_temp0;
   
 };
