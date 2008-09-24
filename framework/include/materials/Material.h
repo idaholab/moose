@@ -49,7 +49,7 @@ public:
     _neutron_per_power(1),
     _heat_xfer_coefficient(1),
     _temp0(1),
-    _temp_fluid(1)
+    _temp_fluid(1),
     _fluid_resistance_coefficient(1),
     _fluid_specific_heat(1),
     _gas_constant(1),
