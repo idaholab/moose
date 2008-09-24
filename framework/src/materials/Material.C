@@ -19,7 +19,6 @@ Material::materialReinit()
   _neutron_per_power.resize(_qrule->n_points(),1);
   _heat_xfer_coefficient.resize(_qrule->n_points(),1);
   _temp0.resize(_qrule->n_points(),1);
-  _temp_fluid.resize(_qrule->n_points(),1);
   _fluid_resistance_coefficient.resize(_qrule->n_points(),1);
   _fluid_conductivity.resize(_qrule->n_points(),1);
   _fluid_specific_heat.resize(_qrule->n_points(),1);

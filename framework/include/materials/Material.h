@@ -49,7 +49,6 @@ public:
     _neutron_per_power(1),
     _heat_xfer_coefficient(1),
     _temp0(1),
-    _temp_fluid(1),
     _fluid_resistance_coefficient(1),
     _fluid_specific_heat(1),
     _gas_constant(1),
@@ -91,7 +90,6 @@ public:
 
   std::vector<Real> & heatXferCoefficient(){ return _heat_xfer_coefficient; }
   std::vector<Real> & temp0(){ return _temp0; }
-  std::vector<Real> & tempFluid(){ return _temp_fluid; }
 
   std::vector<Real> & fluidResistanceCoefficient(){return _fluid_resistance_coefficient;}
   std::vector<Real> & fluidConductivity(){return _fluid_conductivity;}
@@ -153,7 +151,6 @@ protected:
   std::vector<Real> _neutron_per_power;
   std::vector<Real> _heat_xfer_coefficient;
   std::vector<Real> _temp0;
-  std::vector<Real> _temp_fluid;
   std::vector<Real> _fluid_resistance_coefficient;
   std::vector<Real> _fluid_conductivity;
   std::vector<Real> _fluid_specific_heat;

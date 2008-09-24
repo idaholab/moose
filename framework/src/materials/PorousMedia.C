@@ -18,7 +18,6 @@ Parameters valid_params<PorousMedia>()
   params.set<Real>("neutron_per_power")=1.0;
   params.set<Real>("heat_xfer_coefficient")=1.0;
   params.set<Real>("temp0")=1.0;
-  params.set<Real>("temp_fluid")=1.0;
   params.set<Real>("k0")=1.0;
   params.set<Real>("k1")=0.0;
   params.set<Real>("d0")=1.0;
@@ -51,7 +50,6 @@ PorousMedia::computeProperties()
     _neutron_per_power[qp]             = _my_neutron_per_power;
     _heat_xfer_coefficient[qp]         = _my_heat_xfer_coefficient;
     _temp0[qp]                         = _my_temp0;
-    _temp_fluid[qp]                    = _my_temp_fluid;
     _density[qp]                       = _my_density;
     _thermal_conductivity[qp]          = _my_thermal_conductivity;
     _specific_heat[qp]                 = _my_specific_heat;
