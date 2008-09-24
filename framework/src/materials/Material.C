@@ -24,7 +24,7 @@ Material::materialReinit()
   _fluid_specific_heat.resize(_qrule->n_points(),1);
   _gas_constant.resize(_qrule->n_points(),1);
   _gravity.resize(_qrule->n_points(),1);
-  _porosity.resize(_qrule->n_points(),1);
+  _porosity.resize(_qrule->n_points(),0.5);
   
   computeProperties();
 }
