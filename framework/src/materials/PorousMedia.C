@@ -10,7 +10,6 @@ Parameters valid_params<PorousMedia>()
   params.set<Real>("specific_heat")=1.0;
   params.set<Real>("specific_heat_fluid")=5195;  //[J/(kg.K)]
   params.set<Real>("specific_heat_solid")=1725;
-  params.set<Real>("density")=1.0;
   params.set<Real>("neutron_diffusion_coefficient")=1.0;
   params.set<Real>("neutron_absorption_xs")=1.0;
   params.set<Real>("neutron_fission_xs")=1.0;
@@ -30,7 +29,9 @@ Parameters valid_params<PorousMedia>()
   params.set<Real>("fluid_resistance_coefficient")=1.0;
   params.set<Real>("gas_constant")=1.0;
   params.set<Real>("porosity")=0.5;
-  
+  // parameter of pebble-bed reactor
+  params.set<Real>("vessel_cross_section")=1.0;
+  params.set<Real>("pebble_diameter")=0.06;
   return params;
 }
 
@@ -57,5 +58,9 @@ PorousMedia::computeProperties()
     _neutron_per_power[qp]             = _my_neutron_per_power;
     _neutron_per_fission[qp]           = _my_neutron_per_fission;
     _neutron_velocity[qp]              = _my_neutron_velocity;
+    
+//KTA standard
+//    Real pre_in_bar = _pre[qp]/1e6;
+//    _thermal_conductivity_fluid[qp]    = 2.682e-3*(1+1.123e-3*pre_in_bar)*pow(_temp[qp],0.71)*(1-2e-4*pre_in_bar);
   }
 }

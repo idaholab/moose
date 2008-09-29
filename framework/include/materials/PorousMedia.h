@@ -45,13 +45,19 @@ public:
     _my_sigf1(parameters.get<Real>("sigf1")),
     _my_fluid_resistance_coefficient(parameters.get<Real>("fluid_resistance_coefficient")),
     _my_gas_constant(parameters.get<Real>("gas_constant")),
-    _my_porosity(parameters.get<Real>("porosity"))
-    {}
+    _my_porosity(parameters.get<Real>("porosity")),
+    _my_vessel_cross_section(parameters.get<Real>("vessel_cross_section")),
+    _my_pebble_diameter(parameters.get<Real>("pebble_diameter"))
+    {
+      _gravity(0) = 0.0;
+      _gravity(1) = -9.8;
+      _gravity(2) = 0.0;
+    }
 
 
 protected:
   virtual void computeProperties();
-
+  
 private:
   Real _my_thermal_conductivity;
   Real _my_thermal_conductivity_fluid;
@@ -78,6 +84,11 @@ private:
   Real _my_fluid_resistance_coefficient;
   Real _my_gas_constant;
   Real _my_porosity;
+  Real _my_vessel_cross_section;
+  Real _my_pebble_diameter;
+  VectorValue<Real> _gravity;
+  VectorValue<Real> _momentum;
+  
 };
 
 #endif //POROUSMEDIA_H
