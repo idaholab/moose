@@ -36,8 +36,12 @@ public:
     _pre(_has_pre ? coupledVal("pre") : _zero),
     _grad_pre(_has_pre ? coupledGrad("pre") : _grad_zero),
     _thermal_conductivity(1),
+    _thermal_conductivity_fluid(1),
+    _thermal_conductivity_solid(1),
     _thermal_expansion(1),
     _specific_heat(1),
+    _specific_heat_fluid(1),
+    _specific_heat_solid(1),
     _density(1),
     _youngs_modulus(1),
     _poissons_ratio(1),
@@ -48,11 +52,7 @@ public:
     _neutron_velocity(1),
     _neutron_per_power(1),
     _heat_xfer_coefficient(1),
-    _temp0(1),
-    _fluid_resistance_coefficient(1),
-    _fluid_specific_heat(1),
     _gas_constant(1),
-    _gravity(1),
     _porosity(1)
   {}
 
@@ -74,8 +74,12 @@ public:
   void materialReinit();
 
   std::vector<Real> & thermalConductivity(){ return _thermal_conductivity; }
+  std::vector<Real> & thermalConductivityFluid(){ return _thermal_conductivity_fluid; }
+  std::vector<Real> & thermalConductivitySolid(){ return _thermal_conductivity_solid; }
   std::vector<Real> & thermalExpansion(){ return _thermal_expansion; }
   std::vector<Real> & specificHeat(){ return _specific_heat; }
+  std::vector<Real> & specificHeatFluid(){ return _specific_heat_fluid; }
+  std::vector<Real> & specificHeatSolid(){ return _specific_heat_solid; }
   std::vector<Real> & density(){ return _density; }
   
   std::vector<Real> & youngsModulus(){ return _youngs_modulus; }
@@ -89,12 +93,9 @@ public:
   std::vector<Real> & neutronPerPower(){ return _neutron_per_power; }
 
   std::vector<Real> & heatXferCoefficient(){ return _heat_xfer_coefficient; }
-  std::vector<Real> & temp0(){ return _temp0; }
 
   std::vector<Real> & fluidResistanceCoefficient(){return _fluid_resistance_coefficient;}
-  std::vector<Real> & fluidConductivity(){return _fluid_conductivity;}
   std::vector<Real> & gasConstant(){return _gas_constant;}
-  std::vector<Real> & gravity(){return _gravity;}
   std::vector<Real> & porosity(){return _porosity;}
 
 private:
@@ -138,8 +139,12 @@ protected:
   std::vector<RealGradient> & _grad_pre;
   
   std::vector<Real> _thermal_conductivity;
+  std::vector<Real> _thermal_conductivity_fluid;
+  std::vector<Real> _thermal_conductivity_solid;
   std::vector<Real> _thermal_expansion;
   std::vector<Real> _specific_heat;
+  std::vector<Real> _specific_heat_fluid;
+  std::vector<Real> _specific_heat_solid;
   std::vector<Real> _density;
   std::vector<Real> _youngs_modulus;
   std::vector<Real> _poissons_ratio;
@@ -150,12 +155,8 @@ protected:
   std::vector<Real> _neutron_velocity;
   std::vector<Real> _neutron_per_power;
   std::vector<Real> _heat_xfer_coefficient;
-  std::vector<Real> _temp0;
   std::vector<Real> _fluid_resistance_coefficient;
-  std::vector<Real> _fluid_conductivity;
-  std::vector<Real> _fluid_specific_heat;
   std::vector<Real> _gas_constant;
-  std::vector<Real> _gravity;
   std::vector<Real> _porosity;
 };
 

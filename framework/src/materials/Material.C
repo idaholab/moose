@@ -8,6 +8,10 @@ Material::materialReinit()
   _thermal_conductivity.resize(_qrule->n_points(),1);
   _thermal_expansion.resize(_qrule->n_points(),1);
   _specific_heat.resize(_qrule->n_points(),1);
+  _thermal_conductivity_fluid.resize(_qrule->n_points(),1);
+  _thermal_conductivity_solid.resize(_qrule->n_points(),1);
+  _specific_heat_fluid.resize(_qrule->n_points(),1);
+  _specific_heat_solid.resize(_qrule->n_points(),1);
   _density.resize(_qrule->n_points(),1);
   _youngs_modulus.resize(_qrule->n_points(),1);
   _poissons_ratio.resize(_qrule->n_points(),1);
@@ -18,12 +22,8 @@ Material::materialReinit()
   _neutron_velocity.resize(_qrule->n_points(),1);
   _neutron_per_power.resize(_qrule->n_points(),1);
   _heat_xfer_coefficient.resize(_qrule->n_points(),1);
-  _temp0.resize(_qrule->n_points(),1);
   _fluid_resistance_coefficient.resize(_qrule->n_points(),1);
-  _fluid_conductivity.resize(_qrule->n_points(),1);
-  _fluid_specific_heat.resize(_qrule->n_points(),1);
   _gas_constant.resize(_qrule->n_points(),1);
-  _gravity.resize(_qrule->n_points(),1);
   _porosity.resize(_qrule->n_points(),0.5);
   
   computeProperties();
