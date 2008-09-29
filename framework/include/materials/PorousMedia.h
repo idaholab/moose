@@ -35,7 +35,6 @@ public:
     _my_neutron_per_power(parameters.get<Real>("neutron_per_power")),
     _my_heat_xfer_coefficient(parameters.get<Real>("heat_xfer_coefficient")),
     _my_temp0(parameters.get<Real>("temp0")),
-    _my_temp_fluid(parameters.get<Real>("temp_fluid")),
     _my_k0(parameters.get<Real>("k0")),
     _my_k1(parameters.get<Real>("k1")),    
     _my_d0(parameters.get<Real>("d0")),
@@ -70,7 +69,6 @@ private:
   Real _my_neutron_per_power;
   Real _my_heat_xfer_coefficient;
   Real _my_temp0;
-  Real _my_temp_fluid;
   Real _my_k0;
   Real _my_k1;
   Real _my_d0;
