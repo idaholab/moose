@@ -6,6 +6,9 @@
 //Forward Declarations
 class VacuumBC;
 
+template<>
+Parameters valid_params<VacuumBC>();
+
 /**
  * Implements a simple Vacuum BC for neutron diffusion on the boundary.
  * Vacuum BC is defined as \f$ D\frac{du}{dn}+\frac{u}{2} = 0\f$, where u is neutron flux.
@@ -21,7 +24,8 @@ public:
    * constructor.
    */
   VacuumBC(Parameters parameters, std::string var_name, unsigned int boundary_id)
-    :BoundaryCondition(parameters, var_name, true, boundary_id)
+    :BoundaryCondition(parameters, var_name, true, boundary_id),
+    _alpha(_parameters.get<Real>("alpha"))
   {}
 
   virtual ~VacuumBC(){}
@@ -29,12 +33,18 @@ public:
 protected:
   virtual Real computeQpResidual()
   {
-    return _phi_face[_i][_qp]*_u[_qp]/2.;
+    return _phi_face[_i][_qp]*_alpha*_u[_qp]/2.;
   }
   virtual Real computeQpJacobian()
   {
-    return _phi_face[_i][_qp]*_phi_face[_j][_qp]/2.;    
+    return _phi_face[_i][_qp]*_alpha*_phi_face[_j][_qp]/2.;    
   }
+
+private:
+  /**
+   * Ratio of u to du/dn
+   */
+  Real _alpha;
 };
 
 #endif //VACUUM_H
