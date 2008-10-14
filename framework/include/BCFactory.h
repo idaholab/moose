@@ -14,7 +14,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef BoundaryCondition * (*BCBuildPtr)(Parameters parameters, std::string var_name, unsigned int boundary_id);
+typedef BoundaryCondition * (*BCBuildPtr)(Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
 /**
  * Typedef to make things easier.
@@ -25,9 +25,9 @@ typedef Parameters (*BCParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename BCType>
-BoundaryCondition * buildBC(Parameters parameters, std::string var_name, unsigned int boundary_id)
+BoundaryCondition * buildBC(Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
 {
-  return new BCType(parameters, var_name, boundary_id);
+  return new BCType(parameters, var_name, boundary_id, coupled_to, coupled_as);
 }
 
 /**
@@ -54,18 +54,26 @@ public:
   void add(std::string name,
            Parameters parameters,
            std::string var_name,
-           unsigned int boundary_id)
+           unsigned int boundary_id,
+           std::vector<std::string> coupled_to,
+           std::vector<std::string> coupled_as)
   {
-    active_bcs.push_back((*name_to_build_pointer[name])(parameters,var_name,boundary_id));
+    active_bcs[boundary_id].push_back((*name_to_build_pointer[name])(parameters,var_name,boundary_id, coupled_to, coupled_as));
   }
 
   Parameters getValidParams(std::string name)
   {
+    if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
+    {
+      std::cerr<<std::endl<<"A _"<<name<<"_ is not registered BC "<<std::endl<<std::endl;
+      error();
+    }
+
     return name_to_params_pointer[name]();
   }
 
-  std::vector<BoundaryCondition *>::iterator activeBCsBegin(){ return active_bcs.begin(); };
-  std::vector<BoundaryCondition *>::iterator activeBCsEnd(){ return active_bcs.end(); };
+  std::vector<BoundaryCondition *>::iterator activeBCsBegin(unsigned int boundary_id){ return active_bcs[boundary_id].begin(); };
+  std::vector<BoundaryCondition *>::iterator activeBCsEnd(unsigned int boundary_id){ return active_bcs[boundary_id].end(); };
 
 private:
   BCFactory(){}
@@ -74,7 +82,7 @@ private:
   std::map<std::string, BCBuildPtr> name_to_build_pointer;
   std::map<std::string, BCParamsPtr> name_to_params_pointer;
 
-  std::vector<BoundaryCondition *> active_bcs;
+  std::map<unsigned int, std::vector<BoundaryCondition *> > active_bcs;
 };
 
 #endif //BCFACTORY_H

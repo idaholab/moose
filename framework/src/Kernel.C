@@ -27,10 +27,6 @@ Kernel::Kernel(Parameters parameters,
    _phi(*_static_phi),
    _dphi(*_static_dphi),
    _q_point(*_static_q_point),
-   _JxW_face(*_static_JxW_face),
-   _phi_face(*_static_phi_face),
-   _dphi_face(*_static_dphi_face),
-   _normals_face(*_static_normals_face),
    _coupled_to(coupled_to),
    _coupled_as(coupled_as)
 {
@@ -48,6 +44,9 @@ Kernel::Kernel(Parameters parameters,
 
     if(std::find(_var_nums.begin(),_var_nums.end(),coupled_var_num) == _var_nums.end())
       _var_nums.push_back(coupled_var_num);
+
+    if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
+      _coupled_var_nums.push_back(coupled_var_num);
   }
 }
 
@@ -65,18 +64,10 @@ Kernel::init(EquationSystems * es)
   _qrule = new QGauss(_dim,_fe_type.default_quadrature_order());
   _fe->attach_quadrature_rule(_qrule);
 
-  _fe_face = FEBase::build(_dim, _fe_type);
-  _qface = new QGauss(_dim-1,_fe_type.default_quadrature_order());
-  _fe_face->attach_quadrature_rule(_qface);
-
   _static_JxW = &_fe->get_JxW();
   _static_phi = &_fe->get_phi();
   _static_dphi = &_fe->get_dphi();
   _static_q_point = &_fe->get_xyz();
-  _static_JxW_face = &_fe_face->get_JxW();
-  _static_phi_face = &_fe_face->get_phi();
-  _static_dphi_face = &_fe_face->get_dphi();
-  _static_normals_face = &_fe_face->get_normals();
              
   _t = 0;
   _dt = 0;
@@ -171,16 +162,16 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
     for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
     {
-      computeQpSolution(_var_vals[var_num][qp], soln, _var_dof_indices[var_num], qp);
-      computeQpGradSolution(_var_grads[var_num][qp], soln, _var_dof_indices[var_num], qp);
+      computeQpSolution(_var_vals[var_num][qp], soln, _var_dof_indices[var_num], qp, *_static_phi);
+      computeQpGradSolution(_var_grads[var_num][qp], soln, _var_dof_indices[var_num], qp, *_static_dphi);
 
       if(_is_transient)
       {
-        computeQpSolution(_var_vals_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp);
-        computeQpGradSolution(_var_grads_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp);
+        computeQpSolution(_var_vals_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, *_static_phi);
+        computeQpGradSolution(_var_grads_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, *_static_dphi);
         
-        computeQpSolution(_var_vals_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp);
-        computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp);
+        computeQpSolution(_var_vals_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, *_static_phi);
+        computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, *_static_dphi);
       }
     }
   }
@@ -192,9 +183,9 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 }
 
 void
-Kernel::computeElemResidual()
+Kernel::computeResidual()
 {
-  Moose::perf_log.push("computeElemResidual()","Kernel");
+  Moose::perf_log.push("computeResidual()","Kernel");
 
   DenseSubVector<Number> & var_Re = *_var_Res[_var_num];
 
@@ -202,13 +193,13 @@ Kernel::computeElemResidual()
     for (_i=0; _i<_phi.size(); _i++)
       var_Re(_i) += _JxW[_qp]*computeQpResidual();
   
-  Moose::perf_log.pop("computeElemResidual()","Kernel");
+  Moose::perf_log.pop("computeResidual()","Kernel");
 }
 
 void
-Kernel::computeElemJacobian()
+Kernel::computeJacobian()
 {
-  Moose::perf_log.push("computeElemJacobian()","Kernel");
+  Moose::perf_log.push("computeJacobian()","Kernel");
 
   DenseSubMatrix<Number> & var_Ke = *_var_Kes[_var_num];
 
@@ -217,109 +208,13 @@ Kernel::computeElemJacobian()
       for (_j=0; _j<_phi.size(); _j++)
         var_Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
   
-  Moose::perf_log.pop("computeElemJacobian()","Kernel");
+  Moose::perf_log.pop("computeJacobian()","Kernel");
 }
 
 void
-Kernel::computeSideResidual(const NumericVector<Number>& soln,
-			    const Elem * elem,
-			    unsigned int side)
-{
-  Moose::perf_log.push("computeSideResidual()","Kernel");
-
-  _fe_face->reinit(elem, side);
-
-  std::vector<unsigned int> & var_dof_indices = _var_dof_indices[_var_num];
-  DenseSubVector<Number> & var_Re = *_var_Res[_var_num];
-
-  if(_integrated)
-    for (_qp=0; _qp<_qface->n_points(); _qp++)
-    {
-      _u[_qp]=0;
-      _grad_u[_qp]=0;
-      for (_i=0; _i<_phi_face.size(); _i++)
-      {
-        _u[_qp]      +=  _phi_face[_i][_qp]*soln(var_dof_indices[_i]);
-        _grad_u[_qp] += _dphi_face[_i][_qp]*soln(var_dof_indices[_i]);
-      }
-
-      for (_i=0; _i<_phi_face.size(); _i++)
-	var_Re(_i) += _JxW_face[_qp]*computeQpResidual();
-    } 
-  else
-  {
-    // Do this because U is evaluated at the nodes
-    _u.resize(1);
-    _qp = 0;
-    
-    for(_i=0; _i<_phi_face.size(); _i++)
-    {
-      if(elem->is_node_on_side(_i,side))
-      {
-	_u[0] = soln(var_dof_indices[_i]);
-	var_Re(_i) = computeQpResidual();
-      }
-    }
-  }
-
-  Moose::perf_log.pop("computeSideResidual()","Kernel");
-}
-
-void
-Kernel::computeSideJacobian(const NumericVector<Number>& soln,
-			    const Elem * elem,
-			    unsigned int side)
-{
-  Moose::perf_log.push("computeSideJacobian()","Kernel");
-
-  _fe_face->reinit(elem, side);
-
-  std::vector<unsigned int> & var_dof_indices = _var_dof_indices[_var_num];
-  DenseSubMatrix<Number> & var_Ke = *_var_Kes[_var_num];
-
-  if(_integrated)
-    for (_qp=0; _qp<_qface->n_points(); _qp++)
-    {
-      _u[_qp]=0;
-      _grad_u[_qp]=0;
-      for (_i=0; _i<_phi_face.size(); _i++)
-      {
-        _u[_qp]      +=  _phi_face[_i][_qp]*soln(var_dof_indices[_i]);
-        _grad_u[_qp] += _dphi_face[_i][_qp]*soln(var_dof_indices[_i]);
-      }
-
-      for (_i=0; _i<_phi_face.size(); _i++)
-        for (_j=0; _j<_phi_face.size(); _j++)
-          var_Ke(_i,_j) += _JxW_face[_qp]*computeQpJacobian();
-    } 
-  else
-  {
-    // Do this because U is evaluated at the nodes
-    _u.resize(1);
-    _qp = 0;
-    
-    for(_i=0; _i<_phi_face.size(); _i++)
-    {
-      if(elem->is_node_on_side(_i,side))
-      {
-        for(_j=0; _j<_phi_face.size(); _j++)
-          var_Ke(_i,_j) = 0;
-        
-	_u[0] = soln(var_dof_indices[_i]);
-	var_Ke(_i,_i) = 1;
-      }
-    }
-  }
-
-  Moose::perf_log.pop("computeSideJacobian()","Kernel");
-}
-
-void
-Kernel::computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, unsigned int qp)
+Kernel::computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<Real> > & phi)
 {
   u=0;
-
-  const std::vector<std::vector<Real> > & phi = *_static_phi;
 
   for (unsigned int i=0; i<phi.size(); i++) 
   {
@@ -328,11 +223,9 @@ Kernel::computeQpSolution(Real & u, const NumericVector<Number> & soln, const st
 }
 
 void
-Kernel::computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, unsigned int qp)
+Kernel::computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealGradient> > & dphi)
 {
   grad_u=0;
-
-  const std::vector<std::vector<RealGradient> > & dphi = *_static_dphi;
 
   for (unsigned int i=0; i<dphi.size(); i++) 
   {
@@ -362,16 +255,10 @@ unsigned int Kernel::_dim;
 FEType Kernel::_fe_type;
 AutoPtr<FEBase> Kernel::_fe;
 QGauss * Kernel::_qrule;
-AutoPtr<FEBase> Kernel::_fe_face;
-QGauss * Kernel::_qface;
 const std::vector<Real> * Kernel::_static_JxW;
 const std::vector<std::vector<Real> > * Kernel::_static_phi;
 const std::vector<std::vector<RealGradient> > * Kernel::_static_dphi;
 const std::vector<Point> * Kernel::_static_q_point;
-const std::vector<Real> * Kernel::_static_JxW_face;
-const std::vector<std::vector<Real> > * Kernel::_static_phi_face;
-const std::vector<std::vector<RealGradient> > * Kernel::_static_dphi_face;
-const std::vector<Point> * Kernel::_static_normals_face;
 std::vector<unsigned int> Kernel::_var_nums;
 std::map<unsigned int, std::vector<unsigned int> > Kernel::_var_dof_indices;
 std::map<unsigned int, DenseSubVector<Number> * > Kernel::_var_Res;

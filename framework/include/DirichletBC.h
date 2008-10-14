@@ -20,9 +20,9 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  DirichletBC(Parameters parameters, std::string var_name, unsigned int boundary_id)
-    :BoundaryCondition(parameters, var_name, false, boundary_id),
-     _value(_parameters.get<Real>("value"))
+  DirichletBC(Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+    :BoundaryCondition(parameters, var_name, false, boundary_id, coupled_to, coupled_as),
+    _value(_parameters.get<Real>("value"))
   {}
     
   virtual ~DirichletBC(){}
@@ -30,7 +30,7 @@ public:
 protected:
   virtual Real computeQpResidual()
   {
-    return _u[_qp]-_value;
+    return _u_face[_qp]-_value;
   }
 
 private:

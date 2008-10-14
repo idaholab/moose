@@ -23,8 +23,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  VacuumBC(Parameters parameters, std::string var_name, unsigned int boundary_id)
-    :BoundaryCondition(parameters, var_name, true, boundary_id),
+  VacuumBC(Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+    :BoundaryCondition(parameters, var_name, true, boundary_id, coupled_to, coupled_as),
     _alpha(_parameters.get<Real>("alpha"))
   {}
 
@@ -33,7 +33,7 @@ public:
 protected:
   virtual Real computeQpResidual()
   {
-    return _phi_face[_i][_qp]*_alpha*_u[_qp]/2.;
+    return _phi_face[_i][_qp]*_alpha*_u_face[_qp]/2.;
   }
   virtual Real computeQpJacobian()
   {

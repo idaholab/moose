@@ -69,28 +69,12 @@ public:
   /** 
    * Computes the residual for the current element.
    */
-  void computeElemResidual();
+  virtual void computeResidual();
 
   /** 
    * Computes the jacobian for the current element.
    */
-  void computeElemJacobian();
-
-  /** 
-   * Computes the residual for the current side.
-   * 
-   * @param elem Current element.
-   * @param side Current side.
-   */
-  void computeSideResidual(const NumericVector<Number>& soln, const Elem * elem, unsigned int side);
-
-  /** 
-   * Computes the residual for the current side.
-   * 
-   * @param elem Current element.
-   * @param side Current side.
-   */
-  void computeSideJacobian(const NumericVector<Number>& soln, const Elem * elem, unsigned int side);
+  virtual void computeJacobian();
 
   static DofMap * _dof_map;
   static std::vector<unsigned int> _dof_indices;
@@ -186,26 +170,6 @@ protected:
   const std::vector<Point>& _q_point;
 
   /**
-   * Interior Jacobian pre-multiplied by the weight.
-   */
-  const std::vector<Real> & _JxW_face;
-
-  /**
-   * Side shape function.
-   */
-  const std::vector<std::vector<Real> > & _phi_face;
-
-  /**
-   * Gradient of side shape function.
-   */
-  const std::vector<std::vector<RealGradient> > & _dphi_face;
-
-  /**
-   * Normal vectors at the quadrature points.
-   */
-  const std::vector<Point>& _normals_face;
-
-  /**
    * Current shape function.
    */
   unsigned int _i;
@@ -221,6 +185,11 @@ protected:
    * Current _qrule quadrature point.
    */
   unsigned int _qp;
+
+  /**
+   * Variable numbers of the coupled variables.
+   */
+  std::vector<unsigned int> _coupled_var_nums;
 
   /**
    * Names of the variables this kernel is coupled to.
@@ -275,17 +244,7 @@ protected:
   /**
    * Interior quadrature rule.
    */
-  static QGauss * _qrule;
-  
-  /**
-   * Boundary finite element. 
-   */
-  static AutoPtr<FEBase> _fe_face;
-
-  /**
-   * Boundary quadrature rule.
-   */
-  static QGauss * _qface;
+  static QGauss * _qrule;  
 
   /**
    * Current element
@@ -311,29 +270,9 @@ protected:
    * XYZ coordinates of quadrature points
    */
   static const std::vector<Point> * _static_q_point;
-
-  /**
-   * Interior Jacobian pre-multiplied by the weight.
-   */
-  static const std::vector<Real> * _static_JxW_face;
-
-  /**
-   * Side shape function.
-   */
-  static const std::vector<std::vector<Real> > * _static_phi_face;
-
-  /**
-   * Gradient of side shape function.
-   */
-  static const std::vector<std::vector<RealGradient> > * _static_dphi_face;
-
-  /**
-   * Normal vectors at the quadrature points.
-   */
-  static const std::vector<Point> * _static_normals_face;
   
   /**
-   * Variable numbers of the coupled variables.
+   * Variable numbers of the variables.
    */
   static std::vector<unsigned int> _var_nums;
 
@@ -427,20 +366,19 @@ protected:
    */
   static Material * _material;
 
-private:
   /**
    * Computes the value of soln at the current quadrature point.
    * 
    * @param soln The solution vector to pull the coefficients from.
    */
-  static void computeQpSolution(Real & u, const NumericVector<Number>& soln, const std::vector<unsigned int>& dof_indices, unsigned int qp);
+  static void computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<Real> > & phi);
 
   /**
    * Computes the value of the gradient of soln at the current quadrature point.
    * 
    * @param soln The solution vector to pull the coefficients from.
    */
-  static void computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number>& soln, const std::vector<unsigned int>& dof_indices, unsigned int qp);
+  static void computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealGradient> > & dphi);
 };
 
 #endif //KERNEL_H
