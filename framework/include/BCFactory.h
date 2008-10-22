@@ -14,7 +14,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef BoundaryCondition * (*BCBuildPtr)(Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+typedef BoundaryCondition * (*BCBuildPtr)(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
 /**
  * Typedef to make things easier.
@@ -25,9 +25,9 @@ typedef Parameters (*BCParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename BCType>
-BoundaryCondition * buildBC(Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+BoundaryCondition * buildBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
 {
-  return new BCType(parameters, var_name, boundary_id, coupled_to, coupled_as);
+  return new BCType(name, parameters, var_name, boundary_id, coupled_to, coupled_as);
 }
 
 /**
@@ -51,14 +51,15 @@ public:
     name_to_params_pointer[name]=&valid_params<BCType>;
   }
 
-  void add(std::string name,
+  void add(std::string bc_name,
+           std::string name,
            Parameters parameters,
            std::string var_name,
            unsigned int boundary_id,
            std::vector<std::string> coupled_to,
            std::vector<std::string> coupled_as)
   {
-    active_bcs[boundary_id].push_back((*name_to_build_pointer[name])(parameters,var_name,boundary_id, coupled_to, coupled_as));
+    active_bcs[boundary_id].push_back((*name_to_build_pointer[bc_name])(name,parameters,var_name,boundary_id, coupled_to, coupled_as));
   }
 
   Parameters getValidParams(std::string name)

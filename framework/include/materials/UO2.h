@@ -9,11 +9,12 @@
 class UO2 : public Material
 {
 public:
-  UO2(Parameters parameters,
+  UO2(std::string name,
+      Parameters parameters,
       unsigned int block_id,
       std::vector<std::string> coupled_to,
       std::vector<std::string> coupled_as)
-    :Material(parameters,block_id,coupled_to,coupled_as)
+    :Material(name,parameters,block_id,coupled_to,coupled_as)
   {}
 
 protected:

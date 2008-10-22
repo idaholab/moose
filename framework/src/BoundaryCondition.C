@@ -4,13 +4,14 @@
 
 #include "Moose.h"
 
-BoundaryCondition::BoundaryCondition(Parameters parameters,
+BoundaryCondition::BoundaryCondition(std::string name,
+                                     Parameters parameters,
                                      std::string var_name,
                                      bool integrated,
                                      unsigned int boundary_id,
                                      std::vector<std::string> coupled_to,
                                      std::vector<std::string> coupled_as)
-  :Kernel(parameters, var_name, integrated, coupled_to, coupled_as),
+  :Kernel(name, parameters, var_name, integrated, coupled_to, coupled_as),
    _boundary_id(boundary_id),
    _side_elem(NULL),
    _JxW_face(*_static_JxW_face),

@@ -14,7 +14,8 @@
 /**
  * Typedef to make things easier.
  */
-typedef Kernel * (*kernelBuildPtr)(Parameters parameters,
+typedef Kernel * (*kernelBuildPtr)(std::string name,
+                                   Parameters parameters,
                                    std::string var_name,
                                    std::vector<std::string> coupled_to,
                                    std::vector<std::string> coupled_as);
@@ -27,12 +28,13 @@ typedef Parameters (*kernelParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename KernelType>
-Kernel * buildKernel(Parameters parameters,
+Kernel * buildKernel(std::string name,
+                     Parameters parameters,
                      std::string var_name,
                      std::vector<std::string> coupled_to,
                      std::vector<std::string> coupled_as)
 {
-  return new KernelType(parameters, var_name, coupled_to, coupled_as);
+  return new KernelType(name, parameters, var_name, coupled_to, coupled_as);
 }
 
 /**
@@ -56,13 +58,14 @@ public:
     name_to_params_pointer[name]=&valid_params<KernelType>;
   }
 
-  void add(std::string name,
+  void add(std::string kernel_name,
+           std::string name,
            Parameters parameters,
            std::string var_name,
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
            std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    active_kernels.push_back((*name_to_build_pointer[name])(parameters,var_name,coupled_to,coupled_as));
+    active_kernels.push_back((*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as));
   }
 
   Parameters getValidParams(std::string name)

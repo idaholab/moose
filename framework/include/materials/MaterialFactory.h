@@ -14,7 +14,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef Material * (*MaterialBuildPtr)(Parameters parameters, unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+typedef Material * (*MaterialBuildPtr)(std::string name, Parameters parameters, unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
 /**
  * Typedef to make things easier.
@@ -25,12 +25,13 @@ typedef Parameters (*MaterialParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename MaterialType>
-Material * buildMaterial(Parameters parameters,
+Material * buildMaterial(std::string name,
+                         Parameters parameters,
                          unsigned int block_id,
                          std::vector<std::string> coupled_to,
                          std::vector<std::string> coupled_as)
 {
-  return new MaterialType(parameters, block_id, coupled_to, coupled_as);
+  return new MaterialType(name, parameters, block_id, coupled_to, coupled_as);
 }
 
 /**
@@ -54,13 +55,14 @@ public:
     name_to_params_pointer[name]=&valid_params<MaterialType>;
   }
 
-  void add(std::string name,
+  void add(std::string mat_name,
+           std::string name,
            Parameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to,
            std::vector<std::string> coupled_as)
   {
-    active_materials[block_id] = (*name_to_build_pointer[name])(parameters,block_id,coupled_to,coupled_as);
+    active_materials[block_id] = (*name_to_build_pointer[mat_name])(name,parameters,block_id,coupled_to,coupled_as);
   }
 
   Parameters getValidParams(std::string name)

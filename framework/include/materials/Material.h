@@ -14,11 +14,12 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  Material(Parameters parameters,
+  Material(std::string name,
+           Parameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to,
            std::vector<std::string> coupled_as)
-    :Kernel(parameters, Kernel::_es->get_system(0).variable_name(0), false, coupled_to, coupled_as),
+    :Kernel(name, parameters, Kernel::_es->get_system(0).variable_name(0), false, coupled_to, coupled_as),
     _zero(0),
     _grad_zero(0),
     _block_id(block_id),

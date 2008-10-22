@@ -35,14 +35,16 @@ public:
   /** 
    * Factory constrcutor initializes all internal references needed for residual computation.
    * 
-   * 
+   *
+   * @param name The name of this kernel.
    * @param system The system this variable is in
    * @param var_name The variable this Kernel is going to compute a residual for.
    * @param integrated Whether or not the residual is integraded (used by BCs).
    * @param coupled_to The names of the variables this Kernel is coupled_to
    * @param coupled_as The names of the variables the Kernel is going to ask for.
    */
-  Kernel(Parameters parameters,
+  Kernel(std::string name,
+         Parameters parameters,
          std::string var_name,
          bool integrated,
          std::vector<std::string> coupled_to = std::vector<std::string>(0),
@@ -80,6 +82,11 @@ public:
   static std::vector<unsigned int> _dof_indices;
 
 protected:
+  /**
+   * This Kernel's name.
+   */
+  std::string _name;
+  
   /**
    * Holds parameters for derived classes so they can be built with common constructor.
    */

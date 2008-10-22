@@ -15,7 +15,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  BoundaryCondition(Parameters parameters,
+  BoundaryCondition(std::string name,
+                    Parameters parameters,
                     std::string var_name,
                     bool integrated,
                     unsigned int boundary_id,

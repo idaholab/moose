@@ -15,11 +15,12 @@ Parameters valid_params<Constant>();
 class Constant : public Material
 {
 public:
-  Constant(Parameters parameters,
-      unsigned int block_id,
-      std::vector<std::string> coupled_to,
-      std::vector<std::string> coupled_as)
-    :Material(parameters,block_id,coupled_to,coupled_as),
+  Constant(std::string name,
+           Parameters parameters,
+           unsigned int block_id,
+           std::vector<std::string> coupled_to,
+           std::vector<std::string> coupled_as)
+    :Material(name,parameters,block_id,coupled_to,coupled_as),
     _my_thermal_conductivity(parameters.get<Real>("thermal_conductivity")),
     _my_thermal_expansion(parameters.get<Real>("thermal_expansion")),
     _my_specific_heat(parameters.get<Real>("specific_heat")),

@@ -8,12 +8,14 @@
 #include "numeric_vector.h"
 #include "dense_subvector.h"
 
-Kernel::Kernel(Parameters parameters,
+Kernel::Kernel(std::string name,
+               Parameters parameters,
                std::string var_name,
                bool integrated,
                std::vector<std::string> coupled_to,
                std::vector<std::string> coupled_as)
-  :_parameters(parameters),
+  :_name(name),
+   _parameters(parameters),
    _var_name(var_name),
    _var_num(_system->variable_number(_var_name)),
    _integrated(integrated),

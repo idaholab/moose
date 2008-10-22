@@ -20,8 +20,8 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  DirichletBC(Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(parameters, var_name, false, boundary_id, coupled_to, coupled_as),
+  DirichletBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+    :BoundaryCondition(name, parameters, var_name, false, boundary_id, coupled_to, coupled_as),
     _value(_parameters.get<Real>("value"))
   {}
     

@@ -13,11 +13,12 @@ class SecondDerivativeImplicitEuler : public Kernel
 {
 public:
 
-  SecondDerivativeImplicitEuler(Parameters parameters,
-                 std::string var_name,
-                 std::vector<std::string> coupled_to=std::vector<std::string>(0),
-                 std::vector<std::string> coupled_as=std::vector<std::string>(0))
-    :Kernel(parameters,var_name,true,coupled_to,coupled_as)
+  SecondDerivativeImplicitEuler(std::string name,
+                                Parameters parameters,
+                                std::string var_name,
+                                std::vector<std::string> coupled_to=std::vector<std::string>(0),
+                                std::vector<std::string> coupled_as=std::vector<std::string>(0))
+    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as)
   {}
 
 protected:

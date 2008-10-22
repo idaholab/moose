@@ -16,11 +16,12 @@ Parameters valid_params<PorousMedia>();
 class PorousMedia : public Material
 {
 public:
-  PorousMedia(Parameters parameters,
-      unsigned int block_id,
-      std::vector<std::string> coupled_to,
-      std::vector<std::string> coupled_as)
-    :Material(parameters,block_id,coupled_to,coupled_as),
+  PorousMedia(std::string name,
+              Parameters parameters,
+              unsigned int block_id,
+              std::vector<std::string> coupled_to,
+              std::vector<std::string> coupled_as)
+    :Material(name,parameters,block_id,coupled_to,coupled_as),
     _my_thermal_conductivity(parameters.get<Real>("thermal_conductivity")),
     _my_thermal_conductivity_fluid(parameters.get<Real>("thermal_conductivity_fluid")),
     _my_thermal_conductivity_solid(parameters.get<Real>("thermal_conductivity_solid")),
