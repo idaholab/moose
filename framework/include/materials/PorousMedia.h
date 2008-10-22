@@ -48,7 +48,8 @@ public:
     _my_gas_constant(parameters.get<Real>("gas_constant")),
     _my_porosity(parameters.get<Real>("porosity")),
     _my_vessel_cross_section(parameters.get<Real>("vessel_cross_section")),
-    _my_pebble_diameter(parameters.get<Real>("pebble_diameter"))
+    _my_pebble_diameter(parameters.get<Real>("pebble_diameter")),
+    _my_kta_standard(parameters.get<bool>("kta_standard"))
     {
       _gravity(0) = 0.0;
       _gravity(1) = -9.8;
@@ -87,6 +88,7 @@ private:
   Real _my_porosity;
   Real _my_vessel_cross_section;
   Real _my_pebble_diameter;
+  bool _my_kta_standard;
   VectorValue<Real> _gravity;
   VectorValue<Real> _momentum;
   

@@ -31,11 +31,23 @@ public:
     _grad_oxygen(_has_oxygen ? coupledGrad("oxygen") : _grad_zero),
     _has_neut(std::find(coupled_as.begin(),coupled_as.end(),"neut") != coupled_as.end()),
     _neut(_has_neut ? coupledVal("neut") : _zero),
-    _has_solid_temp(std::find(coupled_as.begin(),coupled_as.end(),"solid_temp") != coupled_as.end()),
-    _solid_temp(_has_solid_temp ? coupledVal("solid_temp") : _zero),
     _has_pre(std::find(coupled_as.begin(),coupled_as.end(),"pre") != coupled_as.end()),
     _pre(_has_pre ? coupledVal("pre") : _zero),
     _grad_pre(_has_pre ? coupledGrad("pre") : _grad_zero),
+    _has_xmom(std::find(coupled_as.begin(),coupled_as.end(),"xmom") != coupled_as.end()),
+    _xmom(_has_xmom ? coupledVal("xmom") : _zero),
+    _has_ymom(std::find(coupled_as.begin(),coupled_as.end(),"ymom") != coupled_as.end()),
+    _ymom(_has_ymom ? coupledVal("ymom") : _zero),
+    _has_zmom(std::find(coupled_as.begin(),coupled_as.end(),"zmom") != coupled_as.end()),
+    _zmom(_has_zmom ? coupledVal("zmom") : _zero),
+    _has_rmom(std::find(coupled_as.begin(),coupled_as.end(),"rmom") != coupled_as.end()),
+    _rmom(_has_rmom ? coupledVal("rmom") : _zero),
+    _has_thetamom(std::find(coupled_as.begin(),coupled_as.end(),"thetamom") != coupled_as.end()),
+    _thetamom(_has_thetamom ? coupledVal("thetamom") : _zero),    
+    _has_fluid_temp(std::find(coupled_as.begin(),coupled_as.end(),"fluid_temp") != coupled_as.end()),
+    _fluid_temp(_has_fluid_temp ? coupledVal("fluid_temp") : _zero),
+    _has_solid_temp(std::find(coupled_as.begin(),coupled_as.end(),"solid_temp") != coupled_as.end()),
+    _solid_temp(_has_solid_temp ? coupledVal("solid_temp") : _zero),
     _thermal_conductivity(1),
     _thermal_conductivity_fluid(1),
     _thermal_conductivity_solid(1),
@@ -132,12 +144,27 @@ protected:
   bool _has_neut;
   std::vector<Real> & _neut;
 
-  bool _has_solid_temp;
-  std::vector<Real> & _solid_temp;
-
   bool _has_pre;
   std::vector<Real> & _pre;
   std::vector<RealGradient> & _grad_pre;
+  
+  bool _has_xmom;
+  std::vector<Real> & _xmom;
+  bool _has_ymom;
+  std::vector<Real> & _ymom;
+  bool _has_zmom;
+  std::vector<Real> & _zmom;
+  bool _has_rmom;
+  std::vector<Real> & _rmom;
+  bool _has_thetamom;
+  std::vector<Real> & _thetamom;
+
+  
+  bool _has_fluid_temp;
+  std::vector<Real> & _fluid_temp;
+  
+  bool _has_solid_temp;
+  std::vector<Real> & _solid_temp;
   
   std::vector<Real> _thermal_conductivity;
   std::vector<Real> _thermal_conductivity_fluid;

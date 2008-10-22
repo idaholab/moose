@@ -32,6 +32,8 @@ Parameters valid_params<PorousMedia>()
   // parameter of pebble-bed reactor
   params.set<Real>("vessel_cross_section")=1.0;
   params.set<Real>("pebble_diameter")=0.06;
+  params.set<bool>("kta_standard")=false;
+  
   return params;
 }
 
@@ -40,8 +42,8 @@ PorousMedia::computeProperties()
 {
   for(unsigned int qp=0; qp<_qrule->n_points(); qp++)
   {
-    Real  temp_diff = _temp[qp]-_my_temp0;
-
+    Real  temp_diff = _solid_temp[qp]-_my_temp0;
+    
     _thermal_conductivity[qp]          = _my_thermal_conductivity;
     _thermal_conductivity_fluid[qp]    = _my_thermal_conductivity_fluid;
     _thermal_conductivity_solid[qp]    = _my_thermal_conductivity_solid;
@@ -60,7 +62,86 @@ PorousMedia::computeProperties()
     _neutron_velocity[qp]              = _my_neutron_velocity;
     
 //KTA standard
-//    Real pre_in_bar = _pre[qp]/1e6;
-//    _thermal_conductivity_fluid[qp]    = 2.682e-3*(1+1.123e-3*pre_in_bar)*pow(_temp[qp],0.71)*(1-2e-4*pre_in_bar);
+    if( _my_kta_standard )
+    {
+      Real pre_in_bar = _pre[qp]/1e5;
+      _thermal_conductivity_fluid[qp] = 2.682e-3*(1+1.123e-3*pre_in_bar)*pow(_fluid_temp[qp],0.71)*(1-2e-4*pre_in_bar);
+
+      //Solid
+      Real temp_in_c = _solid_temp[qp]-273.5;
+      Real kappa_pebble = 186.021-39.5408e-2*temp_in_c+4.8852e-4*pow(temp_in_c,2)-2.91e-7*pow(temp_in_c,3)+6.6e-11*pow(temp_in_c,4);
+      Real b = 1.25*pow((1-_porosity[qp])/_porosity[qp],1.111);
+      Real sigma = 5.67e-8;
+      Real emissivity = 0.8;
+    
+      Real lambda = kappa_pebble/(4*sigma*pow(_solid_temp[qp],3)*_my_pebble_diameter);
+
+      //void radiation+solid conduction
+      Real a1 = (1-pow(1-_porosity[qp],0.5))*_porosity[qp];
+      Real a2 = pow(1-_porosity[qp],0.5)/(2/emissivity-1);
+      Real a3 = (b+1)/b;
+      Real a4 = 1/(1+1/((2/emissivity-1)*lambda));
+      Real lambda_r = 4*sigma*pow(_solid_temp[qp],3)*_my_pebble_diameter*(a1+a2*a3*a4);
+
+      //gas conduction+solid conduction
+      Real b1 = pow(1-_porosity[qp],0.5);
+      Real ratio_lambda = _thermal_conductivity_fluid[qp]/kappa_pebble;
+  
+      Real b2 = 2*b1/(1-ratio_lambda*b);
+      Real b3 = (1-ratio_lambda)*b/pow(1-ratio_lambda*b,2)*log(1/(ratio_lambda*b));
+      Real b4 = (b+1)/2;
+      Real b5 = (b-1)/(1-ratio_lambda*b);
+      Real lambda_g = (1-b1+b2*(b3-b4-b5))*_thermal_conductivity_fluid[qp];
+    
+      //contact conduction+solid conduction
+      Real s  = 1;
+      Real sf = 1;
+      Real na = 1/(pow(_my_pebble_diameter,2));
+      Real nl = 1/(_my_pebble_diameter);
+      Real poisson_ratio_pebble = 0.136;
+      Real young_modules_pebble = 9e9;
+      Real f = _pre[qp]*sf/na;
+      Real c1 = 3*(1-poisson_ratio_pebble*poisson_ratio_pebble)*f*0.03/4/young_modules_pebble;
+      Real c2 = pow(c1,0.333);
+      Real lambda_c = c2*na/nl/(0.531*s)*kappa_pebble;
+      _thermal_conductivity_solid[qp] = lambda_r+lambda_g+lambda_c;
+      
+      //Fluid
+      Real density = _pre[qp]/(_my_gas_constant*_fluid_temp[qp]);
+      Real mom = 0;
+      if( _has_xmom)
+      {
+        mom    = _xmom[qp]*_xmom[qp];
+        if( _dim >=2 )
+          mom +=_ymom[qp]*_ymom[qp];
+        if( _dim == 3)
+          mom +=_zmom[qp]*_zmom[qp];
+        mom = pow(mom,0.5);
+      }
+      if( _has_rmom)
+      {
+        mom    = _rmom[qp]*_rmom[qp];
+        if( _dim >=2 )
+          mom +=_zmom[qp]*_zmom[qp];
+        if( _dim == 3)
+          mom +=_thetamom[qp]*_thetamom[qp];
+        mom = pow(mom,0.5);
+      }
+
+      Real dyn_viscosity = 3.674e-7*pow(_fluid_temp[qp],0.7);
+      Real reynolds      = mom*_my_pebble_diameter/dyn_viscosity;
+      Real prandtl       = _specific_heat_fluid[qp]*dyn_viscosity/_thermal_conductivity_fluid[qp];
+      Real nusselt = (7-10*_porosity[qp]+5*pow(_porosity[qp],2))*(1+0.7*pow(reynolds,0.2)*pow(prandtl,0.333))+(1.33-2.4*_porosity[qp]+1.2*pow(_porosity[qp],2))*pow(reynolds,0.7)*pow(prandtl,0.333);
+      Real area = 6*(1-_porosity[qp])/_my_pebble_diameter;
+      
+      _heat_xfer_coefficient[qp] = area*nusselt*_thermal_conductivity_fluid[qp]/_my_pebble_diameter;
+
+      Real reynolds_over_1meps = reynolds/(1-_porosity[qp]);
+      if( reynolds_over_1meps > 1 )
+      {  
+        Real psi = 320/reynolds_over_1meps+6/pow(reynolds_over_1meps,0.1);
+        _fluid_resistance_coefficient[qp] = psi*(1-_porosity[qp])/pow(_porosity[qp],3)/_my_pebble_diameter/2/density*pow(mom,2);
+      }
+    }
   }
 }
