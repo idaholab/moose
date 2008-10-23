@@ -214,6 +214,13 @@ protected:
   std::map<std::string, unsigned int> _coupled_as_to_var_num;
 
   /**
+   * Returns true if a variables has been coupled_as name.
+   *
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  bool isCoupled(std::string name);
+  
+  /**
    * Returns a reference (that can be stored) to a coupled variable's value.
    * 
    * @param name The name the kernel wants to refer to the variable as.

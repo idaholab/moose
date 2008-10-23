@@ -235,15 +235,33 @@ Kernel::computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number>
   }
 }
 
+bool
+Kernel::isCoupled(std::string name)
+{
+  return std::find(_coupled_as.begin(),_coupled_as.end(),name) != _coupled_as.end();
+}
+
 std::vector<Real> &
 Kernel::coupledVal(std::string name)
 {
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+  
   return _var_vals[_coupled_as_to_var_num[name]];
 }
 
 std::vector<RealGradient> &
 Kernel::coupledGrad(std::string name)
 {
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+  
   return _var_grads[_coupled_as_to_var_num[name]];
 }
 

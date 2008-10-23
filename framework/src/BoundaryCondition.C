@@ -159,6 +159,12 @@ BoundaryCondition::computeJacobian()
 std::vector<Real> &
 BoundaryCondition::coupledValFace(std::string name)
 {
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"BC "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+  
   if(_integrated)
     return _var_vals_face[_coupled_as_to_var_num[name]];
 
@@ -168,6 +174,12 @@ BoundaryCondition::coupledValFace(std::string name)
 std::vector<RealGradient> &
 BoundaryCondition::coupledGradFace(std::string name)
 {
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"BC "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+
   if(_integrated)
     return _var_grads_face[_coupled_as_to_var_num[name]];
 
