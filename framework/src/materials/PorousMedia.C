@@ -64,7 +64,17 @@ PorousMedia::computeProperties()
 //KTA standard
     if( _my_kta_standard )
     {
-      Real pre_in_bar = _pre[qp]/1e5;
+      //porosity
+      Real porosity_inf = 0.41;
+      Real delta_r = 0.75-0.070;
+      Real r_m     = (0.07+0.75)/2;
+      Real dist    = delta_r/2-fabs((r_m-_q_point[qp](0)));
+      _porosity[qp] = porosity_inf*(1+(1-porosity_inf)/porosity_inf*exp(-100*dist));
+
+      Real pre_in_bar = 1.0;
+      if( _has_pre)
+        pre_in_bar = _pre[qp]/1e5;
+      
       _thermal_conductivity_fluid[qp] = 2.682e-3*(1+1.123e-3*pre_in_bar)*pow(_fluid_temp[qp],0.71)*(1-2e-4*pre_in_bar);
 
       //Solid
@@ -100,12 +110,15 @@ PorousMedia::computeProperties()
       Real nl = 1/(_my_pebble_diameter);
       Real poisson_ratio_pebble = 0.136;
       Real young_modules_pebble = 9e9;
-      Real f = _pre[qp]*sf/na;
+      Real f = 101325.0*sf/na;
+      if( _has_pre )
+        f = _pre[qp]*sf/na;
+      
       Real c1 = 3*(1-poisson_ratio_pebble*poisson_ratio_pebble)*f*0.03/4/young_modules_pebble;
       Real c2 = pow(c1,0.333);
       Real lambda_c = c2*na/nl/(0.531*s)*kappa_pebble;
       _thermal_conductivity_solid[qp] = lambda_r+lambda_g+lambda_c;
-      
+        
       //Fluid
       Real density = _pre[qp]/(_my_gas_constant*_fluid_temp[qp]);
       Real mom = 0;
@@ -136,12 +149,16 @@ PorousMedia::computeProperties()
       
       _heat_xfer_coefficient[qp] = area*nusselt*_thermal_conductivity_fluid[qp]/_my_pebble_diameter;
 
-      Real reynolds_over_1meps = reynolds/(1-_porosity[qp]);
-      if( reynolds_over_1meps > 1 )
-      {  
-        Real psi = 320/reynolds_over_1meps+6/pow(reynolds_over_1meps,0.1);
-        _fluid_resistance_coefficient[qp] = psi*(1-_porosity[qp])/pow(_porosity[qp],3)/_my_pebble_diameter/2/density*pow(mom,2);
+      if(_has_xmom || _has_rmom )
+      {
+        Real reynolds_over_1meps = reynolds/(1-_porosity[qp]);
+        if( reynolds_over_1meps > 1 )
+        {  
+          Real psi = 320/reynolds_over_1meps+6/pow(reynolds_over_1meps,0.1);
+          _fluid_resistance_coefficient[qp] = psi*(1-_porosity[qp])/pow(_porosity[qp],3)/_my_pebble_diameter/2/density*pow(mom,2);
+        }
       }
+      
     }
   }
 }
