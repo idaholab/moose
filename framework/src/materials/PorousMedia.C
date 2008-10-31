@@ -66,8 +66,11 @@ PorousMedia::computeProperties()
     {
       //porosity
       Real porosity_inf = 0.41;
-      Real delta_r = 0.75-0.070;
-      Real r_m     = (0.07+0.75)/2;
+//      Real delta_r = 0.75-0.0705;
+      Real r_m     = (0.0705+0.75)/2;
+      Real delta_r = 0.80;
+//      Real r_m     = 0.8/2;
+
       Real dist    = delta_r/2-fabs((r_m-_q_point[qp](0)));
       _porosity[qp] = porosity_inf*(1+(1-porosity_inf)/porosity_inf*exp(-100*dist));
 
@@ -118,9 +121,11 @@ PorousMedia::computeProperties()
       Real c2 = pow(c1,0.333);
       Real lambda_c = c2*na/nl/(0.531*s)*kappa_pebble;
       _thermal_conductivity_solid[qp] = lambda_r+lambda_g+lambda_c;
-        
+      
       //Fluid
-      Real density = _pre[qp]/(_my_gas_constant*_fluid_temp[qp]);
+      Real density = 101325/(_my_gas_constant*_fluid_temp[qp]);
+      if( _has_pre)
+        density = _pre[qp]/(_my_gas_constant*_fluid_temp[qp]);
       Real mom = 0;
       if( _has_xmom)
       {
@@ -140,24 +145,35 @@ PorousMedia::computeProperties()
           mom +=_thetamom[qp]*_thetamom[qp];
         mom = pow(mom,0.5);
       }
-
-      Real dyn_viscosity = 3.674e-7*pow(_fluid_temp[qp],0.7);
-      Real reynolds      = mom*_my_pebble_diameter/dyn_viscosity;
-      Real prandtl       = _specific_heat_fluid[qp]*dyn_viscosity/_thermal_conductivity_fluid[qp];
-      Real nusselt = (7-10*_porosity[qp]+5*pow(_porosity[qp],2))*(1+0.7*pow(reynolds,0.2)*pow(prandtl,0.333))+(1.33-2.4*_porosity[qp]+1.2*pow(_porosity[qp],2))*pow(reynolds,0.7)*pow(prandtl,0.333);
-      Real area = 6*(1-_porosity[qp])/_my_pebble_diameter;
       
+      Real dyn_viscosity = 3.674e-7*pow(_fluid_temp[qp],0.7);
+      Real reynolds      = _porosity[qp]*mom*_my_pebble_diameter/dyn_viscosity;
+      
+      Real prandtl       = _specific_heat_fluid[qp]*dyn_viscosity/_thermal_conductivity_fluid[qp];
+
+      Real nusselt = 2;
+         nusselt = (7-10*_porosity[qp]+5*pow(_porosity[qp],2))*(1+0.7*pow(reynolds,0.2)*pow(prandtl,0.333))
+                     +(1.33-2.4*_porosity[qp]+1.2*pow(_porosity[qp],2))*pow(reynolds,0.7)*pow(prandtl,0.333);
+      
+      Real area = 6*(1-_porosity[qp])/_my_pebble_diameter;
+
       _heat_xfer_coefficient[qp] = area*nusselt*_thermal_conductivity_fluid[qp]/_my_pebble_diameter;
 
-      if(_has_xmom || _has_rmom )
+      reynolds      = _porosity[qp]*mom*_my_pebble_diameter/dyn_viscosity;
+       
+      if( _has_rmom || _has_xmom )
       {
         Real reynolds_over_1meps = reynolds/(1-_porosity[qp]);
+        
         if( reynolds_over_1meps > 1 )
         {  
           Real psi = 320/reynolds_over_1meps+6/pow(reynolds_over_1meps,0.1);
           _fluid_resistance_coefficient[qp] = psi*(1-_porosity[qp])/pow(_porosity[qp],3)/_my_pebble_diameter/2/density*pow(mom,2);
+          //std::cout << "W: " << _fluid_resistance_coefficient[qp] <<" " <<  _porosity[qp]     << " " << psi<<std::endl;
         }
+        
       }
+//      std::cout << dyn_viscosity << " " << reynolds << " " << prandtl << " " << nusselt << std::endl;
       
     }
   }
