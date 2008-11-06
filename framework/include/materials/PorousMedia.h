@@ -15,7 +15,7 @@ Parameters valid_params<PorousMedia>();
  */
 class PorousMedia : public Material
 {
-public:
+ public:
   PorousMedia(std::string name,
               Parameters parameters,
               unsigned int block_id,
@@ -49,7 +49,8 @@ public:
     _my_porosity(parameters.get<Real>("porosity")),
     _my_vessel_cross_section(parameters.get<Real>("vessel_cross_section")),
     _my_pebble_diameter(parameters.get<Real>("pebble_diameter")),
-    _my_kta_standard(parameters.get<bool>("kta_standard"))
+    _my_kta_standard(parameters.get<bool>("kta_standard")),
+    _my_non_dim_flag(parameters.get<bool>("non_dim_flag"))
     {
       _gravity(0) = 0.0;
       _gravity(1) = -9.8;
@@ -89,6 +90,7 @@ private:
   Real _my_vessel_cross_section;
   Real _my_pebble_diameter;
   bool _my_kta_standard;
+  bool _my_non_dim_flag;
   VectorValue<Real> _gravity;
   VectorValue<Real> _momentum;
   

@@ -33,7 +33,8 @@ Parameters valid_params<PorousMedia>()
   params.set<Real>("vessel_cross_section")=1.0;
   params.set<Real>("pebble_diameter")=0.06;
   params.set<bool>("kta_standard")=false;
-  
+  params.set<bool>("non_dim_flag")=false;
+
   return params;
 }
 
@@ -60,21 +61,21 @@ PorousMedia::computeProperties()
     _neutron_per_power[qp]             = _my_neutron_per_power;
     _neutron_per_fission[qp]           = _my_neutron_per_fission;
     _neutron_velocity[qp]              = _my_neutron_velocity;
-    
+
 //KTA standard
     
     if( _my_kta_standard )
     {
       //porosity
-      Real porosity_inf = 0.41;
-      Real porosity_max = 0.9;
+      static Real porosity_inf = 0.41;
+      static Real porosity_max = 0.9;
       
 //      Real delta_r = 0.75-0.0705;
-      Real r_m     = (0.0705+0.75)/2;
-      Real delta_r = (0.75-0.0705);
+      static Real r_m     = (0.0705+0.75)/2;
+      static Real delta_r = (0.75-0.0705);
 //      Real r_m     = 0.8/2;
-      Real z_m     = 0.5;
-      Real delta_z = 1.0;
+      static Real z_m     = 0.5;
+      static Real delta_z = 1.0;
       
       Real dist_r  = delta_r/2-fabs((r_m-_q_point[qp](0)));
       Real eps_r   = porosity_inf*(1+(porosity_max-porosity_inf)/porosity_inf*exp(-100*dist_r));
@@ -93,8 +94,8 @@ PorousMedia::computeProperties()
       Real temp_in_c = _solid_temp[qp]-273.5;
       Real kappa_pebble = 186.021-39.5408e-2*temp_in_c+4.8852e-4*pow(temp_in_c,2)-2.91e-7*pow(temp_in_c,3)+6.6e-11*pow(temp_in_c,4);
       Real b = 1.25*pow((1-_porosity[qp])/_porosity[qp],1.111);
-      Real sigma = 5.67e-8;
-      Real emissivity = 0.8;
+      static Real sigma = 5.67e-8;
+      static Real emissivity = 0.8;
     
       Real lambda = kappa_pebble/(4*sigma*pow(_solid_temp[qp],3)*_my_pebble_diameter);
 
@@ -116,12 +117,12 @@ PorousMedia::computeProperties()
       Real lambda_g = (1-b1+b2*(b3-b4-b5))*_thermal_conductivity_fluid[qp];
     
       //contact conduction+solid conduction
-      Real s  = 1;
-      Real sf = 1;
+      static Real s  = 1;
+      static Real sf = 1;
       Real na = 1/(pow(_my_pebble_diameter,2));
       Real nl = 1/(_my_pebble_diameter);
-      Real poisson_ratio_pebble = 0.136;
-      Real young_modules_pebble = 9e9;
+      static Real poisson_ratio_pebble = 0.136;
+      static Real young_modules_pebble = 9e9;
       Real f = 101325.0*sf/na;
       if( _has_pre )
         f = _pre[qp]*sf/na;
@@ -172,16 +173,22 @@ PorousMedia::computeProperties()
       if( _has_rmom || _has_xmom )
       {
         Real reynolds_over_1meps = reynolds/(1-_porosity[qp]);
- 
-        _fluid_resistance_coefficient[qp] =163*dyn_viscosity*pow(1-_porosity[qp],2)/pow(_my_pebble_diameter,2)/density/pow(_porosity[qp],2);
+
+        Real w1 = 320*dyn_viscosity*(1-_porosity[qp])/pow(_my_pebble_diameter,2)/density/2;
+        Real w2 = 0;
+        if( mom >0)
+          w2 = 6*mom/_my_pebble_diameter/2/density/pow(reynolds_over_1meps,0.1);
+        _fluid_resistance_coefficient[qp] = w1+w2;
+        //std::cout <<"w: " << _fluid_resistance_coefficient[qp] << " " << reynolds_over_1meps<< std::endl;
         
+        /*
+        _fluid_resistance_coefficient[qp] =163*dyn_viscosity*pow(1-_porosity[qp],2)/pow(_my_pebble_diameter,2)/density/pow(_porosity[qp],2);
         if( reynolds_over_1meps > 1 )
         {  
           Real psi = 320/reynolds_over_1meps+6/pow(reynolds_over_1meps,0.1);
-          
           _fluid_resistance_coefficient[qp] = psi*(1-_porosity[qp])/pow(_porosity[qp],3)/_my_pebble_diameter/2/density*mom;
-        } 
-//          std::cout << "W: " << _fluid_resistance_coefficient[qp] <<" " <<  _porosity[qp]     << " " << reynolds_over_1meps<<std::endl;
+        }
+        */
       }
     }
   }
