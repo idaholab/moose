@@ -34,7 +34,7 @@ UO2::computeProperties()
 
     _thermal_conductivity[qp] = lambda0*atan_term + 5.95e-11*_temp[qp]*_temp[qp]*_temp[qp];
 
-    _specific_heat[qp] = 264256.0 + 47.0*_temp[qp];
+    _specific_heat[qp] = (264256.0 + 47.0*_temp[qp]) / 1000;
 
     // Page 2-46 in MA_temp[qp]PRO, pg 119 Olander (1/K)
     _thermal_expansion[qp] = 1.0e-5 * (1.0 - 5.1 * _oxygen[qp]);
