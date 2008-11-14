@@ -89,7 +89,7 @@ public:
   /**
    * Retrieve name of the Kernel
    */
-  std::string Kernel::name();
+  std::string name();
 
 protected:
   /**
