@@ -58,14 +58,18 @@ public:
     name_to_params_pointer[name]=&valid_params<KernelType>;
   }
 
-  void add(std::string kernel_name,
-           std::string name,
-           Parameters parameters,
-           std::string var_name,
-           std::vector<std::string> coupled_to=std::vector<std::string>(0),
-           std::vector<std::string> coupled_as=std::vector<std::string>(0))
+  Kernel * add(std::string kernel_name,
+               std::string name,
+               Parameters parameters,
+               std::string var_name,
+               std::vector<std::string> coupled_to=std::vector<std::string>(0),
+               std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    active_kernels.push_back((*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as));
+    Kernel * kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+    
+    active_kernels.push_back(kernel);
+
+    return kernel;
   }
 
   Parameters getValidParams(std::string name)
