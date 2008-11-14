@@ -88,7 +88,7 @@ Kernel::init(EquationSystems * es)
     _bdf2_wei[1]  =-1.;
     _bdf2_wei[2]  = 0.;    
   }
-  
+/*  
   _is_eigenvalue = false;
   if( _es->parameters.have_parameter<Real>("keff") )
   {
@@ -98,6 +98,7 @@ Kernel::init(EquationSystems * es)
     _keff_old = _keff;
     std::cout << "initializing keff: " << _keff << std::endl;
   }
+*/
 }
 
 void
@@ -114,15 +115,6 @@ Kernel::reinitDT()
     _bdf2_wei[1] =-sum/_dt_old;
     _bdf2_wei[0] =_dt*_dt/_dt_old/sum;
   }   
-}
-
-void
-Kernel::reinitEigen()
-{
-  if(_is_eigenvalue)
-  {
-    _keff_old = _keff; 
-  }  
 }
 
 std::string
@@ -317,12 +309,9 @@ std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_older;
 Real Kernel::_t;
 Real Kernel::_dt;
 Real Kernel::_dt_old;
-Real Kernel::_keff;
-Real Kernel::_keff_old;
 int Kernel::_t_step;
 short Kernel::_t_scheme;
 short Kernel::_n_of_rk_stages;
 Real Kernel::_bdf2_wei[3];
 bool Kernel::_is_transient;
-bool Kernel::_is_eigenvalue;
 Material * Kernel::_material;

@@ -359,26 +359,11 @@ protected:
    * Old dt.
    */
   static Real _dt_old;
-
-  /**
-   * Eigenvalue.
-   */
-  static Real _keff;
-  
-  /**
-   * old Eigenvalue.
-   */
-  static Real _keff_old;
   
   /**
    * Whether or not the current simulation is transient.
    */
   static bool _is_transient;
-
-  /**
-   * Whether or not the current simulation is Eigenvalue.
-   */
-  static bool _is_eigenvalue;
 
   /**
    * Current time step.
