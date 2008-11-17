@@ -66,7 +66,7 @@ public:
                std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
     Kernel * kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
-    
+
     active_kernels.push_back(kernel);
 
     return kernel;

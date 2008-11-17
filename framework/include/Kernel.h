@@ -83,6 +83,11 @@ public:
    */
   virtual void computeJacobian();
 
+  /** 
+   * Computes the volume integral for the current element.
+   */
+  virtual Real computeIntegral();
+
   static DofMap * _dof_map;
   static std::vector<unsigned int> _dof_indices;
 
@@ -111,6 +116,14 @@ protected:
    * This is the virtual that derived classes should override for computing the Jacobian.
    */
   virtual Real computeQpJacobian()
+  {
+    return 0;
+  }
+
+  /** 
+   * This is the virtual that derived classes should override for computing the volume integral of kernel.
+   */
+  virtual Real computeQpIntegral()
   {
     return 0;
   }

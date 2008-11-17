@@ -88,17 +88,11 @@ Kernel::init(EquationSystems * es)
     _bdf2_wei[1]  =-1.;
     _bdf2_wei[2]  = 0.;    
   }
-/*  
-  _is_eigenvalue = false;
-  if( _es->parameters.have_parameter<Real>("keff") )
+  if(_es->parameters.have_parameter<Real>("keff"))
   {
-    _is_eigenvalue = true;
-    std::cout << "setting eigenvalue flag true" <<std::endl;  
-    _keff     = _es->parameters.get<Real>("keff");
-    _keff_old = _keff;
-    std::cout << "initializing keff: " << _keff << std::endl;
+    _is_transient = true;
   }
-*/
+  
 }
 
 void
@@ -228,6 +222,22 @@ Kernel::computeJacobian()
         var_Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
   
   Moose::perf_log.pop("computeJacobian()","Kernel");
+}
+
+
+Real
+Kernel::computeIntegral()
+{
+  Moose::perf_log.push("computeIntegral()","Kernel");
+
+  Real sum = 0;
+  
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    for (_i=0; _i<_phi.size(); _i++)
+      sum += _JxW[_qp]*computeQpIntegral();
+  
+  Moose::perf_log.pop("computeIntegral()","Kernel");
+  return sum;
 }
 
 void
