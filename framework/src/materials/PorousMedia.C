@@ -1,5 +1,11 @@
 #include "PorousMedia.h"
 
+template <class T>
+const T& min ( const T& a, const T& b )
+{
+  return (a<b)?a:b;
+}
+
 template<>
 Parameters valid_params<PorousMedia>()
 {
@@ -66,29 +72,33 @@ PorousMedia::computeProperties()
     
     if( _my_kta_standard )
     {
+      /*
       //porosity
       static Real porosity_inf = 0.41;
       static Real porosity_max = 0.9;
+
+      //dimension of the pebble bed
+      static Real r_max = +0.75;
+      static Real r_min = +0.07;
+      static Real z_max = +0.5;
+      static Real z_min = -0.5;
+
       
-//      Real delta_r = 0.75-0.0705;
-      static Real r_m     = (0.0705+0.75)/2;
-      static Real delta_r = (0.75-0.0705);
-//      Real r_m     = 0.8/2;
-      static Real z_m     = 0.5;
-      static Real delta_z = 1.0;
+      Real dist_r = min( _q_point[qp](0) - r_min , r_max - _q_point[qp](0) );
+      Real dist_z = min( _q_point[qp](1) - z_min , z_max - _q_point[qp](1) );
+
+      Real C = 100;
+      Real Y = min(dist_r,dist_z);
       
-      Real dist_r  = delta_r/2-fabs((r_m-_q_point[qp](0)));
-      Real eps_r   = porosity_inf*(1+(porosity_max-porosity_inf)/porosity_inf*exp(-100*dist_r));
-      Real dist_z  = delta_z/2-fabs((z_m-_q_point[qp](1)));
-      Real eps_z   = porosity_inf*(1+(porosity_max-porosity_inf)/porosity_inf*exp(-100*dist_z));
+      Real _porosity[qp] = porosity_inf * (1 + (porosity_max - porosity_inf)/porosity_inf * exp(-C*Y));
+      */
       
-//      _porosity[qp] = 2.0/(1/eps_r + 1/eps_z);
-      
+      //fluid thermal conductivity
       Real pre_in_bar = 1.0;
       if( _has_pre)
         pre_in_bar = _pre[qp]/1e5;
       
-      _thermal_conductivity_fluid[qp] = 2.682e-3*(1+1.123e-3*pre_in_bar)*pow(_fluid_temp[qp],0.71)*(1-2e-4*pre_in_bar);
+      _thermal_conductivity_fluid[qp] = 2.682e-3*(1+1.123e-3*pre_in_bar)*pow((_fluid_temp[qp]+_solid_temp[qp])/2,0.71)*(1-2e-4*pre_in_bar);
 
       //Solid
       Real temp_in_c = _solid_temp[qp]-273.5;
@@ -157,7 +167,7 @@ PorousMedia::computeProperties()
       }
       mom = mom*_porosity[qp];
       
-      Real dyn_viscosity = 3.674e-7*pow(_fluid_temp[qp],0.7);
+      Real dyn_viscosity = 3.674e-7*pow((_fluid_temp[qp]+_solid_temp[qp])/2,0.7);
       Real reynolds      = mom*_my_pebble_diameter/dyn_viscosity;
       
       Real prandtl       = _specific_heat_fluid[qp]*dyn_viscosity/_thermal_conductivity_fluid[qp];
