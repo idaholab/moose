@@ -72,8 +72,8 @@ PorousMedia::computeProperties()
     
     if( _my_kta_standard )
     {
-      /*
       //porosity
+      /*
       static Real porosity_inf = 0.41;
       static Real porosity_max = 0.9;
 
