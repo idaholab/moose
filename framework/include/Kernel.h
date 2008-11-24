@@ -379,6 +379,11 @@ protected:
   static bool _is_transient;
 
   /**
+   * Whether or not the current simulation is Eigenvalue.
+   */
+  static bool _is_eigenvalue;
+
+  /**
    * Current time step.
    */
   static int _t_step;

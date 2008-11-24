@@ -40,6 +40,10 @@ Parameters valid_params<PorousMedia>()
   params.set<Real>("pebble_diameter")=0.06;
   params.set<bool>("kta_standard")=false;
   params.set<bool>("non_dim_flag")=false;
+  params.set<Real>("pre0")=101325.0;
+  params.set<Real>("mom0")=0.0;
+  params.set<Real>("mom1")=0.0;
+  params.set<Real>("mom2")=0.0;;
 
   return params;
 }
@@ -94,7 +98,8 @@ PorousMedia::computeProperties()
       */
       
       //fluid thermal conductivity
-      Real pre_in_bar = 1.0;
+      Real pre_in_bar = _my_pre0/101325;
+
       if( _has_pre)
         pre_in_bar = _pre[qp]/1e5;
       
@@ -133,7 +138,7 @@ PorousMedia::computeProperties()
       Real nl = 1/(_my_pebble_diameter);
       static Real poisson_ratio_pebble = 0.136;
       static Real young_modules_pebble = 9e9;
-      Real f = 101325.0*sf/na;
+      Real f = _my_pre0*sf/na;
       if( _has_pre )
         f = _pre[qp]*sf/na;
       
@@ -143,10 +148,17 @@ PorousMedia::computeProperties()
       _thermal_conductivity_solid[qp] = lambda_r+lambda_g+lambda_c;
       
       //Fluid
-      Real density = 101325/(_my_gas_constant*_fluid_temp[qp]);
+      Real density = _my_pre0/(_my_gas_constant*_fluid_temp[qp]);
       if( _has_pre)
         density = _pre[qp]/(_my_gas_constant*_fluid_temp[qp]);
+
       Real mom = 0;
+      mom = _my_mom0*_my_mom0;
+      if( _dim >=2 )
+        mom +=_my_mom1*_my_mom1;
+      if( _dim >=3)
+        mom +=_my_mom2*_my_mom2;
+      
       if( _has_xmom)
       {
         mom    = _xmom[qp]*_xmom[qp];

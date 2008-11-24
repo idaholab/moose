@@ -50,7 +50,11 @@ class PorousMedia : public Material
     _my_vessel_cross_section(parameters.get<Real>("vessel_cross_section")),
     _my_pebble_diameter(parameters.get<Real>("pebble_diameter")),
     _my_kta_standard(parameters.get<bool>("kta_standard")),
-    _my_non_dim_flag(parameters.get<bool>("non_dim_flag"))
+    _my_non_dim_flag(parameters.get<bool>("non_dim_flag")),
+    _my_pre0(parameters.get<Real>("pre0")),
+    _my_mom0(parameters.get<Real>("mom0")),
+    _my_mom1(parameters.get<Real>("mom1")),
+    _my_mom2(parameters.get<Real>("mom2"))
     {
       _gravity(0) = 0.0;
       _gravity(1) = -9.8;
@@ -91,6 +95,10 @@ private:
   Real _my_pebble_diameter;
   bool _my_kta_standard;
   bool _my_non_dim_flag;
+  Real _my_pre0;
+  Real _my_mom0;
+  Real _my_mom1;
+  Real _my_mom2;
   VectorValue<Real> _gravity;
   VectorValue<Real> _momentum;
   

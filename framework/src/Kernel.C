@@ -92,7 +92,6 @@ Kernel::init(EquationSystems * es)
   {
     _is_transient = true;
   }
-  
 }
 
 void
@@ -116,7 +115,6 @@ Kernel::name()
 {
   return _name;
 }
-
 void
 Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
