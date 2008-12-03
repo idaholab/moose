@@ -166,7 +166,6 @@ PorousMedia::computeProperties()
           mom +=_ymom[qp]*_ymom[qp];
         if( _dim == 3)
           mom +=_zmom[qp]*_zmom[qp];
-        mom = pow(mom,0.5);
       }
       if( _has_rmom)
       {
@@ -175,8 +174,8 @@ PorousMedia::computeProperties()
           mom +=_zmom[qp]*_zmom[qp];
         if( _dim == 3)
           mom +=_thetamom[qp]*_thetamom[qp];
-        mom = pow(mom,0.5);
       }
+      mom = pow(mom,0.5);
       mom = mom*_porosity[qp];
       
       Real dyn_viscosity = 3.674e-7*pow((_fluid_temp[qp]+_solid_temp[qp])/2,0.7);
