@@ -96,6 +96,13 @@ public:
    */
   std::string name();
 
+  /**
+   * This virtual gets called every time the subdomain changes.  This is useful for doing pre-calcualtions
+   * that should only be done once per subdomain.  In particular this is where references to material
+   * property vectors should be initialized.
+   */
+  virtual void subdomainSetup() {}
+
 protected:
   /**
    * This Kernel's name.

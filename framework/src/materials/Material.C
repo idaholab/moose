@@ -3,28 +3,11 @@
 void
 Material::materialReinit()
 {
-  _zero.resize(_qrule->n_points(),0);
-  _grad_zero.resize(_qrule->n_points(),0);
-  _thermal_conductivity.resize(_qrule->n_points(),1);
-  _thermal_expansion.resize(_qrule->n_points(),1);
-  _specific_heat.resize(_qrule->n_points(),1);
-  _thermal_conductivity_fluid.resize(_qrule->n_points(),1);
-  _thermal_conductivity_solid.resize(_qrule->n_points(),1);
-  _specific_heat_fluid.resize(_qrule->n_points(),1);
-  _specific_heat_solid.resize(_qrule->n_points(),1);
-  _density.resize(_qrule->n_points(),1);
-  _youngs_modulus.resize(_qrule->n_points(),1);
-  _poissons_ratio.resize(_qrule->n_points(),1);
-  _neutron_diffusion_coefficient.resize(_qrule->n_points(),1);
-  _neutron_absorption_xs.resize(_qrule->n_points(),1);
-  _neutron_fission_xs.resize(_qrule->n_points(),1);
-  _neutron_per_fission.resize(_qrule->n_points(),1);
-  _neutron_velocity.resize(_qrule->n_points(),1);
-  _neutron_per_power.resize(_qrule->n_points(),1);
-  _heat_xfer_coefficient.resize(_qrule->n_points(),1);
-  _fluid_resistance_coefficient.resize(_qrule->n_points(),1);
-  _gas_constant.resize(_qrule->n_points(),1);
-  _porosity.resize(_qrule->n_points(),0.5);
-  
+  std::map<std::string, std::vector<Real> >::iterator it = _real_props.begin();
+  std::map<std::string, std::vector<Real> >::iterator it_end = _real_props.end();
+
+  for(;it!=it_end;++it)
+    it->second.resize(_qrule->n_points(),1);
+
   computeProperties();
 }

@@ -189,7 +189,7 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
   _material = MaterialFactory::instance()->getMaterial(elem->subdomain_id());
   _material->materialReinit();
-  
+
   Moose::perf_log.pop("reinit()","Kernel");
 }
 

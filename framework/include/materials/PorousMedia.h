@@ -54,7 +54,40 @@ class PorousMedia : public Material
     _my_pre0(parameters.get<Real>("pre0")),
     _my_mom0(parameters.get<Real>("mom0")),
     _my_mom1(parameters.get<Real>("mom1")),
-    _my_mom2(parameters.get<Real>("mom2"))
+    _my_mom2(parameters.get<Real>("mom2")),
+    _has_pre(isCoupled("pre")),
+    _pre(_has_pre ? coupledVal("pre") : _zero),
+    _grad_pre(_has_pre ? coupledGrad("pre") : _grad_zero),
+    _has_fluid_temp(isCoupled("fluid_temp")),
+    _fluid_temp(_has_fluid_temp ? coupledVal("fluid_temp") : _zero),
+    _has_solid_temp(isCoupled("solid_temp")),
+    _solid_temp(_has_solid_temp ? coupledVal("solid_temp") : _zero),
+    _has_xmom(isCoupled("xmom")),
+    _xmom(_has_xmom ? coupledVal("xmom") : _zero),
+    _has_ymom(isCoupled("ymom")),
+    _ymom(_has_ymom ? coupledVal("ymom") : _zero),
+    _has_zmom(isCoupled("zmom")),
+    _zmom(_has_zmom ? coupledVal("zmom") : _zero),
+    _has_rmom(isCoupled("rmom")),
+    _rmom(_has_rmom ? coupledVal("rmom") : _zero),
+    _has_thetamom(isCoupled("thetamom")),
+    _thetamom(_has_thetamom ? coupledVal("thetamom") : _zero),    
+    _thermal_conductivity(declareRealProperty("thermal_conductivity")),
+    _thermal_conductivity_fluid(declareRealProperty("thermal_conductivity_fluid")),
+    _thermal_conductivity_solid(declareRealProperty("thermal_conductivity_solid")),
+    _specific_heat(declareRealProperty("specific_heat")),
+    _specific_heat_fluid(declareRealProperty("specific_heat_fluid")),
+    _specific_heat_solid(declareRealProperty("specific_heat_solid")),
+    _heat_xfer_coefficient(declareRealProperty("heat_xfer_coefficient")),
+    _fluid_resistance_coefficient(declareRealProperty("fluid_resistance_coefficient")),
+    _gas_constant(declareRealProperty("gas_constant")),
+    _porosity(declareRealProperty("porosity")),
+    _neutron_diffusion_coefficient(declareRealProperty("neutron_diffusion_coefficient")),
+    _neutron_absorption_xs(declareRealProperty("neutron_absorption_xs")),
+    _neutron_fission_xs(declareRealProperty("neutron_fission_xs")),
+    _neutron_per_power(declareRealProperty("neutron_per_power")),
+    _neutron_per_fission(declareRealProperty("neutron_per_fission")),
+    _neutron_velocity(declareRealProperty("neutron_velocity"))
     {
       _gravity(0) = 0.0;
       _gravity(1) = -9.8;
@@ -101,7 +134,44 @@ private:
   Real _my_mom2;
   VectorValue<Real> _gravity;
   VectorValue<Real> _momentum;
+
+  bool _has_pre;
+  std::vector<Real> & _pre;
+  std::vector<RealGradient> & _grad_pre;
+
+  bool _has_fluid_temp;
+  std::vector<Real> & _fluid_temp;
   
+  bool _has_solid_temp;
+  std::vector<Real> & _solid_temp;
+
+  bool _has_xmom;
+  std::vector<Real> & _xmom;
+  bool _has_ymom;
+  std::vector<Real> & _ymom;
+  bool _has_zmom;
+  std::vector<Real> & _zmom;
+  bool _has_rmom;
+  std::vector<Real> & _rmom;
+  bool _has_thetamom;
+  std::vector<Real> & _thetamom;
+
+  std::vector<Real> & _thermal_conductivity;
+  std::vector<Real> & _thermal_conductivity_fluid;
+  std::vector<Real> & _thermal_conductivity_solid;
+  std::vector<Real> & _specific_heat;
+  std::vector<Real> & _specific_heat_fluid;
+  std::vector<Real> & _specific_heat_solid;
+  std::vector<Real> & _heat_xfer_coefficient;  
+  std::vector<Real> & _fluid_resistance_coefficient;
+  std::vector<Real> & _gas_constant;  
+  std::vector<Real> & _porosity;  
+  std::vector<Real> & _neutron_diffusion_coefficient;
+  std::vector<Real> & _neutron_absorption_xs;  
+  std::vector<Real> & _neutron_fission_xs;  
+  std::vector<Real> & _neutron_per_power;  
+  std::vector<Real> & _neutron_per_fission;
+  std::vector<Real> & _neutron_velocity;
 };
 
 #endif //POROUSMEDIA_H

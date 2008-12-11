@@ -22,51 +22,7 @@ public:
     :Kernel(name, parameters, Kernel::_es->get_system(0).variable_name(0), false, coupled_to, coupled_as),
     _zero(0),
     _grad_zero(0),
-    _block_id(block_id),
-    _has_temp(isCoupled("temp")),
-    _temp(_has_temp ? coupledVal("temp") : _zero),
-    _grad_temp(_has_temp ? coupledGrad("temp") : _grad_zero),
-    _has_oxygen(isCoupled("oxygen")),
-    _oxygen(_has_oxygen ? coupledVal("oxygen") : _zero),
-    _grad_oxygen(_has_oxygen ? coupledGrad("oxygen") : _grad_zero),
-    _has_neut(isCoupled("neut")),
-    _neut(_has_neut ? coupledVal("neut") : _zero),
-    _has_pre(isCoupled("pre")),
-    _pre(_has_pre ? coupledVal("pre") : _zero),
-    _grad_pre(_has_pre ? coupledGrad("pre") : _grad_zero),
-    _has_xmom(isCoupled("xmom")),
-    _xmom(_has_xmom ? coupledVal("xmom") : _zero),
-    _has_ymom(isCoupled("ymom")),
-    _ymom(_has_ymom ? coupledVal("ymom") : _zero),
-    _has_zmom(isCoupled("zmom")),
-    _zmom(_has_zmom ? coupledVal("zmom") : _zero),
-    _has_rmom(isCoupled("rmom")),
-    _rmom(_has_rmom ? coupledVal("rmom") : _zero),
-    _has_thetamom(isCoupled("thetamom")),
-    _thetamom(_has_thetamom ? coupledVal("thetamom") : _zero),    
-    _has_fluid_temp(isCoupled("fluid_temp")),
-    _fluid_temp(_has_fluid_temp ? coupledVal("fluid_temp") : _zero),
-    _has_solid_temp(isCoupled("solid_temp")),
-    _solid_temp(_has_solid_temp ? coupledVal("solid_temp") : _zero),
-    _thermal_conductivity(1),
-    _thermal_conductivity_fluid(1),
-    _thermal_conductivity_solid(1),
-    _thermal_expansion(1),
-    _specific_heat(1),
-    _specific_heat_fluid(1),
-    _specific_heat_solid(1),
-    _density(1),
-    _youngs_modulus(1),
-    _poissons_ratio(1),
-    _neutron_diffusion_coefficient(1),
-    _neutron_absorption_xs(1),
-    _neutron_fission_xs(1),
-    _neutron_per_fission(1),
-    _neutron_velocity(1),
-    _neutron_per_power(1),
-    _heat_xfer_coefficient(1),
-    _gas_constant(1),
-    _porosity(1)
+    _block_id(block_id)
   {}
 
   virtual ~Material(){}
@@ -86,36 +42,48 @@ public:
    */
   void materialReinit();
 
-  std::vector<Real> & thermalConductivity(){ return _thermal_conductivity; }
-  std::vector<Real> & thermalConductivityFluid(){ return _thermal_conductivity_fluid; }
-  std::vector<Real> & thermalConductivitySolid(){ return _thermal_conductivity_solid; }
-  std::vector<Real> & thermalExpansion(){ return _thermal_expansion; }
-  std::vector<Real> & specificHeat(){ return _specific_heat; }
-  std::vector<Real> & specificHeatFluid(){ return _specific_heat_fluid; }
-  std::vector<Real> & specificHeatSolid(){ return _specific_heat_solid; }
-  std::vector<Real> & density(){ return _density; }
-  
-  std::vector<Real> & youngsModulus(){ return _youngs_modulus; }
-  std::vector<Real> & poissonsRatio(){ return _poissons_ratio; }
+  /**
+   * Retrieve the Real valued property named "name"
+   */
+  std::vector<Real> & getRealProperty(const std::string & name)
+  {
+    std::map<std::string, std::vector<Real> >::iterator it = _real_props.find(name);
 
-  std::vector<Real> & neutronDiffusionCoefficient(){ return _neutron_diffusion_coefficient; }
-  std::vector<Real> & neutronAbsorptionXS(){ return _neutron_absorption_xs; }
-  std::vector<Real> & neutronFissionXS(){ return _neutron_fission_xs; }
-  std::vector<Real> & neutronPerFission(){ return _neutron_per_fission; }
-  std::vector<Real> & neutronVelocity(){ return _neutron_velocity; }
-  std::vector<Real> & neutronPerPower(){ return _neutron_per_power; }
+    if(it != _real_props.end())
+      return it->second;
 
-  std::vector<Real> & heatXferCoefficient(){ return _heat_xfer_coefficient; }
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  }
 
-  std::vector<Real> & fluidResistanceCoefficient(){return _fluid_resistance_coefficient;}
-  std::vector<Real> & gasConstant(){return _gas_constant;}
-  std::vector<Real> & porosity(){return _porosity;}
+  /**
+   * Retrieve the Vector valued property named "name"
+   */
+  std::vector<std::vector<Real> > & getVectorProperty(const std::string & name)
+  {
+    std::map<std::string, std::vector<std::vector<Real> > >::iterator it = _vector_props.find(name);
 
-private:
-  std::vector<Real> _zero;
-  std::vector<RealGradient> _grad_zero;
+    if(it != _vector_props.end())
+      return it->second;
+
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  }
+
+  /**
+   * Retrieve the Tensor valued property named "name"
+   */
+  std::vector<std::vector<std::vector<Real> > > & getTensorProperty(const std::string & name)
+  {
+    std::map<std::string, std::vector<std::vector<std::vector<Real> > > >::iterator it = _tensor_props.find(name);
+
+    if(it != _tensor_props.end())
+      return it->second;
+
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  }
 
 protected:
+  std::vector<Real> _zero;
+  std::vector<RealGradient> _grad_zero;
 
   /**
    * All materials must override this virtual.
@@ -133,59 +101,39 @@ protected:
    */
   virtual Real computeQpResidual(){ return 0; }
 
-  bool _has_temp;
-  std::vector<Real> & _temp;
-  std::vector<RealGradient> & _grad_temp;
+  /**
+   * Declare the Real valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using get().
+   */
+  std::vector<Real> & declareRealProperty(const std::string & name)
+  {
+    return _real_props[name];
+  }
 
-  bool _has_oxygen;  
-  std::vector<Real> & _oxygen;
-  std::vector<RealGradient> & _grad_oxygen;
+  /**
+   * Declare the Vector valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using get().
+   */
+  std::vector<std::vector<Real> > & declareVectorProperty(const std::string & name)
+  {
+    return _vector_props[name];
+  }
 
-  bool _has_neut;
-  std::vector<Real> & _neut;
+  /**
+   * Declare the Tensor valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using get().
+   */
+  std::vector<std::vector<std::vector<Real> > > & declareTensorProperty(const std::string & name)
+  {
+    return _tensor_props[name];
+  }
 
-  bool _has_pre;
-  std::vector<Real> & _pre;
-  std::vector<RealGradient> & _grad_pre;
-  
-  bool _has_xmom;
-  std::vector<Real> & _xmom;
-  bool _has_ymom;
-  std::vector<Real> & _ymom;
-  bool _has_zmom;
-  std::vector<Real> & _zmom;
-  bool _has_rmom;
-  std::vector<Real> & _rmom;
-  bool _has_thetamom;
-  std::vector<Real> & _thetamom;
-
-  
-  bool _has_fluid_temp;
-  std::vector<Real> & _fluid_temp;
-  
-  bool _has_solid_temp;
-  std::vector<Real> & _solid_temp;
-  
-  std::vector<Real> _thermal_conductivity;
-  std::vector<Real> _thermal_conductivity_fluid;
-  std::vector<Real> _thermal_conductivity_solid;
-  std::vector<Real> _thermal_expansion;
-  std::vector<Real> _specific_heat;
-  std::vector<Real> _specific_heat_fluid;
-  std::vector<Real> _specific_heat_solid;
-  std::vector<Real> _density;
-  std::vector<Real> _youngs_modulus;
-  std::vector<Real> _poissons_ratio;
-  std::vector<Real> _neutron_diffusion_coefficient;
-  std::vector<Real> _neutron_absorption_xs;
-  std::vector<Real> _neutron_fission_xs;
-  std::vector<Real> _neutron_per_fission;
-  std::vector<Real> _neutron_velocity;
-  std::vector<Real> _neutron_per_power;
-  std::vector<Real> _heat_xfer_coefficient;
-  std::vector<Real> _fluid_resistance_coefficient;
-  std::vector<Real> _gas_constant;
-  std::vector<Real> _porosity;
+  std::map<std::string, std::vector<Real> > _real_props;
+  std::map<std::string, std::vector<std::vector<Real> > > _vector_props;
+  std::map<std::string, std::vector<std::vector<std::vector<Real> > > > _tensor_props;
 };
 
 #endif //MATERIAL_H

@@ -31,7 +31,18 @@ public:
     _my_neutron_absorption_xs(parameters.get<Real>("neutron_absorption_xs")),
     _my_neutron_fission_xs(parameters.get<Real>("neutron_fission_xs")),
     _my_neutron_per_fission(parameters.get<Real>("neutron_per_fission")),
-    _my_neutron_velocity(parameters.get<Real>("neutron_velocity"))
+    _my_neutron_velocity(parameters.get<Real>("neutron_velocity")),
+    _thermal_conductivity(declareRealProperty("thermal_conductivity")),
+    _thermal_expansion(declareRealProperty("thermal_expansion")),
+    _specific_heat(declareRealProperty("specific_heat")),
+    _density(declareRealProperty("density")),
+    _youngs_modulus(declareRealProperty("youngs_modulus")),
+    _poissons_ratio(declareRealProperty("poissons_ratio")),
+    _neutron_diffusion_coefficient(declareRealProperty("neutron_diffusion_coefficient")),
+    _neutron_absorption_xs(declareRealProperty("neutron_absorption_xs")),
+    _neutron_fission_xs(declareRealProperty("neutron_fission_xs")),
+    _neutron_per_fission(declareRealProperty("neutron_per_fission")),
+    _neutron_velocity(declareRealProperty("neutron_velocity"))
   {}
 
 protected:
@@ -49,6 +60,18 @@ private:
   Real _my_neutron_fission_xs;
   Real _my_neutron_per_fission;
   Real _my_neutron_velocity;
+  
+  std::vector<Real> & _thermal_conductivity;
+  std::vector<Real> & _thermal_expansion;
+  std::vector<Real> & _specific_heat;
+  std::vector<Real> & _density;
+  std::vector<Real> & _youngs_modulus;
+  std::vector<Real> & _poissons_ratio;
+  std::vector<Real> & _neutron_diffusion_coefficient;
+  std::vector<Real> & _neutron_absorption_xs;
+  std::vector<Real> & _neutron_fission_xs;
+  std::vector<Real> & _neutron_per_fission;
+  std::vector<Real> & _neutron_velocity;
 };
 
 #endif //CONSTANT_H
