@@ -14,8 +14,6 @@
 #include "ImplicitBackwardDifference2.h"
 
 #include "MaterialFactory.h"
-#include "Constant.h"
-#include "UO2.h"
 #include "PorousMedia.h"
 #include "Moose.h"
 
@@ -34,7 +32,5 @@ Moose::registerObjects()
   BCFactory::instance()->registerBC<VacuumBC>("VacuumBC");
   BCFactory::instance()->registerBC<MatchedValueBC>("MatchedValueBC");
 
-  MaterialFactory::instance()->registerMaterial<Constant>("Constant");
-  MaterialFactory::instance()->registerMaterial<UO2>("UO2");
   MaterialFactory::instance()->registerMaterial<PorousMedia>("PorousMedia");
 }
