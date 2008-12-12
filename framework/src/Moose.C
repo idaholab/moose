@@ -14,7 +14,6 @@
 #include "ImplicitBackwardDifference2.h"
 
 #include "MaterialFactory.h"
-#include "PorousMedia.h"
 #include "Moose.h"
 
 void
@@ -31,6 +30,4 @@ Moose::registerObjects()
   BCFactory::instance()->registerBC<VectorNeumannBC>("VectorNeumannBC");
   BCFactory::instance()->registerBC<VacuumBC>("VacuumBC");
   BCFactory::instance()->registerBC<MatchedValueBC>("MatchedValueBC");
-
-  MaterialFactory::instance()->registerMaterial<PorousMedia>("PorousMedia");
 }
