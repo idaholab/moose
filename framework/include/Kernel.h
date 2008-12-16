@@ -265,6 +265,13 @@ protected:
   std::vector<RealGradient> & coupledGrad(std::string name);
 
   /**
+   * Returns a reference (that can be stored) to a coupled variable's value at old time step.
+   * 
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  std::vector<Real> & coupledValOld(std::string name);
+
+  /**
    * ***********************
    * All of the static stuff
    * ***********************

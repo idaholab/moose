@@ -290,6 +290,18 @@ Kernel::coupledGrad(std::string name)
   return _var_grads[_coupled_as_to_var_num[name]];
 }
 
+std::vector<Real> &
+Kernel::coupledValOld(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+  
+  return _var_vals_old[_coupled_as_to_var_num[name]];
+}
+
 const Elem * Kernel::_current_elem;
 DofMap * Kernel::_dof_map;
 std::vector<unsigned int> Kernel::_dof_indices;
