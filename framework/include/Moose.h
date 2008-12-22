@@ -1,8 +1,29 @@
 //libMesh includes
 #include "perf_log.h"
+#include "parameters.h"
 
 #ifndef MOOSE_H
 #define MOOSE_H
+
+/**
+ * These are here because of a problem with Parameter::print() for std::vectors
+ */
+template<>
+inline
+void Parameters::Parameter<std::vector<Real> >::print (std::ostream& os) const
+{
+  for (unsigned int i=0; i<_value.size(); i++)
+    os << _value[i] << " ";
+}
+
+template<>
+inline
+void Parameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostream& os) const
+{
+  for (unsigned int i=0; i<_value[i].size(); i++)
+    for (unsigned int j=0; i<_value[j].size(); j++)
+      os << _value[i][j] << " ";
+}
 
 namespace Moose
 {
