@@ -5,6 +5,8 @@
 #ifndef MOOSE_H
 #define MOOSE_H
 
+#include <vector>
+
 /**
  * These are here because of a problem with Parameter::print() for std::vectors
  */
