@@ -231,7 +231,6 @@ Kernel::computeIntegral()
   Real sum = 0;
   
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_i=0; _i<_phi.size(); _i++)
       sum += _JxW[_qp]*computeQpIntegral();
   
   Moose::perf_log.pop("computeIntegral()","Kernel");
