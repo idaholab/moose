@@ -53,6 +53,11 @@ public:
    */
   virtual void computeJacobian();
 
+  /**
+   * Computes d-ivar-residual / d-jvar... storing the result in Ke.
+   */
+  void computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar);
+
 protected:
 
   /**

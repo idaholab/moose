@@ -156,6 +156,34 @@ BoundaryCondition::computeJacobian()
   Moose::perf_log.pop("computeJacobian()","BoundaryCondition");
 }
 
+void
+BoundaryCondition::computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar)
+{
+  Moose::perf_log.push("computeJacobianBlock()","BoundaryCondition");
+
+  if(_integrated)
+    for (_qp=0; _qp<_qface->n_points(); _qp++)
+      for (_i=0; _i<_phi_face.size(); _i++)
+        for (_j=0; _j<_phi_face.size(); _j++)
+          Ke(_i,_j) += _JxW_face[_qp]*computeQpJacobian();
+  else
+  {
+    for(_i=0; _i<_phi_face.size(); _i++)
+    {
+      if(_current_elem->is_node_on_side(_i,_current_side))
+      {
+        //Zero out the row and put 1 on the diagonal
+        for(_j=0; _j<_phi_face.size(); _j++)
+          Ke(_i,_j) = 0;
+        
+	Ke(_i,_i) = 1;
+      }
+    }
+  }
+
+  Moose::perf_log.pop("computeJacobianBlock()","BoundaryCondition");
+}
+
 std::vector<Real> &
 BoundaryCondition::coupledValFace(std::string name)
 {

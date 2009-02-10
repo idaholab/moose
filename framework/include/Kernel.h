@@ -61,7 +61,7 @@ public:
   /**
    * Re-Initializes common data structures for a specific element.
    */
-  static void reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
+  static void reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL, System * precond_system = NULL);
 
   /**
    * Re-Initializes temporal discretization/transient control data.
@@ -83,6 +83,11 @@ public:
    */
   virtual void computeJacobian();
 
+  /**
+   * Computes d-ivar-residual / d-jvar... storing the result in Ke.
+   */
+  virtual void computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar);
+
   /** 
    * Computes the volume integral for the current element.
    */
@@ -103,6 +108,11 @@ public:
    */
   virtual void subdomainSetup() {}
 
+  /**
+   * The variable number that this kernel operates on.
+   */
+  unsigned int variable(){return _var_num;}
+  
 protected:
   /**
    * This Kernel's name.
