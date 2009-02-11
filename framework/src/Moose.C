@@ -2,6 +2,7 @@
 #include "BodyForce.h"
 #include "Diffusion.h"
 #include "Reaction.h"
+#include "CoupledForce.h"
 
 #include "BCFactory.h"
 #include "DirichletBC.h"
@@ -24,6 +25,7 @@ Moose::registerObjects()
   KernelFactory::instance()->registerKernel<Reaction>("Reaction");
   KernelFactory::instance()->registerKernel<ImplicitEuler>("ImplicitEuler");
   KernelFactory::instance()->registerKernel<ImplicitBackwardDifference2>("ImplicitBackwardDifference2");
+  KernelFactory::instance()->registerKernel<CoupledForce>("CoupledForce");
   
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<NeumannBC>("NeumannBC");

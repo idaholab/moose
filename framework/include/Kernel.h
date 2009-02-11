@@ -84,9 +84,9 @@ public:
   virtual void computeJacobian();
 
   /**
-   * Computes d-ivar-residual / d-jvar... storing the result in Ke.
+   * Computes d-residual / d-jvar... storing the result in Ke.
    */
-  virtual void computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar);
+  virtual void computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar);
 
   /** 
    * Computes the volume integral for the current element.
@@ -133,6 +133,14 @@ protected:
    * This is the virtual that derived classes should override for computing the Jacobian.
    */
   virtual Real computeQpJacobian()
+  {
+    return 0;
+  }
+
+  /** 
+   * This is the virtual that derived classes should override for computing an off-diagonal jacobian component.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar)
   {
     return 0;
   }
@@ -259,6 +267,11 @@ protected:
    * @param name The name the kernel wants to refer to the variable as.
    */
   bool isCoupled(std::string name);
+
+  /**
+   * Returns the variable number of the coupled variable.
+   */
+  unsigned int coupled(std::string name);
   
   /**
    * Returns a reference (that can be stored) to a coupled variable's value.

@@ -228,16 +228,21 @@ Kernel::computeJacobian()
 }
 
 void
-Kernel::computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar)
+Kernel::computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar)
 {
-  Moose::perf_log.push("computeJacobianBlock()",_name);
+  Moose::perf_log.push("computeOffDiagJacobian()",_name);
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     for (_i=0; _i<_phi.size(); _i++)
       for (_j=0; _j<_phi.size(); _j++)
-        Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+      {
+        if(jvar == _var_num)
+          Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+        else
+          Ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);
+      }
   
-  Moose::perf_log.pop("computeJacobianBlock()",_name);
+  Moose::perf_log.pop("computeOffDiagJacobian()",_name);
 }
 
 
@@ -281,6 +286,18 @@ bool
 Kernel::isCoupled(std::string name)
 {
   return std::find(_coupled_as.begin(),_coupled_as.end(),name) != _coupled_as.end();
+}
+
+unsigned int
+Kernel::coupled(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+
+  return _coupled_as_to_var_num[name];
 }
 
 std::vector<Real> &

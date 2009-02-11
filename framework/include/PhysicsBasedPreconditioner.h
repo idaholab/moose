@@ -57,6 +57,37 @@ public:
   {_compute_jacobian_block = compute_jacobian_block;}
 
   /**
+   * Set the order the block rows are solved for.  If not set then the solve happens in the order
+   * the variables were added to the NonlinearSystem.
+   */
+  void setSolveOrder(std::vector<unsigned int> solve_order)
+  { _solve_order = solve_order; }
+
+  /**
+   * Sets the preconditioner type to use for each solve.
+   * These are in the same order as what's passed to setSolveOrder.
+   * For instance, if you pass [1 0 3 2] to setSolveOrder() and then
+   * pass [AMG ILU BLOCK_JACOBI AMG] to setPreconditionerType() then
+   * variable 1 will get preconditioned by AMG, 0 by ILU, 3 by BJ and 2 by AMG
+   *
+   * If you don't call this function the default is to use AMG for
+   * everything.
+   * 
+   */
+  void setPreconditionerType(std::vector<PreconditionerType> pre_type)
+  { _pre_type = pre_type; }
+
+  /**
+   * Set which off diagonal blocks need to get computed and used by the preconditioner.
+   * off_diag[number] should be a vector of the off diagonal blocks needed by var_num = number.
+   * The blocks are specified by the coupled var_nums. So to compute the off diagonal block for
+   * variable 1 corresponding to variable 3 off_diag[1] should have 3 in it somewhere. The
+   * order of the off diagnal blocks doesn't matter.
+   */
+  void setOffDiagBlocks(std::vector<std::vector<unsigned int> > off_diag)
+  { _off_diag = off_diag; }
+
+  /**
    * Helper function for copying values associated with variables in vectors from two different systems.
    */
   static void copyVarValues(MeshBase & mesh,
@@ -78,6 +109,30 @@ protected:
    * Holds one Preconditioner object per small system to solve.
    */
   std::vector<Preconditioner<Number> *> _preconditioners;
+
+  /**
+   * Holds the order the blocks are solved for.
+   */
+  std::vector<unsigned int> _solve_order;
+
+  /**
+   * Which preconditioner to use for each solve.
+   */
+  std::vector<PreconditionerType> _pre_type;
+
+  /**
+   * Holds which off diagonal blocks to compute.
+   */
+  std::vector<std::vector<unsigned int> > _off_diag;
+
+  /**
+   * Holds pointers to the off-diagonal matrices.
+   * This is in the same order as _off_diag.
+   *
+   * This is really just for convenience so we don't have
+   * to keep looking this thing up through it's name.
+   */
+  std::vector<std::vector<SparseMatrix<Number> *> > _off_diag_mats;
 };
 
 inline
