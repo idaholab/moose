@@ -165,7 +165,7 @@ BoundaryCondition::computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int i
     for (_qp=0; _qp<_qface->n_points(); _qp++)
       for (_i=0; _i<_phi_face.size(); _i++)
         for (_j=0; _j<_phi_face.size(); _j++)
-          Ke(_i,_j) += _JxW_face[_qp]*computeQpJacobian();
+          Ke(_i,_j) += _JxW_face[_qp]*computeQpOffDiagJacobian(jvar);
   else
   {
     for(_i=0; _i<_phi_face.size(); _i++)
@@ -175,8 +175,9 @@ BoundaryCondition::computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int i
         //Zero out the row and put 1 on the diagonal
         for(_j=0; _j<_phi_face.size(); _j++)
           Ke(_i,_j) = 0;
-        
-	Ke(_i,_i) = 1;
+
+        if(ivar ==jvar)
+          Ke(_i,_i) = 1;
       }
     }
   }
