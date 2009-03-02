@@ -65,10 +65,8 @@ public:
 
   /**
    * Sets the preconditioner type to use for each solve.
-   * These are in the same order as what's passed to setSolveOrder.
-   * For instance, if you pass [1 0 3 2] to setSolveOrder() and then
-   * pass [AMG ILU BLOCK_JACOBI AMG] to setPreconditionerType() then
-   * variable 1 will get preconditioned by AMG, 0 by ILU, 3 by BJ and 2 by AMG
+   * These are in the same order as the variable numbers in the
+   * System.
    *
    * If you don't call this function the default is to use AMG for
    * everything.
