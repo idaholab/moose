@@ -111,7 +111,7 @@ protected:
   /**
    * Boundary finite element. 
    */
-  static AutoPtr<FEBase> _fe_face;
+  static std::map<FEType, FEBase *> _fe_face;
 
   /**
    * Boundary quadrature rule.
@@ -121,27 +121,27 @@ protected:
   /**
    * XYZ coordinates of quadrature points
    */
-  static const std::vector<Point> * _static_q_point_face;
+  static std::map<FEType, const std::vector<Point> *> _static_q_point_face;
 
   /**
    * Side Jacobian pre-multiplied by the weight.
    */
-  static const std::vector<Real> * _static_JxW_face;
+  static std::map<FEType, const std::vector<Real> *> _static_JxW_face;
 
   /**
    * Side shape function.
    */
-  static const std::vector<std::vector<Real> > * _static_phi_face;
+  static std::map<FEType, const std::vector<std::vector<Real> > *> _static_phi_face;
 
   /**
    * Gradient of side shape function.
    */
-  static const std::vector<std::vector<RealGradient> > * _static_dphi_face;
+  static std::map<FEType, const std::vector<std::vector<RealGradient> > *> _static_dphi_face;
 
   /**
    * Normal vectors at the quadrature points.
    */
-  static const std::vector<Point> * _static_normals_face;
+  static std::map<FEType, const std::vector<Point> *> _static_normals_face;
 
   /**
    * Map to vector of variable numbers that need to be evaluated

@@ -25,10 +25,11 @@ Kernel::Kernel(std::string name,
    _u_older(_var_vals_older[_var_num]),
    _grad_u_old(_var_grads_old[_var_num]),
    _grad_u_older(_var_grads_older[_var_num]),
-   _JxW(*_static_JxW),
-   _phi(*_static_phi),
-   _dphi(*_static_dphi),
-   _q_point(*_static_q_point),
+   _fe_type(_dof_map->variable_type(_var_num)),
+   _JxW(*_static_JxW[_fe_type]),
+   _phi(*_static_phi[_fe_type]),
+   _dphi(*_static_dphi[_fe_type]),
+   _q_point(*_static_q_point[_fe_type]),
    _coupled_to(coupled_to),
    _coupled_as(coupled_as)
 {
@@ -60,16 +61,35 @@ Kernel::init(EquationSystems * es)
   _dim = _mesh->mesh_dimension();
   _system = &_es->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
   _dof_map = &_system->get_dof_map();
-  _fe_type = _dof_map->variable_type(0);
 
-  _fe = FEBase::build(_dim, _fe_type);
-  _qrule = new QGauss(_dim,_fe_type.default_quadrature_order());
-  _fe->attach_quadrature_rule(_qrule);
+  _max_quadrature_order = CONSTANT;
+  
+  //Find the largest quadrature order necessary... all variables _must_ use the same rule!
+  for(unsigned int var=0; var < _system->n_vars(); var++)
+  {
+    FEType fe_type = _dof_map->variable_type(var);
+    if(fe_type.default_quadrature_order() > _max_quadrature_order)
+      _max_quadrature_order = fe_type.default_quadrature_order();
+  }
 
-  _static_JxW = &_fe->get_JxW();
-  _static_phi = &_fe->get_phi();
-  _static_dphi = &_fe->get_dphi();
-  _static_q_point = &_fe->get_xyz();
+  _qrule = new QGauss(_dim, _max_quadrature_order);
+
+  //This allows for different basis functions / orders for each variable
+  for(unsigned int var=0; var < _system->n_vars(); var++)
+  {
+    FEType fe_type = _dof_map->variable_type(var);
+
+    if(!_fe[fe_type])
+    {
+      _fe[fe_type] = FEBase::build(_dim, fe_type).release();
+      _fe[fe_type]->attach_quadrature_rule(_qrule);
+
+      _static_JxW[fe_type] = &_fe[fe_type]->get_JxW();
+      _static_phi[fe_type] = &_fe[fe_type]->get_phi();
+      _static_dphi[fe_type] = &_fe[fe_type]->get_dphi();
+      _static_q_point[fe_type] = &_fe[fe_type]->get_xyz();
+    }
+  }
              
   _t = 0;
   _dt = 0;
@@ -125,7 +145,11 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
   _dof_map->dof_indices(elem, _dof_indices);
 
-  _fe->reinit(elem);
+  std::map<FEType, FEBase*>::iterator fe_it = _fe.begin();
+  std::map<FEType, FEBase*>::iterator fe_end = _fe.end();
+
+  for(;fe_it != fe_end; ++fe_it)
+    fe_it->second->reinit(elem);
 
   if(Re)
     Re->resize(_dof_indices.size());
@@ -139,6 +163,8 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
   for(;var_num_it != var_num_end; ++var_num_it)
   {
     unsigned int var_num = *var_num_it;
+    
+    FEType fe_type = _dof_map->variable_type(var_num);
 
     _dof_map->dof_indices(elem, _var_dof_indices[var_num], var_num);
 
@@ -159,31 +185,36 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     
       _var_Kes[var_num] = new DenseSubMatrix<Number>(*Ke,var_num*num_dofs,var_num*num_dofs,num_dofs,num_dofs);
     }
+
+    unsigned int num_q_points = _qrule->n_points();
     
-    _var_vals[var_num].resize(_qrule->n_points());
-    _var_grads[var_num].resize(_qrule->n_points());
+    _var_vals[var_num].resize(num_q_points);
+    _var_grads[var_num].resize(num_q_points);
 
     if(_is_transient)
     {
-      _var_vals_old[var_num].resize(_qrule->n_points());
-      _var_grads_old[var_num].resize(_qrule->n_points());
+      _var_vals_old[var_num].resize(num_q_points);
+      _var_grads_old[var_num].resize(num_q_points);
 
-      _var_vals_older[var_num].resize(_qrule->n_points());
-      _var_grads_older[var_num].resize(_qrule->n_points());
+      _var_vals_older[var_num].resize(num_q_points);
+      _var_grads_older[var_num].resize(num_q_points);
     }
+    
+    const std::vector<std::vector<Real> > & static_phi = *_static_phi[fe_type];
+    const std::vector<std::vector<RealGradient> > & static_dphi= *_static_dphi[fe_type];
 
     for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
     {
-      computeQpSolution(_var_vals[var_num][qp], soln, _var_dof_indices[var_num], qp, *_static_phi);
-      computeQpGradSolution(_var_grads[var_num][qp], soln, _var_dof_indices[var_num], qp, *_static_dphi);
+      computeQpSolution(_var_vals[var_num][qp], soln, _var_dof_indices[var_num], qp, static_phi);
+      computeQpGradSolution(_var_grads[var_num][qp], soln, _var_dof_indices[var_num], qp, static_dphi);
 
       if(_is_transient)
       {
-        computeQpSolution(_var_vals_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, *_static_phi);
-        computeQpGradSolution(_var_grads_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, *_static_dphi);
+        computeQpSolution(_var_vals_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, static_phi);
+        computeQpGradSolution(_var_grads_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, static_dphi);
         
-        computeQpSolution(_var_vals_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, *_static_phi);
-        computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, *_static_dphi);
+        computeQpSolution(_var_vals_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_phi);
+        computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_dphi);
       }
     }
   }
@@ -343,13 +374,13 @@ EquationSystems * Kernel::_es;
 TransientNonlinearImplicitSystem * Kernel::_system;
 MeshBase * Kernel::_mesh;
 unsigned int Kernel::_dim;
-FEType Kernel::_fe_type;
-AutoPtr<FEBase> Kernel::_fe;
+std::map<FEType, FEBase *> Kernel::_fe;
+Order Kernel::_max_quadrature_order;
 QGauss * Kernel::_qrule;
-const std::vector<Real> * Kernel::_static_JxW;
-const std::vector<std::vector<Real> > * Kernel::_static_phi;
-const std::vector<std::vector<RealGradient> > * Kernel::_static_dphi;
-const std::vector<Point> * Kernel::_static_q_point;
+std::map<FEType, const std::vector<Real> *> Kernel::_static_JxW;
+std::map<FEType, const std::vector<std::vector<Real> > *> Kernel::_static_phi;
+std::map<FEType, const std::vector<std::vector<RealGradient> > *> Kernel::_static_dphi;
+std::map<FEType, const std::vector<Point> *> Kernel::_static_q_point;
 std::vector<unsigned int> Kernel::_var_nums;
 std::map<unsigned int, std::vector<unsigned int> > Kernel::_var_dof_indices;
 std::map<unsigned int, DenseSubVector<Number> * > Kernel::_var_Res;

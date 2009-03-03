@@ -203,6 +203,12 @@ protected:
    * Holds the t-2 solution gradient at the current quadrature point.
    */
   std::vector<RealGradient> & _grad_u_older;
+
+  /**
+   * The Finite Element type corresponding to the variable this
+   * Kernel operates on.
+   */
+  FEType _fe_type;
   
   /**
    * Interior Jacobian pre-multiplied by the weight.
@@ -306,14 +312,14 @@ protected:
   static unsigned int _dim;
 
   /**
-   * FE Type to be used.
-   */
-  static FEType _fe_type;
-
-  /**
    * Interior finite element.
    */
-  static AutoPtr<FEBase> _fe;
+  static std::map<FEType, FEBase*> _fe;
+
+  /**
+   * Maximum quadrature order required by all variables.
+   */
+  static Order _max_quadrature_order;
 
   /**
    * Interior quadrature rule.
@@ -328,22 +334,22 @@ protected:
   /**
    * Interior Jacobian pre-multiplied by the weight.
    */
-  static const std::vector<Real> * _static_JxW;
+  static std::map<FEType, const std::vector<Real> *> _static_JxW;
 
   /**
    * Interior shape function.
    */
-  static const std::vector<std::vector<Real> > * _static_phi;
+  static std::map<FEType, const std::vector<std::vector<Real> > *> _static_phi;
 
   /**
    * Gradient of interior shape function.
    */
-  static const std::vector<std::vector<RealGradient> > * _static_dphi;
+  static std::map<FEType, const std::vector<std::vector<RealGradient> > *> _static_dphi;
 
   /**
    * XYZ coordinates of quadrature points
    */
-  static const std::vector<Point> * _static_q_point;
+  static std::map<FEType, const std::vector<Point> *> _static_q_point;
   
   /**
    * Variable numbers of the variables.

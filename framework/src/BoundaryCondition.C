@@ -3,6 +3,7 @@
 #include "numeric_vector.h"
 
 #include "Moose.h"
+#include "dof_map.h"
 
 BoundaryCondition::BoundaryCondition(std::string name,
                                      Parameters parameters,
@@ -14,11 +15,11 @@ BoundaryCondition::BoundaryCondition(std::string name,
   :Kernel(name, parameters, var_name, integrated, coupled_to, coupled_as),
    _boundary_id(boundary_id),
    _side_elem(NULL),
-   _JxW_face(*_static_JxW_face),
-   _phi_face(*_static_phi_face),
-   _dphi_face(*_static_dphi_face),
-   _normals_face(*_static_normals_face),
-   _q_point_face(*_static_q_point_face),
+   _JxW_face(*_static_JxW_face[_fe_type]),
+   _phi_face(*_static_phi_face[_fe_type]),
+   _dphi_face(*_static_dphi_face[_fe_type]),
+   _normals_face(*_static_normals_face[_fe_type]),
+   _q_point_face(*_static_q_point_face[_fe_type]),
    _u_face(integrated ? _var_vals_face[_var_num] : _var_vals_face_nodal[_var_num]),
    _grad_zero(0),
    _grad_u_face(integrated ? _var_grads_face[_var_num] : _grad_zero)
@@ -48,15 +49,25 @@ void BoundaryCondition::addVarNums(std::vector<unsigned int> & var_nums)
 
 void BoundaryCondition::init()
 {
-  _fe_face = FEBase::build(_dim, _fe_type);
-  _qface = new QGauss(_dim-1,_fe_type.default_quadrature_order());
-  _fe_face->attach_quadrature_rule(_qface);
+  //Max quadrature order was already found by Kernel::init()
+  _qface = new QGauss(_dim-1,_max_quadrature_order);
 
-  _static_q_point_face = &_fe_face->get_xyz();
-  _static_JxW_face = &_fe_face->get_JxW();
-  _static_phi_face = &_fe_face->get_phi();
-  _static_dphi_face = &_fe_face->get_dphi();
-  _static_normals_face = &_fe_face->get_normals();
+  for(unsigned int var=0; var < _system->n_vars(); var++)
+  {
+    FEType fe_type = _dof_map->variable_type(var);
+
+    if(!_fe_face[fe_type])
+    {
+      _fe_face[fe_type] = FEBase::build(_dim, fe_type).release();
+      _fe_face[fe_type]->attach_quadrature_rule(_qface);
+
+      _static_q_point_face[fe_type] = &_fe_face[fe_type]->get_xyz();
+      _static_JxW_face[fe_type] = &_fe_face[fe_type]->get_JxW();
+      _static_phi_face[fe_type] = &_fe_face[fe_type]->get_phi();
+      _static_dphi_face[fe_type] = &_fe_face[fe_type]->get_dphi();
+      _static_normals_face[fe_type] = &_fe_face[fe_type]->get_normals();
+    }
+  }
 }
 
 void BoundaryCondition::reinit(const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id)
@@ -64,7 +75,12 @@ void BoundaryCondition::reinit(const NumericVector<Number>& soln, const unsigned
   Moose::perf_log.push("reinit()","BoundaryCondition");
 
   _current_side = side;
-  _fe_face->reinit(_current_elem, _current_side);  
+
+  std::map<FEType, FEBase*>::iterator fe_it = _fe_face.begin();
+  std::map<FEType, FEBase*>::iterator fe_end = _fe_face.end();
+
+  for(;fe_it != fe_end; ++fe_it)
+    fe_it->second->reinit(_current_elem, _current_side);  
 
   std::vector<unsigned int>::iterator var_nums_it = _boundary_to_var_nums[boundary_id].begin();
   std::vector<unsigned int>::iterator var_nums_end = _boundary_to_var_nums[boundary_id].end();
@@ -73,15 +89,20 @@ void BoundaryCondition::reinit(const NumericVector<Number>& soln, const unsigned
   {
     unsigned int var_num = *var_nums_it;
 
+    FEType fe_type = _dof_map->variable_type(var_num);
+
     std::vector<unsigned int> & var_dof_indices = _var_dof_indices[var_num];
 
     _var_vals_face[var_num].resize(_qface->n_points());
     _var_grads_face[var_num].resize(_qface->n_points());
 
+    const std::vector<std::vector<Real> > & static_phi_face = *_static_phi_face[fe_type];
+    const std::vector<std::vector<RealGradient> > & static_dphi_face= *_static_dphi_face[fe_type];
+
     for (unsigned int qp=0; qp<_qface->n_points(); qp++)
     {
-      computeQpSolution(_var_vals_face[var_num][qp], soln, var_dof_indices, qp, *_static_phi_face);
-      computeQpGradSolution(_var_grads_face[var_num][qp], soln, var_dof_indices, qp, *_static_dphi_face);
+      computeQpSolution(_var_vals_face[var_num][qp], soln, var_dof_indices, qp, static_phi_face);
+      computeQpGradSolution(_var_grads_face[var_num][qp], soln, var_dof_indices, qp, static_dphi_face);
     }
   }
 
@@ -222,13 +243,13 @@ BoundaryCondition::coupledGradFace(std::string name)
 }
 
 unsigned int BoundaryCondition::_current_side;
-AutoPtr<FEBase> BoundaryCondition::_fe_face;
+std::map<FEType, FEBase *> BoundaryCondition::_fe_face;
 QGauss * BoundaryCondition::_qface;
-const std::vector<Point> * BoundaryCondition::_static_q_point_face;
-const std::vector<Real> * BoundaryCondition::_static_JxW_face;
-const std::vector<std::vector<Real> > * BoundaryCondition::_static_phi_face;
-const std::vector<std::vector<RealGradient> > * BoundaryCondition::_static_dphi_face;
-const std::vector<Point> * BoundaryCondition::_static_normals_face;
+std::map<FEType, const std::vector<Point> *> BoundaryCondition::_static_q_point_face;
+std::map<FEType, const std::vector<Real> *> BoundaryCondition::_static_JxW_face;
+std::map<FEType, const std::vector<std::vector<Real> > *> BoundaryCondition::_static_phi_face;
+std::map<FEType, const std::vector<std::vector<RealGradient> > *> BoundaryCondition::_static_dphi_face;
+std::map<FEType, const std::vector<Point> *> BoundaryCondition::_static_normals_face;
 std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums;
 std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums_nodal;
 std::map<unsigned int, std::vector<Real> > BoundaryCondition::_var_vals_face;
