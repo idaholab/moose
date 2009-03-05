@@ -80,6 +80,8 @@ public:
     return active_materials[block_id];
   }
 
+  void updateMaterialDataState();
+
 private:
   MaterialFactory(){}
   virtual ~MaterialFactory(){}

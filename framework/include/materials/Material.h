@@ -1,4 +1,5 @@
 #include "Kernel.h"
+#include "QpData.h"
 
 #ifndef MATERIAL_H
 #define MATERIAL_H
@@ -81,6 +82,11 @@ public:
     std::cerr<<"Material "<<_name<<" has no property named: "<<name;
   }
 
+  /**
+   * Updates the old (first) material properties to the current/new material properies (second)
+   */
+  void updateDataState();
+
 protected:
   std::vector<Real> _zero;
   std::vector<RealGradient> _grad_zero;
@@ -134,6 +140,7 @@ protected:
   std::map<std::string, std::vector<Real> > _real_props;
   std::map<std::string, std::vector<std::vector<Real> > > _vector_props;
   std::map<std::string, std::vector<std::vector<std::vector<Real> > > > _tensor_props;
+  std::map<unsigned int, std::pair<QpData *, QpData *> > _qp_props;
 };
 
 #endif //MATERIAL_H
