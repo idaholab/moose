@@ -10,6 +10,18 @@ Material::materialReinit()
   for(;it!=it_end;++it)
     it->second.resize(_qrule->n_points(),1);
 
+  std::map<std::string, std::vector<RealGradient> >::iterator grad_it = _gradient_props.begin();
+  std::map<std::string, std::vector<RealGradient> >::iterator grad_it_end = _gradient_props.end();
+
+  for(;grad_it!=grad_it_end;++grad_it)
+    grad_it->second.resize(_qrule->n_points());
+
+  std::map<std::string, std::vector<RealTensorValue> >::iterator tensor_it = _tensor_props.begin();
+  std::map<std::string, std::vector<RealTensorValue> >::iterator tensor_it_end = _tensor_props.end();
+
+  for(;tensor_it!=tensor_it_end;++tensor_it)
+    tensor_it->second.resize(_qrule->n_points());
+
   computeProperties();
 }
 

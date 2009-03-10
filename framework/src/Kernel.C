@@ -31,7 +31,9 @@ Kernel::Kernel(std::string name,
    _dphi(*_static_dphi[_fe_type]),
    _q_point(*_static_q_point[_fe_type]),
    _coupled_to(coupled_to),
-   _coupled_as(coupled_as)
+   _coupled_as(coupled_as),
+   _zero(_static_zero),
+   _grad_zero(_static_grad_zero)
 {
   // If this variable isn't known yet... make it so
   if(std::find(_var_nums.begin(),_var_nums.end(),_var_num) == _var_nums.end())
@@ -187,6 +189,9 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     }
 
     unsigned int num_q_points = _qrule->n_points();
+
+    _static_zero.resize(num_q_points,0);
+    _static_grad_zero.resize(num_q_points,0);
     
     _var_vals[var_num].resize(num_q_points);
     _var_grads[var_num].resize(num_q_points);
@@ -237,7 +242,7 @@ Kernel::computeResidual()
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     for (_i=0; _i<_phi.size(); _i++)
-      var_Re(_i) += _JxW[_qp]*computeQpResidual();
+      var_Re(_i) += _JxW[_qp]*computeQpResidual();  
   
 //  Moose::perf_log.pop("computeResidual()","Kernel");
   Moose::perf_log.pop("computeResidual()",_name);
@@ -400,3 +405,5 @@ short Kernel::_n_of_rk_stages;
 Real Kernel::_bdf2_wei[3];
 bool Kernel::_is_transient;
 Material * Kernel::_material;
+std::vector<Real> Kernel::_static_zero;
+std::vector<RealGradient> Kernel::_static_grad_zero;

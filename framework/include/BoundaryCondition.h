@@ -182,12 +182,6 @@ protected:
   std::vector<Real> & _u_face;
 
   /**
-   * "Something" to initialize _grad_u_face with
-   * when it's a non-integrated boundary condition.
-   */
-  std::vector<RealGradient> _grad_zero;
-
-  /**
    * Holds the current solution gradient at the current quadrature point on the face.
    */
   std::vector<RealGradient> & _grad_u_face;

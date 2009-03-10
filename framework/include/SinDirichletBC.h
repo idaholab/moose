@@ -20,9 +20,9 @@ public:
 		  std::vector<std::string> coupled_to, 
 		  std::vector<std::string> coupled_as)
   :BoundaryCondition(name, parameters, var_name, false, boundary_id, coupled_to, coupled_as),
-   _tempzero(_parameters.get<Real>("tempzero")),
-   _tempmax(_parameters.get<Real>("tempmax")),
-   _timeduration(_parameters.get<Real>("timeduration"))
+   _initial(_parameters.get<Real>("initial")),
+   _final(_parameters.get<Real>("final")),
+   _duration(_parameters.get<Real>("duration"))
   {}
   
 protected:
@@ -31,18 +31,18 @@ protected:
   
     Real value;
 
-    if(_t < _timeduration)
-      value = _tempzero + _tempmax * std::sin((0.5/_timeduration) * libMesh::pi * _t);
+    if(_t < _duration)
+      value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
     else
-      value = _tempmax;
+      value = _final;
     
     return _u_face[_qp]- value;
   }
 
 private:
-  Real _tempzero;
-  Real _tempmax;
-  Real _timeduration;
+  Real _initial;
+  Real _final;
+  Real _duration;
 };
  
 #endif

@@ -301,6 +301,12 @@ protected:
   std::vector<Real> & coupledValOld(std::string name);
 
   /**
+   * Just here for convenience.  Used in constructors... usually to deal with multiple dimensional stuff.
+   */
+  std::vector<Real> & _zero;
+  std::vector<RealGradient> & _grad_zero;
+
+  /**
    * ***********************
    * All of the static stuff
    * ***********************
@@ -464,6 +470,12 @@ protected:
    * @param soln The solution vector to pull the coefficients from.
    */
   static void computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealGradient> > & dphi);
+
+  /**
+   * Static convenience zeros.
+   */
+  static std::vector<Real> _static_zero;
+  static std::vector<RealGradient> _static_grad_zero;
 };
 
 #endif //KERNEL_H

@@ -21,7 +21,6 @@ BoundaryCondition::BoundaryCondition(std::string name,
    _normals_face(*_static_normals_face[_fe_type]),
    _q_point_face(*_static_q_point_face[_fe_type]),
    _u_face(integrated ? _var_vals_face[_var_num] : _var_vals_face_nodal[_var_num]),
-   _grad_zero(0),
    _grad_u_face(integrated ? _var_grads_face[_var_num] : _grad_zero)
 {
   if(_integrated)
