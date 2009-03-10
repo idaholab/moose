@@ -128,11 +128,25 @@ public:
   void updateDataState();
 
 protected:
+  enum QP_Data_Type { CURR, PREV };
+
   /**
    * All materials must override this virtual.
    * This is where they fill up the vectors with values.
    */
   virtual void computeProperties() = 0;
+
+  /**
+   * This function is called to create the data structure that will be associated
+   * with a quadrature point
+   */
+  virtual QpData * createData() {}
+
+  /**
+   * This function returns a reference to a standard vector of datastructures for all 
+   * the quadrature points on the current element
+   */
+  virtual std::vector<QpData *> & getData(QP_Data_Type qp_data_type); 
 
   /**
    * Block ID this material is active on.
@@ -210,7 +224,9 @@ protected:
   std::map<std::string, std::vector<std::vector<Real> > > _vector_props;
   std::map<std::string, std::vector<RealTensorValue> > _tensor_props;
   std::map<std::string, std::vector<std::vector<std::vector<Real> > > > _matrix_props;
-  std::map<unsigned int, std::pair<QpData *, QpData *> > _qp_props;
+  std::map<unsigned int, std::vector<QpData *> > _qp_prev;
+  std::map<unsigned int, std::vector<QpData *> > _qp_curr;
+
 };
 
 #endif //MATERIAL_H
