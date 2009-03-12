@@ -60,7 +60,7 @@ Material::getData(QP_Data_Type qp_data_type)
       locMap = &_qp_prev;
       break;
   }
-
+  
   i_map = locMap->find(elemId);
   if (i_map != locMap->end())
     return i_map->second;
@@ -74,7 +74,8 @@ Material::getData(QP_Data_Type qp_data_type)
     for (;i_vec != v->end();++i_vec)       
       *i_vec = createData();
     
-    _qp_curr[elemId] = *v;
+    (*locMap)[elemId] = *v;
+    
     return *v;
   }
 }
