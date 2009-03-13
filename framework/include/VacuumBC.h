@@ -47,4 +47,4 @@ private:
   Real _alpha;
 };
 
-#endif //VACUUM_H
+#endif //VACUUMBC_H
