@@ -24,7 +24,8 @@ public:
    * constructor.
    */
   VacuumBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as)
+    :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as),
+    _alpha(_parameters.get<Real>("alpha"))
   {}
 
   virtual ~VacuumBC(){}
@@ -32,12 +33,18 @@ public:
 protected:
   virtual Real computeQpResidual()
   {
-    return _phi_face[_i][_qp]*_u_face[_qp]/2.;
+    return _phi_face[_i][_qp]*_alpha*_u_face[_qp]/2.;
   }
   virtual Real computeQpJacobian()
   {
-    return _phi_face[_i][_qp]*_phi_face[_j][_qp]/2.;    
+    return _phi_face[_i][_qp]*_alpha*_phi_face[_j][_qp]/2.;    
   }
+
+private:
+  /**
+   * Ratio of u to du/dn
+   */
+  Real _alpha;
 };
 
 #endif //VACUUMBC_H
