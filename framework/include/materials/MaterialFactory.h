@@ -82,6 +82,9 @@ public:
 
   void updateMaterialDataState();
 
+  std::map<int, Material *>::iterator activeMaterialsBegin() { return active_materials.begin(); }
+  std::map<int, Material *>::iterator activeMaterialsEnd() { return active_materials.end(); }
+
 private:
   MaterialFactory(){}
   virtual ~MaterialFactory(){}

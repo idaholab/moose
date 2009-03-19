@@ -27,7 +27,13 @@ public:
     _block_id(block_id)
   {}
 
-  virtual ~Material(){}
+  virtual ~Material()
+  {
+    // TODO: Implement destructor to clean up after the _qp_prev and _qp_curr data objects
+    
+    //std::for_each(_qp_prev.begin(), _qp_prev.end(), DeleteFunctor());
+    //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
+  }
 
   /** 
    * Block ID the Material is active on.
@@ -128,6 +134,18 @@ public:
   void updateDataState();
 
 protected:
+// struct DeleteFunctor 
+//   {
+//     void operator()(const std::pair<const unsigned int, std::vector<QpData *> > & p) const
+//     {
+//       //for(std::vector<QpData *>::iterator i = p.second.begin(); i != p.second.end(); ++i)
+//       //  delete *i;
+//       std::cerr << p.first << " ";
+//       //std::vector<const QpData *>::iterator i = p.second;
+//       std::cerr << p.second[0] << std::endl;
+//     }
+//  };
+  
   enum QP_Data_Type { CURR, PREV };
 
   /**
@@ -140,7 +158,7 @@ protected:
    * This function is called to create the data structure that will be associated
    * with a quadrature point
    */
-  virtual QpData * createData() {}
+  virtual QpData * createData() { return NULL; }
 
   /**
    * This function returns a reference to a standard vector of datastructures for all 
