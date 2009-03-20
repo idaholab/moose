@@ -44,6 +44,14 @@ void Parameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream
       os << _value[i][j] << " ";
 }
 
+template<>
+inline
+void Parameters::Parameter<std::vector<std::string> >::print (std::ostream& os) const
+{
+  for (unsigned int i=0; i<_value.size(); i++)
+    os << _value[i] << " ";
+}
+
 namespace Moose
 {
   /**
