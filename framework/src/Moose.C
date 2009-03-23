@@ -12,6 +12,10 @@
 #include "VacuumBC.h"
 #include "MatchedValueBC.h"
 
+#include "AuxFactory.h"
+#include "ConstantAux.h"
+#include "CoupledAux.h"
+
 #include "ImplicitEuler.h"
 #include "ImplicitBackwardDifference2.h"
 
@@ -34,4 +38,7 @@ Moose::registerObjects()
   BCFactory::instance()->registerBC<VectorNeumannBC>("VectorNeumannBC");
   BCFactory::instance()->registerBC<VacuumBC>("VacuumBC");
   BCFactory::instance()->registerBC<MatchedValueBC>("MatchedValueBC");
+
+  AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
+  AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");
 }

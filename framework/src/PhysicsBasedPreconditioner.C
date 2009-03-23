@@ -31,8 +31,8 @@ PhysicsBasedPreconditioner::init ()
 
   TransientNonlinearImplicitSystem & system = _equation_systems->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
 
-  // -1 to take into account the Nonlinear system itself
-  const unsigned int num_systems = _equation_systems->n_systems()-1;
+  // -2 to take into account the Nonlinear system and the Auxilliary System
+  const unsigned int num_systems = _equation_systems->n_systems()-2;
 
   if(_preconditioners.size() == 0)
     _preconditioners.resize(num_systems);
@@ -110,8 +110,8 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 {
   Moose::perf_log.push("apply()","PhysicsBasedPreconditioner");
 
-  // -1 to take into account the Nonlinear system itself
-  const unsigned int num_systems = _equation_systems->n_systems()-1;
+  // -2 to take into account the Nonlinear system and the Auxilliary System
+  const unsigned int num_systems = _equation_systems->n_systems()-2;
   
   TransientNonlinearImplicitSystem & system = _equation_systems->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
 

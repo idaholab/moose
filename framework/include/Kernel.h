@@ -61,7 +61,7 @@ public:
   /**
    * Re-Initializes common data structures for a specific element.
    */
-  static void reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL, System * precond_system = NULL);
+  static void reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
 
   /**
    * Re-Initializes temporal discretization/transient control data.
@@ -94,7 +94,9 @@ public:
   virtual Real computeIntegral();
 
   static DofMap * _dof_map;
+  static DofMap * _aux_dof_map;
   static std::vector<unsigned int> _dof_indices;
+  static std::vector<unsigned int> _aux_dof_indices;
 
   /**
    * Retrieve name of the Kernel
@@ -112,6 +114,15 @@ public:
    * The variable number that this kernel operates on.
    */
   unsigned int variable(){return _var_num;}
+
+  /**
+   * Computes the modified variable number for an auxiliary variable.
+   * This is the variable number that Kernels know this variable to operate under.
+   *
+   * This is necessary because Kernels need unique variable numbers for computing
+   * off-diagonal jacobian components.
+   */
+  static bool modifiedAuxVarNum(unsigned int var_num);
   
 protected:
   /**
@@ -157,6 +168,11 @@ protected:
    * Name of the variable being solved for.
    */
   std::string _var_name;
+
+  /**
+   * Whether or not this kernel is operating on an auxiliary variable.
+   */
+  bool _is_aux;
 
   /**
    * System variable number for this variable.
@@ -253,6 +269,11 @@ protected:
   std::vector<unsigned int> _coupled_var_nums;
 
   /**
+   * Variable numbers of the coupled auxiliary variables.
+   */
+  std::vector<unsigned int> _aux_coupled_var_nums;
+
+  /**
    * Names of the variables this kernel is coupled to.
    */
   std::vector<std::string> _coupled_to;
@@ -266,6 +287,11 @@ protected:
    * Map from _as_ to the actual variable number.
    */
   std::map<std::string, unsigned int> _coupled_as_to_var_num;
+
+  /**
+   * Map from _as_ to the actual variable number for auxiliary variables.
+   */
+  std::map<std::string, unsigned int> _aux_coupled_as_to_var_num;
 
   /**
    * Returns true if a variables has been coupled_as name.
@@ -314,6 +340,7 @@ protected:
   
   static EquationSystems * _es;
   static TransientNonlinearImplicitSystem * _system;
+  static TransientExplicitSystem * _aux_system;
   static MeshBase * _mesh;
   static unsigned int _dim;
 
@@ -363,9 +390,19 @@ protected:
   static std::vector<unsigned int> _var_nums;
 
   /**
+   * Variable numbers of the auxiliary variables.
+   */
+  static std::vector<unsigned int> _aux_var_nums;
+
+  /**
    * Dof Maps for all the variables.
    */
   static std::map<unsigned int, std::vector<unsigned int> > _var_dof_indices;
+
+  /**
+   * Dof Maps for all the auxiliary variables.
+   */
+  static std::map<unsigned int, std::vector<unsigned int> > _aux_var_dof_indices;
 
   /**
    * Residual vectors for all variables.
@@ -406,6 +443,36 @@ protected:
    * Gradient of the variables at the quadrature points.
    */
   static std::map<unsigned int, std::vector<RealGradient> > _var_grads_older;
+
+  /**
+   * Value of the variables at the quadrature points.
+   */
+  static std::map<unsigned int, std::vector<Real> > _aux_var_vals;
+
+  /**
+   * Gradient of the variables at the quadrature points.
+   */
+  static std::map<unsigned int, std::vector<RealGradient> > _aux_var_grads;
+
+  /**
+   * Value of the variables at the quadrature points.
+   */
+  static std::map<unsigned int, std::vector<Real> > _aux_var_vals_old;
+
+  /**
+   * Value of the variables at the quadrature points at t-2.
+   */
+  static std::map<unsigned int, std::vector<Real> > _aux_var_vals_older;
+
+  /**
+   * Gradient of the variables at the quadrature points.
+   */
+  static std::map<unsigned int, std::vector<RealGradient> > _aux_var_grads_old;
+
+  /**
+   * Gradient of the variables at the quadrature points.
+   */
+  static std::map<unsigned int, std::vector<RealGradient> > _aux_var_grads_older;
   
   /**
    * Current time.
@@ -470,6 +537,11 @@ protected:
    * @param soln The solution vector to pull the coefficients from.
    */
   static void computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealGradient> > & dphi);
+
+  /**
+   * Whether or not this coupled_as name is associated with an auxiliary variable.
+   */
+  bool isAux(std::string name);
 
   /**
    * Static convenience zeros.

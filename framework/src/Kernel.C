@@ -17,7 +17,8 @@ Kernel::Kernel(std::string name,
   :_name(name),
    _parameters(parameters),
    _var_name(var_name),
-   _var_num(_system->variable_number(_var_name)),
+   _is_aux(_aux_system->has_variable(_var_name)),
+   _var_num(_is_aux ? _aux_system->variable_number(_var_name) : _system->variable_number(_var_name)),
    _integrated(integrated),
    _u(_var_vals[_var_num]),
    _grad_u(_var_grads[_var_num]),
@@ -25,7 +26,7 @@ Kernel::Kernel(std::string name,
    _u_older(_var_vals_older[_var_num]),
    _grad_u_old(_var_grads_old[_var_num]),
    _grad_u_older(_var_grads_older[_var_num]),
-   _fe_type(_dof_map->variable_type(_var_num)),
+   _fe_type(_is_aux ? _aux_dof_map->variable_type(_var_num) : _dof_map->variable_type(_var_num)),
    _JxW(*_static_JxW[_fe_type]),
    _phi(*_static_phi[_fe_type]),
    _dphi(*_static_dphi[_fe_type]),
@@ -36,22 +37,52 @@ Kernel::Kernel(std::string name,
    _grad_zero(_static_grad_zero)
 {
   // If this variable isn't known yet... make it so
-  if(std::find(_var_nums.begin(),_var_nums.end(),_var_num) == _var_nums.end())
-    _var_nums.push_back(_var_num);
+  if(!_is_aux)
+  {
+    if(std::find(_var_nums.begin(),_var_nums.end(),_var_num) == _var_nums.end())
+      _var_nums.push_back(_var_num);
+  }
+  else
+  {
+    if(std::find(_aux_var_nums.begin(),_aux_var_nums.end(),_var_num) == _aux_var_nums.end())
+      _aux_var_nums.push_back(_var_num);
+  }
 
   for(unsigned int i=0;i<_coupled_to.size();i++)
   {
     std::string coupled_var_name=_coupled_to[i];
 
-    unsigned int coupled_var_num = _system->variable_number(coupled_var_name);
+    std::cout<<"Coupled var: "<<coupled_var_name<<std::endl;
 
-    _coupled_as_to_var_num[coupled_as[i]] = coupled_var_num;
+    //Is it in the nonlinear system or the aux system?
+    if(_system->has_variable(coupled_var_name))
+    {
+      std::cout<<"Found in nonlinear system"<<std::endl;
+      
+      unsigned int coupled_var_num = _system->variable_number(coupled_var_name);
 
-    if(std::find(_var_nums.begin(),_var_nums.end(),coupled_var_num) == _var_nums.end())
-      _var_nums.push_back(coupled_var_num);
+      _coupled_as_to_var_num[coupled_as[i]] = coupled_var_num;
 
-    if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
-      _coupled_var_nums.push_back(coupled_var_num);
+      if(std::find(_var_nums.begin(),_var_nums.end(),coupled_var_num) == _var_nums.end())
+        _var_nums.push_back(coupled_var_num);
+
+      if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
+        _coupled_var_nums.push_back(coupled_var_num);
+    }
+    else //Look for it in the Aux system
+    {
+      std::cout<<"Found in aux system"<<std::endl;
+      
+      unsigned int coupled_var_num = _aux_system->variable_number(coupled_var_name);
+
+      _aux_coupled_as_to_var_num[coupled_as[i]] = coupled_var_num;
+
+      if(std::find(_aux_var_nums.begin(),_aux_var_nums.end(),coupled_var_num) == _aux_var_nums.end())
+        _aux_var_nums.push_back(coupled_var_num);
+
+      if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
+        _aux_coupled_var_nums.push_back(coupled_var_num);
+    }  
   }
 }
 
@@ -63,6 +94,9 @@ Kernel::init(EquationSystems * es)
   _dim = _mesh->mesh_dimension();
   _system = &_es->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
   _dof_map = &_system->get_dof_map();
+
+  _aux_system = &_es->get_system<TransientExplicitSystem>("AuxiliarySystem");
+  _aux_dof_map = &_aux_system->get_dof_map();
 
   _max_quadrature_order = CONSTANT;
   
@@ -139,7 +173,7 @@ Kernel::name()
 }
 
 void
-Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke, System * precond_system)
+Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
   Moose::perf_log.push("reinit()","Kernel");
   
@@ -220,6 +254,57 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
         
         computeQpSolution(_var_vals_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_phi);
         computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_dphi);
+      }
+    }
+  }
+
+  const NumericVector<Number>& aux_soln = (*_aux_system->current_local_solution);
+
+  std::vector<unsigned int>::iterator aux_var_num_it = _aux_var_nums.begin();
+  std::vector<unsigned int>::iterator aux_var_num_end = _aux_var_nums.end();
+
+  for(;aux_var_num_it != aux_var_num_end; ++aux_var_num_it)
+  {
+    unsigned int var_num = *aux_var_num_it;
+    
+    FEType fe_type = _aux_dof_map->variable_type(var_num);
+
+    _aux_dof_map->dof_indices(elem, _aux_var_dof_indices[var_num], var_num);
+
+    unsigned int num_dofs = _aux_var_dof_indices[var_num].size();
+
+    unsigned int num_q_points = _qrule->n_points();
+
+    _static_zero.resize(num_q_points,0);
+    _static_grad_zero.resize(num_q_points,0);
+    
+    _aux_var_vals[var_num].resize(num_q_points);
+    _aux_var_grads[var_num].resize(num_q_points);
+
+    if(_is_transient)
+    {
+      _aux_var_vals_old[var_num].resize(num_q_points);
+      _aux_var_grads_old[var_num].resize(num_q_points);
+
+      _aux_var_vals_older[var_num].resize(num_q_points);
+      _aux_var_grads_older[var_num].resize(num_q_points);
+    }
+    
+    const std::vector<std::vector<Real> > & static_phi = *_static_phi[fe_type];
+    const std::vector<std::vector<RealGradient> > & static_dphi= *_static_dphi[fe_type];
+
+    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+    {
+      computeQpSolution(_aux_var_vals[var_num][qp], aux_soln, _aux_var_dof_indices[var_num], qp, static_phi);
+      computeQpGradSolution(_aux_var_grads[var_num][qp], aux_soln, _aux_var_dof_indices[var_num], qp, static_dphi);
+
+      if(_is_transient)
+      {
+        computeQpSolution(_aux_var_vals_old[var_num][qp], *_aux_system->old_local_solution, _aux_var_dof_indices[var_num], qp, static_phi);
+        computeQpGradSolution(_aux_var_grads_old[var_num][qp], *_aux_system->old_local_solution, _aux_var_dof_indices[var_num], qp, static_dphi);
+        
+        computeQpSolution(_aux_var_vals_older[var_num][qp], *_aux_system->older_local_solution, _aux_var_dof_indices[var_num], qp, static_phi);
+        computeQpGradSolution(_aux_var_grads_older[var_num][qp], *_aux_system->older_local_solution, _aux_var_dof_indices[var_num], qp, static_dphi);
       }
     }
   }
@@ -319,9 +404,27 @@ Kernel::computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number>
 }
 
 bool
+Kernel::modifiedAuxVarNum(unsigned int var_num)
+{
+  return MAX_VARS + var_num;
+}
+
+bool
+Kernel::isAux(std::string name)
+{
+  return _aux_coupled_as_to_var_num.find(name) != _aux_coupled_as_to_var_num.end();
+}
+
+bool
 Kernel::isCoupled(std::string name)
 {
-  return std::find(_coupled_as.begin(),_coupled_as.end(),name) != _coupled_as.end();
+  bool found = std::find(_coupled_as.begin(),_coupled_as.end(),name) != _coupled_as.end();
+
+  //See if it's an Aux variable
+  if(!found)
+    found = isAux(name);
+
+  return found;
 }
 
 unsigned int
@@ -333,7 +436,10 @@ Kernel::coupled(std::string name)
     libmesh_error();
   }
 
-  return _coupled_as_to_var_num[name];
+  if(!isAux(name))
+    return _coupled_as_to_var_num[name];
+  else
+    return modifiedAuxVarNum(_aux_coupled_as_to_var_num[name]);
 }
 
 std::vector<Real> &
@@ -344,8 +450,15 @@ Kernel::coupledVal(std::string name)
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
     libmesh_error();
   }
-  
-  return _var_vals[_coupled_as_to_var_num[name]];
+
+  if(!isAux(name))
+    return _var_vals[_coupled_as_to_var_num[name]];
+  else
+  {
+    std::cout<<"Coupled Aux!"<<std::endl;
+    
+    return _aux_var_vals[_aux_coupled_as_to_var_num[name]];
+  }
 }
 
 std::vector<RealGradient> &
@@ -356,8 +469,11 @@ Kernel::coupledGrad(std::string name)
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
     libmesh_error();
   }
-  
-  return _var_grads[_coupled_as_to_var_num[name]];
+
+  if(!isAux(name))
+    return _var_grads[_coupled_as_to_var_num[name]];
+  else
+    return _aux_var_grads[_aux_coupled_as_to_var_num[name]];
 }
 
 std::vector<Real> &
@@ -368,15 +484,21 @@ Kernel::coupledValOld(std::string name)
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
     libmesh_error();
   }
-  
-  return _var_vals_old[_coupled_as_to_var_num[name]];
+
+  if(!isAux(name))
+    return _var_vals_old[_coupled_as_to_var_num[name]];
+  else
+    return _aux_var_vals_old[_aux_coupled_as_to_var_num[name]];
 }
 
 const Elem * Kernel::_current_elem;
 DofMap * Kernel::_dof_map;
+DofMap * Kernel::_aux_dof_map;
 std::vector<unsigned int> Kernel::_dof_indices;
+std::vector<unsigned int> Kernel::_aux_dof_indices;
 EquationSystems * Kernel::_es;
 TransientNonlinearImplicitSystem * Kernel::_system;
+TransientExplicitSystem * Kernel::_aux_system;
 MeshBase * Kernel::_mesh;
 unsigned int Kernel::_dim;
 std::map<FEType, FEBase *> Kernel::_fe;
@@ -387,7 +509,9 @@ std::map<FEType, const std::vector<std::vector<Real> > *> Kernel::_static_phi;
 std::map<FEType, const std::vector<std::vector<RealGradient> > *> Kernel::_static_dphi;
 std::map<FEType, const std::vector<Point> *> Kernel::_static_q_point;
 std::vector<unsigned int> Kernel::_var_nums;
+std::vector<unsigned int> Kernel::_aux_var_nums;
 std::map<unsigned int, std::vector<unsigned int> > Kernel::_var_dof_indices;
+std::map<unsigned int, std::vector<unsigned int> > Kernel::_aux_var_dof_indices;
 std::map<unsigned int, DenseSubVector<Number> * > Kernel::_var_Res;
 std::map<unsigned int, DenseSubMatrix<Number> * > Kernel::_var_Kes;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals;
@@ -396,6 +520,12 @@ std::map<unsigned int, std::vector<Real> > Kernel::_var_vals_old;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals_older;
 std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_old;
 std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_older;
+std::map<unsigned int, std::vector<Real> > Kernel::_aux_var_vals;
+std::map<unsigned int, std::vector<RealGradient> > Kernel::_aux_var_grads;
+std::map<unsigned int, std::vector<Real> > Kernel::_aux_var_vals_old;
+std::map<unsigned int, std::vector<Real> > Kernel::_aux_var_vals_older;
+std::map<unsigned int, std::vector<RealGradient> > Kernel::_aux_var_grads_old;
+std::map<unsigned int, std::vector<RealGradient> > Kernel::_aux_var_grads_older;
 Real Kernel::_t;
 Real Kernel::_dt;
 Real Kernel::_dt_old;
