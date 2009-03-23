@@ -45,7 +45,7 @@ void Parameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream
     for (unsigned int j=0; i<_value[j].size(); j++)
       os << _value[i][j] << " ";
 }
-
+ 
 template<>
 inline
 void Parameters::Parameter<std::vector<std::string> >::print (std::ostream& os) const
