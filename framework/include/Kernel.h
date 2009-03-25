@@ -329,6 +329,7 @@ protected:
   /**
    * Just here for convenience.  Used in constructors... usually to deal with multiple dimensional stuff.
    */
+  Real & _real_zero;
   std::vector<Real> & _zero;
   std::vector<RealGradient> & _grad_zero;
 
@@ -546,6 +547,7 @@ protected:
   /**
    * Static convenience zeros.
    */
+  static Real _static_real_zero;
   static std::vector<Real> _static_zero;
   static std::vector<RealGradient> _static_grad_zero;
 };

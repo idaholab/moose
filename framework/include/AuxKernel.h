@@ -26,10 +26,23 @@ public:
    * Must be called _after_ Kernel::init()
    */
   static void init();
-  
+
+  /**
+   * Nodal reinit.
+   */
   static void reinit(const NumericVector<Number>& soln, const Node & node);
 
+  /**
+   * Elemental reinit.
+   */
+  static void reinit(const NumericVector<Number>& soln, const Elem & elem);
+
   void computeAndStore();
+
+  bool isNodal()
+  {
+    return _nodal;
+  }
   
 protected:
   virtual Real computeValue() = 0;
@@ -39,9 +52,11 @@ protected:
     return 0;
   }
 
-  Real & _u_nodal;  
-  Real & _u_old_nodal;
-  Real & _u_older_nodal;
+  bool _nodal;
+
+  Real & _u_aux;  
+  Real & _u_old_aux;
+  Real & _u_older_aux;
 
   Real & coupledValAux(std::string name);
   Real & coupledValOldAux(std::string name);
@@ -53,6 +68,21 @@ protected:
   static NumericVector<Number> * _aux_soln;
   static const NumericVector<Number> * _aux_old_soln;
   static const NumericVector<Number> * _aux_older_soln;
+
+  /**
+   * Holds the current dof numbers for each variable
+   */
+  static std::map<unsigned int, unsigned int> _aux_var_dofs;
+
+
+  /*************
+   * Nodal Stuff
+   *************/
+  
+  /**
+   * Holds the variable numbers of the nodal aux vars.
+   */
+  static std::vector<unsigned int> _nodal_var_nums;
   
   /**
    * Value of the variables at the nodes.
@@ -70,11 +100,6 @@ protected:
   static std::map<unsigned int, Real > _var_vals_older_nodal;
 
   /**
-   * Holds the current dof numbers for each variable
-   */
-  static std::map<unsigned int, unsigned int> _aux_var_dofs;
-
-  /**
    * Value of the variables at the nodes.
    */
   static std::map<unsigned int, Real > _aux_var_vals_nodal;
@@ -88,7 +113,81 @@ protected:
    * Value of the variables at the nodes at t-2.
    */
   static std::map<unsigned int, Real > _aux_var_vals_older_nodal;
-  
+
+
+  /*****************
+   * Elemental Stuff
+   *****************/
+
+  /**
+   * Holds the variable numbers of the elemental aux vars.
+   */
+  static std::vector<unsigned int> _element_var_nums;
+
+  /**
+   * Value of the variables at the elements.
+   */
+  static std::map<unsigned int, Real > _var_vals_element;
+
+  /**
+   * Value of the variables at the elements.
+   */
+  static std::map<unsigned int, Real > _var_vals_old_element;
+
+  /**
+   * Value of the variables at the elements at t-2.
+   */
+  static std::map<unsigned int, Real > _var_vals_older_element;
+
+  /**
+   * Gradient of the variables at the elements.
+   */
+  static std::map<unsigned int, RealGradient > _var_grads_element;
+
+  /**
+   * Gradient of the variables at the elements.
+   */
+  static std::map<unsigned int, RealGradient > _var_grads_old_element;
+
+  /**
+   * Gradient of the variables at the elements at t-2.
+   */
+  static std::map<unsigned int, RealGradient > _var_grads_older_element;
+
+  /**
+   * Value of the variables at the elements.
+   */
+  static std::map<unsigned int, Real > _aux_var_vals_element;
+
+  /**
+   * Value of the variables at the elements.
+   */
+  static std::map<unsigned int, Real > _aux_var_vals_old_element;
+
+  /**
+   * Value of the variables at the elements at t-2.
+   */
+  static std::map<unsigned int, Real > _aux_var_vals_older_element;
+
+  /**
+   * Gradient of the variables at the elements.
+   */
+  static std::map<unsigned int, RealGradient > _aux_var_grads_element;
+
+  /**
+   * Gradient of the variables at the elements.
+   */
+  static std::map<unsigned int, RealGradient > _aux_var_grads_old_element;
+
+  /**
+   * Gradient of the variables at the elements at t-2.
+   */
+  static std::map<unsigned int, RealGradient > _aux_var_grads_older_element;
+
+
+  static Real integrateValue(const std::vector<Real> & vals, const std::vector<Real> & JxW);
+  static RealGradient integrateGradient(const std::vector<RealGradient> & grads, const std::vector<Real> & JxW);
+
 private:
   
   /**

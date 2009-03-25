@@ -69,7 +69,10 @@ public:
   {
     AuxKernel * aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
 
-    active_AuxKernels.push_back(aux);
+    if(aux->isNodal())
+      active_NodalAuxKernels.push_back(aux);
+    else
+      active_ElementAuxKernels.push_back(aux);
 
     return aux;
   }
@@ -100,8 +103,11 @@ public:
     return name_to_params_pointer[name]();
   }
 
-  std::vector<AuxKernel *>::iterator activeAuxKernelsBegin(){ return active_AuxKernels.begin(); };
-  std::vector<AuxKernel *>::iterator activeAuxKernelsEnd(){ return active_AuxKernels.end(); };
+  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsBegin(){ return active_NodalAuxKernels.begin(); };
+  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsEnd(){ return active_NodalAuxKernels.end(); };
+
+  std::vector<AuxKernel *>::iterator activeElementAuxKernelsBegin(){ return active_ElementAuxKernels.begin(); };
+  std::vector<AuxKernel *>::iterator activeElementAuxKernelsEnd(){ return active_ElementAuxKernels.end(); };
 
   std::vector<AuxKernel *>::iterator activeAuxBCsBegin(unsigned int boundary_id){ return active_bcs[boundary_id].begin(); };
   std::vector<AuxKernel *>::iterator activeAuxBCsEnd(unsigned int boundary_id){ return active_bcs[boundary_id].end(); };
@@ -113,7 +119,8 @@ private:
   std::map<std::string, AuxKernelBuildPtr> name_to_build_pointer;
   std::map<std::string, AuxKernelParamsPtr> name_to_params_pointer;
 
-  std::vector<AuxKernel *> active_AuxKernels;
+  std::vector<AuxKernel *> active_NodalAuxKernels;
+  std::vector<AuxKernel *> active_ElementAuxKernels;
 
   std::map<unsigned int, std::vector<AuxKernel *> > active_bcs;
 };

@@ -33,6 +33,7 @@ Kernel::Kernel(std::string name,
    _q_point(*_static_q_point[_fe_type]),
    _coupled_to(coupled_to),
    _coupled_as(coupled_as),
+   _real_zero(_static_real_zero),
    _zero(_static_zero),
    _grad_zero(_static_grad_zero)
 {
@@ -52,13 +53,9 @@ Kernel::Kernel(std::string name,
   {
     std::string coupled_var_name=_coupled_to[i];
 
-    std::cout<<"Coupled var: "<<coupled_var_name<<std::endl;
-
     //Is it in the nonlinear system or the aux system?
     if(_system->has_variable(coupled_var_name))
     {
-      std::cout<<"Found in nonlinear system"<<std::endl;
-      
       unsigned int coupled_var_num = _system->variable_number(coupled_var_name);
 
       _coupled_as_to_var_num[coupled_as[i]] = coupled_var_num;
@@ -71,8 +68,6 @@ Kernel::Kernel(std::string name,
     }
     else //Look for it in the Aux system
     {
-      std::cout<<"Found in aux system"<<std::endl;
-      
       unsigned int coupled_var_num = _aux_system->variable_number(coupled_var_name);
 
       _aux_coupled_as_to_var_num[coupled_as[i]] = coupled_var_num;
@@ -126,7 +121,24 @@ Kernel::init(EquationSystems * es)
       _static_q_point[fe_type] = &_fe[fe_type]->get_xyz();
     }
   }
-             
+
+  //This allows for different basis functions / orders for each Aux variable
+  for(unsigned int var=0; var < _aux_system->n_vars(); var++)
+  {
+    FEType fe_type = _aux_dof_map->variable_type(var);
+
+    if(!_fe[fe_type])
+    {
+      _fe[fe_type] = FEBase::build(_dim, fe_type).release();
+      _fe[fe_type]->attach_quadrature_rule(_qrule);
+
+      _static_JxW[fe_type] = &_fe[fe_type]->get_JxW();
+      _static_phi[fe_type] = &_fe[fe_type]->get_phi();
+      _static_dphi[fe_type] = &_fe[fe_type]->get_dphi();
+      _static_q_point[fe_type] = &_fe[fe_type]->get_xyz();
+    }
+  }
+
   _t = 0;
   _dt = 0;
   _is_transient = false;
@@ -224,6 +236,7 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
     unsigned int num_q_points = _qrule->n_points();
 
+    _static_real_zero = 0;
     _static_zero.resize(num_q_points,0);
     _static_grad_zero.resize(num_q_points,0);
     
@@ -275,6 +288,7 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
     unsigned int num_q_points = _qrule->n_points();
 
+    _static_real_zero = 0;
     _static_zero.resize(num_q_points,0);
     _static_grad_zero.resize(num_q_points,0);
     
@@ -535,5 +549,6 @@ short Kernel::_n_of_rk_stages;
 Real Kernel::_bdf2_wei[3];
 bool Kernel::_is_transient;
 Material * Kernel::_material;
+Real Kernel::_static_real_zero;
 std::vector<Real> Kernel::_static_zero;
 std::vector<RealGradient> Kernel::_static_grad_zero;
