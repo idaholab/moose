@@ -1,5 +1,8 @@
 #include "AuxKernel.h"
 
+//local includes
+#include "Moose.h"
+
 //libmesh includes
 #include "numeric_vector.h"
 #include "dof_map.h"
@@ -35,6 +38,8 @@ AuxKernel::init()
 void
 AuxKernel::reinit(const NumericVector<Number>& soln, const Node & node)
 {
+  Moose::perf_log.push("reinit(node)","AuxKernel");
+
   unsigned int nonlinear_system_number = _system->number();
   unsigned int aux_system_number = _aux_system->number();
 
@@ -68,11 +73,15 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Node & node)
     _aux_var_vals_old_nodal[var_num] = (*_aux_old_soln)(dof_number);
     _aux_var_vals_older_nodal[var_num] = (*_aux_older_soln)(dof_number);
   }
+
+  Moose::perf_log.pop("reinit(node)","AuxKernel");
 }
 
 void
 AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
 {
+  Moose::perf_log.push("reinit(elem)","AuxKernel");
+
   unsigned int nonlinear_system_number = _system->number();
   unsigned int aux_system_number = _aux_system->number();
 
@@ -131,6 +140,8 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
 
     _aux_var_dofs[var_num] = dof_number;
   }
+
+  Moose::perf_log.pop("reinit(elem)","AuxKernel");
 }
 
 void

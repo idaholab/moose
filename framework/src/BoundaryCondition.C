@@ -123,10 +123,41 @@ void BoundaryCondition::reinit(const NumericVector<Number>& soln, const unsigned
   Moose::perf_log.pop("reinit()","BoundaryCondition");
 }
 
+
+
+void BoundaryCondition::reinit(const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual)
+{
+  Moose::perf_log.push("reinit(node)","BoundaryCondition");
+
+  _current_node = &node;
+
+  _current_residual = &residual;
+
+  std::vector<unsigned int>::iterator var_nums_nodal_it = _boundary_to_var_nums_nodal[boundary_id].begin();
+  std::vector<unsigned int>::iterator var_nums_nodal_end = _boundary_to_var_nums_nodal[boundary_id].end();
+
+  unsigned int nonlinear_system_number = _system->number();
+  
+  for(;var_nums_nodal_it != var_nums_nodal_end; ++var_nums_nodal_it)
+  {
+    unsigned int var_num = *var_nums_nodal_it;
+
+    //The zero is the component... that works fine for lagrange FE types.
+    unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);
+
+    _nodal_bc_var_dofs[var_num] = dof_number;
+
+    _var_vals_face_nodal[var_num][0] = soln(dof_number);
+  }
+
+  Moose::perf_log.pop("reinit(node)","BoundaryCondition");
+}
+
+
 void
 BoundaryCondition::computeResidual()
 {
-  Moose::perf_log.push("computeResidual()","BoundaryCondition");
+//  Moose::perf_log.push("computeResidual()","BoundaryCondition");
 
   DenseSubVector<Number> & var_Re = *_var_Res[_var_num];
 
@@ -143,13 +174,13 @@ BoundaryCondition::computeResidual()
 	var_Re(_qp) = computeQpResidual();
   }
 
-  Moose::perf_log.pop("computeResidual()","BoundaryCondition");
+//  Moose::perf_log.pop("computeResidual()","BoundaryCondition");
 }
 
 void
 BoundaryCondition::computeJacobian()
 {
-  Moose::perf_log.push("computeJacobian()","BoundaryCondition");
+//  Moose::perf_log.push("computeJacobian()","BoundaryCondition");
 
   DenseSubMatrix<Number> & var_Ke = *_var_Kes[_var_num];
 
@@ -173,13 +204,13 @@ BoundaryCondition::computeJacobian()
     }
   }
 
-  Moose::perf_log.pop("computeJacobian()","BoundaryCondition");
+//  Moose::perf_log.pop("computeJacobian()","BoundaryCondition");
 }
 
 void
 BoundaryCondition::computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar)
 {
-  Moose::perf_log.push("computeJacobianBlock()","BoundaryCondition");
+//  Moose::perf_log.push("computeJacobianBlock()","BoundaryCondition");
 
   if(_integrated)
     for (_qp=0; _qp<_qface->n_points(); _qp++)
@@ -208,7 +239,14 @@ BoundaryCondition::computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int i
     }
   }
 
-  Moose::perf_log.pop("computeJacobianBlock()","BoundaryCondition");
+//  Moose::perf_log.pop("computeJacobianBlock()","BoundaryCondition");
+}
+
+void
+BoundaryCondition::computeAndStoreResidual()
+{
+  _qp = 0;
+  _current_residual->set(_nodal_bc_var_dofs[_var_num], computeQpResidual());
 }
 
 std::vector<Real> &
@@ -241,6 +279,8 @@ BoundaryCondition::coupledGradFace(std::string name)
   error();
 }
 
+const Node * BoundaryCondition::_current_node;
+NumericVector<Number> * BoundaryCondition::_current_residual;
 unsigned int BoundaryCondition::_current_side;
 std::map<FEType, FEBase *> BoundaryCondition::_fe_face;
 QGauss * BoundaryCondition::_qface;
@@ -251,6 +291,7 @@ std::map<FEType, const std::vector<std::vector<RealGradient> > *> BoundaryCondit
 std::map<FEType, const std::vector<Point> *> BoundaryCondition::_static_normals_face;
 std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums;
 std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums_nodal;
+std::map<unsigned int, unsigned int> BoundaryCondition::_nodal_bc_var_dofs;
 std::map<unsigned int, std::vector<Real> > BoundaryCondition::_var_vals_face;
 std::map<unsigned int, std::vector<RealGradient> > BoundaryCondition::_var_grads_face;
 std::map<unsigned int, std::vector<Real> > BoundaryCondition::_var_vals_face_nodal;

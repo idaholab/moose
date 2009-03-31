@@ -59,7 +59,12 @@ public:
            std::vector<std::string> coupled_to,
            std::vector<std::string> coupled_as)
   {
-    active_bcs[boundary_id].push_back((*name_to_build_pointer[bc_name])(name,parameters,var_name,boundary_id, coupled_to, coupled_as));
+    BoundaryCondition * bc = (*name_to_build_pointer[bc_name])(name,parameters,var_name,boundary_id, coupled_to, coupled_as);
+
+    if(bc->isIntegrated())
+      active_bcs[boundary_id].push_back(bc);
+    else
+      active_nodal_bcs[boundary_id].push_back(bc);
   }
 
   Parameters getValidParams(std::string name)
@@ -76,6 +81,9 @@ public:
   std::vector<BoundaryCondition *>::iterator activeBCsBegin(unsigned int boundary_id){ return active_bcs[boundary_id].begin(); };
   std::vector<BoundaryCondition *>::iterator activeBCsEnd(unsigned int boundary_id){ return active_bcs[boundary_id].end(); };
 
+  std::vector<BoundaryCondition *>::iterator activeNodalBCsBegin(unsigned int boundary_id){ return active_nodal_bcs[boundary_id].begin(); };
+  std::vector<BoundaryCondition *>::iterator activeNodalBCsEnd(unsigned int boundary_id){ return active_nodal_bcs[boundary_id].end(); };
+
 private:
   BCFactory(){}
   virtual ~BCFactory(){}
@@ -84,6 +92,7 @@ private:
   std::map<std::string, BCParamsPtr> name_to_params_pointer;
 
   std::map<unsigned int, std::vector<BoundaryCondition *> > active_bcs;
+  std::map<unsigned int, std::vector<BoundaryCondition *> > active_nodal_bcs;
 };
 
 #endif //BCFACTORY_H

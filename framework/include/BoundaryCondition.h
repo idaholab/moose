@@ -36,6 +36,11 @@ public:
    */
   static void reinit(const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id);
 
+  /**
+   * Reinitializes common datastructures for nodal bcs.
+   */
+  static void reinit(const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
+
   /** 
    * Boundary ID the BC is active on.
    * 
@@ -57,6 +62,16 @@ public:
    * Computes d-ivar-residual / d-jvar... storing the result in Ke.
    */
   void computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar);
+
+  /**
+   * For use with non-integrated / nodal (Dirichlet) BC's
+   */
+  void computeAndStoreResidual();
+
+  /**
+   * Whether or not the BC is integrated over the boundary.
+   */
+  bool isIntegrated(){ return _integrated; }
 
 protected:
 
@@ -103,6 +118,16 @@ protected:
    * ***********************
    */
 
+  /**
+   * Current node for nodal BC's
+   */
+  static const Node * _current_node;
+  
+  /**
+   * Current residual vector.  Only valid for nodal BC's.
+   */
+  static NumericVector<Number> * _current_residual;
+    
   /**
    * Current side.
    */
@@ -154,6 +179,11 @@ protected:
    * at the nodes on that boundary
    */
   static std::map<unsigned int, std::vector<unsigned int> > _boundary_to_var_nums_nodal;
+  
+  /**
+   * Holds the current dof numbers for each variable for nodal bcs
+   */
+  static std::map<unsigned int, unsigned int> _nodal_bc_var_dofs;
 
   /**
    * ***************
