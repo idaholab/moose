@@ -1,0 +1,116 @@
+//Moose Includes
+#include "Moose.h"
+#include "UpdateAuxVars.h"
+#include "KernelFactory.h"
+#include "BoundaryCondition.h"
+#include "BCFactory.h"
+
+//libMesh includes
+#include "numeric_vector.h"
+#include "dense_vector.h"
+#include "petsc_matrix.h"
+#include "dof_map.h"
+#include "mesh.h"
+#include "boundary_info.h"
+
+#include <vector>
+
+namespace Moose
+{
+  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
+  {
+    Moose::perf_log.push("compute_residual()","Solve");
+
+    DenseVector<Number> Re;
+
+    residual.zero();
+
+    update_aux_vars(soln);  
+
+    MeshBase::const_element_iterator       el     = mesh->active_local_elements_begin();
+    const MeshBase::const_element_iterator end_el = mesh->active_local_elements_end();
+
+    std::vector<Kernel *>::iterator kernel_begin = KernelFactory::instance()->activeKernelsBegin();
+    std::vector<Kernel *>::iterator kernel_end = KernelFactory::instance()->activeKernelsEnd();
+    std::vector<Kernel *>::iterator kernel_it = kernel_begin;
+
+    unsigned int subdomain = 999999999;
+
+    for ( ; el != end_el; ++el)
+    {
+      const Elem* elem = *el;
+
+      Re.zero();
+
+      Kernel::reinit(soln, elem, &Re);
+
+      unsigned int cur_subdomain = elem->subdomain_id();
+
+      if(cur_subdomain != subdomain)
+      {
+        subdomain = cur_subdomain;
+
+        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+          (*kernel_it)->subdomainSetup();
+      } 
+
+      for(kernel_it=kernel_begin;kernel_it!=kernel_end;++kernel_it)
+        (*kernel_it)->computeResidual();
+    
+      for (unsigned int side=0; side<elem->n_sides(); side++)
+      {
+        if (elem->neighbor(side) == NULL)
+        {
+          unsigned int boundary_id = mesh->boundary_info->boundary_id (elem, side);
+
+          std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeBCsBegin(boundary_id);
+          std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeBCsEnd(boundary_id);
+
+          if(bc_it != bc_end)
+          {
+            BoundaryCondition::reinit(soln, side, boundary_id);
+          
+            for(; bc_it!=bc_end; ++bc_it)
+              (*bc_it)->computeResidual();
+          }
+        }
+      }
+
+      Kernel::_dof_map->constrain_element_vector (Re, Kernel::_dof_indices, false);
+      residual.add_vector(Re, Kernel::_dof_indices);
+    }
+
+    residual.close();
+
+    //Dirichlet BCs
+    std::vector<unsigned int> nodes;
+    std::vector<short int> ids;
+
+    mesh->boundary_info->build_node_list(nodes, ids);
+  
+    const unsigned int n_nodes = nodes.size();
+
+    for(unsigned int i=0; i<n_nodes; i++)
+    {
+      unsigned int boundary_id = ids[i];
+    
+      std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeNodalBCsBegin(boundary_id);
+      std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeNodalBCsEnd(boundary_id);
+
+      if(bc_it != bc_end)
+      {
+        Node & node = mesh->node(nodes[i]);
+        BoundaryCondition::reinit(soln, node, boundary_id, residual);
+
+        for(; bc_it != bc_end; ++bc_it)
+          (*bc_it)->computeAndStoreResidual();
+      }
+    }
+
+  
+  //  residual.print();
+  //  u_system->rhs->print();
+
+    Moose::perf_log.pop("compute_residual()","Solve");
+  }
+}

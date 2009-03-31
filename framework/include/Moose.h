@@ -2,6 +2,10 @@
 #include "perf_log.h"
 #include "parameters.h"
 
+//Forward Declarations
+class Mesh;
+class EquationSystems;
+
 #define MAX_VARS 1000
 
 #ifndef MOOSE_H
@@ -66,6 +70,21 @@ namespace Moose
    * Registers the Kernels and BCs provided by Moose.
    */
   void registerObjects();
+
+
+  /*******************
+   * Global Variables - yeah I know...
+   *******************/
+
+  /**
+   * The one mesh to rule them all
+   */
+  extern Mesh * mesh;
+
+  /**
+   * The one equation system to rule them all
+   */
+  extern EquationSystems * equation_system;
 }
 
 #endif //MOOSE_H

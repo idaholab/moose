@@ -42,3 +42,11 @@ Moose::registerObjects()
   AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
   AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");
 }
+
+/******************
+ * Global Variables
+ * ****************/
+
+Mesh * Moose::mesh;
+EquationSystems * Moose::equation_system;
+
