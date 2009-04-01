@@ -34,6 +34,10 @@ namespace Moose
     std::vector<Kernel *>::iterator kernel_end = KernelFactory::instance()->activeKernelsEnd();
     std::vector<Kernel *>::iterator kernel_it = kernel_begin;
 
+    std::vector<Kernel *>::iterator block_kernel_begin;
+    std::vector<Kernel *>::iterator block_kernel_end;
+    std::vector<Kernel *>::iterator block_kernel_it;
+
     unsigned int subdomain = 999999999;
 
     for ( ; el != end_el; ++el)
@@ -50,13 +54,26 @@ namespace Moose
       {
         subdomain = cur_subdomain;
 
+        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(subdomain);
+        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(subdomain);
+
+        //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
           (*kernel_it)->subdomainSetup();
+
+        //Kernels on this block
+        for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
+          (*block_kernel_it)->subdomainSetup();        
       } 
 
+      //Global Kernels
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;++kernel_it)
         (*kernel_it)->computeResidual();
-    
+
+      //Kernels on this block
+      for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;++block_kernel_it)
+        (*block_kernel_it)->computeResidual();
+
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
         if (elem->neighbor(side) == NULL)

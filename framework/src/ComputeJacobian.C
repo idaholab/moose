@@ -37,6 +37,10 @@ namespace Moose
     std::vector<Kernel *>::iterator kernel_end = KernelFactory::instance()->activeKernelsEnd();
     std::vector<Kernel *>::iterator kernel_it = kernel_begin;
 
+    std::vector<Kernel *>::iterator block_kernel_begin;
+    std::vector<Kernel *>::iterator block_kernel_end;
+    std::vector<Kernel *>::iterator block_kernel_it;
+
     unsigned int subdomain = 999999999;
 
     for ( ; el != end_el; ++el)
@@ -50,13 +54,26 @@ namespace Moose
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
+
+        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(subdomain);
+        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(subdomain);
       
+        //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
           (*kernel_it)->subdomainSetup();
+
+        //Kernels on this block
+        for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
+          (*block_kernel_it)->subdomainSetup();
       } 
 
+      //Global Kernels
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
         (*kernel_it)->computeJacobian();
+
+      //Kernels on this block
+      for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
+        (*block_kernel_it)->computeJacobian();
 
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
@@ -138,6 +155,10 @@ namespace Moose
     std::vector<Kernel *>::iterator kernel_end = KernelFactory::instance()->activeKernelsEnd();
     std::vector<Kernel *>::iterator kernel_it = kernel_begin;
 
+    std::vector<Kernel *>::iterator block_kernel_begin;
+    std::vector<Kernel *>::iterator block_kernel_end;
+    std::vector<Kernel *>::iterator block_kernel_it;
+
     unsigned int subdomain = 999999999;
 
     DofMap & dof_map = precond_system.get_dof_map();
@@ -161,17 +182,35 @@ namespace Moose
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
+
+        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(subdomain);
+        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(subdomain);
       
+        //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
           (*kernel_it)->subdomainSetup();
+
+        //Kernels on this block
+        for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
+          (*block_kernel_it)->subdomainSetup();
       } 
     
+      //Global Kernels
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
       {
         Kernel * kernel = *kernel_it;
 
         if(kernel->variable() == ivar)
           kernel->computeOffDiagJacobian(Ke,jvar);
+      }
+
+      //Kernels on this block
+      for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
+      {
+        Kernel * block_kernel = *block_kernel_it;
+
+        if(block_kernel->variable() == ivar)
+          block_kernel->computeOffDiagJacobian(Ke,jvar);
       }
 
       for (unsigned int side=0; side<elem->n_sides(); side++)

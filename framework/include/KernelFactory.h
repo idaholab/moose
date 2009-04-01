@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <typeinfo>
 
 // LibMesh includes
 #include <parameters.h>
@@ -72,6 +73,24 @@ public:
     return kernel;
   }
 
+
+  Kernel * add(std::string kernel_name,
+               std::string name,
+               Parameters parameters,
+               std::string var_name,
+               std::vector<std::string> coupled_to,
+               std::vector<std::string> coupled_as,
+               unsigned int block_id)
+  {
+    Kernel * kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+
+    std::cout<<"Adding "<<kernel->name()<<" to block "<<block_id<<std::endl;
+
+    block_kernels[block_id].push_back(kernel);
+
+    return kernel;
+  }
+
   Parameters getValidParams(std::string name)
   {
     if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
@@ -85,6 +104,11 @@ public:
   std::vector<Kernel *>::iterator activeKernelsBegin(){ return active_kernels.begin(); };
   std::vector<Kernel *>::iterator activeKernelsEnd(){ return active_kernels.end(); };
 
+  std::vector<Kernel *>::iterator blockKernelsBegin(unsigned int block_id){
+    std::cout<<"BK size "<<block_kernels[block_id].size()<<std::endl;
+    return block_kernels[block_id].begin(); };
+  std::vector<Kernel *>::iterator blockKernelsEnd(unsigned int block_id){ return block_kernels[block_id].end(); };
+
 private:
   KernelFactory(){}
   virtual ~KernelFactory(){}
@@ -93,6 +117,8 @@ private:
   std::map<std::string, kernelParamsPtr> name_to_params_pointer;
 
   std::vector<Kernel *> active_kernels;
+
+  std::map<unsigned int, std::vector<Kernel *> > block_kernels;
 };
 
 #endif //KERNELFACTORY_H
