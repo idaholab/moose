@@ -120,12 +120,15 @@ namespace Moose
 
       if(bc_it != bc_end)
       {
-        Node & node = mesh->node(nodes[i]);
-
-        for(; bc_it != bc_end; ++bc_it)
-          //The first zero is for the system
-          //The second zero only works with Lagrange elements!
-          zero_rows.push_back(node.dof_number(0, (*bc_it)->variable(), 0));
+          Node & node = mesh->node(nodes[i]);
+          
+          if(node.processor_id() == libMesh::processor_id())
+          {
+            for(; bc_it != bc_end; ++bc_it)
+              //The first zero is for the system
+              //The second zero only works with Lagrange elements!
+              zero_rows.push_back(node.dof_number(0, (*bc_it)->variable(), 0));
+          }
       }
     }
 
@@ -264,11 +267,14 @@ namespace Moose
       {
         Node & node = mesh->node(nodes[i]);
 
-        for(; bc_it != bc_end; ++bc_it)
-          //The first zero is for the variable number... there is only one variable in each mini-system
-          //The second zero only works with Lagrange elements!
-          if((*bc_it)->variable() == ivar)
-            zero_rows.push_back(node.dof_number(precond_system.number(), 0, 0));
+        if(node.processor_id() == libMesh::processor_id())
+        {
+          for(; bc_it != bc_end; ++bc_it)
+            //The first zero is for the variable number... there is only one variable in each mini-system
+            //The second zero only works with Lagrange elements!
+            if((*bc_it)->variable() == ivar)
+              zero_rows.push_back(node.dof_number(precond_system.number(), 0, 0));
+        }
       }
     }
 

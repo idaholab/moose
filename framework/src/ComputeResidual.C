@@ -117,17 +117,25 @@ namespace Moose
       if(bc_it != bc_end)
       {
         Node & node = mesh->node(nodes[i]);
-        BoundaryCondition::reinit(soln, node, boundary_id, residual);
 
-        for(; bc_it != bc_end; ++bc_it)
-          (*bc_it)->computeAndStoreResidual();
+        if(node.processor_id() == libMesh::processor_id())
+        {
+          BoundaryCondition::reinit(soln, node, boundary_id, residual);
+
+          for(; bc_it != bc_end; ++bc_it)
+            (*bc_it)->computeAndStoreResidual();
+        }
       }
     }
 
-  
-  //  residual.print();
+
+//    Parallel::barrier();
+//    residual.print();
   //  u_system->rhs->print();
 
+    residual.close();
+
+    
     Moose::perf_log.pop("compute_residual()","Solve");
   }
 }

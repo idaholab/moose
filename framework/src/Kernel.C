@@ -464,11 +464,7 @@ Kernel::coupledVal(std::string name)
   if(!isAux(name))
     return _var_vals[_coupled_as_to_var_num[name]];
   else
-  {
-    std::cout<<"Coupled Aux!"<<std::endl;
-    
     return _aux_var_vals[_aux_coupled_as_to_var_num[name]];
-  }
 }
 
 std::vector<RealGradient> &

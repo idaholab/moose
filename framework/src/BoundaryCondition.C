@@ -147,6 +147,8 @@ void BoundaryCondition::reinit(const NumericVector<Number>& soln, const Node & n
 
     _nodal_bc_var_dofs[var_num] = dof_number;
 
+    _var_vals_face_nodal[var_num].resize(1);
+
     _var_vals_face_nodal[var_num][0] = soln(dof_number);
   }
 

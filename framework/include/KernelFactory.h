@@ -84,8 +84,6 @@ public:
   {
     Kernel * kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
 
-    std::cout<<"Adding "<<kernel->name()<<" to block "<<block_id<<std::endl;
-
     block_kernels[block_id].push_back(kernel);
 
     return kernel;
@@ -104,9 +102,7 @@ public:
   std::vector<Kernel *>::iterator activeKernelsBegin(){ return active_kernels.begin(); };
   std::vector<Kernel *>::iterator activeKernelsEnd(){ return active_kernels.end(); };
 
-  std::vector<Kernel *>::iterator blockKernelsBegin(unsigned int block_id){
-    std::cout<<"BK size "<<block_kernels[block_id].size()<<std::endl;
-    return block_kernels[block_id].begin(); };
+  std::vector<Kernel *>::iterator blockKernelsBegin(unsigned int block_id){ return block_kernels[block_id].begin(); };
   std::vector<Kernel *>::iterator blockKernelsEnd(unsigned int block_id){ return block_kernels[block_id].end(); };
 
 private:
