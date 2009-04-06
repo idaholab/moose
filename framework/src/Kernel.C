@@ -106,7 +106,7 @@ Kernel::init(EquationSystems * es)
       _max_quadrature_order = fe_type.default_quadrature_order();
   }
 
-  _qrule = new QGauss(_dim, _max_quadrature_order);
+  _qrule = new QGauss(_dim, _max_quadrature_order); //For Gauss quadrature
 
   //This allows for different basis functions / orders for each variable
   for(unsigned int var=0; var < _system->n_vars(); var++)
@@ -540,7 +540,17 @@ Kernel::coupledValOld(std::string name)
   else
     return _aux_var_vals_old[_aux_coupled_as_to_var_num[name]];
 }
-
+std::vector<RealGradient> &
+Kernel::coupledGradValOld(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+  
+  return _var_grads_old[_coupled_as_to_var_num[name]];
+}
 const Elem * Kernel::_current_elem;
 DofMap * Kernel::_dof_map;
 DofMap * Kernel::_aux_dof_map;

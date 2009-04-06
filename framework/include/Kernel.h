@@ -340,6 +340,14 @@ protected:
   std::vector<Real> & coupledValOld(std::string name);
 
   /**
+   * Returns a referene (that can be sotred) to a coupled gradient of a variable's value at an old time step.
+   *
+   * @param name The name the kernel wants to refer to the variable as
+   */
+  
+  std::vector<RealGradient> & coupledGradValOld(std::string name);
+  
+  /**
    * Just here for convenience.  Used in constructors... usually to deal with multiple dimensional stuff.
    */
   Real & _real_zero;
