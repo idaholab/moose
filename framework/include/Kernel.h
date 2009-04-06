@@ -8,6 +8,7 @@
 #include "parameters.h"
 #include "dense_subvector.h"
 #include "dense_submatrix.h"
+#include "tensor_value.h"
 
 //Forward Declarations
 class Elem;
@@ -242,6 +243,11 @@ protected:
   const std::vector<std::vector<RealGradient> > & _dphi;
 
   /**
+   * Second derivative of interior shape function.
+   */
+  const std::vector<std::vector<RealTensor> > & _d2phi;
+
+  /**
    * XYZ coordinates of quadrature points
    */
   const std::vector<Point>& _q_point;
@@ -318,6 +324,13 @@ protected:
    * @param name The name the kernel wants to refer to the variable as.
    */
   std::vector<RealGradient> & coupledGrad(std::string name);
+  
+  /**
+   * Returns a reference (that can be stored) to a coupled variable's second derivative.
+   * 
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  std::vector<RealTensor> & coupledSecond(std::string name);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value at old time step.
@@ -332,6 +345,12 @@ protected:
   Real & _real_zero;
   std::vector<Real> & _zero;
   std::vector<RealGradient> & _grad_zero;
+  std::vector<RealTensor> & _second_zero;
+
+  /**
+   * Whether or not the variable this Kernel operates on supports second derivatives.
+   */
+  bool _has_second_derivatives;
 
   /**
    * ***********************
@@ -381,6 +400,11 @@ protected:
   static std::map<FEType, const std::vector<std::vector<RealGradient> > *> _static_dphi;
 
   /**
+   * Gradient of interior shape function.
+   */
+  static std::map<FEType, const std::vector<std::vector<RealTensor> > *> _static_d2phi;
+
+  /**
    * XYZ coordinates of quadrature points
    */
   static std::map<FEType, const std::vector<Point> *> _static_q_point;
@@ -424,6 +448,11 @@ protected:
    * Gradient of the variables at the quadrature points.
    */
   static std::map<unsigned int, std::vector<RealGradient> > _var_grads;
+
+  /**
+   * Second derivatives of the variables at the quadrature points.
+   */
+  static std::map<unsigned int, std::vector<RealTensor> > _var_seconds;
 
   /**
    * Value of the variables at the quadrature points.
@@ -540,6 +569,13 @@ protected:
   static void computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealGradient> > & dphi);
 
   /**
+   * Computes the value of the second derivative of soln at the current quadrature point.
+   * 
+   * @param soln The solution vector to pull the coefficients from.
+   */
+  static void computeQpSecondSolution(RealTensor & second_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealTensor> > & d2phi);
+
+  /**
    * Whether or not this coupled_as name is associated with an auxiliary variable.
    */
   bool isAux(std::string name);
@@ -550,6 +586,7 @@ protected:
   static Real _static_real_zero;
   static std::vector<Real> _static_zero;
   static std::vector<RealGradient> _static_grad_zero;
+  static std::vector<RealTensor> _static_second_zero;
 };
 
 #endif //KERNEL_H

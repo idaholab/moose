@@ -13,6 +13,10 @@ namespace Moose
 {
   void update_aux_vars(const NumericVector<Number>& soln)
   {
+    //If there aren't any auxiliary variables just return
+    if(!equation_system->get_system<ExplicitSystem>("AuxiliarySystem").n_vars())
+      return;
+    
     Moose::perf_log.push("update_aux_vars()","Solve");
 
     //Nodal AuxKernels

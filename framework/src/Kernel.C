@@ -27,15 +27,18 @@ Kernel::Kernel(std::string name,
    _grad_u_old(_var_grads_old[_var_num]),
    _grad_u_older(_var_grads_older[_var_num]),
    _fe_type(_is_aux ? _aux_dof_map->variable_type(_var_num) : _dof_map->variable_type(_var_num)),
+   _has_second_derivatives(_fe_type.family == CLOUGH || _fe_type.family == HERMITE),
    _JxW(*_static_JxW[_fe_type]),
    _phi(*_static_phi[_fe_type]),
    _dphi(*_static_dphi[_fe_type]),
+   _d2phi(*_static_d2phi[_fe_type]),
    _q_point(*_static_q_point[_fe_type]),
    _coupled_to(coupled_to),
    _coupled_as(coupled_as),
    _real_zero(_static_real_zero),
    _zero(_static_zero),
-   _grad_zero(_static_grad_zero)
+   _grad_zero(_static_grad_zero),
+   _second_zero(_static_second_zero)
 {
   // If this variable isn't known yet... make it so
   if(!_is_aux)
@@ -119,6 +122,11 @@ Kernel::init(EquationSystems * es)
       _static_phi[fe_type] = &_fe[fe_type]->get_phi();
       _static_dphi[fe_type] = &_fe[fe_type]->get_dphi();
       _static_q_point[fe_type] = &_fe[fe_type]->get_xyz();
+
+      FEFamily family = fe_type.family;
+
+      if(family == CLOUGH || family == HERMITE)
+        _static_d2phi[fe_type] = &_fe[fe_type]->get_d2phi();
     }
   }
 
@@ -214,6 +222,10 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     
     FEType fe_type = _dof_map->variable_type(var_num);
 
+    FEFamily family = fe_type.family;
+
+    bool has_second_derivatives = (family == CLOUGH || family == HERMITE);
+
     _dof_map->dof_indices(elem, _var_dof_indices[var_num], var_num);
 
     unsigned int num_dofs = _var_dof_indices[var_num].size();
@@ -239,9 +251,13 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     _static_real_zero = 0;
     _static_zero.resize(num_q_points,0);
     _static_grad_zero.resize(num_q_points,0);
+    _static_second_zero.resize(num_q_points,0);
     
     _var_vals[var_num].resize(num_q_points);
     _var_grads[var_num].resize(num_q_points);
+
+    if(has_second_derivatives)
+      _var_seconds[var_num].resize(num_q_points);
 
     if(_is_transient)
     {
@@ -254,17 +270,21 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     
     const std::vector<std::vector<Real> > & static_phi = *_static_phi[fe_type];
     const std::vector<std::vector<RealGradient> > & static_dphi= *_static_dphi[fe_type];
+    const std::vector<std::vector<RealTensor> > & static_d2phi= *_static_d2phi[fe_type];
 
     for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
     {
       computeQpSolution(_var_vals[var_num][qp], soln, _var_dof_indices[var_num], qp, static_phi);
       computeQpGradSolution(_var_grads[var_num][qp], soln, _var_dof_indices[var_num], qp, static_dphi);
 
+      if(has_second_derivatives)
+        computeQpSecondSolution(_var_seconds[var_num][qp], soln, _var_dof_indices[var_num], qp, static_d2phi);
+
       if(_is_transient)
       {
         computeQpSolution(_var_vals_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, static_phi);
         computeQpGradSolution(_var_grads_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, static_dphi);
-        
+
         computeQpSolution(_var_vals_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_phi);
         computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_dphi);
       }
@@ -413,6 +433,17 @@ Kernel::computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number>
   }
 }
 
+void
+Kernel::computeQpSecondSolution(RealTensor & second_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealTensor> > & d2phi)
+{
+  second_u=0;
+
+  for (unsigned int i=0; i<d2phi.size(); i++) 
+  {
+    second_u += d2phi[i][qp]*soln(dof_indices[i]);
+  }
+}
+
 bool
 Kernel::modifiedAuxVarNum(unsigned int var_num)
 {
@@ -482,6 +513,19 @@ Kernel::coupledGrad(std::string name)
     return _aux_var_grads[_aux_coupled_as_to_var_num[name]];
 }
 
+std::vector<RealTensor> &
+Kernel::coupledSecond(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+
+  //Aux vars can't have second derivatives!
+  return _var_seconds[_coupled_as_to_var_num[name]];
+}
+
 std::vector<Real> &
 Kernel::coupledValOld(std::string name)
 {
@@ -513,6 +557,7 @@ QGauss * Kernel::_qrule;
 std::map<FEType, const std::vector<Real> *> Kernel::_static_JxW;
 std::map<FEType, const std::vector<std::vector<Real> > *> Kernel::_static_phi;
 std::map<FEType, const std::vector<std::vector<RealGradient> > *> Kernel::_static_dphi;
+std::map<FEType, const std::vector<std::vector<RealTensor> > *> Kernel::_static_d2phi;
 std::map<FEType, const std::vector<Point> *> Kernel::_static_q_point;
 std::vector<unsigned int> Kernel::_var_nums;
 std::vector<unsigned int> Kernel::_aux_var_nums;
@@ -522,6 +567,7 @@ std::map<unsigned int, DenseSubVector<Number> * > Kernel::_var_Res;
 std::map<unsigned int, DenseSubMatrix<Number> * > Kernel::_var_Kes;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals;
 std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads;
+std::map<unsigned int, std::vector<RealTensor> > Kernel::_var_seconds;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals_old;
 std::map<unsigned int, std::vector<Real> > Kernel::_var_vals_older;
 std::map<unsigned int, std::vector<RealGradient> > Kernel::_var_grads_old;
@@ -544,3 +590,4 @@ Material * Kernel::_material;
 Real Kernel::_static_real_zero;
 std::vector<Real> Kernel::_static_zero;
 std::vector<RealGradient> Kernel::_static_grad_zero;
+std::vector<RealTensor> Kernel::_static_second_zero;
