@@ -106,7 +106,7 @@ Kernel::init(EquationSystems * es)
       _max_quadrature_order = fe_type.default_quadrature_order();
   }
 
-  _qrule = new QGauss(_dim, _max_quadrature_order); //For Gauss quadrature
+  _qrule = new QGauss(_dim, _max_quadrature_order);
 
   //This allows for different basis functions / orders for each variable
   for(unsigned int var=0; var < _system->n_vars(); var++)
@@ -213,6 +213,29 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
   if(Ke)
     Ke->resize(_dof_indices.size(),_dof_indices.size());
 
+  unsigned int position = 0;
+
+  for(unsigned int i=0; i<_var_nums.size();i++)
+  {
+    unsigned int num_dofs = _var_dof_indices[i].size();
+    if(Re)
+    {
+      if(_var_Res[i])
+        delete _var_Res[i];
+
+      _var_Res[i] = new DenseSubVector<Number>(*Re,position, num_dofs);
+    }
+
+    if(Ke)
+    {
+      if(_var_Kes[i])
+        delete _var_Kes[i];
+    
+      _var_Kes[i] = new DenseSubMatrix<Number>(*Ke,position,position,num_dofs,num_dofs);
+    }
+    position+=num_dofs;
+  }
+  
   std::vector<unsigned int>::iterator var_num_it = _var_nums.begin();
   std::vector<unsigned int>::iterator var_num_end = _var_nums.end();
 
@@ -229,22 +252,6 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     _dof_map->dof_indices(elem, _var_dof_indices[var_num], var_num);
 
     unsigned int num_dofs = _var_dof_indices[var_num].size();
-
-    if(Re)
-    {
-      if(_var_Res[var_num])
-        delete _var_Res[var_num];
-    
-      _var_Res[var_num] = new DenseSubVector<Number>(*Re,var_num*num_dofs,num_dofs);
-    }
-
-    if(Ke)
-    {
-      if(_var_Kes[var_num])
-        delete _var_Kes[var_num];
-    
-      _var_Kes[var_num] = new DenseSubMatrix<Number>(*Ke,var_num*num_dofs,var_num*num_dofs,num_dofs,num_dofs);
-    }
 
     unsigned int num_q_points = _qrule->n_points();
 
@@ -290,7 +297,7 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
       }
     }
   }
-
+  
   const NumericVector<Number>& aux_soln = (*_aux_system->current_local_solution);
 
   std::vector<unsigned int>::iterator aux_var_num_it = _aux_var_nums.begin();
@@ -358,7 +365,7 @@ Kernel::computeResidual()
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     for (_i=0; _i<_phi.size(); _i++)
-      var_Re(_i) += _JxW[_qp]*computeQpResidual();  
+      var_Re(_i) += _JxW[_qp]*computeQpResidual();
   
 //  Moose::perf_log.pop("computeResidual()","Kernel");
 }
