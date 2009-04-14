@@ -62,6 +62,10 @@ protected:
   Real & coupledValOldAux(std::string name);
   Real & coupledValOlderAux(std::string name);
 
+  RealGradient & coupledGradAux(std::string name);
+  RealGradient & coupledGradOldAux(std::string name);
+  RealGradient & coupledGradOlderAux(std::string name);
+
   static const NumericVector<Number> * _nonlinear_old_soln;
   static const NumericVector<Number> * _nonlinear_older_soln;
   
@@ -185,8 +189,8 @@ protected:
   static std::map<unsigned int, RealGradient > _aux_var_grads_older_element;
 
 
-  static Real integrateValue(const std::vector<Real> & vals, const std::vector<Real> & JxW);
-  static RealGradient integrateGradient(const std::vector<RealGradient> & grads, const std::vector<Real> & JxW);
+  static Real integrateValue(const std::vector<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
+  static RealGradient integrateGradient(const std::vector<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
 
 private:
   

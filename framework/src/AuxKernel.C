@@ -89,9 +89,24 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
   Real area = 0;
   //Just use any old JxW... they are all actually the same
   const std::vector<Real> & jxw = *(_static_JxW.begin()->second);
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
-    area += jxw[qp];
 
+  if( Moose::geom_type == Moose::XYZ)
+  {
+    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+      area += jxw[qp];
+  }
+  else if (Moose::geom_type == Moose::CYLINDRICAL)
+  {  
+    const std::vector<Point> & q_point = *(_static_q_point.begin()->second);
+    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+      area += q_point[qp](0)*jxw[qp];
+  }
+  else
+  {
+    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
+    libmesh_error();
+  }
+  
   //Compute the average value of each variable on the element
   
   //Non Aux vars first
@@ -102,14 +117,15 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
     FEType fe_type = _dof_map->variable_type(var_num);
 
     const std::vector<Real> & JxW = *_static_JxW[fe_type];
+    const std::vector<Point> & q_point = *_static_q_point[fe_type];
     
-    _var_vals_element[var_num] = integrateValue(_var_vals[var_num], JxW) / area;
-    _var_vals_old_element[var_num] = integrateValue(_var_vals_old[var_num], JxW) / area;
-    _var_vals_older_element[var_num] = integrateValue(_var_vals_older[var_num], JxW) / area;
+    _var_vals_element[var_num] = integrateValue(_var_vals[var_num], JxW, q_point) / area;
+    _var_vals_old_element[var_num] = integrateValue(_var_vals_old[var_num], JxW, q_point) / area;
+    _var_vals_older_element[var_num] = integrateValue(_var_vals_older[var_num], JxW, q_point) / area;
 
-    _var_grads_element[var_num] = integrateGradient(_var_grads[var_num], JxW) / area;
-    _var_grads_old_element[var_num] = integrateGradient(_var_grads_old[var_num], JxW) / area;
-    _var_grads_older_element[var_num] = integrateGradient(_var_grads_older[var_num], JxW) / area;
+    _var_grads_element[var_num] = integrateGradient(_var_grads[var_num], JxW, q_point) / area;
+    _var_grads_old_element[var_num] = integrateGradient(_var_grads_old[var_num], JxW, q_point) / area;
+    _var_grads_older_element[var_num] = integrateGradient(_var_grads_older[var_num], JxW, q_point) / area;
   }
 
   //Now Aux vars
@@ -120,14 +136,15 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
     FEType fe_type = _aux_dof_map->variable_type(var_num);
 
     const std::vector<Real> & JxW = *_static_JxW[fe_type];
+    const std::vector<Point> & q_point = *_static_q_point[fe_type];
     
-    _aux_var_vals_element[var_num] = integrateValue(_aux_var_vals[var_num], JxW) / area;
-    _aux_var_vals_old_element[var_num] = integrateValue(_aux_var_vals_old[var_num], JxW) / area;
-    _aux_var_vals_older_element[var_num] = integrateValue(_aux_var_vals_older[var_num], JxW) / area;
+    _aux_var_vals_element[var_num] = integrateValue(_aux_var_vals[var_num], JxW, q_point) / area;
+    _aux_var_vals_old_element[var_num] = integrateValue(_aux_var_vals_old[var_num], JxW, q_point) / area;
+    _aux_var_vals_older_element[var_num] = integrateValue(_aux_var_vals_older[var_num], JxW, q_point) / area;
 
-    _aux_var_grads_element[var_num] = integrateGradient(_aux_var_grads[var_num], JxW) / area;
-    _aux_var_grads_old_element[var_num] = integrateGradient(_aux_var_grads_old[var_num], JxW) / area;
-    _aux_var_grads_older_element[var_num] = integrateGradient(_aux_var_grads_older[var_num], JxW) / area;
+    _aux_var_grads_element[var_num] = integrateGradient(_aux_var_grads[var_num], JxW, q_point) / area;
+    _aux_var_grads_old_element[var_num] = integrateGradient(_aux_var_grads_old[var_num], JxW, q_point) / area;
+    _aux_var_grads_older_element[var_num] = integrateGradient(_aux_var_grads_older[var_num], JxW, q_point) / area;
   }
 
   //Grab the dof numbers for the element variables
@@ -227,25 +244,123 @@ AuxKernel::coupledValOlderAux(std::string name)
   }  
 }
 
+
+RealGradient &
+AuxKernel::coupledGradAux(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+
+  if(_nodal)
+  {
+    std::cerr<<std::endl<<"Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+  else
+  {
+    if(!isAux(name))
+      return _var_grads_element[_coupled_as_to_var_num[name]];
+    else
+      return _aux_var_grads_element[_aux_coupled_as_to_var_num[name]];
+  }
+}
+
+RealGradient &
+AuxKernel::coupledGradOldAux(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+
+  if(_nodal)
+  {
+    std::cerr<<std::endl<<"Old Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+  else
+  {
+    if(!isAux(name))
+      return _var_grads_old_element[_coupled_as_to_var_num[name]];
+    else
+      return _aux_var_grads_old_element[_aux_coupled_as_to_var_num[name]];
+  }
+}
+
+RealGradient &
+AuxKernel::coupledGradOlderAux(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+
+  if(_nodal)
+  {
+    std::cerr<<std::endl<<"Older Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
+    libmesh_error();
+  }
+  else
+  {
+    if(!isAux(name))
+      return _var_grads_older_element[_coupled_as_to_var_num[name]];
+    else
+      return _aux_var_grads_older_element[_aux_coupled_as_to_var_num[name]];
+  }
+}
+
+
 Real
-AuxKernel::integrateValue(const std::vector<Real> & vals, const std::vector<Real> & JxW)
+AuxKernel::integrateValue(const std::vector<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
 {
   Real value = 0;
 
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
-    value += vals[qp]*JxW[qp];
-
+  if( Moose::geom_type == Moose::XYZ)
+  {    
+    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+      value += vals[qp]*JxW[qp];
+  }
+  else if( Moose::geom_type == Moose::CYLINDRICAL )
+  {        
+    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+      value += q_point[qp](0)*vals[qp]*JxW[qp];
+  }
+  else
+  {
+    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
+    libmesh_error();
+  }
+  
   return value;
 }
 
 RealGradient
-AuxKernel::integrateGradient(const std::vector<RealGradient> & grads, const std::vector<Real> & JxW)
+AuxKernel::integrateGradient(const std::vector<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
 {
   RealGradient value = 0;
 
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
-    value += grads[qp]*JxW[qp];
-
+  if( Moose::geom_type == Moose::XYZ )
+  {  
+    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+      value += grads[qp]*JxW[qp];
+  }
+  else if( Moose::geom_type == Moose::CYLINDRICAL )
+  {
+    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+      value += q_point[qp](0)*grads[qp]*JxW[qp];
+  }
+  else
+  {
+    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
+    libmesh_error();
+  }
+  
+  
   return value;
 }
 

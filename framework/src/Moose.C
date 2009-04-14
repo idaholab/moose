@@ -50,3 +50,6 @@ Moose::registerObjects()
 Mesh * Moose::mesh;
 EquationSystems * Moose::equation_system;
 
+enum Moose::GeomType;
+Moose::GeomType Moose::geom_type = Moose::XYZ;
+

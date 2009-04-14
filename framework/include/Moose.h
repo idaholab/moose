@@ -85,6 +85,16 @@ namespace Moose
    * The one equation system to rule them all
    */
   extern EquationSystems * equation_system;
+
+  enum GeomType
+  {
+    XYZ,
+    CYLINDRICAL
+  };
+
+  extern GeomType geom_type;
+  
+  
 }
 
 #endif //MOOSE_H
