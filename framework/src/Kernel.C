@@ -217,7 +217,10 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
   for(unsigned int i=0; i<_var_nums.size();i++)
   {
+    _dof_map->dof_indices(elem, _var_dof_indices[i], i);
+
     unsigned int num_dofs = _var_dof_indices[i].size();
+    
     if(Re)
     {
       if(_var_Res[i])
@@ -248,8 +251,6 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     FEFamily family = fe_type.family;
 
     bool has_second_derivatives = (family == CLOUGH || family == HERMITE);
-
-    _dof_map->dof_indices(elem, _var_dof_indices[var_num], var_num);
 
     unsigned int num_dofs = _var_dof_indices[var_num].size();
 
