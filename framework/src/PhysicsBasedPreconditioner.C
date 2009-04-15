@@ -66,20 +66,26 @@ PhysicsBasedPreconditioner::init ()
     unsigned int sys = system_var+1;
     
     if(!_preconditioners[system_var])
+    {
       _preconditioners[system_var] = Preconditioner<Number>::build();
 
-    if(_off_diag_mats[system_var].size() != _off_diag[system_var].size())
-      _off_diag_mats[system_var].resize(_off_diag[system_var].size());
+      if(_off_diag_mats[system_var].size() != _off_diag[system_var].size())
+        _off_diag_mats[system_var].resize(_off_diag[system_var].size());
 
-    Preconditioner<Number> * preconditioner = _preconditioners[system_var];
+      Preconditioner<Number> * preconditioner = _preconditioners[system_var];
+
+      LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
+
+      preconditioner->set_matrix(*u_system.matrix);
+
+      preconditioner->set_type(_pre_type[system_var]);
+
+      preconditioner->init();
+    }
 
     LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
-
-    preconditioner->set_matrix(*u_system.matrix);
-
-    preconditioner->set_type(_pre_type[system_var]);
-
-    //Compute the diagonal block... storing the result in the system matrix
+    
+      //Compute the diagonal block... storing the result in the system matrix
     _compute_jacobian_block(*system.current_local_solution,*u_system.matrix,u_system,system_var,system_var);
 
 //    std::cout<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(system_var)<<std::endl;
@@ -99,7 +105,6 @@ PhysicsBasedPreconditioner::init ()
                               u_system,system_var,coupled_var);
     }
 
-    preconditioner->init();
   }
 
   Moose::perf_log.pop("init()","PhysicsBasedPreconditioner");
