@@ -133,7 +133,8 @@ namespace Moose
     }
 
     //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
-    jacobian.zero_rows(zero_rows, 1.0);
+    if(!zero_rows.empty())
+      jacobian.zero_rows(zero_rows, 1.0);
 
     jacobian.close();
   
@@ -279,7 +280,8 @@ namespace Moose
     }
 
     //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
-    jacobian.zero_rows(zero_rows, 1.0);
+    if(!zero_rows.empty())
+      jacobian.zero_rows(zero_rows, 1.0);
   
     jacobian.close();
   
