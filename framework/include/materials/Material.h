@@ -61,6 +61,7 @@ public:
       return it->second;
 
     std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
   }
 
   /**
@@ -74,6 +75,7 @@ public:
       return it->second;
 
     std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
   }
 
   /**
@@ -87,6 +89,7 @@ public:
       return it->second;
 
     std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
   }
 
   /**
@@ -100,6 +103,7 @@ public:
       return it->second;
 
     std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
   }
 
   /**
@@ -113,6 +117,7 @@ public:
       return it->second;
 
     std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
   }
 
   /**
@@ -126,6 +131,7 @@ public:
       return it->second;
 
     std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
   }
 
   /**
