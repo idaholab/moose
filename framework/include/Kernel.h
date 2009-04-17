@@ -202,6 +202,11 @@ protected:
   std::vector<RealGradient> & _grad_u;
 
   /**
+   * Holds the current solution second derivative at the current quadrature point.
+   */
+  std::vector<RealTensor> & _second_u;
+
+  /**
    * Holds the previous solution at the current quadrature point.
    */
   std::vector<Real> & _u_old;
@@ -408,7 +413,7 @@ protected:
   static std::map<FEType, const std::vector<std::vector<RealGradient> > *> _static_dphi;
 
   /**
-   * Gradient of interior shape function.
+   * Second derivative of interior shape function.
    */
   static std::map<FEType, const std::vector<std::vector<RealTensor> > *> _static_d2phi;
 

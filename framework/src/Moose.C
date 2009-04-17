@@ -55,3 +55,4 @@ EquationSystems * Moose::equation_system;
 enum Moose::GeomType;
 Moose::GeomType Moose::geom_type = Moose::XYZ;
 
+bool Moose::no_fe_reinit = false;

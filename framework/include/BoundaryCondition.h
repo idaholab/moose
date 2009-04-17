@@ -103,6 +103,11 @@ protected:
   const std::vector<std::vector<RealGradient> > & _dphi_face;
 
   /**
+   * Second derivative of side shape function.
+   */
+  const std::vector<std::vector<RealTensor> > & _d2phi_face;
+
+  /**
    * Normal vectors at the quadrature points.
    */
   const std::vector<Point>& _normals_face;
@@ -164,6 +169,11 @@ protected:
   static std::map<FEType, const std::vector<std::vector<RealGradient> > *> _static_dphi_face;
 
   /**
+   * Second derivative of interior shape function.
+   */
+  static std::map<FEType, const std::vector<std::vector<RealTensor> > *> _static_d2phi_face;
+
+  /**
    * Normal vectors at the quadrature points.
    */
   static std::map<FEType, const std::vector<Point> *> _static_normals_face;
@@ -202,6 +212,11 @@ protected:
   static std::map<unsigned int, std::vector<RealGradient> > _var_grads_face;
 
   /**
+   * Second derivatives of the variables at the quadrature points.
+   */
+  static std::map<unsigned int, std::vector<RealTensor> > _var_seconds_face;
+
+  /**
    * Value of the variables at the nodes.
    */
   static std::map<unsigned int, std::vector<Real> > _var_vals_face_nodal;
@@ -215,6 +230,11 @@ protected:
    * Holds the current solution gradient at the current quadrature point on the face.
    */
   std::vector<RealGradient> & _grad_u_face;
+
+  /**
+   * Holds the current solution second derivative at the current quadrature point on the face
+   */
+  std::vector<RealTensor> & _second_u_face;
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value.
@@ -247,9 +267,11 @@ private:
   Kernel::_grad_u;
   Kernel::_grad_u_old;
   Kernel::_grad_u_older;
+  Kernel::_second_u;
   Kernel::_JxW;
   Kernel::_phi;
   Kernel::_dphi;
+  Kernel::_d2phi;
   Kernel::_q_point;
   Kernel::coupledVal;
   Kernel::coupledGrad;

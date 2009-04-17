@@ -18,10 +18,12 @@ BoundaryCondition::BoundaryCondition(std::string name,
    _JxW_face(*_static_JxW_face[_fe_type]),
    _phi_face(*_static_phi_face[_fe_type]),
    _dphi_face(*_static_dphi_face[_fe_type]),
+   _d2phi_face(*_static_d2phi_face[_fe_type]),
    _normals_face(*_static_normals_face[_fe_type]),
    _q_point_face(*_static_q_point_face[_fe_type]),
    _u_face(integrated ? _var_vals_face[_var_num] : _var_vals_face_nodal[_var_num]),
-   _grad_u_face(integrated ? _var_grads_face[_var_num] : _grad_zero)
+   _grad_u_face(integrated ? _var_grads_face[_var_num] : _grad_zero),
+   _second_u_face(integrated ? _var_seconds_face[_var_num] : _second_zero)
 {
   if(_integrated)
     addVarNums(_boundary_to_var_nums[_boundary_id]);
@@ -65,6 +67,11 @@ void BoundaryCondition::init()
       _static_phi_face[fe_type] = &_fe_face[fe_type]->get_phi();
       _static_dphi_face[fe_type] = &_fe_face[fe_type]->get_dphi();
       _static_normals_face[fe_type] = &_fe_face[fe_type]->get_normals();
+
+      FEFamily family = fe_type.family;
+
+      if(family == CLOUGH || family == HERMITE)
+        _static_d2phi_face[fe_type] = &_fe[fe_type]->get_d2phi();
     }
   }
 }
@@ -90,18 +97,29 @@ void BoundaryCondition::reinit(const NumericVector<Number>& soln, const unsigned
 
     FEType fe_type = _dof_map->variable_type(var_num);
 
+    FEFamily family = fe_type.family;
+
+    bool has_second_derivatives = (family == CLOUGH || family == HERMITE);
+
     std::vector<unsigned int> & var_dof_indices = _var_dof_indices[var_num];
 
     _var_vals_face[var_num].resize(_qface->n_points());
     _var_grads_face[var_num].resize(_qface->n_points());
 
+    if(has_second_derivatives)
+      _var_seconds_face[var_num].resize(_qface->n_points());
+
     const std::vector<std::vector<Real> > & static_phi_face = *_static_phi_face[fe_type];
     const std::vector<std::vector<RealGradient> > & static_dphi_face= *_static_dphi_face[fe_type];
+    const std::vector<std::vector<RealTensor> > & static_d2phi_face= *_static_d2phi_face[fe_type];
 
     for (unsigned int qp=0; qp<_qface->n_points(); qp++)
     {
       computeQpSolution(_var_vals_face[var_num][qp], soln, var_dof_indices, qp, static_phi_face);
       computeQpGradSolution(_var_grads_face[var_num][qp], soln, var_dof_indices, qp, static_dphi_face);
+
+      if(has_second_derivatives)
+        computeQpSecondSolution(_var_seconds_face[var_num][qp], soln, var_dof_indices, qp, static_d2phi_face);
     }
   }
 
@@ -290,10 +308,12 @@ std::map<FEType, const std::vector<Point> *> BoundaryCondition::_static_q_point_
 std::map<FEType, const std::vector<Real> *> BoundaryCondition::_static_JxW_face;
 std::map<FEType, const std::vector<std::vector<Real> > *> BoundaryCondition::_static_phi_face;
 std::map<FEType, const std::vector<std::vector<RealGradient> > *> BoundaryCondition::_static_dphi_face;
+std::map<FEType, const std::vector<std::vector<RealTensor> > *> BoundaryCondition::_static_d2phi_face;
 std::map<FEType, const std::vector<Point> *> BoundaryCondition::_static_normals_face;
 std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums;
 std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums_nodal;
 std::map<unsigned int, unsigned int> BoundaryCondition::_nodal_bc_var_dofs;
 std::map<unsigned int, std::vector<Real> > BoundaryCondition::_var_vals_face;
 std::map<unsigned int, std::vector<RealGradient> > BoundaryCondition::_var_grads_face;
+std::map<unsigned int, std::vector<RealTensor> > BoundaryCondition::_var_seconds_face;
 std::map<unsigned int, std::vector<Real> > BoundaryCondition::_var_vals_face_nodal;

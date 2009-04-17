@@ -22,6 +22,7 @@ Kernel::Kernel(std::string name,
    _integrated(integrated),
    _u(_var_vals[_var_num]),
    _grad_u(_var_grads[_var_num]),
+   _second_u(_var_seconds[_var_num]),
    _u_old(_var_vals_old[_var_num]),
    _u_older(_var_vals_older[_var_num]),
    _grad_u_old(_var_grads_old[_var_num]),
@@ -204,8 +205,17 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
   std::map<FEType, FEBase*>::iterator fe_it = _fe.begin();
   std::map<FEType, FEBase*>::iterator fe_end = _fe.end();
 
-  for(;fe_it != fe_end; ++fe_it)
-    fe_it->second->reinit(elem);
+  Moose::perf_log.push("reinit() - fereinit","Kernel");
+
+  static bool first = true;
+
+  if(!Moose::no_fe_reinit || first)
+    for(;fe_it != fe_end; ++fe_it)
+      fe_it->second->reinit(elem);
+
+  first = false;
+
+  Moose::perf_log.pop("reinit() - fereinit","Kernel");
 
   if(Re)
     Re->resize(_dof_indices.size());
@@ -239,9 +249,16 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     position+=num_dofs;
   }
   
+  unsigned int num_q_points = _qrule->n_points();
+
+  _static_real_zero = 0;
+  _static_zero.resize(num_q_points,0);
+  _static_grad_zero.resize(num_q_points,0);
+  _static_second_zero.resize(num_q_points,0);
+
   std::vector<unsigned int>::iterator var_num_it = _var_nums.begin();
   std::vector<unsigned int>::iterator var_num_end = _var_nums.end();
-
+  
   for(;var_num_it != var_num_end; ++var_num_it)
   {
     unsigned int var_num = *var_num_it;
@@ -254,13 +271,6 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
     unsigned int num_dofs = _var_dof_indices[var_num].size();
 
-    unsigned int num_q_points = _qrule->n_points();
-
-    _static_real_zero = 0;
-    _static_zero.resize(num_q_points,0);
-    _static_grad_zero.resize(num_q_points,0);
-    _static_second_zero.resize(num_q_points,0);
-    
     _var_vals[var_num].resize(num_q_points);
     _var_grads[var_num].resize(num_q_points);
 
@@ -280,6 +290,8 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     const std::vector<std::vector<RealGradient> > & static_dphi= *_static_dphi[fe_type];
     const std::vector<std::vector<RealTensor> > & static_d2phi= *_static_d2phi[fe_type];
 
+    Moose::perf_log.push("reinit() - compute vals","Kernel");
+
     for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
     {
       computeQpSolution(_var_vals[var_num][qp], soln, _var_dof_indices[var_num], qp, static_phi);
@@ -297,6 +309,8 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
         computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_dphi);
       }
     }
+    
+    Moose::perf_log.pop("reinit() - compute vals","Kernel");
   }
   
   const NumericVector<Number>& aux_soln = (*_aux_system->current_local_solution);
@@ -314,12 +328,6 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
     unsigned int num_dofs = _aux_var_dof_indices[var_num].size();
 
-    unsigned int num_q_points = _qrule->n_points();
-
-    _static_real_zero = 0;
-    _static_zero.resize(num_q_points,0);
-    _static_grad_zero.resize(num_q_points,0);
-    
     _aux_var_vals[var_num].resize(num_q_points);
     _aux_var_grads[var_num].resize(num_q_points);
 
@@ -424,9 +432,21 @@ Kernel::computeQpSolution(Real & u, const NumericVector<Number> & soln, const st
 {
   u=0;
 
-  for (unsigned int i=0; i<phi.size(); i++) 
+  unsigned int phi_size = phi.size();
+
+  //All of this stuff so that the loop will vectorize
+  std::vector<Real> sol_vals(phi_size);
+  std::vector<Real> phi_vals(phi_size);
+
+  for (unsigned int i=0; i<phi_size; i++) 
   {
-    u +=  phi[i][qp]*soln(dof_indices[i]);
+    sol_vals[i] = soln(dof_indices[i]);
+    phi_vals[i] = phi[i][qp];
+  }
+  
+  for (unsigned int i=0; i<phi_size; i++) 
+  {
+    u +=  phi_vals[i]*sol_vals[i];
   }
 }
 
@@ -435,7 +455,9 @@ Kernel::computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number>
 {
   grad_u=0;
 
-  for (unsigned int i=0; i<dphi.size(); i++) 
+  unsigned int dphi_size = dphi.size();
+
+  for (unsigned int i=0; i<dphi_size; i++) 
   {
     grad_u += dphi[i][qp]*soln(dof_indices[i]);
   }
@@ -446,7 +468,9 @@ Kernel::computeQpSecondSolution(RealTensor & second_u, const NumericVector<Numbe
 {
   second_u=0;
 
-  for (unsigned int i=0; i<d2phi.size(); i++) 
+  unsigned int d2phi_size = d2phi.size();
+
+  for (unsigned int i=0; i<d2phi_size; i++) 
   {
     second_u += d2phi[i][qp]*soln(dof_indices[i]);
   }
