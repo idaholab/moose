@@ -11,10 +11,10 @@ Parameters valid_params<ConvectiveFluxBC>()
 
 Real ConvectiveFluxBC::computeQpResidual()
 {
-  return -(_phi_face[_i][_qp]*_rate*(_u_face[_qp] - _value));
+  return -(_phi_face[_i][_qp]*_rate*(_value - _u_face[_qp]));
 }
   
 Real ConvectiveFluxBC::computeQpJacobian()
 {
-  return -(_phi_face[_i][_qp]*_rate*(_phi_face[_j][_qp] - _value));
+  return -(_phi_face[_i][_qp]*_rate*(_value - _phi_face[_j][_qp]));
 }
