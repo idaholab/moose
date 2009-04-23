@@ -32,5 +32,5 @@ Real ConvectiveFluxBC::computeQpJacobian()
   else
     value = _final;
   
-  return -(_phi_face[_i][_qp]*_rate*(value - _phi_face[_j][_qp]));
+  return -(_phi_face[_i][_qp]*_rate*(-_phi_face[_j][_qp]));
 }
