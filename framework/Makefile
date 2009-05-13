@@ -25,7 +25,7 @@ objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 ###############################################################################
 
 
-.PHONY: clean clobber distclean doc
+.PHONY: clean doc
 
 ###############################################################################
 # Target:
@@ -70,18 +70,10 @@ doc:
 
 # Useful rules.
 clean:
-	@rm -f $(objects) *~
-	@rm -f $(target)
+	@rm -f bison-*
+	@find . -name "*~" -or -name "*.o" | xargs rm
 	@rm -f .depend
 	@rm -f Makefile.export
-
-clobber:
-	@$(MAKE) clean
-	@rm -f $(target) out.gmv
-
-distclean:
-	@$(MAKE) clobber
-	@rm -f *.o *.g.o *.pg.o
 
 # include the dependency list
 include .depend
