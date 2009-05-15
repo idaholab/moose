@@ -196,7 +196,8 @@ Kernel::name()
 void
 Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
-  Moose::perf_log.push("reinit()","Kernel");
+//  Moose::perf_log.push("reinit()","Kernel");
+//  Moose::perf_log.push("reinit() - dof_indices","Kernel");
   
   _current_elem = elem;
 
@@ -205,8 +206,9 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
   std::map<FEType, FEBase*>::iterator fe_it = _fe.begin();
   std::map<FEType, FEBase*>::iterator fe_end = _fe.end();
 
-  Moose::perf_log.push("reinit() - fereinit","Kernel");
-
+//  Moose::perf_log.pop("reinit() - dof_indices","Kernel");
+//  Moose::perf_log.push("reinit() - fereinit","Kernel");
+  
   static bool first = true;
 
   if(!Moose::no_fe_reinit || first)
@@ -215,8 +217,9 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
 
   first = false;
 
-  Moose::perf_log.pop("reinit() - fereinit","Kernel");
+//  Moose::perf_log.pop("reinit() - fereinit","Kernel");
 
+//  Moose::perf_log.push("reinit() - resizing","Kernel");
   if(Re)
     Re->resize(_dof_indices.size());
 
@@ -259,6 +262,9 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
   std::vector<unsigned int>::iterator var_num_it = _var_nums.begin();
   std::vector<unsigned int>::iterator var_num_end = _var_nums.end();
   
+//  Moose::perf_log.pop("reinit() - resizing","Kernel");
+//  Moose::perf_log.push("reinit() - compute vals","Kernel");
+  
   for(;var_num_it != var_num_end; ++var_num_it)
   {
     unsigned int var_num = *var_num_it;
@@ -290,29 +296,34 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     const std::vector<std::vector<RealGradient> > & static_dphi= *_static_dphi[fe_type];
     const std::vector<std::vector<RealTensor> > & static_d2phi= *_static_d2phi[fe_type];
 
-    Moose::perf_log.push("reinit() - compute vals","Kernel");
 
-    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+    if (_is_transient)
     {
-      computeQpSolution(_var_vals[var_num][qp], soln, _var_dof_indices[var_num], qp, static_phi);
-      computeQpGradSolution(_var_grads[var_num][qp], soln, _var_dof_indices[var_num], qp, static_dphi);
-
-      if(has_second_derivatives)
-        computeQpSecondSolution(_var_seconds[var_num][qp], soln, _var_dof_indices[var_num], qp, static_d2phi);
-
-      if(_is_transient)
-      {
-        computeQpSolution(_var_vals_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, static_phi);
-        computeQpGradSolution(_var_grads_old[var_num][qp], *_system->old_local_solution, _var_dof_indices[var_num], qp, static_dphi);
-
-        computeQpSolution(_var_vals_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_phi);
-        computeQpGradSolution(_var_grads_older[var_num][qp], *_system->older_local_solution, _var_dof_indices[var_num], qp, static_dphi);
-      }
+      if( has_second_derivatives )
+        computeQpSolutionAll(_var_vals[var_num], _var_vals_old[var_num], _var_vals_older[var_num],
+                             _var_grads[var_num], _var_grads_old[var_num], _var_grads_older[var_num],
+                             _var_seconds[var_num],
+                             soln, *_system->old_local_solution, *_system->older_local_solution,
+                             _var_dof_indices[var_num], _qrule->n_points(), static_phi, static_dphi, static_d2phi);
+      else
+        computeQpSolutionAll(_var_vals[var_num], _var_vals_old[var_num], _var_vals_older[var_num],
+                             _var_grads[var_num], _var_grads_old[var_num], _var_grads_older[var_num],
+                             soln, *_system->old_local_solution, *_system->older_local_solution,
+                             _var_dof_indices[var_num], _qrule->n_points(),static_phi, static_dphi);
     }
-    
-    Moose::perf_log.pop("reinit() - compute vals","Kernel");
+    else
+    {
+      if( has_second_derivatives )
+        computeQpSolutionAll(_var_vals[var_num], _var_grads[var_num],  _var_seconds[var_num],
+                             soln, _var_dof_indices[var_num], _qrule->n_points(), static_phi, static_dphi, static_d2phi);
+      else
+        computeQpSolutionAll(_var_vals[var_num], _var_grads[var_num],
+                             soln, _var_dof_indices[var_num], _qrule->n_points(),static_phi, static_dphi);
+    }
   }
+//  Moose::perf_log.pop("reinit() - compute vals","Kernel");
   
+//  Moose::perf_log.push("reinit() - compute aux vals","Kernel");
   const NumericVector<Number>& aux_soln = (*_aux_system->current_local_solution);
 
   std::vector<unsigned int>::iterator aux_var_num_it = _aux_var_nums.begin();
@@ -343,26 +354,29 @@ Kernel::reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector
     const std::vector<std::vector<Real> > & static_phi = *_static_phi[fe_type];
     const std::vector<std::vector<RealGradient> > & static_dphi= *_static_dphi[fe_type];
 
-    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
-    {
-      computeQpSolution(_aux_var_vals[var_num][qp], aux_soln, _aux_var_dof_indices[var_num], qp, static_phi);
-      computeQpGradSolution(_aux_var_grads[var_num][qp], aux_soln, _aux_var_dof_indices[var_num], qp, static_dphi);
 
-      if(_is_transient)
-      {
-        computeQpSolution(_aux_var_vals_old[var_num][qp], *_aux_system->old_local_solution, _aux_var_dof_indices[var_num], qp, static_phi);
-        computeQpGradSolution(_aux_var_grads_old[var_num][qp], *_aux_system->old_local_solution, _aux_var_dof_indices[var_num], qp, static_dphi);
-        
-        computeQpSolution(_aux_var_vals_older[var_num][qp], *_aux_system->older_local_solution, _aux_var_dof_indices[var_num], qp, static_phi);
-        computeQpGradSolution(_aux_var_grads_older[var_num][qp], *_aux_system->older_local_solution, _aux_var_dof_indices[var_num], qp, static_dphi);
-      }
+    if (_is_transient)
+    {
+      computeQpSolutionAll(_aux_var_vals[var_num], _aux_var_vals_old[var_num], _aux_var_vals_older[var_num],
+                           _aux_var_grads[var_num], _aux_var_grads_old[var_num], _aux_var_grads_older[var_num],
+                           aux_soln, *_aux_system->old_local_solution, *_aux_system->older_local_solution,
+                           _aux_var_dof_indices[var_num], _qrule->n_points(),static_phi, static_dphi);
+    }
+    else
+    {
+      computeQpSolutionAll(_aux_var_vals[var_num], _aux_var_grads[var_num],
+                           aux_soln, _aux_var_dof_indices[var_num], _qrule->n_points(),static_phi, static_dphi);
     }
   }
+  
+//  Moose::perf_log.pop("reinit() - compute aux vals","Kernel");
+//  Moose::perf_log.push("reinit() - material","Kernel");
 
   _material = MaterialFactory::instance()->getMaterial(elem->subdomain_id());
   _material->materialReinit();
 
-  Moose::perf_log.pop("reinit()","Kernel");
+//  Moose::perf_log.pop("reinit() - material","Kernel");
+//  Moose::perf_log.pop("reinit()","Kernel");
 }
 
 void
@@ -447,6 +461,168 @@ Kernel::computeQpSolution(Real & u, const NumericVector<Number> & soln, const st
   for (unsigned int i=0; i<phi_size; i++) 
   {
     u +=  phi_vals[i]*sol_vals[i];
+  }
+}
+
+void
+Kernel::computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std::vector<Real> & u_older,
+                             std::vector<RealGradient> &grad_u,  std::vector<RealGradient> &grad_u_old, std::vector<RealGradient> &grad_u_older,
+                             std::vector<RealTensor> &second_u,
+                             const NumericVector<Number> & soln, const NumericVector<Number> & soln_old,  const NumericVector<Number> & soln_older,
+                             const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
+                             const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi, const std::vector<std::vector<RealTensor> > & d2phi)
+{
+  for (unsigned int qp =0;qp<n_qp;qp++)
+  {
+    u[qp] = 0;
+    u_old[qp] = 0;
+    u_older[qp] = 0;
+    
+    grad_u[qp] = 0;
+    grad_u_old[qp] = 0;
+    grad_u_older[qp] = 0;
+
+    second_u[qp] = 0;
+  }
+  
+  unsigned int phi_size = phi.size();
+
+  for (unsigned int i=0; i<phi_size; i++)
+  {
+    int indx = dof_indices[i];
+    Real soln_local       = soln(indx);
+    Real soln_old_local   = soln_old(indx);
+    Real soln_older_local = soln_older(indx);
+    
+    for (unsigned int qp =0; qp<n_qp; qp++)
+    {
+      Real phi_local = phi[i][qp];
+      RealGradient dphi_local = dphi[i][qp];
+      
+      u[qp]        += phi_local*soln_local;
+      u_old[qp]    += phi_local*soln_old_local;
+      u_older[qp]  += phi_local*soln_older_local;
+
+      grad_u[qp]       += dphi_local*soln_local;
+      grad_u_old[qp]   += dphi_local*soln_old_local;
+      grad_u_older[qp] += dphi_local*soln_older_local;
+
+      second_u[qp] +=d2phi[i][qp]*soln_local;
+    }
+    
+  }
+}
+
+void
+Kernel::computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std::vector<Real> & u_older,
+                             std::vector<RealGradient> &grad_u,  std::vector<RealGradient> &grad_u_old, std::vector<RealGradient> &grad_u_older,
+                             const NumericVector<Number> & soln, const NumericVector<Number> & soln_old,  const NumericVector<Number> & soln_older,
+                             const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
+                             const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi)
+{
+
+  for (unsigned int qp =0;qp<n_qp;qp++)
+  {
+    u[qp]=0;
+    u_old[qp]=0;
+    u_older[qp] = 0;
+    
+    grad_u[qp] = 0;
+    grad_u_old[qp] = 0;
+    grad_u_older[qp] = 0;
+  }
+  
+  unsigned int phi_size = phi.size();
+
+  for (unsigned int i=0; i<phi_size; i++)
+  {
+    int indx = dof_indices[i];
+    Real soln_local       = soln(indx);
+    Real soln_old_local   = soln_old(indx);
+    Real soln_older_local = soln_older(indx);
+    
+    for (unsigned int qp =0; qp<n_qp; qp++)
+    {
+      Real phi_local = phi[i][qp];
+      RealGradient dphi_local = dphi[i][qp];
+      
+      u[qp]        += phi_local*soln_local;
+      u_old[qp]    += phi_local*soln_old_local;
+      u_older[qp]  += phi_local*soln_older_local;
+
+      grad_u[qp]       += dphi_local*soln_local;
+      grad_u_old[qp]   += dphi_local*soln_old_local;
+      grad_u_older[qp] += dphi_local*soln_older_local;
+    }
+    
+  }
+}
+
+void
+Kernel::computeQpSolutionAll(std::vector<Real> & u,
+                             std::vector<RealGradient> &grad_u,
+                             std::vector<RealTensor> &second_u,
+                             const NumericVector<Number> & soln,
+                             const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
+                             const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi, const std::vector<std::vector<RealTensor> > & d2phi)
+{
+  for (unsigned int qp =0;qp<n_qp;qp++)
+  {
+    u[qp]=0;
+    grad_u[qp] = 0;
+    second_u[qp] = 0;
+  }
+  
+  unsigned int phi_size = phi.size();
+
+  for (unsigned int i=0; i<phi_size; i++)
+  {
+    int indx = dof_indices[i];
+    Real soln_local       = soln(indx);
+    
+    for (unsigned int qp =0; qp<n_qp; qp++)
+    {
+      Real phi_local = phi[i][qp];
+      RealGradient dphi_local = dphi[i][qp];
+      
+      u[qp]        += phi_local*soln_local;
+      grad_u[qp]   += dphi_local*soln_local;
+      second_u[qp] += d2phi[i][qp]*soln_local;
+    }
+    
+  }
+}
+
+
+void
+Kernel::computeQpSolutionAll(std::vector<Real> & u,
+                             std::vector<RealGradient> &grad_u,
+                             const NumericVector<Number> & soln,
+                             const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
+                             const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi)
+{
+  for (unsigned int qp =0;qp<n_qp;qp++)
+  {
+    u[qp]=0;
+    grad_u[qp] = 0;
+  }
+  
+  unsigned int phi_size = phi.size();
+
+  for (unsigned int i=0; i<phi_size; i++)
+  {
+    int indx = dof_indices[i];
+    Real soln_local = soln(indx);
+
+    for (unsigned int qp =0; qp<n_qp; qp++)
+    {
+      Real phi_local = phi[i][qp];
+      RealGradient dphi_local = dphi[i][qp];
+      
+      u[qp]        += phi_local*soln_local;
+      grad_u[qp]   += dphi_local*soln_local;
+    }
+    
   }
 }
 
