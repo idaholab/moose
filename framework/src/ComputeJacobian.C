@@ -2,6 +2,7 @@
 #include "Moose.h"
 #include "UpdateAuxVars.h"
 #include "KernelFactory.h"
+#include "MaterialFactory.h"
 #include "BoundaryCondition.h"
 #include "BCFactory.h"
 
@@ -54,6 +55,9 @@ namespace Moose
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
+
+        Material * material = MaterialFactory::instance()->getMaterial(subdomain);
+        material->subdomainSetup();
 
         block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(subdomain);
         block_kernel_end = KernelFactory::instance()->blockKernelsEnd(subdomain);
@@ -185,6 +189,9 @@ namespace Moose
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
+
+        Material * material = MaterialFactory::instance()->getMaterial(subdomain);
+        material->subdomainSetup();
 
         block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(subdomain);
         block_kernel_end = KernelFactory::instance()->blockKernelsEnd(subdomain);
