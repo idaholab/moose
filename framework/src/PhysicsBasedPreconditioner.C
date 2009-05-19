@@ -86,7 +86,10 @@ PhysicsBasedPreconditioner::init ()
       preconditioner->set_matrix(*u_system.matrix);
 
       preconditioner->set_type(_pre_type[system_var]);
-/*
+
+      preconditioner->init();
+
+      /*
       PetscPreconditioner<Number> * petsc_pre = dynamic_cast<PetscPreconditioner<Number> *>(preconditioner);
 
       if(petsc_pre)

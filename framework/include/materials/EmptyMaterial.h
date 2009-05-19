@@ -7,8 +7,7 @@
 class EmptyMaterial;
 
 template<>
-Parameters valid_params<EmptyMaterial>()
-{}
+Parameters valid_params<EmptyMaterial>();
 
 /**
  * Empty material for use in simple applications that don't need material properties.
