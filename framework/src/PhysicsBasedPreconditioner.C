@@ -12,6 +12,13 @@
 #include "numeric_vector.h"
 #include "sparse_matrix.h"
 
+/*
+#include "petsc_preconditioner.h"
+#include "private/pcimpl.h"
+#include "HYPRE.h"
+#include "HYPRE_parcsr_ls.h"
+*/
+
 void
 PhysicsBasedPreconditioner::init ()
 {
@@ -79,8 +86,26 @@ PhysicsBasedPreconditioner::init ()
       preconditioner->set_matrix(*u_system.matrix);
 
       preconditioner->set_type(_pre_type[system_var]);
+/*
+      PetscPreconditioner<Number> * petsc_pre = dynamic_cast<PetscPreconditioner<Number> *>(preconditioner);
 
-      preconditioner->init();
+      if(petsc_pre)
+      {
+        if(petsc_pre->type() == AMG_PRECOND)
+        {     
+          PC pc = petsc_pre->pc();
+
+//          PC_HYPRE * jac = (PC_HYPRE*)pc->data;
+//          HYPRE_Solver hsolver = jac->hsolver;
+          
+          HYPRE_Solver hsolver = (HYPRE_Solver)pc->data;
+        
+          HYPRE_BoomerAMGSetMaxLevels(hsolver,1);
+
+          preconditioner->init();
+        }
+      }
+*/
     }
 
     LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);

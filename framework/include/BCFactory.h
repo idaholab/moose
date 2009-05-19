@@ -56,8 +56,8 @@ public:
            Parameters parameters,
            std::string var_name,
            unsigned int boundary_id,
-           std::vector<std::string> coupled_to,
-           std::vector<std::string> coupled_as)
+           std::vector<std::string> coupled_to=std::vector<std::string>(0),
+           std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
     BoundaryCondition * bc = (*name_to_build_pointer[bc_name])(name,parameters,var_name,boundary_id, coupled_to, coupled_as);
 

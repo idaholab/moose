@@ -59,8 +59,8 @@ public:
            std::string name,
            Parameters parameters,
            unsigned int block_id,
-           std::vector<std::string> coupled_to,
-           std::vector<std::string> coupled_as)
+           std::vector<std::string> coupled_to=std::vector<std::string>(0),
+           std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
     active_materials[block_id] = (*name_to_build_pointer[mat_name])(name,parameters,block_id,coupled_to,coupled_as);
   }

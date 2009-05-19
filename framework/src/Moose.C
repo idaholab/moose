@@ -21,6 +21,8 @@
 #include "ImplicitBackwardDifference2.h"
 
 #include "MaterialFactory.h"
+#include "EmptyMaterial.h"
+
 #include "Moose.h"
 
 void
@@ -43,6 +45,8 @@ Moose::registerObjects()
 
   AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
   AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");
+
+  MaterialFactory::instance()->registerMaterial<EmptyMaterial>("EmptyMaterial");
 }
 
 /******************
