@@ -45,6 +45,11 @@ public:
    * function fits
    */
   void dumpSampleFile(unsigned int proc_id, float xmin, float xmax, float ymin, float ymax);
+
+  /**
+   * This function returns the size of the array holding the points, i.e. the number of sample points
+   */
+  unsigned int getSampleSize();
   
 private:
 

@@ -11,14 +11,18 @@ PolynomialFit::PolynomialFit(std::vector<double> x, std::vector<double> y, unsig
    _order(order),
    _truncate_order(truncate_order)
 {
-  if (_truncate_order && _x.size() < _order + 3) 
+  if (_truncate_order)  // && (_x.size() / 10) < _order) 
   {
-    int temp = _x.size() - 3;
-
-    if(temp < 0)
+    if (_x.size() == 1)
       _order = 0;
-    else
-      _order = temp;
+    else 
+    {
+      _order = (_x.size() / 10) + 1;
+
+      if (_order > order)
+        _order = order;
+    }
+    
   }
   else if (!_truncate_order) 
   {
@@ -122,8 +126,13 @@ PolynomialFit::dumpSampleFile(unsigned int proc_id, float xmin, float xmax, floa
 
   /* First dump the GNUPLOT file with the Least Squares Equations */
   std::ofstream out(filename.str().c_str());
+  out.precision(15);
+  out.fill(fill_character);
+  
   out << "set terminal postscript color enhanced\n" 
-      << "set output \"least_squares" << _file_number << ".eps\"\n"
+      << "set output \"least_squares";
+  out.width(field_width);
+  out << _file_number << ".eps\"\n"
       << "set xlabel \"Temperature\"\n"
       << "set ylabel \"Thermal Conductivity\"\n"
       << "set xrange [" << xmin << ":" << xmax << "]\n"
@@ -131,8 +140,6 @@ PolynomialFit::dumpSampleFile(unsigned int proc_id, float xmin, float xmax, floa
       << "set key left top\n"
       << "f(x)=";
 
-  out.precision(15);
-  
   for (unsigned int i = 0; i<_coeffs.size(); ++i) 
   {
     if (i)
@@ -157,6 +164,10 @@ PolynomialFit::dumpSampleFile(unsigned int proc_id, float xmin, float xmax, floa
   out.close();
 }
 
-    
-                                
+unsigned int
+PolynomialFit::getSampleSize()
+{
+  return _x.size();
+}
+
   
