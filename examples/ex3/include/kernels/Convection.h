@@ -22,7 +22,7 @@ Parameters valid_params<Convection>();
 /**
  * Define the Kernel for a convection operator that looks like:
  *
- * velocity dot u'
+ * grad_some_var dot u'
  * 
  * This first line is defining the name and inheriting from Kernel.
  */
@@ -46,19 +46,11 @@ public:
     // over the domain.
     :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
 
-    // This is the "Intialization List" it sets the values of class variables
-    // Here we are grabbing the values of Parameters to use for a velocity vector
-    _x(_parameters.get<Real>("x")),
-    _y(_parameters.get<Real>("y")),
-    _z(_parameters.get<Real>("z"))
+    // coupledGrad will give us a reference to the gradient of another
+    // variable in the computation.  We are going to use that gradient
+    // as our velocity vector.
+    _grad_some_var(coupledGrad("some_var"))
   {
-    // Build a velocity vector to use in the residual / jacobian computations.
-    // We do this here so that it's only done once and then we just reuse it.
-    // Note that RealVectorValues ALWAYS have 3 components... even when running in
-    // 2D or 1D.  This makes the code simpler...
-    velocity(0)=_x;
-    velocity(1)=_y;
-    velocity(2)=_z;
   }
 
 protected:
@@ -83,15 +75,11 @@ protected:
 
 private:
   /**
-   * A velocity vector that supports a dot product.
+   * Coupled things come through as std::vector _refernces_.
+   *
+   * Since this is a reference it MUST be set in the Initialization List of the
+   * constructor!
    */
-  RealVectorValue velocity;
-
-  /**
-   * Class variables to hold the components of velocity coming from the input parameters.
-   */
-  Real _x;
-  Real _y;
-  Real _z;
+  std::vector<RealGradient> & _grad_some_var;
 };
 #endif //CONVECTION_H
