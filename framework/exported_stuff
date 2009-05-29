@@ -8,7 +8,7 @@ meshdir := $(LIBMESH_DIR)
 include $(meshdir)/Make.common
 
 libmesh_INCLUDE := -I$(MOOSE_DIR)/include -I$(MOOSE_DIR)/include/materials $(libmesh_INCLUDE)
-libmesh_LIBS := -L$(MOOSE_DIR) -lmoose-$(METHOD) $(libmesh_LIBS)
+libmesh_LIBS := -L$(MOOSE_DIR) -Wl,-rpath,$(MOOSE_DIR) -lmoose-$(METHOD) $(libmesh_LIBS)
 
 moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
 
