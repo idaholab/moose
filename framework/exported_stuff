@@ -10,4 +10,8 @@ include $(meshdir)/Make.common
 libmesh_INCLUDE := -I$(MOOSE_DIR)/include -I$(MOOSE_DIR)/include/materials $(libmesh_INCLUDE)
 libmesh_LIBS := -L$(MOOSE_DIR) -lmoose-$(METHOD) $(libmesh_LIBS)
 
-moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD).a
+moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
+
+ifeq ($(enable-shared),yes)
+  moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
+endif

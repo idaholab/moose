@@ -30,38 +30,36 @@ objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 ###############################################################################
 # Target:
 #
-target 	   := ./libmoose-$(METHOD).a
+target := ./libmoose-$(METHOD)$(static_libext)
+
+ifeq ($(enable-shared),yes)
+  target := ./libmoose-$(METHOD)$(shared_libext)
+endif
 
 all:: Makefile.export $(target)
-
-# Production rules:  how to make the target - depends on library configuration
-#	@echo "Linking "$@"..."
-#	libtool -static -o $(target) $(objects)
-#	$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
-
 
 #@echo "MOOSE_DIR := " $(PWD) > Makefile.export
 Makefile.export: exported_stuff
 	@echo "Creating Makefile.export"
 	@cat exported_stuff >> Makefile.export
 
+ifeq ($(enable-shared),yes)
+# Build dynamic library
+$(target): $(objects)
+	@echo "Linking "$@
+	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(objects) $(libmesh_LDFLAGS)
+else
+# Build static library
 ifeq ($(findstring darwin,$(hostos)),darwin)
 $(target): $(objects)
 	@echo "Linking "$@
-	@libtool -static -o $(target) $(objects)
-
+	@libtool -static -o $@ $(objects)
 else
 $(target): $(objects)
 	@echo "Linking "$@
-	@$(AR) rv $(target) $(objects)
+	@$(AR) rv $@ $(objects)
 endif
-# shared library
-#
-# (target): $(objects)
-# 	@$(shell mkdir -p $(mesh_library_dir))
-# 	@echo "Linking "$@
-# 	@$(libmesh_CXX) $(libmesh_CXXSHAREDFLAG) -o $(mesh_library) $(objects) $(libmesh_LDFLAGS)
-# 	@$(MAKE) -C contrib
+endif
 
 
 doc:
