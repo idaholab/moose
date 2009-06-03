@@ -9,6 +9,7 @@
 //libMesh includes
 #include "numeric_vector.h"
 #include "petsc_matrix.h"
+#include "sparse_matrix.h"
 #include "dof_map.h"
 #include "mesh.h"
 #include "boundary_info.h"
