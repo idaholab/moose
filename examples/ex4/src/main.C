@@ -50,13 +50,13 @@ int main (int argc, char** argv)
     MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
 
     // Create the mesh object
-    Mesh *mesh = new Mesh(2);
+    Mesh mesh(2);
 
     // MUST set the global mesh!
-    Moose::mesh = mesh;
+    Moose::mesh = &mesh;
 
     // Read the mesh from an Exodus file and prepare it for use
-    ExodusII_IO exreader(*mesh);
+    ExodusII_IO exreader(mesh);
     exreader.read("square.e");
 
     /**
@@ -64,7 +64,7 @@ int main (int argc, char** argv)
      * this could be a slight hit to performance, but it means that your
      * output file will have the same node and element numbering as the input
      */
-    mesh->prepare_for_use(false);
+    mesh.prepare_for_use(false);
 
     /**
      * This builds nodesets from your sidesets
@@ -72,13 +72,13 @@ int main (int argc, char** argv)
      * NEVER manually create nodesets... always let the code autogenerate them
      * note that if the mesh changes (such as after adaptivity) you have to
      */
-    mesh->boundary_info->build_node_list_from_side_list();
+    mesh.boundary_info->build_node_list_from_side_list();
 
     // Print some useful information about the mesh
-    mesh->print_info();
+    mesh.print_info();
 
     // The equation_systems holds all the Systems we want to solve
-    EquationSystems equation_systems (*mesh);
+    EquationSystems equation_systems (mesh);
 
     // MUST set the global equation_systems!
     Moose::equation_system = &equation_systems;
@@ -194,7 +194,7 @@ int main (int argc, char** argv)
     system.solve();
 
     // Write the solution out.
-    ExodusII_IO(*mesh).write_equation_systems("out.e", equation_systems);
+    ExodusII_IO(mesh).write_equation_systems("out.e", equation_systems);
   }
 
   return 0;
