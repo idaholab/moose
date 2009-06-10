@@ -27,6 +27,8 @@
 #include "nonlinear_implicit_system.h"
 #include "linear_implicit_system.h"
 #include "transient_system.h"
+#include "getpot.h"
+#include "mesh_refinement.h"
 
 // Initialize default Performance Logging
 PerfLog Moose::perf_log("Example5");
@@ -38,6 +40,17 @@ int main (int argc, char** argv)
     // Initialize libMesh and any dependent libaries
     LibMeshInit init (argc, argv);
 
+    // Create a GetPot object to parse the command line
+    GetPot command_line (argc, argv);
+
+    // The diffusivity we're going to pass to our Material
+    // We're giving it a default value of 1.0
+    Real diffusivity = 1.0;
+    
+    // See if a diffusivity was provided on the command-line
+    if(command_line.search("--diffusivity"))
+      diffusivity = command_line.next(diffusivity);
+    
     // This registers a bunch of common objects that exist in Moose with the factories.
     // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
     Moose::registerObjects();
@@ -65,6 +78,12 @@ int main (int argc, char** argv)
      * output file will have the same node and element numbering as the input
      */
     mesh.prepare_for_use(false);
+
+    /**
+     * Do some uniform refinement of the mesh so we can capture the solution better.
+     */
+    MeshRefinement mesh_refinement(mesh);
+    mesh_refinement.uniformly_refine(3);
 
     /**
      * This builds nodesets from your sidesets
@@ -185,7 +204,7 @@ int main (int argc, char** argv)
     Parameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
 
     // Override the default diffusivity
-    mat_params.set<Real>("diffusivity") = 3.0;
+    mat_params.set<Real>("diffusivity") = diffusivity;
 
     // Add the Example material into the calculation using the new diffusivity.
     MaterialFactory::instance()->add("ExampleMaterial", "example", mat_params, 1);

@@ -52,7 +52,7 @@ int main (int argc, char** argv)
     
     // Grab a boolean from the command-line
     if(command_line.search("--use-neumann"))
-      use_neumann = command_line.next(false);
+      use_neumann = command_line.next(use_neumann);
 
     // Tell PetsC to use some default preconditioning
     // by default this will build a block diagonal jacobian
