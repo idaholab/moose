@@ -29,7 +29,7 @@
 #include "transient_system.h"
 
 // Initialize default Performance Logging
-PerfLog Moose::perf_log("Example4");
+PerfLog Moose::perf_log("Example5");
 
 // Begin the main program.
 int main (int argc, char** argv)
