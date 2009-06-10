@@ -1,6 +1,7 @@
 //Local Includes
 #include "Convection.h"
 #include "CoupledDirichletBC.h"
+#include "CoupledNeumannBC.h"
 
 //Moose Includes
 #include "Moose.h"
@@ -27,6 +28,7 @@
 #include "linear_implicit_system.h"
 #include "transient_system.h"
 #include "mesh_refinement.h"
+#include "getpot.h"
 
 // Petsc includes
 #include <petsc.h>
@@ -40,6 +42,17 @@ int main (int argc, char** argv)
   {
     // Initialize libMesh and any dependent libaries
     LibMeshInit init (argc, argv);
+
+    // Create a GetPot object to parse the command line
+    GetPot command_line (argc, argv);
+
+    // A boolean telling us whether or not to use the NeumannBC
+    // we are going to default it to false.
+    bool use_neumann = false;
+    
+    // Grab a boolean from the command-line
+    if(command_line.search("--use-neumann"))
+      use_neumann = command_line.next(false);
 
     // Tell PetsC to use some default preconditioning
     // by default this will build a block diagonal jacobian
@@ -55,6 +68,7 @@ int main (int argc, char** argv)
 
     // Register a new boundary condition with the factory so we can use it in the computation.
     BCFactory::instance()->registerBC<CoupledDirichletBC>("CoupledDirichletBC");
+    BCFactory::instance()->registerBC<CoupledNeumannBC>("CoupledNeumannBC");
 
     // Create the mesh object
     Mesh mesh(2);
@@ -183,9 +197,16 @@ int main (int argc, char** argv)
     // Add the two boundary conditions using the DirichletBC object from MOOSE
     BCFactory::instance()->add("DirichletBC", "left",  left_bc_params,  "u", 1);
 
-    // Use our new CoupledDirichletBC
-    BCFactory::instance()->add("CoupledDirichletBC", "right", coupled_bc_params, "u", 2, conv_coupled_to, conv_coupled_as);
-
+    if(use_neumann)
+    {
+      // Use our new CoupledNeumannBC
+      BCFactory::instance()->add("CoupledNeumannBC", "right", coupled_bc_params, "u", 2, conv_coupled_to, conv_coupled_as);
+    }
+    else
+    {
+      // Use our new CoupledDirichletBC
+      BCFactory::instance()->add("CoupledDirichletBC", "right", coupled_bc_params, "u", 2, conv_coupled_to, conv_coupled_as);
+    }
     
     //////////////
     // "v" Kernels

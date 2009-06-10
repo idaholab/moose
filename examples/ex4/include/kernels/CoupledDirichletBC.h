@@ -10,7 +10,7 @@ template<>
 Parameters valid_params<CoupledDirichletBC>();
 
 /**
- * Implements a simple constant CoupledDirichlet BC where u=value on the boundary.
+ * Implements a coupled Dirichlet BC where u = value * some_var on the boundary.
  */
 class CoupledDirichletBC : public BoundaryCondition
 {
@@ -20,19 +20,17 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  CoupledDirichletBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, false, boundary_id, coupled_to, coupled_as),
-    _value(_parameters.get<Real>("value")),
-    _some_var_val(coupledValFace("some_var"))
-  {}
+  CoupledDirichletBC(std::string name,
+                     Parameters parameters,
+                     std::string var_name,
+                     unsigned int boundary_id,
+                     std::vector<std::string> coupled_to,
+                     std::vector<std::string> coupled_as);
     
   virtual ~CoupledDirichletBC(){}
 
 protected:
-  virtual Real computeQpResidual()
-  {
-    return _u_face[_qp]-(_value*_some_var_val[_qp]);
-  }
+  virtual Real computeQpResidual();
 
 private:
   /**
