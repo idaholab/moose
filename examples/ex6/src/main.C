@@ -29,9 +29,12 @@
 #include "transient_system.h"
 #include "getpot.h"
 #include "mesh_refinement.h"
+#include "error_vector.h"
+#include "kelly_error_estimator.h"
+#include "gmv_io.h"
 
 // Initialize default Performance Logging
-PerfLog Moose::perf_log("Example5");
+PerfLog Moose::perf_log("Example6");
 
 // Begin the main program.
 int main (int argc, char** argv)
@@ -42,32 +45,15 @@ int main (int argc, char** argv)
 
     // Create a GetPot object to parse the command line
     GetPot command_line (argc, argv);
-    
-    // Will hold the name of the input file... default to blank
-    std::string input_filename = "";
-    
-    // See if an input file was provided on the command-line
-    if ( command_line.search("-i") )
-      input_filename = command_line.next(input_filename);
-    else
-    {
-      // Print a message and throw an error if the input file wasn't provided
-      std::cout<<"Must specify an input file using -i"<<std::endl;
-      libmesh_error();
-    }
 
-    // Create a parser for the input file
-    GetPot input_file(input_filename);
-    
     // The diffusivity we're going to pass to our Material
     // We're giving it a default value of 1.0
-    Real diffusivity = input_file("MatProps/diffusivity",1.0);
-
-    // The time_coefficient we're going to pass to our Material
-    // We're giving it a default value of 1.0
-    Real time_coefficient = input_file("MatProps/time_coefficient",1.0);
+    Real diffusivity = 0.1;
     
-
+    // See if a diffusivity was provided on the command-line
+    if(command_line.search("--diffusivity"))
+      diffusivity = command_line.next(diffusivity);
+    
     // This registers a bunch of common objects that exist in Moose with the factories.
     // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
     Moose::registerObjects();
@@ -100,7 +86,18 @@ int main (int argc, char** argv)
      * Do some uniform refinement of the mesh so we can capture the solution better.
      */
     MeshRefinement mesh_refinement(mesh);
-    mesh_refinement.uniformly_refine(3);
+    mesh_refinement.uniformly_refine(1);
+
+    /**
+     * Setup the percentage of elements to refine and coarsen and the
+     * maximum refinement level.
+     */
+    mesh_refinement.refine_fraction()  = .3;
+    mesh_refinement.coarsen_fraction() = 0;
+    mesh_refinement.max_h_level()      = 10;
+
+    // The number of refinement steps we want to do
+    unsigned int max_r_steps = 7;
 
     /**
      * This builds nodesets from your sidesets
@@ -226,8 +223,42 @@ int main (int argc, char** argv)
     // Add the Example material into the calculation using the new diffusivity.
     MaterialFactory::instance()->add("ExampleMaterial", "example", mat_params, 1);
 
-    // Solve the Nonlinear System
-    system.solve();
+    {
+      // Holds a scalar per element representing the error in that element
+      ErrorVector error;
+
+      // Gradient Jump based error estimator... others exist in libMesh
+      KellyErrorEstimator error_estimator;
+
+      // Note the <= to make sure we solve at least once
+      for(unsigned int i=0; i<= max_r_steps; ++i)
+      {
+        // Solve the Nonlinear System
+        system.solve();
+
+        if(i != max_r_steps)
+        {
+          error_estimator.estimate_error(system, error);
+
+          // Flag elements to be refined and coarsened
+          mesh_refinement.flag_elements_by_error_fraction (error);
+          
+          // Perform refinement and coarsening
+          mesh_refinement.refine_and_coarsen_elements();
+          
+          // Reinitialize the equation_systems object for the newly refined
+          // mesh. One of the steps in this is project the solution onto the 
+          // new mesh
+          equation_systems.reinit();
+
+          // After the mesh changes... you MUST update the boundary lists
+          mesh.boundary_info->build_node_list_from_side_list();
+
+          // Print out mesh info so we can see how many elements / nodes we have now
+          mesh.print_info();
+        }
+      }
+    }
 
     // Write the solution out.
     ExodusII_IO(mesh).write_equation_systems("out.e", equation_systems);

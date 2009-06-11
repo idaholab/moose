@@ -2,6 +2,7 @@
 #include "Convection.h"
 #include "ExampleDiffusion.h"
 #include "ExampleMaterial.h"
+#include "ExampleImplicitEuler.h"
 
 //Moose Includes
 #include "Moose.h"
@@ -27,11 +28,12 @@
 #include "nonlinear_implicit_system.h"
 #include "linear_implicit_system.h"
 #include "transient_system.h"
-#include "getpot.h"
+#include "numeric_vector.h"
 #include "mesh_refinement.h"
+#include "getpot.h"
 
 // Initialize default Performance Logging
-PerfLog Moose::perf_log("Example5");
+PerfLog Moose::perf_log("Example7");
 
 // Begin the main program.
 int main (int argc, char** argv)
@@ -66,7 +68,9 @@ int main (int argc, char** argv)
     // The time_coefficient we're going to pass to our Material
     // We're giving it a default value of 1.0
     Real time_coefficient = input_file("MatProps/time_coefficient",1.0);
-    
+
+    // The timestep size to take... defaulting to 1.0
+    Real input_dt = input_file("Transient/dt", 1.0);
 
     // This registers a bunch of common objects that exist in Moose with the factories.
     // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
@@ -75,6 +79,7 @@ int main (int argc, char** argv)
     // Register a new kernel with the factory so we can use it in the computation.
     KernelFactory::instance()->registerKernel<Convection>("Convection");
     KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
+    KernelFactory::instance()->registerKernel<ExampleImplicitEuler>("ExampleImplicitEuler");
 
     // Register our new material class so we can use it.
     MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
@@ -100,7 +105,7 @@ int main (int argc, char** argv)
      * Do some uniform refinement of the mesh so we can capture the solution better.
      */
     MeshRefinement mesh_refinement(mesh);
-    mesh_refinement.uniformly_refine(3);
+    mesh_refinement.uniformly_refine(4);
 
     /**
      * This builds nodesets from your sidesets
@@ -153,6 +158,23 @@ int main (int argc, char** argv)
     equation_systems.print_info();
 
     /**
+     * Set up Transient parameters.  For a Transient solve time, dt and t_step
+     * MUST exist and MUST be set before Kernel::init()!!!!!!!
+     */
+    
+    // The starting time
+    Real & time = equation_systems.parameters.set<Real> ("time") = 0;
+
+    // The step size
+    Real & dt = equation_systems.parameters.set<Real> ("dt") = input_dt;
+
+    // The starting step
+    int & t_step = equation_systems.parameters.set<int> ("t_step") = 0;
+
+    // Number of timesteps to take
+    unsigned int num_steps = 20;
+    
+    /**
      * Initialize common data structures for Kernels.
      * These MUST be called in this order... and at this point.
      */
@@ -200,6 +222,9 @@ int main (int argc, char** argv)
     // Note that we are passing in our coupling vectors
     KernelFactory::instance()->add("Convection", "conv", params, "u", conv_coupled_to, conv_coupled_as);
 
+    // Add an ImplicitEuler Kernel for the time operator
+    KernelFactory::instance()->add("ImplicitEuler", "u_ie", params, "u");
+
     // Add the two boundary conditions using the DirichletBC object from MOOSE
     BCFactory::instance()->add("DirichletBC", "left",  left_bc_params,  "u", 1);
     BCFactory::instance()->add("DirichletBC", "right", right_bc_params, "u", 2);
@@ -212,25 +237,59 @@ int main (int argc, char** argv)
     // Add a Diffusion Kernel from MOOSE into the calculation.
     KernelFactory::instance()->add("Diffusion", "diff", params, "v");
 
+    // Add an ImplicitEuler Kernel for the time operator
+    KernelFactory::instance()->add("ExampleImplicitEuler", "u_ie", params, "v");
+
     // Add the two boundary conditions using the DirichletBC object from MOOSE
-    BCFactory::instance()->add("DirichletBC", "left",  left_bc_params,  "v", 1);
-    BCFactory::instance()->add("DirichletBC", "right", right_bc_params, "v", 2);
+    BCFactory::instance()->add("DirichletBC", "left",  right_bc_params,  "v", 1);
+    BCFactory::instance()->add("DirichletBC", "right", left_bc_params, "v", 2);
 
-
+    
     // Get the default values for the ExampleMaterial's parameters
     Parameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
 
     // Override the default diffusivity
     mat_params.set<Real>("diffusivity") = diffusivity;
 
+    // Override the default time_coefficient
+    mat_params.set<Real>("time_coefficient") = time_coefficient;
+
     // Add the Example material into the calculation using the new diffusivity.
     MaterialFactory::instance()->add("ExampleMaterial", "example", mat_params, 1);
 
-    // Solve the Nonlinear System
-    system.solve();
+    
+    // Create an output object that we can write to each timestep
+    // Note that this ONLY works with Exodus!
+    ExodusII_IO ex_out(mesh);
 
-    // Write the solution out.
-    ExodusII_IO(mesh).write_equation_systems("out.e", equation_systems);
+    // Write out the initial condition
+    // The +1 is because Exodus starts counting from 1
+    ex_out.write_timestep("out.e", equation_systems, t_step+1, time);
+
+    for(t_step = 1; t_step <= num_steps; ++t_step)
+    {
+      // Solve for the next timestep
+      time += dt;
+
+      // Print out what timestep we're at and the current time
+      std::cout<<std::endl<<"Solving Timestep "<<t_step<<" at time "<<time<<std::endl;
+
+      // After time, dt or t_step change reinitDT MUST be called
+      Kernel::reinitDT();
+                  
+      // Copy the old solutions backwards
+      *system.older_local_solution = *system.old_local_solution;
+      *system.old_local_solution   = *system.current_local_solution;
+      *aux_system.older_local_solution = *aux_system.old_local_solution;
+      *aux_system.old_local_solution   = *aux_system.current_local_solution;
+
+      // Solve the Nonlinear System for this timestep
+      system.solve();
+
+      // Write the solution out.
+      // The +1 is because Exodus numbering starts at 1
+      ex_out.write_timestep("out.e", equation_systems, t_step+1, time);
+    }
   }
 
   return 0;
