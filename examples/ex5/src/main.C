@@ -42,32 +42,15 @@ int main (int argc, char** argv)
 
     // Create a GetPot object to parse the command line
     GetPot command_line (argc, argv);
-    
-    // Will hold the name of the input file... default to blank
-    std::string input_filename = "";
-    
-    // See if an input file was provided on the command-line
-    if ( command_line.search("-i") )
-      input_filename = command_line.next(input_filename);
-    else
-    {
-      // Print a message and throw an error if the input file wasn't provided
-      std::cout<<"Must specify an input file using -i"<<std::endl;
-      libmesh_error();
-    }
 
-    // Create a parser for the input file
-    GetPot input_file(input_filename);
-    
     // The diffusivity we're going to pass to our Material
     // We're giving it a default value of 1.0
-    Real diffusivity = input_file("MatProps/diffusivity",1.0);
-
-    // The time_coefficient we're going to pass to our Material
-    // We're giving it a default value of 1.0
-    Real time_coefficient = input_file("MatProps/time_coefficient",1.0);
+    Real diffusivity = 1.0;
     
-
+    // See if a diffusivity was provided on the command-line
+    if(command_line.search("--diffusivity"))
+      diffusivity = command_line.next(diffusivity);
+    
     // This registers a bunch of common objects that exist in Moose with the factories.
     // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
     Moose::registerObjects();
