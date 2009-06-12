@@ -54,6 +54,16 @@ int main (int argc, char** argv)
     if(command_line.search("--use-neumann"))
       use_neumann = command_line.next(use_neumann);
 
+    // A string and int to hold an optional mesh filename
+    // and dimension
+    std::string mesh_file = "square.e";
+    int mesh_dim = 2;
+    if(command_line.search("--mesh-file")) 
+    {
+      mesh_file = command_line.next(mesh_file);
+      mesh_dim = command_line.next(mesh_dim);
+    }
+      
     // Tell PetsC to use some default preconditioning
     // by default this will build a block diagonal jacobian
     // and employ ILU0 preconditioning
@@ -71,14 +81,14 @@ int main (int argc, char** argv)
     BCFactory::instance()->registerBC<CoupledNeumannBC>("CoupledNeumannBC");
 
     // Create the mesh object
-    Mesh mesh(2);
+    Mesh mesh(mesh_dim);
 
     // MUST set the global mesh!
     Moose::mesh = &mesh;
 
     // Read the mesh from an Exodus file and prepare it for use
     ExodusII_IO exreader(mesh);
-    exreader.read("square.e");
+    exreader.read(mesh_file);
 
     /**
      * The "false" specifies _not_ to renumber nodes and elements
@@ -90,8 +100,8 @@ int main (int argc, char** argv)
     /**
      * Do some uniform refinement of the mesh so we can capture the solution better.
      */
-    MeshRefinement mesh_refinement(mesh);
-    mesh_refinement.uniformly_refine(2);
+    //MeshRefinement mesh_refinement(mesh);
+    //mesh_refinement.uniformly_refine(2);
 
     /**
      * This builds nodesets from your sidesets
