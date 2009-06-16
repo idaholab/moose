@@ -18,13 +18,6 @@
 
 #include <vector>
 
-#include "tbb/task_scheduler_init.h"
-#include "tbb/parallel_for.h"
-#include "tbb/blocked_range.h"
-
-
-
-
 class ComputeInternalResiduals
 {
 public:
@@ -132,7 +125,7 @@ namespace Moose
 {
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
   {
-    Moose::perf_log.push("compute_residual() - Interior","Solve");
+    Moose::perf_log.push("compute_residual()","Solve");
 
     residual.zero();
 
@@ -142,13 +135,9 @@ namespace Moose
                                      Moose::mesh->active_local_elements_end(),1);
     
     Threads::parallel_for(elem_range,
-                          ComputeInternalResiduals(soln, residual),
-                          tbb::auto_partitioner());
+                          ComputeInternalResiduals(soln, residual));
 
     residual.close();
-
-    Moose::perf_log.pop("compute_residual() - Interior","Solve");
-    Moose::perf_log.push("compute_residual() - Boundary","Solve");
 
     //Dirichlet BCs
     std::vector<unsigned int> nodes;
@@ -187,6 +176,6 @@ namespace Moose
     residual.close();
 
     
-    Moose::perf_log.pop("compute_residual() - Boundary","Solve");
+    Moose::perf_log.pop("compute_residual()","Solve");
   }
 }

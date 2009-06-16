@@ -130,9 +130,8 @@ namespace Moose
     update_aux_vars(soln);
 
     Threads::parallel_for(ConstElemRange(Moose::mesh->active_local_elements_begin(),
-                                         Moose::mesh->active_local_elements_end()),
-                          ComputeInternalJacobians(soln, jacobian),
-                          tbb::auto_partitioner());
+                                         Moose::mesh->active_local_elements_end(),1),
+                          ComputeInternalJacobians(soln, jacobian));
 
     jacobian.close();
 
@@ -313,9 +312,9 @@ protected:
     update_aux_vars(soln);
 
     Threads::parallel_for(ConstElemRange(Moose::mesh->active_local_elements_begin(),
-                                         Moose::mesh->active_local_elements_end()),
-                          ComputeInternalJacobianBlocks(soln, jacobian, precond_system, ivar, jvar),
-                          tbb::auto_partitioner());
+                                         Moose::mesh->active_local_elements_end(),1),
+                          ComputeInternalJacobianBlocks(soln, jacobian, precond_system, ivar, jvar));
+    
 
     jacobian.close();
 
