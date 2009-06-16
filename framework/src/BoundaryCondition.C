@@ -110,7 +110,7 @@ void BoundaryCondition::init()
 
 void BoundaryCondition::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id)
 {
-  Moose::perf_log.push("reinit()","BoundaryCondition");
+//  Moose::perf_log.push("reinit()","BoundaryCondition");
 
   _static_current_side[tid] = side;
 
@@ -170,14 +170,14 @@ void BoundaryCondition::reinit(THREAD_ID tid, const NumericVector<Number>& soln,
       _var_vals_face_nodal[tid][var_num][i] = soln(var_dof_indices[i]);
   }
   
-  Moose::perf_log.pop("reinit()","BoundaryCondition");
+//  Moose::perf_log.pop("reinit()","BoundaryCondition");
 }
 
 
 
 void BoundaryCondition::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual)
 {
-  Moose::perf_log.push("reinit(node)","BoundaryCondition");
+//  Moose::perf_log.push("reinit(node)","BoundaryCondition");
 
   _static_current_node[tid] = &node;
 
@@ -202,7 +202,7 @@ void BoundaryCondition::reinit(THREAD_ID tid, const NumericVector<Number>& soln,
     _var_vals_face_nodal[tid][var_num][0] = soln(dof_number);
   }
 
-  Moose::perf_log.pop("reinit(node)","BoundaryCondition");
+//  Moose::perf_log.pop("reinit(node)","BoundaryCondition");
 }
 
 
