@@ -1,6 +1,7 @@
 //libMesh includes
 #include "perf_log.h"
 #include "parameters.h"
+#include "getpot.h"
 
 //Forward Declarations
 class Mesh;
@@ -56,6 +57,26 @@ void Parameters::Parameter<std::vector<std::string> >::print (std::ostream& os) 
 {
   for (unsigned int i=0; i<_value.size(); i++)
     os << _value[i] << " ";
+}
+
+template<>
+inline
+void Parameters::Parameter<GetPot>::print (std::ostream& os) const
+{
+}
+
+template<>
+inline
+void Parameters::Parameter<std::vector<float> >::print (std::ostream& os) const
+{
+  for (unsigned int i=0; i<_value.size(); i++)
+    os << _value[i] << " ";
+}
+
+template<>
+inline
+void Parameters::Parameter<std::map<std::string, unsigned int> >::print (std::ostream& os) const
+{
 }
 
 namespace Moose
