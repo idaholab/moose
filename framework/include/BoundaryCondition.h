@@ -26,6 +26,11 @@ public:
   virtual ~BoundaryCondition(){}
 
   /**
+   * Size everything.
+   */
+  static void sizeEverything();
+
+  /**
    * Initializes common data structures.
    */
   static void init();
@@ -34,12 +39,12 @@ public:
    * Reinitializes common datastructures
    * Must be called after a Kernel::reinit() for the same element
    */
-  static void reinit(const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id);
+  static void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id);
 
   /**
    * Reinitializes common datastructures for nodal bcs.
    */
-  static void reinit(const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
+  static void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
 
   /** 
    * Boundary ID the BC is active on.
@@ -111,11 +116,31 @@ protected:
    * Normal vectors at the quadrature points.
    */
   const std::vector<Point>& _normals_face;
+
+  /**
+   * Boundary quadrature rule.
+   */
+  QGauss * & _qface;
   
   /**
    * XYZ coordinates of quadrature points
    */
   const std::vector<Point>& _q_point_face;
+
+  /**
+   * Current side.
+   */
+  unsigned int & _current_side;
+
+  /**
+   * Current node for nodal BC's
+   */
+  const Node * & _current_node;
+  
+  /**
+   * Current residual vector.  Only valid for nodal BC's.
+   */
+  NumericVector<Number> * & _current_residual;
 
   /**
    * ***********************
@@ -126,57 +151,57 @@ protected:
   /**
    * Current node for nodal BC's
    */
-  static const Node * _current_node;
+  static std::vector<const Node *> _static_current_node;
   
   /**
    * Current residual vector.  Only valid for nodal BC's.
    */
-  static NumericVector<Number> * _current_residual;
+  static std::vector<NumericVector<Number> *> _static_current_residual;
     
   /**
    * Current side.
    */
-  static unsigned int _current_side;
+  static std::vector<unsigned int> _static_current_side;
   
   /**
    * Boundary finite element. 
    */
-  static std::map<FEType, FEBase *> _fe_face;
+  static std::vector<std::map<FEType, FEBase *> > _fe_face;
 
   /**
    * Boundary quadrature rule.
    */
-  static QGauss * _qface;
+  static std::vector<QGauss *> _static_qface;
 
   /**
    * XYZ coordinates of quadrature points
    */
-  static std::map<FEType, const std::vector<Point> *> _static_q_point_face;
+  static std::vector<std::map<FEType, const std::vector<Point> *> > _static_q_point_face;
 
   /**
    * Side Jacobian pre-multiplied by the weight.
    */
-  static std::map<FEType, const std::vector<Real> *> _static_JxW_face;
+  static std::vector<std::map<FEType, const std::vector<Real> *> > _static_JxW_face;
 
   /**
    * Side shape function.
    */
-  static std::map<FEType, const std::vector<std::vector<Real> > *> _static_phi_face;
+  static std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _static_phi_face;
 
   /**
    * Gradient of side shape function.
    */
-  static std::map<FEType, const std::vector<std::vector<RealGradient> > *> _static_dphi_face;
+  static std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _static_dphi_face;
 
   /**
    * Second derivative of interior shape function.
    */
-  static std::map<FEType, const std::vector<std::vector<RealTensor> > *> _static_d2phi_face;
+  static std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _static_d2phi_face;
 
   /**
    * Normal vectors at the quadrature points.
    */
-  static std::map<FEType, const std::vector<Point> *> _static_normals_face;
+  static std::vector<std::map<FEType, const std::vector<Point> *> > _static_normals_face;
 
   /**
    * Map to vector of variable numbers that need to be evaluated
@@ -193,7 +218,7 @@ protected:
   /**
    * Holds the current dof numbers for each variable for nodal bcs
    */
-  static std::map<unsigned int, unsigned int> _nodal_bc_var_dofs;
+  static std::vector<std::map<unsigned int, unsigned int> > _nodal_bc_var_dofs;
 
   /**
    * ***************
@@ -204,22 +229,22 @@ protected:
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<Real> > _var_vals_face;
+  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals_face;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealGradient> > _var_grads_face;
+  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _var_grads_face;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealTensor> > _var_seconds_face;
+  static std::vector<std::map<unsigned int, std::vector<RealTensor> > > _var_seconds_face;
 
   /**
    * Value of the variables at the nodes.
    */
-  static std::map<unsigned int, std::vector<Real> > _var_vals_face_nodal;
+  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals_face_nodal;
 
   /**
    * Holds the current solution at the current quadrature point on the face.

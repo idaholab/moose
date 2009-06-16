@@ -24,8 +24,8 @@ namespace Moose
     MeshBase::const_node_iterator nd     = mesh->local_nodes_begin();
     MeshBase::const_node_iterator nd_end = mesh->local_nodes_end();
 
-    std::vector<AuxKernel *>::iterator aux_begin = AuxFactory::instance()->activeNodalAuxKernelsBegin();
-    std::vector<AuxKernel *>::iterator aux_end = AuxFactory::instance()->activeNodalAuxKernelsEnd();
+    std::vector<AuxKernel *>::iterator aux_begin = AuxFactory::instance()->activeNodalAuxKernelsBegin(0);
+    std::vector<AuxKernel *>::iterator aux_end = AuxFactory::instance()->activeNodalAuxKernelsEnd(0);
     std::vector<AuxKernel *>::iterator aux_it = aux_begin;
 
     if(aux_begin != aux_end)
@@ -34,10 +34,10 @@ namespace Moose
       {
         Node * node = *nd;
 
-        AuxKernel::reinit(soln, *node);
+        AuxKernel::reinit(0, soln, *node);
       
         for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-          (*aux_it)->computeAndStore();
+          (*aux_it)->computeAndStore(0);
       }
     }
 
@@ -51,23 +51,23 @@ namespace Moose
 
     for(unsigned int i=0; i<n_nodes; i++)
     {
-      aux_begin = AuxFactory::instance()->activeAuxBCsBegin(ids[i]);
-      aux_end = AuxFactory::instance()->activeAuxBCsEnd(ids[i]);
+      aux_begin = AuxFactory::instance()->activeAuxBCsBegin(0,ids[i]);
+      aux_end = AuxFactory::instance()->activeAuxBCsEnd(0,ids[i]);
 
       if(aux_begin != aux_end)
       {
         Node & node = mesh->node(nodes[i]);
-        AuxKernel::reinit(soln, node);
+        AuxKernel::reinit(0, soln, node);
 
         for(aux_it=aux_begin; aux_it != aux_end; ++aux_it)
-          (*aux_it)->computeAndStore();
+          (*aux_it)->computeAndStore(0);
       }
     }
 
 
     // Update the element aux vars
-    aux_begin = AuxFactory::instance()->activeElementAuxKernelsBegin();
-    aux_end = AuxFactory::instance()->activeElementAuxKernelsEnd();
+    aux_begin = AuxFactory::instance()->activeElementAuxKernelsBegin(0);
+    aux_end = AuxFactory::instance()->activeElementAuxKernelsEnd(0);
     aux_it = aux_begin;
   
     MeshBase::const_element_iterator       el     = mesh->active_local_elements_begin();
@@ -81,9 +81,9 @@ namespace Moose
       {
         const Elem* elem = *el;
       
-        Kernel::reinit(soln, elem, NULL);
+        Kernel::reinit(0, soln, elem, NULL);
       
-        AuxKernel::reinit(soln, *elem);
+        AuxKernel::reinit(0, soln, *elem);
       
         unsigned int cur_subdomain = elem->subdomain_id();
       
@@ -96,7 +96,7 @@ namespace Moose
         }
       
         for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-          (*aux_it)->computeAndStore();
+          (*aux_it)->computeAndStore(0);
       }
     }
 

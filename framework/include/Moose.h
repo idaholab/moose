@@ -9,6 +9,8 @@ class EquationSystems;
 
 #define MAX_VARS 1000
 
+typedef unsigned int THREAD_ID;
+
 #ifndef MOOSE_H
 #define MOOSE_H
 
@@ -97,6 +99,13 @@ namespace Moose
    * Global Variables - yeah I know...
    *******************/
 
+
+  /**
+   * Current thread id... this is used by serial processes to set stuff up.
+   * This is NOT valid inside of a thread!
+   */
+  extern THREAD_ID current_thread_id;
+  
   /**
    * The one mesh to rule them all
    */

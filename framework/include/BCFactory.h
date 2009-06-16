@@ -59,12 +59,17 @@ public:
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
            std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    BoundaryCondition * bc = (*name_to_build_pointer[bc_name])(name,parameters,var_name,boundary_id, coupled_to, coupled_as);
+    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    {
+      Moose::current_thread_id = tid;
 
-    if(bc->isIntegrated())
-      active_bcs[boundary_id].push_back(bc);
-    else
-      active_nodal_bcs[boundary_id].push_back(bc);
+      BoundaryCondition * bc = (*name_to_build_pointer[bc_name])(name,parameters,var_name,boundary_id, coupled_to, coupled_as);
+
+      if(bc->isIntegrated())
+        active_bcs[tid][boundary_id].push_back(bc);
+      else
+        active_nodal_bcs[tid][boundary_id].push_back(bc);
+    }
   }
 
   Parameters getValidParams(std::string name)
@@ -78,21 +83,25 @@ public:
     return name_to_params_pointer[name]();
   }
 
-  std::vector<BoundaryCondition *>::iterator activeBCsBegin(unsigned int boundary_id){ return active_bcs[boundary_id].begin(); };
-  std::vector<BoundaryCondition *>::iterator activeBCsEnd(unsigned int boundary_id){ return active_bcs[boundary_id].end(); };
+  std::vector<BoundaryCondition *>::iterator activeBCsBegin(THREAD_ID tid, unsigned int boundary_id){ return active_bcs[tid][boundary_id].begin(); };
+  std::vector<BoundaryCondition *>::iterator activeBCsEnd(THREAD_ID tid, unsigned int boundary_id){ return active_bcs[tid][boundary_id].end(); };
 
-  std::vector<BoundaryCondition *>::iterator activeNodalBCsBegin(unsigned int boundary_id){ return active_nodal_bcs[boundary_id].begin(); };
-  std::vector<BoundaryCondition *>::iterator activeNodalBCsEnd(unsigned int boundary_id){ return active_nodal_bcs[boundary_id].end(); };
+  std::vector<BoundaryCondition *>::iterator activeNodalBCsBegin(THREAD_ID tid, unsigned int boundary_id){ return active_nodal_bcs[tid][boundary_id].begin(); };
+  std::vector<BoundaryCondition *>::iterator activeNodalBCsEnd(THREAD_ID tid, unsigned int boundary_id){ return active_nodal_bcs[tid][boundary_id].end(); };
 
 private:
-  BCFactory(){}
+  BCFactory()
+  {
+    active_bcs.resize(libMesh::n_threads());
+    active_nodal_bcs.resize(libMesh::n_threads());
+  }
   virtual ~BCFactory(){}
 
   std::map<std::string, BCBuildPtr> name_to_build_pointer;
   std::map<std::string, BCParamsPtr> name_to_params_pointer;
 
-  std::map<unsigned int, std::vector<BoundaryCondition *> > active_bcs;
-  std::map<unsigned int, std::vector<BoundaryCondition *> > active_nodal_bcs;
+  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > active_bcs;
+  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > active_nodal_bcs;
 };
 
 #endif //BCFACTORY_H

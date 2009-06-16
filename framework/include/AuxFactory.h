@@ -67,12 +67,19 @@ public:
                   std::vector<std::string> coupled_to=std::vector<std::string>(0),
                   std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    AuxKernel * aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
+    AuxKernel * aux;
+    
+    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    {
+      Moose::current_thread_id = tid;
 
-    if(aux->isNodal())
-      active_NodalAuxKernels.push_back(aux);
-    else
-      active_ElementAuxKernels.push_back(aux);
+      aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
+
+      if(aux->isNodal())
+        active_NodalAuxKernels[tid].push_back(aux);
+      else
+        active_ElementAuxKernels[tid].push_back(aux);
+    }
 
     return aux;
   }
@@ -85,10 +92,16 @@ public:
                     std::vector<std::string> coupled_to=std::vector<std::string>(0),
                     std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    AuxKernel * aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
-
-    active_bcs[boundary_id].push_back(aux);
+    AuxKernel * aux;
     
+    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    {
+      Moose::current_thread_id = tid;
+      
+      aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
+
+      active_bcs[tid][boundary_id].push_back(aux);
+    }
 
     return aux;
   }
@@ -103,26 +116,31 @@ public:
     return name_to_params_pointer[name]();
   }
 
-  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsBegin(){ return active_NodalAuxKernels.begin(); };
-  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsEnd(){ return active_NodalAuxKernels.end(); };
+  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsBegin(THREAD_ID tid){ return active_NodalAuxKernels[tid].begin(); };
+  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsEnd(THREAD_ID tid){ return active_NodalAuxKernels[tid].end(); };
 
-  std::vector<AuxKernel *>::iterator activeElementAuxKernelsBegin(){ return active_ElementAuxKernels.begin(); };
-  std::vector<AuxKernel *>::iterator activeElementAuxKernelsEnd(){ return active_ElementAuxKernels.end(); };
+  std::vector<AuxKernel *>::iterator activeElementAuxKernelsBegin(THREAD_ID tid){ return active_ElementAuxKernels[tid].begin(); };
+  std::vector<AuxKernel *>::iterator activeElementAuxKernelsEnd(THREAD_ID tid){ return active_ElementAuxKernels[tid].end(); };
 
-  std::vector<AuxKernel *>::iterator activeAuxBCsBegin(unsigned int boundary_id){ return active_bcs[boundary_id].begin(); };
-  std::vector<AuxKernel *>::iterator activeAuxBCsEnd(unsigned int boundary_id){ return active_bcs[boundary_id].end(); };
+  std::vector<AuxKernel *>::iterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id){ return active_bcs[tid][boundary_id].begin(); };
+  std::vector<AuxKernel *>::iterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id){ return active_bcs[tid][boundary_id].end(); };
 
 private:
-  AuxFactory(){}
+  AuxFactory()
+  {
+    active_NodalAuxKernels.resize(libMesh::n_threads());
+    active_ElementAuxKernels.resize(libMesh::n_threads());
+    active_bcs.resize(libMesh::n_threads());
+  }
   virtual ~AuxFactory(){}
 
   std::map<std::string, AuxKernelBuildPtr> name_to_build_pointer;
   std::map<std::string, AuxKernelParamsPtr> name_to_params_pointer;
 
-  std::vector<AuxKernel *> active_NodalAuxKernels;
-  std::vector<AuxKernel *> active_ElementAuxKernels;
+  std::vector<std::vector<AuxKernel *> > active_NodalAuxKernels;
+  std::vector<std::vector<AuxKernel *> > active_ElementAuxKernels;
 
-  std::map<unsigned int, std::vector<AuxKernel *> > active_bcs;
+  std::vector<std::map<unsigned int, std::vector<AuxKernel *> > > active_bcs;
 };
 
 #endif //AUXFACTORY_H

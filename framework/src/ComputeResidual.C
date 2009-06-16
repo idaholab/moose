@@ -5,6 +5,7 @@
 #include "MaterialFactory.h"
 #include "BoundaryCondition.h"
 #include "BCFactory.h"
+#include "ParallelUniqueId.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -13,26 +14,37 @@
 #include "dof_map.h"
 #include "mesh.h"
 #include "boundary_info.h"
+#include "elem_range.h"
 
 #include <vector>
 
-namespace Moose
+#include "tbb/task_scheduler_init.h"
+#include "tbb/parallel_for.h"
+#include "tbb/blocked_range.h"
+
+
+
+
+class ComputeInternalResiduals
 {
-  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
+public:
+  ComputeInternalResiduals(const NumericVector<Number>& in_soln, NumericVector<Number>& in_residual)
+    :soln(in_soln),
+     residual(in_residual)
+  {}
+
+  void operator() (const ConstElemRange & range) const
   {
-    Moose::perf_log.push("compute_residual()","Solve");
+    ParallelUniqueId puid;
+
+    unsigned int tid = puid.id;
 
     DenseVector<Number> Re;
 
-    residual.zero();
+    ConstElemRange::const_iterator el = range.begin();
 
-    update_aux_vars(soln);  
-
-    MeshBase::const_element_iterator       el     = mesh->active_local_elements_begin();
-    const MeshBase::const_element_iterator end_el = mesh->active_local_elements_end();
-
-    std::vector<Kernel *>::iterator kernel_begin = KernelFactory::instance()->activeKernelsBegin();
-    std::vector<Kernel *>::iterator kernel_end = KernelFactory::instance()->activeKernelsEnd();
+    std::vector<Kernel *>::iterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
+    std::vector<Kernel *>::iterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
     std::vector<Kernel *>::iterator kernel_it = kernel_begin;
 
     std::vector<Kernel *>::iterator block_kernel_begin;
@@ -41,13 +53,13 @@ namespace Moose
 
     unsigned int subdomain = 999999999;
 
-    for ( ; el != end_el; ++el)
+    for (el = range.begin() ; el != range.end(); ++el)
     {
       const Elem* elem = *el;
 
       Re.zero();
 
-      Kernel::reinit(soln, elem, &Re);
+      Kernel::reinit(tid, soln, elem, &Re);
 
       unsigned int cur_subdomain = elem->subdomain_id();
 
@@ -55,11 +67,11 @@ namespace Moose
       {
         subdomain = cur_subdomain;
 
-        Material * material = MaterialFactory::instance()->getMaterial(subdomain);
+        Material * material = MaterialFactory::instance()->getMaterial(tid, subdomain);
         material->subdomainSetup();
 
-        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(subdomain);
-        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(subdomain);
+        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(tid, subdomain);
+        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(tid, subdomain);
 
         //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -82,26 +94,61 @@ namespace Moose
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = mesh->boundary_info->boundary_id (elem, side);
+          unsigned int boundary_id = Moose::mesh->boundary_info->boundary_id (elem, side);
 
-          std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeBCsBegin(boundary_id);
-          std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeBCsEnd(boundary_id);
+          std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeBCsBegin(tid,boundary_id);
+          std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeBCsEnd(tid,boundary_id);
 
           if(bc_it != bc_end)
           {
-            BoundaryCondition::reinit(soln, side, boundary_id);
+            BoundaryCondition::reinit(tid, soln, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
               (*bc_it)->computeResidual();
           }
         }
       }
+      
+      Kernel::_dof_map->constrain_element_vector (Re, Kernel::_dof_indices[tid], false);
 
-      Kernel::_dof_map->constrain_element_vector (Re, Kernel::_dof_indices, false);
-      residual.add_vector(Re, Kernel::_dof_indices);
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx); 
+        residual.add_vector(Re, Kernel::_dof_indices[tid]);
+      }
     }
 
+  }
+
+protected:
+  const NumericVector<Number>& soln;
+  NumericVector<Number>& residual;
+};
+
+      
+      
+
+
+namespace Moose
+{
+  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
+  {
+    Moose::perf_log.push("compute_residual() - Interior","Solve");
+
+    residual.zero();
+
+    update_aux_vars(soln);  
+
+    static ConstElemRange elem_range(Moose::mesh->active_local_elements_begin(),
+                                     Moose::mesh->active_local_elements_end(),1);
+    
+    Threads::parallel_for(elem_range,
+                          ComputeInternalResiduals(soln, residual),
+                          tbb::auto_partitioner());
+
     residual.close();
+
+    Moose::perf_log.pop("compute_residual() - Interior","Solve");
+    Moose::perf_log.push("compute_residual() - Boundary","Solve");
 
     //Dirichlet BCs
     std::vector<unsigned int> nodes;
@@ -115,8 +162,8 @@ namespace Moose
     {
       unsigned int boundary_id = ids[i];
     
-      std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeNodalBCsBegin(boundary_id);
-      std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeNodalBCsEnd(boundary_id);
+      std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeNodalBCsBegin(0,boundary_id);
+      std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeNodalBCsEnd(0,boundary_id);
 
       if(bc_it != bc_end)
       {
@@ -124,7 +171,7 @@ namespace Moose
 
         if(node.processor_id() == libMesh::processor_id())
         {
-          BoundaryCondition::reinit(soln, node, boundary_id, residual);
+          BoundaryCondition::reinit(0, soln, node, boundary_id, residual);
 
           for(; bc_it != bc_end; ++bc_it)
             (*bc_it)->computeAndStoreResidual();
@@ -140,6 +187,6 @@ namespace Moose
     residual.close();
 
     
-    Moose::perf_log.pop("compute_residual()","Solve");
+    Moose::perf_log.pop("compute_residual() - Boundary","Solve");
   }
 }

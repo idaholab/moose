@@ -1,3 +1,6 @@
+// local includes
+#include "Moose.h"
+
 // libMesh includes
 #include "equation_systems.h"
 #include "mesh_base.h"
@@ -55,6 +58,11 @@ public:
   {};
 
   /**
+   * Size everything.
+   */
+  static void sizeEverything();
+
+  /**
    * Initializes common data structures.
    */
   static void init(EquationSystems * es);
@@ -62,7 +70,7 @@ public:
   /**
    * Re-Initializes common data structures for a specific element.
    */
-  static void reinit(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
+  static void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
 
   /**
    * Re-Initializes temporal discretization/transient control data.
@@ -96,8 +104,8 @@ public:
 
   static DofMap * _dof_map;
   static DofMap * _aux_dof_map;
-  static std::vector<unsigned int> _dof_indices;
-  static std::vector<unsigned int> _aux_dof_indices;
+  static std::vector<std::vector<unsigned int> > _dof_indices;
+  static std::vector<std::vector<unsigned int> > _aux_dof_indices;
 
   /**
    * Retrieve name of the Kernel
@@ -130,6 +138,11 @@ protected:
    * This Kernel's name.
    */
   std::string _name;
+
+  /**
+   * The thread id this kernel is associated with.
+   */
+  THREAD_ID _tid;
   
   /**
    * Holds parameters for derived classes so they can be built with common constructor.
@@ -231,6 +244,16 @@ protected:
    * Kernel operates on.
    */
   FEType _fe_type;
+
+  /**
+   * Current element
+   */
+  const Elem * & _current_elem;
+
+  /**
+   * Current material
+   */
+  Material * & _material;
   
   /**
    * Interior Jacobian pre-multiplied by the weight.
@@ -251,6 +274,11 @@ protected:
    * Second derivative of interior shape function.
    */
   const std::vector<std::vector<RealTensor> > & _d2phi;
+
+  /**
+   * Current quadrature rule.
+   */
+  QGauss * & _qrule;  
 
   /**
    * XYZ coordinates of quadrature points
@@ -380,7 +408,7 @@ protected:
   /**
    * Interior finite element.
    */
-  static std::map<FEType, FEBase*> _fe;
+  static std::vector<std::map<FEType, FEBase*> > _fe;
 
   /**
    * Maximum quadrature order required by all variables.
@@ -390,37 +418,37 @@ protected:
   /**
    * Interior quadrature rule.
    */
-  static QGauss * _qrule;  
+  static std::vector<QGauss *> _static_qrule;  
 
   /**
    * Current element
    */
-  static const Elem * _current_elem;
+  static std::vector<const Elem *> _static_current_elem;
 
   /**
    * Interior Jacobian pre-multiplied by the weight.
    */
-  static std::map<FEType, const std::vector<Real> *> _static_JxW;
+  static std::vector<std::map<FEType, const std::vector<Real> *> > _static_JxW;
 
   /**
    * Interior shape function.
    */
-  static std::map<FEType, const std::vector<std::vector<Real> > *> _static_phi;
+  static std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _static_phi;
 
   /**
    * Gradient of interior shape function.
    */
-  static std::map<FEType, const std::vector<std::vector<RealGradient> > *> _static_dphi;
+  static std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _static_dphi;
 
   /**
    * Second derivative of interior shape function.
    */
-  static std::map<FEType, const std::vector<std::vector<RealTensor> > *> _static_d2phi;
+  static std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _static_d2phi;
 
   /**
    * XYZ coordinates of quadrature points
    */
-  static std::map<FEType, const std::vector<Point> *> _static_q_point;
+  static std::vector<std::map<FEType, const std::vector<Point> *> > _static_q_point;
   
   /**
    * Variable numbers of the variables.
@@ -435,87 +463,87 @@ protected:
   /**
    * Dof Maps for all the variables.
    */
-  static std::map<unsigned int, std::vector<unsigned int> > _var_dof_indices;
+  static std::vector<std::map<unsigned int, std::vector<unsigned int> > > _var_dof_indices;
 
   /**
    * Dof Maps for all the auxiliary variables.
    */
-  static std::map<unsigned int, std::vector<unsigned int> > _aux_var_dof_indices;
+  static std::vector<std::map<unsigned int, std::vector<unsigned int> > > _aux_var_dof_indices;
 
   /**
    * Residual vectors for all variables.
    */
-  static std::map<unsigned int, DenseSubVector<Number> * > _var_Res;
+  static std::vector<std::map<unsigned int, DenseSubVector<Number> * > > _var_Res;
 
   /**
    * Jacobian matrices for all variables.
    */
-  static std::map<unsigned int, DenseSubMatrix<Number> * > _var_Kes;
+  static std::vector<std::map<unsigned int, DenseSubMatrix<Number> * > > _var_Kes;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<Real> > _var_vals;
+  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealGradient> > _var_grads;
+  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _var_grads;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealTensor> > _var_seconds;
+  static std::vector<std::map<unsigned int, std::vector<RealTensor> > > _var_seconds;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<Real> > _var_vals_old;
+  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals_old;
 
   /**
    * Value of the variables at the quadrature points at t-2.
    */
-  static std::map<unsigned int, std::vector<Real> > _var_vals_older;
+  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals_older;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealGradient> > _var_grads_old;
+  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _var_grads_old;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealGradient> > _var_grads_older;
+  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _var_grads_older;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<Real> > _aux_var_vals;
+  static std::vector<std::map<unsigned int, std::vector<Real> > > _aux_var_vals;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealGradient> > _aux_var_grads;
+  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _aux_var_grads;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<Real> > _aux_var_vals_old;
+  static std::vector<std::map<unsigned int, std::vector<Real> > > _aux_var_vals_old;
 
   /**
    * Value of the variables at the quadrature points at t-2.
    */
-  static std::map<unsigned int, std::vector<Real> > _aux_var_vals_older;
+  static std::vector<std::map<unsigned int, std::vector<Real> > > _aux_var_vals_older;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealGradient> > _aux_var_grads_old;
+  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _aux_var_grads_old;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::map<unsigned int, std::vector<RealGradient> > _aux_var_grads_older;
+  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _aux_var_grads_older;
   
   /**
    * Current time.
@@ -565,7 +593,7 @@ protected:
   /**
    * Pointer to the material that is valid for the current block.
    */
-  static Material * _material;
+  static std::vector<Material *> _static_material;
 
   /**
    * Computes the value of soln at the current quadrature point.
@@ -642,10 +670,10 @@ protected:
   /**
    * Static convenience zeros.
    */
-  static Real _static_real_zero;
-  static std::vector<Real> _static_zero;
-  static std::vector<RealGradient> _static_grad_zero;
-  static std::vector<RealTensor> _static_second_zero;
+  static std::vector<Real> _static_real_zero;
+  static std::vector<std::vector<Real> > _static_zero;
+  static std::vector<std::vector<RealGradient> > _static_grad_zero;
+  static std::vector<std::vector<RealTensor> > _static_second_zero;
 };
 
 #endif //KERNEL_H

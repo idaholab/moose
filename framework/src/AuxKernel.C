@@ -14,15 +14,43 @@ AuxKernel::AuxKernel(std::string name,
                      std::vector<std::string> coupled_as)
   :Kernel(name, parameters, var_name, false, coupled_to, coupled_as),
    _nodal(_fe_type.family == LAGRANGE),
-   _u_aux(_nodal ? _aux_var_vals_nodal[_var_num] : _aux_var_vals_element[_var_num]),
-   _u_old_aux(_nodal ? _aux_var_vals_old_nodal[_var_num] : _aux_var_vals_old_element[_var_num]),
-   _u_older_aux(_nodal ? _aux_var_vals_older_nodal[_var_num] : _aux_var_vals_older_element[_var_num])
+   _u_aux(_nodal ? _aux_var_vals_nodal[_tid][_var_num] : _aux_var_vals_element[_tid][_var_num]),
+   _u_old_aux(_nodal ? _aux_var_vals_old_nodal[_tid][_var_num] : _aux_var_vals_old_element[_tid][_var_num]),
+   _u_older_aux(_nodal ? _aux_var_vals_older_nodal[_tid][_var_num] : _aux_var_vals_older_element[_tid][_var_num])
   {
     if(_nodal)
       _nodal_var_nums.push_back(_var_num);
     else
       _element_var_nums.push_back(_var_num);
   }
+
+void
+AuxKernel::sizeEverything()
+{
+  int n_threads = libMesh::n_threads();
+
+  _var_vals_nodal.resize(n_threads);
+  _var_vals_old_nodal.resize(n_threads);
+  _var_vals_older_nodal.resize(n_threads);
+
+  _aux_var_dofs.resize(n_threads);
+  _aux_var_vals_nodal.resize(n_threads);
+  _aux_var_vals_old_nodal.resize(n_threads);
+  _aux_var_vals_older_nodal.resize(n_threads);
+
+  _var_vals_element.resize(n_threads);
+  _var_vals_old_element.resize(n_threads);
+  _var_vals_older_element.resize(n_threads);
+  _var_grads_element.resize(n_threads);
+  _var_grads_old_element.resize(n_threads);
+  _var_grads_older_element.resize(n_threads);
+  _aux_var_vals_element.resize(n_threads);
+  _aux_var_vals_old_element.resize(n_threads);
+  _aux_var_vals_older_element.resize(n_threads);
+  _aux_var_grads_element.resize(n_threads);
+  _aux_var_grads_old_element.resize(n_threads);
+  _aux_var_grads_older_element.resize(n_threads);
+}
 
 void
 AuxKernel::init()
@@ -36,7 +64,7 @@ AuxKernel::init()
 }
 
 void
-AuxKernel::reinit(const NumericVector<Number>& soln, const Node & node)
+AuxKernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node)
 {
   Moose::perf_log.push("reinit(node)","AuxKernel");
 
@@ -51,9 +79,9 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Node & node)
     //The zero is the component... that works fine for lagrange FE types.
     unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);
 
-    _var_vals_nodal[var_num] = soln(dof_number);
-    _var_vals_old_nodal[var_num] = (*_nonlinear_old_soln)(dof_number);
-    _var_vals_older_nodal[var_num] = (*_nonlinear_older_soln)(dof_number);
+    _var_vals_nodal[tid][var_num] = soln(dof_number);
+    _var_vals_old_nodal[tid][var_num] = (*_nonlinear_old_soln)(dof_number);
+    _var_vals_older_nodal[tid][var_num] = (*_nonlinear_older_soln)(dof_number);
   }
 
   const NumericVector<Number>& aux_soln = *_aux_system->solution;
@@ -68,17 +96,17 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Node & node)
     //The zero is the component... that works fine for lagrange FE types.
     unsigned int dof_number = node.dof_number(aux_system_number, var_num, 0);
 
-    _aux_var_dofs[var_num] = dof_number;
-    _aux_var_vals_nodal[var_num] = (*_aux_soln)(dof_number);
-    _aux_var_vals_old_nodal[var_num] = (*_aux_old_soln)(dof_number);
-    _aux_var_vals_older_nodal[var_num] = (*_aux_older_soln)(dof_number);
+    _aux_var_dofs[tid][var_num] = dof_number;
+    _aux_var_vals_nodal[tid][var_num] = (*_aux_soln)(dof_number);
+    _aux_var_vals_old_nodal[tid][var_num] = (*_aux_old_soln)(dof_number);
+    _aux_var_vals_older_nodal[tid][var_num] = (*_aux_older_soln)(dof_number);
   }
 
   Moose::perf_log.pop("reinit(node)","AuxKernel");
 }
 
 void
-AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
+AuxKernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem)
 {
   Moose::perf_log.push("reinit(elem)","AuxKernel");
 
@@ -88,17 +116,17 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
   //Compute the area of the element
   Real area = 0;
   //Just use any old JxW... they are all actually the same
-  const std::vector<Real> & jxw = *(_static_JxW.begin()->second);
+  const std::vector<Real> & jxw = *(_static_JxW[tid].begin()->second);
 
   if( Moose::geom_type == Moose::XYZ)
   {
-    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+    for (unsigned int qp=0; qp<_static_qrule[tid]->n_points(); qp++)
       area += jxw[qp];
   }
   else if (Moose::geom_type == Moose::CYLINDRICAL)
   {  
-    const std::vector<Point> & q_point = *(_static_q_point.begin()->second);
-    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+    const std::vector<Point> & q_point = *(_static_q_point[tid].begin()->second);
+    for (unsigned int qp=0; qp<_static_qrule[tid]->n_points(); qp++)
       area += q_point[qp](0)*jxw[qp];
   }
   else
@@ -116,16 +144,16 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
 
     FEType fe_type = _dof_map->variable_type(var_num);
 
-    const std::vector<Real> & JxW = *_static_JxW[fe_type];
-    const std::vector<Point> & q_point = *_static_q_point[fe_type];
+    const std::vector<Real> & JxW = *_static_JxW[tid][fe_type];
+    const std::vector<Point> & q_point = *_static_q_point[tid][fe_type];
     
-    _var_vals_element[var_num] = integrateValue(_var_vals[var_num], JxW, q_point) / area;
-    _var_vals_old_element[var_num] = integrateValue(_var_vals_old[var_num], JxW, q_point) / area;
-    _var_vals_older_element[var_num] = integrateValue(_var_vals_older[var_num], JxW, q_point) / area;
+    _var_vals_element[tid][var_num] = integrateValue(_var_vals[tid][var_num], JxW, q_point) / area;
+    _var_vals_old_element[tid][var_num] = integrateValue(_var_vals_old[tid][var_num], JxW, q_point) / area;
+    _var_vals_older_element[tid][var_num] = integrateValue(_var_vals_older[tid][var_num], JxW, q_point) / area;
 
-    _var_grads_element[var_num] = integrateGradient(_var_grads[var_num], JxW, q_point) / area;
-    _var_grads_old_element[var_num] = integrateGradient(_var_grads_old[var_num], JxW, q_point) / area;
-    _var_grads_older_element[var_num] = integrateGradient(_var_grads_older[var_num], JxW, q_point) / area;
+    _var_grads_element[tid][var_num] = integrateGradient(_var_grads[tid][var_num], JxW, q_point) / area;
+    _var_grads_old_element[tid][var_num] = integrateGradient(_var_grads_old[tid][var_num], JxW, q_point) / area;
+    _var_grads_older_element[tid][var_num] = integrateGradient(_var_grads_older[tid][var_num], JxW, q_point) / area;
   }
 
   //Now Aux vars
@@ -135,16 +163,16 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
     
     FEType fe_type = _aux_dof_map->variable_type(var_num);
 
-    const std::vector<Real> & JxW = *_static_JxW[fe_type];
-    const std::vector<Point> & q_point = *_static_q_point[fe_type];
+    const std::vector<Real> & JxW = *_static_JxW[tid][fe_type];
+    const std::vector<Point> & q_point = *_static_q_point[tid][fe_type];
     
-    _aux_var_vals_element[var_num] = integrateValue(_aux_var_vals[var_num], JxW, q_point) / area;
-    _aux_var_vals_old_element[var_num] = integrateValue(_aux_var_vals_old[var_num], JxW, q_point) / area;
-    _aux_var_vals_older_element[var_num] = integrateValue(_aux_var_vals_older[var_num], JxW, q_point) / area;
+    _aux_var_vals_element[tid][var_num] = integrateValue(_aux_var_vals[tid][var_num], JxW, q_point) / area;
+    _aux_var_vals_old_element[tid][var_num] = integrateValue(_aux_var_vals_old[tid][var_num], JxW, q_point) / area;
+    _aux_var_vals_older_element[tid][var_num] = integrateValue(_aux_var_vals_older[tid][var_num], JxW, q_point) / area;
 
-    _aux_var_grads_element[var_num] = integrateGradient(_aux_var_grads[var_num], JxW, q_point) / area;
-    _aux_var_grads_old_element[var_num] = integrateGradient(_aux_var_grads_old[var_num], JxW, q_point) / area;
-    _aux_var_grads_older_element[var_num] = integrateGradient(_aux_var_grads_older[var_num], JxW, q_point) / area;
+    _aux_var_grads_element[tid][var_num] = integrateGradient(_aux_var_grads[tid][var_num], JxW, q_point) / area;
+    _aux_var_grads_old_element[tid][var_num] = integrateGradient(_aux_var_grads_old[tid][var_num], JxW, q_point) / area;
+    _aux_var_grads_older_element[tid][var_num] = integrateGradient(_aux_var_grads_older[tid][var_num], JxW, q_point) / area;
   }
 
   //Grab the dof numbers for the element variables
@@ -155,16 +183,16 @@ AuxKernel::reinit(const NumericVector<Number>& soln, const Elem & elem)
     //The zero is the component... that works fine for FIRST order monomials
     unsigned int dof_number = elem.dof_number(aux_system_number, var_num, 0);
 
-    _aux_var_dofs[var_num] = dof_number;
+    _aux_var_dofs[tid][var_num] = dof_number;
   }
 
   Moose::perf_log.pop("reinit(elem)","AuxKernel");
 }
 
 void
-AuxKernel::computeAndStore()
+AuxKernel::computeAndStore(THREAD_ID tid)
 {
-  _aux_soln->set(_aux_var_dofs[_var_num], computeValue());
+  _aux_soln->set(_aux_var_dofs[tid][_var_num], computeValue());
 }
 
 Real &
@@ -179,16 +207,16 @@ AuxKernel::coupledValAux(std::string name)
   if(_nodal)
   {
     if(!isAux(name))
-      return _var_vals_nodal[_coupled_as_to_var_num[name]];
+      return _var_vals_nodal[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_vals_nodal[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_vals_nodal[_tid][_aux_coupled_as_to_var_num[name]];
   }
   else
   {
     if(!isAux(name))
-      return _var_vals_element[_coupled_as_to_var_num[name]];
+      return _var_vals_element[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_vals_element[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_vals_element[_tid][_aux_coupled_as_to_var_num[name]];
   }
 }
 
@@ -205,16 +233,16 @@ AuxKernel::coupledValOldAux(std::string name)
   if(_nodal)
   {
     if(!isAux(name))
-      return _var_vals_old_nodal[_coupled_as_to_var_num[name]];
+      return _var_vals_old_nodal[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_vals_old_nodal[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_vals_old_nodal[_tid][_aux_coupled_as_to_var_num[name]];
   }
   else
   {
     if(!isAux(name))
-      return _var_vals_old_element[_coupled_as_to_var_num[name]];
+      return _var_vals_old_element[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_vals_old_element[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_vals_old_element[_tid][_aux_coupled_as_to_var_num[name]];
   }
 }
 
@@ -231,16 +259,16 @@ AuxKernel::coupledValOlderAux(std::string name)
   if(_nodal)
   {
     if(!isAux(name))
-      return _var_vals_older_nodal[_coupled_as_to_var_num[name]];
+      return _var_vals_older_nodal[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_vals_older_nodal[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_vals_older_nodal[_tid][_aux_coupled_as_to_var_num[name]];
   }
   else
   {
     if(!isAux(name))
-      return _var_vals_older_element[_coupled_as_to_var_num[name]];
+      return _var_vals_older_element[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_vals_older_element[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_vals_older_element[_tid][_aux_coupled_as_to_var_num[name]];
   }  
 }
 
@@ -262,9 +290,9 @@ AuxKernel::coupledGradAux(std::string name)
   else
   {
     if(!isAux(name))
-      return _var_grads_element[_coupled_as_to_var_num[name]];
+      return _var_grads_element[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_grads_element[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_grads_element[_tid][_aux_coupled_as_to_var_num[name]];
   }
 }
 
@@ -285,9 +313,9 @@ AuxKernel::coupledGradOldAux(std::string name)
   else
   {
     if(!isAux(name))
-      return _var_grads_old_element[_coupled_as_to_var_num[name]];
+      return _var_grads_old_element[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_grads_old_element[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_grads_old_element[_tid][_aux_coupled_as_to_var_num[name]];
   }
 }
 
@@ -308,9 +336,9 @@ AuxKernel::coupledGradOlderAux(std::string name)
   else
   {
     if(!isAux(name))
-      return _var_grads_older_element[_coupled_as_to_var_num[name]];
+      return _var_grads_older_element[_tid][_coupled_as_to_var_num[name]];
     else
-      return _aux_var_grads_older_element[_aux_coupled_as_to_var_num[name]];
+      return _aux_var_grads_older_element[_tid][_aux_coupled_as_to_var_num[name]];
   }
 }
 
@@ -322,12 +350,12 @@ AuxKernel::integrateValue(const std::vector<Real> & vals, const std::vector<Real
 
   if( Moose::geom_type == Moose::XYZ)
   {    
-    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+    for (unsigned int qp=0; qp<_static_qrule[0]->n_points(); qp++)
       value += vals[qp]*JxW[qp];
   }
   else if( Moose::geom_type == Moose::CYLINDRICAL )
   {        
-    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+    for (unsigned int qp=0; qp<_static_qrule[0]->n_points(); qp++)
       value += q_point[qp](0)*vals[qp]*JxW[qp];
   }
   else
@@ -346,12 +374,12 @@ AuxKernel::integrateGradient(const std::vector<RealGradient> & grads, const std:
 
   if( Moose::geom_type == Moose::XYZ )
   {  
-    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+    for (unsigned int qp=0; qp<_static_qrule[0]->n_points(); qp++)
       value += grads[qp]*JxW[qp];
   }
   else if( Moose::geom_type == Moose::CYLINDRICAL )
   {
-    for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+    for (unsigned int qp=0; qp<_static_qrule[0]->n_points(); qp++)
       value += q_point[qp](0)*grads[qp]*JxW[qp];
   }
   else
@@ -373,25 +401,26 @@ const NumericVector<Number> * AuxKernel::_aux_old_soln;
 const NumericVector<Number> * AuxKernel::_aux_older_soln;
 
 std::vector<unsigned int> AuxKernel::_nodal_var_nums;
-std::map<unsigned int, Real > AuxKernel::_var_vals_nodal;
-std::map<unsigned int, Real > AuxKernel::_var_vals_old_nodal;
-std::map<unsigned int, Real > AuxKernel::_var_vals_older_nodal;
 
-std::map<unsigned int, unsigned int> AuxKernel::_aux_var_dofs;
-std::map<unsigned int, Real > AuxKernel::_aux_var_vals_nodal;
-std::map<unsigned int, Real > AuxKernel::_aux_var_vals_old_nodal;
-std::map<unsigned int, Real > AuxKernel::_aux_var_vals_older_nodal;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_nodal;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_old_nodal;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_older_nodal;
+
+std::vector<std::map<unsigned int, unsigned int> > AuxKernel::_aux_var_dofs;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_nodal;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_old_nodal;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_older_nodal;
 
 std::vector<unsigned int> AuxKernel::_element_var_nums;
-std::map<unsigned int, Real > AuxKernel::_var_vals_element;
-std::map<unsigned int, Real > AuxKernel::_var_vals_old_element;
-std::map<unsigned int, Real > AuxKernel::_var_vals_older_element;
-std::map<unsigned int, RealGradient > AuxKernel::_var_grads_element;
-std::map<unsigned int, RealGradient > AuxKernel::_var_grads_old_element;
-std::map<unsigned int, RealGradient > AuxKernel::_var_grads_older_element;
-std::map<unsigned int, Real > AuxKernel::_aux_var_vals_element;
-std::map<unsigned int, Real > AuxKernel::_aux_var_vals_old_element;
-std::map<unsigned int, Real > AuxKernel::_aux_var_vals_older_element;
-std::map<unsigned int, RealGradient > AuxKernel::_aux_var_grads_element;
-std::map<unsigned int, RealGradient > AuxKernel::_aux_var_grads_old_element;
-std::map<unsigned int, RealGradient > AuxKernel::_aux_var_grads_older_element;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_element;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_old_element;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_older_element;
+std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_var_grads_element;
+std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_var_grads_old_element;
+std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_var_grads_older_element;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_element;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_old_element;
+std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_older_element;
+std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_aux_var_grads_element;
+std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_aux_var_grads_old_element;
+std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_aux_var_grads_older_element;

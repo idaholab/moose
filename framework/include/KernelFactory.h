@@ -49,6 +49,7 @@ public:
     static KernelFactory * instance;
     if(!instance)
       instance=new KernelFactory;
+    
     return instance;
   }
 
@@ -66,9 +67,16 @@ public:
                std::vector<std::string> coupled_to=std::vector<std::string>(0),
                std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    Kernel * kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+    Kernel * kernel;
+    
+    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    {
+      Moose::current_thread_id = tid;
 
-    active_kernels.push_back(kernel);
+      kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+
+      active_kernels[tid].push_back(kernel);
+    }
 
     return kernel;
   }
@@ -82,9 +90,16 @@ public:
                std::vector<std::string> coupled_as,
                unsigned int block_id)
   {
-    Kernel * kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+    Kernel * kernel;
+    
+    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    {
+      Moose::current_thread_id = tid;
+      
+      kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
 
-    block_kernels[block_id].push_back(kernel);
+      block_kernels[tid][block_id].push_back(kernel);
+    }
 
     return kernel;
   }
@@ -99,22 +114,26 @@ public:
     return name_to_params_pointer[name]();
   }
 
-  std::vector<Kernel *>::iterator activeKernelsBegin(){ return active_kernels.begin(); };
-  std::vector<Kernel *>::iterator activeKernelsEnd(){ return active_kernels.end(); };
+  std::vector<Kernel *>::iterator activeKernelsBegin(THREAD_ID tid){ return active_kernels[tid].begin(); };
+  std::vector<Kernel *>::iterator activeKernelsEnd(THREAD_ID tid){ return active_kernels[tid].end(); };
 
-  std::vector<Kernel *>::iterator blockKernelsBegin(unsigned int block_id){ return block_kernels[block_id].begin(); };
-  std::vector<Kernel *>::iterator blockKernelsEnd(unsigned int block_id){ return block_kernels[block_id].end(); };
+  std::vector<Kernel *>::iterator blockKernelsBegin(THREAD_ID tid, unsigned int block_id){ return block_kernels[tid][block_id].begin(); };
+  std::vector<Kernel *>::iterator blockKernelsEnd(THREAD_ID tid, unsigned int block_id){ return block_kernels[tid][block_id].end(); };
 
 private:
-  KernelFactory(){}
+  KernelFactory()
+  {
+    active_kernels.resize(libMesh::n_threads());
+    block_kernels.resize(libMesh::n_threads());
+  }
   virtual ~KernelFactory(){}
 
   std::map<std::string, kernelBuildPtr> name_to_build_pointer;
   std::map<std::string, kernelParamsPtr> name_to_params_pointer;
 
-  std::vector<Kernel *> active_kernels;
+  std::vector<std::vector<Kernel *> > active_kernels;
 
-  std::map<unsigned int, std::vector<Kernel *> > block_kernels;
+  std::vector<std::map<unsigned int, std::vector<Kernel *> > > block_kernels;
 };
 
 #endif //KERNELFACTORY_H

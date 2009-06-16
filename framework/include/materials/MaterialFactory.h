@@ -62,7 +62,12 @@ public:
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
            std::vector<std::string> coupled_as=std::vector<std::string>(0))
   {
-    active_materials[block_id] = (*name_to_build_pointer[mat_name])(name,parameters,block_id,coupled_to,coupled_as);
+    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    {
+      Moose::current_thread_id = tid;
+
+      active_materials[tid][block_id] = (*name_to_build_pointer[mat_name])(name,parameters,block_id,coupled_to,coupled_as);
+    }
   }
 
   Parameters getValidParams(std::string name)
@@ -75,24 +80,27 @@ public:
     return name_to_params_pointer[name]();
   }
 
-  Material * getMaterial(unsigned int block_id)
+  Material * getMaterial(THREAD_ID tid, unsigned int block_id)
   {
-    return active_materials[block_id];
+    return active_materials[tid][block_id];
   }
 
   void updateMaterialDataState();
 
-  std::map<int, Material *>::iterator activeMaterialsBegin() { return active_materials.begin(); }
-  std::map<int, Material *>::iterator activeMaterialsEnd() { return active_materials.end(); }
+  std::map<int, Material *>::iterator activeMaterialsBegin(THREAD_ID tid) { return active_materials[tid].begin(); }
+  std::map<int, Material *>::iterator activeMaterialsEnd(THREAD_ID tid) { return active_materials[tid].end(); }
 
 private:
-  MaterialFactory(){}
+  MaterialFactory()
+  {
+    active_materials.resize(libMesh::n_threads());
+  }
   virtual ~MaterialFactory(){}
 
   std::map<std::string, MaterialBuildPtr> name_to_build_pointer;
   std::map<std::string, MaterialParamsPtr> name_to_params_pointer;
 
-  std::map<int, Material *> active_materials;
+  std::vector<std::map<int, Material *> > active_materials;
 };
 
 #endif //MATERIALFACTORY_H

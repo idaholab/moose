@@ -25,9 +25,22 @@
 
 #include "Moose.h"
 
+#include "ParallelUniqueId.h"
+
 void
 Moose::registerObjects()
 {
+  static bool first = true;
+  if(first)
+  {
+    first = false;
+    ParallelUniqueId::initialize();
+
+    Kernel::sizeEverything();
+    BoundaryCondition::sizeEverything();
+    AuxKernel::sizeEverything();
+  }
+
   KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
   KernelFactory::instance()->registerKernel<Diffusion>("Diffusion");
   KernelFactory::instance()->registerKernel<Reaction>("Reaction");
@@ -52,6 +65,7 @@ Moose::registerObjects()
 /******************
  * Global Variables
  * ****************/
+THREAD_ID Moose::current_thread_id;
 
 Mesh * Moose::mesh;
 EquationSystems * Moose::equation_system;
