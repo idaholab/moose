@@ -14,5 +14,5 @@ ifeq ($(enable-shared),yes)
 endif
 
 libmesh_INCLUDE := -I$(MOOSE_DIR)/include -I$(MOOSE_DIR)/include/materials $(libmesh_INCLUDE)
-libmesh_LIBS := $(libmesh_LIBS) $(moose_LIB) -Wl,-rpath,$(MOOSE_DIR)
+libmesh_LIBS := $(moose_LIB) $(libmesh_LIBS) -Wl,-rpath,$(MOOSE_DIR)
 
