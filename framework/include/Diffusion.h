@@ -1,7 +1,8 @@
-#include "Kernel.h"
-
 #ifndef DIFFUSION_H
 #define DIFFUSION_H
+
+#include "Kernel.h"
+
 //Forward Declarations
 class Diffusion;
 
@@ -13,20 +14,14 @@ public:
             Parameters parameters,
             std::string var_name,
             std::vector<std::string> coupled_to=std::vector<std::string>(0),
-            std::vector<std::string> coupled_as=std::vector<std::string>(0))
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as)
-  {}
+            std::vector<std::string> coupled_as=std::vector<std::string>(0));
+  
+    
 
 protected:
-  virtual Real computeQpResidual()
-  {
-    return _dphi[_i][_qp]*_grad_u[_qp];
-  }
+  virtual Real computeQpResidual();
 
-  virtual Real computeQpJacobian()
-  {
-    return _dphi[_i][_qp]*_dphi[_j][_qp];
-  }
-
+  virtual Real computeQpJacobian();
+  
 };
 #endif //DIFFUSION_H

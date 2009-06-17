@@ -1,7 +1,8 @@
-#include "BoundaryCondition.h"
-
 #ifndef MATCHEDVALUEBC_H
 #define MATCHEDVALUEBC_H
+
+#include "BoundaryCondition.h"
+
 
 //Forward Declarations
 class MatchedValueBC;
@@ -15,18 +16,12 @@ Parameters valid_params<MatchedValueBC>();
 class MatchedValueBC : public BoundaryCondition
 {
 public:
-  MatchedValueBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, false, boundary_id, coupled_to, coupled_as),
-    _v_face(coupledValFace("v"))
-  {}
+  MatchedValueBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
     
-  virtual ~MatchedValueBC(){}
+  virtual ~MatchedValueBC() {}
 
 protected:
-  virtual Real computeQpResidual()
-  {
-    return _u_face[_qp]-_v_face[_qp];
-  }
+  virtual Real computeQpResidual();
 
 private:
   std::vector<Real> & _v_face;

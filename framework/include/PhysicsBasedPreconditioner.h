@@ -27,7 +27,9 @@ public:
   /**
    * Destructor.
    */
-  virtual ~PhysicsBasedPreconditioner ();  
+  virtual ~PhysicsBasedPreconditioner ();
+  
+    
 
   /**
    * Computes the preconditioned vector "y" based on input "x".

@@ -1,10 +1,11 @@
+#ifndef VECTORNEUMANNBC_H
+#define VECTORNEUMANNBC_H
+
 #include "BoundaryCondition.h"
 
 //libMesh includes
 #include "vector_value.h"
 
-#ifndef VECTORNEUMANNBC_H
-#define VECTORNEUMANNBC_H
 
 //Forward Declarations
 class VectorNeumannBC;
@@ -24,22 +25,13 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  VectorNeumannBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as)
-  {
-    _value(0)=_parameters.get<Real>("value0");
-    _value(1)=_parameters.get<Real>("value1");
-    _value(2)=_parameters.get<Real>("value2");
-  }
-
-  virtual ~VectorNeumannBC(){}
+  VectorNeumannBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+  
+ virtual ~VectorNeumannBC(){}
 
 protected:
-  virtual Real computeQpResidual()
-  {
-    return -_phi_face[_i][_qp]*(_value*_normals_face[_qp]);
-  }
-
+  virtual Real computeQpResidual();
+  
 private:
   /**
    * Vector to dot with the normal.

@@ -1,7 +1,8 @@
-#include "BoundaryCondition.h"
-
 #ifndef VACUUMBC_H
 #define VACUUMBC_H
+
+#include "BoundaryCondition.h"
+
 
 //Forward Declarations
 class VacuumBC;
@@ -23,22 +24,14 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  VacuumBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as),
-    _alpha(_parameters.get<Real>("alpha"))
-  {}
+  VacuumBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
   virtual ~VacuumBC(){}
 
 protected:
-  virtual Real computeQpResidual()
-  {
-    return _phi_face[_i][_qp]*_alpha*_u_face[_qp]/2.;
-  }
-  virtual Real computeQpJacobian()
-  {
-    return _phi_face[_i][_qp]*_alpha*_phi_face[_j][_qp]/2.;    
-  }
+  virtual Real computeQpResidual();
+  
+  virtual Real computeQpJacobian();
 
 private:
   /**

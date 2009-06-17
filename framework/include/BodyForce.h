@@ -1,7 +1,8 @@
-#include "Kernel.h"
-
 #ifndef BODYFORCE_H
 #define BODYFORCE_H
+
+#include "Kernel.h"
+
 
 //Forward Declarations
 class BodyForce;
@@ -17,16 +18,10 @@ public:
             Parameters parameters,
             std::string var_name,
             std::vector<std::string> coupled_to=std::vector<std::string>(0),
-            std::vector<std::string> coupled_as=std::vector<std::string>(0))
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
-    _value(_parameters.get<Real>("value"))
-  {}
+            std::vector<std::string> coupled_as=std::vector<std::string>(0));
   
 protected:
-  virtual Real computeQpResidual()
-  {
-    return _phi[_i][_qp]*-_value;
-  }
+  virtual Real computeQpResidual();
 
 private:
   Real _value;

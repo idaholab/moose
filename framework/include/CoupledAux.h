@@ -1,7 +1,8 @@
-#include "AuxKernel.h"
-
 #ifndef COUPLEDAUX_H
 #define COUPLEDAUX_H
+
+#include "AuxKernel.h"
+
 
 //Forward Declarations
 class CoupledAux;
@@ -26,7 +27,7 @@ public:
             std::vector<std::string> coupled_to,
             std::vector<std::string> coupled_as);
 
-  virtual ~CoupledAux(){}
+  virtual ~CoupledAux() {}
   
 protected:
   virtual Real computeValue();

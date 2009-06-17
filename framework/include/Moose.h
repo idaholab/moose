@@ -1,3 +1,5 @@
+#ifndef MOOSE_H
+#define MOOSE_H
 //libMesh includes
 #include "perf_log.h"
 #include "parameters.h"
@@ -9,10 +11,11 @@ class EquationSystems;
 
 #define MAX_VARS 1000
 
+
+
 typedef unsigned int THREAD_ID;
 
-#ifndef MOOSE_H
-#define MOOSE_H
+
 
 #include <vector>
 

@@ -195,6 +195,18 @@ AuxKernel::computeAndStore(THREAD_ID tid)
   _aux_soln->set(_aux_var_dofs[tid][_var_num], computeValue());
 }
 
+bool
+AuxKernel::isNodal()
+  {
+    return _nodal;
+  }
+
+Real
+AuxKernel::computeQpResidual()
+  {
+    return 0;
+  }
+
 Real &
 AuxKernel::coupledValAux(std::string name)
 {

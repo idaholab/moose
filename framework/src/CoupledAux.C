@@ -19,6 +19,7 @@ CoupledAux::CoupledAux(std::string name,
    _value(_parameters.get<Real>("value"))
 {}
 
+
 Real
 CoupledAux::computeValue()
 {

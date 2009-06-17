@@ -1,10 +1,11 @@
+#ifndef POLYNOMIALFIT_H
+#define POLYNOMIALFIT_H
+
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <string>
 
-#ifndef POLYNOMIALFIT_H
-#define POLYNOMIALFIT_H
 
 /**
  * This class applies the Least Squares algorithm to a set of points to provide a smooth curve for
@@ -25,7 +26,7 @@ public:
   PolynomialFit(std::vector<double> X, std::vector<double> Y, unsigned int order, bool truncate_order = false);
 
   virtual ~PolynomialFit()
-    {};
+    {}
 
   /**
    * This function generates the polynomial fit.  This function must be called prior to using

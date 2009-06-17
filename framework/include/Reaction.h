@@ -1,7 +1,8 @@
-#include "Kernel.h"
-
 #ifndef REACTION_H
 #define REACTION_H
+
+#include "Kernel.h"
+
 
 //Forward Declarations
 class Reaction;
@@ -14,18 +15,11 @@ public:
            Parameters parameters,
            std::string var_name,
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
-           std::vector<std::string> coupled_as=std::vector<std::string>(0))
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as)
-  {}
-  
+           std::vector<std::string> coupled_as=std::vector<std::string>(0));
+
 protected:
-  virtual Real computeQpResidual()
-  {
-    return _phi[_i][_qp]*_u[_qp];
-  }
-  virtual Real computeQpJacobian()
-  {
-    return _phi[_i][_qp]*_phi[_j][_qp];
-  }
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+
 };
 #endif //REACTION_H

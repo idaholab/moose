@@ -17,6 +17,7 @@ ConstantAux::ConstantAux(std::string name,
    _value(_parameters.get<Real>("value"))
 {}
 
+
 Real
 ConstantAux::computeValue()
 {

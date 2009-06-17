@@ -1,7 +1,8 @@
-#include "AuxKernel.h"
-
 #ifndef CONSTANTAUX_H
 #define CONSTANTAUX_H
+
+#include "AuxKernel.h"
+
 
 //Forward Declarations
 class ConstantAux;
@@ -26,7 +27,7 @@ public:
             std::vector<std::string> coupled_to,
             std::vector<std::string> coupled_as);
 
-  virtual ~ConstantAux(){}
+  virtual ~ConstantAux() {}
   
 protected:
   virtual Real computeValue();

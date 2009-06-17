@@ -1,7 +1,7 @@
-#include "Kernel.h"
-
 #ifndef AUXKERNEL_H
 #define AUXKERNEL_H
+
+#include "Kernel.h"
 
 /** 
  * AuxKernels compute values at nodes.
@@ -44,18 +44,14 @@ public:
 
   void computeAndStore(THREAD_ID tid);
 
-  bool isNodal()
-  {
-    return _nodal;
-  }
+  bool isNodal();
+  
   
 protected:
   virtual Real computeValue() = 0;
 
-  virtual Real computeQpResidual()
-  {
-    return 0;
-  }
+  virtual Real computeQpResidual();
+  
 
   bool _nodal;
 
