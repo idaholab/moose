@@ -310,12 +310,113 @@ protected:
 #endif
 
     update_aux_vars(soln);
-
+/*
     Threads::parallel_for(ConstElemRange(Moose::mesh->active_local_elements_begin(),
                                          Moose::mesh->active_local_elements_end(),1),
                           ComputeInternalJacobianBlocks(soln, jacobian, precond_system, ivar, jvar));
+*/
     
+  {
+    unsigned int tid = 0;
+    
+    MeshBase::const_element_iterator el = Moose::mesh->active_local_elements_begin();
+    const MeshBase::const_element_iterator end_el = Moose::mesh->active_local_elements_end();
 
+    std::vector<Kernel *>::iterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
+    std::vector<Kernel *>::iterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
+    std::vector<Kernel *>::iterator kernel_it = kernel_begin;
+
+    std::vector<Kernel *>::iterator block_kernel_begin;
+    std::vector<Kernel *>::iterator block_kernel_end;
+    std::vector<Kernel *>::iterator block_kernel_it;
+
+    unsigned int subdomain = 999999999;
+
+    DofMap & dof_map = precond_system.get_dof_map();
+    DenseMatrix<Number> Ke;
+    std::vector<unsigned int> dof_indices;
+
+    jacobian.zero();
+
+    for (; el != end_el; ++el)
+    {
+      const Elem* elem = *el;
+
+      Kernel::reinit(tid, soln, elem, NULL, NULL);
+
+      dof_map.dof_indices(elem, dof_indices);
+
+      Ke.resize(dof_indices.size(),dof_indices.size());
+
+      unsigned int cur_subdomain = elem->subdomain_id();
+
+      if(cur_subdomain != subdomain)
+      {
+        subdomain = cur_subdomain;
+
+        Material * material = MaterialFactory::instance()->getMaterial(tid, subdomain);
+        material->subdomainSetup();
+
+        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(tid, subdomain);
+        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(tid, subdomain);
+      
+        //Global Kernels
+        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+          (*kernel_it)->subdomainSetup();
+
+        //Kernels on this block
+        for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
+          (*block_kernel_it)->subdomainSetup();
+      } 
+    
+      //Global Kernels
+      for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+      {
+        Kernel * kernel = *kernel_it;
+
+        if(kernel->variable() == ivar)
+          kernel->computeOffDiagJacobian(Ke,jvar);
+      }
+
+      //Kernels on this block
+      for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
+      {
+        Kernel * block_kernel = *block_kernel_it;
+
+        if(block_kernel->variable() == ivar)
+          block_kernel->computeOffDiagJacobian(Ke,jvar);
+      }
+
+      for (unsigned int side=0; side<elem->n_sides(); side++)
+      {
+        if (elem->neighbor(side) == NULL)
+        {
+          unsigned int boundary_id = mesh->boundary_info->boundary_id (elem, side);
+
+          std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeBCsBegin(tid,boundary_id);
+          std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeBCsEnd(tid,boundary_id);
+
+          if(bc_it != bc_end)
+          {
+            BoundaryCondition::reinit(tid, soln, side, boundary_id);
+          
+            for(; bc_it!=bc_end; ++bc_it)
+            {
+              BoundaryCondition * bc = *bc_it;
+
+              if(bc->variable() == ivar)
+                bc->computeJacobianBlock(Ke,ivar,jvar);
+            }
+          }
+        }
+      }    
+
+      dof_map.constrain_element_matrix (Ke, dof_indices, false);
+
+      jacobian.add_matrix(Ke, dof_indices);
+    }
+  }
+    
     jacobian.close();
 
     //Dirichlet BCs
@@ -349,6 +450,8 @@ protected:
         }
       }
     }
+
+    jacobian.close();
 
     //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
     jacobian.zero_rows(zero_rows, 1.0);
