@@ -1,5 +1,6 @@
 # $Id: Makefile 2501 2007-11-20 02:33:29Z benkirk $
 
+MOOSE_DIR ?= $(shell pwd)
 
 # The location of the mesh library
 meshdir := $(LIBMESH_DIR)
@@ -30,10 +31,10 @@ objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 ###############################################################################
 # Target:
 #
-target := ./libmoose-$(METHOD)$(static_libext)
+target := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
 
 ifeq ($(enable-shared),yes)
-  target := ./libmoose-$(METHOD)$(shared_libext)
+  target := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
 endif
 
 all:: Makefile.export $(target)
