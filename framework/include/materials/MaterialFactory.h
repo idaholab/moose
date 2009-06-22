@@ -63,16 +63,8 @@ public:
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
            std::vector<std::string> coupled_as=std::vector<std::string>(0));
   
-  Parameters getValidParams(std::string name)
-  {
-    if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
-    {
-      std::cerr<<std::endl<<"A _"<<name<<"_ is not registered Material "<<std::endl<<std::endl;
-      error();
-    }
-    return name_to_params_pointer[name]();
-  }
-
+  Parameters getValidParams(std::string name);
+  
   Material * getMaterial(THREAD_ID tid, unsigned int block_id)
   {
     return active_materials[tid][block_id];

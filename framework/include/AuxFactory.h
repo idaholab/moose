@@ -107,24 +107,16 @@ public:
     return aux;
   }
 
-  Parameters getValidParams(std::string name)
-  {
-    if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
-    {
-      std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Aux "<<std::endl<<std::endl;
-      error();
-    }
-    return name_to_params_pointer[name]();
-  }
+  Parameters getValidParams(std::string name);
+  
+  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsBegin(THREAD_ID tid);
+  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsEnd(THREAD_ID tid);
 
-  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsBegin(THREAD_ID tid){ return active_NodalAuxKernels[tid].begin(); };
-  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsEnd(THREAD_ID tid){ return active_NodalAuxKernels[tid].end(); };
+  std::vector<AuxKernel *>::iterator activeElementAuxKernelsBegin(THREAD_ID tid);
+  std::vector<AuxKernel *>::iterator activeElementAuxKernelsEnd(THREAD_ID tid);
 
-  std::vector<AuxKernel *>::iterator activeElementAuxKernelsBegin(THREAD_ID tid){ return active_ElementAuxKernels[tid].begin(); };
-  std::vector<AuxKernel *>::iterator activeElementAuxKernelsEnd(THREAD_ID tid){ return active_ElementAuxKernels[tid].end(); };
-
-  std::vector<AuxKernel *>::iterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id){ return active_bcs[tid][boundary_id].begin(); };
-  std::vector<AuxKernel *>::iterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id){ return active_bcs[tid][boundary_id].end(); };
+  std::vector<AuxKernel *>::iterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id);
+  std::vector<AuxKernel *>::iterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id);
 
 private:
   AuxFactory();

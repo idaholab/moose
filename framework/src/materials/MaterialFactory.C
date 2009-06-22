@@ -17,6 +17,17 @@
     }
   }
 
+Parameters
+MaterialFactory::getValidParams(std::string name)
+  {
+    if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
+    {
+      std::cerr<<std::endl<<"A _"<<name<<"_ is not registered Material "<<std::endl<<std::endl;
+      error();
+    }
+    return name_to_params_pointer[name]();
+  }
+
 void MaterialFactory::updateMaterialDataState()
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -33,3 +44,4 @@ MaterialFactory::MaterialFactory()
   {
     active_materials.resize(libMesh::n_threads());
   }
+
