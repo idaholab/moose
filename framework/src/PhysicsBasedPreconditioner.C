@@ -19,6 +19,98 @@
 #include "HYPRE_parcsr_ls.h"
 */
 
+
+void
+PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector<Number> & y)
+{
+  Moose::perf_log.push("apply()","PhysicsBasedPreconditioner");
+
+  // -2 to take into account the Nonlinear system and the Auxilliary System
+  const unsigned int num_systems = _equation_systems->n_systems()-2;
+  
+  TransientNonlinearImplicitSystem & system = _equation_systems->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+
+  MeshBase & mesh = _equation_systems->get_mesh();
+
+  //Zero out the solution vectors
+  for(unsigned int sys=1; sys<num_systems+1; sys++)
+  {
+    LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
+    u_system.solution->zero();
+  }
+  
+  //Loop over solve order
+  for(unsigned int i=0; i<_solve_order.size(); i++)
+  {
+    //+1 to take into acount the Nonlinear system
+    unsigned int sys = _solve_order[i]+1;
+    
+    //By convention
+    unsigned int system_var = sys-1;
+      
+    LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
+
+    //Copy rhs from the big system into the small one
+    copyVarValues(mesh,0,system_var,x,sys,0,*u_system.rhs);
+
+//    std::cout<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(system_var)<<std::endl;
+
+    //Modify the RHS by subtracting off the matvecs of the solutions for the other preconditioning
+    //systems with the off diagonal blocks in this system.
+    for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
+    {
+      unsigned int coupled_var = _off_diag[system_var][diag];
+
+//      std::cout<<" "<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(coupled_var)<<std::endl;
+
+      //By convention
+      unsigned int coupled_sys = coupled_var+1;
+      
+      LinearImplicitSystem & coupled_system = _equation_systems->get_system<LinearImplicitSystem>(coupled_sys);
+
+      SparseMatrix<Number> & off_diag = *_off_diag_mats[system_var][diag];
+
+      NumericVector<Number> & rhs = *u_system.rhs;
+
+      //This next bit computes rhs -= A*coupled_solution
+      //It does what it does because there is no vector_mult_sub()
+      rhs.close();
+      rhs.scale(-1.0);
+      rhs.close();
+      off_diag.vector_mult_add(rhs,*coupled_system.solution);
+      rhs.close();
+      rhs.scale(-1.0);
+      rhs.close();
+    }      
+
+    //Apply the preconditioner to the small system
+    _preconditioners[system_var]->apply(*u_system.rhs,*u_system.solution);
+    
+    //Copy solution from small system into the big one
+    //copyVarValues(mesh,sys,0,*u_system.solution,0,system_var,y);
+  }
+
+  //Copy the solutions out
+  for(unsigned int sys=1; sys<num_systems+1; sys++)
+  {
+    //By convention
+    unsigned int system_var = sys-1;
+
+    LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
+
+    copyVarValues(mesh,sys,0,*u_system.solution,0,system_var,y);
+  }
+
+
+
+  Moose::perf_log.pop("apply()","PhysicsBasedPreconditioner");
+}
+
+void
+PhysicsBasedPreconditioner::clear ()
+{
+}
+
 void
 PhysicsBasedPreconditioner::init ()
 {
@@ -139,89 +231,33 @@ PhysicsBasedPreconditioner::init ()
 }
 
 void
-PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector<Number> & y)
+PhysicsBasedPreconditioner::setEq(EquationSystems & equation_systems)
 {
-  Moose::perf_log.push("apply()","PhysicsBasedPreconditioner");
+  _equation_systems = &equation_systems;
+}
 
-  // -2 to take into account the Nonlinear system and the Auxilliary System
-  const unsigned int num_systems = _equation_systems->n_systems()-2;
-  
-  TransientNonlinearImplicitSystem & system = _equation_systems->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+void
+PhysicsBasedPreconditioner::setComputeJacobianBlock(void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar))
+{
+  _compute_jacobian_block = compute_jacobian_block;
+}
 
-  MeshBase & mesh = _equation_systems->get_mesh();
+void
+PhysicsBasedPreconditioner::setSolveOrder(std::vector<unsigned int> solve_order)
+{
+  _solve_order = solve_order;
+}
 
-  //Zero out the solution vectors
-  for(unsigned int sys=1; sys<num_systems+1; sys++)
-  {
-    LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
-    u_system.solution->zero();
-  }
-  
-  //Loop over solve order
-  for(unsigned int i=0; i<_solve_order.size(); i++)
-  {
-    //+1 to take into acount the Nonlinear system
-    unsigned int sys = _solve_order[i]+1;
-    
-    //By convention
-    unsigned int system_var = sys-1;
-      
-    LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
+void
+PhysicsBasedPreconditioner::setPreconditionerType(std::vector<PreconditionerType> pre_type)
+{
+  _pre_type = pre_type;
+}
 
-    //Copy rhs from the big system into the small one
-    copyVarValues(mesh,0,system_var,x,sys,0,*u_system.rhs);
-
-//    std::cout<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(system_var)<<std::endl;
-
-    //Modify the RHS by subtracting off the matvecs of the solutions for the other preconditioning
-    //systems with the off diagonal blocks in this system.
-    for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
-    {
-      unsigned int coupled_var = _off_diag[system_var][diag];
-
-//      std::cout<<" "<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(coupled_var)<<std::endl;
-
-      //By convention
-      unsigned int coupled_sys = coupled_var+1;
-      
-      LinearImplicitSystem & coupled_system = _equation_systems->get_system<LinearImplicitSystem>(coupled_sys);
-
-      SparseMatrix<Number> & off_diag = *_off_diag_mats[system_var][diag];
-
-      NumericVector<Number> & rhs = *u_system.rhs;
-
-      //This next bit computes rhs -= A*coupled_solution
-      //It does what it does because there is no vector_mult_sub()
-      rhs.close();
-      rhs.scale(-1.0);
-      rhs.close();
-      off_diag.vector_mult_add(rhs,*coupled_system.solution);
-      rhs.close();
-      rhs.scale(-1.0);
-      rhs.close();
-    }      
-
-    //Apply the preconditioner to the small system
-    _preconditioners[system_var]->apply(*u_system.rhs,*u_system.solution);
-    
-    //Copy solution from small system into the big one
-    //copyVarValues(mesh,sys,0,*u_system.solution,0,system_var,y);
-  }
-
-  //Copy the solutions out
-  for(unsigned int sys=1; sys<num_systems+1; sys++)
-  {
-    //By convention
-    unsigned int system_var = sys-1;
-
-    LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
-
-    copyVarValues(mesh,sys,0,*u_system.solution,0,system_var,y);
-  }
-
-
-
-  Moose::perf_log.pop("apply()","PhysicsBasedPreconditioner");
+void
+PhysicsBasedPreconditioner::setOffDiagBlocks(std::vector<std::vector<unsigned int> > off_diag)
+{
+  _off_diag = off_diag;
 }
 
 void

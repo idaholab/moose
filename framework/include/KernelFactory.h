@@ -105,28 +105,17 @@ public:
     return kernel;
   }
 
-  Parameters getValidParams(std::string name)
-  {
-    if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
-    {
-      std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Kernel "<<std::endl<<std::endl;
-      error();
-    }
-    return name_to_params_pointer[name]();
-  }
+  Parameters getValidParams(std::string name);
+  
+  std::vector<Kernel *>::iterator activeKernelsBegin(THREAD_ID tid);
+  std::vector<Kernel *>::iterator activeKernelsEnd(THREAD_ID tid);
 
-  std::vector<Kernel *>::iterator activeKernelsBegin(THREAD_ID tid){ return active_kernels[tid].begin(); };
-  std::vector<Kernel *>::iterator activeKernelsEnd(THREAD_ID tid){ return active_kernels[tid].end(); };
-
-  std::vector<Kernel *>::iterator blockKernelsBegin(THREAD_ID tid, unsigned int block_id){ return block_kernels[tid][block_id].begin(); };
-  std::vector<Kernel *>::iterator blockKernelsEnd(THREAD_ID tid, unsigned int block_id){ return block_kernels[tid][block_id].end(); };
+  std::vector<Kernel *>::iterator blockKernelsBegin(THREAD_ID tid, unsigned int block_id);
+  std::vector<Kernel *>::iterator blockKernelsEnd(THREAD_ID tid, unsigned int block_id);
 
 private:
-  KernelFactory()
-  {
-    active_kernels.resize(libMesh::n_threads());
-    block_kernels.resize(libMesh::n_threads());
-  }
+  KernelFactory();
+
   virtual ~KernelFactory() 
     {
 

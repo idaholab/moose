@@ -40,7 +40,7 @@ public:
   /**
    * Release all memory and clear data structures.
    */
-  virtual void clear () {}
+  virtual void clear ();
 
   /**
    * Initialize data structures if not done so already.
@@ -50,21 +50,19 @@ public:
   /**
    * Set the equation_systems object.
    */
-  void setEq(EquationSystems & equation_systems){_equation_systems = &equation_systems;}
+  void setEq(EquationSystems & equation_systems);
 
   /**
    * Set a function pointer for how to evaluate a block of the "Jacobian"
    */
-  void setComputeJacobianBlock(void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar))
-  {_compute_jacobian_block = compute_jacobian_block;}
-
+  void setComputeJacobianBlock(void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar));
+  
   /**
    * Set the order the block rows are solved for.  If not set then the solve happens in the order
    * the variables were added to the NonlinearSystem.
    */
-  void setSolveOrder(std::vector<unsigned int> solve_order)
-  { _solve_order = solve_order; }
-
+  void setSolveOrder(std::vector<unsigned int> solve_order);
+  
   /**
    * Sets the preconditioner type to use for each solve.
    * These are in the same order as the variable numbers in the
@@ -74,9 +72,8 @@ public:
    * everything.
    * 
    */
-  void setPreconditionerType(std::vector<PreconditionerType> pre_type)
-  { _pre_type = pre_type; }
-
+  void setPreconditionerType(std::vector<PreconditionerType> pre_type);
+  
   /**
    * Set which off diagonal blocks need to get computed and used by the preconditioner.
    * off_diag[number] should be a vector of the off diagonal blocks needed by var_num = number.
@@ -84,9 +81,8 @@ public:
    * variable 1 corresponding to variable 3 off_diag[1] should have 3 in it somewhere. The
    * order of the off diagnal blocks doesn't matter.
    */
-  void setOffDiagBlocks(std::vector<std::vector<unsigned int> > off_diag)
-  { _off_diag = off_diag; }
-
+  void setOffDiagBlocks(std::vector<std::vector<unsigned int> > off_diag);
+  
   /**
    * Helper function for copying values associated with variables in vectors from two different systems.
    */

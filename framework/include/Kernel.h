@@ -118,12 +118,12 @@ public:
    * that should only be done once per subdomain.  In particular this is where references to material
    * property vectors should be initialized.
    */
-  virtual void subdomainSetup() {}
+  virtual void subdomainSetup();
 
   /**
    * The variable number that this kernel operates on.
    */
-  unsigned int variable(){return _var_num;}
+  unsigned int variable();
 
   /**
    * Computes the modified variable number for an auxiliary variable.
@@ -158,27 +158,18 @@ protected:
   /** 
    * This is the virtual that derived classes should override for computing the Jacobian.
    */
-  virtual Real computeQpJacobian()
-  {
-    return 0;
-  }
-
+  virtual Real computeQpJacobian();
+  
   /** 
    * This is the virtual that derived classes should override for computing an off-diagonal jacobian component.
    */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar)
-  {
-    return 0;
-  }
-
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  
   /** 
    * This is the virtual that derived classes should override for computing the volume integral of kernel.
    */
-  virtual Real computeQpIntegral()
-  {
-    return 0;
-  }
-
+  virtual Real computeQpIntegral();
+  
   /**
    * Name of the variable being solved for.
    */

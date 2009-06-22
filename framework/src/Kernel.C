@@ -708,11 +708,40 @@ Kernel::computeQpSecondSolution(RealTensor & second_u, const NumericVector<Numbe
   }
 }
 
+void
+Kernel::subdomainSetup()
+{
+}
+
+unsigned int
+Kernel::variable()
+{
+  return _var_num;
+}
+
 bool
 Kernel::modifiedAuxVarNum(unsigned int var_num)
 {
   return MAX_VARS + var_num;
 }
+
+Real
+Kernel::computeQpJacobian()
+  {
+    return 0;
+  }
+
+Real
+Kernel::computeQpOffDiagJacobian(unsigned int jvar)
+  {
+    return 0;
+  }
+
+Real
+Kernel::computeQpIntegral()
+  {
+    return 0;
+  }
 
 bool
 Kernel::isAux(std::string name)
