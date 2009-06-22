@@ -1,3 +1,6 @@
+#ifndef MATERIALFACTORY_H
+#define MATERIALFACTORY_H
+
 #include "Material.h"
 
 // System includes
@@ -8,8 +11,6 @@
 // LibMesh includes
 #include <parameters.h>
 
-#ifndef MATERIALFACTORY_H
-#define MATERIALFACTORY_H
 
 /**
  * Typedef to make things easier.
@@ -41,7 +42,7 @@ class MaterialFactory
 {
 public:
   static MaterialFactory * instance()
-  {
+     {
     static MaterialFactory * instance;
     if(!instance)
       instance=new MaterialFactory;
@@ -60,16 +61,8 @@ public:
            Parameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
-           std::vector<std::string> coupled_as=std::vector<std::string>(0))
-  {
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      Moose::current_thread_id = tid;
-
-      active_materials[tid][block_id] = (*name_to_build_pointer[mat_name])(name,parameters,block_id,coupled_to,coupled_as);
-    }
-  }
-
+           std::vector<std::string> coupled_as=std::vector<std::string>(0));
+  
   Parameters getValidParams(std::string name)
   {
     if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
@@ -91,10 +84,8 @@ public:
   std::map<int, Material *>::iterator activeMaterialsEnd(THREAD_ID tid) { return active_materials[tid].end(); }
 
 private:
-  MaterialFactory()
-  {
-    active_materials.resize(libMesh::n_threads());
-  }
+  MaterialFactory();
+  
   virtual ~MaterialFactory(){}
 
   std::map<std::string, MaterialBuildPtr> name_to_build_pointer;

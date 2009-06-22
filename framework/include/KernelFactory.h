@@ -1,3 +1,6 @@
+#ifndef KERNELFACTORY_H
+#define KERNELFACTORY_H
+
 #include "Kernel.h"
 
 // System includes
@@ -9,8 +12,6 @@
 // LibMesh includes
 #include <parameters.h>
 
-#ifndef KERNELFACTORY_H
-#define KERNELFACTORY_H
 
 /**
  * Typedef to make things easier.
@@ -66,7 +67,7 @@ public:
                std::string var_name,
                std::vector<std::string> coupled_to=std::vector<std::string>(0),
                std::vector<std::string> coupled_as=std::vector<std::string>(0))
-  {
+   {
     Kernel * kernel;
     
     for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -126,7 +127,13 @@ private:
     active_kernels.resize(libMesh::n_threads());
     block_kernels.resize(libMesh::n_threads());
   }
-  virtual ~KernelFactory(){}
+  virtual ~KernelFactory() 
+    {
+
+      
+      
+    }
+  
 
   std::map<std::string, kernelBuildPtr> name_to_build_pointer;
   std::map<std::string, kernelParamsPtr> name_to_params_pointer;

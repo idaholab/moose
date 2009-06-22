@@ -1,6 +1,21 @@
 #include "Material.h"
 #include <iostream>
 
+Material::Material(std::string name,
+           Parameters parameters,
+           unsigned int block_id,
+           std::vector<std::string> coupled_to,
+           std::vector<std::string> coupled_as)
+    :Kernel(name, parameters, Kernel::_es->get_system(0).variable_name(0), false, coupled_to, coupled_as),
+    _block_id(block_id)
+  {}
+
+unsigned int
+Material::blockID()
+{
+  return _block_id;
+}
+
 void
 Material::materialReinit()
 {

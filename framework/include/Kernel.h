@@ -1,3 +1,6 @@
+#ifndef KERNEL_H
+#define KERNEL_H
+
 // local includes
 #include "Moose.h"
 
@@ -17,8 +20,6 @@
 class Elem;
 class Material;
 
-#ifndef KERNEL_H
-#define KERNEL_H
 
 template<class KernelType>
 Parameters valid_params()

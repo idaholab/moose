@@ -1,11 +1,12 @@
+#ifndef MATERIAL_H
+#define MATERIAL_H
+
 #include "Kernel.h"
 #include "QpData.h"
 
 //libmesh includes
 #include "tensor_value.h"
 
-#ifndef MATERIAL_H
-#define MATERIAL_H
 
 /**
  * Holds material properties that are assigned to blocks.
@@ -22,11 +23,8 @@ public:
            Parameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to,
-           std::vector<std::string> coupled_as)
-    :Kernel(name, parameters, Kernel::_es->get_system(0).variable_name(0), false, coupled_to, coupled_as),
-    _block_id(block_id)
-  {}
-
+           std::vector<std::string> coupled_as);
+  
   virtual ~Material()
   {
     // TODO: Implement destructor to clean up after the _qp_prev and _qp_curr data objects
@@ -40,7 +38,7 @@ public:
    * 
    * @return The block ID.
    */
-  unsigned int blockID(){ return _block_id; }
+  unsigned int blockID();
 
   /**
    * Causes the material to recompute all of it's values

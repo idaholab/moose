@@ -1,3 +1,6 @@
+#ifndef AUXFACTORY_H
+#define AUXFACTORY_H
+
 #include "AuxKernel.h"
 
 // System includes
@@ -8,8 +11,6 @@
 // LibMesh includes
 #include <parameters.h>
 
-#ifndef AUXFACTORY_H
-#define AUXFACTORY_H
 
 /**
  * Typedef to make things easier.
@@ -126,12 +127,8 @@ public:
   std::vector<AuxKernel *>::iterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id){ return active_bcs[tid][boundary_id].end(); };
 
 private:
-  AuxFactory()
-  {
-    active_NodalAuxKernels.resize(libMesh::n_threads());
-    active_ElementAuxKernels.resize(libMesh::n_threads());
-    active_bcs.resize(libMesh::n_threads());
-  }
+  AuxFactory();
+  
   virtual ~AuxFactory(){}
 
   std::map<std::string, AuxKernelBuildPtr> name_to_build_pointer;

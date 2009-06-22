@@ -1,7 +1,8 @@
-#include "Material.h"
-
 #ifndef EMPTYMATERIAL_H
 #define EMPTYMATERIAL_H
+
+#include "Material.h"
+
 
 //Forward Declarations
 class EmptyMaterial;
@@ -19,10 +20,8 @@ public:
            Parameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to,
-           std::vector<std::string> coupled_as)
-    :Material(name,parameters,block_id,coupled_to,coupled_as)
-  {}
-
+                std::vector<std::string> coupled_as);
+  
 protected:
   virtual void computeProperties();
 };
