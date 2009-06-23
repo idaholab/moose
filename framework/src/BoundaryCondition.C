@@ -205,6 +205,11 @@ void BoundaryCondition::reinit(THREAD_ID tid, const NumericVector<Number>& soln,
 //  Moose::perf_log.pop("reinit(node)","BoundaryCondition");
 }
 
+unsigned int
+BoundaryCondition::boundaryID()
+{
+  return _boundary_id;
+}
 
 void
 BoundaryCondition::computeResidual()
@@ -299,6 +304,12 @@ BoundaryCondition::computeAndStoreResidual()
 {
   _qp = 0;
   _current_residual->set(_nodal_bc_var_dofs[_tid][_var_num], computeQpResidual());
+}
+
+bool
+BoundaryCondition::isIntegrated()
+{
+  return _integrated;
 }
 
 std::vector<Real> &

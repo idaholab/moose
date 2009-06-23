@@ -1,3 +1,6 @@
+#ifndef BCFACTORY_H
+#define BCFACTORY_H
+
 #include "BoundaryCondition.h"
 
 // System includes
@@ -8,8 +11,6 @@
 // LibMesh includes
 #include <parameters.h>
 
-#ifndef BCFACTORY_H
-#define BCFACTORY_H
 
 /**
  * Typedef to make things easier.
@@ -36,14 +37,8 @@ BoundaryCondition * buildBC(std::string name, Parameters parameters, std::string
 class BCFactory
 {
 public:
-  static BCFactory * instance()
-  {
-    static BCFactory * instance;
-    if(!instance)
-      instance=new BCFactory;
-    return instance;
-  }
-
+  static BCFactory * instance();
+  
   template<typename BCType> 
   void registerBC(std::string name)
   {

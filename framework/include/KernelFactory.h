@@ -45,14 +45,7 @@ Kernel * buildKernel(std::string name,
 class KernelFactory
 {
 public:
-  static KernelFactory * instance()
-  {
-    static KernelFactory * instance;
-    if(!instance)
-      instance=new KernelFactory;
-    
-    return instance;
-  }
+  static KernelFactory * instance();
 
   template<typename KernelType> 
   void registerKernel(std::string name)
@@ -66,22 +59,8 @@ public:
                Parameters parameters,
                std::string var_name,
                std::vector<std::string> coupled_to=std::vector<std::string>(0),
-               std::vector<std::string> coupled_as=std::vector<std::string>(0))
-   {
-    Kernel * kernel;
-    
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      Moose::current_thread_id = tid;
-
-      kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
-
-      active_kernels[tid].push_back(kernel);
-    }
-
-    return kernel;
-  }
-
+               std::vector<std::string> coupled_as=std::vector<std::string>(0));
+  
 
   Kernel * add(std::string kernel_name,
                std::string name,
@@ -89,22 +68,8 @@ public:
                std::string var_name,
                std::vector<std::string> coupled_to,
                std::vector<std::string> coupled_as,
-               unsigned int block_id)
-  {
-    Kernel * kernel;
-    
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      Moose::current_thread_id = tid;
-      
-      kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
-
-      block_kernels[tid][block_id].push_back(kernel);
-    }
-
-    return kernel;
-  }
-
+               unsigned int block_id);
+  
   Parameters getValidParams(std::string name);
   
   std::vector<Kernel *>::iterator activeKernelsBegin(THREAD_ID tid);

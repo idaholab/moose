@@ -1,5 +1,14 @@
 #include "BCFactory.h"
 
+BCFactory *
+BCFactory::instance()
+  {
+    static BCFactory * instance;
+    if(!instance)
+      instance=new BCFactory;
+    return instance;
+  }
+
  void
  BCFactory::add(std::string bc_name,
            std::string name,

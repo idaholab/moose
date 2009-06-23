@@ -51,7 +51,7 @@ public:
    * 
    * @return The boundary ID.
    */
-  unsigned int boundaryID(){ return _boundary_id; }
+  unsigned int boundaryID();
 
   /** 
    * Computes the residual for the current side.
@@ -76,7 +76,7 @@ public:
   /**
    * Whether or not the BC is integrated over the boundary.
    */
-  bool isIntegrated(){ return _integrated; }
+  bool isIntegrated();
 
 protected:
 
