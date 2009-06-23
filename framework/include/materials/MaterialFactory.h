@@ -41,14 +41,8 @@ Material * buildMaterial(std::string name,
 class MaterialFactory
 {
 public:
-  static MaterialFactory * instance()
-     {
-    static MaterialFactory * instance;
-    if(!instance)
-      instance=new MaterialFactory;
-    return instance;
-  }
-
+  static MaterialFactory * instance();
+  
   template<typename MaterialType> 
   void registerMaterial(std::string name)
   {
@@ -65,15 +59,12 @@ public:
   
   Parameters getValidParams(std::string name);
   
-  Material * getMaterial(THREAD_ID tid, unsigned int block_id)
-  {
-    return active_materials[tid][block_id];
-  }
+  Material * getMaterial(THREAD_ID tid, unsigned int block_id);
+  
+void updateMaterialDataState();
 
-  void updateMaterialDataState();
-
-  std::map<int, Material *>::iterator activeMaterialsBegin(THREAD_ID tid) { return active_materials[tid].begin(); }
-  std::map<int, Material *>::iterator activeMaterialsEnd(THREAD_ID tid) { return active_materials[tid].end(); }
+  std::map<int, Material *>::iterator activeMaterialsBegin(THREAD_ID tid);
+  std::map<int, Material *>::iterator activeMaterialsEnd(THREAD_ID tid);
 
 private:
   MaterialFactory();

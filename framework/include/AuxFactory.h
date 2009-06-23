@@ -46,14 +46,8 @@ AuxKernel * buildAux(std::string name,
 class AuxFactory
 {
 public:
-  static AuxFactory * instance()
-  {
-    static AuxFactory * instance;
-    if(!instance)
-      instance=new AuxFactory;
-    return instance;
-  }
-
+  static AuxFactory * instance();
+  
   template<typename AuxType> 
   void registerAux(std::string name)
   {
@@ -66,24 +60,7 @@ public:
                   Parameters parameters,
                   std::string var_name,
                   std::vector<std::string> coupled_to=std::vector<std::string>(0),
-                  std::vector<std::string> coupled_as=std::vector<std::string>(0))
-  {
-    AuxKernel * aux;
-    
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      Moose::current_thread_id = tid;
-
-      aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
-
-      if(aux->isNodal())
-        active_NodalAuxKernels[tid].push_back(aux);
-      else
-        active_ElementAuxKernels[tid].push_back(aux);
-    }
-
-    return aux;
-  }
+                  std::vector<std::string> coupled_as=std::vector<std::string>(0));
   
   AuxKernel * addBC(std::string Aux_name,
                     std::string name,
@@ -91,21 +68,7 @@ public:
                     std::string var_name,
                     unsigned int boundary_id,
                     std::vector<std::string> coupled_to=std::vector<std::string>(0),
-                    std::vector<std::string> coupled_as=std::vector<std::string>(0))
-  {
-    AuxKernel * aux;
-    
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      Moose::current_thread_id = tid;
-      
-      aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
-
-      active_bcs[tid][boundary_id].push_back(aux);
-    }
-
-    return aux;
-  }
+                    std::vector<std::string> coupled_as=std::vector<std::string>(0));
 
   Parameters getValidParams(std::string name);
   

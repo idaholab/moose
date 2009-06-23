@@ -51,87 +51,33 @@ public:
   /**
    * Retrieve the Constant Real valued property named "name"
    */
-  Real & getConstantRealProperty(const std::string & name)
-  {
-    std::map<std::string, Real >::iterator it = _constant_real_props.find(name);
-
-    if(it != _constant_real_props.end())
-      return it->second;
-
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    libmesh_error();
-  }
-
+  Real & getConstantRealProperty(const std::string & name);
+  
   /**
    * Retrieve the Real valued property named "name"
    */
-  std::vector<Real> & getRealProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<Real> >::iterator it = _real_props.find(name);
-
-    if(it != _real_props.end())
-      return it->second;
-
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    libmesh_error();
-  }
-
+  std::vector<Real> & getRealProperty(const std::string & name);
+  
   /**
    * Retrieve the Gradient valued property named "name"
    */
-  std::vector<RealGradient> & getGradientProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<RealGradient> >::iterator it = _gradient_props.find(name);
-
-    if(it != _gradient_props.end())
-      return it->second;
-
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    libmesh_error();
-  }
-
+  std::vector<RealGradient> & getGradientProperty(const std::string & name);
+  
   /**
    * Retrieve the Vector valued property named "name"
    */
-  std::vector<std::vector<Real> > & getVectorProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<std::vector<Real> > >::iterator it = _vector_props.find(name);
-
-    if(it != _vector_props.end())
-      return it->second;
-
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    libmesh_error();
-  }
-
+  std::vector<std::vector<Real> > & getVectorProperty(const std::string & name);
+  
   /**
    * Retrieve the Tensor valued property named "name"
    */
-  std::vector<RealTensorValue> & getTensorProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<RealTensorValue> >::iterator it = _tensor_props.find(name);
-
-    if(it != _tensor_props.end())
-      return it->second;
-
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    libmesh_error();
-  }
-
+  std::vector<RealTensorValue> & getTensorProperty(const std::string & name);
+  
   /**
    * Retrieve the Matrix valued property named "name"
    */
-  std::vector<std::vector<std::vector<Real> > > & getMatrixProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<std::vector<std::vector<Real> > > >::iterator it = _matrix_props.find(name);
-
-    if(it != _matrix_props.end())
-      return it->second;
-
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    libmesh_error();
-  }
-
+  std::vector<std::vector<std::vector<Real> > > & getMatrixProperty(const std::string & name);
+  
   /**
    * Updates the old (first) material properties to the current/new material properies (second)
    */
@@ -162,7 +108,7 @@ protected:
    * This function is called to create the data structure that will be associated
    * with a quadrature point
    */
-  virtual QpData * createData() { return NULL; }
+  virtual QpData * createData();
 
   /**
    * This function returns a reference to a standard vector of datastructures for all 
@@ -178,68 +124,50 @@ protected:
   /**
    * Doesn't do anything for materials.
    */
-  virtual Real computeQpResidual(){ return 0; }
+  virtual Real computeQpResidual();
 
   /**
    * Declare the Real valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<Real> & declareRealProperty(const std::string & name)
-  {
-    return _real_props[name];
-  }
+  std::vector<Real> & declareRealProperty(const std::string & name);
   
   /**
    * Declare the Constant Real valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  Real & declareConstantRealProperty(const std::string & name)
-  {
-    return _constant_real_props[name];
-  }
-
+  Real & declareConstantRealProperty(const std::string & name);
+  
   /**
    * Declare the Gradient valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<RealGradient> & declareGradientProperty(const std::string & name)
-  {
-    return _gradient_props[name];
-  }
-
+  std::vector<RealGradient> & declareGradientProperty(const std::string & name);
+  
   /**
    * Declare the Vector valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<std::vector<Real> > & declareVectorProperty(const std::string & name)
-  {
-    return _vector_props[name];
-  }
-
+  std::vector<std::vector<Real> > & declareVectorProperty(const std::string & name);
+  
   /**
    * Declare the Tensor valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<RealTensorValue> & declareTensorProperty(const std::string & name)
-  {
-    return _tensor_props[name];
-  }
-
+  std::vector<RealTensorValue> & declareTensorProperty(const std::string & name);
+  
   /**
    * Declare the Matrix valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<std::vector<std::vector<Real> > > & declareMatrixProperty(const std::string & name)
-  {
-    return _matrix_props[name];
-  }
-
+  std::vector<std::vector<std::vector<Real> > > & declareMatrixProperty(const std::string & name);
+  
   std::map<std::string, Real > _constant_real_props;
   std::map<std::string, std::vector<Real> > _real_props;
   std::map<std::string, std::vector<RealGradient> > _gradient_props;

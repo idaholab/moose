@@ -1,7 +1,16 @@
 #include "MaterialFactory.h"
 #include <iostream>
 
-  void
+MaterialFactory *
+MaterialFactory::instance()
+     {
+    static MaterialFactory * instance;
+    if(!instance)
+      instance=new MaterialFactory;
+    return instance;
+  }
+
+void
   MaterialFactory::add(std::string mat_name,
            std::string name,
            Parameters parameters,
@@ -28,6 +37,12 @@ MaterialFactory::getValidParams(std::string name)
     return name_to_params_pointer[name]();
   }
 
+Material *
+MaterialFactory::getMaterial(THREAD_ID tid, unsigned int block_id)
+  {
+    return active_materials[tid][block_id];
+  }
+
 void MaterialFactory::updateMaterialDataState()
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -38,6 +53,18 @@ void MaterialFactory::updateMaterialDataState()
     for(;it!=it_end;++it) 
       it->second->updateDataState();
   }
+}
+
+std::map<int, Material *>::iterator
+MaterialFactory::activeMaterialsBegin(THREAD_ID tid)
+{
+  return active_materials[tid].begin();
+}
+
+std::map<int, Material *>::iterator
+MaterialFactory::activeMaterialsEnd(THREAD_ID tid)
+{
+  return active_materials[tid].end();
 }
 
 MaterialFactory::MaterialFactory()

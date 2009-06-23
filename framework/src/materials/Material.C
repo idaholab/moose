@@ -40,6 +40,78 @@ Material::materialReinit()
   computeProperties();
 }
 
+Real &
+Material::getConstantRealProperty(const std::string & name)
+  {
+    std::map<std::string, Real >::iterator it = _constant_real_props.find(name);
+
+    if(it != _constant_real_props.end())
+      return it->second;
+
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
+  }
+
+std::vector<Real> &
+Material::getRealProperty(const std::string & name)
+  {
+    std::map<std::string, std::vector<Real> >::iterator it = _real_props.find(name);
+
+    if(it != _real_props.end())
+      return it->second;
+
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
+  }
+
+std::vector<RealGradient> &
+Material::getGradientProperty(const std::string & name)
+  {
+    std::map<std::string, std::vector<RealGradient> >::iterator it = _gradient_props.find(name);
+
+    if(it != _gradient_props.end())
+      return it->second;
+
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
+  }
+
+std::vector<std::vector<Real> > &
+Material::getVectorProperty(const std::string & name)
+  {
+    std::map<std::string, std::vector<std::vector<Real> > >::iterator it = _vector_props.find(name);
+
+    if(it != _vector_props.end())
+      return it->second;
+
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
+  }
+
+std::vector<RealTensorValue> &
+Material::getTensorProperty(const std::string & name)
+  {
+    std::map<std::string, std::vector<RealTensorValue> >::iterator it = _tensor_props.find(name);
+
+    if(it != _tensor_props.end())
+      return it->second;
+
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
+  }
+
+std::vector<std::vector<std::vector<Real> > > &
+Material::getMatrixProperty(const std::string & name)
+  {
+    std::map<std::string, std::vector<std::vector<std::vector<Real> > > >::iterator it = _matrix_props.find(name);
+
+    if(it != _matrix_props.end())
+      return it->second;
+
+    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+    libmesh_error();
+  }
+
 /**
  * Updates the old (first) material properties to the current/new material properies (second)
  */
@@ -57,6 +129,12 @@ Material::updateDataState()
           j_prev != i_prev->second.end(); 
           ++j_prev, ++j_curr)
       *j_prev = *j_curr;
+}
+
+QpData *
+Material::createData()
+{
+  return NULL;
 }
 
 std::vector<QpData *> &
@@ -94,3 +172,46 @@ Material::getData(QP_Data_Type qp_data_type)
     return *v;
   }
 }
+
+Real
+Material::computeQpResidual()
+{
+  return 0;
+}
+
+std::vector<Real> &
+Material::declareRealProperty(const std::string & name)
+  {
+    return _real_props[name];
+  }
+
+Real &
+Material::declareConstantRealProperty(const std::string & name)
+  {
+    return _constant_real_props[name];
+  }
+
+std::vector<RealGradient> &
+Material::declareGradientProperty(const std::string & name)
+  {
+    return _gradient_props[name];
+  }
+
+std::vector<std::vector<Real> > &
+Material::declareVectorProperty(const std::string & name)
+  {
+    return _vector_props[name];
+  }
+
+std::vector<RealTensorValue> &
+Material::declareTensorProperty(const std::string & name)
+  {
+    return _tensor_props[name];
+  }
+
+std::vector<std::vector<std::vector<Real> > > &
+Material::declareMatrixProperty(const std::string & name)
+  {
+    return _matrix_props[name];
+  }
+
