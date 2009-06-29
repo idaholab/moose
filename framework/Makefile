@@ -69,7 +69,7 @@ doc:
 
 # Useful rules.
 clean:
-	@rm -f bison-*
+	@rm -f libmoose-*
 	@find . -name "*~" -or -name "*.o" | xargs rm
 	@rm -f .depend
 	@rm -f Makefile.export
