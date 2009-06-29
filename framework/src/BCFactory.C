@@ -73,4 +73,58 @@ BCFactory::BCFactory()
     active_bcs.resize(libMesh::n_threads());
     active_nodal_bcs.resize(libMesh::n_threads());
   }
+BCFactory::~BCFactory()
+{
+  {
+    std::map<std::string, BCBuildPtr>::iterator i;
+    for (i=name_to_build_pointer.begin(); i!=name_to_build_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+
+  {
+    std::map<std::string, BCParamsPtr>::iterator i;
+    for(i=name_to_params_pointer.begin(); i!=name_to_params_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+
+  }
+
+  {
+    std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > >::iterator i;
+    for(i=active_bcs.begin(); i!=active_bcs.end(); ++i)
+    {
+      std::map<unsigned int, std::vector<BoundaryCondition *> >::iterator j;
+      for(j=i->begin(); j!=i->end(); ++j)
+      {
+        std::vector<BoundaryCondition *>::iterator k;
+        for(k=(j->second).begin(); k!=(j->second).end(); ++k)
+        {
+          delete *k;
+        }
+      }
+    }
+  }
+
+  {
+    std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > >::iterator i;
+    for(i=active_nodal_bcs.begin(); i!=active_nodal_bcs.end(); ++i)
+    {
+      std::map<unsigned int, std::vector<BoundaryCondition *> >::iterator j;
+      for(j=i->begin(); j!=i->end(); ++j)
+      {
+        std::vector<BoundaryCondition *>::iterator k;
+        for(k=(j->second).begin(); k!=(j->second).end(); ++k)
+        {
+          delete *k;
+        }
+      }
+    }
+  }
+
+}
+
+
  

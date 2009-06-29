@@ -83,8 +83,8 @@ public:
 
 private:
   AuxFactory();
-  
-  virtual ~AuxFactory(){}
+
+  virtual ~AuxFactory();
 
   std::map<std::string, AuxKernelBuildPtr> name_to_build_pointer;
   std::map<std::string, AuxKernelParamsPtr> name_to_params_pointer;
@@ -93,6 +93,7 @@ private:
   std::vector<std::vector<AuxKernel *> > active_ElementAuxKernels;
 
   std::vector<std::map<unsigned int, std::vector<AuxKernel *> > > active_bcs;
+  
 };
 
 #endif //AUXFACTORY_H

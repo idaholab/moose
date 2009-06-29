@@ -98,3 +98,55 @@ KernelFactory::KernelFactory()
     block_kernels.resize(libMesh::n_threads());
   }
   
+KernelFactory:: ~KernelFactory() 
+    {
+       {
+        std::map<std::string, kernelBuildPtr>:: iterator i;
+        for(i=name_to_build_pointer.begin(); i!=name_to_build_pointer.end(); ++i)
+        {
+          delete &i;
+        }
+      }
+
+      {
+        std::map<std::string, kernelParamsPtr>::iterator i;
+        for(i=name_to_params_pointer.begin(); i!=name_to_params_pointer.end(); ++i)
+        {
+          delete &i;
+        }
+      }
+     
+      {
+        
+        std::vector<std::vector<Kernel *> >::iterator i;
+        for (i=active_kernels.begin(); i!=active_kernels.end(); ++i)
+        { 
+
+          std::vector<Kernel *>::iterator j;
+          for (j=i->begin(); j!=i->end(); ++j)
+          {
+            delete *j;
+          }
+        }
+      }
+
+      {
+        std::vector<std::map<unsigned int, std::vector<Kernel *> > >::iterator i;
+        for (i=block_kernels.begin(); i!=block_kernels.end(); ++i)
+        {
+          
+        std::map<unsigned int, std::vector<Kernel *> >::iterator j;
+        for (j=i->begin(); j!=i->end(); ++j)
+
+          {
+            std::vector<Kernel *>::iterator k;
+            for(k=(j->second).begin(); k!=(j->second).end(); ++k)
+            {
+              delete *k;
+            }
+          }
+        }
+      } 
+
+    }
+

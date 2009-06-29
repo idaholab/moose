@@ -81,20 +81,19 @@ public:
 private:
   KernelFactory();
 
-  virtual ~KernelFactory() 
-    {
-
-      
-      
-    }
+  virtual ~KernelFactory();
   
-
   std::map<std::string, kernelBuildPtr> name_to_build_pointer;
   std::map<std::string, kernelParamsPtr> name_to_params_pointer;
 
   std::vector<std::vector<Kernel *> > active_kernels;
 
   std::vector<std::map<unsigned int, std::vector<Kernel *> > > block_kernels;
+
+  
+      
+      
+    
 };
 
 #endif //KERNELFACTORY_H

@@ -65,7 +65,7 @@ public:
 private:
   BCFactory();
 
-  virtual ~BCFactory(){}
+  virtual ~BCFactory();
 
   std::map<std::string, BCBuildPtr> name_to_build_pointer;
   std::map<std::string, BCParamsPtr> name_to_params_pointer;
