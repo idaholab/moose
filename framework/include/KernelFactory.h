@@ -27,6 +27,16 @@ typedef Kernel * (*kernelBuildPtr)(std::string name,
 typedef Parameters (*kernelParamsPtr)();
 
 /**
+ * Typedef to hide implementation details
+ */
+typedef std::vector<Kernel *>::iterator KernelIterator;
+
+/**
+ * Typedef to hide implementation details
+ */
+typedef std::vector<std::string>::iterator KernelNamesIterator;
+
+/**
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename KernelType>
@@ -78,6 +88,9 @@ public:
   std::vector<Kernel *>::iterator blockKernelsBegin(THREAD_ID tid, unsigned int block_id);
   std::vector<Kernel *>::iterator blockKernelsEnd(THREAD_ID tid, unsigned int block_id);
 
+  KernelNamesIterator registeredKernelsBegin();
+  KernelNamesIterator registeredKernelsEnd();
+  
 private:
   KernelFactory();
 
@@ -86,14 +99,11 @@ private:
   std::map<std::string, kernelBuildPtr> name_to_build_pointer;
   std::map<std::string, kernelParamsPtr> name_to_params_pointer;
 
+  std::vector<std::string> _registered_kernel_names;
   std::vector<std::vector<Kernel *> > active_kernels;
 
   std::vector<std::map<unsigned int, std::vector<Kernel *> > > block_kernels;
 
-  
-      
-      
-    
 };
 
 #endif //KERNELFACTORY_H
