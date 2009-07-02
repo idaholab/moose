@@ -43,36 +43,61 @@ BCFactory::getValidParams(std::string name)
     return name_to_params_pointer[name]();
   }
 
-std::vector<BoundaryCondition *>::iterator
+BCIterator
 BCFactory::activeBCsBegin(THREAD_ID tid, unsigned int boundary_id)
 {
   return active_bcs[tid][boundary_id].begin();
 }
 
-std::vector<BoundaryCondition *>::iterator
+BCIterator
 BCFactory::activeBCsEnd(THREAD_ID tid, unsigned int boundary_id)
 {
   return active_bcs[tid][boundary_id].end();
 }
 
 
-std::vector<BoundaryCondition *>::iterator
+BCIterator
 BCFactory::activeNodalBCsBegin(THREAD_ID tid, unsigned int boundary_id)
 {
   return active_nodal_bcs[tid][boundary_id].begin();
 }
 
-std::vector<BoundaryCondition *>::iterator
+BCIterator
 BCFactory::activeNodalBCsEnd(THREAD_ID tid, unsigned int boundary_id)
 {
   return active_nodal_bcs[tid][boundary_id].end();
 }
 
-BCFactory::BCFactory()
+BCNamesIterator
+BCFactory::registeredBCsBegin()
+{
+  // Make sure the _registered_kernel_names are up to date
+  _registered_bc_names.clear();
+  _registered_bc_names.reserve(name_to_params_pointer.size());
+
+  // build a vector of strings from the params pointer map
+  for (std::map<std::string, BCParamsPtr>::iterator i = name_to_params_pointer.begin();
+       i != name_to_params_pointer.end();
+       ++i)
   {
-    active_bcs.resize(libMesh::n_threads());
-    active_nodal_bcs.resize(libMesh::n_threads());
+    _registered_bc_names.push_back(i->first);
   }
+  
+  return _registered_bc_names.begin();
+}
+
+BCNamesIterator
+BCFactory::registeredBCsEnd()
+{
+  return _registered_bc_names.end();
+}
+
+BCFactory::BCFactory()
+{
+  active_bcs.resize(libMesh::n_threads());
+  active_nodal_bcs.resize(libMesh::n_threads());
+}
+
 BCFactory::~BCFactory()
 {
   {
@@ -99,7 +124,7 @@ BCFactory::~BCFactory()
       std::map<unsigned int, std::vector<BoundaryCondition *> >::iterator j;
       for(j=i->begin(); j!=i->end(); ++j)
       {
-        std::vector<BoundaryCondition *>::iterator k;
+        BCIterator k;
         for(k=(j->second).begin(); k!=(j->second).end(); ++k)
         {
           delete *k;
@@ -115,7 +140,7 @@ BCFactory::~BCFactory()
       std::map<unsigned int, std::vector<BoundaryCondition *> >::iterator j;
       for(j=i->begin(); j!=i->end(); ++j)
       {
-        std::vector<BoundaryCondition *>::iterator k;
+        BCIterator k;
         for(k=(j->second).begin(); k!=(j->second).end(); ++k)
         {
           delete *k;

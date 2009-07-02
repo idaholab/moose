@@ -82,11 +82,11 @@ public:
   
   Parameters getValidParams(std::string name);
   
-  std::vector<Kernel *>::iterator activeKernelsBegin(THREAD_ID tid);
-  std::vector<Kernel *>::iterator activeKernelsEnd(THREAD_ID tid);
+  KernelIterator activeKernelsBegin(THREAD_ID tid);
+  KernelIterator activeKernelsEnd(THREAD_ID tid);
 
-  std::vector<Kernel *>::iterator blockKernelsBegin(THREAD_ID tid, unsigned int block_id);
-  std::vector<Kernel *>::iterator blockKernelsEnd(THREAD_ID tid, unsigned int block_id);
+  KernelIterator blockKernelsBegin(THREAD_ID tid, unsigned int block_id);
+  KernelIterator blockKernelsEnd(THREAD_ID tid, unsigned int block_id);
 
   KernelNamesIterator registeredKernelsBegin();
   KernelNamesIterator registeredKernelsEnd();

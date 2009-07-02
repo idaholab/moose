@@ -36,13 +36,13 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
-    std::vector<Kernel *>::iterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
-    std::vector<Kernel *>::iterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
-    std::vector<Kernel *>::iterator kernel_it = kernel_begin;
+    KernelIterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
+    KernelIterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
+    KernelIterator kernel_it = kernel_begin;
 
-    std::vector<Kernel *>::iterator block_kernel_begin;
-    std::vector<Kernel *>::iterator block_kernel_end;
-    std::vector<Kernel *>::iterator block_kernel_it;
+    KernelIterator block_kernel_begin;
+    KernelIterator block_kernel_end;
+    KernelIterator block_kernel_it;
 
     unsigned int subdomain = 999999999;
 
@@ -89,8 +89,8 @@ public:
         {
           unsigned int boundary_id = Moose::mesh->boundary_info->boundary_id (elem, side);
 
-          std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeBCsBegin(tid,boundary_id);
-          std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeBCsEnd(tid,boundary_id);
+          BCIterator bc_it = BCFactory::instance()->activeBCsBegin(tid,boundary_id);
+          BCIterator bc_end = BCFactory::instance()->activeBCsEnd(tid,boundary_id);
 
           if(bc_it != bc_end)
           {
@@ -151,8 +151,8 @@ namespace Moose
     {
       unsigned int boundary_id = ids[i];
     
-      std::vector<BoundaryCondition *>::iterator bc_it = BCFactory::instance()->activeNodalBCsBegin(0,boundary_id);
-      std::vector<BoundaryCondition *>::iterator bc_end = BCFactory::instance()->activeNodalBCsEnd(0,boundary_id);
+      BCIterator bc_it = BCFactory::instance()->activeNodalBCsBegin(0,boundary_id);
+      BCIterator bc_end = BCFactory::instance()->activeNodalBCsEnd(0,boundary_id);
 
       if(bc_it != bc_end)
       {

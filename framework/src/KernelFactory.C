@@ -66,26 +66,26 @@ Parameters
     return name_to_params_pointer[name]();
   }
 
-std::vector<Kernel *>::iterator
+KernelIterator
 KernelFactory::activeKernelsBegin(THREAD_ID tid)
 {
   return active_kernels[tid].begin();
 }
 
-std::vector<Kernel *>::iterator
+KernelIterator
 KernelFactory::activeKernelsEnd(THREAD_ID tid)
 {
   return active_kernels[tid].end();
 }
 
 
-std::vector<Kernel *>::iterator
+KernelIterator
 KernelFactory::blockKernelsBegin(THREAD_ID tid, unsigned int block_id)
 {
   return block_kernels[tid][block_id].begin();
 }
 
-std::vector<Kernel *>::iterator
+KernelIterator
 KernelFactory::blockKernelsEnd(THREAD_ID tid, unsigned int block_id)
 {
   return block_kernels[tid][block_id].end();
@@ -145,7 +145,7 @@ KernelFactory:: ~KernelFactory()
     for (i=active_kernels.begin(); i!=active_kernels.end(); ++i)
     { 
 
-      std::vector<Kernel *>::iterator j;
+      KernelIterator j;
       for (j=i->begin(); j!=i->end(); ++j)
       {
         delete *j;
@@ -161,7 +161,7 @@ KernelFactory:: ~KernelFactory()
       std::map<unsigned int, std::vector<Kernel *> >::iterator j;
       for (j=i->begin(); j!=i->end(); ++j)
       {
-        std::vector<Kernel *>::iterator k;
+        KernelIterator k;
         for(k=(j->second).begin(); k!=(j->second).end(); ++k)
         {
           delete *k;

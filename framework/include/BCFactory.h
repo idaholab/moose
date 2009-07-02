@@ -23,6 +23,16 @@ typedef BoundaryCondition * (*BCBuildPtr)(std::string name, Parameters parameter
 typedef Parameters (*BCParamsPtr)();
 
 /**
+ * Typedef to hide implementation details
+ */
+typedef std::vector<BoundaryCondition *>::iterator BCIterator;
+
+/**
+ * Typedef to hide implementation details
+ */
+typedef std::vector<std::string>::iterator BCNamesIterator;
+
+/**
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename BCType>
@@ -56,12 +66,15 @@ public:
   
   Parameters getValidParams(std::string name);
   
-  std::vector<BoundaryCondition *>::iterator activeBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  std::vector<BoundaryCondition *>::iterator activeBCsEnd(THREAD_ID tid, unsigned int boundary_id);
+  BCIterator activeBCsBegin(THREAD_ID tid, unsigned int boundary_id);
+  BCIterator activeBCsEnd(THREAD_ID tid, unsigned int boundary_id);
 
-  std::vector<BoundaryCondition *>::iterator activeNodalBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  std::vector<BoundaryCondition *>::iterator activeNodalBCsEnd(THREAD_ID tid, unsigned int boundary_id);
+  BCIterator activeNodalBCsBegin(THREAD_ID tid, unsigned int boundary_id);
+  BCIterator activeNodalBCsEnd(THREAD_ID tid, unsigned int boundary_id);
 
+  BCNamesIterator registeredBCsBegin();
+  BCNamesIterator registeredBCsEnd();
+  
 private:
   BCFactory();
 
@@ -70,6 +83,8 @@ private:
   std::map<std::string, BCBuildPtr> name_to_build_pointer;
   std::map<std::string, BCParamsPtr> name_to_params_pointer;
 
+  std::vector<std::string> _registered_bc_names;
+  
   std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > active_bcs;
   std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > active_nodal_bcs;
 };
