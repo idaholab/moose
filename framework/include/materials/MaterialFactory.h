@@ -23,6 +23,16 @@ typedef Material * (*MaterialBuildPtr)(std::string name, Parameters parameters, 
 typedef Parameters (*MaterialParamsPtr)();
 
 /**
+ * Typedef to hide implementation details
+ */
+typedef std::map<int, Material *>::iterator MaterialIterator;
+
+/**
+ * Typedef to hide implementation details
+ */
+typedef std::vector<std::string>::iterator MaterialNamesIterator;
+
+/**
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename MaterialType>
@@ -61,10 +71,13 @@ public:
   
   Material * getMaterial(THREAD_ID tid, unsigned int block_id);
   
-void updateMaterialDataState();
+  void updateMaterialDataState();
 
-  std::map<int, Material *>::iterator activeMaterialsBegin(THREAD_ID tid);
-  std::map<int, Material *>::iterator activeMaterialsEnd(THREAD_ID tid);
+  MaterialIterator activeMaterialsBegin(THREAD_ID tid);
+  MaterialIterator activeMaterialsEnd(THREAD_ID tid);
+
+  MaterialNamesIterator registeredMaterialsBegin();
+  MaterialNamesIterator registeredMaterialsEnd();
 
 private:
   MaterialFactory();
@@ -74,6 +87,7 @@ private:
   std::map<std::string, MaterialBuildPtr> name_to_build_pointer;
   std::map<std::string, MaterialParamsPtr> name_to_params_pointer;
 
+  std::vector<std::string> _registered_material_names;
   std::vector<std::map<int, Material *> > active_materials;
 };
 

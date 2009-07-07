@@ -55,20 +55,46 @@ void MaterialFactory::updateMaterialDataState()
   }
 }
 
-std::map<int, Material *>::iterator
+
+MaterialNamesIterator
+MaterialFactory::registeredMaterialsBegin()
+{
+  // Make sure the _registered_kernel_names are up to date
+  _registered_material_names.clear();
+  _registered_material_names.reserve(name_to_params_pointer.size());
+
+  // build a vector of strings from the params pointer map
+  for (std::map<std::string, MaterialParamsPtr>::iterator i = name_to_params_pointer.begin();
+       i != name_to_params_pointer.end();
+       ++i)
+  {
+    _registered_material_names.push_back(i->first);
+  }
+  
+  return _registered_material_names.begin();
+}
+
+MaterialNamesIterator
+MaterialFactory::registeredMaterialsEnd()
+{
+  return _registered_material_names.end();
+}
+
+
+MaterialIterator
 MaterialFactory::activeMaterialsBegin(THREAD_ID tid)
 {
   return active_materials[tid].begin();
 }
 
-std::map<int, Material *>::iterator
+MaterialIterator
 MaterialFactory::activeMaterialsEnd(THREAD_ID tid)
 {
   return active_materials[tid].end();
 }
 
 MaterialFactory::MaterialFactory()
-  {
-    active_materials.resize(libMesh::n_threads());
-  }
+{
+  active_materials.resize(libMesh::n_threads());
+}
 

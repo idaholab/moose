@@ -2,69 +2,69 @@
 
 KernelFactory *
 KernelFactory::instance()
-  {
-    static KernelFactory * instance;
-    if(!instance)
-      instance=new KernelFactory;
+{
+  static KernelFactory * instance;
+  if(!instance)
+    instance=new KernelFactory;
     
-    return instance;
-  }
+  return instance;
+}
 
 Kernel *
 KernelFactory::add(std::string kernel_name,
-               std::string name,
-               Parameters parameters,
-               std::string var_name,
-               std::vector<std::string> coupled_to,
-               std::vector<std::string> coupled_as)
-   {
-    Kernel * kernel;
+                   std::string name,
+                   Parameters parameters,
+                   std::string var_name,
+                   std::vector<std::string> coupled_to,
+                   std::vector<std::string> coupled_as)
+{
+  Kernel * kernel;
     
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      Moose::current_thread_id = tid;
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    Moose::current_thread_id = tid;
 
-      kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+    kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
 
-      active_kernels[tid].push_back(kernel);
-    }
-
-    return kernel;
+    active_kernels[tid].push_back(kernel);
   }
+
+  return kernel;
+}
 
 Kernel *
 KernelFactory::add(std::string kernel_name,
-               std::string name,
-               Parameters parameters,
-               std::string var_name,
-               std::vector<std::string> coupled_to,
-               std::vector<std::string> coupled_as,
-               unsigned int block_id)
-  {
-    Kernel * kernel;
+                   std::string name,
+                   Parameters parameters,
+                   std::string var_name,
+                   std::vector<std::string> coupled_to,
+                   std::vector<std::string> coupled_as,
+                   unsigned int block_id)
+{
+  Kernel * kernel;
     
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      Moose::current_thread_id = tid;
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    Moose::current_thread_id = tid;
       
-      kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+    kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
 
-      block_kernels[tid][block_id].push_back(kernel);
-    }
-
-    return kernel;
+    block_kernels[tid][block_id].push_back(kernel);
   }
+
+  return kernel;
+}
 
 Parameters
- KernelFactory::getValidParams(std::string name)
+KernelFactory::getValidParams(std::string name)
+{
+  if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
   {
-    if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
-    {
-      std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Kernel "<<std::endl<<std::endl;
-      error();
-    }
-    return name_to_params_pointer[name]();
+    std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Kernel "<<std::endl<<std::endl;
+    error();
   }
+  return name_to_params_pointer[name]();
+}
 
 KernelIterator
 KernelFactory::activeKernelsBegin(THREAD_ID tid)
@@ -116,10 +116,10 @@ KernelFactory::registeredKernelsEnd()
 }
 
 KernelFactory::KernelFactory()
-  {
-    active_kernels.resize(libMesh::n_threads());
-    block_kernels.resize(libMesh::n_threads());
-  }
+{
+  active_kernels.resize(libMesh::n_threads());
+  block_kernels.resize(libMesh::n_threads());
+}
   
 KernelFactory:: ~KernelFactory() 
 {
@@ -168,7 +168,6 @@ KernelFactory:: ~KernelFactory()
         }
       }
     }
-  } 
-
+  }
 }
 
