@@ -19,7 +19,6 @@
 #include "HYPRE_parcsr_ls.h"
 */
 
-
 void
 PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector<Number> & y)
 {
@@ -53,15 +52,11 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
     //Copy rhs from the big system into the small one
     copyVarValues(mesh,0,system_var,x,sys,0,*u_system.rhs);
 
-//    std::cout<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(system_var)<<std::endl;
-
     //Modify the RHS by subtracting off the matvecs of the solutions for the other preconditioning
     //systems with the off diagonal blocks in this system.
     for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
-
-//      std::cout<<" "<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(coupled_var)<<std::endl;
 
       //By convention
       unsigned int coupled_sys = coupled_var+1;
@@ -81,8 +76,8 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
       rhs.close();
       rhs.scale(-1.0);
       rhs.close();
-    }      
-
+    }
+    
     //Apply the preconditioner to the small system
     _preconditioners[system_var]->apply(*u_system.rhs,*u_system.solution);
     
@@ -179,8 +174,6 @@ PhysicsBasedPreconditioner::init ()
 
       preconditioner->set_type(_pre_type[system_var]);
 
-      preconditioner->init();
-
       /*
       PetscPreconditioner<Number> * petsc_pre = dynamic_cast<PetscPreconditioner<Number> *>(preconditioner);
 
@@ -203,19 +196,18 @@ PhysicsBasedPreconditioner::init ()
 */
     }
 
+    Preconditioner<Number> * preconditioner = _preconditioners[system_var];
+    preconditioner->init();
+    
     LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
     
       //Compute the diagonal block... storing the result in the system matrix
     _compute_jacobian_block(*system.current_local_solution,*u_system.matrix,u_system,system_var,system_var);
 
-//    std::cout<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(system_var)<<std::endl;
-
     for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
 
-//      std::cout<<" "<<_equation_systems->get_system<TransientNonlinearImplicitSystem>(0).variable_name(coupled_var)<<std::endl;
-      
       //System 0 is the Nonlinear system
       std::string coupled_name = _equation_systems->get_system(0).variable_name(coupled_var);
       
