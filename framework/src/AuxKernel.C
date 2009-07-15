@@ -16,7 +16,8 @@ AuxKernel::AuxKernel(std::string name,
    _nodal(_fe_type.family == LAGRANGE),
    _u_aux(_nodal ? _aux_var_vals_nodal[_tid][_var_num] : _aux_var_vals_element[_tid][_var_num]),
    _u_old_aux(_nodal ? _aux_var_vals_old_nodal[_tid][_var_num] : _aux_var_vals_old_element[_tid][_var_num]),
-   _u_older_aux(_nodal ? _aux_var_vals_older_nodal[_tid][_var_num] : _aux_var_vals_older_element[_tid][_var_num])
+   _u_older_aux(_nodal ? _aux_var_vals_older_nodal[_tid][_var_num] : _aux_var_vals_older_element[_tid][_var_num]),
+   _current_node(_static_current_node[_tid])
   {
     if(_nodal)
       _nodal_var_nums.push_back(_var_num);
@@ -29,6 +30,8 @@ AuxKernel::sizeEverything()
 {
   int n_threads = libMesh::n_threads();
 
+  _static_current_node.resize(n_threads);
+  
   _var_vals_nodal.resize(n_threads);
   _var_vals_old_nodal.resize(n_threads);
   _var_vals_older_nodal.resize(n_threads);
@@ -67,6 +70,8 @@ void
 AuxKernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node)
 {
   Moose::perf_log.push("reinit(node)","AuxKernel");
+
+  _static_current_node[tid] = &node;
 
   unsigned int nonlinear_system_number = _system->number();
   unsigned int aux_system_number = _aux_system->number();
@@ -411,6 +416,8 @@ const NumericVector<Number> * AuxKernel::_nonlinear_older_soln;
 NumericVector<Number> * AuxKernel::_aux_soln;
 const NumericVector<Number> * AuxKernel::_aux_old_soln;
 const NumericVector<Number> * AuxKernel::_aux_older_soln;
+
+std::vector<const Node *> AuxKernel::_static_current_node;
 
 std::vector<unsigned int> AuxKernel::_nodal_var_nums;
 

@@ -12,6 +12,7 @@
 #include "VacuumBC.h"
 #include "MatchedValueBC.h"
 #include "ConvectiveFluxBC.h"
+#include "WeakGradientBC.h"
 
 #include "AuxFactory.h"
 #include "ConstantAux.h"
@@ -55,6 +56,7 @@ Moose::registerObjects()
   BCFactory::instance()->registerBC<VacuumBC>("VacuumBC");
   BCFactory::instance()->registerBC<MatchedValueBC>("MatchedValueBC");
   BCFactory::instance()->registerBC<ConvectiveFluxBC>("ConvectiveFluxBC");
+  BCFactory::instance()->registerBC<WeakGradientBC>("WeakGradientBC");
 
   AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
   AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");

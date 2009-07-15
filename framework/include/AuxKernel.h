@@ -51,7 +51,6 @@ protected:
   virtual Real computeValue() = 0;
 
   virtual Real computeQpResidual();
-  
 
   bool _nodal;
 
@@ -83,7 +82,16 @@ protected:
   /*************
    * Nodal Stuff
    *************/
-  
+  /**
+   * Current Node
+   */
+  const Node * & _current_node;
+
+  /**
+   * Current Node
+   */
+  static std::vector<const Node *> _static_current_node;
+
   /**
    * Holds the variable numbers of the nodal aux vars.
    */
