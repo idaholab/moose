@@ -719,6 +719,12 @@ Kernel::variable()
   return _var_num;
 }
 
+THREAD_ID
+Kernel::tid()
+{
+  return _tid;
+}
+
 bool
 Kernel::modifiedAuxVarNum(unsigned int var_num)
 {

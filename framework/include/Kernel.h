@@ -126,6 +126,11 @@ public:
   unsigned int variable();
 
   /**
+   * Return the thread id this kernel is associated with.
+   */
+  THREAD_ID tid();
+
+  /**
    * Computes the modified variable number for an auxiliary variable.
    * This is the variable number that Kernels know this variable to operate under.
    *
