@@ -116,8 +116,7 @@ protected:
 };
 
 namespace Moose
-{
-  
+{ 
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
   {
     Moose::perf_log.push("compute_jacobian()","Solve");
@@ -129,8 +128,7 @@ namespace Moose
   
     update_aux_vars(soln);
 
-    Threads::parallel_for(ConstElemRange(Moose::mesh->active_local_elements_begin(),
-                                         Moose::mesh->active_local_elements_end(),1),
+    Threads::parallel_for(*Moose::getActiveLocalElementRange(),
                           ComputeInternalJacobians(soln, jacobian));
 
     jacobian.close();

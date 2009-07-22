@@ -129,12 +129,9 @@ namespace Moose
 
     residual.zero();
 
-    update_aux_vars(soln);  
-
-    static ConstElemRange elem_range(Moose::mesh->active_local_elements_begin(),
-                                     Moose::mesh->active_local_elements_end(),1);
+    update_aux_vars(soln);
     
-    Threads::parallel_for(elem_range,
+    Threads::parallel_for(*Moose::getActiveLocalElementRange(),
                           ComputeInternalResiduals(soln, residual));
 
     residual.close();

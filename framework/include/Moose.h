@@ -4,6 +4,7 @@
 #include "perf_log.h"
 #include "parameters.h"
 #include "getpot.h"
+#include "elem_range.h"
 
 //Forward Declarations
 class Mesh;
@@ -98,6 +99,18 @@ namespace Moose
   void registerObjects();
 
 
+  /**
+   * Should be called after the mesh has been modified in any way.
+   */
+  void meshChanged();
+
+
+  /**
+   * Get access to the active_local_element_range
+   * Automatically builds it if it hasn't been initialized.
+   */
+  ConstElemRange * getActiveLocalElementRange();
+  
   /*******************
    * Global Variables - yeah I know...
    *******************/
@@ -118,6 +131,12 @@ namespace Moose
    * The one equation system to rule them all
    */
   extern EquationSystems * equation_system;
+
+  /**
+   * A range for use with TBB.  We do this so that it doesn't have
+   * to get rebuilt all the time (which takes time).
+   */
+  extern ConstElemRange * active_local_elem_range;
 
   enum GeomType
   {

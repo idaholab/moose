@@ -28,6 +28,10 @@
 
 #include "ParallelUniqueId.h"
 
+//libMesh includes
+#include "mesh.h"
+#include "boundary_info.h"
+
 void
 Moose::registerObjects()
 {
@@ -41,7 +45,7 @@ Moose::registerObjects()
     BoundaryCondition::sizeEverything();
     AuxKernel::sizeEverything();
   }
-
+  
   KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
   KernelFactory::instance()->registerKernel<Diffusion>("Diffusion");
   KernelFactory::instance()->registerKernel<Reaction>("Reaction");
@@ -64,13 +68,47 @@ Moose::registerObjects()
   MaterialFactory::instance()->registerMaterial<EmptyMaterial>("EmptyMaterial");
 }
 
+void
+Moose::meshChanged()
+{
+  // Reinitialize the equation_systems object for the newly refined
+  // mesh. One of the steps in this is project the solution onto the 
+  // new mesh
+  Moose::equation_system->reinit();
+
+  // Rebuild the boundary conditions 
+  Moose::mesh->boundary_info->build_node_list_from_side_list();
+
+  // Rebuild the active local element range
+  delete Moose::active_local_elem_range;
+  Moose::active_local_elem_range = NULL;
+
+  // Calling this function will rebuild the range.
+  Moose::getActiveLocalElementRange();
+}
+
+ConstElemRange *
+Moose::getActiveLocalElementRange()
+{
+  if(!Moose::active_local_elem_range)
+  {
+    Moose::active_local_elem_range = new ConstElemRange(Moose::mesh->active_local_elements_begin(),
+                                                        Moose::mesh->active_local_elements_end(),1);
+  }
+
+  return Moose::active_local_elem_range;  
+}
+
+
 /******************
  * Global Variables
  * ****************/
-THREAD_ID Moose::current_thread_id;
+THREAD_ID Moose::current_thread_id = 0;
 
 Mesh * Moose::mesh;
 EquationSystems * Moose::equation_system;
+
+ConstElemRange * Moose::active_local_elem_range = NULL;
 
 enum Moose::GeomType;
 Moose::GeomType Moose::geom_type = Moose::XYZ;
