@@ -339,7 +339,7 @@ BoundaryCondition::coupledGradFace(std::string name)
   if(_integrated)
     return _var_grads_face[_tid][_coupled_as_to_var_num[name]];
 
-  error();
+  libmesh_error();
 }
 
 std::vector<const Node *> BoundaryCondition::_static_current_node;
