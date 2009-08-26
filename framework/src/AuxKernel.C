@@ -85,8 +85,12 @@ AuxKernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node &
     unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);
 
     _var_vals_nodal[tid][var_num] = soln(dof_number);
-    _var_vals_old_nodal[tid][var_num] = (*_nonlinear_old_soln)(dof_number);
-    _var_vals_older_nodal[tid][var_num] = (*_nonlinear_older_soln)(dof_number);
+
+    if(_is_transient)
+    {
+      _var_vals_old_nodal[tid][var_num] = (*_nonlinear_old_soln)(dof_number);
+      _var_vals_older_nodal[tid][var_num] = (*_nonlinear_older_soln)(dof_number);
+    }
   }
 
   const NumericVector<Number>& aux_soln = *_aux_system->solution;
@@ -103,8 +107,12 @@ AuxKernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node &
 
     _aux_var_dofs[tid][var_num] = dof_number;
     _aux_var_vals_nodal[tid][var_num] = (*_aux_soln)(dof_number);
-    _aux_var_vals_old_nodal[tid][var_num] = (*_aux_old_soln)(dof_number);
-    _aux_var_vals_older_nodal[tid][var_num] = (*_aux_older_soln)(dof_number);
+
+    if(_is_transient)
+    {
+      _aux_var_vals_old_nodal[tid][var_num] = (*_aux_old_soln)(dof_number);
+      _aux_var_vals_older_nodal[tid][var_num] = (*_aux_older_soln)(dof_number);
+    }
   }
 
   Moose::perf_log.pop("reinit(node)","AuxKernel");
@@ -153,12 +161,20 @@ AuxKernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem &
     const std::vector<Point> & q_point = *_static_q_point[tid][fe_type];
     
     _var_vals_element[tid][var_num] = integrateValue(_var_vals[tid][var_num], JxW, q_point) / area;
-    _var_vals_old_element[tid][var_num] = integrateValue(_var_vals_old[tid][var_num], JxW, q_point) / area;
-    _var_vals_older_element[tid][var_num] = integrateValue(_var_vals_older[tid][var_num], JxW, q_point) / area;
+
+    if(_is_transient)
+    {
+      _var_vals_old_element[tid][var_num] = integrateValue(_var_vals_old[tid][var_num], JxW, q_point) / area;
+      _var_vals_older_element[tid][var_num] = integrateValue(_var_vals_older[tid][var_num], JxW, q_point) / area;
+    }
 
     _var_grads_element[tid][var_num] = integrateGradient(_var_grads[tid][var_num], JxW, q_point) / area;
-    _var_grads_old_element[tid][var_num] = integrateGradient(_var_grads_old[tid][var_num], JxW, q_point) / area;
-    _var_grads_older_element[tid][var_num] = integrateGradient(_var_grads_older[tid][var_num], JxW, q_point) / area;
+
+    if(_is_transient)
+    {
+      _var_grads_old_element[tid][var_num] = integrateGradient(_var_grads_old[tid][var_num], JxW, q_point) / area;
+      _var_grads_older_element[tid][var_num] = integrateGradient(_var_grads_older[tid][var_num], JxW, q_point) / area;
+    }
   }
 
   //Now Aux vars
@@ -172,12 +188,20 @@ AuxKernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem &
     const std::vector<Point> & q_point = *_static_q_point[tid][fe_type];
     
     _aux_var_vals_element[tid][var_num] = integrateValue(_aux_var_vals[tid][var_num], JxW, q_point) / area;
-    _aux_var_vals_old_element[tid][var_num] = integrateValue(_aux_var_vals_old[tid][var_num], JxW, q_point) / area;
-    _aux_var_vals_older_element[tid][var_num] = integrateValue(_aux_var_vals_older[tid][var_num], JxW, q_point) / area;
 
+    if(_is_transient)
+    {
+      _aux_var_vals_old_element[tid][var_num] = integrateValue(_aux_var_vals_old[tid][var_num], JxW, q_point) / area;
+      _aux_var_vals_older_element[tid][var_num] = integrateValue(_aux_var_vals_older[tid][var_num], JxW, q_point) / area;
+    }
+    
     _aux_var_grads_element[tid][var_num] = integrateGradient(_aux_var_grads[tid][var_num], JxW, q_point) / area;
-    _aux_var_grads_old_element[tid][var_num] = integrateGradient(_aux_var_grads_old[tid][var_num], JxW, q_point) / area;
-    _aux_var_grads_older_element[tid][var_num] = integrateGradient(_aux_var_grads_older[tid][var_num], JxW, q_point) / area;
+
+    if(_is_transient)
+    {
+      _aux_var_grads_old_element[tid][var_num] = integrateGradient(_aux_var_grads_old[tid][var_num], JxW, q_point) / area;
+      _aux_var_grads_older_element[tid][var_num] = integrateGradient(_aux_var_grads_older[tid][var_num], JxW, q_point) / area;
+    }
   }
 
   //Grab the dof numbers for the element variables
