@@ -63,8 +63,10 @@ Parameters
   {
     if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
     {
+
       std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Aux "<<std::endl<<std::endl;
       libmesh_error();
+
     }
     return name_to_params_pointer[name]();
   }
