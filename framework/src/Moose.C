@@ -99,7 +99,6 @@ Moose::getActiveLocalElementRange()
   return Moose::active_local_elem_range;  
 }
 
-
 /******************
  * Global Variables
  * ****************/
