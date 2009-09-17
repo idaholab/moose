@@ -32,6 +32,7 @@
 #include "mesh.h"
 #include "boundary_info.h"
 
+
 void
 Moose::registerObjects()
 {
