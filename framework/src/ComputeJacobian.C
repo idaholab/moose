@@ -123,7 +123,16 @@ namespace Moose
 
 #ifdef LIBMESH_HAVE_PETSC
     //Necessary for speed
+#if PETSC_VERSION_LESS_THAN(3,0,0)
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+#else
+    // In Petsc 3.0.0, MatSetOption has three args...the third arg
+    // determines whether the option is set (true) or unset (false)
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+		 MAT_KEEP_ZEROED_ROWS,
+		 PETSC_TRUE);
+#endif
+    
 #endif
   
     update_aux_vars(soln);
@@ -304,7 +313,15 @@ protected:
 
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
+#if PETSC_VERSION_LESS_THAN(3,0,0)
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+#else
+    // In Petsc 3.0.0, MatSetOption has three args...the third arg
+    // determines whether the option is set (true) or unset (false)
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+		 MAT_KEEP_ZEROED_ROWS,
+		 PETSC_TRUE);
+#endif
 #endif
 
     update_aux_vars(soln);
