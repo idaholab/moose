@@ -145,6 +145,10 @@ Kernel::init(EquationSystems * es)
   _aux_dof_map = &_aux_system->get_dof_map();
 
   _max_quadrature_order = CONSTANT;
+
+  //Set the default variable scaling to 1
+  for(unsigned int i=0; i < _system->n_vars(); i++)
+    _scaling_factor.push_back(1.0);
   
   //Find the largest quadrature order necessary... all variables _must_ use the same rule!
   for(unsigned int var=0; var < _system->n_vars(); var++)
@@ -444,7 +448,7 @@ Kernel::computeResidual()
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     for (_i=0; _i<_phi.size(); _i++)
-      var_Re(_i) += _JxW[_qp]*computeQpResidual();
+      var_Re(_i) += _scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
   
 //  Moose::perf_log.pop("computeResidual()","Kernel");
 }
@@ -459,7 +463,7 @@ Kernel::computeJacobian()
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     for (_i=0; _i<_phi.size(); _i++)
       for (_j=0; _j<_phi.size(); _j++)
-        var_Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+        var_Ke(_i,_j) += _scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
   
 //  Moose::perf_log.pop("computeJacobian()",_name);
 }
@@ -474,9 +478,9 @@ Kernel::computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar)
       for (_j=0; _j<_phi.size(); _j++)
       {
         if(jvar == _var_num)
-          Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+          Ke(_i,_j) += _scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
         else
-          Ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);
+          Ke(_i,_j) += _scaling_factor[_var_num]*_JxW[_qp]*computeQpOffDiagJacobian(jvar);
       }
   
 //  Moose::perf_log.pop("computeOffDiagJacobian()",_name);
@@ -731,6 +735,18 @@ Kernel::modifiedAuxVarNum(unsigned int var_num)
   return MAX_VARS + var_num;
 }
 
+void
+Kernel::setVarScaling(std::vector<Real> scaling)
+{
+  if(scaling.size() != _system->n_vars())
+  {
+    std::cout<<"Error: size of scaling factor vector not the same as the number of variables in the system!"<<std::endl;
+    libmesh_error();
+  }
+  
+  _scaling_factor = scaling;
+}
+
 Real
 Kernel::computeQpJacobian()
   {
@@ -901,3 +917,4 @@ std::vector<Real> Kernel::_static_real_zero;
 std::vector<std::vector<Real> > Kernel::_static_zero;
 std::vector<std::vector<RealGradient> > Kernel::_static_grad_zero;
 std::vector<std::vector<RealTensor> > Kernel::_static_second_zero;
+std::vector<Real> Kernel::_scaling_factor;

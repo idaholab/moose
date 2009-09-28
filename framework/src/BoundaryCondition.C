@@ -221,14 +221,14 @@ BoundaryCondition::computeResidual()
   if(_integrated)
     for (_qp=0; _qp<_qface->n_points(); _qp++)
       for (_i=0; _i<_phi_face.size(); _i++)
-	var_Re(_i) += _JxW_face[_qp]*computeQpResidual();
+	var_Re(_i) += _scaling_factor[_var_num]*_JxW_face[_qp]*computeQpResidual();
   else
   {
     //Use _qp to keep things standard at the leaf level
     //_qp is really looping over nodes right now.
     for(_qp=0; _qp<_current_elem->n_nodes(); _qp++)
       if(_current_elem->is_node_on_side(_qp,_current_side))
-	var_Re(_qp) = computeQpResidual();
+	var_Re(_qp) = _scaling_factor[_var_num]*computeQpResidual();
   }
 
 //  Moose::perf_log.pop("computeResidual()","BoundaryCondition");
@@ -245,7 +245,7 @@ BoundaryCondition::computeJacobian()
     for (_qp=0; _qp<_qface->n_points(); _qp++)
       for (_i=0; _i<_phi_face.size(); _i++)
         for (_j=0; _j<_phi_face.size(); _j++)
-          var_Ke(_i,_j) += _JxW_face[_qp]*computeQpJacobian();
+          var_Ke(_i,_j) += _scaling_factor[_var_num]*_JxW_face[_qp]*computeQpJacobian();
   else
   {
     for(_i=0; _i<_phi_face.size(); _i++)
@@ -256,7 +256,7 @@ BoundaryCondition::computeJacobian()
         for(_j=0; _j<_phi_face.size(); _j++)
           var_Ke(_i,_j) = 0;
         
-	var_Ke(_i,_i) = 1;
+	var_Ke(_i,_i) = _scaling_factor[_var_num]*1;
       }
     }
   }
@@ -303,7 +303,7 @@ void
 BoundaryCondition::computeAndStoreResidual()
 {
   _qp = 0;
-  _current_residual->set(_nodal_bc_var_dofs[_tid][_var_num], computeQpResidual());
+  _current_residual->set(_nodal_bc_var_dofs[_tid][_var_num], _scaling_factor[_var_num]*computeQpResidual());
 }
 
 bool

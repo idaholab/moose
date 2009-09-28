@@ -177,6 +177,10 @@ protected:
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
 
+//  QGauss * _qrule;
+  
+//private:
+//  Kernel::_qrule;
 };
 
 #endif //MATERIAL_H

@@ -2,7 +2,10 @@
 
 template<>
 Parameters valid_params<EmptyMaterial>()
-{}
+{
+  Parameters params;
+  return params;
+}
 
 EmptyMaterial::EmptyMaterial(std::string name,
            Parameters parameters,

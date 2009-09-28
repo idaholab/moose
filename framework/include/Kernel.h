@@ -138,6 +138,15 @@ public:
    * off-diagonal jacobian components.
    */
   static bool modifiedAuxVarNum(unsigned int var_num);
+
+  /**
+   * Allows specification of per variable scaling factors.
+   * The size of the vector MUST be the same as the number of Nonlinear Variables.
+   * Should be called after Kernel::init() (because that sets the default scaling).
+   * Can be called multiple times to change the scaling.
+   * The initial scaling is just 1 for each variable.
+   */
+  static void setVarScaling(std::vector<Real> scaling);
   
 protected:
   /**
@@ -671,6 +680,11 @@ protected:
   static std::vector<std::vector<Real> > _static_zero;
   static std::vector<std::vector<RealGradient> > _static_grad_zero;
   static std::vector<std::vector<RealTensor> > _static_second_zero;
+
+  /**
+   * Scaling factors for each variable.
+   */
+  static std::vector<Real> _scaling_factor;
 };
 
 #endif //KERNEL_H
