@@ -306,6 +306,21 @@ BoundaryCondition::computeAndStoreResidual()
   _current_residual->set(_nodal_bc_var_dofs[_tid][_var_num], _scaling_factor[_var_num]*computeQpResidual());
 }
 
+Real
+BoundaryCondition::computeIntegral()
+{
+//  Moose::perf_log.push("computeIntegral()",_name);
+
+  Real sum = 0;
+  
+  for (_qp=0; _qp<_qface->n_points(); _qp++)
+      sum += _JxW_face[_qp]*computeQpIntegral();
+  
+//  Moose::perf_log.pop("computeIntegral()",_name);
+  return sum;
+}
+
+
 bool
 BoundaryCondition::isIntegrated()
 {

@@ -73,6 +73,11 @@ public:
    */
   void computeAndStoreResidual();
 
+  /** 
+   * Computes the integral over the current side.
+   */
+  Real computeIntegral();
+
   /**
    * Whether or not the BC is integrated over the boundary.
    */
