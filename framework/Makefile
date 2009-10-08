@@ -10,7 +10,7 @@ meshdir := $(LIBMESH_DIR)
 # link with the library.
 include $(meshdir)/Make.common
 
-libmesh_INCLUDE += -Iinclude -Iinclude/materials
+libmesh_INCLUDE += -Iinclude -Iinclude/materials -Iinclude/parser
 
 ###############################################################################
 # File management.  This is where the source, header, and object files are
@@ -18,7 +18,7 @@ libmesh_INCLUDE += -Iinclude -Iinclude/materials
 
 #
 # source files
-srcfiles 	:= $(wildcard src/*.C) $(wildcard src/materials/*.C)
+srcfiles 	:= $(wildcard src/*.C) $(wildcard src/materials/*.C) $(wildcard src/parser/*.C)
 
 #
 # object files
@@ -82,7 +82,7 @@ include .depend
 # Dependencies
 #
 .depend:
-	@$(perl) $(meshdir)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(meshdir)/include/*), -I$(i)) -Iinclude -Iinclude/materials "-S\$$(obj-suffix)" $(srcfiles) > .depend
+	@$(perl) $(meshdir)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(meshdir)/include/*), -I$(i)) -Iinclude -Iinclude/materials -Iinclude/parser "-S\$$(obj-suffix)" $(srcfiles) > .depend
 	@echo "Updated .depend"
 
 ###############################################################################

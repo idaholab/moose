@@ -24,6 +24,19 @@
 #include "MaterialFactory.h"
 #include "EmptyMaterial.h"
 
+#include "ParserBlockFactory.h"
+#include "MeshBlock.h"
+#include "VariablesBlock.h"
+#include "GenericVariableBlock.h"
+#include "KernelsBlock.h"
+#include "GenericKernelBlock.h"
+#include "BCsBlock.h"
+#include "GenericBCBlock.h"
+#include "MaterialsBlock.h"
+#include "GenericMaterialBlock.h"
+#include "ExecutionBlock.h"
+#include "OutputBlock.h"
+
 #include "Moose.h"
 
 #include "ParallelUniqueId.h"
@@ -67,6 +80,18 @@ Moose::registerObjects()
   AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");
 
   MaterialFactory::instance()->registerMaterial<EmptyMaterial>("EmptyMaterial");
+
+  ParserBlockFactory::instance()->registerParserBlock<MeshBlock>("Mesh");
+  ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables");
+  ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("Variables/*");
+  ParserBlockFactory::instance()->registerParserBlock<KernelsBlock>("Kernels");
+  ParserBlockFactory::instance()->registerParserBlock<GenericKernelBlock>("Kernels/*");
+  ParserBlockFactory::instance()->registerParserBlock<BCsBlock>("BCs");
+  ParserBlockFactory::instance()->registerParserBlock<GenericBCBlock>("BCs/*");
+  ParserBlockFactory::instance()->registerParserBlock<MaterialsBlock>("Materials");
+  ParserBlockFactory::instance()->registerParserBlock<GenericMaterialBlock>("Materials/*");
+  ParserBlockFactory::instance()->registerParserBlock<ExecutionBlock>("Execution");
+  ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
 }
 
 void
