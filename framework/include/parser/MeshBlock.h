@@ -6,9 +6,12 @@
 class MeshBlock: public ParserBlock
 {
 public:
-  MeshBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file);
+  MeshBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
 
   virtual void execute();
+
+private:
+  bool detectRestart();
 };
 
   

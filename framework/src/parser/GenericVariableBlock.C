@@ -6,11 +6,12 @@
 #include "nonlinear_implicit_system.h"
 #include "string_to_enum.h"
 
-GenericVariableBlock::GenericVariableBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, input_file)
+GenericVariableBlock::GenericVariableBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
+  :ParserBlock(reg_id, real_id, parent, input_file)
 {
   _block_params.set<std::string>("family") = "LAGRANGE";
   _block_params.set<std::string>("order") = "FIRST";
+  _block_params.set<std::vector<std::string> >("initial_from_file");
 }
 
 void
@@ -33,4 +34,10 @@ GenericVariableBlock::execute()
                       Utility::string_to_enum<Order>(_block_params.get<std::string>("order")),
                       Utility::string_to_enum<FEFamily>(_block_params.get<std::string>("family")));
   
+}
+
+bool
+GenericVariableBlock::restartRequired() const
+{
+  return bool(_block_params.get<std::vector<std::string> >("initial_from_file").size());
 }

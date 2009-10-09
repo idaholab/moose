@@ -3,13 +3,6 @@
 
 #include "Kernel.h"
 
-#include <vector>
-#include <string>
-
-//libMesh includes
-#include "parameters.h"
-#include "getpot.h"
-
 /**
  * This class represents the base class for the various parser block data structures and the associated
  * member function which is responsible for setting up the appropriate data structures within MOOSE
@@ -18,12 +11,17 @@ class ParserBlock
 {
 public:
   /**
+   * Typedef to hide implementation details
+   */
+  typedef std::vector<ParserBlock *>::iterator PBChildIterator;
+  
+  /**
    * The registered id (reg_id) is a "path-like" identifier supporting an optional trailing
    * wildcard character '*'.  The real_id is the actual parsed path containing the real identifier
-   * for this ParserBlock instance.  Finally a reference to the GetPot object is passed for
-   * flexible extension.
+   * for this ParserBlock instance.  A pointer to the parent is passed for use in searching the tree
+   * Finally a reference to the GetPot object is passed for flexible extension.
    */
-  ParserBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file);
+  ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
 
   /**
    * Cleans up the ParserBlock tree strucutre
@@ -54,15 +52,14 @@ public:
    */
   virtual void execute();
 
+  /************************************
+   * Public Data Members
+   ************************************/
   /**
-   * This function calles execute over all of the child blocks of the current Parser Block
-   */
-  void visitChildren();
-
-  /**
-   * Child Parser Blocks (TODO: Probably should be hidden)
+   * Child Parser Blocks and parent pointers (TODO: Probably should be hidden)
    */
   std::vector<ParserBlock *> _children;
+  ParserBlock * _parent;
 
   /** The _class_params are those parameters which will be passed directly to the Factory constructor
    * objects directly.
@@ -76,7 +73,21 @@ public:
    */
   Parameters _block_params;
 
+  /**
+   * This function searches the ParserTree for a given ParserBlock and returns the handle to it
+   * if it exists.  This function expects a long name not a short name.
+   */
+  ParserBlock * locateBlock(const std::string & id);
+
 protected:
+  /**
+   * This function calles execute over all of the child blocks of the current Parser Block
+   */
+  void visitChildren();
+  
+  /************************************
+   * Protected Data Members
+   ************************************/
   std::string _reg_id;
   std::string _real_id;
   const GetPot & _input_file;

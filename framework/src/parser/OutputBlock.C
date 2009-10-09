@@ -3,8 +3,8 @@
 #include "exodusII_io.h"
 #include "mesh.h"
 
-OutputBlock::OutputBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, input_file)
+OutputBlock::OutputBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
+  :ParserBlock(reg_id, real_id, parent, input_file)
 {
   _block_params.set<std::string>("file_base") = "out";
 }

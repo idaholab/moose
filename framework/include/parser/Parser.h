@@ -16,7 +16,6 @@ public:
    */
   void parse();
 
-private:
   /**
    * This function will split the passed in string on a set of delimiters appending the substrings
    * to the passed in vector.  The delimiters default to "/" but may be supplied as well
@@ -25,6 +24,13 @@ private:
                        std::vector<std::string> & elements,
                        const std::string &delims = "/");
 
+private:
+  /**
+   * This function inserts blocks into the tree which are optional in the input file but are
+   * necessary for the correct execution of MOOSE based applications.
+   */
+  void fixupOptionalBlocks(const GetPot & input_file);
+  
   /**
    * This function initiates the traversal of the parse block tree which is each block is resposible
    * for creating and filling in various MOOSE based objects.

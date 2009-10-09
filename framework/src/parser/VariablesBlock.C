@@ -15,8 +15,8 @@
 #include "nonlinear_implicit_system.h"
 #include "getpot.h"
 
-VariablesBlock::VariablesBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, input_file)
+VariablesBlock::VariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
+  :ParserBlock(reg_id, real_id, parent, input_file)
 {}
 
 void
@@ -35,12 +35,5 @@ VariablesBlock::execute()
   visitChildren();
 
   system.nonlinear_solver->residual = Moose::compute_residual;
-  system.nonlinear_solver->jacobian = Moose::compute_jacobian;
-
-  // TODO: Move this to the AuxSystems area
-  TransientExplicitSystem& aux_system = equation_system->add_system<TransientExplicitSystem> ("AuxiliarySystem");
-  equation_system->init();
-  equation_system->print_info();
-//  AuxKernel::init();
-  
+  system.nonlinear_solver->jacobian = Moose::compute_jacobian;  
 }

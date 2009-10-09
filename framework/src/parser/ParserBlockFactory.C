@@ -11,11 +11,11 @@ ParserBlockFactory::instance()
 }
 
 ParserBlock *
-ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, const GetPot & input_file)
+ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
 {
   ParserBlock * parser_block;
 
-  parser_block = (*name_to_build_pointer[reg_id])(reg_id, real_id, input_file);
+  parser_block = (*name_to_build_pointer[reg_id])(reg_id, real_id, parent, input_file);
   active_parser_blocks.push_back(parser_block);
 
   return parser_block;

@@ -6,7 +6,7 @@
 class GenericMaterialBlock: public ParserBlock
 {
 public:
-  GenericMaterialBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file);
+  GenericMaterialBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
 
   virtual void execute();
 

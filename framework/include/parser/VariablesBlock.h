@@ -6,7 +6,7 @@
 class VariablesBlock: public ParserBlock
 {
 public:
-  VariablesBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file);
+  VariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
 
   virtual void execute();
 };

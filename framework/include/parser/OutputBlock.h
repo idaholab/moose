@@ -6,7 +6,7 @@
 class OutputBlock: public ParserBlock
 {
 public:
-  OutputBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file);
+  OutputBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
 
   virtual void execute();
 };

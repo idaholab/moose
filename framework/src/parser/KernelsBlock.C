@@ -1,9 +1,10 @@
 #include "KernelsBlock.h"
 
 #include "KernelFactory.h"
+#include "AuxKernel.h"
 
-KernelsBlock::KernelsBlock(const std::string & reg_id, const std::string & real_id, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, input_file)
+KernelsBlock::KernelsBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
+  :ParserBlock(reg_id, real_id, parent, input_file)
 {
   _block_params.set<std::vector<std::string> >("names");
 }
@@ -18,6 +19,8 @@ KernelsBlock::execute()
   // TODO: Setup Time Params
 
   Kernel::init(Moose::equation_system);
+  AuxKernel::init();
+  
   
 
   // Add the kernels to the system

@@ -28,8 +28,10 @@
 #include "MeshBlock.h"
 #include "VariablesBlock.h"
 #include "GenericVariableBlock.h"
+#include "AuxVariablesBlock.h"
 #include "KernelsBlock.h"
 #include "GenericKernelBlock.h"
+#include "AuxKernelsBlock.h"
 #include "BCsBlock.h"
 #include "GenericBCBlock.h"
 #include "MaterialsBlock.h"
@@ -84,8 +86,10 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<MeshBlock>("Mesh");
   ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables");
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("Variables/*");
+  ParserBlockFactory::instance()->registerParserBlock<AuxVariablesBlock>("AuxVariables");
   ParserBlockFactory::instance()->registerParserBlock<KernelsBlock>("Kernels");
   ParserBlockFactory::instance()->registerParserBlock<GenericKernelBlock>("Kernels/*");
+  ParserBlockFactory::instance()->registerParserBlock<AuxKernelsBlock>("AuxKernels");
   ParserBlockFactory::instance()->registerParserBlock<BCsBlock>("BCs");
   ParserBlockFactory::instance()->registerParserBlock<GenericBCBlock>("BCs/*");
   ParserBlockFactory::instance()->registerParserBlock<MaterialsBlock>("Materials");
