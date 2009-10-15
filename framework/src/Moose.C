@@ -26,17 +26,20 @@
 
 #include "ParserBlockFactory.h"
 #include "MeshBlock.h"
+#include "exodusII_io.h"
 #include "VariablesBlock.h"
 #include "GenericVariableBlock.h"
 #include "AuxVariablesBlock.h"
 #include "KernelsBlock.h"
 #include "GenericKernelBlock.h"
 #include "AuxKernelsBlock.h"
+#include "GenericAuxKernelBlock.h"
 #include "BCsBlock.h"
 #include "GenericBCBlock.h"
 #include "MaterialsBlock.h"
 #include "GenericMaterialBlock.h"
 #include "ExecutionBlock.h"
+#include "TransientBlock.h"
 #include "OutputBlock.h"
 
 #include "Moose.h"
@@ -85,16 +88,27 @@ Moose::registerObjects()
 
   ParserBlockFactory::instance()->registerParserBlock<MeshBlock>("Mesh");
   ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables");
+//  ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables/a");
+//  ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables/Special");
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("Variables/*");
+//  ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables/special");
   ParserBlockFactory::instance()->registerParserBlock<AuxVariablesBlock>("AuxVariables");
+  // Reuse the GenericVariableBlock for AuxVariables/*
+  ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("AuxVariables/*");
   ParserBlockFactory::instance()->registerParserBlock<KernelsBlock>("Kernels");
   ParserBlockFactory::instance()->registerParserBlock<GenericKernelBlock>("Kernels/*");
   ParserBlockFactory::instance()->registerParserBlock<AuxKernelsBlock>("AuxKernels");
+  ParserBlockFactory::instance()->registerParserBlock<GenericAuxKernelBlock>("AuxKernels/*");
   ParserBlockFactory::instance()->registerParserBlock<BCsBlock>("BCs");
   ParserBlockFactory::instance()->registerParserBlock<GenericBCBlock>("BCs/*");
+  // Reuse the BCsBlock for AuxBCs
+  ParserBlockFactory::instance()->registerParserBlock<BCsBlock>("AuxBCs");
+  // Reuse the GenericBCBlock for AuxBCs/*
+  ParserBlockFactory::instance()->registerParserBlock<GenericBCBlock>("AuxBCs/*");
   ParserBlockFactory::instance()->registerParserBlock<MaterialsBlock>("Materials");
   ParserBlockFactory::instance()->registerParserBlock<GenericMaterialBlock>("Materials/*");
   ParserBlockFactory::instance()->registerParserBlock<ExecutionBlock>("Execution");
+  ParserBlockFactory::instance()->registerParserBlock<TransientBlock>("Execution/Transient");
   ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
 }
 
@@ -135,6 +149,7 @@ Moose::getActiveLocalElementRange()
 THREAD_ID Moose::current_thread_id = 0;
 
 Mesh * Moose::mesh;
+ExodusII_IO * Moose::exreader;
 EquationSystems * Moose::equation_system;
 
 ConstElemRange * Moose::active_local_elem_range = NULL;
@@ -143,3 +158,17 @@ enum Moose::GeomType;
 Moose::GeomType Moose::geom_type = Moose::XYZ;
 
 bool Moose::no_fe_reinit = false;
+
+std::string Moose::execution_type;
+
+std::string Moose::file_base = "";
+int Moose::interval = 1;
+bool Moose::exodus_output = false;
+bool Moose::gmv_output = false;
+bool Moose::tecplot_output = false;
+bool Moose::print_out_info = false;
+bool Moose::output_initial = false;
+bool Moose::auto_scaling = false;
+MeshRefinement * Moose::mesh_refinement = NULL;
+
+

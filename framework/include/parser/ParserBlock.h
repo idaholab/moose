@@ -79,11 +79,13 @@ public:
    */
   ParserBlock * locateBlock(const std::string & id);
 
+  void printBlockData();
+  
 protected:
   /**
    * This function calles execute over all of the child blocks of the current Parser Block
    */
-  void visitChildren();
+  void visitChildren(void (ParserBlock::*action)() = &ParserBlock::execute, bool visit_named_only=true);
   
   /************************************
    * Protected Data Members

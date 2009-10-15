@@ -71,19 +71,27 @@ ParserBlockFactory::registeredParserBlocksEnd()
 std::string
 ParserBlockFactory::isRegistered(std::string & real_id)
 {
-  std::map<std::string, parserBlockParamsPtr>::iterator i;
+  /* This implementation assumes that wildcards can occur in the final position of the registered id.
+   * Since maps are ordered, a reverse traversal through the registered list will always select a more
+   * specific match before a wildcard match ('*' == char(42))
+   */
+  std::map<std::string, parserBlockParamsPtr>::reverse_iterator i;
 
-  for (i=name_to_params_pointer.begin(); i!=name_to_params_pointer.end(); ++i) 
+  for (i=name_to_params_pointer.rbegin(); i!=name_to_params_pointer.rend(); ++i) 
   {
-    if (i->first == real_id)
+    if (i->first == real_id) 
       return i->first;
+
     else if (i->first[i->first.length()-1] == '*') 
     {
-      if (i->first.substr(0, i->first.find_last_of('/')) == real_id.substr(0, real_id.find_last_of('/')))
+      size_t pos = real_id.rfind('/');
+      // It's important to compare the trailing slashes to avoid premature matches when using
+      // the wildcard behavior (pos+1).
+      if (pos != std::string::npos && i->first.substr(0, i->first.rfind('/')+1) == real_id.substr(0, pos+1)) 
         return i->first;
     }
   }
-
+  
   return std::string("");
 }
 

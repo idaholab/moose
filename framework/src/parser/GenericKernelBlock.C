@@ -8,6 +8,7 @@ GenericKernelBlock::GenericKernelBlock(const std::string & reg_id, const std::st
   _block_params.set<std::string>("variable");
   _block_params.set<std::vector<std::string> >("coupled_to");
   _block_params.set<std::vector<std::string> >("coupled_as");
+  _block_params.set<int>("block") = -1;
 
   _class_params = KernelFactory::instance()->getValidParams(_type);
 }
@@ -22,9 +23,16 @@ GenericKernelBlock::execute()
             << "\tvariable:" << _block_params.get<std::string>("variable") << ":" << std::endl;
 #endif
 
-  KernelFactory::instance()->add(_type, getShortName(), _class_params, 
-                                 _block_params.get<std::string>("variable"),
-                                 _block_params.get<std::vector<std::string> >("coupled_to"),
-                                 _block_params.get<std::vector<std::string> >("coupled_as"));
+  if (_block_params.get<int>("block") < 0)
+    KernelFactory::instance()->add(_type, getShortName(), _class_params, 
+                                   _block_params.get<std::string>("variable"),
+                                   _block_params.get<std::vector<std::string> >("coupled_to"),
+                                   _block_params.get<std::vector<std::string> >("coupled_as"));
+  else
+    KernelFactory::instance()->add(_type, getShortName(), _class_params, 
+                                   _block_params.get<std::string>("variable"),
+                                   _block_params.get<std::vector<std::string> >("coupled_to"),
+                                   _block_params.get<std::vector<std::string> >("coupled_as"),
+                                   _block_params.get<int>("block"));
   
 }

@@ -9,6 +9,7 @@
 //Forward Declarations
 class Mesh;
 class EquationSystems;
+class ExodusII_IO;
 
 #define MAX_VARS 1000
 
@@ -128,6 +129,11 @@ namespace Moose
   extern Mesh * mesh;
 
   /**
+   * The ExodusIO Reader to support reading of solutions at element qps
+   */
+  extern ExodusII_IO * exreader;
+
+  /**
    * The one equation system to rule them all
    */
   extern EquationSystems * equation_system;
@@ -153,7 +159,22 @@ namespace Moose
    *
    * This can provide a huge speedup... but must be used with care.
    */
-  extern bool no_fe_reinit;  
+  extern bool no_fe_reinit;
+
+  extern std::string execution_type;
+
+  extern std::string file_base;
+  extern int interval;
+  extern bool exodus_output;
+  extern bool gmv_output;
+  extern bool tecplot_output;
+  extern bool print_out_info;
+  extern bool output_initial;
+  extern bool auto_scaling;
+
+  extern MeshRefinement * mesh_refinement;
+  
+
 }
 
 #endif //MOOSE_H

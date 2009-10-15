@@ -13,7 +13,7 @@
 #include "getpot.h"
 
 AuxVariablesBlock::AuxVariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, parent, input_file)
+  :VariablesBlock(reg_id, real_id, parent, input_file)
 {}
 
 void
@@ -25,10 +25,16 @@ AuxVariablesBlock::execute()
 
   TransientExplicitSystem& aux_system =
     Moose::equation_system->add_system<TransientExplicitSystem> ("AuxiliarySystem");
-
-  // TODO: Implement GenericAuxVariableBlock
+  
   visitChildren();
   
   Moose::equation_system->init();
   Moose::equation_system->print_info();
+
+  // Copy out nodal values is required (Variables Block)
+  if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("VariablesBlock")))
+    vars->copyNodalValues("NonlinearSystem");
+
+  // Aux Variables
+  this->copyNodalValues("AuxiliarySystem");
 }

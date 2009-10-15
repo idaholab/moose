@@ -9,6 +9,8 @@
 #include "exodusII_io.h"
 #include "boundary_info.h"
 #include "getpot.h"
+#include "mesh_refinement.h"
+#include "linear_partitioner.h"
 
 MeshBlock::MeshBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
   :ParserBlock(reg_id, real_id, parent, input_file)
@@ -17,7 +19,11 @@ MeshBlock::MeshBlock(const std::string & reg_id, const std::string & real_id, Pa
   _block_params.set<std::string>("file");
   _block_params.set<bool>("second_order") = false;
   _block_params.set<bool>("generated") = false;
+  _block_params.set<std::string>("partitioner");
+  _block_params.set<int>("uniform_refine") = 0;
 }
+
+// TODO: Need to make a Mesh Generation Block handler
 
 void
 MeshBlock::execute() 
@@ -33,8 +39,9 @@ MeshBlock::execute()
   // TODO: Copy Nodal Solutions
   if (detectRestart()) 
   {
-    ExodusII_IO exreader(*mesh);
-    exreader.read(_block_params.get<std::string>("file"));
+    ExodusII_IO *exreader = new ExodusII_IO(*mesh);
+    Moose::exreader = exreader;
+    exreader->read(_block_params.get<std::string>("file"));
   }
   else
     /* We will use the mesh object to read the file to cut down on
@@ -46,15 +53,21 @@ MeshBlock::execute()
   // TODO: Fix this call - always breaks ???
   // mesh->all_second_order(_block_params.get<bool>("second_order"));
 
+  if (_block_params.get<std::string>("partitioner") == "linear")
+    mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
   mesh->prepare_for_use(false);
 
-  // TODO: Need to make a Mesh Generation Block handler
-  
-  // TODO: Check for Mesh Refinement Params
-  // TODO: Check for Mesh Partitioner Params
+  // If using ParallelMesh this will delete non-local elements from the current processor
+  mesh->delete_remote_elements();
+
+  MeshRefinement *mesh_refinement = new MeshRefinement(*mesh);
+  mesh_refinement->uniformly_refine(_block_params.get<int>("uniform_refine"));
+  Moose::mesh_refinement = mesh_refinement;
   
   mesh->boundary_info->build_node_list_from_side_list();
   mesh->print_info();
+
+  visitChildren();
 }
 
 bool

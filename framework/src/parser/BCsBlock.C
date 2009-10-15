@@ -12,11 +12,12 @@ void
 BCsBlock::execute() 
 {
 #ifdef DEBUG
-  std::cerr << "Inside the KernelsBlock Object\n";
+  std::cerr << "Inside the BCsBlock Object\n";
 #endif
 
-  BoundaryCondition::init();
+  if (_reg_id == "BCs")
+    BoundaryCondition::init();
   
-  // Add the BCs to the system
+  // Add the BCs or AuxBCs to the system
   visitChildren();
 }

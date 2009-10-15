@@ -68,6 +68,11 @@ Parser::parse()
   }
 
   fixupOptionalBlocks(input_file);
+
+#ifdef DEBUG
+  _input_tree->printBlockData();
+#endif
+  
   // Make a second pass through the tree to setup the various MOOSE objects
   execute();
 }

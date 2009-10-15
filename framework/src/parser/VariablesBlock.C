@@ -4,8 +4,8 @@
 #include "Moose.h"
 #include "ComputeResidual.h"
 #include "ComputeJacobian.h"
-
 #include "AuxFactory.h"
+#include "GenericVariableBlock.h"
 
 // libMesh includes
 #include "libmesh.h"
@@ -14,6 +14,7 @@
 #include "nonlinear_solver.h"
 #include "nonlinear_implicit_system.h"
 #include "getpot.h"
+#include "exodusII_io.h"
 
 VariablesBlock::VariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
   :ParserBlock(reg_id, real_id, parent, input_file)
@@ -35,5 +36,30 @@ VariablesBlock::execute()
   visitChildren();
 
   system.nonlinear_solver->residual = Moose::compute_residual;
-  system.nonlinear_solver->jacobian = Moose::compute_jacobian;  
+  system.nonlinear_solver->jacobian = Moose::compute_jacobian;
+
+  /** If requested, nodal values are copied out after the equation systems are initialized.
+   * This is handled in the AuxVariables Block
+   */
+}
+
+void
+VariablesBlock::copyNodalValues(const std::string &system_name)
+{
+  System *system;
+  if (system_name == "NonlinearSystem")
+    system = &Moose::equation_system->get_system<TransientNonlinearImplicitSystem>(system_name);
+  else
+    system = &Moose::equation_system->get_system<TransientExplicitSystem>(system_name);
+  
+  // Iterate over the children and see if they need nodal values read
+  for (std::vector<ParserBlock *>::iterator i = _children.begin(); i!=_children.end(); ++i)
+  {
+    if (GenericVariableBlock * var_block = dynamic_cast<GenericVariableBlock *>(*i))
+    {
+      std::pair<std::string, unsigned int> init_pair = var_block->initialValuePair();
+      if (init_pair.first != "") 
+        Moose::exreader->copy_nodal_solution(*system, init_pair.first, init_pair.second);
+    }
+  }
 }

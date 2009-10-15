@@ -9,6 +9,7 @@ public:
   VariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
 
   virtual void execute();
+  virtual void copyNodalValues(const std::string &system_name);
 };
 
   

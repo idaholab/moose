@@ -13,6 +13,9 @@ ExecutionBlock::ExecutionBlock(const std::string & reg_id, const std::string & r
   _block_params.set<Real>        ("nl_abs_step_tol")     = 1.0e-50;
   _block_params.set<Real>        ("nl_rel_step_tol")     = 1.0e-50;
   _block_params.set<bool>        ("no_fe_reinit")        = false;
+  _block_params.set<std::string> ("type");
+  _block_params.set<bool>        ("perf_log")            = false;
+  _block_params.set<bool>        ("auto_scaling")        = false;
 }
 
 void
@@ -21,6 +24,12 @@ ExecutionBlock::execute()
 #ifdef DEBUG
   std::cerr << "Inside the ExecutionBlock Object\n";
 #endif
+
+  Moose::equation_system->parameters.set<Real> ("linear solver tolerance")
+    = _block_params.get<Real>("l_tol");
+
+  Moose::equation_system->parameters.set<Real> ("linear solver absolute step tolerance")
+    = _block_params.get<Real>("l_abs_step_tol");
 
   Moose::equation_system->parameters.set<unsigned int> ("linear solver maximum iterations")
     = _block_params.get<unsigned int>("l_max_its");    
@@ -44,6 +53,13 @@ ExecutionBlock::execute()
     = _block_params.get<Real>("nl_rel_step_tol");
 
   Moose::no_fe_reinit = _block_params.get<bool>("no_fe_reinit");
-  
-  // TODO: Execution stuff
+
+  if (!_block_params.get<bool>("perf_log"))
+    Moose::perf_log.disable_logging();
+
+  Moose::execution_type = _block_params.get<std::string>("type");
+
+  Moose::auto_scaling = _block_params.get<bool>("auto_scaling");
+
+  visitChildren();
 }
