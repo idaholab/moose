@@ -31,7 +31,9 @@ VariablesBlock::execute()
   Moose::equation_system = equation_system;
   TransientNonlinearImplicitSystem &system =
     equation_system->add_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
-  
+
+  Moose::manual_scaling.reserve(n_activeChildren());
+
   // Add variable blocks from the children nodes
   visitChildren();
 
@@ -39,7 +41,7 @@ VariablesBlock::execute()
   system.nonlinear_solver->jacobian = Moose::compute_jacobian;
 
   /** If requested, nodal values are copied out after the equation systems are initialized.
-   * This is handled in the AuxVariables Block
+   *  This call is made from the AuxVariables Block
    */
 }
 

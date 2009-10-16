@@ -26,6 +26,7 @@
 
 #include "ParserBlockFactory.h"
 #include "MeshBlock.h"
+#include "MeshGenerationBlock.h"
 #include "exodusII_io.h"
 #include "VariablesBlock.h"
 #include "GenericVariableBlock.h"
@@ -87,11 +88,9 @@ Moose::registerObjects()
   MaterialFactory::instance()->registerMaterial<EmptyMaterial>("EmptyMaterial");
 
   ParserBlockFactory::instance()->registerParserBlock<MeshBlock>("Mesh");
+  ParserBlockFactory::instance()->registerParserBlock<MeshGenerationBlock>("Mesh/Generation");
   ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables");
-//  ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables/a");
-//  ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables/Special");
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("Variables/*");
-//  ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables/special");
   ParserBlockFactory::instance()->registerParserBlock<AuxVariablesBlock>("AuxVariables");
   // Reuse the GenericVariableBlock for AuxVariables/*
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("AuxVariables/*");
@@ -170,5 +169,7 @@ bool Moose::print_out_info = false;
 bool Moose::output_initial = false;
 bool Moose::auto_scaling = false;
 MeshRefinement * Moose::mesh_refinement = NULL;
+std::vector<Real> Moose::manual_scaling;
+
 
 

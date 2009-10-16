@@ -21,16 +21,18 @@ GenericVariableBlock::GenericVariableBlock(const std::string & reg_id, const std
   _block_params.set<std::string>("family") = "LAGRANGE";
   _block_params.set<std::string>("order") = "FIRST";
   _block_params.set<Real>("initial_condition") = 0.0;
-  _block_params.set<Real>("scaling") = 0.0;
+  _block_params.set<Real>("scaling") = 1.0;
   _block_params.set<std::vector<std::string> >("initial_from_file");
 }
 
 void
 GenericVariableBlock::execute() 
 {
+  std::string var_name = getShortName();
+  
 #ifdef DEBUG
   std::cerr << "Inside the GenericVariableBlock Object\n";
-  std::cerr << "Variable: " << getShortName()
+  std::cerr << "Variable: " << var_name
             << "\torder: " << _block_params.get<std::string>("order")
             << "\tfamily: " << _block_params.get<std::string>("family") << std::endl;
 #endif
@@ -41,15 +43,24 @@ GenericVariableBlock::execute()
   else
     system = &Moose::equation_system->get_system<TransientExplicitSystem>("AuxiliarySystem");
 
-  system->add_variable(getShortName(),
+  system->add_variable(var_name,
                        Utility::string_to_enum<Order>(_block_params.get<std::string>("order")),
                        Utility::string_to_enum<FEFamily>(_block_params.get<std::string>("family")));
   
   // Set initial condition
   Real initial = _block_params.get<Real>("initial_condition");
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
-    Moose::equation_system->parameters.set<Real>("initial_" + getShortName()) = initial;
-  
+    Moose::equation_system->parameters.set<Real>("initial_" + var_name) = initial;
+
+  if (_reg_id == "Variables/*") 
+  {
+    // Manual Scaling
+    unsigned int var_number= system->variable_number(var_name);
+    Moose::manual_scaling.push_back(_block_params.get<Real>("scaling"));
+    // This variable number should go in the same vector position as the manual scaling vector
+    libmesh_assert(var_number == Moose::manual_scaling.size()-1);
+  }
+
   // retrieve inital conditions from exodus file
   std::vector<std::string> initial_from_file = _block_params.get<std::vector<std::string> >("initial_from_file");
   if (initial_from_file.size()) 
@@ -70,9 +81,6 @@ GenericVariableBlock::execute()
       _timestep_to_read = 2;
       }*/
   }
-  
-  // TODO: Manual Scaling
-  
 }
 
 bool

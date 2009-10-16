@@ -173,7 +173,7 @@ namespace Moose
   extern bool auto_scaling;
 
   extern MeshRefinement * mesh_refinement;
-  
+  extern std::vector<Real> manual_scaling;
 
 }
 

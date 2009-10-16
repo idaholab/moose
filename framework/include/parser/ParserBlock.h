@@ -83,6 +83,12 @@ public:
   
 protected:
   /**
+   * This function returns the number of active children which is either the children named in the
+   * optional "names" parameter or else all of the children underneath this Block
+   */
+  unsigned int n_activeChildren() const;
+
+  /**
    * This function calles execute over all of the child blocks of the current Parser Block
    */
   void visitChildren(void (ParserBlock::*action)() = &ParserBlock::execute, bool visit_named_only=true);

@@ -45,6 +45,27 @@ ParserBlock::execute()
   visitChildren();
 }
 
+unsigned int
+ParserBlock::n_activeChildren() const
+{
+  std::vector<std::string> named_children = _block_params.get<std::vector<std::string> >("names");
+
+  // if there is no parameter named "names" then assume that all children are active
+  if (named_children.size() == 0) 
+    return _children.size();
+  
+  // Make sure that all named children are actually in the _children list  
+  // Load the children names into a set for faster locating
+  std::set<std::string> child_set(named_children.begin(), named_children.end());
+  unsigned int count = 0;
+
+  std::vector<ParserBlock *>::const_iterator i;
+  for (i=_children.begin(); i!=_children.end(); ++i)
+    if (child_set.find((*i)->getShortName()) != child_set.end())
+      ++count;
+  return count;
+}
+
 void
 ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_named_only)
 {

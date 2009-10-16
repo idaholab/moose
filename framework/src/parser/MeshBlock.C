@@ -21,9 +21,8 @@ MeshBlock::MeshBlock(const std::string & reg_id, const std::string & real_id, Pa
   _block_params.set<bool>("generated") = false;
   _block_params.set<std::string>("partitioner");
   _block_params.set<int>("uniform_refine") = 0;
+  _block_params.set<bool>("generated") = false;
 }
-
-// TODO: Need to make a Mesh Generation Block handler
 
 void
 MeshBlock::execute() 
@@ -35,8 +34,15 @@ MeshBlock::execute()
   Mesh *mesh = new Mesh(_block_params.get<int>("dim"));
   Moose::mesh = mesh;
 
-  // TODO: Might need to save handle to ExodusII reader for copying the nodal solutions later
-  // TODO: Copy Nodal Solutions
+  // TODO: Need test for Mesh Generation
+  if (_block_params.get<bool>("generated")) 
+  {
+    if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
+      gen_block->execute();
+    else
+      libmesh_error();
+  }
+  
   if (detectRestart()) 
   {
     ExodusII_IO *exreader = new ExodusII_IO(*mesh);
@@ -50,8 +56,8 @@ MeshBlock::execute()
      */
     mesh->read(_block_params.get<std::string>("file"));
 
-  // TODO: Fix this call - always breaks ???
-  // mesh->all_second_order(_block_params.get<bool>("second_order"));
+  if (_block_params.get<bool>("second_order"))
+    mesh->all_second_order(true);
 
   if (_block_params.get<std::string>("partitioner") == "linear")
     mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
@@ -90,4 +96,3 @@ MeshBlock::detectRestart()
   }
   return false;
 }
-
