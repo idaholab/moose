@@ -66,20 +66,17 @@ GenericVariableBlock::execute()
   if (initial_from_file.size()) 
   {
     _variable_to_read = initial_from_file.at(0);
-    _timestep_to_read = 2;
 
-    // TODO: WTF?
-    /*try 
+    // TODO: Why does this fail in debug mode?
+    try 
     {
       std::stringstream iss(initial_from_file.at(1));
       if ((iss >> _timestep_to_read).fail())
         libmesh_error();
     }
     catch (std::out_of_range & e)
-    {
-      // default to reading timestep 2 (which will be the final solution from a steady state calc
-      _timestep_to_read = 2;
-      }*/
+    { // discard the out of range exception and go with the default
+    }
   }
 }
 
