@@ -334,7 +334,7 @@ def executeExodiff(test_dir, out_files):
     if stdout.find('different') != -1 or stdout.find('ERROR') != -1 or stdout.find('command not found') != -1:
       assert False
 
-def executeBisonAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0):
+def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0):
   test_dir = os.path.dirname(test_file)
   delOldOutFiles(test_dir, out_files)
   executeApp(test_dir, input_file, min_dofs, parallel)
