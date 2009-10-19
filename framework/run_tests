@@ -2,13 +2,13 @@
 import sys, os
 from socket import gethostname
 
-#### Set the name of the application here
+#### Set the name of the application here and moose directory relative to the application
 app_name = ''
-
-### Override MOOSE DIR here is necessary
 MOOSE_DIR = '../moose'
+#### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
+
 
 # Import the TestHarness and Helper functions from the MOOSE toolkit
 sys.path.append(MOOSE_DIR + '/tests')
@@ -20,18 +20,6 @@ if host_name == 'service0' or host_name == 'service1':
   sys.exit(0)
 
   
-
-#This junk is for running the tests with Bitten
-test_dir='tests'
-test_workdir_pos = 0
-try:
-  test_workdir_pos = sys.argv.index('TEST_WORKDIR')
-  test_dir=os.path.join(sys.argv[test_workdir_pos+1],test_dir)
-  sys.argv.pop(test_workdir_pos+1)
-  test_workdir_pos = sys.argv.remove('TEST_WORKDIR')
-except:
-  pass
-
 # Determine the application name based on the libMesh naming scheme
 # Assume the application is in the current working directory
 method = ''
