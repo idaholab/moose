@@ -27,6 +27,8 @@ AuxVariablesBlock::execute()
     Moose::equation_system->add_system<TransientExplicitSystem> ("AuxiliarySystem");
   
   visitChildren();
+
+  aux_system.attach_init_function(Moose::init_cond);
   
   Moose::equation_system->init();
   Moose::equation_system->print_info();

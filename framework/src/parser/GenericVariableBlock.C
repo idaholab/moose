@@ -11,7 +11,7 @@
 #include "explicit_system.h"
 #include "string_to_enum.h"
 
-const Real GenericVariableBlock::_abs_zero_tol = 1e12;
+const Real GenericVariableBlock::_abs_zero_tol = 1e-12;
 
 GenericVariableBlock::GenericVariableBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
   :ParserBlock(reg_id, real_id, parent, input_file),
@@ -49,9 +49,10 @@ GenericVariableBlock::execute()
   
   // Set initial condition
   Real initial = _block_params.get<Real>("initial_condition");
-  if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
+  if (initial > _abs_zero_tol || initial < -_abs_zero_tol) 
     Moose::equation_system->parameters.set<Real>("initial_" + var_name) = initial;
 
+  
   if (_reg_id == "Variables/*") 
   {
     // Manual Scaling

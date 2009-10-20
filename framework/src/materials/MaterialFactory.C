@@ -40,7 +40,13 @@ MaterialFactory::getValidParams(std::string name)
 Material *
 MaterialFactory::getMaterial(THREAD_ID tid, unsigned int block_id)
   {
-    return active_materials[tid][block_id];
+    MaterialIterator mat_iter = active_materials[tid].find(block_id);
+    if (mat_iter == active_materials[tid].end()) 
+    {
+      std::cerr << "Active Material Missing\n";
+      libmesh_error();
+    }
+    return mat_iter->second;
   }
 
 void MaterialFactory::updateMaterialDataState()

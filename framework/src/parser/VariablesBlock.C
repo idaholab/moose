@@ -40,6 +40,8 @@ VariablesBlock::execute()
   system.nonlinear_solver->residual = Moose::compute_residual;
   system.nonlinear_solver->jacobian = Moose::compute_jacobian;
 
+  system.attach_init_function(Moose::init_cond);
+
   /** If requested, nodal values are copied out after the equation systems are initialized.
    *  This call is made from the AuxVariables Block
    */

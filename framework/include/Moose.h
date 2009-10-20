@@ -5,6 +5,7 @@
 #include "parameters.h"
 #include "getpot.h"
 #include "elem_range.h"
+#include "vector_value.h"
 
 //Forward Declarations
 class Mesh;
@@ -105,13 +106,25 @@ namespace Moose
    */
   void meshChanged();
 
-
   /**
    * Get access to the active_local_element_range
    * Automatically builds it if it hasn't been initialized.
    */
   ConstElemRange * getActiveLocalElementRange();
+
+
+  Number initial_value(const Point& p,
+                       const Parameters& parameters,
+                       const std::string& sys_name,
+                       const std::string& var_name);
   
+  Gradient initial_gradient(const Point& p,
+                            const Parameters& parameters,
+                            const std::string& sys_name,
+                            const std::string& var_name);
+  
+  void initial_cond(EquationSystems& es, const std::string& system_name);
+
   /*******************
    * Global Variables - yeah I know...
    *******************/
@@ -174,7 +187,15 @@ namespace Moose
 
   extern MeshRefinement * mesh_refinement;
   extern std::vector<Real> manual_scaling;
-
+  extern Number (*init_value)(const Point& p,
+                              const Parameters& parameters,
+                              const std::string& sys_name,
+                              const std::string& var_name);
+  extern Gradient (*init_gradient)(const Point& p,
+                                   const Parameters& parameters,
+                                   const std::string& sys_name,
+                                   const std::string& var_name);
+  extern void (*init_cond)(EquationSystems& es, const std::string& system_name);
 }
 
 #endif //MOOSE_H

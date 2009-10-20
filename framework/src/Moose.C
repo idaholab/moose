@@ -142,6 +142,42 @@ Moose::getActiveLocalElementRange()
   return Moose::active_local_elem_range;  
 }
 
+/* Default implementations of initial values */
+Number
+Moose::initial_value (const Point& p,
+                      const Parameters& parameters,
+                      const std::string& sys_name,
+                      const std::string& var_name)
+{
+  if(parameters.have_parameter<Real>("initial_"+var_name)) 
+  {
+    std::cout << "setting var: " << var_name << std::endl;
+    return parameters.get<Real>("initial_"+var_name);
+  }
+  return 0;
+}
+
+Gradient
+Moose::initial_gradient (const Point& p,
+                        const Parameters& parameters,
+                        const std::string& sys_name,
+                        const std::string& var_name)
+{
+  if(parameters.have_parameter<Real>("initial_"+var_name))
+    return parameters.get<Real>("initial_"+var_name);
+  
+  return 0;
+}
+
+void
+Moose::initial_cond(EquationSystems& es, const std::string& system_name)
+{
+  ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
+  
+  system.project_solution(init_value, init_gradient, es.parameters);
+}
+
+
 /******************
  * Global Variables
  * ****************/
@@ -170,6 +206,17 @@ bool Moose::output_initial = false;
 bool Moose::auto_scaling = false;
 MeshRefinement * Moose::mesh_refinement = NULL;
 std::vector<Real> Moose::manual_scaling;
+Number (*Moose::init_value)(const Point& p,
+                            const Parameters& parameters,
+                            const std::string& sys_name,
+                            const std::string& var_name) = Moose::initial_value;
+Gradient (*Moose::init_gradient)(const Point& p,
+                                 const Parameters& parameters,
+                                 const std::string& sys_name,
+                                 const std::string& var_name) = Moose::initial_gradient;
+void (*Moose::init_cond)(EquationSystems& es, const std::string& system_name) = Moose::initial_cond;
+
+
 
 
 
