@@ -22,7 +22,8 @@ GenericVariableBlock::GenericVariableBlock(const std::string & reg_id, const std
   _block_params.set<std::string>("order") = "FIRST";
   _block_params.set<Real>("initial_condition") = 0.0;
   _block_params.set<Real>("scaling") = 1.0;
-  _block_params.set<std::vector<std::string> >("initial_from_file");
+  _block_params.set<std::string>("initial_from_file_var");
+  _block_params.set<int>("initial_from_file_timestep");
 }
 
 void
@@ -63,28 +64,17 @@ GenericVariableBlock::execute()
   }
 
   // retrieve inital conditions from exodus file
-  std::vector<std::string> initial_from_file = _block_params.get<std::vector<std::string> >("initial_from_file");
-  if (initial_from_file.size()) 
-  {
-    _variable_to_read = initial_from_file.at(0);
-
-    // TODO: Why does this fail in debug mode?
-    try 
-    {
-      std::stringstream iss(initial_from_file.at(1));
-      if ((iss >> _timestep_to_read).fail())
-        libmesh_error();
-    }
-    catch (std::out_of_range & e)
-    { // discard the out of range exception and go with the default
-    }
-  }
+  _variable_to_read = _block_params.get<std::string>("initial_from_file_var");
+  _timestep_to_read = _block_params.get<int>("initial_from_file_timestep");  
 }
 
 bool
 GenericVariableBlock::restartRequired() const
 {
-  return bool(_block_params.get<std::vector<std::string> >("initial_from_file").size());
+  if (_block_params.get<std::string>("initial_from_file_var") == "") 
+    return false;
+  else 
+    return true;
 }
 
 std::pair<std::string, unsigned int>

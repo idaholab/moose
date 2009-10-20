@@ -34,7 +34,7 @@ AuxVariablesBlock::execute()
   Moose::equation_system->print_info();
 
   // Copy out nodal values is required (Variables Block)
-  if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("VariablesBlock")))
+  if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("Variables")))
     vars->copyNodalValues("NonlinearSystem");
 
   // Aux Variables
