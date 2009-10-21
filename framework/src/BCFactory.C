@@ -37,7 +37,7 @@ BCFactory::getValidParams(std::string name)
     if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
     {
       std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered BC "<<std::endl<<std::endl;
-      libmesh_error();
+      mooseError();
     }
 
     return name_to_params_pointer[name]();

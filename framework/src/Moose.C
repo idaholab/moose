@@ -51,6 +51,11 @@
 #include "mesh.h"
 #include "boundary_info.h"
 
+void mooseError(std::string error)
+{
+  std::cerr<<std::endl<<std::endl<<error<<std::endl<<std::endl;
+  libmesh_error();
+}
 
 void
 Moose::registerObjects()

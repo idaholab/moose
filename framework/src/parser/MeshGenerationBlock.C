@@ -73,7 +73,7 @@ MeshGenerationBlock::execute()
     break;
   default:
     std::cerr << "Unable to generate mesh for unknown dimension\n";
-    libmesh_error();
+    mooseError();
   }
   
   visitChildren();

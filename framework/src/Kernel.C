@@ -741,7 +741,7 @@ Kernel::setVarScaling(std::vector<Real> scaling)
   if(scaling.size() != _system->n_vars())
   {
     std::cout<<"Error: size of scaling factor vector not the same as the number of variables in the system!"<<std::endl;
-    libmesh_error();
+    mooseError();
   }
   
   _scaling_factor = scaling;
@@ -789,7 +789,7 @@ Kernel::coupled(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    libmesh_error();
+    mooseError();
   }
 
   if(!isAux(name))
@@ -804,7 +804,7 @@ Kernel::coupledVal(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    libmesh_error();
+    mooseError();
   }
 
   if(!isAux(name))
@@ -819,7 +819,7 @@ Kernel::coupledGrad(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    libmesh_error();
+    mooseError();
   }
 
   if(!isAux(name))
@@ -834,7 +834,7 @@ Kernel::coupledSecond(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    libmesh_error();
+    mooseError();
   }
 
   //Aux vars can't have second derivatives!
@@ -847,7 +847,7 @@ Kernel::coupledValOld(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    libmesh_error();
+    mooseError();
   }
 
   if(!isAux(name))
@@ -861,7 +861,7 @@ Kernel::coupledGradValOld(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    libmesh_error();
+    mooseError();
   }
   
   return _var_grads_old[_tid][_coupled_as_to_var_num[name]];

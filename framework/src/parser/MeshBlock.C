@@ -40,7 +40,7 @@ MeshBlock::execute()
     if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
       gen_block->execute();
     else
-      libmesh_error();
+      mooseError();
   }
   
   if (detectRestart()) 

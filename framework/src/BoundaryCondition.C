@@ -333,7 +333,7 @@ BoundaryCondition::coupledValFace(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"BC "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    libmesh_error();
+    mooseError();
   }
   
   if(_integrated)
@@ -348,13 +348,13 @@ BoundaryCondition::coupledGradFace(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"BC "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    libmesh_error();
+    mooseError();
   }
 
   if(_integrated)
     return _var_grads_face[_tid][_coupled_as_to_var_num[name]];
 
-  libmesh_error();
+  mooseError();
 }
 
 std::vector<const Node *> BoundaryCondition::_static_current_node;

@@ -32,7 +32,7 @@ MaterialFactory::getValidParams(std::string name)
     if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
     {
       std::cerr<<std::endl<<"A _"<<name<<"_ is not registered Material "<<std::endl<<std::endl;
-      libmesh_error();
+      mooseError();
     }
     return name_to_params_pointer[name]();
   }
@@ -44,7 +44,7 @@ MaterialFactory::getMaterial(THREAD_ID tid, unsigned int block_id)
     if (mat_iter == active_materials[tid].end()) 
     {
       std::cerr << "Active Material Missing\n";
-      libmesh_error();
+      mooseError();
     }
     return mat_iter->second;
   }

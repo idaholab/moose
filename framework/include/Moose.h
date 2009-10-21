@@ -87,6 +87,11 @@ void Parameters::Parameter<std::map<std::string, unsigned int> >::print (std::os
 {
 }
 
+/**
+ * A function to call when you need the whole program to die a spit out a message
+ */
+void mooseError(std::string error = "An error has occurred");
+
 namespace Moose
 {
   /**
