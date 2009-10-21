@@ -46,6 +46,7 @@
 #include "PBPBlock.h"
 
 #include "Moose.h"
+#include "PetscSupport.h"
 
 #include "ParallelUniqueId.h"
 
@@ -183,6 +184,19 @@ Moose::initial_cond(EquationSystems& es, const std::string& system_name)
   
   system.project_solution(init_value, init_gradient, es.parameters);
 }
+
+void
+Moose::setSolverDefaults(EquationSystems * es,
+                         TransientNonlinearImplicitSystem & system,
+                         void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar),
+                         void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual))
+{
+#ifdef LIBMESH_HAVE_PETSC
+  PetscSupport::petscSetDefaults(es, system, compute_jacobian_block, compute_residual);
+#endif //LIBMESH_HAVE_PETSC
+}
+
+  
 
 
 /******************

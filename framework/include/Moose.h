@@ -1,11 +1,23 @@
 #ifndef MOOSE_H
 #define MOOSE_H
+
+#ifdef LIBMESH_HAVE_PETSC
+#include "PetscSupport.h"
+#endif //LIBMESH_HAVE_PETSC
+
 //libMesh includes
 #include "perf_log.h"
 #include "parameters.h"
 #include "getpot.h"
 #include "elem_range.h"
 #include "vector_value.h"
+#include "libmesh.h"
+#include "mesh.h"
+#include "equation_systems.h"
+#include "nonlinear_solver.h"
+#include "nonlinear_implicit_system.h"
+#include "transient_system.h"
+
 
 //Forward Declarations
 class Mesh;
@@ -129,6 +141,12 @@ namespace Moose
                             const std::string& var_name);
   
   void initial_cond(EquationSystems& es, const std::string& system_name);
+
+  void setSolverDefaults(EquationSystems * es,
+                         TransientNonlinearImplicitSystem & system,
+                         void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar),
+                         void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual));
+  
 
   /*******************
    * Global Variables - yeah I know...

@@ -1,5 +1,16 @@
 #include "ExecutionBlock.h"
 
+#ifdef LIBMESH_HAVE_PETSC
+/*#include "sparse_matrix.h"
+#include "petsc_vector.h"
+#include "petsc_matrix.h"
+#include "petsc_linear_solver.h"
+#include "petsc_preconditioner.h"
+*/
+#include "PetscSupport.h"
+#endif //LIBMESH_HAVE_PETSC
+
+
 ExecutionBlock::ExecutionBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
   :ParserBlock(reg_id, real_id, parent, input_file)
 {
@@ -16,6 +27,13 @@ ExecutionBlock::ExecutionBlock(const std::string & reg_id, const std::string & r
   _block_params.set<std::string> ("type");
   _block_params.set<bool>        ("perf_log")            = false;
   _block_params.set<bool>        ("auto_scaling")        = false;
+
+#ifdef LIBMESH_HAVE_PETSC
+  _block_params.set<std::vector<std::string> >("petsc_options");
+  _block_params.set<std::vector<std::string> >("petsc_options_iname");
+  _block_params.set<std::vector<std::string> >("petsc_options_value");
+#endif //LIBMESH_HAVE_PETSC
+  
 }
 
 void
@@ -60,6 +78,26 @@ ExecutionBlock::execute()
   Moose::execution_type = _block_params.get<std::string>("type");
 
   Moose::auto_scaling = _block_params.get<bool>("auto_scaling");
+
+
+#ifdef LIBMESH_HAVE_PETSC
+  std::vector<std::string> petsc_options,  petsc_inames, petsc_values;
+  petsc_options = _block_params.get<std::vector<std::string> >("petsc_options");
+  petsc_inames = _block_params.get<std::vector<std::string> >("petsc_options_iname");
+  petsc_values = _block_params.get<std::vector<std::string> >("petsc_options_value");
+
+  PetscSupport::l_abs_step_tol = _block_params.get<Real>("l_abs_step_tol");
+  
+  if (petsc_inames.size() != petsc_values.size())
+    mooseError("Petsc names and options from input file are not the same length");
+
+  for (unsigned int i=0; i<petsc_options.size(); ++i)
+    PetscOptionsSetValue(petsc_options[i].c_str(), PETSC_NULL);
+  
+  for (unsigned int i=0; i<petsc_inames.size(); ++i)
+    PetscOptionsSetValue(petsc_inames[i].c_str(), petsc_values[i].c_str());
+#endif //LIBMESH_HAVE_PETSC
+  
 
   visitChildren();
 }
