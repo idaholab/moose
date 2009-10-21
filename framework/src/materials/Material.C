@@ -2,13 +2,13 @@
 #include <iostream>
 
 Material::Material(std::string name,
-           Parameters parameters,
-           unsigned int block_id,
-           std::vector<std::string> coupled_to,
-           std::vector<std::string> coupled_as)
-    :Kernel(name, parameters, Kernel::_es->get_system(0).variable_name(0), false, coupled_to, coupled_as),
-    _block_id(block_id)
-  {}
+                   Parameters parameters,
+                   unsigned int block_id,
+                   std::vector<std::string> coupled_to,
+                   std::vector<std::string> coupled_as)
+  :Kernel(name, parameters, Kernel::_es->get_system(0).variable_name(0), false, coupled_to, coupled_as),
+   _block_id(block_id)
+{}
 
 unsigned int
 Material::blockID()
@@ -42,75 +42,87 @@ Material::materialReinit()
 
 Real &
 Material::getConstantRealProperty(const std::string & name)
-  {
-    std::map<std::string, Real >::iterator it = _constant_real_props.find(name);
+{
+  std::map<std::string, Real >::iterator it = _constant_real_props.find(name);
 
-    if(it != _constant_real_props.end())
-      return it->second;
+  if(it != _constant_real_props.end())
+    return it->second;
 
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    mooseError();
-  }
+  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  mooseError();
+}
 
 std::vector<Real> &
 Material::getRealProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<Real> >::iterator it = _real_props.find(name);
+{
+  std::map<std::string, std::vector<Real> >::iterator it = _real_props.find(name);
 
-    if(it != _real_props.end())
-      return it->second;
+  if(it != _real_props.end())
+    return it->second;
 
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    mooseError();
-  }
+  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  mooseError();
+}
 
 std::vector<RealGradient> &
 Material::getGradientProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<RealGradient> >::iterator it = _gradient_props.find(name);
+{
+  std::map<std::string, std::vector<RealGradient> >::iterator it = _gradient_props.find(name);
 
-    if(it != _gradient_props.end())
-      return it->second;
+  if(it != _gradient_props.end())
+    return it->second;
 
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    mooseError();
-  }
+  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  mooseError();
+}
+
+std::vector<RealVectorValue> &
+Material::getRealVectorValueProperty(const std::string & name)
+{
+  std::map<std::string, std::vector<RealVectorValue> >::iterator it = _real_vector_value_props.find(name);
+  
+  if(it != _real_vector_value_props.end())
+    return it->second;
+  
+  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  mooseError();
+}
 
 std::vector<std::vector<Real> > &
 Material::getVectorProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<std::vector<Real> > >::iterator it = _vector_props.find(name);
+{
+  std::map<std::string, std::vector<std::vector<Real> > >::iterator it = _vector_props.find(name);
 
-    if(it != _vector_props.end())
-      return it->second;
+  if(it != _vector_props.end())
+    return it->second;
 
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    mooseError();
-  }
+  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  mooseError();
+}
 
 std::vector<RealTensorValue> &
 Material::getTensorProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<RealTensorValue> >::iterator it = _tensor_props.find(name);
+{
+  std::map<std::string, std::vector<RealTensorValue> >::iterator it = _tensor_props.find(name);
 
-    if(it != _tensor_props.end())
-      return it->second;
+  if(it != _tensor_props.end())
+    return it->second;
 
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    mooseError();
-  }
+  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  mooseError();
+}
 
 std::vector<std::vector<std::vector<Real> > > &
 Material::getMatrixProperty(const std::string & name)
-  {
-    std::map<std::string, std::vector<std::vector<std::vector<Real> > > >::iterator it = _matrix_props.find(name);
+{
+  std::map<std::string, std::vector<std::vector<std::vector<Real> > > >::iterator it = _matrix_props.find(name);
 
-    if(it != _matrix_props.end())
-      return it->second;
+  if(it != _matrix_props.end())
+    return it->second;
 
-    std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-    mooseError();
-  }
+  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  mooseError();
+}
 
 /**
  * Updates the old (first) material properties to the current/new material properies (second)
@@ -126,8 +138,8 @@ Material::updateDataState()
 
   while (i_prev != _qp_prev.end())
     for (j_prev = i_prev->second.begin(), j_curr = i_prev->second.begin(); 
-          j_prev != i_prev->second.end(); 
-          ++j_prev, ++j_curr)
+         j_prev != i_prev->second.end(); 
+         ++j_prev, ++j_curr)
       *j_prev = *j_curr;
 }
 
@@ -146,12 +158,12 @@ Material::getData(QP_Data_Type qp_data_type)
 
   switch (qp_data_type)
   {
-    case CURR:
-      locMap = &_qp_curr;
-      break;
-    case PREV:
-      locMap = &_qp_prev;
-      break;
+  case CURR:
+    locMap = &_qp_curr;
+    break;
+  case PREV:
+    locMap = &_qp_prev;
+    break;
   }
   
   i_map = locMap->find(elemId);
@@ -181,37 +193,43 @@ Material::computeQpResidual()
 
 std::vector<Real> &
 Material::declareRealProperty(const std::string & name)
-  {
-    return _real_props[name];
-  }
+{
+  return _real_props[name];
+}
 
 Real &
 Material::declareConstantRealProperty(const std::string & name)
-  {
-    return _constant_real_props[name];
-  }
+{
+  return _constant_real_props[name];
+}
 
 std::vector<RealGradient> &
 Material::declareGradientProperty(const std::string & name)
-  {
-    return _gradient_props[name];
-  }
+{
+  return _gradient_props[name];
+}
+
+std::vector<RealVectorValue> &
+Material::declareRealVectorValueProperty(const std::string & name)
+{
+  return _real_vector_value_props[name];
+}
 
 std::vector<std::vector<Real> > &
 Material::declareVectorProperty(const std::string & name)
-  {
-    return _vector_props[name];
-  }
+{
+  return _vector_props[name];
+}
 
 std::vector<RealTensorValue> &
 Material::declareTensorProperty(const std::string & name)
-  {
-    return _tensor_props[name];
-  }
+{
+  return _tensor_props[name];
+}
 
 std::vector<std::vector<std::vector<Real> > > &
 Material::declareMatrixProperty(const std::string & name)
-  {
-    return _matrix_props[name];
-  }
+{
+  return _matrix_props[name];
+}
 

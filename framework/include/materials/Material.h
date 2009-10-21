@@ -62,7 +62,12 @@ public:
    * Retrieve the Gradient valued property named "name"
    */
   std::vector<RealGradient> & getGradientProperty(const std::string & name);
-  
+
+  /**
+   * Retrieve RealVectorValue valued property named "name"
+   */
+  std::vector<RealVectorValue> & getRealVectorValueProperty(const std::string & name);
+
   /**
    * Retrieve the Vector valued property named "name"
    */
@@ -146,7 +151,14 @@ protected:
    * to be retrieved using get().
    */
   std::vector<RealGradient> & declareGradientProperty(const std::string & name);
-  
+
+  /**
+   * Declare the RealVectorValue valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using get().
+   */
+  std::vector<RealVectorValue> & declareRealVectorValueProperty(const std::string & name);
+
   /**
    * Declare the Vector valued property named "name".
    * This must be done _before_ a property of that name is tried
@@ -171,6 +183,7 @@ protected:
   std::map<std::string, Real > _constant_real_props;
   std::map<std::string, std::vector<Real> > _real_props;
   std::map<std::string, std::vector<RealGradient> > _gradient_props;
+  std::map<std::string, std::vector<RealVectorValue> > _real_vector_value_props;
   std::map<std::string, std::vector<std::vector<Real> > > _vector_props;
   std::map<std::string, std::vector<RealTensorValue> > _tensor_props;
   std::map<std::string, std::vector<std::vector<std::vector<Real> > > > _matrix_props;

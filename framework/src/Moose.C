@@ -42,6 +42,8 @@
 #include "ExecutionBlock.h"
 #include "TransientBlock.h"
 #include "OutputBlock.h"
+#include "PreconditioningBlock.h"
+#include "PBPBlock.h"
 
 #include "Moose.h"
 
@@ -114,6 +116,8 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<ExecutionBlock>("Execution");
   ParserBlockFactory::instance()->registerParserBlock<TransientBlock>("Execution/Transient");
   ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
+  ParserBlockFactory::instance()->registerParserBlock<PreconditioningBlock>("Preconditioning");
+  ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");
 }
 
 void
