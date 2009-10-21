@@ -219,7 +219,7 @@ class TestHarness:
     end = timeit.default_timer()
 
     if self.xls_writer:
-      xls_writer.close()
+      self.xls_writer.close()
     return out_string, results_table, test_counter, str(round(end-start,3))
 
 
