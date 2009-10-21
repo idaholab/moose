@@ -31,6 +31,13 @@ Material::materialReinit()
   for(;grad_it!=grad_it_end;++grad_it)
     grad_it->second.resize(_static_qrule[_tid]->n_points());
 
+
+  std::map<std::string, std::vector<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props.begin();
+  std::map<std::string, std::vector<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props.end();
+
+  for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
+    real_vector_value_it->second.resize(_static_qrule[_tid]->n_points());
+
   std::map<std::string, std::vector<RealTensorValue> >::iterator tensor_it = _tensor_props.begin();
   std::map<std::string, std::vector<RealTensorValue> >::iterator tensor_it_end = _tensor_props.end();
 
