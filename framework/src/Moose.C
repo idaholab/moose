@@ -150,10 +150,8 @@ Moose::initial_value (const Point& p,
                       const std::string& var_name)
 {
   if(parameters.have_parameter<Real>("initial_"+var_name)) 
-  {
-    std::cout << "setting var: " << var_name << std::endl;
     return parameters.get<Real>("initial_"+var_name);
-  }
+
   return 0;
 }
 

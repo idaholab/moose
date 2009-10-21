@@ -186,15 +186,14 @@ class TestHarness:
     global_exec_name = exec_name
 
     # parse command line args
-    options, arg_string = self.getoptions(argv)
+    self.options, self.arg_string = self.getoptions(argv)
 
     # Emulate the standard Nose RegEx for consistency
     self.test_match = re.compile(r"(?:^|\b|[_-])[Tt]est")
-    self.arg_string = arg_string
 
     # See if an Excel dump was requested
-    if options.xlsFile:
-      self.xls_writer = ExcelWriter(options.xlsFile)
+    if self.options.xlsFile:
+      self.xls_writer = ExcelWriter(self.options.xlsFile)
     else:
       self.xls_writer = None
 
@@ -263,8 +262,8 @@ class TestHarness:
                 parser = PerfLogParser()
                 parser.parse(capture.getvalue())
                 parser.writeExcel(self.xls_writer, module_name)
-              if (options.verbose == True):
-                result_string += capture.getvalue()
+            if (self.options.verbose == True):
+              result_string += capture.getvalue()
                   
                         
         except AssertionError:
@@ -298,7 +297,7 @@ class TestHarness:
 
 
   
-################ Testing Functions Go Here inside of the TestHarness #################
+################ Testing Functions Go Here outside of the TestHarness #################
 def executeCommand(command):
   print 'Executing: ' + command
 
