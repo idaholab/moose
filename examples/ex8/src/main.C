@@ -53,10 +53,17 @@ int main (int argc, char** argv)
   Parser p = Parser(input_filename);
   p.parse();
 
-  TransientNonlinearImplicitSystem & system =
-    Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+  // Solve the system inside of Moose
+  {
+    TransientNonlinearImplicitSystem & system =
+      Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
 
-  system.solve();
+    system.solve();
+  }
 
-  ExodusII_IO(*Moose::mesh).write_equation_systems("out.e", *Moose::equation_system);
+  // Only bother with exodus outputs
+  if (Moose::exodus_output)
+    ExodusII_IO(*Moose::mesh).write_equation_systems(Moose::file_base + ".e", *Moose::equation_system);
+  else
+    std::cout << "Exodus Output not selected and no other output method implemented\n";
 }

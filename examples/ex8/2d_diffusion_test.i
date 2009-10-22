@@ -1,6 +1,7 @@
 [Mesh]
   dim = 2
   file = square.e
+  uniform_refine = 4
 []
 
 [Variables]
@@ -11,8 +12,10 @@
     family = LAGRANGE
   [../]
 
-  something = 'a'
-  somethingelse = 'b'
+  [./v]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [Kernels]
@@ -30,14 +33,14 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = '1 3'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = '2 4'
     value = 1
   [../]
 []
