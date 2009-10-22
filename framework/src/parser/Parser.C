@@ -147,6 +147,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
 {
   Parameters::Parameter<Real> * real_param = dynamic_cast<Parameters::Parameter<Real>*>(it->second);
   Parameters::Parameter<int>  * int_param  = dynamic_cast<Parameters::Parameter<int>*>(it->second);
+  Parameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<Parameters::Parameter<unsigned int>*>(it->second);
   Parameters::Parameter<bool> * bool_param = dynamic_cast<Parameters::Parameter<bool>*>(it->second);
   Parameters::Parameter<std::string> * string_param = dynamic_cast<Parameters::Parameter<std::string>*>(it->second);
   Parameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<Parameters::Parameter<std::vector<Real> >*>(it->second);
@@ -176,6 +177,15 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
     if( int_param->get() == from_input )
       default_flag = true;
     int_param->set() = from_input;
+    return default_flag;
+  }
+  else if( uint_param )
+  {
+    unsigned int from_input;
+    from_input = input_file((name).c_str(), uint_param->get());
+    if( uint_param->get() == from_input )
+      default_flag = true;
+    uint_param->set() = from_input;
     return default_flag;
   }
   else if( bool_param )
