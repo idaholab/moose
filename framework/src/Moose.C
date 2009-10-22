@@ -192,7 +192,7 @@ Moose::setSolverDefaults(EquationSystems * es,
                          void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual))
 {
 #ifdef LIBMESH_HAVE_PETSC
-  PetscSupport::petscSetDefaults(es, system, compute_jacobian_block, compute_residual);
+  MoosePetscSupport::petscSetDefaults(es, system, compute_jacobian_block, compute_residual);
 #endif //LIBMESH_HAVE_PETSC
 }
 
