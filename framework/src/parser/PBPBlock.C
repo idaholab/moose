@@ -10,10 +10,10 @@
 PBPBlock::PBPBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
   :ParserBlock(reg_id, real_id, parent, input_file)
 {
-  addParam<std::vector<std::string> >("solve_order", "TODO: docstring");
-  addParam<std::vector<std::string> >("preconditioner", "TODO: docstring");
-  addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring");
-  addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring");
+  addParam<std::vector<std::string> >("solve_order", "TODO: docstring", true);
+  addParam<std::vector<std::string> >("preconditioner", "TODO: docstring", true);
+  addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring", false);
+  addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring", false);
 }
 
 void

@@ -7,8 +7,8 @@ GenericKernelBlock::GenericKernelBlock(const std::string & reg_id, const std::st
 {
   addParam<std::string>("variable", "", "The Kernel Name used in your model", true);
   addParam<int>("block", -1, "The mesh file block for which this kernel is active", true);
-  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this Kernel");
-  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this Kernel which correspond with the coupled_as objects");
+  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this Kernel", false);
+  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this Kernel which correspond with the coupled_as objects", false);
 
   setClassParams(KernelFactory::instance()->getValidParams(_type));
 }

@@ -19,6 +19,9 @@ ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id
 {
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
   addParam<std::vector<std::string> >("active", "If specified only the blocks named will be visited and made active", false);
+
+  // "names" in the input file is now deprecated
+  addParam<std::vector<std::string> >("names", "Deprecated DO NOT USE!", false);
 }
 
 ParserBlock::~ParserBlock() 
@@ -49,7 +52,11 @@ unsigned int
 ParserBlock::n_activeChildren() const
 {
   std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
+  std::vector<std::string> named_children = getParamValue<std::vector<std::string> >("names");
 
+  if (named_children.size())
+    mooseError(std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.");
+    
   // if there is no parameter named "active" then assume that all children are active
   if (active_children.size() == 0) 
     return _children.size();
@@ -70,7 +77,11 @@ void
 ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only)
 {
   std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
+  std::vector<std::string> named_children = getParamValue<std::vector<std::string> >("names");
 
+  if (named_children.size())
+    mooseError(std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.");
+  
   // if there is no parameter named "active" then assume that all children are to be visited
   if (active_children.size() == 0)
     visit_active_only = false;

@@ -57,7 +57,7 @@ public:
    * the input file, checked and used within MOOSE
    */
   template <typename T>
-  void addParam(std::string name, T value, std::string doc_string, bool required=false) 
+  void addParam(std::string name, T value, std::string doc_string, bool required) 
     {
       _block_params.set<T>(name) = value;
       if (required)
@@ -70,7 +70,7 @@ public:
    * the input file, it's intended purpose is for required parameters with no default value
    */
   template <typename T>
-  void addParam(std::string name, std::string doc_string, bool required=true) 
+  void addParam(std::string name, std::string doc_string, bool required) 
     {
       _block_params.set<T>(name);
       if (required)

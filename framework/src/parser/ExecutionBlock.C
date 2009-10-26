@@ -29,9 +29,9 @@ ExecutionBlock::ExecutionBlock(const std::string & reg_id, const std::string & r
   addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling", false);
 
 #ifdef LIBMESH_HAVE_PETSC
-  addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options");
-  addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs");
-  addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"");
+  addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options", false);
+  addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs", false);
+  addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"", false);
 #endif //LIBMESH_HAVE_PETSC
   
 }
