@@ -6,15 +6,15 @@ GenericBCBlock::GenericBCBlock(const std::string & reg_id, const std::string & r
   :ParserBlock(reg_id, real_id, parent, input_file),
    _type(getType())
 {
-  _block_params.set<std::string>("variable");
-  _block_params.set<std::vector<int> >("boundary");
-  _block_params.set<std::vector<std::string> >("coupled_to");
-  _block_params.set<std::vector<std::string> >("coupled_as");
+  addParam<std::string>("variable", "", "The BC Name used in your model", true);
+  addParam<std::vector<int> >("boundary", "The boundary number from your input mesh which corresponds to this boundary");
+  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this AuxKernel");
+  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this AuxKernel which correspond with the coupled_as objects");
   
   if (reg_id == "BCs/*")
-    _class_params = BCFactory::instance()->getValidParams(_type);
+    setClassParams(BCFactory::instance()->getValidParams(_type));
   else
-    _class_params = AuxFactory::instance()->getValidParams(_type);
+    setClassParams(AuxFactory::instance()->getValidParams(_type));
 }
 
 void
@@ -24,25 +24,25 @@ GenericBCBlock::execute()
   std::cerr << "Inside the GenericBCBlock Object\n";
   std::cerr << "BC: " << _type
             << "\tname: " << getShortName()
-            << "\tvariable: " << _block_params.get<std::string>("variable") << std::endl;
-//          << "\tboundary: " << _block_params.get<std::vector<int> >("boundary")
+            << "\tvariable: " << getParamValue<std::string>("variable") << std::endl;
+//          << "\tboundary: " << getParamValue<std::vector<int> >("boundary")
 //            << "\tvalue: " << _class_params.get<Real>("value") << std::endl;
 #endif
 
   
-  std::vector<int> boundary_vector = _block_params.get<std::vector<int> >("boundary");
+  std::vector<int> boundary_vector = getParamValue<std::vector<int> >("boundary");
 
   for (std::vector<int>::iterator boundary=boundary_vector.begin(); boundary != boundary_vector.end(); ++boundary)
     if (_reg_id == "BCs/*")
-      BCFactory::instance()->add(_type, getShortName(), _class_params, 
-                                 _block_params.get<std::string>("variable"),
+      BCFactory::instance()->add(_type, getShortName(), getClassParams(), 
+                                 getParamValue<std::string>("variable"),
                                  *boundary,
-                                 _block_params.get<std::vector<std::string> >("coupled_to"),
-                                 _block_params.get<std::vector<std::string> >("coupled_as"));
+                                 getParamValue<std::vector<std::string> >("coupled_to"),
+                                 getParamValue<std::vector<std::string> >("coupled_as"));
     else
-      AuxFactory::instance()->addBC(_type, getShortName(), _class_params, 
-                                  _block_params.get<std::string>("variable"),
+      AuxFactory::instance()->addBC(_type, getShortName(), getClassParams(), 
+                                  getParamValue<std::string>("variable"),
                                   *boundary,
-                                  _block_params.get<std::vector<std::string> >("coupled_to"),
-                                  _block_params.get<std::vector<std::string> >("coupled_as"));
+                                  getParamValue<std::vector<std::string> >("coupled_to"),
+                                  getParamValue<std::vector<std::string> >("coupled_as"));
 }

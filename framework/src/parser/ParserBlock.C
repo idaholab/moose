@@ -17,8 +17,8 @@ ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id
    _input_file(input_file),
    _parent(parent)
 {
-  // Add the "names" parameter to the list so that all blocks can support selective child visitation
-  _block_params.set<std::vector<std::string> >("names");
+  // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
+  addParam<std::vector<std::string> >("active", "If specified only the blocks named will be visited and made active", false);
 }
 
 ParserBlock::~ParserBlock() 
@@ -48,15 +48,15 @@ ParserBlock::execute()
 unsigned int
 ParserBlock::n_activeChildren() const
 {
-  std::vector<std::string> named_children = _block_params.get<std::vector<std::string> >("names");
+  std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
 
-  // if there is no parameter named "names" then assume that all children are active
-  if (named_children.size() == 0) 
+  // if there is no parameter named "active" then assume that all children are active
+  if (active_children.size() == 0) 
     return _children.size();
   
   // Make sure that all named children are actually in the _children list  
   // Load the children names into a set for faster locating
-  std::set<std::string> child_set(named_children.begin(), named_children.end());
+  std::set<std::string> child_set(active_children.begin(), active_children.end());
   unsigned int count = 0;
 
   std::vector<ParserBlock *>::const_iterator i;
@@ -67,20 +67,20 @@ ParserBlock::n_activeChildren() const
 }
 
 void
-ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_named_only)
+ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only)
 {
-  std::vector<std::string> named_children = _block_params.get<std::vector<std::string> >("names");
+  std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
 
-  // if there is no parameter named "names" then assume that all children are to be visited
-  if (named_children.size() == 0)
-    visit_named_only = false;
+  // if there is no parameter named "active" then assume that all children are to be visited
+  if (active_children.size() == 0)
+    visit_active_only = false;
 
   // Load the children names into a set for faster locating
-  std::set<std::string> child_set(named_children.begin(), named_children.end());
+  std::set<std::string> child_set(active_children.begin(), active_children.end());
 
   std::vector<ParserBlock *>::iterator i;
   for (i=_children.begin(); i!=_children.end(); ++i)
-    if (!visit_named_only || child_set.find((*i)->getShortName()) != child_set.end())
+    if (!visit_active_only || child_set.find((*i)->getShortName()) != child_set.end())
       ((*i)->*action)();  // Call the method through the function pointer
 }
 

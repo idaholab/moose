@@ -52,6 +52,57 @@ public:
    */
   virtual void execute();
 
+  /**
+   * This function is for adding new parameters to the ParserBlock that will be extracted from
+   * the input file, checked and used within MOOSE
+   */
+  template <typename T>
+  void addParam(std::string name, T value, std::string doc_string, bool required=false) 
+    {
+      _block_params.set<T>(name) = value;
+      if (required)
+        _required_params.insert(name);
+      _doc_string[name] = doc_string;
+    }
+
+  /**
+   * This function is for adding new parameters to the ParserBlock that will be extracted from
+   * the input file, it's intended purpose is for required parameters with no default value
+   */
+  template <typename T>
+  void addParam(std::string name, std::string doc_string, bool required=true) 
+    {
+      _block_params.set<T>(name);
+      if (required)
+        _required_params.insert(name);
+      _doc_string[name] = doc_string;
+    }
+
+  /************************************
+   * Data Accessors
+   ************************************/
+  template <typename T>
+  T getParamValue(std::string name) const
+    {
+      return _block_params.get<T>(name);
+    }
+  
+  inline void setClassParams(Parameters p)
+    {
+      _class_params = p;
+    }
+
+  inline Parameters & getClassParams()
+    {
+      return _class_params;
+    }
+
+  inline Parameters & getBlockParams()
+    {
+      return _block_params;
+    }
+  
+
   /************************************
    * Public Data Members
    ************************************/
@@ -60,18 +111,6 @@ public:
    */
   std::vector<ParserBlock *> _children;
   ParserBlock * _parent;
-
-  /** The _class_params are those parameters which will be passed directly to the Factory constructor
-   * objects directly.
-   */
-  Parameters _class_params;
-
-  /**
-   * The _block_params are those parameters which are valid for the currently parsed block but may not
-   * necessarily be passed directly to the Factory constructor for this object type.  These should
-   * be set in the constructor for each derived class and are an augmentation to the _class_params.
-   */
-  Parameters _block_params;
 
   /**
    * This function searches the ParserTree for a given ParserBlock and returns the handle to it
@@ -84,14 +123,14 @@ public:
 protected:
   /**
    * This function returns the number of active children which is either the children named in the
-   * optional "names" parameter or else all of the children underneath this Block
+   * optional "active" parameter or else all of the children underneath this Block
    */
   unsigned int n_activeChildren() const;
 
   /**
    * This function calles execute over all of the child blocks of the current Parser Block
    */
-  void visitChildren(void (ParserBlock::*action)() = &ParserBlock::execute, bool visit_named_only=true);
+  void visitChildren(void (ParserBlock::*action)() = &ParserBlock::execute, bool visit_active_only=true);
   
   /************************************
    * Protected Data Members
@@ -99,6 +138,25 @@ protected:
   std::string _reg_id;
   std::string _real_id;
   const GetPot & _input_file;
+
+  /************************************
+   * Private Data Members (use accessors)
+   ************************************/
+private:
+  /**
+   * The _block_params are those parameters which are valid for the currently parsed block but may not
+   * necessarily be passed directly to the Factory constructor for this object type.  These should
+   * be set in the constructor for each derived class and are an augmentation to the _class_params.
+   */
+  Parameters _block_params;
+
+  /** The _class_params are those parameters which will be passed directly to the Factory constructor
+   * objects directly.
+   */
+  Parameters _class_params;
+  
+  std::map<std::string, std::string> _doc_string;
+  std::set<std::string> _required_params;
 };
 
 #endif //PARSERBLOCK_H

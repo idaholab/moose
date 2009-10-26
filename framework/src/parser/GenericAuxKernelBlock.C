@@ -5,11 +5,11 @@ GenericAuxKernelBlock::GenericAuxKernelBlock(const std::string & reg_id, const s
   :ParserBlock(reg_id, real_id, parent, input_file),
    _type(getType())
 {
-  _block_params.set<std::string>("variable");
-  _block_params.set<std::vector<std::string> >("coupled_to");
-  _block_params.set<std::vector<std::string> >("coupled_as");
+  addParam<std::string>("variable", "", "The Aux Kernel Name used in your model", true);
+  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this AuxKernel");
+  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this AuxKernel which correspond with the coupled_as objects");
 
-  _class_params = AuxFactory::instance()->getValidParams(_type);
+  setClassParams(AuxFactory::instance()->getValidParams(_type));
 }
 
 void
@@ -19,12 +19,12 @@ GenericAuxKernelBlock::execute()
   std::cerr << "Inside the GenericAuxKernelBlock Object\n";
   std::cerr << "AuxKernel:" << _type << ":"
             << "\tname:" << getShortName() << ":" 
-            << "\tvariable:" << _block_params.get<std::string>("variable") << ":" << std::endl;
+            << "\tvariable:" << getParamValue<std::string>("variable") << ":" << std::endl;
 #endif
 
-  AuxFactory::instance()->add(_type, getShortName(), _class_params, 
-                              _block_params.get<std::string>("variable"),
-                              _block_params.get<std::vector<std::string> >("coupled_to"),
-                              _block_params.get<std::vector<std::string> >("coupled_as"));
+  AuxFactory::instance()->add(_type, getShortName(), getClassParams(), 
+                              getParamValue<std::string>("variable"),
+                              getParamValue<std::vector<std::string> >("coupled_to"),
+                              getParamValue<std::vector<std::string> >("coupled_as"));
   
 }

@@ -15,13 +15,12 @@
 MeshBlock::MeshBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
   :ParserBlock(reg_id, real_id, parent, input_file)
 {
-  _block_params.set<int>("dim") = 3;
-  _block_params.set<std::string>("file");
-  _block_params.set<bool>("second_order") = false;
-  _block_params.set<bool>("generated") = false;
-  _block_params.set<std::string>("partitioner");
-  _block_params.set<int>("uniform_refine") = 0;
-  _block_params.set<bool>("generated") = false;
+  addParam<int>("dim", -1, "The dimension of the mesh file to read or generate", true);
+  addParam<std::string>("file", "", "The name of the mesh file to read (required unless using dynamic generation)", false);
+  addParam<bool>("second_order", false, "Turns on second order elements for the input mesh", false);
+  addParam<bool>("generated", false, "Tell MOOSE that a mesh will be generated", false);
+  addParam<std::string>("partitioner", "", "Specifies a mesh partitioner to use when spliting the mesh for a parallel computation", false);
+  addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh", false);
 }
 
 void
@@ -31,11 +30,11 @@ MeshBlock::execute()
   std::cerr << "Inside the MeshBlock Object\n";
 #endif
 
-  Mesh *mesh = new Mesh(_block_params.get<int>("dim"));
+  Mesh *mesh = new Mesh(getParamValue<int>("dim"));
   Moose::mesh = mesh;
 
   // TODO: Need test for Mesh Generation
-  if (_block_params.get<bool>("generated")) 
+  if (getParamValue<bool>("generated")) 
   {
     if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
       gen_block->execute();
@@ -47,19 +46,19 @@ MeshBlock::execute()
   {
     ExodusII_IO *exreader = new ExodusII_IO(*mesh);
     Moose::exreader = exreader;
-    exreader->read(_block_params.get<std::string>("file"));
+    exreader->read(getParamValue<std::string>("file"));
   }
   else
     /* We will use the mesh object to read the file to cut down on
      * I/O conntention.  We still need to use the Exodus reader though
      *for copy_nodal_solutions
      */
-    mesh->read(_block_params.get<std::string>("file"));
+    mesh->read(getParamValue<std::string>("file"));
 
-  if (_block_params.get<bool>("second_order"))
+  if (getParamValue<bool>("second_order"))
     mesh->all_second_order(true);
 
-  if (_block_params.get<std::string>("partitioner") == "linear")
+  if (getParamValue<std::string>("partitioner") == "linear")
     mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
   mesh->prepare_for_use(false);
 
@@ -67,7 +66,7 @@ MeshBlock::execute()
   mesh->delete_remote_elements();
 
   MeshRefinement *mesh_refinement = new MeshRefinement(*mesh);
-  mesh_refinement->uniformly_refine(_block_params.get<int>("uniform_refine"));
+  mesh_refinement->uniformly_refine(getParamValue<int>("uniform_refine"));
   Moose::mesh_refinement = mesh_refinement;
   
   mesh->boundary_info->build_node_list_from_side_list();

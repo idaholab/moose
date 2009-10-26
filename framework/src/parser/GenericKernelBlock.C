@@ -5,12 +5,12 @@ GenericKernelBlock::GenericKernelBlock(const std::string & reg_id, const std::st
   :ParserBlock(reg_id, real_id, parent, input_file),
    _type(getType())
 {
-  _block_params.set<std::string>("variable");
-  _block_params.set<std::vector<std::string> >("coupled_to");
-  _block_params.set<std::vector<std::string> >("coupled_as");
-  _block_params.set<int>("block") = -1;
+  addParam<std::string>("variable", "", "The Kernel Name used in your model", true);
+  addParam<int>("block", -1, "The mesh file block for which this kernel is active", true);
+  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this Kernel");
+  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this Kernel which correspond with the coupled_as objects");
 
-  _class_params = KernelFactory::instance()->getValidParams(_type);
+  setClassParams(KernelFactory::instance()->getValidParams(_type));
 }
 
 void
@@ -20,19 +20,18 @@ GenericKernelBlock::execute()
   std::cerr << "Inside the GenericKernelBlock Object\n";
   std::cerr << "Kernel:" << _type << ":"
             << "\tname:" << getShortName() << ":" 
-            << "\tvariable:" << _block_params.get<std::string>("variable") << ":" << std::endl;
+            << "\tvariable:" << getParamValue<std::string>("variable") << ":" << std::endl;
 #endif
 
-  if (_block_params.get<int>("block") < 0)
-    KernelFactory::instance()->add(_type, getShortName(), _class_params, 
-                                   _block_params.get<std::string>("variable"),
-                                   _block_params.get<std::vector<std::string> >("coupled_to"),
-                                   _block_params.get<std::vector<std::string> >("coupled_as"));
+  if (getParamValue<int>("block") < 0)
+    KernelFactory::instance()->add(_type, getShortName(), getClassParams(), 
+                                   getParamValue<std::string>("variable"),
+                                   getParamValue<std::vector<std::string> >("coupled_to"),
+                                   getParamValue<std::vector<std::string> >("coupled_as"));
   else
-    KernelFactory::instance()->add(_type, getShortName(), _class_params, 
-                                   _block_params.get<std::string>("variable"),
-                                   _block_params.get<std::vector<std::string> >("coupled_to"),
-                                   _block_params.get<std::vector<std::string> >("coupled_as"),
-                                   _block_params.get<int>("block"));
-  
+    KernelFactory::instance()->add(_type, getShortName(), getClassParams(), 
+                                   getParamValue<std::string>("variable"),
+                                   getParamValue<std::vector<std::string> >("coupled_to"),
+                                   getParamValue<std::vector<std::string> >("coupled_as"),
+                                   getParamValue<int>("block"));
 }

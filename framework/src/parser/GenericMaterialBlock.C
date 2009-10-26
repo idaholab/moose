@@ -5,12 +5,11 @@ GenericMaterialBlock::GenericMaterialBlock(const std::string & reg_id, const std
   :ParserBlock(reg_id, real_id, parent, input_file),
    _type(getType())
 {
-  _block_params.set<std::string>("type");
-  _block_params.set<std::vector<int> >("block");
-  _block_params.set<std::vector<std::string> >("coupled_to");
-  _block_params.set<std::vector<std::string> >("coupled_as");
-  
-  _class_params = MaterialFactory::instance()->getValidParams(_type);
+  addParam<std::vector<int> >("block", "The list of blocks for which this material is active on");
+  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this Material");
+  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this Material which correspond with the coupled_as objects");
+
+  setClassParams(MaterialFactory::instance()->getValidParams(_type));
 }
 
 void
@@ -20,14 +19,14 @@ GenericMaterialBlock::execute()
   std::cerr << "Inside the GenericMaterialBlock Object\n";
   std::cerr << "Material: " << _type
             << "\tname: " << getShortName() << std::endl;
-//          << "\tblock: " << _block_params.get<std::vector<int> >("block") << std::endl;
+//          << "\tblock: " << getParamValue<std::vector<int> >("block") << std::endl;
 #endif
 
-  std::vector<int> block_vector = _block_params.get<std::vector<int> >("block");
+  std::vector<int> block_vector = getParamValue<std::vector<int> >("block");
 
   for (std::vector<int>::iterator block=block_vector.begin(); block != block_vector.end(); ++block)
-    MaterialFactory::instance()->add(_type, getShortName(), _class_params,
+    MaterialFactory::instance()->add(_type, getShortName(), getClassParams(),
                                      *block,
-                                     _block_params.get<std::vector<std::string> >("coupled_to"),
-                                     _block_params.get<std::vector<std::string> >("coupled_as"));
+                                     getParamValue<std::vector<std::string> >("coupled_to"),
+                                     getParamValue<std::vector<std::string> >("coupled_as"));
 }

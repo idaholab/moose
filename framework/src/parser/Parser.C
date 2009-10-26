@@ -63,8 +63,8 @@ Parser::parse()
     }
 
     // Extract all the requested parameters from the input file
-    extractParams(curr_block->getID(), curr_block->_block_params, input_file);
-    extractParams(curr_block->getID(), curr_block->_class_params, input_file);
+    extractParams(curr_block->getID(), curr_block->getBlockParams(), input_file);
+    extractParams(curr_block->getID(), curr_block->getClassParams(), input_file);
   }
 
   fixupOptionalBlocks(input_file);
@@ -113,6 +113,41 @@ Parser::fixupOptionalBlocks(const GetPot & input_file)
 
   optionalBlocks["AuxVariables"] = "Kernels";
   optionalBlocks["AuxKernels"] = "BCs";
+	
+  // First see if the Optional Block exists
+  for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i)
+  {
+    if (_input_tree->locateBlock(i->first) == NULL)
+    {
+      // Get a pointer to the required block to prepare for insertion
+      // The newly constructed block will be the sibling before this block
+      // which means it better exist and it better not be the root
+      block_ptr = _input_tree->locateBlock(i->second);
+      if (block_ptr == NULL || block_ptr->_parent == NULL)
+	mooseError();
+
+      ParserBlock::PBChildIterator position =
+	find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
+     
+      block_ptr->_parent->_children.insert(position,
+                                           ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, input_file));
+    }
+  }
+}
+
+/*
+void
+Parser::fixupOptionalBlocks(const GetPot & input_file)
+{
+  /* Create a map of Optional Blocks to fill in if they don't exist in the tree and where
+   * they should fit (after the second id listed).  The map key is used as the type of block
+   * to create and insert into the tree 
+  std::map<std::string, std::string> optionalBlocks;
+  std::map<std::string, std::string>::iterator i;
+  ParserBlock *block_ptr;
+
+  optionalBlocks["AuxVariables"] = "Variables";
+  optionalBlocks["AuxKernels"] = "Kernels";
 
   // First see if the Optional Block exists
   for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i) 
@@ -128,12 +163,17 @@ Parser::fixupOptionalBlocks(const GetPot & input_file)
 
       ParserBlock::PBChildIterator position =
         find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
-      
-      block_ptr->_parent->_children.insert(position,
+
+      if (position == block_ptr->_parent->_children.end())
+        mooseError("Unable to find required block " + i->second + " for optional block insertion");
+
+      // Increment one past this location so the new element be inserted afterwards      
+      block_ptr->_parent->_children.insert(++position,
                                             ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, input_file));
     }
   }
 }
+*/
 
 void
 Parser::execute()

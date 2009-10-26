@@ -18,12 +18,12 @@ GenericVariableBlock::GenericVariableBlock(const std::string & reg_id, const std
    _variable_to_read(""),
    _timestep_to_read(2)
 {
-  _block_params.set<std::string>("family") = "LAGRANGE";
-  _block_params.set<std::string>("order") = "FIRST";
-  _block_params.set<Real>("initial_condition") = 0.0;
-  _block_params.set<Real>("scaling") = 1.0;
-  _block_params.set<std::string>("initial_from_file_var");
-  _block_params.set<int>("initial_from_file_timestep");
+  addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for this variable", false);
+  addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for this variable", false);
+  addParam<Real>("initial_condition", 0.0, "Specifies the initial condition for this variable", false);
+  addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable", false);
+  addParam<std::string>("initial_from_file_var", "", "Gives the name of a variable for which to read an initial condition from a mesh file", false);
+  addParam<int>("initial_from_file_timestep", 2, "Gives the timestep for which to read a solution from a file for a given variable", false);
 }
 
 void
@@ -34,8 +34,8 @@ GenericVariableBlock::execute()
 #ifdef DEBUG
   std::cerr << "Inside the GenericVariableBlock Object\n";
   std::cerr << "Variable: " << var_name
-            << "\torder: " << _block_params.get<std::string>("order")
-            << "\tfamily: " << _block_params.get<std::string>("family") << std::endl;
+            << "\torder: " << getParamValue<std::string>("order")
+            << "\tfamily: " << getParamValue<std::string>("family") << std::endl;
 #endif
 
   System *system;
@@ -45,11 +45,11 @@ GenericVariableBlock::execute()
     system = &Moose::equation_system->get_system<TransientExplicitSystem>("AuxiliarySystem");
 
   system->add_variable(var_name,
-                       Utility::string_to_enum<Order>(_block_params.get<std::string>("order")),
-                       Utility::string_to_enum<FEFamily>(_block_params.get<std::string>("family")));
+                       Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
+                       Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
   
   // Set initial condition
-  Real initial = _block_params.get<Real>("initial_condition");
+  Real initial = getParamValue<Real>("initial_condition");
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol) 
     Moose::equation_system->parameters.set<Real>("initial_" + var_name) = initial;
 
@@ -58,20 +58,20 @@ GenericVariableBlock::execute()
   {
     // Manual Scaling
     unsigned int var_number= system->variable_number(var_name);
-    Moose::manual_scaling.push_back(_block_params.get<Real>("scaling"));
+    Moose::manual_scaling.push_back(getParamValue<Real>("scaling"));
     // This variable number should go in the same vector position as the manual scaling vector
     libmesh_assert(var_number == Moose::manual_scaling.size()-1);
   }
 
   // retrieve inital conditions from exodus file
-  _variable_to_read = _block_params.get<std::string>("initial_from_file_var");
-  _timestep_to_read = _block_params.get<int>("initial_from_file_timestep");  
+  _variable_to_read = getParamValue<std::string>("initial_from_file_var");
+  _timestep_to_read = getParamValue<int>("initial_from_file_timestep");  
 }
 
 bool
 GenericVariableBlock::restartRequired() const
 {
-  if (_block_params.get<std::string>("initial_from_file_var") == "") 
+  if (getParamValue<std::string>("initial_from_file_var") == "") 
     return false;
   else 
     return true;

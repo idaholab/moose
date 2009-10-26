@@ -10,10 +10,10 @@
 PBPBlock::PBPBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
   :ParserBlock(reg_id, real_id, parent, input_file)
 {
-  _block_params.set<std::vector<std::string> >("solve_order");
-  _block_params.set<std::vector<std::string> >("preconditioner");
-  _block_params.set<std::vector<std::string> >("off_diag_row");
-  _block_params.set<std::vector<std::string> >("off_diag_column");
+  addParam<std::vector<std::string> >("solve_order", "TODO: docstring");
+  addParam<std::vector<std::string> >("preconditioner", "TODO: docstring");
+  addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring");
+  addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring");
 }
 
 void
@@ -39,27 +39,27 @@ PBPBlock::execute()
   
   std::vector<unsigned int> solve_order;
       
-  for(int i=0;i<_block_params.get<std::vector<std::string> >("solve_order").size();i++)
-    solve_order.push_back(system.variable_number(_block_params.get<std::vector<std::string> >("solve_order")[i]));
+  for(int i=0;i<getParamValue<std::vector<std::string> >("solve_order").size();i++)
+    solve_order.push_back(system.variable_number(getParamValue<std::vector<std::string> >("solve_order")[i]));
 
   std::vector<PreconditionerType> pre;
 
-  for(int i=0;i<_block_params.get<std::vector<std::string> >("preconditioner").size();i++)
-    pre.push_back(Utility::string_to_enum<PreconditionerType>(_block_params.get<std::vector<std::string> >("preconditioner")[i]));
+  for(int i=0;i<getParamValue<std::vector<std::string> >("preconditioner").size();i++)
+    pre.push_back(Utility::string_to_enum<PreconditionerType>(getParamValue<std::vector<std::string> >("preconditioner")[i]));
 
 
   std::vector<std::vector<unsigned int> > off_diag(system.n_vars());
 
-  for(int i=0;i<_block_params.get<std::vector<std::string> >("off_diag_row").size();i++)
+  for(int i=0;i<getParamValue<std::vector<std::string> >("off_diag_row").size();i++)
   {
-    unsigned int row = system.variable_number(_block_params.get<std::vector<std::string> >("off_diag_row")[i]);
-    unsigned int column = system.variable_number(_block_params.get<std::vector<std::string> >("off_diag_column")[i]);
+    unsigned int row = system.variable_number(getParamValue<std::vector<std::string> >("off_diag_row")[i]);
+    unsigned int column = system.variable_number(getParamValue<std::vector<std::string> >("off_diag_column")[i]);
 
     //The +1 is because the preconditioning system is always 1 more than the variable number
     LinearImplicitSystem & u_system = Moose::equation_system->get_system<LinearImplicitSystem>(row+1);
 
     //Add the matrix to hold the off diagonal piece
-    u_system.add_matrix(_block_params.get<std::vector<std::string> >("off_diag_column")[i]);
+    u_system.add_matrix(getParamValue<std::vector<std::string> >("off_diag_column")[i]);
         
     off_diag[row].push_back(column);
   }  
