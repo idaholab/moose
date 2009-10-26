@@ -23,6 +23,8 @@
 class Mesh;
 class EquationSystems;
 class ExodusII_IO;
+class ErrorEstimator;
+class ErrorVector;
 
 #define MAX_VARS 1000
 
@@ -170,9 +172,24 @@ namespace Moose
   extern ExodusII_IO * exreader;
 
   /**
+   * A mesh refinement object to be used with Adaptivity.
+   */
+  extern MeshRefinement * mesh_refinement;
+
+  /**
    * The one equation system to rule them all
    */
   extern EquationSystems * equation_system;
+
+  /**
+   * Error estimator to be used by the apps.
+   */
+  extern ErrorEstimator * error_estimator;
+
+  /**
+   * Error vector for use with the error estimator.
+   */
+  extern ErrorVector * error;
 
   /**
    * A range for use with TBB.  We do this so that it doesn't have
@@ -208,7 +225,6 @@ namespace Moose
   extern bool output_initial;
   extern bool auto_scaling;
 
-  extern MeshRefinement * mesh_refinement;
   extern std::vector<Real> manual_scaling;
   extern Number (*init_value)(const Point& p,
                               const Parameters& parameters,

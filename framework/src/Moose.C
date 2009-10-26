@@ -206,7 +206,12 @@ THREAD_ID Moose::current_thread_id = 0;
 
 Mesh * Moose::mesh;
 ExodusII_IO * Moose::exreader;
+
 EquationSystems * Moose::equation_system;
+
+MeshRefinement * Moose::mesh_refinement = NULL;
+ErrorEstimator * Moose::error_estimator = NULL;
+ErrorVector * Moose::error = NULL;
 
 ConstElemRange * Moose::active_local_elem_range = NULL;
 
@@ -225,7 +230,6 @@ bool Moose::tecplot_output = false;
 bool Moose::print_out_info = false;
 bool Moose::output_initial = false;
 bool Moose::auto_scaling = false;
-MeshRefinement * Moose::mesh_refinement = NULL;
 std::vector<Real> Moose::manual_scaling;
 Number (*Moose::init_value)(const Point& p,
                             const Parameters& parameters,
@@ -236,8 +240,3 @@ Gradient (*Moose::init_gradient)(const Point& p,
                                  const std::string& sys_name,
                                  const std::string& var_name) = Moose::initial_gradient;
 void (*Moose::init_cond)(EquationSystems& es, const std::string& system_name) = Moose::initial_cond;
-
-
-
-
-
