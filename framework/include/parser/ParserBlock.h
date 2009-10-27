@@ -3,6 +3,9 @@
 
 #include "Kernel.h"
 
+
+class Parser;
+
 /**
  * This class represents the base class for the various parser block data structures and the associated
  * member function which is responsible for setting up the appropriate data structures within MOOSE
@@ -21,7 +24,7 @@ public:
    * for this ParserBlock instance.  A pointer to the parent is passed for use in searching the tree
    * Finally a reference to the GetPot object is passed for flexible extension.
    */
-  ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
+  ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
 
   /**
    * Cleans up the ParserBlock tree strucutre
@@ -137,7 +140,6 @@ protected:
    ************************************/
   std::string _reg_id;
   std::string _real_id;
-  const GetPot & _input_file;
 
   /************************************
    * Private Data Members (use accessors)
@@ -157,6 +159,8 @@ private:
   
   std::map<std::string, std::string> _doc_string;
   std::set<std::string> _required_params;
+
+  Parser & _parser_handle;  
 };
 
 #endif //PARSERBLOCK_H

@@ -1,8 +1,8 @@
 #include "GenericMaterialBlock.h"
 #include "MaterialFactory.h"
 
-GenericMaterialBlock::GenericMaterialBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, parent, input_file),
+GenericMaterialBlock::GenericMaterialBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
+  :ParserBlock(reg_id, real_id, parent, parser_handle),
    _type(getType())
 {
   addParam<std::vector<int> >("block", "The list of blocks for which this material is active on", true);

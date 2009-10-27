@@ -12,8 +12,8 @@
 #include "mesh_refinement.h"
 #include "linear_partitioner.h"
 
-MeshBlock::MeshBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, parent, input_file)
+MeshBlock::MeshBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
+  :ParserBlock(reg_id, real_id, parent, parser_handle)
 {
   addParam<int>("dim", -1, "The dimension of the mesh file to read or generate", true);
   addParam<std::string>("file", "", "The name of the mesh file to read (required unless using dynamic generation)", false);

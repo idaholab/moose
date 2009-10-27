@@ -1,7 +1,7 @@
 #include "TransientBlock.h"
 
-TransientBlock::TransientBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, parent, input_file)
+TransientBlock::TransientBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
+  :ParserBlock(reg_id, real_id, parent, parser_handle)
 {
   addParam<Real>        ("start_time",                         0.0,    "The start time of the simulation", false);
   addParam<Real>        ("end_time",                           1.0e30, "The end time of the simulation",   false);

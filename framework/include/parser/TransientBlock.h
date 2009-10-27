@@ -6,7 +6,7 @@
 class TransientBlock: public ParserBlock
 {
 public:
-  TransientBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
+  TransientBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
 
   virtual void execute();
 

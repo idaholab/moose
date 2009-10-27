@@ -1,16 +1,34 @@
 #include <string>
 #include <map>
+#include <fstream>
 
 #include "Parser.h"
 #include "getpot.h"
 #include "parameters.h"
 #include "ParserBlockFactory.h"
-
+#include "KernelFactory.h"
+#include "BCFactory.h"
+#include "MaterialFactory.h"
 
 Parser::Parser(std::string input_filename)
   :_input_filename(input_filename),
-   _input_tree(NULL)
-{}
+   _input_tree(NULL),
+   _getpot_initialized(false)
+{
+  // Build the Parse Tree from the input file
+  parse();
+}
+
+Parser::Parser(bool build_full_tree)
+  :_input_tree(NULL),
+   _getpot_initialized(false)
+{
+  if (build_full_tree)
+    // Build a full tree of all objects from Factory iterators
+    buildFullTree();
+  else
+    mooseError("Parser should be contstructed with a filename or argument to build full tree");
+}
 
 Parser::~Parser() 
 {
@@ -27,9 +45,13 @@ Parser::parse()
   std::string curr_value, curr_identifier;
   ParserBlock *curr_block, *t;
 
-  GetPot input_file(_input_filename);
-  _input_tree = new ParserBlock("/", "/", NULL, input_file);
-  _section_names = input_file.get_section_names();
+  checkInputFile();
+  
+  // GetPot object
+  _getpot_file.parse_input_file(_input_filename);
+  _getpot_initialized = true;
+  _input_tree = new ParserBlock("/", "/", NULL, *this);
+  _section_names = _getpot_file.get_section_names();
 
   // The variable_names function returns section names and variable names in
   // one large string so we can build the data structure in one pass
@@ -54,35 +76,114 @@ Parser::parse()
         std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
       
         if (matched_identifier.length())
-          curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, input_file));
+          curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
         else
-          curr_block->_children.push_back(new ParserBlock(curr_identifier, curr_identifier, curr_block, input_file));
+          curr_block->_children.push_back(new ParserBlock(curr_identifier, curr_identifier, curr_block, *this));
       }
 
       curr_block = *(curr_block->_children.rbegin());
     }
 
     // Extract all the requested parameters from the input file
-    extractParams(curr_block->getID(), curr_block->getBlockParams(), input_file);
-    extractParams(curr_block->getID(), curr_block->getClassParams(), input_file);
+    extractParams(curr_block->getID(), curr_block->getBlockParams());
+    extractParams(curr_block->getID(), curr_block->getClassParams());
   }
 
-  fixupOptionalBlocks(input_file);
+  fixupOptionalBlocks();
 
 #ifdef DEBUG
   _input_tree->printBlockData();
 #endif
-  
-  // Make a second pass through the tree to setup the various MOOSE objects
-  execute();
 }
 
 void
-Parser::extractParams(const std::string & prefix, Parameters &p, const GetPot & input_file)
+Parser::buildFullTree()
+{
+  std::string prefix;
+  ParserBlock *curr_block;
+  
+  // Build the root of the tree
+  _input_tree = new ParserBlock("/", "/", NULL, *this);
+  curr_block = _input_tree;
+
+
+  // Build all the ParserBlock Types
+  for (ParserBlockNamesIterator i = ParserBlockFactory::instance()->registeredParserBlocksBegin();
+       i != ParserBlockFactory::instance()->registeredParserBlocksEnd(); ++i)
+  {
+    // skip the generic matches here because they don't correlate to a real instance
+    if ((*i)[i->length()-1] == '*')
+      continue;
+    
+    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
+    std::cerr << matched_identifier << std::endl;
+    
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, *i, curr_block, *this));
+  }
+  
+  // Create the Kernels Block
+  curr_block = ParserBlockFactory::instance()->add("Kernels", "Kernels", _input_tree, *this);
+  _input_tree->_children.push_back(curr_block);
+  prefix = "Kernels/";
+
+  // Add all the Kernels
+  for (KernelNamesIterator i = KernelFactory::instance()->registeredKernelsBegin();
+       i != KernelFactory::instance()->registeredKernelsEnd(); ++i)
+  {
+    std::string curr_identifier(prefix + *i);
+    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
+
+    if (matched_identifier.length())
+      curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+    else
+      mooseError("An error that shouldn't have occured has occured and this isn't even Microsoft in Parser::BuildFullTree");
+  }
+
+  // Create the BCs Block
+  curr_block = ParserBlockFactory::instance()->add("BCs", "BCs", _input_tree, *this);
+  _input_tree->_children.push_back(curr_block);
+  prefix = "BCs/";
+  
+  // Add all the BCs
+  for (BCNamesIterator i = BCFactory::instance()->registeredBCsBegin();
+       i != BCFactory::instance()->registeredBCsEnd(); ++i)
+  {
+    std::string curr_identifier(prefix + *i);
+    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
+
+    if (matched_identifier.length())
+      curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+    else
+      mooseError("An error that shouldn't have occured has occured and this isn't even Microsoft in Parser::BuildFullTree");
+  }
+
+  // Create the Materials Block
+  curr_block = ParserBlockFactory::instance()->add("Materials", "Materials", _input_tree, *this);
+  _input_tree->_children.push_back(curr_block);
+  prefix = "Materials/";
+  
+  // Add all the Materials
+  for (MaterialNamesIterator i = MaterialFactory::instance()->registeredMaterialsBegin();
+       i != MaterialFactory::instance()->registeredMaterialsEnd(); ++i)
+  {
+    std::string curr_identifier(prefix + *i);
+    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
+
+    if (matched_identifier.length())
+      curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+    else
+      mooseError("An error that shouldn't have occured has occured and this isn't even Microsoft in Parser::BuildFullTree");
+  }
+
+  _input_tree->printBlockData();
+}
+
+void
+Parser::extractParams(const std::string & prefix, Parameters &p)
 {
   for (Parameters::iterator iter = p.begin(); iter != p.end(); ++iter)
   {
-    setParameters(prefix + "/" + iter->first, iter, input_file);
+    setParameters(prefix + "/" + iter->first, iter);
   }
   
 }
@@ -102,8 +203,14 @@ Parser::tokenize(const std::string &str, std::vector<std::string> &elements, con
   }
 }
 
+const GetPot *
+Parser::getPotHandle() const
+{
+  return _getpot_initialized ? &_getpot_file : NULL;
+}
+
 void
-Parser::fixupOptionalBlocks(const GetPot & input_file)
+Parser::fixupOptionalBlocks()
 {
   /* Create a map of Optional Blocks to fill in if they don't exist in the tree and where
    * they should fit (before the second id listed) */
@@ -130,14 +237,14 @@ Parser::fixupOptionalBlocks(const GetPot & input_file)
 	find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
      
       block_ptr->_parent->_children.insert(position,
-                                           ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, input_file));
+                                           ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, *this));
     }
   }
 }
 
 /*
 void
-Parser::fixupOptionalBlocks(const GetPot & input_file)
+Parser::fixupOptionalBlocks()
 {
   /* Create a map of Optional Blocks to fill in if they don't exist in the tree and where
    * they should fit (after the second id listed).  The map key is used as the type of block
@@ -169,7 +276,7 @@ Parser::fixupOptionalBlocks(const GetPot & input_file)
 
       // Increment one past this location so the new element be inserted afterwards      
       block_ptr->_parent->_children.insert(++position,
-                                            ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, input_file));
+                                            ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, *this));
     }
   }
 }
@@ -181,9 +288,21 @@ Parser::execute()
   _input_tree->execute();
 }
 
+void
+Parser::checkInputFile()
+{
+  std::ifstream in(_input_filename.c_str(), std::ifstream::in);
+  if (in.fail())
+    mooseError(std::string("Unable to open file \"") + _input_filename
+               + std::string("\". Check to make sure that it exists and that you have read permission."));
+
+  in.close();
+}
+
+
 // function to set parameters with arbitrary type
 bool
-Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &input_file)
+Parser::setParameters(std::string name, Parameters::iterator &it)
 {
   Parameters::Parameter<Real> * real_param = dynamic_cast<Parameters::Parameter<Real>*>(it->second);
   Parameters::Parameter<int>  * int_param  = dynamic_cast<Parameters::Parameter<int>*>(it->second);
@@ -203,7 +322,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
   if( real_param )
   {
     Real from_input;
-    from_input = input_file((name).c_str(), real_param->get());
+    from_input = _getpot_file((name).c_str(), real_param->get());
     //check whether parameter exists in inputfile.
     if( real_param->get() == from_input )
       default_flag = true;
@@ -213,7 +332,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
   else if( int_param )
   {
     int from_input;
-    from_input = input_file((name).c_str(), int_param->get());
+    from_input = _getpot_file((name).c_str(), int_param->get());
     if( int_param->get() == from_input )
       default_flag = true;
     int_param->set() = from_input;
@@ -222,7 +341,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
   else if( uint_param )
   {
     unsigned int from_input;
-    from_input = input_file((name).c_str(), uint_param->get());
+    from_input = _getpot_file((name).c_str(), uint_param->get());
     if( uint_param->get() == from_input )
       default_flag = true;
     uint_param->set() = from_input;
@@ -231,7 +350,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
   else if( bool_param )
   {
     bool from_input;
-    from_input = input_file((name).c_str(), bool_param->get());
+    from_input = _getpot_file((name).c_str(), bool_param->get());
     if( bool_param->get() == from_input )
       default_flag = true;
     bool_param->set() = from_input;
@@ -240,7 +359,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
   else if( string_param )
   {
     std::string from_input;
-    from_input = input_file((name).c_str(), string_param->get());
+    from_input = _getpot_file((name).c_str(), string_param->get());
     if( string_param->get() == from_input )
       default_flag = true;
     string_param->set() = from_input;
@@ -248,59 +367,59 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
   }
   else if( vec_real_param )
   {
-    int vec_size = input_file.vector_variable_size((name).c_str());
+    int vec_size = _getpot_file.vector_variable_size((name).c_str());
     vec_real_param->set().resize(vec_size);
 
     if( vec_size == 0)
       default_flag = true;
     
     for(int j=0;j<vec_size;j++)
-      vec_real_param->set()[j] = input_file((name).c_str(), 0.0, j);
+      vec_real_param->set()[j] = _getpot_file((name).c_str(), 0.0, j);
 
     return default_flag;
   }
   else if( vec_int_param )
   {
-    int vec_size = input_file.vector_variable_size((name).c_str());
+    int vec_size = _getpot_file.vector_variable_size((name).c_str());
     vec_int_param->set().resize(vec_size);
 
     if( vec_size == 0 )
       default_flag = true;
     
     for(int j=0;j<vec_size;j++)
-      vec_int_param->set()[j] = input_file((name).c_str(), vec_int_param->get()[j], j);
+      vec_int_param->set()[j] = _getpot_file((name).c_str(), vec_int_param->get()[j], j);
 
     return default_flag;
   }
   else if( vec_bool_param )
   {
-    int vec_size = input_file.vector_variable_size((name).c_str());
+    int vec_size = _getpot_file.vector_variable_size((name).c_str());
     vec_bool_param->set().resize(vec_size);
     
     if( vec_size == 0 )
       default_flag = true;
     
     for(int j=0;j<vec_size;j++)
-      vec_bool_param->set()[j] = input_file((name).c_str(), vec_bool_param->get()[j], j);
+      vec_bool_param->set()[j] = _getpot_file((name).c_str(), vec_bool_param->get()[j], j);
 
     return default_flag;
   }
   else if( vec_string_param )
   {
-    int vec_size = input_file.vector_variable_size((name).c_str());
+    int vec_size = _getpot_file.vector_variable_size((name).c_str());
     vec_string_param->set().resize(vec_size);
 
     if( vec_size == 0 )
       default_flag = true;
     
     for(int j=0;j<vec_size;j++)
-      vec_string_param->set()[j] = input_file((name).c_str(), vec_string_param->get()[j].c_str(), j);
+      vec_string_param->set()[j] = _getpot_file((name).c_str(), vec_string_param->get()[j].c_str(), j);
 
     return default_flag;
   }
   else if( tensor_real_param)
   {
-    int vec_size = input_file.vector_variable_size((name).c_str());
+    int vec_size = _getpot_file.vector_variable_size((name).c_str());
     vec_size = pow(vec_size,0.5);
     if( vec_size == 0 )
       default_flag = true;
@@ -314,7 +433,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
     {
       for(int i=0;i<vec_size;i++)
       {
-        tensor_real_param->set()[i][j] = input_file((name).c_str(), tensor_real_param->get()[i][j], cntr);
+        tensor_real_param->set()[i][j] = _getpot_file((name).c_str(), tensor_real_param->get()[i][j], cntr);
         cntr++;
       }
     }
@@ -322,7 +441,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
   }
   else if( tensor_int_param )
   {
-    int vec_size = input_file.vector_variable_size((name).c_str());
+    int vec_size = _getpot_file.vector_variable_size((name).c_str());
     vec_size = pow(vec_size,0.5);
 
     if( vec_size == 0 )
@@ -345,7 +464,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
     {
       for(int i=0;i<vec_size;i++)
       {
-        tensor_int_param->set()[i][j] = input_file((name).c_str(), tensor_int_param->get()[i][j], cntr);
+        tensor_int_param->set()[i][j] = _getpot_file((name).c_str(), tensor_int_param->get()[i][j], cntr);
         cntr++;
       }
     }
@@ -353,7 +472,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
   }
   else if( tensor_bool_param)
   {
-    int vec_size = input_file.vector_variable_size((name).c_str());
+    int vec_size = _getpot_file.vector_variable_size((name).c_str());
     vec_size = pow(vec_size,0.5);
 
     if( vec_size == 0 )
@@ -376,7 +495,7 @@ Parser::setParameters(std::string name, Parameters::iterator &it, const GetPot &
     {
       for(int i=0;i<vec_size;i++)
       {
-        tensor_bool_param->set()[i][j] = input_file((name).c_str(), tensor_bool_param->get()[i][j], cntr);
+        tensor_bool_param->set()[i][j] = _getpot_file((name).c_str(), tensor_bool_param->get()[i][j], cntr);
         cntr++;
       }
     }

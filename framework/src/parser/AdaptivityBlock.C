@@ -4,8 +4,8 @@
 #include "mesh_refinement.h"
 #include "error_estimator.h"
 
-AdaptivityBlock::AdaptivityBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, parent, input_file)
+AdaptivityBlock::AdaptivityBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
+  :ParserBlock(reg_id, real_id, parent, parser_handle)
 {
   addParam<unsigned int>("steps", 0, "The number of adaptivity steps to perform at any one time", false);
   addParam<Real> ("refine_fraction", 0.0, "The fraction of elements or error to refine. Should be between 0 and 1.", false);

@@ -16,7 +16,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef ParserBlock * (*parserBlockBuildPtr)(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
+typedef ParserBlock * (*parserBlockBuildPtr)(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
 /**
  * Typedef to make things easier.
  */
@@ -36,9 +36,9 @@ typedef std::vector<std::string>::iterator ParserBlockNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename ParserBlockType>
-ParserBlock * buildParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
+ParserBlock * buildParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
 {
-  return new ParserBlockType(reg_id, real_id, parent, input_file);
+  return new ParserBlockType(reg_id, real_id, parent, parser_handle);
 }
 
 /**
@@ -56,7 +56,7 @@ public:
     name_to_params_pointer[name]=&valid_params<ParserBlockType>;
   }
 
-  ParserBlock * add(const std::string & red_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
+  ParserBlock * add(const std::string & red_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
 
   Parameters getValidParams(const std::string & name);
   
@@ -66,7 +66,7 @@ public:
   ParserBlockNamesIterator registeredParserBlocksBegin();
   ParserBlockNamesIterator registeredParserBlocksEnd();
 
-  std::string isRegistered(std::string & real_id);
+  std::string isRegistered(const std::string & real_id);
   
 private:
   ParserBlockFactory()

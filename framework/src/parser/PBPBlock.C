@@ -7,8 +7,8 @@
 #include "nonlinear_solver.h"
 #include "string_to_enum.h"
 
-PBPBlock::PBPBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
-  :ParserBlock(reg_id, real_id, parent, input_file)
+PBPBlock::PBPBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
+  :ParserBlock(reg_id, real_id, parent, parser_handle)
 {
   addParam<std::vector<std::string> >("solve_order", "TODO: docstring", true);
   addParam<std::vector<std::string> >("preconditioner", "TODO: docstring", true);

@@ -11,11 +11,11 @@ ParserBlockFactory::instance()
 }
 
 ParserBlock *
-ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
+ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
 {
   ParserBlock * parser_block;
 
-  parser_block = (*name_to_build_pointer[reg_id])(reg_id, real_id, parent, input_file);
+  parser_block = (*name_to_build_pointer[reg_id])(reg_id, real_id, parent, parser_handle);
   active_parser_blocks.push_back(parser_block);
 
   return parser_block;
@@ -69,7 +69,7 @@ ParserBlockFactory::registeredParserBlocksEnd()
 }
 
 std::string
-ParserBlockFactory::isRegistered(std::string & real_id)
+ParserBlockFactory::isRegistered(const std::string & real_id)
 {
   /* This implementation assumes that wildcards can occur in the final position of the registered id.
    * Since maps are ordered, a reverse traversal through the registered list will always select a more

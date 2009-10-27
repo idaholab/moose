@@ -11,10 +11,10 @@
 #include "parameters.h"
 #include "getpot.h"
 
-ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file)
+ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
   :_reg_id(reg_id),
    _real_id(real_id),
-   _input_file(input_file),
+   _parser_handle(parser_handle),
    _parent(parent)
 {
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
@@ -39,7 +39,8 @@ ParserBlock::getShortName() const
 std::string
 ParserBlock::getType() const
 {
-  return _input_file((_real_id + "/type").c_str(), "");
+  const GetPot *getpot_handle = _parser_handle.getPotHandle();
+  return getpot_handle == NULL ? getShortName() : (*getpot_handle)((_real_id + "/type").c_str(), "");
 }
 
 void
@@ -141,21 +142,23 @@ ParserBlock::printBlockData()
   std::cout << "\n"
             << spacing << "name: " <<  getShortName() << "\n"
             << spacing << "type: " <<  typeid(*this).name() << "\n"
-            << spacing << "  block_params={\n";
+            << spacing << "  params={\n";
 
   for (Parameters::iterator iter = _block_params.begin(); iter != _block_params.end(); ++iter) 
   {
-    std::cout << spacing << "    " << iter->first << ": ";
+    // Block params may be required and will have a doc string
+    std::string required = _required_params.find(iter->first) != _required_params.end() ? "*" : " ";
+
+    std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
+    std::cout.width(10);
     iter->second->print(std::cout);
-    std::cout << "\n";
+    std::cout << _doc_string[iter->first] << "\n";
   }
-  
-  std::cout << spacing << "  }\n"
-            << spacing << "  class_params={\n";
   
   for (Parameters::iterator iter = _class_params.begin(); iter != _class_params.end(); ++iter)
   {
-    std::cout << spacing << "    " << iter->first << ": ";
+    std::cout << spacing << "    " << std::setw(30) << iter->first << ": ";
+    std::cout.width(10);
     iter->second->print(std::cout);
     std::cout << "\n";
   }

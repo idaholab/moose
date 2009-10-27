@@ -6,7 +6,7 @@
 class BCsBlock: public ParserBlock
 {
 public:
-  BCsBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, const GetPot & input_file);
+  BCsBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
 
   virtual void execute();
 };
