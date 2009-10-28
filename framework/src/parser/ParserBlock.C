@@ -142,32 +142,30 @@ ParserBlock::printBlockData()
   std::cout << "\n"
             << spacing << "name: " <<  getShortName() << "\n"
             << spacing << "type: " <<  typeid(*this).name() << "\n"
-            << spacing << "  params={\n";
+            << spacing << "  params=\n"
+            << spacing << "  {\n";
 
   for (Parameters::iterator iter = _block_params.begin(); iter != _block_params.end(); ++iter) 
   {
     // Block params may be required and will have a doc string
     std::string required = _required_params.find(iter->first) != _required_params.end() ? "*" : " ";
 
-    std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
-    std::cout.width(10);
+    std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": default(";
     iter->second->print(std::cout);
-    std::cout << _doc_string[iter->first] << "\n";
+    std::cout << ")\n" << spacing << "    " << std::setw(30) << " " << "    " << _doc_string[iter->first] << "\n";
   }
   
   for (Parameters::iterator iter = _class_params.begin(); iter != _class_params.end(); ++iter)
   {
-    std::cout << spacing << "    " << std::setw(30) << iter->first << ": ";
-    std::cout.width(10);
+    std::cout << spacing << "     " << std::setw(30) << iter->first << ": default (";
     iter->second->print(std::cout);
-    std::cout << "\n";
+    std::cout << ")\n";
   }
   
   std::cout << spacing << "  }\n";
 
   visitChildren(&ParserBlock::printBlockData);
 }
-
 
     
       
