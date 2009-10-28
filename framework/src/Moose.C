@@ -44,6 +44,7 @@
 #include "OutputBlock.h"
 #include "PreconditioningBlock.h"
 #include "PBPBlock.h"
+#include "AdaptivityBlock.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -116,6 +117,7 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<GenericMaterialBlock>("Materials/*");
   ParserBlockFactory::instance()->registerParserBlock<ExecutionBlock>("Execution");
   ParserBlockFactory::instance()->registerParserBlock<TransientBlock>("Execution/Transient");
+  ParserBlockFactory::instance()->registerParserBlock<AdaptivityBlock>("Execution/Adaptivity");
   ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
   ParserBlockFactory::instance()->registerParserBlock<PreconditioningBlock>("Preconditioning");
   ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");
