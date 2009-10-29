@@ -266,18 +266,19 @@ Parser::fixupOptionalBlocks()
 void
 Parser::fixupOptionalBlocks()
 {
-  /* Create a map of Optional Blocks to fill in if they don't exist in the tree and where
-   * they should fit (after the second id listed).  The map key is used as the type of block
+  /* Create a vector of Optional Blocks to fill in if they don't exist in the tree and where
+   * they should fit (after the second id listed).  The vector->first is used as the type of block
    * to create and insert into the tree
    */
-  std::map<std::string, std::string> optionalBlocks;
-  std::map<std::string, std::string>::iterator i;
+  std::vector<std::pair<std::string, std::string> > optionalBlocks;
+  std::vector<std::pair<std::string, std::string> >::iterator i;
   ParserBlock *block_ptr;
 
-  optionalBlocks["AuxVariables"] = "Variables";
-  optionalBlocks["AuxKernels"] = "Kernels";
-  optionalBlocks["BCs"] = "AuxKernels";
-  optionalBlocks["AuxBCs"] = "BCs";
+  optionalBlocks.push_back(std::make_pair("Preconditioning", "Variables"));
+  optionalBlocks.push_back(std::make_pair("AuxVariables", "Preconditioning"));
+  optionalBlocks.push_back(std::make_pair("AuxKernels", "Kernels"));
+  optionalBlocks.push_back(std::make_pair("BCs", "AuxKernels"));
+  optionalBlocks.push_back(std::make_pair("AuxBCs", "BCs"));
 
   // First see if the Optional Block exists
   for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i) 
