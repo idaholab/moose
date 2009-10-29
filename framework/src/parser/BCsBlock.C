@@ -4,13 +4,23 @@
 
 BCsBlock::BCsBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
   :ParserBlock(reg_id, real_id, parent, parser_handle)
-{}
+{
+  // Register execution prereqs
+  addPrereq("Mesh");
+  addPrereq("Variables");
+  addPrereq("AuxVariables");
+  addPrereq("Kernels");
+  addPrereq("AuxKernels");
+}
 
 void
 BCsBlock::execute() 
 {
 #ifdef DEBUG
-  std::cerr << "Inside the BCsBlock Object\n";
+  if (_reg_id == "BCs")
+    std::cerr << "Inside the BCsBlock Object\n";
+  else
+    std::cerr << "Inside the BCsBlock (Aux) Object\n";
 #endif
 
   if (_reg_id == "BCs")

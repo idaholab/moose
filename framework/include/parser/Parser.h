@@ -3,6 +3,8 @@
 
 #include "ParserBlock.h"
 
+#include <list>
+
 class Parser
 {
 public:
@@ -28,6 +30,41 @@ public:
    * for creating and filling in various MOOSE based objects.
    */
   void execute();
+
+  /**
+   * This function is called to track a parser block that is unable to execute because it's
+   * prerequesites have not been satisfied.  The parser object will be in charge of executing
+   * this block at a later time.
+   */
+  inline void deferExecution(ParserBlock * pb_ptr)
+    {
+      _deferred_execution.push_back(pb_ptr);
+    }
+
+  inline std::list<ParserBlock *> & getDeferredList()
+    {
+      return _deferred_execution;
+    }
+  
+  inline void markExecuted(const std::string & pb_name)
+    {
+      _executed_blocks.insert(pb_name);
+    }
+
+  inline bool isExecuted(const std::string & pb_name)
+    {
+      return _executed_blocks.find(pb_name) != _executed_blocks.end();
+    }
+
+  inline std::set<std::string>::iterator getExecutedSetBegin()
+    {
+      return _executed_blocks.begin();
+    }
+
+  inline std::set<std::string>::iterator getExecutedSetEnd()
+    {
+      return _executed_blocks.end();
+    }
 
   /**
    * This function will split the passed in string on a set of delimiters appending the substrings
@@ -98,6 +135,9 @@ private:
   
   bool _getpot_initialized;
   GetPot _getpot_file;
+
+  std::list<ParserBlock *> _deferred_execution;
+  std::set<std::string> _executed_blocks;
 };
 
 #endif //PARSER_H

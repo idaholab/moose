@@ -33,7 +33,16 @@ ExecutionBlock::ExecutionBlock(const std::string & reg_id, const std::string & r
   addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs", false);
   addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"", false);
 #endif //LIBMESH_HAVE_PETSC
-  
+
+  // Register the execution Prereqs
+  addPrereq("Mesh");
+  addPrereq("Variables");
+  addPrereq("AuxVariables");
+  addPrereq("Kernels");
+  addPrereq("AuxKernels");
+  addPrereq("BCs");
+  addPrereq("AuxBCs");
+  addPrereq("Materials");
 }
 
 void

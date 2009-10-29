@@ -55,6 +55,8 @@ public:
    */
   virtual void execute();
 
+  void driveExecute();
+
   /**
    * This function is for adding new parameters to the ParserBlock that will be extracted from
    * the input file, checked and used within MOOSE
@@ -79,6 +81,11 @@ public:
       if (required)
         _required_params.insert(name);
       _doc_string[name] = doc_string;
+    }
+
+  inline void addPrereq(std::string name)
+    {
+      _execute_prereqs.insert(name);
     }
 
   /************************************
@@ -133,13 +140,30 @@ protected:
   /**
    * This function calles execute over all of the child blocks of the current Parser Block
    */
-  void visitChildren(void (ParserBlock::*action)() = &ParserBlock::execute, bool visit_active_only=true);
+  void visitChildren(void (ParserBlock::*action)() = &ParserBlock::execute,
+                     bool visit_active_only=true,
+                     bool check_prereqs=true);
+
+  /**
+   * This function checks the prereqs of the the passed ParserBlock * to make sure that it
+   * can be executed.
+   */
+  bool checkPrereqs(ParserBlock *pb_ptr);
+
+  void executeDeferred(void (ParserBlock::*action)());
+  
   
   /************************************
    * Protected Data Members
    ************************************/
   std::string _reg_id;
   std::string _real_id;
+
+  /**
+   * The list of ParserBlocks which must be executed prior to executing the current ParserBlock
+   */
+  std::set<std::string> _execute_prereqs;
+  
 
   /************************************
    * Private Data Members (use accessors)
@@ -160,7 +184,7 @@ private:
   std::map<std::string, std::string> _doc_string;
   std::set<std::string> _required_params;
 
-  Parser & _parser_handle;  
+  Parser & _parser_handle;
 };
 
 #endif //PARSERBLOCK_H

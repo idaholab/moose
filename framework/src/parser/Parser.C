@@ -116,8 +116,6 @@ Parser::buildFullTree()
       continue;
     
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
-    std::cerr << matched_identifier << std::endl;
-    
     curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, *i, curr_block, *this));
   }
   
@@ -209,11 +207,32 @@ Parser::getPotHandle() const
   return _getpot_initialized ? &_getpot_file : NULL;
 }
 
+/*
+void
+Parser::fixupOptionalBlocks()
+{
+  // Create a vector of Optional Blocks to stick in the tree if they don't exist
+  std::vector<std::string> optionalBlocks;
+  std::vector<std::string>::iterator i;
+
+  optionalBlocks.push_back("AuxVariables");
+  optionalBlocks.push_back("AuxKernels");
+  optionalBlocks.push_back("BCs");
+  optionalBlocks.push_back("AuxBCs");
+
+  for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i)
+    if (_input_tree->locateBlock(*i) == NULL)
+      _input_tree->_children.push_back(ParserBlockFactory::instance()->add(*i, *i, _input_tree, *this));
+}
+*/
+
+
+/*
 void
 Parser::fixupOptionalBlocks()
 {
   /* Create a map of Optional Blocks to fill in if they don't exist in the tree and where
-   * they should fit (before the second id listed) */
+   * they should fit (before the second id listed) /
   std::map<std::string, std::string> optionalBlocks;
   std::map<std::string, std::string>::iterator i;
   ParserBlock *block_ptr;
@@ -241,20 +260,24 @@ Parser::fixupOptionalBlocks()
     }
   }
 }
+*/
 
-/*
+
 void
 Parser::fixupOptionalBlocks()
 {
   /* Create a map of Optional Blocks to fill in if they don't exist in the tree and where
    * they should fit (after the second id listed).  The map key is used as the type of block
-   * to create and insert into the tree 
+   * to create and insert into the tree
+   */
   std::map<std::string, std::string> optionalBlocks;
   std::map<std::string, std::string>::iterator i;
   ParserBlock *block_ptr;
 
   optionalBlocks["AuxVariables"] = "Variables";
   optionalBlocks["AuxKernels"] = "Kernels";
+  optionalBlocks["BCs"] = "AuxKernels";
+  optionalBlocks["AuxBCs"] = "BCs";
 
   // First see if the Optional Block exists
   for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i) 
@@ -280,11 +303,12 @@ Parser::fixupOptionalBlocks()
     }
   }
 }
-*/
+
 
 void
 Parser::execute()
 {
+  _executed_blocks.clear();
   _input_tree->execute();
 }
 

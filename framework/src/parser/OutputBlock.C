@@ -13,6 +13,17 @@ OutputBlock::OutputBlock(const std::string & reg_id, const std::string & real_id
   addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)", false);
   addParam<bool>("print_out_info", false, "Specifies that you would like to see more verbose output information on STDOUT", false);
   addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file", false);
+
+   // Register the execution Prereqs
+  addPrereq("Mesh");
+  addPrereq("Variables");
+  addPrereq("AuxVariables");
+  addPrereq("Kernels");
+  addPrereq("AuxKernels");
+  addPrereq("BCs");
+  addPrereq("AuxBCs");
+  addPrereq("Materials");
+  addPrereq("Execution");
 }
 
 void

@@ -46,7 +46,14 @@ ParserBlock::getType() const
 void
 ParserBlock::execute()
 {
-  visitChildren();
+  visitChildren(&ParserBlock::execute);
+
+/*
+  executeDeferred(&ParserBlock::execute);
+  // See if all the deferred blocks have been executed
+  if (!_parser_handle.getDeferredList().empty())
+    mooseError("Unexecuted ParserBlocks remain");
+*/
 }
 
 unsigned int
@@ -55,11 +62,11 @@ ParserBlock::n_activeChildren() const
   std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
   std::vector<std::string> named_children = getParamValue<std::vector<std::string> >("names");
 
-  if (named_children.size())
+  if (!named_children.empty())
     mooseError(std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.");
     
   // if there is no parameter named "active" then assume that all children are active
-  if (active_children.size() == 0) 
+  if (active_children.empty()) 
     return _children.size();
   
   // Make sure that all named children are actually in the _children list  
@@ -75,16 +82,16 @@ ParserBlock::n_activeChildren() const
 }
 
 void
-ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only)
+ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only, bool check_prereqs)
 {
   std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
   std::vector<std::string> named_children = getParamValue<std::vector<std::string> >("names");
 
-  if (named_children.size())
+  if (!named_children.empty())
     mooseError(std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.");
   
   // if there is no parameter named "active" then assume that all children are to be visited
-  if (active_children.size() == 0)
+  if (active_children.empty())
     visit_active_only = false;
 
   // Load the children names into a set for faster locating
@@ -92,8 +99,55 @@ ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only
 
   std::vector<ParserBlock *>::iterator i;
   for (i=_children.begin(); i!=_children.end(); ++i)
+  {
     if (!visit_active_only || child_set.find((*i)->getShortName()) != child_set.end())
-      ((*i)->*action)();  // Call the method through the function pointer
+//      if (!check_prereqs || checkPrereqs(*i))                    // Check Prereqs before executing if requested
+//      {
+//        if (!_parser_handle.isExecuted((*i)->getID())) 
+//        {
+//          std::cout << "Debug: " << (*i)->getID();
+          
+          ((*i)->*action)();                                       // Call the method through the function pointer
+//          _parser_handle.markExecuted((*i)->getID());              // Add the executed block to the executed set
+//          executeDeferred(action);
+//        }
+//      }
+//      else
+//        _parser_handle.deferExecution(*i);
+  }
+}
+
+bool
+ParserBlock::checkPrereqs(ParserBlock *pb_ptr)
+{
+  std::set<std::string> result;
+  
+  std::set_difference(pb_ptr->_execute_prereqs.begin(), pb_ptr->_execute_prereqs.end(),
+                      _parser_handle.getExecutedSetBegin(), _parser_handle.getExecutedSetEnd(),
+                      std::insert_iterator<std::set<std::string> >(result, result.end()));
+
+  // The result set should be empty if all prereqs have been satisified
+  return result.empty() ? true : false;
+}
+
+void
+ParserBlock::executeDeferred(void (ParserBlock::*action)())
+{
+  // See if any of the defered blocks have their prereqs fulfilled and execute
+  std::list<ParserBlock *> & deferred = _parser_handle.getDeferredList();
+  for (std::list<ParserBlock *>::iterator i = deferred.begin(); i != deferred.end(); ) 
+  {
+    if (checkPrereqs(*i) && !_parser_handle.isExecuted((*i)->getID()))
+    {
+      std::cout << "Debug: " << (*i)->getID();
+      
+      ((*i)->*action)();
+      _parser_handle.markExecuted((*i)->getID());
+      deferred.erase(i++);                                     // Important: Erase with a postfix increment
+    }
+    else
+      ++i;
+  }
 }
 
 ParserBlock *
@@ -164,7 +218,7 @@ ParserBlock::printBlockData()
   
   std::cout << spacing << "  }\n";
 
-  visitChildren(&ParserBlock::printBlockData);
+  visitChildren(&ParserBlock::printBlockData, true, false);
 }
 
     
