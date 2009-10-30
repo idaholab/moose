@@ -3,13 +3,16 @@
 // libMesh includes
 #include "mesh_refinement.h"
 #include "error_estimator.h"
+#include "error_vector.h"
+#include "kelly_error_estimator.h"
 
 AdaptivityBlock::AdaptivityBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
   :ParserBlock(reg_id, real_id, parent, parser_handle)
 {
-  addParam<unsigned int>("steps", 0, "The number of adaptivity steps to perform at any one time", false);
+  addParam<unsigned int>("steps", 0, "The number of adaptivity steps to perform at any one time for steady state", false);
+  addParam<unsigned int>("initial_adaptivity", 0, "The number of adaptivity steps to perform using the initial conditions", false);
   addParam<Real> ("refine_fraction", 0.0, "The fraction of elements or error to refine. Should be between 0 and 1.", false);
-  addParam<Real> ("coarse_fraction", 0.0, "The fraction of elements or error to coarsen. Should be between 0 and 1.", false);
+  addParam<Real> ("coarsen_fraction", 0.0, "The fraction of elements or error to coarsen. Should be between 0 and 1.", false);
   addParam<unsigned int> ("max_h_level", 0, "Maximum number of times a single element can be refined. If 0 then infinite.", false);
   addParam<std::vector<std::string> > ("weight_names", "List of names of variables that will be associated with weight_values", false);
   addParam<std::vector<Real> > ("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by", false);
@@ -25,14 +28,18 @@ AdaptivityBlock::execute()
   Moose::equation_system->parameters.set<unsigned int>("max_r_steps") = max_r_steps;
   Moose::equation_system->parameters.set<bool>("adaptivity") = true;
 
+  Moose::equation_system->parameters.set<unsigned int>("initial_adaptivity") = getParamValue<unsigned int>("initial_adaptivity");
+
   if(Moose::mesh_refinement)
     mooseError("Mesh refinement object has already been initialized!");
 
   Moose::mesh_refinement = new MeshRefinement(*Moose::mesh);
+  Moose::error = new ErrorVector;
+  Moose::error_estimator = new KellyErrorEstimator;
 
   Moose::mesh_refinement->refine_fraction()  = getParamValue<Real>("refine_fraction");
   Moose::mesh_refinement->coarsen_fraction() = getParamValue<Real>("coarsen_fraction");
-  Moose::mesh_refinement->max_h_level()      = getParamValue<Real>("max_h_level");
+  Moose::mesh_refinement->max_h_level()      = getParamValue<unsigned int>("max_h_level");
 
   const std::vector<std::string> & weight_names = getParamValue<std::vector<std::string> >("weight_names");
   const std::vector<Real> & weight_values = getParamValue<std::vector<Real> >("weight_values");

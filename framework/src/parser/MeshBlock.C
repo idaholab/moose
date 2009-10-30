@@ -68,7 +68,6 @@ MeshBlock::execute()
 
   MeshRefinement *mesh_refinement = new MeshRefinement(*mesh);
   mesh_refinement->uniformly_refine(getParamValue<int>("uniform_refine"));
-  Moose::mesh_refinement = mesh_refinement;
   
   mesh->boundary_info->build_node_list_from_side_list();
   mesh->print_info();

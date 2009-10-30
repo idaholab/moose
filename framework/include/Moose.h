@@ -150,6 +150,11 @@ namespace Moose
                          void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual));
   
 
+  /**
+   * Output the given system to output files.
+   */
+  void Moose::output_system(EquationSystems * equation_systems, std::string file_base, unsigned int t_step, Real time, bool exodus_output, bool gmv_output, bool tecplot_output, bool print_out_info);
+
   /*******************
    * Global Variables - yeah I know...
    *******************/
@@ -190,6 +195,11 @@ namespace Moose
    * Error vector for use with the error estimator.
    */
   extern ErrorVector * error;
+
+  /**
+   * Whether or not the mesh has changed recently.  Useful for doing separate output.
+   */
+  extern bool mesh_changed;
 
   /**
    * A range for use with TBB.  We do this so that it doesn't have

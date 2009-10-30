@@ -54,6 +54,9 @@
 //libMesh includes
 #include "mesh.h"
 #include "boundary_info.h"
+#include "gmv_io.h"
+#include "exodusII_io.h"
+#include "tecplot_io.h"
 
 void mooseError(std::string error)
 {
@@ -140,6 +143,9 @@ Moose::meshChanged()
 
   // Calling this function will rebuild the range.
   Moose::getActiveLocalElementRange();
+
+  // Lets the output system know that the mesh has changed recently.
+  Moose::mesh_changed = true;
 }
 
 ConstElemRange *
@@ -198,8 +204,101 @@ Moose::setSolverDefaults(EquationSystems * es,
 #endif //LIBMESH_HAVE_PETSC
 }
 
+/**
+ * Outputs the system.
+ */
+void
+Moose::output_system(EquationSystems * equation_systems, std::string file_base, unsigned int t_step, Real time, bool exodus_output, bool gmv_output, bool tecplot_output, bool print_out_info)
+{
+  OStringStream stream_file_base;
   
+  stream_file_base << file_base << "_";
+  OSSRealzeroright(stream_file_base,3,0,t_step);
 
+  std::string file_name = stream_file_base.str();
+
+  if(print_out_info)
+     std::cout << "   --> Output in file ";
+  
+  if(exodus_output) 
+  {
+    std::string exodus_file_name;
+    
+    static ExodusII_IO * ex_out = NULL;
+    static unsigned int num_files = 0;
+    static unsigned int num_in_current_file = 0;
+    
+    bool adaptivity = Moose::equation_system->parameters.have_parameter<bool>("adaptivity");
+
+    //if the mesh changed we need to write to a new file
+    if(Moose::mesh_changed || !ex_out)
+    {
+      num_files++;
+      
+      if(ex_out)
+        delete ex_out;
+      
+      ex_out = new ExodusII_IO(equation_systems->get_mesh());
+
+      // We've captured this change... let's reset the changed bool and then see if it's changed again next time.
+      Moose::mesh_changed = false;
+
+      // We're starting over
+      num_in_current_file = 0;
+    }
+
+    num_in_current_file++;
+
+    if(!adaptivity)
+      exodus_file_name = file_base;
+    else
+    {
+      OStringStream exodus_stream_file_base;
+  
+      exodus_stream_file_base << file_base << "_";
+
+      // -1 is so that the first one that comes out is 000
+      OSSRealzeroright(exodus_stream_file_base,4,0,num_files-1);
+      
+      exodus_file_name = exodus_stream_file_base.str();
+    }
+
+    // The +1 is because Exodus starts timesteps at 1 and we start at 0
+    ex_out->write_timestep(exodus_file_name + ".e", *equation_systems, num_in_current_file, time);
+
+    if(print_out_info)
+    {       
+      std::cout << file_base+".e";
+      OStringStream out;
+      out <<  "(";
+      OSSInt(out,2,t_step+1);
+      out <<  ") ";
+      std::cout << out.str();
+    } 
+  }
+  if(gmv_output) 
+  {     
+    GMVIO(*Moose::mesh).write_equation_systems(file_name + ".gmv", *equation_systems);
+    if(print_out_info)
+    {       
+      if(exodus_output)
+         std::cout << " and ";    
+      std::cout << file_name+".gmv";
+    }    
+  }  
+  if(tecplot_output) 
+  {     
+    TecplotIO(*Moose::mesh).write_equation_systems(file_name + ".plt", *equation_systems);
+    if(print_out_info)
+    {       
+      if(exodus_output || gmv_output)
+         std::cout << " and ";    
+      std::cout << file_name+".plt";
+    }    
+  }
+
+  if(print_out_info) std::cout << std::endl; 
+}
 
 /******************
  * Global Variables
@@ -214,6 +313,7 @@ EquationSystems * Moose::equation_system;
 MeshRefinement * Moose::mesh_refinement = NULL;
 ErrorEstimator * Moose::error_estimator = NULL;
 ErrorVector * Moose::error = NULL;
+bool Moose::mesh_changed = false;
 
 ConstElemRange * Moose::active_local_elem_range = NULL;
 
