@@ -296,7 +296,7 @@ Parser::fixupOptionalBlocks()
         find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
 
       if (position == block_ptr->_parent->_children.end())
-        mooseError("Unable to find required block " + i->second + " for optional block insertion");
+        mooseError(("Unable to find required block " + i->second + " for optional block insertion").c_str());
 
       // Increment one past this location so the new element be inserted afterwards      
       block_ptr->_parent->_children.insert(++position,
@@ -318,8 +318,8 @@ Parser::checkInputFile()
 {
   std::ifstream in(_input_filename.c_str(), std::ifstream::in);
   if (in.fail())
-    mooseError(std::string("Unable to open file \"") + _input_filename
-               + std::string("\". Check to make sure that it exists and that you have read permission."));
+    mooseError((std::string("Unable to open file \"") + _input_filename
+                + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
 
   in.close();
 }

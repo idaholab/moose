@@ -63,7 +63,7 @@ ParserBlock::n_activeChildren() const
   std::vector<std::string> named_children = getParamValue<std::vector<std::string> >("names");
 
   if (!named_children.empty())
-    mooseError(std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.");
+    mooseError((std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.").c_str());
     
   // if there is no parameter named "active" then assume that all children are active
   if (active_children.empty()) 
@@ -88,7 +88,7 @@ ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only
   std::vector<std::string> named_children = getParamValue<std::vector<std::string> >("names");
 
   if (!named_children.empty())
-    mooseError(std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.");
+    mooseError((std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.").c_str());
   
   // if there is no parameter named "active" then assume that all children are to be visited
   if (active_children.empty())

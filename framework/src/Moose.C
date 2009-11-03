@@ -59,12 +59,6 @@
 #include "exodusII_io.h"
 #include "tecplot_io.h"
 
-void mooseError(std::string error)
-{
-  std::cerr<<std::endl<<std::endl<<error<<std::endl<<std::endl;
-  libmesh_error();
-}
-
 void
 Moose::registerObjects()
 {

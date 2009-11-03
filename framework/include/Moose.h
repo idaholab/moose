@@ -18,6 +18,8 @@
 #include "nonlinear_implicit_system.h"
 #include "transient_system.h"
 
+#include <cstdio>
+
 
 //Forward Declarations
 class Mesh;
@@ -104,7 +106,12 @@ void Parameters::Parameter<std::map<std::string, unsigned int> >::print (std::os
 /**
  * A function to call when you need the whole program to die a spit out a message
  */
-void mooseError(std::string error = "An error has occurred");
+#define mooseError(...)                                                 \
+  do {                                                                  \
+    std::fprintf(stderr, "\n\n");                                       \
+    std::fprintf(stderr, ##  __VA_ARGS__, "");                          \
+    std::fprintf(stderr, "\n\n"); libmesh_error();                      \
+  } while(0)
 
 namespace Moose
 {
@@ -153,7 +160,7 @@ namespace Moose
   /**
    * Output the given system to output files.
    */
-  void Moose::output_system(EquationSystems * equation_systems, std::string file_base, unsigned int t_step, Real time, bool exodus_output, bool gmv_output, bool tecplot_output, bool print_out_info);
+  void output_system(EquationSystems * equation_systems, std::string file_base, unsigned int t_step, Real time, bool exodus_output, bool gmv_output, bool tecplot_output, bool print_out_info);
 
   /*******************
    * Global Variables - yeah I know...
