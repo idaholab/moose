@@ -3,6 +3,7 @@
 // Moose Includes
 #include "MeshBlock.h"
 #include "Moose.h"
+#include "Parser.h"
 
 // libMesh includes
 #include "mesh.h"
@@ -43,7 +44,7 @@ MeshBlock::execute()
       mooseError();
   }
   
-  if (detectRestart()) 
+  if (checkVariableProperties(&GenericVariableBlock::restartRequired)) 
   {
     ExodusII_IO *exreader = new ExodusII_IO(*mesh);
     Moose::exreader = exreader;
@@ -66,8 +67,20 @@ MeshBlock::execute()
   // If using ParallelMesh this will delete non-local elements from the current processor
   mesh->delete_remote_elements();
 
-  MeshRefinement *mesh_refinement = new MeshRefinement(*mesh);
-  mesh_refinement->uniformly_refine(getParamValue<int>("uniform_refine"));
+  // uniformly refine mesh
+  MeshRefinement mesh_refinement(*mesh);
+  if (!autoResizeProblem(mesh, mesh_refinement))
+    mesh_refinement.uniformly_refine(getParamValue<int>("uniform_refine"));
+    
+  
+//  unsigned int init_unif_refine;
+//  MeshRefinement mesh_refinement(*mesh);
+//  bool success = false;
+//  if (Moose::command_line != NULL && Moose::command_line->search("--dofs"))
+//    success = Moose::autoResizeProblem(Moose::command_line->next(-1), _parser_handle.getPotHandle(), mesh_refinement);
+//  if (!success)
+//    mesh_refinement.uniformly_refine(getParamValue<int>("uniform_refine"));
+
   
   mesh->boundary_info->build_node_list_from_side_list();
   mesh->print_info();
@@ -76,7 +89,28 @@ MeshBlock::execute()
 }
 
 bool
-MeshBlock::detectRestart()
+MeshBlock::autoResizeProblem(Mesh *mesh, MeshRefinement &mesh_refinement)
+{
+  unsigned int requested_dofs;
+
+  // See if dofs was passed on the command line
+  if (Moose::command_line != NULL && Moose::command_line->search("--dofs"))
+    requested_dofs = Moose::command_line->next(-1);
+  else
+    return false;
+
+  // See if the variables report themselves as resizable
+  if (!checkVariableProperties(&GenericVariableBlock::autoResizeable))
+    return false;
+
+  unsigned int num_vars = locateBlock("Variables")->n_activeChildren();
+  while (mesh->n_nodes() * num_vars < requested_dofs)
+    mesh_refinement.uniformly_refine();
+  return true;
+}
+
+bool
+MeshBlock::checkVariableProperties(bool (GenericVariableBlock::*property)() const)
 {
   std::vector<std::string> blocks_to_check(2);
   blocks_to_check[0] = "Variables";
@@ -89,7 +123,7 @@ MeshBlock::detectRestart()
       for (PBChildIterator j = vars_block->_children.begin(); j != vars_block->_children.end(); ++j) 
       {
         GenericVariableBlock *v = dynamic_cast<GenericVariableBlock *>(*j);
-        if (v && v->restartRequired())
+        if (v && (v->*property)())
           return true;
       }
   }

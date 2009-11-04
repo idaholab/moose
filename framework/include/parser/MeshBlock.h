@@ -3,6 +3,8 @@
 
 #include "ParserBlock.h"
 
+class GenericVariableBlock;
+
 class MeshBlock: public ParserBlock
 {
 public:
@@ -11,7 +13,8 @@ public:
   virtual void execute();
 
 private:
-  bool detectRestart();
+  bool autoResizeProblem(Mesh *mesh, MeshRefinement &mesh_refinement);
+  bool checkVariableProperties(bool (GenericVariableBlock::*property)() const);
 };
 
   

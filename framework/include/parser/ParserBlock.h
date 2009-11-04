@@ -129,13 +129,14 @@ public:
   ParserBlock * locateBlock(const std::string & id);
 
   void printBlockData();
-  
-protected:
+
   /**
    * This function returns the number of active children which is either the children named in the
    * optional "active" parameter or else all of the children underneath this Block
    */
   unsigned int n_activeChildren() const;
+
+protected:
 
   /**
    * This function calles execute over all of the child blocks of the current Parser Block
@@ -152,12 +153,12 @@ protected:
 
   void executeDeferred(void (ParserBlock::*action)());
   
-  
   /************************************
    * Protected Data Members
    ************************************/
   std::string _reg_id;
   std::string _real_id;
+  Parser & _parser_handle;
 
   /**
    * The list of ParserBlocks which must be executed prior to executing the current ParserBlock
@@ -183,8 +184,6 @@ private:
   
   std::map<std::string, std::string> _doc_string;
   std::set<std::string> _required_params;
-
-  Parser & _parser_handle;
 };
 
 #endif //PARSERBLOCK_H

@@ -54,10 +54,12 @@
 
 //libMesh includes
 #include "mesh.h"
+#include "mesh_refinement.h"
 #include "boundary_info.h"
 #include "gmv_io.h"
 #include "exodusII_io.h"
 #include "tecplot_io.h"
+
 
 void
 Moose::registerObjects()
@@ -338,3 +340,7 @@ Gradient (*Moose::init_gradient)(const Point& p,
                                  const std::string& sys_name,
                                  const std::string& var_name) = Moose::initial_gradient;
 void (*Moose::init_cond)(EquationSystems& es, const std::string& system_name) = Moose::initial_cond;
+
+// This variable will be static in the new Moose System object - only need one per application
+GetPot *Moose::command_line;
+

@@ -12,6 +12,7 @@ public:
   virtual void execute();
 
   bool restartRequired() const;
+  bool autoResizeable() const;
   std::pair<std::string, unsigned int> initialValuePair() const;
 
 private:

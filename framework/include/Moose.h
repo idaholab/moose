@@ -137,8 +137,7 @@ namespace Moose
    * Automatically builds it if it hasn't been initialized.
    */
   ConstElemRange * getActiveLocalElementRange();
-
-
+  
   Number initial_value(const Point& p,
                        const Parameters& parameters,
                        const std::string& sys_name,
@@ -252,6 +251,8 @@ namespace Moose
                                    const std::string& sys_name,
                                    const std::string& var_name);
   extern void (*init_cond)(EquationSystems& es, const std::string& system_name);
+
+  extern GetPot *command_line;
 }
 
 #endif //MOOSE_H

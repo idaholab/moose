@@ -77,6 +77,16 @@ GenericVariableBlock::restartRequired() const
     return true;
 }
 
+bool
+GenericVariableBlock::autoResizeable() const
+{
+  if (getParamValue<std::string>("order") == "FIRST" && getParamValue<std::string>("family") == "LAGRANGE")
+    return true;
+  else
+    return false;
+}
+
+
 std::pair<std::string, unsigned int>
 GenericVariableBlock::initialValuePair() const
 {
