@@ -10,7 +10,7 @@ meshdir := $(LIBMESH_DIR)
 # link with the library.
 include $(meshdir)/Make.common
 
-libmesh_INCLUDE += -Iinclude -Iinclude/materials -Iinclude/parser
+libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/utils -Iinclude/materials -Iinclude/parser
 
 ###############################################################################
 # File management.  This is where the source, header, and object files are
@@ -18,7 +18,7 @@ libmesh_INCLUDE += -Iinclude -Iinclude/materials -Iinclude/parser
 
 #
 # source files
-srcfiles 	:= $(wildcard src/*.C) $(wildcard src/materials/*.C) $(wildcard src/parser/*.C)
+srcfiles 	:= $(wildcard src/*.C) $(wildcard src/*/*.C)
 
 #
 # object files

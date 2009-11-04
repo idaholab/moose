@@ -5,6 +5,7 @@
 #include "error_estimator.h"
 #include "error_vector.h"
 #include "kelly_error_estimator.h"
+#include "fourth_error_estimators.h"
 
 AdaptivityBlock::AdaptivityBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
   :ParserBlock(reg_id, real_id, parent, parser_handle)
@@ -35,7 +36,7 @@ AdaptivityBlock::execute()
 
   Moose::mesh_refinement = new MeshRefinement(*Moose::mesh);
   Moose::error = new ErrorVector;
-  Moose::error_estimator = new KellyErrorEstimator;
+  Moose::error_estimator = new LaplacianErrorEstimator; //KellyErrorEstimator;
 
   Moose::mesh_refinement->refine_fraction()  = getParamValue<Real>("refine_fraction");
   Moose::mesh_refinement->coarsen_fraction() = getParamValue<Real>("coarsen_fraction");
