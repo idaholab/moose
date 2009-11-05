@@ -17,6 +17,7 @@ AdaptivityBlock::AdaptivityBlock(const std::string & reg_id, const std::string &
   addParam<unsigned int> ("max_h_level", 0, "Maximum number of times a single element can be refined. If 0 then infinite.", false);
   addParam<std::vector<std::string> > ("weight_names", "List of names of variables that will be associated with weight_values", false);
   addParam<std::vector<Real> > ("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by", false);
+  addParam<std::string> ("error_estimator", "The class name of the error estimator you want to use.", "KellyErrorEstimator");
 }
 
 void
@@ -36,7 +37,15 @@ AdaptivityBlock::execute()
 
   Moose::mesh_refinement = new MeshRefinement(*Moose::mesh);
   Moose::error = new ErrorVector;
-  Moose::error_estimator = new LaplacianErrorEstimator; //KellyErrorEstimator;
+
+  std::string error_estimator = getParamValue<std::string>("error_estimator");
+  
+  if(error_estimator == "KellyErrorEstimator")
+    Moose::error_estimator = new LaplacianErrorEstimator;
+  else if(error_estimator == "LaplacianErrorEstimator")
+    Moose::error_estimator = new LaplacianErrorEstimator;
+  else
+    mooseError((std::string("Unknown error_estimator selection: ") + error_estimator).c_str());
 
   Moose::mesh_refinement->refine_fraction()  = getParamValue<Real>("refine_fraction");
   Moose::mesh_refinement->coarsen_fraction() = getParamValue<Real>("coarsen_fraction");
