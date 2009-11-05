@@ -24,6 +24,15 @@
 #include "ThermalBC.h"
 #include "VelocityAux.h"
 
+// linear_elasticity
+#include "SolidMechX.h"
+#include "SolidMechY.h"
+#include "SolidMechZ.h"
+#include "SolidMechImplicitEuler.h"
+#include "SolidMechTempCoupleX.h"
+#include "SolidMechTempCoupleY.h"
+#include "SolidMechTempCoupleZ.h"
+
 void
 Elk::registerObjects()
 {
@@ -45,4 +54,13 @@ Elk::registerObjects()
   BCFactory::instance()->registerBC<PressureNeumannBC>("PressureNeumannBC");
   BCFactory::instance()->registerBC<ThermalBC>("ThermalBC");
   AuxFactory::instance()->registerAux<VelocityAux>("VelocityAux");
+
+  // linear_elasticity
+  KernelFactory::instance()->registerKernel<SolidMechX>("SolidMechX");
+  KernelFactory::instance()->registerKernel<SolidMechY>("SolidMechY");
+  KernelFactory::instance()->registerKernel<SolidMechZ>("SolidMechZ");
+  KernelFactory::instance()->registerKernel<SolidMechImplicitEuler>("SolidMechImplicitEuler");
+  KernelFactory::instance()->registerKernel<SolidMechTempCoupleX>("SolidMechTempCoupleX");
+  KernelFactory::instance()->registerKernel<SolidMechTempCoupleY>("SolidMechTempCoupleY");
+  KernelFactory::instance()->registerKernel<SolidMechTempCoupleZ>("SolidMechTempCoupleZ");
 }
