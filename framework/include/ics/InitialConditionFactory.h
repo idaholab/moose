@@ -2,6 +2,7 @@
 #define INITIALCONDITIONFACTORY_H
 
 #include "InitialCondition.h"
+#include "Kernel.h"
 
 // System includes
 #include <map>
@@ -62,7 +63,7 @@ public:
   
   Parameters getValidParams(std::string name);
   
-  InitialCondition * InitialConditionFactory::getInitialCondition(THREAD_ID tid, std::string var_name);
+  InitialCondition * getInitialCondition(THREAD_ID tid, std::string var_name);
   
   InitialConditionIterator activeInitialConditionsBegin(THREAD_ID tid);
   InitialConditionIterator activeInitialConditionsEnd(THREAD_ID tid);
