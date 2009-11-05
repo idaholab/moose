@@ -1,7 +1,7 @@
 #ifndef ELK_H
 #define ELK_H
 
-namespace Moose
+namespace Elk
 {
   /**
    * Registers the Kernels, BCs, and Materials provided in Elk.
