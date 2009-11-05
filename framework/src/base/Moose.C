@@ -3,7 +3,6 @@
 #include "Diffusion.h"
 #include "Reaction.h"
 #include "CoupledForce.h"
-#include "CoefDiffusion.h"
 
 #include "BCFactory.h"
 #include "DirichletBC.h"
@@ -47,6 +46,10 @@
 #include "PBPBlock.h"
 #include "AdaptivityBlock.h"
 
+#include "ComputeInitialConditions.h"
+#include "InitialConditionFactory.h"
+#include "ConstantIC.h"
+
 #include "Moose.h"
 #include "PetscSupport.h"
 
@@ -81,7 +84,6 @@ Moose::registerObjects()
   KernelFactory::instance()->registerKernel<ImplicitEuler>("ImplicitEuler");
   KernelFactory::instance()->registerKernel<ImplicitBackwardDifference2>("ImplicitBackwardDifference2");
   KernelFactory::instance()->registerKernel<CoupledForce>("CoupledForce");
-  KernelFactory::instance()->registerKernel<CoefDiffusion>("CoefDiffusion");
   
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<SinDirichletBC>("SinDirichletBC");
@@ -122,6 +124,8 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
   ParserBlockFactory::instance()->registerParserBlock<PreconditioningBlock>("Preconditioning");
   ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");
+
+  InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
 }
 
 void
@@ -156,39 +160,6 @@ Moose::getActiveLocalElementRange()
   }
 
   return Moose::active_local_elem_range;  
-}
-
-/* Default implementations of initial values */
-Number
-Moose::initial_value (const Point& p,
-                      const Parameters& parameters,
-                      const std::string& sys_name,
-                      const std::string& var_name)
-{
-  if(parameters.have_parameter<Real>("initial_"+var_name)) 
-    return parameters.get<Real>("initial_"+var_name);
-
-  return 0;
-}
-
-Gradient
-Moose::initial_gradient (const Point& p,
-                        const Parameters& parameters,
-                        const std::string& sys_name,
-                        const std::string& var_name)
-{
-  if(parameters.have_parameter<Real>("initial_"+var_name))
-    return parameters.get<Real>("initial_"+var_name);
-  
-  return 0;
-}
-
-void
-Moose::initial_cond(EquationSystems& es, const std::string& system_name)
-{
-  ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
-  
-  system.project_solution(init_value, init_gradient, es.parameters);
 }
 
 void
@@ -339,7 +310,7 @@ Gradient (*Moose::init_gradient)(const Point& p,
                                  const Parameters& parameters,
                                  const std::string& sys_name,
                                  const std::string& var_name) = Moose::initial_gradient;
-void (*Moose::init_cond)(EquationSystems& es, const std::string& system_name) = Moose::initial_cond;
+void (*Moose::init_cond)(EquationSystems& es, const std::string& system_name) = Moose::initial_condition;
 
 // This variable will be static in the new Moose System object - only need one per application
 GetPot *Moose::command_line;

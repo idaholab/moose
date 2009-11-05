@@ -136,19 +136,7 @@ namespace Moose
    * Get access to the active_local_element_range
    * Automatically builds it if it hasn't been initialized.
    */
-  ConstElemRange * getActiveLocalElementRange();
-  
-  Number initial_value(const Point& p,
-                       const Parameters& parameters,
-                       const std::string& sys_name,
-                       const std::string& var_name);
-  
-  Gradient initial_gradient(const Point& p,
-                            const Parameters& parameters,
-                            const std::string& sys_name,
-                            const std::string& var_name);
-  
-  void initial_cond(EquationSystems& es, const std::string& system_name);
+  ConstElemRange * getActiveLocalElementRange();  
 
   void setSolverDefaults(EquationSystems * es,
                          TransientNonlinearImplicitSystem & system,
