@@ -56,7 +56,7 @@ Material::getConstantRealProperty(const std::string & name)
     return it->second;
 
   std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError();
+  mooseError("");
 }
 
 std::vector<Real> &
@@ -68,7 +68,7 @@ Material::getRealProperty(const std::string & name)
     return it->second;
 
   std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError();
+  mooseError("");
 }
 
 std::vector<RealGradient> &
@@ -80,7 +80,7 @@ Material::getGradientProperty(const std::string & name)
     return it->second;
 
   std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError();
+  mooseError("");
 }
 
 std::vector<RealVectorValue> &
@@ -92,7 +92,7 @@ Material::getRealVectorValueProperty(const std::string & name)
     return it->second;
   
   std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError();
+  mooseError("");
 }
 
 std::vector<std::vector<Real> > &
@@ -104,7 +104,7 @@ Material::getVectorProperty(const std::string & name)
     return it->second;
 
   std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError();
+  mooseError("");
 }
 
 std::vector<RealTensorValue> &
@@ -116,7 +116,7 @@ Material::getTensorProperty(const std::string & name)
     return it->second;
 
   std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError();
+  mooseError("");
 }
 
 std::vector<std::vector<std::vector<Real> > > &
@@ -128,7 +128,7 @@ Material::getMatrixProperty(const std::string & name)
     return it->second;
 
   std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError();
+  mooseError("");
 }
 
 /**

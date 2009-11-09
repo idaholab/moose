@@ -28,7 +28,7 @@ PolynomialFit::PolynomialFit(std::vector<double> x, std::vector<double> y, unsig
   else if (!_truncate_order) 
   {
     std::cerr << "Polynomial Fit requires an order less than the size of the input vector\n";
-    mooseError();
+    mooseError("");
   }
 }
 
@@ -76,7 +76,7 @@ PolynomialFit::doLeastSquares()
 
   dgels_(&mode, &num_rows, &num_coeff, &num_rhs, &_matrix[0], &num_rows, &rhs[0], &num_rows, &opt_buffer_size, &buffer_size, &return_value);
   if (return_value)
-    mooseError();
+    mooseError("");
   
   buffer_size = (int) opt_buffer_size;
   
@@ -85,7 +85,7 @@ PolynomialFit::doLeastSquares()
   delete [] buffer;
 
   if (return_value)
-    mooseError();
+    mooseError("");
   
   _coeffs.resize(num_coeff);
   for (unsigned int i=0; i<num_coeff; ++i)

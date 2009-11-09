@@ -145,7 +145,7 @@ AuxKernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem &
   else
   {
     std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError();
+    mooseError("");
   }
   
   //Compute the average value of each variable on the element
@@ -242,7 +242,7 @@ AuxKernel::coupledValAux(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
 
   if(_nodal)
@@ -268,7 +268,7 @@ AuxKernel::coupledValOldAux(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
 
   if(_nodal)
@@ -294,7 +294,7 @@ AuxKernel::coupledValOlderAux(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
 
   if(_nodal)
@@ -320,13 +320,13 @@ AuxKernel::coupledGradAux(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
 
   if(_nodal)
   {
     std::cerr<<std::endl<<"Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
   else
   {
@@ -343,13 +343,13 @@ AuxKernel::coupledGradOldAux(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
 
   if(_nodal)
   {
     std::cerr<<std::endl<<"Old Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
   else
   {
@@ -366,13 +366,13 @@ AuxKernel::coupledGradOlderAux(std::string name)
   if(!isCoupled(name))
   {
     std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
 
   if(_nodal)
   {
     std::cerr<<std::endl<<"Older Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
   else
   {
@@ -402,7 +402,7 @@ AuxKernel::integrateValue(const std::vector<Real> & vals, const std::vector<Real
   else
   {
     std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError();
+    mooseError("");
   }
   
   return value;
@@ -426,7 +426,7 @@ AuxKernel::integrateGradient(const std::vector<RealGradient> & grads, const std:
   else
   {
     std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError();
+    mooseError("");
   }
   
   

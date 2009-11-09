@@ -114,13 +114,13 @@ PhysicsBasedPreconditioner::init ()
   if(!_equation_systems)
   {
     std::cerr<<"EquationSystems must be set on PhysicsBasedPreconditioner before use!"<<std::endl;
-    mooseError();
+    mooseError("");
   }
 
   if(!_compute_jacobian_block)
   {
     std::cerr<<"ComputeJacobianBlock must be set on PhysicsBasedPreconditioner before use!"<<std::endl;
-    mooseError();
+    mooseError("");
   }
 
   TransientNonlinearImplicitSystem & system = _equation_systems->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");

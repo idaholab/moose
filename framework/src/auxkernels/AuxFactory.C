@@ -65,7 +65,7 @@ Parameters
     {
 
       std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Aux "<<std::endl<<std::endl;
-      mooseError();
+      mooseError("");
 
     }
     return name_to_params_pointer[name]();

@@ -1,4 +1,5 @@
 #include "ParserBlockFactory.h"
+#include "Parser.h"
 
 ParserBlockFactory *
 ParserBlockFactory::instance()
@@ -27,7 +28,7 @@ ParserBlockFactory::getValidParams(const std::string & name)
   if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
   {
     std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered ParserBlock "<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
   return name_to_params_pointer[name]();
 }
@@ -76,12 +77,31 @@ ParserBlockFactory::isRegistered(const std::string & real_id)
    * specific match before a wildcard match ('*' == char(42))
    */
   std::map<std::string, parserBlockParamsPtr>::reverse_iterator i;
+  std::vector<std::string> real_elements, reg_elements;
 
+  Parser::tokenize(real_id, real_elements);
+  
   for (i=name_to_params_pointer.rbegin(); i!=name_to_params_pointer.rend(); ++i) 
   {
-    if (i->first == real_id) 
-      return i->first;
-
+    std::string reg_id = i->first;
+    if (reg_id == real_id) 
+      return reg_id;
+    
+    reg_elements.clear();
+    Parser::tokenize(reg_id, reg_elements);
+    if (real_elements.size() == reg_elements.size())
+    {
+      bool keep_going = true;
+      for (unsigned int j=0; keep_going && j<real_elements.size(); ++j)
+      {
+        if (real_elements[j] != reg_elements[j] && reg_elements[j] != std::string("*"))
+          keep_going = false;
+      }
+      if (keep_going)
+        return reg_id;
+    }
+    
+    /* 
     else if (i->first[i->first.length()-1] == '*') 
     {
       size_t pos = real_id.rfind('/');
@@ -89,7 +109,8 @@ ParserBlockFactory::isRegistered(const std::string & real_id)
       // the wildcard behavior (pos+1).
       if (pos != std::string::npos && i->first.substr(0, i->first.rfind('/')+1) == real_id.substr(0, pos+1)) 
         return i->first;
-    }
+     }
+     */
   }
   
   return std::string("");

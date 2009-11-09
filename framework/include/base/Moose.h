@@ -18,9 +18,6 @@
 #include "nonlinear_implicit_system.h"
 #include "transient_system.h"
 
-#include <cstdio>
-
-
 //Forward Declarations
 class Mesh;
 class EquationSystems;
@@ -106,12 +103,8 @@ void Parameters::Parameter<std::map<std::string, unsigned int> >::print (std::os
 /**
  * A function to call when you need the whole program to die a spit out a message
  */
-#define mooseError(...)                                                 \
-  do {                                                                  \
-    std::fprintf(stderr, "\n\n");                                       \
-    std::fprintf(stderr, ##  __VA_ARGS__, "");                          \
-    std::fprintf(stderr, "\n\n"); libmesh_error();                      \
-  } while(0)
+#define mooseError(msg)                                                 \
+  do { std::cerr << "\n\n" << msg << "\n\n"; libmesh_error(); } while(0)
 
 namespace Moose
 {

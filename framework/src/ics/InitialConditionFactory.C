@@ -30,7 +30,7 @@ InitialConditionFactory::getValidParams(std::string name)
   if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
   {
     std::cerr<<std::endl<<"A _"<<name<<"_ is not registered InitialCondition "<<std::endl<<std::endl;
-    mooseError();
+    mooseError("");
   }
   return name_to_params_pointer[name]();
 }

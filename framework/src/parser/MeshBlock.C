@@ -41,7 +41,7 @@ MeshBlock::execute()
     if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
       gen_block->execute();
     else
-      mooseError();
+      mooseError("");
   }
   
   if (checkVariableProperties(&GenericVariableBlock::restartRequired)) 

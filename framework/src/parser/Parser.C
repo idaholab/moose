@@ -250,7 +250,7 @@ Parser::fixupOptionalBlocks()
       // which means it better exist and it better not be the root
       block_ptr = _input_tree->locateBlock(i->second);
       if (block_ptr == NULL || block_ptr->_parent == NULL)
-	mooseError();
+	mooseError("");
 
       ParserBlock::PBChildIterator position =
 	find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
@@ -290,7 +290,7 @@ Parser::fixupOptionalBlocks()
       // which means it better exist and it better not be the root
       block_ptr = _input_tree->locateBlock(i->second);
       if (block_ptr == NULL || block_ptr->_parent == NULL)
-        mooseError();
+        mooseError("");
 
       ParserBlock::PBChildIterator position =
         find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
