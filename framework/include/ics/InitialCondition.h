@@ -26,7 +26,7 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   InitialCondition(std::string name,
-                   Parameters parameters,
+                   InputParameters parameters,
                    std::string var_name);
 
   /**
@@ -46,7 +46,7 @@ public:
 
 private:
   std::string _name;
-  Parameters _parameters;
+  InputParameters _parameters;
   std::string _var_name;
 };
 

@@ -10,7 +10,7 @@
 #include <typeinfo>
 
 // LibMesh includes
-#include <parameters.h>
+#include "InputParameters.h"
 
 
 /**
@@ -20,7 +20,7 @@ typedef ParserBlock * (*parserBlockBuildPtr)(const std::string & reg_id, const s
 /**
  * Typedef to make things easier.
  */
-typedef Parameters (*parserBlockParamsPtr)();
+typedef InputParameters (*parserBlockParamsPtr)();
 
 /**
  * Typedef to hide implementation details
@@ -58,7 +58,7 @@ public:
 
   ParserBlock * add(const std::string & red_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
 
-  Parameters getValidParams(const std::string & name);
+  InputParameters getValidParams(const std::string & name);
   
   ParserBlockIterator activeParserBlocksBegin();
   ParserBlockIterator activeParserBlocksEnd();

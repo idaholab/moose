@@ -4,7 +4,7 @@
 
 #include "Parser.h"
 #include "getpot.h"
-#include "parameters.h"
+#include "InputParameters.h"
 #include "ParserBlockFactory.h"
 #include "KernelFactory.h"
 #include "BCFactory.h"
@@ -177,9 +177,9 @@ Parser::buildFullTree()
 }
 
 void
-Parser::extractParams(const std::string & prefix, Parameters &p)
+Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
-  for (Parameters::iterator iter = p.begin(); iter != p.end(); ++iter)
+  for (InputParameters::iterator iter = p.begin(); iter != p.end(); ++iter)
   {
     setParameters(prefix + "/" + iter->first, iter);
   }
@@ -327,20 +327,20 @@ Parser::checkInputFile()
 
 // function to set parameters with arbitrary type
 bool
-Parser::setParameters(std::string name, Parameters::iterator &it)
+Parser::setParameters(std::string name, InputParameters::iterator &it)
 {
-  Parameters::Parameter<Real> * real_param = dynamic_cast<Parameters::Parameter<Real>*>(it->second);
-  Parameters::Parameter<int>  * int_param  = dynamic_cast<Parameters::Parameter<int>*>(it->second);
-  Parameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<Parameters::Parameter<unsigned int>*>(it->second);
-  Parameters::Parameter<bool> * bool_param = dynamic_cast<Parameters::Parameter<bool>*>(it->second);
-  Parameters::Parameter<std::string> * string_param = dynamic_cast<Parameters::Parameter<std::string>*>(it->second);
-  Parameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<Parameters::Parameter<std::vector<Real> >*>(it->second);
-  Parameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<Parameters::Parameter<std::vector<int> >*>(it->second);
-  Parameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<Parameters::Parameter<std::vector<bool> >*>(it->second);
-  Parameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<Parameters::Parameter<std::vector<std::string> >*>(it->second);
-  Parameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<Parameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
-  Parameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<Parameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
-  Parameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<Parameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
+  InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
+  InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
+  InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
+  InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
+  InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
+  InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
+  InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
+  InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
+  InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
+  InputParameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
+  InputParameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
+  InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
   
   bool default_flag = false;
   

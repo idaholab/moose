@@ -1,14 +1,14 @@
 #include "ImplicitBackwardDifference2.h"
 
 template<>
-Parameters valid_params<ImplicitBackwardDifference2>()
+InputParameters valid_params<ImplicitBackwardDifference2>()
 {
-  Parameters params;
+  InputParameters params;
   return params;
 }
 
 ImplicitBackwardDifference2::ImplicitBackwardDifference2(std::string name,
-                              Parameters parameters,
+                              InputParameters parameters,
                               std::string var_name,
                               std::vector<std::string> coupled_to,
                               std::vector<std::string> coupled_as)

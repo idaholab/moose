@@ -8,7 +8,7 @@
 class MatchedValueBC;
 
 template<>
-Parameters valid_params<MatchedValueBC>();
+InputParameters valid_params<MatchedValueBC>();
 
 /**
  * Implements a simple coupled boundary condition where u=v on the boundary.
@@ -16,7 +16,7 @@ Parameters valid_params<MatchedValueBC>();
 class MatchedValueBC : public BoundaryCondition
 {
 public:
-  MatchedValueBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+  MatchedValueBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
     
   virtual ~MatchedValueBC() {}
 

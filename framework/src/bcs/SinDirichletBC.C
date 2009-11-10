@@ -1,9 +1,9 @@
 #include "SinDirichletBC.h"
  
 template<>
-Parameters valid_params<SinDirichletBC>()
+InputParameters valid_params<SinDirichletBC>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("initial")=0.0;
   params.set<Real>("final")=0.0;
   params.set<Real>("duration")=0.0;
@@ -11,7 +11,7 @@ Parameters valid_params<SinDirichletBC>()
 }
 
 SinDirichletBC::SinDirichletBC(std::string name,
-		  Parameters parameters, 
+		  InputParameters parameters, 
 		  std::string var_name, unsigned int boundary_id, 
 		  std::vector<std::string> coupled_to, 
 		  std::vector<std::string> coupled_as)

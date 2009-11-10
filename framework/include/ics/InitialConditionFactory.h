@@ -16,12 +16,12 @@
 /**
  * Typedef to make things easier.
  */
-typedef InitialCondition * (*InitialConditionBuildPtr)(std::string name, Parameters parameters, std::string names);
+typedef InitialCondition * (*InitialConditionBuildPtr)(std::string name, InputParameters parameters, std::string names);
 
 /**
  * Typedef to make things easier.
  */
-typedef Parameters (*InitialConditionParamsPtr)();
+typedef InputParameters (*InitialConditionParamsPtr)();
 
 /**
  * Typedef to hide implementation details
@@ -38,7 +38,7 @@ typedef std::vector<std::string>::iterator InitialConditionNamesIterator;
  */
 template<typename InitialConditionType>
 InitialCondition * buildInitialCondition(std::string name,
-                                         Parameters parameters,
+                                         InputParameters parameters,
                                          std::string var_name)
 {
   return new InitialConditionType(name, parameters, var_name);
@@ -59,9 +59,9 @@ public:
     name_to_params_pointer[name]=&valid_params<InitialConditionType>;
   }
 
-  void add(std::string ic_name, std::string name, Parameters parameters, std::string var_name);
+  void add(std::string ic_name, std::string name, InputParameters parameters, std::string var_name);
   
-  Parameters getValidParams(std::string name);
+  InputParameters getValidParams(std::string name);
   
   InitialCondition * getInitialCondition(THREAD_ID tid, std::string var_name);
   

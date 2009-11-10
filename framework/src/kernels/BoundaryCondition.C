@@ -6,7 +6,7 @@
 #include "dof_map.h"
 
 BoundaryCondition::BoundaryCondition(std::string name,
-                                     Parameters parameters,
+                                     InputParameters parameters,
                                      std::string var_name,
                                      bool integrated,
                                      unsigned int boundary_id,

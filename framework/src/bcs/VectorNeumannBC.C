@@ -1,16 +1,16 @@
 #include "VectorNeumannBC.h"
 
 template<>
-Parameters valid_params<VectorNeumannBC>()
+InputParameters valid_params<VectorNeumannBC>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("value0")=0.0;
   params.set<Real>("value1")=0.0;
   params.set<Real>("value2")=0.0;
   return params;
 }
 
-VectorNeumannBC::VectorNeumannBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+VectorNeumannBC::VectorNeumannBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
     :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as)
   {
     _value(0)=_parameters.get<Real>("value0");

@@ -8,14 +8,14 @@
 class BodyForce;
 
 template<>
-Parameters valid_params<BodyForce>();
+InputParameters valid_params<BodyForce>();
 
 class BodyForce : public Kernel
 {
 public:
 
   BodyForce(std::string name,
-            Parameters parameters,
+            InputParameters parameters,
             std::string var_name,
             std::vector<std::string> coupled_to=std::vector<std::string>(0),
             std::vector<std::string> coupled_as=std::vector<std::string>(0));

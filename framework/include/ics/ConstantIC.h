@@ -15,7 +15,7 @@
 class ConstantIC;
 
 template<class ConstantIC>
-Parameters valid_params();
+InputParameters valid_params();
 
 /**
  * ConstantIC just returns a constant value.
@@ -32,7 +32,7 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   ConstantIC(std::string name,
-             Parameters parameters,
+             InputParameters parameters,
              std::string var_name);
 
   /**

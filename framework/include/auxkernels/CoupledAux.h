@@ -8,7 +8,7 @@
 class CoupledAux;
 
 template<>
-Parameters valid_params<CoupledAux>();
+InputParameters valid_params<CoupledAux>();
 
 /** 
  * Coupled auxiliary value
@@ -22,7 +22,7 @@ public:
    * constructor.
    */
   CoupledAux(std::string name,
-            Parameters parameters,
+            InputParameters parameters,
             std::string var_name,
             std::vector<std::string> coupled_to,
             std::vector<std::string> coupled_as);

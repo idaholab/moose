@@ -2,14 +2,14 @@
  
 
 template<>
-Parameters valid_params<SecondDerivativeImplicitEuler>()
+InputParameters valid_params<SecondDerivativeImplicitEuler>()
 {
-  Parameters params;
+  InputParameters params;
   return params;
 }
 
 SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(std::string name,
-                                Parameters parameters,
+                                InputParameters parameters,
                                 std::string var_name,
                                 std::vector<std::string> coupled_to,
                                 std::vector<std::string> coupled_as)

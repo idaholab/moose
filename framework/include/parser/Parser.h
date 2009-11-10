@@ -113,13 +113,13 @@ private:
    * the passed parameters objects.  It handles a number of various types with dynamic casting
    * including vector types
    */
-  void extractParams(const std::string & prefix, Parameters &p);
+  void extractParams(const std::string & prefix, InputParameters &p);
 
   /**
    * This function is the helper function for extractParams and does the actual extraction
    * from the input file
    */
-  bool setParameters(std::string name, Parameters::iterator &it);
+  bool setParameters(std::string name, InputParameters::iterator &it);
 
 
   /************************************

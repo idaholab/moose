@@ -7,14 +7,14 @@
 class ImplicitEuler;
 
 template<>
-Parameters valid_params<ImplicitEuler>();
+InputParameters valid_params<ImplicitEuler>();
 
 class ImplicitEuler : public Kernel
 {
 public:
 
   ImplicitEuler(std::string name,
-                Parameters parameters,
+                InputParameters parameters,
                 std::string var_name,
                 std::vector<std::string> coupled_to=std::vector<std::string>(0),
                 std::vector<std::string> coupled_as=std::vector<std::string>(0));

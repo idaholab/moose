@@ -97,17 +97,17 @@ public:
       return _block_params.get<T>(name);
     }
   
-  inline void setClassParams(Parameters p)
+  inline void setClassParams(InputParameters p)
     {
       _class_params = p;
     }
 
-  inline Parameters & getClassParams()
+  inline InputParameters & getClassParams()
     {
       return _class_params;
     }
 
-  inline Parameters & getBlockParams()
+  inline InputParameters & getBlockParams()
     {
       return _block_params;
     }
@@ -175,12 +175,12 @@ private:
    * necessarily be passed directly to the Factory constructor for this object type.  These should
    * be set in the constructor for each derived class and are an augmentation to the _class_params.
    */
-  Parameters _block_params;
+  InputParameters _block_params;
 
   /** The _class_params are those parameters which will be passed directly to the Factory constructor
    * objects directly.
    */
-  Parameters _class_params;
+  InputParameters _class_params;
   
   std::map<std::string, std::string> _doc_string;
   std::set<std::string> _required_params;

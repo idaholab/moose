@@ -11,7 +11,7 @@
 #include "fe_base.h"
 #include "quadrature_gauss.h"
 #include "transient_system.h"
-#include "parameters.h"
+#include "InputParameters.h"
 #include "dense_subvector.h"
 #include "dense_submatrix.h"
 #include "tensor_value.h"
@@ -22,9 +22,9 @@ class Material;
 
 
 template<class KernelType>
-Parameters valid_params()
+InputParameters valid_params()
 {
-  Parameters params;
+  InputParameters params;
   return params;
 }
 
@@ -49,7 +49,7 @@ public:
    * @param coupled_as The names of the variables the Kernel is going to ask for.
    */
   Kernel(std::string name,
-         Parameters parameters,
+         InputParameters parameters,
          std::string var_name,
          bool integrated,
          std::vector<std::string> coupled_to = std::vector<std::string>(0),
@@ -162,7 +162,7 @@ protected:
   /**
    * Holds parameters for derived classes so they can be built with common constructor.
    */
-  Parameters _parameters;
+  InputParameters _parameters;
 
   /** 
    * This is the virtual that derived classes should override for computing the residual.

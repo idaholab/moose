@@ -13,7 +13,7 @@ MaterialFactory::instance()
 void
   MaterialFactory::add(std::string mat_name,
            std::string name,
-           Parameters parameters,
+           InputParameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to,
            std::vector<std::string> coupled_as)
@@ -26,7 +26,7 @@ void
     }
   }
 
-Parameters
+InputParameters
 MaterialFactory::getValidParams(std::string name)
   {
     if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )

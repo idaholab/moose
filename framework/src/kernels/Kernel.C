@@ -11,7 +11,7 @@
 #include "libmesh_common.h"
 
 Kernel::Kernel(std::string name,
-               Parameters parameters,
+               InputParameters parameters,
                std::string var_name,
                bool integrated,
                std::vector<std::string> coupled_to,

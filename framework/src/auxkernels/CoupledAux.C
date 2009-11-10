@@ -1,15 +1,15 @@
 #include "CoupledAux.h"
 
 template<>
-Parameters valid_params<CoupledAux>()
+InputParameters valid_params<CoupledAux>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("value")=0.0;
   return params;
 }
 
 CoupledAux::CoupledAux(std::string name,
-                         Parameters parameters,
+                         InputParameters parameters,
                          std::string var_name,
                          std::vector<std::string> coupled_to,
                          std::vector<std::string> coupled_as)

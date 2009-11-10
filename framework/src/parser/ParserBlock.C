@@ -8,7 +8,7 @@
 #include "Parser.h"
 
 //libMesh includes
-#include "parameters.h"
+#include "InputParameters.h"
 #include "getpot.h"
 
 ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
@@ -199,7 +199,7 @@ ParserBlock::printBlockData()
             << spacing << "  params=\n"
             << spacing << "  {\n";
 
-  for (Parameters::iterator iter = _block_params.begin(); iter != _block_params.end(); ++iter) 
+  for (InputParameters::iterator iter = _block_params.begin(); iter != _block_params.end(); ++iter) 
   {
     // Block params may be required and will have a doc string
     std::string required = _required_params.find(iter->first) != _required_params.end() ? "*" : " ";
@@ -209,7 +209,7 @@ ParserBlock::printBlockData()
     std::cout << ")\n" << spacing << "    " << std::setw(30) << " " << "    " << _doc_string[iter->first] << "\n";
   }
   
-  for (Parameters::iterator iter = _class_params.begin(); iter != _class_params.end(); ++iter)
+  for (InputParameters::iterator iter = _class_params.begin(); iter != _class_params.end(); ++iter)
   {
     std::cout << spacing << "     " << std::setw(30) << iter->first << ": default (";
     iter->second->print(std::cout);

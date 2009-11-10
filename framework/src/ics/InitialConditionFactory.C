@@ -13,7 +13,7 @@ InitialConditionFactory::instance()
 void
 InitialConditionFactory::add(std::string ic_name,
                              std::string name,
-                             Parameters parameters,
+                             InputParameters parameters,
                              std::string var_name)
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -24,7 +24,7 @@ InitialConditionFactory::add(std::string ic_name,
   }
 }
 
-Parameters
+InputParameters
 InitialConditionFactory::getValidParams(std::string name)
 {
   if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )

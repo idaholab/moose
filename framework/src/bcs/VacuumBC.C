@@ -1,14 +1,14 @@
 #include "VacuumBC.h"
 
 template<>
-Parameters valid_params<VacuumBC>()
+InputParameters valid_params<VacuumBC>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("alpha")=1;
   return params;
 }
 
-VacuumBC::VacuumBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+VacuumBC::VacuumBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
     :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as),
     _alpha(_parameters.get<Real>("alpha"))
   {}

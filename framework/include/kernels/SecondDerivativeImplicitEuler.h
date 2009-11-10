@@ -8,14 +8,14 @@
 class SecondDerivativeImplicitEuler;
 
 template<>
-Parameters valid_params<SecondDerivativeImplicitEuler>();
+InputParameters valid_params<SecondDerivativeImplicitEuler>();
 
 class SecondDerivativeImplicitEuler : public Kernel
 {
 public:
 
   SecondDerivativeImplicitEuler(std::string name,
-                                Parameters parameters,
+                                InputParameters parameters,
                                 std::string var_name,
                                 std::vector<std::string> coupled_to=std::vector<std::string>(0),
                                 std::vector<std::string> coupled_as=std::vector<std::string>(0));

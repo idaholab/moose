@@ -1,15 +1,15 @@
 #include "ConstantAux.h"
 
 template<>
-Parameters valid_params<ConstantAux>()
+InputParameters valid_params<ConstantAux>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("value")=0.0;
   return params;
 }
 
 ConstantAux::ConstantAux(std::string name,
-                         Parameters parameters,
+                         InputParameters parameters,
                          std::string var_name,
                          std::vector<std::string> coupled_to,
                          std::vector<std::string> coupled_as)

@@ -20,7 +20,7 @@ public:
    * constructor.
    */
   Material(std::string name,
-           Parameters parameters,
+           InputParameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to,
            std::vector<std::string> coupled_as);

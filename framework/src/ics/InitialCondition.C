@@ -1,7 +1,7 @@
 #include "InitialCondition.h"
 
 InitialCondition::InitialCondition(std::string name,
-                                   Parameters parameters,
+                                   InputParameters parameters,
                                    std::string var_name)
   :_name(name),
    _parameters(parameters),

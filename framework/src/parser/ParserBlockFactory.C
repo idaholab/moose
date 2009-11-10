@@ -22,7 +22,7 @@ ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id,
   return parser_block;
 }
 
-Parameters
+InputParameters
 ParserBlockFactory::getValidParams(const std::string & name)
 {
   if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )

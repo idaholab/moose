@@ -12,7 +12,7 @@ BCFactory::instance()
  void
  BCFactory::add(std::string bc_name,
            std::string name,
-           Parameters parameters,
+           InputParameters parameters,
            std::string var_name,
            unsigned int boundary_id,
            std::vector<std::string> coupled_to,
@@ -31,7 +31,7 @@ BCFactory::instance()
     }
   }
 
-Parameters
+InputParameters
 BCFactory::getValidParams(std::string name)
   {
     if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )

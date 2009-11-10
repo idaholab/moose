@@ -13,7 +13,7 @@ AuxFactory::instance()
 AuxKernel *
 AuxFactory::add(std::string Aux_name,
                   std::string name,
-                  Parameters parameters,
+                  InputParameters parameters,
                   std::string var_name,
                   std::vector<std::string> coupled_to,
                   std::vector<std::string> coupled_as)
@@ -38,7 +38,7 @@ AuxFactory::add(std::string Aux_name,
 AuxKernel *
 AuxFactory::addBC(std::string Aux_name,
                     std::string name,
-                    Parameters parameters,
+                    InputParameters parameters,
                     std::string var_name,
                     unsigned int boundary_id,
                     std::vector<std::string> coupled_to,
@@ -58,7 +58,7 @@ AuxFactory::addBC(std::string Aux_name,
     return aux;
   }
 
-Parameters
+InputParameters
  AuxFactory::getValidParams(std::string name)
   {
     if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )

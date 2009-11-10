@@ -9,14 +9,14 @@
 class SinDirichletBC;
 
 template<>
-Parameters valid_params<SinDirichletBC>();
+InputParameters valid_params<SinDirichletBC>();
 
 class SinDirichletBC : public BoundaryCondition
 {
 public:
 
   SinDirichletBC(std::string name,
-		  Parameters parameters, 
+		  InputParameters parameters, 
 		  std::string var_name, unsigned int boundary_id, 
 		  std::vector<std::string> coupled_to, 
 		  std::vector<std::string> coupled_as);

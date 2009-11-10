@@ -15,12 +15,12 @@
 /**
  * Typedef to make things easier.
  */
-typedef BoundaryCondition * (*BCBuildPtr)(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+typedef BoundaryCondition * (*BCBuildPtr)(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
 /**
  * Typedef to make things easier.
  */
-typedef Parameters (*BCParamsPtr)();
+typedef InputParameters (*BCParamsPtr)();
 
 /**
  * Typedef to hide implementation details
@@ -36,7 +36,7 @@ typedef std::vector<std::string>::iterator BCNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename BCType>
-BoundaryCondition * buildBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+BoundaryCondition * buildBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
 {
   return new BCType(name, parameters, var_name, boundary_id, coupled_to, coupled_as);
 }
@@ -58,13 +58,13 @@ public:
 
   void add(std::string bc_name,
            std::string name,
-           Parameters parameters,
+           InputParameters parameters,
            std::string var_name,
            unsigned int boundary_id,
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
            std::vector<std::string> coupled_as=std::vector<std::string>(0));
   
-  Parameters getValidParams(std::string name);
+  InputParameters getValidParams(std::string name);
   
   BCIterator activeBCsBegin(THREAD_ID tid, unsigned int boundary_id);
   BCIterator activeBCsEnd(THREAD_ID tid, unsigned int boundary_id);

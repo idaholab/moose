@@ -15,12 +15,12 @@
 /**
  * Typedef to make things easier.
  */
-typedef Material * (*MaterialBuildPtr)(std::string name, Parameters parameters, unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+typedef Material * (*MaterialBuildPtr)(std::string name, InputParameters parameters, unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
 /**
  * Typedef to make things easier.
  */
-typedef Parameters (*MaterialParamsPtr)();
+typedef InputParameters (*MaterialParamsPtr)();
 
 /**
  * Typedef to hide implementation details
@@ -37,7 +37,7 @@ typedef std::vector<std::string>::iterator MaterialNamesIterator;
  */
 template<typename MaterialType>
 Material * buildMaterial(std::string name,
-                         Parameters parameters,
+                         InputParameters parameters,
                          unsigned int block_id,
                          std::vector<std::string> coupled_to,
                          std::vector<std::string> coupled_as)
@@ -62,12 +62,12 @@ public:
 
   void add(std::string mat_name,
            std::string name,
-           Parameters parameters,
+           InputParameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to=std::vector<std::string>(0),
            std::vector<std::string> coupled_as=std::vector<std::string>(0));
   
-  Parameters getValidParams(std::string name);
+  InputParameters getValidParams(std::string name);
   
   Material * getMaterial(THREAD_ID tid, unsigned int block_id);
   

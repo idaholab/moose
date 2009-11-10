@@ -1,15 +1,15 @@
 #include "ConstantIC.h"
 
 template<class ConstantIC>
-Parameters valid_params()
+InputParameters valid_params()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("value") = 0.0;
   return params;
 }
 
 ConstantIC::ConstantIC(std::string name,
-                       Parameters parameters,
+                       InputParameters parameters,
                        std::string var_name)
   :InitialCondition(name,parameters,var_name),
    _value(parameters.get<Real>("value"))

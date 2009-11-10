@@ -1,9 +1,9 @@
 #include "ConvectiveFluxBC.h"
 
 template<>
-Parameters valid_params<ConvectiveFluxBC>()
+InputParameters valid_params<ConvectiveFluxBC>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("rate")=7500;
   params.set<Real>("initial")=500;
   params.set<Real>("final")=500;
@@ -11,7 +11,7 @@ Parameters valid_params<ConvectiveFluxBC>()
   return params;
 }
 
-ConvectiveFluxBC::ConvectiveFluxBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+ConvectiveFluxBC::ConvectiveFluxBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
     :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as),
      _initial(_parameters.get<Real>("initial")),
      _final(_parameters.get<Real>("final")),

@@ -2,15 +2,15 @@
 #include "ImplicitEuler.h"
 
 template<>
-Parameters valid_params<ImplicitEuler>()
+InputParameters valid_params<ImplicitEuler>()
 {
-  Parameters params;
+  InputParameters params;
   return params;
 }
 
 
 ImplicitEuler::ImplicitEuler(std::string name,
-                Parameters parameters,
+                InputParameters parameters,
                 std::string var_name,
                 std::vector<std::string> coupled_to,
                 std::vector<std::string> coupled_as)

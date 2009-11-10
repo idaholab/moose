@@ -7,7 +7,7 @@
 
 //libMesh includes
 #include "perf_log.h"
-#include "parameters.h"
+#include "InputParameters.h"
 #include "getpot.h"
 #include "elem_range.h"
 #include "vector_value.h"
@@ -40,7 +40,7 @@ typedef unsigned int THREAD_ID;
  */
 template<>
 inline
-void Parameters::Parameter<std::vector<Real> >::print (std::ostream& os) const
+void InputParameters::Parameter<std::vector<Real> >::print (std::ostream& os) const
 {
   for (unsigned int i=0; i<_value.size(); i++)
     os << _value[i] << " ";
@@ -48,7 +48,7 @@ void Parameters::Parameter<std::vector<Real> >::print (std::ostream& os) const
 
 template<>
 inline
-void Parameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostream& os) const
+void InputParameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostream& os) const
 {
   for (unsigned int i=0; i<_value[i].size(); i++)
     for (unsigned int j=0; i<_value[j].size(); j++)
@@ -57,7 +57,7 @@ void Parameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostrea
 
 template<>
 inline
-void Parameters::Parameter<std::vector<int> >::print (std::ostream& os) const
+void InputParameters::Parameter<std::vector<int> >::print (std::ostream& os) const
 {
   for (unsigned int i=0; i<_value.size(); i++)
     os << _value[i] << " ";
@@ -65,7 +65,7 @@ void Parameters::Parameter<std::vector<int> >::print (std::ostream& os) const
 
 template<>
 inline
-void Parameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream& os) const
+void InputParameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream& os) const
 {
   for (unsigned int i=0; i<_value[i].size(); i++)
     for (unsigned int j=0; i<_value[j].size(); j++)
@@ -74,7 +74,7 @@ void Parameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream
  
 template<>
 inline
-void Parameters::Parameter<std::vector<std::string> >::print (std::ostream& os) const
+void InputParameters::Parameter<std::vector<std::string> >::print (std::ostream& os) const
 {
   for (unsigned int i=0; i<_value.size(); i++)
     os << _value[i] << " ";
@@ -82,13 +82,13 @@ void Parameters::Parameter<std::vector<std::string> >::print (std::ostream& os) 
 
 template<>
 inline
-void Parameters::Parameter<GetPot>::print (std::ostream& os) const
+void InputParameters::Parameter<GetPot>::print (std::ostream& os) const
 {
 }
 
 template<>
 inline
-void Parameters::Parameter<std::vector<float> >::print (std::ostream& os) const
+void InputParameters::Parameter<std::vector<float> >::print (std::ostream& os) const
 {
   for (unsigned int i=0; i<_value.size(); i++)
     os << _value[i] << " ";
@@ -96,7 +96,7 @@ void Parameters::Parameter<std::vector<float> >::print (std::ostream& os) const
 
 template<>
 inline
-void Parameters::Parameter<std::map<std::string, unsigned int> >::print (std::ostream& os) const
+void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (std::ostream& os) const
 {
 }
 

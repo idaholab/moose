@@ -17,14 +17,14 @@
  * Typedef to make things easier.
  */
 typedef Kernel * (*kernelBuildPtr)(std::string name,
-                                   Parameters parameters,
+                                   InputParameters parameters,
                                    std::string var_name,
                                    std::vector<std::string> coupled_to,
                                    std::vector<std::string> coupled_as);
 /**
  * Typedef to make things easier.
  */
-typedef Parameters (*kernelParamsPtr)();
+typedef InputParameters (*kernelParamsPtr)();
 
 /**
  * Typedef to hide implementation details
@@ -41,7 +41,7 @@ typedef std::vector<std::string>::iterator KernelNamesIterator;
  */
 template<typename KernelType>
 Kernel * buildKernel(std::string name,
-                     Parameters parameters,
+                     InputParameters parameters,
                      std::string var_name,
                      std::vector<std::string> coupled_to,
                      std::vector<std::string> coupled_as)
@@ -66,7 +66,7 @@ public:
 
   Kernel * add(std::string kernel_name,
                std::string name,
-               Parameters parameters,
+               InputParameters parameters,
                std::string var_name,
                std::vector<std::string> coupled_to=std::vector<std::string>(0),
                std::vector<std::string> coupled_as=std::vector<std::string>(0));
@@ -74,13 +74,13 @@ public:
 
   Kernel * add(std::string kernel_name,
                std::string name,
-               Parameters parameters,
+               InputParameters parameters,
                std::string var_name,
                std::vector<std::string> coupled_to,
                std::vector<std::string> coupled_as,
                unsigned int block_id);
   
-  Parameters getValidParams(std::string name);
+  InputParameters getValidParams(std::string name);
   
   KernelIterator activeKernelsBegin(THREAD_ID tid);
   KernelIterator activeKernelsEnd(THREAD_ID tid);

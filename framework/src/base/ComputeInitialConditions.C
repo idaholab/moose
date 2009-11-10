@@ -2,7 +2,7 @@
 // libMesh includes
 #include "libmesh.h"
 #include "point.h"
-#include "parameters.h"
+#include "InputParameters.h"
 #include "vector_value.h"
 #include "equation_systems.h"
 #include "explicit_system.h"

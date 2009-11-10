@@ -1,14 +1,14 @@
 #include "EmptyMaterial.h"
 
 template<>
-Parameters valid_params<EmptyMaterial>()
+InputParameters valid_params<EmptyMaterial>()
 {
-  Parameters params;
+  InputParameters params;
   return params;
 }
 
 EmptyMaterial::EmptyMaterial(std::string name,
-           Parameters parameters,
+           InputParameters parameters,
            unsigned int block_id,
            std::vector<std::string> coupled_to,
            std::vector<std::string> coupled_as)
