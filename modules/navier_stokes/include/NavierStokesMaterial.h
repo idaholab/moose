@@ -8,7 +8,7 @@
 class NavierStokesMaterial;
 
 template<>
-Parameters valid_params<NavierStokesMaterial>();
+InputParameters valid_params<NavierStokesMaterial>();
 
 /**
  * This is the base class all materials should use if you are trying to use the Navier-Stokes Kernels.
@@ -25,7 +25,7 @@ class NavierStokesMaterial : public Material
 {
 public:
 NavierStokesMaterial(std::string name,
-      Parameters parameters,
+      InputParameters parameters,
       unsigned int block_id,
       std::vector<std::string> coupled_to,
       std::vector<std::string> coupled_as);

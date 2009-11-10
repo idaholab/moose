@@ -1,14 +1,14 @@
 #include "PressureNeumannBC.h"
 
 template<>
-Parameters valid_params<PressureNeumannBC>()
+InputParameters valid_params<PressureNeumannBC>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("component");
   return params;
 }
 
-PressureNeumannBC::PressureNeumannBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+PressureNeumannBC::PressureNeumannBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
     :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as),
     _p(coupledValFace("p")),
     _pe(coupledValFace("pe")),

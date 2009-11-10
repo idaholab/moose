@@ -2,14 +2,14 @@
  
 
 template<>
-Parameters valid_params<EnergyInviscidFlux>()
+InputParameters valid_params<EnergyInviscidFlux>()
 {
-  Parameters params;
+  InputParameters params;
   return params;
 }
 
 EnergyInviscidFlux::EnergyInviscidFlux(std::string name,
-                  Parameters parameters,
+                  InputParameters parameters,
                   std::string var_name,
                   std::vector<std::string> coupled_to,
                   std::vector<std::string> coupled_as)

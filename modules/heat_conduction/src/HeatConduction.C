@@ -2,14 +2,14 @@
  
 
 template<>
-Parameters valid_params<HeatConduction>()
+InputParameters valid_params<HeatConduction>()
 {
-  Parameters params;
+  InputParameters params;
   return params;
 }
 
 HeatConduction::HeatConduction(std::string name,
-                 Parameters parameters,
+                 InputParameters parameters,
                  std::string var_name,
                  std::vector<std::string> coupled_to,
                  std::vector<std::string> coupled_as)

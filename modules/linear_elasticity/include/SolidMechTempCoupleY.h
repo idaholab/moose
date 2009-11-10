@@ -8,14 +8,14 @@
 class SolidMechTempCoupleY;
 
 template<>
-Parameters valid_params<SolidMechTempCoupleY>();
+InputParameters valid_params<SolidMechTempCoupleY>();
 
 class SolidMechTempCoupleY : public SolidMechTempCouple
 {
 public:
 
   SolidMechTempCoupleY(std::string name,
-                       Parameters parameters,
+                       InputParameters parameters,
                        std::string var_name,
                        std::vector<std::string> coupled_to,
                        std::vector<std::string> coupled_as);

@@ -2,15 +2,15 @@
  
 
 template<>
-Parameters valid_params<GravityPower>()
+InputParameters valid_params<GravityPower>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("acceleration") = -9.80665;
   return params;
 }
 
 GravityPower::GravityPower(std::string name,
-                  Parameters parameters,
+                  InputParameters parameters,
                   std::string var_name,
                   std::vector<std::string> coupled_to,
                   std::vector<std::string> coupled_as)

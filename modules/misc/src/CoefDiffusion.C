@@ -1,15 +1,15 @@
 #include "CoefDiffusion.h"
 
 template<>
-Parameters valid_params<CoefDiffusion>()
+InputParameters valid_params<CoefDiffusion>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("coef")=0.0;
   return params;
 }
 
 CoefDiffusion::CoefDiffusion(std::string name,
-                             Parameters parameters,
+                             InputParameters parameters,
                              std::string var_name,
                              std::vector<std::string> coupled_to,
                              std::vector<std::string> coupled_as)

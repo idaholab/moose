@@ -1,9 +1,9 @@
 #include "NavierStokesMaterial.h"
 
 template<>
-Parameters valid_params<NavierStokesMaterial>()
+InputParameters valid_params<NavierStokesMaterial>()
 {
-  Parameters params;
+  InputParameters params;
 
   //Default is Air
   params.set<Real>("R")=287.04; // J/kgK
@@ -14,7 +14,7 @@ Parameters valid_params<NavierStokesMaterial>()
 }
 
 NavierStokesMaterial::NavierStokesMaterial(std::string name,
-      Parameters parameters,
+      InputParameters parameters,
       unsigned int block_id,
       std::vector<std::string> coupled_to,
       std::vector<std::string> coupled_as)

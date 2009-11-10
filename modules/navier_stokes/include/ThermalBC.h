@@ -9,13 +9,13 @@
 class ThermalBC;
 
 template<>
-Parameters valid_params<ThermalBC>();
+InputParameters valid_params<ThermalBC>();
 
 class ThermalBC : public BoundaryCondition
 {
 public:
 
-  ThermalBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+  ThermalBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
   
   virtual ~ThermalBC(){}
 

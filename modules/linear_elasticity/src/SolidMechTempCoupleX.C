@@ -1,14 +1,14 @@
 #include "SolidMechTempCoupleX.h"
 
 template<>
-Parameters valid_params<SolidMechTempCoupleX>()
+InputParameters valid_params<SolidMechTempCoupleX>()
 {
-  Parameters params = valid_params<SolidMechTempCouple>();
+  InputParameters params = valid_params<SolidMechTempCouple>();
   return params;
 }
 
 SolidMechTempCoupleX::SolidMechTempCoupleX(std::string name,
-                       Parameters parameters,
+                       InputParameters parameters,
                        std::string var_name,
                        std::vector<std::string> coupled_to,
                        std::vector<std::string> coupled_as)

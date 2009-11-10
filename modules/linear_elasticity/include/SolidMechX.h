@@ -8,14 +8,14 @@
 class SolidMechX;
 
 template<>
-Parameters valid_params<SolidMechX>();
+InputParameters valid_params<SolidMechX>();
 
 class SolidMechX : public SolidMech
 {
 public:
 
   SolidMechX(std::string name,
-             Parameters parameters,
+             InputParameters parameters,
              std::string var_name,
              std::vector<std::string> coupled_to,
              std::vector<std::string> coupled_as);

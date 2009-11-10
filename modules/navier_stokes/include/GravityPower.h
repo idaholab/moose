@@ -9,14 +9,14 @@
 class GravityPower;
 
 template<>
-Parameters valid_params<GravityPower>();
+InputParameters valid_params<GravityPower>();
 
 class GravityPower : public Kernel
 {
 public:
 
   GravityPower(std::string name,
-                  Parameters parameters,
+                  InputParameters parameters,
                   std::string var_name,
                   std::vector<std::string> coupled_to=std::vector<std::string>(0),
                std::vector<std::string> coupled_as=std::vector<std::string>(0));

@@ -1,16 +1,16 @@
 #include "ThermalBC.h"
 
 template<>
-Parameters valid_params<ThermalBC>()
+InputParameters valid_params<ThermalBC>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("initial")=0.0;
   params.set<Real>("final")=0.0;
   params.set<Real>("duration")=0.0;
   return params;
 }
 
-ThermalBC::ThermalBC(std::string name, Parameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+ThermalBC::ThermalBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
     :BoundaryCondition(name, parameters, var_name, false, boundary_id, coupled_to, coupled_as),
     _p_var(coupled("p")),
     _p(coupledValFace("p")),

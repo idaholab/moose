@@ -1,14 +1,14 @@
 #include "SolidMech.h"
 
 template<>
-Parameters valid_params<SolidMech>()
+InputParameters valid_params<SolidMech>()
 {
-  Parameters params;
+  InputParameters params;
   return params;
 }
 
 SolidMech::SolidMech(std::string name,
-            Parameters parameters,
+            InputParameters parameters,
             std::string var_name,
             std::vector<std::string> coupled_to,
             std::vector<std::string> coupled_as)
