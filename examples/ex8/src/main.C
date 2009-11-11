@@ -51,7 +51,7 @@ int main (int argc, char** argv)
   }
 
   Parser p = Parser(input_filename);
-  p.parse();
+  p.execute();
 
   // Solve the system inside of Moose
   {

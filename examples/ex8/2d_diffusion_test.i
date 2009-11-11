@@ -5,7 +5,7 @@
 []
 
 [Variables]
-  names = 'u'
+  active = 'u'
 
   [./u]
     order = FIRST
@@ -19,7 +19,7 @@
 []
 
 [Kernels]
-  names = 'diff'
+  active = 'diff'
 
   [./diff]
     type = Diffusion
@@ -28,7 +28,7 @@
 []
 
 [BCs]
-  names = 'left right'
+  active = 'left right'
 
   [./left]
     type = DirichletBC
@@ -46,7 +46,7 @@
 []
 
 [Materials]
-  names = empty
+  active = empty
 
   [./empty]
     type = EmptyMaterial

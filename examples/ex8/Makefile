@@ -50,7 +50,7 @@ pfobjects 	:= $(PF_DIR)/src/pf.o
 
 
 # include dirs
-libmesh_INCLUDE += -Iinclude -Iinclude/kernels -Iinclude/user -Iinclude/materials -Iinclude/parser
+libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/utils -Iinclude/materials -Iinclude/parser
 ###############################################################################
 
 
