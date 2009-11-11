@@ -33,6 +33,12 @@ namespace Moose
                              const std::string& sys_name,
                              const std::string& var_name)
   {
+    // Try to grab an InitialCondition object for this variable.
+    InitialCondition * ic = InitialConditionFactory::instance()->getInitialCondition(0, var_name);
+    
+    if(ic)
+      return ic->gradient(p);
+
     return RealGradient();
   }
 
