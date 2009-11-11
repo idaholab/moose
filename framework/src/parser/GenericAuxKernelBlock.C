@@ -6,8 +6,8 @@ GenericAuxKernelBlock::GenericAuxKernelBlock(const std::string & reg_id, const s
    _type(getType())
 {
   addParam<std::string>("variable", "", "The Aux Kernel Name used in your model", true);
-  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this AuxKernel", false);
-  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this AuxKernel which correspond with the coupled_as objects", false);
+  addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Kernel is coupled to.", false);
+  addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Kernel which correspond with the coupled_as names", false);
 
   setClassParams(AuxFactory::instance()->getValidParams(_type));
 }

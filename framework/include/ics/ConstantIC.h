@@ -1,6 +1,7 @@
 #ifndef CONSTANTIC_H
 #define CONSTANTIC_H
 
+#include "Kernel.h"
 #include "InitialCondition.h"
 
 // LibMesh includes
@@ -14,8 +15,8 @@
 // Forward Declarations
 class ConstantIC;
 
-template<class ConstantIC>
-InputParameters valid_params();
+template<>
+InputParameters valid_params<ConstantIC>();
 
 /**
  * ConstantIC just returns a constant value.

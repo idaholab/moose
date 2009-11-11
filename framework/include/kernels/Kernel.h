@@ -25,6 +25,7 @@ template<class KernelType>
 InputParameters valid_params()
 {
   InputParameters params;
+  params.set<bool>("junk") = true;
   return params;
 }
 

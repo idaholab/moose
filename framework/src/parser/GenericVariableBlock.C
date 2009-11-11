@@ -65,7 +65,9 @@ GenericVariableBlock::execute()
 
   // retrieve inital conditions from exodus file
   _variable_to_read = getParamValue<std::string>("initial_from_file_var");
-  _timestep_to_read = getParamValue<int>("initial_from_file_timestep");  
+  _timestep_to_read = getParamValue<int>("initial_from_file_timestep");
+
+  visitChildren();
 }
 
 bool

@@ -8,8 +8,8 @@ GenericBCBlock::GenericBCBlock(const std::string & reg_id, const std::string & r
 {
   addParam<std::string>("variable", "", "The BC Name used in your model", true);
   addParam<std::vector<int> >("boundary", "The boundary number from your input mesh which corresponds to this boundary", true);
-  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this AuxKernel", false);
-  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this AuxKernel which correspond with the coupled_as objects", false);
+  addParam<std::vector<std::string> >("coupled_to", "The list of variable names this object is coupled to.", false);
+  addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this object which correspond with the coupled_as names", false);
   
   if (reg_id == "BCs/*")
     setClassParams(BCFactory::instance()->getValidParams(_type));

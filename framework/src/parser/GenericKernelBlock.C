@@ -5,10 +5,10 @@ GenericKernelBlock::GenericKernelBlock(const std::string & reg_id, const std::st
   :ParserBlock(reg_id, real_id, parent, parser_handle),
    _type(getType())
 {
-  addParam<std::string>("variable", "", "The Kernel Name used in your model", true);
-  addParam<int>("block", -1, "The mesh file block for which this kernel is active", true);
-  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this Kernel", false);
-  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this Kernel which correspond with the coupled_as objects", false);
+  addParam<std::string>("variable", "", "The name of the variable this Kernel will act on.", true);
+  addParam<int>("block", -1, "The mesh file block for which this kernel is active.  If not set then this Kernel will be active everywhere.", true);
+  addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Kernel is coupled to.", false);
+  addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Kernel which correspond with the coupled_as names", false);
 
   setClassParams(KernelFactory::instance()->getValidParams(_type));
 }

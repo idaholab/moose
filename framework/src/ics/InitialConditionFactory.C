@@ -28,10 +28,8 @@ InputParameters
 InitialConditionFactory::getValidParams(std::string name)
 {
   if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
-  {
-    std::cerr<<std::endl<<"A _"<<name<<"_ is not registered InitialCondition "<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError(std::string("A _") + name + "_ is not registered InitialCondition ");
+
   return name_to_params_pointer[name]();
 }
 
@@ -41,7 +39,7 @@ InitialConditionFactory::getInitialCondition(THREAD_ID tid, std::string var_name
   InitialConditionIterator ic_iter = active_initial_conditions[tid].find(var_name);
 
   if (ic_iter == active_initial_conditions[tid].end()) 
-    mooseError("Active InitialCondition Missing");
+    return NULL;
 
   return ic_iter->second;
 }

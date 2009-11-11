@@ -1,7 +1,7 @@
 #include "ConstantIC.h"
 
-template<class ConstantIC>
-InputParameters valid_params()
+template<>
+InputParameters valid_params<ConstantIC>()
 {
   InputParameters params;
   params.set<Real>("value") = 0.0;

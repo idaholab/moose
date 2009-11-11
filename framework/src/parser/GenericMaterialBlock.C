@@ -6,8 +6,8 @@ GenericMaterialBlock::GenericMaterialBlock(const std::string & reg_id, const std
    _type(getType())
 {
   addParam<std::vector<int> >("block", "The list of blocks for which this material is active on", true);
-  addParam<std::vector<std::string> >("coupled_to", "The list of kernels, BCs, materials, or auxillary types which are coupled into this Material", false);
-  addParam<std::vector<std::string> >("coupled_as", "The list of names referenced inside of this Material which correspond with the coupled_as objects", false);
+  addParam<std::vector<std::string> >("coupled_to", "The list of variable names this object is coupled to.", false);
+  addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this object which correspond with the coupled_as names", false);
 
   setClassParams(MaterialFactory::instance()->getValidParams(_type));
 }

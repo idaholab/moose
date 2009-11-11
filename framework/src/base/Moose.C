@@ -45,6 +45,7 @@
 #include "PreconditioningBlock.h"
 #include "PBPBlock.h"
 #include "AdaptivityBlock.h"
+#include "GenericICBlock.h"
 
 #include "ComputeInitialConditions.h"
 #include "InitialConditionFactory.h"
@@ -103,6 +104,7 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<MeshGenerationBlock>("Mesh/Generation");
   ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables");
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("Variables/*");
+  ParserBlockFactory::instance()->registerParserBlock<GenericICBlock>("Variables/*/InitialCondition");
   ParserBlockFactory::instance()->registerParserBlock<AuxVariablesBlock>("AuxVariables");
   // Reuse the GenericVariableBlock for AuxVariables/*
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("AuxVariables/*");

@@ -1,3 +1,5 @@
+#include "InitialCondition.h"
+#include "InitialConditionFactory.h"
 
 // libMesh includes
 #include "libmesh.h"
@@ -14,6 +16,12 @@ namespace Moose
                         const std::string& sys_name,
                         const std::string& var_name)
   {
+    // Try to grab an InitialCondition object for this variable.
+    InitialCondition * ic = InitialConditionFactory::instance()->getInitialCondition(0, var_name);
+    
+    if(ic)
+      return ic->value(p);
+   
     if(parameters.have_parameter<Real>("initial_"+var_name))
       return parameters.get<Real>("initial_"+var_name);
     
