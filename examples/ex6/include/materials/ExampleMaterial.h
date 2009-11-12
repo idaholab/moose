@@ -7,7 +7,7 @@
 class ExampleMaterial;
 
 template<>
-Parameters valid_params<ExampleMaterial>();
+InputParameters valid_params<ExampleMaterial>();
 
 /**
  * Example material class that defines a few properties.
@@ -16,7 +16,7 @@ class ExampleMaterial : public Material
 {
 public:
   ExampleMaterial(std::string name,
-                  Parameters parameters,
+                  InputParameters parameters,
                   unsigned int block_id,
                   std::vector<std::string> coupled_to,
                   std::vector<std::string> coupled_as);

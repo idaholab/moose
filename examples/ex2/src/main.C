@@ -114,7 +114,7 @@ int main (int argc, char** argv)
     Parameters params;
 
     // Get the valid parameters for the Convection Kernel
-    Parameters conv_params = KernelFactory::instance()->getValidParams("Convection");
+    InputParameters conv_params = KernelFactory::instance()->getValidParams("Convection");
 
     // Override the x component of velocity's default value:
     conv_params.set<Real>("x") = 1.0;

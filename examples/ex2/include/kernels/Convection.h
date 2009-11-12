@@ -17,7 +17,7 @@ class Convection;
  * The actual body of the function MUST be in the .C file.
  */
 template<>
-Parameters valid_params<Convection>();
+InputParameters valid_params<Convection>();
 
 /**
  * Define the Kernel for a convection operator that looks like:
@@ -36,7 +36,7 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   Convection(std::string name,
-            Parameters parameters,
+            InputParameters parameters,
             std::string var_name,
             std::vector<std::string> coupled_to,
             std::vector<std::string> coupled_as)

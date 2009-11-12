@@ -5,9 +5,9 @@
  * this Kernel and their default values
  */
 template<>
-Parameters valid_params<Convection>()
+InputParameters valid_params<Convection>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("x")=0.0;
   params.set<Real>("y")=0.0;
   params.set<Real>("z")=0.0;

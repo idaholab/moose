@@ -7,7 +7,7 @@
 class CoupledDirichletBC;
 
 template<>
-Parameters valid_params<CoupledDirichletBC>();
+InputParameters valid_params<CoupledDirichletBC>();
 
 /**
  * Implements a coupled Dirichlet BC where u = value * some_var on the boundary.
@@ -21,7 +21,7 @@ public:
    * constructor.
    */
   CoupledDirichletBC(std::string name,
-                     Parameters parameters,
+                     InputParameters parameters,
                      std::string var_name,
                      unsigned int boundary_id,
                      std::vector<std::string> coupled_to,

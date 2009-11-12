@@ -7,7 +7,7 @@
 class CoupledNeumannBC;
 
 template<>
-Parameters valid_params<CoupledNeumannBC>();
+InputParameters valid_params<CoupledNeumannBC>();
 
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
@@ -22,7 +22,7 @@ public:
    * constructor.
    */
   CoupledNeumannBC(std::string name,
-                   Parameters parameters,
+                   InputParameters parameters,
                    std::string var_name,
                    unsigned int boundary_id,
                    std::vector<std::string> coupled_to,

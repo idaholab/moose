@@ -201,7 +201,7 @@ int main (int argc, char** argv)
 
 
     // Get the default values for the ExampleMaterial's parameters
-    Parameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
+    InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
 
     // Override the default diffusivity
     mat_params.set<Real>("diffusivity") = diffusivity;

@@ -1,15 +1,15 @@
 #include "CoupledNeumannBC.h"
 
 template<>
-Parameters valid_params<CoupledNeumannBC>()
+InputParameters valid_params<CoupledNeumannBC>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("value")=0.0;
   return params;
 }
 
 CoupledNeumannBC::CoupledNeumannBC(std::string name,
-                   Parameters parameters,
+                   InputParameters parameters,
                    std::string var_name,
                    unsigned int boundary_id,
                    std::vector<std::string> coupled_to,

@@ -1,15 +1,15 @@
 #include "CoupledDirichletBC.h"
 
 template<>
-Parameters valid_params<CoupledDirichletBC>()
+InputParameters valid_params<CoupledDirichletBC>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("value")=0.0;
   return params;
 }
 
 CoupledDirichletBC::CoupledDirichletBC(std::string name,
-                                       Parameters parameters,
+                                       InputParameters parameters,
                                        std::string var_name,
                                        unsigned int boundary_id,
                                        std::vector<std::string> coupled_to,

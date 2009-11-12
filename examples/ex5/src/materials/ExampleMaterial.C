@@ -1,15 +1,15 @@
 #include "ExampleMaterial.h"
 
 template<>
-Parameters valid_params<ExampleMaterial>()
+InputParameters valid_params<ExampleMaterial>()
 {
-  Parameters params;
+  InputParameters params;
   params.set<Real>("diffusivity")=1.0;
   return params;
 }
 
 ExampleMaterial::ExampleMaterial(std::string name,
-                                 Parameters parameters,
+                                 InputParameters parameters,
                                  unsigned int block_id,
                                  std::vector<std::string> coupled_to,
                                  std::vector<std::string> coupled_as)
