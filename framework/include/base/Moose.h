@@ -106,6 +106,14 @@ void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (st
 #define mooseError(msg)                                                 \
   do { std::cerr << "\n\n" << msg << "\n\n"; libmesh_error(); } while(0)
 
+#ifdef NDEBUG
+#define mooseAssert(asserted, msg) 
+#else
+#define mooseAssert(asserted, msg)  do { if (!(asserted)) { std::cerr << "Assertion `" #asserted "' failed.\n" << msg << std::endl; libmesh_error(); } } while(0)
+#endif
+
+
+
 namespace Moose
 {
   /**

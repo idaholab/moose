@@ -93,6 +93,9 @@ Parser::parse()
 
 #ifdef DEBUG
   _input_tree->printBlockData();
+#else
+  if ( Moose::command_line && Moose::command_line->search("--show-tree"))
+    _input_tree->printBlockData();
 #endif
 }
 
@@ -174,16 +177,6 @@ Parser::buildFullTree()
   }
 
   _input_tree->printBlockData();
-}
-
-void
-Parser::extractParams(const std::string & prefix, InputParameters &p)
-{
-  for (InputParameters::iterator iter = p.begin(); iter != p.end(); ++iter)
-  {
-    setParameters(prefix + "/" + iter->first, iter);
-  }
-  
 }
 
 void
@@ -324,208 +317,101 @@ Parser::checkInputFile()
   in.close();
 }
 
-
-// function to set parameters with arbitrary type
-bool
-Parser::setParameters(std::string name, InputParameters::iterator &it)
+void
+Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
-  InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
-  InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
-  InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
-  InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
-  InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
-  InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
-  InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
-  InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
-  InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
-  InputParameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
-  InputParameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
-  InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
-  
+  for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
+  {
+    InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
+    InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
+    InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
+    InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
+    InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
+    InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
+    InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
+    InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
+    InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
+    InputParameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
+    InputParameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
+    InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
+    
+    std::string full_name = prefix + "/" + it->first;
+     
+    if (real_param)
+      setScalarParameter<Real>(full_name, real_param);
+    else if (int_param)
+      setScalarParameter<int>(full_name, int_param);
+    else if (uint_param)
+      setScalarParameter<unsigned int>(full_name, uint_param);
+    else if (bool_param)
+      setScalarParameter<bool>(full_name, bool_param);
+    else if (string_param)
+      setScalarParameter<std::string>(full_name, string_param);
+    else if (vec_real_param)
+      setVectorParameter<Real>(full_name, vec_real_param);
+    else if (vec_int_param)
+      setVectorParameter<int>(full_name, vec_int_param);
+    else if (vec_bool_param)
+      setVectorParameter<bool>(full_name, vec_bool_param);
+    else if (vec_string_param)
+      setVectorParameter<std::string>(full_name, vec_string_param);
+    else if (tensor_real_param)
+      setTensorParameter<Real>(full_name, tensor_real_param);
+    else if (tensor_int_param)
+      setTensorParameter<int>(full_name, tensor_int_param);
+    else if (tensor_bool_param)
+      setTensorParameter<bool>(full_name, tensor_bool_param);
+  }
+}
+
+template<typename T>
+bool Parser::setScalarParameter(std::string name, Parameters::Parameter<T>* param)
+{
   bool default_flag = false;
-  
-  if( real_param )
-  {
-    Real from_input;
-    from_input = _getpot_file((name).c_str(), real_param->get());
-    //check whether parameter exists in inputfile.
-    if( real_param->get() == from_input )
-      default_flag = true;
-    real_param->set()= from_input;
-    return default_flag;
-  }
-  else if( int_param )
-  {
-    int from_input;
-    from_input = _getpot_file((name).c_str(), int_param->get());
-    if( int_param->get() == from_input )
-      default_flag = true;
-    int_param->set() = from_input;
-    return default_flag;
-  }
-  else if( uint_param )
-  {
-    unsigned int from_input;
-    from_input = _getpot_file((name).c_str(), uint_param->get());
-    if( uint_param->get() == from_input )
-      default_flag = true;
-    uint_param->set() = from_input;
-    return default_flag;
-  }
-  else if( bool_param )
-  {
-    bool from_input;
-    from_input = _getpot_file((name).c_str(), bool_param->get());
-    if( bool_param->get() == from_input )
-      default_flag = true;
-    bool_param->set() = from_input;
-    return default_flag;
-  }
-  else if( string_param )
-  {
-    std::string from_input;
-    from_input = _getpot_file((name).c_str(), string_param->get());
-    if( string_param->get() == from_input )
-      default_flag = true;
-    string_param->set() = from_input;
-    return default_flag;
-  }
-  else if( vec_real_param )
-  {
-    int vec_size = _getpot_file.vector_variable_size((name).c_str());
-    vec_real_param->set().resize(vec_size);
 
-    if( vec_size == 0)
-      default_flag = true;
-    
-    for(int j=0;j<vec_size;j++)
-      vec_real_param->set()[j] = _getpot_file((name).c_str(), 0.0, j);
-
-    return default_flag;
-  }
-  else if( vec_int_param )
-  {
-    int vec_size = _getpot_file.vector_variable_size((name).c_str());
-    vec_int_param->set().resize(vec_size);
-
-    if( vec_size == 0 )
-      default_flag = true;
-    
-    for(int j=0;j<vec_size;j++)
-      vec_int_param->set()[j] = _getpot_file((name).c_str(), vec_int_param->get()[j], j);
-
-    return default_flag;
-  }
-  else if( vec_bool_param )
-  {
-    int vec_size = _getpot_file.vector_variable_size((name).c_str());
-    vec_bool_param->set().resize(vec_size);
-    
-    if( vec_size == 0 )
-      default_flag = true;
-    
-    for(int j=0;j<vec_size;j++)
-      vec_bool_param->set()[j] = _getpot_file((name).c_str(), vec_bool_param->get()[j], j);
-
-    return default_flag;
-  }
-  else if( vec_string_param )
-  {
-    int vec_size = _getpot_file.vector_variable_size((name).c_str());
-    vec_string_param->set().resize(vec_size);
-
-    if( vec_size == 0 )
-      default_flag = true;
-    
-    for(int j=0;j<vec_size;j++)
-      vec_string_param->set()[j] = _getpot_file((name).c_str(), vec_string_param->get()[j].c_str(), j);
-
-    return default_flag;
-  }
-  else if( tensor_real_param)
-  {
-    int vec_size = _getpot_file.vector_variable_size((name).c_str());
-    vec_size = pow(vec_size,0.5);
-    if( vec_size == 0 )
-      default_flag = true;
-
-    tensor_real_param->set().resize(vec_size);
-    for(int j=0;j<vec_size;j++)
-      tensor_real_param->set()[j].resize(vec_size);
-    
-    unsigned int cntr = 0;
-    for(int j=0;j<vec_size;j++)
-    {
-      for(int i=0;i<vec_size;i++)
-      {
-        tensor_real_param->set()[i][j] = _getpot_file((name).c_str(), tensor_real_param->get()[i][j], cntr);
-        cntr++;
-      }
-    }
-    return default_flag;
-  }
-  else if( tensor_int_param )
-  {
-    int vec_size = _getpot_file.vector_variable_size((name).c_str());
-    vec_size = pow(vec_size,0.5);
-
-    if( vec_size == 0 )
-      default_flag = true;
-    
-    if( vec_size == 0 )
-    {
-      tensor_int_param->set().resize(1);
-      tensor_int_param->set()[0].resize(1);
-    }
-    else
-    {
-      tensor_int_param->set().resize(vec_size);
-      for(int j=0;j<vec_size;j++)
-        tensor_int_param->set()[j].resize(vec_size);
-    }
-    
-    unsigned int cntr = 0;
-    for(int j=0;j<vec_size;j++)
-    {
-      for(int i=0;i<vec_size;i++)
-      {
-        tensor_int_param->set()[i][j] = _getpot_file((name).c_str(), tensor_int_param->get()[i][j], cntr);
-        cntr++;
-      }
-    }
-    return default_flag;
-  }
-  else if( tensor_bool_param)
-  {
-    int vec_size = _getpot_file.vector_variable_size((name).c_str());
-    vec_size = pow(vec_size,0.5);
-
-    if( vec_size == 0 )
-      default_flag = true;
-    
-    if( vec_size == 0 )
-    {
-      tensor_bool_param->set().resize(1);
-      tensor_bool_param->set()[0].resize(1);
-    }
-    else
-    {
-      tensor_bool_param->set().resize(vec_size);
-      for(int j=0;j<vec_size;j++)
-        tensor_bool_param->set()[j].resize(vec_size);
-    }
-    
-    unsigned int cntr = 0;
-    for(int j=0;j<vec_size;j++)
-    {
-      for(int i=0;i<vec_size;i++)
-      {
-        tensor_bool_param->set()[i][j] = _getpot_file((name).c_str(), tensor_bool_param->get()[i][j], cntr);
-        cntr++;
-      }
-    }
-    return default_flag;
-  }
+  T from_input = _getpot_file(name.c_str(), param->get());
+  if (param->get() == from_input)
+    default_flag = true;
   else
-    return true;
+    param->set() = from_input;
+      
+  return default_flag;
+}
+
+template<typename T>
+bool Parser::setVectorParameter(std::string name, Parameters::Parameter<std::vector<T> >* param) 
+{
+  bool default_flag = true;
+  int vec_size = _getpot_file.vector_variable_size(name.c_str());
+
+  if (_getpot_file.have_variable(name.c_str())) 
+  {
+    param->set().resize(vec_size);
+    default_flag = false;
+  }
+
+  for (unsigned int i=0; i<vec_size; ++i) 
+    param->set()[i] = _getpot_file(name.c_str(), param->get()[i], i);
+
+  return default_flag;
+}
+
+template<typename T>
+bool Parser::setTensorParameter(std::string name, Parameters::Parameter<std::vector<std::vector<T> > >* param) 
+{
+  bool default_flag = false;
+  int vec_size = _getpot_file.vector_variable_size(name.c_str());
+  int one_dim = pow(vec_size, 0.5);
+
+  if ( vec_size == 0)
+    default_flag = true;
+  param->set().resize(one_dim);
+  for (unsigned int i=0; i<one_dim; ++i) 
+  {
+    param->set()[i].resize(one_dim);
+    for (unsigned int j=0; j<one_dim; ++j)
+      param->set()[i][j] = _getpot_file(name.c_str(), param->get()[i][j], i*one_dim+j);
+  }
+
+  return default_flag;
 }

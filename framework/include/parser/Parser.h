@@ -115,13 +115,18 @@ private:
    */
   void extractParams(const std::string & prefix, InputParameters &p);
 
-  /**
-   * This function is the helper function for extractParams and does the actual extraction
-   * from the input file
+  /* Helper functions for setting parameters of arbitrary types - bodies are in the .C file
+   * since they are colled only from this Object
    */
-  bool setParameters(std::string name, InputParameters::iterator &it);
+  template<typename T>
+  bool setScalarParameter(std::string name, Parameters::Parameter<T>* param);
 
+  template<typename T>
+  bool setVectorParameter(std::string name, Parameters::Parameter<std::vector<T> >* param);
 
+  template<typename T>
+  bool setTensorParameter(std::string name, Parameters::Parameter<std::vector<std::vector<T> > >* param);
+  
   /************************************
    * Private Data Members
    ************************************/

@@ -19,6 +19,8 @@ public:
 
   template <typename T>
   void addParam(const std::string &name, const std::string &doc_string, bool required);
+  template <typename T>
+  void addParam(std::string name, T value, std::string doc_string, bool required);
 
   const std::string &getDocString(const std::string &name) const;
   bool isRequired(const std::string &name) const;
@@ -36,6 +38,15 @@ template <typename T>
 void InputParameters::addParam(const std::string &name, const std::string &doc_string, bool required) 
 {
   Parameters::set<T>(name);
+  if (required)
+    _required_params.insert(name);
+  _doc_string[name] = doc_string;
+}
+
+template <typename T>
+void InputParameters::addParam(std::string name, T value, std::string doc_string, bool required) 
+{
+  Parameters::set<T>(name) = value;
   if (required)
     _required_params.insert(name);
   _doc_string[name] = doc_string;

@@ -17,8 +17,10 @@ ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id
    _parser_handle(parser_handle),
    _parent(parent)
 {
+  std::vector<std::string> blocks(1);
+  blocks[0] = "__all__";
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
-  addParam<std::vector<std::string> >("active", "If specified only the blocks named will be visited and made active", false);
+  addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active", false);
 
   // "names" in the input file is now deprecated
   addParam<std::vector<std::string> >("names", "Deprecated DO NOT USE!", false);
@@ -66,9 +68,14 @@ ParserBlock::n_activeChildren() const
     mooseError((std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.").c_str());
     
   // if there is no parameter named "active" then assume that all children are active
-  if (active_children.empty()) 
-    return _children.size();
-  
+  try 
+  {
+    if (active_children.at(0) == "__all__") 
+      return _children.size();
+  }
+  catch (std::out_of_range) 
+  {}
+
   // Make sure that all named children are actually in the _children list  
   // Load the children names into a set for faster locating
   std::set<std::string> child_set(active_children.begin(), active_children.end());
@@ -91,8 +98,13 @@ ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only
     mooseError((std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.").c_str());
   
   // if there is no parameter named "active" then assume that all children are to be visited
-  if (active_children.empty())
-    visit_active_only = false;
+  try 
+  {
+    if (active_children.at(0) == "__all__") 
+      visit_active_only = false;
+  }
+  catch (std::out_of_range) 
+  {}
 
   // Load the children names into a set for faster locating
   std::set<std::string> child_set(active_children.begin(), active_children.end());
@@ -204,16 +216,16 @@ ParserBlock::printBlockData()
     // Block params may be required and will have a doc string
     std::string required = _required_params.find(iter->first) != _required_params.end() ? "*" : " ";
 
-    std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": default(";
+    std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
     iter->second->print(std::cout);
-    std::cout << ")\n" << spacing << "    " << std::setw(30) << " " << "    " << _doc_string[iter->first] << "\n";
+    std::cout << "\n" << spacing << "    " << std::setw(30) << " " << "    " << _doc_string[iter->first] << "\n";
   }
   
   for (InputParameters::iterator iter = _class_params.begin(); iter != _class_params.end(); ++iter)
   {
-    std::cout << spacing << "     " << std::setw(30) << iter->first << ": default (";
+    std::cout << spacing << "     " << std::setw(30) << iter->first << ": ";
     iter->second->print(std::cout);
-    std::cout << ")\n";
+    std::cout << "\n";
   }
   
   std::cout << spacing << "  }\n";
