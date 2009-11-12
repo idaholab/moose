@@ -67,7 +67,7 @@ all:: $(target)
 # Production rules:  how to make the target - depends on library configuration
 $(target): $(fobjects) $(objects) $(moose_LIB) $(mesh_library)
 	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) -Wl,-flat_namespace
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
 
 with-pf:
 #	@touch src/Ex7.C src/materials/Meso.C src/materials/MesoData.C
