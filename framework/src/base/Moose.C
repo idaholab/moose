@@ -50,6 +50,7 @@
 #include "ComputeInitialConditions.h"
 #include "InitialConditionFactory.h"
 #include "ConstantIC.h"
+#include "BoundingBoxIC.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -128,6 +129,7 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");
 
   InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
+  InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
 }
 
 void
