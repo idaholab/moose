@@ -855,6 +855,22 @@ Kernel::coupledValOld(std::string name)
   else
     return _aux_var_vals_old[_tid][_aux_coupled_as_to_var_num[name]];
 }
+
+std::vector<Real> &
+Kernel::coupledValOlder(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _var_vals_older[_tid][_coupled_as_to_var_num[name]];
+  else
+    return _aux_var_vals_older[_tid][_aux_coupled_as_to_var_num[name]];
+}
+
 std::vector<RealGradient> &
 Kernel::coupledGradValOld(std::string name)
 {

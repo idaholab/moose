@@ -380,6 +380,13 @@ protected:
   std::vector<Real> & coupledValOld(std::string name);
 
   /**
+   * Returns a reference (that can be stored) to a coupled variable's value at older time step.
+   * 
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  std::vector<Real> & coupledValOlder(std::string name);
+
+  /**
    * Returns a referene (that can be sotred) to a coupled gradient of a variable's value at an old time step.
    *
    * @param name The name the kernel wants to refer to the variable as
