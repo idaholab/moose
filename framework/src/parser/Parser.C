@@ -7,8 +7,10 @@
 #include "InputParameters.h"
 #include "ParserBlockFactory.h"
 #include "KernelFactory.h"
+#include "AuxFactory.h"
 #include "BCFactory.h"
 #include "MaterialFactory.h"
+#include "InitialConditionFactory.h"
 
 Parser::Parser(std::string input_filename)
   :_input_filename(input_filename),
@@ -115,52 +117,69 @@ Parser::buildFullTree()
        i != ParserBlockFactory::instance()->registeredParserBlocksEnd(); ++i)
   {
     // skip the generic matches here because they don't correlate to a real instance
-    if ((*i)[i->length()-1] == '*')
+    if (i->find('*') != std::string::npos)
       continue;
-    
+
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
     curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, *i, curr_block, *this));
   }
   
-  // Create the Kernels Block
-  curr_block = ParserBlockFactory::instance()->add("Kernels", "Kernels", _input_tree, *this);
-  _input_tree->_children.push_back(curr_block);
-  prefix = "Kernels/";
+  {
+    // Manually add a sample variable
+    prefix = "Variables/";
+    std::string var_name("SampleVar");
+    curr_block = curr_block->locateBlock("Variables");
+    mooseAssert(curr_block != NULL, "A Variables ParserBlock does not appear to exist");
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add("Variables/*", prefix + var_name, curr_block, *this));
 
+    // Add all the IC Blocks
+    curr_block = curr_block->locateBlock(prefix + var_name);
+    mooseAssert(curr_block != NULL, "The sample variable block appears to be missing");
+    for (InitialConditionNamesIterator i = InitialConditionFactory::instance()->registeredInitialConditionsBegin();
+         i != InitialConditionFactory::instance()->registeredInitialConditionsEnd(); ++i)
+      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + "*/InitialCondition", prefix + var_name + "/" + *i, curr_block, *this));
+  }
+  
   // Add all the Kernels
+  curr_block = curr_block->locateBlock("Kernels");
+  prefix = "Kernels/";
   for (KernelNamesIterator i = KernelFactory::instance()->registeredKernelsBegin();
        i != KernelFactory::instance()->registeredKernelsEnd(); ++i)
   {
     std::string curr_identifier(prefix + *i);
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
 
-    if (matched_identifier.length())
-      curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
-    else
-      mooseError("An error that shouldn't have occured has occured and this isn't even Microsoft in Parser::BuildFullTree");
+    mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
   }
 
-  // Create the BCs Block
-  curr_block = ParserBlockFactory::instance()->add("BCs", "BCs", _input_tree, *this);
-  _input_tree->_children.push_back(curr_block);
-  prefix = "BCs/";
+  // Add all the AuxKernels
+  curr_block = curr_block->locateBlock("AuxKernels");
+  prefix = "AuxKernels/";
+  for (AuxKernelNamesIterator i = AuxFactory::instance()->registeredAuxKernelsBegin();
+       i != AuxFactory::instance()->registeredAuxKernelsEnd(); ++i)
+  {
+    std::string curr_identifier(prefix + *i);
+    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
+
+    mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+  }
   
   // Add all the BCs
+  curr_block = curr_block->locateBlock("BCs");
+  prefix = "BCs/";
   for (BCNamesIterator i = BCFactory::instance()->registeredBCsBegin();
        i != BCFactory::instance()->registeredBCsEnd(); ++i)
   {
     std::string curr_identifier(prefix + *i);
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
 
-    if (matched_identifier.length())
-      curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
-    else
-      mooseError("An error that shouldn't have occured has occured and this isn't even Microsoft in Parser::BuildFullTree");
+    mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
   }
 
-  // Create the Materials Block
-  curr_block = ParserBlockFactory::instance()->add("Materials", "Materials", _input_tree, *this);
-  _input_tree->_children.push_back(curr_block);
+  curr_block = curr_block->locateBlock("Materials");
   prefix = "Materials/";
   
   // Add all the Materials
@@ -170,10 +189,8 @@ Parser::buildFullTree()
     std::string curr_identifier(prefix + *i);
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
 
-    if (matched_identifier.length())
-      curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
-    else
-      mooseError("An error that shouldn't have occured has occured and this isn't even Microsoft in Parser::BuildFullTree");
+    mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
   }
 
   _input_tree->printBlockData();

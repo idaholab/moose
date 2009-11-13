@@ -20,6 +20,12 @@ typedef AuxKernel * (*AuxKernelBuildPtr)(std::string name,
                                          std::string var_name,
                                          std::vector<std::string> coupled_to,
                                          std::vector<std::string> coupled_as);
+
+/**
+ * Typedef to hide implementation details
+ */
+typedef std::vector<std::string>::iterator AuxKernelNamesIterator;
+
 /**
  * Typedef to make things easier.
  */
@@ -81,6 +87,9 @@ public:
   std::vector<AuxKernel *>::iterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id);
   std::vector<AuxKernel *>::iterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id);
 
+  AuxKernelNamesIterator registeredAuxKernelsBegin();
+  AuxKernelNamesIterator registeredAuxKernelsEnd();
+
 private:
   AuxFactory();
 
@@ -89,6 +98,7 @@ private:
   std::map<std::string, AuxKernelBuildPtr> name_to_build_pointer;
   std::map<std::string, AuxKernelParamsPtr> name_to_params_pointer;
 
+  std::vector<std::string> _registered_auxkernel_names;
   std::vector<std::vector<AuxKernel *> > active_NodalAuxKernels;
   std::vector<std::vector<AuxKernel *> > active_ElementAuxKernels;
 
