@@ -246,9 +246,21 @@ Kernel::reinitDT()
 }
 
 std::string
-Kernel::name()
+Kernel::name() const
 {
   return _name;
+}
+
+std::string
+Kernel::varName() const
+{
+  return _var_name;
+}
+
+const std::vector<std::string> &
+Kernel::coupledTo() const
+{
+  return _coupled_to;
 }
 
 void

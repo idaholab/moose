@@ -33,6 +33,7 @@ protected:
   virtual Real computeValue();
 
   Real _value;
+  std::string _operator;
 
   int _coupled;
   Real & _coupled_val;

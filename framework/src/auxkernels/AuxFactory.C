@@ -1,5 +1,5 @@
 #include "AuxFactory.h"
- 
+#include <list> 
 
 AuxFactory *
 AuxFactory::instance()
@@ -19,17 +19,68 @@ AuxFactory::add(std::string Aux_name,
                   std::vector<std::string> coupled_as)
   {
     AuxKernel * aux;
+    AuxKernelIterator curr_aux, end_aux;
+    unsigned int size;
     
+    std::vector<std::list<AuxKernel *>::iterator > dependent_auxs;
+    std::vector<AuxKernel *> *aux_ptr;
+    std::list<AuxKernel *>::iterator new_aux_iter;
+
     for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
     {
       Moose::current_thread_id = tid;
 
       aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
-
-      if(aux->isNodal())
-        active_NodalAuxKernels[tid].push_back(aux);
+      
+      //
+      if (aux->isNodal())
+        aux_ptr = &active_NodalAuxKernels[tid];
       else
-        active_ElementAuxKernels[tid].push_back(aux);
+        aux_ptr = &active_ElementAuxKernels[tid];
+
+      // Copy the active AuxKernels into a list for manipulation
+      std::list<AuxKernel *> active_auxs(aux_ptr->begin(), aux_ptr->end());
+
+      // Get a list of all the dependent variables that this AuxKernel will act on to
+      // place it in the vector in the appropriate location
+      for (std::list<AuxKernel *>::iterator i=active_auxs.begin(); i != active_auxs.end(); ++i)
+        for (std::vector<std::string>::iterator j=coupled_to.begin(); j != coupled_to.end(); ++j)
+          if ((*i)->varName() == *j) 
+            dependent_auxs.push_back(i);
+
+      // Insert the AuxKernel preserving its dependents (last iterator in dependent_auxs)
+      if (dependent_auxs.empty())
+      {
+        active_auxs.push_front(aux);
+        new_aux_iter = active_auxs.begin();
+      }
+      else
+        new_aux_iter = active_auxs.insert(++(*dependent_auxs.rbegin()), aux);
+
+      // Now check to see if any of the existing AuxKernels depend on this newly inserted kernel
+      dependent_auxs.clear();
+      for (std::list<AuxKernel *>::iterator i=active_auxs.begin(); i != new_aux_iter; ++i)
+      {
+        const std::vector<std::string> & curr_coupled = (*i)->coupledTo();
+        for (std::vector<std::string>::const_iterator j=curr_coupled.begin(); j != curr_coupled.end(); ++j)
+          if (var_name == *j)
+            dependent_auxs.push_back(i);
+      }
+      
+      // Move the dependent items to the point after the insertion of this aux kernel
+      ++new_aux_iter;
+      for (std::vector<std::list<AuxKernel *>::iterator >::iterator i=dependent_auxs.begin();
+           i != dependent_auxs.end(); ++i)
+        active_auxs.splice(new_aux_iter, active_auxs, *i);
+      
+      // DEBUG
+      //for (std::list<AuxKernel *>::iterator i = active_auxs.begin(); i != active_auxs.end(); ++i)
+      //  std::cout << (*i)->varName() << std::endl;
+      //std::cout << "\n" << std::endl;
+      // DEBUG
+
+      // Copy the list back into the Auxilary Vector
+      aux_ptr->assign(active_auxs.begin(), active_auxs.end());
     }
 
     return aux;

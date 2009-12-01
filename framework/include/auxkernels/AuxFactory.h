@@ -24,6 +24,11 @@ typedef AuxKernel * (*AuxKernelBuildPtr)(std::string name,
 /**
  * Typedef to hide implementation details
  */
+typedef std::vector<AuxKernel *>::iterator AuxKernelIterator;
+
+/**
+ * Typedef to hide implementation details
+ */
 typedef std::vector<std::string>::iterator AuxKernelNamesIterator;
 
 /**

@@ -112,7 +112,17 @@ public:
   /**
    * Retrieve name of the Kernel
    */
-  std::string name();
+  std::string name() const;
+
+  /**
+   * Retrieve the name of the variable that this Kernel operates on
+   */
+  std::string varName() const;
+
+  /**
+   * Retrieve the names of the variables this Kernel is coupled to
+   */
+  const std::vector<std::string> & coupledTo() const;
 
   /**
    * This virtual gets called every time the subdomain changes.  This is useful for doing pre-calcualtions
