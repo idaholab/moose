@@ -43,8 +43,7 @@ MeshBlock::execute()
     else
       mooseError("");
   }
-  
-  if (checkVariableProperties(&GenericVariableBlock::restartRequired)) 
+  else if (checkVariableProperties(&GenericVariableBlock::restartRequired)) 
   {
     ExodusII_IO *exreader = new ExodusII_IO(*mesh);
     Moose::exreader = exreader;
