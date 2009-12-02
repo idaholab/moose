@@ -186,7 +186,7 @@ class TestHarness:
     global_exec_name = exec_name
 
     # parse command line args
-    self.options, self.arg_string = self.getoptions(argv)
+    self.options, self.leftovers, self.arg_string = self.getoptions(argv)
 
     # Emulate the standard Nose RegEx for consistency
     self.test_match = re.compile(r"(?:^|\b|[_-])[Tt]est")
@@ -207,7 +207,10 @@ class TestHarness:
     for dirpath, dirnames, filenames in os.walk(test_dir):
       if (self.test_match.search(dirpath)):
         for file in filenames:
-          if (file[-2:] == 'py' and self.test_match.search(file)):
+          # See if there were other arguments (test names) passed on the command line
+          if (file[-2:] == 'py' and 
+              self.test_match.search(file) and
+              (len(self.leftovers) == 0 or len([item for item in self.leftovers if re.match(item, file)]) == 1)):
             module_name = file[:-3]
 
             result, result_string = self.inspectAndTest(dirpath, module_name)
@@ -291,9 +294,10 @@ class TestHarness:
     parser.add_option("-d", "--dofs", action="callback", callback=buildArgVector, type="int", dest="dofs", help="refine each example to meet the minimum requested DOFS")
     parser.add_option("-n", "--np", action="callback", callback=buildArgVector, type="int", dest="np", help="specify the number of MPI processes launched")
 
-    # Return the 'options' instance which is the first item in the tuple returned from parse_args and
+    (options, args) = parser.parse_args(argv[1:])
+    # Return the 'options' and leftover args returned from parse_args and
     # also the arg_string made from joining the arguments in the arg_vector
-    return parser.parse_args(argv[1:])[0], ','.join(arg_vector)
+    return (options, args, ','.join(arg_vector))
 
 
   
@@ -345,3 +349,4 @@ def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0):
 
 
 
+  
