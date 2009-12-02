@@ -1,5 +1,6 @@
 #include "CoefDiffusion.h"
 
+
 template<>
 InputParameters valid_params<CoefDiffusion>()
 {
