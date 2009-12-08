@@ -51,6 +51,7 @@
 #include "InitialConditionFactory.h"
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
+#include "RandomIC.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -130,6 +131,7 @@ Moose::registerObjects()
 
   InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
   InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
+  InitialConditionFactory::instance()->registerInitialCondition<RandomIC>("RandomIC");  
 }
 
 void
