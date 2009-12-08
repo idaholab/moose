@@ -1,7 +1,7 @@
 #include "ExampleMaterial.h"
 
 template<>
-InputParameters valid_params<ExampleMaterial>()
+InputParameters validParams<ExampleMaterial>()
 {
   InputParameters params;
   params.set<Real>("diffusivity")=1.0;

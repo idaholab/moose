@@ -7,7 +7,7 @@
 class ExampleMaterial;
 
 template<>
-InputParameters valid_params<ExampleMaterial>();
+InputParameters validParams<ExampleMaterial>();
 
 /**
  * Example material class that defines a few properties.

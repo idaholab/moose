@@ -7,7 +7,7 @@
 class CoupledDirichletBC;
 
 template<>
-InputParameters valid_params<CoupledDirichletBC>();
+InputParameters validParams<CoupledDirichletBC>();
 
 /**
  * Implements a coupled Dirichlet BC where u = value * some_var on the boundary.

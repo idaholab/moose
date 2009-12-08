@@ -1,7 +1,7 @@
 #include "CoupledDirichletBC.h"
 
 template<>
-InputParameters valid_params<CoupledDirichletBC>()
+InputParameters validParams<CoupledDirichletBC>()
 {
   InputParameters params;
   params.set<Real>("value")=0.0;

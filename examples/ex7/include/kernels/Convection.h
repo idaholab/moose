@@ -4,7 +4,7 @@
 #define CONVECTION_H
 
 /**
- * The forward declaration is so that we can declare the valid_params function
+ * The forward declaration is so that we can declare the validParams function
  * before we actually define the class... that way the definition isn't lost
  * at the bottom of the file.
  */
@@ -13,11 +13,11 @@
 class Convection;
 
 /**
- * valid_params returns the parameters that this Kernel accepts / needs
+ * validParams returns the parameters that this Kernel accepts / needs
  * The actual body of the function MUST be in the .C file.
  */
 template<>
-InputParameters valid_params<Convection>();
+InputParameters validParams<Convection>();
 
 /**
  * Define the Kernel for a convection operator that looks like:

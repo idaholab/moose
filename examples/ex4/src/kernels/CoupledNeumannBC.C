@@ -1,7 +1,7 @@
 #include "CoupledNeumannBC.h"
 
 template<>
-InputParameters valid_params<CoupledNeumannBC>()
+InputParameters validParams<CoupledNeumannBC>()
 {
   InputParameters params;
   params.set<Real>("value")=0.0;
