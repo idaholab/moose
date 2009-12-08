@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+class InputParameters;
+
 #include "ParserBlock.h"
 #include "getpot.h"
 
@@ -120,14 +122,14 @@ private:
    * since they are colled only from this Object
    */
   template<typename T>
-  bool setScalarParameter(std::string name, Parameters::Parameter<T>* param);
+  void setScalarParameter(const std::string & name, InputParameters::Parameter<T>* param);
 
   template<typename T>
-  bool setVectorParameter(std::string name, Parameters::Parameter<std::vector<T> >* param);
+  void setVectorParameter(const std::string & name, InputParameters::Parameter<std::vector<T> >* param);
 
   template<typename T>
-  bool setTensorParameter(std::string name, Parameters::Parameter<std::vector<std::vector<T> > >* param);
-  
+  void setTensorParameter(const std::string & name, InputParameters::Parameter<std::vector<std::vector<T> > >* param);
+
   /************************************
    * Private Data Members
    ************************************/

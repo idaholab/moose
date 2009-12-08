@@ -4,16 +4,16 @@ template<>
 InputParameters validParams<BoundingBoxIC>()
 {
   InputParameters params;
-  params.addParam<Real>("x1", 0.0, "The x coordinate of the lower left-hand corner of the box", true);
-  params.addParam<Real>("y1", 0.0, "The y coordinate of the lower left-hand corner of the box", true);
-  params.addParam<Real>("z1", 0.0, "The z coordinate of the lower left-hand corner of the box", false);
+  params.addRequiredParam<Real>("x1", "The x coordinate of the lower left-hand corner of the box");
+  params.addRequiredParam<Real>("y1", "The y coordinate of the lower left-hand corner of the box");
+  params.addParam<Real>("z1", 0.0, "The z coordinate of the lower left-hand corner of the box");
 
-  params.addParam<Real>("x2", 0.0, "The x coordinate of the upper right-hand corner of the box", true);
-  params.addParam<Real>("y2", 0.0, "The y coordinate of the upper right-hand corner of the box", true);
-  params.addParam<Real>("z2", 0.0, "The z coordinate of the upper right-hand corner of the box", false);
+  params.addRequiredParam<Real>("x2", "The x coordinate of the upper right-hand corner of the box");
+  params.addRequiredParam<Real>("y2", "The y coordinate of the upper right-hand corner of the box");
+  params.addParam<Real>("z2", 0.0, "The z coordinate of the upper right-hand corner of the box");
 
-  params.addParam<Real>("inside", 0.0, "The value of the variable inside the box", false);
-  params.addParam<Real>("outside", 0.0, "The value of the variable outside the box", false);
+  params.addParam<Real>("inside", 0.0, "The value of the variable inside the box");
+  params.addParam<Real>("outside", 0.0, "The value of the variable outside the box");
   return params;
 }
 

@@ -339,6 +339,15 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
   {
+    std::string full_name = prefix + "/" + it->first;
+
+    // Mark parameters appearing in the input file
+    if (_getpot_file.have_variable(full_name.c_str()))
+      p.seenInInputFile(full_name);
+    // The parameter is required but missing
+    else if (p.isParamRequired(it->first))
+      mooseError("The required parameter '" + full_name + "' is missing\n");
+      
     InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
     InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
     InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
@@ -352,8 +361,6 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     InputParameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
     InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
     
-    std::string full_name = prefix + "/" + it->first;
-     
     if (real_param)
       setScalarParameter<Real>(full_name, real_param);
     else if (int_param)
@@ -382,46 +389,29 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 }
 
 template<typename T>
-bool Parser::setScalarParameter(std::string name, Parameters::Parameter<T>* param)
+void Parser::setScalarParameter(const std::string & name, InputParameters::Parameter<T>* param)
 {
-  bool default_flag = false;
-
-  T from_input = _getpot_file(name.c_str(), param->get());
-  if (param->get() == from_input)
-    default_flag = true;
-  else
-    param->set() = from_input;
-      
-  return default_flag;
+  param->set() = _getpot_file(name.c_str(), param->get());
 }
 
 template<typename T>
-bool Parser::setVectorParameter(std::string name, Parameters::Parameter<std::vector<T> >* param) 
+void Parser::setVectorParameter(const std::string & name, InputParameters::Parameter<std::vector<T> >* param) 
 {
-  bool default_flag = true;
   int vec_size = _getpot_file.vector_variable_size(name.c_str());
 
   if (_getpot_file.have_variable(name.c_str())) 
-  {
     param->set().resize(vec_size);
-    default_flag = false;
-  }
-
+    
   for (unsigned int i=0; i<vec_size; ++i) 
     param->set()[i] = _getpot_file(name.c_str(), param->get()[i], i);
-
-  return default_flag;
 }
 
 template<typename T>
-bool Parser::setTensorParameter(std::string name, Parameters::Parameter<std::vector<std::vector<T> > >* param) 
+void Parser::setTensorParameter(const std::string & name, InputParameters::Parameter<std::vector<std::vector<T> > >* param) 
 {
-  bool default_flag = false;
   int vec_size = _getpot_file.vector_variable_size(name.c_str());
   int one_dim = pow(vec_size, 0.5);
 
-  if ( vec_size == 0)
-    default_flag = true;
   param->set().resize(one_dim);
   for (unsigned int i=0; i<one_dim; ++i) 
   {
@@ -429,6 +419,5 @@ bool Parser::setTensorParameter(std::string name, Parameters::Parameter<std::vec
     for (unsigned int j=0; j<one_dim; ++j)
       param->set()[i][j] = _getpot_file(name.c_str(), param->get()[i][j], i*one_dim+j);
   }
-
-  return default_flag;
 }
+

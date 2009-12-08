@@ -4,8 +4,8 @@ template<>
 InputParameters validParams<RandomIC>()
 {
   InputParameters params;
-  params.addParam<Real>("min", 0.0, "", true);
-  params.addParam<Real>("max", 1.0, "", true);
+  params.addRequiredParam<Real>("min", "Lower bound of the randomly generated values");
+  params.addRequiredParam<Real>("max", "Upper bound of the randomly generated values");
   return params;
 }
 

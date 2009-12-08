@@ -9,10 +9,11 @@ template<>
 InputParameters validParams<PBPBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
-  params.addParam<std::vector<std::string> >("solve_order", "TODO: docstring", true);
-  params.addParam<std::vector<std::string> >("preconditioner", "TODO: docstring", true);
-  params.addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring", false);
-  params.addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring", false);
+  params.addRequiredParam<std::vector<std::string> >("solve_order", "TODO: docstring");
+  params.addRequiredParam<std::vector<std::string> >("preconditioner", "TODO: docstring");
+  
+  params.addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring");
+  params.addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring");
   return params;
 }
 

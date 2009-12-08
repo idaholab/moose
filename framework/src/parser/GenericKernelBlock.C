@@ -18,15 +18,16 @@ GenericKernelBlock::execute()
             << "\tvariable:" << getParamValue<std::string>("variable") << ":" << std::endl;
 #endif
 
-  if (getParamValue<int>("block") < 0)
-    KernelFactory::instance()->add(_type, getShortName(), getClassParams(), 
-                                   getParamValue<std::string>("variable"),
-                                   getParamValue<std::vector<std::string> >("coupled_to"),
-                                   getParamValue<std::vector<std::string> >("coupled_as"));
-  else
+  if (isParamValid("block"))
     KernelFactory::instance()->add(_type, getShortName(), getClassParams(), 
                                    getParamValue<std::string>("variable"),
                                    getParamValue<std::vector<std::string> >("coupled_to"),
                                    getParamValue<std::vector<std::string> >("coupled_as"),
                                    getParamValue<int>("block"));
+  else
+    KernelFactory::instance()->add(_type, getShortName(), getClassParams(), 
+                                   getParamValue<std::string>("variable"),
+                                   getParamValue<std::vector<std::string> >("coupled_to"),
+                                   getParamValue<std::vector<std::string> >("coupled_as"));
+  
 }

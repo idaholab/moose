@@ -30,3 +30,8 @@ InputParameters::operator=(const Parameters &rhs)
   return *this;
 }
 
+void
+InputParameters::seenInInputFile(const std::string &name)
+{
+  _valid_params.insert(name);
+}

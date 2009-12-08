@@ -200,15 +200,15 @@ ParserBlock::printBlockData()
 
   
   std::cout << "\n"
-            << spacing << "name: " <<  getShortName() << "\n"
-            << spacing << "type: " <<  typeid(*this).name() << "\n"
+            << spacing << "name: " <<  _reg_id << "\n"
+            << spacing << "type: " <<  getShortName() << "\n"
             << spacing << "  params=\n"
             << spacing << "  {\n";
 
   for (InputParameters::iterator iter = _block_params.begin(); iter != _block_params.end(); ++iter) 
   {
     // Block params may be required and will have a doc string
-    std::string required = _block_params.isRequired(iter->first) ? "*" : " ";
+    std::string required = _block_params.isParamRequired(iter->first) ? "*" : " ";
 
     std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
     iter->second->print(std::cout);

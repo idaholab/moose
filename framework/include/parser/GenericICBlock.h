@@ -10,7 +10,6 @@ template<>
 InputParameters validParams<GenericICBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
-  params.addParam<std::string>("variable", "", "The name of the variable to set the initial condition for.", true);
   return params;
 }
 

@@ -18,10 +18,10 @@ InputParameters validParams<ParserBlock>()
   blocks[0] = "__all__";
 
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
-  params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active", false);
+  params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
 
   // "names" in the input file is now deprecated
-  params.addParam<std::vector<std::string> >("names", "Deprecated DO NOT USE!", false);
+  params.addParam<std::vector<std::string> >("names", "Deprecated DO NOT USE!");
   return params;
 }
 
@@ -77,32 +77,6 @@ public:
 
   void driveExecute();
 
-  /**
-   * This function is for adding new parameters to the ParserBlock that will be extracted from
-   * the input file, checked and used within MOOSE
-   */
-  template <typename T>
-  void addParam(std::string name, T value, std::string doc_string, bool required) 
-    {
-      _block_params.set<T>(name) = value;
-      if (required)
-        _required_params.insert(name);
-      _doc_string[name] = doc_string;
-    }
-
-  /**
-   * This function is for adding new parameters to the ParserBlock that will be extracted from
-   * the input file, it's intended purpose is for required parameters with no default value
-   */
-//  template <typename T>
-//  void addParam(std::string name, std::string doc_string, bool required) 
-//     {
-//       _block_params.set<T>(name);
-//       if (required)
-//         _required_params.insert(name);
-//       _doc_string[name] = doc_string;
-//     }
-
   inline void addPrereq(std::string name)
     {
       _execute_prereqs.insert(name);
@@ -115,6 +89,11 @@ public:
   T getParamValue(std::string name) const
     {
       return _block_params.get<T>(name);
+    }
+
+  inline bool isParamValid(const std::string &name) const
+    {
+      return _block_params.isParamValid(name);
     }
   
   inline void setClassParams(InputParameters p)

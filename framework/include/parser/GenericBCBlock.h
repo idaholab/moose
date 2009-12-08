@@ -10,10 +10,11 @@ template<>
 InputParameters validParams<GenericBCBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
-  params.addParam<std::string>("variable", "", "The BC Name used in your model", true);
-  params.addParam<std::vector<int> >("boundary", "The boundary number from your input mesh which corresponds to this boundary", true);
-  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this object is coupled to.", false);
-  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this object which correspond with the coupled_as names", false);
+  params.addRequiredParam<std::string>("variable", "The BC Name used in your model");
+  params.addRequiredParam<std::vector<int> >("boundary", "The boundary number from your input mesh which corresponds to this boundary");
+
+  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this object is coupled to.");
+  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this object which correspond with the coupled_as names");
   return params;
 }
 

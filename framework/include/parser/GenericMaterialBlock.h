@@ -10,9 +10,10 @@ template<>
 InputParameters validParams<GenericMaterialBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
-  params.addParam<std::vector<int> >("block", "The list of blocks for which this material is active on", true);
-  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this object is coupled to.", false);
-  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this object which correspond with the coupled_as names", false);
+  params.addRequiredParam<std::vector<int> >("block", "The list of blocks for which this material is active on");
+  
+  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this object is coupled to.");
+  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this object which correspond with the coupled_as names");
   return params;
 }
 
