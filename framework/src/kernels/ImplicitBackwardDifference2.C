@@ -1,7 +1,7 @@
 #include "ImplicitBackwardDifference2.h"
 
 template<>
-InputParameters valid_params<ImplicitBackwardDifference2>()
+InputParameters validParams<ImplicitBackwardDifference2>()
 {
   InputParameters params;
   return params;

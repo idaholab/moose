@@ -2,15 +2,10 @@
 #include "BCFactory.h"
 #include "AuxFactory.h"
 
-GenericBCBlock::GenericBCBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle),
+GenericBCBlock::GenericBCBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params),
    _type(getType())
 {
-  addParam<std::string>("variable", "", "The BC Name used in your model", true);
-  addParam<std::vector<int> >("boundary", "The boundary number from your input mesh which corresponds to this boundary", true);
-  addParam<std::vector<std::string> >("coupled_to", "The list of variable names this object is coupled to.", false);
-  addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this object which correspond with the coupled_as names", false);
-  
   if (reg_id == "BCs/*")
     setClassParams(BCFactory::instance()->getValidParams(_type));
   else

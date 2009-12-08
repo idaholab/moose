@@ -2,7 +2,7 @@
  
 
 template<>
-InputParameters valid_params<SecondDerivativeImplicitEuler>()
+InputParameters validParams<SecondDerivativeImplicitEuler>()
 {
   InputParameters params;
   return params;

@@ -1,7 +1,7 @@
 #include "ConstantIC.h"
 
 template<>
-InputParameters valid_params<ConstantIC>()
+InputParameters validParams<ConstantIC>()
 {
   InputParameters params;
   params.set<Real>("value") = 0.0;

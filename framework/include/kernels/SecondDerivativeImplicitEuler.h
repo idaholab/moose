@@ -3,13 +3,6 @@
 
 #include "Kernel.h"
 
-
-//Forward Declarations
-class SecondDerivativeImplicitEuler;
-
-template<>
-InputParameters valid_params<SecondDerivativeImplicitEuler>();
-
 class SecondDerivativeImplicitEuler : public Kernel
 {
 public:

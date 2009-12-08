@@ -3,9 +3,6 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
-class Diffusion;
-
 class Diffusion : public Kernel
 {
 public:

@@ -1,7 +1,7 @@
 #include "SinDirichletBC.h"
  
 template<>
-InputParameters valid_params<SinDirichletBC>()
+InputParameters validParams<SinDirichletBC>()
 {
   InputParameters params;
   params.set<Real>("initial")=0.0;

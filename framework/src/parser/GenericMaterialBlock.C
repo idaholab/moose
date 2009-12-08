@@ -1,14 +1,10 @@
 #include "GenericMaterialBlock.h"
 #include "MaterialFactory.h"
 
-GenericMaterialBlock::GenericMaterialBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle),
+GenericMaterialBlock::GenericMaterialBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params),
    _type(getType())
 {
-  addParam<std::vector<int> >("block", "The list of blocks for which this material is active on", true);
-  addParam<std::vector<std::string> >("coupled_to", "The list of variable names this object is coupled to.", false);
-  addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this object which correspond with the coupled_as names", false);
-
   setClassParams(MaterialFactory::instance()->getValidParams(_type));
 }
 

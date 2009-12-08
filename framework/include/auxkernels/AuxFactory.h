@@ -63,7 +63,7 @@ public:
   void registerAux(std::string name)
   {
     name_to_build_pointer[name]=&buildAux<AuxType>;
-    name_to_params_pointer[name]=&valid_params<AuxType>;
+    name_to_params_pointer[name]=&validParams<AuxType>;
   }
 
   AuxKernel * add(std::string Aux_name,

@@ -3,9 +3,6 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
-class CoupledForce;
-
 /**
  * Simple class to demonstrate off diagonal Jacobian contributijons.
  */

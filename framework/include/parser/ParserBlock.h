@@ -1,10 +1,30 @@
 #ifndef PARSERBLOCK_H
 #define PARSERBLOCK_H
 
-#include "Kernel.h"
+#include <vector>
 
+#include "ValidParams.h"
+//#include "Kernel.h"
 
+//Forward Declarations
 class Parser;
+class ParserBlock;
+
+template<>
+InputParameters validParams<ParserBlock>()
+{
+  InputParameters params;
+  std::vector<std::string> blocks(1);
+  blocks[0] = "__all__";
+
+  // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
+  params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active", false);
+
+  // "names" in the input file is now deprecated
+  params.addParam<std::vector<std::string> >("names", "Deprecated DO NOT USE!", false);
+  return params;
+}
+
 
 /**
  * This class represents the base class for the various parser block data structures and the associated
@@ -24,7 +44,7 @@ public:
    * for this ParserBlock instance.  A pointer to the parent is passed for use in searching the tree
    * Finally a reference to the GetPot object is passed for flexible extension.
    */
-  ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
+  ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
 
   /**
    * Cleans up the ParserBlock tree strucutre
@@ -74,14 +94,14 @@ public:
    * This function is for adding new parameters to the ParserBlock that will be extracted from
    * the input file, it's intended purpose is for required parameters with no default value
    */
-  template <typename T>
-  void addParam(std::string name, std::string doc_string, bool required) 
-    {
-      _block_params.set<T>(name);
-      if (required)
-        _required_params.insert(name);
-      _doc_string[name] = doc_string;
-    }
+//  template <typename T>
+//  void addParam(std::string name, std::string doc_string, bool required) 
+//     {
+//       _block_params.set<T>(name);
+//       if (required)
+//         _required_params.insert(name);
+//       _doc_string[name] = doc_string;
+//     }
 
   inline void addPrereq(std::string name)
     {
@@ -182,8 +202,8 @@ private:
    */
   InputParameters _class_params;
   
-  std::map<std::string, std::string> _doc_string;
-  std::set<std::string> _required_params;
+//  std::map<std::string, std::string> _doc_string;
+//  std::set<std::string> _required_params;
 };
 
 #endif //PARSERBLOCK_H

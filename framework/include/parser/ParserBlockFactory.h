@@ -9,14 +9,10 @@
 #include <vector>
 #include <typeinfo>
 
-// LibMesh includes
-#include "InputParameters.h"
-
-
 /**
  * Typedef to make things easier.
  */
-typedef ParserBlock * (*parserBlockBuildPtr)(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
+typedef ParserBlock * (*parserBlockBuildPtr)(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
 /**
  * Typedef to make things easier.
  */
@@ -36,9 +32,9 @@ typedef std::vector<std::string>::iterator ParserBlockNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename ParserBlockType>
-ParserBlock * buildParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
+ParserBlock * buildParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
 {
-  return new ParserBlockType(reg_id, real_id, parent, parser_handle);
+  return new ParserBlockType(reg_id, real_id, parent, parser_handle, params);
 }
 
 /**
@@ -53,10 +49,10 @@ public:
   void registerParserBlock(std::string name)
   {
     name_to_build_pointer[name]=&buildParserBlock<ParserBlockType>;
-    name_to_params_pointer[name]=&valid_params<ParserBlockType>;
+    name_to_params_pointer[name]=&validParams<ParserBlockType>;
   }
 
-  ParserBlock * add(const std::string & red_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
+  ParserBlock * add(const std::string & red_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
 
   InputParameters getValidParams(const std::string & name);
   

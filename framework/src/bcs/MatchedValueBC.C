@@ -1,7 +1,7 @@
 #include "MatchedValueBC.h"
 
 template<>
-InputParameters valid_params<MatchedValueBC>()
+InputParameters validParams<MatchedValueBC>()
 {
   InputParameters params;
   return params;

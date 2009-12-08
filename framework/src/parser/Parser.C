@@ -52,7 +52,7 @@ Parser::parse()
   // GetPot object
   _getpot_file.parse_input_file(_input_filename);
   _getpot_initialized = true;
-  _input_tree = new ParserBlock("/", "/", NULL, *this);
+  _input_tree = new ParserBlock("/", "/", NULL, *this, validParams<ParserBlock>());
   _section_names = _getpot_file.get_section_names();
 
   // The variable_names function returns section names and variable names in
@@ -78,9 +78,9 @@ Parser::parse()
         std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
       
         if (matched_identifier.length())
-          curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+          curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
         else
-          curr_block->_children.push_back(new ParserBlock(curr_identifier, curr_identifier, curr_block, *this));
+          curr_block->_children.push_back(new ParserBlock(curr_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(curr_identifier)));
       }
 
       curr_block = *(curr_block->_children.rbegin());
@@ -106,9 +106,9 @@ Parser::buildFullTree()
 {
   std::string prefix;
   ParserBlock *curr_block;
-  
+
   // Build the root of the tree
-  _input_tree = new ParserBlock("/", "/", NULL, *this);
+  _input_tree = new ParserBlock("/", "/", NULL, *this, validParams<ParserBlock>());
   curr_block = _input_tree;
 
 
@@ -121,7 +121,7 @@ Parser::buildFullTree()
       continue;
 
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, *i, curr_block, *this));
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
   }
   
   {
@@ -130,14 +130,14 @@ Parser::buildFullTree()
     std::string var_name("SampleVar");
     curr_block = curr_block->locateBlock("Variables");
     mooseAssert(curr_block != NULL, "A Variables ParserBlock does not appear to exist");
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add("Variables/*", prefix + var_name, curr_block, *this));
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add("Variables/*", prefix + var_name, curr_block, *this, ParserBlockFactory::instance()->getValidParams("Variables/*")));
 
     // Add all the IC Blocks
     curr_block = curr_block->locateBlock(prefix + var_name);
     mooseAssert(curr_block != NULL, "The sample variable block appears to be missing");
     for (InitialConditionNamesIterator i = InitialConditionFactory::instance()->registeredInitialConditionsBegin();
          i != InitialConditionFactory::instance()->registeredInitialConditionsEnd(); ++i)
-      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + "*/InitialCondition", prefix + var_name + "/" + *i, curr_block, *this));
+      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + "*/InitialCondition", prefix + var_name + "/" + *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams(prefix + "*/InitialCondition")));
   }
   
   // Add all the Kernels
@@ -150,7 +150,7 @@ Parser::buildFullTree()
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
 
     mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
   }
 
   // Add all the AuxKernels
@@ -163,7 +163,7 @@ Parser::buildFullTree()
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
 
     mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
   }
   
   // Add all the BCs
@@ -176,7 +176,7 @@ Parser::buildFullTree()
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
 
     mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
   }
 
   curr_block = curr_block->locateBlock("Materials");
@@ -190,7 +190,7 @@ Parser::buildFullTree()
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
 
     mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this));
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
   }
 
   _input_tree->printBlockData();
@@ -310,7 +310,7 @@ Parser::fixupOptionalBlocks()
 
       // Increment one past this location so the new element be inserted afterwards      
       block_ptr->_parent->_children.insert(++position,
-                                            ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, *this));
+                                           ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, *this, ParserBlockFactory::instance()->getValidParams(i->first)));
     }
   }
 }

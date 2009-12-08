@@ -3,12 +3,16 @@
 
 #include "Kernel.h"
 
-
 //Forward Declarations
 class BodyForce;
 
 template<>
-InputParameters valid_params<BodyForce>();
+InputParameters validParams<BodyForce>()
+{
+  InputParameters params;
+  params.set<Real>("value")=0.0;
+  return params;
+}
 
 class BodyForce : public Kernel
 {

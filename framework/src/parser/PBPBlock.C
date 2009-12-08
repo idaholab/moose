@@ -1,20 +1,16 @@
 #include "PBPBlock.h"
 #include "PhysicsBasedPreconditioner.h"
 #include "ComputeJacobian.h"
+#include "Moose.h"
 
 #include "linear_implicit_system.h"
 #include "nonlinear_implicit_system.h"
 #include "nonlinear_solver.h"
 #include "string_to_enum.h"
 
-PBPBlock::PBPBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle)
-{
-  addParam<std::vector<std::string> >("solve_order", "TODO: docstring", true);
-  addParam<std::vector<std::string> >("preconditioner", "TODO: docstring", true);
-  addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring", false);
-  addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring", false);
-}
+PBPBlock::PBPBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params)
+{}
 
 void
 PBPBlock::execute() 

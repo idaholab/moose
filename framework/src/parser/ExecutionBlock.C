@@ -1,4 +1,5 @@
 #include "ExecutionBlock.h"
+#include "Moose.h"
 
 #ifdef LIBMESH_HAVE_PETSC
 /*#include "sparse_matrix.h"
@@ -11,29 +12,9 @@
 #endif //LIBMESH_HAVE_PETSC
 
 
-ExecutionBlock::ExecutionBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle)
+ExecutionBlock::ExecutionBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params)
 {
-  addParam<std::string> ("type",            "",       "Specifies \"Steady\" or \"Transient\" Solver Strategy", true);
-  addParam<Real>        ("l_tol",           1.0e-5,   "Linear Tolerance",                  false);
-  addParam<Real>        ("l_abs_step_tol",  -1,       "Linear Absolute Step Tolerance",    false);
-  addParam<unsigned int>("l_max_its",       10000,    "Max Linear Iterations",             false);
-  addParam<unsigned int>("nl_max_its",      50,       "Max Nonlinear Iterations",          false);
-  addParam<unsigned int>("nl_max_funcs",    10000,    "Max Nonlinear solver function evaluations", false);
-  addParam<Real>        ("nl_abs_tol",      1.0e-50,  "Nonlinear Absolute Tolerance",      false);
-  addParam<Real>        ("nl_rel_tol",      1.0e-8,  "Nonlinear Relative Tolerance",      false);
-  addParam<Real>        ("nl_abs_step_tol", 1.0e-50,  "Nonlinear Absolute step Tolerance", false);
-  addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance", false);
-  addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs", false);
-  addParam<bool>        ("perf_log",        false,    "Specifies whether or not the Performance log should be printed", false);
-  addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling", false);
-
-#ifdef LIBMESH_HAVE_PETSC
-  addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options", false);
-  addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs", false);
-  addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"", false);
-#endif //LIBMESH_HAVE_PETSC
-
   // Register the execution Prereqs
   addPrereq("Mesh");
   addPrereq("Variables");

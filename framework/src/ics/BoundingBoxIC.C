@@ -1,7 +1,7 @@
 #include "BoundingBoxIC.h"
 
 template<>
-InputParameters valid_params<BoundingBoxIC>()
+InputParameters validParams<BoundingBoxIC>()
 {
   InputParameters params;
   params.addParam<Real>("x1", 0.0, "The x coordinate of the lower left-hand corner of the box", true);

@@ -1,7 +1,7 @@
 #include "NeumannBC.h"
 
 template<>
-InputParameters valid_params<NeumannBC>()
+InputParameters validParams<NeumannBC>()
 {
   InputParameters params;
   params.set<Real>("value")=0.0;

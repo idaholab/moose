@@ -8,7 +8,7 @@
 class CoupledAux;
 
 template<>
-InputParameters valid_params<CoupledAux>();
+InputParameters validParams<CoupledAux>();
 
 /** 
  * Coupled auxiliary value

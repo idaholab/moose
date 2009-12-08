@@ -1,7 +1,7 @@
 #include "ConstantAux.h"
 
 template<>
-InputParameters valid_params<ConstantAux>()
+InputParameters validParams<ConstantAux>()
 {
   InputParameters params;
   params.set<Real>("value")=0.0;

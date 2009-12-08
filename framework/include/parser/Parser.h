@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include "ParserBlock.h"
+#include "getpot.h"
 
 #include <list>
 

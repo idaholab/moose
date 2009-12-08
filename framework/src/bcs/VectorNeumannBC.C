@@ -1,7 +1,7 @@
 #include "VectorNeumannBC.h"
 
 template<>
-InputParameters valid_params<VectorNeumannBC>()
+InputParameters validParams<VectorNeumannBC>()
 {
   InputParameters params;
   params.set<Real>("value0")=0.0;

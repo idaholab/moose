@@ -12,8 +12,8 @@
 #include "nonlinear_implicit_system.h"
 #include "getpot.h"
 
-AuxVariablesBlock::AuxVariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :VariablesBlock(reg_id, real_id, parent, parser_handle)
+AuxVariablesBlock::AuxVariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :VariablesBlock(reg_id, real_id, parent, parser_handle, params)
 {
   // Register execution prereqs
   addPrereq("Mesh");

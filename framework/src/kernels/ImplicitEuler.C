@@ -2,7 +2,7 @@
 #include "ImplicitEuler.h"
 
 template<>
-InputParameters valid_params<ImplicitEuler>()
+InputParameters validParams<ImplicitEuler>()
 {
   InputParameters params;
   return params;

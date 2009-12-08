@@ -1,7 +1,7 @@
 #include "ConvectiveFluxBC.h"
 
 template<>
-InputParameters valid_params<ConvectiveFluxBC>()
+InputParameters validParams<ConvectiveFluxBC>()
 {
   InputParameters params;
   params.set<Real>("rate")=7500;

@@ -8,7 +8,7 @@
 class MatchedValueBC;
 
 template<>
-InputParameters valid_params<MatchedValueBC>();
+InputParameters validParams<MatchedValueBC>();
 
 /**
  * Implements a simple coupled boundary condition where u=v on the boundary.

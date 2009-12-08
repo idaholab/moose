@@ -56,7 +56,7 @@ public:
   void registerInitialCondition(std::string name)
   {
     name_to_build_pointer[name]=&buildInitialCondition<InitialConditionType>;
-    name_to_params_pointer[name]=&valid_params<InitialConditionType>;
+    name_to_params_pointer[name]=&validParams<InitialConditionType>;
   }
 
   void add(std::string ic_name, std::string name, InputParameters parameters, std::string var_name);

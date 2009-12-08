@@ -8,7 +8,7 @@
 class ConvectiveFluxBC;
 
 template<>
-InputParameters valid_params<ConvectiveFluxBC>();
+InputParameters validParams<ConvectiveFluxBC>();
 
 class ConvectiveFluxBC : public BoundaryCondition
 {

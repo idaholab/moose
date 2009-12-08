@@ -6,25 +6,19 @@
 
 //MOOSE includes
 #include "Parser.h"
+#include "Moose.h"
 
 //libMesh includes
 #include "InputParameters.h"
 #include "getpot.h"
 
-ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
+ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
   :_reg_id(reg_id),
    _real_id(real_id),
    _parser_handle(parser_handle),
-   _parent(parent)
-{
-  std::vector<std::string> blocks(1);
-  blocks[0] = "__all__";
-  // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
-  addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active", false);
-
-  // "names" in the input file is now deprecated
-  addParam<std::vector<std::string> >("names", "Deprecated DO NOT USE!", false);
-}
+   _parent(parent),
+   _block_params(params)
+{}
 
 ParserBlock::~ParserBlock() 
 {
@@ -214,11 +208,11 @@ ParserBlock::printBlockData()
   for (InputParameters::iterator iter = _block_params.begin(); iter != _block_params.end(); ++iter) 
   {
     // Block params may be required and will have a doc string
-    std::string required = _required_params.find(iter->first) != _required_params.end() ? "*" : " ";
+    std::string required = _block_params.isRequired(iter->first) ? "*" : " ";
 
     std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
     iter->second->print(std::cout);
-    std::cout << "\n" << spacing << "    " << std::setw(30) << " " << "    " << _doc_string[iter->first] << "\n";
+    std::cout << "\n" << spacing << "    " << std::setw(30) << " " << "    " << _block_params.getDocString(iter->first) << "\n";
   }
   
   for (InputParameters::iterator iter = _class_params.begin(); iter != _class_params.end(); ++iter)

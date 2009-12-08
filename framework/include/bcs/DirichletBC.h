@@ -8,7 +8,7 @@
 class DirichletBC;
 
 template<>
-InputParameters valid_params<DirichletBC>();
+InputParameters validParams<DirichletBC>();
 
 /**
  * Implements a simple constant Dirichlet BC where u=value on the boundary.

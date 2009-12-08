@@ -16,7 +16,7 @@
 class BoundingBoxIC;
 
 template<>
-InputParameters valid_params<BoundingBoxIC>();
+InputParameters validParams<BoundingBoxIC>();
 
 /**
  * BoundingBoxIC allows setting the initial condition of a value inside and outside of a specified box.

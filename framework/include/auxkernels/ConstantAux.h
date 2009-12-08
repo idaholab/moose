@@ -8,7 +8,7 @@
 class ConstantAux;
 
 template<>
-InputParameters valid_params<ConstantAux>();
+InputParameters validParams<ConstantAux>();
 
 /** 
  * Constant auxiliary value

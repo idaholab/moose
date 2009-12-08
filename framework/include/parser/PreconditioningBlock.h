@@ -3,10 +3,19 @@
 
 #include "ParserBlock.h"
 
+class PreconditioningBlock;
+
+template<>
+InputParameters validParams<PreconditioningBlock>()
+{
+  return validParams<ParserBlock>();
+}
+
+
 class PreconditioningBlock: public ParserBlock
 {
 public:
-  PreconditioningBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
+  PreconditioningBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
 
   virtual void execute();
 };

@@ -3,6 +3,7 @@
 
 // local includes
 #include "Moose.h"
+#include "ValidParams.h"
 
 // libMesh includes
 #include "equation_systems.h"
@@ -20,14 +21,15 @@
 class Elem;
 class Material;
 
-
+/*
 template<class KernelType>
-InputParameters valid_params()
+InputParameters validParams()
 {
   InputParameters params;
   params.set<bool>("junk") = true;
   return params;
 }
+*/
 
 /** 
  * The Kernel class is responsible for calculating the residuals for various

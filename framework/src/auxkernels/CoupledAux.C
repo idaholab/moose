@@ -1,7 +1,7 @@
 #include "CoupledAux.h"
 
 template<>
-InputParameters valid_params<CoupledAux>()
+InputParameters validParams<CoupledAux>()
 {
   InputParameters params;
   params.set<Real>("value")=0.0;

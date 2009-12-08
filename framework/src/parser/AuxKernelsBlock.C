@@ -2,8 +2,8 @@
 
 #include "AuxKernel.h"
 
-AuxKernelsBlock::AuxKernelsBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle)
+AuxKernelsBlock::AuxKernelsBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params)
 {
   // Register execution prereqs
   addPrereq("Mesh");

@@ -1,7 +1,7 @@
 #include "DirichletBC.h"
 
 template<>
-InputParameters valid_params<DirichletBC>()
+InputParameters validParams<DirichletBC>()
 {
   InputParameters params;
   params.set<Real>("value")=0.0;

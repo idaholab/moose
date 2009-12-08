@@ -53,7 +53,7 @@ public:
   void registerBC(std::string name)
   {
     name_to_build_pointer[name]=&buildBC<BCType>;
-    name_to_params_pointer[name]=&valid_params<BCType>;
+    name_to_params_pointer[name]=&validParams<BCType>;
   }
 
   void add(std::string bc_name,

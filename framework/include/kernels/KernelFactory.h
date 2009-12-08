@@ -61,7 +61,7 @@ public:
   void registerKernel(std::string name)
   {
     name_to_build_pointer[name]=&buildKernel<KernelType>;
-    name_to_params_pointer[name]=&valid_params<KernelType>;
+    name_to_params_pointer[name]=&validParams<KernelType>;
   }
 
   Kernel * add(std::string kernel_name,

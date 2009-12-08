@@ -1,5 +1,10 @@
 #include "ParserBlockFactory.h"
 #include "Parser.h"
+#include "Moose.h"
+
+// LibMesh includes
+#include "InputParameters.h"
+
 
 ParserBlockFactory *
 ParserBlockFactory::instance()
@@ -12,11 +17,11 @@ ParserBlockFactory::instance()
 }
 
 ParserBlock *
-ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
+ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
 {
   ParserBlock * parser_block;
 
-  parser_block = (*name_to_build_pointer[reg_id])(reg_id, real_id, parent, parser_handle);
+  parser_block = (*name_to_build_pointer[reg_id])(reg_id, real_id, parent, parser_handle, params);
   active_parser_blocks.push_back(parser_block);
 
   return parser_block;
@@ -72,7 +77,9 @@ ParserBlockFactory::registeredParserBlocksEnd()
 std::string
 ParserBlockFactory::isRegistered(const std::string & real_id)
 {
-  /* This implementation assumes that wildcards can occur in the final position of the registered id.
+  /**
+   * This implementation assumes that wildcards can occur in the place of an entire token but not as part
+   * of a token (i.e.  'Variables/* /InitialConditions' is valid but not 'Variables/Partial* /InitialConditions'.
    * Since maps are ordered, a reverse traversal through the registered list will always select a more
    * specific match before a wildcard match ('*' == char(42))
    */
@@ -100,17 +107,6 @@ ParserBlockFactory::isRegistered(const std::string & real_id)
       if (keep_going)
         return reg_id;
     }
-    
-    /* 
-    else if (i->first[i->first.length()-1] == '*') 
-    {
-      size_t pos = real_id.rfind('/');
-      // It's important to compare the trailing slashes to avoid premature matches when using
-      // the wildcard behavior (pos+1).
-      if (pos != std::string::npos && i->first.substr(0, i->first.rfind('/')+1) == real_id.substr(0, pos+1)) 
-        return i->first;
-     }
-     */
   }
   
   return std::string("");

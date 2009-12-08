@@ -1,7 +1,7 @@
 #include "VacuumBC.h"
 
 template<>
-InputParameters valid_params<VacuumBC>()
+InputParameters validParams<VacuumBC>()
 {
   InputParameters params;
   params.set<Real>("alpha")=1;

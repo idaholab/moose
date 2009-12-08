@@ -8,7 +8,7 @@
 class VacuumBC;
 
 template<>
-InputParameters valid_params<VacuumBC>();
+InputParameters validParams<VacuumBC>();
 
 /**
  * Implements a simple Vacuum BC for neutron diffusion on the boundary.

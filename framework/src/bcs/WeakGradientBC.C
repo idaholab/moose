@@ -1,7 +1,7 @@
 #include "WeakGradientBC.h"
 
 template<>
-InputParameters valid_params<WeakGradientBC>()
+InputParameters validParams<WeakGradientBC>()
 {
   InputParameters params;
   params.set<Real>("value")=0.0;

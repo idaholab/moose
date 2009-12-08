@@ -16,7 +16,7 @@
 class ConstantIC;
 
 template<>
-InputParameters valid_params<ConstantIC>();
+InputParameters validParams<ConstantIC>();
 
 /**
  * ConstantIC just returns a constant value.

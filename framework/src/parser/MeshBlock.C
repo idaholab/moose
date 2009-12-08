@@ -13,17 +13,9 @@
 #include "mesh_refinement.h"
 #include "linear_partitioner.h"
 
-MeshBlock::MeshBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle)
-{
-  // Register parameters
-  addParam<int>("dim", -1, "The dimension of the mesh file to read or generate", true);
-  addParam<std::string>("file", "", "The name of the mesh file to read (required unless using dynamic generation)", false);
-  addParam<bool>("second_order", false, "Turns on second order elements for the input mesh", false);
-  addParam<bool>("generated", false, "Tell MOOSE that a mesh will be generated", false);
-  addParam<std::string>("partitioner", "", "Specifies a mesh partitioner to use when spliting the mesh for a parallel computation", false);
-  addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh", false);
-}
+MeshBlock::MeshBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params)
+{}
 
 void
 MeshBlock::execute() 

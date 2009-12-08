@@ -8,7 +8,7 @@
 class NeumannBC;
 
 template<>
-InputParameters valid_params<NeumannBC>();
+InputParameters validParams<NeumannBC>();
 
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.

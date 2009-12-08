@@ -11,7 +11,7 @@
 class VectorNeumannBC;
 
 template<>
-InputParameters valid_params<VectorNeumannBC>();
+InputParameters validParams<VectorNeumannBC>();
 
 /**
  * Implements a simple constant VectorNeumann BC where grad(u)=value on the boundary.

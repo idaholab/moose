@@ -8,7 +8,7 @@
 class WeakGradientBC;
 
 template<>
-InputParameters valid_params<WeakGradientBC>();
+InputParameters validParams<WeakGradientBC>();
 
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.

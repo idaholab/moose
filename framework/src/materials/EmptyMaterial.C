@@ -1,7 +1,7 @@
 #include "EmptyMaterial.h"
 
 template<>
-InputParameters valid_params<EmptyMaterial>()
+InputParameters validParams<EmptyMaterial>()
 {
   InputParameters params;
   return params;

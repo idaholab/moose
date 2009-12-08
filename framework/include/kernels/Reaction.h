@@ -3,10 +3,6 @@
 
 #include "Kernel.h"
 
-
-//Forward Declarations
-class Reaction;
-
 class Reaction : public Kernel
 {
 public:

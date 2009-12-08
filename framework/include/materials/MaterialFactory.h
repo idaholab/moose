@@ -57,7 +57,7 @@ public:
   void registerMaterial(std::string name)
   {
     name_to_build_pointer[name]=&buildMaterial<MaterialType>;
-    name_to_params_pointer[name]=&valid_params<MaterialType>;
+    name_to_params_pointer[name]=&validParams<MaterialType>;
   }
 
   void add(std::string mat_name,

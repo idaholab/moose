@@ -10,21 +10,10 @@
 #include "mesh_generation.h"
 #include "string_to_enum.h"
 
-MeshGenerationBlock::MeshGenerationBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle),
+MeshGenerationBlock::MeshGenerationBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params),
    _executed(false)
-{
-  addParam<int>("nx", 1, "Number of elements in the X direction", false);
-  addParam<int>("ny", 1, "Number of elements in the Y direction", false);
-  addParam<int>("nz", 1, "Number of elements in the Z direction", false);
-  addParam<Real>("xmin", 0.0, "Lower X Coordinate of the generated mesh", false);
-  addParam<Real>("ymin", 0.0, "Lower Y Coordinate of the generated mesh", false);
-  addParam<Real>("zmin", 0.0, "Lower Z Coordinate of the generated mesh", false);
-  addParam<Real>("xmax", 1.0, "Upper X Coordinate of the generated mesh", false);
-  addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh", false);
-  addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh", false);
-  addParam<std::string>("elem_type", "QUAD4", "The type of element from libMesh to generate", false);
-}
+{}
 
 void
 MeshGenerationBlock::execute() 

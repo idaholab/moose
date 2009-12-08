@@ -3,13 +3,6 @@
 
 #include "Kernel.h"
 
-
-//Forward Declarations
-class ImplicitBackwardDifference2;
-
-template<>
-InputParameters valid_params<ImplicitBackwardDifference2>();
-
 class ImplicitBackwardDifference2 : public Kernel
 {
 public:

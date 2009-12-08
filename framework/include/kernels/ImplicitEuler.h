@@ -3,12 +3,6 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
-class ImplicitEuler;
-
-template<>
-InputParameters valid_params<ImplicitEuler>();
-
 class ImplicitEuler : public Kernel
 {
 public:

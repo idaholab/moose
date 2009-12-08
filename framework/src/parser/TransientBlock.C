@@ -1,23 +1,9 @@
 #include "TransientBlock.h"
+#include "Moose.h"
 
-TransientBlock::TransientBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle)
-{
-  addParam<Real>        ("start_time",                         0.0,    "The start time of the simulation", false);
-  addParam<Real>        ("end_time",                           1.0e30, "The end time of the simulation",   false);
-  addParam<Real>        ("dt",                                 -1.0,    "The timestep size between solves", false);
-  addParam<Real>        ("dtmin",                              0.0, "The minimum timestep size in an adaptive run", false);
-  addParam<Real>        ("dtmax",                              1.0e30, "The maximum timestep size in an adaptive run", false);
-  addParam<int>         ("num_steps",                          -1,     "The number of timesteps in a transient run", false);
-  addParam<int>         ("n_startup_steps",                    0,      "The number of timesteps during startup", false);
-  addParam<bool>        ("adaptive_time_stepping",             false,  "Specifies whether adaptive time stepping is turned on or off (default: off)", false);
-  addParam<bool>        ("sol_time_adaptive_time_stepping",    false,  "Specifies that an algorithm that minimizes solution time (wall time) is used", false);
-  addParam<bool>        ("exponential_time_stepping",          false,  "Specifies that an algorithm that employees exponetial time stepping is used", false);
-  addParam<bool>        ("trans_ss_check",                     false,  "TODO: doc string", false);
-  addParam<Real>        ("ss_check_tol",                       1.0e-08,"TODO: doc string", false);
-  addParam<Real>        ("ss_tmin",                            0.0,    "TODO: doc string", false);
-  addParam<Real>        ("reject_step_error",                  -1.0,   "TODO: doc string", false);
-}
+TransientBlock::TransientBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params)
+{}
 
 void
 TransientBlock::execute() 

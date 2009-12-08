@@ -1,4 +1,5 @@
 #include "AdaptivityBlock.h"
+#include "Moose.h"
 
 // libMesh includes
 #include "mesh_refinement.h"
@@ -6,19 +7,11 @@
 #include "error_vector.h"
 #include "kelly_error_estimator.h"
 #include "fourth_error_estimators.h"
+#include "transient_system.h"
 
-AdaptivityBlock::AdaptivityBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle)
-  :ParserBlock(reg_id, real_id, parent, parser_handle)
-{
-  addParam<unsigned int>("steps", 0, "The number of adaptivity steps to perform at any one time for steady state", false);
-  addParam<unsigned int>("initial_adaptivity", 0, "The number of adaptivity steps to perform using the initial conditions", false);
-  addParam<Real> ("refine_fraction", 0.0, "The fraction of elements or error to refine. Should be between 0 and 1.", false);
-  addParam<Real> ("coarsen_fraction", 0.0, "The fraction of elements or error to coarsen. Should be between 0 and 1.", false);
-  addParam<unsigned int> ("max_h_level", 0, "Maximum number of times a single element can be refined. If 0 then infinite.", false);
-  addParam<std::vector<std::string> > ("weight_names", "List of names of variables that will be associated with weight_values", false);
-  addParam<std::vector<Real> > ("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by", false);
-  addParam<std::string> ("error_estimator", "KellyErrorEstimator", "The class name of the error estimator you want to use.", false);
-}
+AdaptivityBlock::AdaptivityBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+  :ParserBlock(reg_id, real_id, parent, parser_handle, params)
+{}
 
 void
 AdaptivityBlock::execute() 

@@ -3,14 +3,29 @@
 
 #include "ParserBlock.h"
 
+//Forward Declarations
+class OutputBlock;
+
+template<>
+InputParameters validParams<OutputBlock>()
+{
+  InputParameters params = validParams<ParserBlock>();
+  params.addParam<std::string>("file_base", "out", "The desired solution output name without an extension", true);
+  params.addParam<int>("interval", 1, "The iterval at which timesteps are output to the solution file", false);
+  params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)", false);
+  params.addParam<bool>("gmv", false, "Specifies that you would like GMV output solution file(s)", false);
+  params.addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)", false);
+  params.addParam<bool>("print_out_info", false, "Specifies that you would like to see more verbose output information on STDOUT", false);
+  params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file", false);
+  return params;
+}
+
 class OutputBlock: public ParserBlock
 {
 public:
-  OutputBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle);
+  OutputBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
 
   virtual void execute();
 };
-
-  
 
 #endif //OUTPUTBLOCK_H

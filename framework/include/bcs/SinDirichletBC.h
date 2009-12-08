@@ -9,7 +9,7 @@
 class SinDirichletBC;
 
 template<>
-InputParameters valid_params<SinDirichletBC>();
+InputParameters validParams<SinDirichletBC>();
 
 class SinDirichletBC : public BoundaryCondition
 {
