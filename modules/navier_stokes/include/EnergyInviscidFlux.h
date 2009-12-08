@@ -9,7 +9,7 @@
 class EnergyInviscidFlux;
 
 template<>
-InputParameters valid_params<EnergyInviscidFlux>();
+InputParameters validParams<EnergyInviscidFlux>();
 
 class EnergyInviscidFlux : public Kernel
 {

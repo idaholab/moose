@@ -2,7 +2,7 @@
  
 
 template<>
-InputParameters valid_params<MomentumViscousFlux>()
+InputParameters validParams<MomentumViscousFlux>()
 {
   InputParameters params;
   params.set<Real>("component") = -1;

@@ -2,7 +2,7 @@
  
 
 template<>
-InputParameters valid_params<GravityPower>()
+InputParameters validParams<GravityPower>()
 {
   InputParameters params;
   params.set<Real>("acceleration") = -9.80665;

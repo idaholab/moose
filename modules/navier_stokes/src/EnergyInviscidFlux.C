@@ -2,7 +2,7 @@
  
 
 template<>
-InputParameters valid_params<EnergyInviscidFlux>()
+InputParameters validParams<EnergyInviscidFlux>()
 {
   InputParameters params;
   return params;

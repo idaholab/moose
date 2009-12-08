@@ -2,7 +2,7 @@
  
 
 template<>
-InputParameters valid_params<HeatConduction>()
+InputParameters validParams<HeatConduction>()
 {
   InputParameters params;
   return params;

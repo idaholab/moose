@@ -9,7 +9,7 @@
 class ThermalBC;
 
 template<>
-InputParameters valid_params<ThermalBC>();
+InputParameters validParams<ThermalBC>();
 
 class ThermalBC : public BoundaryCondition
 {

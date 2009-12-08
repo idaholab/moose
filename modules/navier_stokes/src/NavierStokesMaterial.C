@@ -1,7 +1,7 @@
 #include "NavierStokesMaterial.h"
 
 template<>
-InputParameters valid_params<NavierStokesMaterial>()
+InputParameters validParams<NavierStokesMaterial>()
 {
   InputParameters params;
 

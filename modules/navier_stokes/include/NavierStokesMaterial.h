@@ -8,7 +8,7 @@
 class NavierStokesMaterial;
 
 template<>
-InputParameters valid_params<NavierStokesMaterial>();
+InputParameters validParams<NavierStokesMaterial>();
 
 /**
  * This is the base class all materials should use if you are trying to use the Navier-Stokes Kernels.
@@ -16,7 +16,7 @@ InputParameters valid_params<NavierStokesMaterial>();
  * Note that the derived class just needs to compute dynamic_viscocity then call this class's
  * computeProperties() function.
  *
- * Also make sure that the derived class's valid_params function just adds to this class's valid_params.
+ * Also make sure that the derived class's validParams function just adds to this class's validParams.
  *
  * Finally, note that this Material _isn't_ registered with the MaterialFactory.  The reason is that by
  * itself this material doesn't work!  You _must_ derive from this material and compute dynamic_viscocity!

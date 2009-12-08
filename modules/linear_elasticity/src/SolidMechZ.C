@@ -1,9 +1,9 @@
 #include "SolidMechZ.h"
 
 template<>
-InputParameters valid_params<SolidMechZ>()
+InputParameters validParams<SolidMechZ>()
 {
-  return valid_params<SolidMech>();
+  return validParams<SolidMech>();
 }
 
 SolidMechZ::SolidMechZ(std::string name,

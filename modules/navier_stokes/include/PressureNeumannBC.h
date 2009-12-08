@@ -9,7 +9,7 @@
 class PressureNeumannBC;
 
 template<>
-InputParameters valid_params<PressureNeumannBC>();
+InputParameters validParams<PressureNeumannBC>();
 
 class PressureNeumannBC : public BoundaryCondition
 {

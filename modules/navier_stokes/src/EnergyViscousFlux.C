@@ -2,7 +2,7 @@
  
 
 template<>
-InputParameters valid_params<EnergyViscousFlux>()
+InputParameters validParams<EnergyViscousFlux>()
 {
   InputParameters params;
   return params;

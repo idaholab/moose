@@ -13,7 +13,7 @@
 class SolidMech;
 
 template<>
-InputParameters valid_params<SolidMech>();
+InputParameters validParams<SolidMech>();
 
 class SolidMech : public Kernel
 {

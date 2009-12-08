@@ -2,7 +2,7 @@
  
 
 template<>
-InputParameters valid_params<Temperature>()
+InputParameters validParams<Temperature>()
 {
   InputParameters params;
   return params;

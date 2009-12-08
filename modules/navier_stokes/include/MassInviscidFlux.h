@@ -8,7 +8,7 @@
 class MassInviscidFlux;
 
 template<>
-InputParameters valid_params<MassInviscidFlux>();
+InputParameters validParams<MassInviscidFlux>();
 
 class MassInviscidFlux : public Kernel
 {

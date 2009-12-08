@@ -1,7 +1,7 @@
 #include "PressureNeumannBC.h"
 
 template<>
-InputParameters valid_params<PressureNeumannBC>()
+InputParameters validParams<PressureNeumannBC>()
 {
   InputParameters params;
   params.set<Real>("component");

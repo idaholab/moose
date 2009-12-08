@@ -9,7 +9,7 @@
 class GravityPower;
 
 template<>
-InputParameters valid_params<GravityPower>();
+InputParameters validParams<GravityPower>();
 
 class GravityPower : public Kernel
 {

@@ -9,7 +9,7 @@
 class MomentumInviscidFlux;
 
 template<>
-InputParameters valid_params<MomentumInviscidFlux>();
+InputParameters validParams<MomentumInviscidFlux>();
 
 class MomentumInviscidFlux : public Kernel
 {

@@ -9,7 +9,7 @@
 class Temperature;
 
 template<>
-InputParameters valid_params<Temperature>();
+InputParameters validParams<Temperature>();
 
 class Temperature : public Kernel
 {

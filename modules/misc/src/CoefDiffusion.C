@@ -2,7 +2,7 @@
 
 
 template<>
-InputParameters valid_params<CoefDiffusion>()
+InputParameters validParams<CoefDiffusion>()
 {
   InputParameters params;
   params.set<Real>("coef")=0.0;

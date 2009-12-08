@@ -1,9 +1,9 @@
 #include "SolidMechTempCouple.h"
 
 template<>
-InputParameters valid_params<SolidMechTempCouple>()
+InputParameters validParams<SolidMechTempCouple>()
 {
-  InputParameters params = valid_params<SolidMech>();
+  InputParameters params = validParams<SolidMech>();
   return params;
 }
 

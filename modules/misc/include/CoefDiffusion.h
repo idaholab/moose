@@ -7,7 +7,7 @@
 class CoefDiffusion;
 
 template<>
-InputParameters valid_params<CoefDiffusion>();
+InputParameters validParams<CoefDiffusion>();
 
 class CoefDiffusion : public Kernel
 {

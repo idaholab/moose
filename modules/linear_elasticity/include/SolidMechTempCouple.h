@@ -11,7 +11,7 @@
 class SolidMechTempCouple;
 
 template<>
-InputParameters valid_params<SolidMechTempCouple>();
+InputParameters validParams<SolidMechTempCouple>();
 
 class SolidMechTempCouple : public SolidMech
 {

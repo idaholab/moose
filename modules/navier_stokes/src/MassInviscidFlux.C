@@ -1,7 +1,7 @@
 #include "MassInviscidFlux.h"
 
 template<>
-InputParameters valid_params<MassInviscidFlux>()
+InputParameters validParams<MassInviscidFlux>()
 {
   InputParameters params;
   return params;

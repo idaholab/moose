@@ -1,7 +1,7 @@
 #include "ThermalBC.h"
 
 template<>
-InputParameters valid_params<ThermalBC>()
+InputParameters validParams<ThermalBC>()
 {
   InputParameters params;
   params.set<Real>("initial")=0.0;

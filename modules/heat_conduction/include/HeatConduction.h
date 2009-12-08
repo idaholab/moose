@@ -9,7 +9,7 @@
 class HeatConduction;
 
 template<>
-InputParameters valid_params<HeatConduction>();
+InputParameters validParams<HeatConduction>();
 
 class HeatConduction : public Diffusion
 {

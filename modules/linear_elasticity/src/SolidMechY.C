@@ -1,9 +1,9 @@
 #include "SolidMechY.h"
 
 template<>
-InputParameters valid_params<SolidMechY>()
+InputParameters validParams<SolidMechY>()
 {
-  return valid_params<SolidMech>();
+  return validParams<SolidMech>();
 }
 
 SolidMechY::SolidMechY(std::string name,

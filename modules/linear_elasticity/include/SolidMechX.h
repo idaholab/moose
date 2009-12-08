@@ -8,7 +8,7 @@
 class SolidMechX;
 
 template<>
-InputParameters valid_params<SolidMechX>();
+InputParameters validParams<SolidMechX>();
 
 class SolidMechX : public SolidMech
 {

@@ -1,7 +1,7 @@
 #include "SolidMech.h"
 
 template<>
-InputParameters valid_params<SolidMech>()
+InputParameters validParams<SolidMech>()
 {
   InputParameters params;
   return params;
