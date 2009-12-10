@@ -17,7 +17,7 @@ RandomIC::RandomIC(std::string name,
    _max(parameters.get<Real>("max")),
    _range(_max - _min)
 {
-  mooseAssert(range > 0.0, "Min > Max for RandomIC!");
+  mooseAssert(_range > 0.0, "Min > Max for RandomIC!");
 }
 
 Real
