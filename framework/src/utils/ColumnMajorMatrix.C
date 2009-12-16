@@ -3,19 +3,20 @@
 ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols)
   : _n_rows(rows),
     _n_cols(cols),
+    _n_entries(rows*cols),
     _values(rows*cols)
 {}
 
-inline
 ColumnMajorMatrix::ColumnMajorMatrix(const ColumnMajorMatrix &rhs)
 {
   *this = rhs;
 }
 
-
+explicit 
 ColumnMajorMatrix::ColumnMajorMatrix(const TypeTensor<Real> &rhs)
   :_n_rows(LIBMESH_DIM),
    _n_cols(LIBMESH_DIM),
+   _n_entries(LIBMESH_DIM*LIBMESH_DIM),
    _values(LIBMESH_DIM*LIBMESH_DIM)
 {
   for (unsigned int j=0; j<LIBMESH_DIM; ++j)
@@ -24,25 +25,20 @@ ColumnMajorMatrix::ColumnMajorMatrix(const TypeTensor<Real> &rhs)
 }
 
 ColumnMajorMatrix::ColumnMajorMatrix(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3)
+  :_n_rows(LIBMESH_DIM),
+   _n_cols(LIBMESH_DIM),
+   _n_entries(LIBMESH_DIM*LIBMESH_DIM),
+   _values(LIBMESH_DIM*LIBMESH_DIM)
 {
   unsigned int entry = 0;
   for(unsigned int i=0; i<LIBMESH_DIM; i++)
-  {
-    _values[entry] = col1(i);
-    entry++;
-  }
+    _values[entry++] = col1(i);
 
   for(unsigned int i=0; i<LIBMESH_DIM; i++)
-  {
-    _values[entry] = col2(i);
-    entry++;
-  }
+    _values[entry++] = col2(i);
 
   for(unsigned int i=0; i<LIBMESH_DIM; i++)
-  {
-    _values[entry] = col3(i);
-    entry++;
-  }
+    _values[entry++] = col3(i);
 }
 
     
