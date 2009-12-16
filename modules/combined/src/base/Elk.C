@@ -33,6 +33,10 @@
 #include "SolidMechTempCoupleY.h"
 #include "SolidMechTempCoupleZ.h"
 
+// solid_mechanics
+#include "StressDivergence.h"
+#include "LinearIsotropicMaterial.h"
+
 void
 Elk::registerObjects()
 {
@@ -63,4 +67,8 @@ Elk::registerObjects()
   KernelFactory::instance()->registerKernel<SolidMechTempCoupleX>("SolidMechTempCoupleX");
   KernelFactory::instance()->registerKernel<SolidMechTempCoupleY>("SolidMechTempCoupleY");
   KernelFactory::instance()->registerKernel<SolidMechTempCoupleZ>("SolidMechTempCoupleZ");
+
+  // solid_mechanics
+  KernelFactory::instance()->registerKernel<StressDivergence>("StressDivergence");
+  MaterialFactory::instance()->registerMaterial<LinearIsotropicMaterial>("LinearIsotropic");
 }
