@@ -12,7 +12,6 @@ ColumnMajorMatrix::ColumnMajorMatrix(const ColumnMajorMatrix &rhs)
   *this = rhs;
 }
 
-explicit 
 ColumnMajorMatrix::ColumnMajorMatrix(const TypeTensor<Real> &rhs)
   :_n_rows(LIBMESH_DIM),
    _n_cols(LIBMESH_DIM),

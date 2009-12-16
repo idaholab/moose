@@ -31,8 +31,8 @@ public:
   /**
    * Constructor that fills in the ColumnMajorMatrix with values from a libMesh TypeTensor
    */
+  explicit
   ColumnMajorMatrix(const TypeTensor<Real> & tensor);
-
 
   /**
    * Constructor that takes in 3 vectors and uses them to create columns
