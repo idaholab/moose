@@ -17,16 +17,16 @@ int main(int argc, char **argv)
 {
   CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
 
-  CppUnit::TextUi::TestRunner runner;
+  CppUnit::TextTestRunner runner;
   runner.addTest(suite);
 
   /* Uncomment the following line for bitten testing */
-  runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), std::cerr ) );
+  runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), std::cout ) );
   
   /* Uncomment the following line for CLI testing */
   //runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
 
-  bool wasSucessful = runner.run();
+  bool wasSucessful = runner.run("", false, true, false);
   
   return wasSucessful ? 0 : 1;
 }
