@@ -1,4 +1,5 @@
 //CPPUnit includes
+#include "cppunit/XmlOutputter.h"
 #include "cppunit/CompilerOutputter.h"
 #include "cppunit/ui/text/TestRunner.h"
 #include "cppunit/extensions/TestFactoryRegistry.h"
@@ -19,7 +20,11 @@ int main(int argc, char **argv)
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(suite);
 
-  runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
+  /* Uncomment the following line for bitten testing */
+  runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), std::cerr ) );
+  
+  /* Uncomment the following line for CLI testing */
+  //runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
 
   bool wasSucessful = runner.run();
   
