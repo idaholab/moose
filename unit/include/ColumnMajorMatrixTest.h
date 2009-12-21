@@ -33,6 +33,4 @@ private:
   ColumnMajorMatrix *a, *t; 
 };
 
-  
-
-#endif
+#endif  // COLUMNMAJORMATRIXTEST_H

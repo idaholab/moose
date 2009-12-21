@@ -2,6 +2,8 @@
 
 #If MOOSE_DIR isn't found in the environment it's assumed
 MOOSE_DIR ?= $(shell pwd)/../moose
+CPPUNIT_DIR ?= $HOME/root/usr/local/packages/cppunit
+
 ELK_DIR ?= $(shell pwd)/../elk
 
 # The location of the mesh library
@@ -13,9 +15,8 @@ meshdir := $(LIBMESH_DIR)
 #include $(meshdir)/Make.common
 
 include $(MOOSE_DIR)/Makefile.export
-include $(ELK_DIR)/Makefile.export
 
-mpif77_command := $(libmesh_F77)
+mpif77_command 	:= $(libmesh_F77)
 
 ###############################################################################
 # File management.  This is where the source, header, and object files are
@@ -27,7 +28,7 @@ srcfiles 	:= $(wildcard src/*.C) $(wildcard src/*/*.C)
 
 #
 # object files
-objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
+objects		:= $(patsubst %.C, %.$(MAKECMDGOALS)_$(obj-suffix), $(srcfiles))
 
 # include dirs
 libmesh_INCLUDE += -Iinclude -I$(CPPUNIT_DIR)/include
@@ -38,27 +39,44 @@ libmesh_LDFLAGS	+= $(libmesh_RPATHFLAG)$(CPPUNIT_LIB)
 ###############################################################################
 
 
-.PHONY: clean doc
+.PHONY: clean doc mooseunit elkunit
 
 ###############################################################################
 # Target:
 #
-target 	   := ./mooseunit-$(METHOD)
+all::	mooseunit
 
 
-all:: $(target)
+mooseunit: 
+	@$(MAKE) mooseunit-$(METHOD)
+
+elkunit: 
+	@$(MAKE) elkunit-$(METHOD) libmesh_CXXFLAGS="$(libmesh_CXXFLAGS) -DELK_TEST"
 
 # Production rules:  how to make the target - depends on library configuration
-$(target): $(objects) $(moose_LIB) $(mesh_library)
+mooseunit-$(METHOD): $(objects) $(moose_LIB) $(mesh_library)
 	@echo "Linking "$@"..."
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
 
-doc:
-	doxygen ./doc/Doxyfile
+elkunit-$(METHOD):  $(objects) $(moose_LIB) $(mesh_library)
+	@echo "Linking "$@"..."
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
+
+
+###############################################################################
+# Special Rules for augmented obj_suffix from libmesh
+#
+%.$(MAKECMDGOALS)_$(obj-suffix) : %.C
+	@echo "Compiling C++ (in "$(mode)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) -c $< -o $@
+
+
+#doc:
+#	doxygen ./doc/Doxyfile
 
 # Useful rules.
 clean:
-	@rm -f mooseunit-*
+	@rm -f mooseunit-* elkunit-*
 	@find . -name "*~" -or -name "*.o" | xargs rm
 	@rm -f .depend
 
