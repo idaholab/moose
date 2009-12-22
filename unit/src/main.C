@@ -12,6 +12,7 @@
 #include "Moose.h"
 
 #include <fstream>
+#include <string>
 
 PerfLog Moose::perf_log("CppUnit");
 
@@ -24,11 +25,11 @@ int main(int argc, char **argv)
 
   /* Uncomment the following line for bitten testing */
   std::ofstream out("test_results.xml");
-  
-  runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), out ) );
-  
-  /* Uncomment the following line for CLI testing */
-  //runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
+
+  if (argc == 2 && std::string(argv[1]) == std::string("--xml"))
+    runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), out ) );
+  else
+    runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
 
   bool wasSucessful = runner.run("", false, true, false);
 
