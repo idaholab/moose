@@ -91,6 +91,26 @@ KernelFactory::blockKernelsEnd(THREAD_ID tid, unsigned int block_id)
   return block_kernels[tid][block_id].end();
 }
 
+bool
+KernelFactory::activeKernelBlocks(std::set<subdomain_id_type> & set_buffer) const
+{
+  std::map<unsigned int, std::vector<Kernel *> >::const_iterator curr, end;
+  end = block_kernels[0].end();
+
+  try 
+  {
+    for (curr = block_kernels[0].begin(); curr != end; ++curr)
+      set_buffer.insert(subdomain_id_type(curr->first));
+  }
+  catch (std::exception &e)
+  {
+    mooseError("Invalid block specified in input file");
+  }
+
+  // return a boolean indicated whether there are any global kernels active
+  return ! active_kernels[0].empty();
+}
+
 KernelNamesIterator
 KernelFactory::registeredKernelsBegin()
 {

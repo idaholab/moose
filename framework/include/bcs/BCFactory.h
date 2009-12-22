@@ -74,6 +74,8 @@ public:
 
   BCNamesIterator registeredBCsBegin();
   BCNamesIterator registeredBCsEnd();
+
+  void activeBoundaries(std::set<subdomain_id_type> & set_buffer) const;
   
 private:
   BCFactory();

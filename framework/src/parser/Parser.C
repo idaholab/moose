@@ -343,7 +343,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 
     // Mark parameters appearing in the input file
     if (_getpot_file.have_variable(full_name.c_str()))
-      p.seenInInputFile(full_name);
+      p.seenInInputFile(it->first);
     // The parameter is required but missing
     else if (p.isParamRequired(it->first))
       mooseError("The required parameter '" + full_name + "' is missing\n");

@@ -65,7 +65,9 @@
 #include "gmv_io.h"
 #include "exodusII_io.h"
 #include "tecplot_io.h"
+#include "parallel.h"
 
+#include <set>
 
 void
 Moose::registerObjects()
@@ -273,6 +275,41 @@ Moose::output_system(EquationSystems * equation_systems, std::string file_base, 
   }
 
   if(print_out_info) std::cout << std::endl; 
+}
+
+void
+Moose::checkSystemsIntegrity()
+{
+  parallel_only();
+  std::set<subdomain_id_type> element_subdomains, input_subdomains, difference;
+  bool global_kernels_exist = false;
+
+  // Build a set of active subdomains from the mesh in MOOSE
+  const MeshBase::element_iterator el_end = Moose::mesh->elements_end();
+  for (MeshBase::element_iterator el = Moose::mesh->active_elements_begin(); el != el_end; ++el)
+    element_subdomains.insert((*el)->subdomain_id());
+
+  // Check materials
+  MaterialIterator end = MaterialFactory::instance()->activeMaterialsEnd(0);
+  for (MaterialIterator i = MaterialFactory::instance()->activeMaterialsBegin(0); i != end; ++i)
+    if (element_subdomains.find(i->first) == element_subdomains.end()) 
+    {
+      std::stringstream oss;
+      oss << "Material block \"" << i->first << "\" specified in the input file does not exist";
+      mooseError (oss.str());
+    }
+
+  // Check kernels
+  global_kernels_exist = KernelFactory::instance()->activeKernelBlocks(input_subdomains);
+  std::set_difference (element_subdomains.begin(), element_subdomains.end(),
+                       input_subdomains.begin(), input_subdomains.end(),
+                       std::inserter(difference, difference.end()));
+  
+  if (!global_kernels_exist && !difference.empty())
+    mooseError("Kernel coverage of your mesh subdomains is mismatched");
+
+  // Check BCs
+  // TODO: Check Boundaries
 }
 
 /******************

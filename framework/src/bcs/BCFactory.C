@@ -92,6 +92,26 @@ BCFactory::registeredBCsEnd()
   return _registered_bc_names.end();
 }
 
+void
+BCFactory::activeBoundaries(std::set<subdomain_id_type> & set_buffer) const
+{
+  std::map<unsigned int, std::vector<BoundaryCondition *> >::const_iterator curr, end;
+  end = active_bcs[0].end();
+
+  try 
+  {
+    for (curr = active_bcs[0].begin(); curr != end; ++curr)
+    {
+      set_buffer.insert(subdomain_id_type(curr->first));
+    }
+  }
+  catch (std::exception &e)
+  {
+    mooseError("Invalid block specified in input file");
+  }
+}
+
+
 BCFactory::BCFactory()
 {
   active_bcs.resize(libMesh::n_threads());

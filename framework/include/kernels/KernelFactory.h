@@ -88,6 +88,8 @@ public:
   KernelIterator blockKernelsBegin(THREAD_ID tid, unsigned int block_id);
   KernelIterator blockKernelsEnd(THREAD_ID tid, unsigned int block_id);
 
+  bool activeKernelBlocks(std::set<subdomain_id_type> & set_buffer) const;
+
   KernelNamesIterator registeredKernelsBegin();
   KernelNamesIterator registeredKernelsEnd();
   
