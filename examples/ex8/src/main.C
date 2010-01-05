@@ -40,7 +40,7 @@ int main (int argc, char** argv)
   // See if an input file was provided on the command-line
   std::string input_filename = "";
   if ( Moose::command_line->search("-i") )
-    input_filename = command_line.next(input_filename);
+    input_filename = Moose::command_line->next(input_filename);
   else
     mooseError("Must specify an input file using -i");
 
