@@ -2,6 +2,14 @@
 
 #include "Material.h"
 
+ExampleImplicitEuler::ExampleImplicitEuler(std::string name,
+                                           InputParameters parameters,
+                                           std::string var_name,
+                                           std::vector<std::string> coupled_to,
+                                           std::vector<std::string> coupled_as)
+  :ImplicitEuler(name,parameters,var_name,coupled_to,coupled_as)
+{}
+
 void
 ExampleImplicitEuler::subdomainSetup()
 {

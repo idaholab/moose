@@ -8,12 +8,10 @@ class ExampleImplicitEuler : public ImplicitEuler
 public:
 
   ExampleImplicitEuler(std::string name,
-                InputParameters parameters,
-                std::string var_name,
-                std::vector<std::string> coupled_to=std::vector<std::string>(0),
-                std::vector<std::string> coupled_as=std::vector<std::string>(0))
-    :ImplicitEuler(name,parameters,var_name,coupled_to,coupled_as)
-  {}
+                       InputParameters parameters,
+                       std::string var_name,
+                       std::vector<std::string> coupled_to,
+                       std::vector<std::string> coupled_as);
 
   virtual void subdomainSetup();
 

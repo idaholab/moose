@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<CoupledDirichletBC>()
 {
   InputParameters params;
-  params.set<Real>("value")=0.0;
+  params.addParam<Real>("value", 0.0, "Value multiplided by the coupled value on the boundary");
   return params;
 }
 

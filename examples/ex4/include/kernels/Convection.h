@@ -36,28 +36,10 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   Convection(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as)
-
-    // You must call the constructor of the base class first
-    // The "true" here specifies that this Kernel is to be integrated
-    // over the domain.
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
-
-    // coupledGrad will give us a reference to the gradient of another
-    // variable in the computation.  We are going to use that gradient
-    // as our velocity vector.
-    //
-    // Note that "some_var" is the name this Kernel expects... ie
-    // what should be in "coupled_as"
-    // 
-    // You can also use coupledVal() and coupledValOld() if you want
-    // values
-    _grad_some_var(coupledGrad("some_var"))
-  {
-  }
+             InputParameters parameters,
+             std::string var_name,
+             std::vector<std::string> coupled_to,
+             std::vector<std::string> coupled_as);
 
 protected:
   /**

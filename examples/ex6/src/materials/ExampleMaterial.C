@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<ExampleMaterial>()
 {
   InputParameters params;
-  params.set<Real>("diffusivity")=1.0;
+  params.addParam<Real>("diffusivity", 1.0, "The Diffusivity");
   return params;
 }
 

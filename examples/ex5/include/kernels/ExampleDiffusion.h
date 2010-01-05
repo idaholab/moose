@@ -13,9 +13,7 @@ public:
                    InputParameters parameters,
                    std::string var_name,
                    std::vector<std::string> coupled_to,
-                   std::vector<std::string> coupled_as)
-    :Diffusion(name,parameters,var_name,coupled_to,coupled_as)
-  {}
+                   std::vector<std::string> coupled_as);
 
   // subdomainSetup() gets called each time the subdomain (block) changes.
   // This is where you grab material properties for the current block
