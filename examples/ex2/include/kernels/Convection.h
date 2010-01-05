@@ -36,30 +36,10 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   Convection(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as)
-
-    // You must call the constructor of the base class first
-    // The "true" here specifies that this Kernel is to be integrated
-    // over the domain.
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
-
-    // This is the "Intialization List" it sets the values of class variables
-    // Here we are grabbing the values of Parameters to use for a velocity vector
-    _x(_parameters.get<Real>("x")),
-    _y(_parameters.get<Real>("y")),
-    _z(_parameters.get<Real>("z"))
-  {
-    // Build a velocity vector to use in the residual / jacobian computations.
-    // We do this here so that it's only done once and then we just reuse it.
-    // Note that RealVectorValues ALWAYS have 3 components... even when running in
-    // 2D or 1D.  This makes the code simpler...
-    velocity(0)=_x;
-    velocity(1)=_y;
-    velocity(2)=_z;
-  }
+             InputParameters parameters,
+             std::string var_name,
+             std::vector<std::string> coupled_to,
+             std::vector<std::string> coupled_as);
 
 protected:
   /**
