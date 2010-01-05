@@ -35,21 +35,17 @@ int main (int argc, char** argv)
   Moose::registerObjects();
   
    // Create a GetPot object to parse the command line
-  GetPot command_line (argc, argv);
+  Moose::command_line = new GetPot(argc, argv);
     
-   // Will hold the name of the input file... default to blank
+  // See if an input file was provided on the command-line
   std::string input_filename = "";
-    
-   // See if an input file was provided on the command-line
-  if ( command_line.search("-i") )
+  if ( Moose::command_line->search("-i") )
     input_filename = command_line.next(input_filename);
   else
-  {
-     // Print a message and throw an error if the input file wasn't provided
-     std::cout<<"Must specify an input file using -i"<<std::endl;
-     libmesh_error();
-  }
+    mooseError("Must specify an input file using -i");
 
+
+  // Use the parser
   Parser p = Parser(input_filename);
   p.execute();
 
