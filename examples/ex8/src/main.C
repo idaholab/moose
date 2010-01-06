@@ -40,6 +40,9 @@ int main (int argc, char** argv)
   Parser p = Parser(input_filename);
   p.execute();
 
+  // Output the initial condition in whatever ways are specified
+  Moose::output_system(0, 0.0);
+
   // Solve the system inside of Moose
   {
     TransientNonlinearImplicitSystem & system =
@@ -48,9 +51,6 @@ int main (int argc, char** argv)
     system.solve();
   }
 
-  // Only bother with exodus outputs
-  if (Moose::exodus_output)
-    ExodusII_IO(*Moose::mesh).write_equation_systems(Moose::file_base + ".e", *Moose::equation_system);
-  else
-    std::cout << "Exodus Output not selected and no other output method implemented\n";
+  // Output the solution in whatever ways are specified
+  Moose::output_system(1, 1.0);
 }
