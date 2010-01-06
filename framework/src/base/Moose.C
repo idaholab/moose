@@ -196,8 +196,11 @@ Moose::setSolverDefaults(EquationSystems * es,
  * Outputs the system.
  */
 void
-Moose::output_system(EquationSystems * equation_systems, std::string file_base, unsigned int t_step, Real time, bool exodus_output, bool gmv_output, bool tecplot_output, bool print_out_info)
+Moose::output_system(unsigned int t_step, Real time)
 {
+  EquationSystems * equation_systems = Moose::equation_system;
+  std::string file_base = Moose::file_base;
+  
   OStringStream stream_file_base;
   
   stream_file_base << file_base << "_";
@@ -205,10 +208,7 @@ Moose::output_system(EquationSystems * equation_systems, std::string file_base, 
 
   std::string file_name = stream_file_base.str();
 
-  if(print_out_info)
-     std::cout << "   --> Output in file ";
-  
-  if(exodus_output) 
+  if(Moose::exodus_output) 
   {
     std::string exodus_file_name;
     
@@ -253,39 +253,11 @@ Moose::output_system(EquationSystems * equation_systems, std::string file_base, 
 
     // The +1 is because Exodus starts timesteps at 1 and we start at 0
     ex_out->write_timestep(exodus_file_name + ".e", *equation_systems, num_in_current_file, time);
-
-    if(print_out_info)
-    {       
-      std::cout << file_base+".e";
-      OStringStream out;
-      out <<  "(";
-      OSSInt(out,2,t_step+1);
-      out <<  ") ";
-      std::cout << out.str();
-    } 
   }
-  if(gmv_output) 
-  {     
+  if(Moose::gmv_output) 
     GMVIO(*Moose::mesh).write_equation_systems(file_name + ".gmv", *equation_systems);
-    if(print_out_info)
-    {       
-      if(exodus_output)
-         std::cout << " and ";    
-      std::cout << file_name+".gmv";
-    }    
-  }  
-  if(tecplot_output) 
-  {     
+  if(Moose::tecplot_output) 
     TecplotIO(*Moose::mesh).write_equation_systems(file_name + ".plt", *equation_systems);
-    if(print_out_info)
-    {       
-      if(exodus_output || gmv_output)
-         std::cout << " and ";    
-      std::cout << file_name+".plt";
-    }    
-  }
-
-  if(print_out_info) std::cout << std::endl; 
 }
 
 void

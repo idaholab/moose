@@ -159,7 +159,7 @@ namespace Moose
   /**
    * Output the given system to output files.
    */
-  void output_system(EquationSystems * equation_systems, std::string file_base, unsigned int t_step, Real time, bool exodus_output, bool gmv_output, bool tecplot_output, bool print_out_info);
+  void output_system(unsigned int t_step, Real time);
 
   void checkSystemsIntegrity();
   
