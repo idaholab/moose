@@ -69,6 +69,17 @@
 
 #include <set>
 
+MooseInit::MooseInit(int argc, char** argv)
+  :LibMeshInit(argc, argv)
+{
+  Moose::command_line = new GetPot(argc, argv);
+}
+
+MooseInit::~MooseInit()
+{
+  delete Moose::command_line;
+}
+
 void
 Moose::registerObjects()
 {

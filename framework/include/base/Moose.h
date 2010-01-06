@@ -113,6 +113,13 @@ void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (st
 #endif
 
 
+class MooseInit : public LibMeshInit
+{
+public:
+  MooseInit(int argc, char** argv);
+
+  virtual ~MooseInit();
+};
 
 namespace Moose
 {
@@ -127,7 +134,11 @@ namespace Moose
    */
   void registerObjects();
 
-
+  /**
+   * Initialize MOOSE and the underlying Libmesh libraries and command line parser
+   */
+  void initMoose(int argc, char** argv);
+  
   /**
    * Should be called after the mesh has been modified in any way.
    */
