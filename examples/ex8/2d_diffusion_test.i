@@ -12,6 +12,8 @@
     family = LAGRANGE
   [../]
 
+# This variable is not active in the list above 
+# therefore it is not used in the simulation
   [./v]
     order = FIRST
     family = LAGRANGE
