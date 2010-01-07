@@ -20,7 +20,7 @@
 #include "getpot.h"
 
 // Initialize default Performance Logging
-PerfLog Moose::perf_log("Example8");
+PerfLog Moose::perf_log("Example10");
 
 // Begin the main program.
 int main (int argc, char** argv)
