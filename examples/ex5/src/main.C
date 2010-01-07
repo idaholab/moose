@@ -37,8 +37,8 @@ PerfLog Moose::perf_log("Example5");
 int main (int argc, char** argv)
 {
   {
-    // Initialize libMesh and any dependent libaries
-    LibMeshInit init (argc, argv);
+    // Initialize Moose
+    MooseInit init(argc, argv);
 
     // Create a GetPot object to parse the command line
     GetPot command_line (argc, argv);

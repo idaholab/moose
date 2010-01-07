@@ -33,8 +33,8 @@ PerfLog Moose::perf_log("Example3");
 int main (int argc, char** argv)
 {
   {
-    // Initialize libMesh and any dependent libaries
-    LibMeshInit init (argc, argv);
+    // Initialize Moose
+    MooseInit init(argc, argv);
 
     // This registers a bunch of common objects that exist in Moose with the factories.
     // that includes several Kernels, BoundaryConditions, AuxKernels and Materials

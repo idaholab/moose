@@ -6,7 +6,6 @@
 #include "AuxFactory.h"
 #include "ComputeResidual.h"
 #include "ComputeJacobian.h"
-#include "ColumnMajorMatrix.h"
 
 // C++ include files that we need
 #include <iostream>
@@ -23,7 +22,6 @@
 #include "nonlinear_implicit_system.h"
 #include "linear_implicit_system.h"
 #include "transient_system.h"
-#include "vector_value.h"
 
 // Initialize default Performance Logging
 PerfLog Moose::perf_log("Example1");
@@ -32,73 +30,8 @@ PerfLog Moose::perf_log("Example1");
 int main (int argc, char** argv)
 {
   {
-    VectorValue<Real> V(1, 2, 3);
-    TensorValue<Real> T;
-    
-    
-    ColumnMajorMatrix A(3, 2);
-    ColumnMajorMatrix B(2, 3);
-    ColumnMajorMatrix C;
-
-    ColumnMajorMatrix D(9, 9);
-
-    
-    
-
-    A(0, 0) = 1;
-    A(1, 0) = 2;
-    A(2, 0) = 3;
-    A(0, 1) = 4;
-    A(1, 1) = 5;
-    A(2, 1) = 6;
-
-    B(0, 0) = 1;
-    B(0, 1) = 2;
-    B(0, 2) = 3;
-    B(1, 0) = 4;
-    B(1, 1) = 5;
-    B(1, 2) = 6;
-
-
-    T(0, 0) = 1;
-    T(1, 0) = 2;
-    T(2, 0) = 3;
-    T(0, 1) = 4;
-    T(1, 1) = 5;
-    T(2, 1) = 6;
-    T(0, 2) = 7;
-    T(1, 2) = 8;
-    T(2, 2) = 9;
-
-    for (unsigned int j=0; j<9; ++j)
-      for (unsigned int i=0; i<9; ++i)
-        D(i, j) = i*j;
-    
-    D.print();
-    
-    
-    //C = A*B;
-
-    //A.print();
-    //B.print();
-    //C.print();
-
-    //C = B*V;
-
-    //C.print();
-
-    ColumnMajorMatrix E(T);
-    E.reshape(9,1);
-    
-    C = D*E;
-
-    C.print();
-    
-    
-    
-    
-    // Initialize libMesh and any dependent libaries
-    LibMeshInit init (argc, argv);
+    // Initialize Moose
+    MooseInit init(argc, argv);
 
     // This registers a bunch of common objects that exist in Moose with the factories.
     // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
