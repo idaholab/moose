@@ -33,17 +33,18 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   InitialConditionFactory::instance()->registerInitialCondition<ExampleIC>("ExampleIC");
-  
-  // See if an input file was provided on the command-line
+
+  // Automatically look for a dump option on the commandline
+  Parser p;
+
   std::string input_filename = "";
   if ( Moose::command_line->search("-i") )
     input_filename = Moose::command_line->next(input_filename);
   else
     mooseError("Must specify an input file using -i");
 
-
   // Use the parser
-  Parser p = Parser(input_filename);
+  p.parse(input_filename);
   p.execute();
 
   // Output the initial condition in whatever ways are specified

@@ -12,16 +12,10 @@ class Parser
 {
 public:
   /**
-   * This is the normal user constructor that takes a filename in Getpot format to parse.
-   * This constructor will build the input parser tree automatically
+   * Default constructor that initializes the parser and looks for the option to dump
+   * the registered objects
    */
-  Parser(std::string input_filename);
-
-  /**
-   * This constructor is for building a tree of all possible elements for use in building
-   * documentation and help
-   */
-  Parser(bool build_full_tree);
+  Parser(const std::string &dump_string="--dump");
 
   /**
    * Destructor to remove the dynamically generated Parse Tree
@@ -29,10 +23,21 @@ public:
   virtual ~Parser();
 
   /**
+   * Parse an input file consisting of getpot syntax and setup objects
+   * in the MOOSE derived application
+   */
+  void parse(const std::string &input_filename);
+  
+  /**
    * This function initiates the traversal of the parse block tree which is each block is resposible
    * for creating and filling in various MOOSE based objects.
    */
   void execute();
+
+  /**
+   * Prints the Parser Block tree
+   */
+  void printTree();
 
   /**
    * This function is called to track a parser block that is unable to execute because it's
@@ -84,21 +89,10 @@ public:
   
 private:
   /**
-   * Default Constructor not allowed
-   */
-  Parser();
-  
-  /**
    * This function inserts blocks into the tree which are optional in the input file but are
    * necessary for the correct execution of MOOSE based applications.
    */
   void fixupOptionalBlocks();
-
-  /**
-   * Parse an input file consisting of getpot syntax and setup objects
-   * in the MOOSE derived application
-   */
-  void parse();
 
   /**
    * Use MOOSE Factories to construct a full parse tree for documentation
@@ -142,6 +136,7 @@ private:
   ParserBlock *_input_tree;
   
   bool _getpot_initialized;
+  bool _tree_printed;
   GetPot _getpot_file;
 
   std::list<ParserBlock *> _deferred_execution;

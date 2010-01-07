@@ -27,7 +27,10 @@ int main (int argc, char** argv)
   // This registers a bunch of common objects that exist in Moose with the factories.
    // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
   Moose::registerObjects();
-  
+
+  // Automatically looks for a dump option on the commandline (defaults to "--dump")
+  Parser p;
+
   // See if an input file was provided on the command-line
   std::string input_filename = "";
   if ( Moose::command_line->search("-i") )
@@ -35,9 +38,9 @@ int main (int argc, char** argv)
   else
     mooseError("Must specify an input file using -i");
 
-
   // Use the parser
-  Parser p = Parser(input_filename);
+  p.parse(input_filename);
+  p.printTree();
   p.execute();
 
   // Output the initial condition in whatever ways are specified

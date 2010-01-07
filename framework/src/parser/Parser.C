@@ -12,24 +12,17 @@
 #include "MaterialFactory.h"
 #include "InitialConditionFactory.h"
 
-Parser::Parser(std::string input_filename)
-  :_input_filename(input_filename),
+Parser::Parser(const std::string &dump_string)
+  :_input_filename(""),
    _input_tree(NULL),
-   _getpot_initialized(false)
+   _getpot_initialized(false),
+   _tree_printed(false)
 {
-  // Build the Parse Tree from the input file
-  parse();
-}
-
-Parser::Parser(bool build_full_tree)
-  :_input_tree(NULL),
-   _getpot_initialized(false)
-{
-  if (build_full_tree)
-    // Build a full tree of all objects from Factory iterators
+  if (Moose::command_line != NULL && Moose::command_line->search(dump_string))
+  {
     buildFullTree();
-  else
-    mooseError("Parser should be contstructed with a filename or argument to build full tree");
+    exit(0);
+  }
 }
 
 Parser::~Parser() 
@@ -41,12 +34,14 @@ Parser::~Parser()
 }
 
 void
-Parser::parse()
+Parser::parse(const std::string &input_filename)
 {
   std::vector<std::string> elements;
   std::string curr_value, curr_identifier;
   ParserBlock *curr_block, *t;
 
+  _input_filename = input_filename;
+  
   checkInputFile();
   
   // GetPot object
@@ -93,12 +88,19 @@ Parser::parse()
 
   fixupOptionalBlocks();
 
+  if (!_tree_printed) 
+  {
 #ifdef DEBUG
-  _input_tree->printBlockData();
-#else
-  if ( Moose::command_line && Moose::command_line->search("--show-tree"))
     _input_tree->printBlockData();
+    _tree_printed = true;
+#else
+    if (Moose::command_line && Moose::command_line->search("--show-tree")) 
+    {
+      _input_tree->printBlockData();
+      _tree_printed = true;
+    }
 #endif
+  }
 }
 
 void
@@ -321,6 +323,15 @@ Parser::execute()
 {
   _executed_blocks.clear();
   _input_tree->execute();
+}
+
+void
+Parser::printTree()
+{
+  if (_tree_printed)
+    return;  
+  _input_tree->printBlockData();
+  _tree_printed = true;
 }
 
 void
