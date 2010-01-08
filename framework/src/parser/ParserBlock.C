@@ -16,9 +16,28 @@ ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id
   :_reg_id(reg_id),
    _real_id(real_id),
    _parser_handle(parser_handle),
+   _getpot_handle(parser_handle.getPotHandle()),
    _parent(parent),
    _block_params(params)
-{}
+{
+  size_t asterisk_pos = reg_id.find("*");
+  _block_name = _real_id;
+  
+  if (_getpot_handle) 
+  {
+    // Immediately extract params from the input file instead of when the tree is completely constructed
+    _parser_handle.extractParams(_real_id, _block_params);
+    _active = getParamValue<std::vector<std::string> >("active");
+  }
+  else if (asterisk_pos != std::string::npos) 
+  {
+    _block_name = reg_id;
+    _block_name.replace(asterisk_pos-1, 2, "/<user defined>");
+  }
+  
+  
+  // _block_name = _real_id.substr(0, _real_id.find_last_of('/')) + "/<user defined>";
+}
 
 ParserBlock::~ParserBlock() 
 {
@@ -35,8 +54,30 @@ ParserBlock::getShortName() const
 std::string
 ParserBlock::getType() const
 {
-  const GetPot *getpot_handle = _parser_handle.getPotHandle();
-  return getpot_handle == NULL ? getShortName() : (*getpot_handle)((_real_id + "/type").c_str(), "");
+  if (_getpot_handle)
+    return (*_getpot_handle)((_real_id + "/type").c_str(), "");
+  if (_reg_id.find("*") != std::string::npos)
+    return getShortName();
+  return std::string("");
+
+//  return getpot_handle == NULL ? getShortName() : (*getpot_handle)((_real_id + "/type").c_str(), "");
+}
+
+bool
+ParserBlock::checkActive(const std::string &name) const
+{
+  bool retValue = false;
+  try 
+  {
+    if (_active.at(0) == "__all__")
+      retValue = true;
+    else
+      retValue = std::find(_active.begin(), _active.end(), name) != _active.end();
+  }
+  catch (std::out_of_range)
+  {}
+  
+  return retValue;
 }
 
 void
@@ -196,14 +237,17 @@ ParserBlock::printBlockData()
 
   std::string spacing = "";
   for (unsigned int i=0; i<elements.size(); ++i)
-    spacing += "\t";
+    spacing += "  ";
 
   
   std::cout << "\n"
-            << spacing << "name: " <<  _reg_id << "\n"
-            << spacing << "type: " <<  getShortName() << "\n"
-            << spacing << "  params=\n"
-            << spacing << "  {\n";
+            << spacing << "block name: " << _block_name << "\n";
+  
+  if (getType() != "")
+    std::cout << spacing << "type: " << getType() << "\n";
+  std::cout << spacing << "{\n";
+  
+  std::cout << spacing << "  Valid Parameters:\n";
 
   for (InputParameters::iterator iter = _block_params.begin(); iter != _block_params.end(); ++iter) 
   {
@@ -211,7 +255,9 @@ ParserBlock::printBlockData()
     std::string required = _block_params.isParamRequired(iter->first) ? "*" : " ";
 
     std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
+    
     iter->second->print(std::cout);
+    
     std::cout << "\n" << spacing << "    " << std::setw(30) << " " << "    " << _block_params.getDocString(iter->first) << "\n";
   }
   
@@ -222,9 +268,9 @@ ParserBlock::printBlockData()
     std::cout << "\n";
   }
   
-  std::cout << spacing << "  }\n";
-
   visitChildren(&ParserBlock::printBlockData, true, false);
+
+  std::cout << spacing << "}\n";
 }
 
     

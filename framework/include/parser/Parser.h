@@ -86,6 +86,14 @@ public:
    * Return a reference to the getpot object to extract options from the input file
    */
   const GetPot * getPotHandle() const;
+
+  /**
+   * This function attempts to extract values from the input file based on the contents of
+   * the passed parameters objects.  It handles a number of various types with dynamic casting
+   * including vector types
+   */
+  void extractParams(const std::string & prefix, InputParameters &p);
+
   
 private:
   /**
@@ -105,13 +113,6 @@ private:
    */
   void checkInputFile();
   
-  /**
-   * This function attempts to extract values from the input file based on the contents of
-   * the passed parameters objects.  It handles a number of various types with dynamic casting
-   * including vector types
-   */
-  void extractParams(const std::string & prefix, InputParameters &p);
-
   /* Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are colled only from this Object
    */

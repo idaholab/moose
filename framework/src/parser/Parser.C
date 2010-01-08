@@ -61,6 +61,9 @@ Parser::parse(const std::string &input_filename)
     
     for (int j=0; j<elements.size(); ++j) 
     {
+      if (! curr_block->checkActive(elements[j]) )
+        continue;
+      
       // We don't want a leading slash
       if (j)
         curr_identifier += "/";
@@ -302,7 +305,7 @@ Parser::fixupOptionalBlocks()
       // which means it better exist and it better not be the root
       block_ptr = _input_tree->locateBlock(i->second);
       if (block_ptr == NULL || block_ptr->_parent == NULL)
-        mooseError("");
+        mooseError("Major Error in ParserBlock Structure");
 
       ParserBlock::PBChildIterator position =
         find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);

@@ -6,6 +6,8 @@
 #include "ValidParams.h"
 //#include "Kernel.h"
 
+#include "getpot.h"
+
 //Forward Declarations
 class Parser;
 class ParserBlock;
@@ -68,6 +70,11 @@ public:
    */
   std::string getType() const;
 
+  /**
+   * Check to see if the passed in string is active
+   */
+  bool checkActive(const std::string &name) const;
+  
   /**
    * This is the workhorse function which must setup the appropriate MOOSE objects corresponding
    * to this ParserBlock.  Children blocks must be visited explicitly but may be done with a call
@@ -157,7 +164,10 @@ protected:
    ************************************/
   std::string _reg_id;
   std::string _real_id;
+  std::string _block_name;
   Parser & _parser_handle;
+  const GetPot * _getpot_handle;
+  std::vector<std::string> _active;
 
   /**
    * The list of ParserBlocks which must be executed prior to executing the current ParserBlock
