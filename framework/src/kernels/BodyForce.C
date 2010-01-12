@@ -1,5 +1,13 @@
 #include "BodyForce.h"
- 
+
+template<>
+InputParameters validParams<BodyForce>()
+{
+  InputParameters params;
+  params.set<Real>("value")=0.0;
+  return params;
+}
+
 BodyForce::BodyForce(std::string name,
             InputParameters parameters,
             std::string var_name,

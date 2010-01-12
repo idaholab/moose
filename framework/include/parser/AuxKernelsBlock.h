@@ -6,10 +6,7 @@
 class AuxKernelsBlock;
 
 template<>
-InputParameters validParams<AuxKernelsBlock>()
-{
-  return validParams<ParserBlock>();
-}
+InputParameters validParams<AuxKernelsBlock>();
 
 class AuxKernelsBlock: public ParserBlock
 {

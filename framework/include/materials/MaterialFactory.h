@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-// LibMesh includes
-#include <parameters.h>
+// Moose includes
+#include <InputParameters.h>
 
 
 /**

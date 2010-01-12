@@ -6,11 +6,7 @@
 class PreconditioningBlock;
 
 template<>
-InputParameters validParams<PreconditioningBlock>()
-{
-  return validParams<ParserBlock>();
-}
-
+InputParameters validParams<PreconditioningBlock>();
 
 class PreconditioningBlock: public ParserBlock
 {

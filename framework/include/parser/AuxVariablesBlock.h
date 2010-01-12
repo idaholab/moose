@@ -6,10 +6,7 @@
 class AuxVariablesBlock;
 
 template<>
-InputParameters validParams<AuxVariablesBlock>()
-{
-  return validParams<ParserBlock>();
-}
+InputParameters validParams<AuxVariablesBlock>();
 
 class AuxVariablesBlock: public VariablesBlock
 {

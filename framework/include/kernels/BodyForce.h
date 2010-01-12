@@ -7,12 +7,7 @@
 class BodyForce;
 
 template<>
-InputParameters validParams<BodyForce>()
-{
-  InputParameters params;
-  params.set<Real>("value")=0.0;
-  return params;
-}
+InputParameters validParams<BodyForce>();
 
 class BodyForce : public Kernel
 {

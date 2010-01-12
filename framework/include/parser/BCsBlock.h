@@ -6,10 +6,7 @@
 class BCsBlock;
 
 template<>
-InputParameters validParams<BCsBlock>()
-{
-  return validParams<ParserBlock>();
-}
+InputParameters validParams<BCsBlock>();
 
 class BCsBlock: public ParserBlock
 {

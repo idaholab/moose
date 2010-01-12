@@ -6,10 +6,7 @@
 class VariablesBlock;
 
 template<>
-InputParameters validParams<VariablesBlock>()
-{
-  return validParams<ParserBlock>();
-}
+InputParameters validParams<VariablesBlock>();
 
 class VariablesBlock: public ParserBlock
 {

@@ -6,10 +6,7 @@
 class MaterialsBlock;
 
 template<>
-InputParameters validParams<MaterialsBlock>()
-{
-  return validParams<ParserBlock>();
-}
+InputParameters validParams<MaterialsBlock>();
 
 class MaterialsBlock: public ParserBlock
 {

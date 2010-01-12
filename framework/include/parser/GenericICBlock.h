@@ -7,11 +7,7 @@
 class GenericICBlock;
 
 template<>
-InputParameters validParams<GenericICBlock>()
-{
-  InputParameters params = validParams<ParserBlock>();
-  return params;
-}
+InputParameters validParams<GenericICBlock>();
 
 class GenericICBlock: public ParserBlock
 {

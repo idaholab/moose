@@ -12,6 +12,21 @@
 #include "InputParameters.h"
 #include "getpot.h"
 
+template<>
+InputParameters validParams<ParserBlock>()
+{
+  InputParameters params;
+  std::vector<std::string> blocks(1);
+  blocks[0] = "__all__";
+
+  // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
+  params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
+
+  // "names" in the input file is now deprecated
+  params.addParam<std::vector<std::string> >("names", "Deprecated DO NOT USE!");
+  return params;
+}
+
 ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
   :_reg_id(reg_id),
    _real_id(real_id),

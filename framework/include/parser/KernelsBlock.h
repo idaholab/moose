@@ -6,10 +6,7 @@
 class KernelsBlock;
 
 template<>
-InputParameters validParams<KernelsBlock>()
-{
-  return validParams<ParserBlock>();
-}
+InputParameters validParams<KernelsBlock>();
 
 class KernelsBlock: public ParserBlock
 {
