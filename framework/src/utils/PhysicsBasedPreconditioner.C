@@ -264,11 +264,16 @@ PhysicsBasedPreconditioner::copyVarValues(MeshBase & mesh,
   {
     Node * node = *it;
 
-    //The zeroes are for the component.
-    //If we ever want to use non-lagrange elements we'll have to change that.
-    unsigned int from_dof = node->dof_number(from_system,from_var,0);
-    unsigned int to_dof = node->dof_number(to_system,to_var,0);
+    unsigned int n_comp = node->n_comp(from_system, from_var);
+
+    mooseAssert(node->n_comp(from_system, from_var) == node->n_comp(to_system_to_var), "Number of components does not match in each system in PBP");
+
+    for(unsigned int i=0; i<n_comp; i++)
+    { 
+      unsigned int from_dof = node->dof_number(from_system,from_var,i);
+      unsigned int to_dof = node->dof_number(to_system,to_var,i);
     
-    to_vector.set(to_dof,from_vector(from_dof));
+      to_vector.set(to_dof,from_vector(from_dof));
+    }
   }
 }  
