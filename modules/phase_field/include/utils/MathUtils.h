@@ -14,17 +14,42 @@ namespace MathUtils
 
   inline Real polyLog(Real x)
   {
-    Real tol=1.0e-4;
+    Real tol = 1.e-4;
     Real c1=2.0e12;
     Real c2=-3.0e8;
     Real c3=3.0e4;
-    Real c4=-1.104367370530952e+01;
+    Real c4=-11.04367370530952;
 
     if(x<tol)
-      return c1*tol*tol*tol/6.0 + c2*tol*tol/2.0 + c3*tol + c4;
+      return c1*x*x*x/6.0 + c2*x*x/2.0 + c3*x + c4;
     else
       return std::log(x);
-  };  
+  };
+
+  inline Real dpolyLog(Real x)
+  {
+    Real tol = 1.e-4;
+    Real c1=2.0e12;
+    Real c2=-3.0e8;
+    Real c3=3.0e4;
+
+    if(x<tol)
+      return c1*x*x/2.0 + c2*x + c3;
+    else
+      return 1.0/x;
+  };
+
+  inline Real d2polyLog(Real x)
+  {
+    Real tol = 1.e-4;
+    Real c1=2.0e12;
+    Real c2=-3.0e8;
+
+    if(x<tol)
+      return c1*x + c2;
+    else
+      return -1.0/(x*x);
+  };
 };
 
 #endif //MATHUTILS_H
