@@ -117,12 +117,15 @@ namespace Moose
       //  for(unsigned int var = 0; var < system->n_vars(); var++)
       //    std::cout<<var<<": "<<system->calculate_norm(*system->rhs,var,DISCRETE_L2)<<std::endl;
 
+      static Real initial_residual = 0;
+
       *reason = SNES_CONVERGED_ITERATING;
 
       if (!it)
       {
         /* set parameter for default relative tolerance convergence test */
         snes->ttol = fnorm*snes->rtol;
+        initial_residual = fnorm;
       }
       if (fnorm != fnorm)
       {
@@ -139,6 +142,11 @@ namespace Moose
         PetscInfo2(snes,"Exceeded maximum number of function evaluations: %D > %D\n",snes->nfuncs,snes->max_funcs);
         *reason = SNES_DIVERGED_FUNCTION_COUNT;
       }
+      else if(fnorm >= initial_residual * (1.0/snes->rtol))
+      {
+        PetscInfo2(snes,"Nonlinear solve was blowing up!",snes->nfuncs,snes->max_funcs);
+        *reason = SNES_DIVERGED_LS_FAILURE;
+      } 
 
       if (it && !*reason)
       {
@@ -265,6 +273,7 @@ namespace Moose
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
       KSPSetConvergenceTest(ksp, petscConverged, PETSC_NULL);
+      SNESSetConvergenceTest(snes, petscNonlinearConverged, NULL);
 #else
 
       // In 3.0.0, the context pointer must actually be used, and the
