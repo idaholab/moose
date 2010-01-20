@@ -15,13 +15,12 @@ namespace MathUtils
   inline Real polyLog(Real x)
   {
     Real tol = 1.e-4;
-    Real c1=2.0e12;
-    Real c2=-3.0e8;
-    Real c3=3.0e4;
-    Real c4=-11.04367370530952;
+    Real c1=-1.0e8;
+    Real c2=2.0e4;
+    Real c3=-10.71034037197618;
 
     if(x<tol)
-      return c1*x*x*x/6.0 + c2*x*x/2.0 + c3*x + c4;
+      return c1*x*x/2.0 + c2*x + c3;
     else
       return std::log(x);
   };
@@ -29,12 +28,11 @@ namespace MathUtils
   inline Real dpolyLog(Real x)
   {
     Real tol = 1.e-4;
-    Real c1=2.0e12;
-    Real c2=-3.0e8;
-    Real c3=3.0e4;
+    Real c1=-1.0e8;
+    Real c2=2.0e4;
 
     if(x<tol)
-      return c1*x*x/2.0 + c2*x + c3;
+      return c1*x + c2;
     else
       return 1.0/x;
   };
@@ -42,11 +40,46 @@ namespace MathUtils
   inline Real d2polyLog(Real x)
   {
     Real tol = 1.e-4;
-    Real c1=2.0e12;
-    Real c2=-3.0e8;
+    Real c1=-1.0e8;
+
+    if(x<tol)
+      return c1;
+    else
+      return -1.0/(x*x);
+  };
+
+  inline Real polyLogLT(Real x)
+  {
+    Real tol = 1.e-2;
+    Real c1=-1.0e4;
+    Real c2=2.0e2;
+    Real c3=-6.105170185988091;
+
+    if(x<tol)
+      return c1*x*x/2.0 + c2*x + c3;
+    else
+      return std::log(x);
+  };
+
+  inline Real dpolyLogLT(Real x)
+  {
+    Real tol = 1.e-2;
+    Real c1=-1.0e4;
+    Real c2=2.0e2;
 
     if(x<tol)
       return c1*x + c2;
+    else
+      return 1.0/x;
+  };
+
+  inline Real d2polyLogLT(Real x)
+  {
+    Real tol = 1.e-2;
+    Real c1=-1.0e4;
+
+    if(x<tol)
+      return c1;
     else
       return -1.0/(x*x);
   };
