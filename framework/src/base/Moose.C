@@ -46,6 +46,8 @@
 #include "PBPBlock.h"
 #include "AdaptivityBlock.h"
 #include "GenericICBlock.h"
+#include "PeriodicBlock.h"
+#include "GenericPeriodicBlock.h"
 
 #include "ComputeInitialConditions.h"
 #include "InitialConditionFactory.h"
@@ -141,6 +143,8 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
   ParserBlockFactory::instance()->registerParserBlock<PreconditioningBlock>("Preconditioning");
   ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");
+  ParserBlockFactory::instance()->registerParserBlock<PeriodicBlock>("BCs/Periodic");
+  ParserBlockFactory::instance()->registerParserBlock<GenericPeriodicBlock>("BCs/Periodic/*");
 
   InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
   InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
@@ -299,6 +303,8 @@ Moose::checkSystemsIntegrity()
  * Global Variables
  * ****************/
 THREAD_ID Moose::current_thread_id = 0;
+
+Preconditioner<Real> * Moose::preconditioner = NULL;
 
 Mesh * Moose::mesh;
 ExodusII_IO * Moose::exreader;

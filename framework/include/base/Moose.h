@@ -17,6 +17,7 @@
 #include "nonlinear_solver.h"
 #include "nonlinear_implicit_system.h"
 #include "transient_system.h"
+#include "preconditioner.h"
 
 //Forward Declarations
 class Mesh;
@@ -174,6 +175,11 @@ namespace Moose
    * This is NOT valid inside of a thread!
    */
   extern THREAD_ID current_thread_id;
+
+  /**
+   * Preconditioner
+   */
+  extern Preconditioner<Real> * preconditioner;
   
   /**
    * The one mesh to rule them all

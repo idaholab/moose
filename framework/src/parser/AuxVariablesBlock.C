@@ -33,13 +33,24 @@ AuxVariablesBlock::execute()
   std::cerr << "Inside the AuxVariablesBlock Object\n";
 #endif
 
+  TransientNonlinearImplicitSystem &system =
+    Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+
   TransientExplicitSystem& aux_system =
     Moose::equation_system->add_system<TransientExplicitSystem> ("AuxiliarySystem");
   
   visitChildren();
 
   aux_system.attach_init_function(Moose::init_cond);
-  
+
+  // Add a temporary vector for general use
+  system.add_vector("temp", false);
+
+  ParserBlock * pb = locateBlock("BCs/Periodic");
+
+  if(pb)
+    pb->execute();
+
   Moose::equation_system->init();
   Moose::equation_system->print_info();
 

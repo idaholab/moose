@@ -16,7 +16,4 @@ public:
   virtual void execute();
 };
 
-
-  
-
 #endif //PRECONDITIONINGBLOCK_H

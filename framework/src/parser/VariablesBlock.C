@@ -15,6 +15,7 @@
 #include "nonlinear_implicit_system.h"
 #include "getpot.h"
 #include "exodusII_io.h"
+#include "dof_map.h"
 
 template<>
 InputParameters validParams<VariablesBlock>()

@@ -44,6 +44,8 @@ PBPBlock::execute()
   }
 
   PhysicsBasedPreconditioner *precond = new PhysicsBasedPreconditioner();
+
+  Moose::preconditioner = precond;
   
   std::vector<unsigned int> solve_order;
       

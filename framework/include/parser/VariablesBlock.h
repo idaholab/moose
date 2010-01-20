@@ -3,6 +3,9 @@
 
 #include "ParserBlock.h"
 
+//libmesh Includes
+#include "dof_map.h"
+
 class VariablesBlock;
 
 template<>
