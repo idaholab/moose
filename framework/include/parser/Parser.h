@@ -113,7 +113,13 @@ private:
    */
   void checkInputFile();
   
-  /* Helper functions for setting parameters of arbitrary types - bodies are in the .C file
+  /**
+   * prints a standard cli usage message
+   */
+  void printUsage() const;
+  
+  /**
+   * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are colled only from this Object
    */
   template<typename T>
@@ -130,6 +136,8 @@ private:
    ************************************/
   std::string _input_filename;
   std::vector<std::string> _section_names;
+  const std::string _dump_string;
+  const static std::string _show_tree;
 
   /**
    * Pointer to the parser block tree built from the call to "parse"

@@ -1,6 +1,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <iomanip>
 
 #include "Parser.h"
 #include "getpot.h"
@@ -12,16 +13,29 @@
 #include "MaterialFactory.h"
 #include "InitialConditionFactory.h"
 
+// Static Data initialization
+const std::string Parser::_show_tree = "--show_tree";
+
+ 
 Parser::Parser(const std::string &dump_string)
   :_input_filename(""),
    _input_tree(NULL),
    _getpot_initialized(false),
-   _tree_printed(false)
+   _tree_printed(false),
+   _dump_string(dump_string)
 {
-  if (Moose::command_line != NULL && Moose::command_line->search(dump_string))
+  if (Moose::command_line != NULL)
   {
-    buildFullTree();
-    exit(0);
+    if (Moose::command_line->search("-h") || Moose::command_line->search("--help")) 
+    {
+      printUsage();
+      exit(0);
+    }
+    if (Moose::command_line->search(dump_string))
+    {
+      buildFullTree();
+      exit(0);
+    }
   }
 }
 
@@ -346,6 +360,24 @@ Parser::checkInputFile()
                 + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
 
   in.close();
+}
+
+void
+Parser::printUsage() const
+{
+  // Grad the first item out of argv
+  std::string str((*Moose::command_line)[0]);
+  str.substr(str.find_last_of("/\\")+1);
+  std::cout << "\nUsage: " << str << " <command>" << "\n\n"
+            << "Available Commands:\n" << std::left
+            << std::setw(50) << "  -i <filename> [" + _show_tree + "] [solver options]"
+            << "standard application execution with various options\n"
+            << std::setw(50) << "  -h | --help"
+            << "display usage statement\n"
+            << std::setw(50) << "  --dump"
+            << "show a full dump of available input file syntax\n\n"
+            << "Solver Options:\n"
+            << "  See solver manual for details (Petsc or Trilinos)\n";
 }
 
 void
