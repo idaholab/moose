@@ -1,3 +1,5 @@
+Breaking Example 1 on purpose - please comment this line to compile
+
 //Moose Includes
 #include "Moose.h"
 #include "KernelFactory.h"
