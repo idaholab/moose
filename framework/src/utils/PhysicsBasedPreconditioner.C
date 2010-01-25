@@ -266,7 +266,7 @@ PhysicsBasedPreconditioner::copyVarValues(MeshBase & mesh,
 
     unsigned int n_comp = node->n_comp(from_system, from_var);
 
-    mooseAssert(node->n_comp(from_system, from_var) == node->n_comp(to_system_to_var), "Number of components does not match in each system in PBP");
+    mooseAssert(node->n_comp(from_system, from_var) == node->n_comp(to_system, to_var), "Number of components does not match in each system in PBP");
 
     for(unsigned int i=0; i<n_comp; i++)
     { 
