@@ -3,6 +3,11 @@
 
 #include "Kernel.h"
 
+// Forward Declarations
+class ImplicitBackwardDifference2;
+template<>
+InputParameters validParams<ImplicitBackwardDifference2>();
+
 class ImplicitBackwardDifference2 : public Kernel
 {
 public:
@@ -17,6 +22,7 @@ protected:
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
-  
+
+  bool _start_with_be;
 };
 #endif //IMPLICITBD2
