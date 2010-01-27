@@ -58,7 +58,7 @@
 
 #include "ExecutionerFactory.h"
 #include "Steady.h"
-#include "Transient.h"
+#include "TransientExecutioner.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -158,7 +158,10 @@ Moose::registerObjects()
   InitialConditionFactory::instance()->registerInitialCondition<RandomIC>("RandomIC");
 
   ExecutionerFactory::instance()->registerExecutioner<Steady>("Steady");
-  ExecutionerFactory::instance()->registerExecutioner<Transient>("Transient");
+
+  // Just in this one case to avoid a collision with libMesh am I registering something with a different
+  // name than the class name!
+  ExecutionerFactory::instance()->registerExecutioner<TransientExecutioner>("Transient");
 }
 
 void

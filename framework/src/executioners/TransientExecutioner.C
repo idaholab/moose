@@ -1,4 +1,4 @@
-#include "Transient.h"
+#include "TransientExecutioner.h"
 
 //Moose includes
 #include "Kernel.h"
@@ -16,7 +16,7 @@
 #include <iomanip>
 
 template<>
-InputParameters validParams<Transient>()
+InputParameters validParams<TransientExecutioner>()
 {
   InputParameters params = validParams<Executioner>();
 
@@ -34,7 +34,7 @@ InputParameters validParams<Transient>()
   return params;
 }
 
-Transient::Transient(std::string name, InputParameters parameters)
+TransientExecutioner::TransientExecutioner(std::string name, InputParameters parameters)
   :Executioner(name, parameters),
    _t_step(Moose::equation_system->parameters.set<int> ("t_step") = 0),
    _time(Moose::equation_system->parameters.set<Real>("time") = parameters.get<Real>("start_time")),
@@ -53,7 +53,7 @@ Transient::Transient(std::string name, InputParameters parameters)
 }
 
 bool
-Transient::execute()
+TransientExecutioner::execute()
 {
   _t_step = 1;
 
@@ -145,7 +145,7 @@ Transient::execute()
 }
 
 Real
-Transient::computeDT()
+TransientExecutioner::computeDT()
 {
   // If start up steps are needed
   if(_t_step == 1 && _n_startup_steps > 1)
@@ -155,7 +155,7 @@ Transient::computeDT()
 }
 
 bool
-Transient::keepGoing()
+TransientExecutioner::keepGoing()
 {
   // Check for stop condition based upon steady-state check flag:
   if(_converged && _trans_ss_check == true && _time > _ss_tmin)
@@ -193,7 +193,7 @@ Transient::keepGoing()
 
 
 bool
-Transient::lastSolveConverged()
+TransientExecutioner::lastSolveConverged()
 {
   return _converged;
 }  

@@ -1,5 +1,5 @@
-#ifndef TRANSIENT_H
-#define TRANSIENT_H
+#ifndef TRANSIENTEXECUTIONER_H
+#define TRANSIENTEXECUTIONER_H
 
 #include "Moose.h"
 #include "Executioner.h"
@@ -13,15 +13,15 @@
 #include <string>
 
 // Forward Declarations
-class Transient;
+class TransientExecutioner;
 template<>
-InputParameters validParams<Transient>();
+InputParameters validParams<TransientExecutioner>();
 
 /**
- * Transient executioners usually loop through a number of timesteps... calling solve()
+ * TransientExecutioner executioners usually loop through a number of timesteps... calling solve()
  * for each timestep.
  */
-class Transient: public Executioner
+class TransientExecutioner: public Executioner
 {
 public:
 
@@ -32,7 +32,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Transient(std::string name, InputParameters parameters);
+  TransientExecutioner(std::string name, InputParameters parameters);
 
   /**
    * This will call solve() on the NonlinearSystem.
@@ -100,4 +100,4 @@ private:
   bool _converged;
 };
 
-#endif //TRANSIENT_H
+#endif //TRANSIENTEXECUTIONER_H
