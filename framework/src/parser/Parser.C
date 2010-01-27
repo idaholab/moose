@@ -12,6 +12,7 @@
 #include "BCFactory.h"
 #include "MaterialFactory.h"
 #include "InitialConditionFactory.h"
+#include "ExecutionerFactory.h"
 
 // Static Data initialization
 const std::string Parser::_show_tree = "--show_tree";
@@ -136,7 +137,7 @@ Parser::buildFullTree()
        i != ParserBlockFactory::instance()->registeredParserBlocksEnd(); ++i)
   {
     // skip the generic matches here because they don't correlate to a real instance
-    if (i->find('*') != std::string::npos)
+    if (i->find('*') != std::string::npos || i->find("Executioner") != std::string::npos)
       continue;
 
     std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
@@ -210,6 +211,16 @@ Parser::buildFullTree()
 
     mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
     curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
+  }
+
+  curr_block = _input_tree;
+  prefix = "";
+
+  // Add all the Executioners
+  for (ExecutionerNamesIterator i = ExecutionerFactory::instance()->registeredExecutionersBegin();
+       i != ExecutionerFactory::instance()->registeredExecutionersEnd(); ++i)
+  {
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add("Executioner", *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams("Executioner")));
   }
 
   _input_tree->printBlockData();

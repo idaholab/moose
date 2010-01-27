@@ -36,7 +36,11 @@ ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id
    _block_params(params)
 {
   size_t asterisk_pos = reg_id.find("*");
-  _block_name = _real_id;
+
+  if(reg_id == "Executioner")
+    _block_name = reg_id;
+  else
+    _block_name = _real_id;
   
   if (_getpot_handle) 
   {
@@ -63,7 +67,7 @@ ParserBlock::~ParserBlock()
 std::string
 ParserBlock::getShortName() const
 {
-  return _real_id.substr(_real_id.find_last_of('/')+1);
+  return _real_id.substr(_real_id.find_last_of('/') != std::string::npos ? _real_id.find_last_of('/') + 1 : 0);
 }
 
 std::string
@@ -71,7 +75,7 @@ ParserBlock::getType() const
 {
   if (_getpot_handle)
     return (*_getpot_handle)((_real_id + "/type").c_str(), "");
-  if (_reg_id.find("*") != std::string::npos)
+  if (_reg_id.find("*") != std::string::npos || _reg_id.find("Executioner") != std::string::npos)
     return getShortName();
   return std::string("");
 
