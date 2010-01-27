@@ -48,12 +48,17 @@
 #include "GenericICBlock.h"
 #include "PeriodicBlock.h"
 #include "GenericPeriodicBlock.h"
+#include "GenericExecutionerBlock.h"
 
 #include "ComputeInitialConditions.h"
 #include "InitialConditionFactory.h"
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
 #include "RandomIC.h"
+
+#include "ExecutionerFactory.h"
+#include "Steady.h"
+#include "Transient.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -145,10 +150,15 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");
   ParserBlockFactory::instance()->registerParserBlock<PeriodicBlock>("BCs/Periodic");
   ParserBlockFactory::instance()->registerParserBlock<GenericPeriodicBlock>("BCs/Periodic/*");
+  ParserBlockFactory::instance()->registerParserBlock<GenericExecutionerBlock>("Executioner");
+  ParserBlockFactory::instance()->registerParserBlock<AdaptivityBlock>("Executioner/Adaptivity");
 
   InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
   InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
-  InitialConditionFactory::instance()->registerInitialCondition<RandomIC>("RandomIC");  
+  InitialConditionFactory::instance()->registerInitialCondition<RandomIC>("RandomIC");
+
+  ExecutionerFactory::instance()->registerExecutioner<Steady>("Steady");
+  ExecutionerFactory::instance()->registerExecutioner<Transient>("Transient");
 }
 
 void
@@ -315,6 +325,8 @@ MeshRefinement * Moose::mesh_refinement = NULL;
 ErrorEstimator * Moose::error_estimator = NULL;
 ErrorVector * Moose::error = NULL;
 bool Moose::mesh_changed = false;
+
+Executioner * Moose::executioner;
 
 ConstElemRange * Moose::active_local_elem_range = NULL;
 

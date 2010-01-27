@@ -210,39 +210,28 @@ Kernel::init(EquationSystems * es)
   _dt = 0;
   _is_transient = false;
   _n_of_rk_stages = 1;
-  _t_scheme = 0;  
+  _t_scheme = 0;
+  _t_step       = 0;    
+  _dt_old       = _dt;
+  _bdf2_wei[0]  = 1.;
+  _bdf2_wei[1]  =-1.;
+  _bdf2_wei[2]  = 0.;    
 
-  if(_es->parameters.have_parameter<Real>("time") && _es->parameters.have_parameter<Real>("dt"))
-  {
-    _is_transient = true;
-    _t            = _es->parameters.get<Real>("time");
-    _dt           = _es->parameters.get<Real>("dt");
-    _t_step       = 0;    
-    _dt_old       = _dt;
-    _bdf2_wei[0]  = 1.;
-    _bdf2_wei[1]  =-1.;
-    _bdf2_wei[2]  = 0.;    
-  }
-  if(_es->parameters.have_parameter<Real>("keff"))
-  {
-    _is_transient = true;
-  }
 }
 
 void
 Kernel::reinitDT()
 {
-  if(_is_transient)
-  {
-    _t = _es->parameters.get<Real>("time");
-    _t_step = _es->parameters.get<int>("t_step");
-    _dt_old = _dt;
-    _dt = _es->parameters.get<Real>("dt");
-    Real sum = _dt+_dt_old;
-    _bdf2_wei[2] = 1.+_dt/sum;
-    _bdf2_wei[1] =-sum/_dt_old;
-    _bdf2_wei[0] =_dt*_dt/_dt_old/sum;
-  }   
+  _is_transient = true;
+
+  _t = _es->parameters.get<Real>("time");
+  _t_step = _es->parameters.get<int>("t_step");
+  _dt_old = _dt;
+  _dt = _es->parameters.get<Real>("dt");
+  Real sum = _dt+_dt_old;
+  _bdf2_wei[2] = 1.+_dt/sum;
+  _bdf2_wei[1] =-sum/_dt_old;
+  _bdf2_wei[0] =_dt*_dt/_dt_old/sum;
 }
 
 std::string

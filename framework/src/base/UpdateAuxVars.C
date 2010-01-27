@@ -57,6 +57,7 @@ namespace Moose
       if(aux_begin != aux_end)
       {
         Node & node = mesh->node(nodes[i]);
+        
         AuxKernel::reinit(0, soln, node);
 
         for(aux_it=aux_begin; aux_it != aux_end; ++aux_it)
@@ -64,6 +65,7 @@ namespace Moose
       }
     }
 
+    equation_system->get_system<ExplicitSystem>("AuxiliarySystem").update();
 
     // Update the element aux vars
     aux_begin = AuxFactory::instance()->activeElementAuxKernelsBegin(0);

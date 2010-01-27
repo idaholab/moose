@@ -30,7 +30,7 @@ public:
   bool isParamRequired(const std::string &name) const;
   bool isParamValid(const std::string &name) const;
   InputParameters & operator=(const InputParameters &rhs);
-  InputParameters & operator=(const Parameters &rhs);
+  InputParameters & operator+=(const InputParameters &rhs);
   void seenInInputFile(const std::string &name);
   
 private:

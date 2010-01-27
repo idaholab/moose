@@ -22,11 +22,22 @@ InputParameters::operator=(const InputParameters &rhs)
 }
 
 InputParameters &
-InputParameters::operator=(const Parameters &rhs)
+InputParameters::operator+=(const InputParameters &rhs)
 {
-  Parameters::operator=(rhs);
+  Parameters::operator+=(rhs);
+  
+  std::map<std::string, std::string>::const_iterator doc_it = rhs._doc_string.begin();
+  std::map<std::string, std::string>::const_iterator doc_end = rhs._doc_string.end();
+  
+  for(; doc_it != doc_end; ++doc_it)
+    this->_doc_string[doc_it->first] = doc_it->second;
 
-  // Should we zero out the rest of the members?
+  std::set<std::string>::const_iterator req_it = rhs._required_params.begin();
+  std::set<std::string>::const_iterator req_end = rhs._required_params.end();
+
+  for(; req_it != req_end; ++req_it)
+    this->_required_params.insert(*req_it);
+
   return *this;
 }
 

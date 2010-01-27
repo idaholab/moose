@@ -25,6 +25,7 @@ class EquationSystems;
 class ExodusII_IO;
 class ErrorEstimator;
 class ErrorVector;
+class Executioner;
 
 #define MAX_VARS 1000
 
@@ -215,6 +216,11 @@ namespace Moose
    * Whether or not the mesh has changed recently.  Useful for doing separate output.
    */
   extern bool mesh_changed;
+
+  /**
+   * THE Executioner object that will be used.
+   */
+  extern Executioner * executioner;
 
   /**
    * A range for use with TBB.  We do this so that it doesn't have
