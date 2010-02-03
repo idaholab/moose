@@ -147,6 +147,12 @@ TransientExecutioner::execute()
 Real
 TransientExecutioner::computeDT()
 {
+  if(!lastSolveConverged())
+  {
+    std::cout<<"Solve failed... cutting timestep"<<std::endl;
+    return _dt / 2.0;
+  }
+  
   // If start up steps are needed
   if(_t_step == 1 && _n_startup_steps > 1)
     return _dt/(double)(_n_startup_steps);

@@ -59,6 +59,7 @@
 #include "ExecutionerFactory.h"
 #include "Steady.h"
 #include "TransientExecutioner.h"
+#include "SolutionTimeAdaptive.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -162,6 +163,7 @@ Moose::registerObjects()
   // Just in this one case to avoid a collision with libMesh am I registering something with a different
   // name than the class name!
   ExecutionerFactory::instance()->registerExecutioner<TransientExecutioner>("Transient");
+  ExecutionerFactory::instance()->registerExecutioner<SolutionTimeAdaptive>("SolutionTimeAdaptive");
 }
 
 void
