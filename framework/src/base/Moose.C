@@ -81,6 +81,8 @@ MooseInit::MooseInit(int argc, char** argv)
   :LibMeshInit(argc, argv)
 {
   Moose::command_line = new GetPot(argc, argv);
+
+  std::cout << "Number of Threads: " << libMesh::n_threads() << "\n";
 }
 
 MooseInit::~MooseInit()

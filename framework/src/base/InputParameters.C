@@ -7,7 +7,7 @@ InputParameters::InputParameters(const InputParameters &rhs)
 
 InputParameters::InputParameters(const Parameters &rhs)
 {
-  *this = rhs;
+  Parameters::operator=(rhs);
 }
 
 InputParameters &
