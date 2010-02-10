@@ -181,17 +181,17 @@ int main (int argc, char** argv)
     conv_coupled_as.push_back("some_var");
 
     // Blank params to use for Kernels that don't need params
-    Parameters params;
+    InputParameters params;
 
     // Parameters for DirichletBC's
-    Parameters left_bc_params;
-    left_bc_params.set<Real>("value") = 0.0;
-
-    Parameters right_bc_params;
-    right_bc_params.set<Real>("value") = 1.0;
+    InputParameters left_bc_params;
+    left_bc_params.addParam("value", 0.0, "value on the left boundary");
     
-    Parameters coupled_bc_params;
-    coupled_bc_params.set<Real>("value") = 2.0;
+    InputParameters right_bc_params;
+    right_bc_params.addParam("value", 1.0, "value on the right boundary");
+    
+    InputParameters coupled_bc_params;
+    coupled_bc_params.addParam("value", 2.0, "");
     
     //////////////
     // "u" Kernels

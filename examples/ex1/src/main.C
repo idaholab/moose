@@ -105,14 +105,14 @@ int main (int argc, char** argv)
     AuxKernel::init();
 
     // Blank params to use for Kernels that don't need params
-    Parameters params;
+    InputParameters params;
 
     // Parameters for DirichletBC's
-    Parameters left_bc_params;
-    left_bc_params.set<Real>("value") = 0.0;
+    InputParameters left_bc_params;
+    left_bc_params.addParam("value", 0.0, "value on the left boundary") ;
 
-    Parameters right_bc_params;
-    right_bc_params.set<Real>("value") = 1.0;
+    InputParameters right_bc_params;
+    right_bc_params.addParam("value", 1.0, "value on the right boundary");
 
     // Add a Diffusion Kernel from MOOSE into the calculation.
     KernelFactory::instance()->add("Diffusion", "diff", params, "u");
