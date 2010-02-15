@@ -36,8 +36,11 @@ Kernel::Kernel(std::string name,
    _material(_static_material[_tid]),
    _JxW(*(_static_JxW[_tid])[_fe_type]),
    _phi(*(_static_phi[_tid])[_fe_type]),
+   _test((_static_test[_tid])[_var_num]),
    _dphi(*(_static_dphi[_tid])[_fe_type]),
+   _dtest(*(_static_dphi[_tid])[_fe_type]),
    _d2phi(*(_static_d2phi[_tid])[_fe_type]),
+   _d2test(*(_static_d2phi[_tid])[_fe_type]),
    _qrule(_static_qrule[_tid]),
    _q_point(*(_static_q_point[_tid])[_fe_type]),
    _coupled_to(coupled_to),
@@ -268,13 +271,23 @@ Kernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * el
 //  Moose::perf_log.pop("reinit() - dof_indices","Kernel");
 //  Moose::perf_log.push("reinit() - fereinit","Kernel");
   
-  static bool first = true;
+  static std::vector<bool> first(libMesh::n_threads(), true);
 
-  if(!Moose::no_fe_reinit || first)
+  if(Moose::no_fe_reinit)
+  {
+    if(first[tid])
+    {
+      for(;fe_it != fe_end; ++fe_it)
+        fe_it->second->reinit(elem);
+    }
+  }
+  else
+  {
     for(;fe_it != fe_end; ++fe_it)
       fe_it->second->reinit(elem);
+  }
 
-  first = false;
+  first[tid] = false;
 
 //  Moose::perf_log.pop("reinit() - fereinit","Kernel");
 
@@ -355,6 +368,8 @@ Kernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * el
     const std::vector<std::vector<RealGradient> > & static_dphi= *_static_dphi[tid][fe_type];
     const std::vector<std::vector<RealTensor> > & static_d2phi= *_static_d2phi[tid][fe_type];
 
+    // Copy phi to the test functions.
+    _static_test[tid][var_num] = static_phi;
 
     if (_is_transient)
     {
@@ -899,6 +914,7 @@ Order Kernel::_max_quadrature_order;
 std::vector<QGauss *> Kernel::_static_qrule;
 std::vector<std::map<FEType, const std::vector<Real> *> > Kernel::_static_JxW;
 std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > Kernel::_static_phi;
+std::vector<std::map<unsigned int, std::vector<std::vector<Real> > > > Kernel::_static_test(128);
 std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > Kernel::_static_dphi;
 std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > Kernel::_static_d2phi;
 std::vector<std::map<FEType, const std::vector<Point> *> > Kernel::_static_q_point;

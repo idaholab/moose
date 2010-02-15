@@ -25,7 +25,5 @@ PeriodicBlock::execute()
 
   _executed = true;
 
-  std::cout<<"Executing periodic block!"<<std::endl;
-  
   visitChildren();
 }  

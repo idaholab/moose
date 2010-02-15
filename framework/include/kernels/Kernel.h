@@ -285,14 +285,31 @@ protected:
   const std::vector<std::vector<Real> > & _phi;
 
   /**
+   * Interior test function.
+   *
+   * These are non-const so they can be modified for stabilization.
+   */
+  std::vector<std::vector<Real> > & _test;
+
+  /**
    * Gradient of interior shape function.
    */
   const std::vector<std::vector<RealGradient> > & _dphi;
 
   /**
+   * Gradient of interior test function.
+   */
+  const std::vector<std::vector<RealGradient> > & _dtest;
+
+  /**
    * Second derivative of interior shape function.
    */
   const std::vector<std::vector<RealTensor> > & _d2phi;
+
+  /**
+   * Second derivative of interior test function.
+   */
+  const std::vector<std::vector<RealTensor> > & _d2test;
 
   /**
    * Current quadrature rule.
@@ -460,6 +477,14 @@ protected:
    * Interior shape function.
    */
   static std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _static_phi;
+
+  /**
+   * Interior test function.
+   *
+   * Note that there is a different test function for each variable... allowing for modified
+   * basis for things like SUPG and GLS.
+   */
+  static std::vector<std::map<unsigned int, std::vector<std::vector<Real> > > > _static_test;
 
   /**
    * Gradient of interior shape function.

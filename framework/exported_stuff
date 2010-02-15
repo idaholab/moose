@@ -13,6 +13,6 @@ ifeq ($(enable-shared),yes)
   moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
 endif
 
-libmesh_INCLUDE := -I$(MOOSE_DIR)/include -I$(MOOSE_DIR)/include/executioners -I$(MOOSE_DIR)/include/ics -I$(MOOSE_DIR)/include/materials -I$(MOOSE_DIR)/include/parser -I$(MOOSE_DIR)/include/base -I$(MOOSE_DIR)/include/kernels -I$(MOOSE_DIR)/include/utils -I$(MOOSE_DIR)/include/auxkernels -I$(MOOSE_DIR)/include/bcs $(libmesh_INCLUDE)
+libmesh_INCLUDE := -I$(MOOSE_DIR)/include -I$(MOOSE_DIR)/include/stabilizers -I$(MOOSE_DIR)/include/executioners -I$(MOOSE_DIR)/include/ics -I$(MOOSE_DIR)/include/materials -I$(MOOSE_DIR)/include/parser -I$(MOOSE_DIR)/include/base -I$(MOOSE_DIR)/include/kernels -I$(MOOSE_DIR)/include/utils -I$(MOOSE_DIR)/include/auxkernels -I$(MOOSE_DIR)/include/bcs $(libmesh_INCLUDE)
 libmesh_LIBS := $(moose_LIB) $(libmesh_LIBS) -Wl,-rpath,$(MOOSE_DIR)
 

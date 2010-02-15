@@ -3,6 +3,7 @@
 #include "UpdateAuxVars.h"
 #include "KernelFactory.h"
 #include "MaterialFactory.h"
+#include "StabilizerFactory.h"
 #include "BoundaryCondition.h"
 #include "BCFactory.h"
 #include "ParallelUniqueId.h"
@@ -44,6 +45,10 @@ public:
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
+    StabilizerIterator stabilizer_begin = StabilizerFactory::instance()->activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = StabilizerFactory::instance()->activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_it = stabilizer_begin;
+
     unsigned int subdomain = 999999999;
 
     for (el = range.begin() ; el != range.end(); ++el)
@@ -71,7 +76,15 @@ public:
         //Kernels on this block
         for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
           (*block_kernel_it)->subdomainSetup();
+
+        //Stabilizers
+        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+          stabilizer_it->second->subdomainSetup();
       } 
+
+      //Stabilizers
+      for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+        stabilizer_it->second->computeTestFunctions();
 
       //Global Kernels
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -208,6 +221,10 @@ public:
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
+    StabilizerIterator stabilizer_begin = StabilizerFactory::instance()->activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = StabilizerFactory::instance()->activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_it = stabilizer_begin;
+
     unsigned int subdomain = 999999999;
 
     DofMap & dof_map = precond_system.get_dof_map();
@@ -245,7 +262,15 @@ public:
         //Kernels on this block
         for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
           (*block_kernel_it)->subdomainSetup();
+
+        //Stabilizers
+        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+          stabilizer_it->second->subdomainSetup();
       } 
+
+      //Stabilizers
+      for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+        stabilizer_it->second->computeTestFunctions();
     
       //Global Kernels
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -345,6 +370,10 @@ protected:
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
+    StabilizerIterator stabilizer_begin = StabilizerFactory::instance()->activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = StabilizerFactory::instance()->activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_it = stabilizer_begin;
+
     unsigned int subdomain = 999999999;
 
     DofMap & dof_map = precond_system.get_dof_map();
@@ -382,7 +411,15 @@ protected:
         //Kernels on this block
         for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
           (*block_kernel_it)->subdomainSetup();
+
+        //Stabilizers
+        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+          stabilizer_it->second->subdomainSetup();
       } 
+
+      //Stabilizers
+      for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+        stabilizer_it->second->computeTestFunctions();
     
       //Global Kernels
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)

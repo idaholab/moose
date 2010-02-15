@@ -37,6 +37,8 @@
 #include "GenericAuxKernelBlock.h"
 #include "BCsBlock.h"
 #include "GenericBCBlock.h"
+#include "StabilizersBlock.h"
+#include "GenericStabilizerBlock.h"
 #include "MaterialsBlock.h"
 #include "GenericMaterialBlock.h"
 #include "ExecutionBlock.h"
@@ -60,6 +62,9 @@
 #include "Steady.h"
 #include "TransientExecutioner.h"
 #include "SolutionTimeAdaptive.h"
+
+#include "StabilizerFactory.h"
+#include "ConvectionDiffusionSUPG.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -143,6 +148,8 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<BCsBlock>("AuxBCs");
   // Reuse the GenericBCBlock for AuxBCs/*
   ParserBlockFactory::instance()->registerParserBlock<GenericBCBlock>("AuxBCs/*");
+  ParserBlockFactory::instance()->registerParserBlock<StabilizersBlock>("Stabilizers");
+  ParserBlockFactory::instance()->registerParserBlock<GenericStabilizerBlock>("Stabilizers/*");
   ParserBlockFactory::instance()->registerParserBlock<MaterialsBlock>("Materials");
   ParserBlockFactory::instance()->registerParserBlock<GenericMaterialBlock>("Materials/*");
   ParserBlockFactory::instance()->registerParserBlock<ExecutionBlock>("Execution");
@@ -166,6 +173,8 @@ Moose::registerObjects()
   // name than the class name!
   ExecutionerFactory::instance()->registerExecutioner<TransientExecutioner>("Transient");
   ExecutionerFactory::instance()->registerExecutioner<SolutionTimeAdaptive>("SolutionTimeAdaptive");
+  
+  StabilizerFactory::instance()->registerStabilizer<ConvectionDiffusionSUPG>("ConvectionDiffusionSUPG");
 }
 
 void

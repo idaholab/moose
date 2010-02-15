@@ -22,8 +22,6 @@ GenericPeriodicBlock::GenericPeriodicBlock(const std::string & reg_id, const std
 void
 GenericPeriodicBlock::execute() 
 {
-  std::cout<<"Executing GenericPeriodic block!"<<std::endl;
-
   TransientNonlinearImplicitSystem &system =
     Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
 
