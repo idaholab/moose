@@ -44,7 +44,7 @@ StabilizerFactory::add(std::string stabilizer_name,
                    unsigned int block_id)
 {
   Stabilizer * stabilizer;
-    
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     Moose::current_thread_id = tid;

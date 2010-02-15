@@ -2,7 +2,7 @@
 #define CONVECTIONDIFFUSIONSUPG_H
 
 #include "Moose.h"
-#include "Stabilizer.h"
+#include "SUPGBase.h"
 
 // LibMesh includes
 #include <parameters.h>
@@ -21,7 +21,7 @@ InputParameters validParams<ConvectionDiffusionSUPG>();
 /**
  * 
  */
-class ConvectionDiffusionSUPG : public Stabilizer
+class ConvectionDiffusionSUPG : public SUPGBase
 {
 public:
 
@@ -40,10 +40,7 @@ public:
              std::vector<std::string> coupled_to,
              std::vector<std::string> coupled_as);
 
-  /**
-   * Compute the test functions.
-   */
-  virtual void computeTestFunctions();
+  virtual void computeTausAndVelocities();
 
 protected:
   /**
@@ -64,7 +61,7 @@ protected:
   /**
    * A velocity vector that supports a dot product.
    */
-  RealVectorValue _velocity;
+  RealVectorValue _my_velocity;
 
   /**
    * Class variables to hold the components of velocity coming from the input parameters.
