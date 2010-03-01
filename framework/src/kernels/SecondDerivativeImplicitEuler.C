@@ -19,11 +19,11 @@ SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(std::string name,
 Real
 SecondDerivativeImplicitEuler::computeQpResidual()
   {
-    return _phi[_i][_qp]*((_u[_qp]-2*_u_old[_qp]+_u_older[_qp])/(_dt*_dt));
+    return _test[_i][_qp]*((_u[_qp]-2*_u_old[_qp]+_u_older[_qp])/(_dt*_dt));
   }
 
 Real
 SecondDerivativeImplicitEuler::computeQpJacobian()
   {
-    return _phi[_i][_qp]*(_phi[_j][_qp]/(_dt*_dt));
+    return _test[_i][_qp]*(_phi[_j][_qp]/(_dt*_dt));
   }

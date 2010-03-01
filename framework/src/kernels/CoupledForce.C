@@ -13,7 +13,7 @@ CoupledForce::CoupledForce(std::string name,
 Real
 CoupledForce::computeQpResidual()
 {
-  return -_v[_qp]*_phi[_i][_qp];
+  return -_v[_qp]*_test[_i][_qp];
 }
 
 Real
@@ -26,6 +26,6 @@ Real
 CoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _v_var)
-    return -_phi[_j][_qp]*_phi[_i][_qp];    
+    return -_phi[_j][_qp]*_test[_i][_qp];    
   return 0.0;
 }

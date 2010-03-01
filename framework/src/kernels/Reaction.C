@@ -11,11 +11,11 @@ Reaction::Reaction(std::string name,
 Real
 Reaction::computeQpResidual()
   {
-    return _phi[_i][_qp]*_u[_qp];
+    return _test[_i][_qp]*_u[_qp];
   }
 
 Real
 Reaction::computeQpJacobian()
   {
-    return _phi[_i][_qp]*_phi[_j][_qp];
+    return _test[_i][_qp]*_phi[_j][_qp];
   }

@@ -20,11 +20,11 @@ ImplicitEuler::ImplicitEuler(std::string name,
 Real
 ImplicitEuler::computeQpResidual()
 {
-  return _phi[_i][_qp]*((_u[_qp]-_u_old[_qp])/_dt);
+  return _test[_i][_qp]*((_u[_qp]-_u_old[_qp])/_dt);
 }
 
 Real
 ImplicitEuler::computeQpJacobian()
 {
-  return _phi[_i][_qp]*_phi[_j][_qp]/_dt;
+  return _test[_i][_qp]*_phi[_j][_qp]/_dt;
 }
