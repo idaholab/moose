@@ -462,8 +462,8 @@ Kernel::computeResidual()
   
   DenseSubVector<Number> & var_Re = *_var_Res[_tid][_var_num];
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_i=0; _i<_phi.size(); _i++)
+  for (_i=0; _i<_phi.size(); _i++)
+    for (_qp=0; _qp<_qrule->n_points(); _qp++)
       var_Re(_i) += _scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
   
 //  Moose::perf_log.pop("computeResidual()","Kernel");
@@ -476,9 +476,10 @@ Kernel::computeJacobian()
 
   DenseSubMatrix<Number> & var_Ke = *_var_Kes[_tid][_var_num];
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_i=0; _i<_phi.size(); _i++)
-      for (_j=0; _j<_phi.size(); _j++)
+
+  for (_i=0; _i<_phi.size(); _i++)
+    for (_j=0; _j<_phi.size(); _j++)
+      for (_qp=0; _qp<_qrule->n_points(); _qp++)
         var_Ke(_i,_j) += _scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
   
 //  Moose::perf_log.pop("computeJacobian()",_name);
@@ -489,9 +490,9 @@ Kernel::computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_i=0; _i<_phi.size(); _i++)
-      for (_j=0; _j<_phi.size(); _j++)
+  for (_i=0; _i<_phi.size(); _i++)
+    for (_j=0; _j<_phi.size(); _j++)
+      for (_qp=0; _qp<_qrule->n_points(); _qp++)
       {
         if(jvar == _var_num)
           Ke(_i,_j) += _scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
