@@ -11,11 +11,11 @@ Diffusion::Diffusion(std::string name,
 Real
 Diffusion::computeQpResidual()
   {
-    return _dphi[_i][_qp]*_grad_u[_qp];
+    return _dtest[_i][_qp]*_grad_u[_qp];
   }
 
 Real
 Diffusion::computeQpJacobian()
   {
-    return _dphi[_i][_qp]*_dphi[_j][_qp];
+    return _dtest[_i][_qp]*_dphi[_j][_qp];
   }

@@ -28,5 +28,5 @@ SUPGBase::computeTestFunctions()
 
   for(_i=0; _i<num_shape; _i++)
     for(_qp=0; _qp<num_q_points; _qp++)
-      _test[_i][_qp] += _tau[_qp]*(_velocity[_qp]*_dphi[_i][_qp]);
+      _test[_i][_qp] += _tau[_qp]*(_velocity[_qp]*_dtest[_i][_qp]);
 }
