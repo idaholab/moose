@@ -23,7 +23,7 @@ GravityPower::GravityPower(std::string name,
 Real
 GravityPower::computeQpResidual()
 {
-  return -_pv[_qp]*_acceleration*_phi[_i][_qp];
+  return -_pv[_qp]*_acceleration*_test[_i][_qp];
 }
 
 Real
@@ -31,7 +31,7 @@ GravityPower::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _pv_var)
   {
-    return -_phi[_j][_qp]*_acceleration*_phi[_i][_qp];
+    return -_phi[_j][_qp]*_acceleration*_test[_i][_qp];
   }
 
   return 0;

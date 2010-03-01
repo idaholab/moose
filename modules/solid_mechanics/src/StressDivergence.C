@@ -29,7 +29,7 @@ StressDivergence::subdomainSetup()
 Real
 StressDivergence::computeQpResidual()
 {
-  Real r = (*_stress)[_qp].row(_component) * _dphi[_i][_qp];
+  Real r = (*_stress)[_qp].row(_component) * _dtest[_i][_qp];
   
   return r;
 }

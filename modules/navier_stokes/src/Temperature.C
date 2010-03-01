@@ -43,7 +43,7 @@ Temperature::computeQpResidual()
 
   value *= et - ((vec * vec) / 2.0);
 
-  return (_u[_qp]-value)*_phi[_i][_qp];
+  return (_u[_qp]-value)*_test[_i][_qp];
 }
 
 
@@ -58,7 +58,7 @@ Temperature::computeQpJacobian()
 
   value *= et - ((vec * vec) / 2.0);
   
-  return _phi[_j][_qp]*_phi[_i][_qp];
+  return _phi[_j][_qp]*_test[_i][_qp];
 }
 
 Real
@@ -72,7 +72,7 @@ Temperature::computeQpOffDiagJacobian(unsigned int jvar)
 
     value *= et;
 
-    return (-value)*_phi[_i][_qp];    
+    return (-value)*_test[_i][_qp];    
   }
   else if(jvar == _pe_var)
   {
@@ -82,7 +82,7 @@ Temperature::computeQpOffDiagJacobian(unsigned int jvar)
 
     value *= et;
 
-    return (-value)*_phi[_i][_qp];    
+    return (-value)*_test[_i][_qp];    
   }
   
   return 0;

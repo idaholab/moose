@@ -21,11 +21,11 @@ CoefDiffusion::CoefDiffusion(std::string name,
 Real
 CoefDiffusion::computeQpResidual()
 {
-  return _coef*_dphi[_i][_qp]*_grad_u[_qp];
+  return _coef*_dtest[_i][_qp]*_grad_u[_qp];
 }
 
 Real
 CoefDiffusion::computeQpJacobian()
 {
-  return _coef*_dphi[_i][_qp]*_dphi[_j][_qp];
+  return _coef*_dtest[_i][_qp]*_dphi[_j][_qp];
 }

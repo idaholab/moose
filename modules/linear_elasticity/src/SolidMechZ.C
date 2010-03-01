@@ -35,7 +35,7 @@ SolidMechZ::computeQpResidual()
     _stress(1) = _c1*_c3*_strain(1,2);
     _stress(2) = _c1*_c2*_strain(0,0)+_c1*_c2*_strain(1,1)+_c1*_strain(2,2);
 
-    return (_stress*_dphi[_i][_qp]);
+    return (_stress*_dtest[_i][_qp]);
 
   }
 
@@ -44,7 +44,7 @@ SolidMechZ::computeQpJacobian()
   {
     recomputeConstants();
 
-    Real value = _c1*(_dphi[_i][_qp]*(_B33*_dphi[_j][_qp]));
+    Real value = _c1*(_dtest[_i][_qp]*(_B33*_dphi[_j][_qp]));
 
     return value;
   }
@@ -61,5 +61,5 @@ SolidMechZ::computeQpOffDiagJacobian(unsigned int jvar)
     else if(jvar == _y_var)
       value += _B32*_dphi[_j][_qp];
 
-    return _c1*(_dphi[_i][_qp]*value);
+    return _c1*(_dtest[_i][_qp]*value);
   }

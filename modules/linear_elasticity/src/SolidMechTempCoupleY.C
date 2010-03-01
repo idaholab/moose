@@ -20,7 +20,7 @@ SolidMechTempCoupleY::computeQpResidual()
   {
     recomputeCouplingConstants();
 
-    return -(_c1*(1+2*_c2)*_dphi[_i][_qp](1)*(*_thermal_strain)[_qp]);
+    return -(_c1*(1+2*_c2)*_dtest[_i][_qp](1)*(*_thermal_strain)[_qp]);
   }
 
 Real
@@ -29,7 +29,7 @@ SolidMechTempCoupleY::computeQpOffDiagJacobian(unsigned int jvar)
     recomputeCouplingConstants();
 
     if(jvar == _temp_var)
-      return -(_c1*(1+2*_c2)*_dphi[_i][_qp](1)*(*_alpha)[_qp]*_phi[_j][_qp]);
+      return -(_c1*(1+2*_c2)*_dtest[_i][_qp](1)*(*_alpha)[_qp]*_phi[_j][_qp]);
     
     return 0.0;
   }

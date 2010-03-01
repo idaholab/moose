@@ -23,7 +23,7 @@ GravityForce::GravityForce(std::string name,
 Real
 GravityForce::computeQpResidual()
 {
-  return -_p[_qp]*_acceleration*_phi[_i][_qp];
+  return -_p[_qp]*_acceleration*_test[_i][_qp];
 }
 
 Real
@@ -31,7 +31,7 @@ GravityForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _p_var)
   {
-    return -_phi[_j][_qp]*_acceleration*_phi[_i][_qp];
+    return -_phi[_j][_qp]*_acceleration*_test[_i][_qp];
   }
 
   return 0;
