@@ -96,4 +96,5 @@ GenericExecutionerBlock::execute()
     PetscOptionsSetValue(petsc_inames[i].c_str(), petsc_values[i].c_str());
 #endif //LIBMESH_HAVE_PETSC
 
+  visitChildren();
 }
