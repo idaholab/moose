@@ -96,6 +96,12 @@ protected:
    * The Auxiliary System
    */
   TransientExplicitSystem & _aux_system;
+
+  /**
+   * Initial Residual Variables
+   */
+  Real _initial_residual_norm;
+  Real _old_initial_residual_norm;
 };
 
 #endif //EXECUTIONER_H

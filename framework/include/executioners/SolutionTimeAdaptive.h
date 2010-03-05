@@ -55,6 +55,7 @@ protected:
   timeval _solve_start, _solve_end;
 
   Real _older_sol_time_vs_dt, _old_sol_time_vs_dt, _sol_time_vs_dt;
+  
 };
 
 #endif //SOLUTIONTIMEADAPTIVE_H

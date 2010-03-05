@@ -27,7 +27,9 @@ Executioner::Executioner(std::string name, InputParameters parameters)
   :_name(name),
    _parameters(parameters),
    _system(Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem")),
-   _aux_system(Moose::equation_system->get_system<TransientExplicitSystem>("AuxiliarySystem"))
+   _aux_system(Moose::equation_system->get_system<TransientExplicitSystem>("AuxiliarySystem")),
+   _initial_residual_norm(9999),
+   _old_initial_residual_norm(9999)
 {}
 
 bool
@@ -103,8 +105,11 @@ Executioner::setScaling()
   Kernel::setVarScaling(one_scaling);
   
   Moose::compute_residual(*_system.current_local_solution,*_system.rhs);
+
+  _old_initial_residual_norm = _initial_residual_norm;
+  _initial_residual_norm = _system.rhs->l2_norm();
     
-  std::cout<<"  True Initial Nonlinear Residual: "<<_system.rhs->l2_norm()<<std::endl;
+  std::cout<<"  True Initial Nonlinear Residual: "<<_initial_residual_norm<<std::endl;
   
   // Set the scaling to manual scaling
   Kernel::setVarScaling(Moose::manual_scaling);
