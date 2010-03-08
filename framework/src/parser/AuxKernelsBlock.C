@@ -28,7 +28,7 @@ AuxKernelsBlock::execute()
   /* TODO: Figure out why the AuxKernel::init() breaks here:  It works when in the KernelsBlock
    * module, before the calls to add the regular kernels
    */
-  //AuxKernel::init();
+  AuxKernel::init();
 
   // TODO: Implement GenericAuxKernelBlock
   // Add the AuxKernels to the system

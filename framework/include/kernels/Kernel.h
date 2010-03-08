@@ -514,87 +514,87 @@ protected:
   /**
    * Dof Maps for all the variables.
    */
-  static std::vector<std::map<unsigned int, std::vector<unsigned int> > > _var_dof_indices;
+  static std::vector<std::vector<std::vector<unsigned int> > > _var_dof_indices;
 
   /**
    * Dof Maps for all the auxiliary variables.
    */
-  static std::vector<std::map<unsigned int, std::vector<unsigned int> > > _aux_var_dof_indices;
+  static std::vector<std::vector<std::vector<unsigned int> > > _aux_var_dof_indices;
 
   /**
    * Residual vectors for all variables.
    */
-  static std::vector<std::map<unsigned int, DenseSubVector<Number> * > > _var_Res;
+  static std::vector<std::vector<DenseSubVector<Number> * > > _var_Res;
 
   /**
    * Jacobian matrices for all variables.
    */
-  static std::vector<std::map<unsigned int, DenseSubMatrix<Number> * > > _var_Kes;
+  static std::vector<std::vector<DenseSubMatrix<Number> * > > _var_Kes;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals;
+  static std::vector<std::vector<std::vector<Real> > > _var_vals;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _var_grads;
+  static std::vector<std::vector<std::vector<RealGradient> > > _var_grads;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealTensor> > > _var_seconds;
+  static std::vector<std::vector<std::vector<RealTensor> > > _var_seconds;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals_old;
+  static std::vector<std::vector<std::vector<Real> > > _var_vals_old;
 
   /**
    * Value of the variables at the quadrature points at t-2.
    */
-  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals_older;
+  static std::vector<std::vector<std::vector<Real> > > _var_vals_older;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _var_grads_old;
+  static std::vector<std::vector<std::vector<RealGradient> > > _var_grads_old;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _var_grads_older;
+  static std::vector<std::vector<std::vector<RealGradient> > > _var_grads_older;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<Real> > > _aux_var_vals;
+  static std::vector<std::vector<std::vector<Real> > > _aux_var_vals;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _aux_var_grads;
+  static std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<Real> > > _aux_var_vals_old;
+  static std::vector<std::vector<std::vector<Real> > > _aux_var_vals_old;
 
   /**
    * Value of the variables at the quadrature points at t-2.
    */
-  static std::vector<std::map<unsigned int, std::vector<Real> > > _aux_var_vals_older;
+  static std::vector<std::vector<std::vector<Real> > > _aux_var_vals_older;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _aux_var_grads_old;
+  static std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_old;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _aux_var_grads_older;
+  static std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_older;
   
   /**
    * Current time.

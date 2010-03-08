@@ -147,6 +147,32 @@ Kernel::init(EquationSystems * es)
   _aux_system = &_es->get_system<TransientExplicitSystem>("AuxiliarySystem");
   _aux_dof_map = &_aux_system->get_dof_map();
 
+  unsigned int n_vars = _system->n_vars();
+  unsigned int n_aux_vars = _aux_system->n_vars();
+
+  //Resize data arrays
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {    
+    _var_dof_indices[tid].resize(n_vars);
+    _var_Res[tid].resize(n_vars);
+    _var_Kes[tid].resize(n_vars);
+    _var_vals[tid].resize(n_vars);
+    _var_grads[tid].resize(n_vars);
+    _var_seconds[tid].resize(n_vars);
+    _var_vals_old[tid].resize(n_vars);
+    _var_vals_older[tid].resize(n_vars);
+    _var_grads_old[tid].resize(n_vars);
+    _var_grads_older[tid].resize(n_vars);
+    
+    _aux_var_dof_indices[tid].resize(n_aux_vars);
+    _aux_var_vals[tid].resize(n_aux_vars);
+    _aux_var_grads[tid].resize(n_aux_vars);
+    _aux_var_vals_old[tid].resize(n_aux_vars);
+    _aux_var_vals_older[tid].resize(n_aux_vars);
+    _aux_var_grads_old[tid].resize(n_aux_vars);
+    _aux_var_grads_older[tid].resize(n_aux_vars);
+  }
+
   _max_quadrature_order = CONSTANT;
 
   //Set the default variable scaling to 1
@@ -921,23 +947,23 @@ std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > Ke
 std::vector<std::map<FEType, const std::vector<Point> *> > Kernel::_static_q_point;
 std::vector<unsigned int> Kernel::_var_nums;
 std::vector<unsigned int> Kernel::_aux_var_nums;
-std::vector<std::map<unsigned int, std::vector<unsigned int> > > Kernel::_var_dof_indices;
-std::vector<std::map<unsigned int, std::vector<unsigned int> > > Kernel::_aux_var_dof_indices;
-std::vector<std::map<unsigned int, DenseSubVector<Number> * > > Kernel::_var_Res;
-std::vector<std::map<unsigned int, DenseSubMatrix<Number> * > > Kernel::_var_Kes;
-std::vector<std::map<unsigned int, std::vector<Real> > > Kernel::_var_vals;
-std::vector<std::map<unsigned int, std::vector<RealGradient> > > Kernel::_var_grads;
-std::vector<std::map<unsigned int, std::vector<RealTensor> > > Kernel::_var_seconds;
-std::vector<std::map<unsigned int, std::vector<Real> > > Kernel::_var_vals_old;
-std::vector<std::map<unsigned int, std::vector<Real> > > Kernel::_var_vals_older;
-std::vector<std::map<unsigned int, std::vector<RealGradient> > > Kernel::_var_grads_old;
-std::vector<std::map<unsigned int, std::vector<RealGradient> > > Kernel::_var_grads_older;
-std::vector<std::map<unsigned int, std::vector<Real> > > Kernel::_aux_var_vals;
-std::vector<std::map<unsigned int, std::vector<RealGradient> > > Kernel::_aux_var_grads;
-std::vector<std::map<unsigned int, std::vector<Real> > > Kernel::_aux_var_vals_old;
-std::vector<std::map<unsigned int, std::vector<Real> > > Kernel::_aux_var_vals_older;
-std::vector<std::map<unsigned int, std::vector<RealGradient> > > Kernel::_aux_var_grads_old;
-std::vector<std::map<unsigned int, std::vector<RealGradient> > > Kernel::_aux_var_grads_older;
+std::vector<std::vector<std::vector<unsigned int> > > Kernel::_var_dof_indices;
+std::vector<std::vector<std::vector<unsigned int> > > Kernel::_aux_var_dof_indices;
+std::vector<std::vector<DenseSubVector<Number> * > > Kernel::_var_Res;
+std::vector<std::vector<DenseSubMatrix<Number> * > > Kernel::_var_Kes;
+std::vector<std::vector<std::vector<Real> > > Kernel::_var_vals;
+std::vector<std::vector<std::vector<RealGradient> > > Kernel::_var_grads;
+std::vector<std::vector<std::vector<RealTensor> > > Kernel::_var_seconds;
+std::vector<std::vector<std::vector<Real> > > Kernel::_var_vals_old;
+std::vector<std::vector<std::vector<Real> > > Kernel::_var_vals_older;
+std::vector<std::vector<std::vector<RealGradient> > > Kernel::_var_grads_old;
+std::vector<std::vector<std::vector<RealGradient> > > Kernel::_var_grads_older;
+std::vector<std::vector<std::vector<Real> > > Kernel::_aux_var_vals;
+std::vector<std::vector<std::vector<RealGradient> > > Kernel::_aux_var_grads;
+std::vector<std::vector<std::vector<Real> > > Kernel::_aux_var_vals_old;
+std::vector<std::vector<std::vector<Real> > > Kernel::_aux_var_vals_older;
+std::vector<std::vector<std::vector<RealGradient> > > Kernel::_aux_var_grads_old;
+std::vector<std::vector<std::vector<RealGradient> > > Kernel::_aux_var_grads_older;
 Real Kernel::_t;
 Real Kernel::_dt;
 Real Kernel::_dt_old;

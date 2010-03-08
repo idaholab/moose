@@ -223,7 +223,7 @@ protected:
   /**
    * Holds the current dof numbers for each variable for nodal bcs
    */
-  static std::vector<std::map<unsigned int, unsigned int> > _nodal_bc_var_dofs;
+  static std::vector<std::vector<unsigned int> > _nodal_bc_var_dofs;
 
   /**
    * ***************
@@ -234,22 +234,22 @@ protected:
   /**
    * Value of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals_face;
+  static std::vector<std::vector<std::vector<Real> > > _var_vals_face;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealGradient> > > _var_grads_face;
+  static std::vector<std::vector<std::vector<RealGradient> > > _var_grads_face;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  static std::vector<std::map<unsigned int, std::vector<RealTensor> > > _var_seconds_face;
+  static std::vector<std::vector<std::vector<RealTensor> > > _var_seconds_face;
 
   /**
    * Value of the variables at the nodes.
    */
-  static std::vector<std::map<unsigned int, std::vector<Real> > > _var_vals_face_nodal;
+  static std::vector<std::vector<std::vector<Real> > > _var_vals_face_nodal;
 
   /**
    * Holds the current solution at the current quadrature point on the face.

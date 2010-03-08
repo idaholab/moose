@@ -78,6 +78,21 @@ BoundaryCondition::sizeEverything()
 
 void BoundaryCondition::init()
 {
+  unsigned int n_vars = _system->n_vars();
+  unsigned int n_aux_vars = _aux_system->n_vars();
+
+  //Resize data arrays
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    _boundary_to_var_nums[tid].resize(n_vars);
+    _boundary_to_var_nums_nodal[tid].resize(n_vars);
+    _nodal_bc_var_dofs[tid].resize(n_vars);
+    _var_vals_face[tid].resize(n_vars);
+    _var_grads_face[tid].resize(n_vars);
+    _var_seconds_face[tid].resize(n_vars);
+    _var_vals_face_nodal[tid].resize(n_vars);
+  }
+
   //Max quadrature order was already found by Kernel::init()
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
     _static_qface[tid] = new QGauss(_dim-1,_max_quadrature_order);
@@ -371,8 +386,8 @@ std::vector<std::map<FEType, const std::vector<Point> *> > BoundaryCondition::_s
 
 std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums;
 std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums_nodal;
-std::vector<std::map<unsigned int, unsigned int> > BoundaryCondition::_nodal_bc_var_dofs;
-std::vector<std::map<unsigned int, std::vector<Real> > > BoundaryCondition::_var_vals_face;
-std::vector<std::map<unsigned int, std::vector<RealGradient> > > BoundaryCondition::_var_grads_face;
-std::vector<std::map<unsigned int, std::vector<RealTensor> > > BoundaryCondition::_var_seconds_face;
-std::vector<std::map<unsigned int, std::vector<Real> > > BoundaryCondition::_var_vals_face_nodal;
+std::vector<std::vector<unsigned int> > BoundaryCondition::_nodal_bc_var_dofs;
+std::vector<std::vector<std::vector<Real> > > BoundaryCondition::_var_vals_face;
+std::vector<std::vector<std::vector<RealGradient> > > BoundaryCondition::_var_grads_face;
+std::vector<std::vector<std::vector<RealTensor> > > BoundaryCondition::_var_seconds_face;
+std::vector<std::vector<std::vector<Real> > > BoundaryCondition::_var_vals_face_nodal;

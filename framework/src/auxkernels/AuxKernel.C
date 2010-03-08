@@ -64,6 +64,38 @@ AuxKernel::init()
   _aux_soln = _aux_system->solution.get();
   _aux_old_soln = _aux_system->old_local_solution.get();
   _aux_older_soln = _aux_system->older_local_solution.get();
+
+  unsigned int n_vars = _system->n_vars();
+  unsigned int n_aux_vars = _aux_system->n_vars();
+
+  //Resize data arrays
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    _var_vals_nodal[tid].resize(n_vars);
+    _var_vals_old_nodal[tid].resize(n_vars);
+    _var_vals_older_nodal[tid].resize(n_vars);
+
+    _aux_var_dofs[tid].resize(n_aux_vars);
+    _aux_var_vals_nodal[tid].resize(n_aux_vars);
+    _aux_var_vals_old_nodal[tid].resize(n_aux_vars);
+    _aux_var_vals_older_nodal[tid].resize(n_aux_vars);
+
+    _element_var_nums.resize(n_aux_vars);
+    
+    _var_vals_element[tid].resize(n_vars);
+    _var_vals_old_element[tid].resize(n_vars);
+    _var_vals_older_element[tid].resize(n_vars);
+    _var_grads_element[tid].resize(n_vars);
+    _var_grads_old_element[tid].resize(n_vars);
+    _var_grads_older_element[tid].resize(n_vars);
+    
+    _aux_var_vals_element[tid].resize(n_aux_vars);
+    _aux_var_vals_old_element[tid].resize(n_aux_vars);
+    _aux_var_vals_older_element[tid].resize(n_aux_vars);
+    _aux_var_grads_element[tid].resize(n_aux_vars);
+    _aux_var_grads_old_element[tid].resize(n_aux_vars);
+    _aux_var_grads_older_element[tid].resize(n_aux_vars);
+  }
 }
 
 void
@@ -445,25 +477,25 @@ std::vector<const Node *> AuxKernel::_static_current_node;
 
 std::vector<unsigned int> AuxKernel::_nodal_var_nums;
 
-std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_nodal;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_old_nodal;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_older_nodal;
+std::vector<std::vector<Real > > AuxKernel::_var_vals_nodal;
+std::vector<std::vector<Real > > AuxKernel::_var_vals_old_nodal;
+std::vector<std::vector<Real > > AuxKernel::_var_vals_older_nodal;
 
-std::vector<std::map<unsigned int, unsigned int> > AuxKernel::_aux_var_dofs;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_nodal;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_old_nodal;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_older_nodal;
+std::vector<std::vector<unsigned int> > AuxKernel::_aux_var_dofs;
+std::vector<std::vector<Real > > AuxKernel::_aux_var_vals_nodal;
+std::vector<std::vector<Real > > AuxKernel::_aux_var_vals_old_nodal;
+std::vector<std::vector<Real > > AuxKernel::_aux_var_vals_older_nodal;
 
 std::vector<unsigned int> AuxKernel::_element_var_nums;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_element;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_old_element;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_var_vals_older_element;
-std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_var_grads_element;
-std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_var_grads_old_element;
-std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_var_grads_older_element;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_element;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_old_element;
-std::vector<std::map<unsigned int, Real > > AuxKernel::_aux_var_vals_older_element;
-std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_aux_var_grads_element;
-std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_aux_var_grads_old_element;
-std::vector<std::map<unsigned int, RealGradient > > AuxKernel::_aux_var_grads_older_element;
+std::vector<std::vector<Real > > AuxKernel::_var_vals_element;
+std::vector<std::vector<Real > > AuxKernel::_var_vals_old_element;
+std::vector<std::vector<Real > > AuxKernel::_var_vals_older_element;
+std::vector<std::vector<RealGradient > > AuxKernel::_var_grads_element;
+std::vector<std::vector<RealGradient > > AuxKernel::_var_grads_old_element;
+std::vector<std::vector<RealGradient > > AuxKernel::_var_grads_older_element;
+std::vector<std::vector<Real > > AuxKernel::_aux_var_vals_element;
+std::vector<std::vector<Real > > AuxKernel::_aux_var_vals_old_element;
+std::vector<std::vector<Real > > AuxKernel::_aux_var_vals_older_element;
+std::vector<std::vector<RealGradient > > AuxKernel::_aux_var_grads_element;
+std::vector<std::vector<RealGradient > > AuxKernel::_aux_var_grads_old_element;
+std::vector<std::vector<RealGradient > > AuxKernel::_aux_var_grads_older_element;

@@ -44,7 +44,7 @@ KernelsBlock::execute()
 
   Kernel::init(Moose::equation_system);
   // TODO: Figure out why this can't be called in the AuxKernelsBlock
-  AuxKernel::init();
+//  AuxKernel::init();
   
   // Add the kernels to the system
   visitChildren();
