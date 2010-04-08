@@ -345,7 +345,7 @@ Kernel::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * el
       if(_var_Kes[tid][i])
         delete _var_Kes[tid][i];
     
-      _var_Kes[tid][i] = new DenseSubMatrix<Number>(*Ke,position,position,num_dofs,num_dofs);
+      _var_Kes[tid][i] = new DenseMatrix<Number>(num_dofs,num_dofs);
     }
     position+=num_dofs;
   }
@@ -500,7 +500,7 @@ Kernel::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()",_name);
 
-  DenseSubMatrix<Number> & var_Ke = *_var_Kes[_tid][_var_num];
+  DenseMatrix<Number> & var_Ke = *_var_Kes[_tid][_var_num];
 
 
   for (_i=0; _i<_phi.size(); _i++)
@@ -950,7 +950,7 @@ std::vector<unsigned int> Kernel::_aux_var_nums;
 std::vector<std::vector<std::vector<unsigned int> > > Kernel::_var_dof_indices;
 std::vector<std::vector<std::vector<unsigned int> > > Kernel::_aux_var_dof_indices;
 std::vector<std::vector<DenseSubVector<Number> * > > Kernel::_var_Res;
-std::vector<std::vector<DenseSubMatrix<Number> * > > Kernel::_var_Kes;
+std::vector<std::vector<DenseMatrix<Number> * > > Kernel::_var_Kes;
 std::vector<std::vector<std::vector<Real> > > Kernel::_var_vals;
 std::vector<std::vector<std::vector<RealGradient> > > Kernel::_var_grads;
 std::vector<std::vector<std::vector<RealTensor> > > Kernel::_var_seconds;

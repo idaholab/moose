@@ -254,7 +254,7 @@ BoundaryCondition::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()","BoundaryCondition");
 
-  DenseSubMatrix<Number> & var_Ke = *_var_Kes[_tid][_var_num];
+  DenseMatrix<Number> & var_Ke = *_var_Kes[_tid][_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qface->n_points(); _qp++)

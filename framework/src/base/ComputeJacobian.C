@@ -111,13 +111,15 @@ public:
               (*bc_it)->computeJacobian();
           }
         }
-      }
-    
-      Kernel::_dof_map->constrain_element_matrix (Ke, Kernel::_dof_indices[tid], false);
+      }    
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        jacobian.add_matrix(Ke, Kernel::_dof_indices[tid]);
+        for(unsigned int i=0; i< Kernel::_var_dof_indices[tid].size(); i++)
+        {
+          Kernel::_dof_map->constrain_element_matrix (*Kernel::_var_Kes[tid][i], Kernel::_var_dof_indices[tid][i], false);
+          jacobian.add_matrix(*Kernel::_var_Kes[tid][i], Kernel::_var_dof_indices[tid][i]);
+        }
       }
     }
 
@@ -190,7 +192,7 @@ namespace Moose
     jacobian.zero_rows(zero_rows, 1.0);
 
     jacobian.close();
-  
+
     Moose::perf_log.pop("compute_jacobian()","Solve");
   }
 

@@ -511,11 +511,13 @@ protected:
    */
   static std::vector<unsigned int> _aux_var_nums;
 
+public:
   /**
    * Dof Maps for all the variables.
    */
   static std::vector<std::vector<std::vector<unsigned int> > > _var_dof_indices;
 
+protected:
   /**
    * Dof Maps for all the auxiliary variables.
    */
@@ -526,11 +528,13 @@ protected:
    */
   static std::vector<std::vector<DenseSubVector<Number> * > > _var_Res;
 
+public:
   /**
    * Jacobian matrices for all variables.
    */
-  static std::vector<std::vector<DenseSubMatrix<Number> * > > _var_Kes;
+  static std::vector<std::vector<DenseMatrix<Number> * > > _var_Kes;
 
+protected:
   /**
    * Value of the variables at the quadrature points.
    */

@@ -16,6 +16,7 @@
 #include "getpot.h"
 #include "exodusII_io.h"
 #include "dof_map.h"
+#include "coupling_matrix.h"
 
 template<>
 InputParameters validParams<VariablesBlock>()
@@ -51,6 +52,14 @@ VariablesBlock::execute()
   system.nonlinear_solver->jacobian = Moose::compute_jacobian;
 
   system.attach_init_function(Moose::init_cond);
+
+  CouplingMatrix * cm = new CouplingMatrix(system.n_vars());
+  
+  for(unsigned int i=0; i<system.n_vars(); i++)
+    for(unsigned int j=0; j<system.n_vars(); j++)
+      (*cm)(i, j) = ( i == j ? 1 : 0);
+
+  system.get_dof_map()._dof_coupling = cm;
 
   /** If requested, nodal values are copied out after the equation systems are initialized.
    *  This call is made from the AuxVariables Block

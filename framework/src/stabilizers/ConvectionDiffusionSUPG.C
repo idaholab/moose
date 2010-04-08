@@ -38,6 +38,9 @@ ConvectionDiffusionSUPG::computeTausAndVelocities()
 
   Real tau = (h/(2.0*_vel_mag))*(coth(pec - (1.0/pec)));
 
+  if(tau != tau)
+    return;
+
   unsigned int num_q_points = _qrule->n_points();
 
   for(unsigned int qp=0; qp<num_q_points; qp++)
