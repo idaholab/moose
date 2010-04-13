@@ -82,7 +82,7 @@ VariablesBlock::copyNodalValues(const std::string &system_name)
     {
       std::pair<std::string, unsigned int> init_pair = var_block->initialValuePair();
       if (init_pair.first != "") 
-        Moose::exreader->copy_nodal_solution(*system, init_pair.first, init_pair.second);
+        _moose_system.getExodusReader()->copy_nodal_solution(*system, init_pair.first, init_pair.second);
     }
   }
 }

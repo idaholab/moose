@@ -31,6 +31,7 @@ ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id
   :_reg_id(reg_id),
    _real_id(real_id),
    _parser_handle(parser_handle),
+   _moose_system(parser_handle.getMooseSystem()),
    _getpot_handle(parser_handle.getPotHandle()),
    _parent(parent),
    _block_params(params)

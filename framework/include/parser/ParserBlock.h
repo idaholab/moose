@@ -3,8 +3,8 @@
 
 #include <vector>
 
+#include "MooseSystem.h"
 #include "ValidParams.h"
-//#include "Kernel.h"
 
 #include "getpot.h"
 
@@ -130,6 +130,10 @@ public:
   unsigned int n_activeChildren() const;
 
 protected:
+  /**
+   * The MooseSystem this parser is associated with.
+   */
+  MooseSystem & _moose_system;
 
   /**
    * This function calles execute over all of the child blocks of the current Parser Block

@@ -50,11 +50,7 @@ MeshBlock::execute()
       mooseError("");
   }
   else if (checkVariableProperties(&GenericVariableBlock::restartRequired)) 
-  {
-    ExodusII_IO *exreader = new ExodusII_IO(*mesh);
-    Moose::exreader = exreader;
-    exreader->read(getParamValue<std::string>("file"));
-  }
+    _moose_system.getExodusReader()->read(getParamValue<std::string>("file"));
   else
     /* We will use the mesh object to read the file to cut down on
      * I/O conntention.  We still need to use the Exodus reader though

@@ -8,6 +8,9 @@ class InputParameters;
 
 #include <list>
 
+//Forward Declarations
+class MooseSystem;
+
 class Parser
 {
 public:
@@ -15,7 +18,7 @@ public:
    * Default constructor that initializes the parser and looks for the option to dump
    * the registered objects
    */
-  Parser(const std::string &dump_string="--dump");
+  Parser(MooseSystem & moose_system, const std::string &dump_string="--dump");
 
   /**
    * Destructor to remove the dynamically generated Parse Tree
@@ -83,6 +86,11 @@ public:
                        const std::string &delims = "/");
 
   /**
+   * Get the MooseSystem associated with this object.
+   */
+  MooseSystem & getMooseSystem();
+  
+  /**
    * Return a reference to the getpot object to extract options from the input file
    */
   const GetPot * getPotHandle() const;
@@ -96,6 +104,11 @@ public:
 
   
 private:
+  /**
+   * The MooseSystem this parser is associated with.
+   */
+  MooseSystem & _moose_system;
+  
   /**
    * This function inserts blocks into the tree which are optional in the input file but are
    * necessary for the correct execution of MOOSE based applications.

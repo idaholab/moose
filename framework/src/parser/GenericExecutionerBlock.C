@@ -1,5 +1,6 @@
 #include "GenericExecutionerBlock.h"
 #include "ExecutionerFactory.h"
+#include "PetscSupport.h"
 
 template<>
 InputParameters validParams<GenericExecutionerBlock>()

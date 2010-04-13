@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iomanip>
 
+#include "MooseSystem.h"
 #include "Parser.h"
 #include "getpot.h"
 #include "InputParameters.h"
@@ -18,8 +19,9 @@
 const std::string Parser::_show_tree = "--show_tree";
 
  
-Parser::Parser(const std::string &dump_string)
-  :_input_filename(""),
+Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
+  :_moose_system(moose_system),
+   _input_filename(""),
    _input_tree(NULL),
    _getpot_initialized(false),
    _tree_printed(false),
@@ -239,6 +241,12 @@ Parser::tokenize(const std::string &str, std::vector<std::string> &elements, con
     last_pos = str.find_first_not_of(delims, pos);
     pos = str.find_first_of(delims, last_pos);
   }
+}
+
+MooseSystem &
+Parser::getMooseSystem()
+{
+  return _moose_system;
 }
 
 const GetPot *

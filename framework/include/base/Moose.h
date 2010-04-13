@@ -26,6 +26,7 @@ class ExodusII_IO;
 class ErrorEstimator;
 class ErrorVector;
 class Executioner;
+class MooseSystem;
 
 #define MAX_VARS 1000
 
@@ -181,16 +182,16 @@ namespace Moose
    * Preconditioner
    */
   extern Preconditioner<Real> * preconditioner;
+
+  /**
+   * THE Moose System
+   */
+  extern MooseSystem * moose_system;
   
   /**
    * The one mesh to rule them all
    */
   extern Mesh * mesh;
-
-  /**
-   * The ExodusIO Reader to support reading of solutions at element qps
-   */
-  extern ExodusII_IO * exreader;
 
   /**
    * A mesh refinement object to be used with Adaptivity.

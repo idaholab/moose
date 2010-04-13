@@ -332,8 +332,8 @@ THREAD_ID Moose::current_thread_id = 0;
 
 Preconditioner<Real> * Moose::preconditioner = NULL;
 
+MooseSystem * Moose::moose_system;
 Mesh * Moose::mesh;
-ExodusII_IO * Moose::exreader;
 
 EquationSystems * Moose::equation_system;
 
