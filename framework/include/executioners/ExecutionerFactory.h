@@ -12,7 +12,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef Executioner * (*ExecutionerBuildPtr)(std::string name, InputParameters parameters);
+typedef Executioner * (*ExecutionerBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
 /**
  * Typedef to make things easier.
@@ -33,9 +33,9 @@ typedef std::vector<std::string>::iterator ExecutionerNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename ExecutionerType>
-Executioner * buildExecutioner(std::string name, InputParameters parameters)
+Executioner * buildExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters)
 {
-  return new ExecutionerType(name, parameters);
+  return new ExecutionerType(name, moose_system, parameters);
 }
 
 /**
@@ -53,7 +53,7 @@ public:
     name_to_params_pointer[name]=&validParams<ExecutionerType>;
   }
 
-  Executioner * build(std::string ex_name, std::string name, InputParameters parameters);
+  Executioner * build(std::string ex_name, std::string name, MooseSystem & moose_system, InputParameters parameters);
   
   InputParameters getValidParams(std::string name);
   

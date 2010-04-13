@@ -9,8 +9,8 @@ InputParameters validParams<Steady>()
 }
 
 
-Steady::Steady(std::string name, InputParameters parameters)
-  :Executioner(name, parameters),
+Steady::Steady(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Executioner(name, moose_system, parameters),
    _max_r_steps(parameters.get<int>("max_r_steps"))
 {}
 

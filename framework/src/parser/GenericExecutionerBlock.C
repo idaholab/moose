@@ -40,7 +40,7 @@ GenericExecutionerBlock::GenericExecutionerBlock(const std::string & reg_id, con
 void
 GenericExecutionerBlock::execute() 
 {
-  Moose::executioner = ExecutionerFactory::instance()->build(_type, "Executioner", getClassParams());
+  Moose::executioner = ExecutionerFactory::instance()->build(_type, "Executioner", *Moose::moose_system, getClassParams());
   
   Moose::equation_system->parameters.set<Real> ("linear solver tolerance")
     = getParamValue<Real>("l_tol");

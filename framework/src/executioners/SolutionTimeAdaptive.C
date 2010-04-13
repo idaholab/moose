@@ -14,6 +14,7 @@
 
 // C++ Includes
 #include <iomanip>
+#include <limits>
 
 template<>
 InputParameters validParams<SolutionTimeAdaptive>()
@@ -25,13 +26,13 @@ InputParameters validParams<SolutionTimeAdaptive>()
   return params;
 }
 
-SolutionTimeAdaptive::SolutionTimeAdaptive(std::string name, InputParameters parameters)
-  :TransientExecutioner(name, parameters),
+SolutionTimeAdaptive::SolutionTimeAdaptive(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :TransientExecutioner(name, moose_system, parameters),
    _percent_change(parameters.get<Real>("percent_change")),
    _direction(parameters.get<int>("initial_direction")),
-   _old_sol_time_vs_dt(9999),
-   _older_sol_time_vs_dt(9999),
-   _sol_time_vs_dt(9999)
+   _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
+   _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),
+   _sol_time_vs_dt(std::numeric_limits<Real>::max())
 {}
 
 void
@@ -70,8 +71,8 @@ SolutionTimeAdaptive::computeDT()
     _direction *= -1;
 
     // Make sure we take at least two steps in this new direction
-    _old_sol_time_vs_dt = 9999;
-    _older_sol_time_vs_dt = 9999;    
+    _old_sol_time_vs_dt = std::numeric_limits<Real>::max();
+    _older_sol_time_vs_dt = std::numeric_limits<Real>::max();    
   }
   
   return _dt + _dt * _percent_change * _direction;

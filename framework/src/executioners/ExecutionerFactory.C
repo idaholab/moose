@@ -16,9 +16,10 @@ ExecutionerFactory::instance()
 Executioner *
 ExecutionerFactory::build(std::string ex_name,
                           std::string name,
+                          MooseSystem & moose_system,
                           InputParameters parameters)
 {
-  return (*name_to_build_pointer[ex_name])(name,parameters);
+  return (*name_to_build_pointer[ex_name])(name, moose_system, parameters);
 }
 
 InputParameters

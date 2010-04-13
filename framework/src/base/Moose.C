@@ -76,7 +76,6 @@
 #include "mesh_refinement.h"
 #include "boundary_info.h"
 #include "gmv_io.h"
-#include "exodusII_io.h"
 #include "tecplot_io.h"
 #include "parallel.h"
 

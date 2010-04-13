@@ -15,6 +15,7 @@
 
 // Forward Declarations
 class Executioner;
+class MooseSystem;
 
 template<>
 InputParameters validParams<Executioner>();
@@ -39,7 +40,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Executioner(std::string name, InputParameters parameters);
+  Executioner(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
   /**
    * Optionally override to perform some initial setup steps.
@@ -53,6 +54,11 @@ public:
   virtual bool execute() = 0;
 
 protected:
+
+  /**
+   * The reference to the encompassing Moose System
+   */
+  MooseSystem & _moose_system;
 
   /**
    * Optionally override to do something before solve() gets called

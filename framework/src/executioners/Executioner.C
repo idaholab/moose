@@ -8,6 +8,7 @@
 
 // C++ includes
 #include <vector>
+#include <limits>
 
 // libMesh includes
 #include "nonlinear_implicit_system.h"
@@ -23,13 +24,14 @@ InputParameters validParams<Executioner>()
 }
 
 
-Executioner::Executioner(std::string name, InputParameters parameters)
+Executioner::Executioner(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :_name(name),
+   _moose_system(moose_system),
    _parameters(parameters),
    _system(Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem")),
    _aux_system(Moose::equation_system->get_system<TransientExplicitSystem>("AuxiliarySystem")),
-   _initial_residual_norm(9999),
-   _old_initial_residual_norm(9999)
+   _initial_residual_norm(std::numeric_limits<Real>::max()),
+   _old_initial_residual_norm(std::numeric_limits<Real>::max())
 {}
 
 bool

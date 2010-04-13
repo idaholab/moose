@@ -16,6 +16,7 @@
 class SolutionTimeAdaptive;
 template<>
 InputParameters validParams<SolutionTimeAdaptive>();
+class MooseSystem;
 
 /**
  * SolutionTimeAdaptive executioners usually loop through a number of timesteps... calling solve()
@@ -32,7 +33,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  SolutionTimeAdaptive(std::string name, InputParameters parameters);
+  SolutionTimeAdaptive(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:
 

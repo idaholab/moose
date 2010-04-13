@@ -32,7 +32,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Steady(std::string name, InputParameters parameters);
+  Steady(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
   /**
    * This will call solve() on the NonlinearSystem.
