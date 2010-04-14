@@ -3,6 +3,7 @@
 
 // Moose Includes
 #include "Moose.h"
+#include "MooseSystem.h"
 #include "Parser.h"
 #include "AuxFactory.h"
 
@@ -28,6 +29,9 @@ int main (int argc, char** argv)
   // Initialize Moose and any dependent libaries
   MooseInit init (argc, argv);
 
+  // Create a MooseSystem
+  MooseSystem moose_system;
+  
   // This registers a bunch of common objects that exist in Moose with the factories.
    // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
   Moose::registerObjects();
@@ -35,7 +39,7 @@ int main (int argc, char** argv)
   AuxFactory::instance()->registerAux<ExampleAux>("ExampleAux");
   
   // Automatically look for a dump option on the commandline
-  Parser p;
+  Parser p(moose_system);
 
   std::string input_filename = "";
   if ( Moose::command_line->search("-i") )

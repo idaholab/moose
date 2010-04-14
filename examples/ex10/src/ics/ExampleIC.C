@@ -9,9 +9,9 @@ InputParameters validParams<ExampleIC>()
 }
 
 ExampleIC::ExampleIC(std::string name,
-                       InputParameters parameters,
-                       std::string var_name)
-  :InitialCondition(name,parameters,var_name),
+                     MooseSystem & moose_system,
+                     InputParameters parameters)
+  :InitialCondition(name, moose_system, parameters),
    _value(parameters.get<Real>("value"))
 {}
 

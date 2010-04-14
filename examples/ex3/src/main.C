@@ -3,6 +3,7 @@
 
 //Moose Includes
 #include "Moose.h"
+#include "MooseSystem.h"
 #include "KernelFactory.h"
 #include "BCFactory.h"
 #include "MaterialFactory.h"
@@ -35,6 +36,9 @@ int main (int argc, char** argv)
   {
     // Initialize Moose
     MooseInit init(argc, argv);
+
+    // Create a MooseSystem
+    MooseSystem moose_system;
 
     // This registers a bunch of common objects that exist in Moose with the factories.
     // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
@@ -177,7 +181,9 @@ int main (int argc, char** argv)
     
     // Every calculation MUST add at least one Material
     // Here we use the EmptyMaterial from MOOSE because we don't need material properties.
-    MaterialFactory::instance()->add("EmptyMaterial", "empty", params, 1);
+    InputParameters material_params;
+    material_params.addParam("block", std::vector<unsigned int>(1, 1), "block that this material is associated with");
+    MaterialFactory::instance()->add("EmptyMaterial", "empty", moose_system, material_params);
 
     // Solve the Nonlinear System
     system.solve();

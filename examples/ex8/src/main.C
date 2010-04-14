@@ -1,5 +1,6 @@
 //Moose Includes
 #include "Moose.h"
+#include "MooseSystem.h"
 #include "Parser.h"
 
 // C++ include files that we need
@@ -24,12 +25,15 @@ int main (int argc, char** argv)
   // Initialize Moose and any dependent libaries
   MooseInit init (argc, argv);
 
+  // Create a MooseSystem
+  MooseSystem moose_system;
+
   // This registers a bunch of common objects that exist in Moose with the factories.
    // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
   Moose::registerObjects();
 
   // Automatically looks for a dump option on the commandline (defaults to "--dump")
-  Parser p;
+  Parser p(moose_system);
 
   // See if an input file was provided on the command-line
   std::string input_filename = "";

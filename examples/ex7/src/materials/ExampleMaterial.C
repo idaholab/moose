@@ -10,11 +10,9 @@ InputParameters validParams<ExampleMaterial>()
 }
 
 ExampleMaterial::ExampleMaterial(std::string name,
-                                 InputParameters parameters,
-                                 unsigned int block_id,
-                                 std::vector<std::string> coupled_to,
-                                 std::vector<std::string> coupled_as)
-  :Material(name,parameters,block_id,coupled_to,coupled_as),
+                                 MooseSystem & moose_system,
+                                 InputParameters parameters)
+  :Material(name, moose_system, parameters),
    
    // Get a parameter value for the diffusivity
    _input_diffusivity(parameters.get<Real>("diffusivity")),

@@ -5,6 +5,7 @@
 
 //Moose Includes
 #include "Moose.h"
+#include "MooseSystem.h"
 #include "KernelFactory.h"
 #include "BCFactory.h"
 #include "MaterialFactory.h"
@@ -42,6 +43,9 @@ int main (int argc, char** argv)
   {
     // Initialize Moose
     MooseInit init(argc, argv);
+
+    // Create a MooseSystem
+    MooseSystem moose_system;
 
     // Create a GetPot object to parse the command line
     GetPot command_line (argc, argv);
@@ -219,10 +223,11 @@ int main (int argc, char** argv)
 
     // Override the default diffusivity
     mat_params.set<Real>("diffusivity") = diffusivity;
-
+    mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
+    
     // Add the Example material into the calculation using the new diffusivity.
-    MaterialFactory::instance()->add("ExampleMaterial", "example", mat_params, 1);
-
+    MaterialFactory::instance()->add("ExampleMaterial", "example", moose_system,  mat_params);
+    
     {
       // Holds a scalar per element representing the error in that element
       ErrorVector error;
