@@ -1,13 +1,26 @@
 #include "Material.h"
 #include <iostream>
 
+template<>
+InputParameters validParams<Material>()
+{
+  InputParameters params;
+  params.addRequiredParam<std::vector<unsigned int> >("block", "The id of the block (subdomain) that this material represents.");
+  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Material is coupled to.");
+  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Material which correspond with the coupled_as names");
+  return params;
+}
+
 Material::Material(std::string name,
-                   InputParameters parameters,
-                   unsigned int block_id,
-                   std::vector<std::string> coupled_to,
-                   std::vector<std::string> coupled_as)
-  :Kernel(name, parameters, Kernel::_es->get_system(0).variable_name(0), false, coupled_to, coupled_as),
-   _block_id(block_id)
+                   MooseSystem & moose_system,
+                   InputParameters parameters)
+  :Kernel(name,
+          parameters,
+          Kernel::_es->get_system(0).variable_name(0),
+          false,
+          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
+          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+   _moose_system(moose_system)
 {}
 
 unsigned int

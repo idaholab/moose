@@ -15,7 +15,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef Material * (*MaterialBuildPtr)(std::string name, InputParameters parameters, unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+typedef Material * (*MaterialBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters); // , unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
 /**
  * Typedef to make things easier.
@@ -37,12 +37,13 @@ typedef std::vector<std::string>::iterator MaterialNamesIterator;
  */
 template<typename MaterialType>
 Material * buildMaterial(std::string name,
-                         InputParameters parameters,
-                         unsigned int block_id,
-                         std::vector<std::string> coupled_to,
-                         std::vector<std::string> coupled_as)
+                         MooseSystem & moose_system,
+                         InputParameters parameters)
+//                         unsigned int block_id,
+//                         std::vector<std::string> coupled_to,
+//                         std::vector<std::string> coupled_as)
 {
-  return new MaterialType(name, parameters, block_id, coupled_to, coupled_as);
+  return new MaterialType(name, moose_system, parameters); //, block_id, coupled_to, coupled_as);
 }
 
 /**
@@ -62,10 +63,12 @@ public:
 
   void add(std::string mat_name,
            std::string name,
-           InputParameters parameters,
-           unsigned int block_id,
-           std::vector<std::string> coupled_to=std::vector<std::string>(0),
-           std::vector<std::string> coupled_as=std::vector<std::string>(0));
+           MooseSystem & moose_system,
+           InputParameters parameters);
+  
+  //         unsigned int block_id,
+  //         std::vector<std::string> coupled_to=std::vector<std::string>(0),
+  //         std::vector<std::string> coupled_as=std::vector<std::string>(0));
   
   InputParameters getValidParams(std::string name);
   

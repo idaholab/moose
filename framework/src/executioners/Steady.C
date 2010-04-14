@@ -14,7 +14,7 @@ Steady::Steady(std::string name, MooseSystem & moose_system, InputParameters par
    _max_r_steps(parameters.get<int>("max_r_steps"))
 {}
 
-bool
+void
 Steady::execute()
 {
   // Define the refinement loop

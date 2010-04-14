@@ -45,13 +45,13 @@ public:
   /**
    * Optionally override to perform some initial setup steps.
    */
-  virtual bool setup();
+  virtual void setup();
 
   /**
    * Pure virtual execute function MUST be overriden by children classes.
    * This is where the Executioner actually does it's work.
    */
-  virtual bool execute() = 0;
+  virtual void execute() = 0;
 
 protected:
 

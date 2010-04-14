@@ -52,7 +52,7 @@ TransientExecutioner::TransientExecutioner(std::string name, MooseSystem & moose
   Kernel::reinitDT();
 }
 
-bool
+void
 TransientExecutioner::execute()
 {
   _t_step = 1;

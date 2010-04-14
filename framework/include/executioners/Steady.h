@@ -37,7 +37,7 @@ public:
   /**
    * This will call solve() on the NonlinearSystem.
    */
-  virtual bool execute();
+  virtual void execute();
 
 protected:
 

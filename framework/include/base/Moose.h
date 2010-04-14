@@ -51,10 +51,18 @@ void InputParameters::Parameter<std::vector<Real> >::print (std::ostream& os) co
 
 template<>
 inline
+void InputParameters::Parameter<std::vector<unsigned int> >::print (std::ostream& os) const
+{
+  for (unsigned int i=0; i<_value.size(); i++)
+    os << _value[i] << " ";
+}
+
+template<>
+inline
 void InputParameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostream& os) const
 {
-  for (unsigned int i=0; i<_value[i].size(); i++)
-    for (unsigned int j=0; i<_value[j].size(); j++)
+  for (unsigned int i=0; i<_value.size(); i++)
+    for (unsigned int j=0; i<_value[i].size(); j++)
       os << _value[i][j] << " ";
 }
 

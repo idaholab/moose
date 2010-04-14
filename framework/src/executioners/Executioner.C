@@ -35,7 +35,7 @@ Executioner::Executioner(std::string name, MooseSystem & moose_system, InputPara
    _old_initial_residual_norm(std::numeric_limits<Real>::max())
 {}
 
-bool
+void
 Executioner::setup()
 {
   Moose::setSolverDefaults(Moose::equation_system, _system, Moose::compute_jacobian_block, Moose::compute_residual);

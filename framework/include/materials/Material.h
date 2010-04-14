@@ -8,6 +8,11 @@
 #include "tensor_value.h"
 #include "ColumnMajorMatrix.h"
 
+//forward declarations
+class Material;
+
+template<>
+InputParameters validParams<Material>();
 
 /**
  * Holds material properties that are assigned to blocks.
@@ -21,10 +26,8 @@ public:
    * constructor.
    */
   Material(std::string name,
-           InputParameters parameters,
-           unsigned int block_id,
-           std::vector<std::string> coupled_to,
-           std::vector<std::string> coupled_as);
+           MooseSystem & moose_system,
+           InputParameters parameters);
   
   virtual ~Material()
   {
@@ -96,6 +99,12 @@ public:
   void updateDataState();
 
 protected:
+
+  /**
+   * Reference to the MooseSystem that this material is assocaited to
+   */
+  MooseSystem & _moose_system;
+  
 // struct DeleteFunctor 
 //   {
 //     void operator()(const std::pair<const unsigned int, std::vector<QpData *> > & p) const

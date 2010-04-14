@@ -12,17 +12,17 @@ MaterialFactory::instance()
 
 void
   MaterialFactory::add(std::string mat_name,
-           std::string name,
-           InputParameters parameters,
-           unsigned int block_id,
-           std::vector<std::string> coupled_to,
-           std::vector<std::string> coupled_as)
+                       std::string name,
+                       MooseSystem & moose_system,
+                       InputParameters parameters)
   {
     for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
     {
       Moose::current_thread_id = tid;
+      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
 
-      active_materials[tid][block_id] = (*name_to_build_pointer[mat_name])(name,parameters,block_id,coupled_to,coupled_as);
+      for (unsigned int i=0; i<blocks.size(); ++i)
+        active_materials[tid][blocks[i]] = (*name_to_build_pointer[mat_name])(name, moose_system, parameters);
     }
   }
 

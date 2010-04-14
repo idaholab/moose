@@ -384,7 +384,7 @@ Parser::checkInputFile()
 void
 Parser::printUsage() const
 {
-  // Grad the first item out of argv
+  // Grab the first item out of argv
   std::string str((*Moose::command_line)[0]);
   str.substr(str.find_last_of("/\\")+1);
   std::cout << "\nUsage: " << str << " <command>" << "\n\n"
@@ -420,6 +420,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
     InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
     InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
+    InputParameters::Parameter<std::vector<unsigned int>  > * vec_uint_param  = dynamic_cast<InputParameters::Parameter<std::vector<unsigned int> >*>(it->second);
     InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
     InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
     InputParameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
@@ -440,6 +441,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       setVectorParameter<Real>(full_name, vec_real_param);
     else if (vec_int_param)
       setVectorParameter<int>(full_name, vec_int_param);
+    else if (vec_uint_param)
+      setVectorParameter<unsigned int>(full_name, vec_uint_param);
     else if (vec_bool_param)
       setVectorParameter<bool>(full_name, vec_bool_param);
     else if (vec_string_param)
