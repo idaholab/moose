@@ -7,6 +7,7 @@
 
 // misc
 #include "CoefDiffusion.h"
+#include "Convection.h"
 
 // heat_conduction
 #include "HeatConduction.h"
@@ -42,6 +43,7 @@ Elk::registerObjects()
 {
   // misc
   KernelFactory::instance()->registerKernel<CoefDiffusion>("CoefDiffusion");
+  KernelFactory::instance()->registerKernel<Convection>("Convection");
 
   // heat_conduction
   KernelFactory::instance()->registerKernel<HeatConduction>("HeatConduction");
