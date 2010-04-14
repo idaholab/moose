@@ -48,7 +48,9 @@ Kernel::Kernel(std::string name,
    _real_zero(_static_real_zero[_tid]),
    _zero(_static_zero[_tid]),
    _grad_zero(_static_grad_zero[_tid]),
-   _second_zero(_static_second_zero[_tid])
+   _second_zero(_static_second_zero[_tid]),
+   _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
+   _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
 {
   // If this variable isn't known yet... make it so
   if(!_is_aux)
@@ -770,6 +772,18 @@ THREAD_ID
 Kernel::tid()
 {
   return _tid;
+}
+
+Real
+Kernel::startTime()
+{
+  return _start_time;
+}
+
+Real
+Kernel::stopTime()
+{
+  return _stop_time;
 }
 
 bool

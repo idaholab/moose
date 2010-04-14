@@ -312,13 +312,14 @@ Moose::checkSystemsIntegrity()
     }
 
   // Check kernels
+  KernelFactory::instance()->updateActiveKernels(0);
   global_kernels_exist = KernelFactory::instance()->activeKernelBlocks(input_subdomains);
   std::set_difference (element_subdomains.begin(), element_subdomains.end(),
                        input_subdomains.begin(), input_subdomains.end(),
                        std::inserter(difference, difference.end()));
   
   if (!global_kernels_exist && !difference.empty())
-    mooseError("Kernel coverage of your mesh subdomains is mismatched");
+    mooseError("Each subdomain must contain at least one Kernel.");
 
   // Check BCs
   // TODO: Check Boundaries

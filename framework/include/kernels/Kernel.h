@@ -144,6 +144,16 @@ public:
   THREAD_ID tid();
 
   /**
+   * The time, after which this kernel will be active.
+   */
+  Real startTime();
+
+  /**
+   * The time, after which this kernel will be inactive.
+   */
+  Real stopTime();
+
+  /**
    * Computes the modified variable number for an auxiliary variable.
    * This is the variable number that Kernels know this variable to operate under.
    *
@@ -437,6 +447,16 @@ protected:
   bool _has_second_derivatives;
 
   /**
+   * The time, after which this kernel will be active.
+   */
+  Real _start_time;
+
+  /**
+   * The time, after which this kernel will be inactive.
+   */
+  Real _stop_time;
+
+  /**
    * ***********************
    * All of the static stuff
    * ***********************
@@ -599,16 +619,19 @@ protected:
    * Gradient of the variables at the quadrature points.
    */
   static std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_older;
-  
+
+public:
   /**
    * Current time.
    */
   static Real _t;
-
+  
   /**
    * Current dt.
    */
   static Real _dt;
+
+protected:  
 
   /**
    * Old dt.

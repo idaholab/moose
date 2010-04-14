@@ -37,6 +37,8 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
+    KernelFactory::instance()->updateActiveKernels(tid);
+
     KernelIterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
     KernelIterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;

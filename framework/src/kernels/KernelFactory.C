@@ -26,7 +26,7 @@ KernelFactory::add(std::string kernel_name,
 
     kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
 
-    active_kernels[tid].push_back(kernel);
+    all_kernels[tid].push_back(kernel);
   }
 
   return kernel;
@@ -49,7 +49,7 @@ KernelFactory::add(std::string kernel_name,
       
     kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
 
-    block_kernels[tid][block_id].push_back(kernel);
+    all_block_kernels[tid][block_id].push_back(kernel);
   }
 
   return kernel;
@@ -63,7 +63,16 @@ KernelFactory::getValidParams(std::string name)
     std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Kernel "<<std::endl<<std::endl;
     mooseError("");
   }
-  return name_to_params_pointer[name]();
+  
+  InputParameters params = name_to_params_pointer[name]();
+
+  if(!params.have_parameter<Real>("start_time"))
+    params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");
+
+  if(!params.have_parameter<Real>("stop_time"))
+    params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which this kernel will no longer be active.");
+
+  return params;
 }
 
 KernelIterator
@@ -135,10 +144,55 @@ KernelFactory::registeredKernelsEnd()
   return _registered_kernel_names.end();
 }
 
+void
+KernelFactory::updateActiveKernels(THREAD_ID tid)
+{
+  {
+    Real t = Kernel::_t;
+
+    if(t >= 1.0)
+    {
+      t++;
+    }
+    
+    
+    active_kernels[tid].clear();
+
+    KernelIterator all_it = all_kernels[tid].begin();
+    KernelIterator all_end = all_kernels[tid].end();
+  
+    for(; all_it != all_end; ++all_it)
+      if((*all_it)->startTime() <= Kernel::_t + (1e-6 * Kernel::_dt) && (*all_it)->stopTime() >= Kernel::_t + (1e-6 * Kernel::_dt))
+        active_kernels[tid].push_back(*all_it);
+  }
+  
+  {
+    block_kernels[tid].clear();
+
+    std::map<unsigned int, std::vector<Kernel *> >::iterator block_it = all_block_kernels[tid].begin();
+    std::map<unsigned int, std::vector<Kernel *> >::iterator block_end = all_block_kernels[tid].end();
+
+    for(; block_it != block_end; ++block_it)
+    {
+      unsigned int block_num = block_it->first;
+      block_kernels[tid][block_num].clear();
+      
+      KernelIterator all_block_it = block_it->second.begin();
+      KernelIterator all_block_end = block_it->second.end();
+
+      for(; all_block_it != all_block_end; ++all_block_it)
+        if((*all_block_it)->startTime() <= Kernel::_t + (1e-6 * Kernel::_dt) && (*all_block_it)->stopTime() >= Kernel::_t + (1e-6 * Kernel::_dt))
+          block_kernels[tid][block_num].push_back(*all_block_it);
+    }
+  }
+}
+
 KernelFactory::KernelFactory()
 {
   active_kernels.resize(libMesh::n_threads());
+  all_kernels.resize(libMesh::n_threads());
   block_kernels.resize(libMesh::n_threads());
+  all_block_kernels.resize(libMesh::n_threads());
 }
   
 KernelFactory:: ~KernelFactory() 

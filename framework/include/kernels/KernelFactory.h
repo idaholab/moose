@@ -92,6 +92,8 @@ public:
 
   KernelNamesIterator registeredKernelsBegin();
   KernelNamesIterator registeredKernelsEnd();
+
+  void updateActiveKernels(THREAD_ID tid);
   
 private:
   KernelFactory();
@@ -103,8 +105,10 @@ private:
 
   std::vector<std::string> _registered_kernel_names;
   std::vector<std::vector<Kernel *> > active_kernels;
+  std::vector<std::vector<Kernel *> > all_kernels;
 
   std::vector<std::map<unsigned int, std::vector<Kernel *> > > block_kernels;
+  std::vector<std::map<unsigned int, std::vector<Kernel *> > > all_block_kernels;
 
 };
 

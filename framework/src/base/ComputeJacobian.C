@@ -37,6 +37,8 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
+    KernelFactory::instance()->updateActiveKernels(tid);
+
     KernelIterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
     KernelIterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;
@@ -215,6 +217,8 @@ public:
     
     ConstElemRange::const_iterator el = range.begin();
 
+    KernelFactory::instance()->updateActiveKernels(tid);
+
     KernelIterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
     KernelIterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;
@@ -363,6 +367,8 @@ protected:
     
     MeshBase::const_element_iterator el = Moose::mesh->active_local_elements_begin();
     const MeshBase::const_element_iterator end_el = Moose::mesh->active_local_elements_end();
+
+    KernelFactory::instance()->updateActiveKernels(tid);
 
     KernelIterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
     KernelIterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
