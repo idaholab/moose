@@ -15,6 +15,7 @@
 #include "transient_system.h"
 #include "kelly_error_estimator.h"
 #include "mesh_refinement.h"
+#include "numeric_vector.h"
 
 template<>
 InputParameters validParams<Executioner>()
