@@ -5,6 +5,7 @@
 
 //Forward Declarations
 class StressDivergence;
+class ColumnMajorMatrix;
 
 template<>
 InputParameters validParams<StressDivergence>();
@@ -27,6 +28,7 @@ protected:
   virtual Real computeQpJacobian();
 
   std::vector<RealTensorValue> * _stress;
+  std::vector<ColumnMajorMatrix> * _elasticity_tensor;
 
   unsigned int _component;
 };

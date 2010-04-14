@@ -18,12 +18,15 @@ StressDivergence::StressDivergence(std::string name,
             std::vector<std::string> coupled_as)
   :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
    _component(parameters.get<Real>("component"))
-{}
+{
+  
+}
 
 void
 StressDivergence::subdomainSetup()
 {
   _stress = &_material->getTensorProperty("stress");
+  _elasticity_tensor = &_material->getColumnMajorMatrixProperty("elasticity_tensor");
 }
 
 Real
@@ -37,5 +40,10 @@ StressDivergence::computeQpResidual()
 Real
 StressDivergence::computeQpJacobian()
 {
-  return 0;
+  RealVectorValue value;
+  for(unsigned int j = 0; j<LIBMESH_DIM; j++)
+    for(unsigned int i = 0; i<LIBMESH_DIM; i++)
+      value(i) += (*_elasticity_tensor)[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _dphi[_j][_qp](j);
+  
+  return value * _dphi[_i][_qp];
 }

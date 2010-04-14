@@ -31,7 +31,7 @@ protected:
   Real _youngs_modulus;
   Real _poissons_ratio;
 
-  ElasticityTensor * _elasticity_tensor;
+  ElasticityTensor * _local_elasticity_tensor;
 };
 
 #endif //LINEARISOTROPICMATERIAL_H

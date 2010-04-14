@@ -14,5 +14,6 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(std::string name,
    _grad_disp_x(coupledGrad("disp_x")),
    _grad_disp_y(coupledGrad("disp_y")),
    _grad_disp_z(_dim == 3 ? coupledGrad("disp_z") : _grad_zero),
-   _stress(declareTensorProperty("stress"))
+   _stress(declareTensorProperty("stress")),
+   _elasticity_tensor(declareColumnMajorMatrixProperty("elasticity_tensor"))
 {}

@@ -27,6 +27,7 @@ protected:
   std::vector<RealGradient> & _grad_disp_z;
 
   std::vector<RealTensorValue> & _stress;
+  std::vector<ColumnMajorMatrix> & _elasticity_tensor;
 };
 
 #endif //SOLIDMECHANICSMATERIAL_H

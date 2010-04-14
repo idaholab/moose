@@ -25,7 +25,7 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(std::string name,
   iso_elasticity_tensor->setYoungsModulus(_youngs_modulus);
   iso_elasticity_tensor->setPoissonsRatio(_poissons_ratio);
 
-  _elasticity_tensor = iso_elasticity_tensor;
+  _local_elasticity_tensor = iso_elasticity_tensor;
 }
 
 void
@@ -41,7 +41,7 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
   strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 
   // C * e
-  ColumnMajorMatrix stress_vector = (*_elasticity_tensor) * strain;
+  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * strain;
 
   // Change 9x1 to a 3x3
   stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
@@ -55,7 +55,9 @@ LinearIsotropicMaterial::computeProperties()
 {
   for(unsigned int qp=0; qp<_qrule->n_points(); qp++)
   {
-    _elasticity_tensor->calculate();
+    _local_elasticity_tensor->calculate();
+
+    _elasticity_tensor[qp] = *_local_elasticity_tensor;
 
     computeStress(_grad_disp_x[qp], _grad_disp_y[qp], _grad_disp_z[qp], _stress[qp]);
   }
