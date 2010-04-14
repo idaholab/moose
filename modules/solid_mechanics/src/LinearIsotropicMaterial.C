@@ -15,11 +15,9 @@ InputParameters validParams<LinearIsotropicMaterial>()
 }
 
 LinearIsotropicMaterial::LinearIsotropicMaterial(std::string name,
-                                               InputParameters parameters,
-                                               unsigned int block_id,
-                                               std::vector<std::string> coupled_to,
-                                               std::vector<std::string> coupled_as)
-  :SolidMechanicsMaterial(name,parameters,block_id,coupled_to,coupled_as),
+                                                 MooseSystem & moose_system,
+                                                 InputParameters parameters)
+  :SolidMechanicsMaterial(name, moose_system, parameters),
    _youngs_modulus(parameters.get<Real>("youngs_modulus")),
    _poissons_ratio(parameters.get<Real>("poissons_ratio"))
 {
