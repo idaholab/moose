@@ -44,6 +44,12 @@ Material::materialReinit()
   for(;tensor_it!=tensor_it_end;++tensor_it)
     tensor_it->second.resize(_static_qrule[_tid]->n_points());
 
+  std::map<std::string, std::vector<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props.begin();
+  std::map<std::string, std::vector<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props.end();
+
+  for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
+    column_major_matrix_it->second.resize(_static_qrule[_tid]->n_points());
+
   computeProperties();
 }
 
@@ -113,6 +119,18 @@ Material::getTensorProperty(const std::string & name)
   std::map<std::string, std::vector<RealTensorValue> >::iterator it = _tensor_props.find(name);
 
   if(it != _tensor_props.end())
+    return it->second;
+
+  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
+  mooseError("");
+}
+
+std::vector<ColumnMajorMatrix> &
+Material::getColumnMajorMatrixProperty(const std::string & name)
+{
+  std::map<std::string, std::vector<ColumnMajorMatrix> >::iterator it = _column_major_matrix_props.find(name);
+
+  if(it != _column_major_matrix_props.end())
     return it->second;
 
   std::cerr<<"Material "<<_name<<" has no property named: "<<name;
@@ -232,6 +250,12 @@ std::vector<RealTensorValue> &
 Material::declareTensorProperty(const std::string & name)
 {
   return _tensor_props[name];
+}
+
+std::vector<ColumnMajorMatrix> &
+Material::declareColumnMajorMatrixProperty(const std::string & name)
+{
+  return _column_major_matrix_props[name];
 }
 
 std::vector<std::vector<std::vector<Real> > > &

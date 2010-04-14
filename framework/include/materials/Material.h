@@ -6,6 +6,7 @@
 
 //libmesh includes
 #include "tensor_value.h"
+#include "ColumnMajorMatrix.h"
 
 
 /**
@@ -77,6 +78,12 @@ public:
    * Retrieve the Tensor valued property named "name"
    */
   std::vector<RealTensorValue> & getTensorProperty(const std::string & name);
+  
+  /**
+   * Retrieve the Tensor valued property named "name"
+   */
+  std::vector<ColumnMajorMatrix> & getColumnMajorMatrixProperty(const std::string & name);
+  
   
   /**
    * Retrieve the Matrix valued property named "name"
@@ -174,6 +181,13 @@ protected:
   std::vector<RealTensorValue> & declareTensorProperty(const std::string & name);
   
   /**
+   * Declare the Tensor valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using get().
+   */
+  std::vector<ColumnMajorMatrix> & declareColumnMajorMatrixProperty(const std::string & name);
+  
+  /**
    * Declare the Matrix valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
@@ -186,6 +200,7 @@ protected:
   std::map<std::string, std::vector<RealVectorValue> > _real_vector_value_props;
   std::map<std::string, std::vector<std::vector<Real> > > _vector_props;
   std::map<std::string, std::vector<RealTensorValue> > _tensor_props;
+  std::map<std::string, std::vector<ColumnMajorMatrix> > _column_major_matrix_props;
   std::map<std::string, std::vector<std::vector<std::vector<Real> > > > _matrix_props;
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
