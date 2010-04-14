@@ -12,11 +12,9 @@ StabilizerFactory::instance()
 
 Stabilizer *
 StabilizerFactory::add(std::string stabilizer_name,
-                   std::string name,
-                   InputParameters parameters,
-                   std::string var_name,
-                   std::vector<std::string> coupled_to,
-                   std::vector<std::string> coupled_as)
+                       std::string name,
+                       MooseSystem & moose_system,
+                       InputParameters parameters)
 {
   Stabilizer * stabilizer;
     
@@ -24,35 +22,13 @@ StabilizerFactory::add(std::string stabilizer_name,
   {
     Moose::current_thread_id = tid;
 
-    stabilizer = (*name_to_build_pointer[stabilizer_name])(name,parameters,var_name,coupled_to,coupled_as);
+    stabilizer = (*name_to_build_pointer[stabilizer_name])(name, moose_system, parameters);
 
-    active_stabilizers[tid][stabilizer->variable()] = stabilizer;
+    if (parameters.have_parameter<unsigned int>("block_id"))
+      block_stabilizers[tid][parameters.get<unsigned int>("block_id")][stabilizer->variable()] = stabilizer;
+    else
+      active_stabilizers[tid][stabilizer->variable()] = stabilizer;
 
-    _is_stabilized[stabilizer->variable()] = true;
-  }
-
-  return stabilizer;
-}
-
-Stabilizer *
-StabilizerFactory::add(std::string stabilizer_name,
-                   std::string name,
-                   InputParameters parameters,
-                   std::string var_name,
-                   std::vector<std::string> coupled_to,
-                   std::vector<std::string> coupled_as,
-                   unsigned int block_id)
-{
-  Stabilizer * stabilizer;
-
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    Moose::current_thread_id = tid;
-      
-    stabilizer = (*name_to_build_pointer[stabilizer_name])(name,parameters,var_name,coupled_to,coupled_as);
-
-    block_stabilizers[tid][block_id][stabilizer->variable()] = stabilizer;
-    
     _is_stabilized[stabilizer->variable()] = true;
   }
 

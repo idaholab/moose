@@ -21,8 +21,5 @@ GenericStabilizerBlock::GenericStabilizerBlock(const std::string & reg_id, const
 void
 GenericStabilizerBlock::execute() 
 {
-  StabilizerFactory::instance()->add(_type, getShortName(), getClassParams(),
-                                     getParamValue<std::string>("variable"),
-                                     getParamValue<std::vector<std::string> >("coupled_to"),
-                                     getParamValue<std::vector<std::string> >("coupled_as"));
+  StabilizerFactory::instance()->add(_type, getShortName(), *Moose::moose_system, getClassParams());
 }

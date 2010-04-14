@@ -29,17 +29,13 @@ public:
    * Constructor
    *
    * @param name The name given to the initial condition in the input file.
+   * @param moose_system The reference to the MooseSystem that this object is contained within
    * @param parameters The parameters object holding data for the class to use.
-   * @param var_name The variable this InitialCondtion is supposed to provide values for.
-   * @param coupled_to The real names of the variables this ConvectionDiffusionSUPG is coupled to.
-   * @param coupled_as The name this ConvectionDiffusionSUPG is going to use to refer to the coupled_to variables as.
    */
   ConvectionDiffusionSUPG(std::string name,
-             InputParameters parameters,
-             std::string var_name,
-             std::vector<std::string> coupled_to,
-             std::vector<std::string> coupled_as);
-
+                          MooseSystem & moose_system,
+                          InputParameters parameters);
+  
   virtual void computeTausAndVelocities();
 
 protected:

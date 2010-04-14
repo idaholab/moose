@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<ConvectionDiffusionSUPG>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Stabilizer>();
   params.addRequiredParam<Real>("coef", "The diffusion coefficient.");
   params.addRequiredParam<Real>("x", "Component of velocity in the x direction");
   params.addParam<Real>("y", 0.0, "Component of velocity in the y direction");
@@ -12,11 +12,9 @@ InputParameters validParams<ConvectionDiffusionSUPG>()
 }
 
 ConvectionDiffusionSUPG::ConvectionDiffusionSUPG(std::string name,
-                       InputParameters parameters,
-                       std::string var_name,
-                       std::vector<std::string> coupled_to,
-                       std::vector<std::string> coupled_as)
-  :SUPGBase(name, parameters, var_name, coupled_to, coupled_as),
+                                                 MooseSystem & moose_system,
+                                                 InputParameters parameters)
+  :SUPGBase(name, moose_system, parameters),
    _coef(_parameters.get<Real>("coef")),
    _x(_parameters.get<Real>("x")),
    _y(_parameters.get<Real>("y")),

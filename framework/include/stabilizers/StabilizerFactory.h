@@ -17,10 +17,9 @@
  * Typedef to make things easier.
  */
 typedef Stabilizer * (*stabilizerBuildPtr)(std::string name,
-                                   InputParameters parameters,
-                                   std::string var_name,
-                                   std::vector<std::string> coupled_to,
-                                   std::vector<std::string> coupled_as);
+                                           MooseSystem & moose_system,
+                                           InputParameters parameters);
+
 /**
  * Typedef to make things easier.
  */
@@ -41,12 +40,10 @@ typedef std::vector<std::string>::iterator StabilizerNamesIterator;
  */
 template<typename StabilizerType>
 Stabilizer * buildStabilizer(std::string name,
-                     InputParameters parameters,
-                     std::string var_name,
-                     std::vector<std::string> coupled_to,
-                     std::vector<std::string> coupled_as)
+                             MooseSystem & moose_system,
+                             InputParameters parameters)
 {
-  return new StabilizerType(name, parameters, var_name, coupled_to, coupled_as);
+  return new StabilizerType(name, moose_system, parameters);
 }
 
 /**
@@ -65,20 +62,9 @@ public:
   }
 
   Stabilizer * add(std::string stabilizer_name,
-               std::string name,
-               InputParameters parameters,
-               std::string var_name,
-               std::vector<std::string> coupled_to=std::vector<std::string>(0),
-               std::vector<std::string> coupled_as=std::vector<std::string>(0));
-  
-
-  Stabilizer * add(std::string stabilizer_name,
-               std::string name,
-               InputParameters parameters,
-               std::string var_name,
-               std::vector<std::string> coupled_to,
-               std::vector<std::string> coupled_as,
-               unsigned int block_id);
+                   std::string name,
+                   MooseSystem & moose_system,
+                   InputParameters parameters);
   
   InputParameters getValidParams(std::string name);
 

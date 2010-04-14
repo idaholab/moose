@@ -12,6 +12,19 @@
 // System includes
 #include <string>
 
+//forward declarations
+class Stabilizer;
+
+template<>
+InputParameters validParams<Stabilizer>()
+{
+  InputParameters params;
+  params.addRequiredParam<std::string>("variable", "The name of the variable this Stabilizer will act on.");
+  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Stabilizer is coupled to.");
+  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Stabilizer which correspond with the coupled_as names");
+  return params;
+}
+
 /**
  * Stabilizers compute modified test function spaces to stabilize oscillating solutions.
  */
@@ -23,16 +36,12 @@ public:
    * Constructor
    *
    * @param name The name given to the initial condition in the input file.
+   * @param moose_system The reference to the MooseSystem that this object is contained within
    * @param parameters The parameters object holding data for the class to use.
-   * @param var_name The variable this InitialCondtion is supposed to provide values for.
-   * @param coupled_to The real names of the variables this Stabilizer is coupled to.
-   * @param coupled_as The name this Stabilizer is going to use to refer to the coupled_to variables as.
    */
   Stabilizer(std::string name,
-             InputParameters parameters,
-             std::string var_name,
-             std::vector<std::string> coupled_to,
-             std::vector<std::string> coupled_as);
+             MooseSystem & moose_system,
+             InputParameters parameters);
 
   /**
    * This pure virtual must be overriden by derived classes!
