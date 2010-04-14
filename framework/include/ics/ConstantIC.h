@@ -33,8 +33,8 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   ConstantIC(std::string name,
-             InputParameters parameters,
-             std::string var_name);
+             MooseSystem & moose_system,
+             InputParameters parameters);
 
   /**
    * The value of the variable at a point.

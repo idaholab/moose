@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<BoundingBoxIC>()
 {
-  InputParameters params;
+  InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("x1", "The x coordinate of the lower left-hand corner of the box");
   params.addRequiredParam<Real>("y1", "The y coordinate of the lower left-hand corner of the box");
   params.addParam<Real>("z1", 0.0, "The z coordinate of the lower left-hand corner of the box");
@@ -18,9 +18,9 @@ InputParameters validParams<BoundingBoxIC>()
 }
 
 BoundingBoxIC::BoundingBoxIC(std::string name,
-                       InputParameters parameters,
-                       std::string var_name)
-  :InitialCondition(name,parameters,var_name),
+                             MooseSystem & moose_system,
+                             InputParameters parameters)
+  :InitialCondition(name, moose_system, parameters),
    _x1(parameters.get<Real>("x1")),
    _y1(parameters.get<Real>("y1")),
    _z1(parameters.get<Real>("z1")),

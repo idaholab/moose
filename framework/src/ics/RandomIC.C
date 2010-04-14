@@ -10,9 +10,9 @@ InputParameters validParams<RandomIC>()
 }
 
 RandomIC::RandomIC(std::string name,
-                       InputParameters parameters,
-                       std::string var_name)
-  :InitialCondition(name,parameters,var_name),
+                   MooseSystem & moose_system,
+                   InputParameters parameters)
+  :InitialCondition(name, moose_system, parameters),
    _min(parameters.get<Real>("min")),
    _max(parameters.get<Real>("max")),
    _range(_max - _min)

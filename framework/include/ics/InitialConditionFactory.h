@@ -12,11 +12,12 @@
 // LibMesh includes
 #include <parameters.h>
 
+class MooseSystem;
 
 /**
  * Typedef to make things easier.
  */
-typedef InitialCondition * (*InitialConditionBuildPtr)(std::string name, InputParameters parameters, std::string names);
+typedef InitialCondition * (*InitialConditionBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
 /**
  * Typedef to make things easier.
@@ -38,10 +39,10 @@ typedef std::vector<std::string>::iterator InitialConditionNamesIterator;
  */
 template<typename InitialConditionType>
 InitialCondition * buildInitialCondition(std::string name,
-                                         InputParameters parameters,
-                                         std::string var_name)
+                                         MooseSystem & moose_system,
+                                         InputParameters parameters)
 {
-  return new InitialConditionType(name, parameters, var_name);
+  return new InitialConditionType(name, moose_system, parameters);
 }
 
 /**
@@ -59,7 +60,7 @@ public:
     name_to_params_pointer[name]=&validParams<InitialConditionType>;
   }
 
-  void add(std::string ic_name, std::string name, InputParameters parameters, std::string var_name);
+  void add(std::string ic_name, std::string name, MooseSystem & moose_system, InputParameters parameters, std::string var_name);
   
   InputParameters getValidParams(std::string name);
   

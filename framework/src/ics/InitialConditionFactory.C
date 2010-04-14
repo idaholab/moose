@@ -13,6 +13,7 @@ InitialConditionFactory::instance()
 void
 InitialConditionFactory::add(std::string ic_name,
                              std::string name,
+                             MooseSystem & moose_system,
                              InputParameters parameters,
                              std::string var_name)
 {
@@ -20,7 +21,10 @@ InitialConditionFactory::add(std::string ic_name,
   {
     Moose::current_thread_id = tid;
 
-    active_initial_conditions[tid][var_name] = (*name_to_build_pointer[ic_name])(name,parameters,var_name);
+    // The var_name needs to be added to the parameters object for any InitialCondition derived objects
+    parameters.set<std::string>("var_name") = var_name;
+    
+    active_initial_conditions[tid][var_name] = (*name_to_build_pointer[ic_name])(name, moose_system, parameters);
   }
 }
 

@@ -3,15 +3,15 @@
 template<>
 InputParameters validParams<ConstantIC>()
 {
-  InputParameters params;
+  InputParameters params = validParams<InitialCondition>();
   params.set<Real>("value") = 0.0;
   return params;
 }
 
 ConstantIC::ConstantIC(std::string name,
-                       InputParameters parameters,
-                       std::string var_name)
-  :InitialCondition(name,parameters,var_name),
+                       MooseSystem & moose_system,
+                       InputParameters parameters)
+  :InitialCondition(name, moose_system, parameters),
    _value(parameters.get<Real>("value"))
 {}
 

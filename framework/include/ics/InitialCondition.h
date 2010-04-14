@@ -2,6 +2,7 @@
 #define INITIALCONDITION_H
 
 #include "Moose.h"
+#include "ValidParams.h"
 
 // LibMesh includes
 #include <parameters.h>
@@ -10,6 +11,10 @@
 
 // System includes
 #include <string>
+
+//forward declarations
+class MooseSystem;
+class InitialCondition;
 
 /**
  * InitialConditions are objects that set the initial value of variables.
@@ -26,8 +31,8 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   InitialCondition(std::string name,
-                   InputParameters parameters,
-                   std::string var_name);
+                   MooseSystem & moose_system,
+                   InputParameters parameters);
 
   /**
    * The value of the variable at a point.
@@ -45,6 +50,7 @@ public:
   virtual RealGradient gradient(const Point & p){ return RealGradient(); };
 
 private:
+  MooseSystem & _moose_system;
   std::string _name;
   InputParameters _parameters;
   std::string _var_name;
