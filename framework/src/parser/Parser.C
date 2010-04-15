@@ -161,7 +161,23 @@ Parser::buildFullTree()
          i != InitialConditionFactory::instance()->registeredInitialConditionsEnd(); ++i)
       curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + "*/InitialCondition", prefix + var_name + "/" + *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams(prefix + "*/InitialCondition")));
   }
-  
+
+  {
+    // Manually add a sample variable
+    prefix = "AuxVariables/";
+    std::string var_name("SampleAuxVar");
+    curr_block = curr_block->locateBlock("AuxVariables");
+    mooseAssert(curr_block != NULL, "A AuxVariables ParserBlock does not appear to exist");
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add("AuxVariables/*", prefix + var_name, curr_block, *this, ParserBlockFactory::instance()->getValidParams("AuxVariables/*")));
+
+    // Add all the IC Blocks
+    curr_block = curr_block->locateBlock(prefix + var_name);
+    mooseAssert(curr_block != NULL, "The sample aux variable block appears to be missing");
+    for (InitialConditionNamesIterator i = InitialConditionFactory::instance()->registeredInitialConditionsBegin();
+         i != InitialConditionFactory::instance()->registeredInitialConditionsEnd(); ++i)
+      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + "*/InitialCondition", prefix + var_name + "/" + *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams(prefix + "*/InitialCondition")));
+  }
+
   // Add all the Kernels
   curr_block = curr_block->locateBlock("Kernels");
   prefix = "Kernels/";
