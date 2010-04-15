@@ -40,6 +40,14 @@ Executioner::setup()
 {
   Moose::setSolverDefaults(Moose::equation_system, _system, Moose::compute_jacobian_block, Moose::compute_residual);
 
+  _system.update();
+
+  // Update backward time solution vectors.
+  *_system.older_local_solution = *_system.current_local_solution;
+  *_system.old_local_solution   = *_system.current_local_solution;
+  *_aux_system.older_local_solution = *_aux_system.current_local_solution;
+  *_aux_system.old_local_solution   = *_aux_system.current_local_solution;
+
   unsigned int initial_adaptivity = 0;
 
   if(Moose::equation_system->parameters.have_parameter<unsigned int>("initial_adaptivity"))

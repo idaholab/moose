@@ -135,6 +135,7 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("Variables/*");
   ParserBlockFactory::instance()->registerParserBlock<GenericICBlock>("Variables/*/InitialCondition");
   ParserBlockFactory::instance()->registerParserBlock<AuxVariablesBlock>("AuxVariables");
+  ParserBlockFactory::instance()->registerParserBlock<GenericICBlock>("AuxVariables/*/InitialCondition");
   // Reuse the GenericVariableBlock for AuxVariables/*
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("AuxVariables/*");
   ParserBlockFactory::instance()->registerParserBlock<KernelsBlock>("Kernels");
