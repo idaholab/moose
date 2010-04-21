@@ -11,23 +11,25 @@ BCFactory::instance()
 
  void
  BCFactory::add(std::string bc_name,
-           std::string name,
-           InputParameters parameters,
-           std::string var_name,
-           unsigned int boundary_id,
-           std::vector<std::string> coupled_to,
-           std::vector<std::string> coupled_as)
+                std::string name,
+                MooseSystem & moose_system,
+                InputParameters parameters)
   {
     for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
     {
       Moose::current_thread_id = tid;
+      std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
-      BoundaryCondition * bc = (*name_to_build_pointer[bc_name])(name,parameters,var_name,boundary_id, coupled_to, coupled_as);
+      for (unsigned int i=0; i<boundaries.size(); ++i)
+      {
+        parameters.set<unsigned int>("_boundary_id") = boundaries[i];
+        BoundaryCondition * bc = (*name_to_build_pointer[bc_name])(name, moose_system, parameters);
 
-      if(bc->isIntegrated())
-        active_bcs[tid][boundary_id].push_back(bc);
-      else
-        active_nodal_bcs[tid][boundary_id].push_back(bc);
+        if(bc->isIntegrated())
+          active_bcs[tid][boundaries[i]].push_back(bc);
+        else
+          active_nodal_bcs[tid][boundaries[i]].push_back(bc);
+      }
     }
   }
 

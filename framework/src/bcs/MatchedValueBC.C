@@ -3,12 +3,12 @@
 template<>
 InputParameters validParams<MatchedValueBC>()
 {
-  InputParameters params;
+  InputParameters params = validParams<BoundaryCondition>();
   return params;
 }
 
-MatchedValueBC::MatchedValueBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, false, boundary_id, coupled_to, coupled_as),
+MatchedValueBC::MatchedValueBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, false)),
     _v_face(coupledValFace("v"))
   {}
 

@@ -3,6 +3,12 @@
 
 #include "Kernel.h"
 
+//forward declarations
+class AuxKernel;
+
+template<>
+InputParameters validParams<AuxKernel>();
+
 /** 
  * AuxKernels compute values at nodes.
  */
@@ -14,11 +20,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  AuxKernel(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as);
+  AuxKernel(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual ~AuxKernel(){}
 
@@ -52,6 +54,11 @@ protected:
 
   virtual Real computeQpResidual();
 
+  /**
+   * Reference to the MooseSystem that this BoundaryCondition is assocaited to
+   */
+  MooseSystem & _moose_system;
+  
   bool _nodal;
 
   Real & _u_aux;  

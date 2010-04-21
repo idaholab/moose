@@ -22,7 +22,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  WeakGradientBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+  WeakGradientBC(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 virtual ~WeakGradientBC() {}
 

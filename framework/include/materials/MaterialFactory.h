@@ -36,14 +36,9 @@ typedef std::vector<std::string>::iterator MaterialNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename MaterialType>
-Material * buildMaterial(std::string name,
-                         MooseSystem & moose_system,
-                         InputParameters parameters)
-//                         unsigned int block_id,
-//                         std::vector<std::string> coupled_to,
-//                         std::vector<std::string> coupled_as)
+Material * buildMaterial(std::string name, MooseSystem & moose_system, InputParameters parameters)
 {
-  return new MaterialType(name, moose_system, parameters); //, block_id, coupled_to, coupled_as);
+  return new MaterialType(name, moose_system, parameters);
 }
 
 /**
@@ -65,10 +60,6 @@ public:
            std::string name,
            MooseSystem & moose_system,
            InputParameters parameters);
-  
-  //         unsigned int block_id,
-  //         std::vector<std::string> coupled_to=std::vector<std::string>(0),
-  //         std::vector<std::string> coupled_as=std::vector<std::string>(0));
   
   InputParameters getValidParams(std::string name);
   

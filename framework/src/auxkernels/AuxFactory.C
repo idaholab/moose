@@ -12,15 +12,15 @@ AuxFactory::instance()
 
 AuxKernel *
 AuxFactory::add(std::string Aux_name,
-                  std::string name,
-                  InputParameters parameters,
-                  std::string var_name,
-                  std::vector<std::string> coupled_to,
-                  std::vector<std::string> coupled_as)
+                std::string name,
+                MooseSystem & moose_system,
+                InputParameters parameters)
   {
     AuxKernel * aux;
     AuxKernelIterator curr_aux, end_aux;
     unsigned int size;
+    std::string var_name = parameters.get<std::string>("variable");
+    std::vector<std::string> coupled_to = parameters.get<std::vector<std::string> >("coupled_to");
     
     std::vector<std::list<AuxKernel *>::iterator > dependent_auxs;
     std::vector<AuxKernel *> *aux_ptr;
@@ -30,9 +30,8 @@ AuxFactory::add(std::string Aux_name,
     {
       Moose::current_thread_id = tid;
 
-      aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
+      aux = (*name_to_build_pointer[Aux_name])(name, moose_system, parameters);
       
-      //
       if (aux->isNodal())
         aux_ptr = &active_NodalAuxKernels[tid];
       else
@@ -73,12 +72,6 @@ AuxFactory::add(std::string Aux_name,
            i != dependent_auxs.end(); ++i)
         active_auxs.splice(new_aux_iter, active_auxs, *i);
       
-      // DEBUG
-      //for (std::list<AuxKernel *>::iterator i = active_auxs.begin(); i != active_auxs.end(); ++i)
-      //  std::cout << (*i)->varName() << std::endl;
-      //std::cout << "\n" << std::endl;
-      // DEBUG
-
       // Copy the list back into the Auxilary Vector
       aux_ptr->assign(active_auxs.begin(), active_auxs.end());
     }
@@ -88,22 +81,20 @@ AuxFactory::add(std::string Aux_name,
 
 AuxKernel *
 AuxFactory::addBC(std::string Aux_name,
-                    std::string name,
-                    InputParameters parameters,
-                    std::string var_name,
-                    unsigned int boundary_id,
-                    std::vector<std::string> coupled_to,
-                    std::vector<std::string> coupled_as)
+                  std::string name,
+                  MooseSystem & moose_system,
+                  InputParameters parameters)
   {
     AuxKernel * aux;
     
     for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
     {
       Moose::current_thread_id = tid;
+      std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
       
-      aux = (*name_to_build_pointer[Aux_name])(name,parameters,var_name,coupled_to,coupled_as);
-
-      active_bcs[tid][boundary_id].push_back(aux);
+      aux = (*name_to_build_pointer[Aux_name])(name, moose_system, parameters);
+      for (unsigned int i=0; i<boundaries.size(); ++i)
+        active_bcs[tid][boundaries[i]].push_back(aux);
     }
 
     return aux;

@@ -3,15 +3,15 @@
 template<>
 InputParameters validParams<VectorNeumannBC>()
 {
-  InputParameters params;
+  InputParameters params = validParams<BoundaryCondition>();
   params.set<Real>("value0")=0.0;
   params.set<Real>("value1")=0.0;
   params.set<Real>("value2")=0.0;
   return params;
 }
 
-VectorNeumannBC::VectorNeumannBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as)
+VectorNeumannBC::VectorNeumannBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, true))
   {
     _value(0)=_parameters.get<Real>("value0");
     _value(1)=_parameters.get<Real>("value1");

@@ -15,7 +15,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef BoundaryCondition * (*BCBuildPtr)(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+typedef BoundaryCondition * (*BCBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
 /**
  * Typedef to make things easier.
@@ -36,9 +36,9 @@ typedef std::vector<std::string>::iterator BCNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename BCType>
-BoundaryCondition * buildBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
+BoundaryCondition * buildBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
 {
-  return new BCType(name, parameters, var_name, boundary_id, coupled_to, coupled_as);
+  return new BCType(name, moose_system, parameters);
 }
 
 /**
@@ -58,11 +58,8 @@ public:
 
   void add(std::string bc_name,
            std::string name,
-           InputParameters parameters,
-           std::string var_name,
-           unsigned int boundary_id,
-           std::vector<std::string> coupled_to=std::vector<std::string>(0),
-           std::vector<std::string> coupled_as=std::vector<std::string>(0));
+           MooseSystem & moose_system,
+           InputParameters parameters);
   
   InputParameters getValidParams(std::string name);
   

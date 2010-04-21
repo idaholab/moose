@@ -1,7 +1,13 @@
-#include "Kernel.h"
-
 #ifndef BOUNDARYCONDITION_H
 #define BOUNDARYCONDITION_H
+
+#include "Kernel.h"
+
+//forward declarations
+class BoundaryCondition;
+
+template<>
+InputParameters validParams<BoundaryCondition>();
 
 /** 
  * Extrapolation of a Kernel for BC usage.  Children of this class should override
@@ -16,12 +22,8 @@ public:
    * constructor.
    */
   BoundaryCondition(std::string name,
-                    InputParameters parameters,
-                    std::string var_name,
-                    bool integrated,
-                    unsigned int boundary_id,
-                    std::vector<std::string> coupled_to,
-                    std::vector<std::string> coupled_as);
+                    MooseSystem & moose_system,
+                    InputParameters parameters);
 
   virtual ~BoundaryCondition(){}
 
@@ -83,8 +85,18 @@ public:
    */
   bool isIntegrated();
 
+  /**
+   * Sets the "_integrated" parameter and returns a reference for use in the parent constructor
+   */
+  InputParameters & setIntegratedParam(InputParameters & params, bool integrated);
+
 protected:
 
+  /**
+   * Reference to the MooseSystem that this BoundaryCondition is assocaited to
+   */
+  MooseSystem & _moose_system;
+  
   /**
    * Boundary ID this BC is active on.
    */

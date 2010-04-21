@@ -7,12 +7,27 @@
 #include "numeric_vector.h"
 #include "dof_map.h"
 
-AuxKernel::AuxKernel(std::string name,
-                     InputParameters parameters,
-                     std::string var_name,
-                     std::vector<std::string> coupled_to,
-                     std::vector<std::string> coupled_as)
-  :Kernel(name, parameters, var_name, false, coupled_to, coupled_as),
+template<>
+InputParameters validParams<AuxKernel>()
+{
+  InputParameters params;
+  params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
+  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Material is coupled to.");
+  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Material which correspond with the coupled_as names");
+
+  // For use on the boundary only
+  params.addParam<std::vector<unsigned int> >("boundary", "The list of variable names this Material is coupled to.");
+  return params;
+}
+
+AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name,
+          parameters,
+          parameters.get<std::string>("variable"),
+          false,
+          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
+          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+   _moose_system(moose_system),
    _nodal(_fe_type.family == LAGRANGE),
    _u_aux(_nodal ? _aux_var_vals_nodal[_tid][_var_num] : _aux_var_vals_element[_tid][_var_num]),
    _u_old_aux(_nodal ? _aux_var_vals_old_nodal[_tid][_var_num] : _aux_var_vals_old_element[_tid][_var_num]),

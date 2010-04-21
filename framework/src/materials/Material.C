@@ -23,11 +23,13 @@ Material::Material(std::string name,
    _moose_system(moose_system)
 {}
 
+/*
 unsigned int
 Material::blockID()
 {
   return _block_id;
 }
+*/
 
 void
 Material::materialReinit()

@@ -42,7 +42,7 @@ public:
    * 
    * @return The block ID.
    */
-  unsigned int blockID();
+//  unsigned int blockID();
 
   /**
    * Causes the material to recompute all of it's values
@@ -140,7 +140,7 @@ protected:
   /**
    * Block ID this material is active on.
    */
-  unsigned int _block_id;
+//  unsigned int _block_id;
 
   /**
    * Doesn't do anything for materials.

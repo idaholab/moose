@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<ConvectiveFluxBC>()
 {
-  InputParameters params;
+  InputParameters params = validParams<BoundaryCondition>();
   params.set<Real>("rate")=7500;
   params.set<Real>("initial")=500;
   params.set<Real>("final")=500;
@@ -11,13 +11,12 @@ InputParameters validParams<ConvectiveFluxBC>()
   return params;
 }
 
-ConvectiveFluxBC::ConvectiveFluxBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, true, boundary_id, coupled_to, coupled_as),
+ConvectiveFluxBC::ConvectiveFluxBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, true)),
      _initial(_parameters.get<Real>("initial")),
      _final(_parameters.get<Real>("final")),
      _rate(_parameters.get<Real>("rate")),
      _duration(_parameters.get<Real>("duration"))
-
 {}
  
 

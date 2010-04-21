@@ -15,11 +15,7 @@ class SinDirichletBC : public BoundaryCondition
 {
 public:
 
-  SinDirichletBC(std::string name,
-		  InputParameters parameters, 
-		  std::string var_name, unsigned int boundary_id, 
-		  std::vector<std::string> coupled_to, 
-		  std::vector<std::string> coupled_as);
+  SinDirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

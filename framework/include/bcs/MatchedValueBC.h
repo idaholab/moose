@@ -3,7 +3,6 @@
 
 #include "BoundaryCondition.h"
 
-
 //Forward Declarations
 class MatchedValueBC;
 
@@ -16,7 +15,7 @@ InputParameters validParams<MatchedValueBC>();
 class MatchedValueBC : public BoundaryCondition
 {
 public:
-  MatchedValueBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+  MatchedValueBC(std::string name, MooseSystem & moose_system, InputParameters parameters);
     
   virtual ~MatchedValueBC() {}
 

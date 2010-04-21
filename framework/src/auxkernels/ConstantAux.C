@@ -3,17 +3,13 @@
 template<>
 InputParameters validParams<ConstantAux>()
 {
-  InputParameters params;
+  InputParameters params = validParams<AuxKernel>();
   params.set<Real>("value")=0.0;
   return params;
 }
 
-ConstantAux::ConstantAux(std::string name,
-                         InputParameters parameters,
-                         std::string var_name,
-                         std::vector<std::string> coupled_to,
-                         std::vector<std::string> coupled_as)
-  :AuxKernel(name, parameters, var_name, coupled_to, coupled_as),
+ConstantAux::ConstantAux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :AuxKernel(name, moose_system, parameters),
    _value(_parameters.get<Real>("value"))
 {}
 

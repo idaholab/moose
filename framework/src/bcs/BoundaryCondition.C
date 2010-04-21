@@ -1,19 +1,33 @@
+//MOOSE includes
+#include "Moose.h"
 #include "BoundaryCondition.h"
 
+//libMesh includes
 #include "numeric_vector.h"
-
-#include "Moose.h"
 #include "dof_map.h"
 
+template<>
+InputParameters validParams<BoundaryCondition>()
+{
+  InputParameters params;
+  params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
+  params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Material is coupled to.");
+  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Material which correspond with the coupled_as names");
+  return params;
+}
+
 BoundaryCondition::BoundaryCondition(std::string name,
-                                     InputParameters parameters,
-                                     std::string var_name,
-                                     bool integrated,
-                                     unsigned int boundary_id,
-                                     std::vector<std::string> coupled_to,
-                                     std::vector<std::string> coupled_as)
-  :Kernel(name, parameters, var_name, integrated, coupled_to, coupled_as),
-   _boundary_id(boundary_id),
+                                     MooseSystem & moose_system,                                     
+                                     InputParameters parameters)
+  :Kernel(name,
+          parameters,
+          parameters.get<std::string>("variable"),
+          parameters.get<bool>("_integrated"),
+          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
+          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+   _moose_system(moose_system),
+   _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
    _JxW_face(*_static_JxW_face[_tid][_fe_type]),
    _phi_face(*_static_phi_face[_tid][_fe_type]),
@@ -25,9 +39,9 @@ BoundaryCondition::BoundaryCondition(std::string name,
    _current_side(_static_current_side[_tid]),
    _current_node(_static_current_node[_tid]),
    _current_residual(_static_current_residual[_tid]),
-   _u_face(integrated ? _var_vals_face[_tid][_var_num] : _var_vals_face_nodal[_tid][_var_num]),
-   _grad_u_face(integrated ? _var_grads_face[_tid][_var_num] : _grad_zero),
-   _second_u_face(integrated ? _var_seconds_face[_tid][_var_num] : _second_zero)
+   _u_face(_integrated ? _var_vals_face[_tid][_var_num] : _var_vals_face_nodal[_tid][_var_num]),
+   _grad_u_face(_integrated ? _var_grads_face[_tid][_var_num] : _grad_zero),
+   _second_u_face(_integrated ? _var_seconds_face[_tid][_var_num] : _second_zero)
 {
   if(_integrated)
     addVarNums(_boundary_to_var_nums[_boundary_id]);
@@ -340,6 +354,13 @@ bool
 BoundaryCondition::isIntegrated()
 {
   return _integrated;
+}
+
+InputParameters &
+BoundaryCondition::setIntegratedParam(InputParameters & params, bool integrated)
+{
+  params.set<bool>("_integrated") = integrated;
+  return params;
 }
 
 std::vector<Real> &

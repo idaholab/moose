@@ -16,10 +16,8 @@
  * Typedef to make things easier.
  */
 typedef AuxKernel * (*AuxKernelBuildPtr)(std::string name,
-                                         InputParameters parameters,
-                                         std::string var_name,
-                                         std::vector<std::string> coupled_to,
-                                         std::vector<std::string> coupled_as);
+                                         MooseSystem & moose_system,
+                                         InputParameters parameters);
 
 /**
  * Typedef to hide implementation details
@@ -41,12 +39,10 @@ typedef InputParameters (*AuxKernelParamsPtr)();
  */
 template<typename AuxType>
 AuxKernel * buildAux(std::string name,
-                     InputParameters parameters,
-                     std::string var_name,
-                     std::vector<std::string> coupled_to,
-                     std::vector<std::string> coupled_as)
+                     MooseSystem & moose_system,
+                     InputParameters parameters)
 {
-  return new AuxType(name, parameters, var_name, coupled_to, coupled_as);
+  return new AuxType(name, moose_system, parameters);
 }
 
 /**
@@ -68,18 +64,13 @@ public:
 
   AuxKernel * add(std::string Aux_name,
                   std::string name,
-                  InputParameters parameters,
-                  std::string var_name,
-                  std::vector<std::string> coupled_to=std::vector<std::string>(0),
-                  std::vector<std::string> coupled_as=std::vector<std::string>(0));
+                  MooseSystem & moose_system,
+                  InputParameters parameters);
   
   AuxKernel * addBC(std::string Aux_name,
                     std::string name,
-                    InputParameters parameters,
-                    std::string var_name,
-                    unsigned int boundary_id,
-                    std::vector<std::string> coupled_to=std::vector<std::string>(0),
-                    std::vector<std::string> coupled_as=std::vector<std::string>(0));
+                    MooseSystem & moose_system,
+                    InputParameters parameters);
 
   InputParameters getValidParams(std::string name);
   
