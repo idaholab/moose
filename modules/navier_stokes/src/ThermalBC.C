@@ -3,15 +3,15 @@
 template<>
 InputParameters validParams<ThermalBC>()
 {
-  InputParameters params;
+  InputParameters params = validParams<BoundaryCondition>();
   params.set<Real>("initial")=0.0;
   params.set<Real>("final")=0.0;
   params.set<Real>("duration")=0.0;
   return params;
 }
 
-ThermalBC::ThermalBC(std::string name, InputParameters parameters, std::string var_name, unsigned int boundary_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as)
-    :BoundaryCondition(name, parameters, var_name, false, boundary_id, coupled_to, coupled_as),
+ThermalBC::ThermalBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, true)),
     _p_var(coupled("p")),
     _p(coupledValFace("p")),
     _u_vel_var(coupled("u")),
