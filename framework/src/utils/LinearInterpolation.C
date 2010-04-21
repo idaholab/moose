@@ -1,0 +1,91 @@
+#include "LinearInterpolation.h"
+#include "libmesh_common.h"
+#include "Moose.h"
+
+int LinearInterpolation::_file_number = 0;
+
+LinearInterpolation::LinearInterpolation(std::vector<double> x, std::vector<double> y)
+  :_x(x),
+   _y(y)
+{}
+
+double
+LinearInterpolation::sample(double x)
+{
+  // endpoint cases
+  if (x < _x[0])
+    return _y[0];
+  if (x > _x[_x.size()-1])
+    return _y[_y.size()-1];
+
+  for (unsigned int i=0; i<_x.size(); ++i)
+    if (x >= _x[i])
+      return _y[i] + (_y[i+1]-_y[i])*(x-_x[i])/(_x[i+1]-_x[i]);
+}
+
+void
+LinearInterpolation::dumpSampleFile(std::string base_name, std::string x_label, std::string y_label, float xmin, float xmax, float ymin, float ymax)
+{
+  std::stringstream filename, filename_pts;
+  const unsigned char fill_character = '0';
+  const unsigned int field_width = 4;
+
+  filename.fill(fill_character);
+  filename << base_name;
+  filename.width(field_width);
+  filename << _file_number << ".plt";
+
+  filename_pts.fill(fill_character);
+  filename_pts << base_name << "_pts";
+  filename_pts.width(field_width);
+  filename_pts << _file_number << ".dat";
+
+  /* First dump the GNUPLOT file with the Piecewise Linear Equations */
+  std::ofstream out(filename.str().c_str());
+  out.precision(15);
+  out.fill(fill_character);
+  
+  out << "set terminal postscript color enhanced\n" 
+      << "set output \"" << base_name;
+  out.width(field_width);
+  out << _file_number << ".eps\"\n"
+      << "set xlabel \"" << x_label << "\"\n"
+      << "set ylabel \"" << y_label << "\"\n";
+  if (xmin != 0 && xmax != 0)
+    out << "set xrange [" << xmin << ":" << xmax << "]\n";
+  if (ymin != 0 && ymax != 0)
+    out << "set yrange [" << ymin << ":" << ymax << "]\n";
+  out << "set key left top\n"
+      << "f(x)=";
+
+   for (unsigned int i=1; i<_x.size(); ++i)
+   {
+     Real m = (_y[i] - _y[i-1])/(_x[i] - _x[i-1]);
+     Real b = (_y[i] - m*_x[i]);
+
+     out << _x[i-1] << "<=x && x<" << _x[i] << " ? " << m << "*x+(" << b << ") : ";
+   }
+   out << " 1/0\n";
+   
+  out << "\nplot f(x) with lines, '" << filename_pts.str() << "' using 1:2 title \"Points\"\n";
+  out.close();
+
+  libmesh_assert(_x.size() == _y.size());
+  
+  out.open(filename_pts.str().c_str());
+  /* Next dump the data points into a seperate file */
+  for (unsigned int i = 0; i<_x.size(); ++i)
+    out << _x[i] << " " << _y[i] << "\n";
+  out << std::endl;
+  
+  ++_file_number;
+  out.close();
+}
+
+unsigned int
+LinearInterpolation::getSampleSize()
+{
+  return _x.size();
+}
+
+  

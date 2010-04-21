@@ -1,12 +1,11 @@
-#ifndef POLYNOMIALFIT_H
-#define POLYNOMIALFIT_H
+#ifndef LINEARINTERPOLATION_H
+#define LINEARINTERPOLATION_H
 
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <string>
 
-#include "Moose.h"
 
 /**
  * This class applies the Least Squares algorithm to a set of points to provide a smooth curve for
@@ -14,7 +13,7 @@
  *
  * Requires: LAPACK
  */
-class PolynomialFit
+class LinearInterpolation
 {
 public:
 
@@ -24,23 +23,15 @@ public:
    * order and the forth parameter tells the class whether or not it should truncate the order if there
    * are not enough points for which to apply the polynomial fit.
    */
-  PolynomialFit(std::vector<Real> X, std::vector<Real> Y, unsigned int order, bool truncate_order = false);
+  LinearInterpolation(std::vector<double> X, std::vector<double> Y);
 
-  virtual ~PolynomialFit()
+  virtual ~LinearInterpolation()
     {}
-
-  /**
-   * This function generates the polynomial fit.  This function must be called prior to using
-   * sample or dumpSample File. Note:  If you pass a vectors that
-   * contain duplicate independant measures the call to LAPACK will fail
-   */
-  void generate();
-
   /**
    * This function will take an indenandant variable input and will return the dependant variable
    * based on the generated fit
    */
-  Real sample(Real x);
+  double sample(double x);
 
   /**
    * This function will dump GNUPLOT input files that can be run to show the data points and
@@ -55,27 +46,13 @@ public:
   
 private:
 
-  /**
-   * This is a helper function that creates the matrix necessary for the Least Squares algorithm.
-   */
-  void fillMatrix();
-
-  /**
-   * This function is the wrapper for the LAPACK dgels function and is called by generate.
-   */
-  void doLeastSquares();
-
-  std::vector<Real> _x;
-  std::vector<Real> _y;
-  std::vector<Real> _matrix;
-  std::vector<Real> _coeffs;
-  unsigned int _order;
-  bool _truncate_order;
+  std::vector<double> _x;
+  std::vector<double> _y;
 
   static int _file_number;
 };
 
-#endif //POLYNOMIALFIT_H
+#endif //LINEARINTERPOLATION_H
   
   
   
