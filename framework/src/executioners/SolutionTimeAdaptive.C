@@ -23,6 +23,7 @@ InputParameters validParams<SolutionTimeAdaptive>()
 
   params.addParam<Real>("percent_change", 0.1, "Percentage to change the timestep by.  Should be between 0 and 1");
   params.addParam<int>("initial_direction", 1, "Direction for the first step.  1 for up... -1 for down. ");
+  params.addParam<bool>("adapt_log", false,    "Output adaptive time step log");
   return params;
 }
 
@@ -32,8 +33,16 @@ SolutionTimeAdaptive::SolutionTimeAdaptive(std::string name, MooseSystem & moose
    _direction(parameters.get<int>("initial_direction")),
    _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
    _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),
-   _sol_time_vs_dt(std::numeric_limits<Real>::max())
-{}
+   _sol_time_vs_dt(std::numeric_limits<Real>::max()),
+   _adapt_log(parameters.get<bool>("adapt_log"))
+{
+  if((_adapt_log) && (libMesh::processor_id() == 0))
+  {
+    _adaptive_log.open("adaptive_log");
+    _adaptive_log<<"Adaptive Times Step Log"<<std::endl;
+  }
+  
+}
 
 void
 SolutionTimeAdaptive::preSolve()
@@ -59,9 +68,14 @@ SolutionTimeAdaptive::postSolve()
 Real
 SolutionTimeAdaptive::computeDT()
 {
+  Real new_dt = _dt;
+  
   if(!lastSolveConverged())
   {
     std::cout<<"Solve failed... cutting timestep"<<std::endl;
+    if(_adapt_log)
+      _adaptive_log<<"Solve failed... cutting timestep"<<std::endl;
+    
     return _dt / 2.0;
   }
 
@@ -72,8 +86,28 @@ SolutionTimeAdaptive::computeDT()
 
     // Make sure we take at least two steps in this new direction
     _old_sol_time_vs_dt = std::numeric_limits<Real>::max();
-    _older_sol_time_vs_dt = std::numeric_limits<Real>::max();    
+    _older_sol_time_vs_dt = std::numeric_limits<Real>::max();
   }
   
-  return _dt + _dt * _percent_change * _direction;
+  new_dt =  _dt + _dt * _percent_change*_direction;    
+
+  if((_adapt_log) && (libMesh::processor_id() == 0))
+  {
+    Real out_dt = new_dt;
+    if(out_dt > _dtmax)
+      out_dt = _dtmax;
+    
+    _adaptive_log<<"***Time step: "<<_t_step<<", time = "<<_time+out_dt<<std::endl;
+    _adaptive_log<<"Cur DT: "<<out_dt<<std::endl;
+    _adaptive_log<<"Older Ratio: "<<_older_sol_time_vs_dt<<std::endl;
+    _adaptive_log<<"Old Ratio: "<<_old_sol_time_vs_dt<<std::endl;
+    _adaptive_log<<"New Ratio: "<<_sol_time_vs_dt<<std::endl;
+  }
+  
+  return new_dt;
+}
+
+SolutionTimeAdaptive::~SolutionTimeAdaptive()
+{
+  _adaptive_log.close();
 }
