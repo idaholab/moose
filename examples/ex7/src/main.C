@@ -210,10 +210,17 @@ int main (int argc, char** argv)
 
     // Parameters for DirichletBC's
     InputParameters left_bc_params;
-    left_bc_params.addParam("value", 0.0, "value on the left boundary");
-    
+    std::vector<unsigned int> boundary_ids(1);
+    boundary_ids[0] = 1;
+    left_bc_params.addParam("value", 0.0, "value on the left boundary") ;
+    left_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
+    left_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
+
     InputParameters right_bc_params;
+    boundary_ids[0] = 2;
     right_bc_params.addParam("value", 1.0, "value on the right boundary");
+    right_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
+    right_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
 
     //////////////
     // "u" Kernels
@@ -230,8 +237,8 @@ int main (int argc, char** argv)
     KernelFactory::instance()->add("ImplicitEuler", "u_ie", params, "u");
 
     // Add the two boundary conditions using the DirichletBC object from MOOSE
-    BCFactory::instance()->add("DirichletBC", "left",  left_bc_params,  "u", 1);
-    BCFactory::instance()->add("DirichletBC", "right", right_bc_params, "u", 2);
+    BCFactory::instance()->add("DirichletBC", "left",  moose_system, left_bc_params);
+    BCFactory::instance()->add("DirichletBC", "right", moose_system, right_bc_params);
 
 
     //////////////
@@ -245,8 +252,10 @@ int main (int argc, char** argv)
     KernelFactory::instance()->add("ExampleImplicitEuler", "u_ie", params, "v");
 
     // Add the two boundary conditions using the DirichletBC object from MOOSE
-    BCFactory::instance()->add("DirichletBC", "left",  right_bc_params,  "v", 1);
-    BCFactory::instance()->add("DirichletBC", "right", left_bc_params, "v", 2);
+    left_bc_params.set<std::string>("variable") = "v"; 
+    BCFactory::instance()->add("DirichletBC", "left", moose_system, left_bc_params);
+    right_bc_params.set<std::string>("variable") = "v"; 
+    BCFactory::instance()->add("DirichletBC", "right", moose_system, right_bc_params);
 
     
     // Get the default values for the ExampleMaterial's parameters

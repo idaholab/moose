@@ -3,17 +3,13 @@
 template<>
 InputParameters validParams<ExampleAux>()
 {
-  InputParameters params;
+  InputParameters params = validParams<AuxKernel>();
   params.set<Real>("value")=0.0;
   return params;
 }
 
-ExampleAux::ExampleAux(std::string name,
-                         InputParameters parameters,
-                         std::string var_name,
-                         std::vector<std::string> coupled_to,
-                         std::vector<std::string> coupled_as)
-  :AuxKernel(name, parameters, var_name, coupled_to, coupled_as),
+ExampleAux::ExampleAux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :AuxKernel(name, moose_system, parameters),
    _coupled_val(coupledValAux("coupled")),
    _value(_parameters.get<Real>("value"))
 {}
