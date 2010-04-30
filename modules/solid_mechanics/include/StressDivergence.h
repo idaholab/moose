@@ -30,6 +30,7 @@ protected:
   std::vector<RealTensorValue> * _stress;
   std::vector<ColumnMajorMatrix> * _elasticity_tensor;
 
+private:
   unsigned int _component;
 };
 #endif //STRESSDIVERGENCE_H
