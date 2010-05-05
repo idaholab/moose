@@ -1,5 +1,6 @@
 #include "GenericICBlock.h"
 #include "InitialConditionFactory.h"
+#include "Parser.h"
 
 template<>
 InputParameters validParams<GenericICBlock>()
@@ -18,5 +19,5 @@ GenericICBlock::GenericICBlock(const std::string & reg_id, const std::string & r
 void
 GenericICBlock::execute() 
 {
-  InitialConditionFactory::instance()->add(_type, getShortName(), *Moose::moose_system, getClassParams(), _parent->getShortName());
+  InitialConditionFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams(), _parent->getShortName());
 }

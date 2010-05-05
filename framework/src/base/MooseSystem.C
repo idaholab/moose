@@ -59,7 +59,7 @@ MooseSystem::getMesh()
 EquationSystems *
 MooseSystem::getEquationSystems()
 {
-  checkValid();
+//  checkValid();
   return _es;
 }
 
@@ -82,10 +82,11 @@ MooseSystem::initEquationSystems()
 {
   if (_es != NULL)
     mooseError("EquationSystems Object already initialized for this MooseSystem");
-
+  
   _es = new EquationSystems(*_mesh);
   _system = &_es->add_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
   _aux_system = &_es->add_system<TransientExplicitSystem>("AuxiliarySystem");
+  
   return _es;
 }
 

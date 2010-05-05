@@ -20,16 +20,11 @@
 //Forward Declarations
 class Elem;
 class Material;
+class Kernel;
+class MooseSystem;
 
-/*
-template<class KernelType>
-InputParameters validParams()
-{
-  InputParameters params;
-  params.set<bool>("junk") = true;
-  return params;
-}
-*/
+template<>
+InputParameters validParams<Kernel>();
 
 /** 
  * The Kernel class is responsible for calculating the residuals for various
@@ -45,19 +40,11 @@ public:
    * 
    *
    * @param name The name of this kernel.
-   * @param system The system this variable is in
-   * @param var_name The variable this Kernel is going to compute a residual for.
-   * @param integrated Whether or not the residual is integraded (used by BCs).
-   * @param coupled_to The names of the variables this Kernel is coupled_to
-   * @param coupled_as The names of the variables the Kernel is going to ask for.
+   * @param moose_system The moose_system this kernel is associated with
+   * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
-  Kernel(std::string name,
-         InputParameters parameters,
-         std::string var_name,
-         bool integrated,
-         std::vector<std::string> coupled_to = std::vector<std::string>(0),
-         std::vector<std::string> coupled_as = std::vector<std::string>(0));
-
+  Kernel(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  
   virtual ~Kernel()
   {};
 
@@ -177,6 +164,11 @@ protected:
    */
   std::string _name;
 
+  /**
+   * Reference to the MooseSystem that this Kernel is assocaited to
+   */
+  MooseSystem & _moose_system;
+  
   /**
    * The thread id this kernel is associated with.
    */
@@ -461,12 +453,15 @@ protected:
    * All of the static stuff
    * ***********************
    */
-  
+
+public:
   static EquationSystems * _es;
   static TransientNonlinearImplicitSystem * _system;
   static TransientExplicitSystem * _aux_system;
   static MeshBase * _mesh;
   static unsigned int _dim;
+
+protected:
 
   /**
    * Interior finite element.

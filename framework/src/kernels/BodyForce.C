@@ -3,18 +3,14 @@
 template<>
 InputParameters validParams<BodyForce>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   params.set<Real>("value")=0.0;
   return params;
 }
 
-BodyForce::BodyForce(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as)
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
-    _value(_parameters.get<Real>("value"))
+BodyForce::BodyForce(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
+   _value(_parameters.get<Real>("value"))
   {}
 
 Real

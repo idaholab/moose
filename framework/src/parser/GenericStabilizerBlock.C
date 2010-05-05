@@ -1,5 +1,6 @@
 #include "GenericStabilizerBlock.h"
 #include "StabilizerFactory.h"
+#include "Parser.h"
 
 template<>
 InputParameters validParams<GenericStabilizerBlock>()
@@ -21,5 +22,5 @@ GenericStabilizerBlock::GenericStabilizerBlock(const std::string & reg_id, const
 void
 GenericStabilizerBlock::execute() 
 {
-  StabilizerFactory::instance()->add(_type, getShortName(), *Moose::moose_system, getClassParams());
+  StabilizerFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());
 }

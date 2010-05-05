@@ -1,21 +1,25 @@
 #include "Diffusion.h"
 
-Diffusion::Diffusion(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as)
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as)
-  {}
+template<>
+InputParameters validParams<Diffusion>()
+{
+  InputParameters params = validParams<Kernel>();
+  return params;
+}
+
+
+Diffusion::Diffusion(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters)
+{}
 
 Real
 Diffusion::computeQpResidual()
-  {
-    return _dtest[_i][_qp]*_grad_u[_qp];
-  }
+{
+  return _dtest[_i][_qp]*_grad_u[_qp];
+}
 
 Real
 Diffusion::computeQpJacobian()
-  {
-    return _dtest[_i][_qp]*_dphi[_j][_qp];
-  }
+{
+  return _dtest[_i][_qp]*_dphi[_j][_qp];
+}

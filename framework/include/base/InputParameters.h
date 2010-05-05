@@ -1,16 +1,31 @@
 #ifndef INPUTPARAMETERS_H
 #define INPUTPARAMETERS_H
 
+//local includes
+//#include "ValidParams.h"
+
 #include <set>
 #include <map>
 
 // libMesh includes
 #include "parameters.h"
 
+class InputParameters;
+class Kernel;
+class AuxKernel;
+class BoundaryCondition;
+class Stabilizer;
+class ParserBlock;
+class Material;
+class InitialCondition;
+class Executioner;
+
+template<class KernelType>
+InputParameters validParams();
+
 class InputParameters : public Parameters
 {
 public:
-  InputParameters() {}
   InputParameters(const InputParameters &rhs);
   InputParameters(const Parameters &rhs);
   
@@ -32,8 +47,22 @@ public:
   InputParameters & operator=(const InputParameters &rhs);
   InputParameters & operator+=(const InputParameters &rhs);
   void seenInInputFile(const std::string &name);
+
+  // These are the only objects allowed to _create_ InputParameters
+  friend InputParameters validParams<Kernel>();
+  friend InputParameters validParams<AuxKernel>();
+  friend InputParameters validParams<BoundaryCondition>();
+  friend InputParameters validParams<Stabilizer>();
+  friend InputParameters validParams<ParserBlock>();
+  friend InputParameters validParams<Material>();
+  friend InputParameters validParams<InitialCondition>();
+  friend InputParameters validParams<Executioner>();
+  friend class ParserBlock;
   
 private:
+  // Private constructor so that InputParameters can only be created in certain places.
+  InputParameters() {}
+  
   std::map<std::string, std::string> _doc_string;
   std::set<std::string> _required_params;
 

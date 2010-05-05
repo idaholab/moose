@@ -53,11 +53,6 @@ protected:
   virtual Real computeValue() = 0;
 
   virtual Real computeQpResidual();
-
-  /**
-   * Reference to the MooseSystem that this BoundaryCondition is assocaited to
-   */
-  MooseSystem & _moose_system;
   
   bool _nodal;
 

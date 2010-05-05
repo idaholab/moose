@@ -21,9 +21,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  BoundaryCondition(std::string name,
-                    MooseSystem & moose_system,
-                    InputParameters parameters);
+  BoundaryCondition(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual ~BoundaryCondition(){}
 
@@ -91,11 +89,6 @@ public:
   InputParameters & setIntegratedParam(InputParameters & params, bool integrated);
 
 protected:
-
-  /**
-   * Reference to the MooseSystem that this BoundaryCondition is assocaited to
-   */
-  MooseSystem & _moose_system;
   
   /**
    * Boundary ID this BC is active on.

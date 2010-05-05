@@ -194,7 +194,7 @@ namespace Moose
   /**
    * THE Moose System
    */
-  extern MooseSystem * moose_system;
+//  extern MooseSystem * moose_system;
   
   /**
    * The one mesh to rule them all

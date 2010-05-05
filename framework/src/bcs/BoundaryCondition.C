@@ -12,21 +12,18 @@ InputParameters validParams<BoundaryCondition>()
   InputParameters params;
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
-  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Material is coupled to.");
-  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Material which correspond with the coupled_as names");
+  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this boundary condition is coupled to.");
+  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this boundary condition which correspond with the coupled_to names");
   return params;
 }
 
-BoundaryCondition::BoundaryCondition(std::string name,
-                                     MooseSystem & moose_system,                                     
-                                     InputParameters parameters)
-  :Kernel(name,
-          parameters,
-          parameters.get<std::string>("variable"),
-          parameters.get<bool>("_integrated"),
-          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
-          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
-   _moose_system(moose_system),
+BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
+//          parameters,
+//          parameters.get<std::string>("variable"),
+//          parameters.get<bool>("_integrated"),
+//          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
+//          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
    _JxW_face(*_static_JxW_face[_tid][_fe_type]),

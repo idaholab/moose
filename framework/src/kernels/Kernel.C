@@ -1,5 +1,6 @@
 #include "Kernel.h"
 #include "Moose.h"
+#include "MooseSystem.h"
 #include "MaterialFactory.h"
 #include "ParallelUniqueId.h"
 
@@ -10,19 +11,27 @@
 #include "dense_subvector.h"
 #include "libmesh_common.h"
 
-Kernel::Kernel(std::string name,
-               InputParameters parameters,
-               std::string var_name,
-               bool integrated,
-               std::vector<std::string> coupled_to,
-               std::vector<std::string> coupled_as)
-  :_name(name),
+template<>
+InputParameters validParams<Kernel>()
+{
+  InputParameters params;
+  params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
+  params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
+  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Kernel is coupled to.");
+  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Kernel which correspond with the coupled_to names");
+  return params;
+}
+
+
+Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters parameters):
+   _name(name),
+   _moose_system(moose_system),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
-   _var_name(var_name),
+   _var_name(parameters.get<std::string>("variable")),
    _is_aux(_aux_system->has_variable(_var_name)),
    _var_num(_is_aux ? _aux_system->variable_number(_var_name) : _system->variable_number(_var_name)),
-   _integrated(integrated),
+   _integrated(parameters.have_parameter<bool>("_integrated") ? parameters.get<bool>("_integrated") : true),
    _u(_var_vals[_tid][_var_num]),
    _grad_u(_var_grads[_tid][_var_num]),
    _second_u(_var_seconds[_tid][_var_num]),
@@ -43,8 +52,8 @@ Kernel::Kernel(std::string name,
    _d2test(*(_static_d2phi[_tid])[_fe_type]),
    _qrule(_static_qrule[_tid]),
    _q_point(*(_static_q_point[_tid])[_fe_type]),
-   _coupled_to(coupled_to),
-   _coupled_as(coupled_as),
+   _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
+   _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _real_zero(_static_real_zero[_tid]),
    _zero(_static_zero[_tid]),
    _grad_zero(_static_grad_zero[_tid]),
@@ -73,7 +82,7 @@ Kernel::Kernel(std::string name,
     {
       unsigned int coupled_var_num = _system->variable_number(coupled_var_name);
 
-      _coupled_as_to_var_num[coupled_as[i]] = coupled_var_num;
+      _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
       if(std::find(_var_nums.begin(),_var_nums.end(),coupled_var_num) == _var_nums.end())
         _var_nums.push_back(coupled_var_num);
@@ -85,7 +94,7 @@ Kernel::Kernel(std::string name,
     {
       unsigned int coupled_var_num = _aux_system->variable_number(coupled_var_name);
 
-      _aux_coupled_as_to_var_num[coupled_as[i]] = coupled_var_num;
+      _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
       if(std::find(_aux_var_nums.begin(),_aux_var_nums.end(),coupled_var_num) == _aux_var_nums.end())
         _aux_var_nums.push_back(coupled_var_num);

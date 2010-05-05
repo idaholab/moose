@@ -3,6 +3,12 @@
 
 #include "Kernel.h"
 
+// Forward Declaration
+class CoupledForce;
+
+template<>
+InputParameters validParams<CoupledForce>();
+
 /**
  * Simple class to demonstrate off diagonal Jacobian contributijons.
  */
@@ -10,13 +16,7 @@ class CoupledForce : public Kernel
 {
 public:
 
-  CoupledForce(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to=std::vector<std::string>(0),
-               std::vector<std::string> coupled_as=std::vector<std::string>(0));
-  
- 
+  CoupledForce(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

@@ -1,4 +1,5 @@
 #include "KernelFactory.h"
+#include "MooseSystem.h"
 
 KernelFactory *
 KernelFactory::instance()
@@ -13,10 +14,8 @@ KernelFactory::instance()
 Kernel *
 KernelFactory::add(std::string kernel_name,
                    std::string name,
-                   InputParameters parameters,
-                   std::string var_name,
-                   std::vector<std::string> coupled_to,
-                   std::vector<std::string> coupled_as)
+                   MooseSystem & moose_system,
+                   InputParameters parameters)
 {
   Kernel * kernel;
     
@@ -24,7 +23,7 @@ KernelFactory::add(std::string kernel_name,
   {
     Moose::current_thread_id = tid;
 
-    kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+    kernel = (*name_to_build_pointer[kernel_name])(name, moose_system, parameters);
 
     all_kernels[tid].push_back(kernel);
   }
@@ -35,10 +34,8 @@ KernelFactory::add(std::string kernel_name,
 Kernel *
 KernelFactory::add(std::string kernel_name,
                    std::string name,
+                   MooseSystem & moose_system,
                    InputParameters parameters,
-                   std::string var_name,
-                   std::vector<std::string> coupled_to,
-                   std::vector<std::string> coupled_as,
                    unsigned int block_id)
 {
   Kernel * kernel;
@@ -47,7 +44,7 @@ KernelFactory::add(std::string kernel_name,
   {
     Moose::current_thread_id = tid;
       
-    kernel = (*name_to_build_pointer[kernel_name])(name,parameters,var_name,coupled_to,coupled_as);
+    kernel = (*name_to_build_pointer[kernel_name])(name, moose_system, parameters);
 
     all_block_kernels[tid][block_id].push_back(kernel);
   }
@@ -60,11 +57,16 @@ KernelFactory::getValidParams(std::string name)
 {
   if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
   {
-    std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Kernel "<<std::endl<<std::endl;
-    mooseError("");
+    mooseError(std::string("A _") + name + "_ is not a registered Kernel\n\n");
   }
+
+  std::cout<<"stuff"<<std::endl;
   
   InputParameters params = name_to_params_pointer[name]();
+
+  std::cout<<"getValidParams "<<std::endl;
+  params.print();
+  
 
   if(!params.have_parameter<Real>("start_time"))
     params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");

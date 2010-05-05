@@ -1,4 +1,9 @@
 #include "MaterialFactory.h"
+#include "MooseSystem.h"
+
+//libMesh Includes
+#include "equation_systems.h"
+
 #include <iostream>
 
 MaterialFactory *
@@ -20,6 +25,9 @@ void
     {
       Moose::current_thread_id = tid;
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+
+      // TODO: Remove this hack when Material no longer inherits from Kernel!
+      parameters.set<std::string>("variable") = Kernel::_es->get_system(0).variable_name(0);
 
       for (unsigned int i=0; i<blocks.size(); ++i)
         active_materials[tid][blocks[i]] = (*name_to_build_pointer[mat_name])(name, moose_system, parameters);

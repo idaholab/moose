@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<RandomIC>()
 {
-  InputParameters params;
+  InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("min", "Lower bound of the randomly generated values");
   params.addRequiredParam<Real>("max", "Upper bound of the randomly generated values");
   return params;

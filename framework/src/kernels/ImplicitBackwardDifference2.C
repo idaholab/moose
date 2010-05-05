@@ -3,17 +3,13 @@
 template<>
 InputParameters validParams<ImplicitBackwardDifference2>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   params.addParam<bool>("start_with_be", true, "Whether or not to use first order Backward Euler for the first timestep");
   return params;
 }
 
-ImplicitBackwardDifference2::ImplicitBackwardDifference2(std::string name,
-                                                         InputParameters parameters,
-                                                         std::string var_name,
-                                                         std::vector<std::string> coupled_to,
-                                                         std::vector<std::string> coupled_as)
-  :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
+ImplicitBackwardDifference2::ImplicitBackwardDifference2(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
    _start_with_be(parameters.get<bool>("start_with_be"))
 { _t_scheme = 1;}
 

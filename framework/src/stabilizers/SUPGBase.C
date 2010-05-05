@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<SUPGBase>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Stabilizer>();
   return params;
 }
 

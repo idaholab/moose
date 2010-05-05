@@ -11,15 +11,13 @@ InputParameters validParams<Material>()
   return params;
 }
 
-Material::Material(std::string name,
-                   MooseSystem & moose_system,
-                   InputParameters parameters)
-  :Kernel(name,
-          parameters,
-          Kernel::_es->get_system(0).variable_name(0),
-          false,
-          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
-          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
+//          parameters,
+//          Kernel::_es->get_system(0).variable_name(0),
+//          false,
+//          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
+//          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _moose_system(moose_system)
 {}
 

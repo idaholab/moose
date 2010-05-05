@@ -1,11 +1,14 @@
 #include "CoupledForce.h"
 
-CoupledForce::CoupledForce(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as)
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
+template<>
+InputParameters validParams<CoupledForce>()
+{
+  InputParameters params = validParams<Kernel>();
+  return params;
+}
+
+CoupledForce::CoupledForce(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
     _v_var(coupled("v")),
     _v(coupledVal("v"))
   {}

@@ -1,5 +1,6 @@
 #include "GenericAuxKernelBlock.h"
 #include "AuxFactory.h"
+#include "Parser.h"
 
 template<>
 InputParameters validParams<GenericAuxKernelBlock>()
@@ -25,14 +26,8 @@ GenericAuxKernelBlock::execute()
 #ifdef DEBUG
   std::cerr << "Inside the GenericAuxKernelBlock Object\n";
   std::cerr << "AuxKernel:" << _type << ":"
-            << "\tname:" << getShortName() << std::endl; // ":"
-//            << "\tvariable:" << getParamValue<std::string>("variable") << ":" << std::endl;
+            << "\tname:" << getShortName() << std::endl;
 #endif
 
-  AuxFactory::instance()->add(_type, getShortName(), *Moose::moose_system, getClassParams());
-  
-//                              getParamValue<std::string>("variable"),
-//                              getParamValue<std::vector<std::string> >("coupled_to"),
-//                              getParamValue<std::vector<std::string> >("coupled_as"));
-  
+  AuxFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());  
 }

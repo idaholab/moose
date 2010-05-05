@@ -12,15 +12,14 @@
 // LibMesh includes
 #include <parameters.h>
 
+// forward declarations
+class MooseSystem;
 
 /**
  * Typedef to make things easier.
  */
-typedef Kernel * (*kernelBuildPtr)(std::string name,
-                                   InputParameters parameters,
-                                   std::string var_name,
-                                   std::vector<std::string> coupled_to,
-                                   std::vector<std::string> coupled_as);
+typedef Kernel * (*kernelBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters);
+
 /**
  * Typedef to make things easier.
  */
@@ -40,13 +39,9 @@ typedef std::vector<std::string>::iterator KernelNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename KernelType>
-Kernel * buildKernel(std::string name,
-                     InputParameters parameters,
-                     std::string var_name,
-                     std::vector<std::string> coupled_to,
-                     std::vector<std::string> coupled_as)
+Kernel * buildKernel(std::string name, MooseSystem & moose_system, InputParameters parameters)
 {
-  return new KernelType(name, parameters, var_name, coupled_to, coupled_as);
+  return new KernelType(name, moose_system, parameters);
 }
 
 /**
@@ -66,18 +61,14 @@ public:
 
   Kernel * add(std::string kernel_name,
                std::string name,
-               InputParameters parameters,
-               std::string var_name,
-               std::vector<std::string> coupled_to=std::vector<std::string>(0),
-               std::vector<std::string> coupled_as=std::vector<std::string>(0));
+               MooseSystem & moose_system,
+               InputParameters parameters);
   
 
   Kernel * add(std::string kernel_name,
                std::string name,
+               MooseSystem & moose_system,
                InputParameters parameters,
-               std::string var_name,
-               std::vector<std::string> coupled_to,
-               std::vector<std::string> coupled_as,
                unsigned int block_id);
   
   InputParameters getValidParams(std::string name);

@@ -1,6 +1,7 @@
 #include "GenericExecutionerBlock.h"
 #include "ExecutionerFactory.h"
 #include "PetscSupport.h"
+#include "Parser.h"
 
 template<>
 InputParameters validParams<GenericExecutionerBlock>()
@@ -40,7 +41,7 @@ GenericExecutionerBlock::GenericExecutionerBlock(const std::string & reg_id, con
 void
 GenericExecutionerBlock::execute() 
 {
-  Moose::executioner = ExecutionerFactory::instance()->build(_type, "Executioner", *Moose::moose_system, getClassParams());
+  Moose::executioner = ExecutionerFactory::instance()->build(_type, "Executioner", _parser_handle.getMooseSystem(), getClassParams());
   
   Moose::equation_system->parameters.set<Real> ("linear solver tolerance")
     = getParamValue<Real>("l_tol");

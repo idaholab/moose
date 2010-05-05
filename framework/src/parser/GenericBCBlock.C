@@ -1,6 +1,7 @@
 #include "GenericBCBlock.h"
 #include "BCFactory.h"
 #include "AuxFactory.h"
+#include "Parser.h"
 
 template<>
 InputParameters validParams<GenericBCBlock>()
@@ -41,7 +42,7 @@ GenericBCBlock::execute()
   
 //  for (std::vector<int>::iterator boundary=boundary_vector.begin(); boundary != boundary_vector.end(); ++boundary)
     if (_reg_id == "BCs/*")
-      BCFactory::instance()->add(_type, getShortName(), *Moose::moose_system, getClassParams());
+      BCFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());
     else
-      AuxFactory::instance()->addBC(_type, getShortName(), *Moose::moose_system, getClassParams());
+      AuxFactory::instance()->addBC(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());
 }

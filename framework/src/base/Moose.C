@@ -333,7 +333,7 @@ THREAD_ID Moose::current_thread_id = 0;
 
 Preconditioner<Real> * Moose::preconditioner = NULL;
 
-MooseSystem * Moose::moose_system;
+//MooseSystem * Moose::moose_system;
 Mesh * Moose::mesh;
 
 EquationSystems * Moose::equation_system;
