@@ -1,12 +1,5 @@
 #include "IsotropicElasticityTensor.h"
 
-template<>
-InputParameters validParams<IsotropicElasticityTensor>()
-{
-  InputParameters params = validParams<ElasticityTensor>();
-  return params;
-}
-
 IsotropicElasticityTensor::IsotropicElasticityTensor(const bool constant)
   : ElasticityTensor(constant),
     _lambda_set(false),
