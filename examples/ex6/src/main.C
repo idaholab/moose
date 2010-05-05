@@ -213,13 +213,8 @@ int main (int argc, char** argv)
         // Perform refinement and coarsening
         mesh_refinement.refine_and_coarsen_elements();
 
-        // Reinitialize the equation_systems object for the newly refined
-        // mesh. One of the steps in this is project the solution onto the
-        // new mesh
-        moose_system.reinit();
-
-        // After the mesh changes... you MUST update the boundary lists
-        moose_system.update_boundary_info();
+        // Tell MOOSE that the mesh changed so it can reinitialize internal data structures.
+        moose_system.meshChanged();
 
         // Print out mesh info so we can see how many elements / nodes we have now
         mesh.print_info();
