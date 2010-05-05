@@ -89,7 +89,8 @@ SolutionTimeAdaptive::computeDT()
     _older_sol_time_vs_dt = std::numeric_limits<Real>::max();
   }
   
-  new_dt =  _dt + _dt * _percent_change*_direction;    
+  if(_t_step > 1)
+    new_dt =  _dt + _dt * _percent_change*_direction;    
 
   if((_adapt_log) && (libMesh::processor_id() == 0))
   {
