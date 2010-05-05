@@ -3,6 +3,12 @@
 
 #include "AuxKernel.h"
 
+//Forward Declarations
+class VelocityAux;
+
+template<>
+InputParameters validParams<VelocityAux>();
+
 /** 
  * Velocity auxiliary value
  */

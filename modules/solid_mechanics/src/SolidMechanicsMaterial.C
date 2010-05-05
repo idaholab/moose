@@ -7,9 +7,7 @@ InputParameters validParams<SolidMechanicsMaterial>()
   return params;
 }
 
-SolidMechanicsMaterial::SolidMechanicsMaterial(std::string name,
-                                               MooseSystem & moose_system,
-                                               InputParameters parameters)
+SolidMechanicsMaterial::SolidMechanicsMaterial(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Material(name, moose_system, parameters),
    _grad_disp_x(coupledGrad("disp_x")),
    _grad_disp_y(coupledGrad("disp_y")),

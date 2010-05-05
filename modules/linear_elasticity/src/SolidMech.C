@@ -3,17 +3,13 @@
 template<>
 InputParameters validParams<SolidMech>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   return params;
 }
 
-SolidMech::SolidMech(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as)
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as)
-  {}
+SolidMech::SolidMech(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters)
+{}
 
 void
 SolidMech::subdomainSetup()

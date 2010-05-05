@@ -6,7 +6,6 @@
 //libMesh includes
 #include "tensor_value.h"
 
-
 //Forward Declarations
 class SolidMechTempCouple;
 
@@ -17,11 +16,7 @@ class SolidMechTempCouple : public SolidMech
 {
 public:
 
-  SolidMechTempCouple(std::string name,
-                      InputParameters parameters,
-                      std::string var_name,
-                      std::vector<std::string> coupled_to,
-                      std::vector<std::string> coupled_as);
+  SolidMechTempCouple(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
   virtual void subdomainSetup();
   

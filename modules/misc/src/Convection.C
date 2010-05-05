@@ -7,23 +7,19 @@
 template<>
 InputParameters validParams<Convection>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   params.addRequiredParam<Real>("x", "Component of velocity in the x direction");
   params.addRequiredParam<Real>("y", "Component of velocity in the y direction");
   params.addParam<Real>("z", 0.0, "Component of velocity in the z direction");
   return params;
 }
 
-Convection::Convection(std::string name,
-                       InputParameters parameters,
-                       std::string var_name,
-                       std::vector<std::string> coupled_to,
-                       std::vector<std::string> coupled_as)
+Convection::Convection(std::string name, MooseSystem & moose_system, InputParameters parameters)
   // You must call the constructor of the base class first
   // The "true" here specifies that this Kernel is to be integrated
   // over the domain.
-  :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
-
+  :Kernel(name, moose_system, parameters),
+   
    // This is the "Intialization List" it sets the values of class variables
    // Here we are grabbing the values of Parameters to use for a velocity vector
    _x(_parameters.get<Real>("x")),

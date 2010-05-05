@@ -8,7 +8,6 @@
 #include "tensor_value.h"
 #include "vector_value.h"
 
-
 //Forward Declarations
 class SolidMech;
 
@@ -19,11 +18,7 @@ class SolidMech : public Kernel
 {
 public:
 
-  SolidMech(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as);
+  SolidMech(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
   virtual void subdomainSetup();
   

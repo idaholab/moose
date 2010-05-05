@@ -3,22 +3,18 @@
 
 #include "SolidMechTempCouple.h"
 
-
 //Forward Declarations
 class SolidMechTempCoupleY;
 
 template<>
 InputParameters validParams<SolidMechTempCoupleY>();
 
+
 class SolidMechTempCoupleY : public SolidMechTempCouple
 {
 public:
 
-  SolidMechTempCoupleY(std::string name,
-                       InputParameters parameters,
-                       std::string var_name,
-                       std::vector<std::string> coupled_to,
-                       std::vector<std::string> coupled_as);
+  SolidMechTempCoupleY(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

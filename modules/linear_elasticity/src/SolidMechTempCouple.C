@@ -7,14 +7,10 @@ InputParameters validParams<SolidMechTempCouple>()
   return params;
 }
 
-SolidMechTempCouple::SolidMechTempCouple(std::string name,
-                      InputParameters parameters,
-                      std::string var_name,
-                      std::vector<std::string> coupled_to,
-                      std::vector<std::string> coupled_as)
-    :SolidMech(name,parameters,var_name,coupled_to,coupled_as),
+SolidMechTempCouple::SolidMechTempCouple(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :SolidMech(name, moose_system, parameters),
     _temp_var(coupled("temp"))
-  {}
+{}
 
 void
 SolidMechTempCouple::subdomainSetup()

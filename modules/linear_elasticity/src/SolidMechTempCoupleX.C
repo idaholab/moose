@@ -7,13 +7,9 @@ InputParameters validParams<SolidMechTempCoupleX>()
   return params;
 }
 
-SolidMechTempCoupleX::SolidMechTempCoupleX(std::string name,
-                       InputParameters parameters,
-                       std::string var_name,
-                       std::vector<std::string> coupled_to,
-                       std::vector<std::string> coupled_as)
-    :SolidMechTempCouple(name,parameters,var_name,coupled_to,coupled_as)
-  {}
+SolidMechTempCoupleX::SolidMechTempCoupleX(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :SolidMechTempCouple(name, moose_system, parameters)
+{}
 
 Real
 SolidMechTempCoupleX::computeQpResidual()

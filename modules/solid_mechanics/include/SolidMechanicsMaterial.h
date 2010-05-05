@@ -17,9 +17,7 @@ InputParameters validParams<SolidMechanicsMaterial>();
 class SolidMechanicsMaterial : public Material
 {
 public:
-  SolidMechanicsMaterial(std::string name,
-                         MooseSystem & moose_system,
-                         InputParameters parameters);
+  SolidMechanicsMaterial(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   std::vector<RealGradient> & _grad_disp_x;

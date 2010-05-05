@@ -1,19 +1,14 @@
 #include "EnergyInviscidFlux.h"
  
-
 template<>
 InputParameters validParams<EnergyInviscidFlux>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   return params;
 }
 
-EnergyInviscidFlux::EnergyInviscidFlux(std::string name,
-                  InputParameters parameters,
-                  std::string var_name,
-                  std::vector<std::string> coupled_to,
-                  std::vector<std::string> coupled_as)
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
+EnergyInviscidFlux::EnergyInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
     _u_vel_var(coupled("u")),
     _u_vel(coupledVal("u")),
     _v_vel_var(coupled("v")),

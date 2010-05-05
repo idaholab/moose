@@ -5,22 +5,16 @@
 template<>
 InputParameters validParams<StressDivergence>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   params.addRequiredParam<Real>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   return params;
 }
 
 
-StressDivergence::StressDivergence(std::string name,
-            InputParameters parameters,
-            std::string var_name,
-            std::vector<std::string> coupled_to,
-            std::vector<std::string> coupled_as)
-  :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
+StressDivergence::StressDivergence(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
    _component(parameters.get<Real>("component"))
-{
-  
-}
+{}
 
 void
 StressDivergence::subdomainSetup()

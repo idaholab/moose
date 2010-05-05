@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<NavierStokesMaterial>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Material>();
 
   //Default is Air
   params.set<Real>("R")=287.04; // J/kgK

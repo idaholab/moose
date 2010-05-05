@@ -3,15 +3,12 @@
 template<>
 InputParameters validParams<SolidMechX>()
 {
-  return validParams<SolidMech>();
+  InputParameters params = validParams<SolidMech>();
+  return params;
 }
 
-SolidMechX::SolidMechX(std::string name,
-             InputParameters parameters,
-             std::string var_name,
-             std::vector<std::string> coupled_to,
-             std::vector<std::string> coupled_as)
-    :SolidMech(name,parameters,var_name,coupled_to,coupled_as),
+SolidMechX::SolidMechX(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :SolidMech(name, moose_system, parameters),
      _y_var(coupled("y")),
      _y(coupledVal("y")),
      _grad_y(coupledGrad("y")),

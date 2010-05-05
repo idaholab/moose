@@ -1,19 +1,14 @@
 #include "HeatConduction.h"
- 
 
 template<>
 InputParameters validParams<HeatConduction>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Diffusion>();
   return params;
 }
 
-HeatConduction::HeatConduction(std::string name,
-                 InputParameters parameters,
-                 std::string var_name,
-                 std::vector<std::string> coupled_to,
-                 std::vector<std::string> coupled_as)
-    :Diffusion(name,parameters,var_name,coupled_to,coupled_as)
+HeatConduction::HeatConduction(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Diffusion(name, moose_system, parameters)
   {}
 
 void

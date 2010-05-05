@@ -5,7 +5,7 @@
 #include "Material.h"
 
 
-//ForwardDeclarations
+//Forward Declarations
 class GravityForce;
 
 template<>
@@ -15,11 +15,7 @@ class GravityForce : public Kernel
 {
 public:
 
-  GravityForce(std::string name,
-                  InputParameters parameters,
-                  std::string var_name,
-                  std::vector<std::string> coupled_to=std::vector<std::string>(0),
-               std::vector<std::string> coupled_as=std::vector<std::string>(0));
+  GravityForce(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

@@ -3,6 +3,12 @@
 
 #include "ElasticityTensor.h"
 
+//Forward Declarations
+class IsotropicElasticityTensor;
+
+template<>
+InputParameters validParams<IsotropicElasticityTensor>();
+
 /**
  * Defines an Isotropic Elasticity Tensor.
  *

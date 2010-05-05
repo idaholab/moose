@@ -1,20 +1,15 @@
 #include "GravityForce.h"
  
-
 template<>
 InputParameters validParams<GravityForce>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   params.set<Real>("acceleration") = -9.80665;
   return params;
 }
 
-GravityForce::GravityForce(std::string name,
-                  InputParameters parameters,
-                  std::string var_name,
-                  std::vector<std::string> coupled_to,
-                  std::vector<std::string> coupled_as)
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
+GravityForce::GravityForce(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
     _p_var(coupled("p")),
     _p(coupledVal("p")),
     _acceleration(parameters.get<Real>("acceleration"))

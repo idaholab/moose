@@ -3,15 +3,12 @@
 template<>
 InputParameters validParams<SolidMechZ>()
 {
-  return validParams<SolidMech>();
+  InputParameters params = validParams<SolidMech>();
+  return params;
 }
 
-SolidMechZ::SolidMechZ(std::string name,
-             InputParameters parameters,
-             std::string var_name,
-             std::vector<std::string> coupled_to,
-             std::vector<std::string> coupled_as)
-    :SolidMech(name,parameters,var_name,coupled_to,coupled_as),
+SolidMechZ::SolidMechZ(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :SolidMech(name, moose_system, parameters),
     _x_var(coupled("x")),
     _x(coupledVal("x")),
     _grad_x(coupledGrad("x")),

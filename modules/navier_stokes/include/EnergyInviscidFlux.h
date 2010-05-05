@@ -4,8 +4,7 @@
 #include "Kernel.h"
 #include "Material.h"
 
-
-//ForwardDeclarations
+//Forward Declarations
 class EnergyInviscidFlux;
 
 template<>
@@ -15,13 +14,8 @@ class EnergyInviscidFlux : public Kernel
 {
 public:
 
-  EnergyInviscidFlux(std::string name,
-                  InputParameters parameters,
-                  std::string var_name,
-                  std::vector<std::string> coupled_to=std::vector<std::string>(0),
-                     std::vector<std::string> coupled_as=std::vector<std::string>(0));
+  EnergyInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-
   virtual void subdomainSetup();
   
 protected:

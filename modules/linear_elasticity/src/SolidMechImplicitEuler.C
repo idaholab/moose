@@ -1,12 +1,15 @@
 #include "SolidMechImplicitEuler.h"
 
-SolidMechImplicitEuler::SolidMechImplicitEuler(std::string name,
-                         InputParameters parameters,
-                         std::string var_name,
-                         std::vector<std::string> coupled_to,
-                         std::vector<std::string> coupled_as)
-    :SecondDerivativeImplicitEuler(name,parameters,var_name,coupled_to,coupled_as)
-  {}
+template<>
+InputParameters validParams<SolidMechImplicitEuler>()
+{
+  InputParameters params = validParams<SecondDerivativeImplicitEuler>();
+  return params;
+}
+
+SolidMechImplicitEuler::SolidMechImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :SecondDerivativeImplicitEuler(name,moose_system,parameters)
+{}
 
 void
 SolidMechImplicitEuler::subdomainSetup()

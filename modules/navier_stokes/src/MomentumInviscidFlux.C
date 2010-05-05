@@ -4,37 +4,33 @@
 template<>
 InputParameters validParams<MomentumInviscidFlux>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   params.set<Real>("component") = -1;
   return params;
 }
 
-MomentumInviscidFlux::MomentumInviscidFlux(std::string name,
-                  InputParameters parameters,
-                  std::string var_name,
-                  std::vector<std::string> coupled_to,
-                  std::vector<std::string> coupled_as)
-    :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
-    _u_vel_var(coupled("u")),
-    _u_vel(coupledVal("u")),
-    _v_vel_var(coupled("v")),
-    _v_vel(coupledVal("v")),
-    _w_vel_var(_dim == 3 ? coupled("w") : 0),
-    _w_vel(_dim == 3 ? coupledVal("w") : _zero),
-    _component(parameters.get<Real>("component"))
+MomentumInviscidFlux::MomentumInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+  :Kernel(name, moose_system, parameters),
+   _u_vel_var(coupled("u")),
+   _u_vel(coupledVal("u")),
+   _v_vel_var(coupled("v")),
+   _v_vel(coupledVal("v")),
+   _w_vel_var(_dim == 3 ? coupled("w") : 0),
+   _w_vel(_dim == 3 ? coupledVal("w") : _zero),
+   _component(parameters.get<Real>("component"))
+{
+  if(_component < 0)
   {
-    if(_component < 0)
-    {
-      std::cout<<"Must select a component for MomentumInviscidFlux"<<std::endl;
-      libmesh_error();
-    }
+    std::cout<<"Must select a component for MomentumInviscidFlux"<<std::endl;
+    libmesh_error();
   }
+}
 
 void
 MomentumInviscidFlux::subdomainSetup()
-  {
-    _pressure = &_material->getRealProperty("pressure");
-  }
+{
+  _pressure = &_material->getRealProperty("pressure");
+}
 
 Real
 MomentumInviscidFlux::computeQpResidual()
