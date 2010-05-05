@@ -56,10 +56,10 @@
   [../]
 []
 
-[Execution]
-  type = Steady
-  perf_log = true
-  petsc_options = '-snes_mf_operator'
+[Executioner]
+	type = Steady
+	perf_log = true
+	petsc_options = '-snes_mf_operator'
 []
 
 [Output]

@@ -10,10 +10,8 @@ class ExampleDiffusion : public Diffusion
 public:
 
   ExampleDiffusion(std::string name,
-                   InputParameters parameters,
-                   std::string var_name,
-                   std::vector<std::string> coupled_to,
-                   std::vector<std::string> coupled_as);
+                   MooseSystem &sys,
+                   InputParameters parameters);
 
   // subdomainSetup() gets called each time the subdomain (block) changes.
   // This is where you grab material properties for the current block

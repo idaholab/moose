@@ -5,11 +5,9 @@
 #include "Material.h"
 
 ExampleDiffusion::ExampleDiffusion(std::string name,
-                                   InputParameters parameters,
-                                   std::string var_name,
-                                   std::vector<std::string> coupled_to,
-                                   std::vector<std::string> coupled_as)
-  :Diffusion(name,parameters,var_name,coupled_to,coupled_as)
+                                   MooseSystem &sys,
+                                   InputParameters parameters)
+  :Diffusion(name,sys,parameters)
 {}
 
 void

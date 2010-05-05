@@ -12,15 +12,13 @@ InputParameters validParams<Convection>()
 }
 
 Convection::Convection(std::string name,
-                       InputParameters parameters,
-                       std::string var_name,
-                       std::vector<std::string> coupled_to,
-                       std::vector<std::string> coupled_as)
+                       MooseSystem &sys,
+                       InputParameters parameters)
 
   // You must call the constructor of the base class first
   // The "true" here specifies that this Kernel is to be integrated
   // over the domain.
-  :Kernel(name,parameters,var_name,true,coupled_to,coupled_as),
+  :Kernel(name,sys,parameters),
    
    // coupledGrad will give us a reference to the gradient of another
    // variable in the computation.  We are going to use that gradient

@@ -1,7 +1,7 @@
-#include "Kernel.h"
-
 #ifndef CONVECTION_H
 #define CONVECTION_H
+
+#include "Kernel.h"
 
 /**
  * The forward declaration is so that we can declare the validParams function
@@ -36,10 +36,8 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   Convection(std::string name,
-             InputParameters parameters,
-             std::string var_name,
-             std::vector<std::string> coupled_to,
-             std::vector<std::string> coupled_as);
+             MooseSystem &sys,
+             InputParameters parameters);
 
 protected:
   /**

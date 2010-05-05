@@ -40,243 +40,195 @@ PerfLog Moose::perf_log("Example6");
 // Begin the main program.
 int main (int argc, char** argv)
 {
+  // Initialize Moose
+  MooseInit init(argc, argv);
+
+  // Create a GetPot object to parse the command line
+  GetPot command_line (argc, argv);
+
+  // The diffusivity we're going to pass to our Material
+  // We're giving it a default value of 1.0
+  Real diffusivity = 0.1;
+
+  // See if a diffusivity was provided on the command-line
+  if(command_line.search("--diffusivity"))
+    diffusivity = command_line.next(diffusivity);
+
+  // This registers a bunch of common objects that exist in Moose with the factories.
+  // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
+  Moose::registerObjects();
+
+  // Register a new kernel with the factory so we can use it in the computation.
+  KernelFactory::instance()->registerKernel<Convection>("Convection");
+  KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
+
+  // Register our new material class so we can use it.
+  MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
+
+  // Create the mesh object
+  Mesh mesh(2);
+  // Read the mesh from an Exodus file and prepare it for use
+  ExodusII_IO exreader(mesh);
+  exreader.read("square.e");
+
+  /**
+   * Do some uniform refinement of the mesh so we can capture the solution better.
+   */
+  MeshRefinement mesh_refinement(mesh);
+  mesh_refinement.uniformly_refine(1);
+
+  /**
+   * Setup the percentage of elements to refine and coarsen and the
+   * maximum refinement level.
+   */
+  mesh_refinement.refine_fraction()  = .3;
+  mesh_refinement.coarsen_fraction() = 0;
+  mesh_refinement.max_h_level()      = 10;
+
+  // The number of refinement steps we want to do
+  unsigned int max_r_steps = 7;
+
+  // Print some useful information about the mesh
+  mesh.print_info();
+
+  // Create a MooseSystem
+  MooseSystem moose_system(mesh);
+
+  /**
+   * Add a variable named "u" to solve for.
+   * We are going to approximate it using First order Lagrange FEs
+   */
+  moose_system.addVariable("u", FIRST, LAGRANGE);
+
+  /**
+   * Add a variable named "v" to solve for.
+   * We are going to approximate it using First order Lagrange FEs
+   *
+   * We are going to couple this variable into the convection kernel for variable "u"
+   */
+  moose_system.addVariable("v", FIRST, LAGRANGE);
+
+  // Initialize the Systems and print some info out
+  moose_system.init();
+
+  /**
+   * Next we are going to define our coupling vectors.
+   *
+   * coupled_to = the actual name of the coupled variable
+   *
+   * coupled_as = the name the Kernel _expects_...
+   *   This is essentially the name you pass to the Coupled*()
+   *   functions when you try to get a coupled variable in a Kernel.
+   *   In this case we call coupledGrad("some_var") in Convection.h
+   *   therefore the variable "v" is coupled_as "some_var.
+   *
+   * Note that coupled_to and coupled_as are _paired_.
+   */
+  std::vector<std::string> conv_coupled_to;
+  std::vector<std::string> conv_coupled_as;
+
+  conv_coupled_to.push_back("v");
+  conv_coupled_as.push_back("some_var");
+
+
+  //////////////
+  // "u" Kernels
+  //////////////
+
+  // Add a Diffusion Kernel from MOOSE into the calculation.
+  InputParameters diff_params;
+  diff_params.addParam<std::string>("variable", "u", "variable for which to apply this kernel");
+  moose_system.addKernel("ExampleDiffusion", "diff", diff_params);
+
+  // Add the Convection Kernel from this application into the calculation
+  // Note that we are passing in our coupling vectors
+  InputParameters conv_params;
+  conv_params.addParam<std::string>("variable", "u", "variable for which to apply this kernel");
+  conv_params.addParam<std::vector<std::string> >("coupled_to", conv_coupled_to, "coupled to variable");
+  conv_params.addParam<std::vector<std::string> >("coupled_as", conv_coupled_as, "coupled as variable");
+  moose_system.addKernel("Convection", "conv", conv_params);
+
+  // Add the two boundary conditions using the DirichletBC object from MOOSE
+  InputParameters left_bc_params;
+  std::vector<unsigned int> boundary_ids(1);
+  boundary_ids[0] = 1;
+  left_bc_params.addParam("value", 0.0, "value on the left boundary") ;
+  left_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
+  left_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
+  moose_system.addBC("DirichletBC", "left", left_bc_params);
+
+  InputParameters right_bc_params;
+  boundary_ids[0] = 2;
+  right_bc_params.addParam("value", 1.0, "value on the right boundary");
+  right_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
+  right_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
+  moose_system.addBC("DirichletBC", "right", right_bc_params);
+
+
+  //////////////
+  // "v" Kernels
+  //////////////
+
+  // Add a Diffusion Kernel from MOOSE into the calculation.
+  diff_params.set<std::string>("variable") = "v";
+  moose_system.addKernel("Diffusion", "diff", diff_params);
+
+  // Add the two boundary conditions using the DirichletBC object from MOOSE
+  left_bc_params.set<std::string>("variable") = "v";
+  moose_system.addBC("DirichletBC", "left",  left_bc_params);
+
+  right_bc_params.set<std::string>("variable") = "v";
+  moose_system.addBC("DirichletBC", "right", right_bc_params);
+
+  // Get the default values for the ExampleMaterial's parameters
+  InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
+
+  // Override the default diffusivity
+  mat_params.set<Real>("diffusivity") = diffusivity;
+  mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
+
+  // Add the Example material into the calculation using the new diffusivity.
+  moose_system.addMaterial("ExampleMaterial", "example", mat_params);
+
   {
-    // Initialize Moose
-    MooseInit init(argc, argv);
+    // Holds a scalar per element representing the error in that element
+    ErrorVector error;
 
-    // Create a MooseSystem
-    MooseSystem moose_system;
+    // Gradient Jump based error estimator... others exist in libMesh
+    KellyErrorEstimator error_estimator;
 
-    // Create a GetPot object to parse the command line
-    GetPot command_line (argc, argv);
-
-    // The diffusivity we're going to pass to our Material
-    // We're giving it a default value of 1.0
-    Real diffusivity = 0.1;
-    
-    // See if a diffusivity was provided on the command-line
-    if(command_line.search("--diffusivity"))
-      diffusivity = command_line.next(diffusivity);
-    
-    // This registers a bunch of common objects that exist in Moose with the factories.
-    // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
-    Moose::registerObjects();
-
-    // Register a new kernel with the factory so we can use it in the computation.
-    KernelFactory::instance()->registerKernel<Convection>("Convection");
-    KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
-
-    // Register our new material class so we can use it.
-    MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
-
-    // Create the mesh object
-    Mesh mesh(2);
-
-    // MUST set the global mesh!
-    Moose::mesh = &mesh;
-
-    // Read the mesh from an Exodus file and prepare it for use
-    ExodusII_IO exreader(mesh);
-    exreader.read("square.e");
-
-    /**
-     * The "false" specifies _not_ to renumber nodes and elements
-     * this could be a slight hit to performance, but it means that your
-     * output file will have the same node and element numbering as the input
-     */
-    mesh.prepare_for_use(false);
-
-    /**
-     * Do some uniform refinement of the mesh so we can capture the solution better.
-     */
-    MeshRefinement mesh_refinement(mesh);
-    mesh_refinement.uniformly_refine(1);
-
-    /**
-     * Setup the percentage of elements to refine and coarsen and the
-     * maximum refinement level.
-     */
-    mesh_refinement.refine_fraction()  = .3;
-    mesh_refinement.coarsen_fraction() = 0;
-    mesh_refinement.max_h_level()      = 10;
-
-    // The number of refinement steps we want to do
-    unsigned int max_r_steps = 7;
-
-    /**
-     * This builds nodesets from your sidesets
-     * these autogenerated nodesets are used for Dirichlet boundary conditions
-     * NEVER manually create nodesets... always let the code autogenerate them
-     * note that if the mesh changes (such as after adaptivity) you have to
-     */
-    mesh.boundary_info->build_node_list_from_side_list();
-
-    // Print some useful information about the mesh
-    mesh.print_info();
-
-    // The equation_systems holds all the Systems we want to solve
-    EquationSystems equation_systems (mesh);
-
-    // MUST set the global equation_systems!
-    Moose::equation_system = &equation_systems;
-
-    // This is the actual Nonlinear System we are going to solve
-    TransientNonlinearImplicitSystem& system =
-      equation_systems.add_system<TransientNonlinearImplicitSystem> ("NonlinearSystem");
-
-    /**
-     * Add a variable named "u" to solve for.
-     * We are going to approximate it using First order Lagrange FEs
-     */
-    system.add_variable("u", FIRST, LAGRANGE);
-
-    /**
-     * Add a variable named "v" to solve for.
-     * We are going to approximate it using First order Lagrange FEs
-     *
-     * We are going to couple this variable into the convection kernel for variable "u"
-     */
-    system.add_variable("v", FIRST, LAGRANGE);
-
-    // Set the residual and jacobian functions to the default ones provided by MOOSE
-    system.nonlinear_solver->residual = Moose::compute_residual;
-    system.nonlinear_solver->jacobian = Moose::compute_jacobian;
-
-    /**
-     * This is a NECESSARY auxiliary system for computing auxiliary variables
-     * Even though we're not going to have any of those we MUST create this system.
-     */
-    TransientExplicitSystem& aux_system =
-      equation_systems.add_system<TransientExplicitSystem> ("AuxiliarySystem");
-
-    // Initialize the Systems and print some info out
-    equation_systems.init();
-    equation_systems.print_info();
-
-    /**
-     * Initialize common data structures for Kernels.
-     * These MUST be called in this order... and at this point.
-     */
-    Kernel::init(&equation_systems);
-    BoundaryCondition::init();
-    AuxKernel::init();
-
-    /**
-     * Next we are going to define our coupling vectors.
-     *
-     * coupled_to = the actual name of the coupled variable
-     *
-     * coupled_as = the name the Kernel _expects_...
-     *   This is essentially the name you pass to the Coupled*()
-     *   functions when you try to get a coupled variable in a Kernel.
-     *   In this case we call coupledGrad("some_var") in Convection.h
-     *   therefore the variable "v" is coupled_as "some_var.
-     *
-     * Note that coupled_to and coupled_as are _paired_.
-     */
-    std::vector<std::string> conv_coupled_to;
-    std::vector<std::string> conv_coupled_as;
-
-    conv_coupled_to.push_back("v");
-    conv_coupled_as.push_back("some_var");
-
-    // Blank params to use for Kernels that don't need params
-    InputParameters params;
-
-    // Parameters for DirichletBC's
-    InputParameters left_bc_params;
-    std::vector<unsigned int> boundary_ids(1);
-    boundary_ids[0] = 1;
-    left_bc_params.addParam("value", 0.0, "value on the left boundary") ;
-    left_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
-    left_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
-
-    InputParameters right_bc_params;
-    boundary_ids[0] = 2;
-    right_bc_params.addParam("value", 1.0, "value on the right boundary");
-    right_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
-    right_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
-    
-    //////////////
-    // "u" Kernels
-    //////////////
-    
-    // Add a Diffusion Kernel from MOOSE into the calculation.
-    KernelFactory::instance()->add("ExampleDiffusion", "diff", params, "u");
-
-    // Add the Convection Kernel from this application into the calculation
-    // Note that we are passing in our coupling vectors
-    KernelFactory::instance()->add("Convection", "conv", params, "u", conv_coupled_to, conv_coupled_as);
-
-    // Add the two boundary conditions using the DirichletBC object from MOOSE
-    BCFactory::instance()->add("DirichletBC", "left",  moose_system, left_bc_params);
-    BCFactory::instance()->add("DirichletBC", "right", moose_system, right_bc_params);
-
-
-    //////////////
-    // "v" Kernels
-    //////////////
-
-    // Add a Diffusion Kernel from MOOSE into the calculation.
-    KernelFactory::instance()->add("Diffusion", "diff", params, "v");
-
-    // Add the two boundary conditions using the DirichletBC object from MOOSE
-    left_bc_params.set<std::string>("variable") = "v";
-    BCFactory::instance()->add("DirichletBC", "left",  moose_system, left_bc_params);
-    right_bc_params.set<std::string>("variable") = "v";
-    BCFactory::instance()->add("DirichletBC", "right", moose_system, right_bc_params);
-
-
-    // Get the default values for the ExampleMaterial's parameters
-    InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
-
-    // Override the default diffusivity
-    mat_params.set<Real>("diffusivity") = diffusivity;
-    mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
-    
-    // Add the Example material into the calculation using the new diffusivity.
-    MaterialFactory::instance()->add("ExampleMaterial", "example", moose_system,  mat_params);
-    
+    // Note the <= to make sure we solve at least once
+    for(unsigned int i=0; i<= max_r_steps; ++i)
     {
-      // Holds a scalar per element representing the error in that element
-      ErrorVector error;
+      // Solve the Nonlinear System
+      moose_system.solve();
 
-      // Gradient Jump based error estimator... others exist in libMesh
-      KellyErrorEstimator error_estimator;
-
-      // Note the <= to make sure we solve at least once
-      for(unsigned int i=0; i<= max_r_steps; ++i)
+      if(i != max_r_steps)
       {
-        // Solve the Nonlinear System
-        system.solve();
+        error_estimator.estimate_error(*moose_system.getNonlinearSystem(), error);
 
-        if(i != max_r_steps)
-        {
-          error_estimator.estimate_error(system, error);
+        // Flag elements to be refined and coarsened
+        mesh_refinement.flag_elements_by_error_fraction (error);
 
-          // Flag elements to be refined and coarsened
-          mesh_refinement.flag_elements_by_error_fraction (error);
-          
-          // Perform refinement and coarsening
-          mesh_refinement.refine_and_coarsen_elements();
-          
-          // Reinitialize the equation_systems object for the newly refined
-          // mesh. One of the steps in this is project the solution onto the 
-          // new mesh
-          equation_systems.reinit();
+        // Perform refinement and coarsening
+        mesh_refinement.refine_and_coarsen_elements();
 
-          // After the mesh changes... you MUST update the boundary lists
-          mesh.boundary_info->build_node_list_from_side_list();
+        // Reinitialize the equation_systems object for the newly refined
+        // mesh. One of the steps in this is project the solution onto the
+        // new mesh
+        moose_system.reinit();
 
-          // Print out mesh info so we can see how many elements / nodes we have now
-          mesh.print_info();
-        }
+        // After the mesh changes... you MUST update the boundary lists
+        moose_system.update_boundary_info();
+
+        // Print out mesh info so we can see how many elements / nodes we have now
+        mesh.print_info();
       }
     }
-
-    // Write the solution out.
-    ExodusII_IO(mesh).write_equation_systems("out.e", equation_systems);
   }
+
+  // Write the solution out.
+  moose_system.output_system(0, 1);
 
   return 0;
 }

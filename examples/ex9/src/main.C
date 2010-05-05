@@ -6,6 +6,7 @@
 #include "MooseSystem.h"
 #include "Parser.h"
 #include "AuxFactory.h"
+#include "Executioner.h"
 
 // C++ include files that we need
 #include <iostream>
@@ -52,16 +53,14 @@ int main (int argc, char** argv)
   p.execute();
 
   // Output the initial condition in whatever ways are specified
-  Moose::output_system(0, 0.0);
+  moose_system.output_system(0, 0.0);
 
-  // Solve the system inside of Moose
-  {
-    TransientNonlinearImplicitSystem & system =
-      Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+  if(!Moose::executioner)
+      mooseError("Executioner not supplied!");
 
-    system.solve();
-  }
+  Moose::executioner->setup();
+  Moose::executioner->execute();
 
   // Output the solution in whatever ways are specified
-  Moose::output_system(1, 1.0);
+  moose_system.output_system(1, 1.0);
 }

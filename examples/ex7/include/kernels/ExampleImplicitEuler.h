@@ -8,10 +8,8 @@ class ExampleImplicitEuler : public ImplicitEuler
 public:
 
   ExampleImplicitEuler(std::string name,
-                       InputParameters parameters,
-                       std::string var_name,
-                       std::vector<std::string> coupled_to,
-                       std::vector<std::string> coupled_as);
+                       MooseSystem &sys,
+                       InputParameters parameters);
 
   virtual void subdomainSetup();
 

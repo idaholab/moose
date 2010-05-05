@@ -39,270 +39,219 @@ PerfLog Moose::perf_log("Example7");
 // Begin the main program.
 int main (int argc, char** argv)
 {
+  // Initialize Moose
+  MooseInit init(argc, argv);
+
+  // Create a GetPot object to parse the command line
+  GetPot command_line (argc, argv);
+
+  // Will hold the name of the input file... default to blank
+  std::string input_filename = "";
+
+  // See if an input file was provided on the command-line
+  if ( command_line.search("-i") )
+    input_filename = command_line.next(input_filename);
+  else
   {
-    // Initialize Moose
-    MooseInit init(argc, argv);
+    // Print a message and throw an error if the input file wasn't provided
+    std::cout<<"Must specify an input file using -i"<<std::endl;
+    libmesh_error();
+  }
 
-    // Create a MooseSystem
-    MooseSystem moose_system;
+  // Create a parser for the input file
+  GetPot input_file(input_filename);
 
-    // Create a GetPot object to parse the command line
-    GetPot command_line (argc, argv);
-    
-    // Will hold the name of the input file... default to blank
-    std::string input_filename = "";
-    
-    // See if an input file was provided on the command-line
-    if ( command_line.search("-i") )
-      input_filename = command_line.next(input_filename);
-    else
-    {
-      // Print a message and throw an error if the input file wasn't provided
-      std::cout<<"Must specify an input file using -i"<<std::endl;
-      libmesh_error();
-    }
+  // The diffusivity we're going to pass to our Material
+  // We're giving it a default value of 1.0
+  Real diffusivity = input_file("MatProps/diffusivity",1.0);
 
-    // Create a parser for the input file
-    GetPot input_file(input_filename);
-    
-    // The diffusivity we're going to pass to our Material
-    // We're giving it a default value of 1.0
-    Real diffusivity = input_file("MatProps/diffusivity",1.0);
+  // The time_coefficient we're going to pass to our Material
+  // We're giving it a default value of 1.0
+  Real time_coefficient = input_file("MatProps/time_coefficient",1.0);
 
-    // The time_coefficient we're going to pass to our Material
-    // We're giving it a default value of 1.0
-    Real time_coefficient = input_file("MatProps/time_coefficient",1.0);
+  // The timestep size to take... defaulting to 1.0
+  Real input_dt = input_file("Transient/dt", 1.0);
 
-    // The timestep size to take... defaulting to 1.0
-    Real input_dt = input_file("Transient/dt", 1.0);
+  // This registers a bunch of common objects that exist in Moose with the factories.
+  // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
+  Moose::registerObjects();
 
-    // This registers a bunch of common objects that exist in Moose with the factories.
-    // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
-    Moose::registerObjects();
+  // Register a new kernel with the factory so we can use it in the computation.
+  KernelFactory::instance()->registerKernel<Convection>("Convection");
+  KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
+  KernelFactory::instance()->registerKernel<ExampleImplicitEuler>("ExampleImplicitEuler");
 
-    // Register a new kernel with the factory so we can use it in the computation.
-    KernelFactory::instance()->registerKernel<Convection>("Convection");
-    KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
-    KernelFactory::instance()->registerKernel<ExampleImplicitEuler>("ExampleImplicitEuler");
+  // Register our new material class so we can use it.
+  MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
 
-    // Register our new material class so we can use it.
-    MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
+  // Create the mesh object
+  Mesh mesh(2);
+  // Read the mesh from an Exodus file and prepare it for use
+  ExodusII_IO exreader(mesh);
+  exreader.read("square.e");
 
-    // Create the mesh object
-    Mesh mesh(2);
+  /**
+   * Do some uniform refinement of the mesh so we can capture the solution better.
+   */
+  MeshRefinement mesh_refinement(mesh);
+  mesh_refinement.uniformly_refine(4);
 
-    // MUST set the global mesh!
-    Moose::mesh = &mesh;
+  // Print some useful information about the mesh
+  mesh.print_info();
 
-    // Read the mesh from an Exodus file and prepare it for use
-    ExodusII_IO exreader(mesh);
-    exreader.read("square.e");
+  // Create a MooseSystem
+  MooseSystem moose_system(mesh);
 
-    /**
-     * The "false" specifies _not_ to renumber nodes and elements
-     * this could be a slight hit to performance, but it means that your
-     * output file will have the same node and element numbering as the input
-     */
-    mesh.prepare_for_use(false);
+  /**
+   * Add a variable named "u" to solve for.
+   * We are going to approximate it using First order Lagrange FEs
+   */
+  moose_system.addVariable("u", FIRST, LAGRANGE);
 
-    /**
-     * Do some uniform refinement of the mesh so we can capture the solution better.
-     */
-    MeshRefinement mesh_refinement(mesh);
-    mesh_refinement.uniformly_refine(4);
+  /**
+   * Add a variable named "v" to solve for.
+   * We are going to approximate it using First order Lagrange FEs
+   *
+   * We are going to couple this variable into the convection kernel for variable "u"
+   */
+  moose_system.addVariable("v", FIRST, LAGRANGE);
 
-    /**
-     * This builds nodesets from your sidesets
-     * these autogenerated nodesets are used for Dirichlet boundary conditions
-     * NEVER manually create nodesets... always let the code autogenerate them
-     * note that if the mesh changes (such as after adaptivity) you have to
-     */
-    mesh.boundary_info->build_node_list_from_side_list();
+  // Initialize the systems
+  moose_system.init();
 
-    // Print some useful information about the mesh
-    mesh.print_info();
+  /**
+   * Set up Transient parameters.  For a Transient solve time, dt and t_step
+   * MUST exist and must be set before calling MooseSystem::init()!
+   */
 
-    // The equation_systems holds all the Systems we want to solve
-    EquationSystems equation_systems (mesh);
+  // The starting time
+  Real & time = moose_system.parameters().set<Real> ("time") = 0;
 
-    // MUST set the global equation_systems!
-    Moose::equation_system = &equation_systems;
+  // The step size
+  Real & dt = moose_system.parameters().set<Real> ("dt") = input_dt;
 
-    // This is the actual Nonlinear System we are going to solve
-    TransientNonlinearImplicitSystem& system =
-      equation_systems.add_system<TransientNonlinearImplicitSystem> ("NonlinearSystem");
+  // The starting step
+  int & t_step = moose_system.parameters().set<int> ("t_step") = 0;
 
-    /**
-     * Add a variable named "u" to solve for.
-     * We are going to approximate it using First order Lagrange FEs
-     */
-    system.add_variable("u", FIRST, LAGRANGE);
+  // Number of timesteps to take
+  unsigned int num_steps = 20;
 
-    /**
-     * Add a variable named "v" to solve for.
-     * We are going to approximate it using First order Lagrange FEs
-     *
-     * We are going to couple this variable into the convection kernel for variable "u"
-     */
-    system.add_variable("v", FIRST, LAGRANGE);
+  /**
+   * Next we are going to define our coupling vectors.
+   *
+   * coupled_to = the actual name of the coupled variable
+   *
+   * coupled_as = the name the Kernel _expects_...
+   *   This is essentially the name you pass to the Coupled*()
+   *   functions when you try to get a coupled variable in a Kernel.
+   *   In this case we call coupledGrad("some_var") in Convection.h
+   *   therefore the variable "v" is coupled_as "some_var.
+   *
+   * Note that coupled_to and coupled_as are _paired_.
+   */
+  std::vector<std::string> conv_coupled_to;
+  std::vector<std::string> conv_coupled_as;
 
-    // Set the residual and jacobian functions to the default ones provided by MOOSE
-    system.nonlinear_solver->residual = Moose::compute_residual;
-    system.nonlinear_solver->jacobian = Moose::compute_jacobian;
+  conv_coupled_to.push_back("v");
+  conv_coupled_as.push_back("some_var");
 
-    /**
-     * This is a NECESSARY auxiliary system for computing auxiliary variables
-     * Even though we're not going to have any of those we MUST create this system.
-     */
-    TransientExplicitSystem& aux_system =
-      equation_systems.add_system<TransientExplicitSystem> ("AuxiliarySystem");
+  //////////////
+  // "u" Kernels
+  //////////////
 
-    // Initialize the Systems and print some info out
-    equation_systems.init();
-    equation_systems.print_info();
+  // Add a Diffusion Kernel from MOOSE into the calculation.
+  InputParameters diff_params;
+  diff_params.addParam<std::string>("variable", "u", "variable for which to apply this kernel");
+  moose_system.addKernel("ExampleDiffusion", "diff", diff_params);
 
-    /**
-     * Set up Transient parameters.  For a Transient solve time, dt and t_step
-     * MUST exist and MUST be set before Kernel::init()!!!!!!!
-     */
-    
-    // The starting time
-    Real & time = equation_systems.parameters.set<Real> ("time") = 0;
+  // Add the Convection Kernel from this application into the calculation
+  // Note that we are passing in our coupling vectors
+  InputParameters conv_params;
+  conv_params.addParam<std::string>("variable", "u", "variable for which to apply this kernel");
+  conv_params.addParam<std::vector<std::string> >("coupled_to", conv_coupled_to, "coupled to variable");
+  conv_params.addParam<std::vector<std::string> >("coupled_as", conv_coupled_as, "coupled as variable");
+  moose_system.addKernel("Convection", "conv", conv_params);
 
-    // The step size
-    Real & dt = equation_systems.parameters.set<Real> ("dt") = input_dt;
+  // Add an ImplicitEuler Kernel for the time operator
+  moose_system.addKernel("ImplicitEuler", "u_ie", diff_params);
 
-    // The starting step
-    int & t_step = equation_systems.parameters.set<int> ("t_step") = 0;
+  // Add the two boundary conditions using the DirichletBC object from MOOSE
+  InputParameters left_bc_params;
+  std::vector<unsigned int> boundary_ids(1);
+  boundary_ids[0] = 1;
+  left_bc_params.addParam("value", 0.0, "value on the left boundary") ;
+  left_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
+  left_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
+  moose_system.addBC("DirichletBC", "left", left_bc_params);
 
-    // Number of timesteps to take
-    unsigned int num_steps = 20;
-    
-    /**
-     * Initialize common data structures for Kernels.
-     * These MUST be called in this order... and at this point.
-     */
-    Kernel::init(&equation_systems);
-    BoundaryCondition::init();
-    AuxKernel::init();
-
-    /**
-     * Next we are going to define our coupling vectors.
-     *
-     * coupled_to = the actual name of the coupled variable
-     *
-     * coupled_as = the name the Kernel _expects_...
-     *   This is essentially the name you pass to the Coupled*()
-     *   functions when you try to get a coupled variable in a Kernel.
-     *   In this case we call coupledGrad("some_var") in Convection.h
-     *   therefore the variable "v" is coupled_as "some_var.
-     *
-     * Note that coupled_to and coupled_as are _paired_.
-     */
-    std::vector<std::string> conv_coupled_to;
-    std::vector<std::string> conv_coupled_as;
-
-    conv_coupled_to.push_back("v");
-    conv_coupled_as.push_back("some_var");
-
-    // Blank params to use for Kernels that don't need params
-    InputParameters params;
-
-    // Parameters for DirichletBC's
-    InputParameters left_bc_params;
-    std::vector<unsigned int> boundary_ids(1);
-    boundary_ids[0] = 1;
-    left_bc_params.addParam("value", 0.0, "value on the left boundary") ;
-    left_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
-    left_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
-
-    InputParameters right_bc_params;
-    boundary_ids[0] = 2;
-    right_bc_params.addParam("value", 1.0, "value on the right boundary");
-    right_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
-    right_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
-
-    //////////////
-    // "u" Kernels
-    //////////////
-    
-    // Add a Diffusion Kernel from MOOSE into the calculation.
-    KernelFactory::instance()->add("ExampleDiffusion", "diff", params, "u");
-
-    // Add the Convection Kernel from this application into the calculation
-    // Note that we are passing in our coupling vectors
-    KernelFactory::instance()->add("Convection", "conv", params, "u", conv_coupled_to, conv_coupled_as);
-
-    // Add an ImplicitEuler Kernel for the time operator
-    KernelFactory::instance()->add("ImplicitEuler", "u_ie", params, "u");
-
-    // Add the two boundary conditions using the DirichletBC object from MOOSE
-    BCFactory::instance()->add("DirichletBC", "left",  moose_system, left_bc_params);
-    BCFactory::instance()->add("DirichletBC", "right", moose_system, right_bc_params);
+  InputParameters right_bc_params;
+  boundary_ids[0] = 2;
+  right_bc_params.addParam("value", 1.0, "value on the right boundary");
+  right_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
+  right_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
+  moose_system.addBC("DirichletBC", "right", right_bc_params);
 
 
-    //////////////
-    // "v" Kernels
-    //////////////
+  //////////////
+  // "v" Kernels
+  //////////////
 
-    // Add a Diffusion Kernel from MOOSE into the calculation.
-    KernelFactory::instance()->add("Diffusion", "diff", params, "v");
+  // Add a Diffusion Kernel from MOOSE into the calculation.
+  diff_params.set<std::string>("variable") = "v";
+  moose_system.addKernel("Diffusion", "diff", diff_params);
 
-    // Add an ImplicitEuler Kernel for the time operator
-    KernelFactory::instance()->add("ExampleImplicitEuler", "u_ie", params, "v");
+  // Add an ImplicitEuler Kernel for the time operator
+  moose_system.addKernel("ExampleImplicitEuler", "v_ie", diff_params);
 
-    // Add the two boundary conditions using the DirichletBC object from MOOSE
-    left_bc_params.set<std::string>("variable") = "v"; 
-    BCFactory::instance()->add("DirichletBC", "left", moose_system, left_bc_params);
-    right_bc_params.set<std::string>("variable") = "v"; 
-    BCFactory::instance()->add("DirichletBC", "right", moose_system, right_bc_params);
+  // Add the two boundary conditions using the DirichletBC object from MOOSE
+  left_bc_params.set<std::string>("variable") = "v";
+  moose_system.addBC("DirichletBC", "left", left_bc_params);
 
-    
-    // Get the default values for the ExampleMaterial's parameters
-    InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
+  right_bc_params.set<std::string>("variable") = "v";
+  moose_system.addBC("DirichletBC", "right", right_bc_params);
 
-    // Override the default diffusivity
-    mat_params.set<Real>("diffusivity") = diffusivity;
 
-    // Override the default time_coefficient
-    mat_params.set<Real>("time_coefficient") = time_coefficient;
-    mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
-    
-    // Add the Example material into the calculation using the new diffusivity.
-    MaterialFactory::instance()->add("ExampleMaterial", "example", moose_system,  mat_params);
-    
-    // Create an output object that we can write to each timestep
-    // Note that this ONLY works with Exodus!
-    ExodusII_IO ex_out(mesh);
+  // Get the default values for the ExampleMaterial's parameters
+  InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
 
-    // Write out the initial condition
-    // The +1 is because Exodus starts counting from 1
-    ex_out.write_timestep("out.e", equation_systems, t_step+1, time);
+  // Override the default diffusivity
+  mat_params.set<Real>("diffusivity") = diffusivity;
 
-    for(t_step = 1; t_step <= num_steps; ++t_step)
-    {
-      // Solve for the next timestep
-      time += dt;
+  // Override the default time_coefficient
+  mat_params.set<Real>("time_coefficient") = time_coefficient;
+  mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
 
-      // Print out what timestep we're at and the current time
-      std::cout<<std::endl<<"Solving Timestep "<<t_step<<" at time "<<time<<std::endl;
+  // Add the Example material into the calculation using the new diffusivity.
+  moose_system.addMaterial("ExampleMaterial", "example", mat_params);
 
-      // After time, dt or t_step change reinitDT MUST be called
-      Kernel::reinitDT();
-                  
-      // Copy the old solutions backwards
-      *system.older_local_solution = *system.old_local_solution;
-      *system.old_local_solution   = *system.current_local_solution;
-      *aux_system.older_local_solution = *aux_system.old_local_solution;
-      *aux_system.old_local_solution   = *aux_system.current_local_solution;
+  // Create an output object that we can write to each timestep
+  // Note that this ONLY works with Exodus!
+  ExodusII_IO ex_out(mesh);
 
-      // Solve the Nonlinear System for this timestep
-      system.solve();
+  // Write out the initial condition
+  // The +1 is because Exodus starts counting from 1
+  ex_out.write_timestep("out.e", *moose_system.getEquationSystems(), t_step+1, time);
 
-      // Write the solution out.
-      // The +1 is because Exodus numbering starts at 1
-      ex_out.write_timestep("out.e", equation_systems, t_step+1, time);
-    }
+  for(t_step = 1; t_step <= num_steps; ++t_step)
+  {
+    // Solve for the next timestep
+    time += dt;
+
+    // Print out what timestep we're at and the current time
+    std::cout<<std::endl<<"Solving Timestep "<<t_step<<" at time "<<time<<std::endl;
+
+    // After time, dt or t_step change reinitDT MUST be called
+    moose_system.reinitDT();
+
+    // Copy the old solutions backwards
+    moose_system.copy_old_solutions();
+
+    // Solve the Nonlinear System for this timestep
+    moose_system.solve();
+
+    // Write the solution out.
+    // The +1 is because Exodus numbering starts at 1
+    ex_out.write_timestep("out.e", *moose_system.getEquationSystems(), t_step+1, time);
   }
 
   return 0;
