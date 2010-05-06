@@ -3,6 +3,15 @@
 #ifndef EXAMPLEIMPLICITEULER
 #define EXAMPLEIMPLICITEULER
 
+class ExampleImplicitEuler;
+
+/**
+ * validParams returns the parameters that this Kernel accepts / needs
+ * The actual body of the function MUST be in the .C file.
+ */
+template<>
+InputParameters validParams<ExampleImplicitEuler>();
+
 class ExampleImplicitEuler : public ImplicitEuler
 {
 public:

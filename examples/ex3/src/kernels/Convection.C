@@ -7,7 +7,7 @@
 template<>
 InputParameters validParams<Convection>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Kernel>();
   return params;
 }
 

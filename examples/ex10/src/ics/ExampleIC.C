@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<ExampleIC>()
 {
-  InputParameters params;
+  InputParameters params = validParams<InitialCondition>();
   params.set<Real>("value") = 0.0;
   return params;
 }

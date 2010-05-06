@@ -96,13 +96,13 @@ int main (int argc, char** argv)
   //////////////
 
   // Add a Diffusion Kernel from MOOSE into the calculation.
-  InputParameters diff_params;
+  InputParameters diff_params = KernelFactory::instance()->getValidParams("Diffusion");
   diff_params.addParam<std::string>("variable", "u", "variable for which to apply this kernel");
   moose_system.addKernel("Diffusion", "diff", diff_params);
 
   // Add the Convection Kernel from this application into the calculation
   // Note that we are passing in our coupling vectors
-  InputParameters conv_params;
+  InputParameters conv_params = KernelFactory::instance()->getValidParams("Convection");
   conv_params.addParam<std::string>("variable", "u", "variable for which to apply this kernel");
   conv_params.addParam<std::vector<std::string> >("coupled_to", conv_coupled_to, "coupled to variable");
   conv_params.addParam<std::vector<std::string> >("coupled_as", conv_coupled_as, "coupled as variable");
@@ -110,7 +110,7 @@ int main (int argc, char** argv)
 
   // Add the two boundary conditions using the DirichletBC object from MOOSE
   // Parameters for DirichletBC's
-  InputParameters left_bc_params;
+  InputParameters left_bc_params = BCFactory::instance()->getValidParams("DirichletBC");
   std::vector<unsigned int> boundary_ids(1);
   boundary_ids[0] = 1;
   left_bc_params.addParam("value", 0.0, "value on the left boundary") ;
@@ -118,7 +118,7 @@ int main (int argc, char** argv)
   left_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
   moose_system.addBC("DirichletBC", "left", left_bc_params);
 
-  InputParameters right_bc_params;
+  InputParameters right_bc_params = BCFactory::instance()->getValidParams("DirichletBC");
   boundary_ids[0] = 2;
   right_bc_params.addParam("value", 1.0, "value on the right boundary");
   right_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
@@ -142,7 +142,7 @@ int main (int argc, char** argv)
 
   // Every calculation MUST add at least one Material
   // Here we use the EmptyMaterial from MOOSE because we don't need material properties.
-  InputParameters material_params;
+  InputParameters material_params = MaterialFactory::instance()->getValidParams("EmptyMaterial");
   material_params.addParam("block", std::vector<unsigned int>(1, 1), "block that this material is associated with");
   moose_system.addMaterial("EmptyMaterial", "empty", material_params);
 

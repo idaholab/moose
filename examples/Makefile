@@ -8,7 +8,7 @@ examples:
 	@echo "----------------------------------------------"
 	@echo "--------- Building Example Programs ----------"
 	@echo "----------------------------------------------"
-	@for dir in $(dirlist); do $(MAKE) -C "$${dir}" $(MAKECMDGOALS)||exit 1; done
+	@for dir in $(dirlist); do echo "$${dir}"; $(MAKE) -C "$${dir}" $(MAKECMDGOALS)||exit 1; done
 	@echo "----------------------------------------------"
 	@echo "------- Done Building Example Programs -------"
 	@echo "----------------------------------------------"

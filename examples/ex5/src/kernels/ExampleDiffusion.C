@@ -5,6 +5,18 @@
 #include "Material.h"
 
 
+/**
+ * This function defines the valid parameters for
+ * this Kernel and their default values
+ */
+template<>
+InputParameters validParams<ExampleDiffusion>()
+{
+  InputParameters params = validParams<Diffusion>();
+  return params;
+}
+
+
 ExampleDiffusion::ExampleDiffusion(std::string name,
                                    MooseSystem &sys,
                                    InputParameters parameters)

@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<ExampleMaterial>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Material>();
   params.addParam<Real>("diffusivity", 1.0, "The Diffusivity");
   return params;
 }
