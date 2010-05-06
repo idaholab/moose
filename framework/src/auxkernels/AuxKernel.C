@@ -21,9 +21,25 @@ InputParameters validParams<AuxKernel>()
   return params;
 }
 
-AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+   _name(name),
+   _moose_system(moose_system),
+   _tid(Moose::current_thread_id),
+   _parameters(parameters),
+   _var_name(parameters.get<std::string>("variable")),
+   _is_aux(_moose_system._aux_system->has_variable(_var_name)),
+   _var_num(_is_aux ? _moose_system._aux_system->variable_number(_var_name) : _moose_system._system->variable_number(_var_name)),
+   _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
+   _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _moose_system._dof_map->variable_type(_var_num)),
+   _material(_moose_system._material[_tid]),
+   _qrule(_moose_system._qrule[_tid]),
    _nodal(_fe_type.family == LAGRANGE),
+   _t(_moose_system._t),
+   _dt(_moose_system._dt),
+   _dt_old(_moose_system._dt_old),
+   _t_step(_moose_system._t_step),
+   _bdf2_wei(_moose_system._bdf2_wei),
    _u_aux(_nodal ? moose_system._aux_var_vals_nodal[_tid][_var_num] : moose_system._aux_var_vals_element[_tid][_var_num]),
    _u_old_aux(_nodal ? moose_system._aux_var_vals_old_nodal[_tid][_var_num] : moose_system._aux_var_vals_old_element[_tid][_var_num]),
    _u_older_aux(_nodal ? moose_system._aux_var_vals_older_nodal[_tid][_var_num] : moose_system._aux_var_vals_older_element[_tid][_var_num]),
@@ -47,11 +63,158 @@ AuxKernel::isNodal()
   return _nodal;
 }
 
+void
+AuxKernel::subdomainSetup()
+{
+}
+
+unsigned int
+AuxKernel::variable()
+{
+  return _var_num;
+}
+
+std::string
+AuxKernel::name() const
+{
+  return _name;
+}
+
+std::string
+AuxKernel::varName() const
+{
+  return _var_name;
+}
+
+const std::vector<std::string> &
+AuxKernel::coupledTo() const
+{
+  return _coupled_to;
+}
+
 Real
 AuxKernel::computeQpResidual()
+{
+  return 0;
+}
+
+bool
+AuxKernel::isAux(std::string name)
+{
+  return _aux_coupled_as_to_var_num.find(name) != _aux_coupled_as_to_var_num.end();
+}
+
+bool
+AuxKernel::isCoupled(std::string name)
+{
+  bool found = std::find(_coupled_as.begin(),_coupled_as.end(),name) != _coupled_as.end();
+
+  //See if it's an Aux variable
+  if(!found)
+    found = isAux(name);
+
+  return found;
+}
+
+unsigned int
+AuxKernel::coupled(std::string name)
+{
+  if(!isCoupled(name))
   {
-    return 0;
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
   }
+
+  if(!isAux(name))
+    return _coupled_as_to_var_num[name];
+  else
+    return Kernel::modifiedAuxVarNum(_aux_coupled_as_to_var_num[name]);
+}
+
+std::vector<Real> &
+AuxKernel::coupledVal(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _moose_system._var_vals[_tid][_coupled_as_to_var_num[name]];
+  else
+    return _moose_system._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
+}
+
+std::vector<RealGradient> &
+AuxKernel::coupledGrad(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _moose_system._var_grads[_tid][_coupled_as_to_var_num[name]];
+  else
+    return _moose_system._aux_var_grads[_tid][_aux_coupled_as_to_var_num[name]];
+}
+
+std::vector<RealTensor> &
+AuxKernel::coupledSecond(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  //Aux vars can't have second derivatives!
+  return _moose_system._var_seconds[_tid][_coupled_as_to_var_num[name]];
+}
+
+std::vector<Real> &
+AuxKernel::coupledValOld(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _moose_system._var_vals_old[_tid][_coupled_as_to_var_num[name]];
+  else
+    return _moose_system._aux_var_vals_old[_tid][_aux_coupled_as_to_var_num[name]];
+}
+
+std::vector<Real> &
+AuxKernel::coupledValOlder(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _moose_system._var_vals_older[_tid][_coupled_as_to_var_num[name]];
+  else
+    return _moose_system._aux_var_vals_older[_tid][_aux_coupled_as_to_var_num[name]];
+}
+
+std::vector<RealGradient> &
+AuxKernel::coupledGradValOld(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  return _moose_system._var_grads_old[_tid][_coupled_as_to_var_num[name]];
+}
 
 Real &
 AuxKernel::coupledValAux(std::string name)
@@ -199,4 +362,3 @@ AuxKernel::coupledGradOlderAux(std::string name)
       return _moose_system._aux_var_grads_older_element[_tid][_aux_coupled_as_to_var_num[name]];
   }
 }
-
