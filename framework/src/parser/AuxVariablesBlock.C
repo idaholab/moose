@@ -33,11 +33,8 @@ AuxVariablesBlock::execute()
   std::cerr << "Inside the AuxVariablesBlock Object\n";
 #endif
 
-  TransientNonlinearImplicitSystem &system =
-    Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
-
-  TransientExplicitSystem& aux_system =
-    Moose::equation_system->add_system<TransientExplicitSystem> ("AuxiliarySystem");
+  TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
+  TransientExplicitSystem &aux_system = *_moose_system.getAuxSystem();
   
   visitChildren();
 
@@ -51,8 +48,8 @@ AuxVariablesBlock::execute()
   if(pb)
     pb->execute();
 
-  Moose::equation_system->init();
-  Moose::equation_system->print_info();
+  _moose_system.getEquationSystems()->init();
+  _moose_system.getEquationSystems()->print_info();
 
   // Copy out nodal values is required (Variables Block)
   if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("Variables")))

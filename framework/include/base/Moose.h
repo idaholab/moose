@@ -150,28 +150,11 @@ namespace Moose
    */
   void initMoose(int argc, char** argv);
   
-  /**
-   * Should be called after the mesh has been modified in any way.
-   */
-  void meshChanged();
-
-  /**
-   * Get access to the active_local_element_range
-   * Automatically builds it if it hasn't been initialized.
-   */
-  ConstElemRange * getActiveLocalElementRange();  
-
   void setSolverDefaults(EquationSystems * es,
                          TransientNonlinearImplicitSystem & system,
                          void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar),
                          void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual));
   
-
-  /**
-   * Output the given system to output files.
-   */
-  void output_system(unsigned int t_step, Real time);
-
   void checkSystemsIntegrity();
   
   
@@ -187,29 +170,14 @@ namespace Moose
   extern THREAD_ID current_thread_id;
 
   /**
-   * Preconditioner
-   */
-  extern Preconditioner<Real> * preconditioner;
-
-  /**
    * THE Moose System
    */
-//  extern MooseSystem * moose_system;
+  extern MooseSystem * g_system;
   
-  /**
-   * The one mesh to rule them all
-   */
-  extern Mesh * mesh;
-
   /**
    * A mesh refinement object to be used with Adaptivity.
    */
   extern MeshRefinement * mesh_refinement;
-
-  /**
-   * The one equation system to rule them all
-   */
-  extern EquationSystems * equation_system;
 
   /**
    * Error estimator to be used by the apps.
@@ -222,20 +190,9 @@ namespace Moose
   extern ErrorVector * error;
 
   /**
-   * Whether or not the mesh has changed recently.  Useful for doing separate output.
-   */
-  extern bool mesh_changed;
-
-  /**
    * THE Executioner object that will be used.
    */
   extern Executioner * executioner;
-
-  /**
-   * A range for use with TBB.  We do this so that it doesn't have
-   * to get rebuilt all the time (which takes time).
-   */
-  extern ConstElemRange * active_local_elem_range;
 
   enum GeomType
   {

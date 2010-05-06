@@ -38,8 +38,7 @@ MeshBlock::execute()
   std::cerr << "Inside the MeshBlock Object\n";
 #endif
 
-  Mesh *mesh = new Mesh(getParamValue<int>("dim"));
-  Moose::mesh = mesh;
+  Mesh *mesh = _moose_system.initMesh(getParamValue<int>("dim"));
 
   // TODO: Need test for Mesh Generation
   if (getParamValue<bool>("generated")) 
@@ -53,7 +52,7 @@ MeshBlock::execute()
     _moose_system.getExodusReader()->read(getParamValue<std::string>("file"));
   else
     /* We will use the mesh object to read the file to cut down on
-     * I/O conntention.  We still need to use the Exodus reader though
+     * I/O connection.  We still need to use the Exodus reader though
      *for copy_nodal_solutions
      */
     mesh->read(getParamValue<std::string>("file"));

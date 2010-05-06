@@ -26,5 +26,5 @@ GenericMaterialBlock::execute()
             << "\tname: " << getShortName() << std::endl;
 #endif
   
-    MaterialFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());
+    _moose_system.addMaterial(_type, getShortName(), getClassParams());
 }

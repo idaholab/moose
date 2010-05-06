@@ -21,19 +21,14 @@ typedef Stabilizer * (*stabilizerBuildPtr)(std::string name,
                                            InputParameters parameters);
 
 /**
- * Typedef to make things easier.
- */
-typedef InputParameters (*stabilizerParamsPtr)();
-
-/**
- * Typedef to hide implementation details
- */
-typedef std::map<unsigned int, Stabilizer *>::iterator StabilizerIterator;
-
-/**
  * Typedef to hide implementation details
  */
 typedef std::vector<std::string>::iterator StabilizerNamesIterator;
+
+/**
+ * Typedef to make things easier.
+ */
+typedef InputParameters (*stabilizerParamsPtr)();
 
 /**
  * Templated build function used for generating function pointers to build classes on demand.
@@ -61,26 +56,19 @@ public:
     name_to_params_pointer[name]=&validParams<StabilizerType>;
   }
 
-  Stabilizer * add(std::string stabilizer_name,
-                   std::string name,
-                   MooseSystem & moose_system,
-                   InputParameters parameters);
-  
-  InputParameters getValidParams(std::string name);
-
-  bool isStabilized(unsigned int var_num);
-  
-  StabilizerIterator activeStabilizersBegin(THREAD_ID tid);
-  StabilizerIterator activeStabilizersEnd(THREAD_ID tid);
-
-  StabilizerIterator blockStabilizersBegin(THREAD_ID tid, unsigned int block_id);
-  StabilizerIterator blockStabilizersEnd(THREAD_ID tid, unsigned int block_id);
-
-  bool activeStabilizerBlocks(std::set<subdomain_id_type> & set_buffer) const;
+  Stabilizer * create(std::string stabilizer_name,
+                      std::string name,
+                      MooseSystem & moose_system,
+                      InputParameters parameters)
+  {
+    return (*name_to_build_pointer[stabilizer_name])(name, moose_system, parameters);
+  }
 
   StabilizerNamesIterator registeredStabilizersBegin();
   StabilizerNamesIterator registeredStabilizersEnd();
-  
+
+  InputParameters getValidParams(std::string name);
+
 private:
   StabilizerFactory();
 
@@ -90,11 +78,6 @@ private:
   std::map<std::string, stabilizerParamsPtr> name_to_params_pointer;
 
   std::vector<std::string> _registered_stabilizer_names;
-  std::vector<std::map<unsigned int, Stabilizer *> > active_stabilizers;
-
-  std::vector<std::map<unsigned int, std::map<unsigned int, Stabilizer *> > > block_stabilizers;
-
-  std::map<unsigned int, bool> _is_stabilized;
 };
 
 #endif //STABILIZERFACTORY_H

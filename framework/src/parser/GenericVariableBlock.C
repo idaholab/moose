@@ -48,9 +48,9 @@ GenericVariableBlock::execute()
 
   System *system;
   if (_reg_id == "Variables/*")
-    system = &Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+    system = _moose_system.getNonlinearSystem();
   else
-    system = &Moose::equation_system->get_system<TransientExplicitSystem>("AuxiliarySystem");
+    system = _moose_system.getAuxSystem();
 
   system->add_variable(var_name,
                        Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
@@ -59,7 +59,7 @@ GenericVariableBlock::execute()
   // Set initial condition
   Real initial = getParamValue<Real>("initial_condition");
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol) 
-    Moose::equation_system->parameters.set<Real>("initial_" + var_name) = initial;
+    _moose_system.getEquationSystems()->parameters.set<Real>("initial_" + var_name) = initial;
 
   
   if (_reg_id == "Variables/*") 
@@ -71,7 +71,7 @@ GenericVariableBlock::execute()
     libmesh_assert(var_number == Moose::manual_scaling.size()-1);
   }
 
-  // retrieve inital conditions from exodus file
+  // retrieve initial conditions from exodus file
   _variable_to_read = getParamValue<std::string>("initial_from_file_var");
   _timestep_to_read = getParamValue<int>("initial_from_file_timestep");
 

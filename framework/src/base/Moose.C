@@ -75,8 +75,6 @@
 #include "mesh.h"
 #include "mesh_refinement.h"
 #include "boundary_info.h"
-#include "gmv_io.h"
-#include "tecplot_io.h"
 #include "parallel.h"
 
 #include <set>
@@ -87,6 +85,8 @@ MooseInit::MooseInit(int argc, char** argv)
   Moose::command_line = new GetPot(argc, argv);
 
   std::cout << "Number of Threads: " << libMesh::n_threads() << "\n";
+
+  ParallelUniqueId::initialize();
 }
 
 MooseInit::~MooseInit()
@@ -102,10 +102,6 @@ Moose::registerObjects()
   {
     first = false;
     ParallelUniqueId::initialize();
-
-    Kernel::sizeEverything();
-    BoundaryCondition::sizeEverything();
-    AuxKernel::sizeEverything();
   }
   
   KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
@@ -178,40 +174,6 @@ Moose::registerObjects()
 }
 
 void
-Moose::meshChanged()
-{
-  // Reinitialize the equation_systems object for the newly refined
-  // mesh. One of the steps in this is project the solution onto the 
-  // new mesh
-  Moose::equation_system->reinit();
-
-  // Rebuild the boundary conditions 
-  Moose::mesh->boundary_info->build_node_list_from_side_list();
-
-  // Rebuild the active local element range
-  delete Moose::active_local_elem_range;
-  Moose::active_local_elem_range = NULL;
-
-  // Calling this function will rebuild the range.
-  Moose::getActiveLocalElementRange();
-
-  // Lets the output system know that the mesh has changed recently.
-  Moose::mesh_changed = true;
-}
-
-ConstElemRange *
-Moose::getActiveLocalElementRange()
-{
-  if(!Moose::active_local_elem_range)
-  {
-    Moose::active_local_elem_range = new ConstElemRange(Moose::mesh->active_local_elements_begin(),
-                                                        Moose::mesh->active_local_elements_end(),1);
-  }
-
-  return Moose::active_local_elem_range;  
-}
-
-void
 Moose::setSolverDefaults(EquationSystems * es,
                          TransientNonlinearImplicitSystem & system,
                          void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar),
@@ -222,130 +184,22 @@ Moose::setSolverDefaults(EquationSystems * es,
 #endif //LIBMESH_HAVE_PETSC
 }
 
-/**
- * Outputs the system.
- */
-void
-Moose::output_system(unsigned int t_step, Real time)
-{
-  EquationSystems * equation_systems = Moose::equation_system;
-  std::string file_base = Moose::file_base;
-  
-  OStringStream stream_file_base;
-  
-  stream_file_base << file_base << "_";
-  OSSRealzeroright(stream_file_base,3,0,t_step);
-
-  std::string file_name = stream_file_base.str();
-
-  if(Moose::exodus_output) 
-  {
-    std::string exodus_file_name;
-    
-    static ExodusII_IO * ex_out = NULL;
-    static unsigned int num_files = 0;
-    static unsigned int num_in_current_file = 0;
-    
-    bool adaptivity = Moose::equation_system->parameters.have_parameter<bool>("adaptivity");
-
-    //if the mesh changed we need to write to a new file
-    if(Moose::mesh_changed || !ex_out)
-    {
-      num_files++;
-      
-      if(ex_out)
-        delete ex_out;
-      
-      ex_out = new ExodusII_IO(equation_systems->get_mesh());
-
-      // We've captured this change... let's reset the changed bool and then see if it's changed again next time.
-      Moose::mesh_changed = false;
-
-      // We're starting over
-      num_in_current_file = 0;
-    }
-
-    num_in_current_file++;
-
-    if(!adaptivity)
-      exodus_file_name = file_base;
-    else
-    {
-      OStringStream exodus_stream_file_base;
-  
-      exodus_stream_file_base << file_base << "_";
-
-      // -1 is so that the first one that comes out is 000
-      OSSRealzeroright(exodus_stream_file_base,4,0,num_files-1);
-      
-      exodus_file_name = exodus_stream_file_base.str();
-    }
-
-    // The +1 is because Exodus starts timesteps at 1 and we start at 0
-    ex_out->write_timestep(exodus_file_name + ".e", *equation_systems, num_in_current_file, time);
-  }
-  if(Moose::gmv_output) 
-    GMVIO(*Moose::mesh).write_equation_systems(file_name + ".gmv", *equation_systems);
-  if(Moose::tecplot_output) 
-    TecplotIO(*Moose::mesh).write_equation_systems(file_name + ".plt", *equation_systems);
-}
-
-void
-Moose::checkSystemsIntegrity()
-{
-  parallel_only();
-  std::set<subdomain_id_type> element_subdomains, input_subdomains, difference;
-  bool global_kernels_exist = false;
-
-  // Build a set of active subdomains from the mesh in MOOSE
-  const MeshBase::element_iterator el_end = Moose::mesh->elements_end();
-  for (MeshBase::element_iterator el = Moose::mesh->active_elements_begin(); el != el_end; ++el)
-    element_subdomains.insert((*el)->subdomain_id());
-
-  // Check materials
-  MaterialIterator end = MaterialFactory::instance()->activeMaterialsEnd(0);
-  for (MaterialIterator i = MaterialFactory::instance()->activeMaterialsBegin(0); i != end; ++i)
-    if (element_subdomains.find(i->first) == element_subdomains.end()) 
-    {
-      std::stringstream oss;
-      oss << "Material block \"" << i->first << "\" specified in the input file does not exist";
-      mooseError (oss.str());
-    }
-
-  // Check kernels
-  KernelFactory::instance()->updateActiveKernels(0);
-  global_kernels_exist = KernelFactory::instance()->activeKernelBlocks(input_subdomains);
-  std::set_difference (element_subdomains.begin(), element_subdomains.end(),
-                       input_subdomains.begin(), input_subdomains.end(),
-                       std::inserter(difference, difference.end()));
-  
-  if (!global_kernels_exist && !difference.empty())
-    mooseError("Each subdomain must contain at least one Kernel.");
-
-  // Check BCs
-  // TODO: Check Boundaries
-}
 
 /******************
  * Global Variables
  * ****************/
 THREAD_ID Moose::current_thread_id = 0;
 
-Preconditioner<Real> * Moose::preconditioner = NULL;
+// FIXME
+MooseSystem * Moose::g_system = NULL;
 
-//MooseSystem * Moose::moose_system;
-Mesh * Moose::mesh;
-
-EquationSystems * Moose::equation_system;
+//EquationSystems * Moose::equation_system;
 
 MeshRefinement * Moose::mesh_refinement = NULL;
 ErrorEstimator * Moose::error_estimator = NULL;
 ErrorVector * Moose::error = NULL;
-bool Moose::mesh_changed = false;
 
 Executioner * Moose::executioner;
-
-ConstElemRange * Moose::active_local_elem_range = NULL;
 
 enum Moose::GeomType;
 Moose::GeomType Moose::geom_type = Moose::XYZ;
@@ -354,9 +208,9 @@ bool Moose::no_fe_reinit = false;
 
 std::string Moose::execution_type;
 
-std::string Moose::file_base = "";
+std::string Moose::file_base = "out";
 int Moose::interval = 1;
-bool Moose::exodus_output = false;
+bool Moose::exodus_output = true;         // default output format is exodus
 bool Moose::gmv_output = false;
 bool Moose::tecplot_output = false;
 bool Moose::print_out_info = false;

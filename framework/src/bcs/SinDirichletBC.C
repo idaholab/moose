@@ -1,4 +1,5 @@
 #include "SinDirichletBC.h"
+#include "MooseSystem.h"
  
 template<>
 InputParameters validParams<SinDirichletBC>()
@@ -15,18 +16,18 @@ SinDirichletBC::SinDirichletBC(std::string name, MooseSystem & moose_system, Inp
    _initial(_parameters.get<Real>("initial")),
    _final(_parameters.get<Real>("final")),
    _duration(_parameters.get<Real>("duration"))
-  {}
+{
+}
 
 Real
 SinDirichletBC::computeQpResidual()
-  {
-  
-    Real value;
+{
+  Real value;
 
-    if(_t < _duration)
-      value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
-    else
-      value = _final;
-    
-    return _u_face[_qp]- value;
-  }
+  if(_moose_system._t < _duration)
+    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _moose_system._t);
+  else
+    value = _final;
+  
+  return _u_face[_qp]- value;
+}

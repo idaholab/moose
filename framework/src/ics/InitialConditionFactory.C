@@ -10,24 +10,6 @@ InitialConditionFactory::instance()
   return instance;
 }
 
-void
-InitialConditionFactory::add(std::string ic_name,
-                             std::string name,
-                             MooseSystem & moose_system,
-                             InputParameters parameters,
-                             std::string var_name)
-{
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    Moose::current_thread_id = tid;
-
-    // The var_name needs to be added to the parameters object for any InitialCondition derived objects
-    parameters.set<std::string>("var_name") = var_name;
-    
-    active_initial_conditions[tid][var_name] = (*name_to_build_pointer[ic_name])(name, moose_system, parameters);
-  }
-}
-
 InputParameters
 InitialConditionFactory::getValidParams(std::string name)
 {
@@ -35,17 +17,6 @@ InitialConditionFactory::getValidParams(std::string name)
     mooseError(std::string("A _") + name + "_ is not registered InitialCondition ");
 
   return name_to_params_pointer[name]();
-}
-
-InitialCondition *
-InitialConditionFactory::getInitialCondition(THREAD_ID tid, std::string var_name)
-{
-  InitialConditionIterator ic_iter = active_initial_conditions[tid].find(var_name);
-
-  if (ic_iter == active_initial_conditions[tid].end()) 
-    return NULL;
-
-  return ic_iter->second;
 }
 
 InitialConditionNamesIterator
@@ -72,20 +43,6 @@ InitialConditionFactory::registeredInitialConditionsEnd()
   return _registered_initial_condition_names.end();
 }
 
-
-InitialConditionIterator
-InitialConditionFactory::activeInitialConditionsBegin(THREAD_ID tid)
-{
-  return active_initial_conditions[tid].begin();
-}
-
-InitialConditionIterator
-InitialConditionFactory::activeInitialConditionsEnd(THREAD_ID tid)
-{
-  return active_initial_conditions[tid].end();
-}
-
 InitialConditionFactory::InitialConditionFactory()
 {
-  active_initial_conditions.resize(libMesh::n_threads());
 }

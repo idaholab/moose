@@ -96,12 +96,12 @@ protected:
   /**
    * The Nonlinear System
    */
-  TransientNonlinearImplicitSystem & _system;
+//  TransientNonlinearImplicitSystem & _system;
 
   /**
    * The Auxiliary System
    */
-  TransientExplicitSystem & _aux_system;
+//  TransientExplicitSystem & _aux_system;
 
   /**
    * Initial Residual Variables

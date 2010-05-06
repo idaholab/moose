@@ -33,19 +33,20 @@ AdaptivityBlock::AdaptivityBlock(const std::string & reg_id, const std::string &
 void
 AdaptivityBlock::execute() 
 {
-  TransientNonlinearImplicitSystem & system = Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+  TransientNonlinearImplicitSystem & system = *_moose_system.getNonlinearSystem();
   
   unsigned int max_r_steps = getParamValue<unsigned int>("steps");
 
-  Moose::equation_system->parameters.set<unsigned int>("max_r_steps") = max_r_steps;
-  Moose::equation_system->parameters.set<bool>("adaptivity") = true;
+  EquationSystems *es = _moose_system.getEquationSystems();
+  es->parameters.set<unsigned int>("max_r_steps") = max_r_steps;
+  es->parameters.set<bool>("adaptivity") = true;
 
-  Moose::equation_system->parameters.set<unsigned int>("initial_adaptivity") = getParamValue<unsigned int>("initial_adaptivity");
+  es->parameters.set<unsigned int>("initial_adaptivity") = getParamValue<unsigned int>("initial_adaptivity");
 
   if(Moose::mesh_refinement)
     mooseError("Mesh refinement object has already been initialized!");
 
-  Moose::mesh_refinement = new MeshRefinement(*Moose::mesh);
+  Moose::mesh_refinement = new MeshRefinement(*_moose_system.getMesh());
   Moose::error = new ErrorVector;
 
   std::string error_estimator = getParamValue<std::string>("error_estimator");

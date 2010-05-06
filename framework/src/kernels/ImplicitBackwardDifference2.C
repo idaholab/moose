@@ -1,4 +1,5 @@
 #include "ImplicitBackwardDifference2.h"
+#include "MooseSystem.h"
 
 template<>
 InputParameters validParams<ImplicitBackwardDifference2>()
@@ -25,7 +26,6 @@ ImplicitBackwardDifference2::computeQpResidual()
 Real
 ImplicitBackwardDifference2::computeQpJacobian()
 {
-  
   if(_t_step==1 && _start_with_be) // First step, use BE
     return _test[_i][_qp]*_phi[_j][_qp]/_dt;
   else

@@ -36,7 +36,7 @@ class Kernel
 public:
 
   /** 
-   * Factory constrcutor initializes all internal references needed for residual computation.
+   * Factory constructor initializes all internal references needed for residual computation.
    * 
    *
    * @param name The name of this kernel.
@@ -47,31 +47,6 @@ public:
   
   virtual ~Kernel()
   {};
-
-  /**
-   * Size everything.
-   */
-  static void sizeEverything();
-
-  /**
-   * Initializes common data structures.
-   */
-  static void init(EquationSystems * es);
-
-  /**
-   * Re-Initializes common data structures for a specific element.
-   */
-  static void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
-
-  /**
-   * Re-Initializes temporal discretization/transient control data.
-   */
-  static void reinitDT();
-
-  /**
-   * Re-Initializes Eigenvalue computation
-   */
-  static void reinitEigen();
 
   /** 
    * Computes the residual for the current element.
@@ -92,11 +67,6 @@ public:
    * Computes the volume integral for the current element.
    */
   virtual Real computeIntegral();
-
-  static DofMap * _dof_map;
-  static DofMap * _aux_dof_map;
-  static std::vector<std::vector<unsigned int> > _dof_indices;
-  static std::vector<std::vector<unsigned int> > _aux_dof_indices;
 
   /**
    * Retrieve name of the Kernel
@@ -149,15 +119,6 @@ public:
    */
   static bool modifiedAuxVarNum(unsigned int var_num);
 
-  /**
-   * Allows specification of per variable scaling factors.
-   * The size of the vector MUST be the same as the number of Nonlinear Variables.
-   * Should be called after Kernel::init() (because that sets the default scaling).
-   * Can be called multiple times to change the scaling.
-   * The initial scaling is just 1 for each variable.
-   */
-  static void setVarScaling(std::vector<Real> scaling);
-  
 protected:
   /**
    * This Kernel's name.
@@ -178,6 +139,11 @@ protected:
    * Holds parameters for derived classes so they can be built with common constructor.
    */
   InputParameters _parameters;
+
+  /**
+   * The mesh.
+   */
+  Mesh & _mesh;
 
   /** 
    * This is the virtual that derived classes should override for computing the residual.
@@ -219,6 +185,51 @@ protected:
    * Right now it's only really used for computeSideResidual so Derichlet BC's can be computed exactly.
    */
   bool _integrated;
+
+  /**
+   * The current dimension of the mesh.
+   */
+  unsigned int & _dim;
+
+  /**
+   * Current time.
+   */
+  Real & _t;
+  
+  /**
+   * Current dt.
+   */
+  Real & _dt;
+
+  /**
+   * Old dt.
+   */
+  Real & _dt_old;
+
+  /**
+   * Whether or not the current simulation is transient.
+   */
+  bool & _is_transient;
+
+  /**
+   * Whether or not the current simulation is Eigenvalue.
+   */
+  bool & _is_eigenvalue;
+
+  /**
+   * Current time step.
+   */
+  int & _t_step;
+
+  /**
+   * Coefficients (weights) for the BDF2 time discretization.
+   */
+  std::vector<Real> & _bdf2_wei;
+
+  /**
+   * Time discretization scheme: 0 - Implicit Euler, 1 - 2nd-order Backward Difference
+   */
+  short & _t_scheme;
 
   /**
    * Holds the current solution at the current quadrature point.
@@ -340,6 +351,8 @@ protected:
    */
   unsigned int _qp;
 
+  
+
   /**
    * Variable numbers of the coupled variables.
    */
@@ -418,7 +431,7 @@ protected:
   std::vector<Real> & coupledValOlder(std::string name);
 
   /**
-   * Returns a referene (that can be sotred) to a coupled gradient of a variable's value at an old time step.
+   * Returns a reference (that can be stored) to a coupled gradient of a variable's value at an old time step.
    *
    * @param name The name the kernel wants to refer to the variable as
    */
@@ -449,309 +462,9 @@ protected:
   Real _stop_time;
 
   /**
-   * ***********************
-   * All of the static stuff
-   * ***********************
-   */
-
-public:
-  static EquationSystems * _es;
-  static TransientNonlinearImplicitSystem * _system;
-  static TransientExplicitSystem * _aux_system;
-  static MeshBase * _mesh;
-  static unsigned int _dim;
-
-protected:
-
-  /**
-   * Interior finite element.
-   */
-  static std::vector<std::map<FEType, FEBase*> > _fe;
-
-  /**
-   * Maximum quadrature order required by all variables.
-   */
-  static Order _max_quadrature_order;
-
-  /**
-   * Interior quadrature rule.
-   */
-  static std::vector<QGauss *> _static_qrule;  
-
-  /**
-   * Current element
-   */
-  static std::vector<const Elem *> _static_current_elem;
-
-  /**
-   * Interior Jacobian pre-multiplied by the weight.
-   */
-  static std::vector<std::map<FEType, const std::vector<Real> *> > _static_JxW;
-
-  /**
-   * Interior shape function.
-   */
-  static std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _static_phi;
-
-  /**
-   * Interior test function.
-   *
-   * Note that there is a different test function for each variable... allowing for modified
-   * basis for things like SUPG and GLS.
-   */
-  static std::vector<std::map<unsigned int, std::vector<std::vector<Real> > > > _static_test;
-
-  /**
-   * Gradient of interior shape function.
-   */
-  static std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _static_dphi;
-
-  /**
-   * Second derivative of interior shape function.
-   */
-  static std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _static_d2phi;
-
-  /**
-   * XYZ coordinates of quadrature points
-   */
-  static std::vector<std::map<FEType, const std::vector<Point> *> > _static_q_point;
-  
-  /**
-   * Variable numbers of the variables.
-   */
-  static std::vector<unsigned int> _var_nums;
-
-  /**
-   * Variable numbers of the auxiliary variables.
-   */
-  static std::vector<unsigned int> _aux_var_nums;
-
-public:
-  /**
-   * Dof Maps for all the variables.
-   */
-  static std::vector<std::vector<std::vector<unsigned int> > > _var_dof_indices;
-
-protected:
-  /**
-   * Dof Maps for all the auxiliary variables.
-   */
-  static std::vector<std::vector<std::vector<unsigned int> > > _aux_var_dof_indices;
-
-  /**
-   * Residual vectors for all variables.
-   */
-  static std::vector<std::vector<DenseSubVector<Number> * > > _var_Res;
-
-public:
-  /**
-   * Jacobian matrices for all variables.
-   */
-  static std::vector<std::vector<DenseMatrix<Number> * > > _var_Kes;
-
-protected:
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<Real> > > _var_vals;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealGradient> > > _var_grads;
-
-  /**
-   * Second derivatives of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealTensor> > > _var_seconds;
-
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<Real> > > _var_vals_old;
-
-  /**
-   * Value of the variables at the quadrature points at t-2.
-   */
-  static std::vector<std::vector<std::vector<Real> > > _var_vals_older;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealGradient> > > _var_grads_old;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealGradient> > > _var_grads_older;
-
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<Real> > > _aux_var_vals;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads;
-
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<Real> > > _aux_var_vals_old;
-
-  /**
-   * Value of the variables at the quadrature points at t-2.
-   */
-  static std::vector<std::vector<std::vector<Real> > > _aux_var_vals_older;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_old;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_older;
-
-public:
-  /**
-   * Current time.
-   */
-  static Real _t;
-  
-  /**
-   * Current dt.
-   */
-  static Real _dt;
-
-protected:  
-
-  /**
-   * Old dt.
-   */
-  static Real _dt_old;
-  
-  /**
-   * Whether or not the current simulation is transient.
-   */
-  static bool _is_transient;
-
-  /**
-   * Whether or not the current simulation is Eigenvalue.
-   */
-  static bool _is_eigenvalue;
-
-  /**
-   * Current time step.
-   */
-  static int _t_step;
-
-  /**
-   * Coefficients (weights) for the BDF2 time discretization.
-   */
-  static Real _bdf2_wei[3];
-
-  /**
-   * Time discretization scheme: 0 - Implicit Euler, 1 - 2nd-order Backward Difference
-   */
-  static short _t_scheme;
-
-  /**
-   * The total number of Runge-Kutta stages
-   */
-  static short _n_of_rk_stages;
-  
-  /**
-   * Pointer to the material that is valid for the current block.
-   */
-  static std::vector<Material *> _static_material;
-
-  /**
-   * Computes the value of soln at the current quadrature point.
-   * 
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  static void computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<Real> > & phi);
-
-  /**
-   * Computes the value of all the soln, gradient and second derivative at the current quadrature point in transient problems.
-   * 
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  static void computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std::vector<Real> & u_older,
-                                   std::vector<RealGradient> &grad_u,  std::vector<RealGradient> &grad_u_old, std::vector<RealGradient> &grad_u_older,
-                                   std::vector<RealTensor> &second_u,
-                                   const NumericVector<Number> & soln, const NumericVector<Number> & soln_old,  const NumericVector<Number> & soln_older,
-                                   const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
-                                   const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi, const std::vector<std::vector<RealTensor> > & d2phi);
-  
-  /**
-   * Computes the value of all the soln and gradient at the current quadrature point in transient problems.
-   * 
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  static void computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std::vector<Real> & u_older,
-                                   std::vector<RealGradient> &grad_u,  std::vector<RealGradient> &grad_u_old, std::vector<RealGradient> &grad_u_older,
-                                   const NumericVector<Number> & soln, const NumericVector<Number> & soln_old,  const NumericVector<Number> & soln_older,
-                                   const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
-                                   const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi);
-
-  /**
-   * Computes the value of all the soln, gradient and second derivative at the current quadrature point in steady state problems.
-   * 
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  static void computeQpSolutionAll(std::vector<Real> & u,
-                                   std::vector<RealGradient> &grad_u,
-                                   std::vector<RealTensor> &second_u,
-                                   const NumericVector<Number> & soln,
-                                   const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
-                                   const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi, const std::vector<std::vector<RealTensor> > & d2phi);
-
-  /**
-   * Computes the value of all the soln and gradient at the current quadrature point in steady state problems.
-   * 
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  static void computeQpSolutionAll(std::vector<Real> & u,
-                                   std::vector<RealGradient> &grad_u,
-                                   const NumericVector<Number> & soln,
-                                   const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
-                                   const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi);
-
-  /**
-   * Computes the value of the gradient of soln at the current quadrature point.
-   * 
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  static void computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealGradient> > & dphi);
-
-  /**
-   * Computes the value of the second derivative of soln at the current quadrature point.
-   * 
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  static void computeQpSecondSolution(RealTensor & second_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealTensor> > & d2phi);
-
-  /**
    * Whether or not this coupled_as name is associated with an auxiliary variable.
    */
   bool isAux(std::string name);
-
-  /**
-   * Static convenience zeros.
-   */
-  static std::vector<Real> _static_real_zero;
-  static std::vector<std::vector<Real> > _static_zero;
-  static std::vector<std::vector<RealGradient> > _static_grad_zero;
-  static std::vector<std::vector<RealTensor> > _static_second_zero;
-
-  /**
-   * Scaling factors for each variable.
-   */
-  static std::vector<Real> _scaling_factor;
 };
 
 #endif //KERNEL_H

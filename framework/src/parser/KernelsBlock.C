@@ -30,21 +30,18 @@ KernelsBlock::execute()
   TransientBlock * t_block = dynamic_cast<TransientBlock *>(locateBlock("Execution/Transient"));
   if (t_block != NULL) 
   {
-    t_block->setOutOfOrderTransientParams(Moose::equation_system->parameters);
+    t_block->setOutOfOrderTransientParams(_moose_system.getEquationSystems()->parameters);
 
-    Real reject_step_error = Moose::equation_system->parameters.get<Real> ("reject_step_error");
+    Real reject_step_error = _moose_system.getEquationSystems()->parameters.get<Real> ("reject_step_error");
     if (reject_step_error > 0)
     {
-      TransientNonlinearImplicitSystem &system =
-        Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+      TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
       system.add_vector("time_error");
       system.add_vector("old_solution");
     }
   }
 
-  Kernel::init(Moose::equation_system);
-  // TODO: Figure out why this can't be called in the AuxKernelsBlock
-//  AuxKernel::init();
+  _moose_system.init();
   
   // Add the kernels to the system
   visitChildren();

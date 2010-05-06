@@ -1,4 +1,5 @@
 #include "ConvectiveFluxBC.h"
+#include "MooseSystem.h"
 
 template<>
 InputParameters validParams<ConvectiveFluxBC>()
@@ -25,8 +26,8 @@ ConvectiveFluxBC::computeQpResidual()
 {
   Real value;
 
-  if(_t < _duration)
-    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
+  if(_moose_system._t < _duration)
+    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _moose_system._t);
   else
     value = _final;
     
@@ -38,8 +39,8 @@ ConvectiveFluxBC::computeQpJacobian()
 {
   Real value;
 
-  if(_t < _duration)
-    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
+  if(_moose_system._t < _duration)
+    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _moose_system._t);
   else
     value = _final;
   

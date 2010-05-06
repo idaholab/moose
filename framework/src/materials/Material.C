@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "MooseSystem.h"
 #include <iostream>
 
 template<>
@@ -36,32 +37,32 @@ Material::materialReinit()
   std::map<std::string, std::vector<Real> >::iterator it_end = _real_props.end();
 
   for(;it!=it_end;++it)
-    it->second.resize(_static_qrule[_tid]->n_points(),1);
+    it->second.resize(_moose_system._qrule[_tid]->n_points(),1);
 
   std::map<std::string, std::vector<RealGradient> >::iterator grad_it = _gradient_props.begin();
   std::map<std::string, std::vector<RealGradient> >::iterator grad_it_end = _gradient_props.end();
 
   for(;grad_it!=grad_it_end;++grad_it)
-    grad_it->second.resize(_static_qrule[_tid]->n_points());
+    grad_it->second.resize(_moose_system._qrule[_tid]->n_points());
 
 
   std::map<std::string, std::vector<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props.begin();
   std::map<std::string, std::vector<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props.end();
 
   for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
-    real_vector_value_it->second.resize(_static_qrule[_tid]->n_points());
+    real_vector_value_it->second.resize(_moose_system._qrule[_tid]->n_points());
 
   std::map<std::string, std::vector<RealTensorValue> >::iterator tensor_it = _tensor_props.begin();
   std::map<std::string, std::vector<RealTensorValue> >::iterator tensor_it_end = _tensor_props.end();
 
   for(;tensor_it!=tensor_it_end;++tensor_it)
-    tensor_it->second.resize(_static_qrule[_tid]->n_points());
+    tensor_it->second.resize(_moose_system._qrule[_tid]->n_points());
 
   std::map<std::string, std::vector<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props.begin();
   std::map<std::string, std::vector<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props.end();
 
   for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-    column_major_matrix_it->second.resize(_static_qrule[_tid]->n_points());
+    column_major_matrix_it->second.resize(_moose_system._qrule[_tid]->n_points());
 
   computeProperties();
 }

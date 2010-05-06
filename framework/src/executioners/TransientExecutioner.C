@@ -2,9 +2,8 @@
 
 //Moose includes
 #include "Kernel.h"
-#include "ComputeJacobian.h"
-#include "ComputeResidual.h"
 #include "MaterialFactory.h"
+#include "MooseSystem.h"
 
 //libMesh includes
 #include "implicit_system.h"
@@ -14,6 +13,13 @@
 
 // C++ Includes
 #include <iomanip>
+
+// FIXME: remove me whne libmesh solver problem is fixed
+namespace Moose {
+void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
+void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
+void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
+}
 
 template<>
 InputParameters validParams<TransientExecutioner>()
@@ -36,9 +42,9 @@ InputParameters validParams<TransientExecutioner>()
 
 TransientExecutioner::TransientExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Executioner(name, moose_system, parameters),
-   _t_step(Moose::equation_system->parameters.set<int> ("t_step") = 0),
-   _time(Moose::equation_system->parameters.set<Real>("time") = parameters.get<Real>("start_time")),
-   _dt(Moose::equation_system->parameters.set<Real>("dt") = parameters.get<Real>("dt")),
+   _t_step(moose_system.parameters().set<int> ("t_step") = 0),
+   _time(moose_system.parameters().set<Real>("time") = parameters.get<Real>("start_time")),
+   _dt(moose_system.parameters().set<Real>("dt") = parameters.get<Real>("dt")),
    _end_time(parameters.get<Real>("end_time")),
    _dtmin(parameters.get<Real>("dtmin")),
    _dtmax(parameters.get<Real>("dtmax")),
@@ -49,7 +55,7 @@ TransientExecutioner::TransientExecutioner(std::string name, MooseSystem & moose
    _ss_tmin(parameters.get<Real>("ss_tmin")),
    _converged(true)
 {
-  Kernel::reinitDT();
+  _moose_system.reinitDT();
 }
 
 void
@@ -65,18 +71,13 @@ TransientExecutioner::execute()
     if(_converged)
     {
       // Update backward time solution vectors
-      *_system.older_local_solution = *_system.old_local_solution;
-      *_system.old_local_solution   = *_system.current_local_solution;
-
-      *_aux_system.older_local_solution = *_aux_system.old_local_solution;
-      *_aux_system.old_local_solution   = *_aux_system.current_local_solution;
+      _moose_system.copy_old_solutions();
 
       // Update backward material data structures
-
-      MaterialFactory::instance()->updateMaterialDataState();
+      _moose_system._materials.updateMaterialDataState();
     }    
 
-    _system.update();
+    _moose_system.getNonlinearSystem()->update();
 
     Real dt_cur = computeDT();
 
@@ -96,7 +97,7 @@ TransientExecutioner::execute()
     _time += dt_cur;
     _dt = dt_cur;
 
-    Kernel::reinitDT();
+    _moose_system.reinitDT();
 
     std::cout<<"DT: "<<dt_cur<<std::endl;
 
@@ -111,7 +112,9 @@ TransientExecutioner::execute()
       std::cout << out.str() << std::endl;
     }
 
-    Moose::setSolverDefaults(Moose::equation_system, _system, Moose::compute_jacobian_block, Moose::compute_residual);
+    // FIXME: !!!
+    Moose::setSolverDefaults(_moose_system._es, *_moose_system.getNonlinearSystem(),
+                             Moose::compute_jacobian_block, Moose::compute_residual);
     
     setScaling();
 
@@ -119,19 +122,20 @@ TransientExecutioner::execute()
     
     Moose::perf_log.push("solve()","Solve");
     // System Solve
-    _system.solve();
+    _moose_system.solve();
     Moose::perf_log.pop("solve()","Solve");
 
-    _converged = _system.nonlinear_solver->converged;
+    _converged = _moose_system.getNonlinearSystem()->nonlinear_solver->converged;
 
     postSolve();
 
     std::cout<<"Norm of each nonlinear variable:"<<std::endl;
-    for(unsigned int var = 0; var < _system.n_vars(); var++)
-      std::cout<<_system.variable_name(var)<<": "<<_system.calculate_norm(*_system.rhs,var,DISCRETE_L2)<<std::endl;
+    for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
+      std::cout << _moose_system.getNonlinearSystem()->variable_name(var) << ": "
+                << _moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2) << std::endl;
     
     if ( _converged && (_t_step+1)%Moose::interval == 0)
-      Moose::output_system(_t_step, _time);
+      _moose_system.output_system(_t_step, _time);
 
     keep_going = keepGoing();
 
@@ -167,7 +171,7 @@ TransientExecutioner::keepGoing()
   if(_converged && _trans_ss_check == true && _time > _ss_tmin)
   {
     // Compute new time solution l2_norm
-    Real new_time_solution_norm = _system.current_local_solution->l2_norm();
+    Real new_time_solution_norm = _moose_system.getNonlinearSystem()->current_local_solution->l2_norm();
           
     // Compute l2_norm relative error
     Real ss_relerr_norm = fabs(new_time_solution_norm - _old_time_solution_norm)/new_time_solution_norm;

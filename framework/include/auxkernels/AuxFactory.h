@@ -22,11 +22,6 @@ typedef AuxKernel * (*AuxKernelBuildPtr)(std::string name,
 /**
  * Typedef to hide implementation details
  */
-typedef std::vector<AuxKernel *>::iterator AuxKernelIterator;
-
-/**
- * Typedef to hide implementation details
- */
 typedef std::vector<std::string>::iterator AuxKernelNamesIterator;
 
 /**
@@ -62,26 +57,15 @@ public:
     name_to_params_pointer[name]=&validParams<AuxType>;
   }
 
-  AuxKernel * add(std::string Aux_name,
-                  std::string name,
-                  MooseSystem & moose_system,
-                  InputParameters parameters);
-  
-  AuxKernel * addBC(std::string Aux_name,
-                    std::string name,
-                    MooseSystem & moose_system,
-                    InputParameters parameters);
+  AuxKernel *create(std::string aux_name,
+                     std::string name,
+                     MooseSystem & moose_system,
+                     InputParameters parameters)
+  {
+    return (*name_to_build_pointer[aux_name])(name, moose_system, parameters);
+  }
 
   InputParameters getValidParams(std::string name);
-  
-  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsBegin(THREAD_ID tid);
-  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsEnd(THREAD_ID tid);
-
-  std::vector<AuxKernel *>::iterator activeElementAuxKernelsBegin(THREAD_ID tid);
-  std::vector<AuxKernel *>::iterator activeElementAuxKernelsEnd(THREAD_ID tid);
-
-  std::vector<AuxKernel *>::iterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  std::vector<AuxKernel *>::iterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id);
 
   AuxKernelNamesIterator registeredAuxKernelsBegin();
   AuxKernelNamesIterator registeredAuxKernelsEnd();
@@ -93,13 +77,8 @@ private:
 
   std::map<std::string, AuxKernelBuildPtr> name_to_build_pointer;
   std::map<std::string, AuxKernelParamsPtr> name_to_params_pointer;
-
-  std::vector<std::string> _registered_auxkernel_names;
-  std::vector<std::vector<AuxKernel *> > active_NodalAuxKernels;
-  std::vector<std::vector<AuxKernel *> > active_ElementAuxKernels;
-
-  std::vector<std::map<unsigned int, std::vector<AuxKernel *> > > active_bcs;
   
+  std::vector<std::string> _registered_auxkernel_names;
 };
 
 #endif //AUXFACTORY_H

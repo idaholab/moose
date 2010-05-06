@@ -29,8 +29,8 @@ BCsBlock::execute()
     std::cerr << "Inside the BCsBlock (Aux) Object\n";
 #endif
 
-  if (_reg_id == "BCs")
-    BoundaryCondition::init();
+//  if (_reg_id == "BCs")
+//    BoundaryCondition::init();
   
   // Add the BCs or AuxBCs to the system
   visitChildren();

@@ -19,5 +19,5 @@ GenericICBlock::GenericICBlock(const std::string & reg_id, const std::string & r
 void
 GenericICBlock::execute() 
 {
-  InitialConditionFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams(), _parent->getShortName());
+  _moose_system.addInitialCondition(_type, getShortName(), getClassParams(), _parent->getShortName());
 }

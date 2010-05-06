@@ -2,8 +2,6 @@
 
 //Moose includes
 #include "Kernel.h"
-#include "ComputeJacobian.h"
-#include "ComputeResidual.h"
 #include "MaterialFactory.h"
 
 //libMesh includes

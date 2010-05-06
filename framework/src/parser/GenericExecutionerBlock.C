@@ -42,32 +42,33 @@ void
 GenericExecutionerBlock::execute() 
 {
   Moose::executioner = ExecutionerFactory::instance()->build(_type, "Executioner", _parser_handle.getMooseSystem(), getClassParams());
-  
-  Moose::equation_system->parameters.set<Real> ("linear solver tolerance")
+
+  EquationSystems *es = _moose_system.getEquationSystems();
+  es->parameters.set<Real> ("linear solver tolerance")
     = getParamValue<Real>("l_tol");
 
-  Moose::equation_system->parameters.set<Real> ("linear solver absolute step tolerance")
+  es->parameters.set<Real> ("linear solver absolute step tolerance")
     = getParamValue<Real>("l_abs_step_tol");
 
-  Moose::equation_system->parameters.set<unsigned int> ("linear solver maximum iterations")
+  es->parameters.set<unsigned int> ("linear solver maximum iterations")
     = getParamValue<unsigned int>("l_max_its");    
   
-  Moose::equation_system->parameters.set<unsigned int> ("nonlinear solver maximum iterations")
+  es->parameters.set<unsigned int> ("nonlinear solver maximum iterations")
     = getParamValue<unsigned int>("nl_max_its");
     
-  Moose::equation_system->parameters.set<unsigned int> ("nonlinear solver maximum function evaluations")
+  es->parameters.set<unsigned int> ("nonlinear solver maximum function evaluations")
     = getParamValue<unsigned int>("nl_max_funcs");
     
-  Moose::equation_system->parameters.set<Real> ("nonlinear solver absolute residual tolerance")
+  es->parameters.set<Real> ("nonlinear solver absolute residual tolerance")
     = getParamValue<Real>("nl_abs_tol");
   
-  Moose::equation_system->parameters.set<Real> ("nonlinear solver relative residual tolerance")
+  es->parameters.set<Real> ("nonlinear solver relative residual tolerance")
     = getParamValue<Real>("nl_rel_tol");
   
-  Moose::equation_system->parameters.set<Real> ("nonlinear solver absolute step tolerance")
+  es->parameters.set<Real> ("nonlinear solver absolute step tolerance")
     = getParamValue<Real>("nl_abs_step_tol");
   
-  Moose::equation_system->parameters.set<Real> ("nonlinear solver relative step tolerance")
+  es->parameters.set<Real> ("nonlinear solver relative step tolerance")
     = getParamValue<Real>("nl_rel_step_tol");
 
   Moose::no_fe_reinit = getParamValue<bool>("no_fe_reinit");

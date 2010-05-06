@@ -1,5 +1,6 @@
 //MOOSE includes
 #include "Moose.h"
+#include "MooseSystem.h"
 #include "BoundaryCondition.h"
 
 //libMesh includes
@@ -26,24 +27,24 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
 //          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
-   _JxW_face(*_static_JxW_face[_tid][_fe_type]),
-   _phi_face(*_static_phi_face[_tid][_fe_type]),
-   _dphi_face(*_static_dphi_face[_tid][_fe_type]),
-   _d2phi_face(*_static_d2phi_face[_tid][_fe_type]),
-   _normals_face(*_static_normals_face[_tid][_fe_type]),
-   _qface(_static_qface[_tid]),
-   _q_point_face(*_static_q_point_face[_tid][_fe_type]),
-   _current_side(_static_current_side[_tid]),
-   _current_node(_static_current_node[_tid]),
-   _current_residual(_static_current_residual[_tid]),
-   _u_face(_integrated ? _var_vals_face[_tid][_var_num] : _var_vals_face_nodal[_tid][_var_num]),
-   _grad_u_face(_integrated ? _var_grads_face[_tid][_var_num] : _grad_zero),
-   _second_u_face(_integrated ? _var_seconds_face[_tid][_var_num] : _second_zero)
+   _JxW_face(*moose_system._JxW_face[_tid][_fe_type]),
+   _phi_face(*moose_system._phi_face[_tid][_fe_type]),
+   _dphi_face(*moose_system._dphi_face[_tid][_fe_type]),
+   _d2phi_face(*moose_system._d2phi_face[_tid][_fe_type]),
+   _normals_face(*moose_system._normals_face[_tid][_fe_type]),
+   _qface(moose_system._qface[_tid]),
+   _q_point_face(*moose_system._q_point_face[_tid][_fe_type]),
+   _current_side(moose_system._current_side[_tid]),
+   _current_node(moose_system._current_node[_tid]),
+   _current_residual(moose_system._current_residual[_tid]),
+   _u_face(_integrated ? moose_system._var_vals_face[_tid][_var_num] : moose_system._var_vals_face_nodal[_tid][_var_num]),
+   _grad_u_face(_integrated ? moose_system._var_grads_face[_tid][_var_num] : moose_system._grad_zero[_tid]),
+   _second_u_face(_integrated ? moose_system._var_seconds_face[_tid][_var_num] : moose_system._second_zero[_tid])
 {
   if(_integrated)
-    addVarNums(_boundary_to_var_nums[_boundary_id]);
+    addVarNums(moose_system._boundary_to_var_nums[_boundary_id]);
   else
-    addVarNums(_boundary_to_var_nums_nodal[_boundary_id]);
+    addVarNums(moose_system._boundary_to_var_nums_nodal[_boundary_id]);
 }
 
 void BoundaryCondition::addVarNums(std::vector<unsigned int> & var_nums)
@@ -56,180 +57,12 @@ void BoundaryCondition::addVarNums(std::vector<unsigned int> & var_nums)
   {
     std::string coupled_var_name=_coupled_to[i];
 
-    unsigned int coupled_var_num = _system->variable_number(coupled_var_name);
+    unsigned int coupled_var_num = _moose_system._system->variable_number(coupled_var_name);
 
     if(std::find(var_nums.begin(),var_nums.end(),coupled_var_num) == var_nums.end())
       var_nums.push_back(coupled_var_num);
   }
 } 
-
-void
-BoundaryCondition::sizeEverything()
-{
-  int n_threads = libMesh::n_threads();
-
-  _static_current_node.resize(n_threads);
-  _static_current_residual.resize(n_threads);
-  _static_current_side.resize(n_threads);
-  _fe_face.resize(n_threads);
-  _static_qface.resize(n_threads);
-  _static_q_point_face.resize(n_threads);
-  _static_JxW_face.resize(n_threads);
-  _static_phi_face.resize(n_threads);
-  _static_dphi_face.resize(n_threads);
-  _static_d2phi_face.resize(n_threads);
-  _static_normals_face.resize(n_threads);
-
-  _nodal_bc_var_dofs.resize(n_threads);
-  _var_vals_face.resize(n_threads);
-  _var_grads_face.resize(n_threads);
-  _var_seconds_face.resize(n_threads);
-  _var_vals_face_nodal.resize(n_threads);
-}
-
-void BoundaryCondition::init()
-{
-  unsigned int n_vars = _system->n_vars();
-  unsigned int n_aux_vars = _aux_system->n_vars();
-
-  //Resize data arrays
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    _boundary_to_var_nums[tid].resize(n_vars);
-    _boundary_to_var_nums_nodal[tid].resize(n_vars);
-    _nodal_bc_var_dofs[tid].resize(n_vars);
-    _var_vals_face[tid].resize(n_vars);
-    _var_grads_face[tid].resize(n_vars);
-    _var_seconds_face[tid].resize(n_vars);
-    _var_vals_face_nodal[tid].resize(n_vars);
-  }
-
-  //Max quadrature order was already found by Kernel::init()
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    _static_qface[tid] = new QGauss(_dim-1,_max_quadrature_order);
-
-  for(unsigned int var=0; var < _system->n_vars(); var++)
-  {
-    FEType fe_type = _dof_map->variable_type(var);
-
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      if(!_fe_face[tid][fe_type])
-      {
-        _fe_face[tid][fe_type] = FEBase::build(_dim, fe_type).release();
-        _fe_face[tid][fe_type]->attach_quadrature_rule(_static_qface[tid]);
-
-        _static_q_point_face[tid][fe_type] = &_fe_face[tid][fe_type]->get_xyz();
-        _static_JxW_face[tid][fe_type] = &_fe_face[tid][fe_type]->get_JxW();
-        _static_phi_face[tid][fe_type] = &_fe_face[tid][fe_type]->get_phi();
-        _static_dphi_face[tid][fe_type] = &_fe_face[tid][fe_type]->get_dphi();
-        _static_normals_face[tid][fe_type] = &_fe_face[tid][fe_type]->get_normals();
-
-        FEFamily family = fe_type.family;
-
-        if(family == CLOUGH || family == HERMITE)
-          _static_d2phi_face[tid][fe_type] = &_fe_face[tid][fe_type]->get_d2phi();
-      }
-    }
-  }
-}
-
-void BoundaryCondition::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id)
-{
-//  Moose::perf_log.push("reinit()","BoundaryCondition");
-
-  _static_current_side[tid] = side;
-
-  std::map<FEType, FEBase*>::iterator fe_it = _fe_face[tid].begin();
-  std::map<FEType, FEBase*>::iterator fe_end = _fe_face[tid].end();
-
-  for(;fe_it != fe_end; ++fe_it)
-    fe_it->second->reinit(_static_current_elem[tid], _static_current_side[tid]);
-
-  std::vector<unsigned int>::iterator var_nums_it = _boundary_to_var_nums[boundary_id].begin();
-  std::vector<unsigned int>::iterator var_nums_end = _boundary_to_var_nums[boundary_id].end();
-
-  for(;var_nums_it != var_nums_end; ++var_nums_it)
-  {
-    unsigned int var_num = *var_nums_it;
-
-    FEType fe_type = _dof_map->variable_type(var_num);
-
-    FEFamily family = fe_type.family;
-
-    bool has_second_derivatives = (family == CLOUGH || family == HERMITE);
-
-    std::vector<unsigned int> & var_dof_indices = _var_dof_indices[tid][var_num];
-
-    _var_vals_face[tid][var_num].resize(_static_qface[tid]->n_points());
-    _var_grads_face[tid][var_num].resize(_static_qface[tid]->n_points());
-
-    if(has_second_derivatives)
-      _var_seconds_face[tid][var_num].resize(_static_qface[tid]->n_points());
-
-    const std::vector<std::vector<Real> > & static_phi_face = *_static_phi_face[tid][fe_type];
-    const std::vector<std::vector<RealGradient> > & static_dphi_face= *_static_dphi_face[tid][fe_type];
-    const std::vector<std::vector<RealTensor> > & static_d2phi_face= *_static_d2phi_face[tid][fe_type];
-
-    for (unsigned int qp=0; qp<_static_qface[tid]->n_points(); qp++)
-    {
-      computeQpSolution(_var_vals_face[tid][var_num][qp], soln, var_dof_indices, qp, static_phi_face);
-      computeQpGradSolution(_var_grads_face[tid][var_num][qp], soln, var_dof_indices, qp, static_dphi_face);
-
-      if(has_second_derivatives)
-        computeQpSecondSolution(_var_seconds_face[tid][var_num][qp], soln, var_dof_indices, qp, static_d2phi_face);
-    }
-  }
-
-  std::vector<unsigned int>::iterator var_nums_nodal_it = _boundary_to_var_nums_nodal[boundary_id].begin();
-  std::vector<unsigned int>::iterator var_nums_nodal_end = _boundary_to_var_nums_nodal[boundary_id].end();
-  
-  for(;var_nums_nodal_it != var_nums_nodal_end; ++var_nums_nodal_it)
-  {
-    unsigned int var_num = *var_nums_nodal_it;
-
-    std::vector<unsigned int> & var_dof_indices = _var_dof_indices[tid][var_num];
-
-    _var_vals_face_nodal[tid][var_num].resize(_static_current_elem[tid]->n_nodes());
-
-    for(unsigned int i=0; i<_static_current_elem[tid]->n_nodes(); i++)
-      _var_vals_face_nodal[tid][var_num][i] = soln(var_dof_indices[i]);
-  }
-  
-//  Moose::perf_log.pop("reinit()","BoundaryCondition");
-}
-
-
-
-void BoundaryCondition::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual)
-{
-//  Moose::perf_log.push("reinit(node)","BoundaryCondition");
-
-  _static_current_node[tid] = &node;
-
-  _static_current_residual[tid] = &residual;
-
-  std::vector<unsigned int>::iterator var_nums_nodal_it = _boundary_to_var_nums_nodal[boundary_id].begin();
-  std::vector<unsigned int>::iterator var_nums_nodal_end = _boundary_to_var_nums_nodal[boundary_id].end();
-
-  unsigned int nonlinear_system_number = _system->number();
-  
-  for(;var_nums_nodal_it != var_nums_nodal_end; ++var_nums_nodal_it)
-  {
-    unsigned int var_num = *var_nums_nodal_it;
-
-    //The zero is the component... that works fine for lagrange FE types.
-    unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);
-
-    _nodal_bc_var_dofs[tid][var_num] = dof_number;
-
-    _var_vals_face_nodal[tid][var_num].resize(1);
-
-    _var_vals_face_nodal[tid][var_num][0] = soln(dof_number);
-  }
-
-//  Moose::perf_log.pop("reinit(node)","BoundaryCondition");
-}
 
 unsigned int
 BoundaryCondition::boundaryID()
@@ -242,19 +75,19 @@ BoundaryCondition::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","BoundaryCondition");
 
-  DenseSubVector<Number> & var_Re = *_var_Res[_tid][_var_num];
+  DenseSubVector<Number> & var_Re = *_moose_system._var_Res[_tid][_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qface->n_points(); _qp++)
       for (_i=0; _i<_phi_face.size(); _i++)
-	var_Re(_i) += _scaling_factor[_var_num]*_JxW_face[_qp]*computeQpResidual();
+        var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW_face[_qp]*computeQpResidual();
   else
   {
     //Use _qp to keep things standard at the leaf level
     //_qp is really looping over nodes right now.
     for(_qp=0; _qp<_current_elem->n_nodes(); _qp++)
       if(_current_elem->is_node_on_side(_qp,_current_side))
-	var_Re(_qp) = _scaling_factor[_var_num]*computeQpResidual();
+	var_Re(_qp) = _moose_system._scaling_factor[_var_num]*computeQpResidual();
   }
 
 //  Moose::perf_log.pop("computeResidual()","BoundaryCondition");
@@ -265,13 +98,13 @@ BoundaryCondition::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()","BoundaryCondition");
 
-  DenseMatrix<Number> & var_Ke = *_var_Kes[_tid][_var_num];
+  DenseMatrix<Number> & var_Ke = *_moose_system._var_Kes[_tid][_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qface->n_points(); _qp++)
       for (_i=0; _i<_phi_face.size(); _i++)
         for (_j=0; _j<_phi_face.size(); _j++)
-          var_Ke(_i,_j) += _scaling_factor[_var_num]*_JxW_face[_qp]*computeQpJacobian();
+          var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW_face[_qp]*computeQpJacobian();
   else
   {
     for(_i=0; _i<_phi_face.size(); _i++)
@@ -282,7 +115,7 @@ BoundaryCondition::computeJacobian()
         for(_j=0; _j<_phi_face.size(); _j++)
           var_Ke(_i,_j) = 0;
         
-	var_Ke(_i,_i) = _scaling_factor[_var_num]*1;
+        var_Ke(_i,_i) = _moose_system._scaling_factor[_var_num]*1;
       }
     }
   }
@@ -329,7 +162,7 @@ void
 BoundaryCondition::computeAndStoreResidual()
 {
   _qp = 0;
-  _current_residual->set(_nodal_bc_var_dofs[_tid][_var_num], _scaling_factor[_var_num]*computeQpResidual());
+  _current_residual->set(_moose_system._nodal_bc_var_dofs[_tid][_var_num], _moose_system._scaling_factor[_var_num]*computeQpResidual());
 }
 
 Real
@@ -370,9 +203,9 @@ BoundaryCondition::coupledValFace(std::string name)
   }
   
   if(_integrated)
-    return _var_vals_face[_tid][_coupled_as_to_var_num[name]];
+    return _moose_system._var_vals_face[_tid][_coupled_as_to_var_num[name]];
 
-  return _var_vals_face_nodal[_tid][_coupled_as_to_var_num[name]];
+  return _moose_system._var_vals_face_nodal[_tid][_coupled_as_to_var_num[name]];
 }
 
 std::vector<RealGradient> &
@@ -385,27 +218,7 @@ BoundaryCondition::coupledGradFace(std::string name)
   }
 
   if(_integrated)
-    return _var_grads_face[_tid][_coupled_as_to_var_num[name]];
+    return _moose_system._var_grads_face[_tid][_coupled_as_to_var_num[name]];
 
   mooseError("");
 }
-
-std::vector<const Node *> BoundaryCondition::_static_current_node;
-std::vector<NumericVector<Number> *> BoundaryCondition::_static_current_residual;
-std::vector<unsigned int> BoundaryCondition::_static_current_side;
-std::vector<std::map<FEType, FEBase *> > BoundaryCondition::_fe_face;
-std::vector<QGauss *> BoundaryCondition::_static_qface;
-std::vector<std::map<FEType, const std::vector<Point> *> > BoundaryCondition::_static_q_point_face;
-std::vector<std::map<FEType, const std::vector<Real> *> > BoundaryCondition::_static_JxW_face;
-std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > BoundaryCondition::_static_phi_face;
-std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > BoundaryCondition::_static_dphi_face;
-std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > BoundaryCondition::_static_d2phi_face;
-std::vector<std::map<FEType, const std::vector<Point> *> > BoundaryCondition::_static_normals_face;
-
-std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums;
-std::map<unsigned int, std::vector<unsigned int> > BoundaryCondition::_boundary_to_var_nums_nodal;
-std::vector<std::vector<unsigned int> > BoundaryCondition::_nodal_bc_var_dofs;
-std::vector<std::vector<std::vector<Real> > > BoundaryCondition::_var_vals_face;
-std::vector<std::vector<std::vector<RealGradient> > > BoundaryCondition::_var_grads_face;
-std::vector<std::vector<std::vector<RealTensor> > > BoundaryCondition::_var_seconds_face;
-std::vector<std::vector<std::vector<Real> > > BoundaryCondition::_var_vals_face_nodal;

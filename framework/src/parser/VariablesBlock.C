@@ -2,8 +2,6 @@
 
 // Moose includes
 #include "Moose.h"
-#include "ComputeResidual.h"
-#include "ComputeJacobian.h"
 #include "AuxFactory.h"
 #include "GenericVariableBlock.h"
 
@@ -17,6 +15,13 @@
 #include "exodusII_io.h"
 #include "dof_map.h"
 #include "coupling_matrix.h"
+
+// FIXME: remove me whne libmesh solver problem is fixed
+namespace Moose {
+void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
+void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
+void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
+}
 
 template<>
 InputParameters validParams<VariablesBlock>()
@@ -38,21 +43,23 @@ VariablesBlock::execute()
   std::cerr << "Inside the VariablesBlock Object\n";
 #endif
 
-  EquationSystems *equation_system = new EquationSystems(*Moose::mesh);
-  Moose::equation_system = equation_system;
-  TransientNonlinearImplicitSystem &system =
-    equation_system->add_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+  _moose_system.initEquationSystems();
+  _moose_system.initDataStructures();
+
+  TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
 
   Moose::manual_scaling.reserve(n_activeChildren());
 
   // Add variable blocks from the children nodes
   visitChildren();
 
+  // FIXME: should be inside MooseSystem
   system.nonlinear_solver->residual = Moose::compute_residual;
   system.nonlinear_solver->jacobian = Moose::compute_jacobian;
 
   system.attach_init_function(Moose::init_cond);
 
+  // FIXME: should be inside MooseSystem
   CouplingMatrix * cm = new CouplingMatrix(system.n_vars());
   
   for(unsigned int i=0; i<system.n_vars(); i++)
@@ -71,9 +78,9 @@ VariablesBlock::copyNodalValues(const std::string &system_name)
 {
   System *system;
   if (system_name == "NonlinearSystem")
-    system = &Moose::equation_system->get_system<TransientNonlinearImplicitSystem>(system_name);
+    system = _moose_system.getNonlinearSystem();
   else
-    system = &Moose::equation_system->get_system<TransientExplicitSystem>(system_name);
+    system = _moose_system.getAuxSystem();
   
   // Iterate over the children and see if they need nodal values read
   for (std::vector<ParserBlock *>::iterator i = _children.begin(); i!=_children.end(); ++i)

@@ -34,7 +34,7 @@ GenericKernelBlock::execute()
 #endif
 
   if (isParamValid("block"))
-    KernelFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams(), getParamValue<int>("block")); 
+    _moose_system.addKernel(_type, getShortName(), getClassParams(), getParamValue<int>("block"));
   else
-    KernelFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());
+    _moose_system.addKernel(_type, getShortName(), getClassParams());
 }

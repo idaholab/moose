@@ -42,7 +42,7 @@ GenericBCBlock::execute()
   
 //  for (std::vector<int>::iterator boundary=boundary_vector.begin(); boundary != boundary_vector.end(); ++boundary)
     if (_reg_id == "BCs/*")
-      BCFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());
+      _moose_system.addBC(_type, getShortName(), getClassParams());
     else
-      AuxFactory::instance()->addBC(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());
+      _moose_system.addAuxBC(_type, getShortName(), getClassParams());
 }

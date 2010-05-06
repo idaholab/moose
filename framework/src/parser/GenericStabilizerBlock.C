@@ -22,5 +22,5 @@ GenericStabilizerBlock::GenericStabilizerBlock(const std::string & reg_id, const
 void
 GenericStabilizerBlock::execute() 
 {
-  StabilizerFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());
+  _moose_system.addStabilizer(_type, getShortName(), getClassParams());
 }

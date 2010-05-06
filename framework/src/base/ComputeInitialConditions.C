@@ -1,5 +1,6 @@
+#include "Moose.h"
+#include "MooseSystem.h"
 #include "InitialCondition.h"
-#include "InitialConditionFactory.h"
 
 // libMesh includes
 #include "libmesh.h"
@@ -16,16 +17,7 @@ namespace Moose
                         const std::string& sys_name,
                         const std::string& var_name)
   {
-    // Try to grab an InitialCondition object for this variable.
-    InitialCondition * ic = InitialConditionFactory::instance()->getInitialCondition(0, var_name);
-    
-    if(ic)
-      return ic->value(p);
-   
-    if(parameters.have_parameter<Real>("initial_"+var_name))
-      return parameters.get<Real>("initial_"+var_name);
-    
-    return 0;
+    return Moose::g_system->initial_value(p, parameters, sys_name, var_name);
   }
 
   Gradient initial_gradient (const Point& p,
@@ -33,19 +25,50 @@ namespace Moose
                              const std::string& sys_name,
                              const std::string& var_name)
   {
-    // Try to grab an InitialCondition object for this variable.
-    InitialCondition * ic = InitialConditionFactory::instance()->getInitialCondition(0, var_name);
-    
-    if(ic)
-      return ic->gradient(p);
-
-    return RealGradient();
+    return Moose::g_system->initial_gradient(p, parameters, sys_name, var_name);
   }
 
   void initial_condition(EquationSystems& es, const std::string& system_name)
   {
-    ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
-    
-    system.project_solution(initial_value, initial_gradient, es.parameters);
+    Moose::g_system->initial_condition(es, system_name);
   }
+}
+
+
+Number MooseSystem::initial_value (const Point& p,
+                      const Parameters& parameters,
+                      const std::string& sys_name,
+                      const std::string& var_name)
+{
+  // Try to grab an InitialCondition object for this variable.
+  InitialCondition * ic = _ics.getInitialCondition(0, var_name);
+
+  if(ic)
+    return ic->value(p);
+
+  if(parameters.have_parameter<Real>("initial_"+var_name))
+    return parameters.get<Real>("initial_"+var_name);
+
+  return 0;
+}
+
+Gradient MooseSystem::initial_gradient (const Point& p,
+                           const Parameters& parameters,
+                           const std::string& sys_name,
+                           const std::string& var_name)
+{
+  // Try to grab an InitialCondition object for this variable.
+  InitialCondition * ic = _ics.getInitialCondition(0, var_name);
+
+  if(ic)
+    return ic->gradient(p);
+
+  return RealGradient();
+}
+
+void MooseSystem::initial_condition(EquationSystems& es, const std::string& system_name)
+{
+  ExplicitSystem & system = _es->get_system<ExplicitSystem>(system_name);
+
+  system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
 }

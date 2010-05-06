@@ -6,6 +6,10 @@
 
 #include <iostream>
 
+MaterialFactory::MaterialFactory()
+{
+}
+
 MaterialFactory *
 MaterialFactory::instance()
      {
@@ -13,25 +17,6 @@ MaterialFactory::instance()
     if(!instance)
       instance=new MaterialFactory;
     return instance;
-  }
-
-void
-  MaterialFactory::add(std::string mat_name,
-                       std::string name,
-                       MooseSystem & moose_system,
-                       InputParameters parameters)
-  {
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    {
-      Moose::current_thread_id = tid;
-      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
-
-      // TODO: Remove this hack when Material no longer inherits from Kernel!
-      parameters.set<std::string>("variable") = Kernel::_es->get_system(0).variable_name(0);
-
-      for (unsigned int i=0; i<blocks.size(); ++i)
-        active_materials[tid][blocks[i]] = (*name_to_build_pointer[mat_name])(name, moose_system, parameters);
-    }
   }
 
 InputParameters
@@ -44,31 +29,6 @@ MaterialFactory::getValidParams(std::string name)
     }
     return name_to_params_pointer[name]();
   }
-
-Material *
-MaterialFactory::getMaterial(THREAD_ID tid, unsigned int block_id)
-  {
-    MaterialIterator mat_iter = active_materials[tid].find(block_id);
-    if (mat_iter == active_materials[tid].end()) 
-    {
-      std::cerr << "Active Material Missing\n";
-      mooseError("");
-    }
-    return mat_iter->second;
-  }
-
-void MaterialFactory::updateMaterialDataState()
-{
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  { 
-    std::map<int, Material *>::iterator it = active_materials[tid].begin();
-    std::map<int, Material *>::iterator it_end = active_materials[tid].end();
-    
-    for(;it!=it_end;++it) 
-      it->second->updateDataState();
-  }
-}
-
 
 MaterialNamesIterator
 MaterialFactory::registeredMaterialsBegin()
@@ -93,22 +53,3 @@ MaterialFactory::registeredMaterialsEnd()
 {
   return _registered_material_names.end();
 }
-
-
-MaterialIterator
-MaterialFactory::activeMaterialsBegin(THREAD_ID tid)
-{
-  return active_materials[tid].begin();
-}
-
-MaterialIterator
-MaterialFactory::activeMaterialsEnd(THREAD_ID tid)
-{
-  return active_materials[tid].end();
-}
-
-MaterialFactory::MaterialFactory()
-{
-  active_materials.resize(libMesh::n_threads());
-}
-

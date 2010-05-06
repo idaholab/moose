@@ -1,4 +1,5 @@
 #include "ImplicitEuler.h"
+#include "MooseSystem.h"
 
 template<>
 InputParameters validParams<ImplicitEuler>()

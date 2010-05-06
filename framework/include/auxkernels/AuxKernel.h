@@ -24,26 +24,6 @@ public:
 
   virtual ~AuxKernel(){}
 
-  /**
-   * Size everything.
-   */
-  static void sizeEverything();
-
-  /**
-   * Must be called _after_ Kernel::init()
-   */
-  static void init();
-
-  /**
-   * Nodal reinit.
-   */
-  static void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node);
-
-  /**
-   * Elemental reinit.
-   */
-  static void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem);
-
   void computeAndStore(THREAD_ID tid);
 
   bool isNodal();
@@ -68,18 +48,6 @@ protected:
   RealGradient & coupledGradOldAux(std::string name);
   RealGradient & coupledGradOlderAux(std::string name);
 
-  static const NumericVector<Number> * _nonlinear_old_soln;
-  static const NumericVector<Number> * _nonlinear_older_soln;
-  
-  static NumericVector<Number> * _aux_soln;
-  static const NumericVector<Number> * _aux_old_soln;
-  static const NumericVector<Number> * _aux_older_soln;
-
-  /**
-   * Holds the current dof numbers for each variable
-   */
-  static std::vector<std::vector<unsigned int> > _aux_var_dofs;
-
 
   /*************
    * Nodal Stuff
@@ -89,122 +57,9 @@ protected:
    */
   const Node * & _current_node;
 
-  /**
-   * Current Node
-   */
-  static std::vector<const Node *> _static_current_node;
-
-  /**
-   * Holds the variable numbers of the nodal aux vars.
-   */
-  static std::vector<unsigned int> _nodal_var_nums;
-  
-  /**
-   * Value of the variables at the nodes.
-   */
-  static std::vector<std::vector<Real > > _var_vals_nodal;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  static std::vector<std::vector<Real > > _var_vals_old_nodal;
-
-  /**
-   * Value of the variables at the nodes at t-2.
-   */
-  static std::vector<std::vector<Real > > _var_vals_older_nodal;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  static std::vector<std::vector<Real > > _aux_var_vals_nodal;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  static std::vector<std::vector<Real > > _aux_var_vals_old_nodal;
-
-  /**
-   * Value of the variables at the nodes at t-2.
-   */
-  static std::vector<std::vector<Real > > _aux_var_vals_older_nodal;
-
-
-  /*****************
-   * Elemental Stuff
-   *****************/
-
-  /**
-   * Holds the variable numbers of the elemental aux vars.
-   */
-  static std::vector<unsigned int> _element_var_nums;
-
-  /**
-   * Value of the variables at the elements.
-   */
-  static std::vector<std::vector<Real > > _var_vals_element;
-
-  /**
-   * Value of the variables at the elements.
-   */
-  static std::vector<std::vector<Real > > _var_vals_old_element;
-
-  /**
-   * Value of the variables at the elements at t-2.
-   */
-  static std::vector<std::vector<Real > > _var_vals_older_element;
-
-  /**
-   * Gradient of the variables at the elements.
-   */
-  static std::vector<std::vector<RealGradient > > _var_grads_element;
-
-  /**
-   * Gradient of the variables at the elements.
-   */
-  static std::vector<std::vector<RealGradient > > _var_grads_old_element;
-
-  /**
-   * Gradient of the variables at the elements at t-2.
-   */
-  static std::vector<std::vector<RealGradient > > _var_grads_older_element;
-
-  /**
-   * Value of the variables at the elements.
-   */
-  static std::vector<std::vector<Real > > _aux_var_vals_element;
-
-  /**
-   * Value of the variables at the elements.
-   */
-  static std::vector<std::vector<Real > > _aux_var_vals_old_element;
-
-  /**
-   * Value of the variables at the elements at t-2.
-   */
-  static std::vector<std::vector<Real > > _aux_var_vals_older_element;
-
-  /**
-   * Gradient of the variables at the elements.
-   */
-  static std::vector<std::vector<RealGradient > > _aux_var_grads_element;
-
-  /**
-   * Gradient of the variables at the elements.
-   */
-  static std::vector<std::vector<RealGradient > > _aux_var_grads_old_element;
-
-  /**
-   * Gradient of the variables at the elements at t-2.
-   */
-  static std::vector<std::vector<RealGradient > > _aux_var_grads_older_element;
-
-
-  static Real integrateValue(const std::vector<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
-  static RealGradient integrateGradient(const std::vector<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
 
 private:
-  
+
   /**
    * Stuff we don't want AuxKernel classes to get access to from Kernel
    */
@@ -217,7 +72,7 @@ private:
   Kernel::_JxW;
   Kernel::_phi;
   Kernel::_dphi;
-  Kernel::_q_point;  
+  Kernel::_q_point;
 };
 
 #endif //AUXKERNEL_H

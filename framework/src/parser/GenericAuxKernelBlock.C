@@ -29,5 +29,5 @@ GenericAuxKernelBlock::execute()
             << "\tname:" << getShortName() << std::endl;
 #endif
 
-  AuxFactory::instance()->add(_type, getShortName(), _parser_handle.getMooseSystem(), getClassParams());  
+  _moose_system.addAuxKernel(_type, getShortName(), getClassParams());
 }

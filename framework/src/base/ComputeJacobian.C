@@ -1,12 +1,12 @@
 //Moose Includes
 #include "Moose.h"
-#include "UpdateAuxVars.h"
 #include "KernelFactory.h"
 #include "MaterialFactory.h"
 #include "StabilizerFactory.h"
 #include "BoundaryCondition.h"
 #include "BCFactory.h"
 #include "ParallelUniqueId.h"
+#include "MooseSystem.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -22,8 +22,9 @@
 class ComputeInternalJacobians
 {
 public:
-  ComputeInternalJacobians(const NumericVector<Number>& in_soln, SparseMatrix<Number>&  in_jacobian)
-    :soln(in_soln),
+  ComputeInternalJacobians(MooseSystem &sys, const NumericVector<Number>& in_soln, SparseMatrix<Number>&  in_jacobian)
+    :sys(sys),
+     soln(in_soln),
      jacobian(in_jacobian)
   {}
   
@@ -37,18 +38,18 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
-    KernelFactory::instance()->updateActiveKernels(tid);
+    sys._kernels.updateActiveKernels(tid);
 
-    KernelIterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
-    KernelIterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
+    KernelIterator kernel_begin = sys._kernels.activeKernelsBegin(tid);
+    KernelIterator kernel_end = sys._kernels.activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;
 
     KernelIterator block_kernel_begin;
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
-    StabilizerIterator stabilizer_begin = StabilizerFactory::instance()->activeStabilizersBegin(tid);
-    StabilizerIterator stabilizer_end = StabilizerFactory::instance()->activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_begin = sys._stabilizers.activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = sys._stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
     unsigned int subdomain = 999999999;
@@ -57,7 +58,7 @@ public:
     {
       const Elem* elem = *el;
 
-      Kernel::reinit(tid, soln, elem, NULL, &Ke);
+      sys.reinitKernels(tid, soln, elem, NULL, &Ke);
 
       unsigned int cur_subdomain = elem->subdomain_id();
 
@@ -65,11 +66,11 @@ public:
       {
         subdomain = cur_subdomain;
 
-        Material * material = MaterialFactory::instance()->getMaterial(tid, subdomain);
+        Material * material = sys._materials.getMaterial(tid, subdomain);
         material->subdomainSetup();
 
-        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(tid, subdomain);
-        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(tid, subdomain);
+        block_kernel_begin = sys._kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = sys._kernels.blockKernelsEnd(tid, subdomain);
       
         //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -100,14 +101,14 @@ public:
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = Moose::mesh->boundary_info->boundary_id (elem, side);
+          unsigned int boundary_id = sys._mesh->boundary_info->boundary_id (elem, side);
 
-          BCIterator bc_it = BCFactory::instance()->activeBCsBegin(tid,boundary_id);
-          BCIterator bc_end = BCFactory::instance()->activeBCsEnd(tid,boundary_id);
+          BCIterator bc_it = sys._bcs.activeBCsBegin(tid,boundary_id);
+          BCIterator bc_end = sys._bcs.activeBCsEnd(tid,boundary_id);
 
           if(bc_it != bc_end)
           {
-            BoundaryCondition::reinit(tid, soln, side, boundary_id);
+            sys.reinitBCs(tid, soln, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
               (*bc_it)->computeJacobian();
@@ -117,10 +118,10 @@ public:
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for(unsigned int i=0; i< Kernel::_var_dof_indices[tid].size(); i++)
+        for(unsigned int i=0; i< sys._var_dof_indices[tid].size(); i++)
         {
-          Kernel::_dof_map->constrain_element_matrix (*Kernel::_var_Kes[tid][i], Kernel::_var_dof_indices[tid][i], false);
-          jacobian.add_matrix(*Kernel::_var_Kes[tid][i], Kernel::_var_dof_indices[tid][i]);
+          sys._dof_map->constrain_element_matrix (*sys._var_Kes[tid][i], sys._var_dof_indices[tid][i], false);
+          jacobian.add_matrix(*sys._var_Kes[tid][i], sys._var_dof_indices[tid][i]);
         }
       }
     }
@@ -128,81 +129,90 @@ public:
   }
 
 protected:
+  MooseSystem& sys;
   const NumericVector<Number>& soln;
   SparseMatrix<Number>& jacobian;
 };
 
-namespace Moose
-{ 
-  void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
-  {
-    Moose::perf_log.push("compute_jacobian()","Solve");
+namespace Moose {
+
+void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
+{
+  g_system->compute_jacobian(soln, jacobian);
+}
+
+}
+
+void MooseSystem::compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
+{
+  Moose::perf_log.push("compute_jacobian()","Solve");
 
 #ifdef LIBMESH_HAVE_PETSC
-    //Necessary for speed
+  //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
 #else
-    // In Petsc 3.0.0, MatSetOption has three args...the third arg
-    // determines whether the option is set (true) or unset (false)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-		 MAT_KEEP_ZEROED_ROWS,
-		 PETSC_TRUE);
+  // In Petsc 3.0.0, MatSetOption has three args...the third arg
+  // determines whether the option is set (true) or unset (false)
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+   MAT_KEEP_ZEROED_ROWS,
+   PETSC_TRUE);
 #endif
     
 #endif
   
-    update_aux_vars(soln);
+  update_aux_vars(soln);
 
-    Threads::parallel_for(*Moose::getActiveLocalElementRange(),
-                          ComputeInternalJacobians(soln, jacobian));
+  Threads::parallel_for(*getActiveLocalElementRange(),
+                        ComputeInternalJacobians(*this, soln, jacobian));
 
-    jacobian.close();
+  jacobian.close();
 
-    //Dirichlet BCs
-    std::vector<int> zero_rows;
-    
-    std::vector<unsigned int> nodes;
-    std::vector<short int> ids;
+  //Dirichlet BCs
+  std::vector<int> zero_rows;
 
-    mesh->boundary_info->build_node_list(nodes, ids);
+  std::vector<unsigned int> nodes;
+  std::vector<short int> ids;
+
+  _mesh->boundary_info->build_node_list(nodes, ids);
+
+  const unsigned int n_nodes = nodes.size();
+
+  for(unsigned int i=0; i<n_nodes; i++)
+  {
+    unsigned int boundary_id = ids[i];
   
-    const unsigned int n_nodes = nodes.size();
+    BCIterator bc_it = _bcs.activeNodalBCsBegin(0,boundary_id);
+    BCIterator bc_end = _bcs.activeNodalBCsEnd(0,boundary_id);
 
-    for(unsigned int i=0; i<n_nodes; i++)
+    if(bc_it != bc_end)
     {
-      unsigned int boundary_id = ids[i];
-    
-      BCIterator bc_it = BCFactory::instance()->activeNodalBCsBegin(0,boundary_id);
-      BCIterator bc_end = BCFactory::instance()->activeNodalBCsEnd(0,boundary_id);
+        Node & node = _mesh->node(nodes[i]);
 
-      if(bc_it != bc_end)
-      {
-          Node & node = mesh->node(nodes[i]);
-          
-          if(node.processor_id() == libMesh::processor_id())
-          {
-            for(; bc_it != bc_end; ++bc_it)
-              //The first zero is for the system
-              //The second zero only works with Lagrange elements!
-              zero_rows.push_back(node.dof_number(0, (*bc_it)->variable(), 0));
-          }
-      }
+        if(node.processor_id() == libMesh::processor_id())
+        {
+          for(; bc_it != bc_end; ++bc_it)
+            //The first zero is for the system
+            //The second zero only works with Lagrange elements!
+            zero_rows.push_back(node.dof_number(0, (*bc_it)->variable(), 0));
+        }
     }
-
-    //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
-    jacobian.zero_rows(zero_rows, 1.0);
-
-    jacobian.close();
-
-    Moose::perf_log.pop("compute_jacobian()","Solve");
   }
+
+  //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
+  jacobian.zero_rows(zero_rows, 1.0);
+
+  jacobian.close();
+
+  Moose::perf_log.pop("compute_jacobian()","Solve");
+}
 
 class ComputeInternalJacobianBlocks
 {
 public:
-  ComputeInternalJacobianBlocks(const NumericVector<Number>& in_soln, SparseMatrix<Number>&  in_jacobian, System& in_precond_system, unsigned int & in_ivar, unsigned int & in_jvar)
-    :soln(in_soln),
+  ComputeInternalJacobianBlocks(MooseSystem &sys, const NumericVector<Number>& in_soln, SparseMatrix<Number>&  in_jacobian, System& in_precond_system, unsigned int & in_ivar, unsigned int & in_jvar)
+    :sys(sys),
+     soln(in_soln),
      jacobian(in_jacobian),
      precond_system(in_precond_system),
      ivar(in_ivar),
@@ -217,18 +227,18 @@ public:
     
     ConstElemRange::const_iterator el = range.begin();
 
-    KernelFactory::instance()->updateActiveKernels(tid);
+    sys._kernels.updateActiveKernels(tid);
 
-    KernelIterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
-    KernelIterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
+    KernelIterator kernel_begin = sys._kernels.activeKernelsBegin(tid);
+    KernelIterator kernel_end = sys._kernels.activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;
 
     KernelIterator block_kernel_begin;
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
-    StabilizerIterator stabilizer_begin = StabilizerFactory::instance()->activeStabilizersBegin(tid);
-    StabilizerIterator stabilizer_end = StabilizerFactory::instance()->activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_begin = sys._stabilizers.activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = sys._stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
     unsigned int subdomain = 999999999;
@@ -243,7 +253,7 @@ public:
     {
       const Elem* elem = *el;
 
-      Kernel::reinit(tid, soln, elem, NULL, NULL);
+      sys.reinitKernels(tid, soln, elem, NULL, NULL);
 
       dof_map.dof_indices(elem, dof_indices);
 
@@ -255,11 +265,11 @@ public:
       {
         subdomain = cur_subdomain;
 
-        Material * material = MaterialFactory::instance()->getMaterial(tid, subdomain);
+        Material * material = sys._materials.getMaterial(tid, subdomain);
         material->subdomainSetup();
 
-        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(tid, subdomain);
-        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(tid, subdomain);
+        block_kernel_begin = sys._kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = sys._kernels.blockKernelsEnd(tid, subdomain);
       
         //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -300,14 +310,14 @@ public:
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = mesh->boundary_info->boundary_id (elem, side);
+          unsigned int boundary_id = sys._mesh->boundary_info->boundary_id (elem, side);
 
-          BCIterator bc_it = BCFactory::instance()->activeBCsBegin(tid,boundary_id);
-          BCIterator bc_end = BCFactory::instance()->activeBCsEnd(tid,boundary_id);
+          BCIterator bc_it = sys._bcs.activeBCsBegin(tid,boundary_id);
+          BCIterator bc_end = sys._bcs.activeBCsEnd(tid,boundary_id);
 
           if(bc_it != bc_end)
           {
-            BoundaryCondition::reinit(tid, soln, side, boundary_id);
+            sys.reinitBCs(tid, soln, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
             {
@@ -330,6 +340,7 @@ public:
   }
 
 protected:
+  MooseSystem& sys;
   const NumericVector<Number>& soln;
   SparseMatrix<Number>& jacobian;
   System& precond_system;
@@ -337,25 +348,33 @@ protected:
   unsigned int & jvar;
 };
 
-  
-  void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar)
-  {
-    Moose::perf_log.push("compute_jacobian_block()","Solve");
+namespace Moose {
+
+void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar)
+{
+  g_system->compute_jacobian_block (soln, jacobian, precond_system, ivar, jvar);
+}
+
+}
+
+void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar)
+{
+  Moose::perf_log.push("compute_jacobian_block()","Solve");
 
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
 #else
-    // In Petsc 3.0.0, MatSetOption has three args...the third arg
-    // determines whether the option is set (true) or unset (false)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-		 MAT_KEEP_ZEROED_ROWS,
-		 PETSC_TRUE);
+  // In Petsc 3.0.0, MatSetOption has three args...the third arg
+  // determines whether the option is set (true) or unset (false)
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+   MAT_KEEP_ZEROED_ROWS,
+   PETSC_TRUE);
 #endif
 #endif
 
-    update_aux_vars(soln);
+  update_aux_vars(soln);
 /*
     Threads::parallel_for(ConstElemRange(Moose::mesh->active_local_elements_begin(),
                                          Moose::mesh->active_local_elements_end(),1),
@@ -365,21 +384,21 @@ protected:
   {
     unsigned int tid = 0;
     
-    MeshBase::const_element_iterator el = Moose::mesh->active_local_elements_begin();
-    const MeshBase::const_element_iterator end_el = Moose::mesh->active_local_elements_end();
+    MeshBase::const_element_iterator el = _mesh->active_local_elements_begin();
+    const MeshBase::const_element_iterator end_el = _mesh->active_local_elements_end();
 
-    KernelFactory::instance()->updateActiveKernels(tid);
+    _kernels.updateActiveKernels(tid);
 
-    KernelIterator kernel_begin = KernelFactory::instance()->activeKernelsBegin(tid);
-    KernelIterator kernel_end = KernelFactory::instance()->activeKernelsEnd(tid);
+    KernelIterator kernel_begin = _kernels.activeKernelsBegin(tid);
+    KernelIterator kernel_end = _kernels.activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;
 
     KernelIterator block_kernel_begin;
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
-    StabilizerIterator stabilizer_begin = StabilizerFactory::instance()->activeStabilizersBegin(tid);
-    StabilizerIterator stabilizer_end = StabilizerFactory::instance()->activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_begin = _stabilizers.activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = _stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
     unsigned int subdomain = 999999999;
@@ -394,7 +413,7 @@ protected:
     {
       const Elem* elem = *el;
 
-      Kernel::reinit(tid, soln, elem, NULL, NULL);
+      reinitKernels(tid, soln, elem, NULL, NULL);
 
       dof_map.dof_indices(elem, dof_indices);
 
@@ -406,11 +425,11 @@ protected:
       {
         subdomain = cur_subdomain;
 
-        Material * material = MaterialFactory::instance()->getMaterial(tid, subdomain);
+        Material * material = _materials.getMaterial(tid, subdomain);
         material->subdomainSetup();
 
-        block_kernel_begin = KernelFactory::instance()->blockKernelsBegin(tid, subdomain);
-        block_kernel_end = KernelFactory::instance()->blockKernelsEnd(tid, subdomain);
+        block_kernel_begin = _kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = _kernels.blockKernelsEnd(tid, subdomain);
       
         //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -451,14 +470,14 @@ protected:
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = mesh->boundary_info->boundary_id (elem, side);
+          unsigned int boundary_id = _mesh->boundary_info->boundary_id (elem, side);
 
-          BCIterator bc_it = BCFactory::instance()->activeBCsBegin(tid,boundary_id);
-          BCIterator bc_end = BCFactory::instance()->activeBCsEnd(tid,boundary_id);
+          BCIterator bc_it = _bcs.activeBCsBegin(tid,boundary_id);
+          BCIterator bc_end = _bcs.activeBCsEnd(tid,boundary_id);
 
           if(bc_it != bc_end)
           {
-            BoundaryCondition::reinit(tid, soln, side, boundary_id);
+            reinitBCs(tid, soln, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
             {
@@ -477,48 +496,46 @@ protected:
     }
   }
     
-    jacobian.close();
+  jacobian.close();
 
-    //Dirichlet BCs
-    std::vector<int> zero_rows;
-    
-    std::vector<unsigned int> nodes;
-    std::vector<short int> ids;
+  //Dirichlet BCs
+  std::vector<int> zero_rows;
 
-    mesh->boundary_info->build_node_list(nodes, ids);
+  std::vector<unsigned int> nodes;
+  std::vector<short int> ids;
+
+  _mesh->boundary_info->build_node_list(nodes, ids);
+
+  const unsigned int n_nodes = nodes.size();
+
+  for(unsigned int i=0; i<n_nodes; i++)
+  {
+    unsigned int boundary_id = ids[i];
   
-    const unsigned int n_nodes = nodes.size();
+    BCIterator bc_it = _bcs.activeNodalBCsBegin(0,boundary_id);
+    BCIterator bc_end = _bcs.activeNodalBCsEnd(0,boundary_id);
 
-    for(unsigned int i=0; i<n_nodes; i++)
+    if(bc_it != bc_end)
     {
-      unsigned int boundary_id = ids[i];
-    
-      BCIterator bc_it = BCFactory::instance()->activeNodalBCsBegin(0,boundary_id);
-      BCIterator bc_end = BCFactory::instance()->activeNodalBCsEnd(0,boundary_id);
+      Node & node = _mesh->node(nodes[i]);
 
-      if(bc_it != bc_end)
+      if(node.processor_id() == libMesh::processor_id())
       {
-        Node & node = mesh->node(nodes[i]);
-
-        if(node.processor_id() == libMesh::processor_id())
-        {
-          for(; bc_it != bc_end; ++bc_it)
-            //The first zero is for the variable number... there is only one variable in each mini-system
-            //The second zero only works with Lagrange elements!
-            if((*bc_it)->variable() == ivar)
-              zero_rows.push_back(node.dof_number(precond_system.number(), 0, 0));
-        }
+        for(; bc_it != bc_end; ++bc_it)
+          //The first zero is for the variable number... there is only one variable in each mini-system
+          //The second zero only works with Lagrange elements!
+          if((*bc_it)->variable() == ivar)
+            zero_rows.push_back(node.dof_number(precond_system.number(), 0, 0));
       }
     }
-
-    jacobian.close();
-
-    //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
-    jacobian.zero_rows(zero_rows, 1.0);
-  
-    jacobian.close();
-  
-    Moose::perf_log.pop("compute_jacobian_block()","Solve");
   }
 
+  jacobian.close();
+
+  //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
+  jacobian.zero_rows(zero_rows, 1.0);
+
+  jacobian.close();
+
+  Moose::perf_log.pop("compute_jacobian_block()","Solve");
 }

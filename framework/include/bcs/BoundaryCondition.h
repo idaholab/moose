@@ -25,27 +25,6 @@ public:
 
   virtual ~BoundaryCondition(){}
 
-  /**
-   * Size everything.
-   */
-  static void sizeEverything();
-
-  /**
-   * Initializes common data structures.
-   */
-  static void init();
-
-  /**
-   * Reinitializes common datastructures
-   * Must be called after a Kernel::reinit() for the same element
-   */
-  static void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id);
-
-  /**
-   * Reinitializes common datastructures for nodal bcs.
-   */
-  static void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
-
   /** 
    * Boundary ID the BC is active on.
    * 
@@ -152,109 +131,6 @@ protected:
    */
   NumericVector<Number> * & _current_residual;
 
-  /**
-   * ***********************
-   * All of the static stuff
-   * ***********************
-   */
-
-  /**
-   * Current node for nodal BC's
-   */
-  static std::vector<const Node *> _static_current_node;
-  
-  /**
-   * Current residual vector.  Only valid for nodal BC's.
-   */
-  static std::vector<NumericVector<Number> *> _static_current_residual;
-    
-  /**
-   * Current side.
-   */
-  static std::vector<unsigned int> _static_current_side;
-  
-  /**
-   * Boundary finite element. 
-   */
-  static std::vector<std::map<FEType, FEBase *> > _fe_face;
-
-  /**
-   * Boundary quadrature rule.
-   */
-  static std::vector<QGauss *> _static_qface;
-
-  /**
-   * XYZ coordinates of quadrature points
-   */
-  static std::vector<std::map<FEType, const std::vector<Point> *> > _static_q_point_face;
-
-  /**
-   * Side Jacobian pre-multiplied by the weight.
-   */
-  static std::vector<std::map<FEType, const std::vector<Real> *> > _static_JxW_face;
-
-  /**
-   * Side shape function.
-   */
-  static std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _static_phi_face;
-
-  /**
-   * Gradient of side shape function.
-   */
-  static std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _static_dphi_face;
-
-  /**
-   * Second derivative of interior shape function.
-   */
-  static std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _static_d2phi_face;
-
-  /**
-   * Normal vectors at the quadrature points.
-   */
-  static std::vector<std::map<FEType, const std::vector<Point> *> > _static_normals_face;
-
-  /**
-   * Map to vector of variable numbers that need to be evaluated
-   * at the quadrature points on that boundary
-   */
-  static std::map<unsigned int, std::vector<unsigned int> > _boundary_to_var_nums;
-
-  /**
-   * Map to vector of variable numbers that need to be evaluated
-   * at the nodes on that boundary
-   */
-  static std::map<unsigned int, std::vector<unsigned int> > _boundary_to_var_nums_nodal;
-  
-  /**
-   * Holds the current dof numbers for each variable for nodal bcs
-   */
-  static std::vector<std::vector<unsigned int> > _nodal_bc_var_dofs;
-
-  /**
-   * ***************
-   * Values of stuff
-   * ***************
-   */
-  
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<Real> > > _var_vals_face;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealGradient> > > _var_grads_face;
-
-  /**
-   * Second derivatives of the variables at the quadrature points.
-   */
-  static std::vector<std::vector<std::vector<RealTensor> > > _var_seconds_face;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  static std::vector<std::vector<std::vector<Real> > > _var_vals_face_nodal;
 
   /**
    * Holds the current solution at the current quadrature point on the face.

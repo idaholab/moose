@@ -22,8 +22,7 @@ GenericPeriodicBlock::GenericPeriodicBlock(const std::string & reg_id, const std
 void
 GenericPeriodicBlock::execute() 
 {
-  TransientNonlinearImplicitSystem &system =
-    Moose::equation_system->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+  TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
 
   PeriodicBoundary p;
   p.myboundary = getParamValue<unsigned int>("primary");

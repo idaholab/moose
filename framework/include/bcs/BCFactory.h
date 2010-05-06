@@ -18,19 +18,14 @@
 typedef BoundaryCondition * (*BCBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
 /**
- * Typedef to make things easier.
- */
-typedef InputParameters (*BCParamsPtr)();
-
-/**
- * Typedef to hide implementation details
- */
-typedef std::vector<BoundaryCondition *>::iterator BCIterator;
-
-/**
  * Typedef to hide implementation details
  */
 typedef std::vector<std::string>::iterator BCNamesIterator;
+
+/**
+ * Typedef to make things easier.
+ */
+typedef InputParameters (*BCParamsPtr)();
 
 /**
  * Templated build function used for generating function pointers to build classes on demand.
@@ -56,23 +51,18 @@ public:
     name_to_params_pointer[name]=&validParams<BCType>;
   }
 
-  void add(std::string bc_name,
-           std::string name,
-           MooseSystem & moose_system,
-           InputParameters parameters);
-  
-  InputParameters getValidParams(std::string name);
-  
-  BCIterator activeBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  BCIterator activeBCsEnd(THREAD_ID tid, unsigned int boundary_id);
-
-  BCIterator activeNodalBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  BCIterator activeNodalBCsEnd(THREAD_ID tid, unsigned int boundary_id);
+  BoundaryCondition *create(std::string bc_name,
+                            std::string name,
+                            MooseSystem & moose_system,
+                            InputParameters parameters)
+  {
+    return (*name_to_build_pointer[bc_name])(name, moose_system, parameters);
+  }
 
   BCNamesIterator registeredBCsBegin();
   BCNamesIterator registeredBCsEnd();
 
-  void activeBoundaries(std::set<subdomain_id_type> & set_buffer) const;
+  InputParameters getValidParams(std::string name);
   
 private:
   BCFactory();
@@ -83,9 +73,7 @@ private:
   std::map<std::string, BCParamsPtr> name_to_params_pointer;
 
   std::vector<std::string> _registered_bc_names;
-  
-  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > active_bcs;
-  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > active_nodal_bcs;
+
 };
 
 #endif //BCFACTORY_H
