@@ -268,24 +268,24 @@ ParserBlock::printBlockData()
   std::cout << spacing << "{\n";
   
   std::cout << spacing << "  Valid Parameters:\n";
-
-  for (InputParameters::iterator iter = _block_params.begin(); iter != _block_params.end(); ++iter) 
-  {
-    // Block params may be required and will have a doc string
-    std::string required = _block_params.isParamRequired(iter->first) ? "*" : " ";
-
-    std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
-    
-    iter->second->print(std::cout);
-    
-    std::cout << "\n" << spacing << "    " << std::setw(30) << " " << "    " << _block_params.getDocString(iter->first) << "\n";
-  }
   
-  for (InputParameters::iterator iter = _class_params.begin(); iter != _class_params.end(); ++iter)
+  std::vector<InputParameters *> param_ptrs;
+  param_ptrs.push_back(&_block_params);
+  param_ptrs.push_back(&_class_params);
+
+  for (unsigned int i=0; i<param_ptrs.size(); ++i)
   {
-    std::cout << spacing << "     " << std::setw(30) << iter->first << ": ";
-    iter->second->print(std::cout);
-    std::cout << "\n";
+    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
+    {
+      // Block params may be required and will have a doc string
+      std::string required = param_ptrs[i]->isParamRequired(iter->first) ? "*" : " ";
+
+      std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
+    
+      iter->second->print(std::cout);
+    
+      std::cout << "\n" << spacing << "    " << std::setw(30) << " " << "    " << param_ptrs[i]->getDocString(iter->first) << "\n";
+    }
   }
   
   visitChildren(&ParserBlock::printBlockData, true, false);

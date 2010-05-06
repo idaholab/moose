@@ -40,6 +40,8 @@ Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
       exit(0);
     }
   }
+  else
+    printUsage();
 }
 
 Parser::~Parser() 
