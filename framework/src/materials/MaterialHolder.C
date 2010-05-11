@@ -8,6 +8,15 @@ MaterialHolder::MaterialHolder(MooseSystem &sys)
 
 MaterialHolder::~MaterialHolder()
 {
+  {
+    std::vector<std::map<int, Material *> >::iterator i;
+    for (i = active_materials.begin(); i != active_materials.end(); ++i)
+    {
+      std::map<int, Material *>::iterator j;
+      for (j = i->begin(); j != i->end(); ++j)
+        delete j->second;
+    }
+  }
 }
 
 Material *

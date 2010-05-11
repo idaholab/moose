@@ -96,6 +96,46 @@ MooseSystem::~MooseSystem()
 
   if (_delete_mesh && _mesh != NULL)
     delete _mesh;
+
+  for (std::vector<std::vector<DenseSubVector<Number> *> >::iterator i = _var_Res.begin(); i != _var_Res.end(); ++i)
+  {
+    for (std::vector<DenseSubVector<Number> *>::iterator j = i->begin(); j != i->end(); ++j)
+    {
+      delete *j;
+    }
+  }
+
+  for (std::vector<std::vector<DenseMatrix<Number> *> >::iterator i = _var_Kes.begin(); i != _var_Kes.end(); ++i)
+  {
+    for (std::vector<DenseMatrix<Number> *>::iterator j = i->begin(); j != i->end(); ++j)
+    {
+      delete *j;
+    }
+  }
+
+  for (std::vector<std::map<FEType, FEBase*> >::iterator i = _fe.begin(); i != _fe.end(); ++i)
+  {
+    for (std::map<FEType, FEBase*>::iterator j = i->begin(); j != i->end(); ++j)
+      delete j->second;
+  }
+
+  for (std::vector<std::map<FEType, FEBase*> >::iterator i = _fe_face.begin(); i != _fe_face.end(); ++i)
+  {
+    for (std::map<FEType, FEBase*>::iterator j = i->begin(); j != i->end(); ++j)
+      delete j->second;
+  }
+
+  for (std::vector<QGauss *>::iterator i = _qrule.begin(); i != _qrule.end(); ++i)
+  {
+    delete *i;
+  }
+
+  for (std::vector<QGauss *>::iterator i = _qface.begin(); i != _qface.end(); ++i)
+  {
+    delete *i;
+  }
+
+  delete active_local_elem_range;
 }
 
 Mesh *
