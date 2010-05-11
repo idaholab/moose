@@ -37,7 +37,7 @@ results, results_table, test_counter, time = test_harness.run_tests()
 # Was it completely successful?
 print "\n" + '-'*70 + "\nRan " + str(test_counter) + " tests in " + time + "s\n\nOK"
 if results:
-  print "\n" + results + results_table + "\n" + '-'*70 + "\nRan " + str(test_counter) + " tests in " + time + "s\n\nOK"
+  print "\n" + results + results_table + "\n" + '-'*70 + "\nRan " + str(test_counter) + " tests in " + time + "s"
   sys.exit(1)
 
 sys.exit(0)

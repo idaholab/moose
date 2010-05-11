@@ -217,8 +217,10 @@ class TestHarness:
             out_string += result_string
             if (result != 'skipped'):
               test_counter += 1
-            print file + " ... " + result
-            results_table += file + " ... " + result + "\n"
+	    cnt = 70 - len(file + result) - 2
+	    s = file + " " + '.'*cnt + " " + result
+            print s
+            results_table += s + "\n"
     end = timeit.default_timer()
 
     if self.xls_writer:
@@ -258,7 +260,7 @@ class TestHarness:
             sys.stdout = saved_stdout
             test_end = timeit.default_timer()
             if (self.arg_string == ''):
-              test_result = 'ok'
+              test_result = 'OK'
             else:
               test_result = str(round(test_end-test_start,3)) + 's'
               if self.xls_writer:
@@ -274,7 +276,7 @@ class TestHarness:
           test_end = timeit.default_timer()
 
           result_string += capture.getvalue()
-          test_result = 'FAIL'
+          test_result = 'FAILED'
 
     os.chdir(saved_cwd)
     sys.path.pop()
