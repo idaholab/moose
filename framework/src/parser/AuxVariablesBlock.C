@@ -11,6 +11,7 @@
 #include "nonlinear_solver.h"
 #include "nonlinear_implicit_system.h"
 #include "getpot.h"
+#include "numeric_vector.h"
 
 template<>
 InputParameters validParams<AuxVariablesBlock>()
@@ -48,7 +49,7 @@ AuxVariablesBlock::execute()
   if(pb)
     pb->execute();
 
-  _moose_system.getEquationSystems()->init();
+  _moose_system.init();
   _moose_system.getEquationSystems()->print_info();
 
   // Copy out nodal values is required (Variables Block)

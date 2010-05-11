@@ -71,8 +71,9 @@ PBPBlock::execute()
     unsigned int row = system.variable_number(getParamValue<std::vector<std::string> >("off_diag_row")[i]);
     unsigned int column = system.variable_number(getParamValue<std::vector<std::string> >("off_diag_column")[i]);
 
-    //The +1 is because the preconditioning system is always 1 more than the variable number
-    LinearImplicitSystem & u_system = _moose_system.getEquationSystems()->get_system<LinearImplicitSystem>(row+1);
+    //The +2 is because the preconditioning system is always 2 more than the variable number
+    //This is because of the Nonlinear and Auxiliary systems
+    LinearImplicitSystem & u_system = _moose_system.getEquationSystems()->get_system<LinearImplicitSystem>(row+2);
 
     //Add the matrix to hold the off diagonal piece
     u_system.add_matrix(getParamValue<std::vector<std::string> >("off_diag_column")[i]);

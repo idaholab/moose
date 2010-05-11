@@ -19,13 +19,7 @@ KernelFactory::getValidParams(std::string name)
     mooseError(std::string("A _") + name + "_ is not a registered Kernel\n\n");
   }
 
-  std::cout<<"stuff"<<std::endl;
-  
   InputParameters params = name_to_params_pointer[name]();
-
-  std::cout<<"getValidParams "<<std::endl;
-  params.print();
-  
 
   if(!params.have_parameter<Real>("start_time"))
     params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");

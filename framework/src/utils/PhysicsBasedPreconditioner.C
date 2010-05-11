@@ -32,7 +32,8 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
   MeshBase & mesh = _equation_systems->get_mesh();
 
   //Zero out the solution vectors
-  for(unsigned int sys=1; sys<num_systems+1; sys++)
+  //Twos are for the nonlinear and auxiliary systems
+  for(unsigned int sys=2; sys<num_systems+2; sys++)
   {
     LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
     u_system.solution->zero();
@@ -41,11 +42,11 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
   //Loop over solve order
   for(unsigned int i=0; i<_solve_order.size(); i++)
   {
-    //+1 to take into acount the Nonlinear system
-    unsigned int sys = _solve_order[i]+1;
+    //+2 to take into acount the Nonlinear system and auxiliary system
+    unsigned int sys = _solve_order[i]+2;
     
     //By convention
-    unsigned int system_var = sys-1;
+    unsigned int system_var = sys-2;
       
     LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
 
@@ -59,7 +60,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
       unsigned int coupled_var = _off_diag[system_var][diag];
 
       //By convention
-      unsigned int coupled_sys = coupled_var+1;
+      unsigned int coupled_sys = coupled_var+2;
       
       LinearImplicitSystem & coupled_system = _equation_systems->get_system<LinearImplicitSystem>(coupled_sys);
 
@@ -86,10 +87,10 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
   }
 
   //Copy the solutions out
-  for(unsigned int sys=1; sys<num_systems+1; sys++)
+  for(unsigned int sys=2; sys<num_systems+2; sys++)
   {
     //By convention
-    unsigned int system_var = sys-1;
+    unsigned int system_var = sys-2;
 
     LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
 
@@ -156,8 +157,8 @@ PhysicsBasedPreconditioner::init ()
   //Loop over variables
   for(unsigned int system_var=0; system_var<num_systems; system_var++)
   {
-    //+1 to take into acount the Nonlinear system
-    unsigned int sys = system_var+1;
+    //+2 to take into acount the Nonlinear system and Auxiliary System
+    unsigned int sys = system_var+2;
     
     if(!_preconditioners[system_var])
     {

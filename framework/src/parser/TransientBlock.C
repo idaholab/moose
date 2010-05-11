@@ -18,7 +18,6 @@ InputParameters validParams<TransientBlock>()
   params.addParam<bool>        ("trans_ss_check",                     false,  "TODO: doc string");
   params.addParam<Real>        ("ss_check_tol",                       1.0e-08,"TODO: doc string");
   params.addParam<Real>        ("ss_tmin",                            0.0,    "TODO: doc string");
-  params.addParam<Real>        ("reject_step_error",                  -1.0,   "TODO: doc string");
   return params;
 }
 
@@ -39,7 +38,6 @@ TransientBlock::execute()
 void
 TransientBlock::setOutOfOrderTransientParams(Parameters & params) const
 {
-  std::cerr << "Setting Time Param in Moose equation_system" << std::endl;
   params.set<Real> ("time")                            = getParamValue<Real> ("start_time");
   params.set<Real> ("end_time")                        = getParamValue<Real> ("end_time");
   params.set<Real> ("dt")                              = getParamValue<Real> ("dt");

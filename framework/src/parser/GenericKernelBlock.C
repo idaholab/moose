@@ -18,9 +18,6 @@ GenericKernelBlock::GenericKernelBlock(const std::string & reg_id, const std::st
   :ParserBlock(reg_id, real_id, parent, parser_handle, params),
    _type(getType())
 {
-  std::cout<<"Type: "<<_type<<std::endl;
-  
-  KernelFactory::instance()->getValidParams(_type).print();
   setClassParams(KernelFactory::instance()->getValidParams(_type));
 }
 
