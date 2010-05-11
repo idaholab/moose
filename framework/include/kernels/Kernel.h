@@ -117,7 +117,7 @@ public:
    * This is necessary because Kernels need unique variable numbers for computing
    * off-diagonal jacobian components.
    */
-  static bool modifiedAuxVarNum(unsigned int var_num);
+  static unsigned int modifiedAuxVarNum(unsigned int var_num);
 
 protected:
   /**

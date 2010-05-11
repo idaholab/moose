@@ -226,7 +226,7 @@ Kernel::stopTime()
   return _stop_time;
 }
 
-bool
+unsigned int
 Kernel::modifiedAuxVarNum(unsigned int var_num)
 {
   return MAX_VARS + var_num;
