@@ -21,6 +21,9 @@ LinearInterpolation::sample(double x)
   for (unsigned int i=0; i<_x.size(); ++i)
     if (x >= _x[i])
       return _y[i] + (_y[i+1]-_y[i])*(x-_x[i])/(_x[i+1]-_x[i]);
+
+  mooseError("Unreachable?");
+  return 0;
 }
 
 void
