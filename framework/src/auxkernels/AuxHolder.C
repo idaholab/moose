@@ -6,6 +6,7 @@ AuxHolder::AuxHolder(MooseSystem &sys)
   active_NodalAuxKernels.resize(libMesh::n_threads());
   active_ElementAuxKernels.resize(libMesh::n_threads());
   active_bcs.resize(libMesh::n_threads());
+  _aux_bcs.resize(libMesh::n_threads());
 }
 
 AuxHolder::~AuxHolder()
@@ -35,17 +36,13 @@ AuxHolder::~AuxHolder()
   }
 
   {
-    std::vector<std::map<unsigned int, std::vector<AuxKernel *> > >::iterator i;
-    for(i=active_bcs.begin(); i!=active_bcs.end(); ++i)
+    std::vector<std::vector<AuxKernel *> >::iterator i;
+    for(i=_aux_bcs.begin(); i!=_aux_bcs.end(); ++i)
     {
-      std::map<unsigned int, std::vector<AuxKernel *> >::iterator j;
+      std::vector<AuxKernel *>::iterator j;
       for(j=i->begin(); j!=i->end(); ++j)
       {
-        std::vector<AuxKernel *>::iterator k;
-        for(k=(j->second).begin(); k!=(j->second).end(); ++k)
-        {
-          delete *k;
-        }
+        delete *j;
       }
     }
   }

@@ -669,6 +669,7 @@ MooseSystem::addAuxBC(std::string aux_name,
 
     for (unsigned int i=0; i<boundaries.size(); ++i)
       _auxs.active_bcs[tid][boundaries[i]].push_back(aux);
+    _auxs._aux_bcs[tid].push_back(aux);
   }
 }
 

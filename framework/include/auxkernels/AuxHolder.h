@@ -35,6 +35,7 @@ public:
   std::vector<std::vector<AuxKernel *> > active_NodalAuxKernels;
   std::vector<std::vector<AuxKernel *> > active_ElementAuxKernels;
 
+  std::vector<std::vector<AuxKernel *> > _aux_bcs;
   std::vector<std::map<unsigned int, std::vector<AuxKernel *> > > active_bcs;
 
 protected:
