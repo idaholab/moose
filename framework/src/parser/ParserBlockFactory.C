@@ -16,6 +16,7 @@ ParserBlockFactory::instance()
   return instance;
 }
 
+/*
 ParserBlock *
 ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
 {
@@ -26,16 +27,33 @@ ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id,
 
   return parser_block;
 }
+*/
+
+ParserBlock *
+ParserBlockFactory::add(std::string name, MooseSystem & moose_system, InputParameters params)
+{
+  ParserBlock * parser_block;
+  std::string generic_identifier = ParserBlockFactory::instance()->isRegistered(name);
+  
+  parser_block = (*name_to_build_pointer[generic_identifier])(name, moose_system, params);
+  active_parser_blocks.push_back(parser_block);
+
+  return parser_block;
+}
 
 InputParameters
 ParserBlockFactory::getValidParams(const std::string & name)
 {
-  if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
-  {
-    std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered ParserBlock "<<std::endl<<std::endl;
-    mooseError("");
-  }
-  return name_to_params_pointer[name]();
+  /**
+   * If a name is not found for a ParserBlock a generic version is substituted instead
+   * of throwing an error
+   */
+  std::string generic_identifier = ParserBlockFactory::instance()->isRegistered(name);
+
+  if( name_to_params_pointer.find(generic_identifier) == name_to_params_pointer.end() )
+    return name_to_params_pointer["ParserBlock"]();
+  else
+    return name_to_params_pointer[generic_identifier]();
 }
 
 ParserBlockIterator

@@ -11,7 +11,7 @@ InputParameters validParams<StabilizersBlock>();
 class StabilizersBlock: public ParserBlock
 {
 public:
-  StabilizersBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
+  StabilizersBlock(std::string name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

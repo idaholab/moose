@@ -86,6 +86,13 @@ public:
                        const std::string &delims = "/");
 
   /**
+   * This function tokenizes a path and checks to see if it contains the string to look for
+   */
+  static bool pathContains(const std::string &expression,
+                           const std::string &string_to_find,
+                           const std::string &delims = "/");
+  
+  /**
    * Get the MooseSystem associated with this object.
    */
   MooseSystem & getMooseSystem();

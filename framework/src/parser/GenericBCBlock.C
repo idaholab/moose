@@ -15,11 +15,11 @@ InputParameters validParams<GenericBCBlock>()
   return params;
 }
 
-GenericBCBlock::GenericBCBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
-  :ParserBlock(reg_id, real_id, parent, parser_handle, params),
+GenericBCBlock::GenericBCBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+  :ParserBlock(name, moose_system, params),
    _type(getType())
 {
-  if (reg_id == "BCs/*")
+  if (Parser::pathContains(name, "BCs"))
     setClassParams(BCFactory::instance()->getValidParams(_type));
   else
     setClassParams(AuxFactory::instance()->getValidParams(_type));
@@ -32,17 +32,10 @@ GenericBCBlock::execute()
   std::cerr << "Inside the GenericBCBlock Object\n";
   std::cerr << "BC: " << _type
             << "\tname: " << getShortName();
-//            << "\tvariable: " << getParamValue<std::string>("variable") << std::endl;
-//          << "\tboundary: " << getParamValue<std::vector<int> >("boundary")
-//            << "\tvalue: " << _class_params.get<Real>("value") << std::endl;
 #endif
  
-  
-//  std::vector<int> boundary_vector = getParamValue<std::vector<int> >("boundary");
-  
-//  for (std::vector<int>::iterator boundary=boundary_vector.begin(); boundary != boundary_vector.end(); ++boundary)
-    if (_reg_id == "BCs/*")
-      _moose_system.addBC(_type, getShortName(), getClassParams());
-    else
-      _moose_system.addAuxBC(_type, getShortName(), getClassParams());
+  if (Parser::pathContains(_name, "BCs"))
+    _moose_system.addBC(_type, getShortName(), getClassParams());
+  else
+    _moose_system.addAuxBC(_type, getShortName(), getClassParams());
 }

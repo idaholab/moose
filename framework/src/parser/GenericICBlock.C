@@ -9,8 +9,8 @@ InputParameters validParams<GenericICBlock>()
   return params;
 }
 
-GenericICBlock::GenericICBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
-  :ParserBlock(reg_id, real_id, parent, parser_handle, params),
+GenericICBlock::GenericICBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+  :ParserBlock(name, moose_system, params),
    _type(getType())
 {
   setClassParams(InitialConditionFactory::instance()->getValidParams(_type));

@@ -11,7 +11,7 @@ InputParameters validParams<PBPBlock>();
 class PBPBlock: public ParserBlock
 {
 public:
-  PBPBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
+  PBPBlock(std::string name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

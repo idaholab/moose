@@ -17,6 +17,7 @@ InputParameters::operator=(const InputParameters &rhs)
 
   this->_doc_string = rhs._doc_string;
   this->_required_params = rhs._required_params;
+  this->_private_params = rhs._private_params;
 
   return *this;
 }
@@ -36,6 +37,11 @@ InputParameters::operator+=(const InputParameters &rhs)
       ++it)
     this->_required_params.insert(*it);
 
+  for(std::set<std::string>::const_iterator it = rhs._private_params.begin();
+      it!=rhs._private_params.end();
+      ++it)
+    this->_private_params.insert(*it);
+
   return *this;
 }
 
@@ -44,3 +50,30 @@ InputParameters::seenInInputFile(const std::string &name)
 {
   _valid_params.insert(name);
 }
+
+const std::string &
+InputParameters::getDocString(const std::string &name) const
+{
+  static std::string empty;
+  std::map<std::string, std::string>::const_iterator doc_string = _doc_string.find(name);
+  return doc_string != _doc_string.end() ? doc_string->second : empty;
+}
+
+bool
+InputParameters::isParamRequired(const std::string &name) const
+{
+  return _required_params.find(name) != _required_params.end();
+}
+
+bool
+InputParameters::isParamValid(const std::string &name) const
+{
+  return _valid_params.find(name) != _valid_params.end();
+}
+
+bool
+InputParameters::isPrivate(const std::string &name) const
+{
+  return _private_params.find(name) != _private_params.end();
+}
+

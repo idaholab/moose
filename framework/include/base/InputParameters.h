@@ -41,9 +41,16 @@ public:
   template <typename T>
   void addParam(const std::string &name, const std::string &doc_string);
 
+  template <typename T>
+  void addPrivateParam(const std::string &name);
+
+  template <typename T>
+  void addPrivateParam(const std::string &name, const T &value);
+
   const std::string &getDocString(const std::string &name) const;
   bool isParamRequired(const std::string &name) const;
   bool isParamValid(const std::string &name) const;
+  bool isPrivate(const std::string &name) const;
   InputParameters & operator=(const InputParameters &rhs);
   InputParameters & operator+=(const InputParameters &rhs);
   void seenInInputFile(const std::string &name);
@@ -69,7 +76,12 @@ private:
   /**
    * The set of parameters either seen in the input file or provided a default value when added
    */
-  std::set<std::string> _valid_params;  
+  std::set<std::string> _valid_params;
+
+  /**
+   * The set of parameters that will NOT appear in the the dump of the parser tree
+   */
+  std::set<std::string> _private_params;
 };
 
 
@@ -97,26 +109,18 @@ void InputParameters::addParam(const std::string &name, const std::string &doc_s
   _doc_string[name] = doc_string;
 }
 
-inline const std::string &
-InputParameters::getDocString(const std::string &name) const
+template <typename T>
+void InputParameters::addPrivateParam(const std::string &name)
 {
-  static std::string empty;
-  std::map<std::string, std::string>::const_iterator doc_string = _doc_string.find(name);
-  return doc_string != _doc_string.end() ? doc_string->second : empty;
+  Parameters::set<T>(name);
+  _private_params.insert(name);
 }
 
-inline bool
-InputParameters::isParamRequired(const std::string &name) const
+template <typename T>
+void InputParameters::addPrivateParam(const std::string &name, const T &value)
 {
-  return _required_params.find(name) != _required_params.end();
+  Parameters::set<T>(name) = value;
+  _private_params.insert(name);
 }
-
-inline bool
-InputParameters::isParamValid(const std::string &name) const
-{
-  return _valid_params.find(name) != _valid_params.end();
-}
-
-
 
 #endif //INPUTPARAMETERS_H

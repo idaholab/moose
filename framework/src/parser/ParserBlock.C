@@ -21,42 +21,27 @@ InputParameters validParams<ParserBlock>()
 
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
   params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
-
-  // "names" in the input file is now deprecated
-  params.addParam<std::vector<std::string> >("names", "Deprecated DO NOT USE!");
+  params.addParam<std::string>("type", "A string representing the object type that this ParserBlock will hold if applicable");
+  params.addPrivateParam<ParserBlock *>("parent");
+  params.addPrivateParam<Parser *>("parser_handle");
+ 
   return params;
 }
 
-ParserBlock::ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
-  :_reg_id(reg_id),
-   _real_id(real_id),
-   _parser_handle(parser_handle),
-   _moose_system(parser_handle.getMooseSystem()),
-   _getpot_handle(parser_handle.getPotHandle()),
-   _parent(parent),
+ParserBlock::ParserBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+  :_name(name),
+   _parser_handle(*params.get<Parser *>("parser_handle")),
+   _moose_system(moose_system),
+   _getpot_handle(_parser_handle.getPotHandle()),
+   _parent(params.get<ParserBlock*>("parent")),
    _block_params(params)
 {
-  size_t asterisk_pos = reg_id.find("*");
-
-  if(reg_id == "Executioner")
-    _block_name = reg_id;
-  else
-    _block_name = _real_id;
-  
   if (_getpot_handle) 
   {
     // Immediately extract params from the input file instead of when the tree is completely constructed
-    _parser_handle.extractParams(_real_id, _block_params);
+    _parser_handle.extractParams(name, _block_params);
     _active = getParamValue<std::vector<std::string> >("active");
   }
-  else if (asterisk_pos != std::string::npos) 
-  {
-    _block_name = reg_id;
-    _block_name.replace(asterisk_pos-1, 2, "/<user defined>");
-  }
-  
-  
-  // _block_name = _real_id.substr(0, _real_id.find_last_of('/')) + "/<user defined>";
 }
 
 ParserBlock::~ParserBlock() 
@@ -68,19 +53,23 @@ ParserBlock::~ParserBlock()
 std::string
 ParserBlock::getShortName() const
 {
-  return _real_id.substr(_real_id.find_last_of('/') != std::string::npos ? _real_id.find_last_of('/') + 1 : 0);
+  return _name.substr(_name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') + 1 : 0);
 }
 
 std::string
 ParserBlock::getType() const
 {
+  std::string type;
+  /**
+   * The "type" should be in the input file for normal runs, however for syntax dumps the type will
+   * be passed as a parameter.  
+   */
   if (_getpot_handle)
-    return (*_getpot_handle)((_real_id + "/type").c_str(), "");
-  if (_reg_id.find("*") != std::string::npos || _reg_id.find("Executioner") != std::string::npos)
-    return getShortName();
-  return std::string("");
+    type = (*_getpot_handle)((_name + "/type").c_str(), "");
+  else
+    type = _block_params.get<std::string>("type");
 
-//  return getpot_handle == NULL ? getShortName() : (*getpot_handle)((_real_id + "/type").c_str(), "");
+  return type;
 }
 
 bool
@@ -117,10 +106,6 @@ unsigned int
 ParserBlock::n_activeChildren() const
 {
   std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
-  std::vector<std::string> named_children = getParamValue<std::vector<std::string> >("names");
-
-  if (!named_children.empty())
-    mooseError((std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.").c_str());
     
   // if there is no parameter named "active" then assume that all children are active
   try 
@@ -147,10 +132,6 @@ void
 ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only, bool check_prereqs)
 {
   std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
-  std::vector<std::string> named_children = getParamValue<std::vector<std::string> >("names");
-
-  if (!named_children.empty())
-    mooseError((std::string("Error in: ") + _real_id + ". The use of 'names' is deprecated.").c_str());
   
   // if there is no parameter named "active" then assume that all children are to be visited
   try 
@@ -253,7 +234,7 @@ void
 ParserBlock::printBlockData()
 {
   std::vector<std::string> elements;
-  Parser::tokenize(_real_id, elements);
+  Parser::tokenize(_name, elements);
 
   std::string spacing = "";
   for (unsigned int i=0; i<elements.size(); ++i)
@@ -261,7 +242,7 @@ ParserBlock::printBlockData()
 
   
   std::cout << "\n"
-            << spacing << "block name: " << _block_name << "\n";
+            << spacing << "block name: " << _name << "\n";
   
   if (getType() != "")
     std::cout << spacing << "type: " << getType() << "\n";
@@ -277,6 +258,10 @@ ParserBlock::printBlockData()
   {
     for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
     {
+      // First make sure we want to see this parameter
+      if (param_ptrs[i]->isPrivate(iter->first)) 
+        continue;
+
       // Block params may be required and will have a doc string
       std::string required = param_ptrs[i]->isParamRequired(iter->first) ? "*" : " ";
 

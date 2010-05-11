@@ -11,7 +11,7 @@ InputParameters validParams<PreconditioningBlock>();
 class PreconditioningBlock: public ParserBlock
 {
 public:
-  PreconditioningBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
+  PreconditioningBlock(std::string name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

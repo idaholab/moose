@@ -66,38 +66,47 @@ Parser::parse(const std::string &input_filename)
   // GetPot object
   _getpot_file.parse_input_file(_input_filename);
   _getpot_initialized = true;
-  _input_tree = new ParserBlock("/", "/", NULL, *this, validParams<ParserBlock>());
+  
+  InputParameters root_params = validParams<ParserBlock>();
+  root_params.set<ParserBlock *>("parent") = NULL;
+  root_params.set<Parser *>("parser_handle") = this;
+  _input_tree = new ParserBlock("/", _moose_system, root_params);
+  
   _section_names = _getpot_file.get_section_names();
 
-  // The variable_names function returns section names and variable names in
-  // one large string so we can build the data structure in one pass
+  /**
+   * The variable_names function returns section names and variable names in
+   * one large string so we can build the data structure in one pass.
+   * (.i.e) /Variables/temp/InitialCondition will be split on slashes and
+   * a tree of three levels will be build for each remaining piece of text
+   */
   for (std::vector<std::string>::iterator i=_section_names.begin(); i != _section_names.end(); ++i) 
   {
     elements.clear();
     tokenize(*i, elements);
     curr_block = _input_tree;
     curr_identifier = "";
-    
+
     for (int j=0; j<elements.size(); ++j) 
     {
       if (! curr_block->checkActive(elements[j]) )
         continue;
       
-      // We don't want a leading slash
+      // Add slashes as seperators back into our text strings as we build them up but don't
+      // start with an initial slash
       if (j)
         curr_identifier += "/";
       curr_identifier += elements[j];
 
       std::vector<ParserBlock *>::reverse_iterator last = curr_block->_children.rbegin();
+      // See if this block is already in the tree from a previous section string iteration
       if (last == curr_block->_children.rend() || (*last)->getID() != curr_identifier) 
       {
-        // Add the new block to the parse tree
-        std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
-      
-        if (matched_identifier.length())
-          curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
-        else
-          curr_block->_children.push_back(new ParserBlock(curr_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(curr_identifier)));
+        InputParameters params = ParserBlockFactory::instance()->getValidParams(curr_identifier);
+        params.set<ParserBlock *>("parent") = curr_block;
+        params.set<Parser *>("parser_handle") = this;
+
+        curr_block->_children.push_back(ParserBlockFactory::instance()->add(curr_identifier, _moose_system, params));          
       }
 
       curr_block = *(curr_block->_children.rbegin());
@@ -132,20 +141,24 @@ Parser::buildFullTree()
   ParserBlock *curr_block;
 
   // Build the root of the tree
-  _input_tree = new ParserBlock("/", "/", NULL, *this, validParams<ParserBlock>());
+  InputParameters params = validParams<ParserBlock>();
+  params.set<ParserBlock *>("parent") = NULL;
+  params.set<Parser *>("parser_handle") = this;
+  _input_tree = new ParserBlock("/", _moose_system, params);
+  
   curr_block = _input_tree;
 
-
   // Build all the ParserBlock Types
+  params.set<ParserBlock *>("parent") = curr_block;
   for (ParserBlockNamesIterator i = ParserBlockFactory::instance()->registeredParserBlocksBegin();
        i != ParserBlockFactory::instance()->registeredParserBlocksEnd(); ++i)
   {
-    // skip the generic matches here because they don't correlate to a real instance
+    // skip the generic matches here because they don't correlate to a real instance and well pick them up manually below
     if (i->find('*') != std::string::npos || i->find("Executioner") != std::string::npos)
       continue;
 
-    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
+    // std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(*i, _moose_system, params));
   }
   
   {
@@ -154,14 +167,25 @@ Parser::buildFullTree()
     std::string var_name("SampleVar");
     curr_block = curr_block->locateBlock("Variables");
     mooseAssert(curr_block != NULL, "A Variables ParserBlock does not appear to exist");
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add("Variables/*", prefix + var_name, curr_block, *this, ParserBlockFactory::instance()->getValidParams("Variables/*")));
-
+    
+    params = ParserBlockFactory::instance()->getValidParams(prefix + var_name);
+    params.set<ParserBlock *>("parent") = curr_block;
+    params.set<Parser *>("parser_handle") = this;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + var_name, _moose_system, params));
+    
     // Add all the IC Blocks
     curr_block = curr_block->locateBlock(prefix + var_name);
+    params = ParserBlockFactory::instance()->getValidParams(prefix + var_name +  "/InitialCondition");
+    params.set<ParserBlock *>("parent") = curr_block;
+    params.set<Parser *>("parser_handle") = this;
+    
     mooseAssert(curr_block != NULL, "The sample variable block appears to be missing");
     for (InitialConditionNamesIterator i = InitialConditionFactory::instance()->registeredInitialConditionsBegin();
          i != InitialConditionFactory::instance()->registeredInitialConditionsEnd(); ++i)
-      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + "*/InitialCondition", prefix + var_name + "/" + *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams(prefix + "*/InitialCondition")));
+    {
+      params.set<std::string>("type") = *i;
+      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + var_name + "/InitialCondition", _moose_system, params));
+    }
   }
 
   {
@@ -170,79 +194,92 @@ Parser::buildFullTree()
     std::string var_name("SampleAuxVar");
     curr_block = curr_block->locateBlock("AuxVariables");
     mooseAssert(curr_block != NULL, "A AuxVariables ParserBlock does not appear to exist");
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add("AuxVariables/*", prefix + var_name, curr_block, *this, ParserBlockFactory::instance()->getValidParams("AuxVariables/*")));
+    
+    params = ParserBlockFactory::instance()->getValidParams(prefix + var_name);
+    params.set<ParserBlock *>("parent") = curr_block;
+    params.set<Parser *>("parser_handle") = this;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + var_name, _moose_system, params));
 
     // Add all the IC Blocks
     curr_block = curr_block->locateBlock(prefix + var_name);
+    params = ParserBlockFactory::instance()->getValidParams(prefix + var_name +  "/InitialCondition");
+    params.set<ParserBlock *>("parent") = curr_block;
+    params.set<Parser *>("parser_handle") = this;
+
     mooseAssert(curr_block != NULL, "The sample aux variable block appears to be missing");
     for (InitialConditionNamesIterator i = InitialConditionFactory::instance()->registeredInitialConditionsBegin();
          i != InitialConditionFactory::instance()->registeredInitialConditionsEnd(); ++i)
-      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + "*/InitialCondition", prefix + var_name + "/" + *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams(prefix + "*/InitialCondition")));
+    {
+      params.set<std::string>("type") = *i;
+      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + var_name + "/InitialCondition", _moose_system, params));
+    }
   }
 
   // Add all the Kernels
   curr_block = curr_block->locateBlock("Kernels");
   prefix = "Kernels/";
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
   for (KernelNamesIterator i = KernelFactory::instance()->registeredKernelsBegin();
        i != KernelFactory::instance()->registeredKernelsEnd(); ++i)
   {
-    std::string curr_identifier(prefix + *i);
-    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
-
-    mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
   }
-
+  
   // Add all the AuxKernels
   curr_block = curr_block->locateBlock("AuxKernels");
   prefix = "AuxKernels/";
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
   for (AuxKernelNamesIterator i = AuxFactory::instance()->registeredAuxKernelsBegin();
        i != AuxFactory::instance()->registeredAuxKernelsEnd(); ++i)
   {
-    std::string curr_identifier(prefix + *i);
-    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
-
-    mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
   }
   
   // Add all the BCs
   curr_block = curr_block->locateBlock("BCs");
   prefix = "BCs/";
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
   for (BCNamesIterator i = BCFactory::instance()->registeredBCsBegin();
        i != BCFactory::instance()->registeredBCsEnd(); ++i)
   {
-    std::string curr_identifier(prefix + *i);
-    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
-
-    mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
   }
 
+  // Add all the Materials
   curr_block = curr_block->locateBlock("Materials");
   prefix = "Materials/";
-  
-  // Add all the Materials
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
   for (MaterialNamesIterator i = MaterialFactory::instance()->registeredMaterialsBegin();
        i != MaterialFactory::instance()->registeredMaterialsEnd(); ++i)
   {
-    std::string curr_identifier(prefix + *i);
-    std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(curr_identifier);
-
-    mooseAssert(matched_identifier.length(), "Unable to find a suitable ParserBlock for " + curr_identifier);
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(matched_identifier, curr_identifier, curr_block, *this, ParserBlockFactory::instance()->getValidParams(matched_identifier)));
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
   }
-
+  
+  // Add all the Executioners
   curr_block = _input_tree;
   prefix = "";
-
-  // Add all the Executioners
+  params = ParserBlockFactory::instance()->getValidParams("Executioner");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
   for (ExecutionerNamesIterator i = ExecutionerFactory::instance()->registeredExecutionersBegin();
        i != ExecutionerFactory::instance()->registeredExecutionersEnd(); ++i)
   {
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add("Executioner", *i, curr_block, *this, ParserBlockFactory::instance()->getValidParams("Executioner")));
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add("Executioner", _moose_system, params));
   }
-
+  
   _input_tree->printBlockData();
 }
 
@@ -259,6 +296,21 @@ Parser::tokenize(const std::string &str, std::vector<std::string> &elements, con
     last_pos = str.find_first_not_of(delims, pos);
     pos = str.find_first_of(delims, last_pos);
   }
+}
+
+bool Parser::pathContains(const std::string &expression,
+                          const std::string &string_to_find,
+                          const std::string &delims)
+{
+  std::vector<std::string> elements;
+  
+  tokenize(expression, elements, delims);
+
+  std::vector<std::string>::iterator found_it = std::find(elements.begin(), elements.end(), string_to_find);
+  if (found_it != elements.end())
+    return true;
+  else
+    return false;
 }
 
 MooseSystem &
@@ -364,9 +416,13 @@ Parser::fixupOptionalBlocks()
       if (position == block_ptr->_parent->_children.end())
         mooseError(("Unable to find required block " + i->second + " for optional block insertion").c_str());
 
-      // Increment one past this location so the new element be inserted afterwards      
-      block_ptr->_parent->_children.insert(++position,
-                                           ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, *this, ParserBlockFactory::instance()->getValidParams(i->first)));
+
+      InputParameters params = ParserBlockFactory::instance()->getValidParams(i->first);
+      params.set<ParserBlock *>("parent") = block_ptr->_parent;
+      params.set<Parser *>("parser_handle") = this;
+
+      // Increment one past this location so the new element be inserted afterwards
+      block_ptr->_parent->_children.insert(++position, ParserBlockFactory::instance()->add(i->first, _moose_system, params));
     }
   }
 }

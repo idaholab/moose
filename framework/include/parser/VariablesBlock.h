@@ -14,7 +14,7 @@ InputParameters validParams<VariablesBlock>();
 class VariablesBlock: public ParserBlock
 {
 public:
-  VariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
+  VariablesBlock(std::string name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
   virtual void copyNodalValues(const std::string &system_name);

@@ -16,7 +16,7 @@
 #include "dof_map.h"
 #include "coupling_matrix.h"
 
-// FIXME: remove me whne libmesh solver problem is fixed
+// FIXME: remove me when libmesh solver problem is fixed
 namespace Moose {
 void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
 void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
@@ -29,8 +29,8 @@ InputParameters validParams<VariablesBlock>()
   return validParams<ParserBlock>();
 }
 
-VariablesBlock::VariablesBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
-  :ParserBlock(reg_id, real_id, parent, parser_handle, params)
+VariablesBlock::VariablesBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+  :ParserBlock(name, moose_system, params)
 {
   // Register execution prereqs
   addPrereq("Mesh");

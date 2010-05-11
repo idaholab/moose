@@ -28,8 +28,8 @@ InputParameters validParams<GenericVariableBlock>()
   return params;
 }
 
-GenericVariableBlock::GenericVariableBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
-  :ParserBlock(reg_id, real_id, parent, parser_handle, params),
+GenericVariableBlock::GenericVariableBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+  :ParserBlock(name, moose_system, params),
    _variable_to_read(""),
    _timestep_to_read(2)
 {}
@@ -38,6 +38,7 @@ void
 GenericVariableBlock::execute() 
 {
   std::string var_name = getShortName();
+  bool is_variables_block;
   
 #ifdef DEBUG
   std::cerr << "Inside the GenericVariableBlock Object\n";
@@ -47,7 +48,8 @@ GenericVariableBlock::execute()
 #endif
 
   System *system;
-  if (_reg_id == "Variables/*")
+  is_variables_block = Parser::pathContains(_name, "Variables");
+  if (is_variables_block)
     system = _moose_system.getNonlinearSystem();
   else
     system = _moose_system.getAuxSystem();
@@ -62,7 +64,7 @@ GenericVariableBlock::execute()
     _moose_system.getEquationSystems()->parameters.set<Real>("initial_" + var_name) = initial;
 
   
-  if (_reg_id == "Variables/*") 
+  if (is_variables_block) 
   {
     // Manual Scaling
     unsigned int var_number= system->variable_number(var_name);

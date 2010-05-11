@@ -8,8 +8,8 @@ InputParameters validParams<StabilizersBlock>()
   return validParams<ParserBlock>();
 }
 
-StabilizersBlock::StabilizersBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
-  :ParserBlock(reg_id, real_id, parent, parser_handle, params)
+StabilizersBlock::StabilizersBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+  :ParserBlock(name, moose_system, params)
 {
   // Register execution prereqs
   addPrereq("Mesh");

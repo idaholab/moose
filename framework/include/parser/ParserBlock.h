@@ -5,6 +5,7 @@
 
 #include "MooseSystem.h"
 #include "ValidParams.h"
+#include "Parser.h"
 
 #include "getpot.h"
 
@@ -33,7 +34,7 @@ public:
    * for this ParserBlock instance.  A pointer to the parent is passed for use in searching the tree
    * Finally a reference to the GetPot object is passed for flexible extension.
    */
-  ParserBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
+  ParserBlock(std::string name, MooseSystem & moose_system, InputParameters params);
 
   /**
    * Cleans up the ParserBlock tree strucutre
@@ -43,7 +44,7 @@ public:
   /**
    * Returns the full path identifier for this block
    */
-  inline std::string getID() const { return _real_id; }
+  inline std::string getID() const { return _name; }
 
   /**
    * Returns the short name which is the final string after the last delimiter for the
@@ -153,8 +154,9 @@ protected:
   /************************************
    * Protected Data Members
    ************************************/
-  std::string _reg_id;
-  std::string _real_id;
+//  std::string _reg_id;
+//  std::string _real_id;
+  std::string _name;
   std::string _block_name;
   Parser & _parser_handle;
   const GetPot * _getpot_handle;

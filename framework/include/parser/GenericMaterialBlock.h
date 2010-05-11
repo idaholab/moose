@@ -12,7 +12,7 @@ InputParameters validParams<GenericMaterialBlock>();
 class GenericMaterialBlock: public ParserBlock
 {
 public:
-  GenericMaterialBlock(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params);
+  GenericMaterialBlock(std::string name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 
