@@ -45,10 +45,46 @@ AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParamete
    _u_older_aux(_nodal ? moose_system._aux_var_vals_older_nodal[_tid][_var_num] : moose_system._aux_var_vals_older_element[_tid][_var_num]),
    _current_node(moose_system._current_node[_tid])
 {
+  // If this variable isn't known yet... make it so
+  if(std::find(_moose_system._aux_var_nums.begin(),_moose_system._aux_var_nums.end(),_var_num) == _moose_system._aux_var_nums.end())
+    _moose_system._aux_var_nums.push_back(_var_num);
+
   if(_nodal)
-    moose_system._nodal_var_nums.push_back(_var_num);
+    _moose_system._nodal_var_nums.push_back(_var_num);
   else
-    moose_system._element_var_nums.push_back(_var_num);
+    _moose_system._element_var_nums.push_back(_var_num);
+
+  // FIXME: this for statement will go into a common ancestor (it is copied from Kernel.C)
+  for(unsigned int i=0;i<_coupled_to.size();i++)
+  {
+    std::string coupled_var_name=_coupled_to[i];
+
+    //Is it in the nonlinear system or the aux system?
+    if(_moose_system._system->has_variable(coupled_var_name))
+    {
+      unsigned int coupled_var_num = _moose_system._system->variable_number(coupled_var_name);
+
+      _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
+
+      if(std::find(_moose_system._var_nums.begin(),_moose_system._var_nums.end(),coupled_var_num) == _moose_system._var_nums.end())
+        _moose_system._var_nums.push_back(coupled_var_num);
+
+      if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
+        _coupled_var_nums.push_back(coupled_var_num);
+    }
+    else //Look for it in the Aux system
+    {
+      unsigned int coupled_var_num = _moose_system._aux_system->variable_number(coupled_var_name);
+
+      _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
+
+      if(std::find(_moose_system._aux_var_nums.begin(),_moose_system._aux_var_nums.end(),coupled_var_num) == _moose_system._aux_var_nums.end())
+        _moose_system._aux_var_nums.push_back(coupled_var_num);
+
+      if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
+        _aux_coupled_var_nums.push_back(coupled_var_num);
+    }
+  }
 }
 
 void

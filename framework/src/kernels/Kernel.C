@@ -72,17 +72,10 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
 {
   // If this variable isn't known yet... make it so
-  if(!_is_aux)
-  {
-    if(std::find(_moose_system._var_nums.begin(),_moose_system._var_nums.end(),_var_num) == _moose_system._var_nums.end())
-      _moose_system._var_nums.push_back(_var_num);
-  }
-  else
-  {
-    if(std::find(_moose_system._aux_var_nums.begin(),_moose_system._aux_var_nums.end(),_var_num) == _moose_system._aux_var_nums.end())
-      _moose_system._aux_var_nums.push_back(_var_num);
-  }
+  if(std::find(_moose_system._var_nums.begin(),_moose_system._var_nums.end(),_var_num) == _moose_system._var_nums.end())
+    _moose_system._var_nums.push_back(_var_num);
 
+  // FIXME: this for statement will go into a common ancestor
   for(unsigned int i=0;i<_coupled_to.size();i++)
   {
     std::string coupled_var_name=_coupled_to[i];
