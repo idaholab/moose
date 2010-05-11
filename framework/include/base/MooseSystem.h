@@ -60,7 +60,7 @@ public:
   /**
    * Returns a writable reference to the mesh held wihin this MooseSystem
    */
-  Mesh * getMesh();
+  Mesh * getMesh(bool skip_full_check=false);
 
   inline unsigned int getDim() { return _dim; }
   

@@ -150,9 +150,12 @@ MooseSystem::initMesh(unsigned int dim)
 }
 
 Mesh *
-MooseSystem::getMesh() 
+MooseSystem::getMesh(bool skip_full_check) 
 {
-  checkValid();
+  if (!skip_full_check)
+    checkValid();
+  else if (_mesh == NULL)
+    mooseError("Full check skipped but Mesh is not initialized");
   return _mesh;
 }
 

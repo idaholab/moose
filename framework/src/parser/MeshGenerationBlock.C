@@ -43,19 +43,20 @@ MeshGenerationBlock::execute()
 #endif
 
   ElemType elem_type = Utility::string_to_enum<ElemType>(getParamValue<std::string>("elem_type"));
-  unsigned int mesh_dim = _moose_system.getMesh()->mesh_dimension();
-
+  int mesh_dim = _parent->getParamValue<int>("dim");
+  Mesh *mesh = _moose_system.getMesh(true);
+  
   switch (mesh_dim)
   {
   case 1:
-    MeshTools::Generation::build_line(*_moose_system.getMesh(),
+    MeshTools::Generation::build_line(*mesh,
                                       getParamValue<int>("nx"),
                                       getParamValue<Real>("xmin"),
                                       getParamValue<Real>("xmax"),
                                       elem_type);
     break;
   case 2:
-    MeshTools::Generation::build_square(*_moose_system.getMesh(),
+    MeshTools::Generation::build_square(*mesh,
                                         getParamValue<int>("nx"),
                                         getParamValue<int>("ny"),
                                         getParamValue<Real>("xmin"),
@@ -65,7 +66,7 @@ MeshGenerationBlock::execute()
                                         elem_type);
     break;
   case 3:
-    MeshTools::Generation::build_cube(*_moose_system.getMesh(),
+    MeshTools::Generation::build_cube(*mesh,
                                       getParamValue<int>("nx"),
                                       getParamValue<int>("ny"),
                                       getParamValue<int>("nz"),
