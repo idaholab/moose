@@ -43,7 +43,8 @@ MooseSystem::MooseSystem()
    _auxs(*this),
    _ics(*this),
    _no_fe_reinit(false),
-   _preconditioner(NULL)
+   _preconditioner(NULL),
+   active_local_elem_range(NULL)
 {
   Moose::g_system = this;     // FIXME: this will eventually go away
   sizeEverything();
@@ -63,7 +64,8 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _auxs(*this),
     _ics(*this),
     _no_fe_reinit(false),
-    _preconditioner(NULL)
+    _preconditioner(NULL),
+    active_local_elem_range(NULL)
 {
   Moose::g_system = this;     // FIXME: this will eventually go away
 
