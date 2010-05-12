@@ -114,8 +114,12 @@ void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (st
 /**
  * A function to call when you need the whole program to die a spit out a message
  */
-#define mooseError(msg)                                                 \
-  do { std::cerr << "\n\n" << msg << "\n\n"; libmesh_error(); } while(0)
+
+#ifndef NDEBUG
+#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); libmesh_error(); } while(0)
+#else
+#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; libmesh_error(); } while(0)
+#endif
 
 #ifdef NDEBUG
 #define mooseAssert(asserted, msg) 
