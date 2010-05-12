@@ -148,8 +148,7 @@ Parser::buildFullTree()
   
   curr_block = _input_tree;
 
-  // Build all the ParserBlock Types
-  params.set<ParserBlock *>("parent") = curr_block;
+  // Build all the base level ParserBlock types that are not generic
   for (ParserBlockNamesIterator i = ParserBlockFactory::instance()->registeredParserBlocksBegin();
        i != ParserBlockFactory::instance()->registeredParserBlocksEnd(); ++i)
   {
@@ -158,6 +157,9 @@ Parser::buildFullTree()
       continue;
 
     // std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
+    params = ParserBlockFactory::instance()->getValidParams(*i);
+    params.set<ParserBlock *>("parent") = curr_block;
+    params.set<Parser *>("parser_handle") = this;
     curr_block->_children.push_back(ParserBlockFactory::instance()->add(*i, _moose_system, params));
   }
   
