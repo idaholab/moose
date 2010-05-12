@@ -18,6 +18,7 @@
 #include "nonlinear_implicit_system.h"
 #include "transient_system.h"
 #include "preconditioner.h"
+#include "print_trace.h"
 
 //Forward Declarations
 class Mesh;
