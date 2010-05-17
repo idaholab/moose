@@ -204,7 +204,6 @@ ParserBlock::executeDeferred(void (ParserBlock::*action)())
 
     for (std::list<ParserBlock *>::iterator i = deferred.begin(); i != deferred.end(); ) 
     {
-      std::cerr << "Debug: " << (*i)->getID();
       if (checkPrereqs(*i) && !_parser_handle.isExecuted((*i)->getID()))
       {
         /**
