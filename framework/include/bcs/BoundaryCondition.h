@@ -1,7 +1,17 @@
 #ifndef BOUNDARYCONDITION_H
 #define BOUNDARYCONDITION_H
 
-#include "Kernel.h"
+// local includes
+#include "Moose.h"
+#include "ValidParams.h"
+
+// libMesh includes
+#include "mesh_base.h"
+#include "fe_base.h"
+#include "quadrature_gauss.h"
+#include "InputParameters.h"
+#include "dense_subvector.h"
+#include "dense_submatrix.h"
 
 //forward declarations
 class BoundaryCondition;
