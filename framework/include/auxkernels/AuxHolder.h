@@ -32,11 +32,11 @@ public:
   std::vector<AuxKernel *>::iterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id);
   std::vector<AuxKernel *>::iterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id);
 
-  std::vector<std::vector<AuxKernel *> > active_NodalAuxKernels;
-  std::vector<std::vector<AuxKernel *> > active_ElementAuxKernels;
+  std::vector<std::vector<AuxKernel *> > _active_nodal_aux_kernels;
+  std::vector<std::vector<AuxKernel *> > _active_element_aux_kernels;
 
   std::vector<std::vector<AuxKernel *> > _aux_bcs;
-  std::vector<std::map<unsigned int, std::vector<AuxKernel *> > > active_bcs;
+  std::vector<std::map<unsigned int, std::vector<AuxKernel *> > > _active_bcs;
 
 protected:
   MooseSystem &_moose_system;

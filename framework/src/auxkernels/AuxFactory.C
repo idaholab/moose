@@ -13,14 +13,14 @@ AuxFactory::instance()
 InputParameters
 AuxFactory::getValidParams(std::string name)
   {
-    if( name_to_params_pointer.find(name) == name_to_params_pointer.end() )
+    if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
     {
 
       std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Aux "<<std::endl<<std::endl;
       mooseError("");
 
     }
-    return name_to_params_pointer[name]();
+    return _name_to_params_pointer[name]();
   }
 
   
@@ -32,7 +32,7 @@ AuxFactory:: ~AuxFactory()
 {
   {
     std::map<std::string, AuxKernelBuildPtr>::iterator i;
-    for(i=name_to_build_pointer.begin(); i!=name_to_build_pointer.end(); ++i)
+    for(i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
     {
       delete &i;
     }
@@ -40,7 +40,7 @@ AuxFactory:: ~AuxFactory()
 
   {
     std::map<std::string, AuxKernelParamsPtr>::iterator i;
-    for(i=name_to_params_pointer.begin(); i!=name_to_params_pointer.end(); ++i)
+    for(i=_name_to_params_pointer.begin(); i!=_name_to_params_pointer.end(); ++i)
     {
       delete &i;
     }
@@ -52,11 +52,11 @@ AuxFactory::registeredAuxKernelsBegin()
 {
   // Make sure the _registered_auxkernel_names are up to date
   _registered_auxkernel_names.clear();
-  _registered_auxkernel_names.reserve(AuxFactory::instance()->name_to_params_pointer.size());
+  _registered_auxkernel_names.reserve(AuxFactory::instance()->_name_to_params_pointer.size());
 
   // build a vector of strings from the params pointer map
-  for (std::map<std::string, AuxKernelParamsPtr>::iterator i = name_to_params_pointer.begin();
-       i != name_to_params_pointer.end();
+  for (std::map<std::string, AuxKernelParamsPtr>::iterator i = _name_to_params_pointer.begin();
+       i != _name_to_params_pointer.end();
        ++i)
   {
     _registered_auxkernel_names.push_back(i->first);

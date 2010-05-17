@@ -52,8 +52,8 @@ public:
   template<typename StabilizerType> 
   void registerStabilizer(std::string name)
   {
-    name_to_build_pointer[name]=&buildStabilizer<StabilizerType>;
-    name_to_params_pointer[name]=&validParams<StabilizerType>;
+    _name_to_build_pointer[name]=&buildStabilizer<StabilizerType>;
+    _name_to_params_pointer[name]=&validParams<StabilizerType>;
   }
 
   Stabilizer * create(std::string stabilizer_name,
@@ -61,7 +61,7 @@ public:
                       MooseSystem & moose_system,
                       InputParameters parameters)
   {
-    return (*name_to_build_pointer[stabilizer_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[stabilizer_name])(name, moose_system, parameters);
   }
 
   StabilizerNamesIterator registeredStabilizersBegin();
@@ -74,8 +74,8 @@ private:
 
   virtual ~StabilizerFactory();
   
-  std::map<std::string, stabilizerBuildPtr> name_to_build_pointer;
-  std::map<std::string, stabilizerParamsPtr> name_to_params_pointer;
+  std::map<std::string, stabilizerBuildPtr> _name_to_build_pointer;
+  std::map<std::string, stabilizerParamsPtr> _name_to_params_pointer;
 
   std::vector<std::string> _registered_stabilizer_names;
 };

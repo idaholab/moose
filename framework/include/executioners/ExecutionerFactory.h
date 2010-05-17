@@ -49,8 +49,8 @@ public:
   template<typename ExecutionerType> 
   void registerExecutioner(std::string name)
   {
-    name_to_build_pointer[name]=&buildExecutioner<ExecutionerType>;
-    name_to_params_pointer[name]=&validParams<ExecutionerType>;
+    _name_to_build_pointer[name]=&buildExecutioner<ExecutionerType>;
+    _name_to_params_pointer[name]=&validParams<ExecutionerType>;
   }
 
   Executioner * build(std::string ex_name, std::string name, MooseSystem & moose_system, InputParameters parameters);
@@ -65,8 +65,8 @@ private:
   
   virtual ~ExecutionerFactory(){}
 
-  std::map<std::string, ExecutionerBuildPtr> name_to_build_pointer;
-  std::map<std::string, ExecutionerParamsPtr> name_to_params_pointer;
+  std::map<std::string, ExecutionerBuildPtr> _name_to_build_pointer;
+  std::map<std::string, ExecutionerParamsPtr> _name_to_params_pointer;
 
   std::vector<std::string> _registered_initial_condition_names;
 };

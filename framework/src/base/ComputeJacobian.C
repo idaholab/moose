@@ -23,9 +23,9 @@ class ComputeInternalJacobians
 {
 public:
   ComputeInternalJacobians(MooseSystem &sys, const NumericVector<Number>& in_soln, SparseMatrix<Number>&  in_jacobian)
-    :sys(sys),
-     soln(in_soln),
-     jacobian(in_jacobian)
+    :_moose_system(sys),
+     _soln(in_soln),
+     _jacobian(in_jacobian)
   {}
   
   void operator() (const ConstElemRange & range) const
@@ -38,18 +38,18 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
-    sys._kernels.updateActiveKernels(tid);
+    _moose_system._kernels.updateActiveKernels(tid);
 
-    KernelIterator kernel_begin = sys._kernels.activeKernelsBegin(tid);
-    KernelIterator kernel_end = sys._kernels.activeKernelsEnd(tid);
+    KernelIterator kernel_begin = _moose_system._kernels.activeKernelsBegin(tid);
+    KernelIterator kernel_end = _moose_system._kernels.activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;
 
     KernelIterator block_kernel_begin;
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
-    StabilizerIterator stabilizer_begin = sys._stabilizers.activeStabilizersBegin(tid);
-    StabilizerIterator stabilizer_end = sys._stabilizers.activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_begin = _moose_system._stabilizers.activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = _moose_system._stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
     unsigned int subdomain = 999999999;
@@ -58,7 +58,7 @@ public:
     {
       const Elem* elem = *el;
 
-      sys.reinitKernels(tid, soln, elem, NULL, &Ke);
+      _moose_system.reinitKernels(tid, _soln, elem, NULL, &Ke);
 
       unsigned int cur_subdomain = elem->subdomain_id();
 
@@ -66,11 +66,11 @@ public:
       {
         subdomain = cur_subdomain;
 
-        Material * material = sys._materials.getMaterial(tid, subdomain);
+        Material * material = _moose_system._materials.getMaterial(tid, subdomain);
         material->subdomainSetup();
 
-        block_kernel_begin = sys._kernels.blockKernelsBegin(tid, subdomain);
-        block_kernel_end = sys._kernels.blockKernelsEnd(tid, subdomain);
+        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
       
         //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -101,14 +101,14 @@ public:
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = sys._mesh->boundary_info->boundary_id (elem, side);
+          unsigned int boundary_id = _moose_system._mesh->boundary_info->boundary_id (elem, side);
 
-          BCIterator bc_it = sys._bcs.activeBCsBegin(tid,boundary_id);
-          BCIterator bc_end = sys._bcs.activeBCsEnd(tid,boundary_id);
+          BCIterator bc_it = _moose_system._bcs.activeBCsBegin(tid,boundary_id);
+          BCIterator bc_end = _moose_system._bcs.activeBCsEnd(tid,boundary_id);
 
           if(bc_it != bc_end)
           {
-            sys.reinitBCs(tid, soln, side, boundary_id);
+            _moose_system.reinitBCs(tid, _soln, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
               (*bc_it)->computeJacobian();
@@ -118,10 +118,10 @@ public:
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for(unsigned int i=0; i< sys._var_dof_indices[tid].size(); i++)
+        for(unsigned int i=0; i< _moose_system._var_dof_indices[tid].size(); i++)
         {
-          sys._dof_map->constrain_element_matrix (*sys._var_Kes[tid][i], sys._var_dof_indices[tid][i], false);
-          jacobian.add_matrix(*sys._var_Kes[tid][i], sys._var_dof_indices[tid][i]);
+          _moose_system._dof_map->constrain_element_matrix (*_moose_system._var_Kes[tid][i], _moose_system._var_dof_indices[tid][i], false);
+          _jacobian.add_matrix(*_moose_system._var_Kes[tid][i], _moose_system._var_dof_indices[tid][i]);
         }
       }
     }
@@ -129,9 +129,9 @@ public:
   }
 
 protected:
-  MooseSystem& sys;
-  const NumericVector<Number>& soln;
-  SparseMatrix<Number>& jacobian;
+  MooseSystem& _moose_system;
+  const NumericVector<Number>& _soln;
+  SparseMatrix<Number>& _jacobian;
 };
 
 namespace Moose {

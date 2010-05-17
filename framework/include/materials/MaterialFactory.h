@@ -47,8 +47,8 @@ public:
   template<typename MaterialType> 
   void registerMaterial(std::string name)
   {
-    name_to_build_pointer[name]=&buildMaterial<MaterialType>;
-    name_to_params_pointer[name]=&validParams<MaterialType>;
+    _name_to_build_pointer[name]=&buildMaterial<MaterialType>;
+    _name_to_params_pointer[name]=&validParams<MaterialType>;
   }
 
   Material *create(std::string mat_name,
@@ -56,7 +56,7 @@ public:
                    MooseSystem & moose_system,
                    InputParameters parameters)
   {
-    return (*name_to_build_pointer[mat_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[mat_name])(name, moose_system, parameters);
   }
   
   InputParameters getValidParams(std::string name);
@@ -69,8 +69,8 @@ private:
   
   virtual ~MaterialFactory(){}
 
-  std::map<std::string, MaterialBuildPtr> name_to_build_pointer;
-  std::map<std::string, MaterialParamsPtr> name_to_params_pointer;
+  std::map<std::string, MaterialBuildPtr> _name_to_build_pointer;
+  std::map<std::string, MaterialParamsPtr> _name_to_params_pointer;
 
   std::vector<std::string> _registered_material_names;
 };

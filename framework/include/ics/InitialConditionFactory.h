@@ -51,13 +51,13 @@ public:
   template<typename InitialConditionType> 
   void registerInitialCondition(std::string name)
   {
-    name_to_build_pointer[name]=&buildInitialCondition<InitialConditionType>;
-    name_to_params_pointer[name]=&validParams<InitialConditionType>;
+    _name_to_build_pointer[name]=&buildInitialCondition<InitialConditionType>;
+    _name_to_params_pointer[name]=&validParams<InitialConditionType>;
   }
 
   InitialCondition *create(std::string ic_name, std::string name, MooseSystem & moose_system, InputParameters parameters)
   {
-    return (*name_to_build_pointer[ic_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[ic_name])(name, moose_system, parameters);
   }
   
   InputParameters getValidParams(std::string name);
@@ -70,8 +70,8 @@ private:
   
   virtual ~InitialConditionFactory(){}
 
-  std::map<std::string, InitialConditionBuildPtr> name_to_build_pointer;
-  std::map<std::string, InitialConditionParamsPtr> name_to_params_pointer;
+  std::map<std::string, InitialConditionBuildPtr> _name_to_build_pointer;
+  std::map<std::string, InitialConditionParamsPtr> _name_to_params_pointer;
 
   std::vector<std::string> _registered_initial_condition_names;
 };

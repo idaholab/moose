@@ -3,8 +3,8 @@
 StabilizerHolder::StabilizerHolder(MooseSystem &sys)
   : _moose_system(sys)
 {
-  active_stabilizers.resize(libMesh::n_threads());
-  block_stabilizers.resize(libMesh::n_threads());
+  _active_stabilizers.resize(libMesh::n_threads());
+  _block_stabilizers.resize(libMesh::n_threads());
 }
 
 StabilizerHolder::~StabilizerHolder()
@@ -12,7 +12,7 @@ StabilizerHolder::~StabilizerHolder()
   {
 
     std::vector<std::map<unsigned int, Stabilizer *> >::iterator i;
-    for (i=active_stabilizers.begin(); i!=active_stabilizers.end(); ++i)
+    for (i=_active_stabilizers.begin(); i!=_active_stabilizers.end(); ++i)
     {
 
       StabilizerIterator j;
@@ -25,7 +25,7 @@ StabilizerHolder::~StabilizerHolder()
 
   {
     std::vector<std::map<unsigned int, std::map<unsigned int, Stabilizer *> > >::iterator i;
-    for (i=block_stabilizers.begin(); i!=block_stabilizers.end(); ++i)
+    for (i=_block_stabilizers.begin(); i!=_block_stabilizers.end(); ++i)
     {
 
       std::map<unsigned int, std::map<unsigned int, Stabilizer *> >::iterator j;
@@ -50,24 +50,24 @@ StabilizerHolder::isStabilized(unsigned int var_num)
 StabilizerIterator
 StabilizerHolder::activeStabilizersBegin(THREAD_ID tid)
 {
-  return active_stabilizers[tid].begin();
+  return _active_stabilizers[tid].begin();
 }
 
 StabilizerIterator
 StabilizerHolder::activeStabilizersEnd(THREAD_ID tid)
 {
-  return active_stabilizers[tid].end();
+  return _active_stabilizers[tid].end();
 }
 
 
 StabilizerIterator
 StabilizerHolder::blockStabilizersBegin(THREAD_ID tid, unsigned int block_id)
 {
-  return block_stabilizers[tid][block_id].begin();
+  return _block_stabilizers[tid][block_id].begin();
 }
 
 StabilizerIterator
 StabilizerHolder::blockStabilizersEnd(THREAD_ID tid, unsigned int block_id)
 {
-  return block_stabilizers[tid][block_id].end();
+  return _block_stabilizers[tid][block_id].end();
 }

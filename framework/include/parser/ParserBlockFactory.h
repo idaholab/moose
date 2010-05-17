@@ -48,8 +48,8 @@ public:
   template<typename ParserBlockType> 
   void registerParserBlock(std::string name)
   {
-    name_to_build_pointer[name]=&buildParserBlock<ParserBlockType>;
-    name_to_params_pointer[name]=&validParams<ParserBlockType>;
+    _name_to_build_pointer[name]=&buildParserBlock<ParserBlockType>;
+    _name_to_params_pointer[name]=&validParams<ParserBlockType>;
   }
 
   ParserBlock * add(std::string name, MooseSystem & moose_system, InputParameters params);
@@ -70,11 +70,11 @@ private:
 
   virtual ~ParserBlockFactory();
   
-  std::map<std::string, parserBlockBuildPtr> name_to_build_pointer;
-  std::map<std::string, parserBlockParamsPtr> name_to_params_pointer;
+  std::map<std::string, parserBlockBuildPtr> _name_to_build_pointer;
+  std::map<std::string, parserBlockParamsPtr> _name_to_params_pointer;
 
   std::vector<std::string> _registered_parser_block_names;
-  std::vector<ParserBlock *> active_parser_blocks;
+  std::vector<ParserBlock *> _active_parser_blocks;
 
 };
 

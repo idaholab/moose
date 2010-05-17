@@ -20,8 +20,8 @@ class ComputeInternalResiduals
 {
 public:
   ComputeInternalResiduals(MooseSystem &sys, const NumericVector<Number>& in_soln, NumericVector<Number>& in_residual)
-    :sys(sys),
-     soln(in_soln),
+    :_moose_system(sys),
+     _soln(in_soln),
      residual(in_residual)
   {}
 
@@ -35,18 +35,18 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
-    sys._kernels.updateActiveKernels(tid);
+    _moose_system._kernels.updateActiveKernels(tid);
 
-    KernelIterator kernel_begin = sys._kernels.activeKernelsBegin(tid);
-    KernelIterator kernel_end = sys._kernels.activeKernelsEnd(tid);
+    KernelIterator kernel_begin = _moose_system._kernels.activeKernelsBegin(tid);
+    KernelIterator kernel_end = _moose_system._kernels.activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;
 
     KernelIterator block_kernel_begin;
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
-    StabilizerIterator stabilizer_begin = sys._stabilizers.activeStabilizersBegin(tid);
-    StabilizerIterator stabilizer_end = sys._stabilizers.activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_begin = _moose_system._stabilizers.activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = _moose_system._stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
     unsigned int subdomain = 999999999;
@@ -57,7 +57,7 @@ public:
 
       Re.zero();
 
-      sys.reinitKernels(tid, soln, elem, &Re);
+      _moose_system.reinitKernels(tid, _soln, elem, &Re);
 
       unsigned int cur_subdomain = elem->subdomain_id();
 
@@ -65,11 +65,11 @@ public:
       {
         subdomain = cur_subdomain;
 
-        Material * material = sys._materials.getMaterial(tid, subdomain);
+        Material * material = _moose_system._materials.getMaterial(tid, subdomain);
         material->subdomainSetup();
 
-        block_kernel_begin = sys._kernels.blockKernelsBegin(tid, subdomain);
-        block_kernel_end = sys._kernels.blockKernelsEnd(tid, subdomain);
+        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
 
         //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -100,14 +100,14 @@ public:
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = sys._mesh->boundary_info->boundary_id (elem, side);
+          unsigned int boundary_id = _moose_system._mesh->boundary_info->boundary_id (elem, side);
 
-          BCIterator bc_it = sys._bcs.activeBCsBegin(tid,boundary_id);
-          BCIterator bc_end = sys._bcs.activeBCsEnd(tid,boundary_id);
+          BCIterator bc_it = _moose_system._bcs.activeBCsBegin(tid,boundary_id);
+          BCIterator bc_end = _moose_system._bcs.activeBCsEnd(tid,boundary_id);
 
           if(bc_it != bc_end)
           {
-            sys.reinitBCs(tid, soln, side, boundary_id);
+            _moose_system.reinitBCs(tid, _soln, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
               (*bc_it)->computeResidual();
@@ -115,19 +115,19 @@ public:
         }
       }
       
-      sys._dof_map->constrain_element_vector (Re, sys._dof_indices[tid], false);
+      _moose_system._dof_map->constrain_element_vector (Re, _moose_system._dof_indices[tid], false);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx); 
-        residual.add_vector(Re, sys._dof_indices[tid]);
+        residual.add_vector(Re, _moose_system._dof_indices[tid]);
       }
     }
 
   }
 
 protected:
-  MooseSystem &sys;
-  const NumericVector<Number>& soln;
+  MooseSystem &_moose_system;
+  const NumericVector<Number>& _soln;
   NumericVector<Number>& residual;
 };
 

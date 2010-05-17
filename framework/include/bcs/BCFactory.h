@@ -47,8 +47,8 @@ public:
   template<typename BCType> 
   void registerBC(std::string name)
   {
-    name_to_build_pointer[name]=&buildBC<BCType>;
-    name_to_params_pointer[name]=&validParams<BCType>;
+    _name_to_build_pointer[name]=&buildBC<BCType>;
+    _name_to_params_pointer[name]=&validParams<BCType>;
   }
 
   BoundaryCondition *create(std::string bc_name,
@@ -56,7 +56,7 @@ public:
                             MooseSystem & moose_system,
                             InputParameters parameters)
   {
-    return (*name_to_build_pointer[bc_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[bc_name])(name, moose_system, parameters);
   }
 
   BCNamesIterator registeredBCsBegin();
@@ -69,8 +69,8 @@ private:
 
   virtual ~BCFactory();
 
-  std::map<std::string, BCBuildPtr> name_to_build_pointer;
-  std::map<std::string, BCParamsPtr> name_to_params_pointer;
+  std::map<std::string, BCBuildPtr> _name_to_build_pointer;
+  std::map<std::string, BCParamsPtr> _name_to_params_pointer;
 
   std::vector<std::string> _registered_bc_names;
 

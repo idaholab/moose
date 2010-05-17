@@ -53,8 +53,8 @@ public:
   template<typename AuxType> 
   void registerAux(std::string name)
   {
-    name_to_build_pointer[name]=&buildAux<AuxType>;
-    name_to_params_pointer[name]=&validParams<AuxType>;
+    _name_to_build_pointer[name]=&buildAux<AuxType>;
+    _name_to_params_pointer[name]=&validParams<AuxType>;
   }
 
   AuxKernel *create(std::string aux_name,
@@ -62,7 +62,7 @@ public:
                      MooseSystem & moose_system,
                      InputParameters parameters)
   {
-    return (*name_to_build_pointer[aux_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[aux_name])(name, moose_system, parameters);
   }
 
   InputParameters getValidParams(std::string name);
@@ -75,8 +75,8 @@ private:
 
   virtual ~AuxFactory();
 
-  std::map<std::string, AuxKernelBuildPtr> name_to_build_pointer;
-  std::map<std::string, AuxKernelParamsPtr> name_to_params_pointer;
+  std::map<std::string, AuxKernelBuildPtr> _name_to_build_pointer;
+  std::map<std::string, AuxKernelParamsPtr> _name_to_params_pointer;
   
   std::vector<std::string> _registered_auxkernel_names;
 };

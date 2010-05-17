@@ -34,10 +34,10 @@ public:
   void updateActiveKernels(THREAD_ID tid);
 
   std::vector<Kernel *> _kernels;
-  std::vector<std::vector<Kernel *> > active_kernels;
-  std::vector<std::vector<Kernel *> > all_kernels;
-  std::vector<std::map<unsigned int, std::vector<Kernel *> > > block_kernels;
-  std::vector<std::map<unsigned int, std::vector<Kernel *> > > all_block_kernels;
+  std::vector<std::vector<Kernel *> > _active_kernels;
+  std::vector<std::vector<Kernel *> > _all_kernels;
+  std::vector<std::map<unsigned int, std::vector<Kernel *> > > _block_kernels;
+  std::vector<std::map<unsigned int, std::vector<Kernel *> > > _all_block_kernels;
 
 protected:
   MooseSystem &_moose_system;

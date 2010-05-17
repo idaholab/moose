@@ -26,8 +26,8 @@ public:
 
   void activeBoundaries(std::set<subdomain_id_type> & set_buffer) const;
 
-  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > active_bcs;
-  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > active_nodal_bcs;
+  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > _active_bcs;
+  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > _active_nodal_bcs;
 
 protected:
   MooseSystem &_moose_system;

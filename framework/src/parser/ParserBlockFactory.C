@@ -35,8 +35,8 @@ ParserBlockFactory::add(std::string name, MooseSystem & moose_system, InputParam
   ParserBlock * parser_block;
   std::string generic_identifier = ParserBlockFactory::instance()->isRegistered(name);
   
-  parser_block = (*name_to_build_pointer[generic_identifier])(name, moose_system, params);
-  active_parser_blocks.push_back(parser_block);
+  parser_block = (*_name_to_build_pointer[generic_identifier])(name, moose_system, params);
+  _active_parser_blocks.push_back(parser_block);
 
   return parser_block;
 }
@@ -50,22 +50,22 @@ ParserBlockFactory::getValidParams(const std::string & name)
    */
   std::string generic_identifier = ParserBlockFactory::instance()->isRegistered(name);
 
-  if( name_to_params_pointer.find(generic_identifier) == name_to_params_pointer.end() )
-    return name_to_params_pointer["ParserBlock"]();
+  if( _name_to_params_pointer.find(generic_identifier) == _name_to_params_pointer.end() )
+    return _name_to_params_pointer["ParserBlock"]();
   else
-    return name_to_params_pointer[generic_identifier]();
+    return _name_to_params_pointer[generic_identifier]();
 }
 
 ParserBlockIterator
 ParserBlockFactory::activeParserBlocksBegin()
 {
-  return active_parser_blocks.begin();
+  return _active_parser_blocks.begin();
 }
 
 ParserBlockIterator
 ParserBlockFactory::activeParserBlocksEnd()
 {
-  return active_parser_blocks.end();
+  return _active_parser_blocks.end();
 }
 
 ParserBlockNamesIterator
@@ -73,11 +73,11 @@ ParserBlockFactory::registeredParserBlocksBegin()
 {
   // Make sure the _registered_parserBlock_names are up to date
   _registered_parser_block_names.clear();
-  _registered_parser_block_names.reserve(name_to_params_pointer.size());
+  _registered_parser_block_names.reserve(_name_to_params_pointer.size());
 
   // build a vector of strings from the params pointer map
-  for (std::map<std::string, parserBlockParamsPtr>::iterator i = name_to_params_pointer.begin();
-       i != name_to_params_pointer.end();
+  for (std::map<std::string, parserBlockParamsPtr>::iterator i = _name_to_params_pointer.begin();
+       i != _name_to_params_pointer.end();
        ++i)
   {
     _registered_parser_block_names.push_back(i->first);
@@ -106,7 +106,7 @@ ParserBlockFactory::isRegistered(const std::string & real_id)
 
   Parser::tokenize(real_id, real_elements);
   
-  for (i=name_to_params_pointer.rbegin(); i!=name_to_params_pointer.rend(); ++i) 
+  for (i=_name_to_params_pointer.rbegin(); i!=_name_to_params_pointer.rend(); ++i) 
   {
     std::string reg_id = i->first;
     if (reg_id == real_id) 
@@ -135,7 +135,7 @@ ParserBlockFactory:: ~ParserBlockFactory()
 {
   {
     std::map<std::string, parserBlockBuildPtr>:: iterator i;
-    for(i=name_to_build_pointer.begin(); i!=name_to_build_pointer.end(); ++i)
+    for(i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
     {
       delete &i;
     }
@@ -143,7 +143,7 @@ ParserBlockFactory:: ~ParserBlockFactory()
 
   {
     std::map<std::string, parserBlockParamsPtr>::iterator i;
-    for(i=name_to_params_pointer.begin(); i!=name_to_params_pointer.end(); ++i)
+    for(i=_name_to_params_pointer.begin(); i!=_name_to_params_pointer.end(); ++i)
     {
       delete &i;
     }
@@ -152,7 +152,7 @@ ParserBlockFactory:: ~ParserBlockFactory()
   {
         
     std::vector<ParserBlock *>::iterator i;
-    for (i=active_parser_blocks.begin(); i!=active_parser_blocks.end(); ++i)
+    for (i=_active_parser_blocks.begin(); i!=_active_parser_blocks.end(); ++i)
     {
       delete *i;
     }

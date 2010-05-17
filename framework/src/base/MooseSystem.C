@@ -44,7 +44,7 @@ MooseSystem::MooseSystem()
    _ics(*this),
    _no_fe_reinit(false),
    _preconditioner(NULL),
-   active_local_elem_range(NULL)
+   _active_local_elem_range(NULL)
 {
   Moose::g_system = this;     // FIXME: this will eventually go away
   sizeEverything();
@@ -65,7 +65,7 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _ics(*this),
     _no_fe_reinit(false),
     _preconditioner(NULL),
-    active_local_elem_range(NULL)
+    _active_local_elem_range(NULL)
 {
   Moose::g_system = this;     // FIXME: this will eventually go away
 
@@ -135,7 +135,7 @@ MooseSystem::~MooseSystem()
     delete *i;
   }
 
-  delete active_local_elem_range;
+  delete _active_local_elem_range;
 }
 
 Mesh *
@@ -588,7 +588,7 @@ MooseSystem::addKernel(std::string kernel_name,
 
     Kernel * kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
 
-    _kernels.all_kernels[tid].push_back(kernel);
+    _kernels._all_kernels[tid].push_back(kernel);
   }
 }
 
@@ -603,7 +603,7 @@ void MooseSystem::addKernel(std::string kernel_name,
 
     Kernel * kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
 
-    _kernels.all_block_kernels[tid][block_id].push_back(kernel);
+    _kernels._all_block_kernels[tid][block_id].push_back(kernel);
   }
 
 }
@@ -624,9 +624,9 @@ MooseSystem::addBC(std::string bc_name,
       BoundaryCondition * bc = BCFactory::instance()->create(bc_name, name, *this, parameters);
 
       if(bc->isIntegrated())
-        _bcs.active_bcs[tid][boundaries[i]].push_back(bc);
+        _bcs._active_bcs[tid][boundaries[i]].push_back(bc);
       else
-        _bcs.active_nodal_bcs[tid][boundaries[i]].push_back(bc);
+        _bcs._active_nodal_bcs[tid][boundaries[i]].push_back(bc);
     }
   }
 }
@@ -654,9 +654,9 @@ MooseSystem::addAuxKernel(std::string aux_name,
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
 
     if (aux->isNodal())
-      aux_ptr = &_auxs.active_NodalAuxKernels[tid];
+      aux_ptr = &_auxs._active_nodal_aux_kernels[tid];
     else
-      aux_ptr = &_auxs.active_ElementAuxKernels[tid];
+      aux_ptr = &_auxs._active_element_aux_kernels[tid];
 
     // Copy the active AuxKernels into a list for manipulation
     std::list<AuxKernel *> active_auxs(aux_ptr->begin(), aux_ptr->end());
@@ -713,7 +713,7 @@ MooseSystem::addAuxBC(std::string aux_name,
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
 
     for (unsigned int i=0; i<boundaries.size(); ++i)
-      _auxs.active_bcs[tid][boundaries[i]].push_back(aux);
+      _auxs._active_bcs[tid][boundaries[i]].push_back(aux);
     _auxs._aux_bcs[tid].push_back(aux);
   }
 }
@@ -732,7 +732,7 @@ MooseSystem::addMaterial(std::string mat_name,
     parameters.set<std::string>("variable") = _es->get_system(0).variable_name(0);
 
     for (unsigned int i=0; i<blocks.size(); ++i)
-      _materials.active_materials[tid][blocks[i]] = MaterialFactory::instance()->create(mat_name, name, *this, parameters);
+      _materials._active_materials[tid][blocks[i]] = MaterialFactory::instance()->create(mat_name, name, *this, parameters);
   }
 }
 
@@ -750,9 +750,9 @@ MooseSystem::addStabilizer(std::string stabilizer_name,
     stabilizer = StabilizerFactory::instance()->create(stabilizer_name, name, *this, parameters);
 
     if (parameters.have_parameter<unsigned int>("block_id"))
-      _stabilizers.block_stabilizers[tid][parameters.get<unsigned int>("block_id")][stabilizer->variable()] = stabilizer;
+      _stabilizers._block_stabilizers[tid][parameters.get<unsigned int>("block_id")][stabilizer->variable()] = stabilizer;
     else
-      _stabilizers.active_stabilizers[tid][stabilizer->variable()] = stabilizer;
+      _stabilizers._active_stabilizers[tid][stabilizer->variable()] = stabilizer;
 
     _stabilizers._is_stabilized[stabilizer->variable()] = true;
   }
@@ -771,7 +771,7 @@ MooseSystem::addInitialCondition(std::string ic_name,
     // The var_name needs to be added to the parameters object for any InitialCondition derived objects
     parameters.set<std::string>("var_name") = var_name;
 
-    _ics.active_initial_conditions[tid][var_name] = InitialConditionFactory::instance()->create(ic_name, name, *this, parameters);
+    _ics._active_initial_conditions[tid][var_name] = InitialConditionFactory::instance()->create(ic_name, name, *this, parameters);
   }
 }
 
@@ -1565,8 +1565,8 @@ MooseSystem::meshChanged()
   _mesh->boundary_info->build_node_list_from_side_list();
 
   // Rebuild the active local element range
-  delete active_local_elem_range;
-  active_local_elem_range = NULL;
+  delete _active_local_elem_range;
+  _active_local_elem_range = NULL;
 
   // Calling this function will rebuild the range.
   getActiveLocalElementRange();
@@ -1578,13 +1578,13 @@ MooseSystem::meshChanged()
 ConstElemRange *
 MooseSystem::getActiveLocalElementRange()
 {
-  if(!active_local_elem_range)
+  if(!_active_local_elem_range)
   {
-    active_local_elem_range = new ConstElemRange(_mesh->active_local_elements_begin(),
+    _active_local_elem_range = new ConstElemRange(_mesh->active_local_elements_begin(),
                                                  _mesh->active_local_elements_end(), 1);
   }
 
-  return active_local_elem_range;
+  return _active_local_elem_range;
 }
 
 /**

@@ -25,7 +25,7 @@ public:
   MaterialIterator activeMaterialsBegin(THREAD_ID tid);
   MaterialIterator activeMaterialsEnd(THREAD_ID tid);
 
-  std::vector<std::map<int, Material *> > active_materials;
+  std::vector<std::map<int, Material *> > _active_materials;
 
 protected:
   MooseSystem &_moose_system;
