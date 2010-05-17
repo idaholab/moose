@@ -18,13 +18,24 @@ InputParameters validParams<BoundaryCondition>()
   return params;
 }
 
-BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
-//          parameters,
-//          parameters.get<std::string>("variable"),
-//          parameters.get<bool>("_integrated"),
-//          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
-//          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+   _name(name),
+   _moose_system(moose_system),
+   _tid(Moose::current_thread_id),
+   _parameters(parameters),
+   _mesh(*_moose_system.getMesh()),
+   _var_name(parameters.get<std::string>("variable")),
+   _is_aux(_moose_system._aux_system->has_variable(_var_name)),
+   _var_num(_is_aux ? _moose_system._aux_system->variable_number(_var_name) : _moose_system._system->variable_number(_var_name)),
+   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _moose_system._dof_map->variable_type(_var_num)),
+   _integrated(parameters.have_parameter<bool>("_integrated") ? parameters.get<bool>("_integrated") : true),
+   _dim(_moose_system._dim),
+   _t(_moose_system._t),
+   _dt(_moose_system._dt),
+   _dt_old(_moose_system._dt_old),
+   _is_transient(_moose_system._is_transient),
+   _current_elem(_moose_system._current_elem[_tid]),
+   _material(_moose_system._material[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
    _JxW_face(*moose_system._JxW_face[_tid][_fe_type]),
@@ -34,6 +45,14 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _normals_face(*moose_system._normals_face[_tid][_fe_type]),
    _qface(moose_system._qface[_tid]),
    _q_point_face(*moose_system._q_point_face[_tid][_fe_type]),
+   _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
+   _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+   _real_zero(_moose_system._real_zero[_tid]),
+   _zero(_moose_system._zero[_tid]),
+   _grad_zero(_moose_system._grad_zero[_tid]),
+   _second_zero(_moose_system._second_zero[_tid]),
+   _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
+   _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max()),
    _current_side(moose_system._current_side[_tid]),
    _current_node(moose_system._current_node[_tid]),
    _current_residual(moose_system._current_residual[_tid]),
@@ -41,6 +60,38 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _grad_u_face(_integrated ? moose_system._var_grads_face[_tid][_var_num] : moose_system._grad_zero[_tid]),
    _second_u_face(_integrated ? moose_system._var_seconds_face[_tid][_var_num] : moose_system._second_zero[_tid])
 {
+  // FIXME: this for statement will go into a common ancestor
+  for(unsigned int i=0;i<_coupled_to.size();i++)
+  {
+    std::string coupled_var_name=_coupled_to[i];
+
+    //Is it in the nonlinear system or the aux system?
+    if(_moose_system._system->has_variable(coupled_var_name))
+    {
+      unsigned int coupled_var_num = _moose_system._system->variable_number(coupled_var_name);
+
+      _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
+
+      if(std::find(_moose_system._var_nums.begin(),_moose_system._var_nums.end(),coupled_var_num) == _moose_system._var_nums.end())
+        _moose_system._var_nums.push_back(coupled_var_num);
+
+      if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
+        _coupled_var_nums.push_back(coupled_var_num);
+    }
+    else //Look for it in the Aux system
+    {
+      unsigned int coupled_var_num = _moose_system._aux_system->variable_number(coupled_var_name);
+
+      _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
+
+      if(std::find(_moose_system._aux_var_nums.begin(),_moose_system._aux_var_nums.end(),coupled_var_num) == _moose_system._aux_var_nums.end())
+        _moose_system._aux_var_nums.push_back(coupled_var_num);
+
+      if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
+        _aux_coupled_var_nums.push_back(coupled_var_num);
+    }
+  }
+
   if(_integrated)
     addVarNums(moose_system._boundary_to_var_nums[_boundary_id]);
   else
@@ -179,6 +230,17 @@ BoundaryCondition::computeIntegral()
   return sum;
 }
 
+unsigned int
+BoundaryCondition::variable()
+{
+  return _var_num;
+}
+
+THREAD_ID
+BoundaryCondition::tid()
+{
+  return _tid;
+}
 
 bool
 BoundaryCondition::isIntegrated()
@@ -221,4 +283,55 @@ BoundaryCondition::coupledGradFace(std::string name)
     return _moose_system._var_grads_face[_tid][_coupled_as_to_var_num[name]];
 
   mooseError("");
+}
+
+bool
+BoundaryCondition::isCoupled(std::string name)
+{
+  bool found = std::find(_coupled_as.begin(),_coupled_as.end(),name) != _coupled_as.end();
+
+  //See if it's an Aux variable
+  if(!found)
+    found = isAux(name);
+
+  return found;
+}
+
+unsigned int
+BoundaryCondition::coupled(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _coupled_as_to_var_num[name];
+  else
+    return Kernel::modifiedAuxVarNum(_aux_coupled_as_to_var_num[name]);
+}
+
+Real
+BoundaryCondition::computeQpJacobian()
+{
+  return 0;
+}
+
+Real
+BoundaryCondition::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  return 0;
+}
+
+Real
+BoundaryCondition::computeQpIntegral()
+{
+  return 0;
+}
+
+bool
+BoundaryCondition::isAux(std::string name)
+{
+  return _aux_coupled_as_to_var_num.find(name) != _aux_coupled_as_to_var_num.end();
 }
