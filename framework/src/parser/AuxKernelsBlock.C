@@ -11,9 +11,10 @@ InputParameters validParams<AuxKernelsBlock>()
 AuxKernelsBlock::AuxKernelsBlock(std::string name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
-  // Register execution prereqs
+  // Register AuxKernel prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
+  addPrereq("Preconditioning");
   addPrereq("AuxVariables");
   addPrereq("Kernels");
 }

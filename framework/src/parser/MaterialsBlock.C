@@ -10,7 +10,17 @@ InputParameters validParams<MaterialsBlock>()
 
 MaterialsBlock::MaterialsBlock(std::string name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
-{}
+{
+  // Register Materials prereqs
+  addPrereq("Mesh");
+  addPrereq("Variables");
+  addPrereq("Preconditioning");
+  addPrereq("AuxVariables");
+  addPrereq("Kernels");
+  addPrereq("AuxKernels");
+  addPrereq("BCs");
+  addPrereq("AuxBCs");
+}
 
 void
 MaterialsBlock::execute() 

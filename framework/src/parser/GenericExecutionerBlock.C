@@ -35,6 +35,14 @@ GenericExecutionerBlock::GenericExecutionerBlock(std::string name, MooseSystem &
   :ParserBlock(name, moose_system, params),
    _type(getType())
 {
+  // Register execution prereqs
+  addPrereq("Mesh");
+  addPrereq("Variables");
+  addPrereq("AuxVariables");
+  addPrereq("Materials");
+  addPrereq("BCs");
+  
+  
   setClassParams(ExecutionerFactory::instance()->getValidParams(_type));
 }
 

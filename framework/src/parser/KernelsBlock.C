@@ -16,6 +16,7 @@ KernelsBlock::KernelsBlock(std::string name, MooseSystem & moose_system, InputPa
   // Register execution prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
+  addPrereq("Preconditioning");
   addPrereq("AuxVariables");
 }
 

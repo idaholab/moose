@@ -51,7 +51,7 @@ ParserBlockFactory::getValidParams(const std::string & name)
   std::string generic_identifier = ParserBlockFactory::instance()->isRegistered(name);
 
   if( _name_to_params_pointer.find(generic_identifier) == _name_to_params_pointer.end() )
-    return _name_to_params_pointer["ParserBlock"]();
+    mooseError("No ParserBlock registered for \"" << name << "\"");
   else
     return _name_to_params_pointer[generic_identifier]();
 }

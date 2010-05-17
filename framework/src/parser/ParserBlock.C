@@ -28,6 +28,9 @@ InputParameters validParams<ParserBlock>()
   return params;
 }
 
+
+bool ParserBlock::_deferred_execution = false;
+
 ParserBlock::ParserBlock(std::string name, MooseSystem & moose_system, InputParameters params)
   :_name(name),
    _parser_handle(*params.get<Parser *>("parser_handle")),
@@ -94,12 +97,17 @@ ParserBlock::execute()
 {
   visitChildren(&ParserBlock::execute);
 
-/*
   executeDeferred(&ParserBlock::execute);
+  
   // See if all the deferred blocks have been executed
-  if (!_parser_handle.getDeferredList().empty())
-    mooseError("Unexecuted ParserBlocks remain");
-*/
+  std::list<ParserBlock *> & unexecuted = _parser_handle.getDeferredList();
+  if (!unexecuted.empty())
+  {
+    std::cerr << "Unexecuted ParserBlocks remain, consider checking prereqs for the following blocks:\n";
+    for (std::list<ParserBlock *>::iterator i=unexecuted.begin(); i!=unexecuted.end(); ++i)
+      std::cout << (*i)->getID() << "\n";
+    mooseError("*******************************************************************************");
+  }
 }
 
 unsigned int
@@ -132,7 +140,7 @@ void
 ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only, bool check_prereqs)
 {
   std::vector<std::string> active_children = getParamValue<std::vector<std::string> >("active");
-  
+
   // if there is no parameter named "active" then assume that all children are to be visited
   try 
   {
@@ -147,22 +155,23 @@ ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only
 
   std::vector<ParserBlock *>::iterator i;
   for (i=_children.begin(); i!=_children.end(); ++i)
-  {
+  { 
     if (!visit_active_only || child_set.find((*i)->getShortName()) != child_set.end())
-//      if (!check_prereqs || checkPrereqs(*i))                    // Check Prereqs before executing if requested
-//      {
-//        if (!_parser_handle.isExecuted((*i)->getID())) 
-//        {
-//          std::cout << "Debug: " << (*i)->getID();
-          
+      if (!check_prereqs || checkPrereqs(*i))                      // Check Prereqs before executing if requested
+      {
+        if (!_parser_handle.isExecuted((*i)->getID())) 
+        { 
           ((*i)->*action)();                                       // Call the method through the function pointer
-//          _parser_handle.markExecuted((*i)->getID());              // Add the executed block to the executed set
-//          executeDeferred(action);
-//        }
-//      }
-//      else
-//        _parser_handle.deferExecution(*i);
+          _parser_handle.markExecuted((*i)->getID());              // Add the executed block to the executed set
+
+          if (!_deferred_execution)                                // Execute deferred blocks unless we are
+            executeDeferred(action);                               // already executing deferred blocks
+        }
+      }
+      else
+        _parser_handle.deferExecution(*i);                         // Add to the deferred list of prereqs not met
   }
+  executeDeferred(action);                                         // execute deferred blocks before going on
 }
 
 bool
@@ -174,28 +183,50 @@ ParserBlock::checkPrereqs(ParserBlock *pb_ptr)
                       _parser_handle.getExecutedSetBegin(), _parser_handle.getExecutedSetEnd(),
                       std::insert_iterator<std::set<std::string> >(result, result.end()));
 
-  // The result set should be empty if all prereqs have been satisified
   return result.empty() ? true : false;
 }
 
 void
 ParserBlock::executeDeferred(void (ParserBlock::*action)())
 {
-  // See if any of the defered blocks have their prereqs fulfilled and execute
-  std::list<ParserBlock *> & deferred = _parser_handle.getDeferredList();
-  for (std::list<ParserBlock *>::iterator i = deferred.begin(); i != deferred.end(); ) 
+  // Don't go off into recursion no-mans land (base case)
+  if (_deferred_execution)
+    return;
+  
+  _deferred_execution = true;  // Switch modes to "deferred execution" for the duration of this subroutine
+
+  // Keep looping over the deferred blocks as long as the list isn't empty but is still shrinking
+  unsigned int last_size, curr_size;
+  do 
   {
-    if (checkPrereqs(*i) && !_parser_handle.isExecuted((*i)->getID()))
+    std::list<ParserBlock *> & deferred = _parser_handle.getDeferredList();
+    last_size = deferred.size();
+
+    for (std::list<ParserBlock *>::iterator i = deferred.begin(); i != deferred.end(); ) 
     {
-      std::cout << "Debug: " << (*i)->getID();
-      
-      ((*i)->*action)();
-      _parser_handle.markExecuted((*i)->getID());
-      deferred.erase(i++);                                     // Important: Erase with a postfix increment
+      std::cerr << "Debug: " << (*i)->getID();
+      if (checkPrereqs(*i) && !_parser_handle.isExecuted((*i)->getID()))
+      {
+        /**
+         * Because we are going to recurse down the children of this block and those children
+         * will themselves call "executeDeferred" we need to mark the current block as executed
+         * before the recursive call.  This will allow us to catch the base case at the top of this
+         * function during the subsequent recursive calls and properly unwind the stack back to the
+         * point where we originally entered the deferred execution block in "visitChildren"
+         */
+        _parser_handle.markExecuted((*i)->getID());
+        ((*i)->*action)();
+
+        deferred.erase(i++);    // VERY IMPORTANT: Erase with a postfix increment
+      }
+      else
+        ++i;
     }
-    else
-      ++i;
-  }
+
+    curr_size = deferred.size();
+  } while (last_size - curr_size);
+  
+  _deferred_execution = false;  // Switch modes back to "normal execution" as we leave this subroutine
 }
 
 ParserBlock *

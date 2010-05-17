@@ -25,6 +25,7 @@ AuxVariablesBlock::AuxVariablesBlock(std::string name, MooseSystem & moose_syste
   // Register execution prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
+  addPrereq("Preconditioning");
 }
 
 void

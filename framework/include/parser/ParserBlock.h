@@ -130,6 +130,8 @@ public:
    */
   unsigned int n_activeChildren() const;
 
+  static bool _deferred_execution;
+  
 protected:
   /**
    * The MooseSystem this parser is associated with.
@@ -154,8 +156,6 @@ protected:
   /************************************
    * Protected Data Members
    ************************************/
-//  std::string _reg_id;
-//  std::string _real_id;
   std::string _name;
   std::string _block_name;
   Parser & _parser_handle;
@@ -167,7 +167,6 @@ protected:
    */
   std::set<std::string> _execute_prereqs;
   
-
   /************************************
    * Private Data Members (use accessors)
    ************************************/
@@ -183,9 +182,11 @@ private:
    * objects directly.
    */
   InputParameters _class_params;
-  
-//  std::map<std::string, std::string> _doc_string;
-//  std::set<std::string> _required_params;
+
+  /**
+   * Variable which lets a block tell whether or not it is executing under deferred execution
+   */
+
 };
 
 #endif //PARSERBLOCK_H

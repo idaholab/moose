@@ -22,16 +22,17 @@ InputParameters validParams<OutputBlock>()
 OutputBlock::OutputBlock(std::string name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
-  // Register the execution Prereqs
+  // Register Output prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
+  addPrereq("Preconditioning");
   addPrereq("AuxVariables");
   addPrereq("Kernels");
   addPrereq("AuxKernels");
   addPrereq("BCs");
   addPrereq("AuxBCs");
   addPrereq("Materials");
-  addPrereq("Execution");
+  addPrereq("Executioner");
 }
 
 void

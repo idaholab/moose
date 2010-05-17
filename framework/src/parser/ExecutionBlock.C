@@ -42,9 +42,10 @@ InputParameters validParams<ExecutionBlock>()
 ExecutionBlock::ExecutionBlock(std::string name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
-  // Register the execution Prereqs
+  // Register Execution prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
+  addPrereq("Preconditioning");
   addPrereq("AuxVariables");
   addPrereq("Kernels");
   addPrereq("AuxKernels");

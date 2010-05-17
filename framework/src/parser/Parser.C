@@ -386,29 +386,29 @@ Parser::fixupOptionalBlocks()
 void
 Parser::fixupOptionalBlocks()
 {
-  /* Create a vector of Optional Blocks to fill in if they don't exist in the tree and where
-   * they should fit (after the second id listed).  The vector->first is used as the type of block
-   * to create and insert into the tree
+  /* Create a vector of Optional Blocks to fill in if they don't exist in the parsed tree.
+   * The pairs should consist of the required block followed by the optional block.  The optional
+   * block will be inserted into the tree immediatly following the required block.
    */
   std::vector<std::pair<std::string, std::string> > optionalBlocks;
   std::vector<std::pair<std::string, std::string> >::iterator i;
   ParserBlock *block_ptr;
 
-  optionalBlocks.push_back(std::make_pair("Preconditioning", "Variables"));
-  optionalBlocks.push_back(std::make_pair("AuxVariables", "Preconditioning"));
-  optionalBlocks.push_back(std::make_pair("AuxKernels", "Kernels"));
-  optionalBlocks.push_back(std::make_pair("BCs", "AuxKernels"));
-  optionalBlocks.push_back(std::make_pair("AuxBCs", "BCs"));
-
+  optionalBlocks.push_back(std::make_pair("Variables", "Preconditioning"));
+  optionalBlocks.push_back(std::make_pair("Preconditioning", "AuxVariables"));
+  optionalBlocks.push_back(std::make_pair("Kernels", "AuxKernels"));
+  optionalBlocks.push_back(std::make_pair("AuxKernels", "BCs"));
+  optionalBlocks.push_back(std::make_pair("BCs", "AuxBCs"));
+  
   // First see if the Optional Block exists
   for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i) 
   {
-    if (_input_tree->locateBlock(i->first) == NULL) 
+    if (_input_tree->locateBlock(i->second) == NULL) 
     {
       // Get a pointer to the required block to prepare for insertion
       // The newly constructed block will be the sibling before this block
       // which means it better exist and it better not be the root
-      block_ptr = _input_tree->locateBlock(i->second);
+      block_ptr = _input_tree->locateBlock(i->first);
       if (block_ptr == NULL || block_ptr->_parent == NULL)
         mooseError("Major Error in ParserBlock Structure");
 
@@ -416,15 +416,15 @@ Parser::fixupOptionalBlocks()
         find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
 
       if (position == block_ptr->_parent->_children.end())
-        mooseError(("Unable to find required block " + i->second + " for optional block insertion").c_str());
+        mooseError(("Unable to find required block " + i->first + " for optional block insertion").c_str());
 
 
-      InputParameters params = ParserBlockFactory::instance()->getValidParams(i->first);
+      InputParameters params = ParserBlockFactory::instance()->getValidParams(i->second);
       params.set<ParserBlock *>("parent") = block_ptr->_parent;
       params.set<Parser *>("parser_handle") = this;
 
       // Increment one past this location so the new element be inserted afterwards
-      block_ptr->_parent->_children.insert(++position, ParserBlockFactory::instance()->add(i->first, _moose_system, params));
+      block_ptr->_parent->_children.insert(++position, ParserBlockFactory::instance()->add(i->second, _moose_system, params));
     }
   }
 }

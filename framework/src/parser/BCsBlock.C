@@ -11,9 +11,10 @@ InputParameters validParams<BCsBlock>()
 BCsBlock::BCsBlock(std::string name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
-  // Register execution prereqs
+  // Register BCs/AuxBCs prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
+  addPrereq("Preconditioning");
   addPrereq("AuxVariables");
   addPrereq("Kernels");
   addPrereq("AuxKernels");
