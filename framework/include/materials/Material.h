@@ -1,11 +1,11 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "Kernel.h"
 #include "QpData.h"
 
 //libmesh includes
 #include "tensor_value.h"
+#include "quadrature_gauss.h"
 #include "ColumnMajorMatrix.h"
 
 //forward declarations
@@ -17,7 +17,7 @@ InputParameters validParams<Material>();
 /**
  * Holds material properties that are assigned to blocks.
  */
-class Material : public Kernel
+class Material
 {
 public:
 
@@ -96,13 +96,134 @@ public:
    */
   void updateDataState();
 
+  /**
+   * This virtual gets called every time the subdomain changes.  This is useful for doing pre-calcualtions
+   * that should only be done once per subdomain.  In particular this is where references to material
+   * property vectors should be initialized.
+   */
+  virtual void subdomainSetup();
+
 protected:
 
   /**
-   * Reference to the MooseSystem that this material is assocaited to
+   * This Material's name.
+   */
+  std::string _name;
+
+  /**
+   * Reference to the MooseSystem that this Kernel is associated to
    */
   MooseSystem & _moose_system;
   
+  /**
+   * The thread id this kernel is associated with.
+   */
+  THREAD_ID _tid;
+
+  /**
+   * Holds parameters for derived classes so they can be built with common constructor.
+   */
+  InputParameters _parameters;
+
+  /**
+   * The current dimension of the mesh.
+   */
+  unsigned int & _dim;
+
+  /**
+   * Current time.
+   */
+  Real & _t;
+
+  /**
+   * Current dt.
+   */
+  Real & _dt;
+
+  /**
+   * Old dt.
+   */
+  Real & _dt_old;
+
+  /**
+   * Whether or not the current simulation is transient.
+   */
+  bool & _is_transient;
+
+  /**
+   * Current element
+   */
+  const Elem * & _current_elem;
+
+  /**
+   * Current quadrature rule.
+   */
+  QGauss * & _qrule;
+
+  /**
+   * Variable numbers of the coupled variables.
+   */
+  std::vector<unsigned int> _coupled_var_nums;
+
+  /**
+   * Variable numbers of the coupled auxiliary variables.
+   */
+  std::vector<unsigned int> _aux_coupled_var_nums;
+
+  /**
+   * Names of the variables this kernel is coupled to.
+   */
+  std::vector<std::string> _coupled_to;
+
+  /**
+   * Names of the variables this kernel is coupled to.
+   */
+  std::vector<std::string> _coupled_as;
+
+  /**
+   * Map from _as_ to the actual variable number.
+   */
+  std::map<std::string, unsigned int> _coupled_as_to_var_num;
+
+  /**
+   * Map from _as_ to the actual variable number for auxiliary variables.
+   */
+  std::map<std::string, unsigned int> _aux_coupled_as_to_var_num;
+
+  /**
+   * Returns true if a variables has been coupled_as name.
+   *
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  bool isCoupled(std::string name);
+
+  /**
+   * Returns the variable number of the coupled variable.
+   */
+  unsigned int coupled(std::string name);
+
+  /**
+   * Returns a reference (that can be stored) to a coupled variable's value.
+   *
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  std::vector<Real> & coupledVal(std::string name);
+
+  /**
+   * Returns a reference (that can be stored) to a coupled variable's gradient.
+   *
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  std::vector<RealGradient> & coupledGrad(std::string name);
+
+  /**
+   * Just here for convenience.  Used in constructors... usually to deal with multiple dimensional stuff.
+   */
+  Real & _real_zero;
+  std::vector<Real> & _zero;
+  std::vector<RealGradient> & _grad_zero;
+  std::vector<RealTensor> & _second_zero;
+
 // struct DeleteFunctor 
 //   {
 //     void operator()(const std::pair<const unsigned int, std::vector<QpData *> > & p) const
@@ -216,6 +337,11 @@ protected:
   
 //private:
 //  Kernel::_qrule;
+
+  /**
+   * Whether or not this coupled_as name is associated with an auxiliary variable.
+   */
+  bool isAux(std::string name);
 };
 
 #endif //MATERIAL_H

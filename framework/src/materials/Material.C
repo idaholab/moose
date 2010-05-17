@@ -12,15 +12,58 @@ InputParameters validParams<Material>()
   return params;
 }
 
-Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
-//          parameters,
-//          Kernel::_es->get_system(0).variable_name(0),
-//          false,
-//          parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0),
-//          parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
-   _moose_system(moose_system)
-{}
+Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+   _name(name),
+   _moose_system(moose_system),
+   _tid(Moose::current_thread_id),
+   _parameters(parameters),
+   _dim(_moose_system._dim),
+   _t(_moose_system._t),
+   _dt(_moose_system._dt),
+   _dt_old(_moose_system._dt_old),
+   _is_transient(_moose_system._is_transient),
+   _current_elem(_moose_system._current_elem[_tid]),
+   _qrule(_moose_system._qrule[_tid]),
+   _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
+   _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+   _real_zero(_moose_system._real_zero[_tid]),
+   _zero(_moose_system._zero[_tid]),
+   _grad_zero(_moose_system._grad_zero[_tid]),
+   _second_zero(_moose_system._second_zero[_tid])
+
+{
+  // FIXME: this for statement will go into a common ancestor
+  for(unsigned int i=0;i<_coupled_to.size();i++)
+  {
+    std::string coupled_var_name=_coupled_to[i];
+
+    //Is it in the nonlinear system or the aux system?
+    if(_moose_system._system->has_variable(coupled_var_name))
+    {
+      unsigned int coupled_var_num = _moose_system._system->variable_number(coupled_var_name);
+
+      _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
+
+      if(std::find(_moose_system._var_nums.begin(),_moose_system._var_nums.end(),coupled_var_num) == _moose_system._var_nums.end())
+        _moose_system._var_nums.push_back(coupled_var_num);
+
+      if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
+        _coupled_var_nums.push_back(coupled_var_num);
+    }
+    else //Look for it in the Aux system
+    {
+      unsigned int coupled_var_num = _moose_system._aux_system->variable_number(coupled_var_name);
+
+      _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
+
+      if(std::find(_moose_system._aux_var_nums.begin(),_moose_system._aux_var_nums.end(),coupled_var_num) == _moose_system._aux_var_nums.end())
+        _moose_system._aux_var_nums.push_back(coupled_var_num);
+
+      if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
+        _aux_coupled_var_nums.push_back(coupled_var_num);
+    }
+  }
+}
 
 /*
 unsigned int
@@ -230,6 +273,11 @@ Material::computeQpResidual()
   return 0;
 }
 
+void
+Material::subdomainSetup()
+{
+}
+
 std::vector<Real> &
 Material::declareRealProperty(const std::string & name)
 {
@@ -278,3 +326,65 @@ Material::declareMatrixProperty(const std::string & name)
   return _matrix_props[name];
 }
 
+bool
+Material::isAux(std::string name)
+{
+  return _aux_coupled_as_to_var_num.find(name) != _aux_coupled_as_to_var_num.end();
+}
+
+bool
+Material::isCoupled(std::string name)
+{
+  bool found = std::find(_coupled_as.begin(),_coupled_as.end(),name) != _coupled_as.end();
+
+  //See if it's an Aux variable
+  if(!found)
+    found = isAux(name);
+
+  return found;
+}
+
+unsigned int
+Material::coupled(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _coupled_as_to_var_num[name];
+  else
+    return Kernel::modifiedAuxVarNum(_aux_coupled_as_to_var_num[name]);
+}
+
+std::vector<Real> &
+Material::coupledVal(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _moose_system._var_vals[_tid][_coupled_as_to_var_num[name]];
+  else
+    return _moose_system._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
+}
+
+std::vector<RealGradient> &
+Material::coupledGrad(std::string name)
+{
+  if(!isCoupled(name))
+  {
+    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
+    mooseError("");
+  }
+
+  if(!isAux(name))
+    return _moose_system._var_grads[_tid][_coupled_as_to_var_num[name]];
+  else
+    return _moose_system._aux_var_grads[_tid][_aux_coupled_as_to_var_num[name]];
+}
