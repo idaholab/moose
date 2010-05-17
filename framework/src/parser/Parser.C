@@ -327,62 +327,6 @@ Parser::getPotHandle() const
   return _getpot_initialized ? &_getpot_file : NULL;
 }
 
-/*
-void
-Parser::fixupOptionalBlocks()
-{
-  // Create a vector of Optional Blocks to stick in the tree if they don't exist
-  std::vector<std::string> optionalBlocks;
-  std::vector<std::string>::iterator i;
-
-  optionalBlocks.push_back("AuxVariables");
-  optionalBlocks.push_back("AuxKernels");
-  optionalBlocks.push_back("BCs");
-  optionalBlocks.push_back("AuxBCs");
-
-  for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i)
-    if (_input_tree->locateBlock(*i) == NULL)
-      _input_tree->_children.push_back(ParserBlockFactory::instance()->add(*i, *i, _input_tree, *this));
-}
-*/
-
-
-/*
-void
-Parser::fixupOptionalBlocks()
-{
-  /* Create a map of Optional Blocks to fill in if they don't exist in the tree and where
-   * they should fit (before the second id listed) /
-  std::map<std::string, std::string> optionalBlocks;
-  std::map<std::string, std::string>::iterator i;
-  ParserBlock *block_ptr;
-
-  optionalBlocks["AuxVariables"] = "Kernels";
-  optionalBlocks["AuxKernels"] = "BCs";
-	
-  // First see if the Optional Block exists
-  for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i)
-  {
-    if (_input_tree->locateBlock(i->first) == NULL)
-    {
-      // Get a pointer to the required block to prepare for insertion
-      // The newly constructed block will be the sibling before this block
-      // which means it better exist and it better not be the root
-      block_ptr = _input_tree->locateBlock(i->second);
-      if (block_ptr == NULL || block_ptr->_parent == NULL)
-	mooseError("");
-
-      ParserBlock::PBChildIterator position =
-	find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
-     
-      block_ptr->_parent->_children.insert(position,
-                                           ParserBlockFactory::instance()->add(i->first, i->first, block_ptr->_parent, *this));
-    }
-  }
-}
-*/
-
-
 void
 Parser::fixupOptionalBlocks()
 {
@@ -390,18 +334,18 @@ Parser::fixupOptionalBlocks()
    * The pairs should consist of the required block followed by the optional block.  The optional
    * block will be inserted into the tree immediatly following the required block.
    */
-  std::vector<std::pair<std::string, std::string> > optionalBlocks;
+  std::vector<std::pair<std::string, std::string> > optional_blocks;
   std::vector<std::pair<std::string, std::string> >::iterator i;
   ParserBlock *block_ptr;
 
-  optionalBlocks.push_back(std::make_pair("Variables", "Preconditioning"));
-  optionalBlocks.push_back(std::make_pair("Preconditioning", "AuxVariables"));
-  optionalBlocks.push_back(std::make_pair("Kernels", "AuxKernels"));
-  optionalBlocks.push_back(std::make_pair("AuxKernels", "BCs"));
-  optionalBlocks.push_back(std::make_pair("BCs", "AuxBCs"));
+  optional_blocks.push_back(std::make_pair("Variables", "Preconditioning"));
+  optional_blocks.push_back(std::make_pair("Preconditioning", "AuxVariables"));
+  optional_blocks.push_back(std::make_pair("Kernels", "AuxKernels"));
+  optional_blocks.push_back(std::make_pair("AuxKernels", "BCs"));
+  optional_blocks.push_back(std::make_pair("BCs", "AuxBCs"));
   
   // First see if the Optional Block exists
-  for (i = optionalBlocks.begin(); i != optionalBlocks.end(); ++i) 
+  for (i = optional_blocks.begin(); i != optional_blocks.end(); ++i) 
   {
     if (_input_tree->locateBlock(i->second) == NULL) 
     {

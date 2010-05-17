@@ -129,8 +129,6 @@ public:
    * optional "active" parameter or else all of the children underneath this Block
    */
   unsigned int n_activeChildren() const;
-
-  static bool _deferred_execution;
   
 protected:
   /**
@@ -171,6 +169,11 @@ protected:
    * Private Data Members (use accessors)
    ************************************/
 private:
+  /**
+   * Variable for indicating which mode of execution the ParserBlocks are in during their recursive descent
+   */
+  static bool _deferred_execution;
+  
   /**
    * The _block_params are those parameters which are valid for the currently parsed block but may not
    * necessarily be passed directly to the Factory constructor for this object type.  These should
