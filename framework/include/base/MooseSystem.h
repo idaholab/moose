@@ -43,9 +43,9 @@ public:
   /**
    * Data Accessors for the various FE datastructures indexed by thread
    */
-  ElementData * getElementData(THREAD_ID tid);
-  FaceData * getFaceData(THREAD_ID tid);
-  AuxData * getAuxData(THREAD_ID tid);
+  //ElementData * getElementData(THREAD_ID tid);
+  //FaceData * getFaceData(THREAD_ID tid);
+  //AuxData * getAuxData(THREAD_ID tid);
 
   /**
    * Initialize the system
@@ -187,13 +187,6 @@ public:
 
   void checkSystemsIntegrity();
 
-  /**
-   * Allows specification of per variable scaling factors.
-   * The size of the vector MUST be the same as the number of Nonlinear Variables.
-   * Should be called after Kernel::init() (because that sets the default scaling).
-   * Can be called multiple times to change the scaling.
-   * The initial scaling is just 1 for each variable.
-   */
   void setVarScaling(std::vector<Real> scaling);
 
   /**
@@ -223,6 +216,8 @@ public:
   void setPreconditioner(Preconditioner<Real> *pc) { _preconditioner = pc; }
 
   bool & dontReinitFE();
+
+  Material * getMaterial(THREAD_ID tid, unsigned int block_id);
   
 protected:
   void sizeEverything();
@@ -231,9 +226,13 @@ protected:
   void initAuxKernels();
 
 private:
-  std::vector<ElementData *> _element_data;
-  std::vector<FaceData *> _face_data;
-  std::vector<AuxData *> _aux_data;
+  // TODO: Switch these to vectors later
+  ElementData *_element_data;
+  FaceData *_face_data;
+  AuxData *_aux_data;
+  //  std::vector<ElementData *> _element_data;
+  //  std::vector<FaceData *> _face_data;
+  //  std::vector<AuxData *> _aux_data;
 
   EquationSystems * _es;
   TransientNonlinearImplicitSystem * _system;
@@ -266,168 +265,11 @@ private:
   Preconditioner<Real> * _preconditioner;
 
   /**
-   * Pointer to the material that is valid for the current block.
-   */
-  std::vector<Material *> _material;
-
-  /**
    * The ExodusIO Reader to support reading of solutions at element qps
    */
   ExodusII_IO * _exreader;
 
   bool _is_valid;
-
-  /**
-   * Interior finite element.
-   */
-  std::vector<std::map<FEType, FEBase*> > _fe;
-
-  /**
-   * Maximum quadrature order required by all variables.
-   */
-  Order _max_quadrature_order;
-
-  /**
-   * Interior quadrature rule.
-   */
-  std::vector<QGauss *> _qrule;
-
-  /**
-   * Current element
-   */
-  std::vector<const Elem *> _current_elem;
-
-  /**
-   * Interior Jacobian pre-multiplied by the weight.
-   */
-  std::vector<std::map<FEType, const std::vector<Real> *> > _JxW;
-
-  /**
-   * Interior shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _phi;
-
-  /**
-   * Interior test function.
-   *
-   * Note that there is a different test function for each variable... allowing for modified
-   * basis for things like SUPG and GLS.
-   */
-  std::vector<std::map<unsigned int, std::vector<std::vector<Real> > > > _test;
-
-  /**
-   * Gradient of interior shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _dphi;
-
-  /**
-   * Second derivative of interior shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _d2phi;
-
-  /**
-   * XYZ coordinates of quadrature points
-   */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _q_point;
-
-  /**
-   * Variable numbers of the variables.
-   */
-  std::vector<unsigned int> _var_nums;
-
-  /**
-   * Variable numbers of the auxiliary variables.
-   */
-  std::vector<unsigned int> _aux_var_nums;
-
-public:
-  /**
-   * Dof Maps for all the variables.
-   */
-  std::vector<std::vector<std::vector<unsigned int> > > _var_dof_indices;
-
-protected:
-  /**
-   * Dof Maps for all the auxiliary variables.
-   */
-  std::vector<std::vector<std::vector<unsigned int> > > _aux_var_dof_indices;
-
-  /**
-   * Residual vectors for all variables.
-   */
-  std::vector<std::vector<DenseSubVector<Number> * > > _var_Res;
-
-public:
-  /**
-   * Jacobian matrices for all variables.
-   */
-  std::vector<std::vector<DenseMatrix<Number> * > > _var_Kes;
-
-protected:
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<Real> > > _var_vals;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<RealGradient> > > _var_grads;
-
-  /**
-   * Second derivatives of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<RealTensor> > > _var_seconds;
-
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<Real> > > _var_vals_old;
-
-  /**
-   * Value of the variables at the quadrature points at t-2.
-   */
-  std::vector<std::vector<std::vector<Real> > > _var_vals_older;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<RealGradient> > > _var_grads_old;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<RealGradient> > > _var_grads_older;
-
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<Real> > > _aux_var_vals;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads;
-
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<Real> > > _aux_var_vals_old;
-
-  /**
-   * Value of the variables at the quadrature points at t-2.
-   */
-  std::vector<std::vector<std::vector<Real> > > _aux_var_vals_older;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_old;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_older;
 
 public:
   /**
@@ -439,8 +281,6 @@ public:
    * Current dt.
    */
   Real _dt;
-
-protected:
 
   /**
    * Old dt.
@@ -476,18 +316,17 @@ protected:
    * The total number of Runge-Kutta stages
    */
   short _n_of_rk_stages;
-
-
-  DofMap * _dof_map;
+  
   DofMap * _aux_dof_map;
-  std::vector<std::vector<unsigned int> > _dof_indices;
-  std::vector<std::vector<unsigned int> > _aux_dof_indices;
 
   /**
-   * Scaling factors for each variable.
+   * Maximum quadrature order required by all variables.
    */
-  std::vector<Real> _scaling_factor;
+  Order _max_quadrature_order;
 
+  
+protected:
+  std::vector<std::vector<unsigned int> > _aux_dof_indices;
 
   /// BCs
   /**
@@ -591,11 +430,14 @@ protected:
   /**
    * Convenience zeros.
    */
+
+public:
   std::vector<Real> _real_zero;
   std::vector<std::vector<Real> > _zero;
   std::vector<std::vector<RealGradient> > _grad_zero;
   std::vector<std::vector<RealTensor> > _second_zero;
 
+protected:
   /**
    * A range for use with TBB.  We do this so that it doesn't have
    * to get rebuilt all the time (which takes time).
@@ -727,72 +569,6 @@ protected:
 
   void update_aux_vars(const NumericVector<Number>& soln);
 
-  /**
-   * Computes the value of soln at the current quadrature point.
-   *
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  void computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<Real> > & phi);
-
-  /**
-   * Computes the value of all the soln, gradient and second derivative at the current quadrature point in transient problems.
-   *
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  void computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std::vector<Real> & u_older,
-                            std::vector<RealGradient> &grad_u,  std::vector<RealGradient> &grad_u_old, std::vector<RealGradient> &grad_u_older,
-                            std::vector<RealTensor> &second_u,
-                            const NumericVector<Number> & soln, const NumericVector<Number> & soln_old,  const NumericVector<Number> & soln_older,
-                            const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
-                            const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi, const std::vector<std::vector<RealTensor> > & d2phi);
-
-  /**
-   * Computes the value of all the soln and gradient at the current quadrature point in transient problems.
-   *
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  void computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std::vector<Real> & u_older,
-                            std::vector<RealGradient> &grad_u,  std::vector<RealGradient> &grad_u_old, std::vector<RealGradient> &grad_u_older,
-                            const NumericVector<Number> & soln, const NumericVector<Number> & soln_old,  const NumericVector<Number> & soln_older,
-                            const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
-                            const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi);
-
-  /**
-   * Computes the value of all the soln, gradient and second derivative at the current quadrature point in steady state problems.
-   *
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  void computeQpSolutionAll(std::vector<Real> & u,
-                            std::vector<RealGradient> &grad_u,
-                            std::vector<RealTensor> &second_u,
-                            const NumericVector<Number> & soln,
-                            const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
-                            const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi, const std::vector<std::vector<RealTensor> > & d2phi);
-
-  /**
-   * Computes the value of all the soln and gradient at the current quadrature point in steady state problems.
-   *
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  void computeQpSolutionAll(std::vector<Real> & u,
-                            std::vector<RealGradient> &grad_u,
-                            const NumericVector<Number> & soln,
-                            const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
-                            const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi);
-
-  /**
-   * Computes the value of the gradient of soln at the current quadrature point.
-   *
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  void computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealGradient> > & dphi);
-
-  /**
-   * Computes the value of the second derivative of soln at the current quadrature point.
-   *
-   * @param soln The solution vector to pull the coefficients from.
-   */
-  void computeQpSecondSolution(RealTensor & second_u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<RealTensor> > & d2phi);
 
   friend class ComputeInternalJacobians;
   friend class ComputeInternalJacobianBlocks;
@@ -807,4 +583,5 @@ protected:
   friend class TransientExecutioner;
 };
 
+  
 #endif //MOOSESYSTEM_H

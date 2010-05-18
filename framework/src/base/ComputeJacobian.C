@@ -7,6 +7,7 @@
 #include "BCFactory.h"
 #include "ParallelUniqueId.h"
 #include "MooseSystem.h"
+#include "ElementData.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -118,10 +119,10 @@ public:
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for(unsigned int i=0; i< _moose_system._var_dof_indices[tid].size(); i++)
+        for(unsigned int i=0; i< _moose_system._element_data->_var_dof_indices[tid].size(); i++)
         {
-          _moose_system._dof_map->constrain_element_matrix (*_moose_system._var_Kes[tid][i], _moose_system._var_dof_indices[tid][i], false);
-          _jacobian.add_matrix(*_moose_system._var_Kes[tid][i], _moose_system._var_dof_indices[tid][i]);
+          _moose_system._element_data->_dof_map->constrain_element_matrix (*_moose_system._element_data->_var_Kes[tid][i], _moose_system._element_data->_var_dof_indices[tid][i], false);
+          _jacobian.add_matrix(*_moose_system._element_data->_var_Kes[tid][i], _moose_system._element_data->_var_dof_indices[tid][i]);
         }
       }
     }

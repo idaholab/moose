@@ -1,5 +1,6 @@
 #include "Stabilizer.h"
 #include "MooseSystem.h"
+#include "ElementData.h"
 
 #include <vector>
 
@@ -14,20 +15,21 @@ InputParameters validParams<Stabilizer>()
 }
 
 
-Stabilizer::Stabilizer(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+Stabilizer::Stabilizer(std::string name, MooseSystem & moose_system, InputParameters parameters):
   _name(name),
   _moose_system(moose_system),
+  _element_data(*moose_system._element_data),
   _tid(Moose::current_thread_id),
   _parameters(parameters),
   _var_name(parameters.get<std::string>("variable")),
   _is_aux(_moose_system._aux_system->has_variable(_var_name)),
   _var_num(_is_aux ? _moose_system._aux_system->variable_number(_var_name) : _moose_system._system->variable_number(_var_name)),
-  _current_elem(_moose_system._current_elem[_tid]),
-  _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _moose_system._dof_map->variable_type(_var_num)),
-  _phi(*(_moose_system._phi[_tid])[_fe_type]),
-  _test((_moose_system._test[_tid])[_var_num]),
-  _dtest(*(_moose_system._dphi[_tid])[_fe_type]),
-  _qrule(_moose_system._qrule[_tid])
+  _current_elem(_element_data._current_elem[_tid]),
+  _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
+  _phi(*(_element_data._phi[_tid])[_fe_type]),
+  _test((_element_data._test[_tid])[_var_num]),
+  _dtest(*(_element_data._dphi[_tid])[_fe_type]),
+  _qrule(_element_data._qrule[_tid])
 {
 }
 

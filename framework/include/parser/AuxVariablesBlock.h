@@ -12,7 +12,7 @@ class AuxVariablesBlock: public VariablesBlock
 {
 public:
   AuxVariablesBlock(std::string name, MooseSystem & moose_system, InputParameters params);
-
+  
   virtual void execute();
 };
 

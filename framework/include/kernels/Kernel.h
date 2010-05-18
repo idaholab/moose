@@ -22,6 +22,7 @@ class Elem;
 class Material;
 class Kernel;
 class MooseSystem;
+class ElementData;
 
 template<>
 InputParameters validParams<Kernel>();
@@ -129,6 +130,11 @@ protected:
    * Reference to the MooseSystem that this Kernel is assocaited to
    */
   MooseSystem & _moose_system;
+
+  /**
+   * Convenience reference to the ElementData object inside of MooseSystem
+   */
+  ElementData & _element_data;
   
   /**
    * The thread id this kernel is associated with.

@@ -4,6 +4,7 @@
 #include "BoundaryCondition.h"
 #include "ParallelUniqueId.h"
 #include "MooseSystem.h"
+#include "ElementData.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -115,11 +116,11 @@ public:
         }
       }
       
-      _moose_system._dof_map->constrain_element_vector (Re, _moose_system._dof_indices[tid], false);
+      _moose_system._element_data->_dof_map->constrain_element_vector (Re, _moose_system._element_data->_dof_indices[tid], false);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx); 
-        residual.add_vector(Re, _moose_system._dof_indices[tid]);
+        residual.add_vector(Re, _moose_system._element_data->_dof_indices[tid]);
       }
     }
 

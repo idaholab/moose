@@ -1,6 +1,7 @@
 //MOOSE includes
 #include "Moose.h"
 #include "MooseSystem.h"
+#include "ElementData.h"
 #include "BoundaryCondition.h"
 
 //libMesh includes
@@ -21,21 +22,22 @@ InputParameters validParams<BoundaryCondition>()
 BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_system, InputParameters parameters) :
    _name(name),
    _moose_system(moose_system),
+   _element_data(*moose_system._element_data),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
    _mesh(*_moose_system.getMesh()),
    _var_name(parameters.get<std::string>("variable")),
    _is_aux(_moose_system._aux_system->has_variable(_var_name)),
    _var_num(_is_aux ? _moose_system._aux_system->variable_number(_var_name) : _moose_system._system->variable_number(_var_name)),
-   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _moose_system._dof_map->variable_type(_var_num)),
+   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
    _integrated(parameters.have_parameter<bool>("_integrated") ? parameters.get<bool>("_integrated") : true),
    _dim(_moose_system._dim),
    _t(_moose_system._t),
    _dt(_moose_system._dt),
    _dt_old(_moose_system._dt_old),
    _is_transient(_moose_system._is_transient),
-   _current_elem(_moose_system._current_elem[_tid]),
-   _material(_moose_system._material[_tid]),
+   _current_elem(_element_data._current_elem[_tid]),
+   _material(_element_data._material[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
    _JxW_face(*moose_system._JxW_face[_tid][_fe_type]),
@@ -72,8 +74,8 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
 
       _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
-      if(std::find(_moose_system._var_nums.begin(),_moose_system._var_nums.end(),coupled_var_num) == _moose_system._var_nums.end())
-        _moose_system._var_nums.push_back(coupled_var_num);
+      if(std::find(_element_data._var_nums.begin(),_element_data._var_nums.end(),coupled_var_num) == _element_data._var_nums.end())
+        _element_data._var_nums.push_back(coupled_var_num);
 
       if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
         _coupled_var_nums.push_back(coupled_var_num);
@@ -84,8 +86,8 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
 
       _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
-      if(std::find(_moose_system._aux_var_nums.begin(),_moose_system._aux_var_nums.end(),coupled_var_num) == _moose_system._aux_var_nums.end())
-        _moose_system._aux_var_nums.push_back(coupled_var_num);
+      if(std::find(_element_data._aux_var_nums.begin(),_element_data._aux_var_nums.end(),coupled_var_num) == _element_data._aux_var_nums.end())
+        _element_data._aux_var_nums.push_back(coupled_var_num);
 
       if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
         _aux_coupled_var_nums.push_back(coupled_var_num);
@@ -126,19 +128,19 @@ BoundaryCondition::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","BoundaryCondition");
 
-  DenseSubVector<Number> & var_Re = *_moose_system._var_Res[_tid][_var_num];
+  DenseSubVector<Number> & var_Re = *_element_data._var_Res[_tid][_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qface->n_points(); _qp++)
       for (_i=0; _i<_phi_face.size(); _i++)
-        var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW_face[_qp]*computeQpResidual();
+        var_Re(_i) += _element_data._scaling_factor[_var_num]*_JxW_face[_qp]*computeQpResidual();
   else
   {
     //Use _qp to keep things standard at the leaf level
     //_qp is really looping over nodes right now.
     for(_qp=0; _qp<_current_elem->n_nodes(); _qp++)
       if(_current_elem->is_node_on_side(_qp,_current_side))
-	var_Re(_qp) = _moose_system._scaling_factor[_var_num]*computeQpResidual();
+	var_Re(_qp) = _element_data._scaling_factor[_var_num]*computeQpResidual();
   }
 
 //  Moose::perf_log.pop("computeResidual()","BoundaryCondition");
@@ -149,13 +151,13 @@ BoundaryCondition::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()","BoundaryCondition");
 
-  DenseMatrix<Number> & var_Ke = *_moose_system._var_Kes[_tid][_var_num];
+  DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_tid][_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qface->n_points(); _qp++)
       for (_i=0; _i<_phi_face.size(); _i++)
         for (_j=0; _j<_phi_face.size(); _j++)
-          var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW_face[_qp]*computeQpJacobian();
+          var_Ke(_i,_j) += _element_data._scaling_factor[_var_num]*_JxW_face[_qp]*computeQpJacobian();
   else
   {
     for(_i=0; _i<_phi_face.size(); _i++)
@@ -166,7 +168,7 @@ BoundaryCondition::computeJacobian()
         for(_j=0; _j<_phi_face.size(); _j++)
           var_Ke(_i,_j) = 0;
         
-        var_Ke(_i,_i) = _moose_system._scaling_factor[_var_num]*1;
+        var_Ke(_i,_i) = _element_data._scaling_factor[_var_num]*1;
       }
     }
   }
@@ -213,7 +215,7 @@ void
 BoundaryCondition::computeAndStoreResidual()
 {
   _qp = 0;
-  _current_residual->set(_moose_system._nodal_bc_var_dofs[_tid][_var_num], _moose_system._scaling_factor[_var_num]*computeQpResidual());
+  _current_residual->set(_moose_system._nodal_bc_var_dofs[_tid][_var_num], _element_data._scaling_factor[_var_num]*computeQpResidual());
 }
 
 Real

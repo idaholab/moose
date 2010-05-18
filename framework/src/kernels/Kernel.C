@@ -1,6 +1,7 @@
 #include "Kernel.h"
 #include "Moose.h"
 #include "MooseSystem.h"
+#include "ElementData.h"
 #include "MaterialFactory.h"
 #include "ParallelUniqueId.h"
 
@@ -26,6 +27,7 @@ InputParameters validParams<Kernel>()
 Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters parameters):
    _name(name),
    _moose_system(moose_system),
+   _element_data(*moose_system._element_data),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
    _mesh(*_moose_system.getMesh()),
@@ -42,26 +44,26 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _t_step(_moose_system._t_step),
    _bdf2_wei(_moose_system._bdf2_wei),
    _t_scheme(_moose_system._t_scheme),
-   _u(_moose_system._var_vals[_tid][_var_num]),
-   _grad_u(_moose_system._var_grads[_tid][_var_num]),
-   _second_u(_moose_system._var_seconds[_tid][_var_num]),
-   _u_old(_moose_system._var_vals_old[_tid][_var_num]),
-   _u_older(_moose_system._var_vals_older[_tid][_var_num]),
-   _grad_u_old(_moose_system._var_grads_old[_tid][_var_num]),
-   _grad_u_older(_moose_system._var_grads_older[_tid][_var_num]),
-   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _moose_system._dof_map->variable_type(_var_num)),
+   _u(_element_data._var_vals[_tid][_var_num]),
+   _grad_u(_element_data._var_grads[_tid][_var_num]),
+   _second_u(_element_data._var_seconds[_tid][_var_num]),
+   _u_old(_element_data._var_vals_old[_tid][_var_num]),
+   _u_older(_element_data._var_vals_older[_tid][_var_num]),
+   _grad_u_old(_element_data._var_grads_old[_tid][_var_num]),
+   _grad_u_older(_element_data._var_grads_older[_tid][_var_num]),
+   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
    _has_second_derivatives(_fe_type.family == CLOUGH || _fe_type.family == HERMITE),
-   _current_elem(_moose_system._current_elem[_tid]),
-   _material(_moose_system._material[_tid]),
-   _JxW(*(_moose_system._JxW[_tid])[_fe_type]),
-   _phi(*(_moose_system._phi[_tid])[_fe_type]),
-   _test((_moose_system._test[_tid])[_var_num]),
-   _dphi(*(_moose_system._dphi[_tid])[_fe_type]),
-   _dtest(*(_moose_system._dphi[_tid])[_fe_type]),
-   _d2phi(*(_moose_system._d2phi[_tid])[_fe_type]),
-   _d2test(*(_moose_system._d2phi[_tid])[_fe_type]),
-   _qrule(_moose_system._qrule[_tid]),
-   _q_point(*(_moose_system._q_point[_tid])[_fe_type]),
+   _current_elem(_element_data._current_elem[_tid]),
+   _material(_element_data._material[_tid]),
+   _JxW(*(_element_data._JxW[_tid])[_fe_type]),
+   _phi(*(_element_data._phi[_tid])[_fe_type]),
+   _test((_element_data._test[_tid])[_var_num]),
+   _dphi(*(_element_data._dphi[_tid])[_fe_type]),
+   _dtest(*(_element_data._dphi[_tid])[_fe_type]),
+   _d2phi(*(_element_data._d2phi[_tid])[_fe_type]),
+   _d2test(*(_element_data._d2phi[_tid])[_fe_type]),
+   _qrule(_element_data._qrule[_tid]),
+   _q_point(*(_element_data._q_point[_tid])[_fe_type]),
    _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
    _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _real_zero(_moose_system._real_zero[_tid]),
@@ -72,8 +74,8 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
 {
   // If this variable isn't known yet... make it so
-  if(std::find(_moose_system._var_nums.begin(),_moose_system._var_nums.end(),_var_num) == _moose_system._var_nums.end())
-    _moose_system._var_nums.push_back(_var_num);
+  if(std::find(_element_data._var_nums.begin(),_element_data._var_nums.end(),_var_num) == _element_data._var_nums.end())
+    _element_data._var_nums.push_back(_var_num);
 
   // FIXME: this for statement will go into a common ancestor
   for(unsigned int i=0;i<_coupled_to.size();i++)
@@ -87,8 +89,8 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
 
       _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
-      if(std::find(_moose_system._var_nums.begin(),_moose_system._var_nums.end(),coupled_var_num) == _moose_system._var_nums.end())
-        _moose_system._var_nums.push_back(coupled_var_num);
+      if(std::find(_element_data._var_nums.begin(),_element_data._var_nums.end(),coupled_var_num) == _element_data._var_nums.end())
+        _element_data._var_nums.push_back(coupled_var_num);
 
       if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
         _coupled_var_nums.push_back(coupled_var_num);
@@ -99,8 +101,8 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
 
       _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
-      if(std::find(_moose_system._aux_var_nums.begin(),_moose_system._aux_var_nums.end(),coupled_var_num) == _moose_system._aux_var_nums.end())
-        _moose_system._aux_var_nums.push_back(coupled_var_num);
+      if(std::find(_element_data._aux_var_nums.begin(),_element_data._aux_var_nums.end(),coupled_var_num) == _element_data._aux_var_nums.end())
+        _element_data._aux_var_nums.push_back(coupled_var_num);
 
       if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
         _aux_coupled_var_nums.push_back(coupled_var_num);
@@ -132,11 +134,11 @@ Kernel::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","Kernel");
   
-  DenseSubVector<Number> & var_Re = *_moose_system._var_Res[_tid][_var_num];
+  DenseSubVector<Number> & var_Re = *_element_data._var_Res[_tid][_var_num];
 
   for (_i=0; _i<_phi.size(); _i++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
+      var_Re(_i) += _element_data._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
   
 //  Moose::perf_log.pop("computeResidual()","Kernel");
 }
@@ -146,13 +148,13 @@ Kernel::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()",_name);
 
-  DenseMatrix<Number> & var_Ke = *_moose_system._var_Kes[_tid][_var_num];
+  DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_tid][_var_num];
 
 
   for (_i=0; _i<_phi.size(); _i++)
     for (_j=0; _j<_phi.size(); _j++)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
-        var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
+        var_Ke(_i,_j) += _element_data._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
   
 //  Moose::perf_log.pop("computeJacobian()",_name);
 }
@@ -167,9 +169,9 @@ Kernel::computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
       {
         if(jvar == _var_num)
-          Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
+          Ke(_i,_j) += _element_data._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
         else
-          Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpOffDiagJacobian(jvar);
+          Ke(_i,_j) += _element_data._scaling_factor[_var_num]*_JxW[_qp]*computeQpOffDiagJacobian(jvar);
       }
   
 //  Moose::perf_log.pop("computeOffDiagJacobian()",_name);
@@ -286,9 +288,9 @@ Kernel::coupledVal(std::string name)
   }
 
   if(!isAux(name))
-    return _moose_system._var_vals[_tid][_coupled_as_to_var_num[name]];
+    return _element_data._var_vals[_tid][_coupled_as_to_var_num[name]];
   else
-    return _moose_system._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
+    return _element_data._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
 std::vector<RealGradient> &
@@ -301,9 +303,9 @@ Kernel::coupledGrad(std::string name)
   }
 
   if(!isAux(name))
-    return _moose_system._var_grads[_tid][_coupled_as_to_var_num[name]];
+    return _element_data._var_grads[_tid][_coupled_as_to_var_num[name]];
   else
-    return _moose_system._aux_var_grads[_tid][_aux_coupled_as_to_var_num[name]];
+    return _element_data._aux_var_grads[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
 std::vector<RealTensor> &
@@ -316,7 +318,7 @@ Kernel::coupledSecond(std::string name)
   }
 
   //Aux vars can't have second derivatives!
-  return _moose_system._var_seconds[_tid][_coupled_as_to_var_num[name]];
+  return _element_data._var_seconds[_tid][_coupled_as_to_var_num[name]];
 }
 
 std::vector<Real> &
@@ -329,9 +331,9 @@ Kernel::coupledValOld(std::string name)
   }
 
   if(!isAux(name))
-    return _moose_system._var_vals_old[_tid][_coupled_as_to_var_num[name]];
+    return _element_data._var_vals_old[_tid][_coupled_as_to_var_num[name]];
   else
-    return _moose_system._aux_var_vals_old[_tid][_aux_coupled_as_to_var_num[name]];
+    return _element_data._aux_var_vals_old[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
 std::vector<Real> &
@@ -344,9 +346,9 @@ Kernel::coupledValOlder(std::string name)
   }
 
   if(!isAux(name))
-    return _moose_system._var_vals_older[_tid][_coupled_as_to_var_num[name]];
+    return _element_data._var_vals_older[_tid][_coupled_as_to_var_num[name]];
   else
-    return _moose_system._aux_var_vals_older[_tid][_aux_coupled_as_to_var_num[name]];
+    return _element_data._aux_var_vals_older[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
 std::vector<RealGradient> &
@@ -358,5 +360,5 @@ Kernel::coupledGradValOld(std::string name)
     mooseError("");
   }
   
-  return _moose_system._var_grads_old[_tid][_coupled_as_to_var_num[name]];
+  return _element_data._var_grads_old[_tid][_coupled_as_to_var_num[name]];
 }

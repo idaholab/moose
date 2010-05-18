@@ -10,6 +10,8 @@
 
 //forward declarations
 class Material;
+class MooseSystem;
+class ElementData;
 
 template<>
 InputParameters validParams<Material>();
@@ -114,6 +116,11 @@ protected:
    * Reference to the MooseSystem that this Kernel is associated to
    */
   MooseSystem & _moose_system;
+
+  /**
+   * Convenience reference to the ElementData object inside of MooseSystem
+   */
+  ElementData & _element_data;
   
   /**
    * The thread id this kernel is associated with.

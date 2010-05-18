@@ -14,7 +14,7 @@ public:
 private:
   /**
    * The MooseSystem this Kernel is associated with.
-   */
+    */
   MooseSystem & _moose_system;
 };
 

@@ -1,10 +1,13 @@
 #ifndef AUXKERNEL_H
 #define AUXKERNEL_H
 
+// This should be removed!!!
 #include "Kernel.h"
 
 //forward declarations
 class AuxKernel;
+class MooseSystem;
+class ElementData;
 
 template<>
 InputParameters validParams<AuxKernel>();
@@ -69,6 +72,11 @@ protected:
    * Reference to the MooseSystem that this Kernel is assocaited to
    */
   MooseSystem & _moose_system;
+
+  /**
+   * Convenience reference to the ElementData object inside of MooseSystem
+   */
+  ElementData & _element_data;
 
   /**
    * The thread id this kernel is associated with.
