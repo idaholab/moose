@@ -227,6 +227,10 @@ Material::updateDataState()
       *j_prev = *j_curr;
 }
 
+void
+Material::timeStepSetup()
+{}
+
 QpData *
 Material::createData()
 {
@@ -277,8 +281,7 @@ Material::computeQpResidual()
 
 void
 Material::subdomainSetup()
-{
-}
+{}
 
 std::vector<Real> &
 Material::declareRealProperty(const std::string & name)

@@ -47,6 +47,11 @@ protected:
   virtual bool lastSolveConverged();
 
   int _max_r_steps;
+
+  /**
+   * Reference to moose_system
+   */
+  MooseSystem & _moose_system;
 };
 
 #endif //STEADY_H

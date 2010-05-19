@@ -39,7 +39,10 @@ void MaterialHolder::updateMaterialDataState()
     std::map<int, Material *>::iterator it_end = _active_materials[tid].end();
 
     for(;it!=it_end;++it)
+    {
       it->second->updateDataState();
+      it->second->timeStepSetup();
+    }
   }
 }
 

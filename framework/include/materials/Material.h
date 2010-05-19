@@ -99,6 +99,12 @@ public:
   void updateDataState();
 
   /**
+   * This function is called at the beginning of each timestep
+   * for each active material block
+   */
+  virtual void timeStepSetup();
+
+  /**
    * This virtual gets called every time the subdomain changes.  This is useful for doing pre-calcualtions
    * that should only be done once per subdomain.  In particular this is where references to material
    * property vectors should be initialized.
@@ -272,7 +278,7 @@ protected:
    * Doesn't do anything for materials.
    */
   virtual Real computeQpResidual();
-
+  
   /**
    * Declare the Real valued property named "name".
    * This must be done _before_ a property of that name is tried

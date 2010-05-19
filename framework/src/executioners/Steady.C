@@ -12,6 +12,7 @@ InputParameters validParams<Steady>()
 
 Steady::Steady(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Executioner(name, moose_system, parameters),
+   _moose_system(moose_system),
    _max_r_steps(parameters.get<int>("max_r_steps"))
 {}
 
@@ -26,6 +27,8 @@ Steady::execute()
     setScaling();
 
     preSolve();
+
+    _moose_system._materials.updateMaterialDataState();
     
     PerfLog solve_only("Solve Only");
     solve_only.push("solve()","Solve");

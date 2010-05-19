@@ -581,6 +581,7 @@ protected:
   friend class Stabilizer;
   friend class Executioner;
   friend class TransientExecutioner;
+  friend class Steady;
 };
 
   
