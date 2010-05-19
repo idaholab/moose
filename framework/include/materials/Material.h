@@ -2,6 +2,7 @@
 #define MATERIAL_H
 
 #include "QpData.h"
+#include "MooseArray.h"
 
 //libmesh includes
 #include "tensor_value.h"
@@ -60,38 +61,38 @@ public:
   /**
    * Retrieve the Real valued property named "name"
    */
-  std::vector<Real> & getRealProperty(const std::string & name);
+  MooseArray<Real> & getRealProperty(const std::string & name);
   
   /**
    * Retrieve the Gradient valued property named "name"
    */
-  std::vector<RealGradient> & getGradientProperty(const std::string & name);
+  MooseArray<RealGradient> & getGradientProperty(const std::string & name);
 
   /**
    * Retrieve RealVectorValue valued property named "name"
    */
-  std::vector<RealVectorValue> & getRealVectorValueProperty(const std::string & name);
+  MooseArray<RealVectorValue> & getRealVectorValueProperty(const std::string & name);
 
   /**
    * Retrieve the Vector valued property named "name"
    */
-  std::vector<std::vector<Real> > & getVectorProperty(const std::string & name);
+  MooseArray<MooseArray<Real> > & getVectorProperty(const std::string & name);
   
   /**
    * Retrieve the Tensor valued property named "name"
    */
-  std::vector<RealTensorValue> & getTensorProperty(const std::string & name);
+  MooseArray<RealTensorValue> & getTensorProperty(const std::string & name);
   
   /**
    * Retrieve the Tensor valued property named "name"
    */
-  std::vector<ColumnMajorMatrix> & getColumnMajorMatrixProperty(const std::string & name);
+  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixProperty(const std::string & name);
   
   
   /**
    * Retrieve the Matrix valued property named "name"
    */
-  std::vector<std::vector<std::vector<Real> > > & getMatrixProperty(const std::string & name);
+  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixProperty(const std::string & name);
   
   /**
    * Updates the old (first) material properties to the current/new material properies (second)
@@ -239,12 +240,12 @@ protected:
 
 // struct DeleteFunctor 
 //   {
-//     void operator()(const std::pair<const unsigned int, std::vector<QpData *> > & p) const
+//     void operator()(const std::pair<const unsigned int, MooseArray<QpData *> > & p) const
 //     {
-//       //for(std::vector<QpData *>::iterator i = p.second.begin(); i != p.second.end(); ++i)
+//       //for(MooseArray<QpData *>::iterator i = p.second.begin(); i != p.second.end(); ++i)
 //       //  delete *i;
 //       std::cerr << p.first << " ";
-//       //std::vector<const QpData *>::iterator i = p.second;
+//       //MooseArray<const QpData *>::iterator i = p.second;
 //       std::cerr << p.second[0] << std::endl;
 //     }
 //  };
@@ -284,7 +285,7 @@ protected:
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<Real> & declareRealProperty(const std::string & name);
+  MooseArray<Real> & declareRealProperty(const std::string & name);
   
   /**
    * Declare the Constant Real valued property named "name".
@@ -298,51 +299,51 @@ protected:
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<RealGradient> & declareGradientProperty(const std::string & name);
+  MooseArray<RealGradient> & declareGradientProperty(const std::string & name);
 
   /**
    * Declare the RealVectorValue valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<RealVectorValue> & declareRealVectorValueProperty(const std::string & name);
+  MooseArray<RealVectorValue> & declareRealVectorValueProperty(const std::string & name);
 
   /**
    * Declare the Vector valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<std::vector<Real> > & declareVectorProperty(const std::string & name);
+  MooseArray<MooseArray<Real> > & declareVectorProperty(const std::string & name);
   
   /**
    * Declare the Tensor valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<RealTensorValue> & declareTensorProperty(const std::string & name);
+  MooseArray<RealTensorValue> & declareTensorProperty(const std::string & name);
   
   /**
    * Declare the Tensor valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<ColumnMajorMatrix> & declareColumnMajorMatrixProperty(const std::string & name);
+  MooseArray<ColumnMajorMatrix> & declareColumnMajorMatrixProperty(const std::string & name);
   
   /**
    * Declare the Matrix valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  std::vector<std::vector<std::vector<Real> > > & declareMatrixProperty(const std::string & name);
+  MooseArray<MooseArray<MooseArray<Real> > > & declareMatrixProperty(const std::string & name);
   
   std::map<std::string, Real > _constant_real_props;
-  std::map<std::string, std::vector<Real> > _real_props;
-  std::map<std::string, std::vector<RealGradient> > _gradient_props;
-  std::map<std::string, std::vector<RealVectorValue> > _real_vector_value_props;
-  std::map<std::string, std::vector<std::vector<Real> > > _vector_props;
-  std::map<std::string, std::vector<RealTensorValue> > _tensor_props;
-  std::map<std::string, std::vector<ColumnMajorMatrix> > _column_major_matrix_props;
-  std::map<std::string, std::vector<std::vector<std::vector<Real> > > > _matrix_props;
+  std::map<std::string, MooseArray<Real> > _real_props;
+  std::map<std::string, MooseArray<RealGradient> > _gradient_props;
+  std::map<std::string, MooseArray<RealVectorValue> > _real_vector_value_props;
+  std::map<std::string, MooseArray<MooseArray<Real> > > _vector_props;
+  std::map<std::string, MooseArray<RealTensorValue> > _tensor_props;
+  std::map<std::string, MooseArray<ColumnMajorMatrix> > _column_major_matrix_props;
+  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > _matrix_props;
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
 

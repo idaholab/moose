@@ -78,33 +78,33 @@ Material::blockID()
 void
 Material::materialReinit()
 {
-  std::map<std::string, std::vector<Real> >::iterator it = _real_props.begin();
-  std::map<std::string, std::vector<Real> >::iterator it_end = _real_props.end();
+  std::map<std::string, MooseArray<Real> >::iterator it = _real_props.begin();
+  std::map<std::string, MooseArray<Real> >::iterator it_end = _real_props.end();
 
   for(;it!=it_end;++it)
-    it->second.resize(_element_data._qrule[_tid]->n_points(),1);
+    it->second.resize(_element_data._qrule[_tid]->n_points());
 
-  std::map<std::string, std::vector<RealGradient> >::iterator grad_it = _gradient_props.begin();
-  std::map<std::string, std::vector<RealGradient> >::iterator grad_it_end = _gradient_props.end();
+  std::map<std::string, MooseArray<RealGradient> >::iterator grad_it = _gradient_props.begin();
+  std::map<std::string, MooseArray<RealGradient> >::iterator grad_it_end = _gradient_props.end();
 
   for(;grad_it!=grad_it_end;++grad_it)
     grad_it->second.resize(_element_data._qrule[_tid]->n_points());
 
 
-  std::map<std::string, std::vector<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props.begin();
-  std::map<std::string, std::vector<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props.end();
+  std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props.begin();
+  std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props.end();
 
   for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
     real_vector_value_it->second.resize(_element_data._qrule[_tid]->n_points());
 
-  std::map<std::string, std::vector<RealTensorValue> >::iterator tensor_it = _tensor_props.begin();
-  std::map<std::string, std::vector<RealTensorValue> >::iterator tensor_it_end = _tensor_props.end();
+  std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it = _tensor_props.begin();
+  std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it_end = _tensor_props.end();
 
   for(;tensor_it!=tensor_it_end;++tensor_it)
     tensor_it->second.resize(_element_data._qrule[_tid]->n_points());
 
-  std::map<std::string, std::vector<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props.begin();
-  std::map<std::string, std::vector<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props.end();
+  std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props.begin();
+  std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props.end();
 
   for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
     column_major_matrix_it->second.resize(_element_data._qrule[_tid]->n_points());
@@ -124,10 +124,10 @@ Material::getConstantRealProperty(const std::string & name)
   mooseError("");
 }
 
-std::vector<Real> &
+MooseArray<Real> &
 Material::getRealProperty(const std::string & name)
 {
-  std::map<std::string, std::vector<Real> >::iterator it = _real_props.find(name);
+  std::map<std::string, MooseArray<Real> >::iterator it = _real_props.find(name);
 
   if(it != _real_props.end())
     return it->second;
@@ -136,10 +136,10 @@ Material::getRealProperty(const std::string & name)
   mooseError("");
 }
 
-std::vector<RealGradient> &
+MooseArray<RealGradient> &
 Material::getGradientProperty(const std::string & name)
 {
-  std::map<std::string, std::vector<RealGradient> >::iterator it = _gradient_props.find(name);
+  std::map<std::string, MooseArray<RealGradient> >::iterator it = _gradient_props.find(name);
 
   if(it != _gradient_props.end())
     return it->second;
@@ -148,10 +148,10 @@ Material::getGradientProperty(const std::string & name)
   mooseError("");
 }
 
-std::vector<RealVectorValue> &
+MooseArray<RealVectorValue> &
 Material::getRealVectorValueProperty(const std::string & name)
 {
-  std::map<std::string, std::vector<RealVectorValue> >::iterator it = _real_vector_value_props.find(name);
+  std::map<std::string, MooseArray<RealVectorValue> >::iterator it = _real_vector_value_props.find(name);
   
   if(it != _real_vector_value_props.end())
     return it->second;
@@ -160,10 +160,10 @@ Material::getRealVectorValueProperty(const std::string & name)
   mooseError("");
 }
 
-std::vector<std::vector<Real> > &
+MooseArray<MooseArray<Real> > &
 Material::getVectorProperty(const std::string & name)
 {
-  std::map<std::string, std::vector<std::vector<Real> > >::iterator it = _vector_props.find(name);
+  std::map<std::string, MooseArray<MooseArray<Real> > >::iterator it = _vector_props.find(name);
 
   if(it != _vector_props.end())
     return it->second;
@@ -172,10 +172,10 @@ Material::getVectorProperty(const std::string & name)
   mooseError("");
 }
 
-std::vector<RealTensorValue> &
+MooseArray<RealTensorValue> &
 Material::getTensorProperty(const std::string & name)
 {
-  std::map<std::string, std::vector<RealTensorValue> >::iterator it = _tensor_props.find(name);
+  std::map<std::string, MooseArray<RealTensorValue> >::iterator it = _tensor_props.find(name);
 
   if(it != _tensor_props.end())
     return it->second;
@@ -184,10 +184,10 @@ Material::getTensorProperty(const std::string & name)
   mooseError("");
 }
 
-std::vector<ColumnMajorMatrix> &
+MooseArray<ColumnMajorMatrix> &
 Material::getColumnMajorMatrixProperty(const std::string & name)
 {
-  std::map<std::string, std::vector<ColumnMajorMatrix> >::iterator it = _column_major_matrix_props.find(name);
+  std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator it = _column_major_matrix_props.find(name);
 
   if(it != _column_major_matrix_props.end())
     return it->second;
@@ -196,10 +196,10 @@ Material::getColumnMajorMatrixProperty(const std::string & name)
   mooseError("");
 }
 
-std::vector<std::vector<std::vector<Real> > > &
+MooseArray<MooseArray<MooseArray<Real> > > &
 Material::getMatrixProperty(const std::string & name)
 {
-  std::map<std::string, std::vector<std::vector<std::vector<Real> > > >::iterator it = _matrix_props.find(name);
+  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > >::iterator it = _matrix_props.find(name);
 
   if(it != _matrix_props.end())
     return it->second;
@@ -283,7 +283,7 @@ void
 Material::subdomainSetup()
 {}
 
-std::vector<Real> &
+MooseArray<Real> &
 Material::declareRealProperty(const std::string & name)
 {
   return _real_props[name];
@@ -295,37 +295,37 @@ Material::declareConstantRealProperty(const std::string & name)
   return _constant_real_props[name];
 }
 
-std::vector<RealGradient> &
+MooseArray<RealGradient> &
 Material::declareGradientProperty(const std::string & name)
 {
   return _gradient_props[name];
 }
 
-std::vector<RealVectorValue> &
+MooseArray<RealVectorValue> &
 Material::declareRealVectorValueProperty(const std::string & name)
 {
   return _real_vector_value_props[name];
 }
 
-std::vector<std::vector<Real> > &
+MooseArray<MooseArray<Real> > &
 Material::declareVectorProperty(const std::string & name)
 {
   return _vector_props[name];
 }
 
-std::vector<RealTensorValue> &
+MooseArray<RealTensorValue> &
 Material::declareTensorProperty(const std::string & name)
 {
   return _tensor_props[name];
 }
 
-std::vector<ColumnMajorMatrix> &
+MooseArray<ColumnMajorMatrix> &
 Material::declareColumnMajorMatrixProperty(const std::string & name)
 {
   return _column_major_matrix_props[name];
 }
 
-std::vector<std::vector<std::vector<Real> > > &
+MooseArray<MooseArray<MooseArray<Real> > > &
 Material::declareMatrixProperty(const std::string & name)
 {
   return _matrix_props[name];

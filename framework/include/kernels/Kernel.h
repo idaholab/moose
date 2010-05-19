@@ -4,6 +4,7 @@
 // local includes
 #include "Moose.h"
 #include "ValidParams.h"
+#include "MooseArray.h"
 
 // libMesh includes
 #include "equation_systems.h"
