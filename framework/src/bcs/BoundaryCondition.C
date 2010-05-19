@@ -2,6 +2,7 @@
 #include "Moose.h"
 #include "MooseSystem.h"
 #include "ElementData.h"
+#include "FaceData.h"
 #include "BoundaryCondition.h"
 
 //libMesh includes
@@ -23,6 +24,7 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _name(name),
    _moose_system(moose_system),
    _element_data(*moose_system._element_data),
+   _face_data(*moose_system._face_data),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
    _mesh(*_moose_system.getMesh()),
@@ -40,13 +42,13 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _material(_element_data._material[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
-   _JxW_face(*moose_system._JxW_face[_tid][_fe_type]),
-   _phi_face(*moose_system._phi_face[_tid][_fe_type]),
-   _dphi_face(*moose_system._dphi_face[_tid][_fe_type]),
-   _d2phi_face(*moose_system._d2phi_face[_tid][_fe_type]),
-   _normals_face(*moose_system._normals_face[_tid][_fe_type]),
-   _qface(moose_system._qface[_tid]),
-   _q_point_face(*moose_system._q_point_face[_tid][_fe_type]),
+   _JxW_face(*_face_data._JxW_face[_tid][_fe_type]),
+   _phi_face(*_face_data._phi_face[_tid][_fe_type]),
+   _dphi_face(*_face_data._dphi_face[_tid][_fe_type]),
+   _d2phi_face(*_face_data._d2phi_face[_tid][_fe_type]),
+   _normals_face(*_face_data._normals_face[_tid][_fe_type]),
+   _qface(_face_data._qface[_tid]),
+   _q_point_face(*_face_data._q_point_face[_tid][_fe_type]),
    _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
    _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _real_zero(_moose_system._real_zero[_tid]),
@@ -55,12 +57,12 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _second_zero(_moose_system._second_zero[_tid]),
    _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
    _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max()),
-   _current_side(moose_system._current_side[_tid]),
-   _current_node(moose_system._current_node[_tid]),
-   _current_residual(moose_system._current_residual[_tid]),
-   _u_face(_integrated ? moose_system._var_vals_face[_tid][_var_num] : moose_system._var_vals_face_nodal[_tid][_var_num]),
-   _grad_u_face(_integrated ? moose_system._var_grads_face[_tid][_var_num] : moose_system._grad_zero[_tid]),
-   _second_u_face(_integrated ? moose_system._var_seconds_face[_tid][_var_num] : moose_system._second_zero[_tid])
+   _current_side(_face_data._current_side[_tid]),
+   _current_node(_face_data._current_node[_tid]),
+   _current_residual(_face_data._current_residual[_tid]),
+   _u_face(_integrated ? _face_data._var_vals_face[_tid][_var_num] : _face_data._var_vals_face_nodal[_tid][_var_num]),
+   _grad_u_face(_integrated ? _face_data._var_grads_face[_tid][_var_num] : moose_system._grad_zero[_tid]),
+   _second_u_face(_integrated ? _face_data._var_seconds_face[_tid][_var_num] : moose_system._second_zero[_tid])
 {
   // FIXME: this for statement will go into a common ancestor
   for(unsigned int i=0;i<_coupled_to.size();i++)
@@ -95,9 +97,9 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
   }
 
   if(_integrated)
-    addVarNums(moose_system._boundary_to_var_nums[_boundary_id]);
+    addVarNums(_face_data._boundary_to_var_nums[_boundary_id]);
   else
-    addVarNums(moose_system._boundary_to_var_nums_nodal[_boundary_id]);
+    addVarNums(_face_data._boundary_to_var_nums_nodal[_boundary_id]);
 }
 
 void BoundaryCondition::addVarNums(std::vector<unsigned int> & var_nums)
@@ -215,7 +217,7 @@ void
 BoundaryCondition::computeAndStoreResidual()
 {
   _qp = 0;
-  _current_residual->set(_moose_system._nodal_bc_var_dofs[_tid][_var_num], _element_data._scaling_factor[_var_num]*computeQpResidual());
+  _current_residual->set(_face_data._nodal_bc_var_dofs[_tid][_var_num], _element_data._scaling_factor[_var_num]*computeQpResidual());
 }
 
 Real
@@ -267,9 +269,9 @@ BoundaryCondition::coupledValFace(std::string name)
   }
   
   if(_integrated)
-    return _moose_system._var_vals_face[_tid][_coupled_as_to_var_num[name]];
+    return _face_data._var_vals_face[_tid][_coupled_as_to_var_num[name]];
 
-  return _moose_system._var_vals_face_nodal[_tid][_coupled_as_to_var_num[name]];
+  return _face_data._var_vals_face_nodal[_tid][_coupled_as_to_var_num[name]];
 }
 
 std::vector<RealGradient> &
@@ -282,7 +284,7 @@ BoundaryCondition::coupledGradFace(std::string name)
   }
 
   if(_integrated)
-    return _moose_system._var_grads_face[_tid][_coupled_as_to_var_num[name]];
+    return _face_data._var_grads_face[_tid][_coupled_as_to_var_num[name]];
 
   mooseError("");
 }

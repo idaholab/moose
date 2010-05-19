@@ -4,6 +4,7 @@
 #include "Moose.h"
 #include "MooseSystem.h"
 #include "ElementData.h"
+#include "FaceData.h"
 
 //libmesh includes
 #include "numeric_vector.h"
@@ -45,7 +46,8 @@ AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParamete
    _u_aux(_nodal ? moose_system._aux_var_vals_nodal[_tid][_var_num] : moose_system._aux_var_vals_element[_tid][_var_num]),
    _u_old_aux(_nodal ? moose_system._aux_var_vals_old_nodal[_tid][_var_num] : moose_system._aux_var_vals_old_element[_tid][_var_num]),
    _u_older_aux(_nodal ? moose_system._aux_var_vals_older_nodal[_tid][_var_num] : moose_system._aux_var_vals_older_element[_tid][_var_num]),
-   _current_node(moose_system._current_node[_tid])
+   // TODO: Train wreck fix
+   _current_node(moose_system._face_data->_current_node[_tid])
 {
   // If this variable isn't known yet... make it so
   if(std::find(_element_data._aux_var_nums.begin(),_element_data._aux_var_nums.end(),_var_num) == _element_data._aux_var_nums.end())
