@@ -35,8 +35,8 @@ protected:
   unsigned int _temp_var;
   std::vector<RealGradient> & _grad_temp;
 
-  std::vector<RealTensorValue> * _viscous_stress_tensor;
-  std::vector<Real> * _thermal_conductivity;
+  MooseArray<RealTensorValue> * _viscous_stress_tensor;
+  MooseArray<Real> * _thermal_conductivity;
 };
  
 #endif

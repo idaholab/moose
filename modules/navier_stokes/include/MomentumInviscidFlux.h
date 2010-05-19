@@ -35,7 +35,7 @@ protected:
 
   int _component;
 
-  std::vector<Real> * _pressure;
+  MooseArray<Real> * _pressure;
 };
  
 #endif

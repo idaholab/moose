@@ -32,7 +32,7 @@ protected:
   unsigned int _w_vel_var;
   std::vector<Real> & _w_vel;
 
-  std::vector<Real> * _pressure;
+  MooseArray<Real> * _pressure;
 };
  
 #endif

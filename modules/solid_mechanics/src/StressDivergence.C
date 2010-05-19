@@ -13,6 +13,9 @@ InputParameters validParams<StressDivergence>()
 
 StressDivergence::StressDivergence(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
+   _xdisp_var(isCoupled("x_disp") ? coupled("x_disp") : 0),
+   _ydisp_var(isCoupled("y_disp") ? coupled("y_disp") : 0),
+   _zdisp_var(isCoupled("z_disp") ? coupled("z_disp") : 0),
    _component(parameters.get<Real>("component"))
 {}
 
@@ -43,4 +46,22 @@ StressDivergence::computeQpJacobian()
     }
   
   return value * _dtest[_i][_qp];
+}
+
+Real
+StressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  unsigned int coupled_component = 0;
+
+  if(jvar == _ydisp_var)
+    coupled_component = 1;
+  else if(jvar == _zdisp_var)
+    coupled_component = 2;
+  
+  RealVectorValue value;
+  for(unsigned int j = 0; j<LIBMESH_DIM; j++)
+    for(unsigned int i = 0; i<LIBMESH_DIM; i++)
+      value(i) += (*_elasticity_tensor)[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*coupled_component)+j) * _dphi[_j][_qp](j);
+  
+  return value * _dphi[_i][_qp];
 }

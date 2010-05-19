@@ -24,7 +24,7 @@ protected:
 
   int _component;
 
-  std::vector<RealTensorValue> * _viscous_stress_tensor;
+  MooseArray<RealTensorValue> * _viscous_stress_tensor;
 };
  
 #endif

@@ -24,7 +24,7 @@ protected:
   virtual Real computeQpJacobian();
   
 private:
-  std::vector<Real> * _specific_heat;
-  std::vector<Real> * _density;
+  MooseArray<Real> * _specific_heat;
+  MooseArray<Real> * _density;
 };
 #endif //HEATCONDUCTIONIMPLICITEULER

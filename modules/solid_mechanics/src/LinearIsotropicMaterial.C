@@ -37,6 +37,8 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
   strain += strain.transpose();
   strain *= 0.5;
 
+  computeStrain(strain);
+
   // Create column vector
   strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 
@@ -48,6 +50,11 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
 
   // Fill the material property
   stress_vector.fill(stress);
+}
+
+void
+LinearIsotropicMaterial::computeStrain(ColumnMajorMatrix & strain)
+{
 }
 
 void

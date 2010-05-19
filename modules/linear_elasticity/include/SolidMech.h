@@ -46,8 +46,8 @@ protected:
 
   Real _density;
 
-  std::vector<Real> * _E_prop;
-  std::vector<Real> * _nu_prop;
+  MooseArray<Real> * _E_prop;
+  MooseArray<Real> * _nu_prop;
 };
  
 

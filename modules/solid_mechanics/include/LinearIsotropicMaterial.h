@@ -28,6 +28,12 @@ protected:
                      const RealVectorValue & z,
                      RealTensorValue & stress);
 
+  /**
+   * Will always be passed to full symmetric strain tensor.
+   * What should come out is a modified strain tensor.
+   */
+  virtual void computeStrain(ColumnMajorMatrix & strain);
+
   Real _youngs_modulus;
   Real _poissons_ratio;
 

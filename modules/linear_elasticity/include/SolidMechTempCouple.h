@@ -25,8 +25,8 @@ public:
 protected:
   unsigned int _temp_var;
   
-  std::vector<Real> * _thermal_strain;
-  std::vector<Real> * _alpha;
+  MooseArray<Real> * _thermal_strain;
+  MooseArray<Real> * _alpha;
 
   Real _c4;
 };

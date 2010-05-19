@@ -49,9 +49,9 @@ protected:
   std::vector<Real> & _pe;
   std::vector<RealGradient> & _grad_pe;
 
-  std::vector<RealTensorValue> & _viscous_stress_tensor;
-  std::vector<Real> & _thermal_conductivity;
-  std::vector<Real> & _pressure;
+  MooseArray<RealTensorValue> & _viscous_stress_tensor;
+  MooseArray<Real> & _thermal_conductivity;
+  MooseArray<Real> & _pressure;
 
   Real & _gamma;
   Real & _c_v;
@@ -59,7 +59,7 @@ protected:
   Real & _R;
   Real & _Pr;
 
-  std::vector<Real> & _dynamic_viscocity;
+  MooseArray<Real> & _dynamic_viscocity;
   
   Real _R_param;
   Real _gamma_param;
