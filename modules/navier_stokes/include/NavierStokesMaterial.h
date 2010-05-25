@@ -34,20 +34,20 @@ protected:
   virtual void computeProperties();
 
   bool _has_u;
-  std::vector<Real> & _u;
-  std::vector<RealGradient> & _grad_u;
+  MooseArray<Real> & _u;
+  MooseArray<RealGradient> & _grad_u;
 
   bool _has_v;
-  std::vector<Real> & _v;
-  std::vector<RealGradient> & _grad_v;
+  MooseArray<Real> & _v;
+  MooseArray<RealGradient> & _grad_v;
 
   bool _has_w;
-  std::vector<Real> & _w;
-  std::vector<RealGradient> & _grad_w;
+  MooseArray<Real> & _w;
+  MooseArray<RealGradient> & _grad_w;
 
   bool _has_pe;
-  std::vector<Real> & _pe;
-  std::vector<RealGradient> & _grad_pe;
+  MooseArray<Real> & _pe;
+  MooseArray<RealGradient> & _grad_pe;
 
   MooseArray<RealTensorValue> & _viscous_stress_tensor;
   MooseArray<Real> & _thermal_conductivity;
@@ -65,7 +65,7 @@ protected:
   Real _gamma_param;
   Real _Pr_param;
 
-  std::vector<std::vector<RealGradient> *> _vel_grads;
+  std::vector<MooseArray<RealGradient> *> _vel_grads;
 };
 
 #endif //NAVIERSTOKESMATERIAL_H

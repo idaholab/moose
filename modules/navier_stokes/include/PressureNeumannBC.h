@@ -29,13 +29,13 @@ protected:
   virtual Real computeQpResidual();
   
 
-  std::vector<Real> & _p;
+  MooseArray<Real> & _p;
 
-  std::vector<Real> & _pe;
+  MooseArray<Real> & _pe;
 
-  std::vector<Real> & _pu;
-  std::vector<Real> & _pv;
-  std::vector<Real> & _pw;
+  MooseArray<Real> & _pu;
+  MooseArray<Real> & _pv;
+  MooseArray<Real> & _pw;
 
   int _component;
 };

@@ -24,12 +24,12 @@ protected:
   
 private:
   unsigned int _x_var;
-  std::vector<Real> & _x;
-  std::vector<RealGradient> & _grad_x;
+  MooseArray<Real> & _x;
+  MooseArray<RealGradient> & _grad_x;
   
   unsigned int _y_var;
-  std::vector<Real> & _y;
-  std::vector<RealGradient> & _grad_y;
+  MooseArray<Real> & _y;
+  MooseArray<RealGradient> & _grad_y;
 };
  
 #endif //SOLIDMECHZ

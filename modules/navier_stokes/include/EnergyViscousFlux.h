@@ -24,16 +24,16 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   unsigned int _u_vel_var;
-  std::vector<Real> & _u_vel;
+  MooseArray<Real> & _u_vel;
 
   unsigned int _v_vel_var;
-  std::vector<Real> & _v_vel;
+  MooseArray<Real> & _v_vel;
 
   unsigned int _w_vel_var;
-  std::vector<Real> & _w_vel;
+  MooseArray<Real> & _w_vel;
 
   unsigned int _temp_var;
-  std::vector<RealGradient> & _grad_temp;
+  MooseArray<RealGradient> & _grad_temp;
 
   MooseArray<RealTensorValue> * _viscous_stress_tensor;
   MooseArray<Real> * _thermal_conductivity;

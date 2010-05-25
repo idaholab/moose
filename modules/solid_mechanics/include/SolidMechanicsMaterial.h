@@ -20,9 +20,9 @@ public:
   SolidMechanicsMaterial(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
-  std::vector<RealGradient> & _grad_disp_x;
-  std::vector<RealGradient> & _grad_disp_y;
-  std::vector<RealGradient> & _grad_disp_z;
+  MooseArray<RealGradient> & _grad_disp_x;
+  MooseArray<RealGradient> & _grad_disp_y;
+  MooseArray<RealGradient> & _grad_disp_z;
 
   MooseArray<RealTensorValue> & _stress;
   MooseArray<ColumnMajorMatrix> & _elasticity_tensor;

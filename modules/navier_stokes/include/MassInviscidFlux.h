@@ -22,13 +22,13 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   unsigned int _pu_var;
-  std::vector<Real> & _pu;
+  MooseArray<Real> & _pu;
 
   unsigned int _pv_var;
-  std::vector<Real> & _pv;
+  MooseArray<Real> & _pv;
 
   unsigned int _pw_var;
-  std::vector<Real> & _pw;
+  MooseArray<Real> & _pw;
 };
  
 #endif
