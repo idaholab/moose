@@ -410,32 +410,32 @@ protected:
   /**
    * Value of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<Real> > > _var_vals_face;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_face;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealGradient> > > _var_grads_face;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_face;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealTensor> > > _var_seconds_face;
+  MooseArray<MooseArray<MooseArray<RealTensor> > > _var_seconds_face;
 
   /**
    * Value of the variables at the nodes.
    */
-  std::vector<std::vector<std::vector<Real> > > _var_vals_face_nodal;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_face_nodal;
 
   /**
    * Convenience zeros.
    */
 
 public:
-  std::vector<Real> _real_zero;
-  std::vector<std::vector<Real> > _zero;
-  std::vector<std::vector<RealGradient> > _grad_zero;
-  std::vector<std::vector<RealTensor> > _second_zero;
+  MooseArray<Real> _real_zero;
+  MooseArray<MooseArray<Real> > _zero;
+  MooseArray<MooseArray<RealGradient> > _grad_zero;
+  MooseArray<MooseArray<RealTensor> > _second_zero;
 
 protected:
   /**
@@ -563,8 +563,8 @@ protected:
   std::vector<std::vector<RealGradient > > _aux_var_grads_older_element;
 
 
-  Real integrateValueAux(const std::vector<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
-  RealGradient integrateGradientAux(const std::vector<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
+  Real integrateValueAux(const MooseArray<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
+  RealGradient integrateGradientAux(const MooseArray<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
 
 
   void update_aux_vars(const NumericVector<Number>& soln);

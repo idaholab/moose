@@ -241,7 +241,7 @@ protected:
   /**
    * Holds the current solution at the current quadrature point.
    */
-  std::vector<Real> & _u;
+  MooseArray<Real> & _u;
 
   /**
    * The value of _u at a nodal position.  Used by non-integrated boundaries.
@@ -251,32 +251,32 @@ protected:
   /**
    * Holds the current solution gradient at the current quadrature point.
    */
-  std::vector<RealGradient> & _grad_u;
+  MooseArray<RealGradient> & _grad_u;
 
   /**
    * Holds the current solution second derivative at the current quadrature point.
    */
-  std::vector<RealTensor> & _second_u;
+  MooseArray<RealTensor> & _second_u;
 
   /**
    * Holds the previous solution at the current quadrature point.
    */
-  std::vector<Real> & _u_old;
+  MooseArray<Real> & _u_old;
 
   /**
    * Holds the t-2 solution at the current quadrature point.
    */
-  std::vector<Real> & _u_older;
+  MooseArray<Real> & _u_older;
 
   /**
    * Holds the previous solution gradient at the current quadrature point.
    */
-  std::vector<RealGradient> & _grad_u_old;
+  MooseArray<RealGradient> & _grad_u_old;
 
   /**
    * Holds the t-2 solution gradient at the current quadrature point.
    */
-  std::vector<RealGradient> & _grad_u_older;
+  MooseArray<RealGradient> & _grad_u_older;
 
   /**
    * The Finite Element type corresponding to the variable this
@@ -407,35 +407,35 @@ protected:
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<Real> & coupledVal(std::string name);
+  MooseArray<Real> & coupledVal(std::string name);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's gradient.
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<RealGradient> & coupledGrad(std::string name);
+  MooseArray<RealGradient> & coupledGrad(std::string name);
   
   /**
    * Returns a reference (that can be stored) to a coupled variable's second derivative.
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<RealTensor> & coupledSecond(std::string name);
+  MooseArray<RealTensor> & coupledSecond(std::string name);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value at old time step.
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<Real> & coupledValOld(std::string name);
+  MooseArray<Real> & coupledValOld(std::string name);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value at older time step.
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<Real> & coupledValOlder(std::string name);
+  MooseArray<Real> & coupledValOlder(std::string name);
 
   /**
    * Returns a reference (that can be stored) to a coupled gradient of a variable's value at an old time step.
@@ -443,15 +443,15 @@ protected:
    * @param name The name the kernel wants to refer to the variable as
    */
   
-  std::vector<RealGradient> & coupledGradValOld(std::string name);
+  MooseArray<RealGradient> & coupledGradValOld(std::string name);
   
   /**
    * Just here for convenience.  Used in constructors... usually to deal with multiple dimensional stuff.
    */
   Real & _real_zero;
-  std::vector<Real> & _zero;
-  std::vector<RealGradient> & _grad_zero;
-  std::vector<RealTensor> & _second_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
 
   /**
    * Whether or not the variable this Kernel operates on supports second derivatives.

@@ -23,7 +23,7 @@ protected:
   virtual Real computeQpResidual();
 
 private:
-  std::vector<Real> & _v_face;
+  MooseArray<Real> & _v_face;
 };
 
 #endif //MATCHEDVALUEBC_H

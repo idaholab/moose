@@ -22,9 +22,9 @@ void computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::
   }
 }
 
-void computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std::vector<Real> & u_older,
-                             std::vector<RealGradient> &grad_u,  std::vector<RealGradient> &grad_u_old, std::vector<RealGradient> &grad_u_older,
-                             std::vector<RealTensor> &second_u,
+void computeQpSolutionAll(MooseArray<Real> & u, MooseArray<Real> & u_old, MooseArray<Real> & u_older,
+                             MooseArray<RealGradient> &grad_u,  MooseArray<RealGradient> &grad_u_old, MooseArray<RealGradient> &grad_u_older,
+                             MooseArray<RealTensor> &second_u,
                              const NumericVector<Number> & soln, const NumericVector<Number> & soln_old,  const NumericVector<Number> & soln_older,
                              const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
                              const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi, const std::vector<std::vector<RealTensor> > & d2phi)
@@ -70,8 +70,8 @@ void computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std:
   }
 }
 
-void computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std::vector<Real> & u_older,
-                             std::vector<RealGradient> &grad_u,  std::vector<RealGradient> &grad_u_old, std::vector<RealGradient> &grad_u_older,
+void computeQpSolutionAll(MooseArray<Real> & u, MooseArray<Real> & u_old, MooseArray<Real> & u_older,
+                             MooseArray<RealGradient> &grad_u,  MooseArray<RealGradient> &grad_u_old, MooseArray<RealGradient> &grad_u_older,
                              const NumericVector<Number> & soln, const NumericVector<Number> & soln_old,  const NumericVector<Number> & soln_older,
                              const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
                              const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi)
@@ -114,9 +114,9 @@ void computeQpSolutionAll(std::vector<Real> & u, std::vector<Real> & u_old, std:
   }
 }
 
-void computeQpSolutionAll(std::vector<Real> & u,
-                                  std::vector<RealGradient> &grad_u,
-                                  std::vector<RealTensor> &second_u,
+void computeQpSolutionAll(MooseArray<Real> & u,
+                                  MooseArray<RealGradient> &grad_u,
+                                  MooseArray<RealTensor> &second_u,
                                   const NumericVector<Number> & soln,
                                   const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
                                   const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi, const std::vector<std::vector<RealTensor> > & d2phi)
@@ -149,8 +149,8 @@ void computeQpSolutionAll(std::vector<Real> & u,
 }
 
 
-void computeQpSolutionAll(std::vector<Real> & u,
-                                  std::vector<RealGradient> &grad_u,
+void computeQpSolutionAll(MooseArray<Real> & u,
+                                  MooseArray<RealGradient> &grad_u,
                                   const NumericVector<Number> & soln,
                                   const std::vector<unsigned int> & dof_indices, const unsigned int n_qp,
                                   const std::vector<std::vector<Real> > & phi, const std::vector<std::vector<RealGradient> > & dphi)

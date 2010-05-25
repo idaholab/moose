@@ -27,6 +27,6 @@ protected:
 
 private:
   unsigned int _v_var;
-  std::vector<Real> & _v;
+  MooseArray<Real> & _v;
 };
 #endif //COUPLEDFORCE_H

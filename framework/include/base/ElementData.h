@@ -3,6 +3,7 @@
 
 //MOOSE includes
 #include "Moose.h"
+#include "MooseArray.h"
 
 //libMesh includes
 #include "transient_system.h"
@@ -101,67 +102,67 @@ public:
     /**
    * Value of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<Real> > > _var_vals;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealGradient> > > _var_grads;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealTensor> > > _var_seconds;
+  MooseArray<MooseArray<MooseArray<RealTensor> > > _var_seconds;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<Real> > > _var_vals_old;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_old;
 
   /**
    * Value of the variables at the quadrature points at t-2.
    */
-  std::vector<std::vector<std::vector<Real> > > _var_vals_older;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_older;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealGradient> > > _var_grads_old;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_old;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealGradient> > > _var_grads_older;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_older;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<Real> > > _aux_var_vals;
+  MooseArray<MooseArray<MooseArray<Real> > > _aux_var_vals;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<Real> > > _aux_var_vals_old;
+  MooseArray<MooseArray<MooseArray<Real> > > _aux_var_vals_old;
 
   /**
    * Value of the variables at the quadrature points at t-2.
    */
-  std::vector<std::vector<std::vector<Real> > > _aux_var_vals_older;
+  MooseArray<MooseArray<MooseArray<Real> > > _aux_var_vals_older;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_old;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads_old;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealGradient> > > _aux_var_grads_older;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads_older;
 
   /**
    * Current element

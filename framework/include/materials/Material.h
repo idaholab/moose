@@ -228,22 +228,22 @@ protected:
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<Real> & coupledVal(std::string name);
+  MooseArray<Real> & coupledVal(std::string name);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's gradient.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<RealGradient> & coupledGrad(std::string name);
+  MooseArray<RealGradient> & coupledGrad(std::string name);
 
   /**
    * Just here for convenience.  Used in constructors... usually to deal with multiple dimensional stuff.
    */
   Real & _real_zero;
-  std::vector<Real> & _zero;
-  std::vector<RealGradient> & _grad_zero;
-  std::vector<RealTensor> & _second_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
 
 // struct DeleteFunctor 
 //   {

@@ -367,7 +367,7 @@ Material::coupled(std::string name)
     return Kernel::modifiedAuxVarNum(_aux_coupled_as_to_var_num[name]);
 }
 
-std::vector<Real> &
+MooseArray<Real> &
 Material::coupledVal(std::string name)
 {
   if(!isCoupled(name))
@@ -382,7 +382,7 @@ Material::coupledVal(std::string name)
     return _element_data._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
-std::vector<RealGradient> &
+MooseArray<RealGradient> &
 Material::coupledGrad(std::string name)
 {
   if(!isCoupled(name))

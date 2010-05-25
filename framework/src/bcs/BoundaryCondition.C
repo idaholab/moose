@@ -257,7 +257,7 @@ BoundaryCondition::setIntegratedParam(InputParameters & params, bool integrated)
   return params;
 }
 
-std::vector<Real> &
+MooseArray<Real> &
 BoundaryCondition::coupledValFace(std::string name)
 {
   if(!isCoupled(name))
@@ -272,7 +272,7 @@ BoundaryCondition::coupledValFace(std::string name)
   return _moose_system._var_vals_face_nodal[_tid][_coupled_as_to_var_num[name]];
 }
 
-std::vector<RealGradient> &
+MooseArray<RealGradient> &
 BoundaryCondition::coupledGradFace(std::string name)
 {
   if(!isCoupled(name))

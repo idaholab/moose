@@ -948,7 +948,7 @@ MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, 
 
 
 Real
-MooseSystem::integrateValueAux(const std::vector<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
+MooseSystem::integrateValueAux(const MooseArray<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
 {
   Real value = 0;
 
@@ -972,7 +972,7 @@ MooseSystem::integrateValueAux(const std::vector<Real> & vals, const std::vector
 }
 
 RealGradient
-MooseSystem::integrateGradientAux(const std::vector<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
+MooseSystem::integrateGradientAux(const MooseArray<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
 {
   RealGradient value = 0;
 

@@ -278,7 +278,7 @@ Kernel::coupled(std::string name)
     return modifiedAuxVarNum(_aux_coupled_as_to_var_num[name]);
 }
 
-std::vector<Real> &
+MooseArray<Real> &
 Kernel::coupledVal(std::string name)
 {
   if(!isCoupled(name))
@@ -293,7 +293,7 @@ Kernel::coupledVal(std::string name)
     return _element_data._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
-std::vector<RealGradient> &
+MooseArray<RealGradient> &
 Kernel::coupledGrad(std::string name)
 {
   if(!isCoupled(name))
@@ -308,7 +308,7 @@ Kernel::coupledGrad(std::string name)
     return _element_data._aux_var_grads[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
-std::vector<RealTensor> &
+MooseArray<RealTensor> &
 Kernel::coupledSecond(std::string name)
 {
   if(!isCoupled(name))
@@ -321,7 +321,7 @@ Kernel::coupledSecond(std::string name)
   return _element_data._var_seconds[_tid][_coupled_as_to_var_num[name]];
 }
 
-std::vector<Real> &
+MooseArray<Real> &
 Kernel::coupledValOld(std::string name)
 {
   if(!isCoupled(name))
@@ -336,7 +336,7 @@ Kernel::coupledValOld(std::string name)
     return _element_data._aux_var_vals_old[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
-std::vector<Real> &
+MooseArray<Real> &
 Kernel::coupledValOlder(std::string name)
 {
   if(!isCoupled(name))
@@ -351,7 +351,7 @@ Kernel::coupledValOlder(std::string name)
     return _element_data._aux_var_vals_older[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
-std::vector<RealGradient> &
+MooseArray<RealGradient> &
 Kernel::coupledGradValOld(std::string name)
 {
   if(!isCoupled(name))

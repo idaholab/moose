@@ -4,6 +4,7 @@
 // local includes
 #include "Moose.h"
 #include "ValidParams.h"
+#include "MooseArray.h"
 
 // libMesh includes
 #include "mesh_base.h"
@@ -330,39 +331,39 @@ protected:
   /**
    * Holds the current solution at the current quadrature point on the face.
    */
-  std::vector<Real> & _u_face;
+  MooseArray<Real> & _u_face;
 
   /**
    * Holds the current solution gradient at the current quadrature point on the face.
    */
-  std::vector<RealGradient> & _grad_u_face;
+  MooseArray<RealGradient> & _grad_u_face;
 
   /**
    * Holds the current solution second derivative at the current quadrature point on the face
    */
-  std::vector<RealTensor> & _second_u_face;
+  MooseArray<RealTensor> & _second_u_face;
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value.
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<Real> & coupledValFace(std::string name);  
+  MooseArray<Real> & coupledValFace(std::string name);  
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's gradient.
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  std::vector<RealGradient> & coupledGradFace(std::string name);
+  MooseArray<RealGradient> & coupledGradFace(std::string name);
 
   /**
    * Just here for convenience.  Used in constructors... usually to deal with multiple dimensional stuff.
    */
   Real & _real_zero;
-  std::vector<Real> & _zero;
-  std::vector<RealGradient> & _grad_zero;
-  std::vector<RealTensor> & _second_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
 
   /**
    * The time, after which this kernel will be active.
