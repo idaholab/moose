@@ -1,6 +1,7 @@
 #include "Material.h"
 #include "MooseSystem.h"
 #include "ElementData.h"
+#include "QpData.h"
 #include <iostream>
 
 template<>
@@ -26,6 +27,8 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
    _is_transient(_moose_system._is_transient),
    _current_elem(_element_data._current_elem[_tid]),
    _qrule(_element_data._qrule[_tid]),
+   // _q_point is initialized to the first variables's associated fe_type (same physical space for all vars)
+   _q_point(*(_element_data._q_point[_tid])[_element_data._dof_map->variable_type(0)]), 
    _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
    _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _real_zero(_moose_system._real_zero[_tid]),

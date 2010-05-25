@@ -1,7 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "QpData.h"
+
 #include "MooseArray.h"
 
 //libmesh includes
@@ -13,6 +13,7 @@
 class Material;
 class MooseSystem;
 class ElementData;
+class QpData;
 
 template<>
 InputParameters validParams<Material>();
@@ -144,6 +145,12 @@ protected:
    */
   unsigned int & _dim;
 
+  /**
+   * XYZ coordinates of quadrature points (initialized from the first fe_type since the reverse
+   * mapping of the reference space is the same for all element types to physical space
+   */
+  const std::vector<Point>& _q_point;
+  
   /**
    * Current time.
    */
