@@ -54,6 +54,7 @@ public:
    */
   void materialReinit();
 
+  
   /**
    * Retrieve the Constant Real valued property named "name"
    */
@@ -87,13 +88,99 @@ public:
   /**
    * Retrieve the Tensor valued property named "name"
    */
-  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixProperty(const std::string & name);
-  
+  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixProperty(const std::string & name);  
   
   /**
    * Retrieve the Matrix valued property named "name"
    */
   MooseArray<MooseArray<MooseArray<Real> > > & getMatrixProperty(const std::string & name);
+
+
+
+  /**
+   * Retrieve the Constant Real valued property named "name"
+   */
+  Real & getConstantRealPropertyOld(const std::string & name);
+  
+  /**
+   * Retrieve the Real valued property named "name"
+   */
+  MooseArray<Real> & getRealPropertyOld(const std::string & name);
+  
+  /**
+   * Retrieve the Gradient valued property named "name"
+   */
+  MooseArray<RealGradient> & getGradientPropertyOld(const std::string & name);
+
+  /**
+   * Retrieve RealVectorValue valued property named "name"
+   */
+  MooseArray<RealVectorValue> & getRealVectorValuePropertyOld(const std::string & name);
+
+  /**
+   * Retrieve the Vector valued property named "name"
+   */
+  MooseArray<MooseArray<Real> > & getVectorPropertyOld(const std::string & name);
+  
+  /**
+   * Retrieve the Tensor valued property named "name"
+   */
+  MooseArray<RealTensorValue> & getTensorPropertyOld(const std::string & name);
+  
+  /**
+   * Retrieve the Tensor valued property named "name"
+   */
+  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixPropertyOld(const std::string & name);  
+  
+  /**
+   * Retrieve the Matrix valued property named "name"
+   */
+  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixPropertyOld(const std::string & name);
+
+
+
+
+  /**
+   * Retrieve the Constant Real valued property named "name"
+   */
+  Real & getConstantRealPropertyOlder(const std::string & name);
+  
+  /**
+   * Retrieve the Real valued property named "name"
+   */
+  MooseArray<Real> & getRealPropertyOlder(const std::string & name);
+  
+  /**
+   * Retrieve the Gradient valued property named "name"
+   */
+  MooseArray<RealGradient> & getGradientPropertyOlder(const std::string & name);
+
+  /**
+   * Retrieve RealVectorValue valued property named "name"
+   */
+  MooseArray<RealVectorValue> & getRealVectorValuePropertyOlder(const std::string & name);
+
+  /**
+   * Retrieve the Vector valued property named "name"
+   */
+  MooseArray<MooseArray<Real> > & getVectorPropertyOlder(const std::string & name);
+  
+  /**
+   * Retrieve the Tensor valued property named "name"
+   */
+  MooseArray<RealTensorValue> & getTensorPropertyOlder(const std::string & name);
+  
+  /**
+   * Retrieve the Tensor valued property named "name"
+   */
+  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixPropertyOlder(const std::string & name);  
+  
+  /**
+   * Retrieve the Matrix valued property named "name"
+   */
+  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixPropertyOlder(const std::string & name);
+
+
   
   /**
    * Updates the old (first) material properties to the current/new material properies (second)
@@ -144,6 +231,12 @@ protected:
    * The current dimension of the mesh.
    */
   unsigned int & _dim;
+
+  /**
+   * Whether or not this material has stateful properties.  This will get automatically
+   * set to true if a stateful property is declared.
+   */
+  bool _has_stateful_props;
 
   /**
    * XYZ coordinates of quadrature points (initialized from the first fe_type since the reverse
@@ -342,7 +435,127 @@ protected:
    * to be retrieved using get().
    */
   MooseArray<MooseArray<MooseArray<Real> > > & declareMatrixProperty(const std::string & name);
+
+
+  /**
+   * Declare the Real valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOld().
+   */
+  MooseArray<Real> & declareRealPropertyOld(const std::string & name);
   
+  /**
+   * Declare the Constant Real valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOld().
+   */
+  Real & declareConstantRealPropertyOld(const std::string & name);
+  
+  /**
+   * Declare the Gradient valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOld().
+   */
+  MooseArray<RealGradient> & declareGradientPropertyOld(const std::string & name);
+
+  /**
+   * Declare the RealVectorValue valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOld().
+   */
+  MooseArray<RealVectorValue> & declareRealVectorValuePropertyOld(const std::string & name);
+
+  /**
+   * Declare the Vector valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOld().
+   */
+  MooseArray<MooseArray<Real> > & declareVectorPropertyOld(const std::string & name);
+  
+  /**
+   * Declare the Tensor valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOld().
+   */
+  MooseArray<RealTensorValue> & declareTensorPropertyOld(const std::string & name);
+  
+  /**
+   * Declare the Tensor valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOld().
+   */
+  MooseArray<ColumnMajorMatrix> & declareColumnMajorMatrixPropertyOld(const std::string & name);
+  
+  /**
+   * Declare the Matrix valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOld().
+   */
+  MooseArray<MooseArray<MooseArray<Real> > > & declareMatrixPropertyOld(const std::string & name);
+
+
+
+
+
+  /**
+   * Declare the Real valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOlder().
+   */
+  MooseArray<Real> & declareRealPropertyOlder(const std::string & name);
+  
+  /**
+   * Declare the Constant Real valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOlder().
+   */
+  Real & declareConstantRealPropertyOlder(const std::string & name);
+  
+  /**
+   * Declare the Gradient valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOlder().
+   */
+  MooseArray<RealGradient> & declareGradientPropertyOlder(const std::string & name);
+
+  /**
+   * Declare the RealVectorValue valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOlder().
+   */
+  MooseArray<RealVectorValue> & declareRealVectorValuePropertyOlder(const std::string & name);
+
+  /**
+   * Declare the Vector valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOlder().
+   */
+  MooseArray<MooseArray<Real> > & declareVectorPropertyOlder(const std::string & name);
+  
+  /**
+   * Declare the Tensor valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOlder().
+   */
+  MooseArray<RealTensorValue> & declareTensorPropertyOlder(const std::string & name);
+  
+  /**
+   * Declare the Tensor valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOlder().
+   */
+  MooseArray<ColumnMajorMatrix> & declareColumnMajorMatrixPropertyOlder(const std::string & name);
+  
+  /**
+   * Declare the Matrix valued property named "name".
+   * This must be done _before_ a property of that name is tried
+   * to be retrieved using getOlder().
+   */
+  MooseArray<MooseArray<MooseArray<Real> > > & declareMatrixPropertyOlder(const std::string & name);
+
+
+  
+  // These are what the Material objects actually get references to
   std::map<std::string, Real > _constant_real_props;
   std::map<std::string, MooseArray<Real> > _real_props;
   std::map<std::string, MooseArray<RealGradient> > _gradient_props;
@@ -354,7 +567,62 @@ protected:
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
 
-//  QGauss * _qrule;
+  std::map<std::string, Real > _constant_real_props_old;
+  std::map<std::string, MooseArray<Real> > _real_props_old;
+  std::map<std::string, MooseArray<RealGradient> > _gradient_props_old;
+  std::map<std::string, MooseArray<RealVectorValue> > _real_vector_value_props_old;
+  std::map<std::string, MooseArray<MooseArray<Real> > > _vector_props_old;
+  std::map<std::string, MooseArray<RealTensorValue> > _tensor_props_old;
+  std::map<std::string, MooseArray<ColumnMajorMatrix> > _column_major_matrix_props_old;
+  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > _matrix_props_old;
+
+  std::map<std::string, Real > _constant_real_props_older;
+  std::map<std::string, MooseArray<Real> > _real_props_older;
+  std::map<std::string, MooseArray<RealGradient> > _gradient_props_older;
+  std::map<std::string, MooseArray<RealVectorValue> > _real_vector_value_props_older;
+  std::map<std::string, MooseArray<MooseArray<Real> > > _vector_props_older;
+  std::map<std::string, MooseArray<RealTensorValue> > _tensor_props_older;
+  std::map<std::string, MooseArray<ColumnMajorMatrix> > _column_major_matrix_props_older;
+  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > _matrix_props_older;
+
+  std::vector<std::string> _constant_real_stateful_props;
+  std::vector<std::string> _real_stateful_props;
+  std::vector<std::string> _gradient_stateful_props;
+  std::vector<std::string> _real_vector_value_stateful_props;
+  std::vector<std::string> _vector_stateful_props;
+  std::vector<std::string> _tensor_stateful_props;
+  std::vector<std::string> _column_major_matrix_stateful_props;
+  std::vector<std::string> _matrix_stateful_props;
+  
+  // Per elem stateful property data
+  std::map<std::string, Real > * _constant_real_props_current_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<Real> > > * _real_props_current_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > > * _gradient_props_current_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > > * _real_vector_value_props_current_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > > * _vector_props_current_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > > * _tensor_props_current_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > > * _column_major_matrix_props_current_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > > * _matrix_props_current_elem;
+
+  std::map<std::string, Real > * _constant_real_props_old_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<Real> > > * _real_props_old_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > > * _gradient_props_old_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > > * _real_vector_value_props_old_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > > * _vector_props_old_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > > * _tensor_props_old_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > > * _column_major_matrix_props_old_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > > * _matrix_props_old_elem;
+
+  std::map<std::string, Real > * _constant_real_props_older_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<Real> > > * _real_props_older_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > > * _gradient_props_older_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > > * _real_vector_value_props_older_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > > * _vector_props_older_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > > * _tensor_props_older_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > > * _column_major_matrix_props_older_elem;
+  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > > * _matrix_props_older_elem;
+
+  //  QGauss * _qrule;
   
 //private:
 //  Kernel::_qrule;
