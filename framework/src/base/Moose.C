@@ -3,6 +3,7 @@
 #include "Diffusion.h"
 #include "Reaction.h"
 #include "CoupledForce.h"
+#include "RealPropertyOutput.h"
 
 #include "BCFactory.h"
 #include "DirichletBC.h"
@@ -110,6 +111,7 @@ Moose::registerObjects()
   KernelFactory::instance()->registerKernel<ImplicitEuler>("ImplicitEuler");
   KernelFactory::instance()->registerKernel<ImplicitBackwardDifference2>("ImplicitBackwardDifference2");
   KernelFactory::instance()->registerKernel<CoupledForce>("CoupledForce");
+  KernelFactory::instance()->registerKernel<RealPropertyOutput>("RealPropertyOutput");
   
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<SinDirichletBC>("SinDirichletBC");
