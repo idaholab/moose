@@ -320,6 +320,12 @@ Material::materialReinit()
   }
 }
 
+bool
+Material::hasStatefulProperties()
+{
+  return _has_stateful_props;
+}
+
 Real &
 Material::getConstantRealProperty(const std::string & name)
 {

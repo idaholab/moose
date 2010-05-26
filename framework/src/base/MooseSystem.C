@@ -1008,15 +1008,22 @@ MooseSystem::checkSystemsIntegrity()
   for (MeshBase::element_iterator el = _mesh->active_elements_begin(); el != el_end; ++el)
     element_subdomains.insert((*el)->subdomain_id());
 
+  bool adaptivity = _es->parameters.have_parameter<bool>("adaptivity");
+
   // Check materials
   MaterialIterator end = _materials.activeMaterialsEnd(0);
   for (MaterialIterator i = _materials.activeMaterialsBegin(0); i != end; ++i)
+  {
+    if(i->second->hasStatefulProperties() && adaptivity)
+      mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
+    
     if (element_subdomains.find(i->first) == element_subdomains.end())
     {
       std::stringstream oss;
       oss << "Material block \"" << i->first << "\" specified in the input file does not exist";
       mooseError (oss.str());
     }
+  }
 
   // Check kernels
   _kernels.updateActiveKernels(0);

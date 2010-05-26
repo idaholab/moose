@@ -54,6 +54,7 @@ public:
    */
   void materialReinit();
 
+  bool hasStatefulProperties();
   
   /**
    * Retrieve the Constant Real valued property named "name"
