@@ -1,0 +1,20 @@
+ins
+{
+  float: left;
+}
+.required
+{
+  color: red;
+  //clear: all;
+  //float: left;
+}
+.red
+{
+  color: red;
+  clear: none;
+}
+#footer
+{
+  font-style: italic;
+  font-size: 0.8em;
+}

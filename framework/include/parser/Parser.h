@@ -123,9 +123,11 @@ private:
   void fixupOptionalBlocks();
 
   /**
-   * Use MOOSE Factories to construct a full parse tree for documentation
+   * Use MOOSE Factories to construct a full parse tree for documentation. Format
+   * parameter specifies how to print the resulting parse tree. Only "dump", the
+   * original human readable format, and "yaml" are supported.
    */
-  void buildFullTree();
+  void buildFullTree( const std::string format );
 
   /**
    * This function check for the existance and readability of the input file and throws a

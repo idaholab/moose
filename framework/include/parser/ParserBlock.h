@@ -123,6 +123,7 @@ public:
   ParserBlock * locateBlock(const std::string & id);
 
   void printBlockData();
+  void printBlockYAML();
 
   /**
    * This function returns the number of active children which is either the children named in the

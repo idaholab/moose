@@ -308,6 +308,58 @@ ParserBlock::printBlockData()
   std::cout << spacing << "}\n";
 }
 
-    
-      
-      
+void
+ParserBlock::printBlockYAML()
+{
+  std::vector<std::string> elements;
+  Parser::tokenize(_name, elements);
+
+  std::string spacing = "";
+  for (unsigned int i=0; i<elements.size(); ++i)
+    spacing += "  ";
+
+  std::cout << spacing << "- name: " << _name << "\n";
+  spacing += "  ";
+  
+  //will print "" if there is no type, which translates to None in python
+  std::cout << spacing << "type: " << getType() << "\n";
+  
+  std::cout << spacing << "parameters:\n";
+  std::string subblocks = spacing + "subblocks: \n";
+  spacing += "  ";
+  
+  std::vector<InputParameters *> param_ptrs;
+  param_ptrs.push_back(&_block_params);
+  param_ptrs.push_back(&_class_params);
+
+  for (unsigned int i=0; i<param_ptrs.size(); ++i)
+  {
+    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
+    {
+      std::string name = iter->first;
+      // First make sure we want to see this parameter, also block active and type
+      if (param_ptrs[i]->isPrivate(iter->first) || name == "active" || name == "type") 
+        continue;
+
+      // Block params may be required and will have a doc string
+      std::string required = param_ptrs[i]->isParamRequired(iter->first) ? "Yes" : "No";
+
+      std::cout << spacing << "- name: " << name << "\n";
+      std::cout << spacing << "  required: " << required << "\n";
+      std::cout << spacing << "  default: !!str ";
+
+      //prints the value, which is the default value when dumping the tree
+      //because it hasn't been changed
+      iter->second->print(std::cout);
+
+      std::cout << "\n" << spacing << "  description: |\n    " << spacing
+                << param_ptrs[i]->getDocString(iter->first) << "\n";
+    }
+  }
+
+  //if there aren't any sub blocks it will just parse as None in python
+  std::cout << subblocks;
+  
+  visitChildren(&ParserBlock::printBlockYAML, true, false);
+}
+

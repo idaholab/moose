@@ -36,7 +36,15 @@ Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
     }
     if (Moose::command_line->search(dump_string))
     {
-      buildFullTree();
+      buildFullTree( "dump" );
+      exit(0);
+    }
+    if (Moose::command_line->search( "--yaml" ))
+    {
+      //important: start and end yaml data delimiters used by python
+      std::cout << "**START YAML DATA**\n";
+      buildFullTree( "yaml" );
+      std::cout << "**END YAML DATA**\n";
       exit(0);
     }
   }
@@ -135,7 +143,7 @@ Parser::parse(const std::string &input_filename)
 }
 
 void
-Parser::buildFullTree()
+Parser::buildFullTree( const std::string format )
 {
   std::string prefix;
   ParserBlock *curr_block;
@@ -282,7 +290,10 @@ Parser::buildFullTree()
     curr_block->_children.push_back(ParserBlockFactory::instance()->add("Executioner", _moose_system, params));
   }
   
-  _input_tree->printBlockData();
+  if (format == "yaml")
+    _input_tree->printBlockYAML();
+  else // "dump" is all that's left
+    _input_tree->printBlockData();
 }
 
 void
