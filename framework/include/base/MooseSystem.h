@@ -25,6 +25,7 @@ class MeshBase;
 class FaceData;
 class AuxData;
 class Material;
+class MaterialData;
 template<class T> class NumericVector;
 
 /**
@@ -230,6 +231,7 @@ private:
   ElementData *_element_data;
   FaceData *_face_data;
   AuxData *_aux_data;
+  MaterialData *_material_data;
   //  std::vector<ElementData *> _element_data;
   //  std::vector<FaceData *> _face_data;
   //  std::vector<AuxData *> _aux_data;

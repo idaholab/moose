@@ -1,6 +1,7 @@
 #include "Material.h"
 #include "MooseSystem.h"
 #include "ElementData.h"
+#include "MaterialData.h"
 #include "QpData.h"
 #include <iostream>
 
@@ -18,6 +19,29 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
    _name(name),
    _moose_system(moose_system),
    _element_data(*moose_system._element_data),
+   _material_data(*moose_system._material_data),
+   _constant_real_props(_material_data._constant_real_props),
+   _real_props(_material_data._real_props),
+   _gradient_props(_material_data._gradient_props),
+   _real_vector_value_props(_material_data._real_vector_value_props),
+   _vector_props(_material_data._vector_props),
+   _tensor_props(_material_data._tensor_props),
+   _column_major_matrix_props(_material_data._column_major_matrix_props),
+   _matrix_props(_material_data._matrix_props),                                                                                                                             _constant_real_props_old(_material_data._constant_real_props_old),                                                                                                                                  _real_props_old(_material_data._real_props_old),
+   _gradient_props_old(_material_data._gradient_props_old),
+   _real_vector_value_props_old(_material_data._real_vector_value_props_old),
+   _vector_props_old(_material_data._vector_props_old),
+   _tensor_props_old(_material_data._tensor_props_old),
+   _column_major_matrix_props_old(_material_data._column_major_matrix_props_old),
+   _matrix_props_old(_material_data._matrix_props_old),
+   _constant_real_props_older(_material_data._constant_real_props_older),
+   _real_props_older(_material_data._real_props_older),
+   _gradient_props_older(_material_data._gradient_props_older),
+   _real_vector_value_props_older(_material_data._real_vector_value_props_older),
+   _vector_props_older(_material_data._vector_props_older),
+   _tensor_props_older(_material_data._tensor_props_older),
+   _column_major_matrix_props_older(_material_data._column_major_matrix_props_older),
+   _matrix_props_older(_material_data._matrix_props_older),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
    _dim(_moose_system._dim),

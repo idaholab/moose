@@ -2,6 +2,7 @@
 #include "ElementData.h"
 #include "FaceData.h"
 #include "AuxData.h"
+#include "MaterialData.h"
 #include "KernelFactory.h"
 #include "BCFactory.h"
 #include "AuxFactory.h"
@@ -89,6 +90,7 @@ MooseSystem::~MooseSystem()
     delete _element_data;
     delete _face_data;
     delete _aux_data;
+    delete _material_data;
     
     /*
     for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid) 
@@ -408,6 +410,7 @@ MooseSystem::initDataStructures()
   _element_data = new ElementData(*this);
   _face_data = new FaceData(*this);
   _aux_data = new AuxData(*this, *_element_data);
+  _material_data = new MaterialData(*this);
 
   // TODO: Make multiple copies of the data objects instead of select
   // members inside of these objects
