@@ -2,6 +2,7 @@
 #include "Moose.h"
 #include "MooseSystem.h"
 #include "ElementData.h"
+#include "MaterialData.h"
 #include "MaterialFactory.h"
 #include "ParallelUniqueId.h"
 
@@ -28,6 +29,7 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _name(name),
    _moose_system(moose_system),
    _element_data(*moose_system._element_data),
+   _material_data(*moose_system._material_data),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
    _mesh(*_moose_system.getMesh()),

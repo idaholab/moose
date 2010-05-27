@@ -643,10 +643,6 @@ Material::getMatrixPropertyOlder(const std::string & name)
 }
 
 
-
-
-
-
 /**
  * Updates the old (first) material properties to the current/new material properies (second)
  */
