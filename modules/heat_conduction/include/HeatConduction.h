@@ -16,14 +16,12 @@ public:
 
   HeatConduction(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
-  virtual void subdomainSetup();
-  
 protected:  
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
   
 private:
-  MooseArray<Real> * _k;
+  MooseArray<Real> & _k;
 };
 #endif //HEATCONDUCTION_H

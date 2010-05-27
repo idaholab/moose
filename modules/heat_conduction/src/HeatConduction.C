@@ -8,23 +8,18 @@ InputParameters validParams<HeatConduction>()
 }
 
 HeatConduction::HeatConduction(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :Diffusion(name, moose_system, parameters)
+  :Diffusion(name, moose_system, parameters),
+   _k(_material_data.getRealProperty("thermal_conductivity"))
   {}
-
-void
-HeatConduction::subdomainSetup()
-{
-  _k = &_material->getRealProperty("thermal_conductivity");
-}
 
 Real
 HeatConduction::computeQpResidual()
 {
-  return (*_k)[_qp]*Diffusion::computeQpResidual();
+  return _k[_qp]*Diffusion::computeQpResidual();
 }
 
 Real
 HeatConduction::computeQpJacobian()
 {
-  return (*_k)[_qp]*Diffusion::computeQpJacobian();
+  return _k[_qp]*Diffusion::computeQpJacobian();
 }
