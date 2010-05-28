@@ -22,10 +22,10 @@ const std::string Parser::_show_tree = "--show_tree";
 Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
   :_moose_system(moose_system),
    _input_filename(""),
+   _dump_string(dump_string),
    _input_tree(NULL),
    _getpot_initialized(false),
-   _tree_printed(false),
-   _dump_string(dump_string)
+   _tree_printed(false)
 {
   if (Moose::command_line != NULL)
   {
@@ -65,7 +65,7 @@ Parser::parse(const std::string &input_filename)
 {
   std::vector<std::string> elements;
   std::string curr_value, curr_identifier;
-  ParserBlock *curr_block, *t;
+  ParserBlock *curr_block;
 
   _input_filename = input_filename;
   
@@ -95,7 +95,7 @@ Parser::parse(const std::string &input_filename)
     curr_block = _input_tree;
     curr_identifier = "";
 
-    for (int j=0; j<elements.size(); ++j) 
+    for (unsigned int j=0; j<elements.size(); ++j) 
     {
       if (! curr_block->checkActive(elements[j]) )
         continue;
@@ -501,7 +501,7 @@ void Parser::setVectorParameter(const std::string & name, InputParameters::Param
   if (_getpot_file.have_variable(name.c_str())) 
     param->set().resize(vec_size);
     
-  for (unsigned int i=0; i<vec_size; ++i) 
+  for (int i=0; i<vec_size; ++i) 
     param->set()[i] = _getpot_file(name.c_str(), param->get()[i], i);
 }
 
@@ -512,10 +512,10 @@ void Parser::setTensorParameter(const std::string & name, InputParameters::Param
   int one_dim = pow(vec_size, 0.5);
 
   param->set().resize(one_dim);
-  for (unsigned int i=0; i<one_dim; ++i) 
+  for (int i=0; i<one_dim; ++i) 
   {
     param->set()[i].resize(one_dim);
-    for (unsigned int j=0; j<one_dim; ++j)
+    for (int j=0; j<one_dim; ++j)
       param->set()[i][j] = _getpot_file(name.c_str(), param->get()[i][j], i*one_dim+j);
   }
 }

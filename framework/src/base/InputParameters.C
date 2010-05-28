@@ -1,6 +1,6 @@
 #include "InputParameters.h"
 
-InputParameters::InputParameters(const InputParameters &rhs)
+InputParameters::InputParameters(const InputParameters &rhs) : Parameters()
 {
   *this = rhs;
 }

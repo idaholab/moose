@@ -39,7 +39,7 @@ class MooseSystem
 public:
   MooseSystem();
   MooseSystem(Mesh &mesh);
-  ~MooseSystem();
+  virtual ~MooseSystem();
 
   /**
    * Data Accessors for the various FE datastructures indexed by thread

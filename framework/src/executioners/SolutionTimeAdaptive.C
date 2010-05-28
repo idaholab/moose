@@ -27,10 +27,10 @@ InputParameters validParams<SolutionTimeAdaptive>()
 
 SolutionTimeAdaptive::SolutionTimeAdaptive(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :TransientExecutioner(name, moose_system, parameters),
-   _percent_change(parameters.get<Real>("percent_change")),
    _direction(parameters.get<int>("initial_direction")),
-   _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
+   _percent_change(parameters.get<Real>("percent_change")),
    _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),
+   _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
    _sol_time_vs_dt(std::numeric_limits<Real>::max()),
    _adapt_log(parameters.get<bool>("adapt_log"))
 {

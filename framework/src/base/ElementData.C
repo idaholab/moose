@@ -87,8 +87,6 @@ ElementData::sizeEverything()
 void
 ElementData::init()
 {
-  int n_thread = libMesh::n_threads();
-
   _dof_map = &_moose_system.getNonlinearSystem()->get_dof_map();
 
   unsigned int n_vars = _moose_system.getNonlinearSystem()->n_vars();
@@ -294,8 +292,6 @@ ElementData::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
 
     bool has_second_derivatives = (family == CLOUGH || family == HERMITE);
 
-    unsigned int num_dofs = _var_dof_indices[tid][var_num].size();
-
     _var_vals[tid][var_num].resize(num_q_points);
     _var_grads[tid][var_num].resize(num_q_points);
 
@@ -360,8 +356,6 @@ ElementData::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
     FEType fe_type = _moose_system._aux_dof_map->variable_type(var_num);
 
     _moose_system._aux_dof_map->dof_indices(elem, _aux_var_dof_indices[tid][var_num], var_num);
-
-    unsigned int num_dofs = _aux_var_dof_indices[tid][var_num].size();
 
     _aux_var_vals[tid][var_num].resize(num_q_points);
     _aux_var_grads[tid][var_num].resize(num_q_points);

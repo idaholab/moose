@@ -116,7 +116,7 @@ MeshBlock::checkVariableProperties(bool (GenericVariableBlock::*property)() cons
   blocks_to_check[0] = "Variables";
   blocks_to_check[1] = "AuxVariables";
   
-  for (int i=0; i<blocks_to_check.size(); ++i) 
+  for (unsigned int i=0; i<blocks_to_check.size(); ++i) 
   {
     ParserBlock *vars_block = locateBlock(blocks_to_check[i]);
     if (vars_block != NULL)

@@ -155,7 +155,7 @@ void MooseSystem::compute_jacobian (const NumericVector<Number>& soln, SparseMat
 #else
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
   // determines whether the option is set (true) or unset (false)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
    MAT_KEEP_ZEROED_ROWS,
    PETSC_TRUE);
 #endif
@@ -212,12 +212,12 @@ class ComputeInternalJacobianBlocks
 {
 public:
   ComputeInternalJacobianBlocks(MooseSystem &sys, const NumericVector<Number>& in_soln, SparseMatrix<Number>&  in_jacobian, System& in_precond_system, unsigned int & in_ivar, unsigned int & in_jvar)
-    :sys(sys),
-     soln(in_soln),
-     jacobian(in_jacobian),
-     precond_system(in_precond_system),
-     ivar(in_ivar),
-     jvar(in_jvar)
+    :_moose_system(sys),
+     _soln(in_soln),
+     _jacobian(in_jacobian),
+     _precond_system(in_precond_system),
+     _ivar(in_ivar),
+     _jvar(in_jvar)
   {}
   
   void operator() (const ConstElemRange & range) const
@@ -228,33 +228,33 @@ public:
     
     ConstElemRange::const_iterator el = range.begin();
 
-    sys._kernels.updateActiveKernels(tid);
+    _moose_system._kernels.updateActiveKernels(tid);
 
-    KernelIterator kernel_begin = sys._kernels.activeKernelsBegin(tid);
-    KernelIterator kernel_end = sys._kernels.activeKernelsEnd(tid);
+    KernelIterator kernel_begin = _moose_system._kernels.activeKernelsBegin(tid);
+    KernelIterator kernel_end = _moose_system._kernels.activeKernelsEnd(tid);
     KernelIterator kernel_it = kernel_begin;
 
     KernelIterator block_kernel_begin;
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
-    StabilizerIterator stabilizer_begin = sys._stabilizers.activeStabilizersBegin(tid);
-    StabilizerIterator stabilizer_end = sys._stabilizers.activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_begin = _moose_system._stabilizers.activeStabilizersBegin(tid);
+    StabilizerIterator stabilizer_end = _moose_system._stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
     unsigned int subdomain = 999999999;
 
-    DofMap & dof_map = precond_system.get_dof_map();
+    DofMap & dof_map = _precond_system.get_dof_map();
     DenseMatrix<Number> Ke;
     std::vector<unsigned int> dof_indices;
 
-    jacobian.zero();
+    _jacobian.zero();
 
     for (el = range.begin() ; el != range.end(); ++el)
     {
       const Elem* elem = *el;
 
-      sys.reinitKernels(tid, soln, elem, NULL, NULL);
+      _moose_system.reinitKernels(tid, _soln, elem, NULL, NULL);
 
       dof_map.dof_indices(elem, dof_indices);
 
@@ -266,11 +266,11 @@ public:
       {
         subdomain = cur_subdomain;
 
-        Material * material = sys._materials.getMaterial(tid, subdomain);
+        Material * material = _moose_system._materials.getMaterial(tid, subdomain);
         material->subdomainSetup();
 
-        block_kernel_begin = sys._kernels.blockKernelsBegin(tid, subdomain);
-        block_kernel_end = sys._kernels.blockKernelsEnd(tid, subdomain);
+        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
       
         //Global Kernels
         for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
@@ -294,8 +294,8 @@ public:
       {
         Kernel * kernel = *kernel_it;
 
-        if(kernel->variable() == ivar)
-          kernel->computeOffDiagJacobian(Ke,jvar);
+        if(kernel->variable() == _ivar)
+          kernel->computeOffDiagJacobian(Ke,_jvar);
       }
 
       //Kernels on this block
@@ -303,29 +303,29 @@ public:
       {
         Kernel * block_kernel = *block_kernel_it;
 
-        if(block_kernel->variable() == ivar)
-          block_kernel->computeOffDiagJacobian(Ke,jvar);
+        if(block_kernel->variable() == _ivar)
+          block_kernel->computeOffDiagJacobian(Ke,_jvar);
       }
 
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = sys._mesh->boundary_info->boundary_id (elem, side);
+          unsigned int boundary_id = _moose_system._mesh->boundary_info->boundary_id (elem, side);
 
-          BCIterator bc_it = sys._bcs.activeBCsBegin(tid,boundary_id);
-          BCIterator bc_end = sys._bcs.activeBCsEnd(tid,boundary_id);
+          BCIterator bc_it = _moose_system._bcs.activeBCsBegin(tid,boundary_id);
+          BCIterator bc_end = _moose_system._bcs.activeBCsEnd(tid,boundary_id);
 
           if(bc_it != bc_end)
           {
-            sys.reinitBCs(tid, soln, side, boundary_id);
+            _moose_system.reinitBCs(tid, _soln, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
             {
               BoundaryCondition * bc = *bc_it;
 
-              if(bc->variable() == ivar)
-                bc->computeJacobianBlock(Ke,ivar,jvar);
+              if(bc->variable() == _ivar)
+                bc->computeJacobianBlock(Ke,_ivar,_jvar);
             }
           }
         }
@@ -335,18 +335,18 @@ public:
 
       {  
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        jacobian.add_matrix(Ke, dof_indices);
+        _jacobian.add_matrix(Ke, dof_indices);
       }   
     }
   }
 
 protected:
-  MooseSystem& sys;
-  const NumericVector<Number>& soln;
-  SparseMatrix<Number>& jacobian;
-  System& precond_system;
-  unsigned int & ivar;
-  unsigned int & jvar;
+  MooseSystem& _moose_system;
+  const NumericVector<Number>& _soln;
+  SparseMatrix<Number>& _jacobian;
+  System& _precond_system;
+  unsigned int & _ivar;
+  unsigned int & _jvar;
 };
 
 namespace Moose {
@@ -369,7 +369,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
 #else
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
   // determines whether the option is set (true) or unset (false)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
    MAT_KEEP_ZEROED_ROWS,
    PETSC_TRUE);
 #endif

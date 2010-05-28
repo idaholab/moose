@@ -40,18 +40,18 @@ public:
   virtual void execute();
 
 protected:
+  /**
+   * Reference to moose_system
+   */
+  MooseSystem & _moose_system;
 
   /**
    * Whether or not the last solve converged.
    */
   virtual bool lastSolveConverged();
 
-  int _max_r_steps;
+  unsigned int _max_r_steps;
 
-  /**
-   * Reference to moose_system
-   */
-  MooseSystem & _moose_system;
 };
 
 #endif //STEADY_H

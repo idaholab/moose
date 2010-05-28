@@ -89,7 +89,7 @@ BCHolder::activeBoundaries(std::set<subdomain_id_type> & set_buffer) const
       set_buffer.insert(subdomain_id_type(curr->first));
     }
   }
-  catch (std::exception &e)
+  catch (std::exception & /*e*/)
   {
     mooseError("Invalid block specified in input file");
   }

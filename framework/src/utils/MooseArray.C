@@ -7,24 +7,24 @@
 
 template<typename T>
 MooseArray<T>::MooseArray()
-  :_allocated_size(0),
+  :_data(NULL),
    _size(0),
-   _data(NULL)
+   _allocated_size(0)
 {
 }
 
 template<typename T>
 MooseArray<T>::MooseArray(const unsigned int size)
-  :_allocated_size(0),
-   _data(NULL)
+  :_data(NULL),
+   _allocated_size(0)
 {
   resize(size);
 }
 
 template<typename T>
 MooseArray<T>::MooseArray(const unsigned int size, const T & default_value)
-  :_allocated_size(0),
-   _data(NULL)
+  :_data(NULL),
+   _allocated_size(0)
 {
   resize(size);
 

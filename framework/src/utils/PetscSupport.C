@@ -109,7 +109,7 @@ namespace Moose
       return 0;
     }
 
-    PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void *dummy)
+    PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void * /*dummy*/)
     {
       // unused
       // TransientNonlinearImplicitSystem * system = dynamic_cast<TransientNonlinearImplicitSystem *>(&_equation_system->get_system("NonlinearSystem"));
@@ -164,7 +164,7 @@ namespace Moose
       return(0);
     }
 
-    PetscErrorCode MatrixFreePreconditionerSetup(void *ctx)
+    PetscErrorCode MatrixFreePreconditionerSetup(void * /*ctx*/)
     {
       Moose::perf_log.push("MatrixFreePreconditionerSetup()","Preconditioning");
 
@@ -220,7 +220,7 @@ namespace Moose
       }
     }  
 
-    PetscErrorCode MatrixFreePreconditioner(void *ctx,Vec x, Vec y)
+    PetscErrorCode MatrixFreePreconditioner(void * /*ctx*/,Vec x, Vec y)
     {
       Moose::perf_log.push("MatrixFreePreconditioner()","Preconditioning");
 
@@ -304,14 +304,12 @@ namespace Moose
       */
     }
     
-    PetscErrorCode petscPhysicsBasedLineSearch(SNES snes,void *lsctx,Vec x,Vec f,Vec g,Vec y,Vec w, PetscReal fnorm,PetscReal *ynorm,PetscReal *gnorm,PetscTruth *flag)
+    PetscErrorCode petscPhysicsBasedLineSearch(SNES snes,void *lsctx,Vec x,Vec /*f*/,Vec g,Vec y,Vec w, PetscReal /*fnorm*/,PetscReal *ynorm,PetscReal *gnorm,PetscTruth *flag)
     {
       //w = updated solution = x+ scaling*y
       //x = current solution
       //y = updates.
       // for simple newton use w = x-y
-    
-      PetscScalar mone = -1.0;
     
       int ierr;
       Real facmin = 1.0;
@@ -384,7 +382,7 @@ namespace Moose
       ierr = VecWAXPY(w,facmin,y,x);
       ierr = SNESComputeFunction(snes,w,g);
       ierr = VecNorm(g,NORM_2,gnorm);
-      return(0);
+      return(ierr);
     
 
     } 

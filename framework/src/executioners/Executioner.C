@@ -32,14 +32,18 @@ InputParameters validParams<Executioner>()
 
 
 Executioner::Executioner(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :_name(name),
-   _moose_system(moose_system),
+  :_moose_system(moose_system),
+   _name(name),
    _parameters(parameters),
 //   _system(*moose_system.getNonlinearSystem()),
 //   _aux_system(*moose_system.getAuxSystem()),
    _initial_residual_norm(std::numeric_limits<Real>::max()),
    _old_initial_residual_norm(std::numeric_limits<Real>::max())
 {}
+
+Executioner::~Executioner()
+{
+}
 
 void
 Executioner::setup()

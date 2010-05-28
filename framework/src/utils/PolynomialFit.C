@@ -85,7 +85,7 @@ PolynomialFit::doLeastSquares()
     mooseError("");
   
   _coeffs.resize(num_coeff);
-  for (unsigned int i=0; i<num_coeff; ++i)
+  for (int i=0; i<num_coeff; ++i)
     _coeffs[i] = rhs[i];
   
 }

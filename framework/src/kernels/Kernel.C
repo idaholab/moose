@@ -54,7 +54,6 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _grad_u_old(_element_data._var_grads_old[_tid][_var_num]),
    _grad_u_older(_element_data._var_grads_older[_tid][_var_num]),
    _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
-   _has_second_derivatives(_fe_type.family == CLOUGH || _fe_type.family == HERMITE),
    _current_elem(_element_data._current_elem[_tid]),
    _material(_element_data._material[_tid]),
    _JxW(*(_element_data._JxW[_tid])[_fe_type]),
@@ -72,6 +71,7 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _zero(_moose_system._zero[_tid]),
    _grad_zero(_moose_system._grad_zero[_tid]),
    _second_zero(_moose_system._second_zero[_tid]),
+   _has_second_derivatives(_fe_type.family == CLOUGH || _fe_type.family == HERMITE),
    _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
    _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
 {
@@ -236,7 +236,7 @@ Kernel::computeQpJacobian()
   }
 
 Real
-Kernel::computeQpOffDiagJacobian(unsigned int jvar)
+Kernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
   {
     return 0;
   }

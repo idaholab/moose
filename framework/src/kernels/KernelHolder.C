@@ -80,7 +80,7 @@ KernelHolder::activeKernelBlocks(std::set<subdomain_id_type> & set_buffer) const
     for (curr = _block_kernels[0].begin(); curr != end; ++curr)
       set_buffer.insert(subdomain_id_type(curr->first));
   }
-  catch (std::exception &e)
+  catch (std::exception &/*e*/)
   {
     mooseError("Invalid block specified in input file");
   }

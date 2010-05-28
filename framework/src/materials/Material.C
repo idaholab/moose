@@ -46,14 +46,14 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
    _parameters(parameters),
    _dim(_moose_system._dim),
    _has_stateful_props(false),
+   // _q_point is initialized to the first variables's associated fe_type (same physical space for all vars)
+   _q_point(*(_element_data._q_point[_tid])[_element_data._dof_map->variable_type(0)]),
    _t(_moose_system._t),
    _dt(_moose_system._dt),
    _dt_old(_moose_system._dt_old),
    _is_transient(_moose_system._is_transient),
    _current_elem(_element_data._current_elem[_tid]),
    _qrule(_element_data._qrule[_tid]),
-   // _q_point is initialized to the first variables's associated fe_type (same physical space for all vars)
-   _q_point(*(_element_data._q_point[_tid])[_element_data._dof_map->variable_type(0)]), 
    _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
    _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _real_zero(_moose_system._real_zero[_tid]),
@@ -652,7 +652,6 @@ Material::updateDataState()
   if (_qp_prev.size() != _qp_curr.size()) throw std::out_of_range("_qp_prev != _qp_curr");
 
   std::map<unsigned int, std::vector<QpData *> >::iterator i_prev = _qp_prev.begin();
-  std::map<unsigned int, std::vector<QpData *> >::iterator i_curr = _qp_curr.begin(); 
   std::vector<QpData *>::iterator j_prev, j_curr;
 
   while (i_prev != _qp_prev.end())

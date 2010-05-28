@@ -151,9 +151,8 @@ public:
   
 
 protected:
-  std::vector<Real> _values;
-
   unsigned int _n_rows, _n_cols, _n_entries;
+  std::vector<Real> _values;
 };
 
 inline unsigned int

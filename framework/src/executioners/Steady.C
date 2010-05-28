@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<Steady>()
 {
   InputParameters params = validParams<Executioner>();
-  params.addParam<int>("max_r_steps", 0, "Number of refinement steps to do.");
+  params.addParam<unsigned int>("max_r_steps", 0, "Number of refinement steps to do.");
   return params;
 }
 
@@ -13,7 +13,7 @@ InputParameters validParams<Steady>()
 Steady::Steady(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Executioner(name, moose_system, parameters),
    _moose_system(moose_system),
-   _max_r_steps(parameters.get<int>("max_r_steps"))
+   _max_r_steps(parameters.get<unsigned int>("max_r_steps"))
 {}
 
 void

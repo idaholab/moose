@@ -34,6 +34,8 @@ public:
                    MooseSystem & moose_system,
                    InputParameters parameters);
 
+  virtual ~InitialCondition();
+
   /**
    * The value of the variable at a point.
    *
@@ -47,7 +49,7 @@ public:
    * This is optional.  Note that if you are using C1 continuous elements you will
    * want to use an initial condition that defines this!
    */
-  virtual RealGradient gradient(const Point & p){ return RealGradient(); };
+  virtual RealGradient gradient(const Point & /*p*/){ return RealGradient(); };
 
 private:
   MooseSystem & _moose_system;

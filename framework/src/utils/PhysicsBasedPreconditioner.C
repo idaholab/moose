@@ -27,8 +27,6 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
   // -2 to take into account the Nonlinear system and the Auxilliary System
   const unsigned int num_systems = _equation_systems->n_systems()-2;
   
-  TransientNonlinearImplicitSystem & system = _equation_systems->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
-
   MeshBase & mesh = _equation_systems->get_mesh();
 
   //Zero out the solution vectors

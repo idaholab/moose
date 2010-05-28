@@ -37,12 +37,5 @@ ConvectiveFluxBC::computeQpResidual()
 Real
 ConvectiveFluxBC::computeQpJacobian()
 {
-  Real value;
-
-  if(_moose_system._t < _duration)
-    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _moose_system._t);
-  else
-    value = _final;
-  
   return -(_phi_face[_i][_qp]*_rate*(-_phi_face[_j][_qp]));
 }

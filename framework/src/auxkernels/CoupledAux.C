@@ -11,10 +11,10 @@ InputParameters validParams<CoupledAux>()
 
 CoupledAux::CoupledAux(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :AuxKernel(name, moose_system, parameters),
-   _coupled(coupled("coupled")),
-   _coupled_val(coupledValAux("coupled")),
    _value(_parameters.get<Real>("value")),
-   _operator(_parameters.get<std::string>("operator"))
+   _operator(_parameters.get<std::string>("operator")),
+   _coupled(coupled("coupled")),
+   _coupled_val(coupledValAux("coupled"))
 {}
 
 

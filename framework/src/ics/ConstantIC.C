@@ -16,7 +16,7 @@ ConstantIC::ConstantIC(std::string name,
 {}
 
 Real
-ConstantIC::value(const Point & p)
+ConstantIC::value(const Point & /*p*/)
 {
   return _value;
 }

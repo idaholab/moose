@@ -179,7 +179,7 @@ TransientExecutioner::keepGoing()
     // Check current solution relative error norm against steady-state tolerance
     if(ss_relerr_norm < _ss_check_tol)
     {
-      std::cout<<"Steady-State Solution Achieved at time: "<<time<<std::endl;
+      std::cout<<"Steady-State Solution Achieved at time: "<<_time<<std::endl;
       return false;
     }
     else // Keep going

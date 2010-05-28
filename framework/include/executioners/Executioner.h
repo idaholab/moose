@@ -42,6 +42,8 @@ public:
    */
   Executioner(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
+  virtual ~Executioner();
+
   /**
    * Optionally override to perform some initial setup steps.
    */

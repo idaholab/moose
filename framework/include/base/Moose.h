@@ -94,7 +94,7 @@ void InputParameters::Parameter<std::vector<std::string> >::print (std::ostream&
 
 template<>
 inline
-void InputParameters::Parameter<GetPot>::print (std::ostream& os) const
+void InputParameters::Parameter<GetPot>::print (std::ostream& /*os*/) const
 {
 }
 
@@ -108,7 +108,7 @@ void InputParameters::Parameter<std::vector<float> >::print (std::ostream& os) c
 
 template<>
 inline
-void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (std::ostream& os) const
+void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (std::ostream& /*os*/) const
 {
 }
 

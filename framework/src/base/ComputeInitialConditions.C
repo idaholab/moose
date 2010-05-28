@@ -37,7 +37,7 @@ namespace Moose
 
 Number MooseSystem::initial_value (const Point& p,
                       const Parameters& parameters,
-                      const std::string& sys_name,
+                      const std::string& /*sys_name*/,
                       const std::string& var_name)
 {
   // Try to grab an InitialCondition object for this variable.
@@ -53,8 +53,8 @@ Number MooseSystem::initial_value (const Point& p,
 }
 
 Gradient MooseSystem::initial_gradient (const Point& p,
-                           const Parameters& parameters,
-                           const std::string& sys_name,
+                           const Parameters& /*parameters*/,
+                           const std::string& /*sys_name*/,
                            const std::string& var_name)
 {
   // Try to grab an InitialCondition object for this variable.

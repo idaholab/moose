@@ -29,23 +29,35 @@ void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Num
 }
 
 MooseSystem::MooseSystem()
-  :_es(NULL),
+ : _element_data(NULL),
+   _face_data(NULL),
+   _aux_data(NULL),
+   _es(NULL),
    _system(NULL),
    _aux_system(NULL),
    _mesh(NULL),
    _delete_mesh(true),
    _dim(0),
    _mesh_changed(false),
-   _exreader(NULL),
-   _is_valid(false),
    _kernels(*this),
    _bcs(*this),
+   _auxs(*this),
    _materials(*this),
    _stabilizers(*this),
-   _auxs(*this),
    _ics(*this),
    _no_fe_reinit(false),
    _preconditioner(NULL),
+   _exreader(NULL),
+   _is_valid(false),
+   _t(0),
+   _dt(0),
+   _dt_old(0),
+   _is_transient(false),
+   _is_eigenvalue(false),
+   _t_step(0),
+   _t_scheme(0),
+   _n_of_rk_stages(0),
+   _aux_dof_map(NULL),
    _active_local_elem_range(NULL)
 {
   Moose::g_system = this;     // FIXME: this will eventually go away
@@ -53,20 +65,35 @@ MooseSystem::MooseSystem()
 }
 
 MooseSystem::MooseSystem(Mesh &mesh)
-  : _mesh(&mesh),
+  : _element_data(NULL),
+    _face_data(NULL),
+    _aux_data(NULL),
+    _es(NULL),
+    _system(NULL),
+    _aux_system(NULL),
+    _mesh(&mesh),
     _delete_mesh(false),
     _dim(_mesh->mesh_dimension()),
     _mesh_changed(false),
-    _exreader(NULL),
-    _is_valid(false),
     _kernels(*this),
     _bcs(*this),
+    _auxs(*this),
     _materials(*this),
     _stabilizers(*this),
-    _auxs(*this),
     _ics(*this),
     _no_fe_reinit(false),
     _preconditioner(NULL),
+    _exreader(NULL),
+    _is_valid(false),
+    _t(0),
+    _dt(0),
+    _dt_old(0),
+    _is_transient(false),
+    _is_eigenvalue(false),
+    _t_step(0),
+    _t_scheme(0),
+    _n_of_rk_stages(0),
+    _aux_dof_map(NULL),
     _active_local_elem_range(NULL)
 {
   Moose::g_system = this;     // FIXME: this will eventually go away
@@ -557,7 +584,6 @@ MooseSystem::addAuxKernel(std::string aux_name,
 {
   AuxKernel * aux;
   AuxKernelIterator curr_aux, end_aux;
-  unsigned int size;
   std::string var_name = parameters.get<std::string>("variable");
   std::vector<std::string> coupled_to = parameters.get<std::vector<std::string> >("coupled_to");
 
@@ -823,10 +849,6 @@ MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, 
       _var_vals_older_nodal[tid][var_num] = (*_nonlinear_older_soln)(dof_number);
     }
   }
-
-  const NumericVector<Number>& aux_soln = *_aux_system->solution;
-  const NumericVector<Number>& aux_old_soln = *_aux_system->old_local_solution;
-  const NumericVector<Number>& aux_older_soln = *_aux_system->older_local_solution;
 
   //Now Nodal Aux vars
   for(unsigned int i=0; i<_nodal_var_nums.size(); i++)

@@ -32,11 +32,11 @@ InputParameters validParams<ParserBlock>()
 bool ParserBlock::_deferred_execution = false;
 
 ParserBlock::ParserBlock(std::string name, MooseSystem & moose_system, InputParameters params)
-  :_name(name),
-   _parser_handle(*params.get<Parser *>("parser_handle")),
+  :_parent(params.get<ParserBlock*>("parent")),
    _moose_system(moose_system),
+   _name(name),
+   _parser_handle(*params.get<Parser *>("parser_handle")),
    _getpot_handle(_parser_handle.getPotHandle()),
-   _parent(params.get<ParserBlock*>("parent")),
    _block_params(params)
 {
   if (_getpot_handle) 

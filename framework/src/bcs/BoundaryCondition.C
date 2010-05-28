@@ -29,17 +29,17 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _var_name(parameters.get<std::string>("variable")),
    _is_aux(_moose_system._aux_system->has_variable(_var_name)),
    _var_num(_is_aux ? _moose_system._aux_system->variable_number(_var_name) : _moose_system._system->variable_number(_var_name)),
-   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
    _integrated(parameters.have_parameter<bool>("_integrated") ? parameters.get<bool>("_integrated") : true),
    _dim(_moose_system._dim),
    _t(_moose_system._t),
    _dt(_moose_system._dt),
    _dt_old(_moose_system._dt_old),
    _is_transient(_moose_system._is_transient),
+   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
    _current_elem(_element_data._current_elem[_tid]),
-   _material(_element_data._material[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
+   _material(_element_data._material[_tid]),
    _JxW_face(*moose_system._JxW_face[_tid][_fe_type]),
    _phi_face(*moose_system._phi_face[_tid][_fe_type]),
    _dphi_face(*moose_system._dphi_face[_tid][_fe_type]),
@@ -49,18 +49,18 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _q_point_face(*moose_system._q_point_face[_tid][_fe_type]),
    _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
    _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
-   _real_zero(_moose_system._real_zero[_tid]),
-   _zero(_moose_system._zero[_tid]),
-   _grad_zero(_moose_system._grad_zero[_tid]),
-   _second_zero(_moose_system._second_zero[_tid]),
-   _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
-   _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max()),
    _current_side(moose_system._current_side[_tid]),
    _current_node(moose_system._current_node[_tid]),
    _current_residual(moose_system._current_residual[_tid]),
    _u_face(_integrated ? moose_system._var_vals_face[_tid][_var_num] : moose_system._var_vals_face_nodal[_tid][_var_num]),
    _grad_u_face(_integrated ? moose_system._var_grads_face[_tid][_var_num] : moose_system._grad_zero[_tid]),
-   _second_u_face(_integrated ? moose_system._var_seconds_face[_tid][_var_num] : moose_system._second_zero[_tid])
+   _second_u_face(_integrated ? moose_system._var_seconds_face[_tid][_var_num] : moose_system._second_zero[_tid]),
+   _real_zero(_moose_system._real_zero[_tid]),
+   _zero(_moose_system._zero[_tid]),
+   _grad_zero(_moose_system._grad_zero[_tid]),
+   _second_zero(_moose_system._second_zero[_tid]),
+   _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
+   _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
 {
   // FIXME: this for statement will go into a common ancestor
   for(unsigned int i=0;i<_coupled_to.size();i++)
@@ -321,7 +321,7 @@ BoundaryCondition::computeQpJacobian()
 }
 
 Real
-BoundaryCondition::computeQpOffDiagJacobian(unsigned int jvar)
+BoundaryCondition::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0;
 }

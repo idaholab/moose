@@ -55,18 +55,18 @@ PBPBlock::execute()
   
   std::vector<unsigned int> solve_order;
       
-  for(int i=0;i<getParamValue<std::vector<std::string> >("solve_order").size();i++)
+  for(unsigned int i=0;i<getParamValue<std::vector<std::string> >("solve_order").size();i++)
     solve_order.push_back(system.variable_number(getParamValue<std::vector<std::string> >("solve_order")[i]));
 
   std::vector<PreconditionerType> pre;
 
-  for(int i=0;i<getParamValue<std::vector<std::string> >("preconditioner").size();i++)
+  for(unsigned int i=0;i<getParamValue<std::vector<std::string> >("preconditioner").size();i++)
     pre.push_back(Utility::string_to_enum<PreconditionerType>(getParamValue<std::vector<std::string> >("preconditioner")[i]));
 
 
   std::vector<std::vector<unsigned int> > off_diag(system.n_vars());
 
-  for(int i=0;i<getParamValue<std::vector<std::string> >("off_diag_row").size();i++)
+  for(unsigned int i=0;i<getParamValue<std::vector<std::string> >("off_diag_row").size();i++)
   {
     unsigned int row = system.variable_number(getParamValue<std::vector<std::string> >("off_diag_row")[i]);
     unsigned int column = system.variable_number(getParamValue<std::vector<std::string> >("off_diag_column")[i]);

@@ -21,7 +21,7 @@ RandomIC::RandomIC(std::string name,
 }
 
 Real
-RandomIC::value(const Point & p)
+RandomIC::value(const Point & /*p*/)
 {
   //Random number between 0 and 1
   Real rand_num = (Real)rand() / (Real)RAND_MAX;

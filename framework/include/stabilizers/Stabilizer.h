@@ -36,6 +36,8 @@ public:
    */
   Stabilizer(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
+  virtual ~Stabilizer();
+
   /**
    * This pure virtual must be overriden by derived classes!
    *
