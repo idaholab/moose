@@ -222,8 +222,8 @@ public:
   
 protected:
   void sizeEverything();
-  void initKernels();
-  void initAuxKernels();
+
+  void update_aux_vars(const NumericVector<Number>& soln);
 
 private:
   // TODO: Switch these to vectors later
@@ -234,6 +234,11 @@ private:
   //  std::vector<ElementData *> _element_data;
   //  std::vector<FaceData *> _face_data;
   //  std::vector<AuxData *> _aux_data;
+
+  /**
+   * Pointer to the material that is valid for the current block.
+   */
+  std::vector<Material *> _material;
 
   EquationSystems * _es;
   TransientNonlinearImplicitSystem * _system;
@@ -318,16 +323,10 @@ public:
    */
   short _n_of_rk_stages;
   
-  DofMap * _aux_dof_map;
-
   /**
    * Maximum quadrature order required by all variables.
    */
   Order _max_quadrature_order;
-
-  
-protected:
-  std::vector<std::vector<unsigned int> > _aux_dof_indices;
 
   /**
    * Convenience zeros.
@@ -346,132 +345,6 @@ protected:
    */
   ConstElemRange * _active_local_elem_range;
 
-  // Aux Kernels
-  const NumericVector<Number> * _nonlinear_old_soln;
-  const NumericVector<Number> * _nonlinear_older_soln;
-
-  NumericVector<Number> * _aux_soln;
-  const NumericVector<Number> * _aux_old_soln;
-  const NumericVector<Number> * _aux_older_soln;
-
-  /**
-   * Holds the current dof numbers for each variable
-   */
-  std::vector<std::vector<unsigned int> > _aux_var_dofs;
-
-  /**
-   * Holds the variable numbers of the nodal aux vars.
-   */
-  std::vector<unsigned int> _nodal_var_nums;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  std::vector<std::vector<Real > > _var_vals_nodal;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  std::vector<std::vector<Real > > _var_vals_old_nodal;
-
-  /**
-   * Value of the variables at the nodes at t-2.
-   */
-  std::vector<std::vector<Real > > _var_vals_older_nodal;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  std::vector<std::vector<Real > > _aux_var_vals_nodal;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  std::vector<std::vector<Real > > _aux_var_vals_old_nodal;
-
-  /**
-   * Value of the variables at the nodes at t-2.
-   */
-  std::vector<std::vector<Real > > _aux_var_vals_older_nodal;
-
-
-  /*****************
-   * Elemental Stuff
-   *****************/
-
-  /**
-   * Holds the variable numbers of the elemental aux vars.
-   */
-  std::vector<unsigned int> _element_var_nums;
-
-  /**
-   * Value of the variables at the elements.
-   */
-  std::vector<std::vector<Real > > _var_vals_element;
-
-  /**
-   * Value of the variables at the elements.
-   */
-  std::vector<std::vector<Real > > _var_vals_old_element;
-
-  /**
-   * Value of the variables at the elements at t-2.
-   */
-  std::vector<std::vector<Real > > _var_vals_older_element;
-
-  /**
-   * Gradient of the variables at the elements.
-   */
-  std::vector<std::vector<RealGradient > > _var_grads_element;
-
-  /**
-   * Gradient of the variables at the elements.
-   */
-  std::vector<std::vector<RealGradient > > _var_grads_old_element;
-
-  /**
-   * Gradient of the variables at the elements at t-2.
-   */
-  std::vector<std::vector<RealGradient > > _var_grads_older_element;
-
-  /**
-   * Value of the variables at the elements.
-   */
-  std::vector<std::vector<Real > > _aux_var_vals_element;
-
-  /**
-   * Value of the variables at the elements.
-   */
-  std::vector<std::vector<Real > > _aux_var_vals_old_element;
-
-  /**
-   * Value of the variables at the elements at t-2.
-   */
-  std::vector<std::vector<Real > > _aux_var_vals_older_element;
-
-  /**
-   * Gradient of the variables at the elements.
-   */
-  std::vector<std::vector<RealGradient > > _aux_var_grads_element;
-
-  /**
-   * Gradient of the variables at the elements.
-   */
-  std::vector<std::vector<RealGradient > > _aux_var_grads_old_element;
-
-  /**
-   * Gradient of the variables at the elements at t-2.
-   */
-  std::vector<std::vector<RealGradient > > _aux_var_grads_older_element;
-
-
-  Real integrateValueAux(const MooseArray<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
-  RealGradient integrateGradientAux(const MooseArray<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
-
-
-  void update_aux_vars(const NumericVector<Number>& soln);
-
-
   friend class ComputeInternalJacobians;
   friend class ComputeInternalJacobianBlocks;
   friend class ComputeInternalResiduals;
@@ -485,6 +358,7 @@ protected:
   friend class TransientExecutioner;
   friend class Steady;
 
+  friend class ElementData;
   friend class FaceData;
 };
 

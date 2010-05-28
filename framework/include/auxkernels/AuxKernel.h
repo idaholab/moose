@@ -8,6 +8,7 @@
 class AuxKernel;
 class MooseSystem;
 class ElementData;
+class AuxData;
 
 template<>
 InputParameters validParams<AuxKernel>();
@@ -77,6 +78,11 @@ protected:
    * Convenience reference to the ElementData object inside of MooseSystem
    */
   ElementData & _element_data;
+
+  /**
+   * Convenience reference to the AuxData object inside of MooseSystem
+   */
+  AuxData & _aux_data;
 
   /**
    * The thread id this kernel is associated with.

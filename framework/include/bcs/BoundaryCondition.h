@@ -19,6 +19,7 @@ class BoundaryCondition;
 class MooseSystem;
 class ElementData;
 class FaceData;
+class AuxData;
 
 template<>
 InputParameters validParams<BoundaryCondition>();
@@ -103,12 +104,14 @@ protected:
    */
   MooseSystem & _moose_system;
 
-  FaceData & _face_data;
-
   /**
    * Convenience reference to the ElementData object inside of MooseSystem
    */
   ElementData & _element_data;
+
+  FaceData & _face_data;
+
+  AuxData & _aux_data;
 
   /**
    * The thread id this kernel is associated with.

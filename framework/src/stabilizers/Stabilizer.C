@@ -24,7 +24,7 @@ Stabilizer::Stabilizer(std::string name, MooseSystem & moose_system, InputParame
   _var_name(parameters.get<std::string>("variable")),
   _is_aux(_moose_system._aux_system->has_variable(_var_name)),
   _var_num(_is_aux ? _moose_system._aux_system->variable_number(_var_name) : _moose_system._system->variable_number(_var_name)),
-  _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
+  _fe_type(_is_aux ? _element_data._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
   _current_elem(_element_data._current_elem[_tid]),
   _phi(*(_element_data._phi[_tid])[_fe_type]),
   _test((_element_data._test[_tid])[_var_num]),

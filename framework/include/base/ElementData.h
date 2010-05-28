@@ -46,6 +46,7 @@ public:
   void setVarScaling(std::vector<Real> scaling);
   
   void reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke);
+
   
   /**
    * The MooseSystem this Kernel is associated with.
@@ -135,14 +136,52 @@ public:
   MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_older;
 
   /**
+   * Current element
+   */
+  std::vector<const Elem *> _current_elem;
+
+  /**
+   * Variable numbers of the variables.
+   */
+  std::vector<unsigned int> _var_nums;
+
+    /**
+   * Residual vectors for all variables.
+   */
+  std::vector<std::vector<DenseSubVector<Number> * > > _var_Res;
+
+  /**
+   * Jacobian matrices for all variables.
+   */
+  std::vector<std::vector<DenseMatrix<Number> * > > _var_Kes;
+
+  /**
+   * Dof Maps for all the variables.
+   */
+  std::vector<std::vector<std::vector<unsigned int> > > _var_dof_indices;
+
+  DofMap * _aux_dof_map;
+
+  std::vector<std::vector<unsigned int> > _aux_dof_indices;
+
+  /**
+   * Holds the current dof numbers for each variable
+   */
+  std::vector<std::vector<unsigned int> > _aux_var_dofs;
+
+  /**
+   * Variable numbers of the auxiliary variables.
+   */
+  std::vector<unsigned int> _aux_var_nums;
+
+  /**
+   * Dof Maps for all the auxiliary variables.
+   */
+  std::vector<std::vector<std::vector<unsigned int> > > _aux_var_dof_indices;
+  /**
    * Value of the variables at the quadrature points.
    */
   MooseArray<MooseArray<MooseArray<Real> > > _aux_var_vals;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads;
 
   /**
    * Value of the variables at the quadrature points.
@@ -157,6 +196,11 @@ public:
   /**
    * Gradient of the variables at the quadrature points.
    */
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads;
+
+  /**
+   * Gradient of the variables at the quadrature points.
+   */
   MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads_old;
 
   /**
@@ -164,45 +208,6 @@ public:
    */
   MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads_older;
 
-  /**
-   * Current element
-   */
-  std::vector<const Elem *> _current_elem;
-
-  /**
-   * Variable numbers of the variables.
-   */
-  std::vector<unsigned int> _var_nums;
-
-  /**
-   * Variable numbers of the auxiliary variables.
-   */
-  std::vector<unsigned int> _aux_var_nums;
-
-    /**
-   * Residual vectors for all variables.
-   */
-  std::vector<std::vector<DenseSubVector<Number> * > > _var_Res;
-  
-  /**
-   * Jacobian matrices for all variables.
-   */
-  std::vector<std::vector<DenseMatrix<Number> * > > _var_Kes;
-
-  /**
-   * Dof Maps for all the variables.
-   */
-  std::vector<std::vector<std::vector<unsigned int> > > _var_dof_indices;
-
-  /**
-   * Dof Maps for all the auxiliary variables.
-   */
-  std::vector<std::vector<std::vector<unsigned int> > > _aux_var_dof_indices;
-
-  /**
-   * Pointer to the material that is valid for the current block.
-   */
-  std::vector<Material *> _material;
 
   /**
    * Scaling factors for each variable.

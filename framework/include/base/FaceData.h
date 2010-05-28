@@ -2,6 +2,7 @@
 #define FACEDATA_H
 
 #include "Moose.h"
+#include "MooseArray.h"
 
 //libMesh includes
 #include "transient_system.h"
@@ -114,22 +115,22 @@ public:
   /**
    * Value of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<Real> > > _var_vals_face;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_face;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealGradient> > > _var_grads_face;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_face;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  std::vector<std::vector<std::vector<RealTensor> > > _var_seconds_face;
+  MooseArray<MooseArray<MooseArray<RealTensor> > > _var_seconds_face;
 
   /**
    * Value of the variables at the nodes.
    */
-  std::vector<std::vector<std::vector<Real> > > _var_vals_face_nodal;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_face_nodal;
 };
 
   

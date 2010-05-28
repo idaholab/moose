@@ -58,7 +58,6 @@ MooseSystem::MooseSystem()
    _t_step(0),
    _t_scheme(0),
    _n_of_rk_stages(0),
-   _aux_dof_map(NULL),
    _active_local_elem_range(NULL)
 {
   Moose::g_system = this;     // FIXME: this will eventually go away
@@ -95,7 +94,6 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _t_step(0),
     _t_scheme(0),
     _n_of_rk_stages(0),
-    _aux_dof_map(NULL),
     _active_local_elem_range(NULL)
 {
   Moose::g_system = this;     // FIXME: this will eventually go away
@@ -171,7 +169,7 @@ MooseSystem::sizeEverything()
   _bdf2_wei.resize(3);
 //  _current_elem.resize(n_threads);
 //  _dof_indices.resize(n_threads);
-  _aux_dof_indices.resize(n_threads);
+//  _aux_dof_indices.resize(n_threads);
 //  _fe.resize(n_threads);
 // _qrule.resize(n_threads);
 
@@ -202,7 +200,7 @@ MooseSystem::sizeEverything()
 //  _aux_var_grads_old.resize(n_threads);
 //  _aux_var_grads_older.resize(n_threads);
 
-//  _material.resize(n_threads);
+  _material.resize(n_threads);
 
   // Single Instance Variables
   _real_zero.resize(n_threads);
@@ -211,27 +209,6 @@ MooseSystem::sizeEverything()
   _second_zero.resize(n_threads);
 
   // AuxKernels::sizeEverything
-  _var_vals_nodal.resize(n_threads);
-  _var_vals_old_nodal.resize(n_threads);
-  _var_vals_older_nodal.resize(n_threads);
-
-  _aux_var_dofs.resize(n_threads);
-  _aux_var_vals_nodal.resize(n_threads);
-  _aux_var_vals_old_nodal.resize(n_threads);
-  _aux_var_vals_older_nodal.resize(n_threads);
-
-  _var_vals_element.resize(n_threads);
-  _var_vals_old_element.resize(n_threads);
-  _var_vals_older_element.resize(n_threads);
-  _var_grads_element.resize(n_threads);
-  _var_grads_old_element.resize(n_threads);
-  _var_grads_older_element.resize(n_threads);
-  _aux_var_vals_element.resize(n_threads);
-  _aux_var_vals_old_element.resize(n_threads);
-  _aux_var_vals_older_element.resize(n_threads);
-  _aux_var_grads_element.resize(n_threads);
-  _aux_var_grads_old_element.resize(n_threads);
-  _aux_var_grads_older_element.resize(n_threads);
 }
 
 void
@@ -241,11 +218,10 @@ MooseSystem::init()
     mooseError("Mesh is not set.");
   
   _es->init();
-  _aux_dof_map = &_aux_system->get_dof_map();
   
   _element_data.init();
   _face_data.init();
-  initAuxKernels();
+  _aux_data.init();
 
   _t = 0;
   _dt = 0;
@@ -263,47 +239,6 @@ void
 MooseSystem::setVarScaling(std::vector<Real> scaling)
 {
   _element_data.setVarScaling(scaling);
-}
-
-void
-MooseSystem::initAuxKernels()
-{
-  _nonlinear_old_soln = _system->old_local_solution.get();
-  _nonlinear_older_soln = _system->older_local_solution.get();
-
-  _aux_soln = _aux_system->solution.get();
-  _aux_old_soln = _aux_system->old_local_solution.get();
-  _aux_older_soln = _aux_system->older_local_solution.get();
-
-  unsigned int n_vars = _system->n_vars();
-  unsigned int n_aux_vars = _aux_system->n_vars();
-
-  //Resize data arrays
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    _var_vals_nodal[tid].resize(n_vars);
-    _var_vals_old_nodal[tid].resize(n_vars);
-    _var_vals_older_nodal[tid].resize(n_vars);
-
-    _aux_var_dofs[tid].resize(n_aux_vars);
-    _aux_var_vals_nodal[tid].resize(n_aux_vars);
-    _aux_var_vals_old_nodal[tid].resize(n_aux_vars);
-    _aux_var_vals_older_nodal[tid].resize(n_aux_vars);
-
-    _var_vals_element[tid].resize(n_vars);
-    _var_vals_old_element[tid].resize(n_vars);
-    _var_vals_older_element[tid].resize(n_vars);
-    _var_grads_element[tid].resize(n_vars);
-    _var_grads_old_element[tid].resize(n_vars);
-    _var_grads_older_element[tid].resize(n_vars);
-
-    _aux_var_vals_element[tid].resize(n_aux_vars);
-    _aux_var_vals_old_element[tid].resize(n_aux_vars);
-    _aux_var_vals_older_element[tid].resize(n_aux_vars);
-    _aux_var_grads_element[tid].resize(n_aux_vars);
-    _aux_var_grads_old_element[tid].resize(n_aux_vars);
-    _aux_var_grads_older_element[tid].resize(n_aux_vars);
-  }
 }
 
 EquationSystems *
@@ -632,6 +567,13 @@ void
 MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
   _element_data.reinitKernels(tid, soln, elem, Re, Ke);
+
+//  Moose::perf_log.push("reinit() - material","Kernel");
+
+  _material[tid] = getMaterial(tid,elem->subdomain_id());
+  _material[tid]->materialReinit();
+
+//  Moose::perf_log.pop("reinit() - material","Kernel");
 }
 
 void
@@ -649,199 +591,14 @@ MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const N
 void
 MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node)
 {
-  Moose::perf_log.push("reinit(node)","AuxKernel");
-
   _face_data._current_node[tid] = &node;
-
-  unsigned int nonlinear_system_number = _system->number();
-  unsigned int aux_system_number = _aux_system->number();
-
-  //Non Aux vars first
-  for(unsigned int i=0; i<_element_data._var_nums.size(); i++)
-  {
-    unsigned int var_num = _element_data._var_nums[i];
-
-    //The zero is the component... that works fine for lagrange FE types.
-    unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);
-
-    _var_vals_nodal[tid][var_num] = soln(dof_number);
-
-    if(_is_transient)
-    {
-      _var_vals_old_nodal[tid][var_num] = (*_nonlinear_old_soln)(dof_number);
-      _var_vals_older_nodal[tid][var_num] = (*_nonlinear_older_soln)(dof_number);
-    }
-  }
-
-  //Now Nodal Aux vars
-  for(unsigned int i=0; i<_nodal_var_nums.size(); i++)
-  {
-    unsigned int var_num = _nodal_var_nums[i];
-
-    //The zero is the component... that works fine for lagrange FE types.
-    unsigned int dof_number = node.dof_number(aux_system_number, var_num, 0);
-
-    _aux_var_dofs[tid][var_num] = dof_number;
-    _aux_var_vals_nodal[tid][var_num] = (*_aux_soln)(dof_number);
-
-    if(_is_transient)
-    {
-      _aux_var_vals_old_nodal[tid][var_num] = (*_aux_old_soln)(dof_number);
-      _aux_var_vals_older_nodal[tid][var_num] = (*_aux_older_soln)(dof_number);
-    }
-  }
-
-  Moose::perf_log.pop("reinit(node)","AuxKernel");
+  _aux_data.reinit(tid, soln, node);
 }
 
 void
 MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem)
 {
-  Moose::perf_log.push("reinit(elem)","AuxKernel");
-
-  unsigned int nonlinear_system_number = _system->number();
-  unsigned int aux_system_number = _aux_system->number();
-
-  //Compute the area of the element
-  Real area = 0;
-  //Just use any old JxW... they are all actually the same
-  const std::vector<Real> & jxw = *(_element_data._JxW[tid].begin()->second);
-
-  if( Moose::geom_type == Moose::XYZ)
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule[tid]->n_points(); qp++)
-      area += jxw[qp];
-  }
-  else if (Moose::geom_type == Moose::CYLINDRICAL)
-  {
-    const std::vector<Point> & q_point = *(_element_data._q_point[tid].begin()->second);
-    for (unsigned int qp=0; qp<_element_data._qrule[tid]->n_points(); qp++)
-      area += q_point[qp](0)*jxw[qp];
-  }
-  else
-  {
-    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError("");
-  }
-
-  //Compute the average value of each variable on the element
-
-  //Non Aux vars first
-  for(unsigned int i=0; i<_element_data._var_nums.size(); i++)
-  {
-    unsigned int var_num = _element_data._var_nums[i];
-
-    FEType fe_type = _element_data._dof_map->variable_type(var_num);
-
-    const std::vector<Real> & JxW = *_element_data._JxW[tid][fe_type];
-    const std::vector<Point> & q_point = *_element_data._q_point[tid][fe_type];
-
-    _var_vals_element[tid][var_num] = integrateValueAux(_element_data._var_vals[tid][var_num], JxW, q_point) / area;
-
-    if(_is_transient)
-    {
-      _var_vals_old_element[tid][var_num] = integrateValueAux(_element_data._var_vals_old[tid][var_num], JxW, q_point) / area;
-      _var_vals_older_element[tid][var_num] = integrateValueAux(_element_data._var_vals_older[tid][var_num], JxW, q_point) / area;
-    }
-
-    _var_grads_element[tid][var_num] = integrateGradientAux(_element_data._var_grads[tid][var_num], JxW, q_point) / area;
-
-    if(_is_transient)
-    {
-      _var_grads_old_element[tid][var_num] = integrateGradientAux(_element_data._var_grads_old[tid][var_num], JxW, q_point) / area;
-      _var_grads_older_element[tid][var_num] = integrateGradientAux(_element_data._var_grads_older[tid][var_num], JxW, q_point) / area;
-    }
-  }
-
-  //Now Aux vars
-  for(unsigned int i=0; i<_element_data._aux_var_nums.size(); i++)
-  {
-    unsigned int var_num = _element_data._aux_var_nums[i];
-
-    FEType fe_type = _aux_dof_map->variable_type(var_num);
-
-    const std::vector<Real> & JxW = *_element_data._JxW[tid][fe_type];
-    const std::vector<Point> & q_point = *_element_data._q_point[tid][fe_type];
-
-    _aux_var_vals_element[tid][var_num] = integrateValueAux(_element_data._aux_var_vals[tid][var_num], JxW, q_point) / area;
-
-    if(_is_transient)
-    {
-      _aux_var_vals_old_element[tid][var_num] = integrateValueAux(_element_data._aux_var_vals_old[tid][var_num], JxW, q_point) / area;
-      _aux_var_vals_older_element[tid][var_num] = integrateValueAux(_element_data._aux_var_vals_older[tid][var_num], JxW, q_point) / area;
-    }
-
-    _aux_var_grads_element[tid][var_num] = integrateGradientAux(_element_data._aux_var_grads[tid][var_num], JxW, q_point) / area;
-
-    if(_is_transient)
-    {
-      _aux_var_grads_old_element[tid][var_num] = integrateGradientAux(_element_data._aux_var_grads_old[tid][var_num], JxW, q_point) / area;
-      _aux_var_grads_older_element[tid][var_num] = integrateGradientAux(_element_data._aux_var_grads_older[tid][var_num], JxW, q_point) / area;
-    }
-  }
-
-  //Grab the dof numbers for the element variables
-  for(unsigned int i=0; i<_element_var_nums.size(); i++)
-  {
-    unsigned int var_num = _element_var_nums[i];
-
-    //The zero is the component... that works fine for FIRST order monomials
-    unsigned int dof_number = elem.dof_number(aux_system_number, var_num, 0);
-
-    _aux_var_dofs[tid][var_num] = dof_number;
-  }
-
-  Moose::perf_log.pop("reinit(elem)","AuxKernel");
-}
-
-
-Real
-MooseSystem::integrateValueAux(const MooseArray<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
-{
-  Real value = 0;
-
-  if( Moose::geom_type == Moose::XYZ)
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule[0]->n_points(); qp++)
-      value += vals[qp]*JxW[qp];
-  }
-  else if( Moose::geom_type == Moose::CYLINDRICAL )
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule[0]->n_points(); qp++)
-      value += q_point[qp](0)*vals[qp]*JxW[qp];
-  }
-  else
-  {
-    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError("");
-  }
-
-  return value;
-}
-
-RealGradient
-MooseSystem::integrateGradientAux(const MooseArray<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
-{
-  RealGradient value = 0;
-
-  if( Moose::geom_type == Moose::XYZ )
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule[0]->n_points(); qp++)
-      value += grads[qp]*JxW[qp];
-  }
-  else if( Moose::geom_type == Moose::CYLINDRICAL )
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule[0]->n_points(); qp++)
-      value += q_point[qp](0)*grads[qp]*JxW[qp];
-  }
-  else
-  {
-    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError("");
-  }
-
-
-  return value;
+  _aux_data.reinit(tid, soln, elem);
 }
 
 void

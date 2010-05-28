@@ -53,6 +53,7 @@ ElementData::sizeEverything()
 
   _current_elem.resize(n_threads);
   _dof_indices.resize(n_threads);
+  _aux_var_dof_indices.resize(n_threads);
   _fe.resize(n_threads);
   _qrule.resize(n_threads);
   
@@ -63,7 +64,6 @@ ElementData::sizeEverything()
   _d2phi.resize(n_threads);
   _q_point.resize(n_threads);
   _var_dof_indices.resize(n_threads);
-  _aux_var_dof_indices.resize(n_threads);
   _var_Res.resize(n_threads);
   _var_Kes.resize(n_threads);
   _var_vals.resize(n_threads);
@@ -73,14 +73,15 @@ ElementData::sizeEverything()
   _var_vals_older.resize(n_threads);
   _var_grads_old.resize(n_threads);
   _var_grads_older.resize(n_threads);
+
+  _aux_var_dof_indices.resize(n_threads);
+  _aux_var_dofs.resize(n_threads);
   _aux_var_vals.resize(n_threads);
   _aux_var_grads.resize(n_threads);
   _aux_var_vals_old.resize(n_threads);
   _aux_var_vals_older.resize(n_threads);
   _aux_var_grads_old.resize(n_threads);
   _aux_var_grads_older.resize(n_threads);
-
-  _material.resize(n_threads);
 }
 
 
@@ -88,6 +89,7 @@ void
 ElementData::init()
 {
   _dof_map = &_moose_system.getNonlinearSystem()->get_dof_map();
+  _aux_dof_map = &_moose_system.getAuxSystem()->get_dof_map();
 
   unsigned int n_vars = _moose_system.getNonlinearSystem()->n_vars();
   unsigned int n_aux_vars = _moose_system.getAuxSystem()->n_vars();
@@ -108,11 +110,12 @@ ElementData::init()
     _var_grads_older[tid].resize(n_vars);
 
     // aux var
+    _aux_var_dofs[tid].resize(n_aux_vars);
     _aux_var_dof_indices[tid].resize(n_aux_vars);
     _aux_var_vals[tid].resize(n_aux_vars);
-    _aux_var_grads[tid].resize(n_aux_vars);
     _aux_var_vals_old[tid].resize(n_aux_vars);
     _aux_var_vals_older[tid].resize(n_aux_vars);
+    _aux_var_grads[tid].resize(n_aux_vars);
     _aux_var_grads_old[tid].resize(n_aux_vars);
     _aux_var_grads_older[tid].resize(n_aux_vars);
   }
@@ -136,6 +139,7 @@ ElementData::init()
 
   initKernels();
 }
+
 
 void
 ElementData::initKernels()
@@ -168,7 +172,7 @@ ElementData::initKernels()
   //This allows for different basis functions / orders for each Aux variable
   for(unsigned int var=0; var < _moose_system.getAuxSystem()->n_vars(); var++)
   {
-    FEType fe_type = _moose_system._aux_dof_map->variable_type(var);
+    FEType fe_type = _moose_system._element_data._aux_dof_map->variable_type(var);
 
     for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
     {
@@ -342,7 +346,6 @@ ElementData::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   }
 
 //  Moose::perf_log.pop("reinit() - compute vals","Kernel");
-
 //  Moose::perf_log.push("reinit() - compute aux vals","Kernel");
   const NumericVector<Number>& aux_soln = (*_moose_system.getAuxSystem()->current_local_solution);
 
@@ -353,9 +356,9 @@ ElementData::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   {
     unsigned int var_num = *aux_var_num_it;
 
-    FEType fe_type = _moose_system._aux_dof_map->variable_type(var_num);
+    FEType fe_type = _aux_dof_map->variable_type(var_num);
 
-    _moose_system._aux_dof_map->dof_indices(elem, _aux_var_dof_indices[tid][var_num], var_num);
+    _aux_dof_map->dof_indices(elem, _aux_var_dof_indices[tid][var_num], var_num);
 
     _aux_var_vals[tid][var_num].resize(num_q_points);
     _aux_var_grads[tid][var_num].resize(num_q_points);
@@ -388,12 +391,6 @@ ElementData::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   }
 
 //  Moose::perf_log.pop("reinit() - compute aux vals","Kernel");
-//  Moose::perf_log.push("reinit() - material","Kernel");
-
-  _material[tid] = _moose_system.getMaterial(tid,elem->subdomain_id());
-  _material[tid]->materialReinit();
-
-//  Moose::perf_log.pop("reinit() - material","Kernel");
 //  Moose::perf_log.pop("reinit()","Kernel");
 }
 
