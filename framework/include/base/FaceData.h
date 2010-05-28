@@ -52,42 +52,42 @@ public:
   /**
    * Boundary finite element.
    */
-  std::vector<std::map<FEType, FEBase *> > _fe_face;
+  std::vector<std::map<FEType, FEBase *> > _fe;
 
   /**
    * Boundary quadrature rule.
    */
-  std::vector<QGauss *> _qface;
+  std::vector<QGauss *> _qrule;
 
   /**
    * XYZ coordinates of quadrature points
    */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _q_point_face;
+  std::vector<std::map<FEType, const std::vector<Point> *> > _q_point;
 
   /**
    * Side Jacobian pre-multiplied by the weight.
    */
-  std::vector<std::map<FEType, const std::vector<Real> *> > _JxW_face;
+  std::vector<std::map<FEType, const std::vector<Real> *> > _JxW;
 
   /**
    * Side shape function.
    */
-  std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _phi_face;
+  std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _phi;
 
   /**
    * Gradient of side shape function.
    */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _dphi_face;
+  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _dphi;
 
   /**
    * Second derivative of interior shape function.
    */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _d2phi_face;
+  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _d2phi;
 
   /**
    * Normal vectors at the quadrature points.
    */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _normals_face;
+  std::vector<std::map<FEType, const std::vector<Point> *> > _normals;
 
   /**
    * Map to vector of variable numbers that need to be evaluated
@@ -115,24 +115,23 @@ public:
   /**
    * Value of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_face;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_face;
+  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealTensor> > > _var_seconds_face;
+  MooseArray<MooseArray<MooseArray<RealTensor> > > _var_seconds;
 
   /**
    * Value of the variables at the nodes.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_face_nodal;
+  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_nodal;
 };
 
-  
 
 #endif //FACEDATA_H
