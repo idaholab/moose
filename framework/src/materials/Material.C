@@ -18,8 +18,26 @@ InputParameters validParams<Material>()
 Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters) :
    _name(name),
    _moose_system(moose_system),
-   _element_data(*moose_system._element_data),
-   _material_data(*moose_system._material_data),
+   _element_data(moose_system._element_data),
+   _material_data(moose_system._material_data),
+   _tid(Moose::current_thread_id),
+   _parameters(parameters),
+   _dim(_moose_system._dim),
+   _has_stateful_props(false),
+   // _q_point is initialized to the first variables's associated fe_type (same physical space for all vars)
+   _q_point(*(_element_data._q_point[_tid])[_element_data._dof_map->variable_type(0)]),
+   _t(_moose_system._t),
+   _dt(_moose_system._dt),
+   _dt_old(_moose_system._dt_old),
+   _is_transient(_moose_system._is_transient),
+   _current_elem(_element_data._current_elem[_tid]),
+   _qrule(_element_data._qrule[_tid]),
+   _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
+   _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
+   _real_zero(_moose_system._real_zero[_tid]),
+   _zero(_moose_system._zero[_tid]),
+   _grad_zero(_moose_system._grad_zero[_tid]),
+   _second_zero(_moose_system._second_zero[_tid]),
    _constant_real_props(_material_data._constant_real_props),
    _real_props(_material_data._real_props),
    _gradient_props(_material_data._gradient_props),
@@ -41,26 +59,7 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
    _vector_props_older(_material_data._vector_props_older),
    _tensor_props_older(_material_data._tensor_props_older),
    _column_major_matrix_props_older(_material_data._column_major_matrix_props_older),
-   _matrix_props_older(_material_data._matrix_props_older),
-   _tid(Moose::current_thread_id),
-   _parameters(parameters),
-   _dim(_moose_system._dim),
-   _has_stateful_props(false),
-   // _q_point is initialized to the first variables's associated fe_type (same physical space for all vars)
-   _q_point(*(_element_data._q_point[_tid])[_element_data._dof_map->variable_type(0)]),
-   _t(_moose_system._t),
-   _dt(_moose_system._dt),
-   _dt_old(_moose_system._dt_old),
-   _is_transient(_moose_system._is_transient),
-   _current_elem(_element_data._current_elem[_tid]),
-   _qrule(_element_data._qrule[_tid]),
-   _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
-   _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
-   _real_zero(_moose_system._real_zero[_tid]),
-   _zero(_moose_system._zero[_tid]),
-   _grad_zero(_moose_system._grad_zero[_tid]),
-   _second_zero(_moose_system._second_zero[_tid])
-
+   _matrix_props_older(_material_data._matrix_props_older)
 {
   _constant_real_props_current_elem       = new std::map<std::string, Real >;
   _real_props_current_elem                = new std::map<unsigned int, std::map<std::string, MooseArray<Real> > >;

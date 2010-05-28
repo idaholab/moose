@@ -12,6 +12,9 @@
 #include "MaterialHolder.h"
 #include "StabilizerHolder.h"
 #include "ICHolder.h"
+#include "ElementData.h"
+#include "FaceData.h"
+#include "AuxData.h"
 
 //libmesh includes
 #include "transient_system.h"
@@ -20,10 +23,7 @@
 
 //Forward Declarations
 class EquationSystems;
-class ElementData;
 class MeshBase;
-class FaceData;
-class AuxData;
 class Material;
 class MaterialData;
 template<class T> class NumericVector;
@@ -223,15 +223,14 @@ public:
 protected:
   void sizeEverything();
   void initKernels();
-  void initBCs();
   void initAuxKernels();
 
 private:
   // TODO: Switch these to vectors later
-  ElementData *_element_data;
-  FaceData *_face_data;
-  AuxData *_aux_data;
-  MaterialData *_material_data;
+  ElementData _element_data;
+  FaceData _face_data;
+  AuxData _aux_data;
+  MaterialData _material_data;
   //  std::vector<ElementData *> _element_data;
   //  std::vector<FaceData *> _face_data;
   //  std::vector<AuxData *> _aux_data;
@@ -329,105 +328,6 @@ public:
   
 protected:
   std::vector<std::vector<unsigned int> > _aux_dof_indices;
-
-  /// BCs
-  /**
-   * Current node for nodal BC's
-   */
-  std::vector<const Node *> _current_node;
-
-  /**
-   * Current residual vector.  Only valid for nodal BC's.
-   */
-  std::vector<NumericVector<Number> *> _current_residual;
-
-  /**
-   * Current side.
-   */
-  std::vector<unsigned int> _current_side;
-
-  /**
-   * Boundary finite element.
-   */
-  std::vector<std::map<FEType, FEBase *> > _fe_face;
-
-  /**
-   * Boundary quadrature rule.
-   */
-  std::vector<QGauss *> _qface;
-
-  /**
-   * XYZ coordinates of quadrature points
-   */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _q_point_face;
-
-  /**
-   * Side Jacobian pre-multiplied by the weight.
-   */
-  std::vector<std::map<FEType, const std::vector<Real> *> > _JxW_face;
-
-  /**
-   * Side shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _phi_face;
-
-  /**
-   * Gradient of side shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _dphi_face;
-
-  /**
-   * Second derivative of interior shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _d2phi_face;
-
-  /**
-   * Normal vectors at the quadrature points.
-   */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _normals_face;
-
-  /**
-   * Map to vector of variable numbers that need to be evaluated
-   * at the quadrature points on that boundary
-   */
-  std::map<unsigned int, std::vector<unsigned int> > _boundary_to_var_nums;
-
-  /**
-   * Map to vector of variable numbers that need to be evaluated
-   * at the nodes on that boundary
-   */
-  std::map<unsigned int, std::vector<unsigned int> > _boundary_to_var_nums_nodal;
-
-  /**
-   * Holds the current dof numbers for each variable for nodal bcs
-   */
-  std::vector<std::vector<unsigned int> > _nodal_bc_var_dofs;
-
-  /**
-   * ***************
-   * Values of stuff
-   * ***************
-   */
-
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_face;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_face;
-
-  /**
-   * Second derivatives of the variables at the quadrature points.
-   */
-  MooseArray<MooseArray<MooseArray<RealTensor> > > _var_seconds_face;
-
-  /**
-   * Value of the variables at the nodes.
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_face_nodal;
 
   /**
    * Convenience zeros.
@@ -584,6 +484,8 @@ protected:
   friend class Executioner;
   friend class TransientExecutioner;
   friend class Steady;
+
+  friend class FaceData;
 };
 
   

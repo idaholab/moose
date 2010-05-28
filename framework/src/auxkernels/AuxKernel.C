@@ -25,7 +25,7 @@ InputParameters validParams<AuxKernel>()
 AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParameters parameters) :
    _name(name),
    _moose_system(moose_system),
-   _element_data(*moose_system._element_data),
+   _element_data(moose_system._element_data),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
    _var_name(parameters.get<std::string>("variable")),
@@ -45,7 +45,7 @@ AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParamete
    _u_aux(_nodal ? moose_system._aux_var_vals_nodal[_tid][_var_num] : moose_system._aux_var_vals_element[_tid][_var_num]),
    _u_old_aux(_nodal ? moose_system._aux_var_vals_old_nodal[_tid][_var_num] : moose_system._aux_var_vals_old_element[_tid][_var_num]),
    _u_older_aux(_nodal ? moose_system._aux_var_vals_older_nodal[_tid][_var_num] : moose_system._aux_var_vals_older_element[_tid][_var_num]),
-   _current_node(moose_system._current_node[_tid])
+   _current_node(moose_system._face_data._current_node[_tid])
 {
   // If this variable isn't known yet... make it so
   if(std::find(_element_data._aux_var_nums.begin(),_element_data._aux_var_nums.end(),_var_num) == _element_data._aux_var_nums.end())

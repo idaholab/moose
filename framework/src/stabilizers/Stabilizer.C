@@ -18,7 +18,7 @@ InputParameters validParams<Stabilizer>()
 Stabilizer::Stabilizer(std::string name, MooseSystem & moose_system, InputParameters parameters):
   _name(name),
   _moose_system(moose_system),
-  _element_data(*moose_system._element_data),
+  _element_data(moose_system._element_data),
   _tid(Moose::current_thread_id),
   _parameters(parameters),
   _var_name(parameters.get<std::string>("variable")),
