@@ -3,6 +3,7 @@
 
 #include "Moose.h"
 #include "MooseArray.h"
+#include "QuadrPtData.h"
 
 //libMesh includes
 #include "transient_system.h"
@@ -14,7 +15,7 @@ class FEBase;
 
 template <class T> class NumericVector;
 
-class FaceData
+class FaceData : public QuadrPtData
 {
 public:
   FaceData(MooseSystem & moose_system);
@@ -49,40 +50,6 @@ public:
    */
   std::vector<unsigned int> _current_side;
 
-  /**
-   * Boundary finite element.
-   */
-  std::vector<std::map<FEType, FEBase *> > _fe;
-
-  /**
-   * Boundary quadrature rule.
-   */
-  std::vector<QGauss *> _qrule;
-
-  /**
-   * XYZ coordinates of quadrature points
-   */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _q_point;
-
-  /**
-   * Side Jacobian pre-multiplied by the weight.
-   */
-  std::vector<std::map<FEType, const std::vector<Real> *> > _JxW;
-
-  /**
-   * Side shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _phi;
-
-  /**
-   * Gradient of side shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _dphi;
-
-  /**
-   * Second derivative of interior shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _d2phi;
 
   /**
    * Normal vectors at the quadrature points.

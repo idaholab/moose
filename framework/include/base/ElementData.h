@@ -4,6 +4,7 @@
 //MOOSE includes
 #include "Moose.h"
 #include "MooseArray.h"
+#include "QuadrPtData.h"
 
 //libMesh includes
 #include "transient_system.h"
@@ -23,7 +24,7 @@ template<class T> class DenseMatrix;
  *
  * _One_ of these will get built for each MooseSystem.
  */
-class ElementData
+class ElementData : public QuadrPtData
 {
 public:
   ElementData(MooseSystem & moose_system);
@@ -58,26 +59,6 @@ public:
   std::vector<std::vector<unsigned int> > _dof_indices;
 
   /**
-   * Interior finite element.
-   */
-  std::vector<std::map<FEType, FEBase*> > _fe;
-  
-  /**
-   * Interior quadrature rule.
-   */
-  std::vector<QGauss *> _qrule;
-
-  /**
-   * Interior Jacobian pre-multiplied by the weight.
-   */
-  std::vector<std::map<FEType, const std::vector<Real> *> > _JxW;
-
-  /**
-   * Interior shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _phi;
-
-  /**
    * Interior test function.
    *
    * Note that there is a different test function for each variable... allowing for modified
@@ -86,21 +67,6 @@ public:
   std::vector<std::map<unsigned int, std::vector<std::vector<Real> > > > _test;
 
   /**
-   * Gradient of interior shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _dphi;
-
-  /**
-   * Second derivative of interior shape function.
-   */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _d2phi;
-
-  /**
-   * XYZ coordinates of quadrature points
-   */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _q_point;
-
-    /**
    * Value of the variables at the quadrature points.
    */
   MooseArray<MooseArray<MooseArray<Real> > > _var_vals;

@@ -6,24 +6,15 @@
 //libmesh includes
 #include "numeric_vector.h"
 
-FaceData::FaceData(MooseSystem & moose_system)
-  :_moose_system(moose_system)
+FaceData::FaceData(MooseSystem & moose_system) :
+  QuadrPtData(moose_system),
+  _moose_system(moose_system)
 {
   sizeEverything();
 }
 
 FaceData::~FaceData()
 {
-  for (std::vector<std::map<FEType, FEBase*> >::iterator i = _fe.begin(); i != _fe.end(); ++i)
-  {
-    for (std::map<FEType, FEBase*>::iterator j = i->begin(); j != i->end(); ++j)
-      delete j->second;
-  }
-
-  for (std::vector<QGauss *>::iterator i = _qrule.begin(); i != _qrule.end(); ++i)
-  {
-    delete *i;
-  }
 }
 
 void FaceData::sizeEverything()
@@ -33,13 +24,6 @@ void FaceData::sizeEverything()
   _current_node.resize(n_threads);
   _current_residual.resize(n_threads);
   _current_side.resize(n_threads);
-  _fe.resize(n_threads);
-  _qrule.resize(n_threads);
-  _q_point.resize(n_threads);
-  _JxW.resize(n_threads);
-  _phi.resize(n_threads);
-  _dphi.resize(n_threads);
-  _d2phi.resize(n_threads);
   _normals.resize(n_threads);
 
   _nodal_bc_var_dofs.resize(n_threads);
