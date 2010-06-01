@@ -134,6 +134,14 @@ public:
   ColumnMajorMatrix & operator+=(const ColumnMajorMatrix & rhs);
 
   /**
+   * Matrix Matrix Subtraction plus assignment
+   *
+   * Note that this is faster than regular subtraction
+   * because the result doesn't have to get copied out
+   */
+  ColumnMajorMatrix & operator-=(const ColumnMajorMatrix & rhs);
+
+  /**
    * Scalar addition
    */
   ColumnMajorMatrix operator+(Real scalar) const;
@@ -354,6 +362,17 @@ ColumnMajorMatrix::operator+=(const ColumnMajorMatrix & rhs)
 
   for(unsigned int i=0; i<_n_entries; i++)
     _values[i] += rhs._values[i];
+
+  return *this;
+}
+
+inline ColumnMajorMatrix &
+ColumnMajorMatrix::operator-=(const ColumnMajorMatrix & rhs)
+{
+  mooseAssert((_n_rows == rhs._n_rows) && (_n_cols == rhs._n_cols), "Cannot perform matrix addition and assignment!  The shapes of the two operands are not compatible!");
+
+  for(unsigned int i=0; i<_n_entries; i++)
+    _values[i] -= rhs._values[i];
 
   return *this;
 }
