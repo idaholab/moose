@@ -9,7 +9,7 @@ InputParameters validParams<HeatConduction>()
 
 HeatConduction::HeatConduction(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Diffusion(name, moose_system, parameters),
-   _k(_material_data.getRealProperty("thermal_conductivity"))
+   _k(getRealMaterialProperty("thermal_conductivity"))
   {}
 
 Real

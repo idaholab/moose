@@ -11,6 +11,8 @@ InputParameters validParams<LinearIsotropicMaterial>()
   InputParameters params = validParams<SolidMechanicsMaterial>();
   params.addRequiredParam<Real>("youngs_modulus", "Young's Modulus");
   params.addRequiredParam<Real>("poissons_ratio", "Poisson's Ratio");
+  params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
+  params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   return params;
 }
 
@@ -19,7 +21,9 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(std::string name,
                                                  InputParameters parameters)
   :SolidMechanicsMaterial(name, moose_system, parameters),
    _youngs_modulus(parameters.get<Real>("youngs_modulus")),
-   _poissons_ratio(parameters.get<Real>("poissons_ratio"))
+   _poissons_ratio(parameters.get<Real>("poissons_ratio")),
+   _t_ref(parameters.get<Real>("t_ref")),
+   _alpha(parameters.get<Real>("thermal_expansion"))
 {
   IsotropicElasticityTensor * iso_elasticity_tensor = new IsotropicElasticityTensor;
   iso_elasticity_tensor->setYoungsModulus(_youngs_modulus);
@@ -39,6 +43,18 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
 
   computeStrain(strain);
 
+  // Add in Isotropic Thermal Strain
+  if(_has_temp)
+  {
+    ColumnMajorMatrix thermal_strain;
+
+    Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
+    
+    thermal_strain.setDiag(isotropic_strain);
+
+    strain += thermal_strain;
+  }
+
   // Create column vector
   strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 
@@ -54,18 +70,17 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
 
 void
 LinearIsotropicMaterial::computeStrain(ColumnMajorMatrix & strain)
-{
-}
+{}
 
 void
 LinearIsotropicMaterial::computeProperties()
 {
-  for(unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for(_qp=0; _qp<_qrule->n_points(); _qp++)
   {
     _local_elasticity_tensor->calculate();
 
-    _elasticity_tensor[qp] = *_local_elasticity_tensor;
+    _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
-    computeStress(_grad_disp_x[qp], _grad_disp_y[qp], _grad_disp_z[qp], _stress[qp]);
+    computeStress(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp], _stress[_qp]);
   }
 }

@@ -24,6 +24,9 @@ protected:
   MooseArray<RealGradient> & _grad_disp_y;
   MooseArray<RealGradient> & _grad_disp_z;
 
+  bool _has_temp;
+  MooseArray<Real> & _temp;
+
   MooseArray<RealTensorValue> & _stress;
   MooseArray<ColumnMajorMatrix> & _elasticity_tensor;
 };

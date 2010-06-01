@@ -34,8 +34,16 @@ protected:
    */
   virtual void computeStrain(ColumnMajorMatrix & strain);
 
+  /**
+   * The current quadrature point.
+   */
+  unsigned int _qp;
+
   Real _youngs_modulus;
   Real _poissons_ratio;
+
+  Real _t_ref;
+  Real _alpha;
 
   ElasticityTensor * _local_elasticity_tensor;
 };
