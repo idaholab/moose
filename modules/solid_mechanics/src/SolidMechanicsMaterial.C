@@ -15,5 +15,6 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(std::string name, MooseSystem & m
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledVal("temp") : _zero),
    _stress(declareTensorProperty("stress")),
-   _elasticity_tensor(declareColumnMajorMatrixProperty("elasticity_tensor"))
+   _elasticity_tensor(declareColumnMajorMatrixProperty("elasticity_tensor")),
+   _thermal_conductivity(declareRealProperty("thermal_conductivity"))
 {}

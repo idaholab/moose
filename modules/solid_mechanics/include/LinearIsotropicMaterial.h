@@ -45,6 +45,8 @@ protected:
   Real _t_ref;
   Real _alpha;
 
+  Real _input_thermal_conductivity;
+
   ElasticityTensor * _local_elasticity_tensor;
 };
 

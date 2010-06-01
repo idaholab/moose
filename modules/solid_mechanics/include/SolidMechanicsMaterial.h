@@ -29,6 +29,8 @@ protected:
 
   MooseArray<RealTensorValue> & _stress;
   MooseArray<ColumnMajorMatrix> & _elasticity_tensor;
+
+  MooseArray<Real> & _thermal_conductivity;
 };
 
 #endif //SOLIDMECHANICSMATERIAL_H
