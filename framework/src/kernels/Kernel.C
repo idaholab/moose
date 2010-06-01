@@ -26,6 +26,7 @@ InputParameters validParams<Kernel>()
 
 
 Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters parameters):
+  MaterialPropertyInterface(moose_system._material_data),
    _name(name),
    _moose_system(moose_system),
    _element_data(moose_system._element_data),

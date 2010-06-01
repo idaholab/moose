@@ -82,6 +82,11 @@ public:
   ColumnMajorMatrix transpose();
 
   /**
+   * Set the value of each of the diagonals to the passsed in value.
+   */
+  void setDiag(Real value);
+
+  /**
    * Sets the values in _this_ tensor to the values on the RHS.
    * Will also reshape this tensor if necessary.
    */
@@ -228,6 +233,12 @@ ColumnMajorMatrix::transpose()
   return ret_matrix;
 }
 
+inline void
+ColumnMajorMatrix::setDiag(Real value)
+{
+  for(unsigned int i=0; i<_n_rows; i++)
+    (*this)(i,i) = value;
+}
 
 
 inline ColumnMajorMatrix &

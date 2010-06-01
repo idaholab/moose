@@ -6,6 +6,7 @@
 #include "ValidParams.h"
 #include "MooseArray.h"
 #include "MaterialData.h"
+#include "MaterialPropertyInterface.h"
 
 // libMesh includes
 #include "equation_systems.h"
@@ -34,7 +35,7 @@ InputParameters validParams<Kernel>();
  * physics.
  * 
  */
-class Kernel
+class Kernel : protected MaterialPropertyInterface
 {
 public:
 
