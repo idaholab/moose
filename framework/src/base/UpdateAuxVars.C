@@ -93,6 +93,8 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
       {
         subdomain = cur_subdomain;
       
+        Material * material = _materials.getMaterial(0, subdomain);
+        _element_data._material[0] = material;
         for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
           (*aux_it)->subdomainSetup();
       }

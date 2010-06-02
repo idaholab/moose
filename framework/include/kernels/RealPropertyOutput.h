@@ -17,8 +17,6 @@ public:
 
   RealPropertyOutput(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
-  virtual void subdomainSetup();
-  
 protected:
   virtual Real computeQpResidual();
 
@@ -26,6 +24,6 @@ protected:
 
   std::string _prop_name;
 
-  MooseArray<Real> * _prop;
+  MooseArray<Real> & _prop;
 };
 #endif //REALPROPERTYOUTPUT_H

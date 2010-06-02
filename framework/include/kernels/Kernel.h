@@ -5,7 +5,6 @@
 #include "Moose.h"
 #include "ValidParams.h"
 #include "MooseArray.h"
-#include "MaterialData.h"
 #include "MaterialPropertyInterface.h"
 
 // libMesh includes
@@ -138,11 +137,6 @@ protected:
    * Convenience reference to the ElementData object inside of MooseSystem
    */
   ElementData & _element_data;
-
-  /**
-   * Convenience reference to the MaterialData object inside of MooseSystem
-   */
-  MaterialData & _material_data;
 
   /**
    * The thread id this kernel is associated with.

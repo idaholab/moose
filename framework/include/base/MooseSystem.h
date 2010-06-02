@@ -165,12 +165,13 @@ public:
 
   void reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
 
-  void reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id);
+  void reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id);
   void reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
 
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node);
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem);
 
+  void subdomainSetup(THREAD_ID tid, unsigned int block_id);
   /**
    * Re-Initializes temporal discretization/transient control data.
    */
@@ -188,6 +189,13 @@ public:
 
   void checkSystemsIntegrity();
 
+  /**
+   * Allows specification of per variable scaling factors.
+   * The size of the vector MUST be the same as the number of Nonlinear Variables.
+   * Should be called after Kernel::init() (because that sets the default scaling).
+   * Can be called multiple times to change the scaling.
+   * The initial scaling is just 1 for each variable.
+   */
   void setVarScaling(std::vector<Real> scaling);
 
   /**
@@ -235,10 +243,26 @@ private:
   //  std::vector<FaceData *> _face_data;
   //  std::vector<AuxData *> _aux_data;
 
+  DofMap * _dof_map;
+
+  std::vector<std::vector<unsigned int> > _dof_indices;
+
   /**
-   * Pointer to the material that is valid for the current block.
+   * Dof Maps for all the variables.
    */
-  std::vector<Material *> _material;
+  std::vector<std::vector<std::vector<unsigned int> > > _var_dof_indices;
+
+  DofMap * _aux_dof_map;
+
+  /**
+   * Holds the current dof numbers for each variable
+   */
+  std::vector<std::vector<unsigned int> > _aux_var_dofs;
+
+  /**
+   * Dof Maps for all the auxiliary variables.
+   */
+  std::vector<std::vector<std::vector<unsigned int> > > _aux_var_dof_indices;
 
   EquationSystems * _es;
   TransientNonlinearImplicitSystem * _system;
@@ -329,6 +353,11 @@ public:
   Order _max_quadrature_order;
 
   /**
+   * Scaling factors for each variable.
+   */
+  std::vector<Real> _scaling_factor;
+
+  /**
    * Convenience zeros.
    */
 
@@ -358,8 +387,10 @@ protected:
   friend class TransientExecutioner;
   friend class Steady;
 
+  friend class QuadraturePointData;
   friend class ElementData;
   friend class FaceData;
+  friend class AuxData;
 };
 
   

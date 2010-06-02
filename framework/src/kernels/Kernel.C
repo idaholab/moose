@@ -30,7 +30,6 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _name(name),
    _moose_system(moose_system),
    _element_data(moose_system._element_data),
-   _material_data(moose_system._material_data),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
    _mesh(*_moose_system.getMesh()),
@@ -54,9 +53,9 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _u_older(_element_data._var_vals_older[_tid][_var_num]),
    _grad_u_old(_element_data._var_grads_old[_tid][_var_num]),
    _grad_u_older(_element_data._var_grads_older[_tid][_var_num]),
-   _fe_type(_is_aux ? _moose_system._element_data._aux_dof_map->variable_type(_var_num) : _element_data._dof_map->variable_type(_var_num)),
+   _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _moose_system._dof_map->variable_type(_var_num)),
    _current_elem(_element_data._current_elem[_tid]),
-   _material(_moose_system._material[_tid]),
+   _material(_moose_system._element_data._material[_tid]),
    _JxW(*(_element_data._JxW[_tid])[_fe_type]),
    _phi(*(_element_data._phi[_tid])[_fe_type]),
    _test((_element_data._test[_tid])[_var_num]),
@@ -77,8 +76,8 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
 {
   // If this variable isn't known yet... make it so
-  if(std::find(_element_data._var_nums.begin(),_element_data._var_nums.end(),_var_num) == _element_data._var_nums.end())
-    _element_data._var_nums.push_back(_var_num);
+  if(std::find(_element_data._var_nums[0].begin(),_element_data._var_nums[0].end(),_var_num) == _element_data._var_nums[0].end())
+    _element_data._var_nums[0].push_back(_var_num);
 
   // FIXME: this for statement will go into a common ancestor
   for(unsigned int i=0;i<_coupled_to.size();i++)
@@ -92,8 +91,8 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
 
       _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
-      if(std::find(_element_data._var_nums.begin(),_element_data._var_nums.end(),coupled_var_num) == _element_data._var_nums.end())
-        _element_data._var_nums.push_back(coupled_var_num);
+      if(std::find(_element_data._var_nums[0].begin(),_element_data._var_nums[0].end(),coupled_var_num) == _element_data._var_nums[0].end())
+        _element_data._var_nums[0].push_back(coupled_var_num);
 
       if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
         _coupled_var_nums.push_back(coupled_var_num);
@@ -104,8 +103,8 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
 
       _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
-      if(std::find(_element_data._aux_var_nums.begin(),_element_data._aux_var_nums.end(),coupled_var_num) == _element_data._aux_var_nums.end())
-        _element_data._aux_var_nums.push_back(coupled_var_num);
+      if(std::find(_element_data._aux_var_nums[0].begin(),_element_data._aux_var_nums[0].end(),coupled_var_num) == _element_data._aux_var_nums[0].end())
+        _element_data._aux_var_nums[0].push_back(coupled_var_num);
 
       if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
         _aux_coupled_var_nums.push_back(coupled_var_num);
@@ -141,7 +140,7 @@ Kernel::computeResidual()
 
   for (_i=0; _i<_phi.size(); _i++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      var_Re(_i) += _element_data._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
+      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
   
 //  Moose::perf_log.pop("computeResidual()","Kernel");
 }
@@ -157,7 +156,7 @@ Kernel::computeJacobian()
   for (_i=0; _i<_phi.size(); _i++)
     for (_j=0; _j<_phi.size(); _j++)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
-        var_Ke(_i,_j) += _element_data._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
+        var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
   
 //  Moose::perf_log.pop("computeJacobian()",_name);
 }
@@ -172,9 +171,9 @@ Kernel::computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
       {
         if(jvar == _var_num)
-          Ke(_i,_j) += _element_data._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
+          Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
         else
-          Ke(_i,_j) += _element_data._scaling_factor[_var_num]*_JxW[_qp]*computeQpOffDiagJacobian(jvar);
+          Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpOffDiagJacobian(jvar);
       }
   
 //  Moose::perf_log.pop("computeOffDiagJacobian()",_name);

@@ -12,19 +12,14 @@ InputParameters validParams<RealPropertyOutput>()
 
 RealPropertyOutput::RealPropertyOutput(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
-   _prop_name(_parameters.get<std::string>("prop_name"))
+   _prop_name(_parameters.get<std::string>("prop_name")),
+   _prop(getRealMaterialProperty(_prop_name))
 {}
-
-void
-RealPropertyOutput::subdomainSetup()
-{
-  _prop = &_material->getRealProperty(_prop_name);
-}
 
 Real
 RealPropertyOutput::computeQpResidual()
 {
-  return _test[_i][_qp]*(_u[_qp] - (*_prop)[_qp]);
+  return _test[_i][_qp]*(_u[_qp] - _prop[_qp]);
 }
 
 Real

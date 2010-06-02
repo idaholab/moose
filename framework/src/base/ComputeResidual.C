@@ -65,24 +65,7 @@ public:
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
-
-        Material * material = _moose_system._materials.getMaterial(tid, subdomain);
-        material->subdomainSetup();
-
-        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
-        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
-
-        //Global Kernels
-        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
-          (*kernel_it)->subdomainSetup();
-
-        //Kernels on this block
-        for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
-          (*block_kernel_it)->subdomainSetup();
-
-        //Stabilizers
-        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
-          stabilizer_it->second->subdomainSetup();
+        _moose_system.subdomainSetup(tid, subdomain);
       } 
 
       //Stabilizers
@@ -108,7 +91,7 @@ public:
 
           if(bc_it != bc_end)
           {
-            _moose_system.reinitBCs(tid, _soln, side, boundary_id);
+            _moose_system.reinitBCs(tid, _soln, elem, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
               (*bc_it)->computeResidual();
@@ -116,11 +99,11 @@ public:
         }
       }
       
-      _moose_system._element_data._dof_map->constrain_element_vector (Re, _moose_system._element_data._dof_indices[tid], false);
+      _moose_system._dof_map->constrain_element_vector (Re, _moose_system._dof_indices[tid], false);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx); 
-        residual.add_vector(Re, _moose_system._element_data._dof_indices[tid]);
+        residual.add_vector(Re, _moose_system._dof_indices[tid]);
       }
     }
 

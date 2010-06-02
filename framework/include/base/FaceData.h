@@ -3,7 +3,7 @@
 
 #include "Moose.h"
 #include "MooseArray.h"
-#include "QuadrPtData.h"
+#include "QuadraturePointData.h"
 
 //libMesh includes
 #include "transient_system.h"
@@ -15,7 +15,7 @@ class FEBase;
 
 template <class T> class NumericVector;
 
-class FaceData : public QuadrPtData
+class FaceData : public QuadraturePointData
 {
 public:
   FaceData(MooseSystem & moose_system);
@@ -25,7 +25,7 @@ public:
 
   void init();
 
-  void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id);
+  void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id);
   void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
 
 public:
@@ -58,12 +58,6 @@ public:
 
   /**
    * Map to vector of variable numbers that need to be evaluated
-   * at the quadrature points on that boundary
-   */
-  std::map<unsigned int, std::vector<unsigned int> > _boundary_to_var_nums;
-
-  /**
-   * Map to vector of variable numbers that need to be evaluated
    * at the nodes on that boundary
    */
   std::map<unsigned int, std::vector<unsigned int> > _boundary_to_var_nums_nodal;
@@ -72,27 +66,6 @@ public:
    * Holds the current dof numbers for each variable for nodal bcs
    */
   std::vector<std::vector<unsigned int> > _nodal_bc_var_dofs;
-
-  /**
-   * ***************
-   * Values of stuff
-   * ***************
-   */
-
-  /**
-   * Value of the variables at the quadrature points.
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals;
-
-  /**
-   * Gradient of the variables at the quadrature points.
-   */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads;
-
-  /**
-   * Second derivatives of the variables at the quadrature points.
-   */
-  MooseArray<MooseArray<MooseArray<RealTensor> > > _var_seconds;
 
   /**
    * Value of the variables at the nodes.

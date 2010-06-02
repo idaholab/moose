@@ -3,11 +3,12 @@
 
 
 #include "MooseArray.h"
+#include "QuadraturePointData.h"
+#include "ColumnMajorMatrix.h"
 
 //libmesh includes
 #include "tensor_value.h"
 #include "quadrature_gauss.h"
-#include "ColumnMajorMatrix.h"
 
 //forward declarations
 class Material;
@@ -204,6 +205,8 @@ public:
 
 protected:
 
+  QuadraturePointData &getQuadraturePointData(InputParameters &parameters);
+
   /**
    * This Material's name.
    */
@@ -217,7 +220,7 @@ protected:
   /**
    * Convenience reference to the ElementData object inside of MooseSystem
    */
-  ElementData & _element_data;
+  QuadraturePointData & _data;
 
   /**
    * Convenience reference to the MaterialData object inside of MooseSystem

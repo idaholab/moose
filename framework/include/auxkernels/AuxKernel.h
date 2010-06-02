@@ -3,6 +3,7 @@
 
 // This should be removed!!!
 #include "Kernel.h"
+#include "MaterialPropertyInterface.h"
 
 //forward declarations
 class AuxKernel;
@@ -16,7 +17,7 @@ InputParameters validParams<AuxKernel>();
 /** 
  * AuxKernels compute values at nodes.
  */
-class AuxKernel
+class AuxKernel : protected MaterialPropertyInterface
 {
 public:
 

@@ -66,24 +66,7 @@ public:
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
-
-        Material * material = _moose_system._materials.getMaterial(tid, subdomain);
-        material->subdomainSetup();
-
-        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
-        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
-      
-        //Global Kernels
-        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
-          (*kernel_it)->subdomainSetup();
-
-        //Kernels on this block
-        for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
-          (*block_kernel_it)->subdomainSetup();
-
-        //Stabilizers
-        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
-          stabilizer_it->second->subdomainSetup();
+        _moose_system.subdomainSetup(tid, subdomain);
       } 
 
       //Stabilizers
@@ -109,7 +92,7 @@ public:
 
           if(bc_it != bc_end)
           {
-            _moose_system.reinitBCs(tid, _soln, side, boundary_id);
+            _moose_system.reinitBCs(tid, _soln, elem, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
               (*bc_it)->computeJacobian();
@@ -119,10 +102,10 @@ public:
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for(unsigned int i=0; i< _moose_system._element_data._var_dof_indices[tid].size(); i++)
+        for(unsigned int i=0; i< _moose_system._var_dof_indices[tid].size(); i++)
         {
-          _moose_system._element_data._dof_map->constrain_element_matrix (*_moose_system._element_data._var_Kes[tid][i], _moose_system._element_data._var_dof_indices[tid][i], false);
-          _jacobian.add_matrix(*_moose_system._element_data._var_Kes[tid][i], _moose_system._element_data._var_dof_indices[tid][i]);
+          _moose_system._dof_map->constrain_element_matrix (*_moose_system._element_data._var_Kes[tid][i], _moose_system._var_dof_indices[tid][i], false);
+          _jacobian.add_matrix(*_moose_system._element_data._var_Kes[tid][i], _moose_system._var_dof_indices[tid][i]);
         }
       }
     }
@@ -265,24 +248,7 @@ public:
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
-
-        Material * material = _moose_system._materials.getMaterial(tid, subdomain);
-        material->subdomainSetup();
-
-        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
-        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
-      
-        //Global Kernels
-        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
-          (*kernel_it)->subdomainSetup();
-
-        //Kernels on this block
-        for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
-          (*block_kernel_it)->subdomainSetup();
-
-        //Stabilizers
-        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
-          stabilizer_it->second->subdomainSetup();
+        _moose_system.subdomainSetup(tid, subdomain);
       } 
 
       //Stabilizers
@@ -318,7 +284,7 @@ public:
 
           if(bc_it != bc_end)
           {
-            _moose_system.reinitBCs(tid, _soln, side, boundary_id);
+            _moose_system.reinitBCs(tid, _soln, elem, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
             {
@@ -425,24 +391,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
-
-        Material * material = _materials.getMaterial(tid, subdomain);
-        material->subdomainSetup();
-
-        block_kernel_begin = _kernels.blockKernelsBegin(tid, subdomain);
-        block_kernel_end = _kernels.blockKernelsEnd(tid, subdomain);
-      
-        //Global Kernels
-        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
-          (*kernel_it)->subdomainSetup();
-
-        //Kernels on this block
-        for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
-          (*block_kernel_it)->subdomainSetup();
-
-        //Stabilizers
-        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
-          stabilizer_it->second->subdomainSetup();
+        subdomainSetup(tid, subdomain);
       } 
 
       //Stabilizers
@@ -478,7 +427,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
 
           if(bc_it != bc_end)
           {
-            reinitBCs(tid, soln, side, boundary_id);
+            reinitBCs(tid, soln, elem, side, boundary_id);
           
             for(; bc_it!=bc_end; ++bc_it)
             {

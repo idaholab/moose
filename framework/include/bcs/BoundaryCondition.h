@@ -5,6 +5,7 @@
 #include "Moose.h"
 #include "ValidParams.h"
 #include "MooseArray.h"
+#include "MaterialPropertyInterface.h"
 
 // libMesh includes
 #include "mesh_base.h"
@@ -28,7 +29,7 @@ InputParameters validParams<BoundaryCondition>();
  * Extrapolation of a Kernel for BC usage.  Children of this class should override
  * computeQpResidual() for use by computeSideResidual.
  */
-class BoundaryCondition
+class BoundaryCondition : protected MaterialPropertyInterface
 {
 public:
 
@@ -109,9 +110,10 @@ protected:
    */
   ElementData & _element_data;
 
+  /**
+   * Convenience reference to the FaceData object inside of MooseSystem
+   */
   FaceData & _face_data;
-
-  AuxData & _aux_data;
 
   /**
    * The thread id this kernel is associated with.

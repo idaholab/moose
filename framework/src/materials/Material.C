@@ -1,6 +1,7 @@
 #include "Material.h"
 #include "MooseSystem.h"
 #include "ElementData.h"
+#include "FaceData.h"
 #include "MaterialData.h"
 #include "QpData.h"
 #include <iostream>
@@ -18,20 +19,20 @@ InputParameters validParams<Material>()
 Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters) :
    _name(name),
    _moose_system(moose_system),
-   _element_data(moose_system._element_data),
+   _data(getQuadraturePointData(parameters)),
    _material_data(moose_system._material_data),
    _tid(Moose::current_thread_id),
    _parameters(parameters),
    _dim(_moose_system._dim),
    _has_stateful_props(false),
    // _q_point is initialized to the first variables's associated fe_type (same physical space for all vars)
-   _q_point(*(_element_data._q_point[_tid])[_element_data._dof_map->variable_type(0)]),
+   _q_point(*(_data._q_point[_tid])[_moose_system._dof_map->variable_type(0)]),
    _t(_moose_system._t),
    _dt(_moose_system._dt),
    _dt_old(_moose_system._dt_old),
    _is_transient(_moose_system._is_transient),
-   _current_elem(_element_data._current_elem[_tid]),
-   _qrule(_element_data._qrule[_tid]),
+   _current_elem(_moose_system._element_data._current_elem[_tid]),
+   _qrule(_data._qrule[_tid]),
    _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
    _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _real_zero(_moose_system._real_zero[_tid]),
@@ -89,6 +90,8 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
   _matrix_props_older_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > >;
 
   
+  int bid = 0;  // FIXME: block/boundary id, will depend on a value passed in InputParams
+
   // FIXME: this for statement will go into a common ancestor
   for(unsigned int i=0;i<_coupled_to.size();i++)
   {
@@ -101,8 +104,8 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
 
       _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
-      if(std::find(_element_data._var_nums.begin(),_element_data._var_nums.end(),coupled_var_num) == _element_data._var_nums.end())
-        _element_data._var_nums.push_back(coupled_var_num);
+      if(std::find(_data._var_nums[bid].begin(),_data._var_nums[bid].end(),coupled_var_num) == _data._var_nums[bid].end())
+        _data._var_nums[bid].push_back(coupled_var_num);
 
       if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
         _coupled_var_nums.push_back(coupled_var_num);
@@ -113,8 +116,8 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
 
       _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
 
-      if(std::find(_element_data._aux_var_nums.begin(),_element_data._aux_var_nums.end(),coupled_var_num) == _element_data._aux_var_nums.end())
-        _element_data._aux_var_nums.push_back(coupled_var_num);
+      if(std::find(_data._aux_var_nums[bid].begin(),_data._aux_var_nums[bid].end(),coupled_var_num) == _data._aux_var_nums[bid].end())
+        _data._aux_var_nums[bid].push_back(coupled_var_num);
 
       if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
         _aux_coupled_var_nums.push_back(coupled_var_num);
@@ -149,7 +152,7 @@ Material::materialReinit()
 {
   unsigned int current_elem = _current_elem->id();
 
-  unsigned int qpoints = _element_data._qrule[_tid]->n_points();
+  unsigned int qpoints = _data._qrule[_tid]->n_points();
 
   if(_has_stateful_props)
   {
@@ -1017,9 +1020,9 @@ Material::coupledVal(std::string name)
   }
 
   if(!isAux(name))
-    return _element_data._var_vals[_tid][_coupled_as_to_var_num[name]];
+    return _data._var_vals[_tid][_coupled_as_to_var_num[name]];
   else
-    return _element_data._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
+    return _data._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
 }
 
 MooseArray<RealGradient> &
@@ -1032,7 +1035,16 @@ Material::coupledGrad(std::string name)
   }
 
   if(!isAux(name))
-    return _element_data._var_grads[_tid][_coupled_as_to_var_num[name]];
+    return _data._var_grads[_tid][_coupled_as_to_var_num[name]];
   else
-    return _element_data._aux_var_grads[_tid][_aux_coupled_as_to_var_num[name]];
+    return _data._aux_var_grads[_tid][_aux_coupled_as_to_var_num[name]];
+}
+
+QuadraturePointData &
+Material::getQuadraturePointData(InputParameters &parameters)
+{
+  if (parameters.have_parameter<bool>("_is_boundary_material"))
+    return _moose_system._face_data;
+  else
+    return _moose_system._element_data;
 }

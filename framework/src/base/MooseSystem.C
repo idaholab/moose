@@ -167,40 +167,12 @@ MooseSystem::sizeEverything()
 
   // Kernels::sizeEverything
   _bdf2_wei.resize(3);
-//  _current_elem.resize(n_threads);
-//  _dof_indices.resize(n_threads);
-//  _aux_dof_indices.resize(n_threads);
-//  _fe.resize(n_threads);
-// _qrule.resize(n_threads);
 
-// ElementData::sizeEverything
-//  _element_data->sizeEverything();
-  
-//  _JxW.resize(n_threads);
-//  _phi.resize(n_threads);
-//  _test.resize(n_threads);
-//  _dphi.resize(n_threads);
-//  _d2phi.resize(n_threads);
-//  _q_point.resize(n_threads);
-//  _var_dof_indices.resize(n_threads);
-//  _aux_var_dof_indices.resize(n_threads);
-//  _var_Res.resize(n_threads);
-//  _var_Kes.resize(n_threads);
-//  _var_vals.resize(n_threads);
-//  _var_grads.resize(n_threads);
-//  _var_seconds.resize(n_threads);
-//  _var_vals_old.resize(n_threads);
-//  _var_vals_older.resize(n_threads);
-//  _var_grads_old.resize(n_threads);
-//  _var_grads_older.resize(n_threads);
-//  _aux_var_vals.resize(n_threads);
-//  _aux_var_grads.resize(n_threads);
-//  _aux_var_vals_old.resize(n_threads);
-//  _aux_var_vals_older.resize(n_threads);
-//  _aux_var_grads_old.resize(n_threads);
-//  _aux_var_grads_older.resize(n_threads);
+  _dof_indices.resize(n_threads);
+  _var_dof_indices.resize(n_threads);
 
-  _material.resize(n_threads);
+  _aux_var_dof_indices.resize(n_threads);
+  _aux_var_dofs.resize(n_threads);
 
   // Single Instance Variables
   _real_zero.resize(n_threads);
@@ -218,7 +190,32 @@ MooseSystem::init()
     mooseError("Mesh is not set.");
   
   _es->init();
-  
+
+  _dof_map = &_system->get_dof_map();
+  _aux_dof_map = &_aux_system->get_dof_map();
+
+  unsigned int n_vars = _system->n_vars();
+  unsigned int n_aux_vars = _aux_system->n_vars();
+
+  //Resize data arrays
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    // kernels
+    _var_dof_indices[tid].resize(n_vars);
+    // aux var
+    _aux_var_dofs[tid].resize(n_aux_vars);
+    _aux_var_dof_indices[tid].resize(n_aux_vars);
+  }
+
+  //Find the largest quadrature order necessary... all variables _must_ use the same rule!
+  _max_quadrature_order = CONSTANT;
+  for(unsigned int var=0; var < _system->n_vars(); var++)
+  {
+    FEType fe_type = _dof_map->variable_type(var);
+    if(fe_type.default_quadrature_order() > _max_quadrature_order)
+      _max_quadrature_order = fe_type.default_quadrature_order();
+  }
+
   _element_data.init();
   _face_data.init();
   _aux_data.init();
@@ -233,12 +230,23 @@ MooseSystem::init()
   _bdf2_wei[0]  = 1.;
   _bdf2_wei[1]  =-1.;
   _bdf2_wei[2]  = 0.;
+
+  //Set the default variable scaling to 1
+  for(unsigned int i=0; i < _system->n_vars(); i++)
+    _scaling_factor.push_back(1.0);
+
 }
 
 void
 MooseSystem::setVarScaling(std::vector<Real> scaling)
 {
-  _element_data.setVarScaling(scaling);
+  if(scaling.size() != _system->n_vars())
+  {
+    std::cout<<"Error: size of scaling factor vector not the same as the number of variables in the system!"<<std::endl;
+    mooseError("");
+  }
+
+  _scaling_factor = scaling;
 }
 
 EquationSystems *
@@ -352,7 +360,7 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, type, active_subdomains);
-  _element_data._var_nums.push_back(var_num);
+  _element_data._var_nums[0].push_back(var_num);
   return var_num;
 }
 
@@ -360,7 +368,7 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const Order order, const FEFamily family, const std::set< subdomain_id_type > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, order, family, active_subdomains);
-  _element_data._var_nums.push_back(var_num);
+  _element_data._var_nums[0].push_back(var_num);
   return var_num;
 }
 
@@ -519,8 +527,13 @@ MooseSystem::addMaterial(std::string mat_name,
     // TODO: Remove this hack when Material no longer inherits from Kernel!
     parameters.set<std::string>("variable") = _es->get_system(0).variable_name(0);
 
-    for (unsigned int i=0; i<blocks.size(); ++i)
+    for (unsigned int i=0; i<blocks.size(); ++i) {
+      parameters.set<bool>("_is_boudary_material") = false;
       _materials._active_materials[tid][blocks[i]] = MaterialFactory::instance()->create(mat_name, name, *this, parameters);
+
+      parameters.set<bool>("_is_boudary_material") = true;
+      _materials._active_boundary_materials[tid][blocks[i]] = MaterialFactory::instance()->create(mat_name, name, *this, parameters);
+    }
   }
 }
 
@@ -567,19 +580,12 @@ void
 MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
   _element_data.reinitKernels(tid, soln, elem, Re, Ke);
-
-//  Moose::perf_log.push("reinit() - material","Kernel");
-
-  _material[tid] = getMaterial(tid,elem->subdomain_id());
-  _material[tid]->materialReinit();
-
-//  Moose::perf_log.pop("reinit() - material","Kernel");
 }
 
 void
-MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const unsigned int side, const unsigned int boundary_id)
+MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
 {
-  _face_data.reinit(tid, soln, side, boundary_id);
+  _face_data.reinit(tid, soln, elem, side, boundary_id);
 }
 
 void
@@ -600,6 +606,36 @@ MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, 
 {
   _aux_data.reinit(tid, soln, elem);
 }
+
+void
+MooseSystem::subdomainSetup(THREAD_ID tid, unsigned int block_id)
+{
+  _element_data._material[tid] = _materials.getMaterial(tid, block_id);
+  _face_data._material[tid] = _materials.getBoundaryMaterial(tid, block_id);
+
+  // call subdomainSetup
+  _element_data._material[tid]->subdomainSetup();
+  _face_data._material[tid]->subdomainSetup();
+
+  //Global Kernels
+  KernelIterator kernel_begin = _kernels.activeKernelsBegin(tid);
+  KernelIterator kernel_end = _kernels.activeKernelsEnd(tid);
+  for(KernelIterator kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+    (*kernel_it)->subdomainSetup();
+
+  //Kernels on this block
+  KernelIterator block_kernel_begin = _kernels.blockKernelsBegin(tid, block_id);
+  KernelIterator block_kernel_end = _kernels.blockKernelsEnd(tid, block_id);
+  for(KernelIterator block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
+    (*block_kernel_it)->subdomainSetup();
+
+  //Stabilizers
+  StabilizerIterator stabilizer_begin = _stabilizers.activeStabilizersBegin(tid);
+  StabilizerIterator stabilizer_end = _stabilizers.activeStabilizersEnd(tid);
+  for(StabilizerIterator stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+    stabilizer_it->second->subdomainSetup();
+}
+
 
 void
 MooseSystem::checkSystemsIntegrity()
