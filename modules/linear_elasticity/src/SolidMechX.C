@@ -4,6 +4,8 @@ template<>
 InputParameters validParams<SolidMechX>()
 {
   InputParameters params = validParams<SolidMech>();
+  params.addRequiredCoupledVar("y", "Coupled Displacement in the y Direction");
+  params.addCoupledVar("z", "Coupled Displacement in the z Direction");
   return params;
 }
 
