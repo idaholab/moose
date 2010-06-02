@@ -47,6 +47,10 @@ public:
   template <typename T>
   void addPrivateParam(const std::string &name, const T &value);
 
+  void addCoupledVar(const std::string &name, const std::string &doc_string);
+
+  void addRequiredCoupledVar(const std::string &name, const std::string &doc_string);
+
   const std::string &getDocString(const std::string &name) const;
   bool isParamRequired(const std::string &name) const;
   bool isParamValid(const std::string &name) const;
@@ -54,6 +58,16 @@ public:
   InputParameters & operator=(const InputParameters &rhs);
   InputParameters & operator+=(const InputParameters &rhs);
   void seenInInputFile(const std::string &name);
+
+  inline std::set<std::string, std::string>::const_iterator coupledVarsBegin()
+  {
+    return _coupled_vars.begin();
+  }
+  
+  inline std::set<std::string, std::string>::const_iterator coupledVarsEnd()
+  {
+    return _coupled_vars.end();
+  }
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters validParams<Kernel>();
@@ -82,6 +96,11 @@ private:
    * The set of parameters that will NOT appear in the the dump of the parser tree
    */
   std::set<std::string> _private_params;
+
+  /**
+   * The coupled variables set 
+   */
+  std::set<std::string> _coupled_vars;
 };
 
 

@@ -4,6 +4,9 @@ template<>
 InputParameters validParams<CoupledForce>()
 {
   InputParameters params = validParams<Kernel>();
+
+  params.addRequiredCoupledVar("v", "");
+  
   return params;
 }
 

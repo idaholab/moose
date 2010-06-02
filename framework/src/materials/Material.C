@@ -62,6 +62,19 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
    _column_major_matrix_props_older(_material_data._column_major_matrix_props_older),
    _matrix_props_older(_material_data._matrix_props_older)
 {
+  // Add all of our coupled variables to the coupled_to and coupled_as vectors
+  for (std::set<std::string>::const_iterator iter = _parameters.coupledVarsBegin();
+       iter != _parameters.coupledVarsEnd();
+       ++iter)
+  {
+    if (_parameters.get<std::string>(*iter) != std::string())
+    {
+      _coupled_as.push_back(*iter);
+      _coupled_to.push_back(_parameters.get<std::string>(*iter));
+    }
+  }
+
+  
   _constant_real_props_current_elem       = new std::map<std::string, Real >;
   _real_props_current_elem                = new std::map<unsigned int, std::map<std::string, MooseArray<Real> > >;
   _gradient_props_current_elem            = new std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > >;

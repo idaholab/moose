@@ -4,6 +4,7 @@ template<>
 InputParameters validParams<MatchedValueBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
+  params.addRequiredCoupledVar("v", "");
   return params;
 }
 

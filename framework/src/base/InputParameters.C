@@ -18,6 +18,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_doc_string = rhs._doc_string;
   this->_required_params = rhs._required_params;
   this->_private_params = rhs._private_params;
+  this->_coupled_vars = rhs._coupled_vars;
 
   return *this;
 }
@@ -42,7 +43,29 @@ InputParameters::operator+=(const InputParameters &rhs)
       ++it)
     this->_private_params.insert(*it);
 
+  for(std::set<std::string>::const_iterator it = rhs._coupled_vars.begin();
+      it!=rhs._coupled_vars.end();
+      ++it)
+    this->_coupled_vars.insert(*it);
+
   return *this;
+}
+
+void
+InputParameters::addCoupledVar(const std::string &name, const std::string &doc_string)
+{
+  Parameters::set<std::string>(name);
+  _doc_string[name] = doc_string;
+  _coupled_vars.insert(name);
+}
+
+void
+InputParameters::addRequiredCoupledVar(const std::string &name, const std::string &doc_string)
+{
+  Parameters::set<std::string>(name);
+  _required_params.insert(name);
+  _doc_string[name] = doc_string;
+  _coupled_vars.insert(name);
 }
 
 void

@@ -122,7 +122,8 @@ Parser::parse(const std::string &input_filename)
 
     // Extract all the requested parameters from the input file
     extractParams(curr_block->getID(), curr_block->getBlockParams());
-    extractParams(curr_block->getID(), curr_block->getClassParams());
+    extractParams(curr_block->getID(), curr_block->getClassParams());    
+
   }
 
   fixupOptionalBlocks();

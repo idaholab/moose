@@ -75,6 +75,19 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
    _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
 {
+  
+  // Add all of our coupled variables to the coupled_to and coupled_as vectors
+  for (std::set<std::string>::const_iterator iter = _parameters.coupledVarsBegin();
+       iter != _parameters.coupledVarsEnd();
+       ++iter)
+  {
+    if (_parameters.get<std::string>(*iter) != std::string())
+    {
+      _coupled_as.push_back(*iter);
+      _coupled_to.push_back(_parameters.get<std::string>(*iter));
+    }
+  }
+  
   // If this variable isn't known yet... make it so
   if(std::find(_element_data._var_nums[0].begin(),_element_data._var_nums[0].end(),_var_num) == _element_data._var_nums[0].end())
     _element_data._var_nums[0].push_back(_var_num);

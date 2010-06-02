@@ -4,6 +4,9 @@ template<>
 InputParameters validParams<CoupledAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+
+  params.addRequiredCoupledVar("coupled", "Coupled Value for Calculation");
+  
   params.set<Real>("value")=0.0;
   params.set<std::string>("operator")='+';
   return params;

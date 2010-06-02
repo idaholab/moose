@@ -64,6 +64,18 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
    _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
 {
+  // Add all of our coupled variables to the coupled_to and coupled_as vectors
+  for (std::set<std::string>::const_iterator iter = _parameters.coupledVarsBegin();
+       iter != _parameters.coupledVarsEnd();
+       ++iter)
+  {
+    if (_parameters.get<std::string>(*iter) != std::string())
+    {
+      _coupled_as.push_back(*iter);
+      _coupled_to.push_back(_parameters.get<std::string>(*iter));
+    }
+  }
+  
   // FIXME: this for statement will go into a common ancestor
   for(unsigned int i=0;i<_coupled_to.size();i++)
   {

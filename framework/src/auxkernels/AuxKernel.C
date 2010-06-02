@@ -49,6 +49,18 @@ AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParamete
    _u_older_aux(_nodal ? moose_system._aux_data._aux_var_vals_older_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_older_element[_tid][_var_num]),
    _current_node(moose_system._face_data._current_node[_tid])
 {
+  // Add all of our coupled variables to the coupled_to and coupled_as vectors
+  for (std::set<std::string>::const_iterator iter = _parameters.coupledVarsBegin();
+       iter != _parameters.coupledVarsEnd();
+       ++iter)
+  {
+    if (_parameters.get<std::string>(*iter) != std::string())
+    {
+      _coupled_as.push_back(*iter);
+      _coupled_to.push_back(_parameters.get<std::string>(*iter));
+    }
+  }
+
   // If this variable isn't known yet... make it so
   if(std::find(_element_data._aux_var_nums[0].begin(),_element_data._aux_var_nums[0].end(),_var_num) == _element_data._aux_var_nums[0].end())
     _element_data._aux_var_nums[0].push_back(_var_num);
