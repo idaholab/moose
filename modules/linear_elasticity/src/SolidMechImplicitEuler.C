@@ -8,24 +8,19 @@ InputParameters validParams<SolidMechImplicitEuler>()
 }
 
 SolidMechImplicitEuler::SolidMechImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :SecondDerivativeImplicitEuler(name,moose_system,parameters)
+  :SecondDerivativeImplicitEuler(name,moose_system,parameters),
+   _density(getRealMaterialProperty("density"))
 {}
-
-void
-SolidMechImplicitEuler::subdomainSetup()
-  {
-    _density = &_material->getRealProperty("density");
-  }
 
 Real
 SolidMechImplicitEuler::computeQpResidual()
   {
-    return (*_density)[_qp]*SecondDerivativeImplicitEuler::computeQpResidual();
+    return _density[_qp]*SecondDerivativeImplicitEuler::computeQpResidual();
   }
 
 Real
 SolidMechImplicitEuler::computeQpJacobian()
   {
-    return (*_density)[_qp]*SecondDerivativeImplicitEuler::computeQpJacobian();
+    return _density[_qp]*SecondDerivativeImplicitEuler::computeQpJacobian();
   }
   

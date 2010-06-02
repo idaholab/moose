@@ -17,14 +17,12 @@ public:
 
   MomentumViscousFlux(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-  virtual void subdomainSetup();
-  
 protected:
   virtual Real computeQpResidual();
 
   int _component;
 
-  MooseArray<RealTensorValue> * _viscous_stress_tensor;
+  MooseArray<RealTensorValue> & _viscous_stress_tensor;
 };
  
 #endif

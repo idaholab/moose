@@ -17,8 +17,6 @@ public:
 
   EnergyViscousFlux(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-  virtual void subdomainSetup();
-
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
@@ -35,8 +33,8 @@ protected:
   unsigned int _temp_var;
   MooseArray<RealGradient> & _grad_temp;
 
-  MooseArray<RealTensorValue> * _viscous_stress_tensor;
-  MooseArray<Real> * _thermal_conductivity;
+  MooseArray<RealTensorValue> & _viscous_stress_tensor;
+  MooseArray<Real> &_thermal_conductivity;
 };
  
 #endif

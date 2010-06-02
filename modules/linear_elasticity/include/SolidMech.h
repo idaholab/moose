@@ -20,8 +20,6 @@ public:
 
   SolidMech(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-  virtual void subdomainSetup();
-  
   void recomputeConstants();
   
 protected:
@@ -46,8 +44,8 @@ protected:
 
   Real _density;
 
-  MooseArray<Real> * _E_prop;
-  MooseArray<Real> * _nu_prop;
+  MooseArray<Real> & _E_prop;
+  MooseArray<Real> & _nu_prop;
 };
  
 

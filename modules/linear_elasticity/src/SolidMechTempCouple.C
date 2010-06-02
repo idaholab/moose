@@ -9,16 +9,10 @@ InputParameters validParams<SolidMechTempCouple>()
 
 SolidMechTempCouple::SolidMechTempCouple(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :SolidMech(name, moose_system, parameters),
-    _temp_var(coupled("temp"))
+    _temp_var(coupled("temp")),
+    _thermal_strain(getRealMaterialProperty("thermal_strain")),
+    _alpha(getRealMaterialProperty("alpha"))
 {}
-
-void
-SolidMechTempCouple::subdomainSetup()
-  {
-    SolidMech::subdomainSetup(); 
-    _thermal_strain = &_material->getRealProperty("thermal_strain");
-    _alpha = &_material->getRealProperty("alpha");
-  }
 
 void
 SolidMechTempCouple::recomputeCouplingConstants()

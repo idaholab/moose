@@ -17,8 +17,6 @@ public:
 
   StressDivergence(std::string name, MooseSystem & moose_system, InputParameters parameters);
     
-  void subdomainSetup();
-
 protected:
   virtual Real computeQpResidual();
 
@@ -26,8 +24,8 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  MooseArray<RealTensorValue> * _stress;
-  MooseArray<ColumnMajorMatrix> * _elasticity_tensor;
+  MooseArray<RealTensorValue> & _stress;
+  MooseArray<ColumnMajorMatrix> & _elasticity_tensor;
 
 private:
   unsigned int _component;

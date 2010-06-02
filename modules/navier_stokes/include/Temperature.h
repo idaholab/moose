@@ -15,9 +15,7 @@ class Temperature : public Kernel
 public:
 
   Temperature(std::string name, MooseSystem & moose_system, InputParameters parameters);
-  
-  virtual void subdomainSetup();
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -38,7 +36,7 @@ protected:
   unsigned int _w_vel_var;
   MooseArray<Real> & _w_vel;
 
-  Real * _c_v;
+  Real & _c_v;
 };
  
 #endif

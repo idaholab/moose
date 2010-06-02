@@ -9,24 +9,19 @@ InputParameters validParams<HeatConductionImplicitEuler>()
 
 
 HeatConductionImplicitEuler::HeatConductionImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :ImplicitEuler(name, moose_system, parameters)
+  :ImplicitEuler(name, moose_system, parameters),
+   _specific_heat(getRealMaterialProperty("specific_heat")),
+   _density(getRealMaterialProperty("density"))
 {}
-
-void
-HeatConductionImplicitEuler::subdomainSetup()
-{
-  _specific_heat = &_material->getRealProperty("specific_heat");
-  _density = &_material->getRealProperty("density");
-}
 
 Real
 HeatConductionImplicitEuler::computeQpResidual()
 {
-  return (*_specific_heat)[_qp]*(*_density)[_qp]*ImplicitEuler::computeQpResidual();
+  return _specific_heat[_qp]*_density[_qp]*ImplicitEuler::computeQpResidual();
 }
 
 Real
 HeatConductionImplicitEuler::computeQpJacobian()
 {
-  return (*_specific_heat)[_qp]*(*_density)[_qp]*ImplicitEuler::computeQpJacobian();
+  return _specific_heat[_qp]*_density[_qp]*ImplicitEuler::computeQpJacobian();
 }

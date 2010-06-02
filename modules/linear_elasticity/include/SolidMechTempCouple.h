@@ -18,15 +18,13 @@ public:
 
   SolidMechTempCouple(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-  virtual void subdomainSetup();
-  
   void recomputeCouplingConstants();
   
 protected:
   unsigned int _temp_var;
   
-  MooseArray<Real> * _thermal_strain;
-  MooseArray<Real> * _alpha;
+  MooseArray<Real> & _thermal_strain;
+  MooseArray<Real> & _alpha;
 
   Real _c4;
 };

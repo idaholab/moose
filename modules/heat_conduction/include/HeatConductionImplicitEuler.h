@@ -16,15 +16,13 @@ public:
 
   HeatConductionImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-  virtual void subdomainSetup();
-  
 protected:
   virtual Real computeQpResidual();
   
   virtual Real computeQpJacobian();
   
 private:
-  MooseArray<Real> * _specific_heat;
-  MooseArray<Real> * _density;
+  MooseArray<Real> & _specific_heat;
+  MooseArray<Real> & _density;
 };
 #endif //HEATCONDUCTIONIMPLICITEULER

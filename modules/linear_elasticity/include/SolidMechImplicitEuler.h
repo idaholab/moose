@@ -16,14 +16,12 @@ public:
 
   SolidMechImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-  virtual void subdomainSetup();
- 
 protected:
   virtual Real computeQpResidual();
   
   virtual Real computeQpJacobian();
   
 private:
-  MooseArray<Real> * _density;
+  MooseArray<Real> & _density;
 };
 #endif //SOLIDMECHIMPLICITEULER_H

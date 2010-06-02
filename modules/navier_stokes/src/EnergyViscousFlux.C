@@ -17,15 +17,10 @@ EnergyViscousFlux::EnergyViscousFlux(std::string name, MooseSystem & moose_syste
     _w_vel_var(_dim == 3 ? coupled("w") : 999999),
     _w_vel(_dim == 3 ? coupledVal("w") : _zero),
     _temp_var(coupled("temp")),
-    _grad_temp(coupledGrad("temp"))
+    _grad_temp(coupledGrad("temp")),
+    _viscous_stress_tensor(getTensorMaterialProperty("viscous_stress_tensor")),
+    _thermal_conductivity(getRealMaterialProperty("thermal_conductivity"))
   {}
-
-void
-EnergyViscousFlux::subdomainSetup()
-  {
-    _viscous_stress_tensor = &_material->getTensorProperty("viscous_stress_tensor");
-    _thermal_conductivity  = &_material->getRealProperty("thermal_conductivity");
-  }
 
 Real
 EnergyViscousFlux::computeQpResidual()
@@ -35,10 +30,10 @@ EnergyViscousFlux::computeQpResidual()
   RealVectorValue vec = _grad_temp[_qp];
 
   // -(-k*grad_T)
-  vec *= (*_thermal_conductivity)[_qp];
+  vec *= _thermal_conductivity[_qp];
 
   // Tau dot velocity
-  vec += (*_viscous_stress_tensor)[_qp] * velocity;
+  vec += _viscous_stress_tensor[_qp] * velocity;
 
   return vec*_dtest[_i][_qp];
 }
@@ -49,24 +44,24 @@ EnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   if(jvar == _u_vel_var)
   {
     RealVectorValue velocity(_phi[_j][_qp],0,0);
-    return ( (*_viscous_stress_tensor)[_qp] * velocity ) *_dtest[_i][_qp];
+    return ( _viscous_stress_tensor[_qp] * velocity ) *_dtest[_i][_qp];
   }
   else if(jvar == _v_vel_var)
   {
     RealVectorValue velocity(0,_phi[_j][_qp],0);
-    return ( (*_viscous_stress_tensor)[_qp] * velocity ) *_dtest[_i][_qp];
+    return ( _viscous_stress_tensor[_qp] * velocity ) *_dtest[_i][_qp];
   }
   else if(jvar == _w_vel_var)
   {
     RealVectorValue velocity(0,0,_phi[_j][_qp]);
-    return ( (*_viscous_stress_tensor)[_qp] * velocity ) *_dtest[_i][_qp];
+    return ( _viscous_stress_tensor[_qp] * velocity ) *_dtest[_i][_qp];
   }
   else if(jvar == _temp_var)
   {
     RealVectorValue vec = _dphi[_j][_qp];
 
     // -(-k*grad_T)
-    vec *= (*_thermal_conductivity)[_qp];
+    vec *= _thermal_conductivity[_qp];
 
     return vec*_dtest[_i][_qp];
   }

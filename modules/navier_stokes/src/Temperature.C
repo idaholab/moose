@@ -19,19 +19,14 @@ Temperature::Temperature(std::string name, MooseSystem & moose_system, InputPara
     _v_vel_var(coupled("v")),
     _v_vel(coupledVal("v")),
     _w_vel_var(_dim == 3 ? coupled("w") : 0),
-    _w_vel(_dim == 3 ? coupledVal("w") : _zero)
+    _w_vel(_dim == 3 ? coupledVal("w") : _zero),
+    _c_v(getConstantRealMaterialProperty("c_v"))
 {}
-
-void
-Temperature::subdomainSetup()
-{
-  _c_v = &_material->getConstantRealProperty("c_v");
-}
 
 Real
 Temperature::computeQpResidual()
 {
-  Real value = 1.0/(*_c_v);
+  Real value = 1.0/_c_v;
 
   Real et = _pe[_qp]/_p[_qp];
 
@@ -46,7 +41,7 @@ Temperature::computeQpResidual()
 Real
 Temperature::computeQpJacobian()
 {
-  Real value = 1.0/(*_c_v);
+  Real value = 1.0/_c_v;
 
   Real et = _pe[_qp]/_p[_qp];
 
@@ -62,7 +57,7 @@ Temperature::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _p_var)
   {
-    Real value = 1.0/(*_c_v);
+    Real value = 1.0/_c_v;
 
     Real et = (_pe[_qp]/(-_p[_qp]*_p[_qp]))*_phi[_j][_qp];
 
@@ -72,7 +67,7 @@ Temperature::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if(jvar == _pe_var)
   {
-    Real value = 1.0/(*_c_v);
+    Real value = 1.0/_c_v;
 
     Real et = _phi[_j][_qp]/_p[_qp];
 

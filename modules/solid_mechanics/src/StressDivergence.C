@@ -13,23 +13,18 @@ InputParameters validParams<StressDivergence>()
 
 StressDivergence::StressDivergence(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
+   _stress(getTensorMaterialProperty("stress")),
+   _elasticity_tensor(getColumnMajorMatrixMaterialProperty("elasticity_tensor")),
+   _component(parameters.get<Real>("component")),
    _xdisp_var(isCoupled("x_disp") ? coupled("x_disp") : 0),
    _ydisp_var(isCoupled("y_disp") ? coupled("y_disp") : 0),
-   _zdisp_var(isCoupled("z_disp") ? coupled("z_disp") : 0),
-   _component(parameters.get<Real>("component"))
+   _zdisp_var(isCoupled("z_disp") ? coupled("z_disp") : 0)
 {}
-
-void
-StressDivergence::subdomainSetup()
-{
-  _stress = &_material->getTensorProperty("stress");
-  _elasticity_tensor = &_material->getColumnMajorMatrixProperty("elasticity_tensor");
-}
 
 Real
 StressDivergence::computeQpResidual()
 {
-  Real r = (*_stress)[_qp].row(_component) * _dtest[_i][_qp];
+  Real r = _stress[_qp].row(_component) * _dtest[_i][_qp];
   
   return r;
 }
@@ -41,8 +36,8 @@ StressDivergence::computeQpJacobian()
   for(unsigned int j = 0; j<LIBMESH_DIM; j++)
     for(unsigned int i = 0; i<LIBMESH_DIM; i++)
     {
-      value(i) += 0.5*(*_elasticity_tensor)[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _dphi[_j][_qp](j);
-      value(i) += 0.5*(*_elasticity_tensor)[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _dphi[_j][_qp](j);
+      value(i) += 0.5*_elasticity_tensor[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _dphi[_j][_qp](j);
+      value(i) += 0.5*_elasticity_tensor[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _dphi[_j][_qp](j);
     }
   
   return value * _dtest[_i][_qp];
@@ -61,7 +56,7 @@ StressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
   RealVectorValue value;
   for(unsigned int j = 0; j<LIBMESH_DIM; j++)
     for(unsigned int i = 0; i<LIBMESH_DIM; i++)
-      value(i) += (*_elasticity_tensor)[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*coupled_component)+j) * _dphi[_j][_qp](j);
+      value(i) += _elasticity_tensor[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*coupled_component)+j) * _dphi[_j][_qp](j);
   
   return value * _dphi[_i][_qp];
 }
