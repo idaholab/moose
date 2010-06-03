@@ -2,21 +2,7 @@
 
 import sys, os, time, shutil
 import commands # probably only available on unix-like OSes
-import yaml
 from socket import gethostname
-
-# if we're running this from the build system we only want to run it once instead
-# of on all four targets. So bitten passes the --helios-only option, then this
-# script does nothing if it is not run on helios
-if len(sys.argv) == 2 and sys.argv[1] == '--helios-only':
-  if gethostname() != 'helios':
-    print 'Syntax NOT generated because this is not helios'
-    sys.exit(0)
-  else:
-    print 'Generating syntax, this is helios'
-
-# easy_install Mako
-from mako.template import Template
 
 EXTENSIONS = [ 'opt', 'dbg', 'dev' ]
 
@@ -38,17 +24,19 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
   # if we're running this from the build system we only want to run it once instead
   # of on all four targets. So bitten passes the --helios-only option, then this
   # script does nothing if it is not run on helios
-  if len(sys.argv) == 2 and sys.argv[1] == '--helios-only':
+  if len(argv) == 2 and argv[1] == '--helios-only':
     if gethostname() != 'helios':
       print 'Syntax NOT generated because this is not helios'
       sys.exit(0)
     else:
       print 'Generating syntax, this is helios'
 
-  fname = None
-  timestamp = time.time() + 99 #initialize to a big number (in the future)
+  # Try to import the required modules and die gracefully if they don't load
+  test_import_modules()
 
   # look for the most recently modified executable
+  fname = None
+  timestamp = time.time() + 99 #initialize to a big number (in the future)
   for ext in EXTENSIONS:
     exe = app_path + '/' + app_name + '-' + ext
     if os.path.isfile(exe):
@@ -60,8 +48,15 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
           app_name + ' executable in ' + app_path + ' first.'
     sys.exit(1)
 
-  #print fname
   data = commands.getoutput( fname + " --yaml" )
+
+  #test if YAML DATA is in the output. This is so we can give a clear error
+  #message if the program doesn't run to completion (instead of an IndexError)
+  if data.find( 'YAML DATA' ) < 0:
+    print 'File Data' + '-'*50 + '\n' + data
+    print 'End File Data' + '-'*46
+    print 'ERROR: The yaml data is not being printed by: ' + fname
+    sys.exit(1)
 
   #ignore the first part of the file, up to START YAML DATA
   data = data.split('**START YAML DATA**\n')[1]
@@ -105,3 +100,31 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
     shutil.copytree( docBase, app_path + '/syntax' )
 
   return docBase
+
+
+# tests to see if we can load yaml and Mako Templates. If not print an error
+# message telling the user what to install
+def test_import_modules():
+  yaml_loaded = False
+  mako_loaded = False
+  try:
+    global yaml
+    import yaml
+    yaml_loaded = True
+  except ImportError:
+    pass
+  try:
+    global Template
+    from mako.template import Template
+    mako_loaded = True
+  except ImportError:
+    pass
+
+  msg = ''
+  if not yaml_loaded:
+    msg += 'ImportError: No module named yaml\nPlease easy_install PyYaml\n'
+  if not mako_loaded:
+    msg += 'ImportError: No module named mako.template\nPlease easy_install Mako\n'
+  if not msg == '':
+    print msg
+    exit(1)
