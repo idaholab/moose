@@ -59,12 +59,12 @@ public:
   InputParameters & operator+=(const InputParameters &rhs);
   void seenInInputFile(const std::string &name);
 
-  inline std::set<std::string, std::string>::const_iterator coupledVarsBegin()
+  inline std::set<std::string>::const_iterator coupledVarsBegin()
   {
     return _coupled_vars.begin();
   }
   
-  inline std::set<std::string, std::string>::const_iterator coupledVarsEnd()
+  inline std::set<std::string>::const_iterator coupledVarsEnd()
   {
     return _coupled_vars.end();
   }
