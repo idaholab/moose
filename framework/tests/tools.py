@@ -1,6 +1,7 @@
 import os, sys, re
 from subprocess import *
 from optparse import OptionParser
+from socket import gethostname
 
 #######################################
 #######################################
@@ -181,12 +182,24 @@ global_exec_name = ''
 
 import timeit, inspect, StringIO
 class TestHarness:
-  def __init__(self, argv, exec_name):
-    global global_exec_name
-    global_exec_name = exec_name
-
+  def __init__(self, argv, app_name):
     # parse command line args
     self.options, self.leftovers, self.arg_string = self.getoptions(argv)
+
+    # Determine the application name based on the libMesh naming scheme
+    # Assume the application is in the current working directory
+    # Order of importance, 1. command line args 2. environment 3. default is opt
+    method = ''
+    if self.options.method:
+      method = self.options.method
+    elif os.environ.has_key('METHOD'):
+      method = os.environ['METHOD']
+    else:
+      method = 'opt'
+    executable = os.getcwd() + '/' + app_name + '-' + method
+
+    global global_exec_name
+    global_exec_name = executable
 
     # Emulate the standard Nose RegEx for consistency
     self.test_match = re.compile(r"(?:^|\b|[_-])[Tt]est")
@@ -227,6 +240,21 @@ class TestHarness:
       self.xls_writer.close()
     return out_string, results_table, test_counter, str(round(end-start,3))
 
+  # checks if this is icestorm, runs the tests, prints the results, and exits
+  def run_tests_and_exit(self, check_icestorm=True):
+    host_name = gethostname()
+    if check_icestorm and (host_name == 'service0' or host_name == 'service1'):
+      print 'Testing not supported on Icestorm head node'
+      sys.exit(0)
+
+    results, results_table, test_counter, time = self.run_tests()
+    # Was it completely successful?
+    print "\n" + '-'*70 + "\nRan " + str(test_counter) + " tests in " + time + "s\n\nOK"
+    if results:
+      print "\n" + results + results_table + "\n" + '-'*70 + "\nRan " + str(test_counter) + " tests in " + time + "s\n\nOK"
+      sys.exit(1)
+
+    sys.exit(0)
 
   def inspectAndTest(self, dirpath, module_name):
     saved_cwd = os.getcwd()  
@@ -295,6 +323,9 @@ class TestHarness:
     parser.add_option("-x", "--xls", action="store", dest="xlsFile", metavar="FILE", help="write excel format performance data to FILE")
     parser.add_option("-d", "--dofs", action="callback", callback=buildArgVector, type="int", dest="dofs", help="refine each example to meet the minimum requested DOFS")
     parser.add_option("-n", "--np", action="callback", callback=buildArgVector, type="int", dest="np", help="specify the number of MPI processes launched")
+    parser.add_option("--opt", action="store_const", dest="method", const="opt", help="test the app_name-opt binary")
+    parser.add_option("--dbg", action="store_const", dest="method", const="dbg", help="test the app_name-dbg binary")
+    parser.add_option("--dev", action="store_const", dest="method", const="dev", help="test the app_name-dev binary")
 
     (options, args) = parser.parse_args(argv[1:])
     # Return the 'options' and leftover args returned from parse_args and
