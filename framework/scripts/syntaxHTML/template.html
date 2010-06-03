@@ -1,24 +1,24 @@
 <%def name="genBlock(block)">
   <%doc>Only display Child from a node named /ParentBlock/Child </%doc>
-  <li id="base"><b>${block['name'].split('/')[-1] |u}</b>
+  <li><a><b>${block['name'].split('/')[-1] |u}</b></a>
     <ul>
       % if block['type'] != None:
-        <li>type = ${block['type']}</li>
+        <li><a>type = ${block['type']}</a></li>
       % endif
 
       <%doc>Generate parameters, required ones are red</%doc>
       % if block['parameters'] != None:
         % for param in block['parameters']:
-          <li id="param"><div class="
+          <li><div class="
             % if param['required'] == True:
               required
             % endif
-            ">${param['name']}</div>
+            "><a>${param['name']}</a></div>
               <ul>
                 % if param['default'] != None:
-                  <li>Default: ${param['default']}</li>
+                  <li><a>Default: ${param['default']}</a></li>
                 % endif
-                <li>Description: ${param['description']}</li>
+                <li><a>Description: ${param['description']}</a></li>
               </ul>
           </li>
         % endfor
@@ -42,19 +42,26 @@
 
   <!-- based off of http://www.jstree.com/documentation/core -->
   <script type="text/javascript" src="static/jquery.js"></script> 
-  <script type="text/javascript" src="static/jquery.cookie.js"></script> 
   <script type="text/javascript" src="static/jquery.jstree.min.js"></script> 
 </head>
 <body>
   <h1>${project} Input File Syntax</h1>
 
   <b>Blocks</b> are bolded.<br/>
-  <span class="red">Red parameters</span> are required.
+  <span class="required">Red parameters</span> are required.
 
-  <!-- search (hopefully) coming soon!
-  <br/> <br/>
-  <input type="text" id="searchBox" value="search"/><input type="button" value="Search" id="search"/> <br/>
-  -->
+  <br/><br/>
+  <form onSubmit="$('#search').click();return false;">
+    <input type="text" id="searchBox" value="search" onfocus="clearSearch()" onblur="unclearSearch()"/>
+    <input type="button" value="Search" id="search"/>
+    <input type="button" value="Clear" id="clear"/>
+    <span id="results"> </span>
+  </form>
+  
+  <div id="openclose">
+    <a href='javascript:$.jstree._focused().open_all();'>[expand all]</a>
+    <a href='javascript:$.jstree._focused().close_all();'>[collapse all]</a>
+  </div>
 
   <ul id="tree">
     % for block in data:
@@ -64,18 +71,36 @@
 
   <script type="text/javascript" class="source"> 
   $(function () {
-    //bind search function to search button
-    $("#search").click( function() {
-      $("#tree").jstree("search", document.getElementById("searchBox").value);
-    });
-
     //initialize jstree
     $("#tree")
       .jstree({ plugins : [ "themes", "html_data", "search" ], core : { html_titles : true }, search : { case_insensitive : true } })
       .bind( "search.jstree", function( e, data ) {
-        alert( "Found " + data.rslt.nodes.length + " nodes matching '" + data.rslt.str + "'.");
+        //alert( "Found " + data.rslt.nodes.length + " nodes matching '" + data.rslt.str + "'.");
+        document.getElementById("results").innerHTML="Found " + data.rslt.nodes.length + " results matching '" + data.rslt.str + "'.";
       });
     });
+    //bind search function to search button
+    $("#search").click( function() {
+      $("#tree").jstree("search", document.getElementById("searchBox").value);
+    });
+    //bind clear function to clear button
+    $("#clear").click( function() {
+      $("#tree").jstree("clear_search");
+      document.getElementById("results").innerHTML="";
+      document.getElementById("searchBox").value = "search";
+    });
+  function clearSearch()
+  {
+    val = document.getElementById("searchBox").value;
+    if( val == "search" )
+      document.getElementById("searchBox").value = "";
+  }
+  function unclearSearch()
+  {
+    val = document.getElementById("searchBox").value;
+    if( val == "" )
+      document.getElementById("searchBox").value = "search";
+  }
   </script> 
 
   <div id="footer">

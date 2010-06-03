@@ -87,7 +87,7 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
   # assume if the static dir still exists (ie a previous user didn't move it
   # away) then it is filled with all the js and css we need
   if not os.path.exists( docBase + 'static' ):
-    shutil.copytree( template_path + 'static', docBase + 'static' )
+    shutil.copytree( template_path + 'static', docBase + 'static', ignore=ignore_svns )
 
   # finally, write our generated html over index.html
   index = open( docBase + 'index.html', 'w' )
@@ -101,6 +101,10 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
 
   return docBase
 
+
+# used by copytree, don't copy any .svn files out to the server!
+def ignore_svns( adir, filenames ):
+  return [ filename for filename in filenames if filename == ".svn" ]
 
 # tests to see if we can load yaml and Mako Templates. If not print an error
 # message telling the user what to install

@@ -5,8 +5,6 @@ ins
 .required
 {
   color: red;
-  //clear: all;
-  //float: left;
 }
 .red
 {
@@ -16,5 +14,16 @@ ins
 #footer
 {
   font-style: italic;
+  font-size: 0.8em;
+}
+.jstree a > .jstree-icon
+{
+  visibility: hidden;
+  width: 0px;
+  margin-right: -5px;
+  margin-left: -5px;
+}
+#openclose
+{
   font-size: 0.8em;
 }
