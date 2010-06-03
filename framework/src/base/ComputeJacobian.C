@@ -67,6 +67,9 @@ public:
       {
         subdomain = cur_subdomain;
         _moose_system.subdomainSetup(tid, subdomain);
+
+        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
       } 
 
       //Stabilizers
@@ -249,6 +252,9 @@ public:
       {
         subdomain = cur_subdomain;
         _moose_system.subdomainSetup(tid, subdomain);
+
+        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
       } 
 
       //Stabilizers
@@ -392,6 +398,9 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
       {
         subdomain = cur_subdomain;
         subdomainSetup(tid, subdomain);
+
+        block_kernel_begin = _kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = _kernels.blockKernelsEnd(tid, subdomain);
       } 
 
       //Stabilizers

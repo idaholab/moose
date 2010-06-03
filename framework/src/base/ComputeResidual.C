@@ -66,6 +66,9 @@ public:
       {
         subdomain = cur_subdomain;
         _moose_system.subdomainSetup(tid, subdomain);
+
+        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
+        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
       } 
 
       //Stabilizers
