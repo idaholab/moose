@@ -3,6 +3,17 @@
 import sys, os, time, shutil
 import commands # probably only available on unix-like OSes
 import yaml
+from socket import gethostname
+
+# if we're running this from the build system we only want to run it once instead
+# of on all four targets. So bitten passes the --helios-only option, then this
+# script does nothing if it is not run on helios
+if len(sys.argv) == 2 and sys.argv[1] == '--helios-only':
+  if gethostname() != 'helios':
+    print 'Syntax NOT generated because this is not helios'
+    sys.exit(0)
+  else:
+    print 'Generating syntax, this is helios'
 
 # easy_install Mako
 from mako.template import Template
