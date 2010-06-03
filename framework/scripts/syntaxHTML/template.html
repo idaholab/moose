@@ -71,7 +71,7 @@
 
     //initialize jstree
     $("#tree")
-      .jstree({ plugins : [ "themes", "cookies", "html_data", "search" ], core : { html_titles : true }, search : { case_insensitive : true } })
+      .jstree({ plugins : [ "themes", "html_data", "search" ], core : { html_titles : true }, search : { case_insensitive : true } })
       .bind( "search.jstree", function( e, data ) {
         alert( "Found " + data.rslt.nodes.length + " nodes matching '" + data.rslt.str + "'.");
       });

@@ -18,10 +18,22 @@ EXTENSIONS = [ 'opt', 'dbg', 'dev' ]
 #
 # app_path: base directory to search for executable
 #
+# argv: the arguments passed to the script
+#
 # moose_path: the moose base directory.
 #
 # autocopy: if True, remove app_path/syntax/ then copy the new documentation there
-def generateHTML( app_name, app_path, moose_path = '../moose', autocopy = True ):
+def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = True ):
+  # if we're running this from the build system we only want to run it once instead
+  # of on all four targets. So bitten passes the --helios-only option, then this
+  # script does nothing if it is not run on helios
+  if len(sys.argv) == 2 and sys.argv[1] == '--helios-only':
+    if gethostname() != 'helios':
+      print 'Syntax NOT generated because this is not helios'
+      sys.exit(0)
+    else:
+      print 'Generating syntax, this is helios'
+
   fname = None
   timestamp = time.time() + 99 #initialize to a big number (in the future)
 
