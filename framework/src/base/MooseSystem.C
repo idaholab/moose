@@ -373,36 +373,33 @@ MooseSystem::addVariable(const std::string &var, const Order order, const FEFami
 }
 
 // Kernels ////
-
-void
-MooseSystem::addKernel(std::string kernel_name,
-                       std::string name,
-                       InputParameters parameters)
-{
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    Moose::current_thread_id = tid;
-
-    Kernel * kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
-
-    _kernels._all_kernels[tid].push_back(kernel);
-  }
-}
-
 void MooseSystem::addKernel(std::string kernel_name,
                             std::string name,
-                            InputParameters parameters,
-                            unsigned int block_id)
+                            InputParameters parameters)
 {
+  Kernel * kernel;
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     Moose::current_thread_id = tid;
 
-    Kernel * kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
-
-    _kernels._all_block_kernels[tid][block_id].push_back(kernel);
+    if (!parameters.isParamValid("block"))
+    {
+      kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
+      _kernels._all_kernels[tid].push_back(kernel);
+    }
+    
+    else
+    {
+      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+    
+      for (unsigned int i=0; i<blocks.size(); ++i)
+      {
+        kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
+        _kernels._all_block_kernels[tid][blocks[i]].push_back(kernel);
+      }
+    }
   }
-
 }
 
 void

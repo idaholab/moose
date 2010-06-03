@@ -108,13 +108,6 @@ public:
                  std::string name,
                  InputParameters parameters);
 
-
-  void addKernel(std::string kernel_name,
-                 std::string name,
-                 InputParameters parameters,
-                 unsigned int block_id);
-
-
   void addBC(std::string bc_name,
              std::string name,
              InputParameters parameters);

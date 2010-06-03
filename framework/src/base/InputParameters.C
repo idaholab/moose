@@ -18,6 +18,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_doc_string = rhs._doc_string;
   this->_required_params = rhs._required_params;
   this->_private_params = rhs._private_params;
+  this->_valid_params = rhs._valid_params;
   this->_coupled_vars = rhs._coupled_vars;
 
   return *this;

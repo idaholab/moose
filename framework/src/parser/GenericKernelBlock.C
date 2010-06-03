@@ -29,9 +29,6 @@ GenericKernelBlock::execute()
   std::cerr << "Kernel:" << _type << ":"
             << "\tname:" << getShortName() << ":";
 #endif
-
-  if (isParamValid("block"))
-    _moose_system.addKernel(_type, getShortName(), getClassParams(), getParamValue<int>("block"));
-  else
-    _moose_system.addKernel(_type, getShortName(), getClassParams());
+  
+  _moose_system.addKernel(_type, getShortName(), getClassParams());
 }
