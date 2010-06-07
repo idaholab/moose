@@ -35,7 +35,7 @@ ThermalBC::temperature()
   
   Real value = 1.0/c_v;
 
-  Real et = _u_face[_qp]/_p[_qp];
+  Real et = _u[_qp]/_p[_qp];
 
   RealVectorValue vec(_u_vel[_qp],_v_vel[_qp],_w_vel[_qp]);
 
