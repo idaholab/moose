@@ -228,37 +228,37 @@ protected:
   /**
    * Side Jacobian pre-multiplied by the weight.
    */
-  const std::vector<Real> & _JxW_face;
+  const std::vector<Real> & _JxW;
 
   /**
    * Side shape function.
    */
-  const std::vector<std::vector<Real> > & _phi_face;
+  const std::vector<std::vector<Real> > & _phi;
 
   /**
    * Gradient of side shape function.
    */
-  const std::vector<std::vector<RealGradient> > & _dphi_face;
+  const std::vector<std::vector<RealGradient> > & _dphi;
 
   /**
    * Second derivative of side shape function.
    */
-  const std::vector<std::vector<RealTensor> > & _d2phi_face;
+  const std::vector<std::vector<RealTensor> > & _d2phi;
 
   /**
    * Normal vectors at the quadrature points.
    */
-  const std::vector<Point>& _normals_face;
+  const std::vector<Point>& _normals;
 
   /**
    * Boundary quadrature rule.
    */
-  QGauss * & _qface;
+  QGauss * & _qrule;
   
   /**
    * XYZ coordinates of quadrature points
    */
-  const std::vector<Point>& _q_point_face;
+  const std::vector<Point>& _q_point;
 
   /**
    * Current shape function.
@@ -339,17 +339,17 @@ protected:
   /**
    * Holds the current solution at the current quadrature point on the face.
    */
-  MooseArray<Real> & _u_face;
+  MooseArray<Real> & _u;
 
   /**
    * Holds the current solution gradient at the current quadrature point on the face.
    */
-  MooseArray<RealGradient> & _grad_u_face;
+  MooseArray<RealGradient> & _grad_u;
 
   /**
    * Holds the current solution second derivative at the current quadrature point on the face
    */
-  MooseArray<RealTensor> & _second_u_face;
+  MooseArray<RealTensor> & _second_u;
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value.

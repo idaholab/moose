@@ -16,12 +16,12 @@ WeakGradientBC::WeakGradientBC(std::string name, MooseSystem & moose_system, Inp
 Real
 WeakGradientBC::computeQpResidual()
   {
-    return (_grad_u_face[_qp]*_normals_face[_qp])*_phi_face[_i][_qp];
+    return (_grad_u[_qp]*_normals[_qp])*_phi[_i][_qp];
   }
 
 Real
 WeakGradientBC::computeQpJacobian()
   {
-    return (_dphi_face[_j][_qp]*_normals_face[_qp])*_phi_face[_i][_qp];
+    return (_dphi[_j][_qp]*_normals[_qp])*_phi[_i][_qp];
   }
 

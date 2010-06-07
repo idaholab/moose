@@ -16,11 +16,11 @@ VacuumBC::VacuumBC(std::string name, MooseSystem & moose_system, InputParameters
 Real
 VacuumBC::computeQpResidual()
   {
-    return _phi_face[_i][_qp]*_alpha*_u_face[_qp]/2.;
+    return _phi[_i][_qp]*_alpha*_u[_qp]/2.;
   }
 
 Real
 VacuumBC::computeQpJacobian()
   {
-    return _phi_face[_i][_qp]*_alpha*_phi_face[_j][_qp]/2.;    
+    return _phi[_i][_qp]*_alpha*_phi[_j][_qp]/2.;    
   }

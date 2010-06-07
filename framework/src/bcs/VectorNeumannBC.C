@@ -22,6 +22,6 @@ VectorNeumannBC::VectorNeumannBC(std::string name, MooseSystem & moose_system, I
 Real
 VectorNeumannBC::computeQpResidual()
   {
-    return -_phi_face[_i][_qp]*(_value*_normals_face[_qp]);
+    return -_phi[_i][_qp]*(_value*_normals[_qp]);
   }
 

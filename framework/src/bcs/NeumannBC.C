@@ -16,6 +16,6 @@ NeumannBC::NeumannBC(std::string name, MooseSystem & moose_system, InputParamete
 Real
 NeumannBC::computeQpResidual()
   {
-    return -_phi_face[_i][_qp]*_value;
+    return -_phi[_i][_qp]*_value;
   }
 

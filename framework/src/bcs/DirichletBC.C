@@ -16,5 +16,5 @@ DirichletBC::DirichletBC(std::string name, MooseSystem & moose_system, InputPara
 Real
 DirichletBC::computeQpResidual()
   {
-    return _u_face[_qp]-_value;
+    return _u[_qp]-_value;
   }

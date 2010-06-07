@@ -42,21 +42,21 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
    _material(_moose_system._face_data._material[_tid]),
-   _JxW_face(*moose_system._face_data._JxW[_tid][_fe_type]),
-   _phi_face(*moose_system._face_data._phi[_tid][_fe_type]),
-   _dphi_face(*moose_system._face_data._dphi[_tid][_fe_type]),
-   _d2phi_face(*moose_system._face_data._d2phi[_tid][_fe_type]),
-   _normals_face(*moose_system._face_data._normals[_tid][_fe_type]),
-   _qface(moose_system._face_data._qrule[_tid]),
-   _q_point_face(*moose_system._face_data._q_point[_tid][_fe_type]),
+   _JxW(*moose_system._face_data._JxW[_tid][_fe_type]),
+   _phi(*moose_system._face_data._phi[_tid][_fe_type]),
+   _dphi(*moose_system._face_data._dphi[_tid][_fe_type]),
+   _d2phi(*moose_system._face_data._d2phi[_tid][_fe_type]),
+   _normals(*moose_system._face_data._normals[_tid][_fe_type]),
+   _qrule(moose_system._face_data._qrule[_tid]),
+   _q_point(*moose_system._face_data._q_point[_tid][_fe_type]),
    _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
    _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _current_side(moose_system._face_data._current_side[_tid]),
    _current_node(moose_system._face_data._current_node[_tid]),
    _current_residual(moose_system._face_data._current_residual[_tid]),
-   _u_face(_integrated ? moose_system._face_data._var_vals[_tid][_var_num] : moose_system._face_data._var_vals_nodal[_tid][_var_num]),
-   _grad_u_face(_integrated ? moose_system._face_data._var_grads[_tid][_var_num] : moose_system._grad_zero[_tid]),
-   _second_u_face(_integrated ? moose_system._face_data._var_seconds[_tid][_var_num] : moose_system._second_zero[_tid]),
+   _u(_integrated ? moose_system._face_data._var_vals[_tid][_var_num] : moose_system._face_data._var_vals_nodal[_tid][_var_num]),
+   _grad_u(_integrated ? moose_system._face_data._var_grads[_tid][_var_num] : moose_system._grad_zero[_tid]),
+   _second_u(_integrated ? moose_system._face_data._var_seconds[_tid][_var_num] : moose_system._second_zero[_tid]),
    _real_zero(_moose_system._real_zero[_tid]),
    _zero(_moose_system._zero[_tid]),
    _grad_zero(_moose_system._grad_zero[_tid]),
@@ -145,9 +145,9 @@ BoundaryCondition::computeResidual()
   DenseSubVector<Number> & var_Re = *_element_data._var_Res[_tid][_var_num];
 
   if(_integrated)
-    for (_qp=0; _qp<_qface->n_points(); _qp++)
-      for (_i=0; _i<_phi_face.size(); _i++)
-        var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW_face[_qp]*computeQpResidual();
+    for (_qp=0; _qp<_qrule->n_points(); _qp++)
+      for (_i=0; _i<_phi.size(); _i++)
+        var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
   else
   {
     //Use _qp to keep things standard at the leaf level
@@ -168,18 +168,18 @@ BoundaryCondition::computeJacobian()
   DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_tid][_var_num];
 
   if(_integrated)
-    for (_qp=0; _qp<_qface->n_points(); _qp++)
-      for (_i=0; _i<_phi_face.size(); _i++)
-        for (_j=0; _j<_phi_face.size(); _j++)
-          var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW_face[_qp]*computeQpJacobian();
+    for (_qp=0; _qp<_qrule->n_points(); _qp++)
+      for (_i=0; _i<_phi.size(); _i++)
+        for (_j=0; _j<_phi.size(); _j++)
+          var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
   else
   {
-    for(_i=0; _i<_phi_face.size(); _i++)
+    for(_i=0; _i<_phi.size(); _i++)
     {
       if(_current_elem->is_node_on_side(_i,_current_side))
       {
         //Zero out the row and put 1 on the diagonal
-        for(_j=0; _j<_phi_face.size(); _j++)
+        for(_j=0; _j<_phi.size(); _j++)
           var_Ke(_i,_j) = 0;
         
         var_Ke(_i,_i) = _moose_system._scaling_factor[_var_num]*1;
@@ -196,24 +196,24 @@ BoundaryCondition::computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int i
 //  Moose::perf_log.push("computeJacobianBlock()","BoundaryCondition");
 
   if(_integrated)
-    for (_qp=0; _qp<_qface->n_points(); _qp++)
-      for (_i=0; _i<_phi_face.size(); _i++)
-        for (_j=0; _j<_phi_face.size(); _j++)
+    for (_qp=0; _qp<_qrule->n_points(); _qp++)
+      for (_i=0; _i<_phi.size(); _i++)
+        for (_j=0; _j<_phi.size(); _j++)
         {
           if(ivar ==jvar)
-            Ke(_i,_j) += _JxW_face[_qp]*computeQpJacobian();
+            Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
           else
-            Ke(_i,_j) += _JxW_face[_qp]*computeQpOffDiagJacobian(jvar);
+            Ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);
         }
   
   else
   {
-    for(_i=0; _i<_phi_face.size(); _i++)
+    for(_i=0; _i<_phi.size(); _i++)
     {
       if(_current_elem->is_node_on_side(_i,_current_side))
       {
         //Zero out the row and put 1 on the diagonal
-        for(_j=0; _j<_phi_face.size(); _j++)
+        for(_j=0; _j<_phi.size(); _j++)
           Ke(_i,_j) = 0;
 
         if(ivar ==jvar)
@@ -239,8 +239,8 @@ BoundaryCondition::computeIntegral()
 
   Real sum = 0;
   
-  for (_qp=0; _qp<_qface->n_points(); _qp++)
-      sum += _JxW_face[_qp]*computeQpIntegral();
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+      sum += _JxW[_qp]*computeQpIntegral();
   
 //  Moose::perf_log.pop("computeIntegral()",_name);
   return sum;

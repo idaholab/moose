@@ -29,5 +29,5 @@ SinDirichletBC::computeQpResidual()
   else
     value = _final;
   
-  return _u_face[_qp]- value;
+  return _u[_qp]- value;
 }

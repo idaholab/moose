@@ -16,5 +16,5 @@ MatchedValueBC::MatchedValueBC(std::string name, MooseSystem & moose_system, Inp
 Real
 MatchedValueBC::computeQpResidual()
   {
-    return _u_face[_qp]-_v_face[_qp];
+    return _u[_qp]-_v_face[_qp];
   }
