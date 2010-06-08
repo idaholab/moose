@@ -10,7 +10,7 @@ InputParameters validParams<MatchedValueBC>()
 
 MatchedValueBC::MatchedValueBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, false)),
-    _v_face(coupledValFace("v"))
+    _v_face(coupledVal("v"))
   {}
 
 Real

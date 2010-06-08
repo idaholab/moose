@@ -272,7 +272,7 @@ BoundaryCondition::setIntegratedParam(InputParameters & params, bool integrated)
 }
 
 MooseArray<Real> &
-BoundaryCondition::coupledValFace(std::string name)
+BoundaryCondition::coupledVal(std::string name)
 {
   if(!isCoupled(name))
   {
@@ -287,7 +287,7 @@ BoundaryCondition::coupledValFace(std::string name)
 }
 
 MooseArray<RealGradient> &
-BoundaryCondition::coupledGradFace(std::string name)
+BoundaryCondition::coupledGrad(std::string name)
 {
   if(!isCoupled(name))
   {

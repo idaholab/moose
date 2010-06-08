@@ -19,7 +19,7 @@ CoupledDirichletBC::CoupledDirichletBC(std::string name, MooseSystem & moose_sys
    /**
     * Get a reference to the coupled variable's values.
     */
-   _some_var_val(coupledValFace("some_var"))
+   _some_var_val(coupledVal("some_var"))
 {}
 
 Real
