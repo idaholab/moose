@@ -87,6 +87,31 @@ public:
   void setDiag(Real value);
 
   /**
+   * The trace of the CMM.
+   */
+  Real tr();
+
+  /**
+   * Zero the matrix.
+   */
+  void zero();
+
+  /**
+   * Turn the matrix into an identity matrix.
+   */
+  void identity();
+
+  /**
+   * Double contraction of two matrices ie A : B = Sum(A_ab * B_ba)
+   */
+  Real doubleContraction(const ColumnMajorMatrix & rhs);
+
+  /**
+   * The Euclidean norm of the matrix.
+   */
+  Real norm();
+  
+  /**
    * Sets the values in _this_ tensor to the values on the RHS.
    * Will also reshape this tensor if necessary.
    */
@@ -150,6 +175,11 @@ public:
    * Scalar Multiplication plus assignment
    */
   ColumnMajorMatrix & operator*=(Real scalar);
+
+  /**
+   * Scalar Division plus assignment
+   */
+  ColumnMajorMatrix & operator/=(Real scalar);
 
   /**
    * Scalar Addition plus assignment
@@ -244,10 +274,62 @@ ColumnMajorMatrix::transpose()
 inline void
 ColumnMajorMatrix::setDiag(Real value)
 {
+  mooseAssert(_n_rows == _n_cols, "Cannot set the diagonal of a non-square matrix!");
+
   for(unsigned int i=0; i<_n_rows; i++)
     (*this)(i,i) = value;
 }
 
+inline Real
+ColumnMajorMatrix::tr()
+{
+  mooseAssert(_n_rows == _n_cols, "Cannot find the trace of a non-square matrix!");
+  
+  Real trace = 0;
+  
+  for(unsigned int i=0; i<_n_rows; i++)
+    trace += (*this)(i,i);
+
+  return trace;
+}
+
+inline void
+ColumnMajorMatrix::zero()
+{
+  for(unsigned int i=0; i<_n_entries; i++)
+    _values[i] = 0;
+}
+
+inline void
+ColumnMajorMatrix::identity()
+{
+  mooseAssert(_n_rows == _n_cols, "Cannot set the diagonal of a non-square matrix!");
+
+  zero();
+
+  for(unsigned int i=0; i<_n_rows; i++)
+    (*this)(i,i) = 1;
+}
+
+inline Real
+ColumnMajorMatrix::doubleContraction(const ColumnMajorMatrix & rhs)
+{
+  mooseAssert(_n_rows == rhs._n_rows && _n_cols == rhs._n_cols, "Matrices must be the same shape for a double contraction!");
+  
+  Real value = 0;
+  
+  for(unsigned int j=0; j<_n_cols; j++)
+    for(unsigned int i=0; i<_n_rows; i++)
+      value += (*this)(i,j) * rhs(j, i);
+
+  return value;
+}
+
+inline Real
+ColumnMajorMatrix::norm()
+{
+  return std::sqrt(doubleContraction(*this));
+}
 
 inline ColumnMajorMatrix &
 ColumnMajorMatrix::operator=(const TypeTensor<Real> & rhs)
@@ -333,7 +415,7 @@ ColumnMajorMatrix::operator*(const ColumnMajorMatrix & rhs) const
   mooseAssert(_n_cols == rhs._n_rows, "Cannot perform matrix multiply!  The shapes of the two operands are not compatible!");
 
   ColumnMajorMatrix ret_matrix(_n_rows, rhs._n_cols);
-
+  
   for (unsigned int i=0; i<ret_matrix._n_rows; ++i)
     for (unsigned int j=0; j<ret_matrix._n_cols; ++j) 
       for (unsigned int k=0; k<_n_cols; ++k)
@@ -369,7 +451,7 @@ ColumnMajorMatrix::operator+=(const ColumnMajorMatrix & rhs)
 inline ColumnMajorMatrix &
 ColumnMajorMatrix::operator-=(const ColumnMajorMatrix & rhs)
 {
-  mooseAssert((_n_rows == rhs._n_rows) && (_n_cols == rhs._n_cols), "Cannot perform matrix addition and assignment!  The shapes of the two operands are not compatible!");
+  mooseAssert((_n_rows == rhs._n_rows) && (_n_cols == rhs._n_cols), "Cannot perform matrix subtraction and assignment!  The shapes of the two operands are not compatible!");
 
   for(unsigned int i=0; i<_n_entries; i++)
     _values[i] -= rhs._values[i];
@@ -393,6 +475,14 @@ ColumnMajorMatrix::operator*=(Real scalar)
 {
   for(unsigned int i=0; i<_n_entries; i++)
     _values[i] *= scalar;
+  return *this;
+}
+
+inline ColumnMajorMatrix &
+ColumnMajorMatrix::operator/=(Real scalar)
+{
+  for(unsigned int i=0; i<_n_entries; i++)
+    _values[i] /= scalar;
   return *this;
 }
 

@@ -8,6 +8,7 @@
 #include "BCFactory.h"
 #include "DirichletBC.h"
 #include "SinDirichletBC.h"
+#include "SinNeumannBC.h"
 #include "NeumannBC.h"
 #include "VectorNeumannBC.h"
 #include "VacuumBC.h"
@@ -115,6 +116,7 @@ Moose::registerObjects()
   
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<SinDirichletBC>("SinDirichletBC");
+  BCFactory::instance()->registerBC<SinNeumannBC>("SinNeumannBC");
   BCFactory::instance()->registerBC<NeumannBC>("NeumannBC");
   BCFactory::instance()->registerBC<VectorNeumannBC>("VectorNeumannBC");
   BCFactory::instance()->registerBC<VacuumBC>("VacuumBC");

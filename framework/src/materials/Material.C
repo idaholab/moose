@@ -272,7 +272,7 @@ Material::materialReinit()
       std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props_old.end();
 
       for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-        column_major_matrix_it->second.resize(qpoints,0);
+        column_major_matrix_it->second.resize(qpoints);
     }
 
     {      
@@ -305,7 +305,7 @@ Material::materialReinit()
       std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props_older.end();
 
       for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-        column_major_matrix_it->second.resize(qpoints,0);
+        column_major_matrix_it->second.resize(qpoints);
     }
 
   }
