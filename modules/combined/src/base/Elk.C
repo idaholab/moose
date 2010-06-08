@@ -37,6 +37,8 @@
 // solid_mechanics
 #include "StressDivergence.h"
 #include "LinearIsotropicMaterial.h"
+#include "PlasticMaterial.h"
+#include "DeltaGamma.h"
 
 void
 Elk::registerObjects()
@@ -72,5 +74,7 @@ Elk::registerObjects()
 
   // solid_mechanics
   KernelFactory::instance()->registerKernel<StressDivergence>("StressDivergence");
+  KernelFactory::instance()->registerKernel<DeltaGamma>("DeltaGamma");
   MaterialFactory::instance()->registerMaterial<LinearIsotropicMaterial>("LinearIsotropic");
+  MaterialFactory::instance()->registerMaterial<PlasticMaterial>("PlasticMaterial");
 }

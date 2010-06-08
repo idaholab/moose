@@ -4,6 +4,10 @@ template<>
 InputParameters validParams<SolidMechanicsMaterial>()
 {
   InputParameters params = validParams<Material>();
+  params.addRequiredCoupledVar("disp_x", "The x displacement");
+  params.addRequiredCoupledVar("disp_y", "The y displacement");
+  params.addRequiredCoupledVar("disp_z", "The z displacement");
+  params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
   return params;
 }
 
@@ -16,5 +20,8 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(std::string name, MooseSystem & m
    _temp(_has_temp ? coupledVal("temp") : _zero),
    _stress(declareTensorProperty("stress")),
    _elasticity_tensor(declareColumnMajorMatrixProperty("elasticity_tensor")),
-   _thermal_conductivity(declareRealProperty("thermal_conductivity"))
+   _elastic_strain(declareColumnMajorMatrixProperty("elastic_strain")),
+   _thermal_conductivity(declareRealProperty("thermal_conductivity")),
+   _density(declareRealProperty("density")),
+   _specific_heat(declareRealProperty("specific_heat"))
 {}

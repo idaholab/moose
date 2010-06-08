@@ -43,6 +43,10 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
   strain += strain.transpose();
   strain *= 0.5;
 
+  // Save that off as the elastic strain
+  _elastic_strain[_qp] = strain;
+
+  // Add in any extra strain components
   computeStrain(strain);
 
   // Add in Isotropic Thermal Strain
@@ -53,7 +57,7 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
     Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
     
     thermal_strain.setDiag(isotropic_strain);
-
+    
     strain -= thermal_strain;
   }
 
