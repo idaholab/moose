@@ -159,10 +159,7 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& /*soln*/, const
       area += q_point[qp](0) * jxw[qp];
   }
   else
-  {
-    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError("");
-  }
+    mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
 
   //Compute the average value of each variable on the element
 
@@ -250,10 +247,7 @@ AuxData::integrateValueAux(const MooseArray<Real> & vals, const std::vector<Real
       value += q_point[qp](0)*vals[qp]*JxW[qp];
   }
   else
-  {
-    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError("");
-  }
+    mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
 
   return value;
 }
@@ -274,11 +268,7 @@ AuxData::integrateGradientAux(const MooseArray<RealGradient> & grads, const std:
       value += q_point[qp](0)*grads[qp]*JxW[qp];
   }
   else
-  {
-    std::cerr << "geom_type must either XYZ or CYLINDRICAL" << std::endl;
-    mooseError("");
-  }
-
+    mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
 
   return value;
 }

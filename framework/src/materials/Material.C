@@ -373,8 +373,7 @@ Material::getConstantRealProperty(const std::string & name)
   if(it != _constant_real_props.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<Real> &
@@ -385,8 +384,7 @@ Material::getRealProperty(const std::string & name)
   if(it != _real_props.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealGradient> &
@@ -397,8 +395,7 @@ Material::getGradientProperty(const std::string & name)
   if(it != _gradient_props.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealVectorValue> &
@@ -409,8 +406,7 @@ Material::getRealVectorValueProperty(const std::string & name)
   if(it != _real_vector_value_props.end())
     return it->second;
   
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<MooseArray<Real> > &
@@ -421,8 +417,7 @@ Material::getVectorProperty(const std::string & name)
   if(it != _vector_props.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealTensorValue> &
@@ -433,8 +428,7 @@ Material::getTensorProperty(const std::string & name)
   if(it != _tensor_props.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<ColumnMajorMatrix> &
@@ -445,8 +439,7 @@ Material::getColumnMajorMatrixProperty(const std::string & name)
   if(it != _column_major_matrix_props.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<MooseArray<MooseArray<Real> > > &
@@ -457,8 +450,7 @@ Material::getMatrixProperty(const std::string & name)
   if(it != _matrix_props.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 
@@ -471,8 +463,7 @@ Material::getConstantRealPropertyOld(const std::string & name)
   if(it != _constant_real_props_old.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<Real> &
@@ -483,8 +474,7 @@ Material::getRealPropertyOld(const std::string & name)
   if(it != _real_props_old.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealGradient> &
@@ -495,8 +485,7 @@ Material::getGradientPropertyOld(const std::string & name)
   if(it != _gradient_props_old.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealVectorValue> &
@@ -507,8 +496,7 @@ Material::getRealVectorValuePropertyOld(const std::string & name)
   if(it != _real_vector_value_props_old.end())
     return it->second;
   
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<MooseArray<Real> > &
@@ -519,8 +507,7 @@ Material::getVectorPropertyOld(const std::string & name)
   if(it != _vector_props_old.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealTensorValue> &
@@ -531,8 +518,7 @@ Material::getTensorPropertyOld(const std::string & name)
   if(it != _tensor_props_old.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<ColumnMajorMatrix> &
@@ -543,8 +529,7 @@ Material::getColumnMajorMatrixPropertyOld(const std::string & name)
   if(it != _column_major_matrix_props_old.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<MooseArray<MooseArray<Real> > > &
@@ -555,8 +540,7 @@ Material::getMatrixPropertyOld(const std::string & name)
   if(it != _matrix_props_old.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 
@@ -569,8 +553,7 @@ Material::getConstantRealPropertyOlder(const std::string & name)
   if(it != _constant_real_props_older.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<Real> &
@@ -581,8 +564,7 @@ Material::getRealPropertyOlder(const std::string & name)
   if(it != _real_props_older.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealGradient> &
@@ -593,8 +575,7 @@ Material::getGradientPropertyOlder(const std::string & name)
   if(it != _gradient_props_older.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealVectorValue> &
@@ -605,8 +586,7 @@ Material::getRealVectorValuePropertyOlder(const std::string & name)
   if(it != _real_vector_value_props_older.end())
     return it->second;
   
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<MooseArray<Real> > &
@@ -617,8 +597,7 @@ Material::getVectorPropertyOlder(const std::string & name)
   if(it != _vector_props_older.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<RealTensorValue> &
@@ -629,8 +608,7 @@ Material::getTensorPropertyOlder(const std::string & name)
   if(it != _tensor_props_older.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<ColumnMajorMatrix> &
@@ -641,8 +619,7 @@ Material::getColumnMajorMatrixPropertyOlder(const std::string & name)
   if(it != _column_major_matrix_props_older.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
 
 MooseArray<MooseArray<MooseArray<Real> > > &
@@ -653,10 +630,8 @@ Material::getMatrixPropertyOlder(const std::string & name)
   if(it != _matrix_props_older.end())
     return it->second;
 
-  std::cerr<<"Material "<<_name<<" has no property named: "<<name;
-  mooseError("");
+  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
 }
-
 
 /**
  * Updates the old (first) material properties to the current/new material properies (second)
@@ -1012,10 +987,7 @@ unsigned int
 Material::coupled(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Material _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _coupled_as_to_var_num[name];
@@ -1027,11 +999,8 @@ MooseArray<Real> &
 Material::coupledVal(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
-
+    mooseError("Material _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
+  
   if(!isAux(name))
     return _data._var_vals[_tid][_coupled_as_to_var_num[name]];
   else
@@ -1042,10 +1011,7 @@ MooseArray<RealGradient> &
 Material::coupledGrad(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+      mooseError("Material _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _data._var_grads[_tid][_coupled_as_to_var_num[name]];

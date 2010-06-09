@@ -36,3 +36,5 @@ KernelsBlock::execute()
   // Add the kernels to the system
   visitChildren();
 }  
+
+  

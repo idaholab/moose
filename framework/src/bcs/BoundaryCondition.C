@@ -275,10 +275,7 @@ MooseArray<Real> &
 BoundaryCondition::coupledVal(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"BC "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("BC _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
   
   if(_integrated)
     return _moose_system._face_data._var_vals[_tid][_coupled_as_to_var_num[name]];
@@ -290,15 +287,12 @@ MooseArray<RealGradient> &
 BoundaryCondition::coupledGrad(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"BC "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("BC _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(_integrated)
     return _moose_system._face_data._var_grads[_tid][_coupled_as_to_var_num[name]];
 
-  mooseError("");
+  mooseError("Integrated BC required for coupled Gradient type\n");
 }
 
 bool
@@ -317,10 +311,7 @@ unsigned int
 BoundaryCondition::coupled(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("BC _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _coupled_as_to_var_num[name];

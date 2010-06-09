@@ -282,11 +282,8 @@ unsigned int
 Kernel::coupled(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
-
+    mooseError("Kernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
+  
   if(!isAux(name))
     return _coupled_as_to_var_num[name];
   else
@@ -297,10 +294,7 @@ MooseArray<Real> &
 Kernel::coupledVal(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Kernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _element_data._var_vals[_tid][_coupled_as_to_var_num[name]];
@@ -312,10 +306,7 @@ MooseArray<RealGradient> &
 Kernel::coupledGrad(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Kernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _element_data._var_grads[_tid][_coupled_as_to_var_num[name]];
@@ -327,10 +318,7 @@ MooseArray<RealTensor> &
 Kernel::coupledSecond(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Kernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   //Aux vars can't have second derivatives!
   return _element_data._var_seconds[_tid][_coupled_as_to_var_num[name]];
@@ -340,10 +328,7 @@ MooseArray<Real> &
 Kernel::coupledValOld(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Kernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _element_data._var_vals_old[_tid][_coupled_as_to_var_num[name]];
@@ -355,10 +340,7 @@ MooseArray<Real> &
 Kernel::coupledValOlder(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Kernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _element_data._var_vals_older[_tid][_coupled_as_to_var_num[name]];
@@ -370,10 +352,7 @@ MooseArray<RealGradient> &
 Kernel::coupledGradValOld(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Kernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
   
   return _element_data._var_grads_old[_tid][_coupled_as_to_var_num[name]];
 }

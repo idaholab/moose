@@ -172,10 +172,7 @@ unsigned int
 AuxKernel::coupled(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _coupled_as_to_var_num[name];
@@ -187,10 +184,7 @@ MooseArray<Real> &
 AuxKernel::coupledVal(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _element_data._var_vals[_tid][_coupled_as_to_var_num[name]];
@@ -202,10 +196,7 @@ MooseArray<RealGradient> &
 AuxKernel::coupledGrad(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _element_data._var_grads[_tid][_coupled_as_to_var_num[name]];
@@ -217,10 +208,7 @@ MooseArray<RealTensor> &
 AuxKernel::coupledSecond(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   //Aux vars can't have second derivatives!
   return _element_data._var_seconds[_tid][_coupled_as_to_var_num[name]];
@@ -230,10 +218,7 @@ MooseArray<Real> &
 AuxKernel::coupledValOld(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _element_data._var_vals_old[_tid][_coupled_as_to_var_num[name]];
@@ -245,10 +230,7 @@ MooseArray<Real> &
 AuxKernel::coupledValOlder(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(!isAux(name))
     return _element_data._var_vals_older[_tid][_coupled_as_to_var_num[name]];
@@ -260,10 +242,7 @@ MooseArray<RealGradient> &
 AuxKernel::coupledGradValOld(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"Kernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   return _element_data._var_grads_old[_tid][_coupled_as_to_var_num[name]];
 }
@@ -272,10 +251,7 @@ Real &
 AuxKernel::coupledValAux(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(_nodal)
   {
@@ -298,10 +274,7 @@ Real &
 AuxKernel::coupledValOldAux(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(_nodal)
   {
@@ -324,10 +297,7 @@ Real &
 AuxKernel::coupledValOlderAux(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(_nodal)
   {
@@ -350,16 +320,10 @@ RealGradient &
 AuxKernel::coupledGradAux(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(_nodal)
-  {
-    std::cerr<<std::endl<<"Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Gradient can not be recovered with nodal AuxKernel _" + _name + "_ with a variable coupled_as " + name + "\n\n");
   else
   {
     if(!isAux(name))
@@ -373,16 +337,10 @@ RealGradient &
 AuxKernel::coupledGradOldAux(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(_nodal)
-  {
-    std::cerr<<std::endl<<"Old Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Old Gradient can not be recovered with nodal AuxKernel _" + _name + "_ with a variable coupled_as " + name + "\n\n");
   else
   {
     if(!isAux(name))
@@ -396,16 +354,10 @@ RealGradient &
 AuxKernel::coupledGradOlderAux(std::string name)
 {
   if(!isCoupled(name))
-  {
-    std::cerr<<std::endl<<"AuxKernel "<<_name<<" was not provided with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
 
   if(_nodal)
-  {
-    std::cerr<<std::endl<<"Older Gradient can not be recovered with nodal AuxKernel "<<_name<<" with a variable coupled_as "<<name<<std::endl<<std::endl;
-    mooseError("");
-  }
+    mooseError("Older Gradient can not be recovered with nodal AuxKernel _" + _name + "_ with a variable coupled_as " + name + "\n\n");    
   else
   {
     if(!isAux(name))

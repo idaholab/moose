@@ -14,12 +14,8 @@ InputParameters
 AuxFactory::getValidParams(std::string name)
   {
     if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
-    {
-
-      std::cerr<<std::endl<<"A _"<<name<<"_ is not a registered Aux "<<std::endl<<std::endl;
-      mooseError("");
-
-    }
+      mooseError("\nA _" + name + "_ is not a registered Aux\n\n");
+    
     return _name_to_params_pointer[name]();
   }
 

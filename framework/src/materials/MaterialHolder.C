@@ -29,10 +29,8 @@ MaterialHolder::getMaterial(THREAD_ID tid, unsigned int block_id)
   {
     MaterialIterator mat_iter = _active_materials[tid].find(block_id);
     if (mat_iter == _active_materials[tid].end())
-    {
-      std::cerr << "Active Material Missing\n";
-      mooseError("");
-    }
+      mooseError("Active Material Missing\n");
+    
     return mat_iter->second;
   }
 
@@ -41,10 +39,8 @@ MaterialHolder::getBoundaryMaterial(THREAD_ID tid, unsigned int boundary_id)
   {
     MaterialIterator mat_iter = _active_boundary_materials[tid].find(boundary_id);
     if (mat_iter == _active_boundary_materials[tid].end())
-    {
-      std::cerr << "Active Boundary Material Missing\n";
-      mooseError("");
-    }
+      mooseError("Active Boundary Material Missing\n");
+    
     return mat_iter->second;
   }
 

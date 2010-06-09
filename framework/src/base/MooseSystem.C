@@ -241,11 +241,8 @@ void
 MooseSystem::setVarScaling(std::vector<Real> scaling)
 {
   if(scaling.size() != _system->n_vars())
-  {
-    std::cout<<"Error: size of scaling factor vector not the same as the number of variables in the system!"<<std::endl;
-    mooseError("");
-  }
-
+    mooseError("Error: Size of scaling factor vector not the same as the number of variables in the system!\n");
+  
   _scaling_factor = scaling;
 }
 
