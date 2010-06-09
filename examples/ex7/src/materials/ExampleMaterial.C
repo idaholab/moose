@@ -32,7 +32,7 @@ ExampleMaterial::ExampleMaterial(std::string name,
 void
 ExampleMaterial::computeProperties()
 {
-  for(unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for(unsigned int qp=0; qp<_n_qpoints; qp++)
   {
     _diffusivity[qp] = _input_diffusivity;
     _time_coefficient[qp] = _input_time_coefficient;
