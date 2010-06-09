@@ -15,5 +15,5 @@ import tools
 
 # create an instance of the test harness passing in the main arg vector
 # and the name of the application
-test_harness = tools.TestHarness(sys.argv, executable)
+test_harness = tools.TestHarness(sys.argv, app_name)
 test_harness.run_tests_and_exit()
