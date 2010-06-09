@@ -33,6 +33,7 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
    _is_transient(_moose_system._is_transient),
    _current_elem(_moose_system._element_data._current_elem[_tid]),
    _qrule(_data._qrule[_tid]),
+   _n_qpoints(_data._n_qpoints),
    _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
    _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
    _real_zero(_moose_system._real_zero[_tid]),

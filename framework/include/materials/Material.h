@@ -285,6 +285,11 @@ protected:
   QGauss * & _qrule;
 
   /**
+   * Current quadrature rule size
+   */
+  unsigned int & _n_qpoints;
+
+  /**
    * Variable numbers of the coupled variables.
    */
   std::vector<unsigned int> _coupled_var_nums;

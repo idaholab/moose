@@ -89,7 +89,8 @@ QuadraturePointData::init()
 void
 QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericVector<Number>& soln, const Elem * elem)
 {
-  unsigned int num_q_points = _qrule[tid]->n_points();
+  // set the number of quadrature points
+  _n_qpoints = _qrule[tid]->n_points();
 
   std::vector<unsigned int>::iterator var_num_it = _var_nums[block_id].begin();
   std::vector<unsigned int>::iterator var_num_end = _var_nums[block_id].end();
@@ -106,19 +107,19 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
 
     bool has_second_derivatives = (family == CLOUGH || family == HERMITE);
 
-    _var_vals[tid][var_num].resize(num_q_points);
-    _var_grads[tid][var_num].resize(num_q_points);
+    _var_vals[tid][var_num].resize(_n_qpoints);
+    _var_grads[tid][var_num].resize(_n_qpoints);
 
     if(has_second_derivatives)
-      _var_seconds[tid][var_num].resize(num_q_points);
+      _var_seconds[tid][var_num].resize(_n_qpoints);
 
     if(_moose_system._is_transient)
     {
-      _var_vals_old[tid][var_num].resize(num_q_points);
-      _var_grads_old[tid][var_num].resize(num_q_points);
+      _var_vals_old[tid][var_num].resize(_n_qpoints);
+      _var_grads_old[tid][var_num].resize(_n_qpoints);
 
-      _var_vals_older[tid][var_num].resize(num_q_points);
-      _var_grads_older[tid][var_num].resize(num_q_points);
+      _var_vals_older[tid][var_num].resize(_n_qpoints);
+      _var_grads_older[tid][var_num].resize(_n_qpoints);
     }
 
     const std::vector<std::vector<Real> > & static_phi = *_phi[tid][fe_type];
@@ -132,23 +133,23 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
                              _var_grads[tid][var_num], _var_grads_old[tid][var_num], _var_grads_older[tid][var_num],
                              _var_seconds[tid][var_num],
                              soln, *_moose_system.getNonlinearSystem()->old_local_solution, *_moose_system.getNonlinearSystem()->older_local_solution,
-                             _moose_system._var_dof_indices[tid][var_num], _qrule[tid]->n_points(),
+                             _moose_system._var_dof_indices[tid][var_num], _n_qpoints,
                              static_phi, static_dphi, static_d2phi);
       else
         computeQpSolutionAll(_var_vals[tid][var_num], _var_vals_old[tid][var_num], _var_vals_older[tid][var_num],
                              _var_grads[tid][var_num], _var_grads_old[tid][var_num], _var_grads_older[tid][var_num],
                              soln, *_moose_system.getNonlinearSystem()->old_local_solution, *_moose_system.getNonlinearSystem()->older_local_solution,
-                             _moose_system._var_dof_indices[tid][var_num], _qrule[tid]->n_points(),
+                             _moose_system._var_dof_indices[tid][var_num], _n_qpoints,
                              static_phi, static_dphi);
     }
     else
     {
       if( has_second_derivatives )
         computeQpSolutionAll(_var_vals[tid][var_num], _var_grads[tid][var_num],  _var_seconds[tid][var_num],
-                             soln, _moose_system._var_dof_indices[tid][var_num], _qrule[tid]->n_points(), static_phi, static_dphi, static_d2phi);
+                             soln, _moose_system._var_dof_indices[tid][var_num], _n_qpoints, static_phi, static_dphi, static_d2phi);
       else {
         computeQpSolutionAll(_var_vals[tid][var_num], _var_grads[tid][var_num],
-                             soln, _moose_system._var_dof_indices[tid][var_num], _qrule[tid]->n_points(), static_phi, static_dphi);
+                             soln, _moose_system._var_dof_indices[tid][var_num], _n_qpoints, static_phi, static_dphi);
       }
     }
   }
@@ -168,16 +169,16 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
 
     _moose_system._aux_dof_map->dof_indices(elem, _moose_system._aux_var_dof_indices[tid][var_num], var_num);
 
-    _aux_var_vals[tid][var_num].resize(num_q_points);
-    _aux_var_grads[tid][var_num].resize(num_q_points);
+    _aux_var_vals[tid][var_num].resize(_n_qpoints);
+    _aux_var_grads[tid][var_num].resize(_n_qpoints);
 
     if(_moose_system._is_transient)
     {
-      _aux_var_vals_old[tid][var_num].resize(num_q_points);
-      _aux_var_grads_old[tid][var_num].resize(num_q_points);
+      _aux_var_vals_old[tid][var_num].resize(_n_qpoints);
+      _aux_var_grads_old[tid][var_num].resize(_n_qpoints);
 
-      _aux_var_vals_older[tid][var_num].resize(num_q_points);
-      _aux_var_grads_older[tid][var_num].resize(num_q_points);
+      _aux_var_vals_older[tid][var_num].resize(_n_qpoints);
+      _aux_var_grads_older[tid][var_num].resize(_n_qpoints);
     }
 
     const std::vector<std::vector<Real> > & static_phi = *_phi[tid][fe_type];
@@ -189,12 +190,12 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
       computeQpSolutionAll(_aux_var_vals[tid][var_num], _aux_var_vals_old[tid][var_num], _aux_var_vals_older[tid][var_num],
                            _aux_var_grads[tid][var_num], _aux_var_grads_old[tid][var_num], _aux_var_grads_older[tid][var_num],
                            aux_soln, *_moose_system.getAuxSystem()->old_local_solution, *_moose_system.getAuxSystem()->older_local_solution,
-                           _moose_system._aux_var_dof_indices[tid][var_num], _qrule[tid]->n_points(), static_phi, static_dphi);
+                           _moose_system._aux_var_dof_indices[tid][var_num], _n_qpoints, static_phi, static_dphi);
     }
     else
     {
       computeQpSolutionAll(_aux_var_vals[tid][var_num], _aux_var_grads[tid][var_num],
-                           aux_soln, _moose_system._aux_var_dof_indices[tid][var_num], _qrule[tid]->n_points(), static_phi, static_dphi);
+                           aux_soln, _moose_system._aux_var_dof_indices[tid][var_num], _n_qpoints, static_phi, static_dphi);
     }
   }
 

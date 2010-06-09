@@ -36,15 +36,20 @@ public:
   MooseSystem & _moose_system;
 
   /**
-   * Boundary finite element.
+   * finite element.
    */
   std::vector<std::map<FEType, FEBase *> > _fe;
 
   /**
-   * Boundary quadrature rule.
+   * quadrature rule.
    */
   std::vector<QGauss *> _qrule;
 
+  /**
+   * number of quadrature points for current element
+   */
+  unsigned int _n_qpoints;
+  
   /**
    * XYZ coordinates of quadrature points
    */
