@@ -25,5 +25,5 @@ CoupledDirichletBC::CoupledDirichletBC(std::string name, MooseSystem & moose_sys
 Real
 CoupledDirichletBC::computeQpResidual()
 {
-  return _u_face[_qp]-(_value*_some_var_val[_qp]);
+  return _u[_qp]-(_value*_some_var_val[_qp]);
 }

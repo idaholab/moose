@@ -25,7 +25,7 @@ protected:
 private:
   Real _input_diffusivity;
   
-  std::vector<Real> & _diffusivity;
+  MooseArray<Real> & _diffusivity;
 };
 
 #endif //EXAMPLEMATERIAL_H

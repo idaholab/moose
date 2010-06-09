@@ -136,6 +136,23 @@ int main (int argc, char** argv)
   // Number of timesteps to take
   unsigned int num_steps = 20;
 
+  ////////////////
+  // Materials
+  ////////////////
+  
+  // Get the default values for the ExampleMaterial's parameters
+  InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
+
+  // Override the default diffusivity
+  mat_params.set<Real>("diffusivity") = diffusivity;
+
+  // Override the default time_coefficient
+  mat_params.set<Real>("time_coefficient") = time_coefficient;
+  mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
+
+  // Add the Example material into the calculation using the new diffusivity.
+  moose_system.addMaterial("ExampleMaterial", "example", mat_params);
+
   /**
    * Next we are going to define our coupling vectors.
    *
@@ -210,20 +227,7 @@ int main (int argc, char** argv)
   right_bc_params.set<std::string>("variable") = "v";
   moose_system.addBC("DirichletBC", "right", right_bc_params);
 
-
-  // Get the default values for the ExampleMaterial's parameters
-  InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
-
-  // Override the default diffusivity
-  mat_params.set<Real>("diffusivity") = diffusivity;
-
-  // Override the default time_coefficient
-  mat_params.set<Real>("time_coefficient") = time_coefficient;
-  mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
-
-  // Add the Example material into the calculation using the new diffusivity.
-  moose_system.addMaterial("ExampleMaterial", "example", mat_params);
-
+  
   // Create an output object that we can write to each timestep
   // Note that this ONLY works with Exodus!
   ExodusII_IO ex_out(mesh);

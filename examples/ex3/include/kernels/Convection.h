@@ -66,6 +66,6 @@ private:
    * Since this is a reference it MUST be set in the Initialization List of the
    * constructor!
    */
-  std::vector<RealGradient> & _grad_some_var;
+  MooseArray<RealGradient> & _grad_some_var;
 };
 #endif //CONVECTION_H

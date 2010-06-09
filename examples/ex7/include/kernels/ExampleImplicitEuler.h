@@ -20,13 +20,11 @@ public:
                        MooseSystem &sys,
                        InputParameters parameters);
 
-  virtual void subdomainSetup();
-
 protected:
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
 
-  std::vector<Real> * _time_coefficient;
+  MooseArray<Real> & _time_coefficient;
 };
 #endif //EXAMPLEIMPLICITEULER

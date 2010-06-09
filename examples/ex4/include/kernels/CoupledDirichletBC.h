@@ -37,7 +37,7 @@ private:
    * Holds the values at the quadrature points
    * of a coupled variable.
    */
-  std::vector<Real> & _some_var_val;
+  MooseArray<Real> & _some_var_val;
 };
 
 #endif //COUPLEDDIRICHLETBC_H

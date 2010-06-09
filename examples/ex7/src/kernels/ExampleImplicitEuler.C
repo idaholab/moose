@@ -16,23 +16,18 @@ InputParameters validParams<ExampleImplicitEuler>()
 ExampleImplicitEuler::ExampleImplicitEuler(std::string name,
                                            MooseSystem &sys,
                                            InputParameters parameters)
-  :ImplicitEuler(name,sys,parameters)
+  :ImplicitEuler(name,sys,parameters),
+   _time_coefficient(getRealMaterialProperty("time_coefficient"))
 {}
-
-void
-ExampleImplicitEuler::subdomainSetup()
-{
-  _time_coefficient = &_material->getRealProperty("time_coefficient");
-}
 
 Real
 ExampleImplicitEuler::computeQpResidual()
 {
-  return (*_time_coefficient)[_qp]*ImplicitEuler::computeQpResidual();
+  return _time_coefficient[_qp]*ImplicitEuler::computeQpResidual();
 }
 
 Real
 ExampleImplicitEuler::computeQpJacobian()
 {
-  return (*_time_coefficient)[_qp]*ImplicitEuler::computeQpJacobian();
+  return _time_coefficient[_qp]*ImplicitEuler::computeQpJacobian();
 }

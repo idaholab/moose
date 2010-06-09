@@ -109,6 +109,23 @@ int main (int argc, char** argv)
    *
    * Note that coupled_to and coupled_as are _paired_.
    */
+
+  ///////////////
+  // Materials
+  ///////////////
+  
+  // Get the default values for the ExampleMaterial's parameters
+  InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
+
+  // Override the default diffusivity
+  mat_params.set<Real>("diffusivity") = diffusivity;
+  mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
+
+  // Add the Example material into the calculation using the new diffusivity.
+  moose_system.addMaterial("ExampleMaterial", "example", mat_params);
+
+
+  
   std::vector<std::string> conv_coupled_to;
   std::vector<std::string> conv_coupled_as;
 
@@ -163,17 +180,6 @@ int main (int argc, char** argv)
 
   right_bc_params.set<std::string>("variable") = "v";
   moose_system.addBC("DirichletBC", "right", right_bc_params);
-
-
-  // Get the default values for the ExampleMaterial's parameters
-  InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
-
-  // Override the default diffusivity
-  mat_params.set<Real>("diffusivity") = diffusivity;
-  mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
-
-  // Add the Example material into the calculation using the new diffusivity.
-  moose_system.addMaterial("ExampleMaterial", "example", mat_params);
 
   // Solve the Nonlinear System
   moose_system.solve();

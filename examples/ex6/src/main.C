@@ -110,6 +110,16 @@ int main (int argc, char** argv)
 
   // Initialize the Systems and print some info out
   moose_system.init();
+  
+  // Get the default values for the ExampleMaterial's parameters
+  InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
+
+  // Override the default diffusivity
+  mat_params.set<Real>("diffusivity") = diffusivity;
+  mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
+
+  // Add the Example material into the calculation using the new diffusivity.
+  moose_system.addMaterial("ExampleMaterial", "example", mat_params);
 
   /**
    * Next we are going to define our coupling vectors.
@@ -129,7 +139,6 @@ int main (int argc, char** argv)
 
   conv_coupled_to.push_back("v");
   conv_coupled_as.push_back("some_var");
-
 
   //////////////
   // "u" Kernels
@@ -179,17 +188,7 @@ int main (int argc, char** argv)
 
   right_bc_params.set<std::string>("variable") = "v";
   moose_system.addBC("DirichletBC", "right", right_bc_params);
-
-  // Get the default values for the ExampleMaterial's parameters
-  InputParameters mat_params = MaterialFactory::instance()->getValidParams("ExampleMaterial");
-
-  // Override the default diffusivity
-  mat_params.set<Real>("diffusivity") = diffusivity;
-  mat_params.set<std::vector<unsigned int> >("block") = std::vector<unsigned int>(1, 1);
-
-  // Add the Example material into the calculation using the new diffusivity.
-  moose_system.addMaterial("ExampleMaterial", "example", mat_params);
-
+  
   {
     // Holds a scalar per element representing the error in that element
     ErrorVector error;

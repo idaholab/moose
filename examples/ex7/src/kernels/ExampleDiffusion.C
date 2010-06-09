@@ -18,17 +18,9 @@ InputParameters validParams<ExampleDiffusion>()
 ExampleDiffusion::ExampleDiffusion(std::string name,
                                    MooseSystem &sys,
                                    InputParameters parameters)
-  :Diffusion(name,sys,parameters)
+  :Diffusion(name,sys,parameters),
+   _diffusivity(getRealMaterialProperty("diffusivity"))
 {}
-
-void
-ExampleDiffusion::subdomainSetup()
-{
-  // We are grabbing the "diffusivity" material property
-  // that will be used on this subdomain.
-  // _material automatically points to the current material
-  _diffusivity = &_material->getRealProperty("diffusivity");
-}
 
 Real
 ExampleDiffusion::computeQpResidual()
@@ -39,7 +31,7 @@ ExampleDiffusion::computeQpResidual()
 
   // Also... we're reusing the Diffusion Kernel's residual
   // so that we don't have to recode that.
-  return (*_diffusivity)[_qp]*Diffusion::computeQpResidual();
+  return _diffusivity[_qp]*Diffusion::computeQpResidual();
 }
 
 Real
@@ -51,5 +43,5 @@ ExampleDiffusion::computeQpJacobian()
 
   // Also... we're reusing the Diffusion Kernel's residual
   // so that we don't have to recode that.
-  return (*_diffusivity)[_qp]*Diffusion::computeQpJacobian();
+  return _diffusivity[_qp]*Diffusion::computeQpJacobian();
 }
