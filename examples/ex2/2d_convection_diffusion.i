@@ -11,21 +11,21 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
-# This variable is not active in the list above 
-# therefore it is not used in the simulation
-  [./v]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 []
 
 [Kernels]
-  active = 'diff'
+  active = 'diff conv'
 
   [./diff]
     type = Diffusion
     variable = u
+  [../]
+
+  [./conv]
+    type = Convection
+    variable = u
+    x = 2.0
+    y = 0.0
   [../]
 []
 
@@ -35,14 +35,14 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = '1 3'
+    boundary = '1'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
     variable = u
-    boundary = '2 4'
+    boundary = '2'
     value = 1
   [../]
 []
