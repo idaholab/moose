@@ -13,9 +13,9 @@ double
 LinearInterpolation::sample(double x)
 {
   // endpoint cases
-  if (x < _x[0])
+  if (x <= _x[0])
     return _y[0];
-  if (x > _x[_x.size()-1])
+  if (x >= _x[_x.size()-1])
     return _y[_y.size()-1];
 
   for (unsigned int i=0; i<_x.size(); ++i)

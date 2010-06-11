@@ -45,6 +45,7 @@ MooseArray<T>::release()
 
 // Explicit Instantiations
 template class MooseArray<Real>;
+template class MooseArray<int>;
 
 template class MooseArray<VectorValue<Real> >;
 template class MooseArray<MooseArray<VectorValue<Real> > >;

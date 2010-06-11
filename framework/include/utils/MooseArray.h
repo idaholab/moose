@@ -142,8 +142,16 @@ inline
 void
 MooseArray<T>::resize(const unsigned int size, const T & default_value)
 {
-  if(size <= _allocated_size)
+  if (size <= _allocated_size)
+  {
+    //if we are making it larger and bothered to use default_value, fill in the default
+    if (size > _size)
+    {
+      for(unsigned int i=_size; i<size; i++)
+        _data[i] = default_value;
+    }
     _size = size;
+  }
   else
   {
     T * new_pointer = new T[size];

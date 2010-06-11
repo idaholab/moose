@@ -19,14 +19,13 @@ public:
 
   /* Constructor, Takes two vectors of points for which to apply the fit.  One should be of the
    * independant variable while the other should be of the dependant varible.  These values should
-   * correspond to one and other in the same position.  The third parameter is the requested polynomial
-   * order and the forth parameter tells the class whether or not it should truncate the order if there
-   * are not enough points for which to apply the polynomial fit.
+   * correspond to one and other in the same position.
    */
   LinearInterpolation(std::vector<double> X, std::vector<double> Y);
 
   virtual ~LinearInterpolation()
     {}
+
   /**
    * This function will take an indenandant variable input and will return the dependant variable
    * based on the generated fit
