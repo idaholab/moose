@@ -4,8 +4,7 @@
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-//Moose includes
-#include "ColumnMajorMatrix.h"
+class ColumnMajorMatrix;
 
 class ColumnMajorMatrixTest : public CppUnit::TestFixture 
 {

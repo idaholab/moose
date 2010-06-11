@@ -8,8 +8,18 @@
 #include "perf_log.h"
 
 //Moose includes
-#include "ColumnMajorMatrixTest.h"
 #include "Moose.h"
+
+//Moose Tests
+#include "ParallelUniqueIdTest.h"
+#include "LinearInterpolationTest.h"
+#include "MooseArrayTest.h"
+#include "ColumnMajorMatrixTest.h"
+
+//Elk Tests
+#ifdef ELK_TEST
+#include "IsotropicElasticityTensorTest.h"
+#endif
 
 #include <fstream>
 #include <string>

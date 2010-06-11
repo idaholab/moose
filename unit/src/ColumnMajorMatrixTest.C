@@ -1,5 +1,8 @@
 #include "ColumnMajorMatrixTest.h"
 
+//Moose includes
+#include "ColumnMajorMatrix.h"
+
 CPPUNIT_TEST_SUITE_REGISTRATION( ColumnMajorMatrixTest );
 
 void
