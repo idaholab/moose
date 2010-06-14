@@ -12,6 +12,7 @@
 // heat_conduction
 #include "HeatConduction.h"
 #include "HeatConductionImplicitEuler.h"
+#include "FluxBC.h"
 
 // navier_stokes
 #include "MassInviscidFlux.h"
@@ -50,6 +51,7 @@ Elk::registerObjects()
   // heat_conduction
   KernelFactory::instance()->registerKernel<HeatConduction>("HeatConduction");
   KernelFactory::instance()->registerKernel<HeatConductionImplicitEuler>("HeatConductionImplicitEuler");
+  BCFactory::instance()->registerBC<FluxBC>("FluxBC");
 
   // navier_stokes
   KernelFactory::instance()->registerKernel<MassInviscidFlux>("MassInviscidFlux");
