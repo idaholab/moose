@@ -5,6 +5,7 @@ InputParameters validParams<CoupledDirichletBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
   params.addParam<Real>("value", 0.0, "Value multiplied by the coupled value on the boundary");
+  params.addRequiredCoupledVar("some_var", "Value on the Boundary");
   return params;
 }
 

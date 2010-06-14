@@ -1,215 +1,72 @@
-//Local Includes
+/**
+ * Example 4 - Demonstrating Boundary Condition Coupling and active syntax in input file
+ * This example augments the third example (Convection-Diffusion) by adding custom boundary
+ * conditions selectable by changing the input file
+ */
+
+//Moose Includes
+#include "Parser.h"
+#include "Executioner.h"
+#include "MooseSystem.h"
+// Moose Registration
+#include "KernelFactory.h"
 #include "Convection.h"
+#include "BCFactory.h"
 #include "CoupledDirichletBC.h"
 #include "CoupledNeumannBC.h"
 
-//Moose Includes
-#include "Moose.h"
-#include "MooseSystem.h"
-#include "KernelFactory.h"
-#include "BCFactory.h"
-#include "MaterialFactory.h"
-#include "AuxFactory.h"
-#include "ComputeResidual.h"
-#include "ComputeJacobian.h"
-
-// C++ include files that we need
+// C++ include files
 #include <iostream>
-#include <fstream>
 
 // libMesh includes
-#include "libmesh.h"
 #include "perf_log.h"
-#include "mesh.h"
-#include "boundary_info.h"
-#include "exodusII_io.h"
-#include "equation_systems.h"
-#include "nonlinear_solver.h"
-#include "nonlinear_implicit_system.h"
-#include "linear_implicit_system.h"
-#include "transient_system.h"
-#include "mesh_refinement.h"
-#include "getpot.h"
 
-// Petsc includes
-#include <petsc.h>
+// Create a performance log
+PerfLog Moose::perf_log("Example 4");
 
-// Initialize default Performance Logging
-PerfLog Moose::perf_log("Example4");
-
-// Begin the main program.
+ // Begin the main program.
 int main (int argc, char** argv)
 {
-  // Initialize Moose
-  MooseInit init(argc, argv);
+  // Create a MooseInit Object
+  MooseInit init (argc, argv);
 
-  // Create a GetPot object to parse the command line
-  GetPot command_line (argc, argv);
+  // Create a single MooseSystem which can hold
+  // a single nonlinear system and single auxillary system
+  MooseSystem moose_system;
 
-  // A boolean telling us whether or not to use the NeumannBC
-  // we are going to default it to false.
-  bool use_neumann = false;
-
-  // Grab a boolean from the command-line
-  if(command_line.search("--use-neumann"))
-    use_neumann = command_line.next(use_neumann);
-
-  // A string and int to hold an optional mesh filename
-  // and dimension
-  std::string mesh_file = "square.e";
-  int mesh_dim = 2;
-  if(command_line.search("--mesh-file"))
-  {
-    mesh_file = command_line.next(mesh_file);
-    mesh_dim = command_line.next(mesh_dim);
-  }
-    
-  // Tell PetsC to use some default preconditioning
-  // by default this will build a block diagonal jacobian
-  // and employ ILU0 preconditioning
-  PetscOptionsSetValue("-snes_mf_operator",PETSC_NULL);
-
-  // This registers a bunch of common objects that exist in Moose with the factories.
-  // that includes several Kernels, BoundaryConditions, AuxKernels and Materials
+  // Register a bunch of common objects that exist inside of Moose.
+  // You will generally create a registerObjects method of your own
+  // to register modules that you create in your own application where
+  // you will generally call this method.
   Moose::registerObjects();
 
-  // Register a new kernel with the factory so we can use it in the computation.
+  // Register any custom objects you have built on the MOOSE Framework
   KernelFactory::instance()->registerKernel<Convection>("Convection");
-
+  
   // Register a new boundary condition with the factory so we can use it in the computation.
   BCFactory::instance()->registerBC<CoupledDirichletBC>("CoupledDirichletBC");
   BCFactory::instance()->registerBC<CoupledNeumannBC>("CoupledNeumannBC");
 
-  // Create the mesh object
-  Mesh mesh(mesh_dim);
-
-  // Read the mesh from an Exodus file and prepare it for use
-  ExodusII_IO exreader(mesh);
-  exreader.read(mesh_file);
-
-  // Create a MooseSystem
-  MooseSystem moose_system(mesh);
-
-  /**
-   * Do some uniform refinement of the mesh so we can capture the solution better.
-   */
-  //MeshRefinement mesh_refinement(mesh);
-  //mesh_refinement.uniformly_refine(2);
-
-  // Print some useful information about the mesh
-  mesh.print_info();
-
-  /**
-   * Add a variable named "u" to solve for.
-   * We are going to approximate it using First order Lagrange FEs
-   */
-  moose_system.addVariable("u", FIRST, LAGRANGE);
-
-  /**
-   * Add a variable named "v" to solve for.
-   * We are going to approximate it using First order Lagrange FEs
-   *
-   * We are going to couple this variable into the convection kernel for variable "u"
-   */
-  moose_system.addVariable("v", FIRST, LAGRANGE);
-
-  // Initialize the system
-  moose_system.init();
-
-  /**
-   * Next we are going to define our coupling vectors.
-   *
-   * coupled_to = the actual name of the coupled variable
-   *
-   * coupled_as = the name the Kernel _expects_...
-   *   This is essentially the name you pass to the Coupled*()
-   *   functions when you try to get a coupled variable in a Kernel.
-   *   In this case we call coupledGrad("some_var") in Convection.h
-   *   therefore the variable "v" is coupled_as "some_var.
-   *
-   * Note that coupled_to and coupled_as are _paired_.
-   */
-  std::vector<std::string> conv_coupled_to;
-  std::vector<std::string> conv_coupled_as;
-
-  conv_coupled_to.push_back("v");
-  conv_coupled_as.push_back("some_var");
-
-
-  //////////////
-  // "u" Kernels
-  //////////////
-
-  // Add a Diffusion Kernel from MOOSE into the calculation.
-  InputParameters diff_params = KernelFactory::instance()->getValidParams("Diffusion");
-  diff_params.addParam<std::string>("variable", "u", "variable for which to apply this kernel");
-  moose_system.addKernel("Diffusion", "diff", diff_params);
-
-  // Add the Convection Kernel from this application into the calculation
-  // Note that we are passing in our coupling vectors
-  InputParameters conv_params = KernelFactory::instance()->getValidParams("Convection");
-  conv_params.addParam<std::string>("variable", "u", "variable for which to apply this kernel");
-  conv_params.addParam<std::vector<std::string> >("coupled_to", conv_coupled_to, "coupled to variable");
-  conv_params.addParam<std::vector<std::string> >("coupled_as", conv_coupled_as, "coupled as variable");
-  moose_system.addKernel("Convection", "conv", conv_params);
-
-  // Add the two boundary conditions using the DirichletBC object from MOOSE
-  InputParameters left_bc_params = BCFactory::instance()->getValidParams("DirichletBC");
-  std::vector<unsigned int> boundary_ids(1);
-  boundary_ids[0] = 1;
-  left_bc_params.addParam("value", 0.0, "value on the left boundary") ;
-  left_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
-  left_bc_params.addParam<std::string>("variable", "u", "variable for which to apply this BC");
-  moose_system.addBC("DirichletBC", "left", left_bc_params);
-
-  InputParameters coupled_bc_params = BCFactory::instance()->getValidParams("DirichletBC");
-  boundary_ids[0] = 2;
-  coupled_bc_params.addParam("value", 2.0, "");
-  coupled_bc_params.addParam("boundary", boundary_ids, "");
-  coupled_bc_params.addParam<std::string>("variable", "u", "");
-  coupled_bc_params.addParam("coupled_to", conv_coupled_to, "");
-  coupled_bc_params.addParam("coupled_as", conv_coupled_as, "");
-  if(use_neumann)
-  {
-    // Use our new CoupledNeumannBC
-    moose_system.addBC("CoupledNeumannBC", "right", coupled_bc_params);
-  }
+  // Create the input file parser which takes a reference to the main
+  // MooseSystem
+  Parser p(moose_system);
+  
+  // Do some bare minimum command line parsing to look for a filename
+  // to parse
+  std::string input_filename = "";
+  if ( Moose::command_line->search("-i") )
+    input_filename = Moose::command_line->next(input_filename);
   else
-  {
-    // Use our new CoupledDirichletBC
-    moose_system.addBC("CoupledDirichletBC", "right", coupled_bc_params);
-  }
+    mooseError("Must specify an input file using -i");      
 
-  //////////////
-  // "v" Kernels
-  //////////////
+  // Tell the parser to parse the given file to setup the simulation and execute
+  p.parse(input_filename);
+  p.execute();
 
-  // Add a Diffusion Kernel from MOOSE into the calculation.
-  diff_params.set<std::string>("variable") = "v";
-  moose_system.addKernel("Diffusion", "diff", diff_params);
+  if(!Moose::executioner)
+    mooseError("Executioner not supplied!");
 
-  // Add the two boundary conditions using the DirichletBC object from MOOSE
-  left_bc_params.set<std::string>("variable") = "v";
-  moose_system.addBC("DirichletBC", "left", left_bc_params);
-
-  InputParameters right_bc_params = BCFactory::instance()->getValidParams("DirichletBC");
-  boundary_ids[0] = 2;
-  right_bc_params.addParam("value", 1.0, "value on the right boundary");
-  right_bc_params.addParam("boundary", boundary_ids, "exodus boundary number for which to apply this BC");
-  right_bc_params.addParam<std::string>("variable", "v", "variable for which to apply this BC");
-  moose_system.addBC("DirichletBC", "right", right_bc_params);
-
-  // Every calculation MUST add at least one Material
-  // Here we use the EmptyMaterial from MOOSE because we don't need material properties.
-  InputParameters material_params = MaterialFactory::instance()->getValidParams("EmptyMaterial");
-  material_params.addParam("block", std::vector<unsigned int>(1, 1), "block that this material is associated with");
-  moose_system.addMaterial("EmptyMaterial", "empty", material_params);
-
-  // Solve the Nonlinear System
-  moose_system.solve();
-
-  // Write the solution out.
-  moose_system.output_system(0, 1);
-
-  return 0;
+  // Run the executioner once the problem has been setup by the parser
+  Moose::executioner->setup();
+  Moose::executioner->execute();
 }

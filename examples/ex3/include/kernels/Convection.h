@@ -1,7 +1,7 @@
-#include "Kernel.h"
-
 #ifndef CONVECTION_H
 #define CONVECTION_H
+
+#include "Kernel.h"
 
 /**
  * The forward declaration is so that we can declare the validParams function
@@ -66,6 +66,7 @@ private:
    * Since this is a reference it MUST be set in the Initialization List of the
    * constructor!
    */
-  MooseArray<RealGradient> & _grad_some_var;
+  MooseArray<RealGradient> & _velocity_vector;
 };
+
 #endif //CONVECTION_H
