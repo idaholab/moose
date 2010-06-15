@@ -18,10 +18,14 @@ class MooseArrayTest : public CppUnit::TestFixture
   CPPUNIT_TEST( size );
   CPPUNIT_TEST( access );
   CPPUNIT_TEST( shallowCopy );
+  CPPUNIT_TEST( testCrashBug );
 
   CPPUNIT_TEST_SUITE_END();
   
 public:
+  void setUp();
+  void tearDown();
+
   void defaultConstructor();
   void sizeConstructor();
   void valueConstructor();
@@ -32,6 +36,7 @@ public:
   void size();
   void access();
   void shallowCopy();
+  void testCrashBug();
 
 private:
 };
