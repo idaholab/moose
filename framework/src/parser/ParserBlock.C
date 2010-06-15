@@ -175,24 +175,6 @@ ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only
         }
         else
           _parser_handle.deferExecution(*i);                 // Add to the deferred list of prereqs not met
-    
-
-
-
-/*      
-      if (!check_prereqs || checkPrereqs(*i))                      // Check Prereqs before executing if requested
-      {
-        if (!_parser_handle.isExecuted((*i)->getID())) 
-        { 
-          ((*i)->*action)();                                       // Call the method through the function pointer
-          _parser_handle.markExecuted((*i)->getID());              // Add the executed block to the executed set
-
-          if (!_deferred_execution)                                // Execute deferred blocks unless we are
-            executeDeferred(action);                               // already executing deferred blocks
-        }
-      }
-      else
-      _parser_handle.deferExecution(*i);                         // Add to the deferred list of prereqs not met*/
   }
   executeDeferred(action);                                         // execute deferred blocks before going on
 }
