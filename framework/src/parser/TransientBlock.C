@@ -1,4 +1,4 @@
-#ifdef 0   // DEPRECATED - USE EXECUTIONER SYSTEM
+#if 0   // DEPRECATED - USE EXECUTIONER SYSTEM
 
 #include "TransientBlock.h"
 #include "Moose.h"
