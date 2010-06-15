@@ -287,15 +287,10 @@ Parser::buildFullTree( const std::string format )
   for (ExecutionerNamesIterator i = ExecutionerFactory::instance()->registeredExecutionersBegin();
        i != ExecutionerFactory::instance()->registeredExecutionersEnd(); ++i)
   {
-    std::cerr << "\n\n\n" + *i +"\n\n\n";
     params.set<std::string>("type") = *i;
     curr_block->_children.push_back(ParserBlockFactory::instance()->add("Executioner", _moose_system, params));
   }
 
-  // DEBUG
-  for (unsigned int i=0; i<curr_block->_children.size(); ++i)
-    std::cerr << "\n\n\n" << curr_block->_children[i]->getID() << "\n\n\n";
-  
   if (format == "yaml")
     _input_tree->printBlockYAML();
   else // "dump" is all that's left
