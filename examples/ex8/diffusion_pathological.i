@@ -4,8 +4,31 @@
   uniform_refine = 4
 []
 
+# Note: This output block is out of it's normal place (should be at the bottom)
+[Output]
+  file_base = out
+  interval = 1
+  exodus = true
+[]
+
+# Note: The executioner is out of it's normal place (should be just about the output block)
+[Executioner]
+	type = Steady
+	perf_log = true
+	petsc_options = '-snes_mf_operator'
+[]
+
+[Materials]
+  active = empty
+
+  [./empty]
+    type = EmptyMaterial
+    block = 1
+  [../]
+[]
+
 [Variables]
-  active = 'u'
+  active = 'u'   # Note the active list here
 
   [./u]
     order = FIRST
@@ -29,6 +52,7 @@
   [../]
 []
 
+# This example applies DirichletBCs to all four sides of our square domain
 [BCs]
   active = 'left right'
 
@@ -46,26 +70,5 @@
     value = 1
   [../]
 []
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
-[Executioner]
-	type = Steady
-	perf_log = true
-	petsc_options = '-snes_mf_operator'
-[]
-
-[Output]
-  file_base = out
-  interval = 1
-  exodus = true
-[]
-   
+  
     
