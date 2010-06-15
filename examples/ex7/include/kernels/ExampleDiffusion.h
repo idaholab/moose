@@ -12,7 +12,6 @@ class ExampleDiffusion;
 template<>
 InputParameters validParams<ExampleDiffusion>();
 
-
 class ExampleDiffusion : public Diffusion
 {
 public:
