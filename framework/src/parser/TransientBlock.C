@@ -1,3 +1,5 @@
+#ifdef 0   // DEPRECATED - USE EXECUTIONER SYSTEM
+
 #include "TransientBlock.h"
 #include "Moose.h"
 
@@ -53,3 +55,5 @@ TransientBlock::setOutOfOrderTransientParams(Parameters & params) const
   params.set<Real> ("ss_tmin")                         = getParamValue<Real> ("ss_tmin");
   params.set<Real> ("reject_step_error")               = getParamValue<Real> ("reject_step_error");
 }
+
+#endif

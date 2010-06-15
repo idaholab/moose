@@ -43,8 +43,8 @@
 #include "GenericStabilizerBlock.h"
 #include "MaterialsBlock.h"
 #include "GenericMaterialBlock.h"
-#include "ExecutionBlock.h"
-#include "TransientBlock.h"
+//#include "ExecutionBlock.h"
+//#include "TransientBlock.h"
 #include "OutputBlock.h"
 #include "PreconditioningBlock.h"
 #include "PBPBlock.h"
@@ -152,9 +152,9 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<GenericStabilizerBlock>("Stabilizers/*");
   ParserBlockFactory::instance()->registerParserBlock<MaterialsBlock>("Materials");
   ParserBlockFactory::instance()->registerParserBlock<GenericMaterialBlock>("Materials/*");
-  ParserBlockFactory::instance()->registerParserBlock<ExecutionBlock>("Execution");
-  ParserBlockFactory::instance()->registerParserBlock<TransientBlock>("Execution/Transient");
-  ParserBlockFactory::instance()->registerParserBlock<AdaptivityBlock>("Execution/Adaptivity");
+//  ParserBlockFactory::instance()->registerParserBlock<ExecutionBlock>("Execution");
+//  ParserBlockFactory::instance()->registerParserBlock<TransientBlock>("Execution/Transient");
+//  ParserBlockFactory::instance()->registerParserBlock<AdaptivityBlock>("Execution/Adaptivity");
   ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
   ParserBlockFactory::instance()->registerParserBlock<PreconditioningBlock>("Preconditioning");
   ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");

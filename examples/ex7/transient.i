@@ -100,8 +100,8 @@
   perf_log = true
   petsc_options = '-snes_mf_operator'
 
-  num_steps = 20
-  dt = 0.5
+  num_steps = 400
+  dt = 0.005
 
   [../]
 []

@@ -157,6 +157,29 @@ ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only
   for (i=_children.begin(); i!=_children.end(); ++i)
   { 
     if (!visit_active_only || child_set.find((*i)->getShortName()) != child_set.end())
+
+      // Simple traversals (check prereqs = off) don't require any special logic - just run!
+      if (!check_prereqs)
+         ((*i)->*action)();
+      else
+        if (checkPrereqs(*i))                                // Check Prereqs and defer if not met
+        {
+          if (!_parser_handle.isExecuted((*i)->getID()))     // Just ignore this block if already executed
+          {
+            ((*i)->*action)();                               // Call the method through the function pointer
+            _parser_handle.markExecuted((*i)->getID());      // Add the current block to the executed set
+
+            if (!_deferred_execution)                        // Execute deferred blocks unless we are
+              executeDeferred(action);                       // already executing deferred blocks
+          }
+        }
+        else
+          _parser_handle.deferExecution(*i);                 // Add to the deferred list of prereqs not met
+    
+
+
+
+/*      
       if (!check_prereqs || checkPrereqs(*i))                      // Check Prereqs before executing if requested
       {
         if (!_parser_handle.isExecuted((*i)->getID())) 
@@ -169,7 +192,7 @@ ParserBlock::visitChildren(void (ParserBlock::*action)(), bool visit_active_only
         }
       }
       else
-        _parser_handle.deferExecution(*i);                         // Add to the deferred list of prereqs not met
+      _parser_handle.deferExecution(*i);                         // Add to the deferred list of prereqs not met*/
   }
   executeDeferred(action);                                         // execute deferred blocks before going on
 }

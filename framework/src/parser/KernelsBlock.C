@@ -29,9 +29,12 @@ KernelsBlock::execute()
 #endif
 
   // See if there is a transient block and setup time params before calling Kernel::init()
-  TransientBlock * t_block = dynamic_cast<TransientBlock *>(locateBlock("Execution/Transient"));
-  if (t_block != NULL) 
-    t_block->setOutOfOrderTransientParams(_moose_system.getEquationSystems()->parameters);
+
+// DEPRECATED
+//  TransientBlock * t_block = dynamic_cast<TransientBlock *>(locateBlock("Execution/Transient"));
+//  if (t_block != NULL) 
+//    t_block->setOutOfOrderTransientParams(_moose_system.getEquationSystems()->parameters);
+// DEPRECATED
 
   // Add the kernels to the system
   visitChildren();

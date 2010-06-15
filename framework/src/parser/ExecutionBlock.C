@@ -1,3 +1,5 @@
+#ifdef 0   // DEPRECATED - USE EXECUTIONER SYSTEM
+
 #include "ExecutionBlock.h"
 #include "Moose.h"
 
@@ -111,3 +113,5 @@ ExecutionBlock::execute()
 
   visitChildren();
 }
+
+#endif
