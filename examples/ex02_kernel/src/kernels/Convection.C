@@ -40,11 +40,11 @@ Convection::Convection(std::string name,
 Real Convection::computeQpResidual()
 {
   // velocity * _grad_u[_qp] is actually doing a dot product
-  return _phi[_i][_qp]*(velocity*_grad_u[_qp]);
+  return _test[_i][_qp]*(velocity*_grad_u[_qp]);
 }
 
 Real Convection::computeQpJacobian()
 {
-  // the partial derivative of _grad_u is just _dphi[_j]
-  return _phi[_i][_qp]*(velocity*_grad_phi[_j][_qp]);
+  // the partial derivative of _grad_u is just _grad_phi[_j]
+  return _test[_i][_qp]*(velocity*_grad_phi[_j][_qp]);
 }

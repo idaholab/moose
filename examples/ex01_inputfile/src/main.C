@@ -1,7 +1,7 @@
 /**
- * Example 1 - The smallest MOOSE based applicatino possible.  It solves a simple 2D
- * diffusion problem with Dirichlet boundary conditions using built-in objects from
- * MOOSE.  All steps objects are setup with data from the input file
+ * Example 1: Input File - The smallest MOOSE based application possible.  It solves
+ * a simple 2D diffusion problem with Dirichlet boundary conditions using built-in
+ * objects from MOOSE.
  */
 
 //Moose Includes
@@ -16,7 +16,7 @@
 #include "perf_log.h"
 
 // Create a performance log
-PerfLog Moose::perf_log("Example 1");
+PerfLog Moose::perf_log("Example 1: Input File");
 
  // Begin the main program.
 int main (int argc, char** argv)

@@ -1,7 +1,8 @@
-#include "Diffusion.h"
-
 #ifndef EXAMPLEDIFFUSION_H
 #define EXAMPLEDIFFUSION_H
+
+#include "Diffusion.h"
+
 //Forward Declarations
 class ExampleDiffusion;
 
@@ -12,6 +13,10 @@ class ExampleDiffusion;
 template<>
 InputParameters validParams<ExampleDiffusion>();
 
+/**
+ * This Kernel inherits from Diffusion not directly
+ * from Kernel.
+ */
 class ExampleDiffusion : public Diffusion
 {
 public:
