@@ -1,6 +1,6 @@
 all:: examples
 
-dirlist := $(wildcard ex?/ ex??/)
+dirlist := $(wildcard ex*/)
 
 #
 # Build the example programs

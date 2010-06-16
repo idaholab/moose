@@ -25,8 +25,7 @@
   active = 'example_diff conv diff'
 
   [./example_diff]
-    # This Kernel uses "diffusivity" from the active material 
-    type = ExampleDiffusion
+    type = Diffusion
     variable = u
   [../]
 
@@ -72,7 +71,7 @@
     type = DirichletBC
     variable = v
     boundary = '2'
-    value = 1
+    value = 10
   [../]
 
 []
@@ -81,9 +80,8 @@
   active = empty
 
   [./empty]
-    type = ExampleMaterial
+    type = EmptyMaterial
     block = 1
-    diffusivity = 0.1
   [../]
 []
 
