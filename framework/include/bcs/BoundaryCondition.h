@@ -88,11 +88,6 @@ public:
    */
   bool isIntegrated();
 
-  /**
-   * Sets the "_integrated" parameter and returns a reference for use in the parent constructor
-   */
-  InputParameters & setIntegratedParam(InputParameters & params, bool integrated);
-
 protected:
   
   /**

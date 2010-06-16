@@ -6,14 +6,14 @@ template<>
 InputParameters validParams<SinNeumannBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
-  params.set<Real>("initial")=0.0;
-  params.set<Real>("final")=0.0;
-  params.set<Real>("duration")=0.0;
+  params.addParam<Real>("initial", 0.0, "The initial value of the gradient on the boundary");
+  params.addParam<Real>("final", 0.0,   "The final value of the gradient on the boundary");
+  params.addParam<Real>("duration", 0.0, "The duration of the ramp");
   return params;
 }
 
 SinNeumannBC::SinNeumannBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, true)),
+  :BoundaryCondition(name, moose_system, parameters),
    _initial(_parameters.get<Real>("initial")),
    _final(_parameters.get<Real>("final")),
    _duration(_parameters.get<Real>("duration"))

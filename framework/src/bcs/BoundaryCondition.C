@@ -12,6 +12,8 @@ template<>
 InputParameters validParams<BoundaryCondition>()
 {
   InputParameters params;
+  params.addPrivateParam<bool>("_integrated", true);
+
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
   params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this boundary condition is coupled to.");
@@ -262,13 +264,6 @@ bool
 BoundaryCondition::isIntegrated()
 {
   return _integrated;
-}
-
-InputParameters &
-BoundaryCondition::setIntegratedParam(InputParameters & params, bool integrated)
-{
-  params.set<bool>("_integrated") = integrated;
-  return params;
 }
 
 MooseArray<Real> &

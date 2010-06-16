@@ -4,12 +4,12 @@ template<>
 InputParameters validParams<VacuumBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
-  params.set<Real>("alpha")=1;
+  params.addParam<Real>("alpha", 1, "No idea.");
   return params;
 }
 
 VacuumBC::VacuumBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, true)),
+  :BoundaryCondition(name, moose_system, parameters),
     _alpha(_parameters.get<Real>("alpha"))
   {}
 

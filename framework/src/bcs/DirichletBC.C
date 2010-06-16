@@ -4,17 +4,18 @@ template<>
 InputParameters validParams<DirichletBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
-  params.set<Real>("value")=0.0;
+  params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
+  params.set<bool>("_integrated") = false;
   return params;
 }
 
 DirichletBC::DirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, false)),
+  :BoundaryCondition(name, moose_system, parameters),
     _value(_parameters.get<Real>("value"))
-  {}
+{}
 
 Real
 DirichletBC::computeQpResidual()
-  {
-    return _u[_qp]-_value;
-  }
+{
+  return _u[_qp]-_value;
+}

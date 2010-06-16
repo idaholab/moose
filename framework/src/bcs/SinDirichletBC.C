@@ -8,11 +8,13 @@ InputParameters validParams<SinDirichletBC>()
   params.set<Real>("initial")=0.0;
   params.set<Real>("final")=0.0;
   params.set<Real>("duration")=0.0;
+
+  params.set<bool>("_integrated") = false;
   return params;
 }
 
 SinDirichletBC::SinDirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, false)),
+  :BoundaryCondition(name, moose_system, parameters),
    _initial(_parameters.get<Real>("initial")),
    _final(_parameters.get<Real>("final")),
    _duration(_parameters.get<Real>("duration"))
