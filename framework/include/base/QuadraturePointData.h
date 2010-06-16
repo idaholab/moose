@@ -68,12 +68,12 @@ public:
   /**
    * Gradient of side shape function.
    */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _dphi;
+  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _grad_phi;
 
   /**
    * Second derivative of interior shape function.
    */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _d2phi;
+  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _second_phi;
 
 
   /**

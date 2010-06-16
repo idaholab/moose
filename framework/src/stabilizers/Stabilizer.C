@@ -28,7 +28,7 @@ Stabilizer::Stabilizer(std::string name, MooseSystem & moose_system, InputParame
   _current_elem(_element_data._current_elem[_tid]),
   _phi(*(_element_data._phi[_tid])[_fe_type]),
   _test((_element_data._test[_tid])[_var_num]),
-  _dtest(*(_element_data._dphi[_tid])[_fe_type]),
+  _grad_test(*(_element_data._grad_phi[_tid])[_fe_type]),
   _qrule(_element_data._qrule[_tid])
 {
 }

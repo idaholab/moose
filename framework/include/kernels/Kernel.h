@@ -315,22 +315,22 @@ protected:
   /**
    * Gradient of interior shape function.
    */
-  const std::vector<std::vector<RealGradient> > & _dphi;
+  const std::vector<std::vector<RealGradient> > & _grad_phi;
 
   /**
    * Gradient of interior test function.
    */
-  const std::vector<std::vector<RealGradient> > & _dtest;
+  const std::vector<std::vector<RealGradient> > & _grad_test;
 
   /**
    * Second derivative of interior shape function.
    */
-  const std::vector<std::vector<RealTensor> > & _d2phi;
+  const std::vector<std::vector<RealTensor> > & _second_phi;
 
   /**
    * Second derivative of interior test function.
    */
-  const std::vector<std::vector<RealTensor> > & _d2test;
+  const std::vector<std::vector<RealTensor> > & _second_test;
 
   /**
    * Current quadrature rule.

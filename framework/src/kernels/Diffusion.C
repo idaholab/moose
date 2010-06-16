@@ -15,11 +15,11 @@ Diffusion::Diffusion(std::string name, MooseSystem & moose_system, InputParamete
 Real
 Diffusion::computeQpResidual()
 {
-  return _dtest[_i][_qp]*_grad_u[_qp];
+  return _grad_test[_i][_qp]*_grad_u[_qp];
 }
 
 Real
 Diffusion::computeQpJacobian()
 {
-  return _dtest[_i][_qp]*_dphi[_j][_qp];
+  return _grad_test[_i][_qp]*_grad_phi[_j][_qp];
 }

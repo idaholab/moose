@@ -40,8 +40,8 @@ QuadraturePointData::sizeEverything()
   _q_point.resize(n_threads);
   _JxW.resize(n_threads);
   _phi.resize(n_threads);
-  _dphi.resize(n_threads);
-  _d2phi.resize(n_threads);
+  _grad_phi.resize(n_threads);
+  _second_phi.resize(n_threads);
 
   _var_vals.resize(n_threads);
   _var_vals_old.resize(n_threads);
@@ -123,8 +123,8 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
     }
 
     const std::vector<std::vector<Real> > & static_phi = *_phi[tid][fe_type];
-    const std::vector<std::vector<RealGradient> > & static_dphi= *_dphi[tid][fe_type];
-    const std::vector<std::vector<RealTensor> > & static_d2phi= *_d2phi[tid][fe_type];
+    const std::vector<std::vector<RealGradient> > & static_dphi= *_grad_phi[tid][fe_type];
+    const std::vector<std::vector<RealTensor> > & static_d2phi= *_second_phi[tid][fe_type];
 
     if (_moose_system._is_transient)
     {
@@ -182,7 +182,7 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
     }
 
     const std::vector<std::vector<Real> > & static_phi = *_phi[tid][fe_type];
-    const std::vector<std::vector<RealGradient> > & static_dphi= *_dphi[tid][fe_type];
+    const std::vector<std::vector<RealGradient> > & static_dphi= *_grad_phi[tid][fe_type];
 
 
     if (_moose_system._is_transient)

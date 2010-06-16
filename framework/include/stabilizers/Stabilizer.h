@@ -126,7 +126,7 @@ protected:
   /**
    * Gradient of interior test function.
    */
-  const std::vector<std::vector<RealGradient> > & _dtest;
+  const std::vector<std::vector<RealGradient> > & _grad_test;
 
   /**
    * Current quadrature rule.

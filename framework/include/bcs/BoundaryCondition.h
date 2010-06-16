@@ -238,12 +238,12 @@ protected:
   /**
    * Gradient of side shape function.
    */
-  const std::vector<std::vector<RealGradient> > & _dphi;
+  const std::vector<std::vector<RealGradient> > & _grad_phi;
 
   /**
    * Second derivative of side shape function.
    */
-  const std::vector<std::vector<RealTensor> > & _d2phi;
+  const std::vector<std::vector<RealTensor> > & _second_phi;
 
   /**
    * Normal vectors at the quadrature points.

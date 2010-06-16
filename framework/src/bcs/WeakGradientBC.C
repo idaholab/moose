@@ -22,6 +22,6 @@ WeakGradientBC::computeQpResidual()
 Real
 WeakGradientBC::computeQpJacobian()
   {
-    return (_dphi[_j][_qp]*_normals[_qp])*_phi[_i][_qp];
+    return (_grad_phi[_j][_qp]*_normals[_qp])*_phi[_i][_qp];
   }
 

@@ -64,13 +64,13 @@ void FaceData::init()
         _q_point[tid][fe_type] = &_fe[tid][fe_type]->get_xyz();
         _JxW[tid][fe_type] = &_fe[tid][fe_type]->get_JxW();
         _phi[tid][fe_type] = &_fe[tid][fe_type]->get_phi();
-        _dphi[tid][fe_type] = &_fe[tid][fe_type]->get_dphi();
+        _grad_phi[tid][fe_type] = &_fe[tid][fe_type]->get_dphi();
         _normals[tid][fe_type] = &_fe[tid][fe_type]->get_normals();
 
         FEFamily family = fe_type.family;
 
         if(family == CLOUGH || family == HERMITE)
-          _d2phi[tid][fe_type] = &_fe[tid][fe_type]->get_d2phi();
+          _second_phi[tid][fe_type] = &_fe[tid][fe_type]->get_d2phi();
       }
     }
   }
