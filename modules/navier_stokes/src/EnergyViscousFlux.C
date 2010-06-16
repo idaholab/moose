@@ -35,7 +35,7 @@ EnergyViscousFlux::computeQpResidual()
   // Tau dot velocity
   vec += _viscous_stress_tensor[_qp] * velocity;
 
-  return vec*_dtest[_i][_qp];
+  return vec*_grad_test[_i][_qp];
 }
 
 Real
@@ -44,26 +44,26 @@ EnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   if(jvar == _u_vel_var)
   {
     RealVectorValue velocity(_phi[_j][_qp],0,0);
-    return ( _viscous_stress_tensor[_qp] * velocity ) *_dtest[_i][_qp];
+    return ( _viscous_stress_tensor[_qp] * velocity ) *_grad_test[_i][_qp];
   }
   else if(jvar == _v_vel_var)
   {
     RealVectorValue velocity(0,_phi[_j][_qp],0);
-    return ( _viscous_stress_tensor[_qp] * velocity ) *_dtest[_i][_qp];
+    return ( _viscous_stress_tensor[_qp] * velocity ) *_grad_test[_i][_qp];
   }
   else if(jvar == _w_vel_var)
   {
     RealVectorValue velocity(0,0,_phi[_j][_qp]);
-    return ( _viscous_stress_tensor[_qp] * velocity ) *_dtest[_i][_qp];
+    return ( _viscous_stress_tensor[_qp] * velocity ) *_grad_test[_i][_qp];
   }
   else if(jvar == _temp_var)
   {
-    RealVectorValue vec = _dphi[_j][_qp];
+    RealVectorValue vec = _grad_phi[_j][_qp];
 
     // -(-k*grad_T)
     vec *= _thermal_conductivity[_qp];
 
-    return vec*_dtest[_i][_qp];
+    return vec*_grad_test[_i][_qp];
   }
 
   return 0;

@@ -24,7 +24,7 @@ StressDivergence::StressDivergence(std::string name, MooseSystem & moose_system,
 Real
 StressDivergence::computeQpResidual()
 {
-  Real r = _stress[_qp].row(_component) * _dtest[_i][_qp];
+  Real r = _stress[_qp].row(_component) * _grad_test[_i][_qp];
   
   return r;
 }
@@ -36,11 +36,11 @@ StressDivergence::computeQpJacobian()
   for(unsigned int j = 0; j<LIBMESH_DIM; j++)
     for(unsigned int i = 0; i<LIBMESH_DIM; i++)
     {
-      value(i) += 0.5*_elasticity_tensor[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _dphi[_j][_qp](j);
-      value(i) += 0.5*_elasticity_tensor[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _dphi[_j][_qp](j);
+      value(i) += 0.5*_elasticity_tensor[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
+      value(i) += 0.5*_elasticity_tensor[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
     }
   
-  return value * _dtest[_i][_qp];
+  return value * _grad_test[_i][_qp];
 }
 
 Real
@@ -56,7 +56,7 @@ StressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
   RealVectorValue value;
   for(unsigned int j = 0; j<LIBMESH_DIM; j++)
     for(unsigned int i = 0; i<LIBMESH_DIM; i++)
-      value(i) += _elasticity_tensor[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*coupled_component)+j) * _dphi[_j][_qp](j);
+      value(i) += _elasticity_tensor[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*coupled_component)+j) * _grad_phi[_j][_qp](j);
   
-  return value * _dphi[_i][_qp];
+  return value * _grad_phi[_i][_qp];
 }

@@ -39,7 +39,7 @@ SolidMechY::computeQpResidual()
       _stress(2) = _c1*_c3*_strain(1,2);
     }
 
-    Real value = (_stress*_dtest[_i][_qp]);
+    Real value = (_stress*_grad_test[_i][_qp]);
     
     return value;
   }
@@ -49,7 +49,7 @@ SolidMechY::computeQpJacobian()
   {
     recomputeConstants();
 
-    Real value = _c1*(_dtest[_i][_qp]*(_B22*_dphi[_j][_qp]));
+    Real value = _c1*(_grad_test[_i][_qp]*(_B22*_grad_phi[_j][_qp]));
 
     return value;
   }
@@ -62,9 +62,9 @@ SolidMechY::computeQpOffDiagJacobian(unsigned int jvar)
     RealGradient value = 0;
 
     if(jvar == _x_var)
-      value += _B21*_dphi[_j][_qp];
+      value += _B21*_grad_phi[_j][_qp];
     else if(jvar == _z_var)
-      value += _B23*_dphi[_j][_qp];
+      value += _B23*_grad_phi[_j][_qp];
 
-    return _c1*(_dtest[_i][_qp]*value);
+    return _c1*(_grad_test[_i][_qp]*value);
   }

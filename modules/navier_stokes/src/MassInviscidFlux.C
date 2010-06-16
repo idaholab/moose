@@ -22,7 +22,7 @@ MassInviscidFlux::computeQpResidual()
 {
   RealVectorValue vec(_pu[_qp],_pv[_qp],_pw[_qp]);
 
-  return -(vec*_dtest[_i][_qp]);
+  return -(vec*_grad_test[_i][_qp]);
 }
 
 Real
@@ -31,7 +31,7 @@ MassInviscidFlux::computeQpJacobian()
   //Essentially a vector of the velocities
   RealVectorValue vec(_pu[_qp]/_u[_qp],_pv[_qp]/_u[_qp],_pw[_qp]/_u[_qp]);
 
-  return -(_phi[_j][_qp]*vec*_dtest[_i][_qp]);
+  return -(_phi[_j][_qp]*vec*_grad_test[_i][_qp]);
 }
 
 Real
@@ -40,17 +40,17 @@ MassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
   if(jvar == _pu_var)
   {
     RealVectorValue vec(_phi[_j][_qp],0,0);
-    return -(vec*_dtest[_i][_qp]);
+    return -(vec*_grad_test[_i][_qp]);
   }
   else if(jvar == _pv_var)
   {
     RealVectorValue vec(0,_phi[_j][_qp],0);
-    return -(vec*_dtest[_i][_qp]);
+    return -(vec*_grad_test[_i][_qp]);
   }
   else if(jvar == _pw_var)
   {
     RealVectorValue vec(0,0,_phi[_j][_qp]);
-    return -(vec*_dtest[_i][_qp]);
+    return -(vec*_grad_test[_i][_qp]);
   }
 
   return 0;

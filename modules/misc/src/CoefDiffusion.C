@@ -17,11 +17,11 @@ CoefDiffusion::CoefDiffusion(std::string name, MooseSystem & moose_system, Input
 Real
 CoefDiffusion::computeQpResidual()
 {
-  return _coef*_dtest[_i][_qp]*_grad_u[_qp];
+  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
 }
 
 Real
 CoefDiffusion::computeQpJacobian()
 {
-  return _coef*_dtest[_i][_qp]*_dphi[_j][_qp];
+  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
 }
