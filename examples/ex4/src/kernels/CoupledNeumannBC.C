@@ -10,7 +10,7 @@ InputParameters validParams<CoupledNeumannBC>()
 }
 
 CoupledNeumannBC::CoupledNeumannBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
- :BoundaryCondition(name, moose_system, setIntegratedParam(parameters, true)),
+ :BoundaryCondition(name, moose_system, parameters),
   _value(_parameters.get<Real>("value")),
   _some_var_val(coupledVal("some_var"))
 {}

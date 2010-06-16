@@ -45,6 +45,6 @@ Real Convection::computeQpResidual()
 
 Real Convection::computeQpJacobian()
 {
-  // the partial derivative of _grad_u is just _dphi[_j]
-  return _phi[_i][_qp]*(_velocity_vector[_qp]*_dphi[_j][_qp]);
+  // the partial derivative of _grad_u is just _grad_phi[_j]
+  return _phi[_i][_qp]*(_velocity_vector[_qp]*_grad_phi[_j][_qp]);
 }
