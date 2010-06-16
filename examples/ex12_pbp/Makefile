@@ -59,7 +59,7 @@ libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/ics -Iinclude/kernels -Iin
 ###############################################################################
 # Target:
 #
-target 	   := ./ex11-$(METHOD)
+target 	   := ./ex12-$(METHOD)
 
 
 all:: $(target)
@@ -82,7 +82,7 @@ doc:
 
 # Useful rules.
 clean:
-	@rm -f ex11-*
+	@rm -f ex12-*
 	@find . -name "*~" -or -name "*.o" | xargs rm
 	@rm -f .depend
 

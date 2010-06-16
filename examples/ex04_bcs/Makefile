@@ -59,7 +59,7 @@ libmesh_INCLUDE += -Iinclude -Iinclude/kernels -Iinclude/user -Iinclude/material
 ###############################################################################
 # Target:
 #
-target 	   := ./ex4-$(METHOD)
+target 	   := ./ex04-$(METHOD)
 
 
 all:: $(target)
@@ -82,7 +82,7 @@ doc:
 
 # Useful rules.
 clean:
-	@rm -f ex4-*
+	@rm -f ex04-*
 	@find . -name "*~" -or -name "*.o" | xargs rm
 	@rm -f .depend
 

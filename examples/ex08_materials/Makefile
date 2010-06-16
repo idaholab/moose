@@ -42,7 +42,7 @@ fobjects        := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 
 #
 # phasefield objects and build rule
-ex3PFobjects 	:= $(patsubst %.C, %-pf.$(obj-suffix), $(srcfiles))
+ex5PFobjects 	:= $(patsubst %.C, %-pf.$(obj-suffix), $(srcfiles))
 pfobjects 	:= $(PF_DIR)/src/pf.o 
 %-pf.$(obj-suffix) : %.C
 	@echo "Compiling C++ (in "$(mode)" mode) "$<"..."
@@ -59,7 +59,7 @@ libmesh_INCLUDE += -Iinclude -Iinclude/kernels -Iinclude/user -Iinclude/material
 ###############################################################################
 # Target:
 #
-target 	   := ./ex3-$(METHOD)
+target 	   := ./ex08-$(METHOD)
 
 
 all:: $(target)
@@ -70,19 +70,19 @@ $(target): $(fobjects) $(objects) $(moose_LIB) $(mesh_library)
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
 
 with-pf:
-#	@touch src/Ex3.C src/materials/Meso.C src/materials/MesoData.C
+#	@touch src/Ex5.C src/materials/Meso.C src/materials/MesoData.C
 	@$(MAKE) with-pf_ libmesh_CXXFLAGS="$(libmesh_CXXFLAGS) -DWITH_PF" libmesh_INCLUDE="$(libmesh_INCLUDE) -I$(PF_DIR)/include"
 
-with-pf_: $(ex3PFobjects) $(fobjects) $(moose_LIB) $(mesh_library)
+with-pf_: $(ex5PFobjects) $(fobjects) $(moose_LIB) $(mesh_library)
 	@echo "Linking "$(target)-pf"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(ex3PFobjects) $(pfobjects) $(fobjects) -o $(target)-pf $(libmesh_LIBS) $(libmesh_LDFLAGS) 	$(HYPRE_LINK_FLAGS)
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(ex5PFobjects) $(pfobjects) $(fobjects) -o $(target)-pf $(libmesh_LIBS) $(libmesh_LDFLAGS) 	$(HYPRE_LINK_FLAGS)
 
 doc:
 	doxygen ./doc/Doxyfile
 
 # Useful rules.
 clean:
-	@rm -f ex3-*
+	@rm -f ex08-*
 	@find . -name "*~" -or -name "*.o" | xargs rm
 	@rm -f .depend
 
