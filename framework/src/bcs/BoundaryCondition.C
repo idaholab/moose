@@ -48,6 +48,12 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _phi(*moose_system._face_data._phi[_tid][_fe_type]),
    _grad_phi(*moose_system._face_data._grad_phi[_tid][_fe_type]),
    _second_phi(*moose_system._face_data._second_phi[_tid][_fe_type]),
+
+  // TODO: Fix this holy hack!
+   _test(*moose_system._face_data._phi[_tid][_fe_type]),
+   _grad_test(*moose_system._face_data._grad_phi[_tid][_fe_type]),
+   _second_test(*moose_system._face_data._second_phi[_tid][_fe_type]),
+  
    _normals(*moose_system._face_data._normals[_tid][_fe_type]),
    _qrule(moose_system._face_data._qrule[_tid]),
    _q_point(*moose_system._face_data._q_point[_tid][_fe_type]),

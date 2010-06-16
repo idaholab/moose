@@ -275,6 +275,11 @@ protected:
   bool & _is_transient;
 
   /**
+   * Current time step.
+   */
+  int & _t_step;
+
+  /**
    * Current element
    */
   const Elem * & _current_elem;

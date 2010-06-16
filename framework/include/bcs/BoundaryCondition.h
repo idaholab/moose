@@ -241,6 +241,21 @@ protected:
   const std::vector<std::vector<RealTensor> > & _second_phi;
 
   /**
+   * Side shape function.
+   */
+  const std::vector<std::vector<Real> > & _test;
+
+  /**
+   * Gradient of side shape function.
+   */
+  const std::vector<std::vector<RealGradient> > & _grad_test;
+
+  /**
+   * Second derivative of side shape function.
+   */
+  const std::vector<std::vector<RealTensor> > & _second_test;
+
+  /**
    * Normal vectors at the quadrature points.
    */
   const std::vector<Point>& _normals;

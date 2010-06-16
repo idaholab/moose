@@ -31,6 +31,7 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
    _dt(_moose_system._dt),
    _dt_old(_moose_system._dt_old),
    _is_transient(_moose_system._is_transient),
+   _t_step(_moose_system._t_step),
    _current_elem(_moose_system._element_data._current_elem[_tid]),
    _qrule(_data._qrule[_tid]),
    _n_qpoints(_data._n_qpoints),
