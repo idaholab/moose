@@ -20,5 +20,5 @@ CoupledNeumannBC::CoupledNeumannBC(std::string name, MooseSystem & moose_system,
 Real
 CoupledNeumannBC::computeQpResidual()
 {
-  return -_phi[_i][_qp]*_value*_some_var_val[_qp];
+  return -_test[_i][_qp]*_value*_some_var_val[_qp];
 }
