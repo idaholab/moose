@@ -4,7 +4,6 @@ template<>
 InputParameters validParams<Convection>()
 {
   InputParameters params = validParams<Kernel>();
-
   params.addRequiredCoupledVar("velocity_vector", "Velocity Vector for the Convection Kernel");
     
   return params;
@@ -16,8 +15,7 @@ Convection::Convection(std::string name,
 
   :Kernel(name, sys, parameters),
    _velocity_vector(coupledGrad("velocity_vector"))
-{
-}
+{}
 
 Real Convection::computeQpResidual()
 {

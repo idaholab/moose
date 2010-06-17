@@ -8,9 +8,13 @@
   active = 'u'
 
   [./u]
+    # Note that we do not have the 'active' parameter here.  Since it 
+    # is missing we will automatically pickup all nested blocks
     order = FIRST
     family = LAGRANGE
 
+    # Use the initial Condition block underneath the variable
+    # for which we want to apply this initial condition
     [./InitialCondition]
       type = ExampleIC
       value = 2.0;
@@ -46,7 +50,7 @@
 []
 
 [Materials]
-  active = empty
+  active = 'empty'
 
   [./empty]
     type = EmptyMaterial
@@ -61,6 +65,9 @@
 []
 
 [Output]
+  # Request that we output the initial condition so we can inspect
+  # the values with our visualization tool
+  output_initial = true  
   file_base = out
   interval = 1
   exodus = true

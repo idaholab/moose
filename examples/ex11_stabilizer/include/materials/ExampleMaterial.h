@@ -9,9 +9,6 @@ class ExampleMaterial;
 template<>
 InputParameters validParams<ExampleMaterial>();
 
-/**
- * Example material class that defines a few properties.
- */
 class ExampleMaterial : public Material
 {
 public:

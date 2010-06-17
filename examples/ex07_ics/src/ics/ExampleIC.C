@@ -18,7 +18,12 @@ ExampleIC::ExampleIC(std::string name,
 Real
 ExampleIC::value(const Point & p)
 {
-  // _value * x
+  /**
+   * _value * x
+   * The Point class is defined in libMesh.  The spacial
+   * coordinates x,y,z can be accessed individually using
+   * the parenthesis operator and a numeric index from 0..2
+   */
   return _value*p(0);
 }
 

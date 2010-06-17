@@ -1,6 +1,7 @@
 #ifndef EXAMPLEIC_H
 #define EXAMPLEIC_H
 
+// MOOSE Includes
 #include "Kernel.h"
 #include "InitialCondition.h"
 
@@ -26,15 +27,11 @@ class ExampleIC : public InitialCondition
 public:
 
   /**
-   * Constructor
-   *
-   * @param name The name given to the initial condition in the input file.
-   * @param parameters The parameters object holding data for the class to use.
-   * @param var_name The variable this InitialCondtion is supposed to provide values for.
+   * Constructor: Same as the rest of the MOOSE Objects
    */
   ExampleIC(std::string name,
             MooseSystem & moose_system,
-             InputParameters parameters);
+            InputParameters parameters);
 
   /**
    * The value of the variable at a point.

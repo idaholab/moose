@@ -22,9 +22,9 @@
   active = 'example_diff conv diff euler'
 
   [./example_diff]
-    # This Kernel uses "diffusivity" from the active material 
     type = ExampleDiffusion
     variable = u
+    diffusivity = 0.1
   [../]
 
   [./conv]
@@ -41,6 +41,7 @@
   [./euler]
     type = ExampleImplicitEuler
     variable = v
+    time_coefficient = 20.0
   [../]
 []
 
@@ -83,15 +84,8 @@
   active = empty
 
   [./empty]
-    type = ExampleMaterial
+    type = EmptyMaterial
     block = 1
-    diffusivity = 0.5
-    time_coefficient = 20.0    # New Input paramater use in our Example Material
-    
-    # Note: These values here are input parameters and in general may or may not correlate with
-    # the actual values of the material properties.  That functionality is determined by the
-    # computeProperties function within the material.  In this case the input parameters are
-    # used directly as the material properties of the same name
   [../]
 []
 

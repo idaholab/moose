@@ -2,6 +2,8 @@
  * Example 6: Transient Analysis
  * This example demonstrates how to use the builtin transient executioner.
  * Shows the creation of a time kernel "ExampleImplicitEuler"
+ *
+ * Additional registrations are added but the rest of main stays the same
  */
 
 // Moose Includes
@@ -9,14 +11,11 @@
 #include "Executioner.h"
 #include "MooseSystem.h"
 #include "KernelFactory.h"
-#include "MaterialFactory.h"
 
 // Example 6 Includes
 #include "ExampleDiffusion.h"
 #include "Convection.h"
 #include "ExampleImplicitEuler.h"
-
-#include "ExampleMaterial.h"
 
 // C++ include files
 #include <iostream>
@@ -25,7 +24,7 @@
 #include "perf_log.h"
 
 // Create a performance log
-PerfLog Moose::perf_log("Example 6");
+PerfLog Moose::perf_log("Example 6: Transient Analysis");
 
 int main (int argc, char** argv)
 {
@@ -39,9 +38,6 @@ int main (int argc, char** argv)
   KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
   KernelFactory::instance()->registerKernel<ExampleImplicitEuler>("ExampleImplicitEuler");
   
-  // Register our new material class so we can use it.
-  MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
-
   Parser p(moose_system);
   
   std::string input_filename = "";

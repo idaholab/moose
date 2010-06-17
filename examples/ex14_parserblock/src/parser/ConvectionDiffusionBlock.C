@@ -6,7 +6,7 @@ template<>
 InputParameters validParams<ConvectionDiffusionBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
-
+  
   params.addParam<std::vector<std::string> >("variables", "The diffusion-convection and diffusion variables respectively");
   return params;
 }
@@ -19,6 +19,12 @@ void
 ConvectionDiffusionBlock::execute() 
 {
   std::vector<std::string> variables = getBlockParams().get<std::vector<std::string> >("variables");
+
+  /**
+   * We need to manually setup our Convection-Diffusion and Diffusion variables on our two
+   * variables we are expecting from the input file.  Much of the syntax below is hidden by the
+   * parser system but we have to set things up ourselves this time.
+   */
 
   // Do some error checking
   mooseAssert(variables.size() == 2, "Expected 2 variables, received " + variables.size());

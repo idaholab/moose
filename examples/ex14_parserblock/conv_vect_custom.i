@@ -23,6 +23,10 @@
 
   # This is our new custom Convection Diffusion "Meta" block
   # that adds multiple kernels into our simulation
+  #
+  # Convection and Diffusion kernels on the first variable
+  # Diffusion kernel on the second variable
+  # The Convection kernel is coupled to the Diffusion kernel on the second variable
   [./ConvectionDiffusion]
     variables = 'u v'
   [../]

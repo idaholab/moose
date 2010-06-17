@@ -12,7 +12,6 @@
 #include "KernelFactory.h"
 
 // Example 5 Registration
-#include "ExampleDiffusion.h"
 #include "Convection.h"
 
 // C++ include files
@@ -32,7 +31,6 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   KernelFactory::instance()->registerKernel<Convection>("Convection");
-  KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
 
   Parser p(moose_system);
   

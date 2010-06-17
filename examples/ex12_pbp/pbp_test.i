@@ -17,6 +17,7 @@
   [../]
 []
 
+# The Preconditioning block
 [Preconditioning]
   active = 'PBP'
 

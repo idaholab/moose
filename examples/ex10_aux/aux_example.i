@@ -13,6 +13,9 @@
   [../]
 []
 
+# Here is the AuxVariables section where we declare the variables that
+# will hold the AuxKernel calcuations.  The declaration syntax is very 
+# similar to that of the regular variables section
 [AuxVariables]
   active = 'nodal_aux element_aux'
 
@@ -36,6 +39,8 @@
   [../]
 []
 
+# Here is the AuxKernels section where we enable the AuxKernels, link
+# them to our AuxVariables, set coupling parameters, and set input parameters 
 [AuxKernels]
   active = 'nodal_example element_example'
   
@@ -43,16 +48,14 @@
     type = ExampleAux
     variable = nodal_aux
     value = 3.0
-    coupled_to = u
-    coupled_as = coupled
+    coupled = u
   [../]
 
   [./element_example]
     type = ExampleAux
     variable = element_aux
     value = 4.0
-    coupled_to = u
-    coupled_as = coupled
+    coupled = u
   [../]
 []
 

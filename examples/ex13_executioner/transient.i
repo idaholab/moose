@@ -22,7 +22,6 @@
   active = 'example_diff conv diff euler'
 
   [./example_diff]
-    # This Kernel uses "diffusivity" from the active material 
     type = ExampleDiffusion
     variable = u
   [../]
@@ -80,22 +79,20 @@
 []
 
 [Materials]
-  active = empty
+  active = 'example'
 
-  [./empty]
+  [./example]
     type = ExampleMaterial
     block = 1
     diffusivity = 0.5
-    time_coefficient = 20.0    # New Input paramater use in our Example Material
-    
-    # Note: These values here are input parameters and in general may or may not correlate with
-    # the actual values of the material properties.  That functionality is determined by the
-    # computeProperties function within the material.  In this case the input parameters are
-    # used directly as the material properties of the same name
+    time_coefficient = 20.0 
   [../]
 []
 
 [Executioner]
+  # Each simulation has a single executioner so we don't specify them
+  # in subblocks.  Instead we just change the type inside the Executioner.
+
   type = TransientHalf   # Here we use our custom Executioner
   perf_log = true
   petsc_options = '-snes_mf_operator'
@@ -104,8 +101,6 @@
   dt = 1
   ratio = 0.5
   min_dt = 0.01
-
-  [../]
 []
 
 [Output]

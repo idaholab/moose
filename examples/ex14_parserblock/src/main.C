@@ -1,17 +1,19 @@
 /**
- * Example 13 - Demonstrating Custom Parser Blocks
+ * Example 14: Custom Parser Block
  * This example runs our favorite Convection Diffusion problems but uses
- * a custom parser block to add the kernels all together
+ * a custom parser block to add the kernels all together with one new
+ * block in our input file instead of listing everything explicitly
  */
 
 //Moose Includes
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-// Moose Registration
 #include "KernelFactory.h"
+#include "ParserBlockFactory.h"    // <- Need to include the ParserBlockFactory
+
+// Example 14 Includes
 #include "Convection.h"
-#include "ParserBlockFactory.h"
 #include "ConvectionDiffusionBlock.h"
 
 // C++ include files
@@ -20,49 +22,42 @@
 // libMesh includes
 #include "perf_log.h"
 
-// Create a performance log
-PerfLog Moose::perf_log("Example 13");
+PerfLog Moose::perf_log("Example 14: Custom Parser Block");
 
- // Begin the main program.
 int main (int argc, char** argv)
 {
-  // Create a MooseInit Object
   MooseInit init (argc, argv);
 
-  // Create a single MooseSystem which can hold
-  // a single nonlinear system and single auxillary system
   MooseSystem moose_system;
-
-  // Register a bunch of common objects that exist inside of Moose.
-  // You will generally create a registerObjects method of your own
-  // to register modules that you create in your own application where
-  // you will generally call this method.
+  
   Moose::registerObjects();
 
-  // Register any custom objects you have built on the MOOSE Framework
   KernelFactory::instance()->registerKernel<Convection>("Convection");
+
+  /**
+   * Registering a Parser Block is a little different than registering the other MOOSE
+   * objects.  The name of what you register should match the fully qualified block
+   * name where this block is expected in the input file.  The wildcard character can
+   * also be used provided it replaces an entire "directory" (between parens) if
+   * your block should be matched for multiple cases.  One final thing to note is that you
+   * don't specify a leading slash ever in your registration names
+   */
   ParserBlockFactory::instance()->registerParserBlock<ConvectionDiffusionBlock>("Kernels/ConvectionDiffusion");
 
-  // Create the input file parser which takes a reference to the main
-  // MooseSystem
   Parser p(moose_system);
   
-  // Do some bare minimum command line parsing to look for a filename
-  // to parse
   std::string input_filename = "";
   if ( Moose::command_line->search("-i") )
     input_filename = Moose::command_line->next(input_filename);
   else
-    mooseError("Must specify an input file using -i");      
-
-  // Tell the parser to parse the given file to setup the simulation and execute
+    mooseError("Must specify an input file using -i");
+  
   p.parse(input_filename);
   p.execute();
 
   if(!Moose::executioner)
     mooseError("Executioner not supplied!");
-
-  // Run the executioner once the problem has been setup by the parser
+  
   Moose::executioner->setup();
   Moose::executioner->execute();
 }

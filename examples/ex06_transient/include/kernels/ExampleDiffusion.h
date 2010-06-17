@@ -1,13 +1,13 @@
-#include "Diffusion.h"
-
 #ifndef EXAMPLEDIFFUSION_H
 #define EXAMPLEDIFFUSION_H
+
+#include "Diffusion.h"
+
 //Forward Declarations
 class ExampleDiffusion;
 
-/**
- * validParams returns the parameters that this Kernel accepts / needs
- * The actual body of the function MUST be in the .C file.
+/* This class extends the Diffusion kernel to multiply by a coefficient
+ * read from the input file
  */
 template<>
 InputParameters validParams<ExampleDiffusion>();
@@ -24,6 +24,6 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  MooseArray<Real> & _diffusivity;
+  Real _diffusivity;
 };
 #endif //EXAMPLEDIFFUSION_H

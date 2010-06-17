@@ -24,7 +24,11 @@ protected:
 
 private:
   Real _input_diffusivity;
-  
+
+  /**
+   * Create two MooseArray Refs to hold the current
+   * and previous material properties respectively
+   */
   MooseArray<Real> & _diffusivity;
   MooseArray<Real> & _diffusivity_old;
 };
