@@ -3,12 +3,9 @@
 
 
 #include "MooseArray.h"
+#include "PDEBase.h"
 #include "QuadraturePointData.h"
 #include "ColumnMajorMatrix.h"
-
-//libmesh includes
-#include "tensor_value.h"
-#include "quadrature_gauss.h"
 
 //forward declarations
 class Material;
@@ -23,10 +20,10 @@ InputParameters validParams<Material>();
 /**
  * Holds material properties that are assigned to blocks.
  */
-class Material
+class Material :
+  public PDEBase
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -196,31 +193,7 @@ public:
    */
   virtual void timeStepSetup();
 
-  /**
-   * This virtual gets called every time the subdomain changes.  This is useful for doing pre-calcualtions
-   * that should only be done once per subdomain.  In particular this is where references to material
-   * property vectors should be initialized.
-   */
-  virtual void subdomainSetup();
-
 protected:
-
-  QuadraturePointData &getQuadraturePointData(InputParameters &parameters);
-
-  /**
-   * This Material's name.
-   */
-  std::string _name;
-
-  /**
-   * Reference to the MooseSystem that this Kernel is associated to
-   */
-  MooseSystem & _moose_system;
-
-  /**
-   * Convenience reference to the ElementData object inside of MooseSystem
-   */
-  QuadraturePointData & _data;
 
   /**
    * Convenience reference to the MaterialData object inside of MooseSystem
@@ -228,135 +201,15 @@ protected:
   MaterialData & _material_data;
   
   /**
-   * The thread id this kernel is associated with.
-   */
-  THREAD_ID _tid;
-
-  /**
-   * Holds parameters for derived classes so they can be built with common constructor.
-   */
-  InputParameters _parameters;
-
-  /**
-   * The current dimension of the mesh.
-   */
-  unsigned int & _dim;
-
-  /**
    * Whether or not this material has stateful properties.  This will get automatically
    * set to true if a stateful property is declared.
    */
   bool _has_stateful_props;
 
   /**
-   * XYZ coordinates of quadrature points (initialized from the first fe_type since the reverse
-   * mapping of the reference space is the same for all element types to physical space
-   */
-  const std::vector<Point>& _q_point;
-  
-  /**
-   * Current time.
-   */
-  Real & _t;
-
-  /**
-   * Current dt.
-   */
-  Real & _dt;
-
-  /**
-   * Old dt.
-   */
-  Real & _dt_old;
-
-  /**
-   * Whether or not the current simulation is transient.
-   */
-  bool & _is_transient;
-
-  /**
-   * Current time step.
-   */
-  int & _t_step;
-
-  /**
-   * Current element
-   */
-  const Elem * & _current_elem;
-
-  /**
-   * Current quadrature rule.
-   */
-  QGauss * & _qrule;
-
-  /**
    * Current quadrature rule size
    */
-  unsigned int & _n_qpoints;
-
-  /**
-   * Variable numbers of the coupled variables.
-   */
-  std::vector<unsigned int> _coupled_var_nums;
-
-  /**
-   * Variable numbers of the coupled auxiliary variables.
-   */
-  std::vector<unsigned int> _aux_coupled_var_nums;
-
-  /**
-   * Names of the variables this kernel is coupled to.
-   */
-  std::vector<std::string> _coupled_to;
-
-  /**
-   * Names of the variables this kernel is coupled to.
-   */
-  std::vector<std::string> _coupled_as;
-
-  /**
-   * Map from _as_ to the actual variable number.
-   */
-  std::map<std::string, unsigned int> _coupled_as_to_var_num;
-
-  /**
-   * Map from _as_ to the actual variable number for auxiliary variables.
-   */
-  std::map<std::string, unsigned int> _aux_coupled_as_to_var_num;
-
-  /**
-   * Returns true if a variables has been coupled_as name.
-   *
-   * @param name The name the kernel wants to refer to the variable as.
-   */
-  bool isCoupled(std::string name);
-
-  /**
-   * Returns the variable number of the coupled variable.
-   */
-  unsigned int coupled(std::string name);
-
-  /**
-   * Returns a reference (that can be stored) to a coupled variable's value.
-   *
-   * @param name The name the kernel wants to refer to the variable as.
-   */
-  MooseArray<Real> & coupledVal(std::string name);
-
-  /**
-   * Returns a reference (that can be stored) to a coupled variable's gradient.
-   *
-   * @param name The name the kernel wants to refer to the variable as.
-   */
-  MooseArray<RealGradient> & coupledGrad(std::string name);
-
-  /**
-   * Just here for convenience.  Used in constructors... usually to deal with multiple dimensional stuff.
-   */
-  Real & _real_zero;
-  MooseArray<Real> & _zero;
-  MooseArray<RealGradient> & _grad_zero;
-  MooseArray<RealTensor> & _second_zero;
+  unsigned int _n_qpoints;
 
 // struct DeleteFunctor 
 //   {
@@ -652,7 +505,7 @@ protected:
   /**
    * Whether or not this coupled_as name is associated with an auxiliary variable.
    */
-  bool isAux(std::string name);
+//  bool isAux(std::string name, int i = 0);
 };
 
 #endif //MATERIAL_H

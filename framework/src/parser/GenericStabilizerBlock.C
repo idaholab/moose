@@ -7,8 +7,6 @@ InputParameters validParams<GenericStabilizerBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
   params.addRequiredParam<std::string>("variable", "The name of the variable this Stabilizer will act on.");
-  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Stabilizer is coupled to.");
-  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Stabilizer which correspond with the coupled_as names");
   return params;
 }
 

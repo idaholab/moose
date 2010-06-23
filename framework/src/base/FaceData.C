@@ -4,6 +4,7 @@
 #include "ComputeQPSolution.h"
 
 //libmesh includes
+#include "fe_base.h"
 #include "numeric_vector.h"
 
 FaceData::FaceData(MooseSystem & moose_system) :

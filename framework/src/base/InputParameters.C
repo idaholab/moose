@@ -1,4 +1,6 @@
+#include <vector>
 #include "InputParameters.h"
+#include "Moose.h"
 
 InputParameters::InputParameters(const InputParameters &rhs) : Parameters()
 {
@@ -55,7 +57,7 @@ InputParameters::operator+=(const InputParameters &rhs)
 void
 InputParameters::addCoupledVar(const std::string &name, const std::string &doc_string)
 {
-  Parameters::set<std::string>(name);
+  Parameters::set<std::vector<std::string> >(name);
   _doc_string[name] = doc_string;
   _coupled_vars.insert(name);
 }
@@ -63,7 +65,7 @@ InputParameters::addCoupledVar(const std::string &name, const std::string &doc_s
 void
 InputParameters::addRequiredCoupledVar(const std::string &name, const std::string &doc_string)
 {
-  Parameters::set<std::string>(name);
+  Parameters::set<std::vector<std::string> >(name);
   _required_params.insert(name);
   _doc_string[name] = doc_string;
   _coupled_vars.insert(name);

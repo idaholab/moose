@@ -267,6 +267,45 @@ MooseSystem::getAuxSystem()
   return _aux_system;
 }
 
+QuadraturePointData &
+MooseSystem::getQuadraturePointData(bool is_boundary)
+{
+  if (is_boundary)
+    return _face_data;
+  else
+    return _element_data;
+}
+
+bool
+MooseSystem::hasVariable(const std::string &var_name)
+{
+  return _system->has_variable(var_name);
+}
+
+bool
+MooseSystem::hasAuxVariable(const std::string &var_name)
+{
+  return _aux_system->has_variable(var_name);
+}
+
+unsigned int
+MooseSystem::getVariableNumber(const std::string &var_name)
+{
+  return _system->variable_number(var_name);
+}
+
+unsigned int
+MooseSystem::getAuxVariableNumber(const std::string &var_name)
+{
+  return _aux_system->variable_number(var_name);
+}
+
+unsigned int
+MooseSystem::modifiedAuxVarNum(unsigned int var_num)
+{
+  return MAX_VARS + var_num;
+}
+
 EquationSystems *
 MooseSystem::initEquationSystems()
 {
@@ -431,7 +470,6 @@ MooseSystem::addAuxKernel(std::string aux_name,
   AuxKernel * aux;
   AuxKernelIterator curr_aux, end_aux;
   std::string var_name = parameters.get<std::string>("variable");
-  std::vector<std::string> coupled_to = parameters.get<std::vector<std::string> >("coupled_to");
 
   std::vector<std::list<AuxKernel *>::iterator > dependent_auxs;
   std::vector<AuxKernel *> *aux_ptr;
@@ -442,6 +480,7 @@ MooseSystem::addAuxKernel(std::string aux_name,
     Moose::current_thread_id = tid;
 
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
+    std::vector<std::string> coupled_to = aux->coupledTo();
 
     if (aux->isNodal())
       aux_ptr = &_auxs._active_nodal_aux_kernels[tid];
@@ -518,10 +557,12 @@ MooseSystem::addMaterial(std::string mat_name,
     Moose::current_thread_id = tid;
     std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
 
-    // TODO: Remove this hack when Material no longer inherits from Kernel!
+    // We need to set 'variable' in order to initialize other member data, since Material inherits from PDEBase
     parameters.set<std::string>("variable") = _es->get_system(0).variable_name(0);
 
     for (unsigned int i=0; i<blocks.size(); ++i) {
+      parameters.set<int>("_bid") = blocks[i];
+
       parameters.set<bool>("_is_boudary_material") = false;
       _materials._active_materials[tid][blocks[i]] = MaterialFactory::instance()->create(mat_name, name, *this, parameters);
 

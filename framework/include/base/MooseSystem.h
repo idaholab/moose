@@ -87,6 +87,34 @@ public:
   TransientExplicitSystem * getAuxSystem();
   
   /**
+   * Get the reference either to _element_data or _face_data from MooseSystem
+   */
+  QuadraturePointData &getQuadraturePointData(bool is_boundary);
+
+  /**
+   * Checks if we have a variable named 'var_name
+   */
+  bool hasVariable(const std::string &var_name);
+
+  /**
+   * Checks if we have an auxiliary variable named 'var_name
+   */
+  bool hasAuxVariable(const std::string &var_name);
+
+  unsigned int getVariableNumber(const std::string &var_name);
+
+  unsigned int getAuxVariableNumber(const std::string &var_name);
+
+  /**
+   * Computes the modified variable number for an auxiliary variable.
+   * This is the variable number that Kernels know this variable to operate under.
+   *
+   * This is necessary because Kernels need unique variable numbers for computing
+   * off-diagonal jacobian components.
+   */
+  unsigned int modifiedAuxVarNum(unsigned int var_num);
+
+  /**
    * Initialize all of the FE datastructures
    */
   void initDataStructures();
@@ -371,6 +399,7 @@ protected:
   friend class ComputeInternalJacobianBlocks;
   friend class ComputeInternalResiduals;
 
+  friend class PDEBase;
   friend class Kernel;
   friend class AuxKernel;
   friend class BoundaryCondition;

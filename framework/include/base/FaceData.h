@@ -5,13 +5,8 @@
 #include "MooseArray.h"
 #include "QuadraturePointData.h"
 
-//libMesh includes
-#include "transient_system.h"
-
 //Forward Declarations
 class MooseSystem;
-class QGauss;
-class FEBase;
 
 template <class T> class NumericVector;
 
@@ -31,7 +26,7 @@ public:
 public:
   /**
    * The MooseSystem this Kernel is associated with.
-    */
+   */
   MooseSystem & _moose_system;
 
   /// BCs

@@ -11,36 +11,13 @@ InputParameters validParams<Material>()
 {
   InputParameters params;
   params.addRequiredParam<std::vector<unsigned int> >("block", "The id of the block (subdomain) that this material represents.");
-  params.addParam<std::vector<std::string> >("coupled_to", "The list of variable names this Material is coupled to.");
-  params.addParam<std::vector<std::string> >("coupled_as", "The list of variable names as referenced inside of this Material which correspond with the coupled_as names");
   return params;
 }
 
 Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters) :
-   _name(name),
-   _moose_system(moose_system),
-   _data(getQuadraturePointData(parameters)),
+  PDEBase(name, moose_system, parameters, moose_system.getQuadraturePointData(parameters.get<bool>("_is_boudary_material"))),
    _material_data(moose_system._material_data),
-   _tid(Moose::current_thread_id),
-   _parameters(parameters),
-   _dim(_moose_system._dim),
    _has_stateful_props(false),
-   // _q_point is initialized to the first variables's associated fe_type (same physical space for all vars)
-   _q_point(*(_data._q_point[_tid])[_moose_system._dof_map->variable_type(0)]),
-   _t(_moose_system._t),
-   _dt(_moose_system._dt),
-   _dt_old(_moose_system._dt_old),
-   _is_transient(_moose_system._is_transient),
-   _t_step(_moose_system._t_step),
-   _current_elem(_moose_system._element_data._current_elem[_tid]),
-   _qrule(_data._qrule[_tid]),
-   _n_qpoints(_data._n_qpoints),
-   _coupled_to(parameters.have_parameter<std::vector<std::string> >("coupled_to") ? parameters.get<std::vector<std::string> >("coupled_to") : std::vector<std::string>(0)),
-   _coupled_as(parameters.have_parameter<std::vector<std::string> >("coupled_as") ? parameters.get<std::vector<std::string> >("coupled_as") : std::vector<std::string>(0)),
-   _real_zero(_moose_system._real_zero[_tid]),
-   _zero(_moose_system._zero[_tid]),
-   _grad_zero(_moose_system._grad_zero[_tid]),
-   _second_zero(_moose_system._second_zero[_tid]),
    _constant_real_props(_material_data._constant_real_props),
    _real_props(_material_data._real_props),
    _gradient_props(_material_data._gradient_props),
@@ -64,19 +41,6 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
    _column_major_matrix_props_older(_material_data._column_major_matrix_props_older),
    _matrix_props_older(_material_data._matrix_props_older)
 {
-  // Add all of our coupled variables to the coupled_to and coupled_as vectors
-  for (std::set<std::string>::const_iterator iter = _parameters.coupledVarsBegin();
-       iter != _parameters.coupledVarsEnd();
-       ++iter)
-  {
-    if (_parameters.get<std::string>(*iter) != std::string())
-    {
-      _coupled_as.push_back(*iter);
-      _coupled_to.push_back(_parameters.get<std::string>(*iter));
-    }
-  }
-
-  
   _constant_real_props_current_elem       = new std::map<std::string, Real >;
   _real_props_current_elem                = new std::map<unsigned int, std::map<std::string, MooseArray<Real> > >;
   _gradient_props_current_elem            = new std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > >;
@@ -104,39 +68,26 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
   _column_major_matrix_props_older_elem = new std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > >;
   _matrix_props_older_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > >;
 
-  
-  int bid = 0;  // FIXME: block/boundary id, will depend on a value passed in InputParams
+  int bid = parameters.get<int>("_bid");
 
-  // FIXME: this for statement will go into a common ancestor
-  for(unsigned int i=0;i<_coupled_to.size();i++)
+  for (unsigned int i = 0; i < _coupled_to.size(); i++)
   {
-    std::string coupled_var_name=_coupled_to[i];
+    std::string coupled_var_name = _coupled_to[i];
 
     //Is it in the nonlinear system or the aux system?
-    if(_moose_system._system->has_variable(coupled_var_name))
+    if (_moose_system.hasVariable(coupled_var_name))
     {
-      unsigned int coupled_var_num = _moose_system._system->variable_number(coupled_var_name);
-
-      _coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
-
-      if(std::find(_data._var_nums[bid].begin(),_data._var_nums[bid].end(),coupled_var_num) == _data._var_nums[bid].end())
-        _data._var_nums[bid].push_back(coupled_var_num);
-
-      if(std::find(_coupled_var_nums.begin(),_coupled_var_nums.end(),coupled_var_num) == _coupled_var_nums.end())
-        _coupled_var_nums.push_back(coupled_var_num);
+      unsigned int coupled_var_num = _moose_system.getVariableNumber(coupled_var_name);
+      add_nonexistent(coupled_var_num, _data._var_nums[bid]);
     }
-    else //Look for it in the Aux system
+    //Look for it in the Aux system
+    else if (_moose_system.hasAuxVariable(coupled_var_name))
     {
-      unsigned int coupled_var_num = _moose_system._aux_system->variable_number(coupled_var_name);
-
-      _aux_coupled_as_to_var_num[_coupled_as[i]] = coupled_var_num;
-
-      if(std::find(_data._aux_var_nums[bid].begin(),_data._aux_var_nums[bid].end(),coupled_var_num) == _data._aux_var_nums[bid].end())
-        _data._aux_var_nums[bid].push_back(coupled_var_num);
-
-      if(std::find(_aux_coupled_var_nums.begin(),_aux_coupled_var_nums.end(),coupled_var_num) == _aux_coupled_var_nums.end())
-        _aux_coupled_var_nums.push_back(coupled_var_num);
+      unsigned int coupled_var_num = _moose_system.getAuxVariableNumber(coupled_var_name);
+      add_nonexistent(coupled_var_num, _data._aux_var_nums[bid]);
     }
+    else
+      mooseError("Coupled variable '" + coupled_var_name + "' not found.");
   }
 }
 
@@ -167,7 +118,7 @@ Material::materialReinit()
 {
   unsigned int current_elem = _current_elem->id();
 
-  unsigned int qpoints = _data._qrule[_tid]->n_points();
+  _n_qpoints = _data._qrule[_tid]->n_points();
 
   if(_has_stateful_props)
   {
@@ -215,32 +166,32 @@ Material::materialReinit()
   std::map<std::string, MooseArray<Real> >::iterator it_end = _real_props.end();
 
   for(;it!=it_end;++it)
-    it->second.resize(qpoints);
+    it->second.resize(_n_qpoints);
 
   std::map<std::string, MooseArray<RealGradient> >::iterator grad_it = _gradient_props.begin();
   std::map<std::string, MooseArray<RealGradient> >::iterator grad_it_end = _gradient_props.end();
 
   for(;grad_it!=grad_it_end;++grad_it)
-    grad_it->second.resize(qpoints);
+    grad_it->second.resize(_n_qpoints);
 
 
   std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props.begin();
   std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props.end();
 
   for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
-    real_vector_value_it->second.resize(qpoints);
+    real_vector_value_it->second.resize(_n_qpoints);
 
   std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it = _tensor_props.begin();
   std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it_end = _tensor_props.end();
 
   for(;tensor_it!=tensor_it_end;++tensor_it)
-    tensor_it->second.resize(qpoints);
+    tensor_it->second.resize(_n_qpoints);
 
   std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props.begin();
   std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props.end();
 
   for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-    column_major_matrix_it->second.resize(qpoints);
+    column_major_matrix_it->second.resize(_n_qpoints);
 
   if(_has_stateful_props)
   {
@@ -249,32 +200,32 @@ Material::materialReinit()
       std::map<std::string, MooseArray<Real> >::iterator it_end = _real_props_old.end();
 
       for(;it!=it_end;++it)
-        it->second.resize(qpoints,0);
+        it->second.resize(_n_qpoints,0);
 
       std::map<std::string, MooseArray<RealGradient> >::iterator grad_it = _gradient_props_old.begin();
       std::map<std::string, MooseArray<RealGradient> >::iterator grad_it_end = _gradient_props_old.end();
 
       for(;grad_it!=grad_it_end;++grad_it)
-        grad_it->second.resize(qpoints,0);
+        grad_it->second.resize(_n_qpoints,0);
 
 
       std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props_old.begin();
       std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props_old.end();
 
       for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
-        real_vector_value_it->second.resize(qpoints);
+        real_vector_value_it->second.resize(_n_qpoints);
 
       std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it = _tensor_props_old.begin();
       std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it_end = _tensor_props_old.end();
 
       for(;tensor_it!=tensor_it_end;++tensor_it)
-        tensor_it->second.resize(qpoints,0);
+        tensor_it->second.resize(_n_qpoints,0);
 
       std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props_old.begin();
       std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props_old.end();
 
       for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-        column_major_matrix_it->second.resize(qpoints);
+        column_major_matrix_it->second.resize(_n_qpoints);
     }
 
     {      
@@ -282,32 +233,32 @@ Material::materialReinit()
       std::map<std::string, MooseArray<Real> >::iterator it_end = _real_props_older.end();
 
       for(;it!=it_end;++it)
-        it->second.resize(qpoints,0);
+        it->second.resize(_n_qpoints,0);
 
       std::map<std::string, MooseArray<RealGradient> >::iterator grad_it = _gradient_props_older.begin();
       std::map<std::string, MooseArray<RealGradient> >::iterator grad_it_end = _gradient_props_older.end();
 
       for(;grad_it!=grad_it_end;++grad_it)
-        grad_it->second.resize(qpoints,0);
+        grad_it->second.resize(_n_qpoints,0);
 
 
       std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props_older.begin();
       std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props_older.end();
 
       for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
-        real_vector_value_it->second.resize(qpoints);
+        real_vector_value_it->second.resize(_n_qpoints);
 
       std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it = _tensor_props_older.begin();
       std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it_end = _tensor_props_older.end();
 
       for(;tensor_it!=tensor_it_end;++tensor_it)
-        tensor_it->second.resize(qpoints,0);
+        tensor_it->second.resize(_n_qpoints,0);
 
       std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props_older.begin();
       std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props_older.end();
 
       for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-        column_major_matrix_it->second.resize(qpoints);
+        column_major_matrix_it->second.resize(_n_qpoints);
     }
 
   }
@@ -728,10 +679,6 @@ Material::computeQpResidual()
   return 0;
 }
 
-void
-Material::subdomainSetup()
-{}
-
 MooseArray<Real> &
 Material::declareRealProperty(const std::string & name)
 {
@@ -962,70 +909,4 @@ Material::declareMatrixPropertyOlder(const std::string & name)
     _matrix_stateful_props.push_back(name);
 
   return _matrix_props_older[name];
-}
-
-
-
-
-bool
-Material::isAux(std::string name)
-{
-  return _aux_coupled_as_to_var_num.find(name) != _aux_coupled_as_to_var_num.end();
-}
-
-bool
-Material::isCoupled(std::string name)
-{
-  bool found = std::find(_coupled_as.begin(),_coupled_as.end(),name) != _coupled_as.end();
-
-  //See if it's an Aux variable
-  if(!found)
-    found = isAux(name);
-
-  return found;
-}
-
-unsigned int
-Material::coupled(std::string name)
-{
-  if(!isCoupled(name))
-    mooseError("Material _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
-
-  if(!isAux(name))
-    return _coupled_as_to_var_num[name];
-  else
-    return Kernel::modifiedAuxVarNum(_aux_coupled_as_to_var_num[name]);
-}
-
-MooseArray<Real> &
-Material::coupledVal(std::string name)
-{
-  if(!isCoupled(name))
-    mooseError("Material _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
-  
-  if(!isAux(name))
-    return _data._var_vals[_tid][_coupled_as_to_var_num[name]];
-  else
-    return _data._aux_var_vals[_tid][_aux_coupled_as_to_var_num[name]];
-}
-
-MooseArray<RealGradient> &
-Material::coupledGrad(std::string name)
-{
-  if(!isCoupled(name))
-      mooseError("Material _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
-
-  if(!isAux(name))
-    return _data._var_grads[_tid][_coupled_as_to_var_num[name]];
-  else
-    return _data._aux_var_grads[_tid][_aux_coupled_as_to_var_num[name]];
-}
-
-QuadraturePointData &
-Material::getQuadraturePointData(InputParameters &parameters)
-{
-  if (parameters.have_parameter<bool>("_is_boundary_material"))
-    return _moose_system._face_data;
-  else
-    return _moose_system._element_data;
 }

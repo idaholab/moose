@@ -2,13 +2,7 @@
 #define EXECUTIONER_H
 
 #include "ValidParams.h"
-
-// LibMesh includes
-#include "parameters.h"
-#include "point.h"
-#include "vector_value.h"
-#include "nonlinear_implicit_system.h"
-#include "transient_system.h"
+#include "MooseObject.h"
 
 // System includes
 #include <string>
@@ -29,7 +23,7 @@ InputParameters validParams<Executioner>();
  * for the NonlinearSystem once... where Transient Executioners call solve()
  * multiple times... i.e. once per timestep.
  */
-class Executioner
+class Executioner : public MooseObject
 {
 public:
 
@@ -56,11 +50,6 @@ public:
   virtual void execute() = 0;
 
 protected:
-
-  /**
-   * The reference to the encompassing Moose System
-   */
-  MooseSystem & _moose_system;
 
   /**
    * Optionally override to do something before solve() gets called
@@ -91,19 +80,6 @@ protected:
    * Should be called before solve() to set the relative equation scaling.
    */
   void setScaling();
-
-  std::string _name;
-  InputParameters _parameters;
-
-  /**
-   * The Nonlinear System
-   */
-//  TransientNonlinearImplicitSystem & _system;
-
-  /**
-   * The Auxiliary System
-   */
-//  TransientExplicitSystem & _aux_system;
 
   /**
    * Initial Residual Variables
