@@ -5,6 +5,7 @@ InputParameters validParams<ExampleAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addParam<Real>("value", 0.0, "Scalar value used for our auxiliary calculation");
+  params.addRequiredCoupledVar("coupled", "Coupled variable");
   return params;
 }
 
