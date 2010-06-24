@@ -75,9 +75,9 @@
 []
 
 [Materials]
-  active = empty
+  active = example
 
-  [./empty]
+  [./example]
     type = ExampleMaterial
     block = 1
     diffusivity = 0.1
