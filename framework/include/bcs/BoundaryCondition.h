@@ -166,6 +166,21 @@ protected:
    * @param name The name the kernel wants to refer to the variable as.
    */
   MooseArray<RealGradient> & coupledGrad(std::string var_name, int i = 0);
+
+
+  /** Side shape function. 
+   */ 
+  const std::vector<std::vector<Real> > & _test; 
+ 
+  /** 
+   * Gradient of side shape function. 
+   */ 
+  const std::vector<std::vector<RealGradient> > & _grad_test; 
+ 
+  /** 
+   * Second derivative of side shape function. 
+   */ 
+  const std::vector<std::vector<RealTensor> > & _second_test; 
 };
 
 #endif //BOUNDARYCONDITION_H

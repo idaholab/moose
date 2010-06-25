@@ -32,7 +32,11 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _current_residual(moose_system._face_data._current_residual[_tid]),
    _u(_integrated ? moose_system._face_data._var_vals[_tid][_var_num] : moose_system._face_data._var_vals_nodal[_tid][_var_num]),
    _grad_u(_integrated ? moose_system._face_data._var_grads[_tid][_var_num] : moose_system._grad_zero[_tid]),
-   _second_u(_integrated ? moose_system._face_data._var_seconds[_tid][_var_num] : moose_system._second_zero[_tid])
+   _second_u(_integrated ? moose_system._face_data._var_seconds[_tid][_var_num] : moose_system._second_zero[_tid]),
+   // TODO: Fix this holy hack!
+   _test(*moose_system._face_data._phi[_tid][_fe_type]), 
+   _grad_test(*moose_system._face_data._grad_phi[_tid][_fe_type]), 
+   _second_test(*moose_system._face_data._second_phi[_tid][_fe_type])
 {
   // If this variable isn't known yet... make it so
   if(_integrated)
