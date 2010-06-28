@@ -1,3 +1,4 @@
+# Moose Examples
 all:: examples
 
 dirlist := $(wildcard ex*/)
