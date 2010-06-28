@@ -101,9 +101,10 @@
  If you are unsure, just leave it. It won't slow down the other parts of
  the library.
 */
-#ifndef FP_NO_SUPPORT_OPTIMIZER
-#define FP_SUPPORT_OPTIMIZER
-#endif
+//PJJ removed optimizer support
+//#ifndef FP_NO_SUPPORT_OPTIMIZER
+//#define FP_SUPPORT_OPTIMIZER
+//#endif
 
 
 /*
