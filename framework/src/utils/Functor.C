@@ -7,8 +7,9 @@ Functor::Functor( std::string equation, std::vector<std::string> vars ):
   for( int i = 0; i < vars.size(); i++ )
     variables += "," + vars[i];
 
-  _parser.AddConstant("pi", 3.1415926535897932);
-  _parser.AddConstant("e", 2.71828183);
+  //add constants to the parser, like pi and e
+  defineConstants();
+
   int res = _parser.Parse( equation, variables );
   if (res != -1 )
   {
@@ -29,6 +30,13 @@ Functor::Functor( std::string equation, std::vector<std::string> vars ):
 
 Functor::~Functor()
 {
+}
+
+void
+Functor::defineConstants()
+{
+  _parser.AddConstant("pi", 3.1415926535897932);
+  _parser.AddConstant("e", 2.71828183);
 }
 
 Real &

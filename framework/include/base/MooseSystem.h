@@ -72,7 +72,7 @@ public:
   EquationSystems * initEquationSystems();
 
   /**
-   * Returns a writable reference to the EquationSystems object helf within this MooseSystem
+   * Returns a writable reference to the EquationSystems object held within this MooseSystem
    */
   EquationSystems * getEquationSystems();
 

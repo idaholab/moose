@@ -1,8 +1,8 @@
 #include "Kernel.h"
 #include "Functor.h"
 
-#ifndef FORCINGFUNCTION_H
-#define FORCINGFUNCTION_H
+#ifndef USERFORCINGFUNCTION_H
+#define USERFORCINGFUNCTION_H
 
 //Forward Declarations
 class UserForcingFunction;
@@ -42,4 +42,4 @@ protected:
 private:
   Functor _functor;
 };
-#endif //FORCINGFUNCTION_H
+#endif //USERFORCINGFUNCTION_H

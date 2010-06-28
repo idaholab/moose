@@ -50,6 +50,15 @@ class Functor
      */
     Real operator()(Real t, Real x, Real y = 0, Real z = 0);
 
+  protected:
+    /**
+     * Override this method if you want to make your own Functor with custom
+     * constants available to the end user. In the base class pi and e are
+     * defined. This method is called when the FunctionParser object is being
+     * constructed but before it parses the input equation.
+     */
+    void defineConstants();
+
   private:
     FunctionParser _parser;
     std::vector<Real> _vars;
