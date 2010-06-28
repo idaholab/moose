@@ -30,13 +30,16 @@ public:
 
   bool activeStabilizerBlocks(std::set<subdomain_id_type> & set_buffer) const;
 
+  void addBlockStabilizer(THREAD_ID tid, unsigned int block_id, unsigned int var_num, Stabilizer *stabilizer);
+  void addStabilizer(THREAD_ID tid, unsigned int var_num, Stabilizer *stabilizer);
+
+protected:
   std::vector<std::map<unsigned int, Stabilizer *> > _active_stabilizers;
 
   std::vector<std::map<unsigned int, std::map<unsigned int, Stabilizer *> > > _block_stabilizers;
 
   std::map<unsigned int, bool> _is_stabilized;
 
-protected:
   MooseSystem &_moose_system;
 };
 

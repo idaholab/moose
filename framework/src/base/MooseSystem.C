@@ -413,27 +413,18 @@ void MooseSystem::addKernel(std::string kernel_name,
                             std::string name,
                             InputParameters parameters)
 {
-  Kernel * kernel;
-
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     Moose::current_thread_id = tid;
 
     if (!parameters.isParamValid("block"))
-    {
-      kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
-      _kernels._all_kernels[tid].push_back(kernel);
-    }
-    
+      _kernels.addKernel(tid, KernelFactory::instance()->create(kernel_name, name, *this, parameters));
     else
     {
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
     
       for (unsigned int i=0; i<blocks.size(); ++i)
-      {
-        kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
-        _kernels._all_block_kernels[tid][blocks[i]].push_back(kernel);
-      }
+        _kernels.addBlockKernel(tid, blocks[i], KernelFactory::instance()->create(kernel_name, name, *this, parameters));
     }
   }
 }
@@ -454,9 +445,9 @@ MooseSystem::addBC(std::string bc_name,
       BoundaryCondition * bc = BCFactory::instance()->create(bc_name, name, *this, parameters);
 
       if(bc->isIntegrated())
-        _bcs._active_bcs[tid][boundaries[i]].push_back(bc);
+        _bcs.addBC(tid, boundaries[i], bc);
       else
-        _bcs._active_nodal_bcs[tid][boundaries[i]].push_back(bc);
+        _bcs.addNodalBC(tid, boundaries[i], bc);
     }
   }
 }
@@ -482,13 +473,12 @@ MooseSystem::addAuxKernel(std::string aux_name,
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
     std::vector<std::string> coupled_to = aux->coupledTo();
 
-    if (aux->isNodal())
-      aux_ptr = &_auxs._active_nodal_aux_kernels[tid];
-    else
-      aux_ptr = &_auxs._active_element_aux_kernels[tid];
-
     // Copy the active AuxKernels into a list for manipulation
-    std::list<AuxKernel *> active_auxs(aux_ptr->begin(), aux_ptr->end());
+    std::list<AuxKernel *> active_auxs;
+    if (aux->isNodal())
+      active_auxs = _auxs.getActiveNodalKernels(tid);
+    else
+      active_auxs = _auxs.getActiveElementKernels(tid);
 
     // Get a list of all the dependent variables that this AuxKernel will act on to
     // place it in the vector in the appropriate location
@@ -522,8 +512,11 @@ MooseSystem::addAuxKernel(std::string aux_name,
          i != dependent_auxs.end(); ++i)
       active_auxs.splice(new_aux_iter, active_auxs, *i);
 
-    // Copy the list back into the Auxilary Vector
-    aux_ptr->assign(active_auxs.begin(), active_auxs.end());
+    // Copy the list back into the Auxiliary Vector
+    if (aux->isNodal())
+      _auxs.setActiveNodalKernels(tid, active_auxs);
+    else
+      _auxs.setActiveElementKernels(tid, active_auxs);
   }
 }
 
@@ -542,8 +535,8 @@ MooseSystem::addAuxBC(std::string aux_name,
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
 
     for (unsigned int i=0; i<boundaries.size(); ++i)
-      _auxs._active_bcs[tid][boundaries[i]].push_back(aux);
-    _auxs._aux_bcs[tid].push_back(aux);
+      _auxs.addActiveBC(tid, boundaries[i], aux);
+    _auxs.addBC(tid, aux);
   }
 }
 
@@ -564,10 +557,10 @@ MooseSystem::addMaterial(std::string mat_name,
       parameters.set<int>("_bid") = blocks[i];
 
       parameters.set<bool>("_is_boudary_material") = false;
-      _materials._active_materials[tid][blocks[i]] = MaterialFactory::instance()->create(mat_name, name, *this, parameters);
+      _materials.addMaterial(tid, blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
 
       parameters.set<bool>("_is_boudary_material") = true;
-      _materials._active_boundary_materials[tid][blocks[i]] = MaterialFactory::instance()->create(mat_name, name, *this, parameters);
+      _materials.addBoundaryMaterial(tid, blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
     }
   }
 }
@@ -586,11 +579,9 @@ MooseSystem::addStabilizer(std::string stabilizer_name,
     stabilizer = StabilizerFactory::instance()->create(stabilizer_name, name, *this, parameters);
 
     if (parameters.have_parameter<unsigned int>("block_id"))
-      _stabilizers._block_stabilizers[tid][parameters.get<unsigned int>("block_id")][stabilizer->variable()] = stabilizer;
+      _stabilizers.addBlockStabilizer(tid, parameters.get<unsigned int>("block_id"), stabilizer->variable(), stabilizer);
     else
-      _stabilizers._active_stabilizers[tid][stabilizer->variable()] = stabilizer;
-
-    _stabilizers._is_stabilized[stabilizer->variable()] = true;
+      _stabilizers.addStabilizer(tid, stabilizer->variable(), stabilizer);
   }
 }
 
@@ -607,7 +598,7 @@ MooseSystem::addInitialCondition(std::string ic_name,
     // The var_name needs to be added to the parameters object for any InitialCondition derived objects
     parameters.set<std::string>("var_name") = var_name;
 
-    _ics._active_initial_conditions[tid][var_name] = InitialConditionFactory::instance()->create(ic_name, name, *this, parameters);
+    _ics.addIC(tid, var_name, InitialConditionFactory::instance()->create(ic_name, name, *this, parameters));
   }
 }
 

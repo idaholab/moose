@@ -71,3 +71,17 @@ StabilizerHolder::blockStabilizersEnd(THREAD_ID tid, unsigned int block_id)
 {
   return _block_stabilizers[tid][block_id].end();
 }
+
+void
+StabilizerHolder::addBlockStabilizer(THREAD_ID tid, unsigned int block_id, unsigned int var_num, Stabilizer *stabilizer)
+{
+  _block_stabilizers[tid][block_id][var_num] = stabilizer;
+  _is_stabilized[var_num] = true;
+}
+
+void
+StabilizerHolder::addStabilizer(THREAD_ID tid, unsigned int var_num, Stabilizer *stabilizer)
+{
+  _active_stabilizers[tid][var_num] = stabilizer;
+  _is_stabilized[var_num] = true;
+}

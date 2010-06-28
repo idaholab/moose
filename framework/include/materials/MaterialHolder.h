@@ -29,6 +29,10 @@ public:
   MaterialIterator activeBoundaryMaterialsBegin(THREAD_ID tid);
   MaterialIterator activeBoundaryMaterialsEnd(THREAD_ID tid);
 
+  void addMaterial(THREAD_ID tid, int block_id, Material *material);
+  void addBoundaryMaterial(THREAD_ID tid, int block_id, Material *material);
+
+protected:
   /**
    * A list of material associated with the block (subdomain)
    */
@@ -38,7 +42,6 @@ public:
    */
   std::vector<std::map<int, Material *> > _active_boundary_materials;
 
-protected:
   MooseSystem &_moose_system;
 };
 

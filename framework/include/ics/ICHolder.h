@@ -22,9 +22,11 @@ public:
 
   InitialCondition * getInitialCondition(THREAD_ID tid, std::string var_name);
 
-  std::vector<std::map<std::string, InitialCondition *> > _active_initial_conditions;
+  void addIC(THREAD_ID tid, std::string var_name, InitialCondition *ic);
 
 protected:
+  std::vector<std::map<std::string, InitialCondition *> > _active_initial_conditions;
+
   MooseSystem &_moose_system;
 };
 

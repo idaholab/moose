@@ -23,9 +23,9 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
   MeshBase::const_node_iterator nd     = _mesh->local_nodes_begin();
   MeshBase::const_node_iterator nd_end = _mesh->local_nodes_end();
 
-  std::vector<AuxKernel *>::iterator aux_begin = _auxs.activeNodalAuxKernelsBegin(0);
-  std::vector<AuxKernel *>::iterator aux_end = _auxs.activeNodalAuxKernelsEnd(0);
-  std::vector<AuxKernel *>::iterator aux_it = aux_begin;
+  AuxKernelIterator aux_begin = _auxs.activeNodalAuxKernelsBegin(0);
+  AuxKernelIterator aux_end = _auxs.activeNodalAuxKernelsEnd(0);
+  AuxKernelIterator aux_it = aux_begin;
 
   if(aux_begin != aux_end)
   {

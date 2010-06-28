@@ -33,3 +33,9 @@ ICHolder::getInitialCondition(THREAD_ID tid, std::string var_name)
 
   return ic_iter->second;
 }
+
+void
+ICHolder::addIC(THREAD_ID tid, std::string var_name, InitialCondition *ic)
+{
+  _active_initial_conditions[tid][var_name] = ic;
+}

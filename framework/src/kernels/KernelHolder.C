@@ -44,6 +44,18 @@ KernelHolder::~KernelHolder()
   }
 }
 
+void
+KernelHolder::addKernel(THREAD_ID tid, Kernel *kernel)
+{
+  _all_kernels[tid].push_back(kernel);
+}
+
+void
+KernelHolder::addBlockKernel(THREAD_ID tid, unsigned int block_id, Kernel *kernel)
+{
+  _all_block_kernels[tid][block_id].push_back(kernel);
+}
+
 KernelIterator
 KernelHolder::activeKernelsBegin(THREAD_ID tid)
 {

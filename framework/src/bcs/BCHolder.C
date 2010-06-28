@@ -51,6 +51,18 @@ BCHolder::sizeEverything()
   _active_nodal_bcs.resize(n_threads);
 }
 
+void
+BCHolder::addBC(THREAD_ID tid, unsigned int boundary_id, BoundaryCondition *bc)
+{
+  _active_bcs[tid][boundary_id].push_back(bc);
+}
+
+void
+BCHolder::addNodalBC(THREAD_ID tid, unsigned int boundary_id, BoundaryCondition *bc)
+{
+  _active_nodal_bcs[tid][boundary_id].push_back(bc);
+}
+
 BCIterator
 BCHolder::activeBCsBegin(THREAD_ID tid, unsigned int boundary_id)
 {

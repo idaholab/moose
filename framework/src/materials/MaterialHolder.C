@@ -11,14 +11,14 @@ MaterialHolder::~MaterialHolder()
 {
   for (std::vector<std::map<int, Material *> >::iterator i = _active_materials.begin(); i != _active_materials.end(); ++i)
   {
-    std::map<int, Material *>::iterator j;
+    MaterialIterator j;
     for (j = i->begin(); j != i->end(); ++j)
       delete j->second;
   }
 
   for (std::vector<std::map<int, Material *> >::iterator i = _active_boundary_materials.begin(); i != _active_boundary_materials.end(); ++i)
   {
-    std::map<int, Material *>::iterator j;
+    MaterialIterator j;
     for (j = i->begin(); j != i->end(); ++j)
       delete j->second;
   }
@@ -48,8 +48,8 @@ void MaterialHolder::updateMaterialDataState()
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    std::map<int, Material *>::iterator it = _active_materials[tid].begin();
-    std::map<int, Material *>::iterator it_end = _active_materials[tid].end();
+    MaterialIterator it = _active_materials[tid].begin();
+    MaterialIterator it_end = _active_materials[tid].end();
 
     for(;it!=it_end;++it)
     {
@@ -90,4 +90,15 @@ MaterialIterator
 MaterialHolder::activeBoundaryMaterialsEnd(THREAD_ID tid)
 {
   return _active_boundary_materials[tid].end();
+}
+
+void
+MaterialHolder::addMaterial(THREAD_ID tid, int block_id, Material *material)
+{
+  _active_materials[tid][block_id] = material;
+}
+
+void MaterialHolder::addBoundaryMaterial(THREAD_ID tid, int block_id, Material *material)
+{
+  _active_boundary_materials[tid][block_id] = material;
 }

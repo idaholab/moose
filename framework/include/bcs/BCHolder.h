@@ -24,12 +24,15 @@ public:
   BCIterator activeNodalBCsBegin(THREAD_ID tid, unsigned int boundary_id);
   BCIterator activeNodalBCsEnd(THREAD_ID tid, unsigned int boundary_id);
 
+  void addBC(THREAD_ID tid, unsigned int boundary_id, BoundaryCondition *bc);
+  void addNodalBC(THREAD_ID tid, unsigned int boundary_id, BoundaryCondition *bc);
+
   void activeBoundaries(std::set<subdomain_id_type> & set_buffer) const;
 
+protected:
   std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > _active_bcs;
   std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > _active_nodal_bcs;
 
-protected:
   MooseSystem &_moose_system;
 };
 

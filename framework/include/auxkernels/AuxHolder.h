@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <list>
 
 #include "AuxKernel.h"
 
@@ -23,22 +24,31 @@ public:
   AuxHolder(MooseSystem &sys);
   virtual ~AuxHolder();
 
-  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsBegin(THREAD_ID tid);
-  std::vector<AuxKernel *>::iterator activeNodalAuxKernelsEnd(THREAD_ID tid);
+  AuxKernelIterator activeNodalAuxKernelsBegin(THREAD_ID tid);
+  AuxKernelIterator activeNodalAuxKernelsEnd(THREAD_ID tid);
 
-  std::vector<AuxKernel *>::iterator activeElementAuxKernelsBegin(THREAD_ID tid);
-  std::vector<AuxKernel *>::iterator activeElementAuxKernelsEnd(THREAD_ID tid);
+  AuxKernelIterator activeElementAuxKernelsBegin(THREAD_ID tid);
+  AuxKernelIterator activeElementAuxKernelsEnd(THREAD_ID tid);
 
-  std::vector<AuxKernel *>::iterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  std::vector<AuxKernel *>::iterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id);
+  AuxKernelIterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id);
+  AuxKernelIterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id);
 
+  std::list<AuxKernel *> getActiveNodalKernels(THREAD_ID tid);
+  std::list<AuxKernel *> getActiveElementKernels(THREAD_ID tid);
+
+  void setActiveNodalKernels(THREAD_ID tid, std::list<AuxKernel *> &auxs);
+  void setActiveElementKernels(THREAD_ID tid, std::list<AuxKernel *> &auxs);
+
+  void addBC(THREAD_ID tid, AuxKernel *aux);
+  void addActiveBC(THREAD_ID tid, unsigned int boundary_id, AuxKernel *aux);
+
+protected:
   std::vector<std::vector<AuxKernel *> > _active_nodal_aux_kernels;
   std::vector<std::vector<AuxKernel *> > _active_element_aux_kernels;
 
   std::vector<std::vector<AuxKernel *> > _aux_bcs;
   std::vector<std::map<unsigned int, std::vector<AuxKernel *> > > _active_bcs;
 
-protected:
   MooseSystem &_moose_system;
 };
 
