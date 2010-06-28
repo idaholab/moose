@@ -10,7 +10,7 @@ meshdir := $(LIBMESH_DIR)
 # link with the library.
 include $(meshdir)/Make.common
 
-libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/stabilizers -Iinclude/executioners -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/utils -Iinclude/materials -Iinclude/parser
+libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/stabilizers -Iinclude/executioners -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/utils -Iinclude/utils/fparser -Iinclude/materials -Iinclude/parser
 
 ###############################################################################
 # File management.  This is where the source, header, and object files are
@@ -18,7 +18,7 @@ libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/stabilizers -Iinclude/exec
 
 #
 # source files
-srcfiles 	:= $(wildcard src/*.C) $(wildcard src/*/*.C)
+srcfiles 	:= $(wildcard src/*.C) $(wildcard src/*/*.C) $(wildcard src/*/*/*.C)
 
 #
 # object files
@@ -40,9 +40,9 @@ endif
 all:: Makefile.export $(target)
 
 #@echo "MOOSE_DIR := " $(PWD) > Makefile.export
-Makefile.export: exported_stuff
+Makefile.export: Makefile.export.in
 	@echo "Creating Makefile.export"
-	@cat exported_stuff >> Makefile.export
+	@cat Makefile.export.in >> Makefile.export
 
 ifeq ($(enable-shared),yes)
 # Build dynamic library
