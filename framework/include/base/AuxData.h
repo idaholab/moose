@@ -61,32 +61,32 @@ public:
   /**
    * Value of the variables at the nodes.
    */
-  std::vector<std::vector<Real > > _var_vals_nodal;
+  std::vector<std::vector<MooseArray<Real> > > _var_vals_nodal;
 
   /**
    * Value of the variables at the nodes.
    */
-  std::vector<std::vector<Real > > _var_vals_old_nodal;
+  std::vector<std::vector<MooseArray<Real> > > _var_vals_old_nodal;
 
   /**
    * Value of the variables at the nodes at t-2.
    */
-  std::vector<std::vector<Real > > _var_vals_older_nodal;
+  std::vector<std::vector<MooseArray<Real> > > _var_vals_older_nodal;
 
   /**
    * Value of the variables at the nodes.
    */
-  std::vector<std::vector<Real > > _aux_var_vals_nodal;
+  std::vector<std::vector<MooseArray<Real> > > _aux_var_vals_nodal;
 
   /**
    * Value of the variables at the nodes.
    */
-  std::vector<std::vector<Real > > _aux_var_vals_old_nodal;
+  std::vector<std::vector<MooseArray<Real> > > _aux_var_vals_old_nodal;
 
   /**
    * Value of the variables at the nodes at t-2.
    */
-  std::vector<std::vector<Real > > _aux_var_vals_older_nodal;
+  std::vector<std::vector<MooseArray<Real> > > _aux_var_vals_older_nodal;
 
 
 
@@ -102,62 +102,62 @@ public:
   /**
    * Value of the variables at the elements.
    */
-  std::vector<std::vector<Real > > _var_vals_element;
+  std::vector<std::vector<MooseArray<Real> > > _var_vals_element;
 
   /**
    * Value of the variables at the elements.
    */
-  std::vector<std::vector<Real > > _var_vals_old_element;
+  std::vector<std::vector<MooseArray<Real> > > _var_vals_old_element;
 
   /**
    * Value of the variables at the elements at t-2.
    */
-  std::vector<std::vector<Real > > _var_vals_older_element;
+  std::vector<std::vector<MooseArray<Real> > > _var_vals_older_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  std::vector<std::vector<RealGradient > > _var_grads_element;
+  std::vector<std::vector<MooseArray<RealGradient> > > _var_grads_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  std::vector<std::vector<RealGradient > > _var_grads_old_element;
+  std::vector<std::vector<MooseArray<RealGradient> > > _var_grads_old_element;
 
   /**
    * Gradient of the variables at the elements at t-2.
    */
-  std::vector<std::vector<RealGradient > > _var_grads_older_element;
+  std::vector<std::vector<MooseArray<RealGradient> > > _var_grads_older_element;
 
   /**
    * Value of the variables at the elements.
    */
-  std::vector<std::vector<Real > > _aux_var_vals_element;
+  std::vector<std::vector<MooseArray<Real> > > _aux_var_vals_element;
 
   /**
    * Value of the variables at the elements.
    */
-  std::vector<std::vector<Real > > _aux_var_vals_old_element;
+  std::vector<std::vector<MooseArray<Real> > > _aux_var_vals_old_element;
 
   /**
    * Value of the variables at the elements at t-2.
    */
-  std::vector<std::vector<Real > > _aux_var_vals_older_element;
+  std::vector<std::vector<MooseArray<Real> > > _aux_var_vals_older_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  std::vector<std::vector<RealGradient > > _aux_var_grads_element;
+  std::vector<std::vector<MooseArray<RealGradient> > > _aux_var_grads_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  std::vector<std::vector<RealGradient > > _aux_var_grads_old_element;
+  std::vector<std::vector<MooseArray<RealGradient> > > _aux_var_grads_old_element;
 
   /**
    * Gradient of the variables at the elements at t-2.
    */
-  std::vector<std::vector<RealGradient > > _aux_var_grads_older_element;
+  std::vector<std::vector<MooseArray<RealGradient> > > _aux_var_grads_older_element;
 };
 
 #endif //AUXDATA_H

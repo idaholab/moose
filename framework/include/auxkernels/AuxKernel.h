@@ -57,17 +57,17 @@ protected:
 
   bool _nodal;
 
-  Real & _u_aux;  
-  Real & _u_old_aux;
-  Real & _u_older_aux;
+  MooseArray<Real> & _u;
+  MooseArray<Real> & _u_old;
+  MooseArray<Real> & _u_older;
 
-  Real & coupledValAux(std::string name, int i = 0);
-  Real & coupledValOldAux(std::string name, int i = 0);
-  Real & coupledValOlderAux(std::string name, int i = 0);
-
-  RealGradient & coupledGradAux(std::string name, int i = 0);
-  RealGradient & coupledGradOldAux(std::string name, int i = 0);
-  RealGradient & coupledGradOlderAux(std::string name, int i = 0);
+  virtual MooseArray<Real> & coupledVal(std::string name, int i = 0);
+  virtual MooseArray<Real> & coupledValOld(std::string name, int i = 0);
+  virtual MooseArray<Real> & coupledValOlder(std::string name, int i = 0);
+  
+  virtual MooseArray<RealGradient> & coupledGrad(std::string name, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradOld(std::string name, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradOlder(std::string name, int i = 0);
 
 
   /*************

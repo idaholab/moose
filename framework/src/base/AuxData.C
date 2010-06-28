@@ -98,6 +98,9 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Nod
   unsigned int nonlinear_system_number = _moose_system.getNonlinearSystem()->number();
   unsigned int aux_system_number = _moose_system.getAuxSystem()->number();
 
+  // Only ever one "qp" for aux kernels
+  unsigned int qp = 0;
+
   //Non Aux vars first
   for (unsigned int i = 0; i < _element_data._var_nums[0].size(); i++)
   {
@@ -106,12 +109,16 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Nod
     //The zero is the component... that works fine for lagrange FE types.
     unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);
 
-    _var_vals_nodal[tid][var_num] = soln(dof_number);
+    _var_vals_nodal[tid][var_num].resize(1);
+    _var_vals_nodal[tid][var_num][qp] = soln(dof_number);
 
     if (_moose_system._is_transient)
     {
-      _var_vals_old_nodal[tid][var_num] = (*_nonlinear_old_soln)(dof_number);
-      _var_vals_older_nodal[tid][var_num] = (*_nonlinear_older_soln)(dof_number);
+      _var_vals_old_nodal[tid][var_num].resize(1);
+      _var_vals_older_nodal[tid][var_num].resize(1);
+      
+      _var_vals_old_nodal[tid][var_num][qp] = (*_nonlinear_old_soln)(dof_number);
+      _var_vals_older_nodal[tid][var_num][qp] = (*_nonlinear_older_soln)(dof_number);
     }
   }
 
@@ -124,12 +131,16 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Nod
     unsigned int dof_number = node.dof_number(aux_system_number, var_num, 0);
 
     _moose_system._aux_var_dofs[tid][var_num] = dof_number;
-    _aux_var_vals_nodal[tid][var_num] = (*_aux_soln)(dof_number);
+    _aux_var_vals_nodal[tid][var_num].resize(1);
+    _aux_var_vals_nodal[tid][var_num][qp] = (*_aux_soln)(dof_number);
 
     if (_moose_system._is_transient)
     {
-      _aux_var_vals_old_nodal[tid][var_num] = (*_aux_old_soln)(dof_number);
-      _aux_var_vals_older_nodal[tid][var_num] = (*_aux_older_soln)(dof_number);
+      _aux_var_vals_old_nodal[tid][var_num].resize(1);
+      _aux_var_vals_older_nodal[tid][var_num].resize(1);
+      
+      _aux_var_vals_old_nodal[tid][var_num][qp] = (*_aux_old_soln)(dof_number);
+      _aux_var_vals_older_nodal[tid][var_num][qp] = (*_aux_older_soln)(dof_number);
     }
   }
 
@@ -161,6 +172,9 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& /*soln*/, const
   else
     mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
 
+  // Only ever one "quadrature point" 
+  unsigned int qp = 0;
+
   //Compute the average value of each variable on the element
 
   //Non Aux vars first
@@ -173,20 +187,28 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& /*soln*/, const
     const std::vector<Real> & JxW = *_element_data._JxW[tid][fe_type];
     const std::vector<Point> & q_point = *_element_data._q_point[tid][fe_type];
 
-    _var_vals_element[tid][var_num] = integrateValueAux(_element_data._var_vals[tid][var_num], JxW, q_point) / area;
+    _var_vals_element[tid][var_num].resize(1);
+    _var_vals_element[tid][var_num][qp] = integrateValueAux(_element_data._var_vals[tid][var_num], JxW, q_point) / area;
 
     if (_moose_system._is_transient)
     {
-      _var_vals_old_element[tid][var_num] = integrateValueAux(_element_data._var_vals_old[tid][var_num], JxW, q_point) / area;
-      _var_vals_older_element[tid][var_num] = integrateValueAux(_element_data._var_vals_older[tid][var_num], JxW, q_point) / area;
+      _var_vals_old_element[tid][var_num].resize(1);
+      _var_vals_older_element[tid][var_num].resize(1);
+
+      _var_vals_old_element[tid][var_num][qp] = integrateValueAux(_element_data._var_vals_old[tid][var_num], JxW, q_point) / area;
+      _var_vals_older_element[tid][var_num][qp] = integrateValueAux(_element_data._var_vals_older[tid][var_num], JxW, q_point) / area;
     }
 
-    _var_grads_element[tid][var_num] = integrateGradientAux(_element_data._var_grads[tid][var_num], JxW, q_point) / area;
+    _var_grads_element[tid][var_num].resize(1);
+    _var_grads_element[tid][var_num][qp] = integrateGradientAux(_element_data._var_grads[tid][var_num], JxW, q_point) / area;
 
     if (_moose_system._is_transient)
     {
-      _var_grads_old_element[tid][var_num] = integrateGradientAux(_element_data._var_grads_old[tid][var_num], JxW, q_point) / area;
-      _var_grads_older_element[tid][var_num] = integrateGradientAux(_element_data._var_grads_older[tid][var_num], JxW, q_point) / area;
+      _var_grads_old_element[tid][var_num].resize(1);
+      _var_grads_older_element[tid][var_num].resize(1);
+
+      _var_grads_old_element[tid][var_num][qp] = integrateGradientAux(_element_data._var_grads_old[tid][var_num], JxW, q_point) / area;
+      _var_grads_older_element[tid][var_num][qp] = integrateGradientAux(_element_data._var_grads_older[tid][var_num], JxW, q_point) / area;
     }
   }
 
@@ -200,20 +222,28 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& /*soln*/, const
     const std::vector<Real> & JxW = *_element_data._JxW[tid][fe_type];
     const std::vector<Point> & q_point = *_element_data._q_point[tid][fe_type];
 
-    _aux_var_vals_element[tid][var_num] = integrateValueAux(_element_data._aux_var_vals[tid][var_num], JxW, q_point) / area;
+    _aux_var_vals_element[tid][var_num].resize(1);
+    _aux_var_vals_element[tid][var_num][qp] = integrateValueAux(_element_data._aux_var_vals[tid][var_num], JxW, q_point) / area;
 
     if (_moose_system._is_transient)
     {
-      _aux_var_vals_old_element[tid][var_num] = integrateValueAux(_element_data._aux_var_vals_old[tid][var_num], JxW, q_point) / area;
-      _aux_var_vals_older_element[tid][var_num] = integrateValueAux(_element_data._aux_var_vals_older[tid][var_num], JxW, q_point) / area;
+      _aux_var_vals_old_element[tid][var_num].resize(1);
+      _aux_var_vals_older_element[tid][var_num].resize(1);
+
+      _aux_var_vals_old_element[tid][var_num][qp] = integrateValueAux(_element_data._aux_var_vals_old[tid][var_num], JxW, q_point) / area;
+      _aux_var_vals_older_element[tid][var_num][qp] = integrateValueAux(_element_data._aux_var_vals_older[tid][var_num], JxW, q_point) / area;
     }
 
-    _aux_var_grads_element[tid][var_num] = integrateGradientAux(_element_data._aux_var_grads[tid][var_num], JxW, q_point) / area;
+    _aux_var_grads_element[tid][var_num].resize(1);
+    _aux_var_grads_element[tid][var_num][qp] = integrateGradientAux(_element_data._aux_var_grads[tid][var_num], JxW, q_point) / area;
 
     if (_moose_system._is_transient)
     {
-      _aux_var_grads_old_element[tid][var_num] = integrateGradientAux(_element_data._aux_var_grads_old[tid][var_num], JxW, q_point) / area;
-      _aux_var_grads_older_element[tid][var_num] = integrateGradientAux(_element_data._aux_var_grads_older[tid][var_num], JxW, q_point) / area;
+      _aux_var_grads_old_element[tid][var_num].resize(1);
+      _aux_var_grads_older_element[tid][var_num].resize(1);
+      
+      _aux_var_grads_old_element[tid][var_num][qp] = integrateGradientAux(_element_data._aux_var_grads_old[tid][var_num], JxW, q_point) / area;
+      _aux_var_grads_older_element[tid][var_num][qp] = integrateGradientAux(_element_data._aux_var_grads_older[tid][var_num], JxW, q_point) / area;
     }
   }
 

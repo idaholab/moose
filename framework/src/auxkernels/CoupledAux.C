@@ -17,7 +17,7 @@ CoupledAux::CoupledAux(std::string name, MooseSystem & moose_system, InputParame
    _value(_parameters.get<Real>("value")),
    _operator(_parameters.get<std::string>("operator")),
    _coupled(coupled("coupled")),
-   _coupled_val(coupledValAux("coupled"))
+   _coupled_val(coupledVal("coupled"))
 {}
 
 
@@ -25,13 +25,13 @@ Real
 CoupledAux::computeValue()
 {
   if (_operator == "+")
-    return _coupled_val+_value;
+    return _coupled_val[_qp]+_value;
   else if (_operator == "-")
-    return _coupled_val-_value;
+    return _coupled_val[_qp]-_value;
   else if (_operator == "*")
-    return _coupled_val*_value;
+    return _coupled_val[_qp]*_value;
   else if (_operator == "/")
-    return _coupled_val/_value;
+    return _coupled_val[_qp]/_value;
   else
     mooseError("Unknown operator");
 }

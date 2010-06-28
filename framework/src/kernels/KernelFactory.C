@@ -20,13 +20,6 @@ KernelFactory::getValidParams(std::string name)
   }
 
   InputParameters params = _name_to_params_pointer[name]();
-
-  if(!params.have_parameter<Real>("start_time"))
-    params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");
-
-  if(!params.have_parameter<Real>("stop_time"))
-    params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which this kernel will no longer be active.");
-
   return params;
 }
 

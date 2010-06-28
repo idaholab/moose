@@ -5,6 +5,11 @@ template<>
 InputParameters validParams<PDEBase>()
 {
   InputParameters params;
+  params.addPrivateParam<bool>("_integrated", true);
+
+  // FIXME: should go into parent class
+  params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");
+  params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which this kernel will no longer be active.");
   return params;
 }
 
@@ -16,7 +21,7 @@ PDEBase::PDEBase(std::string name, MooseSystem &moose_system, InputParameters pa
   _is_aux(moose_system.hasAuxVariable(_var_name)),
   _var_num(_is_aux ? moose_system.getAuxVariableNumber(_var_name) : moose_system.getVariableNumber(_var_name)),
   _fe_type(_is_aux ? moose_system._aux_dof_map->variable_type(_var_num) : moose_system._dof_map->variable_type(_var_num)),
-  _integrated(parameters.have_parameter<bool>("_integrated") ? parameters.get<bool>("_integrated") : true),
+  _integrated(parameters.get<bool>("_integrated")),
   _dim(_moose_system._dim),
   _data(data),
   _qrule(data._qrule[_tid]),
@@ -37,8 +42,8 @@ PDEBase::PDEBase(std::string name, MooseSystem &moose_system, InputParameters pa
   _t_step(moose_system._t_step),
   _bdf2_wei(moose_system._bdf2_wei),
   _t_scheme(moose_system._t_scheme),
-  _start_time(parameters.have_parameter<Real>("start_time") ? parameters.get<Real>("start_time") : -std::numeric_limits<Real>::max()),
-  _stop_time(parameters.have_parameter<Real>("stop_time") ? parameters.get<Real>("stop_time") : std::numeric_limits<Real>::max())
+  _start_time(parameters.get<Real>("start_time")),
+  _stop_time(parameters.get<Real>("stop_time"))
 {
   // Coupling
   for (std::set<std::string>::const_iterator iter = parameters.coupledVarsBegin();

@@ -15,12 +15,14 @@ public:
   /**
    * @param size The initial size of the array.
    */
+  explicit
   MooseArray(const unsigned int size);
 
   /**
    * @param size The initial size of the array.
    * @param default_value The default value to set.
    */
+  explicit
   MooseArray(const unsigned int size, const T & default_value);
 
   /**

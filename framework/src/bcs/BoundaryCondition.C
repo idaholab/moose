@@ -12,7 +12,6 @@ template<>
 InputParameters validParams<BoundaryCondition>()
 {
   InputParameters params = validParams<PDEBase>();
-  params.addPrivateParam<bool>("_integrated", true);
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
   return params;

@@ -26,18 +26,21 @@ AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParamete
    _aux_data(moose_system._aux_data),
    _material(_moose_system._element_data._material[_tid]),
    _nodal(_fe_type.family == LAGRANGE),
-   _u_aux(_nodal ? moose_system._aux_data._aux_var_vals_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_element[_tid][_var_num]),
-   _u_old_aux(_nodal ? moose_system._aux_data._aux_var_vals_old_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_old_element[_tid][_var_num]),
-   _u_older_aux(_nodal ? moose_system._aux_data._aux_var_vals_older_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_older_element[_tid][_var_num]),
+   _u(_nodal ? moose_system._aux_data._aux_var_vals_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_element[_tid][_var_num]),
+   _u_old(_nodal ? moose_system._aux_data._aux_var_vals_old_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_old_element[_tid][_var_num]),
+   _u_older(_nodal ? moose_system._aux_data._aux_var_vals_older_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_older_element[_tid][_var_num]),
    _current_node(moose_system._face_data._current_node[_tid])
 {
+  // Only ever one quadrature point
+  _qp = 0;
+  
   // If this variable isn't known yet... make it so
   add_nonexistent(_var_num, _element_data._aux_var_nums[0]);
 
   if(_nodal)
-    _moose_system._aux_data._nodal_var_nums.push_back(_var_num);
+    add_nonexistent(_var_num, _moose_system._aux_data._nodal_var_nums);
   else
-    _moose_system._aux_data._element_var_nums.push_back(_var_num);
+    add_nonexistent(_var_num, _moose_system._aux_data._element_var_nums);
 
   for(unsigned int i=0;i<_coupled_to.size();i++)
   {
@@ -78,8 +81,8 @@ AuxKernel::computeQpResidual()
   return 0;
 }
 
-Real &
-AuxKernel::coupledValAux(std::string name, int i)
+MooseArray<Real> &
+AuxKernel::coupledVal(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -87,7 +90,12 @@ AuxKernel::coupledValAux(std::string name, int i)
   if(_nodal)
   {
     if(!isAux(name))
+    {
+      unsigned int temp = _coupled_vars[name][i]._num;
+      temp ++;
       return _moose_system._aux_data._var_vals_nodal[_tid][_coupled_vars[name][i]._num];
+    }
+    
     else
       return _moose_system._aux_data._aux_var_vals_nodal[_tid][_coupled_aux_vars[name][i]._num];
   }
@@ -101,8 +109,8 @@ AuxKernel::coupledValAux(std::string name, int i)
 }
 
 
-Real &
-AuxKernel::coupledValOldAux(std::string name, int i)
+MooseArray<Real> &
+AuxKernel::coupledValOld(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -124,8 +132,8 @@ AuxKernel::coupledValOldAux(std::string name, int i)
 }
 
 
-Real &
-AuxKernel::coupledValOlderAux(std::string name, int i)
+MooseArray<Real> &
+AuxKernel::coupledValOlder(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -147,8 +155,8 @@ AuxKernel::coupledValOlderAux(std::string name, int i)
 }
 
 
-RealGradient &
-AuxKernel::coupledGradAux(std::string name, int i)
+MooseArray<RealGradient> &
+AuxKernel::coupledGrad(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -164,8 +172,8 @@ AuxKernel::coupledGradAux(std::string name, int i)
   }
 }
 
-RealGradient &
-AuxKernel::coupledGradOldAux(std::string name, int i)
+MooseArray<RealGradient> &
+AuxKernel::coupledGradOld(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -181,8 +189,8 @@ AuxKernel::coupledGradOldAux(std::string name, int i)
   }
 }
 
-RealGradient &
-AuxKernel::coupledGradOlderAux(std::string name, int i)
+MooseArray<RealGradient> &
+AuxKernel::coupledGradOlder(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");

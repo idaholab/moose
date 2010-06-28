@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<Material>()
 {
-  InputParameters params;
+  InputParameters params = validParams<PDEBase>();
   params.addRequiredParam<std::vector<unsigned int> >("block", "The id of the block (subdomain) that this material represents.");
   return params;
 }
