@@ -5,21 +5,21 @@
 #define FORCINGFUNCTION_H
 
 //Forward Declarations
-class ForcingFunction;
+class UserForcingFunction;
 
 template<>
-InputParameters validParams<ForcingFunction>();
+InputParameters validParams<UserForcingFunction>();
 
 /**
- * Define the Kernel for a forcing function that looks like:
+ * Define the Kernel for a user defined forcing function that looks like:
  *
  * test function * forcing function
  */
-class ForcingFunction : public Kernel
+class UserForcingFunction : public Kernel
 {
 public:
 
-  ForcingFunction(std::string name,
+  UserForcingFunction(std::string name,
              MooseSystem &sys,
              InputParameters parameters);
 
