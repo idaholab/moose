@@ -317,6 +317,10 @@ MooseSystem::initEquationSystems()
     mooseError("EquationSystems Object already initialized for this MooseSystem");
   
   _es = new EquationSystems(*_mesh);
+
+  // Store off the MooseSystem so we can get access to it.
+  _es->parameters.set<MooseSystem *>("moose_system") = this;
+  
   _system = &_es->add_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
   _aux_system = &_es->add_system<TransientExplicitSystem>("AuxiliarySystem");
   

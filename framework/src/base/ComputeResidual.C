@@ -123,7 +123,9 @@ namespace Moose
 {
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
-    g_system->compute_residual(soln, residual);
+    MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
+    
+    moose_system->compute_residual(soln, residual);
   }
 }
       

@@ -125,7 +125,9 @@ namespace Moose {
 
 void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
 {
-  g_system->compute_jacobian(soln, jacobian);
+  MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
+
+  moose_system->compute_jacobian(soln, jacobian);
 }
 
 }
@@ -325,7 +327,9 @@ namespace Moose {
 
 void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, NonlinearImplicitSystem& sys, unsigned int ivar, unsigned int jvar)
 {
-  g_system->compute_jacobian_block (soln, jacobian, precond_system, ivar, jvar);
+  MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
+
+  moose_system->compute_jacobian_block (soln, jacobian, precond_system, ivar, jvar);
 }
 
 }
