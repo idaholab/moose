@@ -1,16 +1,20 @@
+#ifndef FUNCTOR_H
+#define FUNCTOR_H
+
 #include "fparser.h"
 
 #include <iostream>
 #include <string>
 #include <map>
 
-#include "libmesh_common.h" // to get typedef Real
+#include "libmesh_common.h" // to get Real
 
 /**
  * This class is used to evaluate symbolic equations passed in to Moose through
- * the input file.
+ * the input file. It supports symbolic variables that you can change by putting
+ * a different value in a reference returned by getVarAddr().
  * 
- * Documentation for the Function Parser cab be found at:
+ * Documentation for the Function Parser can be found at:
  * http://warp.povusers.org/FunctionParser/fparser.html
  */
 class Functor
@@ -19,12 +23,23 @@ class Functor
     /**
      * Create a Functor object and initialize the underlying Function Parser.
      *
-     * @param equation The actual equation, following the Function Parser for
+     * @param equation The actual equation, following the "Function Parser for
      *        C++ 4.2" syntax. All basic operators and mathematical functions
      *        are supported.
      * @param vars The variables used in this equation, excluding t, x, y, and z
+     * @param vals The values to stick in the variables listed in vars. If you
+     *        want to dynamically change the variables this parameter is usually
+     *        not used and the values are filled with getVarAddr().
+     *
+     *        This list may be shorter than the vars list, in which case the vals
+     *        will be put in the first `len(vals)` variables. In that case you
+     *        would have to set the remaining variables using getVarAddr().
+     *
+     *        TODO: putting these values as constants would probably be faster
      */
-    Functor( std::string equation, std::vector<std::string> vars = std::vector<std::string>(0) );
+    Functor( std::string equation,
+             std::vector<std::string> vars = std::vector<std::string>(0),
+             std::vector<Real> vals = std::vector<Real>(0) );
 
     ~Functor();
 
@@ -45,8 +60,6 @@ class Functor
     /**
      * Evaluate the equation at the given location. For 1-D and 2-D equations
      * x and y are optional.
-     * TODO: override for 1-D and 2-D cases so we don't have to copy 0.0 into
-     *       the array every time we evaluate for z and y.
      */
     Real operator()(Real t, Real x, Real y = 0, Real z = 0);
 
@@ -64,3 +77,5 @@ class Functor
     std::vector<Real> _vars;
     std::map<std::string, Real*> _var_map;
 };
+
+#endif //FUNCTOR_H

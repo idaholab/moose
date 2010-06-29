@@ -68,6 +68,7 @@
 #include "Steady.h"
 #include "TransientExecutioner.h"
 #include "SolutionTimeAdaptive.h"
+#include "ExactSolutionExecutioner.h"
 
 #include "StabilizerFactory.h"
 #include "ConvectionDiffusionSUPG.h"
@@ -178,6 +179,7 @@ Moose::registerObjects()
   // name than the class name!
   ExecutionerFactory::instance()->registerExecutioner<TransientExecutioner>("Transient");
   ExecutionerFactory::instance()->registerExecutioner<SolutionTimeAdaptive>("SolutionTimeAdaptive");
+  ExecutionerFactory::instance()->registerExecutioner<ExactSolutionExecutioner>("ExactSolutionExecutioner");
   
   StabilizerFactory::instance()->registerStabilizer<ConvectionDiffusionSUPG>("ConvectionDiffusionSUPG");
 }

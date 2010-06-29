@@ -1,8 +1,8 @@
-#include "Kernel.h"
-#include "Functor.h"
-
 #ifndef USERFORCINGFUNCTION_H
 #define USERFORCINGFUNCTION_H
+
+#include "Kernel.h"
+#include "Functor.h"
 
 //Forward Declarations
 class UserForcingFunction;

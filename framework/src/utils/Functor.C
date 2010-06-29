@@ -1,6 +1,7 @@
+#include "Moose.h" //for mooseAssert
 #include "Functor.h"
 
-Functor::Functor( std::string equation, std::vector<std::string> vars ):
+Functor::Functor( std::string equation, std::vector<std::string> vars, std::vector<Real> vals ):
   _vars(vars.size() + 4)
 {
   std::string variables = "t,x,y,z";
@@ -16,13 +17,18 @@ Functor::Functor( std::string equation, std::vector<std::string> vars ):
     //Show the user their equation with a ^ where the parsing error is
     std::string msg(res, ' ');
     msg = "ERROR: Can not parse function\n" + equation + "\n" + msg + "^\n";
-    std::cout << msg;
-    return; //TODO MooseError(msg);
+    mooseError(msg);
   }
 
   //prebuild map of variable names to pointers to put the variable value
   for (int i = 0; i < vars.size(); i++)
     _var_map[vars[i]] = &(_vars[4+i]); //add 4 to account for t,x,y,z
+
+  //fill in the variables whose values we already know. The values in vals fill
+  //in the first n variables in the variables list.
+  mooseAssert( vars.size() <= vals.size(), "There can't be more values than variables!" );
+  for (int i = 0; i < vals.size(); i++)
+    _vars[i+4] = vals[i];
 
   //TODO compile with support for optimization (ask about alloca)
   _parser.Optimize();
