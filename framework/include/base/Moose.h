@@ -223,15 +223,6 @@ namespace Moose
   extern bool auto_scaling;
 
   extern std::vector<Real> manual_scaling;
-  extern Number (*init_value)(const Point& p,
-                              const Parameters& parameters,
-                              const std::string& sys_name,
-                              const std::string& var_name);
-  extern Gradient (*init_gradient)(const Point& p,
-                                   const Parameters& parameters,
-                                   const std::string& sys_name,
-                                   const std::string& var_name);
-  extern void (*init_cond)(EquationSystems& es, const std::string& system_name);
 
   extern GetPot *command_line;
 }

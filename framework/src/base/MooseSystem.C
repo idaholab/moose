@@ -14,6 +14,7 @@
 #include "ComputeQPSolution.h"
 #include "ComputeResidual.h"
 #include "ComputeJacobian.h"
+#include "ComputeInitialConditions.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -309,10 +310,10 @@ MooseSystem::initEquationSystems()
   _system = &_es->add_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
   _system->nonlinear_solver->residual = Moose::compute_residual;
   _system->nonlinear_solver->jacobian = Moose::compute_jacobian;
-  _system->attach_init_function(Moose::init_cond);
+  _system->attach_init_function(Moose::initial_condition);
 
   _aux_system = &_es->add_system<TransientExplicitSystem>("AuxiliarySystem");
-  _aux_system->attach_init_function(Moose::init_cond);
+  _aux_system->attach_init_function(Moose::initial_condition);
 
 
   return _es;

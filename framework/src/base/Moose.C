@@ -225,15 +225,6 @@ bool Moose::print_out_info = false;
 bool Moose::output_initial = false;
 bool Moose::auto_scaling = false;
 std::vector<Real> Moose::manual_scaling;
-Number (*Moose::init_value)(const Point& p,
-                            const Parameters& parameters,
-                            const std::string& sys_name,
-                            const std::string& var_name) = Moose::initial_value;
-Gradient (*Moose::init_gradient)(const Point& p,
-                                 const Parameters& parameters,
-                                 const std::string& sys_name,
-                                 const std::string& var_name) = Moose::initial_gradient;
-void (*Moose::init_cond)(EquationSystems& es, const std::string& system_name) = Moose::initial_condition;
 
 // This variable will be static in the new Moose System object - only need one per application
 GetPot *Moose::command_line;

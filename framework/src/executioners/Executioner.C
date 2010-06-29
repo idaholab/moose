@@ -6,6 +6,7 @@
 #include "Kernel.h"
 #include "ComputeJacobian.h"
 #include "ComputeResidual.h"
+#include "ComputeInitialConditions.h"
 
 // C++ includes
 #include <vector>
@@ -76,7 +77,7 @@ Executioner::setup()
     _moose_system.meshChanged();
 
     //reproject the initial condition
-    _moose_system.getNonlinearSystem()->project_solution(Moose::init_value, NULL, _moose_system.getEquationSystems()->parameters);
+    _moose_system.getNonlinearSystem()->project_solution(Moose::initial_value, NULL, _moose_system.getEquationSystems()->parameters);
   }    
 
   if(Moose::output_initial)
