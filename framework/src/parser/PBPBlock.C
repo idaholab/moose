@@ -1,18 +1,13 @@
 #include "PBPBlock.h"
 #include "PhysicsBasedPreconditioner.h"
 #include "Moose.h"
+#include "ComputeJacobian.h"
+#include "ComputeResidual.h"
 
 #include "linear_implicit_system.h"
 #include "nonlinear_implicit_system.h"
 #include "nonlinear_solver.h"
 #include "string_to_enum.h"
-
-// FIXME: remove me whne libmesh solver problem is fixed
-namespace Moose {
-void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
-void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
-void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
-}
 
 template<>
 InputParameters validParams<PBPBlock>()
@@ -49,7 +44,7 @@ PBPBlock::execute()
                                 system.variable(var).type().family);
   }
 
-  PhysicsBasedPreconditioner *precond = new PhysicsBasedPreconditioner();
+  PhysicsBasedPreconditioner *precond = new PhysicsBasedPreconditioner(_moose_system);
 
   _moose_system.setPreconditioner(precond);
   
@@ -81,8 +76,6 @@ PBPBlock::execute()
     off_diag[row].push_back(column);
   }  
       
-  precond->setEq(*_moose_system.getEquationSystems());
-  precond->setComputeJacobianBlock(Moose::compute_jacobian_block);
   precond->setSolveOrder(solve_order);
   precond->setPreconditionerType(pre);
   precond->setOffDiagBlocks(off_diag);

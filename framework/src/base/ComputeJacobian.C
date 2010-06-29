@@ -123,7 +123,7 @@ protected:
 
 namespace Moose {
 
-void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
+void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
 {
   g_system->compute_jacobian(soln, jacobian);
 }
@@ -323,7 +323,7 @@ protected:
 
 namespace Moose {
 
-void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar)
+void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, NonlinearImplicitSystem& sys, unsigned int ivar, unsigned int jvar)
 {
   g_system->compute_jacobian_block (soln, jacobian, precond_system, ivar, jvar);
 }

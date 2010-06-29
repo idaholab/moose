@@ -20,6 +20,116 @@
 */
 
 void
+PhysicsBasedPreconditioner::init ()
+{
+  Moose::perf_log.push("init()","PhysicsBasedPreconditioner");
+
+  if(!_equation_systems)
+  {
+    std::cerr<<"EquationSystems must be set on PhysicsBasedPreconditioner before use!"<<std::endl;
+    mooseError("");
+  }
+  
+  TransientNonlinearImplicitSystem & system = _equation_systems->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+
+  // -2 to take into account the Nonlinear system and the Auxilliary System
+  const unsigned int num_systems = _equation_systems->n_systems()-2;
+
+  if(_preconditioners.size() == 0)
+    _preconditioners.resize(num_systems);
+
+  //If no order was specified, just solve them in increasing order
+  if(_solve_order.size() == 0)
+  {
+    _solve_order.resize(num_systems);
+    for(unsigned int i=0;i<num_systems;i++)
+      _solve_order[i]=i;
+  }
+
+  if(_off_diag.size() != num_systems)
+    _off_diag.resize(num_systems);
+
+  if(_off_diag_mats.size() != num_systems)
+    _off_diag_mats.resize(num_systems);
+
+  //Default to using AMG
+  if(_pre_type.size() != num_systems)
+  {
+    _pre_type.resize(num_systems);
+    for(unsigned int i=0;i<num_systems;i++)
+      _pre_type[i]=AMG_PRECOND;
+  }
+
+  //Loop over variables
+  for(unsigned int system_var=0; system_var<num_systems; system_var++)
+  {
+    //+2 to take into acount the Nonlinear system and Auxiliary System
+    unsigned int sys = system_var+2;
+    
+    if(!_preconditioners[system_var])
+    {
+      _preconditioners[system_var] = Preconditioner<Number>::build();
+
+      if(_off_diag_mats[system_var].size() != _off_diag[system_var].size())
+        _off_diag_mats[system_var].resize(_off_diag[system_var].size());
+
+      Preconditioner<Number> * preconditioner = _preconditioners[system_var];
+
+      LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
+
+      preconditioner->set_matrix(*u_system.matrix);
+
+      preconditioner->set_type(_pre_type[system_var]);
+
+      /*
+      PetscPreconditioner<Number> * petsc_pre = dynamic_cast<PetscPreconditioner<Number> *>(preconditioner);
+
+      if(petsc_pre)
+      {
+        if(petsc_pre->type() == AMG_PRECOND)
+        {     
+          PC pc = petsc_pre->pc();
+
+//          PC_HYPRE * jac = (PC_HYPRE*)pc->data;
+//          HYPRE_Solver hsolver = jac->hsolver;
+          
+          HYPRE_Solver hsolver = (HYPRE_Solver)pc->data;
+        
+          HYPRE_BoomerAMGSetMaxLevels(hsolver,1);
+
+          preconditioner->init();
+        }
+      }
+*/
+    }
+
+    Preconditioner<Number> * preconditioner = _preconditioners[system_var];
+    preconditioner->init();
+    
+    LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
+    
+      //Compute the diagonal block... storing the result in the system matrix
+    _moose_system.compute_jacobian_block(*system.current_local_solution,*u_system.matrix,u_system,system_var,system_var);
+
+    for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
+    {
+      unsigned int coupled_var = _off_diag[system_var][diag];
+
+      //System 0 is the Nonlinear system
+      std::string coupled_name = _equation_systems->get_system(0).variable_name(coupled_var);
+      
+      _off_diag_mats[system_var][diag] = &u_system.get_matrix(coupled_name);
+        
+      _moose_system.compute_jacobian_block(*system.current_local_solution,*_off_diag_mats[system_var][diag],
+                                           u_system,system_var,coupled_var);
+    }
+
+  }
+
+  Moose::perf_log.pop("init()","PhysicsBasedPreconditioner");
+}
+
+void
 PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector<Number> & y)
 {
   Moose::perf_log.push("apply()","PhysicsBasedPreconditioner");
@@ -103,134 +213,6 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 void
 PhysicsBasedPreconditioner::clear ()
 {
-}
-
-void
-PhysicsBasedPreconditioner::init ()
-{
-  Moose::perf_log.push("init()","PhysicsBasedPreconditioner");
-
-  if(!_equation_systems)
-  {
-    std::cerr<<"EquationSystems must be set on PhysicsBasedPreconditioner before use!"<<std::endl;
-    mooseError("");
-  }
-
-  if(!_compute_jacobian_block)
-  {
-    std::cerr<<"ComputeJacobianBlock must be set on PhysicsBasedPreconditioner before use!"<<std::endl;
-    mooseError("");
-  }
-
-  TransientNonlinearImplicitSystem & system = _equation_systems->get_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
-
-  // -2 to take into account the Nonlinear system and the Auxilliary System
-  const unsigned int num_systems = _equation_systems->n_systems()-2;
-
-  if(_preconditioners.size() == 0)
-    _preconditioners.resize(num_systems);
-
-  //If no order was specified, just solve them in increasing order
-  if(_solve_order.size() == 0)
-  {
-    _solve_order.resize(num_systems);
-    for(unsigned int i=0;i<num_systems;i++)
-      _solve_order[i]=i;
-  }
-
-  if(_off_diag.size() != num_systems)
-    _off_diag.resize(num_systems);
-
-  if(_off_diag_mats.size() != num_systems)
-    _off_diag_mats.resize(num_systems);
-
-  //Default to using AMG
-  if(_pre_type.size() != num_systems)
-  {
-    _pre_type.resize(num_systems);
-    for(unsigned int i=0;i<num_systems;i++)
-      _pre_type[i]=AMG_PRECOND;
-  }
-
-  //Loop over variables
-  for(unsigned int system_var=0; system_var<num_systems; system_var++)
-  {
-    //+2 to take into acount the Nonlinear system and Auxiliary System
-    unsigned int sys = system_var+2;
-    
-    if(!_preconditioners[system_var])
-    {
-      _preconditioners[system_var] = Preconditioner<Number>::build();
-
-      if(_off_diag_mats[system_var].size() != _off_diag[system_var].size())
-        _off_diag_mats[system_var].resize(_off_diag[system_var].size());
-
-      Preconditioner<Number> * preconditioner = _preconditioners[system_var];
-
-      LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
-
-      preconditioner->set_matrix(*u_system.matrix);
-
-      preconditioner->set_type(_pre_type[system_var]);
-
-      /*
-      PetscPreconditioner<Number> * petsc_pre = dynamic_cast<PetscPreconditioner<Number> *>(preconditioner);
-
-      if(petsc_pre)
-      {
-        if(petsc_pre->type() == AMG_PRECOND)
-        {     
-          PC pc = petsc_pre->pc();
-
-//          PC_HYPRE * jac = (PC_HYPRE*)pc->data;
-//          HYPRE_Solver hsolver = jac->hsolver;
-          
-          HYPRE_Solver hsolver = (HYPRE_Solver)pc->data;
-        
-          HYPRE_BoomerAMGSetMaxLevels(hsolver,1);
-
-          preconditioner->init();
-        }
-      }
-*/
-    }
-
-    Preconditioner<Number> * preconditioner = _preconditioners[system_var];
-    preconditioner->init();
-    
-    LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
-    
-      //Compute the diagonal block... storing the result in the system matrix
-    _compute_jacobian_block(*system.current_local_solution,*u_system.matrix,u_system,system_var,system_var);
-
-    for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
-    {
-      unsigned int coupled_var = _off_diag[system_var][diag];
-
-      //System 0 is the Nonlinear system
-      std::string coupled_name = _equation_systems->get_system(0).variable_name(coupled_var);
-      
-      _off_diag_mats[system_var][diag] = &u_system.get_matrix(coupled_name);
-        
-      _compute_jacobian_block(*system.current_local_solution,*_off_diag_mats[system_var][diag],
-                              u_system,system_var,coupled_var);
-    }
-
-  }
-
-  Moose::perf_log.pop("init()","PhysicsBasedPreconditioner");
-}
-
-void
-PhysicsBasedPreconditioner::setEq(EquationSystems & equation_systems)
-{
-  _equation_systems = &equation_systems;
-}
-
-void
-PhysicsBasedPreconditioner::setComputeJacobianBlock(void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar))
-{
-  _compute_jacobian_block = compute_jacobian_block;
 }
 
 void

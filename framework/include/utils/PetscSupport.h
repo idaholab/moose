@@ -23,7 +23,18 @@ namespace Moose
   
     PetscErrorCode petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy);
     PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void *dummy);
-    void petscSetDefaults(EquationSystems * es, TransientNonlinearImplicitSystem & system, void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar), void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual));
+    
+    void petscSetDefaults(EquationSystems * es, TransientNonlinearImplicitSystem & system,
+                          void (*compute_jacobian_block) (const NumericVector<Number>& soln,
+                                                          SparseMatrix<Number>&  jacobian,
+                                                          System& precond_system,
+                                                          NonlinearImplicitSystem& sys,
+                                                          unsigned int ivar,
+                                                          unsigned int jvar),
+                          void (*compute_residual) (const NumericVector<Number>& soln,
+                                                    NumericVector<Number>& residual,
+                                                    NonlinearImplicitSystem& sys));
+    
     PetscErrorCode petscPhysicsBasedLineSearch(SNES snes,void *lsctx,Vec x,Vec f,Vec g,Vec y,Vec w, PetscReal fnorm,PetscReal *ynorm,PetscReal *gnorm,PetscTruth *flag);
   }
 }

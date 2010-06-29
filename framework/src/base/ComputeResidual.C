@@ -119,13 +119,12 @@ protected:
 };
 
 
-namespace Moose {
-
-void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
+namespace Moose
 {
-  g_system->compute_residual(soln, residual);
-}
-
+  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
+  {
+    g_system->compute_residual(soln, residual);
+  }
 }
       
 

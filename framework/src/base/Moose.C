@@ -1,3 +1,6 @@
+#include "ComputeResidual.h"
+#include "ComputeJacobian.h"
+
 #include "KernelFactory.h"
 #include "BodyForce.h"
 #include "Diffusion.h"
@@ -182,8 +185,8 @@ Moose::registerObjects()
 void
 Moose::setSolverDefaults(EquationSystems * es,
                          TransientNonlinearImplicitSystem & system,
-                         void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar),
-                         void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual))
+                         void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, NonlinearImplicitSystem& sys, unsigned int ivar, unsigned int jvar),
+                         void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys))
 {
 #ifdef LIBMESH_HAVE_PETSC
   MoosePetscSupport::petscSetDefaults(es, system, compute_jacobian_block, compute_residual);

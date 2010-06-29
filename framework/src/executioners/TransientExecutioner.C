@@ -4,6 +4,8 @@
 #include "Kernel.h"
 #include "MaterialFactory.h"
 #include "MooseSystem.h"
+#include "ComputeJacobian.h"
+#include "ComputeResidual.h"
 
 //libMesh includes
 #include "implicit_system.h"
@@ -13,13 +15,6 @@
 
 // C++ Includes
 #include <iomanip>
-
-// FIXME: remove me whne libmesh solver problem is fixed
-namespace Moose {
-void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
-void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
-void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
-}
 
 template<>
 InputParameters validParams<TransientExecutioner>()

@@ -12,6 +12,8 @@
 #include "AuxKernel.h"
 #include "ParallelUniqueId.h"
 #include "ComputeQPSolution.h"
+#include "ComputeResidual.h"
+#include "ComputeJacobian.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -22,11 +24,13 @@
 #include "boundary_info.h"
 
 // FIXME: remove me when libmesh solver problem is fixed
+/*
 namespace Moose {
-void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
-void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
-void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
+  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys);
+  void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys);
+  void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, NonlinearImplicitSystem& sys, unsigned int ivar, unsigned int jvar);
 }
+*/
 
 MooseSystem::MooseSystem()
  : _element_data(*this),

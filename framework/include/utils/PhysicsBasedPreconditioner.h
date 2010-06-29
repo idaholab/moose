@@ -1,12 +1,16 @@
 #ifndef PHYSICSBASEDPRECONDITIONER_H
 #define PHYSICSBASEDPRECONDITIONER_H
 
+//Moose Includes
+#include "MooseSystem.h"
+
 //Global includes:
 #include<vector>
 
 //libMesh includes:
 #include "preconditioner.h"
 #include "system.h"
+#include "nonlinear_implicit_system.h"
 
 //Forward declarations
 class EquationSystems;
@@ -22,13 +26,12 @@ public:
   /**
    *  Constructor. Initializes PhysicsBasedPreconditioner data structures
    */
-  PhysicsBasedPreconditioner ();
+  PhysicsBasedPreconditioner (MooseSystem & moose_system);
     
   /**
    * Destructor.
    */
   virtual ~PhysicsBasedPreconditioner ();
-  
     
 
   /**
@@ -46,16 +49,6 @@ public:
    * Initialize data structures if not done so already.
    */
   virtual void init ();
-
-  /**
-   * Set the equation_systems object.
-   */
-  void setEq(EquationSystems & equation_systems);
-
-  /**
-   * Set a function pointer for how to evaluate a block of the "Jacobian"
-   */
-  void setComputeJacobianBlock(void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar));
   
   /**
    * Set the order the block rows are solved for.  If not set then the solve happens in the order
@@ -92,14 +85,14 @@ public:
   
 protected:
   /**
+   * The MooseSystem this PBP is associated with.
+   */
+  MooseSystem & _moose_system;
+  
+  /**
    * The EquationSystems object that all of the systems live in.
    */
   EquationSystems * _equation_systems;
-
-  /**
-   * A pointer to the function to call to compute one block of the jacobian.
-   */
-  void (*_compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
 
   /**
    * Holds one Preconditioner object per small system to solve.
@@ -132,10 +125,10 @@ protected:
 };
 
 inline
-PhysicsBasedPreconditioner::PhysicsBasedPreconditioner () :
-                           Preconditioner<Number>(),
-                           _equation_systems(NULL),
-                           _compute_jacobian_block(NULL)
+PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (MooseSystem & moose_system)
+  :_moose_system(moose_system),
+   Preconditioner<Number>(),
+   _equation_systems(moose_system.getEquationSystems())
 {
 }
 

@@ -30,8 +30,8 @@ namespace Moose
     PetscReal l_abs_step_tol = -1;
     EquationSystems *_equation_system = NULL;
 
-    void (*_compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar) = NULL;
-    void (*_compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual) = NULL;
+    void (*_compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, NonlinearImplicitSystem& sys, unsigned int ivar, unsigned int jvar) = NULL;
+    void (*_compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys) = NULL;
 
     std::vector<PetscPreconditioner<Number> *> preconditioners;
 
@@ -190,7 +190,7 @@ namespace Moose
 
         preconditioner->set_type(AMG_PRECOND);
 
-        _compute_jacobian_block(*system.current_local_solution,*u_system.matrix,u_system,system_var,system_var);
+        _compute_jacobian_block(*system.current_local_solution,*u_system.matrix,u_system, system, system_var,system_var);
 
         preconditioner->init();
       }
@@ -258,7 +258,16 @@ namespace Moose
       return 0;
     }
 
-    void petscSetDefaults(EquationSystems * es, TransientNonlinearImplicitSystem & system, void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar), void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual))
+    void petscSetDefaults(EquationSystems * es, TransientNonlinearImplicitSystem & system,
+                          void (*compute_jacobian_block) (const NumericVector<Number>& soln,
+                                                          SparseMatrix<Number>&  jacobian,
+                                                          System& precond_system,
+                                                          NonlinearImplicitSystem& sys,
+                                                          unsigned int ivar,
+                                                          unsigned int jvar),
+                          void (*compute_residual) (const NumericVector<Number>& soln,
+                                                    NumericVector<Number>& residual,
+                                                    NonlinearImplicitSystem& sys))
     {
       _equation_system = es;
       _compute_jacobian_block = compute_jacobian_block;

@@ -4,6 +4,8 @@
 #include "Moose.h"
 #include "MooseSystem.h"
 #include "Kernel.h"
+#include "ComputeJacobian.h"
+#include "ComputeResidual.h"
 
 // C++ includes
 #include <vector>
@@ -15,13 +17,6 @@
 #include "kelly_error_estimator.h"
 #include "mesh_refinement.h"
 #include "numeric_vector.h"
-
-// FIXME: remove me when libmesh solver problem is fixed
-namespace Moose {
-void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
-void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
-void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
-}
 
 template<>
 InputParameters validParams<Executioner>()
