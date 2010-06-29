@@ -17,7 +17,9 @@ namespace Moose
                         const std::string& sys_name,
                         const std::string& var_name)
   {
-    return Moose::g_system->initial_value(p, parameters, sys_name, var_name);
+    MooseSystem * moose_system = parameters.get<MooseSystem *>("moose_system");
+    mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
+    return moose_system->initial_value(p, parameters, sys_name, var_name);
   }
 
   Gradient initial_gradient (const Point& p,
@@ -25,12 +27,16 @@ namespace Moose
                              const std::string& sys_name,
                              const std::string& var_name)
   {
-    return Moose::g_system->initial_gradient(p, parameters, sys_name, var_name);
+    MooseSystem * moose_system = parameters.get<MooseSystem *>("moose_system");
+    mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
+    return moose_system->initial_gradient(p, parameters, sys_name, var_name);
   }
 
   void initial_condition(EquationSystems& es, const std::string& system_name)
   {
-    Moose::g_system->initial_condition(es, system_name);
+    MooseSystem * moose_system = es.parameters.get<MooseSystem *>("moose_system");
+    mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
+    moose_system->initial_condition(es, system_name);
   }
 }
 

@@ -16,13 +16,6 @@
 #include "dof_map.h"
 #include "coupling_matrix.h"
 
-// FIXME: remove me when libmesh solver problem is fixed
-namespace Moose {
-void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys);
-void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys);
-void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, NonlinearImplicitSystem& sys, unsigned int ivar, unsigned int jvar);
-}
-
 template<>
 InputParameters validParams<VariablesBlock>()
 {
@@ -52,12 +45,6 @@ VariablesBlock::execute()
 
   // Add variable blocks from the children nodes
   visitChildren();
-
-  // FIXME: should be inside MooseSystem
-  system.nonlinear_solver->residual = Moose::compute_residual;
-  system.nonlinear_solver->jacobian = Moose::compute_jacobian;
-
-  system.attach_init_function(Moose::init_cond);
 
   // FIXME: should be inside MooseSystem
   CouplingMatrix * cm = new CouplingMatrix(system.n_vars());

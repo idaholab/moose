@@ -124,7 +124,7 @@ namespace Moose
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
     MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
-    
+    mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
     moose_system->compute_residual(soln, residual);
   }
 }

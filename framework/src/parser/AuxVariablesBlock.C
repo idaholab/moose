@@ -40,8 +40,6 @@ AuxVariablesBlock::execute()
   
   visitChildren();
 
-  aux_system.attach_init_function(Moose::init_cond);
-
   // Add a temporary vector for general use
   system.add_vector("temp", false);
 

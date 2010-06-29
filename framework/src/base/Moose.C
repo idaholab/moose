@@ -201,9 +201,6 @@ Moose::setSolverDefaults(EquationSystems * es,
  * ****************/
 THREAD_ID Moose::current_thread_id = 0;
 
-// FIXME
-MooseSystem * Moose::g_system = NULL;
-
 //EquationSystems * Moose::equation_system;
 
 MeshRefinement * Moose::mesh_refinement = NULL;

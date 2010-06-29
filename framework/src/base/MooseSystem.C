@@ -23,15 +23,6 @@
 #include "tecplot_io.h"
 #include "boundary_info.h"
 
-// FIXME: remove me when libmesh solver problem is fixed
-/*
-namespace Moose {
-  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys);
-  void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys);
-  void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, NonlinearImplicitSystem& sys, unsigned int ivar, unsigned int jvar);
-}
-*/
-
 MooseSystem::MooseSystem()
  : _element_data(*this),
    _face_data(*this),
@@ -64,7 +55,6 @@ MooseSystem::MooseSystem()
    _n_of_rk_stages(0),
    _active_local_elem_range(NULL)
 {
-  Moose::g_system = this;     // FIXME: this will eventually go away
   sizeEverything();
 }
 
@@ -100,13 +90,8 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _n_of_rk_stages(0),
     _active_local_elem_range(NULL)
 {
-  Moose::g_system = this;     // FIXME: this will eventually go away
-
   sizeEverything();
   initEquationSystems();
-  // setup solver
-  _system->nonlinear_solver->residual = Moose::compute_residual;
-  _system->nonlinear_solver->jacobian = Moose::compute_jacobian;
 
   _mesh->prepare_for_use(false);
   _mesh->boundary_info->build_node_list_from_side_list();
@@ -322,8 +307,14 @@ MooseSystem::initEquationSystems()
   _es->parameters.set<MooseSystem *>("moose_system") = this;
   
   _system = &_es->add_system<TransientNonlinearImplicitSystem>("NonlinearSystem");
+  _system->nonlinear_solver->residual = Moose::compute_residual;
+  _system->nonlinear_solver->jacobian = Moose::compute_jacobian;
+  _system->attach_init_function(Moose::init_cond);
+
   _aux_system = &_es->add_system<TransientExplicitSystem>("AuxiliarySystem");
-  
+  _aux_system->attach_init_function(Moose::init_cond);
+
+
   return _es;
 }
 

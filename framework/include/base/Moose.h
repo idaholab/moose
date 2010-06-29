@@ -175,11 +175,6 @@ namespace Moose
   extern THREAD_ID current_thread_id;
 
   /**
-   * THE Moose System
-   */
-  extern MooseSystem * g_system;
-  
-  /**
    * A mesh refinement object to be used with Adaptivity.
    */
   extern MeshRefinement * mesh_refinement;
