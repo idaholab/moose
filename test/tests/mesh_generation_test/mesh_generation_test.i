@@ -1,6 +1,5 @@
 [Mesh]
   dim = 2
-  generated = true
     
   [./Generation]
     nx = 2

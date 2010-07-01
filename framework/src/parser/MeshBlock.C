@@ -19,9 +19,8 @@ InputParameters validParams<MeshBlock>()
   InputParameters params = validParams<ParserBlock>();
   params.addRequiredParam<int>("dim", "The dimension of the mesh file to read or generate");
   
-  params.addParam<std::string>("file", "The name of the mesh file to read (required unless using dynamic generation)");
+  params.addParam<std::string>("file", "(no file supplied)", "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
-  params.addParam<bool>("generated", false, "Tell MOOSE that a mesh will be generated");
   params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when spliting the mesh for a parallel computation");
   params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
   return params;
@@ -40,21 +39,17 @@ MeshBlock::execute()
 
   Mesh *mesh = _moose_system.initMesh(getParamValue<int>("dim"));
 
-  // TODO: Need test for Mesh Generation
-  if (getParamValue<bool>("generated")) 
-  {
-    if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
-      gen_block->execute();
-    else
-      mooseError("");
-  }
+  /**
+   * We will use the mesh object to read the file to cut down on
+   * I/O conntention.  We still need to use the Exodus reader though
+   * for copy_nodal_solutions
+   */
+  
+  if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
+    gen_block->execute();
   else if (checkVariableProperties(&GenericVariableBlock::restartRequired)) 
     _moose_system.getExodusReader()->read(getParamValue<std::string>("file"));
   else
-    /* We will use the mesh object to read the file to cut down on
-     * I/O connection.  We still need to use the Exodus reader though
-     *for copy_nodal_solutions
-     */
     mesh->read(getParamValue<std::string>("file"));
 
   if (getParamValue<bool>("second_order"))
