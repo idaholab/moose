@@ -210,7 +210,7 @@ PDEBase::coupledComponents(std::string varname)
 
 
 MooseArray<Real> &
-PDEBase::coupledVal(std::string varname, int i)
+PDEBase::coupledValue(std::string varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -222,7 +222,7 @@ PDEBase::coupledVal(std::string varname, int i)
 }
 
 MooseArray<RealGradient> &
-PDEBase::coupledGrad(std::string varname, int i)
+PDEBase::coupledGradient(std::string varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -244,7 +244,7 @@ PDEBase::coupledSecond(std::string varname, int i)
 }
 
 MooseArray<Real> &
-PDEBase::coupledValOld(std::string varname, int i)
+PDEBase::coupledValueOld(std::string varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -256,7 +256,7 @@ PDEBase::coupledValOld(std::string varname, int i)
 }
 
 MooseArray<Real> &
-PDEBase::coupledValOlder(std::string varname, int i)
+PDEBase::coupledValueOlder(std::string varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -268,7 +268,7 @@ PDEBase::coupledValOlder(std::string varname, int i)
 }
 
 MooseArray<RealGradient> &
-PDEBase::coupledGradValOld(std::string varname, int i)
+PDEBase::coupledGradientOld(std::string varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");

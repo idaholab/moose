@@ -32,7 +32,7 @@ protected:
   std::string _operator;
 
   int _coupled;
-  MooseArray<Real> & _coupled_val;
+  VariableValue & _coupled_val;
 };
 
 #endif //COUPLEDAUX_H

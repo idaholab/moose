@@ -23,7 +23,7 @@ protected:
   virtual Real computeQpResidual();
 
 private:
-  MooseArray<Real> & _v_face;
+  VariableValue & _v_face;
 };
 
 #endif //MATCHEDVALUEBC_H

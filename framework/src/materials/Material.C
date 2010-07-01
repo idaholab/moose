@@ -16,57 +16,15 @@ InputParameters validParams<Material>()
 
 Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters, moose_system.getQuadraturePointData(parameters.get<bool>("_is_boudary_material"))),
-   _material_data(moose_system._material_data),
-   _has_stateful_props(false),
-   _constant_real_props(_material_data._constant_real_props),
-   _real_props(_material_data._real_props),
-   _gradient_props(_material_data._gradient_props),
-   _real_vector_value_props(_material_data._real_vector_value_props),
-   _vector_props(_material_data._vector_props),
-   _tensor_props(_material_data._tensor_props),
-   _column_major_matrix_props(_material_data._column_major_matrix_props),
-   _matrix_props(_material_data._matrix_props),                                                                                                                             _constant_real_props_old(_material_data._constant_real_props_old),                                                                                                                                  _real_props_old(_material_data._real_props_old),
-   _gradient_props_old(_material_data._gradient_props_old),
-   _real_vector_value_props_old(_material_data._real_vector_value_props_old),
-   _vector_props_old(_material_data._vector_props_old),
-   _tensor_props_old(_material_data._tensor_props_old),
-   _column_major_matrix_props_old(_material_data._column_major_matrix_props_old),
-   _matrix_props_old(_material_data._matrix_props_old),
-   _constant_real_props_older(_material_data._constant_real_props_older),
-   _real_props_older(_material_data._real_props_older),
-   _gradient_props_older(_material_data._gradient_props_older),
-   _real_vector_value_props_older(_material_data._real_vector_value_props_older),
-   _vector_props_older(_material_data._vector_props_older),
-   _tensor_props_older(_material_data._tensor_props_older),
-   _column_major_matrix_props_older(_material_data._column_major_matrix_props_older),
-   _matrix_props_older(_material_data._matrix_props_older)
+  _material_data(moose_system._material_data),
+  _has_stateful_props(false),
+  _props(_material_data._props),
+  _props_old(_material_data._props_old),
+  _props_older(_material_data._props_older)
 {
-  _constant_real_props_current_elem       = new std::map<std::string, Real >;
-  _real_props_current_elem                = new std::map<unsigned int, std::map<std::string, MooseArray<Real> > >;
-  _gradient_props_current_elem            = new std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > >;
-  _real_vector_value_props_current_elem   = new std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > >;
-  _vector_props_current_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > >;
-  _tensor_props_current_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > >;
-  _column_major_matrix_props_current_elem = new std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > >;
-  _matrix_props_current_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > >;
-
-  _constant_real_props_old_elem       = new std::map<std::string, Real >;
-  _real_props_old_elem                = new std::map<unsigned int, std::map<std::string, MooseArray<Real> > >;
-  _gradient_props_old_elem            = new std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > >;
-  _real_vector_value_props_old_elem   = new std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > >;
-  _vector_props_old_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > >;
-  _tensor_props_old_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > >;
-  _column_major_matrix_props_old_elem = new std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > >;
-  _matrix_props_old_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > >;
-
-  _constant_real_props_older_elem       = new std::map<std::string, Real >;
-  _real_props_older_elem                = new std::map<unsigned int, std::map<std::string, MooseArray<Real> > >;
-  _gradient_props_older_elem            = new std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > >;
-  _real_vector_value_props_older_elem   = new std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > >;
-  _vector_props_older_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > >;
-  _tensor_props_older_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > >;
-  _column_major_matrix_props_older_elem = new std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > >;
-  _matrix_props_older_elem              = new std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > >;
+  _props_elem = new std::map<unsigned int, std::map<std::string, PropertyValue *> >;
+  _props_elem_old   = new std::map<unsigned int, std::map<std::string, PropertyValue *> >;
+  _props_elem_older = new std::map<unsigned int, std::map<std::string, PropertyValue *> >;
 
   int bid = parameters.get<int>("_bid");
 
@@ -99,17 +57,16 @@ Material::blockID()
 }
 */
 
-template<typename T>
-void shallowCopyData(const std::vector<std::string> & names, T & data, T & data_from)
+void shallowCopyData(const std::set<std::string> & names,
+                     std::map<std::string, PropertyValue *> & data,
+                     std::map<std::string, PropertyValue *> & data_from)
 {
-  std::vector<std::string>::const_iterator it = names.begin();
-  std::vector<std::string>::const_iterator it_end = names.end();
-
-  for(;it!=it_end;++it)
+  for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
   {
     std::string name = *it;
-
-    data[name].shallowCopy(data_from[name]);
+    if (data[name] == NULL)
+      data[name] = data_from[name]->init();
+    data[name]->shallowCopy(data_from[name]);
   }
 }
 
@@ -120,195 +77,43 @@ Material::materialReinit()
 
   _n_qpoints = _data._qrule[_tid]->n_points();
 
-  if(_has_stateful_props)
+  if (_has_stateful_props)
   {
-    // For constant properties
+    // initialize elemental data
+    for (std::set<std::string>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
     {
-      std::vector<std::string>::const_iterator it = _constant_real_stateful_props.begin();
-      std::vector<std::string>::const_iterator it_end = _constant_real_stateful_props.end();
-
-      for(;it!=it_end;++it)
-      {
-        std::string name = *it;
-
-        _constant_real_props[name] = (*_constant_real_props_current_elem)[name];
-        _constant_real_props_old[name] = (*_constant_real_props_old_elem)[name];
-        _constant_real_props_older[name] = (*_constant_real_props_older_elem)[name];
-      }
+      std::string name = *it;
+      if ((*_props_elem)[current_elem][name] == NULL) (*_props_elem)[current_elem][name] = _props[name]->init();
+      if ((*_props_elem_old)[current_elem][name] == NULL) (*_props_elem_old)[current_elem][name] = _props[name]->init();
+      if ((*_props_elem_older)[current_elem][name] == NULL) (*_props_elem_older)[current_elem][name] = _props[name]->init();
     }
-    
-    shallowCopyData(_real_stateful_props, _real_props, (*_real_props_current_elem)[current_elem]);
-    shallowCopyData(_gradient_stateful_props, _gradient_props, (*_gradient_props_current_elem)[current_elem]);
-    shallowCopyData(_real_vector_value_stateful_props, _real_vector_value_props, (*_real_vector_value_props_current_elem)[current_elem]);
-    shallowCopyData(_vector_stateful_props, _vector_props, (*_vector_props_current_elem)[current_elem]);
-    shallowCopyData(_tensor_stateful_props, _tensor_props, (*_tensor_props_current_elem)[current_elem]);
-    shallowCopyData(_column_major_matrix_stateful_props, _column_major_matrix_props, (*_column_major_matrix_props_current_elem)[current_elem]);
-    shallowCopyData(_matrix_stateful_props, _matrix_props, (*_matrix_props_current_elem)[current_elem]);
 
-    shallowCopyData(_real_stateful_props, _real_props_old, (*_real_props_old_elem)[current_elem]);
-    shallowCopyData(_gradient_stateful_props, _gradient_props_old, (*_gradient_props_old_elem)[current_elem]);
-    shallowCopyData(_real_vector_value_stateful_props, _real_vector_value_props_old, (*_real_vector_value_props_old_elem)[current_elem]);
-    shallowCopyData(_vector_stateful_props, _vector_props_old, (*_vector_props_old_elem)[current_elem]);
-    shallowCopyData(_tensor_stateful_props, _tensor_props_old, (*_tensor_props_old_elem)[current_elem]);
-    shallowCopyData(_column_major_matrix_stateful_props, _column_major_matrix_props_old, (*_column_major_matrix_props_old_elem)[current_elem]);
-    shallowCopyData(_matrix_stateful_props, _matrix_props_old, (*_matrix_props_old_elem)[current_elem]);
-
-    shallowCopyData(_real_stateful_props, _real_props_older, (*_real_props_older_elem)[current_elem]);
-    shallowCopyData(_gradient_stateful_props, _gradient_props_older, (*_gradient_props_older_elem)[current_elem]);
-    shallowCopyData(_real_vector_value_stateful_props, _real_vector_value_props_older, (*_real_vector_value_props_older_elem)[current_elem]);
-    shallowCopyData(_vector_stateful_props, _vector_props_older, (*_vector_props_older_elem)[current_elem]);
-    shallowCopyData(_tensor_stateful_props, _tensor_props_older, (*_tensor_props_older_elem)[current_elem]);
-    shallowCopyData(_column_major_matrix_stateful_props, _column_major_matrix_props_older, (*_column_major_matrix_props_older_elem)[current_elem]);
-    shallowCopyData(_matrix_stateful_props, _matrix_props_older, (*_matrix_props_older_elem)[current_elem]); 
+    shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem]);
+    shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem]);
+    shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem]);
   }
-  
-  std::map<std::string, MooseArray<Real> >::iterator it = _real_props.begin();
-  std::map<std::string, MooseArray<Real> >::iterator it_end = _real_props.end();
 
-  for(;it!=it_end;++it)
-    it->second.resize(_n_qpoints);
-
-  std::map<std::string, MooseArray<RealGradient> >::iterator grad_it = _gradient_props.begin();
-  std::map<std::string, MooseArray<RealGradient> >::iterator grad_it_end = _gradient_props.end();
-
-  for(;grad_it!=grad_it_end;++grad_it)
-    grad_it->second.resize(_n_qpoints);
-
-
-  std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props.begin();
-  std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props.end();
-
-  for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
-    real_vector_value_it->second.resize(_n_qpoints);
-
-  std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it = _tensor_props.begin();
-  std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it_end = _tensor_props.end();
-
-  for(;tensor_it!=tensor_it_end;++tensor_it)
-    tensor_it->second.resize(_n_qpoints);
-
-  std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props.begin();
-  std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props.end();
-
-  for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-    column_major_matrix_it->second.resize(_n_qpoints);
-
-  if(_has_stateful_props)
+  for (std::map<std::string, PropertyValue *>::iterator it = _props.begin(); it != _props.end(); ++it)
   {
-    {      
-      std::map<std::string, MooseArray<Real> >::iterator it = _real_props_old.begin();
-      std::map<std::string, MooseArray<Real> >::iterator it_end = _real_props_old.end();
+    mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
+    it->second->resize(_n_qpoints);
+  }
 
-      for(;it!=it_end;++it)
-        it->second.resize(_n_qpoints,0);
-
-      std::map<std::string, MooseArray<RealGradient> >::iterator grad_it = _gradient_props_old.begin();
-      std::map<std::string, MooseArray<RealGradient> >::iterator grad_it_end = _gradient_props_old.end();
-
-      for(;grad_it!=grad_it_end;++grad_it)
-        grad_it->second.resize(_n_qpoints,0);
-
-
-      std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props_old.begin();
-      std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props_old.end();
-
-      for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
-        real_vector_value_it->second.resize(_n_qpoints);
-
-      std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it = _tensor_props_old.begin();
-      std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it_end = _tensor_props_old.end();
-
-      for(;tensor_it!=tensor_it_end;++tensor_it)
-        tensor_it->second.resize(_n_qpoints,0);
-
-      std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props_old.begin();
-      std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props_old.end();
-
-      for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-        column_major_matrix_it->second.resize(_n_qpoints);
-    }
-
-    {      
-      std::map<std::string, MooseArray<Real> >::iterator it = _real_props_older.begin();
-      std::map<std::string, MooseArray<Real> >::iterator it_end = _real_props_older.end();
-
-      for(;it!=it_end;++it)
-        it->second.resize(_n_qpoints,0);
-
-      std::map<std::string, MooseArray<RealGradient> >::iterator grad_it = _gradient_props_older.begin();
-      std::map<std::string, MooseArray<RealGradient> >::iterator grad_it_end = _gradient_props_older.end();
-
-      for(;grad_it!=grad_it_end;++grad_it)
-        grad_it->second.resize(_n_qpoints,0);
-
-
-      std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_it = _real_vector_value_props_older.begin();
-      std::map<std::string, MooseArray<RealVectorValue> >::iterator real_vector_value_end = _real_vector_value_props_older.end();
-
-      for(;real_vector_value_it!=real_vector_value_end;++real_vector_value_it)
-        real_vector_value_it->second.resize(_n_qpoints);
-
-      std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it = _tensor_props_older.begin();
-      std::map<std::string, MooseArray<RealTensorValue> >::iterator tensor_it_end = _tensor_props_older.end();
-
-      for(;tensor_it!=tensor_it_end;++tensor_it)
-        tensor_it->second.resize(_n_qpoints,0);
-
-      std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it = _column_major_matrix_props_older.begin();
-      std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator column_major_matrix_it_end = _column_major_matrix_props_older.end();
-
-      for(;column_major_matrix_it!=column_major_matrix_it_end;++column_major_matrix_it)
-        column_major_matrix_it->second.resize(_n_qpoints);
-    }
-
+  if (_has_stateful_props)
+  {
+    for (std::map<std::string, PropertyValue *>::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
+      it->second->resize(_n_qpoints);
+    for (std::map<std::string, PropertyValue *>::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+      it->second->resize(_n_qpoints);
   }
   
   computeProperties();
 
-  if(_has_stateful_props)
+  if (_has_stateful_props)
   {
-    // For constant properties
-    {
-      std::vector<std::string>::const_iterator it = _constant_real_stateful_props.begin();
-      std::vector<std::string>::const_iterator it_end = _constant_real_stateful_props.end();
-
-      for(;it!=it_end;++it)
-      {
-        std::string name = *it;
-
-        (*_constant_real_props_current_elem)[name] = _constant_real_props[name];
-        (*_constant_real_props_old_elem)[name] = _constant_real_props_old[name];
-        (*_constant_real_props_older_elem)[name] = _constant_real_props_older[name];
-      }
-    }
-
-    shallowCopyData(_real_stateful_props, (*_real_props_current_elem)[current_elem], _real_props);
-
-//    if(current_elem == 1)
-//      std::cout<<(*_real_props_current_elem)[current_elem]["test"][0]<<std::endl;
-    
-    shallowCopyData(_gradient_stateful_props, (*_gradient_props_current_elem)[current_elem], _gradient_props);
-    shallowCopyData(_real_vector_value_stateful_props, (*_real_vector_value_props_current_elem)[current_elem], _real_vector_value_props);
-    shallowCopyData(_vector_stateful_props, (*_vector_props_current_elem)[current_elem], _vector_props);
-    shallowCopyData(_tensor_stateful_props, (*_tensor_props_current_elem)[current_elem], _tensor_props);
-    shallowCopyData(_column_major_matrix_stateful_props, (*_column_major_matrix_props_current_elem)[current_elem], _column_major_matrix_props);
-    shallowCopyData(_matrix_stateful_props, (*_matrix_props_current_elem)[current_elem], _matrix_props);
-
-    shallowCopyData(_real_stateful_props, (*_real_props_old_elem)[current_elem], _real_props_old);
-    shallowCopyData(_gradient_stateful_props, (*_gradient_props_old_elem)[current_elem], _gradient_props_old);
-    shallowCopyData(_real_vector_value_stateful_props, (*_real_vector_value_props_old_elem)[current_elem], _real_vector_value_props_old);
-    shallowCopyData(_vector_stateful_props, (*_vector_props_old_elem)[current_elem], _vector_props_old);
-    shallowCopyData(_tensor_stateful_props, (*_tensor_props_old_elem)[current_elem], _tensor_props_old);
-    shallowCopyData(_column_major_matrix_stateful_props, (*_column_major_matrix_props_old_elem)[current_elem], _column_major_matrix_props_old);
-    shallowCopyData(_matrix_stateful_props, (*_matrix_props_old_elem)[current_elem], _matrix_props_old);
-
-    shallowCopyData(_real_stateful_props, (*_real_props_older_elem)[current_elem], _real_props_older);
-    shallowCopyData(_gradient_stateful_props, (*_gradient_props_older_elem)[current_elem], _gradient_props_older);
-    shallowCopyData(_real_vector_value_stateful_props, (*_real_vector_value_props_older_elem)[current_elem], _real_vector_value_props_older);
-    shallowCopyData(_vector_stateful_props, (*_vector_props_older_elem)[current_elem], _vector_props_older);
-    shallowCopyData(_tensor_stateful_props, (*_tensor_props_older_elem)[current_elem], _tensor_props_older);
-    shallowCopyData(_column_major_matrix_stateful_props, (*_column_major_matrix_props_older_elem)[current_elem], _column_major_matrix_props_older);
-    shallowCopyData(_matrix_stateful_props, (*_matrix_props_older_elem)[current_elem], _matrix_props_older);
+    shallowCopyData(_stateful_props, (*_props_elem)[current_elem], _props);
+    shallowCopyData(_stateful_props, (*_props_elem_old)[current_elem], _props_old);
+    shallowCopyData(_stateful_props, (*_props_elem_older)[current_elem], _props_older);
   }
 }
 
@@ -318,280 +123,13 @@ Material::hasStatefulProperties()
   return _has_stateful_props;
 }
 
-Real &
-Material::getConstantRealProperty(const std::string & name)
-{
-  std::map<std::string, Real >::iterator it = _constant_real_props.find(name);
-
-  if(it != _constant_real_props.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<Real> &
-Material::getRealProperty(const std::string & name)
-{
-  std::map<std::string, MooseArray<Real> >::iterator it = _real_props.find(name);
-
-  if(it != _real_props.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealGradient> &
-Material::getGradientProperty(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealGradient> >::iterator it = _gradient_props.find(name);
-
-  if(it != _gradient_props.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealVectorValue> &
-Material::getRealVectorValueProperty(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealVectorValue> >::iterator it = _real_vector_value_props.find(name);
-  
-  if(it != _real_vector_value_props.end())
-    return it->second;
-  
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<MooseArray<Real> > &
-Material::getVectorProperty(const std::string & name)
-{
-  std::map<std::string, MooseArray<MooseArray<Real> > >::iterator it = _vector_props.find(name);
-
-  if(it != _vector_props.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealTensorValue> &
-Material::getTensorProperty(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealTensorValue> >::iterator it = _tensor_props.find(name);
-
-  if(it != _tensor_props.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<ColumnMajorMatrix> &
-Material::getColumnMajorMatrixProperty(const std::string & name)
-{
-  std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator it = _column_major_matrix_props.find(name);
-
-  if(it != _column_major_matrix_props.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<MooseArray<MooseArray<Real> > > &
-Material::getMatrixProperty(const std::string & name)
-{
-  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > >::iterator it = _matrix_props.find(name);
-
-  if(it != _matrix_props.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-
-
-Real &
-Material::getConstantRealPropertyOld(const std::string & name)
-{
-  std::map<std::string, Real >::iterator it = _constant_real_props_old.find(name);
-
-  if(it != _constant_real_props_old.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<Real> &
-Material::getRealPropertyOld(const std::string & name)
-{
-  std::map<std::string, MooseArray<Real> >::iterator it = _real_props_old.find(name);
-
-  if(it != _real_props_old.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealGradient> &
-Material::getGradientPropertyOld(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealGradient> >::iterator it = _gradient_props_old.find(name);
-
-  if(it != _gradient_props_old.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealVectorValue> &
-Material::getRealVectorValuePropertyOld(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealVectorValue> >::iterator it = _real_vector_value_props_old.find(name);
-  
-  if(it != _real_vector_value_props_old.end())
-    return it->second;
-  
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<MooseArray<Real> > &
-Material::getVectorPropertyOld(const std::string & name)
-{
-  std::map<std::string, MooseArray<MooseArray<Real> > >::iterator it = _vector_props_old.find(name);
-
-  if(it != _vector_props_old.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealTensorValue> &
-Material::getTensorPropertyOld(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealTensorValue> >::iterator it = _tensor_props_old.find(name);
-
-  if(it != _tensor_props_old.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<ColumnMajorMatrix> &
-Material::getColumnMajorMatrixPropertyOld(const std::string & name)
-{
-  std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator it = _column_major_matrix_props_old.find(name);
-
-  if(it != _column_major_matrix_props_old.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<MooseArray<MooseArray<Real> > > &
-Material::getMatrixPropertyOld(const std::string & name)
-{
-  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > >::iterator it = _matrix_props_old.find(name);
-
-  if(it != _matrix_props_old.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-
-
-Real &
-Material::getConstantRealPropertyOlder(const std::string & name)
-{
-  std::map<std::string, Real >::iterator it = _constant_real_props_older.find(name);
-
-  if(it != _constant_real_props_older.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<Real> &
-Material::getRealPropertyOlder(const std::string & name)
-{
-  std::map<std::string, MooseArray<Real> >::iterator it = _real_props_older.find(name);
-
-  if(it != _real_props_older.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealGradient> &
-Material::getGradientPropertyOlder(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealGradient> >::iterator it = _gradient_props_older.find(name);
-
-  if(it != _gradient_props_older.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealVectorValue> &
-Material::getRealVectorValuePropertyOlder(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealVectorValue> >::iterator it = _real_vector_value_props_older.find(name);
-  
-  if(it != _real_vector_value_props_older.end())
-    return it->second;
-  
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<MooseArray<Real> > &
-Material::getVectorPropertyOlder(const std::string & name)
-{
-  std::map<std::string, MooseArray<MooseArray<Real> > >::iterator it = _vector_props_older.find(name);
-
-  if(it != _vector_props_older.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<RealTensorValue> &
-Material::getTensorPropertyOlder(const std::string & name)
-{
-  std::map<std::string, MooseArray<RealTensorValue> >::iterator it = _tensor_props_older.find(name);
-
-  if(it != _tensor_props_older.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<ColumnMajorMatrix> &
-Material::getColumnMajorMatrixPropertyOlder(const std::string & name)
-{
-  std::map<std::string, MooseArray<ColumnMajorMatrix> >::iterator it = _column_major_matrix_props_older.find(name);
-
-  if(it != _column_major_matrix_props_older.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
-MooseArray<MooseArray<MooseArray<Real> > > &
-Material::getMatrixPropertyOlder(const std::string & name)
-{
-  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > >::iterator it = _matrix_props_older.find(name);
-
-  if(it != _matrix_props_older.end())
-    return it->second;
-
-  mooseError("Material _" + _name + "_ has no property named: " + name + "\n\n");
-}
-
 /**
  * Updates the old (first) material properties to the current/new material properies (second)
  */
 void
 Material::updateDataState()
 {
+
   if (_qp_prev.size() != _qp_curr.size()) throw std::out_of_range("_qp_prev != _qp_curr");
 
   std::map<unsigned int, std::vector<QpData *> >::iterator i_prev = _qp_prev.begin();
@@ -603,27 +141,10 @@ Material::updateDataState()
          ++j_prev, ++j_curr)
       *j_prev = *j_curr;
 
-  if(_has_stateful_props)
+  if (_has_stateful_props)
   {
-    // Swap old and older
-    std::swap(_constant_real_props_old_elem       , _constant_real_props_older_elem);
-    std::swap(_real_props_old_elem                , _real_props_older_elem);
-    std::swap(_gradient_props_old_elem            , _gradient_props_older_elem);
-    std::swap(_real_vector_value_props_old_elem   , _real_vector_value_props_older_elem);
-    std::swap(_vector_props_old_elem              , _vector_props_older_elem);
-    std::swap(_tensor_props_old_elem              , _tensor_props_older_elem);
-    std::swap(_column_major_matrix_props_old_elem , _column_major_matrix_props_older_elem);
-    std::swap(_matrix_props_old_elem              , _matrix_props_older_elem);
-
-    // Swap current and "older" (which is now in old)
-    std::swap(_constant_real_props_current_elem       , _constant_real_props_old_elem);
-    std::swap(_real_props_current_elem                , _real_props_old_elem);
-    std::swap(_gradient_props_current_elem            , _gradient_props_old_elem);
-    std::swap(_real_vector_value_props_current_elem   , _real_vector_value_props_old_elem);
-    std::swap(_vector_props_current_elem              , _vector_props_old_elem);
-    std::swap(_tensor_props_current_elem              , _tensor_props_old_elem);
-    std::swap(_column_major_matrix_props_current_elem , _column_major_matrix_props_old_elem);
-    std::swap(_matrix_props_current_elem              , _matrix_props_old_elem);
+    std::swap(_props_elem_old,  _props_elem_older);   // Swap old and older
+    std::swap(_props_elem, _props_elem_old);     // Swap current and "older" (which is now in old)
   }
 }
 
@@ -677,236 +198,4 @@ Real
 Material::computeQpResidual()
 {
   return 0;
-}
-
-MooseArray<Real> &
-Material::declareRealProperty(const std::string & name)
-{
-  return _real_props[name];
-}
-
-Real &
-Material::declareConstantRealProperty(const std::string & name)
-{
-  return _constant_real_props[name];
-}
-
-MooseArray<RealGradient> &
-Material::declareGradientProperty(const std::string & name)
-{
-  return _gradient_props[name];
-}
-
-MooseArray<RealVectorValue> &
-Material::declareRealVectorValueProperty(const std::string & name)
-{
-  return _real_vector_value_props[name];
-}
-
-MooseArray<MooseArray<Real> > &
-Material::declareVectorProperty(const std::string & name)
-{
-  return _vector_props[name];
-}
-
-MooseArray<RealTensorValue> &
-Material::declareTensorProperty(const std::string & name)
-{
-  return _tensor_props[name];
-}
-
-MooseArray<ColumnMajorMatrix> &
-Material::declareColumnMajorMatrixProperty(const std::string & name)
-{
-  return _column_major_matrix_props[name];
-}
-
-MooseArray<MooseArray<MooseArray<Real> > > &
-Material::declareMatrixProperty(const std::string & name)
-{
-  return _matrix_props[name];
-}
-
-
-
-
-MooseArray<Real> &
-Material::declareRealPropertyOld(const std::string & name)
-{
-  _has_stateful_props = true;
-  
-  if(std::find(_real_stateful_props.begin(), _real_stateful_props.end(), name) == _real_stateful_props.end())
-    _real_stateful_props.push_back(name);
-  
-  return _real_props_old[name];
-}
-
-Real &
-Material::declareConstantRealPropertyOld(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_constant_real_stateful_props.begin(), _constant_real_stateful_props.end(), name) == _constant_real_stateful_props.end())
-    _constant_real_stateful_props.push_back(name);
-  
-  return _constant_real_props_old[name];
-}
-
-MooseArray<RealGradient> &
-Material::declareGradientPropertyOld(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_gradient_stateful_props.begin(), _gradient_stateful_props.end(), name) == _gradient_stateful_props.end())
-    _gradient_stateful_props.push_back(name);
-
-  return _gradient_props_old[name];
-}
-
-MooseArray<RealVectorValue> &
-Material::declareRealVectorValuePropertyOld(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_real_vector_value_stateful_props.begin(), _real_vector_value_stateful_props.end(), name) == _real_vector_value_stateful_props.end())
-    _real_vector_value_stateful_props.push_back(name);  
-  
-  return _real_vector_value_props_old[name];
-}
-
-MooseArray<MooseArray<Real> > &
-Material::declareVectorPropertyOld(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_vector_stateful_props.begin(), _vector_stateful_props.end(), name) == _vector_stateful_props.end())
-    _vector_stateful_props.push_back(name);
-
-  return _vector_props_old[name];
-}
-
-MooseArray<RealTensorValue> &
-Material::declareTensorPropertyOld(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_tensor_stateful_props.begin(), _tensor_stateful_props.end(), name) == _tensor_stateful_props.end())
-    _tensor_stateful_props.push_back(name);
-
-  return _tensor_props_old[name];
-}
-
-MooseArray<ColumnMajorMatrix> &
-Material::declareColumnMajorMatrixPropertyOld(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_column_major_matrix_stateful_props.begin(), _column_major_matrix_stateful_props.end(), name) == _column_major_matrix_stateful_props.end())
-    _column_major_matrix_stateful_props.push_back(name);
-
-  return _column_major_matrix_props_old[name];
-}
-
-MooseArray<MooseArray<MooseArray<Real> > > &
-Material::declareMatrixPropertyOld(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_matrix_stateful_props.begin(), _matrix_stateful_props.end(), name) == _matrix_stateful_props.end())
-    _matrix_stateful_props.push_back(name);
-
-  return _matrix_props_old[name];
-}
-
-
-
-
-
-
-MooseArray<Real> &
-Material::declareRealPropertyOlder(const std::string & name)
-{
-  _has_stateful_props = true;
-  
-  if(std::find(_real_stateful_props.begin(), _real_stateful_props.end(), name) == _real_stateful_props.end())
-    _real_stateful_props.push_back(name);
-  
-  return _real_props_older[name];
-}
-
-Real &
-Material::declareConstantRealPropertyOlder(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_constant_real_stateful_props.begin(), _constant_real_stateful_props.end(), name) == _constant_real_stateful_props.end())
-    _constant_real_stateful_props.push_back(name);
-  
-  return _constant_real_props_older[name];
-}
-
-MooseArray<RealGradient> &
-Material::declareGradientPropertyOlder(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_gradient_stateful_props.begin(), _gradient_stateful_props.end(), name) == _gradient_stateful_props.end())
-    _gradient_stateful_props.push_back(name);
-
-  return _gradient_props_older[name];
-}
-
-MooseArray<RealVectorValue> &
-Material::declareRealVectorValuePropertyOlder(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_real_vector_value_stateful_props.begin(), _real_vector_value_stateful_props.end(), name) == _real_vector_value_stateful_props.end())
-    _real_vector_value_stateful_props.push_back(name);  
-  
-  return _real_vector_value_props_older[name];
-}
-
-MooseArray<MooseArray<Real> > &
-Material::declareVectorPropertyOlder(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_vector_stateful_props.begin(), _vector_stateful_props.end(), name) == _vector_stateful_props.end())
-    _vector_stateful_props.push_back(name);
-
-  return _vector_props_older[name];
-}
-
-MooseArray<RealTensorValue> &
-Material::declareTensorPropertyOlder(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_tensor_stateful_props.begin(), _tensor_stateful_props.end(), name) == _tensor_stateful_props.end())
-    _tensor_stateful_props.push_back(name);
-
-  return _tensor_props_older[name];
-}
-
-MooseArray<ColumnMajorMatrix> &
-Material::declareColumnMajorMatrixPropertyOlder(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_column_major_matrix_stateful_props.begin(), _column_major_matrix_stateful_props.end(), name) == _column_major_matrix_stateful_props.end())
-    _column_major_matrix_stateful_props.push_back(name);
-
-  return _column_major_matrix_props_older[name];
-}
-
-MooseArray<MooseArray<MooseArray<Real> > > &
-Material::declareMatrixPropertyOlder(const std::string & name)
-{
-  _has_stateful_props = true;
-
-  if(std::find(_matrix_stateful_props.begin(), _matrix_stateful_props.end(), name) == _matrix_stateful_props.end())
-    _matrix_stateful_props.push_back(name);
-
-  return _matrix_props_older[name];
 }

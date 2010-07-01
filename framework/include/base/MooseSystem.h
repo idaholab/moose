@@ -15,6 +15,7 @@
 #include "ElementData.h"
 #include "FaceData.h"
 #include "AuxData.h"
+#include "MaterialData.h"
 
 //libmesh includes
 #include "transient_system.h"
@@ -25,7 +26,6 @@
 class EquationSystems;
 class MeshBase;
 class Material;
-class MaterialData;
 template<class T> class NumericVector;
 
 /**

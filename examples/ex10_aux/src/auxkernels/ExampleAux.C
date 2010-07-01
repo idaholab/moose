@@ -12,8 +12,8 @@ InputParameters validParams<ExampleAux>()
 ExampleAux::ExampleAux(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :AuxKernel(name, moose_system, parameters),
    
-   // We can couple in a value from one of our kernels with a call to coupledValAux 
-   _coupled_val(coupledValAux("coupled")),
+   // We can couple in a value from one of our kernels with a call to coupledValueAux 
+   _coupled_val(coupledValue("coupled")),
 
    // Set our member scalar value from InputParameters (read from the input file)
    _value(_parameters.get<Real>("value"))
@@ -28,5 +28,5 @@ ExampleAux::ExampleAux(std::string name, MooseSystem & moose_system, InputParame
 Real
 ExampleAux::computeValue()
 {
-  return _coupled_val + _value;
+  return _coupled_val[_qp] + _value;
 }

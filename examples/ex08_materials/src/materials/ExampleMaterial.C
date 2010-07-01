@@ -18,7 +18,7 @@ ExampleMaterial::ExampleMaterial(std::string name,
 
    // Declare that this material is going to have a Real
    // valued property named "diffusivity" that Kernels can use.
-   _diffusivity(declareRealProperty("diffusivity"))
+   _diffusivity(declareProperty<Real>("diffusivity"))
 {}
 
 void

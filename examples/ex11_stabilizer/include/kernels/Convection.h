@@ -66,7 +66,7 @@ private:
    * Since this is a reference it MUST be set in the Initialization List of the
    * constructor!
    */
-  MooseArray<RealGradient> & _velocity_vector;
+  VariableGradient & _velocity_vector;
 };
 
 #endif //CONVECTION_H

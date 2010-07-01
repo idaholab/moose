@@ -13,7 +13,7 @@ ExampleImplicitEuler::ExampleImplicitEuler(std::string name,
                                            MooseSystem &sys,
                                            InputParameters parameters)
   :ImplicitEuler(name,sys,parameters),
-   _time_coefficient(getRealMaterialProperty("time_coefficient"))
+   _time_coefficient(getMaterialProperty<Real>("time_coefficient"))
 {}
 
 Real

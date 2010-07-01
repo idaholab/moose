@@ -183,7 +183,7 @@ BoundaryCondition::computeIntegral()
 }
 
 MooseArray<Real> &
-BoundaryCondition::coupledVal(std::string var_name, int i)
+BoundaryCondition::coupledValue(std::string var_name, int i)
 {
   if(!isCoupled(var_name, i))
     mooseError("BC _" + name() + "_ was not provided with a variable coupled_as " + var_name + "\n\n");
@@ -195,7 +195,7 @@ BoundaryCondition::coupledVal(std::string var_name, int i)
 }
 
 MooseArray<RealGradient> &
-BoundaryCondition::coupledGrad(std::string var_name, int i)
+BoundaryCondition::coupledGradient(std::string var_name, int i)
 {
   if(!isCoupled(var_name, i))
     mooseError("BC _" + name() + "_ was not provided with a variable coupled_as " + var_name + "\n\n");

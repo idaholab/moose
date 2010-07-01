@@ -16,6 +16,14 @@ template<>
 InputParameters validParams<PDEBase>();
 
 /**
+ * Types for Variable
+ */
+typedef unsigned int             VariableNumber;
+typedef MooseArray<Real>         VariableValue;
+typedef MooseArray<RealGradient> VariableGradient;
+typedef MooseArray<RealTensor>   VariableSecond;
+
+/**
  * Base class for PDE objects (kernels, BCs, etc.)
  */
 class PDEBase : public MooseObject
@@ -305,14 +313,14 @@ protected:
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<Real> & coupledVal(std::string varname, int i = 0);
+  virtual MooseArray<Real> & coupledValue(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's gradient.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<RealGradient> & coupledGrad(std::string varname, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradient(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's second derivative.
@@ -326,21 +334,21 @@ protected:
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<Real> & coupledValOld(std::string varname, int i = 0);
+  virtual MooseArray<Real> & coupledValueOld(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value at older time step.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<Real> & coupledValOlder(std::string varname, int i = 0);
+  virtual MooseArray<Real> & coupledValueOlder(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled gradient of a variable's value at an old time step.
    *
    * @param name The name the kernel wants to refer to the variable as
    */
-  virtual MooseArray<RealGradient> & coupledGradValOld(std::string varname, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradientOld(std::string varname, int i = 0);
 
 };
 

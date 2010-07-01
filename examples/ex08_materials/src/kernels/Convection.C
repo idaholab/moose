@@ -13,7 +13,7 @@ Convection::Convection(std::string name,
                        MooseSystem &sys,
                        InputParameters parameters)
  :Kernel(name, sys, parameters),
-_velocity_vector(coupledGrad("velocity_vector"))
+_velocity_vector(coupledGradient("velocity_vector"))
 {}
 
 Real Convection::computeQpResidual()

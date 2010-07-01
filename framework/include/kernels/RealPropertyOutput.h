@@ -24,6 +24,6 @@ protected:
 
   std::string _prop_name;
 
-  MooseArray<Real> & _prop;
+  MaterialProperty<Real> & _prop;
 };
 #endif //REALPROPERTYOUTPUT_H

@@ -19,7 +19,7 @@ ExampleDiffusion::ExampleDiffusion(std::string name,
                                    MooseSystem &sys,
                                    InputParameters parameters)
   :Diffusion(name,sys,parameters),
-   _diffusivity(getRealMaterialProperty("diffusivity"))
+   _diffusivity(getMaterialProperty<Real>("diffusivity"))
 {}
 
 Real

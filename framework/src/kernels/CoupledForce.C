@@ -13,7 +13,7 @@ InputParameters validParams<CoupledForce>()
 CoupledForce::CoupledForce(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
     _v_var(coupled("v")),
-    _v(coupledVal("v"))
+    _v(coupledValue("v"))
   {}
 
 Real

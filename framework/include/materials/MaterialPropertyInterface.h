@@ -1,10 +1,13 @@
 #ifndef MATERIALPROPERTYINTERFACE_H
 #define MATERIALPROPERTYINTERFACE_H
 
+#include <map>
+#include <string>
+
+#include "Moose.h"
 #include "MaterialData.h"
 
 // Forward Declarations
-class MaterialData;
 
 class MaterialPropertyInterface
 {
@@ -12,127 +15,65 @@ public:
   MaterialPropertyInterface(MaterialData & material_data);
 
   /**
-   * Retrieve the Constant Real valued property named "name"
+   * Retrieve the property named "name"
    */
-  Real & getConstantRealMaterialProperty(const std::string & name);
-  
-  /**
-   * Retrieve the Real valued property named "name"
-   */
-  MooseArray<Real> & getRealMaterialProperty(const std::string & name);
-  
-  /**
-   * Retrieve the Gradient valued property named "name"
-   */
-  MooseArray<RealGradient> & getGradientMaterialProperty(const std::string & name);
+  template<typename T>
+  MaterialProperty<T> & getMaterialProperty(const std::string & name);
 
-  /**
-   * Retrieve RealVectorValue valued property named "name"
-   */
-  MooseArray<RealVectorValue> & getRealVectorValueMaterialProperty(const std::string & name);
+  template<typename T>
+  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
 
-  /**
-   * Retrieve the Vector valued property named "name"
-   */
-  MooseArray<MooseArray<Real> > & getVectorMaterialProperty(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<RealTensorValue> & getTensorMaterialProperty(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixMaterialProperty(const std::string & name);  
-  
-  /**
-   * Retrieve the Matrix valued property named "name"
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixMaterialProperty(const std::string & name);
-
-  /**
-   * Retrieve the Constant Real valued property named "name"
-   */
-  Real & getConstantRealMaterialPropertyOld(const std::string & name);
-  
-  /**
-   * Retrieve the Real valued property named "name"
-   */
-  MooseArray<Real> & getRealMaterialPropertyOld(const std::string & name);
-  
-  /**
-   * Retrieve the Gradient valued property named "name"
-   */
-  MooseArray<RealGradient> & getGradientMaterialPropertyOld(const std::string & name);
-
-  /**
-   * Retrieve RealVectorValue valued property named "name"
-   */
-  MooseArray<RealVectorValue> & getRealVectorValueMaterialPropertyOld(const std::string & name);
-
-  /**
-   * Retrieve the Vector valued property named "name"
-   */
-  MooseArray<MooseArray<Real> > & getVectorMaterialPropertyOld(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<RealTensorValue> & getTensorMaterialPropertyOld(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixMaterialPropertyOld(const std::string & name);  
-  
-  /**
-   * Retrieve the Matrix valued property named "name"
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixMaterialPropertyOld(const std::string & name);
-
-  /**
-   * Retrieve the Constant Real valued property named "name"
-   */
-  Real & getConstantRealMaterialPropertyOlder(const std::string & name);
-  
-  /**
-   * Retrieve the Real valued property named "name"
-   */
-  MooseArray<Real> & getRealMaterialPropertyOlder(const std::string & name);
-  
-  /**
-   * Retrieve the Gradient valued property named "name"
-   */
-  MooseArray<RealGradient> & getGradientMaterialPropertyOlder(const std::string & name);
-
-  /**
-   * Retrieve RealVectorValue valued property named "name"
-   */
-  MooseArray<RealVectorValue> & getRealVectorValueMaterialPropertyOlder(const std::string & name);
-
-  /**
-   * Retrieve the Vector valued property named "name"
-   */
-  MooseArray<MooseArray<Real> > & getVectorMaterialPropertyOlder(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<RealTensorValue> & getTensorMaterialPropertyOlder(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixMaterialPropertyOlder(const std::string & name);  
-  
-  /**
-   * Retrieve the Matrix valued property named "name"
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixMaterialPropertyOlder(const std::string & name);
+  template<typename T>
+  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
 private:
   MaterialData & _material_data;
 };
+
+
+template<typename T>
+MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialProperty(const std::string & name)
+{
+  Material::const_iterator it = _material_data._props.find(name);
+
+  if (it != _material_data._props.end())
+  {
+    mooseAssert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL, "");
+    return *dynamic_cast<MaterialProperty<T>*>(it->second);
+  }
+
+  mooseError("Material has no property named: " + name);
+}
+
+template<typename T>
+MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
+{
+  std::map<std::string, T>::iterator it = _material_data._props_old.find(name);
+
+  if(it != _material_data._props_old.end())
+  {
+    mooseAssert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL, "");
+    return *dynamic_cast<MaterialProperty<T>*>(it->second);
+  }
+
+  mooseError("Material has no property named: " + name);
+}
+
+template<typename T>
+MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
+{
+  std::map<std::string, T>::iterator it = _material_data._props_older.find(name);
+
+  if(it != _material_data._props_older.end())
+  {
+    mooseAssert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL, "");
+    return *dynamic_cast<MaterialProperty<T>*>(it->second);
+  }
+
+  mooseError("Material has no property named: " + name);
+}
 
 #endif //MATERIALPROPERTYINTERFACE_H

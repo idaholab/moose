@@ -41,7 +41,7 @@ class Functor
              std::vector<std::string> vars = std::vector<std::string>(0),
              std::vector<Real> vals = std::vector<Real>(0) );
 
-    virtual ~Functor();
+    ~Functor();
 
     /**
      * Get the address to stick the value of the specified variable in. When you

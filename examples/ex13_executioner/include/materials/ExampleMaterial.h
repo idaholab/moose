@@ -26,8 +26,8 @@ private:
   Real _input_diffusivity;
   Real _input_time_coefficient;
   
-  MooseArray<Real> & _diffusivity;
-  MooseArray<Real> & _time_coefficient;
+  MaterialProperty<Real> & _diffusivity;
+  MaterialProperty<Real> & _time_coefficient;
 };
 
 #endif //EXAMPLEMATERIAL_H

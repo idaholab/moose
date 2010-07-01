@@ -82,7 +82,7 @@ AuxKernel::computeQpResidual()
 }
 
 MooseArray<Real> &
-AuxKernel::coupledVal(std::string name, int i)
+AuxKernel::coupledValue(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -110,7 +110,7 @@ AuxKernel::coupledVal(std::string name, int i)
 
 
 MooseArray<Real> &
-AuxKernel::coupledValOld(std::string name, int i)
+AuxKernel::coupledValueOld(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -133,7 +133,7 @@ AuxKernel::coupledValOld(std::string name, int i)
 
 
 MooseArray<Real> &
-AuxKernel::coupledValOlder(std::string name, int i)
+AuxKernel::coupledValueOlder(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -156,7 +156,7 @@ AuxKernel::coupledValOlder(std::string name, int i)
 
 
 MooseArray<RealGradient> &
-AuxKernel::coupledGrad(std::string name, int i)
+AuxKernel::coupledGradient(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -173,7 +173,7 @@ AuxKernel::coupledGrad(std::string name, int i)
 }
 
 MooseArray<RealGradient> &
-AuxKernel::coupledGradOld(std::string name, int i)
+AuxKernel::coupledGradientOld(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -190,7 +190,7 @@ AuxKernel::coupledGradOld(std::string name, int i)
 }
 
 MooseArray<RealGradient> &
-AuxKernel::coupledGradOlder(std::string name, int i)
+AuxKernel::coupledGradientOlder(std::string name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");

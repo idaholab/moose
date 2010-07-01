@@ -30,7 +30,7 @@ protected:
 
   Real _value;
 
-  Real & _coupled_val;
+  VariableValue & _coupled_val;
 };
 
 #endif //EXAMPLEAUX_H

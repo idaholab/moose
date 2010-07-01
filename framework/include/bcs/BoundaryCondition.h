@@ -1,6 +1,8 @@
 #ifndef BOUNDARYCONDITION_H
 #define BOUNDARYCONDITION_H
 
+#include "dense_matrix.h"
+
 // local includes
 #include "Moose.h"
 #include "ValidParams.h"
@@ -158,14 +160,14 @@ protected:
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  MooseArray<Real> & coupledVal(std::string var_name, int i = 0);
+  MooseArray<Real> & coupledValue(std::string var_name, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's gradient.
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  MooseArray<RealGradient> & coupledGrad(std::string var_name, int i = 0);
+  MooseArray<RealGradient> & coupledGradient(std::string var_name, int i = 0);
 
 
   /** Side shape function. 

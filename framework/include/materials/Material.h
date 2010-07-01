@@ -6,6 +6,7 @@
 #include "PDEBase.h"
 #include "QuadraturePointData.h"
 #include "ColumnMajorMatrix.h"
+#include "MaterialProperty.h"
 
 //forward declarations
 class Material;
@@ -54,134 +55,36 @@ public:
   void materialReinit();
 
   bool hasStatefulProperties();
-  
-  /**
-   * Retrieve the Constant Real valued property named "name"
-   */
-  Real & getConstantRealProperty(const std::string & name);
-  
-  /**
-   * Retrieve the Real valued property named "name"
-   */
-  MooseArray<Real> & getRealProperty(const std::string & name);
-  
-  /**
-   * Retrieve the Gradient valued property named "name"
-   */
-  MooseArray<RealGradient> & getGradientProperty(const std::string & name);
-
-  /**
-   * Retrieve RealVectorValue valued property named "name"
-   */
-  MooseArray<RealVectorValue> & getRealVectorValueProperty(const std::string & name);
-
-  /**
-   * Retrieve the Vector valued property named "name"
-   */
-  MooseArray<MooseArray<Real> > & getVectorProperty(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<RealTensorValue> & getTensorProperty(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixProperty(const std::string & name);  
-  
-  /**
-   * Retrieve the Matrix valued property named "name"
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixProperty(const std::string & name);
-
-
 
   /**
    * Retrieve the Constant Real valued property named "name"
    */
-  Real & getConstantRealPropertyOld(const std::string & name);
-  
-  /**
-   * Retrieve the Real valued property named "name"
-   */
-  MooseArray<Real> & getRealPropertyOld(const std::string & name);
-  
-  /**
-   * Retrieve the Gradient valued property named "name"
-   */
-  MooseArray<RealGradient> & getGradientPropertyOld(const std::string & name);
-
-  /**
-   * Retrieve RealVectorValue valued property named "name"
-   */
-  MooseArray<RealVectorValue> & getRealVectorValuePropertyOld(const std::string & name);
-
-  /**
-   * Retrieve the Vector valued property named "name"
-   */
-  MooseArray<MooseArray<Real> > & getVectorPropertyOld(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<RealTensorValue> & getTensorPropertyOld(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixPropertyOld(const std::string & name);  
-  
-  /**
-   * Retrieve the Matrix valued property named "name"
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixPropertyOld(const std::string & name);
-
-
-
+  template<class T>
+  MaterialProperty<T> & getProperty(const std::string & prop_name);
 
   /**
    * Retrieve the Constant Real valued property named "name"
    */
-  Real & getConstantRealPropertyOlder(const std::string & name);
-  
-  /**
-   * Retrieve the Real valued property named "name"
-   */
-  MooseArray<Real> & getRealPropertyOlder(const std::string & name);
-  
-  /**
-   * Retrieve the Gradient valued property named "name"
-   */
-  MooseArray<RealGradient> & getGradientPropertyOlder(const std::string & name);
+  template<class T>
+  MaterialProperty<T> & getPropertyOld(const std::string & prop_name);
 
   /**
-   * Retrieve RealVectorValue valued property named "name"
+   * Retrieve the Constant Real valued property named "name"
    */
-  MooseArray<RealVectorValue> & getRealVectorValuePropertyOlder(const std::string & name);
-
-  /**
-   * Retrieve the Vector valued property named "name"
-   */
-  MooseArray<MooseArray<Real> > & getVectorPropertyOlder(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<RealTensorValue> & getTensorPropertyOlder(const std::string & name);
-  
-  /**
-   * Retrieve the Tensor valued property named "name"
-   */
-  MooseArray<ColumnMajorMatrix> & getColumnMajorMatrixPropertyOlder(const std::string & name);  
-  
-  /**
-   * Retrieve the Matrix valued property named "name"
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & getMatrixPropertyOlder(const std::string & name);
+  template<class T>
+  MaterialProperty<T> & getPropertyOlder(const std::string & prop_name);
 
 
-  
+  /**
+   * Parameter map iterator.
+   */
+  typedef std::map<std::string, PropertyValue *>::iterator iterator;
+
+  /**
+   * Constant parameter map iterator.
+   */
+  typedef std::map<std::string, PropertyValue *>::const_iterator const_iterator;
+
   /**
    * Updates the old (first) material properties to the current/new material properies (second)
    */
@@ -252,251 +155,43 @@ protected:
    * Doesn't do anything for materials.
    */
   virtual Real computeQpResidual();
-  
+
+  template <typename T>
+  bool have_property(const std::string & prop_name) const;
+
+  template <typename T>
+  bool have_property_old(const std::string & prop_name) const;
+
+  template <typename T>
+  bool have_property_older(const std::string & prop_name) const;
+
   /**
    * Declare the Real valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using get().
    */
-  MooseArray<Real> & declareRealProperty(const std::string & name);
-  
-  /**
-   * Declare the Constant Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
-   */
-  Real & declareConstantRealProperty(const std::string & name);
-  
-  /**
-   * Declare the Gradient valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
-   */
-  MooseArray<RealGradient> & declareGradientProperty(const std::string & name);
-
-  /**
-   * Declare the RealVectorValue valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
-   */
-  MooseArray<RealVectorValue> & declareRealVectorValueProperty(const std::string & name);
-
-  /**
-   * Declare the Vector valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
-   */
-  MooseArray<MooseArray<Real> > & declareVectorProperty(const std::string & name);
-  
-  /**
-   * Declare the Tensor valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
-   */
-  MooseArray<RealTensorValue> & declareTensorProperty(const std::string & name);
-  
-  /**
-   * Declare the Tensor valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
-   */
-  MooseArray<ColumnMajorMatrix> & declareColumnMajorMatrixProperty(const std::string & name);
-  
-  /**
-   * Declare the Matrix valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & declareMatrixProperty(const std::string & name);
-
+  template<typename T>
+  MaterialProperty<T> & declareProperty(const std::string & prop_name);
 
   /**
    * Declare the Real valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using getOld().
    */
-  MooseArray<Real> & declareRealPropertyOld(const std::string & name);
-  
-  /**
-   * Declare the Constant Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
-   */
-  Real & declareConstantRealPropertyOld(const std::string & name);
-  
-  /**
-   * Declare the Gradient valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
-   */
-  MooseArray<RealGradient> & declareGradientPropertyOld(const std::string & name);
-
-  /**
-   * Declare the RealVectorValue valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
-   */
-  MooseArray<RealVectorValue> & declareRealVectorValuePropertyOld(const std::string & name);
-
-  /**
-   * Declare the Vector valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
-   */
-  MooseArray<MooseArray<Real> > & declareVectorPropertyOld(const std::string & name);
-  
-  /**
-   * Declare the Tensor valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
-   */
-  MooseArray<RealTensorValue> & declareTensorPropertyOld(const std::string & name);
-  
-  /**
-   * Declare the Tensor valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
-   */
-  MooseArray<ColumnMajorMatrix> & declareColumnMajorMatrixPropertyOld(const std::string & name);
-  
-  /**
-   * Declare the Matrix valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & declareMatrixPropertyOld(const std::string & name);
-
-
-
-
+  template<typename T>
+  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
 
   /**
    * Declare the Real valued property named "name".
    * This must be done _before_ a property of that name is tried
    * to be retrieved using getOlder().
    */
-  MooseArray<Real> & declareRealPropertyOlder(const std::string & name);
-  
-  /**
-   * Declare the Constant Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
-   */
-  Real & declareConstantRealPropertyOlder(const std::string & name);
-  
-  /**
-   * Declare the Gradient valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
-   */
-  MooseArray<RealGradient> & declareGradientPropertyOlder(const std::string & name);
-
-  /**
-   * Declare the RealVectorValue valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
-   */
-  MooseArray<RealVectorValue> & declareRealVectorValuePropertyOlder(const std::string & name);
-
-  /**
-   * Declare the Vector valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
-   */
-  MooseArray<MooseArray<Real> > & declareVectorPropertyOlder(const std::string & name);
-  
-  /**
-   * Declare the Tensor valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
-   */
-  MooseArray<RealTensorValue> & declareTensorPropertyOlder(const std::string & name);
-  
-  /**
-   * Declare the Tensor valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
-   */
-  MooseArray<ColumnMajorMatrix> & declareColumnMajorMatrixPropertyOlder(const std::string & name);
-  
-  /**
-   * Declare the Matrix valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
-   */
-  MooseArray<MooseArray<MooseArray<Real> > > & declareMatrixPropertyOlder(const std::string & name);
+  template<typename T>
+  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
 
 
-  
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
-
-  std::vector<std::string> _constant_real_stateful_props;
-  std::vector<std::string> _real_stateful_props;
-  std::vector<std::string> _gradient_stateful_props;
-  std::vector<std::string> _real_vector_value_stateful_props;
-  std::vector<std::string> _vector_stateful_props;
-  std::vector<std::string> _tensor_stateful_props;
-  std::vector<std::string> _column_major_matrix_stateful_props;
-  std::vector<std::string> _matrix_stateful_props;
-
-
-  std::map<std::string, Real >                                       & _constant_real_props;
-  std::map<std::string, MooseArray<Real> >                           & _real_props;
-  std::map<std::string, MooseArray<RealGradient> >                   & _gradient_props;
-  std::map<std::string, MooseArray<RealVectorValue> >                & _real_vector_value_props;
-  std::map<std::string, MooseArray<MooseArray<Real> > >              & _vector_props;
-  std::map<std::string, MooseArray<RealTensorValue> >                & _tensor_props;
-  std::map<std::string, MooseArray<ColumnMajorMatrix> >              & _column_major_matrix_props;
-  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > & _matrix_props;
-
-  std::map<std::string, Real >                                       & _constant_real_props_old;
-  std::map<std::string, MooseArray<Real> >                           & _real_props_old;
-  std::map<std::string, MooseArray<RealGradient> >                   & _gradient_props_old;
-  std::map<std::string, MooseArray<RealVectorValue> >                & _real_vector_value_props_old;
-  std::map<std::string, MooseArray<MooseArray<Real> > >              & _vector_props_old;
-  std::map<std::string, MooseArray<RealTensorValue> >                & _tensor_props_old;
-  std::map<std::string, MooseArray<ColumnMajorMatrix> >              & _column_major_matrix_props_old;
-  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > & _matrix_props_old;
-
-  std::map<std::string, Real >                                       & _constant_real_props_older;
-  std::map<std::string, MooseArray<Real> >                           & _real_props_older;
-  std::map<std::string, MooseArray<RealGradient> >                   & _gradient_props_older;
-  std::map<std::string, MooseArray<RealVectorValue> >                & _real_vector_value_props_older;
-  std::map<std::string, MooseArray<MooseArray<Real> > >              & _vector_props_older;
-  std::map<std::string, MooseArray<RealTensorValue> >                & _tensor_props_older;
-  std::map<std::string, MooseArray<ColumnMajorMatrix> >              & _column_major_matrix_props_older;
-  std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > & _matrix_props_older;
-
-  
-  // Per elem stateful property data
-  std::map<std::string, Real > * _constant_real_props_current_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<Real> > > * _real_props_current_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > > * _gradient_props_current_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > > * _real_vector_value_props_current_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > > * _vector_props_current_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > > * _tensor_props_current_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > > * _column_major_matrix_props_current_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > > * _matrix_props_current_elem;
-
-  std::map<std::string, Real > * _constant_real_props_old_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<Real> > > * _real_props_old_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > > * _gradient_props_old_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > > * _real_vector_value_props_old_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > > * _vector_props_old_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > > * _tensor_props_old_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > > * _column_major_matrix_props_old_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > > * _matrix_props_old_elem;
-
-  std::map<std::string, Real > * _constant_real_props_older_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<Real> > > * _real_props_older_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealGradient> > > * _gradient_props_older_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealVectorValue> > > * _real_vector_value_props_older_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<Real> > > > * _vector_props_older_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<RealTensorValue> > > * _tensor_props_older_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<ColumnMajorMatrix> > > * _column_major_matrix_props_older_elem;
-  std::map<unsigned int, std::map<std::string, MooseArray<MooseArray<MooseArray<Real> > > > > * _matrix_props_older_elem;
-
   //  QGauss * _qrule;
   
 //private:
@@ -506,6 +201,149 @@ protected:
    * Whether or not this coupled_as name is associated with an auxiliary variable.
    */
 //  bool isAux(std::string name, int i = 0);
+
+  /**
+   * Data structure to map names with values.
+   */
+  std::set<std::string> _stateful_props;
+
+  std::map<std::string, PropertyValue *> & _props;
+  std::map<std::string, PropertyValue *> & _props_old;
+  std::map<std::string, PropertyValue *> & _props_older;
+
+  std::map<unsigned int, std::map<std::string, PropertyValue *> > * _props_elem;
+  std::map<unsigned int, std::map<std::string, PropertyValue *> > * _props_elem_old;
+  std::map<unsigned int, std::map<std::string, PropertyValue *> > * _props_elem_older;
 };
+
+
+template <typename T>
+inline bool
+Material::have_property (const std::string& prop_name) const
+{
+  Material::const_iterator it = _props.find(prop_name);
+
+  if (it != _props.end())
+    if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
+      return true;
+
+  return false;
+}
+
+template <typename T>
+inline bool
+Material::have_property_old (const std::string& prop_name) const
+{
+  Material::const_iterator it = _props_old.find(prop_name);
+
+  if (it != _props_old.end())
+    if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
+      return true;
+
+  return false;
+}
+
+template <typename T>
+inline bool
+Material::have_property_older (const std::string& prop_name) const
+{
+  Material::const_iterator it = _props_older.find(prop_name);
+
+  if (it != _props_older.end())
+    if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
+      return true;
+
+  return false;
+}
+
+template<class T>
+MaterialProperty<T> &
+Material::getProperty(const std::string & prop_name)
+{
+  Material::const_iterator it = _props.find(prop_name);
+
+  if (it != _props.end())
+  {
+    libmesh_assert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL);
+    return *dynamic_cast<MaterialProperty<T>*>(it->second);
+  }
+
+  mooseError("Material _" + name() + "_ has no property named: " + prop_name + "\n\n");
+}
+
+template<class T>
+MaterialProperty<T> &
+Material::getPropertyOld(const std::string & prop_name)
+{
+  std::map<std::string, T>::iterator it = _props_old.find(prop_name);
+
+  if(it != _props_old.end())
+  {
+    libmesh_assert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL);
+    return *dynamic_cast<MaterialProperty<T>*>(it->second);
+  }
+
+  mooseError("Material _" + name() + "_ has no property named: " + prop_name + "\n\n");
+}
+
+template<class T>
+MaterialProperty<T> &
+Material::getPropertyOlder(const std::string & prop_name)
+{
+  std::map<std::string, T>::iterator it = _props_older.find(prop_name);
+
+  if(it != _props_older.end())
+  {
+    libmesh_assert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL);
+    return *dynamic_cast<MaterialProperty<T>*>(it->second);
+  }
+
+  mooseError("Material _" + name() + "_ has no property named: " + prop_name + "\n\n");
+}
+
+template<typename T>
+MaterialProperty<T> &
+Material::declareProperty(const std::string & prop_name)
+{
+  if (!this->have_property<T>(prop_name))
+    _props[prop_name] = new MaterialProperty<T>;
+
+  MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_name]);
+  mooseAssert(prop != NULL, "Internal material error in declaring property: " + prop_name);
+
+  return *prop;
+}
+
+template<typename T>
+MaterialProperty<T> &
+Material::declarePropertyOld(const std::string & prop_name)
+{
+  _has_stateful_props = true;
+  _stateful_props.insert(prop_name);
+
+  if (!this->have_property_old<T>(prop_name))
+    _props_old[prop_name] = new MaterialProperty<T>;
+
+  MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props_old[prop_name]);
+  mooseAssert(prop != NULL, "Internal material error in declaring property: " + prop_name);
+
+  return *prop;
+}
+
+template<typename T>
+MaterialProperty<T> &
+Material::declarePropertyOlder(const std::string & prop_name)
+{
+  _has_stateful_props = true;
+  _stateful_props.insert(prop_name);
+
+  if (!this->have_property_older<T>(prop_name))
+    _props_older[prop_name] = new MaterialProperty<T>;
+
+  MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props_older[prop_name]);
+  mooseAssert(prop != NULL, "Internal material error in declaring property: " + prop_name);
+
+  return *prop;
+}
 
 #endif //MATERIAL_H

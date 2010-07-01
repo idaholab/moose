@@ -31,7 +31,7 @@ private:
    * shared to other MOOSE objects when using
    * one of the declare property methods.
    */
-  MooseArray<Real> & _diffusivity;
+  MaterialProperty<Real> & _diffusivity;
 };
 
 #endif //EXAMPLEMATERIAL_H

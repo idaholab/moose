@@ -18,12 +18,12 @@ ExampleMaterial::ExampleMaterial(std::string name,
 
    // Declare that this material is going to have a Real
    // valued property named "diffusivity" that Kernels can use.
-   _diffusivity(declareRealProperty("diffusivity")),
+   _diffusivity(declareProperty<Real>("diffusivity")),
 
    // Declare that we are going to have an old value of diffusivity
    // Note: this is _expensive_ and currently means that you can't
    // use adaptivity!  Only do this if you REALLY need it!
-   _diffusivity_old(declareRealPropertyOld("diffusivity"))
+   _diffusivity_old(declarePropertyOld<Real>("diffusivity"))
 {}
 
 void

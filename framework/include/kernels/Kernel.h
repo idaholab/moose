@@ -1,6 +1,8 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
+#include "dense_matrix.h"
+
 // local includes
 #include "Moose.h"
 #include "ValidParams.h"

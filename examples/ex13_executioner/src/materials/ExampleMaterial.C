@@ -22,11 +22,11 @@ ExampleMaterial::ExampleMaterial(std::string name,
 
    // Declare that this material is going to have a Real
    // valued property named "diffusivity" that Kernels can use.
-   _diffusivity(declareRealProperty("diffusivity")),
+   _diffusivity(declareProperty<Real>("diffusivity")),
 
    // Declare that this material is going to have a Real
    // valued property named "time_coefficient" that Kernels can use.
-   _time_coefficient(declareRealProperty("time_coefficient"))
+   _time_coefficient(declareProperty<Real>("time_coefficient"))
 {}
 
 void

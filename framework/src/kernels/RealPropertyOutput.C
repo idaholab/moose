@@ -13,7 +13,7 @@ InputParameters validParams<RealPropertyOutput>()
 RealPropertyOutput::RealPropertyOutput(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _prop_name(_parameters.get<std::string>("prop_name")),
-   _prop(getRealMaterialProperty(_prop_name))
+   _prop(getMaterialProperty<Real>(_prop_name))
 {}
 
 Real

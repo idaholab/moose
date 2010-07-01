@@ -21,7 +21,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  MooseArray<Real> & _diffusivity;
+  MaterialProperty<Real> & _diffusivity;
 };
 
 #endif //EXAMPLEDIFFUSION_H

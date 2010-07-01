@@ -25,7 +25,7 @@ protected:
 
 private:
 
-  MooseArray<RealGradient> & _velocity_vector;
+  VariableGradient & _velocity_vector;
 };
 
 #endif //CONVECTION_H

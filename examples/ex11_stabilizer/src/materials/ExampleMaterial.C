@@ -13,7 +13,7 @@ ExampleMaterial::ExampleMaterial(std::string name,
                                  InputParameters parameters)
   :Material(name, moose_system, parameters),
    _input_diffusivity(parameters.get<Real>("diffusivity")),
-   _diffusivity(declareRealProperty("diffusivity"))
+   _diffusivity(declareProperty<Real>("diffusivity"))
 {}
 
 void

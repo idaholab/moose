@@ -29,6 +29,6 @@ protected:
    * This MooseArray will hold the reference we need to our
    * material property from the Material class
    */
-  MooseArray<Real> & _diffusivity;
+  MaterialProperty<Real> & _diffusivity;
 };
 #endif //EXAMPLEDIFFUSION_H

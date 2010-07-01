@@ -61,13 +61,13 @@ protected:
   MooseArray<Real> & _u_old;
   MooseArray<Real> & _u_older;
 
-  virtual MooseArray<Real> & coupledVal(std::string name, int i = 0);
-  virtual MooseArray<Real> & coupledValOld(std::string name, int i = 0);
-  virtual MooseArray<Real> & coupledValOlder(std::string name, int i = 0);
+  virtual MooseArray<Real> & coupledValue(std::string name, int i = 0);
+  virtual MooseArray<Real> & coupledValueOld(std::string name, int i = 0);
+  virtual MooseArray<Real> & coupledValueOlder(std::string name, int i = 0);
   
-  virtual MooseArray<RealGradient> & coupledGrad(std::string name, int i = 0);
-  virtual MooseArray<RealGradient> & coupledGradOld(std::string name, int i = 0);
-  virtual MooseArray<RealGradient> & coupledGradOlder(std::string name, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradient(std::string name, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradientOld(std::string name, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradientOlder(std::string name, int i = 0);
 
 
   /*************

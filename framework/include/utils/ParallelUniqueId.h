@@ -14,13 +14,7 @@ public:
   ParallelUniqueId()
     {
       #ifdef LIBMESH_HAVE_TBB_API
-
-      #ifdef TBB_DEPRECATED
       ids.pop(id);
-      #else
-      ids.try_pop(id);
-      #endif
-      
       #else
       id = 0;
       #endif

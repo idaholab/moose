@@ -21,7 +21,7 @@ protected:
 
   virtual Real computeQpJacobian();
 
-  MooseArray<Real> & _time_coefficient;
+  MaterialProperty<Real> & _time_coefficient;
 };
 
 #endif //EXAMPLEIMPLICITEULER

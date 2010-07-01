@@ -22,7 +22,7 @@ protected:
 private:
   Real _input_diffusivity;
   
-  MooseArray<Real> & _diffusivity;
+  MaterialProperty<Real> & _diffusivity;
 };
 
 #endif //EXAMPLEMATERIAL_H

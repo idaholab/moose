@@ -27,6 +27,6 @@ protected:
 
 private:
   unsigned int _v_var;
-  MooseArray<Real> & _v;
+  VariableValue & _v;
 };
 #endif //COUPLEDFORCE_H
