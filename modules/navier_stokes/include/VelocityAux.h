@@ -27,8 +27,8 @@ public:
 protected:
   virtual Real computeValue();
 
-  MooseArray<Real> & _p;
-  MooseArray<Real> & _momentum;
+  VariableValue & _p;
+  VariableValue & _momentum;
 };
 
 #endif //VELOCITYAUX_H

@@ -12,11 +12,11 @@ InputParameters validParams<SolidMechY>()
 SolidMechY::SolidMechY(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :SolidMech(name, moose_system, parameters),
     _x_var(coupled("x")),
-    _x(coupledVal("x")),
-    _grad_x(coupledGrad("x")),
+    _x(coupledValue("x")),
+    _grad_x(coupledGradient("x")),
     _z_var(_dim == 3 ? coupled("z") : 1000000),
-    _z(_dim == 3 ? coupledVal("z") : _zero),
-    _grad_z(_dim == 3 ? coupledGrad("z") : _grad_zero)
+    _z(_dim == 3 ? coupledValue("z") : _zero),
+    _grad_z(_dim == 3 ? coupledGradient("z") : _grad_zero)
   {}
 
 Real

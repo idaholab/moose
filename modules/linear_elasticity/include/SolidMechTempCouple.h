@@ -23,8 +23,8 @@ public:
 protected:
   unsigned int _temp_var;
   
-  MooseArray<Real> & _thermal_strain;
-  MooseArray<Real> & _alpha;
+  MaterialProperty<Real> & _thermal_strain;
+  MaterialProperty<Real> & _alpha;
 
   Real _c4;
 };

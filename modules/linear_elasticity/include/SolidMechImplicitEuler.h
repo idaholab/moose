@@ -22,6 +22,6 @@ protected:
   virtual Real computeQpJacobian();
   
 private:
-  MooseArray<Real> & _density;
+  MaterialProperty<Real> & _density;
 };
 #endif //SOLIDMECHIMPLICITEULER_H

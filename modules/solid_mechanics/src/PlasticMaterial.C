@@ -14,18 +14,18 @@ PlasticMaterial::PlasticMaterial(std::string name,
                                  InputParameters parameters)
   :LinearIsotropicMaterial(name, moose_system, parameters),
    _input_yield_stress(parameters.get<Real>("yield_stress")),
-   _yield_stress(declareRealProperty("yield_stress")),
-   _shear_modulus(declareRealProperty("shear_modulus")),
+   _yield_stress(declareProperty<Real>("yield_stress")),
+   _shear_modulus(declareProperty<Real>("shear_modulus")),
    
-   _accumulated_plastic_strain(declareRealProperty("accumulated_plastic_strain")),
-   _accumulated_plastic_strain_old(declareRealPropertyOld("accumulated_plastic_strain")),
+   _accumulated_plastic_strain(declareProperty<Real>("accumulated_plastic_strain")),
+   _accumulated_plastic_strain_old(declarePropertyOld<Real>("accumulated_plastic_strain")),
    
-   _plastic_strain(declareColumnMajorMatrixProperty("plastic_strain")),
-   _plastic_strain_old(declareColumnMajorMatrixPropertyOld("plastic_strain")),
+   _plastic_strain(declareProperty<ColumnMajorMatrix>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<ColumnMajorMatrix>("plastic_strain")),
    
-   _von_mises_stress(declareRealProperty("von_mises_stress")),
+   _von_mises_stress(declareProperty<Real>("von_mises_stress")),
    
-   _delta_gamma(coupledVal("delta_gamma"))
+   _delta_gamma(coupledValue("delta_gamma"))
 {
   _input_shear_modulus = _youngs_modulus / ((2*(1+_poissons_ratio)));
 }

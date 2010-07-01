@@ -44,8 +44,8 @@ protected:
 
   Real _density;
 
-  MooseArray<Real> & _E_prop;
-  MooseArray<Real> & _nu_prop;
+  MaterialProperty<Real> & _E_prop;
+  MaterialProperty<Real> & _nu_prop;
 };
  
 

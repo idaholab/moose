@@ -36,18 +36,18 @@ protected:
    */
   Real _input_shear_modulus;
 
-  MooseArray<Real> & _yield_stress;
-  MooseArray<Real> & _shear_modulus;
+  MaterialProperty<Real> & _yield_stress;
+  MaterialProperty<Real> & _shear_modulus;
 
-  MooseArray<ColumnMajorMatrix> & _plastic_strain;
-  MooseArray<ColumnMajorMatrix> & _plastic_strain_old;
+  MaterialProperty<ColumnMajorMatrix> & _plastic_strain;
+  MaterialProperty<ColumnMajorMatrix> & _plastic_strain_old;
   
-  MooseArray<Real> & _accumulated_plastic_strain;
-  MooseArray<Real> & _accumulated_plastic_strain_old;
+  MaterialProperty<Real> & _accumulated_plastic_strain;
+  MaterialProperty<Real> & _accumulated_plastic_strain_old;
 
-  MooseArray<Real> & _von_mises_stress;
+  MaterialProperty<Real> & _von_mises_stress;
 
-  MooseArray<Real> & _delta_gamma;
+  VariableValue & _delta_gamma;
 };
 
 #endif //PLASTICMATERIAL_H

@@ -20,20 +20,20 @@ public:
   SolidMechanicsMaterial(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
-  MooseArray<RealGradient> & _grad_disp_x;
-  MooseArray<RealGradient> & _grad_disp_y;
-  MooseArray<RealGradient> & _grad_disp_z;
+  VariableGradient & _grad_disp_x;
+  VariableGradient & _grad_disp_y;
+  VariableGradient & _grad_disp_z;
 
   bool _has_temp;
-  MooseArray<Real> & _temp;
+  VariableValue & _temp;
 
-  MooseArray<RealTensorValue> & _stress;
-  MooseArray<ColumnMajorMatrix> & _elasticity_tensor;
-  MooseArray<ColumnMajorMatrix> & _elastic_strain;
+  MaterialProperty<RealTensorValue> & _stress;
+  MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
+  MaterialProperty<ColumnMajorMatrix> & _elastic_strain;
 
-  MooseArray<Real> & _thermal_conductivity;
-  MooseArray<Real> & _density;
-  MooseArray<Real> & _specific_heat;
+  MaterialProperty<Real> & _thermal_conductivity;
+  MaterialProperty<Real> & _density;
+  MaterialProperty<Real> & _specific_heat;
 };
 
 #endif //SOLIDMECHANICSMATERIAL_H

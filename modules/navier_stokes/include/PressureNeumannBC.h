@@ -29,13 +29,13 @@ protected:
   virtual Real computeQpResidual();
   
 
-  MooseArray<Real> & _p;
+  VariableValue & _p;
 
-  MooseArray<Real> & _pe;
+  VariableValue & _pe;
 
-  MooseArray<Real> & _pu;
-  MooseArray<Real> & _pv;
-  MooseArray<Real> & _pw;
+  VariableValue & _pu;
+  VariableValue & _pv;
+  VariableValue & _pw;
 
   int _component;
 };

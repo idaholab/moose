@@ -11,15 +11,15 @@ InputParameters validParams<EnergyViscousFlux>()
 EnergyViscousFlux::EnergyViscousFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
     _u_vel_var(coupled("u")),
-    _u_vel(coupledVal("u")),
+    _u_vel(coupledValue("u")),
     _v_vel_var(coupled("v")),
-    _v_vel(coupledVal("v")),
+    _v_vel(coupledValue("v")),
     _w_vel_var(_dim == 3 ? coupled("w") : 999999),
-    _w_vel(_dim == 3 ? coupledVal("w") : _zero),
+    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
     _temp_var(coupled("temp")),
-    _grad_temp(coupledGrad("temp")),
-    _viscous_stress_tensor(getTensorMaterialProperty("viscous_stress_tensor")),
-    _thermal_conductivity(getRealMaterialProperty("thermal_conductivity"))
+    _grad_temp(coupledGradient("temp")),
+    _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
+    _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
   {}
 
 Real

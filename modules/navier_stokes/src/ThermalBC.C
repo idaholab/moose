@@ -13,13 +13,13 @@ InputParameters validParams<ThermalBC>()
 ThermalBC::ThermalBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
     _p_var(coupled("p")),
-    _p(coupledVal("p")),
+    _p(coupledValue("p")),
     _u_vel_var(coupled("u")),
-    _u_vel(coupledVal("u")),
+    _u_vel(coupledValue("u")),
     _v_vel_var(coupled("v")),
-    _v_vel(coupledVal("v")),
+    _v_vel(coupledValue("v")),
     _w_vel_var(_dim == 3 ? coupled("w") : 0),
-    _w_vel(_dim == 3 ? coupledVal("w") : _zero),
+    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
     _initial(_parameters.get<Real>("initial")),
     _final(_parameters.get<Real>("final")),
     _duration(_parameters.get<Real>("duration"))
@@ -29,9 +29,9 @@ Real
 ThermalBC::temperature()
 {
   //Only constant material properties are allowed in a BC
-  Real & R = _material->getConstantRealProperty("R");
-  Real & c_v = _material->getConstantRealProperty("c_v");
-  Real & gamma = _material->getConstantRealProperty("gamma");
+  Real & R = _material->getProperty<Real>("R")[_qp];
+  Real & c_v = _material->getProperty<Real>("c_v")[_qp];
+  Real & gamma = _material->getProperty<Real>("gamma")[_qp];
   
   Real value = 1.0/c_v;
 

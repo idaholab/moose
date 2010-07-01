@@ -10,11 +10,11 @@ InputParameters validParams<PressureNeumannBC>()
 
 PressureNeumannBC::PressureNeumannBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
-    _p(coupledVal("p")),
-    _pe(coupledVal("pe")),
-    _pu(coupledVal("pu")),
-    _pv(coupledVal("pv")),
-    _pw(_dim == 3 ? coupledVal("pw") : _zero),
+    _p(coupledValue("p")),
+    _pe(coupledValue("pe")),
+    _pu(coupledValue("pu")),
+    _pv(coupledValue("pv")),
+    _pw(_dim == 3 ? coupledValue("pw") : _zero),
     _component(parameters.get<Real>("component"))
   {
     if(_component < 0)
@@ -28,7 +28,7 @@ Real
 PressureNeumannBC::pressure()
   {
     //Only CONSTANT Real properties can be used by BCs
-    Real gamma = _material->getConstantRealProperty("gamma");
+    Real gamma = _material->getProperty<Real>("gamma")[_qp];
 
     Real _u_vel = _pu[_qp] / _p[_qp];
     Real _v_vel = _pv[_qp] / _p[_qp];

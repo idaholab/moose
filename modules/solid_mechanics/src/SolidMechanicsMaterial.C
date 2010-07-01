@@ -13,15 +13,15 @@ InputParameters validParams<SolidMechanicsMaterial>()
 
 SolidMechanicsMaterial::SolidMechanicsMaterial(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Material(name, moose_system, parameters),
-   _grad_disp_x(coupledGrad("disp_x")),
-   _grad_disp_y(coupledGrad("disp_y")),
-   _grad_disp_z(_dim == 3 ? coupledGrad("disp_z") : _grad_zero),
+   _grad_disp_x(coupledGradient("disp_x")),
+   _grad_disp_y(coupledGradient("disp_y")),
+   _grad_disp_z(_dim == 3 ? coupledGradient("disp_z") : _grad_zero),
    _has_temp(isCoupled("temp")),
-   _temp(_has_temp ? coupledVal("temp") : _zero),
-   _stress(declareTensorProperty("stress")),
-   _elasticity_tensor(declareColumnMajorMatrixProperty("elasticity_tensor")),
-   _elastic_strain(declareColumnMajorMatrixProperty("elastic_strain")),
-   _thermal_conductivity(declareRealProperty("thermal_conductivity")),
-   _density(declareRealProperty("density")),
-   _specific_heat(declareRealProperty("specific_heat"))
+   _temp(_has_temp ? coupledValue("temp") : _zero),
+   _stress(declareProperty<RealTensorValue>("stress")),
+   _elasticity_tensor(declareProperty<ColumnMajorMatrix>("elasticity_tensor")),
+   _elastic_strain(declareProperty<ColumnMajorMatrix>("elastic_strain")),
+   _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+   _density(declareProperty<Real>("density")),
+   _specific_heat(declareProperty<Real>("specific_heat"))
 {}

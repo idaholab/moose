@@ -12,11 +12,11 @@ InputParameters validParams<DeltaGamma>()
 
 DeltaGamma::DeltaGamma(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
-   _elastic_strain(getColumnMajorMatrixMaterialProperty("elastic_strain")),
-   _accumulated_plastic_strain(getRealMaterialProperty("accumulated_plastic_strain")),
-   _von_mises_stress(getRealMaterialProperty("von_mises_stress")),
-   _yield_stress(getRealMaterialProperty("yield_stress")),
-   _shear_modulus(getRealMaterialProperty("shear_modulus"))
+   _elastic_strain(getMaterialProperty<ColumnMajorMatrix>("elastic_strain")),
+   _accumulated_plastic_strain(getMaterialProperty<Real>("accumulated_plastic_strain")),
+   _von_mises_stress(getMaterialProperty<Real>("von_mises_stress")),
+   _yield_stress(getMaterialProperty<Real>("yield_stress")),
+   _shear_modulus(getMaterialProperty<Real>("shear_modulus"))
 {}
 
 Real

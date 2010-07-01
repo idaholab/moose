@@ -10,11 +10,11 @@ InputParameters validParams<MassInviscidFlux>()
 MassInviscidFlux::MassInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
     _pu_var(coupled("pu")),
-    _pu(coupledVal("pu")),
+    _pu(coupledValue("pu")),
     _pv_var(coupled("pv")),
-    _pv(coupledVal("pv")),
+    _pv(coupledValue("pv")),
     _pw_var(_dim == 3 ? coupled("pw") : 999999),
-    _pw(_dim == 3 ? coupledVal("pw") : _zero)
+    _pw(_dim == 3 ? coupledValue("pw") : _zero)
   {}
 
 Real

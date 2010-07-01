@@ -24,12 +24,12 @@ protected:
   
 private:
   unsigned int _x_var;
-  MooseArray<Real> & _x;
-  MooseArray<RealGradient> & _grad_x;
+  VariableValue  & _x;
+  VariableGradient & _grad_x;
   
   unsigned int _y_var;
-  MooseArray<Real> & _y;
-  MooseArray<RealGradient> & _grad_y;
+  VariableValue  & _y;
+  VariableGradient & _grad_y;
 };
  
 #endif //SOLIDMECHZ

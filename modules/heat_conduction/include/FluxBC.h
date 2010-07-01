@@ -32,7 +32,7 @@ protected:
 private:
   
   //Thermal conductivity
-  MooseArray<Real> & _k;
+  MaterialProperty<Real> & _k;
 };
 
 #endif //NEUMANNBC_H

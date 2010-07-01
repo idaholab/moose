@@ -6,7 +6,6 @@
 //Forward Declarations
 class DeltaGamma;
 class ColumnMajorMatrix;
-template<typename T> class MooseArray;
 
 template<>
 InputParameters validParams<DeltaGamma>();
@@ -22,10 +21,10 @@ protected:
 
   virtual Real computeQpJacobian();
 
-  MooseArray<ColumnMajorMatrix> & _elastic_strain;
-  MooseArray<Real> & _accumulated_plastic_strain;
-  MooseArray<Real> & _von_mises_stress;
-  MooseArray<Real> & _yield_stress;
-  MooseArray<Real> & _shear_modulus;
+  MaterialProperty<ColumnMajorMatrix> & _elastic_strain;
+  MaterialProperty<Real> & _accumulated_plastic_strain;
+  MaterialProperty<Real> & _von_mises_stress;
+  MaterialProperty<Real> & _yield_stress;
+  MaterialProperty<Real> & _shear_modulus;
 };
 #endif //DELTAGAMMA_H

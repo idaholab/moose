@@ -34,38 +34,38 @@ protected:
   virtual void computeProperties();
 
   bool _has_u;
-  MooseArray<Real> & _u;
-  MooseArray<RealGradient> & _grad_u;
+  VariableValue  & _u;
+  VariableGradient & _grad_u;
 
   bool _has_v;
-  MooseArray<Real> & _v;
-  MooseArray<RealGradient> & _grad_v;
+  VariableValue  & _v;
+  VariableGradient & _grad_v;
 
   bool _has_w;
-  MooseArray<Real> & _w;
-  MooseArray<RealGradient> & _grad_w;
+  VariableValue  & _w;
+  VariableGradient & _grad_w;
 
   bool _has_pe;
-  MooseArray<Real> & _pe;
-  MooseArray<RealGradient> & _grad_pe;
+  VariableValue  & _pe;
+  VariableGradient & _grad_pe;
 
-  MooseArray<RealTensorValue> & _viscous_stress_tensor;
-  MooseArray<Real> & _thermal_conductivity;
-  MooseArray<Real> & _pressure;
+  MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
+  MaterialProperty<Real> & _thermal_conductivity;
+  MaterialProperty<Real> & _pressure;
 
-  Real & _gamma;
-  Real & _c_v;
-  Real & _c_p;
-  Real & _R;
-  Real & _Pr;
+  MaterialProperty<Real> & _gamma;
+  MaterialProperty<Real> & _c_v;
+  MaterialProperty<Real> & _c_p;
+  MaterialProperty<Real> & _R;
+  MaterialProperty<Real> & _Pr;
 
-  MooseArray<Real> & _dynamic_viscocity;
+  MaterialProperty<Real> & _dynamic_viscocity;
   
   Real _R_param;
   Real _gamma_param;
   Real _Pr_param;
 
-  std::vector<MooseArray<RealGradient> *> _vel_grads;
+  std::vector<VariableGradient *> _vel_grads;
 };
 
 #endif //NAVIERSTOKESMATERIAL_H

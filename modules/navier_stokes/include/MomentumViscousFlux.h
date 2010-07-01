@@ -22,7 +22,7 @@ protected:
 
   int _component;
 
-  MooseArray<RealTensorValue> & _viscous_stress_tensor;
+  MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
 };
  
 #endif

@@ -10,12 +10,12 @@ InputParameters validParams<EnergyInviscidFlux>()
 EnergyInviscidFlux::EnergyInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
     _u_vel_var(coupled("u")),
-    _u_vel(coupledVal("u")),
+    _u_vel(coupledValue("u")),
     _v_vel_var(coupled("v")),
-    _v_vel(coupledVal("v")),
+    _v_vel(coupledValue("v")),
     _w_vel_var(_dim == 3 ? coupled("w") : 9999999),
-    _w_vel(_dim == 3 ? coupledVal("w") : _zero),
-    _pressure(getRealMaterialProperty("pressure"))
+    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+    _pressure(getMaterialProperty<Real>("pressure"))
   {}
 
 Real

@@ -19,46 +19,38 @@ NavierStokesMaterial::NavierStokesMaterial(std::string name,
   :Material(name, moose_system, parameters),
     _has_u(isCoupled("u")),
 
-    _u(coupledVal("u")),
-    _grad_u(coupledGrad("u")),
+    _u(coupledValue("u")),
+    _grad_u(coupledGradient("u")),
     
     _has_v(isCoupled("v")),
-    _v(coupledVal("v")),
-    _grad_v(coupledGrad("v")),
+    _v(coupledValue("v")),
+    _grad_v(coupledGradient("v")),
     
     _has_w(isCoupled("w")),
-    _w(_has_w ? coupledVal("w") : _zero),
-    _grad_w(_has_w ? coupledGrad("w") : _grad_zero),
+    _w(_has_w ? coupledValue("w") : _zero),
+    _grad_w(_has_w ? coupledGradient("w") : _grad_zero),
     
     _has_pe(isCoupled("pe")),
-    _pe(coupledVal("pe")),
-    _grad_pe(coupledGrad("pe")),
+    _pe(coupledValue("pe")),
+    _grad_pe(coupledGradient("pe")),
 
-    _viscous_stress_tensor(declareTensorProperty("viscous_stress_tensor")),
-    _thermal_conductivity(declareRealProperty("thermal_conductivity")),
-    _pressure(declareRealProperty("pressure")),
+    _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
+    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+    _pressure(declareProperty<Real>("pressure")),
 
-    _gamma(declareConstantRealProperty("gamma")),
-    _c_v(declareConstantRealProperty("c_v")),
-    _c_p(declareConstantRealProperty("c_p")),
-    _R(declareConstantRealProperty("R")),
-    _Pr(declareConstantRealProperty("Pr")),
+    _gamma(declareProperty<Real>("gamma")),
+    _c_v(declareProperty<Real>("c_v")),
+    _c_p(declareProperty<Real>("c_p")),
+    _R(declareProperty<Real>("R")),
+    _Pr(declareProperty<Real>("Pr")),
 
     //Declared here but _not_ calculated here
-    _dynamic_viscocity(declareRealProperty("dynamic_viscocity")),
+    _dynamic_viscocity(declareProperty<Real>("dynamic_viscocity")),
     
     _R_param(parameters.get<Real>("R")),
     _gamma_param(parameters.get<Real>("gamma")),
     _Pr_param(parameters.get<Real>("Pr"))
   {
-    _gamma = _gamma_param;
-    _R = _R_param;
-    _Pr = _Pr_param;
-    
-    _c_v = _R / (_gamma_param - 1);
-
-    _c_p = _gamma_param * _c_v;
-
     //Load these up in a vector for convenience
     _vel_grads.resize(3);
 
@@ -74,8 +66,15 @@ NavierStokesMaterial::NavierStokesMaterial(std::string name,
 void
 NavierStokesMaterial::computeProperties()
 {  
-  for(unsigned int qp=0; qp<_n_qpoints; qp++)
+  for (unsigned int qp=0; qp<_n_qpoints; qp++)
   {  
+    _gamma[qp] = _gamma_param;
+    _R[qp] = _R_param;
+    _Pr[qp] = _Pr_param;
+
+    _c_v[qp] = _R[qp] / (_gamma_param - 1);
+    _c_p[qp] = _gamma_param * _c_v[qp];
+
     /******* Viscous Stress Tensor *******/
     //Technically... this _is_ the transpose (since we are loading these by rows)
     //But it doesn't matter....
@@ -99,7 +98,7 @@ NavierStokesMaterial::computeProperties()
     /******* Pressure *******/
     _pressure[qp] = (_gamma_param - 1)*(_pe[qp] - (0.5 * (_u[qp]*_u[qp] + _v[qp]*_v[qp] + _w[qp]*_w[qp])));
       
-    _thermal_conductivity[qp] = (_c_p * _dynamic_viscocity[qp]) / _Pr;
+    _thermal_conductivity[qp] = (_c_p[qp] * _dynamic_viscocity[qp]) / _Pr[qp];
   }
 }
 

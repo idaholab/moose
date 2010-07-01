@@ -9,8 +9,8 @@ InputParameters validParams<VelocityAux>()
 
 VelocityAux::VelocityAux(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :AuxKernel(name, moose_system, parameters),
-   _p(coupledVal("p")),
-   _momentum(coupledVal("momentum"))
+   _p(coupledValue("p")),
+   _momentum(coupledValue("momentum"))
 {}
 
 Real

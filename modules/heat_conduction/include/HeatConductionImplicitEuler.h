@@ -22,7 +22,7 @@ protected:
   virtual Real computeQpJacobian();
   
 private:
-  MooseArray<Real> & _specific_heat;
-  MooseArray<Real> & _density;
+  MaterialProperty<Real> & _specific_heat;
+  MaterialProperty<Real> & _density;
 };
 #endif //HEATCONDUCTIONIMPLICITEULER
