@@ -77,7 +77,7 @@ Executioner::setup()
     _moose_system.meshChanged();
 
     //reproject the initial condition
-    _moose_system.getNonlinearSystem()->project_solution(Moose::initial_value, NULL, _moose_system.getEquationSystems()->parameters);
+    _moose_system.project_solution(Moose::initial_value, NULL);
   }    
 
   if(Moose::output_initial)

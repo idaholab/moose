@@ -210,6 +210,15 @@ public:
 
   void checkSystemsIntegrity();
 
+  void project_solution(Number fptr(const Point& p,
+                                    const Parameters& parameters,
+                                    const std::string& sys_name,
+                                    const std::string& unknown_name),
+                        Gradient gptr(const Point& p,
+                                      const Parameters& parameters,
+                                      const std::string& sys_name,
+                                      const std::string& unknown_name));
+
   /**
    * Allows specification of per variable scaling factors.
    * The size of the vector MUST be the same as the number of Nonlinear Variables.

@@ -865,3 +865,15 @@ MooseSystem::copy_old_solutions()
   *_aux_system->old_local_solution   = *_aux_system->current_local_solution;
 }
 
+void
+MooseSystem::project_solution(Number fptr(const Point& p,
+                                          const Parameters& parameters,
+                                          const std::string& sys_name,
+                                          const std::string& unknown_name),
+                              Gradient gptr(const Point& p,
+                                            const Parameters& parameters,
+                                            const std::string& sys_name,
+                                            const std::string& unknown_name))
+{
+  _system->project_solution(fptr, gptr, _es->parameters);
+}
