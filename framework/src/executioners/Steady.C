@@ -30,8 +30,8 @@ Steady::execute()
 
     _moose_system._materials.updateMaterialDataState();
     
-    PerfLog solve_only("Solve Only");
-    solve_only.push("solve()","Solve");
+//    PerfLog solve_only("Solve Only");
+//    solve_only.push("solve()","Solve");
 
     Moose::perf_log.push("solve()","Solve");
 
@@ -39,7 +39,7 @@ Steady::execute()
 
     Moose::perf_log.pop("solve()","Solve");
         
-    solve_only.pop("solve()","Solve");
+//    solve_only.pop("solve()","Solve");
 
     postSolve();
         

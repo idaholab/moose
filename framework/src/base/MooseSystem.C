@@ -54,7 +54,8 @@ MooseSystem::MooseSystem()
    _t_step(0),
    _t_scheme(0),
    _n_of_rk_stages(0),
-   _active_local_elem_range(NULL)
+   _active_local_elem_range(NULL),
+   _print_mesh_changed(false)
 {
   sizeEverything();
 }
@@ -89,7 +90,8 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _t_step(0),
     _t_scheme(0),
     _n_of_rk_stages(0),
-    _active_local_elem_range(NULL)
+    _active_local_elem_range(NULL),
+    _print_mesh_changed(false)
 {
   sizeEverything();
   initEquationSystems();
@@ -171,6 +173,12 @@ MooseSystem::sizeEverything()
   _second_zero.resize(n_threads);
 
   // AuxKernels::sizeEverything
+}
+
+void
+MooseSystem::setPrintMeshChanged(bool print_mesh_changed)
+{
+  _print_mesh_changed = print_mesh_changed;
 }
 
 void
@@ -745,6 +753,13 @@ MooseSystem::meshChanged()
   // Calling this function will rebuild the range.
   getActiveLocalElementRange();
 
+  // Print out information about the adapated mesh if requested
+  if (_print_mesh_changed)
+  {
+    std::cout << "\nMesh Changed:\n";
+    _mesh->print_info();
+  }
+  
   // Lets the output system know that the mesh has changed recently.
   _mesh_changed = true;
 }

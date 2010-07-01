@@ -97,6 +97,7 @@
     coarsen_fraction = 0
     max_h_level = 10
     error_estimator = KellyErrorEstimator
+    print_changed_info = true
   [../]
 []
 

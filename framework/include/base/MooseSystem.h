@@ -248,6 +248,8 @@ public:
   bool & dontReinitFE();
 
   Material * getMaterial(THREAD_ID tid, unsigned int block_id);
+
+  void setPrintMeshChanged(bool print_mesh_changed);
   
 protected:
   void sizeEverything();
@@ -378,6 +380,8 @@ public:
    */
   std::vector<Real> _scaling_factor;
 
+  bool _print_mesh_changed;
+  
   /**
    * Convenience zeros.
    */
