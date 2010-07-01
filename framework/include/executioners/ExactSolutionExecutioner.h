@@ -1,6 +1,10 @@
 #ifndef EXACTSOLEXEC_H
 #define EXACTSOLEXEC_H
 
+#include <ios>
+#include <iostream>
+#include <fstream>
+
 //libmesh includes
 #include "exact_solution.h"
 
@@ -16,21 +20,24 @@ InputParameters validParams<ExactSolutionExecutioner>();
 
 /**
  * This class overrides postSolve() to print the dofs and the l2 norm of the
- * Moose solution and the exact solution for every solve.
+ * Moose solution and the exact solution for every solve.  It will also output
+ * those values to a file if you specify it in the input file.
  */
 class ExactSolutionExecutioner: public Steady
 {
 public:
-
   ExactSolutionExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters);
+
+  virtual ~ExactSolutionExecutioner();
 
   /**
    * Function pointer to evaluate the exact solution at a point.
+   * Evaluate the exact solution at a point
    */
   Number exactSolution(const Point& p,
-                const Parameters& Parameters,     // not needed
-                const std::string& sys_name,      // not needed
-                const std::string& unknown_name); // not needed
+                const Parameters& Parameters,
+                const std::string& sys_name,
+                const std::string& unknown_name);
 
 protected:
   /**
@@ -41,6 +48,11 @@ protected:
 private:
   ExactSolution _exact;
   Functor _functor;
+
+  std::vector<std::string> _unknowns;
+
+  std::ofstream _out_file;
+  bool _output_norms;
 };
 
 #endif //EXACTSOLEXEC_H

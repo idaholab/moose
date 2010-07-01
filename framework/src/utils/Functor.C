@@ -62,22 +62,3 @@ Functor::operator()(Real t, Real x, Real y, Real z)
   _vars[3] = z;
   return _parser.Eval(&(_vars[0]));
 }
-
-/*
-int main()
-{
-  std::vector<std::string> vars(1);
-  vars[0] = "q";
-
-  Functor f( std::string("y+q*x*t"), vars );
-
-  Real & q = f.getVarAddr( std::string("q") );
-  q = 1.5;
-
-  std::cout << f(1, 2, 3) << "\n"; // 3 + 1.5 * 2 * 1 = 6
-
-  q = 2.5;
-  std::cout << f(1, 2, 3) << "\n"; // 3 + 2.5 * 2 * 1 = 8
-
-  return 0;
-}*/
