@@ -60,7 +60,7 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
     else if (moose_system.hasAuxVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = moose_system.getAuxVariableNumber(coupled_var_name);
-      add_nonexistent(coupled_var_num, _face_data._aux_var_nums[_boundary_id]);
+      add_nonexistent(coupled_var_num, _face_data._aux_var_nums[0]);
     }
     else
       mooseError("Coupled variable '" + coupled_var_name + "' not found.");
@@ -189,7 +189,7 @@ BoundaryCondition::coupledValue(std::string var_name, int i)
     mooseError("BC _" + name() + "_ was not provided with a variable coupled_as " + var_name + "\n\n");
   
   if(_integrated)
-    return _moose_system._face_data._var_vals[_tid][_coupled_vars[var_name][i]._num];
+    return PDEBase::coupledValue(var_name, i);
 
   return _moose_system._face_data._var_vals_nodal[_tid][_coupled_vars[var_name][i]._num];
 }
@@ -201,7 +201,7 @@ BoundaryCondition::coupledGradient(std::string var_name, int i)
     mooseError("BC _" + name() + "_ was not provided with a variable coupled_as " + var_name + "\n\n");
 
   if(_integrated)
-    return _moose_system._face_data._var_grads[_tid][_coupled_vars[var_name][i]._num];
+    return PDEBase::coupledGradient(var_name, i);
 
   mooseError("Integrated BC required for coupled Gradient type\n");
 }
