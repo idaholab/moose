@@ -81,7 +81,6 @@
 
 //libMesh includes
 #include "mesh.h"
-#include "mesh_refinement.h"
 #include "boundary_info.h"
 #include "parallel.h"
 
@@ -204,10 +203,6 @@ Moose::setSolverDefaults(EquationSystems * es,
 THREAD_ID Moose::current_thread_id = 0;
 
 //EquationSystems * Moose::equation_system;
-
-MeshRefinement * Moose::mesh_refinement = NULL;
-ErrorEstimator * Moose::error_estimator = NULL;
-ErrorVector * Moose::error = NULL;
 
 Executioner * Moose::executioner;
 

@@ -47,29 +47,18 @@ Executioner::setup()
 
   _moose_system.getNonlinearSystem()->update();
 
-//  _moose_system.copy_old_solutions();
   // Update backward time solution vectors.
   *_moose_system._system->older_local_solution = *_moose_system._system->current_local_solution;
   *_moose_system._system->old_local_solution   = *_moose_system._system->current_local_solution;
   *_moose_system._aux_system->older_local_solution = *_moose_system._aux_system->current_local_solution;
   *_moose_system._aux_system->old_local_solution   = *_moose_system._aux_system->current_local_solution;
 
-  unsigned int initial_adaptivity = 0;
-
-  if(_moose_system.getEquationSystems()->parameters.have_parameter<unsigned int>("initial_adaptivity"))
-    initial_adaptivity = _moose_system.getEquationSystems()->parameters.get<unsigned int>("initial_adaptivity");
+  unsigned int initial_adaptivity = _moose_system.getInitialAdaptivityStepCount();
 
   //Initial adaptivity
   for(unsigned int i=0; i<initial_adaptivity; i++)
   {
-    // Compute the error for each active element
-    Moose::error_estimator->estimate_error(*_moose_system.getNonlinearSystem(), *Moose::error);
-      
-    // Flag elements to be refined and coarsened
-    Moose::mesh_refinement->flag_elements_by_error_fraction (*Moose::error);
-          
-    // Perform refinement and coarsening
-    Moose::mesh_refinement->refine_and_coarsen_elements();
+    _moose_system.doAdaptivityStep();
 
     // Tell MOOSE that the mesh has changed
     // this performs a lot of functions including projecting
@@ -94,20 +83,7 @@ Executioner::setup()
 void
 Executioner::adaptMesh()
 {
-  if(Moose::mesh_refinement)
-  {
-    // Compute the error for each active element
-    Moose::error_estimator->estimate_error(*_moose_system.getNonlinearSystem(), *Moose::error);
-          
-    // Flag elements to be refined and coarsened
-    Moose::mesh_refinement->flag_elements_by_error_fraction (*Moose::error);
-          
-    // Perform refinement and coarsening
-    Moose::mesh_refinement->refine_and_coarsen_elements();
-          
-    // Tell MOOSE that the Mesh has changed
-    _moose_system.meshChanged();
-  }
+  _moose_system.adaptMesh();
 }
 
 void

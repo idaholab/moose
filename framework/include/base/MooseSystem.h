@@ -21,6 +21,9 @@
 #include "transient_system.h"
 #include "dof_map.h"
 #include "mesh_base.h"
+#include "mesh_refinement.h"
+#include "error_estimator.h"
+#include "error_vector.h"
 
 //Forward Declarations
 class EquationSystems;
@@ -259,7 +262,32 @@ public:
   Material * getMaterial(THREAD_ID tid, unsigned int block_id);
 
   void setPrintMeshChanged(bool print_mesh_changed);
-  
+
+  /**
+   * Adaptivity interface
+   */
+
+  /**
+   * Initialize adaptivitty
+   *
+   * @param max_r_steps - Maximum r steps to take
+   * @param inital_steps - The number of adaptivity steps to perform using the initial conditions
+   */
+  void initAdaptivity(unsigned int max_r_steps, unsigned int initial_steps = 0);
+
+  unsigned int getInitialAdaptivityStepCount();
+
+  void setErrorEstimator(const std::string &error_estimator_name);
+
+  template<typename T>
+  void setAdaptivityParam(const std::string &param_name, const T &param_value);
+
+  void setErrorNorm(SystemNorm &sys_norm);
+
+  void adaptMesh();
+
+  void doAdaptivityStep();
+
 protected:
   void sizeEverything();
 
@@ -334,6 +362,21 @@ private:
   ExodusII_IO * _exreader;
 
   bool _is_valid;
+
+  /**
+   * A mesh refinement object to be used with Adaptivity.
+   */
+  MeshRefinement * _mesh_refinement;
+
+  /**
+   * Error estimator to be used by the apps.
+   */
+  ErrorEstimator * _error_estimator;
+
+  /**
+   * Error vector for use with the error estimator.
+   */
+  ErrorVector * _error;
 
 public:
   /**
@@ -430,5 +473,29 @@ protected:
   friend class AuxData;
 };
 
+/**
+ * Set parameters for adaptivity
+ */
+template<typename T>
+void
+MooseSystem::setAdaptivityParam(const std::string &param_name, const T &param_value)
+{
+  if (param_name == "refine fraction")
+  {
+    _mesh_refinement->refine_fraction() = param_value;
+  }
+  else if (param_name == "coarsen fraction")
+  {
+    _mesh_refinement->coarsen_fraction() = param_value;
+  }
+  else if (param_name == "max h-level")
+  {
+    _mesh_refinement->max_h_level() = param_value;
+  }
+  else
+  {
+    // TODO: spit out some warning/error
+  }
+}
   
 #endif //MOOSESYSTEM_H

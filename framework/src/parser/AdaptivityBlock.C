@@ -2,11 +2,6 @@
 #include "Moose.h"
 
 // libMesh includes
-#include "mesh_refinement.h"
-#include "error_estimator.h"
-#include "error_vector.h"
-#include "kelly_error_estimator.h"
-#include "fourth_error_estimators.h"
 #include "transient_system.h"
 
 template<>
@@ -36,32 +31,15 @@ AdaptivityBlock::execute()
 {
   TransientNonlinearImplicitSystem & system = *_moose_system.getNonlinearSystem();
   
-  unsigned int max_r_steps = getParamValue<unsigned int>("steps");
+  _moose_system.initAdaptivity(getParamValue<unsigned int>("steps"),
+      getParamValue<unsigned int>("initial_adaptivity"));
 
-  EquationSystems *es = _moose_system.getEquationSystems();
-  es->parameters.set<unsigned int>("max_r_steps") = max_r_steps;
-  es->parameters.set<bool>("adaptivity") = true;
-
-  es->parameters.set<unsigned int>("initial_adaptivity") = getParamValue<unsigned int>("initial_adaptivity");
-
-  if(Moose::mesh_refinement)
-    mooseError("Mesh refinement object has already been initialized!");
-
-  Moose::mesh_refinement = new MeshRefinement(*_moose_system.getMesh());
-  Moose::error = new ErrorVector;
-
-  std::string error_estimator = getParamValue<std::string>("error_estimator");
+  _moose_system.setErrorEstimator(getParamValue<std::string>("error_estimator"));
   
-  if(error_estimator == "KellyErrorEstimator")
-    Moose::error_estimator = new KellyErrorEstimator;
-  else if(error_estimator == "LaplacianErrorEstimator")
-    Moose::error_estimator = new LaplacianErrorEstimator;
-  else
-    mooseError((std::string("Unknown error_estimator selection: ") + error_estimator).c_str());
+  _moose_system.setAdaptivityParam("refine fraction", getParamValue<Real>("refine_fraction"));
+  _moose_system.setAdaptivityParam("coarsen fraction", getParamValue<Real>("coarsen_fraction"));
+  _moose_system.setAdaptivityParam("max h-level", getParamValue<unsigned int>("max_h_level"));
 
-  Moose::mesh_refinement->refine_fraction()  = getParamValue<Real>("refine_fraction");
-  Moose::mesh_refinement->coarsen_fraction() = getParamValue<Real>("coarsen_fraction");
-  Moose::mesh_refinement->max_h_level()      = getParamValue<unsigned int>("max_h_level");
   _moose_system.setPrintMeshChanged(getParamValue<bool>("print_changed_info"));
 
   const std::vector<std::string> & weight_names = getParamValue<std::vector<std::string> >("weight_names");
@@ -83,14 +61,14 @@ AdaptivityBlock::execute()
       std::string name = weight_names[i];
       double value = weight_values[i];
 
-      weights[system.variable_number(name)] = value;
+      weights[_moose_system.getVariableNumber(name)] = value;
     }
 
     std::vector<FEMNormType> norms(system.n_vars(), H1_SEMINORM);
 
     SystemNorm sys_norm(norms, weights);
 
-    Moose::error_estimator->error_norm = sys_norm;
+    _moose_system.setErrorNorm(sys_norm);
   }
   visitChildren();
 }

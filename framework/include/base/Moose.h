@@ -9,7 +9,6 @@
 #include "perf_log.h"
 #include "InputParameters.h"
 #include "getpot.h"
-#include "elem_range.h"
 #include "vector_value.h"
 #include "libmesh.h"
 #include "mesh.h"
@@ -173,21 +172,6 @@ namespace Moose
    * This is NOT valid inside of a thread!
    */
   extern THREAD_ID current_thread_id;
-
-  /**
-   * A mesh refinement object to be used with Adaptivity.
-   */
-  extern MeshRefinement * mesh_refinement;
-
-  /**
-   * Error estimator to be used by the apps.
-   */
-  extern ErrorEstimator * error_estimator;
-
-  /**
-   * Error vector for use with the error estimator.
-   */
-  extern ErrorVector * error;
 
   /**
    * THE Executioner object that will be used.

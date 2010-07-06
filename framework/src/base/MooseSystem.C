@@ -23,6 +23,11 @@
 #include "gmv_io.h"
 #include "tecplot_io.h"
 #include "boundary_info.h"
+#include "mesh_refinement.h"
+#include "error_estimator.h"
+#include "error_vector.h"
+#include "kelly_error_estimator.h"
+#include "fourth_error_estimators.h"
 
 MooseSystem::MooseSystem()
  : _element_data(*this),
@@ -47,6 +52,9 @@ MooseSystem::MooseSystem()
    _preconditioner(NULL),
    _exreader(NULL),
    _is_valid(false),
+   _mesh_refinement(NULL),
+   _error_estimator(NULL),
+   _error(NULL),
    _t(0),
    _dt(0),
    _dt_old(0),
@@ -83,6 +91,9 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _preconditioner(NULL),
     _exreader(NULL),
     _is_valid(false),
+    _mesh_refinement(NULL),
+    _error_estimator(NULL),
+    _error(NULL),
     _t(0),
     _dt(0),
     _dt_old(0),
@@ -124,6 +135,10 @@ MooseSystem::~MooseSystem()
     delete _mesh;
 
   delete _active_local_elem_range;
+
+  delete _mesh_refinement;
+  delete _error_estimator;
+  delete _error;
 }
 
 Mesh *
@@ -354,6 +369,80 @@ MooseSystem::initDataStructures()
 
   // Need to initialize data
   _is_valid = true;
+}
+
+void
+MooseSystem::initAdaptivity(unsigned int max_r_steps, unsigned int initial_steps)
+{
+  if (_mesh_refinement)
+    mooseError("Mesh refinement object has already been initialized!");
+
+  _es->parameters.set<bool>("adaptivity") = true;
+  _es->parameters.set<unsigned int>("max_r_steps") = max_r_steps;
+  _es->parameters.set<unsigned int>("initial_adaptivity") = initial_steps;
+
+  _mesh_refinement = new MeshRefinement(*_mesh);
+  _error = new ErrorVector;
+}
+
+unsigned int
+MooseSystem::getInitialAdaptivityStepCount()
+{
+  if (_es->parameters.have_parameter<unsigned int>("initial_adaptivity"))
+    return _es->parameters.get<unsigned int>("initial_adaptivity");
+  else
+    return 0;
+}
+
+void
+MooseSystem::setErrorEstimator(const std::string &error_estimator_name)
+{
+  if(error_estimator_name == "KellyErrorEstimator")
+    _error_estimator = new KellyErrorEstimator;
+  else if(error_estimator_name == "LaplacianErrorEstimator")
+    _error_estimator = new LaplacianErrorEstimator;
+  else
+    mooseError("Unknown error_estimator selection: " + error_estimator_name);
+}
+
+
+void
+MooseSystem::setErrorNorm(SystemNorm &sys_norm)
+{
+  mooseAssert(_error_estimator != NULL, "error_estimator not initialized. Did you call init_adaptivity()?");
+  _error_estimator->error_norm = sys_norm;
+}
+
+void
+MooseSystem::adaptMesh()
+{
+  if (_mesh_refinement)
+  {
+    // Compute the error for each active element
+    _error_estimator->estimate_error(*_system, *_error);
+
+    // Flag elements to be refined and coarsened
+    _mesh_refinement->flag_elements_by_error_fraction (*_error);
+
+    // Perform refinement and coarsening
+    _mesh_refinement->refine_and_coarsen_elements();
+
+    // Tell MOOSE that the Mesh has changed
+    meshChanged();
+  }
+}
+
+void
+MooseSystem::doAdaptivityStep()
+{
+  // Compute the error for each active element
+  _error_estimator->estimate_error(*_system, *_error);
+
+  // Flag elements to be refined and coarsened
+  _mesh_refinement->flag_elements_by_error_fraction (*_error);
+
+  // Perform refinement and coarsening
+  _mesh_refinement->refine_and_coarsen_elements();
 }
 
 void
