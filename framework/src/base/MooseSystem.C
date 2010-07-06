@@ -65,7 +65,14 @@ MooseSystem::MooseSystem()
    _n_of_rk_stages(0),
    _active_local_elem_range(NULL),
    _auto_scaling(false),
-   _print_mesh_changed(false)
+   _print_mesh_changed(false),
+   _file_base ("out"),
+   _interval(1),
+   _exodus_output(true),
+   _gmv_output(false),
+   _tecplot_output(false),
+   _print_out_info(false),
+   _output_initial(false)
 {
   sizeEverything();
 }
@@ -105,7 +112,14 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _n_of_rk_stages(0),
     _active_local_elem_range(NULL),
     _auto_scaling(false),
-    _print_mesh_changed(false)
+    _print_mesh_changed(false),
+    _file_base ("out"),
+    _interval(1),
+    _exodus_output(true),
+    _gmv_output(false),
+    _tecplot_output(false),
+    _print_out_info(false),
+    _output_initial(false)
 {
   sizeEverything();
   initEquationSystems();
@@ -874,16 +888,14 @@ MooseSystem::getActiveLocalElementRange()
 void
 MooseSystem::output_system(unsigned int t_step, Real time)
 {
-  std::string file_base = Moose::file_base;
-
   OStringStream stream_file_base;
 
-  stream_file_base << file_base << "_";
+  stream_file_base << _file_base << "_";
   OSSRealzeroright(stream_file_base,3,0,t_step);
 
   std::string file_name = stream_file_base.str();
 
-  if(Moose::exodus_output)
+  if (_exodus_output)
   {
     std::string exodus_file_name;
 
@@ -913,12 +925,12 @@ MooseSystem::output_system(unsigned int t_step, Real time)
     num_in_current_file++;
 
     if(!adaptivity)
-      exodus_file_name = file_base;
+      exodus_file_name = _file_base;
     else
     {
       OStringStream exodus_stream_file_base;
 
-      exodus_stream_file_base << file_base << "_";
+      exodus_stream_file_base << _file_base << "_";
 
       // -1 is so that the first one that comes out is 000
       OSSRealzeroright(exodus_stream_file_base,4,0,num_files-1);
@@ -929,9 +941,9 @@ MooseSystem::output_system(unsigned int t_step, Real time)
     // The +1 is because Exodus starts timesteps at 1 and we start at 0
     ex_out->write_timestep(exodus_file_name + ".e", *_es, num_in_current_file, time);
   }
-  if(Moose::gmv_output)
+  if(_gmv_output)
     GMVIO(*_mesh).write_equation_systems(file_name + ".gmv", *_es);
-  if(Moose::tecplot_output)
+  if(_tecplot_output)
     TecplotIO(*_mesh).write_equation_systems(file_name + ".plt", *_es);
 }
 

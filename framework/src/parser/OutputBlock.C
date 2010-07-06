@@ -42,13 +42,13 @@ OutputBlock::execute()
   std::cerr << "Inside the OutputBlock Object\n";
 #endif
 
-  Moose::file_base = getParamValue<std::string>("file_base");
-  Moose::interval = getParamValue<int>("interval");
-  Moose::exodus_output = getParamValue<bool>("exodus");
-  Moose::gmv_output = getParamValue<bool>("gmv");
-  Moose::tecplot_output = getParamValue<bool>("tecplot");
-  Moose::print_out_info = getParamValue<bool>("print_out_info");
-  Moose::output_initial = getParamValue<bool>("output_initial");
+  _moose_system._file_base = getParamValue<std::string>("file_base");
+  _moose_system._interval = getParamValue<int>("interval");
+  _moose_system._exodus_output = getParamValue<bool>("exodus");
+  _moose_system._gmv_output = getParamValue<bool>("gmv");
+  _moose_system._tecplot_output = getParamValue<bool>("tecplot");
+  _moose_system._print_out_info = getParamValue<bool>("print_out_info");
+  _moose_system._output_initial = getParamValue<bool>("output_initial");
 
   visitChildren();
 }

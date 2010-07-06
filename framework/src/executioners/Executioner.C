@@ -69,7 +69,7 @@ Executioner::setup()
     _moose_system.project_solution(Moose::initial_value, NULL);
   }    
 
-  if(Moose::output_initial)
+  if(_moose_system._output_initial)
   {
     std::cout<<"Outputting Initial Condition"<<std::endl;
       

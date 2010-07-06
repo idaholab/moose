@@ -446,6 +446,17 @@ public:
   bool _print_mesh_changed;
   
   /**
+   * Output related vars
+   */
+  std::string _file_base;
+  int _interval;
+  bool _exodus_output;
+  bool _gmv_output;
+  bool _tecplot_output;
+  bool _print_out_info;
+  bool _output_initial;
+
+  /**
    * Convenience zeros.
    */
 
