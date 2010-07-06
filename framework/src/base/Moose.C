@@ -213,8 +213,6 @@ Executioner * Moose::executioner;
 
 bool Moose::no_fe_reinit = false;
 
-std::string Moose::execution_type;
-
 std::string Moose::file_base = "out";
 int Moose::interval = 1;
 bool Moose::exodus_output = true;         // default output format is exodus

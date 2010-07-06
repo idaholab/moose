@@ -84,8 +84,6 @@ GenericExecutionerBlock::execute()
   if (!getParamValue<bool>("perf_log"))
     Moose::perf_log.disable_logging();
 
-  Moose::execution_type = getParamValue<std::string>("type");
-
   Moose::auto_scaling = getParamValue<bool>("auto_scaling");
 
 
