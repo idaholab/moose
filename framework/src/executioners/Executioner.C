@@ -41,9 +41,7 @@ Executioner::~Executioner()
 void
 Executioner::setup()
 {
-  // FIXME: !!!
-  Moose::setSolverDefaults(_moose_system.getEquationSystems(), *_moose_system.getNonlinearSystem(),
-                           Moose::compute_jacobian_block, Moose::compute_residual);
+  Moose::setSolverDefaults(_moose_system);
 
   _moose_system.getNonlinearSystem()->update();
 

@@ -95,7 +95,7 @@ GenericExecutionerBlock::execute()
   petsc_inames = getParamValue<std::vector<std::string> >("petsc_options_iname");
   petsc_values = getParamValue<std::vector<std::string> >("petsc_options_value");
 
-  MoosePetscSupport::l_abs_step_tol = getParamValue<Real>("l_abs_step_tol");
+  _moose_system._l_abs_step_tol = getParamValue<Real>("l_abs_step_tol");
   
   if (petsc_inames.size() != petsc_values.size())
     mooseError("Petsc names and options from input file are not the same length");

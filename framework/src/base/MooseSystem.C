@@ -72,7 +72,8 @@ MooseSystem::MooseSystem()
    _gmv_output(false),
    _tecplot_output(false),
    _print_out_info(false),
-   _output_initial(false)
+   _output_initial(false),
+   _l_abs_step_tol(1e-10)
 {
   sizeEverything();
 }
@@ -119,7 +120,8 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _gmv_output(false),
     _tecplot_output(false),
     _print_out_info(false),
-    _output_initial(false)
+    _output_initial(false),
+    _l_abs_step_tol(1e-10)
 {
   sizeEverything();
   initEquationSystems();

@@ -456,6 +456,10 @@ public:
   bool _print_out_info;
   bool _output_initial;
 
+
+  // Solver convergence tolerance
+  Real _l_abs_step_tol;
+
   /**
    * Convenience zeros.
    */

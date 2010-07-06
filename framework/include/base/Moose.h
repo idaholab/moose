@@ -154,10 +154,7 @@ namespace Moose
    */
   void initMoose(int argc, char** argv);
   
-  void setSolverDefaults(EquationSystems * es,
-                         TransientNonlinearImplicitSystem & system,
-                         void (*compute_jacobian_block) (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, NonlinearImplicitSystem& sys, unsigned int ivar, unsigned int jvar),
-                         void (*compute_residual) (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys));
+  void setSolverDefaults(MooseSystem &moose_system);
   
   void checkSystemsIntegrity();
   

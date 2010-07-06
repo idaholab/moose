@@ -107,9 +107,7 @@ TransientExecutioner::execute()
       std::cout << out.str() << std::endl;
     }
 
-    // FIXME: !!!
-    Moose::setSolverDefaults(_moose_system._es, *_moose_system.getNonlinearSystem(),
-                             Moose::compute_jacobian_block, Moose::compute_residual);
+    Moose::setSolverDefaults(_moose_system);
     
     setScaling();
 
