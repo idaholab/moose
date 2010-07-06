@@ -4,7 +4,7 @@
 template<>
 InputParameters validParams<PDEBase>()
 {
-  InputParameters params;
+  InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<bool>("_integrated", true);
 
   // FIXME: should go into parent class

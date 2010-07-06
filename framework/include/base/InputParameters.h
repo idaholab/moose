@@ -11,13 +11,8 @@
 #include "parameters.h"
 
 class InputParameters;
-class PDEBase;
-class Kernel;
-class AuxKernel;
-class BoundaryCondition;
-class Stabilizer;
+class MooseObject;
 class ParserBlock;
-class Material;
 class InitialCondition;
 class Executioner;
 
@@ -71,12 +66,8 @@ public:
   }
 
   // These are the only objects allowed to _create_ InputParameters
-  friend InputParameters validParams<PDEBase>();
-  friend InputParameters validParams<Kernel>();
-  friend InputParameters validParams<BoundaryCondition>();
-  friend InputParameters validParams<Stabilizer>();
+  friend InputParameters validParams<MooseObject>();
   friend InputParameters validParams<ParserBlock>();
-  friend InputParameters validParams<Material>();
   friend InputParameters validParams<InitialCondition>();
   friend InputParameters validParams<Executioner>();
   friend class ParserBlock;

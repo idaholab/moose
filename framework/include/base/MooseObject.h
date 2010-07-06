@@ -8,6 +8,11 @@
 #include "InputParameters.h"
 
 class MooseSystem;
+class MooseObject;
+
+template<>
+InputParameters validParams<MooseObject>();
+
 
 /**
  * Base class for MOOSE objects

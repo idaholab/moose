@@ -2,11 +2,20 @@
 #include "Moose.h"
 #include "MooseSystem.h"
 
+template<>
+InputParameters validParams<MooseObject>()
+{
+  InputParameters params;
+  params.addPrivateParam<THREAD_ID>("_tid");
+  return params;
+}
+
+
 MooseObject::MooseObject(std::string name, MooseSystem & moose_system, InputParameters parameters) :
   _name(name),
   _moose_system(moose_system),
   _parameters(parameters),
-  _tid(Moose::current_thread_id)
+  _tid(parameters.get<THREAD_ID>("_tid"))
 {
 }
 

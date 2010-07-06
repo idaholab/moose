@@ -166,13 +166,6 @@ namespace Moose
    * Global Variables - yeah I know...
    *******************/
 
-
-  /**
-   * Current thread id... this is used by serial processes to set stuff up.
-   * This is NOT valid inside of a thread!
-   */
-  extern THREAD_ID current_thread_id;
-
   /**
    * THE Executioner object that will be used.
    */

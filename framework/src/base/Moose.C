@@ -200,8 +200,6 @@ Moose::setSolverDefaults(EquationSystems * es,
 /******************
  * Global Variables
  * ****************/
-THREAD_ID Moose::current_thread_id = 0;
-
 //EquationSystems * Moose::equation_system;
 
 Executioner * Moose::executioner;

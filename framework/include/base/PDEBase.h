@@ -9,6 +9,7 @@
 
 #include "quadrature_gauss.h"
 
+class PDEBase;
 class MooseSystem;
 class QuadraturePointData;
 

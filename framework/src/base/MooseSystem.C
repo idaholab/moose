@@ -513,7 +513,7 @@ void MooseSystem::addKernel(std::string kernel_name,
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    Moose::current_thread_id = tid;
+    parameters.set<THREAD_ID>("_tid") = tid;
 
     if (!parameters.isParamValid("block"))
       _kernels.addKernel(tid, KernelFactory::instance()->create(kernel_name, name, *this, parameters));
@@ -534,7 +534,7 @@ MooseSystem::addBC(std::string bc_name,
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    Moose::current_thread_id = tid;
+    parameters.set<THREAD_ID>("_tid") = tid;
     std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
     for (unsigned int i=0; i<boundaries.size(); ++i)
@@ -566,7 +566,7 @@ MooseSystem::addAuxKernel(std::string aux_name,
 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    Moose::current_thread_id = tid;
+    parameters.set<THREAD_ID>("_tid") = tid;
 
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
     std::vector<std::string> coupled_to = aux->coupledTo();
@@ -627,7 +627,7 @@ MooseSystem::addAuxBC(std::string aux_name,
 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    Moose::current_thread_id = tid;
+    parameters.set<THREAD_ID>("_tid") = tid;
     std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
@@ -645,7 +645,7 @@ MooseSystem::addMaterial(std::string mat_name,
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    Moose::current_thread_id = tid;
+    parameters.set<THREAD_ID>("_tid") = tid;
     std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
 
     // We need to set 'variable' in order to initialize other member data, since Material inherits from PDEBase
@@ -672,7 +672,7 @@ MooseSystem::addStabilizer(std::string stabilizer_name,
 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    Moose::current_thread_id = tid;
+    parameters.set<THREAD_ID>("_tid") = tid;
 
     stabilizer = StabilizerFactory::instance()->create(stabilizer_name, name, *this, parameters);
 
@@ -691,7 +691,7 @@ MooseSystem::addInitialCondition(std::string ic_name,
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    Moose::current_thread_id = tid;
+    parameters.set<THREAD_ID>("_tid") = tid;
 
     // The var_name needs to be added to the parameters object for any InitialCondition derived objects
     parameters.set<std::string>("var_name") = var_name;

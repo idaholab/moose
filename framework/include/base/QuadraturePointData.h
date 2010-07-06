@@ -10,6 +10,7 @@ class MooseSystem;
 class QGauss;
 class DofMap;
 class FEBase;
+class Material;
 template<class T> class NumericVector;
 template<class T> class DenseVector;
 template<class T> class DenseSubVector;
