@@ -200,8 +200,6 @@ namespace Moose
     CYLINDRICAL
   };
 
-  extern GeomType geom_type;
-
   /**
    * If this is true than the finite element objects will only get reinited _once_!
    *

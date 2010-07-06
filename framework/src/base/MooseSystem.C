@@ -32,6 +32,7 @@ MooseSystem::MooseSystem()
    _es(NULL),
    _system(NULL),
    _aux_system(NULL),
+   _geom_type(Moose::XYZ),
    _mesh(NULL),
    _delete_mesh(true),
    _dim(0),

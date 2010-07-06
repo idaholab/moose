@@ -299,6 +299,8 @@ private:
   EquationSystems * _es;
   TransientNonlinearImplicitSystem * _system;
   TransientExplicitSystem * _aux_system;
+
+  Moose::GeomType _geom_type;
   Mesh * _mesh;
   bool _delete_mesh;                            // true if we own the mesh and we are responsible for its destruction
   unsigned int _dim;

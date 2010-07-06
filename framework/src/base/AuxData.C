@@ -158,12 +158,12 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& /*soln*/, const
   //Just use any old JxW... they are all actually the same
   const std::vector<Real> & jxw = *(_element_data._JxW[tid].begin()->second);
 
-  if (Moose::geom_type == Moose::XYZ)
+  if (_moose_system._geom_type == Moose::XYZ)
   {
     for (unsigned int qp = 0; qp < _element_data._qrule[tid]->n_points(); qp++)
       area += jxw[qp];
   }
-  else if (Moose::geom_type == Moose::CYLINDRICAL)
+  else if (_moose_system._geom_type == Moose::CYLINDRICAL)
   {
     const std::vector<Point> & q_point = *(_element_data._q_point[tid].begin()->second);
     for (unsigned int qp = 0; qp < _element_data._qrule[tid]->n_points(); qp++)
@@ -266,12 +266,12 @@ AuxData::integrateValueAux(const MooseArray<Real> & vals, const std::vector<Real
 {
   Real value = 0;
 
-  if( Moose::geom_type == Moose::XYZ)
+  if (_moose_system._geom_type == Moose::XYZ)
   {
     for (unsigned int qp=0; qp<_element_data._qrule[0]->n_points(); qp++)
       value += vals[qp]*JxW[qp];
   }
-  else if( Moose::geom_type == Moose::CYLINDRICAL )
+  else if (_moose_system._geom_type == Moose::CYLINDRICAL)
   {
     for (unsigned int qp=0; qp<_element_data._qrule[0]->n_points(); qp++)
       value += q_point[qp](0)*vals[qp]*JxW[qp];
@@ -287,12 +287,12 @@ AuxData::integrateGradientAux(const MooseArray<RealGradient> & grads, const std:
 {
   RealGradient value = 0;
 
-  if( Moose::geom_type == Moose::XYZ )
+  if (_moose_system._geom_type == Moose::XYZ)
   {
     for (unsigned int qp=0; qp<_element_data._qrule[0]->n_points(); qp++)
       value += grads[qp]*JxW[qp];
   }
-  else if( Moose::geom_type == Moose::CYLINDRICAL )
+  else if (_moose_system._geom_type == Moose::CYLINDRICAL)
   {
     for (unsigned int qp=0; qp<_element_data._qrule[0]->n_points(); qp++)
       value += q_point[qp](0)*grads[qp]*JxW[qp];

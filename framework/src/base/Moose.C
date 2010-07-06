@@ -211,9 +211,6 @@ ErrorVector * Moose::error = NULL;
 
 Executioner * Moose::executioner;
 
-enum Moose::GeomType;
-Moose::GeomType Moose::geom_type = Moose::XYZ;
-
 bool Moose::no_fe_reinit = false;
 
 std::string Moose::execution_type;
