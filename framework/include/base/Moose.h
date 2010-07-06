@@ -177,15 +177,6 @@ namespace Moose
     CYLINDRICAL
   };
 
-  /**
-   * If this is true than the finite element objects will only get reinited _once_!
-   *
-   * This is only valid if you are using a perfectly regular grid!
-   *
-   * This can provide a huge speedup... but must be used with care.
-   */
-  extern bool no_fe_reinit;
-
   extern std::string execution_type;
 
   extern std::string file_base;

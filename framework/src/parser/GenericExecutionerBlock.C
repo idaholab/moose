@@ -81,7 +81,7 @@ GenericExecutionerBlock::execute()
   es->parameters.set<Real> ("nonlinear solver relative step tolerance")
     = getParamValue<Real>("nl_rel_step_tol");
 
-  Moose::no_fe_reinit = getParamValue<bool>("no_fe_reinit");
+  _moose_system._no_fe_reinit = getParamValue<bool>("no_fe_reinit");
 
   if (!getParamValue<bool>("perf_log"))
     Moose::perf_log.disable_logging();

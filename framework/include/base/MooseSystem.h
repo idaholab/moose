@@ -348,6 +348,10 @@ private:
   /**
    * Whether or not we need to recompute the shape functions for each element.  Should only be true if EVERY element is exactly
    * the same shape.
+   *
+   * If this is true than the finite element objects will only get reinited _once_!
+   * This is only valid if you are using a perfectly regular grid!
+   * This can provide a huge speedup... but must be used with care.
    */
   bool _no_fe_reinit;
 
@@ -456,6 +460,7 @@ protected:
   friend class ComputeInternalJacobians;
   friend class ComputeInternalJacobianBlocks;
   friend class ComputeInternalResiduals;
+  friend class GenericExecutionerBlock;
 
   friend class PDEBase;
   friend class Kernel;
