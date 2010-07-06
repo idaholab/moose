@@ -50,9 +50,9 @@ template<typename T>
 MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
-  std::map<std::string, T>::iterator it = _material_data._props_old.find(name);
+  Material::const_iterator it = _material_data._props_old.find(name);
 
-  if(it != _material_data._props_old.end())
+  if (it != _material_data._props_old.end())
   {
     mooseAssert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL, "");
     return *dynamic_cast<MaterialProperty<T>*>(it->second);
@@ -65,9 +65,9 @@ template<typename T>
 MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
-  std::map<std::string, T>::iterator it = _material_data._props_older.find(name);
+  Material::const_iterator it = _material_data._props_older.find(name);
 
-  if(it != _material_data._props_older.end())
+  if (it != _material_data._props_older.end())
   {
     mooseAssert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL, "");
     return *dynamic_cast<MaterialProperty<T>*>(it->second);

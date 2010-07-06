@@ -59,19 +59,19 @@ public:
   /**
    * Retrieve the Constant Real valued property named "name"
    */
-  template<class T>
+  template<typename T>
   MaterialProperty<T> & getProperty(const std::string & prop_name);
 
   /**
    * Retrieve the Constant Real valued property named "name"
    */
-  template<class T>
+  template<typename T>
   MaterialProperty<T> & getPropertyOld(const std::string & prop_name);
 
   /**
    * Retrieve the Constant Real valued property named "name"
    */
-  template<class T>
+  template<typename T>
   MaterialProperty<T> & getPropertyOlder(const std::string & prop_name);
 
 
@@ -256,7 +256,7 @@ Material::have_property_older (const std::string& prop_name) const
   return false;
 }
 
-template<class T>
+template<typename T>
 MaterialProperty<T> &
 Material::getProperty(const std::string & prop_name)
 {
@@ -271,11 +271,11 @@ Material::getProperty(const std::string & prop_name)
   mooseError("Material _" + name() + "_ has no property named: " + prop_name + "\n\n");
 }
 
-template<class T>
+template<typename T>
 MaterialProperty<T> &
 Material::getPropertyOld(const std::string & prop_name)
 {
-  std::map<std::string, T>::iterator it = _props_old.find(prop_name);
+  Material::const_iterator it = _props_old.find(prop_name);
 
   if(it != _props_old.end())
   {
@@ -286,11 +286,11 @@ Material::getPropertyOld(const std::string & prop_name)
   mooseError("Material _" + name() + "_ has no property named: " + prop_name + "\n\n");
 }
 
-template<class T>
+template<typename T>
 MaterialProperty<T> &
 Material::getPropertyOlder(const std::string & prop_name)
 {
-  std::map<std::string, T>::iterator it = _props_older.find(prop_name);
+  Material::const_iterator it = _props_older.find(prop_name);
 
   if(it != _props_older.end())
   {
