@@ -268,7 +268,7 @@ public:
    */
 
   /**
-   * Initialize adaptivitty
+   * Initialize adaptivity
    *
    * @param max_r_steps - Maximum r steps to take
    * @param inital_steps - The number of adaptivity steps to perform using the initial conditions
@@ -437,6 +437,11 @@ public:
    * Scaling factors for each variable.
    */
   std::vector<Real> _scaling_factor;
+
+  bool _auto_scaling;
+
+  std::vector<Real> _manual_scaling;
+
 
   bool _print_mesh_changed;
   

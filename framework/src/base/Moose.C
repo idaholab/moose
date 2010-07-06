@@ -211,9 +211,6 @@ bool Moose::gmv_output = false;
 bool Moose::tecplot_output = false;
 bool Moose::print_out_info = false;
 bool Moose::output_initial = false;
-bool Moose::auto_scaling = false;
-std::vector<Real> Moose::manual_scaling;
 
 // This variable will be static in the new Moose System object - only need one per application
 GetPot *Moose::command_line;
-

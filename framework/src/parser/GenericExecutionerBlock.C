@@ -86,7 +86,7 @@ GenericExecutionerBlock::execute()
   if (!getParamValue<bool>("perf_log"))
     Moose::perf_log.disable_logging();
 
-  Moose::auto_scaling = getParamValue<bool>("auto_scaling");
+  _moose_system._auto_scaling = getParamValue<bool>("auto_scaling");
 
 
 #ifdef LIBMESH_HAVE_PETSC

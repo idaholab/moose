@@ -41,7 +41,7 @@ VariablesBlock::execute()
 
   TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
 
-  Moose::manual_scaling.reserve(n_activeChildren());
+  _moose_system._manual_scaling.reserve(n_activeChildren());
 
   // Add variable blocks from the children nodes
   visitChildren();

@@ -106,9 +106,9 @@ Executioner::setScaling()
   std::cout<<"  True Initial Nonlinear Residual: "<<_initial_residual_norm<<std::endl;
   
   // Set the scaling to manual scaling
-  _moose_system.setVarScaling(Moose::manual_scaling);
+  _moose_system.setVarScaling(_moose_system._manual_scaling);
 
-  if(Moose::auto_scaling)
+  if (_moose_system._auto_scaling)
   {
     std::vector<Real> scaling;
       

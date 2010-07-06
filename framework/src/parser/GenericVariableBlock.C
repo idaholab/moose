@@ -68,9 +68,9 @@ GenericVariableBlock::execute()
   {
     // Manual Scaling
     unsigned int var_number= system->variable_number(var_name);
-    Moose::manual_scaling.push_back(getParamValue<Real>("scaling"));
+    _moose_system._manual_scaling.push_back(getParamValue<Real>("scaling"));
     // This variable number should go in the same vector position as the manual scaling vector
-    libmesh_assert(var_number == Moose::manual_scaling.size()-1);
+    libmesh_assert(var_number == _moose_system._manual_scaling.size()-1);
   }
 
   // retrieve initial conditions from exodus file

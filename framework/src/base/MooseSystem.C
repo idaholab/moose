@@ -64,6 +64,7 @@ MooseSystem::MooseSystem()
    _t_scheme(0),
    _n_of_rk_stages(0),
    _active_local_elem_range(NULL),
+   _auto_scaling(false),
    _print_mesh_changed(false)
 {
   sizeEverything();
@@ -103,6 +104,7 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _t_scheme(0),
     _n_of_rk_stages(0),
     _active_local_elem_range(NULL),
+    _auto_scaling(false),
     _print_mesh_changed(false)
 {
   sizeEverything();

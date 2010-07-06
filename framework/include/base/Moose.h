@@ -177,8 +177,6 @@ namespace Moose
     CYLINDRICAL
   };
 
-  extern std::string execution_type;
-
   extern std::string file_base;
   extern int interval;
   extern bool exodus_output;
@@ -186,9 +184,6 @@ namespace Moose
   extern bool tecplot_output;
   extern bool print_out_info;
   extern bool output_initial;
-  extern bool auto_scaling;
-
-  extern std::vector<Real> manual_scaling;
 
   extern GetPot *command_line;
 }
