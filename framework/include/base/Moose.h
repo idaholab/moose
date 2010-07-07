@@ -45,76 +45,82 @@ typedef unsigned int THREAD_ID;
 /**
  * These are here because of a problem with Parameter::print() for std::vectors
  */
-template<>
-inline
-void InputParameters::Parameter<std::vector<Real> >::print (std::ostream& os) const
+namespace libMesh
 {
-  for (unsigned int i=0; i<_value.size(); i++)
-    os << _value[i] << " ";
-}
 
-template<>
-inline
-void InputParameters::Parameter<std::vector<unsigned int> >::print (std::ostream& os) const
-{
-  for (unsigned int i=0; i<_value.size(); i++)
-    os << _value[i] << " ";
-}
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<Real> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
 
-template<>
-inline
-void InputParameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostream& os) const
-{
-  for (unsigned int i=0; i<_value.size(); i++)
-    for (unsigned int j=0; i<_value[i].size(); j++)
-      os << _value[i][j] << " ";
-}
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<unsigned int> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
 
-template<>
-inline
-void InputParameters::Parameter<std::vector<int> >::print (std::ostream& os) const
-{
-  for (unsigned int i=0; i<_value.size(); i++)
-    os << _value[i] << " ";
-}
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      for (unsigned int j=0; i<_value[i].size(); j++)
+        os << _value[i][j] << " ";
+  }
 
-template<>
-inline
-void InputParameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream& os) const
-{
-  for (unsigned int i=0; i<_value[i].size(); i++)
-    for (unsigned int j=0; i<_value[j].size(); j++)
-      os << _value[i][j] << " ";
-}
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<int> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
+
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value[i].size(); i++)
+      for (unsigned int j=0; i<_value[j].size(); j++)
+        os << _value[i][j] << " ";
+  }
  
-template<>
-inline
-void InputParameters::Parameter<std::vector<std::string> >::print (std::ostream& os) const
-{
-  for (unsigned int i=0; i<_value.size(); i++)
-    os << _value[i] << " ";
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<std::string> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
+
+  template<>
+  inline
+  void InputParameters::Parameter<GetPot>::print (std::ostream& /*os*/) const
+  {
+  }
+
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<float> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
+
+  template<>
+  inline
+  void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (std::ostream& /*os*/) const
+  {
+  }
+
 }
 
-template<>
-inline
-void InputParameters::Parameter<GetPot>::print (std::ostream& /*os*/) const
-{
-}
-
-template<>
-inline
-void InputParameters::Parameter<std::vector<float> >::print (std::ostream& os) const
-{
-  for (unsigned int i=0; i<_value.size(); i++)
-    os << _value[i] << " ";
-}
-
-template<>
-inline
-void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (std::ostream& /*os*/) const
-{
-}
-
+  
 /**
  * A function to call when you need the whole program to die a spit out a message
  */
