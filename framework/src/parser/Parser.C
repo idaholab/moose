@@ -333,6 +333,14 @@ Parser::getMooseSystem()
   return _moose_system;
 }
 
+Executioner &
+Parser::getExecutioner()
+{
+  if (_executioner == NULL)
+    mooseError("Executioner not available.");
+  return *_executioner;
+}
+
 const GetPot *
 Parser::getPotHandle() const
 {

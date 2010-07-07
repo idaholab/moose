@@ -197,9 +197,6 @@ Moose::setSolverDefaults(MooseSystem &moose_system)
 /******************
  * Global Variables
  * ****************/
-//EquationSystems * Moose::equation_system;
-
-Executioner * Moose::executioner;
 
 // This variable will be static in the new Moose System object - only need one per application
 GetPot *Moose::command_line;

@@ -50,10 +50,7 @@ int main (int argc, char** argv)
   p.parse(input_filename);
   p.execute();
 
-  if(!Moose::executioner)
-    mooseError("Executioner not supplied!");
-
-  // Run the executioner once the problem has been setup by the parser
-  Moose::executioner->setup();
-  Moose::executioner->execute();
+  Executioner &e = p.getExecutioner();
+  e.setup();
+  e.execute();
 }

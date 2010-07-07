@@ -163,11 +163,6 @@ namespace Moose
    * Global Variables - yeah I know...
    *******************/
 
-  /**
-   * THE Executioner object that will be used.
-   */
-  extern Executioner * executioner;
-
   enum GeomType
   {
     XYZ,
