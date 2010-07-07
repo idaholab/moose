@@ -783,8 +783,7 @@ void
 MooseSystem::checkSystemsIntegrity()
 {
   parallel_only();
-  std::set<subdomain_id_type> element_subdomains, input_subdomains, difference;
-  bool global_kernels_exist = false;
+  std::set<subdomain_id_type> element_subdomains;
 
   // Build a set of active subdomains from the mesh in MOOSE
   const MeshBase::element_iterator el_end = _mesh->elements_end();
@@ -808,18 +807,49 @@ MooseSystem::checkSystemsIntegrity()
     }
   }
 
-  // Check kernels
-  _kernels.updateActiveKernels(0);
-  global_kernels_exist = _kernels.activeKernelBlocks(input_subdomains);
-  std::set_difference (element_subdomains.begin(), element_subdomains.end(),
+  // Check kernel coverage of subdomains (blocks) in your mesh
+  {
+    std::set<subdomain_id_type> input_subdomains;
+    std::set<unsigned short> difference;
+    bool global_kernels_exist = false;
+    
+    
+    _kernels.updateActiveKernels(0);
+    global_kernels_exist = _kernels.activeKernelBlocks(input_subdomains);
+    std::set_difference (element_subdomains.begin(), element_subdomains.end(),
                        input_subdomains.begin(), input_subdomains.end(),
                        std::inserter(difference, difference.end()));
 
-  if (!global_kernels_exist && !difference.empty())
-    mooseError("Each subdomain must contain at least one Kernel.");
+    if (!global_kernels_exist && !difference.empty())
+    {
+      std::stringstream missing_block_ids;
 
-  // Check BCs
-  // TODO: Check Boundaries
+      std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned short>( missing_block_ids, " "));
+      
+      mooseError("Each subdomain must contain at least one Kernel.\nThe following blocks lack an active kernel "
+                 + missing_block_ids.str());
+    }
+  }
+
+  // Check that BCs used in your simulation exist in your mesh
+  {
+    std::set<short> input_bcs, difference;
+    const std::set<short> & simulation_bcs = _mesh->boundary_info->get_boundary_ids();
+
+    _bcs.activeBoundaries(input_bcs);  // get the boundaries from the simulation (input file)
+    std::set_difference (input_bcs.begin(), input_bcs.end(),
+                         simulation_bcs.begin(), simulation_bcs.end(),
+                         std::inserter(difference, difference.end()));
+    if (!difference.empty())
+    {
+      std::stringstream extra_boundary_ids;
+
+      std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned short>( extra_boundary_ids, " "));
+      
+      mooseError("The following boundary ids from your input file do not exist in the input mesh "
+                 + extra_boundary_ids.str());
+    }
+  }
 }
 
 void

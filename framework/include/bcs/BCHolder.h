@@ -27,7 +27,7 @@ public:
   void addBC(THREAD_ID tid, unsigned int boundary_id, BoundaryCondition *bc);
   void addNodalBC(THREAD_ID tid, unsigned int boundary_id, BoundaryCondition *bc);
 
-  void activeBoundaries(std::set<subdomain_id_type> & set_buffer) const;
+  void activeBoundaries(std::set<short> & set_buffer) const;
 
 protected:
   std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > _active_bcs;

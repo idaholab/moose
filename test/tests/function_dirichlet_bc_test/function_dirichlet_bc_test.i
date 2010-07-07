@@ -36,7 +36,7 @@
   [./all]
     type = FunctionDirichletBC
     variable = u
-    boundary = '1 2 3 4'
+    boundary = '1 2'
     function = sin(alpha*pi*x)
     vars = 'alpha'
     vals = '16'

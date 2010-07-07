@@ -89,20 +89,13 @@ BCHolder::activeNodalBCsEnd(THREAD_ID tid, unsigned int boundary_id)
 }
 
 void
-BCHolder::activeBoundaries(std::set<subdomain_id_type> & set_buffer) const
+BCHolder::activeBoundaries(std::set<short> & set_buffer) const
 {
-  std::map<unsigned int, std::vector<BoundaryCondition *> >::const_iterator curr, end;
-  end = _active_bcs[0].end();
+  std::map<unsigned int, std::vector<BoundaryCondition *> >::const_iterator curr;
 
-  try
-  {
-    for (curr = _active_bcs[0].begin(); curr != end; ++curr)
-    {
-      set_buffer.insert(subdomain_id_type(curr->first));
-    }
-  }
-  catch (std::exception & /*e*/)
-  {
-    mooseError("Invalid block specified in input file");
-  }
+  for (curr = _active_bcs[0].begin(); curr != _active_bcs[0].end(); ++curr)
+      set_buffer.insert(curr->first);
+
+  for (curr = _active_nodal_bcs[0].begin(); curr != _active_nodal_bcs[0].end(); ++curr)
+      set_buffer.insert(curr->first);
 }
