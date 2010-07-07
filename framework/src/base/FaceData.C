@@ -6,6 +6,7 @@
 //libmesh includes
 #include "fe_base.h"
 #include "numeric_vector.h"
+#include "quadrature_gauss.h"
 
 FaceData::FaceData(MooseSystem & moose_system) :
   QuadraturePointData(moose_system),

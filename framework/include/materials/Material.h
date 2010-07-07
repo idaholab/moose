@@ -8,6 +8,9 @@
 #include "ColumnMajorMatrix.h"
 #include "MaterialProperty.h"
 
+// libMesh includes
+#include "quadrature_gauss.h"
+
 //forward declarations
 class Material;
 class MooseSystem;

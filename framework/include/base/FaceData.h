@@ -8,7 +8,10 @@
 //Forward Declarations
 class MooseSystem;
 
-template <class T> class NumericVector;
+namespace libMesh
+{
+  template <class T> class NumericVector;
+}
 
 class FaceData : public QuadraturePointData
 {

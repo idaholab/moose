@@ -1,5 +1,7 @@
 #include "ConvectionDiffusionSUPG.h"
 
+#include "quadrature_gauss.h"
+
 template<>
 InputParameters validParams<ConvectionDiffusionSUPG>()
 {

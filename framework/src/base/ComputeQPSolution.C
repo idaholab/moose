@@ -1,5 +1,7 @@
 #include "ComputeQPSolution.h"
 
+#include "numeric_vector.h"
+
 void computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::vector<unsigned int> & dof_indices, const unsigned int qp, const std::vector<std::vector<Real> > & phi)
 {
   u=0;

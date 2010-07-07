@@ -10,12 +10,20 @@
 #include "PDEBase.h"
 #include "MaterialPropertyInterface.h"
 
+// libmesh includes
+#include "quadrature_gauss.h"
+
 //Forward Declarations
-class Elem;
 class Material;
 class Kernel;
 class MooseSystem;
 class ElementData;
+
+namespace libMesh
+{
+  class Elem;
+}
+
 
 template<>
 InputParameters validParams<Kernel>();

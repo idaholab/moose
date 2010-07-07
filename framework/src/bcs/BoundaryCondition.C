@@ -7,6 +7,7 @@
 //libMesh includes
 #include "numeric_vector.h"
 #include "dof_map.h"
+#include "quadrature_gauss.h"
 
 template<>
 InputParameters validParams<BoundaryCondition>()

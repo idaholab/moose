@@ -26,10 +26,14 @@
 #include "error_vector.h"
 
 //Forward Declarations
-class EquationSystems;
-class MeshBase;
 class Material;
-template<class T> class NumericVector;
+
+namespace libMesh
+{
+  class EquationSystems;
+  class MeshBase;
+  template<class T> class NumericVector;
+}
 
 /**
  * This class represents one full coupled system of nonlinear equations including any

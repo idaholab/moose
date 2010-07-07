@@ -13,8 +13,11 @@
 #include "nonlinear_implicit_system.h"
 
 //Forward declarations
-class EquationSystems;
-class MeshBase;
+namespace libMesh
+{
+  class EquationSystems;
+  class MeshBase;
+}
 
 /**
  * Implements a segregated solve preconditioner.

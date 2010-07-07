@@ -1,6 +1,8 @@
 #include "PDEBase.h"
 #include "MooseSystem.h"
 
+#include "quadrature_gauss.h"
+
 template<>
 InputParameters validParams<PDEBase>()
 {

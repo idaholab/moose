@@ -1,5 +1,7 @@
 #include "SUPGBase.h"
 
+#include "quadrature_gauss.h"
+
 template<>
 InputParameters validParams<SUPGBase>()
 {

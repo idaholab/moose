@@ -13,7 +13,6 @@ class MooseObject;
 template<>
 InputParameters validParams<MooseObject>();
 
-
 /**
  * Base class for MOOSE objects
  */

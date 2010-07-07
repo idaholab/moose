@@ -1,8 +1,6 @@
 #ifndef BOUNDARYCONDITION_H
 #define BOUNDARYCONDITION_H
 
-#include "dense_matrix.h"
-
 // local includes
 #include "Moose.h"
 #include "ValidParams.h"
@@ -16,6 +14,12 @@ class MooseSystem;
 class ElementData;
 class FaceData;
 class AuxData;
+
+namespace libMesh
+{
+  class Elem;
+  template<class T> class DenseMatrix;
+}
 
 template<>
 InputParameters validParams<BoundaryCondition>();

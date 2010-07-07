@@ -6,18 +6,19 @@
 #include "MooseArray.h"
 #include "QuadraturePointData.h"
 
-//libMesh includes
-#include "transient_system.h"
-
 //Forward Declarations
 class MooseSystem;
-class QGauss;
-class DofMap;
-class FEBase;
-template<class T> class NumericVector;
-template<class T> class DenseVector;
-template<class T> class DenseSubVector;
-template<class T> class DenseMatrix;
+
+namespace libMesh
+{
+  class QGauss;
+  class DofMap;
+  class FEBase;
+  template<class T> class NumericVector;
+  template<class T> class DenseVector;
+  template<class T> class DenseSubVector;
+  template<class T> class DenseMatrix;
+}
 
 /**
  * One stop shop for all the data a Kernel class needs.
@@ -38,7 +39,6 @@ public:
   void initKernels();
 
   void reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke);
-
   
   /**
    * The MooseSystem this Kernel is associated with.

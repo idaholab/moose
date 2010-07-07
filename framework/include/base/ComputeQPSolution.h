@@ -6,11 +6,13 @@
 #include <vector>
 
 #include "libmesh_common.h"
-#include "vector_value.h"
-#include "tensor_value.h"
-#include "numeric_vector.h"
 
-template <class T> class NumericVector;
+// Forward Declarations
+namespace libMesh
+{
+  template <class T> class NumericVector;
+}
+
 
 /**
    * Computes the value of soln at the current quadrature point.

@@ -20,13 +20,17 @@
 #include "print_trace.h"
 
 //Forward Declarations
-class Mesh;
-class EquationSystems;
-class ExodusII_IO;
-class ErrorEstimator;
-class ErrorVector;
-class Executioner;
 class MooseSystem;
+class Executioner;
+
+namespace libMesh
+{  
+  class Mesh;
+  class EquationSystems;
+  class ExodusII_IO;
+  class ErrorEstimator;
+  class ErrorVector;
+}
 
 #define MAX_VARS 1000
 

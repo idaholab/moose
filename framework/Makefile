@@ -10,7 +10,7 @@ meshdir := $(LIBMESH_DIR)
 # link with the library.
 include $(meshdir)/Make.common
 
-libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/stabilizers -Iinclude/executioners -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/utils -Iinclude/utils/fparser -Iinclude/materials -Iinclude/parser
+libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/postprocessors -Iinclude/stabilizers -Iinclude/executioners -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/utils -Iinclude/utils/fparser -Iinclude/materials -Iinclude/parser
 
 ###############################################################################
 # File management.  This is where the source, header, and object files are

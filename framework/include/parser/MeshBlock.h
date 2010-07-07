@@ -6,8 +6,12 @@
 //Forward Declarations
 class GenericVariableBlock;
 class MeshBlock;
-class MeshRefinement;
-class Mesh;
+
+namespace libMesh
+{
+  class MeshRefinement;
+  class Mesh;
+}
 
 template<>
 InputParameters validParams<MeshBlock>();

@@ -7,11 +7,15 @@
 #include "MooseArray.h"
 #include "MooseObject.h"
 
-#include "quadrature_gauss.h"
-
 class PDEBase;
 class MooseSystem;
 class QuadraturePointData;
+
+namespace libMesh
+{
+  class Mesh;
+  class QGauss;
+}
 
 template<>
 InputParameters validParams<PDEBase>();
@@ -81,7 +85,7 @@ protected:
   /**
    * The mesh.
    */
-  Mesh & _mesh;
+  libMesh::Mesh & _mesh;
 
   /**
    * Current element
