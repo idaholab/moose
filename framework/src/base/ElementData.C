@@ -197,11 +197,9 @@ ElementData::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   _moose_system._grad_zero[tid].resize(num_q_points,0);
   _moose_system._second_zero[tid].resize(num_q_points,0);
 
-  std::vector<unsigned int>::iterator var_num_it = _var_nums[0].begin();
-  std::vector<unsigned int>::iterator var_num_end = _var_nums[0].end();
-  for(;var_num_it != var_num_end; ++var_num_it)
+  for(std::set<unsigned int>::iterator it = _var_nums[0].begin(); it != _var_nums[0].end(); ++it)
   {
-    unsigned int var_num = *var_num_it;
+    unsigned int var_num = *it;
     FEType fe_type = _moose_system._dof_map->variable_type(var_num);
     // Copy phi to the test functions.
     const std::vector<std::vector<Real> > & static_phi = *_phi[tid][fe_type];

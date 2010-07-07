@@ -36,13 +36,13 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
     if (_moose_system.hasVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = _moose_system.getVariableNumber(coupled_var_name);
-      add_nonexistent(coupled_var_num, _data._var_nums[bid]);
+      _data._var_nums[bid].insert(coupled_var_num);
     }
     //Look for it in the Aux system
     else if (_moose_system.hasAuxVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = _moose_system.getAuxVariableNumber(coupled_var_name);
-      add_nonexistent(coupled_var_num, _data._aux_var_nums[bid]);
+      _data._aux_var_nums[bid].insert(coupled_var_num);
     }
     else
       mooseError("Coupled variable '" + coupled_var_name + "' not found.");

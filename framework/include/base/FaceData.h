@@ -55,7 +55,7 @@ public:
    * Map to vector of variable numbers that need to be evaluated
    * at the nodes on that boundary
    */
-  std::map<unsigned int, std::vector<unsigned int> > _boundary_to_var_nums_nodal;
+  std::map<unsigned int, std::set<unsigned int> > _boundary_to_var_nums_nodal;
 
   /**
    * Holds the current dof numbers for each variable for nodal bcs

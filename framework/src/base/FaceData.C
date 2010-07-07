@@ -41,7 +41,6 @@ void FaceData::init()
   //Resize data arrays
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    _boundary_to_var_nums_nodal[tid].resize(n_vars);
     _nodal_bc_var_dofs[tid].resize(n_vars);
     _var_vals_nodal[tid].resize(n_vars);
   }
@@ -92,12 +91,11 @@ void FaceData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const El
 
   QuadraturePointData::reinit(tid, boundary_id, soln, elem);
 
-  std::vector<unsigned int>::iterator var_nums_nodal_it = _boundary_to_var_nums_nodal[boundary_id].begin();
-  std::vector<unsigned int>::iterator var_nums_nodal_end = _boundary_to_var_nums_nodal[boundary_id].end();
-
-  for(;var_nums_nodal_it != var_nums_nodal_end; ++var_nums_nodal_it)
+  for (std::set<unsigned int>::iterator it = _boundary_to_var_nums_nodal[boundary_id].begin();
+       it != _boundary_to_var_nums_nodal[boundary_id].end();
+       ++it)
   {
-    unsigned int var_num = *var_nums_nodal_it;
+    unsigned int var_num = *it;
 
     std::vector<unsigned int> & var_dof_indices = _moose_system._var_dof_indices[tid][var_num];
 
@@ -115,17 +113,15 @@ void FaceData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const No
 //  Moose::perf_log.push("reinit(node)","BoundaryCondition");
 
   _current_node[tid] = &node;
-
   _current_residual[tid] = &residual;
-
-  std::vector<unsigned int>::iterator var_nums_nodal_it = _boundary_to_var_nums_nodal[boundary_id].begin();
-  std::vector<unsigned int>::iterator var_nums_nodal_end = _boundary_to_var_nums_nodal[boundary_id].end();
 
   unsigned int nonlinear_system_number = _moose_system.getNonlinearSystem()->number();
 
-  for(;var_nums_nodal_it != var_nums_nodal_end; ++var_nums_nodal_it)
+  for (std::set<unsigned int>::iterator it = _boundary_to_var_nums_nodal[boundary_id].begin();
+       it != _boundary_to_var_nums_nodal[boundary_id].end();
+       ++it)
   {
-    unsigned int var_num = *var_nums_nodal_it;
+    unsigned int var_num = *it;
 
     //The zero is the component... that works fine for lagrange FE types.
     unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);

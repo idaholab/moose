@@ -87,7 +87,7 @@ public:
    * In FaceData, the mapping goes from boundary id to list of variables active
    * on this boundary (not all variables are needed on all boundaries)
    */
-  std::map<unsigned int, std::vector<unsigned int> > _var_nums;
+  std::map<unsigned int, std::set<unsigned int> > _var_nums;
 
   /**
    * Value of the variables at the quadrature points.
@@ -129,7 +129,7 @@ public:
    * Map to vector of auxiliary variable numbers that need to be evaluated
    * at the quadrature points
    */
-  std::map<unsigned int, std::vector<unsigned int> > _aux_var_nums;
+  std::map<unsigned int, std::set<unsigned int> > _aux_var_nums;
 
   /**
    * Value of the variables at the quadrature points.

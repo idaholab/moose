@@ -92,8 +92,8 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
   // set the number of quadrature points
   _n_qpoints = _qrule[tid]->n_points();
 
-  std::vector<unsigned int>::iterator var_num_it = _var_nums[block_id].begin();
-  std::vector<unsigned int>::iterator var_num_end = _var_nums[block_id].end();
+  std::set<unsigned int>::iterator var_num_it = _var_nums[block_id].begin();
+  std::set<unsigned int>::iterator var_num_end = _var_nums[block_id].end();
 
 //  Moose::perf_log.push("reinit() - compute vals","Kernel");
 
@@ -158,12 +158,11 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
 //  Moose::perf_log.push("reinit() - compute aux vals","Kernel");
   const NumericVector<Number>& aux_soln = (*_moose_system.getAuxSystem()->current_local_solution);
 
-  std::vector<unsigned int>::iterator aux_var_num_it = _aux_var_nums[0].begin();
-  std::vector<unsigned int>::iterator aux_var_num_end = _aux_var_nums[0].end();
-
-  for(;aux_var_num_it != aux_var_num_end; ++aux_var_num_it)
+  for (std::set<unsigned int>::iterator it = _aux_var_nums[0].begin();
+      it != _aux_var_nums[0].end();
+      ++it)
   {
-    unsigned int var_num = *aux_var_num_it;
+    unsigned int var_num = *it;
 
     FEType fe_type = _moose_system._aux_dof_map->variable_type(var_num);
 

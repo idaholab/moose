@@ -102,9 +102,9 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Nod
   unsigned int qp = 0;
 
   //Non Aux vars first
-  for (unsigned int i = 0; i < _element_data._var_nums[0].size(); i++)
+  for (std::set<unsigned int>::iterator it = _element_data._var_nums[0].begin(); it != _element_data._var_nums[0].end(); ++it)
   {
-    unsigned int var_num = _element_data._var_nums[0][i];
+    unsigned int var_num = *it;
 
     //The zero is the component... that works fine for lagrange FE types.
     unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);
@@ -123,9 +123,9 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Nod
   }
 
   //Now Nodal Aux vars
-  for (unsigned int i = 0; i < _nodal_var_nums.size(); i++)
+  for (std::set<unsigned int>::iterator it = _nodal_var_nums.begin(); it != _nodal_var_nums.end(); ++it)
   {
-    unsigned int var_num = _nodal_var_nums[i];
+    unsigned int var_num = *it;
 
     //The zero is the component... that works fine for lagrange FE types.
     unsigned int dof_number = node.dof_number(aux_system_number, var_num, 0);
@@ -178,9 +178,9 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& /*soln*/, const
   //Compute the average value of each variable on the element
 
   //Non Aux vars first
-  for (unsigned int i = 0; i < _element_data._var_nums[0].size(); i++)
+  for (std::set<unsigned int>::iterator it = _element_data._var_nums[0].begin(); it != _element_data._var_nums[0].end(); ++it)
   {
-    unsigned int var_num = _element_data._var_nums[0][i];
+    unsigned int var_num = *it;
 
     FEType fe_type = _moose_system._dof_map->variable_type(var_num);
 
@@ -213,9 +213,9 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& /*soln*/, const
   }
 
   //Now Aux vars
-  for (unsigned int i = 0; i < _element_data._aux_var_nums[0].size(); i++)
+  for (std::set<unsigned int>::iterator it = _element_data._aux_var_nums[0].begin(); it != _element_data._aux_var_nums[0].end(); ++it)
   {
-    unsigned int var_num = _element_data._aux_var_nums[0][i];
+    unsigned int var_num = *it;
 
     FEType fe_type = _moose_system._aux_dof_map->variable_type(var_num);
 
@@ -248,9 +248,9 @@ void AuxData::reinit(THREAD_ID tid, const NumericVector<Number>& /*soln*/, const
   }
 
   //Grab the dof numbers for the element variables
-  for (unsigned int i = 0; i < _element_var_nums.size(); i++)
+  for (std::set<unsigned int>::iterator it = _element_var_nums.begin(); it != _element_var_nums.end(); ++it)
   {
-    unsigned int var_num = _element_var_nums[i];
+    unsigned int var_num = *it;
 
     //The zero is the component... that works fine for FIRST order monomials
     unsigned int dof_number = elem.dof_number(aux_system_number, var_num, 0);

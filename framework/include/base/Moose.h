@@ -172,16 +172,4 @@ namespace Moose
   extern GetPot *command_line;
 }
 
-/**
- * Add a non-existent value into std;:vector
- *
- * A helper function that searches the vector for value 'value' and adds it, if it does not exist yet
- */
-template<class T, class EqualityComparable>
-void add_nonexistent(const EqualityComparable& value, std::vector<T> &vec)
-{
-  if(std::find(vec.begin(), vec.end(), value) == vec.end())
-    vec.push_back(value);
-}
-
 #endif //MOOSE_H

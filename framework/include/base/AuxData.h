@@ -56,7 +56,7 @@ public:
   /**
    * Holds the variable numbers of the nodal aux vars.
    */
-  std::vector<unsigned int> _nodal_var_nums;
+  std::set<unsigned int> _nodal_var_nums;
 
   /**
    * Value of the variables at the nodes.
@@ -97,7 +97,7 @@ public:
   /**
    * Holds the variable numbers of the elemental aux vars.
    */
-  std::vector<unsigned int> _element_var_nums;
+  std::set<unsigned int> _element_var_nums;
 
   /**
    * Value of the variables at the elements.

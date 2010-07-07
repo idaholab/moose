@@ -512,7 +512,7 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, type, active_subdomains);
-  _element_data._var_nums[0].push_back(var_num);
+  _element_data._var_nums[0].insert(var_num);
   return var_num;
 }
 
@@ -520,7 +520,7 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const Order order, const FEFamily family, const std::set< subdomain_id_type > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, order, family, active_subdomains);
-  _element_data._var_nums[0].push_back(var_num);
+  _element_data._var_nums[0].insert(var_num);
   return var_num;
 }
 
