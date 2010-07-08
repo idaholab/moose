@@ -49,8 +49,13 @@ public:
   template<typename ExecutionerType> 
   void registerExecutioner(std::string name)
   {
-    _name_to_build_pointer[name]=&buildExecutioner<ExecutionerType>;
-    _name_to_params_pointer[name]=&validParams<ExecutionerType>;
+    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[name] = &buildExecutioner<ExecutionerType>;
+      _name_to_params_pointer[name] = &validParams<ExecutionerType>;
+    }
+    else
+      mooseError("Executioner '" + name + "' already registered.");
   }
 
   Executioner * build(std::string ex_name, std::string name, MooseSystem & moose_system, InputParameters parameters);

@@ -52,8 +52,13 @@ public:
   template<typename StabilizerType> 
   void registerStabilizer(std::string name)
   {
-    _name_to_build_pointer[name]=&buildStabilizer<StabilizerType>;
-    _name_to_params_pointer[name]=&validParams<StabilizerType>;
+    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[name] = &buildStabilizer<StabilizerType>;
+      _name_to_params_pointer[name] = &validParams<StabilizerType>;
+    }
+    else
+      mooseError("Stabilizer '" + name + "' already registered.");
   }
 
   Stabilizer * create(std::string stabilizer_name,

@@ -50,8 +50,13 @@ public:
   template<typename PostprocessorType> 
   void registerPostprocessor(std::string name)
   {
-    _name_to_build_pointer[name]=&buildPostprocessor<PostprocessorType>;
-    _name_to_params_pointer[name]=&validParams<PostprocessorType>;
+    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[name] = &buildPostprocessor<PostprocessorType>;
+      _name_to_params_pointer[name] = &validParams<PostprocessorType>;
+    }
+    else
+      mooseError("Postprocessor '" + name + "' already registered.");
   }
 
   Postprocessor *create(std::string postprocessor_name, std::string name, MooseSystem & moose_system, InputParameters parameters)

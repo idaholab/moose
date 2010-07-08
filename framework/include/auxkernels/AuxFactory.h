@@ -53,8 +53,13 @@ public:
   template<typename AuxType> 
   void registerAux(std::string name)
   {
-    _name_to_build_pointer[name]=&buildAux<AuxType>;
-    _name_to_params_pointer[name]=&validParams<AuxType>;
+    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[name] = &buildAux<AuxType>;
+      _name_to_params_pointer[name] = &validParams<AuxType>;
+    }
+    else
+      mooseError("AuxKernel '" + name + "' already registered.");
   }
 
   AuxKernel *create(std::string aux_name,

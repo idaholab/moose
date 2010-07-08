@@ -47,8 +47,13 @@ public:
   template<typename BCType> 
   void registerBC(std::string name)
   {
-    _name_to_build_pointer[name]=&buildBC<BCType>;
-    _name_to_params_pointer[name]=&validParams<BCType>;
+    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[name] = &buildBC<BCType>;
+      _name_to_params_pointer[name] = &validParams<BCType>;
+    }
+    else
+      mooseError("BoundaryCondition '" + name + "' already registered.");
   }
 
   BoundaryCondition *create(std::string bc_name,

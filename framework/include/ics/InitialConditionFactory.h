@@ -51,8 +51,13 @@ public:
   template<typename InitialConditionType> 
   void registerInitialCondition(std::string name)
   {
-    _name_to_build_pointer[name]=&buildInitialCondition<InitialConditionType>;
-    _name_to_params_pointer[name]=&validParams<InitialConditionType>;
+    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[name] = &buildInitialCondition<InitialConditionType>;
+      _name_to_params_pointer[name] = &validParams<InitialConditionType>;
+    }
+    else
+      mooseError("InitialCondition '" + name + "' already registered.");
   }
 
   InitialCondition *create(std::string ic_name, std::string name, MooseSystem & moose_system, InputParameters parameters)

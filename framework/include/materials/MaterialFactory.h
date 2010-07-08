@@ -47,8 +47,13 @@ public:
   template<typename MaterialType> 
   void registerMaterial(std::string name)
   {
-    _name_to_build_pointer[name]=&buildMaterial<MaterialType>;
-    _name_to_params_pointer[name]=&validParams<MaterialType>;
+    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[name] = &buildMaterial<MaterialType>;
+      _name_to_params_pointer[name] = &validParams<MaterialType>;
+    }
+    else
+      mooseError("Material '" + name + "' already registered.");
   }
 
   Material *create(std::string mat_name,

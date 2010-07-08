@@ -50,8 +50,13 @@ public:
   template<typename KernelType> 
   void registerKernel(std::string name)
   {
-    _name_to_build_pointer[name]=&buildKernel<KernelType>;
-    _name_to_params_pointer[name]=&validParams<KernelType>;
+    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[name] = &buildKernel<KernelType>;
+      _name_to_params_pointer[name] = &validParams<KernelType>;
+    }
+    else
+      mooseError("Kernel '" + name + "' already registered.");
   }
 
   Kernel *create(std::string kernel_name, std::string name, MooseSystem & moose_system, InputParameters parameters)
