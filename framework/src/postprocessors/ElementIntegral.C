@@ -27,6 +27,7 @@ ElementIntegral::execute()
 Real
 ElementIntegral::getValue()
 {
+  gatherSum(_integral_value);
   return _integral_value;
 }
 

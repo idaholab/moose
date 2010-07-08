@@ -34,6 +34,13 @@ public:
    * This will get called to actually grab the final value the postprocessor has calculated.
    */
   virtual Real getValue() = 0;
+
+  /**
+   * Gather the parallel sum of the variable passed in.
+   *
+   * After calling this, the variable that was passed in will hold the gathered value.
+   */
+  void gatherSum(Real value);
 };
  
 #endif
