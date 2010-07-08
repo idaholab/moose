@@ -1,7 +1,7 @@
 #ifndef POSTPROCESSOR_H
 #define POSTPROCESSOR_H
 
-#include "Kernel.h"
+#include "MooseObject.h"
 
 //Forward Declarations
 class Postprocessor;
@@ -9,9 +9,31 @@ class Postprocessor;
 template<>
 InputParameters validParams<Postprocessor>();
 
-class Postprocessor
+class Postprocessor : public MooseObject
 {
-  virtual void execute() = 0;  
+public:
+  Postprocessor(std::string name, MooseSystem &moose_system, InputParameters parameters);
+  
+  virtual ~Postprocessor(){ }
+  
+  /**
+   * Called before execute() is ever called so that data can be cleared.
+   */
+  virtual void initialize() = 0;
+  
+  /**
+   * This function will get called on each geometric object this postprocessor acts on
+   * (ie Elements, Sides or Nodes).  This will most likely get called multiple times
+   * before getValue() is called.
+   *
+   * Someone somewhere has to override this.
+   */
+  virtual void execute() = 0;
+
+  /**
+   * This will get called to actually grab the final value the postprocessor has calculated.
+   */
+  virtual Real getValue() = 0;
 };
  
 #endif

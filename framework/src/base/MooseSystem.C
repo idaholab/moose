@@ -9,6 +9,7 @@
 #include "MaterialFactory.h"
 #include "StabilizerFactory.h"
 #include "InitialConditionFactory.h"
+#include "PostprocessorFactory.h"
 #include "AuxKernel.h"
 #include "ParallelUniqueId.h"
 #include "ComputeQPSolution.h"
@@ -34,6 +35,7 @@ MooseSystem::MooseSystem()
    _face_data(*this),
    _aux_data(*this, _element_data),
    _material_data(*this),
+   _postprocessor_data(*this),
    _es(NULL),
    _system(NULL),
    _aux_system(NULL),
@@ -48,6 +50,7 @@ MooseSystem::MooseSystem()
    _materials(*this),
    _stabilizers(*this),
    _ics(*this),
+   _pps(*this),
    _no_fe_reinit(false),
    _preconditioner(NULL),
    _exreader(NULL),
@@ -83,6 +86,7 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _face_data(*this),
     _aux_data(*this, _element_data),
     _material_data(*this),
+    _postprocessor_data(*this),
     _es(NULL),
     _system(NULL),
     _aux_system(NULL),
@@ -96,6 +100,7 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _materials(*this),
     _stabilizers(*this),
     _ics(*this),
+    _pps(*this),
     _no_fe_reinit(false),
     _preconditioner(NULL),
     _exreader(NULL),
@@ -463,6 +468,12 @@ MooseSystem::doAdaptivityStep()
   _mesh_refinement->refine_and_coarsen_elements();
 }
 
+Real &
+MooseSystem::getPostprocessorValue(std::string name)
+{
+  return _postprocessor_data._values[name];
+}
+
 void
 MooseSystem::checkValid()
 {
@@ -506,6 +517,8 @@ void
 MooseSystem::solve()
 {
   _system->solve();
+  _system->update();
+  compute_postprocessors(*(_system->current_local_solution));
 }
 
 unsigned int
@@ -715,6 +728,19 @@ MooseSystem::addInitialCondition(std::string ic_name,
     parameters.set<std::string>("var_name") = var_name;
 
     _ics.addIC(tid, var_name, InitialConditionFactory::instance()->create(ic_name, name, *this, parameters));
+  }
+}
+
+void
+MooseSystem::addPostprocessor(std::string pp_name,
+                              std::string name,
+                              InputParameters parameters)
+{
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    _pps.addPostprocessor(tid, PostprocessorFactory::instance()->create(pp_name, name, *this, parameters));
   }
 }
 

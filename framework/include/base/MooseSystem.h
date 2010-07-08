@@ -16,6 +16,8 @@
 #include "FaceData.h"
 #include "AuxData.h"
 #include "MaterialData.h"
+#include "PostprocessorData.h"
+#include "PostprocessorHolder.h"
 
 //libmesh includes
 #include "transient_system.h"
@@ -170,6 +172,10 @@ public:
                            InputParameters parameters,
                            std::string var_name);
 
+  void addPostprocessor(std::string pp_name,
+                        std::string name,
+                        InputParameters parameters);
+
   /**
    * Computes a block diagonal jacobian for the full system.
    */
@@ -198,6 +204,8 @@ public:
 
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node);
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem);
+
+  void compute_postprocessors (const NumericVector<Number>& soln);
 
   void subdomainSetup(THREAD_ID tid, unsigned int block_id);
   /**
@@ -292,6 +300,11 @@ public:
 
   void doAdaptivityStep();
 
+  /**
+   * Get a reference to the value associated with the postprocessor.
+   */
+  Real & getPostprocessorValue(std::string name);
+
 protected:
   void sizeEverything();
 
@@ -303,6 +316,7 @@ private:
   FaceData _face_data;
   AuxData _aux_data;
   MaterialData _material_data;
+  PostprocessorData _postprocessor_data;
   //  std::vector<ElementData *> _element_data;
   //  std::vector<FaceData *> _face_data;
   //  std::vector<AuxData *> _aux_data;
@@ -348,6 +362,7 @@ private:
   MaterialHolder _materials;
   StabilizerHolder _stabilizers;
   ICHolder _ics;
+  PostprocessorHolder _pps;
 
   /**
    * Whether or not we need to recompute the shape functions for each element.  Should only be true if EVERY element is exactly
@@ -484,6 +499,7 @@ protected:
   friend class ComputeInternalJacobians;
   friend class ComputeInternalJacobianBlocks;
   friend class ComputeInternalResiduals;
+  friend class ComputeInternalPostprocessors;
   friend class GenericExecutionerBlock;
 
   friend class PDEBase;

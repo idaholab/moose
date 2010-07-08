@@ -6,6 +6,7 @@
 #include "Moose.h"
 #include "MooseArray.h"
 #include "MooseObject.h"
+#include "PostprocessorInterface.h"
 
 class PDEBase;
 class MooseSystem;
@@ -21,17 +22,9 @@ template<>
 InputParameters validParams<PDEBase>();
 
 /**
- * Types for Variable
- */
-typedef unsigned int             VariableNumber;
-typedef MooseArray<Real>         VariableValue;
-typedef MooseArray<RealGradient> VariableGradient;
-typedef MooseArray<RealTensor>   VariableSecond;
-
-/**
  * Base class for PDE objects (kernels, BCs, etc.)
  */
-class PDEBase : public MooseObject
+class PDEBase : public MooseObject, protected PostprocessorInterface
 {
 public:
   PDEBase(std::string name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data);

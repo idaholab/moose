@@ -58,6 +58,8 @@
 #include "PeriodicBlock.h"
 #include "GenericPeriodicBlock.h"
 #include "GenericExecutionerBlock.h"
+#include "PostprocessorsBlock.h"
+#include "GenericPostprocessorBlock.h"
 
 #include "ComputeInitialConditions.h"
 #include "InitialConditionFactory.h"
@@ -73,6 +75,9 @@
 
 #include "StabilizerFactory.h"
 #include "ConvectionDiffusionSUPG.h"
+
+#include "PostprocessorFactory.h"
+#include "ElementIntegral.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -169,6 +174,8 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<GenericPeriodicBlock>("BCs/Periodic/*");
   ParserBlockFactory::instance()->registerParserBlock<GenericExecutionerBlock>("Executioner");
   ParserBlockFactory::instance()->registerParserBlock<AdaptivityBlock>("Executioner/Adaptivity");
+  ParserBlockFactory::instance()->registerParserBlock<PostprocessorsBlock>("Postprocessors");
+  ParserBlockFactory::instance()->registerParserBlock<GenericPostprocessorBlock>("Postprocessors/*");
 
   InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
   InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
@@ -183,6 +190,8 @@ Moose::registerObjects()
   ExecutionerFactory::instance()->registerExecutioner<ExactSolutionExecutioner>("ExactSolutionExecutioner");
   
   StabilizerFactory::instance()->registerStabilizer<ConvectionDiffusionSUPG>("ConvectionDiffusionSUPG");
+
+  PostprocessorFactory::instance()->registerPostprocessor<ElementIntegral>("ElementIntegral");
 }
 
 void

@@ -22,6 +22,7 @@
 //Forward Declarations
 class MooseSystem;
 class Executioner;
+template <typename T> class MooseArray;
 
 namespace libMesh
 {  
@@ -34,8 +35,14 @@ namespace libMesh
 
 #define MAX_VARS 1000
 
-
-
+/**
+ * Types for Variable
+ */
+typedef unsigned int             VariableNumber;
+typedef MooseArray<Real>         VariableValue;
+typedef MooseArray<RealGradient> VariableGradient;
+typedef MooseArray<RealTensor>   VariableSecond;
+typedef Real                     PostprocessorValue;
 typedef unsigned int THREAD_ID;
 
 
