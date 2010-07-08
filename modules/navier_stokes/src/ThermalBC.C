@@ -22,18 +22,16 @@ ThermalBC::ThermalBC(std::string name, MooseSystem & moose_system, InputParamete
     _w_vel(_dim == 3 ? coupledValue("w") : _zero),
     _initial(_parameters.get<Real>("initial")),
     _final(_parameters.get<Real>("final")),
-    _duration(_parameters.get<Real>("duration"))
+    _duration(_parameters.get<Real>("duration")),
+    _gamma(getMaterialProperty<Real>("gamma")),
+    _R(getMaterialProperty<Real>("R")),
+    _c_v(getMaterialProperty<Real>("c_v"))
   {}
 
 Real
 ThermalBC::temperature()
 {
-  //Only constant material properties are allowed in a BC
-  Real & R = _material->getProperty<Real>("R")[_qp];
-  Real & c_v = _material->getProperty<Real>("c_v")[_qp];
-  Real & gamma = _material->getProperty<Real>("gamma")[_qp];
-  
-  Real value = 1.0/c_v;
+  Real value = 1.0/_c_v[_qp];
 
   Real et = _u[_qp]/_p[_qp];
 

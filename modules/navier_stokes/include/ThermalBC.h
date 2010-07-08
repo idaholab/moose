@@ -39,6 +39,10 @@ protected:
   Real _initial;
   Real _final;
   Real _duration;
+
+  MaterialProperty<Real> & _gamma;
+  MaterialProperty<Real> & _R;
+  MaterialProperty<Real> & _c_v;
 };
 
 #endif //THERMALBC_H
