@@ -78,6 +78,7 @@
 
 #include "PostprocessorFactory.h"
 #include "ElementIntegral.h"
+#include "ElementAverageValue.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -192,6 +193,7 @@ Moose::registerObjects()
   StabilizerFactory::instance()->registerStabilizer<ConvectionDiffusionSUPG>("ConvectionDiffusionSUPG");
 
   PostprocessorFactory::instance()->registerPostprocessor<ElementIntegral>("ElementIntegral");
+  PostprocessorFactory::instance()->registerPostprocessor<ElementAverageValue>("ElementAverageValue");
 }
 
 void
