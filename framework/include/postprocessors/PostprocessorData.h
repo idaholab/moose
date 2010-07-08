@@ -5,7 +5,7 @@
 #include "Moose.h"
 #include "MooseArray.h"
 #include "Postprocessor.h"
-#include "FormatedTable.h"
+#include "FormattedTable.h"
 
 //libMesh includes
 #include "transient_system.h"
@@ -22,6 +22,6 @@ public:
 
   std::map<std::string, Real> _values;
 
-  FormatedTable _output_table;
+  FormattedTable _output_table;
 };
 #endif //POSTPROCESSORDATA_H
