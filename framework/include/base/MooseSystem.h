@@ -263,7 +263,7 @@ public:
 
   bool & dontReinitFE();
 
-  Material * getMaterial(THREAD_ID tid, unsigned int block_id);
+  std::vector<Material *> getMaterials(THREAD_ID tid, unsigned int block_id);
 
   void setPrintMeshChanged(bool print_mesh_changed);
 

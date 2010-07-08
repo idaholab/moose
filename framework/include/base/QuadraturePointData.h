@@ -168,7 +168,7 @@ public:
   /**
    * Pointer to the material that is valid for the current block.
    */
-  std::vector<Material *> _material;
+  std::vector<std::vector<Material *> > _material;
 };
 
 #endif // QUADRPTDATA_H

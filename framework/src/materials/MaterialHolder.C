@@ -9,61 +9,61 @@ MaterialHolder::MaterialHolder(MooseSystem &sys)
 
 MaterialHolder::~MaterialHolder()
 {
-  for (std::vector<std::map<int, Material *> >::iterator i = _active_materials.begin(); i != _active_materials.end(); ++i)
+  for (std::vector<std::map<int, std::vector<Material *> > >::iterator i = _active_materials.begin(); i != _active_materials.end(); ++i)
   {
-    MaterialIterator j;
-    for (j = i->begin(); j != i->end(); ++j)
-      delete j->second;
+    for (MaterialIterator j = i->begin(); j != i->end(); ++j)
+      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+        delete (*k);
   }
 
-  for (std::vector<std::map<int, Material *> >::iterator i = _active_boundary_materials.begin(); i != _active_boundary_materials.end(); ++i)
+  for (std::vector<std::map<int, std::vector<Material *> > >::iterator i = _active_boundary_materials.begin(); i != _active_boundary_materials.end(); ++i)
   {
-    MaterialIterator j;
-    for (j = i->begin(); j != i->end(); ++j)
-      delete j->second;
+    for (MaterialIterator j = i->begin(); j != i->end(); ++j)
+      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+        delete (*k);
   }
 }
 
-Material *
-MaterialHolder::getMaterial(THREAD_ID tid, unsigned int block_id)
-  {
-    MaterialIterator mat_iter = _active_materials[tid].find(block_id);
-    if (mat_iter == _active_materials[tid].end())
-      mooseError("Active Material Missing\n");
-    
-    return mat_iter->second;
-  }
+std::vector<Material *>
+MaterialHolder::getMaterials(THREAD_ID tid, unsigned int block_id)
+{
+  MaterialIterator mat_iter = _active_materials[tid].find(block_id);
+  if (mat_iter == _active_materials[tid].end())
+    mooseError("Active Material Missing\n");
 
-Material *
-MaterialHolder::getBoundaryMaterial(THREAD_ID tid, unsigned int boundary_id)
-  {
-    MaterialIterator mat_iter = _active_boundary_materials[tid].find(boundary_id);
-    if (mat_iter == _active_boundary_materials[tid].end())
-      mooseError("Active Boundary Material Missing\n");
-    
-    return mat_iter->second;
-  }
+  return mat_iter->second;
+}
+
+std::vector<Material *>
+MaterialHolder::getBoundaryMaterials(THREAD_ID tid, unsigned int boundary_id)
+{
+  MaterialIterator mat_iter = _active_boundary_materials[tid].find(boundary_id);
+  if (mat_iter == _active_boundary_materials[tid].end())
+    mooseError("Active Boundary Material Missing\n");
+
+  return mat_iter->second;
+}
 
 void MaterialHolder::updateMaterialDataState()
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    MaterialIterator it = _active_materials[tid].begin();
-    MaterialIterator it_end = _active_materials[tid].end();
-
-    for(;it!=it_end;++it)
+    for (MaterialIterator it = _active_materials[tid].begin(); it != _active_materials[tid].end(); ++it)
     {
-      it->second->updateDataState();
-      it->second->timeStepSetup();
+      for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+      {
+        (*jt)->updateDataState();
+        (*jt)->timeStepSetup();
+      }
     }
 
-    it = _active_boundary_materials[tid].begin();
-    it_end = _active_boundary_materials[tid].end();
-
-    for(;it!=it_end;++it)
+    for (MaterialIterator it = _active_boundary_materials[tid].begin(); it != _active_boundary_materials[tid].end(); ++it)
     {
-      it->second->updateDataState();
-      it->second->timeStepSetup();
+      for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+      {
+        (*jt)->updateDataState();
+        (*jt)->timeStepSetup();
+      }
     }
   }
 }
@@ -95,10 +95,10 @@ MaterialHolder::activeBoundaryMaterialsEnd(THREAD_ID tid)
 void
 MaterialHolder::addMaterial(THREAD_ID tid, int block_id, Material *material)
 {
-  _active_materials[tid][block_id] = material;
+  _active_materials[tid][block_id].push_back(material);
 }
 
 void MaterialHolder::addBoundaryMaterial(THREAD_ID tid, int block_id, Material *material)
 {
-  _active_boundary_materials[tid][block_id] = material;
+  _active_boundary_materials[tid][block_id].push_back(material);
 }

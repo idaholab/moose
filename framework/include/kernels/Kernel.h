@@ -139,11 +139,6 @@ protected:
   MooseArray<RealGradient> & _grad_u_older;
 
   /**
-   * Current material
-   */
-  Material * & _material;
-  
-  /**
    * Interior test function.
    *
    * These are non-const so they can be modified for stabilization.

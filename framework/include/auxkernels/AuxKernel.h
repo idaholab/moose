@@ -50,11 +50,6 @@ protected:
    */
   AuxData & _aux_data;
 
-  /**
-   * Current material
-   */
-  Material * & _material;
-
   bool _nodal;
 
   MooseArray<Real> & _u;

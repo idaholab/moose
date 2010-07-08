@@ -24,7 +24,6 @@ AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParamete
   MaterialPropertyInterface(moose_system._material_data),
    _element_data(moose_system._element_data),
    _aux_data(moose_system._aux_data),
-   _material(_moose_system._element_data._material[_tid]),
    _nodal(_fe_type.family == LAGRANGE),
    _u(_nodal ? moose_system._aux_data._aux_var_vals_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_element[_tid][_var_num]),
    _u_old(_nodal ? moose_system._aux_data._aux_var_vals_old_nodal[_tid][_var_num] : moose_system._aux_data._aux_var_vals_old_element[_tid][_var_num]),

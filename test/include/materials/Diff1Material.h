@@ -1,0 +1,31 @@
+#ifndef DIFF1MATERIAL_H
+#define DIFF1MATERIAL_H
+
+#include "Material.h"
+
+
+//Forward Declarations
+class Diff1Material;
+
+template<>
+InputParameters validParams<Diff1Material>();
+
+/**
+ * Simple material with constant properties.
+ */
+class Diff1Material : public Material
+{
+public:
+  Diff1Material(std::string name,
+                MooseSystem & moose_system,
+                InputParameters parameters);
+  
+protected:
+  virtual void computeProperties();
+  
+private:
+  Real _diff;         // the value read from the input file
+  MaterialProperty<Real> & _diffusivity;
+};
+
+#endif //DIFF1MATERIAL_H

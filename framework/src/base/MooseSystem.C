@@ -180,10 +180,10 @@ MooseSystem::getMesh(bool skip_full_check)
   return _mesh;
 }
 
-Material *
-MooseSystem::getMaterial(THREAD_ID tid, unsigned int block_id)
+std::vector<Material *>
+MooseSystem::getMaterials(THREAD_ID tid, unsigned int block_id)
 {
-  return _materials.getMaterial(tid,block_id);
+  return _materials.getMaterials(tid, block_id);
 }
 
 void
@@ -752,12 +752,14 @@ MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, 
 void
 MooseSystem::subdomainSetup(THREAD_ID tid, unsigned int block_id)
 {
-  _element_data._material[tid] = _materials.getMaterial(tid, block_id);
-  _face_data._material[tid] = _materials.getBoundaryMaterial(tid, block_id);
+  _element_data._material[tid] = _materials.getMaterials(tid, block_id);
+  _face_data._material[tid] = _materials.getBoundaryMaterials(tid, block_id);
 
   // call subdomainSetup
-  _element_data._material[tid]->subdomainSetup();
-  _face_data._material[tid]->subdomainSetup();
+  for (std::vector<Material *>::iterator it = _element_data._material[tid].begin(); it != _element_data._material[tid].end(); ++it)
+    (*it)->subdomainSetup();
+  for (std::vector<Material *>::iterator it = _face_data._material[tid].begin(); it != _face_data._material[tid].end(); ++it)
+    (*it)->subdomainSetup();
 
   //Global Kernels
   KernelIterator kernel_begin = _kernels.activeKernelsBegin(tid);
@@ -793,11 +795,11 @@ MooseSystem::checkSystemsIntegrity()
   bool adaptivity = _es->parameters.have_parameter<bool>("adaptivity");
 
   // Check materials
-  MaterialIterator end = _materials.activeMaterialsEnd(0);
-  for (MaterialIterator i = _materials.activeMaterialsBegin(0); i != end; ++i)
+  for (MaterialIterator i = _materials.activeMaterialsBegin(0); i != _materials.activeMaterialsEnd(0); ++i)
   {
-    if(i->second->hasStatefulProperties() && adaptivity)
-      mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
+    for (std::vector<Material *>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+      if ((*j)->hasStatefulProperties() && adaptivity)
+        mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
     
     if (element_subdomains.find(i->first) == element_subdomains.end())
     {

@@ -119,11 +119,6 @@ protected:
   Elem * _side_elem;
 
   /**
-   * Current material
-   */
-  Material * & _material;
-
-  /**
    * Normal vectors at the quadrature points.
    */
   const std::vector<Point>& _normals;

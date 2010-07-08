@@ -34,7 +34,6 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _u_older(_element_data._var_vals_older[_tid][_var_num]),
    _grad_u_old(_element_data._var_grads_old[_tid][_var_num]),
    _grad_u_older(_element_data._var_grads_older[_tid][_var_num]),
-   _material(_moose_system._element_data._material[_tid]),
    _test((_element_data._test[_tid])[_var_num]),
    _grad_test(*(_element_data._grad_phi[_tid])[_fe_type]),
    _second_test(*(_element_data._second_phi[_tid])[_fe_type])

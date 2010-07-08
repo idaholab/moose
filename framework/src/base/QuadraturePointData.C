@@ -202,8 +202,9 @@ QuadraturePointData::reinit(THREAD_ID tid, unsigned int block_id, const NumericV
 
 //  Moose::perf_log.push("reinit() - material","Kernel");
 
-  _material[tid] = _moose_system.getMaterial(tid,elem->subdomain_id());
-  _material[tid]->materialReinit();
+  _material[tid] = _moose_system.getMaterials(tid, elem->subdomain_id());
+  for (std::vector<Material *>::iterator it = _material[tid].begin(); it != _material[tid].end(); ++it)
+    (*it)->materialReinit();
 
 //  Moose::perf_log.pop("reinit() - material","Kernel");
 }

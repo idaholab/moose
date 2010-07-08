@@ -9,7 +9,7 @@
 /**
  * Typedef to hide implementation details
  */
-typedef std::map<int, Material *>::iterator MaterialIterator;
+typedef std::map<int, std::vector<Material *> >::iterator MaterialIterator;
 
 
 class MaterialHolder
@@ -18,8 +18,8 @@ public:
   MaterialHolder(MooseSystem &sys);
   virtual ~MaterialHolder();
 
-  Material * getMaterial(THREAD_ID tid, unsigned int block_id);
-  Material * getBoundaryMaterial(THREAD_ID tid, unsigned int boundary_id);
+  std::vector<Material *> getMaterials(THREAD_ID tid, unsigned int block_id);
+  std::vector<Material *> getBoundaryMaterials(THREAD_ID tid, unsigned int boundary_id);
 
   void updateMaterialDataState();
 
@@ -36,11 +36,11 @@ protected:
   /**
    * A list of material associated with the block (subdomain)
    */
-  std::vector<std::map<int, Material *> > _active_materials;
+  std::vector<std::map<int, std::vector<Material *> > > _active_materials;
   /**
    * A list of boundary materials associated with the block (subdomain)
    */
-  std::vector<std::map<int, Material *> > _active_boundary_materials;
+  std::vector<std::map<int, std::vector<Material *> > > _active_boundary_materials;
 
   MooseSystem &_moose_system;
 };
