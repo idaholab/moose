@@ -37,21 +37,21 @@ FormattedTable::print(std::ostream & out)
    * Print out the header row
    */
   printRowDivider(out);
-  out << "|" << std::setw(15) << "time" << " |";
+  out << "|" << std::setw(_column_width) << std::left << " time" << " |";
   for (header = _column_names.begin(); header != _column_names.end(); ++header)
   {
-    out << std::setw(15) << *header << " |";
+    out << " " << std::setw(_column_width)  <<  *header << "|";
   }
   out << "\n";
   printRowDivider(out);
   
   for (i = _data.begin(); i != _data.end(); ++i)
   {
-    out << "|" << std::setw(15) << i->first << " |";
+    out << "|" << std::right << std::setw(_column_width) << i->first << " |";
     for (header = _column_names.begin(); header != _column_names.end(); ++header)
     {
       std::map<std::string, Real> &tmp = i->second;
-      out << std::setw(15) << tmp[*header] << " |";
+      out << std::setw(_column_width) << tmp[*header] << " |";
     }
     out << "\n";
   }
