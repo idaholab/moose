@@ -53,7 +53,7 @@ public:
     StabilizerIterator stabilizer_end = _moose_system._stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    unsigned int subdomain = 999999999;
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     for (el = range.begin() ; el != range.end(); ++el)
     {
@@ -230,7 +230,7 @@ public:
     StabilizerIterator stabilizer_end = _moose_system._stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    unsigned int subdomain = 999999999;
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     DofMap & dof_map = _precond_system.get_dof_map();
     DenseMatrix<Number> Ke;
@@ -378,7 +378,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
     StabilizerIterator stabilizer_end = _stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    unsigned int subdomain = 999999999;
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     DofMap & dof_map = precond_system.get_dof_map();
     DenseMatrix<Number> Ke;

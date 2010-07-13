@@ -41,9 +41,9 @@ namespace MooseTest
     MaterialFactory::instance()->registerMaterial<Diff2Material>("Diff2Material");
 
     //Registering the Boundary Conditions
-  BCFactory::instance()->registerBC<MMSCoupledDirichletBC>("MMSCoupledDirichletBC");
+    BCFactory::instance()->registerBC<MMSCoupledDirichletBC>("MMSCoupledDirichletBC");
 
-//Registering our Aux Kernel
-  AuxFactory::instance()->registerAux<MMSConstantAux>("MMSConstantAux");
+    //Registering our Aux Kernel
+    AuxFactory::instance()->registerAux<MMSConstantAux>("MMSConstantAux");
   }
 }

@@ -298,7 +298,7 @@ ParserBlock::printBlockData()
         continue;
 
       // Block params may be required and will have a doc string
-      std::string required = param_ptrs[i]->isParamRequired(iter->first) ? "*" : " ";
+      std::string required = param_ptrs[i]->isParamRequired(iter->first) || iter->first == "type" ? "*" : " ";
       std::string valid = param_ptrs[i]->isParamValid(iter->first) ? " (valid)" : " ";
 
       std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";

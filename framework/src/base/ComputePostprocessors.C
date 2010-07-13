@@ -39,7 +39,7 @@ public:
     PostprocessorIterator postprocessor_end = _moose_system._pps.elementPostprocessorsEnd(tid);
     PostprocessorIterator postprocessor_it = postprocessor_begin;
 
-    unsigned int subdomain = 999999999;
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     //Global Postprocessors
     for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)

@@ -14,6 +14,7 @@
 #include "MaterialFactory.h"
 #include "InitialConditionFactory.h"
 #include "ExecutionerFactory.h"
+#include "PostprocessorFactory.h"
 
 // Static Data initialization
 const std::string Parser::_show_tree = "--show_tree";
@@ -291,11 +292,27 @@ Parser::buildFullTree( const std::string format )
     curr_block->_children.push_back(ParserBlockFactory::instance()->add("Executioner", _moose_system, params));
   }
 
+  // Add all the PostProcessors
+  curr_block = curr_block->locateBlock("Postprocessors");
+  prefix = "Postprocessors/";
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
+  
+  for (PostprocessorNamesIterator i = PostprocessorFactory::instance()->registeredPostprocessorsBegin();
+       i != PostprocessorFactory::instance()->registeredPostprocessorsEnd(); ++i)
+  {
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+  }
+
   if (format == "yaml")
     _input_tree->printBlockYAML();
   else // "dump" is all that's left
     _input_tree->printBlockData();
 }
+
+
 
 void
 Parser::tokenize(const std::string &str, std::vector<std::string> &elements, const std::string &delims)

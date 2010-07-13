@@ -50,7 +50,7 @@ public:
     StabilizerIterator stabilizer_end = _moose_system._stabilizers.activeStabilizersEnd(tid);
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    unsigned int subdomain = 999999999;
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     for (el = range.begin() ; el != range.end(); ++el)
     {
