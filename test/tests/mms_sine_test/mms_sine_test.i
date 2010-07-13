@@ -2,11 +2,11 @@
 #This is for u = sin(a*x*y*z*t)
 [Mesh]
   dim = 3
-  generated = true
+
  [./Generation] #We are generating our own Mesh
-   nx = 6
-   ny = 6
-   nz = 6
+   nx = 8
+   ny = 8
+   nz = 8
    x min =0 
    x max =1
    y min =0			
@@ -98,8 +98,9 @@
 [Executioner]
   type = Transient
   dt = .1
-  num_steps = 20
+  num_steps = 5
   perf_log = true
+  petsc_options = '-snes_mf_operator'
 []
 
 [Output]
