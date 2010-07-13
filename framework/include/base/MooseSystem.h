@@ -472,6 +472,8 @@ public:
   bool _exodus_output;
   bool _gmv_output;
   bool _tecplot_output;
+  bool _postprocessor_screen_output;
+  bool _postprocessor_csv_output;
   bool _print_out_info;
   bool _output_initial;
 

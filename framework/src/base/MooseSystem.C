@@ -74,6 +74,8 @@ MooseSystem::MooseSystem()
    _exodus_output(true),
    _gmv_output(false),
    _tecplot_output(false),
+   _postprocessor_screen_output(true),
+   _postprocessor_csv_output(false),
    _print_out_info(false),
    _output_initial(false),
    _l_abs_step_tol(1e-10)
@@ -124,6 +126,8 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _exodus_output(true),
     _gmv_output(false),
     _tecplot_output(false),
+    _postprocessor_screen_output(true),
+    _postprocessor_csv_output(false),
     _print_out_info(false),
     _output_initial(false),
     _l_abs_step_tol(1e-10)

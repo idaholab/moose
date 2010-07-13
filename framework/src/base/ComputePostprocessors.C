@@ -125,10 +125,18 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
       _postprocessor_data._values[name] = value;
       _postprocessor_data._output_table.addData(name, value, _t);
     }
-    
-    std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-    _postprocessor_data._output_table.print(std::cout);
-    std::cout<<std::endl;
+
+    // Postprocesser Output
+    if (_postprocessor_screen_output)
+    {
+      std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
+      _postprocessor_data._output_table.print_table(std::cout);
+      std::cout<<std::endl;
+    }
+    if (_postprocessor_csv_output)
+    {
+      _postprocessor_data._output_table.print_csv(_file_base + ".csv");
+    }
   }
 
   Moose::perf_log.pop("compute_postprocessors()","Solve");
