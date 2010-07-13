@@ -29,6 +29,11 @@ public:
    */
   THREAD_ID tid();
 
+  /**
+   * Return the InputParameters object associated with this class.
+   */
+  InputParameters & parameters();
+
 protected:
   /**
    * This Object's name.

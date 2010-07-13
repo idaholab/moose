@@ -56,6 +56,26 @@ public:
       //Global Postprocessors
       for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
         (*postprocessor_it)->execute();
+
+      for (unsigned int side=0; side<elem->n_sides(); side++)
+      {
+        if (elem->neighbor(side) == NULL)
+        {
+          unsigned int boundary_id = _moose_system._mesh->boundary_info->boundary_id (elem, side);
+
+          PostprocessorIterator side_postprocessor_begin = _moose_system._pps.sidePostprocessorsBegin(tid,boundary_id);
+          PostprocessorIterator side_postprocessor_end = _moose_system._pps.sidePostprocessorsEnd(tid,boundary_id);
+          PostprocessorIterator side_postprocessor_it = postprocessor_begin;
+
+          if(side_postprocessor_begin != side_postprocessor_end)
+          {
+            _moose_system.reinitBCs(tid, _soln, elem, side, boundary_id);
+            
+            for(; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
+              (*side_postprocessor_it)->execute();
+          }
+        }
+      }
     }
   }
 

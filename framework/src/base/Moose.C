@@ -79,6 +79,8 @@
 #include "PostprocessorFactory.h"
 #include "ElementIntegral.h"
 #include "ElementAverageValue.h"
+#include "SideIntegral.h"
+#include "SideAverageValue.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -194,6 +196,9 @@ Moose::registerObjects()
 
   PostprocessorFactory::instance()->registerPostprocessor<ElementIntegral>("ElementIntegral");
   PostprocessorFactory::instance()->registerPostprocessor<ElementAverageValue>("ElementAverageValue");
+
+  PostprocessorFactory::instance()->registerPostprocessor<SideIntegral>("SideIntegral");
+  PostprocessorFactory::instance()->registerPostprocessor<SideAverageValue>("SideAverageValue");
 }
 
 void

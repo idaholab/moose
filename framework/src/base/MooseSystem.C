@@ -740,7 +740,22 @@ MooseSystem::addPostprocessor(std::string pp_name,
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    _pps.addPostprocessor(tid, PostprocessorFactory::instance()->create(pp_name, name, *this, parameters));
+    if(parameters.have_parameter<std::vector<unsigned int> >("boundary"))
+    {
+      const std::vector<unsigned int> & boundaries = parameters.get<std::vector<unsigned int> >("boundary");
+      
+      for (unsigned int i=0; i<boundaries.size(); ++i)
+      {
+        parameters.set<unsigned int>("_boundary_id") = boundaries[i];
+        Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, *this, parameters);
+        _pps.addPostprocessor(tid, pp);
+      }
+    }
+    else
+    {
+      Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, *this, parameters);
+      _pps.addPostprocessor(tid, pp);
+    }
   }
 }
 

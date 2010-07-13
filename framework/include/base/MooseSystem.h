@@ -511,6 +511,7 @@ protected:
   friend class Executioner;
   friend class TransientExecutioner;
   friend class Steady;
+  friend class Postprocessor;
 
   friend class QuadraturePointData;
   friend class ElementData;

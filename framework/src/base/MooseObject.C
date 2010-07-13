@@ -34,3 +34,10 @@ MooseObject::tid()
 {
   return _tid;
 }
+
+InputParameters &
+MooseObject::parameters()
+{
+  return _parameters;
+}
+

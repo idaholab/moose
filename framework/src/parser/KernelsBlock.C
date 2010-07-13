@@ -19,6 +19,7 @@ KernelsBlock::KernelsBlock(std::string name, MooseSystem & moose_system, InputPa
   addPrereq("Preconditioning");
   addPrereq("AuxVariables");
   addPrereq("Materials");
+  addPrereq("Postprocessors");
 }
 
 void

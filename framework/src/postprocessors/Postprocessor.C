@@ -1,5 +1,7 @@
 #include "Postprocessor.h"
 
+#include "MooseSystem.h"
+
 // libMesh includes
 #include "parallel.h"
 
@@ -13,7 +15,10 @@ InputParameters validParams<Postprocessor>()
 
 Postprocessor::Postprocessor(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :MooseObject(name, moose_system, parameters)
-{}
+{
+  // Initialize the postprocessor data for this PP
+  moose_system._postprocessor_data._values[name] = 0.0;
+}
 
 void
 Postprocessor::gatherSum(Real value)
