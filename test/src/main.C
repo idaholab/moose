@@ -24,8 +24,11 @@ int main (int argc, char** argv)
   MooseInit init (argc, argv);
   MooseSystem moose_system;
 
+
   Moose::registerObjects();
+  
   MooseTest::registerObjects();
+  
   Parser p(moose_system);
 
   std::string input_filename = "";
