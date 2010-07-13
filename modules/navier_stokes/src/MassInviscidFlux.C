@@ -13,7 +13,7 @@ MassInviscidFlux::MassInviscidFlux(std::string name, MooseSystem & moose_system,
     _pu(coupledValue("pu")),
     _pv_var(coupled("pv")),
     _pv(coupledValue("pv")),
-    _pw_var(_dim == 3 ? coupled("pw") : 999999),
+    _pw_var(_dim == 3 ? coupled("pw") : std::numeric_limits<unsigned int>::max()),
     _pw(_dim == 3 ? coupledValue("pw") : _zero)
   {}
 
