@@ -48,6 +48,10 @@ public:
    */
   std::vector<unsigned int> _current_side;
 
+  /**
+   * The current "element" making up the side we are currently on.
+   */
+  std::vector<const Elem *> _current_side_elem;
 
   /**
    * Normal vectors at the quadrature points.

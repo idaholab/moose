@@ -129,6 +129,11 @@ protected:
   unsigned int & _current_side;
 
   /**
+   * Current side element.
+   */
+  const Elem * & _current_side_elem;
+
+  /**
    * Current node for nodal BC's
    */
   const Node * & _current_node;

@@ -30,6 +30,11 @@ public:
 
   void addPostprocessor(THREAD_ID tid, Postprocessor *postprocessor);
 
+  /**
+   * All of the boundary ids that have postprocessors specified to act on them.
+   */
+  std::set<unsigned int> _boundary_ids_with_postprocessors;
+
 protected:
   std::vector<std::vector<Postprocessor *> > _element_postprocessors;
 

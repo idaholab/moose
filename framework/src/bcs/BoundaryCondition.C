@@ -27,6 +27,7 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
    _side_elem(NULL),
    _normals(*moose_system._face_data._normals[_tid][_fe_type]),
    _current_side(moose_system._face_data._current_side[_tid]),
+   _current_side_elem(moose_system._face_data._current_side_elem[_tid]),
    _current_node(moose_system._face_data._current_node[_tid]),
    _current_residual(moose_system._face_data._current_residual[_tid]),
    _u(_integrated ? moose_system._face_data._var_vals[_tid][_var_num] : moose_system._face_data._var_vals_nodal[_tid][_var_num]),

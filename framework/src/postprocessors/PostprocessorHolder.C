@@ -36,6 +36,7 @@ PostprocessorHolder::addPostprocessor(THREAD_ID tid, Postprocessor *postprocesso
   {
     unsigned int boundary_id = dynamic_cast<SidePostprocessor*>(postprocessor)->boundaryID();
     _side_postprocessors[tid][boundary_id].push_back(postprocessor);
+    _boundary_ids_with_postprocessors.insert(boundary_id);
   }
   else
   {

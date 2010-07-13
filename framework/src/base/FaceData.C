@@ -26,6 +26,7 @@ void FaceData::sizeEverything()
   _current_node.resize(n_threads);
   _current_residual.resize(n_threads);
   _current_side.resize(n_threads);
+  _current_side_elem.resize(n_threads);
   _normals.resize(n_threads);
 
   _nodal_bc_var_dofs.resize(n_threads);
@@ -83,6 +84,11 @@ void FaceData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const El
 //  Moose::perf_log.push("reinit()","BoundaryCondition");
 
   _current_side[tid] = side;
+
+  if(_current_side_elem[tid])
+    delete _current_side_elem[tid];
+  
+  _current_side_elem[tid] = elem->build_side(side).release();
 
   std::map<FEType, FEBase*>::iterator fe_it = _fe[tid].begin();
   std::map<FEType, FEBase*>::iterator fe_end = _fe[tid].end();
