@@ -7,6 +7,7 @@
 #include "MooseArray.h"
 #include "MooseObject.h"
 #include "PostprocessorInterface.h"
+#include "FunctionInterface.h"
 
 class PDEBase;
 class MooseSystem;
@@ -24,7 +25,7 @@ InputParameters validParams<PDEBase>();
 /**
  * Base class for PDE objects (kernels, BCs, etc.)
  */
-class PDEBase : public MooseObject, protected PostprocessorInterface
+class PDEBase : public MooseObject, protected PostprocessorInterface, protected FunctionInterface
 {
 public:
   PDEBase(std::string name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data);

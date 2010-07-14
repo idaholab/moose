@@ -2,7 +2,6 @@
 #define MMSFORCING_H
 
 #include "Kernel.h"
-#include "Functor.h"
 
 class MMSForcing;
 

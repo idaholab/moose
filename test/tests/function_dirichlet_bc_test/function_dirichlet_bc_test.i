@@ -13,6 +13,24 @@
   [../]
 []
 
+[Functions]
+  active = 'forcing_func bc_func'
+  
+  [./forcing_func]
+    type = UserFunction
+    function = alpha*alpha*pi*pi*sin(alpha*pi*x)
+    vars = 'alpha'
+    vals = '16'
+  [../]
+
+  [./bc_func]
+    type = UserFunction
+    function = sin(alpha*pi*x)
+    vars = 'alpha'
+    vals = '16'
+  [../]
+[]
+
 [Kernels]
   active = 'diff forcing'
 
@@ -24,9 +42,7 @@
   [./forcing]
     type = UserForcingFunction
     variable = u
-    function = alpha*alpha*pi*pi*sin(alpha*pi*x)
-    vars = 'alpha'
-    vals = '16'
+    function = forcing_func
   [../]
 []
 
@@ -37,9 +53,7 @@
     type = FunctionDirichletBC
     variable = u
     boundary = '1 2'
-    function = sin(alpha*pi*x)
-    vars = 'alpha'
-    vals = '16'
+    function = bc_func
   [../]
 []
 

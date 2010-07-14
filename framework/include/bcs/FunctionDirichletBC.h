@@ -2,7 +2,7 @@
 #define FUNCTIONDIRICHLETBC_H
 
 #include "BoundaryCondition.h"
-#include "Functor.h"
+#include "Function.h"
 
 //Forward Declarations
 class FunctionDirichletBC;
@@ -34,6 +34,6 @@ protected:
   virtual Real computeQpResidual();
 
 private:
-  Functor _functor;
+  Function & _func;
 };
 #endif //FUNCTIONDIRICHLETBC_H

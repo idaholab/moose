@@ -4,8 +4,6 @@
 
 namespace NecessaryFuncPointer
 {
-  ExactSolutionExecutioner * obj;
-
   Number exactSolution(const Point& p,
                 const Parameters& Parameters,
                 const std::string& sys_name,
@@ -17,8 +15,6 @@ InputParameters validParams<ExactSolutionExecutioner>()
 {
   InputParameters params = validParams<Steady>();
   params.addRequiredParam<std::string>("function", "The exact solution.");
-  params.addParam<std::vector<std::string> >("vars", std::vector<std::string>(0), "The variables (excluding t,x,y,z) in the exact solution.");
-  params.addParam<std::vector<Real> >("vals", std::vector<Real>(0), "The values that correspond to the variables.");
 
   params.addParam<std::vector<std::string> >("unknowns", std::vector<std::string>(1, "u"), "List of the variables to compute dofs and norms for. Defaults to just u.");
   params.addParam<std::string>("norm_file", "", "If you pass a file this kernel will write out a table to this file containing: the variable, the dofs, and the l2 norm.");
@@ -29,9 +25,7 @@ ExactSolutionExecutioner::ExactSolutionExecutioner(std::string name, MooseSystem
   :Steady(name, moose_system, parameters),
   _exact(*moose_system.getEquationSystems()),
   _unknowns(parameters.get<std::vector<std::string> >("unknowns")),
-  _functor(parameters.get<std::string>("function"),
-           parameters.get<std::vector<std::string> >("vars"),
-           parameters.get<std::vector<Real> >("vals")),
+  _func(getFunction("function")),
   _output_norms(false)
 {
   //set a pointer to this object in the parameters, so the callback has
@@ -67,7 +61,7 @@ ExactSolutionExecutioner::exactSolution(const Point& p, const Parameters& parame
   Real y = (LIBMESH_DIM > 1) ? p(1) : 0;
   Real z = (LIBMESH_DIM > 2) ? p(2) : 0;
   Real t = _moose_system._t;
-  return _functor(t, x, y, z);
+  return _func(t, x, y, z);
 }
 
 void

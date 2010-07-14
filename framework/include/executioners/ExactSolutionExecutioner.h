@@ -10,7 +10,7 @@
 
 //moose includes
 #include "Steady.h"
-#include "Functor.h"
+#include "Function.h"
 
 // Forward Declarations
 class ExactSolutionExecutioner;
@@ -23,7 +23,7 @@ InputParameters validParams<ExactSolutionExecutioner>();
  * Moose solution and the exact solution for every solve.  It will also output
  * those values to a file if you specify it in the input file.
  */
-class ExactSolutionExecutioner: public Steady
+class ExactSolutionExecutioner : public Steady
 {
 public:
   ExactSolutionExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters);
@@ -47,7 +47,7 @@ protected:
 
 private:
   ExactSolution _exact;
-  Functor _functor;
+  Function & _func;
 
   std::vector<std::string> _unknowns;
 

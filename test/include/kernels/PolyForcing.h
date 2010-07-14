@@ -2,7 +2,6 @@
 #define POLYFORCING_H
 
 #include "Kernel.h"
-#include "Functor.h"
 
 class PolyForcing;
 

@@ -1,8 +1,9 @@
 #ifndef USERFORCINGFUNCTION_H
 #define USERFORCINGFUNCTION_H
 
+//TODO move to .C file?
 #include "Kernel.h"
-#include "Functor.h"
+#include "Function.h"
 
 //Forward Declarations
 class UserForcingFunction;
@@ -34,12 +35,7 @@ protected:
    */
   virtual Real computeQpResidual();
 
-  /**
-   * Currently just 0 because we are assuming f is not coupled to another variable.
-   */
-  virtual Real computeQpJacobian();
-
 private:
-  Functor _functor;
+  Function & _func;
 };
 #endif //USERFORCINGFUNCTION_H

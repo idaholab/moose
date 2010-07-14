@@ -18,6 +18,7 @@ InputParameters validParams<PDEBase>()
 PDEBase::PDEBase(std::string name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data) :
   MooseObject(name, moose_system, parameters),
   PostprocessorInterface(moose_system._postprocessor_data),
+  FunctionInterface(moose_system._functions, parameters, _tid),
   _mesh(*_moose_system.getMesh()),
   _current_elem(_moose_system._element_data._current_elem[_tid]),
   _var_name(parameters.get<std::string>("variable")),

@@ -3,6 +3,7 @@
 
 #include "ValidParams.h"
 #include "MooseObject.h"
+#include "FunctionInterface.h"
 
 // System includes
 #include <string>
@@ -23,7 +24,7 @@ InputParameters validParams<Executioner>();
  * for the NonlinearSystem once... where Transient Executioners call solve()
  * multiple times... i.e. once per timestep.
  */
-class Executioner : public MooseObject
+class Executioner : public MooseObject, protected FunctionInterface
 {
 public:
 

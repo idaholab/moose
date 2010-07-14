@@ -18,6 +18,7 @@
 #include "MaterialData.h"
 #include "PostprocessorData.h"
 #include "PostprocessorHolder.h"
+#include "FunctionWarehouse.h"
 
 //libmesh includes
 #include "transient_system.h"
@@ -175,6 +176,10 @@ public:
   void addPostprocessor(std::string pp_name,
                         std::string name,
                         InputParameters parameters);
+
+  void addFunction(std::string pp_name,
+                   std::string name,
+                   InputParameters parameters);
 
   /**
    * Computes a block diagonal jacobian for the full system.
@@ -363,6 +368,7 @@ private:
   StabilizerHolder _stabilizers;
   ICHolder _ics;
   PostprocessorHolder _pps;
+  FunctionWarehouse _functions;
 
   /**
    * Whether or not we need to recompute the shape functions for each element.  Should only be true if EVERY element is exactly

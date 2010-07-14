@@ -55,7 +55,7 @@ KernelFactory::KernelFactory()
 KernelFactory:: ~KernelFactory() 
 {
   {
-    std::map<std::string, kernelBuildPtr>:: iterator i;
+    std::map<std::string, kernelBuildPtr>::iterator i;
     for(i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
     {
       delete &i;

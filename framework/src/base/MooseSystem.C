@@ -10,6 +10,7 @@
 #include "StabilizerFactory.h"
 #include "InitialConditionFactory.h"
 #include "PostprocessorFactory.h"
+#include "FunctionFactory.h"
 #include "AuxKernel.h"
 #include "ParallelUniqueId.h"
 #include "ComputeQPSolution.h"
@@ -51,6 +52,7 @@ MooseSystem::MooseSystem()
    _stabilizers(*this),
    _ics(*this),
    _pps(*this),
+   _functions(*this),
    _no_fe_reinit(false),
    _preconditioner(NULL),
    _exreader(NULL),
@@ -103,6 +105,7 @@ MooseSystem::MooseSystem(Mesh &mesh)
     _stabilizers(*this),
     _ics(*this),
     _pps(*this),
+    _functions(*this),
     _no_fe_reinit(false),
     _preconditioner(NULL),
     _exreader(NULL),
@@ -432,7 +435,6 @@ MooseSystem::setErrorEstimator(const std::string &error_estimator_name)
     mooseError("Unknown error_estimator selection: " + error_estimator_name);
 }
 
-
 void
 MooseSystem::setErrorNorm(SystemNorm &sys_norm)
 {
@@ -584,7 +586,6 @@ MooseSystem::addBC(std::string bc_name,
     }
   }
 }
-
 
 void
 MooseSystem::addAuxKernel(std::string aux_name,
@@ -764,6 +765,19 @@ MooseSystem::addPostprocessor(std::string pp_name,
 }
 
 void
+MooseSystem::addFunction(std::string func_name,
+                              std::string name,
+                              InputParameters parameters)
+{
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    _functions.addFunction(tid, name, FunctionFactory::instance()->create(func_name, name, *this, parameters));
+  }
+}
+
+void
 MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
   _element_data.reinitKernels(tid, soln, elem, Re, Ke);
@@ -824,7 +838,6 @@ MooseSystem::subdomainSetup(THREAD_ID tid, unsigned int block_id)
   for(StabilizerIterator stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
     stabilizer_it->second->subdomainSetup();
 }
-
 
 void
 MooseSystem::checkSystemsIntegrity()

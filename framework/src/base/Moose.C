@@ -1,6 +1,9 @@
 #include "ComputeResidual.h"
 #include "ComputeJacobian.h"
 
+#include "FunctionFactory.h"
+#include "UserFunction.h"
+
 #include "KernelFactory.h"
 #include "BodyForce.h"
 #include "Diffusion.h"
@@ -39,6 +42,8 @@
 #include "GenericVariableBlock.h"
 #include "AuxVariablesBlock.h"
 #include "KernelsBlock.h"
+#include "FunctionsBlock.h"
+#include "GenericFunctionsBlock.h"
 #include "GenericKernelBlock.h"
 #include "AuxKernelsBlock.h"
 #include "GenericAuxKernelBlock.h"
@@ -118,6 +123,8 @@ Moose::registerObjects()
     first = false;
     ParallelUniqueId::initialize();
   }
+
+  FunctionFactory::instance()->registerFunction<UserFunction>("UserFunction");
   
   KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
   KernelFactory::instance()->registerKernel<Diffusion>("Diffusion");
@@ -146,6 +153,8 @@ Moose::registerObjects()
 
   ParserBlockFactory::instance()->registerParserBlock<MeshBlock>("Mesh");
   ParserBlockFactory::instance()->registerParserBlock<MeshGenerationBlock>("Mesh/Generation");
+  ParserBlockFactory::instance()->registerParserBlock<FunctionsBlock>("Functions");
+  ParserBlockFactory::instance()->registerParserBlock<GenericFunctionsBlock>("Functions/*");
   ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables");
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("Variables/*");
   ParserBlockFactory::instance()->registerParserBlock<GenericICBlock>("Variables/*/InitialCondition");
