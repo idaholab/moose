@@ -1,14 +1,12 @@
-#ifndef FUNCTORTEST_H
-#define FUNCTORTEST_H
+#ifndef USERFUNCTIONTEST_H
+#define USERFUNCTIONTEST_H
 
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-class Functor;
-
-class FunctorTest : public CppUnit::TestFixture 
+class UserFunctionTest : public CppUnit::TestFixture 
 {
-  CPPUNIT_TEST_SUITE( FunctorTest );
+  CPPUNIT_TEST_SUITE( UserFunctionTest );
 
   CPPUNIT_TEST( basicConstructor );
   CPPUNIT_TEST( advancedConstructor );
@@ -26,4 +24,4 @@ public:
 private:
 };
 
-#endif  // FUNCTORTEST_H
+#endif  // USERFUNCTIONTEST_H
