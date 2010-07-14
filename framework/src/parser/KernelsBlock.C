@@ -1,9 +1,5 @@
 #include "KernelsBlock.h"
 
-#include "KernelFactory.h"
-#include "AuxKernel.h"
-#include "TransientBlock.h"
-
 template<>
 InputParameters validParams<KernelsBlock>()
 {

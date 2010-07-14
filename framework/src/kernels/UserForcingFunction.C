@@ -1,4 +1,5 @@
 #include "UserForcingFunction.h"
+#include "Function.h"
 
 template<>
 InputParameters validParams<UserForcingFunction>()

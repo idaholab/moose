@@ -1,12 +1,11 @@
 #ifndef USERFORCINGFUNCTION_H
 #define USERFORCINGFUNCTION_H
 
-//TODO move to .C file?
 #include "Kernel.h"
-#include "Function.h"
 
 //Forward Declarations
 class UserForcingFunction;
+class Function;
 
 template<>
 InputParameters validParams<UserForcingFunction>();

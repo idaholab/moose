@@ -37,8 +37,8 @@ UserFunction::initialize( std::string equation, std::vector<std::string> vars, s
   if (res != -1 )
   {
     //Show the user their equation with a ^ where the parsing error is
-    std::string msg(res, ' ');
-    msg = "ERROR: Can not parse function\n" + equation + "\n" + msg + "^\n";
+    std::string msg(res+1, ' ');
+    msg = "ERROR: Can not parse function\n'" + equation + "'\n" + msg + "^\n";
     mooseError(msg);
   }
 
