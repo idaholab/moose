@@ -6,14 +6,19 @@
 #include "InitialConditionFactory.h"
 
 //Our Example Includes
-#include "MMSImplicitEuler.h" //including Implicit Euler
-#include "MMSCoupledDirichletBC.h" //including our Boundary Conditions
-#include "MMSDiffusion.h" //including our Diffusion Kernel
-#include "MMSConvection.h" //including our Forcing Kernel
-#include "MMSReaction.h" //including our Convection Kernel
-#include "MMSForcing.h" //including our Reaction Kernel
-#include "MMSConstantAux.h" //including our Aux Kerne
-
+#include "MMSImplicitEuler.h" //including our sine Implicit Euler Kernel
+#include "MMSCoupledDirichletBC.h" //including our sine Boundary Conditions
+#include "MMSDiffusion.h" //including our sine Diffusion Kernel
+#include "MMSConvection.h" //including our sine Forcing Kernel
+#include "MMSReaction.h" //including our sine Convection Kernel
+#include "MMSForcing.h" //including our sine Reaction Kernel
+#include "MMSConstantAux.h" //including our sine Aux Kernel
+#include "PolyCoupledDirichletBC.h" //including our polynomial Boundary Conditions
+#include "PolyDiffusion.h" //including our polynomial Diffusion Kernel
+#include "PolyConvection.h" //including our polynomial Forcing Kernel
+#include "PolyReaction.h" //including our polynomial Convection Kernel
+#include "PolyForcing.h" //including our polynomial Reaction Kernel
+#include "PolyConstantAux.h" //including our polynomial Aux Kernel
 //Local Includes
 #include "DiffMKernel.h"
 
@@ -34,7 +39,15 @@ namespace MooseTest
 
     KernelFactory::instance()->registerKernel<MMSReaction>("MMSReaction");
 
-    KernelFactory::instance()->registerKernel<MMSForcing>("MMSForcing");  
+    KernelFactory::instance()->registerKernel<MMSForcing>("MMSForcing");
+
+    KernelFactory::instance()->registerKernel<PolyDiffusion>("PolyDiffusion");
+
+    KernelFactory::instance()->registerKernel<PolyConvection>("PolyConvection");
+
+    KernelFactory::instance()->registerKernel<PolyReaction>("PolyReaction");
+
+    KernelFactory::instance()->registerKernel<PolyForcing>("PolyForcing");
 
     // Register our new material class so we can use it.
     MaterialFactory::instance()->registerMaterial<Diff1Material>("Diff1Material");
@@ -42,8 +55,10 @@ namespace MooseTest
 
     //Registering the Boundary Conditions
     BCFactory::instance()->registerBC<MMSCoupledDirichletBC>("MMSCoupledDirichletBC");
-
+    BCFactory::instance()->registerBC<PolyCoupledDirichletBC>("PolyCoupledDirichletBC");
     //Registering our Aux Kernel
     AuxFactory::instance()->registerAux<MMSConstantAux>("MMSConstantAux");
-  }
+
+    AuxFactory::instance()->registerAux<PolyConstantAux>("PolyConstantAux");}
 }
+
