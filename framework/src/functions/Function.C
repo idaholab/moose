@@ -15,4 +15,3 @@ Function::Function(std::string name, MooseSystem & moose_system, InputParameters
 Function::~Function()
 {
 }
-

@@ -1,5 +1,5 @@
-#ifndef AUXHOLDER_H
-#define AUXHOLDER_H
+#ifndef AUXWAREHOUSE_H
+#define AUXWAREHOUSE_H
 
 #include <vector>
 #include <map>
@@ -18,11 +18,11 @@ typedef std::vector<AuxKernel *>::iterator AuxKernelIterator;
 /**
  * TODO: describe me
  */
-class AuxHolder
+class AuxWarehouse
 {
 public:
-  AuxHolder(MooseSystem &sys);
-  virtual ~AuxHolder();
+  AuxWarehouse(MooseSystem &sys);
+  virtual ~AuxWarehouse();
 
   AuxKernelIterator activeNodalAuxKernelsBegin(THREAD_ID tid);
   AuxKernelIterator activeNodalAuxKernelsEnd(THREAD_ID tid);
@@ -52,4 +52,4 @@ protected:
   MooseSystem &_moose_system;
 };
 
-#endif // AUXHOLDER_H
+#endif // AUXWAREHOUSE_H

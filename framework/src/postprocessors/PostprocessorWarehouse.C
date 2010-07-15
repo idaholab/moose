@@ -1,17 +1,17 @@
-#include "PostprocessorHolder.h"
+#include "PostprocessorWarehouse.h"
 
 #include "MooseSystem.h"
 #include "ElementPostprocessor.h"
 #include "SidePostprocessor.h"
 
-PostprocessorHolder::PostprocessorHolder(MooseSystem &sys) :
+PostprocessorWarehouse::PostprocessorWarehouse(MooseSystem &sys) :
   _moose_system(sys)
 {
   _element_postprocessors.resize(libMesh::n_threads());
   _side_postprocessors.resize(libMesh::n_threads());
 }
 
-PostprocessorHolder::~PostprocessorHolder()
+PostprocessorWarehouse::~PostprocessorWarehouse()
 {
   {
     std::vector<std::vector<Postprocessor *> >::iterator i;
@@ -28,7 +28,7 @@ PostprocessorHolder::~PostprocessorHolder()
 }
 
 void
-PostprocessorHolder::addPostprocessor(THREAD_ID tid, Postprocessor *postprocessor)
+PostprocessorWarehouse::addPostprocessor(THREAD_ID tid, Postprocessor *postprocessor)
 {
   if(dynamic_cast<ElementPostprocessor*>(postprocessor))
     _element_postprocessors[tid].push_back(postprocessor);
@@ -46,25 +46,25 @@ PostprocessorHolder::addPostprocessor(THREAD_ID tid, Postprocessor *postprocesso
 }
 
 PostprocessorIterator
-PostprocessorHolder::elementPostprocessorsBegin(THREAD_ID tid)
+PostprocessorWarehouse::elementPostprocessorsBegin(THREAD_ID tid)
 {
   return _element_postprocessors[tid].begin();
 }
 
 PostprocessorIterator
-PostprocessorHolder::elementPostprocessorsEnd(THREAD_ID tid)
+PostprocessorWarehouse::elementPostprocessorsEnd(THREAD_ID tid)
 {
   return _element_postprocessors[tid].end();
 }
 
 PostprocessorIterator
-PostprocessorHolder::sidePostprocessorsBegin(THREAD_ID tid, unsigned int boundary_id)
+PostprocessorWarehouse::sidePostprocessorsBegin(THREAD_ID tid, unsigned int boundary_id)
 {
   return _side_postprocessors[tid][boundary_id].begin();
 }
 
 PostprocessorIterator
-PostprocessorHolder::sidePostprocessorsEnd(THREAD_ID tid, unsigned int boundary_id)
+PostprocessorWarehouse::sidePostprocessorsEnd(THREAD_ID tid, unsigned int boundary_id)
 {
   return _side_postprocessors[tid][boundary_id].end();
 }

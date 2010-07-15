@@ -1,5 +1,5 @@
-#ifndef STABILIZERHOLDER_H
-#define STABILIZERHOLDER_H
+#ifndef STABILIZERWAREHOUSE_H
+#define STABILIZERWAREHOUSE_H
 
 #include "Stabilizer.h"
 
@@ -9,11 +9,11 @@
 typedef std::map<unsigned int, Stabilizer *>::iterator StabilizerIterator;
 
 
-class StabilizerHolder
+class StabilizerWarehouse
 {
 public:
-  StabilizerHolder(MooseSystem &sys);
-  virtual ~StabilizerHolder();
+  StabilizerWarehouse(MooseSystem &sys);
+  virtual ~StabilizerWarehouse();
 
   Stabilizer * add(std::string stabilizer_name,
                    std::string name,
@@ -43,4 +43,4 @@ protected:
   MooseSystem &_moose_system;
 };
 
-#endif // STABILIZERHOLDER_H
+#endif // STABILIZERWAREHOUSE_H

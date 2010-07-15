@@ -10,6 +10,9 @@ class GenericFunctionsBlock;
 template<>
 InputParameters validParams<GenericFunctionsBlock>();
 
+/**
+ * This class parses functions in the [Functions] block and creates them.
+ */
 class GenericFunctionsBlock: public ParserBlock
 {
 public:

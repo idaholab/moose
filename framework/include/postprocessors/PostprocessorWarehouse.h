@@ -1,5 +1,5 @@
-#ifndef POSTPROCESSORHOLDER_H
-#define POSTPROCESSORHOLDER_H
+#ifndef POSTPROCESSORWAREHOUSE_H
+#define POSTPROCESSORWAREHOUSE_H
 
 #include "Postprocessor.h"
 
@@ -16,11 +16,11 @@ typedef std::vector<Postprocessor *>::iterator PostprocessorIterator;
 /**
  * Holds postprocessors and provides some services
  */
-class PostprocessorHolder
+class PostprocessorWarehouse
 {
 public:
-  PostprocessorHolder(MooseSystem &sys);
-  virtual ~PostprocessorHolder();
+  PostprocessorWarehouse(MooseSystem &sys);
+  virtual ~PostprocessorWarehouse();
 
   PostprocessorIterator elementPostprocessorsBegin(THREAD_ID tid);
   PostprocessorIterator elementPostprocessorsEnd(THREAD_ID tid);
@@ -43,4 +43,4 @@ protected:
   MooseSystem &_moose_system;
 };
 
-#endif // POSTPROCESSORHOLDER_H
+#endif // POSTPROCESSORWAREHOUSE_H

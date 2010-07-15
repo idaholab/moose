@@ -1,13 +1,13 @@
-#include "StabilizerHolder.h"
+#include "StabilizerWarehouse.h"
 
-StabilizerHolder::StabilizerHolder(MooseSystem &sys)
+StabilizerWarehouse::StabilizerWarehouse(MooseSystem &sys)
   : _moose_system(sys)
 {
   _active_stabilizers.resize(libMesh::n_threads());
   _block_stabilizers.resize(libMesh::n_threads());
 }
 
-StabilizerHolder::~StabilizerHolder()
+StabilizerWarehouse::~StabilizerWarehouse()
 {
   {
 
@@ -42,45 +42,45 @@ StabilizerHolder::~StabilizerHolder()
 }
 
 bool
-StabilizerHolder::isStabilized(unsigned int var_num)
+StabilizerWarehouse::isStabilized(unsigned int var_num)
 {
   return _is_stabilized[var_num];
 }
 
 StabilizerIterator
-StabilizerHolder::activeStabilizersBegin(THREAD_ID tid)
+StabilizerWarehouse::activeStabilizersBegin(THREAD_ID tid)
 {
   return _active_stabilizers[tid].begin();
 }
 
 StabilizerIterator
-StabilizerHolder::activeStabilizersEnd(THREAD_ID tid)
+StabilizerWarehouse::activeStabilizersEnd(THREAD_ID tid)
 {
   return _active_stabilizers[tid].end();
 }
 
 
 StabilizerIterator
-StabilizerHolder::blockStabilizersBegin(THREAD_ID tid, unsigned int block_id)
+StabilizerWarehouse::blockStabilizersBegin(THREAD_ID tid, unsigned int block_id)
 {
   return _block_stabilizers[tid][block_id].begin();
 }
 
 StabilizerIterator
-StabilizerHolder::blockStabilizersEnd(THREAD_ID tid, unsigned int block_id)
+StabilizerWarehouse::blockStabilizersEnd(THREAD_ID tid, unsigned int block_id)
 {
   return _block_stabilizers[tid][block_id].end();
 }
 
 void
-StabilizerHolder::addBlockStabilizer(THREAD_ID tid, unsigned int block_id, unsigned int var_num, Stabilizer *stabilizer)
+StabilizerWarehouse::addBlockStabilizer(THREAD_ID tid, unsigned int block_id, unsigned int var_num, Stabilizer *stabilizer)
 {
   _block_stabilizers[tid][block_id][var_num] = stabilizer;
   _is_stabilized[var_num] = true;
 }
 
 void
-StabilizerHolder::addStabilizer(THREAD_ID tid, unsigned int var_num, Stabilizer *stabilizer)
+StabilizerWarehouse::addStabilizer(THREAD_ID tid, unsigned int var_num, Stabilizer *stabilizer)
 {
   _active_stabilizers[tid][var_num] = stabilizer;
   _is_stabilized[var_num] = true;

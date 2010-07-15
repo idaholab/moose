@@ -1,8 +1,6 @@
 #ifndef FUNCTIONINTERFACE_H
 #define FUNCTIONINTERFACE_H
 
-#include "MooseObject.h"
-
 class Function;
 class FunctionWarehouse;
 
@@ -15,6 +13,10 @@ class FunctionInterface
 public:
   /**
    * @param func_warehouse Reference to the FunctionWarehouse stored by MooseSystem
+   * @param params The parameters used by the object being instantiated. This
+   *        class needs them so it can get the function named in the input file,
+   *        but the object calling getFunction only needs to use the name on the
+   *        left hand side of the statement "function = func_name"
    * @param tid The thread id used by this object, used by the warehouse
    */
   FunctionInterface(FunctionWarehouse & func_warehouse, InputParameters params, THREAD_ID tid);
@@ -31,7 +33,7 @@ private:
    * Private copy of the tid so getFunction() knows which tid to use to retrieve
    * the Function object. It is not named _tid because then the compiler doesn't
    * like sub classes of PDEBase using _tid because it is ambiguous (even though
-   * _tid would be private here for some reason).
+   * _tid is private here).
    */
   THREAD_ID _func_tid;
 };

@@ -21,5 +21,3 @@ FunctionsBlock::execute()
   //add the functions to the system
   visitChildren();
 }  
-
-  

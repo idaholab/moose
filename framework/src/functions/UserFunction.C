@@ -54,7 +54,7 @@ UserFunction::initialize( std::string equation, std::vector<std::string> vars, s
   for (int i = 0; i < vals.size(); i++)
     _vars[i+4] = vals[i];
 
-  //TODO compile with support for optimization (ask about alloca)
+  //TODO compile with support for optimization (edit fpconfig.h I think)
   _parser.Optimize();
 }
 

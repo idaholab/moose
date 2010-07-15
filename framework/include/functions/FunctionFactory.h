@@ -4,10 +4,10 @@
 #include "Function.h"
 
 // System includes
-#include <map>
-#include <string>
-#include <vector>
-#include <typeinfo>
+//#include <map>
+//#include <string>
+//#include <vector>
+//#include <typeinfo>
 
 // LibMesh includes
 #include <parameters.h>
@@ -41,7 +41,6 @@ Function * buildFunction(std::string name, MooseSystem & moose_system, InputPara
 
 /**
  * Responsible for building Functions on demand and storing them for retrieval
- * PJJ TODO: clean this class up. it has unecessary cruft from KernelFactory
  */
 class FunctionFactory
 {
@@ -65,9 +64,6 @@ public:
     return (*_name_to_build_pointer[function_name])(name, moose_system, parameters);
   }
 
-  FunctionNamesIterator registeredFunctionsBegin();
-  FunctionNamesIterator registeredFunctionsEnd();
-
   InputParameters getValidParams(std::string name);
   
 private:
@@ -76,8 +72,6 @@ private:
   
   std::map<std::string, functionBuildPtr> _name_to_build_pointer;
   std::map<std::string, functionParamsPtr> _name_to_params_pointer;
-
-  std::vector<std::string> _registered_function_names;
 };
 
 #endif //FUNCTIONFACTORY_H

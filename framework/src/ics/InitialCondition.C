@@ -1,4 +1,5 @@
 #include "InitialCondition.h"
+#include "MooseSystem.h"
 
 template<>
 InputParameters validParams<InitialCondition>()
@@ -10,6 +11,7 @@ InputParameters validParams<InitialCondition>()
 
 InitialCondition::InitialCondition(std::string name, MooseSystem & moose_system, InputParameters parameters) :
   MooseObject(name, moose_system, parameters),
+  FunctionInterface(moose_system._functions, parameters, _tid),
   _var_name(parameters.get<std::string>("var_name"))
 {
 }

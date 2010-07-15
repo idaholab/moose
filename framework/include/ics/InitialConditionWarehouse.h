@@ -1,5 +1,5 @@
-#ifndef ICHOLDER_H
-#define ICHOLDER_H
+#ifndef INITIALCONDITIONWAREHOUSE_H
+#define INITIALCONDITIONWAREHOUSE_H
 
 #include <vector>
 
@@ -11,11 +11,11 @@
 typedef std::map<std::string, InitialCondition *>::iterator InitialConditionIterator;
 
 
-class ICHolder
+class InitialConditionWarehouse
 {
 public:
-  ICHolder(MooseSystem &sys);
-  virtual ~ICHolder();
+  InitialConditionWarehouse(MooseSystem &sys);
+  virtual ~InitialConditionWarehouse();
 
   InitialConditionIterator activeInitialConditionsBegin(THREAD_ID tid);
   InitialConditionIterator activeInitialConditionsEnd(THREAD_ID tid);
@@ -30,4 +30,4 @@ protected:
   MooseSystem &_moose_system;
 };
 
-#endif // BCHOLDER_H
+#endif // INITIALCONDITIONWAREHOUSE_H

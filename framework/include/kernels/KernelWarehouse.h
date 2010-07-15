@@ -1,5 +1,5 @@
-#ifndef KERNELHOLDER_H
-#define KERNELHOLDER_H
+#ifndef KERNELWAREHOUSE_H
+#define KERNELWAREHOUSE_H
 
 #include <vector>
 #include <map>
@@ -17,11 +17,11 @@ typedef std::vector<Kernel *>::iterator KernelIterator;
 /**
  * Holds kernels and provides some services
  */
-class KernelHolder
+class KernelWarehouse
 {
 public:
-  KernelHolder(MooseSystem &sys);
-  virtual ~KernelHolder();
+  KernelWarehouse(MooseSystem &sys);
+  virtual ~KernelWarehouse();
 
   KernelIterator activeKernelsBegin(THREAD_ID tid);
   KernelIterator activeKernelsEnd(THREAD_ID tid);
@@ -46,4 +46,4 @@ protected:
   MooseSystem &_moose_system;
 };
 
-#endif // KERNELHOLDER_H
+#endif // KERNELWAREHOUSE_H

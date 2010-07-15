@@ -1,5 +1,5 @@
-#ifndef MATERIALHOLDER_H
-#define MATERIALHOLDER_H
+#ifndef MATERIALWAREHOUSE_H
+#define MATERIALWAREHOUSE_H
 
 #include <vector>
 #include <map>
@@ -12,11 +12,11 @@
 typedef std::map<int, std::vector<Material *> >::iterator MaterialIterator;
 
 
-class MaterialHolder
+class MaterialWarehouse
 {
 public:
-  MaterialHolder(MooseSystem &sys);
-  virtual ~MaterialHolder();
+  MaterialWarehouse(MooseSystem &sys);
+  virtual ~MaterialWarehouse();
 
   std::vector<Material *> getMaterials(THREAD_ID tid, unsigned int block_id);
   std::vector<Material *> getBoundaryMaterials(THREAD_ID tid, unsigned int boundary_id);
@@ -45,4 +45,4 @@ protected:
   MooseSystem &_moose_system;
 };
 
-#endif // MATERIALHOLDER_H
+#endif // MATERIALWAREHOUSE_H

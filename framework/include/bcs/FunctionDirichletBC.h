@@ -2,10 +2,10 @@
 #define FUNCTIONDIRICHLETBC_H
 
 #include "BoundaryCondition.h"
-#include "Function.h"
 
 //Forward Declarations
 class FunctionDirichletBC;
+class Function;
 
 template<>
 InputParameters validParams<FunctionDirichletBC>();
@@ -24,12 +24,12 @@ public:
 
 protected:
   /**
-   * Evaluate f at the current quadrature point.
+   * Evaluate the function at the current quadrature point and timestep.
    */
   Real f();
 
   /**
-   * u - the function
+   * returns (u - the function)
    */
   virtual Real computeQpResidual();
 

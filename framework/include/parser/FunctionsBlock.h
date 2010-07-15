@@ -19,7 +19,4 @@ public:
   virtual void execute();
 };
 
-
-  
-
 #endif //FUNCTIONSBLOCK_H

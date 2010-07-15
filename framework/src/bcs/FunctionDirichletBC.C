@@ -1,4 +1,5 @@
 #include "FunctionDirichletBC.h"
+#include "Function.h"
 
 template<>
 InputParameters validParams<FunctionDirichletBC>()

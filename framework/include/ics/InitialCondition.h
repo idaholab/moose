@@ -1,15 +1,14 @@
 #ifndef INITIALCONDITION_H
 #define INITIALCONDITION_H
 
-#include "Moose.h"
-#include "ValidParams.h"
 #include "MooseObject.h"
+#include "FunctionInterface.h"
 
 // System includes
 #include <string>
 
 //forward declarations
-class MooseSystem;
+//class MooseSystem;
 class InitialCondition;
 
 template<>
@@ -18,7 +17,7 @@ InputParameters validParams<InitialCondition>();
 /**
  * InitialConditions are objects that set the initial value of variables.
  */
-class InitialCondition : public MooseObject
+class InitialCondition : public MooseObject, protected FunctionInterface
 {
 public:
 

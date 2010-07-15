@@ -1,30 +1,30 @@
-#include "ICHolder.h"
+#include "InitialConditionWarehouse.h"
 
-ICHolder::ICHolder(MooseSystem &sys)
+InitialConditionWarehouse::InitialConditionWarehouse(MooseSystem &sys)
   : _moose_system(sys)
 {
   _active_initial_conditions.resize(libMesh::n_threads());
 }
 
-ICHolder::~ICHolder()
+InitialConditionWarehouse::~InitialConditionWarehouse()
 {
 }
 
 InitialConditionIterator
-ICHolder::activeInitialConditionsBegin(THREAD_ID tid)
+InitialConditionWarehouse::activeInitialConditionsBegin(THREAD_ID tid)
 {
   return _active_initial_conditions[tid].begin();
 }
 
 InitialConditionIterator
-ICHolder::activeInitialConditionsEnd(THREAD_ID tid)
+InitialConditionWarehouse::activeInitialConditionsEnd(THREAD_ID tid)
 {
   return _active_initial_conditions[tid].end();
 }
 
 
 InitialCondition *
-ICHolder::getInitialCondition(THREAD_ID tid, std::string var_name)
+InitialConditionWarehouse::getInitialCondition(THREAD_ID tid, std::string var_name)
 {
   InitialConditionIterator ic_iter = _active_initial_conditions[tid].find(var_name);
 
@@ -35,7 +35,7 @@ ICHolder::getInitialCondition(THREAD_ID tid, std::string var_name)
 }
 
 void
-ICHolder::addIC(THREAD_ID tid, std::string var_name, InitialCondition *ic)
+InitialConditionWarehouse::addIC(THREAD_ID tid, std::string var_name, InitialCondition *ic)
 {
   _active_initial_conditions[tid][var_name] = ic;
 }

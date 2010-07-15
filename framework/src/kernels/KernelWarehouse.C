@@ -1,7 +1,7 @@
-#include "KernelHolder.h"
+#include "KernelWarehouse.h"
 #include "MooseSystem.h"
 
-KernelHolder::KernelHolder(MooseSystem &sys) :
+KernelWarehouse::KernelWarehouse(MooseSystem &sys) :
   _moose_system(sys)
 {
   _active_kernels.resize(libMesh::n_threads());
@@ -10,7 +10,7 @@ KernelHolder::KernelHolder(MooseSystem &sys) :
   _all_block_kernels.resize(libMesh::n_threads());
 }
 
-KernelHolder::~KernelHolder()
+KernelWarehouse::~KernelWarehouse()
 {
   {
 
@@ -45,44 +45,44 @@ KernelHolder::~KernelHolder()
 }
 
 void
-KernelHolder::addKernel(THREAD_ID tid, Kernel *kernel)
+KernelWarehouse::addKernel(THREAD_ID tid, Kernel *kernel)
 {
   _all_kernels[tid].push_back(kernel);
 }
 
 void
-KernelHolder::addBlockKernel(THREAD_ID tid, unsigned int block_id, Kernel *kernel)
+KernelWarehouse::addBlockKernel(THREAD_ID tid, unsigned int block_id, Kernel *kernel)
 {
   _all_block_kernels[tid][block_id].push_back(kernel);
 }
 
 KernelIterator
-KernelHolder::activeKernelsBegin(THREAD_ID tid)
+KernelWarehouse::activeKernelsBegin(THREAD_ID tid)
 {
   return _active_kernels[tid].begin();
 }
 
 KernelIterator
-KernelHolder::activeKernelsEnd(THREAD_ID tid)
+KernelWarehouse::activeKernelsEnd(THREAD_ID tid)
 {
   return _active_kernels[tid].end();
 }
 
 
 KernelIterator
-KernelHolder::blockKernelsBegin(THREAD_ID tid, unsigned int block_id)
+KernelWarehouse::blockKernelsBegin(THREAD_ID tid, unsigned int block_id)
 {
   return _block_kernels[tid][block_id].begin();
 }
 
 KernelIterator
-KernelHolder::blockKernelsEnd(THREAD_ID tid, unsigned int block_id)
+KernelWarehouse::blockKernelsEnd(THREAD_ID tid, unsigned int block_id)
 {
   return _block_kernels[tid][block_id].end();
 }
 
 bool
-KernelHolder::activeKernelBlocks(std::set<subdomain_id_type> & set_buffer) const
+KernelWarehouse::activeKernelBlocks(std::set<subdomain_id_type> & set_buffer) const
 {
   std::map<unsigned int, std::vector<Kernel *> >::const_iterator curr, end;
   end = _block_kernels[0].end();
@@ -102,7 +102,7 @@ KernelHolder::activeKernelBlocks(std::set<subdomain_id_type> & set_buffer) const
 }
 
 void
-KernelHolder::updateActiveKernels(THREAD_ID tid)
+KernelWarehouse::updateActiveKernels(THREAD_ID tid)
 {
   {
     Real t = _moose_system._t;

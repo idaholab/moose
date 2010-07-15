@@ -1,5 +1,5 @@
-#ifndef BCHOLDER_H
-#define BCHOLDER_H
+#ifndef BCWAREHOUSE_H
+#define BCWAREHOUSE_H
 
 #include <vector>
 
@@ -10,11 +10,11 @@
  */
 typedef std::vector<BoundaryCondition *>::iterator BCIterator;
 
-class BCHolder
+class BCWarehouse
 {
 public:
-  BCHolder(MooseSystem &sys);
-  virtual ~BCHolder();
+  BCWarehouse(MooseSystem &sys);
+  virtual ~BCWarehouse();
 
   void sizeEverything();
 
@@ -36,4 +36,4 @@ protected:
   MooseSystem &_moose_system;
 };
 
-#endif // BCHOLDER_H
+#endif // BCWAREHOUSE_H

@@ -1,15 +1,13 @@
 #include "FunctionWarehouse.h"
-#include "MooseSystem.h"
 
 FunctionWarehouse::FunctionWarehouse(MooseSystem &sys):
-  _moose_system(sys),
   _functions(libMesh::n_threads())
 {
 }
 
 FunctionWarehouse::~FunctionWarehouse()
 {
-  //TODO delete Functions created in parsing system?
+  //TODO delete Function objects created by FunctionFactory?
 }
 
 FunctionIterator
@@ -36,8 +34,7 @@ FunctionWarehouse::getFunction(THREAD_ID tid, std::string fname)
 }
 
 void
-FunctionWarehouse::addFunction(THREAD_ID tid, std::string fname, Function *func)
+FunctionWarehouse::addFunction(THREAD_ID tid, std::string fname, Function * func)
 {
-  std::cout << "Adding Function to Warehouse: " << fname << "\n";
   _functions[tid][fname] = func;
 }

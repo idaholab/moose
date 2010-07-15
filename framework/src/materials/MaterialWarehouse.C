@@ -1,13 +1,13 @@
-#include "MaterialHolder.h"
+#include "MaterialWarehouse.h"
 
-MaterialHolder::MaterialHolder(MooseSystem &sys)
+MaterialWarehouse::MaterialWarehouse(MooseSystem &sys)
   : _moose_system(sys)
 {
   _active_materials.resize(libMesh::n_threads());
   _active_boundary_materials.resize(libMesh::n_threads());
 }
 
-MaterialHolder::~MaterialHolder()
+MaterialWarehouse::~MaterialWarehouse()
 {
   for (std::vector<std::map<int, std::vector<Material *> > >::iterator i = _active_materials.begin(); i != _active_materials.end(); ++i)
   {
@@ -25,7 +25,7 @@ MaterialHolder::~MaterialHolder()
 }
 
 std::vector<Material *>
-MaterialHolder::getMaterials(THREAD_ID tid, unsigned int block_id)
+MaterialWarehouse::getMaterials(THREAD_ID tid, unsigned int block_id)
 {
   MaterialIterator mat_iter = _active_materials[tid].find(block_id);
   if (mat_iter == _active_materials[tid].end())
@@ -35,7 +35,7 @@ MaterialHolder::getMaterials(THREAD_ID tid, unsigned int block_id)
 }
 
 std::vector<Material *>
-MaterialHolder::getBoundaryMaterials(THREAD_ID tid, unsigned int boundary_id)
+MaterialWarehouse::getBoundaryMaterials(THREAD_ID tid, unsigned int boundary_id)
 {
   MaterialIterator mat_iter = _active_boundary_materials[tid].find(boundary_id);
   if (mat_iter == _active_boundary_materials[tid].end())
@@ -44,7 +44,7 @@ MaterialHolder::getBoundaryMaterials(THREAD_ID tid, unsigned int boundary_id)
   return mat_iter->second;
 }
 
-void MaterialHolder::updateMaterialDataState()
+void MaterialWarehouse::updateMaterialDataState()
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
@@ -69,36 +69,36 @@ void MaterialHolder::updateMaterialDataState()
 }
 
 MaterialIterator
-MaterialHolder::activeMaterialsBegin(THREAD_ID tid)
+MaterialWarehouse::activeMaterialsBegin(THREAD_ID tid)
 {
   return _active_materials[tid].begin();
 }
 
 MaterialIterator
-MaterialHolder::activeMaterialsEnd(THREAD_ID tid)
+MaterialWarehouse::activeMaterialsEnd(THREAD_ID tid)
 {
   return _active_materials[tid].end();
 }
 
 MaterialIterator
-MaterialHolder::activeBoundaryMaterialsBegin(THREAD_ID tid)
+MaterialWarehouse::activeBoundaryMaterialsBegin(THREAD_ID tid)
 {
   return _active_boundary_materials[tid].begin();
 }
 
 MaterialIterator
-MaterialHolder::activeBoundaryMaterialsEnd(THREAD_ID tid)
+MaterialWarehouse::activeBoundaryMaterialsEnd(THREAD_ID tid)
 {
   return _active_boundary_materials[tid].end();
 }
 
 void
-MaterialHolder::addMaterial(THREAD_ID tid, int block_id, Material *material)
+MaterialWarehouse::addMaterial(THREAD_ID tid, int block_id, Material *material)
 {
   _active_materials[tid][block_id].push_back(material);
 }
 
-void MaterialHolder::addBoundaryMaterial(THREAD_ID tid, int block_id, Material *material)
+void MaterialWarehouse::addBoundaryMaterial(THREAD_ID tid, int block_id, Material *material)
 {
   _active_boundary_materials[tid][block_id].push_back(material);
 }

@@ -28,19 +28,17 @@ public:
   FunctionIterator activeFunctionsEnd(THREAD_ID tid);
 
   /**
-   * Get function by name.
+   * Get function by name and tid.
    */
   Function & getFunction(THREAD_ID tid, std::string fname);
 
   /**
-   * Add function by name.
+   * Add function by name and tid.
    */
   void addFunction(THREAD_ID tid, std::string fname, Function *func);
 
 protected:
   std::vector<std::map<std::string, Function *> > _functions;
-
-  MooseSystem &_moose_system;
 };
 
 #endif // FUNCTIONWAREHOUSE_H

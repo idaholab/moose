@@ -31,7 +31,7 @@ class UserFunction : public Function
 {
   public:
     /**
-     * Created from the FunctionFactory.
+     * Created from MooseSystem via the FunctionFactory.
      */
     UserFunction(std::string name, MooseSystem & moose_system, InputParameters parameters);
 

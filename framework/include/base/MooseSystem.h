@@ -6,18 +6,18 @@
 
 //MOOSE includes
 #include "Moose.h"  // for THREAD_ID
-#include "KernelHolder.h"
-#include "BCHolder.h"
-#include "AuxHolder.h"
-#include "MaterialHolder.h"
-#include "StabilizerHolder.h"
-#include "ICHolder.h"
+#include "KernelWarehouse.h"
+#include "BCWarehouse.h"
+#include "AuxWarehouse.h"
+#include "MaterialWarehouse.h"
+#include "StabilizerWarehouse.h"
+#include "InitialConditionWarehouse.h"
 #include "ElementData.h"
 #include "FaceData.h"
 #include "AuxData.h"
 #include "MaterialData.h"
 #include "PostprocessorData.h"
-#include "PostprocessorHolder.h"
+#include "PostprocessorWarehouse.h"
 #include "FunctionWarehouse.h"
 
 //libmesh includes
@@ -30,6 +30,7 @@
 
 //Forward Declarations
 class Material;
+class InitialConditionWarehouse;
 
 namespace libMesh
 {
@@ -361,13 +362,13 @@ private:
    */
   bool _mesh_changed;
 
-  KernelHolder _kernels;
-  BCHolder _bcs;
-  AuxHolder _auxs;
-  MaterialHolder _materials;
-  StabilizerHolder _stabilizers;
-  ICHolder _ics;
-  PostprocessorHolder _pps;
+  KernelWarehouse _kernels;
+  BCWarehouse _bcs;
+  AuxWarehouse _auxs;
+  MaterialWarehouse _materials;
+  StabilizerWarehouse _stabilizers;
+  InitialConditionWarehouse _ics;
+  PostprocessorWarehouse _pps;
   FunctionWarehouse _functions;
 
   /**
@@ -511,6 +512,7 @@ protected:
   friend class GenericExecutionerBlock;
 
   friend class PDEBase;
+  friend class InitialCondition;
   friend class Kernel;
   friend class AuxKernel;
   friend class BoundaryCondition;
