@@ -1,7 +1,7 @@
 [Mesh]
   dim = 2
   file = square.e
-  uniform_refine = 4
+  uniform_refine = 5
 []
 
 [Variables]
@@ -14,20 +14,22 @@
 []
 
 [Functions]
-  active = 'forcing_func bc_func'
+  active = 'forcing_func u_func'
   
   [./forcing_func]
     type = ParsedFunction
+    #function = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))
     function = alpha*alpha*pi*pi*sin(alpha*pi*x)
     vars = 'alpha'
-    vals = '16'
+    vals = '4'
   [../]
 
-  [./bc_func]
+  [./u_func]
     type = ParsedFunction
+    #function = sin(alpha*pi*x*y)
     function = sin(alpha*pi*x)
     vars = 'alpha'
-    vals = '16'
+    vals = '4'
   [../]
 []
 
@@ -47,13 +49,20 @@
 []
 
 [BCs]
-  active = 'all'
+  active = 'left right'
 
-  [./all]
-    type = FunctionDirichletBC
+  [./left]
+    type = DirichletBC
     variable = u
-    boundary = '1 2'
-    function = bc_func
+    boundary = '1'
+    value = 0
+  [../]
+
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = '2'
+    value = 0
   [../]
 []
 
@@ -69,6 +78,14 @@
 [Executioner]
   type = Steady
   perf_log = true
+[]
+
+[Postprocessors]
+  [./integral]
+    type = ElementL2Error
+    variable = u
+    function = u_func
+  [../]
 []
 
 [Output]

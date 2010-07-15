@@ -32,9 +32,16 @@ public:
 
   /**
    * Function pointer to evaluate the exact solution at a point.
-   * Evaluate the exact solution at a point
    */
   Number exactSolution(const Point& p,
+                const Parameters& Parameters,
+                const std::string& sys_name,
+                const std::string& unknown_name);
+
+  /**
+   * Function pointer to evaluate the exact gradient at a point.
+   */
+  RealGradient exactGrad(const Point& p,
                 const Parameters& Parameters,
                 const std::string& sys_name,
                 const std::string& unknown_name);
@@ -53,6 +60,7 @@ private:
 
   std::ofstream _out_file;
   bool _output_norms;
+  bool _compute_h1;
 };
 
 #endif //EXACTSOLEXEC_H

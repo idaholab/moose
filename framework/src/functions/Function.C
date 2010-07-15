@@ -15,3 +15,9 @@ Function::Function(std::string name, MooseSystem & moose_system, InputParameters
 Function::~Function()
 {
 }
+
+RealGradient 
+Function::grad(Real t, Real x, Real y, Real z)
+{
+  return RealGradient(0, 0, 0);
+}

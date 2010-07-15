@@ -17,7 +17,7 @@
   active = 'forcing_func'
   
   [./forcing_func]
-    type = UserFunction
+    type = ParsedFunction
     function = alpha*alpha*pi*pi*sin(alpha*pi*x)
     vars = 'alpha'
     vals = '16'

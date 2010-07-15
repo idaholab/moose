@@ -1,0 +1,119 @@
+[Mesh]
+  dim = 2
+  file = square.e
+
+#  do not use uniform refine, we are using adaptive refining
+#  uniform_refine = 6
+[]
+
+[Variables]
+  active = 'u'
+
+  [./u]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[Functions]
+  active = 'forcing_func u_func'
+  
+  [./forcing_func]
+    type = ParsedFunction
+    function = alpha*alpha*pi*pi*sin(alpha*pi*x)
+    vars = 'alpha'
+    vals = '4'
+  [../]
+
+  [./u_func]
+    type = ParsedGradFunction
+    function = sin(alpha*pi*x)
+    grad_x   = alpha*pi*sin(alpha*pi*x)
+    vars = 'alpha'
+    vals = '4'
+  [../]
+[]
+
+[Kernels]
+  active = 'diff forcing'
+
+  [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+
+  [./forcing]
+    type = UserForcingFunction
+    variable = u
+    function = forcing_func
+  [../]
+[]
+
+[BCs]
+  active = 'left right'
+
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = '1'
+    value = 0
+  [../]
+
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = '2'
+    value = 0
+  [../]
+[]
+
+[Materials]
+  active = empty
+
+  [./empty]
+    type = EmptyMaterial
+    block = 1
+  [../]
+[]
+
+[Executioner]
+  type = ExactSolutionExecutioner
+
+  # This is the exact solution, if you compute h1 error it must provide a gradient
+  function = u_func
+
+  # Set this to true if you want to compute the h1 error, you must provide a gradient
+  h1_error = true
+
+  # Derek said this might help improve the values we get, but it didnt do anything for me
+  extra_quadrature_order = 3
+
+  # this is the filename where the dofs and norm values will be printed
+  norm_file = dofs
+
+  # set this value to determine how many iterations you do
+  max_r_steps = 6
+
+  perf_log = true
+
+  [./Adaptivity]
+    # if the refine fraction is 1 it will refine every element
+    # remember < 1 means only refine that percentage of elements
+    refine_fraction = 1
+
+    # do not coarsen at all
+    coarsen_fraction = 0
+
+    # maximum level of refinement steps, make sure this is > max_r_steps
+    max_h_level = 10
+
+    # leave this as is
+    error_estimator = KellyErrorEstimator
+  [../]
+[]
+
+[Output]
+  file_base = out
+  interval = 1
+  exodus = true
+[]

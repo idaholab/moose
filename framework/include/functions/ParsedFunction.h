@@ -1,5 +1,5 @@
-#ifndef USERFUNCTION_H
-#define USERFUNCTION_H
+#ifndef PARSEDFUNCTION_H
+#define PARSEDFUNCTION_H
 
 #include "Function.h"
 #include "fparser.h"
@@ -10,10 +10,10 @@
 
 #include "libmesh_common.h" // to get Real
 
-class UserFunction;
+class ParsedFunction;
 
 template<>
-InputParameters validParams<UserFunction>();
+InputParameters validParams<ParsedFunction>();
 
 /**
  * This class is used to evaluate symbolic equations passed in to Moose through
@@ -27,15 +27,15 @@ InputParameters validParams<UserFunction>();
  * the same functor simultaneously you must compile fparser in thread safe mode.
  * (Do this probably by editing the fconfig.h file)
  */
-class UserFunction : public Function
+class ParsedFunction : public Function
 {
   public:
     /**
      * Created from MooseSystem via the FunctionFactory.
      */
-    UserFunction(std::string name, MooseSystem & moose_system, InputParameters parameters);
+    ParsedFunction(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
-    virtual ~UserFunction();
+    virtual ~ParsedFunction();
 
     /**
      * Get the address to stick the value of the specified variable in. When you
@@ -59,12 +59,12 @@ class UserFunction : public Function
 
   protected:
     /**
-     * Override this method if you want to make your own UserFunction with custom
+     * Override this method if you want to make your own ParsedFunction with custom
      * constants available to the end user. In the base class pi and e are
      * defined. This method is called when the FunctionParser object is being
-     * constructed but before it parses the input equation.
+     * initialized in initializeParser before the function is parsed.
      */
-    void defineConstants();
+    void defineConstants(FunctionParser & fp);
 
     /**
      * Called from the constructor to initialize the underlying Function Parser.
@@ -83,14 +83,15 @@ class UserFunction : public Function
      *
      *        TODO: putting these values as constants would probably be faster
      */
-    void initialize(std::string equation,
+    void initializeParser(FunctionParser & fp, std::string equation,
              std::vector<std::string> vars = std::vector<std::string>(0),
              std::vector<Real> vals = std::vector<Real>(0));
 
+    std::vector<Real> _vals;
+
   private:
     FunctionParser _parser;
-    std::vector<Real> _vars;
     std::map<std::string, Real*> _var_map;
 };
 
-#endif //USERFUNCTION_H
+#endif //PARSEDFUNCTION_H

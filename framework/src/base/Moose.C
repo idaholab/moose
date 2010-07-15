@@ -2,7 +2,8 @@
 #include "ComputeJacobian.h"
 
 #include "FunctionFactory.h"
-#include "UserFunction.h"
+#include "ParsedFunction.h"
+#include "ParsedGradFunction.h"
 
 #include "KernelFactory.h"
 #include "BodyForce.h"
@@ -83,6 +84,8 @@
 
 #include "PostprocessorFactory.h"
 #include "ElementIntegral.h"
+#include "ElementL2Error.h"
+#include "ElementH1Error.h"
 #include "ElementAverageValue.h"
 #include "SideIntegral.h"
 #include "SideAverageValue.h"
@@ -124,7 +127,8 @@ Moose::registerObjects()
     ParallelUniqueId::initialize();
   }
 
-  FunctionFactory::instance()->registerFunction<UserFunction>("UserFunction");
+  FunctionFactory::instance()->registerFunction<ParsedFunction>("ParsedFunction");
+  FunctionFactory::instance()->registerFunction<ParsedGradFunction>("ParsedGradFunction");
   
   KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
   KernelFactory::instance()->registerKernel<Diffusion>("Diffusion");
@@ -204,6 +208,8 @@ Moose::registerObjects()
   StabilizerFactory::instance()->registerStabilizer<ConvectionDiffusionSUPG>("ConvectionDiffusionSUPG");
 
   PostprocessorFactory::instance()->registerPostprocessor<ElementIntegral>("ElementIntegral");
+  PostprocessorFactory::instance()->registerPostprocessor<ElementL2Error>("ElementL2Error");
+  PostprocessorFactory::instance()->registerPostprocessor<ElementH1Error>("ElementH1Error");
   PostprocessorFactory::instance()->registerPostprocessor<ElementAverageValue>("ElementAverageValue");
 
   PostprocessorFactory::instance()->registerPostprocessor<SideIntegral>("SideIntegral");
