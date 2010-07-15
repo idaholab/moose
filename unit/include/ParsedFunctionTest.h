@@ -4,9 +4,9 @@
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-class UserFunctionTest : public CppUnit::TestFixture 
+class ParsedFunctionTest : public CppUnit::TestFixture 
 {
-  CPPUNIT_TEST_SUITE( UserFunctionTest );
+  CPPUNIT_TEST_SUITE( ParsedFunctionTest );
 
   CPPUNIT_TEST( basicConstructor );
   CPPUNIT_TEST( advancedConstructor );

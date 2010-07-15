@@ -15,7 +15,7 @@
 #include "LinearInterpolationTest.h"
 #include "MooseArrayTest.h"
 #include "ColumnMajorMatrixTest.h"
-#include "UserFunctionTest.h"
+#include "ParsedFunctionTest.h"
 
 //Elk Tests
 #ifdef ELK_TEST
