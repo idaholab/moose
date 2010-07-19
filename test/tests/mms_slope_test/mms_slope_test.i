@@ -86,7 +86,7 @@
   h1_error = true
 
   # Derek said this might help improve the values we get, but it didnt do anything for me
-  extra_quadrature_order = 3
+  #extra_quadrature_order = 3
 
   # this is the filename where the dofs and norm values will be printed
   norm_file = dofs
@@ -109,6 +109,24 @@
 
     # leave this as is
     error_estimator = KellyErrorEstimator
+  [../]
+[]
+
+# print l2 and h1 errors from the Postprocessors too so I can compare
+[Postprocessors]
+  active = 'l2_error h1_error'
+#  active = ' '
+
+  [./l2_error]
+    type = ElementL2Error
+    variable = u
+    function = u_func
+  [../]
+
+  [./h1_error]
+    type = ElementH1Error
+    variable = u
+    function = u_func
   [../]
 []
 
