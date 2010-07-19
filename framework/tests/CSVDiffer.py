@@ -45,7 +45,9 @@ class CSVDiffer:
       # This way it reports what column is missing, not just # cols is different
       keys1 = table1.keys()
       keys2 = table2.keys()
-      (large,small) = (keys1,keys2) if len(keys1) > len(keys2) else (keys2,keys1)
+      (large,small) = (keys1,keys2)
+      if len(keys1) < len(keys2):
+        (large,small) = (keys2,keys1)
       for key in large:
         if key not in small:
           self.addError(fname, "Header '" + key + "' is missing" )
