@@ -69,8 +69,10 @@ class CSVDiffer:
       for key in keys1:
         for val1, val2 in zip( table1[key], table2[key] ):
           # adjust to the absolute zero
-          val1 = 0 if val1 < abs_zero else val1
-          val2 = 0 if val2 < abs_zero else val2
+          if abs(val1) < abs_zero:
+            val1 = 0
+          if abs(val2) < abs_zero:
+            val2 = 0
 
           # if they're both 0 then they're equal so pass this test
           if max( val1, val2 ) == 0:
@@ -137,7 +139,7 @@ if __name__ == '__main__':
   # Test for absolute zero logic
   d = CSVDiffer(None, [])
   d.addCSVPair('out1.csv', 'col1,col2\n1,2\n1,2', 'col1,col2\n1,2\n1,2.1')
-  d.addCSVPair('out2.csv', 'col1,col2\n1,2\n1,2\n0,0', 'col1,col2\n1,2\n1,2\n1e-12,1e-13')
+  d.addCSVPair('out2.csv', 'col1,col2\n1,2\n1,2\n0,-1e-13', 'col1,col2\n1,2\n1,2\n1e-12,1e-13')
   d.addCSVPair('out3.csv', 'col1,col2\n1,2\n1,2\n0,0', 'col1,col2\n1,2\n1,2\n1e-4,1e-13')
   print 'Should be 2 errors'
   print d.diff()
@@ -145,7 +147,7 @@ if __name__ == '__main__':
   # Test relative tolerance
   d = CSVDiffer(None, [])
   d.addCSVPair('out1.csv', 'col1,col2\n1,2\n1,2', 'col1,col2\n1,2\n1,2.1')
-  d.addCSVPair('out2.csv', 'col1,col2\n1,2\n1,2', 'col1,col2\n1,2\n1,2.00000000001')
+  d.addCSVPair('out2.csv', 'col1,col2\n1,-2\n1,-2', 'col1,col2\n1,-2\n1,-2.00000000001')
   d.addCSVPair('out3.csv', 'col1,col2\n1,2\n1,2', 'col1,col2\n1,2\n1.00001,2.0001')
   print 'Should be 3 errors'
   print d.diff()
