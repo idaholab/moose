@@ -114,7 +114,7 @@
 
 # print l2 and h1 errors from the Postprocessors too so I can compare
 [Postprocessors]
-  active = 'l2_error h1_error'
+  active = 'l2_error h1_error dofs'
 #  active = ' '
 
   [./l2_error]
@@ -127,6 +127,11 @@
     type = ElementH1Error
     variable = u
     function = u_func
+  [../]
+
+  [./dofs]
+    type = PrintDOFs
+    variable = u
   [../]
 []
 

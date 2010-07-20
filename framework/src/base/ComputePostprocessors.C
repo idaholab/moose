@@ -111,6 +111,7 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
     Threads::parallel_for(*getActiveLocalElementRange(),
                           ComputeInternalPostprocessors(*this, soln));
 
+    // Store element postprocessors values
     for(element_postprocessor_it=element_postprocessor_begin;
         element_postprocessor_it!=element_postprocessor_end;
         ++element_postprocessor_it)
@@ -126,6 +127,7 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
       _postprocessor_data._output_table.addData(name, value, _t);
     }
 
+    // Store side postprocessors values
     std::set<unsigned int>::iterator boundary_ids_begin = _pps._boundary_ids_with_postprocessors.begin();
     std::set<unsigned int>::iterator boundary_ids_end = _pps._boundary_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator boundary_ids_it = boundary_ids_begin;
@@ -152,6 +154,28 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
         _postprocessor_data._values[name] = value;
         _postprocessor_data._output_table.addData(name, value, _t);
       }
+    }
+
+    // Compute and store generic postprocessors values
+    PostprocessorIterator generic_postprocessor_begin = _pps.genericPostprocessorsBegin();
+    PostprocessorIterator generic_postprocessor_end = _pps.genericPostprocessorsEnd();
+    PostprocessorIterator generic_postprocessor_it = generic_postprocessor_begin;
+
+    for(generic_postprocessor_it =generic_postprocessor_begin;
+        generic_postprocessor_it!=generic_postprocessor_end;
+        ++generic_postprocessor_it)
+    {
+      std::string name = (*generic_postprocessor_it)->name();
+      (*generic_postprocessor_it)->initialize();
+      (*generic_postprocessor_it)->execute();
+      Real value = (*generic_postprocessor_it)->getValue();
+      Real time = _t;
+      
+      if(!_is_transient)
+        time = _t_step;
+    
+      _postprocessor_data._values[name] = value;
+      _postprocessor_data._output_table.addData(name, value, _t);
     }
 
     // Postprocesser Output

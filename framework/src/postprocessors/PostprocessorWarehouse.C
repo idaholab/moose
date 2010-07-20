@@ -40,8 +40,9 @@ PostprocessorWarehouse::addPostprocessor(THREAD_ID tid, Postprocessor *postproce
   }
   else
   {
-    // TODO: Allow generic PPs
-    mooseError("Unknown PP Type!");
+    //Generic postprocessors aren't multithreaded, so only add one copy of each one
+    if (tid == 0)
+      _generic_postprocessors.push_back(postprocessor);
   }
 }
 
@@ -67,4 +68,16 @@ PostprocessorIterator
 PostprocessorWarehouse::sidePostprocessorsEnd(THREAD_ID tid, unsigned int boundary_id)
 {
   return _side_postprocessors[tid][boundary_id].end();
+}
+
+PostprocessorIterator
+PostprocessorWarehouse::genericPostprocessorsBegin()
+{
+  return _generic_postprocessors.begin();
+}
+
+PostprocessorIterator
+PostprocessorWarehouse::genericPostprocessorsEnd()
+{
+  return _generic_postprocessors.end();
 }

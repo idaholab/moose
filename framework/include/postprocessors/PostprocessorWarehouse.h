@@ -28,6 +28,9 @@ public:
   PostprocessorIterator sidePostprocessorsBegin(THREAD_ID tid, unsigned int boundary_id);
   PostprocessorIterator sidePostprocessorsEnd(THREAD_ID tid, unsigned int boundary_id);
 
+  PostprocessorIterator genericPostprocessorsBegin();
+  PostprocessorIterator genericPostprocessorsEnd();
+
   void addPostprocessor(THREAD_ID tid, Postprocessor *postprocessor);
 
   /**
@@ -39,6 +42,8 @@ protected:
   std::vector<std::vector<Postprocessor *> > _element_postprocessors;
 
   std::vector<std::map<unsigned int, std::vector<Postprocessor *> > > _side_postprocessors;
+
+  std::vector<Postprocessor *> _generic_postprocessors;
 
   MooseSystem &_moose_system;
 };

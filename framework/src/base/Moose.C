@@ -89,6 +89,7 @@
 #include "ElementAverageValue.h"
 #include "SideIntegral.h"
 #include "SideAverageValue.h"
+#include "PrintDOFs.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -214,6 +215,8 @@ Moose::registerObjects()
 
   PostprocessorFactory::instance()->registerPostprocessor<SideIntegral>("SideIntegral");
   PostprocessorFactory::instance()->registerPostprocessor<SideAverageValue>("SideAverageValue");
+
+  PostprocessorFactory::instance()->registerPostprocessor<PrintDOFs>("PrintDOFs");
 }
 
 void
