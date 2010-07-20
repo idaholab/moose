@@ -124,7 +124,7 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
         time = _t_step;
     
       _postprocessor_data._values[name] = value;
-      _postprocessor_data._output_table.addData(name, value, _t);
+      _postprocessor_data._output_table.addData(name, value, time);
     }
 
     // Store side postprocessors values
@@ -152,7 +152,7 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
           time = _t_step;
     
         _postprocessor_data._values[name] = value;
-        _postprocessor_data._output_table.addData(name, value, _t);
+        _postprocessor_data._output_table.addData(name, value, time);
       }
     }
 
@@ -175,7 +175,7 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
         time = _t_step;
     
       _postprocessor_data._values[name] = value;
-      _postprocessor_data._output_table.addData(name, value, _t);
+      _postprocessor_data._output_table.addData(name, value, time);
     }
 
     // Postprocesser Output
