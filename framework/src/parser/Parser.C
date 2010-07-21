@@ -99,7 +99,7 @@ Parser::parse(const std::string &input_filename)
 
     for (unsigned int j=0; j<elements.size(); ++j) 
     {
-      if (! curr_block->checkActive(elements[j]) )
+      if (! curr_block->notifyChildUsed(elements[j]) )
         continue;
       
       // Add slashes as seperators back into our text strings as we build them up but don't
@@ -127,6 +127,9 @@ Parser::parse(const std::string &input_filename)
     extractParams(curr_block->getID(), curr_block->getClassParams());    
 
   }
+
+  // This will throw a mooseError if the active lists aren't all used up
+  _input_tree->checkActiveUsed();
 
   fixupOptionalBlocks();
 

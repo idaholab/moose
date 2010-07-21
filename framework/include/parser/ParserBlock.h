@@ -59,7 +59,14 @@ public:
   std::string getType() const;
 
   /**
-   * Check to see if the passed in string is active
+   * Notify this block that a child "name" is being parsed. This will remove it
+   * from the active list. It also check to see if "name" is active in the first
+   * place and returns false if it isn't.
+   */
+  bool notifyChildUsed(const std::string &name);
+
+  /**
+   * Check if name is in the active list.
    */
   bool checkActive(const std::string &name) const;
   
@@ -106,6 +113,11 @@ public:
       return _block_params;
     }
   
+  /**
+   * Checks to make sure all blocks listed in the active list were parsed. If
+   * not it throws a mooseError.
+   */
+  void checkActiveUsed();
 
   /************************************
    * Public Data Members
@@ -138,7 +150,8 @@ protected:
   MooseSystem & _moose_system;
 
   /**
-   * This function calles execute over all of the child blocks of the current Parser Block
+   * This function calles the passed function pointer over all of the child
+   * blocks of the current Parser Block.
    */
   void visitChildren(void (ParserBlock::*action)() = &ParserBlock::execute,
                      bool visit_active_only=true,
@@ -159,7 +172,9 @@ protected:
   std::string _block_name;
   Parser & _parser_handle;
   const GetPot * _getpot_handle;
+
   std::vector<std::string> _active;
+  std::vector<std::string> _used_children;
 
   /**
    * The list of ParserBlocks which must be executed prior to executing the current ParserBlock

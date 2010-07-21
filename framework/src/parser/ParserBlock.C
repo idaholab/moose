@@ -44,6 +44,9 @@ ParserBlock::ParserBlock(std::string name, MooseSystem & moose_system, InputPara
     // Immediately extract params from the input file instead of when the tree is completely constructed
     _parser_handle.extractParams(name, _block_params);
     _active = getParamValue<std::vector<std::string> >("active");
+
+    //make a copy so we can delete the names when they get used
+    _used_children = _active;
   }
 }
 
@@ -76,6 +79,16 @@ ParserBlock::getType() const
 }
 
 bool
+ParserBlock::notifyChildUsed(const std::string &name)
+{
+  std::vector<std::string>::iterator loc = std::find(_used_children.begin(), _used_children.end(), name);
+  if (loc != _used_children.end())
+    _used_children.erase(loc);
+  
+  return checkActive(name);
+}
+
+bool
 ParserBlock::checkActive(const std::string &name) const
 {
   bool retValue = false;
@@ -88,8 +101,18 @@ ParserBlock::checkActive(const std::string &name) const
   }
   catch (std::out_of_range)
   {}
-  
+    
   return retValue;
+}
+
+void
+ParserBlock::checkActiveUsed()
+{
+  if (_used_children.size() != 0)
+    if (_used_children[0] != "__all__")
+      mooseError("Extra items listed in the active list in block \"" + getID() + "\"");
+
+  visitChildren(&ParserBlock::checkActiveUsed, true, false);
 }
 
 void
