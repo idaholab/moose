@@ -155,41 +155,41 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
         _postprocessor_data._output_table.addData(name, value, time);
       }
     }
+  }
 
-    // Compute and store generic postprocessors values
-    PostprocessorIterator generic_postprocessor_begin = _pps.genericPostprocessorsBegin();
-    PostprocessorIterator generic_postprocessor_end = _pps.genericPostprocessorsEnd();
-    PostprocessorIterator generic_postprocessor_it = generic_postprocessor_begin;
+  // Compute and store generic postprocessors values
+  PostprocessorIterator generic_postprocessor_begin = _pps.genericPostprocessorsBegin();
+  PostprocessorIterator generic_postprocessor_end = _pps.genericPostprocessorsEnd();
+  PostprocessorIterator generic_postprocessor_it = generic_postprocessor_begin;
 
-    for(generic_postprocessor_it =generic_postprocessor_begin;
-        generic_postprocessor_it!=generic_postprocessor_end;
-        ++generic_postprocessor_it)
-    {
-      std::string name = (*generic_postprocessor_it)->name();
-      (*generic_postprocessor_it)->initialize();
-      (*generic_postprocessor_it)->execute();
-      Real value = (*generic_postprocessor_it)->getValue();
-      Real time = _t;
-      
-      if(!_is_transient)
-        time = _t_step;
+  for(generic_postprocessor_it =generic_postprocessor_begin;
+      generic_postprocessor_it!=generic_postprocessor_end;
+      ++generic_postprocessor_it)
+  {
+    std::string name = (*generic_postprocessor_it)->name();
+    (*generic_postprocessor_it)->initialize();
+    (*generic_postprocessor_it)->execute();
+    Real value = (*generic_postprocessor_it)->getValue();
+    Real time = _t;
     
-      _postprocessor_data._values[name] = value;
-      _postprocessor_data._output_table.addData(name, value, time);
-    }
+    if(!_is_transient)
+      time = _t_step;
+  
+    _postprocessor_data._values[name] = value;
+    _postprocessor_data._output_table.addData(name, value, time);
+  }
 
-    // Postprocesser Output
-    if(_postprocessor_screen_output)
-    {
-      std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-      _postprocessor_data._output_table.print_table(std::cout);
-      std::cout<<std::endl;
-    }
-    
-    if(_postprocessor_csv_output)
-    {
-      _postprocessor_data._output_table.print_csv(_file_base + ".csv");
-    }
+  // Postprocesser Output
+  if(_postprocessor_screen_output)
+  {
+    std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
+    _postprocessor_data._output_table.print_table(std::cout);
+    std::cout<<std::endl;
+  }
+  
+  if(_postprocessor_csv_output)
+  {
+    _postprocessor_data._output_table.print_csv(_file_base + ".csv");
   }
 
   Moose::perf_log.pop("compute_postprocessors()","Solve");
