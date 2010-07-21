@@ -109,7 +109,6 @@ def massage_data( data ):
   for block in data:
     if block['name'] == 'Executioner':
       block['name'] += ' (' + str(block['type']) + ')'
-      print block['name']
   return data
 
 # used by copytree, don't copy any .svn files out to the server!

@@ -65,6 +65,9 @@ public:
   }
 
   InputParameters getValidParams(std::string name);
+
+  FunctionNamesIterator registeredFunctionsBegin();
+  FunctionNamesIterator registeredFunctionsEnd();
   
 private:
   FunctionFactory();
@@ -72,6 +75,8 @@ private:
   
   std::map<std::string, functionBuildPtr> _name_to_build_pointer;
   std::map<std::string, functionParamsPtr> _name_to_params_pointer;
+
+  std::vector<std::string> _registered_function_names;
 };
 
 #endif //FUNCTIONFACTORY_H

@@ -9,6 +9,7 @@
 #include "InputParameters.h"
 #include "ParserBlockFactory.h"
 #include "KernelFactory.h"
+#include "FunctionFactory.h"
 #include "AuxFactory.h"
 #include "BCFactory.h"
 #include "MaterialFactory.h"
@@ -227,6 +228,19 @@ Parser::buildFullTree( const std::string format )
     }
   }
 
+  // Add all the Functions
+  curr_block = curr_block->locateBlock("Functions");
+  prefix = "Functions/";
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
+  for (FunctionNamesIterator i = FunctionFactory::instance()->registeredFunctionsBegin();
+       i != FunctionFactory::instance()->registeredFunctionsEnd(); ++i)
+  {
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+  }
+
   // Add all the Kernels
   curr_block = curr_block->locateBlock("Kernels");
   prefix = "Kernels/";
@@ -265,7 +279,7 @@ Parser::buildFullTree( const std::string format )
     params.set<std::string>("type") = *i;
     curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
   }
-
+  
   // Add all the Materials
   curr_block = curr_block->locateBlock("Materials");
   prefix = "Materials/";
