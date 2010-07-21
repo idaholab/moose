@@ -1,9 +1,9 @@
 <%def name="genBlock(block)">
   <%doc>Only display Child from a node named /ParentBlock/Child </%doc>
-  <li><a><b>${block['name'].split('/')[-1] |u}</b></a>
+  <li><a><b>${block['name'].split('/')[-1]}</b></a>
     <ul>
       % if block['type'] != None:
-        <li><a>type = ${block['type']}</a></li>
+        <li><div class="required"><a>type = ${block['type']}</a></div></li>
       % endif
 
       <%doc>Generate parameters, required ones are red</%doc>

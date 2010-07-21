@@ -67,6 +67,9 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
   data = yaml.load( data )
   data = data[0]['subblocks']
 
+  # perform some changes to the data, like renaming executioners to their type
+  data = massage_data( data )
+
   gentime = time.strftime( '%H:%M %B %d, %Y' )
 
   context = { 'data' : data,
@@ -101,6 +104,13 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
 
   return docBase
 
+# modify the data tree
+def massage_data( data ):
+  for block in data:
+    if block['name'] == 'Executioner':
+      block['name'] += ' (' + str(block['type']) + ')'
+      print block['name']
+  return data
 
 # used by copytree, don't copy any .svn files out to the server!
 def ignore_svns( adir, filenames ):
