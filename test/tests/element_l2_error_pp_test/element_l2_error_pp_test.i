@@ -1,7 +1,16 @@
 [Mesh]
   dim = 2
-  file = square.e
-  uniform_refine = 5
+
+  [./Generation]
+    nx = 10
+    ny = 10
+    
+    xmin = 0
+    xmax = 2
+
+    ymin = 0
+    ymax = 2
+  [../]
 []
 
 [Variables]
@@ -71,7 +80,7 @@
 
   [./empty]
     type = EmptyMaterial
-    block = 1
+    block = 0 #since we're generating our own mesh, the materials block must be 0
   [../]
 []
 
@@ -92,4 +101,5 @@
   file_base = out
   interval = 1
   exodus = true
+  postprocessor_csv = true
 []
