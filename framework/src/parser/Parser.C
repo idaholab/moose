@@ -13,6 +13,7 @@
 #include "AuxFactory.h"
 #include "BCFactory.h"
 #include "MaterialFactory.h"
+#include "StabilizerFactory.h"
 #include "InitialConditionFactory.h"
 #include "ExecutionerFactory.h"
 #include "PostprocessorFactory.h"
@@ -322,6 +323,20 @@ Parser::buildFullTree( const std::string format )
     params.set<std::string>("type") = *i;
     curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
   }
+
+  // Add all the Stabilizers
+  curr_block = curr_block->locateBlock("Stabilizers");
+  prefix = "Stabilizers/";
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
+  for (StabilizerNamesIterator i = StabilizerFactory::instance()->registeredStabilizersBegin();
+       i != StabilizerFactory::instance()->registeredStabilizersEnd(); ++i)
+  {
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+  }
+  
 
   if (format == "yaml")
     _input_tree->printBlockYAML();
