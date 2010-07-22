@@ -27,20 +27,28 @@ MaterialWarehouse::~MaterialWarehouse()
 std::vector<Material *>
 MaterialWarehouse::getMaterials(THREAD_ID tid, unsigned int block_id)
 {
+  std::stringstream oss;
+  
   MaterialIterator mat_iter = _active_materials[tid].find(block_id);
   if (mat_iter == _active_materials[tid].end())
-    mooseError("Active Material Missing\n");
-
+  {
+    oss << "Active Material Missing for block: " << block_id << "\n";
+    mooseError(oss.str());
+  }
   return mat_iter->second;
 }
 
 std::vector<Material *>
 MaterialWarehouse::getBoundaryMaterials(THREAD_ID tid, unsigned int boundary_id)
 {
+  std::stringstream oss;
+  
   MaterialIterator mat_iter = _active_boundary_materials[tid].find(boundary_id);
   if (mat_iter == _active_boundary_materials[tid].end())
-    mooseError("Active Boundary Material Missing\n");
-
+  {
+    oss << "Active Boundary Material Missing for boundary: " << boundary_id << "\n";
+    mooseError(oss.str());
+  }
   return mat_iter->second;
 }
 

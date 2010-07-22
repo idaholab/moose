@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<ConstantAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.set<Real>("value")=0.0;
+  params.addParam<Real>("value", 0.0, "Some constant value that can be read from the input file");
   return params;
 }
 

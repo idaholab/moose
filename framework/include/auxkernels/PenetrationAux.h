@@ -1,0 +1,35 @@
+#ifndef PENETRATIONAUX_H
+#define PENETRATIONAUX_H
+
+#include "AuxKernel.h"
+#include "PenetrationLocator.h"
+
+
+//Forward Declarations
+class PenetrationAux;
+
+template<>
+InputParameters validParams<PenetrationAux>();
+
+/** 
+ * Constant auxiliary value
+ */
+class PenetrationAux : public AuxKernel
+{
+public:
+
+  /**
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
+   */
+  PenetrationAux(std::string name, MooseSystem & moose_system, InputParameters parameters);
+
+  virtual ~PenetrationAux() {}
+  
+protected:
+  virtual Real computeValue();
+
+  PenetrationLocator _penetration_locator;
+};
+
+#endif //PENETRATIONAUX_H
