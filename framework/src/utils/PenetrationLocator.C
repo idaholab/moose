@@ -2,7 +2,7 @@
 
 #include "boundary_info.h"
 #include "elem.h"
-#include "plane.h"
+//#include "plane.h"
 
 PenetrationLocator::PenetrationLocator(Mesh & mesh, short int master, short int slave)
   : _mesh(mesh),
@@ -125,9 +125,12 @@ PenetrationLocator::normDistance(const Elem & side, const Point & p0)
   {
 //    libmesh_assert(side.n_points() >= 3);
 
-    Plane p = Plane(side.point(0), side.point(1), side.point(2));
+    // TODO: Fix Plane linking problem
+//    Plane p = Plane(side.point(0), side.point(1), side.point(2));
 
-    d = (p0 - p.closest_point(p0)).size();
+//    d = (p0 - p.closest_point(p0)).size();
+    d = 0.0;
+    
   }
 
   return d;
