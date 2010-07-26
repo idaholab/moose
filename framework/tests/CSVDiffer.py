@@ -1,4 +1,4 @@
-import os
+import os, re
 
 class CSVDiffer:
   def __init__(self, test_dir, out_files, abs_zero=1e-11, relative_error=5.5e-6):
@@ -91,6 +91,10 @@ class CSVDiffer:
 
   # convert text to a map of column names to column values
   def convertToTable(self, fname, text):
+    # ignore newlines
+    text = re.sub( r'\n\s*\n', '\n', text).strip()
+
+    # Exceptions occur if you try to parse a .e file
     try:
       lines = text.split('\n')
       headers = lines.pop(0).split(',')
@@ -119,9 +123,11 @@ class CSVDiffer:
 
 # testing the test harness!
 if __name__ == '__main__':
-  # Test for success
+  # Test for success and ignoring newlines
   d = CSVDiffer(None, [])
   d.addCSVPair('out.csv', 'col1,col2\n1,2\n1,2', 'col1,col2\n1,2\n1,2')
+  d.addCSVPair('out2.csv', 'col1,col2\n \n1,2\n1,2', 'col1,col2\n1,2\n\t\n1,2')
+  d.addCSVPair('out3.csv', 'col1,col2\n1,2\n1,2\n\n', 'col1,col2\n1,2\n1,2')
   print 'Should be 0 errors'
   print d.diff()
 
