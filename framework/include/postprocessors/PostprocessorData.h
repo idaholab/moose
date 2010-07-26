@@ -16,6 +16,8 @@ class MooseSystem;
 class PostprocessorData
 {
 public:
+  bool empty();
+  
   PostprocessorData(MooseSystem & moose_system);
 
   MooseSystem & _moose_system;

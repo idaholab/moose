@@ -12,7 +12,11 @@ FormattedTable::FormattedTable()
 FormattedTable::~FormattedTable()
 {
   if (_stream_open)
+  {
+    _output_file.flush();
     _output_file.close();
+    _stream_open = false;
+  }
 }
 
 void
@@ -83,8 +87,11 @@ FormattedTable::print_csv(const std::string & file_name)
   std::set<std::string>::iterator header;
   
   if (!_stream_open)
-    _output_file.open(file_name.c_str(), std::ios::trunc);
-
+  {
+    _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
+    _stream_open = true;
+  }
+  
   _output_file << "time";
   for (header = _column_names.begin(); header != _column_names.end(); ++header)
   {
@@ -100,6 +107,7 @@ FormattedTable::print_csv(const std::string & file_name)
       std::map<std::string, Real> &tmp = i->second;
       _output_file << "," << tmp[*header];
     }
-    out << "\n";
+    _output_file << "\n";
   }
+  _output_file << "\n";
 }
