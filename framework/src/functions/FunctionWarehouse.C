@@ -7,7 +7,10 @@ FunctionWarehouse::FunctionWarehouse(MooseSystem &sys):
 
 FunctionWarehouse::~FunctionWarehouse()
 {
-  //TODO delete Function objects created by FunctionFactory?
+  std::vector<std::map<std::string, Function *> >::iterator i;
+  for (i = _functions.begin(); i != _functions.end(); ++i)
+    for (FunctionIterator j = i->begin(); j != i->end(); ++j)
+      delete j->second;
 }
 
 FunctionIterator

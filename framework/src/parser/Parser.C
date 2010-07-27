@@ -32,7 +32,7 @@ Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
 {
   if (Moose::command_line != NULL)
   {
-    if (Moose::command_line->search("-h") || Moose::command_line->search("--help")) 
+    if (Moose::command_line->search("-h") || Moose::command_line->search("--help"))
     {
       printUsage();
       exit(0);
@@ -55,12 +55,13 @@ Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
     printUsage();
 }
 
-Parser::~Parser() 
+Parser::~Parser()
 {
-  if (_input_tree != NULL) 
-  {
-    delete (_input_tree);
-  }
+  if (_input_tree != NULL)
+    delete _input_tree;
+
+  if (_executioner != NULL)
+    delete _executioner;
 }
 
 void
@@ -91,14 +92,14 @@ Parser::parse(const std::string &input_filename)
    * (.i.e) /Variables/temp/InitialCondition will be split on slashes and
    * a tree of three levels will be build for each remaining piece of text
    */
-  for (std::vector<std::string>::iterator i=_section_names.begin(); i != _section_names.end(); ++i) 
+  for (std::vector<std::string>::iterator i=_section_names.begin(); i != _section_names.end(); ++i)
   {
     elements.clear();
     tokenize(*i, elements);
     curr_block = _input_tree;
     curr_identifier = "";
 
-    for (unsigned int j=0; j<elements.size(); ++j) 
+    for (unsigned int j=0; j<elements.size(); ++j)
     {
       if (! curr_block->notifyChildUsed(elements[j]) )
         continue;
@@ -111,13 +112,13 @@ Parser::parse(const std::string &input_filename)
 
       std::vector<ParserBlock *>::reverse_iterator last = curr_block->_children.rbegin();
       // See if this block is already in the tree from a previous section string iteration
-      if (last == curr_block->_children.rend() || (*last)->getID() != curr_identifier) 
+      if (last == curr_block->_children.rend() || (*last)->getID() != curr_identifier)
       {
         InputParameters params = ParserBlockFactory::instance()->getValidParams(curr_identifier);
         params.set<ParserBlock *>("parent") = curr_block;
         params.set<Parser *>("parser_handle") = this;
 
-        curr_block->_children.push_back(ParserBlockFactory::instance()->add(curr_identifier, _moose_system, params));          
+        curr_block->_children.push_back(ParserBlockFactory::instance()->add(curr_identifier, _moose_system, params));
       }
 
       curr_block = *(curr_block->_children.rbegin());
@@ -125,7 +126,7 @@ Parser::parse(const std::string &input_filename)
 
     // Extract all the requested parameters from the input file
     extractParams(curr_block->getID(), curr_block->getBlockParams());
-    extractParams(curr_block->getID(), curr_block->getClassParams());    
+    extractParams(curr_block->getID(), curr_block->getClassParams());
 
   }
 
@@ -134,13 +135,13 @@ Parser::parse(const std::string &input_filename)
 
   fixupOptionalBlocks();
 
-  if (!_tree_printed) 
+  if (!_tree_printed)
   {
 #ifdef DEBUG
     _input_tree->printBlockData();
     _tree_printed = true;
 #else
-    if (Moose::command_line && Moose::command_line->search("--show-tree")) 
+    if (Moose::command_line && Moose::command_line->search("--show-tree"))
     {
       _input_tree->printBlockData();
       _tree_printed = true;
@@ -415,9 +416,9 @@ Parser::fixupOptionalBlocks()
   optional_blocks.push_back(std::make_pair("Executioner", "Postprocessors"));
   
   // First see if the Optional Block exists
-  for (i = optional_blocks.begin(); i != optional_blocks.end(); ++i) 
+  for (i = optional_blocks.begin(); i != optional_blocks.end(); ++i)
   {
-    if (_input_tree->locateBlock(i->second) == NULL) 
+    if (_input_tree->locateBlock(i->second) == NULL)
     {
       // Get a pointer to the required block to prepare for insertion
       // The newly constructed block will be the sibling before this block
@@ -455,7 +456,7 @@ void
 Parser::printTree()
 {
   if (_tree_printed)
-    return;  
+    return;
   _input_tree->printBlockData();
   _tree_printed = true;
 }
@@ -553,25 +554,25 @@ void Parser::setScalarParameter(const std::string & name, InputParameters::Param
 }
 
 template<typename T>
-void Parser::setVectorParameter(const std::string & name, InputParameters::Parameter<std::vector<T> >* param) 
+void Parser::setVectorParameter(const std::string & name, InputParameters::Parameter<std::vector<T> >* param)
 {
   int vec_size = _getpot_file.vector_variable_size(name.c_str());
 
-  if (_getpot_file.have_variable(name.c_str())) 
+  if (_getpot_file.have_variable(name.c_str()))
     param->set().resize(vec_size);
     
-  for (int i=0; i<vec_size; ++i) 
+  for (int i=0; i<vec_size; ++i)
     param->set()[i] = _getpot_file(name.c_str(), param->get()[i], i);
 }
 
 template<typename T>
-void Parser::setTensorParameter(const std::string & name, InputParameters::Parameter<std::vector<std::vector<T> > >* param) 
+void Parser::setTensorParameter(const std::string & name, InputParameters::Parameter<std::vector<std::vector<T> > >* param)
 {
   int vec_size = _getpot_file.vector_variable_size(name.c_str());
   int one_dim = pow(vec_size, 0.5);
 
   param->set().resize(one_dim);
-  for (int i=0; i<one_dim; ++i) 
+  for (int i=0; i<one_dim; ++i)
   {
     param->set()[i].resize(one_dim);
     for (int j=0; j<one_dim; ++j)

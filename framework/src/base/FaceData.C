@@ -17,6 +17,9 @@ FaceData::FaceData(MooseSystem & moose_system) :
 
 FaceData::~FaceData()
 {
+  std::vector<const Elem *>::iterator i;
+  for (i = _current_side_elem.begin(); i!=_current_side_elem.end(); ++i)
+    delete *i;
 }
 
 void FaceData::sizeEverything()

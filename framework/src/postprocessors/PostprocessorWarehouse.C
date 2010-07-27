@@ -13,17 +13,42 @@ PostprocessorWarehouse::PostprocessorWarehouse(MooseSystem &sys) :
 
 PostprocessorWarehouse::~PostprocessorWarehouse()
 {
+  std::vector<std::map<unsigned int, std::vector<Postprocessor *> > > _side_postprocessors;
+
+  std::vector<Postprocessor *> _generic_postprocessors;
+  // delete element postprocessors
   {
     std::vector<std::vector<Postprocessor *> >::iterator i;
     for (i=_element_postprocessors.begin(); i!=_element_postprocessors.end(); ++i)
     {
-
       PostprocessorIterator j;
       for (j=i->begin(); j!=i->end(); ++j)
       {
         delete *j;
       }
     }
+  }
+
+  // delete side postprocessors
+  {
+    std::vector<std::map<unsigned int, std::vector<Postprocessor *> > >::iterator i;
+    for (i=_side_postprocessors.begin(); i!=_side_postprocessors.end(); ++i)
+    {
+      std::map<unsigned int, std::vector<Postprocessor *> >::iterator j;
+      for (j=i->begin(); j!=i->end(); ++j)
+      {
+        PostprocessorIterator k;
+        for (k=j->second.begin(); k!=j->second.end(); ++k)
+          delete *k;
+      }
+    }
+  }
+
+  // delete generic postprocessors
+  {
+    std::vector<Postprocessor *>::iterator i;
+    for (i=_generic_postprocessors.begin(); i!=_generic_postprocessors.end(); ++i)
+      delete *i;
   }
 }
 

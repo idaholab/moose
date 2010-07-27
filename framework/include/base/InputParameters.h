@@ -1,11 +1,7 @@
 #ifndef INPUTPARAMETERS_H
 #define INPUTPARAMETERS_H
 
-//local includes
-//#include "ValidParams.h"
-
 #include <set>
-#include <map>
 
 // libMesh includes
 #include "parameters.h"

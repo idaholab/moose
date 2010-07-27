@@ -1,7 +1,6 @@
 #ifndef GENERICFUNCTIONSBLOCK_H
 #define GENERICFUNCTIONSBLOCK_H
 
-#include "InputParameters.h"
 #include "ParserBlock.h"
 
 //Forward Declarations

@@ -161,6 +161,9 @@ MooseSystem::~MooseSystem()
   if (_es != NULL)
     delete _es;
 
+  if (_exreader != NULL)
+    delete _exreader;
+
   if (_delete_mesh && _mesh != NULL)
     delete _mesh;
 

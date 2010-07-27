@@ -40,6 +40,16 @@ public:
     
     //std::for_each(_qp_prev.begin(), _qp_prev.end(), DeleteFunctor());
     //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
+
+    std::map<std::string, PropertyValue *>::iterator it;
+    for (it = _props.begin(); it != _props.end(); ++it)
+    {
+      if (it->second != NULL)
+      {
+        delete it->second;
+        it->second = NULL;
+      }
+    }
   }
 
   /** 
