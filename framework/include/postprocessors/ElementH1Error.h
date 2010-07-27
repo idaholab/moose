@@ -9,14 +9,16 @@ class ElementH1Error;
 template<>
 InputParameters validParams<ElementH1Error>();
 
+/**
+ * This postprocessor will print out the h1 seminorm between the computed
+ * solution and the passed function.
+ * ||u,f||h1 is computed as sqrt( (u-f)^2 + (grad u - grad f) * (grad u - grad f) )
+ */
 class ElementH1Error : public ElementIntegral
 {
 public:
   ElementH1Error(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-  /**
-   * Get the H1 Error.
-   */
   virtual Real getValue();
 
 protected:

@@ -1,15 +1,15 @@
-#include "ElementH1Error.h"
+#include "ElementH1SemiError.h"
 #include "Function.h"
 
 template<>
-InputParameters validParams<ElementH1Error>()
+InputParameters validParams<ElementH1SemiError>()
 {
   InputParameters params = validParams<ElementIntegral>();
   params.addRequiredParam<std::string>("function", "The analytic solution to compare against");
   return params;
 }
 
-ElementH1Error::ElementH1Error(std::string name,
+ElementH1SemiError::ElementH1SemiError(std::string name,
                              MooseSystem & moose_system,
                              InputParameters parameters):
   ElementIntegral(name, moose_system, parameters),
@@ -18,15 +18,14 @@ ElementH1Error::ElementH1Error(std::string name,
 }
 
 Real
-ElementH1Error::getValue()
+ElementH1SemiError::getValue()
 {
   return std::sqrt(ElementIntegral::getValue());
 }
 
 Real
-ElementH1Error::computeQpIntegral()
+ElementH1SemiError::computeQpIntegral()
 {
-  RealGradient graddiff = _grad_u[_qp]-_func.grad(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
-  Real         funcdiff = _u[_qp]-_func(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
-  return graddiff*graddiff + funcdiff*funcdiff;
+  RealGradient diff = _grad_u[_qp]-_func.grad(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
+  return diff*diff;
 }

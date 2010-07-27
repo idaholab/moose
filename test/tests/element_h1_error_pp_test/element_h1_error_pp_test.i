@@ -84,7 +84,7 @@
 
   [./empty]
     type = EmptyMaterial
-    block = 0 #since we're generating our own mesh, the materials block must be 0
+    block = 0
   [../]
 []
 
@@ -94,8 +94,14 @@
 []
 
 [Postprocessors]
-  [./integral]
+  [./h1]
     type = ElementH1Error
+    variable = u
+    function = u_func
+  [../]
+
+  [./h1_semi]
+    type = ElementH1SemiError
     variable = u
     function = u_func
   [../]

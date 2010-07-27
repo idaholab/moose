@@ -86,6 +86,7 @@
 #include "ElementIntegral.h"
 #include "ElementL2Error.h"
 #include "ElementH1Error.h"
+#include "ElementH1SemiError.h"
 #include "ElementAverageValue.h"
 #include "SideIntegral.h"
 #include "SideAverageValue.h"
@@ -213,6 +214,7 @@ Moose::registerObjects()
   PostprocessorFactory::instance()->registerPostprocessor<ElementIntegral>("ElementIntegral");
   PostprocessorFactory::instance()->registerPostprocessor<ElementL2Error>("ElementL2Error");
   PostprocessorFactory::instance()->registerPostprocessor<ElementH1Error>("ElementH1Error");
+  PostprocessorFactory::instance()->registerPostprocessor<ElementH1SemiError>("ElementH1SemiError");
   PostprocessorFactory::instance()->registerPostprocessor<ElementAverageValue>("ElementAverageValue");
 
   PostprocessorFactory::instance()->registerPostprocessor<SideIntegral>("SideIntegral");
