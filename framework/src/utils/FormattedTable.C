@@ -91,7 +91,8 @@ FormattedTable::print_csv(const std::string & file_name)
     _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
     _stream_open = true;
   }
-  
+
+  _output_file.seekp(0, std::ios::beg);
   _output_file << "time";
   for (header = _column_names.begin(); header != _column_names.end(); ++header)
   {
