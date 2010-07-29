@@ -24,10 +24,20 @@ MMSCoupledDirichletBC::computeQpResidual()
   Real a = libMesh::pi;
   Real x = (*_current_node)(0);
   Real y = (*_current_node)(1);
-  Real z = (*_current_node)(2);
   Real t = _t;
-  Real u = sin(a*x*y*z*t);
+  if (_dim == 3)
+  {
+    Real z = (*_current_node)(2);
+    Real u = sin(a*x*y*z*t);
+    //Our function gets added here.
+    return _u[_qp]-(sin(a*x*y*z*t));
+  }
+  else
+  {
+    Real z = 1.0;
+    Real u = sin(a*x*y*z*t);
+    //Our function gets added here.
+    return _u[_qp]-(sin(a*x*y*z*t));
+  }
   
-  //Our function gets added here. 
-  return _u[_qp]-(sin(a*x*y*z*t));
 }

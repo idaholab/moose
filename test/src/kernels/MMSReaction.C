@@ -17,10 +17,19 @@ MMSReaction::computeQpResidual()
     Real a = libMesh::pi;
     Real x = _q_point[_qp](0);
     Real y = _q_point[_qp](1);
-    Real z = _q_point[_qp](2);
     Real t = _t;
-    Real u = std::sin(a*x*y*z*t);
-    return _test[_i][_qp]*2*u*u;
+    if (_dim == 3)
+    {
+      Real z = _q_point[_qp](2);
+      Real u = std::sin(a*x*y*z*t);
+      return _test[_i][_qp]*2*u*u;
+    }
+    else
+    {
+      Real z = 1.0;
+      Real u = std::sin(a*x*y*z*t);
+      return _test[_i][_qp]*2*u*u;
+    }
   }
 
 Real

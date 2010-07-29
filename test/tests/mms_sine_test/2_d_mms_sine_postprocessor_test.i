@@ -1,19 +1,16 @@
-#MMS.i
+#2_d_mms_sine_postprocessor_test.i
 #This is for u = sin(a*x*y*z*t)
 [Mesh]
-  dim = 3
+  dim = 2
 
  [./Generation] #We are generating our own Mesh
    nx = 8
    ny = 8
-   nz = 8
    x min =0 
    x max =1
-   y min =0
-   y max =1
-   z min =0
-   z max =1
-   elem_type = HEX8
+   y min =0			
+   y max =1	
+   elem_type = QUAD4
   [../]
 []
 
@@ -23,6 +20,17 @@
   [./u]
     order = FIRST
     family = LAGRANGE
+  [../]
+[]
+
+[Functions] #Added so that we can use the Postprocessor
+  active = 'solution'
+  
+  [./solution]
+    type = ParsedFunction
+    function = sin(a*x*y*z*t)
+    vars = 'a'
+    vals = '3.141592653589793'
   [../]
 []
 
@@ -54,7 +62,6 @@
     variable = u
     x = -1
     y = 2
-    z = -3
   [../]
 
   [./forcing] #We created our own forcing kernel
@@ -67,6 +74,7 @@
     variable = u
   [../]
 []
+
 [AuxKernels] #We created our own AuxKernel
   active = 'ConstantAux'
    
@@ -81,7 +89,7 @@
   [./all_u]
     type = MMSCoupledDirichletBC
     variable = u
-    boundary = '0 1 2 3 4 5'
+    boundary = '0 1 2 3'
  #   value = sin(a*x*y*z*t)
   [../]
 []
@@ -103,11 +111,28 @@
   petsc_options = '-snes_mf_operator'
 []
 
+[Postprocessors] 
+  active = 'l2_error dofs'
+  
+  [./l2_error]
+    type = ElementL2Error
+    variable = u
+    function = solution
+  [../]
+
+  [./dofs]
+    type = PrintDOFs
+    varaible = u
+  [../]
+[]
+ 
+
 [Output]
-  file_base = out
+  file_base = 2_d_postprocessor_out
   interval = 1
   exodus = true
   output_initial = true
+  postprocessor_csv = true 
 []
    
     
