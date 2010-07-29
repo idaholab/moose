@@ -119,25 +119,26 @@ class TestHarness:
   def runTest(self, test, address):
     result = ''
     try:
-      test_start = timeit.default_timer()
-         
-      # Capture stdout to a buffer object for the local function call
-      saved_stdout = sys.stdout
-      capture = StringIO.StringIO()
-      sys.stdout = capture
+      try:
+        test_start = timeit.default_timer()
+           
+        # Capture stdout to a buffer object for the local function call
+        saved_stdout = sys.stdout
+        capture = StringIO.StringIO()
+        sys.stdout = capture
 
-      eval('address(' + self.arg_string + ')')
+        eval('address(' + self.arg_string + ')')
 
-      # confusing: if arg_string is populated it means we changed dofs/np so
-      # we want to see the testing time, not just pass/fail
-      if (self.arg_string == ''):
-        result = 'OK'
-      else:
-        result = str(round(test_end-test_start,3)) + 's'
+        # confusing: if arg_string is populated it means we changed dofs/np so
+        # we want to see the testing time, not just pass/fail
+        if (self.arg_string == ''):
+          result = 'OK'
+        else:
+          result = str(round(test_end-test_start,3)) + 's'
 
-    except AssertionError:
-      self.all_passed = False
-      result = 'FAILED'
+      except AssertionError:
+        self.all_passed = False
+        result = 'FAILED'
     finally:
       sys.stdout = saved_stdout
       test_end = timeit.default_timer()
