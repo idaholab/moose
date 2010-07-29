@@ -16,7 +16,6 @@
 #include "petsc_linear_solver.h"
 #include "petsc_preconditioner.h"
 
-
 //PETSc includes
 #include <petsc.h>
 #include <petscsnes.h>
@@ -166,6 +165,8 @@ namespace Moose
       KSPSetPreconditionerSide(ksp, PC_RIGHT);
       SNESSetMaxLinearSolveFailures(snes, 1000000);
 
+//      SNESLineSearchSet(snes, petscPhysicsBasedLineSearch, moose_system.getEquationSystems());
+
 #if PETSC_VERSION_LESS_THAN(3,0,0)
       KSPSetConvergenceTest(ksp, petscConverged, &moose_system);
       SNESSetConvergenceTest(snes, petscNonlinearConverged, &moose_system);
@@ -201,17 +202,22 @@ namespace Moose
       //x = current solution
       //y = updates.
       // for simple newton use w = x-y
-    
+
+
       int ierr;
       Real facmin = 1.0;
       Real max_fraction = 0.5;
-    
+
       *flag = PETSC_TRUE;
 
       EquationSystems * equation_systems = static_cast<EquationSystems *>(lsctx);
+
+      MeshBase & mesh = equation_systems->get_mesh();
     
       TransientNonlinearImplicitSystem& system =
         equation_systems->get_system<TransientNonlinearImplicitSystem> ("NonlinearSystem");
+
+      unsigned int sys = system.number();
     
       //create PetscVector
       PetscVector<Number>  update_vec_x(x);
@@ -221,56 +227,67 @@ namespace Moose
       //vector  stores updated solution
       update_vec_w.zero();
       update_vec_w.add(1.,update_vec_x);
-      update_vec_w.add(-1,update_vec_y);
+      update_vec_w.add(-1.0,update_vec_y);
 
-      if(!equation_systems->parameters.have_parameter<std::vector<std::string> >("pbd_var") )
-        facmin = 1.0;
-      else
-      {
-        int n_pbd_var = equation_systems->parameters.get<std::vector<std::string> >("pbd_var").size();
-        std::set<unsigned int> var_indices;
-
-        max_fraction = equation_systems->parameters.get<Real>("pbd_max_fraction");
-
-        std::cout << "max_fraction: " << max_fraction << std::endl;
+      MeshBase::const_node_iterator nd     = mesh.local_nodes_begin();
+      MeshBase::const_node_iterator nd_end = mesh.local_nodes_end();
+      MeshBase::const_node_iterator nd_it  = mesh.local_nodes_begin();;
       
-        for(int j=0;j<n_pbd_var;j++)
+      for(nd_it = nd;nd_it != nd_end; ++nd_it)
+      {
+        Node * node = *nd_it;
+
+        unsigned int dof = node->dof_number(sys, 0, 0);
+        
+//        std::cout<<"x: "<<update_vec_x(dof)<<std::endl;
+
+//        if(dof == 84)
+//          std::cout<<"dof 84!"<<std::endl<<"x: "<<update_vec_x(dof)<<std::endl<<"y: "<<update_vec_y(dof)<<std::endl;          
+
+        if( update_vec_w(dof) <= 0 )
         {
-          std::string var_name = equation_systems->parameters.get<std::vector<std::string> >("pbd_var")[j].c_str();
-          int i = system.variable_number(var_name.c_str());
-          
-          system.local_dof_indices(i, var_indices);
-          std::set<unsigned int>:: iterator it = var_indices.begin();
-          const std::set<unsigned int>::iterator it_end = var_indices.end();
-          for(; it !=it_end; ++it)
-          {
-            if( update_vec_w(*it) < max_fraction*update_vec_x(*it) )
-            {
-              Real fac = max_fraction*update_vec_x(*it)/update_vec_y(*it);
-              if( fac < facmin )
-                facmin = fac;
-            }
-            else if( update_vec_w(*it) > (1+max_fraction)*update_vec_x(*it) )
-            {
-              Real fac = -max_fraction*update_vec_x(*it)/update_vec_y(*it);
-              if( fac < facmin )
-                facmin = fac;
-            }
+          if(update_vec_y(dof))
+          {    
+            Real fac = (update_vec_x(dof) - .000045438)/update_vec_y(dof);
+            if( fac < facmin )
+              facmin = fac;
+          }
+        }
+        else if( update_vec_w(dof) >= 1 )
+        {
+          if(update_vec_y(dof))
+          {    
+            Real fac = (update_vec_x(dof) - .99995457)/update_vec_y(dof);
+            if( fac < facmin )
+              facmin = fac;
           }
         }
       }
 
       Parallel::min(facmin);
+
+      if(facmin < 1.0)
+      {
+        std::cout << std::endl;
+        std::cout << "facmin..: " << facmin << std::endl;
+        std::cout << std::endl;
+      }
     
-      facmin = -facmin;
-    
-      std::cout << std::endl;
-      std::cout << "facmin..: " << facmin << std::endl;
-      std::cout << std::endl;
-    
+      update_vec_w.zero();
       //this is standard newton update with damping parameter
       ierr = VecNorm(y,NORM_2,ynorm);
-      ierr = VecWAXPY(w,facmin,y,x);
+      ierr = VecWAXPY(w,-facmin,y,x);
+
+      for(nd_it = nd;nd_it != nd_end; ++nd_it)
+      {
+        Node * node = *nd_it;
+
+        unsigned int dof = node->dof_number(sys, 0, 0);
+
+        if(update_vec_w(dof) <= 0 || update_vec_w(dof) >= 1)
+          std::cout<<"w: "<<dof<<" = "<<update_vec_w(dof)<<std::endl;
+      }
+
       ierr = SNESComputeFunction(snes,w,g);
       ierr = VecNorm(g,NORM_2,gnorm);
       return(ierr);
