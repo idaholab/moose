@@ -2,6 +2,7 @@ import os
 from subprocess import *
 
 from TestHarness import TestHarness
+from LeakDetector import LeakDetector
 import CSVDiffer
 
 # make the TestHarness class a global of the tools.py module.
@@ -10,6 +11,19 @@ import CSVDiffer
 # another file
 global TestHarness
 
+################################################################################
+############# this function is used by the run_tests scripts ###################
+################################################################################
+def runTests(argv, app_name):
+  if '--memcheck' in argv or '-h' in argv or '--help' in argv:
+    harness = LeakDetector(argv, app_name)
+  else:
+    harness = TestHarness(argv, app_name)
+  harness.runTestsAndExit()
+
+################################################################################
+########## these functions are used by the individual .py file tests ###########
+################################################################################
 def executeCommand(command):
   print 'Executing: ' + command
 
