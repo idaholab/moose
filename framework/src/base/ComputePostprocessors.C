@@ -39,11 +39,25 @@ public:
     PostprocessorIterator postprocessor_end = _moose_system._pps.elementPostprocessorsEnd(tid);
     PostprocessorIterator postprocessor_it = postprocessor_begin;
 
-    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
-
-    //Global Postprocessors
-    for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+    //Initialize side and element post processors
+    for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
       (*postprocessor_it)->initialize();
+
+    std::set<unsigned int>::iterator boundary_begin = _moose_system._pps._boundary_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator boundary_end = _moose_system._pps._boundary_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator boundary_it = boundary_begin;
+
+    for (boundary_it=boundary_begin;boundary_it!=boundary_end;++boundary_it)
+    {
+      //note: for threaded applications where the elements get broken up it
+      //may be more efficient to initialize these on demand inside the loop
+      PostprocessorIterator side_postprocessor_begin = _moose_system._pps.sidePostprocessorsBegin(tid,*boundary_it);
+      PostprocessorIterator side_postprocessor_end = _moose_system._pps.sidePostprocessorsEnd(tid,*boundary_it);
+      PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
+
+      for (side_postprocessor_it=side_postprocessor_begin;side_postprocessor_it!=side_postprocessor_end;++side_postprocessor_it)
+        (*side_postprocessor_it)->initialize();
+    }
 
     for (el = range.begin() ; el != range.end(); ++el)
     {
