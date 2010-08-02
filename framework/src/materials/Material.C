@@ -53,6 +53,67 @@ Material::Material(std::string name, MooseSystem & moose_system, InputParameters
   }
 }
 
+Material::~Material()
+{
+  // TODO: Implement destructor to clean up after the _qp_prev and _qp_curr data objects
+  
+  //std::for_each(_qp_prev.begin(), _qp_prev.end(), DeleteFunctor());
+  //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
+
+  {
+    std::map<std::string, PropertyValue *>::iterator it;
+    for (it = _props.begin(); it != _props.end(); ++it)
+    {
+      if (it->second != NULL)
+      {
+        delete it->second;
+        it->second = NULL;
+      }
+    }
+    for (it = _props_old.begin(); it != _props_old.end(); ++it)
+    {
+      if (it->second != NULL)
+      {
+        delete it->second;
+        it->second = NULL;
+      }
+    }
+    for (it = _props_older.begin(); it != _props_older.end(); ++it)
+    {
+      if (it->second != NULL)
+      {
+        delete it->second;
+        it->second = NULL;
+      }
+    }
+  }
+
+  {
+    std::map<unsigned int, std::map<std::string, PropertyValue *> >::iterator i;
+    for (i = _props_elem->begin(); i != _props_elem->end(); ++i)
+    {
+      std::map<std::string, PropertyValue *>::iterator j;
+      for (j = i->second.begin(); j != i->second.end(); ++j)
+        delete j->second;
+    }
+    for (i = _props_elem_old->begin(); i != _props_elem_old->end(); ++i)
+    {
+      std::map<std::string, PropertyValue *>::iterator j;
+      for (j = i->second.begin(); j != i->second.end(); ++j)
+        delete j->second;
+    }
+    for (i = _props_elem_older->begin(); i != _props_elem_older->end(); ++i)
+    {
+      std::map<std::string, PropertyValue *>::iterator j;
+      for (j = i->second.begin(); j != i->second.end(); ++j)
+        delete j->second;
+    }
+
+    delete _props_elem;
+    delete _props_elem_old;
+    delete _props_elem_older;
+  }
+}
 /*
 unsigned int
 Material::blockID()

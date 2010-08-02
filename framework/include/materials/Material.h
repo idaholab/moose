@@ -34,23 +34,7 @@ public:
    */
   Material(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
-  virtual ~Material()
-  {
-    // TODO: Implement destructor to clean up after the _qp_prev and _qp_curr data objects
-    
-    //std::for_each(_qp_prev.begin(), _qp_prev.end(), DeleteFunctor());
-    //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
-
-    std::map<std::string, PropertyValue *>::iterator it;
-    for (it = _props.begin(); it != _props.end(); ++it)
-    {
-      if (it->second != NULL)
-      {
-        delete it->second;
-        it->second = NULL;
-      }
-    }
-  }
+  virtual ~Material();
 
   /** 
    * Block ID the Material is active on.

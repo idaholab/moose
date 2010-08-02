@@ -139,6 +139,10 @@ inline
 PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner ()
 {
   this->clear ();
+
+  std::vector<Preconditioner<Number> *>::iterator it;
+  for (it = _preconditioners.begin(); it != _preconditioners.end(); ++it)
+    delete *it;
 }
 
 #endif //PHYSICSBASEDPRECONDITIONER_H

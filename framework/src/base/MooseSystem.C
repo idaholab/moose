@@ -158,6 +158,9 @@ MooseSystem::~MooseSystem()
     */
   }
 
+  if (_preconditioner != NULL)
+    delete _preconditioner;
+
   if (_es != NULL)
     delete _es;
 
