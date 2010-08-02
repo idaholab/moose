@@ -4,7 +4,7 @@
 #include "elem.h"
 //#include "plane.h"
 
-PenetrationLocator::PenetrationLocator(Mesh & mesh, short int master, short int slave)
+PenetrationLocator::PenetrationLocator(Mesh & mesh, std::vector<unsigned int> master, unsigned int slave)
   : _mesh(mesh),
     _master_boundary(master),
     _slave_boundary(slave)
@@ -28,62 +28,44 @@ PenetrationLocator::detectPenetration()
   _mesh.boundary_info->build_node_list_from_side_list();
   _mesh.boundary_info->build_node_list(node_list, node_boundary_list);
 
-  // Iterator pairs for use in range functions
-  std::pair<std::vector<short int>::iterator, std::vector<short int>::iterator> bounds_node_boundary;
-  std::pair<std::vector<unsigned int>::iterator, std::vector<unsigned int>::iterator> bounds_nodes, bounds_elems;
-  std::pair<std::vector<unsigned short int>::iterator, std::vector<unsigned short int>::iterator> bounds_sides;
-
-  // Find the iterators for the master sideset nodes
-  bounds_node_boundary = std::equal_range(node_boundary_list.begin(), node_boundary_list.end(), _master_boundary);
-
-  // Bound the vector returned from the boundary_info class where the corresponding id vector matches the
-  // master boundary.  We are going to see if any of the nodes on this boundary have penetrated through
-  // elements on the slave boundary
-  bounds_nodes = std::make_pair(
-    node_list.begin() + int(bounds_node_boundary.first - node_boundary_list.begin()),
-    node_list.begin() + int(bounds_node_boundary.second - node_boundary_list.begin()));
-
-  MeshBase::const_node_iterator node = _mesh.local_nodes_begin();
-  MeshBase::const_node_iterator end_node = _mesh.local_nodes_end();
-  for ( ; node != end_node ; ++node)
+MeshBase::const_node_iterator nl = _mesh.local_nodes_begin();
+  MeshBase::const_node_iterator end_nl = _mesh.local_nodes_end();
+  for ( ; nl != end_nl ; ++nl)
   {
-    // This is a node on the master boundary
-    if (std::binary_search(bounds_nodes.first, bounds_nodes.second, (*node)->id()))
+    const Node* node = *nl;
+
+    std::vector< unsigned int >::iterator pos = std::find(node_list.begin(), node_list.end(), node->id());
+
+    // see if this node is on a boundary and that boundary is the master boundary
+    if (pos != node_list.end()
+      //&& node_boundary_list[int(pos - node_list.begin())] == _master_boundary)
+        && std::find(_master_boundary.begin(), _master_boundary.end(), node_boundary_list[int(pos - node_list.begin())]) != _master_boundary.end())
     {
-      // Now we need to loop over the active elements to see if we have penetrated any
-      // TODO: This might need some cleanup in parallel
+      
       MeshBase::const_element_iterator el = _mesh.active_local_elements_begin();
       MeshBase::const_element_iterator end_el = _mesh.active_local_elements_end();
       for ( ; el != end_el ; ++el)
       {
         const Elem* elem = *el;
 
-        bounds_node_boundary = std::equal_range(id_list.begin(), id_list.end(), _slave_boundary);
+        std::vector< unsigned int >::iterator pos2 = std::find(elem_list.begin(), elem_list.end(), elem->id());
 
-        bounds_elems = std::make_pair(
-          elem_list.begin() + int(bounds_node_boundary.first - id_list.begin()),
-          elem_list.begin() + int(bounds_node_boundary.second - id_list.begin()));
-        
-        std::vector<unsigned int>::iterator pos = std::lower_bound (bounds_elems.first,
-                                                                    bounds_elems.second,
-                                                                    elem->id());
-
-        // Found the local element on the slave boundary
-        if (pos != bounds_elems.second && *pos == elem->id())
+        // see if this elem is on a boundary and that boundary is the slave boundary
+        // and that this elem contains the current node
+        if (pos2 != elem_list.end()
+            && id_list[int(pos2 - elem_list.begin())] == _slave_boundary
+            && elem->contains_point(*node)) 
         {
-          if (elem->contains_point(**node))
-          {
-            unsigned int side_num = *(side_list.begin() + int(pos - elem_list.begin()));
+            unsigned int side_num = *(side_list.begin() + int(pos2 - elem_list.begin()));
 
 #ifdef DEBUG            
-            std::cout << "Node " << (*node)->id() << " contained in " << elem->id()
+            std::cout << "Node " << node->id() << " contained in " << elem->id()
                       << " through side " << side_num
-                      << ". Distance: " << normDistance(*(elem->build_side(side_num)), **node) << "\n";
+                      << ". Distance: " << normDistance(*(elem->build_side(side_num)), *node) << "\n";
 #endif            
 
-            _penetrated_elems[(*node)->id()] = std::make_pair(elem->id(), normDistance(*(elem->build_side(side_num)), **node));
+            _penetrated_elems[node->id()] = std::make_pair(elem->id(), normDistance(*(elem->build_side(side_num)), *node));
             
-          }
         }
       }
     }

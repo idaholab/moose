@@ -29,14 +29,14 @@
   [../]
 []
 
-[AuxKernels]
+[AuxBCs]
   active = 'penetrate'
 
   [./penetrate]
     type = PenetrationAux
     variable = penetration
-    master = 2
-    slave = 3
+    boundary = 2
+    paired_boundary = 3
   [../]
 []
 
