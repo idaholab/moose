@@ -11,7 +11,8 @@ InputParameters validParams<Diff1Material>()
 Diff1Material::Diff1Material(std::string name, MooseSystem & moose_system, InputParameters parameters)
   : Material(name, moose_system, parameters),
     _diff(parameters.get<Real>("diff")),
-    _diffusivity(declareProperty<Real>("diff1"))
+    _diffusivity(declareProperty<Real>("diff1")),
+    _vprop(declareProperty<std::vector<Real> >("vprop"))
 {
 }
 

@@ -12,7 +12,7 @@ Diff2Material::Diff2Material(std::string name, MooseSystem & moose_system, Input
   : Material(name, moose_system, parameters),
     _diff(parameters.get<Real>("diff")),
     _diffusivity(declareProperty<Real>("diff2")),
-    _vector_property(declareProperty<MooseArray<Real> >("vector_property"))
+    _vector_property(declareProperty<std::vector<Real> >("vector_property"))
 {
 }
 

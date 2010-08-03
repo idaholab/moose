@@ -119,17 +119,8 @@ MaterialProperty<T>::init ()
 }
 
 template <>
-inline PropertyValue *
-MaterialProperty<MooseArray<Real> >::init ()
-{
-  MaterialProperty<MooseArray<Real> > *copy = new MaterialProperty<MooseArray<Real> >;
-  libmesh_assert (copy != NULL);
-
-  copy->_value.resize(_value.size());
-
-  return copy;
-}
-
+PropertyValue *
+MaterialProperty<std::vector<Real> >::init ();
 
 template <typename T>
 inline void

@@ -26,6 +26,7 @@ protected:
 private:
   Real _diff;         // the value read from the input file
   MaterialProperty<Real> & _diffusivity;
+  MaterialProperty<std::vector<Real> > & _vprop;
 };
 
 #endif //DIFF1MATERIAL_H

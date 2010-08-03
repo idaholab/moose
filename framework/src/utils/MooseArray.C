@@ -63,3 +63,5 @@ template class MooseArray<MooseArray<MooseArray<RealTensorValue> > >;
 
 template class MooseArray<ColumnMajorMatrix>;
 template class MooseArray<MooseArray<MooseArray<Real> > >;
+
+template class MooseArray<std::vector<Real> >;

@@ -23,6 +23,6 @@ protected:
 
   std::string _prop_name;
   MaterialProperty<Real> & _diff;
-  MaterialProperty<MooseArray<Real> > & _vec_prop;
+  MaterialProperty<std::vector<Real> > & _vec_prop;
 };
 #endif //DIFFMKERNEL_H
