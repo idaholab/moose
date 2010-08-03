@@ -9,6 +9,7 @@
 //forward declarations
 class AuxKernel;
 class MooseSystem;
+class DofData;
 class ElementData;
 class AuxData;
 
@@ -31,7 +32,7 @@ public:
 
   virtual ~AuxKernel(){}
 
-  void computeAndStore(THREAD_ID tid);
+  void computeAndStore();
 
   bool isNodal();
 
@@ -44,6 +45,8 @@ protected:
    * Convenience reference to the ElementData object inside of MooseSystem
    */
   ElementData & _element_data;
+
+  DofData & _dof_data;
 
   /**
    * Convenience reference to the AuxData object inside of MooseSystem

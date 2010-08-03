@@ -19,19 +19,19 @@ typedef std::vector<Postprocessor *>::iterator PostprocessorIterator;
 class PostprocessorWarehouse
 {
 public:
-  PostprocessorWarehouse(MooseSystem &sys);
+  PostprocessorWarehouse();
   virtual ~PostprocessorWarehouse();
 
-  PostprocessorIterator elementPostprocessorsBegin(THREAD_ID tid);
-  PostprocessorIterator elementPostprocessorsEnd(THREAD_ID tid);
+  PostprocessorIterator elementPostprocessorsBegin();
+  PostprocessorIterator elementPostprocessorsEnd();
 
-  PostprocessorIterator sidePostprocessorsBegin(THREAD_ID tid, unsigned int boundary_id);
-  PostprocessorIterator sidePostprocessorsEnd(THREAD_ID tid, unsigned int boundary_id);
+  PostprocessorIterator sidePostprocessorsBegin(unsigned int boundary_id);
+  PostprocessorIterator sidePostprocessorsEnd(unsigned int boundary_id);
 
   PostprocessorIterator genericPostprocessorsBegin();
   PostprocessorIterator genericPostprocessorsEnd();
 
-  void addPostprocessor(THREAD_ID tid, Postprocessor *postprocessor);
+  void addPostprocessor(Postprocessor *postprocessor);
 
   /**
    * All of the boundary ids that have postprocessors specified to act on them.
@@ -39,13 +39,11 @@ public:
   std::set<unsigned int> _boundary_ids_with_postprocessors;
 
 protected:
-  std::vector<std::vector<Postprocessor *> > _element_postprocessors;
+  std::vector<Postprocessor *> _element_postprocessors;
 
-  std::vector<std::map<unsigned int, std::vector<Postprocessor *> > > _side_postprocessors;
+  std::map<unsigned int, std::vector<Postprocessor *> > _side_postprocessors;
 
   std::vector<Postprocessor *> _generic_postprocessors;
-
-  MooseSystem &_moose_system;
 };
 
 #endif // POSTPROCESSORWAREHOUSE_H

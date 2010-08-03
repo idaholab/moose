@@ -1,121 +1,89 @@
 #include "AuxWarehouse.h"
 
-AuxWarehouse::AuxWarehouse(MooseSystem &sys)
-  : _moose_system(sys)
+AuxWarehouse::AuxWarehouse()
 {
-  _active_nodal_aux_kernels.resize(libMesh::n_threads());
-  _active_element_aux_kernels.resize(libMesh::n_threads());
-  _active_bcs.resize(libMesh::n_threads());
-  _aux_bcs.resize(libMesh::n_threads());
 }
 
 AuxWarehouse::~AuxWarehouse()
 {
-  {
-    std::vector<std::vector<AuxKernel *> >::iterator i;
-    for(i=_active_nodal_aux_kernels.begin(); i!=_active_nodal_aux_kernels.end(); ++i)
-    {
-      AuxKernelIterator j;
-      for(j=i->begin(); j!=i->end(); ++j)
-      {
-        delete *j;
-      }
-    }
-  }
+  for(AuxKernelIterator j=_active_nodal_aux_kernels.begin(); j!=_active_nodal_aux_kernels.end(); ++j)
+    delete *j;
 
-  {
-    std::vector<std::vector<AuxKernel *> >::iterator i;
-    for(i=_active_element_aux_kernels.begin(); i!=_active_element_aux_kernels.end(); ++i)
-    {
-      AuxKernelIterator j;
-      for(j=i->begin(); j!=i->end(); ++j)
-      {
-        delete *j;
-      }
-    }
-  }
+  for(AuxKernelIterator j=_active_element_aux_kernels.begin(); j!=_active_element_aux_kernels.end(); ++j)
+    delete *j;
 
-  {
-    std::vector<std::vector<AuxKernel *> >::iterator i;
-    for(i=_aux_bcs.begin(); i!=_aux_bcs.end(); ++i)
-    {
-      AuxKernelIterator j;
-      for(j=i->begin(); j!=i->end(); ++j)
-      {
-        delete *j;
-      }
-    }
-  }
+  for(AuxKernelIterator j=_aux_bcs.begin(); j!=_aux_bcs.end(); ++j)
+    delete *j;
 }
 
 AuxKernelIterator
-AuxWarehouse::activeNodalAuxKernelsBegin(THREAD_ID tid)
+AuxWarehouse::activeNodalAuxKernelsBegin()
 {
-  return _active_nodal_aux_kernels[tid].begin();
+  return _active_nodal_aux_kernels.begin();
 }
 
 AuxKernelIterator
-AuxWarehouse::activeNodalAuxKernelsEnd(THREAD_ID tid)
+AuxWarehouse::activeNodalAuxKernelsEnd()
 {
-  return _active_nodal_aux_kernels[tid].end();
+  return _active_nodal_aux_kernels.end();
 }
 
 AuxKernelIterator
-AuxWarehouse::activeElementAuxKernelsBegin(THREAD_ID tid)
+AuxWarehouse::activeElementAuxKernelsBegin()
 {
-  return _active_element_aux_kernels[tid].begin();
+  return _active_element_aux_kernels.begin();
 }
 
 AuxKernelIterator
-AuxWarehouse::activeElementAuxKernelsEnd(THREAD_ID tid)
+AuxWarehouse::activeElementAuxKernelsEnd()
 {
-  return _active_element_aux_kernels[tid].end();
+  return _active_element_aux_kernels.end();
 }
 
 AuxKernelIterator
-AuxWarehouse::activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id)
+AuxWarehouse::activeAuxBCsBegin(unsigned int boundary_id)
 {
-  return _active_bcs[tid][boundary_id].begin();
+  return _active_bcs[boundary_id].begin();
 }
 
 AuxKernelIterator
-AuxWarehouse::activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id)
+AuxWarehouse::activeAuxBCsEnd(unsigned int boundary_id)
 {
-  return _active_bcs[tid][boundary_id].end();
+  return _active_bcs[boundary_id].end();
 }
 
 std::list<AuxKernel *>
-AuxWarehouse::getActiveNodalKernels(THREAD_ID tid)
+AuxWarehouse::getActiveNodalKernels()
 {
-  return std::list<AuxKernel *>(_active_nodal_aux_kernels[tid].begin(), _active_nodal_aux_kernels[tid].end());
+  return std::list<AuxKernel *>(_active_nodal_aux_kernels.begin(), _active_nodal_aux_kernels.end());
 }
 
 std::list<AuxKernel *>
-AuxWarehouse::getActiveElementKernels(THREAD_ID tid)
+AuxWarehouse::getActiveElementKernels()
 {
-  return std::list<AuxKernel *>(_active_element_aux_kernels[tid].begin(), _active_element_aux_kernels[tid].end());
+  return std::list<AuxKernel *>(_active_element_aux_kernels.begin(), _active_element_aux_kernels.end());
 }
 
 void
-AuxWarehouse::setActiveNodalKernels(THREAD_ID tid, std::list<AuxKernel *> &auxs)
+AuxWarehouse::setActiveNodalKernels(std::list<AuxKernel *> &auxs)
 {
-  _active_nodal_aux_kernels[tid].assign(auxs.begin(), auxs.end());
+  _active_nodal_aux_kernels.assign(auxs.begin(), auxs.end());
 }
 
 void
-AuxWarehouse::setActiveElementKernels(THREAD_ID tid, std::list<AuxKernel *> &auxs)
+AuxWarehouse::setActiveElementKernels(std::list<AuxKernel *> &auxs)
 {
-  _active_element_aux_kernels[tid].assign(auxs.begin(), auxs.end());
+  _active_element_aux_kernels.assign(auxs.begin(), auxs.end());
 }
 
 void
-AuxWarehouse::addBC(THREAD_ID tid, AuxKernel *aux)
+AuxWarehouse::addBC(AuxKernel *aux)
 {
-  _aux_bcs[tid].push_back(aux);
+  _aux_bcs.push_back(aux);
 }
 
 void
-AuxWarehouse::addActiveBC(THREAD_ID tid, unsigned int boundary_id, AuxKernel *aux)
+AuxWarehouse::addActiveBC(unsigned int boundary_id, AuxKernel *aux)
 {
-  _active_bcs[tid][boundary_id].push_back(aux);
+  _active_bcs[boundary_id].push_back(aux);
 }

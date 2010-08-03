@@ -29,7 +29,7 @@ InputParameters validParams<Executioner>()
 
 Executioner::Executioner(std::string name, MooseSystem & moose_system, InputParameters parameters) :
   MooseObject(name, moose_system, parameters),
-  FunctionInterface(moose_system._functions, parameters, _tid),
+  FunctionInterface(moose_system._functions[_tid], parameters),
   _initial_residual_norm(std::numeric_limits<Real>::max()),
   _old_initial_residual_norm(std::numeric_limits<Real>::max())
 {

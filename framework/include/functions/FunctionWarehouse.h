@@ -18,27 +18,27 @@ typedef std::map<std::string, Function *>::iterator FunctionIterator;
 class FunctionWarehouse
 {
 public:
-  FunctionWarehouse(MooseSystem &sys);
+  FunctionWarehouse();
   virtual ~FunctionWarehouse();
 
   /**
    * Access to iterators.
    */
-  FunctionIterator activeFunctionsBegin(THREAD_ID tid);
-  FunctionIterator activeFunctionsEnd(THREAD_ID tid);
+  FunctionIterator activeFunctionsBegin();
+  FunctionIterator activeFunctionsEnd();
 
   /**
    * Get function by name and tid.
    */
-  Function & getFunction(THREAD_ID tid, std::string fname);
+  Function & getFunction(const std::string & fname);
 
   /**
    * Add function by name and tid.
    */
-  void addFunction(THREAD_ID tid, std::string fname, Function *func);
+  void addFunction(const std::string & fname, Function *func);
 
 protected:
-  std::vector<std::map<std::string, Function *> > _functions;
+  std::map<std::string, Function *> _functions;
 };
 
 #endif // FUNCTIONWAREHOUSE_H

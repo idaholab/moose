@@ -9,9 +9,9 @@ InputParameters validParams<Convection>()
   return params;
 }
 
-Convection::Convection(std::string name,
+Convection::Convection(const std::string & name,
                        MooseSystem &sys,
-                       InputParameters parameters)
+                       InputParameters & parameters)
 
   :Kernel(name, sys, parameters),
    _velocity_vector(coupledGradient("velocity_vector"))

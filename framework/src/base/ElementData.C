@@ -10,42 +10,19 @@
 #include "dof_map.h"
 #include "fe_base.h"
 
-ElementData::ElementData(MooseSystem & moose_system) :
-  QuadraturePointData(moose_system),
+ElementData::ElementData(MooseSystem & moose_system, DofData & dof_data) :
+  QuadraturePointData(moose_system, dof_data),
   _moose_system(moose_system)
 {
-  sizeEverything();
 }
 
 ElementData::~ElementData()
 {
-  for (std::vector<std::vector<DenseSubVector<Number> *> >::iterator i = _var_Res.begin(); i != _var_Res.end(); ++i)
-  {
-    for (std::vector<DenseSubVector<Number> *>::iterator j = i->begin(); j != i->end(); ++j)
-    {
-      delete *j;
-    }
-  }
+  for (std::vector<DenseSubVector<Number> *>::iterator i = _var_Res.begin(); i != _var_Res.end(); ++i)
+    delete *i;
 
-  for (std::vector<std::vector<DenseMatrix<Number> *> >::iterator i = _var_Kes.begin(); i != _var_Kes.end(); ++i)
-  {
-    for (std::vector<DenseMatrix<Number> *>::iterator j = i->begin(); j != i->end(); ++j)
-    {
-      delete *j;
-    }
-  }
-}
-
-void
-ElementData::sizeEverything()
-{
-  int n_threads = libMesh::n_threads();
-
-  _current_elem.resize(n_threads);
-  
-  _test.resize(n_threads);
-  _var_Res.resize(n_threads);
-  _var_Kes.resize(n_threads);
+  for (std::vector<DenseMatrix<Number> *>::iterator i = _var_Kes.begin(); i != _var_Kes.end(); ++i)
+    delete *i;
 }
 
 
@@ -57,16 +34,11 @@ ElementData::init()
   unsigned int n_vars = _moose_system.getNonlinearSystem()->n_vars();
   unsigned int n_aux_vars = _moose_system.getAuxSystem()->n_vars();
 
-  //Resize data arrays
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    // kernels
-    _var_Res[tid].resize(n_vars);
-    _var_Kes[tid].resize(n_vars);
-  }
+  // kernels
+  _var_Res.resize(n_vars);
+  _var_Kes.resize(n_vars);
 
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    _qrule[tid] = new QGauss(_moose_system.getDim(), _moose_system._max_quadrature_order);
+  _qrule = new QGauss(_moose_system.getDim(), _moose_system._max_quadrature_order);
 
   initKernels();
 }
@@ -80,23 +52,20 @@ ElementData::initKernels()
   {
     FEType fe_type = _moose_system._dof_map->variable_type(var);
 
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    if(!_fe[fe_type])
     {
-      if(!_fe[tid][fe_type])
-      {
-        _fe[tid][fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
-        _fe[tid][fe_type]->attach_quadrature_rule(_qrule[tid]);
+      _fe[fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
+      _fe[fe_type]->attach_quadrature_rule(_qrule);
 
-        _JxW[tid][fe_type] = &_fe[tid][fe_type]->get_JxW();
-        _phi[tid][fe_type] = &_fe[tid][fe_type]->get_phi();
-        _grad_phi[tid][fe_type] = &_fe[tid][fe_type]->get_dphi();
-        _q_point[tid][fe_type] = &_fe[tid][fe_type]->get_xyz();
+      _JxW[fe_type] = &_fe[fe_type]->get_JxW();
+      _phi[fe_type] = &_fe[fe_type]->get_phi();
+      _grad_phi[fe_type] = &_fe[fe_type]->get_dphi();
+      _q_point[fe_type] = &_fe[fe_type]->get_xyz();
 
-        FEFamily family = fe_type.family;
+      FEFamily family = fe_type.family;
 
-        if(family == CLOUGH || family == HERMITE)
-          _second_phi[tid][fe_type] = &_fe[tid][fe_type]->get_d2phi();
-      }
+      if(family == CLOUGH || family == HERMITE)
+        _second_phi[fe_type] = &_fe[fe_type]->get_d2phi();
     }
   }
 
@@ -105,109 +74,25 @@ ElementData::initKernels()
   {
     FEType fe_type = _moose_system._aux_dof_map->variable_type(var);
 
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    if(!_fe[fe_type])
     {
-      if(!_fe[tid][fe_type])
-      {
-        _fe[tid][fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
-        _fe[tid][fe_type]->attach_quadrature_rule(_qrule[tid]);
+      _fe[fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
+      _fe[fe_type]->attach_quadrature_rule(_qrule);
 
-        _JxW[tid][fe_type] = &_fe[tid][fe_type]->get_JxW();
-        _phi[tid][fe_type] = &_fe[tid][fe_type]->get_phi();
-        _grad_phi[tid][fe_type] = &_fe[tid][fe_type]->get_dphi();
-        _q_point[tid][fe_type] = &_fe[tid][fe_type]->get_xyz();
-      }
+      _JxW[fe_type] = &_fe[fe_type]->get_JxW();
+      _phi[fe_type] = &_fe[fe_type]->get_phi();
+      _grad_phi[fe_type] = &_fe[fe_type]->get_dphi();
+      _q_point[fe_type] = &_fe[fe_type]->get_xyz();
     }
   }
 }
 
 void
-ElementData::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
+ElementData::reinitKernels(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
 //  Moose::perf_log.push("reinit()","Kernel");
-//  Moose::perf_log.push("reinit() - dof_indices","Kernel");
 
-  _current_elem[tid] = elem;
-
-  _moose_system._dof_map->dof_indices(elem, _moose_system._dof_indices[tid]);
-
-  std::map<FEType, FEBase*>::iterator fe_it = _fe[tid].begin();
-  std::map<FEType, FEBase*>::iterator fe_end = _fe[tid].end();
-
-//  Moose::perf_log.pop("reinit() - dof_indices","Kernel");
-//  Moose::perf_log.push("reinit() - fereinit","Kernel");
-
-  static std::vector<bool> first(libMesh::n_threads(), true);
-
-  if(_moose_system.dontReinitFE())
-  {
-    if(first[tid])
-    {
-      for(;fe_it != fe_end; ++fe_it)
-        fe_it->second->reinit(elem);
-    }
-  }
-  else
-  {
-    for(;fe_it != fe_end; ++fe_it)
-      fe_it->second->reinit(elem);
-  }
-
-  first[tid] = false;
-
-//  Moose::perf_log.pop("reinit() - fereinit","Kernel");
-
-//  Moose::perf_log.push("reinit() - resizing","Kernel");
-  if(Re)
-    Re->resize(_moose_system._dof_indices[tid].size());
-
-  if(Ke)
-    Ke->resize(_moose_system._dof_indices[tid].size(), _moose_system._dof_indices[tid].size());
-
-  unsigned int position = 0;
-
-  for(unsigned int i=0; i<_var_nums[0].size();i++)
-  {
-    _moose_system._dof_map->dof_indices(elem, _moose_system._var_dof_indices[tid][i], i);
-
-    unsigned int num_dofs = _moose_system._var_dof_indices[tid][i].size();
-
-    if(Re)
-    {
-      if(_var_Res[tid][i])
-        delete _var_Res[tid][i];
-
-      _var_Res[tid][i] = new DenseSubVector<Number>(*Re,position, num_dofs);
-    }
-
-    if(Ke)
-    {
-      if(_var_Kes[tid][i])
-        delete _var_Kes[tid][i];
-
-      _var_Kes[tid][i] = new DenseMatrix<Number>(num_dofs,num_dofs);
-    }
-    position+=num_dofs;
-  }
-
-  unsigned int num_q_points = _qrule[tid]->n_points();
-
-  _moose_system._real_zero[tid] = 0;
-  _moose_system._zero[tid].resize(num_q_points,0);
-  _moose_system._grad_zero[tid].resize(num_q_points,0);
-  _moose_system._second_zero[tid].resize(num_q_points,0);
-
-  for(std::set<unsigned int>::iterator it = _var_nums[0].begin(); it != _var_nums[0].end(); ++it)
-  {
-    unsigned int var_num = *it;
-    FEType fe_type = _moose_system._dof_map->variable_type(var_num);
-    // Copy phi to the test functions.
-    const std::vector<std::vector<Real> > & static_phi = *_phi[tid][fe_type];
-    _test[tid][var_num] = static_phi;
-  }
-//  Moose::perf_log.pop("reinit() - resizing","Kernel");
-
-  QuadraturePointData::reinit(tid, 0, soln, elem);
+  QuadraturePointData::reinit(0, soln, elem);
 
 //  Moose::perf_log.pop("reinit()","Kernel");
 }

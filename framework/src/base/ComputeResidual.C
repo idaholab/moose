@@ -4,6 +4,7 @@
 #include "BoundaryCondition.h"
 #include "ParallelUniqueId.h"
 #include "MooseSystem.h"
+#include "DofData.h"
 #include "ElementData.h"
 
 //libMesh includes
@@ -36,18 +37,18 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
-    _moose_system._kernels.updateActiveKernels(tid);
+    _moose_system._kernels[tid].updateActiveKernels(_moose_system._t, _moose_system._dt);
 
-    KernelIterator kernel_begin = _moose_system._kernels.activeKernelsBegin(tid);
-    KernelIterator kernel_end = _moose_system._kernels.activeKernelsEnd(tid);
+    KernelIterator kernel_begin = _moose_system._kernels[tid].activeKernelsBegin();
+    KernelIterator kernel_end = _moose_system._kernels[tid].activeKernelsEnd();
     KernelIterator kernel_it = kernel_begin;
 
     KernelIterator block_kernel_begin;
     KernelIterator block_kernel_end;
     KernelIterator block_kernel_it;
 
-    StabilizerIterator stabilizer_begin = _moose_system._stabilizers.activeStabilizersBegin(tid);
-    StabilizerIterator stabilizer_end = _moose_system._stabilizers.activeStabilizersEnd(tid);
+    StabilizerIterator stabilizer_begin = _moose_system._stabilizers[tid].activeStabilizersBegin();
+    StabilizerIterator stabilizer_end = _moose_system._stabilizers[tid].activeStabilizersEnd();
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
     unsigned int subdomain = std::numeric_limits<unsigned int>::max();
@@ -67,9 +68,9 @@ public:
         subdomain = cur_subdomain;
         _moose_system.subdomainSetup(tid, subdomain);
 
-        block_kernel_begin = _moose_system._kernels.blockKernelsBegin(tid, subdomain);
-        block_kernel_end = _moose_system._kernels.blockKernelsEnd(tid, subdomain);
-      } 
+        block_kernel_begin = _moose_system._kernels[tid].blockKernelsBegin(subdomain);
+        block_kernel_end = _moose_system._kernels[tid].blockKernelsEnd(subdomain);
+      }
 
       //Stabilizers
       for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
@@ -89,27 +90,26 @@ public:
         {
           unsigned int boundary_id = _moose_system._mesh->boundary_info->boundary_id (elem, side);
 
-          BCIterator bc_it = _moose_system._bcs.activeBCsBegin(tid,boundary_id);
-          BCIterator bc_end = _moose_system._bcs.activeBCsEnd(tid,boundary_id);
+          BCIterator bc_it = _moose_system._bcs[tid].activeBCsBegin(boundary_id);
+          BCIterator bc_end = _moose_system._bcs[tid].activeBCsEnd(boundary_id);
 
           if(bc_it != bc_end)
           {
             _moose_system.reinitBCs(tid, _soln, elem, side, boundary_id);
-          
+
             for(; bc_it!=bc_end; ++bc_it)
               (*bc_it)->computeResidual();
           }
         }
       }
-      
-      _moose_system._dof_map->constrain_element_vector (Re, _moose_system._dof_indices[tid], false);
+
+      _moose_system._dof_map->constrain_element_vector (Re, _moose_system._dof_data[tid]._dof_indices, false);
 
       {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx); 
-        residual.add_vector(Re, _moose_system._dof_indices[tid]);
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        residual.add_vector(Re, _moose_system._dof_data[tid]._dof_indices);
       }
     }
-
   }
 
 protected:
@@ -156,8 +156,8 @@ void MooseSystem::compute_residual (const NumericVector<Number>& soln, NumericVe
   {
     unsigned int boundary_id = ids[i];
   
-    BCIterator bc_it = _bcs.activeNodalBCsBegin(0,boundary_id);
-    BCIterator bc_end = _bcs.activeNodalBCsEnd(0,boundary_id);
+    BCIterator bc_it = _bcs[0].activeNodalBCsBegin(boundary_id);
+    BCIterator bc_end = _bcs[0].activeNodalBCsEnd(boundary_id);
 
     if(bc_it != bc_end)
     {
@@ -176,10 +176,8 @@ void MooseSystem::compute_residual (const NumericVector<Number>& soln, NumericVe
 
 //    Parallel::barrier();
 //    residual.print();
-//  u_system->rhs->print();
 
   residual.close();
-
 
   Moose::perf_log.pop("compute_residual()","Solve");
 }

@@ -13,27 +13,23 @@ typedef std::vector<BoundaryCondition *>::iterator BCIterator;
 class BCWarehouse
 {
 public:
-  BCWarehouse(MooseSystem &sys);
+  BCWarehouse();
   virtual ~BCWarehouse();
 
-  void sizeEverything();
+  BCIterator activeBCsBegin(unsigned int boundary_id);
+  BCIterator activeBCsEnd(unsigned int boundary_id);
 
-  BCIterator activeBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  BCIterator activeBCsEnd(THREAD_ID tid, unsigned int boundary_id);
+  BCIterator activeNodalBCsBegin(unsigned int boundary_id);
+  BCIterator activeNodalBCsEnd(unsigned int boundary_id);
 
-  BCIterator activeNodalBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  BCIterator activeNodalBCsEnd(THREAD_ID tid, unsigned int boundary_id);
-
-  void addBC(THREAD_ID tid, unsigned int boundary_id, BoundaryCondition *bc);
-  void addNodalBC(THREAD_ID tid, unsigned int boundary_id, BoundaryCondition *bc);
+  void addBC(unsigned int boundary_id, BoundaryCondition *bc);
+  void addNodalBC(unsigned int boundary_id, BoundaryCondition *bc);
 
   void activeBoundaries(std::set<short> & set_buffer) const;
 
 protected:
-  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > _active_bcs;
-  std::vector<std::map<unsigned int, std::vector<BoundaryCondition *> > > _active_nodal_bcs;
-
-  MooseSystem &_moose_system;
+  std::map<unsigned int, std::vector<BoundaryCondition *> > _active_bcs;
+  std::map<unsigned int, std::vector<BoundaryCondition *> > _active_nodal_bcs;
 };
 
 #endif // BCWAREHOUSE_H

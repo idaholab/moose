@@ -1,43 +1,40 @@
 #include "FunctionWarehouse.h"
 
-FunctionWarehouse::FunctionWarehouse(MooseSystem &sys):
-  _functions(libMesh::n_threads())
+FunctionWarehouse::FunctionWarehouse()
 {
 }
 
 FunctionWarehouse::~FunctionWarehouse()
 {
-  std::vector<std::map<std::string, Function *> >::iterator i;
-  for (i = _functions.begin(); i != _functions.end(); ++i)
-    for (FunctionIterator j = i->begin(); j != i->end(); ++j)
-      delete j->second;
+  for (FunctionIterator i = _functions.begin(); i != _functions.end(); ++i)
+    delete i->second;
 }
 
 FunctionIterator
-FunctionWarehouse::activeFunctionsBegin(THREAD_ID tid)
+FunctionWarehouse::activeFunctionsBegin()
 {
-  return _functions[tid].begin();
+  return _functions.begin();
 }
 
 FunctionIterator
-FunctionWarehouse::activeFunctionsEnd(THREAD_ID tid)
+FunctionWarehouse::activeFunctionsEnd()
 {
-  return _functions[tid].end();
+  return _functions.end();
 }
 
 Function &
-FunctionWarehouse::getFunction(THREAD_ID tid, std::string fname)
+FunctionWarehouse::getFunction(const std::string & fname)
 {
-  FunctionIterator iter = _functions[tid].find(fname);
+  FunctionIterator iter = _functions.find(fname);
 
-  if (iter == _functions[tid].end())
+  if (iter == _functions.end())
     mooseError("No Function by name: " + fname);
 
   return *(iter->second);
 }
 
 void
-FunctionWarehouse::addFunction(THREAD_ID tid, std::string fname, Function * func)
+FunctionWarehouse::addFunction(const std::string & fname, Function * func)
 {
-  _functions[tid][fname] = func;
+  _functions[fname] = func;
 }

@@ -20,30 +20,27 @@ typedef std::vector<Kernel *>::iterator KernelIterator;
 class KernelWarehouse
 {
 public:
-  KernelWarehouse(MooseSystem &sys);
+  KernelWarehouse();
   virtual ~KernelWarehouse();
 
-  KernelIterator activeKernelsBegin(THREAD_ID tid);
-  KernelIterator activeKernelsEnd(THREAD_ID tid);
+  KernelIterator activeKernelsBegin();
+  KernelIterator activeKernelsEnd();
 
-  KernelIterator blockKernelsBegin(THREAD_ID tid, unsigned int block_id);
-  KernelIterator blockKernelsEnd(THREAD_ID tid, unsigned int block_id);
+  KernelIterator blockKernelsBegin(unsigned int block_id);
+  KernelIterator blockKernelsEnd(unsigned int block_id);
 
-  void addKernel(THREAD_ID tid, Kernel *kernel);
-  void addBlockKernel(THREAD_ID tid, unsigned int block_id, Kernel *kernel);
+  void addKernel(Kernel *kernel);
+  void addBlockKernel(unsigned int block_id, Kernel *kernel);
 
   bool activeKernelBlocks(std::set<subdomain_id_type> & set_buffer) const;
 
-  void updateActiveKernels(THREAD_ID tid);
+  void updateActiveKernels(Real t, Real dt);
 
 protected:
-  std::vector<Kernel *> _kernels;
-  std::vector<std::vector<Kernel *> > _active_kernels;
-  std::vector<std::vector<Kernel *> > _all_kernels;
-  std::vector<std::map<unsigned int, std::vector<Kernel *> > > _block_kernels;
-  std::vector<std::map<unsigned int, std::vector<Kernel *> > > _all_block_kernels;
-
-  MooseSystem &_moose_system;
+  std::vector<Kernel *> _active_kernels;
+  std::vector<Kernel *> _all_kernels;
+  std::map<unsigned int, std::vector<Kernel *> > _block_kernels;
+  std::map<unsigned int, std::vector<Kernel *> > _all_block_kernels;
 };
 
 #endif // KERNELWAREHOUSE_H

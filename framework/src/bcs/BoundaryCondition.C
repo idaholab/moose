@@ -19,24 +19,24 @@ InputParameters validParams<BoundaryCondition>()
 }
 
 BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_system, InputParameters parameters) :
-  PDEBase(name, moose_system, parameters, moose_system._face_data),
-  MaterialPropertyInterface(moose_system._material_data),
-   _element_data(moose_system._element_data),
-   _face_data(moose_system._face_data),
+  PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
+  MaterialPropertyInterface(moose_system._material_data[_tid]),
+   _element_data(*moose_system._element_data[_tid]),
+   _face_data(*moose_system._face_data[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
-   _normals(*moose_system._face_data._normals[_tid][_fe_type]),
-   _current_side(moose_system._face_data._current_side[_tid]),
-   _current_side_elem(moose_system._face_data._current_side_elem[_tid]),
-   _current_node(moose_system._face_data._current_node[_tid]),
-   _current_residual(moose_system._face_data._current_residual[_tid]),
-   _u(_integrated ? moose_system._face_data._var_vals[_tid][_var_num] : moose_system._face_data._var_vals_nodal[_tid][_var_num]),
-   _grad_u(_integrated ? moose_system._face_data._var_grads[_tid][_var_num] : moose_system._grad_zero[_tid]),
-   _second_u(_integrated ? moose_system._face_data._var_seconds[_tid][_var_num] : moose_system._second_zero[_tid]),
+   _normals(*_face_data._normals[_fe_type]),
+   _current_side(_face_data._current_side),
+   _current_side_elem(_face_data._current_side_elem),
+   _current_node(_face_data._current_node),
+   _current_residual(_face_data._current_residual),
+   _u(_integrated ? _face_data._var_vals[_var_num] : _face_data._var_vals_nodal[_var_num]),
+   _grad_u(_integrated ? _face_data._var_grads[_var_num] : moose_system._grad_zero[_tid]),
+   _second_u(_integrated ? _face_data._var_seconds[_var_num] : moose_system._second_zero[_tid]),
    // TODO: Fix this holy hack!
-   _test(*moose_system._face_data._phi[_tid][_fe_type]), 
-   _grad_test(*moose_system._face_data._grad_phi[_tid][_fe_type]), 
-   _second_test(*moose_system._face_data._second_phi[_tid][_fe_type])
+   _test(*_face_data._phi[_fe_type]),
+   _grad_test(*_face_data._grad_phi[_fe_type]),
+   _second_test(*_face_data._second_phi[_fe_type])
 {
   // If this variable isn't known yet... make it so
   if(_integrated)
@@ -79,7 +79,7 @@ BoundaryCondition::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","BoundaryCondition");
 
-  DenseSubVector<Number> & var_Re = *_element_data._var_Res[_tid][_var_num];
+  DenseSubVector<Number> & var_Re = *_element_data._var_Res[_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -102,7 +102,7 @@ BoundaryCondition::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()","BoundaryCondition");
 
-  DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_tid][_var_num];
+  DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -166,7 +166,7 @@ void
 BoundaryCondition::computeAndStoreResidual()
 {
   _qp = 0;
-  _current_residual->set(_moose_system._face_data._nodal_bc_var_dofs[_tid][_var_num], _moose_system._scaling_factor[_var_num]*computeQpResidual());
+  _current_residual->set(_moose_system._face_data[_tid]->_nodal_bc_var_dofs[_var_num], _moose_system._scaling_factor[_var_num]*computeQpResidual());
 }
 
 Real
@@ -192,7 +192,7 @@ BoundaryCondition::coupledValue(std::string var_name, int i)
   if(_integrated)
     return PDEBase::coupledValue(var_name, i);
 
-  return _moose_system._face_data._var_vals_nodal[_tid][_coupled_vars[var_name][i]._num];
+  return _moose_system._face_data[_tid]->_var_vals_nodal[_coupled_vars[var_name][i]._num];
 }
 
 MooseArray<RealGradient> &

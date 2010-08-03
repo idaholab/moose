@@ -14,20 +14,18 @@ typedef std::map<std::string, InitialCondition *>::iterator InitialConditionIter
 class InitialConditionWarehouse
 {
 public:
-  InitialConditionWarehouse(MooseSystem &sys);
+  InitialConditionWarehouse();
   virtual ~InitialConditionWarehouse();
 
-  InitialConditionIterator activeInitialConditionsBegin(THREAD_ID tid);
-  InitialConditionIterator activeInitialConditionsEnd(THREAD_ID tid);
+  InitialConditionIterator activeInitialConditionsBegin();
+  InitialConditionIterator activeInitialConditionsEnd();
 
-  InitialCondition * getInitialCondition(THREAD_ID tid, std::string var_name);
+  InitialCondition * getInitialCondition(const std::string & var_name);
 
-  void addIC(THREAD_ID tid, std::string var_name, InitialCondition *ic);
+  void addIC(const std::string & var_name, InitialCondition *ic);
 
 protected:
-  std::vector<std::map<std::string, InitialCondition *> > _active_initial_conditions;
-
-  MooseSystem &_moose_system;
+  std::map<std::string, InitialCondition *> _active_initial_conditions;
 };
 
 #endif // INITIALCONDITIONWAREHOUSE_H

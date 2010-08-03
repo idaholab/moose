@@ -23,8 +23,8 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
   MeshBase::const_node_iterator nd     = _mesh->local_nodes_begin();
   MeshBase::const_node_iterator nd_end = _mesh->local_nodes_end();
 
-  AuxKernelIterator aux_begin = _auxs.activeNodalAuxKernelsBegin(0);
-  AuxKernelIterator aux_end = _auxs.activeNodalAuxKernelsEnd(0);
+  AuxKernelIterator aux_begin = _auxs[0].activeNodalAuxKernelsBegin();
+  AuxKernelIterator aux_end = _auxs[0].activeNodalAuxKernelsEnd();
   AuxKernelIterator aux_it = aux_begin;
 
   if(aux_begin != aux_end)
@@ -36,7 +36,7 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
       reinitAuxKernels(0, soln, *node);
 
       for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-        (*aux_it)->computeAndStore(0);
+        (*aux_it)->computeAndStore();
     }
   }
 
@@ -50,8 +50,8 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
 
   for(unsigned int i=0; i<n_nodes; i++)
   {
-    aux_begin = _auxs.activeAuxBCsBegin(0,ids[i]);
-    aux_end = _auxs.activeAuxBCsEnd(0,ids[i]);
+    aux_begin = _auxs[0].activeAuxBCsBegin(ids[i]);
+    aux_end = _auxs[0].activeAuxBCsEnd(ids[i]);
 
     if(aux_begin != aux_end)
     {
@@ -60,7 +60,7 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
       reinitAuxKernels(0, soln, node);
 
       for(aux_it=aux_begin; aux_it != aux_end; ++aux_it)
-        (*aux_it)->computeAndStore(0);
+        (*aux_it)->computeAndStore();
     }
   }
 
@@ -68,8 +68,8 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
   _es->get_system<ExplicitSystem>("AuxiliarySystem").update();
 
   // Update the element aux vars
-  aux_begin = _auxs.activeElementAuxKernelsBegin(0);
-  aux_end = _auxs.activeElementAuxKernelsEnd(0);
+  aux_begin = _auxs[0].activeElementAuxKernelsBegin();
+  aux_end = _auxs[0].activeElementAuxKernelsEnd();
   aux_it = aux_begin;
 
   MeshBase::const_element_iterator       el     = _mesh->active_local_elements_begin();
@@ -93,13 +93,13 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
       {
         subdomain = cur_subdomain;
       
-        _element_data._material[0] = _materials.getMaterials(0, subdomain);
+        _element_data[0]->_material = _materials[0].getMaterials(subdomain);
         for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
           (*aux_it)->subdomainSetup();
       }
 
       for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-        (*aux_it)->computeAndStore(0);
+        (*aux_it)->computeAndStore();
     }
   }
 

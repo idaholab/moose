@@ -8,6 +8,7 @@
 //Forward Declarations
 class MooseSystem;
 class Material;
+class DofData;
 
 namespace libMesh
 {
@@ -26,14 +27,14 @@ namespace libMesh
 class QuadraturePointData
 {
 public:
-  QuadraturePointData(MooseSystem & moose_system);
+  QuadraturePointData(MooseSystem & moose_system, DofData & dof_data);
   virtual ~QuadraturePointData();
-
-  void sizeEverything();
 
   void init();
 
-  void reinit(THREAD_ID tid, unsigned int block_id, const NumericVector<Number>& soln, const Elem * elem);
+  void reinit(unsigned int block_id, const NumericVector<Number>& soln, const Elem * elem);
+
+  void reinitMaterials(std::vector<Material *> & materials);
 
   /**
    * The MooseSystem this Kernel is associated with.
@@ -41,14 +42,19 @@ public:
   MooseSystem & _moose_system;
 
   /**
+   * Reference to DofData
+   */
+  DofData & _dof_data;
+
+  /**
    * finite element.
    */
-  std::vector<std::map<FEType, FEBase *> > _fe;
+  std::map<FEType, FEBase *> _fe;
 
   /**
    * quadrature rule.
    */
-  std::vector<QGauss *> _qrule;
+  QGauss * _qrule;
 
   /**
    * number of quadrature points for current element
@@ -58,27 +64,27 @@ public:
   /**
    * XYZ coordinates of quadrature points
    */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _q_point;
+  std::map<FEType, const std::vector<Point> *> _q_point;
 
   /**
-   * Side Jacobian pre-multiplied by the weight.
+   * Jacobian pre-multiplied by the weight.
    */
-  std::vector<std::map<FEType, const std::vector<Real> *> > _JxW;
+  std::map<FEType, const std::vector<Real> *> _JxW;
 
   /**
-   * Side shape function.
+   * Shape function.
    */
-  std::vector<std::map<FEType, const std::vector<std::vector<Real> > *> > _phi;
+  std::map<FEType, const std::vector<std::vector<Real> > *> _phi;
 
   /**
-   * Gradient of side shape function.
+   * Gradient of shape function.
    */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealGradient> > *> > _grad_phi;
+  std::map<FEType, const std::vector<std::vector<RealGradient> > *> _grad_phi;
 
   /**
    * Second derivative of interior shape function.
    */
-  std::vector<std::map<FEType, const std::vector<std::vector<RealTensor> > *> > _second_phi;
+  std::map<FEType, const std::vector<std::vector<RealTensor> > *> _second_phi;
 
 
   /**
@@ -96,37 +102,37 @@ public:
   /**
    * Value of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals;
+  MooseArray<MooseArray<Real> > _var_vals;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_old;
+  MooseArray<MooseArray<Real> > _var_vals_old;
 
   /**
    * Value of the variables at the quadrature points at t-2.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_older;
+  MooseArray<MooseArray<Real> > _var_vals_older;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads;
+  MooseArray<MooseArray<RealGradient> > _var_grads;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_old;
+  MooseArray<MooseArray<RealGradient> > _var_grads_old;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _var_grads_older;
+  MooseArray<MooseArray<RealGradient> > _var_grads_older;
 
   /**
    * Second derivatives of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealTensor> > > _var_seconds;
+  MooseArray<MooseArray<RealTensor> > _var_seconds;
 
 
   /**
@@ -138,37 +144,37 @@ public:
   /**
    * Value of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _aux_var_vals;
+  MooseArray<MooseArray<Real> > _aux_var_vals;
 
   /**
    * Value of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _aux_var_vals_old;
+  MooseArray<MooseArray<Real> > _aux_var_vals_old;
 
   /**
    * Value of the variables at the quadrature points at t-2.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _aux_var_vals_older;
+  MooseArray<MooseArray<Real> > _aux_var_vals_older;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads;
+  MooseArray<MooseArray<RealGradient> > _aux_var_grads;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads_old;
+  MooseArray<MooseArray<RealGradient> > _aux_var_grads_old;
 
   /**
    * Gradient of the variables at the quadrature points.
    */
-  MooseArray<MooseArray<MooseArray<RealGradient> > > _aux_var_grads_older;
+  MooseArray<MooseArray<RealGradient> > _aux_var_grads_older;
 
   /**
    * Pointer to the material that is valid for the current block.
    */
-  std::vector<std::vector<Material *> > _material;
+  std::vector<Material *> _material;
 };
 
 #endif // QUADRPTDATA_H

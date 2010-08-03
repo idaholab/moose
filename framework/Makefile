@@ -8,7 +8,7 @@ meshdir := $(LIBMESH_DIR)
 # include the library options determined by configure.  This will
 # set the variables INCLUDE and LIBS that we will need to build and
 # link with the library.
-include $(meshdir)/Make.common
+-include $(meshdir)/Make.common
 
 libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/postprocessors -Iinclude/stabilizers -Iinclude/executioners -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/functions -Iinclude/utils -Iinclude/utils/fparser -Iinclude/materials -Iinclude/parser
 
@@ -75,7 +75,7 @@ clean:
 	@rm -f Makefile.export
 
 # include the dependency list
-include .depend
+-include .depend
 
 
 #

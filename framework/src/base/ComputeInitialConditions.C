@@ -47,7 +47,7 @@ Number MooseSystem::initial_value (const Point& p,
                       const std::string& var_name)
 {
   // Try to grab an InitialCondition object for this variable.
-  InitialCondition * ic = _ics.getInitialCondition(0, var_name);
+  InitialCondition * ic = _ics[0].getInitialCondition(var_name);
 
   if(ic)
     return ic->value(p);
@@ -64,7 +64,7 @@ Gradient MooseSystem::initial_gradient (const Point& p,
                            const std::string& var_name)
 {
   // Try to grab an InitialCondition object for this variable.
-  InitialCondition * ic = _ics.getInitialCondition(0, var_name);
+  InitialCondition * ic = _ics[0].getInitialCondition(var_name);
 
   if(ic)
     return ic->gradient(p);

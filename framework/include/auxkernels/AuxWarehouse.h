@@ -21,35 +21,33 @@ typedef std::vector<AuxKernel *>::iterator AuxKernelIterator;
 class AuxWarehouse
 {
 public:
-  AuxWarehouse(MooseSystem &sys);
+  AuxWarehouse();
   virtual ~AuxWarehouse();
 
-  AuxKernelIterator activeNodalAuxKernelsBegin(THREAD_ID tid);
-  AuxKernelIterator activeNodalAuxKernelsEnd(THREAD_ID tid);
+  AuxKernelIterator activeNodalAuxKernelsBegin();
+  AuxKernelIterator activeNodalAuxKernelsEnd();
 
-  AuxKernelIterator activeElementAuxKernelsBegin(THREAD_ID tid);
-  AuxKernelIterator activeElementAuxKernelsEnd(THREAD_ID tid);
+  AuxKernelIterator activeElementAuxKernelsBegin();
+  AuxKernelIterator activeElementAuxKernelsEnd();
 
-  AuxKernelIterator activeAuxBCsBegin(THREAD_ID tid, unsigned int boundary_id);
-  AuxKernelIterator activeAuxBCsEnd(THREAD_ID tid, unsigned int boundary_id);
+  AuxKernelIterator activeAuxBCsBegin(unsigned int boundary_id);
+  AuxKernelIterator activeAuxBCsEnd(unsigned int boundary_id);
 
-  std::list<AuxKernel *> getActiveNodalKernels(THREAD_ID tid);
-  std::list<AuxKernel *> getActiveElementKernels(THREAD_ID tid);
+  std::list<AuxKernel *> getActiveNodalKernels();
+  std::list<AuxKernel *> getActiveElementKernels();
 
-  void setActiveNodalKernels(THREAD_ID tid, std::list<AuxKernel *> &auxs);
-  void setActiveElementKernels(THREAD_ID tid, std::list<AuxKernel *> &auxs);
+  void setActiveNodalKernels(std::list<AuxKernel *> &auxs);
+  void setActiveElementKernels(std::list<AuxKernel *> &auxs);
 
-  void addBC(THREAD_ID tid, AuxKernel *aux);
-  void addActiveBC(THREAD_ID tid, unsigned int boundary_id, AuxKernel *aux);
+  void addBC(AuxKernel *aux);
+  void addActiveBC(unsigned int boundary_id, AuxKernel *aux);
 
 protected:
-  std::vector<std::vector<AuxKernel *> > _active_nodal_aux_kernels;
-  std::vector<std::vector<AuxKernel *> > _active_element_aux_kernels;
+  std::vector<AuxKernel *> _active_nodal_aux_kernels;
+  std::vector<AuxKernel *> _active_element_aux_kernels;
 
-  std::vector<std::vector<AuxKernel *> > _aux_bcs;
-  std::vector<std::map<unsigned int, std::vector<AuxKernel *> > > _active_bcs;
-
-  MooseSystem &_moose_system;
+  std::vector<AuxKernel *> _aux_bcs;
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;
 };
 
 #endif // AUXWAREHOUSE_H

@@ -7,6 +7,7 @@
 
 //Forward Declarations
 class MooseSystem;
+class DofData;
 
 namespace libMesh
 {
@@ -16,15 +17,13 @@ namespace libMesh
 class FaceData : public QuadraturePointData
 {
 public:
-  FaceData(MooseSystem & moose_system);
+  FaceData(MooseSystem & moose_system, DofData & dof_data);
   virtual ~FaceData();
-
-  void sizeEverything();
 
   void init();
 
-  void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id);
-  void reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
+  void reinit(const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id);
+  void reinit(const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
 
 public:
   /**
@@ -32,31 +31,33 @@ public:
    */
   MooseSystem & _moose_system;
 
+  DofData & _dof_data;
+
   /// BCs
   /**
    * Current node for nodal BC's
    */
-  std::vector<const Node *> _current_node;
+  const Node * _current_node;
 
   /**
    * Current residual vector.  Only valid for nodal BC's.
    */
-  std::vector<NumericVector<Number> *> _current_residual;
+  NumericVector<Number> * _current_residual;
 
   /**
    * Current side.
    */
-  std::vector<unsigned int> _current_side;
+  unsigned int _current_side;
 
   /**
    * The current "element" making up the side we are currently on.
    */
-  std::vector<const Elem *> _current_side_elem;
+  const Elem * _current_side_elem;
 
   /**
    * Normal vectors at the quadrature points.
    */
-  std::vector<std::map<FEType, const std::vector<Point> *> > _normals;
+  std::map<FEType, const std::vector<Point> *> _normals;
 
   /**
    * Map to vector of variable numbers that need to be evaluated
@@ -67,12 +68,12 @@ public:
   /**
    * Holds the current dof numbers for each variable for nodal bcs
    */
-  std::vector<std::vector<unsigned int> > _nodal_bc_var_dofs;
+  std::vector<unsigned int> _nodal_bc_var_dofs;
 
   /**
    * Value of the variables at the nodes.
    */
-  MooseArray<MooseArray<MooseArray<Real> > > _var_vals_nodal;
+  MooseArray<MooseArray<Real> > _var_vals_nodal;
 };
 
 

@@ -1,8 +1,4 @@
 #include "MooseSystem.h"
-#include "ElementData.h"
-#include "FaceData.h"
-#include "AuxData.h"
-#include "MaterialData.h"
 #include "KernelFactory.h"
 #include "BCFactory.h"
 #include "AuxFactory.h"
@@ -31,109 +27,89 @@
 #include "kelly_error_estimator.h"
 #include "fourth_error_estimators.h"
 
-MooseSystem::MooseSystem()
- : _element_data(*this),
-   _face_data(*this),
-   _aux_data(*this, _element_data),
-   _material_data(*this),
-   _postprocessor_data(*this),
-   _es(NULL),
-   _system(NULL),
-   _aux_system(NULL),
-   _geom_type(Moose::XYZ),
-   _mesh(NULL),
-   _delete_mesh(true),
-   _dim(0),
-   _mesh_changed(false),
-   _kernels(*this),
-   _bcs(*this),
-   _auxs(*this),
-   _materials(*this),
-   _stabilizers(*this),
-   _ics(*this),
-   _pps(*this),
-   _functions(*this),
-   _no_fe_reinit(false),
-   _preconditioner(NULL),
-   _exreader(NULL),
-   _is_valid(false),
-   _mesh_refinement(NULL),
-   _error_estimator(NULL),
-   _error(NULL),
-   _t(0),
-   _dt(0),
-   _dt_old(0),
-   _is_transient(false),
-   _is_eigenvalue(false),
-   _t_step(0),
-   _t_scheme(0),
-   _n_of_rk_stages(0),
-   _active_local_elem_range(NULL),
-   _auto_scaling(false),
-   _print_mesh_changed(false),
-   _file_base ("out"),
-   _interval(1),
-   _exodus_output(true),
-   _gmv_output(false),
-   _tecplot_output(false),
-   _postprocessor_screen_output(true),
-   _postprocessor_csv_output(false),
-   _print_out_info(false),
-   _output_initial(false),
-   _l_abs_step_tol(1e-10)
+MooseSystem::MooseSystem() :
+  _dof_data(libMesh::n_threads(), DofData(*this)),
+  _material_data(libMesh::n_threads(), MaterialData(*this)),
+  _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
+  _es(NULL),
+  _system(NULL),
+  _aux_system(NULL),
+  _geom_type(Moose::XYZ),
+  _mesh(NULL),
+  _delete_mesh(true),
+  _dim(0),
+  _mesh_changed(false),
+  _no_fe_reinit(false),
+  _preconditioner(NULL),
+  _exreader(NULL),
+  _is_valid(false),
+  _mesh_refinement(NULL),
+  _error_estimator(NULL),
+  _error(NULL),
+  _t(0),
+  _dt(0),
+  _dt_old(0),
+  _is_transient(false),
+  _is_eigenvalue(false),
+  _t_step(0),
+  _t_scheme(0),
+  _n_of_rk_stages(0),
+  _active_local_elem_range(NULL),
+  _auto_scaling(false),
+  _print_mesh_changed(false),
+  _file_base ("out"),
+  _interval(1),
+  _exodus_output(true),
+  _gmv_output(false),
+  _tecplot_output(false),
+  _postprocessor_screen_output(true),
+  _postprocessor_csv_output(false),
+  _print_out_info(false),
+  _output_initial(false),
+  _l_abs_step_tol(1e-10)
 {
   sizeEverything();
 }
 
-MooseSystem::MooseSystem(Mesh &mesh)
-  : _element_data(*this),
-    _face_data(*this),
-    _aux_data(*this, _element_data),
-    _material_data(*this),
-    _postprocessor_data(*this),
-    _es(NULL),
-    _system(NULL),
-    _aux_system(NULL),
-    _mesh(&mesh),
-    _delete_mesh(false),
-    _dim(_mesh->mesh_dimension()),
-    _mesh_changed(false),
-    _kernels(*this),
-    _bcs(*this),
-    _auxs(*this),
-    _materials(*this),
-    _stabilizers(*this),
-    _ics(*this),
-    _pps(*this),
-    _functions(*this),
-    _no_fe_reinit(false),
-    _preconditioner(NULL),
-    _exreader(NULL),
-    _is_valid(false),
-    _mesh_refinement(NULL),
-    _error_estimator(NULL),
-    _error(NULL),
-    _t(0),
-    _dt(0),
-    _dt_old(0),
-    _is_transient(false),
-    _is_eigenvalue(false),
-    _t_step(0),
-    _t_scheme(0),
-    _n_of_rk_stages(0),
-    _active_local_elem_range(NULL),
-    _auto_scaling(false),
-    _print_mesh_changed(false),
-    _file_base ("out"),
-    _interval(1),
-    _exodus_output(true),
-    _gmv_output(false),
-    _tecplot_output(false),
-    _postprocessor_screen_output(true),
-    _postprocessor_csv_output(false),
-    _print_out_info(false),
-    _output_initial(false),
-    _l_abs_step_tol(1e-10)
+MooseSystem::MooseSystem(Mesh &mesh) :
+  _dof_data(libMesh::n_threads(), DofData(*this)),
+  _material_data(libMesh::n_threads(), MaterialData(*this)),
+  _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
+  _es(NULL),
+  _system(NULL),
+  _aux_system(NULL),
+  _mesh(&mesh),
+  _delete_mesh(false),
+  _dim(_mesh->mesh_dimension()),
+  _mesh_changed(false),
+  _no_fe_reinit(false),
+  _preconditioner(NULL),
+  _exreader(NULL),
+  _is_valid(false),
+  _mesh_refinement(NULL),
+  _error_estimator(NULL),
+  _error(NULL),
+  _t(0),
+  _dt(0),
+  _dt_old(0),
+  _is_transient(false),
+  _is_eigenvalue(false),
+  _t_step(0),
+  _t_scheme(0),
+  _n_of_rk_stages(0),
+  _active_local_elem_range(NULL),
+  _auto_scaling(false),
+  _print_mesh_changed(false),
+  _file_base ("out"),
+  _interval(1),
+  _exodus_output(true),
+  _gmv_output(false),
+  _tecplot_output(false),
+  _postprocessor_screen_output(true),
+  _postprocessor_csv_output(false),
+  _print_out_info(false),
+  _output_initial(false),
+  _l_abs_step_tol(1e-10)
 {
   sizeEverything();
   initEquationSystems();
@@ -146,16 +122,11 @@ MooseSystem::MooseSystem(Mesh &mesh)
 
 MooseSystem::~MooseSystem()
 {
-  if (_is_valid)
+  for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    /*
-    for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid) 
-    {
-      delete _element_data[tid];
-      delete _face_data[tid];
-      delete _aux_data[tid];
-    }
-    */
+    delete _element_data[tid];
+    delete _face_data[tid];
+    delete _aux_data[tid];
   }
 
   if (_preconditioner != NULL)
@@ -198,25 +169,32 @@ MooseSystem::getMesh(bool skip_full_check)
   return _mesh;
 }
 
-std::vector<Material *>
-MooseSystem::getMaterials(THREAD_ID tid, unsigned int block_id)
-{
-  return _materials.getMaterials(tid, block_id);
-}
-
 void
 MooseSystem::sizeEverything()
 {
   int n_threads = libMesh::n_threads();
 
+  _element_data.resize(n_threads);
+  _face_data.resize(n_threads);
+  _aux_data.resize(n_threads);
+  for (THREAD_ID tid = 0; tid < n_threads; ++tid)
+  {
+    _element_data[tid] = new ElementData(*this, _dof_data[tid]);
+    _face_data[tid] = new FaceData(*this, _dof_data[tid]);
+    _aux_data[tid] = new AuxData(*this, _dof_data[tid], *_element_data[tid]);
+  }
+
+  _kernels.resize(n_threads);
+  _bcs.resize(n_threads);
+  _auxs.resize(n_threads);
+  _materials.resize(n_threads);
+  _stabilizers.resize(n_threads);
+  _ics.resize(n_threads);
+  _pps.resize(n_threads);
+  _functions.resize(n_threads);
+
   // Kernels::sizeEverything
   _bdf2_wei.resize(3);
-
-  _dof_indices.resize(n_threads);
-  _var_dof_indices.resize(n_threads);
-
-  _aux_var_dof_indices.resize(n_threads);
-  _aux_var_dofs.resize(n_threads);
 
   // Single Instance Variables
   _real_zero.resize(n_threads);
@@ -251,10 +229,10 @@ MooseSystem::init()
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     // kernels
-    _var_dof_indices[tid].resize(n_vars);
+    _dof_data[tid]._var_dof_indices.resize(n_vars);
     // aux var
-    _aux_var_dofs[tid].resize(n_aux_vars);
-    _aux_var_dof_indices[tid].resize(n_aux_vars);
+    _dof_data[tid]._aux_var_dofs.resize(n_aux_vars);
+    _dof_data[tid]._aux_var_dof_indices.resize(n_aux_vars);
   }
 
   //Find the largest quadrature order necessary... all variables _must_ use the same rule!
@@ -266,9 +244,13 @@ MooseSystem::init()
       _max_quadrature_order = fe_type.default_quadrature_order();
   }
 
-  _element_data.init();
-  _face_data.init();
-  _aux_data.init();
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    _element_data[tid]->init();
+    _face_data[tid]->init();
+    _aux_data[tid]->init();
+  }
+
 
   _t = 0;
   _dt = 0;
@@ -318,12 +300,12 @@ MooseSystem::getAuxSystem()
 }
 
 QuadraturePointData &
-MooseSystem::getQuadraturePointData(bool is_boundary)
+MooseSystem::getQuadraturePointData(THREAD_ID tid, bool is_boundary)
 {
   if (is_boundary)
-    return _face_data;
+    return *_face_data[tid];
   else
-    return _element_data;
+    return *_element_data[tid];
 }
 
 bool
@@ -483,7 +465,7 @@ MooseSystem::doAdaptivityStep()
 Real &
 MooseSystem::getPostprocessorValue(std::string name)
 {
-  return _postprocessor_data._values[name];
+  return _postprocessor_data[0]._values[name];
 }
 
 void
@@ -537,7 +519,8 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, type, active_subdomains);
-  _element_data._var_nums[0].insert(var_num);
+  for (THREAD_ID tid = 0; libMesh::n_threads(); ++tid)
+    _element_data[tid]->_var_nums[0].insert(var_num);
   return var_num;
 }
 
@@ -545,7 +528,8 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const Order order, const FEFamily family, const std::set< subdomain_id_type > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, order, family, active_subdomains);
-  _element_data._var_nums[0].insert(var_num);
+  for (THREAD_ID tid = 0; libMesh::n_threads(); ++tid)
+    _element_data[tid]->_var_nums[0].insert(var_num);
   return var_num;
 }
 
@@ -559,13 +543,13 @@ void MooseSystem::addKernel(std::string kernel_name,
     parameters.set<THREAD_ID>("_tid") = tid;
 
     if (!parameters.isParamValid("block"))
-      _kernels.addKernel(tid, KernelFactory::instance()->create(kernel_name, name, *this, parameters));
+      _kernels[tid].addKernel(KernelFactory::instance()->create(kernel_name, name, *this, parameters));
     else
     {
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
     
       for (unsigned int i=0; i<blocks.size(); ++i)
-        _kernels.addBlockKernel(tid, blocks[i], KernelFactory::instance()->create(kernel_name, name, *this, parameters));
+        _kernels[tid].addBlockKernel(blocks[i], KernelFactory::instance()->create(kernel_name, name, *this, parameters));
     }
   }
 }
@@ -586,9 +570,9 @@ MooseSystem::addBC(std::string bc_name,
       BoundaryCondition * bc = BCFactory::instance()->create(bc_name, name, *this, parameters);
 
       if(bc->isIntegrated())
-        _bcs.addBC(tid, boundaries[i], bc);
+        _bcs[tid].addBC(boundaries[i], bc);
       else
-        _bcs.addNodalBC(tid, boundaries[i], bc);
+        _bcs[tid].addNodalBC(boundaries[i], bc);
     }
   }
 }
@@ -616,9 +600,9 @@ MooseSystem::addAuxKernel(std::string aux_name,
     // Copy the active AuxKernels into a list for manipulation
     std::list<AuxKernel *> active_auxs;
     if (aux->isNodal())
-      active_auxs = _auxs.getActiveNodalKernels(tid);
+      active_auxs = _auxs[tid].getActiveNodalKernels();
     else
-      active_auxs = _auxs.getActiveElementKernels(tid);
+      active_auxs = _auxs[tid].getActiveElementKernels();
 
     // Get a list of all the dependent variables that this AuxKernel will act on to
     // place it in the vector in the appropriate location
@@ -654,9 +638,9 @@ MooseSystem::addAuxKernel(std::string aux_name,
 
     // Copy the list back into the Auxiliary Vector
     if (aux->isNodal())
-      _auxs.setActiveNodalKernels(tid, active_auxs);
+      _auxs[tid].setActiveNodalKernels(active_auxs);
     else
-      _auxs.setActiveElementKernels(tid, active_auxs);
+      _auxs[tid].setActiveElementKernels(active_auxs);
   }
 }
 
@@ -675,8 +659,8 @@ MooseSystem::addAuxBC(std::string aux_name,
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
 
     for (unsigned int i=0; i<boundaries.size(); ++i)
-      _auxs.addActiveBC(tid, boundaries[i], aux);
-    _auxs.addBC(tid, aux);
+      _auxs[tid].addActiveBC(boundaries[i], aux);
+    _auxs[tid].addBC(aux);
   }
 }
 
@@ -696,11 +680,11 @@ MooseSystem::addMaterial(std::string mat_name,
     for (unsigned int i=0; i<blocks.size(); ++i) {
       parameters.set<int>("_bid") = blocks[i];
 
-      parameters.set<bool>("_is_boudary_material") = false;
-      _materials.addMaterial(tid, blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
+      parameters.set<bool>("_is_boundary_material") = false;
+      _materials[tid].addMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
 
-      parameters.set<bool>("_is_boudary_material") = true;
-      _materials.addBoundaryMaterial(tid, blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
+      parameters.set<bool>("_is_boundary_material") = true;
+      _materials[tid].addBoundaryMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
     }
   }
 }
@@ -719,9 +703,9 @@ MooseSystem::addStabilizer(std::string stabilizer_name,
     stabilizer = StabilizerFactory::instance()->create(stabilizer_name, name, *this, parameters);
 
     if (parameters.have_parameter<unsigned int>("block_id"))
-      _stabilizers.addBlockStabilizer(tid, parameters.get<unsigned int>("block_id"), stabilizer->variable(), stabilizer);
+      _stabilizers[tid].addBlockStabilizer(parameters.get<unsigned int>("block_id"), stabilizer->variable(), stabilizer);
     else
-      _stabilizers.addStabilizer(tid, stabilizer->variable(), stabilizer);
+      _stabilizers[tid].addStabilizer(stabilizer->variable(), stabilizer);
   }
 }
 
@@ -738,7 +722,7 @@ MooseSystem::addInitialCondition(std::string ic_name,
     // The var_name needs to be added to the parameters object for any InitialCondition derived objects
     parameters.set<std::string>("var_name") = var_name;
 
-    _ics.addIC(tid, var_name, InitialConditionFactory::instance()->create(ic_name, name, *this, parameters));
+    _ics[tid].addIC(var_name, InitialConditionFactory::instance()->create(ic_name, name, *this, parameters));
   }
 }
 
@@ -759,13 +743,13 @@ MooseSystem::addPostprocessor(std::string pp_name,
       {
         parameters.set<unsigned int>("_boundary_id") = boundaries[i];
         Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, *this, parameters);
-        _pps.addPostprocessor(tid, pp);
+        _pps[tid].addPostprocessor(pp);
       }
     }
     else
     {
       Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, *this, parameters);
-      _pps.addPostprocessor(tid, pp);
+      _pps[tid].addPostprocessor(pp);
     }
   }
 }
@@ -779,68 +763,152 @@ MooseSystem::addFunction(std::string func_name,
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    _functions.addFunction(tid, name, FunctionFactory::instance()->create(func_name, name, *this, parameters));
+    _functions[tid].addFunction(name, FunctionFactory::instance()->create(func_name, name, *this, parameters));
   }
 }
 
 void
 MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
-  _element_data.reinitKernels(tid, soln, elem, Re, Ke);
+//  Moose::perf_log.push("reinit() - dof_indices","Kernel");
+
+  _dof_data[tid]._current_elem = elem;
+
+  _dof_map->dof_indices(elem, _dof_data[tid]._dof_indices);
+
+  std::map<FEType, FEBase*>::iterator fe_it = _element_data[tid]->_fe.begin();
+  std::map<FEType, FEBase*>::iterator fe_end = _element_data[tid]->_fe.end();
+
+//  Moose::perf_log.pop("reinit() - dof_indices","Kernel");
+//  Moose::perf_log.push("reinit() - fereinit","Kernel");
+
+  static std::vector<bool> first(libMesh::n_threads(), true);
+
+  if(dontReinitFE())
+  {
+    if(first[tid])
+    {
+      for(;fe_it != fe_end; ++fe_it)
+        fe_it->second->reinit(elem);
+    }
+  }
+  else
+  {
+    for(;fe_it != fe_end; ++fe_it)
+      fe_it->second->reinit(elem);
+  }
+
+  first[tid] = false;
+
+//  Moose::perf_log.pop("reinit() - fereinit","Kernel");
+
+//  Moose::perf_log.push("reinit() - resizing","Kernel");
+  if(Re)
+    Re->resize(_dof_data[tid]._dof_indices.size());
+
+  if(Ke)
+    Ke->resize(_dof_data[tid]._dof_indices.size(), _dof_data[tid]._dof_indices.size());
+
+  unsigned int position = 0;
+
+  for(unsigned int i=0; i<_element_data[tid]->_var_nums[0].size();i++)
+  {
+    _dof_map->dof_indices(elem, _dof_data[tid]._var_dof_indices[i], i);
+
+    unsigned int num_dofs = _dof_data[tid]._var_dof_indices[i].size();
+
+    if(Re)
+    {
+      if(_element_data[tid]->_var_Res[i])
+        delete _element_data[tid]->_var_Res[i];
+
+      _element_data[tid]->_var_Res[i] = new DenseSubVector<Number>(*Re,position, num_dofs);
+    }
+
+    if(Ke)
+    {
+      if(_element_data[tid]->_var_Kes[i])
+        delete _element_data[tid]->_var_Kes[i];
+
+      _element_data[tid]->_var_Kes[i] = new DenseMatrix<Number>(num_dofs,num_dofs);
+    }
+    position+=num_dofs;
+  }
+
+  unsigned int num_q_points = _element_data[tid]->_qrule->n_points();
+
+  _real_zero[tid] = 0;
+  _zero[tid].resize(num_q_points,0);
+  _grad_zero[tid].resize(num_q_points,0);
+  _second_zero[tid].resize(num_q_points,0);
+
+  for(std::set<unsigned int>::iterator it = _element_data[tid]->_var_nums[0].begin(); it != _element_data[tid]->_var_nums[0].end(); ++it)
+  {
+    unsigned int var_num = *it;
+    FEType fe_type = _dof_map->variable_type(var_num);
+    // Copy phi to the test functions.
+    const std::vector<std::vector<Real> > & static_phi = *_element_data[tid]->_phi[fe_type];
+    _element_data[tid]->_test[var_num] = static_phi;
+  }
+//  Moose::perf_log.pop("reinit() - resizing","Kernel");
+
+  _element_data[tid]->reinitKernels(soln, elem, Re, Ke);
+  _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(elem->subdomain_id()));
 }
 
 void
 MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
 {
-  _face_data.reinit(tid, soln, elem, side, boundary_id);
+  _face_data[tid]->reinit(soln, elem, side, boundary_id);
+  _face_data[tid]->reinitMaterials(_materials[tid].getMaterials(elem->subdomain_id()));
 }
 
 void
 MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual)
 {
-  _face_data.reinit(tid, soln, node, boundary_id, residual);
+  _face_data[tid]->reinit(soln, node, boundary_id, residual);
 }
 
 void
 MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node)
 {
-  _face_data._current_node[tid] = &node;
-  _aux_data.reinit(tid, soln, node);
+  _face_data[tid]->_current_node = &node;
+  _aux_data[tid]->reinit(soln, node);
 }
 
 void
 MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem)
 {
-  _aux_data.reinit(tid, soln, elem);
+  _aux_data[tid]->reinit(soln, elem);
 }
 
 void
 MooseSystem::subdomainSetup(THREAD_ID tid, unsigned int block_id)
 {
-  _element_data._material[tid] = _materials.getMaterials(tid, block_id);
-  _face_data._material[tid] = _materials.getBoundaryMaterials(tid, block_id);
+  _element_data[tid]->_material = _materials[tid].getMaterials(block_id);
+  _face_data[tid]->_material = _materials[tid].getBoundaryMaterials(block_id);
 
   // call subdomainSetup
-  for (std::vector<Material *>::iterator it = _element_data._material[tid].begin(); it != _element_data._material[tid].end(); ++it)
+  for (std::vector<Material *>::iterator it = _element_data[tid]->_material.begin(); it != _element_data[tid]->_material.end(); ++it)
     (*it)->subdomainSetup();
-  for (std::vector<Material *>::iterator it = _face_data._material[tid].begin(); it != _face_data._material[tid].end(); ++it)
+  for (std::vector<Material *>::iterator it = _face_data[tid]->_material.begin(); it != _face_data[tid]->_material.end(); ++it)
     (*it)->subdomainSetup();
 
   //Global Kernels
-  KernelIterator kernel_begin = _kernels.activeKernelsBegin(tid);
-  KernelIterator kernel_end = _kernels.activeKernelsEnd(tid);
+  KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
+  KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
   for(KernelIterator kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
     (*kernel_it)->subdomainSetup();
 
   //Kernels on this block
-  KernelIterator block_kernel_begin = _kernels.blockKernelsBegin(tid, block_id);
-  KernelIterator block_kernel_end = _kernels.blockKernelsEnd(tid, block_id);
+  KernelIterator block_kernel_begin = _kernels[tid].blockKernelsBegin(block_id);
+  KernelIterator block_kernel_end = _kernels[tid].blockKernelsEnd(block_id);
   for(KernelIterator block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
     (*block_kernel_it)->subdomainSetup();
 
   //Stabilizers
-  StabilizerIterator stabilizer_begin = _stabilizers.activeStabilizersBegin(tid);
-  StabilizerIterator stabilizer_end = _stabilizers.activeStabilizersEnd(tid);
+  StabilizerIterator stabilizer_begin = _stabilizers[tid].activeStabilizersBegin();
+  StabilizerIterator stabilizer_end = _stabilizers[tid].activeStabilizersEnd();
   for(StabilizerIterator stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
     stabilizer_it->second->subdomainSetup();
 }
@@ -859,7 +927,7 @@ MooseSystem::checkSystemsIntegrity()
   bool adaptivity = _es->parameters.have_parameter<bool>("adaptivity");
 
   // Check materials
-  for (MaterialIterator i = _materials.activeMaterialsBegin(0); i != _materials.activeMaterialsEnd(0); ++i)
+  for (MaterialIterator i = _materials[0].activeMaterialsBegin(); i != _materials[0].activeMaterialsEnd(); ++i)
   {
     for (std::vector<Material *>::iterator j = i->second.begin(); j != i->second.end(); ++j)
       if ((*j)->hasStatefulProperties() && adaptivity)
@@ -880,8 +948,8 @@ MooseSystem::checkSystemsIntegrity()
     bool global_kernels_exist = false;
     
     
-    _kernels.updateActiveKernels(0);
-    global_kernels_exist = _kernels.activeKernelBlocks(input_subdomains);
+    _kernels[0].updateActiveKernels(_t, _dt);
+    global_kernels_exist = _kernels[0].activeKernelBlocks(input_subdomains);
     std::set_difference (element_subdomains.begin(), element_subdomains.end(),
                        input_subdomains.begin(), input_subdomains.end(),
                        std::inserter(difference, difference.end()));
@@ -902,7 +970,7 @@ MooseSystem::checkSystemsIntegrity()
     std::set<short> input_bcs, difference;
     const std::set<short> & simulation_bcs = _mesh->boundary_info->get_boundary_ids();
 
-    _bcs.activeBoundaries(input_bcs);  // get the boundaries from the simulation (input file)
+    _bcs[0].activeBoundaries(input_bcs);  // get the boundaries from the simulation (input file)
     std::set_difference (input_bcs.begin(), input_bcs.end(),
                          simulation_bcs.begin(), simulation_bcs.end(),
                          std::inserter(difference, difference.end()));
@@ -974,7 +1042,7 @@ MooseSystem::getActiveLocalElementRange()
   if(!_active_local_elem_range)
   {
     _active_local_elem_range = new ConstElemRange(_mesh->active_local_elements_begin(),
-                                                 _mesh->active_local_elements_end(), 1);
+                                                  _mesh->active_local_elements_end(), 1);
   }
 
   return _active_local_elem_range;

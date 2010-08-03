@@ -17,10 +17,10 @@ InputParameters validParams<PDEBase>()
 
 PDEBase::PDEBase(std::string name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data) :
   MooseObject(name, moose_system, parameters),
-  PostprocessorInterface(moose_system._postprocessor_data),
-  FunctionInterface(moose_system._functions, parameters, _tid),
+  PostprocessorInterface(moose_system._postprocessor_data[_tid]),
+  FunctionInterface(moose_system._functions[_tid], parameters),
   _mesh(*_moose_system.getMesh()),
-  _current_elem(_moose_system._element_data._current_elem[_tid]),
+  _current_elem(_moose_system._dof_data[_tid]._current_elem),
   _var_name(parameters.get<std::string>("variable")),
   _is_aux(moose_system.hasAuxVariable(_var_name)),
   _var_num(_is_aux ? moose_system.getAuxVariableNumber(_var_name) : moose_system.getVariableNumber(_var_name)),
@@ -28,12 +28,12 @@ PDEBase::PDEBase(std::string name, MooseSystem &moose_system, InputParameters pa
   _integrated(parameters.get<bool>("_integrated")),
   _dim(_moose_system._dim),
   _data(data),
-  _qrule(data._qrule[_tid]),
-  _q_point(*data._q_point[_tid][_fe_type]),
-  _JxW(*(data._JxW[_tid])[_fe_type]),
-  _phi(*(data._phi[_tid])[_fe_type]),
-  _grad_phi(*data._grad_phi[_tid][_fe_type]),
-  _second_phi(*data._second_phi[_tid][_fe_type]),
+  _qrule(data._qrule),
+  _q_point(*data._q_point[_fe_type]),
+  _JxW(*(data._JxW)[_fe_type]),
+  _phi(*(data._phi)[_fe_type]),
+  _grad_phi(*data._grad_phi[_fe_type]),
+  _second_phi(*data._second_phi[_fe_type]),
   _real_zero(moose_system._real_zero[_tid]),
   _zero(moose_system._zero[_tid]),
   _grad_zero(moose_system._grad_zero[_tid]),
@@ -220,9 +220,9 @@ PDEBase::coupledValue(std::string varname, int i)
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
 
   if(!isAux(varname))
-    return _data._var_vals[_tid][_coupled_vars[varname][i]._num];
+    return _data._var_vals[_coupled_vars[varname][i]._num];
   else
-    return _data._aux_var_vals[_tid][_coupled_aux_vars[varname][i]._num];
+    return _data._aux_var_vals[_coupled_aux_vars[varname][i]._num];
 }
 
 MooseArray<RealGradient> &
@@ -232,9 +232,9 @@ PDEBase::coupledGradient(std::string varname, int i)
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
 
   if(!isAux(varname))
-    return _data._var_grads[_tid][_coupled_vars[varname][i]._num];
+    return _data._var_grads[_coupled_vars[varname][i]._num];
   else
-    return _data._aux_var_grads[_tid][_coupled_aux_vars[varname][i]._num];
+    return _data._aux_var_grads[_coupled_aux_vars[varname][i]._num];
 }
 
 MooseArray<RealTensor> &
@@ -244,7 +244,7 @@ PDEBase::coupledSecond(std::string varname, int i)
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
 
   //Aux vars can't have second derivatives!
-  return _data._var_seconds[_tid][_coupled_vars[varname][i]._num];
+  return _data._var_seconds[_coupled_vars[varname][i]._num];
 }
 
 MooseArray<Real> &
@@ -254,9 +254,9 @@ PDEBase::coupledValueOld(std::string varname, int i)
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
 
   if(!isAux(varname))
-    return _data._var_vals_old[_tid][_coupled_vars[varname][i]._num];
+    return _data._var_vals_old[_coupled_vars[varname][i]._num];
   else
-    return _data._aux_var_vals_old[_tid][_coupled_aux_vars[varname][i]._num];
+    return _data._aux_var_vals_old[_coupled_aux_vars[varname][i]._num];
 }
 
 MooseArray<Real> &
@@ -266,9 +266,9 @@ PDEBase::coupledValueOlder(std::string varname, int i)
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
 
   if(!isAux(varname))
-    return _data._var_vals_older[_tid][_coupled_vars[varname][i]._num];
+    return _data._var_vals_older[_coupled_vars[varname][i]._num];
   else
-    return _data._aux_var_vals_older[_tid][_coupled_aux_vars[varname][i]._num];
+    return _data._aux_var_vals_older[_coupled_aux_vars[varname][i]._num];
 }
 
 MooseArray<RealGradient> &
@@ -277,5 +277,5 @@ PDEBase::coupledGradientOld(std::string varname, int i)
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
 
-  return _data._var_grads_old[_tid][_coupled_vars[varname][i]._num];
+  return _data._var_grads_old[_coupled_vars[varname][i]._num];
 }

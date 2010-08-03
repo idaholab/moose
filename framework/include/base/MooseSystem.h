@@ -12,6 +12,7 @@
 #include "MaterialWarehouse.h"
 #include "StabilizerWarehouse.h"
 #include "InitialConditionWarehouse.h"
+#include "DofData.h"
 #include "ElementData.h"
 #include "FaceData.h"
 #include "AuxData.h"
@@ -100,7 +101,7 @@ public:
   /**
    * Get the reference either to _element_data or _face_data from MooseSystem
    */
-  QuadraturePointData &getQuadraturePointData(bool is_boundary);
+  QuadraturePointData &getQuadraturePointData(THREAD_ID tid, bool is_boundary);
 
   /**
    * Checks if we have a variable named 'var_name
@@ -277,8 +278,6 @@ public:
 
   bool & dontReinitFE();
 
-  std::vector<Material *> getMaterials(THREAD_ID tid, unsigned int block_id);
-
   void setPrintMeshChanged(bool print_mesh_changed);
 
   /**
@@ -317,36 +316,16 @@ protected:
   void update_aux_vars(const NumericVector<Number>& soln);
 
 private:
-  // TODO: Switch these to vectors later
-  ElementData _element_data;
-  FaceData _face_data;
-  AuxData _aux_data;
-  MaterialData _material_data;
-  PostprocessorData _postprocessor_data;
-  //  std::vector<ElementData *> _element_data;
-  //  std::vector<FaceData *> _face_data;
-  //  std::vector<AuxData *> _aux_data;
+  std::vector<DofData> _dof_data;
+  std::vector<ElementData *> _element_data;
+  std::vector<FaceData *> _face_data;
+  std::vector<AuxData *> _aux_data;
+  std::vector<MaterialData> _material_data;
+  std::vector<PostprocessorData> _postprocessor_data;
 
   DofMap * _dof_map;
 
-  std::vector<std::vector<unsigned int> > _dof_indices;
-
-  /**
-   * Dof Maps for all the variables.
-   */
-  std::vector<std::vector<std::vector<unsigned int> > > _var_dof_indices;
-
   DofMap * _aux_dof_map;
-
-  /**
-   * Holds the current dof numbers for each variable
-   */
-  std::vector<std::vector<unsigned int> > _aux_var_dofs;
-
-  /**
-   * Dof Maps for all the auxiliary variables.
-   */
-  std::vector<std::vector<std::vector<unsigned int> > > _aux_var_dof_indices;
 
   EquationSystems * _es;
   TransientNonlinearImplicitSystem * _system;
@@ -362,14 +341,14 @@ private:
    */
   bool _mesh_changed;
 
-  KernelWarehouse _kernels;
-  BCWarehouse _bcs;
-  AuxWarehouse _auxs;
-  MaterialWarehouse _materials;
-  StabilizerWarehouse _stabilizers;
-  InitialConditionWarehouse _ics;
-  PostprocessorWarehouse _pps;
-  FunctionWarehouse _functions;
+  std::vector<KernelWarehouse> _kernels;
+  std::vector<BCWarehouse> _bcs;
+  std::vector<AuxWarehouse> _auxs;
+  std::vector<MaterialWarehouse> _materials;
+  std::vector<StabilizerWarehouse> _stabilizers;
+  std::vector<InitialConditionWarehouse> _ics;
+  std::vector<PostprocessorWarehouse> _pps;
+  std::vector<FunctionWarehouse> _functions;
 
   /**
    * Whether or not we need to recompute the shape functions for each element.  Should only be true if EVERY element is exactly

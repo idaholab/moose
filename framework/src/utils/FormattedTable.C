@@ -9,6 +9,11 @@ FormattedTable::FormattedTable()
   : _stream_open(false)
 {}
 
+FormattedTable::FormattedTable(const FormattedTable &o)
+{
+
+}
+
 FormattedTable::~FormattedTable()
 {
   if (_stream_open)

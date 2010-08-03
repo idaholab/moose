@@ -28,7 +28,8 @@ Steady::execute()
 
     preSolve();
 
-    _moose_system._materials.updateMaterialDataState();
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+      _moose_system._materials[tid].updateMaterialDataState();
     
 //    PerfLog solve_only("Solve Only");
 //    solve_only.push("solve()","Solve");

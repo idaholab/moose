@@ -14,6 +14,8 @@ class FormattedTable
 public:
   FormattedTable();
 
+  FormattedTable(const FormattedTable &o);
+
   /**
    * The destructor is used to close the file handle
    */

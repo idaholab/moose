@@ -28,17 +28,15 @@ namespace libMesh
 class ElementData : public QuadraturePointData
 {
 public:
-  ElementData(MooseSystem & moose_system);
+  ElementData(MooseSystem & moose_system, DofData & dof_data);
 
   ~ElementData();
-
-  void sizeEverything();
 
   void init();
 
   void initKernels();
 
-  void reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke);
+  void reinitKernels(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke);
   
   /**
    * The MooseSystem this Kernel is associated with.
@@ -51,22 +49,17 @@ public:
    * Note that there is a different test function for each variable... allowing for modified
    * basis for things like SUPG and GLS.
    */
-  std::vector<std::map<unsigned int, std::vector<std::vector<Real> > > > _test;
-
-  /**
-   * Current element
-   */
-  std::vector<const Elem *> _current_elem;
+  std::map<unsigned int, std::vector<std::vector<Real> > > _test;
 
     /**
    * Residual vectors for all variables.
    */
-  std::vector<std::vector<DenseSubVector<Number> * > > _var_Res;
+  std::vector<DenseSubVector<Number> * > _var_Res;
 
   /**
    * Jacobian matrices for all variables.
    */
-  std::vector<std::vector<DenseMatrix<Number> * > > _var_Kes;
+  std::vector<DenseMatrix<Number> * > _var_Kes;
 
 };
 

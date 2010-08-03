@@ -14,10 +14,10 @@ InputParameters validParams<Stabilizer>()
 
 
 Stabilizer::Stabilizer(std::string name, MooseSystem & moose_system, InputParameters parameters) :
-  PDEBase(name, moose_system, parameters, moose_system._element_data),
-  _element_data(moose_system._element_data),
-  _test((_element_data._test[_tid])[_var_num]),
-  _grad_test(*(_element_data._grad_phi[_tid])[_fe_type])
+  PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
+  _element_data(*moose_system._element_data[_tid]),
+  _test(_element_data._test[_var_num]),
+  _grad_test(*_element_data._grad_phi[_fe_type])
 {
 }
 

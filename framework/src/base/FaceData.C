@@ -1,5 +1,6 @@
 //Moose includes
 #include "FaceData.h"
+#include "DofData.h"
 #include "MooseSystem.h"
 #include "ComputeQPSolution.h"
 
@@ -8,32 +9,17 @@
 #include "numeric_vector.h"
 #include "quadrature_gauss.h"
 
-FaceData::FaceData(MooseSystem & moose_system) :
-  QuadraturePointData(moose_system),
-  _moose_system(moose_system)
+FaceData::FaceData(MooseSystem & moose_system, DofData & dof_data) :
+  QuadraturePointData(moose_system, dof_data),
+  _moose_system(moose_system),
+  _dof_data(dof_data),
+  _current_side_elem(NULL)
 {
-  sizeEverything();
 }
 
 FaceData::~FaceData()
 {
-  std::vector<const Elem *>::iterator i;
-  for (i = _current_side_elem.begin(); i!=_current_side_elem.end(); ++i)
-    delete *i;
-}
-
-void FaceData::sizeEverything()
-{
-  int n_threads = libMesh::n_threads();
-
-  _current_node.resize(n_threads);
-  _current_residual.resize(n_threads);
-  _current_side.resize(n_threads);
-  _current_side_elem.resize(n_threads);
-  _normals.resize(n_threads);
-
-  _nodal_bc_var_dofs.resize(n_threads);
-  _var_vals_nodal.resize(n_threads);
+  delete _current_side_elem;
 }
 
 void FaceData::init()
@@ -44,62 +30,55 @@ void FaceData::init()
   int dim = _moose_system.getDim();
 
   //Resize data arrays
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    _nodal_bc_var_dofs[tid].resize(n_vars);
-    _var_vals_nodal[tid].resize(n_vars);
-  }
+  _nodal_bc_var_dofs.resize(n_vars);
+  _var_vals_nodal.resize(n_vars);
 
   //Max quadrature order was already found by Kernel::init()
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-    _qrule[tid] = new QGauss(dim - 1, _moose_system._max_quadrature_order);
+  _qrule = new QGauss(dim - 1, _moose_system._max_quadrature_order);
 
   for(unsigned int var=0; var < n_vars; var++)
   {
     // TODO: Replicate dof_map
     FEType fe_type = _moose_system._dof_map->variable_type(var);
 
-    for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+    if(!_fe[fe_type])
     {
-      if(!_fe[tid][fe_type])
-      {
-        _fe[tid][fe_type] = FEBase::build(dim, fe_type).release();
-        _fe[tid][fe_type]->attach_quadrature_rule(_qrule[tid]);
+      _fe[fe_type] = FEBase::build(dim, fe_type).release();
+      _fe[fe_type]->attach_quadrature_rule(_qrule);
 
-        _q_point[tid][fe_type] = &_fe[tid][fe_type]->get_xyz();
-        _JxW[tid][fe_type] = &_fe[tid][fe_type]->get_JxW();
-        _phi[tid][fe_type] = &_fe[tid][fe_type]->get_phi();
-        _grad_phi[tid][fe_type] = &_fe[tid][fe_type]->get_dphi();
-        _normals[tid][fe_type] = &_fe[tid][fe_type]->get_normals();
+      _q_point[fe_type] = &_fe[fe_type]->get_xyz();
+      _JxW[fe_type] = &_fe[fe_type]->get_JxW();
+      _phi[fe_type] = &_fe[fe_type]->get_phi();
+      _grad_phi[fe_type] = &_fe[fe_type]->get_dphi();
+      _normals[fe_type] = &_fe[fe_type]->get_normals();
 
-        FEFamily family = fe_type.family;
+      FEFamily family = fe_type.family;
 
-        if(family == CLOUGH || family == HERMITE)
-          _second_phi[tid][fe_type] = &_fe[tid][fe_type]->get_d2phi();
-      }
+      if(family == CLOUGH || family == HERMITE)
+        _second_phi[fe_type] = &_fe[fe_type]->get_d2phi();
     }
   }
 
 }
 
-void FaceData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
+void FaceData::reinit(const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
 {
 //  Moose::perf_log.push("reinit()","BoundaryCondition");
 
-  _current_side[tid] = side;
+  _current_side = side;
 
-  if(_current_side_elem[tid])
-    delete _current_side_elem[tid];
+  if(_current_side_elem)
+    delete _current_side_elem;
   
-  _current_side_elem[tid] = elem->build_side(side).release();
+  _current_side_elem = elem->build_side(side).release();
 
-  std::map<FEType, FEBase*>::iterator fe_it = _fe[tid].begin();
-  std::map<FEType, FEBase*>::iterator fe_end = _fe[tid].end();
+  std::map<FEType, FEBase*>::iterator fe_it = _fe.begin();
+  std::map<FEType, FEBase*>::iterator fe_end = _fe.end();
 
   for(;fe_it != fe_end; ++fe_it)
-    fe_it->second->reinit(elem, _current_side[tid]);
+    fe_it->second->reinit(elem, _current_side);
 
-  QuadraturePointData::reinit(tid, boundary_id, soln, elem);
+  QuadraturePointData::reinit(boundary_id, soln, elem);
 
   for (std::set<unsigned int>::iterator it = _boundary_to_var_nums_nodal[boundary_id].begin();
        it != _boundary_to_var_nums_nodal[boundary_id].end();
@@ -107,23 +86,23 @@ void FaceData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const El
   {
     unsigned int var_num = *it;
 
-    std::vector<unsigned int> & var_dof_indices = _moose_system._var_dof_indices[tid][var_num];
+    std::vector<unsigned int> & var_dof_indices = _dof_data._var_dof_indices[var_num];
 
-    _var_vals_nodal[tid][var_num].resize(_moose_system._element_data._current_elem[tid]->n_nodes());
+    _var_vals_nodal[var_num].resize(_dof_data._current_elem->n_nodes());
 
-    for(unsigned int i=0; i<_moose_system._element_data._current_elem[tid]->n_nodes(); i++)
-      _var_vals_nodal[tid][var_num][i] = soln(var_dof_indices[i]);
+    for(unsigned int i=0; i<_dof_data._current_elem->n_nodes(); i++)
+      _var_vals_nodal[var_num][i] = soln(var_dof_indices[i]);
   }
 
 //  Moose::perf_log.pop("reinit()","BoundaryCondition");
 }
 
-void FaceData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual)
+void FaceData::reinit(const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual)
 {
 //  Moose::perf_log.push("reinit(node)","BoundaryCondition");
 
-  _current_node[tid] = &node;
-  _current_residual[tid] = &residual;
+  _current_node = &node;
+  _current_residual = &residual;
 
   unsigned int nonlinear_system_number = _moose_system.getNonlinearSystem()->number();
 
@@ -136,11 +115,11 @@ void FaceData::reinit(THREAD_ID tid, const NumericVector<Number>& soln, const No
     //The zero is the component... that works fine for lagrange FE types.
     unsigned int dof_number = node.dof_number(nonlinear_system_number, var_num, 0);
 
-    _nodal_bc_var_dofs[tid][var_num] = dof_number;
+    _nodal_bc_var_dofs[var_num] = dof_number;
 
-    _var_vals_nodal[tid][var_num].resize(1);
+    _var_vals_nodal[var_num].resize(1);
 
-    _var_vals_nodal[tid][var_num][0] = soln(dof_number);
+    _var_vals_nodal[var_num][0] = soln(dof_number);
   }
 
 //  Moose::perf_log.pop("reinit(node)","BoundaryCondition");

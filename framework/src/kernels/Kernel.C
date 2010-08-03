@@ -24,19 +24,19 @@ InputParameters validParams<Kernel>()
 
 
 Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters parameters):
-  PDEBase(name, moose_system, parameters, moose_system._element_data),
-  MaterialPropertyInterface(moose_system._material_data),
-   _element_data(moose_system._element_data),
-   _u(_element_data._var_vals[_tid][_var_num]),
-   _grad_u(_element_data._var_grads[_tid][_var_num]),
-   _second_u(_element_data._var_seconds[_tid][_var_num]),
-   _u_old(_element_data._var_vals_old[_tid][_var_num]),
-   _u_older(_element_data._var_vals_older[_tid][_var_num]),
-   _grad_u_old(_element_data._var_grads_old[_tid][_var_num]),
-   _grad_u_older(_element_data._var_grads_older[_tid][_var_num]),
-   _test((_element_data._test[_tid])[_var_num]),
-   _grad_test(*(_element_data._grad_phi[_tid])[_fe_type]),
-   _second_test(*(_element_data._second_phi[_tid])[_fe_type])
+  PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
+  MaterialPropertyInterface(moose_system._material_data[_tid]),
+   _element_data(*moose_system._element_data[_tid]),
+   _u(_element_data._var_vals[_var_num]),
+   _grad_u(_element_data._var_grads[_var_num]),
+   _second_u(_element_data._var_seconds[_var_num]),
+   _u_old(_element_data._var_vals_old[_var_num]),
+   _u_older(_element_data._var_vals_older[_var_num]),
+   _grad_u_old(_element_data._var_grads_old[_var_num]),
+   _grad_u_older(_element_data._var_grads_older[_var_num]),
+   _test((_element_data._test)[_var_num]),
+   _grad_test(*(_element_data._grad_phi)[_fe_type]),
+   _second_test(*(_element_data._second_phi)[_fe_type])
 {
   // If this variable isn't known yet... make it so
   _element_data._var_nums[0].insert(_var_num);
@@ -66,7 +66,7 @@ Kernel::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","Kernel");
   
-  DenseSubVector<Number> & var_Re = *_element_data._var_Res[_tid][_var_num];
+  DenseSubVector<Number> & var_Re = *_element_data._var_Res[_var_num];
 
   for (_i=0; _i<_phi.size(); _i++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -80,7 +80,7 @@ Kernel::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()",_name);
 
-  DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_tid][_var_num];
+  DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_var_num];
 
 
   for (_i=0; _i<_phi.size(); _i++)

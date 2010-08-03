@@ -19,7 +19,7 @@ public:
    *        left hand side of the statement "function = func_name"
    * @param tid The thread id used by this object, used by the warehouse
    */
-  FunctionInterface(FunctionWarehouse & func_warehouse, InputParameters params, THREAD_ID tid);
+  FunctionInterface(FunctionWarehouse & func_warehouse, InputParameters & params);
 
   Function & getFunction(std::string name);
 
@@ -28,14 +28,6 @@ private:
   //issues. The compiler will complain even though it's private data
   InputParameters _func_params;
   FunctionWarehouse & _func_warehouse;
-
-  /**
-   * Private copy of the tid so getFunction() knows which tid to use to retrieve
-   * the Function object. It is not named _tid because then the compiler doesn't
-   * like sub classes of PDEBase using _tid because it is ambiguous (even though
-   * _tid is private here).
-   */
-  THREAD_ID _func_tid;
 };
 
 #endif //FUNCTIONINTERFACE_H

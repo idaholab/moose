@@ -19,8 +19,9 @@ InputParameters validParams<Material>()
 }
 
 Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters) :
-  PDEBase(name, moose_system, parameters, moose_system.getQuadraturePointData(parameters.get<bool>("_is_boudary_material"))),
-  _material_data(moose_system._material_data),
+  PDEBase(name, moose_system, parameters,
+          moose_system.getQuadraturePointData(parameters.get<THREAD_ID>("_tid"), parameters.get<bool>("_is_boundary_material"))),
+  _material_data(moose_system._material_data[_tid]),
   _has_stateful_props(false),
   _props(_material_data._props),
   _props_old(_material_data._props_old),
@@ -140,7 +141,7 @@ Material::materialReinit()
 {
   unsigned int current_elem = _current_elem->id();
 
-  _n_qpoints = _data._qrule[_tid]->n_points();
+  _n_qpoints = _data._qrule->n_points();
 
   if (_has_stateful_props)
   {
