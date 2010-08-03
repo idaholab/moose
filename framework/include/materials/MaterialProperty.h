@@ -118,6 +118,19 @@ MaterialProperty<T>::init ()
   return copy;
 }
 
+template <>
+inline PropertyValue *
+MaterialProperty<MooseArray<Real> >::init ()
+{
+  MaterialProperty<MooseArray<Real> > *copy = new MaterialProperty<MooseArray<Real> >;
+  libmesh_assert (copy != NULL);
+
+  copy->_value.resize(_value.size());
+
+  return copy;
+}
+
+
 template <typename T>
 inline void
 MaterialProperty<T>::resize (int n)

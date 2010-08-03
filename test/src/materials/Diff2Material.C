@@ -11,7 +11,8 @@ InputParameters validParams<Diff2Material>()
 Diff2Material::Diff2Material(std::string name, MooseSystem & moose_system, InputParameters parameters)
   : Material(name, moose_system, parameters),
     _diff(parameters.get<Real>("diff")),
-    _diffusivity(declareProperty<Real>("diff2"))
+    _diffusivity(declareProperty<Real>("diff2")),
+    _vector_property(declareProperty<MooseArray<Real> >("vector_property"))
 {
 }
 
@@ -19,5 +20,10 @@ void
 Diff2Material::computeProperties()
 {
   for (unsigned int qp = 0; qp < _n_qpoints; qp++)
+  {
     _diffusivity[qp] = _diff;
+
+    // resize the vector in quadrature point to some random size (10 for instance)
+    _vector_property[qp].resize(10);
+  }
 }
