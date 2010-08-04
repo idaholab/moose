@@ -4,6 +4,7 @@
 
 // libMesh Includes
 #include "vector_value.h"
+#include "dense_matrix.h"
 
 template<typename T>
 MooseArray<T>::MooseArray()
@@ -65,3 +66,4 @@ template class MooseArray<ColumnMajorMatrix>;
 template class MooseArray<MooseArray<MooseArray<Real> > >;
 
 template class MooseArray<std::vector<Real> >;
+template class MooseArray<DenseMatrix<Real> >;
