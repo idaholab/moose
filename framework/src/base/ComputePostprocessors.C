@@ -136,9 +136,8 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
       
       if(!_is_transient)
         time = _t_step;
-    
-      _postprocessor_data[0]._values[name] = value;
-      _postprocessor_data[0]._output_table.addData(name, value, time);
+      
+      _postprocessor_data[0].addData(name, value, time);
     }
 
     // Store side postprocessors values
@@ -164,9 +163,8 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
       
         if(!_is_transient)
           time = _t_step;
-    
-        _postprocessor_data[0]._values[name] = value;
-        _postprocessor_data[0]._output_table.addData(name, value, time);
+        
+        _postprocessor_data[0].addData(name, value, time);
       }
     }
   }
@@ -189,23 +187,22 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
     if(!_is_transient)
       time = _t_step;
   
-    _postprocessor_data[0]._values[name] = value;
-    _postprocessor_data[0]._output_table.addData(name, value, time);
+    _postprocessor_data[0].addData(name, value, time);
   }
 
   // Postprocesser Output
-  if (!_postprocessor_data.empty())
+  if (!_postprocessor_data[0].empty())
   {
     if(_postprocessor_screen_output)
     {
       std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-      _postprocessor_data[0]._output_table.print_table(std::cout);
+      _postprocessor_data[0].print_table(std::cout);
       std::cout<<std::endl;
     }
   
     if(_postprocessor_csv_output)
     {
-      _postprocessor_data[0]._output_table.print_csv(_file_base + ".csv");
+      _postprocessor_data[0].print_csv(_file_base + ".csv");
     }
   }
   

@@ -10,10 +10,13 @@ PostprocessorInterface::PostprocessorInterface(PostprocessorData & postprocessor
 PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & name)
 {
-  std::map<std::string, Real>::iterator it = _postprocessor_data._values.find(name);
+  return _postprocessor_data.getPostprocessorValue(name);
+  
+  
+  // std::map<std::string, Real>::iterator it = _postprocessor_data._values.find(name);
 
-  if (it != _postprocessor_data._values.end())
-    return it->second;
+//   if (it != _postprocessor_data._values.end())
+//     return it->second;
 
-  mooseError("No Postprocessor named: " + name);
+  //mooseError("No Postprocessor named: " + name);
 }

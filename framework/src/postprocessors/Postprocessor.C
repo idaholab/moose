@@ -12,12 +12,11 @@ InputParameters validParams<Postprocessor>()
   return params;
 }
 
-
 Postprocessor::Postprocessor(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :MooseObject(name, moose_system, parameters)
 {
   // Initialize the postprocessor data for this PP
-  moose_system._postprocessor_data[_tid]._values[name] = 0.0;
+//  moose_system._postprocessor_data[_tid]._values[name] = 0.0;
 }
 
 void

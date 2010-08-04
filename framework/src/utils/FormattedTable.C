@@ -1,4 +1,5 @@
 #include "FormattedTable.h"
+#include "Moose.h"
 
 #include <iomanip>
 #include <iterator>
@@ -6,12 +7,22 @@
 const unsigned short FormattedTable::_column_width = 15;
 
 FormattedTable::FormattedTable()
-  : _stream_open(false)
+  : _stream_open(false),
+    _last_key(-1)
 {}
 
 FormattedTable::FormattedTable(const FormattedTable &o)
+  : _column_names(o._column_names),
+    _stream_open(o._stream_open),
+    _last_key(o._last_key)
 {
+  if (_stream_open)
+    mooseError ("Copying a FormattedTable with an open stream is not supported");
 
+  std::map<Real, std::map<std::string, Real> >::const_iterator it = o._data.begin();
+  
+  for ( ; it != o._data.end(); ++it)
+    _data[it->first] = it->second;
 }
 
 FormattedTable::~FormattedTable()
@@ -24,12 +35,32 @@ FormattedTable::~FormattedTable()
   }
 }
 
+bool
+FormattedTable::empty() const
+{
+  return _last_key == -1 ? true : false;
+}
+
 void
 FormattedTable::addData(const std::string & name, Real value, Real time)
 {
   _data[time][name] = value;
   _column_names.insert(name);
+  _last_key = time;
 }
+
+Real &
+FormattedTable::getLastData(const std::string & name)
+{
+  mooseAssert(_last_key != -1, "No Data stored in the FormattedTable");
+
+  std::map<std::string, Real>::iterator it = (_data[_last_key]).find(name);
+  if (it != (_data[_last_key]).end())
+    return it->second;
+
+  mooseError("No Data found for name: " + name);
+}
+
 
 void
 FormattedTable::printRowDivider(std::ostream & out)

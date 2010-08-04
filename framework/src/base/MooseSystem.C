@@ -465,7 +465,7 @@ MooseSystem::doAdaptivityStep()
 Real &
 MooseSystem::getPostprocessorValue(std::string name)
 {
-  return _postprocessor_data[0]._values[name];
+  return _postprocessor_data[0].getPostprocessorValue(name);
 }
 
 void

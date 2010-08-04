@@ -22,10 +22,20 @@ public:
   ~FormattedTable();
 
   /**
+   * Returns a boolean value based on whether the FormattedTable contains data or not
+   */
+  bool empty() const;
+  
+  /**
    * Method for adding data to the output table.  The dependant varible is named "time"
    */
   void addData(const std::string & name, Real value, Real time);
 
+  /**
+   * Retrieve Data for last value of given name
+   */
+  Real & getLastData(const std::string & name);
+  
   /**
    * Methods for dumping the table to the stream - either by filename or by stream handle.  If
    * a filename is supplied openening and closing of the file is properly handled
@@ -64,6 +74,11 @@ private:
    */
   std::ofstream _output_file;
   bool _stream_open;
+
+  /**
+   * The last key value inserted
+   */
+  Real _last_key;
 };
 
   
