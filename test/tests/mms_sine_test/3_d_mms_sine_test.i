@@ -4,15 +4,15 @@
   dim = 3
 
  [./Generation] #We are generating our own Mesh
-   nx = 8
-   ny = 8
-   nz = 8
-   x min =0 
-   x max =1
-   y min =0
-   y max =1
-   z min =0
-   z max =1
+   nx = 4
+   ny = 4
+   nz = 4
+   x min = 0
+   x max = 1
+   y min = 0
+   y max = 1
+   z min = 0
+   z max = 1
    elem_type = HEX8
   [../]
 []
@@ -109,5 +109,3 @@
   exodus = true
   output_initial = true
 []
-   
-  

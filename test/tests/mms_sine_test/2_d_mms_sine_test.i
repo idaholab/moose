@@ -6,10 +6,10 @@
  [./Generation] #We are generating our own Mesh
    nx = 8
    ny = 8
-   x min =0 
-   x max =1
-   y min =0
-   y max =1
+   x min = 0
+   x max = 1
+   y min = 0
+   y max = 1
    elem_type = QUAD4
   [../]
 []
@@ -105,5 +105,3 @@
   exodus = true
   output_initial = true
 []
-   
-  

@@ -6,10 +6,10 @@
  [./Generation] #We are generating our own Mesh
    nx = 8
    ny = 8
-   x min =0 
-   x max =1
-   y min =0			
-   y max =1	
+   x min = 0 
+   x max = 1
+   y min = 0
+   y max = 1
    elem_type = QUAD4
   [../]
 []
@@ -130,9 +130,7 @@
 [Output]
   file_base = 2_d_postprocessor_out
   interval = 1
-  exodus = true
+  exodus = false
   output_initial = true
   postprocessor_csv = true 
 []
-   
-    

@@ -129,6 +129,7 @@ class TestHarness:
 
         eval('address(' + self.arg_string + ')')
 
+        test_end = timeit.default_timer()
         # confusing: if arg_string is populated it means we changed dofs/np so
         # we want to see the testing time, not just pass/fail
         if (self.arg_string == ''):

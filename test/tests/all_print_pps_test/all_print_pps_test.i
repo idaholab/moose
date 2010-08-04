@@ -84,6 +84,6 @@
 [Output]
   file_base = out
   interval = 1
-  exodus = true
+  exodus = false
   postprocessor_csv = true
 []

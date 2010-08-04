@@ -74,8 +74,8 @@ def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0):
   if (min_dofs == 0 and parallel == 0):
     executeExodiff(test_dir, out_files)
 
-def executeAppAndDiffCSV(test_file, input_file, out_files, abs_zero=1e-11, relative_error=5.5e-6):
+def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=0, abs_zero=1e-11, relative_error=5.5e-6):
   test_dir = os.path.dirname(test_file)
   delOldOutFiles(test_dir, out_files)
-  executeApp(test_dir, input_file)
+  executeApp(test_dir, input_file, min_dofs=0, parallel=0)
   diffCSV(test_dir, out_files)

@@ -4,15 +4,15 @@
   dim = 3
   generated = true
  [./Generation] #We are generating our own Mesh
-   nx = 6
-   ny = 6
-   nz = 6
-   x min =0 
-   x max =1
-   y min =0			
-   y max =1			
-   z min =0
-   z max =1
+   nx = 3
+   ny = 3
+   nz = 3
+   x min = 0 
+   x max = 1
+   y min = 0
+   y max = 1
+   z min = 0
+   z max = 1
    elem_type = HEX8
   [../]
 []
