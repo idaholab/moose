@@ -18,7 +18,7 @@ ParsedFunction::ParsedFunction(std::string name, MooseSystem & moose_system, Inp
   std::vector<Real>        vals = parameters.get<std::vector<Real> >("vals");
 
   //set up array to hold the variable values
-  mooseAssert(vars.size() <= vals.size(), "There can't be more values than variables!");
+  mooseAssert(vars.size() >= vals.size(), "There can't be more values than variables!");
   _vals.resize(vars.size() + 4);
 
   //prebuild map of variable names to pointers to put the variable value
