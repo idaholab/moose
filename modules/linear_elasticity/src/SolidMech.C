@@ -4,6 +4,7 @@ template<>
 InputParameters validParams<SolidMech>()
 {
   InputParameters params = validParams<Kernel>();
+  params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
 
