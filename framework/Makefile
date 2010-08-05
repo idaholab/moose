@@ -39,8 +39,10 @@ endif
 
 # pass the parameter coverage=true if you want to support gcov
 ifeq ($(coverage),true)
-	libmesh_CXXFLAGS += --coverage
-	libmesh_LDFLAGS += --coverage
+	ifneq (,$(findstring gcc,$(GXX-VERSION)))
+		libmesh_CXXFLAGS += --coverage
+		libmesh_LDFLAGS += --coverage
+	endif
 endif
 
 all:: Makefile.export $(target)
@@ -76,7 +78,7 @@ doc:
 # Useful rules.
 clean:
 	@rm -f libmoose-*
-	@find . -name "*~" -or -name "*.o" | xargs rm
+	@find . -name "*~" -or -name "*.o" -or -name "*.gcda" -or -name "*.gcno" | xargs rm
 	@rm -f .depend
 	@rm -f Makefile.export
 

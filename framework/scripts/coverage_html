@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script generates gcov code coverage data and rsyncs it to the webserver
 
-if [ "`hostname -s`" == "ubuntu" ]
+if [ "`hostname -s`" == "helios-gnu" ]
 then
   echo "Generating coverage html because this is helios"
   mkdir coverage

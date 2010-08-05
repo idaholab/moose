@@ -37,8 +37,10 @@ target := ./moose_test-$(METHOD)
 
 # pass the parameter coverage=true if you want to support gcov
 ifeq ($(coverage),true)
-	libmesh_CXXFLAGS += --coverage
-	libmesh_LDFLAGS += --coverage
+	ifneq (,$(findstring gcc,$(GXX-VERSION)))
+		libmesh_CXXFLAGS += --coverage
+		libmesh_LDFLAGS += --coverage
+	endif
 endif
 
 all:: $(target)
