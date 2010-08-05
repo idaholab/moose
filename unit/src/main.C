@@ -39,8 +39,8 @@ int main(int argc, char **argv)
 
   if (argc == 2 && std::string(argv[1]) == std::string("--xml"))
     runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), out ) );
-  else
-    runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
+
+  runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
 
   bool wasSucessful = runner.run("", false, true, false);
 
