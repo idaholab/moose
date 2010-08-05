@@ -17,6 +17,7 @@ Postprocessor::Postprocessor(std::string name, MooseSystem & moose_system, Input
 {
   // Initialize the postprocessor data for this PP
 //  moose_system._postprocessor_data[_tid]._values[name] = 0.0;
+  moose_system._postprocessor_data[_tid].addData(name, 0.0, 0.0);
 }
 
 void

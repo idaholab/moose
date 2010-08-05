@@ -28,7 +28,7 @@ PenetrationLocator::detectPenetration()
   _mesh.boundary_info->build_node_list_from_side_list();
   _mesh.boundary_info->build_node_list(node_list, node_boundary_list);
 
-MeshBase::const_node_iterator nl = _mesh.local_nodes_begin();
+  MeshBase::const_node_iterator nl = _mesh.local_nodes_begin();
   MeshBase::const_node_iterator end_nl = _mesh.local_nodes_end();
   for ( ; nl != end_nl ; ++nl)
   {
@@ -58,14 +58,19 @@ MeshBase::const_node_iterator nl = _mesh.local_nodes_begin();
         {
             unsigned int side_num = *(side_list.begin() + int(pos2 - elem_list.begin()));
 
+
+            Elem *side = (elem->build_side(side_num)).release();
 //#ifdef DEBUG            
             std::cout << "Node " << node->id() << " contained in " << elem->id()
                       << " through side " << side_num
-                      << ". Distance: " << normDistance(*(elem->build_side(side_num)), *node)
-                      << ". Norm: " << norm(*(elem->build_side(side_num)), *node);
-//#endif            
+                      << ". Distance: " << normDistance(*side, *node)
+                      << ". Norm: " << norm(*side, *node);
+//#endif    
 
-            _penetrated_elems[node->id()] = std::make_pair(elem->id(), normDistance(*(elem->build_side(side_num)), *node));
+
+            _penetrated_elems[node->id()] =  new PenetrationInfo(elem->id(),
+                                                                 norm(*side, *node),
+                                                                 normDistance(*side, *node));
             
         }
       }
@@ -73,7 +78,7 @@ MeshBase::const_node_iterator nl = _mesh.local_nodes_begin();
   }
 }
 
-VectorValue<Real>
+RealVectorValue
 PenetrationLocator::norm(const Elem & side, const Point & p0)
 {
   
@@ -83,22 +88,22 @@ PenetrationLocator::norm(const Elem & side, const Point & p0)
   {
     // TODO: Does this always work? Does the ordering of the points
     // work out such that we always obtain the correct direction vector?
-    VectorValue<Real> b = (side.point(0) - side.point(1)).unit();
+    RealVectorValue b = (side.point(0) - side.point(1)).unit();
 
-    return VectorValue<Real> (-b(1), b(0),  0);
+    return RealVectorValue (-b(1), b(0),  0);
   }
   else if (dim == 3)
     // TODO
-    return VectorValue<Real> ();
+    return RealVectorValue ();
 }
 
 Real
 PenetrationLocator::penetrationDistance(unsigned int node_id) const
 {
-  std::map<unsigned int, std::pair<unsigned int, Real> >::const_iterator found_it;
+  std::map<unsigned int, PenetrationInfo *>::const_iterator found_it;
   
   if ((found_it = _penetrated_elems.find(node_id)) != _penetrated_elems.end())
-    return found_it->second.second;
+    return found_it->second->_norm_distance;
   else
     return 0;
 }
@@ -280,3 +285,17 @@ PenetrationLocator::inSegment(Point P, Point SP0, Point SP1)
   return 0;
 }
 //===================================================================
+
+
+PenetrationLocator::PenetrationInfo::PenetrationInfo(unsigned int elem_id, RealVectorValue norm, Real norm_distance)
+  : _elem_id(elem_id),
+    _norm(norm),
+    _norm_distance(norm_distance)
+{}
+
+  
+PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
+  : _elem_id(p._elem_id),
+    _norm(p._norm),
+    _norm_distance(p._norm_distance)
+{}

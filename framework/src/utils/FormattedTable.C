@@ -58,7 +58,11 @@ FormattedTable::getLastData(const std::string & name)
   if (it != (_data[_last_key]).end())
     return it->second;
 
-  mooseError("No Data found for name: " + name);
+  //std::cerr << "No data found for name: " + name + "\n";
+//  return 0;
+  
+  
+  //mooseError("No Data found for name: " + name);
 }
 
 
