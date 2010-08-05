@@ -23,6 +23,9 @@ QuadraturePointData::~QuadraturePointData()
   for (std::map<FEType, FEBase*>::iterator i = _fe.begin(); i != _fe.end(); ++i)
     delete i->second;
 
+  for (std::map<FEType, FEBase*>::iterator i = _fe_displaced.begin(); i != _fe_displaced.end(); ++i)
+    delete i->second;
+
   delete _qrule;
 }
 

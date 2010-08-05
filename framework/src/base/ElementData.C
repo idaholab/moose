@@ -57,10 +57,17 @@ ElementData::initKernels()
       _fe[fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
       _fe[fe_type]->attach_quadrature_rule(_qrule);
 
+      _fe_displaced[fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
+      _fe_displaced[fe_type]->attach_quadrature_rule(_qrule);
+
       _JxW[fe_type] = &_fe[fe_type]->get_JxW();
+      _JxW_displaced[fe_type] = &_fe_displaced[fe_type]->get_JxW();
+        
       _phi[fe_type] = &_fe[fe_type]->get_phi();
       _grad_phi[fe_type] = &_fe[fe_type]->get_dphi();
+
       _q_point[fe_type] = &_fe[fe_type]->get_xyz();
+      _q_point_displaced[fe_type] = &_fe_displaced[fe_type]->get_xyz();
 
       FEFamily family = fe_type.family;
 

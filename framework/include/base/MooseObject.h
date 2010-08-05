@@ -55,6 +55,11 @@ protected:
    * The thread id this object is associated with.
    */
   THREAD_ID _tid;
+
+  /**
+   * Whether or not this object should be evaluated on the displaced mesh.
+   */
+  bool _use_displaced_mesh;
 };
 
 #endif // MOOSEOBJECT_H

@@ -150,6 +150,9 @@ void MooseSystem::compute_jacobian (const NumericVector<Number>& soln, SparseMat
 #endif
     
 #endif
+
+  if(_has_displaced_mesh)
+    updateDisplacedMesh(soln);
   
   update_aux_vars(soln);
 
@@ -360,6 +363,9 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
 */
     
   {
+    if(_has_displaced_mesh)
+      updateDisplacedMesh(soln);
+
     unsigned int tid = 0;
     
     MeshBase::const_element_iterator el = _mesh->active_local_elements_begin();

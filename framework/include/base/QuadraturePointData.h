@@ -52,6 +52,11 @@ public:
   std::map<FEType, FEBase *> _fe;
 
   /**
+   * finite element for the displaced mesh.
+   */
+  std::map<FEType, FEBase *> _fe_displaced;
+  
+  /**
    * quadrature rule.
    */
   QGauss * _qrule;
@@ -67,10 +72,20 @@ public:
   std::map<FEType, const std::vector<Point> *> _q_point;
 
   /**
+   * XYZ coordinates of the displaced quadrature points
+   */
+  std::map<FEType, const std::vector<Point> *> _q_point_displaced;
+
+  /**
    * Jacobian pre-multiplied by the weight.
    */
   std::map<FEType, const std::vector<Real> *> _JxW;
 
+  /**
+   * Jacobian pre-multiplied by the weight for the displaced mesh.
+   */
+  std::map<FEType, const std::vector<Real> *> _JxW_displaced;
+  
   /**
    * Shape function.
    */

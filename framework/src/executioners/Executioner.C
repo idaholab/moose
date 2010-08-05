@@ -22,7 +22,7 @@
 template<>
 InputParameters validParams<Executioner>()
 {
-  InputParameters params;
+  InputParameters params = validParams<MooseObject>();
   return params;
 }
 

@@ -36,6 +36,8 @@ MooseSystem::MooseSystem() :
   _aux_system(NULL),
   _geom_type(Moose::XYZ),
   _mesh(NULL),
+  _displaced_mesh(NULL),
+  _has_displaced_mesh(false),
   _delete_mesh(true),
   _dim(0),
   _mesh_changed(false),
@@ -79,6 +81,8 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _system(NULL),
   _aux_system(NULL),
   _mesh(&mesh),
+  _displaced_mesh(NULL),
+  _has_displaced_mesh(false),
   _delete_mesh(false),
   _dim(_mesh->mesh_dimension()),
   _mesh_changed(false),
@@ -142,6 +146,7 @@ MooseSystem::~MooseSystem()
     delete _mesh;
 
   delete _active_local_elem_range;
+  delete _active_node_range;
 
   delete _mesh_refinement;
   delete _error_estimator;
@@ -160,6 +165,19 @@ MooseSystem::initMesh(unsigned int dim)
 }
 
 Mesh *
+MooseSystem::initDisplacedMesh(std::vector<std::string> displacements) 
+{
+  if (_mesh == NULL)
+    mooseError("The regular mesh must already be initialized before the displaced mesh can be!");
+
+  _has_displaced_mesh = true;
+  _displacements = displacements;
+  _displaced_mesh = new Mesh(*_mesh);
+  
+  return _displaced_mesh;
+}
+
+Mesh *
 MooseSystem::getMesh(bool skip_full_check) 
 {
   if (!skip_full_check)
@@ -167,6 +185,28 @@ MooseSystem::getMesh(bool skip_full_check)
   else if (_mesh == NULL)
     mooseError("Full check skipped but Mesh is not initialized");
   return _mesh;
+}
+
+Mesh *
+MooseSystem::getDisplacedMesh(bool skip_full_check) 
+{
+  if (!skip_full_check)
+    checkValid();
+  else if (_mesh == NULL)
+    mooseError("Full check skipped but Mesh is not initialized");
+  return _displaced_mesh;
+}
+
+bool
+MooseSystem::hasDisplacedMesh()
+{
+  return _has_displaced_mesh;
+}
+
+std::vector<std::string>
+MooseSystem::getDisplacementVariables()
+{
+  return _displacements;
 }
 
 void
@@ -297,6 +337,13 @@ MooseSystem::getAuxSystem()
 {
   checkValid();
   return _aux_system;
+}
+
+ExplicitSystem *
+MooseSystem::getDisplacedSystem()
+{
+  checkValid();
+  return _displaced_system;
 }
 
 QuadraturePointData &
@@ -512,6 +559,10 @@ MooseSystem::solve()
 {
   _system->solve();
   _system->update();
+
+  if(_has_displaced_mesh)
+    updateDisplacedMesh(*_system->solution);
+
   compute_postprocessors(*(_system->current_local_solution));
 }
 
@@ -775,29 +826,31 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   _dof_data[tid]._current_elem = elem;
 
   _dof_map->dof_indices(elem, _dof_data[tid]._dof_indices);
-
+  
   std::map<FEType, FEBase*>::iterator fe_it = _element_data[tid]->_fe.begin();
   std::map<FEType, FEBase*>::iterator fe_end = _element_data[tid]->_fe.end();
+
+
+  std::map<FEType, FEBase*>::iterator fe_displaced_it = _element_data[tid]->_fe_displaced.begin();
+  std::map<FEType, FEBase*>::iterator fe_displaced_end = _element_data[tid]->_fe_displaced.end();
 
 //  Moose::perf_log.pop("reinit() - dof_indices","Kernel");
 //  Moose::perf_log.push("reinit() - fereinit","Kernel");
 
   static std::vector<bool> first(libMesh::n_threads(), true);
 
-  if(dontReinitFE())
-  {
-    if(first[tid])
-    {
-      for(;fe_it != fe_end; ++fe_it)
-        fe_it->second->reinit(elem);
-    }
-  }
-  else
+  if(!dontReinitFE() || first[tid])
   {
     for(;fe_it != fe_end; ++fe_it)
       fe_it->second->reinit(elem);
-  }
 
+    if(_has_displaced_mesh)
+    {
+      for(;fe_displaced_it != fe_displaced_end; ++fe_displaced_it)
+        fe_displaced_it->second->reinit(_displaced_mesh->elem(elem->id()));
+    }
+  }
+  
   first[tid] = false;
 
 //  Moose::perf_log.pop("reinit() - fereinit","Kernel");
@@ -1022,8 +1075,15 @@ MooseSystem::meshChanged()
   delete _active_local_elem_range;
   _active_local_elem_range = NULL;
 
+  // Rebuild the node range
+  delete _active_node_range;
+  _active_node_range = NULL;
+
   // Calling this function will rebuild the range.
   getActiveLocalElementRange();
+
+  // Calling this function will rebuild the range.
+  getActiveNodeRange();
 
   // Print out information about the adapated mesh if requested
   if (_print_mesh_changed)
@@ -1046,6 +1106,22 @@ MooseSystem::getActiveLocalElementRange()
   }
 
   return _active_local_elem_range;
+}
+
+NodeRange *
+MooseSystem::getActiveNodeRange()
+{
+  if(!_active_node_range)
+  {
+    if(_has_displaced_mesh)
+      _active_node_range = new NodeRange(_displaced_mesh->active_nodes_begin(),
+                                         _displaced_mesh->active_nodes_end(), 1);
+    else      
+      _active_node_range = new NodeRange(_mesh->active_nodes_begin(),
+                                         _mesh->active_nodes_end(), 1);
+  }
+
+  return _active_node_range;
 }
 
 /**
@@ -1106,6 +1182,9 @@ MooseSystem::output_system(unsigned int t_step, Real time)
 
     // The +1 is because Exodus starts timesteps at 1 and we start at 0
     ex_out->write_timestep(exodus_file_name + ".e", *_es, num_in_current_file, time);
+
+    if(_has_displaced_mesh)
+      _displaced_mesh->write(file_name + "_displaced.e");
   }
   if(_gmv_output)
     GMVIO(*_mesh).write_equation_systems(file_name + ".gmv", *_es);

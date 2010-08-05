@@ -52,6 +52,12 @@ protected:
 
   unsigned int _max_r_steps;
 
+  /**
+   * Current timestep.
+   *
+   * Please don't modify this directly!
+   */
+  int & _t_step;
 };
 
 #endif //STEADY_H

@@ -23,6 +23,8 @@ InputParameters validParams<MeshBlock>()
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
   params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when spliting the mesh for a parallel computation");
   params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
+  params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
+
   return params;
 }
 
@@ -79,6 +81,19 @@ MeshBlock::execute()
   
   mesh->boundary_info->build_node_list_from_side_list();
   mesh->print_info();
+
+
+  if(isParamValid("displacements"))
+  {
+    std::vector<std::string> displacements = getParamValue<std::vector<std::string> >("displacements");
+
+    if(displacements.size() != mesh->mesh_dimension())
+      mooseError("Number of displacements and dimension of mesh MUST be the same!");
+
+    Mesh * displaced_mesh = _moose_system.initDisplacedMesh(displacements);
+
+    displaced_mesh->prepare_for_use(false);
+  }
 
   visitChildren();
 }

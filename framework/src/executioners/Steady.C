@@ -13,7 +13,8 @@ InputParameters validParams<Steady>()
 Steady::Steady(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Executioner(name, moose_system, parameters),
    _moose_system(moose_system),
-   _max_r_steps(parameters.get<unsigned int>("max_r_steps"))
+   _max_r_steps(parameters.get<unsigned int>("max_r_steps")),
+   _t_step(moose_system.parameters().set<int> ("t_step") = 0)
 {}
 
 void
@@ -22,6 +23,10 @@ Steady::execute()
   // Define the refinement loop
   for(unsigned int r_step=0; r_step<=_max_r_steps; r_step++)
   {
+    _t_step = r_step+1;
+
+    _moose_system._t_step = _t_step;
+    
     _moose_system.getNonlinearSystem()->print_info();
 
     setScaling();

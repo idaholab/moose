@@ -28,6 +28,7 @@
 #include "mesh_refinement.h"
 #include "error_estimator.h"
 #include "error_vector.h"
+#include "node_range.h"
 
 //Forward Declarations
 class Material;
@@ -71,9 +72,31 @@ public:
   Mesh * initMesh(unsigned int dim);
 
   /**
+   * Initialize the Displaced Mesh for this MooseSystem and return a pointer
+   *
+   * @param displacements The names of the variables to be used as the displacements in x y z directions.
+   */
+  Mesh * initDisplacedMesh(std::vector<std::string> displacements);
+
+  /**
    * Returns a writable reference to the mesh held wihin this MooseSystem
    */
   Mesh * getMesh(bool skip_full_check=false);
+
+  /**
+   * Returns a writable reference to the displaced version of the mesh held wihin this MooseSystem
+   */
+  Mesh * getDisplacedMesh(bool skip_full_check=false);
+
+  /**
+   * Whether or not this MooseSystem has a displaced version of the mesh.
+   */
+  bool hasDisplacedMesh();
+
+  /**
+   * Get displacement variables.
+   */
+  std::vector<std::string> getDisplacementVariables();
 
   inline unsigned int getDim() { return _dim; }
   
@@ -97,7 +120,12 @@ public:
    * Returns a reference to the auxillary system in this instance of MooseSystem
    */
   TransientExplicitSystem * getAuxSystem();
-  
+
+  /**
+   * Returns a reference to the displaced system in this instance of MooseSystem
+   */
+  ExplicitSystem * getDisplacedSystem();
+
   /**
    * Get the reference either to _element_data or _face_data from MooseSystem
    */
@@ -257,6 +285,12 @@ public:
   ConstElemRange * getActiveLocalElementRange();
 
   /**
+   * Get access to the node_range
+   * Automatically builds it if it hasn't been initialized.
+   */
+  NodeRange * getActiveNodeRange();
+
+  /**
    * Should be called after the mesh has been modified in any way.
    */
   void meshChanged();
@@ -315,6 +349,8 @@ protected:
 
   void update_aux_vars(const NumericVector<Number>& soln);
 
+  void updateDisplacedMesh(const NumericVector<Number>& soln);
+
 private:
   std::vector<DofData> _dof_data;
   std::vector<ElementData *> _element_data;
@@ -330,9 +366,14 @@ private:
   EquationSystems * _es;
   TransientNonlinearImplicitSystem * _system;
   TransientExplicitSystem * _aux_system;
+  ExplicitSystem * _displaced_system;
 
   Moose::GeomType _geom_type;
   Mesh * _mesh;
+  Mesh * _displaced_mesh;
+
+  std::vector<std::string> _displacements;
+  bool _has_displaced_mesh;
   bool _delete_mesh;                            // true if we own the mesh and we are responsible for its destruction
   unsigned int _dim;
 
@@ -483,6 +524,7 @@ protected:
    * to get rebuilt all the time (which takes time).
    */
   ConstElemRange * _active_local_elem_range;
+  NodeRange * _active_node_range;
 
   friend class ComputeInternalJacobians;
   friend class ComputeInternalJacobianBlocks;

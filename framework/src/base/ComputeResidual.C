@@ -137,6 +137,9 @@ void MooseSystem::compute_residual (const NumericVector<Number>& soln, NumericVe
 
   residual.zero();
 
+  if(_has_displaced_mesh)
+    updateDisplacedMesh(soln);
+
   update_aux_vars(soln);
 
   Threads::parallel_for(*getActiveLocalElementRange(),
