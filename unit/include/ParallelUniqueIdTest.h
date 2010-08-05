@@ -1,4 +1,4 @@
-#ifndef PARALLELUNIQUEIDTEST_H
+/*#ifndef PARALLELUNIQUEIDTEST_H
 #define PARALLELUNIQUEIDTEST_H
 
 //CPPUnit includes
@@ -7,6 +7,7 @@
 /** This class is testing a class meant to be used in parallel applications,
  * however it doesn't test it in parallel.
  */
+/*
 class ParallelUniqueIdTest : public CppUnit::TestFixture 
 {
   CPPUNIT_TEST_SUITE( ParallelUniqueIdTest );
@@ -24,3 +25,4 @@ private:
 };
 
 #endif  // PARALLELUNIQUEIDTEST_H
+*/
