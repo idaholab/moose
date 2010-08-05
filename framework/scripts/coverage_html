@@ -1,0 +1,17 @@
+#!/bin/bash
+# This script generates gcov code coverage data and rsyncs it to the webserver
+
+if [ "`hostname -s`" == "ubuntu" ]
+then
+  echo "Generating coverage html because this is helios"
+  mkdir coverage
+  lcov --base-directory moose --directory moose/src/ --capture --output-file raw.info
+  echo "Removing unecessary folders"
+  lcov -r raw.info "/usr/include/c++/*" -r raw.info "*/libmesh/*" -r raw.info "*/utils/fparser*" -o moose.info
+  echo "Generating html"
+  genhtml moose.info -t "Moose Test Coverage" --num-spaces 2 --legend -o coverage
+  echo "rsyncing html"
+  rsync -av coverage hpcsc:/srv/www/ssl/MOOSE/coverage
+else
+  echo "Did NOT generate coverage html because hostname isn't helios"
+fi

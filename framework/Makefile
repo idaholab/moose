@@ -37,6 +37,12 @@ ifeq ($(enable-shared),yes)
   target := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
 endif
 
+# pass the parameter coverage=true if you want to support gcov
+ifeq ($(coverage),true)
+	libmesh_CXXFLAGS += --coverage
+	libmesh_LDFLAGS += --coverage
+endif
+
 all:: Makefile.export $(target)
 
 #@echo "MOOSE_DIR := " $(PWD) > Makefile.export

@@ -35,6 +35,12 @@ objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 #
 target := ./moose_test-$(METHOD)
 
+# pass the parameter coverage=true if you want to support gcov
+ifeq ($(coverage),true)
+	libmesh_CXXFLAGS += --coverage
+	libmesh_LDFLAGS += --coverage
+endif
+
 all:: $(target)
 
 $(target): $(objects) $(moose_LIB) $(mesh_library)
