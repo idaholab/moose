@@ -17,6 +17,7 @@ public:
   void detectPenetration();
 
   Real penetrationDistance(unsigned int node_id) const;
+  RealVectorValue penetrationNorm(unsigned int node_id) const;
   
 private:
   /**

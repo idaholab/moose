@@ -20,9 +20,7 @@ public:
   
   PostprocessorData(MooseSystem & moose_system);
 
-  MooseSystem & _moose_system;
-
-//  std::map<std::string, Real> _values;
+  void init(const std::string & name);
 
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
@@ -32,7 +30,9 @@ public:
   void print_table(const std::string & file_name);
   void print_csv(const std::string & file_name);
   
-private:  
+private:
+  MooseSystem & _moose_system;
   FormattedTable _output_table;
+  std::map<std::string, Real> _values;
 };
 #endif //POSTPROCESSORDATA_H

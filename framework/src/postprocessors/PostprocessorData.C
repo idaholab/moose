@@ -16,12 +16,22 @@ PostprocessorData::empty()
 PostprocessorValue &
 PostprocessorData::getPostprocessorValue(const std::string & name)
 {
-  return _output_table.getLastData(name);
+  if (_values.find(name) == _values.end())
+    mooseError("No Data found for name: " + name);
+  
+  return _values[name];
+}
+
+void
+PostprocessorData::init(const std::string & name)
+{
+  _values[name] = 0.0;
 }
 
 void
 PostprocessorData::addData(const std::string & name, Real value, Real time)
 {
+  _values[name] = value;
   _output_table.addData(name, value, time);
 }
 

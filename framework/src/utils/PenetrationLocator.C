@@ -144,6 +144,20 @@ PenetrationLocator::normDistance(const Elem & side, const Point & p0)
 }
 
 
+RealVectorValue
+PenetrationLocator::penetrationNorm(unsigned int node_id) const
+{
+  std::map<unsigned int, PenetrationInfo *>::const_iterator found_it;
+
+  if ((found_it = _penetrated_elems.find(node_id)) != _penetrated_elems.end())
+    return found_it->second->_norm;
+  else
+    return RealVectorValue(0, 0, 0);
+}
+
+
+
+
 // Copyright 2001, softSurfer (www.softsurfer.com)
 // This code may be freely used and modified for any purpose
 // providing that this copyright notice is included with it.
