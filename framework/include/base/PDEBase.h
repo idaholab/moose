@@ -312,42 +312,42 @@ protected:
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<Real> & coupledValue(std::string varname, int i = 0);
+  virtual VariableValue & coupledValue(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's gradient.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<RealGradient> & coupledGradient(std::string varname, int i = 0);
+  virtual VariableGradient & coupledGradient(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's second derivative.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<RealTensor> & coupledSecond(std::string varname, int i = 0);
+  virtual VariableSecond & coupledSecond(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value at old time step.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<Real> & coupledValueOld(std::string varname, int i = 0);
+  virtual VariableValue & coupledValueOld(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value at older time step.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual MooseArray<Real> & coupledValueOlder(std::string varname, int i = 0);
+  virtual VariableValue & coupledValueOlder(std::string varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled gradient of a variable's value at an old time step.
    *
    * @param name The name the kernel wants to refer to the variable as
    */
-  virtual MooseArray<RealGradient> & coupledGradientOld(std::string varname, int i = 0);
+  virtual VariableGradient & coupledGradientOld(std::string varname, int i = 0);
 
 };
 

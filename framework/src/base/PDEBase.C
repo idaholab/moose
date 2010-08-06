@@ -213,7 +213,7 @@ PDEBase::coupledComponents(std::string varname)
 }
 
 
-MooseArray<Real> &
+VariableValue &
 PDEBase::coupledValue(std::string varname, int i)
 {
   if(!isCoupled(varname))
@@ -225,7 +225,7 @@ PDEBase::coupledValue(std::string varname, int i)
     return _data._aux_var_vals[_coupled_aux_vars[varname][i]._num];
 }
 
-MooseArray<RealGradient> &
+VariableGradient &
 PDEBase::coupledGradient(std::string varname, int i)
 {
   if(!isCoupled(varname))
@@ -237,7 +237,7 @@ PDEBase::coupledGradient(std::string varname, int i)
     return _data._aux_var_grads[_coupled_aux_vars[varname][i]._num];
 }
 
-MooseArray<RealTensor> &
+VariableSecond &
 PDEBase::coupledSecond(std::string varname, int i)
 {
   if(!isCoupled(varname))
@@ -247,7 +247,7 @@ PDEBase::coupledSecond(std::string varname, int i)
   return _data._var_seconds[_coupled_vars[varname][i]._num];
 }
 
-MooseArray<Real> &
+VariableValue &
 PDEBase::coupledValueOld(std::string varname, int i)
 {
   if(!isCoupled(varname))
@@ -259,7 +259,7 @@ PDEBase::coupledValueOld(std::string varname, int i)
     return _data._aux_var_vals_old[_coupled_aux_vars[varname][i]._num];
 }
 
-MooseArray<Real> &
+VariableValue &
 PDEBase::coupledValueOlder(std::string varname, int i)
 {
   if(!isCoupled(varname))
@@ -271,7 +271,7 @@ PDEBase::coupledValueOlder(std::string varname, int i)
     return _data._aux_var_vals_older[_coupled_aux_vars[varname][i]._num];
 }
 
-MooseArray<RealGradient> &
+VariableGradient &
 PDEBase::coupledGradientOld(std::string varname, int i)
 {
   if(!isCoupled(varname))

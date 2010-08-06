@@ -54,7 +54,7 @@ GenericVariableBlock::execute()
   else
     system = _moose_system.getAuxSystem();
 
-  system->add_variable(var_name,
+  _moose_system.addVariable(var_name,
                        Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
                        Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
   

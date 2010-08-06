@@ -301,7 +301,6 @@ MooseSystem::init()
     _aux_data[tid]->init();
   }
 
-
   _t = 0;
   _dt = 0;
   _is_transient = false;
@@ -317,6 +316,9 @@ MooseSystem::init()
   for(unsigned int i=0; i < _system->n_vars(); i++)
     _scaling_factor.push_back(1.0);
 
+  // Make sure the displaced mesh is consistent with the initial condition
+  if(_has_displaced_mesh)
+    updateDisplacedMesh(*_system->solution);
 }
 
 void
@@ -593,10 +595,10 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, type, active_subdomains);
+
   if(_has_displaced_mesh)
     _displaced_system->add_variable(var, type, active_subdomains);
-  for (THREAD_ID tid = 0; libMesh::n_threads(); ++tid)
-    _element_data[tid]->_var_nums[0].insert(var_num);
+  
   return var_num;
 }
 
@@ -604,8 +606,10 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const Order order, const FEFamily family, const std::set< subdomain_id_type > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, order, family, active_subdomains);
-  for (THREAD_ID tid = 0; libMesh::n_threads(); ++tid)
-    _element_data[tid]->_var_nums[0].insert(var_num);
+
+  if(_has_displaced_mesh)
+    _displaced_system->add_variable(var, order, family, active_subdomains);
+
   return var_num;
 }
 
@@ -1162,21 +1166,29 @@ void
 MooseSystem::output_system(unsigned int t_step, Real time)
 {
   OStringStream stream_file_base;
+  OStringStream stream_file_base_displaced;
 
   stream_file_base << _file_base << "_";
-  OSSRealzeroright(stream_file_base,3,0,t_step);
+  stream_file_base_displaced << _file_base << "_displaced_";
+  OSSRealzeroright(stream_file_base,4,0,t_step);
+  OSSRealzeroright(stream_file_base_displaced,4,0,t_step);
 
   std::string file_name = stream_file_base.str();
+  std::string file_name_displaced = stream_file_base_displaced.str();
 
   if (_exodus_output)
   {
     std::string exodus_file_name;
 
+    // TODO: move statics into MooseSystem Proper
     static ExodusII_IO * ex_out = NULL;
     static unsigned int num_files = 0;
     static unsigned int num_in_current_file = 0;
 
     bool adaptivity = _es->parameters.have_parameter<bool>("adaptivity");
+
+//    _mesh_changed = true;
+//    adaptivity = true;
 
     //if the mesh changed we need to write to a new file
     if(_mesh_changed || !ex_out)
@@ -1214,13 +1226,44 @@ MooseSystem::output_system(unsigned int t_step, Real time)
     // The +1 is because Exodus starts timesteps at 1 and we start at 0
     ex_out->write_timestep(exodus_file_name + ".e", *_es, num_in_current_file, time);
 
-//    if(_has_displaced_mesh)
-//      ExodusII_IO(*_displaced_mesh).write_timestep(file_name + "_displaced.e", *_displaced_es, t_step, time);
+    if(_has_displaced_mesh)
+    {
+      static unsigned int num_files_displaced = 0;
+      static unsigned int num_in_current_file_displaced = 1;
+
+      num_files_displaced++;
+
+      ExodusII_IO displaced_ex_out(_displaced_es->get_mesh());
+
+      OStringStream exodus_stream_file_base;
+
+      exodus_stream_file_base << _file_base << "_displaced_";
+
+      // -1 is so that the first one that comes out is 000
+      OSSRealzeroright(exodus_stream_file_base,4,0,num_files_displaced-1);
+
+      exodus_file_name = exodus_stream_file_base.str();
+
+      displaced_ex_out.write_timestep(exodus_file_name + ".e", *_displaced_es, num_in_current_file_displaced, time);      
+    }
   }
+
   if(_gmv_output)
+  {
     GMVIO(*_mesh).write_equation_systems(file_name + ".gmv", *_es);
+    
+    if(_has_displaced_mesh)
+      GMVIO(*_displaced_mesh).write_equation_systems(file_name_displaced + ".gmv", *_displaced_es);
+  }
+  
+      
   if(_tecplot_output)
+  {
     TecplotIO(*_mesh).write_equation_systems(file_name + ".plt", *_es);
+
+    if(_has_displaced_mesh)
+      TecplotIO(*_displaced_mesh).write_equation_systems(file_name_displaced + ".plt", *_displaced_es);
+  }
 }
 
 bool & MooseSystem::dontReinitFE()
