@@ -1,70 +1,29 @@
-# $Id: Makefile 2501 2007-11-20 02:33:29Z benkirk $ 
+###############################################################################
+################### MOOSE Application Standard Makefile #######################
+###############################################################################
+#
+# Required Environment variables
+# LIBMESH_DIR	- location of the libMesh library
+#
+# Optional Environment variables
+# MOOSE_DIR	- location of the MOOSE framework
+# ELK_DIR	- location of ELK (if enabled)
+#
+# Required Make variables
+# APP_NAME	- the name of this application (all lower case)
+# ENABLE_ELK 	- should be set to 'yes' to enable ELK
 
-MOOSE_DIR ?= ../moose
+MOOSE_DIR 	?= $(shell pwd)/../moose
+ENABLE_ELK 	:= no
 
-# The location of the mesh library
-meshdir := $(LIBMESH_DIR)
+# APPLICATION NAME (all lower case)
+APPLICATION_NAME := moose_test
 
-# include the library options determined by configure.  This will
-# set the variables INCLUDE and LIBS that we will need to build and
-# link with the library.
--include $(meshdir)/Make.common
+HYPRE_LINK_FLAGS=
 
+# Include the MOOSE Export file
 -include $(MOOSE_DIR)/Makefile.export
 
-libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/stabilizers -Iinclude/executioners -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/utils -Iinclude/utils/fparser -Iinclude/materials -Iinclude/parser
 
 ###############################################################################
-# File management.  This is where the source, header, and object files are
-# defined
-
-#
-# source files
-srcfiles 	:= $(wildcard src/*.C) $(wildcard src/*/*.C) $(wildcard src/*/*/*.C)
-
-#
-# object files
-objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
-###############################################################################
-
-
-.PHONY: clean doc .depend
-
-###############################################################################
-# Target:
-#
-target := ./moose_test-$(METHOD)
-
-# pass the parameter coverage=true if you want to support gcov
-ifeq ($(coverage),true)
-	ifneq (,$(findstring gcc,$(GXX-VERSION)))
-		libmesh_CXXFLAGS += --coverage
-		libmesh_LDFLAGS += --coverage
-	endif
-endif
-
-all:: $(target)
-
-$(target): $(objects) $(moose_LIB) $(mesh_library)
-	@echo "Linking "$@
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
-doc:
-	doxygen ./doc/Doxyfile
-
-# Useful rules.
-clean:
-	@rm -f moose_test-*
-	@find . -name "*~" -or -name "*.o" | xargs rm
-	@rm -f .depend
-	@rm -f Makefile.export
-
-# include the dependency list
--include .depend
-
-#
-# Dependencies
-#
-.depend:
-	@$(perl) $(meshdir)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(meshdir)/include/*), -I$(i)) $(foreach i, $(wildcard $(MOOSE_DIR)/include/*), -I$(i)) -Iinclude -Iinclude/stabilizers -Iinclude/executioners -Iinclude/base -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/utils -Iinclude/materials -Iinclude/parser "-S\$$(obj-suffix)" $(srcfiles) > .depend
-
-###############################################################################
+# Additional special case targets should be added here
