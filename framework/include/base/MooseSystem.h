@@ -112,6 +112,11 @@ public:
   EquationSystems * getEquationSystems();
 
   /**
+   * Returns a writable reference to the displaced EquationSystems object held within this MooseSystem
+   */
+  EquationSystems * getDisplacedEquationSystems();
+
+  /**
    * Returns a reference to the main nonlinear system in this instance of MooseSystem
    */
   TransientNonlinearImplicitSystem * getNonlinearSystem();
@@ -366,6 +371,7 @@ private:
   EquationSystems * _es;
   TransientNonlinearImplicitSystem * _system;
   TransientExplicitSystem * _aux_system;
+  EquationSystems * _displaced_es;
   ExplicitSystem * _displaced_system;
 
   Moose::GeomType _geom_type;

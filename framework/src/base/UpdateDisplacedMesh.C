@@ -63,6 +63,8 @@ void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)
 {
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
+  (*_displaced_system->solution) = soln;
+
   std::vector<Number> localized_solution;
   
   soln.localize(localized_solution);

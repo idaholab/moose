@@ -32,6 +32,7 @@ MooseSystem::MooseSystem() :
   _material_data(libMesh::n_threads(), MaterialData(*this)),
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _es(NULL),
+  _displaced_es(NULL),
   _system(NULL),
   _aux_system(NULL),
   _geom_type(Moose::XYZ),
@@ -57,6 +58,7 @@ MooseSystem::MooseSystem() :
   _t_scheme(0),
   _n_of_rk_stages(0),
   _active_local_elem_range(NULL),
+  _active_node_range(NULL),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -78,6 +80,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _material_data(libMesh::n_threads(), MaterialData(*this)),
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _es(NULL),
+  _displaced_es(NULL),
   _system(NULL),
   _aux_system(NULL),
   _mesh(&mesh),
@@ -102,6 +105,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _t_scheme(0),
   _n_of_rk_stages(0),
   _active_local_elem_range(NULL),
+  _active_node_range(NULL),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -138,6 +142,9 @@ MooseSystem::~MooseSystem()
 
   if (_es != NULL)
     delete _es;
+
+  if (_displaced_es != NULL)
+    delete _displaced_es;
 
   if (_exreader != NULL)
     delete _exreader;
@@ -259,6 +266,9 @@ MooseSystem::init()
   
   _es->init();
 
+  if(_has_displaced_mesh)
+    _displaced_es->init();
+  
   _dof_map = &_system->get_dof_map();
   _aux_dof_map = &_aux_system->get_dof_map();
 
@@ -323,6 +333,13 @@ MooseSystem::getEquationSystems()
 {
 //  checkValid();
   return _es;
+}
+
+EquationSystems *
+MooseSystem::getDisplacedEquationSystems()
+{
+//  checkValid();
+  return _displaced_es;
 }
 
 TransientNonlinearImplicitSystem *
@@ -393,6 +410,13 @@ MooseSystem::initEquationSystems()
   
   _es = new EquationSystems(*_mesh);
 
+  if(_has_displaced_mesh)
+  {
+    _displaced_es = new EquationSystems(*_displaced_mesh);
+    _displaced_es->parameters.set<MooseSystem *>("moose_system") = this;
+    _displaced_system = &_displaced_es->add_system<ExplicitSystem>("DisplacedSystem");
+  }
+
   // Store off the MooseSystem so we can get access to it.
   _es->parameters.set<MooseSystem *>("moose_system") = this;
   
@@ -402,8 +426,7 @@ MooseSystem::initEquationSystems()
   _system->attach_init_function(Moose::initial_condition);
 
   _aux_system = &_es->add_system<TransientExplicitSystem>("AuxiliarySystem");
-  _aux_system->attach_init_function(Moose::initial_condition);
-
+  _aux_system->attach_init_function(Moose::initial_condition);  
 
   return _es;
 }
@@ -570,6 +593,8 @@ unsigned int
 MooseSystem::addVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains)
 {
   unsigned int var_num = _system->add_variable(var, type, active_subdomains);
+  if(_has_displaced_mesh)
+    _displaced_system->add_variable(var, type, active_subdomains);
   for (THREAD_ID tid = 0; libMesh::n_threads(); ++tid)
     _element_data[tid]->_var_nums[0].insert(var_num);
   return var_num;
@@ -830,10 +855,16 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   std::map<FEType, FEBase*>::iterator fe_it = _element_data[tid]->_fe.begin();
   std::map<FEType, FEBase*>::iterator fe_end = _element_data[tid]->_fe.end();
 
+  
+  std::map<FEType, FEBase*>::iterator fe_displaced_it; 
+  std::map<FEType, FEBase*>::iterator fe_displaced_end;
 
-  std::map<FEType, FEBase*>::iterator fe_displaced_it = _element_data[tid]->_fe_displaced.begin();
-  std::map<FEType, FEBase*>::iterator fe_displaced_end = _element_data[tid]->_fe_displaced.end();
-
+  if(_has_displaced_mesh)
+  { 
+    fe_displaced_it = _element_data[tid]->_fe_displaced.begin();
+    fe_displaced_end = _element_data[tid]->_fe_displaced.end();
+  }
+  
 //  Moose::perf_log.pop("reinit() - dof_indices","Kernel");
 //  Moose::perf_log.push("reinit() - fereinit","Kernel");
 
@@ -1183,8 +1214,8 @@ MooseSystem::output_system(unsigned int t_step, Real time)
     // The +1 is because Exodus starts timesteps at 1 and we start at 0
     ex_out->write_timestep(exodus_file_name + ".e", *_es, num_in_current_file, time);
 
-    if(_has_displaced_mesh)
-      _displaced_mesh->write(file_name + "_displaced.e");
+//    if(_has_displaced_mesh)
+//      ExodusII_IO(*_displaced_mesh).write_timestep(file_name + "_displaced.e", *_displaced_es, t_step, time);
   }
   if(_gmv_output)
     GMVIO(*_mesh).write_equation_systems(file_name + ".gmv", *_es);
