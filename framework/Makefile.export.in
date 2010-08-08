@@ -1,115 +1,18 @@
-# This file contains common MOOSE application settings
-# Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and optionally ELK.
-#       This can be overridden by using environment variables (MOOSE_DIR and/or ELK_DIR)
+
+# The location of the mesh library
+meshdir := $(LIBMESH_DIR)
 
 # include the library options determined by configure.  This will
 # set the variables INCLUDE and LIBS that we will need to build and
 # link with the library.
-include $(LIBMESH_DIR)/Make.common
+include $(meshdir)/Make.common
 
-libmesh_INCLUDE := $(foreach i, $(wildcard $(LIBMESH_DIR)/include/*), -I$(i)) -I$(MOOSE_DIR)/include/utils/fparser $(foreach i, $(wildcard $(MOOSE_DIR)/include/*), -I$(i)) $(libmesh_INCLUDE)
-
-# Location of the MOOSE library
 moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
+
 ifeq ($(enable-shared),yes)
   moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
 endif
 
+libmesh_INCLUDE := -I$(MOOSE_DIR)/include -I$(MOOSE_DIR)/include/postprocessors -I$(MOOSE_DIR)/include/stabilizers -I$(MOOSE_DIR)/include/executioners -I$(MOOSE_DIR)/include/ics -I$(MOOSE_DIR)/include/materials -I$(MOOSE_DIR)/include/parser -I$(MOOSE_DIR)/include/base -I$(MOOSE_DIR)/include/kernels -I$(MOOSE_DIR)/include/utils -I$(MOOSE_DIR)/include/functions -I$(MOOSE_DIR)/include/utils/fparser -I$(MOOSE_DIR)/include/auxkernels -I$(MOOSE_DIR)/include/bcs $(libmesh_INCLUDE)
 libmesh_LIBS := $(moose_LIB) $(libmesh_LIBS) -Wl,-rpath,$(MOOSE_DIR)
 
-ifeq ($(ENABLE_ELK),yes)
-  ELK_DIR ?= $(shell pwd)/../elk
-  -include $(ELK_DIR)/Makefile.export
-  libmesh_INCLUDE := $(libmesh_INCLUDE)  $(foreach i, $(wildcard $(ELK_DIR)/include/*), -I$(i))
-endif
-
-
-# Fortran baggage
-mpif77_command := $(libmesh_F77)
-
-# If $(libmesh_f77) is an mpiXXX compiler script, use -show
-# to determine the base compiler
-ifneq (,$(findstring mpi,$(mpif77_command)))
-  mpif77_command := $(shell $(libmesh_F77) -show)
-endif
-
-# Set certain flags based on compiler
-
-# ifort
-ifneq (,$(findstring ifort,$(mpif77_command)))
-  libmesh_FFLAGS += -r8
-endif
-
-# gfortran
-ifneq (,$(findstring gfortran,$(mpif77_command)))
-  libmesh_FFLAGS += -fdefault-real-8
-endif
-
-# g95
-ifneq (,$(findstring g95,$(mpif77_command)))
-  libmesh_FFLAGS += -r8
-endif
-
-ifeq ($(coverage),true)
-	ifneq (,$(findstring gcc,$(GXX-VERSION)))
-		libmesh_CXXFLAGS += --coverage
-		libmesh_LDFLAGS += --coverage
-	endif
-endif
-
-##############################################################################
-######################### Application Variables ##############################
-##############################################################################
-#
-# source files
-srcfiles 	:= $(wildcard src/*.C) $(wildcard src/*/*.C) $(wildcard src/*/*/*.C)
-fsrcfiles       := $(wildcard src/*/*.f)
-f90srcfiles	:= $(wildcard src/*/*.f90)
-
-#
-# object files
-objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
-fobjects        := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
-f90objects	:= $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
-
-#
-# header files
-libmesh_INCLUDE += $(foreach i, $(wildcard include/*), -I$(i))
-
-.PHONY: clean doc .depend
-
-###############################################################################
-# Target:
-#
-target 	   := ./$(APPLICATION_NAME)-$(METHOD)
-
-all:: $(target)
-
-# Production rules:  how to make the target - depends on library configuration
-$(target): $(fobjects) $(f90objects) $(objects) $(moose_LIB) $(mesh_library)
-	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
-
-doc:
-	doxygen doc/Doxyfile
-
-clean::
-	@rm -f $(APPLICATION_NAME)-*
-	@find . -name "*~" -or -name "*.o" | xargs rm
-	@rm -f .depend
-
-# include the dependency list
--include .depend
-
-print:
-	@echo $(mpif77_command)
-	@echo $(libmesh_F77)
-	@echo $(libmesh_FFLAGS)
-
-syntax:
-	python scripts/generate_input_syntax.py
-#
-# Dependencies
-#
-.depend:
-	@$(perl) $(LIBMESH_DIR)/contrib/bin/make_dependencies.pl -I. $(libmesh_INCLUDE) "-S\$$(obj-suffix)" $(srcfiles) > .depend

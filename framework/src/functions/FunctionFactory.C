@@ -24,10 +24,28 @@ FunctionFactory::getValidParams(std::string name)
 }
 
 FunctionFactory::FunctionFactory()
-{}
+{
+}
   
 FunctionFactory::~FunctionFactory() 
-{}
+{
+  //TODO wtf???
+  {
+    std::map<std::string, functionBuildPtr>::iterator i;
+    for(i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+
+  {
+    std::map<std::string, functionParamsPtr>::iterator i;
+    for(i=_name_to_params_pointer.begin(); i!=_name_to_params_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+}
 
 FunctionNamesIterator
 FunctionFactory::registeredFunctionsBegin()

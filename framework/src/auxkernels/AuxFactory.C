@@ -25,7 +25,23 @@ AuxFactory::AuxFactory()
 }
 
 AuxFactory:: ~AuxFactory()
-{}
+{
+  {
+    std::map<std::string, AuxKernelBuildPtr>::iterator i;
+    for(i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+
+  {
+    std::map<std::string, AuxKernelParamsPtr>::iterator i;
+    for(i=_name_to_params_pointer.begin(); i!=_name_to_params_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+}
 
 AuxKernelNamesIterator
 AuxFactory::registeredAuxKernelsBegin()

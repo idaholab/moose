@@ -16,6 +16,19 @@ ParserBlockFactory::instance()
   return instance;
 }
 
+/*
+ParserBlock *
+ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
+{
+  ParserBlock * parser_block;
+
+  parser_block = (*name_to_build_pointer[reg_id])(reg_id, real_id, parent, parser_handle, params);
+  active_parser_blocks.push_back(parser_block);
+
+  return parser_block;
+}
+*/
+
 ParserBlock *
 ParserBlockFactory::add(std::string name, MooseSystem & moose_system, InputParameters params)
 {
@@ -119,11 +132,31 @@ ParserBlockFactory::isRegistered(const std::string & real_id)
 
 
 ParserBlockFactory:: ~ParserBlockFactory() 
-{     
-  std::vector<ParserBlock *>::iterator i;
-  for (i=_active_parser_blocks.begin(); i!=_active_parser_blocks.end(); ++i)
+{
   {
-    delete *i;
+    std::map<std::string, parserBlockBuildPtr>:: iterator i;
+    for(i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+
+  {
+    std::map<std::string, parserBlockParamsPtr>::iterator i;
+    for(i=_name_to_params_pointer.begin(); i!=_name_to_params_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+     
+  {
+        
+    std::vector<ParserBlock *>::iterator i;
+    for (i=_active_parser_blocks.begin(); i!=_active_parser_blocks.end(); ++i)
+    {
+      delete *i;
+    }
+    
   }
 }
 

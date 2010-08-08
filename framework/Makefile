@@ -1,42 +1,53 @@
-###############################################################################
-################### MOOSE Application Standard Makefile #######################
-###############################################################################
-#
-# Required Environment variables
-# LIBMESH_DIR	- location of the libMesh library
-#
-# Optional Environment variables
-# MOOSE_DIR	- location of the MOOSE framework
-# ELK_DIR	- location of ELK (if enabled)
-#
-# Required Make variables
-# APP_NAME	- the name of this application (all lower case)
-# ENABLE_ELK 	- should be set to 'yes' to enable ELK
+# $Id: Makefile 2501 2007-11-20 02:33:29Z benkirk $ 
 
-MOOSE_DIR	?= $(shell pwd)
-ENABLE_ELK 	:= no
+MOOSE_DIR ?= $(shell pwd)
 
-# APPLICATION NAME (all lower case)
-APPLICATION_NAME := libmoose
+# The location of the mesh library
+meshdir := $(LIBMESH_DIR)
 
-# Include the MOOSE Export file
--include $(MOOSE_DIR)/Makefile.export.in
-# Note: This export is in MOOSE therefore we can't include Makefile.export
-#       here since it won't exist before the Makefile is executed.  If we
-#       adopt a configure script the export file should be generated there
-#       or in some sort of bootstrap script
+# include the library options determined by configure.  This will
+# set the variables INCLUDE and LIBS that we will need to build and
+# link with the library.
+-include $(meshdir)/Make.common
+
+libmesh_INCLUDE += -Iinclude -Iinclude/base -Iinclude/postprocessors -Iinclude/stabilizers -Iinclude/executioners -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/functions -Iinclude/utils -Iinclude/utils/fparser -Iinclude/materials -Iinclude/parser
 
 ###############################################################################
-# Additional special case targets should be added here
+# File management.  This is where the source, header, and object files are
+# defined
 
-target := $(MOOSE_DIR)/$(APPLICATION_NAME)-$(METHOD)$(static_libext)
+#
+# source files
+srcfiles 	:= $(wildcard src/*.C) $(wildcard src/*/*.C) $(wildcard src/*/*/*.C)
+
+#
+# object files
+objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
+###############################################################################
+
+
+.PHONY: clean doc .depend
+
+###############################################################################
+# Target:
+#
+target := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
 
 ifeq ($(enable-shared),yes)
-  target := $(MOOSE_DIR)/$(APPLICATION_NAME)-$(METHOD)$(shared_libext)
+  target := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
+endif
+
+# pass the parameter coverage=true if you want to support gcov
+ifeq ($(coverage),true)
+	ifneq (,$(findstring gcc,$(GXX-VERSION)))
+		libmesh_CXXFLAGS += --coverage
+		libmesh_LDFLAGS += --coverage
+	endif
 endif
 
 all:: Makefile.export $(target)
 
+#@echo "MOOSE_DIR := " $(PWD) > Makefile.export
 Makefile.export: Makefile.export.in
 	@echo "Creating Makefile.export"
 	@cat Makefile.export.in >> Makefile.export
@@ -59,7 +70,26 @@ $(target): $(objects)
 endif
 endif
 
-clean::
-	@rm -f Makefile.export
-###############################################################################
 
+doc:
+	doxygen ./doc/Doxyfile
+
+
+# Useful rules.
+clean:
+	@rm -f libmoose-*
+	@find . -name "*~" -or -name "*.o" -or -name "*.gcda" -or -name "*.gcno" | xargs rm
+	@rm -f .depend
+	@rm -f Makefile.export
+
+# include the dependency list
+-include .depend
+
+
+#
+# Dependencies
+#
+.depend:
+	@$(perl) $(meshdir)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(meshdir)/include/*), -I$(i)) -Iinclude -Iinclude/postprocessors -Iinclude/stabilizers -Iinclude/executioners -Iinclude/base -Iinclude/ics -Iinclude/kernels -Iinclude/bcs -Iinclude/auxkernels -Iinclude/functions -Iinclude/utils -Iinclude/materials -Iinclude/parser "-S\$$(obj-suffix)" $(srcfiles) > .depend
+
+###############################################################################

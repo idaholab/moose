@@ -22,10 +22,27 @@ StabilizerFactory::getValidParams(std::string name)
 }
 
 StabilizerFactory::StabilizerFactory()
-{}
+{
+}
   
 StabilizerFactory:: ~StabilizerFactory() 
-{}
+{
+  {
+    std::map<std::string, stabilizerBuildPtr>:: iterator i;
+    for(i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+
+  {
+    std::map<std::string, stabilizerParamsPtr>::iterator i;
+    for(i=_name_to_params_pointer.begin(); i!=_name_to_params_pointer.end(); ++i)
+    {
+      delete &i;
+    }
+  }
+}
 
 StabilizerNamesIterator
 StabilizerFactory::registeredStabilizersBegin()
