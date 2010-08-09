@@ -19,6 +19,14 @@ ifeq ($(MAKECMDGOALS), elkunit-$(METHOD))
 	-include $(ELK_DIR)/Makefile.export
 endif
 
+# pass the parameter coverage=true if you want to support gcov
+ifeq ($(coverage),true)
+	ifneq (,$(findstring gcc,$(GXX-VERSION)))
+		libmesh_CXXFLAGS += --coverage
+		libmesh_LDFLAGS += --coverage
+	endif
+endif
+
 mpif77_command 	:= $(libmesh_F77)
 
 ###############################################################################
