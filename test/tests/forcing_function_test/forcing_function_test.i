@@ -50,7 +50,7 @@
   [../]
 
   [./right]
-    type = DirichletBC
+    type = DirichletBC 
     variable = u
     boundary = '2'
     value = 0
