@@ -594,7 +594,13 @@ MooseSystem::solve()
 unsigned int
 MooseSystem::addVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains)
 {
-  unsigned int var_num = _system->add_variable(var, type, active_subdomains);
+  unsigned int var_num = 0;
+  
+  if(active_subdomains)
+    var_num = _system->add_variable(var, type, active_subdomains);
+  else
+    var_num = _system->add_variable(var, type);
+
 
   if(_has_displaced_mesh)
     _displaced_system->add_variable(var, type, active_subdomains);
@@ -605,8 +611,13 @@ MooseSystem::addVariable(const std::string &var, const FEType  &type, const std:
 unsigned int
 MooseSystem::addVariable(const std::string &var, const Order order, const FEFamily family, const std::set< subdomain_id_type > *const active_subdomains)
 {
-  unsigned int var_num = _system->add_variable(var, order, family, active_subdomains);
+  unsigned int var_num = 0;
 
+  if(active_subdomains)
+    var_num = _system->add_variable(var, order, family, active_subdomains);
+  else
+    var_num = _system->add_variable(var, order, family);
+  
   if(_has_displaced_mesh)
     _displaced_system->add_variable(var, order, family, active_subdomains);
 
