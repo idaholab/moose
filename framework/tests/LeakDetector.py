@@ -1,6 +1,9 @@
 from TestHarness import TestHarness
 
 
+# This class runs tests the same as TestHarness, but it also looks for and
+# reports memory leaks. It has an option to exit ungracefully if memory
+# leaks were found.
 class LeakDetector(TestHarness):
   def __init__(self, argv, app_name):
     TestHarness.__init__(self, argv, app_name)

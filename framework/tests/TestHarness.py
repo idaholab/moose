@@ -37,8 +37,11 @@ class TestHarness:
     self.all_passed = True
     self.num_tests = 0
 
+    # map of tests to results
+    self.results_table = {}
+
     # holds the string table dumped to the screen for easy printing
-    self.results_table = ''
+    self.text_results_table = ''
 
     # See if an Excel dump was requested
     if self.options.xlsFile:
@@ -68,7 +71,8 @@ class TestHarness:
   # override this function if you need to do stuff before the tests are run
   def preRun(self):
     self.all_passed = True
-    self.results_table = ''
+    self.results_table = {}
+    self.text_results_table = ''
     self.num_tests = 0
 
   # finds all the test py scripts and passes them to inspectAndTest
@@ -154,14 +158,16 @@ class TestHarness:
       parser.writeExcel(self.xls_writer, test)
 
     # print the result of this test in table form
+    self.results_table[test] = result
     cnt = 70 - len(test + result) - 2
     s = test + " " + '.'*cnt + " " + result
-    self.results_table += s + '\n'
+    self.text_results_table += '\n' + s
     print s
 
     # print the output if verbose option is on or the test failed
     if self.options.verbose or result == 'FAILED':
       print output
+      print s
 
   # return '' if all tests passed, or a message if some failed. Override if you
   # want more fail criteria
@@ -179,10 +185,10 @@ class TestHarness:
     # print it in it's entirety here at the bottom
     if self.options.verbose or not self.all_passed:
       print '\n\nFull Result Table:\n' + '-'*70
-      print self.results_table
+      print self.text_results_table
 
     print '-'*70
-    print 'Ran ' + str(self.num_tests) + ' tests in ' + str(round(self.testing_time)) + 's\n\n'
+    print 'Ran ' + str(self.num_tests) + ' tests in ' + str(round(self.testing_time)) + 's\n'
 
   # deprecated because it violates the coding standard's naming scheme
   def run_tests_and_exit(self, check_icestorm=True):
@@ -199,6 +205,7 @@ class TestHarness:
     parser.add_option("-x", "--xls", action="store", dest="xlsFile", metavar="FILE", help="write excel format performance data to FILE")
     parser.add_option("-d", "--dofs", action="callback", callback=buildArgVector, type="int", dest="dofs", help="refine each example to meet the minimum requested DOFS")
     parser.add_option("-n", "--np", action="callback", callback=buildArgVector, type="int", dest="np", help="specify the number of MPI processes launched")
+    parser.add_option("--helios-only-after", action="store_true", dest="heliosOnly", help="The options after this option are only applied if hostname == helios")
     parser.add_option("--opt", action="store_const", dest="method", const="opt", help="test the app_name-opt binary")
     parser.add_option("--dbg", action="store_const", dest="method", const="dbg", help="test the app_name-dbg binary")
     parser.add_option("--dev", action="store_const", dest="method", const="dev", help="test the app_name-dev binary")

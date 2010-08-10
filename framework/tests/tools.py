@@ -1,9 +1,18 @@
-import os
+import os, sys
 from subprocess import *
+from socket import gethostname
 
 from TestHarness import TestHarness
 from LeakDetector import LeakDetector
 import CSVDiffer
+
+# if pysqlite2 isn't installed this class won't work, we don't care
+# unless it was actually meant to be used
+try:
+  from TestTimer import TestTimer
+except:
+  if '--store-timing' in sys.argv:
+    raise
 
 # make the TestHarness class a global of the tools.py module.
 # We do this because all the legacy testing scripts use tools.TestHarness to
@@ -15,8 +24,13 @@ global TestHarness
 ############# this function is used by the run_tests scripts ###################
 ################################################################################
 def runTests(argv, app_name):
+  if '--helios-only-after' in argv and gethostname() != 'helios':
+    return runTests(argv[:argv.index('--helios-only-after')], app_name)
+
   if '--memcheck' in argv or '-h' in argv or '--help' in argv:
     harness = LeakDetector(argv, app_name)
+  elif '--store-timing' in argv:
+    harness = TestTimer(argv, app_name)
   else:
     harness = TestHarness(argv, app_name)
   harness.runTestsAndExit()
