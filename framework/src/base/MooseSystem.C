@@ -596,11 +596,7 @@ MooseSystem::addVariable(const std::string &var, const FEType  &type, const std:
 {
   unsigned int var_num = 0;
   
-  if(active_subdomains)
-    var_num = _system->add_variable(var, type, active_subdomains);
-  else
-    var_num = _system->add_variable(var, type);
-
+  var_num = _system->add_variable(var, type, active_subdomains);
 
   if(_has_displaced_mesh)
     _displaced_system->add_variable(var, type, active_subdomains);
@@ -613,10 +609,7 @@ MooseSystem::addVariable(const std::string &var, const Order order, const FEFami
 {
   unsigned int var_num = 0;
 
-  if(active_subdomains)
-    var_num = _system->add_variable(var, order, family, active_subdomains);
-  else
-    var_num = _system->add_variable(var, order, family);
+  var_num = _system->add_variable(var, order, family, active_subdomains);
   
   if(_has_displaced_mesh)
     _displaced_system->add_variable(var, order, family, active_subdomains);

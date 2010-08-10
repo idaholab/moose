@@ -50,13 +50,22 @@ GenericVariableBlock::execute()
   System *system;
   is_variables_block = Parser::pathContains(_name, "Variables");
   if (is_variables_block)
+  {
     system = _moose_system.getNonlinearSystem();
+
+    _moose_system.addVariable(var_name,
+                              Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
+                              Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
+  }
   else
+  {
     system = _moose_system.getAuxSystem();
 
-  system->add_variable(var_name,
-                       Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
-                       Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
+    system->add_variable(var_name,
+                         Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
+                         Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
+  }
+  
   
   // Set initial condition
   Real initial = getParamValue<Real>("initial_condition");
