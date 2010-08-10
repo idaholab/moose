@@ -11,8 +11,7 @@ import CSVDiffer
 try:
   from TestTimer import TestTimer
 except:
-  if '--store-timing' in sys.argv:
-    raise
+  pass
 
 # make the TestHarness class a global of the tools.py module.
 # We do this because all the legacy testing scripts use tools.TestHarness to
