@@ -52,7 +52,7 @@ class TestTimer(TestHarness):
         print 'ERROR: no timing info in string: ' + result
 
     # Don't compute the average if some failed
-    if self.all_passed and not parse_failed:
+    if self.all_passed and not parse_failed and num > 0:
       average = sum_time / num
       data.append( (app, '_average_'+app, rev, timestamp, average, dofs) )
 
