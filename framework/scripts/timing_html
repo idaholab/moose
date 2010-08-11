@@ -7,7 +7,7 @@ then
   echo "Generating timing html because this is helios"
   cp moose/scripts/timingHTML/index.html html/
   cp -r moose/scripts/timingHTML/resources html/
-  rsync -av html/* hpcsc:/srv/www/ssl/timing/
+  rsync -av html/* hpcsc:/srv/www/ssl/MOOSE/timing/
 else
   echo "Did NOT generate timing html because hostname isn't helios"
 fi

@@ -51,7 +51,7 @@
     <button id="tooltip" type="button">Enable Tooltip</button>
     Plot by: <select><option value="rev">Revision</option><option value="time">Time</option></select>
 
-    <br clear="all"/>
+    <br clear="all"/><br/>
     <div id="data">
       <table border="0">
       <tr title="Application this test resides in"><td><b>App:</b></td><td id="tb_app">moose_test</td></tr>
@@ -136,6 +136,9 @@ function redrawPlotData() {
     global_data.push(global_plots[key]);
 
   //TODO: save ranges and keep plot in the same range
+  savedxaxis = minplot.getAxes().xaxis;
+  savedyaxis = minplot.getAxes().yaxis;
+
   plot = $.plot($("#mainplot"), global_data, main_options);
   minplot = $.plot($("#minplot"), global_data, min_options);
 }
@@ -228,8 +231,24 @@ $(function () {
     redrawPlotData();
   });
 
+  //bind a function to the "Zoom Out" button
+  $("#zoom").click(function(event) {
+    //get the maximum range from the minplot
+    savedxaxis = minplot.getAxes().xaxis;
+    savedyaxis = minplot.getAxes().yaxis;
+    //alert( "("+savedxaxis.min+","+savedyaxis.min+") ("+savedxaxis.max+","+savedyaxis.max+")" );
+    range = { xaxis: { to: savedxaxis.min, from: savedxaxis.max },
+              yaxis: { to: savedyaxis.min, from: savedyaxis.max } }
+    plot.setSelection(range);
+  });
+
+  //bind a function to the "Enable Tooltip" button
+  $("#tooltip").click(function(event) {
+    alert("TBD");
+  });
+
   //TODO: simulate click on first checkbox in DOM
-  //move this in ontabload callback with flag for first time
+  //TODO: move this in ontabload callback with flag for first time
   //$(".check").first().click();
 });
 </script>

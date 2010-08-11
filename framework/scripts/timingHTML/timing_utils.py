@@ -23,8 +23,8 @@ class HTMLGen:
     self.trunk_dir = '.' 
     # the generated html goes here
     self.base_dir = os.path.join(self.trunk_dir, 'html')
-    shutil.rmtree(self.base_dir, ignore_errors=True)
-    os.mkdir(self.base_dir)
+    if not os.path.exists(self.base_dir):
+      os.mkdir(self.base_dir)
 
   # generates the html and json data for this app
   def generateHTML(self):
@@ -68,7 +68,8 @@ class HTMLGen:
     html = '\n'.join(tests) + CHECKBOX_END
 
     base = os.path.join(self.base_dir, self.app_name)
-    os.mkdir(base)
+    if not os.path.exists(base):
+      os.mkdir(base)
     f = open( os.path.join(base, self.app_name + '.html'), 'w' )
     f.write(html)
     f.close()
@@ -124,17 +125,39 @@ CREATE_TABLE = """create table timing
 if __name__ == '__main__':
   home = os.environ['HOME']
   fname = os.path.join(home, 'timingDB/timing.sqlite')
+  argv = sys.argv[1:]
 
-  if '-c' in sys.argv or '--create' in sys.argv:
+  if '-h' in argv:
+    argv.remove('-h')
+    print HELP_STRING
+    sys.exit(0)
+
+  if '-c' in argv:
     createDB(fname)
-  elif '-d' in sys.argv or '--dump' in sys.argv:
+    argv.remove('-c')
+
+  if '-d' in argv:
     dumpDB(fname)
-  else: # '-h' in sys.argv or '--html' in sys.argv:
+    argv.remove('-d')
+
+  if len(argv) > 0:
     if gethostname() != 'helios' and gethostname() != 'ubuntu': #PJJ TODO ubuntu just for testing my desktop
       print "Don't generate json data because this isn't helios"
       sys.exit(0)
 
-    print "This is helios: generating json data"
     con = sqlite.connect(fname)
-    gen = HTMLGen('moose_test', con)
-    gen.generateHTML()
+    for app in argv:
+      print "generating json data for " + app + "."
+      gen = HTMLGen(app, con)
+      gen.generateHTML()
+
+
+HELP_STRING = """Usage:
+-h   print this help message
+-c   create database with table timing in ~/timingDB/timing.sqlite
+     the database must either not exist or not have a timing table
+-d   dump the contents of table timing
+
+[list of applications]  using the data in the database, generate
+     json data for every application in the list
+"""
