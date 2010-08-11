@@ -2,7 +2,7 @@
 
 #include "boundary_info.h"
 #include "elem.h"
-//#include "plane.h"
+#include "plane.h"
 
 PenetrationLocator::PenetrationLocator(Mesh & mesh, std::vector<unsigned int> master, unsigned int slave)
   : _mesh(mesh),
@@ -28,6 +28,55 @@ PenetrationLocator::detectPenetration()
   _mesh.boundary_info->build_node_list_from_side_list();
   _mesh.boundary_info->build_node_list(node_list, node_boundary_list);
 
+  const unsigned int n_nodes = node_list.size();
+  const unsigned int n_elems = elem_list.size();
+
+  std::vector<unsigned int>::iterator master_begin = _master_boundary.begin();
+  std::vector<unsigned int>::iterator master_end   = _master_boundary.end();
+
+  for(unsigned int i=0; i<n_nodes; i++)
+  {
+    unsigned int boundary_id = node_boundary_list[i];
+
+    if(std::find(master_begin, master_end, boundary_id) != master_end)
+    {
+      Node & node = _mesh.node(node_list[i]);
+
+      if(node.processor_id() == libMesh::processor_id())
+      {
+        for(unsigned int j=0; j<n_elems; j++)
+        {
+          if(id_list[j] == _slave_boundary)
+          {
+            Elem * elem = _mesh.elem(elem_list[j]);
+
+            if(elem->contains_point(node))
+            {
+              unsigned int side_num = side_list[j];
+
+              Elem *side = (elem->build_side(side_num)).release();
+              
+              _penetrated_elems[node.id()] =  new PenetrationInfo(elem->id(),
+                                                                   norm(*side, node),
+                                                                   normDistance(*side, node));
+#ifdef DEBUG            
+            std::cout << "Node " << node.id() << " contained in " << elem->id()
+                      << " through side " << side_num
+                      << ". Distance: " << normDistance(*side, node)
+                      << ". Norm: " << norm(*side, node);
+#endif    
+
+            }
+          }
+        }
+      }
+    }
+  }
+  
+        
+
+
+/*
   MeshBase::const_node_iterator nl = _mesh.local_nodes_begin();
   MeshBase::const_node_iterator end_nl = _mesh.local_nodes_end();
   for ( ; nl != end_nl ; ++nl)
@@ -75,7 +124,8 @@ PenetrationLocator::detectPenetration()
         }
       }
     }
-  }
+    }*/
+  
 }
 
 RealVectorValue
@@ -133,10 +183,10 @@ PenetrationLocator::normDistance(const Elem & side, const Point & p0)
 //    libmesh_assert(side.n_points() >= 3);
 
     // TODO: Fix Plane linking problem
-//    Plane p = Plane(side.point(0), side.point(1), side.point(2));
+    Plane p = Plane(side.point(0), side.point(1), side.point(2));
 
-//    d = (p0 - p.closest_point(p0)).size();
-    d = 0.0;
+    d = (p0 - p.closest_point(p0)).size();
+//    d = 0.0;
     
   }
 
