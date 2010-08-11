@@ -158,4 +158,4 @@ syntax:
 # Dependencies
 #
 .depend:
-	@$(perl) $(LIBMESH_DIR)/contrib/bin/make_dependencies.pl $(foreach i, $(wildcard $(meshdir)/include/*), -I$(i)) -I. $(MOOSE_INCLUDE) "-S\$$(obj-suffix)" $(moose_src) > .depend
+	@$(perl) $(LIBMESH_DIR)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(LIBMESH_DIR)/include/*), -I$(i)) $(moose_INCLUDE) $(elk_INCLUDE) "-S\$$(obj-suffix)" $(moose_src) > .depend
