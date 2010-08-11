@@ -13,7 +13,10 @@
 # Required Make variables
 # APP_NAME	- the name of this application (all lower case)
 # ENABLE_ELK 	- should be set to 'yes' to enable ELK
-
+#
+# Note: Make sure that there is no whitespace after the word 'yes' if enabling
+# an application
+###############################################################################
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)/../moose
 ENABLE_ELK 	:= no
@@ -22,7 +25,7 @@ MAKE_LIBRARY := no
 APPLICATION_NAME := moose_test
 
 # Include the MOOSE Export file
--include $(MOOSE_DIR)/Makefile.export
+include $(MOOSE_DIR)/Makefile.export
 
 ###############################################################################
 # Additional special case targets should be added here

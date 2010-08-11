@@ -85,7 +85,7 @@ f90objects	:= $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
 #
 # header files
-libmesh_INCLUDE += $(foreach i, $(wildcard include/*), -I$(i))
+libmesh_INCLUDE += -Iinclude $(foreach i, $(wildcard include/*), -I$(i)) $(ADDITIONAL_INCLUDES)
 
 .PHONY: clean doc .depend
 
@@ -131,7 +131,7 @@ else
 # Normal Executable
 $(target): $(fobjects) $(f90objects) $(objects) $(moose_LIB) $(elk_LIB) $(mesh_library)
 	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS)
 
 endif
 
