@@ -24,6 +24,7 @@
 #include "ConvectiveFluxBC.h"
 #include "WeakGradientBC.h"
 #include "FunctionDirichletBC.h"
+#include "FunctionNeumannBC.h"
 
 #include "AuxFactory.h"
 #include "ConstantAux.h"
@@ -72,6 +73,7 @@
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
 #include "RandomIC.h"
+//#include "FunctionIC.h"
 
 #include "ExecutionerFactory.h"
 #include "Steady.h"
@@ -153,6 +155,7 @@ Moose::registerObjects()
   BCFactory::instance()->registerBC<ConvectiveFluxBC>("ConvectiveFluxBC");
   BCFactory::instance()->registerBC<WeakGradientBC>("WeakGradientBC");
   BCFactory::instance()->registerBC<FunctionDirichletBC>("FunctionDirichletBC");
+  BCFactory::instance()->registerBC<FunctionNeumannBC>("FunctionNeumannBC"); //Added by Alex
 
   AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
   AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");
@@ -200,6 +203,7 @@ Moose::registerObjects()
   InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
   InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
   InitialConditionFactory::instance()->registerInitialCondition<RandomIC>("RandomIC");
+//  InitialConditionFactory::instance()->registerInitialCondition<FunctionIC>("FunctionIC");
 
   ExecutionerFactory::instance()->registerExecutioner<Steady>("Steady");
 
