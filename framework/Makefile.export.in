@@ -28,7 +28,11 @@ ifeq ($(ENABLE_ELK),yes)
 endif
 
 libmesh_INCLUDE += $(moose_INCLUDE) $(elk_INCLUDE)
-libmesh_LIBS := $(elk_LIB) $(moose_LIB) $(libmesh_LIBS) -Wl,-rpath,$(MOOSE_DIR) -Wl,-rpath,$(ELK_DIR)
+libmesh_LIBS := $(elk_LIB) $(moose_LIB) $(libmesh_LIBS) -Wl,-rpath,$(MOOSE_DIR) 
+
+ifeq ($(ENABLE_ELK),yes)
+	libmesh_LIBS += -Wl,-rpath,$(ELK_DIR)
+endif
 
 # Fortran baggage
 mpif77_command := $(libmesh_F77)

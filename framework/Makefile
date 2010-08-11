@@ -13,7 +13,10 @@
 # Required Make variables
 # APP_NAME	- the name of this application (all lower case)
 # ENABLE_ELK 	- should be set to 'yes' to enable ELK
-
+#
+# Note: Make sure that there is no whitespace after the word 'yes' if enabling
+# an application
+###############################################################################
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)
 ENABLE_ELK 	:= no
