@@ -20,9 +20,10 @@
 class UpdateDisplacedMesh
 {
 public:
-  UpdateDisplacedMesh(MooseSystem &sys, const std::vector<Number>& in_soln)
+  UpdateDisplacedMesh(MooseSystem &sys, const std::vector<Number>& in_soln, const std::vector<Number>& in_aux_soln)
     :_moose_system(sys),
-     _soln(in_soln)
+     _soln(in_soln),
+     _aux_soln(in_aux_soln)
   {}
 
   void operator() (const NodeRange & range) const
@@ -32,14 +33,38 @@ public:
 
     std::vector<std::string> displacement_variables = _moose_system.getDisplacementVariables();
     unsigned int num_displacements = displacement_variables.size();
-    std::vector<unsigned int> var_nums(num_displacements);
+    
+    std::vector<unsigned int> var_nums;
+    std::vector<unsigned int> var_nums_directions;
+    
+    std::vector<unsigned int> aux_var_nums;
+    std::vector<unsigned int> aux_var_nums_directions;
 
     for(unsigned int i=0; i<num_displacements; i++)
-      var_nums[i] = _moose_system.getVariableNumber(displacement_variables[i]);
+    {
+      std::string displacement_name = displacement_variables[i];
+      
+      if(_moose_system.hasVariable(displacement_name))
+      {
+         var_nums.push_back(_moose_system.getVariableNumber(displacement_name));
+         var_nums_directions.push_back(i);
+      }
+      else if(_moose_system.hasAuxVariable(displacement_name))
+      {
+         aux_var_nums.push_back(_moose_system.getAuxVariableNumber(displacement_name));
+         aux_var_nums_directions.push_back(i);
+      }
+      else
+        mooseError("Undefined variable used for displacements!");
+    }
+
+    unsigned int num_var_nums = var_nums.size();
+    unsigned int num_aux_var_nums = aux_var_nums.size();
 
     Mesh * reference_mesh = _moose_system.getMesh();
     
     unsigned int nonlinear_system_number = _moose_system.getNonlinearSystem()->number();
+    unsigned int aux_system_number = _moose_system.getAuxSystem()->number();
 
     NodeRange::const_iterator nd = range.begin();
 
@@ -48,29 +73,44 @@ public:
       Node & displaced_node = *(*nd);
       
       Node & reference_node = reference_mesh->node(displaced_node.id());
+      
+      for(unsigned int i=0; i<num_var_nums; i++)
+      {
+        unsigned int direction = var_nums_directions[i];
+        displaced_node(direction) = reference_node(direction) + _soln[reference_node.dof_number(nonlinear_system_number, var_nums[i], 0)];
+      }
 
-      for(unsigned int i=0; i<num_displacements; i++)
-        displaced_node(i) = reference_node(i) + _soln[reference_node.dof_number(nonlinear_system_number, var_nums[i], 0)];
+      for(unsigned int i=0; i<num_aux_var_nums; i++)
+      {
+        unsigned int direction = aux_var_nums_directions[i];
+        displaced_node(direction) = reference_node(direction) + _aux_soln[reference_node.dof_number(aux_system_number, aux_var_nums[i], 0)];
+      }
     }
   }
 
 protected:
   MooseSystem &_moose_system;
   const std::vector<Number> & _soln;
+  const std::vector<Number> & _aux_soln;
 };
 
 void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)
 {
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
+  update_aux_vars(soln);
+
   (*_displaced_system->solution) = soln;
 
   std::vector<Number> localized_solution;
+  std::vector<Number> localized_aux_solution;
   
   soln.localize(localized_solution);
 
+  _aux_system->solution->localize(localized_aux_solution);
+
   Threads::parallel_for(*getActiveNodeRange(),
-                        UpdateDisplacedMesh(*this, localized_solution));
+                        UpdateDisplacedMesh(*this, localized_solution, localized_aux_solution));
   
   Moose::perf_log.pop("updateDisplacedMesh()","Solve");
 }
