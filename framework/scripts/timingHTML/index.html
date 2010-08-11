@@ -49,7 +49,7 @@
     <button id="zoom"  type="button">Zoom Out</button>
     <button id="clear" type="button">Clear Plots</button>
     <button id="tooltip" type="button">Enable Tooltip</button>
-    Plot by: <select><option value="rev">Revision</option><option value="time">Time</option></select>
+    Plot by: <select id="plotby"><option value="rev">Revision</option><option value="time">Time</option></select>
 
     <br clear="all"/><br/>
     <div id="data">
@@ -245,6 +245,12 @@ $(function () {
   //bind a function to the "Enable Tooltip" button
   $("#tooltip").click(function(event) {
     alert("TBD");
+  });
+
+  //bind a function to the "Plot By" select box
+  $("#plotby").change(function() {
+    plotby = $("#plotby").val();
+    alert(plotby);
   });
 
   //TODO: simulate click on first checkbox in DOM
