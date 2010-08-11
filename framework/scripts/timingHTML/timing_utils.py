@@ -1,6 +1,13 @@
 #!/usr/bin/env python
+
 import sys, os, shutil
-from pysqlite2 import dbapi2 as sqlite
+from socket import gethostname
+
+# if it doesn't import this is probably icestorm and we won't use it anyway
+try:
+  from pysqlite2 import dbapi2 as sqlite
+except:
+  pass
 
 ################################################################################
 ############### Generating html and json data from database ####################
@@ -123,6 +130,11 @@ if __name__ == '__main__':
   elif '-d' in sys.argv or '--dump' in sys.argv:
     dumpDB(fname)
   else: # '-h' in sys.argv or '--html' in sys.argv:
+    if gethostname() != 'helios' and gethostname() != 'ubuntu': #PJJ TODO ubuntu just for testing my desktop
+      print "Don't generate json data because this isn't helios"
+      sys.exit(0)
+
+    print "This is helios: generating json data"
     con = sqlite.connect(fname)
     gen = HTMLGen('moose_test', con)
     gen.generateHTML()

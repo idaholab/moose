@@ -1,0 +1,13 @@
+#!/bin/bash
+# This script moves the html and required resources for the test timing website
+# and rsyncs them to hpcsc
+
+if [ "`hostname -s`" == "helios" ]
+then
+  echo "Generating timing html because this is helios"
+  cp moose/scripts/timingHTML/index.html html/
+  cp -r moose/scripts/timingHTML/resources html/
+  rsync -av html/* hpcsc:/srv/www/ssl/timing/
+else
+  echo "Did NOT generate timing html because hostname isn't helios"
+fi
