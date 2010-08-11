@@ -1,18 +1,157 @@
-
-# The location of the mesh library
-meshdir := $(LIBMESH_DIR)
+# This file contains common MOOSE application settings
+# Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and optionally ELK.
+#       This can be overridden by using environment variables (MOOSE_DIR and/or ELK_DIR)
 
 # include the library options determined by configure.  This will
 # set the variables INCLUDE and LIBS that we will need to build and
 # link with the library.
-include $(meshdir)/Make.common
+include $(LIBMESH_DIR)/Make.common
+
+# Location of the MOOSE Includes and Library
+moose_INCLUDE := $(foreach i, $(wildcard $(MOOSE_DIR)/include/*), -I$(i)) -I$(MOOSE_DIR)/include/utils/fparser
 
 moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
-
 ifeq ($(enable-shared),yes)
-  moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
+	moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
 endif
 
-libmesh_INCLUDE := -I$(MOOSE_DIR)/include -I$(MOOSE_DIR)/include/postprocessors -I$(MOOSE_DIR)/include/stabilizers -I$(MOOSE_DIR)/include/executioners -I$(MOOSE_DIR)/include/ics -I$(MOOSE_DIR)/include/materials -I$(MOOSE_DIR)/include/parser -I$(MOOSE_DIR)/include/base -I$(MOOSE_DIR)/include/kernels -I$(MOOSE_DIR)/include/utils -I$(MOOSE_DIR)/include/functions -I$(MOOSE_DIR)/include/utils/fparser -I$(MOOSE_DIR)/include/auxkernels -I$(MOOSE_DIR)/include/bcs $(libmesh_INCLUDE)
-libmesh_LIBS := $(moose_LIB) $(libmesh_LIBS) -Wl,-rpath,$(MOOSE_DIR)
+# Location of ELK Includes and Library
+ifeq ($(ENABLE_ELK),yes)
+	ELK_DIR ?= $(shell pwd)/../elk
 
+	elk_INCLUDE := $(foreach i, $(wildcard $(ELK_DIR)/include/*), -I$(i))
+
+	elk_LIB := $(ELK_DIR)/libelk-$(METHOD)$(static_libext)
+	ifeq ($(enable-shared),yes)
+		elk_LIB := $(ELK_DIR)/libelk-$(METHOD)$(shared_libext)
+	endif
+endif
+
+libmesh_INCLUDE += $(moose_INCLUDE) $(elk_INCLUDE)
+libmesh_LIBS := $(elk_LIB) $(moose_LIB) $(libmesh_LIBS) -Wl,-rpath,$(MOOSE_DIR) -Wl,-rpath,$(ELK_DIR)
+
+# Fortran baggage
+mpif77_command := $(libmesh_F77)
+
+# If $(libmesh_f77) is an mpiXXX compiler script, use -show
+# to determine the base compiler
+ifneq (,$(findstring mpi,$(mpif77_command)))
+	mpif77_command := $(shell $(libmesh_F77) -show)
+endif
+
+# Set certain flags based on compiler
+
+# ifort
+ifneq (,$(findstring ifort,$(mpif77_command)))
+	libmesh_FFLAGS += -r8
+endif
+
+# gfortran
+ifneq (,$(findstring gfortran,$(mpif77_command)))
+	libmesh_FFLAGS += -fdefault-real-8
+endif
+
+# g95
+ifneq (,$(findstring g95,$(mpif77_command)))
+	libmesh_FFLAGS += -r8
+endif
+
+ifeq ($(coverage),true)
+	ifneq (,$(findstring gcc,$(GXX-VERSION)))
+		libmesh_CXXFLAGS += --coverage
+		libmesh_LDFLAGS += --coverage
+	endif
+endif
+
+##############################################################################
+######################### Application Variables ##############################
+##############################################################################
+#
+# source files
+moose_src	:= $(wildcard src/*.C) $(wildcard src/*/*.C)
+srcfiles 	:= $(moose_src) $(wildcard src/utils/fparser/*.C)
+fsrcfiles       := $(wildcard src/*/*.f)
+f90srcfiles	:= $(wildcard src/*/*.f90)
+
+#
+# object files
+objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
+fobjects        := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
+f90objects	:= $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
+
+#
+# header files
+libmesh_INCLUDE += $(foreach i, $(wildcard include/*), -I$(i))
+
+.PHONY: clean doc .depend
+
+###############################################################################
+# Target:
+#
+ifeq ($(MAKE_LIBRARY),yes)
+APPLICATION_NAME := lib$(APPLICATION_NAME)
+target := $(CURR_DIR)/$(APPLICATION_NAME)-$(METHOD)$(static_libext)
+
+ifeq ($(enable-shared),yes)
+	target := $(CURR_DIR)/$(APPLICATION_NAME)-$(METHOD)$(shared_libext)
+endif
+else
+target	:= ./$(APPLICATION_NAME)-$(METHOD)
+endif
+
+###############################################################################
+# Build Rules:
+#
+all:: $(target)
+
+ifeq ($(MAKE_LIBRARY),yes)
+ifeq ($(enable-shared),yes)
+# Build dynamic library
+$(target): $(objects)
+	@echo "Linking "$@
+	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(objects) $(libmesh_LDFLAGS)
+else
+# Build static library
+ifeq ($(findstring darwin,$(hostos)),darwin)
+$(target): $(objects)
+	@echo "Linking "$@
+	@libtool -static -o $@ $(objects)
+else
+$(target): $(objects)
+	@echo "Linking "$@
+	@$(AR) rv $@ $(objects)
+endif
+endif
+else
+
+# Normal Executable
+$(target): $(fobjects) $(f90objects) $(objects) $(moose_LIB) $(elk_LIB) $(mesh_library)
+	@echo "Linking "$@"..."
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
+
+endif
+
+
+doc:
+	doxygen doc/Doxyfile
+
+clean::
+	@rm -f $(APPLICATION_NAME)-*
+	@find . -name "*~" -or -name "*.o" | xargs rm
+	@rm -f .depend
+
+# include the dependency list
+-include .depend
+
+print:
+	@echo $(mpif77_command)
+	@echo $(libmesh_F77)
+	@echo $(libmesh_FFLAGS)
+
+syntax:
+	python scripts/generate_input_syntax.py
+#
+# Dependencies
+#
+.depend:
+	@$(perl) $(LIBMESH_DIR)/contrib/bin/make_dependencies.pl $(foreach i, $(wildcard $(meshdir)/include/*), -I$(i)) -I. $(MOOSE_INCLUDE) "-S\$$(obj-suffix)" $(moose_src) > .depend
