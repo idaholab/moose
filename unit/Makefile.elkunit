@@ -19,15 +19,18 @@
 ###############################################################################
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)/../moose
-ENABLE_ELK 	:= no
+ENABLE_ELK 	:= yes
 
 MAKE_LIBRARY := no
-APPLICATION_NAME := mooseunit
+APPLICATION_NAME := elkunit
 
 # Extra stuff for CPPUNIT
 CPPUNIT_DIR 		?= $HOME/root/usr/local/packages/cppunit
 ADDITIONAL_INCLUDES 	:= -I$(CPPUNIT_DIR)/include
 ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit 
+
+# ELK Compile FLAGS
+libmesh_CXXFLAGS	+= -DELK_TEST
 
 # Include the MOOSE Export file
 include $(MOOSE_DIR)/Makefile.export
