@@ -26,6 +26,7 @@
 #include "error_vector.h"
 #include "kelly_error_estimator.h"
 #include "fourth_error_estimators.h"
+#include "mesh_tools.h"
 
 MooseSystem::MooseSystem() :
   _dof_data(libMesh::n_threads(), DofData(*this)),
@@ -124,6 +125,8 @@ MooseSystem::MooseSystem(Mesh &mesh) :
 
   _mesh->prepare_for_use(false);
   _mesh->boundary_info->build_node_list_from_side_list();
+  MeshTools::build_nodes_to_elem_map(*_mesh, node_to_elem_map);
+//  meshChanged();
 
   initDataStructures();
 }
@@ -428,7 +431,10 @@ MooseSystem::initEquationSystems()
   _system->attach_init_function(Moose::initial_condition);
 
   _aux_system = &_es->add_system<TransientExplicitSystem>("AuxiliarySystem");
-  _aux_system->attach_init_function(Moose::initial_condition);  
+  _aux_system->attach_init_function(Moose::initial_condition);
+
+  if(_has_displaced_mesh)
+    _displaced_aux_system = &_displaced_es->add_system<ExplicitSystem>("DisplacedAuxiliarySystem");
 
   return _es;
 }
@@ -613,6 +619,33 @@ MooseSystem::addVariable(const std::string &var, const Order order, const FEFami
   
   if(_has_displaced_mesh)
     _displaced_system->add_variable(var, order, family, active_subdomains);
+
+  return var_num;
+}
+
+
+unsigned int
+MooseSystem::addAuxVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains)
+{
+  unsigned int var_num = 0;
+  
+  var_num = _aux_system->add_variable(var, type, active_subdomains);
+
+  if(_has_displaced_mesh)
+    _displaced_aux_system->add_variable(var, type, active_subdomains);
+  
+  return var_num;
+}
+
+unsigned int
+MooseSystem::addAuxVariable(const std::string &var, const Order order, const FEFamily family, const std::set< subdomain_id_type > *const active_subdomains)
+{
+  unsigned int var_num = 0;
+
+  var_num = _aux_system->add_variable(var, order, family, active_subdomains);
+  
+  if(_has_displaced_mesh)
+    _displaced_aux_system->add_variable(var, order, family, active_subdomains);
 
   return var_num;
 }
@@ -1105,7 +1138,8 @@ MooseSystem::meshChanged()
   // Reinitialize the equation_systems object for the newly refined
   // mesh. One of the steps in this is project the solution onto the
   // new mesh
-  _es->reinit();
+  if(_es)
+    _es->reinit();
 
   // Rebuild the boundary conditions
   _mesh->boundary_info->build_node_list_from_side_list();
@@ -1130,6 +1164,9 @@ MooseSystem::meshChanged()
     std::cout << "\nMesh Changed:\n";
     _mesh->print_info();
   }
+
+  //Update the node to elem map
+  MeshTools::build_nodes_to_elem_map(*_mesh, node_to_elem_map);
   
   // Lets the output system know that the mesh has changed recently.
   _mesh_changed = true;

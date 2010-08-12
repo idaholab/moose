@@ -61,9 +61,9 @@ GenericVariableBlock::execute()
   {
     system = _moose_system.getAuxSystem();
 
-    system->add_variable(var_name,
-                         Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
-                         Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
+    _moose_system.addAuxVariable(var_name,
+                                 Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
+                                 Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
   }
   
   

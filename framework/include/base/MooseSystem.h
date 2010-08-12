@@ -177,6 +177,9 @@ public:
   unsigned int addVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains=NULL);
   unsigned int addVariable(const std::string &var, const Order order=FIRST, const FEFamily=LAGRANGE, const std::set< subdomain_id_type > *const active_subdomains=NULL);
 
+  unsigned int addAuxVariable(const std::string &var, const FEType  &type, const std::set< subdomain_id_type  > *const active_subdomains=NULL);
+  unsigned int addAuxVariable(const std::string &var, const Order order=FIRST, const FEFamily=LAGRANGE, const std::set< subdomain_id_type > *const active_subdomains=NULL);
+
   void addKernel(std::string kernel_name,
                  std::string name,
                  InputParameters parameters);
@@ -373,6 +376,7 @@ private:
   TransientExplicitSystem * _aux_system;
   EquationSystems * _displaced_es;
   ExplicitSystem * _displaced_system;
+  ExplicitSystem * _displaced_aux_system;
 
   Moose::GeomType _geom_type;
   Mesh * _mesh;
@@ -532,6 +536,12 @@ protected:
   ConstElemRange * _active_local_elem_range;
   NodeRange * _active_node_range;
 
+public:
+  /**
+   * A map of all of the current nodes to the elements that they are connected to.
+   */
+  std::vector<std::vector<unsigned int> > node_to_elem_map;
+protected:
   friend class ComputeInternalJacobians;
   friend class ComputeInternalJacobianBlocks;
   friend class ComputeInternalResiduals;

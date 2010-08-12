@@ -12,6 +12,7 @@
 #include "getpot.h"
 #include "mesh_refinement.h"
 #include "linear_partitioner.h"
+#include "mesh_tools.h"
 
 template<>
 InputParameters validParams<MeshBlock>()
@@ -78,8 +79,11 @@ MeshBlock::execute()
 //  if (!success)
 //    mesh_refinement.uniformly_refine(getParamValue<int>("uniform_refine"));
 
-  
+
+//  _moose_system.meshChanged();
   mesh->boundary_info->build_node_list_from_side_list();
+  MeshTools::build_nodes_to_elem_map(*mesh, _moose_system.node_to_elem_map);
+
   mesh->print_info();
 
 
@@ -93,6 +97,10 @@ MeshBlock::execute()
     Mesh * displaced_mesh = _moose_system.initDisplacedMesh(displacements);
 
     displaced_mesh->prepare_for_use(false);
+
+    (*displaced_mesh->boundary_info) = (*mesh->boundary_info);
+
+    displaced_mesh->boundary_info->build_node_list_from_side_list();
   }
 
   visitChildren();

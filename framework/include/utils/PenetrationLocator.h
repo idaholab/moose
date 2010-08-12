@@ -1,6 +1,8 @@
 #ifndef PENETRATIONLOCATOR_H
 #define PENETRATIONLOCATOR_H
 
+#include "MooseSystem.h"
+
 #include "libmesh_common.h"
 
 #include <vector>
@@ -13,7 +15,7 @@ class PenetrationLocator
 {
 public:
 
-  PenetrationLocator(Mesh & mesh, std::vector<unsigned int> master, unsigned int slave);
+  PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, unsigned int slave);
   void detectPenetration();
 
   Real penetrationDistance(unsigned int node_id) const;
@@ -35,7 +37,9 @@ private:
     Real _norm_distance;
   };
 
-  RealVectorValue norm(const Elem & side, const Point & p0);
+  MooseSystem & _moose_system;
+
+  RealVectorValue normal(const Elem & side, const Point & p0);
   Real normDistance(const Elem & side, const Point & p0);
 
   int intersect2D_Segments( Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point* I0, Point* I1 );

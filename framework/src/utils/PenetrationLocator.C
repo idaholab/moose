@@ -1,19 +1,24 @@
 #include "PenetrationLocator.h"
 
+#include "Moose.h"
+
 #include "boundary_info.h"
 #include "elem.h"
 #include "plane.h"
 
-PenetrationLocator::PenetrationLocator(Mesh & mesh, std::vector<unsigned int> master, unsigned int slave)
-  : _mesh(mesh),
-    _master_boundary(master),
-    _slave_boundary(slave)
+PenetrationLocator::PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, unsigned int slave)
+  :_moose_system(moose_system),
+  _mesh(mesh),
+  _master_boundary(master),
+  _slave_boundary(slave)
 {}
 
 
 void
 PenetrationLocator::detectPenetration()
 {
+  Moose::perf_log.push("detectPenetration()","Solve");
+
   // Data structures to hold the element boundary information
   std::vector< unsigned int > elem_list;
   std::vector< unsigned short int > side_list;
@@ -44,29 +49,58 @@ PenetrationLocator::detectPenetration()
 
       if(node.processor_id() == libMesh::processor_id())
       {
-        for(unsigned int j=0; j<n_elems; j++)
+        Node * closest_node = NULL;
+        
+        Real closest_distance = 999999999;
+        
+        for(unsigned int k=0; k<n_nodes; k++)  
         {
-          if(id_list[j] == _slave_boundary)
+          unsigned int other_boundary_id = node_boundary_list[k];
+
+          if(other_boundary_id == _slave_boundary)
           {
-            Elem * elem = _mesh.elem(elem_list[j]);
+            Node * cur_node = _mesh.node_ptr(node_list[k]);
+                                             
+            Real distance = ((*cur_node) - node).size();
 
-            if(elem->contains_point(node))
+            if(distance < closest_distance)
             {
-              unsigned int side_num = side_list[j];
-
-              Elem *side = (elem->build_side(side_num)).release();
-              
-              _penetrated_elems[node.id()] =  new PenetrationInfo(elem->id(),
-                                                                   norm(*side, node),
-                                                                   normDistance(*side, node));
-#ifdef DEBUG            
-            std::cout << "Node " << node.id() << " contained in " << elem->id()
-                      << " through side " << side_num
-                      << ". Distance: " << normDistance(*side, node)
-                      << ". Norm: " << norm(*side, node);
-#endif    
-
+              closest_distance = distance;
+              closest_node = cur_node;
             }
+          }
+        }
+
+        std::vector<unsigned int> & closest_elems = _moose_system.node_to_elem_map[closest_node->id()];
+
+        for(unsigned int j=0; j<closest_elems.size(); j++)
+        {          
+          unsigned int elem_id = closest_elems[j];
+          Elem * elem = _mesh.elem(elem_id);
+            
+          if(elem->contains_point(node))
+          {
+            for(unsigned int m=0; m<n_elems; m++)
+            {
+              if(elem_list[m] == elem_id && id_list[m] == _slave_boundary)
+              {
+                unsigned int side_num = side_list[m];
+              
+                Elem *side = (elem->build_side(side_num)).release();
+                
+                _penetrated_elems[node.id()] =  new PenetrationInfo(elem->id(),
+                                                                    normal(*side, node),
+                                                                    normDistance(*side, node));
+                /*
+#ifdef DEBUG            
+                std::cerr << "Node " << node.id() << " contained in " << elem->id()
+                          << " through side " << side_num
+                          << ". Distance: " << normDistance(*side, node)
+                          << ". Norm: " << norm(*side, node);
+#endif
+                */
+              }
+            }            
           }
         }
       }
@@ -125,11 +159,11 @@ PenetrationLocator::detectPenetration()
       }
     }
     }*/
-  
+  Moose::perf_log.pop("detectPenetration()","Solve");
 }
 
 RealVectorValue
-PenetrationLocator::norm(const Elem & side, const Point & p0)
+PenetrationLocator::normal(const Elem & side, const Point & p0)
 {
   
   unsigned int dim = _mesh.mesh_dimension();

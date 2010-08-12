@@ -29,6 +29,7 @@
 #include "AuxFactory.h"
 #include "ConstantAux.h"
 #include "CoupledAux.h"
+#include "PenetrationAux.h"
 
 #include "ImplicitEuler.h"
 #include "ImplicitBackwardDifference2.h"
@@ -159,6 +160,7 @@ Moose::registerObjects()
 
   AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
   AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");
+  AuxFactory::instance()->registerAux<PenetrationAux>("PenetrationAux");
 
   MaterialFactory::instance()->registerMaterial<EmptyMaterial>("EmptyMaterial");
 

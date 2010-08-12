@@ -25,6 +25,8 @@ public:
   PenetrationAux(std::string name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual ~PenetrationAux() {}
+
+  virtual void setup();
   
 protected:
   virtual Real computeValue();

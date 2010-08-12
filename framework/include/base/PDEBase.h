@@ -73,6 +73,12 @@ public:
    */
   virtual Real computeIntegral();
 
+  /**
+   * Gets called at the beginning of ComputeResidual/Jacobian/UpdateAuxVars/etc.
+   * Hook can be used to do global calculations the object will need later.
+   */
+  virtual void setup() {};
+
 protected:
   // Integrable -------------------------------------------------------------------------
 

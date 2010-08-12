@@ -27,6 +27,11 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
   AuxKernelIterator aux_end = _auxs[0].activeNodalAuxKernelsEnd();
   AuxKernelIterator aux_it = aux_begin;
 
+  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
+    (*aux_it)->setup();
+
+  aux_it = aux_begin;
+
   if(aux_begin != aux_end)
   {
     for(;nd != nd_end; ++nd)
@@ -41,6 +46,20 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
   }
 
   //Boundary AuxKernels
+
+  const std::set<short int> & boundary_ids = _mesh->boundary_info->get_boundary_ids();
+    
+  for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+  {
+    short int id = *it;
+    
+    aux_begin = _auxs[0].activeAuxBCsBegin(id);
+    aux_end = _auxs[0].activeAuxBCsEnd(id);
+
+    for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
+      (*aux_it)->setup();
+  }
+  
   std::vector<unsigned int> nodes;
   std::vector<short int> ids;
 
@@ -57,10 +76,13 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
     {
       Node & node = _mesh->node(nodes[i]);
 
-      reinitAuxKernels(0, soln, node);
+      if(node.processor_id() == libMesh::processor_id())
+      {
+        reinitAuxKernels(0, soln, node);
 
-      for(aux_it=aux_begin; aux_it != aux_end; ++aux_it)
-        (*aux_it)->computeAndStore();
+        for(aux_it=aux_begin; aux_it != aux_end; ++aux_it)
+          (*aux_it)->computeAndStore();
+      }
     }
   }
 
@@ -70,6 +92,11 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
   // Update the element aux vars
   aux_begin = _auxs[0].activeElementAuxKernelsBegin();
   aux_end = _auxs[0].activeElementAuxKernelsEnd();
+  aux_it = aux_begin;
+
+  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
+    (*aux_it)->setup();
+
   aux_it = aux_begin;
 
   MeshBase::const_element_iterator       el     = _mesh->active_local_elements_begin();
