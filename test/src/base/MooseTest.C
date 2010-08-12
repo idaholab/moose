@@ -19,7 +19,7 @@
 #include "PolyReaction.h" //including our polynomial Convection Kernel
 #include "PolyForcing.h" //including our polynomial Reaction Kernel
 #include "PolyConstantAux.h" //including our polynomial Aux Kernel
-#include "PenetrationAux.h"
+
 //Local Includes
 #include "DiffMKernel.h"
 
@@ -61,8 +61,6 @@ namespace MooseTest
     AuxFactory::instance()->registerAux<MMSConstantAux>("MMSConstantAux");
 
     AuxFactory::instance()->registerAux<PolyConstantAux>("PolyConstantAux");
-
-    AuxFactory::instance()->registerAux<PenetrationAux>("PenetrationAux");
   }
 }
 
