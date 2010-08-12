@@ -8,7 +8,8 @@
 include $(LIBMESH_DIR)/Make.common
 
 # Location of the MOOSE Includes and Library
-moose_INCLUDE := $(foreach i, $(wildcard $(MOOSE_DIR)/include/*), -I$(i)) -I$(MOOSE_DIR)/include/utils/fparser
+moose_DIRS	:= $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
+moose_INCLUDE 	:= $(foreach i, $(moose_DIRS), -I$(i))
 
 moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
 ifeq ($(enable-shared),yes)
@@ -19,7 +20,8 @@ endif
 ifeq ($(ENABLE_ELK),yes)
 	ELK_DIR ?= $(shell pwd)/../elk
 
-	elk_INCLUDE := $(foreach i, $(wildcard $(ELK_DIR)/include/*), -I$(i))
+	elk_DIRS    := $(shell find $(ELK_DIR)/include -type d -not -path "*/.svn*")
+	elk_INCLUDE := $(foreach i, $(elk_DIRS), -I$(i))
 
 	elk_LIB := $(ELK_DIR)/libelk-$(METHOD)$(static_libext)
 	ifeq ($(enable-shared),yes)
@@ -85,7 +87,8 @@ f90objects	:= $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
 #
 # header files
-libmesh_INCLUDE += -Iinclude $(foreach i, $(wildcard include/*), -I$(i)) $(ADDITIONAL_INCLUDES)
+app_DIRS	+= $(shell find . -type d | grep -v .svn)
+libmesh_INCLUDE += -Iinclude $(foreach i, $(app_DIRS), -I$(i)) $(ADDITIONAL_INCLUDES)
 
 .PHONY: clean doc .depend
 
@@ -112,17 +115,17 @@ ifeq ($(MAKE_LIBRARY),yes)
 ifeq ($(enable-shared),yes)
 # Build dynamic library
 $(target): $(objects)
-	@echo "Linking "$@
+	@echo "Linking "$@"..."
 	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(objects) $(libmesh_LDFLAGS)
 else
 # Build static library
 ifeq ($(findstring darwin,$(hostos)),darwin)
 $(target): $(objects)
-	@echo "Linking "$@
+	@echo "Linking "$@"..."
 	@libtool -static -o $@ $(objects)
 else
 $(target): $(objects)
-	@echo "Linking "$@
+	@echo "Linking "$@"..."
 	@$(AR) rv $@ $(objects)
 endif
 endif
@@ -144,14 +147,6 @@ clean::
 	@find . -name "*~" -or -name "*.o" | xargs rm
 	@rm -f .depend
 
-# include the dependency list
--include .depend
-
-print:
-	@echo $(mpif77_command)
-	@echo $(libmesh_F77)
-	@echo $(libmesh_FFLAGS)
-
 syntax:
 	python scripts/generate_input_syntax.py
 #
@@ -159,3 +154,6 @@ syntax:
 #
 .depend:
 	@$(perl) $(LIBMESH_DIR)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(LIBMESH_DIR)/include/*), -I$(i)) $(moose_INCLUDE) $(elk_INCLUDE) "-S\$$(obj-suffix)" $(moose_src) > .depend
+
+# include the dependency list
+-include .depend
