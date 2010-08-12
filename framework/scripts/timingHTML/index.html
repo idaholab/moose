@@ -250,7 +250,19 @@ $(function () {
   //bind a function to the "Plot By" select box
   $("#plotby").change(function() {
     plotby = $("#plotby").val();
-    alert(plotby);
+    if (plotby === "time") {
+      main_options.xaxis.mode = "time";
+      min_options.xaxis.mode = "time";
+      delete main_options.xaxis["minTickSize"];
+      delete main_options.xaxis["tickDecimals"];
+    }
+    else { //plot by revision
+      main_options.xaxis.mode = null;
+      min_options.xaxis.mode = null;
+      main_options.xaxis["minTickSize"] = 1;
+      main_options.xaxis["tickDecimals"] = 0;
+    }
+    redrawPlotData();
   });
 
   //TODO: simulate click on first checkbox in DOM
