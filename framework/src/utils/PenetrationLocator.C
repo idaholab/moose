@@ -179,6 +179,8 @@ PenetrationLocator::normal(const Elem & side, const Point & p0)
   else if (dim == 3)
     // TODO
     return RealVectorValue ();
+  else
+    mooseError("Unsupported dimension");
 }
 
 Real
