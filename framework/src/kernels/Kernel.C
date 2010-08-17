@@ -26,6 +26,7 @@ InputParameters validParams<Kernel>()
 Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters parameters):
   PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
   MaterialPropertyInterface(moose_system._material_data[_tid]),
+   _dof_data(moose_system._dof_data[_tid]),
    _element_data(*moose_system._element_data[_tid]),
    _u(_element_data._var_vals[_var_num]),
    _grad_u(_element_data._var_grads[_var_num]),
@@ -66,7 +67,7 @@ Kernel::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","Kernel");
   
-  DenseSubVector<Number> & var_Re = *_element_data._var_Res[_var_num];
+  DenseSubVector<Number> & var_Re = *_dof_data._var_Res[_var_num];
 
   for (_i=0; _i<_phi.size(); _i++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -80,7 +81,7 @@ Kernel::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()",_name);
 
-  DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_var_num];
+  DenseMatrix<Number> & var_Ke = *_dof_data._var_Kes[_var_num];
 
 
   for (_i=0; _i<_phi.size(); _i++)

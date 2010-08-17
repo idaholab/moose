@@ -74,6 +74,11 @@ public:
 
 protected:
   /**
+   * Convenience reference to the DofData object inside of MooseSystem
+   */
+  DofData & _dof_data;
+
+  /**
    * Convenience reference to the ElementData object inside of MooseSystem
    */
   ElementData & _element_data;

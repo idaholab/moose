@@ -1,7 +1,7 @@
 //MOOSE includes
 #include "Moose.h"
 #include "MooseSystem.h"
-#include "ElementData.h"
+#include "DofData.h"
 #include "BoundaryCondition.h"
 
 //libMesh includes
@@ -21,7 +21,7 @@ InputParameters validParams<BoundaryCondition>()
 BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
   MaterialPropertyInterface(moose_system._material_data[_tid]),
-   _element_data(*moose_system._element_data[_tid]),
+   _dof_data(moose_system._dof_data[_tid]),
    _face_data(*moose_system._face_data[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
@@ -79,7 +79,7 @@ BoundaryCondition::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","BoundaryCondition");
 
-  DenseSubVector<Number> & var_Re = *_element_data._var_Res[_var_num];
+  DenseSubVector<Number> & var_Re = *_dof_data._var_Res[_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -102,7 +102,7 @@ BoundaryCondition::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()","BoundaryCondition");
 
-  DenseMatrix<Number> & var_Ke = *_element_data._var_Kes[_var_num];
+  DenseMatrix<Number> & var_Ke = *_dof_data._var_Kes[_var_num];
 
   if(_integrated)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)

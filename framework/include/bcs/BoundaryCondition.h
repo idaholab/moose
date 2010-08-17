@@ -11,7 +11,7 @@
 //forward declarations
 class BoundaryCondition;
 class MooseSystem;
-class ElementData;
+class DofData;
 class FaceData;
 class AuxData;
 
@@ -79,7 +79,7 @@ protected:
   /**
    * Convenience reference to the ElementData object inside of MooseSystem
    */
-  ElementData & _element_data;
+  DofData & _dof_data;
 
   /**
    * Convenience reference to the FaceData object inside of MooseSystem

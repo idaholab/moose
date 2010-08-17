@@ -280,13 +280,7 @@ MooseSystem::init()
 
   //Resize data arrays
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    // kernels
-    _dof_data[tid]._var_dof_indices.resize(n_vars);
-    // aux var
-    _dof_data[tid]._aux_var_dofs.resize(n_aux_vars);
-    _dof_data[tid]._aux_var_dof_indices.resize(n_aux_vars);
-  }
+    _dof_data[tid].init();
 
   //Find the largest quadrature order necessary... all variables _must_ use the same rule!
   _max_quadrature_order = CONSTANT;
@@ -944,18 +938,18 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
 
     if(Re)
     {
-      if(_element_data[tid]->_var_Res[i])
-        delete _element_data[tid]->_var_Res[i];
+      if(_dof_data[tid]._var_Res[i])
+        delete _dof_data[tid]._var_Res[i];
 
-      _element_data[tid]->_var_Res[i] = new DenseSubVector<Number>(*Re,position, num_dofs);
+      _dof_data[tid]._var_Res[i] = new DenseSubVector<Number>(*Re,position, num_dofs);
     }
 
     if(Ke)
     {
-      if(_element_data[tid]->_var_Kes[i])
-        delete _element_data[tid]->_var_Kes[i];
+      if(_dof_data[tid]._var_Kes[i])
+        delete _dof_data[tid]._var_Kes[i];
 
-      _element_data[tid]->_var_Kes[i] = new DenseMatrix<Number>(num_dofs,num_dofs);
+      _dof_data[tid]._var_Kes[i] = new DenseMatrix<Number>(num_dofs,num_dofs);
     }
     position+=num_dofs;
   }

@@ -18,11 +18,6 @@ ElementData::ElementData(MooseSystem & moose_system, DofData & dof_data) :
 
 ElementData::~ElementData()
 {
-  for (std::vector<DenseSubVector<Number> *>::iterator i = _var_Res.begin(); i != _var_Res.end(); ++i)
-    delete *i;
-
-  for (std::vector<DenseMatrix<Number> *>::iterator i = _var_Kes.begin(); i != _var_Kes.end(); ++i)
-    delete *i;
 }
 
 
@@ -30,13 +25,6 @@ void
 ElementData::init()
 {
   QuadraturePointData::init();
-
-  unsigned int n_vars = _moose_system.getNonlinearSystem()->n_vars();
-  unsigned int n_aux_vars = _moose_system.getAuxSystem()->n_vars();
-
-  // kernels
-  _var_Res.resize(n_vars);
-  _var_Kes.resize(n_vars);
 
   _qrule = new QGauss(_moose_system.getDim(), _moose_system._max_quadrature_order);
 

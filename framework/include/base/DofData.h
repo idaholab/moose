@@ -20,6 +20,8 @@ public:
   DofData(MooseSystem & moose_system);
   virtual ~DofData();
 
+  void init();
+
 public:
   /**
    * The MooseSystem this object is associated with.
@@ -47,6 +49,17 @@ public:
    * Current element
    */
   const Elem *_current_elem;
+
+  /**
+   * Residual vectors for all variables.
+   */
+  std::vector<DenseSubVector<Number> * > _var_Res;
+
+  /**
+   * Jacobian matrices for all variables.
+   */
+  std::vector<DenseMatrix<Number> * > _var_Kes;
+
 };
 
 #endif //DOFDATA_H

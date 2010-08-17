@@ -51,16 +51,6 @@ public:
    */
   std::map<unsigned int, std::vector<std::vector<Real> > > _test;
 
-    /**
-   * Residual vectors for all variables.
-   */
-  std::vector<DenseSubVector<Number> * > _var_Res;
-
-  /**
-   * Jacobian matrices for all variables.
-   */
-  std::vector<DenseMatrix<Number> * > _var_Kes;
-
 };
 
 #endif //ELEMENTDATA_H
