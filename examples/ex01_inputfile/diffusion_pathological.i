@@ -59,14 +59,14 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = '1 3'
+    boundary = '1'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
     variable = u
-    boundary = '2 4'
+    boundary = '2'
     value = 1
   [../]
 []
