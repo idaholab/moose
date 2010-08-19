@@ -205,7 +205,7 @@ namespace Moose
 
 
       int ierr;
-      Real facmin = 1.0;
+      Real facmin = 0.5;
       Real max_fraction = 0.5;
 
       *flag = PETSC_TRUE;
@@ -228,11 +228,11 @@ namespace Moose
       update_vec_w.zero();
       update_vec_w.add(1.,update_vec_x);
       update_vec_w.add(-1.0,update_vec_y);
-
+/*
       MeshBase::const_node_iterator nd     = mesh.local_nodes_begin();
       MeshBase::const_node_iterator nd_end = mesh.local_nodes_end();
       MeshBase::const_node_iterator nd_it  = mesh.local_nodes_begin();;
-      
+
       for(nd_it = nd;nd_it != nd_end; ++nd_it)
       {
         Node * node = *nd_it;
@@ -272,12 +272,12 @@ namespace Moose
         std::cout << "facmin..: " << facmin << std::endl;
         std::cout << std::endl;
       }
-    
+*/  
       update_vec_w.zero();
       //this is standard newton update with damping parameter
       ierr = VecNorm(y,NORM_2,ynorm);
       ierr = VecWAXPY(w,-facmin,y,x);
-
+/*
       for(nd_it = nd;nd_it != nd_end; ++nd_it)
       {
         Node * node = *nd_it;
@@ -287,7 +287,7 @@ namespace Moose
         if(update_vec_w(dof) <= 0 || update_vec_w(dof) >= 1)
           std::cout<<"w: "<<dof<<" = "<<update_vec_w(dof)<<std::endl;
       }
-
+*/
       ierr = SNESComputeFunction(snes,w,g);
       ierr = VecNorm(g,NORM_2,gnorm);
       return(ierr);

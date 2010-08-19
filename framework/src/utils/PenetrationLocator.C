@@ -46,7 +46,17 @@ PenetrationLocator::detectPenetration()
     if(std::find(master_begin, master_end, boundary_id) != master_end)
     {
       Node & node = _mesh.node(node_list[i]);
+/*
+      std::map<unsigned int, PenetrationInfo *>::const_iterator found_it;
+  
+      if ((found_it = _penetrated_elems.find(node.id())) != _penetrated_elems.end())
+      {
+        
+        found_it->second->_norm_distance = normDistance(*side, node);
 
+        continue;
+      }
+*/
       if(node.processor_id() == libMesh::processor_id())
       {
         Node * closest_node = NULL;

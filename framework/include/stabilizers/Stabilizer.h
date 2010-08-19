@@ -3,6 +3,7 @@
 
 #include "Moose.h"
 #include "PDEBase.h"
+#include "MaterialPropertyInterface.h"
 
 // System includes
 #include <string>
@@ -18,7 +19,7 @@ InputParameters validParams<Stabilizer>();
 /**
  * Stabilizers compute modified test function spaces to stabilize oscillating solutions.
  */
-class Stabilizer : public PDEBase
+class Stabilizer : public PDEBase, protected MaterialPropertyInterface
 {
 public:
   /**
