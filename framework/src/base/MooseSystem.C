@@ -1,5 +1,6 @@
 #include "MooseSystem.h"
 #include "KernelFactory.h"
+#include "DGKernelFactory.h"
 #include "BCFactory.h"
 #include "AuxFactory.h"
 #include "MaterialFactory.h"
@@ -26,10 +27,12 @@
 #include "error_vector.h"
 #include "kelly_error_estimator.h"
 #include "fourth_error_estimators.h"
+#include "fe_interface.h"
 #include "mesh_tools.h"
 
 MooseSystem::MooseSystem() :
   _dof_data(libMesh::n_threads(), DofData(*this)),
+  _neighbor_dof_data(libMesh::n_threads(), DofData(*this)),
   _material_data(libMesh::n_threads(), MaterialData(*this)),
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _es(NULL),
@@ -78,6 +81,7 @@ MooseSystem::MooseSystem() :
 
 MooseSystem::MooseSystem(Mesh &mesh) :
   _dof_data(libMesh::n_threads(), DofData(*this)),
+  _neighbor_dof_data(libMesh::n_threads(), DofData(*this)),
   _material_data(libMesh::n_threads(), MaterialData(*this)),
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _es(NULL),
@@ -137,6 +141,7 @@ MooseSystem::~MooseSystem()
   {
     delete _element_data[tid];
     delete _face_data[tid];
+    delete _neighbor_face_data[tid];
     delete _aux_data[tid];
   }
 
@@ -226,15 +231,18 @@ MooseSystem::sizeEverything()
 
   _element_data.resize(n_threads);
   _face_data.resize(n_threads);
+  _neighbor_face_data.resize(n_threads);
   _aux_data.resize(n_threads);
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
   {
     _element_data[tid] = new ElementData(*this, _dof_data[tid]);
     _face_data[tid] = new FaceData(*this, _dof_data[tid]);
+    _neighbor_face_data[tid] = new FaceData(*this, _neighbor_dof_data[tid]);
     _aux_data[tid] = new AuxData(*this, _dof_data[tid], *_element_data[tid]);
   }
 
   _kernels.resize(n_threads);
+  _dg_kernels.resize(n_threads);
   _bcs.resize(n_threads);
   _auxs.resize(n_threads);
   _materials.resize(n_threads);
@@ -275,12 +283,12 @@ MooseSystem::init()
   _dof_map = &_system->get_dof_map();
   _aux_dof_map = &_aux_system->get_dof_map();
 
-  unsigned int n_vars = _system->n_vars();
-  unsigned int n_aux_vars = _aux_system->n_vars();
-
   //Resize data arrays
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
     _dof_data[tid].init();
+    _neighbor_dof_data[tid].init();
+  }
 
   //Find the largest quadrature order necessary... all variables _must_ use the same rule!
   _max_quadrature_order = CONSTANT;
@@ -295,6 +303,7 @@ MooseSystem::init()
   {
     _element_data[tid]->init();
     _face_data[tid]->init();
+    _neighbor_face_data[tid]->init();
     _aux_data[tid]->init();
   }
 
@@ -665,6 +674,19 @@ void MooseSystem::addKernel(std::string kernel_name,
   }
 }
 
+// DGKernels ////
+void MooseSystem::addDGKernel(std::string dg_kernel_name,
+                              std::string name,
+                              InputParameters parameters)
+{
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<unsigned int>("_boundary_id") = 123456789;      // invalid id
+    _dg_kernels[tid].addDGKernel(DGKernelFactory::instance()->create(dg_kernel_name, name, *this, parameters));
+  }
+}
+
 void
 MooseSystem::addBC(std::string bc_name,
                    std::string name,
@@ -922,11 +944,8 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
 //  Moose::perf_log.pop("reinit() - fereinit","Kernel");
 
 //  Moose::perf_log.push("reinit() - resizing","Kernel");
-  if(Re)
-    Re->resize(_dof_data[tid]._dof_indices.size());
-
-  if(Ke)
-    Ke->resize(_dof_data[tid]._dof_indices.size(), _dof_data[tid]._dof_indices.size());
+  if(Re) Re->resize(_dof_data[tid]._dof_indices.size());
+  if(Ke) Ke->resize(_dof_data[tid]._dof_indices.size(), _dof_data[tid]._dof_indices.size());
 
   unsigned int position = 0;
 
@@ -935,22 +954,9 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
     _dof_map->dof_indices(elem, _dof_data[tid]._var_dof_indices[i], i);
 
     unsigned int num_dofs = _dof_data[tid]._var_dof_indices[i].size();
+    if(Re) _dof_data[tid].reinitRes(i, *Re, position, num_dofs);
+    if(Ke) _dof_data[tid].reinitKes(i, num_dofs);
 
-    if(Re)
-    {
-      if(_dof_data[tid]._var_Res[i])
-        delete _dof_data[tid]._var_Res[i];
-
-      _dof_data[tid]._var_Res[i] = new DenseSubVector<Number>(*Re,position, num_dofs);
-    }
-
-    if(Ke)
-    {
-      if(_dof_data[tid]._var_Kes[i])
-        delete _dof_data[tid]._var_Kes[i];
-
-      _dof_data[tid]._var_Kes[i] = new DenseMatrix<Number>(num_dofs,num_dofs);
-    }
     position+=num_dofs;
   }
 
@@ -986,6 +992,81 @@ void
 MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual)
 {
   _face_data[tid]->reinit(soln, node, boundary_id, residual);
+}
+
+void
+MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const Elem * neighbor, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
+{
+  unsigned int boundary_id = 123456789;
+
+//  _current_side = side;
+//
+//  if(_current_side_elem)
+//    delete _current_side_elem;
+//
+//  _current_side_elem = elem->build_side(side).release();
+//
+//  std::map<FEType, FEBase*>::iterator fe_it = _fe.begin();
+//  std::map<FEType, FEBase*>::iterator fe_end = _fe.end();
+//
+//  for(;fe_it != fe_end; ++fe_it)
+//    fe_it->second->reinit(elem, _current_side);
+//
+//  QuadraturePointData::reinit(boundary_id, soln, elem);
+
+  // current element
+  _face_data[tid]->_current_side = side;
+  _face_data[tid]->_current_side_elem = elem->build_side(side).release();
+
+  // loop over variables and reinit FE objects
+  std::set<unsigned int>::iterator var_num_it = _face_data[tid]->_var_nums[boundary_id].begin();
+  std::set<unsigned int>::iterator var_num_end = _face_data[tid]->_var_nums[boundary_id].end();
+  for(;var_num_it != var_num_end; ++var_num_it)
+  {
+    unsigned int var_num = *var_num_it;
+
+    FEType fe_type = _dof_map->variable_type(var_num);
+    _face_data[tid]->_fe[fe_type]->reinit(elem, side);
+
+//    _dof_map->dof_indices(elem, _dof_data[tid]._var_dof_indices[var_num], var_num);
+  }
+
+  ((QuadraturePointData *) _face_data[tid])->reinit(boundary_id, soln, elem);
+
+
+  // neighbor stuff
+
+  _neighbor_dof_data[tid]._current_elem = neighbor;
+  _dof_map->dof_indices(neighbor, _neighbor_dof_data[tid]._dof_indices);
+
+  if(Re) Re->resize(_neighbor_dof_data[tid]._dof_indices.size());
+  if(Ke) Ke->resize(_neighbor_dof_data[tid]._dof_indices.size(), _neighbor_dof_data[tid]._dof_indices.size());
+
+  unsigned int position = 0;
+
+  var_num_it = _face_data[tid]->_var_nums[boundary_id].begin();
+  var_num_end = _face_data[tid]->_var_nums[boundary_id].end();
+  for(;var_num_it != var_num_end; ++var_num_it)
+  {
+    unsigned int var_num = *var_num_it;
+
+    FEType fe_type = _dof_map->variable_type(var_num);
+
+    // Find locations of quad points on the neighbor
+    std::vector<Point> qface_neighbor_point;
+    libMesh::FEInterface::inverse_map (elem->dim(), fe_type, neighbor, (*_face_data[tid]->_q_point[fe_type]), qface_neighbor_point);
+    // Calculate the neighbor element shape functions at those locations
+    _neighbor_face_data[tid]->_fe[fe_type]->reinit(neighbor, &qface_neighbor_point);
+
+    _dof_map->dof_indices(neighbor, _neighbor_dof_data[tid]._var_dof_indices[var_num], var_num);
+    unsigned int num_dofs = _neighbor_dof_data[tid]._var_dof_indices[var_num].size();
+
+    if(Re) _neighbor_dof_data[tid].reinitRes(var_num, *Re, position, num_dofs);
+    if(Ke) _neighbor_dof_data[tid].reinitKes(var_num, num_dofs);
+
+    position+=num_dofs;
+  }
+  ((QuadraturePointData *) _neighbor_face_data[tid])->reinit(boundary_id, soln, neighbor);
 }
 
 void

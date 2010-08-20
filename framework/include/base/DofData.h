@@ -22,6 +22,10 @@ public:
 
   void init();
 
+  void reinitRes(int var_num, DenseVector<Number> & Re, unsigned int position, unsigned int num_dofs);
+
+  void reinitKes(int var_num, unsigned int num_dofs);
+
 public:
   /**
    * The MooseSystem this object is associated with.

@@ -7,6 +7,7 @@
 //MOOSE includes
 #include "Moose.h"  // for THREAD_ID
 #include "KernelWarehouse.h"
+#include "DGKernelWarehouse.h"
 #include "BCWarehouse.h"
 #include "AuxWarehouse.h"
 #include "MaterialWarehouse.h"
@@ -184,6 +185,10 @@ public:
                  std::string name,
                  InputParameters parameters);
 
+  void addDGKernel(std::string kernel_name,
+                   std::string name,
+                   InputParameters parameters);
+
   void addBC(std::string bc_name,
              std::string name,
              InputParameters parameters);
@@ -241,6 +246,8 @@ public:
   void initial_condition(EquationSystems& es, const std::string& system_name);
 
   void reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
+
+  void reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const Elem * neighbor, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
 
   void reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id);
   void reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
@@ -363,6 +370,8 @@ private:
   std::vector<DofData> _dof_data;
   std::vector<ElementData *> _element_data;
   std::vector<FaceData *> _face_data;
+  std::vector<DofData> _neighbor_dof_data;
+  std::vector<FaceData *> _neighbor_face_data;
   std::vector<AuxData *> _aux_data;
   std::vector<MaterialData> _material_data;
   std::vector<PostprocessorData> _postprocessor_data;
@@ -393,6 +402,7 @@ private:
   bool _mesh_changed;
 
   std::vector<KernelWarehouse> _kernels;
+  std::vector<DGKernelWarehouse> _dg_kernels;
   std::vector<BCWarehouse> _bcs;
   std::vector<AuxWarehouse> _auxs;
   std::vector<MaterialWarehouse> _materials;
@@ -552,6 +562,7 @@ protected:
   friend class InitialCondition;
   friend class Kernel;
   friend class AuxKernel;
+  friend class DGKernel;
   friend class BoundaryCondition;
   friend class Material;
   friend class Stabilizer;
@@ -560,6 +571,7 @@ protected:
   friend class PowerIterationExecutioner;
   friend class Steady;
   friend class Postprocessor;
+  friend class FunctionNeumannBC;
 
   friend class QuadraturePointData;
   friend class ElementData;

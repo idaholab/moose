@@ -37,3 +37,21 @@ DofData::init()
   _var_Res.resize(n_vars);
   _var_Kes.resize(n_vars);
 }
+
+void
+DofData::reinitRes(int var_num, DenseVector<Number> & Re, unsigned int position, unsigned int num_dofs)
+{
+  if (_var_Res[var_num])
+    delete _var_Res[var_num];
+
+  _var_Res[var_num] = new DenseSubVector<Number>(Re, position, num_dofs);
+}
+
+void
+DofData::reinitKes(int var_num, unsigned int num_dofs)
+{
+  if (_var_Kes[var_num])
+    delete _var_Kes[var_num];
+
+  _var_Kes[var_num] = new DenseMatrix<Number>(num_dofs, num_dofs);
+}

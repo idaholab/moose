@@ -17,6 +17,7 @@
 class Material;
 class Kernel;
 class MooseSystem;
+class DofData;
 class ElementData;
 
 namespace libMesh

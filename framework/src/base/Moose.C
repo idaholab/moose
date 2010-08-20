@@ -13,6 +13,9 @@
 #include "RealPropertyOutput.h"
 #include "UserForcingFunction.h"
 
+#include "DGKernelFactory.h"
+#include "NIPG0.h"
+
 #include "BCFactory.h"
 #include "DirichletBC.h"
 #include "SinDirichletBC.h"
@@ -25,6 +28,7 @@
 #include "WeakGradientBC.h"
 #include "FunctionDirichletBC.h"
 #include "FunctionNeumannBC.h"
+#include "DGBC.h"
 
 #include "AuxFactory.h"
 #include "ConstantAux.h"
@@ -45,9 +49,11 @@
 #include "GenericVariableBlock.h"
 #include "AuxVariablesBlock.h"
 #include "KernelsBlock.h"
+#include "DGKernelsBlock.h"
 #include "FunctionsBlock.h"
 #include "GenericFunctionsBlock.h"
 #include "GenericKernelBlock.h"
+#include "GenericDGKernelBlock.h"
 #include "AuxKernelsBlock.h"
 #include "GenericAuxKernelBlock.h"
 #include "BCsBlock.h"
@@ -96,6 +102,7 @@
 #include "PrintDOFs.h"
 #include "PrintNumElems.h"
 #include "PrintNumNodes.h"
+#include "AverageElementSize.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -145,7 +152,9 @@ Moose::registerObjects()
   KernelFactory::instance()->registerKernel<CoupledForce>("CoupledForce");
   KernelFactory::instance()->registerKernel<RealPropertyOutput>("RealPropertyOutput");
   KernelFactory::instance()->registerKernel<UserForcingFunction>("UserForcingFunction");
-  
+
+  DGKernelFactory::instance()->registerDGKernel<NIPG0>("NIPG0");
+
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<SinDirichletBC>("SinDirichletBC");
   BCFactory::instance()->registerBC<SinNeumannBC>("SinNeumannBC");
@@ -156,7 +165,8 @@ Moose::registerObjects()
   BCFactory::instance()->registerBC<ConvectiveFluxBC>("ConvectiveFluxBC");
   BCFactory::instance()->registerBC<WeakGradientBC>("WeakGradientBC");
   BCFactory::instance()->registerBC<FunctionDirichletBC>("FunctionDirichletBC");
-  BCFactory::instance()->registerBC<FunctionNeumannBC>("FunctionNeumannBC"); //Added by Alex
+  BCFactory::instance()->registerBC<FunctionNeumannBC>("FunctionNeumannBC");
+  BCFactory::instance()->registerBC<DGBC>("DGBC");
 
   AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
   AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");
@@ -177,6 +187,8 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("AuxVariables/*");
   ParserBlockFactory::instance()->registerParserBlock<KernelsBlock>("Kernels");
   ParserBlockFactory::instance()->registerParserBlock<GenericKernelBlock>("Kernels/*");
+  ParserBlockFactory::instance()->registerParserBlock<DGKernelsBlock>("DGKernels");
+  ParserBlockFactory::instance()->registerParserBlock<GenericDGKernelBlock>("DGKernels/*");
   ParserBlockFactory::instance()->registerParserBlock<AuxKernelsBlock>("AuxKernels");
   ParserBlockFactory::instance()->registerParserBlock<GenericAuxKernelBlock>("AuxKernels/*");
   ParserBlockFactory::instance()->registerParserBlock<BCsBlock>("BCs");
@@ -229,6 +241,7 @@ Moose::registerObjects()
   PostprocessorFactory::instance()->registerPostprocessor<PrintDOFs>("PrintDOFs");
   PostprocessorFactory::instance()->registerPostprocessor<PrintNumElems>("PrintNumElems");
   PostprocessorFactory::instance()->registerPostprocessor<PrintNumNodes>("PrintNumNodes");
+  PostprocessorFactory::instance()->registerPostprocessor<AverageElementSize>("AverageElementSize");
 }
 
 void

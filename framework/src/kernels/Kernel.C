@@ -1,6 +1,7 @@
 #include "Kernel.h"
 #include "Moose.h"
 #include "MooseSystem.h"
+#include "DofData.h"
 #include "ElementData.h"
 #include "MaterialData.h"
 #include "MaterialFactory.h"

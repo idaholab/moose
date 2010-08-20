@@ -9,6 +9,7 @@
 #include "InputParameters.h"
 #include "ParserBlockFactory.h"
 #include "KernelFactory.h"
+#include "DGKernelFactory.h"
 #include "FunctionFactory.h"
 #include "AuxFactory.h"
 #include "BCFactory.h"
@@ -259,6 +260,19 @@ Parser::buildFullTree( const std::string format )
     curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
   }
   
+  // Add all the DG Kernels
+  curr_block = curr_block->locateBlock("DGKernels");
+  prefix = "DGKernels/";
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
+  for (DGKernelNamesIterator i = DGKernelFactory::instance()->registeredDGKernelsBegin();
+       i != DGKernelFactory::instance()->registeredDGKernelsEnd(); ++i)
+  {
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+  }
+
   // Add all the AuxKernels
   curr_block = curr_block->locateBlock("AuxKernels");
   prefix = "AuxKernels/";
@@ -408,6 +422,7 @@ Parser::fixupOptionalBlocks()
   std::vector<std::pair<std::string, std::string> >::iterator i;
   ParserBlock *block_ptr;
 
+  // TODO: DGKernels?
   optional_blocks.push_back(std::make_pair("Variables", "Preconditioning"));
   optional_blocks.push_back(std::make_pair("Preconditioning", "AuxVariables"));
   optional_blocks.push_back(std::make_pair("Kernels", "AuxKernels"));
