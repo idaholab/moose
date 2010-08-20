@@ -14,13 +14,16 @@
 []
 
 [Functions]
-  active = 'forcing_func'
+  active = 'forcing_func exact_func'
   
   [./forcing_func]
+    type = ParsedGradFunction
+    function = 2
+  [../]
+  
+  [./exact_func]
     type = ParsedFunction
     function = x*x 
-  #  vars = 'alpha'
-  #  vals = '16'
   [../]
 []
 
@@ -51,10 +54,9 @@
 
   [./right]
     type = FunctionNeumannBC 
-    function = forcing_func 
+    function = exact_func 
     variable = u
     boundary = '2'
-    value = 1 
   [../]
 []
 

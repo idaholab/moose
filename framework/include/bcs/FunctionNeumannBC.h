@@ -21,9 +21,6 @@ public:
 
 protected:
 
-  Real f();
-
-
   virtual Real computeQpResidual();
 
 private:

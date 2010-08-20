@@ -18,14 +18,7 @@ FunctionNeumannBC::FunctionNeumannBC(std::string name,
 }
 
 Real
-FunctionNeumannBC::f()
-{
-
-  return _func(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
-}
-
-Real
 FunctionNeumannBC::computeQpResidual()
 {
-  return -_test[_i][_qp] * f();
+  return -_test[_i][_qp] * _normals[_qp] * _func.grad(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
 }
