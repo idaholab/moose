@@ -77,6 +77,11 @@ Executioner::setup()
     
   // Check for Kernel, BC, and Material coverage on the Mesh
   _moose_system.checkSystemsIntegrity();
+
+  _moose_system.getNonlinearSystem()->update();
+
+  // Compute the initial value of postprocessors
+  _moose_system.compute_postprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
 }
 
 void

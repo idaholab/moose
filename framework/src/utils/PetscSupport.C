@@ -205,7 +205,7 @@ namespace Moose
 
 
       int ierr;
-      Real facmin = 0.5;
+      Real facmin = 0.2;
       Real max_fraction = 0.5;
 
       *flag = PETSC_TRUE;
