@@ -25,6 +25,7 @@ PDEBase::PDEBase(std::string name, MooseSystem &moose_system, InputParameters pa
   _is_aux(moose_system.hasAuxVariable(_var_name)),
   _var_num(_is_aux ? moose_system.getAuxVariableNumber(_var_name) : moose_system.getVariableNumber(_var_name)),
   _fe_type(_is_aux ? moose_system._aux_dof_map->variable_type(_var_num) : moose_system._dof_map->variable_type(_var_num)),
+  _fe(data._fe[_fe_type]),
   _integrated(parameters.get<bool>("_integrated")),
   _dim(_moose_system._dim),
   _data(data),

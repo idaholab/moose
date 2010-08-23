@@ -9,6 +9,8 @@
 #include "PostprocessorInterface.h"
 #include "FunctionInterface.h"
 
+#include "fe_base.h"
+
 class PDEBase;
 class MooseSystem;
 class QuadraturePointData;
@@ -112,6 +114,10 @@ protected:
    * Object operates on.
    */
   FEType _fe_type;
+
+  /**
+   */
+  FEBase * & _fe;
 
   /**
    * If false the result of computeQpResidual() will overwrite the current Re entry instead of summing.

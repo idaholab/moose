@@ -1,20 +1,20 @@
 [Mesh]
   dim = 2
-#  generated = true
-#  [./Generation]
-#   nx = 10
-#   ny = 10
-##   nx = 5
-##   ny = 5
-#   xmin = -1 
-#   xmax = 1
-#   ymin = -1
-#   ymax = 1
-#   elem_type = QUAD4
-#  [../]
+  generated = true
+  [./Generation]
+   nx = 5
+   ny = 5
+#   nx = 5
+#   ny = 5
+   xmin = -1 
+   xmax = 1
+   ymin = -1
+   ymax = 1
+   elem_type = QUAD4
+  [../]
 
-  file = l-shape.e
-  uniform_refine = 2
+#  file = l-shape.e
+#  uniform_refine = 3
 []
 
 [Variables]
@@ -48,23 +48,23 @@
   [./forcing_fn]
     type = ParsedFunction
 #    function = -4.0+(x*x)+(y*y)
-    function = x
-#    function = (x*x)-2.0
+#    function = x
+    function = (x*x)-2.0
   [../]
   
   [./exact_fn]
     type = ParsedGradFunction
-    function = x
-    grad_x = 1
-    grad_y = 0
+#    function = x
+#    grad_x = 1
+#    grad_y = 0
     
 #    function = (x*x)+(y*y)
 #    grad_x = 2*x
 #    grad_y = 2*y
 
-#    function = (x*x)
-#    grad_x = 2*x
-#    grad_y = 0
+    function = (x*x)
+    grad_x = 2*x
+    grad_y = 0
   [../]
   
   # BR
@@ -82,8 +82,8 @@
 []
 
 [Kernels]
-  active = 'diff'
-#  active = 'diff abs forcing'
+#  active = 'diff'
+  active = 'diff abs forcing'
 #  active = 'abs forcing'
 
   [./diff]
@@ -112,7 +112,7 @@
   	type = NIPG0
   	variable = u
   	e = -1
-  	sigma = 16
+  	sigma = 4
   [../]
 []
 
@@ -125,13 +125,13 @@
     type = DGBC
 #    type = NeumannBC
     variable = u
-#    boundary = '0 1 2 3'
+    boundary = '0 1 2 3'
 #    boundary = '1 3'
-    boundary = '1'
+#    boundary = '1'
     function = exact_fn
 #    function = br_exact
 #	value = 0
-    pen = 16
+    pen = 4
   [../]
 []
 
@@ -140,22 +140,25 @@
 
   [./empty]
     type = EmptyMaterial
-    block = 1
+    block = 0
+#    block = 1
   [../]
 []
 
 [Executioner]
   type = Steady
   perf_log = true
-#  petsc_options = '-snes_mf_operator'
-  petsc_options = '-snes_mf'
-  max_r_steps = 0
+  petsc_options = '-snes_mf_operator'
+#  petsc_options = '-snes_mf'
+  max_r_steps = 5
   [./Adaptivity]
   	steps = 1
     refine_fraction = 1.0
     coarsen_fraction = 0
     max_h_level = 8
   [../]
+  
+#  nl_rel_tol = 1e-12
 []
 
 [Postprocessors]
