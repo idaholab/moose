@@ -40,7 +40,12 @@ public:
    *
    * After calling this, the variable that was passed in will hold the gathered value.
    */
-  void gatherSum(Real value);
+  void gatherSum(Real & value);
+
+  /**
+   * Same but for ints.
+   */
+  void gatherSum(int & value);
 };
  
 #endif

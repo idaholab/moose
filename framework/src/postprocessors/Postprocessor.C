@@ -21,7 +21,14 @@ Postprocessor::Postprocessor(std::string name, MooseSystem & moose_system, Input
 }
 
 void
-Postprocessor::gatherSum(Real value)
+Postprocessor::gatherSum(Real & value)
+{
+  // TODO: Gather threaded values as well
+  Parallel::sum(value);
+}
+
+void
+Postprocessor::gatherSum(int & value)
 {
   // TODO: Gather threaded values as well
   Parallel::sum(value);
