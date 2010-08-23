@@ -26,6 +26,10 @@
 #include "Diff1Material.h"
 #include "Diff2Material.h"
 
+#include "PressX.h"
+#include "PressY.h"
+#include "Divergence.h"
+
 namespace MooseTest
 {
   void registerObjects()
@@ -49,6 +53,11 @@ namespace MooseTest
     KernelFactory::instance()->registerKernel<PolyReaction>("PolyReaction");
 
     KernelFactory::instance()->registerKernel<PolyForcing>("PolyForcing");
+
+    KernelFactory::instance()->registerKernel<PressX>("PressX");
+    KernelFactory::instance()->registerKernel<PressY>("PressY");
+    KernelFactory::instance()->registerKernel<Divergence>("Divergence");
+    KernelFactory::instance()->registerKernel<Divergence>("NlConv");
 
     // Register our new material class so we can use it.
     MaterialFactory::instance()->registerMaterial<Diff1Material>("Diff1Material");

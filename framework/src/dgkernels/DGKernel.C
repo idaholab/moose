@@ -16,7 +16,7 @@
 template<>
 InputParameters validParams<DGKernel>()
 {
-  // FIXME: make ot a descendant of BoundaryCondition
+  // FIXME: make it a descendant of BoundaryCondition
   InputParameters params = validParams<PDEBase>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.set<bool>("_integrated") = true;

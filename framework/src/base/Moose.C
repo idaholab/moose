@@ -14,7 +14,7 @@
 #include "UserForcingFunction.h"
 
 #include "DGKernelFactory.h"
-#include "NIPG0.h"
+#include "DGDiffusion.h"
 
 #include "BCFactory.h"
 #include "DirichletBC.h"
@@ -28,7 +28,7 @@
 #include "WeakGradientBC.h"
 #include "FunctionDirichletBC.h"
 #include "FunctionNeumannBC.h"
-#include "DGBC.h"
+#include "DGFunctionDiffusionDirichletBC.h"
 
 #include "AuxFactory.h"
 #include "ConstantAux.h"
@@ -153,7 +153,7 @@ Moose::registerObjects()
   KernelFactory::instance()->registerKernel<RealPropertyOutput>("RealPropertyOutput");
   KernelFactory::instance()->registerKernel<UserForcingFunction>("UserForcingFunction");
 
-  DGKernelFactory::instance()->registerDGKernel<NIPG0>("NIPG0");
+  DGKernelFactory::instance()->registerDGKernel<DGDiffusion>("DGDiffusion");
 
   BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
   BCFactory::instance()->registerBC<SinDirichletBC>("SinDirichletBC");
@@ -166,7 +166,7 @@ Moose::registerObjects()
   BCFactory::instance()->registerBC<WeakGradientBC>("WeakGradientBC");
   BCFactory::instance()->registerBC<FunctionDirichletBC>("FunctionDirichletBC");
   BCFactory::instance()->registerBC<FunctionNeumannBC>("FunctionNeumannBC");
-  BCFactory::instance()->registerBC<DGBC>("DGBC");
+  BCFactory::instance()->registerBC<DGFunctionDiffusionDirichletBC>("DGFunctionDiffusionDirichletBC");
 
   AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
   AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");

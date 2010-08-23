@@ -4,17 +4,12 @@
   [./Generation]
    nx = 5
    ny = 5
-#   nx = 5
-#   ny = 5
    xmin = -1 
    xmax = 1
    ymin = -1
    ymax = 1
    elem_type = QUAD4
   [../]
-
-#  file = l-shape.e
-#  uniform_refine = 3
 []
 
 [Variables]
@@ -25,12 +20,8 @@
     order = FIRST
 #    order = SECOND
 #    order = THIRD
-    
+   
     family = MONOMIAL
-#    family = LAGRANGE
-#    family = SCALAR
-#    family = XYZ
-#    family = HIERARCHIC
 
 	[./InitialCondition]
       type = ConstantIC
@@ -40,9 +31,6 @@
 []
 
 [Functions]
-#  active = ''
-#  active = 'br_forcing_fn br_exact'
-
   active = 'forcing_fn exact_fn br_forcing_fn br_exact'
   
   [./forcing_fn]
@@ -105,13 +93,13 @@
 []
 
 [DGKernels]
-  active = 'nipg0'
+  active = 'dg_diff'
 #  active = ' '
   
-  [./nipg0]
-  	type = NIPG0
+  [./dg_diff]
+  	type = DGDiffusion
   	variable = u
-  	e = -1
+  	epsilon = 1
   	sigma = 4
   [../]
 []
@@ -122,7 +110,7 @@
   [./all]
 #    type = FunctionNeumannBC
 #    type = FunctionDirichletBC
-    type = DGBC
+    type = DGFunctionDiffusionDirichletBC
 #    type = NeumannBC
     variable = u
     boundary = '0 1 2 3'
@@ -131,7 +119,8 @@
     function = exact_fn
 #    function = br_exact
 #	value = 0
-    pen = 4
+	epsilon = 1
+	sigma = 4
   [../]
 []
 
