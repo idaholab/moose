@@ -1067,6 +1067,8 @@ MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, c
     position+=num_dofs;
   }
   ((QuadraturePointData *) _neighbor_face_data[tid])->reinit(boundary_id, soln, neighbor);
+
+
 }
 
 void

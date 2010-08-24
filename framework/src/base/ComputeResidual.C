@@ -117,7 +117,7 @@ public:
           // We don't want to compute twice the same contributions.
           // If the neighbor has a different h level perform integration
           // only if the neighbor is at a lower level.
-//          if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+          if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
           {
             DGKernelIterator dg_it = _moose_system._dg_kernels[tid].activeDGKernelsBegin();
             DGKernelIterator dg_end = _moose_system._dg_kernels[tid].activeDGKernelsEnd();
@@ -127,20 +127,16 @@ public:
               DenseVector<Number> neighbor_Re;
               neighbor_Re.zero();
 
-//              const double h_elem = (elem->volume()/elem_side->volume()) * 1./pow(side_order,2.);
-
               _moose_system.reinitDGKernels(tid, _soln, elem, side, neighbor, &neighbor_Re);
 
               for(; dg_it!=dg_end; ++dg_it)
                 (*dg_it)->computeResidual();
 
-#if 0
-//              _moose_system._dof_map->constrain_element_vector (neighbor_Re, _moose_system._neighbor_dof_data[tid]._dof_indices, false);
+              _moose_system._dof_map->constrain_element_vector (neighbor_Re, _moose_system._neighbor_dof_data[tid]._dof_indices, false);
               {
                 Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
                 residual.add_vector(neighbor_Re, _moose_system._neighbor_dof_data[tid]._dof_indices);
               }
-#endif
             }
           }
         }

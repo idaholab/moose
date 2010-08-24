@@ -26,6 +26,10 @@ public:
   
 protected:
   virtual Real computeQpResidual();
+  virtual Real computeQpResidualNeighbor();
+
+  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobianNeighbor();
 
   Real _epsilon;
   Real _sigma;

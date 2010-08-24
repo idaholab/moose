@@ -44,6 +44,16 @@ public:
   
   virtual ~DGKernel();
 
+  /**
+   * Computes the residual for the current side.
+   */
+  virtual void computeResidual();
+
+  /**
+   * Computes the jacobian for the current side.
+   */
+  virtual void computeJacobian();
+
 protected:
   /**
    * The neighboring element
@@ -109,6 +119,16 @@ protected:
    * Holds the t-2 solution gradient at the current quadrature point.
    */
   MooseArray<RealGradient> & _grad_u_older_neighbor;
+
+  /**
+   * This is the virtual that derived classes should override for computing the residual on neighboring element.
+   */
+  virtual Real computeQpResidualNeighbor() = 0;
+
+  /**
+   * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
+   */
+  virtual Real computeQpJacobianNeighbor() = 0;
 };
 
 #endif //DGKERNEL_H

@@ -102,6 +102,46 @@ public:
               (*bc_it)->computeJacobian();
           }
         }
+        else
+        {
+          // Pointer to the neighbor we are currently working on.
+          const Elem * neighbor = elem->neighbor(side);
+
+          // Get the global id of the element and the neighbor
+          const unsigned int elem_id = elem->id();
+          const unsigned int neighbor_id = neighbor->id();
+
+          // If the neighbor has the same h level and is active
+          // perform integration only if our global id is bigger than our neighbor id.
+          // We don't want to compute twice the same contributions.
+          // If the neighbor has a different h level perform integration
+          // only if the neighbor is at a lower level.
+          if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+          {
+            DGKernelIterator dg_it = _moose_system._dg_kernels[tid].activeDGKernelsBegin();
+            DGKernelIterator dg_end = _moose_system._dg_kernels[tid].activeDGKernelsEnd();
+
+            if (dg_it!=dg_end)
+            {
+              DenseMatrix<Number> neighbor_Ke;
+
+              _moose_system.reinitDGKernels(tid, _soln, elem, side, neighbor, NULL, &neighbor_Ke);
+
+              for(; dg_it!=dg_end; ++dg_it)
+                (*dg_it)->computeJacobian();
+
+              {
+                Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+                for(unsigned int i=0; i< _moose_system._neighbor_dof_data[tid]._var_dof_indices.size(); i++)
+                {
+                  _moose_system._dof_map->constrain_element_matrix(*_moose_system._neighbor_dof_data[tid]._var_Kes[i],
+                      _moose_system._neighbor_dof_data[tid]._var_dof_indices[i], false);
+                  _jacobian.add_matrix(*_moose_system._neighbor_dof_data[tid]._var_Kes[i], _moose_system._neighbor_dof_data[tid]._var_dof_indices[i]);
+                }
+              }
+            }
+          }
+        }
       }    
 
       {
@@ -304,6 +344,45 @@ public:
 
               if(bc->variable() == _ivar)
                 bc->computeJacobianBlock(Ke,_ivar,_jvar);
+            }
+          }
+        }
+        else
+        {
+          // Pointer to the neighbor we are currently working on.
+          const Elem * neighbor = elem->neighbor(side);
+
+          // Get the global id of the element and the neighbor
+          const unsigned int elem_id = elem->id();
+          const unsigned int neighbor_id = neighbor->id();
+
+          // If the neighbor has the same h level and is active
+          // perform integration only if our global id is bigger than our neighbor id.
+          // We don't want to compute twice the same contributions.
+          // If the neighbor has a different h level perform integration
+          // only if the neighbor is at a lower level.
+          if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+          {
+            DGKernelIterator dg_it = _moose_system._dg_kernels[tid].activeDGKernelsBegin();
+            DGKernelIterator dg_end = _moose_system._dg_kernels[tid].activeDGKernelsEnd();
+
+            if (dg_it!=dg_end)
+            {
+              DenseMatrix<Number> neighbor_Ke;
+
+              _moose_system.reinitDGKernels(tid, _soln, elem, side, neighbor, NULL, &neighbor_Ke);
+
+              for(; dg_it!=dg_end; ++dg_it)
+              {
+                (*dg_it)->computeJacobianBlock(Ke,_ivar,_jvar);
+                (*dg_it)->computeJacobianBlock(neighbor_Ke,_ivar,_jvar);
+              }
+
+              dof_map.constrain_element_matrix (neighbor_Ke, dof_indices, false);
+              {
+                Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+                _jacobian.add_matrix(neighbor_Ke, dof_indices);
+              }
             }
           }
         }

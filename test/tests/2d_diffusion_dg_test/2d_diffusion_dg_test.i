@@ -16,11 +16,7 @@
   active = 'u'
 
   [./u] 
-#    order = CONSTANT
-    order = FIRST
-#    order = SECOND
-#    order = THIRD
-   
+    order = SECOND 
     family = MONOMIAL
 
 	[./InitialCondition]
@@ -31,13 +27,15 @@
 []
 
 [Functions]
-  active = 'forcing_fn exact_fn br_forcing_fn br_exact'
+  active = 'forcing_fn exact_fn'
   
   [./forcing_fn]
     type = ParsedFunction
 #    function = -4.0+(x*x)+(y*y)
 #    function = x
-    function = (x*x)-2.0
+#    function = (x*x)-2.0
+#    function = -pow(e,-x-(y*y))*(4*y*y-2)
+    function = (x*x*x)-6.0*x
   [../]
   
   [./exact_fn]
@@ -50,29 +48,22 @@
 #    grad_x = 2*x
 #    grad_y = 2*y
 
-    function = (x*x)
-    grad_x = 2*x
+#    function = (x*x)
+#    grad_x = 2*x
+#    grad_y = 0
+
+#    function = pow(e,-x-(y*y))
+#    grad_x = -pow(e,-x-(y*y))
+#    grad_y = -2*y*pow(e,-x-(y*y))
+
+    function = (x*x*x)
+    grad_x = 3*x*x
     grad_y = 0
-  [../]
-  
-  # BR
-  [./br_forcing_fn]
-    type = ParsedFunction
-    function = -pow(e,-x-(y*y))*(4*y*y-2)
-  [../]
-  
-  [./br_exact]
-    type = ParsedGradFunction
-    function = pow(e,-x-(y*y))
-    grad_x = -pow(e,-x-(y*y))
-    grad_y = -2*y*pow(e,-x-(y*y))
   [../]
 []
 
 [Kernels]
-#  active = 'diff'
   active = 'diff abs forcing'
-#  active = 'abs forcing'
 
   [./diff]
     type = Diffusion
@@ -88,19 +79,17 @@
     type = UserForcingFunction
     variable = u
     function = forcing_fn
-#    function = br_forcing_fn
   [../]
 []
 
 [DGKernels]
   active = 'dg_diff'
-#  active = ' '
   
   [./dg_diff]
   	type = DGDiffusion
   	variable = u
-  	epsilon = 1
-  	sigma = 4
+  	epsilon = 0
+  	sigma = 18
   [../]
 []
 
@@ -108,19 +97,12 @@
   active = 'all'
 
   [./all]
-#    type = FunctionNeumannBC
-#    type = FunctionDirichletBC
     type = DGFunctionDiffusionDirichletBC
-#    type = NeumannBC
     variable = u
     boundary = '0 1 2 3'
-#    boundary = '1 3'
-#    boundary = '1'
     function = exact_fn
-#    function = br_exact
-#	value = 0
-	epsilon = 1
-	sigma = 4
+	epsilon = 0
+	sigma = 18
   [../]
 []
 
@@ -130,7 +112,6 @@
   [./empty]
     type = EmptyMaterial
     block = 0
-#    block = 1
   [../]
 []
 
@@ -138,8 +119,11 @@
   type = Steady
   perf_log = true
   petsc_options = '-snes_mf_operator'
+#  petsc_options_iname = '-pc_type -pc_hypre_type'
+#  petsc_options_value = 'hypre    boomeramg'
+  
 #  petsc_options = '-snes_mf'
-  max_r_steps = 5
+  max_r_steps = 0
   [./Adaptivity]
   	steps = 1
     refine_fraction = 1.0
@@ -155,7 +139,7 @@
 
   [./h]
     type = AverageElementSize
-    variable = u					# kinda stupid, but what can we do :)
+    variable = u
   [../]
   
   [./dofs]
@@ -167,7 +151,6 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-#    function = br_exact
   [../]  
 []
 

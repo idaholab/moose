@@ -67,3 +67,41 @@ DGKernel::DGKernel(std::string name, MooseSystem & moose_system, InputParameters
 DGKernel::~DGKernel()
 {
 }
+
+void
+DGKernel::computeResidual()
+{
+//  Moose::perf_log.push("computeResidual()","DGKernel");
+
+  DenseSubVector<Number> & var_Re = *_dof_data._var_Res[_var_num];
+  DenseSubVector<Number> & neighbor_var_Re = *_neighbor_dof_data._var_Res[_var_num];
+
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    for (_i=0; _i<_phi.size(); _i++)
+    {
+      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
+      neighbor_var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidualNeighbor();
+    }
+
+//  Moose::perf_log.pop("computeResidual()","DGKernel");
+}
+
+void
+DGKernel::computeJacobian()
+{
+//  Moose::perf_log.push("computeJacobian()","DGKernel");
+
+  DenseMatrix<Number> & var_Ke = *_dof_data._var_Kes[_var_num];
+  DenseMatrix<Number> & neighbor_var_Ke = *_neighbor_dof_data._var_Kes[_var_num];
+
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    for (_i=0; _i<_phi.size(); _i++)
+      for (_j=0; _j<_phi.size(); _j++)
+      {
+        var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
+        neighbor_var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobianNeighbor();
+      }
+
+//  Moose::perf_log.pop("computeJacobian()","DGKernel");
+}
+
