@@ -7,6 +7,9 @@
 # link with the library.
 include $(LIBMESH_DIR)/Make.common
 
+libmesh_CXXFLAGS     += -MD
+libmesh_CFLAGS       += -MD
+
 # Location of the MOOSE Includes and Library
 moose_DIRS	:= $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
 moose_INCLUDE 	:= $(foreach i, $(moose_DIRS), -I$(i))
@@ -90,7 +93,7 @@ f90objects	:= $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 app_DIRS	+= $(shell find . -type d | grep -v .svn)
 libmesh_INCLUDE += -Iinclude $(foreach i, $(app_DIRS), -I$(i)) $(ADDITIONAL_INCLUDES)
 
-.PHONY: clean doc .depend
+.PHONY: clean doc 
 
 ###############################################################################
 # Target:
@@ -145,15 +148,15 @@ doc:
 clean::
 	@rm -f $(APPLICATION_NAME)-*
 	@find . -name "*~" -or -name "*.o" | xargs rm
-	@rm -f .depend
 
 syntax:
 	python scripts/generate_input_syntax.py
 #
 # Dependencies
 #
-.depend:
-	@$(perl) $(LIBMESH_DIR)/contrib/bin/make_dependencies.pl -I. $(foreach i, $(wildcard $(LIBMESH_DIR)/include/*), -I$(i)) $(moose_INCLUDE) $(elk_INCLUDE) "-S\$$(obj-suffix)" $(moose_src) > .depend
 
 # include the dependency list
--include .depend
+-include */*.d
+-include */*/*.d
+-include */*/*/*.d
+
