@@ -147,7 +147,7 @@ doc:
 
 clean::
 	@rm -f $(APPLICATION_NAME)-*
-	@find . -name "*~" -or -name "*.o" | xargs rm
+	@find . -name "*~" -or -name "*.o" -or -name "*.d" | xargs rm
 
 syntax:
 	python scripts/generate_input_syntax.py
