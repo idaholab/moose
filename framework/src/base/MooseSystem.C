@@ -1085,6 +1085,13 @@ MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, 
 }
 
 void
+MooseSystem::updateMaterials()
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    _materials[tid].updateMaterialDataState();
+}
+
+void
 MooseSystem::subdomainSetup(THREAD_ID tid, unsigned int block_id)
 {
   _element_data[tid]->_material = _materials[tid].getMaterials(block_id);

@@ -258,6 +258,13 @@ public:
   void compute_postprocessors (const NumericVector<Number>& soln);
 
   void subdomainSetup(THREAD_ID tid, unsigned int block_id);
+
+  /**
+   * Update materials
+   * Transient executioners has to call this at the beginning of tha time step
+   */
+  void updateMaterials();
+
   /**
    * Re-Initializes temporal discretization/transient control data.
    */
@@ -567,8 +574,6 @@ protected:
   friend class Material;
   friend class Stabilizer;
   friend class Executioner;
-  friend class TransientExecutioner;
-  friend class PowerIterationExecutioner;
   friend class Steady;
   friend class Postprocessor;
   friend class FunctionNeumannBC;

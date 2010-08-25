@@ -69,8 +69,7 @@ TransientExecutioner::execute()
       _moose_system.copy_old_solutions();
 
       // Update backward material data structures
-      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-        _moose_system._materials[tid].updateMaterialDataState();
+      _moose_system.updateMaterials();
     }    
 
     _moose_system.getNonlinearSystem()->update();
