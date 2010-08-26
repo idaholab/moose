@@ -89,17 +89,22 @@ public:
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = _moose_system._mesh->boundary_info->boundary_id (elem, side);
+          std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
 
-          BCIterator bc_it = _moose_system._bcs[tid].activeBCsBegin(boundary_id);
-          BCIterator bc_end = _moose_system._bcs[tid].activeBCsEnd(boundary_id);
-
-          if(bc_it != bc_end)
+          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           {
-            _moose_system.reinitBCs(tid, _soln, elem, side, boundary_id);
-          
-            for(; bc_it!=bc_end; ++bc_it)
-              (*bc_it)->computeJacobian();
+            short int bnd_id = *it;
+
+            BCIterator bc_it = _moose_system._bcs[tid].activeBCsBegin(bnd_id);
+            BCIterator bc_end = _moose_system._bcs[tid].activeBCsEnd(bnd_id);
+
+            if(bc_it != bc_end)
+            {
+              _moose_system.reinitBCs(tid, _soln, elem, side, bnd_id);
+
+              for(; bc_it!=bc_end; ++bc_it)
+                (*bc_it)->computeJacobian();
+            }
           }
         }
         else

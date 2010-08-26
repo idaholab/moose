@@ -75,18 +75,23 @@ public:
       {
         if (elem->neighbor(side) == NULL)
         {
-          unsigned int boundary_id = _moose_system._mesh->boundary_info->boundary_id (elem, side);
+          std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
 
-          PostprocessorIterator side_postprocessor_begin = _moose_system._pps[tid].sidePostprocessorsBegin(boundary_id);
-          PostprocessorIterator side_postprocessor_end = _moose_system._pps[tid].sidePostprocessorsEnd(boundary_id);
-          PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
-
-          if(side_postprocessor_begin != side_postprocessor_end)
+          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           {
-            _moose_system.reinitBCs(tid, _soln, elem, side, boundary_id);
-            
-            for(; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
-              (*side_postprocessor_it)->execute();
+            short int bnd_id = *it;
+
+            PostprocessorIterator side_postprocessor_begin = _moose_system._pps[tid].sidePostprocessorsBegin(bnd_id);
+            PostprocessorIterator side_postprocessor_end = _moose_system._pps[tid].sidePostprocessorsEnd(bnd_id);
+            PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
+
+            if(side_postprocessor_begin != side_postprocessor_end)
+            {
+              _moose_system.reinitBCs(tid, _soln, elem, side, bnd_id);
+
+              for(; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
+                (*side_postprocessor_it)->execute();
+            }
           }
         }
       }
