@@ -130,24 +130,6 @@ PDEBase::computeIntegral()
 }
 
 Real
-PDEBase::computeQpResidual()
-{
-  return 0;
-}
-
-Real
-PDEBase::computeQpJacobian()
-{
-  return 0;
-}
-
-Real
-PDEBase::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  return 0;
-}
-
-Real
 PDEBase::computeQpIntegral()
 {
   return 0;

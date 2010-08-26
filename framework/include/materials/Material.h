@@ -148,11 +148,6 @@ protected:
    */
 //  unsigned int _block_id;
 
-  /**
-   * Doesn't do anything for materials.
-   */
-  virtual Real computeQpResidual();
-
   template <typename T>
   bool have_property(const std::string & prop_name) const;
 

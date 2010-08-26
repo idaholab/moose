@@ -39,8 +39,6 @@ public:
 protected:
   virtual Real computeValue() = 0;
 
-  virtual Real computeQpResidual();
-  
   /**
    * Convenience reference to the ElementData object inside of MooseSystem
    */

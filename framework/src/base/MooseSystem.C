@@ -682,7 +682,6 @@ void MooseSystem::addDGKernel(std::string dg_kernel_name,
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<unsigned int>("_boundary_id") = 123456789;      // invalid id
     _dg_kernels[tid].addDGKernel(DGKernelFactory::instance()->create(dg_kernel_name, name, *this, parameters));
   }
 }
@@ -995,24 +994,10 @@ MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const N
 }
 
 void
-MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const Elem * neighbor, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
+MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const Elem * neighbor, DenseVector<Number> * Re, bool reinitKe)
 {
+  // FIXME: remove this magic constant
   unsigned int boundary_id = 123456789;
-
-//  _current_side = side;
-//
-//  if(_current_side_elem)
-//    delete _current_side_elem;
-//
-//  _current_side_elem = elem->build_side(side).release();
-//
-//  std::map<FEType, FEBase*>::iterator fe_it = _fe.begin();
-//  std::map<FEType, FEBase*>::iterator fe_end = _fe.end();
-//
-//  for(;fe_it != fe_end; ++fe_it)
-//    fe_it->second->reinit(elem, _current_side);
-//
-//  QuadraturePointData::reinit(boundary_id, soln, elem);
 
   // current element
   _face_data[tid]->_current_side = side;
@@ -1040,7 +1025,6 @@ MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, c
   _dof_map->dof_indices(neighbor, _neighbor_dof_data[tid]._dof_indices);
 
   if(Re) Re->resize(_neighbor_dof_data[tid]._dof_indices.size());
-  if(Ke) Ke->resize(_neighbor_dof_data[tid]._dof_indices.size(), _neighbor_dof_data[tid]._dof_indices.size());
 
   unsigned int position = 0;
 
@@ -1059,16 +1043,22 @@ MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, c
     _neighbor_face_data[tid]->_fe[fe_type]->reinit(neighbor, &qface_neighbor_point);
 
     _dof_map->dof_indices(neighbor, _neighbor_dof_data[tid]._var_dof_indices[var_num], var_num);
-    unsigned int num_dofs = _neighbor_dof_data[tid]._var_dof_indices[var_num].size();
 
-    if(Re) _neighbor_dof_data[tid].reinitRes(var_num, *Re, position, num_dofs);
-    if(Ke) _neighbor_dof_data[tid].reinitKes(var_num, num_dofs);
+    unsigned int num_e_dofs = _dof_data[tid]._var_dof_indices[var_num].size();
+    unsigned int num_n_dofs = _neighbor_dof_data[tid]._var_dof_indices[var_num].size();
 
-    position+=num_dofs;
+    if(Re) _neighbor_dof_data[tid].reinitRes(var_num, *Re, position, num_n_dofs);
+
+    if(reinitKe)
+    {
+      _dof_data[tid].reinitKns(var_num, num_e_dofs, num_n_dofs);
+      _neighbor_dof_data[tid].reinitKes(var_num, num_n_dofs);
+      _neighbor_dof_data[tid].reinitKns(var_num, num_n_dofs, num_e_dofs);
+    }
+
+    position+=num_n_dofs;
   }
   ((QuadraturePointData *) _neighbor_face_data[tid])->reinit(boundary_id, soln, neighbor);
-
-
 }
 
 void

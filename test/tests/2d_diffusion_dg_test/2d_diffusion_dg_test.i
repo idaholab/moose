@@ -88,8 +88,8 @@
   [./dg_diff]
   	type = DGDiffusion
   	variable = u
-  	epsilon = 0
-  	sigma = 18
+  	epsilon = 1
+  	sigma = 6
   [../]
 []
 
@@ -101,8 +101,8 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-	epsilon = 0
-	sigma = 18
+	epsilon = 1
+	sigma = 6
   [../]
 []
 

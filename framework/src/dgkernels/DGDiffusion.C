@@ -10,18 +10,6 @@ InputParameters validParams<DGDiffusion>()
   return params;
 }
 
-static
-Real j(Real a, Real b)
-{
-  return a-b;
-}
-
-static
-Real av(Real a, Real b)
-{
-  return 0.5 * (a+b);
-}
-
 DGDiffusion::DGDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :DGKernel(name, moose_system, parameters),
    _epsilon(parameters.get<Real>("epsilon")),
@@ -30,65 +18,65 @@ DGDiffusion::DGDiffusion(std::string name, MooseSystem & moose_system, InputPara
 }
 
 Real
-DGDiffusion::computeQpResidual()
+DGDiffusion::computeQpResidual(DGResidualType type)
 {
   Real r = 0;
 
   const unsigned int elem_b_order = static_cast<unsigned int> (_fe->get_order());
   const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
 
-  r -= av(_grad_u[_qp] * _normals[_qp], _grad_u_neighbor[_qp] * _normals[_qp]) * _test[_i][_qp];
-  r += _epsilon * j(_u_neighbor[_qp], _u[_qp]) * 0.5 * _grad_test[_i][_qp] * _normals[_qp];
+  switch (type)
+  {
+  case Element:
+    r -= 0.5 * (_u[_qp] * _normals[_qp] * _grad_test[_i][_qp] + _test[_i][_qp] * _normals[_qp] * _grad_u[_qp]);
+    r += _sigma / h_elem * _u[_qp] * _test[_i][_qp];
 
-  r += _sigma/h_elem * j(_u[_qp], _u_neighbor[_qp]) * _test[_i][_qp];
+    r += 0.5 * (_u_neighbor[_qp] * _normals[_qp] * _grad_test[_i][_qp] - _test[_i][_qp] * _normals[_qp] * _grad_u_neighbor[_qp]);
+    r -= _sigma / h_elem * _test[_i][_qp] * _u_neighbor[_qp];
+    break;
+
+  case Neighbor:
+    r += 0.5 * (_u_neighbor[_qp] * _normals[_qp] * _grad_test_neighbor[_i][_qp] + _test_neighbor[_i][_qp] * _normals[_qp] * _grad_u_neighbor[_qp]);
+    r += _sigma / h_elem * _u_neighbor[_qp] * _test_neighbor[_i][_qp];
+
+    r += 0.5 * (_test_neighbor[_i][_qp] * _normals[_qp] * _grad_u[_qp] - _u[_qp] * _normals[_qp] * _grad_test_neighbor[_i][_qp]);
+    r -= _sigma / h_elem * _u[_qp] * _test_neighbor[_i][_qp];
+    break;
+  }
 
   return r;
 }
 
 Real
-DGDiffusion::computeQpResidualNeighbor()
+DGDiffusion::computeQpJacobian(DGJacobianType type)
 {
   Real r = 0;
 
   const unsigned int elem_b_order = static_cast<unsigned int> (_fe->get_order());
   const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
 
-  r += av(_grad_u[_qp] * _normals[_qp], _grad_u_neighbor[_qp] * _normals[_qp]) * _test_neighbor[_i][_qp];
-  r += _epsilon * j(_u_neighbor[_qp], _u[_qp]) * 0.5 * _grad_test_neighbor[_i][_qp] * _normals[_qp];
+  switch (type)
+  {
+  case ElementElement:
+    r -= 0.5 * (_test[_j][_qp] * _normals[_qp] * _grad_test[_i][_qp] + _test[_i][_qp] * _normals[_qp] * _grad_test[_j][_qp]);
+    r += _sigma / h_elem * _test[_j][_qp] * _test[_i][_qp];
+    break;
 
-  r += _sigma/h_elem * j(_u_neighbor[_qp], _u[_qp]) * _test_neighbor[_i][_qp];
+  case ElementNeighbor:
+    r += 0.5 * (_test_neighbor[_j][_qp] * _normals[_qp] * _grad_test[_i][_qp] - _test[_i][_qp] * _normals[_qp] * _grad_test_neighbor[_j][_qp]);
+    r -= _sigma / h_elem * _test[_i][_qp] * _test_neighbor[_j][_qp];
+    break;
 
-  return r;
-}
+  case NeighborElement:
+    r += 0.5 * (_test_neighbor[_i][_qp] * _normals[_qp] * _grad_test[_j][_qp] - _test[_j][_qp] * _normals[_qp] * _grad_test_neighbor[_i][_qp]);
+    r -= _sigma / h_elem * _test[_j][_qp] * _test_neighbor[_i][_qp];
+    break;
 
-Real
-DGDiffusion::computeQpJacobian()
-{
-  Real r = 0;
-
-  const unsigned int elem_b_order = static_cast<unsigned int> (_fe->get_order());
-  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
-
-  r -= av(_grad_test[_j][_qp] * _normals[_qp], _grad_test_neighbor[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
-  r += _epsilon * j(_test_neighbor[_j][_qp], _test[_j][_qp]) * 0.5 * _grad_test[_i][_qp] * _normals[_qp];
-
-  r += _sigma/h_elem * j(_test[_j][_qp], _test_neighbor[_j][_qp]) * _test[_i][_qp];
-
-  return r;
-}
-
-Real
-DGDiffusion::computeQpJacobianNeighbor()
-{
-  Real r = 0;
-
-  const unsigned int elem_b_order = static_cast<unsigned int> (_fe->get_order());
-  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
-
-  r += av(_grad_test[_j][_qp] * _normals[_qp], _grad_test_neighbor[_j][_qp] * _normals[_qp]) * _test_neighbor[_i][_qp];
-  r += _epsilon * j(_test_neighbor[_j][_qp], _u[_qp]) * 0.5 * _grad_test_neighbor[_i][_qp] * _normals[_qp];
-
-  r += _sigma/h_elem * j(_test_neighbor[_j][_qp], _u[_qp]) * _test_neighbor[_i][_qp];
+  case NeighborNeighbor:
+    r += 0.5 * (_test_neighbor[_j][_qp] * _normals[_qp] * _grad_test_neighbor[_i][_qp] + _test_neighbor[_i][_qp] * _normals[_qp] * _grad_test_neighbor[_j][_qp]);
+    r += _sigma / h_elem * _test_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
+    break;
+  }
 
   return r;
 }

@@ -22,6 +22,9 @@ DofData::~DofData()
 
   for (std::vector<DenseMatrix<Number> *>::iterator i = _var_Kes.begin(); i != _var_Kes.end(); ++i)
     delete *i;
+
+  for (std::vector<DenseMatrix<Number> *>::iterator i = _var_Kns.begin(); i != _var_Kns.end(); ++i)
+    delete *i;
 }
 
 void
@@ -36,6 +39,7 @@ DofData::init()
 
   _var_Res.resize(n_vars);
   _var_Kes.resize(n_vars);
+  _var_Kns.resize(n_vars);
 }
 
 void
@@ -52,6 +56,13 @@ DofData::reinitKes(int var_num, unsigned int num_dofs)
 {
   if (_var_Kes[var_num])
     delete _var_Kes[var_num];
-
   _var_Kes[var_num] = new DenseMatrix<Number>(num_dofs, num_dofs);
+}
+
+void
+DofData::reinitKns(int var_num, unsigned int num_dofs, unsigned int num_n_dofs)
+{
+  if (_var_Kns[var_num])
+    delete _var_Kns[var_num];
+  _var_Kns[var_num] = new DenseMatrix<Number>(num_dofs, num_n_dofs);
 }

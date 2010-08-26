@@ -259,9 +259,3 @@ Material::getData(QP_Data_Type qp_data_type)
     return *v;
   }
 }
-
-Real
-Material::computeQpResidual()
-{
-  return 0;
-}

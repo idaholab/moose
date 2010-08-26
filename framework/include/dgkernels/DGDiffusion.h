@@ -25,11 +25,8 @@ public:
   DGDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpResidualNeighbor();
-
-  virtual Real computeQpJacobian();
-  virtual Real computeQpJacobianNeighbor();
+  virtual Real computeQpResidual(DGResidualType type);
+  virtual Real computeQpJacobian(DGJacobianType type);
 
   Real _epsilon;
   Real _sigma;

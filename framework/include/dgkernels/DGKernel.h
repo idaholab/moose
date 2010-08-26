@@ -5,7 +5,8 @@
 #include "Moose.h"
 #include "ValidParams.h"
 #include "MooseArray.h"
-#include "BoundaryCondition.h"
+#include "PDEBase.h"
+#include "FaceData.h"
 #include "MaterialPropertyInterface.h"
 
 //Forward Declarations
@@ -28,8 +29,24 @@ InputParameters validParams<DGKernel>();
  * 
  */
 class DGKernel :
-  public BoundaryCondition
+  public PDEBase,
+  protected MaterialPropertyInterface
 {
+protected:
+    enum DGResidualType
+    {
+      Element,
+      Neighbor
+    };
+
+    enum DGJacobianType
+    {
+      ElementElement,
+      ElementNeighbor,
+      NeighborElement,
+      NeighborNeighbor
+    };
+
 public:
 
   /** 
@@ -56,9 +73,14 @@ public:
 
 protected:
   /**
-   * The neighboring element
+   * Convenience reference to the DofData object inside of MooseSystem
    */
-  Elem * _neighbor_elem;
+  DofData & _dof_data;
+
+  /**
+   * Convenience reference to the FaceData object inside of MooseSystem
+   */
+  FaceData & _face_data;
 
   /**
    * Convenience reference to the FaceData object for neighboring element inside of MooseSystem
@@ -71,7 +93,83 @@ protected:
   FaceData & _neighbor_face_data;
 
   /**
+   * Made-up number for internal edges
+   */
+  unsigned int _boundary_id;
+
+  /**
+   * The current side as an element
+   * Only valid if there is a Dirichlet BC
+   * on this side.
+   */
+  Elem * _side_elem;
+
+  /**
+   * The neighboring element
+   */
+  Elem * _neighbor_elem;
+
+  /**
+   * Current side.
+   */
+  unsigned int & _current_side;
+
+  /**
+   * Current side element.
+   */
+  const Elem * & _current_side_elem;
+
+  /**
+   * Holds the current solution at the current quadrature point on the face.
+   */
+  MooseArray<Real> & _u;
+
+  /**
+   * Holds the current solution gradient at the current quadrature point on the face.
+   */
+  MooseArray<RealGradient> & _grad_u;
+
+  /**
+   * Holds the current solution second derivative at the current quadrature point on the face
+   */
+  MooseArray<RealTensor> & _second_u;
+
+  /** Side shape function.
+   */
+  const std::vector<std::vector<Real> > & _test;
+
+  /**
+   * Gradient of side shape function.
+   */
+  const std::vector<std::vector<RealGradient> > & _grad_test;
+
+  /**
+   * Second derivative of side shape function.
+   */
+  const std::vector<std::vector<RealTensor> > & _second_test;
+
+  /**
+   * Normal vectors at the quadrature points.
+   */
+  const std::vector<Point>& _normals;
+
+  /**
    *  Side shape function.
+   */
+  const std::vector<std::vector<Real> > & _phi_neighbor;
+
+  /**
+   * Gradient of side shape function.
+   */
+  const std::vector<std::vector<RealGradient> > & _grad_phi_neighbor;
+
+  /**
+   * Second derivative of side shape function.
+   */
+  const std::vector<std::vector<RealTensor> > & _second_phi_neighbor;
+
+  /**
+   *  Side test function.
    */
   const std::vector<std::vector<Real> > & _test_neighbor;
 
@@ -120,15 +218,15 @@ protected:
    */
   MooseArray<RealGradient> & _grad_u_older_neighbor;
 
-  /**
+ /**
    * This is the virtual that derived classes should override for computing the residual on neighboring element.
    */
-  virtual Real computeQpResidualNeighbor() = 0;
+  virtual Real computeQpResidual(DGResidualType type) = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
    */
-  virtual Real computeQpJacobianNeighbor() = 0;
+  virtual Real computeQpJacobian(DGJacobianType type) = 0;
 };
 
 #endif //DGKERNEL_H

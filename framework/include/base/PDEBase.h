@@ -191,25 +191,9 @@ protected:
   MooseArray<RealTensor> & _second_zero;
 
   /**
-   * This is the virtual that derived classes should override for computing the residual.
-   */
-  virtual Real computeQpResidual();
-
-  /**
-   * This is the virtual that derived classes should override for computing the Jacobian.
-   */
-  virtual Real computeQpJacobian();
-
-  /**
-   * This is the virtual that derived classes should override for computing an off-diagonal jacobian component.
-   */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
-  /**
    * This is the virtual that derived classes should override for computing the volume integral of kernel.
    */
   virtual Real computeQpIntegral();
-
 
   // Transient --------------------------------------------------------------------------
 

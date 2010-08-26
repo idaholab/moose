@@ -25,6 +25,7 @@ public:
   void reinitRes(int var_num, DenseVector<Number> & Re, unsigned int position, unsigned int num_dofs);
 
   void reinitKes(int var_num, unsigned int num_dofs);
+  void reinitKns(int var_num, unsigned int num_dofs, unsigned int num_n_dofs);
 
 public:
   /**
@@ -64,6 +65,10 @@ public:
    */
   std::vector<DenseMatrix<Number> * > _var_Kes;
 
+  /**
+   * Jacobian matrices for all variables (used in DG).
+   */
+  std::vector<DenseMatrix<Number> * > _var_Kns;
 };
 
 #endif //DOFDATA_H

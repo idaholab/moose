@@ -76,12 +76,6 @@ AuxKernel::isNodal()
   return _nodal;
 }
 
-Real
-AuxKernel::computeQpResidual()
-{
-  return 0;
-}
-
 MooseArray<Real> &
 AuxKernel::coupledValue(std::string name, int i)
 {
