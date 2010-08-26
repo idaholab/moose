@@ -38,7 +38,7 @@ all:: Makefile.export $(target)
 
 Makefile.export: Makefile.export.in
 	@echo "Creating Makefile.export"
-	@cat Makefile.export.in >> Makefile.export
+	@cat Makefile.export.in > Makefile.export
 
 clean::
 	@rm -f Makefile.export
