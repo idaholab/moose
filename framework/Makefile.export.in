@@ -77,16 +77,15 @@ endif
 ##############################################################################
 #
 # source files
-moose_src	:= $(wildcard src/*.C) $(wildcard src/*/*.C)
-srcfiles 	:= $(moose_src) $(wildcard src/utils/fparser/*.C)
-fsrcfiles       := $(wildcard src/*/*.f)
-f90srcfiles	:= $(wildcard src/*/*.f90)
+srcfiles    := $(shell find . -name *.C)
+fsrcfiles   := $(shell find . -name *.f)
+f90srcfiles := $(shell find . -name *.f90)
 
 #
 # object files
-objects		:= $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
-fobjects        := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
-f90objects	:= $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
+objects	    := $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
+fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
+f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
 #
 # header files
