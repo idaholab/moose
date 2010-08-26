@@ -3,7 +3,7 @@
 #include "Parser.h"
 #include "Moose.h"
 
-#include "dof_map.h"
+#include "periodic_boundaries.h"
 
 template<>
 InputParameters validParams<GenericPeriodicBlock>()
