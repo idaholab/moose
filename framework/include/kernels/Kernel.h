@@ -105,6 +105,11 @@ protected:
   virtual Real computeQpIntegral();
 
   /**
+   * Called before forming the residual for an element
+   */
+  virtual void precalculateResidual();
+
+  /**
    * Holds the current solution at the current quadrature point.
    */
   MooseArray<Real> & _u;
