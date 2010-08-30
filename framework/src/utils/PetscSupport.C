@@ -225,7 +225,7 @@ namespace Moose
       //y = updates.
       // for simple newton use w = x-y
 
-      int ierr;
+      int ierr = 0;
       Real damping = 1.0;
 
       EquationSystems * equation_systems = static_cast<EquationSystems *>(lsctx);
