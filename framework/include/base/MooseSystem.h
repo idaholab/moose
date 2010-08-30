@@ -418,6 +418,8 @@ private:
   std::vector<PostprocessorWarehouse> _pps;
   std::vector<FunctionWarehouse> _functions;
 
+  std::vector<bool> _first;
+
   /**
    * Whether or not we need to recompute the shape functions for each element.  Should only be true if EVERY element is exactly
    * the same shape.
@@ -534,6 +536,8 @@ public:
 
   // Solver convergence tolerance
   Real _l_abs_step_tol;
+  Real _last_rnorm;
+  Real _initial_residual;
 
   /**
    * Convenience zeros.

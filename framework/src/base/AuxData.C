@@ -62,7 +62,7 @@ void AuxData::init()
 
 void AuxData::reinit(const NumericVector<Number>& soln, const Node & node)
 {
-  Moose::perf_log.push("reinit(node)", "AuxKernel");
+//  Moose::perf_log.push("reinit(node)", "AuxKernel");
 
   unsigned int nonlinear_system_number = _moose_system.getNonlinearSystem()->number();
   unsigned int aux_system_number = _moose_system.getAuxSystem()->number();
@@ -113,7 +113,7 @@ void AuxData::reinit(const NumericVector<Number>& soln, const Node & node)
     }
   }
 
-  Moose::perf_log.pop("reinit(node)","AuxKernel");
+//  Moose::perf_log.pop("reinit(node)","AuxKernel");
 }
 
 void AuxData::reinit(const NumericVector<Number>& /*soln*/, const Elem & elem)

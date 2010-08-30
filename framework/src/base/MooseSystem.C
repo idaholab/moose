@@ -74,7 +74,9 @@ MooseSystem::MooseSystem() :
   _postprocessor_csv_output(false),
   _print_out_info(false),
   _output_initial(false),
-  _l_abs_step_tol(1e-10)
+  _l_abs_step_tol(1e-10),
+  _last_rnorm(0),
+  _initial_residual(0)
 {
   sizeEverything();
 }
@@ -122,7 +124,9 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _postprocessor_csv_output(false),
   _print_out_info(false),
   _output_initial(false),
-  _l_abs_step_tol(1e-10)
+  _l_abs_step_tol(1e-10),
+  _last_rnorm(0),
+  _initial_residual(0)
 {
   sizeEverything();
   initEquationSystems();
@@ -228,6 +232,8 @@ void
 MooseSystem::sizeEverything()
 {
   int n_threads = libMesh::n_threads();
+
+  _first.resize(n_threads, true);
 
   _element_data.resize(n_threads);
   _face_data.resize(n_threads);
@@ -924,9 +930,7 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
 //  Moose::perf_log.pop("reinit() - dof_indices","Kernel");
 //  Moose::perf_log.push("reinit() - fereinit","Kernel");
 
-  static std::vector<bool> first(libMesh::n_threads(), true);
-
-  if(!dontReinitFE() || first[tid])
+  if(!dontReinitFE() || _first[tid])
   {
     for(;fe_it != fe_end; ++fe_it)
       fe_it->second->reinit(elem);
@@ -938,7 +942,7 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
     }
   }
   
-  first[tid] = false;
+  _first[tid] = false;
 
 //  Moose::perf_log.pop("reinit() - fereinit","Kernel");
 

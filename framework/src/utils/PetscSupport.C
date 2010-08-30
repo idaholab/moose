@@ -61,14 +61,11 @@ namespace Moose
 
       *reason = KSP_CONVERGED_ITERATING;
 
-      //See if the solver has stagnated
-      static PetscReal last_rnorm = 0;
-
       //If it's the beginning of a new set of iterations, reset last_rnorm
       if(!n)
-        last_rnorm = 1e99;
+        moose_system->_last_rnorm = 1e99;
 
-      PetscReal norm_diff = std::fabs(rnorm-last_rnorm);
+      PetscReal norm_diff = std::fabs(rnorm - moose_system->_last_rnorm);
   
       if(norm_diff < moose_system->_l_abs_step_tol)
       {
@@ -76,7 +73,7 @@ namespace Moose
         return(0);
       }
 
-      last_rnorm = rnorm;
+      moose_system->_last_rnorm = rnorm;
 
       // From here, we want the default behavior of the KSPDefaultConverged
       // test, but we don't want PETSc to die in that function with a
@@ -101,15 +98,15 @@ namespace Moose
       return 0;
     }
 
-    PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void * /*dummy*/)
+    PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void * dummy)
     {
+      MooseSystem *moose_system = (MooseSystem *) dummy;      // C strikes
+
       // unused
       // TransientNonlinearImplicitSystem * system = dynamic_cast<TransientNonlinearImplicitSystem *>(&_equation_system->get_system("NonlinearSystem"));
   
       //  for(unsigned int var = 0; var < system->n_vars(); var++)
       //    std::cout<<var<<": "<<system->calculate_norm(*system->rhs,var,DISCRETE_L2)<<std::endl;
-
-      static Real initial_residual = 0;
 
       *reason = SNES_CONVERGED_ITERATING;
 
@@ -117,7 +114,7 @@ namespace Moose
       {
         /* set parameter for default relative tolerance convergence test */
         snes->ttol = fnorm*snes->rtol;
-        initial_residual = fnorm;
+        moose_system->_initial_residual = fnorm;
       }
       if (fnorm != fnorm)
       {
@@ -134,7 +131,7 @@ namespace Moose
         PetscInfo2(snes,"Exceeded maximum number of function evaluations: %D > %D\n",snes->nfuncs,snes->max_funcs);
         *reason = SNES_DIVERGED_FUNCTION_COUNT;
       }
-      else if(fnorm >= initial_residual * (1.0/snes->rtol))
+      else if(fnorm >= moose_system->_initial_residual * (1.0/snes->rtol))
       {
         PetscInfo2(snes,"Nonlinear solve was blowing up!",snes->nfuncs,snes->max_funcs);
         *reason = SNES_DIVERGED_LS_FAILURE;
