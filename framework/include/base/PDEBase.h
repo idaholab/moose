@@ -81,6 +81,13 @@ public:
    */
   virtual void setup() {};
 
+  template <typename T>
+  const T & getParam(const std::string &name)
+  {
+    return _parameters.get<T>(name);
+  }
+
+
 protected:
   // Integrable -------------------------------------------------------------------------
 

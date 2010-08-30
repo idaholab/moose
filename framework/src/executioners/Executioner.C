@@ -42,7 +42,7 @@ Executioner::~Executioner()
 void
 Executioner::setup()
 {
-  Moose::setSolverDefaults(_moose_system);
+  Moose::setSolverDefaults(_moose_system, this);
 
   _moose_system.getNonlinearSystem()->update();
 
@@ -131,3 +131,8 @@ Executioner::setScaling()
   }
 }
 
+void
+Executioner::updateNewtonStep()
+{
+  _moose_system.updateNewtonStep();
+}

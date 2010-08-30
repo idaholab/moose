@@ -165,6 +165,16 @@ protected:
    * Second derivative of interior test function.
    */
   const std::vector<std::vector<RealTensor> > & _second_test;
+
+  /**
+   * Holds the solution at the previous newton iteration.
+   */
+  MooseArray<Real> & _u_old_newton;
+
+  /**
+   * Holds the gradient of the solution at the previous newton iteration.
+   */
+  MooseArray<RealGradient> & _grad_u_old_newton;
 };
 
 #endif //KERNEL_H

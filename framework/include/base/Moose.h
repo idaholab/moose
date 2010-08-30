@@ -171,7 +171,7 @@ namespace Moose
    */
   void initMoose(int argc, char** argv);
   
-  void setSolverDefaults(MooseSystem &moose_system);
+  void setSolverDefaults(MooseSystem &moose_system, Executioner *executioner);
   
   void checkSystemsIntegrity();
   

@@ -45,6 +45,9 @@ MooseSystem::MooseSystem() :
   _has_displaced_mesh(false),
   _delete_mesh(true),
   _dim(0),
+  _need_old_newton(false),
+  _newton_soln(NULL),
+  _old_newton_soln(NULL),
   _mesh_changed(false),
   _no_fe_reinit(false),
   _preconditioner(NULL),
@@ -95,6 +98,9 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _has_displaced_mesh(false),
   _delete_mesh(false),
   _dim(_mesh->mesh_dimension()),
+  _need_old_newton(false),
+  _newton_soln(NULL),
+  _old_newton_soln(NULL),
   _mesh_changed(false),
   _no_fe_reinit(false),
   _preconditioner(NULL),
@@ -440,6 +446,9 @@ MooseSystem::initEquationSystems()
   _system->nonlinear_solver->jacobian = Moose::compute_jacobian;
   _system->attach_init_function(Moose::initial_condition);
 
+  _newton_soln = &_system->add_vector("newton_soln", false);
+  _old_newton_soln = &_system->add_vector("old_newton_soln", false);
+
   _aux_system = &_es->add_system<TransientExplicitSystem>("AuxiliarySystem");
   _aux_system->attach_init_function(Moose::initial_condition);
 
@@ -670,13 +679,23 @@ void MooseSystem::addKernel(std::string kernel_name,
     parameters.set<THREAD_ID>("_tid") = tid;
 
     if (!parameters.isParamValid("block"))
-      _kernels[tid].addKernel(KernelFactory::instance()->create(kernel_name, name, *this, parameters));
+    {
+      Kernel *kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
+      _kernels[tid].addKernel(kernel);
+      if (kernel->getParam<bool>("need_old_newton"))
+        _need_old_newton = true;
+    }
     else
     {
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
     
       for (unsigned int i=0; i<blocks.size(); ++i)
-        _kernels[tid].addBlockKernel(blocks[i], KernelFactory::instance()->create(kernel_name, name, *this, parameters));
+      {
+        Kernel *kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
+        _kernels[tid].addBlockKernel(blocks[i], kernel);
+        if (kernel->getParam<bool>("need_old_newton"))
+          _need_old_newton = true;
+      }
     }
   }
 }
@@ -982,6 +1001,8 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
 //  Moose::perf_log.pop("reinit() - resizing","Kernel");
 
   _element_data[tid]->reinitKernels(soln, elem, Re, Ke);
+  if (_need_old_newton)
+    _element_data[tid]->reinitNewtonStep(*_old_newton_soln);
   _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(elem->subdomain_id()));
 }
 
@@ -1077,6 +1098,16 @@ void
 MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem)
 {
   _aux_data[tid]->reinit(soln, elem);
+}
+
+void
+MooseSystem::updateNewtonStep()
+{
+  if (_need_old_newton)
+  {
+    *_old_newton_soln = *_newton_soln;
+    *_newton_soln = *_system->solution;
+  }
 }
 
 void

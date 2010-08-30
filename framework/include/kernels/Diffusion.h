@@ -21,6 +21,6 @@ protected:
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
-  
+
 };
 #endif //DIFFUSION_H

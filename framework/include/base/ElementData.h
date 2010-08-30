@@ -37,7 +37,12 @@ public:
   void initKernels();
 
   void reinitKernels(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke);
-  
+
+  /**
+   * Stores the values of variables for actual newton step
+   */
+  void reinitNewtonStep(const NumericVector<Number>& soln);
+
   /**
    * The MooseSystem this Kernel is associated with.
    */
@@ -51,6 +56,15 @@ public:
    */
   std::map<unsigned int, std::vector<std::vector<Real> > > _test;
 
+  /**
+   * Value of the variables at the quadrature points at previous newton step.
+   */
+  MooseArray<MooseArray<Real> > _var_vals_old_newton;
+
+  /**
+   * Gradient of the variables at the quadrature points at previous newton step.
+   */
+  MooseArray<MooseArray<RealGradient> > _var_grads_old_newton;
 };
 
 #endif //ELEMENTDATA_H

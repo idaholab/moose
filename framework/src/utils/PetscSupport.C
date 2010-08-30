@@ -4,6 +4,7 @@
 
 #include "Moose.h"
 #include "MooseSystem.h"
+#include "Executioner.h"
 
 //libMesh Includes
 #include "libmesh_common.h"
@@ -153,7 +154,27 @@ namespace Moose
       return(0);
     }
 
-    void petscSetDefaults(MooseSystem &moose_system)
+
+    /**
+     * Called at the beginning of every nonlinear step (before Jacobian is formed)
+     */
+    PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt step)
+    {
+      void *ctx = NULL;
+      SNESGetApplicationContext(snes, &ctx);
+
+      if (ctx != NULL)
+      {
+        Executioner *exec = (Executioner *) ctx;    // C strikes again
+
+        exec->updateNewtonStep();
+        exec->onNewtonUpdate();
+      }
+
+      return 0;
+    }
+
+    void petscSetDefaults(MooseSystem &moose_system, Executioner *executioner)
     {
       PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(moose_system.getNonlinearSystem()->nonlinear_solver.get());
       SNES snes = petsc_solver->snes();
@@ -184,6 +205,9 @@ namespace Moose
     
 #endif
     
+      SNESSetUpdate(snes, petscNewtonUpdate);
+      SNESSetApplicationContext(snes, (void *) executioner);
+
       /*
         PC pc;
         KSPGetPC(ksp,&pc);

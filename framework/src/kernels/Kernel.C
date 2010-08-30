@@ -38,7 +38,9 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _grad_u_older(_element_data._var_grads_older[_var_num]),
    _test((_element_data._test)[_var_num]),
    _grad_test(*(_element_data._grad_phi)[_fe_type]),
-   _second_test(*(_element_data._second_phi)[_fe_type])
+   _second_test(*(_element_data._second_phi)[_fe_type]),
+   _u_old_newton(_element_data._var_vals_old_newton[_var_num]),
+   _grad_u_old_newton(_element_data._var_grads_old_newton[_var_num])
 {
   // If this variable isn't known yet... make it so
   _element_data._var_nums[0].insert(_var_num);

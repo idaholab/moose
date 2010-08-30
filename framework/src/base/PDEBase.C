@@ -8,6 +8,7 @@ InputParameters validParams<PDEBase>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<bool>("_integrated", true);
+  params.addPrivateParam<bool>("need_old_newton", false);
 
   // FIXME: should go into parent class
   params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");

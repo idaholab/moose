@@ -245,10 +245,10 @@ Moose::registerObjects()
 }
 
 void
-Moose::setSolverDefaults(MooseSystem &moose_system)
+Moose::setSolverDefaults(MooseSystem &moose_system, Executioner *executioner)
 {
 #ifdef LIBMESH_HAVE_PETSC
-  MoosePetscSupport::petscSetDefaults(moose_system);
+  MoosePetscSupport::petscSetDefaults(moose_system, executioner);
 #endif //LIBMESH_HAVE_PETSC
 }
 

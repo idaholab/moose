@@ -109,7 +109,7 @@ TransientExecutioner::execute()
       std::cout << out.str() << std::endl;
     }
 
-    Moose::setSolverDefaults(_moose_system);
+    Moose::setSolverDefaults(_moose_system, this);
     
     setScaling();
 

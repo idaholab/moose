@@ -50,6 +50,16 @@ public:
    */
   virtual void execute() = 0;
 
+  /**
+   * Update newton-step related data
+   */
+  void updateNewtonStep();
+
+  /**
+   * Gets called at the beginning of every newton step
+   */
+  virtual void onNewtonUpdate() { }
+
 protected:
 
   /**
@@ -87,6 +97,7 @@ protected:
    */
   Real _initial_residual_norm;
   Real _old_initial_residual_norm;
+
 };
 
 #endif //EXECUTIONER_H

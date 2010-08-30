@@ -100,7 +100,7 @@ public:
   std::vector<std::string> getDisplacementVariables();
 
   inline unsigned int getDim() { return _dim; }
-  
+
   /**
    * Initialize the EquationSystems object and add both the nonlinear and auxiliary systems
    * to that object for this MooseSystem
@@ -121,7 +121,7 @@ public:
    * Returns a reference to the main nonlinear system in this instance of MooseSystem
    */
   TransientNonlinearImplicitSystem * getNonlinearSystem();
-  
+
   /**
    * Returns a reference to the auxillary system in this instance of MooseSystem
    */
@@ -336,6 +336,8 @@ public:
 
   void setPrintMeshChanged(bool print_mesh_changed);
 
+  void updateNewtonStep();
+
   /**
    * Adaptivity interface
    */
@@ -402,6 +404,14 @@ private:
   bool _has_displaced_mesh;
   bool _delete_mesh;                            // true if we own the mesh and we are responsible for its destruction
   unsigned int _dim;
+
+  /**
+   * True if we need old Isaac for solving our problems
+   */
+  bool _need_old_newton;
+
+  NumericVector<Number> * _newton_soln;       /// solution vector for the current newton step
+  NumericVector<Number> * _old_newton_soln;   /// solution vector for the previous newton step
 
   /**
    * Whether or not the mesh has changed recently.  Useful for doing separate output.
@@ -502,7 +512,7 @@ public:
    * The total number of Runge-Kutta stages
    */
   short _n_of_rk_stages;
-  
+
   /**
    * Maximum quadrature order required by all variables.
    */
@@ -519,7 +529,7 @@ public:
 
 
   bool _print_mesh_changed;
-  
+
   /**
    * Output related vars
    */
