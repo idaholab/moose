@@ -6,7 +6,7 @@ InputParameters validParams<SolidMechanicsMaterial>()
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
-  params.addRequiredCoupledVar("disp_z", "The z displacement");
+  params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
   return params;
 }
