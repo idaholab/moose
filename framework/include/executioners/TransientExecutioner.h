@@ -73,6 +73,11 @@ protected:
   double & _time;
 
   /**
+   * The dt from the input file.
+   */
+  double _input_dt;
+  
+  /**
    * Current delta t... or timestep size.
    *
    * Please don't modify this directly!

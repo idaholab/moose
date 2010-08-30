@@ -39,7 +39,8 @@ TransientExecutioner::TransientExecutioner(std::string name, MooseSystem & moose
   :Executioner(name, moose_system, parameters),
    _t_step(moose_system.parameters().set<int> ("t_step") = 0),
    _time(moose_system.parameters().set<Real>("time") = parameters.get<Real>("start_time")),
-   _dt(moose_system.parameters().set<Real>("dt") = parameters.get<Real>("dt")),
+   _input_dt(parameters.get<Real>("dt")),
+   _dt(moose_system.parameters().set<Real>("dt") = 0),
    _end_time(parameters.get<Real>("end_time")),
    _dtmin(parameters.get<Real>("dtmin")),
    _dtmax(parameters.get<Real>("dtmax")),
@@ -57,6 +58,7 @@ void
 TransientExecutioner::execute()
 {
   _t_step = 1;
+  _dt = _input_dt;
 
   bool keep_going = true;
 
