@@ -63,7 +63,7 @@ private:
   /**
    * A velocity vector that supports a dot product.
    */
-  RealVectorValue velocity;
+  RealVectorValue _velocity;
 
   /**
    * Class variables to hold the components of velocity coming from the input parameters.

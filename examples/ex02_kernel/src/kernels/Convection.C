@@ -32,19 +32,19 @@ Convection::Convection(std::string name,
   // We do this here so that it's only done once and then we just reuse it.
   // Note that RealVectorValues ALWAYS have 3 components... even when running in
   // 2D or 1D.  This makes the code simpler...
-  velocity(0)=_x;
-  velocity(1)=_y;
-  velocity(2)=_z;
+  _velocity(0)=_x;
+  _velocity(1)=_y;
+  _velocity(2)=_z;
 }
 
 Real Convection::computeQpResidual()
 {
   // velocity * _grad_u[_qp] is actually doing a dot product
-  return _test[_i][_qp]*(velocity*_grad_u[_qp]);
+  return _test[_i][_qp]*(_velocity*_grad_u[_qp]);
 }
 
 Real Convection::computeQpJacobian()
 {
   // the partial derivative of _grad_u is just _grad_phi[_j]
-  return _test[_i][_qp]*(velocity*_grad_phi[_j][_qp]);
+  return _test[_i][_qp]*(_velocity*_grad_test[_j][_qp]);
 }
