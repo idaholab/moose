@@ -21,6 +21,8 @@
 #include "PostprocessorData.h"
 #include "PostprocessorWarehouse.h"
 #include "FunctionWarehouse.h"
+#include "DamperData.h"
+#include "DamperWarehouse.h"
 
 //libmesh includes
 #include "transient_system.h"
@@ -224,6 +226,10 @@ public:
                    std::string name,
                    InputParameters parameters);
 
+  void addDamper(std::string damper_name,
+                 std::string name,
+                 InputParameters parameters);
+
   /**
    * Computes a block diagonal jacobian for the full system.
    */
@@ -247,6 +253,8 @@ public:
 
   void reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
 
+  void reinitDampers(THREAD_ID tid, const NumericVector<Number>& increment);
+
   void reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const Elem * neighbor, DenseVector<Number> * Re, bool reinitKe = false);
 
   void reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id);
@@ -256,6 +264,8 @@ public:
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem);
 
   void compute_postprocessors (const NumericVector<Number>& soln);
+
+  Real compute_damping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   void subdomainSetup(THREAD_ID tid, unsigned int block_id);
 
@@ -384,6 +394,7 @@ private:
   std::vector<AuxData *> _aux_data;
   std::vector<MaterialData> _material_data;
   std::vector<PostprocessorData> _postprocessor_data;
+  std::vector<DamperData *> _damper_data;
 
   DofMap * _dof_map;
 
@@ -427,6 +438,7 @@ private:
   std::vector<InitialConditionWarehouse> _ics;
   std::vector<PostprocessorWarehouse> _pps;
   std::vector<FunctionWarehouse> _functions;
+  std::vector<DamperWarehouse> _dampers;
 
   std::vector<bool> _first;
 
@@ -579,6 +591,7 @@ protected:
   friend class ComputeInternalResiduals;
   friend class ComputeInternalPostprocessors;
   friend class GenericExecutionerBlock;
+  friend class ComputeInternalDamping;
 
   friend class PDEBase;
   friend class InitialCondition;
@@ -592,11 +605,13 @@ protected:
   friend class Steady;
   friend class Postprocessor;
   friend class FunctionNeumannBC;
+  friend class Damper;
 
   friend class QuadraturePointData;
   friend class ElementData;
   friend class FaceData;
   friend class AuxData;
+  friend class DamperData;
 };
 
 /**

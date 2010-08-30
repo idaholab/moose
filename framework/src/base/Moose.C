@@ -104,6 +104,12 @@
 #include "PrintNumNodes.h"
 #include "AverageElementSize.h"
 
+#include "Damper.h"
+#include "DamperFactory.h"
+#include "DampersBlock.h"
+#include "GenericDamperBlock.h"
+#include "ConstantDamper.h"
+
 #include "Moose.h"
 #include "PetscSupport.h"
 
@@ -213,6 +219,8 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<AdaptivityBlock>("Executioner/Adaptivity");
   ParserBlockFactory::instance()->registerParserBlock<PostprocessorsBlock>("Postprocessors");
   ParserBlockFactory::instance()->registerParserBlock<GenericPostprocessorBlock>("Postprocessors/*");
+  ParserBlockFactory::instance()->registerParserBlock<DampersBlock>("Dampers");
+  ParserBlockFactory::instance()->registerParserBlock<GenericDamperBlock>("Dampers/*");
 
   InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
   InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
@@ -242,6 +250,8 @@ Moose::registerObjects()
   PostprocessorFactory::instance()->registerPostprocessor<PrintNumElems>("PrintNumElems");
   PostprocessorFactory::instance()->registerPostprocessor<PrintNumNodes>("PrintNumNodes");
   PostprocessorFactory::instance()->registerPostprocessor<AverageElementSize>("AverageElementSize");
+
+  DamperFactory::instance()->registerDamper<ConstantDamper>("ConstantDamper");
 }
 
 void

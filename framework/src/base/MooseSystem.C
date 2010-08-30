@@ -14,6 +14,7 @@
 #include "ComputeResidual.h"
 #include "ComputeJacobian.h"
 #include "ComputeInitialConditions.h"
+#include "DamperFactory.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -154,6 +155,7 @@ MooseSystem::~MooseSystem()
     delete _face_data[tid];
     delete _neighbor_face_data[tid];
     delete _aux_data[tid];
+    delete _damper_data[tid];
   }
 
   if (_preconditioner != NULL)
@@ -246,12 +248,15 @@ MooseSystem::sizeEverything()
   _face_data.resize(n_threads);
   _neighbor_face_data.resize(n_threads);
   _aux_data.resize(n_threads);
+  _damper_data.resize(n_threads);
+  
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
   {
     _element_data[tid] = new ElementData(*this, _dof_data[tid]);
     _face_data[tid] = new FaceData(*this, _dof_data[tid]);
     _neighbor_face_data[tid] = new FaceData(*this, _neighbor_dof_data[tid]);
     _aux_data[tid] = new AuxData(*this, _dof_data[tid], *_element_data[tid]);
+    _damper_data[tid] = new DamperData(*this, *_element_data[tid]);
   }
 
   _kernels.resize(n_threads);
@@ -263,6 +268,7 @@ MooseSystem::sizeEverything()
   _ics.resize(n_threads);
   _pps.resize(n_threads);
   _functions.resize(n_threads);
+  _dampers.resize(n_threads);
 
   // Kernels::sizeEverything
   _bdf2_wei.resize(3);
@@ -318,6 +324,7 @@ MooseSystem::init()
     _face_data[tid]->init();
     _neighbor_face_data[tid]->init();
     _aux_data[tid]->init();
+    _damper_data[tid]->init();
   }
 
   _t = 0;
@@ -926,6 +933,19 @@ MooseSystem::addFunction(std::string func_name,
 }
 
 void
+MooseSystem::addDamper(std::string damper_name,
+                       std::string name,
+                       InputParameters parameters)
+{
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    _dampers[tid].addDamper(DamperFactory::instance()->create(damper_name, name, *this, parameters));
+  }
+}
+
+void
 MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
 //  Moose::perf_log.push("reinit() - dof_indices","Kernel");
@@ -1099,6 +1119,12 @@ MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, 
 {
   _aux_data[tid]->reinit(soln, elem);
 }
+
+void
+MooseSystem::reinitDampers(THREAD_ID tid, const NumericVector<Number>& increment)
+{
+  _damper_data[tid]->reinit(increment);
+}  
 
 void
 MooseSystem::updateNewtonStep()

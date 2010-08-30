@@ -183,7 +183,7 @@ namespace Moose
       KSPSetPreconditionerSide(ksp, PC_RIGHT);
       SNESSetMaxLinearSolveFailures(snes, 1000000);
 
-//      SNESLineSearchSet(snes, petscPhysicsBasedLineSearch, moose_system.getEquationSystems());
+      SNESLineSearchSetPostCheck(snes, dampedCheck, moose_system.getEquationSystems());
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
       KSPSetConvergenceTest(ksp, petscConverged, &moose_system);
@@ -217,21 +217,20 @@ namespace Moose
       */
     }
     
-    PetscErrorCode petscPhysicsBasedLineSearch(SNES snes,void *lsctx,Vec x,Vec /*f*/,Vec g,Vec y,Vec w, PetscReal /*fnorm*/,PetscReal *ynorm,PetscReal *gnorm,PetscTruth *flag)
+//    PetscErrorCode petscPhysicsBasedLineSearch(SNES snes,void *lsctx,Vec x,Vec /*f*/,Vec g,Vec y,Vec w, PetscReal /*fnorm*/,PetscReal *ynorm,PetscReal *gnorm,PetscTruth *flag)
+    PetscErrorCode dampedCheck(SNES snes, Vec x, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * changed_w)
     {
       //w = updated solution = x+ scaling*y
       //x = current solution
       //y = updates.
       // for simple newton use w = x-y
 
-
       int ierr;
-      Real facmin = 0.2;
-      Real max_fraction = 0.5;
-
-      *flag = PETSC_TRUE;
+      Real damping = 1.0;
 
       EquationSystems * equation_systems = static_cast<EquationSystems *>(lsctx);
+
+      MooseSystem * moose_system = equation_systems->parameters.get<MooseSystem *>("moose_system");
 
       MeshBase & mesh = equation_systems->get_mesh();
     
@@ -245,76 +244,16 @@ namespace Moose
       PetscVector<Number>  update_vec_y(y);
       PetscVector<Number>  update_vec_w(w);
 
-      //vector  stores updated solution
-      update_vec_w.zero();
-      update_vec_w.add(1.,update_vec_x);
-      update_vec_w.add(-1.0,update_vec_y);
-/*
-      MeshBase::const_node_iterator nd     = mesh.local_nodes_begin();
-      MeshBase::const_node_iterator nd_end = mesh.local_nodes_end();
-      MeshBase::const_node_iterator nd_it  = mesh.local_nodes_begin();;
+      damping = moose_system->compute_damping(update_vec_w, update_vec_y);
 
-      for(nd_it = nd;nd_it != nd_end; ++nd_it)
+      if(damping != 1.0)
       {
-        Node * node = *nd_it;
-
-        unsigned int dof = node->dof_number(sys, 0, 0);
-        
-//        std::cout<<"x: "<<update_vec_x(dof)<<std::endl;
-
-//        if(dof == 84)
-//          std::cout<<"dof 84!"<<std::endl<<"x: "<<update_vec_x(dof)<<std::endl<<"y: "<<update_vec_y(dof)<<std::endl;          
-
-        if( update_vec_w(dof) <= 0 )
-        {
-          if(update_vec_y(dof))
-          {    
-            Real fac = (update_vec_x(dof) - .000045438)/update_vec_y(dof);
-            if( fac < facmin )
-              facmin = fac;
-          }
-        }
-        else if( update_vec_w(dof) >= 1 )
-        {
-          if(update_vec_y(dof))
-          {    
-            Real fac = (update_vec_x(dof) - .99995457)/update_vec_y(dof);
-            if( fac < facmin )
-              facmin = fac;
-          }
-        }
+        VecScale(y, damping);
+        *changed_y = PETSC_TRUE;
       }
 
-      Parallel::min(facmin);
-
-      if(facmin < 1.0)
-      {
-        std::cout << std::endl;
-        std::cout << "facmin..: " << facmin << std::endl;
-        std::cout << std::endl;
-      }
-*/  
-      update_vec_w.zero();
-      //this is standard newton update with damping parameter
-      ierr = VecNorm(y,NORM_2,ynorm);
-      ierr = VecWAXPY(w,-facmin,y,x);
-/*
-      for(nd_it = nd;nd_it != nd_end; ++nd_it)
-      {
-        Node * node = *nd_it;
-
-        unsigned int dof = node->dof_number(sys, 0, 0);
-
-        if(update_vec_w(dof) <= 0 || update_vec_w(dof) >= 1)
-          std::cout<<"w: "<<dof<<" = "<<update_vec_w(dof)<<std::endl;
-      }
-*/
-      ierr = SNESComputeFunction(snes,w,g);
-      ierr = VecNorm(g,NORM_2,gnorm);
       return(ierr);
-    
-
-    } 
+    }
   }
 }
 

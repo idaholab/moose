@@ -143,7 +143,6 @@ protected:
    */
   NumericVector<Number> * & _current_residual;
 
-
   /**
    * Holds the current solution at the current quadrature point on the face.
    */
