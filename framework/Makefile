@@ -24,6 +24,8 @@ ENABLE_ELK 	:= no
 MAKE_LIBRARY	:= yes
 APPLICATION_NAME := moose
 
+all:: Makefile.export
+
 # Include the MOOSE Export file
 include $(MOOSE_DIR)/Makefile.export.in
 # Note: This export is in MOOSE therefore we can't include Makefile.export
@@ -33,8 +35,6 @@ include $(MOOSE_DIR)/Makefile.export.in
 
 ###############################################################################
 # Additional special case targets should be added here
-
-all:: Makefile.export $(target)
 
 Makefile.export: Makefile.export.in
 	@echo "Creating Makefile.export"
