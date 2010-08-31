@@ -19,6 +19,7 @@ void
 ConvectionDiffusionBlock::execute() 
 {
   std::vector<std::string> variables = getBlockParams().get<std::vector<std::string> >("variables");
+  std::vector<std::string> vel_vec_variable;
 
   /**
    * We need to manually setup our Convection-Diffusion and Diffusion variables on our two
@@ -36,7 +37,8 @@ ConvectionDiffusionBlock::execute()
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   conv_diff_params.addCoupledVar("velocity_vector", "The Velocity Vector");
-  conv_diff_params.set<std::string>("velocity_vector") = variables[1];
+  vel_vec_variable.push_back(variables[1]);
+  conv_diff_params.set<std::vector<std::string> >("velocity_vector") = vel_vec_variable;
   _moose_system.addKernel("Convection", "conv", conv_diff_params);
 
   // Setup out Diffusion Kernel on the "v" variable
