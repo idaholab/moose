@@ -57,89 +57,95 @@ TransientExecutioner::TransientExecutioner(std::string name, MooseSystem & moose
 void
 TransientExecutioner::execute()
 {
-  _t_step = 1;
-  _dt = _input_dt;
-
-  bool keep_going = true;
-
   // Start time loop...
-  while(keep_going) 
+  while(keepGoing()) 
   {
-    if(_converged)
-    {
-      // Update backward time solution vectors
-      _moose_system.copy_old_solutions();
+    takeStep();
+  }
+}
 
-      // Update backward material data structures
-      _moose_system.updateMaterials();
-    }    
+void
+TransientExecutioner::takeStep()
+{
+  // If this is the first step
+  if(_t_step == 0)
+  {
+    _t_step = 1;
+    _dt = _input_dt;
+  }
 
-    _moose_system.getNonlinearSystem()->update();
+  if(_converged)
+  {
+    // Update backward time solution vectors
+    _moose_system.copy_old_solutions();
 
-    Real dt_cur = computeDT();
+    // Update backward material data structures
+    _moose_system.updateMaterials();
+  }    
 
-    // Don't let the time step size exceed maximum time step size
-    if(dt_cur > _dtmax)
-      dt_cur = _dtmax;
+  _moose_system.getNonlinearSystem()->update();
 
-    // Don't allow time step size to be smaller than minimum time step size
-    if(dt_cur < _dtmin)
-      dt_cur = _dtmin;
+  Real dt_cur = computeDT();
+
+  // Don't let the time step size exceed maximum time step size
+  if(dt_cur > _dtmax)
+    dt_cur = _dtmax;
+
+  // Don't allow time step size to be smaller than minimum time step size
+  if(dt_cur < _dtmin)
+    dt_cur = _dtmin;
           
-    // Don't let time go beyond simulation end time
-    if(_time + dt_cur > _end_time)
-      dt_cur = _end_time - _time;
+  // Don't let time go beyond simulation end time
+  if(_time + dt_cur > _end_time)
+    dt_cur = _end_time - _time;
     
-    // Increment time
-    _time += dt_cur;
-    _dt = dt_cur;
+  // Increment time
+  _time += dt_cur;
+  _dt = dt_cur;
 
-    _moose_system.reinitDT();
+  _moose_system.reinitDT();
 
-    std::cout<<"DT: "<<dt_cur<<std::endl;
+  std::cout<<"DT: "<<dt_cur<<std::endl;
 
-    std::cout << " Solving time step ";
-    {
-      OStringStream out;
+  std::cout << " Solving time step ";
+  {
+    OStringStream out;
       
-      OSSInt(out,2,_t_step);
-      out << ", time=";
-      OSSRealzeroleft(out,9,6,_time);
-      out <<  "...";
-      std::cout << out.str() << std::endl;
-    }
+    OSSInt(out,2,_t_step);
+    out << ", time=";
+    OSSRealzeroleft(out,9,6,_time);
+    out <<  "...";
+    std::cout << out.str() << std::endl;
+  }
 
-    Moose::setSolverDefaults(_moose_system, this);
+  Moose::setSolverDefaults(_moose_system, this);
     
-    setScaling();
+  setScaling();
 
-    preSolve();
+  preSolve();
     
-    Moose::perf_log.push("solve()","Solve");
-    // System Solve
-    _moose_system.solve();
-    Moose::perf_log.pop("solve()","Solve");
+  Moose::perf_log.push("solve()","Solve");
+  // System Solve
+  _moose_system.solve();
+  Moose::perf_log.pop("solve()","Solve");
 
-    _converged = _moose_system.getNonlinearSystem()->nonlinear_solver->converged;
+  _converged = _moose_system.getNonlinearSystem()->nonlinear_solver->converged;
 
-    postSolve();
+  postSolve();
 
-    std::cout<<"Norm of each nonlinear variable:"<<std::endl;
-    for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
-      std::cout << _moose_system.getNonlinearSystem()->variable_name(var) << ": "
-                << _moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2) << std::endl;
+  std::cout<<"Norm of each nonlinear variable:"<<std::endl;
+  for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
+    std::cout << _moose_system.getNonlinearSystem()->variable_name(var) << ": "
+              << _moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2) << std::endl;
     
-    if ( _converged && (_t_step+1)%_moose_system._interval == 0)
-      _moose_system.output_system(_t_step, _time);
+  if ( _converged && (_t_step+1)%_moose_system._interval == 0)
+    _moose_system.output_system(_t_step, _time);
 
-    keep_going = keepGoing();
-
-    if( _converged )
-    {
-      adaptMesh();
+  if( _converged )
+  {
+    adaptMesh();
             
-      _t_step++;
-    }
+    _t_step++;
   }
 }
 
@@ -187,7 +193,7 @@ TransientExecutioner::keepGoing()
   }
         
   // Check for stop condition based upon number of simulation steps and/or solution end time:
-  if(_t_step==_num_steps)
+  if(_t_step>_num_steps)
     return false;
   
   if((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))

@@ -39,7 +39,10 @@ public:
    */
   virtual void execute();
 
-protected:
+  /**
+   * This should execute the solve for one timestep.
+   */
+  virtual void takeStep();
 
   /**
    * Optional override.
@@ -57,6 +60,8 @@ protected:
    * Whether or not the last solve converged.
    */
   virtual bool lastSolveConverged();
+
+protected:
 
   /**
    * Current timestep.
