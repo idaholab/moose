@@ -46,6 +46,11 @@ MooseSystem::MooseSystem() :
   _has_displaced_mesh(false),
   _delete_mesh(true),
   _dim(0),
+  _ex_out(NULL),
+  _num_files(0),
+  _num_in_current_file(0),
+  _num_files_displaced(0),
+  _num_in_current_file_displaced(1),
   _need_old_newton(false),
   _newton_soln(NULL),
   _old_newton_soln(NULL),
@@ -99,6 +104,11 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _has_displaced_mesh(false),
   _delete_mesh(false),
   _dim(_mesh->mesh_dimension()),
+  _ex_out(NULL),
+  _num_files(0),
+  _num_in_current_file(0),
+  _num_files_displaced(0),
+  _num_in_current_file_displaced(1),
   _need_old_newton(false),
   _newton_soln(NULL),
   _old_newton_soln(NULL),
@@ -1357,34 +1367,29 @@ MooseSystem::output_system(unsigned int t_step, Real time)
   {
     std::string exodus_file_name;
 
-    // TODO: move statics into MooseSystem Proper
-    static ExodusII_IO * ex_out = NULL;
-    static unsigned int num_files = 0;
-    static unsigned int num_in_current_file = 0;
-
     bool adaptivity = _es->parameters.have_parameter<bool>("adaptivity");
 
 //    _mesh_changed = true;
 //    adaptivity = true;
 
     //if the mesh changed we need to write to a new file
-    if(_mesh_changed || !ex_out)
+    if(_mesh_changed || !_ex_out)
     {
-      num_files++;
+      _num_files++;
 
-      if(ex_out)
-        delete ex_out;
+      if(_ex_out)
+        delete _ex_out;
 
-      ex_out = new ExodusII_IO(_es->get_mesh());
+      _ex_out = new ExodusII_IO(_es->get_mesh());
 
       // We've captured this change... let's reset the changed bool and then see if it's changed again next time.
       _mesh_changed = false;
 
       // We're starting over
-      num_in_current_file = 0;
+      _num_in_current_file = 0;
     }
 
-    num_in_current_file++;
+    _num_in_current_file++;
 
     if(!adaptivity)
       exodus_file_name = _file_base;
@@ -1395,20 +1400,17 @@ MooseSystem::output_system(unsigned int t_step, Real time)
       exodus_stream_file_base << _file_base << "_";
 
       // -1 is so that the first one that comes out is 000
-      OSSRealzeroright(exodus_stream_file_base,4,0,num_files-1);
+      OSSRealzeroright(exodus_stream_file_base,4,0,_num_files-1);
 
       exodus_file_name = exodus_stream_file_base.str();
     }
 
     // The +1 is because Exodus starts timesteps at 1 and we start at 0
-    ex_out->write_timestep(exodus_file_name + ".e", *_es, num_in_current_file, time);
+    _ex_out->write_timestep(exodus_file_name + ".e", *_es, _num_in_current_file, time);
 
     if(_has_displaced_mesh)
     {
-      static unsigned int num_files_displaced = 0;
-      static unsigned int num_in_current_file_displaced = 1;
-
-      num_files_displaced++;
+      _num_files_displaced++;
 
       ExodusII_IO displaced_ex_out(_displaced_es->get_mesh());
 
@@ -1417,11 +1419,11 @@ MooseSystem::output_system(unsigned int t_step, Real time)
       exodus_stream_file_base << _file_base << "_displaced_";
 
       // -1 is so that the first one that comes out is 000
-      OSSRealzeroright(exodus_stream_file_base,4,0,num_files_displaced-1);
+      OSSRealzeroright(exodus_stream_file_base,4,0,_num_files_displaced-1);
 
       exodus_file_name = exodus_stream_file_base.str();
 
-      displaced_ex_out.write_timestep(exodus_file_name + ".e", *_displaced_es, num_in_current_file_displaced, time);      
+      displaced_ex_out.write_timestep(exodus_file_name + ".e", *_displaced_es, _num_in_current_file_displaced, time);      
     }
   }
 

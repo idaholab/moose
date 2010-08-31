@@ -207,23 +207,13 @@ namespace Moose
     
       SNESSetUpdate(snes, petscNewtonUpdate);
       SNESSetApplicationContext(snes, (void *) executioner);
-
-      /*
-        PC pc;
-        KSPGetPC(ksp,&pc);
-        PCSetType(pc,PCSHELL);
-        PCShellSetSetUp(pc,MatrixFreePreconditionerSetup);
-        PCShellSetApply(pc,MatrixFreePreconditioner);
-      */
     }
     
-//    PetscErrorCode petscPhysicsBasedLineSearch(SNES snes,void *lsctx,Vec x,Vec /*f*/,Vec g,Vec y,Vec w, PetscReal /*fnorm*/,PetscReal *ynorm,PetscReal *gnorm,PetscTruth *flag)
     PetscErrorCode dampedCheck(SNES snes, Vec x, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * changed_w)
     {
       //w = updated solution = x+ scaling*y
       //x = current solution
       //y = updates.
-      // for simple newton use w = x-y
 
       int ierr = 0;
       Real damping = 1.0;
@@ -246,7 +236,7 @@ namespace Moose
 
       damping = moose_system->compute_damping(update_vec_w, update_vec_y);
 
-      if(damping != 1.0)
+      if(damping < 1.0)
       {
         VecScale(y, damping);
         *changed_y = PETSC_TRUE;

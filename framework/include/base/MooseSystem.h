@@ -417,6 +417,16 @@ private:
   unsigned int _dim;
 
   /**
+   * Needed for output.
+   */
+  ExodusII_IO * _ex_out;
+  unsigned int _num_files;
+  unsigned int _num_in_current_file;
+  unsigned int _num_files_displaced;
+  unsigned int _num_in_current_file_displaced;
+
+
+  /**
    * True if we need old Isaac for solving our problems
    */
   bool _need_old_newton;
