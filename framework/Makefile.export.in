@@ -78,6 +78,12 @@ endif
 #
 # source files
 srcfiles    := $(shell find . -name *.C)
+
+ifeq ($(MAKE_LIBRARY),yes)
+# THIS LINE SHOULD BE MADE MORE GENERIC
+srcfiles    := $(filter-out ./src/main.C, $(srcfiles))
+endif
+
 fsrcfiles   := $(shell find . -name *.f)
 f90srcfiles := $(shell find . -name *.f90)
 
@@ -116,36 +122,38 @@ all:: $(target)
 ifeq ($(MAKE_LIBRARY),yes)
 ifeq ($(enable-shared),yes)
 # Build dynamic library
-$(target): $(objects)
+$(target): $(fobjects) $(f90objects) $(objects)
 	@echo "Linking "$@"..."
-	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(objects) $(libmesh_LDFLAGS)
+	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(fobjects) $(f90objects) $(objects) $(libmesh_LDFLAGS)
 else
 # Build static library
 ifeq ($(findstring darwin,$(hostos)),darwin)
-$(target): $(objects)
+$(target): $(fobjects) $(f90objects) $(objects)
 	@echo "Linking "$@"..."
-	@libtool -static -o $@ $(objects)
+	@libtool -static -o $@ $(fobjects) $(f90objects) $(objects) 
 else
-$(target): $(objects)
+$(target): $(fobjects) $(f90objects) $(objects)
 	@echo "Linking "$@"..."
-	@$(AR) rv $@ $(objects)
+	@$(AR) rv $@ $(fobjects) $(f90objects) $(objects)
 endif
 endif
 else
 
 # Normal Executable
-$(target): $(fobjects) $(f90objects) $(objects) $(moose_LIB) $(elk_LIB) $(mesh_library)
+$(target): $(fobjects) $(f90objects) $(objects) $(moose_LIB) $(elk_LIB) $(mesh_library) $(ADDITIONAL_DEPS)
 	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS)
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS) 
 
 endif
 
+libonly:
+	@$(MAKE) MAKE_LIBRARY=yes
 
 doc:
 	doxygen doc/Doxyfile
 
 clean::
-	@rm -f $(APPLICATION_NAME)-*
+	@rm -f $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
 	@find . -name "*~" -or -name "*.o" -or -name "*.d" | xargs rm
 
 syntax:
