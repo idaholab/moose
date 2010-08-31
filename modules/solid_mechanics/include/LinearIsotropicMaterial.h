@@ -23,7 +23,7 @@ public:
 protected:
   virtual void computeProperties();
 
-  void computeStress(const RealVectorValue & x,
+  virtual void computeStress(const RealVectorValue & x,
                      const RealVectorValue & y,
                      const RealVectorValue & z,
                      RealTensorValue & stress);

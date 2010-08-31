@@ -14,9 +14,9 @@ InputParameters validParams<LinearIsotropicMaterial>()
   params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addParam<Real>("thermal_conductivity", 0.0, "The thermal conductivity coeffecient.");
-  params.addCoupledVar("disp_x", "TODO: describe me");
-  params.addCoupledVar("disp_y", "TODO: describe me");
-  params.addCoupledVar("disp_z", "TODO: describe me");
+  params.addCoupledVar("disp_x", "x-displacement");
+  params.addCoupledVar("disp_y", "y-displacement");
+  params.addCoupledVar("disp_z", "z-displacement");
   return params;
 }
 
