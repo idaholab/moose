@@ -103,6 +103,7 @@
 #include "PrintNumElems.h"
 #include "PrintNumNodes.h"
 #include "AverageElementSize.h"
+#include "EmptyPostprocessor.h"
 
 #include "Damper.h"
 #include "DamperFactory.h"
@@ -250,6 +251,7 @@ Moose::registerObjects()
   PostprocessorFactory::instance()->registerPostprocessor<PrintNumElems>("PrintNumElems");
   PostprocessorFactory::instance()->registerPostprocessor<PrintNumNodes>("PrintNumNodes");
   PostprocessorFactory::instance()->registerPostprocessor<AverageElementSize>("AverageElementSize");
+  PostprocessorFactory::instance()->registerPostprocessor<EmptyPostprocessor>("EmptyPostprocessor");
 
   DamperFactory::instance()->registerDamper<ConstantDamper>("ConstantDamper");
 }
