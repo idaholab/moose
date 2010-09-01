@@ -1,7 +1,7 @@
-#include "Material.h"
-
 #ifndef EXAMPLEMATERIAL_H
 #define EXAMPLEMATERIAL_H
+
+#include "Material.h"
 
 //Forward Declarations
 class ExampleMaterial;

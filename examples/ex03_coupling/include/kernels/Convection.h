@@ -24,12 +24,12 @@ protected:
 
 private:
   /**
-   * Coupled things come through as MooseArray _refernces_.
+   * Coupled things come through as VaribleXYZ _references_.
    *
    * Since this is a reference it MUST be set in the Initialization List of the
    * constructor!
    */
-  MooseArray<RealGradient> & _velocity_vector;
+  VariableGradient & _velocity_vector;
 };
 
 #endif //CONVECTION_H

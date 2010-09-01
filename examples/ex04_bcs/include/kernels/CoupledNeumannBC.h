@@ -38,7 +38,7 @@ private:
    * Holds the values at the quadrature points
    * of a coupled variable.
    */
-  MooseArray<Real> & _some_var_val;
+  VariableValue & _some_var_val;
 };
 
 #endif //COUPLEDNEUMANNBC_H

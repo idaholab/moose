@@ -1,7 +1,7 @@
-#include "Kernel.h"
-
 #ifndef CONVECTION_H
 #define CONVECTION_H
+
+#include "Kernel.h"
 
 /**
  * The forward declaration is so that we can declare the validParams function
@@ -72,4 +72,5 @@ private:
   Real _y;
   Real _z;
 };
+
 #endif //CONVECTION_H

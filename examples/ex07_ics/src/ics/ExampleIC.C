@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<ExampleIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.set<Real>("value") = 0.0;
+  params.addRequiredParam<Real>("value", "The value of the initial condition");
   return params;
 }
 
@@ -26,8 +26,3 @@ ExampleIC::value(const Point & p)
    */
   return _value*p(0);
 }
-
-  
-
-
-  

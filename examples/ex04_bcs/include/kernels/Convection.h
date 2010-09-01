@@ -23,7 +23,7 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  MooseArray<RealGradient> & _velocity_vector;
+  VariableGradient & _velocity_vector;
 };
 
 #endif //CONVECTION_H
