@@ -18,10 +18,10 @@ InputParameters validParams<StressOutput>()
 StressOutput::StressOutput(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _stress(getMaterialProperty<RealTensorValue>("stress")),
-   _VonMises(_parameters.get<bool>("VonMises")),
-   _Hydrostatic(_parameters.get<bool>("Hydrostatic")),
-   _comp1(_parameters.get<int>("comp1")),
-   _comp2(_parameters.get<int>("comp2"))
+   _VonMises(getParam<bool>("VonMises")),
+   _Hydrostatic(getParam<bool>("Hydrostatic")),
+   _comp1(getParam<int>("comp1")),
+   _comp2(getParam<int>("comp2"))
 {
 }
 

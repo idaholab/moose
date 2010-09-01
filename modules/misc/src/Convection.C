@@ -22,9 +22,9 @@ Convection::Convection(std::string name, MooseSystem & moose_system, InputParame
    
    // This is the "Intialization List" it sets the values of class variables
    // Here we are grabbing the values of Parameters to use for a velocity vector
-   _x(_parameters.get<Real>("x")),
-   _y(_parameters.get<Real>("y")),
-   _z(_parameters.get<Real>("z"))
+   _x(getParam<Real>("x")),
+   _y(getParam<Real>("y")),
+   _z(getParam<Real>("z"))
 {
   // Build a velocity vector to use in the residual / jacobian computations.
   // We do this here so that it's only done once and then we just reuse it.

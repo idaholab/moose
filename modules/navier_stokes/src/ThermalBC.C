@@ -22,9 +22,9 @@ ThermalBC::ThermalBC(std::string name, MooseSystem & moose_system, InputParamete
     _v_vel(coupledValue("v")),
     _w_vel_var(_dim == 3 ? coupled("w") : 0),
     _w_vel(_dim == 3 ? coupledValue("w") : _zero),
-    _initial(_parameters.get<Real>("initial")),
-    _final(_parameters.get<Real>("final")),
-    _duration(_parameters.get<Real>("duration")),
+    _initial(getParam<Real>("initial")),
+    _final(getParam<Real>("final")),
+    _duration(getParam<Real>("duration")),
     _gamma(getMaterialProperty<Real>("gamma")),
     _R(getMaterialProperty<Real>("R")),
     _c_v(getMaterialProperty<Real>("c_v"))

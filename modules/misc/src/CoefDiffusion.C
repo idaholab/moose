@@ -11,7 +11,7 @@ InputParameters validParams<CoefDiffusion>()
 
 CoefDiffusion::CoefDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
-   _coef(_parameters.get<Real>("coef"))
+   _coef(getParam<Real>("coef"))
 {}
 
 Real
