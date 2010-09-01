@@ -16,19 +16,6 @@ ParserBlockFactory::instance()
   return instance;
 }
 
-/*
-ParserBlock *
-ParserBlockFactory::add(const std::string & reg_id, const std::string & real_id, ParserBlock * parent, Parser & parser_handle, InputParameters params)
-{
-  ParserBlock * parser_block;
-
-  parser_block = (*name_to_build_pointer[reg_id])(reg_id, real_id, parent, parser_handle, params);
-  active_parser_blocks.push_back(parser_block);
-
-  return parser_block;
-}
-*/
-
 ParserBlock *
 ParserBlockFactory::add(std::string name, MooseSystem & moose_system, InputParameters params)
 {
@@ -44,10 +31,6 @@ ParserBlockFactory::add(std::string name, MooseSystem & moose_system, InputParam
 InputParameters
 ParserBlockFactory::getValidParams(const std::string & name)
 {
-  /**
-   * If a name is not found for a ParserBlock a generic version is substituted instead
-   * of throwing an error
-   */
   std::string generic_identifier = ParserBlockFactory::instance()->isRegistered(name);
 
   if( _name_to_params_pointer.find(generic_identifier) == _name_to_params_pointer.end() )

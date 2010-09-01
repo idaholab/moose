@@ -11,6 +11,7 @@ class MooseObject;
 class ParserBlock;
 class InitialCondition;
 class Executioner;
+class GlobalParamsBlock;
 
 template<class KernelType>
 InputParameters validParams();
@@ -66,6 +67,7 @@ public:
   friend InputParameters validParams<ParserBlock>();
   friend InputParameters validParams<InitialCondition>();
   friend InputParameters validParams<Executioner>();
+  friend InputParameters validParams<GlobalParamsBlock>();
   friend class ParserBlock;
   
 private:

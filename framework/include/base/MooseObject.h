@@ -9,6 +9,7 @@
 
 class MooseSystem;
 class MooseObject;
+class GlobalParamsBlock;
 
 template<>
 InputParameters validParams<MooseObject>();
@@ -30,11 +31,12 @@ public:
   THREAD_ID tid();
 
   template <typename T>
+  inline 
   const T & getParam(const std::string &name)
   {
     return _parameters.get<T>(name);
   }
-  
+
 protected:
   /**
    * This Object's name.

@@ -96,10 +96,27 @@ namespace libMesh
       for (unsigned int j=0; i<_value[j].size(); j++)
         os << _value[i][j] << " ";
   }
- 
+
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<std::vector<bool> > >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      for (unsigned int j=0; i<_value[i].size(); j++)
+        os << _value[i][j] << " ";
+  }
+
   template<>
   inline
   void InputParameters::Parameter<std::vector<std::string> >::print (std::ostream& os) const
+  {
+    for (unsigned int i=0; i<_value.size(); i++)
+      os << _value[i] << " ";
+  }
+
+  template<>
+  inline
+  void InputParameters::Parameter<std::vector<bool> >::print (std::ostream& os) const
   {
     for (unsigned int i=0; i<_value.size(); i++)
       os << _value[i] << " ";

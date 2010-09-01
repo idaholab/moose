@@ -62,8 +62,6 @@
 #include "GenericStabilizerBlock.h"
 #include "MaterialsBlock.h"
 #include "GenericMaterialBlock.h"
-//#include "ExecutionBlock.h"
-//#include "TransientBlock.h"
 #include "OutputBlock.h"
 #include "PreconditioningBlock.h"
 #include "PBPBlock.h"
@@ -74,6 +72,7 @@
 #include "GenericExecutionerBlock.h"
 #include "PostprocessorsBlock.h"
 #include "GenericPostprocessorBlock.h"
+#include "GlobalParamsBlock.h"
 
 #include "ComputeInitialConditions.h"
 #include "InitialConditionFactory.h"
@@ -208,9 +207,6 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<GenericStabilizerBlock>("Stabilizers/*");
   ParserBlockFactory::instance()->registerParserBlock<MaterialsBlock>("Materials");
   ParserBlockFactory::instance()->registerParserBlock<GenericMaterialBlock>("Materials/*");
-//  ParserBlockFactory::instance()->registerParserBlock<ExecutionBlock>("Execution");
-//  ParserBlockFactory::instance()->registerParserBlock<TransientBlock>("Execution/Transient");
-//  ParserBlockFactory::instance()->registerParserBlock<AdaptivityBlock>("Execution/Adaptivity");
   ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
   ParserBlockFactory::instance()->registerParserBlock<PreconditioningBlock>("Preconditioning");
   ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");
@@ -222,11 +218,11 @@ Moose::registerObjects()
   ParserBlockFactory::instance()->registerParserBlock<GenericPostprocessorBlock>("Postprocessors/*");
   ParserBlockFactory::instance()->registerParserBlock<DampersBlock>("Dampers");
   ParserBlockFactory::instance()->registerParserBlock<GenericDamperBlock>("Dampers/*");
+  ParserBlockFactory::instance()->registerParserBlock<GlobalParamsBlock>("GlobalParams");
 
   InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
   InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
   InitialConditionFactory::instance()->registerInitialCondition<RandomIC>("RandomIC");
-//  InitialConditionFactory::instance()->registerInitialCondition<FunctionIC>("FunctionIC");
 
   ExecutionerFactory::instance()->registerExecutioner<Steady>("Steady");
 

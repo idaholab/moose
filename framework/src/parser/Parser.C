@@ -18,6 +18,7 @@
 #include "InitialConditionFactory.h"
 #include "ExecutionerFactory.h"
 #include "PostprocessorFactory.h"
+#include "GlobalParamsBlock.h"
 
 // Static Data initialization
 const std::string Parser::_show_tree = "--show_tree";
@@ -508,17 +509,40 @@ Parser::printUsage() const
 void
 Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
+  const std::string global_params_block_name = "GlobalParams";
+  ParserBlock *parser_block =
+    _input_tree != NULL ? _input_tree->locateBlock(global_params_block_name) : NULL;
+  GlobalParamsBlock *global_params_block =
+    parser_block != NULL ? dynamic_cast<GlobalParamsBlock *>(parser_block) : NULL;
+
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
   {
+    bool found = false;
+    bool in_global = false;
     std::string full_name = prefix + "/" + it->first;
 
     // Mark parameters appearing in the input file
     if (_getpot_file.have_variable(full_name.c_str()))
+    {
       p.seenInInputFile(it->first);
-    // The parameter is required but missing
-    else if (p.isParamRequired(it->first))
+      found = true;
+    }
+    // Wait! Check the GlobalParams section
+    else if (global_params_block != NULL)
+    {
+      full_name = global_params_block_name + "/" + it->first;
+      if (_getpot_file.have_variable(full_name.c_str()))
+      {
+        p.seenInInputFile(it->first);
+        found = true;
+        in_global = true;
+      }
+    }
+    
+    if (!found && p.isParamRequired(it->first))
+      // The parameter is required but missing
       mooseError("The required parameter '" + full_name + "' is missing\n");
-      
+    
     InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
     InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
     InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
@@ -534,56 +558,67 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
     
     if (real_param)
-      setScalarParameter<Real>(full_name, real_param);
+      setScalarParameter<Real>(full_name, it->first, real_param, in_global, global_params_block);
     else if (int_param)
-      setScalarParameter<int>(full_name, int_param);
+      setScalarParameter<int>(full_name, it->first, int_param, in_global, global_params_block);
     else if (uint_param)
-      setScalarParameter<unsigned int>(full_name, uint_param);
+      setScalarParameter<unsigned int>(full_name, it->first, uint_param, in_global, global_params_block);
     else if (bool_param)
-      setScalarParameter<bool>(full_name, bool_param);
+      setScalarParameter<bool>(full_name, it->first, bool_param, in_global, global_params_block);
     else if (string_param)
-      setScalarParameter<std::string>(full_name, string_param);
+      setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
     else if (vec_real_param)
-      setVectorParameter<Real>(full_name, vec_real_param);
+      setVectorParameter<Real>(full_name, it->first, vec_real_param, in_global, global_params_block);
     else if (vec_int_param)
-      setVectorParameter<int>(full_name, vec_int_param);
+      setVectorParameter<int>(full_name, it->first, vec_int_param, in_global, global_params_block);
     else if (vec_uint_param)
-      setVectorParameter<unsigned int>(full_name, vec_uint_param);
+      setVectorParameter<unsigned int>(full_name, it->first, vec_uint_param, in_global, global_params_block);
     else if (vec_bool_param)
-      setVectorParameter<bool>(full_name, vec_bool_param);
+      setVectorParameter<bool>(full_name, it->first, vec_bool_param, in_global, global_params_block);
     else if (vec_string_param)
-      setVectorParameter<std::string>(full_name, vec_string_param);
+      setVectorParameter<std::string>(full_name, it->first, vec_string_param, in_global, global_params_block);
     else if (tensor_real_param)
-      setTensorParameter<Real>(full_name, tensor_real_param);
+      setTensorParameter<Real>(full_name, it->first, tensor_real_param, in_global, global_params_block);
     else if (tensor_int_param)
-      setTensorParameter<int>(full_name, tensor_int_param);
+      setTensorParameter<int>(full_name, it->first, tensor_int_param, in_global, global_params_block);
     else if (tensor_bool_param)
-      setTensorParameter<bool>(full_name, tensor_bool_param);
+      setTensorParameter<bool>(full_name, it->first, tensor_bool_param, in_global, global_params_block);
   }
 }
 
 template<typename T>
-void Parser::setScalarParameter(const std::string & name, InputParameters::Parameter<T>* param)
+void Parser::setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsBlock *global_block)
 {
-  param->set() = _getpot_file(name.c_str(), param->get());
+  T value = _getpot_file(full_name.c_str(), param->get());
+  
+  param->set() = value;
+  if (in_global)
+    global_block->setScalarParam<T>(short_name) = value;
 }
 
 template<typename T>
-void Parser::setVectorParameter(const std::string & name, InputParameters::Parameter<std::vector<T> >* param)
+void Parser::setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsBlock *global_block)
 {
-  int vec_size = _getpot_file.vector_variable_size(name.c_str());
+  int vec_size = _getpot_file.vector_variable_size(full_name.c_str());
 
-  if (_getpot_file.have_variable(name.c_str()))
+  if (_getpot_file.have_variable(full_name.c_str()))
     param->set().resize(vec_size);
     
   for (int i=0; i<vec_size; ++i)
-    param->set()[i] = _getpot_file(name.c_str(), param->get()[i], i);
+    param->set()[i] = _getpot_file(full_name.c_str(), param->get()[i], i);
+
+  if (in_global)
+  {
+    global_block->setVectorParam<T>(short_name).resize(vec_size);
+    for (int i=0; i<vec_size; ++i)
+      global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
+  }
 }
 
 template<typename T>
-void Parser::setTensorParameter(const std::string & name, InputParameters::Parameter<std::vector<std::vector<T> > >* param)
+void Parser::setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsBlock *global_block)
 {
-  int vec_size = _getpot_file.vector_variable_size(name.c_str());
+  int vec_size = _getpot_file.vector_variable_size(full_name.c_str());
   int one_dim = pow(vec_size, 0.5);
 
   param->set().resize(one_dim);
@@ -591,7 +626,17 @@ void Parser::setTensorParameter(const std::string & name, InputParameters::Param
   {
     param->set()[i].resize(one_dim);
     for (int j=0; j<one_dim; ++j)
-      param->set()[i][j] = _getpot_file(name.c_str(), param->get()[i][j], i*one_dim+j);
+      param->set()[i][j] = _getpot_file(full_name.c_str(), param->get()[i][j], i*one_dim+j);
+  }
+
+  if (in_global)
+  {
+    global_block->setTensorParam<T>(short_name).resize(one_dim);
+    for (int i=0; i<one_dim; ++i)
+    {
+      global_block->setTensorParam<T>(short_name)[i].resize(one_dim);
+      for (int j=0; j<one_dim; ++j)
+        global_block->setTensorParam<T>(short_name)[i][j] = param->get()[i][j];
+    }
   }
 }
-

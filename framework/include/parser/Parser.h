@@ -155,13 +155,13 @@ private:
    * since they are colled only from this Object
    */
   template<typename T>
-  void setScalarParameter(const std::string & name, InputParameters::Parameter<T>* param);
+  void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsBlock *global_block);
+  
+  template<typename T>
+  void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsBlock *global_block);
 
   template<typename T>
-  void setVectorParameter(const std::string & name, InputParameters::Parameter<std::vector<T> >* param);
-
-  template<typename T>
-  void setTensorParameter(const std::string & name, InputParameters::Parameter<std::vector<std::vector<T> > >* param);
+  void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsBlock *global_block);
 
   /************************************
    * Private Data Members
