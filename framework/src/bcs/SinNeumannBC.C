@@ -14,9 +14,9 @@ InputParameters validParams<SinNeumannBC>()
 
 SinNeumannBC::SinNeumannBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
-   _initial(_parameters.get<Real>("initial")),
-   _final(_parameters.get<Real>("final")),
-   _duration(_parameters.get<Real>("duration"))
+   _initial(getParam<Real>("initial")),
+   _final(getParam<Real>("final")),
+   _duration(getParam<Real>("duration"))
  {}
 
 Real

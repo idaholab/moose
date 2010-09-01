@@ -14,10 +14,10 @@ InputParameters validParams<ConvectiveFluxBC>()
 
 ConvectiveFluxBC::ConvectiveFluxBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
-     _initial(_parameters.get<Real>("initial")),
-     _final(_parameters.get<Real>("final")),
-     _rate(_parameters.get<Real>("rate")),
-     _duration(_parameters.get<Real>("duration"))
+     _initial(getParam<Real>("initial")),
+     _final(getParam<Real>("final")),
+     _rate(getParam<Real>("rate")),
+     _duration(getParam<Real>("duration"))
 {}
  
 

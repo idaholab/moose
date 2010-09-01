@@ -29,11 +29,12 @@ public:
    */
   THREAD_ID tid();
 
-  /**
-   * Return the InputParameters object associated with this class.
-   */
-  InputParameters & parameters();
-
+  template <typename T>
+  const T & getParam(const std::string &name)
+  {
+    return _parameters.get<T>(name);
+  }
+  
 protected:
   /**
    * This Object's name.
@@ -45,11 +46,6 @@ protected:
    */
   MooseSystem &_moose_system;
 
-  /**
-   * Holds parameters for derived classes so they can be built with common constructor.
-   */
-  InputParameters _parameters;
-
   // FIXME: remove this after fixing the threading model?
   /**
    * The thread id this object is associated with.
@@ -60,6 +56,13 @@ protected:
    * Whether or not this object should be evaluated on the displaced mesh.
    */
   bool _use_displaced_mesh;
+
+private:
+  /**
+   * Holds parameters for derived classes so they can be built with common constructor.
+   */
+  InputParameters _parameters;
+
 };
 
 #endif // MOOSEOBJECT_H

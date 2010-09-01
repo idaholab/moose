@@ -17,10 +17,10 @@ ConvectionDiffusionSUPG::ConvectionDiffusionSUPG(std::string name,
                                                  MooseSystem & moose_system,
                                                  InputParameters parameters)
   :SUPGBase(name, moose_system, parameters),
-   _coef(_parameters.get<Real>("coef")),
-   _x(_parameters.get<Real>("x")),
-   _y(_parameters.get<Real>("y")),
-   _z(_parameters.get<Real>("z"))
+   _coef(getParam<Real>("coef")),
+   _x(getParam<Real>("x")),
+   _y(getParam<Real>("y")),
+   _z(getParam<Real>("z"))
 {
   _my_velocity(0)=_x;
   _my_velocity(1)=_y;

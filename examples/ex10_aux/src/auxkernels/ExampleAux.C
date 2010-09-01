@@ -16,7 +16,7 @@ ExampleAux::ExampleAux(std::string name, MooseSystem & moose_system, InputParame
    _coupled_val(coupledValue("coupled")),
 
    // Set our member scalar value from InputParameters (read from the input file)
-   _value(_parameters.get<Real>("value"))
+   _value(getParam<Real>("value"))
 {}
 
 /**

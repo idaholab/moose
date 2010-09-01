@@ -17,9 +17,9 @@ PolyConvection::PolyConvection(std::string name,
   :Kernel(name, sys, parameters),
 
    // This is the "Intialization List" it sets the values of class variables
-   _x(_parameters.get<Real>("x")),
-   _y(_parameters.get<Real>("y")),
-   _z(_parameters.get<Real>("z"))
+   _x(getParam<Real>("x")),
+   _y(getParam<Real>("y")),
+   _z(getParam<Real>("z"))
 {
   
   velocity(0)=_x;

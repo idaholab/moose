@@ -16,9 +16,9 @@ MMSConvection::MMSConvection(std::string name,
  
   :Kernel(name, sys, parameters),
    
-   _x(_parameters.get<Real>("x")),
-   _y(_parameters.get<Real>("y")),
-   _z(_parameters.get<Real>("z"))
+   _x(getParam<Real>("x")),
+   _y(getParam<Real>("y")),
+   _z(getParam<Real>("z"))
 {
   
   velocity(0)=_x;

@@ -10,7 +10,7 @@ InputParameters validParams<NeumannBC>()
 
 NeumannBC::NeumannBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
-    _value(_parameters.get<Real>("value"))
+    _value(getParam<Real>("value"))
  {}
 
 Real

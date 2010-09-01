@@ -14,7 +14,7 @@ MMSCoupledDirichletBC::MMSCoupledDirichletBC(std::string name, MooseSystem & moo
   :BoundaryCondition(name, moose_system, parameters),
 
    //Grab the parameter for the multiplier. 
-   _value(_parameters.get<Real>("value"))
+   _value(getParam<Real>("value"))
 {}
 
 Real

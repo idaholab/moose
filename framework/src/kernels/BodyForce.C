@@ -10,7 +10,7 @@ InputParameters validParams<BodyForce>()
 
 BodyForce::BodyForce(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
-   _value(_parameters.get<Real>("value"))
+   _value(getParam<Real>("value"))
   {}
 
 Real

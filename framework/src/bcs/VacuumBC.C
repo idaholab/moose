@@ -10,7 +10,7 @@ InputParameters validParams<VacuumBC>()
 
 VacuumBC::VacuumBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
-    _alpha(_parameters.get<Real>("alpha"))
+    _alpha(getParam<Real>("alpha"))
   {}
 
 Real

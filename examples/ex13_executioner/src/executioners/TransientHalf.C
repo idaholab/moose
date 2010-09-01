@@ -13,8 +13,8 @@ InputParameters validParams<TransientHalf>()
 
 TransientHalf::TransientHalf(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :TransientExecutioner(name, moose_system, parameters),
-   _ratio(_parameters.get<Real>("ratio")),
-   _min_dt(_parameters.get<Real>("min_dt"))
+   _ratio(getParam<Real>("ratio")),
+   _min_dt(getParam<Real>("min_dt"))
 {}
 
 Real

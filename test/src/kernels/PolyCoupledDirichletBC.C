@@ -14,7 +14,7 @@ PolyCoupledDirichletBC::PolyCoupledDirichletBC(std::string name, MooseSystem & m
   :BoundaryCondition(name, moose_system, parameters),
 
    //Grab the parameter for the multiplier. 
-   _value(_parameters.get<Real>("value"))
+   _value(getParam<Real>("value"))
 {}
 
 Real

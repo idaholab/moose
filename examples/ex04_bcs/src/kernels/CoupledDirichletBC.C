@@ -17,7 +17,7 @@ CoupledDirichletBC::CoupledDirichletBC(std::string name, MooseSystem & moose_sys
    /**
     * Grab the parameter for the multiplier.
     */
-   _value(_parameters.get<Real>("value")),
+   _value(getParam<Real>("value")),
 
    /**
     * Get a reference to the coupled variable's values.
