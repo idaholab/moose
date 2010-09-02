@@ -33,6 +33,7 @@
 #include "ExecutionerFactory.h"
 #include "PostprocessorFactory.h"
 #include "GlobalParamsBlock.h"
+#include "DamperFactory.h"
 
 // Static Data initialization
 const std::string Parser::_show_tree = "--show_tree";
@@ -288,6 +289,20 @@ Parser::buildFullTree( const std::string format )
     curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
   }
 
+  // Add all the Dampers Kernels
+  curr_block = curr_block->locateBlock("Dampers");
+  prefix = "Dampers/";
+  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params.set<ParserBlock *>("parent") = curr_block;
+  params.set<Parser *>("parser_handle") = this;
+  for (DamperNamesIterator i = DamperFactory::instance()->registeredDampersBegin();
+       i != DamperFactory::instance()->registeredDampersEnd(); ++i)
+  {
+    params.set<std::string>("type") = *i;
+    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+  }
+
+  
   // Add all the AuxKernels
   curr_block = curr_block->locateBlock("AuxKernels");
   prefix = "AuxKernels/";
