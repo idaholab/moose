@@ -20,17 +20,24 @@
 #include "PolyForcing.h" //including our polynomial Reaction Kernel
 #include "PolyConstantAux.h" //including our polynomial Aux Kernel
 
-//Local Includes
+// kernels
 #include "DiffMKernel.h"
+#include "MatDiffusion.h"
 
+// boundary conditions
+#include "MTBC.h"
+
+// materials
 #include "Diff1Material.h"
 #include "Diff2Material.h"
+#include "MTMaterial.h"
 
 namespace MooseTest
 {
   void registerObjects()
   {
     KernelFactory::instance()->registerKernel<DiffMKernel>("DiffMKernel");
+    KernelFactory::instance()->registerKernel<MatDiffusion>("MatDiffusion");
 
     KernelFactory::instance()->registerKernel<MMSImplicitEuler>("MMSImplicitEuler");
 
@@ -53,10 +60,12 @@ namespace MooseTest
     // Register our new material class so we can use it.
     MaterialFactory::instance()->registerMaterial<Diff1Material>("Diff1Material");
     MaterialFactory::instance()->registerMaterial<Diff2Material>("Diff2Material");
+    MaterialFactory::instance()->registerMaterial<MTMaterial>("MTMaterial");
 
     //Registering the Boundary Conditions
     BCFactory::instance()->registerBC<MMSCoupledDirichletBC>("MMSCoupledDirichletBC");
     BCFactory::instance()->registerBC<PolyCoupledDirichletBC>("PolyCoupledDirichletBC");
+    BCFactory::instance()->registerBC<MTBC>("MTBC");
     //Registering our Aux Kernel
     AuxFactory::instance()->registerAux<MMSConstantAux>("MMSConstantAux");
 

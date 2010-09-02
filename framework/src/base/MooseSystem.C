@@ -1040,7 +1040,7 @@ void
 MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
 {
   _face_data[tid]->reinit(soln, elem, side, boundary_id);
-  _face_data[tid]->reinitMaterials(_materials[tid].getMaterials(elem->subdomain_id()));
+  _face_data[tid]->reinitMaterials(_materials[tid].getBoundaryMaterials(elem->subdomain_id()));
 }
 
 void
