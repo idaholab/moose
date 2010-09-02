@@ -7,10 +7,11 @@ InputParameters validParams<GlobalParamsBlock>()
   std::vector<std::string> blocks(1);
   blocks[0] = "__all__";
 
-  /* GlobalParams should not have children or other standard block attributes */
+  /* GlobalParams should not have children or other standard public block attributes */
   params.addPrivateParam<std::vector<std::string> >("active", blocks);
   params.addPrivateParam<ParserBlock *>("parent");
   params.addPrivateParam<Parser *>("parser_handle");
+  params.addPrivateParam<std::string>("type", "GlobalParams");
   return params;
 }
 
