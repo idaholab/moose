@@ -234,6 +234,9 @@ namespace Moose
       PetscVector<Number>  update_vec_y(y);
       PetscVector<Number>  update_vec_w(w);
 
+//      std::cout<<"y type: "<<update_vec_y.type()<<std::endl;
+//      std::cout<<"w type: "<<update_vec_w.type()<<std::endl;
+
       damping = moose_system->compute_damping(update_vec_w, update_vec_y);
 
       if(damping < 1.0)

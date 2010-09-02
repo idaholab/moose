@@ -16,8 +16,11 @@ PostprocessorData::empty()
 PostprocessorValue &
 PostprocessorData::getPostprocessorValue(const std::string & name)
 {
+  // TODO: do something smarter so we can have lazy binding like this... but still have good errors.
+  /*
   if (_values.find(name) == _values.end())
     mooseError("No Data found for name: " + name);
+  */
   
   return _values[name];
 }

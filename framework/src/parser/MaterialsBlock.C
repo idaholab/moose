@@ -16,6 +16,7 @@ MaterialsBlock::MaterialsBlock(std::string name, MooseSystem & moose_system, Inp
   addPrereq("Variables");
   addPrereq("Preconditioning");
   addPrereq("AuxVariables");
+//  addPrereq("Postprocessors");
 }
 
 void
