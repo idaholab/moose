@@ -60,6 +60,7 @@ MooseSystem::MooseSystem() :
   _has_displaced_mesh(false),
   _delete_mesh(true),
   _dim(0),
+  _has_dampers(false),
   _ex_out(NULL),
   _num_files(0),
   _num_in_current_file(0),
@@ -118,6 +119,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _has_displaced_mesh(false),
   _delete_mesh(false),
   _dim(_mesh->mesh_dimension()),
+  _has_dampers(false),
   _ex_out(NULL),
   _num_files(0),
   _num_in_current_file(0),
@@ -254,6 +256,13 @@ MooseSystem::hasDisplacedMesh()
 {
   return _has_displaced_mesh;
 }
+
+bool
+MooseSystem::hasDampers()
+{
+  return _has_dampers;
+}
+
 
 std::vector<std::string>
 MooseSystem::getDisplacementVariables()
@@ -961,6 +970,8 @@ MooseSystem::addDamper(std::string damper_name,
                        std::string name,
                        InputParameters parameters)
 {
+  _has_dampers = true;
+  
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;

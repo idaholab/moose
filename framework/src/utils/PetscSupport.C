@@ -197,7 +197,8 @@ namespace Moose
       KSPSetPreconditionerSide(ksp, PC_RIGHT);
       SNESSetMaxLinearSolveFailures(snes, 1000000);
 
-      SNESLineSearchSetPostCheck(snes, dampedCheck, moose_system.getEquationSystems());
+      if(moose_system.hasDampers())
+        SNESLineSearchSetPostCheck(snes, dampedCheck, moose_system.getEquationSystems());
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
       KSPSetConvergenceTest(ksp, petscConverged, &moose_system);
@@ -241,23 +242,38 @@ namespace Moose
       TransientNonlinearImplicitSystem& system =
         equation_systems->get_system<TransientNonlinearImplicitSystem> ("NonlinearSystem");
 
-      unsigned int sys = system.number();
-    
-      //create PetscVector
-      PetscVector<Number>  update_vec_x(x);
-      PetscVector<Number>  update_vec_y(y);
-      PetscVector<Number>  update_vec_w(w);
+      // The whole deal here is that we need ghosted versions of these vectors.
+      // So to do that I'm going to duplicate current_local_solution (which has the ghosting we want).
+      // Then stuff values into the duplicates
+      // Then "close()" the vectors which updates their ghosted vaulues.
+      
+      Vec current_local_solution = static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec();    
 
-//      std::cout<<"y type: "<<update_vec_y.type()<<std::endl;
-//      std::cout<<"w type: "<<update_vec_w.type()<<std::endl;
+      Vec ghosted_w;
+      Vec ghosted_y;
 
-      damping = moose_system->compute_damping(update_vec_w, update_vec_y);
+      VecDuplicate(current_local_solution, &ghosted_w);
+      VecDuplicate(current_local_solution, &ghosted_y);
+
+      VecCopy(w, ghosted_w);
+      VecCopy(y, ghosted_y);
+
+      PetscVector<Number>  ghosted_update_vec_y(ghosted_y);
+      PetscVector<Number>  ghosted_update_vec_w(ghosted_w);
+
+      ghosted_update_vec_y.close();
+      ghosted_update_vec_w.close();
+
+      damping = moose_system->compute_damping(ghosted_update_vec_w, ghosted_update_vec_y);
 
       if(damping < 1.0)
       {
         VecScale(y, damping);
         *changed_y = PETSC_TRUE;
       }
+
+      VecDestroy(ghosted_w);
+      VecDestroy(ghosted_y);
 
       return(ierr);
     }

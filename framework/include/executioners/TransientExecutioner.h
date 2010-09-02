@@ -117,7 +117,6 @@ protected:
   double _ss_tmin;
   Real _old_time_solution_norm;
   
-private:
   /**
    * Whether or not the previous solve converged.
    */

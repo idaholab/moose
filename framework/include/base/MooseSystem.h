@@ -111,6 +111,11 @@ public:
   bool hasDisplacedMesh();
 
   /**
+   * Whether or not this system has dampers.
+   */
+  bool hasDampers();
+
+  /**
    * Get displacement variables.
    */
   std::vector<std::string> getDisplacementVariables();
@@ -409,7 +414,7 @@ private:
   std::vector<MaterialData> _material_data;
   std::vector<PostprocessorData> _postprocessor_data;
   std::vector<DamperData *> _damper_data;
-
+  
   DofMap * _dof_map;
 
   DofMap * _aux_dof_map;
@@ -429,6 +434,11 @@ private:
   bool _has_displaced_mesh;
   bool _delete_mesh;                            // true if we own the mesh and we are responsible for its destruction
   unsigned int _dim;
+
+  /**
+   * Whether or not this system has any Dampers associated with it.
+   */
+  bool _has_dampers;
 
   /**
    * Needed for output.
