@@ -1,0 +1,62 @@
+#include "RndBoundingBoxIC.h"
+
+template<>
+InputParameters validParams<RndBoundingBoxIC>()
+{
+  InputParameters params = validParams<InitialCondition>();
+  params.addRequiredParam<Real>("x1", "The x coordinate of the lower left-hand corner of the box");
+  params.addRequiredParam<Real>("y1", "The y coordinate of the lower left-hand corner of the box");
+  params.addParam<Real>("z1", 0.0, "The z coordinate of the lower left-hand corner of the box");
+
+  params.addRequiredParam<Real>("x2", "The x coordinate of the upper right-hand corner of the box");
+  params.addRequiredParam<Real>("y2", "The y coordinate of the upper right-hand corner of the box");
+  params.addParam<Real>("z2", 0.0, "The z coordinate of the upper right-hand corner of the box");
+
+  params.addParam<Real>("mx_inside", 0.0, "The max value of the variable inside the box");
+  params.addParam<Real>("mx_outside", 0.0, "The max value of the variable outside the box");
+
+  params.addParam<Real>("mn_inside", 0.0, "The min value of the variable inside the box");
+  params.addParam<Real>("mn_outside", 0.0, "The min value of the variable outside the box");
+  return params;
+}
+
+RndBoundingBoxIC::RndBoundingBoxIC(std::string name,
+                             MooseSystem & moose_system,
+                             InputParameters parameters)
+  :InitialCondition(name, moose_system, parameters),
+   _x1(parameters.get<Real>("x1")),
+   _y1(parameters.get<Real>("y1")),
+   _z1(parameters.get<Real>("z1")),
+   _x2(parameters.get<Real>("x2")),
+   _y2(parameters.get<Real>("y2")),
+   _z2(parameters.get<Real>("z2")),
+   _mx_inside(parameters.get<Real>("mx_inside")),
+   _mx_outside(parameters.get<Real>("mx_outside")),
+   _mn_inside(parameters.get<Real>("mn_inside")),
+   _mn_outside(parameters.get<Real>("mn_outside")),
+   _range_inside(_mx_inside - _mn_inside),
+   _range_outside(_mx_outside - _mn_outside),
+   _bottom_left(_x1,_y1,_z1),
+   _top_right(_x2,_y2,_z2)
+{
+  mooseAssert(_range_inside > 0.0, "Inside Min > Inside Max for RandomIC!");
+  mooseAssert(_range_outside > 0.0, "Outside Min > Outside Max for RandomIC!");
+}
+
+Real
+RndBoundingBoxIC::value(const Point & p)
+{
+  //Random number between 0 and 1
+  Real rand_num = (Real)rand() / (Real)RAND_MAX;
+  
+  for(unsigned int i=0; i<LIBMESH_DIM; i++)
+    if(p(i) < _bottom_left(i) || p(i) > _top_right(i))
+      return rand_num*_range_outside + _mn_outside;
+
+  return rand_num*_range_inside + _mn_inside;
+}
+
+  
+
+
+  
