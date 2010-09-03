@@ -51,7 +51,7 @@ def fixupHeader():
     print dirnames
     for file in filenames:
       suffix = os.path.splitext(file)
-      if suffix[-1] == '.C' or suffix[-1] == '.h' and suffix[-1][0] != ".":
+      if suffix[-1] == '.C' or suffix[-1] == '.h':
         checkAndUpdate(dirpath + '/' + file)
           
 
