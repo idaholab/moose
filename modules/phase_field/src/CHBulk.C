@@ -1,6 +1,4 @@
 #include "CHBulk.h"
-#include "MathUtils.h"
-using namespace MathUtils;
 
 template<>
 InputParameters validParams<CHBulk>()

@@ -1,6 +1,4 @@
 #include "CHInterface.h"
-#include "MathUtils.h"
-using namespace MathUtils;
 
 template<>
 InputParameters validParams<CHInterface>()
