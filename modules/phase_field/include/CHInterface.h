@@ -22,7 +22,7 @@ protected:
 
 private:
   
-  MaterialProperty<Real> & _kappa;
+  MaterialProperty<Real> & _kappa_c;
   MaterialProperty<Real> & _M;
   MaterialProperty<RealGradient> & _grad_M;
   
