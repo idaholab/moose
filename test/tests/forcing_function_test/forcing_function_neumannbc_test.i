@@ -18,12 +18,12 @@
   
   [./forcing_func]
     type = ParsedGradFunction
-    function = 2
+    value = 2
   [../]
   
   [./exact_func]
     type = ParsedFunction
-    function = x*x 
+    value = x*x 
   [../]
 []
 

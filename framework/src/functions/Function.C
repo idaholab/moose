@@ -31,7 +31,7 @@ Function::~Function()
 }
 
 RealGradient 
-Function::grad(Real t, Real x, Real y, Real z)
+Function::gradient(Real t, Real x, Real y, Real z)
 {
   return RealGradient(0, 0, 0);
 }

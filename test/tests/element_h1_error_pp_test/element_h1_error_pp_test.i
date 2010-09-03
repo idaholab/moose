@@ -27,20 +27,20 @@
   
   [./forcing_func]
     type = ParsedFunction
-    #function = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))
-    function = alpha*alpha*pi*pi*sin(alpha*pi*x)
+    #value = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))
+    value = alpha*alpha*pi*pi*sin(alpha*pi*x)
     vars = 'alpha'
     vals = '4'
   [../]
 
   [./u_func]
     type = ParsedGradFunction
-    #function = sin(alpha*pi*x*y)
+    #value = sin(alpha*pi*x*y)
     #grad_x   = alpha*pi*y*sin(alpha*pi*x*y)
     #grad_y   = alpha*pi*x*sin(alpha*pi*x*y)
 
-    function = sin(alpha*pi*x)
-    grad_x   = alpha*pi*sin(alpha*pi*x)
+    value = sin(alpha*pi*x)
+    grad_x  = alpha*pi*sin(alpha*pi*x)
     vars = 'alpha'
     vals = '4'
   [../]

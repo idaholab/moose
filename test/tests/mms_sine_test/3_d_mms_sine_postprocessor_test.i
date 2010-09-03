@@ -31,7 +31,7 @@
   
   [./solution]
     type = ParsedFunction
-    function = sin(a*x*y*z*t)
+    value = sin(a*x*y*z*t)
     vars = 'a'
     vals = '3.141592653589793'
   [../]

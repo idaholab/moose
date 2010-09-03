@@ -40,7 +40,7 @@ ElementH1Error::getValue()
 Real
 ElementH1Error::computeQpIntegral()
 {
-  RealGradient graddiff = _grad_u[_qp]-_func.grad(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
-  Real         funcdiff = _u[_qp]-_func(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
+  RealGradient graddiff = _grad_u[_qp]-_func.gradient(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
+  Real         funcdiff = _u[_qp]-_func.value(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
   return graddiff*graddiff + funcdiff*funcdiff;
 }

@@ -18,14 +18,14 @@
   
   [./forcing_func]
     type = ParsedFunction
-    function = alpha*alpha*pi*pi*sin(alpha*pi*x)
+    value = alpha*alpha*pi*pi*sin(alpha*pi*x)
     vars = 'alpha'
     vals = '16'
   [../]
 
   [./bc_func]
     type = ParsedFunction
-    function = sin(alpha*pi*x)
+    value = sin(alpha*pi*x)
     vars = 'alpha'
     vals = '16'
   [../]

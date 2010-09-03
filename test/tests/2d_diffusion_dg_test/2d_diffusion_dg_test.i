@@ -31,32 +31,32 @@
   
   [./forcing_fn]
     type = ParsedFunction
-#    function = -4.0+(x*x)+(y*y)
-#    function = x
-#    function = (x*x)-2.0
-#    function = -pow(e,-x-(y*y))*(4*y*y-2)
-    function = (x*x*x)-6.0*x
+#    value = -4.0+(x*x)+(y*y)
+#    value = x
+#    value = (x*x)-2.0
+#    value = -pow(e,-x-(y*y))*(4*y*y-2)
+    value = (x*x*x)-6.0*x
   [../]
   
   [./exact_fn]
     type = ParsedGradFunction
-#    function = x
+#    value = x
 #    grad_x = 1
 #    grad_y = 0
     
-#    function = (x*x)+(y*y)
+#    value = (x*x)+(y*y)
 #    grad_x = 2*x
 #    grad_y = 2*y
 
-#    function = (x*x)
+#    value = (x*x)
 #    grad_x = 2*x
 #    grad_y = 0
 
-#    function = pow(e,-x-(y*y))
+#    value = pow(e,-x-(y*y))
 #    grad_x = -pow(e,-x-(y*y))
 #    grad_y = -2*y*pow(e,-x-(y*y))
 
-    function = (x*x*x)
+    value = (x*x*x)
     grad_x = 3*x*x
     grad_y = 0
   [../]

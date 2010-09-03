@@ -35,7 +35,7 @@ FunctionDirichletBC::FunctionDirichletBC(std::string name,
 Real
 FunctionDirichletBC::f()
 {
-  return _func(_t, (*_current_node)(0), (*_current_node)(1), (*_current_node)(2));
+  return _func.value(_t, (*_current_node)(0), (*_current_node)(1), (*_current_node)(2));
 }
 
 Real

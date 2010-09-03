@@ -94,7 +94,7 @@ ExactSolutionExecutioner::exactSolution(const Point& p, const Parameters& parame
   Real y = (LIBMESH_DIM > 1) ? p(1) : 0;
   Real z = (LIBMESH_DIM > 2) ? p(2) : 0;
   Real t = _moose_system._t;
-  return _func(t, x, y, z);
+  return _func.value(t, x, y, z);
 }
 
 RealGradient
@@ -105,7 +105,7 @@ ExactSolutionExecutioner::exactGrad(const Point& p, const Parameters& parameters
   Real y = (LIBMESH_DIM > 1) ? p(1) : 0;
   Real z = (LIBMESH_DIM > 2) ? p(2) : 0;
   Real t = _moose_system._t;
-  return _func.grad(t, x, y, z);
+  return _func.gradient(t, x, y, z);
 }
 
 void

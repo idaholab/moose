@@ -36,7 +36,7 @@ ParsedGradFunction::ParsedGradFunction(std::string name, MooseSystem & moose_sys
 }
 
 RealGradient
-ParsedGradFunction::grad(Real t, Real x, Real y, Real z)
+ParsedGradFunction::gradient(Real t, Real x, Real y, Real z)
 {
   _vals[0] = t;
   _vals[1] = x;

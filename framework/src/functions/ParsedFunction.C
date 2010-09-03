@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<ParsedFunction>()
 {
   InputParameters params = validParams<Function>();
-  params.addRequiredParam<std::string>("function", "The user defined function.");
+  params.addRequiredParam<std::string>("value", "The user defined function.");
   params.addParam<std::vector<std::string> >("vars", std::vector<std::string>(0), "The constant variables (excluding t,x,y,z) in the forcing function.");
   params.addParam<std::vector<Real> >("vals", std::vector<Real>(0), "The values that correspond to the variables");
   return params;
@@ -44,7 +44,7 @@ ParsedFunction::ParsedFunction(std::string name, MooseSystem & moose_system, Inp
   for (int i = 0; i < vals.size(); i++)
     _vals[i+4] = vals[i];
 
-  initializeParser(_parser, parameters.get<std::string>("function"), vars, vals);
+  initializeParser(_parser, parameters.get<std::string>("value"), vars, vals);
 }
 
 ParsedFunction::~ParsedFunction()
@@ -90,7 +90,7 @@ ParsedFunction::getVarAddr(std::string var)
 }
 
 Real
-ParsedFunction::operator()(Real t, Real x, Real y, Real z)
+ParsedFunction::value(Real t, Real x, Real y, Real z)
 {
   _vals[0] = t;
   _vals[1] = x;
