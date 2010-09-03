@@ -4,6 +4,7 @@
 #include "BCFactory.h"
 #include "AuxFactory.h"
 #include "MaterialFactory.h"
+#include "InitialConditionFactory.h"
 
 // misc
 #include "CoefDiffusion.h"
@@ -41,6 +42,15 @@
 #include "LinearIsotropicMaterial.h"
 #include "PlasticMaterial.h"
 #include "DeltaGamma.h"
+
+// phase_field
+#include "AC.h"
+#include "CHBulk.h"
+#include "CHInterface.h"
+#include "CrossIC.h"
+#include "SmoothCircleIC.h"
+#include "RndSmoothCircleIC.h"
+#include "RndBoundingBoxIC.h"
 
 void
 Elk::registerObjects()
@@ -81,4 +91,13 @@ Elk::registerObjects()
   KernelFactory::instance()->registerKernel<DeltaGamma>("DeltaGamma");
   MaterialFactory::instance()->registerMaterial<LinearIsotropicMaterial>("LinearIsotropic");
   MaterialFactory::instance()->registerMaterial<PlasticMaterial>("PlasticMaterial");
+  
+  // phase_field
+  KernelFactory::instance()->registerKernel<AC>("AC");
+  KernelFactory::instance()->registerKernel<CHBulk>("CHBulk");
+  KernelFactory::instance()->registerKernel<CHInterface>("CHInterface");
+  InitialConditionFactory::instance()->registerInitialCondition<CrossIC>("CrossIC");
+  InitialConditionFactory::instance()->registerInitialCondition<SmoothCircleIC>("SmoothCircleIC");
+  InitialConditionFactory::instance()->registerInitialCondition<RndSmoothCircleIC>("RndSmoothCircleIC");
+  InitialConditionFactory::instance()->registerInitialCondition<RndBoundingBoxIC>("RndBoundingBoxIC");
 }
