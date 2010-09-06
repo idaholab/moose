@@ -65,9 +65,16 @@ ifneq (,$(findstring g95,$(mpif77_command)))
 	libmesh_FFLAGS += -r8
 endif
 
+# compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
 	ifneq (,$(findstring gcc,$(GXX-VERSION)))
 		libmesh_CXXFLAGS += --coverage
+		libmesh_LDFLAGS += --coverage
+	endif
+endif
+
+ifeq ($(linkcoverage),true)
+	ifneq (,$(findstring gcc,$(GXX-VERSION)))
 		libmesh_LDFLAGS += --coverage
 	endif
 endif
