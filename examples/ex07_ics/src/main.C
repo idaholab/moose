@@ -8,7 +8,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "InitialConditionFactory.h"
+#include "MooseFactory.h"
 
 // Example 7 Includes
 #include "ExampleIC.h"
@@ -31,7 +31,7 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   // Register our custom Initial Condition with the InitialConditionFactory
-  InitialConditionFactory::instance()->registerInitialCondition<ExampleIC>("ExampleIC");
+  registerInitialCondition(ExampleIC);
 
   Parser p(moose_system);
 

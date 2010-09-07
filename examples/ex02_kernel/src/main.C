@@ -8,7 +8,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "KernelFactory.h"        // <- New include for registration
+#include "MooseFactory.h"        // <- New include for registration
 
 // Example 2 Includes
 #include "Convection.h"           // <- New include for our custom kernel
@@ -32,7 +32,7 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   // Register any custom objects you have built on the MOOSE Framework
-  KernelFactory::instance()->registerKernel<Convection>("Convection");  // <- registration
+  registerKernel(Convection);  // <- registration
 
   Parser p(moose_system);
   

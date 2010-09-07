@@ -9,8 +9,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "KernelFactory.h"
-#include "ParserBlockFactory.h"    // <- Need to include the ParserBlockFactory
+#include "MooseFactory.h"
 
 // Example 14 Includes
 #include "Convection.h"
@@ -32,7 +31,7 @@ int main (int argc, char** argv)
   
   Moose::registerObjects();
 
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
+  registerKernel(Convection);
 
   /**
    * Registering a Parser Block is a little different than registering the other MOOSE
@@ -42,7 +41,7 @@ int main (int argc, char** argv)
    * your block should be matched for multiple cases.  One final thing to note is that you
    * don't specify a leading slash ever in your registration names
    */
-  ParserBlockFactory::instance()->registerParserBlock<ConvectionDiffusionBlock>("Kernels/ConvectionDiffusion");
+  registerNamedParserBlock(ConvectionDiffusionBlock, "Kernels/ConvectionDiffusion");
 
   Parser p(moose_system);
   

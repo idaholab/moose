@@ -1,9 +1,5 @@
 #include "Moose.h"
-#include "KernelFactory.h"
-#include "BCFactory.h"
-#include "MaterialFactory.h"
-#include "AuxFactory.h"
-#include "InitialConditionFactory.h"
+#include "MooseFactory.h"
 
 //Our Example Includes
 #include "MMSImplicitEuler.h" //including our sine Implicit Euler Kernel
@@ -36,40 +32,40 @@ namespace MooseTest
 {
   void registerObjects()
   {
-    KernelFactory::instance()->registerKernel<DiffMKernel>("DiffMKernel");
-    KernelFactory::instance()->registerKernel<MatDiffusion>("MatDiffusion");
+    registerKernel(DiffMKernel);
+    registerKernel(MatDiffusion);
 
-    KernelFactory::instance()->registerKernel<MMSImplicitEuler>("MMSImplicitEuler");
+    registerKernel(MMSImplicitEuler);
 
-    KernelFactory::instance()->registerKernel<MMSDiffusion>("MMSDiffusion");
+    registerKernel(MMSDiffusion);
 
-    KernelFactory::instance()->registerKernel<MMSConvection>("MMSConvection");
+    registerKernel(MMSConvection);
 
-    KernelFactory::instance()->registerKernel<MMSReaction>("MMSReaction");
+    registerKernel(MMSReaction);
 
-    KernelFactory::instance()->registerKernel<MMSForcing>("MMSForcing");
+    registerKernel(MMSForcing);
 
-    KernelFactory::instance()->registerKernel<PolyDiffusion>("PolyDiffusion");
+    registerKernel(PolyDiffusion);
 
-    KernelFactory::instance()->registerKernel<PolyConvection>("PolyConvection");
+    registerKernel(PolyConvection);
 
-    KernelFactory::instance()->registerKernel<PolyReaction>("PolyReaction");
+    registerKernel(PolyReaction);
 
-    KernelFactory::instance()->registerKernel<PolyForcing>("PolyForcing");
+    registerKernel(PolyForcing);
 
     // Register our new material class so we can use it.
-    MaterialFactory::instance()->registerMaterial<Diff1Material>("Diff1Material");
-    MaterialFactory::instance()->registerMaterial<Diff2Material>("Diff2Material");
-    MaterialFactory::instance()->registerMaterial<MTMaterial>("MTMaterial");
+    registerMaterial(Diff1Material);
+    registerMaterial(Diff2Material);
+    registerMaterial(MTMaterial);
 
     //Registering the Boundary Conditions
-    BCFactory::instance()->registerBC<MMSCoupledDirichletBC>("MMSCoupledDirichletBC");
-    BCFactory::instance()->registerBC<PolyCoupledDirichletBC>("PolyCoupledDirichletBC");
-    BCFactory::instance()->registerBC<MTBC>("MTBC");
+    registerBC(MMSCoupledDirichletBC);
+    registerBC(PolyCoupledDirichletBC);
+    registerBC(MTBC);
     //Registering our Aux Kernel
-    AuxFactory::instance()->registerAux<MMSConstantAux>("MMSConstantAux");
+    registerAux(MMSConstantAux);
 
-    AuxFactory::instance()->registerAux<PolyConstantAux>("PolyConstantAux");
+    registerAux(PolyConstantAux);
   }
 }
 

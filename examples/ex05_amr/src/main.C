@@ -9,7 +9,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "KernelFactory.h"
+#include "MooseFactory.h"
 
 // Example 5 Registration
 #include "Convection.h"
@@ -30,7 +30,7 @@ int main (int argc, char** argv)
 
   Moose::registerObjects();
 
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
+  registerKernel(Convection);
 
   Parser p(moose_system);
   

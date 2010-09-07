@@ -14,12 +14,11 @@
 
 #include "ComputeResidual.h"
 #include "ComputeJacobian.h"
+#include "MooseFactory.h"
 
-#include "FunctionFactory.h"
 #include "ParsedFunction.h"
 #include "ParsedGradFunction.h"
 
-#include "KernelFactory.h"
 #include "BodyForce.h"
 #include "Diffusion.h"
 #include "Reaction.h"
@@ -27,10 +26,8 @@
 #include "RealPropertyOutput.h"
 #include "UserForcingFunction.h"
 
-#include "DGKernelFactory.h"
 #include "DGDiffusion.h"
 
-#include "BCFactory.h"
 #include "DirichletBC.h"
 #include "SinDirichletBC.h"
 #include "SinNeumannBC.h"
@@ -44,7 +41,6 @@
 #include "FunctionNeumannBC.h"
 #include "DGFunctionDiffusionDirichletBC.h"
 
-#include "AuxFactory.h"
 #include "ConstantAux.h"
 #include "CoupledAux.h"
 #include "PenetrationAux.h"
@@ -52,10 +48,8 @@
 #include "ImplicitEuler.h"
 #include "ImplicitBackwardDifference2.h"
 
-#include "MaterialFactory.h"
 #include "EmptyMaterial.h"
 
-#include "ParserBlockFactory.h"
 #include "MeshBlock.h"
 #include "MeshGenerationBlock.h"
 #include "exodusII_io.h"
@@ -89,22 +83,18 @@
 #include "GlobalParamsBlock.h"
 
 #include "ComputeInitialConditions.h"
-#include "InitialConditionFactory.h"
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
 #include "RandomIC.h"
 //#include "FunctionIC.h"
 
-#include "ExecutionerFactory.h"
 #include "Steady.h"
 #include "TransientExecutioner.h"
 #include "SolutionTimeAdaptive.h"
 #include "ExactSolutionExecutioner.h"
 
-#include "StabilizerFactory.h"
 #include "ConvectionDiffusionSUPG.h"
 
-#include "PostprocessorFactory.h"
 #include "ElementIntegral.h"
 #include "ElementL2Error.h"
 #include "ElementH1Error.h"
@@ -119,7 +109,6 @@
 #include "EmptyPostprocessor.h"
 
 #include "Damper.h"
-#include "DamperFactory.h"
 #include "DampersBlock.h"
 #include "GenericDamperBlock.h"
 #include "ConstantDamper.h"
@@ -161,109 +150,109 @@ Moose::registerObjects()
     ParallelUniqueId::initialize();
   }
 
-  FunctionFactory::instance()->registerFunction<ParsedFunction>("ParsedFunction");
-  FunctionFactory::instance()->registerFunction<ParsedGradFunction>("ParsedGradFunction");
-  
-  KernelFactory::instance()->registerKernel<BodyForce>("BodyForce");
-  KernelFactory::instance()->registerKernel<Diffusion>("Diffusion");
-  KernelFactory::instance()->registerKernel<Reaction>("Reaction");
-  KernelFactory::instance()->registerKernel<ImplicitEuler>("ImplicitEuler");
-  KernelFactory::instance()->registerKernel<ImplicitBackwardDifference2>("ImplicitBackwardDifference2");
-  KernelFactory::instance()->registerKernel<CoupledForce>("CoupledForce");
-  KernelFactory::instance()->registerKernel<RealPropertyOutput>("RealPropertyOutput");
-  KernelFactory::instance()->registerKernel<UserForcingFunction>("UserForcingFunction");
+  registerFunction(ParsedFunction);
+  registerFunction(ParsedGradFunction);
 
-  DGKernelFactory::instance()->registerDGKernel<DGDiffusion>("DGDiffusion");
+  registerKernel(BodyForce);
+  registerKernel(Diffusion);
+  registerKernel(Reaction);
+  registerKernel(ImplicitEuler);
+  registerKernel(ImplicitBackwardDifference2);
+  registerKernel(CoupledForce);
+  registerKernel(RealPropertyOutput);
+  registerKernel(UserForcingFunction);
 
-  BCFactory::instance()->registerBC<DirichletBC>("DirichletBC");
-  BCFactory::instance()->registerBC<SinDirichletBC>("SinDirichletBC");
-  BCFactory::instance()->registerBC<SinNeumannBC>("SinNeumannBC");
-  BCFactory::instance()->registerBC<NeumannBC>("NeumannBC");
-  BCFactory::instance()->registerBC<VectorNeumannBC>("VectorNeumannBC");
-  BCFactory::instance()->registerBC<VacuumBC>("VacuumBC");
-  BCFactory::instance()->registerBC<MatchedValueBC>("MatchedValueBC");
-  BCFactory::instance()->registerBC<ConvectiveFluxBC>("ConvectiveFluxBC");
-  BCFactory::instance()->registerBC<WeakGradientBC>("WeakGradientBC");
-  BCFactory::instance()->registerBC<FunctionDirichletBC>("FunctionDirichletBC");
-  BCFactory::instance()->registerBC<FunctionNeumannBC>("FunctionNeumannBC");
-  BCFactory::instance()->registerBC<DGFunctionDiffusionDirichletBC>("DGFunctionDiffusionDirichletBC");
+  registerDGKernel(DGDiffusion);
 
-  AuxFactory::instance()->registerAux<ConstantAux>("ConstantAux");
-  AuxFactory::instance()->registerAux<CoupledAux>("CoupledAux");
-  AuxFactory::instance()->registerAux<PenetrationAux>("PenetrationAux");
+  registerBC(DirichletBC);
+  registerBC(SinDirichletBC);
+  registerBC(SinNeumannBC);
+  registerBC(NeumannBC);
+  registerBC(VectorNeumannBC);
+  registerBC(VacuumBC);
+  registerBC(MatchedValueBC);
+  registerBC(ConvectiveFluxBC);
+  registerBC(WeakGradientBC);
+  registerBC(FunctionDirichletBC);
+  registerBC(FunctionNeumannBC);
+  registerBC(DGFunctionDiffusionDirichletBC);
 
-  MaterialFactory::instance()->registerMaterial<EmptyMaterial>("EmptyMaterial");
+  registerAux(ConstantAux);
+  registerAux(CoupledAux);
+  registerAux(PenetrationAux);
 
-  ParserBlockFactory::instance()->registerParserBlock<MeshBlock>("Mesh");
-  ParserBlockFactory::instance()->registerParserBlock<MeshGenerationBlock>("Mesh/Generation");
-  ParserBlockFactory::instance()->registerParserBlock<FunctionsBlock>("Functions");
-  ParserBlockFactory::instance()->registerParserBlock<GenericFunctionsBlock>("Functions/*");
-  ParserBlockFactory::instance()->registerParserBlock<VariablesBlock>("Variables");
-  ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("Variables/*");
-  ParserBlockFactory::instance()->registerParserBlock<GenericICBlock>("Variables/*/InitialCondition");
-  ParserBlockFactory::instance()->registerParserBlock<AuxVariablesBlock>("AuxVariables");
-  ParserBlockFactory::instance()->registerParserBlock<GenericICBlock>("AuxVariables/*/InitialCondition");
+  registerMaterial(EmptyMaterial);
+
+  registerNamedParserBlock(MeshBlock, "Mesh");
+  registerNamedParserBlock(MeshGenerationBlock, "Mesh/Generation");
+  registerNamedParserBlock(FunctionsBlock, "Functions");
+  registerNamedParserBlock(GenericFunctionsBlock, "Functions/*");
+  registerNamedParserBlock(VariablesBlock, "Variables");
+  registerNamedParserBlock(GenericVariableBlock, "Variables/*");
+  registerNamedParserBlock(GenericICBlock, "Variables/*/InitialCondition");
+  registerNamedParserBlock(AuxVariablesBlock, "AuxVariables");
+  registerNamedParserBlock(GenericICBlock, "AuxVariables/*/InitialCondition");
   // Reuse the GenericVariableBlock for AuxVariables/*
-  ParserBlockFactory::instance()->registerParserBlock<GenericVariableBlock>("AuxVariables/*");
-  ParserBlockFactory::instance()->registerParserBlock<KernelsBlock>("Kernels");
-  ParserBlockFactory::instance()->registerParserBlock<GenericKernelBlock>("Kernels/*");
-  ParserBlockFactory::instance()->registerParserBlock<DGKernelsBlock>("DGKernels");
-  ParserBlockFactory::instance()->registerParserBlock<GenericDGKernelBlock>("DGKernels/*");
-  ParserBlockFactory::instance()->registerParserBlock<AuxKernelsBlock>("AuxKernels");
-  ParserBlockFactory::instance()->registerParserBlock<GenericAuxKernelBlock>("AuxKernels/*");
-  ParserBlockFactory::instance()->registerParserBlock<BCsBlock>("BCs");
-  ParserBlockFactory::instance()->registerParserBlock<GenericBCBlock>("BCs/*");
+  registerNamedParserBlock(GenericVariableBlock, "AuxVariables/*");
+  registerNamedParserBlock(KernelsBlock, "Kernels");
+  registerNamedParserBlock(GenericKernelBlock, "Kernels/*");
+  registerNamedParserBlock(DGKernelsBlock, "DGKernels");
+  registerNamedParserBlock(GenericDGKernelBlock, "DGKernels/*");
+  registerNamedParserBlock(AuxKernelsBlock, "AuxKernels");
+  registerNamedParserBlock(GenericAuxKernelBlock, "AuxKernels/*");
+  registerNamedParserBlock(BCsBlock, "BCs");
+  registerNamedParserBlock(GenericBCBlock, "BCs/*");
   // Reuse the BCsBlock for AuxBCs
-  ParserBlockFactory::instance()->registerParserBlock<BCsBlock>("AuxBCs");
+  registerNamedParserBlock(BCsBlock, "AuxBCs");
   // Reuse the GenericBCBlock for AuxBCs/*
-  ParserBlockFactory::instance()->registerParserBlock<GenericBCBlock>("AuxBCs/*");
-  ParserBlockFactory::instance()->registerParserBlock<StabilizersBlock>("Stabilizers");
-  ParserBlockFactory::instance()->registerParserBlock<GenericStabilizerBlock>("Stabilizers/*");
-  ParserBlockFactory::instance()->registerParserBlock<MaterialsBlock>("Materials");
-  ParserBlockFactory::instance()->registerParserBlock<GenericMaterialBlock>("Materials/*");
-  ParserBlockFactory::instance()->registerParserBlock<OutputBlock>("Output");
-  ParserBlockFactory::instance()->registerParserBlock<PreconditioningBlock>("Preconditioning");
-  ParserBlockFactory::instance()->registerParserBlock<PBPBlock>("Preconditioning/PBP");
-  ParserBlockFactory::instance()->registerParserBlock<PeriodicBlock>("BCs/Periodic");
-  ParserBlockFactory::instance()->registerParserBlock<GenericPeriodicBlock>("BCs/Periodic/*");
-  ParserBlockFactory::instance()->registerParserBlock<GenericExecutionerBlock>("Executioner");
-  ParserBlockFactory::instance()->registerParserBlock<AdaptivityBlock>("Executioner/Adaptivity");
-  ParserBlockFactory::instance()->registerParserBlock<PostprocessorsBlock>("Postprocessors");
-  ParserBlockFactory::instance()->registerParserBlock<GenericPostprocessorBlock>("Postprocessors/*");
-  ParserBlockFactory::instance()->registerParserBlock<DampersBlock>("Dampers");
-  ParserBlockFactory::instance()->registerParserBlock<GenericDamperBlock>("Dampers/*");
-  ParserBlockFactory::instance()->registerParserBlock<GlobalParamsBlock>("GlobalParams");
+  registerNamedParserBlock(GenericBCBlock, "AuxBCs/*");
+  registerNamedParserBlock(StabilizersBlock, "Stabilizers");
+  registerNamedParserBlock(GenericStabilizerBlock, "Stabilizers/*");
+  registerNamedParserBlock(MaterialsBlock, "Materials");
+  registerNamedParserBlock(GenericMaterialBlock, "Materials/*");
+  registerNamedParserBlock(OutputBlock, "Output");
+  registerNamedParserBlock(PreconditioningBlock, "Preconditioning");
+  registerNamedParserBlock(PBPBlock, "Preconditioning/PBP");
+  registerNamedParserBlock(PeriodicBlock, "BCs/Periodic");
+  registerNamedParserBlock(GenericPeriodicBlock, "BCs/Periodic/*");
+  registerNamedParserBlock(GenericExecutionerBlock, "Executioner");
+  registerNamedParserBlock(AdaptivityBlock, "Executioner/Adaptivity");
+  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors");
+  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/*");
+  registerNamedParserBlock(DampersBlock, "Dampers");
+  registerNamedParserBlock(GenericDamperBlock, "Dampers/*");
+  registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");
+  
+  registerInitialCondition(ConstantIC);  
+  registerInitialCondition(BoundingBoxIC);  
+  registerInitialCondition(RandomIC);
 
-  InitialConditionFactory::instance()->registerInitialCondition<ConstantIC>("ConstantIC");  
-  InitialConditionFactory::instance()->registerInitialCondition<BoundingBoxIC>("BoundingBoxIC");  
-  InitialConditionFactory::instance()->registerInitialCondition<RandomIC>("RandomIC");
-
-  ExecutionerFactory::instance()->registerExecutioner<Steady>("Steady");
+  registerExecutioner(Steady);
 
   // Just in this one case to avoid a collision with libMesh am I registering something with a different
   // name than the class name!
-  ExecutionerFactory::instance()->registerExecutioner<TransientExecutioner>("Transient");
-  ExecutionerFactory::instance()->registerExecutioner<SolutionTimeAdaptive>("SolutionTimeAdaptive");
-  ExecutionerFactory::instance()->registerExecutioner<ExactSolutionExecutioner>("ExactSolutionExecutioner");
+  registerNamedExecutioner(TransientExecutioner, "Transient");
+  registerExecutioner(SolutionTimeAdaptive);
+  registerExecutioner(ExactSolutionExecutioner);
   
-  StabilizerFactory::instance()->registerStabilizer<ConvectionDiffusionSUPG>("ConvectionDiffusionSUPG");
+  registerStabilizer(ConvectionDiffusionSUPG);
 
-  PostprocessorFactory::instance()->registerPostprocessor<ElementIntegral>("ElementIntegral");
-  PostprocessorFactory::instance()->registerPostprocessor<ElementL2Error>("ElementL2Error");
-  PostprocessorFactory::instance()->registerPostprocessor<ElementH1Error>("ElementH1Error");
-  PostprocessorFactory::instance()->registerPostprocessor<ElementH1SemiError>("ElementH1SemiError");
-  PostprocessorFactory::instance()->registerPostprocessor<ElementAverageValue>("ElementAverageValue");
+  registerPostprocessor(ElementIntegral);
+  registerPostprocessor(ElementL2Error);
+  registerPostprocessor(ElementH1Error);
+  registerPostprocessor(ElementH1SemiError);
+  registerPostprocessor(ElementAverageValue);
 
-  PostprocessorFactory::instance()->registerPostprocessor<SideIntegral>("SideIntegral");
-  PostprocessorFactory::instance()->registerPostprocessor<SideAverageValue>("SideAverageValue");
+  registerPostprocessor(SideIntegral);
+  registerPostprocessor(SideAverageValue);
 
-  PostprocessorFactory::instance()->registerPostprocessor<PrintDOFs>("PrintDOFs");
-  PostprocessorFactory::instance()->registerPostprocessor<PrintNumElems>("PrintNumElems");
-  PostprocessorFactory::instance()->registerPostprocessor<PrintNumNodes>("PrintNumNodes");
-  PostprocessorFactory::instance()->registerPostprocessor<AverageElementSize>("AverageElementSize");
-  PostprocessorFactory::instance()->registerPostprocessor<EmptyPostprocessor>("EmptyPostprocessor");
+  registerPostprocessor(PrintDOFs);
+  registerPostprocessor(PrintNumElems);
+  registerPostprocessor(PrintNumNodes);
+  registerPostprocessor(AverageElementSize);
+  registerPostprocessor(EmptyPostprocessor);
 
-  DamperFactory::instance()->registerDamper<ConstantDamper>("ConstantDamper");
+  registerDamper(ConstantDamper);
 }
 
 void

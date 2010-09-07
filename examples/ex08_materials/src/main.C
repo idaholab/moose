@@ -8,8 +8,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "KernelFactory.h"
-#include "MaterialFactory.h"
+#include "MooseFactory.h"
 
 // Example 8 Includes
 #include "ExampleDiffusion.h"
@@ -34,13 +33,13 @@ int main (int argc, char** argv)
   
   Moose::registerObjects();
 
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
+  registerKernel(Convection);
 
   // Our new Diffusion Kernel that accepts a material property
-  KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
+  registerKernel(ExampleDiffusion);
   
   // Register our new material class so we can use it.
-  MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
+  registerMaterial(ExampleMaterial);
 
   Parser p(moose_system);
   

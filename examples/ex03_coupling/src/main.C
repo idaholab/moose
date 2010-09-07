@@ -12,7 +12,7 @@
 #include "MooseSystem.h"
 
 // Example 3 Includes
-#include "KernelFactory.h"
+#include "MooseFactory.h"
 #include "Convection.h"
 
 // C++ include files
@@ -33,7 +33,7 @@ int main (int argc, char** argv)
 
   Moose::registerObjects();
 
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
+  registerKernel(Convection);
 
   Parser p(moose_system);
   

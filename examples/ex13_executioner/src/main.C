@@ -11,9 +11,7 @@
 #include "MooseSystem.h"
 #include "Parser.h"
 #include "Executioner.h"
-#include "ExecutionerFactory.h"
-#include "KernelFactory.h"
-#include "MaterialFactory.h"
+#include "MooseFactory.h"
 
 // Example 13 Includes
 #include "TransientHalf.h"
@@ -39,11 +37,11 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   // Register our new executioner
-  ExecutionerFactory::instance()->registerExecutioner<TransientHalf>("TransientHalf");
-  KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
-  KernelFactory::instance()->registerKernel<ExampleImplicitEuler>("ExampleImplicitEuler");
-  MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
+  registerExecutioner(TransientHalf);
+  registerKernel(ExampleDiffusion);
+  registerKernel(Convection);
+  registerKernel(ExampleImplicitEuler);
+  registerMaterial(ExampleMaterial);
 
   Parser p(moose_system);
 

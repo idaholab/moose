@@ -10,7 +10,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "KernelFactory.h"
+#include "MooseFactory.h"
 
 // Example 6 Includes
 #include "ExampleDiffusion.h"
@@ -34,9 +34,9 @@ int main (int argc, char** argv)
 
   Moose::registerObjects();
 
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
-  KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
-  KernelFactory::instance()->registerKernel<ExampleImplicitEuler>("ExampleImplicitEuler");
+  registerKernel(Convection);
+  registerKernel(ExampleDiffusion);
+  registerKernel(ExampleImplicitEuler);
   
   Parser p(moose_system);
   

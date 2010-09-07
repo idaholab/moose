@@ -8,8 +8,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "KernelFactory.h"
-#include "MaterialFactory.h"
+#include "MooseFactory.h"
 
 // Example 11 Includes
 #include "ExampleDiffusion.h"
@@ -32,9 +31,9 @@ int main (int argc, char** argv)
 
   Moose::registerObjects();
 
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
-  KernelFactory::instance()->registerKernel<ExampleDiffusion>("ExampleDiffusion");
-  MaterialFactory::instance()->registerMaterial<ExampleMaterial>("ExampleMaterial");
+  registerKernel(Convection);
+  registerKernel(ExampleDiffusion);
+  registerMaterial(ExampleMaterial);
 
   Parser p(moose_system);
   

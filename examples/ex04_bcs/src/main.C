@@ -9,8 +9,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "KernelFactory.h"
-#include "BCFactory.h"       // <- Include BCFactory to register bcs
+#include "MooseFactory.h"
 
 // Example 4 Includes
 #include "Convection.h"
@@ -35,14 +34,14 @@ int main (int argc, char** argv)
 
   Moose::registerObjects();
 
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
+  registerKernel(Convection);
   
   /**
    * In this example we need to register our Boundary Conditions with BCFactory.
    * Each Main MOOSE Module has it's own factory that you will register your objects with
    */
-  BCFactory::instance()->registerBC<CoupledDirichletBC>("CoupledDirichletBC");
-  BCFactory::instance()->registerBC<CoupledNeumannBC>("CoupledNeumannBC");
+  registerBC(CoupledDirichletBC);
+  registerBC(CoupledNeumannBC);
 
   Parser p(moose_system);
   

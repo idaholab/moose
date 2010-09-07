@@ -8,7 +8,7 @@
 #include "Moose.h"
 #include "MooseSystem.h"
 #include "Parser.h"
-#include "AuxFactory.h"       // <- Need to include the AuxFactory
+#include "MooseFactory.h"       // <- Need to include the AuxFactory
 #include "Executioner.h"
 
 // Example 10 Includes
@@ -31,7 +31,7 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   // Register our Example AuxKernel with the AuxFactory
-  AuxFactory::instance()->registerAux<ExampleAux>("ExampleAux");
+  registerAux(ExampleAux);
   
   Parser p(moose_system);
 
