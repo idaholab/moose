@@ -58,10 +58,19 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0):
   if (parallel):
     command = 'mpiexec -np ' + str(parallel) + ' ' + command  
   if (min_dofs):
+    # First make sure the dang thing runs
+    stdout = executeCommand(command)
+    checkForFail(stdout)
+
+    # Now we can safely capture the timing
     command = 'time ' + command + ' --dofs ' + str(min_dofs)
   stdout = executeCommand(command)
   print stdout
   os.chdir(saved_cwd)
+
+def checkForFail(output):
+  if output.find('different') != -1 or output.find('ERROR') != -1 or output.find('command not found') != -1:
+    assert False
 
 def executeExodiff(test_dir, out_files):
   for file in out_files:
@@ -69,8 +78,9 @@ def executeExodiff(test_dir, out_files):
     print command
     stdout = executeCommand(command)
     print stdout
-    if stdout.find('different') != -1 or stdout.find('ERROR') != -1 or stdout.find('command not found') != -1:
-      assert False
+    checkForFail(stdout)
+#    if stdout.find('different') != -1 or stdout.find('ERROR') != -1 or stdout.find('command not found') != -1:
+#      assert False
 
 def diffCSV(test_dir, out_files):
   differ = CSVDiffer.CSVDiffer(test_dir, out_files)
