@@ -26,7 +26,8 @@ AC::computeDFDOP(PFFunctionType type)
   case Jacobian:
     return _phi[_j][_qp]*(3*_u[_qp]*_u[_qp] - 1. );
   }
-    
+
+  mooseError("Invalid type passed in");
 }
 
 Real

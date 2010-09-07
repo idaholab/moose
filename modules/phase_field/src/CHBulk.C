@@ -27,6 +27,7 @@ CHBulk::computeGradDFDCons(PFFunctionType type)
     
   }
   
+  mooseError("Invalid type passed in");
 }
 
 Real
