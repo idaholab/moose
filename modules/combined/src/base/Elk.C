@@ -1,10 +1,5 @@
 #include "Elk.h"
-
-#include "KernelFactory.h"
-#include "BCFactory.h"
-#include "AuxFactory.h"
-#include "MaterialFactory.h"
-#include "InitialConditionFactory.h"
+#include "MooseFactory.h"
 
 // misc
 #include "CoefDiffusion.h"
@@ -56,48 +51,48 @@ void
 Elk::registerObjects()
 {
   // misc
-  KernelFactory::instance()->registerKernel<CoefDiffusion>("CoefDiffusion");
-  KernelFactory::instance()->registerKernel<Convection>("Convection");
+  registerKernel(CoefDiffusion);
+  registerKernel(Convection);
 
   // heat_conduction
-  KernelFactory::instance()->registerKernel<HeatConduction>("HeatConduction");
-  KernelFactory::instance()->registerKernel<HeatConductionImplicitEuler>("HeatConductionImplicitEuler");
-  BCFactory::instance()->registerBC<FluxBC>("FluxBC");
+  registerKernel(HeatConduction);
+  registerKernel(HeatConductionImplicitEuler);
+  registerBC(FluxBC);
 
   // navier_stokes
-  KernelFactory::instance()->registerKernel<MassInviscidFlux>("MassInviscidFlux");
-  KernelFactory::instance()->registerKernel<MomentumInviscidFlux>("MomentumInviscidFlux");
-  KernelFactory::instance()->registerKernel<MomentumViscousFlux>("MomentumViscousFlux");
-  KernelFactory::instance()->registerKernel<EnergyInviscidFlux>("EnergyInviscidFlux");
-  KernelFactory::instance()->registerKernel<EnergyViscousFlux>("EnergyViscousFlux");
-  KernelFactory::instance()->registerKernel<GravityPower>("GravityPower");
-  KernelFactory::instance()->registerKernel<GravityForce>("GravityForce");
-  BCFactory::instance()->registerBC<PressureNeumannBC>("PressureNeumannBC");
-  BCFactory::instance()->registerBC<ThermalBC>("ThermalBC");
-  AuxFactory::instance()->registerAux<VelocityAux>("VelocityAux");
+  registerKernel(MassInviscidFlux);
+  registerKernel(MomentumInviscidFlux);
+  registerKernel(MomentumViscousFlux);
+  registerKernel(EnergyInviscidFlux);
+  registerKernel(EnergyViscousFlux);
+  registerKernel(GravityPower);
+  registerKernel(GravityForce);
+  registerBC(PressureNeumannBC);
+  registerBC(ThermalBC);
+  registerAux(VelocityAux);
 
   // linear_elasticity
-  KernelFactory::instance()->registerKernel<SolidMechX>("SolidMechX");
-  KernelFactory::instance()->registerKernel<SolidMechY>("SolidMechY");
-  KernelFactory::instance()->registerKernel<SolidMechZ>("SolidMechZ");
-  KernelFactory::instance()->registerKernel<SolidMechImplicitEuler>("SolidMechImplicitEuler");
-  KernelFactory::instance()->registerKernel<SolidMechTempCoupleX>("SolidMechTempCoupleX");
-  KernelFactory::instance()->registerKernel<SolidMechTempCoupleY>("SolidMechTempCoupleY");
-  KernelFactory::instance()->registerKernel<SolidMechTempCoupleZ>("SolidMechTempCoupleZ");
+  registerKernel(SolidMechX);
+  registerKernel(SolidMechY);
+  registerKernel(SolidMechZ);
+  registerKernel(SolidMechImplicitEuler);
+  registerKernel(SolidMechTempCoupleX);
+  registerKernel(SolidMechTempCoupleY);
+  registerKernel(SolidMechTempCoupleZ);
 
   // solid_mechanics
-  KernelFactory::instance()->registerKernel<StressDivergence>("StressDivergence");
-  KernelFactory::instance()->registerKernel<StressOutput>("StressOutput");
-  KernelFactory::instance()->registerKernel<DeltaGamma>("DeltaGamma");
-  MaterialFactory::instance()->registerMaterial<LinearIsotropicMaterial>("LinearIsotropic");
-  MaterialFactory::instance()->registerMaterial<PlasticMaterial>("PlasticMaterial");
+  registerKernel(StressDivergence);
+  registerKernel(StressOutput);
+  registerKernel(DeltaGamma);
+  registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
+  registerMaterial(PlasticMaterial);
   
   // phase_field
-  KernelFactory::instance()->registerKernel<AC>("AC");
-  KernelFactory::instance()->registerKernel<CHBulk>("CHBulk");
-  KernelFactory::instance()->registerKernel<CHInterface>("CHInterface");
-  InitialConditionFactory::instance()->registerInitialCondition<CrossIC>("CrossIC");
-  InitialConditionFactory::instance()->registerInitialCondition<SmoothCircleIC>("SmoothCircleIC");
-  InitialConditionFactory::instance()->registerInitialCondition<RndSmoothCircleIC>("RndSmoothCircleIC");
-  InitialConditionFactory::instance()->registerInitialCondition<RndBoundingBoxIC>("RndBoundingBoxIC");
+  registerKernel(AC);
+  registerKernel(CHBulk);
+  registerKernel(CHInterface);
+  registerInitialCondition(CrossIC);
+  registerInitialCondition(SmoothCircleIC);
+  registerInitialCondition(RndSmoothCircleIC);
+  registerInitialCondition(RndBoundingBoxIC);
 }
