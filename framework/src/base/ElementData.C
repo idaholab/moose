@@ -38,21 +38,10 @@ ElementData::~ElementData()
 void
 ElementData::init()
 {
-  QuadraturePointData::init();
-
   _qrule = new QGauss(_moose_system.getDim(), _moose_system._max_quadrature_order);
 
-  unsigned int n_vars = _moose_system.getNonlinearSystem()->n_vars();
-  _var_vals_old_newton.resize(n_vars);
-  _var_grads_old_newton.resize(n_vars);
-
-  initKernels();
-}
-
-
-void
-ElementData::initKernels()
-{
+  QuadraturePointData::init();
+/*
   //This allows for different basis functions / orders for each variable
   for(unsigned int var=0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
   {
@@ -98,14 +87,16 @@ ElementData::initKernels()
       _q_point[fe_type] = &_fe[fe_type]->get_xyz();
     }
   }
+*/
 }
+
 
 void
 ElementData::reinitKernels(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
 //  Moose::perf_log.push("reinit()","Kernel");
 
-  QuadraturePointData::reinit(0, soln, elem);
+  QuadraturePointData::reinit(soln, elem);
 
 //  Moose::perf_log.pop("reinit()","Kernel");
 }
@@ -113,12 +104,10 @@ ElementData::reinitKernels(const NumericVector<Number>& soln, const Elem * elem,
 void
 ElementData::reinitNewtonStep(const NumericVector<Number>& soln)
 {
-  unsigned int block_id = 0;
-
   _n_qpoints = _qrule->n_points();
 
-  std::set<unsigned int>::iterator var_num_it = _var_nums[block_id].begin();
-  std::set<unsigned int>::iterator var_num_end = _var_nums[block_id].end();
+  std::set<unsigned int>::iterator var_num_it = _var_nums.begin();
+  std::set<unsigned int>::iterator var_num_end = _var_nums.end();
 
   for(;var_num_it != var_num_end; ++var_num_it)
   {
@@ -136,3 +125,16 @@ ElementData::reinitNewtonStep(const NumericVector<Number>& soln)
                          soln, _dof_data._var_dof_indices[var_num], _n_qpoints, static_phi, static_dphi);
   }
 }
+
+void
+ElementData::reinitMaterials(std::vector<Material *> & materials)
+{
+//  Moose::perf_log.push("reinit() - material", "ElementData");
+
+  _material = materials;
+  for (std::vector<Material *>::iterator it = _material.begin(); it != _material.end(); ++it)
+    (*it)->materialReinit();
+
+//  Moose::perf_log.pop("reinit() - material","ElementData");
+}
+

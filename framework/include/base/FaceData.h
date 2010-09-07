@@ -39,6 +39,8 @@ public:
   void reinit(const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id);
   void reinit(const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual);
 
+  void reinitMaterials(std::vector<Material *> & materials, unsigned int side);
+
 public:
   /**
    * The MooseSystem this Kernel is associated with.

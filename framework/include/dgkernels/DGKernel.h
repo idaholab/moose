@@ -21,7 +21,7 @@
 #include "MooseArray.h"
 #include "PDEBase.h"
 #include "FaceData.h"
-#include "MaterialPropertyInterface.h"
+#include "TwoMaterialPropertyInterface.h"
 
 //Forward Declarations
 class DGKernel;
@@ -44,7 +44,7 @@ InputParameters validParams<DGKernel>();
  */
 class DGKernel :
   public PDEBase,
-  protected MaterialPropertyInterface
+  protected TwoMaterialPropertyInterface
 {
 protected:
     enum DGResidualType
@@ -241,6 +241,23 @@ protected:
    * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
    */
   virtual Real computeQpJacobian(DGJacobianType type) = 0;
+
+
+  VariableValue & coupledNeighborValue(std::string varname, int i);
+
+  VariableGradient & coupledNeighborGradient(std::string varname, int i);
+
+  VariableSecond & coupledNeighborSecond(std::string varname, int i);
+
+  VariableValue & coupledNeighborValueOld(std::string varname, int i);
+
+  VariableValue & coupledNeighborValueOlder(std::string varname, int i);
+
+  VariableGradient & coupledNeighborGradientOld(std::string varname, int i);
+
+public:
+  // boundary id used for internal edges (all DG kernels lives on this boundary id)
+  static const unsigned int InternalBndId;
 };
 
 #endif //DGKERNEL_H

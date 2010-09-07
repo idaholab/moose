@@ -57,6 +57,20 @@ MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
   return mat_iter->second;
 }
 
+std::vector<Material *> &
+MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
+{
+  std::stringstream oss;
+
+  MaterialIterator mat_iter = _active_neighbor_materials.find(boundary_id);
+  if (mat_iter == _active_neighbor_materials.end())
+  {
+    oss << "Active Neighbor Material Missing for boundary: " << boundary_id << "\n";
+    mooseError(oss.str());
+  }
+  return mat_iter->second;
+}
+
 void MaterialWarehouse::updateMaterialDataState()
 {
   for (MaterialIterator it = _active_materials.begin(); it != _active_materials.end(); ++it)
@@ -112,3 +126,9 @@ void MaterialWarehouse::addBoundaryMaterial(int block_id, Material *material)
 {
   _active_boundary_materials[block_id].push_back(material);
 }
+
+void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
+{
+  _active_neighbor_materials[block_id].push_back(material);
+}
+

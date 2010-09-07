@@ -85,14 +85,8 @@ public:
   /**
    * Map to vector of variable numbers that need to be evaluated
    * at the quadrature points
-   *
-   * NOTE: This variable is used differently in ElementData and FaceData
-   * In ElementData, the mapping uses only index zero (0), since all variables lives
-   * inside the whole domain.
-   * In FaceData, the mapping goes from boundary id to list of variables active
-   * on this boundary (not all variables are needed on all boundaries)
    */
-  std::map<unsigned int, std::set<unsigned int> > & _var_nums;
+  std::set<unsigned int> & _var_nums;
 
   /**
    * Shape function.

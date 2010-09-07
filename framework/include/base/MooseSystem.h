@@ -412,6 +412,7 @@ private:
   std::vector<FaceData *> _neighbor_face_data;
   std::vector<AuxData *> _aux_data;
   std::vector<MaterialData> _material_data;
+  std::vector<MaterialData> _neighbor_material_data;
   std::vector<PostprocessorData> _postprocessor_data;
   std::vector<DamperData *> _damper_data;
   

@@ -54,7 +54,7 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
 {
   // If this variable isn't known yet... make it so
   if(_integrated)
-    _face_data._var_nums[_boundary_id].insert(_var_num);
+    _face_data._var_nums.insert(_var_num);
   else
     _face_data._boundary_to_var_nums_nodal[_boundary_id].insert(_var_num);
 
@@ -67,7 +67,7 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
     {
       unsigned int coupled_var_num = moose_system.getVariableNumber(coupled_var_name);
       if(_integrated)
-        _face_data._var_nums[_boundary_id].insert(coupled_var_num);
+        _face_data._var_nums.insert(coupled_var_num);
       else
         _face_data._boundary_to_var_nums_nodal[_boundary_id].insert(coupled_var_num);
     }
@@ -75,7 +75,7 @@ BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_syste
     else if (moose_system.hasAuxVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = moose_system.getAuxVariableNumber(coupled_var_name);
-      _face_data._aux_var_nums[0].insert(coupled_var_num);
+      _face_data._aux_var_nums.insert(coupled_var_num);
     }
     else
       mooseError("Coupled variable '" + coupled_var_name + "' not found.");

@@ -50,7 +50,7 @@ AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParamete
   _qp = 0;
   
   // If this variable isn't known yet... make it so
-  _element_data._aux_var_nums[0].insert(_var_num);
+  _element_data._aux_var_nums.insert(_var_num);
 
   if(_nodal)
     _aux_data._nodal_var_nums.insert(_var_num);
@@ -65,13 +65,13 @@ AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParamete
     if(_moose_system.hasVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = _moose_system._system->variable_number(coupled_var_name);
-      _element_data._var_nums[0].insert(coupled_var_num);
+      _element_data._var_nums.insert(coupled_var_num);
     }
     //Look for it in the Aux system
     else if (_moose_system.hasAuxVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = _moose_system._aux_system->variable_number(coupled_var_name);
-      _element_data._aux_var_nums[0].insert(coupled_var_num);
+      _element_data._aux_var_nums.insert(coupled_var_num);
     }
     else
       mooseError("Coupled variable '" + coupled_var_name + "' not found.");

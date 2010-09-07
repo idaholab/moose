@@ -46,9 +46,7 @@ public:
 
   void init();
 
-  void reinit(unsigned int block_id, const NumericVector<Number>& soln, const Elem * elem);
-
-  void reinitMaterials(std::vector<Material *> & materials);
+  void reinit(const NumericVector<Number>& soln, const Elem * elem);
 
   /**
    * The MooseSystem this Kernel is associated with.
@@ -117,16 +115,10 @@ public:
 
 
   /**
-   * Map to vector of variable numbers that need to be evaluated
+   * Vector of variable numbers that need to be evaluated
    * at the quadrature points
-   *
-   * NOTE: This variable is used differently in ElementData and FaceData
-   * In ElementData, the mapping uses only index zero (0), since all variables lives
-   * inside the whole domain.
-   * In FaceData, the mapping goes from boundary id to list of variables active
-   * on this boundary (not all variables are needed on all boundaries)
    */
-  std::map<unsigned int, std::set<unsigned int> > _var_nums;
+  std::set<unsigned int> _var_nums;
 
   /**
    * Value of the variables at the quadrature points.
@@ -165,10 +157,10 @@ public:
 
 
   /**
-   * Map to vector of auxiliary variable numbers that need to be evaluated
+   * Vector of auxiliary variable numbers that need to be evaluated
    * at the quadrature points
    */
-  std::map<unsigned int, std::set<unsigned int> > _aux_var_nums;
+  std::set<unsigned int> _aux_var_nums;
 
   /**
    * Value of the variables at the quadrature points.
@@ -204,6 +196,17 @@ public:
    * Pointer to the material that is valid for the current block.
    */
   std::vector<Material *> _material;
+
+
+  /**
+   * Value of the variables at the quadrature points at previous newton step.
+   */
+  MooseArray<MooseArray<Real> > _var_vals_old_newton;
+
+  /**
+   * Gradient of the variables at the quadrature points at previous newton step.
+   */
+  MooseArray<MooseArray<RealGradient> > _var_grads_old_newton;
 };
 
 #endif // QUADRPTDATA_H

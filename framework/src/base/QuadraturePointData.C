@@ -63,16 +63,65 @@ QuadraturePointData::init()
   _aux_var_grads.resize(n_aux_vars);
   _aux_var_grads_old.resize(n_aux_vars);
   _aux_var_grads_older.resize(n_aux_vars);
+
+  _var_vals_old_newton.resize(n_vars);
+  _var_grads_old_newton.resize(n_vars);
+
+  //This allows for different basis functions / orders for each variable
+  for(unsigned int var=0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
+  {
+    FEType fe_type = _moose_system._dof_map->variable_type(var);
+
+    if(!_fe[fe_type])
+    {
+      _fe[fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
+      _fe[fe_type]->attach_quadrature_rule(_qrule);
+
+      _fe_displaced[fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
+      _fe_displaced[fe_type]->attach_quadrature_rule(_qrule);
+
+      _JxW[fe_type] = &_fe[fe_type]->get_JxW();
+      _JxW_displaced[fe_type] = &_fe_displaced[fe_type]->get_JxW();
+
+      _phi[fe_type] = &_fe[fe_type]->get_phi();
+      _grad_phi[fe_type] = &_fe[fe_type]->get_dphi();
+
+      _q_point[fe_type] = &_fe[fe_type]->get_xyz();
+      _q_point_displaced[fe_type] = &_fe_displaced[fe_type]->get_xyz();
+
+      FEFamily family = fe_type.family;
+
+      if(family == CLOUGH || family == HERMITE)
+        _second_phi[fe_type] = &_fe[fe_type]->get_d2phi();
+    }
+  }
+
+  //This allows for different basis functions / orders for each Aux variable
+  for(unsigned int var=0; var < _moose_system.getAuxSystem()->n_vars(); var++)
+  {
+    FEType fe_type = _moose_system._aux_dof_map->variable_type(var);
+
+    if(!_fe[fe_type])
+    {
+      _fe[fe_type] = FEBase::build(_moose_system.getDim(), fe_type).release();
+      _fe[fe_type]->attach_quadrature_rule(_qrule);
+
+      _JxW[fe_type] = &_fe[fe_type]->get_JxW();
+      _phi[fe_type] = &_fe[fe_type]->get_phi();
+      _grad_phi[fe_type] = &_fe[fe_type]->get_dphi();
+      _q_point[fe_type] = &_fe[fe_type]->get_xyz();
+    }
+  }
 }
 
 void
-QuadraturePointData::reinit(unsigned int block_id, const NumericVector<Number>& soln, const Elem * elem)
+QuadraturePointData::reinit(const NumericVector<Number>& soln, const Elem * elem)
 {
   // set the number of quadrature points
   _n_qpoints = _qrule->n_points();
 
-  std::set<unsigned int>::iterator var_num_it = _var_nums[block_id].begin();
-  std::set<unsigned int>::iterator var_num_end = _var_nums[block_id].end();
+  std::set<unsigned int>::iterator var_num_it = _var_nums.begin();
+  std::set<unsigned int>::iterator var_num_end = _var_nums.end();
 
 //  Moose::perf_log.push("reinit() - compute vals","Kernel");
 
@@ -137,8 +186,8 @@ QuadraturePointData::reinit(unsigned int block_id, const NumericVector<Number>& 
 //  Moose::perf_log.push("reinit() - compute aux vals","Kernel");
   const NumericVector<Number>& aux_soln = (*_moose_system.getAuxSystem()->current_local_solution);
 
-  for (std::set<unsigned int>::iterator it = _aux_var_nums[0].begin();
-      it != _aux_var_nums[0].end();
+  for (std::set<unsigned int>::iterator it = _aux_var_nums.begin();
+      it != _aux_var_nums.end();
       ++it)
   {
     unsigned int var_num = *it;
@@ -180,14 +229,3 @@ QuadraturePointData::reinit(unsigned int block_id, const NumericVector<Number>& 
 //  Moose::perf_log.pop("reinit() - compute aux vals","Kernel");
 }
 
-void
-QuadraturePointData::reinitMaterials(std::vector<Material *> & materials)
-{
-//  Moose::perf_log.push("reinit() - material","Kernel");
-
-  _material = materials;
-  for (std::vector<Material *>::iterator it = _material.begin(); it != _material.end(); ++it)
-    (*it)->materialReinit();
-
-//  Moose::perf_log.pop("reinit() - material","Kernel");
-}

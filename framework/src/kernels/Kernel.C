@@ -57,7 +57,7 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
    _grad_u_old_newton(_element_data._var_grads_old_newton[_var_num])
 {
   // If this variable isn't known yet... make it so
-  _element_data._var_nums[0].insert(_var_num);
+  _element_data._var_nums.insert(_var_num);
   for(unsigned int i=0;i<_coupled_to.size();i++)
   {
     std::string coupled_var_name=_coupled_to[i];
@@ -66,13 +66,13 @@ Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters par
     if(moose_system.hasVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = moose_system.getVariableNumber(coupled_var_name);
-      _element_data._var_nums[0].insert(coupled_var_num);
+      _element_data._var_nums.insert(coupled_var_num);
     }
     //Look for it in the Aux system
     else if (moose_system.hasAuxVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = moose_system.getAuxVariableNumber(coupled_var_name);
-      _element_data._aux_var_nums[0].insert(coupled_var_num);
+      _element_data._aux_var_nums.insert(coupled_var_num);
     }
     else
       mooseError("Coupled variable '" + coupled_var_name + "' not found.");

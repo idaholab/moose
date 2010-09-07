@@ -65,6 +65,11 @@ public:
    */
   void materialReinit();
 
+  /**
+   * Reinit version for side material
+   */
+  void materialReinit(unsigned int side);
+
   bool hasStatefulProperties();
 
   /**
@@ -220,6 +225,10 @@ protected:
   std::map<unsigned int, std::map<std::string, PropertyValue *> > * _props_elem;
   std::map<unsigned int, std::map<std::string, PropertyValue *> > * _props_elem_old;
   std::map<unsigned int, std::map<std::string, PropertyValue *> > * _props_elem_older;
+
+  std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > > * _props_face;
+  std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > > * _props_face_old;
+  std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > > * _props_face_older;
 };
 
 

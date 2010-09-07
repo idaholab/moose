@@ -85,7 +85,7 @@ void AuxData::reinit(const NumericVector<Number>& soln, const Node & node)
   unsigned int qp = 0;
 
   //Non Aux vars first
-  for (std::set<unsigned int>::iterator it = _element_data._var_nums[0].begin(); it != _element_data._var_nums[0].end(); ++it)
+  for (std::set<unsigned int>::iterator it = _element_data._var_nums.begin(); it != _element_data._var_nums.end(); ++it)
   {
     unsigned int var_num = *it;
 
@@ -132,7 +132,7 @@ void AuxData::reinit(const NumericVector<Number>& soln, const Node & node)
 
 void AuxData::reinit(const NumericVector<Number>& /*soln*/, const Elem & elem)
 {
-  Moose::perf_log.push("reinit(elem)", "AuxKernel");
+//  Moose::perf_log.push("reinit(elem)", "AuxKernel");
 
   unsigned int aux_system_number = _moose_system.getAuxSystem()->number();
 
@@ -161,7 +161,7 @@ void AuxData::reinit(const NumericVector<Number>& /*soln*/, const Elem & elem)
   //Compute the average value of each variable on the element
 
   //Non Aux vars first
-  for (std::set<unsigned int>::iterator it = _element_data._var_nums[0].begin(); it != _element_data._var_nums[0].end(); ++it)
+  for (std::set<unsigned int>::iterator it = _element_data._var_nums.begin(); it != _element_data._var_nums.end(); ++it)
   {
     unsigned int var_num = *it;
 
@@ -196,7 +196,7 @@ void AuxData::reinit(const NumericVector<Number>& /*soln*/, const Elem & elem)
   }
 
   //Now Aux vars
-  for (std::set<unsigned int>::iterator it = _element_data._aux_var_nums[0].begin(); it != _element_data._aux_var_nums[0].end(); ++it)
+  for (std::set<unsigned int>::iterator it = _element_data._aux_var_nums.begin(); it != _element_data._aux_var_nums.end(); ++it)
   {
     unsigned int var_num = *it;
 
@@ -241,7 +241,7 @@ void AuxData::reinit(const NumericVector<Number>& /*soln*/, const Elem & elem)
     _dof_data._aux_var_dofs[var_num] = dof_number;
   }
 
-  Moose::perf_log.pop("reinit(elem)", "AuxKernel");
+//  Moose::perf_log.pop("reinit(elem)", "AuxKernel");
 }
 
 Real

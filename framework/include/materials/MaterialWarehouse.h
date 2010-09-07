@@ -34,6 +34,7 @@ public:
 
   std::vector<Material *> & getMaterials(unsigned int block_id);
   std::vector<Material *> & getBoundaryMaterials(unsigned int boundary_id);
+  std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);
 
   void updateMaterialDataState();
 
@@ -43,8 +44,12 @@ public:
   MaterialIterator activeBoundaryMaterialsBegin();
   MaterialIterator activeBoundaryMaterialsEnd();
 
+  MaterialIterator activeNeighborMaterialsBegin();
+  MaterialIterator activeNeighborMaterialsEnd();
+
   void addMaterial(int block_id, Material *material);
   void addBoundaryMaterial(int block_id, Material *material);
+  void addNeighborMaterial(int block_id, Material *material);
 
 protected:
   /**
@@ -55,6 +60,10 @@ protected:
    * A list of boundary materials associated with the block (subdomain)
    */
   std::map<int, std::vector<Material *> > _active_boundary_materials;
+  /**
+   * A list of neighbor materials associated with the block (subdomain) (for DG)
+   */
+  std::map<int, std::vector<Material *> > _active_neighbor_materials;
 };
 
 #endif // MATERIALWAREHOUSE_H

@@ -47,9 +47,8 @@ DamperData::init()
 void
 DamperData::reinit(const NumericVector<Number>& increment_vec)
 {
-  // 0 is for the block id
-  std::set<unsigned int>::iterator var_num_it = _var_nums[0].begin();
-  std::set<unsigned int>::iterator var_num_end = _var_nums[0].end();
+  std::set<unsigned int>::iterator var_num_it = _var_nums.begin();
+  std::set<unsigned int>::iterator var_num_end = _var_nums.end();
 
   for(;var_num_it != var_num_end; ++var_num_it)
   {

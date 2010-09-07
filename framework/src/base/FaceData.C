@@ -38,41 +38,25 @@ FaceData::~FaceData()
 
 void FaceData::init()
 {
+  //Max quadrature order was already found by Kernel::init()
+  int dim = _moose_system.getDim();
+  _qrule = new QGauss(dim - 1, _moose_system._max_quadrature_order);
+
   QuadraturePointData::init();
 
   unsigned int n_vars = _moose_system.getNonlinearSystem()->n_vars();
-  int dim = _moose_system.getDim();
 
   //Resize data arrays
   _nodal_bc_var_dofs.resize(n_vars);
   _var_vals_nodal.resize(n_vars);
-
-  //Max quadrature order was already found by Kernel::init()
-  _qrule = new QGauss(dim - 1, _moose_system._max_quadrature_order);
 
   for(unsigned int var=0; var < n_vars; var++)
   {
     // TODO: Replicate dof_map
     FEType fe_type = _moose_system._dof_map->variable_type(var);
 
-    if(!_fe[fe_type])
-    {
-      _fe[fe_type] = FEBase::build(dim, fe_type).release();
-      _fe[fe_type]->attach_quadrature_rule(_qrule);
-
-      _q_point[fe_type] = &_fe[fe_type]->get_xyz();
-      _JxW[fe_type] = &_fe[fe_type]->get_JxW();
-      _phi[fe_type] = &_fe[fe_type]->get_phi();
-      _grad_phi[fe_type] = &_fe[fe_type]->get_dphi();
-      _normals[fe_type] = &_fe[fe_type]->get_normals();
-
-      FEFamily family = fe_type.family;
-
-      if(family == CLOUGH || family == HERMITE)
-        _second_phi[fe_type] = &_fe[fe_type]->get_d2phi();
-    }
+    _normals[fe_type] = &_fe[fe_type]->get_normals();
   }
-
 }
 
 void FaceData::reinit(const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
@@ -92,7 +76,7 @@ void FaceData::reinit(const NumericVector<Number>& soln, const Elem * elem, cons
   for(;fe_it != fe_end; ++fe_it)
     fe_it->second->reinit(elem, _current_side);
 
-  QuadraturePointData::reinit(boundary_id, soln, elem);
+  QuadraturePointData::reinit(soln, elem);
 
   for (std::set<unsigned int>::iterator it = _boundary_to_var_nums_nodal[boundary_id].begin();
        it != _boundary_to_var_nums_nodal[boundary_id].end();
@@ -138,3 +122,16 @@ void FaceData::reinit(const NumericVector<Number>& soln, const Node & node, cons
 
 //  Moose::perf_log.pop("reinit(node)","BoundaryCondition");
 }
+
+void
+FaceData::reinitMaterials(std::vector<Material *> & materials, unsigned int side)
+{
+//  Moose::perf_log.push("reinit() - material","FaceData");
+
+  _material = materials;
+  for (std::vector<Material *>::iterator it = _material.begin(); it != _material.end(); ++it)
+    (*it)->materialReinit(side);
+
+//  Moose::perf_log.pop("reinit() - material","FaceData");
+}
+

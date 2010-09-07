@@ -27,20 +27,22 @@
 #include "dense_subvector.h"
 #include "libmesh_common.h"
 
+const unsigned int DGKernel::InternalBndId = 123456789;
+
 template<>
 InputParameters validParams<DGKernel>()
 {
   InputParameters params = validParams<PDEBase>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.set<bool>("_integrated") = true;
-  params.addPrivateParam<unsigned int>("_boundary_id", 123456789);
+  params.addPrivateParam<unsigned int>("_boundary_id", DGKernel::InternalBndId);
   return params;
 }
 
 
 DGKernel::DGKernel(std::string name, MooseSystem & moose_system, InputParameters parameters):
   PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
-  MaterialPropertyInterface(moose_system._material_data[_tid]),
+  TwoMaterialPropertyInterface(moose_system._material_data[_tid], moose_system._neighbor_material_data[_tid]),
   _dof_data(moose_system._dof_data[_tid]),
   _face_data(*moose_system._face_data[_tid]),
   _neighbor_dof_data(moose_system._neighbor_dof_data[_tid]),
@@ -72,8 +74,8 @@ DGKernel::DGKernel(std::string name, MooseSystem & moose_system, InputParameters
   _grad_u_old_neighbor(_neighbor_face_data._var_grads_old[_var_num]),
   _grad_u_older_neighbor(_neighbor_face_data._var_grads_older[_var_num])
 {
-  _face_data._var_nums[_boundary_id].insert(_var_num);
-  _neighbor_face_data._var_nums[_boundary_id].insert(_var_num);
+  _face_data._var_nums.insert(_var_num);
+  _neighbor_face_data._var_nums.insert(_var_num);
 
   for(unsigned int i=0;i<_coupled_to.size();i++)
   {
@@ -83,15 +85,15 @@ DGKernel::DGKernel(std::string name, MooseSystem & moose_system, InputParameters
     if(moose_system.hasVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = moose_system.getVariableNumber(coupled_var_name);
-      _face_data._var_nums[_boundary_id].insert(coupled_var_num);
-      _neighbor_face_data._var_nums[_boundary_id].insert(coupled_var_num);
+      _face_data._var_nums.insert(coupled_var_num);
+      _neighbor_face_data._var_nums.insert(coupled_var_num);
     }
     //Look for it in the Aux system
     else if (moose_system.hasAuxVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = moose_system.getAuxVariableNumber(coupled_var_name);
-      _face_data._aux_var_nums[0].insert(coupled_var_num);
-      _neighbor_face_data._aux_var_nums[_boundary_id].insert(coupled_var_num);
+      _face_data._aux_var_nums.insert(coupled_var_num);
+      _neighbor_face_data._aux_var_nums.insert(coupled_var_num);
     }
     else
       mooseError("Coupled variable '" + coupled_var_name + "' not found.");
@@ -155,3 +157,70 @@ DGKernel::computeJacobian()
 //  Moose::perf_log.pop("computeJacobian()","DGKernel");
 }
 
+
+VariableValue &
+DGKernel::coupledNeighborValue(std::string varname, int i)
+{
+  if(!isCoupled(varname))
+    mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
+
+  if(!isAux(varname))
+    return _neighbor_face_data._var_vals[_coupled_vars[varname][i]._num];
+  else
+    return _neighbor_face_data._aux_var_vals[_coupled_aux_vars[varname][i]._num];
+}
+
+VariableGradient &
+DGKernel::coupledNeighborGradient(std::string varname, int i)
+{
+  if(!isCoupled(varname))
+    mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
+
+  if(!isAux(varname))
+    return _neighbor_face_data._var_grads[_coupled_vars[varname][i]._num];
+  else
+    return _neighbor_face_data._aux_var_grads[_coupled_aux_vars[varname][i]._num];
+}
+
+VariableSecond &
+DGKernel::coupledNeighborSecond(std::string varname, int i)
+{
+  if(!isCoupled(varname))
+    mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
+
+  //Aux vars can't have second derivatives!
+  return _neighbor_face_data._var_seconds[_coupled_vars[varname][i]._num];
+}
+
+VariableValue &
+DGKernel::coupledNeighborValueOld(std::string varname, int i)
+{
+  if(!isCoupled(varname))
+    mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
+
+  if(!isAux(varname))
+    return _neighbor_face_data._var_vals_old[_coupled_vars[varname][i]._num];
+  else
+    return _neighbor_face_data._aux_var_vals_old[_coupled_aux_vars[varname][i]._num];
+}
+
+VariableValue &
+DGKernel::coupledNeighborValueOlder(std::string varname, int i)
+{
+  if(!isCoupled(varname))
+    mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
+
+  if(!isAux(varname))
+    return _neighbor_face_data._var_vals_older[_coupled_vars[varname][i]._num];
+  else
+    return _neighbor_face_data._aux_var_vals_older[_coupled_aux_vars[varname][i]._num];
+}
+
+VariableGradient &
+DGKernel::coupledNeighborGradientOld(std::string varname, int i)
+{
+  if(!isCoupled(varname))
+    mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
+
+  return _neighbor_face_data._var_grads_old[_coupled_vars[varname][i]._num];
+}

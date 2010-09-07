@@ -49,6 +49,7 @@ MooseSystem::MooseSystem() :
   _dof_data(libMesh::n_threads(), DofData(*this)),
   _neighbor_dof_data(libMesh::n_threads(), DofData(*this)),
   _material_data(libMesh::n_threads(), MaterialData(*this)),
+  _neighbor_material_data(libMesh::n_threads(), MaterialData(*this)),
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _es(NULL),
   _displaced_es(NULL),
@@ -109,6 +110,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _dof_data(libMesh::n_threads(), DofData(*this)),
   _neighbor_dof_data(libMesh::n_threads(), DofData(*this)),
   _material_data(libMesh::n_threads(), MaterialData(*this)),
+  _neighbor_material_data(libMesh::n_threads(), MaterialData(*this)),
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _es(NULL),
   _displaced_es(NULL),
@@ -878,11 +880,14 @@ MooseSystem::addMaterial(std::string mat_name,
     for (unsigned int i=0; i<blocks.size(); ++i) {
       parameters.set<int>("_bid") = blocks[i];
 
+      parameters.set<bool>("_is_neighbor_material") = false;
       parameters.set<bool>("_is_boundary_material") = false;
       _materials[tid].addMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
 
       parameters.set<bool>("_is_boundary_material") = true;
       _materials[tid].addBoundaryMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
+      parameters.set<bool>("_is_neighbor_material") = true;
+      _materials[tid].addNeighborMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
     }
   }
 }
@@ -1027,7 +1032,7 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
 
   unsigned int position = 0;
 
-  for(unsigned int i=0; i<_element_data[tid]->_var_nums[0].size();i++)
+  for(unsigned int i=0; i<_element_data[tid]->_var_nums.size();i++)
   {
     _dof_map->dof_indices(elem, _dof_data[tid]._var_dof_indices[i], i);
 
@@ -1045,7 +1050,7 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   _grad_zero[tid].resize(num_q_points,0);
   _second_zero[tid].resize(num_q_points,0);
 
-  for(std::set<unsigned int>::iterator it = _element_data[tid]->_var_nums[0].begin(); it != _element_data[tid]->_var_nums[0].end(); ++it)
+  for(std::set<unsigned int>::iterator it = _element_data[tid]->_var_nums.begin(); it != _element_data[tid]->_var_nums.end(); ++it)
   {
     unsigned int var_num = *it;
     FEType fe_type = _dof_map->variable_type(var_num);
@@ -1065,7 +1070,7 @@ void
 MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
 {
   _face_data[tid]->reinit(soln, elem, side, boundary_id);
-  _face_data[tid]->reinitMaterials(_materials[tid].getBoundaryMaterials(elem->subdomain_id()));
+  _face_data[tid]->reinitMaterials(_materials[tid].getBoundaryMaterials(elem->subdomain_id()), side);
 }
 
 void
@@ -1077,28 +1082,24 @@ MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const N
 void
 MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const Elem * neighbor, DenseVector<Number> * Re, bool reinitKe)
 {
-  // FIXME: remove this magic constant
-  unsigned int boundary_id = 123456789;
-
   // current element
   _face_data[tid]->_current_side = side;
   _face_data[tid]->_current_side_elem = elem->build_side(side).release();
 
   // loop over variables and reinit FE objects
-  std::set<unsigned int>::iterator var_num_it = _face_data[tid]->_var_nums[boundary_id].begin();
-  std::set<unsigned int>::iterator var_num_end = _face_data[tid]->_var_nums[boundary_id].end();
+  std::set<unsigned int>::iterator var_num_it = _face_data[tid]->_var_nums.begin();
+  std::set<unsigned int>::iterator var_num_end = _face_data[tid]->_var_nums.end();
   for(;var_num_it != var_num_end; ++var_num_it)
   {
     unsigned int var_num = *var_num_it;
 
     FEType fe_type = _dof_map->variable_type(var_num);
     _face_data[tid]->_fe[fe_type]->reinit(elem, side);
-
-//    _dof_map->dof_indices(elem, _dof_data[tid]._var_dof_indices[var_num], var_num);
   }
 
-  ((QuadraturePointData *) _face_data[tid])->reinit(boundary_id, soln, elem);
+  ((QuadraturePointData *) _face_data[tid])->reinit(soln, elem);
 
+  _face_data[tid]->reinitMaterials(_materials[tid].getBoundaryMaterials(elem->subdomain_id()), side);
 
   // neighbor stuff
 
@@ -1109,8 +1110,8 @@ MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, c
 
   unsigned int position = 0;
 
-  var_num_it = _face_data[tid]->_var_nums[boundary_id].begin();
-  var_num_end = _face_data[tid]->_var_nums[boundary_id].end();
+  var_num_it = _face_data[tid]->_var_nums.begin();
+  var_num_end = _face_data[tid]->_var_nums.end();
   for(;var_num_it != var_num_end; ++var_num_it)
   {
     unsigned int var_num = *var_num_it;
@@ -1139,7 +1140,13 @@ MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, c
 
     position+=num_n_dofs;
   }
-  ((QuadraturePointData *) _neighbor_face_data[tid])->reinit(boundary_id, soln, neighbor);
+  ((QuadraturePointData *) _neighbor_face_data[tid])->reinit(soln, neighbor);
+
+   ((QuadraturePointData *) _neighbor_face_data[tid])->reinit(soln, neighbor);
+ 
+   // passing side here is WRONG, needs to be fixed somehow, should be the side from the other element, but that
+   // is not going to work for adaptivity.
+   _neighbor_face_data[tid]->reinitMaterials(_materials[tid].getNeighborMaterials(neighbor->subdomain_id()), side);
 }
 
 void

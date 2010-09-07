@@ -48,9 +48,9 @@ public:
 
   void init();
 
-  void initKernels();
-
   void reinitKernels(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke);
+
+  void reinitMaterials(std::vector<Material *> & materials);
 
   /**
    * Stores the values of variables for actual newton step
@@ -69,16 +69,6 @@ public:
    * basis for things like SUPG and GLS.
    */
   std::map<unsigned int, std::vector<std::vector<Real> > > _test;
-
-  /**
-   * Value of the variables at the quadrature points at previous newton step.
-   */
-  MooseArray<MooseArray<Real> > _var_vals_old_newton;
-
-  /**
-   * Gradient of the variables at the quadrature points at previous newton step.
-   */
-  MooseArray<MooseArray<RealGradient> > _var_grads_old_newton;
 };
 
 #endif //ELEMENTDATA_H
