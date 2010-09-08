@@ -1,3 +1,17 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "Convection.h"
 
 template<>
@@ -12,8 +26,8 @@ InputParameters validParams<Convection>()
 Convection::Convection(const std::string & name,
                        MooseSystem &sys,
                        InputParameters parameters)
- :Kernel(name, sys, parameters),
-_velocity_vector(coupledGradient("velocity_vector"))
+  :Kernel(name, sys, parameters),
+   _velocity_vector(coupledGradient("velocity_vector"))
 {}
 
 Real Convection::computeQpResidual()

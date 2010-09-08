@@ -1,3 +1,17 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 /**
  * Example 15: Functions - Using function objects
  */
@@ -9,7 +23,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseSystem.h"
-#include "FunctionFactory.h"
+#include "MooseFactory.h"
 
 // C++ include files
 #include <iostream>
@@ -29,7 +43,7 @@ int main (int argc, char** argv)
 
   Moose::registerObjects();
 
-  FunctionFactory::instance()->registerFunction<ExampleFunction>("ExampleFunction");
+  registerFunction(ExampleFunction);
 
   Parser p(moose_system);
   

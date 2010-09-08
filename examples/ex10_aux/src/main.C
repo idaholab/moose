@@ -1,3 +1,17 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 /**
  * Example 10: Auxiliary Calcuations
  * This examples shows how to compute auxiliary values outside of the
@@ -8,7 +22,7 @@
 #include "Moose.h"
 #include "MooseSystem.h"
 #include "Parser.h"
-#include "MooseFactory.h"       // <- Need to include the AuxFactory
+#include "MooseFactory.h"
 #include "Executioner.h"
 
 // Example 10 Includes

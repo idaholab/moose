@@ -1,3 +1,17 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "ConvectionDiffusionBlock.h"
 #include "KernelFactory.h"
 #include "Parser.h"
@@ -18,6 +32,14 @@ ConvectionDiffusionBlock::ConvectionDiffusionBlock(const std::string & name, Moo
 void
 ConvectionDiffusionBlock::execute() 
 {
+  /**
+   * Retrieving Parameters from a ParserBlock object is different than retrieving Parameters from
+   * other MooseObjects.  ParserBlocks differentiate between their own parameters and the parameters
+   * for the MooseObjects for which they represent.  Therefore to get or set a parameter you need
+   * to call on of the following functions "getBlockParams" or "getClassParams" to retrieve the
+   * ParserBlock params or the MooseObject params for the object it represents respectively.
+   */
+  
   std::vector<std::string> variables = getBlockParams().get<std::vector<std::string> >("variables");
   std::vector<std::string> vel_vec_variable;
 
