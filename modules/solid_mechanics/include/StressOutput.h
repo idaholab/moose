@@ -13,7 +13,7 @@ class StressOutput : public Kernel
 {
 public:
 
-  StressOutput(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  StressOutput(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
     
 protected:
   virtual Real computeQpResidual();

@@ -14,7 +14,7 @@ class EnergyInviscidFlux : public Kernel
 {
 public:
 
-  EnergyInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  EnergyInviscidFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

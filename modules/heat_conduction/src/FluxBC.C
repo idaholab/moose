@@ -7,7 +7,7 @@ InputParameters validParams<FluxBC>()
   return params;
 }
 
-FluxBC::FluxBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+FluxBC::FluxBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :NeumannBC(name, moose_system, parameters),
     _k(getMaterialProperty<Real>("thermal_conductivity"))
  {}

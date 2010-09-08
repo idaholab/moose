@@ -15,7 +15,7 @@ class ThermalBC : public BoundaryCondition
 {
 public:
 
-  ThermalBC(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ThermalBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
   virtual ~ThermalBC(){}
 

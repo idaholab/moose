@@ -8,7 +8,7 @@ InputParameters validParams<GravityForce>()
   return params;
 }
 
-GravityForce::GravityForce(std::string name, MooseSystem & moose_system, InputParameters parameters)
+GravityForce::GravityForce(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
     _p_var(coupled("p")),
     _p(coupledValue("p")),

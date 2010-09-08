@@ -14,7 +14,7 @@ class HeatConduction : public Diffusion
 {
 public:
 
-  HeatConduction(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  HeatConduction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:  
   virtual Real computeQpResidual();

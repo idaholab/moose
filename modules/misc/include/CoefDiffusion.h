@@ -13,7 +13,7 @@ class CoefDiffusion : public Kernel
 {
 public:
 
-  CoefDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  CoefDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

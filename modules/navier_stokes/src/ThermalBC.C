@@ -12,7 +12,7 @@ InputParameters validParams<ThermalBC>()
   return params;
 }
 
-ThermalBC::ThermalBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+ThermalBC::ThermalBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
     _p_var(coupled("p")),
     _p(coupledValue("p")),

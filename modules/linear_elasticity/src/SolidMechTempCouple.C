@@ -8,7 +8,7 @@ InputParameters validParams<SolidMechTempCouple>()
   return params;
 }
 
-SolidMechTempCouple::SolidMechTempCouple(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SolidMechTempCouple::SolidMechTempCouple(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :SolidMech(name, moose_system, parameters),
     _temp_var(coupled("temp")),
     _thermal_strain(getMaterialProperty<Real>("thermal_strain")),

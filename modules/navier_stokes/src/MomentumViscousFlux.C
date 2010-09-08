@@ -9,7 +9,7 @@ InputParameters validParams<MomentumViscousFlux>()
   return params;
 }
 
-MomentumViscousFlux::MomentumViscousFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MomentumViscousFlux::MomentumViscousFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _component(getParam<Real>("component")),
    _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor"))

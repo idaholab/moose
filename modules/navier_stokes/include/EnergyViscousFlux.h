@@ -15,7 +15,7 @@ class EnergyViscousFlux : public Kernel
 {
 public:
 
-  EnergyViscousFlux(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  EnergyViscousFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

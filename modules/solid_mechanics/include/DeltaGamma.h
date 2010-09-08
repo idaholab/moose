@@ -14,7 +14,7 @@ class DeltaGamma : public Kernel
 {
 public:
 
-  DeltaGamma(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  DeltaGamma(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
     
 protected:
   virtual Real computeQpResidual();

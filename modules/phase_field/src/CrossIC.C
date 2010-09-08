@@ -24,7 +24,7 @@ InputParameters validParams<CrossIC>()
   return validParams<C1ICBase>();
 }
 
-CrossIC::CrossIC(std::string name,
+CrossIC::CrossIC(const std::string & name,
                  MooseSystem & moose_system,
                  InputParameters parameters)
   :C1ICBase(name, moose_system, parameters)

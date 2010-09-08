@@ -10,7 +10,7 @@ InputParameters validParams<DeltaGamma>()
 }
 
 
-DeltaGamma::DeltaGamma(std::string name, MooseSystem & moose_system, InputParameters parameters)
+DeltaGamma::DeltaGamma(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _elastic_strain(getMaterialProperty<ColumnMajorMatrix>("elastic_strain")),
    _accumulated_plastic_strain(getMaterialProperty<Real>("accumulated_plastic_strain")),

@@ -33,7 +33,7 @@ InputParameters validParams<C1ICBase>()
   return params;
 }
 
-C1ICBase::C1ICBase(std::string name,
+C1ICBase::C1ICBase(const std::string & name,
                    MooseSystem & moose_system,
                    InputParameters parameters)
   :InitialCondition(name, moose_system, parameters),

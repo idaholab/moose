@@ -8,7 +8,7 @@ InputParameters validParams<CHInterface>()
   return params;
 }
 
-CHInterface::CHInterface(std::string name, MooseSystem & moose_system, InputParameters parameters)
+CHInterface::CHInterface(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _kappa_c(getMaterialProperty<Real>("kappa_c")),
    _M(getMaterialProperty<Real>("M")),

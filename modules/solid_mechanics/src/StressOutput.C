@@ -15,7 +15,7 @@ InputParameters validParams<StressOutput>()
 }
 
 
-StressOutput::StressOutput(std::string name, MooseSystem & moose_system, InputParameters parameters)
+StressOutput::StressOutput(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _stress(getMaterialProperty<RealTensorValue>("stress")),
    _VonMises(getParam<bool>("VonMises")),

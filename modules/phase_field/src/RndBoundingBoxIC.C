@@ -20,7 +20,7 @@ InputParameters validParams<RndBoundingBoxIC>()
   return params;
 }
 
-RndBoundingBoxIC::RndBoundingBoxIC(std::string name,
+RndBoundingBoxIC::RndBoundingBoxIC(const std::string & name,
                              MooseSystem & moose_system,
                              InputParameters parameters)
   :InitialCondition(name, moose_system, parameters),

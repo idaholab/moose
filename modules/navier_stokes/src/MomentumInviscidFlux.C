@@ -9,7 +9,7 @@ InputParameters validParams<MomentumInviscidFlux>()
   return params;
 }
 
-MomentumInviscidFlux::MomentumInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MomentumInviscidFlux::MomentumInviscidFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _u_vel_var(coupled("u")),
    _u_vel(coupledValue("u")),

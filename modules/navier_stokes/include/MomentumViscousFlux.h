@@ -15,7 +15,7 @@ class MomentumViscousFlux : public Kernel
 {
 public:
 
-  MomentumViscousFlux(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  MomentumViscousFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

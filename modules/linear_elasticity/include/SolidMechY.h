@@ -14,7 +14,7 @@ class SolidMechY : public SolidMech
 {
 public:
 
-  SolidMechY(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  SolidMechY(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

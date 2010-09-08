@@ -8,7 +8,7 @@ InputParameters validParams<SolidMech>()
   return params;
 }
 
-SolidMech::SolidMech(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SolidMech::SolidMech(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _E_prop(getMaterialProperty<Real>("youngs_modulus")),
    _nu_prop(getMaterialProperty<Real>("poissons_ratio"))

@@ -16,7 +16,7 @@ InputParameters validParams<LinearIsotropicMaterial>();
 class LinearIsotropicMaterial : public SolidMechanicsMaterial
 {
 public:
-  LinearIsotropicMaterial(std::string name,
+  LinearIsotropicMaterial(const std::string & name,
                           MooseSystem & moose_system,
                           InputParameters parameters);
   

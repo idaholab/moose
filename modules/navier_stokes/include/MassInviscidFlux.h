@@ -14,7 +14,7 @@ class MassInviscidFlux : public Kernel
 {
 public:
 
-  MassInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  MassInviscidFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

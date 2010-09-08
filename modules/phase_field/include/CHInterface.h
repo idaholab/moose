@@ -14,7 +14,7 @@ class CHInterface : public Kernel
 {
 public:
 
-  CHInterface(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  CHInterface(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

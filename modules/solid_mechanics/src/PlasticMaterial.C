@@ -9,7 +9,7 @@ InputParameters validParams<PlasticMaterial>()
   return params;
 }
 
-PlasticMaterial::PlasticMaterial(std::string name,
+PlasticMaterial::PlasticMaterial(const std::string & name,
                                  MooseSystem & moose_system,
                                  InputParameters parameters)
   :LinearIsotropicMaterial(name, moose_system, parameters),

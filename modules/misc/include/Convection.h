@@ -35,7 +35,7 @@ public:
    * It is ok to have the definition in the .h if the function body
    * is really small.  Otherwise it should be in the .C
    */
-  Convection(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  Convection(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:
   /**

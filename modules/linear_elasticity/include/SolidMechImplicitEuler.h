@@ -14,7 +14,7 @@ class SolidMechImplicitEuler : public SecondDerivativeImplicitEuler
 {
 public:
 
-  SolidMechImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  SolidMechImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

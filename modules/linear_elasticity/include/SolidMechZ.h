@@ -13,7 +13,7 @@ class SolidMechZ : public SolidMech
 {
 public:
 
-  SolidMechZ(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  SolidMechZ(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

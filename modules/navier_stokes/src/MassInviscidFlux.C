@@ -7,7 +7,7 @@ InputParameters validParams<MassInviscidFlux>()
   return params;
 }
 
-MassInviscidFlux::MassInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MassInviscidFlux::MassInviscidFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
     _pu_var(coupled("pu")),
     _pu(coupledValue("pu")),

@@ -8,7 +8,7 @@ InputParameters validParams<CHBulk>()
   return params;
 }
 
-CHBulk::CHBulk(std::string name, MooseSystem & moose_system, InputParameters parameters)
+CHBulk::CHBulk(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _M(getMaterialProperty<Real>("M"))
 {  

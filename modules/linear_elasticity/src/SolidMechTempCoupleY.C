@@ -8,7 +8,7 @@ InputParameters validParams<SolidMechTempCoupleY>()
 }
 
 
-SolidMechTempCoupleY::SolidMechTempCoupleY(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SolidMechTempCoupleY::SolidMechTempCoupleY(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :SolidMechTempCouple(name, moose_system, parameters)
 {}
 

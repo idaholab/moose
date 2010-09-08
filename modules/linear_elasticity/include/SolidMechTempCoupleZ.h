@@ -14,7 +14,7 @@ class SolidMechTempCoupleZ : public SolidMechTempCouple
 {
 public:
 
-  SolidMechTempCoupleZ(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  SolidMechTempCoupleZ(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

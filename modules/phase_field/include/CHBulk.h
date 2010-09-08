@@ -13,7 +13,7 @@ class CHBulk : public Kernel
 {
 public:
 
-  CHBulk(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  CHBulk(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   enum PFFunctionType

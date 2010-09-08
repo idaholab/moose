@@ -7,7 +7,7 @@ InputParameters validParams<EnergyInviscidFlux>()
   return params;
 }
 
-EnergyInviscidFlux::EnergyInviscidFlux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+EnergyInviscidFlux::EnergyInviscidFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _u_vel_var(coupled("u")),
    _u_vel(coupledValue("u")),

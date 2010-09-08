@@ -9,7 +9,7 @@ InputParameters validParams<SolidMechZ>()
   return params;
 }
 
-SolidMechZ::SolidMechZ(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SolidMechZ::SolidMechZ(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :SolidMech(name, moose_system, parameters),
     _x_var(coupled("x")),
     _x(coupledValue("x")),

@@ -14,7 +14,7 @@ class Temperature : public Kernel
 {
 public:
 
-  Temperature(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  Temperature(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

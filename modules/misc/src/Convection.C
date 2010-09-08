@@ -14,7 +14,7 @@ InputParameters validParams<Convection>()
   return params;
 }
 
-Convection::Convection(std::string name, MooseSystem & moose_system, InputParameters parameters)
+Convection::Convection(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   // You must call the constructor of the base class first
   // The "true" here specifies that this Kernel is to be integrated
   // over the domain.

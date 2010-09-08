@@ -15,7 +15,7 @@ InputParameters validParams<PlasticMaterial>();
 class PlasticMaterial : public LinearIsotropicMaterial
 {
 public:
-  PlasticMaterial(std::string name,
+  PlasticMaterial(const std::string & name,
                   MooseSystem & moose_system,
                   InputParameters parameters);
   

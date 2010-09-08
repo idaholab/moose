@@ -13,7 +13,7 @@ InputParameters validParams<NavierStokesMaterial>()
   return params;
 }
 
-NavierStokesMaterial::NavierStokesMaterial(std::string name,
+NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
                                            MooseSystem & moose_system,
                                            InputParameters parameters)
   :Material(name, moose_system, parameters),

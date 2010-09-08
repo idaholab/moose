@@ -16,7 +16,7 @@ InputParameters validParams<RndSmoothCircleIC>()
   return params;
 }
 
-RndSmoothCircleIC::RndSmoothCircleIC(std::string name,
+RndSmoothCircleIC::RndSmoothCircleIC(const std::string & name,
                                MooseSystem & moose_system,
                                InputParameters parameters)
   :InitialCondition(name, moose_system, parameters),

@@ -9,7 +9,7 @@ InputParameters validParams<SolidMechY>()
   return params;
 }
 
-SolidMechY::SolidMechY(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SolidMechY::SolidMechY(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :SolidMech(name, moose_system, parameters),
     _x_var(coupled("x")),
     _x(coupledValue("x")),

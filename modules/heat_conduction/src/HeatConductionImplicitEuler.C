@@ -8,7 +8,7 @@ InputParameters validParams<HeatConductionImplicitEuler>()
 }
 
 
-HeatConductionImplicitEuler::HeatConductionImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters)
+HeatConductionImplicitEuler::HeatConductionImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :ImplicitEuler(name, moose_system, parameters),
    _specific_heat(getMaterialProperty<Real>("specific_heat")),
    _density(getMaterialProperty<Real>("density"))
