@@ -15,10 +15,10 @@ ExampleMaterial::ExampleMaterial(std::string name,
   :Material(name, moose_system, parameters),
    
    // Get a parameter value for the diffusivity
-   _input_diffusivity(parameters.get<Real>("diffusivity")),
+   _input_diffusivity(getParam<Real>("diffusivity")),
 
    // Get a parameter value for the time_coefficient
-   _input_time_coefficient(parameters.get<Real>("time_coefficient")),
+   _input_time_coefficient(getParam<Real>("time_coefficient")),
 
    // Declare that this material is going to have a Real
    // valued property named "diffusivity" that Kernels can use.

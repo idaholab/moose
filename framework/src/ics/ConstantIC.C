@@ -26,7 +26,7 @@ ConstantIC::ConstantIC(std::string name,
                        MooseSystem & moose_system,
                        InputParameters parameters)
   :InitialCondition(name, moose_system, parameters),
-   _value(parameters.get<Real>("value"))
+   _value(getParam<Real>("value"))
 {}
 
 Real

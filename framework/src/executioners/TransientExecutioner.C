@@ -52,17 +52,17 @@ InputParameters validParams<TransientExecutioner>()
 TransientExecutioner::TransientExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Executioner(name, moose_system, parameters),
    _t_step(moose_system.parameters().set<int> ("t_step") = 0),
-   _time(moose_system.parameters().set<Real>("time") = parameters.get<Real>("start_time")),
-   _input_dt(parameters.get<Real>("dt")),
+   _time(moose_system.parameters().set<Real>("time") = getParam<Real>("start_time")),
+   _input_dt(getParam<Real>("dt")),
    _dt(moose_system.parameters().set<Real>("dt") = 0),
-   _end_time(parameters.get<Real>("end_time")),
-   _dtmin(parameters.get<Real>("dtmin")),
-   _dtmax(parameters.get<Real>("dtmax")),
-   _num_steps(parameters.get<int>("num_steps")),
-   _n_startup_steps(parameters.get<int>("n_startup_steps")),
-   _trans_ss_check(parameters.get<bool>("trans_ss_check")),
-   _ss_check_tol(parameters.get<Real>("ss_check_tol")),
-   _ss_tmin(parameters.get<Real>("ss_tmin")),
+   _end_time(getParam<Real>("end_time")),
+   _dtmin(getParam<Real>("dtmin")),
+   _dtmax(getParam<Real>("dtmax")),
+   _num_steps(getParam<int>("num_steps")),
+   _n_startup_steps(getParam<int>("n_startup_steps")),
+   _trans_ss_check(getParam<bool>("trans_ss_check")),
+   _ss_check_tol(getParam<Real>("ss_check_tol")),
+   _ss_tmin(getParam<Real>("ss_tmin")),
    _converged(true)
 {
   _moose_system.reinitDT();

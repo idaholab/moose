@@ -15,7 +15,7 @@ ExampleDiffusion::ExampleDiffusion(std::string name,
                                    InputParameters parameters)
   :Diffusion(name,sys,parameters),
    // Initialize our member variable based on a default or input file
-   _diffusivity(parameters.get<Real>("diffusivity"))
+   _diffusivity(getParam<Real>("diffusivity"))
 {}
 
 Real

@@ -27,7 +27,7 @@ InputParameters validParams<Steady>()
 Steady::Steady(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Executioner(name, moose_system, parameters),
    _moose_system(moose_system),
-   _max_r_steps(parameters.get<unsigned int>("max_r_steps")),
+   _max_r_steps(getParam<unsigned int>("max_r_steps")),
    _t_step(moose_system.parameters().set<int> ("t_step") = 0)
 {}
 

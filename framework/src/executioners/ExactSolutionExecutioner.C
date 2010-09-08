@@ -47,8 +47,8 @@ InputParameters validParams<ExactSolutionExecutioner>()
 ExactSolutionExecutioner::ExactSolutionExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters)
   :Steady(name, moose_system, parameters),
   _exact(*moose_system.getEquationSystems()),
-  _unknowns(parameters.get<std::vector<std::string> >("unknowns")),
-  _compute_h1(parameters.get<bool>("h1_error")),
+  _unknowns(getParam<std::vector<std::string> >("unknowns")),
+  _compute_h1(getParam<bool>("h1_error")),
   _func(getFunction("function")),
   _output_norms(false)
 {
@@ -63,12 +63,12 @@ ExactSolutionExecutioner::ExactSolutionExecutioner(std::string name, MooseSystem
   if (_compute_h1)
     _exact.attach_exact_deriv(NecessaryFuncPointer::exactGrad);
 
-  int quad_order = parameters.get<int>("extra_quadrature_order");
+  int quad_order = getParam<int>("extra_quadrature_order");
   if (quad_order != 0)
     _exact.extra_quadrature_order(quad_order);
 
   //open the file to write output to if the user wants it
-  std::string file = parameters.get<std::string>("norm_file");
+  std::string file = getParam<std::string>("norm_file");
   if( file != "" )
   {
     _output_norms = true;

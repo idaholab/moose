@@ -15,7 +15,7 @@ ExampleImplicitEuler::ExampleImplicitEuler(std::string name,
                                            InputParameters parameters)
   :ImplicitEuler(name,sys,parameters),
    // This kernel expects an input parameter named "time_coefficient"
-   _time_coefficient(parameters.get<Real>("time_coefficient"))
+   _time_coefficient(getParam<Real>("time_coefficient"))
 {}
 
 Real

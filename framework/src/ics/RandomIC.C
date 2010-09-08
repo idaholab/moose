@@ -27,8 +27,8 @@ RandomIC::RandomIC(std::string name,
                    MooseSystem & moose_system,
                    InputParameters parameters)
   :InitialCondition(name, moose_system, parameters),
-   _min(parameters.get<Real>("min")),
-   _max(parameters.get<Real>("max")),
+   _min(getParam<Real>("min")),
+   _max(getParam<Real>("max")),
    _range(_max - _min)
 {
   mooseAssert(_range > 0.0, "Min > Max for RandomIC!");

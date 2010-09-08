@@ -26,3 +26,4 @@ SidePostprocessor::SidePostprocessor(std::string name, MooseSystem & moose_syste
   :BoundaryCondition(name, moose_system, parameters),
    Postprocessor(name, moose_system, parameters)
 {}
+
