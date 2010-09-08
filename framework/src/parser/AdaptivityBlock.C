@@ -36,7 +36,7 @@ InputParameters validParams<AdaptivityBlock>()
   return params;
 }
 
-AdaptivityBlock::AdaptivityBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+AdaptivityBlock::AdaptivityBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {}
 

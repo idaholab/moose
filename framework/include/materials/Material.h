@@ -46,7 +46,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  Material(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  Material(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
   virtual ~Material();
 
@@ -211,7 +211,7 @@ protected:
   /**
    * Whether or not this coupled_as name is associated with an auxiliary variable.
    */
-//  bool isAux(std::string name, int i = 0);
+//  bool isAux(const std::string & name, int i = 0);
 
   /**
    * Data structure to map names with values.

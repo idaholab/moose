@@ -14,11 +14,11 @@ InputParameters validParams<Convection>()
   return params;
 }
 
-Convection::Convection(std::string name,
+Convection::Convection(const std::string & name,
                        MooseSystem &sys,
                        InputParameters parameters)
  :Kernel(name, sys, parameters),
-  _velocity_vector(coupledGradient("velocity_vector"))     // <- Initialize the class member with 
+  _velocity_vector(coupledGradient("velocity_vector")) // <- Initialize the class member with 
                                                        //    a reference to the coupled variable
                                                        //    by name from the input file
 {}

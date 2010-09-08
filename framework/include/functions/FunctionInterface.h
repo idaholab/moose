@@ -35,7 +35,7 @@ public:
    */
   FunctionInterface(FunctionWarehouse & func_warehouse, InputParameters & params);
 
-  Function & getFunction(std::string name);
+  Function & getFunction(const std::string & name);
 
 private:
   //prefixed all member data with _func to prevent future Multiple Inheritance

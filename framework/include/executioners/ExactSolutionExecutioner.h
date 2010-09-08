@@ -40,7 +40,7 @@ InputParameters validParams<ExactSolutionExecutioner>();
 class ExactSolutionExecutioner : public Steady
 {
 public:
-  ExactSolutionExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ExactSolutionExecutioner(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual ~ExactSolutionExecutioner();
 

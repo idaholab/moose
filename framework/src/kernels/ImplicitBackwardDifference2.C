@@ -23,7 +23,7 @@ InputParameters validParams<ImplicitBackwardDifference2>()
   return params;
 }
 
-ImplicitBackwardDifference2::ImplicitBackwardDifference2(std::string name, MooseSystem & moose_system, InputParameters parameters)
+ImplicitBackwardDifference2::ImplicitBackwardDifference2(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _start_with_be(getParam<bool>("start_with_be"))
 { _t_scheme = 1;}

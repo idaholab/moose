@@ -28,7 +28,7 @@ InputParameters validParams<FunctionsBlock>();
 class FunctionsBlock : public ParserBlock
 {
 public:
-  FunctionsBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  FunctionsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

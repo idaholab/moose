@@ -23,7 +23,7 @@ InputParameters validParams<GenericMaterialBlock>()
   return validParams<ParserBlock>();
 }
 
-GenericMaterialBlock::GenericMaterialBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+GenericMaterialBlock::GenericMaterialBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params),
    _type(getType())
 {

@@ -32,7 +32,7 @@ class MooseSystem;
 /**
  * Typedef to make things easier.
  */
-typedef Kernel * (*kernelBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters);
+typedef Kernel * (*kernelBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 /**
  * Typedef to hide implementation details
@@ -48,7 +48,7 @@ typedef InputParameters (*kernelParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename KernelType>
-Kernel * buildKernel(std::string name, MooseSystem & moose_system, InputParameters parameters)
+Kernel * buildKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
 {
   return new KernelType(name, moose_system, parameters);
 }
@@ -62,7 +62,7 @@ public:
   static KernelFactory * instance();
 
   template<typename KernelType> 
-  void registerKernel(std::string name)
+  void registerKernel(const std::string & name)
   {
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
     {
@@ -73,7 +73,7 @@ public:
       mooseError("Kernel '" + name + "' already registered.");
   }
 
-  Kernel *create(std::string kernel_name, std::string name, MooseSystem & moose_system, InputParameters parameters)
+  Kernel *create(std::string kernel_name, const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   {
     return (*_name_to_build_pointer[kernel_name])(name, moose_system, parameters);
   }
@@ -81,7 +81,7 @@ public:
   KernelNamesIterator registeredKernelsBegin();
   KernelNamesIterator registeredKernelsEnd();
 
-  InputParameters getValidParams(std::string name);
+  InputParameters getValidParams(const std::string & name);
   
 private:
   KernelFactory();

@@ -44,7 +44,7 @@ InputParameters validParams<ExactSolutionExecutioner>()
   return params;
 }
 
-ExactSolutionExecutioner::ExactSolutionExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters)
+ExactSolutionExecutioner::ExactSolutionExecutioner(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Steady(name, moose_system, parameters),
   _exact(*moose_system.getEquationSystems()),
   _unknowns(getParam<std::vector<std::string> >("unknowns")),

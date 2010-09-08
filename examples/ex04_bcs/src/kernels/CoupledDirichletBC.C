@@ -11,7 +11,7 @@ InputParameters validParams<CoupledDirichletBC>()
   return params;
 }
 
-CoupledDirichletBC::CoupledDirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+CoupledDirichletBC::CoupledDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
    
    /**

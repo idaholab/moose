@@ -13,7 +13,7 @@ class ExampleImplicitEuler : public ImplicitEuler
 {
 public:
 
-  ExampleImplicitEuler(std::string name,
+  ExampleImplicitEuler(const std::string & name,
                        MooseSystem &sys,
                        InputParameters parameters);
 

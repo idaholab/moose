@@ -9,7 +9,7 @@ InputParameters validParams<MatDiffusion>()
 }
 
 
-MatDiffusion::MatDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MatDiffusion::MatDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   : Kernel(name, moose_system, parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _diff(getMaterialProperty<Real>(_prop_name))

@@ -602,7 +602,7 @@ MooseSystem::doAdaptivityStep()
 }
 
 Real &
-MooseSystem::getPostprocessorValue(std::string name)
+MooseSystem::getPostprocessorValue(const std::string & name)
 {
   return _postprocessor_data[0].getPostprocessorValue(name);
 }
@@ -713,7 +713,7 @@ MooseSystem::addAuxVariable(const std::string &var, const Order order, const FEF
 
 // Kernels ////
 void MooseSystem::addKernel(std::string kernel_name,
-                            std::string name,
+                            const std::string & name,
                             InputParameters parameters)
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -744,7 +744,7 @@ void MooseSystem::addKernel(std::string kernel_name,
 
 // DGKernels ////
 void MooseSystem::addDGKernel(std::string dg_kernel_name,
-                              std::string name,
+                              const std::string & name,
                               InputParameters parameters)
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -756,7 +756,7 @@ void MooseSystem::addDGKernel(std::string dg_kernel_name,
 
 void
 MooseSystem::addBC(std::string bc_name,
-                   std::string name,
+                   const std::string & name,
                    InputParameters parameters)
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -779,7 +779,7 @@ MooseSystem::addBC(std::string bc_name,
 
 void
 MooseSystem::addAuxKernel(std::string aux_name,
-                          std::string name,
+                          const std::string & name,
                           InputParameters parameters)
 {
   AuxKernel * aux;
@@ -846,7 +846,7 @@ MooseSystem::addAuxKernel(std::string aux_name,
 
 void
 MooseSystem::addAuxBC(std::string aux_name,
-                      std::string name,
+                      const std::string & name,
                       InputParameters parameters)
 {
   AuxKernel * aux;
@@ -866,7 +866,7 @@ MooseSystem::addAuxBC(std::string aux_name,
 
 void
 MooseSystem::addMaterial(std::string mat_name,
-                         std::string name,
+                         const std::string & name,
                          InputParameters parameters)
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -894,7 +894,7 @@ MooseSystem::addMaterial(std::string mat_name,
 
 void
 MooseSystem::addStabilizer(std::string stabilizer_name,
-                           std::string name,
+                           const std::string & name,
                            InputParameters parameters)
 {
   Stabilizer * stabilizer;
@@ -914,7 +914,7 @@ MooseSystem::addStabilizer(std::string stabilizer_name,
 
 void
 MooseSystem::addInitialCondition(std::string ic_name,
-                                 std::string name,
+                                 const std::string & name,
                                  InputParameters parameters,
                                  std::string var_name)
 {
@@ -931,7 +931,7 @@ MooseSystem::addInitialCondition(std::string ic_name,
 
 void
 MooseSystem::addPostprocessor(std::string pp_name,
-                              std::string name,
+                              const std::string & name,
                               InputParameters parameters)
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -959,7 +959,7 @@ MooseSystem::addPostprocessor(std::string pp_name,
 
 void
 MooseSystem::addFunction(std::string func_name,
-                              std::string name,
+                              const std::string & name,
                               InputParameters parameters)
 {
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -972,7 +972,7 @@ MooseSystem::addFunction(std::string func_name,
 
 void
 MooseSystem::addDamper(std::string damper_name,
-                       std::string name,
+                       const std::string & name,
                        InputParameters parameters)
 {
   _has_dampers = true;

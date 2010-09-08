@@ -46,7 +46,7 @@ public:
    * @param moose_system The reference to the MooseSystem that this object is contained within
    * @param parameters The parameters object holding data for the class to use.
    */
-  SUPGBase(std::string name,
+  SUPGBase(const std::string & name,
            MooseSystem & moose_system,
            InputParameters parameters);
 

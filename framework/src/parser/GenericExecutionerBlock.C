@@ -45,7 +45,7 @@ InputParameters validParams<GenericExecutionerBlock>()
   return params;
 }
 
-GenericExecutionerBlock::GenericExecutionerBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+GenericExecutionerBlock::GenericExecutionerBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params),
    _type(getType())
 {

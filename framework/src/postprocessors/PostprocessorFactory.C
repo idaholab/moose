@@ -26,7 +26,7 @@ PostprocessorFactory::instance()
 }
 
 InputParameters
-PostprocessorFactory::getValidParams(std::string name)
+PostprocessorFactory::getValidParams(const std::string & name)
 {
   if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
   {

@@ -13,7 +13,7 @@ class MMSDiffusion : public Kernel
 {
 public:
 
-  MMSDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters);  
+  MMSDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
 
 protected:
   virtual Real computeQpResidual();

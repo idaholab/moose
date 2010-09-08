@@ -29,7 +29,7 @@ class FunctionNeumannBC : public BoundaryCondition
 {
 public:
 
-  FunctionNeumannBC(std::string name,
+  FunctionNeumannBC(const std::string & name,
              MooseSystem &sys,
              InputParameters parameters);
 

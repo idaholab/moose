@@ -26,7 +26,7 @@ InputParameters validParams<GenericPostprocessorBlock>();
 class GenericPostprocessorBlock: public ParserBlock
 {
 public:
-  GenericPostprocessorBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  GenericPostprocessorBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

@@ -32,7 +32,7 @@ InputParameters validParams<BoundaryCondition>()
   return params;
 }
 
-BoundaryCondition::BoundaryCondition(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+BoundaryCondition::BoundaryCondition(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
   MaterialPropertyInterface(moose_system._material_data[_tid]),
    _dof_data(moose_system._dof_data[_tid]),

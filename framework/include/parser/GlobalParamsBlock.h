@@ -26,7 +26,7 @@ InputParameters validParams<GlobalParamsBlock>();
 class GlobalParamsBlock: public ParserBlock
 {
 public:
-  GlobalParamsBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  GlobalParamsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

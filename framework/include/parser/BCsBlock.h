@@ -25,7 +25,7 @@ InputParameters validParams<BCsBlock>();
 class BCsBlock: public ParserBlock
 {
 public:
-  BCsBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  BCsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

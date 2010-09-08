@@ -33,7 +33,7 @@ class UserForcingFunction : public Kernel
 {
 public:
 
-  UserForcingFunction(std::string name,
+  UserForcingFunction(const std::string & name,
              MooseSystem &sys,
              InputParameters parameters);
 

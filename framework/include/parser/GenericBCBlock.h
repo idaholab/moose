@@ -26,7 +26,7 @@ InputParameters validParams<GenericBCBlock>();
 class GenericBCBlock: public ParserBlock
 {
 public:
-  GenericBCBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  GenericBCBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

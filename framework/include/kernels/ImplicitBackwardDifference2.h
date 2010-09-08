@@ -26,7 +26,7 @@ class ImplicitBackwardDifference2 : public Kernel
 {
 public:
 
-  ImplicitBackwardDifference2(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ImplicitBackwardDifference2(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

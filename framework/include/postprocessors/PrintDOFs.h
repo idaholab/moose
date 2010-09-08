@@ -26,7 +26,7 @@ InputParameters validParams<PrintDOFs>();
 class PrintDOFs : public Postprocessor
 {
 public:
-  PrintDOFs(std::string name, MooseSystem &moose_system, InputParameters parameters);
+  PrintDOFs(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
   
   virtual void initialize() {}
   

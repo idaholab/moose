@@ -26,7 +26,7 @@ InputParameters validParams<GenericExecutionerBlock>();
 class GenericExecutionerBlock: public ParserBlock
 {
 public:
-  GenericExecutionerBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  GenericExecutionerBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

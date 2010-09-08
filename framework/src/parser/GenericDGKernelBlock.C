@@ -23,7 +23,7 @@ InputParameters validParams<GenericDGKernelBlock>()
   return params;
 }
 
-GenericDGKernelBlock::GenericDGKernelBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+GenericDGKernelBlock::GenericDGKernelBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params),
    _type(getType())
 {

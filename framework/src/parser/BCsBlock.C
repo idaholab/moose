@@ -22,7 +22,7 @@ InputParameters validParams<BCsBlock>()
   return validParams<ParserBlock>();
 }
 
-BCsBlock::BCsBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+BCsBlock::BCsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
   // Register BCs/AuxBCs prereqs

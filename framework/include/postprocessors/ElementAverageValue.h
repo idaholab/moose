@@ -32,7 +32,7 @@ InputParameters validParams<ElementAverageValue>();
 class ElementAverageValue : public ElementIntegral
 {
 public:
-  ElementAverageValue(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ElementAverageValue(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual void initialize();
   virtual void execute();

@@ -22,7 +22,7 @@ InputParameters validParams<WeakGradientBC>()
   return params;
 }
 
-WeakGradientBC::WeakGradientBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+WeakGradientBC::WeakGradientBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
     _value(getParam<Real>("value"))
  {}

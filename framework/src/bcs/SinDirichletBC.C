@@ -27,7 +27,7 @@ InputParameters validParams<SinDirichletBC>()
   return params;
 }
 
-SinDirichletBC::SinDirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SinDirichletBC::SinDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
    _initial(getParam<Real>("initial")),
    _final(getParam<Real>("final")),

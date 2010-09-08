@@ -23,7 +23,7 @@ InputParameters validParams<GenericICBlock>()
   return params;
 }
 
-GenericICBlock::GenericICBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+GenericICBlock::GenericICBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params),
    _type(getType())
 {

@@ -20,7 +20,7 @@ InputParameters validParams<FunctionsBlock>()
   return validParams<ParserBlock>();
 }
 
-FunctionsBlock::FunctionsBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+FunctionsBlock::FunctionsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
 }

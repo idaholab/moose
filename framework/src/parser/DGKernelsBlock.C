@@ -20,7 +20,7 @@ InputParameters validParams<DGKernelsBlock>()
   return validParams<ParserBlock>();
 }
 
-DGKernelsBlock::DGKernelsBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+DGKernelsBlock::DGKernelsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
   // Register execution prereqs

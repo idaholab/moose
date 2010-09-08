@@ -8,7 +8,7 @@ InputParameters validParams<PolyConstantAux>()
   return params;
 }
 
-PolyConstantAux::PolyConstantAux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+PolyConstantAux::PolyConstantAux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :AuxKernel(name, moose_system, parameters)
 {}
 

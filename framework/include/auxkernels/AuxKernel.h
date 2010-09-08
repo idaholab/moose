@@ -42,7 +42,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  AuxKernel(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  AuxKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual ~AuxKernel(){}
 
@@ -71,13 +71,13 @@ protected:
   MooseArray<Real> & _u_old;
   MooseArray<Real> & _u_older;
 
-  virtual MooseArray<Real> & coupledValue(std::string name, int i = 0);
-  virtual MooseArray<Real> & coupledValueOld(std::string name, int i = 0);
-  virtual MooseArray<Real> & coupledValueOlder(std::string name, int i = 0);
+  virtual MooseArray<Real> & coupledValue(const std::string & name, int i = 0);
+  virtual MooseArray<Real> & coupledValueOld(const std::string & name, int i = 0);
+  virtual MooseArray<Real> & coupledValueOlder(const std::string & name, int i = 0);
   
-  virtual MooseArray<RealGradient> & coupledGradient(std::string name, int i = 0);
-  virtual MooseArray<RealGradient> & coupledGradientOld(std::string name, int i = 0);
-  virtual MooseArray<RealGradient> & coupledGradientOlder(std::string name, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradient(const std::string & name, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradientOld(const std::string & name, int i = 0);
+  virtual MooseArray<RealGradient> & coupledGradientOlder(const std::string & name, int i = 0);
 
 
   /*************

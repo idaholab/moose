@@ -29,7 +29,7 @@ ExecutionerFactory::instance()
 
 Executioner *
 ExecutionerFactory::build(std::string ex_name,
-                          std::string name,
+                          const std::string & name,
                           MooseSystem & moose_system,
                           InputParameters parameters)
 {
@@ -37,7 +37,7 @@ ExecutionerFactory::build(std::string ex_name,
 }
 
 InputParameters
-ExecutionerFactory::getValidParams(std::string name)
+ExecutionerFactory::getValidParams(const std::string & name)
 {
   if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
     mooseError(std::string("A _") + name + "_ is not registered Executioner ");

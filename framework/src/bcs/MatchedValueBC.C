@@ -23,7 +23,7 @@ InputParameters validParams<MatchedValueBC>()
   return params;
 }
 
-MatchedValueBC::MatchedValueBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MatchedValueBC::MatchedValueBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
     _v_face(coupledValue("v"))
   {}

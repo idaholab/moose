@@ -12,7 +12,7 @@ class PolyForcing : public Kernel
 {
 public:
 
-  PolyForcing(std::string name,
+  PolyForcing(const std::string & name,
              MooseSystem &sys,
              InputParameters parameters);
 

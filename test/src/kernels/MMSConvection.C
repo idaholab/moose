@@ -10,7 +10,7 @@ InputParameters validParams<MMSConvection>()
   return params;
 }
 
-MMSConvection::MMSConvection(std::string name,
+MMSConvection::MMSConvection(const std::string & name,
                        MooseSystem &sys,
                        InputParameters parameters)
  

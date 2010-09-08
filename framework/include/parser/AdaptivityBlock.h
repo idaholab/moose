@@ -26,7 +26,7 @@ InputParameters validParams<AdaptivityBlock>();
 class AdaptivityBlock: public ParserBlock
 {
 public:
-  AdaptivityBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  AdaptivityBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

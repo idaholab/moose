@@ -34,7 +34,7 @@ InputParameters validParams<MooseObject>();
 class MooseObject
 {
 public:
-  MooseObject(std::string name, MooseSystem &moose_system, InputParameters parameters);
+  MooseObject(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
   virtual ~MooseObject();
 
   virtual const std::string &name();

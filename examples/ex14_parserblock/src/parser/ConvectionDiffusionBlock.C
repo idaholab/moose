@@ -11,7 +11,7 @@ InputParameters validParams<ConvectionDiffusionBlock>()
   return params;
 }
 
-ConvectionDiffusionBlock::ConvectionDiffusionBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+ConvectionDiffusionBlock::ConvectionDiffusionBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {}
 

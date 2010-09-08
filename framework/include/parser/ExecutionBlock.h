@@ -28,7 +28,7 @@ InputParameters validParams<ExecutionBlock>();
 class ExecutionBlock: public ParserBlock
 {
 public:
-  ExecutionBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  ExecutionBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

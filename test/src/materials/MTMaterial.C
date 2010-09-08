@@ -7,7 +7,7 @@ InputParameters validParams<MTMaterial>()
   return params;
 }
 
-MTMaterial::MTMaterial(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MTMaterial::MTMaterial(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   : Material(name, moose_system, parameters),
     _mat_prop(declareProperty<Real>("matp"))
 {

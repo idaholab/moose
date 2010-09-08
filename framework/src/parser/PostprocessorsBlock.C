@@ -22,7 +22,7 @@ InputParameters validParams<PostprocessorsBlock>()
   return validParams<ParserBlock>();
 }
 
-PostprocessorsBlock::PostprocessorsBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+PostprocessorsBlock::PostprocessorsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
   // Register execution prereqs

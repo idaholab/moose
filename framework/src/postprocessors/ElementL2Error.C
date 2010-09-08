@@ -23,7 +23,7 @@ InputParameters validParams<ElementL2Error>()
   return params;
 }
 
-ElementL2Error::ElementL2Error(std::string name,
+ElementL2Error::ElementL2Error(const std::string & name,
                              MooseSystem & moose_system,
                              InputParameters parameters):
   ElementIntegral(name, moose_system, parameters),

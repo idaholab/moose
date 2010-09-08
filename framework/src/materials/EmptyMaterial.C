@@ -21,7 +21,7 @@ InputParameters validParams<EmptyMaterial>()
   return params;
 }
 
-EmptyMaterial::EmptyMaterial(std::string name,
+EmptyMaterial::EmptyMaterial(const std::string & name,
                              MooseSystem & moose_system,
                              InputParameters parameters)
   :Material(name, moose_system, parameters)

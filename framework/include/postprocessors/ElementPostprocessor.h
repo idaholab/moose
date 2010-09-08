@@ -27,7 +27,7 @@ InputParameters validParams<ElementPostprocessor>();
 class ElementPostprocessor : public Kernel, public Postprocessor
 {
 public:
-  ElementPostprocessor(std::string name, MooseSystem & moose_system, InputParameters parameters);  
+  ElementPostprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
 
   /**
    * TODO: We need to re-evaluate the object model of ElementPostprocessors.  Right now this class

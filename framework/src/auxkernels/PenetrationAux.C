@@ -26,7 +26,7 @@ InputParameters validParams<PenetrationAux>()
   return params;
 }
 
-PenetrationAux::PenetrationAux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+PenetrationAux::PenetrationAux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :AuxKernel(name, moose_system, parameters),
    _penetration_locator(_moose_system, _mesh, getParam<std::vector<unsigned int> >("boundary"), parameters.get<unsigned int>("paired_boundary"))
 { 

@@ -26,7 +26,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef Executioner * (*ExecutionerBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters);
+typedef Executioner * (*ExecutionerBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 /**
  * Typedef to make things easier.
@@ -47,7 +47,7 @@ typedef std::vector<std::string>::iterator ExecutionerNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename ExecutionerType>
-Executioner * buildExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters)
+Executioner * buildExecutioner(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
 {
   return new ExecutionerType(name, moose_system, parameters);
 }
@@ -61,7 +61,7 @@ public:
   static ExecutionerFactory * instance();
   
   template<typename ExecutionerType> 
-  void registerExecutioner(std::string name)
+  void registerExecutioner(const std::string & name)
   {
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
     {
@@ -72,9 +72,9 @@ public:
       mooseError("Executioner '" + name + "' already registered.");
   }
 
-  Executioner * build(std::string ex_name, std::string name, MooseSystem & moose_system, InputParameters parameters);
+  Executioner * build(std::string ex_name, const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
-  InputParameters getValidParams(std::string name);
+  InputParameters getValidParams(const std::string & name);
   
   ExecutionerNamesIterator registeredExecutionersBegin();
   ExecutionerNamesIterator registeredExecutionersEnd();

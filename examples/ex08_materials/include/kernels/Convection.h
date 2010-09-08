@@ -12,7 +12,7 @@ class Convection : public Kernel
 {
 public:
 
-  Convection(std::string name,
+  Convection(const std::string & name,
              MooseSystem &sys,
              InputParameters parameters);
 

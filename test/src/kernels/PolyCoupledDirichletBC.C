@@ -10,7 +10,7 @@ InputParameters validParams<PolyCoupledDirichletBC>()
   return params;
 }
 
-PolyCoupledDirichletBC::PolyCoupledDirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+PolyCoupledDirichletBC::PolyCoupledDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
 
    //Grab the parameter for the multiplier. 

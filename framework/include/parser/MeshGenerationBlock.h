@@ -26,7 +26,7 @@ InputParameters validParams<MeshGenerationBlock>();
 class MeshGenerationBlock: public ParserBlock
 {
 public:
-  MeshGenerationBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  MeshGenerationBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
   

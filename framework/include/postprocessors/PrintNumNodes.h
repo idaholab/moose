@@ -26,7 +26,7 @@ InputParameters validParams<PrintNumNodes>();
 class PrintNumNodes : public Postprocessor
 {
 public:
-  PrintNumNodes(std::string name, MooseSystem &moose_system, InputParameters parameters);
+  PrintNumNodes(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
   
   virtual void initialize() {}
   

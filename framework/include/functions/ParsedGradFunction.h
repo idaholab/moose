@@ -32,7 +32,7 @@ InputParameters validParams<ParsedGradFunction>();
 class ParsedGradFunction : public ParsedFunction
 {
   public:
-    ParsedGradFunction(std::string name, MooseSystem & moose_system, InputParameters parameters);
+    ParsedGradFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
     virtual RealGradient gradient(Real t, Real x, Real y = 0, Real z = 0);
 

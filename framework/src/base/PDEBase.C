@@ -30,7 +30,7 @@ InputParameters validParams<PDEBase>()
   return params;
 }
 
-PDEBase::PDEBase(std::string name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data) :
+PDEBase::PDEBase(const std::string & name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data) :
   MooseObject(name, moose_system, parameters),
   PostprocessorInterface(moose_system._postprocessor_data[_tid]),
   FunctionInterface(moose_system._functions[_tid], parameters),

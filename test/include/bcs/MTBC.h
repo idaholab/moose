@@ -16,7 +16,7 @@ InputParameters validParams<MTBC>();
 class MTBC : public BoundaryCondition
 {
 public:
-  MTBC(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  MTBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
   virtual ~MTBC() {}
 

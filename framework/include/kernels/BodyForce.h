@@ -27,7 +27,7 @@ class BodyForce : public Kernel
 {
 public:
 
-  BodyForce(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  BodyForce(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

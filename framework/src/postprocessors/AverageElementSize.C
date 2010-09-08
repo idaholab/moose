@@ -21,7 +21,7 @@ InputParameters validParams<AverageElementSize>()
   return params;
 }
 
-AverageElementSize::AverageElementSize(std::string name, MooseSystem & moose_system, InputParameters parameters)
+AverageElementSize::AverageElementSize(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :ElementAverageValue(name, moose_system, parameters)
 {}
 

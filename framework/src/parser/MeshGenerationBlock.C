@@ -41,7 +41,7 @@ InputParameters validParams<MeshGenerationBlock>()
   return params;
 }
 
-MeshGenerationBlock::MeshGenerationBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+MeshGenerationBlock::MeshGenerationBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params),
    _executed(false)
 {}

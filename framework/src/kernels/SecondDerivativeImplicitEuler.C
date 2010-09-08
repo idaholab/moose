@@ -22,7 +22,7 @@ InputParameters validParams<SecondDerivativeImplicitEuler>()
   return params;
 }
 
-SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters)
   {}
 

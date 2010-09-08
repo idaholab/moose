@@ -25,7 +25,7 @@ InputParameters validParams<PeriodicBlock>()
   return validParams<ParserBlock>();
 }
 
-PeriodicBlock::PeriodicBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+PeriodicBlock::PeriodicBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params),
    _executed(false)
 {}

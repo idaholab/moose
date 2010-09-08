@@ -8,7 +8,7 @@ InputParameters validParams<ExampleIC>()
   return params;
 }
 
-ExampleIC::ExampleIC(std::string name,
+ExampleIC::ExampleIC(const std::string & name,
                      MooseSystem & moose_system,
                      InputParameters parameters)
   :InitialCondition(name, moose_system, parameters),

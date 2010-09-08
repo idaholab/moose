@@ -27,7 +27,7 @@ InputParameters validParams<ConstantDamper>();
 class ConstantDamper : public Damper
 {
 public:
-  ConstantDamper(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ConstantDamper(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:
   /**

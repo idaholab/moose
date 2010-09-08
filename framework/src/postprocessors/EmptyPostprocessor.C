@@ -26,7 +26,7 @@ InputParameters validParams<EmptyPostprocessor>()
   return params;
 }
 
-EmptyPostprocessor::EmptyPostprocessor(std::string name, MooseSystem & moose_system, InputParameters parameters)
+EmptyPostprocessor::EmptyPostprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Postprocessor(name, moose_system, parameters)
 {}
 

@@ -30,7 +30,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef Stabilizer * (*stabilizerBuildPtr)(std::string name,
+typedef Stabilizer * (*stabilizerBuildPtr)(const std::string & name,
                                            MooseSystem & moose_system,
                                            InputParameters parameters);
 
@@ -48,7 +48,7 @@ typedef InputParameters (*stabilizerParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename StabilizerType>
-Stabilizer * buildStabilizer(std::string name,
+Stabilizer * buildStabilizer(const std::string & name,
                              MooseSystem & moose_system,
                              InputParameters parameters)
 {
@@ -64,7 +64,7 @@ public:
   static StabilizerFactory * instance();
 
   template<typename StabilizerType> 
-  void registerStabilizer(std::string name)
+  void registerStabilizer(const std::string & name)
   {
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
     {
@@ -76,7 +76,7 @@ public:
   }
 
   Stabilizer * create(std::string stabilizer_name,
-                      std::string name,
+                      const std::string & name,
                       MooseSystem & moose_system,
                       InputParameters parameters)
   {
@@ -86,7 +86,7 @@ public:
   StabilizerNamesIterator registeredStabilizersBegin();
   StabilizerNamesIterator registeredStabilizersEnd();
 
-  InputParameters getValidParams(std::string name);
+  InputParameters getValidParams(const std::string & name);
 
 private:
   StabilizerFactory();

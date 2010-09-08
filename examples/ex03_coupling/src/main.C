@@ -24,7 +24,7 @@
 // Create a performance log
 PerfLog Moose::perf_log("Example 3: Coupling");
 
- // Begin the main program.
+// Begin the main program.
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);

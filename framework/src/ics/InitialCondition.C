@@ -23,7 +23,7 @@ InputParameters validParams<InitialCondition>()
   return params;
 }
 
-InitialCondition::InitialCondition(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+InitialCondition::InitialCondition(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   MooseObject(name, moose_system, parameters),
   FunctionInterface(moose_system._functions[_tid], parameters),
   _var_name(getParam<std::string>("var_name"))

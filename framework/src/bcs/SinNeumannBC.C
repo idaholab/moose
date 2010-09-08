@@ -26,7 +26,7 @@ InputParameters validParams<SinNeumannBC>()
   return params;
 }
 
-SinNeumannBC::SinNeumannBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SinNeumannBC::SinNeumannBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
    _initial(getParam<Real>("initial")),
    _final(getParam<Real>("final")),

@@ -21,7 +21,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  ExampleAux(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ExampleAux(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual ~ExampleAux() {}
   

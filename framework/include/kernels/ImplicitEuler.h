@@ -27,7 +27,7 @@ class ImplicitEuler : public Kernel
 {
 public:
 
-  ImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

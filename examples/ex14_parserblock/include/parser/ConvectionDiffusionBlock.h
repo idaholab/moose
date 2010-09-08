@@ -12,7 +12,7 @@ InputParameters validParams<ConvectionDiffusionBlock>();
 class ConvectionDiffusionBlock: public ParserBlock
 {
 public:
-  ConvectionDiffusionBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  ConvectionDiffusionBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

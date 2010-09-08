@@ -7,7 +7,7 @@ InputParameters validParams<MMSForcing>()
   return params;
 }
 
-MMSForcing::MMSForcing(std::string name,
+MMSForcing::MMSForcing(const std::string & name,
                        MooseSystem &sys,
                        InputParameters parameters)
   :Kernel(name, sys, parameters)

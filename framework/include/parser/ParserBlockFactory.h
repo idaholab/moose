@@ -26,7 +26,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef ParserBlock * (*parserBlockBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters params);
+typedef ParserBlock * (*parserBlockBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters params);
 /**
  * Typedef to make things easier.
  */
@@ -46,7 +46,7 @@ typedef std::vector<std::string>::iterator ParserBlockNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename ParserBlockType>
-ParserBlock * buildParserBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+ParserBlock * buildParserBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
 {
   return new ParserBlockType(name, moose_system, params);
 }
@@ -60,13 +60,13 @@ public:
   static ParserBlockFactory * instance();
 
   template<typename ParserBlockType> 
-  void registerParserBlock(std::string name)
+  void registerParserBlock(const std::string & name)
   {
     _name_to_build_pointer[name]=&buildParserBlock<ParserBlockType>;
     _name_to_params_pointer[name]=&validParams<ParserBlockType>;
   }
 
-  ParserBlock * add(std::string name, MooseSystem & moose_system, InputParameters params);
+  ParserBlock * add(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   InputParameters getValidParams(const std::string & name);
   

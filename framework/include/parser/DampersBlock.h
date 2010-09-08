@@ -25,7 +25,7 @@ InputParameters validParams<DampersBlock>();
 class DampersBlock: public ParserBlock
 {
 public:
-  DampersBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  DampersBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

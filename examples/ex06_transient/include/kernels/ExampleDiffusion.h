@@ -16,7 +16,7 @@ class ExampleDiffusion : public Diffusion
 {
 public:
 
-  ExampleDiffusion(std::string name,
+  ExampleDiffusion(const std::string & name,
                    MooseSystem &sys,
                    InputParameters parameters);
 

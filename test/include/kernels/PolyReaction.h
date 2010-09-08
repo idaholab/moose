@@ -12,7 +12,7 @@ class PolyReaction : public Kernel
 {
 public:
 
-  PolyReaction(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  PolyReaction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
            
 protected:
   virtual Real computeQpResidual();

@@ -23,7 +23,7 @@ InputParameters validParams<RandomIC>()
   return params;
 }
 
-RandomIC::RandomIC(std::string name,
+RandomIC::RandomIC(const std::string & name,
                    MooseSystem & moose_system,
                    InputParameters parameters)
   :InitialCondition(name, moose_system, parameters),

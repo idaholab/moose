@@ -10,7 +10,7 @@ InputParameters validParams<PolyConvection>()
   return params;
 }
 
-PolyConvection::PolyConvection(std::string name,
+PolyConvection::PolyConvection(const std::string & name,
                        MooseSystem &sys,
                        InputParameters parameters)
  

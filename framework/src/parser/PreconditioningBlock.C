@@ -23,7 +23,7 @@ InputParameters validParams<PreconditioningBlock>()
   return validParams<ParserBlock>();
 }
 
-PreconditioningBlock::PreconditioningBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+PreconditioningBlock::PreconditioningBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
   // Register the Preconditioning Prereqs

@@ -203,50 +203,50 @@ public:
   unsigned int addAuxVariable(const std::string &var, const Order order=FIRST, const FEFamily=LAGRANGE, const std::set< subdomain_id_type > *const active_subdomains=NULL);
 
   void addKernel(std::string kernel_name,
-                 std::string name,
+                 const std::string & name,
                  InputParameters parameters);
 
   void addDGKernel(std::string kernel_name,
-                   std::string name,
+                   const std::string & name,
                    InputParameters parameters);
 
   void addBC(std::string bc_name,
-             std::string name,
+             const std::string & name,
              InputParameters parameters);
 
   void addAuxKernel(std::string aux_name,
-                    std::string name,
+                    const std::string & name,
                     InputParameters parameters);
 
   // FIXME: was AuxKernel::addBC
   void addAuxBC(std::string aux_name,
-                std::string name,
+                const std::string & name,
                 InputParameters parameters);
 
   void addMaterial(std::string mat_name,
-                   std::string name,
+                   const std::string & name,
                    InputParameters parameters);
 
   void addStabilizer(std::string stabilizer_name,
-                     std::string name,
+                     const std::string & name,
                      InputParameters parameters);
 
   // FIXME: var_name should go to 'parameters'?
   void addInitialCondition(std::string ic_name,
-                           std::string name,
+                           const std::string & name,
                            InputParameters parameters,
                            std::string var_name);
 
   void addPostprocessor(std::string pp_name,
-                        std::string name,
+                        const std::string & name,
                         InputParameters parameters);
 
   void addFunction(std::string pp_name,
-                   std::string name,
+                   const std::string & name,
                    InputParameters parameters);
 
   void addDamper(std::string damper_name,
-                 std::string name,
+                 const std::string & name,
                  InputParameters parameters);
 
   /**
@@ -395,7 +395,7 @@ public:
   /**
    * Get a reference to the value associated with the postprocessor.
    */
-  Real & getPostprocessorValue(std::string name);
+  Real & getPostprocessorValue(const std::string & name);
 
 protected:
   void sizeEverything();

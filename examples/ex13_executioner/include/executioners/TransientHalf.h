@@ -13,7 +13,7 @@ class TransientHalf: public TransientExecutioner
 {
 public:
 
-  TransientHalf(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  TransientHalf(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:
   virtual Real computeDT();

@@ -26,7 +26,7 @@ DGKernelFactory::instance()
 }
 
 InputParameters
-DGKernelFactory::getValidParams(std::string name)
+DGKernelFactory::getValidParams(const std::string & name)
 {
   if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
   {

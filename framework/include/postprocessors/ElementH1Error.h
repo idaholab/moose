@@ -31,7 +31,7 @@ InputParameters validParams<ElementH1Error>();
 class ElementH1Error : public ElementIntegral
 {
 public:
-  ElementH1Error(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ElementH1Error(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
   virtual Real getValue();
 

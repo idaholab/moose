@@ -46,7 +46,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  TransientExecutioner(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  TransientExecutioner(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
   /**
    * This will call solve() on the NonlinearSystem.

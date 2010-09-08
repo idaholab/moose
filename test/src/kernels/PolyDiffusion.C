@@ -7,7 +7,7 @@ InputParameters validParams<PolyDiffusion>()
   return params;
 }
 
-PolyDiffusion::PolyDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters)
+PolyDiffusion::PolyDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters)
 {}
 

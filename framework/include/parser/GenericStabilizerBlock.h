@@ -26,7 +26,7 @@ InputParameters validParams<GenericStabilizerBlock>();
 class GenericStabilizerBlock: public ParserBlock
 {
 public:
-  GenericStabilizerBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  GenericStabilizerBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

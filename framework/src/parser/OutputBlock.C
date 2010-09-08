@@ -36,7 +36,7 @@ InputParameters validParams<OutputBlock>()
   return params;
 }
 
-OutputBlock::OutputBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+OutputBlock::OutputBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
   // Register Output prereqs

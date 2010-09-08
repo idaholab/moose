@@ -18,7 +18,7 @@
 // Create a performance log
 PerfLog Moose::perf_log("Example 1: Input File");
 
- // Begin the main program.
+// Begin the main program.
 int main (int argc, char** argv)
 {
   // Create a MooseInit Object

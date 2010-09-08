@@ -31,7 +31,7 @@ ParserBlockFactory::instance()
 }
 
 ParserBlock *
-ParserBlockFactory::add(std::string name, MooseSystem & moose_system, InputParameters params)
+ParserBlockFactory::add(const std::string & name, MooseSystem & moose_system, InputParameters params)
 {
   ParserBlock * parser_block;
   std::string generic_identifier = ParserBlockFactory::instance()->isRegistered(name);

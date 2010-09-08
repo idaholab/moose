@@ -22,7 +22,7 @@
 // Create a performance log
 PerfLog Moose::perf_log("Example 2: Kernel");
 
- // Begin the main program.
+// Begin the main program.
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);

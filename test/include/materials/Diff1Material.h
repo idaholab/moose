@@ -16,7 +16,7 @@ InputParameters validParams<Diff1Material>();
 class Diff1Material : public Material
 {
 public:
-  Diff1Material(std::string name,
+  Diff1Material(const std::string & name,
                 MooseSystem & moose_system,
                 InputParameters parameters);
   

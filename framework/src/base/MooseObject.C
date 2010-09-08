@@ -26,7 +26,7 @@ InputParameters validParams<MooseObject>()
 }
 
 
-MooseObject::MooseObject(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+MooseObject::MooseObject(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   _name(name),
   _moose_system(moose_system),
   _parameters(parameters),

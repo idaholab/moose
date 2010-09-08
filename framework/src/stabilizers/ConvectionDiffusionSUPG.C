@@ -27,7 +27,7 @@ InputParameters validParams<ConvectionDiffusionSUPG>()
   return params;
 }
 
-ConvectionDiffusionSUPG::ConvectionDiffusionSUPG(std::string name,
+ConvectionDiffusionSUPG::ConvectionDiffusionSUPG(const std::string & name,
                                                  MooseSystem & moose_system,
                                                  InputParameters parameters)
   :SUPGBase(name, moose_system, parameters),

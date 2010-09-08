@@ -27,7 +27,7 @@ class Reaction : public Kernel
 {
 public:
 
-  Reaction(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  Reaction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
            
 protected:
   virtual Real computeQpResidual();

@@ -26,7 +26,7 @@ DamperFactory::instance()
 }
 
 InputParameters
-DamperFactory::getValidParams(std::string name)
+DamperFactory::getValidParams(const std::string & name)
 {
   if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
   {

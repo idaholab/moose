@@ -29,7 +29,7 @@ InputParameters validParams<MatchedValueBC>();
 class MatchedValueBC : public BoundaryCondition
 {
 public:
-  MatchedValueBC(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  MatchedValueBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
     
   virtual ~MatchedValueBC() {}
 

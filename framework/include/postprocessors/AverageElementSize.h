@@ -29,7 +29,7 @@ InputParameters validParams<AverageElementSize>();
 class AverageElementSize : public ElementAverageValue
 {
 public:
-  AverageElementSize(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  AverageElementSize(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual void initialize();
   virtual void execute();

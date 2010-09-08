@@ -29,7 +29,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef Material * (*MaterialBuildPtr)(std::string name, MooseSystem & moose_system, InputParameters parameters); // , unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+typedef Material * (*MaterialBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters); // , unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
 /**
  * Typedef to make things easier.
@@ -45,7 +45,7 @@ typedef std::vector<std::string>::iterator MaterialNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename MaterialType>
-Material * buildMaterial(std::string name, MooseSystem & moose_system, InputParameters parameters)
+Material * buildMaterial(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
 {
   return new MaterialType(name, moose_system, parameters);
 }
@@ -59,7 +59,7 @@ public:
   static MaterialFactory * instance();
   
   template<typename MaterialType> 
-  void registerMaterial(std::string name)
+  void registerMaterial(const std::string & name)
   {
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
     {
@@ -71,14 +71,14 @@ public:
   }
 
   Material *create(std::string mat_name,
-                   std::string name,
+                   const std::string & name,
                    MooseSystem & moose_system,
                    InputParameters parameters)
   {
     return (*_name_to_build_pointer[mat_name])(name, moose_system, parameters);
   }
   
-  InputParameters getValidParams(std::string name);
+  InputParameters getValidParams(const std::string & name);
   
   MaterialNamesIterator registeredMaterialsBegin();
   MaterialNamesIterator registeredMaterialsEnd();

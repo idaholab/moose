@@ -21,7 +21,7 @@ InputParameters validParams<Function>()
   return params;
 }
 
-Function::Function(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+Function::Function(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   MooseObject(name, moose_system, parameters)
 {
 }

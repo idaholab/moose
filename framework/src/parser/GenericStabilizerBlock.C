@@ -24,7 +24,7 @@ InputParameters validParams<GenericStabilizerBlock>()
   return params;
 }
 
-GenericStabilizerBlock::GenericStabilizerBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+GenericStabilizerBlock::GenericStabilizerBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params),
    _type(getType())
 {

@@ -29,7 +29,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef AuxKernel * (*AuxKernelBuildPtr)(std::string name,
+typedef AuxKernel * (*AuxKernelBuildPtr)(const std::string & name,
                                          MooseSystem & moose_system,
                                          InputParameters parameters);
 
@@ -47,7 +47,7 @@ typedef InputParameters (*AuxKernelParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename AuxType>
-AuxKernel * buildAux(std::string name,
+AuxKernel * buildAux(const std::string & name,
                      MooseSystem & moose_system,
                      InputParameters parameters)
 {
@@ -65,7 +65,7 @@ public:
   static AuxFactory * instance();
   
   template<typename AuxType> 
-  void registerAux(std::string name)
+  void registerAux(const std::string & name)
   {
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
     {
@@ -77,14 +77,14 @@ public:
   }
 
   AuxKernel *create(std::string aux_name,
-                     std::string name,
+                     const std::string & name,
                      MooseSystem & moose_system,
                      InputParameters parameters)
   {
     return (*_name_to_build_pointer[aux_name])(name, moose_system, parameters);
   }
 
-  InputParameters getValidParams(std::string name);
+  InputParameters getValidParams(const std::string & name);
 
   AuxKernelNamesIterator registeredAuxKernelsBegin();
   AuxKernelNamesIterator registeredAuxKernelsEnd();

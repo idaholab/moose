@@ -34,7 +34,7 @@ MaterialFactory::instance()
   }
 
 InputParameters
-MaterialFactory::getValidParams(std::string name)
+MaterialFactory::getValidParams(const std::string & name)
   {
     if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
       mooseError("A _" + name + "_ is not registered Material\n\n");

@@ -26,7 +26,7 @@ InputParameters validParams<ElementL2Error>();
 class ElementL2Error : public ElementIntegral
 {
 public:
-  ElementL2Error(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  ElementL2Error(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
   /**
    * Get the L2 Error.

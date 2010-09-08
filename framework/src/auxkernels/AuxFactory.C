@@ -25,7 +25,7 @@ AuxFactory::instance()
   }
 
 InputParameters
-AuxFactory::getValidParams(std::string name)
+AuxFactory::getValidParams(const std::string & name)
   {
     if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
       mooseError("\nA _" + name + "_ is not a registered Aux\n\n");

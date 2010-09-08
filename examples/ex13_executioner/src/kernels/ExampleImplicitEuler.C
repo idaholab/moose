@@ -9,7 +9,7 @@ InputParameters validParams<ExampleImplicitEuler>()
   return params;
 }
 
-ExampleImplicitEuler::ExampleImplicitEuler(std::string name,
+ExampleImplicitEuler::ExampleImplicitEuler(const std::string & name,
                                            MooseSystem &sys,
                                            InputParameters parameters)
   :ImplicitEuler(name,sys,parameters),

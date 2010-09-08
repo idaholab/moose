@@ -14,7 +14,7 @@ InputParameters validParams<DiffMKernel>();
 class DiffMKernel : public Kernel
 {
 public:
-  DiffMKernel(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  DiffMKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

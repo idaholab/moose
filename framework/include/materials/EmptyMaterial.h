@@ -30,7 +30,7 @@ InputParameters validParams<EmptyMaterial>();
 class EmptyMaterial : public Material
 {
 public:
-  EmptyMaterial(std::string name,
+  EmptyMaterial(const std::string & name,
                 MooseSystem & moose_system,
                 InputParameters parameters);
   

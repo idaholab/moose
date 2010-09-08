@@ -9,7 +9,7 @@ InputParameters validParams<ExampleMaterial>()
   return params;
 }
 
-ExampleMaterial::ExampleMaterial(std::string name,
+ExampleMaterial::ExampleMaterial(const std::string & name,
                                  MooseSystem & moose_system,
                                  InputParameters parameters)
   :Material(name, moose_system, parameters),

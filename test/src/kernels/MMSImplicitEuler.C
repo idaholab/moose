@@ -8,7 +8,7 @@ InputParameters validParams<MMSImplicitEuler>()
   return params;
 }
 
-MMSImplicitEuler::MMSImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MMSImplicitEuler::MMSImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters)
 {}
 

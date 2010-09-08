@@ -26,7 +26,7 @@ InputParameters validParams<Postprocessor>();
 class Postprocessor : public MooseObject
 {
 public:
-  Postprocessor(std::string name, MooseSystem &moose_system, InputParameters parameters);
+  Postprocessor(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
   
   virtual ~Postprocessor(){ }
   

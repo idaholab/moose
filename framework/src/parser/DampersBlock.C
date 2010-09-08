@@ -22,7 +22,7 @@ InputParameters validParams<DampersBlock>()
   return validParams<ParserBlock>();
 }
 
-DampersBlock::DampersBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+DampersBlock::DampersBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
   // Register execution prereqs

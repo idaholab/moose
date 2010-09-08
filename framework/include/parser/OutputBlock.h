@@ -26,7 +26,7 @@ InputParameters validParams<OutputBlock>();
 class OutputBlock: public ParserBlock
 {
 public:
-  OutputBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  OutputBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 };

@@ -47,7 +47,7 @@ class ParsedFunction : public Function
     /**
      * Created from MooseSystem via the FunctionFactory.
      */
-    ParsedFunction(std::string name, MooseSystem & moose_system, InputParameters parameters);
+    ParsedFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
     virtual ~ParsedFunction();
 

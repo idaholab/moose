@@ -45,7 +45,7 @@ InputParameters validParams<ParserBlock>()
 
 bool ParserBlock::_deferred_execution = false;
 
-ParserBlock::ParserBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+ParserBlock::ParserBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :_parent(params.get<ParserBlock*>("parent")),
    _moose_system(moose_system),
    _name(name),

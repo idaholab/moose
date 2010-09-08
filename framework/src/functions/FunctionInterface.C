@@ -23,7 +23,7 @@ FunctionInterface::FunctionInterface(FunctionWarehouse & func_warehouse, InputPa
 }
 
 Function &
-FunctionInterface::getFunction( std::string name )
+FunctionInterface::getFunction( const std::string & name )
 {
   return _func_warehouse.getFunction(_func_params.get<std::string>(name));
 }

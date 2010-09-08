@@ -22,7 +22,7 @@ InputParameters validParams<ConstantAux>()
   return params;
 }
 
-ConstantAux::ConstantAux(std::string name, MooseSystem & moose_system, InputParameters parameters)
+ConstantAux::ConstantAux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :AuxKernel(name, moose_system, parameters),
    _value(getParam<Real>("value"))
 {}

@@ -29,7 +29,7 @@ InputParameters validParams<GenericFunctionsBlock>();
 class GenericFunctionsBlock: public ParserBlock
 {
 public:
-  GenericFunctionsBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  GenericFunctionsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

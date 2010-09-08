@@ -27,7 +27,7 @@ InputParameters validParams<Stabilizer>()
 }
 
 
-Stabilizer::Stabilizer(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+Stabilizer::Stabilizer(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
   MaterialPropertyInterface(moose_system._material_data[_tid]),
   _element_data(*moose_system._element_data[_tid]),

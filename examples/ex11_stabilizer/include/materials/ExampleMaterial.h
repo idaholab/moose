@@ -12,7 +12,7 @@ InputParameters validParams<ExampleMaterial>();
 class ExampleMaterial : public Material
 {
 public:
-  ExampleMaterial(std::string name,
+  ExampleMaterial(const std::string & name,
                   MooseSystem & moose_system,
                   InputParameters parameters);
 

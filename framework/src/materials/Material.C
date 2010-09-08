@@ -32,7 +32,7 @@ InputParameters validParams<Material>()
   return params;
 }
 
-Material::Material(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+Material::Material(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters,
           moose_system.getQuadraturePointData(parameters.get<THREAD_ID>("_tid"), parameters.get<bool>("_is_boundary_material"))),
   _material_data(getParam<bool>("_is_neighbor_material") ? moose_system._neighbor_material_data[_tid] : moose_system._material_data[_tid]),

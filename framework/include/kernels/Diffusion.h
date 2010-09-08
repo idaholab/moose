@@ -29,7 +29,7 @@ class Diffusion : public Kernel
 {
 public:
 
-  Diffusion(std::string name, MooseSystem & moose_system, InputParameters parameters);  
+  Diffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
 
 protected:
   virtual Real computeQpResidual();

@@ -16,7 +16,7 @@ InputParameters validParams<MTMaterial>();
 class MTMaterial : public Material
 {
 public:
-  MTMaterial(std::string name,
+  MTMaterial(const std::string & name,
              MooseSystem & moose_system,
              InputParameters parameters);
   

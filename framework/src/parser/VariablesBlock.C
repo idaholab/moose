@@ -36,7 +36,7 @@ InputParameters validParams<VariablesBlock>()
   return validParams<ParserBlock>();
 }
 
-VariablesBlock::VariablesBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+VariablesBlock::VariablesBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
   // Register execution prereqs

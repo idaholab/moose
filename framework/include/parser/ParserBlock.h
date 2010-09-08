@@ -48,7 +48,7 @@ public:
    * for this ParserBlock instance.  A pointer to the parent is passed for use in searching the tree
    * Finally a reference to the GetPot object is passed for flexible extension.
    */
-  ParserBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  ParserBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   /**
    * Cleans up the ParserBlock tree strucutre
@@ -93,7 +93,7 @@ public:
 
   void driveExecute();
 
-  inline void addPrereq(std::string name)
+  inline void addPrereq(const std::string & name)
     {
       _execute_prereqs.insert(name);
     }
@@ -102,7 +102,7 @@ public:
    * Data Accessors
    ************************************/
   template <typename T>
-  T getParamValue(std::string name) const
+  T getParamValue(const std::string & name) const
     {
       return _block_params.get<T>(name);
     }

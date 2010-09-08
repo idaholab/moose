@@ -12,7 +12,7 @@ class MMSConvection : public Kernel
 {
 public:
   
- MMSConvection(std::string name,
+ MMSConvection(const std::string & name,
              MooseSystem &sys,
              InputParameters parameters);
 

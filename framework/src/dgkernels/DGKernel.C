@@ -40,7 +40,7 @@ InputParameters validParams<DGKernel>()
 }
 
 
-DGKernel::DGKernel(std::string name, MooseSystem & moose_system, InputParameters parameters):
+DGKernel::DGKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
   PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
   TwoMaterialPropertyInterface(moose_system._material_data[_tid], moose_system._neighbor_material_data[_tid]),
   _dof_data(moose_system._dof_data[_tid]),

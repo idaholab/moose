@@ -24,7 +24,7 @@ InputParameters validParams<DGDiffusion>()
   return params;
 }
 
-DGDiffusion::DGDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters)
+DGDiffusion::DGDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :DGKernel(name, moose_system, parameters),
    _epsilon(getParam<Real>("epsilon")),
    _sigma(getParam<Real>("sigma"))

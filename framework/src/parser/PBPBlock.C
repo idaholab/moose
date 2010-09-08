@@ -35,7 +35,7 @@ InputParameters validParams<PBPBlock>()
   return params;
 }
 
-PBPBlock::PBPBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+PBPBlock::PBPBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {}
 

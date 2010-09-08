@@ -23,7 +23,7 @@ InputParameters validParams<DirichletBC>()
   return params;
 }
 
-DirichletBC::DirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+DirichletBC::DirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
     _value(getParam<Real>("value"))
 {}

@@ -23,7 +23,7 @@ InputParameters validParams<ElementH1SemiError>()
   return params;
 }
 
-ElementH1SemiError::ElementH1SemiError(std::string name,
+ElementH1SemiError::ElementH1SemiError(const std::string & name,
                              MooseSystem & moose_system,
                              InputParameters parameters):
   ElementIntegral(name, moose_system, parameters),

@@ -12,7 +12,7 @@ class PolyCoupledDirichletBC : public BoundaryCondition
 {
 public:
   
-  PolyCoupledDirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  PolyCoupledDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
     
   virtual ~PolyCoupledDirichletBC(){}
 

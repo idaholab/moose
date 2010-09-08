@@ -7,7 +7,7 @@ InputParameters validParams<PolyReaction>()
   return params;
 }
 
-PolyReaction::PolyReaction(std::string name, MooseSystem & moose_system, InputParameters parameters)
+PolyReaction::PolyReaction(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters)
   {}
 

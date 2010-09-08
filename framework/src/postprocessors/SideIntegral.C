@@ -21,7 +21,7 @@ InputParameters validParams<SideIntegral>()
   return params;
 }
 
-SideIntegral::SideIntegral(std::string name, MooseSystem & moose_system, InputParameters parameters)
+SideIntegral::SideIntegral(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :SidePostprocessor(name, moose_system, parameters),
    _integral_value(0)
 {}

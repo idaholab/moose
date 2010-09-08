@@ -25,7 +25,7 @@ StabilizerFactory::instance()
 }
 
 InputParameters
-StabilizerFactory::getValidParams(std::string name)
+StabilizerFactory::getValidParams(const std::string & name)
 {
   if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
   {

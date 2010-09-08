@@ -30,7 +30,7 @@ public:
   virtual ~StabilizerWarehouse();
 
   Stabilizer * add(std::string stabilizer_name,
-                   std::string name,
+                   const std::string & name,
                    MooseSystem & moose_system,
                    InputParameters parameters);
 

@@ -33,7 +33,7 @@ InputParameters validParams<MeshBlock>();
 class MeshBlock: public ParserBlock
 {
 public:
-  MeshBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  MeshBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

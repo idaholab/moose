@@ -26,7 +26,7 @@ InputParameters validParams<GenericKernelBlock>();
 class GenericKernelBlock: public ParserBlock
 {
 public:
-  GenericKernelBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  GenericKernelBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

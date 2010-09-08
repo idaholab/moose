@@ -29,7 +29,7 @@ class RealPropertyOutput : public Kernel
 {
 public:
 
-  RealPropertyOutput(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  RealPropertyOutput(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -14,7 +14,7 @@ InputParameters validParams<Convection>()
   return params;
 }
 
-Convection::Convection(std::string name,
+Convection::Convection(const std::string & name,
                        MooseSystem &sys,
                        InputParameters parameters)
   // You must call the constructor of the base class first

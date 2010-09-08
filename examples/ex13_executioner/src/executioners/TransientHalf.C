@@ -11,7 +11,7 @@ InputParameters validParams<TransientHalf>()
   return params;
 }
 
-TransientHalf::TransientHalf(std::string name, MooseSystem & moose_system, InputParameters parameters)
+TransientHalf::TransientHalf(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :TransientExecutioner(name, moose_system, parameters),
    _ratio(getParam<Real>("ratio")),
    _min_dt(getParam<Real>("min_dt"))

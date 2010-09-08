@@ -10,7 +10,7 @@ InputParameters validParams<ExampleDiffusion>()
   return params;
 }
 
-ExampleDiffusion::ExampleDiffusion(std::string name,
+ExampleDiffusion::ExampleDiffusion(const std::string & name,
                                    MooseSystem &sys,
                                    InputParameters parameters)
   :Diffusion(name,sys,parameters),

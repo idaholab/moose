@@ -43,7 +43,7 @@ InputParameters validParams<MeshBlock>()
   return params;
 }
 
-MeshBlock::MeshBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+MeshBlock::MeshBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {}
 

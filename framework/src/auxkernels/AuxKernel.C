@@ -34,7 +34,7 @@ InputParameters validParams<AuxKernel>()
   return params;
 }
 
-AuxKernel::AuxKernel(std::string name, MooseSystem & moose_system, InputParameters parameters) :
+AuxKernel::AuxKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
   MaterialPropertyInterface(moose_system._material_data[_tid]),
    _element_data(*moose_system._element_data[_tid]),
@@ -91,7 +91,7 @@ AuxKernel::isNodal()
 }
 
 MooseArray<Real> &
-AuxKernel::coupledValue(std::string name, int i)
+AuxKernel::coupledValue(const std::string & name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -119,7 +119,7 @@ AuxKernel::coupledValue(std::string name, int i)
 
 
 MooseArray<Real> &
-AuxKernel::coupledValueOld(std::string name, int i)
+AuxKernel::coupledValueOld(const std::string & name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -142,7 +142,7 @@ AuxKernel::coupledValueOld(std::string name, int i)
 
 
 MooseArray<Real> &
-AuxKernel::coupledValueOlder(std::string name, int i)
+AuxKernel::coupledValueOlder(const std::string & name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -165,7 +165,7 @@ AuxKernel::coupledValueOlder(std::string name, int i)
 
 
 MooseArray<RealGradient> &
-AuxKernel::coupledGradient(std::string name, int i)
+AuxKernel::coupledGradient(const std::string & name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -182,7 +182,7 @@ AuxKernel::coupledGradient(std::string name, int i)
 }
 
 MooseArray<RealGradient> &
-AuxKernel::coupledGradientOld(std::string name, int i)
+AuxKernel::coupledGradientOld(const std::string & name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -199,7 +199,7 @@ AuxKernel::coupledGradientOld(std::string name, int i)
 }
 
 MooseArray<RealGradient> &
-AuxKernel::coupledGradientOlder(std::string name, int i)
+AuxKernel::coupledGradientOlder(const std::string & name, int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");

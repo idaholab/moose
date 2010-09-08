@@ -13,7 +13,7 @@ class PolyDiffusion : public Kernel
 {
 public:
 
-  PolyDiffusion(std::string name, MooseSystem & moose_system, InputParameters parameters);  
+  PolyDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
 
 protected:
   virtual Real computeQpResidual();

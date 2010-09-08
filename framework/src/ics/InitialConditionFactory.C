@@ -25,7 +25,7 @@ InitialConditionFactory::instance()
 }
 
 InputParameters
-InitialConditionFactory::getValidParams(std::string name)
+InitialConditionFactory::getValidParams(const std::string & name)
 {
   if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
     mooseError(std::string("A _") + name + "_ is not registered InitialCondition ");

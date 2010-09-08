@@ -12,7 +12,7 @@ class PolyConstantAux : public AuxKernel
 {
 public:
   
- PolyConstantAux(std::string name, MooseSystem & moose_system, InputParameters parameters);
+ PolyConstantAux(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
   virtual ~PolyConstantAux() {}
   

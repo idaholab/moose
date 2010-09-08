@@ -44,7 +44,7 @@ InputParameters validParams<PDEBase>();
 class PDEBase : public MooseObject, protected PostprocessorInterface, protected FunctionInterface
 {
 public:
-  PDEBase(std::string name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data);
+  PDEBase(const std::string & name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data);
   virtual ~PDEBase();
 
   /**

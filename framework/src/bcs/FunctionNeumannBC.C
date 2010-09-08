@@ -23,7 +23,7 @@ InputParameters validParams<FunctionNeumannBC>()
   return params;
 }
 
-FunctionNeumannBC::FunctionNeumannBC(std::string name,
+FunctionNeumannBC::FunctionNeumannBC(const std::string & name,
                        MooseSystem &sys,
                        InputParameters parameters)
   :BoundaryCondition(name, sys, parameters),

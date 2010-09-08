@@ -38,7 +38,7 @@ InputParameters validParams<Kernel>()
 }
 
 
-Kernel::Kernel(std::string name, MooseSystem & moose_system, InputParameters parameters):
+Kernel::Kernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
   PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
   MaterialPropertyInterface(moose_system._material_data[_tid]),
    _dof_data(moose_system._dof_data[_tid]),

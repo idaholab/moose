@@ -22,7 +22,7 @@ InputParameters validParams<MaterialsBlock>()
   return validParams<ParserBlock>();
 }
 
-MaterialsBlock::MaterialsBlock(std::string name, MooseSystem & moose_system, InputParameters params)
+MaterialsBlock::MaterialsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
   :ParserBlock(name, moose_system, params)
 {
   // Register Materials prereqs

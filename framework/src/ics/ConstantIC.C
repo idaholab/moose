@@ -22,7 +22,7 @@ InputParameters validParams<ConstantIC>()
   return params;
 }
 
-ConstantIC::ConstantIC(std::string name,
+ConstantIC::ConstantIC(const std::string & name,
                        MooseSystem & moose_system,
                        InputParameters parameters)
   :InitialCondition(name, moose_system, parameters),

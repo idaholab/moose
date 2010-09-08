@@ -24,7 +24,7 @@ InputParameters validParams<ParsedGradFunction>()
   return params;
 }
 
-ParsedGradFunction::ParsedGradFunction(std::string name, MooseSystem & moose_system, InputParameters parameters):
+ParsedGradFunction::ParsedGradFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
   ParsedFunction(name, moose_system, parameters)
 {
   std::vector<std::string> vars = parameters.get<std::vector<std::string> >("vars");

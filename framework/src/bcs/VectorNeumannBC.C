@@ -24,7 +24,7 @@ InputParameters validParams<VectorNeumannBC>()
   return params;
 }
 
-VectorNeumannBC::VectorNeumannBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+VectorNeumannBC::VectorNeumannBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters)
   {
     _value(0)=getParam<Real>("value0");

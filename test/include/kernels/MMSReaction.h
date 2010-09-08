@@ -12,7 +12,7 @@ class MMSReaction : public Kernel
 {
 public:
 
-  MMSReaction(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  MMSReaction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
            
 protected:
   virtual Real computeQpResidual();

@@ -25,7 +25,7 @@ InputParameters validParams<PeriodicBlock>();
 class PeriodicBlock: public ParserBlock
 {
 public:
-  PeriodicBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  PeriodicBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

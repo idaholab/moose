@@ -22,7 +22,7 @@ InputParameters validParams<PrintNumElems>()
   return params;
 }
 
-PrintNumElems::PrintNumElems(std::string name, MooseSystem &moose_system, InputParameters parameters):
+PrintNumElems::PrintNumElems(const std::string & name, MooseSystem &moose_system, InputParameters parameters):
   Postprocessor(name, moose_system, parameters)
 {
 }

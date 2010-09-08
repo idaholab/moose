@@ -29,7 +29,7 @@ public:
   /**
    * Constructor: Same as the rest of the MOOSE Objects
    */
-  ExampleIC(std::string name,
+  ExampleIC(const std::string & name,
             MooseSystem & moose_system,
             InputParameters parameters);
 

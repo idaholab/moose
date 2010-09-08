@@ -10,7 +10,7 @@ InputParameters validParams<MMSCoupledDirichletBC>()
   return params;
 }
 
-MMSCoupledDirichletBC::MMSCoupledDirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MMSCoupledDirichletBC::MMSCoupledDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
 
    //Grab the parameter for the multiplier. 

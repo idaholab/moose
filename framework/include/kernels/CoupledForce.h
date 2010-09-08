@@ -30,7 +30,7 @@ class CoupledForce : public Kernel
 {
 public:
 
-  CoupledForce(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  CoupledForce(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

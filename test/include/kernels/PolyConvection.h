@@ -12,7 +12,7 @@ class PolyConvection : public Kernel
 {
 public:
   
- PolyConvection(std::string name,
+ PolyConvection(const std::string & name,
              MooseSystem &sys,
              InputParameters parameters);
 

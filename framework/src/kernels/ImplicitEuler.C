@@ -22,7 +22,7 @@ InputParameters validParams<ImplicitEuler>()
   return params;
 }
 
-ImplicitEuler::ImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters)
+ImplicitEuler::ImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters)
 {}
 

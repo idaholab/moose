@@ -29,7 +29,7 @@ InputParameters validParams<TransientBlock>();
 class TransientBlock: public ParserBlock
 {
 public:
-  TransientBlock(std::string name, MooseSystem & moose_system, InputParameters params);
+  TransientBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
 

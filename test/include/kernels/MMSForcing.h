@@ -12,7 +12,7 @@ class MMSForcing : public Kernel
 {
 public:
 
-  MMSForcing(std::string name,
+  MMSForcing(const std::string & name,
              MooseSystem &sys,
              InputParameters parameters);
 

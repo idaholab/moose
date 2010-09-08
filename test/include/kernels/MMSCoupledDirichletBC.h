@@ -12,7 +12,7 @@ class MMSCoupledDirichletBC : public BoundaryCondition
 {
 public:
   
-  MMSCoupledDirichletBC(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  MMSCoupledDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
     
   virtual ~MMSCoupledDirichletBC(){}
 

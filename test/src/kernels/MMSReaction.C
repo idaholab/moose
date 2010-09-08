@@ -7,7 +7,7 @@ InputParameters validParams<MMSReaction>()
   return params;
 }
 
-MMSReaction::MMSReaction(std::string name, MooseSystem & moose_system, InputParameters parameters)
+MMSReaction::MMSReaction(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters)
   {}
 

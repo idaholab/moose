@@ -27,7 +27,7 @@ class SecondDerivativeImplicitEuler : public Kernel
 {
 public:
 
-  SecondDerivativeImplicitEuler(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  SecondDerivativeImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();
