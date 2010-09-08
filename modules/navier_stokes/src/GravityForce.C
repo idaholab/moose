@@ -12,7 +12,7 @@ GravityForce::GravityForce(std::string name, MooseSystem & moose_system, InputPa
   :Kernel(name, moose_system, parameters),
     _p_var(coupled("p")),
     _p(coupledValue("p")),
-    _acceleration(parameters.get<Real>("acceleration"))
+    _acceleration(getParam<Real>("acceleration"))
   {}
 
 Real

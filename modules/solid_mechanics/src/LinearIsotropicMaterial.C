@@ -24,11 +24,11 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(std::string name,
                                                  MooseSystem & moose_system,
                                                  InputParameters parameters)
   :SolidMechanicsMaterial(name, moose_system, parameters),
-   _youngs_modulus(parameters.get<Real>("youngs_modulus")),
-   _poissons_ratio(parameters.get<Real>("poissons_ratio")),
-   _t_ref(parameters.get<Real>("t_ref")),
-   _alpha(parameters.get<Real>("thermal_expansion")),
-   _input_thermal_conductivity(parameters.get<Real>("thermal_conductivity"))
+   _youngs_modulus(getParam<Real>("youngs_modulus")),
+   _poissons_ratio(getParam<Real>("poissons_ratio")),
+   _t_ref(getParam<Real>("t_ref")),
+   _alpha(getParam<Real>("thermal_expansion")),
+   _input_thermal_conductivity(getParam<Real>("thermal_conductivity"))
 {
   IsotropicElasticityTensor * iso_elasticity_tensor = new IsotropicElasticityTensor;
   iso_elasticity_tensor->setYoungsModulus(_youngs_modulus);

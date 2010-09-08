@@ -12,7 +12,7 @@ GravityPower::GravityPower(std::string name, MooseSystem & moose_system, InputPa
   :Kernel(name, moose_system, parameters),
     _pv_var(coupled("pv")),
     _pv(coupledValue("pv")),
-    _acceleration(parameters.get<Real>("acceleration"))
+    _acceleration(getParam<Real>("acceleration"))
   {}
 
 Real

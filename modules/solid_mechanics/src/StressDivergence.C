@@ -18,7 +18,7 @@ StressDivergence::StressDivergence(std::string name, MooseSystem & moose_system,
   :Kernel(name, moose_system, parameters),
    _stress(getMaterialProperty<RealTensorValue>("stress")),
    _elasticity_tensor(getMaterialProperty<ColumnMajorMatrix>("elasticity_tensor")),
-   _component(parameters.get<Real>("component")),
+   _component(getParam<Real>("component")),
    _xdisp_var(isCoupled("x_disp") ? coupled("x_disp") : 0),
    _ydisp_var(isCoupled("y_disp") ? coupled("y_disp") : 0),
    _zdisp_var(isCoupled("z_disp") ? coupled("z_disp") : 0)

@@ -15,7 +15,7 @@ PressureNeumannBC::PressureNeumannBC(std::string name, MooseSystem & moose_syste
     _pu(coupledValue("pu")),
     _pv(coupledValue("pv")),
     _pw(_dim == 3 ? coupledValue("pw") : _zero),
-    _component(parameters.get<Real>("component")),
+    _component(getParam<Real>("component")),
     _gamma(getMaterialProperty<Real>("gamma"))
 {
   if(_component < 0)

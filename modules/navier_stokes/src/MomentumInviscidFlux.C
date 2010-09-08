@@ -17,7 +17,7 @@ MomentumInviscidFlux::MomentumInviscidFlux(std::string name, MooseSystem & moose
    _v_vel(coupledValue("v")),
    _w_vel_var(_dim == 3 ? coupled("w") : 0),
    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
-   _component(parameters.get<Real>("component")),
+   _component(getParam<Real>("component")),
    _pressure(getMaterialProperty<Real>("pressure"))
 {
   if(_component < 0)

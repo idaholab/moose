@@ -13,7 +13,7 @@ PlasticMaterial::PlasticMaterial(std::string name,
                                  MooseSystem & moose_system,
                                  InputParameters parameters)
   :LinearIsotropicMaterial(name, moose_system, parameters),
-   _input_yield_stress(parameters.get<Real>("yield_stress")),
+   _input_yield_stress(getParam<Real>("yield_stress")),
    _yield_stress(declareProperty<Real>("yield_stress")),
    _shear_modulus(declareProperty<Real>("shear_modulus")),
    

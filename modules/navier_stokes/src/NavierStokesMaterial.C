@@ -47,9 +47,9 @@ NavierStokesMaterial::NavierStokesMaterial(std::string name,
     //Declared here but _not_ calculated here
     _dynamic_viscocity(declareProperty<Real>("dynamic_viscocity")),
     
-    _R_param(parameters.get<Real>("R")),
-    _gamma_param(parameters.get<Real>("gamma")),
-    _Pr_param(parameters.get<Real>("Pr"))
+    _R_param(getParam<Real>("R")),
+    _gamma_param(getParam<Real>("gamma")),
+    _Pr_param(getParam<Real>("Pr"))
   {
     //Load these up in a vector for convenience
     _vel_grads.resize(3);
