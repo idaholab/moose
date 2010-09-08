@@ -28,7 +28,7 @@ ParsedFunctionTest::basicConstructor()
   InputParameters params = validParams<ParsedFunction>();
 
   //test constructor with no additional variables
-  params.set<std::string>("function") = std::string("x + 1.5*y + 2 * z + t/4");
+  params.set<std::string>("value") = std::string("x + 1.5*y + 2 * z + t/4");
   ParsedFunction f("test", m, params);
   CPPUNIT_ASSERT(f.value(4, 1, 2, 3) == 11);
 }
@@ -43,7 +43,7 @@ ParsedFunctionTest::advancedConstructor()
   one_var[0] = "q";
 
   InputParameters params = validParams<ParsedFunction>();
-  params.set<std::string>("function") = "x + y + q";
+  params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
 
   ParsedFunction f("test", m, params);
@@ -57,7 +57,7 @@ ParsedFunctionTest::advancedConstructor()
   three_vars[2] = "r";
 
   InputParameters params2 = validParams<ParsedFunction>();
-  params2.set<std::string>("function") = "r*x + y/w + q";
+  params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
 
   ParsedFunction f2("test", m, params2);
@@ -71,7 +71,7 @@ ParsedFunctionTest::advancedConstructor()
   one_val[0] = 2.5;
 
   InputParameters params3 = validParams<ParsedFunction>();
-  params3.set<std::string>("function") = "q*x";
+  params3.set<std::string>("value") = "q*x";
   params3.set<std::vector<std::string> >("vars") = one_var;
   params3.set<std::vector<Real> >("vals") = one_val;
 
@@ -84,7 +84,7 @@ ParsedFunctionTest::advancedConstructor()
   two_vals[1] = 1;
 
   InputParameters params4 = validParams<ParsedFunction>();
-  params4.set<std::string>("function") = "q*x + y/r + w";
+  params4.set<std::string>("value") = "q*x + y/r + w";
   params4.set<std::vector<std::string> >("vars") = three_vars;
   params4.set<std::vector<Real> >("vals") = two_vals;
 
@@ -106,7 +106,7 @@ ParsedFunctionTest::testVariables()
   one_var[0] = "q";
 
   InputParameters params = validParams<ParsedFunction>();
-  params.set<std::string>("function") = "x + y + q";
+  params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
 
   ParsedFunction f("test", m, params);
@@ -125,7 +125,7 @@ ParsedFunctionTest::testVariables()
   three_vars[2] = "r";
 
   InputParameters params2 = validParams<ParsedFunction>();
-  params2.set<std::string>("function") = "r*x + y/w + q";
+  params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
 
   ParsedFunction f2("test", m, params2);
@@ -150,13 +150,13 @@ ParsedFunctionTest::testConstants()
   //this functions tests that pi and e get correctly substituted
   //it also tests built in functions of the function parser
   InputParameters params = validParams<ParsedFunction>();
-  params.set<std::string>("function") = "log(e) + x";
+  params.set<std::string>("value") = "log(e) + x";
 
   ParsedFunction f("test", m, params);
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 2, f.value(0,1), 0.0000001 );
 
   InputParameters params2 = validParams<ParsedFunction>();
-  params2.set<std::string>("function") = "sin(pi*x)";
+  params2.set<std::string>("value") = "sin(pi*x)";
 
   ParsedFunction f2("test", m, params2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 0, f2.value(0,1), 0.0000001 );
