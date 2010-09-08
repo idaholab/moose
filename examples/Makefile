@@ -15,7 +15,7 @@ examples:
 	@echo "----------------------------------------------"
 
 
-.PHONY: clean clobber distclean link run .depend
+.PHONY: clean clobber distclean link run .depend test
 
 #
 # Clean up the example programs
@@ -44,4 +44,7 @@ run: $(wildcard examples/ex*/*.C)
 #
 # Rebuild the dependencies for the examples
 .depend: $(wildcard examples/ex*/*.C)
+	@for dir in $(dirlist); do $(MAKE) -C "$${dir}" $(MAKECMDGOALS)||exit 1; done
+
+test:
 	@for dir in $(dirlist); do $(MAKE) -C "$${dir}" $(MAKECMDGOALS)||exit 1; done

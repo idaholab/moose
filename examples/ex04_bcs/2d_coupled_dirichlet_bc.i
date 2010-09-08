@@ -99,7 +99,7 @@
 []
 
 [Output]
-  file_base = out
+  file_base = out_coupled_dirichlet
   interval = 1
   exodus = true
 []

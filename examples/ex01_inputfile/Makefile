@@ -26,6 +26,10 @@ APPLICATION_NAME := ex01
 
 # Include the MOOSE Export file
 include $(MOOSE_DIR)/Makefile.export
+include ../test.mk
 
 ###############################################################################
 # Additional special case targets should be added here
+
+test:
+	$(call TEST_exodiff,2d_diffusion.i,out.e)

@@ -99,7 +99,7 @@
 []
 
 [Output]
-  file_base = out
+  file_base = out_coupled_neumann
   interval = 1
   exodus = true
 []

@@ -26,6 +26,12 @@ APPLICATION_NAME := ex04
 
 # Include the MOOSE Export file
 include $(MOOSE_DIR)/Makefile.export
+include ../test.mk
 
 ###############################################################################
 # Additional special case targets should be added here
+
+test:
+	$(call TEST_exodiff,2d_coupled_dirichlet_bc.i,out_coupled_dirichlet.e)
+	$(call TEST_exodiff,2d_coupled_neumann_bc.i,out_coupled_neumann.e)
+	
