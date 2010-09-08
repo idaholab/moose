@@ -173,7 +173,7 @@ PDEBase::coupledTo() const
 }
 
 bool
-PDEBase::isCoupled(std::string varname, int i)
+PDEBase::isCoupled(const std::string & varname, int i)
 {
   std::map<std::string, std::vector<Variable> >::iterator it = _all_coupled_var.find(varname);
   if (it != _all_coupled_var.end())
@@ -183,7 +183,7 @@ PDEBase::isCoupled(std::string varname, int i)
 }
 
 bool
-PDEBase::isAux(std::string varname, int i)
+PDEBase::isAux(const std::string & varname, int i)
 {
   std::map<std::string, std::vector<Variable> >::iterator it = _coupled_aux_vars.find(varname);
   if (it != _coupled_aux_vars.end())
@@ -193,7 +193,7 @@ PDEBase::isAux(std::string varname, int i)
 }
 
 unsigned int
-PDEBase::coupled(std::string varname, int i)
+PDEBase::coupled(const std::string & varname, int i)
 {
   if(!isCoupled(varname, i))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -205,14 +205,14 @@ PDEBase::coupled(std::string varname, int i)
 }
 
 unsigned int
-PDEBase::coupledComponents(std::string varname)
+PDEBase::coupledComponents(const std::string & varname)
 {
   return _all_coupled_var[varname].size();
 }
 
 
 VariableValue &
-PDEBase::coupledValue(std::string varname, int i)
+PDEBase::coupledValue(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -224,7 +224,7 @@ PDEBase::coupledValue(std::string varname, int i)
 }
 
 VariableGradient &
-PDEBase::coupledGradient(std::string varname, int i)
+PDEBase::coupledGradient(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -236,7 +236,7 @@ PDEBase::coupledGradient(std::string varname, int i)
 }
 
 VariableSecond &
-PDEBase::coupledSecond(std::string varname, int i)
+PDEBase::coupledSecond(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -246,7 +246,7 @@ PDEBase::coupledSecond(std::string varname, int i)
 }
 
 VariableValue &
-PDEBase::coupledValueOld(std::string varname, int i)
+PDEBase::coupledValueOld(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -258,7 +258,7 @@ PDEBase::coupledValueOld(std::string varname, int i)
 }
 
 VariableValue &
-PDEBase::coupledValueOlder(std::string varname, int i)
+PDEBase::coupledValueOlder(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -270,7 +270,7 @@ PDEBase::coupledValueOlder(std::string varname, int i)
 }
 
 VariableGradient &
-PDEBase::coupledGradientOld(std::string varname, int i)
+PDEBase::coupledGradientOld(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");

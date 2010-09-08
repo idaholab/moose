@@ -90,7 +90,7 @@ AuxKernel::isNodal()
   return _nodal;
 }
 
-MooseArray<Real> &
+VariableValue &
 AuxKernel::coupledValue(const std::string & name, int i)
 {
   if(!isCoupled(name))
@@ -104,7 +104,6 @@ AuxKernel::coupledValue(const std::string & name, int i)
       temp ++;
       return _aux_data._var_vals_nodal[_coupled_vars[name][i]._num];
     }
-    
     else
       return _aux_data._aux_var_vals_nodal[_coupled_aux_vars[name][i]._num];
   }
@@ -118,7 +117,7 @@ AuxKernel::coupledValue(const std::string & name, int i)
 }
 
 
-MooseArray<Real> &
+VariableValue &
 AuxKernel::coupledValueOld(const std::string & name, int i)
 {
   if(!isCoupled(name))
@@ -141,7 +140,7 @@ AuxKernel::coupledValueOld(const std::string & name, int i)
 }
 
 
-MooseArray<Real> &
+VariableValue &
 AuxKernel::coupledValueOlder(const std::string & name, int i)
 {
   if(!isCoupled(name))
@@ -164,7 +163,7 @@ AuxKernel::coupledValueOlder(const std::string & name, int i)
 }
 
 
-MooseArray<RealGradient> &
+VariableGradient &
 AuxKernel::coupledGradient(const std::string & name, int i)
 {
   if(!isCoupled(name))
@@ -181,7 +180,7 @@ AuxKernel::coupledGradient(const std::string & name, int i)
   }
 }
 
-MooseArray<RealGradient> &
+VariableGradient &
 AuxKernel::coupledGradientOld(const std::string & name, int i)
 {
   if(!isCoupled(name))
@@ -198,7 +197,7 @@ AuxKernel::coupledGradientOld(const std::string & name, int i)
   }
 }
 
-MooseArray<RealGradient> &
+VariableGradient &
 AuxKernel::coupledGradientOlder(const std::string & name, int i)
 {
   if(!isCoupled(name))

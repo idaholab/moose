@@ -49,6 +49,7 @@ MooseSystem::MooseSystem() :
   _dof_data(libMesh::n_threads(), DofData(*this)),
   _neighbor_dof_data(libMesh::n_threads(), DofData(*this)),
   _material_data(libMesh::n_threads(), MaterialData(*this)),
+  _bnd_material_data(libMesh::n_threads(), MaterialData(*this)),
   _neighbor_material_data(libMesh::n_threads(), MaterialData(*this)),
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _es(NULL),
@@ -110,6 +111,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _dof_data(libMesh::n_threads(), DofData(*this)),
   _neighbor_dof_data(libMesh::n_threads(), DofData(*this)),
   _material_data(libMesh::n_threads(), MaterialData(*this)),
+  _bnd_material_data(libMesh::n_threads(), MaterialData(*this)),
   _neighbor_material_data(libMesh::n_threads(), MaterialData(*this)),
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _es(NULL),
@@ -424,15 +426,6 @@ MooseSystem::getDisplacedSystem()
 {
   checkValid();
   return _displaced_system;
-}
-
-QuadraturePointData &
-MooseSystem::getQuadraturePointData(THREAD_ID tid, bool is_boundary)
-{
-  if (is_boundary)
-    return *_face_data[tid];
-  else
-    return *_element_data[tid];
 }
 
 bool
@@ -880,13 +873,14 @@ MooseSystem::addMaterial(std::string mat_name,
     for (unsigned int i=0; i<blocks.size(); ++i) {
       parameters.set<int>("_bid") = blocks[i];
 
-      parameters.set<bool>("_is_neighbor_material") = false;
-      parameters.set<bool>("_is_boundary_material") = false;
+      parameters.set<QuadraturePointData *>("_qp_data") = _element_data[tid];
+      parameters.set<MaterialData *>("_material_data") = &_material_data[tid];
       _materials[tid].addMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
 
-      parameters.set<bool>("_is_boundary_material") = true;
+      parameters.set<QuadraturePointData *>("_qp_data") = _face_data[tid];
+      parameters.set<MaterialData *>("_material_data") = &_bnd_material_data[tid];
       _materials[tid].addBoundaryMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
-      parameters.set<bool>("_is_neighbor_material") = true;
+      parameters.set<MaterialData *>("_material_data") = &_neighbor_material_data[tid];
       _materials[tid].addNeighborMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
     }
   }

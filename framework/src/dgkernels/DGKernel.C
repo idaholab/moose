@@ -42,7 +42,7 @@ InputParameters validParams<DGKernel>()
 
 DGKernel::DGKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
   PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
-  TwoMaterialPropertyInterface(moose_system._material_data[_tid], moose_system._neighbor_material_data[_tid]),
+  TwoMaterialPropertyInterface(moose_system._bnd_material_data[_tid], moose_system._neighbor_material_data[_tid]),
   _dof_data(moose_system._dof_data[_tid]),
   _face_data(*moose_system._face_data[_tid]),
   _neighbor_dof_data(moose_system._neighbor_dof_data[_tid]),
@@ -159,7 +159,7 @@ DGKernel::computeJacobian()
 
 
 VariableValue &
-DGKernel::coupledNeighborValue(std::string varname, int i)
+DGKernel::coupledNeighborValue(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -171,7 +171,7 @@ DGKernel::coupledNeighborValue(std::string varname, int i)
 }
 
 VariableGradient &
-DGKernel::coupledNeighborGradient(std::string varname, int i)
+DGKernel::coupledNeighborGradient(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -183,7 +183,7 @@ DGKernel::coupledNeighborGradient(std::string varname, int i)
 }
 
 VariableSecond &
-DGKernel::coupledNeighborSecond(std::string varname, int i)
+DGKernel::coupledNeighborSecond(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -193,7 +193,7 @@ DGKernel::coupledNeighborSecond(std::string varname, int i)
 }
 
 VariableValue &
-DGKernel::coupledNeighborValueOld(std::string varname, int i)
+DGKernel::coupledNeighborValueOld(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -205,7 +205,7 @@ DGKernel::coupledNeighborValueOld(std::string varname, int i)
 }
 
 VariableValue &
-DGKernel::coupledNeighborValueOlder(std::string varname, int i)
+DGKernel::coupledNeighborValueOlder(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
@@ -217,7 +217,7 @@ DGKernel::coupledNeighborValueOlder(std::string varname, int i)
 }
 
 VariableGradient &
-DGKernel::coupledNeighborGradientOld(std::string varname, int i)
+DGKernel::coupledNeighborGradientOld(const std::string & varname, int i)
 {
   if(!isCoupled(varname))
     mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");

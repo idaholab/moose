@@ -300,64 +300,64 @@ protected:
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual bool isCoupled(std::string varname, int i = 0);
+  virtual bool isCoupled(const std::string & varname, int i = 0);
 
   /**
    * Whether or not this coupled_as name is associated with an auxiliary variable.
    */
-  virtual bool isAux(std::string varname, int i = 0);
+  virtual bool isAux(const std::string & varname, int i = 0);
 
   /**
    * Returns the variable number of the coupled variable.
    */
-  virtual unsigned int coupled(std::string varname, int i = 0);
+  virtual unsigned int coupled(const std::string & varname, int i = 0);
 
   /**
    * Returns the number of coupled variables with name 'name'
    */
-  virtual unsigned int coupledComponents(std::string varname);
+  virtual unsigned int coupledComponents(const std::string & varname);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual VariableValue & coupledValue(std::string varname, int i = 0);
+  virtual VariableValue & coupledValue(const std::string & varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's gradient.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual VariableGradient & coupledGradient(std::string varname, int i = 0);
+  virtual VariableGradient & coupledGradient(const std::string & varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's second derivative.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual VariableSecond & coupledSecond(std::string varname, int i = 0);
+  virtual VariableSecond & coupledSecond(const std::string & varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value at old time step.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual VariableValue & coupledValueOld(std::string varname, int i = 0);
+  virtual VariableValue & coupledValueOld(const std::string & varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's value at older time step.
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual VariableValue & coupledValueOlder(std::string varname, int i = 0);
+  virtual VariableValue & coupledValueOlder(const std::string & varname, int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled gradient of a variable's value at an old time step.
    *
    * @param name The name the kernel wants to refer to the variable as
    */
-  virtual VariableGradient & coupledGradientOld(std::string varname, int i = 0);
+  virtual VariableGradient & coupledGradientOld(const std::string & varname, int i = 0);
 
 };
 

@@ -154,11 +154,6 @@ public:
   ExplicitSystem * getDisplacedSystem();
 
   /**
-   * Get the reference either to _element_data or _face_data from MooseSystem
-   */
-  QuadraturePointData &getQuadraturePointData(THREAD_ID tid, bool is_boundary);
-
-  /**
    * Checks if we have a variable named 'var_name
    */
   bool hasVariable(const std::string &var_name);
@@ -412,6 +407,7 @@ private:
   std::vector<FaceData *> _neighbor_face_data;
   std::vector<AuxData *> _aux_data;
   std::vector<MaterialData> _material_data;
+  std::vector<MaterialData> _bnd_material_data;
   std::vector<MaterialData> _neighbor_material_data;
   std::vector<PostprocessorData> _postprocessor_data;
   std::vector<DamperData *> _damper_data;

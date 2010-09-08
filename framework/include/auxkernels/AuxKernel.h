@@ -67,17 +67,17 @@ protected:
 
   bool _nodal;
 
-  MooseArray<Real> & _u;
-  MooseArray<Real> & _u_old;
-  MooseArray<Real> & _u_older;
+  VariableValue & _u;
+  VariableValue & _u_old;
+  VariableValue & _u_older;
 
-  virtual MooseArray<Real> & coupledValue(const std::string & name, int i = 0);
-  virtual MooseArray<Real> & coupledValueOld(const std::string & name, int i = 0);
-  virtual MooseArray<Real> & coupledValueOlder(const std::string & name, int i = 0);
+  virtual VariableValue & coupledValue(const std::string & name, int i = 0);
+  virtual VariableValue & coupledValueOld(const std::string & name, int i = 0);
+  virtual VariableValue & coupledValueOlder(const std::string & name, int i = 0);
   
-  virtual MooseArray<RealGradient> & coupledGradient(const std::string & name, int i = 0);
-  virtual MooseArray<RealGradient> & coupledGradientOld(const std::string & name, int i = 0);
-  virtual MooseArray<RealGradient> & coupledGradientOlder(const std::string & name, int i = 0);
+  virtual VariableGradient & coupledGradient(const std::string & name, int i = 0);
+  virtual VariableGradient & coupledGradientOld(const std::string & name, int i = 0);
+  virtual VariableGradient & coupledGradientOlder(const std::string & name, int i = 0);
 
 
   /*************

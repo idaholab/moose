@@ -34,7 +34,7 @@ InputParameters validParams<BoundaryCondition>()
 
 BoundaryCondition::BoundaryCondition(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
-  MaterialPropertyInterface(moose_system._material_data[_tid]),
+  MaterialPropertyInterface(moose_system._bnd_material_data[_tid]),
    _dof_data(moose_system._dof_data[_tid]),
    _face_data(*moose_system._face_data[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
@@ -197,8 +197,8 @@ BoundaryCondition::computeIntegral()
   return sum;
 }
 
-MooseArray<Real> &
-BoundaryCondition::coupledValue(std::string var_name, int i)
+VariableValue &
+BoundaryCondition::coupledValue(const std::string & var_name, int i)
 {
   if(!isCoupled(var_name, i))
     mooseError("BC _" + name() + "_ was not provided with a variable coupled_as " + var_name + "\n\n");
@@ -209,8 +209,8 @@ BoundaryCondition::coupledValue(std::string var_name, int i)
   return _moose_system._face_data[_tid]->_var_vals_nodal[_coupled_vars[var_name][i]._num];
 }
 
-MooseArray<RealGradient> &
-BoundaryCondition::coupledGradient(std::string var_name, int i)
+VariableGradient &
+BoundaryCondition::coupledGradient(const std::string & var_name, int i)
 {
   if(!isCoupled(var_name, i))
     mooseError("BC _" + name() + "_ was not provided with a variable coupled_as " + var_name + "\n\n");

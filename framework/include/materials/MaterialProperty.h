@@ -21,7 +21,7 @@
 /**
  * Abstract definition of a property value.
  */
-class PropertyValue : public ReferenceCountedObject<PropertyValue>
+class PropertyValue
 {
 public:
   /**

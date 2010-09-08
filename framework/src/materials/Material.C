@@ -33,22 +33,16 @@ InputParameters validParams<Material>()
 }
 
 Material::Material(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
-  PDEBase(name, moose_system, parameters,
-          moose_system.getQuadraturePointData(parameters.get<THREAD_ID>("_tid"), parameters.get<bool>("_is_boundary_material"))),
-  _material_data(getParam<bool>("_is_neighbor_material") ? moose_system._neighbor_material_data[_tid] : moose_system._material_data[_tid]),
+  PDEBase(name, moose_system, parameters, *parameters.get<QuadraturePointData *>("_qp_data")),
+  _material_data(*getParam<MaterialData *>("_material_data")),
   _has_stateful_props(false),
   _props(_material_data._props),
   _props_old(_material_data._props_old),
   _props_older(_material_data._props_older)
 {
-  _props_elem       = new std::map<unsigned int, std::map<std::string, PropertyValue *> >;
-  _props_elem_old   = new std::map<unsigned int, std::map<std::string, PropertyValue *> >;
-  _props_elem_older = new std::map<unsigned int, std::map<std::string, PropertyValue *> >;
-
-  _props_face       = new std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >;
-  _props_face_old   = new std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >;
-  _props_face_older = new std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >;
-
+  _props_elem       = new std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >;
+  _props_elem_old   = new std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >;
+  _props_elem_older = new std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >;
 
   for (unsigned int i = 0; i < _coupled_to.size(); i++)
   {
@@ -105,36 +99,36 @@ Material::~Material()
       }
     }
   }
-/*
+
   {
-    std::map<unsigned int, std::vector<std::map<std::string, PropertyValue *> > >::iterator i;
+    std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >::iterator i;
     for (i = _props_elem->begin(); i != _props_elem->end(); ++i)
     {
-      std::vector<std::map<std::string, PropertyValue *> >::iterator j;
+      std::map<unsigned int, std::map<std::string, PropertyValue *> >::iterator j;
       for (j = i->second.begin(); j != i->second.end(); ++j)
       {
         std::map<std::string, PropertyValue *>::iterator k;
-        for (k = j->begin(); k != j->end(); ++k)
+        for (k = j->second.begin(); k != j->second.end(); ++k)
           delete k->second;
       }
     }
     for (i = _props_elem_old->begin(); i != _props_elem_old->end(); ++i)
     {
-      std::vector<std::map<std::string, PropertyValue *> >::iterator j;
+      std::map<unsigned int, std::map<std::string, PropertyValue *> >::iterator j;
       for (j = i->second.begin(); j != i->second.end(); ++j)
         {
           std::map<std::string, PropertyValue *>::iterator k;
-          for (k = j->begin(); k != j->end(); ++k)
+          for (k = j->second.begin(); k != j->second.end(); ++k)
             delete k->second;
         }
     }
     for (i = _props_elem_older->begin(); i != _props_elem_older->end(); ++i)
     {
-      std::vector<std::map<std::string, PropertyValue *> >::iterator j;
+      std::map<unsigned int, std::map<std::string, PropertyValue *> >::iterator j;
       for (j = i->second.begin(); j != i->second.end(); ++j)
         {
           std::map<std::string, PropertyValue *>::iterator k;
-          for (k = j->begin(); k != j->end(); ++k)
+          for (k = j->second.begin(); k != j->second.end(); ++k)
             delete k->second;
         }
     }
@@ -143,7 +137,6 @@ Material::~Material()
     delete _props_elem_old;
     delete _props_elem_older;
   }
-  */
 }
 /*
 unsigned int
@@ -180,14 +173,14 @@ Material::materialReinit()
     {
       std::string name = *it;
 
-      if ((*_props_elem)[current_elem][name] == NULL) (*_props_elem)[current_elem][name] = _props[name]->init();
-      if ((*_props_elem_old)[current_elem][name] == NULL) (*_props_elem_old)[current_elem][name] = _props[name]->init();
-      if ((*_props_elem_older)[current_elem][name] == NULL) (*_props_elem_older)[current_elem][name] = _props[name]->init();
+      if ((*_props_elem)[current_elem][0][name] == NULL) (*_props_elem)[current_elem][0][name] = _props[name]->init();
+      if ((*_props_elem_old)[current_elem][0][name] == NULL) (*_props_elem_old)[current_elem][0][name] = _props[name]->init();
+      if ((*_props_elem_older)[current_elem][0][name] == NULL) (*_props_elem_older)[current_elem][0][name] = _props[name]->init();
     }
 
-    shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem]);
-    shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem]);
-    shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem]);
+    shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem][0]);
+    shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem][0]);
+    shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][0]);
   }
 
   for (std::map<std::string, PropertyValue *>::iterator it = _props.begin(); it != _props.end(); ++it)
@@ -208,9 +201,9 @@ Material::materialReinit()
 
   if (_has_stateful_props)
   {
-    shallowCopyData(_stateful_props, (*_props_elem)[current_elem], _props);
-    shallowCopyData(_stateful_props, (*_props_elem_old)[current_elem], _props_old);
-    shallowCopyData(_stateful_props, (*_props_elem_older)[current_elem], _props_older);
+    shallowCopyData(_stateful_props, (*_props_elem)[current_elem][0], _props);
+    shallowCopyData(_stateful_props, (*_props_elem_old)[current_elem][0], _props_old);
+    shallowCopyData(_stateful_props, (*_props_elem_older)[current_elem][0], _props_older);
   }
 }
 
@@ -228,14 +221,14 @@ Material::materialReinit(unsigned int side)
     {
       std::string name = *it;
 
-      if ((*_props_face)[current_elem][side][name] == NULL) (*_props_face)[current_elem][side][name] = _props[name]->init();
-      if ((*_props_face_old)[current_elem][side][name] == NULL) (*_props_face_old)[current_elem][side][name] = _props[name]->init();
-      if ((*_props_face_older)[current_elem][side][name] == NULL) (*_props_face_older)[current_elem][side][name] = _props[name]->init();
+      if ((*_props_elem)[current_elem][side][name] == NULL) (*_props_elem)[current_elem][side][name] = _props[name]->init();
+      if ((*_props_elem_old)[current_elem][side][name] == NULL) (*_props_elem_old)[current_elem][side][name] = _props[name]->init();
+      if ((*_props_elem_older)[current_elem][side][name] == NULL) (*_props_elem_older)[current_elem][side][name] = _props[name]->init();
     }
 
-    shallowCopyData(_stateful_props, _props, (*_props_face)[current_elem][side]);
-    shallowCopyData(_stateful_props, _props_old, (*_props_face_old)[current_elem][side]);
-    shallowCopyData(_stateful_props, _props_older, (*_props_face_older)[current_elem][side]);
+    shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem][side]);
+    shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem][side]);
+    shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][side]);
   }
 
   for (std::map<std::string, PropertyValue *>::iterator it = _props.begin(); it != _props.end(); ++it)
@@ -256,9 +249,9 @@ Material::materialReinit(unsigned int side)
 
   if (_has_stateful_props)
   {
-    shallowCopyData(_stateful_props, (*_props_face)[current_elem][side], _props);
-    shallowCopyData(_stateful_props, (*_props_face_old)[current_elem][side], _props_old);
-    shallowCopyData(_stateful_props, (*_props_face_older)[current_elem][side], _props_older);
+    shallowCopyData(_stateful_props, (*_props_elem)[current_elem][side], _props);
+    shallowCopyData(_stateful_props, (*_props_elem_old)[current_elem][side], _props_old);
+    shallowCopyData(_stateful_props, (*_props_elem_older)[current_elem][side], _props_older);
   }
 }
 
