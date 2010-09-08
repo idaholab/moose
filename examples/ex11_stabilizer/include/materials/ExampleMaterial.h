@@ -31,7 +31,7 @@ public:
                   InputParameters parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
 private:
   Real _input_diffusivity;

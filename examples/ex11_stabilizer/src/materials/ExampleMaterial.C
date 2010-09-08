@@ -31,10 +31,7 @@ ExampleMaterial::ExampleMaterial(const std::string & name,
 {}
 
 void
-ExampleMaterial::computeProperties()
+ExampleMaterial::computeQpProperties()
 {
-  for(unsigned int qp=0; qp<_n_qpoints; qp++)
-  {
-    _diffusivity[qp] = _input_diffusivity;
-  }
+  _diffusivity[_qp] = _input_diffusivity;
 }

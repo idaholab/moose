@@ -275,8 +275,22 @@ Material::hasStatefulProperties()
   return _has_stateful_props;
 }
 
+void
+Material::computeProperties()
+{
+  for (_qp = 0; _qp < _n_qpoints; ++_qp)
+    computeQpProperties();
+}
+
+void
+Material::computeQpProperties()
+{
+
+}
+
+
 /**
- * Updates the old (first) material properties to the current/new material properies (second)
+ * Updates the old (first) material properties to the current/new material properties (second)
  */
 void
 Material::updateDataState()

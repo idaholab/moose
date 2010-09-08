@@ -162,7 +162,13 @@ protected:
    * All materials must override this virtual.
    * This is where they fill up the vectors with values.
    */
-  virtual void computeProperties() = 0;
+  virtual void computeProperties();
+
+  /**
+   * Compute material properties in quadrature point
+   * Materials has to redefine this.
+   */
+  virtual void computeQpProperties();
 
   /**
    * This function is called to create the data structure that will be associated
