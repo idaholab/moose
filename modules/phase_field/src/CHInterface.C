@@ -4,6 +4,8 @@ template<>
 InputParameters validParams<CHInterface>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addRequiredParam<std::string>("mob_name","The mobility used with the kernel");
+  params.addRequiredParam<std::string>("grad_mob_name","The gradient of the mobility used with the kernel");
   
   return params;
 }
@@ -11,8 +13,10 @@ InputParameters validParams<CHInterface>()
 CHInterface::CHInterface(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _kappa_c(getMaterialProperty<Real>("kappa_c")),
-   _M(getMaterialProperty<Real>("M")),
-   _grad_M(getMaterialProperty<RealGradient>("grad_M"))
+   _mob_name(getParam<std::string>("mob_name")),
+   _M(getMaterialProperty<Real>(_mob_name)),
+   _grad_mob_name(getParam<std::string>("grad_mob_name")),
+   _grad_M(getMaterialProperty<RealGradient>(_grad_mob_name))
 {
 }
 
