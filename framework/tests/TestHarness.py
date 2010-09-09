@@ -112,7 +112,7 @@ class TestHarness:
         testname = module_name + '.' + routine
         # See if this test function supports benchmarking or parallel requests
         if ((self.arg_string.find('dofs') >= 0 and not 'dofs' in supported_args) or (self.arg_string.find('np') >=0 and not 'np' in supported_args)):
-          self.processOutput(testname, 'skipped', '')
+          self.runTest(testname, address, True)
         else:
           self.runTest(testname, address)
                         
@@ -120,7 +120,7 @@ class TestHarness:
     sys.path.pop()
 
   # run a single test
-  def runTest(self, test, address):
+  def runTest(self, test, address, override=False):
     result = ''
     try:
       try:
@@ -131,12 +131,18 @@ class TestHarness:
         capture = StringIO.StringIO()
         sys.stdout = capture
 
-        eval('address(' + self.arg_string + ')')
+        args = ''
+        if override:
+          args = ''
+        else:
+          args = self.arg_string
+
+        eval('address(' + args + ')')
 
         test_end = timeit.default_timer()
         # confusing: if arg_string is populated it means we changed dofs/np so
         # we want to see the testing time, not just pass/fail
-        if (self.arg_string == ''):
+        if (args == ''):
           result = 'OK'
         else:
           result = str(round(test_end-test_start,3)) + 's'
