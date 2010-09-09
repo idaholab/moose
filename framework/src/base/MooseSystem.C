@@ -1136,8 +1136,6 @@ MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, c
   }
   ((QuadraturePointData *) _neighbor_face_data[tid])->reinit(soln, neighbor);
 
-   ((QuadraturePointData *) _neighbor_face_data[tid])->reinit(soln, neighbor);
- 
    // passing side here is WRONG, needs to be fixed somehow, should be the side from the other element, but that
    // is not going to work for adaptivity.
    _neighbor_face_data[tid]->reinitMaterials(_materials[tid].getNeighborMaterials(neighbor->subdomain_id()), side);

@@ -34,8 +34,11 @@
 #include "DiffMKernel.h"
 #include "MatDiffusion.h"
 
+#include "DGMatDiffusion.h"
+
 // boundary conditions
 #include "MTBC.h"
+#include "DGMDDBC.h"
 
 // materials
 #include "Diff1Material.h"
@@ -76,10 +79,13 @@ namespace MooseTest
     registerBC(MMSCoupledDirichletBC);
     registerBC(PolyCoupledDirichletBC);
     registerBC(MTBC);
+    registerBC(DGMDDBC);
     //Registering our Aux Kernel
     registerAux(MMSConstantAux);
 
     registerAux(PolyConstantAux);
+
+    registerDGKernel(DGMatDiffusion);
   }
 }
 

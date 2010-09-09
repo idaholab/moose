@@ -19,10 +19,10 @@
     order = SECOND 
     family = MONOMIAL
 
-	[./InitialCondition]
+    [./InitialCondition]
       type = ConstantIC
       value = 1 
-	[../]
+    [../]
   [../]
 []
 
@@ -101,8 +101,8 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-	epsilon = 1
-	sigma = 6
+	  epsilon = 1
+  	sigma = 6
   [../]
 []
 

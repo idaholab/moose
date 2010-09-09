@@ -12,34 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MTMATERIAL_H
-#define MTMATERIAL_H
+#ifndef DGMATDIFFUSION_H
+#define DGMATDIFFUSION_H
 
-#include "Material.h"
-
+#include "DGKernel.h"
 
 //Forward Declarations
-class MTMaterial;
+class DGMatDiffusion;
 
 template<>
-InputParameters validParams<MTMaterial>();
+InputParameters validParams<DGMatDiffusion>();
 
 /**
- * Simple material with constant properties.
+ * DG kernel for diffusion with material property
+ *
+ * General DG kernel that this class can handle is:
+ * { \grad u * n_e} [v] + epsilon { \grad v * n_e } [u] + (sigma / |e| * [u][v])
+ *
+ *  [a] = [ a_1 - a_2 ]
+ *  {a} = 0.5 * (a_1 + a_2)
+ *
  */
-class MTMaterial : public Material
+class DGMatDiffusion : public DGKernel
 {
 public:
-  MTMaterial(const std::string & name,
-             MooseSystem & moose_system,
-             InputParameters parameters);
+  DGMatDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
-  virtual void computeProperties();
-  
-private:
-  MaterialProperty<Real> & _mat_prop;
-  Real _value;
-};
+  virtual Real computeQpResidual(DGResidualType type);
+  virtual Real computeQpJacobian(DGJacobianType type);
 
-#endif //DIFF1MATERIAL_H
+  Real _epsilon;
+  Real _sigma;
+
+  std::string _prop_name;                       // name of the material property
+  MaterialProperty<Real> & _diff;               // diffusivity
+  MaterialProperty<Real> & _diff_neighbor;      // diffusivity
+};
+ 
+#endif

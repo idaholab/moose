@@ -18,12 +18,14 @@ template<>
 InputParameters validParams<MTMaterial>()
 {
   InputParameters params = validParams<Material>();
+  params.addParam<Real>("value", 1.0, "lift");
   return params;
 }
 
 MTMaterial::MTMaterial(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   : Material(name, moose_system, parameters),
-    _mat_prop(declareProperty<Real>("matp"))
+    _mat_prop(declareProperty<Real>("matp")),
+    _value(getParam<Real>("value"))
 {
 }
 
@@ -31,5 +33,5 @@ void
 MTMaterial::computeProperties()
 {
   for (unsigned int qp = 0; qp < _n_qpoints; qp++)
-    _mat_prop[qp] = _q_point[qp](0) + 1;              // x + 1
+    _mat_prop[qp] = _q_point[qp](0) + _value;              // x + value
 }

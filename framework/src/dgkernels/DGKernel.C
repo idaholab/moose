@@ -49,7 +49,7 @@ DGKernel::DGKernel(const std::string & name, MooseSystem & moose_system, InputPa
   _neighbor_face_data(*moose_system._neighbor_face_data[_tid]),
   _boundary_id(parameters.get<unsigned int>("_boundary_id")),
   _side_elem(NULL),
-  _neighbor_elem(NULL),
+  _neighbor_elem(_neighbor_dof_data._current_elem),
   _current_side(_face_data._current_side),
   _current_side_elem(_face_data._current_side_elem),
   _u(_face_data._var_vals[_var_num]),

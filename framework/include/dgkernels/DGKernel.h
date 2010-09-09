@@ -121,7 +121,7 @@ protected:
   /**
    * The neighboring element
    */
-  Elem * _neighbor_elem;
+  const Elem * & _neighbor_elem;
 
   /**
    * Current side.
