@@ -94,7 +94,7 @@ public:
    * @param displacements The names of the variables to be used as the displacements in x y z directions.
    */
   Mesh * initDisplacedMesh(std::vector<std::string> displacements);
-
+  
   /**
    * Returns a writable reference to the mesh held wihin this MooseSystem
    */
@@ -340,6 +340,11 @@ public:
    * Should be called after the mesh has been modified in any way.
    */
   void meshChanged();
+
+  /**
+   * Tell MooseSystem to retrieve the dimension from the mesh
+   */
+  void updateDimension();
 
   virtual void solve();
 

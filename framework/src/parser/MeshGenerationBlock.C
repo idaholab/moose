@@ -28,6 +28,7 @@ template<>
 InputParameters validParams<MeshGenerationBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
+  params.addParam<int>("dim", "The dimension of the mesh to be generated - Required to appear in this block or parent");
   params.addParam<int>("nx", 1, "Number of elements in the X direction");
   params.addParam<int>("ny", 1, "Number of elements in the Y direction");
   params.addParam<int>("nz", 1, "Number of elements in the Z direction");
@@ -57,7 +58,15 @@ MeshGenerationBlock::execute()
 #endif
 
   ElemType elem_type = Utility::string_to_enum<ElemType>(getParamValue<std::string>("elem_type"));
-  int mesh_dim = _parent->getParamValue<int>("dim");
+  int mesh_dim = -1;
+
+  if (isParamValid("dim"))
+    mesh_dim = getParamValue<int>("dim");
+  else if (_parent->isParamValid("dim"))
+    mesh_dim = _parent->getParamValue<int>("dim");
+  else
+    mooseError("You must provide ""dim"" in the Mesh or Mesh/Generation block");
+  
   Mesh *mesh = _moose_system.getMesh(true);
   
   switch (mesh_dim)

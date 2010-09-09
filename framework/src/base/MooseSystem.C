@@ -1342,6 +1342,13 @@ MooseSystem::meshChanged()
   _mesh_changed = true;
 }
 
+void
+MooseSystem::updateDimension()
+{
+  _dim = _mesh->mesh_dimension();
+}
+
+
 ConstElemRange *
 MooseSystem::getActiveLocalElementRange()
 {

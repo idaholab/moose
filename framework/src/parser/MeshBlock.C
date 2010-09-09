@@ -32,8 +32,7 @@ template<>
 InputParameters validParams<MeshBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
-  params.addRequiredParam<int>("dim", "The dimension of the mesh file to read or generate");
-  
+  params.addParam<int>("dim", "DEPRECATED - Mesh dim can be determined from the file read.");
   params.addParam<std::string>("file", "(no file supplied)", "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
   params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when spliting the mesh for a parallel computation");
@@ -54,7 +53,8 @@ MeshBlock::execute()
   std::cerr << "Inside the MeshBlock Object\n";
 #endif
 
-  Mesh *mesh = _moose_system.initMesh(getParamValue<int>("dim"));
+  int mesh_dim = isParamValid("dim") ? getParamValue<int>("dim") : 1;
+  Mesh *mesh = _moose_system.initMesh(mesh_dim);
 
   /**
    * We will use the mesh object to read the file to cut down on
@@ -69,6 +69,9 @@ MeshBlock::execute()
   else
     mesh->read(getParamValue<std::string>("file"));
 
+  // Tell MooseSystem that the dimension of the mesh has changed
+  _moose_system.updateDimension();
+  
   if (getParamValue<bool>("second_order"))
     mesh->all_second_order(true);
 

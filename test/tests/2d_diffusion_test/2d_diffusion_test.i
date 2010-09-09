@@ -1,5 +1,5 @@
 [Mesh]
-  dim = 2
+  # dim = 2  -> DEPRECATED 
   file = square.e
 []
 
