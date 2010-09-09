@@ -161,7 +161,7 @@ doc:
 
 clean::
 	@rm -f $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
-	@find . -name "*~" -or -name "*.o" -or -name "*.d" | xargs rm
+	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" | xargs rm
 
 syntax:
 	python scripts/generate_input_syntax.py
