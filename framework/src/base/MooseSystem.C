@@ -871,7 +871,7 @@ MooseSystem::addMaterial(std::string mat_name,
     parameters.set<std::string>("variable") = _es->get_system(0).variable_name(0);
 
     for (unsigned int i=0; i<blocks.size(); ++i) {
-      parameters.set<int>("_bid") = blocks[i];
+      parameters.set<unsigned int>("block_id") = blocks[i];
 
       parameters.set<QuadraturePointData *>("_qp_data") = _element_data[tid];
       parameters.set<MaterialData *>("_material_data") = &_material_data[tid];

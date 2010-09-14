@@ -35,6 +35,7 @@ InputParameters validParams<Material>()
 Material::Material(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters, *parameters.get<QuadraturePointData *>("_qp_data")),
   _material_data(*getParam<MaterialData *>("_material_data")),
+  _block_id(getParam<unsigned int>("block_id")),
   _has_stateful_props(false),
   _props(_material_data._props),
   _props_old(_material_data._props_old),
@@ -138,13 +139,13 @@ Material::~Material()
     delete _props_elem_older;
   }
 }
-/*
+
 unsigned int
 Material::blockID()
 {
   return _block_id;
 }
-*/
+
 
 void shallowCopyData(const std::set<std::string> & names,
                      std::map<std::string, PropertyValue *> & data,
