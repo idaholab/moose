@@ -45,8 +45,13 @@ public:
     return Postprocessor::getParam<T>(name);
   }
 
+  unsigned int blockID() { return _block_id; }
   
 private:
+  /**
+   * The block ID this postprocessor works on
+   */
+  unsigned int _block_id;
   /**
    * Override the pure virtual... this function should NOT be overridden by other ElementPostprocessors
    */

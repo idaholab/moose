@@ -24,9 +24,15 @@ PostprocessorWarehouse::PostprocessorWarehouse()
 
 PostprocessorWarehouse::~PostprocessorWarehouse()
 {
-  PostprocessorIterator j;
-  for (j=_element_postprocessors.begin(); j!=_element_postprocessors.end(); ++j)
-    delete *j;
+  {
+    std::map<unsigned int, std::vector<Postprocessor *> >::iterator j;
+    for (j=_element_postprocessors.begin(); j!=_element_postprocessors.end(); ++j)
+    {
+      PostprocessorIterator k;
+      for (k=j->second.begin(); k!=j->second.end(); ++k)
+        delete *k;
+    }
+  }
 
   // delete side postprocessors
   {
@@ -48,7 +54,11 @@ void
 PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 {
   if(dynamic_cast<ElementPostprocessor*>(postprocessor))
-    _element_postprocessors.push_back(postprocessor);
+  {
+    unsigned int block_id = dynamic_cast<ElementPostprocessor*>(postprocessor)->blockID();
+    _element_postprocessors[block_id].push_back(postprocessor);
+    _block_ids_with_postprocessors.insert(block_id);
+  }
   else if(dynamic_cast<SidePostprocessor*>(postprocessor))
   {
     unsigned int boundary_id = dynamic_cast<SidePostprocessor*>(postprocessor)->boundaryID();
@@ -63,15 +73,15 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 }
 
 PostprocessorIterator
-PostprocessorWarehouse::elementPostprocessorsBegin()
+PostprocessorWarehouse::elementPostprocessorsBegin(unsigned int block_id)
 {
-  return _element_postprocessors.begin();
+  return _element_postprocessors[block_id].begin();
 }
 
 PostprocessorIterator
-PostprocessorWarehouse::elementPostprocessorsEnd()
+PostprocessorWarehouse::elementPostprocessorsEnd(unsigned int block_id)
 {
-  return _element_postprocessors.end();
+  return _element_postprocessors[block_id].end();
 }
 
 PostprocessorIterator
