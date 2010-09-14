@@ -32,7 +32,7 @@ protected:
    * Will always be passed to full symmetric strain tensor.
    * What should come out is a modified strain tensor.
    */
-  virtual void computeStrain(ColumnMajorMatrix & strain);
+  virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);
 
   /**
    * The current quadrature point.

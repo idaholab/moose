@@ -37,17 +37,19 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(const std::string & name,
 void
 LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVectorValue & y, const RealVectorValue & z, RealTensorValue & stress)
 {
-  ColumnMajorMatrix strain(x,y,z);
+  ColumnMajorMatrix total_strain(x,y,z);
 
   // 1/2 * (strain + strain^T)
-  strain += strain.transpose();
-  strain *= 0.5;
-
-  // Save that off as the elastic strain
-  _elastic_strain[_qp] = strain;
+  total_strain += total_strain.transpose();
+  total_strain *= 0.5;
 
   // Add in any extra strain components
-  computeStrain(strain);
+  ColumnMajorMatrix elastic_strain;
+
+  computeStrain(total_strain, elastic_strain);
+
+  // Save that off as the elastic strain
+  _elastic_strain[_qp] = elastic_strain;
 
   // Add in Isotropic Thermal Strain
   if(_has_temp)
@@ -58,14 +60,14 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
     
     thermal_strain.setDiag(isotropic_strain);
     
-    strain -= thermal_strain;
+    elastic_strain -= thermal_strain;
   }
 
   // Create column vector
-  strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
+  elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 
   // C * e
-  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * strain;
+  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * elastic_strain;
 
   // Change 9x1 to a 3x3
   stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
@@ -75,8 +77,10 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
 }
 
 void
-LinearIsotropicMaterial::computeStrain(ColumnMajorMatrix & strain)
-{}
+LinearIsotropicMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
+{
+  elastic_strain = total_strain;
+}
 
 void
 LinearIsotropicMaterial::computeProperties()
