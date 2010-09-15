@@ -3,7 +3,7 @@
 import os, re
 from subprocess import Popen
 
-moose_examples_dir = os.environ['HOME'] + "/projects/gnu/trunk/moose_examples"
+moose_examples_dir = "../../../moose_examples"
 
 preamble_file = 'preamble.tex'
 line_template = '\\lstinputlisting[style=<STYLE>, caption=<CAPTION>]{<PATH>}\n\clearpage\n\n'
