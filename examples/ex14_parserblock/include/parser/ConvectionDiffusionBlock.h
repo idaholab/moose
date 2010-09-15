@@ -29,9 +29,6 @@ public:
   ConvectionDiffusionBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
-
-private:
-  std::vector<std::string> _boundary_list;
 };
 
 #endif //CONVECTIONDIFFUSIONBLOCK_H

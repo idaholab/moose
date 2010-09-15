@@ -21,7 +21,7 @@ InputParameters validParams<ConvectionDiffusionBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
   
-  params.addParam<std::vector<std::string> >("variables", "The diffusion-convection and diffusion variables respectively");
+  params.addRequiredParam<std::vector<std::string> >("variables", "The diffusion-convection and diffusion variables respectively");
   return params;
 }
 

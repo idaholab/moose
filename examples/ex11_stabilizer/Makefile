@@ -32,4 +32,4 @@ include ../test.mk
 # Additional special case targets should be added here
 
 test:
-	$(call TEST_exodiff,example_material.i,out.e)
+	$(call TEST_exodiff,example_stabilizer.i,out.e)

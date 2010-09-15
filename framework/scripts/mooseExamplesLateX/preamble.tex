@@ -1,0 +1,50 @@
+\documentclass{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{courier}
+\definecolor{darkgreen}{rgb}{0,0.4,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstdefinestyle{C++}
+{  language=C++,
+   tabsize=3,
+   frame=lines,
+   keywordstyle=\color{blue},
+   commentstyle=\color{darkgreen},
+   stringstyle=\color{red},
+   breaklines=true,
+   showstringspaces=false,
+   basicstyle=\footnotesize\ttfamily,
+   emph={label}
+} 
+
+\lstdefinelanguage{ini}
+{
+   morekeywords= {active, type},
+   morecomment=[s][\color{blue}]{[}{]},
+   morecomment=[s][\color{black}]{[.}{]},
+   morecomment=[l]{\#},
+   morestring=[b]',
+}
+
+\lstdefinestyle{ini}
+{  
+   language=ini,
+   tabsize=3,
+   frame=lines,
+   keywordstyle=\color{black}\bfseries,
+   commentstyle=\color{darkgreen},
+   stringstyle=\color{red},
+   showstringspaces=false,
+   basicstyle=\footnotesize\ttfamily,   
+}
+
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+
+\begin{document}
+

@@ -1,0 +1,6 @@
+transient.i
+include/kernels/ExampleDiffusion.h
+src/kernels/ExampleDiffusion.C
+include/kernels/ExampleImplicitEuler.h
+src/kernels/ExampleImplicitEuler.C
+src/main.C
