@@ -88,6 +88,7 @@ public:
       const Elem* elem = *el;
 
       _moose_system.reinitKernels(tid, _soln, elem, NULL);
+      _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(elem->subdomain_id()));
 
       unsigned int cur_subdomain = elem->subdomain_id();
 
@@ -146,6 +147,7 @@ namespace Moose
     MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
     moose_system->compute_postprocessors(soln);
+    moose_system->output_postprocessors();
   }
 }
 
@@ -240,6 +242,11 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
     _postprocessor_data[0].addData(name, value, time);
   }
 
+  Moose::perf_log.pop("compute_postprocessors()","Solve");
+}
+
+void MooseSystem::output_postprocessors()
+{
   // Postprocesser Output
   if (!_postprocessor_data[0].empty())
   {
@@ -255,7 +262,4 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
       _postprocessor_data[0].print_csv(_file_base + ".csv");
     }
   }
-  
-  Moose::perf_log.pop("compute_postprocessors()","Solve");
 }
-

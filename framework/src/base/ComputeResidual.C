@@ -88,6 +88,8 @@ public:
         block_kernel_end = _moose_system._kernels[tid].blockKernelsEnd(subdomain);
       }
 
+      _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(cur_subdomain));
+
       //Stabilizers
       for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
         stabilizer_it->second->computeTestFunctions();
@@ -182,6 +184,8 @@ namespace Moose
   {
     MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
+    if (moose_system->needPostprocessorsForResiduals())
+      moose_system->compute_postprocessors(*(moose_system->getNonlinearSystem()->current_local_solution));
     moose_system->compute_residual(soln, residual);
   }
 }

@@ -87,6 +87,8 @@ public:
         block_kernel_end = _moose_system._kernels[tid].blockKernelsEnd(subdomain);
       } 
 
+      _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(cur_subdomain));
+
       //Stabilizers
       for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
         stabilizer_it->second->computeTestFunctions();
@@ -327,6 +329,8 @@ public:
         block_kernel_end = _moose_system._kernels[tid].blockKernelsEnd(subdomain);
       } 
 
+      _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(cur_subdomain));
+
       //Stabilizers
       for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
         stabilizer_it->second->computeTestFunctions();
@@ -477,6 +481,8 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
         block_kernel_begin = _kernels[tid].blockKernelsBegin(subdomain);
         block_kernel_end = _kernels[tid].blockKernelsEnd(subdomain);
       } 
+
+      _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(cur_subdomain));
 
       //Stabilizers
       for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)

@@ -279,6 +279,12 @@ public:
 
   void compute_postprocessors (const NumericVector<Number>& soln);
 
+  void output_postprocessors();
+
+  bool needPostprocessorsForResiduals() { return _compute_pps_each_residual_evaluation; }
+
+  void needPostprocessorsForResiduals(bool state) { _compute_pps_each_residual_evaluation = state; }
+
   Real compute_damping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   void subdomainSetup(THREAD_ID tid, unsigned int block_id);
@@ -459,6 +465,11 @@ private:
 
   NumericVector<Number> * _newton_soln;       /// solution vector for the current newton step
   NumericVector<Number> * _old_newton_soln;   /// solution vector for the previous newton step
+
+  /**
+   * TRUE if we need to compute postprocessors before every residual evaluation, otherwise FALSE
+   */
+  bool _compute_pps_each_residual_evaluation;
 
   /**
    * Whether or not the mesh has changed recently.  Useful for doing separate output.

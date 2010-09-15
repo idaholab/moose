@@ -125,6 +125,7 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
       const Elem* elem = *el;
 
       reinitKernels(0, soln, elem, NULL);
+      _element_data[0]->reinitMaterials(_materials[0].getMaterials(elem->subdomain_id()));
 
       reinitAuxKernels(0, soln, *elem);
 

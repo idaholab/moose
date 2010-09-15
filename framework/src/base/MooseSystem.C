@@ -71,6 +71,7 @@ MooseSystem::MooseSystem() :
   _need_old_newton(false),
   _newton_soln(NULL),
   _old_newton_soln(NULL),
+  _compute_pps_each_residual_evaluation(false),
   _mesh_changed(false),
   _no_fe_reinit(false),
   _preconditioner(NULL),
@@ -132,6 +133,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _need_old_newton(false),
   _newton_soln(NULL),
   _old_newton_soln(NULL),
+  _compute_pps_each_residual_evaluation(false),
   _mesh_changed(false),
   _no_fe_reinit(false),
   _preconditioner(NULL),
@@ -649,6 +651,7 @@ MooseSystem::solve()
     updateDisplacedMesh(*_system->solution);
 
   compute_postprocessors(*(_system->current_local_solution));
+  output_postprocessors();
 }
 
 unsigned int
@@ -1057,7 +1060,6 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   _element_data[tid]->reinitKernels(soln, elem, Re, Ke);
   if (_need_old_newton)
     _element_data[tid]->reinitNewtonStep(*_old_newton_soln);
-  _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(elem->subdomain_id()));
 }
 
 void
