@@ -76,9 +76,6 @@ Parser::~Parser()
 {
   if (_input_tree != NULL)
     delete _input_tree;
-
-  if (_executioner != NULL)
-    delete _executioner;
 }
 
 void
@@ -425,14 +422,6 @@ MooseSystem &
 Parser::getMooseSystem()
 {
   return _moose_system;
-}
-
-Executioner &
-Parser::getExecutioner()
-{
-  if (_executioner == NULL)
-    mooseError("Executioner not available.");
-  return *_executioner;
 }
 
 const GetPot *

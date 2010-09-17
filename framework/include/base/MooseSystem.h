@@ -50,6 +50,7 @@
 //Forward Declarations
 class Material;
 class InitialConditionWarehouse;
+class Executioner;
 
 namespace libMesh
 {
@@ -137,6 +138,13 @@ public:
    * Returns a writable reference to the displaced EquationSystems object held within this MooseSystem
    */
   EquationSystems * getDisplacedEquationSystems();
+
+  void initExecutioner(Executioner * e);
+  
+  /**
+   * Get the Executioner.
+   */
+  Executioner & getExecutioner();
 
   /**
    * Returns a reference to the main nonlinear system in this instance of MooseSystem
@@ -427,6 +435,7 @@ private:
 
   DofMap * _aux_dof_map;
 
+  Executioner *_executioner;
   EquationSystems * _es;
   TransientNonlinearImplicitSystem * _system;
   TransientExplicitSystem * _aux_system;

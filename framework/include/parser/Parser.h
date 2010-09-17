@@ -117,11 +117,6 @@ public:
   const GetPot * getPotHandle() const;
 
   /**
-   * Get the Executioner.
-   */
-  Executioner & getExecutioner();
-
-  /**
    * This function attempts to extract values from the input file based on the contents of
    * the passed parameters objects.  It handles a number of various types with dynamic casting
    * including vector types
@@ -134,11 +129,6 @@ private:
    * The MooseSystem this parser is associated with.
    */
   MooseSystem & _moose_system;
-
-  /**
-   * Executioner object that will be used
-   */
-  Executioner *_executioner;
   
   /**
    * This function inserts blocks into the tree which are optional in the input file but are

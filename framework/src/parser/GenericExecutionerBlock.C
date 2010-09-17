@@ -63,8 +63,8 @@ GenericExecutionerBlock::execute()
   InputParameters classParams = getClassParams();
   classParams.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'
 
-  _parser_handle._executioner = ExecutionerFactory::instance()->build(_type, "Executioner", _parser_handle.getMooseSystem(), classParams);
-
+  _moose_system.initExecutioner(ExecutionerFactory::instance()->build(_type, "Executioner", _moose_system, classParams));
+  
   EquationSystems *es = _moose_system.getEquationSystems();
   es->parameters.set<Real> ("linear solver tolerance")
     = getParamValue<Real>("l_tol");

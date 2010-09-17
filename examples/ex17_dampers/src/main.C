@@ -36,7 +36,7 @@ int main (int argc, char** argv)
   p.parse(input_filename);
   p.execute();
 
-  Executioner &e = p.getExecutioner();
+  Executioner &e = moose_system.getExecutioner();
   e.setup();
   e.execute();
 }

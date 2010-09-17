@@ -29,6 +29,7 @@
 #include "ComputeJacobian.h"
 #include "ComputeInitialConditions.h"
 #include "DamperFactory.h"
+#include "Executioner.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -211,6 +212,9 @@ MooseSystem::~MooseSystem()
   delete _mesh_refinement;
   delete _error_estimator;
   delete _error;
+
+  if (_executioner != NULL)
+    delete _executioner;
 }
 
 Mesh *
@@ -407,6 +411,23 @@ MooseSystem::getDisplacedEquationSystems()
 {
 //  checkValid();
   return _displaced_es;
+}
+
+void
+MooseSystem::initExecutioner(Executioner * e)
+{
+  if (_executioner != NULL)
+    mooseError("Executioner already initialized for this MooseSystem");
+
+  _executioner = e;
+}
+
+Executioner &
+MooseSystem::getExecutioner()
+{
+  if (_executioner == NULL)
+    mooseError("Executioner not available.");
+  return *_executioner;
 }
 
 TransientNonlinearImplicitSystem *
