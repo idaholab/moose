@@ -2,6 +2,7 @@
 
 import sys, os, shutil
 from socket import gethostname
+from datetime import datetime
 
 # if it doesn't import this is probably icestorm and we won't use it anyway
 try:
@@ -28,8 +29,9 @@ class HTMLGen:
 
   # generates the html and json data for this app
   def generateHTML(self):
-    self.ex('select distinct test_name, dofs from timing where app_name = ?', (self.app_name,))
+    self.ex('select distinct test_name from timing where app_name = ?', (self.app_name,))
     tests = self.cr.fetchall()
+    tests = [test[0] for test in tests]
 
     # generate the app.html file containing the checkboxes
     self.generateAppHTML(tests)
@@ -39,19 +41,23 @@ class HTMLGen:
     # revision, and other info listed by revision
     base = os.path.join(self.base_dir, self.app_name)
     for test in tests:
-      dofs = test[1]
-      test = test[0]
       json = JSON_TEMPLATE.replace('$LABEL$', self.app_name + '.' + test)
 
       # fill out revision vs timing
-      self.ex('select revision, seconds from timing where app_name = ? and test_name = ? order by revision',
+      self.ex('select revision, seconds, dofs, date from timing where app_name = ? and test_name = ? order by revision',
                    (self.app_name,test))
       results = self.cr.fetchall()
       data = ['[' + str(r[0]) + ', ' + str(r[1]) + ']' for r in results]
       data = '[ ' + ', '.join(data) + ' ]'
       json = json.replace('$REV_DATA$', data)
 
+      data = [ ( self.app_name, test, str(r[0]), str(r[1]), str(datetime.fromtimestamp(r[3])), str(r[2]) ) for r in results ]
+      data = [ '["' + '","'.join(d) + '"]' for d in data ]
+      data = '[ ' + ', '.join(data) + ' ]'
+      json = json.replace( '$INFO$', data )
+
       # fill out data vs timing
+      # use another select statement because revisions and real dates may not exactly align
       self.ex('select date, seconds from timing where app_name = ? and test_name = ? order by date',
                    (self.app_name,test))
       results = self.cr.fetchall()
@@ -66,7 +72,7 @@ class HTMLGen:
 
   # generates the app.html file that contains the list of checkboxes
   def generateAppHTML(self, tests):
-    tests = [CHECKBOX_TEMPLATE.replace('$TEST$', test[0]) for test in tests]
+    tests = [CHECKBOX_TEMPLATE.replace('$TEST$', test) for test in tests]
     html = '\n'.join(tests) + CHECKBOX_END
 
     base = os.path.join(self.base_dir, self.app_name)
@@ -88,7 +94,7 @@ JSON_TEMPLATE = """{
     label: "$LABEL$",
     data: $TIME_DATA$
   },
-  info: "$INFO$"
+  info: $INFO$
 }"""
 CHECKBOX_TEMPLATE = '<div class="test"><input class="check" type="checkbox" id="$TEST$"></input><label for="$TEST$">$TEST$</label></div>'
 CHECKBOX_END = '\n<br clear="all"/>'
@@ -114,16 +120,6 @@ def dumpDB(fname):
     print row
 
 
-CREATE_TABLE = """create table timing
-(
-  app_name text,
-  test_name text,
-  revision int,
-  date int,
-  seconds real,
-  dofs int
-);"""
-
 if __name__ == '__main__':
   home = os.environ['HOME']
   fname = os.path.join(home, 'timingDB/timing.sqlite')
@@ -143,7 +139,7 @@ if __name__ == '__main__':
     argv.remove('-d')
 
   if len(argv) > 0:
-    if gethostname() != 'helios' and gethostname() != 'ubuntu': #PJJ TODO ubuntu just for testing my desktop
+    if gethostname() != 'helios' and gethostname() != 'Philip-Jagielskis-MacBook-Pro.local': #PJJ TODO just for testing
       print "Don't generate json data because this isn't helios"
       sys.exit(0)
 
@@ -154,6 +150,16 @@ if __name__ == '__main__':
       gen.generateHTML()
 
 
+CREATE_TABLE = """create table timing
+(
+  app_name text,
+  test_name text,
+  revision int,
+  date int,
+  seconds real,
+  dofs int
+);"""
+
 HELP_STRING = """Usage:
 -h   print this help message
 -c   create database with table timing in ~/timingDB/timing.sqlite
@@ -161,5 +167,6 @@ HELP_STRING = """Usage:
 -d   dump the contents of table timing
 
 [list of applications]  using the data in the database, generate
-     json data for every application in the list
+     json data for every application in the list. Assume db at
+     ~/timingDB/timing.sqlite
 """

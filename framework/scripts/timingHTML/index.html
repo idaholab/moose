@@ -48,31 +48,38 @@
     <br clear="all"/><br/>
     <button id="zoom"  type="button">Zoom Out</button>
     <button id="clear" type="button">Clear Plots</button>
-    <button id="tooltip" type="button">Enable Tooltip</button>
-    Plot by: <select id="plotby"><option value="rev">Revision</option><option value="time">Time</option></select>
+    <!-- TODO: maybe? <button id="tooltip" type="button">Enable Tooltip</button>
+         TODO: later? Plot by: <select id="plotby"><option value="rev">Revision</option><option value="time">Time</option></select> -->
 
     <br clear="all"/><br/>
     <div id="data">
       <table border="0">
-      <tr title="Application this test resides in"><td><b>App:</b></td><td id="tb_app">moose_test</td></tr>
-      <tr title="Tests .py file and function name"><td><b>Test:</b></td><td id="tb_test">2d_diffustion_test</td></tr>
-      <tr title="Revision that was checked out to run the test"><td><b>Revision:</b></td><td id="tb_rev">2120</td></tr>
-      <tr title="Time it took the test to execute"><td><b>Time:</b></td><td id="tb_timing">16.4 secs</td></tr>
-      <tr title="Approx. time the test was run"><td><b>Date:</b></td><td id="tb_date">08/06/2010</td></tr>
-      <tr title="Dofs passed to run_tests script with --dofs"><td><b>Dofs:</b></td><td id="tb_dofs">5000</td></tr>
-      <tr title="Load average of the server when the test was run"><td><b>Load Average:</b></td><td id="tb_load">4.3</td></tr>
+      <tr title="Application this test resides in"><td><b>App:</b></td><td id="tb_app"></td></tr>
+      <tr title="Tests .py file and function name"><td><b>Test:</b></td><td id="tb_test"></td></tr>
+      <tr title="Revision that was checked out to run the test"><td><b>Revision:</b></td><td id="tb_rev"></td></tr>
+      <tr title="Time it took the test to execute"><td><b>Time:</b></td><td id="tb_timing"></td></tr>
+      <tr title="Approx. time the test was run"><td><b>Date:</b></td><td id="tb_date"></td></tr>
+      <tr title="Dofs passed to run_tests script with --dofs"><td><b>Dofs:</b></td><td id="tb_dofs"></td></tr>
+      <!-- TODO: maybe?? <tr title="Load average of the server when the test was run"><td><b>Load Average:</b></td><td id="tb_load"></td></tr>-->
       </table>
     </div>
 
 <script id="source">
 var TAB_NAMES = ["moose_test", "bison", "bighorn", "marmot", "rat", "falcon", "emu", "jackalope", "elk"];
 
+//holds the data currently to be plotted indexed by url (same info as global_data)
 var global_plots = {};
 
+//all the loaded data indexed by url, this is all data, not just the plotting data
 var loaded_plots = {};
 
+//the data set currently being plotted (list of [x,y] positions and labels)
 var global_data = [];
 
+//what is currently being plotted, byrev or bytime
+var global_plotby = "byrev";
+
+//the plot and miniature plot used for zooming
 var plot;
 var minplot;
 
@@ -87,7 +94,7 @@ var main_options = {
              tickFormatter: function(val, axis) { return val.toFixed(axis.tickDecimals) + "s"; }
            },
     xaxis: { minTickSize: 1, tickDecimals: 0 },
-    grid: { color: "#999" },
+    grid: { clickable: true, color: "#999" },
     selection: { mode: "xy" }
 };
 
@@ -124,7 +131,7 @@ function onDataReceived(series) {
   pt = label.indexOf(".");
   url = label.substring(0,pt) + "/" + label.substring(pt+1) + ".json";
   //alert("Received: " + url);
-  loaded_plots[url] = series["byrev"];
+  loaded_plots[url] = series;
   global_plots[url] = series["byrev"];
   redrawPlotData();
 }
@@ -156,7 +163,7 @@ function checkboxClickCallback(event) {
   {
     if (url in loaded_plots)
     {
-      global_plots[url] = loaded_plots[url];
+      global_plots[url] = loaded_plots[url][global_plotby];
       redrawPlotData();
     }
     else
@@ -245,6 +252,39 @@ $(function () {
   //bind a function to the "Enable Tooltip" button
   $("#tooltip").click(function(event) {
     alert("TBD");
+  });
+
+  //bind a function that shows the tooltip as you hover over points
+  $("#mainplot").bind("plothover", function(event, pos, item) {
+    if (item) {
+      //TODO: not sure if a tooltip would be useful or annoying
+      //if so, set hoverable to true in options
+    }
+  });
+
+  //bind a function to show data when you click on the plot
+  $("#mainplot").bind("plotclick", function(event, pos, item) {
+    if (item) {
+      //get which series and which data point were clicked on
+      series = item.seriesIndex;
+      index = item.dataIndex;
+
+      //get the info data from loaded_plots, indexed by url
+      label = global_data[series]["label"];
+      //alert("series: " + series + "  index: " + index + "  label: " + label );
+      pt = label.indexOf(".");
+      url = label.substring(0,pt) + "/" + label.substring(pt+1) + ".json";
+      data = loaded_plots[url]["info"][index];
+
+      //put that data into the html for the user to see
+      $("#tb_app").html(data[0]);
+      $("#tb_test").html(data[1]);
+      $("#tb_rev").html("<a href='https://hpcsc/data/trac/FPCP/changeset/" + data[2] + "'>" + data[2] + "</a>");
+      $("#tb_timing").html(data[3]);
+      $("#tb_date").html(data[4]);
+      $("#tb_dofs").html(data[5]);
+      //$("#tb_load").html("Not Supported Yet");
+    }
   });
 
   //bind a function to the "Plot By" select box
