@@ -349,7 +349,14 @@ Parser::buildFullTree( const std::string format )
        i != ExecutionerFactory::instance()->registeredExecutionersEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add("Executioner", _moose_system, params));
+    ParserBlock * exec = ParserBlockFactory::instance()->add("Executioner", _moose_system, params);
+    curr_block->_children.push_back(exec);
+
+    // Add the adaptivity block to each executioner
+    InputParameters adapt_params = ParserBlockFactory::instance()->getValidParams("Executioner/Adaptivity");
+    adapt_params.set<ParserBlock *>("parent") = exec;
+    adapt_params.set<Parser *>("parser_handle") = this;
+    exec->_children.push_back(ParserBlockFactory::instance()->add("Executioner/Adaptivity", _moose_system, adapt_params));
   }
 
   // Add all the PostProcessors
