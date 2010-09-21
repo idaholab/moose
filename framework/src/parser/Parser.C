@@ -544,13 +544,14 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
   {
     bool found = false;
     bool in_global = false;
-    std::string full_name = prefix + "/" + it->first;
+    std::string orig_name = prefix + "/" + it->first;
+    std::string full_name = orig_name;
 
     // Mark parameters appearing in the input file
     if (_getpot_file.have_variable(full_name.c_str()))
     {
       p.seenInInputFile(it->first);
-      found = true;
+      found = true; 
     }
     // Wait! Check the GlobalParams section
     else if (global_params_block != NULL)
@@ -566,7 +567,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     
     if (!found && p.isParamRequired(it->first))
       // The parameter is required but missing
-      mooseError("The required parameter '" + full_name + "' is missing\n");
+      mooseError("The required parameter '" + orig_name + "' is missing\n");
     
     InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
     InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
