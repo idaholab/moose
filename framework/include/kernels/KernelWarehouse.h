@@ -40,21 +40,30 @@ public:
   KernelIterator activeKernelsBegin();
   KernelIterator activeKernelsEnd();
 
-  KernelIterator blockKernelsBegin(unsigned int block_id);
-  KernelIterator blockKernelsEnd(unsigned int block_id);
+  void addKernel(Kernel *kernel, const std::set<unsigned int> & block_ids);
 
-  void addKernel(Kernel *kernel);
-  void addBlockKernel(unsigned int block_id, Kernel *kernel);
-
-  bool activeKernelBlocks(std::set<subdomain_id_type> & set_buffer) const;
-
-  void updateActiveKernels(Real t, Real dt);
+  void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
 
 protected:
+  /**
+   * Kernels active on a block and in specified time
+   */
   std::vector<Kernel *> _active_kernels;
+
+  /**
+   * All instances of kernels
+   */
   std::vector<Kernel *> _all_kernels;
+
+  /**
+   * Kernels that live everywhere (on the whole domain)
+   */
+  std::vector<Kernel *> _global_kernels;
+
+  /**
+   * Kernels that live on a specified block
+   */
   std::map<unsigned int, std::vector<Kernel *> > _block_kernels;
-  std::map<unsigned int, std::vector<Kernel *> > _all_block_kernels;
 };
 
 #endif // KERNELWAREHOUSE_H

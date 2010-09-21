@@ -52,16 +52,7 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
-    _moose_system._kernels[tid].updateActiveKernels(_moose_system._t, _moose_system._dt);
     _moose_system._dg_kernels[tid].updateActiveDGKernels(_moose_system._t, _moose_system._dt);
-
-    KernelIterator kernel_begin = _moose_system._kernels[tid].activeKernelsBegin();
-    KernelIterator kernel_end = _moose_system._kernels[tid].activeKernelsEnd();
-    KernelIterator kernel_it = kernel_begin;
-
-    KernelIterator block_kernel_begin;
-    KernelIterator block_kernel_end;
-    KernelIterator block_kernel_it;
 
     StabilizerIterator stabilizer_begin = _moose_system._stabilizers[tid].activeStabilizersBegin();
     StabilizerIterator stabilizer_end = _moose_system._stabilizers[tid].activeStabilizersEnd();
@@ -72,20 +63,17 @@ public:
     for (el = range.begin() ; el != range.end(); ++el)
     {
       const Elem* elem = *el;
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       Re.zero();
 
       _moose_system.reinitKernels(tid, _soln, elem, &Re);
 
-      unsigned int cur_subdomain = elem->subdomain_id();
-
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
         _moose_system.subdomainSetup(tid, subdomain);
-
-        block_kernel_begin = _moose_system._kernels[tid].blockKernelsBegin(subdomain);
-        block_kernel_end = _moose_system._kernels[tid].blockKernelsEnd(subdomain);
+        _moose_system._kernels[tid].updateActiveKernels(_moose_system._t, _moose_system._dt, cur_subdomain);
       }
 
       _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(cur_subdomain));
@@ -94,20 +82,20 @@ public:
       for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
         stabilizer_it->second->computeTestFunctions();
 
-      //Global Kernels
+      //Kernels
+      KernelIterator kernel_begin = _moose_system._kernels[tid].activeKernelsBegin();
+      KernelIterator kernel_end = _moose_system._kernels[tid].activeKernelsEnd();
+      KernelIterator kernel_it = kernel_begin;
+
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;++kernel_it)
         (*kernel_it)->computeResidual();
 
-      //Kernels on this block
-      for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;++block_kernel_it)
-        (*block_kernel_it)->computeResidual();
-
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
-        if (elem->neighbor(side) == NULL)
-        {
-          std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
+        std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
 
+        if (boundary_ids.size() > 0)
+        {
           for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           {
             short int bnd_id = *it;
@@ -124,7 +112,8 @@ public:
             }
           }
         }
-        else
+
+        if (elem->neighbor(side) != NULL)
         {
           // Pointer to the neighbor we are currently working on.
           const Elem * neighbor = elem->neighbor(side);

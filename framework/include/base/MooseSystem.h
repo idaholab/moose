@@ -443,6 +443,11 @@ private:
   ExplicitSystem * _displaced_system;
   ExplicitSystem * _displaced_aux_system;
 
+  /**
+   * The list of block for given variable number
+   */
+  std::map<unsigned int, std::set<unsigned int> > _var_map;
+
   Moose::GeomType _geom_type;
   Mesh * _mesh;
   Mesh * _displaced_mesh;

@@ -526,22 +526,6 @@ MooseSystem::initDataStructures()
   if (_es == NULL)
     mooseError("EquationsSystems is uninitialized in call to initialize data structures");
 
-  // TODO: Make multiple copies of the data objects instead of select
-  // members inside of these objects
-/*
-  unsigned int n_threads = libMesh::n_threads();
-  _element_data.resize(n_threads);
-  _face_data.resize(n_threads);
-  _aux_data.resize(n_threads);
-
-  for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    _element_data[tid] = new ElementData(*this);
-    _face_data[tid] = new FaceData(*this);
-    _aux_data[tid] = new AuxData(*this, *_element_data[tid]);
-  }
-*/
-
   // Need to initialize data
   _is_valid = true;
 }
@@ -684,6 +668,12 @@ MooseSystem::addVariable(const std::string &var, const FEType  &type, const std:
   
   var_num = _system->add_variable(var, type, active_subdomains);
 
+  if (active_subdomains == NULL)
+    _var_map[var_num].insert(Moose::ANY_BLOCK_ID);
+  else
+    for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+      _var_map[var_num].insert(*it);
+
   if(_has_displaced_mesh)
     _displaced_system->add_variable(var, type, active_subdomains);
   
@@ -696,7 +686,13 @@ MooseSystem::addVariable(const std::string &var, const Order order, const FEFami
   unsigned int var_num = 0;
 
   var_num = _system->add_variable(var, order, family, active_subdomains);
-  
+
+  if (active_subdomains == NULL)
+    _var_map[var_num].insert(Moose::ANY_BLOCK_ID);
+  else
+    for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+      _var_map[var_num].insert(*it);
+
   if(_has_displaced_mesh)
     _displaced_system->add_variable(var, order, family, active_subdomains);
 
@@ -739,25 +735,26 @@ void MooseSystem::addKernel(std::string kernel_name,
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
+    Kernel *kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
+
+    std::set<unsigned int> blk_ids;
     if (!parameters.isParamValid("block"))
-    {
-      Kernel *kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
-      _kernels[tid].addKernel(kernel);
-      if (kernel->getParam<bool>("need_old_newton"))
-        _need_old_newton = true;
-    }
+      blk_ids = _var_map[kernel->variable()];
     else
     {
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
-    
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
-        Kernel *kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
-        _kernels[tid].addBlockKernel(blocks[i], kernel);
-        if (kernel->getParam<bool>("need_old_newton"))
-          _need_old_newton = true;
+        if (_var_map[kernel->variable()].count(blocks[i]) > 0 || _var_map[kernel->variable()].count(Moose::ANY_BLOCK_ID) > 0)
+          blk_ids.insert(blocks[i]);
+        else
+          mooseError("Kernel (" + kernel->name() + "): block outside of the domain of the variable");
       }
     }
+
+    _kernels[tid].addKernel(kernel, blk_ids);
+    if (kernel->getParam<bool>("need_old_newton"))
+      _need_old_newton = true;
   }
 }
 
@@ -1220,12 +1217,6 @@ MooseSystem::subdomainSetup(THREAD_ID tid, unsigned int block_id)
   for(KernelIterator kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
     (*kernel_it)->subdomainSetup();
 
-  //Kernels on this block
-  KernelIterator block_kernel_begin = _kernels[tid].blockKernelsBegin(block_id);
-  KernelIterator block_kernel_end = _kernels[tid].blockKernelsEnd(block_id);
-  for(KernelIterator block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
-    (*block_kernel_it)->subdomainSetup();
-
   //Stabilizers
   StabilizerIterator stabilizer_begin = _stabilizers[tid].activeStabilizersBegin();
   StabilizerIterator stabilizer_end = _stabilizers[tid].activeStabilizersEnd();
@@ -1267,9 +1258,7 @@ MooseSystem::checkSystemsIntegrity()
     std::set<unsigned short> difference;
     bool global_kernels_exist = false;
     
-    
-    _kernels[0].updateActiveKernels(_t, _dt);
-    global_kernels_exist = _kernels[0].activeKernelBlocks(input_subdomains);
+    global_kernels_exist = true; // FIXME
     std::set_difference (element_subdomains.begin(), element_subdomains.end(),
                        input_subdomains.begin(), input_subdomains.end(),
                        std::inserter(difference, difference.end()));

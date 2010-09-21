@@ -38,6 +38,7 @@ InputParameters validParams<GenericVariableBlock>()
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
   params.addParam<int>("initial_from_file_timestep", 2, "Gives the timestep for which to read a solution from a file for a given variable");
   params.addParam<std::string>("initial_from_file_var", "Gives the name of a variable for which to read an initial condition from a mesh file");
+  params.addParam<std::vector<unsigned int> >("block", "The block id where this variable lives");
 
   return params;
 }
@@ -67,9 +68,19 @@ GenericVariableBlock::execute()
   {
     system = _moose_system.getNonlinearSystem();
 
-    _moose_system.addVariable(var_name,
-                              Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
-                              Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
+    std::set<subdomain_id_type> blocks;
+    std::vector<unsigned int> block_param = getParamValue<std::vector<unsigned int> >("block");
+    for (std::vector<unsigned int>::iterator it = block_param.begin(); it != block_param.end(); ++it)
+      blocks.insert(*it);
+
+    if (blocks.empty())
+      _moose_system.addVariable(var_name,
+                                Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
+                                Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")));
+    else
+      _moose_system.addVariable(var_name,
+                                Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
+                                Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family")), &blocks);
   }
   else
   {

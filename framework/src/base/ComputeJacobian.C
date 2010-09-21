@@ -54,15 +54,7 @@ public:
 
     ConstElemRange::const_iterator el = range.begin();
 
-    _moose_system._kernels[tid].updateActiveKernels(_moose_system._t, _moose_system._dt);
-
-    KernelIterator kernel_begin = _moose_system._kernels[tid].activeKernelsBegin();
-    KernelIterator kernel_end = _moose_system._kernels[tid].activeKernelsEnd();
-    KernelIterator kernel_it = kernel_begin;
-
-    KernelIterator block_kernel_begin;
-    KernelIterator block_kernel_end;
-    KernelIterator block_kernel_it;
+    _moose_system._dg_kernels[tid].updateActiveDGKernels(_moose_system._t, _moose_system._dt);
 
     StabilizerIterator stabilizer_begin = _moose_system._stabilizers[tid].activeStabilizersBegin();
     StabilizerIterator stabilizer_end = _moose_system._stabilizers[tid].activeStabilizersEnd();
@@ -73,18 +65,15 @@ public:
     for (el = range.begin() ; el != range.end(); ++el)
     {
       const Elem* elem = *el;
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       _moose_system.reinitKernels(tid, _soln, elem, NULL, &Ke);
-
-      unsigned int cur_subdomain = elem->subdomain_id();
 
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
         _moose_system.subdomainSetup(tid, subdomain);
-
-        block_kernel_begin = _moose_system._kernels[tid].blockKernelsBegin(subdomain);
-        block_kernel_end = _moose_system._kernels[tid].blockKernelsEnd(subdomain);
+        _moose_system._kernels[tid].updateActiveKernels(_moose_system._t, _moose_system._dt, cur_subdomain);
       } 
 
       _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(cur_subdomain));
@@ -94,19 +83,19 @@ public:
         stabilizer_it->second->computeTestFunctions();
 
       //Global Kernels
+      KernelIterator kernel_begin = _moose_system._kernels[tid].activeKernelsBegin();
+      KernelIterator kernel_end = _moose_system._kernels[tid].activeKernelsEnd();
+      KernelIterator kernel_it = kernel_begin;
+
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
         (*kernel_it)->computeJacobian();
 
-      //Kernels on this block
-      for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
-        (*block_kernel_it)->computeJacobian();
-
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
-        if (elem->neighbor(side) == NULL)
-        {
-          std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
+        std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
 
+        if (boundary_ids.size() > 0)
+        {
           for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           {
             short int bnd_id = *it;
@@ -123,7 +112,8 @@ public:
             }
           }
         }
-        else
+
+        if (elem->neighbor(side) != NULL)
         {
           // Pointer to the neighbor we are currently working on.
           const Elem * neighbor = elem->neighbor(side);
@@ -246,15 +236,15 @@ void MooseSystem::compute_jacobian (const NumericVector<Number>& soln, SparseMat
 
     if(bc_it != bc_end)
     {
-        Node & node = _mesh->node(nodes[i]);
+      Node & node = _mesh->node(nodes[i]);
 
-        if(node.processor_id() == libMesh::processor_id())
-        {
-          for(; bc_it != bc_end; ++bc_it)
-            //The first zero is for the system
-            //The second zero only works with Lagrange elements!
-            zero_rows.push_back(node.dof_number(0, (*bc_it)->variable(), 0));
-        }
+      if(node.processor_id() == libMesh::processor_id())
+      {
+        for(; bc_it != bc_end; ++bc_it)
+          //The first zero is for the system
+          //The second zero only works with Lagrange elements!
+          zero_rows.push_back(node.dof_number(0, (*bc_it)->variable(), 0));
+      }
     }
   }
 
@@ -286,16 +276,6 @@ public:
     
     ConstElemRange::const_iterator el = range.begin();
 
-    _moose_system._kernels[tid].updateActiveKernels(_moose_system._t, _moose_system._dt);
-
-    KernelIterator kernel_begin = _moose_system._kernels[tid].activeKernelsBegin();
-    KernelIterator kernel_end = _moose_system._kernels[tid].activeKernelsEnd();
-    KernelIterator kernel_it = kernel_begin;
-
-    KernelIterator block_kernel_begin;
-    KernelIterator block_kernel_end;
-    KernelIterator block_kernel_it;
-
     StabilizerIterator stabilizer_begin = _moose_system._stabilizers[tid].activeStabilizersBegin();
     StabilizerIterator stabilizer_end = _moose_system._stabilizers[tid].activeStabilizersEnd();
     StabilizerIterator stabilizer_it = stabilizer_begin;
@@ -311,6 +291,7 @@ public:
     for (el = range.begin() ; el != range.end(); ++el)
     {
       const Elem* elem = *el;
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       _moose_system.reinitKernels(tid, _soln, elem, NULL, NULL);
 
@@ -318,15 +299,11 @@ public:
 
       Ke.resize(dof_indices.size(),dof_indices.size());
 
-      unsigned int cur_subdomain = elem->subdomain_id();
-
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
         _moose_system.subdomainSetup(tid, subdomain);
-
-        block_kernel_begin = _moose_system._kernels[tid].blockKernelsBegin(subdomain);
-        block_kernel_end = _moose_system._kernels[tid].blockKernelsEnd(subdomain);
+        _moose_system._kernels[tid].updateActiveKernels(_moose_system._t, _moose_system._dt, cur_subdomain);
       } 
 
       _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(cur_subdomain));
@@ -335,7 +312,11 @@ public:
       for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
         stabilizer_it->second->computeTestFunctions();
     
-      //Global Kernels
+      //Kernels
+      KernelIterator kernel_begin = _moose_system._kernels[tid].activeKernelsBegin();
+      KernelIterator kernel_end = _moose_system._kernels[tid].activeKernelsEnd();
+      KernelIterator kernel_it = kernel_begin;
+
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
       {
         Kernel * kernel = *kernel_it;
@@ -344,34 +325,30 @@ public:
           kernel->computeOffDiagJacobian(Ke,_jvar);
       }
 
-      //Kernels on this block
-      for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
-      {
-        Kernel * block_kernel = *block_kernel_it;
-
-        if(block_kernel->variable() == _ivar)
-          block_kernel->computeOffDiagJacobian(Ke,_jvar);
-      }
-
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
-        if (elem->neighbor(side) == NULL)
+        std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
+
+        if (boundary_ids.size() > 0)
         {
-          unsigned int boundary_id = _moose_system._mesh->boundary_info->boundary_id (elem, side);
-
-          BCIterator bc_it = _moose_system._bcs[tid].activeBCsBegin(boundary_id);
-          BCIterator bc_end = _moose_system._bcs[tid].activeBCsEnd(boundary_id);
-
-          if(bc_it != bc_end)
+          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           {
-            _moose_system.reinitBCs(tid, _soln, elem, side, boundary_id);
-          
-            for(; bc_it!=bc_end; ++bc_it)
-            {
-              BoundaryCondition * bc = *bc_it;
+            short int bnd_id = *it;
 
-              if(bc->variable() == _ivar)
-                bc->computeJacobianBlock(Ke,_ivar,_jvar);
+            BCIterator bc_it = _moose_system._bcs[tid].activeBCsBegin(bnd_id);
+            BCIterator bc_end = _moose_system._bcs[tid].activeBCsEnd(bnd_id);
+
+            if(bc_it != bc_end)
+            {
+              _moose_system.reinitBCs(tid, _soln, elem, side, bnd_id);
+
+              for(; bc_it!=bc_end; ++bc_it)
+              {
+                BoundaryCondition * bc = *bc_it;
+
+                if(bc->variable() == _ivar)
+                  bc->computeJacobianBlock(Ke,_ivar,_jvar);
+              }
             }
           }
         }
@@ -439,16 +416,6 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
     MeshBase::const_element_iterator el = _mesh->active_local_elements_begin();
     const MeshBase::const_element_iterator end_el = _mesh->active_local_elements_end();
 
-    _kernels[tid].updateActiveKernels(_t, _dt);
-
-    KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
-    KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
-    KernelIterator kernel_it = kernel_begin;
-
-    KernelIterator block_kernel_begin;
-    KernelIterator block_kernel_end;
-    KernelIterator block_kernel_it;
-
     StabilizerIterator stabilizer_begin = _stabilizers[tid].activeStabilizersBegin();
     StabilizerIterator stabilizer_end = _stabilizers[tid].activeStabilizersEnd();
     StabilizerIterator stabilizer_it = stabilizer_begin;
@@ -464,6 +431,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
     for (; el != end_el; ++el)
     {
       const Elem* elem = *el;
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       reinitKernels(tid, soln, elem, NULL, NULL);
 
@@ -471,15 +439,11 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
 
       Ke.resize(dof_indices.size(),dof_indices.size());
 
-      unsigned int cur_subdomain = elem->subdomain_id();
-
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;
         subdomainSetup(tid, subdomain);
-
-        block_kernel_begin = _kernels[tid].blockKernelsBegin(subdomain);
-        block_kernel_end = _kernels[tid].blockKernelsEnd(subdomain);
+        _kernels[tid].updateActiveKernels(_t, _dt, cur_subdomain);
       } 
 
       _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(cur_subdomain));
@@ -488,7 +452,11 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
       for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
         stabilizer_it->second->computeTestFunctions();
     
-      //Global Kernels
+      //Kernels
+      KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
+      KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
+      KernelIterator kernel_it = kernel_begin;
+
       for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
       {
         Kernel * kernel = *kernel_it;
@@ -497,34 +465,30 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
           kernel->computeOffDiagJacobian(Ke,jvar);
       }
 
-      //Kernels on this block
-      for(block_kernel_it=block_kernel_begin;block_kernel_it!=block_kernel_end;block_kernel_it++)
-      {
-        Kernel * block_kernel = *block_kernel_it;
-
-        if(block_kernel->variable() == ivar)
-          block_kernel->computeOffDiagJacobian(Ke,jvar);
-      }
-
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
-        if (elem->neighbor(side) == NULL)
+        std::vector<short int> boundary_ids = _mesh->boundary_info->boundary_ids (elem, side);
+
+        if (boundary_ids.size() > 0)
         {
-          unsigned int boundary_id = _mesh->boundary_info->boundary_id (elem, side);
-
-          BCIterator bc_it = _bcs[tid].activeBCsBegin(boundary_id);
-          BCIterator bc_end = _bcs[tid].activeBCsEnd(boundary_id);
-
-          if(bc_it != bc_end)
+          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           {
-            reinitBCs(tid, soln, elem, side, boundary_id);
-          
-            for(; bc_it!=bc_end; ++bc_it)
-            {
-              BoundaryCondition * bc = *bc_it;
+            short int bnd_id = *it;
 
-              if(bc->variable() == ivar)
-                bc->computeJacobianBlock(Ke,ivar,jvar);
+            BCIterator bc_it = _bcs[tid].activeBCsBegin(bnd_id);
+            BCIterator bc_end = _bcs[tid].activeBCsEnd(bnd_id);
+
+            if(bc_it != bc_end)
+            {
+              reinitBCs(tid, soln, elem, side, bnd_id);
+
+              for(; bc_it!=bc_end; ++bc_it)
+              {
+                BoundaryCondition * bc = *bc_it;
+
+                if(bc->variable() == ivar)
+                  bc->computeJacobianBlock(Ke,ivar,jvar);
+              }
             }
           }
         }
