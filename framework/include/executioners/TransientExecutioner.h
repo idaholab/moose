@@ -89,23 +89,26 @@ protected:
    *
    * Please don't modify this directly!
    */
-  double & _time;
+  Real & _time;
 
   /**
    * The dt from the input file.
    */
-  double _input_dt;
+  Real _input_dt;
   
   /**
    * Current delta t... or timestep size.
    *
    * Please don't modify this directly!
    */
-  double & _dt;
+  Real & _dt;
 
-  double _end_time;
-  double _dtmin;
-  double _dtmax;
+  Real _prev_dt;
+  bool _reset_dt;
+  
+  Real _end_time;
+  Real _dtmin;
+  Real _dtmax;
   int _num_steps;
   int _n_startup_steps;
 
@@ -113,14 +116,18 @@ protected:
    * Steady state detection variables:
    */
   bool _trans_ss_check;
-  double _ss_check_tol;
-  double _ss_tmin;
+  Real _ss_check_tol;
+  Real _ss_tmin;
   Real _old_time_solution_norm;
   
   /**
    * Whether or not the previous solve converged.
    */
   bool _converged;
+
+  std::vector<Real> _sync_times;
+  std::vector<Real>::iterator _curr_sync_time_iter;
+  bool _remaining_sync_time;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

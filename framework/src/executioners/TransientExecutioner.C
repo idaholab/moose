@@ -34,6 +34,8 @@ template<>
 InputParameters validParams<TransientExecutioner>()
 {
   InputParameters params = validParams<Executioner>();
+  std::vector<Real> sync_times(1);
+  sync_times[0] = -1;
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
@@ -45,6 +47,7 @@ InputParameters validParams<TransientExecutioner>()
   params.addParam<bool>("trans_ss_check",  false,  "Whether or not to check for steady state conditions");
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
   params.addParam<Real>("ss_tmin",         0.0,    "Minimum number of timesteps to take before checking for steady state conditions.");
+  params.addParam<std::vector<Real> >("sync_times", sync_times, "A list of times that will be solved for provided they are within the simulation time");
 
   return params;
 }
@@ -55,6 +58,8 @@ TransientExecutioner::TransientExecutioner(const std::string & name, MooseSystem
    _time(moose_system.parameters().set<Real>("time") = getParam<Real>("start_time")),
    _input_dt(getParam<Real>("dt")),
    _dt(moose_system.parameters().set<Real>("dt") = 0),
+   _prev_dt(-1),
+   _reset_dt(false),
    _end_time(getParam<Real>("end_time")),
    _dtmin(getParam<Real>("dtmin")),
    _dtmax(getParam<Real>("dtmax")),
@@ -63,9 +68,17 @@ TransientExecutioner::TransientExecutioner(const std::string & name, MooseSystem
    _trans_ss_check(getParam<bool>("trans_ss_check")),
    _ss_check_tol(getParam<Real>("ss_check_tol")),
    _ss_tmin(getParam<Real>("ss_tmin")),
-   _converged(true)
+   _converged(true),
+   _sync_times(getParam<std::vector<Real> >("sync_times")),
+   _curr_sync_time_iter(_sync_times.begin()),
+   _remaining_sync_time(true)
 {
   _moose_system.reinitDT();
+
+  // Advance to the first sync time if one is provided in sim time range
+  while (_remaining_sync_time && *_curr_sync_time_iter < _time)
+    if (++_curr_sync_time_iter == _sync_times.end())
+      _remaining_sync_time = false;
 }
 
 void
@@ -112,11 +125,32 @@ TransientExecutioner::takeStep()
   // Don't let time go beyond simulation end time
   if(_time + dt_cur > _end_time)
     dt_cur = _end_time - _time;
-    
-  // Increment time
-  _time += dt_cur;
-  _dt = dt_cur;
 
+  // Adjust to a sync time if supplied and skipped over
+  if (_remaining_sync_time && _time + dt_cur > *_curr_sync_time_iter)
+  {
+    dt_cur = *_curr_sync_time_iter - _time;
+    if (++_curr_sync_time_iter == _sync_times.end())
+      _remaining_sync_time = false;
+
+    _prev_dt = _dt;
+
+    // Increment time
+    _time += dt_cur;
+    _dt = dt_cur;
+
+    _reset_dt = true;
+  }
+  else 
+  {
+    if (_reset_dt)
+      dt_cur = _prev_dt;
+    
+    // Increment time
+    _time += dt_cur;
+    _dt = dt_cur;
+  }
+    
   _moose_system.reinitDT();
 
   std::cout<<"DT: "<<dt_cur<<std::endl;
