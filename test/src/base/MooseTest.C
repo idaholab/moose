@@ -36,9 +36,16 @@
 
 #include "DGMatDiffusion.h"
 
+#include "Convection.h"
+
+// DG kernels
+#include "DGConvection.h"
+
 // boundary conditions
 #include "MTBC.h"
 #include "DGMDDBC.h"
+
+#include "DGFunctionConvectionDirichletBC.h"
 
 // materials
 #include "Diff1Material.h"
@@ -51,7 +58,8 @@ namespace MooseTest
   {
     registerKernel(DiffMKernel);
     registerKernel(MatDiffusion);
-
+    registerKernel(Convection);
+    
     registerKernel(MMSImplicitEuler);
 
     registerKernel(MMSDiffusion);
@@ -70,6 +78,8 @@ namespace MooseTest
 
     registerKernel(PolyForcing);
 
+    registerDGKernel(DGConvection);
+    
     // Register our new material class so we can use it.
     registerMaterial(Diff1Material);
     registerMaterial(Diff2Material);
@@ -80,6 +90,9 @@ namespace MooseTest
     registerBC(PolyCoupledDirichletBC);
     registerBC(MTBC);
     registerBC(DGMDDBC);
+
+    registerBC(DGFunctionConvectionDirichletBC);
+    
     //Registering our Aux Kernel
     registerAux(MMSConstantAux);
 
