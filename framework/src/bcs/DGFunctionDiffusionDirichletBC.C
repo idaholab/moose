@@ -48,7 +48,7 @@ DGFunctionDiffusionDirichletBC::computeQpResidual()
   Real fn = _func.value(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
   Real r = 0;
   r -= (_grad_u[_qp] * _normals[_qp] * _test[_i][_qp]);
-  r += _epsilon * (fn - _u[_qp]) * _grad_test[_i][_qp] * _normals[_qp];
+  r += _epsilon * (_u[_qp] - fn) * _grad_test[_i][_qp] * _normals[_qp];
   r += _sigma/h_elem * (_u[_qp] - fn) * _test[_i][_qp];
 
   return r;
@@ -63,7 +63,7 @@ DGFunctionDiffusionDirichletBC::computeQpJacobian()
   Real fn = _func.value(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
   Real r = 0;
   r -= (_grad_test[_j][_qp] * _normals[_qp] * _test[_i][_qp]);
-  r -= _epsilon * _test[_j][_qp] * _grad_test[_i][_qp] * _normals[_qp];
+  r += _epsilon * _test[_j][_qp] * _grad_test[_i][_qp] * _normals[_qp];
   r += _sigma/h_elem * _test[_j][_qp] * _test[_i][_qp];
   return r;
 }
