@@ -177,20 +177,21 @@ Parser::buildFullTree( const std::string format )
   _input_tree = new ParserBlock("/", _moose_system, params);
   
   curr_block = _input_tree;
+  ParserBlockFactory * pb_factory = ParserBlockFactory::instance();
 
   // Build all the base level ParserBlock types that are not generic
-  for (ParserBlockNamesIterator i = ParserBlockFactory::instance()->registeredParserBlocksBegin();
-       i != ParserBlockFactory::instance()->registeredParserBlocksEnd(); ++i)
+  for (ParserBlockNamesIterator i = pb_factory->registeredParserBlocksBegin();
+       i != pb_factory->registeredParserBlocksEnd(); ++i)
   {
     // skip the generic matches here because they don't correlate to a real instance and well pick them up manually below
     if (i->find('*') != std::string::npos || i->find("Executioner") != std::string::npos)
       continue;
 
-    // std::string matched_identifier = ParserBlockFactory::instance()->isRegistered(*i);
-    params = ParserBlockFactory::instance()->getValidParams(*i);
+    // std::string matched_identifier = pb_factory->isRegistered(*i);
+    params = pb_factory->getValidParams(*i);
     params.set<ParserBlock *>("parent") = curr_block;
     params.set<Parser *>("parser_handle") = this;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(*i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(*i, _moose_system, params));
   }
   
   {
@@ -200,14 +201,14 @@ Parser::buildFullTree( const std::string format )
     curr_block = curr_block->locateBlock("Variables");
     mooseAssert(curr_block != NULL, "A Variables ParserBlock does not appear to exist");
     
-    params = ParserBlockFactory::instance()->getValidParams(prefix + var_name);
+    params = pb_factory->getValidParams(prefix + var_name);
     params.set<ParserBlock *>("parent") = curr_block;
     params.set<Parser *>("parser_handle") = this;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + var_name, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + var_name, _moose_system, params));
     
     // Add all the IC Blocks
     curr_block = curr_block->locateBlock(prefix + var_name);
-    params = ParserBlockFactory::instance()->getValidParams(prefix + var_name +  "/InitialCondition");
+    params = pb_factory->getValidParams(prefix + var_name +  "/InitialCondition");
     params.set<ParserBlock *>("parent") = curr_block;
     params.set<Parser *>("parser_handle") = this;
     
@@ -216,7 +217,7 @@ Parser::buildFullTree( const std::string format )
          i != InitialConditionFactory::instance()->registeredInitialConditionsEnd(); ++i)
     {
       params.set<std::string>("type") = *i;
-      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + var_name + "/InitialCondition", _moose_system, params));
+      curr_block->_children.push_back(pb_factory->add(prefix + var_name + "/InitialCondition", _moose_system, params));
     }
   }
 
@@ -227,14 +228,14 @@ Parser::buildFullTree( const std::string format )
     curr_block = curr_block->locateBlock("AuxVariables");
     mooseAssert(curr_block != NULL, "A AuxVariables ParserBlock does not appear to exist");
     
-    params = ParserBlockFactory::instance()->getValidParams(prefix + var_name);
+    params = pb_factory->getValidParams(prefix + var_name);
     params.set<ParserBlock *>("parent") = curr_block;
     params.set<Parser *>("parser_handle") = this;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + var_name, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + var_name, _moose_system, params));
 
     // Add all the IC Blocks
     curr_block = curr_block->locateBlock(prefix + var_name);
-    params = ParserBlockFactory::instance()->getValidParams(prefix + var_name +  "/InitialCondition");
+    params = pb_factory->getValidParams(prefix + var_name +  "/InitialCondition");
     params.set<ParserBlock *>("parent") = curr_block;
     params.set<Parser *>("parser_handle") = this;
 
@@ -243,126 +244,126 @@ Parser::buildFullTree( const std::string format )
          i != InitialConditionFactory::instance()->registeredInitialConditionsEnd(); ++i)
     {
       params.set<std::string>("type") = *i;
-      curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + var_name + "/InitialCondition", _moose_system, params));
+      curr_block->_children.push_back(pb_factory->add(prefix + var_name + "/InitialCondition", _moose_system, params));
     }
   }
 
   // Add all the Functions
   curr_block = curr_block->locateBlock("Functions");
   prefix = "Functions/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (FunctionNamesIterator i = FunctionFactory::instance()->registeredFunctionsBegin();
        i != FunctionFactory::instance()->registeredFunctionsEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
 
   // Add all the Kernels
   curr_block = curr_block->locateBlock("Kernels");
   prefix = "Kernels/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (KernelNamesIterator i = KernelFactory::instance()->registeredKernelsBegin();
        i != KernelFactory::instance()->registeredKernelsEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
   
   // Add all the DG Kernels
   curr_block = curr_block->locateBlock("DGKernels");
   prefix = "DGKernels/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (DGKernelNamesIterator i = DGKernelFactory::instance()->registeredDGKernelsBegin();
        i != DGKernelFactory::instance()->registeredDGKernelsEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
 
   // Add all the Dampers Kernels
   curr_block = curr_block->locateBlock("Dampers");
   prefix = "Dampers/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (DamperNamesIterator i = DamperFactory::instance()->registeredDampersBegin();
        i != DamperFactory::instance()->registeredDampersEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
 
   
   // Add all the AuxKernels
   curr_block = curr_block->locateBlock("AuxKernels");
   prefix = "AuxKernels/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (AuxKernelNamesIterator i = AuxFactory::instance()->registeredAuxKernelsBegin();
        i != AuxFactory::instance()->registeredAuxKernelsEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
   
   // Add all the BCs
   curr_block = curr_block->locateBlock("BCs");
   prefix = "BCs/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (BCNamesIterator i = BCFactory::instance()->registeredBCsBegin();
        i != BCFactory::instance()->registeredBCsEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
   
   // Add all the Materials
   curr_block = curr_block->locateBlock("Materials");
   prefix = "Materials/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (MaterialNamesIterator i = MaterialFactory::instance()->registeredMaterialsBegin();
        i != MaterialFactory::instance()->registeredMaterialsEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
   
   // Add all the Executioners
   curr_block = _input_tree;
   prefix = "";
-  params = ParserBlockFactory::instance()->getValidParams("Executioner");
+  params = pb_factory->getValidParams("Executioner");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (ExecutionerNamesIterator i = ExecutionerFactory::instance()->registeredExecutionersBegin();
        i != ExecutionerFactory::instance()->registeredExecutionersEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    ParserBlock * exec = ParserBlockFactory::instance()->add("Executioner", _moose_system, params);
+    ParserBlock * exec = pb_factory->add("Executioner", _moose_system, params);
     curr_block->_children.push_back(exec);
 
     // Add the adaptivity block to each executioner
-    InputParameters adapt_params = ParserBlockFactory::instance()->getValidParams("Executioner/Adaptivity");
+    InputParameters adapt_params = pb_factory->getValidParams("Executioner/Adaptivity");
     adapt_params.set<ParserBlock *>("parent") = exec;
     adapt_params.set<Parser *>("parser_handle") = this;
-    exec->_children.push_back(ParserBlockFactory::instance()->add("Executioner/Adaptivity", _moose_system, adapt_params));
+    exec->_children.push_back(pb_factory->add("Executioner/Adaptivity", _moose_system, adapt_params));
   }
 
   // Add all the PostProcessors
   curr_block = curr_block->locateBlock("Postprocessors");
   prefix = "Postprocessors/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   
@@ -370,20 +371,20 @@ Parser::buildFullTree( const std::string format )
        i != PostprocessorFactory::instance()->registeredPostprocessorsEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
 
   // Add all the Stabilizers
   curr_block = curr_block->locateBlock("Stabilizers");
   prefix = "Stabilizers/";
-  params = ParserBlockFactory::instance()->getValidParams(prefix + "foo");
+  params = pb_factory->getValidParams(prefix + "foo");
   params.set<ParserBlock *>("parent") = curr_block;
   params.set<Parser *>("parser_handle") = this;
   for (StabilizerNamesIterator i = StabilizerFactory::instance()->registeredStabilizersBegin();
        i != StabilizerFactory::instance()->registeredStabilizersEnd(); ++i)
   {
     params.set<std::string>("type") = *i;
-    curr_block->_children.push_back(ParserBlockFactory::instance()->add(prefix + *i, _moose_system, params));
+    curr_block->_children.push_back(pb_factory->add(prefix + *i, _moose_system, params));
   }
   
 
