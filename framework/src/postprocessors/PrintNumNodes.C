@@ -18,14 +18,13 @@
 template<>
 InputParameters validParams<PrintNumNodes>()
 {
-  InputParameters params = validParams<Postprocessor>();
+  InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
 PrintNumNodes::PrintNumNodes(const std::string & name, MooseSystem &moose_system, InputParameters parameters):
-  Postprocessor(name, moose_system, parameters)
-{
-}
+  GeneralPostprocessor(name, moose_system, parameters)
+{}
 
 Real
 PrintNumNodes::getValue()

@@ -15,15 +15,23 @@
 #ifndef POSTPROCESSOR_H
 #define POSTPROCESSOR_H
 
-#include "MooseObject.h"
+#include <string>
+
+//MOOSE includes
+#include "Moose.h"
+
+//libMesh includes
+#include "libmesh_common.h"
+#include "ValidParams.h"
 
 //Forward Declarations
 class Postprocessor;
+class MooseSystem;
 
 template<>
 InputParameters validParams<Postprocessor>();
 
-class Postprocessor : public MooseObject
+class Postprocessor
 {
 public:
   Postprocessor(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
@@ -50,6 +58,11 @@ public:
   virtual Real getValue() = 0;
 
   /**
+   * returns the name of this object
+   */
+  virtual const std::string & name();
+  
+  /**
    * Gather the parallel sum of the variable passed in.
    *
    * After calling this, the variable that was passed in will hold the gathered value.
@@ -60,6 +73,10 @@ public:
    * Same but for ints.
    */
   void gatherSum(int & value);
+
+private:
+  std::string _local_name;
+  THREAD_ID _local_tid;
 };
  
 #endif

@@ -665,6 +665,7 @@ protected:
   friend class Executioner;
   friend class Steady;
   friend class Postprocessor;
+  friend class GeneralPostprocessor;
   friend class FunctionNeumannBC;
   friend class Damper;
 

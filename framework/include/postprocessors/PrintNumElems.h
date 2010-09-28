@@ -15,7 +15,7 @@
 #ifndef PRINTELEMS_H
 #define PRINTELEMS_H
 
-#include "Postprocessor.h"
+#include "GeneralPostprocessor.h"
 
 //Forward Declarations
 class PrintNumElems;
@@ -23,7 +23,7 @@ class PrintNumElems;
 template<>
 InputParameters validParams<PrintNumElems>();
 
-class PrintNumElems : public Postprocessor
+class PrintNumElems : public GeneralPostprocessor
 {
 public:
   PrintNumElems(const std::string & name, MooseSystem &moose_system, InputParameters parameters);

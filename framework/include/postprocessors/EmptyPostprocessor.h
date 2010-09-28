@@ -15,7 +15,7 @@
 #ifndef EMPTYPOSTPROCESSOR_H
 #define EMPTYPOSTPROCESSOR_H
 
-#include "Postprocessor.h"
+#include "GeneralPostprocessor.h"
 
 //Forward Declarations
 class EmptyPostprocessor;
@@ -23,7 +23,7 @@ class EmptyPostprocessor;
 template<>
 InputParameters validParams<EmptyPostprocessor>();
 
-class EmptyPostprocessor : public Postprocessor
+class EmptyPostprocessor : public GeneralPostprocessor
 {
 public:
   EmptyPostprocessor(const std::string & name, MooseSystem &moose_system, InputParameters parameters);

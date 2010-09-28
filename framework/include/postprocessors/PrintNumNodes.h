@@ -15,7 +15,7 @@
 #ifndef PRINTNODES_H
 #define PRINTNODES_H
 
-#include "Postprocessor.h"
+#include "GeneralPostprocessor.h"
 
 //Forward Declarations
 class PrintNumNodes;
@@ -23,7 +23,7 @@ class PrintNumNodes;
 template<>
 InputParameters validParams<PrintNumNodes>();
 
-class PrintNumNodes : public Postprocessor
+class PrintNumNodes : public GeneralPostprocessor
 {
 public:
   PrintNumNodes(const std::string & name, MooseSystem &moose_system, InputParameters parameters);

@@ -29,22 +29,6 @@ class ElementPostprocessor : public Kernel, public Postprocessor
 public:
   ElementPostprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
 
-  /**
-   * TODO: We need to re-evaluate the object model of ElementPostprocessors.  Right now this class
-   * creates a non-virtual diamond inheritance structure with two separate copies of MooseObject.
-   * Both copies contain a complete copy of the parameters object at construction time which at best is
-   * just a little wasted memory.  If at some point, a call to add a parameter to one of the parameters
-   * object is made the copies will then differ and potentially cause problems when retrieving said
-   * parameter later.  For now, I'm explicitly choosing one param object to retrieve from explicitly
-   * here so that end user code is consistent and oblivious to the workings underneath.
-   */
-  template <typename T>
-  inline
-  const T & getParam(const std::string &name)
-  {
-    return Postprocessor::getParam<T>(name);
-  }
-
   unsigned int blockID() { return _block_id; }
   
 private:

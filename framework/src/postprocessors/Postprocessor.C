@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "Postprocessor.h"
-
 #include "MooseSystem.h"
 
 // libMesh includes
@@ -27,11 +26,17 @@ InputParameters validParams<Postprocessor>()
 }
 
 Postprocessor::Postprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :MooseObject(name, moose_system, parameters)
+  :_local_name(name),
+   _local_tid(parameters.get<THREAD_ID>("_tid"))
 {
   // Initialize the postprocessor data for this PP
-//  moose_system._postprocessor_data[_tid]._values[name] = 0.0;
-  moose_system._postprocessor_data[_tid].init(name);
+  moose_system._postprocessor_data[_local_tid].init(name);
+}
+
+const std::string &
+Postprocessor::name()
+{
+  return _local_name;
 }
 
 void
