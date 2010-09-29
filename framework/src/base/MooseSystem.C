@@ -477,6 +477,18 @@ MooseSystem::getAuxVariableNumber(const std::string &var_name)
   return _aux_system->variable_number(var_name);
 }
 
+const std::string &
+MooseSystem::getVariableName(unsigned int var_num) const
+{
+  return _system->variable_name(var_num);
+}
+
+const std::string &
+MooseSystem::getAuxVariableName(unsigned int var_num) const
+{
+  return _aux_system->variable_name(var_num);
+}
+
 unsigned int
 MooseSystem::modifiedAuxVarNum(unsigned int var_num)
 {

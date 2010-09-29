@@ -176,6 +176,16 @@ public:
   unsigned int getAuxVariableNumber(const std::string &var_name);
 
   /**
+   * Get the name of the nonlinear variable (using its number)
+   */
+  const std::string & getVariableName(unsigned int var_num) const;
+
+  /**
+   * Get the name of the auxiliary variable (using its number)
+   */
+  const std::string & getAuxVariableName(unsigned int var_num) const;
+
+  /**
    * Computes the modified variable number for an auxiliary variable.
    * This is the variable number that Kernels know this variable to operate under.
    *
