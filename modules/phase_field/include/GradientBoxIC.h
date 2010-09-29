@@ -1,5 +1,5 @@
-#ifndef RNDBOUNDINGBOXIC_H
-#define RNDBOUNDINGBOXIC_H
+#ifndef GradientBOXIC_H
+#define GradientBOXIC_H
 
 #include "Kernel.h"
 #include "InitialCondition.h"
@@ -13,21 +13,18 @@
 #include <string>
 
 // Forward Declarations
-class RndBoundingBoxIC;
+class GradientBoxIC;
 
 template<>
-InputParameters validParams<RndBoundingBoxIC>();
+InputParameters validParams<GradientBoxIC>();
 
 /**
- * RndBoundingBoxIC allows setting the initial condition of a value inside and outside of a specified box.
+ * GradientBoxIC allows setting the initial condition of a value inside specified box to have a linear slope.
  * The box is aligned with the x,y,z axis... and is specified by passing in the x,y,z coordinates of the bottom
  * left point and the top right point. Each of the coordinates of the "bottom_left" point MUST be less than
  * those coordinates in the "top_right" point.
- *
- * When setting the initial condition if bottom_left <= Point <= top_right then the "inside" value is used.
- * Otherwise the "outside" value is used.
  */
-class RndBoundingBoxIC : public InitialCondition
+class GradientBoxIC : public InitialCondition
 {
 public:
 
@@ -38,7 +35,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
-  RndBoundingBoxIC(const std::string & name,
+  GradientBoxIC(const std::string & name,
                 MooseSystem & moose_system,
                 InputParameters parameters);
 
@@ -56,15 +53,16 @@ private:
   Real _x2; 
   Real _y2; 
   Real _z2; 
-  Real _mx_invalue;
-  Real _mx_outvalue;
-  Real _mn_invalue;
-  Real _mn_outvalue;
-  Real _range_invalue;
-  Real _range_outvalue;
+  Real _mx_value;
+  Real _mn_value;
+  
+  int _grad_direction;
+  int _grad_sign;
+
+  Real _range;
 
   Point _bottom_left;
   Point _top_right;
 };
 
-#endif //RNDBOUNDINGBOXIC_H
+#endif //GradientBOXIC_H

@@ -36,6 +36,7 @@
 #include "StressOutput.h"
 #include "LinearIsotropicMaterial.h"
 #include "PlasticMaterial.h"
+#include "wopsBiLinPlasticMaterial.h"
 #include "DeltaGamma.h"
 
 // phase_field
@@ -46,6 +47,7 @@
 #include "SmoothCircleIC.h"
 #include "RndSmoothCircleIC.h"
 #include "RndBoundingBoxIC.h"
+#include "GradientBoxIC.h"
 
 void
 Elk::registerObjects()
@@ -86,6 +88,7 @@ Elk::registerObjects()
   registerKernel(DeltaGamma);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerMaterial(PlasticMaterial);
+  registerMaterial(wopsBiLinPlasticMaterial);
   
   // phase_field
   registerKernel(AC);
@@ -95,4 +98,5 @@ Elk::registerObjects()
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
+  registerInitialCondition(GradientBoxIC);
 }

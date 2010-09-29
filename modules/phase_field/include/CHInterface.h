@@ -22,10 +22,11 @@ protected:
 
 private:
   
+  std::string _kappa_name;
   std::string _mob_name;
   std::string _grad_mob_name;
   
-  MaterialProperty<Real> & _kappa_c;
+  MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _M;
   MaterialProperty<RealGradient> & _grad_M;
   

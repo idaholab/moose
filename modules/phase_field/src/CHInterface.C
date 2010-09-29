@@ -4,6 +4,7 @@ template<>
 InputParameters validParams<CHInterface>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addRequiredParam<std::string>("kappa_name","The kappa used with the kernel");
   params.addRequiredParam<std::string>("mob_name","The mobility used with the kernel");
   params.addRequiredParam<std::string>("grad_mob_name","The gradient of the mobility used with the kernel");
   
@@ -12,7 +13,8 @@ InputParameters validParams<CHInterface>()
 
 CHInterface::CHInterface(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
-   _kappa_c(getMaterialProperty<Real>("kappa_c")),
+   _kappa_name(getParam<std::string>("kappa_name")),
+   _kappa(getMaterialProperty<Real>(_kappa_name)),
    _mob_name(getParam<std::string>("mob_name")),
    _M(getMaterialProperty<Real>(_mob_name)),
    _grad_mob_name(getParam<std::string>("grad_mob_name")),
@@ -26,7 +28,7 @@ CHInterface::computeQpResidual()
   //Actual value to return
   Real value = 0.0;
   
-  value += _kappa_c[_qp]*(_second_u[_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]));
+  value += _kappa[_qp]*(_second_u[_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]));
   
   return value;
 }
@@ -37,7 +39,7 @@ CHInterface::computeQpJacobian()
   //Actual value to return
   Real value = 0.0;
 
-  value += _kappa_c[_qp]*_second_phi[_j][_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]);
+  value += _kappa[_qp]*_second_phi[_j][_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]);
   
   return value;
 }
