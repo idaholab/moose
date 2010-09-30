@@ -65,5 +65,6 @@ DGFunctionDiffusionDirichletBC::computeQpJacobian()
   r -= (_grad_test[_j][_qp] * _normals[_qp] * _test[_i][_qp]);
   r += _epsilon * _test[_j][_qp] * _grad_test[_i][_qp] * _normals[_qp];
   r += _sigma/h_elem * _test[_j][_qp] * _test[_i][_qp];
+
   return r;
 }

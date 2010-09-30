@@ -42,19 +42,15 @@ DGDiffusion::computeQpResidual(DGResidualType type)
   switch (type)
   {
   case Element:
-    r += 0.5 * (- _grad_u[_qp] * _normals[_qp] * _test[_i][_qp] + _epsilon * _grad_test[_i][_qp] * _normals[_qp] * _u[_qp]);
-    r += _sigma / h_elem * _u[_qp] * _test[_i][_qp];
-
-    r += 0.5 * (- _grad_u_neighbor[_qp] * _normals[_qp] * _test[_i][_qp] - _epsilon * _grad_test[_i][_qp] * _normals[_qp] * _u_neighbor[_qp]);
-    r += - _sigma / h_elem * _u_neighbor[_qp] * _test[_i][_qp];
+    r -= 0.5 * (_grad_u[_qp] * _normals[_qp] + _grad_u_neighbor[_qp] * _normals[_qp]) * _test[_i][_qp];
+    r += _epsilon * 0.5 * _grad_test[_i][_qp] * _normals[_qp] * (_u[_qp] - _u_neighbor[_qp]);
+    r += _sigma / h_elem * (_u[_qp] - _u_neighbor[_qp]) * _test[_i][_qp];
     break;
 
   case Neighbor:
-    r += 0.5 * (_grad_u_neighbor[_qp] * _normals[_qp] * _test_neighbor[_i][_qp] - _epsilon * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _u_neighbor[_qp]);
-    r += _sigma / h_elem * _u_neighbor[_qp] * _test_neighbor[_i][_qp];
-
-    r += 0.5 * (_grad_u[_qp] * _normals[_qp] * _test_neighbor[_i][_qp] + _epsilon * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _u[_qp]);
-    r += - _sigma / h_elem * _u[_qp] * _test_neighbor[_i][_qp];
+    r += 0.5 * (_grad_u[_qp] * _normals[_qp] + _grad_u_neighbor[_qp] * _normals[_qp]) * _test_neighbor[_i][_qp];
+    r += _epsilon * 0.5 * _grad_test_neighbor[_i][_qp] * _normals[_qp] * (_u[_qp] - _u_neighbor[_qp]);
+    r -= _sigma / h_elem * (_u[_qp] - _u_neighbor[_qp]) * _test_neighbor[_i][_qp];
     break;
   }
 
@@ -71,23 +67,28 @@ DGDiffusion::computeQpJacobian(DGJacobianType type)
 
   switch (type)
   {
+
   case ElementElement:
-    r += 0.5 * (- _grad_test[_j][_qp] * _normals[_qp] * _test[_i][_qp] + _epsilon * _grad_test[_i][_qp] * _normals[_qp] * _test[_j][_qp]);
+    r -= 0.5 * _grad_test[_j][_qp] * _normals[_qp] * _test[_i][_qp];
+    r += _epsilon * 0.5 * _grad_test[_i][_qp] * _normals[_qp] * _test[_j][_qp];
     r += _sigma / h_elem * _test[_j][_qp] * _test[_i][_qp];
     break;
 
   case ElementNeighbor:
-    r += 0.5 * (- _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp] - _epsilon * _grad_test[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp]);
-    r += - _sigma / h_elem * _test_neighbor[_j][_qp] * _test[_i][_qp];
+    r += 0.5 * _grad_test[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
+    r += _epsilon * 0.5 * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test[_j][_qp];
+    r -= _sigma / h_elem * _test[_j][_qp] * _test_neighbor[_i][_qp];
     break;
 
   case NeighborElement:
-    r += 0.5 * (_grad_test[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp] + _epsilon * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test[_j][_qp]);
-    r += - _sigma / h_elem * _test[_j][_qp] * _test_neighbor[_i][_qp];
+    r -= 0.5 * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp];
+    r -= _epsilon * 0.5 * _grad_test[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp];
+    r -= _sigma / h_elem * _test_neighbor[_j][_qp] * _test[_i][_qp];
     break;
 
   case NeighborNeighbor:
-    r += 0.5 * (_grad_test_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp] - _epsilon * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp]);
+    r += 0.5 * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
+    r -= _epsilon * 0.5 * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp];
     r += _sigma / h_elem * _test_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
     break;
   }
