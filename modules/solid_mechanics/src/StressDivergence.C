@@ -17,7 +17,7 @@ InputParameters validParams<StressDivergence>()
 StressDivergence::StressDivergence(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _stress(getMaterialProperty<RealTensorValue>("stress")),
-   _elasticity_tensor(getMaterialProperty<ColumnMajorMatrix>("elasticity_tensor")),
+   _Jacobian_mult(getMaterialProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _component(getParam<Real>("component")),
    _xdisp_var(isCoupled("x_disp") ? coupled("x_disp") : 0),
    _ydisp_var(isCoupled("y_disp") ? coupled("y_disp") : 0),
@@ -39,8 +39,8 @@ StressDivergence::computeQpJacobian()
   for(unsigned int j = 0; j<LIBMESH_DIM; j++)
     for(unsigned int i = 0; i<LIBMESH_DIM; i++)
     {
-      value(i) += 0.5*_elasticity_tensor[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
-      value(i) += 0.5*_elasticity_tensor[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
+      value(i) += 0.5*_Jacobian_mult[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
+      value(i) += 0.5*_Jacobian_mult[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
     }
   
   return value * _grad_test[_i][_qp];
@@ -59,7 +59,7 @@ StressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
   RealVectorValue value;
   for(unsigned int j = 0; j<LIBMESH_DIM; j++)
     for(unsigned int i = 0; i<LIBMESH_DIM; i++)
-      value(i) += _elasticity_tensor[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*coupled_component)+j) * _grad_phi[_j][_qp](j);
+      value(i) += _Jacobian_mult[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*coupled_component)+j) * _grad_phi[_j][_qp](j);
   
-  return value * _grad_phi[_i][_qp];
+  return value * _grad_test[_i][_qp];
 }

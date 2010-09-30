@@ -29,6 +29,7 @@ protected:
 
   MaterialProperty<RealTensorValue> & _stress;
   MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
+  MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
   MaterialProperty<ColumnMajorMatrix> & _elastic_strain;
 
   MaterialProperty<Real> & _thermal_conductivity;

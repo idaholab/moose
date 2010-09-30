@@ -20,6 +20,7 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, MooseSy
    _temp(_has_temp ? coupledValue("temp") : _zero),
    _stress(declareProperty<RealTensorValue>("stress")),
    _elasticity_tensor(declareProperty<ColumnMajorMatrix>("elasticity_tensor")),
+   _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _elastic_strain(declareProperty<ColumnMajorMatrix>("elastic_strain")),
    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
    _density(declareProperty<Real>("density")),

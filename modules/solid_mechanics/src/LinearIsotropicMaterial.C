@@ -72,7 +72,7 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
   // Change 9x1 to a 3x3
   stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
 
-  // Fill the material property
+  // Fill the material properties
   stress_vector.fill(stress);
 }
 
@@ -80,6 +80,8 @@ void
 LinearIsotropicMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
 {
   elastic_strain = total_strain;
+  //Jacobian multiplier of the stress
+  _Jacobian_mult[_qp] = *_local_elasticity_tensor;
 }
 
 void
