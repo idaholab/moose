@@ -35,6 +35,7 @@
 #include "StressDivergence.h"
 #include "StressOutput.h"
 #include "LinearIsotropicMaterial.h"
+#include "LinearAnisotropicMaterial.h"
 #include "PlasticMaterial.h"
 #include "wopsBiLinPlasticMaterial.h"
 #include "DeltaGamma.h"
@@ -87,6 +88,7 @@ Elk::registerObjects()
   registerKernel(StressOutput);
   registerKernel(DeltaGamma);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
+  registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(PlasticMaterial);
   registerMaterial(wopsBiLinPlasticMaterial);
   
