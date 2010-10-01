@@ -2,11 +2,15 @@
   dim = 2
   generated = true
   [./Generation]
-   nx = 5
-   ny = 5
-   xmin = -1 
+   nx = 2
+   ny = 2
+#   xmin = -1
+#   xmax = 1
+#   ymin = -1
+#   ymax = 1
+   xmin = 0
    xmax = 1
-   ymin = -1
+   ymin = 0
    ymax = 1
    elem_type = QUAD4
   [../]
@@ -16,13 +20,13 @@
   active = 'u'
 
   [./u] 
-    order = SECOND 
+    order = FIRST
     family = MONOMIAL
 
-    [./InitialCondition]
+	[./InitialCondition]
       type = ConstantIC
       value = 1 
-    [../]
+	[../]
   [../]
 []
 
@@ -31,34 +35,34 @@
   
   [./forcing_fn]
     type = ParsedFunction
-#    value = -4.0+(x*x)+(y*y)
-#    value = x
-#    value = (x*x)-2.0
-#    value = -pow(e,-x-(y*y))*(4*y*y-2)
-    value = (x*x*x)-6.0*x
+#    function = -4.0+(x*x)+(y*y)
+#    function = x
+#    function = (x*x)-2.0
+    value = 2*pow(e,-x-(y*y))*(1-2*y*y)
+#    function = (x*x*x)-6.0*x
   [../]
   
   [./exact_fn]
     type = ParsedGradFunction
-#    value = x
+#    function = x
 #    grad_x = 1
 #    grad_y = 0
     
-#    value = (x*x)+(y*y)
+#    function = (x*x)+(y*y)
 #    grad_x = 2*x
 #    grad_y = 2*y
 
-#    value = (x*x)
+#    function = (x*x)
 #    grad_x = 2*x
 #    grad_y = 0
 
-#    value = pow(e,-x-(y*y))
-#    grad_x = -pow(e,-x-(y*y))
-#    grad_y = -2*y*pow(e,-x-(y*y))
+    value = pow(e,-x-(y*y))
+    grad_x = -pow(e,-x-(y*y))
+    grad_y = -2*y*pow(e,-x-(y*y))
 
-    value = (x*x*x)
-    grad_x = 3*x*x
-    grad_y = 0
+#    function = (x*x*x)
+#    grad_x = 3*x*x
+#    grad_y = 0
   [../]
 []
 
@@ -88,7 +92,7 @@
   [./dg_diff]
   	type = DGDiffusion
   	variable = u
-  	epsilon = 1
+  	epsilon = -1
   	sigma = 6
   [../]
 []
@@ -101,8 +105,8 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-	  epsilon = 1
-  	sigma = 6
+	epsilon = -1
+	sigma = 6
   [../]
 []
 
@@ -119,17 +123,20 @@
   type = Steady
   perf_log = true
   petsc_options = '-snes_mf_operator'
+#  petsc_options = '-snes_mf'
 #  petsc_options_iname = '-pc_type -pc_hypre_type'
 #  petsc_options_value = 'hypre    boomeramg'
   
 #  petsc_options = '-snes_mf'
-  max_r_steps = 0
+  max_r_steps = 2
   [./Adaptivity]
-  	steps = 1
+  	steps = 3
     refine_fraction = 1.0
     coarsen_fraction = 0
     max_h_level = 8
   [../]
+
+  nl_rel_tol = 1e-10
   
 #  nl_rel_tol = 1e-12
 []

@@ -62,7 +62,7 @@
     type = DGMatDiffusion
     variable = u
     sigma = 6
-    epsilon = 1.0
+    epsilon = -1.0
     prop_name = matp
   [../]
 []
@@ -77,7 +77,7 @@
     function = exact_fn
     prop_name = matp
     sigma = 6
-    epsilon = 1.0
+    epsilon = -1.0
   [../]
 []
 
