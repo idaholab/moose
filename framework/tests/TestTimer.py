@@ -39,7 +39,7 @@ class TestTimer(TestHarness):
     num = 0
     parse_failed = False
     for test, result in self.results_table.items():
-      if result == 'skipped' or result == 'FAILED' or result == 'FAIL':
+      if result == 'OK' or result == 'skipped' or result == 'FAILED' or result == 'FAIL':
         continue
 
       try:
