@@ -36,12 +36,12 @@ ParsedFunction::ParsedFunction(const std::string & name, MooseSystem & moose_sys
   _vals.resize(vars.size() + 4);
 
   //prebuild map of variable names to pointers to put the variable value
-  for (int i = 0; i < vars.size(); i++)
+  for (unsigned int i = 0; i < vars.size(); i++)
     _var_map[vars[i]] = &(_vals[4+i]); //add 4 to account for t,x,y,z
 
   //fill in the variables whose values we already know. The values in vals fill
   //in the first n variables in the variables list.
-  for (int i = 0; i < vals.size(); i++)
+  for (unsigned int i = 0; i < vals.size(); i++)
     _vals[i+4] = vals[i];
 
   initializeParser(_parser, parameters.get<std::string>("value"), vars, vals);
@@ -52,13 +52,13 @@ ParsedFunction::~ParsedFunction()
 }
 
 void
-ParsedFunction::initializeParser(FunctionParser & fp, std::string equation, std::vector<std::string> vars, std::vector<Real> vals)
+ParsedFunction::initializeParser(FunctionParser & fp, std::string equation, std::vector<std::string> vars, std::vector<Real> /*vals*/)
 {
   //add constants to the parser, like pi and e
   defineConstants(fp);
 
   std::string variables = "t,x,y,z";
-  for (int i = 0; i < vars.size(); i++)
+  for (unsigned int i = 0; i < vars.size(); i++)
     variables += "," + vars[i];
 
   int res = fp.Parse( equation, variables );

@@ -36,18 +36,18 @@ class ComputeInternalDamping
 {
 public:
   ComputeInternalDamping(MooseSystem &sys, const NumericVector<Number>& in_soln, const NumericVector<Number>& update)
-    :_moose_system(sys),
+    :_damping(1.0),
+     _moose_system(sys),
      _soln(in_soln),
-     _update(update),
-     _damping(1.0)
+     _update(update)
   {}
 
   // Splitting Constructor
   ComputeInternalDamping(ComputeInternalDamping & x, Threads::split)
-    : _moose_system(x._moose_system),
+    : _damping(1.0),
+      _moose_system(x._moose_system),
       _soln(x._soln),
-      _update(x._update),
-      _damping(1.0)
+      _update(x._update)
   {}
 
   // Join Operator
@@ -77,8 +77,6 @@ public:
 
       _moose_system.reinitKernels(tid, _soln, elem, NULL);
       _moose_system.reinitDampers(tid, _update);
-
-      unsigned int cur_subdomain = elem->subdomain_id();
 
       for(damper_it=damper_begin;damper_it!=damper_end;++damper_it)
       {

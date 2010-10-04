@@ -198,7 +198,7 @@ BoundaryCondition::computeIntegral()
 }
 
 VariableValue &
-BoundaryCondition::coupledValue(const std::string & var_name, int i)
+BoundaryCondition::coupledValue(const std::string & var_name, unsigned int i)
 {
   if(!isCoupled(var_name, i))
     mooseError("BC _" + name() + "_ was not provided with a variable coupled_as " + var_name + "\n\n");
@@ -210,7 +210,7 @@ BoundaryCondition::coupledValue(const std::string & var_name, int i)
 }
 
 VariableGradient &
-BoundaryCondition::coupledGradient(const std::string & var_name, int i)
+BoundaryCondition::coupledGradient(const std::string & var_name, unsigned int i)
 {
   if(!isCoupled(var_name, i))
     mooseError("BC _" + name() + "_ was not provided with a variable coupled_as " + var_name + "\n\n");

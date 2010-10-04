@@ -36,10 +36,10 @@ InputParameters validParams<DGMDDBC>()
 DGMDDBC::DGMDDBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :BoundaryCondition(name, moose_system, parameters),
    _func(getFunction("function")),
-   _epsilon(getParam<Real>("epsilon")),
-   _sigma(getParam<Real>("sigma")),
    _prop_name(getParam<std::string>("prop_name")),
-   _diff(getMaterialProperty<Real>(_prop_name))
+   _diff(getMaterialProperty<Real>(_prop_name)),
+   _epsilon(getParam<Real>("epsilon")),
+   _sigma(getParam<Real>("sigma"))
 {}
 
 Real
@@ -63,7 +63,6 @@ DGMDDBC::computeQpJacobian()
   const unsigned int elem_b_order = static_cast<unsigned int> (_fe->get_order());
   const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
 
-  Real fn = _func.value(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
   Real r = 0;
   r -= _diff[_qp] * _grad_test[_j][_qp] * _normals[_qp] * _test[_i][_qp];
   r += _epsilon * _test[_j][_qp] * _diff[_qp] * _grad_test[_i][_qp] * _normals[_qp];

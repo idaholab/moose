@@ -17,8 +17,8 @@
 #include "FunctionWarehouse.h"
 
 FunctionInterface::FunctionInterface(FunctionWarehouse & func_warehouse, InputParameters & params):
-  _func_warehouse(func_warehouse),
-  _func_params(params)
+  _func_params(params),
+  _func_warehouse(func_warehouse)
 {
 }
 

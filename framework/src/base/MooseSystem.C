@@ -55,9 +55,11 @@ MooseSystem::MooseSystem() :
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _executioner(NULL),
   _es(NULL),
-  _displaced_es(NULL),
   _system(NULL),
   _aux_system(NULL),
+  _displaced_es(NULL),
+  _displaced_system(NULL),
+  _displaced_aux_system(NULL),
   _geom_type(Moose::XYZ),
   _mesh(NULL),
   _displaced_mesh(NULL),
@@ -90,8 +92,6 @@ MooseSystem::MooseSystem() :
   _t_step(0),
   _t_scheme(0),
   _n_of_rk_stages(0),
-  _active_local_elem_range(NULL),
-  _active_node_range(NULL),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -105,7 +105,9 @@ MooseSystem::MooseSystem() :
   _output_initial(false),
   _l_abs_step_tol(1e-10),
   _last_rnorm(0),
-  _initial_residual(0)
+  _initial_residual(0),
+  _active_local_elem_range(NULL),
+  _active_node_range(NULL)
 {
   sizeEverything();
 }
@@ -119,9 +121,11 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _postprocessor_data(libMesh::n_threads(), PostprocessorData(*this)),
   _executioner(NULL),
   _es(NULL),
-  _displaced_es(NULL),
   _system(NULL),
   _aux_system(NULL),
+  _displaced_es(NULL),
+  _displaced_system(NULL),
+  _displaced_aux_system(NULL),
   _mesh(&mesh),
   _displaced_mesh(NULL),
   _has_displaced_mesh(false),
@@ -153,8 +157,6 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _t_step(0),
   _t_scheme(0),
   _n_of_rk_stages(0),
-  _active_local_elem_range(NULL),
-  _active_node_range(NULL),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -169,7 +171,9 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _output_initial(false),
   _l_abs_step_tol(1e-10),
   _last_rnorm(0),
-  _initial_residual(0)
+  _initial_residual(0),
+  _active_local_elem_range(NULL),
+  _active_node_range(NULL)
 {
   sizeEverything();
   initEquationSystems();
@@ -285,7 +289,7 @@ MooseSystem::getDisplacementVariables()
 void
 MooseSystem::sizeEverything()
 {
-  int n_threads = libMesh::n_threads();
+  unsigned int n_threads = libMesh::n_threads();
 
   _first.resize(n_threads, true);
 
@@ -815,7 +819,6 @@ MooseSystem::addAuxKernel(std::string aux_name,
   std::string var_name = parameters.get<std::string>("variable");
 
   std::vector<std::list<AuxKernel *>::iterator > dependent_auxs;
-  std::vector<AuxKernel *> *aux_ptr;
   std::list<AuxKernel *>::iterator new_aux_iter;
 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)

@@ -143,8 +143,8 @@ protected:
 
 inline
 PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (MooseSystem & moose_system)
-  :_moose_system(moose_system),
-   Preconditioner<Number>(),
+  :Preconditioner<Number>(),
+   _moose_system(moose_system),
    _equation_systems(moose_system.getEquationSystems())
 {
 }

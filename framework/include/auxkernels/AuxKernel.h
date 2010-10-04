@@ -71,13 +71,13 @@ protected:
   VariableValue & _u_old;
   VariableValue & _u_older;
 
-  virtual VariableValue & coupledValue(const std::string & name, int i = 0);
-  virtual VariableValue & coupledValueOld(const std::string & name, int i = 0);
-  virtual VariableValue & coupledValueOlder(const std::string & name, int i = 0);
+  virtual VariableValue & coupledValue(const std::string & name, unsigned int i = 0);
+  virtual VariableValue & coupledValueOld(const std::string & name, unsigned int i = 0);
+  virtual VariableValue & coupledValueOlder(const std::string & name, unsigned int i = 0);
   
-  virtual VariableGradient & coupledGradient(const std::string & name, int i = 0);
-  virtual VariableGradient & coupledGradientOld(const std::string & name, int i = 0);
-  virtual VariableGradient & coupledGradientOlder(const std::string & name, int i = 0);
+  virtual VariableGradient & coupledGradient(const std::string & name, unsigned int i = 0);
+  virtual VariableGradient & coupledGradientOld(const std::string & name, unsigned int i = 0);
+  virtual VariableGradient & coupledGradientOlder(const std::string & name, unsigned int i = 0);
 
 
   /*************

@@ -45,7 +45,7 @@ ElementData::init()
 
 
 void
-ElementData::reinitKernels(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
+ElementData::reinitKernels(const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * /*Re*/, DenseMatrix<Number> * /*Ke*/)
 {
 //  Moose::perf_log.push("reinit()","Kernel");
 

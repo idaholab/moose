@@ -44,14 +44,14 @@ MMSCoupledDirichletBC::computeQpResidual()
     Real z = (*_current_node)(2);
     Real u = sin(a*x*y*z*t);
     //Our function gets added here.
-    return _u[_qp]-(sin(a*x*y*z*t));
+    return _u[_qp]-u;
   }
   else
   {
     Real z = 1.0;
     Real u = sin(a*x*y*z*t);
     //Our function gets added here.
-    return _u[_qp]-(sin(a*x*y*z*t));
+    return _u[_qp]-u;
   }
   
 }

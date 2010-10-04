@@ -20,7 +20,7 @@
 #include "elem.h"
 #include "plane.h"
 
-PenetrationLocator::PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, unsigned int slave)
+PenetrationLocator::PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, short int slave)
   :_moose_system(moose_system),
   _mesh(mesh),
   _master_boundary(master),
@@ -79,7 +79,7 @@ PenetrationLocator::detectPenetration()
         
         for(unsigned int k=0; k<n_nodes; k++)  
         {
-          unsigned int other_boundary_id = node_boundary_list[k];
+          short int other_boundary_id = node_boundary_list[k];
 
           if(other_boundary_id == _slave_boundary)
           {
@@ -187,7 +187,7 @@ PenetrationLocator::detectPenetration()
 }
 
 RealVectorValue
-PenetrationLocator::normal(const Elem & side, const Point & p0)
+PenetrationLocator::normal(const Elem & side, const Point & /*p0*/)
 {
   
   unsigned int dim = _mesh.mesh_dimension();

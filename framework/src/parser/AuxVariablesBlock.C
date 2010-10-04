@@ -50,7 +50,6 @@ AuxVariablesBlock::execute()
 #endif
 
   TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
-  TransientExplicitSystem &aux_system = *_moose_system.getAuxSystem();
   
   visitChildren();
 

@@ -29,7 +29,7 @@ class PenetrationLocator
 {
 public:
 
-  PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, unsigned int slave);
+  PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, short int slave);
   void detectPenetration();
 
   Real penetrationDistance(unsigned int node_id) const;
@@ -61,7 +61,7 @@ private:
   
   Mesh & _mesh;
   std::vector<unsigned int> _master_boundary;
-  unsigned int _slave_boundary;
+  short int _slave_boundary;
 
   /**
    * Data structure of nodes and their associated penetration information

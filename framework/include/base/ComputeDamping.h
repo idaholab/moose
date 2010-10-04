@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTEPOSTPROCESSORS_H
-#define COMPUTEPOSTPROCESSORS_H
+#ifndef COMPUTEDAMPING_H
+#define COMPUTEDAMPING_H
 
-#endif //COMPUTEPOSTPROCESSORS_H
+#endif //COMPUTEDAMPING_H

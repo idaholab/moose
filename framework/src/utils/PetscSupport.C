@@ -172,7 +172,7 @@ namespace Moose
     /**
      * Called at the beginning of every nonlinear step (before Jacobian is formed)
      */
-    PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt step)
+    PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt /*step*/)
     {
       void *ctx = NULL;
       SNESGetApplicationContext(snes, &ctx);
@@ -224,7 +224,7 @@ namespace Moose
       SNESSetApplicationContext(snes, (void *) executioner);
     }
     
-    PetscErrorCode dampedCheck(SNES snes, Vec x, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * changed_w)
+    PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * /*changed_w*/)
     {
       //w = updated solution = x+ scaling*y
       //x = current solution
@@ -237,8 +237,6 @@ namespace Moose
 
       MooseSystem * moose_system = equation_systems->parameters.get<MooseSystem *>("moose_system");
 
-      MeshBase & mesh = equation_systems->get_mesh();
-    
       TransientNonlinearImplicitSystem& system =
         equation_systems->get_system<TransientNonlinearImplicitSystem> ("NonlinearSystem");
 

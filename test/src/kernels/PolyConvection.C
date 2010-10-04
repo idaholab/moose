@@ -44,14 +44,14 @@ PolyConvection::PolyConvection(const std::string & name,
 Real PolyConvection::computeQpResidual()
 {
   // We changed Residual because we have no grad u.
-  Real a = libMesh::pi;
-  Real b = 3;
-  Real e = 4;
-  Real x = _q_point[_qp](0);
-  Real y = _q_point[_qp](1);
-  Real z = _q_point[_qp](2);
-  Real t = _t;
-  Real u = a*x*x*x*y*t+b*y*y*z+e*x*y*z*z*z*z;  
+//  Real a = libMesh::pi;
+//  Real b = 3;
+//  Real e = 4;
+//  Real x = _q_point[_qp](0);
+//  Real y = _q_point[_qp](1);
+//  Real z = _q_point[_qp](2);
+//  Real t = _t;
+//  Real u = a*x*x*x*y*t+b*y*y*z+e*x*y*z*z*z*z;
   return _test[_i][_qp]*(velocity*_grad_u[_qp]);
 }
 

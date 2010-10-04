@@ -91,7 +91,7 @@ AuxKernel::isNodal()
 }
 
 VariableValue &
-AuxKernel::coupledValue(const std::string & name, int i)
+AuxKernel::coupledValue(const std::string & name, unsigned int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -118,7 +118,7 @@ AuxKernel::coupledValue(const std::string & name, int i)
 
 
 VariableValue &
-AuxKernel::coupledValueOld(const std::string & name, int i)
+AuxKernel::coupledValueOld(const std::string & name, unsigned int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -141,7 +141,7 @@ AuxKernel::coupledValueOld(const std::string & name, int i)
 
 
 VariableValue &
-AuxKernel::coupledValueOlder(const std::string & name, int i)
+AuxKernel::coupledValueOlder(const std::string & name, unsigned int i)
 {
   if(!isCoupled(name))
     mooseError("\nKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -164,7 +164,7 @@ AuxKernel::coupledValueOlder(const std::string & name, int i)
 
 
 VariableGradient &
-AuxKernel::coupledGradient(const std::string & name, int i)
+AuxKernel::coupledGradient(const std::string & name, unsigned int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -181,7 +181,7 @@ AuxKernel::coupledGradient(const std::string & name, int i)
 }
 
 VariableGradient &
-AuxKernel::coupledGradientOld(const std::string & name, int i)
+AuxKernel::coupledGradientOld(const std::string & name, unsigned int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");
@@ -198,7 +198,7 @@ AuxKernel::coupledGradientOld(const std::string & name, int i)
 }
 
 VariableGradient &
-AuxKernel::coupledGradientOlder(const std::string & name, int i)
+AuxKernel::coupledGradientOlder(const std::string & name, unsigned int i)
 {
   if(!isCoupled(name))
     mooseError("\nAuxKernel _" + _name + "_ was not provided with a variable coupled_as " + name + "\n\n");

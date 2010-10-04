@@ -43,7 +43,6 @@ public:
   void operator() (const NodeRange & range) const
   {
     ParallelUniqueId puid;
-    unsigned int tid = puid.id;
 
     std::vector<std::string> displacement_variables = _moose_system.getDisplacementVariables();
     unsigned int num_displacements = displacement_variables.size();

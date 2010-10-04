@@ -56,8 +56,6 @@ DamperData::reinit(const NumericVector<Number>& increment_vec)
 
     FEType fe_type = _moose_system._dof_map->variable_type(var_num);
 
-    FEFamily family = fe_type.family;
-
     _var_increments[var_num].resize(_n_qpoints);
 
     const std::vector<std::vector<Real> > & static_phi = *_phi[fe_type];

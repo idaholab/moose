@@ -29,9 +29,9 @@ InputParameters validParams<MooseObject>()
 MooseObject::MooseObject(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   _name(name),
   _moose_system(moose_system),
-  _parameters(parameters),
   _tid(parameters.get<THREAD_ID>("_tid")),
-  _use_displaced_mesh(moose_system.hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh"))
+  _use_displaced_mesh(moose_system.hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")),
+  _parameters(parameters)
 {}
 
 MooseObject::~MooseObject()

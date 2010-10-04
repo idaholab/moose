@@ -47,10 +47,10 @@ InputParameters validParams<ExactSolutionExecutioner>()
 ExactSolutionExecutioner::ExactSolutionExecutioner(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Steady(name, moose_system, parameters),
   _exact(*moose_system.getEquationSystems()),
-  _unknowns(getParam<std::vector<std::string> >("unknowns")),
-  _compute_h1(getParam<bool>("h1_error")),
   _func(getFunction("function")),
-  _output_norms(false)
+  _unknowns(getParam<std::vector<std::string> >("unknowns")),
+  _output_norms(false),
+  _compute_h1(getParam<bool>("h1_error"))
 {
   //set a pointer to this object in the parameters, so the callback has
   //an object to call exactSolution() on
@@ -87,7 +87,7 @@ ExactSolutionExecutioner::~ExactSolutionExecutioner()
 }
 
 Number
-ExactSolutionExecutioner::exactSolution(const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& unknown_name)
+ExactSolutionExecutioner::exactSolution(const Point& p, const Parameters& /*parameters*/, const std::string& /*sys_name*/, const std::string& /*unknown_name*/)
 {
   //TODO is this the right way to check dimensions?
   Real x = p(0);
@@ -98,7 +98,7 @@ ExactSolutionExecutioner::exactSolution(const Point& p, const Parameters& parame
 }
 
 RealGradient
-ExactSolutionExecutioner::exactGrad(const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& unknown_name)
+ExactSolutionExecutioner::exactGrad(const Point& p, const Parameters& /*parameters*/, const std::string& /*sys_name*/, const std::string& /*unknown_name*/)
 {
   //TODO is this the right way to check dimensions?
   Real x = p(0);
@@ -111,7 +111,7 @@ ExactSolutionExecutioner::exactGrad(const Point& p, const Parameters& parameters
 void
 ExactSolutionExecutioner::postSolve()
 {
-  for (int i = 0; i < _unknowns.size(); i++)
+  for (unsigned int i = 0; i < _unknowns.size(); i++)
   {
     std::string var = _unknowns[i];
     _exact.compute_error("NonlinearSystem", var);

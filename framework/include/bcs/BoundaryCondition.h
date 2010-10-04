@@ -177,14 +177,14 @@ protected:
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  VariableValue & coupledValue(const std::string & var_name, int i = 0);
+  VariableValue & coupledValue(const std::string & var_name, unsigned int i = 0);
 
   /**
    * Returns a reference (that can be stored) to a coupled variable's gradient.
    * 
    * @param name The name the kernel wants to refer to the variable as.
    */
-  VariableGradient & coupledGradient(const std::string & var_name, int i = 0);
+  VariableGradient & coupledGradient(const std::string & var_name, unsigned int i = 0);
 
 
   /** Side shape function. 
