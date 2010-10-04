@@ -14,10 +14,10 @@ InputParameters validParams<CHInterface>()
 CHInterface::CHInterface(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
    _kappa_name(getParam<std::string>("kappa_name")),
-   _kappa(getMaterialProperty<Real>(_kappa_name)),
    _mob_name(getParam<std::string>("mob_name")),
-   _M(getMaterialProperty<Real>(_mob_name)),
    _grad_mob_name(getParam<std::string>("grad_mob_name")),
+   _kappa(getMaterialProperty<Real>(_kappa_name)),
+   _M(getMaterialProperty<Real>(_mob_name)),
    _grad_M(getMaterialProperty<RealGradient>(_grad_mob_name))
 {
 }

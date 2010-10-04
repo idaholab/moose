@@ -14,20 +14,21 @@ PlasticMaterial::PlasticMaterial(const std::string & name,
                                  InputParameters parameters)
   :LinearIsotropicMaterial(name, moose_system, parameters),
    _input_yield_stress(getParam<Real>("yield_stress")),
+   _input_shear_modulus(_youngs_modulus / ((2*(1+_poissons_ratio)))),
    _yield_stress(declareProperty<Real>("yield_stress")),
    _shear_modulus(declareProperty<Real>("shear_modulus")),
    
-   _accumulated_plastic_strain(declareProperty<Real>("accumulated_plastic_strain")),
-   _accumulated_plastic_strain_old(declarePropertyOld<Real>("accumulated_plastic_strain")),
-   
    _plastic_strain(declareProperty<ColumnMajorMatrix>("plastic_strain")),
    _plastic_strain_old(declarePropertyOld<ColumnMajorMatrix>("plastic_strain")),
+
+   _accumulated_plastic_strain(declareProperty<Real>("accumulated_plastic_strain")),
+   _accumulated_plastic_strain_old(declarePropertyOld<Real>("accumulated_plastic_strain")),
    
    _von_mises_stress(declareProperty<Real>("von_mises_stress")),
    
    _delta_gamma(coupledValue("delta_gamma"))
 {
-  _input_shear_modulus = _youngs_modulus / ((2*(1+_poissons_ratio)));
+
 }
 
 void
