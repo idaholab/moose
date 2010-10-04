@@ -61,7 +61,7 @@ public:
   {
     ParallelUniqueId puid;
 
-    unsigned int tid = puid.id;
+    THREAD_ID tid = puid.id;
 
     ConstElemRange::const_iterator el = range.begin();
 

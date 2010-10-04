@@ -40,9 +40,9 @@ public:
   KernelIterator activeKernelsBegin();
   KernelIterator activeKernelsEnd();
 
-  void addKernel(Kernel *kernel, const std::set<unsigned int> & block_ids);
+  void addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids);
 
-  void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
+  void updateActiveKernels(Real t, Real dt, subdomain_id_type subdomain_id);
 
 protected:
   /**

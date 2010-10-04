@@ -753,12 +753,12 @@ void MooseSystem::addKernel(std::string kernel_name,
 
     Kernel *kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
 
-    std::set<unsigned int> blk_ids;
+    std::set<subdomain_id_type> blk_ids;
     if (!parameters.isParamValid("block"))
       blk_ids = _var_map[kernel->variable()];
     else
     {
-      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+      std::vector<subdomain_id_type> blocks = parameters.get<std::vector<subdomain_id_type> >("block");
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
         if (_var_map[kernel->variable()].count(blocks[i]) > 0 || _var_map[kernel->variable()].count(Moose::ANY_BLOCK_ID) > 0)
@@ -903,13 +903,13 @@ MooseSystem::addMaterial(std::string mat_name,
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+    std::vector<subdomain_id_type> blocks = parameters.get<std::vector<subdomain_id_type> >("block");
 
     // We need to set 'variable' in order to initialize other member data, since Material inherits from PDEBase
     parameters.set<std::string>("variable") = _es->get_system(0).variable_name(0);
 
     for (unsigned int i=0; i<blocks.size(); ++i) {
-      parameters.set<unsigned int>("block_id") = blocks[i];
+      parameters.set<subdomain_id_type>("block_id") = blocks[i];
 
       parameters.set<QuadraturePointData *>("_qp_data") = _element_data[tid];
       parameters.set<MaterialData *>("_material_data") = &_material_data[tid];
@@ -937,8 +937,8 @@ MooseSystem::addStabilizer(std::string stabilizer_name,
 
     stabilizer = StabilizerFactory::instance()->create(stabilizer_name, name, *this, parameters);
 
-    if (parameters.have_parameter<unsigned int>("block_id"))
-      _stabilizers[tid].addBlockStabilizer(parameters.get<unsigned int>("block_id"), stabilizer->variable(), stabilizer);
+    if (parameters.have_parameter<subdomain_id_type>("block_id"))
+      _stabilizers[tid].addBlockStabilizer(parameters.get<subdomain_id_type>("block_id"), stabilizer->variable(), stabilizer);
     else
       _stabilizers[tid].addStabilizer(stabilizer->variable(), stabilizer);
   }
@@ -1215,7 +1215,7 @@ MooseSystem::updateMaterials()
 }
 
 void
-MooseSystem::subdomainSetup(THREAD_ID tid, unsigned int block_id)
+MooseSystem::subdomainSetup(THREAD_ID tid, subdomain_id_type block_id)
 {
   _element_data[tid]->_material = _materials[tid].getMaterials(block_id);
   _face_data[tid]->_material = _materials[tid].getBoundaryMaterials(block_id);

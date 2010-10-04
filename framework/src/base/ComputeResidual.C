@@ -46,7 +46,7 @@ public:
   {
     ParallelUniqueId puid;
 
-    unsigned int tid = puid.id;
+    THREAD_ID tid = puid.id;
 
     DenseVector<Number> Re;
 
@@ -58,12 +58,12 @@ public:
     StabilizerIterator stabilizer_end = _moose_system._stabilizers[tid].activeStabilizersEnd();
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
+    subdomain_id_type subdomain = std::numeric_limits<subdomain_id_type>::max();
 
     for (el = range.begin() ; el != range.end(); ++el)
     {
       const Elem* elem = *el;
-      unsigned int cur_subdomain = elem->subdomain_id();
+      subdomain_id_type cur_subdomain = elem->subdomain_id();
 
       Re.zero();
 

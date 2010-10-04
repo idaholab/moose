@@ -33,7 +33,7 @@ InputParameters validParams<Kernel>()
 {
   InputParameters params = validParams<PDEBase>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
-  params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
+  params.addParam<std::vector<subdomain_id_type> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
   return params;
 }
 

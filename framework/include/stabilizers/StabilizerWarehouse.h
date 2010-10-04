@@ -39,18 +39,18 @@ public:
   StabilizerIterator activeStabilizersBegin();
   StabilizerIterator activeStabilizersEnd();
 
-  StabilizerIterator blockStabilizersBegin(unsigned int block_id);
-  StabilizerIterator blockStabilizersEnd(unsigned int block_id);
+  StabilizerIterator blockStabilizersBegin(subdomain_id_type block_id);
+  StabilizerIterator blockStabilizersEnd(subdomain_id_type block_id);
 
   bool activeStabilizerBlocks(std::set<subdomain_id_type> & set_buffer) const;
 
-  void addBlockStabilizer(unsigned int block_id, unsigned int var_num, Stabilizer *stabilizer);
+  void addBlockStabilizer(subdomain_id_type block_id, unsigned int var_num, Stabilizer *stabilizer);
   void addStabilizer(unsigned int var_num, Stabilizer *stabilizer);
 
 protected:
   std::map<unsigned int, Stabilizer *> _active_stabilizers;
 
-  std::map<unsigned int, std::map<unsigned int, Stabilizer *> > _block_stabilizers;
+  std::map<subdomain_id_type, std::map<unsigned int, Stabilizer *> > _block_stabilizers;
 
   std::map<unsigned int, bool> _is_stabilized;
 };

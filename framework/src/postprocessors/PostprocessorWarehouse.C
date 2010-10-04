@@ -25,7 +25,7 @@ PostprocessorWarehouse::PostprocessorWarehouse()
 PostprocessorWarehouse::~PostprocessorWarehouse()
 {
   {
-    std::map<unsigned int, std::vector<Postprocessor *> >::iterator j;
+    std::map<subdomain_id_type, std::vector<Postprocessor *> >::iterator j;
     for (j=_element_postprocessors.begin(); j!=_element_postprocessors.end(); ++j)
     {
       PostprocessorIterator k;
@@ -55,7 +55,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 {
   if(dynamic_cast<ElementPostprocessor*>(postprocessor))
   {
-    unsigned int block_id = dynamic_cast<ElementPostprocessor*>(postprocessor)->blockID();
+    subdomain_id_type block_id = dynamic_cast<ElementPostprocessor*>(postprocessor)->blockID();
     _element_postprocessors[block_id].push_back(postprocessor);
     _block_ids_with_postprocessors.insert(block_id);
   }
@@ -73,13 +73,13 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 }
 
 PostprocessorIterator
-PostprocessorWarehouse::elementPostprocessorsBegin(unsigned int block_id)
+PostprocessorWarehouse::elementPostprocessorsBegin(subdomain_id_type block_id)
 {
   return _element_postprocessors[block_id].begin();
 }
 
 PostprocessorIterator
-PostprocessorWarehouse::elementPostprocessorsEnd(unsigned int block_id)
+PostprocessorWarehouse::elementPostprocessorsEnd(subdomain_id_type block_id)
 {
   return _element_postprocessors[block_id].end();
 }

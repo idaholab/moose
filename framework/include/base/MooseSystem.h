@@ -305,7 +305,7 @@ public:
 
   Real compute_damping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
-  void subdomainSetup(THREAD_ID tid, unsigned int block_id);
+  void subdomainSetup(THREAD_ID tid, subdomain_id_type block_id);
 
   /**
    * Update materials
