@@ -30,7 +30,7 @@ MaterialWarehouse::~MaterialWarehouse()
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getMaterials(subdomain_id_type block_id)
+MaterialWarehouse::getMaterials(unsigned int block_id)
 {
   std::stringstream oss;
 
@@ -44,7 +44,7 @@ MaterialWarehouse::getMaterials(subdomain_id_type block_id)
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getBoundaryMaterials(subdomain_id_type block_id)
+MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
 {
   std::stringstream oss;
 
@@ -58,7 +58,7 @@ MaterialWarehouse::getBoundaryMaterials(subdomain_id_type block_id)
 }
 
 std::vector<Material *> &
-MaterialWarehouse::getNeighborMaterials(subdomain_id_type block_id)
+MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
 {
   std::stringstream oss;
 
@@ -117,17 +117,17 @@ MaterialWarehouse::activeBoundaryMaterialsEnd()
 }
 
 void
-MaterialWarehouse::addMaterial(subdomain_id_type block_id, Material *material)
+MaterialWarehouse::addMaterial(int block_id, Material *material)
 {
   _active_materials[block_id].push_back(material);
 }
 
-void MaterialWarehouse::addBoundaryMaterial(subdomain_id_type block_id, Material *material)
+void MaterialWarehouse::addBoundaryMaterial(int block_id, Material *material)
 {
   _active_boundary_materials[block_id].push_back(material);
 }
 
-void MaterialWarehouse::addNeighborMaterial(subdomain_id_type block_id, Material *material)
+void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
 {
   _active_neighbor_materials[block_id].push_back(material);
 }

@@ -43,7 +43,7 @@ public:
   {
     ParallelUniqueId puid;
 
-    THREAD_ID tid = puid.id;
+    unsigned int tid = puid.id;
 
     DenseVector<Number> Re;
 
@@ -51,13 +51,13 @@ public:
 
     //Initialize side and element post processors
 
-    std::set<subdomain_id_type>::iterator block_begin = _moose_system._pps[tid]._block_ids_with_postprocessors.begin();
-    std::set<subdomain_id_type>::iterator block_end = _moose_system._pps[tid]._block_ids_with_postprocessors.end();
-    std::set<subdomain_id_type>::iterator block_it = block_begin;
+    std::set<unsigned int>::iterator block_begin = _moose_system._pps[tid]._block_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator block_end = _moose_system._pps[tid]._block_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator block_it = block_begin;
 
     for (block_it=block_begin;block_it!=block_end;++block_it)
     {
-      subdomain_id_type block_id = *block_it;
+      unsigned int block_id = *block_it;
 
       PostprocessorIterator postprocessor_begin = _moose_system._pps[tid].elementPostprocessorsBegin(block_id);
       PostprocessorIterator postprocessor_end = _moose_system._pps[tid].elementPostprocessorsEnd(block_id);
@@ -90,7 +90,7 @@ public:
       _moose_system.reinitKernels(tid, _soln, elem, NULL);
       _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(elem->subdomain_id()));
 
-      subdomain_id_type cur_subdomain = elem->subdomain_id();
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       //Global Postprocessors
       PostprocessorIterator postprocessor_begin = _moose_system._pps[tid].elementPostprocessorsBegin(Moose::ANY_BLOCK_ID);
@@ -164,13 +164,13 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
                           ComputeInternalPostprocessors(*this, soln));
 
     // Store element postprocessors values
-    std::set<subdomain_id_type>::iterator block_ids_begin = _pps[0]._block_ids_with_postprocessors.begin();
-    std::set<subdomain_id_type>::iterator block_ids_end = _pps[0]._block_ids_with_postprocessors.end();
-    std::set<subdomain_id_type>::iterator block_ids_it = block_ids_begin;
+    std::set<unsigned int>::iterator block_ids_begin = _pps[0]._block_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator block_ids_end = _pps[0]._block_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator block_ids_it = block_ids_begin;
 
     for(; block_ids_it != block_ids_end; ++block_ids_it)
     {
-      subdomain_id_type block_id = *block_ids_it;
+      unsigned int block_id = *block_ids_it;
 
       PostprocessorIterator element_postprocessor_begin = _pps[0].elementPostprocessorsBegin(block_id);
       PostprocessorIterator element_postprocessor_end = _pps[0].elementPostprocessorsEnd(block_id);

@@ -116,7 +116,7 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
   MeshBase::const_element_iterator       el     = _mesh->active_local_elements_begin();
   const MeshBase::const_element_iterator end_el = _mesh->active_local_elements_end();
 
-  subdomain_id_type subdomain = std::numeric_limits<subdomain_id_type>::max();
+  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
   if(aux_begin != aux_end)
   {
@@ -129,7 +129,7 @@ void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
 
       reinitAuxKernels(0, soln, *elem);
 
-      subdomain_id_type cur_subdomain = elem->subdomain_id();
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       if(cur_subdomain != subdomain)
       {

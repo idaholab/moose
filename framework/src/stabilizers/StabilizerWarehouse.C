@@ -23,7 +23,7 @@ StabilizerWarehouse::~StabilizerWarehouse()
   for (StabilizerIterator j=_active_stabilizers.begin(); j!=_active_stabilizers.end(); ++j)
     delete j->second;
 
-  for (std::map<subdomain_id_type, std::map<unsigned int, Stabilizer *> >::iterator j=_block_stabilizers.begin(); j!=_block_stabilizers.end(); ++j)
+  for (std::map<unsigned int, std::map<unsigned int, Stabilizer *> >::iterator j=_block_stabilizers.begin(); j!=_block_stabilizers.end(); ++j)
   {
     StabilizerIterator k;
     for(k=(j->second).begin(); k!=(j->second).end(); ++k)
@@ -51,19 +51,19 @@ StabilizerWarehouse::activeStabilizersEnd()
 
 
 StabilizerIterator
-StabilizerWarehouse::blockStabilizersBegin(subdomain_id_type block_id)
+StabilizerWarehouse::blockStabilizersBegin(unsigned int block_id)
 {
   return _block_stabilizers[block_id].begin();
 }
 
 StabilizerIterator
-StabilizerWarehouse::blockStabilizersEnd(subdomain_id_type block_id)
+StabilizerWarehouse::blockStabilizersEnd(unsigned int block_id)
 {
   return _block_stabilizers[block_id].end();
 }
 
 void
-StabilizerWarehouse::addBlockStabilizer(subdomain_id_type block_id, unsigned int var_num, Stabilizer *stabilizer)
+StabilizerWarehouse::addBlockStabilizer(unsigned int block_id, unsigned int var_num, Stabilizer *stabilizer)
 {
   _block_stabilizers[block_id][var_num] = stabilizer;
   _is_stabilized[var_num] = true;

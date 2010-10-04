@@ -36,8 +36,8 @@ public:
   PostprocessorWarehouse();
   virtual ~PostprocessorWarehouse();
 
-  PostprocessorIterator elementPostprocessorsBegin(subdomain_id_type block_id);
-  PostprocessorIterator elementPostprocessorsEnd(subdomain_id_type block_id);
+  PostprocessorIterator elementPostprocessorsBegin(unsigned int block_id);
+  PostprocessorIterator elementPostprocessorsEnd(unsigned int block_id);
 
   PostprocessorIterator sidePostprocessorsBegin(unsigned int boundary_id);
   PostprocessorIterator sidePostprocessorsEnd(unsigned int boundary_id);
@@ -50,7 +50,7 @@ public:
   /**
    * All of the block ids that have postprocessors specified to act on them.
    */
-  std::set<subdomain_id_type> _block_ids_with_postprocessors;
+  std::set<unsigned int> _block_ids_with_postprocessors;
 
   /**
    * All of the boundary ids that have postprocessors specified to act on them.
@@ -58,7 +58,7 @@ public:
   std::set<unsigned int> _boundary_ids_with_postprocessors;
 
 protected:
-  std::map<subdomain_id_type, std::vector<Postprocessor *> > _element_postprocessors;
+  std::map<unsigned int, std::vector<Postprocessor *> > _element_postprocessors;
 
   std::map<unsigned int, std::vector<Postprocessor *> > _side_postprocessors;
 

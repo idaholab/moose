@@ -26,12 +26,12 @@ KernelWarehouse::~KernelWarehouse()
 }
 
 void
-KernelWarehouse::addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids)
+KernelWarehouse::addKernel(Kernel *kernel, const std::set<unsigned int> & block_ids)
 {
   _all_kernels.push_back(kernel);
-  for (std::set<subdomain_id_type>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+  for (std::set<unsigned int>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
   {
-    subdomain_id_type blk_id = *it;
+    unsigned int blk_id = *it;
     if (blk_id == Moose::ANY_BLOCK_ID)
       _global_kernels.push_back(kernel);
     else
@@ -52,7 +52,7 @@ KernelWarehouse::activeKernelsEnd()
 }
 
 void
-KernelWarehouse::updateActiveKernels(Real t, Real dt, subdomain_id_type subdomain_id)
+KernelWarehouse::updateActiveKernels(Real t, Real dt, unsigned int subdomain_id)
 {
   _active_kernels.clear();
 

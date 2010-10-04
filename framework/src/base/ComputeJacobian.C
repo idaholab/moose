@@ -48,7 +48,7 @@ public:
   {
     ParallelUniqueId puid;
 
-    THREAD_ID tid = puid.id;
+    unsigned int tid = puid.id;
     
     DenseMatrix<Number> Ke;
 
@@ -60,12 +60,12 @@ public:
     StabilizerIterator stabilizer_end = _moose_system._stabilizers[tid].activeStabilizersEnd();
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    subdomain_id_type subdomain = std::numeric_limits<subdomain_id_type>::max();
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     for (el = range.begin() ; el != range.end(); ++el)
     {
       const Elem* elem = *el;
-      subdomain_id_type cur_subdomain = elem->subdomain_id();
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       _moose_system.reinitKernels(tid, _soln, elem, NULL, &Ke);
 
@@ -272,7 +272,7 @@ public:
   {
     ParallelUniqueId puid;
 
-    THREAD_ID tid = puid.id;
+    unsigned int tid = puid.id;
     
     ConstElemRange::const_iterator el = range.begin();
 
@@ -280,7 +280,7 @@ public:
     StabilizerIterator stabilizer_end = _moose_system._stabilizers[tid].activeStabilizersEnd();
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    subdomain_id_type subdomain = std::numeric_limits<subdomain_id_type>::max();
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     DofMap & dof_map = _precond_system.get_dof_map();
     DenseMatrix<Number> Ke;
@@ -291,7 +291,7 @@ public:
     for (el = range.begin() ; el != range.end(); ++el)
     {
       const Elem* elem = *el;
-      subdomain_id_type cur_subdomain = elem->subdomain_id();
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       _moose_system.reinitKernels(tid, _soln, elem, NULL, NULL);
 
@@ -411,7 +411,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
     if(_has_displaced_mesh)
       updateDisplacedMesh(soln);
 
-    THREAD_ID tid = 0;
+    unsigned int tid = 0;
     
     MeshBase::const_element_iterator el = _mesh->active_local_elements_begin();
     const MeshBase::const_element_iterator end_el = _mesh->active_local_elements_end();
@@ -420,7 +420,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
     StabilizerIterator stabilizer_end = _stabilizers[tid].activeStabilizersEnd();
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    subdomain_id_type subdomain = std::numeric_limits<subdomain_id_type>::max();
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     DofMap & dof_map = precond_system.get_dof_map();
     DenseMatrix<Number> Ke;
@@ -431,7 +431,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
     for (; el != end_el; ++el)
     {
       const Elem* elem = *el;
-      subdomain_id_type cur_subdomain = elem->subdomain_id();
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       reinitKernels(tid, soln, elem, NULL, NULL);
 
