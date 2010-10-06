@@ -19,6 +19,7 @@
 
 // libmesh includes
 #include "type_tensor.h"
+#include "dense_matrix.h"
 
 // system includes
 #include <vector>
@@ -48,6 +49,9 @@ public:
   explicit
   ColumnMajorMatrix(const TypeTensor<Real> & tensor);
 
+  explicit
+  ColumnMajorMatrix(const DenseMatrix<Real> &rhs);
+  
   /**
    * Constructor that takes in 3 vectors and uses them to create columns
    */

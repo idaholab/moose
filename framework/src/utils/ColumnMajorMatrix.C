@@ -37,6 +37,17 @@ ColumnMajorMatrix::ColumnMajorMatrix(const TypeTensor<Real> &rhs)
       (*this)(i, j) = rhs(i, j);
 }
 
+ColumnMajorMatrix::ColumnMajorMatrix(const DenseMatrix<Real> &rhs)
+  :_n_rows(rhs.m()),
+   _n_cols(rhs.n()),
+   _n_entries(rhs.m()*rhs.n()),
+   _values(rhs.m()*rhs.n())
+{
+  for (unsigned int j=0; j<_n_rows; ++j)
+    for (unsigned int i=0; i<_n_cols; ++i)
+      (*this)(i, j) = rhs(i, j);
+}
+
 ColumnMajorMatrix::ColumnMajorMatrix(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3)
   :_n_rows(LIBMESH_DIM),
    _n_cols(LIBMESH_DIM),
