@@ -65,4 +65,19 @@ ColumnMajorMatrix::ColumnMajorMatrix(const TypeVector<Real> & col1, const TypeVe
     _values[entry++] = col3(i);
 }
 
-    
+
+ColumnMajorMatrix ColumnMajorMatrix::kronecker  (const ColumnMajorMatrix &  rhs) const  
+ {
+   mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows, "Matrices must be the same shape for a kronecker product!");
+
+   ColumnMajorMatrix ret_matrix(_n_rows*_n_rows, rhs._n_cols*rhs._n_cols);
+     
+  for(unsigned int i = 0; i < _n_rows; i++)
+    for(unsigned int j = 0; j < _n_cols; j++)
+      for (unsigned int k = 0; k < rhs._n_rows; k++)
+        for(unsigned int l = 0; l < rhs._n_cols; l++)
+          ret_matrix(((i*_n_rows)+k),((j*_n_cols)+l)) = (*this)(i,j) * rhs(k,l);
+      
+   return ret_matrix;
+}
+

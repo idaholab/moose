@@ -128,7 +128,13 @@ public:
    * The Euclidean norm of the matrix.
    */
   Real norm();
-  
+
+
+  /**
+   * Kronecker Product
+   */
+  ColumnMajorMatrix kronecker(const ColumnMajorMatrix &  rhs) const;
+    
   /**
    * Sets the values in _this_ tensor to the values on the RHS.
    * Will also reshape this tensor if necessary.
@@ -168,6 +174,11 @@ public:
    */
   ColumnMajorMatrix operator+(const ColumnMajorMatrix & rhs) const;
 
+  /**
+   * Matrix Matrix Subtraction
+   */
+  ColumnMajorMatrix operator-(const ColumnMajorMatrix & rhs) const;
+  
   /**
    * Matrix Matrix Addition plus assignment
    *
@@ -209,6 +220,7 @@ public:
    */
   bool operator==(const ColumnMajorMatrix & rhs) const;
   bool operator!=(const ColumnMajorMatrix & rhs) const;
+
   
 
 protected:
@@ -451,6 +463,19 @@ ColumnMajorMatrix::operator+(const ColumnMajorMatrix & rhs) const
 
   for(unsigned int i=0; i<_n_entries; i++)
     ret_matrix._values[i] = _values[i] + rhs._values[i];
+
+  return ret_matrix;
+}
+
+inline ColumnMajorMatrix
+ColumnMajorMatrix::operator-(const ColumnMajorMatrix & rhs) const
+{
+  mooseAssert((_n_rows == rhs._n_rows) && (_n_cols == rhs._n_cols), "Cannot perform matrix addition!  The shapes of the two operands are not compatible!");
+
+  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
+
+  for(unsigned int i=0; i<_n_entries; i++)
+    ret_matrix._values[i] = _values[i] - rhs._values[i];
 
   return ret_matrix;
 }
