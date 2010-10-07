@@ -98,6 +98,18 @@ public:
   void fill(TypeTensor<Real> & tensor);
 
   /**
+   * Fills the passed in dense matrix with the values from this tensor.
+   */
+  void fill(DenseMatrix<Real> & rhs);
+
+  
+  /**
+   * Fills the passed in dense vector with the values from this tensor.
+   */
+  void fill(DenseVector<Real> & rhs);
+
+
+  /**
    * Returns a matrix that is the transpose of the matrix this
    * was called on.
    */
@@ -304,6 +316,34 @@ ColumnMajorMatrix::fill(TypeTensor<Real> & tensor)
     for(unsigned int i=0; i<_n_cols; i++)
       tensor(i,j) = s(i,j);
 }
+
+
+inline void
+ColumnMajorMatrix::fill(DenseMatrix<Real> &rhs)
+{
+   mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows, "Matrices must be the same shape for a fill!");
+
+  ColumnMajorMatrix & s = (*this);
+
+  for(unsigned int j=0; j<_n_cols; j++)
+    for(unsigned int i=0; i<_n_cols; i++)
+      rhs(i,j) = s(i,j);
+}
+
+
+
+inline void
+ColumnMajorMatrix::fill(DenseVector<Real> &rhs)
+{
+  mooseAssert(_n_rows == rhs.size(), "Vectors must be the same shape for a fill!");
+
+ 
+    for (unsigned int i=0; i<_n_rows; ++i)
+      rhs(i) = (*this)(i);
+    
+}
+
+
 
 inline ColumnMajorMatrix
 ColumnMajorMatrix::transpose()

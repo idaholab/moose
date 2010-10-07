@@ -90,10 +90,10 @@ ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseMatrix<Real> &rhs)
   _n_entries = rhs.m()*rhs.n();
   _values.resize(rhs.m()*rhs.n());
   
-  for (unsigned int j=0; j<_n_rows; ++j)
-    for (unsigned int i=0; i<_n_cols; ++i)
-      (*this)(i, j) = rhs(i, j);
-
+  for (unsigned int j=0; j<_n_cols; ++j)
+    for (unsigned int i=0; i<_n_rows; ++i)
+         (*this)(i, j) = rhs(i, j);
+   
     return *this;
 }
 
