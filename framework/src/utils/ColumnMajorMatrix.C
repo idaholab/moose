@@ -38,14 +38,13 @@ ColumnMajorMatrix::ColumnMajorMatrix(const TypeTensor<Real> &rhs)
 }
 
 ColumnMajorMatrix::ColumnMajorMatrix(const DenseMatrix<Real> &rhs)
-  :_n_rows(rhs.m()),
-   _n_cols(rhs.n()),
-   _n_entries(rhs.m()*rhs.n()),
-   _values(rhs.m()*rhs.n())
 {
-  for (unsigned int j=0; j<_n_rows; ++j)
-    for (unsigned int i=0; i<_n_cols; ++i)
-      (*this)(i, j) = rhs(i, j);
+   *this = rhs;
+}
+
+ColumnMajorMatrix::ColumnMajorMatrix(const DenseVector<Real> &rhs)
+{
+   *this = rhs;
 }
 
 ColumnMajorMatrix::ColumnMajorMatrix(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3)
@@ -79,5 +78,38 @@ ColumnMajorMatrix ColumnMajorMatrix::kronecker  (const ColumnMajorMatrix &  rhs)
           ret_matrix(((i*_n_rows)+k),((j*_n_cols)+l)) = (*this)(i,j) * rhs(k,l);
       
    return ret_matrix;
+}
+
+
+
+ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseMatrix<Real> &rhs)
+ {
+
+  _n_rows = rhs.m();
+  _n_cols = rhs.n();
+  _n_entries = rhs.m()*rhs.n();
+  _values.resize(rhs.m()*rhs.n());
+  
+  for (unsigned int j=0; j<_n_rows; ++j)
+    for (unsigned int i=0; i<_n_cols; ++i)
+      (*this)(i, j) = rhs(i, j);
+
+    return *this;
+}
+
+
+ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseVector<Real> &rhs)
+ {
+
+   _n_rows = rhs.size();
+   _n_cols = 1;
+   _n_entries = rhs.size();
+   _values.resize(rhs.size());
+  
+ 
+    for (unsigned int i=0; i<_n_rows; ++i)
+      (*this)(i) = rhs(i);
+
+    return *this;
 }
 

@@ -20,6 +20,7 @@
 // libmesh includes
 #include "type_tensor.h"
 #include "dense_matrix.h"
+#include "dense_vector.h"
 
 // system includes
 #include <vector>
@@ -51,6 +52,9 @@ public:
 
   explicit
   ColumnMajorMatrix(const DenseMatrix<Real> &rhs);
+
+  explicit
+  ColumnMajorMatrix(const DenseVector<Real> &rhs);
   
   /**
    * Constructor that takes in 3 vectors and uses them to create columns
@@ -141,6 +145,20 @@ public:
    */
   ColumnMajorMatrix & operator=(const TypeTensor<Real> & rhs);
 
+    /**
+   * Sets the values in _this_ dense matrix to the values on the RHS.
+   * Will also reshape this tensor if necessary.
+   */
+  ColumnMajorMatrix & operator=(const DenseMatrix<Real> & rhs);
+
+
+    /**
+   * Sets the values in _this_ dense vector to the values on the RHS.
+   * Will also reshape this tensor if necessary.
+   */
+  ColumnMajorMatrix & operator=(const DenseVector<Real> & rhs);
+
+  
   /**
    * Sets the values in _this_ tensor to the values on the RHS
    * Will also reshape this tensor if necessary.
