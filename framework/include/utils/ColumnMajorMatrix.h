@@ -321,7 +321,7 @@ ColumnMajorMatrix::fill(TypeTensor<Real> & tensor)
 inline void
 ColumnMajorMatrix::fill(DenseMatrix<Real> &rhs)
 {
-   mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows, "Matrices must be the same shape for a fill!");
+   mooseAssert(_n_rows == rhs._n && _n_cols == rhs._m, "Matrices must be the same shape for a fill!");
 
   ColumnMajorMatrix & s = (*this);
 
