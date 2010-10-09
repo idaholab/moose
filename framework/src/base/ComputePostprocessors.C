@@ -22,6 +22,7 @@
 
 //libMesh includes
 #include "numeric_vector.h"
+#include "nonlinear_implicit_system.h"
 #include "dense_vector.h"
 #include "petsc_matrix.h"
 #include "dof_map.h"

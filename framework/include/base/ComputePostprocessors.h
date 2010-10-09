@@ -15,8 +15,9 @@
 #ifndef COMPUTEPOSTPROCESSORS_H
 #define COMPUTEPOSTPROCESSORS_H
 
-#include "numeric_vector.h"
-#include "nonlinear_implicit_system.h"
+// forward declares
+class NonlinearImplicitSystem;
+template<class T> class NumericVector;
 
 namespace Moose
 {

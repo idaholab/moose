@@ -52,7 +52,3 @@ Postprocessor::gatherSum(int & value)
   // TODO: Gather threaded values as well
   Parallel::sum(value);
 }
-
-
-
-
