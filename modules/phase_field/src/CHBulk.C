@@ -4,13 +4,15 @@ template<>
 InputParameters validParams<CHBulk>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addParam<std::string>("mob_name","M","The mobility used with the kernel");
   
   return params;
 }
 
 CHBulk::CHBulk(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Kernel(name, moose_system, parameters),
-   _M(getMaterialProperty<Real>("M"))
+   _mob_name(getParam<std::string>("mob_name")),
+   _M(getMaterialProperty<Real>(_mob_name))
 {  
 }
 
