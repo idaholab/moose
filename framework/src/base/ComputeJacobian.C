@@ -164,8 +164,11 @@ public:
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
         for(unsigned int i=0; i< _moose_system._dof_data[tid]._var_dof_indices.size(); i++)
         {
-          _moose_system._dof_map->constrain_element_matrix (*_moose_system._dof_data[tid]._var_Kes[i], _moose_system._dof_data[tid]._var_dof_indices[i], false);
-          _jacobian.add_matrix(*_moose_system._dof_data[tid]._var_Kes[i], _moose_system._dof_data[tid]._var_dof_indices[i]);
+          if(_moose_system._dof_data[tid]._var_dof_indices[i].size())
+          {
+            _moose_system._dof_map->constrain_element_matrix (*_moose_system._dof_data[tid]._var_Kes[i], _moose_system._dof_data[tid]._var_dof_indices[i], false);
+            _jacobian.add_matrix(*_moose_system._dof_data[tid]._var_Kes[i], _moose_system._dof_data[tid]._var_dof_indices[i]);
+          }
         }
       }
     }

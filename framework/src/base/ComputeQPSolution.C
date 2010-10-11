@@ -20,19 +20,19 @@ void computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::
 {
   u=0;
 
-  unsigned int phi_size = phi.size();
+  unsigned int num_dofs = dof_indices.size();
 
   //All of this stuff so that the loop will vectorize
-  std::vector<Real> sol_vals(phi_size);
-  std::vector<Real> phi_vals(phi_size);
+  std::vector<Real> sol_vals(num_dofs);
+  std::vector<Real> phi_vals(num_dofs);
 
-  for (unsigned int i=0; i<phi_size; i++)
+  for (unsigned int i=0; i<num_dofs; i++)
   {
     sol_vals[i] = soln(dof_indices[i]);
     phi_vals[i] = phi[i][qp];
   }
 
-  for (unsigned int i=0; i<phi_size; i++)
+  for (unsigned int i=0; i<num_dofs; i++)
   {
     u +=  phi_vals[i]*sol_vals[i];
   }
@@ -58,9 +58,9 @@ void computeQpSolutionAll(MooseArray<Real> & u, MooseArray<Real> & u_old, MooseA
     second_u[qp] = 0;
   }
 
-  unsigned int phi_size = phi.size();
+  unsigned int num_dofs = dof_indices.size();
 
-  for (unsigned int i=0; i<phi_size; i++)
+  for (unsigned int i=0; i<num_dofs; i++)
   {
     int indx = dof_indices[i];
     Real soln_local       = soln(indx);
@@ -104,9 +104,9 @@ void computeQpSolutionAll(MooseArray<Real> & u, MooseArray<Real> & u_old, MooseA
     grad_u_older[qp] = 0;
   }
 
-  unsigned int phi_size = phi.size();
+  unsigned int num_dofs = dof_indices.size();
 
-  for (unsigned int i=0; i<phi_size; i++)
+  for (unsigned int i=0; i<num_dofs; i++)
   {
     int indx = dof_indices[i];
     Real soln_local       = soln(indx);
@@ -144,9 +144,9 @@ void computeQpSolutionAll(MooseArray<Real> & u,
     second_u[qp] = 0;
   }
 
-  unsigned int phi_size = phi.size();
+  unsigned int num_dofs = dof_indices.size();
 
-  for (unsigned int i=0; i<phi_size; i++)
+  for (unsigned int i=0; i<num_dofs; i++)
   {
     int indx = dof_indices[i];
     Real soln_local       = soln(indx);
@@ -177,9 +177,9 @@ void computeQpSolutionAll(MooseArray<Real> & u,
     grad_u[qp] = 0;
   }
 
-  unsigned int phi_size = phi.size();
+  unsigned int num_dofs = dof_indices.size();
 
-  for (unsigned int i=0; i<phi_size; i++)
+  for (unsigned int i=0; i<num_dofs; i++)
   {
     int indx = dof_indices[i];
     Real soln_local = soln(indx);
@@ -200,9 +200,9 @@ void computeQpGradSolution(RealGradient & grad_u, const NumericVector<Number> & 
 {
   grad_u=0;
 
-  unsigned int dphi_size = dphi.size();
+  unsigned int num_dofs = dof_indices.size();
 
-  for (unsigned int i=0; i<dphi_size; i++)
+  for (unsigned int i=0; i<num_dofs; i++)
   {
     grad_u += dphi[i][qp]*soln(dof_indices[i]);
   }
@@ -212,9 +212,9 @@ void computeQpSecondSolution(RealTensor & second_u, const NumericVector<Number> 
 {
   second_u=0;
 
-  unsigned int d2phi_size = d2phi.size();
+  unsigned int num_dofs = dof_indices.size();
 
-  for (unsigned int i=0; i<d2phi_size; i++)
+  for (unsigned int i=0; i<num_dofs; i++)
   {
     second_u += d2phi[i][qp]*soln(dof_indices[i]);
   }
