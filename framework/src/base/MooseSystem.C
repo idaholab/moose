@@ -229,6 +229,8 @@ MooseSystem::initMesh(unsigned int dim)
   if (_mesh != NULL)
     mooseError("Mesh already initialized for this MooseSystem");
 
+  std::cout<<"Dim: "<<dim<<std::endl;
+
   _dim = dim;
   _mesh = new Mesh(dim);
   return _mesh;

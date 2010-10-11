@@ -183,8 +183,6 @@ namespace Moose
 
 void MooseSystem::compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
-  Moose::perf_log.push("compute_residual()","Solve");
-
   residual.zero();
 
   if(_has_displaced_mesh)
@@ -192,8 +190,10 @@ void MooseSystem::compute_residual (const NumericVector<Number>& soln, NumericVe
 
   update_aux_vars(soln);
 
+  Moose::perf_log.push("compute_residual()","Solve");
   Threads::parallel_for(*getActiveLocalElementRange(),
                         ComputeInternalResiduals(*this, soln, residual));
+  Moose::perf_log.pop("compute_residual()","Solve");
 
   residual.close();
 
@@ -226,13 +226,7 @@ void MooseSystem::compute_residual (const NumericVector<Number>& soln, NumericVe
       }
     }
   }
-
-
-//    Parallel::barrier();
-//    residual.print();
-
+  
   residual.close();
-
-  Moose::perf_log.pop("compute_residual()","Solve");
 }
 

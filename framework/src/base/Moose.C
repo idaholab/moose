@@ -112,6 +112,7 @@
 #include "DampersBlock.h"
 #include "GenericDamperBlock.h"
 #include "ConstantDamper.h"
+#include "MaxIncrement.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -253,6 +254,7 @@ Moose::registerObjects()
   registerPostprocessor(EmptyPostprocessor);
 
   registerDamper(ConstantDamper);
+  DamperFactory::instance()->registerDamper<ConstantDamper>("MaxIncrement");
 }
 
 void
