@@ -408,7 +408,7 @@ ColumnMajorMatrix::doubleContraction(const ColumnMajorMatrix & rhs)
   
   for(unsigned int j=0; j<_n_cols; j++)
     for(unsigned int i=0; i<_n_rows; i++)
-      value += (*this)(i,j) * rhs(j, i);
+      value += (*this)(i,j) * rhs(i,j);
 
   return value;
 }
