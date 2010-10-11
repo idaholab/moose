@@ -115,6 +115,13 @@ public:
    */
   ColumnMajorMatrix transpose();
 
+    /**
+   * Returns a matrix that is the deviatoric of the matrix this
+   * was called on.
+   */
+  ColumnMajorMatrix deviatoric();
+
+
   /**
    * Set the value of each of the diagonals to the passsed in value.
    */
@@ -358,6 +365,24 @@ ColumnMajorMatrix::transpose()
 
   return ret_matrix;
 }
+
+
+inline ColumnMajorMatrix
+ColumnMajorMatrix::deviatoric()
+{
+    ColumnMajorMatrix & s = (*this);
+
+    ColumnMajorMatrix ret_matrix(_n_cols, _n_rows), I(_n_cols, _n_rows);
+
+    I.identity();
+    
+    for(unsigned int i=0; i<_n_rows; i++)
+      for(unsigned int j=0; j<_n_cols; j++)
+        ret_matrix(i,j) = s(i,j) - I(i,j) * (s.tr()/3.0);
+    
+    return ret_matrix;
+}
+
 
 inline void
 ColumnMajorMatrix::setDiag(Real value)
