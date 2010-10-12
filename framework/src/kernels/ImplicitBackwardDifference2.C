@@ -26,6 +26,7 @@ InputParameters validParams<ImplicitBackwardDifference2>()
 ImplicitBackwardDifference2::ImplicitBackwardDifference2(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :TimeDerivative(name, moose_system, parameters)
 {
+   _moose_system.initTimeSteppingScheme(Moose::BDF2);
 }
 
 Real
