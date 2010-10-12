@@ -1,21 +1,21 @@
-#ifndef WOPSBILINPLASTICMATERIAL_H
-#define WOPSBILINPLASTICMATERIAL_H
+#ifndef LSHPLASTICMATERIAL_H
+#define LSHPLASTICMATERIAL_H
 
 #include "LinearIsotropicMaterial.h"
 
 //Forward Declarations
-class wopsBiLinPlasticMaterial;
+class LSHPlasticMaterial;
 
 template<>
-InputParameters validParams<wopsBiLinPlasticMaterial>();
+InputParameters validParams<LSHPlasticMaterial>();
 
 /**
  * Plastic material
  */
-class wopsBiLinPlasticMaterial : public LinearIsotropicMaterial
+class LSHPlasticMaterial : public LinearIsotropicMaterial
 {
 public:
-  wopsBiLinPlasticMaterial(std::string name,
+  LSHPlasticMaterial(std::string name,
                   MooseSystem & moose_system,
                   InputParameters parameters);
   
@@ -24,7 +24,9 @@ protected:
    * Will always be passed to full symmetric strain tensor.
    * What should come out is a modified strain tensor.
    */
-  virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);  
+  virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);
+  virtual void computeStress(const RealVectorValue & x, const RealVectorValue & y, const RealVectorValue & z, RealTensorValue & stress);
+  
 
   Real _yield_stress;
   Real _hardening_constant;
@@ -41,6 +43,9 @@ protected:
   Real _K;
 
   MaterialProperty<ColumnMajorMatrix> & _total_strain;
+  MaterialProperty<ColumnMajorMatrix> & _total_strain_old;
+  MaterialProperty<RealTensorValue> & _stress;  
+  MaterialProperty<RealTensorValue> & _stress_old;  
   MaterialProperty<Real> & _hardening_variable;  
   MaterialProperty<Real> & _hardening_variable_old;
   MaterialProperty<ColumnMajorMatrix> & _plastic_strain;
@@ -49,4 +54,4 @@ protected:
   ColumnMajorMatrix _identity;  
 };
 
-#endif //WOPSBILINPLASTICMATERIAL_H
+#endif //LSHPLASTICMATERIAL_H
