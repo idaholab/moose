@@ -90,8 +90,8 @@ MooseSystem::MooseSystem() :
   _is_transient(false),
   _is_eigenvalue(false),
   _t_step(0),
-  _t_scheme(0),
-  _n_of_rk_stages(0),
+  _u_dot_soln(NULL),
+  _res_soln_old(NULL),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -155,8 +155,8 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _is_transient(false),
   _is_eigenvalue(false),
   _t_step(0),
-  _t_scheme(0),
-  _n_of_rk_stages(0),
+  _u_dot_soln(NULL),
+  _res_soln_old(NULL),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -322,7 +322,7 @@ MooseSystem::sizeEverything()
   _dampers.resize(n_threads);
 
   // Kernels::sizeEverything
-  _bdf2_wei.resize(3);
+  _time_weight.resize(3);
 
   // Single Instance Variables
   _real_zero.resize(n_threads);
@@ -381,13 +381,9 @@ MooseSystem::init()
   _t = 0;
   _dt = 0;
   _is_transient = false;
-  _n_of_rk_stages = 1;
-  _t_scheme = 0;
   _t_step       = 0;
   _dt_old       = _dt;
-  _bdf2_wei[0]  = 1.;
-  _bdf2_wei[1]  =-1.;
-  _bdf2_wei[2]  = 0.;
+  initTimeSteppingScheme(Moose::IMPLICIT_EULER);
 
   //Set the default variable scaling to 1
   for(unsigned int i=0; i < _system->n_vars(); i++)
@@ -524,8 +520,11 @@ MooseSystem::initEquationSystems()
   _system->nonlinear_solver->jacobian = Moose::compute_jacobian;
   _system->attach_init_function(Moose::initial_condition);
 
-  _newton_soln = &_system->add_vector("newton_soln", false);
-  _old_newton_soln = &_system->add_vector("old_newton_soln", false);
+  _u_dot_soln = &_system->add_vector("u_dot", false, GHOSTED);
+  _res_soln_old = &_system->add_vector("residual_old", false, GHOSTED);
+
+  _newton_soln = &_system->add_vector("newton_soln", false, GHOSTED);
+  _old_newton_soln = &_system->add_vector("old_newton_soln", false, GHOSTED);
 
   _aux_system = &_es->add_system<TransientExplicitSystem>("AuxiliarySystem");
   _aux_system->attach_init_function(Moose::initial_condition);
@@ -1312,6 +1311,28 @@ MooseSystem::checkSystemsIntegrity()
   }
 }
 
+
+void
+MooseSystem::initTimeSteppingScheme(Moose::TimeSteppingScheme scheme)
+{
+  _time_stepping_scheme = scheme;
+  switch (_time_stepping_scheme)
+  {
+  case Moose::IMPLICIT_EULER:
+  case Moose::CRANK_NICOLSON:
+    _time_weight[0] = 1;
+    _time_weight[1] = 0;
+    _time_weight[2] = 0;
+    break;
+
+  case Moose::BDF2:
+    _time_weight[0] = 0;
+    _time_weight[1] = -1.;
+    _time_weight[2] = 1.;
+    break;
+  }
+}
+
 void
 MooseSystem::reinitDT()
 {
@@ -1321,10 +1342,86 @@ MooseSystem::reinitDT()
   _t_step = _es->parameters.get<int>("t_step");
   _dt_old = _dt;
   _dt = _es->parameters.get<Real>("dt");
-  Real sum = _dt+_dt_old;
-  _bdf2_wei[2] = 1.+_dt/sum;
-  _bdf2_wei[1] =-sum/_dt_old;
-  _bdf2_wei[0] =_dt*_dt/_dt_old/sum;
+
+  Real sum;
+  switch (_time_stepping_scheme)
+  {
+  case Moose::BDF2:
+    sum = _dt+_dt_old;
+    _time_weight[0] = 1.+_dt/sum;
+    _time_weight[1] =-sum/_dt_old;
+    _time_weight[2] =_dt*_dt/_dt_old/sum;
+    break;
+
+  default:
+    break;
+  }
+}
+
+void
+MooseSystem::onTimestepBegin()
+{
+  switch (_time_stepping_scheme)
+  {
+  case Moose::CRANK_NICOLSON:
+    *_u_dot_soln = *_system->old_local_solution;
+    *_u_dot_soln *= -2.0 / _dt;
+    computeResidualInternal(*_system->old_local_solution, *_res_soln_old);
+    break;
+
+  default:
+    break;
+  }
+}
+
+void
+MooseSystem::computeTimeDeriv(const NumericVector<Number> & soln)
+{
+  switch (_time_stepping_scheme)
+  {
+  case Moose::IMPLICIT_EULER:
+    *_u_dot_soln = soln;
+    *_u_dot_soln -= *_system->old_local_solution;
+    *_u_dot_soln /= _dt;
+    break;
+
+  case Moose::CRANK_NICOLSON:
+    *_u_dot_soln = soln;
+    *_u_dot_soln *= 2. / _dt;
+    break;
+
+  case Moose::BDF2:
+    if (_t_step == 1)
+    {
+      // Use backward-euler for the first step
+      *_u_dot_soln = soln;
+      *_u_dot_soln -= *_system->old_local_solution;
+      *_u_dot_soln /= _dt;
+    }
+    else
+    {
+      _u_dot_soln->zero();
+      _u_dot_soln->add(_time_weight[0], soln);
+      _u_dot_soln->add(_time_weight[1], *_system->old_local_solution);
+      _u_dot_soln->add(_time_weight[2], *_system->older_local_solution);
+      _u_dot_soln->scale(1./_dt);
+    }
+    break;
+  }
+}
+
+void
+MooseSystem::finishResidual(NumericVector<Number> & residual)
+{
+  switch (_time_stepping_scheme)
+  {
+  case Moose::CRANK_NICOLSON:
+    residual.add(*_res_soln_old);
+    break;
+
+  default:
+    break;
+  }
 }
 
 void

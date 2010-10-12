@@ -47,6 +47,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, MooseSystem & moo
    _u(_integrated ? _face_data._var_vals[_var_num] : _face_data._var_vals_nodal[_var_num]),
    _grad_u(_integrated ? _face_data._var_grads[_var_num] : moose_system._grad_zero[_tid]),
    _second_u(_integrated ? _face_data._var_seconds[_var_num] : moose_system._second_zero[_tid]),
+   _u_dot(_integrated ? _face_data._var_dots[_var_num] : moose_system._zero[_tid]),
    // TODO: Fix this holy hack!
    _test(*_face_data._phi[_fe_type]),
    _grad_test(*_face_data._grad_phi[_fe_type]),

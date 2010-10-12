@@ -56,6 +56,7 @@ QuadraturePointData::init()
   _var_grads.resize(n_vars);
   _var_grads_old.resize(n_vars);
   _var_grads_older.resize(n_vars);
+  _var_dots.resize(n_vars);
 
   _aux_var_vals.resize(n_aux_vars);
   _aux_var_vals_old.resize(n_aux_vars);
@@ -143,6 +144,8 @@ QuadraturePointData::reinit(const NumericVector<Number>& soln, const Elem * elem
 
     if(_moose_system._is_transient)
     {
+      _var_dots[var_num].resize(_n_qpoints);
+
       _var_vals_old[var_num].resize(_n_qpoints);
       _var_grads_old[var_num].resize(_n_qpoints);
 
@@ -156,6 +159,13 @@ QuadraturePointData::reinit(const NumericVector<Number>& soln, const Elem * elem
 
     if (_moose_system._is_transient)
     {
+      std::vector<unsigned int> & dof_indices = _dof_data._var_dof_indices[var_num];
+      MooseArray<Real> & u_dot = _var_dots[var_num];
+
+      // Compute the increment at each quadrature point
+      for(unsigned int qp=0; qp<_n_qpoints; qp++)
+        computeQpSolution(u_dot[qp], *_moose_system._u_dot_soln, dof_indices, qp, static_phi);
+
       if( has_second_derivatives )
         computeQpSolutionAll(_var_vals[var_num], _var_vals_old[var_num], _var_vals_older[var_num],
                              _var_grads[var_num], _var_grads_old[var_num], _var_grads_older[var_num],

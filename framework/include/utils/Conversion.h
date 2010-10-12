@@ -12,28 +12,19 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef IMPLICITBD2
-#define IMPLICITBD2
+#ifndef CONVERSION_H
+#define CONVERSION_H
 
-#include "TimeDerivative.h"
+#include "Moose.h"
 
-// Forward Declarations
-class ImplicitBackwardDifference2;
-template<>
-InputParameters validParams<ImplicitBackwardDifference2>();
+namespace Moose {
 
-class ImplicitBackwardDifference2 : public TimeDerivative
-{
-public:
+  template<typename T>
+  T stringToEnum(const std::string & s);
 
-  ImplicitBackwardDifference2(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
-  
-protected:
-  virtual Real computeQpResidual();
+  template<>
+  TimeSteppingScheme stringToEnum<TimeSteppingScheme>(const std::string & s);
 
-  virtual Real computeQpJacobian();
+}
 
-  bool _start_with_be;
-};
-
-#endif //IMPLICITBD2
+#endif //CONVERSION_H

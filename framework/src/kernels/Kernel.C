@@ -46,6 +46,7 @@ Kernel::Kernel(const std::string & name, MooseSystem & moose_system, InputParame
    _u(_element_data._var_vals[_var_num]),
    _grad_u(_element_data._var_grads[_var_num]),
    _second_u(_element_data._var_seconds[_var_num]),
+   _u_dot(_element_data._var_dots[_var_num]),
    _u_old(_element_data._var_vals_old[_var_num]),
    _u_older(_element_data._var_vals_older[_var_num]),
    _grad_u_old(_element_data._var_grads_old[_var_num]),

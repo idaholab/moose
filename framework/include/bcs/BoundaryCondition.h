@@ -173,6 +173,11 @@ protected:
   MooseArray<RealTensor> & _second_u;
 
   /**
+   * Holds the time derivative at the current quadrature point on the face.
+   */
+  MooseArray<Real> & _u_dot;
+
+  /**
    * Returns a reference (that can be stored) to a coupled variable's value.
    * 
    * @param name The name the kernel wants to refer to the variable as.

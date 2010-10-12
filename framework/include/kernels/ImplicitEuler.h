@@ -15,7 +15,7 @@
 #ifndef IMPLICITEULER
 #define IMPLICITEULER
 
-#include "Kernel.h"
+#include "TimeDerivative.h"
 
 // Forward Declaration
 class ImplicitEuler;
@@ -23,7 +23,7 @@ class ImplicitEuler;
 template<>
 InputParameters validParams<ImplicitEuler>();
 
-class ImplicitEuler : public Kernel
+class ImplicitEuler : public TimeDerivative
 {
 public:
 

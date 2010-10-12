@@ -135,22 +135,21 @@ TransientExecutioner::takeStep()
 
     _prev_dt = _dt;
 
-    // Increment time
-    _time += dt_cur;
-    _dt = dt_cur;
-
     _reset_dt = true;
   }
   else 
   {
     if (_reset_dt)
       dt_cur = _prev_dt;
-    
-    // Increment time
-    _time += dt_cur;
-    _dt = dt_cur;
   }
-    
+
+  _dt = dt_cur;
+  _moose_system.reinitDT();
+  _moose_system.onTimestepBegin();
+
+  // Increment time
+  _time += dt_cur;
+
   _moose_system.reinitDT();
 
   std::cout<<"DT: "<<dt_cur<<std::endl;
@@ -239,7 +238,7 @@ TransientExecutioner::keepGoing()
       std::cout<<"Steady-State Relative Differential Norm: "<<ss_relerr_norm<<std::endl;
     }
   }
-        
+
   // Check for stop condition based upon number of simulation steps and/or solution end time:
   if(_t_step>_num_steps)
     return false;

@@ -45,6 +45,7 @@
 #include "CoupledAux.h"
 #include "PenetrationAux.h"
 
+#include "TimeDerivative.h"
 #include "ImplicitEuler.h"
 #include "ImplicitBackwardDifference2.h"
 
@@ -157,6 +158,7 @@ Moose::registerObjects()
   registerKernel(BodyForce);
   registerKernel(Diffusion);
   registerKernel(Reaction);
+  registerKernel(TimeDerivative);
   registerKernel(ImplicitEuler);
   registerKernel(ImplicitBackwardDifference2);
   registerKernel(CoupledForce);

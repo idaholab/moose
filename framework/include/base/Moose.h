@@ -217,6 +217,13 @@ namespace Moose
     CYLINDRICAL
   };
 
+  enum TimeSteppingScheme
+  {
+    IMPLICIT_EULER,
+    BDF2,
+    CRANK_NICOLSON
+  };
+
   const unsigned int ANY_BLOCK_ID = (unsigned int) -1;
 
   extern GetPot *command_line;

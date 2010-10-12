@@ -173,15 +173,21 @@ namespace Moose
   {
     MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
-    if (moose_system->needPostprocessorsForResiduals())
-      moose_system->compute_postprocessors(*(moose_system->getNonlinearSystem()->current_local_solution));
-    moose_system->compute_residual(soln, residual);
+    moose_system->computeResidual(soln, residual);
   }
 }
-      
 
+void MooseSystem::computeResidual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
+{
+  if (needPostprocessorsForResiduals())
+    compute_postprocessors(*(getNonlinearSystem()->current_local_solution));
+  computeTimeDeriv(soln);
+  computeResidualInternal(soln, residual);
+  finishResidual(residual);
 
-void MooseSystem::compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
+}
+
+void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   residual.zero();
 

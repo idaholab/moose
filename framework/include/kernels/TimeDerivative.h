@@ -12,28 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef IMPLICITBD2
-#define IMPLICITBD2
+#ifndef TIMEDERIVATIVE_H
+#define TIMEDERIVATIVE_H
 
-#include "TimeDerivative.h"
+#include "Kernel.h"
 
-// Forward Declarations
-class ImplicitBackwardDifference2;
+// Forward Declaration
+class TimeDerivative;
+
 template<>
-InputParameters validParams<ImplicitBackwardDifference2>();
+InputParameters validParams<TimeDerivative>();
 
-class ImplicitBackwardDifference2 : public TimeDerivative
+class TimeDerivative : public Kernel
 {
 public:
 
-  ImplicitBackwardDifference2(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  TimeDerivative(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();
-
+  
   virtual Real computeQpJacobian();
 
-  bool _start_with_be;
+  /**
+   * Coefficients (weights) for the BDF2 time discretization.
+   */
+  std::vector<Real> & _time_weight;
 };
 
-#endif //IMPLICITBD2
+#endif //IMPLICITEULER

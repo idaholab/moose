@@ -242,14 +242,9 @@ protected:
   int & _t_step;
 
   /**
-   * Coefficients (weights) for the BDF2 time discretization.
+   * Reference to time stepping scheme weights
    */
-  std::vector<Real> & _bdf2_wei;
-
-  /**
-   * Time discretization scheme: 0 - Implicit Euler, 1 - 2nd-order Backward Difference
-   */
-  short & _t_scheme;
+  std::vector<Real> & _time_weight;
 
   /**
    * The time, after which this kernel will be active.

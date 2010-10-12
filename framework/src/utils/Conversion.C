@@ -12,28 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef IMPLICITBD2
-#define IMPLICITBD2
+#include "Conversion.h"
 
-#include "TimeDerivative.h"
+namespace Moose {
 
-// Forward Declarations
-class ImplicitBackwardDifference2;
-template<>
-InputParameters validParams<ImplicitBackwardDifference2>();
+  std::map<std::string, TimeSteppingScheme> timesteppingscheme_type_to_enum;
 
-class ImplicitBackwardDifference2 : public TimeDerivative
-{
-public:
+  void initTimeSteppingMap()
+  {
+    if (timesteppingscheme_type_to_enum.empty())
+    {
+      timesteppingscheme_type_to_enum["BACKWARD-EULER"] = IMPLICIT_EULER;
+      timesteppingscheme_type_to_enum["IMPLICIT-EULER"] = IMPLICIT_EULER;
+      timesteppingscheme_type_to_enum["CRANK-NICOLSON"] = CRANK_NICOLSON;
+      timesteppingscheme_type_to_enum["BDF2"]           = BDF2;
 
-  ImplicitBackwardDifference2(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
-  
-protected:
-  virtual Real computeQpResidual();
+    }
+  }
 
-  virtual Real computeQpJacobian();
+  template<>
+  TimeSteppingScheme stringToEnum(const std::string & s)
+  {
+    initTimeSteppingMap();
 
-  bool _start_with_be;
-};
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
-#endif //IMPLICITBD2
+    if (!timesteppingscheme_type_to_enum.count(upper))
+      libmesh_error();
+
+    return timesteppingscheme_type_to_enum[upper];
+  }
+
+}

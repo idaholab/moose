@@ -21,6 +21,7 @@
 #include "ComputeJacobian.h"
 #include "ComputeResidual.h"
 #include "ComputeInitialConditions.h"
+#include "PetscSupport.h"
 
 // C++ includes
 #include <vector>
@@ -116,8 +117,8 @@ Executioner::setScaling()
 
   _moose_system.setVarScaling(one_scaling);
   
-  _moose_system.compute_residual(*_moose_system.getNonlinearSystem()->current_local_solution,
-                                 *_moose_system.getNonlinearSystem()->rhs);
+  _moose_system.computeResidual(*_moose_system.getNonlinearSystem()->current_local_solution,
+                                *_moose_system.getNonlinearSystem()->rhs);
 
   _old_initial_residual_norm = _initial_residual_norm;
   _initial_residual_norm = _moose_system.getNonlinearSystem()->rhs->l2_norm();

@@ -144,6 +144,11 @@ protected:
   MooseArray<RealTensor> & _second_u;
 
   /**
+   * Time derivative of u
+   */
+  MooseArray<Real> & _u_dot;
+
+  /**
    * Holds the previous solution at the current quadrature point.
    */
   MooseArray<Real> & _u_old;

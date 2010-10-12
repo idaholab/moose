@@ -15,6 +15,8 @@
 #include "GenericExecutionerBlock.h"
 #include "ExecutionerFactory.h"
 #include "PetscSupport.h"
+#include "Conversion.h"
+#include "Moose.h"
 #include "Parser.h"
 
 template<>
@@ -35,6 +37,7 @@ InputParameters validParams<GenericExecutionerBlock>()
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
   params.addParam<bool>        ("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
+  params.addParam<std::string> ("scheme",          "backward-euler",  "Time integration scheme used.");
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options");
@@ -100,6 +103,7 @@ GenericExecutionerBlock::execute()
 
   _moose_system._auto_scaling = getParamValue<bool>("auto_scaling");
 
+  _moose_system.initTimeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParamValue<std::string>("scheme")));
 
 #ifdef LIBMESH_HAVE_PETSC
   std::vector<std::string> petsc_options,  petsc_inames, petsc_values;

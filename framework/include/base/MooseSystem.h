@@ -200,6 +200,11 @@ public:
   void initDataStructures();
 
   /**
+   * Initialize the time stepping scheme
+   */
+  void initTimeSteppingScheme(Moose::TimeSteppingScheme scheme);
+
+  /**
    * Check to see if MooseSystem is in a workable state before accessing data
    */
   void checkValid();
@@ -275,7 +280,11 @@ public:
    */
   void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
 
-  void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
+  /**
+   * Computes residual of the full system
+   *
+   */
+  void computeResidual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
 
   Number initial_value (const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& var_name);
 
@@ -294,6 +303,7 @@ public:
 
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node);
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem);
+
 
   void compute_postprocessors (const NumericVector<Number>& soln);
 
@@ -391,9 +401,7 @@ public:
 
   void updateNewtonStep();
 
-  /**
-   * Adaptivity interface
-   */
+  /* Adaptivity interface ---------------------- */
 
   /**
    * Initialize adaptivity
@@ -423,6 +431,8 @@ public:
 
 protected:
   void sizeEverything();
+
+  void computeResidualInternal (const NumericVector<Number>& soln, NumericVector<Number>& residual);
 
   void update_aux_vars(const NumericVector<Number>& soln);
 
@@ -582,19 +592,33 @@ public:
   int _t_step;
 
   /**
-   * Coefficients (weights) for the BDF2 time discretization.
+   * Coefficients (weights) for the time discretization
    */
-  std::vector<Real> _bdf2_wei;
+  std::vector<Real> _time_weight;
 
   /**
-   * Time discretization scheme: 0 - Implicit Euler, 1 - 2nd-order Backward Difference
+   * Time stepping
    */
-  short _t_scheme;
+  Moose::TimeSteppingScheme _time_stepping_scheme;
+
+  NumericVector<Number> * _u_dot_soln;   /// solution vector for the time derivative (u_dot)
+
+  NumericVector<Number> * _res_soln_old; /// residual evaluated at the old time step
 
   /**
-   * The total number of Runge-Kutta stages
+   * Called before each residual evaluation
    */
-  short _n_of_rk_stages;
+  void computeTimeDeriv(const NumericVector<Number> & soln);
+
+  /**
+   * Called at the beginning of the time step in transient simulations
+   */
+  void onTimestepBegin();
+
+  /**
+   * Called after the residual is assembled
+   */
+  void finishResidual(NumericVector<Number> & residual);
 
   /**
    * Maximum quadrature order required by all variables.

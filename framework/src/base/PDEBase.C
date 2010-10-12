@@ -60,8 +60,7 @@ PDEBase::PDEBase(const std::string & name, MooseSystem &moose_system, InputParam
   _is_transient(moose_system._is_transient),
   _is_eigenvalue(moose_system._is_eigenvalue),
   _t_step(moose_system._t_step),
-  _bdf2_wei(moose_system._bdf2_wei),
-  _t_scheme(moose_system._t_scheme),
+  _time_weight(moose_system._time_weight),
   _start_time(parameters.get<Real>("start_time")),
   _stop_time(parameters.get<Real>("stop_time"))
 {

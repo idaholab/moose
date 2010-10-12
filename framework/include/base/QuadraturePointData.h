@@ -155,6 +155,10 @@ public:
    */
   MooseArray<MooseArray<RealTensor> > _var_seconds;
 
+  /**
+   * Value of the variables time derivative at the quadrature points.
+   */
+  MooseArray<MooseArray<Real> > _var_dots;
 
   /**
    * Vector of auxiliary variable numbers that need to be evaluated
