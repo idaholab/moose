@@ -21,7 +21,6 @@
 #include "type_tensor.h"
 #include "dense_matrix.h"
 #include "dense_vector.h"
-#include <cmath>
 // system includes
 #include <vector>
 
@@ -397,9 +396,9 @@ ColumnMajorMatrix::abs()
 
     ColumnMajorMatrix ret_matrix(_n_cols, _n_rows);
     
-    for(unsigned int i=0; i<_n_rows; i++)
-      for(unsigned int j=0; j<_n_cols; j++)
-        ret_matrix(i,j) = fabs(s(i,j));
+    for(unsigned int j=0; j<_n_cols; j++)
+      for(unsigned int i=0; i<_n_rows; i++)
+        ret_matrix(i,j) = std::abs(s(i,j));
     
     return ret_matrix;
 }
