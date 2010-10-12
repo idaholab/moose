@@ -1,10 +1,10 @@
-#include "wopsBiLinPlasticMaterial.h"
+#include "LSHPlasticMaterial.h"
 
 #include "ElasticityTensor.h"
 #include <cmath>
 
 template<>
-InputParameters validParams<wopsBiLinPlasticMaterial>()
+InputParameters validParams<LSHPlasticMaterial>()
 {
    InputParameters params = validParams<LinearIsotropicMaterial>();
    params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
@@ -15,7 +15,7 @@ InputParameters validParams<wopsBiLinPlasticMaterial>()
    return params;
 }
 
-wopsBiLinPlasticMaterial::wopsBiLinPlasticMaterial(std::string name,
+LSHPlasticMaterial::LSHPlasticMaterial(std::string name,
                                              MooseSystem & moose_system,
                                              InputParameters parameters)
   :LinearIsotropicMaterial(name, moose_system, parameters),
@@ -25,6 +25,9 @@ wopsBiLinPlasticMaterial::wopsBiLinPlasticMaterial(std::string name,
    _max_its(parameters.get<unsigned int>("max_its")),
    _print_debug_info(getParam<bool>("print_debug_info")),
    _total_strain(declareProperty<ColumnMajorMatrix>("total_strain")),
+   _total_strain_old(declarePropertyOld<ColumnMajorMatrix>("total_strain")),
+   _stress(declareProperty<RealTensorValue>("stress")),
+   _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
    _plastic_strain(declareProperty<ColumnMajorMatrix>("plastic_strain")),
@@ -41,11 +44,38 @@ wopsBiLinPlasticMaterial::wopsBiLinPlasticMaterial(std::string name,
 }
 
 void
-wopsBiLinPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
+LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
 {
   _total_strain[_qp] = total_strain;
             
   ColumnMajorMatrix etotal_strain(total_strain);
+  etotal_strain -= _total_strain_old[_qp];
+
+//   std::cout <<"\n";
+//   std::cout << "_stress_old";
+//   std::cout <<"\n";
+//   std::cout << _stress_old[_qp](0,0) << " " << _stress_old[_qp](0,1) << " " << _stress_old[_qp](0,2);
+//   std::cout <<"\n";
+//   std::cout << _stress_old[_qp](1,0) << " " << _stress_old[_qp](1,1) << " " << _stress_old[_qp](1,2);
+//   std::cout <<"\n";
+//   std::cout << _stress_old[_qp](2,0) << " " << _stress_old[_qp](2,1) << " " << _stress_old[_qp](2,2);
+//   std::cout <<"\n";
+  
+
+  ColumnMajorMatrix stress_old_b(_stress_old[_qp]);
+
+//   std::cout <<"\n";
+//   std::cout << "stress_old_b";
+//   std::cout <<"\n";
+//   std::cout << stress_old_b(0,0) << " " << stress_old_b(0,1) << " " << stress_old_b(0,2);
+//   std::cout <<"\n";
+//   std::cout << stress_old_b(1,0) << " " << stress_old_b(1,1) << " " << stress_old_b(1,2);
+//   std::cout <<"\n";
+//   std::cout << stress_old_b(2,0) << " " << stress_old_b(2,1) << " " << stress_old_b(2,2);
+//   std::cout <<"\n";
+  
+  
+  
   
 // convert total_strain from 3x3 to 9x1
   etotal_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
@@ -53,6 +83,8 @@ wopsBiLinPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, 
   ColumnMajorMatrix trial_stress = (*_local_elasticity_tensor) * etotal_strain;
 // Change 9x1 to a 3x3
   trial_stress.reshape(LIBMESH_DIM, LIBMESH_DIM);
+  trial_stress += stress_old_b;
+  
 // deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress(trial_stress);
   dev_trial_stress -= _identity*((trial_stress.tr())/3.0);
@@ -66,31 +98,47 @@ wopsBiLinPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, 
   if (yield_condition > 0.)  //then use newton iteration to determine effective plastic strain increment
   {    
     unsigned int it = 0;
-    Real plastic_residual = 1.;
-    Real plastic_strain_increment = 0;
-    Real norm_residual = 10.0;
+    Real plastic_residual = 10.;
+    Real plastic_strain_increment = 0.;
+    Real norm_residual = 10.;
+    
+    
     
     while(it < _max_its && norm_residual > _tolerance)
     {
-      plastic_residual = effective_trial_stress - 3. * _shear_modulus * plastic_strain_increment - _hardening_variable[_qp] - _yield_stress;
+      plastic_residual = effective_trial_stress - (3. * _shear_modulus * plastic_strain_increment) - _hardening_variable[_qp] - _yield_stress;
       norm_residual = std::abs(plastic_residual);
       
-      plastic_strain_increment = plastic_strain_increment + plastic_residual / (3. * _shear_modulus + _hardening_constant);
-      _hardening_variable[_qp] = _hardening_variable_old[_qp] + _hardening_constant * plastic_strain_increment;
+      plastic_strain_increment = plastic_strain_increment + ((plastic_residual) / (3. * _shear_modulus + _hardening_constant));
+      
+      _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_constant * plastic_strain_increment);
       it++;
+       
     }
+    
 
     if(it == _max_its)
       mooseError("Max sub-newton iteration hit during plasticity increment solve!");
 
     ColumnMajorMatrix matrix_plastic_strain_increment(dev_trial_stress);
     matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
+
+//     matrix_plastic_strain_increment(0,1) = 2*matrix_plastic_strain_increment(0,1);
+//     matrix_plastic_strain_increment(0,2) = 2*matrix_plastic_strain_increment(0,2);
+//     matrix_plastic_strain_increment(1,0) = 2*matrix_plastic_strain_increment(1,0);
+//     matrix_plastic_strain_increment(2,0) = 2*matrix_plastic_strain_increment(2,0);
+//     matrix_plastic_strain_increment(1,2) = 2*matrix_plastic_strain_increment(1,2);
+//     matrix_plastic_strain_increment(2,1) = 2*matrix_plastic_strain_increment(2,1);
+    
+    
     // update plastic strain
     _plastic_strain[_qp] = _plastic_strain_old[_qp] + matrix_plastic_strain_increment;
 
     // calculate elastic strain
-    elastic_strain = total_strain;
-    elastic_strain -= _plastic_strain[_qp];
+    elastic_strain = etotal_strain;
+    elastic_strain -= matrix_plastic_strain_increment;
+
+    
 
 //calculate Jacobian
 //calculate R
@@ -98,7 +146,6 @@ wopsBiLinPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, 
 
 //calculate Q
     double Q = 1.5*(1/(1+(3*_shear_modulus/_hardening_constant))-R);
-    unsigned int iii = 0;
     unsigned int i, j, k, l;
     i = j = k = l = 0;
     double devdev[3][3][3][3];
@@ -150,7 +197,7 @@ wopsBiLinPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, 
 
 //now define _Jacobian_mult[_qp], which is a colummajormatrix, in terms of Jac[i][j][k][l]
     double Jac9x9[9][9];
-        _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
+    _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
             for (l=0;l<3;l++)
               for (k=0;k<3;k++)
                 for (j=0;j<3;j++)          
@@ -161,54 +208,58 @@ wopsBiLinPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, 
                     Jac9x9[n][m] = Jac[i][j][k][l];
                     _Jacobian_mult[_qp](n,m) = Jac[i][j][k][l];
                   }
-
-
-//                std::cout <<"\n";
-//                std::cout <<"_Jacobian_mult[_qp]";
-//                std::cout <<"\n";
-    
-//                unsigned int n = 0;
-//                unsigned int m = 0;
-//                for (n=0;n<9;n++)
-//                {  
-//                 std::cout << "\n";
-//                  for (m=0;m<9;m++)
-//                  { 
-//                   std::cout << _Jacobian_mult[_qp](n,m) << " ";
-//                  }
-//                 }
-               
-               
-
-
-//                std::cout <<"\n";
-//                std::cout <<"Jac9x9";
-//                std::cout <<"\n";
-//                for (n=0;n<9;n++)
-//                {  
-//                 std::cout << "\n";
-//                  for (m=0;m<9;m++)
-//                  { 
-//                   std::cout << Jac9x9[n][m] << " ";
-//                  }
-//                 }
-               
-//                std::cout <<"\n";
-               
-
-
+//    _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+            
 //end of if    
   }
   
   else
   {
-    elastic_strain = total_strain;
+    elastic_strain = etotal_strain;
     _hardening_variable[_qp] = 0.0;
     ColumnMajorMatrix A(3,3);
     A.zero();
     _plastic_strain[_qp] = A;
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;
   }
+
   
-//end of main  
+//end of computeStrain  
 }
+
+//computeStress
+void
+LSHPlasticMaterial::computeStress(const RealVectorValue & x, const RealVectorValue & y, const RealVectorValue & z, RealTensorValue & stress)
+{
+  ColumnMajorMatrix total_strain(x,y,z);
+
+  // 1/2 * (strain + strain^T)
+  total_strain += total_strain.transpose();
+  total_strain *= 0.5;
+
+  // Add in any extra strain components
+  ColumnMajorMatrix elastic_strain;
+
+  computeStrain(total_strain, elastic_strain);
+
+  // Save that off as the elastic strain
+  _elastic_strain[_qp] = elastic_strain;
+
+
+  // Create column vector
+  elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
+
+  // C * e
+  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * elastic_strain;
+
+  // Change 9x1 to a 3x3
+  stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
+
+  ColumnMajorMatrix stress_old_e(_stress_old[_qp]);
+  stress_vector += stress_old_e;
+  
+
+  // Fill the material properties
+  stress_vector.fill(stress);
+}
+
