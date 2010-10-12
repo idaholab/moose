@@ -21,7 +21,7 @@
 #include "type_tensor.h"
 #include "dense_matrix.h"
 #include "dense_vector.h"
-
+#include <cmath>
 // system includes
 #include <vector>
 
@@ -120,6 +120,12 @@ public:
    * was called on.
    */
   ColumnMajorMatrix deviatoric();
+
+     /**
+   * Returns a matrix that is the absolute vaule of the matrix this
+   * was called on.
+   */
+  ColumnMajorMatrix abs();
 
 
   /**
@@ -379,6 +385,21 @@ ColumnMajorMatrix::deviatoric()
     for(unsigned int i=0; i<_n_rows; i++)
       for(unsigned int j=0; j<_n_cols; j++)
         ret_matrix(i,j) = s(i,j) - I(i,j) * (s.tr()/3.0);
+    
+    return ret_matrix;
+}
+
+
+inline ColumnMajorMatrix
+ColumnMajorMatrix::abs()
+{
+    ColumnMajorMatrix & s = (*this);
+
+    ColumnMajorMatrix ret_matrix(_n_cols, _n_rows);
+    
+    for(unsigned int i=0; i<_n_rows; i++)
+      for(unsigned int j=0; j<_n_cols; j++)
+        ret_matrix(i,j) = fabs(s(i,j));
     
     return ret_matrix;
 }
