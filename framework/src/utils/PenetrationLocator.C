@@ -60,19 +60,33 @@ PenetrationLocator::detectPenetration()
     if(std::find(master_begin, master_end, boundary_id) != master_end)
     {
       Node & node = _mesh.node(node_list[i]);
-/*
-      std::map<unsigned int, PenetrationInfo *>::const_iterator found_it;
-  
-      if ((found_it = _penetrated_elems.find(node.id())) != _penetrated_elems.end())
-      {
-        
-        found_it->second->_norm_distance = normDistance(*side, node);
-
-        continue;
-      }
-*/
+      
       if(node.processor_id() == libMesh::processor_id())
       {
+        // See if we already have info about this node
+        if(_penetration_info[node.id()])
+        {
+          PenetrationInfo * info = _penetration_info[node.id()];
+
+          Elem * elem = info->_elem;
+          Elem * side = info->_side;
+
+          // See if the same element still contains this point
+          if(elem->contains_point(node))
+          {
+            info->_normal = normal(*side, node);
+            info->_distance = normDistance(*side, node);
+
+            // I hate continues but this is actually cleaner than anything I can think of
+            continue;
+          }
+          else //make sure to clear out the info sine we're no longer in that element and might not be in any!
+          {
+            delete info;
+            _penetration_info[node.id()] = NULL;
+          } 
+        } 
+          
         Node * closest_node = NULL;
         
         Real closest_distance = 999999999;
@@ -111,78 +125,25 @@ PenetrationLocator::detectPenetration()
                 unsigned int side_num = side_list[m];
               
                 Elem *side = (elem->build_side(side_num)).release();
+
+                if(_penetration_info[node.id()])
+                {
+                  delete _penetration_info[node.id()];
+                  _penetration_info[node.id()] = NULL;
+                }
                 
-                _penetrated_elems[node.id()] =  new PenetrationInfo(elem->id(),
+                _penetration_info[node.id()] =  new PenetrationInfo(elem,
+                                                                    side,
                                                                     normal(*side, node),
                                                                     normDistance(*side, node));
-                /*
-#ifdef DEBUG            
-                std::cerr << "Node " << node.id() << " contained in " << elem->id()
-                          << " through side " << side_num
-                          << ". Distance: " << normDistance(*side, node)
-                          << ". Norm: " << norm(*side, node);
-#endif
-                */
               }
             }            
           }
         }
       }
     }
-  }
-  
-        
+  }        
 
-
-/*
-  MeshBase::const_node_iterator nl = _mesh.local_nodes_begin();
-  MeshBase::const_node_iterator end_nl = _mesh.local_nodes_end();
-  for ( ; nl != end_nl ; ++nl)
-  {
-    const Node* node = *nl;
-
-    std::vector< unsigned int >::iterator pos = std::find(node_list.begin(), node_list.end(), node->id());
-
-    // see if this node is on a boundary and that boundary is the master boundary
-    if (pos != node_list.end()
-      //&& node_boundary_list[int(pos - node_list.begin())] == _master_boundary)
-        && std::find(_master_boundary.begin(), _master_boundary.end(), node_boundary_list[int(pos - node_list.begin())]) != _master_boundary.end())
-    {
-      
-      MeshBase::const_element_iterator el = _mesh.elements_begin();
-      MeshBase::const_element_iterator end_el = _mesh.elements_end();
-      for ( ; el != end_el ; ++el)
-      {
-        const Elem* elem = *el;
-
-        std::vector< unsigned int >::iterator pos2 = std::find(elem_list.begin(), elem_list.end(), elem->id());
-
-        // see if this elem is on a boundary and that boundary is the slave boundary
-        // and that this elem contains the current node
-        if (pos2 != elem_list.end()
-            && id_list[int(pos2 - elem_list.begin())] == _slave_boundary
-            && elem->contains_point(*node)) 
-        {
-            unsigned int side_num = *(side_list.begin() + int(pos2 - elem_list.begin()));
-
-
-            Elem *side = (elem->build_side(side_num)).release();
-//#ifdef DEBUG            
-            std::cout << "Node " << node->id() << " contained in " << elem->id()
-                      << " through side " << side_num
-                      << ". Distance: " << normDistance(*side, *node)
-                      << ". Norm: " << norm(*side, *node);
-//#endif    
-
-
-            _penetrated_elems[node->id()] =  new PenetrationInfo(elem->id(),
-                                                                 norm(*side, *node),
-                                                                 normDistance(*side, *node));
-            
-        }
-      }
-    }
-    }*/
   Moose::perf_log.pop("detectPenetration()","Solve");
 }
 
@@ -208,12 +169,12 @@ PenetrationLocator::normal(const Elem & side, const Point & /*p0*/)
 }
 
 Real
-PenetrationLocator::penetrationDistance(unsigned int node_id) const
+PenetrationLocator::penetrationDistance(unsigned int node_id)
 {
-  std::map<unsigned int, PenetrationInfo *>::const_iterator found_it;
+  PenetrationInfo * info = _penetration_info[node_id];
   
-  if ((found_it = _penetrated_elems.find(node_id)) != _penetrated_elems.end())
-    return found_it->second->_norm_distance;
+  if (info)
+    return info->_distance;
   else
     return 0;
 }
@@ -255,12 +216,12 @@ PenetrationLocator::normDistance(const Elem & side, const Point & p0)
 
 
 RealVectorValue
-PenetrationLocator::penetrationNorm(unsigned int node_id) const
+PenetrationLocator::penetrationNormal(unsigned int node_id)
 {
   std::map<unsigned int, PenetrationInfo *>::const_iterator found_it;
 
-  if ((found_it = _penetrated_elems.find(node_id)) != _penetrated_elems.end())
-    return found_it->second->_norm;
+  if ((found_it = _penetration_info.find(node_id)) != _penetration_info.end())
+    return found_it->second->_normal;
   else
     return RealVectorValue(0, 0, 0);
 }
@@ -411,15 +372,22 @@ PenetrationLocator::inSegment(Point P, Point SP0, Point SP1)
 //===================================================================
 
 
-PenetrationLocator::PenetrationInfo::PenetrationInfo(unsigned int elem_id, RealVectorValue norm, Real norm_distance)
-  : _elem_id(elem_id),
-    _norm(norm),
-    _norm_distance(norm_distance)
+PenetrationLocator::PenetrationInfo::PenetrationInfo(Elem * elem, Elem * side, RealVectorValue norm, Real norm_distance)
+  : _elem(elem),
+    _side(side),
+    _normal(norm),
+    _distance(norm_distance)
 {}
 
   
 PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
-  : _elem_id(p._elem_id),
-    _norm(p._norm),
-    _norm_distance(p._norm_distance)
+  : _elem(p._elem),
+    _side(p._side),
+    _normal(p._normal),
+    _distance(p._distance)
 {}
+
+PenetrationLocator::PenetrationInfo::~PenetrationInfo()
+{
+  delete _side;
+}   

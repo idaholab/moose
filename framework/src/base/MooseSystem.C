@@ -221,6 +221,9 @@ MooseSystem::~MooseSystem()
 
   if (_executioner != NULL)
     delete _executioner;
+
+  if(_ex_out)
+    delete _ex_out;  
 }
 
 Mesh *

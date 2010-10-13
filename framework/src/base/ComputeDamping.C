@@ -117,6 +117,8 @@ Real MooseSystem::compute_damping(const NumericVector<Number>& soln, const Numer
 
     damping = cid._damping;
   }
+
+  Parallel::min(damping);
   
   Moose::perf_log.pop("compute_dampers()","Solve");
 

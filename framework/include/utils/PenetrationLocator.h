@@ -32,8 +32,8 @@ public:
   PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, short int slave);
   void detectPenetration();
 
-  Real penetrationDistance(unsigned int node_id) const;
-  RealVectorValue penetrationNorm(unsigned int node_id) const;
+  Real penetrationDistance(unsigned int node_id);
+  RealVectorValue penetrationNormal(unsigned int node_id);
   
 private:
   /**
@@ -42,13 +42,16 @@ private:
   class PenetrationInfo 
   {
   public:
-    PenetrationInfo(unsigned int elem_id, RealVectorValue norm, Real norm_distance);
+    PenetrationInfo(Elem * elem, Elem * side, RealVectorValue norm, Real norm_distance);
 
     PenetrationInfo(const PenetrationInfo & p);
+
+    ~PenetrationInfo();
     
-    unsigned int _elem_id;
-    RealVectorValue _norm;
-    Real _norm_distance;
+    Elem * _elem;
+    Elem * _side;
+    RealVectorValue _normal;
+    Real _distance;
   };
 
   MooseSystem & _moose_system;
@@ -66,7 +69,7 @@ private:
   /**
    * Data structure of nodes and their associated penetration information
    */
-  std::map<unsigned int, PenetrationInfo *> _penetrated_elems;
+  std::map<unsigned int, PenetrationInfo *> _penetration_info;
 };
 
 

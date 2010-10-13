@@ -223,7 +223,7 @@ Moose::registerObjects()
   registerNamedParserBlock(PostprocessorsBlock, "Postprocessors");
   registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/*");
   registerNamedParserBlock(DampersBlock, "Dampers");
-  registerNamedParserBlock(GenericDamperBlock, "Dampers/*");
+  registerNamedParserBlock(GenericDamperBlock, "Dampers/*");  
   registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");
   
   registerInitialCondition(ConstantIC);  
@@ -256,7 +256,7 @@ Moose::registerObjects()
   registerPostprocessor(EmptyPostprocessor);
 
   registerDamper(ConstantDamper);
-  DamperFactory::instance()->registerDamper<ConstantDamper>("MaxIncrement");
+  registerDamper(MaxIncrement);
 }
 
 void
