@@ -92,6 +92,7 @@ MooseSystem::MooseSystem() :
   _t_step(0),
   _u_dot_soln(NULL),
   _res_soln_old(NULL),
+  _du_dot_du_soln(NULL),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -157,6 +158,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _t_step(0),
   _u_dot_soln(NULL),
   _res_soln_old(NULL),
+  _du_dot_du_soln(NULL),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -525,6 +527,7 @@ MooseSystem::initEquationSystems()
 
   _u_dot_soln = &_system->add_vector("u_dot", false, GHOSTED);
   _res_soln_old = &_system->add_vector("residual_old", false, GHOSTED);
+  _du_dot_du_soln = &_system->add_vector("du_dot_du", false, GHOSTED);
 
   _newton_soln = &_system->add_vector("newton_soln", false, GHOSTED);
   _old_newton_soln = &_system->add_vector("old_newton_soln", false, GHOSTED);
@@ -1369,6 +1372,9 @@ MooseSystem::onTimestepBegin()
   case Moose::CRANK_NICOLSON:
     *_u_dot_soln = *_system->old_local_solution;
     *_u_dot_soln *= -2.0 / _dt;
+
+    _du_dot_du_soln->zero();
+
     computeResidualInternal(*_system->old_local_solution, *_res_soln_old);
     break;
 
@@ -1386,11 +1392,15 @@ MooseSystem::computeTimeDeriv(const NumericVector<Number> & soln)
     *_u_dot_soln = soln;
     *_u_dot_soln -= *_system->old_local_solution;
     *_u_dot_soln /= _dt;
+
+    *_du_dot_du_soln = 1.0/_dt;
     break;
 
   case Moose::CRANK_NICOLSON:
     *_u_dot_soln = soln;
     *_u_dot_soln *= 2. / _dt;
+
+    *_du_dot_du_soln = 1.0/_dt;
     break;
 
   case Moose::BDF2:
@@ -1400,6 +1410,8 @@ MooseSystem::computeTimeDeriv(const NumericVector<Number> & soln)
       *_u_dot_soln = soln;
       *_u_dot_soln -= *_system->old_local_solution;
       *_u_dot_soln /= _dt;
+
+      *_du_dot_du_soln = 1.0/_dt;
     }
     else
     {
@@ -1408,6 +1420,8 @@ MooseSystem::computeTimeDeriv(const NumericVector<Number> & soln)
       _u_dot_soln->add(_time_weight[1], *_system->old_local_solution);
       _u_dot_soln->add(_time_weight[2], *_system->older_local_solution);
       _u_dot_soln->scale(1./_dt);
+
+      *_du_dot_du_soln = _time_weight[0]/_dt;
     }
     break;
   }

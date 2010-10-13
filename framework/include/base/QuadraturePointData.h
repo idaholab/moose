@@ -161,6 +161,11 @@ public:
   MooseArray<MooseArray<Real> > _var_dots;
 
   /**
+   * Values of the derivatives wrt to u at quadrature points for variables
+   */
+  MooseArray<MooseArray<Real> > _var_du_dot_dus;
+
+  /**
    * Vector of auxiliary variable numbers that need to be evaluated
    * at the quadrature points
    */

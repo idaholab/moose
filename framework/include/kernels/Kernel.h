@@ -149,6 +149,11 @@ protected:
   MooseArray<Real> & _u_dot;
 
   /**
+   * Derivative of u_dot wrt u
+   */
+  MooseArray<Real> & _du_dot_du;
+
+  /**
    * Holds the previous solution at the current quadrature point.
    */
   MooseArray<Real> & _u_old;

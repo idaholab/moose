@@ -605,6 +605,8 @@ public:
 
   NumericVector<Number> * _res_soln_old; /// residual evaluated at the old time step
 
+  NumericVector<Number> * _du_dot_du_soln;   /// solution vector for the derivative of u_dot
+
   /**
    * Called before each residual evaluation
    */

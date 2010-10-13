@@ -36,5 +36,5 @@ TimeDerivative::computeQpResidual()
 Real
 TimeDerivative::computeQpJacobian()
 {
-  return _test[_i][_qp]*_time_weight[0]*_phi[_j][_qp]/_dt;
+  return _test[_i][_qp]*_phi[_j][_qp]*_du_dot_du[_qp];
 }
