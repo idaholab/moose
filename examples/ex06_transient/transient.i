@@ -39,7 +39,7 @@
   [../]
 
   [./euler]
-    type = ExampleImplicitEuler
+    type = ExampleTimeDerivative
     variable = v
     time_coefficient = 20.0
   [../]

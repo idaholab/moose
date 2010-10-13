@@ -29,7 +29,7 @@
 // Example 6 Includes
 #include "ExampleDiffusion.h"
 #include "Convection.h"
-#include "ExampleImplicitEuler.h"
+#include "ExampleTimeDerivative.h"
 
 // C++ include files
 #include <iostream>
@@ -50,7 +50,7 @@ int main (int argc, char** argv)
 
   registerKernel(Convection);
   registerKernel(ExampleDiffusion);
-  registerKernel(ExampleImplicitEuler);
+  registerKernel(ExampleTimeDerivative);
   
   Parser p(moose_system);
   

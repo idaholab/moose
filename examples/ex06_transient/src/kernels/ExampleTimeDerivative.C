@@ -12,34 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ExampleImplicitEuler.h"
+#include "ExampleTimeDerivative.h"
 
 #include "Material.h"
 
 template<>
-InputParameters validParams<ExampleImplicitEuler>()
+InputParameters validParams<ExampleTimeDerivative>()
 {
-  InputParameters params = validParams<ImplicitEuler>();
+  InputParameters params = validParams<TimeDerivative>();
   params.addParam<Real>("time_coefficient", 1.0, "Time Coefficient");
   return params;
 }
 
-ExampleImplicitEuler::ExampleImplicitEuler(const std::string & name,
-                                           MooseSystem &sys,
-                                           InputParameters parameters)
-  :ImplicitEuler(name,sys,parameters),
+ExampleTimeDerivative::ExampleTimeDerivative(const std::string & name,
+                                             MooseSystem &sys,
+                                             InputParameters parameters)
+  :TimeDerivative(name,sys,parameters),
    // This kernel expects an input parameter named "time_coefficient"
    _time_coefficient(getParam<Real>("time_coefficient"))
 {}
 
 Real
-ExampleImplicitEuler::computeQpResidual()
+ExampleTimeDerivative::computeQpResidual()
 {
-  return _time_coefficient*ImplicitEuler::computeQpResidual();
+  return _time_coefficient*TimeDerivative::computeQpResidual();
 }
 
 Real
-ExampleImplicitEuler::computeQpJacobian()
+ExampleTimeDerivative::computeQpJacobian()
 {
-  return _time_coefficient*ImplicitEuler::computeQpJacobian();
+  return _time_coefficient*TimeDerivative::computeQpJacobian();
 }

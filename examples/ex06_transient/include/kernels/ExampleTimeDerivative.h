@@ -12,24 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EXAMPLEIMPLICITEULER
-#define EXAMPLEIMPLICITEULER
+#ifndef EXAMPLETIMEDERIVATIVE
+#define EXAMPLETIMEDERIVATIVE
 
-#include "ImplicitEuler.h"
+#include "TimeDerivative.h"
 
 // Forward Declarations
-class ExampleImplicitEuler;
+class ExampleTimeDerivative;
 
 template<>
-InputParameters validParams<ExampleImplicitEuler>();
+InputParameters validParams<ExampleTimeDerivative>();
 
-class ExampleImplicitEuler : public ImplicitEuler
+class ExampleTimeDerivative : public TimeDerivative
 {
 public:
 
-  ExampleImplicitEuler(const std::string & name,
-                       MooseSystem &sys,
-                       InputParameters parameters);
+  ExampleTimeDerivative(const std::string & name,
+                        MooseSystem &sys,
+                        InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -38,4 +38,5 @@ protected:
 
   Real _time_coefficient;
 };
-#endif //EXAMPLEIMPLICITEULER
+
+#endif //EXAMPLETIMEDERIVATIVE
