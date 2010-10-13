@@ -354,6 +354,13 @@ protected:
    */
   virtual VariableGradient & coupledGradientOld(const std::string & varname, unsigned int i = 0);
 
+  /**
+   * Returns a reference (that can be stored) to a coupled variable's time derivative.
+   *
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  virtual VariableValue & coupledDot(const std::string & varname, unsigned int i = 0);
+
 };
 
 #endif // PDEBASE_H

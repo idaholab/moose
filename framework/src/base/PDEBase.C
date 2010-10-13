@@ -276,3 +276,15 @@ PDEBase::coupledGradientOld(const std::string & varname, unsigned int i)
 
   return _data._var_grads_old[_coupled_vars[varname][i]._num];
 }
+
+VariableValue &
+PDEBase::coupledDot(const std::string & varname, unsigned int i)
+{
+  if(!isCoupled(varname))
+    mooseError("\nObject " + name() + " was not provided with a coupled variable " + varname + "\n\n");
+
+  if(!isAux(varname))
+    return _data._var_dots[_coupled_vars[varname][i]._num];
+  else
+    mooseError("Time derivative of auxiliary variables not implemented");
+}
