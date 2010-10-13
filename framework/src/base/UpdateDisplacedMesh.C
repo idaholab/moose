@@ -111,7 +111,7 @@ void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)
 {
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
-  update_aux_vars(soln);
+  updateAuxVars(soln);
 
   (*_displaced_system->solution) = soln;
 

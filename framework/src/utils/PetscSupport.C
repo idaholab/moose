@@ -262,7 +262,7 @@ namespace Moose
       ghosted_update_vec_y.close();
       ghosted_update_vec_w.close();
 
-      damping = moose_system->compute_damping(ghosted_update_vec_w, ghosted_update_vec_y);
+      damping = moose_system->computeDamping(ghosted_update_vec_w, ghosted_update_vec_y);
 
       if(damping < 1.0)
       {

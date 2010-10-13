@@ -147,19 +147,19 @@ namespace Moose
   {
     MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
-    moose_system->compute_postprocessors(soln);
-    moose_system->output_postprocessors();
+    moose_system->computePostprocessors(soln);
+    moose_system->outputPostprocessors();
   }
 }
 
-void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
+void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
 {
   Moose::perf_log.push("compute_postprocessors()","Solve");
 
   // TODO: Make this work with threads!
   if (_pps[0]._block_ids_with_postprocessors.size() > 0 || _pps[0]._boundary_ids_with_postprocessors.size() > 0)
   {
-    update_aux_vars(soln);
+    updateAuxVars(soln);
     
     Threads::parallel_for(*getActiveLocalElementRange(),
                           ComputeInternalPostprocessors(*this, soln));
@@ -246,7 +246,7 @@ void MooseSystem::compute_postprocessors(const NumericVector<Number>& soln)
   Moose::perf_log.pop("compute_postprocessors()","Solve");
 }
 
-void MooseSystem::output_postprocessors()
+void MooseSystem::outputPostprocessors()
 {
   // Postprocesser Output
   if (!_postprocessor_data[0].empty())

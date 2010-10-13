@@ -95,7 +95,7 @@ protected:
   const NumericVector<Number> & _update;
 };
 
-Real MooseSystem::compute_damping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
+Real MooseSystem::computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
 {
   Moose::perf_log.push("compute_dampers()","Solve");
 
@@ -109,7 +109,7 @@ Real MooseSystem::compute_damping(const NumericVector<Number>& soln, const Numer
 
   if(damper_begin != damper_end)
   {
-    update_aux_vars(soln);
+    updateAuxVars(soln);
 
     ComputeInternalDamping cid(*this, soln, update);
     

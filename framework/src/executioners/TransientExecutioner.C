@@ -186,7 +186,7 @@ TransientExecutioner::takeStep()
               << _moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2) << std::endl;
     
   if ( _converged && (_t_step+1)%_moose_system._interval == 0)
-    _moose_system.output_system(_t_step, _time);
+    _moose_system.outputSystem(_t_step, _time);
 
   if( _converged )
   {

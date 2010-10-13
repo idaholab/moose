@@ -270,7 +270,7 @@ public:
   /**
    * Computes a block diagonal jacobian for the full system.
    */
-  void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
+  virtual void computeJacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian);
 
   /**
    * Computes one block of the jacobian.
@@ -278,19 +278,19 @@ public:
    * @param ivar The block row to compute.
    * @param jvar The block column to compute.
    */
-  void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
+  virtual void computeJacobianBlock (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar);
 
   /**
    * Computes residual of the full system
    *
    */
-  void computeResidual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
+  virtual void computeResidual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
 
-  Number initial_value (const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& var_name);
+  virtual Number initialValue (const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& var_name);
 
-  Gradient initial_gradient (const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& var_name);
+  virtual Gradient initialGradient (const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& var_name);
 
-  void initial_condition(EquationSystems& es, const std::string& system_name);
+  virtual void initialCondition(EquationSystems& es, const std::string& system_name);
 
   void reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke = NULL);
 
@@ -305,17 +305,17 @@ public:
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem);
 
 
-  void compute_postprocessors (const NumericVector<Number>& soln);
+  virtual void computePostprocessors (const NumericVector<Number>& soln);
 
-  void output_postprocessors();
+  virtual void outputPostprocessors();
 
   bool needPostprocessorsForResiduals() { return _compute_pps_each_residual_evaluation; }
 
   void needPostprocessorsForResiduals(bool state) { _compute_pps_each_residual_evaluation = state; }
 
-  Real compute_damping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
+  virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
-  void subdomainSetup(THREAD_ID tid, unsigned int block_id);
+  virtual void subdomainSetup(THREAD_ID tid, unsigned int block_id);
 
   /**
    * Update materials
@@ -340,7 +340,7 @@ public:
 
   void checkSystemsIntegrity();
 
-  void project_solution(Number fptr(const Point& p,
+  virtual void projectSolution(Number fptr(const Point& p,
                                     const Parameters& parameters,
                                     const std::string& sys_name,
                                     const std::string& unknown_name),
@@ -390,7 +390,7 @@ public:
   /**
    * Output the given system to output files.
    */
-  void output_system(unsigned int t_step, Real time);
+  void outputSystem(unsigned int t_step, Real time);
 
 
   void setPreconditioner(Preconditioner<Real> *pc) { _preconditioner = pc; }
@@ -432,13 +432,13 @@ public:
 protected:
   void sizeEverything();
 
-  void computeResidualInternal (const NumericVector<Number>& soln, NumericVector<Number>& residual);
+  virtual void computeResidualInternal (const NumericVector<Number>& soln, NumericVector<Number>& residual);
 
-  void update_aux_vars(const NumericVector<Number>& soln);
+  void updateAuxVars(const NumericVector<Number>& soln);
 
   void updateDisplacedMesh(const NumericVector<Number>& soln);
 
-private:
+protected:
   std::vector<DofData> _dof_data;
   std::vector<ElementData *> _element_data;
   std::vector<FaceData *> _face_data;

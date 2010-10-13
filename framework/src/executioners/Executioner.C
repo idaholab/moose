@@ -80,14 +80,14 @@ Executioner::setup()
     _moose_system.meshChanged();
 
     //reproject the initial condition
-    _moose_system.project_solution(Moose::initial_value, Moose::initial_gradient);
+    _moose_system.projectSolution(Moose::initial_value, Moose::initial_gradient);
   }    
 
   if(_moose_system._output_initial)
   {
     std::cout<<"Outputting Initial Condition"<<std::endl;
       
-    _moose_system.output_system(0, 0.0);
+    _moose_system.outputSystem(0, 0.0);
   }
     
   // Check for Kernel, BC, and Material coverage on the Mesh
@@ -96,8 +96,8 @@ Executioner::setup()
   _moose_system.getNonlinearSystem()->update();
 
   // Compute the initial value of postprocessors
-  _moose_system.compute_postprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
-  _moose_system.output_postprocessors();
+  _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
+  _moose_system.outputPostprocessors();
 }
 
 void

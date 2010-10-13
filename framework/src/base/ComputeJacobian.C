@@ -187,12 +187,12 @@ void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>& 
 {
   MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
 
-  moose_system->compute_jacobian(soln, jacobian);
+  moose_system->computeJacobian(soln, jacobian);
 }
 
 }
 
-void MooseSystem::compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
+void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
 {
   Moose::perf_log.push("compute_jacobian()","Solve");
 
@@ -213,7 +213,7 @@ void MooseSystem::compute_jacobian (const NumericVector<Number>& soln, SparseMat
   if(_has_displaced_mesh)
     updateDisplacedMesh(soln);
   
-  update_aux_vars(soln);
+  updateAuxVars(soln);
 
   Threads::parallel_for(*getActiveLocalElementRange(),
                         ComputeInternalJacobians(*this, soln, jacobian));
@@ -381,12 +381,12 @@ void compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Num
 {
   MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
 
-  moose_system->compute_jacobian_block (soln, jacobian, precond_system, ivar, jvar);
+  moose_system->computeJacobianBlock (soln, jacobian, precond_system, ivar, jvar);
 }
 
 }
 
-void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar)
+void MooseSystem::computeJacobianBlock (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, System& precond_system, unsigned int ivar, unsigned int jvar)
 {
   Moose::perf_log.push("compute_jacobian_block()","Solve");
 
@@ -403,7 +403,7 @@ void MooseSystem::compute_jacobian_block (const NumericVector<Number>& soln, Spa
 #endif
 #endif
 
-  update_aux_vars(soln);
+  updateAuxVars(soln);
 /*
     Threads::parallel_for(ConstElemRange(Moose::mesh->active_local_elements_begin(),
                                          Moose::mesh->active_local_elements_end(),1),

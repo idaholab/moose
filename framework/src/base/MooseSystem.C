@@ -680,8 +680,8 @@ MooseSystem::solve()
   if(_has_displaced_mesh)
     updateDisplacedMesh(*_system->solution);
 
-  compute_postprocessors(*(_system->current_local_solution));
-  output_postprocessors();
+  computePostprocessors(*(_system->current_local_solution));
+  outputPostprocessors();
 }
 
 unsigned int
@@ -1526,7 +1526,7 @@ MooseSystem::getActiveNodeRange()
  * Outputs the system.
  */
 void
-MooseSystem::output_system(unsigned int t_step, Real time)
+MooseSystem::outputSystem(unsigned int t_step, Real time)
 {
   OStringStream stream_file_base;
   OStringStream stream_file_base_displaced;
@@ -1651,7 +1651,7 @@ MooseSystem::copy_old_solutions()
 }
 
 void
-MooseSystem::project_solution(Number fptr(const Point& p,
+MooseSystem::projectSolution(Number fptr(const Point& p,
                                           const Parameters& parameters,
                                           const std::string& sys_name,
                                           const std::string& unknown_name),

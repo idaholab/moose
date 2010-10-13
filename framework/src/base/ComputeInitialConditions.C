@@ -33,7 +33,7 @@ namespace Moose
   {
     MooseSystem * moose_system = parameters.get<MooseSystem *>("moose_system");
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
-    return moose_system->initial_value(p, parameters, sys_name, var_name);
+    return moose_system->initialValue(p, parameters, sys_name, var_name);
   }
 
   Gradient initial_gradient (const Point& p,
@@ -43,19 +43,19 @@ namespace Moose
   {
     MooseSystem * moose_system = parameters.get<MooseSystem *>("moose_system");
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
-    return moose_system->initial_gradient(p, parameters, sys_name, var_name);
+    return moose_system->initialGradient(p, parameters, sys_name, var_name);
   }
 
   void initial_condition(EquationSystems& es, const std::string& system_name)
   {
     MooseSystem * moose_system = es.parameters.get<MooseSystem *>("moose_system");
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
-    moose_system->initial_condition(es, system_name);
+    moose_system->initialCondition(es, system_name);
   }
 }
 
 
-Number MooseSystem::initial_value (const Point& p,
+Number MooseSystem::initialValue (const Point& p,
                       const Parameters& parameters,
                       const std::string& /*sys_name*/,
                       const std::string& var_name)
@@ -72,7 +72,7 @@ Number MooseSystem::initial_value (const Point& p,
   return 0;
 }
 
-Gradient MooseSystem::initial_gradient (const Point& p,
+Gradient MooseSystem::initialGradient (const Point& p,
                            const Parameters& /*parameters*/,
                            const std::string& /*sys_name*/,
                            const std::string& var_name)
@@ -86,7 +86,7 @@ Gradient MooseSystem::initial_gradient (const Point& p,
   return RealGradient();
 }
 
-void MooseSystem::initial_condition(EquationSystems& es, const std::string& system_name)
+void MooseSystem::initialCondition(EquationSystems& es, const std::string& system_name)
 {
   ExplicitSystem & system = _es->get_system<ExplicitSystem>(system_name);
 

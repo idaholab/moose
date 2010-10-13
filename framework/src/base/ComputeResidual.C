@@ -180,11 +180,10 @@ namespace Moose
 void MooseSystem::computeResidual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   if (needPostprocessorsForResiduals())
-    compute_postprocessors(*(getNonlinearSystem()->current_local_solution));
+    computePostprocessors(*(getNonlinearSystem()->current_local_solution));
   computeTimeDeriv(soln);
   computeResidualInternal(soln, residual);
   finishResidual(residual);
-
 }
 
 void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, NumericVector<Number>& residual)
@@ -194,7 +193,7 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
   if(_has_displaced_mesh)
     updateDisplacedMesh(soln);
 
-  update_aux_vars(soln);
+  updateAuxVars(soln);
 
   Moose::perf_log.push("compute_residual()","Solve");
   Threads::parallel_for(*getActiveLocalElementRange(),

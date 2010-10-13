@@ -24,7 +24,7 @@
 #include "mesh.h"
 #include "boundary_info.h"
 
-void MooseSystem::update_aux_vars(const NumericVector<Number>& soln)
+void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
 {
   //If there aren't any auxiliary variables just return
   if(!_es->get_system<ExplicitSystem>("AuxiliarySystem").n_vars())

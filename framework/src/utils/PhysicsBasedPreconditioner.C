@@ -123,7 +123,7 @@ PhysicsBasedPreconditioner::init ()
     LinearImplicitSystem & u_system = _equation_systems->get_system<LinearImplicitSystem>(sys);
     
       //Compute the diagonal block... storing the result in the system matrix
-    _moose_system.compute_jacobian_block(*system.current_local_solution,*u_system.matrix,u_system,system_var,system_var);
+    _moose_system.computeJacobianBlock(*system.current_local_solution,*u_system.matrix,u_system,system_var,system_var);
 
     for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
     {
@@ -134,7 +134,7 @@ PhysicsBasedPreconditioner::init ()
       
       _off_diag_mats[system_var][diag] = &u_system.get_matrix(coupled_name);
         
-      _moose_system.compute_jacobian_block(*system.current_local_solution,*_off_diag_mats[system_var][diag],
+      _moose_system.computeJacobianBlock(*system.current_local_solution,*_off_diag_mats[system_var][diag],
                                            u_system,system_var,coupled_var);
     }
 
