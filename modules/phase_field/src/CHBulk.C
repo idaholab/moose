@@ -10,7 +10,7 @@ InputParameters validParams<CHBulk>()
 }
 
 CHBulk::CHBulk(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+  :KernelGrad(name, moose_system, parameters),
    _mob_name(getParam<std::string>("mob_name")),
    _M(getMaterialProperty<Real>(_mob_name))
 {  
@@ -32,18 +32,14 @@ CHBulk::computeGradDFDCons(PFFunctionType type)
   mooseError("Invalid type passed in");
 }
 
-Real
-CHBulk::computeQpResidual()
+RealGradient
+CHBulk::precomputeQpResidual()
 {
-  RealGradient grad_dfdc = computeGradDFDCons(Residual);
-    
-  return _M[_qp] * (grad_dfdc * _grad_test[_i][_qp]);
+  return _M[_qp] * computeGradDFDCons(Residual);
 }
 
-Real
-CHBulk::computeQpJacobian()
+RealGradient
+CHBulk::precomputeQpJacobian()
 {
-  RealGradient Jac_grad_dfdc = computeGradDFDCons(Jacobian);
-  
-  return _M[_qp] * (Jac_grad_dfdc * _grad_test[_i][_qp]);
+  return _M[_qp] * computeGradDFDCons(Jacobian);
 }

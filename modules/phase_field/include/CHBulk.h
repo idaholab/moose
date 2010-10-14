@@ -1,7 +1,7 @@
 #ifndef CHBulk_H
 #define CHBulk_H
 
-#include "Kernel.h"
+#include "KernelGrad.h"
 
 //Forward Declarations
 class CHBulk;
@@ -9,7 +9,7 @@ class CHBulk;
 template<>
 InputParameters validParams<CHBulk>();
 
-class CHBulk : public Kernel
+class CHBulk : public KernelGrad
 {
 public:
 
@@ -23,8 +23,8 @@ protected:
     Jacobian,
     Residual
   };
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual RealGradient precomputeQpResidual();
+  virtual RealGradient precomputeQpJacobian();
   virtual RealGradient computeGradDFDCons(PFFunctionType type);
 
 private:
