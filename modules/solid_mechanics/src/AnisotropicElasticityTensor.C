@@ -1,7 +1,7 @@
 #include "AnisotropicElasticityTensor.h"
 
-AnisotropicElasticityTensor::AnisotropicElasticityTensor(const bool constant)
-  : ElasticityTensor(constant),
+AnisotropicElasticityTensor::AnisotropicElasticityTensor()
+  : ElasticityTensor(false),
     _dmat(9,9),
     _qdmat(9,9),
     _dt(6,6),

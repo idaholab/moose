@@ -29,7 +29,7 @@
 class AnisotropicElasticityTensor : public ElasticityTensor
 {
 public:
-  AnisotropicElasticityTensor(const bool constant = true);
+  AnisotropicElasticityTensor();
   
   /**
    * Set the first euler angle
