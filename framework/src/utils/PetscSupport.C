@@ -266,6 +266,7 @@ namespace Moose
 
       if(damping < 1.0)
       {
+        std::cout<<"Damping Factor: "<<damping<<std::endl;
         VecScale(y, damping);
         *changed_y = PETSC_TRUE;
       }

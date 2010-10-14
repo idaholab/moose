@@ -49,15 +49,25 @@ public:
    */
   virtual void computeResidual();
 
+  /** 
+   * Computes the jacobian for the current element.
+   */
+  virtual void computeJacobian();
+
 protected:
   /**
    * Called before forming the residual for an element
    */
-  virtual void precalculateResidual() = 0;
+  virtual Real precomputeQpResidual() = 0;
+
+  /**
+   * Called before forming the jacobian for an element
+   */
+  virtual Real precomputeQpJacobian(){ return 0; }
 
   virtual Real computeQpResidual();
 
-  MooseArray<Real> _value;
+  Real _value;
 };
 
 #endif //KERNELVALUE_H

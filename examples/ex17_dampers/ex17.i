@@ -61,7 +61,7 @@
   [./u_damp]
     type = ConstantDamper
     variable = u
-    damping = 1.0
+    damping = 0.9
   [../]
 []
 

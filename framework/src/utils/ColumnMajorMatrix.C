@@ -17,9 +17,10 @@
 ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols)
   : _n_rows(rows),
     _n_cols(cols),
-    _n_entries(rows*cols),
-    _values(rows*cols)
-{}
+    _n_entries(rows*cols)
+{
+  _values.resize(rows*cols);
+}
 
 ColumnMajorMatrix::ColumnMajorMatrix(const ColumnMajorMatrix &rhs)
 {

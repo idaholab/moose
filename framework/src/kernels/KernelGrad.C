@@ -40,14 +40,36 @@ KernelGrad::computeResidual()
   
   DenseSubVector<Number> & var_Re = *_dof_data._var_Res[_var_num];
 
-  _value.resize(_qrule->n_points());
-  precalculateResidual();
-  for (_i=0; _i<_phi.size(); _i++)
-    for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*_value[_qp]*_grad_test[_i][_qp];
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  {
+    _value = precomputeQpResidual();
+    for (_i=0; _i<_phi.size(); _i++)
+      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*_value*_grad_test[_i][_qp];
+  }
   
 //  Moose::perf_log.pop("computeResidual()","KernelGrad");
 }
+
+void
+KernelGrad::computeJacobian()
+{
+//  Moose::perf_log.push("computeJacobian()",_name);
+
+  DenseMatrix<Number> & var_Ke = *_dof_data._var_Kes[_var_num];
+
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  {
+    for (_j=0; _j<_phi.size(); _j++)
+    {
+      _value = precomputeQpJacobian();
+      for (_i=0; _i<_phi.size(); _i++)
+        var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*_value*_grad_test[_i][_qp];
+    }
+  }
+  
+//  Moose::perf_log.pop("computeJacobian()",_name);
+}
+
 
 Real
 KernelGrad::computeQpResidual()

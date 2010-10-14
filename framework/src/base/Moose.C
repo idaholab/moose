@@ -40,6 +40,7 @@
 #include "FunctionDirichletBC.h"
 #include "FunctionNeumannBC.h"
 #include "DGFunctionDiffusionDirichletBC.h"
+#include "DashpotBC.h"
 
 #include "ConstantAux.h"
 #include "CoupledAux.h"
@@ -179,6 +180,7 @@ Moose::registerObjects()
   registerBC(FunctionDirichletBC);
   registerBC(FunctionNeumannBC);
   registerBC(DGFunctionDiffusionDirichletBC);
+  registerBC(DashpotBC);
 
   registerAux(ConstantAux);
   registerAux(CoupledAux);
