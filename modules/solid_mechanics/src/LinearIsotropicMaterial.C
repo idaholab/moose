@@ -34,6 +34,11 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(const std::string  & name,
   _local_elasticity_tensor = iso_elasticity_tensor;
 }
 
+LinearIsotropicMaterial::~LinearIsotropicMaterial()
+{
+  delete _local_elasticity_tensor;
+}
+
 void
 LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVectorValue & y, const RealVectorValue & z, RealTensorValue & stress)
 {

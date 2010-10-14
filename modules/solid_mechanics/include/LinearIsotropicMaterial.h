@@ -20,6 +20,8 @@ public:
                           MooseSystem & moose_system,
                           InputParameters parameters);
   
+  virtual ~LinearIsotropicMaterial();
+  
 protected:
   virtual void computeProperties();
 
