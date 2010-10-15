@@ -37,6 +37,7 @@
 #include "DGMatDiffusion.h"
 
 #include "Convection.h"
+#include "SinContForcing.h"
 
 // DG kernels
 #include "DGConvection.h"
@@ -77,6 +78,8 @@ namespace MooseTest
     registerKernel(PolyReaction);
 
     registerKernel(PolyForcing);
+
+    registerKernel(SinContForcing);
 
     registerDGKernel(DGConvection);
     
