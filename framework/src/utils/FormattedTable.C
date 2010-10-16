@@ -52,7 +52,7 @@ FormattedTable::~FormattedTable()
 bool
 FormattedTable::empty() const
 {
-  return _last_key == -1 ? true : false;
+  return _last_key == -1;
 }
 
 void
@@ -93,7 +93,10 @@ void
 FormattedTable::print_table(const std::string & file_name)
 {
   if (!_stream_open)
+  {
     _output_file.open(file_name.c_str(), std::ios::trunc);
+    _stream_open = true;
+  }
   print_table(_output_file);
 }
 
@@ -161,4 +164,82 @@ FormattedTable::print_csv(const std::string & file_name)
     _output_file << "\n";
   }
   _output_file << "\n";
+}
+
+// const strings that the gnuplot generator needs
+namespace gnuplot
+{
+  const std::string preamble = "set terminal png\nset output 'all.png'\nset title 'All Postprocessors'\nset xlabel 'time'\nset ylabel 'values'\nplot";
+};
+
+void
+FormattedTable::make_gnuplot(const std::string & base_file)
+{
+  // TODO: run this once at end of simulation, right now it runs every iteration
+  // TODO: do I need to be more careful escaping input?
+  // Note: open and close the files each time, having open files may mess with gnuplot
+  std::map<Real, std::map<std::string, Real> >::iterator i;
+  std::set<std::string>::iterator header;
+
+  // Write the data to disk
+  std::string dat_name = base_file + ".dat";
+  std::ofstream datfile;
+  datfile.open(dat_name.c_str(), std::ios::trunc | std::ios::out);
+
+  datfile << "# time";
+  for (header = _column_names.begin(); header != _column_names.end(); ++header)
+    datfile << '\t' << *header;
+  datfile << '\n';
+
+  for (i = _data.begin(); i != _data.end(); ++i)
+  {
+    datfile << i->first;
+    for (header = _column_names.begin(); header != _column_names.end(); ++header)
+    {
+      std::map<std::string, Real> &tmp = i->second;
+      datfile << '\t' << tmp[*header];
+    }
+    datfile << '\n';
+  }
+  datfile.flush();
+  datfile.close();
+
+  // Write the gnuplot script
+  std::string gp_name = base_file + ".gp";
+  std::ofstream gpfile;
+  gpfile.open(gp_name.c_str(), std::ios::trunc | std::ios::out);
+
+  gpfile << gnuplot::preamble;
+
+  // plot all postprocessors in one plot
+  int column = 2;
+  for (header = _column_names.begin(); header != _column_names.end(); ++header)
+  {
+    gpfile << " '" << dat_name << "' using 1:" << column << " title '" << *header << "' with linespoints";
+    column++;
+    if ( column - 2 < _column_names.size() )
+      gpfile << ", \\\n";
+  }
+  gpfile << "\n\n";
+
+  // plot the postprocessors individually
+  column = 2;
+  for (header = _column_names.begin(); header != _column_names.end(); ++header)
+  {
+    gpfile << "set output '" << *header << ".png'\n";
+    gpfile << "set ylabel '" << *header << "'\n";
+    gpfile << "plot '" << dat_name << "' using 1:" << column << " title '" << *header << "' with linespoints\n\n";
+    column++;
+  }
+
+  gpfile.flush();
+  gpfile.close();
+
+  // Run the gnuplot script
+  if (!system(NULL))
+    mooseError("No way to run gnuplot on this computer");
+
+  std::string command = "gnuplot " + gp_name;
+  if (system(command.c_str()))
+    mooseError("gnuplot command failed");
 }

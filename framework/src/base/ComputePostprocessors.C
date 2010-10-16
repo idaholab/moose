@@ -262,5 +262,10 @@ void MooseSystem::outputPostprocessors()
     {
       _postprocessor_data[0].print_csv(_file_base + ".csv");
     }
+
+    if(_postprocessor_gnuplot_output)
+    {
+      _postprocessor_data[0].make_gnuplot(_file_base);
+    }
   }
 }

@@ -31,6 +31,7 @@ InputParameters validParams<OutputBlock>()
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
   params.addParam<bool>("postprocessor_screen", true, "Specifies that you would like PostProcessor output to the screen (stdout)"); 
   params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma seperated values file"); 
+  params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output"); 
   params.addParam<bool>("print_out_info", false, "Specifies that you would like to see more verbose output information on STDOUT");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
   return params;
@@ -67,6 +68,7 @@ OutputBlock::execute()
   _moose_system._xda_output = getParamValue<bool>("xda");
   _moose_system._postprocessor_screen_output = getParamValue<bool>("postprocessor_screen");
   _moose_system._postprocessor_csv_output = getParamValue<bool>("postprocessor_csv");
+  _moose_system._postprocessor_gnuplot_output = getParamValue<bool>("postprocessor_gnuplot");
   _moose_system._print_out_info = getParamValue<bool>("print_out_info");
   _moose_system._output_initial = getParamValue<bool>("output_initial");
 

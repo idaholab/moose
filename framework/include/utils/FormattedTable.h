@@ -61,6 +61,8 @@ public:
    * Method for dumping the table to a csv file - opening and closing the file handle is handled
    */
   void print_csv(const std::string & file_name);
+
+  void make_gnuplot(const std::string & base_file);
   
 private:
   

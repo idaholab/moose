@@ -70,3 +70,8 @@ PostprocessorData::print_csv(const std::string & file_name)
   _output_table.print_csv(file_name);
 }
 
+void
+PostprocessorData::make_gnuplot(const std::string & file_name)
+{
+  _output_table.make_gnuplot(file_name);
+}
