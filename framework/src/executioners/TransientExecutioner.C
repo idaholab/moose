@@ -140,7 +140,10 @@ TransientExecutioner::takeStep()
   else 
   {
     if (_reset_dt)
+    {
       dt_cur = _prev_dt;
+      _reset_dt = false;
+    }
   }
 
   _dt = dt_cur;
