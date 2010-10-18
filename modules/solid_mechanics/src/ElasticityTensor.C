@@ -6,11 +6,11 @@ ElasticityTensor::ElasticityTensor(const bool constant)
     _values_computed(false)
 {}
 
-void ElasticityTensor::calculate()
+void ElasticityTensor::calculate(unsigned int qp)
 {  
   if(!_constant || !_values_computed)
   {
-    calculateEntries();
+    calculateEntries(qp);
     _values_computed = true;
   }
 }

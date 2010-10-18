@@ -27,7 +27,7 @@ public:
    * Public function that will be called whenever the values for this matrix
    * need to be filled in.
    */
-  void calculate();
+  void calculate(unsigned int qp);
 
 protected:
 
@@ -47,7 +47,7 @@ protected:
    * This method actually fills in the entries of the tensor... using whatever
    * information it has.
    */
-  virtual void calculateEntries() = 0;
+  virtual void calculateEntries(unsigned int qp) = 0;
 };
 
 #endif //ELASTICITYTENSOR_H

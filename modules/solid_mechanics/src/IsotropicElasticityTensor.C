@@ -94,7 +94,7 @@ IsotropicElasticityTensor::isotropicEntry(const unsigned int i, const unsigned j
 }
 
 void
-IsotropicElasticityTensor::calculateEntries()
+IsotropicElasticityTensor::calculateEntries(unsigned int qp)
 {  
   calculateLameCoefficients();
 

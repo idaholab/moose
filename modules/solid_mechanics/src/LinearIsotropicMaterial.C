@@ -96,7 +96,7 @@ LinearIsotropicMaterial::computeProperties()
   {
     _thermal_conductivity[_qp] = _input_thermal_conductivity;
     
-    _local_elasticity_tensor->calculate();
+    _local_elasticity_tensor->calculate(_qp);
 
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 

@@ -98,7 +98,7 @@ protected:
    * Fill in the matrix.
    */
 
-  virtual void calculateEntries();
+  virtual void calculateEntries(unsigned int qp);
 
 };
 
