@@ -156,13 +156,14 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
 {
   Moose::perf_log.push("compute_postprocessors()","Solve");
 
-  // TODO: Make this work with threads!
+  // This resets stuff so that id 0 is the first id
+  ParallelUniqueId::reinitialize();
+
   if (_pps[0]._block_ids_with_postprocessors.size() > 0 || _pps[0]._boundary_ids_with_postprocessors.size() > 0)
   {
     updateAuxVars(soln);
-    
-    Threads::parallel_for(*getActiveLocalElementRange(),
-                          ComputeInternalPostprocessors(*this, soln));
+    ComputeInternalPostprocessors cipp(*this, soln);
+    cipp(*getActiveLocalElementRange());
 
     // Store element postprocessors values
     std::set<unsigned int>::iterator block_ids_begin = _pps[0]._block_ids_with_postprocessors.begin();

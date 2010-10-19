@@ -102,7 +102,6 @@ Real MooseSystem::computeDamping(const NumericVector<Number>& soln, const Numeri
   // Default to no damping
   Real damping = 1.0;
 
-  // TODO: Make this work with threads!
   DamperIterator damper_begin = _dampers[0].dampersBegin();
   DamperIterator damper_end = _dampers[0].dampersEnd();
   DamperIterator damper_it = damper_begin;

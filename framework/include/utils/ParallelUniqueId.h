@@ -58,6 +58,15 @@ public:
 #endif
   }
   
+  static void reinitialize()
+  {
+#ifdef LIBMESH_HAVE_TBB_API
+    initialized = false;
+    ids.clear();
+    initialize();
+#endif
+  }
+  
   unsigned int id;
 
 protected:
