@@ -188,7 +188,8 @@ TransientExecutioner::takeStep()
     std::cout << _moose_system.getNonlinearSystem()->variable_name(var) << ": "
               << _moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2) << std::endl;
     
-  if ( _converged && (_t_step+1)%_moose_system._interval == 0)
+  // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
+  if ( _converged && ((_t_step+1)%_moose_system._interval == 0 || _reset_dt))
     _moose_system.outputSystem(_t_step, _time);
 
   if( _converged )
