@@ -16,6 +16,7 @@
 #define PARALLELUNIQUEID_H
 
 #include "libmesh_common.h"
+#include "threads.h"
 
 #ifdef LIBMESH_HAVE_TBB_API
 #include "tbb/concurrent_queue.h"
@@ -26,40 +27,43 @@ class ParallelUniqueId
 public:
 
   ParallelUniqueId()
-    {
-      #ifdef LIBMESH_HAVE_TBB_API
-
-      #ifdef TBB_DEPRECATED
-      ids.pop(id);
-      #else
-      ids.try_pop(id);
-      #endif
-      
-      #else
-      id = 0;
-      #endif
-    }
+  {
+#ifdef LIBMESH_HAVE_TBB_API
+    ids.pop(id);
+#else
+    id = 0;
+#endif
+  }
 
   ~ParallelUniqueId()
-    {
-      #ifdef LIBMESH_HAVE_TBB_API
-      ids.push(id);
-      #endif
-    }
+  {
+#ifdef LIBMESH_HAVE_TBB_API
+    ids.push(id);
+#endif
+  }
 
+  /**
+   * Must be called by main thread _before_ any threaded computation!
+   * Do NOT call _in_ a worker thread!
+   */
   static void initialize()
+  {
+#ifdef LIBMESH_HAVE_TBB_API
+    if(!initialized)
     {
-      #ifdef LIBMESH_HAVE_TBB_API
+      initialized = true;
       for(unsigned int i=0; i<libMesh::n_threads(); ++i)
         ids.push(i);
-      #endif
     }
+#endif
+  }
   
   unsigned int id;
 
 protected:
 #ifdef LIBMESH_HAVE_TBB_API
-  static tbb::concurrent_queue<unsigned int> ids;
+  static tbb::concurrent_bounded_queue<unsigned int> ids;
+  static bool initialized;
 #endif
 };
 

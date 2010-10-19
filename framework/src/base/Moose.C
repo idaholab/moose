@@ -146,13 +146,6 @@ MooseInit::~MooseInit()
 void
 Moose::registerObjects()
 {
-  static bool first = true;
-  if(first)
-  {
-    first = false;
-    ParallelUniqueId::initialize();
-  }
-
   registerFunction(ParsedFunction);
   registerFunction(ParsedGradFunction);
 
