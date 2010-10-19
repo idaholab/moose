@@ -15,6 +15,7 @@
 #include "Moose.h"
 #include "MooseSystem.h"
 #include "InitialCondition.h"
+#include "ParallelUniqueId.h"
 
 // libMesh includes
 #include "libmesh.h"
@@ -60,8 +61,11 @@ Number MooseSystem::initialValue (const Point& p,
                       const std::string& /*sys_name*/,
                       const std::string& var_name)
 {
+  ParallelUniqueId puid;
+  unsigned int tid = puid.id;
+
   // Try to grab an InitialCondition object for this variable.
-  InitialCondition * ic = _ics[0].getInitialCondition(var_name);
+  InitialCondition * ic = _ics[tid].getInitialCondition(var_name);
 
   if(ic)
     return ic->value(p);
@@ -77,8 +81,11 @@ Gradient MooseSystem::initialGradient (const Point& p,
                            const std::string& /*sys_name*/,
                            const std::string& var_name)
 {
+  ParallelUniqueId puid;
+  unsigned int tid = puid.id;
+
   // Try to grab an InitialCondition object for this variable.
-  InitialCondition * ic = _ics[0].getInitialCondition(var_name);
+  InitialCondition * ic = _ics[tid].getInitialCondition(var_name);
 
   if(ic)
     return ic->gradient(p);
