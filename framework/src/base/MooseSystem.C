@@ -1210,7 +1210,9 @@ MooseSystem::updateNewtonStep()
   if (_need_old_newton)
   {
     *_old_newton_soln = *_newton_soln;
+    _old_newton_soln->close();
     *_newton_soln = *_system->solution;
+    _newton_soln->close();
   }
 }
 
@@ -1372,8 +1374,10 @@ MooseSystem::onTimestepBegin()
   case Moose::CRANK_NICOLSON:
     *_u_dot_soln = *_system->old_local_solution;
     *_u_dot_soln *= -2.0 / _dt;
+    _u_dot_soln->close();
 
     _du_dot_du_soln->zero();
+    _du_dot_du_soln->close();
 
     computeResidualInternal(*_system->old_local_solution, *_res_soln_old);
     break;
@@ -1425,6 +1429,9 @@ MooseSystem::computeTimeDeriv(const NumericVector<Number> & soln)
     }
     break;
   }
+
+  _u_dot_soln->close();
+  _du_dot_du_soln->close();
 }
 
 void
@@ -1434,6 +1441,7 @@ MooseSystem::finishResidual(NumericVector<Number> & residual)
   {
   case Moose::CRANK_NICOLSON:
     residual.add(*_res_soln_old);
+    residual.close();
     break;
 
   default:
