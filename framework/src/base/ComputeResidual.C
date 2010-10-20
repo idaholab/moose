@@ -21,6 +21,7 @@
 #include "MooseSystem.h"
 #include "DofData.h"
 #include "ElementData.h"
+#include "ComputeBase.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -33,137 +34,127 @@
 
 #include <vector>
 
-class ComputeInternalResiduals
+class ComputeInternalResiduals : public ComputeBase
 {
 public:
-  ComputeInternalResiduals(MooseSystem &sys, const NumericVector<Number>& in_soln, NumericVector<Number>& in_residual)
-    :_moose_system(sys),
-     _soln(in_soln),
-     residual(in_residual)
+  ComputeInternalResiduals(MooseSystem &sys, const NumericVector<Number>& in_soln, NumericVector<Number>& in_residual) :
+    ComputeBase(sys),
+    _soln(in_soln),
+    _residual(in_residual)
   {}
 
-  void operator() (const ConstElemRange & range) const
+  // Splitting Constructor
+  ComputeInternalResiduals(ComputeInternalResiduals & x, Threads::split) :
+    ComputeBase(x._moose_system),
+    _soln(x._soln),
+    _residual(x._residual)
   {
-    ParallelUniqueId puid;
+  }
 
-    unsigned int tid = puid.id;
+  virtual void pre()
+  {
+    _moose_system._dg_kernels[_tid].updateActiveDGKernels(_moose_system._t, _moose_system._dt);
+  }
 
-    DenseVector<Number> Re;
+  virtual void preElement(const Elem *elem)
+  {
+    _re.zero();
+    _moose_system.reinitKernels(_tid, _soln, elem, &_re);
+  }
 
-    ConstElemRange::const_iterator el = range.begin();
+  virtual void onElement(const Elem *elem)
+  {
+    unsigned int cur_subdomain = elem->subdomain_id();
+    _moose_system._element_data[_tid]->reinitMaterials(_moose_system._materials[_tid].getMaterials(cur_subdomain));
 
-    _moose_system._dg_kernels[tid].updateActiveDGKernels(_moose_system._t, _moose_system._dt);
-
-    StabilizerIterator stabilizer_begin = _moose_system._stabilizers[tid].activeStabilizersBegin();
-    StabilizerIterator stabilizer_end = _moose_system._stabilizers[tid].activeStabilizersEnd();
+    //Stabilizers
+    StabilizerIterator stabilizer_begin = _moose_system._stabilizers[_tid].activeStabilizersBegin();
+    StabilizerIterator stabilizer_end = _moose_system._stabilizers[_tid].activeStabilizersEnd();
     StabilizerIterator stabilizer_it = stabilizer_begin;
 
-    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
+    for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+      stabilizer_it->second->computeTestFunctions();
 
-    for (el = range.begin() ; el != range.end(); ++el)
+    //Kernels
+    KernelIterator kernel_begin = _moose_system._kernels[_tid].activeKernelsBegin();
+    KernelIterator kernel_end = _moose_system._kernels[_tid].activeKernelsEnd();
+    KernelIterator kernel_it = kernel_begin;
+
+    for(kernel_it=kernel_begin;kernel_it!=kernel_end;++kernel_it)
+      (*kernel_it)->computeResidual();
+  }
+
+  virtual void onDomainChanged(short int subdomain)
+  {
+    _moose_system.subdomainSetup(_tid, subdomain);
+    _moose_system._kernels[_tid].updateActiveKernels(_moose_system._t, _moose_system._dt, subdomain);
+  }
+
+  virtual void postElement(const Elem * /*elem*/)
+  {
+    _moose_system._dof_map->constrain_element_vector (_re, _moose_system._dof_data[_tid]._dof_indices, false);
     {
-      const Elem* elem = *el;
-      unsigned int cur_subdomain = elem->subdomain_id();
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _residual.add_vector(_re, _moose_system._dof_data[_tid]._dof_indices);
+    }
+  }
 
-      Re.zero();
+  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
+  {
+    BCIterator bc_it = _moose_system._bcs[_tid].activeBCsBegin(bnd_id);
+    BCIterator bc_end = _moose_system._bcs[_tid].activeBCsEnd(bnd_id);
 
-      _moose_system.reinitKernels(tid, _soln, elem, &Re);
+    if(bc_it != bc_end)
+    {
+      _moose_system.reinitBCs(_tid, _soln, elem, side, bnd_id);
 
-      if(cur_subdomain != subdomain)
+      for(; bc_it!=bc_end; ++bc_it)
+        (*bc_it)->computeResidual();
+    }
+  }
+
+  virtual void onInternalSide(const Elem *elem, unsigned int side)
+  {
+    // Pointer to the neighbor we are currently working on.
+    const Elem * neighbor = elem->neighbor(side);
+
+    // Get the global id of the element and the neighbor
+    const unsigned int elem_id = elem->id();
+    const unsigned int neighbor_id = neighbor->id();
+
+    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+    {
+      DGKernelIterator dg_it = _moose_system._dg_kernels[_tid].activeDGKernelsBegin();
+      DGKernelIterator dg_end = _moose_system._dg_kernels[_tid].activeDGKernelsEnd();
+
+      if (dg_it!=dg_end)
       {
-        subdomain = cur_subdomain;
-        _moose_system.subdomainSetup(tid, subdomain);
-        _moose_system._kernels[tid].updateActiveKernels(_moose_system._t, _moose_system._dt, cur_subdomain);
-      }
+        DenseVector<Number> neighbor_Re;
+        neighbor_Re.zero();
 
-      _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(cur_subdomain));
+        _moose_system.reinitDGKernels(_tid, _soln, elem, side, neighbor, &neighbor_Re);
 
-      //Stabilizers
-      for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
-        stabilizer_it->second->computeTestFunctions();
+        for(; dg_it!=dg_end; ++dg_it)
+          (*dg_it)->computeResidual();
 
-      //Kernels
-      KernelIterator kernel_begin = _moose_system._kernels[tid].activeKernelsBegin();
-      KernelIterator kernel_end = _moose_system._kernels[tid].activeKernelsEnd();
-      KernelIterator kernel_it = kernel_begin;
-
-      for(kernel_it=kernel_begin;kernel_it!=kernel_end;++kernel_it)
-        (*kernel_it)->computeResidual();
-
-      for (unsigned int side=0; side<elem->n_sides(); side++)
-      {
-        std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
-
-        if (boundary_ids.size() > 0)
+        _moose_system._dof_map->constrain_element_vector (neighbor_Re, _moose_system._neighbor_dof_data[_tid]._dof_indices, false);
         {
-          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-          {
-            short int bnd_id = *it;
-
-            BCIterator bc_it = _moose_system._bcs[tid].activeBCsBegin(bnd_id);
-            BCIterator bc_end = _moose_system._bcs[tid].activeBCsEnd(bnd_id);
-
-            if(bc_it != bc_end)
-            {
-              _moose_system.reinitBCs(tid, _soln, elem, side, bnd_id);
-
-              for(; bc_it!=bc_end; ++bc_it)
-                (*bc_it)->computeResidual();
-            }
-          }
+          Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+          _residual.add_vector(neighbor_Re, _moose_system._neighbor_dof_data[_tid]._dof_indices);
         }
-
-        if (elem->neighbor(side) != NULL)
-        {
-          // Pointer to the neighbor we are currently working on.
-          const Elem * neighbor = elem->neighbor(side);
-
-          // Get the global id of the element and the neighbor
-          const unsigned int elem_id = elem->id();
-          const unsigned int neighbor_id = neighbor->id();
-
-          // If the neighbor has the same h level and is active
-          // perform integration only if our global id is bigger than our neighbor id.
-          // We don't want to compute twice the same contributions.
-          // If the neighbor has a different h level perform integration
-          // only if the neighbor is at a lower level.
-          if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
-          {
-            DGKernelIterator dg_it = _moose_system._dg_kernels[tid].activeDGKernelsBegin();
-            DGKernelIterator dg_end = _moose_system._dg_kernels[tid].activeDGKernelsEnd();
-
-            if (dg_it!=dg_end)
-            {
-              DenseVector<Number> neighbor_Re;
-              neighbor_Re.zero();
-
-              _moose_system.reinitDGKernels(tid, _soln, elem, side, neighbor, &neighbor_Re);
-
-              for(; dg_it!=dg_end; ++dg_it)
-                (*dg_it)->computeResidual();
-
-              _moose_system._dof_map->constrain_element_vector (neighbor_Re, _moose_system._neighbor_dof_data[tid]._dof_indices, false);
-              {
-                Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-                residual.add_vector(neighbor_Re, _moose_system._neighbor_dof_data[tid]._dof_indices);
-              }
-            }
-          }
-        }
-      }
-
-      _moose_system._dof_map->constrain_element_vector (Re, _moose_system._dof_data[tid]._dof_indices, false);
-      {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        residual.add_vector(Re, _moose_system._dof_data[tid]._dof_indices);
       }
     }
   }
 
+  void join(const ComputeInternalResiduals & y)
+  {
+  }
+
 protected:
-  MooseSystem &_moose_system;
   const NumericVector<Number>& _soln;
-  NumericVector<Number>& residual;
+  NumericVector<Number>& _residual;
+
+  DenseVector<Number> _re;
 };
 
 
@@ -196,8 +187,10 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
   updateAuxVars(soln);
 
   Moose::perf_log.push("compute_residual()","Solve");
-  Threads::parallel_for(*getActiveLocalElementRange(),
-                        ComputeInternalResiduals(*this, soln, residual));
+
+  ComputeInternalResiduals cr(*this, soln, residual);
+  Threads::parallel_reduce(*getActiveLocalElementRange(), cr);
+
   Moose::perf_log.pop("compute_residual()","Solve");
 
   residual.close();

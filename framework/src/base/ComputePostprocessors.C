@@ -19,6 +19,7 @@
 #include "ParallelUniqueId.h"
 #include "MooseSystem.h"
 #include "ElementData.h"
+#include "ComputeBase.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -32,111 +33,104 @@
 
 #include <vector>
 
-class ComputeInternalPostprocessors
+class ComputeInternalPostprocessors : public ComputeBase
 {
 public:
-  ComputeInternalPostprocessors(MooseSystem &sys, const NumericVector<Number>& in_soln)
-    :_moose_system(sys),
+  ComputeInternalPostprocessors(MooseSystem &sys, const NumericVector<Number>& in_soln) :
+    ComputeBase(sys),
      _soln(in_soln)
   {}
 
-  void operator() (const ConstElemRange & range) const
+  // Splitting Constructor
+  ComputeInternalPostprocessors(ComputeInternalPostprocessors & x, Threads::split) :
+    ComputeBase(x._moose_system),
+    _soln(x._soln)
   {
-    ParallelUniqueId puid;
+  }
 
-    unsigned int tid = puid.id;
-
-    DenseVector<Number> Re;
-
-    ConstElemRange::const_iterator el = range.begin();
-
+  virtual void pre()
+  {
     //Initialize side and element post processors
 
-    std::set<unsigned int>::iterator block_begin = _moose_system._pps[tid]._block_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator block_end = _moose_system._pps[tid]._block_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator block_begin = _moose_system._pps[_tid]._block_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator block_end = _moose_system._pps[_tid]._block_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator block_it = block_begin;
 
     for (block_it=block_begin;block_it!=block_end;++block_it)
     {
       unsigned int block_id = *block_it;
 
-      PostprocessorIterator postprocessor_begin = _moose_system._pps[tid].elementPostprocessorsBegin(block_id);
-      PostprocessorIterator postprocessor_end = _moose_system._pps[tid].elementPostprocessorsEnd(block_id);
+      PostprocessorIterator postprocessor_begin = _moose_system._pps[_tid].elementPostprocessorsBegin(block_id);
+      PostprocessorIterator postprocessor_end = _moose_system._pps[_tid].elementPostprocessorsEnd(block_id);
       PostprocessorIterator postprocessor_it = postprocessor_begin;
 
       for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
         (*postprocessor_it)->initialize();
     }
 
-    std::set<unsigned int>::iterator boundary_begin = _moose_system._pps[tid]._boundary_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator boundary_end = _moose_system._pps[tid]._boundary_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator boundary_begin = _moose_system._pps[_tid]._boundary_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator boundary_end = _moose_system._pps[_tid]._boundary_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator boundary_it = boundary_begin;
 
     for (boundary_it=boundary_begin;boundary_it!=boundary_end;++boundary_it)
     {
       //note: for threaded applications where the elements get broken up it
       //may be more efficient to initialize these on demand inside the loop
-      PostprocessorIterator side_postprocessor_begin = _moose_system._pps[tid].sidePostprocessorsBegin(*boundary_it);
-      PostprocessorIterator side_postprocessor_end = _moose_system._pps[tid].sidePostprocessorsEnd(*boundary_it);
+      PostprocessorIterator side_postprocessor_begin = _moose_system._pps[_tid].sidePostprocessorsBegin(*boundary_it);
+      PostprocessorIterator side_postprocessor_end = _moose_system._pps[_tid].sidePostprocessorsEnd(*boundary_it);
       PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
 
       for (side_postprocessor_it=side_postprocessor_begin;side_postprocessor_it!=side_postprocessor_end;++side_postprocessor_it)
         (*side_postprocessor_it)->initialize();
     }
+  }
 
-    for (el = range.begin() ; el != range.end(); ++el)
+  virtual void preElement(const Elem * elem)
+  {
+    _moose_system.reinitKernels(_tid, _soln, elem, NULL);
+    _moose_system._element_data[_tid]->reinitMaterials(_moose_system._materials[_tid].getMaterials(elem->subdomain_id()));
+  }
+
+  virtual void onElement(const Elem *elem)
+  {
+    unsigned int subdomain = elem->subdomain_id();
+
+    //Global Postprocessors
+    PostprocessorIterator postprocessor_begin = _moose_system._pps[_tid].elementPostprocessorsBegin(Moose::ANY_BLOCK_ID);
+    PostprocessorIterator postprocessor_end = _moose_system._pps[_tid].elementPostprocessorsEnd(Moose::ANY_BLOCK_ID);
+    PostprocessorIterator postprocessor_it = postprocessor_begin;
+
+    for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+      (*postprocessor_it)->execute();
+
+    postprocessor_begin = _moose_system._pps[_tid].elementPostprocessorsBegin(subdomain);
+    postprocessor_end = _moose_system._pps[_tid].elementPostprocessorsEnd(subdomain);
+    postprocessor_it = postprocessor_begin;
+
+    for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+      (*postprocessor_it)->execute();
+  }
+
+  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
+  {
+    PostprocessorIterator side_postprocessor_begin = _moose_system._pps[_tid].sidePostprocessorsBegin(bnd_id);
+    PostprocessorIterator side_postprocessor_end = _moose_system._pps[_tid].sidePostprocessorsEnd(bnd_id);
+    PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
+
+    if(side_postprocessor_begin != side_postprocessor_end)
     {
-      const Elem* elem = *el;
+      _moose_system.reinitBCs(_tid, _soln, elem, side, bnd_id);
 
-      _moose_system.reinitKernels(tid, _soln, elem, NULL);
-      _moose_system._element_data[tid]->reinitMaterials(_moose_system._materials[tid].getMaterials(elem->subdomain_id()));
-
-      unsigned int cur_subdomain = elem->subdomain_id();
-
-      //Global Postprocessors
-      PostprocessorIterator postprocessor_begin = _moose_system._pps[tid].elementPostprocessorsBegin(Moose::ANY_BLOCK_ID);
-      PostprocessorIterator postprocessor_end = _moose_system._pps[tid].elementPostprocessorsEnd(Moose::ANY_BLOCK_ID);
-      PostprocessorIterator postprocessor_it = postprocessor_begin;
-
-      for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
-        (*postprocessor_it)->execute();
-
-      postprocessor_begin = _moose_system._pps[tid].elementPostprocessorsBegin(cur_subdomain);
-      postprocessor_end = _moose_system._pps[tid].elementPostprocessorsEnd(cur_subdomain);
-      postprocessor_it = postprocessor_begin;
-
-      for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
-        (*postprocessor_it)->execute();
-
-      for (unsigned int side=0; side<elem->n_sides(); side++)
-      {
-        if (elem->neighbor(side) == NULL)
-        {
-          std::vector<short int> boundary_ids = _moose_system._mesh->boundary_info->boundary_ids (elem, side);
-
-          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-          {
-            short int bnd_id = *it;
-
-            PostprocessorIterator side_postprocessor_begin = _moose_system._pps[tid].sidePostprocessorsBegin(bnd_id);
-            PostprocessorIterator side_postprocessor_end = _moose_system._pps[tid].sidePostprocessorsEnd(bnd_id);
-            PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
-
-            if(side_postprocessor_begin != side_postprocessor_end)
-            {
-              _moose_system.reinitBCs(tid, _soln, elem, side, bnd_id);
-
-              for(; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
-                (*side_postprocessor_it)->execute();
-            }
-          }
-        }
-      }
+      for(; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
+        (*side_postprocessor_it)->execute();
     }
   }
 
+  void join(const ComputeInternalPostprocessors & y)
+  {
+  }
+
 protected:
-  MooseSystem &_moose_system;
   const NumericVector<Number>& _soln;
 };
 
