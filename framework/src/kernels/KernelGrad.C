@@ -70,6 +70,31 @@ KernelGrad::computeJacobian()
 //  Moose::perf_log.pop("computeJacobian()",_name);
 }
 
+void
+KernelGrad::computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar)
+{
+//  Moose::perf_log.push("computeOffDiagJacobian()",_name);
+
+  for (_j=0; _j<_phi.size(); _j++)
+    for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    {
+      Real off_diag_value;
+      
+      if(jvar == _var_num)
+        _value = precomputeQpJacobian();
+      else
+        off_diag_value = computeQpOffDiagJacobian(jvar);
+      
+      for (_i=0; _i<_phi.size(); _i++)
+      {
+        if(jvar == _var_num)
+          Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*_value*_grad_test[_i][_qp];
+        else
+          Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*off_diag_value;
+      }
+    }
+//  Moose::perf_log.pop("computeOffDiagJacobian()",_name);
+}
 
 Real
 KernelGrad::computeQpResidual()

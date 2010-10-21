@@ -54,6 +54,11 @@ public:
    */
   virtual void computeJacobian();
 
+  /**
+   * Computes d-residual / d-jvar... storing the result in Ke.
+   */
+  virtual void computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar);
+
 protected:
   /**
    * Called before forming the residual for an element
