@@ -111,7 +111,21 @@ void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)
 {
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
-  updateAuxVars(soln);
+  std::vector<std::string> displacement_variables = getDisplacementVariables();
+  unsigned int num_displacements = displacement_variables.size();
+
+  bool aux_vars_used_to_displace = false;
+  
+  for(unsigned int i=0; i<num_displacements; i++)
+  {
+    std::string displacement_name = displacement_variables[i];
+      
+    if(hasAuxVariable(displacement_name))
+      aux_vars_used_to_displace = true;
+  }
+
+  if(aux_vars_used_to_displace)
+    updateAuxVars(soln);
 
   (*_displaced_system->solution) = soln;
 

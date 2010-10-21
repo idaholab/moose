@@ -22,20 +22,8 @@ void computeQpSolution(Real & u, const NumericVector<Number> & soln, const std::
 
   unsigned int num_dofs = dof_indices.size();
 
-  //All of this stuff so that the loop will vectorize
-  std::vector<Real> sol_vals(num_dofs);
-  std::vector<Real> phi_vals(num_dofs);
-
   for (unsigned int i=0; i<num_dofs; i++)
-  {
-    sol_vals[i] = soln(dof_indices[i]);
-    phi_vals[i] = phi[i][qp];
-  }
-
-  for (unsigned int i=0; i<num_dofs; i++)
-  {
-    u +=  phi_vals[i]*sol_vals[i];
-  }
+    u +=  phi[i][qp]*soln(dof_indices[i]);
 }
 
 void computeQpSolutionAll(MooseArray<Real> & u, MooseArray<Real> & u_old, MooseArray<Real> & u_older,
