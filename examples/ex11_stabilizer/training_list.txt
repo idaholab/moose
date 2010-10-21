@@ -1,1 +1,2 @@
-example_material.i
+Title: Stabilization
+example_stabilizer.i

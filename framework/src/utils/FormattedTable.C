@@ -169,7 +169,7 @@ FormattedTable::print_csv(const std::string & file_name)
 // const strings that the gnuplot generator needs
 namespace gnuplot
 {
-  const std::string preamble = "set terminal png\nset output 'all.png'\nset title 'All Postprocessors'\nset xlabel 'time'\nset ylabel 'values'\nplot";
+  const std::string preamble = "set terminal postscript\nset output 'all.png'\nset title 'All Postprocessors'\nset xlabel 'time'\nset ylabel 'values'\nplot";
 }
 
 void

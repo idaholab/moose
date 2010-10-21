@@ -157,6 +157,20 @@ public:
    */
   Real norm();
 
+  /**
+   * Returns the number of rows
+   */
+  unsigned int n() const;
+
+  /**
+   * Returns the number of columns
+   */
+  unsigned int m() const;
+
+  /**
+   * Returns a reference to the raw data pointer
+   */
+  Real * rawData();
 
   /**
    * Kronecker Product
@@ -464,6 +478,24 @@ ColumnMajorMatrix::norm()
   return std::sqrt(doubleContraction(*this));
 }
 
+inline unsigned int
+ColumnMajorMatrix::n() const
+{
+  return _n_rows;
+}
+
+inline unsigned int
+ColumnMajorMatrix::m() const
+{
+  return _n_cols;
+}
+
+inline Real *
+ColumnMajorMatrix::rawData()
+{
+  return &_values[0];
+}
+
 inline ColumnMajorMatrix &
 ColumnMajorMatrix::operator=(const TypeTensor<Real> & rhs)
 {
@@ -653,6 +685,5 @@ ColumnMajorMatrix::operator!=(const ColumnMajorMatrix & rhs) const
 {
   return !(*this == rhs);
 }
-
 
 #endif //COLUMNMAJORMATRIX_H

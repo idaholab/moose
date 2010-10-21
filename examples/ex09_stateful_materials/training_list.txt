@@ -1,3 +1,4 @@
+Title: Stateful Material Properties
 example_material.i
 include/materials/ExampleMaterial.h
 src/materials/ExampleMaterial.C

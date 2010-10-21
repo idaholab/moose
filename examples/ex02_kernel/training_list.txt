@@ -1,3 +1,4 @@
+Title: Adding a Custom Kernel
 2d_convection_diffusion.i
 include/kernels/Convection.h
 src/kernels/Convection.C

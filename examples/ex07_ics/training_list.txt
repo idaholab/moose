@@ -1,3 +1,4 @@
+Title: Custom Initial Conditions
 ic_example.i
 include/ics/ExampleIC.h
 src/ics/ExampleIC.C

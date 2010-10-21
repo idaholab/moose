@@ -1,3 +1,4 @@
+Title: Custom Boundary Conditions
 2d_coupled_dirichlet_bc.i
 include/bcs/CoupledDirichletBC.h
 src/bcs/CoupledDirichletBC.C

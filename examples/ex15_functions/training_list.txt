@@ -1,3 +1,4 @@
+Title: Custom Functions
 ex15.i
 include/functions/ExampleFunction.h
 src/functions/ExampleFunction.C

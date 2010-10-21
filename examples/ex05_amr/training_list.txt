@@ -1,2 +1,3 @@
+Title: Automatic Mesh Adaptivity
 h_adaptivity.i
 

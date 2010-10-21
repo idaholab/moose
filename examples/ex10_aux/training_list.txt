@@ -1,3 +1,4 @@
+Title: Auxiliary Variables
 aux_example.i
 include/auxkernels/ExampleAux.h
 src/auxkernels/ExampleAux.C
