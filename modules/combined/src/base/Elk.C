@@ -49,6 +49,9 @@
 #include "RndBoundingBoxIC.h"
 #include "GradientBoxIC.h"
 
+// contact
+#include "ContactForce.h"
+
 void
 Elk::registerObjects()
 {
@@ -99,4 +102,7 @@ Elk::registerObjects()
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerInitialCondition(GradientBoxIC);
+
+  // contact
+  registerBC(ContactForce);
 }
