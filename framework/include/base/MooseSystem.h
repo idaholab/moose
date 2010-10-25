@@ -647,6 +647,7 @@ public:
   bool _exodus_output;
   bool _gmv_output;
   bool _tecplot_output;
+  bool _tecplot_binary_output;
   bool _xda_output;
   bool _postprocessor_screen_output;
   bool _postprocessor_csv_output;
