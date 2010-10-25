@@ -42,10 +42,9 @@ int main (int argc, char** argv)
   // a single nonlinear system and single auxillary system
   MooseSystem moose_system;
 
-  // Register a bunch of common objects that exist inside of Moose.
-  // You will generally create a registerObjects method of your own
-  // to register modules that you create in your own application where
-  // you will generally call this method.
+  // Register a bunch of common objects that exist inside of Moose.  You will 
+  // generally create a registerObjects method of your own to register modules
+  // that you create in your own application.
   Moose::registerObjects();
 
   // Create the input file parser which takes a reference to the main

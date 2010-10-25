@@ -46,12 +46,9 @@ int main (int argc, char** argv)
   MooseSystem moose_system;
   
   Moose::registerObjects();
-
   registerKernel(Convection);
-
   // Our new Diffusion Kernel that accepts a material property
   registerKernel(ExampleDiffusion);
-  
   // Register our new material class so we can use it.
   registerMaterial(ExampleMaterial);
 

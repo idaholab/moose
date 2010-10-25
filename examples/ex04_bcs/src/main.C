@@ -49,12 +49,7 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   registerKernel(Convection);
-  
-  /**
-   * In this example we need to register our Boundary Conditions with BCFactory.
-   * Each Main MOOSE Module has it's own factory that you will register your objects with
-   */
-  registerBC(CoupledDirichletBC);
+  registerBC(CoupledDirichletBC);    // Register our Boundary Conditions
   registerBC(CoupledNeumannBC);
 
   Parser p(moose_system);

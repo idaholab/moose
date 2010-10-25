@@ -44,7 +44,6 @@ int main (int argc, char** argv)
   MooseSystem moose_system;
 
   Moose::registerObjects();
-
   // Register any custom objects you have built on the MOOSE Framework
   registerKernel(Convection);  // <- registration
 
