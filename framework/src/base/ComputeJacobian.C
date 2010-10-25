@@ -434,66 +434,69 @@ void MooseSystem::computeJacobianBlock (const NumericVector<Number>& soln, Spars
 
       dof_map.dof_indices(elem, dof_indices);
 
-      Ke.resize(dof_indices.size(),dof_indices.size());
-
-      if(cur_subdomain != subdomain)
+      if(dof_indices.size())
       {
-        subdomain = cur_subdomain;
-        subdomainSetup(tid, subdomain);
-        _kernels[tid].updateActiveKernels(_t, _dt, cur_subdomain);
-      } 
+        Ke.resize(dof_indices.size(),dof_indices.size());
 
-      _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(cur_subdomain));
-
-      //Stabilizers
-      for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
-        stabilizer_it->second->computeTestFunctions();
-    
-      //Kernels
-      KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
-      KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
-      KernelIterator kernel_it = kernel_begin;
-
-      for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
-      {
-        Kernel * kernel = *kernel_it;
-
-        if(kernel->variable() == ivar)
-          kernel->computeOffDiagJacobian(Ke,jvar);
-      }
-
-      for (unsigned int side=0; side<elem->n_sides(); side++)
-      {
-        std::vector<short int> boundary_ids = _mesh->boundary_info->boundary_ids (elem, side);
-
-        if (boundary_ids.size() > 0)
+        if(cur_subdomain != subdomain)
         {
-          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+          subdomain = cur_subdomain;
+          subdomainSetup(tid, subdomain);
+          _kernels[tid].updateActiveKernels(_t, _dt, cur_subdomain);
+        } 
+
+        _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(cur_subdomain));
+
+        //Stabilizers
+        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+          stabilizer_it->second->computeTestFunctions();
+    
+        //Kernels
+        KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
+        KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
+        KernelIterator kernel_it = kernel_begin;
+
+        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+        {
+          Kernel * kernel = *kernel_it;
+
+          if(kernel->variable() == ivar)
+            kernel->computeOffDiagJacobian(Ke,jvar);
+        }
+
+        for (unsigned int side=0; side<elem->n_sides(); side++)
+        {
+          std::vector<short int> boundary_ids = _mesh->boundary_info->boundary_ids (elem, side);
+
+          if (boundary_ids.size() > 0)
           {
-            short int bnd_id = *it;
-
-            BCIterator bc_it = _bcs[tid].activeBCsBegin(bnd_id);
-            BCIterator bc_end = _bcs[tid].activeBCsEnd(bnd_id);
-
-            if(bc_it != bc_end)
+            for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
             {
-              reinitBCs(tid, soln, elem, side, bnd_id);
+              short int bnd_id = *it;
 
-              for(; bc_it!=bc_end; ++bc_it)
+              BCIterator bc_it = _bcs[tid].activeBCsBegin(bnd_id);
+              BCIterator bc_end = _bcs[tid].activeBCsEnd(bnd_id);
+
+              if(bc_it != bc_end)
               {
-                BoundaryCondition * bc = *bc_it;
+                reinitBCs(tid, soln, elem, side, bnd_id);
 
-                if(bc->variable() == ivar)
-                  bc->computeJacobianBlock(Ke,ivar,jvar);
+                for(; bc_it!=bc_end; ++bc_it)
+                {
+                  BoundaryCondition * bc = *bc_it;
+
+                  if(bc->variable() == ivar)
+                    bc->computeJacobianBlock(Ke,ivar,jvar);
+                }
               }
             }
           }
         }
-      }    
+      
+        dof_map.constrain_element_matrix (Ke, dof_indices, false);
 
-      dof_map.constrain_element_matrix (Ke, dof_indices, false);
-
-      jacobian.add_matrix(Ke, dof_indices);
+        jacobian.add_matrix(Ke, dof_indices);
+      }
     }
   }
     
