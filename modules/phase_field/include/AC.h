@@ -24,6 +24,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeDFDOP(PFFunctionType type);
+  std::string _mob_name;
+  std::string _kappa_name;
   
 
 private:
