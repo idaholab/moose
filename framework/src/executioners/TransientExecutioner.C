@@ -42,7 +42,7 @@ InputParameters validParams<TransientExecutioner>()
   params.addRequiredParam<Real>("dt", "The timestep size between solves");
   params.addParam<Real>("dtmin",           0.0,    "The minimum timestep size in an adaptive run");
   params.addParam<Real>("dtmax",           1.0e30, "The maximum timestep size in an adaptive run");
-  params.addParam<int> ("num_steps",       -1,     "The number of timesteps in a transient run");
+  params.addParam<Real> ("num_steps",      -1,     "The number of timesteps in a transient run");
   params.addParam<int> ("n_startup_steps", 0,      "The number of timesteps during startup");
   params.addParam<bool>("trans_ss_check",  false,  "Whether or not to check for steady state conditions");
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
@@ -63,7 +63,7 @@ TransientExecutioner::TransientExecutioner(const std::string & name, MooseSystem
    _end_time(getParam<Real>("end_time")),
    _dtmin(getParam<Real>("dtmin")),
    _dtmax(getParam<Real>("dtmax")),
-   _num_steps(getParam<int>("num_steps")),
+   _num_steps(getParam<Real>("num_steps")),
    _n_startup_steps(getParam<int>("n_startup_steps")),
    _trans_ss_check(getParam<bool>("trans_ss_check")),
    _ss_check_tol(getParam<Real>("ss_check_tol")),

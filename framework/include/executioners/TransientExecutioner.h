@@ -109,7 +109,7 @@ protected:
   Real _end_time;
   Real _dtmin;
   Real _dtmax;
-  int _num_steps;
+  Real _num_steps;
   int _n_startup_steps;
 
   /**
