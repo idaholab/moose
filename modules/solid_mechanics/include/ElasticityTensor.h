@@ -28,6 +28,8 @@ public:
    * need to be filled in.
    */
   void calculate(unsigned int qp);
+  
+  virtual ColumnMajorMatrix calculateDerivative(unsigned int qp,unsigned int i){}
 
 protected:
 
@@ -49,5 +51,7 @@ protected:
    */
   virtual void calculateEntries(unsigned int qp) = 0;
 };
+
+
 
 #endif //ELASTICITYTENSOR_H

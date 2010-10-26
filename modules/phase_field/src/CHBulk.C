@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<CHBulk>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<KernelGrad>();
   params.addParam<std::string>("mob_name","M","The mobility used with the kernel");
   
   return params;
