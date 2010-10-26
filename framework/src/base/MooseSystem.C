@@ -76,6 +76,7 @@ MooseSystem::MooseSystem() :
   _newton_soln(NULL),
   _old_newton_soln(NULL),
   _compute_pps_each_residual_evaluation(false),
+  _serialize_solution(false),
   _mesh_changed(false),
   _no_fe_reinit(false),
   _preconditioner(NULL),
@@ -143,6 +144,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _newton_soln(NULL),
   _old_newton_soln(NULL),
   _compute_pps_each_residual_evaluation(false),
+  _serialize_solution(false),
   _mesh_changed(false),
   _no_fe_reinit(false),
   _preconditioner(NULL),
@@ -394,6 +396,9 @@ MooseSystem::init()
   //Set the default variable scaling to 1
   for(unsigned int i=0; i < _system->n_vars(); i++)
     _scaling_factor.push_back(1.0);
+
+  if(_serialize_solution)
+    serializeSolution(*_system->solution);
 
   // Make sure the displaced mesh is consistent with the initial condition
   if(_has_displaced_mesh)
@@ -1222,6 +1227,18 @@ MooseSystem::updateMaterials()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _materials[tid].updateMaterialDataState();
+}
+
+void
+MooseSystem::serializeSolution(const NumericVector<Number>& soln)
+{
+  std::cout<<"Serializing Solution"<<std::endl;
+  
+  soln.localize(_serialized_solution);
+
+  updateAuxVars(soln);
+
+  _aux_system->solution->localize(_serialized_aux_solution);
 }
 
 void

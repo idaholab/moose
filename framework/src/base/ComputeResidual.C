@@ -181,6 +181,9 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
 {
   residual.zero();
 
+  if(_serialize_solution)
+    serializeSolution(soln);
+
   if(_has_displaced_mesh)
     updateDisplacedMesh(soln);
 

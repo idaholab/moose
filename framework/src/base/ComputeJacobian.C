@@ -203,6 +203,8 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
 #endif
     
 #endif
+  if(_serialize_solution)
+    serializeSolution(soln);
 
   if(_has_displaced_mesh)
     updateDisplacedMesh(soln);

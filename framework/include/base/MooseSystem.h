@@ -313,6 +313,23 @@ public:
 
   void needPostprocessorsForResiduals(bool state) { _compute_pps_each_residual_evaluation = state; }
 
+  /**
+   * Returns true if the solution vector will be serialized before each residual and jacobian evaluation.
+   */
+  bool needSerializedSolution() { return _serialize_solution; }
+      
+  /**
+   * Call this if your object is going to need a serialized solution vector.
+   *
+   * This might be necessary if you require extensive usage of off-processor solution values.
+   */
+  void needSerializedSolution(bool state) { _serialize_solution = state; }
+
+  /**
+   * Serialize the solution and auxiliary solution vectors.
+   */
+  void serializeSolution(const NumericVector<Number>& soln);
+
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   virtual void subdomainSetup(THREAD_ID tid, unsigned int block_id);
@@ -506,6 +523,11 @@ protected:
   bool _compute_pps_each_residual_evaluation;
 
   /**
+   * TRUE if we need to serialize the solution vector before every residual and jacobian evaluation.
+   */
+  bool _serialize_solution;
+
+  /**
    * Whether or not the mesh has changed recently.  Useful for doing separate output.
    */
   bool _mesh_changed;
@@ -606,6 +628,18 @@ public:
   NumericVector<Number> * _res_soln_old; /// residual evaluated at the old time step
 
   NumericVector<Number> * _du_dot_du_soln;   /// solution vector for the derivative of u_dot
+
+  /**
+   * This will be filled up with a full serialization of the solution
+   * vector if _serialize_solution is true.
+   */
+  std::vector<Number> _serialized_solution;
+
+  /**
+   * This will be filled up with a full serialization of the auxiliary solution
+   * vector if _serialize_solution is true.
+   */
+  std::vector<Number> _serialized_aux_solution;
 
   /**
    * Called before each residual evaluation

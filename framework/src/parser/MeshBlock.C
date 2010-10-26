@@ -118,6 +118,8 @@ MeshBlock::execute()
     (*displaced_mesh->boundary_info) = (*mesh->boundary_info);
 
     displaced_mesh->boundary_info->build_node_list_from_side_list();
+
+    _moose_system.needSerializedSolution(true);
   }
 
   visitChildren();
