@@ -1,10 +1,10 @@
-#include "LSHPlasticMaterial.h"
+#include "PLSHPlasticMaterial.h"
 
 #include "ElasticityTensor.h"
 #include <cmath>
 
 template<>
-InputParameters validParams<LSHPlasticMaterial>()
+InputParameters validParams<PLSHPlasticMaterial>()
 {
    InputParameters params = validParams<LinearIsotropicMaterial>();
    params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
@@ -15,7 +15,7 @@ InputParameters validParams<LSHPlasticMaterial>()
    return params;
 }
 
-LSHPlasticMaterial::LSHPlasticMaterial(std::string name,
+PLSHPlasticMaterial::PLSHPlasticMaterial(std::string name,
                                              MooseSystem & moose_system,
                                              InputParameters parameters)
   :LinearIsotropicMaterial(name, moose_system, parameters),
@@ -44,7 +44,7 @@ LSHPlasticMaterial::LSHPlasticMaterial(std::string name,
 }
 
 void
-LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
+PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
 {
   _total_strain[_qp] = total_strain;
             
@@ -78,6 +78,42 @@ LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Column
     Real plastic_residual = 10.;
     Real plastic_strain_increment = 0.;
     Real norm_residual = 10.;
+
+      if (_stress_old[_qp](1,1)> 240.)
+      {
+        if (_stress_old[_qp](1,1)< 360.)
+        {
+          _hardening_constant=1206.;
+        }
+      }
+     
+      if (_stress_old[_qp](1,1)> 360.)
+      {
+        if (_stress_old[_qp](1,1)< 420.)
+        {
+          _hardening_constant=800.;
+        }
+      }
+
+      if (_stress_old[_qp](1,1)> 420.)
+      {
+        if (_stress_old[_qp](1,1)< 1500.)
+        {
+          _hardening_constant=400.;
+        }
+      }
+      
+     
+      if (_stress_old[_qp](1,1)> 1500.)
+      {
+       _hardening_constant=400.;
+      }
+     
+     
+        if (_stress_old[_qp](1,1)< 240.)
+       {
+         _hardening_constant = 1206.;
+       }
     
     
     
@@ -198,7 +234,7 @@ LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Column
 
 //computeStress
 void
-LSHPlasticMaterial::computeStress(const RealVectorValue & x, const RealVectorValue & y, const RealVectorValue & z, RealTensorValue & stress)
+PLSHPlasticMaterial::computeStress(const RealVectorValue & x, const RealVectorValue & y, const RealVectorValue & z, RealTensorValue & stress)
 {
   ColumnMajorMatrix total_strain(x,y,z);
 

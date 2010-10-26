@@ -1,21 +1,21 @@
-#ifndef LSHPLASTICMATERIAL_H
-#define LSHPLASTICMATERIAL_H
+#ifndef CLSHPLASTICMATERIAL_H
+#define CLSHPLASTICMATERIAL_H
 
 #include "LinearIsotropicMaterial.h"
 
 //Forward Declarations
-class LSHPlasticMaterial;
+class CLSHPlasticMaterial;
 
 template<>
-InputParameters validParams<LSHPlasticMaterial>();
+InputParameters validParams<CLSHPlasticMaterial>();
 
 /**
  * Plastic material
  */
-class LSHPlasticMaterial : public LinearIsotropicMaterial
+class CLSHPlasticMaterial : public LinearIsotropicMaterial
 {
 public:
-  LSHPlasticMaterial(std::string name,
+  CLSHPlasticMaterial(std::string name,
                   MooseSystem & moose_system,
                   InputParameters parameters);
   
@@ -30,6 +30,8 @@ protected:
 
   Real _yield_stress;
   Real _hardening_constant;
+  Real _c_alpha;
+  Real _c_beta;
   Real _tolerance;
   unsigned int _max_its;
 

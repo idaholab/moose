@@ -37,6 +37,9 @@
 #include "LinearIsotropicMaterial.h"
 #include "PlasticMaterial.h"
 #include "LSHPlasticMaterial.h"
+#include "LSHPlasticMaterial.h"
+#include "PLSHPlasticMaterial.h"
+#include "CLSHPlasticMaterial.h"
 #include "DeltaGamma.h"
 
 // phase_field
@@ -92,6 +95,9 @@ Elk::registerObjects()
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerMaterial(PlasticMaterial);
   registerMaterial(LSHPlasticMaterial);
+  registerMaterial(LSHPlasticMaterial);
+  registerMaterial(PLSHPlasticMaterial);
+  registerMaterial(CLSHPlasticMaterial);
   
   // phase_field
   registerKernel(AC);

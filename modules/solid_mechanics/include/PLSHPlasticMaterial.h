@@ -1,21 +1,21 @@
-#ifndef LSHPLASTICMATERIAL_H
-#define LSHPLASTICMATERIAL_H
+#ifndef PLSHPLASTICMATERIAL_H
+#define PLSHPLASTICMATERIAL_H
 
 #include "LinearIsotropicMaterial.h"
 
 //Forward Declarations
-class LSHPlasticMaterial;
+class PLSHPlasticMaterial;
 
 template<>
-InputParameters validParams<LSHPlasticMaterial>();
+InputParameters validParams<PLSHPlasticMaterial>();
 
 /**
  * Plastic material
  */
-class LSHPlasticMaterial : public LinearIsotropicMaterial
+class PLSHPlasticMaterial : public LinearIsotropicMaterial
 {
 public:
-  LSHPlasticMaterial(std::string name,
+  PLSHPlasticMaterial(std::string name,
                   MooseSystem & moose_system,
                   InputParameters parameters);
   
@@ -54,4 +54,4 @@ protected:
   ColumnMajorMatrix _identity;  
 };
 
-#endif //CLSHPLASTICMATERIAL_H
+#endif //PLSHPLASTICMATERIAL_H
