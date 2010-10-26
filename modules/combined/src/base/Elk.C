@@ -37,7 +37,6 @@
 #include "LinearIsotropicMaterial.h"
 #include "PlasticMaterial.h"
 #include "LSHPlasticMaterial.h"
-#include "LSHPlasticMaterial.h"
 #include "PLSHPlasticMaterial.h"
 #include "CLSHPlasticMaterial.h"
 #include "DeltaGamma.h"
@@ -96,7 +95,6 @@ Elk::registerObjects()
   registerKernel(DeltaGamma);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerMaterial(PlasticMaterial);
-  registerMaterial(LSHPlasticMaterial);
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(CLSHPlasticMaterial);
