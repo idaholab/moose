@@ -91,6 +91,14 @@ public:
    */
   void print();
 
+  
+  /**
+   * Prints to file
+   */
+
+  void print_scientific(std::ostream & os);
+  
+
   /**
    * Fills the passed in tensor with the values from this tensor.
    */
@@ -290,6 +298,7 @@ ColumnMajorMatrix::numEntries() const
   return _n_entries;
 }
 
+
 inline void
 ColumnMajorMatrix::reshape(unsigned int rows, unsigned int cols)
 {
@@ -318,16 +327,31 @@ ColumnMajorMatrix::operator()(const unsigned int i, const unsigned int j) const
 }
 
 inline void
-ColumnMajorMatrix::print()
+ColumnMajorMatrix::print() 
 {
   ColumnMajorMatrix & s = (*this);
   
   for(unsigned int i=0; i<_n_rows; i++)
   {
     for(unsigned int j=0; j<_n_cols; j++)
-      std::cout<<s(i,j)<<" ";
+      std::cout << std::setw(15) <<s(i,j)<<" ";
 
-    std::cout<<std::endl;
+    std::cout <<std::endl;
+  }
+}
+
+
+inline void
+ColumnMajorMatrix::print_scientific(std::ostream & os)
+{
+  ColumnMajorMatrix & s = (*this);
+  
+  for(unsigned int i=0; i<_n_rows; i++)
+  {
+    for(unsigned int j=0; j<_n_cols; j++)
+       os << std::setw(15)<< std::scientific << std::setprecision(8) << s(i,j) << " ";
+
+    os << std::endl;
   }
 } 
 
@@ -391,7 +415,7 @@ ColumnMajorMatrix::deviatoric()
 {
     ColumnMajorMatrix & s = (*this);
 
-    ColumnMajorMatrix ret_matrix(_n_cols, _n_rows), I(_n_cols, _n_rows);
+    ColumnMajorMatrix ret_matrix(_n_rows, _n_cols), I(_n_rows, _n_cols);
 
     I.identity();
     
@@ -408,7 +432,7 @@ ColumnMajorMatrix::abs()
 {
     ColumnMajorMatrix & s = (*this);
 
-    ColumnMajorMatrix ret_matrix(_n_cols, _n_rows);
+    ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
     
     for(unsigned int j=0; j<_n_cols; j++)
       for(unsigned int i=0; i<_n_rows; i++)
