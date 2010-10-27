@@ -31,6 +31,8 @@ InputParameters validParams<AuxKernel>()
   params.addRequiredParam<std::string>("variable", "The name of the variable that this object applies to");
   // For use on the boundary only
   params.addParam<std::vector<unsigned int> >("boundary", "The list of variable names this Material is coupled to.");
+  params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this aux kernel will be applied to");
+  
   return params;
 }
 

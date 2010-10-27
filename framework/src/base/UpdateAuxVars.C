@@ -41,6 +41,14 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
   AuxKernelIterator aux_end = _auxs[0].activeNodalAuxKernelsEnd();
   AuxKernelIterator aux_it = aux_begin;
 
+  AuxKernelIterator block_nodal_aux_begin;
+  AuxKernelIterator block_nodal_aux_end;
+  AuxKernelIterator block_nodal_aux_it;
+
+  AuxKernelIterator block_element_aux_begin;
+  AuxKernelIterator block_element_aux_end;
+  AuxKernelIterator block_element_aux_it;
+
   for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
     (*aux_it)->setup();
 
@@ -118,18 +126,20 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
 
   unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
-  if(aux_begin != aux_end)
+  for ( ; el != end_el; ++el)
   {
-    for ( ; el != end_el; ++el)
-    {
-      const Elem* elem = *el;
+    const Elem* elem = *el;    
+      
+    unsigned int cur_subdomain = elem->subdomain_id();    
 
+    block_element_aux_it =_auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
+    block_element_aux_end = _auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
+
+    if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
+    {
       reinitKernels(0, soln, elem, NULL);
       _element_data[0]->reinitMaterials(_materials[0].getMaterials(elem->subdomain_id()));
-
       reinitAuxKernels(0, soln, *elem);
-
-      unsigned int cur_subdomain = elem->subdomain_id();
 
       if(cur_subdomain != subdomain)
       {
@@ -139,9 +149,34 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
         for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
           (*aux_it)->subdomainSetup();
       }
+    }
 
-      for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-        (*aux_it)->computeAndStore();
+    for(; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
+      (*block_element_aux_it)->computeAndStore();
+
+    for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
+      (*aux_it)->computeAndStore();
+
+    // Now do the block nodal aux kernels
+    block_nodal_aux_it =_auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+    block_nodal_aux_end = _auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
+    
+    if(block_nodal_aux_it != block_nodal_aux_end)
+    {
+      for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
+      {
+        Node & node = *elem->get_node(nd);
+        
+        if(node.processor_id() == libMesh::processor_id())
+        {
+          reinitAuxKernels(0, soln, node);
+          
+          for(block_nodal_aux_it =_auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+              block_nodal_aux_it != block_nodal_aux_end;
+              ++block_nodal_aux_it)
+            (*block_nodal_aux_it)->computeAndStore();
+        }
+      }
     }
   }
 

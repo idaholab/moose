@@ -112,6 +112,7 @@ void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
   (*_displaced_system->solution) = soln;  
+  (*_displaced_aux_system->solution) = *_aux_system->solution;
 
   Threads::parallel_for(*getActiveNodeRange(),
                         UpdateDisplacedMesh(*this, _serialized_solution, _serialized_aux_solution));

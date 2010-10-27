@@ -407,6 +407,9 @@ void MooseSystem::computeJacobianBlock (const NumericVector<Number>& soln, Spars
 */
     
   {
+    if(_serialize_solution)
+    serializeSolution(*_system->solution);
+
     if(_has_displaced_mesh)
       updateDisplacedMesh(soln);
 

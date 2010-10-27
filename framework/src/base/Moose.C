@@ -45,6 +45,8 @@
 #include "ConstantAux.h"
 #include "CoupledAux.h"
 #include "PenetrationAux.h"
+#include "NearestNodeDistanceAux.h"
+#include "FunctionAux.h"
 
 #include "TimeDerivative.h"
 #include "ImplicitEuler.h"
@@ -178,6 +180,9 @@ Moose::registerObjects()
   registerAux(ConstantAux);
   registerAux(CoupledAux);
   registerAux(PenetrationAux);
+  registerAux(NearestNodeDistanceAux);
+  registerAux(FunctionAux);
+  
 
   registerMaterial(EmptyMaterial);
 

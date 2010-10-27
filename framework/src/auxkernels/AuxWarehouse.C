@@ -66,6 +66,30 @@ AuxWarehouse::activeAuxBCsEnd(unsigned int boundary_id)
   return _active_bcs[boundary_id].end();
 }
 
+AuxKernelIterator
+AuxWarehouse::activeBlockNodalAuxKernelsBegin(unsigned int block)
+{
+  return _active_block_nodal_aux_kernels[block].begin();
+}
+
+AuxKernelIterator
+AuxWarehouse::activeBlockNodalAuxKernelsEnd(unsigned int block)
+{
+  return _active_block_nodal_aux_kernels[block].end();
+}
+
+AuxKernelIterator
+AuxWarehouse::activeBlockElementAuxKernelsBegin(unsigned int block)
+{
+  return _active_block_element_aux_kernels[block].begin();
+}
+
+AuxKernelIterator
+AuxWarehouse::activeBlockElementAuxKernelsEnd(unsigned int block)
+{
+  return _active_block_element_aux_kernels[block].end();
+}
+
 std::list<AuxKernel *>
 AuxWarehouse::getActiveNodalKernels()
 {
@@ -101,3 +125,20 @@ AuxWarehouse::addActiveBC(unsigned int boundary_id, AuxKernel *aux)
 {
   _active_bcs[boundary_id].push_back(aux);
 }
+
+void
+AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<unsigned int> block_ids)
+{
+  for(std::set<unsigned int>::iterator it = block_ids.begin();
+      it != block_ids.end();
+      ++it)
+  {
+    unsigned int id = *it;
+    
+    if(aux->isNodal())
+      _active_block_nodal_aux_kernels[id].push_back(aux);
+    else
+      _active_block_element_aux_kernels[id].push_back(aux);
+  }
+}
+

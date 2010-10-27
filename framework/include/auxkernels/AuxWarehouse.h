@@ -47,6 +47,12 @@ public:
   AuxKernelIterator activeAuxBCsBegin(unsigned int boundary_id);
   AuxKernelIterator activeAuxBCsEnd(unsigned int boundary_id);
 
+  AuxKernelIterator activeBlockNodalAuxKernelsBegin(unsigned int block);
+  AuxKernelIterator activeBlockNodalAuxKernelsEnd(unsigned int block);
+
+  AuxKernelIterator activeBlockElementAuxKernelsBegin(unsigned int block);
+  AuxKernelIterator activeBlockElementAuxKernelsEnd(unsigned int block);
+
   std::list<AuxKernel *> getActiveNodalKernels();
   std::list<AuxKernel *> getActiveElementKernels();
 
@@ -56,12 +62,16 @@ public:
   void addBC(AuxKernel *aux);
   void addActiveBC(unsigned int boundary_id, AuxKernel *aux);
 
+  void addAuxKernel(AuxKernel *aux, std::set<unsigned int> block_ids);
+
 protected:
   std::vector<AuxKernel *> _active_nodal_aux_kernels;
   std::vector<AuxKernel *> _active_element_aux_kernels;
 
   std::vector<AuxKernel *> _aux_bcs;
   std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
 };
 
 #endif // AUXWAREHOUSE_H

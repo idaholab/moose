@@ -1,0 +1,46 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "NearestNodeDistanceAux.h"
+#include "MooseSystem.h"
+
+#include "mesh.h"
+
+template<>
+InputParameters validParams<NearestNodeDistanceAux>()
+{
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredParam<unsigned int>("paired_boundary", "The boundary to find the distance to.");
+  params.set<bool>("use_displaced_mesh") = true;
+  return params;
+}
+
+NearestNodeDistanceAux::NearestNodeDistanceAux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+  :AuxKernel(name, moose_system, parameters),
+   _nearest_node(_moose_system, _mesh, getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary"))
+{
+  if(getParam<std::vector<unsigned int> >("boundary").size() > 1)
+    mooseError("NearestNodeDistanceAux can only be used with one boundary at a time!");
+}
+
+void NearestNodeDistanceAux::setup()
+{
+  _nearest_node.findNodes();
+}  
+
+Real
+NearestNodeDistanceAux::computeValue()
+{
+  return _nearest_node.distance(_current_node->id());
+}

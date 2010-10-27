@@ -481,9 +481,14 @@ protected:
   ExplicitSystem * _displaced_aux_system;
 
   /**
-   * The list of block for given variable number
+   * The list of blocks for a given variable number
    */
   std::map<unsigned int, std::set<unsigned int> > _var_map;
+
+  /**
+   * The list of blocks for a given aux variable number
+   */
+  std::map<unsigned int, std::set<unsigned int> > _aux_var_map;
 
   Moose::GeomType _geom_type;
   Mesh * _mesh;

@@ -683,6 +683,9 @@ MooseSystem::solve()
   _system->solve();
   _system->update();
 
+  if(_serialize_solution)
+    serializeSolution(*_system->solution);
+
   if(_has_displaced_mesh)
     updateDisplacedMesh(*_system->solution);
 
@@ -735,6 +738,12 @@ MooseSystem::addAuxVariable(const std::string &var, const FEType  &type, const s
   unsigned int var_num = 0;
   
   var_num = _aux_system->add_variable(var, type, active_subdomains);
+  
+  if (active_subdomains == NULL)
+    _aux_var_map[var_num].insert(Moose::ANY_BLOCK_ID);
+  else
+    for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+      _aux_var_map[var_num].insert(*it);
 
   if(_has_displaced_mesh)
     _displaced_aux_system->add_variable(var, type, active_subdomains);
@@ -748,6 +757,12 @@ MooseSystem::addAuxVariable(const std::string &var, const Order order, const FEF
   unsigned int var_num = 0;
 
   var_num = _aux_system->add_variable(var, order, family, active_subdomains);
+
+  if (active_subdomains == NULL)
+    _aux_var_map[var_num].insert(Moose::ANY_BLOCK_ID);
+  else
+    for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+      _aux_var_map[var_num].insert(*it);
   
   if(_has_displaced_mesh)
     _displaced_aux_system->add_variable(var, order, family, active_subdomains);
@@ -841,6 +856,33 @@ MooseSystem::addAuxKernel(std::string aux_name,
     aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
     std::vector<std::string> coupled_to = aux->coupledTo();
 
+
+
+    std::set<unsigned int> blk_ids;
+    if (!parameters.isParamValid("block"))
+      blk_ids = _aux_var_map[aux->variable()];
+    else
+    {
+      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+      for (unsigned int i=0; i<blocks.size(); ++i)
+      {
+        if (_aux_var_map[aux->variable()].count(blocks[i]) > 0 || _aux_var_map[aux->variable()].count(Moose::ANY_BLOCK_ID) > 0)
+          blk_ids.insert(blocks[i]);
+        else
+          mooseError("AuxKernel (" + aux->name() + "): block outside of the domain of the variable");
+      }
+    }
+
+    // See if this kernel applies only to specific blocks
+    if(blk_ids.find(Moose::ANY_BLOCK_ID) == blk_ids.end())
+    {
+      _auxs[tid].addAuxKernel(aux, blk_ids);
+      return;
+    }
+
+    // It doesn't apply to specific blocks so do the "normal" stuf........
+
+    
     // Copy the active AuxKernels into a list for manipulation
     std::list<AuxKernel *> active_auxs;
     if (aux->isNodal())
@@ -1232,8 +1274,6 @@ MooseSystem::updateMaterials()
 void
 MooseSystem::serializeSolution(const NumericVector<Number>& soln)
 {
-  std::cout<<"Serializing Solution"<<std::endl;
-  
   soln.localize(_serialized_solution);
 
   updateAuxVars(soln);
