@@ -5,79 +5,79 @@
 []
 
 [Variables]
-  active = 'u v'
+  active = 'convected diffused'
 
-  [./u]
+  [./convected]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  active = 'u_ie example_diff conv v_ie diff'
+  active = 'convected_ie example_diff conv diffused_ie diff'
 
-  [./u_ie]
+  [./convected_ie]
     type = ImplicitEuler
-    variable = u
+    variable = convected
   [../]
 
   [./example_diff]
     # This Kernel uses "diffusivity" from the active material 
     type = ExampleDiffusion
-    variable = u
+    variable = convected
   [../]
 
   [./conv]
     type = Convection
-    variable = u
-    velocity_vector = v
+    variable = convected
+    some_variable = diffused
   [../]
 
-  [./v_ie]
+  [./diffused_ie]
     type = ImplicitEuler
-    variable = v
+    variable = diffused
   [../]
 
   [./diff]
     type = Diffusion
-    variable = v
+    variable = diffused
   [../]
 []
 
 [BCs]
-  active = 'left_u right_u left_v right_v'
+  active = 'left_convected right_convected left_diffused right_diffused'
 
-  [./left_u]
+  [./left_convected]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '1'
     value = 0
   [../]
 
-  [./right_u]
+  [./right_convected]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '2'
     value = 1
 
-    some_var = v
+    some_var = diffused
   [../]
 
-  [./left_v]
+  [./left_diffused]
     type = DirichletBC
-    variable = v
+    variable = diffused
     boundary = '1'
     value = 0
   [../]
 
-  [./right_v]
+  [./right_diffused]
     type = DirichletBC
-    variable = v
+    variable = diffused
     boundary = '2'
     value = 1
   [../]
@@ -90,7 +90,7 @@
   [./empty]
     type = ExampleMaterial
     block = 1
-    diffusivity = 0.1
+    initial_diffusivity = 0.1
   [../]
 []
 

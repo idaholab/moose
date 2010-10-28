@@ -4,9 +4,9 @@
 []
 
 [Variables]
-  active = 'u'
+  active = 'diffused'
 
-  [./u]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -17,7 +17,7 @@
 
   [./diff]
     type = Diffusion
-    variable = u
+    variable = diffused
   [../]
 []
 
@@ -26,14 +26,14 @@
 
   [./left]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = '1'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = '2'
     value = 1
   [../]

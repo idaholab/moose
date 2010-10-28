@@ -5,9 +5,9 @@
 []
 
 [Variables]
-  active = 'u'
+  active = 'convected'
 
-  [./u]
+  [./convected]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -18,12 +18,12 @@
 
   [./diff]
     type = Diffusion
-    variable = u
+    variable = convected
   [../]
 
   [./conv]
     type = Convection
-    variable = u
+    variable = convected
     x = 2.0
     y = 0.0
   [../]
@@ -34,14 +34,14 @@
 
   [./left]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '1'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '2'
     value = 1
   [../]

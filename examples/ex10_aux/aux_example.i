@@ -5,9 +5,9 @@
 []
 
 [Variables]
-  active = 'u'
+  active = 'diffused'
 
-  [./u]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -35,7 +35,7 @@
 
   [./diff]
     type = Diffusion
-    variable = u
+    variable = diffused
   [../]
 []
 
@@ -48,14 +48,14 @@
     type = ExampleAux
     variable = nodal_aux
     value = 3.0
-    coupled = u
+    coupled = diffused
   [../]
 
   [./element_example]
     type = ExampleAux
     variable = element_aux
     value = 4.0
-    coupled = u
+    coupled = diffused
   [../]
 []
 
@@ -64,14 +64,14 @@
 
   [./left]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = '1 3'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = '2 4'
     value = 1
   [../]

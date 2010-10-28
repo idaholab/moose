@@ -5,78 +5,78 @@
 []
 
 [Variables]
-  active = 'u v'
+  active = 'convected diffused'
 
-  [./u]
+  [./convected]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  active = 'diff_u conv diff_v'
+  active = 'diff_convected conv diff_diffused'
 
-  [./diff_u]
+  [./diff_convected]
     type = Diffusion
-    variable = u
+    variable = convected
   [../]
 
   [./conv]
     type = Convection
-    variable = u
-    velocity_vector = v
+    variable = convected
+    some_variable = diffused
   [../]
 
-  [./diff_v]
+  [./diff_diffused]
     type = Diffusion
-    variable = v
+    variable = diffused
   [../]
 []
 
 [BCs]
-  active = 'left_u right_u_neumann left_v right_v'
+  active = 'left_convected right_convected_neumann left_diffused right_diffused'
 
-  [./left_u]
+  [./left_convected]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '1'
     value = 0
   [../]
 
   # Note: This BC is not active in this input file
-  [./right_u_dirichlet]
+  [./right_convected_dirichlet]
     type = CoupledDirichletBC
-    variable = u
+    variable = convected
     boundary = '2'
     value = 2
 
-    some_var = v
+    some_var = diffused
   [../]
 
-  [./right_u_neumann]
+  [./right_convected_neumann]
     type = CoupledNeumannBC
-    variable = u
+    variable = convected
     boundary = '2'
     value = 2
     
-    some_var = v
+    some_var = diffused
   [../]
 
-  [./left_v]
+  [./left_diffused]
     type = DirichletBC
-    variable = v
+    variable = diffused
     boundary = '1'
     value = 0
   [../]
 
-  [./right_v]
+  [./right_diffused]
     type = DirichletBC
-    variable = v
+    variable = diffused
     boundary = '2'
     value = 1
   [../]

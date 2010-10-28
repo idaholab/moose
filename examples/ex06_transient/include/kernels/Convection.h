@@ -17,7 +17,6 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
 class Convection;
 
 template<>
@@ -38,8 +37,8 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-
-  VariableGradient & _velocity_vector;
+  
+  VariableGradient & _some_variable;
 };
 
 #endif //CONVECTION_H

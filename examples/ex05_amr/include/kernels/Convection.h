@@ -17,7 +17,6 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
 class Convection;
 
 template<>
@@ -39,7 +38,7 @@ protected:
 
 private:
   
-  VariableGradient & _velocity_vector;
+  VariableGradient & _some_variable;
 };
 
 #endif //CONVECTION_H

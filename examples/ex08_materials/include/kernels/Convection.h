@@ -38,7 +38,7 @@ protected:
 
 private:
   
-  VariableGradient & _velocity_vector;
+  VariableGradient & _some_variable;
 };
 
 #endif //CONVECTION_H

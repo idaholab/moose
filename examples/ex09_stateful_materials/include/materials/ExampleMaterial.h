@@ -37,7 +37,7 @@ protected:
   virtual void computeQpProperties();
 
 private:
-  Real _input_diffusivity;
+  Real _initial_diffusivity;
 
   /**
    * Create two MooseArray Refs to hold the current

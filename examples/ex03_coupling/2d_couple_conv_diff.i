@@ -5,68 +5,68 @@
 []
 
 [Variables]
-  active = 'u v'
+  active = 'convected diffused'
 
-  [./u]
+  [./convected]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  active = 'diff_u conv diff_v'
+  active = 'diff_convected conv diff_diffused'
 
-  [./diff_u]
+  [./diff_convected]
     type = Diffusion
-    variable = u
+    variable = convected
   [../]
 
   [./conv]
     type = Convection
-    variable = u
+    variable = convected
 
     # Couple a variable into the convection kernel using local_name = simulationg_name syntax
-    velocity_vector = v
+    some_variable = diffused
   [../]
 
-  [./diff_v]
+  [./diff_diffused]
     type = Diffusion
-    variable = v
+    variable = diffused
   [../]
 []
 
 [BCs]
-  active = 'left_u right_u left_v right_v'
+  active = 'left_convected right_convected left_diffused right_diffused'
 
-  [./left_u]
+  [./left_convected]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '1'
     value = 0
   [../]
 
-  [./right_u]
+  [./right_convected]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '2'
     value = 1
   [../]
 
-  [./left_v]
+  [./left_diffused]
     type = DirichletBC
-    variable = v
+    variable = diffused
     boundary = '1'
     value = 0
   [../]
 
-  [./right_v]
+  [./right_diffused]
     type = DirichletBC
-    variable = v
+    variable = diffused
     boundary = '2'
     value = 1
   [../]

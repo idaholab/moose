@@ -37,13 +37,19 @@ protected:
   virtual void computeQpProperties();
 
 private:
-  Real _input_diffusivity;
+  /**
+   * Holds a value from the input file.
+   */
+  Real _diffusivity_baseline;
+
+  /**
+   * Holds the values of a coupled variable.
+   */
+  VariableValue & _some_variable;
 
   /**
    * This is the member reference that will hold the
-   * computed values from this material class and can be
-   * shared to other MOOSE objects when using
-   * one of the declare property methods.
+   * computed values from this material class.
    */
   MaterialProperty<Real> & _diffusivity;
 };

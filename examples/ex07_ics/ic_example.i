@@ -5,9 +5,9 @@
 []
 
 [Variables]
-  active = 'u'
+  active = 'diffused'
 
-  [./u]
+  [./diffused]
     # Note that we do not have the 'active' parameter here.  Since it 
     # is missing we will automatically pickup all nested blocks
     order = FIRST
@@ -27,7 +27,7 @@
 
   [./diff]
     type = Diffusion
-    variable = u
+    variable = diffused
   [../]
 []
 
@@ -36,14 +36,14 @@
 
   [./left]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = '1 3'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = '2 4'
     value = 1
   [../]

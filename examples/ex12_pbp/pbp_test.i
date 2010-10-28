@@ -4,14 +4,14 @@
 []
 
 [Variables]
-  active = 'u v'
+  active = 'diffused forced'
 
-  [./u]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [./forced]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -22,60 +22,60 @@
   active = 'PBP'
 
   [./PBP]
-    solve_order = 'u v'
+    solve_order = 'diffused forced'
     preconditioner  = 'LU LU'
-    off_diag_row    = 'v'
-    off_diag_column = 'u'
+    off_diag_row    = 'forced'
+    off_diag_column = 'diffused'
   [../]
 []
 
 [Kernels]
-  active = 'diff_u conv_v diff_v'
+  active = 'diff_diffused conv_forced diff_forced'
 
-  [./diff_u]
+  [./diff_diffused]
     type = Diffusion
-    variable = u
+    variable = diffused
   [../]
 
-  [./conv_v]
+  [./conv_forced]
     type = CoupledForce
-    variable = v
-    v = u
+    variable = forced
+    v = diffused
   [../]
 
-  [./diff_v]
+  [./diff_forced]
     type = Diffusion
-    variable = v
+    variable = forced
   [../]
 []
 
 [BCs]
-  active = 'left_u right_u left_v'
+  active = 'left_diffused right_diffused left_forced'
 
-  [./left_u]
+  [./left_diffused]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = 1
     value = 0
   [../]
 
-  [./right_u]
+  [./right_diffused]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = 2
     value = 100
   [../]
 
-  [./left_v]
+  [./left_forced]
     type = DirichletBC
-    variable = v
+    variable = forced
     boundary = 1
     value = 0
   [../]
 
-  [./right_v]
+  [./right_forced]
     type = DirichletBC
-    variable = v
+    variable = forced
     boundary = 2
     value = 0
   [../]

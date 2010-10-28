@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<ExampleMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<Real>("diffusivity", 1.0, "The Diffusivity");
+  params.addParam<Real>("initial_diffusivity", 1.0, "The Initial Diffusivity");
   return params;
 }
 
@@ -28,7 +28,7 @@ ExampleMaterial::ExampleMaterial(const std::string & name,
   :Material(name, moose_system, parameters),
    
    // Get a parameter value for the diffusivity
-   _input_diffusivity(getParam<Real>("diffusivity")),
+   _initial_diffusivity(getParam<Real>("initial_diffusivity")),
 
    // Declare that this material is going to have a Real
    // valued property named "diffusivity" that Kernels can use.
@@ -44,7 +44,7 @@ void
 ExampleMaterial::computeQpProperties()
 {
   if(_t_step == 1)
-    _diffusivity[_qp] = _input_diffusivity;
+    _diffusivity[_qp] = _initial_diffusivity;
   else
     _diffusivity[_qp] = _diffusivity_old[_qp] * 2;
 }

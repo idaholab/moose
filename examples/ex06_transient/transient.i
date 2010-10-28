@@ -5,14 +5,14 @@
 []
 
 [Variables]
-  active = 'u v'
+  active = 'convected diffused'
 
-  [./u]
+  [./convected]
     order = FIRST
     family = LAGRANGE
   [../]
 
-  [./v]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -23,57 +23,57 @@
 
   [./example_diff]
     type = ExampleDiffusion
-    variable = u
+    variable = convected
     diffusivity = 0.1
   [../]
 
   [./conv]
     type = Convection
-    variable = u
-    velocity_vector = v
+    variable = convected
+    some_variable = diffused
   [../]
 
   [./diff]
     type = Diffusion
-    variable = v
+    variable = diffused
   [../]
 
   [./euler]
     type = ExampleTimeDerivative
-    variable = v
+    variable = diffused
     time_coefficient = 20.0
   [../]
 []
 
 [BCs]
-  active = 'left_u right_u left_v right_v'
+  active = 'left_convected right_convected left_diffused right_diffused'
 
-  [./left_u]
+  [./left_convected]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '1'
     value = 0
   [../]
 
-  [./right_u]
+  [./right_convected]
     type = DirichletBC
-    variable = u
+    variable = convected
     boundary = '2'
     value = 1
 
-    some_var = v
+    some_var = diffused
   [../]
 
-  [./left_v]
+  [./left_diffused]
     type = DirichletBC
-    variable = v
+    variable = diffused
     boundary = '1'
     value = 0
   [../]
 
-  [./right_v]
+  [./right_diffused]
     type = DirichletBC
-    variable = v
+    variable = diffused
     boundary = '2'
     value = 1
   [../]

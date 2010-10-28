@@ -14,9 +14,9 @@
 []
 
 [Variables]
-  active = 'u'
+  active = 'convected'
 
-  [./u]
+  [./convected]
     order = FIRST
     family = LAGRANGE
   [../]

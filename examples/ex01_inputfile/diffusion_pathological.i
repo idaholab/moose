@@ -28,16 +28,16 @@
 []
 
 [Variables]
-  active = 'u'   # Note the active list here
+  active = 'diffused'   # Note the active list here
 
-  [./u]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
 
 # This variable is not active in the list above 
 # therefore it is not used in the simulation
-  [./v]
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -48,7 +48,7 @@
 
   [./diff]
     type = Diffusion
-    variable = u
+    variable = diffused
   [../]
 []
 
@@ -58,14 +58,14 @@
 
   [./left]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = '1'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
-    variable = u
+    variable = diffused
     boundary = '2'
     value = 1
   [../]
