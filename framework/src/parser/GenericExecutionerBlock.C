@@ -75,6 +75,8 @@ GenericExecutionerBlock::execute()
     AdaptivityBlock *a = dynamic_cast<AdaptivityBlock *>(adaptivity_block);
     class_params.set<unsigned int>("steps") = a->getSteps();
   }
+  else
+    class_params.set<unsigned int>("steps") = 0;
   
   _moose_system.initExecutioner(ExecutionerFactory::instance()->build(_type, "Executioner", _moose_system, class_params));
   
