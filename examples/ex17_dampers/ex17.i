@@ -12,9 +12,9 @@
 []
 
 [Variables]
-  active = 'u'
+  active = 'diffusion'
 
-  [./u]
+  [./diffusion]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -25,7 +25,7 @@
 
   [./diff]
     type = Diffusion
-    variable = u
+    variable = diffusion
   [../]
 []
 
@@ -34,14 +34,14 @@
 
   [./left]
     type = DirichletBC
-    variable = u
+    variable = diffusion
     boundary = 1
     value = 3
   [../]
 
   [./right]
     type = DirichletBC
-    variable = u
+    variable = diffusion
     boundary = 2
     value = 1
   [../]
@@ -58,9 +58,9 @@
 
 [Dampers]
   # Use a constant damping parameter
-  [./u_damp]
+  [./diffusion_damp]
     type = ConstantDamper
-    variable = u
+    variable = diffusion
     damping = 0.9
   [../]
 []

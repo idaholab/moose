@@ -14,9 +14,9 @@
 []
 
 [Variables]
-  active = 'u'
+  active = 'forced'
 
-  [./u]
+  [./forced]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -47,13 +47,13 @@
 
   [./diff]
     type = Diffusion
-    variable = u
+    variable = forced
   [../]
 
   # This Kernel can take a function name to use
   [./forcing]
     type = UserForcingFunction
-    variable = u
+    variable = forced
     function = forcing_func
   [../]
 []
@@ -64,7 +64,7 @@
   # The BC can take a function name to use
   [./all]
     type = FunctionDirichletBC
-    variable = u
+    variable = forced
     boundary = '0 1 2 3'
     function = bc_func
   [../]
@@ -93,12 +93,12 @@
 [Postprocessors]
   [./dofs]
     type = PrintDOFs
-    variable = u
+    variable = forced
   [../]
 
   [./integral]
     type = ElementL2Error
-    variable = u
+    variable = forced
     function = bc_func
   [../]
 []
