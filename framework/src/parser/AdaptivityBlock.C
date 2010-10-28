@@ -87,3 +87,11 @@ AdaptivityBlock::execute()
   visitChildren();
 }
 
+unsigned int
+AdaptivityBlock::getSteps()
+{
+  InputParameters params = getBlockParams();
+
+  return params.have_parameter<unsigned int>("steps") ? params.get<unsigned int>("steps") : 0;
+}
+

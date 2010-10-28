@@ -72,12 +72,9 @@ Executioner::setup()
   //Initial adaptivity
   for(unsigned int i=0; i<initial_adaptivity; i++)
   {
-    _moose_system.doAdaptivityStep();
-
-    // Tell MOOSE that the mesh has changed
-    // this performs a lot of functions including projecting
-    // the solution onto the new grid.
-    _moose_system.meshChanged();
+    _moose_system.adaptMesh();
+    
+    //_moose_system.doAdaptivityStep();
 
     //reproject the initial condition
     _moose_system.projectSolution(Moose::initial_value, Moose::initial_gradient);

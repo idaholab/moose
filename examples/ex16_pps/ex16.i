@@ -83,9 +83,8 @@
   type = Steady
   perf_log = true
 
-  max_r_steps = 5
-
   [./Adaptivity]
+    steps = 5
     refine_fraction = 1.0
     max_h_level = 10
   [../]

@@ -29,6 +29,8 @@ public:
   AdaptivityBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
 
   virtual void execute();
+
+  unsigned int getSteps();
 };
 
   

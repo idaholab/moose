@@ -64,7 +64,7 @@ protected:
    */
   virtual bool lastSolveConverged();
 
-  unsigned int _max_r_steps;
+  unsigned int _steps;
 
   /**
    * Current timestep.

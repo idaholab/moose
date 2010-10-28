@@ -423,10 +423,10 @@ public:
   /**
    * Initialize adaptivity
    *
-   * @param max_r_steps - Maximum r steps to take
+   * @param steps - Maximum r steps to take
    * @param inital_steps - The number of adaptivity steps to perform using the initial conditions
    */
-  void initAdaptivity(unsigned int max_r_steps, unsigned int initial_steps = 0);
+  void initAdaptivity(unsigned int steps, unsigned int initial_steps = 0);
 
   unsigned int getInitialAdaptivityStepCount();
 
@@ -438,8 +438,6 @@ public:
   void setErrorNorm(SystemNorm &sys_norm);
 
   void adaptMesh();
-
-  void doAdaptivityStep();
 
   /**
    * Get a reference to the value associated with the postprocessor.

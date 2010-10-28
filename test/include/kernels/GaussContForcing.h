@@ -12,32 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SINCONTFORCING_H
-#define SINCONTFORCING_H
+#ifndef GAUSSCONTFORCING_H
+#define GAUSSCONTFORCING_H
 
 #include "Kernel.h"
 
-class SinContForcing;
+class GaussContForcing;
 
 template<>
-InputParameters validParams<SinContForcing>();
+InputParameters validParams<GaussContForcing>();
 
 
-class SinContForcing : public Kernel
+class GaussContForcing : public Kernel
 {
 public:
 
-  SinContForcing(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
+  GaussContForcing(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
 
 protected:
   virtual Real computeQpResidual();
 
-  static const Real _x_center;
-  static const Real _y_center;
-  static const Real _area_of_influence;
-  static const Real _x_min;
-  static const Real _x_max;
-  static const Real _y_min;
-  static const Real _y_max;
+  const Real _amplitude;
+  const Real _x_center;
+  const Real _y_center;
+  const Real _x_spread;
+  const Real _y_spread;
+  const Real _x_min;
+  const Real _x_max;
+  const Real _y_min;
+  const Real _y_max;
 };
-#endif //SINCONTFORCING_H
+#endif //GAUSSCONTFORCING_H

@@ -128,9 +128,9 @@
 #  petsc_options_value = 'hypre    boomeramg'
   
 #  petsc_options = '-snes_mf'
-  max_r_steps = 2
+#  max_r_steps = 2
   [./Adaptivity]
-  	steps = 3
+    steps = 3
     refine_fraction = 1.0
     coarsen_fraction = 0
     max_h_level = 8

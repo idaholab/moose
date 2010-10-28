@@ -89,10 +89,10 @@
   type = Steady
   perf_log = true
   petsc_options = '-snes_mf_operator'
-  max_r_steps = 7    # Adaptivity Steps
 
   # The adapativity block
   [./Adaptivity]
+    steps = 7
     refine_fraction = 0.3
     coarsen_fraction = 0
     max_h_level = 10

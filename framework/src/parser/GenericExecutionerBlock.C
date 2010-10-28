@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "GenericExecutionerBlock.h"
+#include "AdaptivityBlock.h"
 #include "ExecutionerFactory.h"
 #include "PetscSupport.h"
 #include "Conversion.h"
@@ -63,10 +64,19 @@ GenericExecutionerBlock::GenericExecutionerBlock(const std::string & name, Moose
 void
 GenericExecutionerBlock::execute() 
 {
-  InputParameters classParams = getClassParams();
-  classParams.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'
+  InputParameters class_params = getClassParams();
+  class_params.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'
 
-  _moose_system.initExecutioner(ExecutionerFactory::instance()->build(_type, "Executioner", _moose_system, classParams));
+  // Steady and derived Executioners need to know the number of adaptivity steps to take.  This paramter
+  // is held in the child block Adaptivity and needs to be pulled early
+  ParserBlock *adaptivity_block = locateBlock("Executioner/Adaptivity");
+  if (adaptivity_block != NULL)
+  {
+    AdaptivityBlock *a = dynamic_cast<AdaptivityBlock *>(adaptivity_block);
+    class_params.set<unsigned int>("steps") = a->getSteps();
+  }
+  
+  _moose_system.initExecutioner(ExecutionerFactory::instance()->build(_type, "Executioner", _moose_system, class_params));
   
   EquationSystems *es = _moose_system.getEquationSystems();
   es->parameters.set<Real> ("linear solver tolerance")

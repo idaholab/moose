@@ -14,12 +14,13 @@
 
 #include "Steady.h"
 #include "MooseSystem.h"
+#include "equation_systems.h" // libMesh
 
 template<>
 InputParameters validParams<Steady>()
 {
   InputParameters params = validParams<Executioner>();
-  params.addParam<unsigned int>("max_r_steps", 0, "Number of refinement steps to do.");
+  params.addParam<unsigned int>("max_r_steps", 0, "DEPRECATED - Please put a parameter named \"steps\" inside of the adaptivity block");
   return params;
 }
 
@@ -27,7 +28,8 @@ InputParameters validParams<Steady>()
 Steady::Steady(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :Executioner(name, moose_system, parameters),
    _moose_system(moose_system),
-   _max_r_steps(getParam<unsigned int>("max_r_steps")),
+   // This parameter is shoved in from the child adaptivity block by the GenericExecutionerBlock
+   _steps(getParam<unsigned int>("steps")),
    _t_step(moose_system.parameters().set<int> ("t_step") = 0)
 {}
 
@@ -35,7 +37,7 @@ void
 Steady::execute()
 {
   // Define the refinement loop
-  for(unsigned int r_step=0; r_step<=_max_r_steps; r_step++)
+  for(unsigned int r_step=0; r_step<=_steps; r_step++)
   {
     _t_step = r_step+1;
 
@@ -68,7 +70,7 @@ Steady::execute()
     for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
       std::cout<<var<<": "<<_moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2)<<std::endl;
         
-    if(r_step != _max_r_steps)
+    if(r_step != _steps)
       adaptMesh();
   }
 }

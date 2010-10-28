@@ -1,8 +1,8 @@
 [Mesh]
   [./Generation]
     dim = 2
-    nx = 50
-    ny = 50
+    nx = 8
+    ny = 8
     nz = 0
     
     xmax = 40
@@ -10,6 +10,8 @@
     zmax = 0
     elem_type = QUAD4
   [../]
+
+  uniform_refine = 2
 []
 
 [Variables]
@@ -22,17 +24,28 @@
 []
 
 [Kernels]
-  active = 'diff forcing dot'
+  active = 'diff conv forcing dot'
 
   [./diff]
-    type = Diffusion
+    type = CoefDiffusion
     variable = u
+    coef = 1e-5
+  [../]
+
+  [./conv]
+    type = Convection
+    variable = u
+    x = -0.04
+    y = 0
   [../]
 
   [./forcing]
     type = GaussContForcing
     variable = u
-    function = forcing_func
+    x_center = 4.0
+    y_center = 18.0
+    x_spread = 1.0
+    y_spread = 5.0
   [../]
 
   [./dot]
@@ -76,7 +89,14 @@
   type = Transient
   perf_log = true
   dt = 1
-  num_steps = 20
+  num_steps = 80
+
+  [./Adaptivity]
+    refine_fraction = .25
+    coarsen_fraction = .005
+    max_h_level = 4
+    error_estimator = KellyErrorEstimator
+  [../]
 []
 
 [Output]

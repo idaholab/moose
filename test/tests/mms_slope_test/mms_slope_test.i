@@ -91,15 +91,14 @@
   # this is the filename where the dofs and norm values will be printed
   norm_file = dofs
 
-  # set this value to determine how many iterations you do
-  max_r_steps = 6
-
   perf_log = true
 
   [./Adaptivity]
     # if the refine fraction is 1 it will refine every element
     # remember < 1 means only refine that percentage of elements
     refine_fraction = 1
+
+    steps = 6
 
     # do not coarsen at all
     coarsen_fraction = 0

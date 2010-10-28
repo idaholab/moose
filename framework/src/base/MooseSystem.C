@@ -560,13 +560,13 @@ MooseSystem::initDataStructures()
 }
 
 void
-MooseSystem::initAdaptivity(unsigned int max_r_steps, unsigned int initial_steps)
+MooseSystem::initAdaptivity(unsigned int steps, unsigned int initial_steps)
 {
   if (_mesh_refinement)
     mooseError("Mesh refinement object has already been initialized!");
 
   _es->parameters.set<bool>("adaptivity") = true;
-  _es->parameters.set<unsigned int>("max_r_steps") = max_r_steps;
+  _es->parameters.set<unsigned int>("steps") = steps;
   _es->parameters.set<unsigned int>("initial_adaptivity") = initial_steps;
 
   _mesh_refinement = new MeshRefinement(*_mesh);
@@ -617,19 +617,6 @@ MooseSystem::adaptMesh()
     // Tell MOOSE that the Mesh has changed
     meshChanged();
   }
-}
-
-void
-MooseSystem::doAdaptivityStep()
-{
-  // Compute the error for each active element
-  _error_estimator->estimate_error(*_system, *_error);
-
-  // Flag elements to be refined and coarsened
-  _mesh_refinement->flag_elements_by_error_fraction (*_error);
-
-  // Perform refinement and coarsening
-  _mesh_refinement->refine_and_coarsen_elements();
 }
 
 Real &
