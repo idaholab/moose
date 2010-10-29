@@ -120,7 +120,7 @@ else
 # Normal Executable
 $(target): $(fobjects) $(f90objects) $(objects) $(mesh_library) $(ADDITIONAL_DEPS)
 	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS) 
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS) 
 
 endif
 

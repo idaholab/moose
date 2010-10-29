@@ -7,9 +7,9 @@ ifeq ($(enable-shared),yes)
 endif
 
 libmesh_INCLUDE += $(moose_INCLUDE)
-libmesh_LIBS += $(moose_LIB)
+LIBS += $(moose_LIB)
 ifeq ($(enable-shared),yes)
-	libmesh_LIBS += -Wl,-rpath,$(MOOSE_DIR)
+	LIBS += -Wl,-rpath,$(MOOSE_DIR)
 endif
 
 # source files
