@@ -5,17 +5,13 @@ dirlist := $(wildcard ex*/)
 
 #
 # Build the example programs
-examples:
-	@echo "----------------------------------------------"
-	@echo "--------- Building Example Programs ----------"
-	@echo "----------------------------------------------"
-	@for dir in $(dirlist); do echo "$${dir}"; $(MAKE) -C "$${dir}" $(MAKECMDGOALS)||exit 1; done
-	@echo "----------------------------------------------"
-	@echo "------- Done Building Example Programs -------"
-	@echo "----------------------------------------------"
+examples: $(dirlist)
+
+$(dirlist):
+	@$(MAKE) -C $@ $(MAKECMDGOALS)||exit 1
 
 
-.PHONY: clean clobber distclean link run .depend test
+.PHONY: clean clobber distclean link run .depend test subdirs $(dirlist)
 
 #
 # Clean up the example programs

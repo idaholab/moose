@@ -10,35 +10,6 @@ include $(LIBMESH_DIR)/Make.common
 libmesh_CXXFLAGS     += -MD
 libmesh_CFLAGS       += -MD
 
-# Location of the MOOSE Includes and Library
-moose_DIRS	:= $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
-moose_INCLUDE 	:= $(foreach i, $(moose_DIRS), -I$(i))
-
-moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
-ifeq ($(enable-shared),yes)
-	moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
-endif
-
-# Location of ELK Includes and Library
-ifeq ($(ENABLE_ELK),yes)
-	ELK_DIR ?= $(shell pwd)/../elk
-
-	elk_DIRS    := $(shell find $(ELK_DIR)/include -type d -not -path "*/.svn*")
-	elk_INCLUDE := $(foreach i, $(elk_DIRS), -I$(i))
-
-	elk_LIB := $(ELK_DIR)/libelk-$(METHOD)$(static_libext)
-	ifeq ($(enable-shared),yes)
-		elk_LIB := $(ELK_DIR)/libelk-$(METHOD)$(shared_libext)
-	endif
-endif
-
-libmesh_INCLUDE += $(moose_INCLUDE) $(elk_INCLUDE)
-libmesh_LIBS := $(elk_LIB) $(moose_LIB) $(libmesh_LIBS) -Wl,-rpath,$(MOOSE_DIR) 
-
-ifeq ($(ENABLE_ELK),yes)
-	libmesh_LIBS += -Wl,-rpath,$(ELK_DIR)
-endif
-
 # Fortran baggage
 mpif77_command := $(libmesh_F77)
 
@@ -129,17 +100,17 @@ all:: $(target)
 ifeq ($(MAKE_LIBRARY),yes)
 ifeq ($(enable-shared),yes)
 # Build dynamic library
-$(target):: $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects)
 	@echo "Linking "$@"..."
 	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(fobjects) $(f90objects) $(objects) $(libmesh_LDFLAGS)
 else
 # Build static library
 ifeq ($(findstring darwin,$(hostos)),darwin)
-$(target):: $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects)
 	@echo "Linking "$@"..."
 	@libtool -static -o $@ $(fobjects) $(f90objects) $(objects) 
 else
-$(target):: $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects)
 	@echo "Linking "$@"..."
 	@$(AR) rv $@ $(fobjects) $(f90objects) $(objects)
 endif
@@ -147,13 +118,16 @@ endif
 else
 
 # Normal Executable
-$(target):: $(fobjects) $(f90objects) $(objects) $(moose_LIB) $(elk_LIB) $(mesh_library) $(ADDITIONAL_DEPS)
+$(target): $(fobjects) $(f90objects) $(objects) $(mesh_library) $(ADDITIONAL_DEPS)
 	@echo "Linking "$@"..."
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS) 
 
 endif
 
 libonly:
+	@$(MAKE) MAKE_LIBRARY=yes
+
+lib: 
 	@$(MAKE) MAKE_LIBRARY=yes
 
 doc:
@@ -163,6 +137,9 @@ clean::
 	@rm -f $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
 	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" | xargs rm
 
+cleanall::
+	$(MAKE) clean
+
 syntax:
 	python scripts/generate_input_syntax.py
 #
@@ -170,7 +147,7 @@ syntax:
 #
 
 # include the dependency list
--include */*.d
--include */*/*.d
--include */*/*/*.d
+-include src/*.d
+-include src/*/*.d
+-include src/*/*/*.d
 
