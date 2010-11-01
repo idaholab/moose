@@ -37,6 +37,7 @@
 #include "DGMatDiffusion.h"
 
 #include "Convection.h"
+#include "CoupledConvection.h"
 #include "GaussContForcing.h"
 #include "CoefDiffusion.h"
 
@@ -61,6 +62,7 @@ namespace MooseTest
     registerKernel(DiffMKernel);
     registerKernel(MatDiffusion);
     registerKernel(Convection);
+    registerKernel(CoupledConvection);
     
     registerKernel(MMSImplicitEuler);
 
