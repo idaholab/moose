@@ -182,7 +182,7 @@ void AnisotropicElasticityTensor::form_rotated_material_qdmat_matrix()
   
 
 
-void AnisotropicElasticityTensor::calculateEntries(unsigned int qp)
+void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 {
   
   form_r_matrix();

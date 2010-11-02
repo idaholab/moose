@@ -29,7 +29,7 @@ public:
    */
   void calculate(unsigned int qp);
   
-  virtual ColumnMajorMatrix calculateDerivative(unsigned int qp,unsigned int i){}
+  virtual ColumnMajorMatrix calculateDerivative(unsigned int qp,unsigned int i);
 
 protected:
 
