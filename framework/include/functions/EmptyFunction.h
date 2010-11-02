@@ -12,49 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef EMPTYFUNCTION_H
+#define EMPTYFUNCTION_H
+
+#include "Function.h"
+
+class EmptyFunction;
+
+template<>
+InputParameters validParams<EmptyFunction>();
+
 /**
- * Moose Test Application
+ * Do nothing function
  */
-
-#include "MooseTest.h"
-
-//Moose Includes
-#include "Parser.h"
-#include "Executioner.h"
-#include "MooseSystem.h"
-
-// C++ include files
-#include <iostream>
-
-// libMesh includes
-#include "perf_log.h"
-
-// Create a performance log
-PerfLog Moose::perf_log("Moose Test");
-
- // Begin the main program.
-int main (int argc, char** argv)
+class EmptyFunction : public Function
 {
-  MooseInit init (argc, argv);
+public:
+  EmptyFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
 
-  Moose::registerObjects();
+  virtual ~EmptyFunction();
 
-  MooseTest::registerObjects();
+  virtual Real value(Real t, Real x, Real y = 0, Real z = 0);
+};
 
-  MooseSystem moose_system;
-
-  Parser p(moose_system);
-
-  std::string input_filename = "";
-  if ( Moose::command_line->search("-i") )
-    input_filename = Moose::command_line->next(input_filename);
-  else
-    mooseError("Must specify an input file using -i");
-
-  p.parse(input_filename);
-  p.execute();
-
-  Executioner &e = moose_system.getExecutioner();
-  e.setup();
-  e.execute();
-}
+#endif //EMPTYFUNCTION_H

@@ -37,6 +37,7 @@
 #include "FunctionWarehouse.h"
 #include "DamperData.h"
 #include "DamperWarehouse.h"
+#include "EmptyFunction.h"
 
 //libmesh includes
 #include "transient_system.h"
@@ -444,6 +445,13 @@ public:
    */
   Real & getPostprocessorValue(const std::string & name);
 
+  /**
+   * Get function by name
+   * @param name name of the function
+   * @return reference to the function
+   */
+  Function & getFunction(const std::string & name);
+
 protected:
   void sizeEverything();
 
@@ -707,6 +715,13 @@ public:
   MooseArray<MooseArray<Real> > _zero;
   MooseArray<MooseArray<RealGradient> > _grad_zero;
   MooseArray<MooseArray<RealTensor> > _second_zero;
+
+  /**
+   * Empty function that does nothing but sets an "empty" reference where we do not need the function to do anything
+   *
+   * NOTE: Should be public.
+   */
+  EmptyFunction _empty_fn;
 
 protected:
   /**

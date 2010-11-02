@@ -12,49 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-/**
- * Moose Test Application
- */
+#include "Moose.h" //for mooseError
+#include "EmptyFunction.h"
 
-#include "MooseTest.h"
-
-//Moose Includes
-#include "Parser.h"
-#include "Executioner.h"
-#include "MooseSystem.h"
-
-// C++ include files
-#include <iostream>
-
-// libMesh includes
-#include "perf_log.h"
-
-// Create a performance log
-PerfLog Moose::perf_log("Moose Test");
-
- // Begin the main program.
-int main (int argc, char** argv)
+template<>
+InputParameters validParams<EmptyFunction>()
 {
-  MooseInit init (argc, argv);
+  InputParameters params = validParams<Function>();
+  return params;
+}
 
-  Moose::registerObjects();
+EmptyFunction::EmptyFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
+  Function(name, moose_system, parameters)
+{
+}
 
-  MooseTest::registerObjects();
+EmptyFunction::~EmptyFunction()
+{
+}
 
-  MooseSystem moose_system;
-
-  Parser p(moose_system);
-
-  std::string input_filename = "";
-  if ( Moose::command_line->search("-i") )
-    input_filename = Moose::command_line->next(input_filename);
-  else
-    mooseError("Must specify an input file using -i");
-
-  p.parse(input_filename);
-  p.execute();
-
-  Executioner &e = moose_system.getExecutioner();
-  e.setup();
-  e.execute();
+Real
+EmptyFunction::value(Real /*t*/, Real /*x*/, Real /*y*/, Real /*z*/)
+{
+  return 0.0;
 }

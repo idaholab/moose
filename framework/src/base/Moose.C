@@ -48,6 +48,8 @@
 #include "NearestNodeDistanceAux.h"
 #include "FunctionAux.h"
 
+#include "EmptyFunction.h"
+
 #include "TimeDerivative.h"
 #include "ImplicitEuler.h"
 #include "ImplicitBackwardDifference2.h"
@@ -150,6 +152,7 @@ Moose::registerObjects()
 {
   registerFunction(ParsedFunction);
   registerFunction(ParsedGradFunction);
+  registerFunction(EmptyFunction);
 
   registerKernel(BodyForce);
   registerKernel(Diffusion);

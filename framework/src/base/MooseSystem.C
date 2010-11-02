@@ -109,6 +109,7 @@ MooseSystem::MooseSystem() :
   _l_abs_step_tol(1e-10),
   _last_rnorm(0),
   _initial_residual(0),
+  _empty_fn(std::string("_moose_system_empty_function"), *this, FunctionFactory::instance()->getValidParams("EmptyFunction")),
   _active_local_elem_range(NULL),
   _active_node_range(NULL)
 {
@@ -177,6 +178,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _l_abs_step_tol(1e-10),
   _last_rnorm(0),
   _initial_residual(0),
+  _empty_fn(std::string("_moose_system_empty_function"), *this, FunctionFactory::instance()->getValidParams("EmptyFunction")),
   _active_local_elem_range(NULL),
   _active_node_range(NULL)
 {
@@ -623,6 +625,12 @@ Real &
 MooseSystem::getPostprocessorValue(const std::string & name)
 {
   return _postprocessor_data[0].getPostprocessorValue(name);
+}
+
+Function &
+MooseSystem::getFunction(const std::string & name)
+{
+  return _functions[0].getFunction(name);
 }
 
 void
