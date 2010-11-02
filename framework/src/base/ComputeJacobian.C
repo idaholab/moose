@@ -85,7 +85,7 @@ public:
       (*kernel_it)->computeJacobian();
   }
 
-  virtual void postElement(const Elem * elem)
+  virtual void postElement(const Elem * /*elem*/)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for(unsigned int i=0; i< _moose_system._dof_data[_tid]._var_dof_indices.size(); i++)
@@ -164,7 +164,7 @@ public:
     }
   }
 
-  void join(const ComputeInternalJacobians & y)
+  void join(const ComputeInternalJacobians & /*y*/)
   {
   }
 

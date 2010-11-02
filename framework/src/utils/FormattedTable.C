@@ -217,7 +217,7 @@ FormattedTable::make_gnuplot(const std::string & base_file)
   {
     gpfile << " '" << dat_name << "' using 1:" << column << " title '" << *header << "' with linespoints";
     column++;
-    if ( column - 2 < _column_names.size() )
+    if ( column - 2 < (int) _column_names.size() )
       gpfile << ", \\\n";
   }
   gpfile << "\n\n";

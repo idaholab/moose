@@ -62,7 +62,7 @@ NearestNode::findNodes()
         
         for(unsigned int k=0; k<n_nodes; k++)  
         {
-          short int other_boundary_id = node_boundary_list[k];
+          unsigned int other_boundary_id = node_boundary_list[k];
 
           if(other_boundary_id != boundary_id && (other_boundary_id == _boundary1 || other_boundary_id == _boundary2))
           {

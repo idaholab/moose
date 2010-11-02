@@ -126,7 +126,7 @@ public:
     }
   }
 
-  void join(const ComputeInternalPostprocessors & y)
+  void join(const ComputeInternalPostprocessors & /*y*/)
   {
   }
 

@@ -48,9 +48,6 @@ public:
    */
   Node * nearestNode(unsigned int node_id);
 
-  unsigned int _boundary1;
-  unsigned int _boundary2;
-
 private:
   /**
    * Data structure used to hold nearest node info.
@@ -69,6 +66,10 @@ private:
   Mesh & _mesh;
 
   std::map<unsigned int, NearestNodeInfo> _nearest_node_info;
+
+public:
+  unsigned int _boundary1;
+  unsigned int _boundary2;
 };
 
 

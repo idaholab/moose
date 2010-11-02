@@ -146,7 +146,7 @@ public:
     }
   }
 
-  void join(const ComputeInternalResiduals & y)
+  void join(const ComputeInternalResiduals & /*y*/)
   {
   }
 
