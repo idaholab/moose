@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "BoundaryCondition.h"
-
 #ifndef COUPLEDDIRICHLETBC_H
 #define COUPLEDDIRICHLETBC_H
+
+#include "BoundaryCondition.h"
 
 //Forward Declarations
 class CoupledDirichletBC;
