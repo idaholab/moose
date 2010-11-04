@@ -57,7 +57,7 @@ private:
   MooseSystem & _moose_system;
 
   RealVectorValue normal(const Elem & side, const Point & p0);
-  Real normDistance(const Elem & side, const Point & p0);
+  Real normDistance(const Elem & elem, const Elem & side, const Point & p0);
 
   int intersect2D_Segments( Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point* I0, Point* I1 );
   int inSegment(Point P, Point SP0, Point SP1);

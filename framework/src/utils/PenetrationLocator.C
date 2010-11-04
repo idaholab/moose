@@ -75,16 +75,11 @@ PenetrationLocator::detectPenetration()
           if(elem->contains_point(node))
           {
             info->_normal = normal(*side, node);
-            info->_distance = normDistance(*side, node);
+            info->_distance = normDistance(*elem, *side, node);
 
             // I hate continues but this is actually cleaner than anything I can think of
             continue;
           }
-          else //make sure to clear out the info sine we're no longer in that element and might not be in any!
-          {
-            delete info;
-            _penetration_info[node.id()] = NULL;
-          } 
         } 
           
         Node * closest_node = NULL;
@@ -116,29 +111,31 @@ PenetrationLocator::detectPenetration()
           unsigned int elem_id = closest_elems[j];
           Elem * elem = _mesh.elem(elem_id);
             
-          if(elem->contains_point(node))
+          for(unsigned int m=0; m<n_elems; m++)
           {
-            for(unsigned int m=0; m<n_elems; m++)
+            if(elem_list[m] == elem_id && id_list[m] == _slave_boundary)
             {
-              if(elem_list[m] == elem_id && id_list[m] == _slave_boundary)
-              {
-                unsigned int side_num = side_list[m];
+              unsigned int side_num = side_list[m];
               
-                Elem *side = (elem->build_side(side_num)).release();
+              Elem *side = (elem->build_side(side_num)).release();
 
-                if(_penetration_info[node.id()])
-                {
-                  delete _penetration_info[node.id()];
-                  _penetration_info[node.id()] = NULL;
-                }
+              Real distance = normDistance(*elem, *side, node);
+
+              if(_penetration_info[node.id()] && std::abs(_penetration_info[node.id()]->_distance) > std::abs(distance))
+              {
+                delete _penetration_info[node.id()];
+                _penetration_info[node.id()] = NULL;
+              }
                 
+              if(std::abs(distance) < 999999999)
                 _penetration_info[node.id()] =  new PenetrationInfo(elem,
                                                                     side,
                                                                     normal(*side, node),
-                                                                    normDistance(*side, node));
-              }
-            }            
+                                                                    distance);
+            }
           }
+          
+          
         }
       }
     }
@@ -180,36 +177,72 @@ PenetrationLocator::penetrationDistance(unsigned int node_id)
 }
 
 Real
-PenetrationLocator::normDistance(const Elem & side, const Point & p0)
+PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Point & p0)
 {
   Real d;
   unsigned int dim = _mesh.mesh_dimension();
+
+  Point p1 = side.point(0);
+  Point p2 = side.point(1);
+  Point p3;
 
   if (dim == 2)
   {
 //    libmesh_assert(side->n_points() == 2);
 
-    Point p1 = side.point(0);
-    Point p2 = side.point(1);
+//    Point p1 = side.point(0);
+//    Point p2 = side.point(1);
+    p3 = p1 + Point(0,0,p1(0)+p2(0)+p1(1)+p2(1));
 
 //    std::cerr << "\nLine Segment: (" << p1(0) << "," << p1(1) << ") - (" << p2(0) << "," << p2(1) << ") "
 //ç              << "Point: (" << p0(0) << "," << p0(1) << ")\n";
     
     
-    d = std::sqrt(std::pow(((p2(1)-p1(1))*(p0(0)-p1(0))-(p2(0)-p1(0))*(p0(1)-p1(1))),2) /
-                   (std::pow(p2(0)-p1(0),2) + std::pow(p2(1)-p1(1),2)));
+//    d = std::sqrt(std::pow(((p2(1)-p1(1))*(p0(0)-p1(0))-(p2(0)-p1(0))*(p0(1)-p1(1))),2) /
+//                   (std::pow(p2(0)-p1(0),2) + std::pow(p2(1)-p1(1),2)));
+
+    // From http://local.wasp.uwa.edu.au/%7Epbourke/geometry/pointline/
+/*    Real u = ((p0(0)-p1(0))*(p2(0)-p1(0)) + (p0(1)-p1(1))*(p2(1)-p1(1))) / (p2 - p1).size();
+
+    // See if the intersection is on the line segment
+    if(u >= 0 && u<=1)
+    {
+      Point closest_point(p1(0) + u*(p2(0)-p1(0)), p1(1) + u*(p2(1) - p1(1)));
+      d = (p0 - closest_point).size();
+    }
+    else
+      d = 9999999999;
+*/
   }
   else if (dim == 3)
   {
 //    libmesh_assert(side.n_points() >= 3);
 
     // TODO: Fix Plane linking problem
-    Plane p = Plane(side.point(0), side.point(1), side.point(2));
-
-    d = (p0 - p.closest_point(p0)).size();
+    
 //    d = 0.0;
+
+    p3 = side.point(2);
     
   }
+
+  Plane p = Plane(p1, p2, p3);
+
+  Point closest_point = p.closest_point(p0);
+
+  // Make sure that the point is in the xy plane
+  if(dim == 2)
+    closest_point(2) = 0;
+
+  if(elem.contains_point(closest_point))
+    d = (p0 - p.closest_point(p0)).size();
+  else
+  {
+    d = 9999999999;
+  }
+
+  if(p.above_surface(p0))
+    d = -d;
 
   return d;
 }
