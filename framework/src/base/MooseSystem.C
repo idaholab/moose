@@ -276,7 +276,11 @@ MooseSystem::getDisplacedMesh(bool skip_full_check)
     checkValid();
   else if (_mesh == NULL)
     mooseError("Full check skipped but Mesh is not initialized");
-  return _displaced_mesh;
+
+  if(hasDisplacedMesh())
+    return _displaced_mesh;
+  else
+    return _mesh;
 }
 
 bool

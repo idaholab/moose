@@ -155,7 +155,14 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
 
   if (_pps[0]._block_ids_with_postprocessors.size() > 0 || _pps[0]._boundary_ids_with_postprocessors.size() > 0)
   {
-    updateAuxVars(soln);
+    if(_serialize_solution)
+      serializeSolution(soln);
+
+    if(_has_displaced_mesh)
+      updateDisplacedMesh(soln);
+
+    updateAuxVars(soln);    
+
     ComputeInternalPostprocessors cipp(*this, soln);
     cipp(*getActiveLocalElementRange());
 

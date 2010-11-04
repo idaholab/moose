@@ -1,0 +1,23 @@
+#include "SideFluxIntegral.h"
+
+template<>
+InputParameters validParams<SideFluxIntegral>()
+{
+  InputParameters params = validParams<SidePostprocessor>();
+  params.addRequiredParam<std::string>("diffusivity", "The name of the diffusivity material property that will be used in the flux computation.");
+  return params;
+}
+
+SideFluxIntegral::SideFluxIntegral(const std::string & name,
+                                           MooseSystem & moose_system,
+                                           InputParameters parameters)
+  :SideIntegral(name, moose_system, parameters),
+   _diffusivity(getParam<std::string>("diffusivity")),
+   _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
+{}
+
+Real
+SideFluxIntegral::computeQpIntegral()
+{
+  return -_diffusion_coef[_qp]*_grad_u[_qp]*_normals[_qp];
+}

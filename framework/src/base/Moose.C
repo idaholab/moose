@@ -46,6 +46,7 @@
 #include "CoupledAux.h"
 #include "PenetrationAux.h"
 #include "NearestNodeDistanceAux.h"
+#include "NearestNodeValueAux.h"
 #include "FunctionAux.h"
 
 #include "EmptyFunction.h"
@@ -55,6 +56,7 @@
 #include "ImplicitBackwardDifference2.h"
 
 #include "EmptyMaterial.h"
+#include "GenericConstantMaterial.h"
 
 #include "MeshBlock.h"
 #include "MeshGenerationBlock.h"
@@ -113,6 +115,7 @@
 #include "PrintNumNodes.h"
 #include "AverageElementSize.h"
 #include "EmptyPostprocessor.h"
+#include "SideFluxIntegral.h"
 
 #include "Damper.h"
 #include "DampersBlock.h"
@@ -184,10 +187,12 @@ Moose::registerObjects()
   registerAux(CoupledAux);
   registerAux(PenetrationAux);
   registerAux(NearestNodeDistanceAux);
+  registerAux(NearestNodeValueAux);
   registerAux(FunctionAux);
   
 
   registerMaterial(EmptyMaterial);
+  registerMaterial(GenericConstantMaterial);
 
   registerNamedParserBlock(MeshBlock, "Mesh");
   registerNamedParserBlock(MeshGenerationBlock, "Mesh/Generation");
@@ -257,6 +262,7 @@ Moose::registerObjects()
   registerPostprocessor(PrintNumNodes);
   registerPostprocessor(AverageElementSize);
   registerPostprocessor(EmptyPostprocessor);
+  registerPostprocessor(SideFluxIntegral);
 
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
