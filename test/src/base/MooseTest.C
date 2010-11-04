@@ -33,6 +33,7 @@
 // kernels
 #include "DiffMKernel.h"
 #include "MatDiffusion.h"
+#include "TEJumpFFN.h"
 
 #include "DGMatDiffusion.h"
 
@@ -47,13 +48,18 @@
 // boundary conditions
 #include "MTBC.h"
 #include "DGMDDBC.h"
+#include "TEJumpBC.h"
 
 #include "DGFunctionConvectionDirichletBC.h"
+
+// ics
+#include "TEIC.h"
 
 // materials
 #include "Diff1Material.h"
 #include "Diff2Material.h"
 #include "MTMaterial.h"
+
 
 namespace MooseTest
 {
@@ -62,6 +68,7 @@ namespace MooseTest
     registerKernel(DiffMKernel);
     registerKernel(MatDiffusion);
     registerKernel(Convection);
+    registerKernel(TEJumpFFN);
     registerKernel(CoupledConvection);
     
     registerKernel(MMSImplicitEuler);
@@ -98,6 +105,7 @@ namespace MooseTest
     registerBC(PolyCoupledDirichletBC);
     registerBC(MTBC);
     registerBC(DGMDDBC);
+    registerBC(TEJumpBC);
 
     registerBC(DGFunctionConvectionDirichletBC);
     
@@ -107,6 +115,9 @@ namespace MooseTest
     registerAux(PolyConstantAux);
 
     registerDGKernel(DGMatDiffusion);
+
+    // ics
+    registerInitialCondition(TEIC);
   }
 }
 
