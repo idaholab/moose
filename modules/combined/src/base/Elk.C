@@ -4,6 +4,7 @@
 // misc
 #include "CoefDiffusion.h"
 #include "Convection.h"
+#include "InternalVolume.h"
 
 // heat_conduction
 #include "HeatConduction.h"
@@ -32,14 +33,14 @@
 #include "SolidMechTempCoupleZ.h"
 
 // solid_mechanics
-#include "StressDivergence.h"
-#include "StressOutput.h"
-#include "LinearIsotropicMaterial.h"
-#include "PlasticMaterial.h"
-#include "LSHPlasticMaterial.h"
-#include "PLSHPlasticMaterial.h"
 #include "CLSHPlasticMaterial.h"
 #include "DeltaGamma.h"
+#include "LinearIsotropicMaterial.h"
+#include "LSHPlasticMaterial.h"
+#include "PlasticMaterial.h"
+#include "PLSHPlasticMaterial.h"
+#include "StressDivergence.h"
+#include "StressOutput.h"
 
 // phase_field
 #include "AC.h"
@@ -62,6 +63,7 @@ Elk::registerObjects()
   // misc
   registerKernel(CoefDiffusion);
   registerKernel(Convection);
+  registerPostprocessor(InternalVolume);
 
   // heat_conduction
   registerKernel(HeatConduction);
@@ -90,14 +92,14 @@ Elk::registerObjects()
   registerKernel(SolidMechTempCoupleZ);
 
   // solid_mechanics
-  registerKernel(StressDivergence);
-  registerKernel(StressOutput);
+  registerMaterial(CLSHPlasticMaterial);
   registerKernel(DeltaGamma);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
-  registerMaterial(PlasticMaterial);
   registerMaterial(LSHPlasticMaterial);
+  registerMaterial(PlasticMaterial);
   registerMaterial(PLSHPlasticMaterial);
-  registerMaterial(CLSHPlasticMaterial);
+  registerKernel(StressDivergence);
+  registerKernel(StressOutput);
   
   // phase_field
   registerKernel(AC);
