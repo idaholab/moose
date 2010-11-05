@@ -169,17 +169,38 @@ FormattedTable::print_csv(const std::string & file_name)
 // const strings that the gnuplot generator needs
 namespace gnuplot
 {
-  const std::string preamble = "set terminal postscript\nset output 'all.png'\nset title 'All Postprocessors'\nset xlabel 'time'\nset ylabel 'values'\nplot";
+  const std::string before_terminal = "set terminal ";
+  const std::string before_ext      = "\nset output 'all";
+  const std::string after_ext       = "'\nset title 'All Postprocessors'\nset xlabel 'time'\nset ylabel 'values'\nplot";
 }
 
 void
-FormattedTable::make_gnuplot(const std::string & base_file)
+FormattedTable::make_gnuplot(const std::string & base_file, const std::string & format)
 {
   // TODO: run this once at end of simulation, right now it runs every iteration
   // TODO: do I need to be more careful escaping input?
   // Note: open and close the files each time, having open files may mess with gnuplot
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
+
+  // supported filetypes: ps, png
+  std::string extension, terminal;
+  if (format == "png")
+  {
+    extension = ".png"; terminal = "png";
+  }
+  else if (format == "ps")
+  {
+    extension = ".ps";  terminal = "postscript";
+  }
+  else if (format == "gif")
+  {
+    extension = ".gif"; terminal = "gif";
+  }
+  else
+  {
+    mooseError("gnuplot format \"" + format + "\" is not supported.");
+  }
 
   // Write the data to disk
   std::string dat_name = base_file + ".dat";
@@ -209,7 +230,7 @@ FormattedTable::make_gnuplot(const std::string & base_file)
   std::ofstream gpfile;
   gpfile.open(gp_name.c_str(), std::ios::trunc | std::ios::out);
 
-  gpfile << gnuplot::preamble;
+  gpfile << gnuplot::before_terminal << terminal << gnuplot::before_ext << extension << gnuplot::after_ext;
 
   // plot all postprocessors in one plot
   int column = 2;
@@ -226,7 +247,7 @@ FormattedTable::make_gnuplot(const std::string & base_file)
   column = 2;
   for (header = _column_names.begin(); header != _column_names.end(); ++header)
   {
-    gpfile << "set output '" << *header << ".png'\n";
+    gpfile << "set output '" << *header << extension << "'\n";
     gpfile << "set ylabel '" << *header << "'\n";
     gpfile << "plot '" << dat_name << "' using 1:" << column << " title '" << *header << "' with linespoints\n\n";
     column++;

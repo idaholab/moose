@@ -62,7 +62,7 @@ public:
    */
   void print_csv(const std::string & file_name);
 
-  void make_gnuplot(const std::string & base_file);
+  void make_gnuplot(const std::string & base_file, const std::string & format);
   
 private:
   

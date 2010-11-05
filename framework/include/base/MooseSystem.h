@@ -688,6 +688,7 @@ public:
    * Output related vars
    */
   std::string _file_base;
+  std::string _gnuplot_format;
   int _interval;
   bool _exodus_output;
   bool _gmv_output;

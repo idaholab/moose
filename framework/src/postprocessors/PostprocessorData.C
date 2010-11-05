@@ -71,7 +71,7 @@ PostprocessorData::print_csv(const std::string & file_name)
 }
 
 void
-PostprocessorData::make_gnuplot(const std::string & file_name)
+PostprocessorData::make_gnuplot(const std::string & file_name, const std::string & format)
 {
-  _output_table.make_gnuplot(file_name);
+  _output_table.make_gnuplot(file_name, format);
 }

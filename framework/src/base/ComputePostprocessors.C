@@ -267,7 +267,7 @@ void MooseSystem::outputPostprocessors()
 
     if(_postprocessor_gnuplot_output)
     {
-      _postprocessor_data[0].make_gnuplot(_file_base);
+      _postprocessor_data[0].make_gnuplot(_file_base, _gnuplot_format);
     }
   }
 }
