@@ -71,6 +71,12 @@ PostprocessorData::print_csv(const std::string & file_name)
 }
 
 void
+PostprocessorData::print_ensight(const std::string & file_name)
+{
+  _output_table.print_ensight(file_name);
+}
+
+void
 PostprocessorData::make_gnuplot(const std::string & file_name, const std::string & format)
 {
   _output_table.make_gnuplot(file_name, format);

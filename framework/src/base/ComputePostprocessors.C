@@ -100,14 +100,14 @@ public:
     PostprocessorIterator postprocessor_end = _moose_system._pps[_tid].elementPostprocessorsEnd(Moose::ANY_BLOCK_ID);
     PostprocessorIterator postprocessor_it = postprocessor_begin;
 
-    for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+    for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
       (*postprocessor_it)->execute();
 
     postprocessor_begin = _moose_system._pps[_tid].elementPostprocessorsBegin(subdomain);
     postprocessor_end = _moose_system._pps[_tid].elementPostprocessorsEnd(subdomain);
     postprocessor_it = postprocessor_begin;
 
-    for(postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+    for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
       (*postprocessor_it)->execute();
   }
 
@@ -117,11 +117,11 @@ public:
     PostprocessorIterator side_postprocessor_end = _moose_system._pps[_tid].sidePostprocessorsEnd(bnd_id);
     PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
 
-    if(side_postprocessor_begin != side_postprocessor_end)
+    if (side_postprocessor_begin != side_postprocessor_end)
     {
       _moose_system.reinitBCs(_tid, _soln, elem, side, bnd_id);
 
-      for(; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
+      for (; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
         (*side_postprocessor_it)->execute();
     }
   }
@@ -155,10 +155,10 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
 
   if (_pps[0]._block_ids_with_postprocessors.size() > 0 || _pps[0]._boundary_ids_with_postprocessors.size() > 0)
   {
-    if(_serialize_solution)
+    if (_serialize_solution)
       serializeSolution(soln);
 
-    if(_has_displaced_mesh)
+    if (_has_displaced_mesh)
       updateDisplacedMesh(soln);
 
     updateAuxVars(soln);    
@@ -171,7 +171,7 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
     std::set<unsigned int>::iterator block_ids_end = _pps[0]._block_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator block_ids_it = block_ids_begin;
 
-    for(; block_ids_it != block_ids_end; ++block_ids_it)
+    for (; block_ids_it != block_ids_end; ++block_ids_it)
     {
       unsigned int block_id = *block_ids_it;
 
@@ -180,7 +180,7 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
       PostprocessorIterator element_postprocessor_it = element_postprocessor_begin;
 
       // Store element postprocessors values
-      for(element_postprocessor_it=element_postprocessor_begin;
+      for (element_postprocessor_it=element_postprocessor_begin;
           element_postprocessor_it!=element_postprocessor_end;
           ++element_postprocessor_it)
       {
@@ -188,7 +188,7 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
         Real value = (*element_postprocessor_it)->getValue();
         Real time = _t;
 
-        if(!_is_transient)
+        if (!_is_transient)
           time = _t_step;
 
         _postprocessor_data[0].addData(name, value, time);
@@ -200,7 +200,7 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
     std::set<unsigned int>::iterator boundary_ids_end = _pps[0]._boundary_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator boundary_ids_it = boundary_ids_begin;
 
-    for(; boundary_ids_it != boundary_ids_end; ++boundary_ids_it)
+    for (; boundary_ids_it != boundary_ids_end; ++boundary_ids_it)
     {
       unsigned int boundary_id = *boundary_ids_it;
       
@@ -208,7 +208,7 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
       PostprocessorIterator side_postprocessor_end = _pps[0].sidePostprocessorsEnd(boundary_id);
       PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
     
-      for(side_postprocessor_it=side_postprocessor_begin;
+      for (side_postprocessor_it=side_postprocessor_begin;
           side_postprocessor_it!=side_postprocessor_end;
           ++side_postprocessor_it)
       {
@@ -216,7 +216,7 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
         Real value = (*side_postprocessor_it)->getValue();
         Real time = _t;
       
-        if(!_is_transient)
+        if (!_is_transient)
           time = _t_step;
         
         _postprocessor_data[0].addData(name, value, time);
@@ -229,7 +229,7 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
   PostprocessorIterator generic_postprocessor_end = _pps[0].genericPostprocessorsEnd();
   PostprocessorIterator generic_postprocessor_it = generic_postprocessor_begin;
 
-  for(generic_postprocessor_it =generic_postprocessor_begin;
+  for (generic_postprocessor_it =generic_postprocessor_begin;
       generic_postprocessor_it!=generic_postprocessor_end;
       ++generic_postprocessor_it)
   {
@@ -239,7 +239,7 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
     Real value = (*generic_postprocessor_it)->getValue();
     Real time = _t;
     
-    if(!_is_transient)
+    if (!_is_transient)
       time = _t_step;
   
     _postprocessor_data[0].addData(name, value, time);
@@ -253,19 +253,24 @@ void MooseSystem::outputPostprocessors()
   // Postprocesser Output
   if (!_postprocessor_data[0].empty())
   {
-    if(_postprocessor_screen_output)
+    if (_postprocessor_screen_output)
     {
       std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
       _postprocessor_data[0].print_table(std::cout);
       std::cout<<std::endl;
     }
   
-    if(_postprocessor_csv_output)
+    if (_postprocessor_csv_output)
     {
       _postprocessor_data[0].print_csv(_file_base + ".csv");
     }
 
-    if(_postprocessor_gnuplot_output)
+    if (_postprocessor_ensight_output)
+    {
+      _postprocessor_data[0].print_ensight(_file_base);
+    }
+
+    if (_postprocessor_gnuplot_output)
     {
       _postprocessor_data[0].make_gnuplot(_file_base, _gnuplot_format);
     }

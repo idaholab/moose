@@ -38,6 +38,7 @@ public:
   void print_table(std::ostream & out);
   void print_table(const std::string & file_name);
   void print_csv(const std::string & file_name);
+  void print_ensight(const std::string & file_name);
   void make_gnuplot(const std::string & file_name, const std::string & format);
   
 private:

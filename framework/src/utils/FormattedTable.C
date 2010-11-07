@@ -175,6 +175,36 @@ namespace gnuplot
 }
 
 void
+FormattedTable::print_ensight(const std::string & file_base)
+{
+  // setup output file
+  std::string file_name = file_base + ".ens";  //TODO not sure what the extension should be
+  std::ofstream ensfile;
+  ensfile.open(file_name.c_str(), std::ios::trunc | std::ios::out);
+
+  // iterators
+  std::map<Real, std::map<std::string, Real> >::iterator i;
+  std::set<std::string>::iterator varnames;
+
+  ensfile << _column_names.size() << std::endl;
+  for (varnames = _column_names.begin(); varnames != _column_names.end(); ++varnames)
+  {
+    ensfile << *varnames << " vs Time for ???" << std::endl;
+    ensfile << "Time" << std::endl;
+    ensfile << *varnames << std::endl;
+    ensfile << "1" << std::endl;
+
+    ensfile << _data.size() << std::endl;
+    for (i = _data.begin(); i != _data.end(); ++i)
+    {
+      ensfile << i->first << " ";
+      std::map<std::string, Real> &tmp = i->second;
+      ensfile << tmp[*varnames] << std::endl;
+    }
+  }
+}
+
+void
 FormattedTable::make_gnuplot(const std::string & base_file, const std::string & format)
 {
   // TODO: run this once at end of simulation, right now it runs every iteration

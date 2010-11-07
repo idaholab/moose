@@ -5,8 +5,7 @@
 # It assumes that ./moose/scripts/timingHTML/timing_utils has already been run
 # to generate the json data
 
-#if [ "`hostname -s`" == "helios" ]
-if [ true ]
+if [ "`hostname -s`" == "helios" ]
 then
   echo "Generating timing html because this is helios"
   mkdir -p html  # this should have already been made for the json data
