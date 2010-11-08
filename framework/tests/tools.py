@@ -41,8 +41,11 @@ def executeCommand(command):
   print 'Executing: ' + command
 
   p = Popen([command],stdout=PIPE,stderr=STDOUT, close_fds=True, shell=True)
-  return p.communicate()[0]
-
+  output = p.communicate()[0]
+  if (p.returncode != 0):
+    assert False
+  else:
+    return output
 
 def delOldOutFiles(test_dir, out_files):
   for file in out_files:
