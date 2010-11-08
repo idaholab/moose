@@ -18,10 +18,29 @@
 
 int LinearInterpolation::_file_number = 0;
 
-LinearInterpolation::LinearInterpolation(std::vector<double> x, std::vector<double> y)
+LinearInterpolation::LinearInterpolation(const std::vector<double> & x,
+                                         const std::vector<double> & y)
   :_x(x),
    _y(y)
-{}
+{
+
+  mooseAssert( x.size() == y.size(),
+               "Vectors are not the same length" );
+
+  bool error(false);
+  for (unsigned i(0); !error && i < x.size()-1; ++i)
+  {
+    if ( _x[i] >= _x[i+1] )
+    {
+      error = true;
+    }
+  }
+  if (error)
+  {
+    mooseError( "x-values are not strictly increasing" );
+  }
+
+}
 
 double
 LinearInterpolation::sample(double x)
@@ -32,9 +51,11 @@ LinearInterpolation::sample(double x)
   if (x >= _x[_x.size()-1])
     return _y[_y.size()-1];
 
-  for (unsigned int i=0; i<_x.size(); ++i)
-    if (x >= _x[i])
+  for (unsigned int i=0; i < _x.size()-1; ++i)
+    if (x >= _x[i]  && x < _x[i+1])
+    {
       return _y[i] + (_y[i+1]-_y[i])*(x-_x[i])/(_x[i+1]-_x[i]);
+    }
 
   mooseError("Unreachable?");
   return 0;
@@ -61,8 +82,8 @@ LinearInterpolation::dumpSampleFile(std::string base_name, std::string x_label, 
   std::ofstream out(filename.str().c_str());
   out.precision(15);
   out.fill(fill_character);
-  
-  out << "set terminal postscript color enhanced\n" 
+
+  out << "set terminal postscript color enhanced\n"
       << "set output \"" << base_name;
   out.width(field_width);
   out << _file_number << ".eps\"\n"
@@ -83,18 +104,18 @@ LinearInterpolation::dumpSampleFile(std::string base_name, std::string x_label, 
      out << _x[i-1] << "<=x && x<" << _x[i] << " ? " << m << "*x+(" << b << ") : ";
    }
    out << " 1/0\n";
-   
+
   out << "\nplot f(x) with lines, '" << filename_pts.str() << "' using 1:2 title \"Points\"\n";
   out.close();
 
   libmesh_assert(_x.size() == _y.size());
-  
+
   out.open(filename_pts.str().c_str());
   /* Next dump the data points into a seperate file */
   for (unsigned int i = 0; i<_x.size(); ++i)
     out << _x[i] << " " << _y[i] << "\n";
   out << std::endl;
-  
+
   ++_file_number;
   out.close();
 }
@@ -104,5 +125,3 @@ LinearInterpolation::getSampleSize()
 {
   return _x.size();
 }
-
-  

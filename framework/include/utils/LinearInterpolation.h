@@ -32,16 +32,17 @@ class LinearInterpolation
 public:
 
   /* Constructor, Takes two vectors of points for which to apply the fit.  One should be of the
-   * independant variable while the other should be of the dependant varible.  These values should
+   * independent variable while the other should be of the dependent varible.  These values should
    * correspond to one and other in the same position.
    */
-  LinearInterpolation(std::vector<double> X, std::vector<double> Y);
+  LinearInterpolation(const std::vector<double> & X,
+                      const std::vector<double> & Y);
 
   virtual ~LinearInterpolation()
     {}
 
   /**
-   * This function will take an indenandant variable input and will return the dependant variable
+   * This function will take an independent variable input and will return the dependent variable
    * based on the generated fit
    */
   double sample(double x);

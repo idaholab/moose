@@ -18,6 +18,7 @@
 
 #include "ParsedFunction.h"
 #include "ParsedGradFunction.h"
+#include "PiecewiseLinear.h"
 
 #include "BodyForce.h"
 #include "Diffusion.h"
@@ -155,9 +156,10 @@ MooseInit::~MooseInit()
 void
 Moose::registerObjects()
 {
+  registerFunction(EmptyFunction);
   registerFunction(ParsedFunction);
   registerFunction(ParsedGradFunction);
-  registerFunction(EmptyFunction);
+  registerFunction(PiecewiseLinear);
 
   registerKernel(BodyForce);
   registerKernel(Diffusion);
