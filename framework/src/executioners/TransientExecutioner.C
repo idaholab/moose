@@ -84,11 +84,13 @@ TransientExecutioner::TransientExecutioner(const std::string & name, MooseSystem
 void
 TransientExecutioner::execute()
 {
+  preExecute();
   // Start time loop...
   while(keepGoing()) 
   {
     takeStep();
   }
+  postExecute();
 }
 
 void
@@ -103,6 +105,7 @@ TransientExecutioner::takeStep()
 
   if(_converged)
   {
+//    std::cout << "copy" << std::endl;
     // Update backward time solution vectors
     _moose_system.copy_old_solutions();
 
@@ -182,6 +185,8 @@ TransientExecutioner::takeStep()
   _converged = _moose_system.getNonlinearSystem()->nonlinear_solver->converged;
 
   postSolve();
+
+  _moose_system.outputPostprocessors();
 
   std::cout<<"Norm of each nonlinear variable:"<<std::endl;
   for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)

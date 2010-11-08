@@ -206,6 +206,11 @@ public:
   void initTimeSteppingScheme(Moose::TimeSteppingScheme scheme);
 
   /**
+   * Get the order of used time integration scheme
+   */
+  Real getTimeSteppingOrder() { return _time_stepping_order; }
+
+  /**
    * Check to see if MooseSystem is in a workable state before accessing data
    */
   void checkValid();
@@ -732,6 +737,11 @@ protected:
    */
   ConstElemRange * _active_local_elem_range;
   NodeRange * _active_node_range;
+
+  /**
+   * The order of the time stepping scheme
+   */
+  Real _time_stepping_order;
 
 public:
   /**

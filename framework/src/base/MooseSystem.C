@@ -113,7 +113,8 @@ MooseSystem::MooseSystem() :
   _initial_residual(0),
   _empty_fn(std::string("_moose_system_empty_function"), *this, validParams<EmptyFunction>()),
   _active_local_elem_range(NULL),
-  _active_node_range(NULL)
+  _active_node_range(NULL),
+  _time_stepping_order(0)
 {
   sizeEverything();
 }
@@ -184,7 +185,8 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _initial_residual(0),
   _empty_fn(std::string("_moose_system_empty_function"), *this, validParams<EmptyFunction>()),
   _active_local_elem_range(NULL),
-  _active_node_range(NULL)
+  _active_node_range(NULL),
+  _time_stepping_order(0)
 {
   sizeEverything();
   initEquationSystems();
@@ -686,14 +688,13 @@ MooseSystem::solve()
   _system->solve();
   _system->update();
 
+  computePostprocessors(*(_system->current_local_solution));
+
   if(_serialize_solution)
     serializeSolution(*_system->solution);
 
   if(_has_displaced_mesh)
     updateDisplacedMesh(*_system->solution);
-
-  computePostprocessors(*(_system->current_local_solution));
-  outputPostprocessors();
 }
 
 unsigned int
@@ -1388,16 +1389,24 @@ MooseSystem::initTimeSteppingScheme(Moose::TimeSteppingScheme scheme)
   switch (_time_stepping_scheme)
   {
   case Moose::IMPLICIT_EULER:
+    _time_weight[0] = 1;
+    _time_weight[1] = 0;
+    _time_weight[2] = 0;
+    _time_stepping_order = 1;
+    break;
+
   case Moose::CRANK_NICOLSON:
     _time_weight[0] = 1;
     _time_weight[1] = 0;
     _time_weight[2] = 0;
+    _time_stepping_order = 2;
     break;
 
   case Moose::BDF2:
     _time_weight[0] = 0;
     _time_weight[1] = -1.;
     _time_weight[2] = 1.;
+    _time_stepping_order = 2;
     break;
   }
 }

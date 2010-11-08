@@ -65,6 +65,7 @@ Steady::execute()
 
     postSolve();
         
+    _moose_system.outputPostprocessors();
     _moose_system.outputSystem(r_step+1, r_step+1);
     
     for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)

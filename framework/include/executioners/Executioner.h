@@ -77,6 +77,16 @@ public:
 protected:
 
   /**
+   * Optionally override to do something before execute() gets called
+   */
+  virtual void preExecute() {};
+
+  /**
+   * Optionally override to do something after execute() gets called
+   */
+  virtual void postExecute() {};
+
+  /**
    * Optionally override to do something before solve() gets called
    */
   virtual void preSolve() {};

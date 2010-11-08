@@ -100,6 +100,7 @@
 #include "TransientExecutioner.h"
 #include "SolutionTimeAdaptive.h"
 #include "ExactSolutionExecutioner.h"
+#include "DT2Transient.h"
 
 #include "ConvectionDiffusionSUPG.h"
 
@@ -113,6 +114,7 @@
 #include "PrintDOFs.h"
 #include "PrintNumElems.h"
 #include "PrintNumNodes.h"
+#include "PrintDT.h"
 #include "AverageElementSize.h"
 #include "EmptyPostprocessor.h"
 #include "SideFluxIntegral.h"
@@ -245,6 +247,7 @@ Moose::registerObjects()
   registerNamedExecutioner(TransientExecutioner, "Transient");
   registerExecutioner(SolutionTimeAdaptive);
   registerExecutioner(ExactSolutionExecutioner);
+  registerExecutioner(DT2Transient);
   
   registerStabilizer(ConvectionDiffusionSUPG);
 
@@ -260,6 +263,7 @@ Moose::registerObjects()
   registerPostprocessor(PrintDOFs);
   registerPostprocessor(PrintNumElems);
   registerPostprocessor(PrintNumNodes);
+  registerPostprocessor(PrintDT);
   registerPostprocessor(AverageElementSize);
   registerPostprocessor(EmptyPostprocessor);
   registerPostprocessor(SideFluxIntegral);
