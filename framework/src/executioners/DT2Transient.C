@@ -134,7 +134,10 @@ DT2Transient::postSolve()
     _moose_system.reinitDT();
     
     std::cout << "  - 1. step" << std::endl;
+    Moose::setSolverDefaults(_moose_system, this);
+    setScaling();
     nl_sys->solve();
+
     _converged = nl_sys->nonlinear_solver->converged;
     if (!_converged) return;
     nl_sys->update();
@@ -145,9 +148,12 @@ DT2Transient::postSolve()
     _moose_system.onTimestepBegin();
     _time += _dt;
     _moose_system.reinitDT();
-
-    std::cout << "  - 2. step" << std::endl;
+    
+    std::cout << "  - 2. step" << std::endl;   
+    Moose::setSolverDefaults(_moose_system, this);   
+    setScaling();
     nl_sys->solve();
+
     _converged = nl_sys->nonlinear_solver->converged;
     if (!_converged) return;
     nl_sys->update();
