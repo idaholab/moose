@@ -34,8 +34,9 @@ template<>
 InputParameters validParams<DT2Transient>()
 {
   InputParameters params = validParams<TransientExecutioner>();
-  params.addParam<Real>("e_tol",           0.0,    "Target error tolerance.");
-  params.addParam<Real>("e_max",           0.0,    "Maximum acceptable error.");
+  params.addRequiredParam<Real>("e_tol","Target error tolerance.");
+  params.addRequiredParam<Real>("e_max","Maximum acceptable error.");
+  params.addParam<Real>("max_increase", 1.0e9,    "Maximum ratio that the time step can increase.");
 
   return params;
 }
@@ -51,7 +52,8 @@ DT2Transient::DT2Transient(const std::string & name, MooseSystem & moose_system,
    _aux_saved(NULL),
    _aux_older_saved(NULL),
    _e_tol(getParam<Real>("e_tol")),
-   _e_max(getParam<Real>("e_max"))
+   _e_max(getParam<Real>("e_max")),
+   _max_increase(getParam<Real>("max_increase"))
 {
 }
 
@@ -103,61 +105,64 @@ DT2Transient::postSolve()
 {
   TransientNonlinearImplicitSystem *nl_sys = _moose_system.getNonlinearSystem();
   TransientExplicitSystem *aux_sys = _moose_system.getAuxSystem();
+  if (_converged)
+  {
+    // save the solution (for time step with dt)
+    *_u1 = *nl_sys->current_local_solution;
+    _u1->close();
+    
+    *_aux1 = *aux_sys->current_local_solution;
+    _aux1->close();
+    
+    // take two steps with dt/2
+    std::cout << "Taking two dt/2 time steps" << std::endl;
 
-  // save the solution (for time step with dt)
-  *_u1 = *nl_sys->current_local_solution;
-  _u1->close();
+    // go back in time
+    *nl_sys->current_local_solution = *_u_saved;
+    *aux_sys->current_local_solution = *_aux_saved;
+    nl_sys->current_local_solution->close();
+    aux_sys->current_local_solution->close();
+    _time -= _dt_full;
+    
+    // cut the time step in half
+    _dt = _dt_full / 2;
+    _moose_system.reinitDT();
+    
+    // 1. step
+    _moose_system.onTimestepBegin();
+    _time += _dt;
+    _moose_system.reinitDT();
+    
+    std::cout << "  - 1. step" << std::endl;
+    nl_sys->solve();
+    _converged = nl_sys->nonlinear_solver->converged;
+    if (!_converged) return;
+    nl_sys->update();
 
-  *_aux1 = *aux_sys->current_local_solution;
-  _aux1->close();
+    _moose_system.copy_old_solutions();
 
-  // take two steps with dt/2
-  std::cout << "Taking two dt/2 time steps" << std::endl;
+    // 2. step
+    _moose_system.onTimestepBegin();
+    _time += _dt;
+    _moose_system.reinitDT();
 
-  // go back in time
-  *nl_sys->current_local_solution = *_u_saved;
-  *aux_sys->current_local_solution = *_aux_saved;
-  nl_sys->current_local_solution->close();
-  aux_sys->current_local_solution->close();
-  _time -= _dt_full;
+    std::cout << "  - 2. step" << std::endl;
+    nl_sys->solve();
+    _converged = nl_sys->nonlinear_solver->converged;
+    if (!_converged) return;
+    nl_sys->update();
+    
+    *_u2 = *nl_sys->current_local_solution;
+    _u2->close();
 
-  // cut the time step in half
-  _dt = _dt_full / 2;
-  _moose_system.reinitDT();
-
-  // 1. step
-  _moose_system.onTimestepBegin();
-  _time += _dt;
-  _moose_system.reinitDT();
-
-  std::cout << "  - 1. step" << std::endl;
-  nl_sys->solve();
-  _converged = nl_sys->nonlinear_solver->converged;
-  if (!_converged) return;
-  nl_sys->update();
-
-  _moose_system.copy_old_solutions();
-
-  // 2. step
-  _moose_system.onTimestepBegin();
-  _time += _dt;
-  _moose_system.reinitDT();
-
-  std::cout << "  - 2. step" << std::endl;
-  nl_sys->solve();
-  _converged = nl_sys->nonlinear_solver->converged;
-  if (!_converged) return;
-  nl_sys->update();
-
-  *_u2 = *nl_sys->current_local_solution;
-  _u2->close();
-
-  // compute error
-  *_u_diff = *_u2;
-  *_u_diff -= *_u1;
-  _u_diff->close();
-
-  _error = (_u_diff->l2_norm() / std::max(_u1->l2_norm(), _u2->l2_norm())) / _dt_full;
+    // compute error
+    *_u_diff = *_u2;
+    *_u_diff -= *_u1;
+    _u_diff->close();
+    
+    _error = (_u_diff->l2_norm() / std::max(_u1->l2_norm(), _u2->l2_norm())) / _dt_full;
+  }
+  
 }
 
 bool
@@ -185,8 +190,13 @@ DT2Transient::computeDT()
 
   if(lastSolveConverged())
   {
-    _dt = _dt_full * std::pow(_e_tol / _error, 1.0 / _moose_system.getTimeSteppingOrder());
+    Real new_dt = _dt_full * std::pow(_e_tol / _error, 1.0 / _moose_system.getTimeSteppingOrder());
 
+    if (new_dt/_dt_full > _max_increase)
+      _dt = _dt_full*_max_increase;
+    else
+      _dt = new_dt;
+    
     *nl_sys->current_local_solution = *_u1;
     *nl_sys->old_local_solution = *_u1;
     *nl_sys->older_local_solution = *_u_saved;

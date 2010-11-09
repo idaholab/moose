@@ -80,6 +80,7 @@ protected:
   Real _error;                          /// global relative time discretization error estimate
   Real _e_tol;                          /// error tolerance
   Real _e_max;                          /// maximal error
+  Real _max_increase;                          /// maximum increase ratio
 
 };
 
