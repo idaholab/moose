@@ -80,6 +80,24 @@ PenetrationLocator::detectPenetration()
             // I hate continues but this is actually cleaner than anything I can think of
             continue;
           }
+          else
+          {
+            // See if this element still has the same one across from it
+            Real distance = normDistance(*elem, *side, node);
+
+            if(std::abs(distance) < 999999999)
+            {
+              info->_normal = normal(*side, node);
+              info->_distance = distance;
+
+              continue;
+            }
+            else
+            {
+              delete _penetration_info[node.id()];
+              _penetration_info[node.id()] = NULL;
+            }
+          }
         } 
           
         Node * closest_node = NULL;
@@ -128,14 +146,15 @@ PenetrationLocator::detectPenetration()
               }
                 
               if(std::abs(distance) < 999999999)
+              {
                 _penetration_info[node.id()] =  new PenetrationInfo(elem,
                                                                     side,
                                                                     normal(*side, node),
                                                                     distance);
+              }
+              
             }
           }
-          
-          
         }
       }
     }
@@ -182,49 +201,18 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Poi
   Real d;
   unsigned int dim = _mesh.mesh_dimension();
 
-  Point p1 = side.point(0);
+  Point p1 = side.point(0);    
   Point p2 = side.point(1);
   Point p3;
-
+  
   if (dim == 2)
   {
-//    libmesh_assert(side->n_points() == 2);
-
-//    Point p1 = side.point(0);
-//    Point p2 = side.point(1);
+    //Create a point that is just off in the z axis.
+    //I do it this way so that it is about the same order of magnitude as the points themselves
     p3 = p1 + Point(0,0,p1(0)+p2(0)+p1(1)+p2(1));
-
-//    std::cerr << "\nLine Segment: (" << p1(0) << "," << p1(1) << ") - (" << p2(0) << "," << p2(1) << ") "
-//ç              << "Point: (" << p0(0) << "," << p0(1) << ")\n";
-    
-    
-//    d = std::sqrt(std::pow(((p2(1)-p1(1))*(p0(0)-p1(0))-(p2(0)-p1(0))*(p0(1)-p1(1))),2) /
-//                   (std::pow(p2(0)-p1(0),2) + std::pow(p2(1)-p1(1),2)));
-
-    // From http://local.wasp.uwa.edu.au/%7Epbourke/geometry/pointline/
-/*    Real u = ((p0(0)-p1(0))*(p2(0)-p1(0)) + (p0(1)-p1(1))*(p2(1)-p1(1))) / (p2 - p1).size();
-
-    // See if the intersection is on the line segment
-    if(u >= 0 && u<=1)
-    {
-      Point closest_point(p1(0) + u*(p2(0)-p1(0)), p1(1) + u*(p2(1) - p1(1)));
-      d = (p0 - closest_point).size();
-    }
-    else
-      d = 9999999999;
-*/
   }
   else if (dim == 3)
-  {
-//    libmesh_assert(side.n_points() >= 3);
-
-    // TODO: Fix Plane linking problem
-    
-//    d = 0.0;
-
     p3 = side.point(2);
-    
-  }
 
   Plane p = Plane(p1, p2, p3);
 

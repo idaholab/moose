@@ -30,13 +30,20 @@
 []
 
 [AuxBCs]
-  active = 'penetrate'
+  active = 'penetrate penetrate2'
 
   [./penetrate]
     type = PenetrationAux
     variable = penetration
     boundary = 2
     paired_boundary = 3
+  [../]
+
+  [./penetrate2]
+    type = PenetrationAux
+    variable = penetration
+    boundary = 3
+    paired_boundary = 2
   [../]
 []
 

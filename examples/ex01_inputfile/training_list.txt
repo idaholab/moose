@@ -1,3 +1,6 @@
 Title: As Simple As It Gets
 2d_diffusion.i
 src/main.C
+../../moose/include/kernels/Diffusion.h
+../../moose/src/kernels/Diffusion.C
+
