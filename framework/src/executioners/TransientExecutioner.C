@@ -79,6 +79,16 @@ TransientExecutioner::TransientExecutioner(const std::string & name, MooseSystem
   while (_remaining_sync_time && *_curr_sync_time_iter < _time)
     if (++_curr_sync_time_iter == _sync_times.end())
       _remaining_sync_time = false;
+
+  if (_num_steps == -1) 
+  {
+    Real total_time = _end_time - _time;
+    _num_steps = total_time / _input_dt;
+    if ( int(_num_steps) <  _num_steps )
+    {
+      _num_steps = int(_num_steps) + 1;
+    }
+  }
 }
 
 void
