@@ -79,7 +79,7 @@
   type = DT2Transient
   
   perf_log = true
-  petsc_options = '-snes_mf'
+  petsc_options = '-snes_mf_operator'
 
   nl_rel_tol = 1e-7
 #  l_tol = 1e-5
