@@ -15,6 +15,7 @@
 #ifndef FORMATTEDTABLE_H
 #define FORMATTEDTABLE_H
 
+#include "exodusII_io.h"
 #include "libmesh_common.h"
 
 #include <string>
@@ -63,6 +64,8 @@ public:
   void print_csv(const std::string & file_name);
 
   void print_ensight(const std::string & file_name);
+  void write_exodus(ExodusII_IO * ex_out,
+                    const std::string & file_name, Real time);
   void make_gnuplot(const std::string & base_file, const std::string & format);
   
 private:

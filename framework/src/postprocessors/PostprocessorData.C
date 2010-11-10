@@ -81,3 +81,10 @@ PostprocessorData::make_gnuplot(const std::string & file_name, const std::string
 {
   _output_table.make_gnuplot(file_name, format);
 }
+
+void
+PostprocessorData::write_exodus( ExodusII_IO * ex_out,
+                                 const std::string & file_name, Real time )
+{
+  _output_table.write_exodus( ex_out, file_name, time );
+}

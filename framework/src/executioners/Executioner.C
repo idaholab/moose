@@ -80,6 +80,9 @@ Executioner::setup()
     _moose_system.projectSolution(Moose::initial_value, Moose::initial_gradient);
   }    
 
+  // Compute the initial value of postprocessors
+  _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
+
   if(_moose_system._output_initial)
   {
     std::cout<<"Outputting Initial Condition"<<std::endl;
@@ -92,8 +95,6 @@ Executioner::setup()
 
   _moose_system.getNonlinearSystem()->update();
 
-  // Compute the initial value of postprocessors
-  _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
   _moose_system.outputPostprocessors();
 }
 

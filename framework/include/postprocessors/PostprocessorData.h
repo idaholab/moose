@@ -39,6 +39,8 @@ public:
   void print_table(const std::string & file_name);
   void print_csv(const std::string & file_name);
   void print_ensight(const std::string & file_name);
+  void write_exodus(ExodusII_IO * ex_out,
+                    const std::string & file_name, Real time);
   void make_gnuplot(const std::string & file_name, const std::string & format);
   
 private:

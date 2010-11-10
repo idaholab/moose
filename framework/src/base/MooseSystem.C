@@ -105,6 +105,7 @@ MooseSystem::MooseSystem() :
   _postprocessor_screen_output(true),
   _postprocessor_csv_output(false),
   _postprocessor_ensight_output(false),
+  _postprocessor_exodus_output(true),
   _postprocessor_gnuplot_output(false),
   _print_out_info(false),
   _output_initial(false),
@@ -177,6 +178,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _postprocessor_screen_output(true),
   _postprocessor_csv_output(false),
   _postprocessor_ensight_output(false),
+  _postprocessor_exodus_output(true),
   _postprocessor_gnuplot_output(false),
   _print_out_info(false),
   _output_initial(false),
@@ -1661,6 +1663,10 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
 
     // The +1 is because Exodus starts timesteps at 1 and we start at 0
     _ex_out->write_timestep(exodus_file_name + ".e", *_es, _num_in_current_file, time);
+    if ( _postprocessor_exodus_output ) 
+    {
+      _postprocessor_data[0].write_exodus( _ex_out, exodus_file_name + ".e", time );
+    }
 
     if(_has_displaced_mesh)
     {
@@ -1678,6 +1684,10 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
       exodus_file_name = exodus_stream_file_base.str();
 
       displaced_ex_out.write_timestep(exodus_file_name + ".e", *_displaced_es, _num_in_current_file_displaced, time);      
+    if ( _postprocessor_exodus_output ) 
+    {
+      _postprocessor_data[0].write_exodus( &displaced_ex_out, exodus_file_name + ".e", time );
+    }
     }
   }
 
