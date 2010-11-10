@@ -186,23 +186,24 @@ TransientExecutioner::takeStep()
 
   postSolve();
 
-  _moose_system.outputPostprocessors();
-
   std::cout<<"Norm of each nonlinear variable:"<<std::endl;
   for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
     std::cout << _moose_system.getNonlinearSystem()->variable_name(var) << ": "
               << _moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2) << std::endl;
+
+  // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
+  bool last_solve_converged = lastSolveConverged();
     
   // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
-  if ( _converged && ((_t_step+1)%_moose_system._interval == 0 || _reset_dt)) 
+  if (last_solve_converged && ((_t_step+1)%_moose_system._interval == 0 || _reset_dt)) 
   {
+    _moose_system.outputPostprocessors();
     _moose_system.outputSystem(_t_step, _time);
   }
 
-  if( _converged )
+  if(last_solve_converged)
   {
     adaptMesh();
-            
     _t_step++;
   }
 }
