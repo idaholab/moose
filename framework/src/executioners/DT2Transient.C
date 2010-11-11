@@ -178,11 +178,10 @@ DT2Transient::lastSolveConverged()
     return false;
 
   if (_error < _e_max)
-    _converged = true;
+    return true;
   else
-    _converged = false;
-
-  return _converged;
+    return false;
+  
 }  
 
 Real

@@ -118,9 +118,6 @@ TransientExecutioner::takeStep()
 //    std::cout << "copy" << std::endl;
     // Update backward time solution vectors
     _moose_system.copy_old_solutions();
-
-    // Update backward material data structures
-    _moose_system.updateMaterials();
   }    
 
   _moose_system.getNonlinearSystem()->update();
@@ -162,6 +159,12 @@ TransientExecutioner::takeStep()
   _dt = dt_cur;
   _moose_system.reinitDT();
   _moose_system.onTimestepBegin();
+
+  if(_converged)
+  {
+    // Update backward material data structures
+    _moose_system.updateMaterials();
+  } 
 
   // Increment time
   _time += dt_cur;
