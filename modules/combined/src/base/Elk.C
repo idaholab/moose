@@ -69,7 +69,7 @@ Elk::registerObjects()
   // heat_conduction
   registerKernel(HeatConduction);
   registerKernel(HeatConductionImplicitEuler);
-  registerBC(FluxBC);
+  registerBoundaryCondition(FluxBC);
 
   // navier_stokes
   registerKernel(MassInviscidFlux);
@@ -79,8 +79,8 @@ Elk::registerObjects()
   registerKernel(EnergyViscousFlux);
   registerKernel(GravityPower);
   registerKernel(GravityForce);
-  registerBC(PressureNeumannBC);
-  registerBC(ThermalBC);
+  registerBoundaryCondition(PressureNeumannBC);
+  registerBoundaryCondition(ThermalBC);
   registerAux(VelocityAux);
 
   // linear_elasticity
@@ -99,7 +99,7 @@ Elk::registerObjects()
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(PlasticMaterial);
   registerMaterial(PLSHPlasticMaterial);
-  registerBC(PressureBC);
+  registerBoundaryCondition(PressureBC);
   registerKernel(StressDivergence);
   registerKernel(StressOutput);
   
@@ -116,5 +116,5 @@ Elk::registerObjects()
   registerInitialCondition(GradientBoxIC);
 
   // contact
-  registerBC(ContactForce);
+  registerBoundaryCondition(ContactForce);
 }
