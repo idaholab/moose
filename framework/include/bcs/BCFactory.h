@@ -59,7 +59,7 @@ public:
   static BCFactory * instance();
   
   template<typename BCType> 
-  void registerBC(const std::string & name)
+  void registerBoundaryCondition(const std::string & name)
   {
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
     {

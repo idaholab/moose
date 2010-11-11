@@ -173,19 +173,19 @@ Moose::registerObjects()
 
   registerDGKernel(DGDiffusion);
 
-  registerBC(DirichletBC);
-  registerBC(SinDirichletBC);
-  registerBC(SinNeumannBC);
-  registerBC(NeumannBC);
-  registerBC(VectorNeumannBC);
-  registerBC(VacuumBC);
-  registerBC(MatchedValueBC);
-  registerBC(ConvectiveFluxBC);
-  registerBC(WeakGradientBC);
-  registerBC(FunctionDirichletBC);
-  registerBC(FunctionNeumannBC);
-  registerBC(DGFunctionDiffusionDirichletBC);
-  registerBC(DashpotBC);
+  registerBoundaryCondition(DirichletBC);
+  registerBoundaryCondition(SinDirichletBC);
+  registerBoundaryCondition(SinNeumannBC);
+  registerBoundaryCondition(NeumannBC);
+  registerBoundaryCondition(VectorNeumannBC);
+  registerBoundaryCondition(VacuumBC);
+  registerBoundaryCondition(MatchedValueBC);
+  registerBoundaryCondition(ConvectiveFluxBC);
+  registerBoundaryCondition(WeakGradientBC);
+  registerBoundaryCondition(FunctionDirichletBC);
+  registerBoundaryCondition(FunctionNeumannBC);
+  registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
+  registerBoundaryCondition(DashpotBC);
 
   registerAux(ConstantAux);
   registerAux(CoupledAux);

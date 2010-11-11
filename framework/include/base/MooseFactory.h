@@ -32,40 +32,40 @@ class MooseFactory
 {
 public:
   template <typename T>
-  static void registerMooseKernel(const std::string & name);          
+  static void registerMooseKernel(const std::string & name);
 
   template <typename T>
-  static void registerMooseBC(const std::string & name);              
+  static void registerMooseBoundaryCondition(const std::string & name);
 
   template <typename T>
-  static void registerMooseAux(const std::string & name);             
+  static void registerMooseAux(const std::string & name);
 
   template <typename T>
-  static void registerMooseMaterial(const std::string & name);        
+  static void registerMooseMaterial(const std::string & name);
 
   template <typename T>
-  static void registerMooseParserBlock(const std::string & name);     
+  static void registerMooseParserBlock(const std::string & name);
 
   template <typename T>
-  static void registerMooseFunction(const std::string & name);        
+  static void registerMooseFunction(const std::string & name);
 
   template <typename T>
   static void registerMooseInitialCondition(const std::string & name);
 
   template <typename T>
   static void registerMooseExecutioner(const std::string & name);
-  
-  template <typename T>
-  static void registerMooseStabilizer(const std::string & name);      
 
   template <typename T>
-  static void registerMoosePostprocessor(const std::string & name);   
+  static void registerMooseStabilizer(const std::string & name);
 
   template <typename T>
-  static void registerMooseDamper(const std::string & name);          
+  static void registerMoosePostprocessor(const std::string & name);
 
   template <typename T>
-  static void registerMooseDGKernel(const std::string & name);          
+  static void registerMooseDamper(const std::string & name);
+
+  template <typename T>
+  static void registerMooseDGKernel(const std::string & name);
 };
 
 
@@ -78,9 +78,9 @@ MooseFactory::registerMooseKernel(const std::string & name)
 
 template <typename T>
 void
-MooseFactory::registerMooseBC(const std::string & name)
+MooseFactory::registerMooseBoundaryCondition(const std::string & name)
 {
-  BCFactory::instance()->registerBC<T>(name);
+  BCFactory::instance()->registerBoundaryCondition<T>(name);
 }
 
 template <typename T>
@@ -158,9 +158,9 @@ MooseFactory::registerMooseDGKernel(const std::string & name)
  */
 #define stringifyName(name) #name
 
-#define registerKernel(name)                      MooseFactory::registerMooseKernel<name>(stringifyName(name));  
-#define registerBC(name)                          MooseFactory::registerMooseBC<name>(stringifyName(name));
-#define registerAux(name)                         MooseFactory::registerMooseAux<name>(stringifyName(name));  
+#define registerKernel(name)                      MooseFactory::registerMooseKernel<name>(stringifyName(name));
+#define registerBoundaryCondition(name)           MooseFactory::registerMooseBoundaryCondition<name>(stringifyName(name));
+#define registerAux(name)                         MooseFactory::registerMooseAux<name>(stringifyName(name));
 #define registerMaterial(name)                    MooseFactory::registerMooseMaterial<name>(stringifyName(name));
 #define registerParserBlock(name)                 MooseFactory::registerMooseParserBlock<name>(stringifyName(name));
 #define registerFunction(name)                    MooseFactory::registerMooseFunction<name>(stringifyName(name));
@@ -171,9 +171,9 @@ MooseFactory::registerMooseDGKernel(const std::string & name)
 #define registerDamper(name)                      MooseFactory::registerMooseDamper<name>(stringifyName(name));
 #define registerDGKernel(name)                    MooseFactory::registerMooseDGKernel<name>(stringifyName(name));
 
-#define registerNamedKernel(tplt, name)           MooseFactory::registerMooseKernel<tplt>(name);  
-#define registerNamedBC(tplt, name)               MooseFactory::registerMooseBC<tplt>(name);
-#define registerNamedAux(tplt, name)              MooseFactory::registerMooseAux<tplt>(name);  
+#define registerNamedKernel(tplt, name)           MooseFactory::registerMooseKernel<tplt>(name);
+#define registerNamedBoundaryCondition(tplt, name) MooseFactory::registerMooseBoundaryCondition<tplt>(name);
+#define registerNamedAux(tplt, name)              MooseFactory::registerMooseAux<tplt>(name);
 #define registerNamedMaterial(tplt, name)         MooseFactory::registerMooseMaterial<tplt>(name);
 #define registerNamedParserBlock(tplt, name)      MooseFactory::registerMooseParserBlock<tplt>(name);
 #define registerNamedFunction(tplt, name)         MooseFactory::registerMooseFunction<tplt>(name);

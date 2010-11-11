@@ -101,13 +101,13 @@ namespace MooseTest
     registerMaterial(MTMaterial);
 
     //Registering the Boundary Conditions
-    registerBC(MMSCoupledDirichletBC);
-    registerBC(PolyCoupledDirichletBC);
-    registerBC(MTBC);
-    registerBC(DGMDDBC);
-    registerBC(TEJumpBC);
+    registerBoundaryCondition(MMSCoupledDirichletBC);
+    registerBoundaryCondition(PolyCoupledDirichletBC);
+    registerBoundaryCondition(MTBC);
+    registerBoundaryCondition(DGMDDBC);
+    registerBoundaryCondition(TEJumpBC);
 
-    registerBC(DGFunctionConvectionDirichletBC);
+    registerBoundaryCondition(DGFunctionConvectionDirichletBC);
     
     //Registering our Aux Kernel
     registerAux(MMSConstantAux);

@@ -49,8 +49,8 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   registerKernel(Convection);
-  registerBC(CoupledDirichletBC);    // Register our Boundary Conditions
-  registerBC(CoupledNeumannBC);
+  registerBoundaryCondition(CoupledDirichletBC);    // Register our Boundary Conditions
+  registerBoundaryCondition(CoupledNeumannBC);
 
   Parser p(moose_system);
   
