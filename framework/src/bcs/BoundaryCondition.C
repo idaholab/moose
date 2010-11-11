@@ -239,3 +239,15 @@ BoundaryCondition::computeQpIntegral()
 {
   return 0;
 }
+
+NumericVector<Number> &
+BoundaryCondition::residualCopy()
+{
+  if(isIntegrated())
+    mooseError("Cannot get a copy of the residual vector in an integrated boundary condition!");
+
+  _moose_system.needResidualCopy(true);
+  
+  return *_moose_system._residual_copy;
+}
+

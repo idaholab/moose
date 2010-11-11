@@ -121,6 +121,11 @@ protected:
   virtual Real computeQpIntegral();
 
   /**
+   * Get a reference to a copy of the residual vector.  This is only a valid thing to do for non-integrated bcs!
+   */
+  NumericVector<Number> & residualCopy();
+
+  /**
    * Boundary ID this BC is active on.
    */
   unsigned int _boundary_id;

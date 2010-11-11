@@ -320,6 +320,23 @@ public:
   void needPostprocessorsForResiduals(bool state) { _compute_pps_each_residual_evaluation = state; }
 
   /**
+   * Returns true if a copy of the residual vector is needed (useful if you are going to be modifying
+   * the residual vector based on it's entries and you can't guarantee the order your going to
+   * be modifying it in.
+   */
+  bool needResidualCopy() { return _need_residual_copy; }
+
+  /**
+   * Call this if your object is going to need a cpy of the residual vector.
+   *
+   * The residual vector is copied just after the internal residual fill... and before dirichlet bcs.
+   * 
+   * Useful if you are going to be modifying the residual vector based on it's entries
+   * and you can't guarantee the order your going to be modifying it in.
+   */
+  void needResidualCopy(bool state) { _need_residual_copy = state; }
+
+  /**
    * Returns true if the solution vector will be serialized before each residual and jacobian evaluation.
    */
   bool needSerializedSolution() { return _serialize_solution; }
@@ -539,6 +556,11 @@ protected:
   bool _compute_pps_each_residual_evaluation;
 
   /**
+   * TRUE if a copy of the residual is needed during dirichlet BC computation.
+   */
+  bool _need_residual_copy;
+  
+  /**
    * TRUE if we need to serialize the solution vector before every residual and jacobian evaluation.
    */
   bool _serialize_solution;
@@ -638,6 +660,8 @@ public:
    * Time stepping
    */
   Moose::TimeSteppingScheme _time_stepping_scheme;
+
+  NumericVector<Number> * _residual_copy;   /// Copy of the residual vector
 
   NumericVector<Number> * _u_dot_soln;   /// solution vector for the time derivative (u_dot)
 

@@ -76,6 +76,7 @@ MooseSystem::MooseSystem() :
   _newton_soln(NULL),
   _old_newton_soln(NULL),
   _compute_pps_each_residual_evaluation(false),
+  _need_residual_copy(false),
   _serialize_solution(false),
   _mesh_changed(false),
   _no_fe_reinit(false),
@@ -149,6 +150,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _newton_soln(NULL),
   _old_newton_soln(NULL),
   _compute_pps_each_residual_evaluation(false),
+  _need_residual_copy(false),
   _serialize_solution(false),
   _mesh_changed(false),
   _no_fe_reinit(false),
@@ -545,6 +547,8 @@ MooseSystem::initEquationSystems()
   _system->nonlinear_solver->jacobian = Moose::compute_jacobian;
   _system->attach_init_function(Moose::initial_condition);
 
+  _residual_copy = &_system->add_vector("residual_copy", false);
+  
   _u_dot_soln = &_system->add_vector("u_dot", false, GHOSTED);
   _res_soln_old = &_system->add_vector("residual_old", false, GHOSTED);
   _du_dot_du_soln = &_system->add_vector("du_dot_du", false, GHOSTED);

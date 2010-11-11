@@ -162,9 +162,13 @@ namespace Moose
 {
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
+    Moose::perf_log.push("compute_residual()","Solve");
+
     MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
     moose_system->computeResidual(soln, residual);
+    
+    Moose::perf_log.pop("compute_residual()","Solve");
   }
 }
 
@@ -189,20 +193,32 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
 
   updateAuxVars(soln);
 
-  Moose::perf_log.push("compute_residual()","Solve");
-
   ComputeInternalResiduals cr(*this, soln, residual);
   Threads::parallel_reduce(*getActiveLocalElementRange(), cr);
 
-  Moose::perf_log.pop("compute_residual()","Solve");
-
   residual.close();
+
+  if(needResidualCopy())
+    *_residual_copy = residual;
 
   //Dirichlet BCs
   std::vector<unsigned int> nodes;
   std::vector<short int> ids;
 
   _mesh->boundary_info->build_node_list(nodes, ids);
+
+  const std::set<short int> & boundary_ids = _mesh->boundary_info->get_boundary_ids();
+
+  for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+  {
+    short int id = *it;
+    
+    BCIterator bc_it = _bcs[0].activeNodalBCsBegin(id);
+    BCIterator bc_end = _bcs[0].activeNodalBCsEnd(id);
+
+    for(; bc_it != bc_end; ++bc_it)
+      (*bc_it)->setup();
+  }
 
   const unsigned int n_nodes = nodes.size();
 
