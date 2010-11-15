@@ -18,12 +18,12 @@
 template<>
 InputParameters validParams<MMSImplicitEuler>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<TimeKernel>();
   return params;
 }
 
 MMSImplicitEuler::MMSImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters)
+  :TimeKernel(name, moose_system, parameters)
 {}
 
 Real

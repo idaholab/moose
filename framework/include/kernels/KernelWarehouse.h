@@ -37,6 +37,9 @@ public:
   KernelWarehouse();
   virtual ~KernelWarehouse();
 
+  KernelIterator allKernelsBegin();
+  KernelIterator allKernelsEnd();
+
   KernelIterator activeKernelsBegin();
   KernelIterator activeKernelsEnd();
 

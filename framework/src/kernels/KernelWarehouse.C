@@ -40,6 +40,18 @@ KernelWarehouse::addKernel(Kernel *kernel, const std::set<unsigned int> & block_
 }
 
 KernelIterator
+KernelWarehouse::allKernelsBegin()
+{
+  return _all_kernels.begin();
+}
+
+KernelIterator
+KernelWarehouse::allKernelsEnd()
+{
+  return _all_kernels.end();
+}
+
+KernelIterator
 KernelWarehouse::activeKernelsBegin()
 {
   return _active_kernels.begin();

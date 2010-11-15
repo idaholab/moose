@@ -30,6 +30,8 @@
 #include "ComputeInitialConditions.h"
 #include "DamperFactory.h"
 #include "Executioner.h"
+#include "Steady.h"
+#include "TimeKernel.h"
 
 //libMesh includes
 #include "numeric_vector.h"
@@ -1384,6 +1386,22 @@ MooseSystem::checkSystemsIntegrity()
       mooseError("The following boundary ids from your input file do not exist in the input mesh "
                  + extra_boundary_ids.str());
     }
+  }
+
+  // check executioner and kernel compatibility
+  {
+    Executioner &e = getExecutioner();
+    bool steady = dynamic_cast<Steady *>(&e) != NULL;                     // using Steady state executioner?
+    bool time_kernels = false;
+    for (KernelIterator it = _kernels[0].allKernelsBegin(); it != _kernels[0].allKernelsEnd(); ++it)
+    {
+      Kernel *kernel = *it;
+      if (dynamic_cast<TimeKernel *>(kernel) != NULL)
+        time_kernels = true;
+    }
+
+    if (steady && time_kernels)
+      mooseError("You have specified time kernels in your steady state simulation");
   }
 }
 

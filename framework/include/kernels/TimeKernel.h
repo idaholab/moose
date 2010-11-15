@@ -12,29 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TimeDerivative.h"
-#include "MooseSystem.h"
+#ifndef TIMEKERNEL_H
+#define TIMEKERNEL_H
+
+#include "Kernel.h"
+
+// Forward Declaration
+class TimeKernel;
 
 template<>
-InputParameters validParams<TimeDerivative>()
-{
-  InputParameters params = validParams<TimeKernel>();
-  return params;
-}
+InputParameters validParams<TimeKernel>();
 
-TimeDerivative::TimeDerivative(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :TimeKernel(name, moose_system, parameters),
-   _time_weight(_moose_system._time_weight)
-{}
-
-Real
-TimeDerivative::computeQpResidual()
+/**
+ * All time kernels should inherit from this class
+ *
+ */
+class TimeKernel : public Kernel
 {
-  return _test[_i][_qp]*_u_dot[_qp];
-}
+public:
 
-Real
-TimeDerivative::computeQpJacobian()
-{
-  return _test[_i][_qp]*_phi[_j][_qp]*_du_dot_du[_qp];
-}
+  TimeKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+};
+
+#endif //TIMEKERNEL

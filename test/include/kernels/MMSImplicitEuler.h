@@ -15,14 +15,14 @@
 #ifndef MMSIMPLICITEULER
 #define MMSIMPLICITEULER
 
-#include "Kernel.h"
+#include "TimeKernel.h"
 
 class MMSImplicitEuler;
 
 template<>
 InputParameters validParams<MMSImplicitEuler>();
 
-class MMSImplicitEuler : public Kernel
+class MMSImplicitEuler : public TimeKernel
 {
 public:
 

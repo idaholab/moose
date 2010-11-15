@@ -15,7 +15,7 @@
 #ifndef SECONDDERIVATIVEIMPLICITEULER_H
 #define SECONDDERIVATIVEIMPLICITEULER_H
 
-#include "Kernel.h"
+#include "TimeKernel.h"
 
 //Forward Declarations
 class SecondDerivativeImplicitEuler;
@@ -23,10 +23,9 @@ class SecondDerivativeImplicitEuler;
 template<>
 InputParameters validParams<SecondDerivativeImplicitEuler>();
 
-class SecondDerivativeImplicitEuler : public Kernel
+class SecondDerivativeImplicitEuler : public TimeKernel
 {
 public:
-
   SecondDerivativeImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
   
 protected:

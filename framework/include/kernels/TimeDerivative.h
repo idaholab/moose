@@ -15,7 +15,7 @@
 #ifndef TIMEDERIVATIVE_H
 #define TIMEDERIVATIVE_H
 
-#include "Kernel.h"
+#include "TimeKernel.h"
 
 // Forward Declaration
 class TimeDerivative;
@@ -23,7 +23,7 @@ class TimeDerivative;
 template<>
 InputParameters validParams<TimeDerivative>();
 
-class TimeDerivative : public Kernel
+class TimeDerivative : public TimeKernel
 {
 public:
 
@@ -40,4 +40,4 @@ protected:
   std::vector<Real> & _time_weight;
 };
 
-#endif //IMPLICITEULER
+#endif //TIMEDERIVATIVE
