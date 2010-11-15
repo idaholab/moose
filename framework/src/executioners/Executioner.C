@@ -150,3 +150,9 @@ Executioner::updateNewtonStep()
 {
   _moose_system.updateNewtonStep();
 }
+
+void
+Executioner::postSolve()
+{
+  _moose_system.postSolve(_moose_system.getNonlinearSystem()->nonlinear_solver->converged);
+}

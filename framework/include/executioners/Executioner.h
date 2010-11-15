@@ -95,7 +95,7 @@ protected:
    * Optionally override to do something after solve() gets called
    * but before adaptivity.  Might be useful for postprocessing.
    */
-  virtual void postSolve() {};
+  virtual void postSolve();
 
   /**
    * Should be overriden if possible.  Should return true if the last solve

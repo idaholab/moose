@@ -221,7 +221,8 @@ namespace Moose
   {
     IMPLICIT_EULER,
     BDF2,
-    CRANK_NICOLSON
+    CRANK_NICOLSON,
+    TRAPEZOIDAL
   };
 
   const unsigned int ANY_BLOCK_ID = (unsigned int) -1;

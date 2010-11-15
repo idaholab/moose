@@ -423,6 +423,13 @@ public:
   virtual void solve();
 
   /**
+   * Called by executioner after solve.
+   *
+   * @param converged true if the solve converged, otherwise false
+   */
+  virtual void postSolve(bool converged);
+
+  /**
    * Get the EquationSystems params
    */
   Parameters &parameters();

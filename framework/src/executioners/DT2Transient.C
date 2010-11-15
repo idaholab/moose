@@ -103,6 +103,8 @@ DT2Transient::preSolve()
 void
 DT2Transient::postSolve()
 {
+  TransientExecutioner::postSolve();
+
   TransientNonlinearImplicitSystem *nl_sys = _moose_system.getNonlinearSystem();
   TransientExplicitSystem *aux_sys = _moose_system.getAuxSystem();
   if (_converged)

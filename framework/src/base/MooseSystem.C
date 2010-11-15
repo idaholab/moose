@@ -695,14 +695,21 @@ MooseSystem::solve()
 {
   _system->solve();
   _system->update();
+}
 
-  computePostprocessors(*(_system->current_local_solution));
+void
+MooseSystem::postSolve(bool converged)
+{
+  if (converged)
+  {
+    computePostprocessors(*(_system->current_local_solution));
 
-  if(_serialize_solution)
-    serializeSolution(*_system->solution);
+    if(_serialize_solution)
+      serializeSolution(*_system->solution);
 
-  if(_has_displaced_mesh)
-    updateDisplacedMesh(*_system->solution);
+    if(_has_displaced_mesh)
+      updateDisplacedMesh(*_system->solution);
+  }
 }
 
 unsigned int
@@ -1420,6 +1427,7 @@ MooseSystem::initTimeSteppingScheme(Moose::TimeSteppingScheme scheme)
     break;
 
   case Moose::CRANK_NICOLSON:
+  case Moose::TRAPEZOIDAL:
     _time_weight[0] = 1;
     _time_weight[1] = 0;
     _time_weight[2] = 0;
@@ -1476,6 +1484,17 @@ MooseSystem::onTimestepBegin()
     computeResidualInternal(*_system->old_local_solution, *_res_soln_old);
     break;
 
+  case Moose::TRAPEZOIDAL:
+      *_u_dot_soln = *_system->old_local_solution;
+      *_u_dot_soln *= -2.0 / _dt;
+      _u_dot_soln->close();
+
+      _du_dot_du_soln->zero();
+      _du_dot_du_soln->close();
+
+      computeResidualInternal(*_system->old_local_solution, *_res_soln_old);
+      break;
+
   default:
     break;
   }
@@ -1496,6 +1515,13 @@ MooseSystem::computeTimeDeriv(const NumericVector<Number> & soln)
 
   case Moose::CRANK_NICOLSON:
     *_u_dot_soln = soln;
+    *_u_dot_soln *= 2. / _dt;
+
+    *_du_dot_du_soln = 1.0/_dt;
+    break;
+
+  case Moose::TRAPEZOIDAL:
+    *_u_dot_soln = *_system->old_local_solution;
     *_u_dot_soln *= 2. / _dt;
 
     *_du_dot_du_soln = 1.0/_dt;
@@ -1534,6 +1560,11 @@ MooseSystem::finishResidual(NumericVector<Number> & residual)
   switch (_time_stepping_scheme)
   {
   case Moose::CRANK_NICOLSON:
+    residual.add(*_res_soln_old);
+    residual.close();
+    break;
+
+  case Moose::TRAPEZOIDAL:
     residual.add(*_res_soln_old);
     residual.close();
     break;
