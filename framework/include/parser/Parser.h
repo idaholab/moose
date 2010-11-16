@@ -123,6 +123,10 @@ public:
    */
   void extractParams(const std::string & prefix, InputParameters &p);
 
+  /**
+   * prints a standard cli usage message
+   */
+  void printUsage() const;
   
 private:
   /**
@@ -148,11 +152,6 @@ private:
    * MOOSE error if there is a problem
    */
   void checkInputFile();
-  
-  /**
-   * prints a standard cli usage message
-   */
-  void printUsage() const;
   
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file

@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<Diffusion>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Implements the Diffusion operator (gradient of 'u')");
   return params;
 }
 

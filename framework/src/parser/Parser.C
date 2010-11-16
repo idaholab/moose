@@ -530,6 +530,7 @@ Parser::printUsage() const
             << "show a full dump of available input file syntax\n\n"
             << "Solver Options:\n"
             << "  See solver manual for details (Petsc or Trilinos)\n";
+  exit(1);
 }
 
 void

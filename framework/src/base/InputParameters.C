@@ -26,6 +26,22 @@ InputParameters::InputParameters(const Parameters &rhs)
   Parameters::operator=(rhs);
 }
 
+void
+InputParameters::addClassDescription(const std::string &doc_string)
+{
+  _doc_string["_class"] = doc_string;
+}
+
+std::string
+InputParameters::getClassDescription() const
+{
+  std::map<std::string, std::string>::const_iterator pos = _doc_string.find("_class");
+  if (pos != _doc_string.end())
+    return pos->second;
+  else
+    return std::string();
+}
+
 InputParameters &
 InputParameters::operator=(const InputParameters &rhs)
 {

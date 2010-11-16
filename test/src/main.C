@@ -49,7 +49,7 @@ int main (int argc, char** argv)
   if ( Moose::command_line->search("-i") )
     input_filename = Moose::command_line->next(input_filename);
   else
-    mooseError("Must specify an input file using -i");
+    p.printUsage();
 
   p.parse(input_filename);
   p.execute();
