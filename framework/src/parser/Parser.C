@@ -467,7 +467,7 @@ Parser::fixupOptionalBlocks()
       // which means it better exist and it better not be the root
       block_ptr = _input_tree->locateBlock(i->first);
       if (block_ptr == NULL || block_ptr->_parent == NULL)
-        mooseError("Major Error in ParserBlock Structure");
+        mooseError("Major Error in ParserBlock Structure!\nPlease make sure that your input file does not contain ""Windows"" line endings");
 
       ParserBlock::PBChildIterator position =
         find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);

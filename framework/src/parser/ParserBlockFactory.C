@@ -94,7 +94,7 @@ ParserBlockFactory::isRegistered(const std::string & real_id)
 {
   /**
    * This implementation assumes that wildcards can occur in the place of an entire token but not as part
-   * of a token (i.e.  'Variables/* /InitialConditions' is valid but not 'Variables/Partial* /InitialConditions'.
+   * of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial* /InitialConditions'.
    * Since maps are ordered, a reverse traversal through the registered list will always select a more
    * specific match before a wildcard match ('*' == char(42))
    */
