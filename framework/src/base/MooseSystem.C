@@ -29,6 +29,7 @@
 #include "ComputeJacobian.h"
 #include "ComputeInitialConditions.h"
 #include "DamperFactory.h"
+#include "DiracKernelFactory.h"
 #include "Executioner.h"
 #include "Steady.h"
 #include "TimeKernel.h"
@@ -63,6 +64,7 @@ MooseSystem::MooseSystem() :
   _displaced_system(NULL),
   _displaced_aux_system(NULL),
   _geom_type(Moose::XYZ),
+  _dirac_kernel_info(*this),
   _mesh(NULL),
   _displaced_mesh(NULL),
   _has_displaced_mesh(false),
@@ -137,6 +139,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _displaced_es(NULL),
   _displaced_system(NULL),
   _displaced_aux_system(NULL),
+  _dirac_kernel_info(*this),
   _mesh(&mesh),
   _displaced_mesh(NULL),
   _has_displaced_mesh(false),
@@ -326,6 +329,7 @@ MooseSystem::sizeEverything()
   _neighbor_face_data.resize(n_threads);
   _aux_data.resize(n_threads);
   _damper_data.resize(n_threads);
+  _dirac_kernel_data.resize(n_threads);
   
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
   {
@@ -334,6 +338,7 @@ MooseSystem::sizeEverything()
     _neighbor_face_data[tid] = new FaceData(*this, _neighbor_dof_data[tid]);
     _aux_data[tid] = new AuxData(*this, _dof_data[tid], *_element_data[tid]);
     _damper_data[tid] = new DamperData(*this, *_element_data[tid]);
+    _dirac_kernel_data[tid] = new DiracKernelData(*this, _dof_data[tid]);
   }
 
   _kernels.resize(n_threads);
@@ -346,6 +351,7 @@ MooseSystem::sizeEverything()
   _pps.resize(n_threads);
   _functions.resize(n_threads);
   _dampers.resize(n_threads);
+  _dirac_kernels.resize(n_threads);
 
   // Kernels::sizeEverything
   _time_weight.resize(3);
@@ -402,6 +408,7 @@ MooseSystem::init()
     _neighbor_face_data[tid]->init();
     _aux_data[tid]->init();
     _damper_data[tid]->init();
+    _dirac_kernel_data[tid]->init();
   }
 
   _t = 0;
@@ -1092,6 +1099,19 @@ MooseSystem::addDamper(std::string damper_name,
 }
 
 void
+MooseSystem::addDiracKernel(std::string dirac_kernel_name,
+                       const std::string & name,
+                       InputParameters parameters)
+{
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    _dirac_kernels[tid].addDiracKernel(DiracKernelFactory::instance()->create(dirac_kernel_name, name, *this, parameters));
+  }
+}
+
+void
 MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
 //  Moose::perf_log.push("reinit() - dof_indices","Kernel");
@@ -1170,6 +1190,7 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   if (_need_old_newton)
     _element_data[tid]->reinitNewtonStep(*_old_newton_soln);
 }
+
 
 void
 MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
@@ -1269,7 +1290,83 @@ void
 MooseSystem::reinitDampers(THREAD_ID tid, const NumericVector<Number>& increment)
 {
   _damper_data[tid]->reinit(increment);
-}  
+}
+
+void
+MooseSystem::reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const std::vector<Point> & points, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
+{  
+  _dof_data[tid]._current_elem = elem;
+  _dof_map->dof_indices(elem, _dof_data[tid]._dof_indices);
+          
+  // Map the points from the physical domain to the reference
+  std::vector<Point> mapped_points;
+  FEType fe_type = _dof_map->variable_type(0);
+  libMesh::FEInterface::inverse_map(_dim, fe_type, elem, points, mapped_points);
+
+  // Set those points so the qrule can use them
+  _dirac_kernel_data[tid]->setPoints(points, mapped_points);
+  
+  std::map<FEType, FEBase*>::iterator fe_it = _dirac_kernel_data[tid]->_fe.begin();
+  std::map<FEType, FEBase*>::iterator fe_end = _dirac_kernel_data[tid]->_fe.end();
+
+  
+  std::map<FEType, FEBase*>::iterator fe_displaced_it; 
+  std::map<FEType, FEBase*>::iterator fe_displaced_end;
+
+  if(_has_displaced_mesh)
+  { 
+    fe_displaced_it = _dirac_kernel_data[tid]->_fe_displaced.begin();
+    fe_displaced_end = _dirac_kernel_data[tid]->_fe_displaced.end();
+  }
+  
+
+  if(!dontReinitFE() || _first[tid])
+  {
+    for(;fe_it != fe_end; ++fe_it)
+      fe_it->second->reinit(elem);
+
+    if(_has_displaced_mesh)
+    {
+      for(;fe_displaced_it != fe_displaced_end; ++fe_displaced_it)
+        fe_displaced_it->second->reinit(_displaced_mesh->elem(elem->id()));
+    }
+  }
+  
+  _first[tid] = false;
+
+  if(Re) Re->resize(_dof_data[tid]._dof_indices.size());
+  if(Ke) Ke->resize(_dof_data[tid]._dof_indices.size(), _dof_data[tid]._dof_indices.size());
+
+  unsigned int position = 0;
+
+  for(unsigned int i=0; i<_dirac_kernel_data[tid]->_var_nums.size();i++)
+  {
+    _dof_map->dof_indices(elem, _dof_data[tid]._var_dof_indices[i], i);
+    unsigned int num_dofs = _dof_data[tid]._var_dof_indices[i].size();
+    if(Re) _dof_data[tid].reinitRes(i, *Re, position, num_dofs);
+    if(Ke) _dof_data[tid].reinitKes(i, num_dofs);
+    position+=num_dofs;
+  }
+
+  unsigned int num_q_points = _dirac_kernel_data[tid]->_qrule->n_points();
+
+  _real_zero[tid] = 0;
+  _zero[tid].resize(num_q_points,0);
+  _grad_zero[tid].resize(num_q_points,0);
+  _second_zero[tid].resize(num_q_points,0);
+
+  for(std::set<unsigned int>::iterator it = _dirac_kernel_data[tid]->_var_nums.begin(); it != _dirac_kernel_data[tid]->_var_nums.end(); ++it)
+  {
+    unsigned int var_num = *it;
+    FEType fe_type = _dof_map->variable_type(var_num);
+    // Copy phi to the test functions.
+    const std::vector<std::vector<Real> > & static_phi = *_dirac_kernel_data[tid]->_phi[fe_type];
+    _dirac_kernel_data[tid]->_test[var_num] = static_phi;
+  }
+
+  _dirac_kernel_data[tid]->reinit(soln, elem);
+}
+
 
 void
 MooseSystem::updateNewtonStep()

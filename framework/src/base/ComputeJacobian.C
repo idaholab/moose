@@ -36,18 +36,18 @@
 
 #include <vector>
 
-class ComputeInternalJacobians : public ComputeBase
+class ComputeInternalJacobians : public ComputeBase<ConstElemRange>
 {
 public:
   ComputeInternalJacobians(MooseSystem &sys, const NumericVector<Number>& in_soln, SparseMatrix<Number>&  in_jacobian) :
-    ComputeBase(sys),
+    ComputeBase<ConstElemRange>(sys),
      _soln(in_soln),
      _jacobian(in_jacobian)
   {}
 
   // Splitting Constructor
   ComputeInternalJacobians(ComputeInternalJacobians & x, Threads::split) :
-    ComputeBase(x._moose_system),
+    ComputeBase<ConstElemRange>(x._moose_system),
     _soln(x._soln),
     _jacobian(x._jacobian)
   {

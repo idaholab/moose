@@ -26,7 +26,7 @@ class DofData;
 
 namespace libMesh
 {
-  class QGauss;
+  class QBase;
   class DofMap;
   class FEBase;
   template<class T> class NumericVector;
@@ -71,7 +71,7 @@ public:
   /**
    * quadrature rule.
    */
-  QGauss * _qrule;
+  QBase * _qrule;
 
   /**
    * number of quadrature points for current element

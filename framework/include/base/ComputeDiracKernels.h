@@ -12,5 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-//Moose Includes
-//#include "ComputeBase.h"
+#ifndef COMPUTEDIRACKERNELS_H
+#define COMPUTEDIRACKERNELS_H
+
+#endif //COMPUTEDIRACKERNELS_H

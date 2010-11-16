@@ -126,6 +126,11 @@
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
 
+#include "DiracKernel.h"
+#include "DiracKernelsBlock.h"
+#include "GenericDiracKernelBlock.h"
+#include "ConstantPointSource.h"
+
 #include "Moose.h"
 #include "PetscSupport.h"
 
@@ -237,6 +242,9 @@ Moose::registerObjects()
   registerNamedParserBlock(DampersBlock, "Dampers");
   registerNamedParserBlock(GenericDamperBlock, "Dampers/*");  
   registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");
+  registerNamedParserBlock(DiracKernelsBlock, "DiracKernels");
+  registerNamedParserBlock(GenericDiracKernelBlock, "DiracKernels/*");  
+  
   
   registerInitialCondition(ConstantIC);  
   registerInitialCondition(BoundingBoxIC);  
@@ -272,6 +280,8 @@ Moose::registerObjects()
 
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
+
+  registerDiracKernel(ConstantPointSource);
 }
 
 void

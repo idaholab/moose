@@ -12,5 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-//Moose Includes
-//#include "ComputeBase.h"
+#include "DiracKernelsBlock.h"
+
+#include "DiracKernelFactory.h"
+
+template<>
+InputParameters validParams<DiracKernelsBlock>()
+{
+  return validParams<ParserBlock>();
+}
+
+DiracKernelsBlock::DiracKernelsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
+  :ParserBlock(name, moose_system, params)
+{
+  // Register execution prereqs
+  addPrereq("Mesh");
+  addPrereq("Variables");
+  addPrereq("Preconditioning");
+  addPrereq("AuxVariables");
+  addPrereq("Materials");
+}
+
+void
+DiracKernelsBlock::execute() 
+{
+#ifdef DEBUG
+  std::cerr << "Inside the DiracKernelsBlock Object\n";
+#endif
+
+  // Add the dirac_kernels to the system
+  visitChildren();
+}  
+
+  

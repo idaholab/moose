@@ -27,6 +27,7 @@
 #include "PostprocessorFactory.h"
 #include "DamperFactory.h"
 #include "DGKernelFactory.h"
+#include "DiracKernelFactory.h"
 
 class MooseFactory
 {
@@ -66,6 +67,9 @@ public:
 
   template <typename T>
   static void registerMooseDGKernel(const std::string & name);
+
+  template <typename T>
+  static void registerMooseDiracKernel(const std::string & name);
 };
 
 
@@ -153,6 +157,13 @@ MooseFactory::registerMooseDGKernel(const std::string & name)
   DGKernelFactory::instance()->registerDGKernel<T>(name);
 }
 
+template <typename T>
+void
+MooseFactory::registerMooseDiracKernel(const std::string & name)
+{
+  DiracKernelFactory::instance()->registerDiracKernel<T>(name);
+}
+
 /**
  * MOOSE Factory Macros
  */
@@ -170,6 +181,7 @@ MooseFactory::registerMooseDGKernel(const std::string & name)
 #define registerPostprocessor(name)               MooseFactory::registerMoosePostprocessor<name>(stringifyName(name));
 #define registerDamper(name)                      MooseFactory::registerMooseDamper<name>(stringifyName(name));
 #define registerDGKernel(name)                    MooseFactory::registerMooseDGKernel<name>(stringifyName(name));
+#define registerDiracKernel(name)                 MooseFactory::registerMooseDiracKernel<name>(stringifyName(name));
 
 #define registerNamedKernel(tplt, name)           MooseFactory::registerMooseKernel<tplt>(name);
 #define registerNamedBoundaryCondition(tplt, name) MooseFactory::registerMooseBoundaryCondition<tplt>(name);
@@ -183,6 +195,7 @@ MooseFactory::registerMooseDGKernel(const std::string & name)
 #define registerNamedPostprocessor(tplt, name)    MooseFactory::registerMoosePostprocessor<tplt>(name);
 #define registerNamedDamper(tplt, name)           MooseFactory::registerMooseDamper<tplt>(name);
 #define registerNamedDGKernel(tplt, name)         MooseFactory::registerMooseDGKernel<tplt>(name);
+#define registerNamedDiracKernel(tplt, name)      MooseFactory::registerMooseDiracKernel<tplt>(name);
 
 
 #endif //MOOSEFACTORY_H

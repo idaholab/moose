@@ -12,5 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-//Moose Includes
-//#include "ComputeBase.h"
+#ifndef DIRACKERNELSBLOCK_H
+#define DIRACKERNELSBLOCK_H
+
+#include "ParserBlock.h"
+
+class DiracKernelsBlock;
+
+template<>
+InputParameters validParams<DiracKernelsBlock>();
+
+class DiracKernelsBlock: public ParserBlock
+{
+public:
+  DiracKernelsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+
+  virtual void execute();
+};
+
+
+  
+
+#endif //DIRACKERNELSBLOCK_H

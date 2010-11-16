@@ -32,7 +32,7 @@ class QuadraturePointData;
 namespace libMesh
 {
   class Mesh;
-  class QGauss;
+  class QBase;
 }
 
 template<>
@@ -152,7 +152,7 @@ protected:
   /**
    * Boundary quadrature rule.
    */
-  QGauss * & _qrule;
+  QBase * & _qrule;
 
   /**
    * XYZ coordinates of quadrature points

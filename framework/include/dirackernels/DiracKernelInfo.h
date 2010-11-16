@@ -12,5 +12,44 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-//Moose Includes
-//#include "ComputeBase.h"
+#ifndef DIRACKERNELINFO_H
+#define DIRACKERNELINFO_H
+
+#include "Moose.h"
+#include "MooseArray.h"
+
+//Forward Declarations
+class MooseSystem;
+
+namespace libMesh
+{
+  template <class T> class NumericVector;
+}
+
+class DiracKernelInfo
+{
+public:
+  DiracKernelInfo(MooseSystem & moose_system);
+  virtual ~DiracKernelInfo();
+
+public:
+  void addPoint(const Elem * elem, Point p);
+
+  /**
+   * The MooseSystem this DiracKernel is associated with.
+   */
+  MooseSystem & _moose_system;
+
+  /**
+   * The list of elements that need distributions.
+   */
+  std::set<const Elem *> _elements;
+
+  /**
+   * The list of physical xyz Points that need to be evaluated in each element.
+   */
+  std::map<const Elem *, std::set<Point> > _points;
+};
+
+
+#endif //DIRACKERNELINFO_H

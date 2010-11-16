@@ -38,6 +38,9 @@
 #include "DamperData.h"
 #include "DamperWarehouse.h"
 #include "EmptyFunction.h"
+#include "DiracKernelData.h"
+#include "DiracKernelInfo.h"
+#include "DiracKernelWarehouse.h"
 
 //libmesh includes
 #include "transient_system.h"
@@ -273,6 +276,10 @@ public:
                  const std::string & name,
                  InputParameters parameters);
 
+  void addDiracKernel(std::string dirac_kernel_name,
+                      const std::string & name,
+                      InputParameters parameters);
+
   /**
    * Computes a block diagonal jacobian for the full system.
    */
@@ -310,6 +317,7 @@ public:
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node);
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem);
 
+  void reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const std::vector<Point> & points, DenseVector<Number> * Re, DenseMatrix<Number> * Ke=NULL);
 
   virtual void computePostprocessors (const NumericVector<Number>& soln);
 
@@ -354,6 +362,8 @@ public:
   void serializeSolution(const NumericVector<Number>& soln);
 
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
+
+  virtual void computeDiracKernels(const NumericVector<Number>& soln, NumericVector<Number>& residual);
 
   virtual void subdomainSetup(THREAD_ID tid, unsigned int block_id);
 
@@ -502,7 +512,10 @@ protected:
   std::vector<MaterialData> _neighbor_material_data;
   std::vector<PostprocessorData> _postprocessor_data;
   std::vector<DamperData *> _damper_data;
-  
+  std::vector<DiracKernelData *> _dirac_kernel_data;
+
+  DiracKernelInfo _dirac_kernel_info;
+
   DofMap * _dof_map;
 
   DofMap * _aux_dof_map;
@@ -587,6 +600,7 @@ protected:
   std::vector<PostprocessorWarehouse> _pps;
   std::vector<FunctionWarehouse> _functions;
   std::vector<DamperWarehouse> _dampers;
+  std::vector<DiracKernelWarehouse> _dirac_kernels;
 
   std::vector<bool> _first;
 
@@ -787,6 +801,7 @@ protected:
   friend class ComputeInternalPostprocessors;
   friend class GenericExecutionerBlock;
   friend class ComputeInternalDamping;
+  friend class ComputeDiracKernels;
 
   friend class PDEBase;
   friend class InitialCondition;
@@ -802,12 +817,14 @@ protected:
   friend class GeneralPostprocessor;
   friend class FunctionNeumannBC;
   friend class Damper;
+  friend class DiracKernel;
 
   friend class QuadraturePointData;
   friend class ElementData;
   friend class FaceData;
   friend class AuxData;
   friend class DamperData;
+  friend class DiracKernelData;
 };
 
 /**

@@ -91,8 +91,7 @@ Kernel::computeResidual()
   precalculateResidual();
   for (_i=0; _i<_phi.size(); _i++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
-  
+      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();  
 //  Moose::perf_log.pop("computeResidual()","Kernel");
 }
 

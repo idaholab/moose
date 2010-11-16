@@ -15,10 +15,12 @@
 #ifndef COMPUTEBASE_H
 #define COMPUTEBASE_H
 
-#include "elem_range.h"
-
 #include "Moose.h"
+#include "MooseSystem.h"
 #include "ParallelUniqueId.h"
+
+//libmesh includes
+#include "boundary_info.h"
 
 class MooseSystem;
 
@@ -26,12 +28,13 @@ class MooseSystem;
  * Base class for assembling-like calculations
  *
  */
+template<typename RangeType>
 class ComputeBase
 {
 public:
   ComputeBase(MooseSystem &moose_system);
 
-  void operator() (const ConstElemRange & range);
+  void operator() (const RangeType & range);
 
   /**
    * Called before the element range loop
@@ -91,5 +94,108 @@ protected:
 
   THREAD_ID _tid;
 };
+
+
+template<typename RangeType>
+ComputeBase<RangeType>::ComputeBase(MooseSystem &sys) :
+  _moose_system(sys)
+{
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::operator () (const RangeType & range)
+{
+  ParallelUniqueId puid;
+  _tid = puid.id;
+
+  pre();
+
+  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
+  typename RangeType::const_iterator el = range.begin();
+  for (el = range.begin() ; el != range.end(); ++el)
+  {
+    const Elem* elem = *el;
+    unsigned int cur_subdomain = elem->subdomain_id();
+
+    preElement(elem);
+
+    if(cur_subdomain != subdomain)
+    {
+      subdomain = cur_subdomain;
+      onDomainChanged(subdomain);
+    }
+
+    onElement(elem);
+
+    for (unsigned int side=0; side<elem->n_sides(); side++)
+    {
+      std::vector<short int> boundary_ids = _moose_system.getMesh()->boundary_info->boundary_ids (elem, side);
+
+      if (boundary_ids.size() > 0)
+      {
+        for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+          onBoundary(elem, side, *it);
+      }
+
+      if (elem->neighbor(side) != NULL)
+        onInternalSide(elem, side);
+    } // sides
+
+    postElement(elem);
+  } // range
+
+  post();
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::pre()
+{
+
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::post()
+{
+
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::preElement(const Elem * /*elem*/)
+{
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::onElement(const Elem * /*elem*/)
+{
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::postElement(const Elem * /*elem*/)
+{
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::onDomainChanged(short int /*subdomain*/)
+{
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, short int /*bnd_id*/)
+{
+}
+
+template<typename RangeType>
+void
+ComputeBase<RangeType>::onInternalSide(const Elem * /*elem*/, unsigned int /*side*/)
+{
+}
 
 #endif //COMPUTEBASE_H

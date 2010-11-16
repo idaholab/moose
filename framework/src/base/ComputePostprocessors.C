@@ -33,17 +33,17 @@
 
 #include <vector>
 
-class ComputeInternalPostprocessors : public ComputeBase
+class ComputeInternalPostprocessors : public ComputeBase<ConstElemRange>
 {
 public:
   ComputeInternalPostprocessors(MooseSystem &sys, const NumericVector<Number>& in_soln) :
-    ComputeBase(sys),
+    ComputeBase<ConstElemRange>(sys),
      _soln(in_soln)
   {}
 
   // Splitting Constructor
   ComputeInternalPostprocessors(ComputeInternalPostprocessors & x, Threads::split) :
-    ComputeBase(x._moose_system),
+    ComputeBase<ConstElemRange>(x._moose_system),
     _soln(x._soln)
   {
   }

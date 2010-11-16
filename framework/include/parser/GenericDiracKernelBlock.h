@@ -12,5 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-//Moose Includes
-//#include "ComputeBase.h"
+#ifndef GENERICDIRACKERNELBLOCK_H
+#define GENERICDIRACKERNELBLOCK_H
+
+#include "ParserBlock.h"
+
+//Forward Declarations
+class GenericDiracKernelBlock;
+
+template<>
+InputParameters validParams<GenericDiracKernelBlock>();
+
+class GenericDiracKernelBlock: public ParserBlock
+{
+public:
+  GenericDiracKernelBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+
+  virtual void execute();
+
+private:
+  std::string _type;
+};
+
+  
+
+#endif //GENERICDIRACKERNELBLOCK_H

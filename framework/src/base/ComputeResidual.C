@@ -34,18 +34,18 @@
 
 #include <vector>
 
-class ComputeInternalResiduals : public ComputeBase
+class ComputeInternalResiduals : public ComputeBase<ConstElemRange>
 {
 public:
   ComputeInternalResiduals(MooseSystem &sys, const NumericVector<Number>& in_soln, NumericVector<Number>& in_residual) :
-    ComputeBase(sys),
+    ComputeBase<ConstElemRange>(sys),
     _soln(in_soln),
     _residual(in_residual)
   {}
 
   // Splitting Constructor
   ComputeInternalResiduals(ComputeInternalResiduals & x, Threads::split) :
-    ComputeBase(x._moose_system),
+    ComputeBase<ConstElemRange>(x._moose_system),
     _soln(x._soln),
     _residual(x._residual)
   {
@@ -200,6 +200,9 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
 
   if(needResidualCopy())
     *_residual_copy = residual;
+
+  //Distribute any point loads
+  computeDiracKernels(soln, residual);
 
   //Dirichlet BCs
   std::vector<unsigned int> nodes;
