@@ -26,8 +26,6 @@ namespace Moose {
       timesteppingscheme_type_to_enum["IMPLICIT-EULER"] = IMPLICIT_EULER;
       timesteppingscheme_type_to_enum["CRANK-NICOLSON"] = CRANK_NICOLSON;
       timesteppingscheme_type_to_enum["BDF2"]           = BDF2;
-      timesteppingscheme_type_to_enum["TRAPEZOID"]      = TRAPEZOIDAL;
-      timesteppingscheme_type_to_enum["TRAPEZOIDAL"]    = TRAPEZOIDAL;
     }
   }
 
