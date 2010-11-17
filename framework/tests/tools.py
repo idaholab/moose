@@ -43,9 +43,8 @@ def executeCommand(command):
   p = Popen([command],stdout=PIPE,stderr=STDOUT, close_fds=True, shell=True)
   output = p.communicate()[0]
   if (p.returncode != 0):
-    assert False
-  else:
-    return output
+    output = 'ERROR: ' + output
+  return output
 
 def delOldOutFiles(test_dir, out_files):
   for file in out_files:
@@ -61,9 +60,14 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0):
   if (parallel):
     command = 'mpiexec -np ' + str(parallel) + ' ' + command  
   if (min_dofs):
-    # First make sure the dang thing runs
-    stdout = executeCommand(command)
-    checkForFail(stdout)
+    try:
+      # First make sure the dang thing runs
+      stdout = executeCommand(command)
+      checkForFail(stdout)
+      # Something is wrong so capture the output
+    except:
+      print stdout
+      raise
 
     # Now we can safely capture the timing
     command = 'time ' + command + ' --dofs ' + str(min_dofs)

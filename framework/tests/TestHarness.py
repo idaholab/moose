@@ -89,7 +89,6 @@ class TestHarness:
 
             module_name = file[:-3]
             self.inspectAndTest(dirpath, module_name)
-            self.num_tests += 1
 
     end = timeit.default_timer()
     self.testing_time = end - start
@@ -140,6 +139,7 @@ class TestHarness:
         eval('address(' + args + ')')
 
         test_end = timeit.default_timer()
+
         # confusing: if arg_string is populated it means we changed dofs/np so
         # we want to see the testing time, not just pass/fail
         if (args == ''):
@@ -153,6 +153,17 @@ class TestHarness:
     finally:
       sys.stdout = saved_stdout
       test_end = timeit.default_timer()
+      output = capture.getvalue()
+      
+      # We can skip established tests with the "pass" keyword in our
+      # python driver files in which case no output is produced.
+      # In this case we want to notify the user that the test was actually
+      # skipped not OK
+      if output == '':
+        result = 'skipped'
+      else:
+        self.num_tests += 1
+
       self.processOutput(test, result, capture.getvalue())
 
 
@@ -172,8 +183,8 @@ class TestHarness:
 
     # print the output if verbose option is on or the test failed
     if self.options.verbose or result == 'FAILED':
-      print output
-      print s
+      print '*'*100 + '\n' + '*'*41 + '  FAILED OUTPUT  ' + '*'*42 + '\n' + '*'*100 + '\n' + output
+      #print s
 
   # return '' if all tests passed, or a message if some failed. Override if you
   # want more fail criteria
