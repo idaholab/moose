@@ -83,21 +83,11 @@ MeshBlock::execute()
   mesh->delete_remote_elements();
 
   // uniformly refine mesh
-  MeshRefinement mesh_refinement(*mesh);
-  if (!autoResizeProblem(mesh, mesh_refinement))
-    mesh_refinement.uniformly_refine(getParamValue<int>("uniform_refine"));
+  MeshRefinement *mesh_refinement = _moose_system.initMeshRefinement();
+  if (!autoResizeProblem(mesh, *mesh_refinement))
+    mesh_refinement->uniformly_refine(getParamValue<int>("uniform_refine"));
     
-  
-//  unsigned int init_unif_refine;
-//  MeshRefinement mesh_refinement(*mesh);
-//  bool success = false;
-//  if (Moose::command_line != NULL && Moose::command_line->search("--dofs"))
-//    success = Moose::autoResizeProblem(Moose::command_line->next(-1), _parser_handle.getPotHandle(), mesh_refinement);
-//  if (!success)
-//    mesh_refinement.uniformly_refine(getParamValue<int>("uniform_refine"));
-
-
-//  _moose_system.meshChanged();
+  //  _moose_system.meshChanged();
   mesh->boundary_info->build_node_list_from_side_list();
   MeshTools::build_nodes_to_elem_map(*mesh, _moose_system.node_to_elem_map);
 

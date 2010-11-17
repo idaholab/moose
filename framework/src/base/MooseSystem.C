@@ -88,6 +88,7 @@ MooseSystem::MooseSystem() :
   _exreader(NULL),
   _is_valid(false),
   _mesh_refinement(NULL),
+  _mesh_refinement_on(false),
   _error_estimator(NULL),
   _error(NULL),
   _t(0),
@@ -163,6 +164,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _exreader(NULL),
   _is_valid(false),
   _mesh_refinement(NULL),
+  _mesh_refinement_on(false),
   _error_estimator(NULL),
   _error(NULL),
   _t(0),
@@ -586,17 +588,29 @@ MooseSystem::initDataStructures()
   _is_valid = true;
 }
 
+MeshRefinement *
+MooseSystem::initMeshRefinement()
+{
+  mooseAssert(!_mesh_refinement, "Mesh refinement object has already been initialized!");
+  mooseAssert(_mesh, "Mesh has not been initialized!");
+  
+  _mesh_refinement = new MeshRefinement(*_mesh);
+  return _mesh_refinement;
+}
+
 void
 MooseSystem::initAdaptivity(unsigned int steps, unsigned int initial_steps)
 {
-  if (_mesh_refinement)
-    mooseError("Mesh refinement object has already been initialized!");
+  mooseAssert(_mesh, "Mesh has not been initialized!");
+  
+  if (!_mesh_refinement)
+    _mesh_refinement = new MeshRefinement(*_mesh);
 
   _es->parameters.set<bool>("adaptivity") = true;
   _es->parameters.set<unsigned int>("steps") = steps;
   _es->parameters.set<unsigned int>("initial_adaptivity") = initial_steps;
-
-  _mesh_refinement = new MeshRefinement(*_mesh);
+  _mesh_refinement_on = true;
+  
   _error = new ErrorVector;
 }
 
@@ -627,11 +641,18 @@ MooseSystem::setErrorNorm(SystemNorm &sys_norm)
   _error_estimator->error_norm = sys_norm;
 }
 
+MeshRefinement &
+MooseSystem::getMeshRefinementObject()
+{
+  mooseAssert(_mesh_refinement != NULL, "mesh_refinement object not initialized, have you properly initialized the mesh?");
+  return *_mesh_refinement;
+}
+
 void
 MooseSystem::adaptMesh()
 {
-  if (_mesh_refinement)
-  {
+  if (_mesh_refinement_on)
+  { 
     // Compute the error for each active element
     _error_estimator->estimate_error(*_system, *_error);
 

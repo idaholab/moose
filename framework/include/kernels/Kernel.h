@@ -46,6 +46,7 @@ InputParameters validParams<Kernel>();
 /** 
  * The Kernel class is responsible for calculating the residuals for various
  * physics.
+ * @nosubgrouping
  * 
  */
 class Kernel :
@@ -98,6 +99,10 @@ protected:
    */
   ElementData & _element_data;
 
+  /**
+   * @name Basic Functionality
+   */
+  /*@{*/
   /** 
    * This is the virtual that derived classes should override for computing the residual.
    */
@@ -107,6 +112,7 @@ protected:
    * This is the virtual that derived classes should override for computing the Jacobian.
    */
   virtual Real computeQpJacobian();
+  /*@}*/
   
   /** 
    * This is the virtual that derived classes should override for computing an off-diagonal jacobian component.

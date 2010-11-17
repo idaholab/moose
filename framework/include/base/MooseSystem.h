@@ -458,6 +458,8 @@ public:
 
   void updateNewtonStep();
 
+  MeshRefinement * initMeshRefinement();
+  
   /* Adaptivity interface ---------------------- */
 
   /**
@@ -476,6 +478,8 @@ public:
   void setAdaptivityParam(const std::string &param_name, const T &param_value);
 
   void setErrorNorm(SystemNorm &sys_norm);
+
+  MeshRefinement & getMeshRefinementObject();
 
   void adaptMesh();
 
@@ -627,9 +631,10 @@ protected:
   bool _is_valid;
 
   /**
-   * A mesh refinement object to be used with Adaptivity.
+   * A mesh refinement object to be used either with initial refinement or with Adaptivity.
    */
   MeshRefinement * _mesh_refinement;
+  bool _mesh_refinement_on;
 
   /**
    * Error estimator to be used by the apps.

@@ -318,6 +318,10 @@ ParserBlock::printBlockData()
   
   if (getType() != "")
     std::cout << spacing << "type: " << getType() << "\n";
+  std::string class_desc = _class_params.getClassDescription();
+  if (class_desc != "")
+    std::cout << spacing << "description: " << class_desc << "\n";
+  
   std::cout << spacing << "{\n";
   
   std::cout << spacing << "  Valid Parameters:\n";

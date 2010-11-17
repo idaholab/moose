@@ -11,7 +11,7 @@
     elem_type = QUAD4
   [../]
 
-  uniform_refine = 2
+  uniform_refine = 4
 []
 
 [Variables]

@@ -18,6 +18,7 @@
 #include "Moose.h"
 
 #include "dof_map.h"
+#include "mesh_refinement.h"
 
 template<>
 InputParameters validParams<PeriodicBlock>()
@@ -40,4 +41,8 @@ PeriodicBlock::execute()
   _executed = true;
 
   visitChildren();
+
+  // Periodic Boundaries have been added so make the MeshRefinement object aware of them
+  MeshRefinement &r = _moose_system.getMeshRefinementObject();
+  r.set_periodic_boundaries_ptr(_moose_system.getNonlinearSystem()->get_dof_map().get_periodic_boundaries());
 }  
