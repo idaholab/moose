@@ -41,6 +41,26 @@ QuadraturePointData::~QuadraturePointData()
     delete i->second;
 
   delete _qrule;
+
+  freeDoubleMooseArray(_var_vals);
+  freeDoubleMooseArray(_var_vals_old);
+  freeDoubleMooseArray(_var_vals_older);
+  freeDoubleMooseArray(_var_seconds);
+  freeDoubleMooseArray(_var_grads);
+  freeDoubleMooseArray(_var_grads_old);
+  freeDoubleMooseArray(_var_grads_older);
+  freeDoubleMooseArray(_var_dots);
+  freeDoubleMooseArray(_var_du_dot_dus);
+
+  freeDoubleMooseArray(_aux_var_vals);
+  freeDoubleMooseArray(_aux_var_vals_old);
+  freeDoubleMooseArray(_aux_var_vals_older);
+  freeDoubleMooseArray(_aux_var_grads);
+  freeDoubleMooseArray(_aux_var_grads_old);
+  freeDoubleMooseArray(_aux_var_grads_older);
+
+  freeDoubleMooseArray(_var_vals_old_newton);
+  freeDoubleMooseArray(_var_grads_old_newton);
 }
 
 void

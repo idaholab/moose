@@ -33,6 +33,7 @@ FaceData::FaceData(MooseSystem & moose_system, DofData & dof_data) :
 
 FaceData::~FaceData()
 {
+  freeDoubleMooseArray(_var_vals_nodal);
   delete _current_side_elem;
 }
 

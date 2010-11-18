@@ -87,7 +87,7 @@ public:
 private:
   InitialConditionFactory();
   
-  virtual ~InitialConditionFactory(){}
+  virtual ~InitialConditionFactory();
 
   std::map<std::string, InitialConditionBuildPtr> _name_to_build_pointer;
   std::map<std::string, InitialConditionParamsPtr> _name_to_params_pointer;

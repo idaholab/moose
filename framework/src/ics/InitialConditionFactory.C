@@ -60,3 +60,7 @@ InitialConditionFactory::registeredInitialConditionsEnd()
 InitialConditionFactory::InitialConditionFactory()
 {
 }
+
+InitialConditionFactory::~InitialConditionFactory()
+{
+}

@@ -215,5 +215,15 @@ MooseArray<T>::shallowCopy(const MooseArray & rhs)
   _allocated_size = rhs._allocated_size;
 }
 
+
+template <class T>
+void
+freeDoubleMooseArray(MooseArray<MooseArray<T> > &a)
+{
+  for (unsigned int i = 0; i < a.size(); i++)
+    a[i].release();
+  a.release();
+}
+
 #endif //MOOSEARRAY_H
 

@@ -219,6 +219,7 @@ MooseSystem::~MooseSystem()
     delete _neighbor_face_data[tid];
     delete _aux_data[tid];
     delete _damper_data[tid];
+    delete _dirac_kernel_data[tid];
   }
 
   if (_preconditioner != NULL)
@@ -1231,6 +1232,8 @@ MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, c
 {
   // current element
   _face_data[tid]->_current_side = side;
+
+  delete _face_data[tid]->_current_side_elem;
   _face_data[tid]->_current_side_elem = elem->build_side(side).release();
 
   // loop over variables and reinit FE objects

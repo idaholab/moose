@@ -35,7 +35,9 @@ DamperData::DamperData(MooseSystem & moose_system, ElementData & element_data) :
 {}
 
 DamperData::~DamperData()
-{}
+{
+  freeDoubleMooseArray(_var_increments);  
+}
 
 void
 DamperData::init()
