@@ -1,8 +1,8 @@
 [Mesh]
   [./Generation]
     dim = 2
-    nx = 8
-    ny = 8
+    nx = 4
+    ny = 4
     nz = 0
     
     xmax = 40
@@ -35,14 +35,14 @@
   [./conv]
     type = Convection
     variable = u
-    x = -0.04
+    x = -0.4
     y = 0
   [../]
 
   [./forcing]
     type = GaussContForcing
     variable = u
-    x_center = 4.0
+    x_center = 8.0
     y_center = 18.0
     x_spread = 1.0
     y_spread = 5.0
@@ -55,7 +55,6 @@
 []
 
 [BCs]
-  #active = ' '
 
   [./Periodic]
     [./x]
@@ -89,18 +88,18 @@
   type = Transient
   perf_log = true
   dt = 1
-  num_steps = 80
+  num_steps = 20
 
   [./Adaptivity]
-    refine_fraction = .25
-    coarsen_fraction = .005
+    refine_fraction = .80
+    coarsen_fraction = .02
     max_h_level = 4
     error_estimator = KellyErrorEstimator
   [../]
 []
 
 [Output]
-  file_base = out
+  file_base = level1
   interval = 1
   exodus = true
 []
