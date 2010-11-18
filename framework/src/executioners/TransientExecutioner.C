@@ -223,7 +223,7 @@ TransientExecutioner::computeDT()
   // If start up steps are needed
   if(_t_step == 1 && _n_startup_steps > 1)
     return _dt/(double)(_n_startup_steps);
-  else if (_t_step == 1+_n_startup_steps)
+  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
     return _dt*(double)(_n_startup_steps);
   else
     return _dt;
