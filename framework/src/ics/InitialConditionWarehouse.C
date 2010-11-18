@@ -20,6 +20,8 @@ InitialConditionWarehouse::InitialConditionWarehouse()
 
 InitialConditionWarehouse::~InitialConditionWarehouse()
 {
+  for (InitialConditionIterator it = activeInitialConditionsBegin(); it != activeInitialConditionsEnd(); ++it)
+    delete it->second;
 }
 
 InitialConditionIterator

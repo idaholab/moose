@@ -27,6 +27,10 @@ MaterialWarehouse::~MaterialWarehouse()
   for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       delete (*k);
+
+  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      delete (*k);
 }
 
 std::vector<Material *> &

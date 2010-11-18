@@ -26,20 +26,20 @@ MaterialFactory::MaterialFactory()
 
 MaterialFactory *
 MaterialFactory::instance()
-     {
-    static MaterialFactory * instance;
-    if(!instance)
-      instance=new MaterialFactory;
-    return instance;
-  }
+{
+  static MaterialFactory * instance;
+  if(!instance)
+    instance=new MaterialFactory;
+  return instance;
+}
 
 InputParameters
 MaterialFactory::getValidParams(const std::string & name)
-  {
-    if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
-      mooseError("A _" + name + "_ is not registered Material\n\n");
-    return _name_to_params_pointer[name]();
-  }
+{
+  if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
+    mooseError("A _" + name + "_ is not registered Material\n\n");
+  return _name_to_params_pointer[name]();
+}
 
 MaterialNamesIterator
 MaterialFactory::registeredMaterialsBegin()

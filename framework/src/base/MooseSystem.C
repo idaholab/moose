@@ -249,6 +249,11 @@ MooseSystem::~MooseSystem()
 
   if(_ex_out)
     delete _ex_out;  
+
+  _real_zero.release();
+  freeDoubleMooseArray(_zero);
+  freeDoubleMooseArray(_grad_zero);
+  freeDoubleMooseArray(_second_zero);
 }
 
 Mesh *
