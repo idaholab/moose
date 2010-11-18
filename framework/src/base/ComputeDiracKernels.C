@@ -52,7 +52,7 @@ public:
       _residual(x._residual)
   {}
 
-  virtual void preElement(const Elem *elem)
+  virtual void preElement(const Elem * /*elem*/)
   {
     _re.zero();
   }
@@ -80,8 +80,6 @@ public:
       DiracKernelIterator dirac_kernel_begin = _moose_system._dirac_kernels[_tid].diracKernelsBegin();
       DiracKernelIterator dirac_kernel_end = _moose_system._dirac_kernels[_tid].diracKernelsEnd();
       DiracKernelIterator dirac_kernel_it = dirac_kernel_begin;
-
-      unsigned int n_points = points.size();
 
       for(dirac_kernel_it=dirac_kernel_begin;dirac_kernel_it!=dirac_kernel_end;++dirac_kernel_it)
       {
@@ -118,7 +116,7 @@ void MooseSystem::computeDiracKernels(const NumericVector<Number>& soln, Numeric
   Moose::perf_log.push("compute_dirac_kernels()","Solve");
 
   // Default to no dirac_kernels
-  Real dirac_kernels = 1.0;
+  // Real dirac_kernels = 1.0;
 
   DiracKernelIterator dirac_kernel_begin = _dirac_kernels[0].diracKernelsBegin();
   DiracKernelIterator dirac_kernel_end = _dirac_kernels[0].diracKernelsEnd();

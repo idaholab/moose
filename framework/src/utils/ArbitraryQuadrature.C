@@ -1,22 +1,16 @@
-// $Id: quadrature_gauss.C 3874 2010-07-02 21:57:26Z roystgnr $
-
-// The libMesh Finite Element Library.
-// Copyright (C) 2002-2008 Benjamin S. Kirk, John W. Peterson, Roy H. Stogner
-  
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
-  
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Lesser General Public License for more details.
-  
-// You should have received a copy of the GNU Lesser General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 
 #include "ArbitraryQuadrature.h"
 
@@ -41,17 +35,23 @@ void
 ArbitraryQuadrature::init_1D(const ElemType _type,
                              unsigned int p_level)
 {
+  this->_type = _type;
+  this->_p_level = p_level;
 }
 
 void
 ArbitraryQuadrature::init_2D(const ElemType _type,
                              unsigned int p_level)
 {
+  this->_type = _type;
+  this->_p_level = p_level;
 }
 
 void
 ArbitraryQuadrature::init_3D(const ElemType _type,
                              unsigned int p_level)
 {
+  this->_type = _type;
+  this->_p_level = p_level;
 }
 

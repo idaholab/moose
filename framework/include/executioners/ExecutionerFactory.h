@@ -82,7 +82,7 @@ public:
 private:
   ExecutionerFactory();
   
-  virtual ~ExecutionerFactory(){}
+  virtual ~ExecutionerFactory() {}
 
   std::map<std::string, ExecutionerBuildPtr> _name_to_build_pointer;
   std::map<std::string, ExecutionerParamsPtr> _name_to_params_pointer;

@@ -86,7 +86,7 @@ public:
 private:
   MaterialFactory();
   
-  virtual ~MaterialFactory(){}
+  virtual ~MaterialFactory() {}
 
   std::map<std::string, MaterialBuildPtr> _name_to_build_pointer;
   std::map<std::string, MaterialParamsPtr> _name_to_params_pointer;

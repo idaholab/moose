@@ -33,28 +33,10 @@ BCFactory::getValidParams(const std::string & name)
 }
 
 BCFactory::BCFactory()
-{
-}
+{}
 
 BCFactory::~BCFactory()
-{
-  {
-    std::map<std::string, BCBuildPtr>::iterator i;
-    for (i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
-    {
-      delete &i;
-    }
-  }
-
-  {
-    std::map<std::string, BCParamsPtr>::iterator i;
-    for(i=_name_to_params_pointer.begin(); i!=_name_to_params_pointer.end(); ++i)
-    {
-      delete &i;
-    }
-
-  }
-}
+{}
 
 BCNamesIterator
 BCFactory::registeredBCsBegin()

@@ -63,25 +63,8 @@ DGKernelFactory::registeredDGKernelsEnd()
 
 
 DGKernelFactory::DGKernelFactory()
-{
-}
+{}
   
 DGKernelFactory:: ~DGKernelFactory()
-{
-  {
-    std::map<std::string, dgKernelBuildPtr>:: iterator i;
-    for(i=_name_to_build_pointer.begin(); i!=_name_to_build_pointer.end(); ++i)
-    {
-      delete &i;
-    }
-  }
-
-  {
-    std::map<std::string, dgKernelParamsPtr>::iterator i;
-    for(i=_name_to_params_pointer.begin(); i!=_name_to_params_pointer.end(); ++i)
-    {
-      delete &i;
-    }
-  }
-}
+{}
 

@@ -1812,7 +1812,7 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
     _ex_out->write_timestep(exodus_file_name + ".e", *_es, _num_in_current_file, time);
     if ( _postprocessor_exodus_output ) 
     {
-      _postprocessor_data[0].write_exodus( _ex_out, exodus_file_name + ".e", time );
+      _postprocessor_data[0].writeExodus( _ex_out, time );
     }
 
     if(_has_displaced_mesh)
@@ -1833,7 +1833,7 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
       displaced_ex_out.write_timestep(exodus_file_name + ".e", *_displaced_es, _num_in_current_file_displaced, time);      
     if ( _postprocessor_exodus_output ) 
     {
-      _postprocessor_data[0].write_exodus( &displaced_ex_out, exodus_file_name + ".e", time );
+      _postprocessor_data[0].writeExodus( &displaced_ex_out, time );
     }
     }
   }

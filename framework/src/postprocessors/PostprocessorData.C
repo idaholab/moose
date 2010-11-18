@@ -53,38 +53,37 @@ PostprocessorData::addData(const std::string & name, Real value, Real time)
 }
 
 void
-PostprocessorData::print_table(std::ostream & out)
+PostprocessorData::printTable(std::ostream & out)
 {
-  _output_table.print_table(out);
+  _output_table.printTable(out);
 }
 
 void
-PostprocessorData::print_table(const std::string & file_name)
+PostprocessorData::printTable(const std::string & file_name)
 {
-  _output_table.print_table(file_name);
+  _output_table.printTable(file_name);
 }
 
 void
-PostprocessorData::print_csv(const std::string & file_name)
+PostprocessorData::printCSV(const std::string & file_name)
 {
-  _output_table.print_csv(file_name);
+  _output_table.printCSV(file_name);
 }
 
 void
-PostprocessorData::print_ensight(const std::string & file_name)
+PostprocessorData::printEnsight(const std::string & file_name)
 {
-  _output_table.print_ensight(file_name);
+  _output_table.printEnsight(file_name);
 }
 
 void
-PostprocessorData::make_gnuplot(const std::string & file_name, const std::string & format)
+PostprocessorData::makeGnuplot(const std::string & file_name, const std::string & format)
 {
-  _output_table.make_gnuplot(file_name, format);
+  _output_table.makeGnuplot(file_name, format);
 }
 
 void
-PostprocessorData::write_exodus( ExodusII_IO * ex_out,
-                                 const std::string & file_name, Real time )
+PostprocessorData::writeExodus( ExodusII_IO * ex_out, Real time )
 {
-  _output_table.write_exodus( ex_out, file_name, time );
+  _output_table.writeExodus( ex_out, time );
 }

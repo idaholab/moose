@@ -518,8 +518,6 @@ protected:
   std::vector<DamperData *> _damper_data;
   std::vector<DiracKernelData *> _dirac_kernel_data;
 
-  DiracKernelInfo _dirac_kernel_info;
-
   DofMap * _dof_map;
 
   DofMap * _aux_dof_map;
@@ -543,6 +541,7 @@ protected:
   std::map<unsigned int, std::set<unsigned int> > _aux_var_map;
 
   Moose::GeomType _geom_type;
+  DiracKernelInfo _dirac_kernel_info;
   Mesh * _mesh;
   Mesh * _displaced_mesh;
 

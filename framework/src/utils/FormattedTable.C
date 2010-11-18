@@ -90,19 +90,19 @@ FormattedTable::printRowDivider(std::ostream & out)
 }
 
 void
-FormattedTable::print_table(const std::string & file_name)
+FormattedTable::printTable(const std::string & file_name)
 {
   if (!_stream_open)
   {
     _output_file.open(file_name.c_str(), std::ios::trunc);
     _stream_open = true;
   }
-  print_table(_output_file);
+  printTable(_output_file);
 }
 
 
 void
-FormattedTable::print_table(std::ostream & out)
+FormattedTable::printTable(std::ostream & out)
 {
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
@@ -134,7 +134,7 @@ FormattedTable::print_table(std::ostream & out)
 }
 
 void
-FormattedTable::print_csv(const std::string & file_name)
+FormattedTable::printCSV(const std::string & file_name)
 {
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
@@ -175,7 +175,7 @@ namespace gnuplot
 }
 
 void
-FormattedTable::print_ensight(const std::string & file_base)
+FormattedTable::printEnsight(const std::string & file_base)
 {
   // setup output file
   std::string file_name = file_base + ".ens";  //TODO not sure what the extension should be
@@ -205,8 +205,7 @@ FormattedTable::print_ensight(const std::string & file_base)
 }
 
 void
-FormattedTable::write_exodus(ExodusII_IO * ex_out,
-                             const std::string & file_base, Real time)
+FormattedTable::writeExodus(ExodusII_IO * ex_out, Real time)
 {
   // iterators
   std::map<Real, std::map<std::string, Real> >::iterator i(_data.end());
@@ -253,7 +252,7 @@ FormattedTable::write_exodus(ExodusII_IO * ex_out,
 }
 
 void
-FormattedTable::make_gnuplot(const std::string & base_file, const std::string & format)
+FormattedTable::makeGnuplot(const std::string & base_file, const std::string & format)
 {
   // TODO: run this once at end of simulation, right now it runs every iteration
   // TODO: do I need to be more careful escaping input?

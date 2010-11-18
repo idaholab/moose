@@ -63,8 +63,7 @@ DamperFactory::registeredDampersEnd()
 
 
 DamperFactory::DamperFactory()
-{
-}
+{}
   
 DamperFactory:: ~DamperFactory() 
 {}

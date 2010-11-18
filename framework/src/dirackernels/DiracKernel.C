@@ -32,6 +32,7 @@ DiracKernel::DiracKernel(const std::string & name, MooseSystem & moose_system, I
   : PDEBase(name, moose_system, parameters, *moose_system._dirac_kernel_data[parameters.get<THREAD_ID>("_tid")]),
     _dirac_kernel_data(*_moose_system._dirac_kernel_data[_tid]),
     _dirac_kernel_info(_moose_system._dirac_kernel_info),
+    _var_name(getParam<std::string>("variable")),
     _dof_data(moose_system._dof_data[_tid]),
     _u(_dirac_kernel_data._var_vals[_var_num]),
     _grad_u(_dirac_kernel_data._var_grads[_var_num]),
@@ -45,7 +46,6 @@ DiracKernel::DiracKernel(const std::string & name, MooseSystem & moose_system, I
     _test((_dirac_kernel_data._test)[_var_num]),
     _grad_test(*(_dirac_kernel_data._grad_phi)[_fe_type]),
     _second_test(*(_dirac_kernel_data._second_phi)[_fe_type]),
-    _var_name(getParam<std::string>("variable")),
     _current_points(_dirac_kernel_data._current_points)
 {
   // If this variable isn't known yet... make it so

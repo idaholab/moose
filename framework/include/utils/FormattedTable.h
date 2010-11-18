@@ -55,18 +55,17 @@ public:
    * Methods for dumping the table to the stream - either by filename or by stream handle.  If
    * a filename is supplied openening and closing of the file is properly handled
    */
-  void print_table(std::ostream & out);
-  void print_table(const std::string & file_name);
+  void printTable(std::ostream & out);
+  void printTable(const std::string & file_name);
 
   /**
    * Method for dumping the table to a csv file - opening and closing the file handle is handled
    */
-  void print_csv(const std::string & file_name);
+  void printCSV(const std::string & file_name);
 
-  void print_ensight(const std::string & file_name);
-  void write_exodus(ExodusII_IO * ex_out,
-                    const std::string & file_name, Real time);
-  void make_gnuplot(const std::string & base_file, const std::string & format);
+  void printEnsight(const std::string & file_name);
+  void writeExodus(ExodusII_IO * ex_out, Real time);
+  void makeGnuplot(const std::string & base_file, const std::string & format);
   
 private:
   

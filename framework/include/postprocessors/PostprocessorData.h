@@ -35,13 +35,12 @@ public:
 
   void addData(const std::string & name, Real value, Real time);
 
-  void print_table(std::ostream & out);
-  void print_table(const std::string & file_name);
-  void print_csv(const std::string & file_name);
-  void print_ensight(const std::string & file_name);
-  void write_exodus(ExodusII_IO * ex_out,
-                    const std::string & file_name, Real time);
-  void make_gnuplot(const std::string & file_name, const std::string & format);
+  void printTable(std::ostream & out);
+  void printTable(const std::string & file_name);
+  void printCSV(const std::string & file_name);
+  void printEnsight(const std::string & file_name);
+  void writeExodus(ExodusII_IO * ex_out, Real time);
+  void makeGnuplot(const std::string & file_name, const std::string & format);
   
 private:
   MooseSystem & _moose_system;

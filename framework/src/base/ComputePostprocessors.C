@@ -256,23 +256,23 @@ void MooseSystem::outputPostprocessors()
     if (_postprocessor_screen_output)
     {
       std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-      _postprocessor_data[0].print_table(std::cout);
+      _postprocessor_data[0].printTable(std::cout);
       std::cout<<std::endl;
     }
   
     if (_postprocessor_csv_output)
     {
-      _postprocessor_data[0].print_csv(_file_base + ".csv");
+      _postprocessor_data[0].printCSV(_file_base + ".csv");
     }
 
     if (_postprocessor_ensight_output)
     {
-      _postprocessor_data[0].print_ensight(_file_base);
+      _postprocessor_data[0].printEnsight(_file_base);
     }
 
     if (_postprocessor_gnuplot_output)
     {
-      _postprocessor_data[0].make_gnuplot(_file_base, _gnuplot_format);
+      _postprocessor_data[0].makeGnuplot(_file_base, _gnuplot_format);
     }
   }
 }
