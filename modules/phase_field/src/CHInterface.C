@@ -28,7 +28,7 @@ CHInterface::computeQpResidual()
   //Actual value to return
   Real value = 0.0;
   
-  value += _kappa[_qp]*(_second_u[_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]));
+  value += _kappa[_qp]*_second_u[_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]);
   
   return value;
 }
