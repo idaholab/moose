@@ -21,19 +21,30 @@
 template<>
 InputParameters validParams<CrossIC>()
 {
-  return validParams<C1ICBase>();
+  InputParameters params = validParams<C1ICBase>();
+  params.addParam<Real>("x1", 0.0, "The x coordinate of the lower left-hand corner of the box");
+  params.addParam<Real>("y1", 0.0, "The y coordinate of the lower left-hand corner of the box");
+
+  params.addParam<Real>("x2", 1.0, "The x coordinate of the upper right-hand corner of the box");
+  params.addParam<Real>("y2", 1.0, "The y coordinate of the upper right-hand corner of the box");
+
+  return params;
 }
 
 CrossIC::CrossIC(const std::string & name,
                  MooseSystem & moose_system,
                  InputParameters parameters)
-  :C1ICBase(name, moose_system, parameters)
+  :C1ICBase(name, moose_system, parameters),
+   _x1(parameters.get<Real>("x1")),
+   _y1(parameters.get<Real>("y1")),
+   _x2(parameters.get<Real>("x2")),
+   _y2(parameters.get<Real>("y2"))
 {}
 
 Real
 CrossIC::value(const Point & p)
 {
-  Real x = p(0), y = p(1);
+  Real x = (p(0) - _x1)/(_x2 - _x1), y = (p(1) - _y1)/(_y2 - _y1);
 
   Real cmax = _average + _amplitude;
   Real cmin = _average - _amplitude;
