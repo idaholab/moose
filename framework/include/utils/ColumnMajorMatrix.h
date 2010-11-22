@@ -285,8 +285,12 @@ public:
   bool operator==(const ColumnMajorMatrix & rhs) const;
   bool operator!=(const ColumnMajorMatrix & rhs) const;
 
-  
+  /**
+   * Computes Eigen values and Eigen vectors only for symmetric and real values
+   */
 
+  void eigen  (ColumnMajorMatrix &  d_matrix, ColumnMajorMatrix &  a_matrix) const;
+  
 protected:
   unsigned int _n_rows, _n_cols, _n_entries;
   std::vector<Real> _values;

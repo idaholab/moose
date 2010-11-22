@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "ColumnMajorMatrix.h"
+#include "c++eigen.h"
 
 ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols)
   : _n_rows(rows),
@@ -83,6 +84,8 @@ ColumnMajorMatrix ColumnMajorMatrix::kronecker  (const ColumnMajorMatrix &  rhs)
 
 
 
+
+
 ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseMatrix<Real> &rhs)
  {
 
@@ -113,4 +116,65 @@ ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseVector<Real> &rhs)
 
     return *this;
 }
+
+
+
+void ColumnMajorMatrix::eigen  (ColumnMajorMatrix &  d_matrix, ColumnMajorMatrix &  a_matrix) const
+ {
+
+    mooseAssert(_n_rows == _n_cols, "Matrices must be square for a eigen system to solve!");
+    
+   const int ND = _n_cols;
+   double **a_mat, dummy;
+   double *d_mat,*e_mat, *e;
+   
+   a_matrix._n_cols = ND;
+   a_matrix._n_rows = ND;
+   a_matrix._n_entries = _n_entries;
+   a_matrix._values.resize(_n_entries);
+   
+   d_matrix._n_cols = 1;
+   d_matrix._n_rows = ND;
+   d_matrix._n_entries = _n_cols;
+   d_matrix._values.resize(_n_cols);
+   
+   a_mat = dmatrix(1,ND,1,ND);
+   d_mat = dvector(1,ND);
+   e_mat = dvector(1,ND);
+   e = dvector(1,ND);
+   
+   for( int j=1;j<=ND;j++)
+     for( int i=1;i<=ND;i++)
+       a_mat[i][j] = this->_values[(j-1)*_n_cols+(i-1)];
+   
+
+   
+   tred2(a_mat, ND, d_mat, e_mat);
+   tqli(d_mat, e_mat, ND, a_mat);
+   
+   /* Sort the eigenvalues in ascending order */
+   for (int i=1; i<ND; i++)
+     for (int j=i+1; j<=ND; j++)
+       if (d_mat[i]>d_mat[j]) {
+         dummy = d_mat[i];
+         d_mat[i] = d_mat[j];
+         d_mat[j] = dummy;
+         for (int k=1; k<=ND; k++) e[k] = a_mat[k][i];
+         for (int k=1; k<=ND; k++) a_mat[k][i] = a_mat[k][j];
+         for (int k=1; k<=ND; k++) a_mat[k][j] = e[k];
+       }
+   
+   for( int j=1;j<=ND;j++)
+   {
+     d_matrix._values[j-1] = d_mat[j];
+     
+     for( int i=1;i<=ND;i++)
+       a_matrix._values[(j-1)*_n_cols+(i-1)] = a_mat[i][j];  
+   }
+   
+        
+   
+   
+ }
+
 
