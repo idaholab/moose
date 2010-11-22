@@ -43,6 +43,8 @@
 #include "StressDivergence.h"
 #include "StressOutput.h"
 
+#include "MaterialModel.h"
+
 // phase_field
 #include "AC.h"
 #include "ACBulk.h"
@@ -102,7 +104,8 @@ Elk::registerObjects()
   registerBoundaryCondition(PressureBC);
   registerKernel(StressDivergence);
   registerKernel(StressOutput);
-  
+  registerMaterial(MaterialModel);
+
   // phase_field
   registerKernel(AC);
   registerKernel(ACBulk);
