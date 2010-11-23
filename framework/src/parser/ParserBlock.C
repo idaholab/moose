@@ -371,7 +371,8 @@ ParserBlock::printBlockYAML()
   std::cout << spacing << "- name: " << _name << "\n";
   spacing += "  ";
   
-  //will print "" if there is no type, which translates to None in python
+  //will print "" if there is no type or desc, which translates to None in python
+  std::cout << spacing << "desc: !!str " << _class_params.getClassDescription() << "\n";
   std::cout << spacing << "type: " << getType() << "\n";
   
   std::cout << spacing << "parameters:\n";
@@ -412,4 +413,3 @@ ParserBlock::printBlockYAML()
   
   visitChildren(&ParserBlock::printBlockYAML, true, false);
 }
-
