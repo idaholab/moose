@@ -17,7 +17,9 @@
 # an application
 ###############################################################################
 CURR_DIR	?= $(shell pwd)
-MOOSE_DIR	?= $(shell pwd)/../moose
+ROOT_DIR  ?= $(shell dirname `pwd`)
+MOOSE_DIR	?= $(ROOT_DIR)/moose
+
 
 MAKE_LIBRARY := no
 APPLICATION_NAME := moose_test

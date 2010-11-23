@@ -55,15 +55,15 @@ endif
 ##############################################################################
 #
 # source files
-srcfiles    := $(shell find . -name *.C)
+srcfiles    := $(shell find $(CURR_DIR) -name *.C)
 
 ifeq ($(MAKE_LIBRARY),yes)
 # THIS LINE SHOULD BE MADE MORE GENERIC
 srcfiles    := $(filter-out ./src/main.C, $(srcfiles))
 endif
 
-fsrcfiles   := $(shell find . -name *.f)
-f90srcfiles := $(shell find . -name *.f90)
+fsrcfiles   := $(shell find $(CURR_DIR) -name *.f)
+f90srcfiles := $(shell find $(CURR_DIR) -name *.f90)
 
 #
 # object files
@@ -73,7 +73,7 @@ f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
 #
 # header files
-app_DIRS	+= $(shell find . -type d | grep -v .svn)
+app_DIRS	+= $(shell find $(CURR_DIR) -type d | grep -v .svn)
 libmesh_INCLUDE += -Iinclude $(foreach i, $(app_DIRS), -I$(i)) $(ADDITIONAL_INCLUDES)
 
 .PHONY: clean doc 
