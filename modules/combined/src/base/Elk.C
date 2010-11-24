@@ -38,6 +38,7 @@
 #include "LinearIsotropicMaterial.h"
 #include "LSHPlasticMaterial.h"
 #include "PlasticMaterial.h"
+#include "PowerLawCreepMaterial.h"
 #include "PressureBC.h"
 #include "PLSHPlasticMaterial.h"
 #include "StressDivergence.h"
@@ -101,6 +102,7 @@ Elk::registerObjects()
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(PlasticMaterial);
   registerMaterial(PLSHPlasticMaterial);
+  registerMaterial(PowerLawCreepMaterial);
   registerBoundaryCondition(PressureBC);
   registerKernel(StressDivergence);
   registerKernel(StressOutput);
