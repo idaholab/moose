@@ -82,6 +82,7 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
   const Real det_Fhat_average( detMatrix( Fhat_average ) );
   const Real third( 1./3. );
 
+  
   // Finalize volumetric locking correction
   for ( _qp=0; _qp < _n_qpoints; ++_qp )
   {
@@ -94,6 +95,64 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
 }
 
 ////////////////////////////////////////////////////////////////////////
+
+void
+MaterialModel::computeStrainAndRotationalIncrement( const ColumnMajorMatrix & Fhat,
+                                          ColumnMajorMatrix & d , ColumnMajorMatrix & R)
+{
+
+  const int ND = 3;
+
+  ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
+  ColumnMajorMatrix  Uhat(ND,ND), invUhat(ND,ND), logVhat(ND,ND), Chat(ND,ND), FhatT(ND,ND), F(ND,ND);
+  ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
+  double lamda1, lamda2, lamda3, log1, log2, log3;
+
+  F = Fhat;
+  
+  FhatT = F.transpose();
+  Chat = FhatT * Fhat;
+
+  Chat.eigen(eigen_value,eigen_vector);
+
+
+  for(int i = 0; i < ND; i++)
+  {
+    N1(i) = eigen_vector(i,0);
+    N2(i) = eigen_vector(i,1);
+    N3(i) = eigen_vector(i,2);
+  }
+
+  lamda1 = std::sqrt(eigen_value(0));
+  lamda2 = std::sqrt(eigen_value(1));
+  lamda3 = std::sqrt(eigen_value(2));
+  
+  Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
+  
+  invertMatrix(Uhat,invUhat);
+  
+  R = Fhat * invUhat;
+
+  n1 = R * N1;
+  n2 = R * N2;
+  n3 = R * N3;
+
+  log1 = std::log(lamda1);
+  log2 = std::log(lamda2);
+  log3 = std::log(lamda3);
+  
+  logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
+
+  d = logVhat * (1.0 / _dt);
+  
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////
+
 
 void
 MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat,
@@ -322,15 +381,15 @@ MaterialModel::computeProperties()
   for ( _qp = 0; _qp < _n_qpoints; ++_qp )
   {
     computeStrainIncrement(Fhat[_qp], strain_increment);
-    computePolarDecomposition( Fhat[_qp], incremental_rotation );
-
+    computePolarDecomposition( Fhat[_qp], incremental_rotation);
+    //computeStrainAndRotationalIncrement(Fhat[_qp], strain_increment,incremental_rotation);  
     modifyStrain( strain_increment );
     computeStress( strain_increment );
     finalizeStress( incremental_rotation );
   }
 }
 
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////                                                                             
 
 void
 MaterialModel::fillMatrix( const VariableGradient & grad_x,

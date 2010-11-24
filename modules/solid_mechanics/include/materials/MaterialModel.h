@@ -66,7 +66,8 @@ protected:
                                ColumnMajorMatrix & d );
   void computePolarDecomposition( const ColumnMajorMatrix & Fhat,
                                   ColumnMajorMatrix & R );
-
+  void computeStrainAndRotationalIncrement( const ColumnMajorMatrix & Fhat,
+                               ColumnMajorMatrix & d , ColumnMajorMatrix & R);
 
 
   void fillMatrix( const VariableGradient & grad_x,
