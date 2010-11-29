@@ -120,7 +120,7 @@ public:
    * Returns a matrix that is the transpose of the matrix this
    * was called on.
    */
-  ColumnMajorMatrix transpose();
+  ColumnMajorMatrix transpose() const;
 
     /**
    * Returns a matrix that is the deviatoric of the matrix this
@@ -400,9 +400,9 @@ ColumnMajorMatrix::fill(DenseVector<Real> &rhs)
 
 
 inline ColumnMajorMatrix
-ColumnMajorMatrix::transpose()
+ColumnMajorMatrix::transpose() const
 {
-  ColumnMajorMatrix & s = (*this);
+  const ColumnMajorMatrix & s = (*this);
 
   ColumnMajorMatrix ret_matrix(_n_cols, _n_rows);
 
