@@ -66,8 +66,16 @@ protected:
                                ColumnMajorMatrix & d );
   void computePolarDecomposition( const ColumnMajorMatrix & Fhat,
                                   ColumnMajorMatrix & R );
-  void computeStrainAndRotationalIncrement( const ColumnMajorMatrix & Fhat,
-                               ColumnMajorMatrix & d , ColumnMajorMatrix & R);
+
+  enum DecompMethod
+  {
+    RashidApprox = 0,
+    Eigen        = 1
+  };
+
+  void computeStrainAndRotationIncrement( DecompMethod method,
+                                          const ColumnMajorMatrix & Fhat,
+                                          ColumnMajorMatrix & d , ColumnMajorMatrix & R);
 
 
   void fillMatrix( const VariableGradient & grad_x,
