@@ -64,6 +64,8 @@ protected:
 
 
   void computeProperties();
+ 
+  
 
   /// Modify increment for things like thermal strain
   virtual void modifyStrain( ColumnMajorMatrix & strain_increment );
@@ -80,6 +82,8 @@ protected:
                                ColumnMajorMatrix & d );
   void computePolarDecomposition( const ColumnMajorMatrix & Fhat,
                                   ColumnMajorMatrix & R );
+  void computePreconditioning();
+  int delta(int i, int j);
 
   enum DecompMethod
   {

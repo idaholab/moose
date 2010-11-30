@@ -567,6 +567,8 @@ MaterialModel::computeProperties()
 
     computeStress( strain_increment );
     finalizeStress( incremental_rotation );
+    computePreconditioning();
+    
   }
 }
 
@@ -703,4 +705,58 @@ MaterialModel::testMe()
 
   exit(0);
 
+}
+
+
+int
+MaterialModel::delta(int i, int j)
+{
+
+  if(i == j)
+    return 1;
+  else
+    return 0;
+}
+
+
+void
+MaterialModel::computePreconditioning()
+{
+
+  const int ND = 3;
+  
+  ColumnMajorMatrix Fdot, I, Finv;
+  ColumnMajorMatrix F(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
+  ColumnMajorMatrix Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]);
+
+  Real term1, term2;
+  
+  I.identity();
+  
+  F = F.transpose() + I;
+  Fbar = Fbar.transpose() + I;
+
+  Fdot = (F - Fbar) * (1.0/ _dt);
+
+  invertMatrix(Fbar,Finv);
+
+  _Jacobian_mult[_qp].zero();
+
+  for(int i = 0; i < ND; i++)
+    for(int j = 0; j < ND; j++)
+      for(int t = 0; t < ND; t++)
+        for(int S = 0; S < ND; S++)
+          for(int k = 0; k < ND; k++)
+            for(int l = 0; l < ND; l++)
+              for(int L = 0; L < ND; L++)
+              {
+                term1 = delta(k,t) * delta(L,S) * Finv(L,l) * (1.0/_dt) - Fdot(k,L) * Finv(L,t) * Finv(S,l);
+                term2 = delta(l,t) * delta(L,S) * Finv(L,k) * (1.0/_dt) - Fdot(l,L) * Finv(L,t) * Finv(S,k);
+                
+                _Jacobian_mult[_qp](j*ND+i,S*ND+t) =  (*_elasticity_tensor)(j*ND+i,l*ND+k) * (term1 + term2) * 0.5;
+              }
+  
+  //_Jacobian_mult[_qp] =  _Jacobian_mult[_qp].transpose();
+  
+  
 }
