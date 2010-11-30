@@ -53,11 +53,6 @@ public:
 protected:
   virtual Real computeValue() = 0;
 
-  /**
-   * Convenience reference to the ElementData object inside of MooseSystem
-   */
-  ElementData & _element_data;
-
   DofData & _dof_data;
 
   /**

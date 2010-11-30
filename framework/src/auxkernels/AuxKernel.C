@@ -39,7 +39,6 @@ InputParameters validParams<AuxKernel>()
 AuxKernel::AuxKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
   PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
   MaterialPropertyInterface(moose_system._material_data[_tid]),
-   _element_data(*moose_system._element_data[_tid]),
    _dof_data(moose_system._dof_data[_tid]),
    _aux_data(*moose_system._aux_data[_tid]),
    _nodal(_fe_type.family == LAGRANGE),
@@ -48,11 +47,8 @@ AuxKernel::AuxKernel(const std::string & name, MooseSystem & moose_system, Input
    _u_older(_nodal ? _aux_data._aux_var_vals_older_nodal[_var_num] : _aux_data._aux_var_vals_older_element[_var_num]),
    _current_node(moose_system._face_data[_tid]->_current_node)
 {
-  // Only ever one quadrature point
-  _qp = 0;
-  
   // If this variable isn't known yet... make it so
-  _element_data._aux_var_nums.insert(_var_num);
+  _moose_system._element_data[_tid]->_aux_var_nums.insert(_var_num);
 
   if(_nodal)
     _aux_data._nodal_var_nums.insert(_var_num);
@@ -67,13 +63,13 @@ AuxKernel::AuxKernel(const std::string & name, MooseSystem & moose_system, Input
     if(_moose_system.hasVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = _moose_system._system->variable_number(coupled_var_name);
-      _element_data._var_nums.insert(coupled_var_num);
+      _moose_system._element_data[_tid]->_var_nums.insert(coupled_var_num);
     }
     //Look for it in the Aux system
     else if (_moose_system.hasAuxVariable(coupled_var_name))
     {
       unsigned int coupled_var_num = _moose_system._aux_system->variable_number(coupled_var_name);
-      _element_data._aux_var_nums.insert(coupled_var_num);
+      _moose_system._element_data[_tid]->_aux_var_nums.insert(coupled_var_num);
     }
     else
       mooseError("Coupled variable '" + coupled_var_name + "' not found.");
@@ -83,7 +79,19 @@ AuxKernel::AuxKernel(const std::string & name, MooseSystem & moose_system, Input
 void
 AuxKernel::computeAndStore()
 {
-  _aux_data._aux_soln->set(_dof_data._aux_var_dofs[_var_num], computeValue());
+  if (isNodal())
+  {
+    _qp = 0;
+    _aux_data._aux_soln->set(_dof_data._aux_var_dofs[_var_num], computeValue());
+  }
+  else
+  {
+    Real value = 0.;
+
+    for (_qp=0; _qp<_qrule->n_points(); _qp++)
+      value += _JxW[_qp]*computeValue();
+    _aux_data._aux_soln->set(_dof_data._aux_var_dofs[_var_num], value / _aux_data._current_volume);
+  }
 }
 
 bool
@@ -101,11 +109,7 @@ AuxKernel::coupledValue(const std::string & name, unsigned int i)
   if(_nodal)
   {
     if(!isAux(name))
-    {
-      unsigned int temp = _coupled_vars[name][i]._num;
-      temp ++;
       return _aux_data._var_vals_nodal[_coupled_vars[name][i]._num];
-    }
     else
       return _aux_data._aux_var_vals_nodal[_coupled_aux_vars[name][i]._num];
   }

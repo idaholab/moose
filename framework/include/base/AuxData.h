@@ -45,9 +45,6 @@ public:
   void reinit(const NumericVector<Number>& soln, const Node & node);
   void reinit(const NumericVector<Number>& soln, const Elem & elem);
 
-  Real integrateValueAux(const MooseArray<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
-  RealGradient integrateGradientAux(const MooseArray<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point);
-
 public:
   /**
    * The MooseSystem this Kernel is associated with.
@@ -104,75 +101,75 @@ public:
   std::vector<MooseArray<Real> > _aux_var_vals_older_nodal;
 
 
-
   /*****************
    * Elemental Stuff
    *****************/
 
-  /**
-   * Holds the variable numbers of the elemental aux vars.
-   */
+  Real _current_volume;
+
   std::set<unsigned int> _element_var_nums;
 
   /**
    * Value of the variables at the elements.
    */
-  std::vector<MooseArray<Real> > _var_vals_element;
+  MooseArray<MooseArray<Real> > & _var_vals_element;
 
   /**
    * Value of the variables at the elements.
    */
-  std::vector<MooseArray<Real> > _var_vals_old_element;
+  MooseArray<MooseArray<Real> > & _var_vals_old_element;
 
   /**
    * Value of the variables at the elements at t-2.
    */
-  std::vector<MooseArray<Real> > _var_vals_older_element;
+  MooseArray<MooseArray<Real> > & _var_vals_older_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  std::vector<MooseArray<RealGradient> > _var_grads_element;
+  MooseArray<MooseArray<RealGradient> > _var_grads_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  std::vector<MooseArray<RealGradient> > _var_grads_old_element;
+  MooseArray<MooseArray<RealGradient> > _var_grads_old_element;
 
   /**
    * Gradient of the variables at the elements at t-2.
    */
-  std::vector<MooseArray<RealGradient> > _var_grads_older_element;
+  MooseArray<MooseArray<RealGradient> > _var_grads_older_element;
+
 
   /**
    * Value of the variables at the elements.
    */
-  std::vector<MooseArray<Real> > _aux_var_vals_element;
+  MooseArray<MooseArray<Real> > & _aux_var_vals_element;
 
   /**
    * Value of the variables at the elements.
    */
-  std::vector<MooseArray<Real> > _aux_var_vals_old_element;
+  MooseArray<MooseArray<Real> > & _aux_var_vals_old_element;
 
   /**
    * Value of the variables at the elements at t-2.
    */
-  std::vector<MooseArray<Real> > _aux_var_vals_older_element;
+  MooseArray<MooseArray<Real> > & _aux_var_vals_older_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  std::vector<MooseArray<RealGradient> > _aux_var_grads_element;
+  MooseArray<MooseArray<RealGradient> > & _aux_var_grads_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  std::vector<MooseArray<RealGradient> > _aux_var_grads_old_element;
+  MooseArray<MooseArray<RealGradient> > & _aux_var_grads_old_element;
 
   /**
    * Gradient of the variables at the elements at t-2.
    */
-  std::vector<MooseArray<RealGradient> > _aux_var_grads_older_element;
+  MooseArray<MooseArray<RealGradient> > & _aux_var_grads_older_element;
+
 };
 
 #endif //AUXDATA_H

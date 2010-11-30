@@ -137,8 +137,6 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
 
     if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
     {
-      reinitKernels(0, soln, elem, NULL);
-      _element_data[0]->reinitMaterials(_materials[0].getMaterials(elem->subdomain_id()));
       reinitAuxKernels(0, soln, *elem);
 
       if(cur_subdomain != subdomain)

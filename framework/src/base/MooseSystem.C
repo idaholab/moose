@@ -1312,6 +1312,9 @@ MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, 
 void
 MooseSystem::reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem)
 {
+  reinitKernels(tid, soln, &elem, NULL);
+  _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(elem.subdomain_id()));
+
   _aux_data[tid]->reinit(soln, elem);
 }
 

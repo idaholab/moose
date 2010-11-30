@@ -24,10 +24,24 @@
 #include "dof_map.h"
 #include "fe_base.h"
 
-AuxData::AuxData(MooseSystem & moose_system, DofData & dof_data, ElementData & element_data)
-  :_moose_system(moose_system),
-   _dof_data(dof_data),
-   _element_data(element_data)
+AuxData::AuxData(MooseSystem & moose_system, DofData & dof_data, ElementData & element_data) :
+  _moose_system(moose_system),
+  _dof_data(dof_data),
+  _element_data(element_data),
+  _element_var_nums(_element_data._aux_var_nums),
+  _var_vals_element(_element_data._var_vals),
+  _var_vals_old_element(_element_data._var_vals_old),
+  _var_vals_older_element(_element_data._var_vals_older),
+  _var_grads_element(_element_data._var_grads),
+  _var_grads_old_element(_element_data._var_grads_old),
+  _var_grads_older_element(_element_data._var_grads_older),
+
+  _aux_var_vals_element(_element_data._aux_var_vals),
+  _aux_var_vals_old_element(_element_data._aux_var_vals_old),
+  _aux_var_vals_older_element(_element_data._aux_var_vals_older),
+  _aux_var_grads_element(_element_data._aux_var_grads),
+  _aux_var_grads_old_element(_element_data._aux_var_grads_old),
+  _aux_var_grads_older_element(_element_data._aux_var_grads_older)
 {
 }
 
@@ -55,23 +69,9 @@ void AuxData::init()
   _aux_var_vals_old_nodal.resize(n_aux_vars);
   _aux_var_vals_older_nodal.resize(n_aux_vars);
 
-  _aux_var_vals_element.resize(n_aux_vars);
-  _aux_var_vals_old_element.resize(n_aux_vars);
-  _aux_var_vals_older_element.resize(n_aux_vars);
-  _aux_var_grads_element.resize(n_aux_vars);
-  _aux_var_grads_old_element.resize(n_aux_vars);
-  _aux_var_grads_older_element.resize(n_aux_vars);
-
   _var_vals_nodal.resize(n_vars);
   _var_vals_old_nodal.resize(n_vars);
   _var_vals_older_nodal.resize(n_vars);
-
-  _var_vals_element.resize(n_vars);
-  _var_vals_old_element.resize(n_vars);
-  _var_vals_older_element.resize(n_vars);
-  _var_grads_element.resize(n_vars);
-  _var_grads_old_element.resize(n_vars);
-  _var_grads_older_element.resize(n_vars);
 }
 
 void AuxData::reinit(const NumericVector<Number>& soln, const Node & node)
@@ -130,105 +130,30 @@ void AuxData::reinit(const NumericVector<Number>& soln, const Node & node)
 //  Moose::perf_log.pop("reinit(node)","AuxKernel");
 }
 
-void AuxData::reinit(const NumericVector<Number>& /*soln*/, const Elem & elem)
+void AuxData::reinit(const NumericVector<Number>& soln, const Elem & elem)
 {
 //  Moose::perf_log.push("reinit(elem)", "AuxKernel");
 
   unsigned int aux_system_number = _moose_system.getAuxSystem()->number();
 
   //Compute the area of the element
-  Real area = 0;
+  _current_volume = 0;
   //Just use any old JxW... they are all actually the same
-  const std::vector<Real> & jxw = *(_element_data._JxW.begin()->second);
+  const std::vector<Real> & jxw = *_element_data._JxW.begin()->second;
 
   if (_moose_system._geom_type == Moose::XYZ)
   {
     for (unsigned int qp = 0; qp < _element_data._qrule->n_points(); qp++)
-      area += jxw[qp];
+      _current_volume += jxw[qp];
   }
   else if (_moose_system._geom_type == Moose::CYLINDRICAL)
   {
     const std::vector<Point> & q_point = *(_element_data._q_point.begin()->second);
     for (unsigned int qp = 0; qp < _element_data._qrule->n_points(); qp++)
-      area += q_point[qp](0) * jxw[qp];
+      _current_volume += q_point[qp](0) * jxw[qp];
   }
   else
     mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
-
-  // Only ever one "quadrature point" 
-  unsigned int qp = 0;
-
-  //Compute the average value of each variable on the element
-
-  //Non Aux vars first
-  for (std::set<unsigned int>::iterator it = _element_data._var_nums.begin(); it != _element_data._var_nums.end(); ++it)
-  {
-    unsigned int var_num = *it;
-
-    FEType fe_type = _moose_system._dof_map->variable_type(var_num);
-
-    const std::vector<Real> & JxW = *_element_data._JxW[fe_type];
-    const std::vector<Point> & q_point = *_element_data._q_point[fe_type];
-
-    _var_vals_element[var_num].resize(1);
-    _var_vals_element[var_num][qp] = integrateValueAux(_element_data._var_vals[var_num], JxW, q_point) / area;
-
-    if (_moose_system._is_transient)
-    {
-      _var_vals_old_element[var_num].resize(1);
-      _var_vals_older_element[var_num].resize(1);
-
-      _var_vals_old_element[var_num][qp] = integrateValueAux(_element_data._var_vals_old[var_num], JxW, q_point) / area;
-      _var_vals_older_element[var_num][qp] = integrateValueAux(_element_data._var_vals_older[var_num], JxW, q_point) / area;
-    }
-
-    _var_grads_element[var_num].resize(1);
-    _var_grads_element[var_num][qp] = integrateGradientAux(_element_data._var_grads[var_num], JxW, q_point) / area;
-
-    if (_moose_system._is_transient)
-    {
-      _var_grads_old_element[var_num].resize(1);
-      _var_grads_older_element[var_num].resize(1);
-
-      _var_grads_old_element[var_num][qp] = integrateGradientAux(_element_data._var_grads_old[var_num], JxW, q_point) / area;
-      _var_grads_older_element[var_num][qp] = integrateGradientAux(_element_data._var_grads_older[var_num], JxW, q_point) / area;
-    }
-  }
-
-  //Now Aux vars
-  for (std::set<unsigned int>::iterator it = _element_data._aux_var_nums.begin(); it != _element_data._aux_var_nums.end(); ++it)
-  {
-    unsigned int var_num = *it;
-
-    FEType fe_type = _moose_system._aux_dof_map->variable_type(var_num);
-
-    const std::vector<Real> & JxW = *_element_data._JxW[fe_type];
-    const std::vector<Point> & q_point = *_element_data._q_point[fe_type];
-
-    _aux_var_vals_element[var_num].resize(1);
-    _aux_var_vals_element[var_num][qp] = integrateValueAux(_element_data._aux_var_vals[var_num], JxW, q_point) / area;
-
-    if (_moose_system._is_transient)
-    {
-      _aux_var_vals_old_element[var_num].resize(1);
-      _aux_var_vals_older_element[var_num].resize(1);
-
-      _aux_var_vals_old_element[var_num][qp] = integrateValueAux(_element_data._aux_var_vals_old[var_num], JxW, q_point) / area;
-      _aux_var_vals_older_element[var_num][qp] = integrateValueAux(_element_data._aux_var_vals_older[var_num], JxW, q_point) / area;
-    }
-
-    _aux_var_grads_element[var_num].resize(1);
-    _aux_var_grads_element[var_num][qp] = integrateGradientAux(_element_data._aux_var_grads[var_num], JxW, q_point) / area;
-
-    if (_moose_system._is_transient)
-    {
-      _aux_var_grads_old_element[var_num].resize(1);
-      _aux_var_grads_older_element[var_num].resize(1);
-      
-      _aux_var_grads_old_element[var_num][qp] = integrateGradientAux(_element_data._aux_var_grads_old[var_num], JxW, q_point) / area;
-      _aux_var_grads_older_element[var_num][qp] = integrateGradientAux(_element_data._aux_var_grads_older[var_num], JxW, q_point) / area;
-    }
-  }
 
   //Grab the dof numbers for the element variables
   for (std::set<unsigned int>::iterator it = _element_var_nums.begin(); it != _element_var_nums.end(); ++it)
@@ -242,46 +167,4 @@ void AuxData::reinit(const NumericVector<Number>& /*soln*/, const Elem & elem)
   }
 
 //  Moose::perf_log.pop("reinit(elem)", "AuxKernel");
-}
-
-Real
-AuxData::integrateValueAux(const MooseArray<Real> & vals, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
-{
-  Real value = 0;
-
-  if (_moose_system._geom_type == Moose::XYZ)
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule->n_points(); qp++)
-      value += vals[qp]*JxW[qp];
-  }
-  else if (_moose_system._geom_type == Moose::CYLINDRICAL)
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule->n_points(); qp++)
-      value += q_point[qp](0)*vals[qp]*JxW[qp];
-  }
-  else
-    mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
-
-  return value;
-}
-
-RealGradient
-AuxData::integrateGradientAux(const MooseArray<RealGradient> & grads, const std::vector<Real> & JxW, const std::vector<Point> & q_point)
-{
-  RealGradient value = 0;
-
-  if (_moose_system._geom_type == Moose::XYZ)
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule->n_points(); qp++)
-      value += grads[qp]*JxW[qp];
-  }
-  else if (_moose_system._geom_type == Moose::CYLINDRICAL)
-  {
-    for (unsigned int qp=0; qp<_element_data._qrule->n_points(); qp++)
-      value += q_point[qp](0)*grads[qp]*JxW[qp];
-  }
-  else
-    mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
-
-  return value;
 }
