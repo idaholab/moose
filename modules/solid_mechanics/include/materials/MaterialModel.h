@@ -4,6 +4,7 @@
 #include "Material.h"
 
 // Forward declarations
+class ElasticityTensor;
 class MaterialModel;
 
 template<>
@@ -18,11 +19,24 @@ public:
   MaterialModel( const std::string & name,
                  MooseSystem & moose_system,
                  InputParameters parameters );
-  virtual ~MaterialModel() {}
+  virtual ~MaterialModel();
 
   void testMe();
 
 protected:
+
+  bool _bulk_modulus_set;
+  bool _lambda_set;
+  bool _poissons_ratio_set;
+  bool _shear_modulus_set;
+  bool _youngs_modulus_set;
+
+  Real _bulk_modulus;
+  Real _lambda;
+  Real _poissons_ratio;
+  Real _shear_modulus;
+  Real _youngs_modulus;
+
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;
   VariableGradient & _grad_disp_z;
@@ -55,7 +69,7 @@ protected:
   virtual void modifyStrain( ColumnMajorMatrix & strain_increment );
 
   /// Compute the stress (sigma += deltaSigma)
-  virtual void computeStress( const ColumnMajorMatrix & strain_increment );
+  virtual void computeStress( ColumnMajorMatrix & strain_increment );
 
   /// Rotate stress to current configuration
   virtual void finalizeStress( const ColumnMajorMatrix & rot );
@@ -89,6 +103,18 @@ protected:
                      ColumnMajorMatrix & Ainv );
 
   RealTensorValue rotateSymmetricTensor( const ColumnMajorMatrix & R, const RealTensorValue & T );
+
+  void
+  elasticityTensor( ElasticityTensor * e );
+
+  ElasticityTensor *
+  elasticityTensor() const
+  {
+    return _elasticity_tensor;
+  }
+
+private:
+  ElasticityTensor * _elasticity_tensor;
 
 };
 

@@ -1,9 +1,16 @@
 #include "MaterialModel.h"
 
+#include "IsotropicElasticityTensor.h"
+
 template<>
 InputParameters validParams<MaterialModel>()
 {
   InputParameters params = validParams<Material>();
+  params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
+  params.addParam<Real>("lambda", "Lame's first parameter for the material.");
+  params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material");
+  params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
+  params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -17,6 +24,16 @@ MaterialModel::MaterialModel( const std::string & name,
                               MooseSystem & moose_system,
                               InputParameters parameters )
   :Material( name, moose_system, parameters ),
+   _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
+   _lambda_set( parameters.isParamValid("lambda") ),
+   _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
+   _shear_modulus_set( parameters.isParamValid("shear_modulus") ),
+   _youngs_modulus_set( parameters.isParamValid("youngs_modulus") ),
+   _bulk_modulus( _bulk_modulus_set ? getParam<Real>("bulk_modulus") : -1 ),
+   _lambda( _lambda_set ? getParam<Real>("lambda") : -1 ),
+   _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
+   _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
+   _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(_dim > 1 ? coupledGradient("disp_y") : _grad_zero),
    _grad_disp_z(_dim > 2 ? coupledGradient("disp_z") : _grad_zero),
@@ -27,12 +44,123 @@ MaterialModel::MaterialModel( const std::string & name,
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
    _alpha(getParam<Real>("thermal_expansion")),
+   _elasticity_tensor(NULL),
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult"))
 {
 //   std::cout << "TESTING MaterialModel class..." << std::endl;
 //   testMe();
+
+  int num_elastic_constants =
+    _bulk_modulus_set + _lambda_set + _poissons_ratio_set + _shear_modulus_set + _youngs_modulus_set;
+
+  if ( num_elastic_constants != 2 )
+  {
+    std::string err("Exactly two elastic constants must be defined for material '");
+    err += name;
+    err += "'.";
+    mooseError(err);
+  }
+
+  if ( _bulk_modulus_set && _bulk_modulus <= 0 )
+  {
+    std::string err("Bulk modulus must be positive in material '");
+    err += name;
+    err += "'.";
+    mooseError(err);
+  }
+  if ( _poissons_ratio_set && (_poissons_ratio <= -1.0 || _poissons_ratio >= 0.5) )
+  {
+    std::string err("Poissons ratio must be greater than -1 and less than 0.5 in material '");
+    err += name;
+    err += "'.";
+    mooseError(err);
+  }
+  if ( _shear_modulus_set &&  _shear_modulus < 0 )
+  {
+    std::string err("Shear modulus must not be negative in material '");
+    err += name;
+    err += "'.";
+    mooseError(err);
+  }
+  if ( _youngs_modulus_set &&  _youngs_modulus <= 0 )
+  {
+    std::string err("Youngs modulus must be positive in material '");
+    err += name;
+    err += "'.";
+    mooseError(err);
+  }
+
+  // Calculate lambda and the shear modulus
+  if(_lambda_set && _shear_modulus_set) // First and second Lame
+  {
+  }
+  else if(_lambda_set && _poissons_ratio_set)
+  {
+    _shear_modulus = (_lambda * (1.0 - 2.0 * _poissons_ratio)) / (2.0 * _poissons_ratio);
+  }
+  else if(_lambda_set && _bulk_modulus_set)
+  {
+    _shear_modulus = 3.0 * (_bulk_modulus - _lambda) / 2.0;
+  }
+  else if(_lambda_set && _youngs_modulus_set)
+  {
+    _shear_modulus = ( (_youngs_modulus - 3.0*_lambda) / 4.0 ) + ( std::sqrt( (_youngs_modulus-3.0*_lambda)*(_youngs_modulus-3.0*_lambda) + 8.0*_lambda*_youngs_modulus ) / 4.0 );
+  }
+  else if(_shear_modulus_set && _poissons_ratio_set)
+  {
+    _lambda = ( 2.0 * _shear_modulus * _poissons_ratio ) / (1.0 - 2.0*_poissons_ratio);
+  }
+  else if(_shear_modulus_set && _bulk_modulus_set)
+  {
+    _lambda = _bulk_modulus - 2.0 * _shear_modulus / 3.0;
+  }
+  else if(_shear_modulus_set && _youngs_modulus_set)
+  {
+    _lambda = ((2.0*_shear_modulus - _youngs_modulus) * _shear_modulus) / (_youngs_modulus - 3.0*_shear_modulus);
+  }
+  else if(_poissons_ratio_set && _bulk_modulus_set)
+  {
+    _lambda = (3.0 * _bulk_modulus * _poissons_ratio) / (1.0 + _poissons_ratio);
+    _shear_modulus = (3.0 * _bulk_modulus * (1.0 - 2.0*_poissons_ratio)) / (2.0 * (1.0 + _poissons_ratio));
+  }
+  else if(_youngs_modulus_set && _poissons_ratio_set) // Young's Modulus and Poisson's Ratio
+  {
+    _lambda = (_poissons_ratio * _youngs_modulus) / ( (1.0+_poissons_ratio) * (1-2.0*_poissons_ratio) );
+    _shear_modulus = _youngs_modulus / ( 2.0 * (1.0+_poissons_ratio));
+  }
+  else if(_youngs_modulus_set && _bulk_modulus_set)
+  {
+    _lambda = 3.0 * _bulk_modulus * (3.0 * _bulk_modulus - _youngs_modulus) / (9.0 * _bulk_modulus - _youngs_modulus);
+    _shear_modulus = 3.0 * _youngs_modulus * _bulk_modulus / (9.0 * _bulk_modulus - _youngs_modulus);
+  }
+
+  _lambda_set = true;
+  _shear_modulus_set = true;
+
+  IsotropicElasticityTensor * iso =  new IsotropicElasticityTensor;
+  iso->setLambda( _lambda );
+  iso->setShearModulus( _shear_modulus );
+  iso->calculate(0);
+  elasticityTensor( iso );
+
+}
+
+////////////////////////////////////////////////////////////////////////
+
+MaterialModel::~MaterialModel()
+{
+  delete _elasticity_tensor;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+MaterialModel::elasticityTensor( ElasticityTensor * e )
+{
+  delete _elasticity_tensor;
+  _elasticity_tensor = e;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -112,45 +240,47 @@ MaterialModel::computeStrainAndRotationIncrement( DecompMethod method,
   else if ( method == Eigen )
   {
 
-    const int ND = 3;
+    mooseError("Eigen not defined.");
 
-    ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
-    ColumnMajorMatrix  Uhat(ND,ND), invUhat(ND,ND), logVhat(ND,ND);
-    ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
+//     const int ND = 3;
 
-    ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
+//     ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
+//     ColumnMajorMatrix  Uhat(ND,ND), invUhat(ND,ND), logVhat(ND,ND);
+//     ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
 
-    Chat.eigen(eigen_value,eigen_vector);
+//     ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
+
+//     Chat.eigen(eigen_value,eigen_vector);
 
 
-    for(int i = 0; i < ND; i++)
-    {
-      N1(i) = eigen_vector(i,0);
-      N2(i) = eigen_vector(i,1);
-      N3(i) = eigen_vector(i,2);
-    }
+//     for(int i = 0; i < ND; i++)
+//     {
+//       N1(i) = eigen_vector(i,0);
+//       N2(i) = eigen_vector(i,1);
+//       N3(i) = eigen_vector(i,2);
+//     }
 
-    const Real lamda1 = std::sqrt(eigen_value(0));
-    const Real lamda2 = std::sqrt(eigen_value(1));
-    const Real lamda3 = std::sqrt(eigen_value(2));
+//     const Real lamda1 = std::sqrt(eigen_value(0));
+//     const Real lamda2 = std::sqrt(eigen_value(1));
+//     const Real lamda3 = std::sqrt(eigen_value(2));
 
-    Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
+//     Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
 
-    invertMatrix(Uhat,invUhat);
+//     invertMatrix(Uhat,invUhat);
 
-    R = Fhat * invUhat;
+//     R = Fhat * invUhat;
 
-    n1 = R * N1;
-    n2 = R * N2;
-    n3 = R * N3;
+//     n1 = R * N1;
+//     n2 = R * N2;
+//     n3 = R * N3;
 
-    const Real log1 = std::log(lamda1);
-    const Real log2 = std::log(lamda2);
-    const Real log3 = std::log(lamda3);
+//     const Real log1 = std::log(lamda1);
+//     const Real log2 = std::log(lamda2);
+//     const Real log3 = std::log(lamda3);
 
-    logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
+//     logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
 
-    d = logVhat * (1.0 / _dt);
+//     d = logVhat * (1.0 / _dt);
   }
   else
   {
@@ -311,32 +441,49 @@ MaterialModel::modifyStrain( ColumnMajorMatrix & strain_increment )
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeStress( const ColumnMajorMatrix & strain_increment )
+MaterialModel::computeStress( ColumnMajorMatrix & strain_increment )
 {
   // Given the stretching, compute the stress increment and add it to the old stress.
   // stress = stressOld + stressIncrement
-  const Real lamda( 0 );
-  const Real twoG( 10e6 );
-  const Real traceD( strain_increment(0,0) +
-                     strain_increment(1,1) +
-                     strain_increment(2,2) );
-  const Real bulk_update = lamda * traceD;
-  _stress[_qp](0,0) = _stress_old[_qp](0,0) + _dt * ( twoG * strain_increment(0,0) + bulk_update );
-  _stress[_qp](1,1) = _stress_old[_qp](1,1) + _dt * ( twoG * strain_increment(1,1) + bulk_update );
-  _stress[_qp](2,2) = _stress_old[_qp](2,2) + _dt * ( twoG * strain_increment(2,2) + bulk_update );
-  _stress[_qp](0,1) = _stress_old[_qp](0,1) + _dt * ( twoG * strain_increment(0,1)               );
-  _stress[_qp](0,2) = _stress_old[_qp](0,2) + _dt * ( twoG * strain_increment(0,2)               );
-  _stress[_qp](1,2) = _stress_old[_qp](1,2) + _dt * ( twoG * strain_increment(1,2)               );
-  _stress[_qp](1,0) = _stress[_qp](0,1);
-  _stress[_qp](2,0) = _stress[_qp](0,2);
-  _stress[_qp](2,1) = _stress[_qp](1,2);
+//   const Real lamda( 0 );
+//   const Real twoG( 10e6 );
+//   const Real traceD( strain_increment(0,0) +
+//                      strain_increment(1,1) +
+//                      strain_increment(2,2) );
+//   const Real bulk_update = lamda * traceD;
+//   _stress[_qp](0,0) = _stress_old[_qp](0,0) + _dt * ( twoG * strain_increment(0,0) + bulk_update );
+//   _stress[_qp](1,1) = _stress_old[_qp](1,1) + _dt * ( twoG * strain_increment(1,1) + bulk_update );
+//   _stress[_qp](2,2) = _stress_old[_qp](2,2) + _dt * ( twoG * strain_increment(2,2) + bulk_update );
+//   _stress[_qp](0,1) = _stress_old[_qp](0,1) + _dt * ( twoG * strain_increment(0,1)               );
+//   _stress[_qp](0,2) = _stress_old[_qp](0,2) + _dt * ( twoG * strain_increment(0,2)               );
+//   _stress[_qp](1,2) = _stress_old[_qp](1,2) + _dt * ( twoG * strain_increment(1,2)               );
+//   _stress[_qp](1,0) = _stress[_qp](0,1);
+//   _stress[_qp](2,0) = _stress[_qp](0,2);
+//   _stress[_qp](2,1) = _stress[_qp](1,2);
+
+  //
+  // This is more work than needs to be done.  The strain and stress tensors are symmetric, and so we are carrying
+  //   a third more memory than is required.  We are also running a 9x9 * 9x1 matrix-vector multiply when at most
+  //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
+  //   constants are needed and a matrix vector multiply can be avoided entirely.
+  //
+  strain_increment.reshape(9, 1);
+  ColumnMajorMatrix stress_new( *_elasticity_tensor * strain_increment );
+  strain_increment.reshape(3, 3);
+//   stress_new.reshape(3, 3);
+  stress_new *= _dt;
+  stress_new.fill(_stress[_qp]);
+  _stress[_qp] += _stress_old[_qp];
+
+//   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
+//   _elasticity_tensor->print();
 
 //   std::cout << "STRAIN INCREMENT: " << _qp << "\n"
 //             << strain_increment(0,0) << " " << strain_increment(0,1) << " " << strain_increment(0,2) << std::endl
 //             << strain_increment(1,0) << " " << strain_increment(1,1) << " " << strain_increment(1,2) << std::endl
 //             << strain_increment(2,0) << " " << strain_increment(2,1) << " " << strain_increment(2,2) << std::endl;
 
-//   std::cout << "STRESS: " << _qp << "\n"
+//   std::cout << "STRESS: " << _qp << " at time " << _t << "\n"
 //             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
 //             << _stress[_qp](1,0) << " " << _stress[_qp](1,1) << " " << _stress[_qp](1,2) << std::endl
 //             << _stress[_qp](2,0) << " " << _stress[_qp](2,1) << " " << _stress[_qp](2,2) << std::endl;

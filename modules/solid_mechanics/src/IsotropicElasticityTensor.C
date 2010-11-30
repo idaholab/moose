@@ -85,6 +85,8 @@ IsotropicElasticityTensor::calculateLameCoefficients()
     _lambda = (3.0 * _k * (3.0 * _k - _E)) / (9.0 * _k - _E);
     _mu = (3.0 * _E * _k) / (9.0 * _k - _E);
   }
+  _lambda_set = true;
+  _mu_set = true;
 }
 
 Real
