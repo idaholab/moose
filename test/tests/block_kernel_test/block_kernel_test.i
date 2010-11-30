@@ -59,9 +59,11 @@
 [Executioner]
   type = Steady
   perf_log = true
-  petsc_options = '-snes_mf_operator'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  solve_type = 'PJFNK'
+  preconditioner = 'AMG'
+#  petsc_options = '-snes_mf_operator'
+#  petsc_options_iname = '-pc_type -pc_hypre_type'
+#  petsc_options_value = 'hypre boomeramg'
 []
 
 [Output]

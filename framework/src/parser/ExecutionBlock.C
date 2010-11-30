@@ -18,12 +18,6 @@
 #include "Moose.h"
 
 #ifdef LIBMESH_HAVE_PETSC
-/*#include "sparse_matrix.h"
-#include "petsc_vector.h"
-#include "petsc_matrix.h"
-#include "petsc_linear_solver.h"
-#include "petsc_preconditioner.h"
-*/
 #include "PetscSupport.h"
 #endif //LIBMESH_HAVE_PETSC
 
@@ -46,10 +40,16 @@ InputParameters validParams<ExecutionBlock>()
   params.addParam<bool>        ("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
 
+  params.addParam<std::string> ("solve_type", "JFNK", "Tells the solver which nonlinear solution method to use (JFNK, PJFNK, NEWTON)");
+  
 #ifdef LIBMESH_HAVE_PETSC
-  params.addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options");
+  params.addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options (Consider using the preconditioner optiion)");
   params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"");
+
+  params.addParam<std::string>("preconditioner", "Specifies the preconditioner to use (AMG | ILU | LU)");
+  params.addParam<unsigned int>("gmres_restart", "Specifies the number of iteratations values that GMRES holds");
+  params.addParam<bool>("eisenstat_walker", false, "Specifies that the Eisenstat-Walker method is used to determine linear convergence");
 #endif //LIBMESH_HAVE_PETSC
 
   return params;
@@ -111,6 +111,48 @@ ExecutionBlock::execute()
   petsc_options = getParamValue<std::vector<std::string> >("petsc_options");
   petsc_inames = getParamValue<std::vector<std::string> >("petsc_options_iname");
   petsc_values = getParamValue<std::vector<std::string> >("petsc_options_value");
+
+  switch (getParamValue<std::string>("solve_type"))
+  {
+  case "JFNK":
+    petsc_options += ' -snes_mf';
+    break;
+  case "PJFNK":
+    petsc_options += ' -snes_mf_operator';
+    break;
+  case "NEWTON":
+    petsc_options += ' -snes';
+    mooseWarning("The Newton Method only works in limited multiphysics settings");
+    break;
+  }  
+  
+  // Using the new preconditioner options supersede the older petsc options
+  if (isParamValid<std::string>("preconditioner"))
+  {
+    if (petsc_options.find("-snes_mf_operator") == std::string::npos)
+      mooseWarning("A Preconditioner has been set but Preconditioned JFNK is not being used");
+    switch (getParamValue<std::string>("preconditioner"))
+    {
+    case "AMG":
+      petsc_inames = "-pc_type -pc_hypre_type";
+      petsc_values = "hypre boomeramg";
+      break;
+    case "ILU":
+      petsc_inames = "-pc_type";
+      petsc_values = "ilu";
+      break;
+    case "LU":
+      petsc_inames = "-pc_type";
+      petsc_values = "lu";
+      break;
+    default:
+      mooseError("Unsupported preconditioner option detected, Please check your ""preconditioner"" option in your Executioner Block");
+    }
+
+  if (getParamValue<bool>("eisenstat_walker"))
+    PetscOptionsSetValue("-snes_ksp_ew", PETSC_NULL);
+
+    
 
   MoosePetscSupport::l_abs_step_tol = getParamValue<Real>("l_abs_step_tol");
   

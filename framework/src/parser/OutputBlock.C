@@ -18,6 +18,11 @@
 #include "exodusII_io.h"
 #include "mesh.h"
 
+#ifdef LIBMESH_HAVE_PETSC
+#include "PetscSupport.h"
+#endif //LIBMESH_HAVE_PETSC
+
+
 template<>
 InputParameters validParams<OutputBlock>()
 {
@@ -37,6 +42,11 @@ InputParameters validParams<OutputBlock>()
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png"); 
   params.addParam<bool>("print_out_info", false, "Specifies that you would like to see more verbose output information on STDOUT");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
+
+#ifdef LIBMESH_HAVE_PETSC
+  params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
+#endif
+
   return params;
 }
 
@@ -62,7 +72,6 @@ OutputBlock::execute()
 #ifdef DEBUG
   std::cerr << "Inside the OutputBlock Object\n";
 #endif
-
   _moose_system._file_base = getParamValue<std::string>("file_base");
   _moose_system._interval = getParamValue<int>("interval");
   _moose_system._exodus_output = getParamValue<bool>("exodus");
@@ -78,6 +87,11 @@ OutputBlock::execute()
   _moose_system._print_out_info = getParamValue<bool>("print_out_info");
   _moose_system._output_initial = getParamValue<bool>("output_initial");
 
+#ifdef LIBMESH_HAVE_PETSC
+  if (getParamValue<bool>("print_linear_residuals"))
+    PetscOptionsSetValue("-ksp_monitor", PETSC_NULL);
+#endif
+  
   visitChildren();
 }
 
