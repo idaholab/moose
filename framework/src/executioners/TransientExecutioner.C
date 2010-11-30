@@ -29,6 +29,8 @@
 
 // C++ Includes
 #include <iomanip>
+#include <iostream>
+#include <fstream>
 
 template<>
 InputParameters validParams<TransientExecutioner>()
@@ -272,3 +274,24 @@ TransientExecutioner::lastSolveConverged()
 {
   return _converged;
 }  
+
+void
+TransientExecutioner::postExecute()
+{
+  MeshFunction mf(* _moose_system.getEquationSystems(), * _moose_system.getNonlinearSystem()->solution, * _moose_system._dof_map, 0);
+  mf.init();
+  Real out[10001];
+  std::ofstream outfile("values_DG_adaptive.xls");
+  
+  for (unsigned int i = 0; i <= 10000; i++)
+  {
+    DenseVector<Number> output;
+    Point p(i * 2.0e-4, 0.45, 0);
+    mf(p, 0.0, output);
+    out[i] = output(0);
+    outfile << i * 2.0e-4 << " " << output(0) << std::endl;
+//    std::cout << "x = " << i*2.0e-4 << ", y = " << out[i] << std::endl;
+  }
+  outfile.close();
+  return;
+}

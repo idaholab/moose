@@ -28,6 +28,7 @@
 #include "UserForcingFunction.h"
 
 #include "DGDiffusion.h"
+#include "EnhancedDGMatDiffusion.h"
 
 #include "DirichletBC.h"
 #include "SinDirichletBC.h"
@@ -177,6 +178,7 @@ Moose::registerObjects()
   registerKernel(UserForcingFunction);
 
   registerDGKernel(DGDiffusion);
+  registerDGKernel(EnhancedDGMatDiffusion);
 
   registerBoundaryCondition(DirichletBC);
   registerBoundaryCondition(SinDirichletBC);

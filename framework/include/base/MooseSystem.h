@@ -517,9 +517,10 @@ protected:
   std::vector<PostprocessorData> _postprocessor_data;
   std::vector<DamperData *> _damper_data;
   std::vector<DiracKernelData *> _dirac_kernel_data;
-
+  
+public:  
   DofMap * _dof_map;
-
+protected:
   DofMap * _aux_dof_map;
 
   Executioner *_executioner;

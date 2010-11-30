@@ -28,7 +28,8 @@ InputParameters validParams<DGFunctionDiffusionDirichletBC>()
   params.addRequiredParam<std::string>("function", "The forcing function.");
   params.addRequiredParam<Real>("epsilon", "Epsilon");
   params.addRequiredParam<Real>("sigma", "Sigma");
-
+  params.addRequiredParam<Real>("coefficient", "Coefficient");
+  
   return params;
 }
 
@@ -36,7 +37,8 @@ DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const std::string
   :BoundaryCondition(name, moose_system, parameters),
    _func(getFunction("function")),
    _epsilon(getParam<Real>("epsilon")),
-   _sigma(getParam<Real>("sigma"))
+   _sigma(getParam<Real>("sigma")),
+   _coefficient(getParam<Real>("coefficient"))
 {}
 
 Real

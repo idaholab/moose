@@ -17,6 +17,7 @@
 
 #include "Moose.h"
 #include "Executioner.h"
+#include "mesh_function.h"
 
 // LibMesh includes
 #include <parameters.h>
@@ -76,6 +77,12 @@ public:
   virtual bool lastSolveConverged();
 
 protected:
+
+  /**
+   * This should plot the solution over a line after execute() gets called
+   */
+  virtual void postExecute();
+  
 
   /**
    * Current timestep.

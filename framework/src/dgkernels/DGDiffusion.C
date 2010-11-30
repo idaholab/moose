@@ -21,13 +21,15 @@ InputParameters validParams<DGDiffusion>()
   // See header file for sigma and epsilon
   params.addRequiredParam<Real>("sigma", "sigma");
   params.addRequiredParam<Real>("epsilon", "epsilon");
+  params.addRequiredParam<Real>("coefficient", "coefficient");
   return params;
 }
 
 DGDiffusion::DGDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :DGKernel(name, moose_system, parameters),
    _epsilon(getParam<Real>("epsilon")),
-   _sigma(getParam<Real>("sigma"))
+   _sigma(getParam<Real>("sigma")),
+   _coefficient(getParam<Real>("coefficient"))
 {
 }
 
@@ -42,9 +44,11 @@ DGDiffusion::computeQpResidual(DGResidualType type)
   switch (type)
   {
   case Element:
-    r -= 0.5 * (_grad_u[_qp] * _normals[_qp] + _grad_u_neighbor[_qp] * _normals[_qp]) * _test[_i][_qp];
-    r += _epsilon * 0.5 * _grad_test[_i][_qp] * _normals[_qp] * (_u[_qp] - _u_neighbor[_qp]);
-    r += _sigma / h_elem * (_u[_qp] - _u_neighbor[_qp]) * _test[_i][_qp];
+    r += 0.5 * (- _grad_u[_qp] * _normals[_qp] * _test[_i][_qp] + _epsilon * _grad_test[_i][_qp] * _normals[_qp] * _u[_qp]);
+    r += _sigma / h_elem * _u[_qp] * _test[_i][_qp];
+
+    r += 0.5 * (-_grad_u_neighbor[_qp] * _normals[_qp] * _test[_i][_qp] - _epsilon * _grad_test[_i][_qp] * _normals[_qp] * _u_neighbor[_qp]);
+    r += - _sigma / h_elem * _u_neighbor[_qp] * _test[_i][_qp];
     break;
 
   case Neighbor:

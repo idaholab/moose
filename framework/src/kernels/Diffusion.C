@@ -18,23 +18,25 @@ template<>
 InputParameters validParams<Diffusion>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addRequiredParam<Real>("coefficient", "coefficient");
   params.addClassDescription("Implements the Diffusion operator (gradient of 'u')");
   return params;
 }
 
 
 Diffusion::Diffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters)
+  :Kernel(name, moose_system, parameters),
+   _coefficient(getParam<Real>("coefficient"))
 {}
 
 Real
 Diffusion::computeQpResidual()
 {
-  return _grad_test[_i][_qp]*_grad_u[_qp];
+  return _grad_test[_i][_qp]*_coefficient*_grad_u[_qp];
 }
 
 Real
 Diffusion::computeQpJacobian()
 {
-  return _grad_test[_i][_qp]*_grad_phi[_j][_qp];
+  return _grad_test[_i][_qp]*_coefficient*_grad_phi[_j][_qp];
 }

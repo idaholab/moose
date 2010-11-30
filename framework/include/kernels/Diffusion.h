@@ -36,5 +36,6 @@ protected:
 
   virtual Real computeQpJacobian();
 
+  Real _coefficient;
 };
 #endif //DIFFUSION_H
