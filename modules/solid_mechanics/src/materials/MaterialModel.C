@@ -44,10 +44,10 @@ MaterialModel::MaterialModel( const std::string & name,
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
    _alpha(getParam<Real>("thermal_expansion")),
-   _elasticity_tensor(NULL),
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
-   _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult"))
+   _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
+   _elasticity_tensor(NULL)
 {
 //   std::cout << "TESTING MaterialModel class..." << std::endl;
 //   testMe();

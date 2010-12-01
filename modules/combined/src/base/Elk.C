@@ -41,6 +41,7 @@
 #include "PowerLawCreepMaterial.h"
 #include "PressureBC.h"
 #include "PLSHPlasticMaterial.h"
+#include "StressAux.h"
 #include "StressDivergence.h"
 #include "StressOutput.h"
 
@@ -104,6 +105,7 @@ Elk::registerObjects()
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreepMaterial);
   registerBoundaryCondition(PressureBC);
+  registerAux(StressAux);
   registerKernel(StressDivergence);
   registerKernel(StressOutput);
   registerMaterial(MaterialModel);
