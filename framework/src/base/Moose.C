@@ -22,6 +22,8 @@
 
 #include "BodyForce.h"
 #include "Diffusion.h"
+#include "Convection.h"
+#include "ConvectionWithDG.h"
 #include "Reaction.h"
 #include "CoupledForce.h"
 #include "RealPropertyOutput.h"
@@ -29,6 +31,7 @@
 
 #include "DGDiffusion.h"
 #include "EnhancedDGMatDiffusion.h"
+#include "DGConvection.h"
 
 #include "DirichletBC.h"
 #include "SinDirichletBC.h"
@@ -176,9 +179,12 @@ Moose::registerObjects()
   registerKernel(CoupledForce);
   registerKernel(RealPropertyOutput);
   registerKernel(UserForcingFunction);
+  registerKernel(Convection);
+  registerKernel(ConvectionWithDG);
 
   registerDGKernel(DGDiffusion);
   registerDGKernel(EnhancedDGMatDiffusion);
+  registerDGKernel(DGConvection);
 
   registerBoundaryCondition(DirichletBC);
   registerBoundaryCondition(SinDirichletBC);
