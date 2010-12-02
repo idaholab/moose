@@ -174,6 +174,12 @@ public:
    * Returns the number of columns
    */
   unsigned int m() const;
+  
+  /**
+   * Returns eigen system solve for a symmetrix real matrix
+   */
+  void eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) const;
+  
 
   /**
    * Returns a reference to the raw data pointer
