@@ -21,17 +21,14 @@ InputParameters validParams<DGDiffusion>()
   // See header file for sigma and epsilon
   params.addRequiredParam<Real>("sigma", "sigma");
   params.addRequiredParam<Real>("epsilon", "epsilon");
-  params.addRequiredParam<Real>("coefficient", "coefficient");
   return params;
 }
 
 DGDiffusion::DGDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
   :DGKernel(name, moose_system, parameters),
    _epsilon(getParam<Real>("epsilon")),
-   _sigma(getParam<Real>("sigma")),
-   _coefficient(getParam<Real>("coefficient"))
-{
-}
+   _sigma(getParam<Real>("sigma"))
+{}
 
 Real
 DGDiffusion::computeQpResidual(DGResidualType type)

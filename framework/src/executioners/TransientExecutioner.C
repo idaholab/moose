@@ -278,6 +278,7 @@ TransientExecutioner::lastSolveConverged()
 void
 TransientExecutioner::postExecute()
 {
+/*
   MeshFunction mf(* _moose_system.getEquationSystems(), * _moose_system.getNonlinearSystem()->solution, * _moose_system._dof_map, 0);
   mf.init();
   Real out[10001];
@@ -294,4 +295,5 @@ TransientExecutioner::postExecute()
   }
   outfile.close();
   return;
+*/
 }
