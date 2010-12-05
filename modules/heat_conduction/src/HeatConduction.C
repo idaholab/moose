@@ -4,6 +4,7 @@ template<>
 InputParameters validParams<HeatConduction>()
 {
   InputParameters params = validParams<Diffusion>();
+  params.addClassDescription("TODO"); // Add a description of what this kernel does
   return params;
 }
 
