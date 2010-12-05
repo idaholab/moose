@@ -15,14 +15,12 @@
 #ifndef FORMATTEDTABLE_H
 #define FORMATTEDTABLE_H
 
-#include "exodusII_io.h"
 #include "libmesh_common.h"
 
 #include <string>
 #include <map>
 #include <set>
 #include <ostream>
-
 
 class FormattedTable
 {

@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "exodusII_io.h"
+
 #include "FormattedTable.h"
 #include "Moose.h"
 
@@ -255,7 +257,7 @@ void
 FormattedTable::makeGnuplot(const std::string & base_file, const std::string & format)
 {
   // TODO: run this once at end of simulation, right now it runs every iteration
-  // TODO: do I need to be more careful escaping input?
+  // TODO: do I need to be more careful escaping column names?
   // Note: open and close the files each time, having open files may mess with gnuplot
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
