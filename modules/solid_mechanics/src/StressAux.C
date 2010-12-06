@@ -13,8 +13,8 @@ StressAux::StressAux( const std::string & name,
                       MooseSystem & moose_system,
                       InputParameters parameters )
   :AuxKernel( name, moose_system, parameters ),
-   _index( getParam<unsigned int>("index") )
-//    _stress( getMaterialProperty<RealTensorValue>("stress") )
+   _index( getParam<unsigned int>("index") ),
+   _stress( getMaterialProperty<RealTensorValue>("stress") )
 {
   if (_index > 5)
   {
@@ -47,6 +47,7 @@ StressAux::computeValue()
   {
     j = 2;
   }
-//   return _stress[_qp](i,j);
-  return _index;
+  return _stress[_qp](i,j);
 }
+
+

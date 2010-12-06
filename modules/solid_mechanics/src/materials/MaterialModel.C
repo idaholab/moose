@@ -568,7 +568,7 @@ MaterialModel::computeProperties()
     computeStress( strain_increment );
     finalizeStress( incremental_rotation );
     computePreconditioning();
-    
+
   }
 }
 
