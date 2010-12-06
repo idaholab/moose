@@ -375,8 +375,6 @@ ColumnMajorMatrix::fill(DenseMatrix<Real> &rhs)
 {
   mooseAssert(rhs.n()*rhs.m() == _n_entries, "Cannot fill dense matrix!  The ColumnMajorMatrix doesn't have the same number of entries!");
 
-  ColumnMajorMatrix & s = (*this);
-
   for(unsigned int j(0), index(0); j < rhs.m(); ++j)
     for(unsigned int i(0); i < rhs.n(); ++i, ++index)
       rhs(i,j) = _values[index];

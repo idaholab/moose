@@ -1821,6 +1821,7 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
 
     // The +1 is because Exodus starts timesteps at 1 and we start at 0
     _ex_out->write_timestep(exodus_file_name + ".e", *_es, _num_in_current_file, time);
+    _ex_out->write_element_data( *_es );
     if ( _postprocessor_exodus_output ) 
     {
       _postprocessor_data[0].writeExodus( _ex_out, time );
@@ -1841,11 +1842,12 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
 
       exodus_file_name = exodus_stream_file_base.str();
 
-      displaced_ex_out.write_timestep(exodus_file_name + ".e", *_displaced_es, _num_in_current_file_displaced, time);      
-    if ( _postprocessor_exodus_output ) 
-    {
-      _postprocessor_data[0].writeExodus( &displaced_ex_out, time );
-    }
+      displaced_ex_out.write_timestep(exodus_file_name + ".e", *_displaced_es, _num_in_current_file_displaced, time);
+      displaced_ex_out.write_element_data( *_displaced_es );
+      if ( _postprocessor_exodus_output )
+      {
+        _postprocessor_data[0].writeExodus( &displaced_ex_out, time );
+      }
     }
   }
 
