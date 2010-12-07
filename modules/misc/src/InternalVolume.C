@@ -17,7 +17,7 @@
 template <>
 InputParameters validParams<InternalVolume>()
 {
-  InputParameters params = validParams<SidePostprocessor>();
+  InputParameters params = validParams<SideIntegral>();
   return params;
 }
 
