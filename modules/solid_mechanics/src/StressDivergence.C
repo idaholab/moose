@@ -34,8 +34,8 @@ Real
 StressDivergence::computeQpJacobian()
 {
   RealVectorValue value;
-  for(unsigned int j = 0; j<LIBMESH_DIM; j++)
-    for(unsigned int i = 0; i<LIBMESH_DIM; i++)
+  for(unsigned int j = 0; j<LIBMESH_DIM; ++j)
+    for(unsigned int i = 0; i<LIBMESH_DIM; ++i)
     {
       value(i) += 0.5*_Jacobian_mult[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
       value(i) += 0.5*_Jacobian_mult[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);

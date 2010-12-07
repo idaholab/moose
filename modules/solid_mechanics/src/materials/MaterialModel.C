@@ -497,11 +497,12 @@ MaterialModel::finalizeStress( const ColumnMajorMatrix & incremental_rotation )
 {
   // Using the incremental rotation, update the stress to the current configuration (R*T*R^T)
   _stress[_qp] = rotateSymmetricTensor( incremental_rotation, _stress[_qp] );
+
 //   std::cout << "STRESS: " << _qp << "\n"
 //             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
 //             << _stress[_qp](1,0) << " " << _stress[_qp](1,1) << " " << _stress[_qp](1,2) << std::endl
 //             << _stress[_qp](2,0) << " " << _stress[_qp](2,1) << " " << _stress[_qp](2,2) << std::endl;
-  _Jacobian_mult[_qp] = ColumnMajorMatrix(LIBMESH_DIM*LIBMESH_DIM,LIBMESH_DIM*LIBMESH_DIM);
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -718,45 +719,48 @@ MaterialModel::delta(int i, int j)
     return 0;
 }
 
+////////////////////////////////////////////////////////////////////////
 
 void
 MaterialModel::computePreconditioning()
 {
 
-  const int ND = 3;
-  
-  ColumnMajorMatrix Fdot, I, Finv;
-  ColumnMajorMatrix F(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
-  ColumnMajorMatrix Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]);
+  _Jacobian_mult[_qp] = *_elasticity_tensor;
 
-  Real term1, term2;
-  
-  I.identity();
-  
-  F = F.transpose() + I;
-  Fbar = Fbar.transpose() + I;
+//   const int ND = 3;
 
-  Fdot = (F - Fbar) * (1.0/ _dt);
+//   ColumnMajorMatrix Fdot, I, Finv;
+//   ColumnMajorMatrix F(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
+//   ColumnMajorMatrix Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]);
 
-  invertMatrix(Fbar,Finv);
+//   Real term1, term2;
 
-  _Jacobian_mult[_qp].zero();
+//   I.identity();
 
-  for(int i = 0; i < ND; i++)
-    for(int j = 0; j < ND; j++)
-      for(int t = 0; t < ND; t++)
-        for(int S = 0; S < ND; S++)
-          for(int k = 0; k < ND; k++)
-            for(int l = 0; l < ND; l++)
-              for(int L = 0; L < ND; L++)
-              {
-                term1 = delta(k,t) * delta(L,S) * Finv(L,l) * (1.0/_dt) - Fdot(k,L) * Finv(L,t) * Finv(S,l);
-                term2 = delta(l,t) * delta(L,S) * Finv(L,k) * (1.0/_dt) - Fdot(l,L) * Finv(L,t) * Finv(S,k);
-                
-                _Jacobian_mult[_qp](j*ND+i,S*ND+t) =  (*_elasticity_tensor)(j*ND+i,l*ND+k) * (term1 + term2) * 0.5;
-              }
-  
+//   F = F.transpose() + I;
+//   Fbar = Fbar.transpose() + I;
+
+//   Fdot = (F - Fbar) * (1.0/ _dt);
+
+//   invertMatrix(Fbar,Finv);
+
+//   _Jacobian_mult[_qp].zero();
+
+//   for(int i = 0; i < ND; i++)
+//     for(int j = 0; j < ND; j++)
+//       for(int t = 0; t < ND; t++)
+//         for(int S = 0; S < ND; S++)
+//           for(int k = 0; k < ND; k++)
+//             for(int l = 0; l < ND; l++)
+//               for(int L = 0; L < ND; L++)
+//               {
+//                 term1 = delta(k,t) * delta(L,S) * Finv(L,l) * (1.0/_dt) - Fdot(k,L) * Finv(L,t) * Finv(S,l);
+//                 term2 = delta(l,t) * delta(L,S) * Finv(L,k) * (1.0/_dt) - Fdot(l,L) * Finv(L,t) * Finv(S,k);
+
+//                 _Jacobian_mult[_qp](j*ND+i,S*ND+t) =  (*_elasticity_tensor)(j*ND+i,l*ND+k) * (term1 + term2) * 0.5;
+//               }
+
   //_Jacobian_mult[_qp] =  _Jacobian_mult[_qp].transpose();
-  
-  
+
+
 }
