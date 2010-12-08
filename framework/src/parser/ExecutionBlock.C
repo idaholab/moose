@@ -152,7 +152,11 @@ ExecutionBlock::execute()
   if (getParamValue<bool>("eisenstat_walker"))
     PetscOptionsSetValue("-snes_ksp_ew", PETSC_NULL);
 
-    
+  if (isParamValid<unsigned int>("gmres_restart"))
+  {
+    petsc_inames += " -ksp_gmres_restart";
+    petsc_values += getParamValue<unsigned int>("gmres_restart");
+  }   
 
   MoosePetscSupport::l_abs_step_tol = getParamValue<Real>("l_abs_step_tol");
   
