@@ -39,7 +39,7 @@ endif
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
 	ifneq (,$(findstring gcc,$(GXX-VERSION)))
-		libmesh_CXXFLAGS += --coverage
+		libmesh_CXXFLAGS += --coverage -fbranch-probabilities
 		libmesh_LDFLAGS += --coverage
 	endif
 endif

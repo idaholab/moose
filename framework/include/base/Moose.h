@@ -177,6 +177,21 @@ namespace libMesh
 #define mooseWarning(msg) do { std::cerr << "\n\n*** Warning ***\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << "\n" << std::endl; } while(0)
 
 
+/**
+ * likely() and unlikely() help the compiler optimize code by telling
+ * it if an if statement is likely to be true or not.
+ * the double negation !!(x) converts x to a 0 or 1 (like casting it to a bool)
+ */
+#ifdef __GNUC__
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#elif __INTEL_COMPILER                         // the intel compiler has the same builtin
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#else
+#define likely(x) (x)
+#define likely(x) (x)
+#endif
 
 class MooseInit : public LibMeshInit
 {
