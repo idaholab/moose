@@ -47,7 +47,9 @@ MaterialModel::MaterialModel( const std::string & name,
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
-   _elasticity_tensor(NULL)
+   _elasticity_tensor(NULL),
+   _strain_increment(NULL),
+   _incremental_rotation(NULL)
 {
 //   std::cout << "TESTING MaterialModel class..." << std::endl;
 //   testMe();
@@ -228,59 +230,58 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
 
 void
 MaterialModel::computeStrainAndRotationIncrement( DecompMethod method,
-                                                  const ColumnMajorMatrix & Fhat,
-                                                  ColumnMajorMatrix & d , ColumnMajorMatrix & R)
+                                                  const ColumnMajorMatrix & Fhat)
 {
   if ( method == RashidApprox )
   {
-    computeStrainIncrement(Fhat, d);
-    computePolarDecomposition( Fhat, R);
+    computeStrainIncrement(Fhat);
+    computePolarDecomposition( Fhat);
   }
 
   else if ( method == Eigen )
   {
-
+    
     mooseError("Eigen not defined.");
-
-//     const int ND = 3;
-
-//     ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
-//     ColumnMajorMatrix  Uhat(ND,ND), invUhat(ND,ND), logVhat(ND,ND);
-//     ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
-
-//     ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
-
-//     Chat.eigen(eigen_value,eigen_vector);
-
-
-//     for(int i = 0; i < ND; i++)
-//     {
-//       N1(i) = eigen_vector(i,0);
-//       N2(i) = eigen_vector(i,1);
-//       N3(i) = eigen_vector(i,2);
-//     }
-
-//     const Real lamda1 = std::sqrt(eigen_value(0));
-//     const Real lamda2 = std::sqrt(eigen_value(1));
-//     const Real lamda3 = std::sqrt(eigen_value(2));
-
-//     Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
-
-//     invertMatrix(Uhat,invUhat);
-
-//     R = Fhat * invUhat;
-
-//     n1 = R * N1;
-//     n2 = R * N2;
-//     n3 = R * N3;
-
-//     const Real log1 = std::log(lamda1);
-//     const Real log2 = std::log(lamda2);
-//     const Real log3 = std::log(lamda3);
-
-//     logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
-
-//     d = logVhat * (1.0 / _dt);
+    
+    const int ND = 3;
+    
+    ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
+    ColumnMajorMatrix  Uhat(ND,ND), invUhat(ND,ND), logVhat(ND,ND);
+    ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
+    
+    ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
+    
+    Chat.eigen(eigen_value,eigen_vector);
+    
+    
+    for(int i = 0; i < ND; i++)
+    {
+      N1(i) = eigen_vector(i,0);
+      N2(i) = eigen_vector(i,1);
+      N3(i) = eigen_vector(i,2);
+    }
+    
+    const Real lamda1 = std::sqrt(eigen_value(0));
+    const Real lamda2 = std::sqrt(eigen_value(1));
+    const Real lamda3 = std::sqrt(eigen_value(2));
+    
+    Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
+    
+    invertMatrix(Uhat,invUhat);
+    
+    _incremental_rotation = Fhat * invUhat;
+    
+    n1 = _incremental_rotation * N1;
+    n2 = _incremental_rotation * N2;
+    n3 = _incremental_rotation * N3;
+    
+    const Real log1 = std::log(lamda1);
+    const Real log2 = std::log(lamda2);
+    const Real log3 = std::log(lamda3);
+    
+    logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
+    
+    _strain_increment = logVhat * (1.0 / _dt);
   }
   else
   {
@@ -291,8 +292,7 @@ MaterialModel::computeStrainAndRotationIncrement( DecompMethod method,
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat,
-                                       ColumnMajorMatrix & d )
+MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
 {
 
   //
@@ -363,23 +363,22 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat,
 //             << Axy << " " << Ayy << " " << Ayz << "\n"
 //             << Axz << " " << Ayz << " " << Azz << std::endl;
 
-  d(0,0) = -(Bxx*Axx + Bxy*Axy + Bxz*Axz) * dt_inv;
-  d(0,1) = -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) * dt_inv;
-  d(0,2) = -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) * dt_inv;
-  d(1,1) = -(Bxy*Axy + Byy*Ayy + Byz*Ayz) * dt_inv;
-  d(1,2) = -(Bxy*Axz + Byy*Ayz + Byz*Azz) * dt_inv;
-  d(2,2) = -(Bxz*Axz + Byz*Ayz + Bzz*Azz) * dt_inv;
-  d(1,0) = d(0,1);
-  d(2,0) = d(0,2);
-  d(2,1) = d(1,2);
-
+  _strain_increment(0,0) = -(Bxx*Axx + Bxy*Axy + Bxz*Axz) * dt_inv;
+  _strain_increment(0,1) = -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) * dt_inv;
+  _strain_increment(0,2) = -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) * dt_inv;
+  _strain_increment(1,1) = -(Bxy*Axy + Byy*Ayy + Byz*Ayz) * dt_inv;
+  _strain_increment(1,2) = -(Bxy*Axz + Byy*Ayz + Byz*Azz) * dt_inv;
+  _strain_increment(2,2) = -(Bxz*Axz + Byz*Ayz + Bzz*Azz) * dt_inv;
+  _strain_increment(1,0) = _strain_increment(0,1);
+  _strain_increment(2,0) = _strain_increment(0,2);
+  _strain_increment(2,1) = _strain_increment(1,2);
+  
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat,
-                                          ColumnMajorMatrix & R )
+MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 {
 
   // From Rashid, 1993.
@@ -412,36 +411,36 @@ MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat,
   // Since the input to this routine is the incremental deformation gradient
   //   and not the inverse incremental gradient, this result is the transpose
   //   of the one in Rashid's paper.
-  R(0,0) = C1 + (C2*Ax)*Ax;
-  R(0,1) =      (C2*Ay)*Ax + (C3*Az);
-  R(0,2) =      (C2*Az)*Ax - (C3*Ay);
-  R(1,0) =      (C2*Ax)*Ay - (C3*Az);
-  R(1,1) = C1 + (C2*Ay)*Ay;
-  R(1,2) =      (C2*Az)*Ay + (C3*Ax);
-  R(2,0) =      (C2*Ax)*Az + (C3*Ay);
-  R(2,1) =      (C2*Ay)*Az - (C3*Ax);
-  R(2,2) = C1 + (C2*Az)*Az;
-
+  _incremental_rotation(0,0) = C1 + (C2*Ax)*Ax;
+  _incremental_rotation(0,1) =      (C2*Ay)*Ax + (C3*Az);
+  _incremental_rotation(0,2) =      (C2*Az)*Ax - (C3*Ay);
+  _incremental_rotation(1,0) =      (C2*Ax)*Ay - (C3*Az);
+  _incremental_rotation(1,1) = C1 + (C2*Ay)*Ay;
+  _incremental_rotation(1,2) =      (C2*Az)*Ay + (C3*Ax);
+  _incremental_rotation(2,0) =      (C2*Ax)*Az + (C3*Ay);
+  _incremental_rotation(2,1) =      (C2*Ay)*Az - (C3*Ax);
+  _incremental_rotation(2,2) = C1 + (C2*Az)*Az;
+  
 }
 
 
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::modifyStrain( ColumnMajorMatrix & strain_increment )
+MaterialModel::modifyStrain()
 {
   if ( _has_temp )
   {
     ColumnMajorMatrix tStrain;
     tStrain.setDiag( _alpha * (_temperature[_qp] - _temperature_old[_qp]) );
-    strain_increment -= tStrain;
+    _strain_increment -= tStrain;
   }
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeStress( ColumnMajorMatrix & strain_increment )
+MaterialModel::computeStress()
 {
   // Given the stretching, compute the stress increment and add it to the old stress.
   // stress = stressOld + stressIncrement
@@ -467,9 +466,9 @@ MaterialModel::computeStress( ColumnMajorMatrix & strain_increment )
   //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
-  strain_increment.reshape(9, 1);
-  ColumnMajorMatrix stress_new( *_elasticity_tensor * strain_increment );
-  strain_increment.reshape(3, 3);
+  _strain_increment.reshape(9, 1);
+  ColumnMajorMatrix stress_new( *_elasticity_tensor * _strain_increment );
+  _strain_increment.reshape(3, 3);
 //   stress_new.reshape(3, 3);
   stress_new *= _dt;
   stress_new.fill(_stress[_qp]);
@@ -493,10 +492,10 @@ MaterialModel::computeStress( ColumnMajorMatrix & strain_increment )
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::finalizeStress( const ColumnMajorMatrix & incremental_rotation )
+MaterialModel::finalizeStress()
 {
   // Using the incremental rotation, update the stress to the current configuration (R*T*R^T)
-  _stress[_qp] = rotateSymmetricTensor( incremental_rotation, _stress[_qp] );
+  _stress[_qp] = rotateSymmetricTensor( _incremental_rotation, _stress[_qp] );
 
 //   std::cout << "STRESS: " << _qp << "\n"
 //             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
@@ -555,19 +554,17 @@ MaterialModel::computeProperties()
   std::vector<ColumnMajorMatrix> Fhat(_n_qpoints);
   computeIncrementalDeformationGradient(Fhat);
 
-  ColumnMajorMatrix strain_increment;
-  ColumnMajorMatrix incremental_rotation;
 
   for ( _qp = 0; _qp < _n_qpoints; ++_qp )
   {
 
-    computeStrainAndRotationIncrement( RashidApprox, Fhat[_qp], strain_increment, incremental_rotation);
-//     computeStrainAndRotationIncrement( Eigen, Fhat[_qp], strain_increment, incremental_rotation);
-    modifyStrain( strain_increment );
+    computeStrainAndRotationIncrement( RashidApprox, Fhat[_qp]);
+//     computeStrainAndRotationIncrement( Eigen, Fhat[_qp]);
+    modifyStrain();
 
 
-    computeStress( strain_increment );
-    finalizeStress( incremental_rotation );
+    computeStress();
+    finalizeStress();
     computePreconditioning();
 
   }
@@ -676,9 +673,9 @@ MaterialModel::testMe()
   _dt = 1;
 
   ColumnMajorMatrix d;
-  computeStrainIncrement( fred, d );
+  computeStrainIncrement(fred);
   ColumnMajorMatrix rot;
-  computePolarDecomposition( fred, rot );
+  computePolarDecomposition(fred);
 
   std::cout << std::setprecision(14);
   std::cout << "Input:\n";
@@ -686,6 +683,7 @@ MaterialModel::testMe()
   std::cout << fred(1,0) << " " << fred(1,1) << " " << fred(1,2) << std::endl;
   std::cout << fred(2,0) << " " << fred(2,1) << " " << fred(2,2) << std::endl;
   std::cout << std::endl;
+  /*
   std::cout << "Output d:\n";
   std::cout << d(0,0) << " " << d(0,1) << " " << d(0,2) << std::endl;
   std::cout << d(1,0) << " " << d(1,1) << " " << d(1,2) << std::endl;
@@ -702,7 +700,7 @@ MaterialModel::testMe()
   std::cout << rot(0,0) << " " << rot(0,1) << " " << rot(0,2) << std::endl;
   std::cout << rot(1,0) << " " << rot(1,1) << " " << rot(1,2) << std::endl;
   std::cout << rot(2,0) << " " << rot(2,1) << " " << rot(2,2) << std::endl;
-  std::cout << std::endl;
+  std::cout << std::endl;*/
 
   exit(0);
 

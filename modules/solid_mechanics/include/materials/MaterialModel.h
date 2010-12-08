@@ -53,7 +53,10 @@ protected:
   MaterialProperty<RealTensorValue> & _stress_old;
 
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
-
+  
+  ColumnMajorMatrix _strain_increment;
+  ColumnMajorMatrix _incremental_rotation;
+  
 
 
   /**
@@ -68,20 +71,18 @@ protected:
   
 
   /// Modify increment for things like thermal strain
-  virtual void modifyStrain( ColumnMajorMatrix & strain_increment );
+  virtual void modifyStrain();
 
   /// Compute the stress (sigma += deltaSigma)
-  virtual void computeStress( ColumnMajorMatrix & strain_increment );
+  virtual void computeStress();
 
   /// Rotate stress to current configuration
-  virtual void finalizeStress( const ColumnMajorMatrix & rot );
+  virtual void finalizeStress();
 
 
   void computeIncrementalDeformationGradient( std::vector<ColumnMajorMatrix> & Fhat );
-  void computeStrainIncrement( const ColumnMajorMatrix & Fhat,
-                               ColumnMajorMatrix & d );
-  void computePolarDecomposition( const ColumnMajorMatrix & Fhat,
-                                  ColumnMajorMatrix & R );
+  void computeStrainIncrement( const ColumnMajorMatrix & Fhat);
+  void computePolarDecomposition( const ColumnMajorMatrix & Fhat);
   void computePreconditioning();
   int delta(int i, int j);
 
@@ -92,8 +93,7 @@ protected:
   };
 
   void computeStrainAndRotationIncrement( DecompMethod method,
-                                          const ColumnMajorMatrix & Fhat,
-                                          ColumnMajorMatrix & d , ColumnMajorMatrix & R);
+                                          const ColumnMajorMatrix & Fhat);
 
 
   void fillMatrix( const VariableGradient & grad_x,
