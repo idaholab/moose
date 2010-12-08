@@ -29,7 +29,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef Material * (*MaterialBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters); // , unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
+typedef Material * (*MaterialBuildPtr)(const std::string & name, InputParameters parameters); // , unsigned int block_id, std::vector<std::string> coupled_to, std::vector<std::string> coupled_as);
 
 /**
  * Typedef to make things easier.
@@ -45,9 +45,9 @@ typedef std::vector<std::string>::iterator MaterialNamesIterator;
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename MaterialType>
-Material * buildMaterial(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+Material * buildMaterial(const std::string & name, InputParameters parameters)
 {
-  return new MaterialType(name, moose_system, parameters);
+  return new MaterialType(name, parameters);
 }
 
 /**
@@ -72,10 +72,9 @@ public:
 
   Material *create(std::string mat_name,
                    const std::string & name,
-                   MooseSystem & moose_system,
                    InputParameters parameters)
   {
-    return (*_name_to_build_pointer[mat_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[mat_name])(name, parameters);
   }
   
   InputParameters getValidParams(const std::string & name);

@@ -26,8 +26,8 @@ InputParameters validParams<GenericBCBlock>()
   return params;
 }
 
-GenericBCBlock::GenericBCBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params),
+GenericBCBlock::GenericBCBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params),
    _type(getType())
 {
   if (Parser::pathContains(name, "BCs"))

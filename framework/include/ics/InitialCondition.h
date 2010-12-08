@@ -42,7 +42,6 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   InitialCondition(const std::string & name,
-                   MooseSystem & moose_system,
                    InputParameters parameters);
 
   virtual ~InitialCondition();
@@ -61,6 +60,9 @@ public:
    * want to use an initial condition that defines this!
    */
   virtual RealGradient gradient(const Point & /*p*/){ return RealGradient(); };
+
+protected:
+  MooseSystem & _moose_system;
 
 private:
   std::string _var_name;

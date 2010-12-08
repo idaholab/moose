@@ -22,8 +22,8 @@ InputParameters validParams<SidePostprocessor>()
   return params;
 }
 
-SidePostprocessor::SidePostprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
-   Postprocessor(name, moose_system, parameters)
+SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
+   Postprocessor(name, parameters)
 {}
 

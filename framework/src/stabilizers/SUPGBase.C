@@ -24,9 +24,8 @@ InputParameters validParams<SUPGBase>()
 }
 
 SUPGBase::SUPGBase(const std::string & name,
-                   MooseSystem & moose_system,
                    InputParameters parameters)
-  :Stabilizer(name, moose_system, parameters)
+  :Stabilizer(name, parameters)
 {}
 
 void

@@ -31,7 +31,6 @@ class MTMaterial : public Material
 {
 public:
   MTMaterial(const std::string & name,
-             MooseSystem & moose_system,
              InputParameters parameters);
   
 protected:

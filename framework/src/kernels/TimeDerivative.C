@@ -22,8 +22,8 @@ InputParameters validParams<TimeDerivative>()
   return params;
 }
 
-TimeDerivative::TimeDerivative(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :TimeKernel(name, moose_system, parameters),
+TimeDerivative::TimeDerivative(const std::string & name, InputParameters parameters)
+  :TimeKernel(name, parameters),
    _time_weight(_moose_system._time_weight)
 {}
 

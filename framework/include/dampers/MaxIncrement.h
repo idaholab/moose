@@ -27,7 +27,7 @@ InputParameters validParams<MaxIncrement>();
 class MaxIncrement : public Damper
 {
 public:
-  MaxIncrement(std::string name, MooseSystem & moose_system, InputParameters parameters);
+  MaxIncrement(std::string name, InputParameters parameters);
 
 protected:
   virtual Real computeQpDamping();

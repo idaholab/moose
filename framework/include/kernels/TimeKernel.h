@@ -31,7 +31,7 @@ class TimeKernel : public Kernel
 {
 public:
 
-  TimeKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  TimeKernel(const std::string & name, InputParameters parameters);
 };
 
 #endif //TIMEKERNEL

@@ -23,8 +23,8 @@ InputParameters validParams<FunctionAux>()
   return params;
 }
 
-FunctionAux::FunctionAux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :AuxKernel(name, moose_system, parameters),
+FunctionAux::FunctionAux(const std::string & name, InputParameters parameters)
+  :AuxKernel(name, parameters),
    _func(getFunction("function"))
 {}
 

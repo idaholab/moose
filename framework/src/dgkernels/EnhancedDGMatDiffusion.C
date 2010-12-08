@@ -17,8 +17,8 @@ InputParameters validParams<EnhancedDGMatDiffusion>()
 }
 
 
-EnhancedDGMatDiffusion::EnhancedDGMatDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :DGKernel(name, moose_system, parameters),
+EnhancedDGMatDiffusion::EnhancedDGMatDiffusion(const std::string & name, InputParameters parameters)
+  :DGKernel(name, parameters),
    _epsilon(getParam<Real>("epsilon")),
    _sigma(getParam<Real>("sigma")),
    _prop_name(getParam<std::string>("diffusivity")),

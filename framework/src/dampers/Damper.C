@@ -25,11 +25,11 @@ InputParameters validParams<Damper>()
   return params;
 }
 
-Damper::Damper(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
-   MaterialPropertyInterface(moose_system._material_data[_tid]),
-   _damper_data(*moose_system._damper_data[_tid]),
-   _element_data(*moose_system._element_data[_tid]),
+Damper::Damper(const std::string & name, InputParameters parameters)
+  :PDEBase(name, parameters, *parameters.get<MooseSystem *>("_moose_system")->_element_data[parameters.get<THREAD_ID>("_tid")]),
+   MaterialPropertyInterface(parameters.get<MooseSystem *>("_moose_system")->_material_data[_tid]),
+   _damper_data(*_moose_system._damper_data[_tid]),
+   _element_data(*_moose_system._element_data[_tid]),
    _u_increment(_damper_data._var_increments[_var_num]),
    _u(_element_data._var_vals[_var_num]),
    _grad_u(_element_data._var_grads[_var_num]),

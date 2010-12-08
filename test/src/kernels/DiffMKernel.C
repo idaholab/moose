@@ -23,8 +23,8 @@ InputParameters validParams<DiffMKernel>()
 }
 
 
-DiffMKernel::DiffMKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  : Kernel(name, moose_system, parameters),
+DiffMKernel::DiffMKernel(const std::string & name, InputParameters parameters)
+  : Kernel(name, parameters),
     _prop_name(getParam<std::string>("mat_prop")),
     _diff(getMaterialProperty<Real>(_prop_name)),
     _vec_prop(getMaterialProperty<std::vector<Real> >("vector_property"))

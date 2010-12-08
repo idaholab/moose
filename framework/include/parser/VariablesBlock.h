@@ -29,7 +29,7 @@ InputParameters validParams<VariablesBlock>();
 class VariablesBlock: public ParserBlock
 {
 public:
-  VariablesBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+  VariablesBlock(const std::string & name, InputParameters params);
   virtual ~VariablesBlock();
 
   virtual void execute();

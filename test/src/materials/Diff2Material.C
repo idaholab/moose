@@ -22,8 +22,8 @@ InputParameters validParams<Diff2Material>()
   return params;
 }
 
-Diff2Material::Diff2Material(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  : Material(name, moose_system, parameters),
+Diff2Material::Diff2Material(const std::string & name, InputParameters parameters)
+  : Material(name, parameters),
     _diff(getParam<Real>("diff")),
     _diffusivity(declareProperty<Real>("diff2")),
     _vector_property(declareProperty<std::vector<Real> >("vector_property"))

@@ -22,8 +22,8 @@ InputParameters validParams<ImplicitEuler>()
   return params;
 }
 
-ImplicitEuler::ImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :TimeDerivative(name, moose_system, parameters)
+ImplicitEuler::ImplicitEuler(const std::string & name, InputParameters parameters)
+  :TimeDerivative(name, parameters)
 {}
 
 Real

@@ -24,9 +24,8 @@ InputParameters validParams<UserForcingFunction>()
 }
 
 UserForcingFunction::UserForcingFunction(const std::string & name,
-                       MooseSystem &sys,
                        InputParameters parameters)
-  :Kernel(name, sys, parameters),
+  :Kernel(name, parameters),
   _func(getFunction("function"))
 {
 }

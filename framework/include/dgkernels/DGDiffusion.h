@@ -36,7 +36,7 @@ InputParameters validParams<DGDiffusion>();
 class DGDiffusion : public DGKernel
 {
 public:
-  DGDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  DGDiffusion(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual(DGResidualType type);

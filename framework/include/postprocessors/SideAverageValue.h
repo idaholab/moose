@@ -32,7 +32,7 @@ InputParameters validParams<SideAverageValue>();
 class SideAverageValue : public SideIntegral
 {
 public:
-  SideAverageValue(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  SideAverageValue(const std::string & name, InputParameters parameters);
 
   virtual void initialize();
   virtual void execute();

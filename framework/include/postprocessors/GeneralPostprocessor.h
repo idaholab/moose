@@ -30,10 +30,13 @@ InputParameters validParams<GeneralPostprocessor>();
 class GeneralPostprocessor : public Postprocessor, public MooseObject, protected PostprocessorInterface
 {
 public:
-  GeneralPostprocessor(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
+  GeneralPostprocessor(const std::string & name, InputParameters parameters);
   
   virtual ~GeneralPostprocessor()
     {}
+
+protected:
+  MooseSystem & _moose_system;
 };
  
 #endif

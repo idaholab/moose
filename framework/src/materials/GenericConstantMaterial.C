@@ -24,9 +24,8 @@ InputParameters validParams<GenericConstantMaterial>()
 }
 
 GenericConstantMaterial::GenericConstantMaterial(const std::string & name,
-                             MooseSystem & moose_system,
                              InputParameters parameters)
-  :Material(name, moose_system, parameters),
+  :Material(name, parameters),
    _prop_names(getParam<std::vector<std::string> >("prop_names")),
    _prop_values(getParam<std::vector<Real> >("prop_values"))
 {

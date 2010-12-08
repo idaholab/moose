@@ -32,9 +32,8 @@ InputParameters validParams<BoundingBoxIC>()
 }
 
 BoundingBoxIC::BoundingBoxIC(const std::string & name,
-                             MooseSystem & moose_system,
                              InputParameters parameters)
-  :InitialCondition(name, moose_system, parameters),
+  :InitialCondition(name, parameters),
    _x1(getParam<Real>("x1")),
    _y1(getParam<Real>("y1")),
    _z1(getParam<Real>("z1")),

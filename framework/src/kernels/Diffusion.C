@@ -23,8 +23,8 @@ InputParameters validParams<Diffusion>()
 }
 
 
-Diffusion::Diffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters)
+Diffusion::Diffusion(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters)
 {}
 
 Real

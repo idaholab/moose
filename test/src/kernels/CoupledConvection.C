@@ -22,8 +22,8 @@ InputParameters validParams<CoupledConvection>()
   return params;
 }
 
-CoupledConvection::CoupledConvection(const std::string & name, MooseSystem &sys, InputParameters parameters) :
-  Kernel(name, sys, parameters),
+CoupledConvection::CoupledConvection(const std::string & name, InputParameters parameters) :
+  Kernel(name, parameters),
   _velocity_vector(coupledGradient("velocity_vector"))
 {}
 

@@ -25,7 +25,7 @@ InputParameters validParams<ExampleFunction>();
 class ExampleFunction : public Function
 {
 public:
-  ExampleFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  ExampleFunction(const std::string & name, InputParameters parameters);
   
   virtual Real value(Real t, Real x, Real y = 0, Real z = 0);
 

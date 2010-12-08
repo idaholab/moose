@@ -32,8 +32,8 @@ InputParameters validParams<GenericPeriodicBlock>()
   return params;
 }
 
-GenericPeriodicBlock::GenericPeriodicBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params)
+GenericPeriodicBlock::GenericPeriodicBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params)
 {}
 
 void

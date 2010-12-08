@@ -24,9 +24,8 @@ InputParameters validParams<TEJumpFFN>()
 }
 
 TEJumpFFN::TEJumpFFN(const std::string & name,
-                     MooseSystem &sys,
                      InputParameters parameters)
-  :Kernel(name, sys, parameters),
+  :Kernel(name, parameters),
    _t_jump(getParam<Real>("t_jump")),
    _slope(getParam<Real>("slope"))
 {

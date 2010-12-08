@@ -37,8 +37,8 @@ InputParameters validParams<TransientBlock>()
   return params;
 }
 
-TransientBlock::TransientBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params)
+TransientBlock::TransientBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params)
 {}
 
 void

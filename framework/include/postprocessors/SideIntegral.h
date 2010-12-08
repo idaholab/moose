@@ -32,7 +32,7 @@ InputParameters validParams<SideIntegral>();
 class SideIntegral : public SidePostprocessor
 {
 public:
-  SideIntegral(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  SideIntegral(const std::string & name, InputParameters parameters);
   
   virtual void initialize();
   virtual void execute();

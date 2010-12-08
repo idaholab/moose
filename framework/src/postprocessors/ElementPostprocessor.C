@@ -24,9 +24,9 @@ InputParameters validParams<ElementPostprocessor>()
   return params;
 }
 
-ElementPostprocessor::ElementPostprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
-   Postprocessor(name, moose_system, parameters),
+ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
+   Postprocessor(name, parameters),
    _block_id(getParam<unsigned int>("block"))
 {
 }

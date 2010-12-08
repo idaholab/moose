@@ -47,7 +47,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  SolutionTimeAdaptive(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  SolutionTimeAdaptive(const std::string & name, InputParameters parameters);
   virtual ~SolutionTimeAdaptive();
 
 protected:

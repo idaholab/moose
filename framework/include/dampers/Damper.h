@@ -29,7 +29,7 @@ InputParameters validParams<Damper>();
 class Damper : protected PDEBase, protected MaterialPropertyInterface
 {
 public:
-  Damper(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  Damper(const std::string & name, InputParameters parameters);
 
   /**
    * Computes this Damper's damping for one element.

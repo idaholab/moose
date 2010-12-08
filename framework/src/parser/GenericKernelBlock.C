@@ -26,8 +26,8 @@ InputParameters validParams<GenericKernelBlock>()
   return params;
 }
 
-GenericKernelBlock::GenericKernelBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params),
+GenericKernelBlock::GenericKernelBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params),
    _type(getType())
 {
   setClassParams(KernelFactory::instance()->getValidParams(_type));

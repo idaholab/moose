@@ -25,10 +25,9 @@ InputParameters validParams<MMSConvection>()
 }
 
 MMSConvection::MMSConvection(const std::string & name,
-                       MooseSystem &sys,
                        InputParameters parameters)
  
-  :Kernel(name, sys, parameters),
+  :Kernel(name, parameters),
    
    _x(getParam<Real>("x")),
    _y(getParam<Real>("y")),

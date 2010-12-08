@@ -25,8 +25,8 @@ InputParameters validParams<ConstantDamper>()
   return params;
 }
 
-ConstantDamper::ConstantDamper(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Damper(name, moose_system, parameters),
+ConstantDamper::ConstantDamper(const std::string & name, InputParameters parameters)
+  :Damper(name, parameters),
    _damping(getParam<Real>("damping"))
 {}
 

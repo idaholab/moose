@@ -23,8 +23,8 @@ InputParameters validParams<MTBC>()
   return params;
 }
 
-MTBC::MTBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+MTBC::MTBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
     _value(getParam<Real>("grad")),
     _prop_name(getParam<std::string>("prop_name")),
     _mat(getMaterialProperty<Real>(_prop_name))

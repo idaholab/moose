@@ -33,8 +33,8 @@ InputParameters validParams<DGMDDBC>()
   return params;
 }
 
-DGMDDBC::DGMDDBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+DGMDDBC::DGMDDBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
    _func(getFunction("function")),
    _prop_name(getParam<std::string>("prop_name")),
    _diff(getMaterialProperty<Real>(_prop_name)),

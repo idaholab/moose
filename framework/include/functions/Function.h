@@ -29,7 +29,7 @@ InputParameters validParams<Function>();
 class Function : public MooseObject
 {
 public:
-  Function(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  Function(const std::string & name, InputParameters parameters);
   virtual ~Function();
 
   /**

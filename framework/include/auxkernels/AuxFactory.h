@@ -30,7 +30,6 @@
  * Typedef to make things easier.
  */
 typedef AuxKernel * (*AuxKernelBuildPtr)(const std::string & name,
-                                         MooseSystem & moose_system,
                                          InputParameters parameters);
 
 /**
@@ -48,10 +47,9 @@ typedef InputParameters (*AuxKernelParamsPtr)();
  */
 template<typename AuxType>
 AuxKernel * buildAux(const std::string & name,
-                     MooseSystem & moose_system,
                      InputParameters parameters)
 {
-  return new AuxType(name, moose_system, parameters);
+  return new AuxType(name, parameters);
 }
 
 /**
@@ -78,10 +76,9 @@ public:
 
   AuxKernel *create(std::string aux_name,
                      const std::string & name,
-                     MooseSystem & moose_system,
                      InputParameters parameters)
   {
-    return (*_name_to_build_pointer[aux_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[aux_name])(name, parameters);
   }
 
   InputParameters getValidParams(const std::string & name);

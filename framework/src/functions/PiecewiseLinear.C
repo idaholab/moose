@@ -24,8 +24,8 @@ InputParameters validParams<PiecewiseLinear>()
   return params;
 }
 
-PiecewiseLinear::PiecewiseLinear(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
-  Function(name, moose_system, parameters),
+PiecewiseLinear::PiecewiseLinear(const std::string & name, InputParameters parameters) :
+  Function(name, parameters),
   _linear_interp( getParam<std::vector<Real> >("x"),
                   getParam<std::vector<Real> >("y") ),
   _scale_factor( getParam<Real>("scale_factor") )

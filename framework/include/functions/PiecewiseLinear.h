@@ -30,7 +30,7 @@ InputParameters validParams<PiecewiseLinear>();
 class PiecewiseLinear : public Function
 {
 public:
-  PiecewiseLinear(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  PiecewiseLinear(const std::string & name, InputParameters parameters);
   virtual ~PiecewiseLinear();
 
   /**

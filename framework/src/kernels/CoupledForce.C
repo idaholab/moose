@@ -24,8 +24,8 @@ InputParameters validParams<CoupledForce>()
   return params;
 }
 
-CoupledForce::CoupledForce(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+CoupledForce::CoupledForce(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
     _v_var(coupled("v")),
     _v(coupledValue("v"))
   {}

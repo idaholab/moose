@@ -21,8 +21,8 @@ InputParameters validParams<PolyDiffusion>()
   return params;
 }
 
-PolyDiffusion::PolyDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters)
+PolyDiffusion::PolyDiffusion(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters)
 {}
 
 Real

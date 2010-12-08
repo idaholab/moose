@@ -9,9 +9,8 @@ InputParameters validParams<SideFluxIntegral>()
 }
 
 SideFluxIntegral::SideFluxIntegral(const std::string & name,
-                                           MooseSystem & moose_system,
                                            InputParameters parameters)
-  :SideIntegral(name, moose_system, parameters),
+  :SideIntegral(name, parameters),
    _diffusivity(getParam<std::string>("diffusivity")),
    _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
 {}

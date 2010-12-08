@@ -28,8 +28,8 @@ InputParameters validParams<DashpotBC>()
   return params;
 }
 
-DashpotBC::DashpotBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+DashpotBC::DashpotBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
    _component(getParam<unsigned int>("component")),
    _coefficient(getParam<Real>("coefficient")),
    _disp_x_var(coupled("disp_x")),

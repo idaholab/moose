@@ -25,7 +25,7 @@ InputParameters validParams<AuxVariablesBlock>();
 class AuxVariablesBlock: public VariablesBlock
 {
 public:
-  AuxVariablesBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+  AuxVariablesBlock(const std::string & name, InputParameters params);
   
   virtual void execute();
 };

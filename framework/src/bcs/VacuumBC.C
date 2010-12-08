@@ -22,8 +22,8 @@ InputParameters validParams<VacuumBC>()
   return params;
 }
 
-VacuumBC::VacuumBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+VacuumBC::VacuumBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
     _alpha(getParam<Real>("alpha"))
   {}
 

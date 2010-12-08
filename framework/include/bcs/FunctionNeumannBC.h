@@ -30,7 +30,6 @@ class FunctionNeumannBC : public BoundaryCondition
 public:
 
   FunctionNeumannBC(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

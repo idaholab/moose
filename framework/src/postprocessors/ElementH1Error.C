@@ -24,9 +24,8 @@ InputParameters validParams<ElementH1Error>()
 }
 
 ElementH1Error::ElementH1Error(const std::string & name,
-                             MooseSystem & moose_system,
                              InputParameters parameters):
-  ElementIntegral(name, moose_system, parameters),
+  ElementIntegral(name, parameters),
   _func(getFunction("function"))
 {
 }

@@ -10,8 +10,8 @@ InputParameters validParams<Convection>()
   return params;
 }
 
-Convection::Convection(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+Convection::Convection(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
    _x(getParam<Real>("x")),
    _y(getParam<Real>("y")),
    _z(getParam<Real>("z"))

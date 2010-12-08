@@ -18,8 +18,8 @@ InputParameters validParams<DGFunctionConvectionDirichletBC>()
   return params;
 }
 
-DGFunctionConvectionDirichletBC::DGFunctionConvectionDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+DGFunctionConvectionDirichletBC::DGFunctionConvectionDirichletBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
    _func(getFunction("function")),
    _x(getParam<Real>("x")),
    _y(getParam<Real>("y")),

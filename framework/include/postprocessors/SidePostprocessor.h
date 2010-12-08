@@ -27,7 +27,7 @@ InputParameters validParams<SidePostprocessor>();
 class SidePostprocessor : public BoundaryCondition, public Postprocessor
 {
 public:
-  SidePostprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
+  SidePostprocessor(const std::string & name, InputParameters parameters);
 
 private:
   /**

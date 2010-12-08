@@ -26,7 +26,7 @@ InputParameters validParams<EmptyPostprocessor>();
 class EmptyPostprocessor : public GeneralPostprocessor
 {
 public:
-  EmptyPostprocessor(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
+  EmptyPostprocessor(const std::string & name, InputParameters parameters);
   
   virtual ~EmptyPostprocessor(){ }
   

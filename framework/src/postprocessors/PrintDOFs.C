@@ -22,8 +22,8 @@ InputParameters validParams<PrintDOFs>()
   return params;
 }
 
-PrintDOFs::PrintDOFs(const std::string & name, MooseSystem &moose_system, InputParameters parameters):
-  GeneralPostprocessor(name, moose_system, parameters)
+PrintDOFs::PrintDOFs(const std::string & name, InputParameters parameters):
+  GeneralPostprocessor(name, parameters)
 {}
 
 Real

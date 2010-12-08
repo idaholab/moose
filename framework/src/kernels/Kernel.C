@@ -38,11 +38,11 @@ InputParameters validParams<Kernel>()
 }
 
 
-Kernel::Kernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
-  PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
-  MaterialPropertyInterface(moose_system._material_data[_tid]),
-   _dof_data(moose_system._dof_data[_tid]),
-   _element_data(*moose_system._element_data[_tid]),
+Kernel::Kernel(const std::string & name, InputParameters parameters):
+  PDEBase(name, parameters, *parameters.get<MooseSystem *>("_moose_system")->_element_data[parameters.get<THREAD_ID>("_tid")]),
+  MaterialPropertyInterface(parameters.get<MooseSystem *>("_moose_system")->_material_data[_tid]),
+   _dof_data(_moose_system._dof_data[_tid]),
+   _element_data(*_moose_system._element_data[_tid]),
    _u(_element_data._var_vals[_var_num]),
    _grad_u(_element_data._var_grads[_var_num]),
    _second_u(_element_data._var_seconds[_var_num]),
@@ -65,15 +65,15 @@ Kernel::Kernel(const std::string & name, MooseSystem & moose_system, InputParame
     std::string coupled_var_name=_coupled_to[i];
 
     //Is it in the nonlinear system or the aux system?
-    if(moose_system.hasVariable(coupled_var_name))
+    if(_moose_system.hasVariable(coupled_var_name))
     {
-      unsigned int coupled_var_num = moose_system.getVariableNumber(coupled_var_name);
+      unsigned int coupled_var_num = _moose_system.getVariableNumber(coupled_var_name);
       _element_data._var_nums.insert(coupled_var_num);
     }
     //Look for it in the Aux system
-    else if (moose_system.hasAuxVariable(coupled_var_name))
+    else if (_moose_system.hasAuxVariable(coupled_var_name))
     {
-      unsigned int coupled_var_num = moose_system.getAuxVariableNumber(coupled_var_name);
+      unsigned int coupled_var_num = _moose_system.getAuxVariableNumber(coupled_var_name);
       _element_data._aux_var_nums.insert(coupled_var_num);
     }
     else

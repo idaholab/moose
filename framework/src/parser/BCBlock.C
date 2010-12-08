@@ -23,8 +23,8 @@ InputParameters validParams<BCBlock>()
   return validParams<ParserBlock>();
 }
 
-BCBlock::BCBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params)
+BCBlock::BCBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params)
 {}
 
 void

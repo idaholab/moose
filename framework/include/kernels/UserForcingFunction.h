@@ -34,7 +34,6 @@ class UserForcingFunction : public Kernel
 public:
 
   UserForcingFunction(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

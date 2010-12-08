@@ -21,8 +21,8 @@ InputParameters validParams<ElementAverageValue>()
   return params;
 }
 
-ElementAverageValue::ElementAverageValue(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :ElementIntegral(name, moose_system, parameters),
+ElementAverageValue::ElementAverageValue(const std::string & name, InputParameters parameters)
+  :ElementIntegral(name, parameters),
    _volume(0)
 {}
 

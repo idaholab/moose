@@ -36,16 +36,16 @@ InputParameters validParams<AuxKernel>()
   return params;
 }
 
-AuxKernel::AuxKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
-  PDEBase(name, moose_system, parameters, *moose_system._element_data[parameters.get<THREAD_ID>("_tid")]),
-  MaterialPropertyInterface(moose_system._material_data[_tid]),
-   _dof_data(moose_system._dof_data[_tid]),
-   _aux_data(*moose_system._aux_data[_tid]),
+AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
+  PDEBase(name, parameters, *parameters.get<MooseSystem *>("_moose_system")->_element_data[parameters.get<THREAD_ID>("_tid")]),
+  MaterialPropertyInterface(parameters.get<MooseSystem *>("_moose_system")->_material_data[_tid]),
+   _dof_data(_moose_system._dof_data[_tid]),
+   _aux_data(*_moose_system._aux_data[_tid]),
    _nodal(_fe_type.family == LAGRANGE),
    _u(_nodal ? _aux_data._aux_var_vals_nodal[_var_num] : _aux_data._aux_var_vals_element[_var_num]),
    _u_old(_nodal ? _aux_data._aux_var_vals_old_nodal[_var_num] : _aux_data._aux_var_vals_old_element[_var_num]),
    _u_older(_nodal ? _aux_data._aux_var_vals_older_nodal[_var_num] : _aux_data._aux_var_vals_older_element[_var_num]),
-   _current_node(moose_system._face_data[_tid]->_current_node)
+   _current_node(_moose_system._face_data[_tid]->_current_node)
 {
   // If this variable isn't known yet... make it so
   _moose_system._element_data[_tid]->_aux_var_nums.insert(_var_num);

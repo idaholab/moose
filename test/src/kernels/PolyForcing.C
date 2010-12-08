@@ -22,9 +22,8 @@ InputParameters validParams<PolyForcing>()
 }
 
 PolyForcing::PolyForcing(const std::string & name,
-                       MooseSystem &sys,
                        InputParameters parameters)
-  :Kernel(name, sys, parameters)
+  :Kernel(name, parameters)
 {
   
 }

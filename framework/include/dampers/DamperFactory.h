@@ -32,7 +32,7 @@ class MooseSystem;
 /**
  * Typedef to make things easier.
  */
-typedef Damper * (*damperBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+typedef Damper * (*damperBuildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef to hide implementation details
@@ -48,9 +48,9 @@ typedef InputParameters (*damperParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename DamperType>
-Damper * buildDamper(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+Damper * buildDamper(const std::string & name, InputParameters parameters)
 {
-  return new DamperType(name, moose_system, parameters);
+  return new DamperType(name, parameters);
 }
 
 /**
@@ -73,9 +73,9 @@ public:
       mooseError("Damper '" + name + "' already registered.");
   }
 
-  Damper *create(std::string damper_name, const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+  Damper *create(std::string damper_name, const std::string & name, InputParameters parameters)
   {
-    return (*_name_to_build_pointer[damper_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[damper_name])(name, parameters);
   }
 
   DamperNamesIterator registeredDampersBegin();

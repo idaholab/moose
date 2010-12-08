@@ -10,8 +10,8 @@ InputParameters validParams<DGConvection>()
   return params;
 }
 
-DGConvection::DGConvection(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :DGKernel(name, moose_system, parameters),
+DGConvection::DGConvection(const std::string & name, InputParameters parameters)
+  :DGKernel(name, parameters),
    _x(getParam<Real>("x")),
    _y(getParam<Real>("y")),
    _z(getParam<Real>("z"))

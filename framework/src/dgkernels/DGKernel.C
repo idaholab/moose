@@ -40,13 +40,13 @@ InputParameters validParams<DGKernel>()
 }
 
 
-DGKernel::DGKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
-  PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
-  TwoMaterialPropertyInterface(moose_system._bnd_material_data[_tid], moose_system._neighbor_material_data[_tid]),
-  _dof_data(moose_system._dof_data[_tid]),
-  _face_data(*moose_system._face_data[_tid]),
-  _neighbor_dof_data(moose_system._neighbor_dof_data[_tid]),
-  _neighbor_face_data(*moose_system._neighbor_face_data[_tid]),
+DGKernel::DGKernel(const std::string & name, InputParameters parameters):
+  PDEBase(name, parameters, *parameters.get<MooseSystem *>("_moose_system")->_face_data[parameters.get<THREAD_ID>("_tid")]),
+  TwoMaterialPropertyInterface(_moose_system._bnd_material_data[_tid], _moose_system._neighbor_material_data[_tid]),
+  _dof_data(_moose_system._dof_data[_tid]),
+  _face_data(*_moose_system._face_data[_tid]),
+  _neighbor_dof_data(_moose_system._neighbor_dof_data[_tid]),
+  _neighbor_face_data(*_moose_system._neighbor_face_data[_tid]),
   _boundary_id(parameters.get<unsigned int>("_boundary_id")),
   _side_elem(NULL),
   _neighbor_elem(_neighbor_dof_data._current_elem),
@@ -82,16 +82,16 @@ DGKernel::DGKernel(const std::string & name, MooseSystem & moose_system, InputPa
     std::string coupled_var_name=_coupled_to[i];
 
     //Is it in the nonlinear system or the aux system?
-    if(moose_system.hasVariable(coupled_var_name))
+    if(_moose_system.hasVariable(coupled_var_name))
     {
-      unsigned int coupled_var_num = moose_system.getVariableNumber(coupled_var_name);
+      unsigned int coupled_var_num = _moose_system.getVariableNumber(coupled_var_name);
       _face_data._var_nums.insert(coupled_var_num);
       _neighbor_face_data._var_nums.insert(coupled_var_num);
     }
     //Look for it in the Aux system
-    else if (moose_system.hasAuxVariable(coupled_var_name))
+    else if (_moose_system.hasAuxVariable(coupled_var_name))
     {
-      unsigned int coupled_var_num = moose_system.getAuxVariableNumber(coupled_var_name);
+      unsigned int coupled_var_num = _moose_system.getAuxVariableNumber(coupled_var_name);
       _face_data._aux_var_nums.insert(coupled_var_num);
       _neighbor_face_data._aux_var_nums.insert(coupled_var_num);
     }

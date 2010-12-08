@@ -25,10 +25,11 @@ InputParameters validParams<GeneralPostprocessor>()
   return params;
 }
 
-GeneralPostprocessor::GeneralPostprocessor(const std::string & name, MooseSystem &moose_system, InputParameters parameters)
-  :Postprocessor(name, moose_system, parameters),
-   MooseObject(name, moose_system, parameters),
-   PostprocessorInterface(moose_system._postprocessor_data[_tid])
+GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters)
+  :Postprocessor(name, parameters),
+   MooseObject(name, parameters),
+   PostprocessorInterface(parameters.get<MooseSystem *>("_moose_system")->_postprocessor_data[_tid]),
+   _moose_system(*parameters.get<MooseSystem *>("_moose_system"))
 {}
 
   

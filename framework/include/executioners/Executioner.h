@@ -49,7 +49,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  Executioner(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  Executioner(const std::string & name, InputParameters parameters);
 
   virtual ~Executioner();
 
@@ -115,6 +115,8 @@ protected:
    * Should be called before solve() to set the relative equation scaling.
    */
   void setScaling();
+
+  MooseSystem & _moose_system;
 
   /**
    * Initial Residual Variables

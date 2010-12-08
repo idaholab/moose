@@ -21,8 +21,8 @@ InputParameters validParams<Reaction>()
   return params;
 }
 
-Reaction::Reaction(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters)
+Reaction::Reaction(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters)
   {}
 
 Real

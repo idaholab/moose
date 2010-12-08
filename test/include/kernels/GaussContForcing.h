@@ -27,7 +27,7 @@ class GaussContForcing : public Kernel
 {
 public:
 
-  GaussContForcing(const std::string & name, MooseSystem & moose_system, InputParameters parameters);  
+  GaussContForcing(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -25,8 +25,8 @@ InputParameters validParams<ParsedFunction>()
   return params;
 }
 
-ParsedFunction::ParsedFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
-  Function(name, moose_system, parameters)
+ParsedFunction::ParsedFunction(const std::string & name, InputParameters parameters):
+  Function(name, parameters)
 {
   std::vector<std::string> vars = parameters.get<std::vector<std::string> >("vars");
   std::vector<Real>        vals = parameters.get<std::vector<Real> >("vals");

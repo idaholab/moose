@@ -50,8 +50,8 @@ InputParameters validParams<OutputBlock>()
   return params;
 }
 
-OutputBlock::OutputBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params)
+OutputBlock::OutputBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params)
 {
   // Register Output prereqs
   addPrereq("Mesh");

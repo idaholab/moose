@@ -46,7 +46,7 @@ InputParameters validParams<DiracKernel>();
 class DiracKernel : public PDEBase
 {
 public:
-  DiracKernel(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
+  DiracKernel(const std::string & name, InputParameters parameters);
   
   virtual ~DiracKernel(){}
   

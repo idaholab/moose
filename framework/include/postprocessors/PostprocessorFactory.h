@@ -32,7 +32,7 @@ class MooseSystem;
 /**
  * Typedef to make things easier.
  */
-typedef Postprocessor * (*postprocessorBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+typedef Postprocessor * (*postprocessorBuildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef to hide implementation details
@@ -48,9 +48,9 @@ typedef InputParameters (*postprocessorParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename PostprocessorType>
-Postprocessor * buildPostprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+Postprocessor * buildPostprocessor(const std::string & name, InputParameters parameters)
 {
-  return new PostprocessorType(name, moose_system, parameters);
+  return new PostprocessorType(name, parameters);
 }
 
 /**
@@ -73,9 +73,9 @@ public:
       mooseError("Postprocessor '" + name + "' already registered.");
   }
 
-  Postprocessor *create(std::string postprocessor_name, const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+  Postprocessor *create(std::string postprocessor_name, const std::string & name, InputParameters parameters)
   {
-    return (*_name_to_build_pointer[postprocessor_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[postprocessor_name])(name, parameters);
   }
 
   PostprocessorNamesIterator registeredPostprocessorsBegin();

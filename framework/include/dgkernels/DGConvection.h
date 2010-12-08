@@ -24,7 +24,7 @@ InputParameters validParams<DGConvection>();
 class DGConvection : public DGKernel
 {
 public:
-  DGConvection(const std::string & name, MooseSystem & moose_system, InputParameters parameters) ;
+  DGConvection(const std::string & name, InputParameters parameters) ;
 
 protected:
   virtual Real computeQpResidual(DGResidualType type);

@@ -21,8 +21,8 @@ InputParameters validParams<PolyReaction>()
   return params;
 }
 
-PolyReaction::PolyReaction(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters)
+PolyReaction::PolyReaction(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters)
   {}
 
 Real

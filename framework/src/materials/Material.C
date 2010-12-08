@@ -32,8 +32,8 @@ InputParameters validParams<Material>()
   return params;
 }
 
-Material::Material(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
-  PDEBase(name, moose_system, parameters, *parameters.get<QuadraturePointData *>("_qp_data")),
+Material::Material(const std::string & name, InputParameters parameters) :
+  PDEBase(name, parameters, *parameters.get<QuadraturePointData *>("_qp_data")),
   _material_data(*getParam<MaterialData *>("_material_data")),
   _has_stateful_props(false),
   _block_id(getParam<unsigned int>("block_id")),

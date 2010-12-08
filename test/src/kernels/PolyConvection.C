@@ -25,10 +25,9 @@ InputParameters validParams<PolyConvection>()
 }
 
 PolyConvection::PolyConvection(const std::string & name,
-                       MooseSystem &sys,
                        InputParameters parameters)
  
-  :Kernel(name, sys, parameters),
+  :Kernel(name, parameters),
 
    // This is the "Intialization List" it sets the values of class variables
    _x(getParam<Real>("x")),

@@ -22,8 +22,8 @@ InputParameters validParams<PrintDT>()
   return params;
 }
 
-PrintDT::PrintDT(const std::string & name, MooseSystem &moose_system, InputParameters parameters):
-  GeneralPostprocessor(name, moose_system, parameters)
+PrintDT::PrintDT(const std::string & name, InputParameters parameters):
+  GeneralPostprocessor(name, parameters)
 {}
 
 Real

@@ -127,12 +127,13 @@ public:
    * prints a standard cli usage message
    */
   void printUsage() const;
-  
-private:
+
   /**
    * The MooseSystem this parser is associated with.
    */
   MooseSystem & _moose_system;
+
+private:
   
   /**
    * This function inserts blocks into the tree which are optional in the input file but are

@@ -31,7 +31,6 @@
  * Typedef to make things easier.
  */
 typedef Stabilizer * (*stabilizerBuildPtr)(const std::string & name,
-                                           MooseSystem & moose_system,
                                            InputParameters parameters);
 
 /**
@@ -49,10 +48,9 @@ typedef InputParameters (*stabilizerParamsPtr)();
  */
 template<typename StabilizerType>
 Stabilizer * buildStabilizer(const std::string & name,
-                             MooseSystem & moose_system,
                              InputParameters parameters)
 {
-  return new StabilizerType(name, moose_system, parameters);
+  return new StabilizerType(name, parameters);
 }
 
 /**
@@ -77,10 +75,9 @@ public:
 
   Stabilizer * create(std::string stabilizer_name,
                       const std::string & name,
-                      MooseSystem & moose_system,
                       InputParameters parameters)
   {
-    return (*_name_to_build_pointer[stabilizer_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[stabilizer_name])(name, parameters);
   }
 
   StabilizerNamesIterator registeredStabilizersBegin();

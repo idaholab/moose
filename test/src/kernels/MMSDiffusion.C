@@ -22,8 +22,8 @@ InputParameters validParams<MMSDiffusion>()
 }
 
 
-MMSDiffusion::MMSDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters)
+MMSDiffusion::MMSDiffusion(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters)
 {}
 
 Real

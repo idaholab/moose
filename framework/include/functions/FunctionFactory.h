@@ -32,7 +32,7 @@ class MooseSystem;
 /**
  * Typedef to make things easier.
  */
-typedef Function * (*functionBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+typedef Function * (*functionBuildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef to hide implementation details
@@ -48,9 +48,9 @@ typedef InputParameters (*functionParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename FunctionType>
-Function * buildFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+Function * buildFunction(const std::string & name, InputParameters parameters)
 {
-  return new FunctionType(name, moose_system, parameters);
+  return new FunctionType(name, parameters);
 }
 
 /**
@@ -73,9 +73,9 @@ public:
       mooseError("Function '" + name + "' already registered.");
   }
 
-  Function *create(std::string function_name, const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+  Function *create(std::string function_name, const std::string & name, InputParameters parameters)
   {
-    return (*_name_to_build_pointer[function_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[function_name])(name, parameters);
   }
 
   InputParameters getValidParams(const std::string & name);

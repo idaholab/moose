@@ -26,8 +26,8 @@ InputParameters validParams<ConstantPointSource>()
   return params;
 }
 
-ConstantPointSource::ConstantPointSource(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :DiracKernel(name, moose_system, parameters),
+ConstantPointSource::ConstantPointSource(const std::string & name, InputParameters parameters)
+  :DiracKernel(name, parameters),
    _value(getParam<Real>("value")),
    _point_param(getParam<std::vector<Real> >("point"))
 {

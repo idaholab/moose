@@ -26,8 +26,8 @@ InputParameters validParams<NearestNodeDistanceAux>()
   return params;
 }
 
-NearestNodeDistanceAux::NearestNodeDistanceAux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :AuxKernel(name, moose_system, parameters),
+NearestNodeDistanceAux::NearestNodeDistanceAux(const std::string & name, InputParameters parameters)
+  :AuxKernel(name, parameters),
    _nearest_node(_moose_system, _mesh, getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary"))
 {
   if(getParam<std::vector<unsigned int> >("boundary").size() > 1)

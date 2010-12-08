@@ -25,7 +25,7 @@ InputParameters validParams<AuxKernelsBlock>();
 class AuxKernelsBlock: public ParserBlock
 {
 public:
-  AuxKernelsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+  AuxKernelsBlock(const std::string & name, InputParameters params);
 
   virtual void execute();
 };

@@ -25,8 +25,8 @@ InputParameters validParams<MaxIncrement>()
   return params;
 }
 
-MaxIncrement::MaxIncrement(std::string name, MooseSystem & moose_system, InputParameters parameters)
-  :Damper(name, moose_system, parameters),
+MaxIncrement::MaxIncrement(std::string name, InputParameters parameters)
+  :Damper(name, parameters),
    _max_increment(parameters.get<Real>("max_increment"))
 {}
 

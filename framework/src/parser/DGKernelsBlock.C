@@ -20,8 +20,8 @@ InputParameters validParams<DGKernelsBlock>()
   return validParams<ParserBlock>();
 }
 
-DGKernelsBlock::DGKernelsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params)
+DGKernelsBlock::DGKernelsBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params)
 {
   // Register execution prereqs
   addPrereq("Mesh");

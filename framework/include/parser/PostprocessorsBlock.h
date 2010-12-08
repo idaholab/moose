@@ -25,7 +25,7 @@ InputParameters validParams<PostprocessorsBlock>();
 class PostprocessorsBlock: public ParserBlock
 {
 public:
-  PostprocessorsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+  PostprocessorsBlock(const std::string & name, InputParameters params);
 
   virtual void execute();
 };

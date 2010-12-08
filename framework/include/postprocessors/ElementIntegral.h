@@ -32,7 +32,7 @@ InputParameters validParams<ElementIntegral>();
 class ElementIntegral : public ElementPostprocessor
 {
 public:
-  ElementIntegral(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  ElementIntegral(const std::string & name, InputParameters parameters);
   
   virtual void initialize();
   virtual void execute();

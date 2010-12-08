@@ -27,7 +27,6 @@ class PolyForcing : public Kernel
 public:
 
   PolyForcing(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

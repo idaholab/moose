@@ -47,7 +47,6 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   SUPGBase(const std::string & name,
-           MooseSystem & moose_system,
            InputParameters parameters);
 
   /**

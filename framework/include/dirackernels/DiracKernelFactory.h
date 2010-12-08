@@ -32,7 +32,7 @@ class MooseSystem;
 /**
  * Typedef to make things easier.
  */
-typedef DiracKernel * (*dirac_kernelBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+typedef DiracKernel * (*dirac_kernelBuildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef to hide implementation details
@@ -48,9 +48,9 @@ typedef InputParameters (*dirac_kernelParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename DiracKernelType>
-DiracKernel * buildDiracKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+DiracKernel * buildDiracKernel(const std::string & name, InputParameters parameters)
 {
-  return new DiracKernelType(name, moose_system, parameters);
+  return new DiracKernelType(name, parameters);
 }
 
 /**
@@ -73,9 +73,9 @@ public:
       mooseError("DiracKernel '" + name + "' already registered.");
   }
 
-  DiracKernel *create(std::string dirac_kernel_name, const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+  DiracKernel *create(std::string dirac_kernel_name, const std::string & name, InputParameters parameters)
   {
-    return (*_name_to_build_pointer[dirac_kernel_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[dirac_kernel_name])(name, parameters);
   }
 
   DiracKernelNamesIterator registeredDiracKernelsBegin();

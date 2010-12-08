@@ -31,7 +31,7 @@ class MooseSystem;
 /**
  * Typedef to make things easier.
  */
-typedef InitialCondition * (*InitialConditionBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+typedef InitialCondition * (*InitialConditionBuildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef to make things easier.
@@ -48,10 +48,9 @@ typedef std::vector<std::string>::iterator InitialConditionNamesIterator;
  */
 template<typename InitialConditionType>
 InitialCondition * buildInitialCondition(const std::string & name,
-                                         MooseSystem & moose_system,
                                          InputParameters parameters)
 {
-  return new InitialConditionType(name, moose_system, parameters);
+  return new InitialConditionType(name, parameters);
 }
 
 /**
@@ -74,9 +73,9 @@ public:
       mooseError("InitialCondition '" + name + "' already registered.");
   }
 
-  InitialCondition *create(std::string ic_name, const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+  InitialCondition *create(std::string ic_name, const std::string & name, InputParameters parameters)
   {
-    return (*_name_to_build_pointer[ic_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[ic_name])(name, parameters);
   }
   
   InputParameters getValidParams(const std::string & name);

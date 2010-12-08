@@ -24,8 +24,8 @@ InputParameters validParams<KernelGrad>()
 }
 
 
-KernelGrad::KernelGrad(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
-  Kernel(name, moose_system, parameters)
+KernelGrad::KernelGrad(const std::string & name, InputParameters parameters):
+  Kernel(name, parameters)
 {
 }
 

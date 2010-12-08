@@ -27,7 +27,6 @@ class TEJumpFFN : public Kernel
 public:
 
   TEJumpFFN(const std::string & name,
-            MooseSystem &sys,
             InputParameters parameters);
 
 protected:

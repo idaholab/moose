@@ -21,8 +21,8 @@ InputParameters validParams<ElementIntegral>()
   return params;
 }
 
-ElementIntegral::ElementIntegral(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :ElementPostprocessor(name, moose_system, parameters),
+ElementIntegral::ElementIntegral(const std::string & name, InputParameters parameters)
+  :ElementPostprocessor(name, parameters),
    _integral_value(0)
 {}
 

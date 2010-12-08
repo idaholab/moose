@@ -21,8 +21,8 @@ InputParameters validParams<SideAverageValue>()
   return params;
 }
 
-SideAverageValue::SideAverageValue(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :SideIntegral(name, moose_system, parameters),
+SideAverageValue::SideAverageValue(const std::string & name, InputParameters parameters)
+  :SideIntegral(name, parameters),
    _volume(0)
 {}
 

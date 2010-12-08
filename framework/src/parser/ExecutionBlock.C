@@ -55,8 +55,8 @@ InputParameters validParams<ExecutionBlock>()
   return params;
 }
 
-ExecutionBlock::ExecutionBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params)
+ExecutionBlock::ExecutionBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params)
 {
   // Register Execution prereqs
   addPrereq("Mesh");

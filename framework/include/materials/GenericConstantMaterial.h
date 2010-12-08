@@ -36,7 +36,6 @@ class GenericConstantMaterial : public Material
 {
 public:
   GenericConstantMaterial(const std::string & name,
-                MooseSystem & moose_system,
                 InputParameters parameters);
   
 protected:

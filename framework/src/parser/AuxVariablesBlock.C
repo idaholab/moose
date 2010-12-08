@@ -33,8 +33,8 @@ InputParameters validParams<AuxVariablesBlock>()
   return validParams<ParserBlock>();
 }
 
-AuxVariablesBlock::AuxVariablesBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :VariablesBlock(name, moose_system, params)
+AuxVariablesBlock::AuxVariablesBlock(const std::string & name, InputParameters params)
+  :VariablesBlock(name, params)
 {
   // Register execution prereqs
   addPrereq("Mesh");

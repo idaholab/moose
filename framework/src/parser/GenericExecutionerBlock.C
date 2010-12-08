@@ -49,8 +49,8 @@ InputParameters validParams<GenericExecutionerBlock>()
   return params;
 }
 
-GenericExecutionerBlock::GenericExecutionerBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params),
+GenericExecutionerBlock::GenericExecutionerBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params),
    _type(getType())
 {
   // Register execution prereqs
@@ -66,6 +66,7 @@ GenericExecutionerBlock::execute()
 {
   InputParameters class_params = getClassParams();
   class_params.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'
+  class_params.set<MooseSystem *>("_moose_system") = &_parser_handle._moose_system;
 
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This paramter
   // is held in the child block Adaptivity and needs to be pulled early
@@ -78,7 +79,7 @@ GenericExecutionerBlock::execute()
   else
     class_params.set<unsigned int>("steps") = 0;
   
-  _moose_system.initExecutioner(ExecutionerFactory::instance()->build(_type, "Executioner", _moose_system, class_params));
+  _moose_system.initExecutioner(ExecutionerFactory::instance()->build(_type, "Executioner", class_params));
   
   EquationSystems *es = _moose_system.getEquationSystems();
   es->parameters.set<Real> ("linear solver tolerance")

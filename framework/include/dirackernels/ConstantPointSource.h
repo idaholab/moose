@@ -27,7 +27,7 @@ InputParameters validParams<ConstantPointSource>();
 class ConstantPointSource : public DiracKernel
 {
 public:
-  ConstantPointSource(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  ConstantPointSource(const std::string & name, InputParameters parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();

@@ -34,7 +34,7 @@ InputParameters validParams<MooseObject>();
 class MooseObject
 {
 public:
-  MooseObject(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
+  MooseObject(const std::string & name, InputParameters parameters);
   virtual ~MooseObject();
 
   virtual const std::string &name();
@@ -57,10 +57,10 @@ protected:
    */
   std::string _name;
 
-  /**
-   * Reference to the MooseSystem that this Object is associated to
-   */
-  MooseSystem &_moose_system;
+//  /**
+//   * Reference to the MooseSystem that this Object is associated to
+//   */
+//  MooseSystem &_moose_system;
 
   // FIXME: remove this after fixing the threading model?
   /**
@@ -68,10 +68,10 @@ protected:
    */
   THREAD_ID _tid;
 
-  /**
-   * Whether or not this object should be evaluated on the displaced mesh.
-   */
-  bool _use_displaced_mesh;
+//  /**
+//   * Whether or not this object should be evaluated on the displaced mesh.
+//   */
+//  bool _use_displaced_mesh;
 
 private:
   /**

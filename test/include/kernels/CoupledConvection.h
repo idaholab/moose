@@ -31,7 +31,7 @@ InputParameters validParams<CoupledConvection>();
 class CoupledConvection : public Kernel
 {
 public:
-  CoupledConvection(const std::string & name, MooseSystem &sys, InputParameters parameters);
+  CoupledConvection(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

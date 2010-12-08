@@ -43,8 +43,8 @@ InputParameters validParams<GenericVariableBlock>()
   return params;
 }
 
-GenericVariableBlock::GenericVariableBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params),
+GenericVariableBlock::GenericVariableBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params),
    _variable_to_read(""),
    _timestep_to_read(2)
 {}

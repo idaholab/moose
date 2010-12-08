@@ -22,8 +22,8 @@ InputParameters validParams<PrintNumElems>()
   return params;
 }
 
-PrintNumElems::PrintNumElems(const std::string & name, MooseSystem &moose_system, InputParameters parameters):
-  GeneralPostprocessor(name, moose_system, parameters)
+PrintNumElems::PrintNumElems(const std::string & name, InputParameters parameters):
+  GeneralPostprocessor(name, parameters)
 {}
 
 Real

@@ -22,8 +22,8 @@ InputParameters validParams<MMSImplicitEuler>()
   return params;
 }
 
-MMSImplicitEuler::MMSImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :TimeKernel(name, moose_system, parameters)
+MMSImplicitEuler::MMSImplicitEuler(const std::string & name, InputParameters parameters)
+  :TimeKernel(name, parameters)
 {}
 
 Real

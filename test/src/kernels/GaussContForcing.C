@@ -27,8 +27,8 @@ InputParameters validParams<GaussContForcing>()
   return params;
 }
 
-GaussContForcing::GaussContForcing(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+GaussContForcing::GaussContForcing(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
    _amplitude(getParam<Real>("amplitude")),
    _x_center(getParam<Real>("x_center")),
    _y_center(getParam<Real>("y_center")),

@@ -118,7 +118,7 @@ MooseSystem::MooseSystem() :
   _l_abs_step_tol(1e-10),
   _last_rnorm(0),
   _initial_residual(0),
-  _empty_fn(std::string("_moose_system_empty_function"), *this, validParams<EmptyFunction>()),
+  _empty_fn(std::string("_moose_system_empty_function"), validParams<EmptyFunction>()),
   _active_local_elem_range(NULL),
   _active_node_range(NULL),
   _time_stepping_order(0)
@@ -194,7 +194,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _l_abs_step_tol(1e-10),
   _last_rnorm(0),
   _initial_residual(0),
-  _empty_fn(std::string("_moose_system_empty_function"), *this, validParams<EmptyFunction>()),
+  _empty_fn(std::string("_moose_system_empty_function"), validParams<EmptyFunction>()),
   _active_local_elem_range(NULL),
   _active_node_range(NULL),
   _time_stepping_order(0)
@@ -828,11 +828,12 @@ void MooseSystem::addKernel(std::string kernel_name,
                             const std::string & name,
                             InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    Kernel *kernel = KernelFactory::instance()->create(kernel_name, name, *this, parameters);
+    Kernel *kernel = KernelFactory::instance()->create(kernel_name, name, parameters);
 
     std::set<unsigned int> blk_ids;
     if (!parameters.isParamValid("block"))
@@ -860,10 +861,11 @@ void MooseSystem::addDGKernel(std::string dg_kernel_name,
                               const std::string & name,
                               InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    _dg_kernels[tid].addDGKernel(DGKernelFactory::instance()->create(dg_kernel_name, name, *this, parameters));
+    _dg_kernels[tid].addDGKernel(DGKernelFactory::instance()->create(dg_kernel_name, name, parameters));
   }
 }
 
@@ -872,6 +874,7 @@ MooseSystem::addBC(std::string bc_name,
                    const std::string & name,
                    InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -880,7 +883,7 @@ MooseSystem::addBC(std::string bc_name,
     for (unsigned int i=0; i<boundaries.size(); ++i)
     {
       parameters.set<unsigned int>("_boundary_id") = boundaries[i];
-      BoundaryCondition * bc = BCFactory::instance()->create(bc_name, name, *this, parameters);
+      BoundaryCondition * bc = BCFactory::instance()->create(bc_name, name, parameters);
 
       if(bc->isIntegrated())
         _bcs[tid].addBC(boundaries[i], bc);
@@ -895,6 +898,8 @@ MooseSystem::addAuxKernel(std::string aux_name,
                           const std::string & name,
                           InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   AuxKernel * aux;
   AuxKernelIterator curr_aux, end_aux;
   std::string var_name = parameters.get<std::string>("variable");
@@ -906,7 +911,7 @@ MooseSystem::addAuxKernel(std::string aux_name,
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
+    aux = AuxFactory::instance()->create(aux_name, name, parameters);
     std::vector<std::string> coupled_to = aux->coupledTo();
 
 
@@ -988,6 +993,8 @@ MooseSystem::addAuxBC(std::string aux_name,
                       const std::string & name,
                       InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   AuxKernel * aux;
 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -995,7 +1002,7 @@ MooseSystem::addAuxBC(std::string aux_name,
     parameters.set<THREAD_ID>("_tid") = tid;
     std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
-    aux = AuxFactory::instance()->create(aux_name, name, *this, parameters);
+    aux = AuxFactory::instance()->create(aux_name, name, parameters);
 
     for (unsigned int i=0; i<boundaries.size(); ++i)
       _auxs[tid].addActiveBC(boundaries[i], aux);
@@ -1008,6 +1015,8 @@ MooseSystem::addMaterial(std::string mat_name,
                          const std::string & name,
                          InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -1021,13 +1030,13 @@ MooseSystem::addMaterial(std::string mat_name,
 
       parameters.set<QuadraturePointData *>("_qp_data") = _element_data[tid];
       parameters.set<MaterialData *>("_material_data") = &_material_data[tid];
-      _materials[tid].addMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
+      _materials[tid].addMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, parameters));
 
       parameters.set<QuadraturePointData *>("_qp_data") = _face_data[tid];
       parameters.set<MaterialData *>("_material_data") = &_bnd_material_data[tid];
-      _materials[tid].addBoundaryMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
+      _materials[tid].addBoundaryMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, parameters));
       parameters.set<MaterialData *>("_material_data") = &_neighbor_material_data[tid];
-      _materials[tid].addNeighborMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, *this, parameters));
+      _materials[tid].addNeighborMaterial(blocks[i], MaterialFactory::instance()->create(mat_name, name, parameters));
     }
   }
 }
@@ -1037,13 +1046,15 @@ MooseSystem::addStabilizer(std::string stabilizer_name,
                            const std::string & name,
                            InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   Stabilizer * stabilizer;
 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    stabilizer = StabilizerFactory::instance()->create(stabilizer_name, name, *this, parameters);
+    stabilizer = StabilizerFactory::instance()->create(stabilizer_name, name, parameters);
 
     if (parameters.have_parameter<unsigned int>("block_id"))
       _stabilizers[tid].addBlockStabilizer(parameters.get<unsigned int>("block_id"), stabilizer->variable(), stabilizer);
@@ -1058,6 +1069,8 @@ MooseSystem::addInitialCondition(std::string ic_name,
                                  InputParameters parameters,
                                  std::string var_name)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -1065,7 +1078,7 @@ MooseSystem::addInitialCondition(std::string ic_name,
     // The var_name needs to be added to the parameters object for any InitialCondition derived objects
     parameters.set<std::string>("var_name") = var_name;
 
-    _ics[tid].addIC(var_name, InitialConditionFactory::instance()->create(ic_name, name, *this, parameters));
+    _ics[tid].addIC(var_name, InitialConditionFactory::instance()->create(ic_name, name, parameters));
   }
 }
 
@@ -1074,6 +1087,8 @@ MooseSystem::addPostprocessor(std::string pp_name,
                               const std::string & name,
                               InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -1085,13 +1100,13 @@ MooseSystem::addPostprocessor(std::string pp_name,
       for (unsigned int i=0; i<boundaries.size(); ++i)
       {
         parameters.set<unsigned int>("_boundary_id") = boundaries[i];
-        Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, *this, parameters);
+        Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, parameters);
         _pps[tid].addPostprocessor(pp);
       }
     }
     else
     {
-      Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, *this, parameters);
+      Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, parameters);
       _pps[tid].addPostprocessor(pp);
     }
   }
@@ -1102,11 +1117,13 @@ MooseSystem::addFunction(std::string func_name,
                               const std::string & name,
                               InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    _functions[tid].addFunction(name, FunctionFactory::instance()->create(func_name, name, *this, parameters));
+    _functions[tid].addFunction(name, FunctionFactory::instance()->create(func_name, name, parameters));
   }
 }
 
@@ -1115,13 +1132,15 @@ MooseSystem::addDamper(std::string damper_name,
                        const std::string & name,
                        InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   _has_dampers = true;
   
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    _dampers[tid].addDamper(DamperFactory::instance()->create(damper_name, name, *this, parameters));
+    _dampers[tid].addDamper(DamperFactory::instance()->create(damper_name, name, parameters));
   }
 }
 
@@ -1130,11 +1149,13 @@ MooseSystem::addDiracKernel(std::string dirac_kernel_name,
                        const std::string & name,
                        InputParameters parameters)
 {
+  parameters.set<MooseSystem *>("_moose_system") = this;
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    _dirac_kernels[tid].addDiracKernel(DiracKernelFactory::instance()->create(dirac_kernel_name, name, *this, parameters));
+    _dirac_kernels[tid].addDiracKernel(DiracKernelFactory::instance()->create(dirac_kernel_name, name, parameters));
   }
 }
 

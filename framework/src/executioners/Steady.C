@@ -25,12 +25,11 @@ InputParameters validParams<Steady>()
 }
 
 
-Steady::Steady(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Executioner(name, moose_system, parameters),
-   _moose_system(moose_system),
+Steady::Steady(const std::string & name, InputParameters parameters)
+  :Executioner(name, parameters),
    // This parameter is shoved in from the child adaptivity block by the GenericExecutionerBlock
    _steps(getParam<unsigned int>("steps")),
-   _t_step(moose_system.parameters().set<int> ("t_step") = 0)
+   _t_step(_moose_system.parameters().set<int> ("t_step") = 0)
 {}
 
 void

@@ -27,7 +27,6 @@ class MMSConvection : public Kernel
 public:
   
  MMSConvection(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

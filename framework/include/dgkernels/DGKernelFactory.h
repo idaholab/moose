@@ -32,7 +32,7 @@ class MooseSystem;
 /**
  * Typedef to make things easier.
  */
-typedef DGKernel * (*dgKernelBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+typedef DGKernel * (*dgKernelBuildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef to hide implementation details
@@ -48,9 +48,9 @@ typedef InputParameters (*dgKernelParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename DGKernelType>
-DGKernel * buildDGKernel(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+DGKernel * buildDGKernel(const std::string & name, InputParameters parameters)
 {
-  return new DGKernelType(name, moose_system, parameters);
+  return new DGKernelType(name, parameters);
 }
 
 /**
@@ -68,9 +68,9 @@ public:
     _name_to_params_pointer[name]=&validParams<DGKernelType>;
   }
 
-  DGKernel *create(std::string kernel_name, const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+  DGKernel *create(std::string kernel_name, const std::string & name, InputParameters parameters)
   {
-    return (*_name_to_build_pointer[kernel_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[kernel_name])(name, parameters);
   }
 
   DGKernelNamesIterator registeredDGKernelsBegin();

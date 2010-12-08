@@ -30,16 +30,18 @@ InputParameters validParams<PDEBase>()
   return params;
 }
 
-PDEBase::PDEBase(const std::string & name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data) :
-  MooseObject(name, moose_system, parameters),
-  PostprocessorInterface(moose_system._postprocessor_data[_tid]),
-  FunctionInterface(moose_system._functions[_tid], parameters),
+PDEBase::PDEBase(const std::string & name, InputParameters parameters, QuadraturePointData &data) :
+  MooseObject(name, parameters),
+  PostprocessorInterface(parameters.get<MooseSystem *>("_moose_system")->_postprocessor_data[_tid]),
+  FunctionInterface(parameters.get<MooseSystem *>("_moose_system")->_functions[_tid], parameters),
+  _moose_system(*parameters.get<MooseSystem *>("_moose_system")),
+  _use_displaced_mesh(_moose_system.hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")),
   _mesh(_use_displaced_mesh ? *_moose_system.getDisplacedMesh() : *_moose_system.getMesh()),
   _current_elem(_moose_system._dof_data[_tid]._current_elem),
   _var_name(parameters.get<std::string>("variable")),
-  _is_aux(moose_system.hasAuxVariable(_var_name)),
-  _var_num(_is_aux ? moose_system.getAuxVariableNumber(_var_name) : moose_system.getVariableNumber(_var_name)),
-  _fe_type(_is_aux ? moose_system._aux_dof_map->variable_type(_var_num) : moose_system._dof_map->variable_type(_var_num)),
+  _is_aux(_moose_system.hasAuxVariable(_var_name)),
+  _var_num(_is_aux ? _moose_system.getAuxVariableNumber(_var_name) : _moose_system.getVariableNumber(_var_name)),
+  _fe_type(_is_aux ? _moose_system._aux_dof_map->variable_type(_var_num) : _moose_system._dof_map->variable_type(_var_num)),
   _fe(data._fe[_fe_type]),
   _integrated(parameters.get<bool>("_integrated")),
   _dim(_moose_system._dim),
@@ -50,17 +52,17 @@ PDEBase::PDEBase(const std::string & name, MooseSystem &moose_system, InputParam
   _phi(*(data._phi)[_fe_type]),
   _grad_phi(*data._grad_phi[_fe_type]),
   _second_phi(*data._second_phi[_fe_type]),
-  _real_zero(moose_system._real_zero[_tid]),
-  _zero(moose_system._zero[_tid]),
-  _grad_zero(moose_system._grad_zero[_tid]),
-  _second_zero(moose_system._second_zero[_tid]),
-  _t(moose_system._t),
-  _dt(moose_system._dt),
-  _dt_old(moose_system._dt_old),
-  _is_transient(moose_system._is_transient),
-  _is_eigenvalue(moose_system._is_eigenvalue),
-  _t_step(moose_system._t_step),
-  _time_weight(moose_system._time_weight),
+  _real_zero(_moose_system._real_zero[_tid]),
+  _zero(_moose_system._zero[_tid]),
+  _grad_zero(_moose_system._grad_zero[_tid]),
+  _second_zero(_moose_system._second_zero[_tid]),
+  _t(_moose_system._t),
+  _dt(_moose_system._dt),
+  _dt_old(_moose_system._dt_old),
+  _is_transient(_moose_system._is_transient),
+  _is_eigenvalue(_moose_system._is_eigenvalue),
+  _t_step(_moose_system._t_step),
+  _time_weight(_moose_system._time_weight),
   _start_time(parameters.get<Real>("start_time")),
   _stop_time(parameters.get<Real>("stop_time"))
 {
@@ -79,15 +81,15 @@ PDEBase::PDEBase(const std::string & name, MooseSystem &moose_system, InputParam
         _coupled_to.push_back(coupled_var_name);
 
         _all_coupled_var[name][i]._name = coupled_var_name;
-        if (moose_system.hasVariable(coupled_var_name))
+        if (_moose_system.hasVariable(coupled_var_name))
         {
-          unsigned int var_num = moose_system.getVariableNumber(coupled_var_name);
+          unsigned int var_num = _moose_system.getVariableNumber(coupled_var_name);
           _all_coupled_var[name][i]._num = var_num;
           _coupled_vars[name].push_back(Variable(coupled_var_name, var_num));
         }
-        else if (moose_system.hasAuxVariable(coupled_var_name))
+        else if (_moose_system.hasAuxVariable(coupled_var_name))
         {
-          unsigned int var_num = moose_system.getAuxVariableNumber(coupled_var_name);
+          unsigned int var_num = _moose_system.getAuxVariableNumber(coupled_var_name);
           _all_coupled_var[name][i]._num = var_num;
           _coupled_aux_vars[name].push_back(Variable(coupled_var_name, var_num));
         }

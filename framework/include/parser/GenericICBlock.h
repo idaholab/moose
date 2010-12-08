@@ -26,7 +26,7 @@ InputParameters validParams<GenericICBlock>();
 class GenericICBlock: public ParserBlock
 {
 public:
-  GenericICBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+  GenericICBlock(const std::string & name, InputParameters params);
 
   virtual void execute();
 

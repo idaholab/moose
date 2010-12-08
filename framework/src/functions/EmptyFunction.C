@@ -22,8 +22,8 @@ InputParameters validParams<EmptyFunction>()
   return params;
 }
 
-EmptyFunction::EmptyFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters):
-  Function(name, moose_system, parameters)
+EmptyFunction::EmptyFunction(const std::string & name, InputParameters parameters):
+  Function(name, parameters)
 {
 }
 

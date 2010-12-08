@@ -30,7 +30,6 @@ class Diff2Material : public Material
 {
 public:
   Diff2Material(const std::string & name,
-                MooseSystem & moose_system,
                 InputParameters parameters);
   
 protected:

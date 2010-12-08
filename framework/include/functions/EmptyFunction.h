@@ -28,7 +28,7 @@ InputParameters validParams<EmptyFunction>();
 class EmptyFunction : public Function
 {
 public:
-  EmptyFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  EmptyFunction(const std::string & name, InputParameters parameters);
 
   virtual ~EmptyFunction();
 

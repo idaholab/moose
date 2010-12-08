@@ -54,12 +54,12 @@ InputParameters validParams<TransientExecutioner>()
   return params;
 }
 
-TransientExecutioner::TransientExecutioner(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Executioner(name, moose_system, parameters),
-   _t_step(moose_system.parameters().set<int> ("t_step") = 0),
-   _time(moose_system.parameters().set<Real>("time") = getParam<Real>("start_time")),
+TransientExecutioner::TransientExecutioner(const std::string & name, InputParameters parameters)
+  :Executioner(name, parameters),
+   _t_step(_moose_system.parameters().set<int> ("t_step") = 0),
+   _time(_moose_system.parameters().set<Real>("time") = getParam<Real>("start_time")),
    _input_dt(getParam<Real>("dt")),
-   _dt(moose_system.parameters().set<Real>("dt") = 0),
+   _dt(_moose_system.parameters().set<Real>("dt") = 0),
    _prev_dt(-1),
    _reset_dt(false),
    _end_time(getParam<Real>("end_time")),

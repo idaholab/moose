@@ -44,9 +44,9 @@ InputParameters validParams<ExactSolutionExecutioner>()
   return params;
 }
 
-ExactSolutionExecutioner::ExactSolutionExecutioner(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Steady(name, moose_system, parameters),
-  _exact(*moose_system.getEquationSystems()),
+ExactSolutionExecutioner::ExactSolutionExecutioner(const std::string & name, InputParameters parameters)
+  :Steady(name, parameters),
+  _exact(*_moose_system.getEquationSystems()),
   _func(getFunction("function")),
   _unknowns(getParam<std::vector<std::string> >("unknowns")),
   _output_norms(false),
@@ -55,7 +55,7 @@ ExactSolutionExecutioner::ExactSolutionExecutioner(const std::string & name, Moo
   //set a pointer to this object in the parameters, so the callback has
   //an object to call exactSolution() on
   //PJJ TODO: index by the name of the system and variable so it can be different for u and v, etc
-  moose_system.getEquationSystems()->parameters.set<ExactSolutionExecutioner*>("ptr") = this;
+  _moose_system.getEquationSystems()->parameters.set<ExactSolutionExecutioner*>("ptr") = this;
 
   //attach a function pointer, this will grab the object set in the parameter
   //above to call the exactSolution() member function

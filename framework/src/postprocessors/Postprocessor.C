@@ -25,12 +25,12 @@ InputParameters validParams<Postprocessor>()
   return params;
 }
 
-Postprocessor::Postprocessor(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :_local_name(name),
+Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
+   _local_name(name),
    _local_tid(parameters.get<THREAD_ID>("_tid"))
 {
   // Initialize the postprocessor data for this PP
-  moose_system._postprocessor_data[_local_tid].init(name);
+  parameters.get<MooseSystem *>("_moose_system")->_postprocessor_data[_local_tid].init(name);
 }
 
 const std::string &

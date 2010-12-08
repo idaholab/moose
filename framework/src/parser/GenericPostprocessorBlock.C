@@ -23,8 +23,8 @@ InputParameters validParams<GenericPostprocessorBlock>()
   return params;
 }
 
-GenericPostprocessorBlock::GenericPostprocessorBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params),
+GenericPostprocessorBlock::GenericPostprocessorBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params),
    _type(getType())
 {
   setClassParams(PostprocessorFactory::instance()->getValidParams(_type));

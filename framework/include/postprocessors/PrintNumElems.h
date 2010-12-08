@@ -26,7 +26,7 @@ InputParameters validParams<PrintNumElems>();
 class PrintNumElems : public GeneralPostprocessor
 {
 public:
-  PrintNumElems(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
+  PrintNumElems(const std::string & name, InputParameters parameters);
   
   virtual void initialize() {}
   

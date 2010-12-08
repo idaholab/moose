@@ -24,9 +24,8 @@ InputParameters validParams<TEIC>()
 }
 
 TEIC::TEIC(const std::string & name,
-                       MooseSystem & moose_system,
                        InputParameters parameters)
-  :InitialCondition(name, moose_system, parameters),
+  :InitialCondition(name, parameters),
    _t_jump(getParam<Real>("t_jump")),
    _slope(getParam<Real>("slope"))
 {}

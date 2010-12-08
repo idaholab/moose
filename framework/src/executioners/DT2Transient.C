@@ -41,8 +41,8 @@ InputParameters validParams<DT2Transient>()
   return params;
 }
 
-DT2Transient::DT2Transient(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :TransientExecutioner(name, moose_system, parameters),
+DT2Transient::DT2Transient(const std::string & name, InputParameters parameters)
+  :TransientExecutioner(name, parameters),
    _u_diff(NULL),
    _u1(NULL),
    _u2(NULL),

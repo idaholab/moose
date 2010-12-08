@@ -48,7 +48,7 @@ public:
    * for this ParserBlock instance.  A pointer to the parent is passed for use in searching the tree
    * Finally a reference to the GetPot object is passed for flexible extension.
    */
-  ParserBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+  ParserBlock(const std::string & name, InputParameters params);
 
   /**
    * Cleans up the ParserBlock tree strucutre
@@ -159,11 +159,6 @@ public:
   
 protected:
   /**
-   * The MooseSystem this parser is associated with.
-   */
-  MooseSystem & _moose_system;
-
-  /**
    * This function calles the passed function pointer over all of the child
    * blocks of the current Parser Block.
    */
@@ -186,6 +181,11 @@ protected:
   std::string _block_name;
   Parser & _parser_handle;
   const GetPot * _getpot_handle;
+
+  /**
+   * The MooseSystem this parser is associated with.
+   */
+  MooseSystem & _moose_system;
 
   std::vector<std::string> _active;
   std::vector<std::string> _used_children;

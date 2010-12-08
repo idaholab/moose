@@ -23,9 +23,8 @@ InputParameters validParams<ExampleMaterial>()
 }
 
 ExampleMaterial::ExampleMaterial(const std::string & name,
-                                 MooseSystem & moose_system,
                                  InputParameters parameters)
-  :Material(name, moose_system, parameters),
+  :Material(name, parameters),
    
    // Get a parameter value for the diffusivity
    _initial_diffusivity(getParam<Real>("initial_diffusivity")),

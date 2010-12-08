@@ -22,8 +22,8 @@ InputParameters validParams<BodyForce>()
   return params;
 }
 
-BodyForce::BodyForce(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+BodyForce::BodyForce(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
    _value(getParam<Real>("value"))
   {}
 

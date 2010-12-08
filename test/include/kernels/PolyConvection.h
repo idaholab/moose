@@ -27,7 +27,6 @@ class PolyConvection : public Kernel
 public:
   
  PolyConvection(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

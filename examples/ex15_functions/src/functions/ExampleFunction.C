@@ -22,8 +22,8 @@ InputParameters validParams<ExampleFunction>()
   return params;
 }
 
-ExampleFunction::ExampleFunction(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Function(name, moose_system, parameters),
+ExampleFunction::ExampleFunction(const std::string & name, InputParameters parameters)
+  :Function(name, parameters),
    _alpha(getParam<Real>("alpha"))
 {}
 

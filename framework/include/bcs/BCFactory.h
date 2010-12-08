@@ -29,7 +29,7 @@
 /**
  * Typedef to make things easier.
  */
-typedef BoundaryCondition * (*BCBuildPtr)(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+typedef BoundaryCondition * (*BCBuildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef to hide implementation details
@@ -45,9 +45,9 @@ typedef InputParameters (*BCParamsPtr)();
  * Templated build function used for generating function pointers to build classes on demand.
  */
 template<typename BCType>
-BoundaryCondition * buildBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+BoundaryCondition * buildBC(const std::string & name, InputParameters parameters)
 {
-  return new BCType(name, moose_system, parameters);
+  return new BCType(name, parameters);
 }
 
 /**
@@ -72,10 +72,9 @@ public:
 
   BoundaryCondition *create(std::string bc_name,
                             const std::string & name,
-                            MooseSystem & moose_system,
                             InputParameters parameters)
   {
-    return (*_name_to_build_pointer[bc_name])(name, moose_system, parameters);
+    return (*_name_to_build_pointer[bc_name])(name, parameters);
   }
 
   BCNamesIterator registeredBCsBegin();

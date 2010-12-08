@@ -23,8 +23,8 @@ InputParameters validParams<GenericDamperBlock>()
   return params;
 }
 
-GenericDamperBlock::GenericDamperBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params),
+GenericDamperBlock::GenericDamperBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params),
    _type(getType())
 {
   setClassParams(DamperFactory::instance()->getValidParams(_type));

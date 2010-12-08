@@ -22,8 +22,8 @@ InputParameters validParams<PostprocessorsBlock>()
   return validParams<ParserBlock>();
 }
 
-PostprocessorsBlock::PostprocessorsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params)
+PostprocessorsBlock::PostprocessorsBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params)
 {
   // Register execution prereqs
   addPrereq("Mesh");

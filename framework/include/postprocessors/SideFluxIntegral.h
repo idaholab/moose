@@ -15,7 +15,7 @@ InputParameters validParams<SideFluxIntegral>();
 class SideFluxIntegral : public SideIntegral
 {
 public:
-  SideFluxIntegral(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  SideFluxIntegral(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpIntegral();

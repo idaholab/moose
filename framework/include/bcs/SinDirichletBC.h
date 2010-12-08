@@ -29,7 +29,7 @@ class SinDirichletBC : public BoundaryCondition
 {
 public:
 
-  SinDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  SinDirichletBC(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

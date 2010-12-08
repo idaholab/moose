@@ -26,7 +26,7 @@ InputParameters validParams<PrintDT>();
 class PrintDT : public GeneralPostprocessor
 {
 public:
-  PrintDT(const std::string & name, MooseSystem &moose_system, InputParameters parameters);
+  PrintDT(const std::string & name, InputParameters parameters);
   
   virtual void initialize() {}
   

@@ -44,7 +44,7 @@ InputParameters validParams<PDEBase>();
 class PDEBase : public MooseObject, protected PostprocessorInterface, protected FunctionInterface
 {
 public:
-  PDEBase(const std::string & name, MooseSystem &moose_system, InputParameters parameters, QuadraturePointData &data);
+  PDEBase(const std::string & name, InputParameters parameters, QuadraturePointData &data);
   virtual ~PDEBase();
 
   /**
@@ -96,6 +96,16 @@ public:
   virtual void setup() {};
 
 protected:
+  /**
+   * Reference to the MooseSystem that this Object is associated to
+   */
+  MooseSystem &_moose_system;
+
+  /**
+   * Whether or not this object should be evaluated on the displaced mesh.
+   */
+  bool _use_displaced_mesh;
+
   // Integrable -------------------------------------------------------------------------
 
   /**

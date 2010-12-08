@@ -28,7 +28,7 @@ InputParameters validParams<MatDiffusion>();
 class MatDiffusion : public Kernel
 {
 public:
-  MatDiffusion(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  MatDiffusion(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

@@ -27,7 +27,6 @@ class MMSForcing : public Kernel
 public:
 
   MMSForcing(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

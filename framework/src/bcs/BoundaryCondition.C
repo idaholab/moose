@@ -32,11 +32,11 @@ InputParameters validParams<BoundaryCondition>()
   return params;
 }
 
-BoundaryCondition::BoundaryCondition(const std::string & name, MooseSystem & moose_system, InputParameters parameters) :
-  PDEBase(name, moose_system, parameters, *moose_system._face_data[parameters.get<THREAD_ID>("_tid")]),
-  MaterialPropertyInterface(moose_system._bnd_material_data[_tid]),
-   _dof_data(moose_system._dof_data[_tid]),
-   _face_data(*moose_system._face_data[_tid]),
+BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
+  PDEBase(name, parameters, *parameters.get<MooseSystem *>("_moose_system")->_face_data[parameters.get<THREAD_ID>("_tid")]),
+  MaterialPropertyInterface(parameters.get<MooseSystem *>("_moose_system")->_bnd_material_data[_tid]),
+   _dof_data(_moose_system._dof_data[_tid]),
+   _face_data(*_moose_system._face_data[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
    _normals(*_face_data._normals[_fe_type]),
@@ -45,9 +45,9 @@ BoundaryCondition::BoundaryCondition(const std::string & name, MooseSystem & moo
    _current_node(_face_data._current_node),
    _current_residual(_face_data._current_residual),
    _u(_integrated ? _face_data._var_vals[_var_num] : _face_data._var_vals_nodal[_var_num]),
-   _grad_u(_integrated ? _face_data._var_grads[_var_num] : moose_system._grad_zero[_tid]),
-   _second_u(_integrated ? _face_data._var_seconds[_var_num] : moose_system._second_zero[_tid]),
-   _u_dot(_integrated ? _face_data._var_dots[_var_num] : moose_system._zero[_tid]),
+   _grad_u(_integrated ? _face_data._var_grads[_var_num] : _moose_system._grad_zero[_tid]),
+   _second_u(_integrated ? _face_data._var_seconds[_var_num] : _moose_system._second_zero[_tid]),
+   _u_dot(_integrated ? _face_data._var_dots[_var_num] : _moose_system._zero[_tid]),
    // TODO: Fix this holy hack!
    _test(*_face_data._phi[_fe_type]),
    _grad_test(*_face_data._grad_phi[_fe_type]),
@@ -64,18 +64,18 @@ BoundaryCondition::BoundaryCondition(const std::string & name, MooseSystem & moo
     std::string coupled_var_name=_coupled_to[i];
 
     //Is it in the nonlinear system or the aux system?
-    if(moose_system.hasVariable(coupled_var_name))
+    if(_moose_system.hasVariable(coupled_var_name))
     {
-      unsigned int coupled_var_num = moose_system.getVariableNumber(coupled_var_name);
+      unsigned int coupled_var_num = _moose_system.getVariableNumber(coupled_var_name);
       if(_integrated)
         _face_data._var_nums.insert(coupled_var_num);
       else
         _face_data._boundary_to_var_nums_nodal[_boundary_id].insert(coupled_var_num);
     }
     //Look for it in the Aux system
-    else if (moose_system.hasAuxVariable(coupled_var_name))
+    else if (_moose_system.hasAuxVariable(coupled_var_name))
     {
-      unsigned int coupled_var_num = moose_system.getAuxVariableNumber(coupled_var_name);
+      unsigned int coupled_var_num = _moose_system.getAuxVariableNumber(coupled_var_name);
       _face_data._aux_var_nums.insert(coupled_var_num);
     }
     else

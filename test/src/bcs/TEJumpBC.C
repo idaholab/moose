@@ -15,8 +15,8 @@ InputParameters validParams<TEJumpBC>()
   return params;
 }
 
-TEJumpBC::TEJumpBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+TEJumpBC::TEJumpBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
    _t_jump(getParam<Real>("t_jump")),
    _slope(getParam<Real>("slope"))
 {

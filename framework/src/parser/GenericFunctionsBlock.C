@@ -23,8 +23,8 @@ InputParameters validParams<GenericFunctionsBlock>()
   return params;
 }
 
-GenericFunctionsBlock::GenericFunctionsBlock(const std::string & name, MooseSystem & moose_system, InputParameters params)
-  :ParserBlock(name, moose_system, params),
+GenericFunctionsBlock::GenericFunctionsBlock(const std::string & name, InputParameters params)
+  :ParserBlock(name, params),
   _type(getType())
 {
   setClassParams(FunctionFactory::instance()->getValidParams(_type));

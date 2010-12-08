@@ -40,7 +40,7 @@ public:
    * @param moose_system The moose_system this kernel is associated with
    * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
-  KernelSecond(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  KernelSecond(const std::string & name, InputParameters parameters);
   
   virtual ~KernelSecond();
 

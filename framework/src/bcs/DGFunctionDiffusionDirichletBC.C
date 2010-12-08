@@ -32,8 +32,8 @@ InputParameters validParams<DGFunctionDiffusionDirichletBC>()
   return params;
 }
 
-DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
    _func(getFunction("function")),
    _epsilon(getParam<Real>("epsilon")),
    _sigma(getParam<Real>("sigma"))

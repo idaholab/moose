@@ -26,7 +26,7 @@ InputParameters validParams<GenericDiracKernelBlock>();
 class GenericDiracKernelBlock: public ParserBlock
 {
 public:
-  GenericDiracKernelBlock(const std::string & name, MooseSystem & moose_system, InputParameters params);
+  GenericDiracKernelBlock(const std::string & name, InputParameters params);
 
   virtual void execute();
 

@@ -33,7 +33,6 @@ class FunctionDirichletBC : public BoundaryCondition
 public:
 
   FunctionDirichletBC(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

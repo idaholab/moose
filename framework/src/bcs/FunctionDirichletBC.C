@@ -25,9 +25,8 @@ InputParameters validParams<FunctionDirichletBC>()
 }
 
 FunctionDirichletBC::FunctionDirichletBC(const std::string & name,
-                       MooseSystem &sys,
                        InputParameters parameters)
-  :BoundaryCondition(name, sys, parameters),
+  :BoundaryCondition(name, parameters),
   _func(getFunction("function"))
 {
 }
