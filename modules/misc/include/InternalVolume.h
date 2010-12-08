@@ -24,7 +24,6 @@ class InternalVolume : public SideIntegral
 public:
 
   InternalVolume( const std::string & name,
-                  MooseSystem & moose_system,
                   InputParameters parameters );
 
   virtual ~InternalVolume() {}

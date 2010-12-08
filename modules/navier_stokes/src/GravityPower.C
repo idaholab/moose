@@ -8,8 +8,8 @@ InputParameters validParams<GravityPower>()
   return params;
 }
 
-GravityPower::GravityPower(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+GravityPower::GravityPower(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
     _pv_var(coupled("pv")),
     _pv(coupledValue("pv")),
     _acceleration(getParam<Real>("acceleration"))

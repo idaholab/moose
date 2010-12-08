@@ -20,9 +20,8 @@ InputParameters validParams<LinearAnisotropicMaterial>()
 }
 
 LinearAnisotropicMaterial::LinearAnisotropicMaterial(const std::string & name,
-                                                 MooseSystem & moose_system,
                                                  InputParameters parameters)
-  :LinearIsotropicMaterial(name, moose_system, parameters),
+  :LinearIsotropicMaterial(name, parameters),
    _material_constant_c11(getParam<Real>("material_constant_c11")),
    _material_constant_c12(getParam<Real>("material_constant_c12")),
    _material_constant_c44(getParam<Real>("material_constant_c44")),

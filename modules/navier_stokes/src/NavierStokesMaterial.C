@@ -14,9 +14,8 @@ InputParameters validParams<NavierStokesMaterial>()
 }
 
 NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
-                                           MooseSystem & moose_system,
                                            InputParameters parameters)
-  :Material(name, moose_system, parameters),
+  :Material(name, parameters),
     _has_u(isCoupled("u")),
 
     _u(coupledValue("u")),

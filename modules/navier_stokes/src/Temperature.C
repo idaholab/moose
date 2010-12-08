@@ -8,8 +8,8 @@ InputParameters validParams<Temperature>()
   return params;
 }
 
-Temperature::Temperature(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+Temperature::Temperature(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
     _p_var(coupled("p")),
     _p(coupledValue("p")),
     _pe_var(coupled("pe")),

@@ -21,9 +21,8 @@ InputParameters validParams<MaterialModel>()
 
 
 MaterialModel::MaterialModel( const std::string & name,
-                              MooseSystem & moose_system,
                               InputParameters parameters )
-  :Material( name, moose_system, parameters ),
+  :Material( name, parameters ),
    _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
    _lambda_set( parameters.isParamValid("lambda") ),
    _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),

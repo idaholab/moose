@@ -13,7 +13,7 @@ class PlenumPressureBC : public BoundaryCondition
 {
 public:
 
-  PlenumPressureBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  PlenumPressureBC(const std::string & name, InputParameters parameters);
 
   virtual ~PlenumPressureBC(){}
 

@@ -14,7 +14,7 @@ class HeatConductionImplicitEuler : public ImplicitEuler
 {
 public:
 
-  HeatConductionImplicitEuler(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  HeatConductionImplicitEuler(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

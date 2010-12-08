@@ -13,7 +13,7 @@ class AC : public Kernel
 {
 public:
 
-  AC(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  AC(const std::string & name, InputParameters parameters);
   
 protected:
   enum PFFunctionType

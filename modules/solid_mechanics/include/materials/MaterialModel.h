@@ -17,7 +17,6 @@ class MaterialModel : public Material
 {
 public:
   MaterialModel( const std::string & name,
-                 MooseSystem & moose_system,
                  InputParameters parameters );
   virtual ~MaterialModel();
 

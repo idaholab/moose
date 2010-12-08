@@ -32,9 +32,8 @@ InputParameters validParams<CrossIC>()
 }
 
 CrossIC::CrossIC(const std::string & name,
-                 MooseSystem & moose_system,
                  InputParameters parameters)
-  :C1ICBase(name, moose_system, parameters),
+  :C1ICBase(name, parameters),
    _x1(parameters.get<Real>("x1")),
    _y1(parameters.get<Real>("y1")),
    _x2(parameters.get<Real>("x2")),

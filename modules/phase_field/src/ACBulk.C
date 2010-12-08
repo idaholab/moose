@@ -9,8 +9,8 @@ InputParameters validParams<ACBulk>()
   return params;
 }
 
-ACBulk::ACBulk(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :KernelValue(name, moose_system, parameters),
+ACBulk::ACBulk(const std::string & name, InputParameters parameters)
+  :KernelValue(name, parameters),
    _mob_name(getParam<std::string>("mob_name")),
    _L(getMaterialProperty<Real>(_mob_name))
 { 

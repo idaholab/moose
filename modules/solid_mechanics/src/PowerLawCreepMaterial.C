@@ -29,9 +29,8 @@ InputParameters validParams<PowerLawCreepMaterial>()
 }
 
 PowerLawCreepMaterial::PowerLawCreepMaterial(std::string name,
-                                             MooseSystem & moose_system,
                                              InputParameters parameters)
-  :LinearIsotropicMaterial(name, moose_system, parameters),
+  :LinearIsotropicMaterial(name, parameters),
    _coefficient(parameters.get<Real>("coefficient")),
    _exponent(parameters.get<Real>("exponent")),
    _activation_energy(parameters.get<Real>("activation_energy")),

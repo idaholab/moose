@@ -17,9 +17,8 @@ InputParameters validParams<RndSmoothCircleIC>()
 }
 
 RndSmoothCircleIC::RndSmoothCircleIC(const std::string & name,
-                               MooseSystem & moose_system,
                                InputParameters parameters)
-  :InitialCondition(name, moose_system, parameters),
+  :InitialCondition(name, parameters),
    _x1(parameters.get<Real>("x1")),
    _y1(parameters.get<Real>("y1")),
    _z1(parameters.get<Real>("z1")),

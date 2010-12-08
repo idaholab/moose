@@ -10,9 +10,8 @@ InputParameters validParams<StressAux>()
 }
 
 StressAux::StressAux( const std::string & name,
-                      MooseSystem & moose_system,
                       InputParameters parameters )
-  :AuxKernel( name, moose_system, parameters ),
+  :AuxKernel( name, parameters ),
    _index( getParam<unsigned int>("index") ),
    _stress( getMaterialProperty<RealTensorValue>("stress") )
 {

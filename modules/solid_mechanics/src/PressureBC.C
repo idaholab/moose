@@ -14,8 +14,8 @@ InputParameters validParams<PressureBC>()
   return params;
 }
 
-PressureBC::PressureBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+PressureBC::PressureBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
    _component(getParam<int>("component")),
    _factor(getParam<Real>("factor")),
    _has_function(getParam<std::string>("function") != ""),

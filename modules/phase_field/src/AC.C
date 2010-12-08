@@ -10,8 +10,8 @@ InputParameters validParams<AC>()
   return params;
 }
 
-AC::AC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+AC::AC(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
    _mob_name(getParam<std::string>("mob_name")),
    _kappa_name(getParam<std::string>("kappa_name")),
    _kappa(getMaterialProperty<Real>(_kappa_name)),

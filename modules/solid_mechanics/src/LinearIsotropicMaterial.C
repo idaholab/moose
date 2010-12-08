@@ -18,9 +18,8 @@ InputParameters validParams<LinearIsotropicMaterial>()
 }
 
 LinearIsotropicMaterial::LinearIsotropicMaterial(const std::string  & name,
-                                                 MooseSystem & moose_system,
                                                  InputParameters parameters)
-  :SolidMechanicsMaterial(name, moose_system, parameters),
+  :SolidMechanicsMaterial(name, parameters),
    _youngs_modulus(getParam<Real>("youngs_modulus")),
    _poissons_ratio(getParam<Real>("poissons_ratio")),
    _t_ref(getParam<Real>("t_ref")),

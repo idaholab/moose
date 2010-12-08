@@ -16,7 +16,6 @@ class LSHPlasticMaterial : public LinearIsotropicMaterial
 {
 public:
   LSHPlasticMaterial(std::string name,
-                  MooseSystem & moose_system,
                   InputParameters parameters);
   
 protected:

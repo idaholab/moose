@@ -14,11 +14,11 @@ InputParameters validParams<Convection>()
   return params;
 }
 
-Convection::Convection(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
+Convection::Convection(const std::string & name, InputParameters parameters)
   // You must call the constructor of the base class first
   // The "true" here specifies that this Kernel is to be integrated
   // over the domain.
-  :Kernel(name, moose_system, parameters),
+  :Kernel(name, parameters),
    
    // This is the "Intialization List" it sets the values of class variables
    // Here we are grabbing the values of Parameters to use for a velocity vector

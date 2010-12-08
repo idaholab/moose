@@ -17,7 +17,6 @@ class PowerLawCreepMaterial : public LinearIsotropicMaterial
 {
 public:
   PowerLawCreepMaterial(std::string name,
-                        MooseSystem & moose_system,
                         InputParameters parameters);
   
 protected:

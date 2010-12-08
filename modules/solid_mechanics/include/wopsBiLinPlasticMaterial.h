@@ -16,7 +16,6 @@ class wopsBiLinPlasticMaterial : public LinearIsotropicMaterial
 {
 public:
   wopsBiLinPlasticMaterial(std::string name,
-                  MooseSystem & moose_system,
                   InputParameters parameters);
   
 protected:

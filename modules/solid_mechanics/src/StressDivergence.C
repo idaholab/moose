@@ -14,8 +14,8 @@ InputParameters validParams<StressDivergence>()
 }
 
 
-StressDivergence::StressDivergence(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+StressDivergence::StressDivergence(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
    _stress(getMaterialProperty<RealTensorValue>("stress")),
    _Jacobian_mult(getMaterialProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _component(getParam<Real>("component")),

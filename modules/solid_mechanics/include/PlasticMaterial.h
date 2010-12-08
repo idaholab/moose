@@ -16,7 +16,6 @@ class PlasticMaterial : public LinearIsotropicMaterial
 {
 public:
   PlasticMaterial(const std::string & name,
-                  MooseSystem & moose_system,
                   InputParameters parameters);
   
 protected:

@@ -11,8 +11,8 @@ InputParameters validParams<CHInterface>()
   return params;
 }
 
-CHInterface::CHInterface(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+CHInterface::CHInterface(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
    _kappa_name(getParam<std::string>("kappa_name")),
    _mob_name(getParam<std::string>("mob_name")),
    _grad_mob_name(getParam<std::string>("grad_mob_name")),

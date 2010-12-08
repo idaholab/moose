@@ -12,7 +12,7 @@ InputParameters validParams<StressAux>();
 class StressAux : public AuxKernel
 {
 public:
-  StressAux( const std::string & name, MooseSystem & moose_system, InputParameters parameters );
+  StressAux( const std::string & name, InputParameters parameters );
 
   virtual ~StressAux() {}
 

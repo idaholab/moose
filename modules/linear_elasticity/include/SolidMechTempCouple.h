@@ -16,7 +16,7 @@ class SolidMechTempCouple : public SolidMech
 {
 public:
 
-  SolidMechTempCouple(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  SolidMechTempCouple(const std::string & name, InputParameters parameters);
   
   void recomputeCouplingConstants();
   

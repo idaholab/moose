@@ -16,7 +16,6 @@ class CLSHPlasticMaterial : public LinearIsotropicMaterial
 {
 public:
   CLSHPlasticMaterial(std::string name,
-                  MooseSystem & moose_system,
                   InputParameters parameters);
   
 protected:

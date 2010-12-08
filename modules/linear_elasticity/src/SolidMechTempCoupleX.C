@@ -7,8 +7,8 @@ InputParameters validParams<SolidMechTempCoupleX>()
   return params;
 }
 
-SolidMechTempCoupleX::SolidMechTempCoupleX(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :SolidMechTempCouple(name, moose_system, parameters)
+SolidMechTempCoupleX::SolidMechTempCoupleX(const std::string & name, InputParameters parameters)
+  :SolidMechTempCouple(name, parameters)
 {}
 
 Real

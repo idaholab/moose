@@ -16,9 +16,8 @@ InputParameters validParams<PLSHPlasticMaterial>()
 }
 
 PLSHPlasticMaterial::PLSHPlasticMaterial(std::string name,
-                                             MooseSystem & moose_system,
                                              InputParameters parameters)
-  :LinearIsotropicMaterial(name, moose_system, parameters),
+  :LinearIsotropicMaterial(name, parameters),
    _yield_stress(parameters.get<Real>("yield_stress")),
    _hardening_constant(parameters.get<Real>("hardening_constant")),
    _tolerance(parameters.get<Real>("tolerance")),

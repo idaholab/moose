@@ -13,8 +13,8 @@ InputParameters validParams<PlenumPressureBC>()
   return params;
 }
 
-PlenumPressureBC::PlenumPressureBC(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
    _initialized(false),
    _n0(0),
    _component(getParam<int>("component")),

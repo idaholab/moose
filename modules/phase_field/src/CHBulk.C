@@ -9,8 +9,8 @@ InputParameters validParams<CHBulk>()
   return params;
 }
 
-CHBulk::CHBulk(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :KernelGrad(name, moose_system, parameters),
+CHBulk::CHBulk(const std::string & name, InputParameters parameters)
+  :KernelGrad(name, parameters),
    _mob_name(getParam<std::string>("mob_name")),
    _M(getMaterialProperty<Real>(_mob_name))
 {  

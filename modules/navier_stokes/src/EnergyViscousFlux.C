@@ -8,8 +8,8 @@ InputParameters validParams<EnergyViscousFlux>()
   return params;
 }
 
-EnergyViscousFlux::EnergyViscousFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :Kernel(name, moose_system, parameters),
+EnergyViscousFlux::EnergyViscousFlux(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
     _u_vel_var(coupled("u")),
     _u_vel(coupledValue("u")),
     _v_vel_var(coupled("v")),

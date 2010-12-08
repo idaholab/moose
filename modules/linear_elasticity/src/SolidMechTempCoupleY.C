@@ -8,8 +8,8 @@ InputParameters validParams<SolidMechTempCoupleY>()
 }
 
 
-SolidMechTempCoupleY::SolidMechTempCoupleY(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :SolidMechTempCouple(name, moose_system, parameters)
+SolidMechTempCoupleY::SolidMechTempCoupleY(const std::string & name, InputParameters parameters)
+  :SolidMechTempCouple(name, parameters)
 {}
 
 Real

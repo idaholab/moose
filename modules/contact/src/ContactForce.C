@@ -15,8 +15,8 @@ InputParameters validParams<ContactForce>()
   return params;
 }
 
-ContactForce::ContactForce(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :BoundaryCondition(name, moose_system, parameters),
+ContactForce::ContactForce(const std::string & name, InputParameters parameters)
+  :BoundaryCondition(name, parameters),
    _penetration(coupledValue("penetration")),
    _penalty(getParam<Real>("penalty")),
    _component(getParam<unsigned int>("component")),

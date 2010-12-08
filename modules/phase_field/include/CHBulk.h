@@ -13,7 +13,7 @@ class CHBulk : public KernelGrad
 {
 public:
 
-  CHBulk(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  CHBulk(const std::string & name, InputParameters parameters);
   
 protected:
   std::string _mob_name;

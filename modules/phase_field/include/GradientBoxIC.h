@@ -36,7 +36,6 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   GradientBoxIC(const std::string & name,
-                MooseSystem & moose_system,
                 InputParameters parameters);
 
   /**

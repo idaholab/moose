@@ -10,9 +10,8 @@ InputParameters validParams<PlasticMaterial>()
 }
 
 PlasticMaterial::PlasticMaterial(const std::string & name,
-                                 MooseSystem & moose_system,
                                  InputParameters parameters)
-  :LinearIsotropicMaterial(name, moose_system, parameters),
+  :LinearIsotropicMaterial(name, parameters),
    _input_yield_stress(getParam<Real>("yield_stress")),
    _input_shear_modulus(_youngs_modulus / ((2*(1+_poissons_ratio)))),
    _yield_stress(declareProperty<Real>("yield_stress")),

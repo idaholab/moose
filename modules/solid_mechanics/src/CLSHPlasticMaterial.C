@@ -18,9 +18,8 @@ InputParameters validParams<CLSHPlasticMaterial>()
 }
 
 CLSHPlasticMaterial::CLSHPlasticMaterial(std::string name,
-                                             MooseSystem & moose_system,
                                              InputParameters parameters)
-  :LinearIsotropicMaterial(name, moose_system, parameters),
+  :LinearIsotropicMaterial(name, parameters),
    _yield_stress(parameters.get<Real>("yield_stress")),
    _hardening_constant(parameters.get<Real>("hardening_constant")),
    _c_alpha(parameters.get<Real>("c_alpha")),

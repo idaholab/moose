@@ -15,7 +15,7 @@ class MomentumInviscidFlux : public Kernel
 {
 public:
 
-  MomentumInviscidFlux(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  MomentumInviscidFlux(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

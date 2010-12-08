@@ -17,7 +17,6 @@ class LinearIsotropicMaterial : public SolidMechanicsMaterial
 {
 public:
   LinearIsotropicMaterial(const std::string & name,
-                          MooseSystem & moose_system,
                           InputParameters parameters);
   
   virtual ~LinearIsotropicMaterial();

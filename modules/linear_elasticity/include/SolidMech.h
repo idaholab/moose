@@ -18,7 +18,7 @@ class SolidMech : public Kernel
 {
 public:
 
-  SolidMech(const std::string & name, MooseSystem & moose_system, InputParameters parameters);
+  SolidMech(const std::string & name, InputParameters parameters);
   
   void recomputeConstants();
   

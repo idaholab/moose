@@ -51,7 +51,6 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   C1ICBase(const std::string & name,
-           MooseSystem & moose_system,
            InputParameters parameters);
 
 protected:

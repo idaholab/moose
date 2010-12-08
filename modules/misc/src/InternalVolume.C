@@ -22,9 +22,8 @@ InputParameters validParams<InternalVolume>()
 }
 
 InternalVolume::InternalVolume(const std::string & name,
-                               MooseSystem & moose_system,
                                InputParameters parameters)
-  : SideIntegral( name, moose_system, parameters )
+  : SideIntegral( name, parameters )
 {}
 
 Real

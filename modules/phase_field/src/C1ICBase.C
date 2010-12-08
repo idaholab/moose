@@ -34,9 +34,8 @@ InputParameters validParams<C1ICBase>()
 }
 
 C1ICBase::C1ICBase(const std::string & name,
-                   MooseSystem & moose_system,
                    InputParameters parameters)
-  :InitialCondition(name, moose_system, parameters),
+  :InitialCondition(name, parameters),
    _average(parameters.get<Real>("average")),   
    _amplitude(parameters.get<Real>("amplitude")),
    _length(parameters.get<Real>("length")),

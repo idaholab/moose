@@ -10,8 +10,8 @@ InputParameters validParams<ACInterface>()
   return params;
 }
 
-ACInterface::ACInterface(const std::string & name, MooseSystem & moose_system, InputParameters parameters)
-  :KernelGrad(name, moose_system, parameters),
+ACInterface::ACInterface(const std::string & name, InputParameters parameters)
+  :KernelGrad(name, parameters),
    _mob_name(getParam<std::string>("mob_name")),
    _kappa_name(getParam<std::string>("kappa_name")),
    _kappa(getMaterialProperty<Real>(_kappa_name)),
