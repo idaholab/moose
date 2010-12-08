@@ -24,9 +24,8 @@ InputParameters validParams<Convection>()
 }
 
 Convection::Convection(const std::string & name,
-                       MooseSystem &sys,
                        InputParameters parameters)
-  :Kernel(name, sys, parameters),
+  :Kernel(name, parameters),
    _some_variable(coupledGradient("some_variable"))
 {}
 

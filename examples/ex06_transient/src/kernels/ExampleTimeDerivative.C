@@ -25,9 +25,8 @@ InputParameters validParams<ExampleTimeDerivative>()
 }
 
 ExampleTimeDerivative::ExampleTimeDerivative(const std::string & name,
-                                             MooseSystem &sys,
                                              InputParameters parameters)
-  :TimeDerivative(name,sys,parameters),
+  :TimeDerivative(name,parameters),
    // This kernel expects an input parameter named "time_coefficient"
    _time_coefficient(getParam<Real>("time_coefficient"))
 {}

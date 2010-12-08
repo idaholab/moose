@@ -27,7 +27,6 @@ class Convection : public Kernel
 public:
 
   Convection(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

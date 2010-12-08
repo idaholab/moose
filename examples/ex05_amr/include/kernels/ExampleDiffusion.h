@@ -36,7 +36,6 @@ class ExampleDiffusion : public Diffusion
 public:
 
   ExampleDiffusion(const std::string & name,
-                   MooseSystem &sys,
                    InputParameters parameters);
 
 protected:

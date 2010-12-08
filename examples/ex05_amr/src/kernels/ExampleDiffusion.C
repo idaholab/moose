@@ -30,9 +30,8 @@ InputParameters validParams<ExampleDiffusion>()
 }
 
 ExampleDiffusion::ExampleDiffusion(const std::string & name,
-                                   MooseSystem &sys,
                                    InputParameters parameters)
-  :Diffusion(name,sys,parameters),
+  :Diffusion(name,parameters),
    _diffusivity(getMaterialProperty<Real>("diffusivity"))
 {}
 

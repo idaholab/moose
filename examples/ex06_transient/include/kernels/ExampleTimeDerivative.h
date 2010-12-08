@@ -28,7 +28,6 @@ class ExampleTimeDerivative : public TimeDerivative
 public:
 
   ExampleTimeDerivative(const std::string & name,
-                        MooseSystem &sys,
                         InputParameters parameters);
 
 protected:

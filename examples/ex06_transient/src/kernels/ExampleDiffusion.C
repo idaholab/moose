@@ -25,9 +25,8 @@ InputParameters validParams<ExampleDiffusion>()
 }
 
 ExampleDiffusion::ExampleDiffusion(const std::string & name,
-                                   MooseSystem &sys,
                                    InputParameters parameters)
-  :Diffusion(name,sys,parameters),
+  :Diffusion(name,parameters),
    // Initialize our member variable based on a default or input file
    _diffusivity(getParam<Real>("diffusivity"))
 {}

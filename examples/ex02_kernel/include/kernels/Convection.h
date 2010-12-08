@@ -50,7 +50,6 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   Convection(const std::string & name,
-             MooseSystem &sys,
              InputParameters parameters);
 
 protected:

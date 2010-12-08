@@ -27,7 +27,6 @@ class ExampleMaterial : public Material
 {
 public:
   ExampleMaterial(const std::string & name,
-                  MooseSystem & moose_system,
                   InputParameters parameters);
 
 protected:

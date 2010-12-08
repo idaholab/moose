@@ -27,7 +27,6 @@ class ExampleImplicitEuler : public ImplicitEuler
 public:
 
   ExampleImplicitEuler(const std::string & name,
-                       MooseSystem &sys,
                        InputParameters parameters);
 
 protected:
