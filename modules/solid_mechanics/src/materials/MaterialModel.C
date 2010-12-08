@@ -240,47 +240,47 @@ MaterialModel::computeStrainAndRotationIncrement( DecompMethod method,
 
   else if ( method == Eigen )
   {
-    
+
     mooseError("Eigen not defined.");
-    
+
     const int ND = 3;
-    
+
     ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
     ColumnMajorMatrix  Uhat(ND,ND), invUhat(ND,ND), logVhat(ND,ND);
     ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
-    
+
     ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
-    
+
     Chat.eigen(eigen_value,eigen_vector);
-    
-    
+
+
     for(int i = 0; i < ND; i++)
     {
       N1(i) = eigen_vector(i,0);
       N2(i) = eigen_vector(i,1);
       N3(i) = eigen_vector(i,2);
     }
-    
+
     const Real lamda1 = std::sqrt(eigen_value(0));
     const Real lamda2 = std::sqrt(eigen_value(1));
     const Real lamda3 = std::sqrt(eigen_value(2));
-    
+
     Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
-    
+
     invertMatrix(Uhat,invUhat);
-    
+
     _incremental_rotation = Fhat * invUhat;
-    
+
     n1 = _incremental_rotation * N1;
     n2 = _incremental_rotation * N2;
     n3 = _incremental_rotation * N3;
-    
+
     const Real log1 = std::log(lamda1);
     const Real log2 = std::log(lamda2);
     const Real log3 = std::log(lamda3);
-    
+
     logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
-    
+
     _strain_increment = logVhat * (1.0 / _dt);
   }
   else
@@ -372,7 +372,7 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
   _strain_increment(1,0) = _strain_increment(0,1);
   _strain_increment(2,0) = _strain_increment(0,2);
   _strain_increment(2,1) = _strain_increment(1,2);
-  
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -420,7 +420,7 @@ MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
   _incremental_rotation(2,0) =      (C2*Ax)*Az + (C3*Ay);
   _incremental_rotation(2,1) =      (C2*Ay)*Az - (C3*Ax);
   _incremental_rotation(2,2) = C1 + (C2*Az)*Az;
-  
+
 }
 
 

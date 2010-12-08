@@ -53,10 +53,10 @@ protected:
   MaterialProperty<RealTensorValue> & _stress_old;
 
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
-  
+
   ColumnMajorMatrix _strain_increment;
   ColumnMajorMatrix _incremental_rotation;
-  
+
 
 
   /**
@@ -67,8 +67,8 @@ protected:
 
 
   void computeProperties();
- 
-  
+
+
 
   /// Modify increment for things like thermal strain
   virtual void modifyStrain();
