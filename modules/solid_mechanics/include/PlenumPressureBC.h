@@ -7,7 +7,7 @@
 class PlenumPressureBC;
 
 template<>
-InputParameters validParams<BoundaryCondition>();
+InputParameters validParams<PlenumPressureBC>();
 
 class PlenumPressureBC : public BoundaryCondition
 {
