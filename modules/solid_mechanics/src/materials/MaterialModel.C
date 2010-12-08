@@ -48,8 +48,8 @@ MaterialModel::MaterialModel( const std::string & name,
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _elasticity_tensor(NULL),
-   _strain_increment(NULL),
-   _incremental_rotation(NULL)
+   _strain_increment(3,3),
+   _incremental_rotation(3,3)
 {
 //   std::cout << "TESTING MaterialModel class..." << std::endl;
 //   testMe();
