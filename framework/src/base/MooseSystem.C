@@ -1941,7 +1941,7 @@ MooseSystem::projectSolution(Number fptr(const Point& p,
 }
 
 Number
-MooseSystem::getVaribleNodalValue(Node & node, const std::string & var_name)
+MooseSystem::getVariableNodalValue(Node & node, const std::string & var_name)
 {
   if (hasVariable(var_name))
   {

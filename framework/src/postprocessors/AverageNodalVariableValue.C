@@ -12,53 +12,45 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NodalVariableValue.h"
+#include "AverageNodalVariableValue.h"
 #include "MooseSystem.h"
 
 // libMesh
 #include "boundary_info.h"
 
 template<>
-InputParameters validParams<NodalVariableValue>()
+InputParameters validParams<AverageNodalVariableValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<std::string>("variable", "The variable to be monitored");
-  params.addRequiredParam<unsigned int>("nodeid", "The ID of the node where we monitor");
+  params.addRequiredParam<unsigned int>("nodeset", "The ID of the node where we monitor");
   return params;
 }
 
-NodalVariableValue::NodalVariableValue(const std::string & name, InputParameters parameters) :
+AverageNodalVariableValue::AverageNodalVariableValue(const std::string & name, InputParameters parameters) :
   GeneralPostprocessor(name, parameters),
   _mesh(*_moose_system.getMesh()),
   _var_name(getParam<std::string>("variable")),
-  _node(_mesh.node(getParam<unsigned int>("nodeid")))
+  _nodesetid(getParam<unsigned int>("nodeset"))
 {
-/*
   std::vector<unsigned int> nodes;
   std::vector<short int> ids;
   _mesh.boundary_info->build_node_list(nodes, ids);
 
-  bool found = false;
-  int i;
-  for (i = 0; i < nodes.size(); i++)
+  for (unsigned int i = 0; i < nodes.size(); i++)
   {
-//    if (nodes[i] == _nodeid)
-//    {
-//      found = true;
-//      break;
-//    }
-    std::cout << "n=" << nodes[i] << ", " << ids[i] << std::endl;
+    if (ids[i] == _nodesetid)
+      _node_ids.push_back(nodes[i]);
   }
-
-  if (!found)
-    mooseError("Specified nodeid was not found in any nodeset");
-
-//  Node & node = _mesh.node(id);
-*/
 }
 
 Real
-NodalVariableValue::getValue()
+AverageNodalVariableValue::getValue()
 {
-  return _moose_system.getVariableNodalValue(_node, _var_name);
+  Real avg = 0;
+  int n = _node_ids.size();
+  for (int i = 0; i < n; i++)
+    avg += _moose_system.getVariableNodalValue(_mesh.node(_node_ids[i]), _var_name);
+
+  return avg / n;
 }

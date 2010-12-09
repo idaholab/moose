@@ -495,7 +495,7 @@ public:
    */
   Function & getFunction(const std::string & name);
 
-  Number getVaribleNodalValue(Node & node, const std::string & var_name);
+  Number getVariableNodalValue(Node & node, const std::string & var_name);
 
 protected:
   void sizeEverything();

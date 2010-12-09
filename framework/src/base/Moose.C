@@ -124,6 +124,7 @@
 #include "EmptyPostprocessor.h"
 #include "SideFluxIntegral.h"
 #include "NodalVariableValue.h"
+#include "AverageNodalVariableValue.h"
 
 #include "Damper.h"
 #include "DampersBlock.h"
@@ -287,6 +288,7 @@ Moose::registerObjects()
   registerPostprocessor(EmptyPostprocessor);
   registerPostprocessor(SideFluxIntegral);
   registerPostprocessor(NodalVariableValue);
+  registerPostprocessor(AverageNodalVariableValue);
 
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
