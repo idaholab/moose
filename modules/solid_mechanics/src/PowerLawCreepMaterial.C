@@ -114,6 +114,7 @@ PowerLawCreepMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Col
       if (_output_iteration_info == true)
         std::cout
           <<" it=" <<it
+          <<" temp=" << _temp[_qp]
           <<" phi=" <<phi
           <<" dphi=" <<dphi_ddelp
           <<" plas_res=" <<plastic_residual

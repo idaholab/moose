@@ -39,6 +39,7 @@
 #include "LSHPlasticMaterial.h"
 #include "PlasticMaterial.h"
 #include "PowerLawCreepMaterial.h"
+#include "PowerLawCreep.h"
 #include "PlenumPressureBC.h"
 #include "PressureBC.h"
 #include "PLSHPlasticMaterial.h"
@@ -105,6 +106,7 @@ Elk::registerObjects()
   registerMaterial(PlasticMaterial);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreepMaterial);
+  registerMaterial(PowerLawCreep);
   registerBoundaryCondition(PlenumPressureBC);
   registerBoundaryCondition(PressureBC);
   registerAux(StressAux);
