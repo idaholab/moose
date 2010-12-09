@@ -101,16 +101,18 @@ public:
 
   virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
   {
-    BCIterator bc_it = _moose_system._bcs[_tid].activeBCsBegin(bnd_id);
-    BCIterator bc_end = _moose_system._bcs[_tid].activeBCsEnd(bnd_id);
+    const BCIterator bc_it = _moose_system._bcs[_tid].activeBCsBegin(bnd_id);
+    const BCIterator bc_end = _moose_system._bcs[_tid].activeBCsEnd(bnd_id);
 
     if(bc_it != bc_end)
     {
       _moose_system.reinitBCs(_tid, _soln, elem, side, bnd_id);
 
-      for(; bc_it!=bc_end; ++bc_it)
-        if((*bc_it)->shouldBeApplied())
-          (*bc_it)->computeResidual();
+      for(BCIterator it(bc_it); it!=bc_end; ++it)
+        (*it)->setup();
+
+      for(BCIterator it(bc_it); it!=bc_end; ++it)
+        (*it)->computeResidual();
     }
   }
 

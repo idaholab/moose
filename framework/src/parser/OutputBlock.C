@@ -42,6 +42,7 @@ InputParameters validParams<OutputBlock>()
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png"); 
   params.addParam<bool>("print_out_info", false, "Specifies that you would like to see more verbose output information on STDOUT");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
+  params.addParam<bool>("output_displaced", false, "Requests that displaced mesh files are written at each solve");
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
@@ -86,6 +87,7 @@ OutputBlock::execute()
   _moose_system._gnuplot_format = getParamValue<std::string>("gnuplot_format");
   _moose_system._print_out_info = getParamValue<bool>("print_out_info");
   _moose_system._output_initial = getParamValue<bool>("output_initial");
+  _moose_system._output_displaced = getParamValue<bool>("output_displaced");
 
 #ifdef LIBMESH_HAVE_PETSC
   if (getParamValue<bool>("print_linear_residuals"))

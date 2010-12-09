@@ -122,6 +122,7 @@ MooseSystem::MooseSystem() :
   _postprocessor_gnuplot_output(false),
   _print_out_info(false),
   _output_initial(false),
+  _output_displaced(false),
   _l_abs_step_tol(1e-10),
   _last_rnorm(0),
   _initial_residual(0),
@@ -1952,7 +1953,7 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
       _postprocessor_data[0].writeExodus( _ex_out, time );
     }
 
-    if(_has_displaced_mesh)
+    if(_has_displaced_mesh && _output_displaced)
     {
       _num_files_displaced++;
 

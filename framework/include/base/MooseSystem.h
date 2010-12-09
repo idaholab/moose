@@ -839,6 +839,7 @@ public:
   bool _postprocessor_gnuplot_output;
   bool _print_out_info;
   bool _output_initial;
+  bool _output_displaced;
 
 
   // Solver convergence tolerance

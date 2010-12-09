@@ -150,8 +150,6 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
 {
   Moose::perf_log.push("compute_postprocessors()","Solve");
 
-  std::cout<<"Computing PPs!"<<std::endl;
-
   // This resets stuff so that id 0 is the first id
   ParallelUniqueId::reinitialize();
 

@@ -59,6 +59,7 @@
 [Output]
   file_base = out
   output_initial = true
+  output_displaced = true
   interval = 1
   exodus = true
 []
