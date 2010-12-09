@@ -29,6 +29,7 @@ InputParameters validParams<GenericPeriodicBlock>()
   params.addParam<std::vector<Real> >("translation", "Vector that translates coordinates on the primary boundary to coordinates on the secondary boundary.");
   params.addParam<std::vector<std::string> >("transform_func", "Functions that specify the transformation");
   params.addParam<std::vector<std::string> >("inv_transform_func", "Functions that specify the inverse transformation");
+  params.addParam<std::string>("variable", "Variable for the periodic boundary");
   return params;
 }
 
@@ -49,6 +50,8 @@ GenericPeriodicBlock::execute()
     PeriodicBoundary p(RealVectorValue(translation[0], translation[1], translation[2]));
     p.myboundary = getParamValue<unsigned int>("primary");
     p.pairedboundary = getParamValue<unsigned int>("secondary");
+    if (getParamValue<std::string>("variable") != std::string())
+      p.set_variable(_moose_system.getVariableNumber(getParamValue<std::string>("variable")));
 
     system.get_dof_map().add_periodic_boundary(p);
   }
@@ -59,6 +62,8 @@ GenericPeriodicBlock::execute()
     FunctionPeriodicBoundary *pb = new FunctionPeriodicBoundary(_moose_system, fn_names);
     pb->myboundary = getParamValue<unsigned int>("primary");
     pb->pairedboundary = getParamValue<unsigned int>("secondary");
+    if (getParamValue<std::string>("variable") != std::string())
+      pb->set_variable(_moose_system.getVariableNumber(getParamValue<std::string>("variable")));
 
     FunctionPeriodicBoundary *ipb = NULL;
     if (getParamValue<std::vector<std::string> >("inv_transform_func") != std::vector<std::string>())
@@ -70,6 +75,8 @@ GenericPeriodicBlock::execute()
       // these are switched, because we are forming the inverse translation
       ipb->myboundary = getParamValue<unsigned int>("secondary");
       ipb->pairedboundary = getParamValue<unsigned int>("primary");
+      if (getParamValue<std::string>("variable") != std::string())
+        ipb->set_variable(_moose_system.getVariableNumber(getParamValue<std::string>("variable")));
     }
     else
     {
