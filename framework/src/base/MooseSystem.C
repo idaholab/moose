@@ -1939,3 +1939,23 @@ MooseSystem::projectSolution(Number fptr(const Point& p,
 {
   _system->project_solution(fptr, gptr, _es->parameters);
 }
+
+Number
+MooseSystem::getVaribleNodalValue(Node & node, const std::string & var_name)
+{
+  if (hasVariable(var_name))
+  {
+    unsigned int dof = node.dof_number(_system->number(), _system->variable_number(var_name), 0);
+    return (*_system->current_local_solution)(dof);
+  }
+  else if (hasAuxVariable(var_name))
+  {
+    // TODO: will not work with elemental aux variables
+    unsigned int dof = node.dof_number(_aux_system->number(), _aux_system->variable_number(var_name), 0);
+    return (*_aux_system->current_local_solution)(dof);
+  }
+  else
+  {
+    mooseError("Variable with name '" + var_name + "' does not exist");
+  }
+}
