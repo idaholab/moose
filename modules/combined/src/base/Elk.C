@@ -9,6 +9,7 @@
 // heat_conduction
 #include "HeatConduction.h"
 #include "HeatConductionImplicitEuler.h"
+#include "HeatConductionMaterial.h"
 #include "FluxBC.h"
 
 // navier_stokes
@@ -75,6 +76,7 @@ Elk::registerObjects()
   // heat_conduction
   registerKernel(HeatConduction);
   registerKernel(HeatConductionImplicitEuler);
+  registerNamedMaterial(HeatConductionMaterial, "HeatConduction");
   registerBoundaryCondition(FluxBC);
 
   // navier_stokes

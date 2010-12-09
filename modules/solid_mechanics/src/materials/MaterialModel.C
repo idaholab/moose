@@ -317,7 +317,7 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
   //  = 0.25*A - 0.5*I
   //
 
-  const Real dt_inv = 1 / _dt;
+  const Real dt_inv = _dt ? 1 / _dt : 1;
 
   const Real Uxx = Fhat(0,0);
   const Real Uxy = Fhat(0,1);
@@ -336,31 +336,12 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
   const Real Ayz = Uxy*Uxz + Uyy*Uyz + Uzy*Uzz;
   const Real Azz = Uxz*Uxz + Uyz*Uyz + Uzz*Uzz - 1.0;
 
-//   std::cout << "\nJDH DEBUG: "
-//             << Uxx*Uxx << " " << Uyx*Uyx << " " << Uzx*Uzx << "\n"
-//             << Uxx*Uxx + Uyx*Uyx + Uzx*Uzx -1 << "\n" << std::endl;
-
-//   std::cout << "JDH DEBUG: Fhat:\n"
-//             << Uxx << " " << Uxy << " " << Uxz << "\n"
-//             << Uyx << " " << Uyy << " " << Uyz << "\n"
-//             << Uzx << " " << Uzy << " " << Uzz << std::endl;
-
-//   std::cout << "JDH DEBUG: A:\n"
-//             << Axx << " " << Axy << " " << Axz << "\n"
-//             << Axy << " " << Ayy << " " << Ayz << "\n"
-//             << Axz << " " << Ayz << " " << Azz << std::endl;
-
   const Real Bxx = 0.25 * Axx - 0.5;
   const Real Bxy = 0.25 * Axy;
   const Real Bxz = 0.25 * Axz;
   const Real Byy = 0.25 * Ayy - 0.5;
   const Real Byz = 0.25 * Ayz;
   const Real Bzz = 0.25 * Azz - 0.5;
-
-//   std::cout << "JDH DEBUG: B:\n"
-//             << Axx << " " << Axy << " " << Axz << "\n"
-//             << Axy << " " << Ayy << " " << Ayz << "\n"
-//             << Axz << " " << Ayz << " " << Azz << std::endl;
 
   _strain_increment(0,0) = -(Bxx*Axx + Bxy*Axy + Bxz*Axz) * dt_inv;
   _strain_increment(0,1) = -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) * dt_inv;
@@ -477,9 +458,9 @@ MaterialModel::computeStress()
 //   _elasticity_tensor->print();
 
 //   std::cout << "STRAIN INCREMENT: " << _qp << "\n"
-//             << strain_increment(0,0) << " " << strain_increment(0,1) << " " << strain_increment(0,2) << std::endl
-//             << strain_increment(1,0) << " " << strain_increment(1,1) << " " << strain_increment(1,2) << std::endl
-//             << strain_increment(2,0) << " " << strain_increment(2,1) << " " << strain_increment(2,2) << std::endl;
+//             << _strain_increment(0,0) << " " << _strain_increment(0,1) << " " << _strain_increment(0,2) << std::endl
+//             << _strain_increment(1,0) << " " << _strain_increment(1,1) << " " << _strain_increment(1,2) << std::endl
+//             << _strain_increment(2,0) << " " << _strain_increment(2,1) << " " << _strain_increment(2,2) << std::endl;
 
 //   std::cout << "STRESS: " << _qp << " at time " << _t << "\n"
 //             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
@@ -617,6 +598,7 @@ MaterialModel::invertMatrix( const ColumnMajorMatrix & A,
   Real Azy = A(2,1);
   Real Azz = A(2,2);
 
+  mooseAssert( detMatrix( A ) > 0, "Matrix is not positive definite!" );
   Real detInv = 1 / detMatrix( A );
 
   Ainv(0,0) = +(Ayy*Azz-Azy*Ayz) * detInv;

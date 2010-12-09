@@ -16,8 +16,8 @@ InputParameters validParams<InternalVolume>();
  * If the sideset defines an interior surface, the volume reported will be
  * positive.  If the sideset defines an exterior surface, the volume
  * reported will be negative.  It is therefore possible to compute the net
- * interior volume by processing an interior and an exterior surface
- * simultaneously.
+ * interior volume by including an interior and an exterior surface
+ * in the same sideset.
  */
 class InternalVolume : public SideIntegral
 {

@@ -17,10 +17,11 @@ public:
 
   virtual ~PlenumPressureBC(){}
 
+  virtual void setup();
+
 protected:
 
   virtual Real computeQpResidual();
-  virtual void setup();
 
   bool _initialized;
 

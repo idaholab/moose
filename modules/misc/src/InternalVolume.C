@@ -18,6 +18,7 @@ template <>
 InputParameters validParams<InternalVolume>()
 {
   InputParameters params = validParams<SideIntegral>();
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 

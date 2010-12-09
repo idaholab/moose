@@ -1,5 +1,7 @@
 #include "PlenumPressureBC.h"
 
+#include "MooseSystem.h"
+
 template<>
 InputParameters validParams<PlenumPressureBC>()
 {
@@ -24,6 +26,8 @@ PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters par
    _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
    _volume( getPostprocessorValue(getParam<std::string>("volume")))
 {
+  _moose_system.needPostprocessorsForResiduals( true );
+
   if(_component < 0)
   {
     std::cout << "Must select a component for "

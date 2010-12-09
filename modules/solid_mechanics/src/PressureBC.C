@@ -1,4 +1,3 @@
-
 #include "PressureBC.h"
 
 #include "Function.h"
@@ -11,6 +10,7 @@ InputParameters validParams<PressureBC>()
   params.addRequiredParam<int>("component", "The component for the PressureBC");
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
   params.addParam<std::string>("function", "", "The function that describes the pressure");
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
@@ -36,11 +36,11 @@ PressureBC::PressureBC(const std::string & name, InputParameters parameters)
               << ") for "
               << name
               << "." << std::endl;
-    
+
     libmesh_error();
   }
 
-  if (_has_function && !_function) 
+  if (_has_function && !_function)
   {
     std::cout << "Unable to find function in pressure bc." << std::endl;
     libmesh_error();
@@ -51,7 +51,7 @@ Real
 PressureBC::computeQpResidual()
 {
   Real factor = _factor;
-  if (_has_function) 
+  if (_has_function)
   {
     factor *= _function->value(_t,
                                _q_point[_qp](0),

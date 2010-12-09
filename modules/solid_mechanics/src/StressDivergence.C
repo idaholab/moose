@@ -8,7 +8,7 @@ InputParameters validParams<StressDivergence>()
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<Real>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
 
-  params.set<bool>("use_displaced_mesh") = false;
+  params.set<bool>("use_displaced_mesh") = true;
 
   return params;
 }
