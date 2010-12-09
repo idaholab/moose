@@ -74,6 +74,13 @@ public:
   virtual void computeJacobian();
 
   /**
+   * Whether or not the BC should be applied.  Allows you to switch on and off BCs.
+   *
+   * Defaults to true.
+   */
+  virtual bool shouldBeApplied() { return true; }
+
+  /**
    * Computes d-ivar-residual / d-jvar... storing the result in Ke.
    */
   void computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar);

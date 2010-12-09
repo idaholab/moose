@@ -85,6 +85,21 @@ public:
    * Whether or not this DiracKernel has something to distribute at this Point.
    */
   bool isActiveAtPoint(const Elem * elem, const Point & p);
+
+  /**
+   * Get a reference to a copy of the residual vector.
+   */
+  NumericVector<Number> & residualCopy();
+
+  /**
+   * Get a reference to a copy of the jacoian vector.
+   */
+  SparseMatrix<Number> & jacobianCopy();
+
+  /**
+   * Remove all of the current points and elements.
+   */
+  void clearPoints();
   
 protected:
 

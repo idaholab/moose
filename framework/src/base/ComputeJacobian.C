@@ -114,7 +114,8 @@ public:
       _moose_system.reinitBCs(_tid, _soln, elem, side, bnd_id);
 
       for(; bc_it!=bc_end; ++bc_it)
-        (*bc_it)->computeJacobian();
+        if((*bc_it)->shouldBeApplied())
+          (*bc_it)->computeJacobian();
     }
   }
 
@@ -189,6 +190,7 @@ void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>& 
 void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
 {
   Moose::perf_log.push("compute_jacobian()","Solve");
+  _current_jacobian = &jacobian;
 
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
@@ -216,6 +218,20 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
 
   jacobian.close();
 
+  if(needJacobianCopy())
+  {
+    MatCopy(static_cast<PetscMatrix<Number> &>(jacobian).mat(), static_cast<PetscMatrix<Number> &>(*_jacobian_copy).mat(), DIFFERENT_NONZERO_PATTERN);
+    _jacobian_copy->close();
+  }
+
+//  jacobian.print();
+  
+  //Distribute any point loads
+  computeDiracKernels(soln, NULL, &jacobian);
+
+  jacobian.close();
+//  jacobian.print();
+
   //Dirichlet BCs
   std::vector<int> zero_rows;
 
@@ -242,7 +258,8 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
         for(; bc_it != bc_end; ++bc_it)
           //The first zero is for the system
           //The second zero only works with Lagrange elements!
-          zero_rows.push_back(node.dof_number(0, (*bc_it)->variable(), 0));
+          if((*bc_it)->shouldBeApplied())
+            zero_rows.push_back(node.dof_number(0, (*bc_it)->variable(), 0));
       }
     }
   }
@@ -251,6 +268,8 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
   jacobian.zero_rows(zero_rows, 1.0);
 
   jacobian.close();
+
+//  jacobian.print();
 
   Moose::perf_log.pop("compute_jacobian()","Solve");
 }

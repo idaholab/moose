@@ -50,5 +50,5 @@ NearestNodeValueAux::computeValue()
   Node * nearest = _nearest_node.nearestNode(_current_node->id());
   long int dof_number = nearest->dof_number(0, _paired_variable, 0);
 
-  return _moose_system._serialized_solution[dof_number];
+  return _moose_system._serialized_solution(dof_number);
 }

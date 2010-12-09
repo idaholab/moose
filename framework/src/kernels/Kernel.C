@@ -39,10 +39,14 @@ InputParameters validParams<Kernel>()
 
 
 Kernel::Kernel(const std::string & name, InputParameters parameters):
-  PDEBase(name, parameters, *parameters.get<MooseSystem *>("_moose_system")->_element_data[parameters.get<THREAD_ID>("_tid")]),
+  PDEBase(name, parameters,
+          (parameters.get<MooseSystem *>("_moose_system")->hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")) ?
+          *parameters.get<MooseSystem *>("_moose_system")->_element_data_displaced[parameters.get<THREAD_ID>("_tid")] :
+          *parameters.get<MooseSystem *>("_moose_system")->_element_data[parameters.get<THREAD_ID>("_tid")]
+         ),
   MaterialPropertyInterface(parameters.get<MooseSystem *>("_moose_system")->_material_data[_tid]),
    _dof_data(_moose_system._dof_data[_tid]),
-   _element_data(*_moose_system._element_data[_tid]),
+   _element_data(_use_displaced_mesh ? *_moose_system._element_data_displaced[_tid] : *_moose_system._element_data[_tid]),
    _u(_element_data._var_vals[_var_num]),
    _grad_u(_element_data._var_grads[_var_num]),
    _second_u(_element_data._var_seconds[_var_num]),
@@ -58,6 +62,9 @@ Kernel::Kernel(const std::string & name, InputParameters parameters):
    _u_old_newton(_element_data._var_vals_old_newton[_var_num]),
    _grad_u_old_newton(_element_data._var_grads_old_newton[_var_num])
 {
+  if(_use_displaced_mesh)
+    _moose_system.reinitializeDisplacedElementData(true);
+  
   // If this variable isn't known yet... make it so
   _element_data._var_nums.insert(_var_num);
   for(unsigned int i=0;i<_coupled_to.size();i++)

@@ -39,43 +39,69 @@ typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistEl
 class ComputeDiracKernels : public ComputeBase<DistElemRange>
 {
 public:
-  ComputeDiracKernels(MooseSystem &sys, const NumericVector<Number>& in_soln, NumericVector<Number>& residual)
+  ComputeDiracKernels(MooseSystem &sys, const NumericVector<Number>& in_soln, NumericVector<Number> * residual, SparseMatrix<Number> * jacobian)
     : ComputeBase<DistElemRange>(sys),
       _soln(in_soln),
-      _residual(residual)
+      _residual(residual),
+      _jacobian(jacobian)
   {}
 
   // Splitting Constructor
   ComputeDiracKernels(ComputeDiracKernels & x, Threads::split)
     : ComputeBase<DistElemRange>(x._moose_system),
       _soln(x._soln),
-      _residual(x._residual)
+      _residual(x._residual),
+      _jacobian(x._jacobian)
   {}
 
   virtual void preElement(const Elem * /*elem*/)
   {
-    _re.zero();
+    if(_residual)
+      _re.zero();
+    else
+      _ke.zero();
   }
   
   virtual void onElement(const Elem *elem)
   {    
     std::set<Point> & points = _moose_system._dirac_kernel_info._points[elem];
+    std::set<Point> & displaced_points = _moose_system._dirac_kernel_info_displaced._points[elem];
 
-    if(points.size())
+    if(points.size() || displaced_points.size())
     {
-      std::set<Point>::iterator pit = points.begin();
-      std::set<Point>::iterator pend = points.end();
-
       std::vector<Point> points_vec;
-      points_vec.reserve(points.size());
+      std::vector<Point> displaced_points_vec;
 
-      for(; pit != pend; ++pit)
       {
-        Point p = *pit;
-        points_vec.push_back(p);
+        std::set<Point>::iterator pit = points.begin();
+        std::set<Point>::iterator pend = points.end();
+
+        points_vec.reserve(points.size());
+        
+        for(; pit != pend; ++pit)
+        {
+          Point p = *pit;
+          points_vec.push_back(p);
+        }
       }
 
-      _moose_system.reinitDiracKernels(_tid, _soln, elem, points_vec, &_re, NULL);
+      {
+        std::set<Point>::iterator pit = displaced_points.begin();
+        std::set<Point>::iterator pend = displaced_points.end();
+
+        displaced_points_vec.reserve(displaced_points.size());
+
+        for(; pit != pend; ++pit)
+        {
+          Point p = *pit;
+          displaced_points_vec.push_back(p);
+        }
+      }
+
+      if(_residual)
+        _moose_system.reinitDiracKernels(_tid, _soln, elem, points_vec, displaced_points_vec, &_re, NULL);
+      else
+        _moose_system.reinitDiracKernels(_tid, _soln, elem, points_vec, displaced_points_vec, NULL, &_ke);
     
       DiracKernelIterator dirac_kernel_begin = _moose_system._dirac_kernels[_tid].diracKernelsBegin();
       DiracKernelIterator dirac_kernel_end = _moose_system._dirac_kernels[_tid].diracKernelsEnd();
@@ -86,17 +112,37 @@ public:
         DiracKernel * dirac = *dirac_kernel_it;
 
         if(dirac->hasPointsOnElem(elem))
-          dirac->computeResidual();
+        {
+          if(_residual)
+            dirac->computeResidual();
+          else
+            dirac->computeJacobian();
+        }
       }
     }
   }
 
   virtual void postElement(const Elem * /*elem*/)
   {
-    _moose_system._dof_map->constrain_element_vector (_re, _moose_system._dof_data[_tid]._dof_indices, false);
+    if(_re.size())
     {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      _residual.add_vector(_re, _moose_system._dof_data[_tid]._dof_indices);
+      _moose_system._dof_map->constrain_element_vector (_re, _moose_system._dof_data[_tid]._dof_indices, false);
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        if(_residual)
+          _residual->add_vector(_re, _moose_system._dof_data[_tid]._dof_indices);
+        else
+        {
+          for(unsigned int i=0; i< _moose_system._dof_data[_tid]._var_dof_indices.size(); i++)
+          {
+            if(_moose_system._dof_data[_tid]._var_dof_indices[i].size())
+            {
+              _moose_system._dof_map->constrain_element_matrix (*_moose_system._dof_data[_tid]._var_Kes[i], _moose_system._dof_data[_tid]._var_dof_indices[i], false);
+              _jacobian->add_matrix(*_moose_system._dof_data[_tid]._var_Kes[i], _moose_system._dof_data[_tid]._var_dof_indices[i]);
+            }
+          }
+        }
+      }
     }
   }
 
@@ -106,14 +152,19 @@ public:
 
 protected:
   const NumericVector<Number> & _soln;
-  NumericVector<Number> & _residual;
+  NumericVector<Number> * _residual;
+  SparseMatrix<Number> * _jacobian;
 
   DenseVector<Number> _re;
+  DenseMatrix<Number> _ke;
 };
 
-void MooseSystem::computeDiracKernels(const NumericVector<Number>& soln, NumericVector<Number>& residual)
+void MooseSystem::computeDiracKernels(const NumericVector<Number>& soln, NumericVector<Number> * residual, SparseMatrix<Number> * jacobian)
 {
   Moose::perf_log.push("compute_dirac_kernels()","Solve");
+
+  _dirac_kernel_info.clearPoints();
+  _dirac_kernel_info_displaced.clearPoints();
 
   // Default to no dirac_kernels
   // Real dirac_kernels = 1.0;
@@ -123,20 +174,32 @@ void MooseSystem::computeDiracKernels(const NumericVector<Number>& soln, Numeric
   DiracKernelIterator dirac_kernel_it = dirac_kernel_begin;
 
   for(dirac_kernel_it=dirac_kernel_begin;dirac_kernel_it!=dirac_kernel_end;++dirac_kernel_it)
+  {
+    (*dirac_kernel_it)->clearPoints();
     (*dirac_kernel_it)->addPoints();
+  }
 
   if(dirac_kernel_begin != dirac_kernel_end)
   {
-    ComputeDiracKernels cd(*this, soln, residual);
+    ComputeDiracKernels cd(*this, soln, residual, jacobian);
 
-    DistElemRange range(_dirac_kernel_info._elements.begin(),
-                        _dirac_kernel_info._elements.end(),
+    std::set<const Elem *> all_elements = _dirac_kernel_info._elements;
+
+    std::set_union(_dirac_kernel_info._elements.begin(), _dirac_kernel_info._elements.end(), 
+                   _dirac_kernel_info_displaced._elements.begin(), _dirac_kernel_info_displaced._elements.end(), 
+                   std::inserter(all_elements, all_elements.begin()));
+
+    DistElemRange range(all_elements.begin(),
+                        all_elements.end(),
                         1);
     
     Threads::parallel_reduce(range, cd);
   }
 
-  residual.close();
+  if(residual)
+    residual->close();
+  else
+    jacobian->close();
 
   Moose::perf_log.pop("compute_dirac_kernels()","Solve");
 }

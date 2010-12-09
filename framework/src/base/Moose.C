@@ -46,6 +46,7 @@
 #include "FunctionNeumannBC.h"
 #include "DGFunctionDiffusionDirichletBC.h"
 #include "DashpotBC.h"
+#include "ContactSlave.h"
 
 #include "ConstantAux.h"
 #include "CoupledAux.h"
@@ -136,6 +137,7 @@
 #include "DiracKernelsBlock.h"
 #include "GenericDiracKernelBlock.h"
 #include "ConstantPointSource.h"
+#include "ContactMaster.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -201,6 +203,7 @@ Moose::registerObjects()
   registerBoundaryCondition(FunctionNeumannBC);
   registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
   registerBoundaryCondition(DashpotBC);
+  registerBoundaryCondition(ContactSlave);
 
   registerAux(ConstantAux);
   registerAux(CoupledAux);
@@ -294,6 +297,7 @@ Moose::registerObjects()
   registerDamper(MaxIncrement);
 
   registerDiracKernel(ConstantPointSource);
+  registerDiracKernel(ContactMaster);
 }
 
 void

@@ -65,9 +65,9 @@ private:
 
   Mesh & _mesh;
 
+public:
   std::map<unsigned int, NearestNodeInfo> _nearest_node_info;
 
-public:
   unsigned int _boundary1;
   unsigned int _boundary2;
 };

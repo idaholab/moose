@@ -34,7 +34,7 @@
 class UpdateDisplacedMesh
 {
 public:
-  UpdateDisplacedMesh(MooseSystem &sys, const std::vector<Number>& in_soln, const std::vector<Number>& in_aux_soln)
+  UpdateDisplacedMesh(MooseSystem &sys, const NumericVector<Number>& in_soln, const NumericVector<Number>& in_aux_soln)
     :_moose_system(sys),
      _soln(in_soln),
      _aux_soln(in_aux_soln)
@@ -90,21 +90,21 @@ public:
       for(unsigned int i=0; i<num_var_nums; i++)
       {
         unsigned int direction = var_nums_directions[i];
-        displaced_node(direction) = reference_node(direction) + _soln[reference_node.dof_number(nonlinear_system_number, var_nums[i], 0)];
+        displaced_node(direction) = reference_node(direction) + _soln(reference_node.dof_number(nonlinear_system_number, var_nums[i], 0));
       }
 
       for(unsigned int i=0; i<num_aux_var_nums; i++)
       {
         unsigned int direction = aux_var_nums_directions[i];
-        displaced_node(direction) = reference_node(direction) + _aux_soln[reference_node.dof_number(aux_system_number, aux_var_nums[i], 0)];
+        displaced_node(direction) = reference_node(direction) + _aux_soln(reference_node.dof_number(aux_system_number, aux_var_nums[i], 0));
       }
     }
   }
 
 protected:
   MooseSystem &_moose_system;
-  const std::vector<Number> & _soln;
-  const std::vector<Number> & _aux_soln;
+  const NumericVector<Number> & _soln;
+  const NumericVector<Number> & _aux_soln;
 };
 
 void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)

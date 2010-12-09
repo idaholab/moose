@@ -65,6 +65,7 @@ MooseSystem::MooseSystem() :
   _displaced_aux_system(NULL),
   _geom_type(Moose::XYZ),
   _dirac_kernel_info(*this),
+  _dirac_kernel_info_displaced(*this),
   _mesh(NULL),
   _displaced_mesh(NULL),
   _has_displaced_mesh(false),
@@ -81,9 +82,13 @@ MooseSystem::MooseSystem() :
   _old_newton_soln(NULL),
   _compute_pps_each_residual_evaluation(false),
   _need_residual_copy(false),
+  _need_jacobian_copy(false),
   _serialize_solution(false),
   _mesh_changed(false),
   _no_fe_reinit(false),
+  _reinitialize_displaced_element_data(false),
+  _reinitialize_displaced_face_data(false),
+  _reinitialize_displaced_dirac_kernel_data(false),
   _preconditioner(NULL),
   _exreader(NULL),
   _is_valid(false),
@@ -100,6 +105,8 @@ MooseSystem::MooseSystem() :
   _u_dot_soln(NULL),
   _res_soln_old(NULL),
   _du_dot_du_soln(NULL),
+  _serialized_solution(*NumericVector<Number>::build().release()),
+  _serialized_aux_solution(*NumericVector<Number>::build().release()),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -141,6 +148,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _displaced_system(NULL),
   _displaced_aux_system(NULL),
   _dirac_kernel_info(*this),
+  _dirac_kernel_info_displaced(*this),
   _mesh(&mesh),
   _displaced_mesh(NULL),
   _has_displaced_mesh(false),
@@ -157,9 +165,13 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _old_newton_soln(NULL),
   _compute_pps_each_residual_evaluation(false),
   _need_residual_copy(false),
+  _need_jacobian_copy(false),
   _serialize_solution(false),
   _mesh_changed(false),
   _no_fe_reinit(false),
+  _reinitialize_displaced_element_data(false),
+  _reinitialize_displaced_face_data(false),
+  _reinitialize_displaced_dirac_kernel_data(false),
   _preconditioner(NULL),
   _exreader(NULL),
   _is_valid(false),
@@ -176,6 +188,8 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _u_dot_soln(NULL),
   _res_soln_old(NULL),
   _du_dot_du_soln(NULL),
+  _serialized_solution(*NumericVector<Number>::build().release()),
+  _serialized_aux_solution(*NumericVector<Number>::build().release()),
   _auto_scaling(false),
   _print_mesh_changed(false),
   _file_base ("out"),
@@ -215,11 +229,14 @@ MooseSystem::~MooseSystem()
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     delete _element_data[tid];
+    delete _element_data_displaced[tid];
     delete _face_data[tid];
+    delete _face_data_displaced[tid];
     delete _neighbor_face_data[tid];
     delete _aux_data[tid];
     delete _damper_data[tid];
     delete _dirac_kernel_data[tid];
+    delete _dirac_kernel_data_displaced[tid];
   }
 
   if (_preconditioner != NULL)
@@ -333,20 +350,26 @@ MooseSystem::sizeEverything()
   _first.resize(n_threads, true);
 
   _element_data.resize(n_threads);
+  _element_data_displaced.resize(n_threads);
   _face_data.resize(n_threads);
+  _face_data_displaced.resize(n_threads);
   _neighbor_face_data.resize(n_threads);
   _aux_data.resize(n_threads);
   _damper_data.resize(n_threads);
   _dirac_kernel_data.resize(n_threads);
+  _dirac_kernel_data_displaced.resize(n_threads);
   
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
   {
     _element_data[tid] = new ElementData(*this, _dof_data[tid]);
+    _element_data_displaced[tid] = new ElementData(*this, _dof_data[tid]);
     _face_data[tid] = new FaceData(*this, _dof_data[tid]);
+    _face_data_displaced[tid] = new FaceData(*this, _dof_data[tid]);
     _neighbor_face_data[tid] = new FaceData(*this, _neighbor_dof_data[tid]);
     _aux_data[tid] = new AuxData(*this, _dof_data[tid], *_element_data[tid]);
     _damper_data[tid] = new DamperData(*this, *_element_data[tid]);
     _dirac_kernel_data[tid] = new DiracKernelData(*this, _dof_data[tid]);
+    _dirac_kernel_data_displaced[tid] = new DiracKernelData(*this, _dof_data[tid]);
   }
 
   _kernels.resize(n_threads);
@@ -387,6 +410,10 @@ MooseSystem::init()
   
   _es->init();
 
+  _serialized_solution.init(_system->n_dofs(), false, SERIAL);
+  _serialized_aux_solution.init(_aux_system->n_dofs(), false, SERIAL);
+  
+
   if(_has_displaced_mesh)
     _displaced_es->init();
   
@@ -412,11 +439,14 @@ MooseSystem::init()
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     _element_data[tid]->init();
+    _element_data_displaced[tid]->init();
     _face_data[tid]->init();
+    _face_data_displaced[tid]->init();
     _neighbor_face_data[tid]->init();
     _aux_data[tid]->init();
     _damper_data[tid]->init();
     _dirac_kernel_data[tid]->init();
+    _dirac_kernel_data_displaced[tid]->init();
   }
 
   _t = 0;
@@ -459,6 +489,12 @@ MooseSystem::getDisplacedEquationSystems()
 {
 //  checkValid();
   return _displaced_es;
+}
+
+DofMap *
+MooseSystem::getDofMap()
+{
+  return _dof_map;
 }
 
 void
@@ -564,7 +600,8 @@ MooseSystem::initEquationSystems()
   _system->nonlinear_solver->jacobian = Moose::compute_jacobian;
   _system->attach_init_function(Moose::initial_condition);
 
-  _residual_copy = &_system->add_vector("residual_copy", false);
+  _residual_copy = &_system->add_vector("residual_copy", false, PARALLEL);
+  _jacobian_copy = &_system->add_matrix("jacobian_copy");
   
   _u_dot_soln = &_system->add_vector("u_dot", false, GHOSTED);
   _res_soln_old = &_system->add_vector("residual_old", false, GHOSTED);
@@ -1162,8 +1199,6 @@ MooseSystem::addDiracKernel(std::string dirac_kernel_name,
 void
 MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
 {
-//  Moose::perf_log.push("reinit() - dof_indices","Kernel");
-
   _dof_data[tid]._current_elem = elem;
 
   _dof_map->dof_indices(elem, _dof_data[tid]._dof_indices);
@@ -1175,38 +1210,30 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   std::map<FEType, FEBase*>::iterator fe_displaced_it; 
   std::map<FEType, FEBase*>::iterator fe_displaced_end;
 
-  if(_has_displaced_mesh)
+  if(_reinitialize_displaced_element_data)
   { 
-    fe_displaced_it = _element_data[tid]->_fe_displaced.begin();
-    fe_displaced_end = _element_data[tid]->_fe_displaced.end();
-  }
-  
-//  Moose::perf_log.pop("reinit() - dof_indices","Kernel");
-//  Moose::perf_log.push("reinit() - fereinit","Kernel");
+    fe_displaced_it = _element_data_displaced[tid]->_fe.begin();
+    fe_displaced_end = _element_data_displaced[tid]->_fe.end();
+  }  
 
   if(!dontReinitFE() || _first[tid])
   {
     for(;fe_it != fe_end; ++fe_it)
       fe_it->second->reinit(elem);
 
-    if(_has_displaced_mesh)
-    {
+    if(_reinitialize_displaced_element_data)
       for(;fe_displaced_it != fe_displaced_end; ++fe_displaced_it)
         fe_displaced_it->second->reinit(_displaced_mesh->elem(elem->id()));
-    }
   }
   
   _first[tid] = false;
 
-//  Moose::perf_log.pop("reinit() - fereinit","Kernel");
-
-//  Moose::perf_log.push("reinit() - resizing","Kernel");
   if(Re) Re->resize(_dof_data[tid]._dof_indices.size());
   if(Ke) Ke->resize(_dof_data[tid]._dof_indices.size(), _dof_data[tid]._dof_indices.size());
 
   unsigned int position = 0;
 
-  for(unsigned int i=0; i<_element_data[tid]->_var_nums.size();i++)
+  for(unsigned int i=0; i<_system->n_vars(); i++)
   {
     _dof_map->dof_indices(elem, _dof_data[tid]._var_dof_indices[i], i);
 
@@ -1232,11 +1259,27 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
     const std::vector<std::vector<Real> > & static_phi = *_element_data[tid]->_phi[fe_type];
     _element_data[tid]->_test[var_num] = static_phi;
   }
-//  Moose::perf_log.pop("reinit() - resizing","Kernel");
 
   _element_data[tid]->reinitKernels(soln, elem, Re, Ke);
   if (_need_old_newton)
     _element_data[tid]->reinitNewtonStep(*_old_newton_soln);
+
+  // Do the same fore the displaced element data
+  if(_reinitialize_displaced_element_data)
+  {
+    for(std::set<unsigned int>::iterator it = _element_data_displaced[tid]->_var_nums.begin(); it != _element_data_displaced[tid]->_var_nums.end(); ++it)
+    {
+      unsigned int var_num = *it;
+      FEType fe_type = _dof_map->variable_type(var_num);
+      // Copy phi to the test functions.
+      const std::vector<std::vector<Real> > & static_phi = *_element_data_displaced[tid]->_phi[fe_type];
+      _element_data_displaced[tid]->_test[var_num] = static_phi;
+    }
+
+    _element_data_displaced[tid]->reinitKernels(soln, elem, Re, Ke);
+    if (_need_old_newton)
+      _element_data_displaced[tid]->reinitNewtonStep(*_old_newton_soln);
+  }
 }
 
 
@@ -1244,6 +1287,10 @@ void
 MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const unsigned int side, const unsigned int boundary_id)
 {
   _face_data[tid]->reinit(soln, elem, side, boundary_id);
+  
+  if(_reinitialize_displaced_face_data)
+    _face_data_displaced[tid]->reinit(soln, _displaced_mesh->elem(elem->id()), side, boundary_id);
+
   _face_data[tid]->reinitMaterials(_materials[tid].getBoundaryMaterials(elem->subdomain_id()), side);
 }
 
@@ -1251,6 +1298,10 @@ void
 MooseSystem::reinitBCs(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node, const unsigned int boundary_id, NumericVector<Number>& residual)
 {
   _face_data[tid]->reinit(soln, node, boundary_id, residual);
+
+  if(_reinitialize_displaced_face_data)
+//    _face_data_displaced[tid]->reinit(soln, node, boundary_id, residual);
+    _face_data_displaced[tid]->reinit(soln, _displaced_mesh->node(node.id()), boundary_id, residual);
 }
 
 void
@@ -1272,7 +1323,7 @@ MooseSystem::reinitDGKernels(THREAD_ID tid, const NumericVector<Number>& soln, c
     FEType fe_type = _dof_map->variable_type(var_num);
     _face_data[tid]->_fe[fe_type]->reinit(elem, side);
   }
-
+  
   ((QuadraturePointData *) _face_data[tid])->reinit(soln, elem);
 
   _face_data[tid]->reinitMaterials(_materials[tid].getBoundaryMaterials(elem->subdomain_id()), side);
@@ -1346,43 +1397,66 @@ MooseSystem::reinitDampers(THREAD_ID tid, const NumericVector<Number>& increment
 }
 
 void
-MooseSystem::reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const std::vector<Point> & points, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
-{  
+MooseSystem::reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const std::vector<Point> & points, const std::vector<Point> & displaced_points, DenseVector<Number> * Re, DenseMatrix<Number> * Ke)
+{
+  Elem * displaced_elem;
+
+  if(_reinitialize_displaced_dirac_kernel_data)
+    displaced_elem = _displaced_mesh->elem(elem->id());
+  
   _dof_data[tid]._current_elem = elem;
   _dof_map->dof_indices(elem, _dof_data[tid]._dof_indices);
-          
-  // Map the points from the physical domain to the reference
-  std::vector<Point> mapped_points;
-  FEType fe_type = _dof_map->variable_type(0);
-  libMesh::FEInterface::inverse_map(_dim, fe_type, elem, points, mapped_points);
 
-  // Set those points so the qrule can use them
-  _dirac_kernel_data[tid]->setPoints(points, mapped_points);
-  
-  std::map<FEType, FEBase*>::iterator fe_it = _dirac_kernel_data[tid]->_fe.begin();
-  std::map<FEType, FEBase*>::iterator fe_end = _dirac_kernel_data[tid]->_fe.end();
+  if(points.size())
+  {  
+    // Map the points from the physical domain to the reference
+    std::vector<Point> mapped_points;
+    FEType fe_type = _dof_map->variable_type(0);
+    libMesh::FEInterface::inverse_map(_dim, fe_type, elem, points, mapped_points);
 
-  
-  std::map<FEType, FEBase*>::iterator fe_displaced_it; 
-  std::map<FEType, FEBase*>::iterator fe_displaced_end;
-
-  if(_has_displaced_mesh)
-  { 
-    fe_displaced_it = _dirac_kernel_data[tid]->_fe_displaced.begin();
-    fe_displaced_end = _dirac_kernel_data[tid]->_fe_displaced.end();
+    // Set those points so the qrule can use them
+    _dirac_kernel_data[tid]->setPoints(points, mapped_points);
   }
   
 
+  if(_reinitialize_displaced_dirac_kernel_data && displaced_points.size())
+  { 
+    // Map the points from the physical domain to the reference
+    std::vector<Point> mapped_points;
+    FEType fe_type = _dof_map->variable_type(0);
+    libMesh::FEInterface::inverse_map(_dim, fe_type, displaced_elem, displaced_points, mapped_points);
+
+    // Set those points so the qrule can use them
+    _dirac_kernel_data_displaced[tid]->setPoints(displaced_points, mapped_points);
+  }
+
+  std::map<FEType, FEBase*>::iterator fe_it;
+  std::map<FEType, FEBase*>::iterator fe_end;
+
+  if(points.size())
+  {  
+    fe_it = _dirac_kernel_data[tid]->_fe.begin();
+    fe_end = _dirac_kernel_data[tid]->_fe.end();
+  }
+    
+  std::map<FEType, FEBase*>::iterator fe_displaced_it; 
+  std::map<FEType, FEBase*>::iterator fe_displaced_end;
+
+  if(_reinitialize_displaced_dirac_kernel_data && displaced_points.size())
+  { 
+    fe_displaced_it = _dirac_kernel_data_displaced[tid]->_fe.begin();
+    fe_displaced_end = _dirac_kernel_data_displaced[tid]->_fe.end();
+  }
+
   if(!dontReinitFE() || _first[tid])
   {
-    for(;fe_it != fe_end; ++fe_it)
-      fe_it->second->reinit(elem);
+    if(points.size())
+      for(;fe_it != fe_end; ++fe_it)
+        fe_it->second->reinit(elem);
 
-    if(_has_displaced_mesh)
-    {
+    if(_reinitialize_displaced_dirac_kernel_data && displaced_points.size())
       for(;fe_displaced_it != fe_displaced_end; ++fe_displaced_it)
         fe_displaced_it->second->reinit(_displaced_mesh->elem(elem->id()));
-    }
   }
   
   _first[tid] = false;
@@ -1392,7 +1466,7 @@ MooseSystem::reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln
 
   unsigned int position = 0;
 
-  for(unsigned int i=0; i<_dirac_kernel_data[tid]->_var_nums.size();i++)
+  for(unsigned int i=0; i<_system->n_vars();i++)
   {
     _dof_map->dof_indices(elem, _dof_data[tid]._var_dof_indices[i], i);
     unsigned int num_dofs = _dof_data[tid]._var_dof_indices[i].size();
@@ -1401,23 +1475,53 @@ MooseSystem::reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln
     position+=num_dofs;
   }
 
-  unsigned int num_q_points = _dirac_kernel_data[tid]->_qrule->n_points();
+  unsigned int num_q_points = 0;
 
+  if(points.size())
+    num_q_points = _dirac_kernel_data[tid]->_qrule->n_points();
+
+  if(_reinitialize_displaced_dirac_kernel_data &&
+     displaced_points.size() &&
+     displaced_points.size() > points.size())
+    num_q_points = _dirac_kernel_data_displaced[tid]->_qrule->n_points();
+  
   _real_zero[tid] = 0;
   _zero[tid].resize(num_q_points,0);
   _grad_zero[tid].resize(num_q_points,0);
   _second_zero[tid].resize(num_q_points,0);
 
-  for(std::set<unsigned int>::iterator it = _dirac_kernel_data[tid]->_var_nums.begin(); it != _dirac_kernel_data[tid]->_var_nums.end(); ++it)
+  if(points.size())
   {
-    unsigned int var_num = *it;
-    FEType fe_type = _dof_map->variable_type(var_num);
-    // Copy phi to the test functions.
-    const std::vector<std::vector<Real> > & static_phi = *_dirac_kernel_data[tid]->_phi[fe_type];
-    _dirac_kernel_data[tid]->_test[var_num] = static_phi;
+    
+    for(std::set<unsigned int>::iterator it = _dirac_kernel_data[tid]->_var_nums.begin();
+        it != _dirac_kernel_data[tid]->_var_nums.end();
+        ++it)
+    {
+      unsigned int var_num = *it;
+      FEType fe_type = _dof_map->variable_type(var_num);
+      // Copy phi to the test functions.
+      const std::vector<std::vector<Real> > & static_phi = *_dirac_kernel_data[tid]->_phi[fe_type];
+      _dirac_kernel_data[tid]->_test[var_num] = static_phi;
+    }
+    
+    _dirac_kernel_data[tid]->reinit(soln, elem);
   }
 
-  _dirac_kernel_data[tid]->reinit(soln, elem);
+  if(_reinitialize_displaced_dirac_kernel_data && displaced_points.size())
+  { 
+    for(std::set<unsigned int>::iterator it = _dirac_kernel_data_displaced[tid]->_var_nums.begin();
+        it != _dirac_kernel_data_displaced[tid]->_var_nums.end();
+        ++it)
+    {
+      unsigned int var_num = *it;
+      FEType fe_type = _dof_map->variable_type(var_num);
+      // Copy phi to the test functions.
+      const std::vector<std::vector<Real> > & static_phi = *_dirac_kernel_data_displaced[tid]->_phi[fe_type];
+      _dirac_kernel_data_displaced[tid]->_test[var_num] = static_phi;
+    }
+
+    _dirac_kernel_data_displaced[tid]->reinit(soln, displaced_elem);
+  }
 }
 
 

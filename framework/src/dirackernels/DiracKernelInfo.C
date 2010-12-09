@@ -16,3 +16,9 @@ DiracKernelInfo::addPoint(const Elem * elem, Point p)
   _points[elem].insert(p);
 }
 
+void
+DiracKernelInfo::clearPoints()
+{
+  _elements.clear();
+  _points.clear();
+}

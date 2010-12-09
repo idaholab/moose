@@ -62,11 +62,6 @@ public:
    * finite element.
    */
   std::map<FEType, FEBase *> _fe;
-
-  /**
-   * finite element for the displaced mesh.
-   */
-  std::map<FEType, FEBase *> _fe_displaced;
   
   /**
    * quadrature rule.
@@ -77,27 +72,17 @@ public:
    * number of quadrature points for current element
    */
   unsigned int _n_qpoints;
-  
+
   /**
    * XYZ coordinates of quadrature points
    */
   std::map<FEType, const std::vector<Point> *> _q_point;
 
   /**
-   * XYZ coordinates of the displaced quadrature points
-   */
-  std::map<FEType, const std::vector<Point> *> _q_point_displaced;
-
-  /**
    * Jacobian pre-multiplied by the weight.
    */
   std::map<FEType, const std::vector<Real> *> _JxW;
 
-  /**
-   * Jacobian pre-multiplied by the weight for the displaced mesh.
-   */
-  std::map<FEType, const std::vector<Real> *> _JxW_displaced;
-  
   /**
    * Shape function.
    */
@@ -112,7 +97,6 @@ public:
    * Second derivative of interior shape function.
    */
   std::map<FEType, const std::vector<std::vector<RealTensor> > *> _second_phi;
-
 
   /**
    * Vector of variable numbers that need to be evaluated

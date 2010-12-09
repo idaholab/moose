@@ -109,7 +109,8 @@ public:
       _moose_system.reinitBCs(_tid, _soln, elem, side, bnd_id);
 
       for(; bc_it!=bc_end; ++bc_it)
-        (*bc_it)->computeResidual();
+        if((*bc_it)->shouldBeApplied())
+          (*bc_it)->computeResidual();
     }
   }
 
@@ -174,6 +175,7 @@ namespace Moose
 
 void MooseSystem::computeResidual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
+  _current_residual = &residual;
   if (needPostprocessorsForResiduals())
     computePostprocessors(*(getNonlinearSystem()->current_local_solution));
   computeTimeDeriv(soln);
@@ -201,8 +203,10 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
   if(needResidualCopy())
     *_residual_copy = residual;
 
+  //std::cout<<*_residual_copy<<std::endl;
+  
   //Distribute any point loads
-  computeDiracKernels(soln, residual);
+  computeDiracKernels(soln, &residual);
 
   //Dirichlet BCs
   std::vector<unsigned int> nodes;
@@ -242,7 +246,8 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
           reinitBCs(0, soln, node, boundary_id, residual);
 
         for(; bc_it != bc_end; ++bc_it)
-          (*bc_it)->computeAndStoreResidual();
+          if((*bc_it)->shouldBeApplied())
+            (*bc_it)->computeAndStoreResidual();
       }
     }
   }

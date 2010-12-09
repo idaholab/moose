@@ -50,6 +50,7 @@
 #include "error_estimator.h"
 #include "error_vector.h"
 #include "node_range.h"
+#include "numeric_vector.h"
 
 //Forward Declarations
 class Material;
@@ -60,7 +61,6 @@ namespace libMesh
 {
   class EquationSystems;
   class MeshBase;
-  template<class T> class NumericVector;
 }
 
 /**
@@ -115,6 +115,15 @@ public:
    */
   bool hasDisplacedMesh();
 
+  bool reinitializeDisplacedElementData() { return _reinitialize_displaced_element_data; }
+  void reinitializeDisplacedElementData(bool state) { _reinitialize_displaced_element_data = state; }
+
+  bool reinitializeDisplacedFaceData() { return _reinitialize_displaced_face_data; }
+  void reinitializeDisplacedFaceData(bool state) { _reinitialize_displaced_face_data = state; }
+
+  bool reinitializeDisplacedDiracKernelData() { return _reinitialize_displaced_dirac_kernel_data; }
+  void reinitializeDisplacedDiracKernelData(bool state) { _reinitialize_displaced_dirac_kernel_data = state; }
+
   /**
    * Whether or not this system has dampers.
    */
@@ -142,6 +151,11 @@ public:
    * Returns a writable reference to the displaced EquationSystems object held within this MooseSystem
    */
   EquationSystems * getDisplacedEquationSystems();
+
+  /**
+   * Returns the dof_map for the NonlinearSystem
+   */
+  DofMap * getDofMap();
 
   void initExecutioner(Executioner * e);
   
@@ -299,6 +313,17 @@ public:
    */
   virtual void computeResidual (const NumericVector<Number>& soln, NumericVector<Number>& residual);
 
+  /**
+   * Gets the current residual being filled.
+   */
+  NumericVector<Number> * getCurrentResidual() { return _current_residual; }
+  
+  /**
+   * Gets the current jacobian being filled.
+   */
+  SparseMatrix<Number> * getCurrentJacobian() { return _current_jacobian; }
+      
+
   virtual Number initialValue (const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& var_name);
 
   virtual Gradient initialGradient (const Point& p, const Parameters& parameters, const std::string& sys_name, const std::string& var_name);
@@ -317,7 +342,7 @@ public:
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Node & node);
   void reinitAuxKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem & elem);
 
-  void reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const std::vector<Point> & points, DenseVector<Number> * Re, DenseMatrix<Number> * Ke=NULL);
+  void reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const std::vector<Point> & points, const std::vector<Point> & displaced_points, DenseVector<Number> * Re, DenseMatrix<Number> * Ke=NULL);
 
   virtual void computePostprocessors (const NumericVector<Number>& soln);
 
@@ -335,6 +360,13 @@ public:
   bool needResidualCopy() { return _need_residual_copy; }
 
   /**
+   * Returns true if a copy of the jacobian matrix is needed (useful if you are going to be modifying
+   * the jacobian vector based on it's entries and you can't guarantee the order your going to
+   * be modifying it in.
+   */
+  bool needJacobianCopy() { return _need_jacobian_copy; }
+
+  /**
    * Call this if your object is going to need a cpy of the residual vector.
    *
    * The residual vector is copied just after the internal residual fill... and before dirichlet bcs.
@@ -343,6 +375,16 @@ public:
    * and you can't guarantee the order your going to be modifying it in.
    */
   void needResidualCopy(bool state) { _need_residual_copy = state; }
+
+  /**
+   * Call this if your object is going to need a cpy of the jacobian vector.
+   *
+   * The jacobian vector is copied just after the internal jacobian fill... and before dirichlet bcs.
+   * 
+   * Useful if you are going to be modifying the jacobian vector based on it's entries
+   * and you can't guarantee the order your going to be modifying it in.
+   */
+  void needJacobianCopy(bool state) { _need_jacobian_copy = state; }
 
   /**
    * Returns true if the solution vector will be serialized before each residual and jacobian evaluation.
@@ -363,7 +405,7 @@ public:
 
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
-  virtual void computeDiracKernels(const NumericVector<Number>& soln, NumericVector<Number>& residual);
+  virtual void computeDiracKernels(const NumericVector<Number>& soln, NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
   virtual void subdomainSetup(THREAD_ID tid, unsigned int block_id);
 
@@ -509,7 +551,9 @@ protected:
 protected:
   std::vector<DofData> _dof_data;
   std::vector<ElementData *> _element_data;
+  std::vector<ElementData *> _element_data_displaced;
   std::vector<FaceData *> _face_data;
+  std::vector<FaceData *> _face_data_displaced;
   std::vector<DofData> _neighbor_dof_data;
   std::vector<FaceData *> _neighbor_face_data;
   std::vector<AuxData *> _aux_data;
@@ -519,8 +563,12 @@ protected:
   std::vector<PostprocessorData> _postprocessor_data;
   std::vector<DamperData *> _damper_data;
   std::vector<DiracKernelData *> _dirac_kernel_data;
-  
+  std::vector<DiracKernelData *> _dirac_kernel_data_displaced;
+
 public:  
+  DiracKernelInfo _dirac_kernel_info;
+  DiracKernelInfo _dirac_kernel_info_displaced;
+
   DofMap * _dof_map;
 protected:
   DofMap * _aux_dof_map;
@@ -544,13 +592,14 @@ protected:
   std::map<unsigned int, std::set<unsigned int> > _aux_var_map;
 
   Moose::GeomType _geom_type;
-  DiracKernelInfo _dirac_kernel_info;
+
   Mesh * _mesh;
   Mesh * _displaced_mesh;
 
   std::vector<std::string> _displacements;
   bool _has_displaced_mesh;
-  bool _delete_mesh;                            // true if we own the mesh and we are responsible for its destruction
+  bool _delete_mesh;  // true if we own the mesh and we are responsible for its destruction
+  
   unsigned int _dim;
 
   /**
@@ -567,6 +616,15 @@ protected:
   unsigned int _num_files_displaced;
   unsigned int _num_in_current_file_displaced;
 
+  /**
+   * A pointer to the current residual being filled.
+   */
+  NumericVector<Number> * _current_residual;
+
+  /**
+   * A pointer to the current jacobian being filled.
+   */
+  SparseMatrix<Number> * _current_jacobian;
 
   /**
    * True if we need old Isaac for solving our problems
@@ -585,7 +643,12 @@ protected:
    * TRUE if a copy of the residual is needed during dirichlet BC computation.
    */
   bool _need_residual_copy;
-  
+
+  /**
+   * TRUE if a copy of the jacobian is needed during dirichlet BC computation.
+   */
+  bool _need_jacobian_copy;
+
   /**
    * TRUE if we need to serialize the solution vector before every residual and jacobian evaluation.
    */
@@ -619,6 +682,21 @@ protected:
    * This can provide a huge speedup... but must be used with care.
    */
   bool _no_fe_reinit;
+
+  /**
+   * Whether or not to reinitialize displaced element data.
+   */
+  bool _reinitialize_displaced_element_data;
+
+  /**
+   * Whether or not to reinitialize displaced face data.
+   */
+  bool _reinitialize_displaced_face_data;
+
+  /**
+   * Whether or not to reinitialize displaced dirac kernel data.
+   */
+  bool _reinitialize_displaced_dirac_kernel_data;
 
   /**
    * Preconditioner
@@ -691,6 +769,8 @@ public:
 
   NumericVector<Number> * _residual_copy;   /// Copy of the residual vector
 
+  SparseMatrix<Number> * _jacobian_copy;   /// Copy of the jacobian vector
+
   NumericVector<Number> * _u_dot_soln;   /// solution vector for the time derivative (u_dot)
 
   NumericVector<Number> * _res_soln_old; /// residual evaluated at the old time step
@@ -701,13 +781,13 @@ public:
    * This will be filled up with a full serialization of the solution
    * vector if _serialize_solution is true.
    */
-  std::vector<Number> _serialized_solution;
+  NumericVector<Number> & _serialized_solution;
 
   /**
    * This will be filled up with a full serialization of the auxiliary solution
    * vector if _serialize_solution is true.
    */
-  std::vector<Number> _serialized_aux_solution;
+  NumericVector<Number> & _serialized_aux_solution;
 
   /**
    * Called before each residual evaluation

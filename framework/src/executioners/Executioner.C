@@ -155,5 +155,6 @@ Executioner::updateNewtonStep()
 void
 Executioner::postSolve()
 {
+  std::cout<<"Post solving!"<<std::endl;
   _moose_system.postSolve(_moose_system.getNonlinearSystem()->nonlinear_solver->converged);
 }

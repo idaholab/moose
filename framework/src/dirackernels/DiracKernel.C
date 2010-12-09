@@ -29,9 +29,13 @@ InputParameters validParams<DiracKernel>()
 }
 
 DiracKernel::DiracKernel(const std::string & name, InputParameters parameters)
-  : PDEBase(name, parameters, *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data[parameters.get<THREAD_ID>("_tid")]),
-    _dirac_kernel_data(*_moose_system._dirac_kernel_data[_tid]),
-    _dirac_kernel_info(_moose_system._dirac_kernel_info),
+  : PDEBase(name, parameters,
+            (parameters.get<MooseSystem *>("_moose_system")->hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")) ?
+            *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data_displaced[parameters.get<THREAD_ID>("_tid")] :
+            *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data[parameters.get<THREAD_ID>("_tid")]
+           ),
+    _dirac_kernel_data(_use_displaced_mesh ? *_moose_system._dirac_kernel_data_displaced[_tid] : *_moose_system._dirac_kernel_data[_tid]),
+    _dirac_kernel_info(_use_displaced_mesh ? _moose_system._dirac_kernel_info_displaced : _moose_system._dirac_kernel_info),
     _var_name(getParam<std::string>("variable")),
     _dof_data(_moose_system._dof_data[_tid]),
     _u(_dirac_kernel_data._var_vals[_var_num]),
@@ -48,6 +52,9 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters)
     _second_test(*(_dirac_kernel_data._second_phi)[_fe_type]),
     _current_points(_dirac_kernel_data._current_points)
 {
+  if(_use_displaced_mesh)
+    _moose_system.reinitializeDisplacedDiracKernelData(true);
+
   // If this variable isn't known yet... make it so
   _dirac_kernel_data._var_nums.insert(_var_num);
   for(unsigned int i=0;i<_coupled_to.size();i++)
@@ -137,3 +144,25 @@ DiracKernel::isActiveAtPoint(const Elem * elem, const Point & p)
   return _points[elem].count(p) != 0;
 }
 
+NumericVector<Number> &
+DiracKernel::residualCopy()
+{
+  _moose_system.needResidualCopy(true);
+  
+  return *_moose_system._residual_copy;
+}
+
+SparseMatrix<Number> &
+DiracKernel::jacobianCopy()
+{
+  _moose_system.needJacobianCopy(true);
+  
+  return *_moose_system._jacobian_copy;
+}
+
+void
+DiracKernel::clearPoints()
+{
+  _elements.clear();
+  _points.clear();
+}

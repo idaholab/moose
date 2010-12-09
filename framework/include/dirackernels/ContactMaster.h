@@ -12,49 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DIRACKERNELINFO_H
-#define DIRACKERNELINFO_H
+#ifndef CONTACTMASTER_H
+#define CONTACTMASTER_H
 
-#include "Moose.h"
-#include "MooseArray.h"
+// Moose Includes
+#include "DiracKernel.h"
+#include "PenetrationLocator.h"
 
 //Forward Declarations
-class MooseSystem;
+class ContactMaster;
 
-namespace libMesh
-{
-  template <class T> class NumericVector;
-}
+template<>
+InputParameters validParams<ContactMaster>();
 
-class DiracKernelInfo
+class ContactMaster : public DiracKernel
 {
 public:
-  DiracKernelInfo(MooseSystem & moose_system);
-  virtual ~DiracKernelInfo();
+  ContactMaster(const std::string & name, InputParameters parameters);
 
-public:
-  void addPoint(const Elem * elem, Point p);
+  virtual void addPoints();
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+protected:
+  PenetrationLocator _penetration_locator;
+  NumericVector<Number> & _residual_copy;
+  SparseMatrix<Number> & _jacobian_copy;
 
-  /**
-   * The MooseSystem this DiracKernel is associated with.
-   */
-  MooseSystem & _moose_system;
-
-  /**
-   * The list of elements that need distributions.
-   */
-  std::set<const Elem *> _elements;
-
-  /**
-   * The list of physical xyz Points that need to be evaluated in each element.
-   */
-  std::map<const Elem *, std::set<Point> > _points;
-
-  /**
-   * Remove all of the current points and elements.
-   */
-  void clearPoints();
+  std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;
 };
-
-
-#endif //DIRACKERNELINFO_H
+ 
+#endif //CONTACTMASTER_H

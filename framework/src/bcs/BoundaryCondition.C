@@ -33,10 +33,14 @@ InputParameters validParams<BoundaryCondition>()
 }
 
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
-  PDEBase(name, parameters, *parameters.get<MooseSystem *>("_moose_system")->_face_data[parameters.get<THREAD_ID>("_tid")]),
+  PDEBase(name, parameters,
+          (parameters.get<MooseSystem *>("_moose_system")->hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")) ?
+          *parameters.get<MooseSystem *>("_moose_system")->_face_data_displaced[parameters.get<THREAD_ID>("_tid")] :
+          *parameters.get<MooseSystem *>("_moose_system")->_face_data[parameters.get<THREAD_ID>("_tid")]
+         ),
   MaterialPropertyInterface(parameters.get<MooseSystem *>("_moose_system")->_bnd_material_data[_tid]),
    _dof_data(_moose_system._dof_data[_tid]),
-   _face_data(*_moose_system._face_data[_tid]),
+   _face_data(_use_displaced_mesh ? *_moose_system._face_data_displaced[_tid] : *_moose_system._face_data[_tid]),
    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
    _side_elem(NULL),
    _normals(*_face_data._normals[_fe_type]),
@@ -53,6 +57,9 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
    _grad_test(*_face_data._grad_phi[_fe_type]),
    _second_test(*_face_data._second_phi[_fe_type])
 {
+  if(_use_displaced_mesh)
+    _moose_system.reinitializeDisplacedFaceData(true);
+
   // If this variable isn't known yet... make it so
   if(_integrated)
     _face_data._var_nums.insert(_var_num);
@@ -181,7 +188,8 @@ void
 BoundaryCondition::computeAndStoreResidual()
 {
   _qp = 0;
-  _current_residual->set(_moose_system._face_data[_tid]->_nodal_bc_var_dofs[_var_num], _moose_system._scaling_factor[_var_num]*computeQpResidual());
+  
+  _current_residual->set(_face_data._nodal_bc_var_dofs[_var_num], _moose_system._scaling_factor[_var_num]*computeQpResidual());
 }
 
 Real
@@ -207,7 +215,7 @@ BoundaryCondition::coupledValue(const std::string & var_name, unsigned int i)
   if(_integrated)
     return PDEBase::coupledValue(var_name, i);
 
-  return _moose_system._face_data[_tid]->_var_vals_nodal[_coupled_vars[var_name][i]._num];
+  return _face_data._var_vals_nodal[_coupled_vars[var_name][i]._num];
 }
 
 VariableGradient &

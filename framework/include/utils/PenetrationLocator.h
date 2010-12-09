@@ -35,29 +35,29 @@ public:
   Real penetrationDistance(unsigned int node_id);
   RealVectorValue penetrationNormal(unsigned int node_id);
   
-private:
   /**
    * Data structure used to hold penetation information
    */
   class PenetrationInfo 
   {
   public:
-    PenetrationInfo(Elem * elem, Elem * side, RealVectorValue norm, Real norm_distance);
+    PenetrationInfo(Node * node, Elem * elem, Elem * side, RealVectorValue norm, Real norm_distance, const Point & closest_point);
 
     PenetrationInfo(const PenetrationInfo & p);
 
     ~PenetrationInfo();
-    
+    Node * _node;
     Elem * _elem;
     Elem * _side;
     RealVectorValue _normal;
     Real _distance;
+    Point _closest_point;
   };
 
   MooseSystem & _moose_system;
 
   RealVectorValue normal(const Elem & side, const Point & p0);
-  Real normDistance(const Elem & elem, const Elem & side, const Point & p0);
+  Real normDistance(const Elem & elem, const Elem & side, const Point & p0, Point & closest_point);
 
   int intersect2D_Segments( Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point* I0, Point* I1 );
   int inSegment(Point P, Point SP0, Point SP1);
