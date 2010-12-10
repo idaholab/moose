@@ -15,7 +15,7 @@ class StressDivergence : public Kernel
 public:
 
   StressDivergence(const std::string & name, InputParameters parameters);
-    
+
 protected:
   virtual Real computeQpResidual();
 
@@ -27,8 +27,13 @@ protected:
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
 
 private:
-  unsigned int _component;
+  const unsigned int _component;
 
-  unsigned int _xdisp_var, _ydisp_var, _zdisp_var;
+  const bool _xdisp_coupled;
+  const bool _ydisp_coupled;
+  const bool _zdisp_coupled;
+  const unsigned int _xdisp_var;
+  const unsigned int _ydisp_var;
+  const unsigned int _zdisp_var;
 };
 #endif //STRESSDIVERGENCE_H
