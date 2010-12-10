@@ -15,12 +15,13 @@
 #include "PenetrationLocator.h"
 
 #include "Moose.h"
+#include "MooseSystem.h"
 
 #include "boundary_info.h"
 #include "elem.h"
 #include "plane.h"
 
-PenetrationLocator::PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, short int slave)
+PenetrationLocator::PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, unsigned int master, unsigned int slave)
   :_moose_system(moose_system),
   _mesh(mesh),
   _master_boundary(master),
@@ -50,14 +51,11 @@ PenetrationLocator::detectPenetration()
   const unsigned int n_nodes = node_list.size();
   const unsigned int n_elems = elem_list.size();
 
-  std::vector<unsigned int>::iterator master_begin = _master_boundary.begin();
-  std::vector<unsigned int>::iterator master_end   = _master_boundary.end();
-
   for(unsigned int i=0; i<n_nodes; i++)
   {
     unsigned int boundary_id = node_boundary_list[i];
 
-    if(std::find(master_begin, master_end, boundary_id) != master_end)
+    if(boundary_id == _master_boundary)
     {
       Node & node = _mesh.node(node_list[i]);
       
@@ -76,8 +74,11 @@ PenetrationLocator::detectPenetration()
           {
             Point closest_point;
             info->_normal = normal(*side, node);
+
             info->_distance = normDistance(*elem, *side, node, closest_point);
             info->_closest_point = closest_point;
+//            if(info->_distance > 0)
+//              _has_penetrated[node.id()] = true;
 
             // I hate continues but this is actually cleaner than anything I can think of
             continue;
@@ -92,7 +93,11 @@ PenetrationLocator::detectPenetration()
             {
               info->_normal = normal(*side, node);
               info->_distance = distance;
+
               info->_closest_point = closest_point;
+//              if(distance > 0)
+//                _has_penetrated[node.id()] = true;
+
               continue;
             }
             else
@@ -151,6 +156,10 @@ PenetrationLocator::detectPenetration()
                 
               if(std::abs(distance) < 999999999)
               {
+//                if(distance > 0)
+//                  _has_penetrated[node.id()] = true;
+                
+
                 _penetration_info[node.id()] =  new PenetrationInfo(&node,
                                                                     elem,
                                                                     side,
@@ -228,15 +237,29 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Poi
     closest_point(2) = 0;
 
   if(elem.contains_point(closest_point))
+  {
     d = (p0 - p.closest_point(p0)).size();
+    if(p.above_surface(p0))
+      d = -d;
+  }
+  else if(elem.contains_point(p0))  // If the point is in the element but the plane point wasn't...
+  {
+    d = 9999999999;
+    for(unsigned int n=0; n<side.n_nodes(); n++)
+    {
+      Real cur_distance = (p0 - side.point(n)).size();
+      if(cur_distance < d)
+      {
+        d = cur_distance;
+        closest_point = side.point(n);
+      }
+    }
+  }
   else
   {
     d = 9999999999;
   }
-
-  if(p.above_surface(p0))
-    d = -d;
-
+  
   return d;
 }
 

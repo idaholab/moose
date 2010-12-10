@@ -15,21 +15,23 @@
 #ifndef PENETRATIONLOCATOR_H
 #define PENETRATIONLOCATOR_H
 
-#include "MooseSystem.h"
-
+// libmesh includes
 #include "libmesh_common.h"
+#include "mesh.h"
+#include "vector_value.h"
+#include "point.h"
 
 #include <vector>
 #include <map>
 
-#include "mesh.h"
-#include "vector_value.h"
+//Forward Declarations
+class MooseSystem;
 
 class PenetrationLocator
 {
 public:
 
-  PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, std::vector<unsigned int> master, short int slave);
+  PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, unsigned int master, unsigned int slave);
   void detectPenetration();
 
   Real penetrationDistance(unsigned int node_id);
@@ -63,13 +65,15 @@ public:
   int inSegment(Point P, Point SP0, Point SP1);
   
   Mesh & _mesh;
-  std::vector<unsigned int> _master_boundary;
-  short int _slave_boundary;
+  unsigned int _master_boundary;
+  unsigned int _slave_boundary;
 
   /**
    * Data structure of nodes and their associated penetration information
    */
   std::map<unsigned int, PenetrationInfo *> _penetration_info;
+
+  std::map<unsigned int, bool> _has_penetrated;
 };
 
 

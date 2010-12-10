@@ -12,33 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PenetrationAux.h"
+#include "GeometricSearchInterface.h"
+
+#include "GeometricSearchData.h"
 #include "MooseSystem.h"
 
-#include "mesh.h"
+GeometricSearchInterface::GeometricSearchInterface(GeometricSearchData & geometric_search_data):
+  _geometric_search_data(geometric_search_data),
+  _penetration_locators(_geometric_search_data._penetration_locators)
+{}
 
-template<>
-InputParameters validParams<PenetrationAux>()
+PenetrationLocator &
+GeometricSearchInterface::getPenetrationLocator(unsigned int master, unsigned int slave)
 {
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("paired_boundary", "The boundary to be penetrated");
-  params.set<bool>("use_displaced_mesh") = true;
-  return params;
-}
-
-PenetrationAux::PenetrationAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _penetration_locator(getPenetrationLocator(getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary")))
-{ 
-}
-
-void PenetrationAux::setup()
-{
-  _penetration_locator.detectPenetration();
-}  
-
-Real
-PenetrationAux::computeValue()
-{
-  return _penetration_locator.penetrationDistance(_current_node->id());
+  return _geometric_search_data.getPenetrationLocator(master, slave);  
 }

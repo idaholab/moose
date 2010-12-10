@@ -12,33 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PenetrationAux.h"
+#include "SlaveConstraint.h"
+
+// Moose includes
 #include "MooseSystem.h"
 
-#include "mesh.h"
+// libmesh includes
+#include "plane.h"
 
 template<>
-InputParameters validParams<PenetrationAux>()
+InputParameters validParams<SlaveConstraint>()
 {
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("paired_boundary", "The boundary to be penetrated");
+  InputParameters params = validParams<DiracKernel>();
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-PenetrationAux::PenetrationAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _penetration_locator(getPenetrationLocator(getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary")))
-{ 
-}
-
-void PenetrationAux::setup()
+SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters parameters)
+  :DiracKernel(name, parameters),
+   _residual_copy(residualCopy())
 {
-  _penetration_locator.detectPenetration();
-}  
+  _node = _mesh.node_ptr(4);
+}
+           
+void
+SlaveConstraint::addPoints()
+{
+  addPoint(*_node);
+}
 
 Real
-PenetrationAux::computeValue()
+SlaveConstraint::computeQpResidual()
 {
-  return _penetration_locator.penetrationDistance(_current_node->id());
+  Plane plane(Point(0.5,1.0), Point(0,2.0), Point(0,2.0,-1.0));
+  
+  return _phi[_i][_qp]*(plane.closest_point(*_node)-(*_node)).size();
 }
+

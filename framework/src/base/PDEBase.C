@@ -34,6 +34,9 @@ PDEBase::PDEBase(const std::string & name, InputParameters parameters, Quadratur
   MooseObject(name, parameters),
   PostprocessorInterface(parameters.get<MooseSystem *>("_moose_system")->_postprocessor_data[_tid]),
   FunctionInterface(parameters.get<MooseSystem *>("_moose_system")->_functions[_tid], parameters),
+  GeometricSearchInterface(parameters.get<MooseSystem *>("_moose_system")->hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh") ?
+                           parameters.get<MooseSystem *>("_moose_system")->_geometric_search_data_displaced :
+                           parameters.get<MooseSystem *>("_moose_system")->_geometric_search_data),
   _moose_system(*parameters.get<MooseSystem *>("_moose_system")),
   _use_displaced_mesh(_moose_system.hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")),
   _mesh(_use_displaced_mesh ? *_moose_system.getDisplacedMesh() : *_moose_system.getMesh()),

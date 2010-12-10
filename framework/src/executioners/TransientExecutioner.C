@@ -110,7 +110,12 @@ TransientExecutioner::takeStep()
 //    std::cout << "copy" << std::endl;
     // Update backward time solution vectors
     _moose_system.copy_old_solutions();
-  }    
+  }
+  else
+  {
+    *_moose_system.getNonlinearSystem()->current_local_solution = *_moose_system.getNonlinearSystem()->old_local_solution;
+    *_moose_system.getNonlinearSystem()->solution = *_moose_system.getNonlinearSystem()->old_local_solution;
+  }
 
   _moose_system.getNonlinearSystem()->update();
 

@@ -138,6 +138,7 @@
 #include "GenericDiracKernelBlock.h"
 #include "ConstantPointSource.h"
 #include "ContactMaster.h"
+#include "SlaveConstraint.h"
 
 #include "Moose.h"
 #include "PetscSupport.h"
@@ -298,6 +299,7 @@ Moose::registerObjects()
 
   registerDiracKernel(ConstantPointSource);
   registerDiracKernel(ContactMaster);
+  registerDiracKernel(SlaveConstraint);
 }
 
 void

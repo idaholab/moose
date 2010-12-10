@@ -26,7 +26,7 @@ public:
 protected:  
   virtual Real computeQpResidual();
 
-  PenetrationLocator _penetration_locator;
+  PenetrationLocator & _penetration_locator;
 };
 
 #endif //CONTACTSLAVE_H

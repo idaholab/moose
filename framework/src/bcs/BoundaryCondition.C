@@ -188,7 +188,6 @@ void
 BoundaryCondition::computeAndStoreResidual()
 {
   _qp = 0;
-  
   _current_residual->set(_face_data._nodal_bc_var_dofs[_var_num], _moose_system._scaling_factor[_var_num]*computeQpResidual());
 }
 

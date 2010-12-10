@@ -34,11 +34,13 @@ public:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 protected:
-  PenetrationLocator _penetration_locator;
+  PenetrationLocator & _penetration_locator;
   NumericVector<Number> & _residual_copy;
   SparseMatrix<Number> & _jacobian_copy;
 
   std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;
+
+  unsigned int _nl_it;
 };
  
 #endif //CONTACTMASTER_H

@@ -45,7 +45,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  PenetrationLocator _penetration_locator;
+  PenetrationLocator & _penetration_locator;
 };
 
 #endif //PENETRATIONAUX_H

@@ -118,5 +118,10 @@ void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)
                         UpdateDisplacedMesh(*this, _serialized_solution, _serialized_aux_solution));
   
   Moose::perf_log.pop("updateDisplacedMesh()","Solve");
+
+  /**
+   * TODO: Remove This!
+   */
+//  _penetration_locator->detectPenetration();
 }
 

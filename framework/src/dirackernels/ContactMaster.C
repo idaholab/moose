@@ -24,24 +24,23 @@ template<>
 InputParameters validParams<ContactMaster>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<std::vector<unsigned int> >("boundary", "The master boundary");
-  params.addRequiredParam<std::vector<unsigned int> >("slave", "The slave boundary");
+  params.addRequiredParam<unsigned int>("boundary", "The master boundary");
+  params.addRequiredParam<unsigned int>("slave", "The slave boundary");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
 ContactMaster::ContactMaster(const std::string & name, InputParameters parameters)
   :DiracKernel(name, parameters),
-   _penetration_locator(_moose_system, _mesh, parameters.get<std::vector<unsigned int> >("slave"),getParam<std::vector<unsigned int> >("boundary")[0]),
+   _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
    _residual_copy(residualCopy()),
-   _jacobian_copy(jacobianCopy())
+   _jacobian_copy(jacobianCopy()),
+   _nl_it(99999)
 {}
            
 void
 ContactMaster::addPoints()
 {
-  _penetration_locator.detectPenetration();
-
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
@@ -49,11 +48,40 @@ ContactMaster::addPoints()
   {
     unsigned int slave_node_num = it->first;
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
-    
-    addPoint(pinfo->_elem, pinfo->_closest_point);
 
-    point_to_info[pinfo->_closest_point] = pinfo;
+    if(!pinfo)
+      continue;
+
+    Node * node = pinfo->_node;
+    long int dof_number = node->dof_number(0, _var_num, 0);
+
+    if(_nl_it != _moose_system._current_nl_it)
+    {
+      if(_residual_copy(dof_number) > 0)
+      {
+//        std::cout<<_residual_copy(dof_number)<<std::endl;
+        _penetration_locator._has_penetrated[slave_node_num] = false;
+      }
+      else if(pinfo->_distance > 0)
+        _penetration_locator._has_penetrated[slave_node_num] = true;
+    }
+
+//    if(pinfo->_distance > 0)
+//    {
+//      std::cout<<_residual_copy(dof_number)<<std::endl;
+//      _penetration_locator._has_penetrated[slave_node_num] = true;
+//    }
+//    else
+//      std::cout<<_residual_copy(dof_number)<<std::endl;
+    
+    if(_penetration_locator._has_penetrated[slave_node_num])
+    {
+      addPoint(pinfo->_elem, pinfo->_closest_point);
+      point_to_info[pinfo->_closest_point] = pinfo;
+    }
   }
+
+  _nl_it = _moose_system._current_nl_it;
 }
 
 Real
@@ -66,9 +94,6 @@ ContactMaster::computeQpResidual()
 //  std::cout<<dof_number<<std::endl;
 //  std::cout<<_residual_copy(dof_number)<<std::endl;
 
-  if(pinfo->_distance < -1e-15)
-    return 0;
-  
   return _phi[_i][_qp]*_residual_copy(dof_number);
 }
 
@@ -79,9 +104,9 @@ ContactMaster::computeQpJacobian()
   Node * node = pinfo->_node;
   long int dof_number = node->dof_number(0, _var_num, 0);
 
-  return 0;
+//  return 0;
   
-  if(_i != _j || pinfo->_distance < -1e-15)
+  if(_i != _j)
     return 0;
 
   //  std::cout<<dof_number<<std::endl;

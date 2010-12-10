@@ -12,33 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PenetrationAux.h"
-#include "MooseSystem.h"
+#ifndef SLAVECONSTRAINT_H
+#define SLAVECONSTRAINT_H
 
-#include "mesh.h"
+// Moose Includes
+#include "DiracKernel.h"
+
+//Forward Declarations
+class SlaveConstraint;
 
 template<>
-InputParameters validParams<PenetrationAux>()
-{
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("paired_boundary", "The boundary to be penetrated");
-  params.set<bool>("use_displaced_mesh") = true;
-  return params;
-}
+InputParameters validParams<SlaveConstraint>();
 
-PenetrationAux::PenetrationAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _penetration_locator(getPenetrationLocator(getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary")))
-{ 
-}
-
-void PenetrationAux::setup()
+class SlaveConstraint : public DiracKernel
 {
-  _penetration_locator.detectPenetration();
-}  
+public:
+  SlaveConstraint(const std::string & name, InputParameters parameters);
 
-Real
-PenetrationAux::computeValue()
-{
-  return _penetration_locator.penetrationDistance(_current_node->id());
-}
+  virtual void addPoints();
+  virtual Real computeQpResidual();
+protected:
+  NumericVector<Number> & _residual_copy;
+
+  Node * _node;
+};
+ 
+#endif //SLAVECONSTRAINT_H

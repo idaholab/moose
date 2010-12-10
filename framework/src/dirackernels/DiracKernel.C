@@ -127,7 +127,7 @@ DiracKernel::addPoint(const Elem * elem, Point p)
 void
 DiracKernel::addPoint(Point p)
 {
-  AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *_moose_system.getMesh());
+  AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, _mesh);
   const Elem * elem = (*pl)(p);
   addPoint(elem, p);
 }

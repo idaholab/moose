@@ -22,6 +22,7 @@
 #include "MooseObject.h"
 #include "PostprocessorInterface.h"
 #include "FunctionInterface.h"
+#include "GeometricSearchInterface.h"
 
 #include "fe_base.h"
 
@@ -41,7 +42,7 @@ InputParameters validParams<PDEBase>();
 /**
  * Base class for PDE objects (kernels, BCs, etc.)
  */
-class PDEBase : public MooseObject, protected PostprocessorInterface, protected FunctionInterface
+class PDEBase : public MooseObject, protected PostprocessorInterface, protected FunctionInterface, protected GeometricSearchInterface
 {
 public:
   PDEBase(const std::string & name, InputParameters parameters, QuadraturePointData &data);

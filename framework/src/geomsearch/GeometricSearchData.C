@@ -12,33 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PenetrationAux.h"
+#include "GeometricSearchData.h"
+
+//Moose includes
 #include "MooseSystem.h"
 
-#include "mesh.h"
+GeometricSearchData::GeometricSearchData(MooseSystem & moose_system, Mesh * & mesh)
+  :_moose_system(moose_system),
+   _mesh(mesh)
+{}
 
-template<>
-InputParameters validParams<PenetrationAux>()
+
+PenetrationLocator &
+GeometricSearchData::getPenetrationLocator(unsigned int master, unsigned int slave)
 {
-  InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("paired_boundary", "The boundary to be penetrated");
-  params.set<bool>("use_displaced_mesh") = true;
-  return params;
+  PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master, slave)];
+
+  if(!pl)
+  {
+    pl = new PenetrationLocator(_moose_system, *_mesh, master, slave);
+    _penetration_locators[std::pair<unsigned int, unsigned int>(master, slave)] = pl;
+  }
+  
+  return *pl;
 }
 
-PenetrationAux::PenetrationAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _penetration_locator(getPenetrationLocator(getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary")))
-{ 
-}
-
-void PenetrationAux::setup()
-{
-  _penetration_locator.detectPenetration();
-}  
-
-Real
-PenetrationAux::computeValue()
-{
-  return _penetration_locator.penetrationDistance(_current_node->id());
-}

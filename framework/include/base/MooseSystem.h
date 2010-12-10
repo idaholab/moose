@@ -41,6 +41,7 @@
 #include "DiracKernelData.h"
 #include "DiracKernelInfo.h"
 #include "DiracKernelWarehouse.h"
+#include "PenetrationLocator.h"
 
 //libmesh includes
 #include "transient_system.h"
@@ -602,6 +603,9 @@ protected:
   
   unsigned int _dim;
 
+  GeometricSearchData _geometric_search_data;
+  GeometricSearchData _geometric_search_data_displaced;
+
   /**
    * Whether or not this system has any Dampers associated with it.
    */
@@ -626,6 +630,13 @@ protected:
    */
   SparseMatrix<Number> * _current_jacobian;
 
+public:
+  /**
+   * The number of the current nonlinear iteration.
+   */
+  unsigned int _current_nl_it;
+
+protected:
   /**
    * True if we need old Isaac for solving our problems
    */
@@ -882,6 +893,7 @@ public:
    * A map of all of the current nodes to the elements that they are connected to.
    */
   std::vector<std::vector<unsigned int> > node_to_elem_map;
+
 protected:
   friend class ComputeInternalJacobians;
   friend class ComputeInternalJacobianBlocks;

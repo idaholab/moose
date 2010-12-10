@@ -2,6 +2,7 @@
 
 //Moose includes
 #include "ComputeQPSolution.h"
+#include "MooseSystem.h"
 
 //libmesh includes
 #include "fe_interface.h"
@@ -18,7 +19,7 @@ InputParameters validParams<ContactSlave>()
 
 ContactSlave::ContactSlave(const std::string & name, InputParameters parameters)
   :BoundaryCondition(name, parameters),
-   _penetration_locator(_moose_system, _mesh, getParam<std::vector<unsigned int> >("boundary"), parameters.get<unsigned int>("master"))
+   _penetration_locator(getPenetrationLocator(getParam<unsigned int>("master"), getParam<std::vector<unsigned int> >("boundary")[0]))
 {
   if(getParam<std::vector<unsigned int> >("boundary").size() > 1)
     mooseError("ContactSlave can only be used with one boundary at a time!");
@@ -28,9 +29,7 @@ ContactSlave::ContactSlave(const std::string & name, InputParameters parameters)
 
 void
 ContactSlave::setup()
-{
-  _penetration_locator.detectPenetration();
-}
+{}
 
 bool
 ContactSlave::shouldBeApplied()
@@ -38,12 +37,9 @@ ContactSlave::shouldBeApplied()
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
   if(!pinfo)
-    return false;  
+    return false;
   
-  if(pinfo->_distance > -1e-15)
-    return true;
-
-  return false;
+  return _penetration_locator._has_penetrated[_current_node->id()];  
 }
 
 Real
@@ -51,7 +47,7 @@ ContactSlave::computeQpResidual()
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   Elem * elem = pinfo->_elem;
-
+/*
   std::vector<unsigned int> dof_indices;
 
   const DofMap& dof_map = *_moose_system.getDofMap();
@@ -75,10 +71,17 @@ ContactSlave::computeQpResidual()
   Real master_displacement = 0;
 
   computeQpSolution(master_displacement, _moose_system._serialized_solution, dof_indices, 0, phi);
-
+*/
 //  std::cout<<_u[_qp]<<std::endl;
   
 //  return 0;
+
+//  if(_current_node->id() == 441)
+//    std::cout<<pinfo->_distance<<std::endl;
+
+//  std::cout<<(_moose_system.getMesh()->node(_current_node->id())(0)+_u[_qp])-pinfo->_closest_point(0)<<std::endl;
+//  if(_current_node->id() == 893)
+//    std::cout<<(_moose_system.getMesh()->node(_current_node->id())(0)+_u[_qp])-pinfo->_closest_point(0)<<std::endl;
   
   return (_moose_system.getMesh()->node(_current_node->id())(0)+_u[_qp])-pinfo->_closest_point(0);
 }
