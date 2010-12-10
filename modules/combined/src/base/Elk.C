@@ -47,6 +47,7 @@
 #include "StressAux.h"
 #include "StressDivergence.h"
 #include "StressOutput.h"
+#include "LinearStrainHardening.h"
 
 #include "MaterialModel.h"
 
@@ -115,6 +116,7 @@ Elk::registerObjects()
   registerKernel(StressDivergence);
   registerKernel(StressOutput);
   registerMaterial(MaterialModel);
+  registerMaterial(LinearStrainHardening);
 
   // phase_field
   registerKernel(AC);
