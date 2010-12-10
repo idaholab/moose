@@ -6,24 +6,18 @@ template<>
 InputParameters validParams<PowerLawCreep>()
 {
   InputParameters params = validParams<MaterialModel>();
-   /*
-     Power-law creep material parameters
-   */
+   
+  //   Power-law creep material parameters
    params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
    params.addRequiredParam<Real>("exponent", "Exponent in power-law equation");
    params.addRequiredParam<Real>("activation_energy", "Activation energy");
    params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
-   /*
-    Iteration control parameters
-   */
+   
+  //  Sub-Newton Iteration control parameters
    params.addParam<Real>("tolerance", 1e-5, "Convergence tolerance for sub-newtion iteration");
    params.addParam<unsigned int>("max_its", 10, "Maximum number of sub-newton iterations");
    params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
 
-   params.addParam<Real>("density", 0.001, "Density");
-   params.addParam<Real>("thermal_conductivity", 100.0, "Thermal conductivity");
-   params.addParam<Real>("specific_heat", 1.0, "Specific heat");
-   
   return params;
 }
 
@@ -39,20 +33,13 @@ PowerLawCreep::PowerLawCreep( const std::string & name,
    _max_its(parameters.get<unsigned int>("max_its")),
    _output_iteration_info(getParam<bool>("output_iteration_info")),
 
-   _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain")),
-
-   _density(declareProperty<Real>("density")),
-   _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-   _specific_heat(declareProperty<Real>("specific_heat"))
-
-  
+   _creep_strain(declareProperty<RealTensorValue>("creep_strain")),
+   _creep_strain_old(declarePropertyOld<RealTensorValue>("creep_strain"))
 {
   
   _identity.identity();
   
-/*
-  
+/*  Below lines are only needed if defining a differnet elasticity tensor
   IsotropicElasticityTensor * iso =  new IsotropicElasticityTensor;
   iso->setLambda( _lambda );
   iso->setShearModulus( _shear_modulus );
@@ -61,14 +48,14 @@ PowerLawCreep::PowerLawCreep( const std::string & name,
 */
 }
 
-
 void
 PowerLawCreep::computeStress()
 {
-  // Given the stretching, compute the stress increment and add it to the old stress.
+  // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
-
+  // creep_strain = creep_strainOld + creep_strainIncrement
   //
+  // 
   // This is more work than needs to be done.  The strain and stress tensors are symmetric, and so we are carrying
   //   a third more memory than is required.  We are also running a 9x9 * 9x1 matrix-vector multiply when at most
   //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
@@ -85,23 +72,18 @@ PowerLawCreep::computeStress()
   stress_new *= _dt;
   stress_new += stress_old;
   
-//  std::cout << "STRAIN INCREMENT: " << _qp << "\n"
-//             << _strain_increment(0,0) << " " << _strain_increment(0,1) << " " << _strain_increment(0,2) << std::endl
-//             << _strain_increment(1,0) << " " << _strain_increment(1,1) << " " << _strain_increment(1,2) << std::endl
-//             << _strain_increment(2,0) << " " << _strain_increment(2,1) << " " << _strain_increment(2,2) << std::endl;
-  
 // compute deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress(stress_new);
   dev_trial_stress -= _identity*((stress_new.tr())/3.0);
 
-// effective trial stress
+// compute effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
   Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
   
 // Use Newton sub-iteration to determine effective creep strain increment
   
   unsigned int it = 0;
-  Real plastic_residual = 10.;
+  Real creep_residual = 10.;
   Real del_p = 0.;
   Real norm_residual = 10.;
     
@@ -113,9 +95,9 @@ PowerLawCreep::computeStress()
     Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_exponent*
       std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _exponent-1.)*
       std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));
-    plastic_residual = phi -  del_p/_dt;
-    norm_residual = std::abs(plastic_residual);
-    del_p = del_p + (plastic_residual / (1/_dt - dphi_ddelp));
+    creep_residual = phi -  del_p/_dt;
+    norm_residual = std::abs(creep_residual);
+    del_p = del_p + (creep_residual / (1/_dt - dphi_ddelp));
       
     // iteration output
     if (_output_iteration_info == true)
@@ -125,7 +107,7 @@ PowerLawCreep::computeStress()
         <<" trial stress=" <<effective_trial_stress
         <<" phi=" <<phi
         <<" dphi=" <<dphi_ddelp
-        <<" plas_res=" <<plastic_residual
+        <<" creep_res=" <<creep_residual
         <<" del_p=" <<del_p
         <<std::endl;
       
@@ -135,23 +117,23 @@ PowerLawCreep::computeStress()
   if(it == _max_its) mooseError("Max sub-newton iteration hit during creep solve!");
 
 
-// compute plastic and elastic strain increments (avoid potential divide by zero - how should this be done)?   
+// compute creep and elastic strain increments (avoid potential divide by zero - how should this be done)?   
   if (effective_trial_stress < 0.01) effective_trial_stress = 0.01;
-  ColumnMajorMatrix plastic_strain_increment(dev_trial_stress);
-  plastic_strain_increment *= (1.5*del_p/effective_trial_stress);
+  ColumnMajorMatrix creep_strain_increment(dev_trial_stress);
+  creep_strain_increment *= (1.5*del_p/effective_trial_stress);
 
   ColumnMajorMatrix elastic_strain_increment;
-  elastic_strain_increment = _strain_increment*_dt - plastic_strain_increment;
+  elastic_strain_increment = _strain_increment*_dt - creep_strain_increment;
 
 //compute stress increment
   elastic_strain_increment.reshape(9, 1);
   stress_new =  *elasticityTensor() * elastic_strain_increment;
 
-// update stress and plastic strain
+// update stress and creep strain
   stress_new.fill(_stress[_qp]);
   _stress[_qp] += _stress_old[_qp];
-  plastic_strain_increment.fill(_plastic_strain[_qp]);
-  _plastic_strain[_qp] += _plastic_strain_old[_qp];
+  creep_strain_increment.fill(_creep_strain[_qp]);
+  _creep_strain[_qp] += _creep_strain_old[_qp];
   
 /*    
    std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";

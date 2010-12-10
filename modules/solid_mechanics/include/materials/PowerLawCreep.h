@@ -30,14 +30,10 @@ protected:
   Real _tolerance;
   unsigned int _max_its;
   bool _output_iteration_info;
-
-  MaterialProperty<Real> _density;
-  MaterialProperty<Real> _thermal_conductivity;
-  MaterialProperty<Real> _specific_heat;
-
-  MaterialProperty<RealTensorValue> & _plastic_strain;
   
-  MaterialProperty<RealTensorValue> & _plastic_strain_old;
+  MaterialProperty<RealTensorValue> & _creep_strain;
+  
+  MaterialProperty<RealTensorValue> & _creep_strain_old;
 
   ColumnMajorMatrix _identity;
   
