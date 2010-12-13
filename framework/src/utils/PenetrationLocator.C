@@ -76,9 +76,10 @@ PenetrationLocator::detectPenetration()
             info->_normal = normal(*side, node);
 
             info->_distance = normDistance(*elem, *side, node, closest_point);
+            mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
+            
             info->_closest_point = closest_point;
-            if(info->_distance > 0)
-              _has_penetrated[node.id()] = true;
+//            _has_penetrated[node.id()] = true;
 
             // I hate continues but this is actually cleaner than anything I can think of
             continue;
@@ -93,10 +94,9 @@ PenetrationLocator::detectPenetration()
             {
               info->_normal = normal(*side, node);
               info->_distance = distance;
+              mooseAssert(info->_distance <= 0, "Error in PenetrationLocator: Slave node not contained in element but distance was positive!");
 
               info->_closest_point = closest_point;
-              if(distance > 0)
-                _has_penetrated[node.id()] = true;
 
               continue;
             }
@@ -156,8 +156,8 @@ PenetrationLocator::detectPenetration()
                 
               if(std::abs(distance) < 999999999)
               {
-                if(distance > 0)
-                  _has_penetrated[node.id()] = true;
+//                if(distance > 0)
+//                  _has_penetrated[node.id()] = true;
                 
 
                 _penetration_info[node.id()] =  new PenetrationInfo(&node,
@@ -166,6 +166,10 @@ PenetrationLocator::detectPenetration()
                                                                     normal(*side, node),
                                                                     distance,
                                                                     closest_point);
+              }
+              else
+              {
+                delete side;
               }
             }
           }
@@ -223,6 +227,7 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Poi
   {
     //Create a point that is just off in the z axis.
     //I do it this way so that it is about the same order of magnitude as the points themselves
+    //TODO: Think about this some more!  Maybe need some absolute values.
     p3 = p1 + Point(0,0,p1(0)+p2(0)+p1(1)+p2(1));
   }
   else if (dim == 3)

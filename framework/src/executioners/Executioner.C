@@ -81,6 +81,9 @@ Executioner::setup()
     _moose_system.projectSolution(Moose::initial_value, Moose::initial_gradient);
   }    
 
+  // Run the geometric searches for the first time
+  _moose_system._geometric_search_data.update();
+  
   // Compute the initial value of postprocessors
   _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
 

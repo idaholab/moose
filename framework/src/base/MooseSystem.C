@@ -132,7 +132,8 @@ MooseSystem::MooseSystem() :
   _empty_fn(std::string("_moose_system_empty_function"), validParams<EmptyFunction>()),
   _active_local_elem_range(NULL),
   _active_node_range(NULL),
-  _time_stepping_order(0)
+  _time_stepping_order(0),
+  DUMMY_CONTACT_FLAG(false)
 {
   sizeEverything();
 }
@@ -218,7 +219,8 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _empty_fn(std::string("_moose_system_empty_function"), validParams<EmptyFunction>()),
   _active_local_elem_range(NULL),
   _active_node_range(NULL),
-  _time_stepping_order(0)
+  _time_stepping_order(0),
+  DUMMY_CONTACT_FLAG(false)
 {
   sizeEverything();
   initEquationSystems();
@@ -1542,6 +1544,10 @@ MooseSystem::updateNewtonStep()
     *_newton_soln = *_system->solution;
     _newton_soln->close();
   }
+  DUMMY_CONTACT_FLAG = true;
+  _system->update(); 
+  computeResidual(*_system->current_local_solution, *_system->rhs);
+  DUMMY_CONTACT_FLAG = false;
 }
 
 void

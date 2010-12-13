@@ -74,6 +74,11 @@ public:
    */
   virtual void onNewtonUpdate() { }
 
+  /**
+   * Get MooseSystem associated with this Executioner
+   */
+  virtual MooseSystem & getMooseSystem() { return _moose_system; }
+
 protected:
 
   /**

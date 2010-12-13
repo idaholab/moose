@@ -894,6 +894,11 @@ public:
    */
   std::vector<std::vector<unsigned int> > node_to_elem_map;
 
+  /**
+   * TODO: Remove this!
+   */
+  bool DUMMY_CONTACT_FLAG;
+
 protected:
   friend class ComputeInternalJacobians;
   friend class ComputeInternalJacobianBlocks;

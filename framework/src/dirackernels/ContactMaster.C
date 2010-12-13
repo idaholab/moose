@@ -41,6 +41,8 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
 void
 ContactMaster::addPoints()
 {
+  point_to_info.clear();
+  
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
@@ -55,27 +57,13 @@ ContactMaster::addPoints()
     Node * node = pinfo->_node;
     long int dof_number = node->dof_number(0, _var_num, 0);
 
-    if(_nl_it != _moose_system._current_nl_it)
+    if(_moose_system.DUMMY_CONTACT_FLAG)
     {
       if(_residual_copy(dof_number) > 0)
-      {
-        std::cout<<_residual_copy(dof_number)<<std::endl;
         _penetration_locator._has_penetrated[slave_node_num] = false;
-      }
       else if(pinfo->_distance > 0)
         _penetration_locator._has_penetrated[slave_node_num] = true;
-    }
-
-    if(pinfo->_distance > 0)
-      _penetration_locator._has_penetrated[slave_node_num] = true;
-    
-//    if(pinfo->_distance > 0)
-//    {
-//      std::cout<<_residual_copy(dof_number)<<std::endl;
-//      _penetration_locator._has_penetrated[slave_node_num] = true;
-//    }
-//    else
-//      std::cout<<_residual_copy(dof_number)<<std::endl;
+    }  
     
     if(_penetration_locator._has_penetrated[slave_node_num])
     {

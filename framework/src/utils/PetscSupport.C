@@ -172,7 +172,7 @@ namespace Moose
     /**
      * Called at the beginning of every nonlinear step (before Jacobian is formed)
      */
-    PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt /*step*/)
+    PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt nl_step)
     {
       void *ctx = NULL;
       SNESGetApplicationContext(snes, &ctx);
@@ -183,6 +183,10 @@ namespace Moose
 
         exec->updateNewtonStep();
         exec->onNewtonUpdate();
+
+        MooseSystem & moose_system = exec->getMooseSystem();
+
+        moose_system._current_nl_it = nl_step;
       }
 
       return 0;
@@ -222,19 +226,6 @@ namespace Moose
     
       SNESSetUpdate(snes, petscNewtonUpdate);
       SNESSetApplicationContext(snes, (void *) executioner);
-      /*
-      {
-#if PETSC_VERSION_LESS_THAN(2,3,3)
-        PetscErrorCode ierr = SNESSetMonitor (snes, petsc_snes_monitor,
-                                              &moose_system, PETSC_NULL);
-#else
-      // API name change in PETSc 2.3.3
-        PetscErrorCode ierr = SNESMonitorSet (snes, petsc_snes_monitor,
-                                              &moose_system, PETSC_NULL);
-#endif
-        CHKERRABORT(libMesh::COMM_WORLD,ierr);
-      }
-      */
     }
     
     PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * /*changed_w*/)
@@ -288,22 +279,7 @@ namespace Moose
       VecDestroy(ghosted_y);
 
       return(ierr);
-    }
-    
-    PetscErrorCode petsc_snes_monitor(SNES snes, PetscInt its, PetscReal fnorm, void * dummy)
-    {
-      MooseSystem *moose_system = (MooseSystem *) dummy;      // C strikes
-      
-      moose_system->_current_nl_it = its;
-
-      libMesh::out << "  NL step "
-                   << std::setw(2) << its
-                   << std::scientific
-                   << ", |residual|_2 = " << fnorm
-                   << std::endl;
-      
-      return 0;
-    }
+    }    
   }
 }
 
