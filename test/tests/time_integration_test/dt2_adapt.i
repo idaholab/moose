@@ -5,8 +5,8 @@
     xmax = 1
     ymin = -1
     ymax = 1
-    nx = 20
-    ny = 20
+    nx = 15
+    ny = 15
     elem_type = QUAD4
   [../]
 []
@@ -14,16 +14,6 @@
 [GlobalParams]
   slope = 1
   t_jump = 2
-[]
-
-[Functions]
-  active = 'u_func'
-  
-  [./u_func]
-    type = ParsedFunction
-    value = 'atan((t-2)*pi)'   # atan((t-t_jump)*pi*slope) - has to match global params above
-  
-  [../]
 []
 
 [Variables]
@@ -78,28 +68,27 @@
 []
 
 [Postprocessors]
-  active = 'dt l2'
+  active = 'dt'
   
   [./dt]
     type = PrintDT
-  [../]
-  
-  [./l2]
-    type = ElementL2Error
-    variable = u
-    function = u_func
   [../]
 []
 
 [Executioner]
   type = DT2Transient
-#  type = Transient
   
   perf_log = true
   petsc_options = '-snes_mf_operator'
 
   nl_rel_tol = 1e-7
 #  l_tol = 1e-5
+
+  [./Adaptivity]
+    refine_fraction = 0.2
+    coarsen_fraction = 0.3
+    max_h_level = 4
+  [../]
 
   start_time = 0.0
   end_time = 5
@@ -115,9 +104,9 @@
 []
 
 [Output]
-  file_base = out_dt2
+  file_base = out_dt2_adapt
   output_initial = false
-  postprocessor_csv = true
+  postprocessor_csv = false
   interval = 1
   exodus = true
 []

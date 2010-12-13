@@ -65,7 +65,7 @@ void
 DT2Transient::preExecute()
 {
   TransientNonlinearImplicitSystem *nl_sys = _moose_system.getNonlinearSystem();
-  _u1 = &nl_sys->add_vector("u1", false, GHOSTED);
+  _u1 = &nl_sys->add_vector("u1", true, GHOSTED);
   _u2 = &nl_sys->add_vector("u2", false, GHOSTED);
   _u_diff = &nl_sys->add_vector("u_diff", false, GHOSTED);
 
@@ -73,7 +73,7 @@ DT2Transient::preExecute()
   _u_older_saved = &nl_sys->add_vector("u_older_saved", false, GHOSTED);
 
   TransientExplicitSystem *aux_sys = _moose_system.getAuxSystem();
-  _aux1 = &aux_sys->add_vector("aux1", false, GHOSTED);
+  _aux1 = &aux_sys->add_vector("aux1", true, GHOSTED);
   _aux_saved = &aux_sys->add_vector("aux_saved", false, GHOSTED);
   _aux_older_saved = &aux_sys->add_vector("aux_older_saved", false, GHOSTED);
 }
@@ -103,8 +103,6 @@ DT2Transient::preSolve()
 void
 DT2Transient::postSolve()
 {
-  TransientExecutioner::postSolve();
-
   TransientNonlinearImplicitSystem *nl_sys = _moose_system.getNonlinearSystem();
   TransientExplicitSystem *aux_sys = _moose_system.getAuxSystem();
   if (_converged)
@@ -124,8 +122,12 @@ DT2Transient::postSolve()
     *aux_sys->current_local_solution = *_aux_saved;
     nl_sys->current_local_solution->close();
     aux_sys->current_local_solution->close();
+
     _time -= _dt_full;
-    
+    _moose_system.reinitDT();
+
+    _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
+
     // cut the time step in half
     _dt = _dt_full / 2;
     _moose_system.reinitDT();
@@ -145,6 +147,7 @@ DT2Transient::postSolve()
     nl_sys->update();
 
     _moose_system.copy_old_solutions();
+    _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
 
     // 2. step
     _moose_system.onTimestepBegin();
@@ -169,8 +172,11 @@ DT2Transient::postSolve()
     _u_diff->close();
     
     _error = (_u_diff->l2_norm() / std::max(_u1->l2_norm(), _u2->l2_norm())) / _dt_full;
+
+    _dt = _dt_full;
+    _moose_system.reinitDT();
+    TransientExecutioner::postSolve();
   }
-  
 }
 
 bool
@@ -223,7 +229,6 @@ DT2Transient::computeDT()
   {
     // reject the step
     _time -= _dt;
-    _dt = _dt_full;
 
     // recover initial state
     *nl_sys->current_local_solution = *_u_saved;

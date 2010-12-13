@@ -46,9 +46,14 @@ PostprocessorData::init(const std::string & name)
 }
 
 void
-PostprocessorData::addData(const std::string & name, Real value, Real time)
+PostprocessorData::storeValue(const std::string & name, Real value)
 {
   _values[name] = value;
+}
+
+void
+PostprocessorData::addData(const std::string & name, Real value, Real time)
+{
   _output_table.addData(name, value, time);
 }
 

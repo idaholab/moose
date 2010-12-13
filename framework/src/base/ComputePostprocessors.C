@@ -186,12 +186,8 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
       {
         std::string name = (*element_postprocessor_it)->name();
         Real value = (*element_postprocessor_it)->getValue();
-        Real time = _t;
 
-        if (!_is_transient)
-          time = _t_step;
-
-        _postprocessor_data[0].addData(name, value, time);
+        _postprocessor_data[0].storeValue(name, value);
       }
     }
 
@@ -214,12 +210,8 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
       {
         std::string name = (*side_postprocessor_it)->name();
         Real value = (*side_postprocessor_it)->getValue();
-        Real time = _t;
-      
-        if (!_is_transient)
-          time = _t_step;
         
-        _postprocessor_data[0].addData(name, value, time);
+        _postprocessor_data[0].storeValue(name, value);
       }
     }
   }
@@ -237,12 +229,8 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
     (*generic_postprocessor_it)->initialize();
     (*generic_postprocessor_it)->execute();
     Real value = (*generic_postprocessor_it)->getValue();
-    Real time = _t;
-    
-    if (!_is_transient)
-      time = _t_step;
   
-    _postprocessor_data[0].addData(name, value, time);
+    _postprocessor_data[0].storeValue(name, value);
   }
 
   Moose::perf_log.pop("compute_postprocessors()","Solve");
@@ -251,28 +239,41 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
 void MooseSystem::outputPostprocessors()
 {
   // Postprocesser Output
-  if (!_postprocessor_data[0].empty())
+  Real time = _t;
+  if (!_is_transient)
+    time = _t_step;
+
+  PostprocessorIterator postprocessor_begin = _pps[0].allPostprocessorsBegin();
+  PostprocessorIterator postprocessor_end = _pps[0].allPostprocessorsEnd();
+  PostprocessorIterator postprocessor_it = postprocessor_begin;
+
+  for (postprocessor_it = postprocessor_begin; postprocessor_it != postprocessor_end; ++postprocessor_it)
   {
-    if (_postprocessor_screen_output)
-    {
-      std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-      _postprocessor_data[0].printTable(std::cout);
-      std::cout<<std::endl;
-    }
-  
-    if (_postprocessor_csv_output)
-    {
-      _postprocessor_data[0].printCSV(_file_base + ".csv");
-    }
+    std::string name = (*postprocessor_it)->name();
+    Real value = (*postprocessor_it)->getValue();
 
-    if (_postprocessor_ensight_output)
-    {
-      _postprocessor_data[0].printEnsight(_file_base);
-    }
+    _postprocessor_data[0].addData(name, value, time);
+  }
 
-    if (_postprocessor_gnuplot_output)
-    {
-      _postprocessor_data[0].makeGnuplot(_file_base, _gnuplot_format);
-    }
+  if (_postprocessor_screen_output)
+  {
+    std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
+    _postprocessor_data[0].printTable(std::cout);
+    std::cout<<std::endl;
+  }
+
+  if (_postprocessor_csv_output)
+  {
+    _postprocessor_data[0].printCSV(_file_base + ".csv");
+  }
+
+  if (_postprocessor_ensight_output)
+  {
+    _postprocessor_data[0].printEnsight(_file_base);
+  }
+
+  if (_postprocessor_gnuplot_output)
+  {
+    _postprocessor_data[0].makeGnuplot(_file_base, _gnuplot_format);
   }
 }

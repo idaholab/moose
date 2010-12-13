@@ -45,6 +45,10 @@ public:
   PostprocessorIterator genericPostprocessorsBegin();
   PostprocessorIterator genericPostprocessorsEnd();
 
+  PostprocessorIterator allPostprocessorsBegin();
+  PostprocessorIterator allPostprocessorsEnd();
+
+
   void addPostprocessor(Postprocessor *postprocessor);
 
   /**
@@ -63,6 +67,8 @@ protected:
   std::map<unsigned int, std::vector<Postprocessor *> > _side_postprocessors;
 
   std::vector<Postprocessor *> _generic_postprocessors;
+
+  std::vector<Postprocessor *> _all_postprocessors;
 };
 
 #endif // POSTPROCESSORWAREHOUSE_H

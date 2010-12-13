@@ -53,6 +53,8 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
 void
 PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 {
+  _all_postprocessors.push_back(postprocessor);
+
   if(dynamic_cast<ElementPostprocessor*>(postprocessor))
   {
     unsigned int block_id = dynamic_cast<ElementPostprocessor*>(postprocessor)->blockID();
@@ -106,4 +108,16 @@ PostprocessorIterator
 PostprocessorWarehouse::genericPostprocessorsEnd()
 {
   return _generic_postprocessors.end();
+}
+
+PostprocessorIterator
+PostprocessorWarehouse::allPostprocessorsBegin()
+{
+  return _all_postprocessors.begin();
+}
+
+PostprocessorIterator
+PostprocessorWarehouse::allPostprocessorsEnd()
+{
+  return _all_postprocessors.end();
 }

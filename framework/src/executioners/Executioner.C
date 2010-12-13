@@ -86,6 +86,7 @@ Executioner::setup()
   
   // Compute the initial value of postprocessors
   _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
+  _moose_system.outputPostprocessors();
 
   if(_moose_system._output_initial)
   {
@@ -99,7 +100,6 @@ Executioner::setup()
 
   _moose_system.getNonlinearSystem()->update();
 
-  _moose_system.outputPostprocessors();
 }
 
 void

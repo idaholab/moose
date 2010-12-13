@@ -24,6 +24,9 @@ def test_bdf2_adapt(dofs=0, np=0):
 def test_cranic_adapt(dofs=0, np=0):
   tools.executeAppAndDiff(__file__,'cranic_adapt.i',['out_cranic_adapt_0004.e'], dofs, np)
 
+def testdt2(dofs=0, np=0):
+  tools.executeAppAndDiff(__file__,'dt2_adapt.i',['out_dt2_adapt_0037.e'], dofs, np)
+
 # 
 #def test_solution_time_adaptive(dofs=0, np=0):
 #  tools.executeAppAndDiff(__file__,'time-adaptive.i',['out_time_adaptive.e'], dofs, np)

@@ -33,6 +33,8 @@ public:
 
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
+  void storeValue(const std::string & name, Real value);
+
   void addData(const std::string & name, Real value, Real time);
 
   void printTable(std::ostream & out);
