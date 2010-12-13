@@ -59,13 +59,16 @@ ContactMaster::addPoints()
     {
       if(_residual_copy(dof_number) > 0)
       {
-//        std::cout<<_residual_copy(dof_number)<<std::endl;
+        std::cout<<_residual_copy(dof_number)<<std::endl;
         _penetration_locator._has_penetrated[slave_node_num] = false;
       }
       else if(pinfo->_distance > 0)
         _penetration_locator._has_penetrated[slave_node_num] = true;
     }
 
+    if(pinfo->_distance > 0)
+      _penetration_locator._has_penetrated[slave_node_num] = true;
+    
 //    if(pinfo->_distance > 0)
 //    {
 //      std::cout<<_residual_copy(dof_number)<<std::endl;

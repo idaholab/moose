@@ -22,6 +22,19 @@ GeometricSearchData::GeometricSearchData(MooseSystem & moose_system, Mesh * & me
    _mesh(mesh)
 {}
 
+void
+GeometricSearchData::update()
+{
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
+
+  for(; pl_it != pl_end; ++pl_it)
+  {
+    PenetrationLocator * pl = pl_it->second;
+
+    pl->detectPenetration();
+  }
+}
 
 PenetrationLocator &
 GeometricSearchData::getPenetrationLocator(unsigned int master, unsigned int slave)

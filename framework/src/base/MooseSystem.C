@@ -1852,6 +1852,9 @@ MooseSystem::meshChanged()
 
   //Update the node to elem map
   MeshTools::build_nodes_to_elem_map(*_mesh, node_to_elem_map);
+
+  //Update the geometric searches
+  _geometric_search_data.update();
   
   // Lets the output system know that the mesh has changed recently.
   _mesh_changed = true;

@@ -119,9 +119,7 @@ void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)
   
   Moose::perf_log.pop("updateDisplacedMesh()","Solve");
 
-  /**
-   * TODO: Remove This!
-   */
-//  _penetration_locator->detectPenetration();
+  // Update the geometric searches that depend on the displaced mesh
+  _geometric_search_data_displaced.update();
 }
 

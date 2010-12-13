@@ -55,7 +55,7 @@ PenetrationLocator::detectPenetration()
   {
     unsigned int boundary_id = node_boundary_list[i];
 
-    if(boundary_id == _master_boundary)
+    if(boundary_id == _slave_boundary)
     {
       Node & node = _mesh.node(node_list[i]);
       
@@ -77,8 +77,8 @@ PenetrationLocator::detectPenetration()
 
             info->_distance = normDistance(*elem, *side, node, closest_point);
             info->_closest_point = closest_point;
-//            if(info->_distance > 0)
-//              _has_penetrated[node.id()] = true;
+            if(info->_distance > 0)
+              _has_penetrated[node.id()] = true;
 
             // I hate continues but this is actually cleaner than anything I can think of
             continue;
@@ -95,8 +95,8 @@ PenetrationLocator::detectPenetration()
               info->_distance = distance;
 
               info->_closest_point = closest_point;
-//              if(distance > 0)
-//                _has_penetrated[node.id()] = true;
+              if(distance > 0)
+                _has_penetrated[node.id()] = true;
 
               continue;
             }
@@ -116,7 +116,7 @@ PenetrationLocator::detectPenetration()
         {
           short int other_boundary_id = node_boundary_list[k];
 
-          if(other_boundary_id == _slave_boundary)
+          if(other_boundary_id == _master_boundary)
           {
             Node * cur_node = _mesh.node_ptr(node_list[k]);
                                              
@@ -139,7 +139,7 @@ PenetrationLocator::detectPenetration()
             
           for(unsigned int m=0; m<n_elems; m++)
           {
-            if(elem_list[m] == elem_id && id_list[m] == _slave_boundary)
+            if(elem_list[m] == elem_id && id_list[m] == _master_boundary)
             {
               unsigned int side_num = side_list[m];
               
@@ -156,8 +156,8 @@ PenetrationLocator::detectPenetration()
                 
               if(std::abs(distance) < 999999999)
               {
-//                if(distance > 0)
-//                  _has_penetrated[node.id()] = true;
+                if(distance > 0)
+                  _has_penetrated[node.id()] = true;
                 
 
                 _penetration_info[node.id()] =  new PenetrationInfo(&node,

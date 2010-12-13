@@ -28,14 +28,12 @@ InputParameters validParams<PenetrationAux>()
 
 PenetrationAux::PenetrationAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
-   _penetration_locator(getPenetrationLocator(getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary")))
+   _penetration_locator(getPenetrationLocator(parameters.get<unsigned int>("paired_boundary"), getParam<std::vector<unsigned int> >("boundary")[0]))
 { 
 }
 
 void PenetrationAux::setup()
-{
-  _penetration_locator.detectPenetration();
-}  
+{}  
 
 Real
 PenetrationAux::computeValue()

@@ -31,6 +31,13 @@ public:
 
   PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave);
 
+  /**
+   * Update all of the search objects.
+   *
+   * This is probably getting called because the mesh changed in some way.
+   */
+  void update();
+
   MooseSystem & _moose_system;
   Mesh * & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
