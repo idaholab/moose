@@ -93,17 +93,21 @@ MaterialModel::MaterialModel( const std::string & name,
     mooseError(err);
   }
 
-  // Calculate lambda and the shear modulus
+  // Calculate lambda, the shear modulus, and Young's modulus
   if(_lambda_set && _shear_modulus_set) // First and second Lame
   {
+    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
   }
   else if(_lambda_set && _poissons_ratio_set)
   {
     _shear_modulus = (_lambda * (1.0 - 2.0 * _poissons_ratio)) / (2.0 * _poissons_ratio);
+    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
+
   }
   else if(_lambda_set && _bulk_modulus_set)
   {
     _shear_modulus = 3.0 * (_bulk_modulus - _lambda) / 2.0;
+    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
   }
   else if(_lambda_set && _youngs_modulus_set)
   {
@@ -112,10 +116,12 @@ MaterialModel::MaterialModel( const std::string & name,
   else if(_shear_modulus_set && _poissons_ratio_set)
   {
     _lambda = ( 2.0 * _shear_modulus * _poissons_ratio ) / (1.0 - 2.0*_poissons_ratio);
+    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
   }
   else if(_shear_modulus_set && _bulk_modulus_set)
   {
     _lambda = _bulk_modulus - 2.0 * _shear_modulus / 3.0;
+    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
   }
   else if(_shear_modulus_set && _youngs_modulus_set)
   {
@@ -125,6 +131,7 @@ MaterialModel::MaterialModel( const std::string & name,
   {
     _lambda = (3.0 * _bulk_modulus * _poissons_ratio) / (1.0 + _poissons_ratio);
     _shear_modulus = (3.0 * _bulk_modulus * (1.0 - 2.0*_poissons_ratio)) / (2.0 * (1.0 + _poissons_ratio));
+    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
   }
   else if(_youngs_modulus_set && _poissons_ratio_set) // Young's Modulus and Poisson's Ratio
   {
@@ -139,6 +146,7 @@ MaterialModel::MaterialModel( const std::string & name,
 
   _lambda_set = true;
   _shear_modulus_set = true;
+  _youngs_modulus_set = true;
 
   IsotropicElasticityTensor * iso =  new IsotropicElasticityTensor;
   iso->setLambda( _lambda );
