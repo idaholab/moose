@@ -118,8 +118,7 @@ void MooseSystem::updateDisplacedMesh(const NumericVector<Number>& soln)
                         UpdateDisplacedMesh(*this, _serialized_solution, _serialized_aux_solution));
   
   Moose::perf_log.pop("updateDisplacedMesh()","Solve");
-
+  
   // Update the geometric searches that depend on the displaced mesh
   _geometric_search_data_displaced.update();
 }
-

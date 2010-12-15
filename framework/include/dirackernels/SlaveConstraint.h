@@ -17,6 +17,7 @@
 
 // Moose Includes
 #include "DiracKernel.h"
+#include "PenetrationLocator.h"
 
 //Forward Declarations
 class SlaveConstraint;
@@ -31,10 +32,20 @@ public:
 
   virtual void addPoints();
   virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
 protected:
+  const unsigned int _component;
+  PenetrationLocator & _penetration_locator;
   NumericVector<Number> & _residual_copy;
+  SparseMatrix<Number> & _jacobian_copy;
 
-  Node * _node;
+  std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;
+
+  unsigned int _x_var;
+  unsigned int _y_var;
+  unsigned int _z_var;
+
+  RealVectorValue _vars;
 };
  
 #endif //SLAVECONSTRAINT_H
