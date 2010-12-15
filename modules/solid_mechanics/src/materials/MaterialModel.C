@@ -14,6 +14,7 @@ InputParameters validParams<MaterialModel>()
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen).");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
   return params;
@@ -42,6 +43,7 @@ MaterialModel::MaterialModel( const std::string & name,
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
+   _decomp_method( RashidApprox ),
    _alpha(getParam<Real>("thermal_expansion")),
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
@@ -154,6 +156,23 @@ MaterialModel::MaterialModel( const std::string & name,
   iso->calculate(0);
   elasticityTensor( iso );
 
+  std::string increment_calculation = getParam<std::string>("increment_calculation");
+  std::transform( increment_calculation.begin(), increment_calculation.end(),
+                  increment_calculation.begin(), ::tolower );
+  if ( increment_calculation == "rashidapprox" )
+  {
+    _decomp_method = RashidApprox;
+  }
+  else if ( increment_calculation == "eigen" )
+  {
+    _decomp_method = Eigen;
+  }
+  else
+  {
+    mooseError( "The options for the increment calculation are RashidApprox and Eigen.");
+  }
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -236,19 +255,18 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeStrainAndRotationIncrement( DecompMethod method,
-                                                  const ColumnMajorMatrix & Fhat)
+MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat)
 {
-  if ( method == RashidApprox )
+  if ( _decomp_method == RashidApprox )
   {
     computeStrainIncrement(Fhat);
     computePolarDecomposition( Fhat);
   }
 
-  else if ( method == Eigen )
+  else if ( _decomp_method == Eigen )
   {
 
-    mooseError("Eigen not defined.");
+    mooseError("Eigen not yet defined.");
 
     const int ND = 3;
 
@@ -546,8 +564,7 @@ MaterialModel::computeProperties()
   for ( _qp = 0; _qp < _n_qpoints; ++_qp )
   {
 
-    computeStrainAndRotationIncrement( RashidApprox, Fhat[_qp]);
-//     computeStrainAndRotationIncrement( Eigen, Fhat[_qp]);
+    computeStrainAndRotationIncrement( Fhat[_qp]);
     modifyStrain();
 
 

@@ -24,6 +24,12 @@ public:
 
 protected:
 
+  enum DecompMethod
+  {
+    RashidApprox = 0,
+    Eigen        = 1
+  };
+
   bool _bulk_modulus_set;
   bool _lambda_set;
   bool _poissons_ratio_set;
@@ -46,6 +52,7 @@ protected:
   const bool _has_temp;
   VariableValue & _temperature;
   VariableValue & _temperature_old;
+  DecompMethod _decomp_method;
   const Real _alpha;
 
   MaterialProperty<RealTensorValue> & _stress;
@@ -85,14 +92,7 @@ protected:
   void computePreconditioning();
   int delta(int i, int j);
 
-  enum DecompMethod
-  {
-    RashidApprox = 0,
-    Eigen        = 1
-  };
-
-  void computeStrainAndRotationIncrement( DecompMethod method,
-                                          const ColumnMajorMatrix & Fhat);
+  void computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat);
 
 
   void fillMatrix( const VariableGradient & grad_x,
