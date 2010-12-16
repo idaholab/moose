@@ -26,6 +26,7 @@ CHBulk::computeGradDFDCons(PFFunctionType type)
     
   case Jacobian: 
     return 6*_u[_qp]*_phi[_j][_qp]*_grad_u[_qp] + 3*_u[_qp]*_u[_qp]*_grad_phi[_j][_qp] - _grad_phi[_j][_qp]; //return Jacobian value
+    //return 0.0;
     
   }
   
