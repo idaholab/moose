@@ -785,9 +785,11 @@ MooseSystem::postSolve(bool converged)
 {
   if (converged)
   {
+    /*
     computePostprocessors(*(_system->current_local_solution));
     outputPostprocessors();
-
+    */
+    
     if(_serialize_solution)
       serializeSolution(*_system->solution);
 

@@ -63,9 +63,16 @@ Steady::execute()
 //    solve_only.pop("solve()","Solve");
 
     postSolve();
-        
-    _moose_system.outputPostprocessors();
-    _moose_system.outputSystem(r_step+1, r_step+1);
+
+    // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
+    bool last_solve_converged = lastSolveConverged();
+
+    if (last_solve_converged) 
+    {
+      _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
+      _moose_system.outputPostprocessors();
+      _moose_system.outputSystem(r_step+1, r_step+1);
+    }
     
     for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
       std::cout<<var<<": "<<_moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2)<<std::endl;

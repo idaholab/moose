@@ -133,7 +133,7 @@ SlaveConstraint::computeQpResidual()
   Real res_mag = pinfo->_normal * res_vec;
   
   return _phi[_i][_qp] * (
-                          1000*(
+                          1e8*(
                                (pinfo->_closest_point(_component) - (_moose_system.getMesh()->node(node->id())(_component)+_u[_qp]))
                               ) -
                           (pinfo->_normal(_component)*res_mag)
@@ -148,7 +148,7 @@ SlaveConstraint::computeQpJacobian()
   long int dof_number = node->dof_number(0, _var_num, 0);  
 
   return _phi[_i][_qp] * (
-                          1000*-_phi[_j][_qp]
+                          1e8*-_phi[_j][_qp]
 //                          -(pinfo->_normal(_component)*pinfo->_normal(_component)*_jacobian_copy(dof_number,dof_number))
                          );
 }

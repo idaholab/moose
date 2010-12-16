@@ -250,7 +250,7 @@ void MooseSystem::outputPostprocessors()
   for (postprocessor_it = postprocessor_begin; postprocessor_it != postprocessor_end; ++postprocessor_it)
   {
     std::string name = (*postprocessor_it)->name();
-    Real value = (*postprocessor_it)->getValue();
+    Real value = _postprocessor_data[0].getPostprocessorValue(name);
 
     _postprocessor_data[0].addData(name, value, time);
   }

@@ -205,10 +205,13 @@ TransientExecutioner::takeStep()
   bool last_solve_converged = lastSolveConverged();
     
   // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
-  if (last_solve_converged && ((_t_step+1)%_moose_system._interval == 0 || _reset_dt)) 
+  if (last_solve_converged) 
   {
+    _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
     _moose_system.outputPostprocessors();
-    _moose_system.outputSystem(_t_step, _time);
+
+    if(((_t_step+1)%_moose_system._interval == 0 || _reset_dt))
+      _moose_system.outputSystem(_t_step, _time);
   }
 
   if(last_solve_converged)

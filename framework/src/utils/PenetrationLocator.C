@@ -307,6 +307,7 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Poi
       }
     }
   }
+  /*
   else if(elem.contains_point(p0))  // If the point is in the element but the plane point wasn't...
   {
     std::cout<<"junk!"<<std::endl;
@@ -325,7 +326,7 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Poi
         normal /= normal.size();
       }
     }
-    
+  */
 
 /*
 //      std::cout<<"--"<<std::endl<<dedge<<std::endl<<elem.neighbor(neighbor_num)->id()<<std::endl<<elem.id()<<std::endl;
@@ -393,8 +394,8 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Poi
 //      std::cout<<normal<<std::endl;
       
 //      std::cout<<normal<<std::endl;
-*/
   }
+*/
   else
   {
     d = 9999999999;
