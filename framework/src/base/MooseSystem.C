@@ -108,6 +108,7 @@ MooseSystem::MooseSystem() :
   _u_dot_soln(NULL),
   _res_soln_old(NULL),
   _du_dot_du_soln(NULL),
+  _residual_copy(*NumericVector<Number>::build().release()),
   _serialized_solution(*NumericVector<Number>::build().release()),
   _serialized_aux_solution(*NumericVector<Number>::build().release()),
   _auto_scaling(false),
@@ -196,6 +197,7 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _u_dot_soln(NULL),
   _res_soln_old(NULL),
   _du_dot_du_soln(NULL),
+  _residual_copy(*NumericVector<Number>::build().release()),
   _serialized_solution(*NumericVector<Number>::build().release()),
   _serialized_aux_solution(*NumericVector<Number>::build().release()),
   _auto_scaling(false),
@@ -419,6 +421,7 @@ MooseSystem::init()
   
   _es->init();
 
+  _residual_copy.init(_system->n_dofs(), false, SERIAL);
   _serialized_solution.init(_system->n_dofs(), false, SERIAL);
   _serialized_aux_solution.init(_aux_system->n_dofs(), false, SERIAL);
   
@@ -609,7 +612,7 @@ MooseSystem::initEquationSystems()
   _system->nonlinear_solver->jacobian = Moose::compute_jacobian;
   _system->attach_init_function(Moose::initial_condition);
 
-  _residual_copy = &_system->add_vector("residual_copy", false, PARALLEL);
+//  _residual_copy = &_system->add_vector("residual_copy", false, PARALLEL);
   _jacobian_copy = &_system->add_matrix("jacobian_copy");
   
   _u_dot_soln = &_system->add_vector("u_dot", false, GHOSTED);

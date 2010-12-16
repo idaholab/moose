@@ -89,10 +89,23 @@ SlaveConstraint::addPoints()
           _penetration_locator._has_penetrated[slave_node_num] = true;
     }  
     
-    if(_penetration_locator._has_penetrated[slave_node_num])
+    if(_penetration_locator._has_penetrated[slave_node_num] && node->processor_id() == libMesh::processor_id())
     {
-      // Just use the first element this node is connected to
-      Elem * elem = _mesh.elem(_moose_system.node_to_elem_map[slave_node_num][0]);
+      // Find an element that is connected to this node that and that is also on this processor
+
+      std::vector<unsigned int> & connected_elems = _moose_system.node_to_elem_map[slave_node_num];
+
+      Elem * elem = NULL;
+      
+      for(unsigned int i=0; i<connected_elems.size() && !elem; i++)
+      {
+        Elem * cur_elem = _mesh.elem(connected_elems[i]);
+        if(cur_elem->processor_id() == libMesh::processor_id())
+          elem = cur_elem;
+      }
+
+      mooseAssert(elem, "Couldn't find an element on this processor that is attached to the slave node!");
+        
       addPoint(elem, *node);
       point_to_info[*node] = pinfo;
     }
@@ -104,10 +117,9 @@ SlaveConstraint::computeQpResidual()
 {
   PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
   Node * node = pinfo->_node;
-/*
-  if(node->id() == 10)
-    std::cout<<"Constraining"<<std::endl;
-*/
+
+//  if(node->id() == 36)
+  //   std::cout<<"Constraining"<<std::endl;
 
   RealVectorValue res_vec;
 
@@ -136,7 +148,7 @@ SlaveConstraint::computeQpJacobian()
   long int dof_number = node->dof_number(0, _var_num, 0);  
 
   return _phi[_i][_qp] * (
-                          1000*-_phi[_j][_qp] -
-                          (pinfo->_normal(_component)*pinfo->_normal(_component)*_jacobian_copy(dof_number,dof_number))
+                          1000*-_phi[_j][_qp]
+//                          -(pinfo->_normal(_component)*pinfo->_normal(_component)*_jacobian_copy(dof_number,dof_number))
                          );
 }

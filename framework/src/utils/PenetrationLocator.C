@@ -236,72 +236,75 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Poi
     normal = p.unit_normal(closest_point);
 
     /********* Computes an Average Normal in 2D *************/
+
+    if(dim == 2)
+    {    
+      Real dedge = 9999999999;
+      unsigned int side_node_num = 0;
     
-    Real dedge = 9999999999;
-    unsigned int side_node_num = 0;
-    
-    for(unsigned int n=0; n<side.n_nodes(); n++)
-    {
-      Real cur_distance = (p0 - side.point(n)).size();
-      
-      if(cur_distance < dedge)
+      for(unsigned int n=0; n<side.n_nodes(); n++)
       {
-        dedge = cur_distance;
-        side_node_num = n;
+        Real cur_distance = (p0 - side.point(n)).size();
+      
+        if(cur_distance < dedge)
+        {
+          dedge = cur_distance;
+          side_node_num = n;
+        }
+      }
+
+      std::map<unsigned int, unsigned int> elems_to_sides;
+
+      Real blend_length = side.hmax()*2e-1;
+    
+      if(dedge < blend_length)
+      {
+        Node * node = side.get_node(side_node_num);
+        unsigned int node_id = node->id();
+
+        std::vector<unsigned int> & elems_connected_to_node = _moose_system.node_to_elem_map[node_id];
+
+        for(unsigned int i=0; i< elems_connected_to_node.size(); i++)
+        {
+          Elem * connected_elem = _mesh.elem(elems_connected_to_node[i]);
+
+          elems_to_sides[connected_elem->id()] = _mesh.boundary_info->side_with_boundary_id(connected_elem, _master_boundary);
+        }
+      
+        std::map<unsigned int, unsigned int>::iterator elems_it = elems_to_sides.begin();
+        std::map<unsigned int, unsigned int>::iterator elems_end = elems_to_sides.end();
+
+        Point neighbor_normal;
+        Point my_normal;
+      
+        for(; elems_it != elems_end; ++elems_it)
+        {
+          Elem * connected_elem = _mesh.elem(elems_it->first);
+        
+          FEType fe_type;
+          AutoPtr<FEBase> fe(FEBase::build(_moose_system.getDim(), fe_type));
+          ArbitraryQuadrature arbitrary_qrule(_moose_system.getDim()-1, _moose_system._max_quadrature_order);
+          fe->attach_quadrature_rule(&arbitrary_qrule);
+          const std::vector<Point>& normals = fe->get_normals();
+      
+          { 
+            Point mapped = libMesh::FEInterface::inverse_map (2, fe_type, connected_elem, *node);
+            std::vector<Point> mapped_points;
+            mapped_points.push_back(mapped);
+            arbitrary_qrule.setPoints(mapped_points);
+            fe->reinit(connected_elem, elems_it->second);
+          }      
+
+          if(connected_elem->id() == elem.id())
+            my_normal = normals[0];
+          else
+            neighbor_normal = normals[0];
+        }
+      
+        Real theta = (-0.5*(1.0/blend_length)*dedge)+0.5;
+        normal = (neighbor_normal*theta)+(my_normal*(1-theta));
       }
     }
-
-    std::map<unsigned int, unsigned int> elems_to_sides;
-
-    Real blend_length = side.hmax()*1e-1;
-    
-    if(dedge < blend_length)
-    {
-      Node * node = side.get_node(side_node_num);
-      unsigned int node_id = node->id();
-
-      std::vector<unsigned int> & elems_connected_to_node = _moose_system.node_to_elem_map[node_id];
-
-      for(unsigned int i=0; i< elems_connected_to_node.size(); i++)
-      {
-        Elem * connected_elem = _mesh.elem(elems_connected_to_node[i]);
-
-        elems_to_sides[connected_elem->id()] = _mesh.boundary_info->side_with_boundary_id(connected_elem, _master_boundary);
-      }
-      
-      std::map<unsigned int, unsigned int>::iterator elems_it = elems_to_sides.begin();
-      std::map<unsigned int, unsigned int>::iterator elems_end = elems_to_sides.end();
-
-      Point neighbor_normal;
-      Point my_normal;
-      
-      for(; elems_it != elems_end; ++elems_it)
-      {
-        Elem * connected_elem = _mesh.elem(elems_it->first);
-        
-        FEType fe_type;
-        AutoPtr<FEBase> fe(FEBase::build(_moose_system.getDim(), fe_type));
-        ArbitraryQuadrature arbitrary_qrule(_moose_system.getDim()-1, _moose_system._max_quadrature_order);
-        fe->attach_quadrature_rule(&arbitrary_qrule);
-        const std::vector<Point>& normals = fe->get_normals();
-      
-        { 
-          Point mapped = libMesh::FEInterface::inverse_map (2, fe_type, connected_elem, *node);
-          std::vector<Point> mapped_points;
-          mapped_points.push_back(mapped);
-          arbitrary_qrule.setPoints(mapped_points);
-          fe->reinit(connected_elem, elems_it->second);
-        }      
-
-        if(connected_elem->id() == elem.id())
-          my_normal = normals[0];
-        else
-          neighbor_normal = normals[0];
-      }
-      
-      Real theta = (-0.5*(1.0/blend_length)*dedge)+0.5;
-      normal = (neighbor_normal*theta)+(my_normal*(1-theta));
-      }
   }
   else if(elem.contains_point(p0))  // If the point is in the element but the plane point wasn't...
   {

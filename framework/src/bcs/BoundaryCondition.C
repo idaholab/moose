@@ -255,6 +255,6 @@ BoundaryCondition::residualCopy()
 
   _moose_system.needResidualCopy(true);
   
-  return *_moose_system._residual_copy;
+  return _moose_system._residual_copy;
 }
 

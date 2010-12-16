@@ -778,7 +778,7 @@ public:
    */
   Moose::TimeSteppingScheme _time_stepping_scheme;
 
-  NumericVector<Number> * _residual_copy;   /// Copy of the residual vector
+  NumericVector<Number> & _residual_copy;   /// Copy of the residual vector
 
   SparseMatrix<Number> * _jacobian_copy;   /// Copy of the jacobian vector
 

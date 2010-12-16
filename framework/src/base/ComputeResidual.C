@@ -203,9 +203,7 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
   residual.close();
 
   if(needResidualCopy())
-    *_residual_copy = residual;
-
-  //std::cout<<*_residual_copy<<std::endl;
+    residual.localize(_residual_copy);
   
   //Distribute any point loads
   computeDiracKernels(soln, &residual);
