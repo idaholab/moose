@@ -80,7 +80,7 @@ ContactMaster::addPoints()
       Real res_mag = pinfo->_normal * res_vec;
 
       
-      if(res_mag < 0 && _penetration_locator._has_penetrated[slave_node_num])
+      if(res_mag < 0 && std::abs(res_mag) > 1e-3 && _penetration_locator._has_penetrated[slave_node_num])
       {
         _penetration_locator._has_penetrated[slave_node_num] = false;
       }

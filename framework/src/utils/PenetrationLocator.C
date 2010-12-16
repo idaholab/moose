@@ -60,9 +60,10 @@ PenetrationLocator::detectPenetration()
     if(boundary_id == _slave_boundary)
     {
       Node & node = _mesh.node(node_list[i]);
-      
+/*      
       if(node.processor_id() == libMesh::processor_id())
       {
+*/
         // See if we already have info about this node
         if(_penetration_info[node.id()])
         {
@@ -182,7 +183,7 @@ PenetrationLocator::detectPenetration()
             }
           }
         }
-      }
+//      }
     }
   }        
 
