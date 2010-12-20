@@ -60,5 +60,12 @@ NodalVariableValue::NodalVariableValue(const std::string & name, InputParameters
 Real
 NodalVariableValue::getValue()
 {
-  return _moose_system.getVariableNodalValue(_node, _var_name);
+  Real value = 0;
+
+  if(_node.processor_id() == libMesh::processor_id())
+    value = _moose_system.getVariableNodalValue(_node, _var_name);
+
+  gatherSum(value);
+
+  return value;
 }

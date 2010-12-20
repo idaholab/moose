@@ -50,7 +50,12 @@ AverageNodalVariableValue::getValue()
   Real avg = 0;
   int n = _node_ids.size();
   for (int i = 0; i < n; i++)
-    avg += _moose_system.getVariableNodalValue(_mesh.node(_node_ids[i]), _var_name);
+  {
+    if(_mesh.node(_node_ids[i]).processor_id() == libMesh::processor_id())
+      avg += _moose_system.getVariableNodalValue(_mesh.node(_node_ids[i]), _var_name);
+  }
+
+  gatherSum(avg);  
 
   return avg / n;
 }
