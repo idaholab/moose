@@ -39,6 +39,8 @@ protected:
 
   const Real & _volume;
 
+  const Real _startup_time;
+
 };
 
 #endif //PLENUMRESSUREBC_H

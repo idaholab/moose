@@ -12,6 +12,7 @@ InputParameters validParams<PlenumPressureBC>()
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
   params.addRequiredParam<std::string>("temperature", "The name of the average temperature postprocessor value.");
   params.addRequiredParam<std::string>("volume", "The name of the internal volume postprocessor value.");
+  params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
   return params;
 }
 
@@ -24,7 +25,8 @@ PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters par
    _material_input( getPostprocessorValue(getParam<std::string>("material_input")) ),
    _R(getParam<Real>("R")),
    _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
-   _volume( getPostprocessorValue(getParam<std::string>("volume")))
+   _volume( getPostprocessorValue(getParam<std::string>("volume"))),
+   _startup_time( getParam<Real>("startup_time"))
 {
   _moose_system.needPostprocessorsForResiduals( true );
 
@@ -53,7 +55,8 @@ Real
 PlenumPressureBC::computeQpResidual()
 {
   const Real pressure = (_n0 + _material_input) * _R * _temperature / _volume;
-  return pressure * (_normals[_qp](_component) * _phi[_i][_qp]);
+  const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
+  return factor * pressure * (_normals[_qp](_component) * _phi[_i][_qp]);
 }
 
 void
