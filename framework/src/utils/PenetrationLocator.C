@@ -163,12 +163,8 @@ PenetrationLocator::detectPenetration()
                 _penetration_info[node.id()] = NULL;
               }
                 
-              if(std::abs(distance) < 999999999)
+              if(std::abs(distance) < 999999999 && (!_penetration_info[node.id()] || std::abs(_penetration_info[node.id()]->_distance) > std::abs(distance)))
               {
-//                if(distance > 0)
-//                  _has_penetrated[node.id()] = true;
-                
-
                 _penetration_info[node.id()] =  new PenetrationInfo(&node,
                                                                     elem,
                                                                     side,
