@@ -7,6 +7,9 @@ InputParameters validParams<StressDivergence>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<Real>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addCoupledVar("disp_x", "The x displacement");
+  params.addCoupledVar("disp_y", "The y displacement");
+  params.addCoupledVar("disp_z", "The z displacement");
 
   params.set<bool>("use_displaced_mesh") = true;
 
@@ -19,12 +22,12 @@ StressDivergence::StressDivergence(const std::string & name, InputParameters par
    _stress(getMaterialProperty<RealTensorValue>("stress")),
    _Jacobian_mult(getMaterialProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _component(getParam<Real>("component")),
-   _xdisp_coupled(isCoupled("x_disp")),
-   _ydisp_coupled(isCoupled("y_disp")),
-   _zdisp_coupled(isCoupled("z_disp")),
-   _xdisp_var(_xdisp_coupled ? coupled("x_disp") : 0),
-   _ydisp_var(_ydisp_coupled ? coupled("y_disp") : 0),
-   _zdisp_var(_zdisp_coupled ? coupled("z_disp") : 0)
+   _xdisp_coupled(isCoupled("disp_x")),
+   _ydisp_coupled(isCoupled("disp_y")),
+   _zdisp_coupled(isCoupled("disp_z")),
+   _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
+   _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
+   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0)
 {}
 
 Real
