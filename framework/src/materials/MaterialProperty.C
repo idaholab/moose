@@ -15,6 +15,7 @@
 #include "MaterialProperty.h"
 
 #include "MooseSystem.h"
+#include "ColumnMajorMatrix.h"
 
 template <>
 PropertyValue *
@@ -24,6 +25,23 @@ MaterialProperty<std::vector<Real> >::init ()
   libmesh_assert (copy != NULL);
 
   copy->_value.resize(_value.size());
+
+  return copy;
+}
+
+template <>
+PropertyValue *
+MaterialProperty<ColumnMajorMatrix>::init ()
+{
+  MaterialProperty<ColumnMajorMatrix> *copy = new MaterialProperty<ColumnMajorMatrix>;
+  libmesh_assert (copy != NULL);
+
+  copy->_value.resize(_value.size());
+
+  for (unsigned int i(0); i < _value.size(); ++i)
+  {
+    (*copy)[i].zero();
+  }
 
   return copy;
 }

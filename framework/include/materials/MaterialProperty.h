@@ -17,6 +17,7 @@
 
 #include "MooseArray.h"
 
+class ColumnMajorMatrix;
 
 /**
  * Abstract definition of a property value.
@@ -27,7 +28,7 @@ public:
   /**
    * Destructor.
    */
-  virtual ~PropertyValue() {};
+  virtual ~PropertyValue() {}
 
   /**
    * String identifying the type of parameter stored.
@@ -135,6 +136,10 @@ MaterialProperty<T>::init ()
 template <>
 PropertyValue *
 MaterialProperty<std::vector<Real> >::init ();
+
+template <>
+PropertyValue *
+MaterialProperty<ColumnMajorMatrix>::init ();
 
 template <typename T>
 inline void
