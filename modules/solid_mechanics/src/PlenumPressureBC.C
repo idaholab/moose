@@ -13,6 +13,7 @@ InputParameters validParams<PlenumPressureBC>()
   params.addRequiredParam<std::string>("temperature", "The name of the average temperature postprocessor value.");
   params.addRequiredParam<std::string>("volume", "The name of the internal volume postprocessor value.");
   params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
+  params.addParam<std::string>("output", "", "The reporting postprocessor to use.");
   return params;
 }
 
@@ -26,7 +27,9 @@ PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters par
    _R(getParam<Real>("R")),
    _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
    _volume( getPostprocessorValue(getParam<std::string>("volume"))),
-   _startup_time( getParam<Real>("startup_time"))
+   _startup_time( getParam<Real>("startup_time")),
+   _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL ),
+   _my_value(0)
 {
   _moose_system.needPostprocessorsForResiduals( true );
 
@@ -54,9 +57,7 @@ PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters par
 Real
 PlenumPressureBC::computeQpResidual()
 {
-  const Real pressure = (_n0 + _material_input) * _R * _temperature / _volume;
-  const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
-  return factor * pressure * (_normals[_qp](_component) * _phi[_i][_qp]);
+  return _my_value * (_normals[_qp](_component) * _phi[_i][_qp]);
 }
 
 void
@@ -64,10 +65,23 @@ PlenumPressureBC::setup()
 {
   if ( _initialized )
   {
+    const Real pressure = (_n0 + _material_input) * _R * _temperature / _volume;
+    const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
+    _my_value = factor * pressure;
+    if (_output)
+    {
+      *_output = _my_value;
+    }
   }
   else
   {
     _initialized = true;
     _n0 = _initial_pressure * _volume / (_R * _temperature);
+    const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
+    _my_value = factor * _initial_pressure;
+    if (_output)
+    {
+      *_output = _my_value;
+    }
   }
 }

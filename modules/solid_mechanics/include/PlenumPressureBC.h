@@ -41,6 +41,10 @@ protected:
 
   const Real _startup_time;
 
+  PostprocessorValue * const _output;
+
+  Real _my_value;
+
 };
 
 #endif //PLENUMRESSUREBC_H
