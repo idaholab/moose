@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NearestNode.h"
+#include "NearestNodeLocator.h"
 
 #include "Moose.h"
 
@@ -20,7 +20,7 @@
 #include "elem.h"
 #include "plane.h"
 
-NearestNode::NearestNode(MooseSystem & moose_system, Mesh & mesh, unsigned int boundary1, unsigned int boundary2)
+NearestNodeLocator::NearestNodeLocator(MooseSystem & moose_system, Mesh & mesh, unsigned int boundary1, unsigned int boundary2)
   :_moose_system(moose_system),
   _mesh(mesh),
   _boundary1(boundary1),
@@ -29,9 +29,9 @@ NearestNode::NearestNode(MooseSystem & moose_system, Mesh & mesh, unsigned int b
 
 
 void
-NearestNode::findNodes()
+NearestNodeLocator::findNodes()
 {
-  Moose::perf_log.push("NearestNode::findNodes()","Solve");
+  Moose::perf_log.push("NearestNodeLocator::findNodes()","Solve");
 
   _nearest_node_info.clear();
 
@@ -53,21 +53,21 @@ NearestNode::findNodes()
     if(boundary_id == _boundary1 || boundary_id == _boundary2)
     {
       Node & node = _mesh.node(node_id);
-      
+
       if(node.processor_id() == libMesh::processor_id())
-      {          
+      {
         Node * closest_node = NULL;
-        
+
         Real closest_distance = 999999999;
-        
-        for(unsigned int k=0; k<n_nodes; k++)  
+
+        for(unsigned int k=0; k<n_nodes; k++)
         {
           unsigned int other_boundary_id = node_boundary_list[k];
 
           if(other_boundary_id != boundary_id && (other_boundary_id == _boundary1 || other_boundary_id == _boundary2))
           {
             Node * cur_node = _mesh.node_ptr(node_list[k]);
-                                             
+
             Real distance = ((*cur_node) - node).size();
 
             if(distance < closest_distance)
@@ -81,35 +81,35 @@ NearestNode::findNodes()
         if(closest_distance == 999999999)
           mooseError("Unable to find nearest node!");
 
-        NearestNodeInfo * info = &_nearest_node_info[node.id()];
+        NearestNodeInfo & info = _nearest_node_info[node.id()];
 
-        if(closest_distance < info->_distance)
+        if(closest_distance < info._distance)
         {
-          info->_nearest_node = closest_node;
-          info->_distance = closest_distance;
+          info._nearest_node = closest_node;
+          info._distance = closest_distance;
         }
       }
     }
-  }        
+  }
 
-  Moose::perf_log.pop("NearestNode::findNodes()","Solve");
+  Moose::perf_log.pop("NearestNodeLocator::findNodes()","Solve");
 }
 
 Real
-NearestNode::distance(unsigned int node_id)
+NearestNodeLocator::distance(unsigned int node_id)
 {
   return _nearest_node_info[node_id]._distance;
 }
 
 
 Node *
-NearestNode::nearestNode(unsigned int node_id)
+NearestNodeLocator::nearestNode(unsigned int node_id)
 {
   return _nearest_node_info[node_id]._nearest_node;
 }
 
 //===================================================================
-NearestNode::NearestNodeInfo::NearestNodeInfo()
+NearestNodeLocator::NearestNodeInfo::NearestNodeInfo()
   : _nearest_node(NULL),
     _distance(9999999999)
 {}

@@ -18,12 +18,18 @@
 #include "MooseSystem.h"
 
 GeometricSearchInterface::GeometricSearchInterface(GeometricSearchData & geometric_search_data):
-  _geometric_search_data(geometric_search_data),
-  _penetration_locators(_geometric_search_data._penetration_locators)
-{}
+  _geometric_search_data(geometric_search_data)
+{
+}
 
 PenetrationLocator &
 GeometricSearchInterface::getPenetrationLocator(unsigned int master, unsigned int slave)
 {
-  return _geometric_search_data.getPenetrationLocator(master, slave);  
+  return _geometric_search_data.getPenetrationLocator(master, slave);
+}
+
+NearestNodeLocator &
+GeometricSearchInterface::getNearestNodeLocator(unsigned int master, unsigned int slave)
+{
+  return _geometric_search_data.getNearestNodeLocator(master, slave);
 }

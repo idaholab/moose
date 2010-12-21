@@ -22,6 +22,7 @@
 
 //Forward Declarations
 class PenetrationLocator;
+class NearestNodeLocator;
 class MooseSystem;
 
 class GeometricSearchData
@@ -31,6 +32,8 @@ public:
 
   PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave);
 
+  NearestNodeLocator & getNearestNodeLocator(unsigned int master, unsigned int slave);
+
   /**
    * Update all of the search objects.
    *
@@ -38,8 +41,10 @@ public:
    */
   void update();
 
+private:
   MooseSystem & _moose_system;
   Mesh * & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
+  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> _nearest_node_locators;
 };
 #endif //GEOMETRICSEARCHDATA_H

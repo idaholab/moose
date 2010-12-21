@@ -16,6 +16,7 @@
 
 //Moose includes
 #include "MooseSystem.h"
+#include "NearestNodeLocator.h"
 
 GeometricSearchData::GeometricSearchData(MooseSystem & moose_system, Mesh * & mesh)
   :_moose_system(moose_system),
@@ -34,6 +35,16 @@ GeometricSearchData::update()
 
     pl->detectPenetration();
   }
+
+  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
+  const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
+
+  for(; nnl_it != nnl_end; ++nnl_it)
+  {
+    NearestNodeLocator * nnl = nnl_it->second;
+
+    nnl->findNodes();
+  }
 }
 
 PenetrationLocator &
@@ -46,7 +57,20 @@ GeometricSearchData::getPenetrationLocator(unsigned int master, unsigned int sla
     pl = new PenetrationLocator(_moose_system, *_mesh, master, slave);
     _penetration_locators[std::pair<unsigned int, unsigned int>(master, slave)] = pl;
   }
-  
+
   return *pl;
 }
 
+NearestNodeLocator &
+GeometricSearchData::getNearestNodeLocator(unsigned int master, unsigned int slave)
+{
+  NearestNodeLocator * nnl = _nearest_node_locators[std::pair<unsigned int, unsigned int>(master, slave)];
+
+  if(!nnl)
+  {
+    nnl = new NearestNodeLocator(_moose_system, *_mesh, master, slave);
+    _nearest_node_locators[std::pair<unsigned int, unsigned int>(master, slave)] = nnl;
+  }
+
+  return *nnl;
+}

@@ -74,16 +74,17 @@ Executioner::setup()
   for(unsigned int i=0; i<initial_adaptivity; i++)
   {
     _moose_system.adaptMesh();
-    
+
     //_moose_system.doAdaptivityStep();
 
     //reproject the initial condition
     _moose_system.projectSolution(Moose::initial_value, Moose::initial_gradient);
-  }    
+  }
 
   // Run the geometric searches for the first time
   _moose_system._geometric_search_data.update();
-  
+  _moose_system._geometric_search_data_displaced.update();
+
   // Compute the initial value of postprocessors
   _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
   _moose_system.outputPostprocessors();
@@ -91,10 +92,10 @@ Executioner::setup()
   if(_moose_system._output_initial)
   {
     std::cout<<"Outputting Initial Condition"<<std::endl;
-      
+
     _moose_system.outputSystem(0, 0.0);
   }
-    
+
   // Check for Kernel, BC, and Material coverage on the Mesh
   _moose_system.checkSystemsIntegrity();
 
@@ -112,39 +113,39 @@ void
 Executioner::setScaling()
 {
   std::vector<Real> one_scaling;
-                  
+
   // Reset the scaling to all 1's so we can compute the true residual
   for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
     one_scaling.push_back(1.0);
 
   _moose_system.setVarScaling(one_scaling);
-  
+
   _moose_system.computeResidual(*_moose_system.getNonlinearSystem()->current_local_solution,
                                 *_moose_system.getNonlinearSystem()->rhs);
 
   _old_initial_residual_norm = _initial_residual_norm;
   _initial_residual_norm = _moose_system.getNonlinearSystem()->rhs->l2_norm();
-    
+
   std::cout<<"  True Initial Nonlinear Residual: "<<_initial_residual_norm<<std::endl;
-  
+
   // Set the scaling to manual scaling
   _moose_system.setVarScaling(_moose_system._manual_scaling);
 
   if (_moose_system._auto_scaling)
   {
     std::vector<Real> scaling;
-      
+
     // Compute the new scaling
     for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
     {
       Real norm = _moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2);
-      
+
       if(norm != 0)
         scaling.push_back(1.0/norm);
       else
         scaling.push_back(1.0);
     }
-          
+
     _moose_system.setVarScaling(scaling);
   }
 }

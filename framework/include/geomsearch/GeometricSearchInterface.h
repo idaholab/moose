@@ -30,10 +30,14 @@ public:
    */
   PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave);
 
+  /**
+   * Retrieve the PentrationLocator associated with the two sides.
+   */
+  NearestNodeLocator & getNearestNodeLocator(unsigned int master, unsigned int slave);
+
 private:
   GeometricSearchData & _geometric_search_data;
-  
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> & _penetration_locators;
+
 };
 
 #endif //GEOMETRICSEARCHINTERFACE_H

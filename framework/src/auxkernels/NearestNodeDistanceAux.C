@@ -28,7 +28,7 @@ InputParameters validParams<NearestNodeDistanceAux>()
 
 NearestNodeDistanceAux::NearestNodeDistanceAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
-   _nearest_node(_moose_system, _mesh, getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary"))
+   _nearest_node(getNearestNodeLocator(getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary")))
 {
   if(getParam<std::vector<unsigned int> >("boundary").size() > 1)
     mooseError("NearestNodeDistanceAux can only be used with one boundary at a time!");
@@ -36,8 +36,7 @@ NearestNodeDistanceAux::NearestNodeDistanceAux(const std::string & name, InputPa
 
 void NearestNodeDistanceAux::setup()
 {
-  _nearest_node.findNodes();
-}  
+}
 
 Real
 NearestNodeDistanceAux::computeValue()

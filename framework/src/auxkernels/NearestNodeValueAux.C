@@ -29,7 +29,7 @@ InputParameters validParams<NearestNodeValueAux>()
 
 NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
-   _nearest_node(_moose_system, _mesh, getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary")),
+   _nearest_node(getNearestNodeLocator(getParam<std::vector<unsigned int> >("boundary")[0], parameters.get<unsigned int>("paired_boundary"))),
    _paired_variable(coupled("paired_variable"))
 {
   if(getParam<std::vector<unsigned int> >("boundary").size() > 1)
@@ -40,8 +40,7 @@ NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParamete
 
 void NearestNodeValueAux::setup()
 {
-  _nearest_node.findNodes();
-}  
+}
 
 Real
 NearestNodeValueAux::computeValue()

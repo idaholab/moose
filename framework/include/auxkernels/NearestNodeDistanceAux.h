@@ -16,7 +16,7 @@
 #define NEARESTNODEDISTANCEAUX_H
 
 #include "AuxKernel.h"
-#include "NearestNode.h"
+#include "NearestNodeLocator.h"
 
 
 //Forward Declarations
@@ -25,7 +25,7 @@ class NearestNodeDistanceAux;
 template<>
 InputParameters validParams<NearestNodeDistanceAux>();
 
-/** 
+/**
  * Constant auxiliary value
  */
 class NearestNodeDistanceAux : public AuxKernel
@@ -40,11 +40,11 @@ public:
   virtual ~NearestNodeDistanceAux() {}
 
   virtual void setup();
-  
+
 protected:
   virtual Real computeValue();
 
-  NearestNode _nearest_node;
+  NearestNodeLocator & _nearest_node;
 };
 
 #endif //NEARESTNODEDISTANCEAUX_H

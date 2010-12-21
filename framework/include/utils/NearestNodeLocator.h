@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NEARESTNODE_H
-#define NEARESTNODE_H
+#ifndef NEARESTNODELOCATOR_H
+#define NEARESTNODELOCATOR_H
 
 #include "MooseSystem.h"
 
@@ -28,10 +28,10 @@
 /**
  * Finds the nearest node to each node in boundary1 to each node in boundary2 and the other way around.
  */
-class NearestNode
+class NearestNodeLocator
 {
 public:
-  NearestNode(MooseSystem & moose_system, Mesh & mesh, unsigned int boundary1, unsigned int boundary2);
+  NearestNodeLocator(MooseSystem & moose_system, Mesh & mesh, unsigned int boundary1, unsigned int boundary2);
 
   /**
    * This is the main method that is going to start the search.
@@ -56,7 +56,7 @@ private:
   {
   public:
     NearestNodeInfo();
-    
+
     Node * _nearest_node;
     Real _distance;
   };
@@ -72,5 +72,4 @@ public:
   unsigned int _boundary2;
 };
 
-
-#endif //NEARESTNODE_H
+#endif //NEARESTNODELOCATOR_H
