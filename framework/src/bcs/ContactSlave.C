@@ -46,8 +46,8 @@ Real
 ContactSlave::computeQpResidual()
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-  Elem * elem = pinfo->_elem;
 /*
+  Elem * elem = pinfo->_elem;
   std::vector<unsigned int> dof_indices;
 
   const DofMap& dof_map = *_moose_system.getDofMap();

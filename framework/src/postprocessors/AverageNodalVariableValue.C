@@ -39,7 +39,7 @@ AverageNodalVariableValue::AverageNodalVariableValue(const std::string & name, I
 
   for (unsigned int i = 0; i < nodes.size(); i++)
   {
-    if (ids[i] == _nodesetid)
+    if (ids[i] == int(_nodesetid))
       _node_ids.push_back(nodes[i]);
   }
 }

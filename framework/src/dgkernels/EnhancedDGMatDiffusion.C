@@ -21,14 +21,14 @@ EnhancedDGMatDiffusion::EnhancedDGMatDiffusion(const std::string & name, InputPa
   :DGKernel(name, parameters),
    _epsilon(getParam<Real>("epsilon")),
    _sigma(getParam<Real>("sigma")),
-   _prop_name(getParam<std::string>("diffusivity")),
-   _diff(getMaterialProperty<Real>(_prop_name)),
-   _diff_neighbor(getNeighborMaterialProperty<Real>(_prop_name)),
    _limiting_factor(getParam<Real>("limit")),
    _x(getParam<Real>("x")),
    _y(getParam<Real>("y")),
    _z(getParam<Real>("z")),
-   _adaptive(getParam<Real>("adaptive"))
+   _adaptive(getParam<Real>("adaptive")),
+   _prop_name(getParam<std::string>("diffusivity")),
+   _diff(getMaterialProperty<Real>(_prop_name)),
+   _diff_neighbor(getNeighborMaterialProperty<Real>(_prop_name))
 {
   _velocity(0) = _x;
   _velocity(1) = _y;

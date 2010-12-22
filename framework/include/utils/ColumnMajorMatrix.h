@@ -144,7 +144,7 @@ public:
   /**
    * The trace of the CMM.
    */
-  Real tr();
+  Real tr() const;
 
   /**
    * Zero the matrix.
@@ -453,7 +453,7 @@ ColumnMajorMatrix::setDiag(Real value)
 }
 
 inline Real
-ColumnMajorMatrix::tr()
+ColumnMajorMatrix::tr() const
 {
   mooseAssert(_n_rows == _n_cols, "Cannot find the trace of a non-square matrix!");
 
