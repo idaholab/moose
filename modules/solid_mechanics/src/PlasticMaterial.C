@@ -31,14 +31,15 @@ PlasticMaterial::PlasticMaterial(const std::string & name,
 }
 
 void
-PlasticMaterial::computeStrain(ColumnMajorMatrix & strain)
+PlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain,
+                               ColumnMajorMatrix & elastic_strain)
 {
   _yield_stress[_qp] = _input_yield_stress;
 
   _shear_modulus[_qp] = _input_shear_modulus;
 
   
-  Real volumetric_strain_invariant = strain.tr();
+  Real volumetric_strain_invariant = total_strain.tr();
 
   
   ColumnMajorMatrix identity;
@@ -46,7 +47,7 @@ PlasticMaterial::computeStrain(ColumnMajorMatrix & strain)
   identity.identity();
 
   
-  ColumnMajorMatrix deviatoric_strain(strain);
+  ColumnMajorMatrix deviatoric_strain(total_strain);
   
   deviatoric_strain -= identity * (1.0/3.0 * volumetric_strain_invariant);
   
@@ -79,7 +80,7 @@ PlasticMaterial::computeStrain(ColumnMajorMatrix & strain)
       std::cout<<"plastic norm "<<_plastic_strain[_qp].norm()<<std::endl;
     }
     */
-    strain -= _plastic_strain[_qp];
+    elastic_strain = total_strain - _plastic_strain[_qp];
     /*
     if(_accumulated_plastic_strain[_qp] > 0)
       std::cout<<"modified norm"<<strain.norm()<<std::endl;

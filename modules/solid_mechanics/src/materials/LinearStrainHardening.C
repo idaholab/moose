@@ -22,31 +22,31 @@ InputParameters validParams<LinearStrainHardening>()
    params.addRequiredParam<Real>("hardening_constant", "Hardening slope");
    params.addParam<Real>("tolerance", 1e-5, "Sub-BiLin iteration tolerance");
    params.addParam<unsigned int>("max_its", 10, "Maximum number of Sub-newton iterations");
-   
-   
+
+
   return params;
 }
 
 
 LinearStrainHardening::LinearStrainHardening( const std::string & name,
-                              
+
                               InputParameters parameters )
   :MaterialModel( name, parameters ),
    _tolerance(parameters.get<Real>("tolerance")),
    _max_its(parameters.get<unsigned int>("max_its")),
    _output_iteration_info(getParam<bool>("output_iteration_info")),
 
+   _yield_stress(parameters.get<Real>("yield_stress")),
+   _hardening_constant(parameters.get<Real>("hardening_constant")),
+
    _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
    _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain")),
 
-
-   _yield_stress(parameters.get<Real>("yield_stress")),
-   _hardening_constant(parameters.get<Real>("hardening_constant")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
-   
-   
-  
+
+
+
 {
   _identity.identity();
 }
@@ -73,37 +73,37 @@ LinearStrainHardening::computeStress()
 // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
   Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
-  
+
 // determine if yield condition is satisfied
   Real yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
 
   if (yield_condition > 0.)  //then use newton iteration to determine effective plastic strain increment
-  {    
+  {
     unsigned int it = 0;
     Real plastic_residual = 10.;
     Real scalar_plastic_strain_increment = 0.;
     Real norm_residual = 10.;
-    
-    
-    
+
+
+
     while(it < _max_its && norm_residual > _tolerance)
     {
       plastic_residual = effective_trial_stress - (3. * _shear_modulus * scalar_plastic_strain_increment) - _hardening_variable[_qp] - _yield_stress;
       norm_residual = std::abs(plastic_residual);
-      
+
       scalar_plastic_strain_increment = scalar_plastic_strain_increment + ((plastic_residual) / (3. * _shear_modulus + _hardening_constant));
-      
+
       _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_constant * scalar_plastic_strain_increment);
       it++;
-       
+
     }
-    
+
 
     if(it == _max_its)
       mooseError("Max sub-newton iteration hit during plasticity increment solve!");
 
 
-// compute plastic and elastic strain increments (avoid potential divide by zero - how should this be done)?   
+// compute plastic and elastic strain increments (avoid potential divide by zero - how should this be done)?
   if (effective_trial_stress < 0.01) effective_trial_stress = 0.01;
   ColumnMajorMatrix plastic_strain_increment(dev_trial_stress);
   plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress);
@@ -120,7 +120,7 @@ LinearStrainHardening::computeStress()
   _stress[_qp] += _stress_old[_qp];
   plastic_strain_increment.fill(_plastic_strain[_qp]);
   _plastic_strain[_qp] += _plastic_strain_old[_qp];
-  
+
   }//end of if statement
 
   else
@@ -135,11 +135,10 @@ LinearStrainHardening::computeStress()
 // update stress and plastic strain
   stress_new.fill(_stress[_qp]);
   _stress[_qp] += _stress_old[_qp];
-  
-  }//end of else
-  
-  
-  
-  
-}//end of computeStress
 
+  }//end of else
+
+
+
+
+}//end of computeStress
