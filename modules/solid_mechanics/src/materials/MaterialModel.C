@@ -435,10 +435,10 @@ MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 void
 MaterialModel::modifyStrain()
 {
-  if ( _has_temp )
+  if ( _has_temp && _t_step != 0 )
   {
     ColumnMajorMatrix tStrain;
-    tStrain.setDiag( _alpha * (_temperature[_qp] - _temperature_old[_qp]) );
+    tStrain.setDiag( _alpha/_dt * (_temperature[_qp] - _temperature_old[_qp]) );
     _strain_increment -= tStrain;
   }
 }
