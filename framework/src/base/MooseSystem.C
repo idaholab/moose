@@ -313,7 +313,7 @@ MooseSystem::initDisplacedMesh(std::vector<std::string> displacements)
 Mesh *
 MooseSystem::getMesh(bool skip_full_check) 
 {
-  if (!skip_full_check)
+  if (likely(!skip_full_check))
     checkValid();
   else if (_mesh == NULL)
     mooseError("Full check skipped but Mesh is not initialized");
@@ -737,7 +737,7 @@ MooseSystem::getFunction(const std::string & name)
 void
 MooseSystem::checkValid()
 {
-  if (!_is_valid)
+  if (unlikely(!_is_valid))
     mooseError("MooseSystem has not been properly initialized before accessing data");
 }
 
@@ -1276,10 +1276,10 @@ MooseSystem::reinitKernels(THREAD_ID tid, const NumericVector<Number>& soln, con
   }
 
   _element_data[tid]->reinitKernels(soln, elem, Re, Ke);
-  if (_need_old_newton)
+  if (unlikely(_need_old_newton))
     _element_data[tid]->reinitNewtonStep(*_old_newton_soln);
 
-  // Do the same fore the displaced element data
+  // Do the same for the displaced element data
   if(_reinitialize_displaced_element_data)
   {
     for(std::set<unsigned int>::iterator it = _element_data_displaced[tid]->_var_nums.begin(); it != _element_data_displaced[tid]->_var_nums.end(); ++it)

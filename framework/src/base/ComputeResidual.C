@@ -236,17 +236,18 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
     BCIterator bc_it = _bcs[0].activeNodalBCsBegin(boundary_id);
     BCIterator bc_end = _bcs[0].activeNodalBCsEnd(boundary_id);
 
-    if(bc_it != bc_end)
+    if (likely(bc_it != bc_end))
     {
       Node & node = _mesh->node(nodes[i]);
 
-      if(node.processor_id() == libMesh::processor_id())
+      // say it's likely even if it's not so we hurry and get the work done
+      if (likely(node.processor_id() == libMesh::processor_id()))
       {
         if (bc_it != bc_end)
           reinitBCs(0, soln, node, boundary_id, residual);
 
         for(; bc_it != bc_end; ++bc_it)
-          if((*bc_it)->shouldBeApplied())
+          if (likely((*bc_it)->shouldBeApplied()))
             (*bc_it)->computeAndStoreResidual();
       }
     }

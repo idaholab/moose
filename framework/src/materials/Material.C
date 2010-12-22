@@ -154,7 +154,7 @@ void shallowCopyData(const std::set<std::string> & names,
   for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
   {
     std::string name = *it;
-    if (data[name] == NULL)
+    if (unlikely(data[name] == NULL))
       data[name] = data_from[name]->init();
     data[name]->shallowCopy(data_from[name]);
   }

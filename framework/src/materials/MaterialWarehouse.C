@@ -37,7 +37,7 @@ std::vector<Material *> &
 MaterialWarehouse::getMaterials(unsigned int block_id)
 {
   MaterialIterator mat_iter = _active_materials.find(block_id);
-  if (mat_iter == _active_materials.end())
+  if (unlikely(mat_iter == _active_materials.end()))
   {
     std::stringstream oss;
     oss << "Active Material Missing for block: " << block_id << "\n";
@@ -50,7 +50,7 @@ std::vector<Material *> &
 MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
 {
   MaterialIterator mat_iter = _active_boundary_materials.find(boundary_id);
-  if (mat_iter == _active_boundary_materials.end())
+  if (unlikely(mat_iter == _active_boundary_materials.end()))
   {
     std::stringstream oss;
     oss << "Active Boundary Material Missing for boundary: " << boundary_id << "\n";
@@ -63,7 +63,7 @@ std::vector<Material *> &
 MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
 {
   MaterialIterator mat_iter = _active_neighbor_materials.find(boundary_id);
-  if (mat_iter == _active_neighbor_materials.end())
+  if (unlikely(mat_iter == _active_neighbor_materials.end()))
   {
     std::stringstream oss;
     oss << "Active Neighbor Material Missing for boundary: " << boundary_id << "\n";

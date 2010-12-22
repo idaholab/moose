@@ -59,7 +59,7 @@ DofData::init()
 void
 DofData::reinitRes(int var_num, DenseVector<Number> & Re, unsigned int position, unsigned int num_dofs)
 {
-  if (_var_Res[var_num])
+  if (likely(_var_Res[var_num]))
     delete _var_Res[var_num];
 
   _var_Res[var_num] = new DenseSubVector<Number>(Re, position, num_dofs);
@@ -68,7 +68,7 @@ DofData::reinitRes(int var_num, DenseVector<Number> & Re, unsigned int position,
 void
 DofData::reinitKes(int var_num, unsigned int num_dofs)
 {
-  if (_var_Kes[var_num])
+  if (likely(_var_Kes[var_num]))
     delete _var_Kes[var_num];
   _var_Kes[var_num] = new DenseMatrix<Number>(num_dofs, num_dofs);
 }
@@ -76,7 +76,7 @@ DofData::reinitKes(int var_num, unsigned int num_dofs)
 void
 DofData::reinitKns(int var_num, unsigned int num_dofs, unsigned int num_n_dofs)
 {
-  if (_var_Kns[var_num])
+  if (likely(_var_Kns[var_num]))
     delete _var_Kns[var_num];
   _var_Kns[var_num] = new DenseMatrix<Number>(num_dofs, num_n_dofs);
 }
