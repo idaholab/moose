@@ -36,6 +36,7 @@ public:
    * Constructor that sets an initial number of entries and shape.
    * Defaults to creating the same size tensor as TensorValue
    */
+  explicit
   ColumnMajorMatrix(const unsigned int rows = LIBMESH_DIM, const unsigned int cols = LIBMESH_DIM);
 
   /**

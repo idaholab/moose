@@ -43,5 +43,5 @@ PenetrationAux::computeValue()
   if(pinfo)
     return pinfo->_distance;
 
-  return 0;
+  return -999999;
 }
