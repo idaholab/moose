@@ -57,7 +57,12 @@ public:
   /**
    * This should execute the solve for one timestep.
    */
-  virtual void takeStep();
+  virtual void takeStep(Real input_dt = -1.0);
+  
+  /**
+   * @return The fully constrained dt for this timestep
+   */
+  virtual Real computeConstrainedDT();
 
   /**
    * Optional override.

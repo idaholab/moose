@@ -96,15 +96,8 @@ TransientExecutioner::execute()
 }
 
 void
-TransientExecutioner::takeStep()
+TransientExecutioner::takeStep(Real input_dt)
 {
-  // If this is the first step
-  if(_t_step == 0)
-  {
-    _t_step = 1;
-    _dt = _input_dt;
-  }
-
   if(_converged)
   {
 //    std::cout << "copy" << std::endl;
@@ -119,41 +112,11 @@ TransientExecutioner::takeStep()
 
   _moose_system.getNonlinearSystem()->update();
 
-  Real dt_cur = computeDT();
-
-  // Don't let the time step size exceed maximum time step size
-  if(dt_cur > _dtmax)
-    dt_cur = _dtmax;
-
-  // Don't allow time step size to be smaller than minimum time step size
-  if(dt_cur < _dtmin)
-    dt_cur = _dtmin;
-          
-  // Don't let time go beyond simulation end time
-  if(_time + dt_cur > _end_time)
-    dt_cur = _end_time - _time;
-
-  // Adjust to a sync time if supplied and skipped over
-  if (_remaining_sync_time && _time + dt_cur > *_curr_sync_time_iter)
-  {
-    dt_cur = *_curr_sync_time_iter - _time;
-    if (++_curr_sync_time_iter == _sync_times.end())
-      _remaining_sync_time = false;
-
-    _prev_dt = _dt;
-
-    _reset_dt = true;
-  }
-  else 
-  {
-    if (_reset_dt)
-    {
-      dt_cur = _prev_dt;
-      _reset_dt = false;
-    }
-  }
-
-  _dt = dt_cur;
+  if (input_dt == -1.0)
+    _dt = computeConstrainedDT();
+  else
+    _dt = input_dt;
+  
   _moose_system.reinitDT();
   _moose_system.onTimestepBegin();
 
@@ -164,11 +127,11 @@ TransientExecutioner::takeStep()
   } 
 
   // Increment time
-  _time += dt_cur;
+  _time += _dt;
 
   _moose_system.reinitDT();
 
-  std::cout<<"DT: "<<dt_cur<<std::endl;
+  std::cout<<"DT: "<<_dt<<std::endl;
 
   std::cout << " Solving time step ";
   {
@@ -219,6 +182,54 @@ TransientExecutioner::takeStep()
     adaptMesh();
     _t_step++;
   }
+}
+
+Real
+TransientExecutioner::computeConstrainedDT()
+{
+  // If this is the first step
+  if(_t_step == 0)
+  {
+    _t_step = 1;
+    _dt = _input_dt;
+  }
+  
+  Real dt_cur = computeDT();
+
+  // Don't let the time step size exceed maximum time step size
+  if(dt_cur > _dtmax)
+    dt_cur = _dtmax;
+
+  // Don't allow time step size to be smaller than minimum time step size
+  if(dt_cur < _dtmin)
+    dt_cur = _dtmin;
+          
+  // Don't let time go beyond simulation end time
+  if(_time + dt_cur > _end_time)
+    dt_cur = _end_time - _time;
+
+  // Adjust to a sync time if supplied and skipped over
+  if (_remaining_sync_time && _time + dt_cur > *_curr_sync_time_iter)
+  {
+    dt_cur = *_curr_sync_time_iter - _time;
+    if (++_curr_sync_time_iter == _sync_times.end())
+      _remaining_sync_time = false;
+
+    _prev_dt = _dt;
+
+    _reset_dt = true;
+  }
+  else 
+  {
+    if (_reset_dt)
+    {
+      dt_cur = _prev_dt;
+      _reset_dt = false;
+    }
+  }
+
+  return dt_cur;
+  
 }
 
 Real

@@ -195,7 +195,7 @@ DT2Transient::lastSolveConverged()
 Real
 DT2Transient::computeDT()
 {
-  if(_t_step == 1)
+  if(_t_step < 2)
     return TransientExecutioner::computeDT();
 
   TransientNonlinearImplicitSystem *nl_sys = _moose_system.getNonlinearSystem();

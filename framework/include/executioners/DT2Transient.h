@@ -61,9 +61,10 @@ public:
    * Whether or not the last solve converged.
    */
   virtual bool lastSolveConverged();
+  
+  virtual void preExecute();
 
 protected:
-  virtual void preExecute();
 
   virtual void preSolve();
 

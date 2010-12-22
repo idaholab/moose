@@ -78,13 +78,13 @@ public:
    * Get MooseSystem associated with this Executioner
    */
   virtual MooseSystem & getMooseSystem() { return _moose_system; }
-
-protected:
-
+  
   /**
    * Optionally override to do something before execute() gets called
    */
   virtual void preExecute() {};
+
+protected:
 
   /**
    * Optionally override to do something after execute() gets called
