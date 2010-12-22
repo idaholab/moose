@@ -67,7 +67,7 @@ public:
   
 private:
   
-  void printRowDivider(std::ostream & out);
+  void printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const;
   
   /**
    * Data structure for the console table

@@ -79,16 +79,22 @@ FormattedTable::getLastData(const std::string & name)
 
 
 void
-FormattedTable::printRowDivider(std::ostream & out)
+FormattedTable::printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const
 {
-  std::string divider(_column_width+1, '-');
+  bool needs_init = col_widths.empty();
   
-  out << "+";
-  for (unsigned int i = 0; i < _column_names.size() + 1; ++i)
+  out.fill('-');
+  out << std::right << "+" << std::setw(_column_width+2) << "+";
+  for (std::set<std::string>::iterator header = _column_names.begin(); header != _column_names.end(); ++header)
   {
-    out << divider << "+";
+    // If the actual column header is longer than the default column width
+    // we can grow the column here
+    if (needs_init)
+      col_widths[*header] = header->length() > _column_width ? header->length()+1 : _column_width;
+    out << std::setw(col_widths[*header]+2) << "+";
   }
   out << "\n";
+  out.fill(' ');
 }
 
 void
@@ -108,18 +114,19 @@ FormattedTable::printTable(std::ostream & out)
 {
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
+  std::map<std::string, unsigned short> col_widths;
 
   /**
    * Print out the header row
    */
-  printRowDivider(out);
+  printRowDivider(out, col_widths);
   out << "|" << std::setw(_column_width) << std::left << " time" << " |";
   for (header = _column_names.begin(); header != _column_names.end(); ++header)
   {
-    out << " " << std::setw(_column_width)  <<  *header << "|";
+    out << " " << std::setw(col_widths[*header])  <<  *header << "|";
   }
   out << "\n";
-  printRowDivider(out);
+  printRowDivider(out, col_widths);
   
   for (i = _data.begin(); i != _data.end(); ++i)
   {
@@ -127,12 +134,12 @@ FormattedTable::printTable(std::ostream & out)
     for (header = _column_names.begin(); header != _column_names.end(); ++header)
     {
       std::map<std::string, Real> &tmp = i->second;
-      out << std::setw(_column_width) << tmp[*header] << " |";
+      out << std::setw(col_widths[*header]) << tmp[*header] << " |";
     }
     out << "\n";
   }
   
-  printRowDivider(out);
+  printRowDivider(out, col_widths);
 }
 
 void
