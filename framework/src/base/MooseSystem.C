@@ -1573,9 +1573,10 @@ MooseSystem::serializeSolution(const NumericVector<Number>& soln)
 {
   soln.localize(_serialized_solution);
 
-  updateAuxVars(soln);
+  //TODO: Reenable the serialization of the auxiliary system
+//  updateAuxVars(soln);
 
-  _aux_system->solution->localize(_serialized_aux_solution);
+//  _aux_system->solution->localize(_serialized_aux_solution);
 }
 
 void
