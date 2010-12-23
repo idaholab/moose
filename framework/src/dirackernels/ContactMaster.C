@@ -84,9 +84,8 @@ ContactMaster::addPoints()
 //        _penetration_locator._has_penetrated[slave_node_num] = false;
 //      }
 //      else
-//        if(pinfo->_distance > 0)
-      if(pinfo->_distance > 0)
-        _penetration_locator._has_penetrated[slave_node_num] = true;
+        if(pinfo->_distance > 0)
+          _penetration_locator._has_penetrated[slave_node_num] = true;
         
 //        if(node->id() == 7207)
 //          std::cout<<"From Master: "<<pinfo->_distance<<std::endl;
