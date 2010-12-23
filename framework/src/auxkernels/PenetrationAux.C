@@ -39,9 +39,16 @@ Real
 PenetrationAux::computeValue()
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  /*
+  if(_penetration_locator._has_penetrated[_current_node->id()])
+    return 1;
+  else
+    return 0;
+  */
 
   if(pinfo)
     return pinfo->_distance;
+  
 
   return -999999;
 }
