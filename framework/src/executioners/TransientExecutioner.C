@@ -58,6 +58,7 @@ TransientExecutioner::TransientExecutioner(const std::string & name, InputParame
   :Executioner(name, parameters),
    _t_step(_moose_system.parameters().set<int> ("t_step") = 0),
    _time(_moose_system.parameters().set<Real>("time") = getParam<Real>("start_time")),
+   _time_old(_time),
    _input_dt(getParam<Real>("dt")),
    _dt(_moose_system.parameters().set<Real>("dt") = 0),
    _prev_dt(-1),
@@ -127,7 +128,7 @@ TransientExecutioner::takeStep(Real input_dt)
   } 
 
   // Increment time
-  _time += _dt;
+  _time = _time_old + _dt;
 
   _moose_system.reinitDT();
 
@@ -181,6 +182,7 @@ TransientExecutioner::takeStep(Real input_dt)
   {
     adaptMesh();
     _t_step++;
+    _time_old = _time;
   }
 }
 

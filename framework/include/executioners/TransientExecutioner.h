@@ -102,6 +102,7 @@ protected:
    * Please don't modify this directly!
    */
   Real & _time;
+  Real _time_old;
 
   /**
    * The dt from the input file.
