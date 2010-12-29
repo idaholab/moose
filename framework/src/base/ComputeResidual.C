@@ -243,10 +243,9 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
       // say it's likely even if it's not so we hurry and get the work done
       if (likely(node.processor_id() == libMesh::processor_id()))
       {
-        if (bc_it != bc_end)
-          reinitBCs(0, soln, node, boundary_id, residual);
+        reinitBCs(0, soln, node, boundary_id, residual);
 
-        for(; bc_it != bc_end; ++bc_it)
+        for (; bc_it != bc_end; ++bc_it)
           if (likely((*bc_it)->shouldBeApplied()))
             (*bc_it)->computeAndStoreResidual();
       }
