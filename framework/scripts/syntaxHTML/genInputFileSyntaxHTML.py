@@ -107,7 +107,8 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
 # modify the data tree
 def massage_data( data ):
   for block in data:
-    if block['name'] == 'Executioner':
+    name =  block['name']
+    if name == 'Executioner' or name == 'InitialCondition':
       block['name'] += ' (' + str(block['type']) + ')'
   return data
 
