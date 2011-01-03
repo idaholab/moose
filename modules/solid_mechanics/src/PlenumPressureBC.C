@@ -13,7 +13,8 @@ InputParameters validParams<PlenumPressureBC>()
   params.addRequiredParam<std::string>("temperature", "The name of the average temperature postprocessor value.");
   params.addRequiredParam<std::string>("volume", "The name of the internal volume postprocessor value.");
   params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
-  params.addParam<std::string>("output", "", "The reporting postprocessor to use.");
+  params.addParam<std::string>("output_initial_moles", "", "The reporting postprocessor to use for the initial moles of gas.");
+  params.addParam<std::string>("output", "", "The reporting postprocessor to use for the plenum pressure value.");
   return params;
 }
 
@@ -28,6 +29,7 @@ PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters par
    _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
    _volume( getPostprocessorValue(getParam<std::string>("volume"))),
    _startup_time( getParam<Real>("startup_time")),
+   _initial_He( getParam<std::string>("output_initial_moles") != "" ? &getPostprocessorValue(getParam<std::string>("output_initial_moles")) : NULL ),
    _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL ),
    _my_value(0)
 {
@@ -77,6 +79,10 @@ PlenumPressureBC::setup()
   {
     _initialized = true;
     _n0 = _initial_pressure * _volume / (_R * _temperature);
+    if ( _initial_He )
+    {
+      *_initial_He = _n0;
+    }
     const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
     _my_value = factor * _initial_pressure;
     if (_output)
