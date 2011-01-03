@@ -27,6 +27,33 @@ InternalVolume::InternalVolume(const std::string & name,
   : SideIntegral( name, parameters )
 {}
 
+//    /              /
+//   |              |
+//   |  div(F) dV = | F dot n dS
+//   |              |
+//  / V            / dS
+//
+// with
+//   F = a field
+//   n = the normal at the surface
+//   V = the volume of the domain
+//   S = the surface of the domain
+//
+// If we choose F as [x 0 0]^T, then
+//   div(F) = 1.
+// So,
+//
+//    /       /
+//   |       |
+//   |  dV = | x * n[0] dS
+//   |       |
+//  / V     / dS
+//
+// That is, the volume of the domain is the integral over the surface of the domain
+// of the x position of the surface times the x-component of the normal of the
+// surface.
+//
+
 Real
 InternalVolume::computeQpIntegral()
 {
