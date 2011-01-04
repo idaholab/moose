@@ -98,7 +98,15 @@ Kernel::computeResidual()
   precalculateResidual();
   for (_i=0; _i<_phi.size(); _i++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();  
+    {
+      var_Re(_i) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpResidual();
+
+#ifdef DEBUG
+      if(libmesh_isnan(var_Re(_i)))
+        mooseError("NaN in Kernel Residual for: " + _name);
+#endif //DEBUG
+    }
+  
 //  Moose::perf_log.pop("computeResidual()","Kernel");
 }
 
@@ -113,7 +121,13 @@ Kernel::computeJacobian()
   for (_i=0; _i<_phi.size(); _i++)
     for (_j=0; _j<_phi.size(); _j++)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
+      {
         var_Ke(_i,_j) += _moose_system._scaling_factor[_var_num]*_JxW[_qp]*computeQpJacobian();
+#ifdef DEBUG
+        if(libmesh_isnan(var_Ke(_i,_j)))
+          mooseError("NaN in Kernel Jacobian for: " + _name);
+#endif //DEBUG
+      }
   
 //  Moose::perf_log.pop("computeJacobian()",_name);
 }

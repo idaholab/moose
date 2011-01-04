@@ -131,23 +131,49 @@ SlaveConstraint::computeQpResidual()
 
   Real res_mag = pinfo->_normal * res_vec;
 
+  Real constraint_mag = pinfo->_normal(_component) * (pinfo->_closest_point(_component) - _mesh.node(node->id())(_component));
+
   return _phi[_i][_qp] * (
                           1e8*(
-                               (pinfo->_closest_point(_component) - (_moose_system.getMesh()->node(node->id())(_component)+_u[_qp]))
-                              ) -
-                          (pinfo->_normal(_component)*res_mag)
+                               (constraint_mag)
+                              )
+                          - (pinfo->_normal(_component)*res_mag)
                          );
 }
 
 Real
 SlaveConstraint::computeQpJacobian()
 {
-//   PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
-//   Node * node = pinfo->_node;
-//   long int dof_number = node->dof_number(0, _var_num, 0);
+  if(_i != _j)
+    return 0;
 
-  return _phi[_i][_qp] * (
-                          1e8*-_phi[_j][_qp]
-//                          -(pinfo->_normal(_component)*pinfo->_normal(_component)*_jacobian_copy(dof_number,dof_number))
-                         );
+   PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
+   Node * node = pinfo->_node;
+   long int dof_number = node->dof_number(0, _var_num, 0);
+
+   /*
+   RealVectorValue jac_vec;
+   
+   // Build up jac vector
+   for(unsigned int i=0; i<_dim; i++)
+   {
+     long int dof_number = node->dof_number(0, _vars(i), 0);
+     jac_vec(i) = _jacobian_copy(dof_number, dof_number);  
+   }
+
+   Real jac_mag = pinfo->_normal * jac_vec;
+
+   return _phi[_i][_qp] * (
+     (1e8*-_phi[_j][_qp])
+     -_jacobian_copy(dof_number, dof_number)
+     );
+   */
+
+   Real constraint_mag = pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id()));
+
+   return _phi[_i][_qp] * (
+//     (1e8 * pinfo->_normal(_component) * pinfo->_normal(_component) * -_phi[_j][_qp])
+     (1e8 * pinfo->_normal(_component) * -_phi[_j][_qp])
+     - (pinfo->_normal(_component) * pinfo->_normal(_component) * _jacobian_copy(dof_number, dof_number))
+     );
 }

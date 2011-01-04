@@ -124,23 +124,23 @@ public:
 
   virtual void postElement(const Elem * /*elem*/)
   {
-    if(_re.size())
+    if(_residual && _re.size())
     {
       _moose_system._dof_map->constrain_element_vector (_re, _moose_system._dof_data[_tid]._dof_indices, false);
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        if(_residual)
-          _residual->add_vector(_re, _moose_system._dof_data[_tid]._dof_indices);
-        else
+        _residual->add_vector(_re, _moose_system._dof_data[_tid]._dof_indices);
+      }
+    }
+    else if(_jacobian)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      for(unsigned int i=0; i< _moose_system._dof_data[_tid]._var_dof_indices.size(); i++)
+      {
+        if(_moose_system._dof_data[_tid]._var_dof_indices[i].size())
         {
-          for(unsigned int i=0; i< _moose_system._dof_data[_tid]._var_dof_indices.size(); i++)
-          {
-            if(_moose_system._dof_data[_tid]._var_dof_indices[i].size())
-            {
-              _moose_system._dof_map->constrain_element_matrix (*_moose_system._dof_data[_tid]._var_Kes[i], _moose_system._dof_data[_tid]._var_dof_indices[i], false);
-              _jacobian->add_matrix(*_moose_system._dof_data[_tid]._var_Kes[i], _moose_system._dof_data[_tid]._var_dof_indices[i]);
-            }
-          }
+          _moose_system._dof_map->constrain_element_matrix (*_moose_system._dof_data[_tid]._var_Kes[i], _moose_system._dof_data[_tid]._var_dof_indices[i], false);
+          _jacobian->add_matrix(*_moose_system._dof_data[_tid]._var_Kes[i], _moose_system._dof_data[_tid]._var_dof_indices[i]);
         }
       }
     }

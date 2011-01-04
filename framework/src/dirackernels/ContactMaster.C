@@ -87,8 +87,8 @@ ContactMaster::addPoints()
         if(pinfo->_distance > 0)
           _penetration_locator._has_penetrated[slave_node_num] = true;
         
-//        if(node->id() == 7207)
-//          std::cout<<"From Master: "<<pinfo->_distance<<std::endl;
+// // //        if(node->id() == 7207)
+// // //          std::cout<<"From Master: "<<pinfo->_distance<<std::endl;
     }  
     
     if(_penetration_locator._has_penetrated[slave_node_num])
@@ -127,17 +127,25 @@ ContactMaster::computeQpResidual()
 Real
 ContactMaster::computeQpJacobian()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
-  Node * node = pinfo->_node;
-  long int dof_number = node->dof_number(0, _var_num, 0);
-
   return 0;
   
   if(_i != _j)
     return 0;
 
-  //  std::cout<<dof_number<<std::endl;
-  //std::cout<<_jacobian_copy(dof_number,dof_number)<<std::endl;
-  return _phi[_i][_qp]*pinfo->_normal(_component)*_jacobian_copy(dof_number,dof_number);
+  PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
+  Node * node = pinfo->_node;
+
+  RealVectorValue jac_vec;
+
+  // Build up jac vector
+  for(unsigned int i=0; i<_dim; i++)
+  {
+    long int dof_number = node->dof_number(0, _vars(i), 0);
+    jac_vec(i) = _jacobian_copy(dof_number, dof_number);  
+  }
+
+  Real jac_mag = pinfo->_normal * jac_vec;
+
+  return _phi[_i][_qp]*pinfo->_normal(_component)*jac_mag;
 }
 
