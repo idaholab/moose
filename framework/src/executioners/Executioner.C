@@ -60,6 +60,9 @@ Executioner::setup()
 {
   Moose::setSolverDefaults(_moose_system, this);
 
+  // Check for Kernel, BC, and Material coverage on the Mesh
+  _moose_system.checkSystemsIntegrity();
+
   _moose_system.getNonlinearSystem()->update();
 
   // Update backward time solution vectors.
@@ -95,9 +98,6 @@ Executioner::setup()
 
     _moose_system.outputSystem(0, 0.0);
   }
-
-  // Check for Kernel, BC, and Material coverage on the Mesh
-  _moose_system.checkSystemsIntegrity();
 
   _moose_system.getNonlinearSystem()->update();
 

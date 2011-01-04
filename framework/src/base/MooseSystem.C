@@ -1627,12 +1627,11 @@ void
 MooseSystem::checkSystemsIntegrity()
 {
   parallel_only();
-  std::set<subdomain_id_type> element_subdomains;
 
   // Build a set of active subdomains from the mesh in MOOSE
   const MeshBase::element_iterator el_end = _mesh->elements_end();
   for (MeshBase::element_iterator el = _mesh->active_elements_begin(); el != el_end; ++el)
-    element_subdomains.insert((*el)->subdomain_id());
+    _element_subdomains.insert((*el)->subdomain_id());
 
   bool adaptivity = _es->parameters.have_parameter<bool>("adaptivity");
 
@@ -1643,7 +1642,7 @@ MooseSystem::checkSystemsIntegrity()
       if ((*j)->hasStatefulProperties() && adaptivity)
         mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
     
-    if (element_subdomains.find(i->first) == element_subdomains.end())
+    if (_element_subdomains.find(i->first) == _element_subdomains.end())
     {
       std::stringstream oss;
       oss << "Material block \"" << i->first << "\" specified in the input file does not exist";
@@ -1658,7 +1657,7 @@ MooseSystem::checkSystemsIntegrity()
     bool global_kernels_exist = false;
     
     global_kernels_exist = true; // FIXME
-    std::set_difference (element_subdomains.begin(), element_subdomains.end(),
+    std::set_difference (_element_subdomains.begin(), _element_subdomains.end(),
                        input_subdomains.begin(), input_subdomains.end(),
                        std::inserter(difference, difference.end()));
 

@@ -64,6 +64,8 @@ namespace libMesh
   class MeshBase;
 }
 
+typedef std::set<subdomain_id_type>::iterator SubdomainIterator;
+
 /**
  * This class represents one full coupled system of nonlinear equations including any
  * explicit (Aux) equations.
@@ -76,7 +78,7 @@ public:
   MooseSystem();
   MooseSystem(Mesh &mesh);
   virtual ~MooseSystem();
-
+  
   /**
    * Data Accessors for the various FE datastructures indexed by thread
    */
@@ -562,6 +564,7 @@ protected:
   std::vector<DamperData *> _damper_data;
   std::vector<DiracKernelData *> _dirac_kernel_data;
   std::vector<DiracKernelData *> _dirac_kernel_data_displaced;
+  std::set<subdomain_id_type> _element_subdomains;
 
 public:  
   DiracKernelInfo _dirac_kernel_info;
