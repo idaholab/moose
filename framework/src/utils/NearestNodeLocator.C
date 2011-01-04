@@ -38,7 +38,7 @@ NearestNodeLocator::findNodes()
   // Data strcutres to hold the Nodal Boundary conditions
   std::vector< unsigned int > node_list;
   std::vector< short int > node_boundary_list;
-  _mesh.boundary_info->build_node_list_from_side_list();
+//  _mesh.boundary_info->build_node_list_from_side_list();
   _mesh.boundary_info->build_node_list(node_list, node_boundary_list);
 
   const unsigned int n_nodes = node_list.size();
@@ -54,40 +54,37 @@ NearestNodeLocator::findNodes()
     {
       Node & node = _mesh.node(node_id);
 
-      if(node.processor_id() == libMesh::processor_id())
+      Node * closest_node = NULL;
+
+      Real closest_distance = 999999999;
+
+      for(unsigned int k=0; k<n_nodes; k++)
       {
-        Node * closest_node = NULL;
+        unsigned int other_boundary_id = node_boundary_list[k];
 
-        Real closest_distance = 999999999;
-
-        for(unsigned int k=0; k<n_nodes; k++)
+        if(other_boundary_id != boundary_id && (other_boundary_id == _boundary1 || other_boundary_id == _boundary2))
         {
-          unsigned int other_boundary_id = node_boundary_list[k];
+          Node * cur_node = _mesh.node_ptr(node_list[k]);
 
-          if(other_boundary_id != boundary_id && (other_boundary_id == _boundary1 || other_boundary_id == _boundary2))
+          Real distance = ((*cur_node) - node).size();
+
+          if(distance < closest_distance)
           {
-            Node * cur_node = _mesh.node_ptr(node_list[k]);
-
-            Real distance = ((*cur_node) - node).size();
-
-            if(distance < closest_distance)
-            {
-              closest_distance = distance;
-              closest_node = cur_node;
-            }
+            closest_distance = distance;
+            closest_node = cur_node;
           }
         }
+      }
 
-        if(closest_distance == 999999999)
-          mooseError("Unable to find nearest node!");
+      if(closest_distance == 999999999)
+        mooseError("Unable to find nearest node!");
 
-        NearestNodeInfo & info = _nearest_node_info[node.id()];
+      NearestNodeInfo & info = _nearest_node_info[node.id()];
 
-        if(closest_distance < info._distance)
-        {
-          info._nearest_node = closest_node;
-          info._distance = closest_distance;
-        }
+      if(closest_distance < info._distance)
+      {
+        info._nearest_node = closest_node;
+        info._distance = closest_distance;
       }
     }
   }

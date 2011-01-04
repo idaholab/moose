@@ -15,6 +15,9 @@
 #ifndef PENETRATIONLOCATOR_H
 #define PENETRATIONLOCATOR_H
 
+// Moose includes
+#include "GeometricSearchInterface.h"
+
 // libmesh includes
 #include "libmesh_common.h"
 #include "mesh.h"
@@ -29,11 +32,11 @@
 //Forward Declarations
 class MooseSystem;
 
-class PenetrationLocator
+class PenetrationLocator : protected GeometricSearchInterface
 {
 public:
 
-  PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, unsigned int master, unsigned int slave);
+  PenetrationLocator(MooseSystem & moose_system, GeometricSearchData & geom_search_data, Mesh & mesh, unsigned int master, unsigned int slave);
   ~PenetrationLocator();
   void detectPenetration();
 
@@ -78,6 +81,8 @@ public:
 
   FEType fe_type;
   FEBase * fe;
+
+  NearestNodeLocator & _nearest_node;
 
   /**
    * Data structure of nodes and their associated penetration information

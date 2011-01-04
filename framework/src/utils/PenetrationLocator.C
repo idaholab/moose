@@ -18,19 +18,22 @@
 #include "MooseSystem.h"
 #include "ArbitraryQuadrature.h"
 #include "LineSegment.h"
+#include "NearestNodeLocator.h"
 
 #include "boundary_info.h"
 #include "elem.h"
 #include "plane.h"
 #include "fe_interface.h"
 
-PenetrationLocator::PenetrationLocator(MooseSystem & moose_system, Mesh & mesh, unsigned int master, unsigned int slave)
-  :_moose_system(moose_system),
-   _mesh(mesh),
-   _master_boundary(master),
-   _slave_boundary(slave),
-   fe_type(),
-   fe(FEBase::build(mesh.mesh_dimension()-1, fe_type).release())
+PenetrationLocator::PenetrationLocator(MooseSystem & moose_system, GeometricSearchData & geom_search_data, Mesh & mesh, unsigned int master, unsigned int slave)
+  :  GeometricSearchInterface(geom_search_data),
+     _moose_system(moose_system),
+     _mesh(mesh),
+     _master_boundary(master),
+     _slave_boundary(slave),
+     fe_type(),
+     fe(FEBase::build(mesh.mesh_dimension()-1, fe_type).release()),
+     _nearest_node(getNearestNodeLocator(master, slave))
 {}
 
 PenetrationLocator::~PenetrationLocator()
@@ -135,10 +138,10 @@ PenetrationLocator::detectPenetration()
           }
         } 
           
-        Node * closest_node = NULL;
+        Node * closest_node = _nearest_node.nearestNode(node.id());
         
-        Real closest_distance = 999999999;
-        
+        Real closest_distance = _nearest_node.distance(node.id());
+        /*
         for(unsigned int k=0; k<n_nodes; k++)  
         {
           unsigned int other_boundary_id = node_boundary_list[k];
@@ -156,7 +159,7 @@ PenetrationLocator::detectPenetration()
             }
           }
         }
-
+        */
         std::vector<unsigned int> & slave_elems = _moose_system.node_to_elem_map[node.id()];
 
         bool a_slave_elem_on_this_processor = false;
@@ -722,14 +725,14 @@ PenetrationLocator::penetrationNormal(unsigned int node_id)
 
 
 PenetrationLocator::PenetrationInfo::PenetrationInfo(Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref)
-  : _node(node),
-    _elem(elem),
-    _side(side),
-    _side_num(side_num),
-    _normal(norm),
-    _distance(norm_distance),
-    _closest_point(closest_point),
-    _closest_point_ref(closest_point_ref)
+  :_node(node),
+   _elem(elem),
+   _side(side),
+   _side_num(side_num),
+   _normal(norm),
+   _distance(norm_distance),
+   _closest_point(closest_point),
+   _closest_point_ref(closest_point_ref)
 {}
 
   

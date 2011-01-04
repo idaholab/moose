@@ -26,16 +26,6 @@ GeometricSearchData::GeometricSearchData(MooseSystem & moose_system, Mesh * & me
 void
 GeometricSearchData::update()
 {
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
-
-  for(; pl_it != pl_end; ++pl_it)
-  {
-    PenetrationLocator * pl = pl_it->second;
-
-    pl->detectPenetration();
-  }
-
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
   const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
 
@@ -44,6 +34,16 @@ GeometricSearchData::update()
     NearestNodeLocator * nnl = nnl_it->second;
 
     nnl->findNodes();
+  }
+
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
+
+  for(; pl_it != pl_end; ++pl_it)
+  {
+    PenetrationLocator * pl = pl_it->second;
+
+    pl->detectPenetration();
   }
 }
 
@@ -54,7 +54,7 @@ GeometricSearchData::getPenetrationLocator(unsigned int master, unsigned int sla
 
   if(!pl)
   {
-    pl = new PenetrationLocator(_moose_system, *_mesh, master, slave);
+    pl = new PenetrationLocator(_moose_system, *this, *_mesh, master, slave);
     _penetration_locators[std::pair<unsigned int, unsigned int>(master, slave)] = pl;
   }
 
