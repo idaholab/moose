@@ -1158,29 +1158,27 @@ MooseSystem::addPostprocessor(std::string pp_name,
     {
       const std::vector<unsigned int> & boundaries = parameters.get<std::vector<unsigned int> >("boundary");
       
-      if (!_postprocessor_data[tid].hasPostprocessor(name))
-      {
+//      if (!_postprocessor_data[tid].hasPostprocessor(name))
+//      {
         for (unsigned int i=0; i<boundaries.size(); ++i)
         {
           parameters.set<unsigned int>("_boundary_id") = boundaries[i];
-          std::cerr << "  adding " << name << std::endl;
             Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, parameters);
             (*pps)[tid].addPostprocessor(pp);
         }
-      }
-      else
-        mooseError("Duplicate postprocessor name '" + name + "'");
+//      }
+//      else
+//        mooseError("Duplicate postprocessor name '" + name + "'");
     }
     else
     {
-      std::cerr << "  adding " << name << std::endl;
-      if (!_postprocessor_data[tid].hasPostprocessor(name))
-      {
+//      if (!_postprocessor_data[tid].hasPostprocessor(name))
+//      {
         Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, parameters);
         (*pps)[tid].addPostprocessor(pp);
-      }
-      else
-        mooseError("Duplicate postprocessor name '" + name + "'");
+//      }
+//      else
+//        mooseError("Duplicate postprocessor name '" + name + "'");
     }
   }
 }
