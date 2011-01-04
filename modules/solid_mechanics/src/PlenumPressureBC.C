@@ -33,8 +33,6 @@ PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters par
    _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL ),
    _my_value(0)
 {
-  //_moose_system.needPostprocessorsForResiduals( true );
-
   if(_component < 0)
   {
     std::cout << "Must select a component for "
