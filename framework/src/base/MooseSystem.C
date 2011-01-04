@@ -83,7 +83,6 @@ MooseSystem::MooseSystem() :
   _need_old_newton(false),
   _newton_soln(NULL),
   _old_newton_soln(NULL),
-  _compute_pps_each_residual_evaluation(false),
   _need_residual_copy(false),
   _need_jacobian_copy(false),
   _serialize_solution(false),
@@ -172,7 +171,6 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _need_old_newton(false),
   _newton_soln(NULL),
   _old_newton_soln(NULL),
-  _compute_pps_each_residual_evaluation(false),
   _need_residual_copy(false),
   _need_jacobian_copy(false),
   _serialize_solution(false),
@@ -391,6 +389,8 @@ MooseSystem::sizeEverything()
   _stabilizers.resize(n_threads);
   _ics.resize(n_threads);
   _pps.resize(n_threads);
+  _pps_residual.resize(n_threads);
+  _pps_jacobian.resize(n_threads);
   _functions.resize(n_threads);
   _dampers.resize(n_threads);
   _dirac_kernels.resize(n_threads);
@@ -1137,8 +1137,17 @@ MooseSystem::addInitialCondition(std::string ic_name,
 void
 MooseSystem::addPostprocessor(std::string pp_name,
                               const std::string & name,
-                              InputParameters parameters)
+                              InputParameters parameters,
+                              Moose::PostprocessorType pps_type/* = Moose::PPS_TIMESTEP*/)
 {
+  std::vector<PostprocessorWarehouse> * pps;
+  switch (pps_type)
+  {
+  case Moose::PPS_RESIDUAL: pps = &_pps_residual; break;
+  case Moose::PPS_JACOBIAN: pps = &_pps_jacobian; break;
+  default: pps = &_pps; break;
+  }
+
   parameters.set<MooseSystem *>("_moose_system") = this;
 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
@@ -1149,17 +1158,29 @@ MooseSystem::addPostprocessor(std::string pp_name,
     {
       const std::vector<unsigned int> & boundaries = parameters.get<std::vector<unsigned int> >("boundary");
       
-      for (unsigned int i=0; i<boundaries.size(); ++i)
+      if (!_postprocessor_data[tid].hasPostprocessor(name))
       {
-        parameters.set<unsigned int>("_boundary_id") = boundaries[i];
-        Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, parameters);
-        _pps[tid].addPostprocessor(pp);
+        for (unsigned int i=0; i<boundaries.size(); ++i)
+        {
+          parameters.set<unsigned int>("_boundary_id") = boundaries[i];
+          std::cerr << "  adding " << name << std::endl;
+            Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, parameters);
+            (*pps)[tid].addPostprocessor(pp);
+        }
       }
+      else
+        mooseError("Duplicate postprocessor name '" + name + "'");
     }
     else
     {
-      Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, parameters);
-      _pps[tid].addPostprocessor(pp);
+      std::cerr << "  adding " << name << std::endl;
+      if (!_postprocessor_data[tid].hasPostprocessor(name))
+      {
+        Postprocessor * pp = PostprocessorFactory::instance()->create(pp_name, name, parameters);
+        (*pps)[tid].addPostprocessor(pp);
+      }
+      else
+        mooseError("Duplicate postprocessor name '" + name + "'");
     }
   }
 }

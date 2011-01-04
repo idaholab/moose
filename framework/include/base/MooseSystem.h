@@ -281,7 +281,8 @@ public:
 
   void addPostprocessor(std::string pp_name,
                         const std::string & name,
-                        InputParameters parameters);
+                        InputParameters parameters,
+                        Moose::PostprocessorType pps_type = Moose::PPS_TIMESTEP);
 
   void addFunction(std::string pp_name,
                    const std::string & name,
@@ -345,13 +346,9 @@ public:
 
   void reinitDiracKernels(THREAD_ID tid, const NumericVector<Number>& soln, const Elem * elem, const std::vector<Point> & points, const std::vector<Point> & displaced_points, DenseVector<Number> * Re, DenseMatrix<Number> * Ke=NULL);
 
-  virtual void computePostprocessors (const NumericVector<Number>& soln);
+  virtual void computePostprocessors (const NumericVector<Number>& soln, int pps_type = Moose::PPS_TIMESTEP);
 
   virtual void outputPostprocessors();
-
-  bool needPostprocessorsForResiduals() { return _compute_pps_each_residual_evaluation; }
-
-  void needPostprocessorsForResiduals(bool state) { _compute_pps_each_residual_evaluation = state; }
 
   /**
    * Returns true if a copy of the residual vector is needed (useful if you are going to be modifying
@@ -646,11 +643,6 @@ protected:
   NumericVector<Number> * _old_newton_soln;   /// solution vector for the previous newton step
 
   /**
-   * TRUE if we need to compute postprocessors before every residual evaluation, otherwise FALSE
-   */
-  bool _compute_pps_each_residual_evaluation;
-
-  /**
    * TRUE if a copy of the residual is needed during dirichlet BC computation.
    */
   bool _need_residual_copy;
@@ -678,6 +670,8 @@ protected:
   std::vector<StabilizerWarehouse> _stabilizers;
   std::vector<InitialConditionWarehouse> _ics;
   std::vector<PostprocessorWarehouse> _pps;
+  std::vector<PostprocessorWarehouse> _pps_residual;    // pps calculated every residual evaluation
+  std::vector<PostprocessorWarehouse> _pps_jacobian;    // pps calculated every jacobian evaluation
   std::vector<FunctionWarehouse> _functions;
   std::vector<DamperWarehouse> _dampers;
   std::vector<DiracKernelWarehouse> _dirac_kernels;
@@ -736,6 +730,8 @@ protected:
    * Error vector for use with the error estimator.
    */
   ErrorVector * _error;
+
+  void computePostprocessors(const NumericVector<Number>& soln, std::vector<PostprocessorWarehouse> & pps);
 
 public:
   /**

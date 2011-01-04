@@ -178,8 +178,7 @@ namespace Moose
 void MooseSystem::computeResidual (const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   _current_residual = &residual;
-  if (needPostprocessorsForResiduals())
-    computePostprocessors(*(getNonlinearSystem()->current_local_solution));
+  computePostprocessors(*(getNonlinearSystem()->current_local_solution), Moose::PPS_RESIDUAL);
   computeTimeDeriv(soln);
   computeResidualInternal(soln, residual);
   finishResidual(residual);

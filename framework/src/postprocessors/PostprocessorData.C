@@ -27,6 +27,12 @@ PostprocessorData::empty()
   return _output_table.empty();
 }
 
+bool
+PostprocessorData::hasPostprocessor(const std::string & name)
+{
+  return (_values.find(name) != _values.end());
+}
+
 PostprocessorValue &
 PostprocessorData::getPostprocessorValue(const std::string & name)
 {
@@ -42,6 +48,7 @@ PostprocessorData::getPostprocessorValue(const std::string & name)
 void
 PostprocessorData::init(const std::string & name)
 {
+  std::cerr << "  init " << std::endl;
   _values[name] = 0.0;
 }
 

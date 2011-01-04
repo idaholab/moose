@@ -31,6 +31,8 @@ public:
 
   void init(const std::string & name);
 
+  bool hasPostprocessor(const std::string & name);
+
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
   void storeValue(const std::string & name, Real value);

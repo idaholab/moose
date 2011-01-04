@@ -241,6 +241,14 @@ namespace Moose
     CRANK_NICOLSON
   };
 
+  // Bit mask flags to be able to combine them through or-operator (|)
+  enum PostprocessorType
+  {
+    PPS_RESIDUAL = 0x01,
+    PPS_JACOBIAN = 0x02,
+    PPS_TIMESTEP = 0x04
+  };
+
   const unsigned int ANY_BLOCK_ID = (unsigned int) -1;
 
   extern GetPot *command_line;

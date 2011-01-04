@@ -192,6 +192,8 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
   Moose::perf_log.push("compute_jacobian()","Solve");
   _current_jacobian = &jacobian;
 
+  computePostprocessors(*(getNonlinearSystem()->current_local_solution), Moose::PPS_JACOBIAN);
+
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)

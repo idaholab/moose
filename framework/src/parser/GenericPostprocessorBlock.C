@@ -28,6 +28,13 @@ GenericPostprocessorBlock::GenericPostprocessorBlock(const std::string & name, I
    _type(getType())
 {
   setClassParams(PostprocessorFactory::instance()->getValidParams(_type));
+
+  if (_parser_handle.pathContains(_name, "Residual"))
+    _pps_type = Moose::PPS_RESIDUAL;
+  else if (_parser_handle.pathContains(_name, "Jacobian"))
+    _pps_type = Moose::PPS_JACOBIAN;
+  else
+    _pps_type = Moose::PPS_TIMESTEP;
 }
 
 void
@@ -39,5 +46,5 @@ GenericPostprocessorBlock::execute()
             << "\tname:" << getShortName() << ":";
 #endif
   
-  _moose_system.addPostprocessor(_type, getShortName(), getClassParams());
+  _moose_system.addPostprocessor(_type, getShortName(), getClassParams(), _pps_type);
 }

@@ -36,15 +36,17 @@
 class ComputeInternalPostprocessors : public ComputeBase<ConstElemRange>
 {
 public:
-  ComputeInternalPostprocessors(MooseSystem &sys, const NumericVector<Number>& in_soln) :
+  ComputeInternalPostprocessors(MooseSystem &sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps) :
     ComputeBase<ConstElemRange>(sys),
-     _soln(in_soln)
+     _soln(in_soln),
+     _pps(pps)
   {}
 
   // Splitting Constructor
   ComputeInternalPostprocessors(ComputeInternalPostprocessors & x, Threads::split) :
     ComputeBase<ConstElemRange>(x._moose_system),
-    _soln(x._soln)
+    _soln(x._soln),
+    _pps(x._pps)
   {
   }
 
@@ -52,32 +54,32 @@ public:
   {
     //Initialize side and element post processors
 
-    std::set<unsigned int>::iterator block_begin = _moose_system._pps[_tid]._block_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator block_end = _moose_system._pps[_tid]._block_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator block_begin = _pps[_tid]._block_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator block_end = _pps[_tid]._block_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator block_it = block_begin;
 
     for (block_it=block_begin;block_it!=block_end;++block_it)
     {
       unsigned int block_id = *block_it;
 
-      PostprocessorIterator postprocessor_begin = _moose_system._pps[_tid].elementPostprocessorsBegin(block_id);
-      PostprocessorIterator postprocessor_end = _moose_system._pps[_tid].elementPostprocessorsEnd(block_id);
+      PostprocessorIterator postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(block_id);
+      PostprocessorIterator postprocessor_end = _pps[_tid].elementPostprocessorsEnd(block_id);
       PostprocessorIterator postprocessor_it = postprocessor_begin;
 
       for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
         (*postprocessor_it)->initialize();
     }
 
-    std::set<unsigned int>::iterator boundary_begin = _moose_system._pps[_tid]._boundary_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator boundary_end = _moose_system._pps[_tid]._boundary_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator boundary_begin = _pps[_tid]._boundary_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator boundary_end = _pps[_tid]._boundary_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator boundary_it = boundary_begin;
 
     for (boundary_it=boundary_begin;boundary_it!=boundary_end;++boundary_it)
     {
       //note: for threaded applications where the elements get broken up it
       //may be more efficient to initialize these on demand inside the loop
-      PostprocessorIterator side_postprocessor_begin = _moose_system._pps[_tid].sidePostprocessorsBegin(*boundary_it);
-      PostprocessorIterator side_postprocessor_end = _moose_system._pps[_tid].sidePostprocessorsEnd(*boundary_it);
+      PostprocessorIterator side_postprocessor_begin = _pps[_tid].sidePostprocessorsBegin(*boundary_it);
+      PostprocessorIterator side_postprocessor_end = _pps[_tid].sidePostprocessorsEnd(*boundary_it);
       PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
 
       for (side_postprocessor_it=side_postprocessor_begin;side_postprocessor_it!=side_postprocessor_end;++side_postprocessor_it)
@@ -96,15 +98,15 @@ public:
     unsigned int subdomain = elem->subdomain_id();
 
     //Global Postprocessors
-    PostprocessorIterator postprocessor_begin = _moose_system._pps[_tid].elementPostprocessorsBegin(Moose::ANY_BLOCK_ID);
-    PostprocessorIterator postprocessor_end = _moose_system._pps[_tid].elementPostprocessorsEnd(Moose::ANY_BLOCK_ID);
+    PostprocessorIterator postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(Moose::ANY_BLOCK_ID);
+    PostprocessorIterator postprocessor_end = _pps[_tid].elementPostprocessorsEnd(Moose::ANY_BLOCK_ID);
     PostprocessorIterator postprocessor_it = postprocessor_begin;
 
     for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
       (*postprocessor_it)->execute();
 
-    postprocessor_begin = _moose_system._pps[_tid].elementPostprocessorsBegin(subdomain);
-    postprocessor_end = _moose_system._pps[_tid].elementPostprocessorsEnd(subdomain);
+    postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(subdomain);
+    postprocessor_end = _pps[_tid].elementPostprocessorsEnd(subdomain);
     postprocessor_it = postprocessor_begin;
 
     for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
@@ -113,8 +115,8 @@ public:
 
   virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
   {
-    PostprocessorIterator side_postprocessor_begin = _moose_system._pps[_tid].sidePostprocessorsBegin(bnd_id);
-    PostprocessorIterator side_postprocessor_end = _moose_system._pps[_tid].sidePostprocessorsEnd(bnd_id);
+    PostprocessorIterator side_postprocessor_begin = _pps[_tid].sidePostprocessorsBegin(bnd_id);
+    PostprocessorIterator side_postprocessor_end = _pps[_tid].sidePostprocessorsEnd(bnd_id);
     PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
 
     if (side_postprocessor_begin != side_postprocessor_end)
@@ -132,6 +134,7 @@ public:
 
 protected:
   const NumericVector<Number>& _soln;
+  std::vector<PostprocessorWarehouse> & _pps;
 };
 
 
@@ -146,14 +149,9 @@ namespace Moose
   }
 }
 
-void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
+void MooseSystem::computePostprocessors(const NumericVector<Number>& soln, std::vector<PostprocessorWarehouse> & pps)
 {
-  Moose::perf_log.push("compute_postprocessors()","Solve");
-
-  // This resets stuff so that id 0 is the first id
-  ParallelUniqueId::reinitialize();
-
-  if (_pps[0]._block_ids_with_postprocessors.size() > 0 || _pps[0]._boundary_ids_with_postprocessors.size() > 0)
+  if (pps[0]._block_ids_with_postprocessors.size() > 0 || pps[0]._boundary_ids_with_postprocessors.size() > 0)
   {
     if (_serialize_solution)
       serializeSolution(soln);
@@ -163,20 +161,20 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
 
     updateAuxVars(soln);    
 
-    ComputeInternalPostprocessors cipp(*this, soln);
+    ComputeInternalPostprocessors cipp(*this, soln, pps);
     cipp(*getActiveLocalElementRange());
 
     // Store element postprocessors values
-    std::set<unsigned int>::iterator block_ids_begin = _pps[0]._block_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator block_ids_end = _pps[0]._block_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator block_ids_begin = pps[0]._block_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator block_ids_end = pps[0]._block_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator block_ids_it = block_ids_begin;
 
     for (; block_ids_it != block_ids_end; ++block_ids_it)
     {
       unsigned int block_id = *block_ids_it;
 
-      PostprocessorIterator element_postprocessor_begin = _pps[0].elementPostprocessorsBegin(block_id);
-      PostprocessorIterator element_postprocessor_end = _pps[0].elementPostprocessorsEnd(block_id);
+      PostprocessorIterator element_postprocessor_begin = pps[0].elementPostprocessorsBegin(block_id);
+      PostprocessorIterator element_postprocessor_end = pps[0].elementPostprocessorsEnd(block_id);
       PostprocessorIterator element_postprocessor_it = element_postprocessor_begin;
 
       // Store element postprocessors values
@@ -192,16 +190,16 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
     }
 
     // Store side postprocessors values
-    std::set<unsigned int>::iterator boundary_ids_begin = _pps[0]._boundary_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator boundary_ids_end = _pps[0]._boundary_ids_with_postprocessors.end();
+    std::set<unsigned int>::iterator boundary_ids_begin = pps[0]._boundary_ids_with_postprocessors.begin();
+    std::set<unsigned int>::iterator boundary_ids_end = pps[0]._boundary_ids_with_postprocessors.end();
     std::set<unsigned int>::iterator boundary_ids_it = boundary_ids_begin;
 
     for (; boundary_ids_it != boundary_ids_end; ++boundary_ids_it)
     {
       unsigned int boundary_id = *boundary_ids_it;
       
-      PostprocessorIterator side_postprocessor_begin = _pps[0].sidePostprocessorsBegin(boundary_id);
-      PostprocessorIterator side_postprocessor_end = _pps[0].sidePostprocessorsEnd(boundary_id);
+      PostprocessorIterator side_postprocessor_begin = pps[0].sidePostprocessorsBegin(boundary_id);
+      PostprocessorIterator side_postprocessor_end = pps[0].sidePostprocessorsEnd(boundary_id);
       PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
     
       for (side_postprocessor_it=side_postprocessor_begin;
@@ -217,8 +215,8 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
   }
 
   // Compute and store generic postprocessors values
-  PostprocessorIterator generic_postprocessor_begin = _pps[0].genericPostprocessorsBegin();
-  PostprocessorIterator generic_postprocessor_end = _pps[0].genericPostprocessorsEnd();
+  PostprocessorIterator generic_postprocessor_begin = pps[0].genericPostprocessorsBegin();
+  PostprocessorIterator generic_postprocessor_end = pps[0].genericPostprocessorsEnd();
   PostprocessorIterator generic_postprocessor_it = generic_postprocessor_begin;
 
   for (generic_postprocessor_it =generic_postprocessor_begin;
@@ -232,6 +230,22 @@ void MooseSystem::computePostprocessors(const NumericVector<Number>& soln)
   
     _postprocessor_data[0].storeValue(name, value);
   }
+
+}
+
+void MooseSystem::computePostprocessors(const NumericVector<Number>& soln, int pps_type)
+{
+  Moose::perf_log.push("compute_postprocessors()","Solve");
+
+  // This resets stuff so that id 0 is the first id
+  ParallelUniqueId::reinitialize();
+
+  if ((pps_type & Moose::PPS_RESIDUAL) == Moose::PPS_RESIDUAL)
+    computePostprocessors(soln, _pps_residual);
+  if ((pps_type & Moose::PPS_JACOBIAN) == Moose::PPS_JACOBIAN)
+    computePostprocessors(soln, _pps_jacobian);
+  if ((pps_type & Moose::PPS_TIMESTEP) == Moose::PPS_TIMESTEP)
+    computePostprocessors(soln, _pps);
 
   Moose::perf_log.pop("compute_postprocessors()","Solve");
 }

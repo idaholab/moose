@@ -30,6 +30,9 @@ public:
 
   virtual void execute();
 
+protected:
+  Moose::PostprocessorType _pps_type;
+
 private:
   std::string _type;
 };
