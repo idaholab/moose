@@ -34,6 +34,7 @@
 //#include "DGConvection.h"
 
 #include "DirichletBC.h"
+#include "DirichletPostprocessorBC.h"
 #include "SinDirichletBC.h"
 #include "SinNeumannBC.h"
 #include "NeumannBC.h"
@@ -193,6 +194,7 @@ Moose::registerObjects()
 //  registerDGKernel(DGConvection);
 
   registerBoundaryCondition(DirichletBC);
+  registerBoundaryCondition(DirichletPostprocessorBC);
   registerBoundaryCondition(SinDirichletBC);
   registerBoundaryCondition(SinNeumannBC);
   registerBoundaryCondition(NeumannBC);
