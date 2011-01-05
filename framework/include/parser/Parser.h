@@ -153,6 +153,13 @@ private:
    * MOOSE error if there is a problem
    */
   void checkInputFile();
+
+  /**
+   * This function builds a vector of variables that appear on the command line.  This is a necessary
+   * step since since there doesn't appear to be an easy way to detect whether a command line variable
+   * exists based on a generic default value.  (i.e. the call to fill the variable will return a default value)
+   */
+  void buildCommandLineVarsVector();
   
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
@@ -174,6 +181,7 @@ private:
   std::vector<std::string> _section_names;
   const std::string _dump_string;
   const static std::string _show_tree;
+  std::set<std::string> _command_line_vars;   // set used for O(log n) lookup
 
   /**
    * Pointer to the parser block tree built from the call to "parse"
