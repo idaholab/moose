@@ -36,7 +36,7 @@
 #include "DamperFactory.h"
 
 // Static Data initialization
-const std::string Parser::_show_tree = "--show_tree";
+const std::string Parser::_show_tree = "--show-tree";
 
  
 Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
@@ -157,7 +157,7 @@ Parser::parse(const std::string &input_filename)
     _input_tree->printBlockData();
     _tree_printed = true;
 #else
-    if (Moose::command_line && Moose::command_line->search("--show-tree"))
+    if (Moose::command_line && Moose::command_line->search(_show_tree))
     {
       _input_tree->printBlockData();
       _tree_printed = true;
