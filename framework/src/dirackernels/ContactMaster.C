@@ -66,7 +66,7 @@ ContactMaster::addPoints()
     Node * node = pinfo->_node;
 
     if(_moose_system.DUMMY_CONTACT_FLAG)
-    {
+    {/*
       RealVectorValue res_vec;
 
       // Build up residual vector
@@ -77,18 +77,11 @@ ContactMaster::addPoints()
       }
   
       Real res_mag = pinfo->_normal * res_vec;
-
+     */
       
-//      if(res_mag < 0 && std::abs(res_mag) > 1e-3 && _penetration_locator._has_penetrated[slave_node_num])
-//      {
-//        _penetration_locator._has_penetrated[slave_node_num] = false;
-//      }
-//      else
-        if(pinfo->_distance > 0)
-          _penetration_locator._has_penetrated[slave_node_num] = true;
+      if(pinfo->_distance > 0)
+        _penetration_locator._has_penetrated[slave_node_num] = true;
         
-// // //        if(node->id() == 7207)
-// // //          std::cout<<"From Master: "<<pinfo->_distance<<std::endl;
     }  
     
     if(_penetration_locator._has_penetrated[slave_node_num])

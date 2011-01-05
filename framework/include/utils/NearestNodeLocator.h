@@ -70,6 +70,10 @@ public:
 
   unsigned int _boundary1;
   unsigned int _boundary2;
+
+  bool _first;
+  std::vector<unsigned int> _slave_nodes;
+  std::vector<unsigned int> _master_nodes;
 };
 
 #endif //NEARESTNODELOCATOR_H

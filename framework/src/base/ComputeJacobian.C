@@ -229,7 +229,9 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
 //  jacobian.print();
   
   //Distribute any point loads
+  DUMMY_CONTACT_FLAG = true;
   computeDiracKernels(soln, NULL, &jacobian);
+  DUMMY_CONTACT_FLAG = false;
 
   jacobian.close();
 //  jacobian.print();

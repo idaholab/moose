@@ -1570,7 +1570,7 @@ MooseSystem::updateNewtonStep()
     _newton_soln->close();
   }
 
-
+/*
   if(_need_residual_copy)
   {
     DUMMY_CONTACT_FLAG = true;
@@ -1578,6 +1578,7 @@ MooseSystem::updateNewtonStep()
     computeResidual(*_system->current_local_solution, *_system->rhs);
     DUMMY_CONTACT_FLAG = false;
   }
+*/
 }
 
 void

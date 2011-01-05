@@ -68,6 +68,7 @@ SlaveConstraint::addPoints()
 
     if(_moose_system.DUMMY_CONTACT_FLAG)
     {
+      /*
       RealVectorValue res_vec;
 
       // Build up residual vector
@@ -78,6 +79,7 @@ SlaveConstraint::addPoints()
       }
 
       Real res_mag = pinfo->_normal * res_vec;
+      */
 
 //      if(res_mag < 0 && _penetration_locator._has_penetrated[slave_node_num])
 //      {
@@ -131,7 +133,7 @@ SlaveConstraint::computeQpResidual()
 
   Real res_mag = pinfo->_normal * res_vec;
 
-  Real constraint_mag = pinfo->_normal(_component) * (pinfo->_closest_point(_component) - _mesh.node(node->id())(_component));
+  Real constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * ( (_mesh.node(node->id())(_component)) - (pinfo->_closest_point(_component)) );
 
   return _phi[_i][_qp] * (
                           1e8*(
@@ -144,6 +146,8 @@ SlaveConstraint::computeQpResidual()
 Real
 SlaveConstraint::computeQpJacobian()
 {
+  return 0;
+  
   if(_i != _j)
     return 0;
 
@@ -173,7 +177,7 @@ SlaveConstraint::computeQpJacobian()
 
    return _phi[_i][_qp] * (
 //     (1e8 * pinfo->_normal(_component) * pinfo->_normal(_component) * -_phi[_j][_qp])
-     (1e8 * pinfo->_normal(_component) * -_phi[_j][_qp])
+     (pinfo->_normal(_component) * pinfo->_normal(_component) * 1e8 * _phi[_j][_qp])
      - (pinfo->_normal(_component) * pinfo->_normal(_component) * _jacobian_copy(dof_number, dof_number))
      );
 }
