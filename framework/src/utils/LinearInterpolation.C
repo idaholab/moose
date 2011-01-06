@@ -28,7 +28,7 @@ LinearInterpolation::LinearInterpolation(const std::vector<double> & x,
                "Vectors are not the same length" );
 
   bool error(false);
-  for (unsigned i(0); !error && i < x.size()-1; ++i)
+  for (unsigned i(0); !error && !x.empty() && i < x.size()-1; ++i)
   {
     if ( _x[i] >= _x[i+1] )
     {
