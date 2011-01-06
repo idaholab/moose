@@ -260,6 +260,8 @@ Moose::registerObjects()
   registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/Residual/*");
   registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/Jacobian");
   registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/Jacobian/*");
+  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/NewtonIter");
+  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/Jacobian/*");
   registerNamedParserBlock(DampersBlock, "Dampers");
   registerNamedParserBlock(GenericDamperBlock, "Dampers/*");  
   registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");

@@ -33,6 +33,8 @@ GenericPostprocessorBlock::GenericPostprocessorBlock(const std::string & name, I
     _pps_type = Moose::PPS_RESIDUAL;
   else if (_parser_handle.pathContains(_name, "Jacobian"))
     _pps_type = Moose::PPS_JACOBIAN;
+  else if (_parser_handle.pathContains(_name, "NewtonIter"))
+    _pps_type = Moose::PPS_NEWTONIT;
   else
     _pps_type = Moose::PPS_TIMESTEP;
 }

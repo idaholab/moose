@@ -246,7 +246,8 @@ namespace Moose
   {
     PPS_RESIDUAL = 0x01,
     PPS_JACOBIAN = 0x02,
-    PPS_TIMESTEP = 0x04
+    PPS_TIMESTEP = 0x04,
+    PPS_NEWTONIT = 0x08
   };
 
   const unsigned int ANY_BLOCK_ID = (unsigned int) -1;

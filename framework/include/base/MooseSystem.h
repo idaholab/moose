@@ -675,6 +675,7 @@ protected:
   std::vector<PostprocessorWarehouse> _pps;
   std::vector<PostprocessorWarehouse> _pps_residual;    // pps calculated every residual evaluation
   std::vector<PostprocessorWarehouse> _pps_jacobian;    // pps calculated every jacobian evaluation
+  std::vector<PostprocessorWarehouse> _pps_newtonit;    // pps calculated every newton iteration
   std::vector<FunctionWarehouse> _functions;
   std::vector<DamperWarehouse> _dampers;
   std::vector<DiracKernelWarehouse> _dirac_kernels;

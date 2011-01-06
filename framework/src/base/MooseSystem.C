@@ -1145,6 +1145,7 @@ MooseSystem::addPostprocessor(std::string pp_name,
   {
   case Moose::PPS_RESIDUAL: pps = &_pps_residual; break;
   case Moose::PPS_JACOBIAN: pps = &_pps_jacobian; break;
+  case Moose::PPS_NEWTONIT: pps = &_pps_newtonit; break;
   default: pps = &_pps; break;
   }
 
@@ -1569,6 +1570,8 @@ MooseSystem::updateNewtonStep()
     *_newton_soln = *_system->solution;
     _newton_soln->close();
   }
+
+  computePostprocessors((*_system->current_local_solution), Moose::PPS_NEWTONIT);
 
 /*
   if(_need_residual_copy)
