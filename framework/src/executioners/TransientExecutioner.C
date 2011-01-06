@@ -191,12 +191,18 @@ TransientExecutioner::takeStep(Real input_dt)
       _moose_system.outputSystem(_t_step, _time);
   }
 
-  if(last_solve_converged)
+  if(last_solve_converged && input_dt == -1)
   {
-    adaptMesh();
-    _t_step++;
-    _time_old = _time;
+    endStep();
   }
+}
+
+void
+TransientExecutioner::endStep()
+{
+  adaptMesh();
+  _t_step++;
+  _time_old = _time;
 }
 
 Real

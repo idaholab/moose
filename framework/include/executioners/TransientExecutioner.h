@@ -61,6 +61,11 @@ public:
   virtual void takeStep(Real input_dt = -1.0);
   
   /**
+   * This should finalize the timestep.
+   */
+  virtual void endStep();
+  
+  /**
    * @return The fully constrained dt for this timestep
    */
   virtual Real computeConstrainedDT();
