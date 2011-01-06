@@ -17,6 +17,7 @@
 
 #include "Moose.h"
 #include "Executioner.h"
+#include "LinearInterpolation.h"
 #include "mesh_function.h"
 
 // LibMesh includes
@@ -141,6 +142,9 @@ protected:
   std::vector<Real> _sync_times;
   std::vector<Real>::iterator _curr_sync_time_iter;
   bool _remaining_sync_time;
+
+  LinearInterpolation _time_ipol;               /// Piecewise linear definition of time stepping
+  bool _use_time_ipol;                          /// true if we want to use piecewise-defined time stepping
 };
 
 #endif //TRANSIENTEXECUTIONER_H

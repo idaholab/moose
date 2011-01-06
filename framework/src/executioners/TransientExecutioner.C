@@ -50,6 +50,8 @@ InputParameters validParams<TransientExecutioner>()
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
   params.addParam<Real>("ss_tmin",         0.0,    "Minimum number of timesteps to take before checking for steady state conditions.");
   params.addParam<std::vector<Real> >("sync_times", sync_times, "A list of times that will be solved for provided they are within the simulation time");
+  params.addParam<std::vector<Real> >("time_t", "The values of t");
+  params.addParam<std::vector<Real> >("time_dt", "The values of dt");
 
   return params;
 }
@@ -74,8 +76,19 @@ TransientExecutioner::TransientExecutioner(const std::string & name, InputParame
    _converged(true),
    _sync_times(getParam<std::vector<Real> >("sync_times")),
    _curr_sync_time_iter(_sync_times.begin()),
-   _remaining_sync_time(true)
+   _remaining_sync_time(true),
+   _time_ipol( getParam<std::vector<Real> >("time_t"),
+               getParam<std::vector<Real> >("time_dt") ),
+   _use_time_ipol(_time_ipol.getSampleSize() > 0)
 {
+  const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
+  if (_use_time_ipol)
+  {
+    _sync_times.insert(_sync_times.end(), time.begin()+1, time.end());          // insert times as sync points except the very first one
+    _curr_sync_time_iter = _sync_times.begin();
+  }
+  sort(_sync_times.begin(), _sync_times.end());
+
   _moose_system.reinitDT();
 
   // Advance to the first sync time if one is provided in sim time range
@@ -195,7 +208,7 @@ TransientExecutioner::computeConstrainedDT()
     _t_step = 1;
     _dt = _input_dt;
   }
-  
+
   Real dt_cur = computeDT();
 
   // Don't let the time step size exceed maximum time step size
@@ -211,7 +224,7 @@ TransientExecutioner::computeConstrainedDT()
     dt_cur = _end_time - _time;
 
   // Adjust to a sync time if supplied and skipped over
-  if (_remaining_sync_time && _time + dt_cur > *_curr_sync_time_iter)
+  if (_remaining_sync_time && _time + dt_cur >= *_curr_sync_time_iter)
   {
     dt_cur = *_curr_sync_time_iter - _time;
     if (++_curr_sync_time_iter == _sync_times.end())
@@ -225,7 +238,10 @@ TransientExecutioner::computeConstrainedDT()
   {
     if (_reset_dt)
     {
-      dt_cur = _prev_dt;
+      if (_use_time_ipol)
+        dt_cur = _time_ipol.sample(_time);
+      else
+        dt_cur = _prev_dt;
       _reset_dt = false;
     }
   }
@@ -243,13 +259,20 @@ TransientExecutioner::computeDT()
     return _dt / 2.0;
   }
   
-  // If start up steps are needed
-  if(_t_step == 1 && _n_startup_steps > 1)
-    return _dt/(double)(_n_startup_steps);
-  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
-    return _dt*(double)(_n_startup_steps);
+  if (_use_time_ipol)
+  {
+    return _time_ipol.sample(_time);
+  }
   else
-    return _dt;
+  {
+    // If start up steps are needed
+    if(_t_step == 1 && _n_startup_steps > 1)
+      return _dt/(double)(_n_startup_steps);
+    else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
+      return _dt*(double)(_n_startup_steps);
+    else
+      return _dt;
+  }
 }
 
 bool
