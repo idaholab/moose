@@ -36,6 +36,7 @@
 // solid_mechanics
 #include "CLSHPlasticMaterial.h"
 #include "DeltaGamma.h"
+#include "CreepStrainAux.h"
 #include "LinearIsotropicMaterial.h"
 #include "LSHPlasticMaterial.h"
 #include "PlasticMaterial.h"
@@ -104,6 +105,7 @@ Elk::registerObjects()
   // solid_mechanics
   registerMaterial(CLSHPlasticMaterial);
   registerKernel(DeltaGamma);
+  registerAux(CreepStrainAux);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(PlasticMaterial);
