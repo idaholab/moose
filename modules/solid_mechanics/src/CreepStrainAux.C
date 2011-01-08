@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<CreepStrainAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("index", "The index into the stress array, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
+  params.addRequiredParam<unsigned int>("index", "The index into the creep strain array, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
   return params;
 }
 
