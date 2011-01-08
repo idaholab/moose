@@ -20,7 +20,7 @@ protected:
   virtual Real computeValue();
 
   const unsigned _index;
-  MaterialProperty<RealTensorValue> & _stress;
+  MaterialProperty<RealTensorValue> & _creep_strain;
 
 };
 

@@ -1,28 +1,28 @@
-#include "CreepStrainAux.h"
+#include "PlasticStrainAux.h"
 
 
 template<>
-InputParameters validParams<CreepStrainAux>()
+InputParameters validParams<PlasticStrainAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<unsigned int>("index", "The index into the stress array, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
   return params;
 }
 
-CreepStrainAux::CreepStrainAux( const std::string & name,
+PlasticStrainAux::PlasticStrainAux( const std::string & name,
                       InputParameters parameters )
   :AuxKernel( name, parameters ),
    _index( getParam<unsigned int>("index") ),
-   _creep_strain( getMaterialProperty<RealTensorValue>("creep_strain") )
+   _plastic_strain( getMaterialProperty<RealTensorValue>("plastic_strain") )
 {
   if (_index > 5)
   {
-    mooseError("CreepStrainAux requires the index to be >= 0 and <= 5.");
+    mooseError("PlasticStrainAux requires the index to be >= 0 and <= 5.");
   }
 }
 
 Real
-CreepStrainAux::computeValue()
+PlasticStrainAux::computeValue()
 {
   unsigned i(0), j(0); // xx
   if ( _index == 1 ) // yy
@@ -46,7 +46,7 @@ CreepStrainAux::computeValue()
   {
     j = 2;
   }
-  return _creep_strain[_qp](i,j);
+  return _plastic_strain[_qp](i,j);
 }
 
 

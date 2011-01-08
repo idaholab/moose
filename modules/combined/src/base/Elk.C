@@ -40,6 +40,7 @@
 #include "LinearIsotropicMaterial.h"
 #include "LSHPlasticMaterial.h"
 #include "PlasticMaterial.h"
+#include "PlasticStrainAux.h"
 #include "PowerLawCreepMaterial.h"
 #include "PowerLawCreep.h"
 #include "PlenumPressureBC.h"
@@ -109,6 +110,7 @@ Elk::registerObjects()
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(PlasticMaterial);
+  registerAux(PlasticStrainAux);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreepMaterial);
   registerMaterial(PowerLawCreep);
