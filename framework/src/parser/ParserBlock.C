@@ -359,6 +359,63 @@ ParserBlock::printBlockData()
 }
 
 void
+ParserBlock::printInputFile()
+{
+  std::vector<std::string> elements;
+  Parser::tokenize(_name, elements);
+
+  std::string spacing = "";
+  for (unsigned int i=1; i<elements.size(); ++i)
+    spacing += "  ";
+
+  std::cout << "\n" << spacing << "[" << _name << "]\n";
+  
+  //if (getType() != "")
+    //std::cout << spacing << "type: " << getType() << "\n";
+  
+  std::vector<InputParameters *> param_ptrs;
+  param_ptrs.push_back(&_block_params);
+  param_ptrs.push_back(&_class_params);
+
+  for (unsigned int i=0; i<param_ptrs.size(); ++i)
+  {
+    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
+    {
+      // First make sure we want to see this parameter
+      if (param_ptrs[i]->isPrivate(iter->first)) 
+        continue;
+
+      // Don't print active if it is the default all, that means it's not in the input file
+      if (iter->first == "active")
+      {
+        libMesh::Parameters::Parameter<std::vector<std::string> > * val = dynamic_cast<libMesh::Parameters::Parameter<std::vector<std::string> >*>(iter->second);
+        std::vector<std::string> active = val->get();
+        if (val != NULL && active.size() == 1 && active[0] == "__all__")
+          continue;
+      }
+
+      // Don't print type if it is blank
+      if (iter->first == "type")
+      {
+        libMesh::Parameters::Parameter<std::string> * val = dynamic_cast<libMesh::Parameters::Parameter<std::string>*>(iter->second);
+        std::string active = val->get();
+        if (val != NULL && active == "")
+          continue;
+      }
+
+      // Block params may be required and will have a doc string
+      std::cout << spacing << "  " << std::left << std::setw(27) << iter->first << " = '";
+    
+      iter->second->print(std::cout);
+      std::cout << "'\n";
+    }
+  }
+  
+  visitChildren(&ParserBlock::printInputFile, true, false);
+  std::cout << spacing << "[]\n";
+}
+
+void
 ParserBlock::printBlockYAML()
 {
   std::vector<std::string> elements;

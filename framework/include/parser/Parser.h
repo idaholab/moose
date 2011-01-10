@@ -181,6 +181,7 @@ private:
   std::vector<std::string> _section_names;
   const std::string _dump_string;
   const static std::string _show_tree;
+  const static std::string _show_input_file;
   std::set<std::string> _command_line_vars;   // set used for O(log n) lookup
 
   /**

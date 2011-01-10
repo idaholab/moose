@@ -36,7 +36,8 @@
 #include "DamperFactory.h"
 
 // Static Data initialization
-const std::string Parser::_show_tree = "--show-tree";
+const std::string Parser::_show_tree       = "--show-tree";
+const std::string Parser::_show_input_file = "--show-input-file";
 
  
 Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
@@ -156,15 +157,22 @@ Parser::parse(const std::string &input_filename)
 
   if (!_tree_printed)
   {
-#ifdef DEBUG
-    _input_tree->printBlockData();
-    _tree_printed = true;
-#else
     if (Moose::command_line && Moose::command_line->search(_show_tree))
     {
       _input_tree->printBlockData();
       _tree_printed = true;
     }
+    else if (Moose::command_line && Moose::command_line->search(_show_input_file))
+    {
+      // Don't print the root node
+      std::vector<ParserBlock *> & first_children = _input_tree->_children;
+      for (unsigned int i = 0; i < first_children.size(); i++)
+        first_children[i]->printInputFile();
+
+      _tree_printed = true;
+    }
+#ifdef DEBUG // In debug mode always print the tree, even if the user doesn't specify
+    printTree();
 #endif
   }
 }
@@ -559,12 +567,16 @@ Parser::printUsage() const
   str.substr(str.find_last_of("/\\")+1);
   std::cout << "\nUsage: " << str << " <command>" << "\n\n"
             << "Available Commands:\n" << std::left
-            << std::setw(50) << "  -i <filename> [" + _show_tree + "] [solver options]"
-            << "standard application execution with various options\n"
+            << std::setw(50) << "  -i <filename> [" + _show_tree + "/" + _show_input_file + "] [solver options]"
+            << " standard application execution with various options\n"
             << std::setw(50) << "  -h | --help"
             << "display usage statement\n"
             << std::setw(50) << "  --dump"
-            << "show a full dump of available input file syntax\n\n"
+            << "show a full dump of available input file syntax\n"
+            << std::setw(50) << "  --yaml"
+            << "dump available input file syntax in yaml format\n"
+            //<< std::setw(50) << "  --dump-input-file"
+            //<< "dump available input file syntax in input file format\n"
             << "Solver Options:\n"
             << "  See solver manual for details (Petsc or Trilinos)\n";
   exit(1);

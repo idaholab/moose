@@ -148,7 +148,11 @@ public:
    */
   ParserBlock * locateBlock(const std::string & id);
 
+  /** Print the input tree in a block format. */
   void printBlockData();
+  /** Print the input tree in the same format as the input file. */
+  void printInputFile();
+  /** Print the input tree in the YAML format. */
   void printBlockYAML();
 
   /**
