@@ -60,6 +60,11 @@ Parser::Parser(MooseSystem & moose_system, const std::string &dump_string)
       buildFullTree( "dump" );
       exit(0);
     }
+    if (Moose::command_line->search("--dump-input-file"))
+    {
+      buildFullTree( "input" );
+      exit(0);
+    }
     if (Moose::command_line->search( "--yaml" ))
     {
       //important: start and end yaml data delimiters used by python
@@ -420,8 +425,10 @@ Parser::buildFullTree( const std::string format )
 
   if (format == "yaml")
     _input_tree->printBlockYAML();
-  else // "dump" is all that's left
+  else if (format == "dump")
     _input_tree->printBlockData();
+  else // "input" is all that's left
+    _input_tree->printInputFile();
 }
 
 
@@ -575,8 +582,8 @@ Parser::printUsage() const
             << "show a full dump of available input file syntax\n"
             << std::setw(50) << "  --yaml"
             << "dump available input file syntax in yaml format\n"
-            //<< std::setw(50) << "  --dump-input-file"
-            //<< "dump available input file syntax in input file format\n"
+            << std::setw(50) << "  --dump-input-file"
+            << "dump available input file syntax in input file format\n"
             << "Solver Options:\n"
             << "  See solver manual for details (Petsc or Trilinos)\n";
   exit(1);

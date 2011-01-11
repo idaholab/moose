@@ -364,14 +364,23 @@ ParserBlock::printInputFile()
   std::vector<std::string> elements;
   Parser::tokenize(_name, elements);
 
-  std::string spacing = "";
+  std::string spacing  = "";
+  std::string forward  = "";
+  std::string backdots = "";
+  int         offset   = 30;
   for (unsigned int i=1; i<elements.size(); ++i)
+  {
     spacing += "  ";
+    forward = ".";
+    backdots += "../";
+    offset -= 2;
+  }
 
-  std::cout << "\n" << spacing << "[" << _name << "]\n";
-  
-  //if (getType() != "")
-    //std::cout << spacing << "type: " << getType() << "\n";
+  int index = _name.find_last_of("/");
+  if (index == (int)_name.npos)
+    index = 0;
+  std::string block_name = _name.substr(index);
+  std::cout << "\n" << spacing << "[" << forward << block_name << "]\n";
   
   std::vector<InputParameters *> param_ptrs;
   param_ptrs.push_back(&_block_params);
@@ -403,8 +412,7 @@ ParserBlock::printInputFile()
           continue;
       }
 
-      // Block params may be required and will have a doc string
-      std::cout << spacing << "  " << std::left << std::setw(27) << iter->first << " = '";
+      std::cout << spacing << "  " << std::left << std::setw(offset) << iter->first << " = '";
     
       iter->second->print(std::cout);
       std::cout << "'\n";
@@ -412,7 +420,7 @@ ParserBlock::printInputFile()
   }
   
   visitChildren(&ParserBlock::printInputFile, true, false);
-  std::cout << spacing << "[]\n";
+  std::cout << spacing << "[" << backdots << "]\n";
 }
 
 void
