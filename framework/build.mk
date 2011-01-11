@@ -44,6 +44,10 @@ ifeq ($(coverage),true)
 	endif
 endif
 
+# link with gcov support, but do now generate data for this build
+# if you wanted code coverage data for moose, but you wanted to run
+# the tests in moose_test you would make moose with coverage=true
+# and moose_test with just linkcoverage=true
 ifeq ($(linkcoverage),true)
 	ifneq (,$(findstring gcc,$(GXX-VERSION)))
 		libmesh_LDFLAGS += --coverage
