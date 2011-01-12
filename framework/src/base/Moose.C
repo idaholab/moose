@@ -55,6 +55,7 @@
 #include "NearestNodeDistanceAux.h"
 #include "NearestNodeValueAux.h"
 #include "FunctionAux.h"
+#include "ProcessorIDAux.h"
 
 #include "EmptyFunction.h"
 
@@ -215,6 +216,7 @@ Moose::registerObjects()
   registerAux(NearestNodeDistanceAux);
   registerAux(NearestNodeValueAux);
   registerAux(FunctionAux);
+  registerAux(ProcessorIDAux);
   
 
   registerMaterial(EmptyMaterial);
