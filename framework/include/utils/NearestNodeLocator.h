@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <map>
+#include <queue>
 
 #include "mesh.h"
 #include "vector_value.h"
@@ -74,6 +75,8 @@ public:
   bool _first;
   std::vector<unsigned int> _slave_nodes;
   std::vector<unsigned int> _master_nodes;
+
+  std::map<unsigned int, std::vector<unsigned int> > _neighbor_nodes;
 };
 
 #endif //NEARESTNODELOCATOR_H
