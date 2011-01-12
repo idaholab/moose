@@ -23,7 +23,10 @@ InputParameters validParams<ProcessorIDAux>()
 
 ProcessorIDAux::ProcessorIDAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters)
-{}
+{
+  if(isNodal())
+    mooseError("ProcessorIDAux can only used with an elemental Aux variable!");
+}
 
 
 Real
