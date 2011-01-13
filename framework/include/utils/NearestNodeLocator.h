@@ -21,7 +21,6 @@
 
 #include <vector>
 #include <map>
-#include <queue>
 
 #include "mesh.h"
 #include "vector_value.h"
@@ -77,6 +76,9 @@ public:
   std::vector<unsigned int> _master_nodes;
 
   std::map<unsigned int, std::vector<unsigned int> > _neighbor_nodes;
+
+  // The following parameter controls the patch size that is searched for each nearest neighbor
+  static const unsigned int _patch_size;
 };
 
 #endif //NEARESTNODELOCATOR_H
