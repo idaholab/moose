@@ -28,17 +28,6 @@ NearestNodeLocator::NearestNodeLocator(MooseSystem & moose_system, Mesh & mesh, 
    _first(true)
 {}
 
-class ComparePair
-{
-public:
-  bool operator()(std::pair<unsigned int, Real> & p1, std::pair<unsigned int, Real> & p2)
-  {
-    if(p1.second > p2.second)
-      return true;
-
-    return false;
-  }
-};
 
 void
 NearestNodeLocator::findNodes()
@@ -69,42 +58,10 @@ NearestNodeLocator::findNodes()
       else if(boundary_id == _boundary2)
         _slave_nodes.push_back(node_id);
     }
-
-    unsigned int n_slave_nodes = _slave_nodes.size();
-    unsigned int n_master_nodes = _master_nodes.size();
-
-    for(unsigned int i=0; i<n_slave_nodes; i++)
-    {
-      unsigned int node_id = _slave_nodes[i];
-
-      std::priority_queue<std::pair<unsigned int, Real>, std::vector<std::pair<unsigned int, Real> >, ComparePair> neighbors;
-
-      Node & node = _mesh.node(node_id);
-
-      for(unsigned int k=0; k<n_master_nodes; k++)
-      {
-        unsigned int master_id = _master_nodes[k];
-        Node * cur_node = _mesh.node_ptr(master_id);
-        Real distance = ((*cur_node) - node).size();
-
-        neighbors.push(std::make_pair(master_id, distance));
-      }
-
-      std::vector<unsigned int> & neighbor_nodes = _neighbor_nodes[node_id];
-
-      neighbor_nodes.resize(20);
-      
-      for(unsigned int t=0; t<20; t++)
-      {
-        std::pair<unsigned int, Real> neighbor_info = neighbors.top();
-        neighbors.pop();
-
-        neighbor_nodes[t] = neighbor_info.first;
-      }
-    }
-  }    
+  }
 
   unsigned int n_slave_nodes = _slave_nodes.size();
+  unsigned int n_master_nodes = _master_nodes.size();
 
   for(unsigned int i=0; i<n_slave_nodes; i++)
   {
@@ -115,13 +72,9 @@ NearestNodeLocator::findNodes()
     Node * closest_node = NULL;
     Real closest_distance = 999999999;
 
-    std::vector<unsigned int> & neighbor_nodes = _neighbor_nodes[node_id];
-
-    unsigned int n_neighbor_nodes = neighbor_nodes.size();
-
-    for(unsigned int k=0; k<n_neighbor_nodes; k++)
+    for(unsigned int k=0; k<n_master_nodes; k++)
     {
-      Node * cur_node = _mesh.node_ptr(neighbor_nodes[k]);
+      Node * cur_node = _mesh.node_ptr(_master_nodes[k]);
       Real distance = ((*cur_node) - node).size();
 
       if(distance < closest_distance)
