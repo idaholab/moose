@@ -156,6 +156,18 @@ public:
   void printBlockYAML();
 
   /**
+   * Call this function on the root block of the tree. It fills result with the same
+   * contents as printInputFile except split into a vector of strings. Each string is
+   * a line in the output. Leaves _out unchanged.
+   */
+  void getInputFileLines(std::vector<std::string> & result);
+
+  /**
+   * Change the output stream that the print* functions print to.
+   */
+  static void set_ostream(std::ostream & out);
+
+  /**
    * This function returns the number of active children which is either the children named in the
    * optional "active" parameter or else all of the children underneath this Block
    */
@@ -193,6 +205,11 @@ protected:
 
   std::vector<std::string> _active;
   std::vector<std::string> _used_children;
+
+  /**
+   * Output stream which the print_* functions print to. Defaults to std::cout 
+   */
+  static std::ostream * _out;
 
   /**
    * The list of ParserBlocks which must be executed prior to executing the current ParserBlock

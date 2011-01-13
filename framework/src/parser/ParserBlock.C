@@ -44,6 +44,7 @@ InputParameters validParams<ParserBlock>()
 
 
 bool ParserBlock::_deferred_execution = false;
+std::ostream * ParserBlock::_out = &std::cout;
 
 ParserBlock::ParserBlock(const std::string & name, InputParameters params)
   :_parent(params.get<ParserBlock*>("parent")),
@@ -308,6 +309,7 @@ ParserBlock::locateBlock(const std::string & id)
 void
 ParserBlock::printBlockData()
 {
+  std::ostream & out = *_out;
   std::vector<std::string> elements;
   Parser::tokenize(_name, elements);
 
@@ -316,18 +318,18 @@ ParserBlock::printBlockData()
     spacing += "  ";
 
   
-  std::cout << "\n"
+  out << "\n"
             << spacing << "block name: " << _name << "\n";
   
   if (getType() != "")
-    std::cout << spacing << "type: " << getType() << "\n";
+    out << spacing << "type: " << getType() << "\n";
   std::string class_desc = _class_params.getClassDescription();
   if (class_desc != "")
-    std::cout << spacing << "description: " << class_desc << "\n";
+    out << spacing << "description: " << class_desc << "\n";
   
-  std::cout << spacing << "{\n";
+  out << spacing << "{\n";
   
-  std::cout << spacing << "  Valid Parameters:\n";
+  out << spacing << "  Valid Parameters:\n";
   
   std::vector<InputParameters *> param_ptrs;
   param_ptrs.push_back(&_block_params);
@@ -345,22 +347,23 @@ ParserBlock::printBlockData()
       std::string required = param_ptrs[i]->isParamRequired(iter->first) || iter->first == "type" ? "*" : " ";
       std::string valid = param_ptrs[i]->isParamValid(iter->first) ? " (valid)" : " ";
 
-      std::cout << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
+      out << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
     
-      iter->second->print(std::cout);
+      iter->second->print(out);
 
-      std::cout << valid << "\n" << spacing << "    " << std::setw(30) << " " << "    " << param_ptrs[i]->getDocString(iter->first) << "\n";
+      out << valid << "\n" << spacing << "    " << std::setw(30) << " " << "    " << param_ptrs[i]->getDocString(iter->first) << "\n";
     }
   }
   
   visitChildren(&ParserBlock::printBlockData, true, false);
 
-  std::cout << spacing << "}\n";
+  out << spacing << "}\n";
 }
 
 void
 ParserBlock::printInputFile()
 {
+  std::ostream & out = *_out;
   std::vector<std::string> elements;
   Parser::tokenize(_name, elements);
 
@@ -380,7 +383,7 @@ ParserBlock::printInputFile()
   if (index == (int)_name.npos)
     index = 0;
   std::string block_name = _name.substr(index);
-  std::cout << "\n" << spacing << "[" << forward << block_name << "]\n";
+  out << "\n" << spacing << "[" << forward << block_name << "]\n";
   
   std::vector<InputParameters *> param_ptrs;
   param_ptrs.push_back(&_block_params);
@@ -412,20 +415,21 @@ ParserBlock::printInputFile()
           continue;
       }
 
-      std::cout << spacing << "  " << std::left << std::setw(offset) << iter->first << " = '";
+      out << spacing << "  " << std::left << std::setw(offset) << iter->first << " = '";
     
-      iter->second->print(std::cout);
-      std::cout << "'\n";
+      iter->second->print(out);
+      out << "'\n";
     }
   }
   
   visitChildren(&ParserBlock::printInputFile, true, false);
-  std::cout << spacing << "[" << backdots << "]\n";
+  out << spacing << "[" << backdots << "]\n";
 }
 
 void
 ParserBlock::printBlockYAML()
 {
+  std::ostream & out = *_out;
   std::vector<std::string> elements;
   Parser::tokenize(_name, elements);
 
@@ -433,14 +437,14 @@ ParserBlock::printBlockYAML()
   for (unsigned int i=0; i<elements.size(); ++i)
     spacing += "  ";
 
-  std::cout << spacing << "- name: " << _name << "\n";
+  out << spacing << "- name: " << _name << "\n";
   spacing += "  ";
   
   //will print "" if there is no type or desc, which translates to None in python
-  std::cout << spacing << "desc: !!str " << _class_params.getClassDescription() << "\n";
-  std::cout << spacing << "type: " << getType() << "\n";
+  out << spacing << "desc: !!str " << _class_params.getClassDescription() << "\n";
+  out << spacing << "type: " << getType() << "\n";
   
-  std::cout << spacing << "parameters:\n";
+  out << spacing << "parameters:\n";
   std::string subblocks = spacing + "subblocks: \n";
   spacing += "  ";
   
@@ -460,21 +464,47 @@ ParserBlock::printBlockYAML()
       // Block params may be required and will have a doc string
       std::string required = param_ptrs[i]->isParamRequired(iter->first) ? "Yes" : "No";
 
-      std::cout << spacing << "- name: " << name << "\n";
-      std::cout << spacing << "  required: " << required << "\n";
-      std::cout << spacing << "  default: !!str ";
+      out << spacing << "- name: " << name << "\n";
+      out << spacing << "  required: " << required << "\n";
+      out << spacing << "  default: !!str ";
 
       //prints the value, which is the default value when dumping the tree
       //because it hasn't been changed
-      iter->second->print(std::cout);
+      iter->second->print(out);
 
-      std::cout << "\n" << spacing << "  description: |\n    " << spacing
+      out << "\n" << spacing << "  description: |\n    " << spacing
                 << param_ptrs[i]->getDocString(iter->first) << "\n";
     }
   }
 
   //if there aren't any sub blocks it will just parse as None in python
-  std::cout << subblocks;
+  out << subblocks;
   
   visitChildren(&ParserBlock::printBlockYAML, true, false);
+}
+
+void
+ParserBlock::getInputFileLines(std::vector<std::string> & result)
+{
+  std::ostream * temp = _out;
+
+  std::stringstream ss;
+  set_ostream(ss);
+
+  // print the input file into the stringstream
+  for (unsigned int i = 0; i < _children.size(); i++)
+    _children[i]->printInputFile();
+
+  std::string line;
+  while (std::getline(ss, line))
+    result.push_back(line);
+
+  //restore the previous value of _out
+  set_ostream(*temp);
+}
+
+void
+ParserBlock::set_ostream(std::ostream & out)
+{
+  _out = &out;
 }
