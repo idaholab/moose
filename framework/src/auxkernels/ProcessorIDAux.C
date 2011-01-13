@@ -25,7 +25,7 @@ ProcessorIDAux::ProcessorIDAux(const std::string & name, InputParameters paramet
   :AuxKernel(name, parameters)
 {
   if(isNodal())
-    mooseError("ProcessorIDAux can only used with an elemental Aux variable!");
+    mooseError("ProcessorIDAux can only be used with an elemental Aux variable!");
 }
 
 
