@@ -366,7 +366,9 @@ ParserBlock::printInputFile()
   std::ostream & out = *_out;
   std::vector<std::string> elements;
   Parser::tokenize(_name, elements);
+  std::stringstream ss;
 
+  std::string quotes   = "";
   std::string spacing  = "";
   std::string forward  = "";
   std::string backdots = "";
@@ -393,15 +395,15 @@ ParserBlock::printInputFile()
   {
     for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
     {
-      // First make sure we want to see this parameter
-      if (param_ptrs[i]->isPrivate(iter->first)) 
+      // We only want non-private valid params
+      if (param_ptrs[i]->isPrivate(iter->first) || !param_ptrs[i]->isParamValid(iter->first)) 
         continue;
 
       // Don't print active if it is the default all, that means it's not in the input file
       if (iter->first == "active")
       {
         libMesh::Parameters::Parameter<std::vector<std::string> > * val = dynamic_cast<libMesh::Parameters::Parameter<std::vector<std::string> >*>(iter->second);
-        std::vector<std::string> active = val->get();
+        const std::vector<std::string> & active = val->get();
         if (val != NULL && active.size() == 1 && active[0] == "__all__")
           continue;
       }
@@ -410,15 +412,23 @@ ParserBlock::printInputFile()
       if (iter->first == "type")
       {
         libMesh::Parameters::Parameter<std::string> * val = dynamic_cast<libMesh::Parameters::Parameter<std::string>*>(iter->second);
-        std::string active = val->get();
+        const std::string & active = val->get();
         if (val != NULL && active == "")
           continue;
       }
 
-      out << spacing << "  " << std::left << std::setw(offset) << iter->first << " = '";
+      out << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
     
-      iter->second->print(out);
-      out << "'\n";
+      // Print the parameter's value to a stringstream.
+      ss.str("");
+      iter->second->print(ss);
+      // If the value has spaces, surround it with quotes, otherwise no quotes
+      std::string value = ss.str();
+      if (value.find(' ') != std::string::npos)
+        quotes = "'";
+      else
+        quotes = "";
+      out << quotes << value << quotes << "\n";
     }
   }
   
