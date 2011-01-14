@@ -12,10 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "LineSegment.h"
+// libMesh includes
+#include "plane.h"
 #include "vector_value.h"
 
-LineSegment::LineSegment(const Point & p0, const Point & p1):
+#include "LineSegment.h"
+
+LineSegment::LineSegment (const Point & p0, const Point & p1):
   _p0(p0),
   _p1(p1)
 {}

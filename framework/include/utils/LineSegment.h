@@ -17,7 +17,12 @@
 
 // libMesh includes
 #include "point.h"
-#include "plane.h"
+
+// forward declares
+namespace libMesh {
+  class Plane;
+}
+
 
 class LineSegment
 {
