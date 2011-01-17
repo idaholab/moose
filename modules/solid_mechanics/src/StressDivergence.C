@@ -29,7 +29,7 @@ StressDivergence::StressDivergence(const std::string & name, InputParameters par
    _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
    _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0)
 {}
-
+        
 Real
 StressDivergence::computeQpResidual()
 {
@@ -38,13 +38,13 @@ StressDivergence::computeQpResidual()
 
 Real
 StressDivergence::computeQpJacobian()
-{
+{ 
   RealVectorValue value;
   for(unsigned int j = 0; j<LIBMESH_DIM; ++j)
     for(unsigned int i = 0; i<LIBMESH_DIM; ++i)
     {
-      value(i) += 0.5*_Jacobian_mult[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
-      value(i) += 0.5*_Jacobian_mult[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
+      value(i) += 1.0*_Jacobian_mult[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
+      //value(i) += 0.5*_Jacobian_mult[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
     }
 
   return value * _grad_test[_i][_qp];

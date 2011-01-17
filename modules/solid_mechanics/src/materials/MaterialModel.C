@@ -21,6 +21,7 @@ InputParameters validParams<MaterialModel>()
 }
 
 
+
 MaterialModel::MaterialModel( const std::string & name,
                               InputParameters parameters )
   :Material( name, parameters ),
@@ -43,18 +44,18 @@ MaterialModel::MaterialModel( const std::string & name,
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
-   _decomp_method( RashidApprox ),
+   _decomp_method( Eigen ),
    _alpha(getParam<Real>("thermal_expansion")),
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _strain_increment(3,3),
    _incremental_rotation(3,3),
+   _Uhat(3,3),
    _elasticity_tensor(NULL)
 {
 //   std::cout << "TESTING MaterialModel class..." << std::endl;
 //   testMe();
-
   int num_elastic_constants =
     _bulk_modulus_set + _lambda_set + _poissons_ratio_set + _shear_modulus_set + _youngs_modulus_set;
 
@@ -155,7 +156,7 @@ MaterialModel::MaterialModel( const std::string & name,
   iso->setShearModulus( _shear_modulus );
   iso->calculate(0);
   elasticityTensor( iso );
-
+  
   std::string increment_calculation = getParam<std::string>("increment_calculation");
   std::transform( increment_calculation.begin(), increment_calculation.end(),
                   increment_calculation.begin(), ::tolower );
@@ -171,6 +172,10 @@ MaterialModel::MaterialModel( const std::string & name,
   {
     mooseError( "The options for the increment calculation are RashidApprox and Eigen.");
   }
+
+  
+  //   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
+  // _elasticity_tensor->print();
 
 
 }
@@ -202,20 +207,24 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
   ColumnMajorMatrix A;
   ColumnMajorMatrix Fbar;
   ColumnMajorMatrix Fbar_inverse;
-
   ColumnMajorMatrix Fhat_average;
   Real volume(0);
+
+  _Fbar.resize(_n_qpoints);
 
   for ( _qp= 0; _qp < _n_qpoints; ++_qp )
   {
     fillMatrix( _grad_disp_x, _grad_disp_y, _grad_disp_z, A );
-    fillMatrix( _grad_disp_x_old, _grad_disp_y_old, _grad_disp_z_old, Fbar );
+    fillMatrix( _grad_disp_x_old, _grad_disp_y_old, _grad_disp_z_old, Fbar);
 
     A -= Fbar;
 
     Fbar(0,0) += 1;
     Fbar(1,1) += 1;
     Fbar(2,2) += 1;
+
+    _Fbar[_qp] = Fbar;
+    
 
     // Get Fbar^(-1)
     // Computing the inverse is generally a bad idea.
@@ -228,6 +237,8 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
     Fhat[_qp](0,0) += 1;
     Fhat[_qp](1,1) += 1;
     Fhat[_qp](2,2) += 1;
+
+
 
     // Now include the contribution for the integration of Fhat over the element
     Fhat_average += Fhat[_qp] * _JxW[_qp];
@@ -247,8 +258,7 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
     const Real factor( std::pow( det_Fhat_average/det_Fhat, third ) );
 
     Fhat[_qp] *= factor;
-//     std::cout << "Fhat[" << _qp << "]\n";
-//     Fhat[_qp].print();
+    
   }
 }
 
@@ -266,19 +276,16 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
   else if ( _decomp_method == Eigen )
   {
 
-    mooseError("Eigen not yet defined.");
-
     const int ND = 3;
 
     ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
-    ColumnMajorMatrix  Uhat(ND,ND), invUhat(ND,ND), logVhat(ND,ND);
+    ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND), logUhat(ND,ND);
     ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
 
     ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
 
     Chat.eigen(eigen_value,eigen_vector);
-
-
+    
     for(int i = 0; i < ND; i++)
     {
       N1(i) = eigen_vector(i,0);
@@ -290,23 +297,30 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
     const Real lamda2 = std::sqrt(eigen_value(1));
     const Real lamda3 = std::sqrt(eigen_value(2));
 
-    Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
-
-    invertMatrix(Uhat,invUhat);
-
-    _incremental_rotation = Fhat * invUhat;
-
-    n1 = _incremental_rotation * N1;
-    n2 = _incremental_rotation * N2;
-    n3 = _incremental_rotation * N3;
-
+    
     const Real log1 = std::log(lamda1);
     const Real log2 = std::log(lamda2);
     const Real log3 = std::log(lamda3);
 
+    _Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
+
+    invertMatrix(_Uhat,invUhat);
+
+    _incremental_rotation = Fhat * invUhat;
+
+    logUhat = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
+
+    _strain_increment = logUhat * (1.0 / _dt);
+
+    /*
+    n1 = _incremental_rotation * N1;
+    n2 = _incremental_rotation * N2;
+    n3 = _incremental_rotation * N3;
+
+
     logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
 
-    _strain_increment = logVhat * (1.0 / _dt);
+    _strain_increment = logVhat * (1.0 / _dt);*/
   }
   else
   {
@@ -472,6 +486,7 @@ MaterialModel::computeStress()
   //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
+  
   _strain_increment.reshape(9, 1);
   ColumnMajorMatrix stress_new( *_elasticity_tensor * _strain_increment );
   _strain_increment.reshape(3, 3);
@@ -480,8 +495,8 @@ MaterialModel::computeStress()
   stress_new.fill(_stress[_qp]);
   _stress[_qp] += _stress_old[_qp];
 
-//   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
-//   _elasticity_tensor->print();
+  //   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
+  //  _elasticity_tensor->print();
 
 //   std::cout << "STRAIN INCREMENT: " << _qp << "\n"
 //             << _strain_increment(0,0) << " " << _strain_increment(0,1) << " " << _strain_increment(0,2) << std::endl
@@ -557,14 +572,16 @@ MaterialModel::computeProperties()
   // Compute the stretching to be handed to the constitutive evaluation
   // Handle volumetric locking along the way
 
-  std::vector<ColumnMajorMatrix> Fhat(_n_qpoints);
-  computeIncrementalDeformationGradient(Fhat);
-
+ 
+  _Fhat.resize(_n_qpoints);
+  
+  computeIncrementalDeformationGradient(_Fhat);
+  
 
   for ( _qp = 0; _qp < _n_qpoints; ++_qp )
   {
 
-    computeStrainAndRotationIncrement( Fhat[_qp]);
+    computeStrainAndRotationIncrement(_Fhat[_qp]);
     modifyStrain();
 
 
@@ -643,8 +660,8 @@ void
 MaterialModel::testMe()
 {
   ColumnMajorMatrix fred;
-  const Real s = std::sin(3*M_PI/180);
-  const Real c = std::cos(3*M_PI/180);
+//  const Real s = std::sin(3*M_PI/180);
+//  const Real c = std::cos(3*M_PI/180);
 //   fred(0,0) =  c;
 //   fred(0,1) = -s;
 //   fred(0,2) =  0;
@@ -731,40 +748,44 @@ MaterialModel::computePreconditioning()
 
   _Jacobian_mult[_qp] = *_elasticity_tensor;
 
-//   const int ND = 3;
+  
+/*
+   std::cout << " I am in material model " << std::endl;
 
-//   ColumnMajorMatrix Fdot, I, Finv;
-//   ColumnMajorMatrix F(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
-//   ColumnMajorMatrix Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]);
+   const int ND = 3;
 
-//   Real term1, term2;
+   ColumnMajorMatrix Fdot, I, Finv;
+   ColumnMajorMatrix F(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
+   ColumnMajorMatrix Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]);
 
-//   I.identity();
+   Real term1, term2;
 
-//   F = F.transpose() + I;
-//   Fbar = Fbar.transpose() + I;
+   I.identity();
 
-//   Fdot = (F - Fbar) * (1.0/ _dt);
+   F = F.transpose() + I;
+   Fbar = Fbar.transpose() + I;
 
-//   invertMatrix(Fbar,Finv);
+   Fdot = (F - Fbar) * (1.0/ _dt);
 
-//   _Jacobian_mult[_qp].zero();
+   invertMatrix(F,Finv);
 
-//   for(int i = 0; i < ND; i++)
-//     for(int j = 0; j < ND; j++)
-//       for(int t = 0; t < ND; t++)
-//         for(int S = 0; S < ND; S++)
-//           for(int k = 0; k < ND; k++)
-//             for(int l = 0; l < ND; l++)
-//               for(int L = 0; L < ND; L++)
-//               {
-//                 term1 = delta(k,t) * delta(L,S) * Finv(L,l) * (1.0/_dt) - Fdot(k,L) * Finv(L,t) * Finv(S,l);
-//                 term2 = delta(l,t) * delta(L,S) * Finv(L,k) * (1.0/_dt) - Fdot(l,L) * Finv(L,t) * Finv(S,k);
+   _Jacobian_mult[_qp].zero();
 
-//                 _Jacobian_mult[_qp](j*ND+i,S*ND+t) =  (*_elasticity_tensor)(j*ND+i,l*ND+k) * (term1 + term2) * 0.5;
-//               }
+   for(int i = 0; i < ND; i++)
+     for(int j = 0; j < ND; j++)
+       for(int t = 0; t < ND; t++)
+         for(int S = 0; S < ND; S++)
+           for(int k = 0; k < ND; k++)
+             for(int l = 0; l < ND; l++)
+               for(int L = 0; L < ND; L++)
+               {
+                 term1 = delta(k,t) * delta(L,S) * Finv(L,l) * (1.0/_dt) - Fdot(k,L) * Finv(L,t) * Finv(S,l);
+                 term2 = delta(l,t) * delta(L,S) * Finv(L,k) * (1.0/_dt) - Fdot(l,L) * Finv(L,t) * Finv(S,k);
 
-  //_Jacobian_mult[_qp] =  _Jacobian_mult[_qp].transpose();
+                 _Jacobian_mult[_qp](j*ND+i,S*ND+t) = _Jacobian_mult[_qp](j*ND+i,S*ND+t) + (*_elasticity_tensor)(j*ND+i,l*ND+k) * (term1 + term2) * 0.5;
+                 }
+
+                 //_Jacobian_mult[_qp] =  _Jacobian_mult[_qp].transpose();*/
 
 
 }
