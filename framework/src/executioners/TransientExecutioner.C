@@ -214,8 +214,18 @@ TransientExecutioner::computeConstrainedDT()
     _t_step = 1;
     _dt = _input_dt;
   }
+  
+  // If start up steps are needed
+  if(_t_step == 1 && _n_startup_steps > 1)
+    _dt = _input_dt/(double)(_n_startup_steps);
+  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
+    _dt = _input_dt;
 
-  Real dt_cur = computeDT();
+  Real dt_cur = _dt;
+  
+  //After startup steps, compute new dt
+  if (_t_step > _n_startup_steps)
+    dt_cur = computeDT();
 
   // Don't let the time step size exceed maximum time step size
   if(dt_cur > _dtmax)
@@ -270,15 +280,8 @@ TransientExecutioner::computeDT()
     return _time_ipol.sample(_time);
   }
   else
-  {
-    // If start up steps are needed
-    if(_t_step == 1 && _n_startup_steps > 1)
-      return _dt/(double)(_n_startup_steps);
-    else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
-      return _dt*(double)(_n_startup_steps);
-    else
-      return _dt;
-  }
+    return _dt;
+  
 }
 
 bool
