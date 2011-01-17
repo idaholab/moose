@@ -42,7 +42,7 @@ GenericBCBlock::execute()
 #ifdef DEBUG
   std::cerr << "Inside the GenericBCBlock Object\n";
   std::cerr << "BC: " << _type
-            << "\tname: " << getShortName();
+            << "\tname: " << getShortName() << "\n";
 #endif
  
   if (Parser::pathContains(_name, "BCs"))

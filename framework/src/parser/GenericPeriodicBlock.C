@@ -34,12 +34,19 @@ InputParameters validParams<GenericPeriodicBlock>()
 }
 
 GenericPeriodicBlock::GenericPeriodicBlock(const std::string & name, InputParameters params)
-  :ParserBlock(name, params)
+  :ParserBlock(name, params),
+   _type(getType())
 {}
 
 void
 GenericPeriodicBlock::execute() 
 {
+#ifdef DEBUG
+  std::cerr << "Inside the GenericPeriodicBlock Object\n";
+  std::cerr << "BC: " << _type
+            << "\tname: " << getShortName() << "\n";
+#endif
+  
   TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
 
   if (getParamValue<std::vector<Real> >("translation") != std::vector<Real>())

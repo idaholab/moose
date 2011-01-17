@@ -83,6 +83,11 @@ public:
    * Check if name is in the active list.
    */
   bool checkActive(const std::string &name) const;
+
+  /**
+   * Check to see if this block is active (i.e. parent says it's active)
+   */
+  bool amIActive() const;
   
   /**
    * This is the workhorse function which must setup the appropriate MOOSE objects corresponding

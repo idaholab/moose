@@ -56,10 +56,15 @@ AuxVariablesBlock::execute()
   // Add a temporary vector for general use
   system.add_vector("temp", false);
 
+  
   ParserBlock * pb = locateBlock("BCs/Periodic");
 
-  if(pb)
+  if (pb && pb->amIActive())
+  {
+    std::cerr << "DEBUG: pb is active*******************************************************\n";
     pb->execute();
+  }
+  
 
   _moose_system.init();
   _moose_system.getEquationSystems()->print_info();

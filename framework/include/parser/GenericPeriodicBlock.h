@@ -28,6 +28,9 @@ public:
   GenericPeriodicBlock(const std::string & name, InputParameters params);
 
   virtual void execute();
+
+private:
+  std::string _type;
 };
 
 

@@ -61,8 +61,8 @@ MeshBlock::execute()
    * I/O conntention.  We still need to use the Exodus reader though
    * for copy_nodal_solutions
    */
-  
-  if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
+  ParserBlock *gen_block;
+  if ((gen_block = locateBlock("Mesh/Generation")) != NULL && gen_block->amIActive())
     gen_block->execute();
   else if (checkVariableProperties(&GenericVariableBlock::restartRequired)) 
     _moose_system.getExodusReader()->read(getParamValue<std::string>("file"));

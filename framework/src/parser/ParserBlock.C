@@ -120,6 +120,15 @@ ParserBlock::checkActive(const std::string &name) const
   return retValue;
 }
 
+bool
+ParserBlock::amIActive() const
+{
+  if (_parent == NULL)
+    return true;
+  else
+    return _parent->checkActive(getShortName());
+}
+
 void
 ParserBlock::checkActiveUsed()
 {
@@ -228,6 +237,16 @@ ParserBlock::checkPrereqs(ParserBlock *pb_ptr)
   std::set_difference(pb_ptr->_execute_prereqs.begin(), pb_ptr->_execute_prereqs.end(),
                       _parser_handle.getExecutedSetBegin(), _parser_handle.getExecutedSetEnd(),
                       std::insert_iterator<std::set<std::string> >(result, result.end()));
+
+#ifdef DEBUG
+  if (!result.empty())
+  {
+    std::cerr << "Can't execute " << pb_ptr->getShortName() << " due to the following unsatisfied prereqs:\n";
+    for (std::set<std::string>::iterator i = result.begin(); i != result.end(); ++i)
+      std::cerr << "\t" << *i << "\n";
+    std::cerr << "\n";
+  }
+#endif 
 
   return result.empty() ? true : false;
 }
