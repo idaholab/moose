@@ -539,6 +539,8 @@ public:
 
   Number getVariableNodalValue(Node & node, const std::string & var_name);
 
+  void inputFileRecord( const std::vector<std::string> & in );
+
 protected:
   void sizeEverything();
 
@@ -615,6 +617,7 @@ protected:
    * Needed for output.
    */
   ExodusII_IO * _ex_out;
+  bool         _ex_initialized;
   unsigned int _num_files;
   unsigned int _num_in_current_file;
   unsigned int _num_files_displaced;
@@ -887,6 +890,12 @@ protected:
    * The order of the time stepping scheme
    */
   Real _time_stepping_order;
+
+  /**
+   * A copy of the input file.
+   */
+  std::vector<std::string> _input_file_record;
+  void outputInputFile();
 
 public:
   /**

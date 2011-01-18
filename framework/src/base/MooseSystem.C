@@ -37,6 +37,7 @@
 //libMesh includes
 #include "numeric_vector.h"
 #include "exodusII_io.h"
+#include "exodusII.h"
 #include "parallel.h"
 #include "gmv_io.h"
 #include "tecplot_io.h"
@@ -75,6 +76,7 @@ MooseSystem::MooseSystem() :
   _geometric_search_data_displaced(*this, _displaced_mesh),
   _has_dampers(false),
   _ex_out(NULL),
+  _ex_initialized(false),
   _num_files(0),
   _num_in_current_file(0),
   _num_files_displaced(0),
@@ -2001,6 +2003,11 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
     {
       _postprocessor_data[0].writeExodus( _ex_out, time );
     }
+    if ( !_ex_initialized )
+    {
+      _ex_initialized = true;
+      outputInputFile();
+    }
 
     if(_has_displaced_mesh && _output_displaced)
     {
@@ -2059,6 +2066,46 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
   
 }
 
+void
+MooseSystem::outputInputFile()
+{
+  std::vector<std::string> records;
+  records.reserve(3+_input_file_record.size());
+  records.push_back("####################");
+  records.push_back("# Created by MOOSE #");
+  records.push_back("####################");
+  for (unsigned int i(0); i < _input_file_record.size(); ++i)
+  {
+    // MAX_LINE_LENGTH is from ExodusII
+    if ( _input_file_record[i].length() > MAX_LINE_LENGTH )
+    {
+      // Must split this into multiple lines
+      const std::string continuation("...");
+      const size_t cont_len(continuation.length());
+      size_t num_lines = _input_file_record[i].length() / (MAX_LINE_LENGTH - cont_len) + 1;
+      std::string split_line;
+      for (size_t j(0), l_begin(0); j < num_lines; ++j, l_begin+=MAX_LINE_LENGTH-cont_len)
+      {
+        size_t l_len = MAX_LINE_LENGTH - cont_len;
+        if ( _input_file_record[i].length() < l_begin + l_len )
+        {
+          l_len = _input_file_record[i].length() - l_begin;
+        }
+        split_line = _input_file_record[i].substr( l_begin, l_len );
+        if (l_begin + l_len != _input_file_record[i].length())
+        {
+          split_line += continuation;
+        }
+        records.push_back(split_line);
+      }
+    } else
+    {
+      records.push_back(_input_file_record[i]);
+    }
+  }
+  _ex_out->write_information_records( records );
+}
+
 bool & MooseSystem::dontReinitFE()
 {
   return _no_fe_reinit;
@@ -2112,4 +2159,10 @@ MooseSystem::getVariableNodalValue(Node & node, const std::string & var_name)
   {
     mooseError("Variable with name '" + var_name + "' does not exist");
   }
+}
+
+void
+MooseSystem::inputFileRecord( const std::vector<std::string> & in )
+{
+  _input_file_record = in;
 }

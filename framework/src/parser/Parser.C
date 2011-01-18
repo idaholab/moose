@@ -160,6 +160,14 @@ Parser::parse(const std::string &input_filename)
 
   fixupOptionalBlocks();
 
+  // Save input file record in _moose_system so that it can be dumped into the
+  // results file.
+  {
+    std::vector<std::string> input;
+    _input_tree->getInputFileLines( input );
+    _moose_system.inputFileRecord( input );
+  }
+
   if (!_tree_printed)
   {
     if (Moose::command_line && Moose::command_line->search(_show_tree))
