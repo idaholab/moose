@@ -2046,7 +2046,7 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
   {
     TecplotIO(*_mesh).write_equation_systems(file_name + ".plt", *_es);
 
-    if(_has_displaced_mesh)
+    if(_has_displaced_mesh && _output_displaced)
       TecplotIO(*_displaced_mesh).write_equation_systems(file_name_displaced + ".plt", *_displaced_es);
   }
 
@@ -2054,7 +2054,7 @@ MooseSystem::outputSystem(unsigned int t_step, Real time)
   {
     TecplotIO(*_mesh, true).write_equation_systems(file_name + ".plt", *_es);
 
-    if(_has_displaced_mesh)
+    if(_has_displaced_mesh && _output_displaced)
       TecplotIO(*_displaced_mesh, true).write_equation_systems(file_name_displaced + ".plt", *_displaced_es);
   }
 
