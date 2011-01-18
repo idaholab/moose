@@ -162,6 +162,9 @@ MooseInit::MooseInit(int argc, char** argv)
 
   std::cout << "Number of Threads: " << libMesh::n_threads() << "\n";
 
+  // Ignore remaining command line options
+  PetscOptionsSetValue("-options_left", "no");
+  
   ParallelUniqueId::initialize();
 }
 
