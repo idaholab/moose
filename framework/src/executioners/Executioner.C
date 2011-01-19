@@ -38,7 +38,6 @@ template<>
 InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<bool>("initial_mesh_rebalance", false, "Whether or not to try and rebalance the mesh at the beginning of the simulation based on the amount of time spent computing on each element");
   return params;
 }
 
@@ -48,8 +47,7 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
   FunctionInterface(parameters.get<MooseSystem *>("_moose_system")->_functions[_tid], parameters),
   _moose_system(*parameters.get<MooseSystem *>("_moose_system")),
   _initial_residual_norm(std::numeric_limits<Real>::max()),
-  _old_initial_residual_norm(std::numeric_limits<Real>::max()),
-  _initial_mesh_rebalance(getParam<bool>("initial_mesh_rebalance"))
+  _old_initial_residual_norm(std::numeric_limits<Real>::max())
 {
 }
 
@@ -103,8 +101,6 @@ Executioner::setup()
 
   _moose_system.getNonlinearSystem()->update();
 
-  if(_initial_mesh_rebalance)
-    _moose_system.rebalanceMesh();
 }
 
 void

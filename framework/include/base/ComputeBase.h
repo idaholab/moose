@@ -111,17 +111,12 @@ ComputeBase<RangeType>::operator () (const RangeType & range)
 
   pre();
 
-  bool calculate_element_time = _moose_system._calculate_element_time;
-
   unsigned int subdomain = std::numeric_limits<unsigned int>::max();
   typename RangeType::const_iterator el = range.begin();
   for (el = range.begin() ; el != range.end(); ++el)
   {
     const Elem* elem = *el;
     unsigned int cur_subdomain = elem->subdomain_id();
-
-    if(unlikely(calculate_element_time))
-      _moose_system.startElementTiming(elem->id());
 
     preElement(elem);
 
@@ -148,9 +143,6 @@ ComputeBase<RangeType>::operator () (const RangeType & range)
     } // sides
 
     postElement(elem);
-    
-    if(unlikely(calculate_element_time))
-      _moose_system.stopElementTiming(elem->id());
   } // range
 
   post();

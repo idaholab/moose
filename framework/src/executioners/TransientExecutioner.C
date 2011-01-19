@@ -62,7 +62,7 @@ TransientExecutioner::TransientExecutioner(const std::string & name, InputParame
    _time(_moose_system.parameters().set<Real>("time") = getParam<Real>("start_time")),
    _time_old(_time),
    _input_dt(getParam<Real>("dt")),
-   _dt(_moose_system.parameters().set<Real>("dt") = 1),
+   _dt(_moose_system.parameters().set<Real>("dt") = 0),
    _prev_dt(-1),
    _reset_dt(false),
    _end_time(getParam<Real>("end_time")),

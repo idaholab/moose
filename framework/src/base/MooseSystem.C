@@ -49,8 +49,6 @@
 #include "fourth_error_estimators.h"
 #include "fe_interface.h"
 #include "mesh_tools.h"
-#include "parallel.h"
-#include "metis_partitioner.h"
 
 MooseSystem::MooseSystem() :
   _dof_data(libMesh::n_threads(), DofData(*this)),
@@ -1870,9 +1868,6 @@ MooseSystem::meshChanged()
   if(_es)
     _es->reinit();
 
-  if(_displaced_es)
-    _displaced_es->reinit();
-
   // Rebuild the boundary conditions
   _mesh->boundary_info->build_node_list_from_side_list();
 
@@ -1905,57 +1900,6 @@ MooseSystem::meshChanged()
   
   // Lets the output system know that the mesh has changed recently.
   _mesh_changed = true;
-}
-
-void
-MooseSystem::rebalanceMesh()
-{
-  Moose::perf_log.push("rebalanceMesh()","Solve");
-
-  reinitElementTiming();
-  _calculate_element_time = true;
-  computeResidual(*(_system->current_local_solution.get()), *_system->rhs);
-  _calculate_element_time = false;
-
-  // Add in contributions from the time we spent computing on nodes.
-  for(unsigned int i=0; i<_node_weights.size(); i++)
-  {
-    if(_node_weights[i] > 0.0)
-    {
-      std::vector<unsigned int> & connected_elems = node_to_elem_map[i];
-      unsigned int num_connected_elems = connected_elems.size();
-      Real contribution = _node_weights[i] / (Real)num_connected_elems;
-      
-      for(unsigned int j=0; j<num_connected_elems; j++)
-        _element_weights[connected_elems[j]] += contribution;
-    }  
-  }
-
-  Parallel::sum(*static_cast<std::vector<ErrorVectorReal> *>(&_element_weights));
-
-  MetisPartitioner * mp = dynamic_cast<MetisPartitioner*>(_mesh->partitioner().get());
-
-  if(!mp)
-    mooseError("Can only reblance the mesh with the MetisPartitioner!");
-  
-  mp->attach_weights(&_element_weights);
-
-  _mesh->partition();
-
-  if(_has_displaced_mesh)
-  {
-    MetisPartitioner * dmp = dynamic_cast<MetisPartitioner*>(_displaced_mesh->partitioner().get());
-
-    if(!dmp)
-      mooseError("Can only reblance the mesh with the MetisPartitioner!");
-
-    dmp->attach_weights(&_element_weights);
-    _displaced_mesh->partition();
-  }
-
-  meshChanged();
-
-  Moose::perf_log.pop("rebalanceMesh()","Solve");
 }
 
 void
@@ -2215,63 +2159,6 @@ MooseSystem::getVariableNodalValue(Node & node, const std::string & var_name)
   {
     mooseError("Variable with name '" + var_name + "' does not exist");
   }
-}
-
-void
-MooseSystem::reinitElementTiming()
-{
-  _element_weights.resize(_mesh->max_elem_id(), 0.0);
-  _node_weights.resize(_mesh->max_node_id(), 0.0);
-
-  std::fill(_element_weights.begin(), _element_weights.end(), 0.0);
-  std::fill(_node_weights.begin(), _node_weights.end(), 0.0);
-}
-
-void
-MooseSystem::startElementTiming(unsigned int element)
-{
-//  gettimeofday (&_element_start_time, NULL);
-  _element_start_time = clock();
-}
-
-
-void
-MooseSystem::stopElementTiming(unsigned int element)
-{
-  /*  gettimeofday (&_element_stop_time, NULL);
-  
-  const double elapsed_time = (static_cast<double>(_element_stop_time.tv_sec  - _element_start_time.tv_sec) +
-			       static_cast<double>(_element_stop_time.tv_usec - _element_stop_time.tv_usec)*1.e-6);
-  */
-  _element_stop_time = clock();
-
-  double elapsed_time = _element_stop_time - _element_start_time;
-  
-  _element_weights[element] += elapsed_time;
-}
-
-
-void
-MooseSystem::startNodeTiming(unsigned int node)
-{
-//  gettimeofday (&_node_start_time, NULL);
-  _node_start_time = clock();
-}
-
-
-void
-MooseSystem::stopNodeTiming(unsigned int node)
-{
-  /*  gettimeofday (&_node_stop_time, NULL);
-  
-  const double elapsed_time = (static_cast<double>(_node_stop_time.tv_sec  - _node_start_time.tv_sec) +
-			       static_cast<double>(_node_stop_time.tv_usec - _node_stop_time.tv_usec)*1.e-6);
-  */
-  _node_stop_time = clock();
-
-  double elapsed_time = _node_stop_time - _node_start_time;
-  
-  _node_weights[node] += elapsed_time;
 }
 
 void

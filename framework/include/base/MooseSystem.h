@@ -468,11 +468,6 @@ public:
   void meshChanged();
 
   /**
-   * Rebalances the mesh based on how long it takes to do computation on each element.
-   */
-  void rebalanceMesh();
-  
-  /**
    * Tell MooseSystem to retrieve the dimension from the mesh
    */
   void updateDimension();
@@ -912,64 +907,6 @@ public:
    * TODO: Remove this!
    */
   bool DUMMY_CONTACT_FLAG;
-
-  /**
-   * Reinitialize (zero out) the element timing so a new one can be taken.
-   */
-  void reinitElementTiming();
-  
-  /**
-   * Call before doing any element calculation so it can be timed.
-   */
-  void startElementTiming(unsigned int element);
-
-  /**
-   * Call after doing any element calculation to end the timing.
-   */
-  void stopElementTiming(unsigned int element);
-
-  /**
-   * Call before doing any node calculation so it can be timed.
-   */
-  void startNodeTiming(unsigned int node);
-
-  /**
-   * Call after doing any element calculation to end the timing.
-   */
-  void stopNodeTiming(unsigned int node);
-
-  /**
-   * Relative element weights for load redistribution.
-   */
-  ErrorVector _element_weights;
-
-  /**
-   * Relative node weights for load redistribution.
-   */
-  ErrorVector _node_weights;
-
-  /**
-   * Start time for the current element.
-   */
-//  struct timeval _element_start_time;
-  clock_t _element_start_time;
-
-  /**
-   * Stop time for the current element.
-   */
-//  struct timeval _element_stop_time;
-  clock_t _element_stop_time;
-
-  clock_t _node_start_time;
-
-  /**
-   * Stop time for the current node.
-   */
-//  struct timeval _node_stop_time;
-  clock_t _node_stop_time;
-
-  bool _calculate_element_time;
-  
 
 protected:
   friend class ComputeInternalJacobians;
