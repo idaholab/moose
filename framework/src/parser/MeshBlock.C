@@ -27,6 +27,8 @@
 #include "mesh_refinement.h"
 #include "linear_partitioner.h"
 #include "mesh_tools.h"
+#include "metis_partitioner.h"
+#include "error_vector.h"
 
 template<>
 InputParameters validParams<MeshBlock>()
@@ -77,6 +79,9 @@ MeshBlock::execute()
 
   if (getParamValue<std::string>("partitioner") == "linear")
     mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+  else
+    mesh->partitioner() = AutoPtr<Partitioner>(new MetisPartitioner);
+  
   mesh->prepare_for_use(false);
 
   // If using ParallelMesh this will delete non-local elements from the current processor
@@ -90,7 +95,7 @@ MeshBlock::execute()
   //  _moose_system.meshChanged();
   mesh->boundary_info->build_node_list_from_side_list();
   MeshTools::build_nodes_to_elem_map(*mesh, _moose_system.node_to_elem_map);
-
+  
   mesh->print_info();
 
 
@@ -103,6 +108,11 @@ MeshBlock::execute()
 
     Mesh * displaced_mesh = _moose_system.initDisplacedMesh(displacements);
 
+    if (getParamValue<std::string>("partitioner") == "linear")
+      displaced_mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+    else
+      displaced_mesh->partitioner() = AutoPtr<Partitioner>(new MetisPartitioner);
+
     displaced_mesh->prepare_for_use(false);
 
     (*displaced_mesh->boundary_info) = (*mesh->boundary_info);
@@ -111,6 +121,8 @@ MeshBlock::execute()
 
     _moose_system.needSerializedSolution(true);
   }
+
+  _moose_system.reinitElementTiming();
 
   visitChildren();
 }

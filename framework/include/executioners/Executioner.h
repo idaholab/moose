@@ -129,6 +129,10 @@ protected:
   Real _initial_residual_norm;
   Real _old_initial_residual_norm;
 
+  /**
+   * Whether an initial rebalancing needs to be performaed.
+   */
+  bool _initial_mesh_rebalance;
 };
 
 #endif //EXECUTIONER_H

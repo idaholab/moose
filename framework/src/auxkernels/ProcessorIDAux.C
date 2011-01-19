@@ -14,6 +14,8 @@
 
 #include "ProcessorIDAux.h"
 
+#include "MooseSystem.h"
+
 template<>
 InputParameters validParams<ProcessorIDAux>()
 {
@@ -32,5 +34,7 @@ ProcessorIDAux::ProcessorIDAux(const std::string & name, InputParameters paramet
 Real
 ProcessorIDAux::computeValue()
 {
+//  return _moose_system._element_weights[_current_elem->id()];
+  
   return _current_elem->processor_id();
 }
