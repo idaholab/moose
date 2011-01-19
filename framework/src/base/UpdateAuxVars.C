@@ -73,10 +73,16 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
     {
       Node * node = *nd;
 
+      if(unlikely(_calculate_element_time))
+        startNodeTiming(node->id());
+
       reinitAuxKernels(0, soln, *node);
 
       for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
         (*aux_it)->computeAndStore();
+
+      if(unlikely(_calculate_element_time))
+        stopNodeTiming(node->id());
     }
   }
 
@@ -111,6 +117,9 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
     {
       Node & node = _mesh->node(nodes[i]);
 
+      if(unlikely(_calculate_element_time))
+        startNodeTiming(node.id());
+
       if(node.processor_id() == libMesh::processor_id())
       {
         reinitAuxKernels(0, soln, node);
@@ -118,6 +127,9 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
         for(aux_it=aux_begin; aux_it != aux_end; ++aux_it)
           (*aux_it)->computeAndStore();
       }
+      
+      if(unlikely(_calculate_element_time))
+        stopNodeTiming(node.id());
     }
   }
 
@@ -152,7 +164,10 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
   {
     const Elem* elem = *el;    
       
-    unsigned int cur_subdomain = elem->subdomain_id();    
+    unsigned int cur_subdomain = elem->subdomain_id();
+
+    if(unlikely(_calculate_element_time))
+      startElementTiming(elem->id());
 
     block_element_aux_it =_auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
     block_element_aux_end = _auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
@@ -198,6 +213,9 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
         }
       }
     }
+    
+    if(unlikely(_calculate_element_time))
+      stopElementTiming(elem->id());
   }
 
   // FIXME: use _nl_system directly?
