@@ -1,0 +1,228 @@
+#include "PLC_LSH.h"
+
+#include "IsotropicElasticityTensor.h"
+
+template<>
+InputParameters validParams<PLC_LSH>()
+{
+  InputParameters params = validParams<MaterialModel>();
+   
+  //   Power-law creep material parameters
+   params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
+   params.addRequiredParam<Real>("exponent", "Exponent in power-law equation");
+   params.addRequiredParam<Real>("activation_energy", "Activation energy");
+   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
+   
+  //  Sub-Newton Iteration control parameters
+   params.addParam<Real>("tolerance", 1e-5, "Convergence tolerance for sub-newtion iteration");
+   params.addParam<unsigned int>("max_its", 10, "Maximum number of sub-newton iterations");
+   params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
+
+   /*
+     Linear strain hardening parameters
+    */
+   params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
+   params.addRequiredParam<Real>("hardening_constant", "Hardening slope");
+   params.addParam<Real>("tolerance", 1e-5, "Sub-BiLin iteration tolerance");
+   params.addParam<unsigned int>("max_its", 10, "Maximum number of Sub-newton iterations");
+   
+
+  return params;
+}
+
+
+PLC_LSH::PLC_LSH( const std::string & name,
+                              InputParameters parameters )
+  :MaterialModel( name, parameters ),
+   _coefficient(parameters.get<Real>("coefficient")),
+   _exponent(parameters.get<Real>("exponent")),
+   _activation_energy(parameters.get<Real>("activation_energy")),
+   _gas_constant(parameters.get<Real>("gas_constant")),
+   _tolerance(parameters.get<Real>("tolerance")),
+   _max_its(parameters.get<unsigned int>("max_its")),
+   _output_iteration_info(getParam<bool>("output_iteration_info")),
+
+   _creep_strain(declareProperty<RealTensorValue>("creep_strain")),
+   _creep_strain_old(declarePropertyOld<RealTensorValue>("creep_strain")),
+
+   _yield_stress(parameters.get<Real>("yield_stress")),
+   _hardening_constant(parameters.get<Real>("hardening_constant")),
+
+   _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain")),
+
+   _hardening_variable(declareProperty<Real>("hardening_variable")),
+   _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
+   
+{
+  
+  _identity.identity();
+  
+/*  Below lines are only needed if defining a differnet elasticity tensor
+  IsotropicElasticityTensor * iso =  new IsotropicElasticityTensor;
+  iso->setLambda( _lambda );
+  iso->setShearModulus( _shear_modulus );
+  iso->calculate(0);
+  elasticityTensor( iso );
+*/
+}
+
+void
+PLC_LSH::computeStress()
+{
+  // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
+  // stress = stressOld + stressIncrement
+  // creep_strain = creep_strainOld + creep_strainIncrement
+  //
+  // 
+  // This is more work than needs to be done.  The strain and stress tensors are symmetric, and so we are carrying
+  //   a third more memory than is required.  We are also running a 9x9 * 9x1 matrix-vector multiply when at most
+  //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
+  //   constants are needed and a matrix vector multiply can be avoided entirely.
+  //
+  
+  ColumnMajorMatrix stress_old(_stress_old[_qp]);
+
+// compute trial stress
+  _strain_increment.reshape(9, 1);
+  ColumnMajorMatrix stress_new( *elasticityTensor() * _strain_increment );
+  _strain_increment.reshape(3, 3);
+  stress_new.reshape(3, 3);
+  stress_new *= _dt;
+  stress_new += stress_old;
+  
+// compute deviatoric trial stress
+  ColumnMajorMatrix dev_trial_stress(stress_new);
+  dev_trial_stress -= _identity*((stress_new.tr())/3.0);
+
+// compute effective trial stress
+  Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
+  Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
+  
+// Use Newton sub-iteration to determine effective creep strain increment
+  
+  unsigned int it = 0;
+  Real creep_residual = 10.;
+  Real del_p = 0.;
+  Real norm_residual = 10.;
+    
+  while(it < _max_its && norm_residual > _tolerance)
+  {
+ 
+    Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*del_p, _exponent)*
+      std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));       
+    Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_exponent*
+      std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _exponent-1.)*
+      std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));
+    creep_residual = phi -  del_p/_dt;
+    norm_residual = std::abs(creep_residual);
+    del_p = del_p + (creep_residual / (1/_dt - dphi_ddelp));
+      
+    // iteration output
+    if (_output_iteration_info == true)
+      std::cout
+        <<" it=" <<it
+        <<" temperature=" << _temperature[_qp]
+        <<" trial stress=" <<effective_trial_stress
+        <<" phi=" <<phi
+        <<" dphi=" <<dphi_ddelp
+        <<" creep_res=" <<creep_residual
+        <<" del_p=" <<del_p
+        <<std::endl;
+      
+    it++;
+  } 
+
+  if(it == _max_its) mooseError("Max sub-newton iteration hit during creep solve!");
+
+
+// compute creep and elastic strain increments (avoid potential divide by zero - how should this be done)?   
+  if (effective_trial_stress < 0.01) effective_trial_stress = 0.01;
+  ColumnMajorMatrix creep_strain_increment(dev_trial_stress);
+  creep_strain_increment *= (1.5*del_p/effective_trial_stress);
+
+  ColumnMajorMatrix elastic_strain_increment;
+  elastic_strain_increment = _strain_increment*_dt - creep_strain_increment;
+
+//compute stress increment
+  elastic_strain_increment.reshape(9, 1);
+  stress_new =  *elasticityTensor() * elastic_strain_increment;
+
+// update stress and creep strain
+  stress_new.fill(_stress[_qp]);
+  _stress[_qp] += _stress_old[_qp];
+  creep_strain_increment.fill(_creep_strain[_qp]);
+  _creep_strain[_qp] += _creep_strain_old[_qp];
+
+// now use stress_new to calculate a new effective_trial_stress and determine if yield has occured
+// and if so, calculate the corresponding plastic strain
+
+// begin new stuff /////////////////////////////////////////////////////////////////////////////
+
+//  ColumnMajorMatrix stress_p(_stress[_qp]);
+  
+  
+// compute deviatoric trial stress
+  ColumnMajorMatrix dev_trial_stress_p(_stress[_qp]);
+  dev_trial_stress_p -= _identity*((_stress[_qp].tr())/3.0);
+
+// effective trial stress
+  Real dts_squared_p = dev_trial_stress_p.doubleContraction(dev_trial_stress_p);
+  Real effective_trial_stress_p = std::sqrt(1.5 * dts_squared_p);
+
+// determine if yield condition is satisfied
+  Real yield_condition = effective_trial_stress_p - _hardening_variable_old[_qp] - _yield_stress;
+
+  if (yield_condition > 0.)  //then use newton iteration to determine effective plastic strain increment
+  {
+//    stress_new *= 0.;
+    unsigned int jt = 0;
+    Real plastic_residual = 10.;
+    Real scalar_plastic_strain_increment = 0.;
+    Real norm_residual = 10.;
+
+
+
+    while(jt < _max_its && norm_residual > _tolerance)
+    {
+      plastic_residual = effective_trial_stress_p - (3. * _shear_modulus * scalar_plastic_strain_increment) - _hardening_variable[_qp] - _yield_stress;
+      norm_residual = std::abs(plastic_residual);
+
+      scalar_plastic_strain_increment = scalar_plastic_strain_increment + ((plastic_residual) / (3. * _shear_modulus + _hardening_constant));
+
+      _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_constant * scalar_plastic_strain_increment);
+      jt++;
+
+    }
+
+
+    if(jt == _max_its)
+      mooseError("Max sub-newton iteration hit during plasticity increment solve!");
+
+
+// compute plastic and elastic strain increments (avoid potential divide by zero - how should this be done)?
+  if (effective_trial_stress_p < 0.01) effective_trial_stress_p = 0.01;
+  ColumnMajorMatrix plastic_strain_increment(dev_trial_stress_p);
+  plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress_p);
+
+  ColumnMajorMatrix elastic_strain_increment_p;
+  elastic_strain_increment_p = _strain_increment*_dt - plastic_strain_increment - creep_strain_increment;
+
+//compute stress increment
+  elastic_strain_increment_p.reshape(9, 1);
+  stress_new =  *elasticityTensor() * elastic_strain_increment_p;
+
+// update stress and plastic strain
+  stress_new.fill(_stress[_qp]);
+  _stress[_qp] += _stress_old[_qp];
+  plastic_strain_increment.fill(_plastic_strain[_qp]);
+  _plastic_strain[_qp] += _plastic_strain_old[_qp];
+
+  }//end of if statement
+  
+
+// end new stuff //////////////////////////////////////////////////////////////////////////////
+  
+  
+}
+

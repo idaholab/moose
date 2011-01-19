@@ -50,6 +50,7 @@
 #include "StressDivergence.h"
 #include "StressOutput.h"
 #include "LinearStrainHardening.h"
+#include "PLC_LSH.h"
 
 #include "MaterialModel.h"
 
@@ -121,6 +122,7 @@ Elk::registerObjects()
   registerKernel(StressOutput);
   registerMaterial(MaterialModel);
   registerMaterial(LinearStrainHardening);
+  registerMaterial(PLC_LSH);
 
   // phase_field
   registerKernel(AC);
