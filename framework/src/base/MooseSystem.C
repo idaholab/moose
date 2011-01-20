@@ -137,7 +137,12 @@ MooseSystem::MooseSystem() :
   _active_local_elem_range(NULL),
   _active_node_range(NULL),
   _time_stepping_order(0),
-  DUMMY_CONTACT_FLAG(false)
+  DUMMY_CONTACT_FLAG(false),
+  _element_start_time(0),
+  _element_stop_time(0),
+  _node_start_time(0),
+  _node_stop_time(0),
+  _calculate_element_time(false)
 {
   sizeEverything();
 }
@@ -224,7 +229,12 @@ MooseSystem::MooseSystem(Mesh &mesh) :
   _active_local_elem_range(NULL),
   _active_node_range(NULL),
   _time_stepping_order(0),
-  DUMMY_CONTACT_FLAG(false)
+  DUMMY_CONTACT_FLAG(false),
+  _element_start_time(0),
+  _element_stop_time(0),
+  _node_start_time(0),
+  _node_stop_time(0),
+  _calculate_element_time(false)
 {
   sizeEverything();
   initEquationSystems();
