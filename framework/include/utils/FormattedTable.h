@@ -40,7 +40,7 @@ public:
   bool empty() const;
   
   /**
-   * Method for adding data to the output table.  The dependant varible is named "time"
+   * Method for adding data to the output table.  The dependant variable is named "time"
    */
   void addData(const std::string & name, Real value, Real time);
 

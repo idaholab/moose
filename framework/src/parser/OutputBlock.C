@@ -22,6 +22,8 @@
 #include "PetscSupport.h"
 #endif //LIBMESH_HAVE_PETSC
 
+//#include "unistd.h" //TODO rm?
+
 
 template<>
 InputParameters validParams<OutputBlock>()
@@ -93,6 +95,12 @@ OutputBlock::execute()
   if (getParamValue<bool>("print_linear_residuals"))
     PetscOptionsSetValue("-ksp_monitor", PETSC_NULL);
 #endif
+
+  // Test to make sure that the user can write to the directory specified in file_base
+  std::string base = "./" + _moose_system._file_base;
+  base = base.substr(0, base.find_last_of('/'));
+  if (access(base.c_str(), W_OK) == -1)
+    mooseError("Can not write to directory: " + base + " for file base: " + _moose_system._file_base);
   
   visitChildren();
 }
