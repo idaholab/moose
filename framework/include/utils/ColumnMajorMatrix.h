@@ -137,9 +137,14 @@ public:
 
 
   /**
-   * Set the value of each of the diagonals to the passsed in value.
+   * Set the value of each of the diagonals to the passed in value.
    */
   void setDiag(Real value);
+
+  /**
+   * Add to each of the diagonals the passsed in value.
+   */
+  void addDiag(Real value);
 
   /**
    * The trace of the CMM.
@@ -450,6 +455,15 @@ ColumnMajorMatrix::setDiag(Real value)
 
   for(unsigned int i=0; i<_n_rows; i++)
     (*this)(i,i) = value;
+}
+
+inline void
+ColumnMajorMatrix::addDiag(Real value)
+{
+  mooseAssert(_n_rows == _n_cols, "Cannot add to the diagonal of a non-square matrix!");
+
+  for(unsigned int i=0; i<_n_rows; i++)
+    (*this)(i,i) += value;
 }
 
 inline Real
