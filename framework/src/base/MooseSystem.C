@@ -290,6 +290,10 @@ MooseSystem::~MooseSystem()
   if(_ex_out)
     delete _ex_out;  
 
+  delete &_residual_copy;
+  delete &_serialized_solution;
+  delete &_serialized_aux_solution;
+
   _real_zero.release();
   freeDoubleMooseArray(_zero);
   freeDoubleMooseArray(_grad_zero);
