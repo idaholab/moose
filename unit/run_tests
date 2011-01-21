@@ -1,0 +1,16 @@
+#!/bin/bash
+# This script runs mooseunit on systems where it can run (not Icestorm)
+#
+
+if [ "`hostname -s`" == "icestorm" ]
+then
+  echo "Did NOT run mooseunit because this is icestorm"
+else
+  echo "Running mooseunit because this is NOT icestorm"
+  if [ -e ./moose_unit-opt ]
+  then
+    ./moose_unit-opt
+  else
+    echo "Executable missing!"
+  fi
+fi

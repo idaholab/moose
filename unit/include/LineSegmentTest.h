@@ -12,40 +12,49 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef USERFUNCTIONTEST_H
-#define USERFUNCTIONTEST_H
+#ifndef LINESEGMENTTEST_H
+#define LINESEGMENTTEST_H
 
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-// Forward declarations
-class MooseInit;
-class MooseSystem;
+// Moose includes
+#include "LineSegment.h"
 
-class ParsedFunctionTest : public CppUnit::TestFixture 
+class LineSegmentTest : public CppUnit::TestFixture 
 {
 
-  CPPUNIT_TEST_SUITE( ParsedFunctionTest );
+  CPPUNIT_TEST_SUITE( LineSegmentTest );
 
-  CPPUNIT_TEST( basicConstructor );
-  CPPUNIT_TEST( advancedConstructor );
-  CPPUNIT_TEST( testVariables );
-  CPPUNIT_TEST( testConstants );
+  CPPUNIT_TEST( closestPointTest );
+  CPPUNIT_TEST( closestNormalPointTest );
+  CPPUNIT_TEST( containsPointTest );
+  CPPUNIT_TEST( planeIntersectTest );
+  CPPUNIT_TEST( lineIntersectTest );
   
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  ParsedFunctionTest();
-  ~ParsedFunctionTest();
-  
-  void basicConstructor();
-  void advancedConstructor();
-  void testVariables();
-  void testConstants();
+  LineSegmentTest();
+  ~LineSegmentTest();
+
+  void closestPointTest();
+  void closestNormalPointTest();
+  void containsPointTest();
+  void planeIntersectTest();
+  void lineIntersectTest();
 
 private:
-  MooseInit *init;
-  MooseSystem *m;
+  LineSegment _posx;
+  LineSegment _posy;
+  LineSegment _negy;
+  LineSegment _posdiag;
+  LineSegment _negdiag;
+
+  LineSegment _pos3x;
+  LineSegment _neg3y;
+  LineSegment _pos3diag;
+  LineSegment _neg3diag;
 };
 
-#endif  // USERFUNCTIONTEST_H
+#endif  // LINESEGMENTTEST_H

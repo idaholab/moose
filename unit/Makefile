@@ -18,19 +18,21 @@
 # an application
 ###############################################################################
 CURR_DIR	?= $(shell pwd)
-MOOSE_DIR	?= $(shell pwd)/../moose
-ENABLE_ELK 	:= no
+ROOT_DIR  ?= $(shell dirname `pwd`)
+MOOSE_DIR	?= $(ROOT_DIR)/moose
 
 MAKE_LIBRARY := no
-APPLICATION_NAME := mooseunit
+APPLICATION_NAME := moose_unit
 
 # Extra stuff for CPPUNIT
-CPPUNIT_DIR 		?= $HOME/root/usr/local/packages/cppunit
+CPPUNIT_DIR 		?= $(PACKAGES_DIR)/cppunit
 ADDITIONAL_INCLUDES 	:= -I$(CPPUNIT_DIR)/include
 ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit 
 
+include $(MOOSE_DIR)/build.mk
+
 # Include the MOOSE Export file
-include $(MOOSE_DIR)/Makefile.export
+include $(MOOSE_DIR)/moose.mk
 
 ###############################################################################
 # Additional special case targets should be added here

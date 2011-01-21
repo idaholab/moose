@@ -306,7 +306,7 @@ ColumnMajorMatrixTest::contractionMatrix()
   sec(0, 1) = 2;
   sec(1, 1) = 1;
 
-  CPPUNIT_ASSERT( mat.doubleContraction( sec ) == 21 );
+  CPPUNIT_ASSERT( mat.doubleContraction( sec ) == (1*4 + 2*3 + 3*2 + 4*1) );
 }
 
 void
@@ -512,4 +512,34 @@ ColumnMajorMatrixTest::notEqualMatrix()
 
   CPPUNIT_ASSERT( *a != *t );
   CPPUNIT_ASSERT( !(mat != mat1) );
+}
+
+void
+ColumnMajorMatrixTest::kronecker()
+{
+  ColumnMajorMatrix rhs(2, 2);
+  rhs(0, 0) = 1;
+  rhs(0, 1) = 2;
+  rhs(1, 0) = 3;
+  rhs(1, 1) = 4;
+
+  ColumnMajorMatrix lhs(2, 2);
+  lhs(0, 0) = 0;
+  lhs(0, 1) = 5;
+  lhs(1, 0) = 6;
+  lhs(1, 1) = 7;
+
+  ColumnMajorMatrix ans = rhs.kronecker(lhs);
+
+  CPPUNIT_ASSERT( ans(0,0) == 0 );
+  CPPUNIT_ASSERT( ans(0,3) == 10 );
+  CPPUNIT_ASSERT( ans(1,0) == 6 );
+  CPPUNIT_ASSERT( ans(1,1) == 7 );
+  CPPUNIT_ASSERT( ans(1,3) == 14 );
+  CPPUNIT_ASSERT( ans(2,1) == 15 );
+  CPPUNIT_ASSERT( ans(2,2) == 0 );
+  CPPUNIT_ASSERT( ans(3,0) == 18 );
+  CPPUNIT_ASSERT( ans(3,1) == 21 );
+  CPPUNIT_ASSERT( ans(3,2) == 24 );
+  CPPUNIT_ASSERT( ans(3,3) == 28 );
 }

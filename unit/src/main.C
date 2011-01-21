@@ -18,23 +18,11 @@
 #include "cppunit/ui/text/TestRunner.h"
 #include "cppunit/extensions/TestFactoryRegistry.h"
 
-//libMesh includes
-#include "perf_log.h"
-
 //Moose includes
 #include "Moose.h"
 
-//Moose Tests
-#include "ParallelUniqueIdTest.h"
-#include "LinearInterpolationTest.h"
-#include "MooseArrayTest.h"
-#include "ColumnMajorMatrixTest.h"
-#include "ParsedFunctionTest.h"
-
-//Elk Tests
-#ifdef ELK_TEST
-#include "IsotropicElasticityTensorTest.h"
-#endif
+//libMesh includes
+#include "perf_log.h"
 
 #include <fstream>
 #include <string>
@@ -47,18 +35,20 @@ int main(int argc, char **argv)
 
   CppUnit::TextTestRunner runner;
   runner.addTest(suite);
+  std::ofstream out;
 
-  /* Uncomment the following line for bitten testing */
-  std::ofstream out("test_results.xml");
-
-  if (argc == 2 && std::string(argv[1]) == std::string("--xml"))
+  if (argc == 2 && std::string(argv[1]) == std::string("--xml")) 
+  {
     runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), out ) );
+    out.open("test_results.xml");
+  }
 
   runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
 
   bool wasSucessful = runner.run("", false, true, false);
 
-  out.close();
+  if (out.is_open())
+    out.close();
   
   return wasSucessful ? 0 : 1;
 }

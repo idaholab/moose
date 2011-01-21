@@ -61,7 +61,7 @@ IsotropicElasticityTensorTest::calcLambdaMu()
   IsotropicElasticityTensor is;
   is.setLambda( 2.57 );
   is.setMu( 1.23 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "LambdaMu\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _lambdaMu, is ) );
@@ -70,7 +70,7 @@ IsotropicElasticityTensorTest::calcLambdaMu()
   IsotropicElasticityTensor is2;
   is2.setLambda( 2.57 );
   is2.setShearModulus( 1.23 );
-  is2.calculate();
+  is2.calculate(0);
   CPPUNIT_ASSERT( testMatrix( _lambdaMu, is2 ) );
 }
 
@@ -80,7 +80,7 @@ IsotropicElasticityTensorTest::calcLambdaNu()
   IsotropicElasticityTensor is;
   is.setLambda( 2.57 );
   is.setPoissonsRatio( 1.23 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "LambdaNu\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _lambdaNu, is ) );
@@ -92,7 +92,7 @@ IsotropicElasticityTensorTest::calcLamdaK()
   IsotropicElasticityTensor is;
   is.setLambda( 1.23 );
   is.setBulkModulus( 2.57 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "LambdaK\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _lambdaK, is ) );
@@ -113,7 +113,7 @@ IsotropicElasticityTensorTest::calcMuNu()
   IsotropicElasticityTensor is;
   is.setMu( 2.57 );
   is.setPoissonsRatio( 1.23 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "MuNu\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _muNu, is ) );
@@ -125,7 +125,7 @@ IsotropicElasticityTensorTest::calcMuK()
   IsotropicElasticityTensor is;
   is.setMu( 1.23 );
   is.setBulkModulus( 2.57 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "MuK\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _muK, is ) );
@@ -137,7 +137,7 @@ IsotropicElasticityTensorTest::calcMuE()
   IsotropicElasticityTensor is;
   is.setMu( 1.23 );
   is.setYoungsModulus( 2.57 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "MuE\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _muE, is ) );
@@ -149,7 +149,7 @@ IsotropicElasticityTensorTest::calcNuK()
   IsotropicElasticityTensor is;
   is.setPoissonsRatio( 1.23 );
   is.setBulkModulus( 2.57 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "NuK\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _nuK, is ) );
@@ -161,7 +161,7 @@ IsotropicElasticityTensorTest::calcENu()
   IsotropicElasticityTensor is;
   is.setYoungsModulus( 2.57 );
   is.setPoissonsRatio( 1.23 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "ENu\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _eNu, is ) );
@@ -173,7 +173,7 @@ IsotropicElasticityTensorTest::calcEK()
   IsotropicElasticityTensor is;
   is.setYoungsModulus( 1.23 );
   is.setBulkModulus( 2.57 );
-  is.calculate();
+  is.calculate(0);
   //std::cout << "EK\n";
   //is.print();
   CPPUNIT_ASSERT( testMatrix( _eK, is ) );

@@ -54,6 +54,7 @@ class ColumnMajorMatrixTest : public CppUnit::TestFixture
   CPPUNIT_TEST( addMatrixScalarEquals );
   CPPUNIT_TEST( equalMatrix );
   CPPUNIT_TEST( notEqualMatrix );
+  CPPUNIT_TEST( kronecker );
 
   CPPUNIT_TEST_SUITE_END();
   
@@ -91,6 +92,7 @@ public:
   void addMatrixScalarEquals();
   void equalMatrix();
   void notEqualMatrix();
+  void kronecker();
 
 private:
   ColumnMajorMatrix *a, *t, *two_mat; 
