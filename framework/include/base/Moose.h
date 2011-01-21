@@ -162,11 +162,11 @@ namespace libMesh
 /**
  * A function to call when you need the whole program to die and spit out a message
  */
-#ifndef NDEBUG
+//#ifndef NDEBUG
 #define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); libmesh_error(); } while(0)
-#else
-#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; libmesh_error(); } while(0)
-#endif
+//#else
+//#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; libmesh_error(); } while(0)
+//#endif
 
 #ifdef NDEBUG
 #define mooseAssert(asserted, msg) 
