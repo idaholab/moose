@@ -22,8 +22,6 @@
 #include "PetscSupport.h"
 #endif //LIBMESH_HAVE_PETSC
 
-//#include "unistd.h" //TODO rm?
-
 
 template<>
 InputParameters validParams<OutputBlock>()
