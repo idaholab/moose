@@ -60,7 +60,7 @@
       <tr title="Time it took the test to execute"><td><b>Time:</b></td><td id="tb_timing"></td></tr>
       <tr title="Approx. time the test was run"><td><b>Date:</b></td><td id="tb_date"></td></tr>
       <tr title="Dofs passed to run_tests script with --dofs"><td><b>Dofs:</b></td><td id="tb_dofs"></td></tr>
-      <!-- TODO: maybe?? <tr title="Load average of the server when the test was run"><td><b>Load Average:</b></td><td id="tb_load"></td></tr>-->
+      <!-- TODO: when snout is up <tr title="Load average of the server when the test was run"><td><b>Load Average:</b></td><td id="tb_load"></td></tr>-->
       </table>
     </div>
 
@@ -121,7 +121,7 @@ function getAppName() {
 //utility function that returns what the plot is plotting by, it is used to
 //construct the url to the data. Returns "rev" for revision or "time"
 function getPlotBy() {
-  return "rev";
+  return "rev"; // currently only plotting by rev is supported
 }
 
 //this function is the ajax callback when new plot data is received
@@ -142,12 +142,49 @@ function redrawPlotData() {
   for (var key in global_plots)
     global_data.push(global_plots[key]);
 
-  //TODO: save ranges and keep plot in the same range
-  savedxaxis = minplot.getAxes().xaxis;
-  savedyaxis = minplot.getAxes().yaxis;
+  //save ranges and keep plot in the same range after data is changed
+  xaxis = plot.getAxes().xaxis;
+  yaxis = plot.getAxes().yaxis;
+
+  // Make sure we want to use the saved zoom state. If this is the first plot the user selects
+  // then the default zoom is [-1,1] so we don't want that. Also if the user never zoomed in,
+  // and the new data has a larger range than the data currently in view then we don't want
+  // to artificially restrict the range to what is currently showing. Basically only save the
+  // range if the user has zoomed in somewhere on the plot.
+  close_enough_x = 0.05 * (minplot.getAxes().xaxis.max - minplot.getAxes().xaxis.min )
+  close_enough_y = 0.05 * (minplot.getAxes().yaxis.max - minplot.getAxes().yaxis.min )
+  ignored = false;
+  if ( xaxis.min == -1 && xaxis.max == 1 || 
+       (xaxis.min - minplot.getAxes().xaxis.min < close_enough_x &&
+        xaxis.max - minplot.getAxes().xaxis.max < close_enough_x &&
+        yaxis.min - minplot.getAxes().yaxis.min < close_enough_y &&
+        yaxis.max - minplot.getAxes().yaxis.max < close_enough_y ) )
+
+  {
+    ignored = true;
+  //main_options = $.extend( main_options,
+    main_options = $.extend(true, {}, main_options,
+                             { xaxis: { min: null, max: null }, 
+                               yaxis: { min: null, max: null } } );
+  }
+  else 
+  {
+    main_options = $.extend(true, {}, main_options,
+                             { xaxis: { min: xaxis.min, max: xaxis.max }, 
+                               yaxis: { min: yaxis.min, max: yaxis.max } } );
+  }
 
   plot = $.plot($("#mainplot"), global_data, main_options);
   minplot = $.plot($("#minplot"), global_data, min_options);
+
+  // show the selection in the minplot so it's not disorienting if the new data doesn't show up
+  // because it is out of range of the user's zoom state
+  if (!ignored)
+  {
+    ranges = { xaxis: { from: xaxis.min, to: xaxis.max }, 
+               yaxis: { from: yaxis.min, to: yaxis.max } };
+    minplot.setSelection(ranges, true);
+  }
 }
 
 //this function is called when a checkbox is clicked, it adds ore removes a plot
@@ -202,8 +239,7 @@ $(function () {
   plot = $.plot($("#mainplot"), [], main_options);
   minplot = $.plot($("#minplot"), [], min_options);
 
-  // now connect the two
-  
+  // now connect the minplot selection to the main plot
   $("#mainplot").bind("plotselected", function (event, ranges) {
       // clamp the zooming to prevent eternal zoom
       if (ranges.xaxis.to - ranges.xaxis.from < 0.00001)
@@ -243,6 +279,7 @@ $(function () {
     //get the maximum range from the minplot
     savedxaxis = minplot.getAxes().xaxis;
     savedyaxis = minplot.getAxes().yaxis;
+
     //alert( "("+savedxaxis.min+","+savedyaxis.min+") ("+savedxaxis.max+","+savedyaxis.max+")" );
     range = { xaxis: { to: savedxaxis.min, from: savedxaxis.max },
               yaxis: { to: savedyaxis.min, from: savedyaxis.max } }
@@ -255,12 +292,12 @@ $(function () {
   });
 
   //bind a function that shows the tooltip as you hover over points
-  $("#mainplot").bind("plothover", function(event, pos, item) {
+  /*$("#mainplot").bind("plothover", function(event, pos, item) {
     if (item) {
       //TODO: not sure if a tooltip would be useful or annoying
       //if so, set hoverable to true in options
     }
-  });
+  });*/
 
   //bind a function to show data when you click on the plot
   $("#mainplot").bind("plotclick", function(event, pos, item) {

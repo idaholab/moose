@@ -119,6 +119,27 @@ def dumpDB(fname):
   for row in rows:
     print row
 
+CREATE_TABLE = """create table timing
+(
+  app_name text,
+  test_name text,
+  revision int,
+  date int,
+  seconds real,
+  dofs int
+);"""
+
+HELP_STRING = """Usage:
+-h   print this help message
+-c   create database with table timing in ~/timingDB/timing.sqlite
+     the database must either not exist or not have a timing table
+-d   dump the contents of table timing
+
+[list of applications]  using the data in the database, generate
+     json data for every application in the list. Assume db at
+     ~/timingDB/timing.sqlite
+"""
+
 
 if __name__ == '__main__':
   home = os.environ['HOME']
@@ -148,25 +169,3 @@ if __name__ == '__main__':
       print "generating json data for " + app + "."
       gen = HTMLGen(app, con)
       gen.generateHTML()
-
-
-CREATE_TABLE = """create table timing
-(
-  app_name text,
-  test_name text,
-  revision int,
-  date int,
-  seconds real,
-  dofs int
-);"""
-
-HELP_STRING = """Usage:
--h   print this help message
--c   create database with table timing in ~/timingDB/timing.sqlite
-     the database must either not exist or not have a timing table
--d   dump the contents of table timing
-
-[list of applications]  using the data in the database, generate
-     json data for every application in the list. Assume db at
-     ~/timingDB/timing.sqlite
-"""

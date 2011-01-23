@@ -4,7 +4,7 @@ import sys, os, time, shutil
 import commands # probably only available on unix-like OSes
 from socket import gethostname
 
-EXTENSIONS = [ 'opt', 'dbg', 'dev' ]
+EXTENSIONS = [ 'opt', 'dbg', 'pro' ]
 
 # Returns an absolute path to a folder containing the web page representing
 # a tree of the blocks expected in the input file for a moose program.
