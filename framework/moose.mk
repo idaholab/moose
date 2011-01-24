@@ -1,5 +1,6 @@
 moose_DIRS	:= $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
-moose_INCLUDE 	:= $(foreach i, $(moose_DIRS), -I$(i))
+contrib_DIRS  := $(shell find $(MOOSE_DIR)/contrib/*/include -type d -not -path "*/.svn*")
+moose_INCLUDE 	:= $(foreach i, $(moose_DIRS) $(contrib_DIRS), -I$(i))
 
 moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
 ifeq ($(enable-shared),yes)
