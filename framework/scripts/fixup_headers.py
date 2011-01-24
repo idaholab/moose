@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
+# This script checks and can optionally update MOOSE source files.
+# You should always run this script without the "-u" option
+# first to make sure there is a clean dry run of the files that should
+# be updated
+
 import os, string
 from optparse import OptionParser
 
-global_ignores = ['fparser', '.svn']
+global_ignores = ['contrib', '.svn']
 
 copyright_header = \
 """/****************************************************************/
@@ -22,6 +27,8 @@ copyright_header = \
 
 """
 
+global_options = {}
+
 def fixupHeader():
   for dirpath, dirnames, filenames in os.walk(os.getcwd() + "/../"):
 
@@ -30,8 +37,8 @@ def fixupHeader():
       if ignore in dirnames:
         dirnames.remove(ignore)
 
-    print dirpath
-    print dirnames
+    #print dirpath
+    #print dirnames
     for file in filenames:
       suffix = os.path.splitext(file)
       if suffix[-1] == '.C' or suffix[-1] == '.h':
@@ -45,15 +52,24 @@ def checkAndUpdate(filename):
 
   # Check (exact match only)
   if (string.find(text, copyright_header) == -1):
-    # Update
-    f = open(filename + "~tmp", "w")
-    f.write(copyright_header)
-    f.write(text)
-    f.close()
-
-    os.rename(filename + "~tmp", filename)
+    # print the first 10 lines or so of the file
+    if global_options.update == False: # Report only
+      print filename + ' does not contain an up to date header'
+      if global_options.verbose == True:
+        print '>'*40, '\n', '\n'.join((text.split('\n', 10))[:10]), '\n'*5
+    else:
+      # Update
+      f = open(filename + '~tmp', 'w')
+      f.write(copyright_header)
+      f.write(text)
+      f.close()
+      os.rename(filename + '~tmp', filename)
   
 if __name__ == '__main__':
+  parser = OptionParser()
+  parser.add_option("-u", "--update", action="store_true", dest="update", default=False)
+  parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False)
+  (global_options, args) = parser.parse_args()
   fixupHeader()
 
 
