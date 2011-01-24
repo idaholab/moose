@@ -53,7 +53,7 @@ def delOldOutFiles(test_dir, out_files):
     except:
       pass
 
-def executeApp(test_dir, input_file, min_dofs=0, parallel=0):
+def executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error=''):
   saved_cwd = os.getcwd()
   os.chdir(test_dir)
   command = TestHarness.exec_name + ' -i ' + input_file
@@ -63,7 +63,7 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0):
     try:
       # First make sure the dang thing runs
       stdout = executeCommand(command)
-      checkForFail(stdout)
+      checkForFail(stdout, expect_error)
       # Something is wrong so capture the output
     except:
       print stdout
@@ -75,8 +75,10 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0):
   print stdout
   os.chdir(saved_cwd)
 
-def checkForFail(output):
-  if output.find('different') != -1 or output.find('ERROR') != -1 or output.find('command not found') != -1:
+def checkForFail(output, expect_error=''):
+  if expect_error != '' and output.find('ERROR') and output.find(expect_error):
+    assert True 
+  elif output.find('different') != -1 or output.find('ERROR') != -1 or output.find('command not found') != -1:
     assert False
 
 def executeExodiff(test_dir, out_files, abs_zero, relative_error):
@@ -109,3 +111,8 @@ def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=
   delOldOutFiles(test_dir, out_files)
   executeApp(test_dir, input_file, min_dofs=0, parallel=0)
   diffCSV(test_dir, out_files)
+
+def executeAppExpectError(test_file, input_file, expect_error=''):
+  test_dir = os.path.dirname(test_file)
+  executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error='')
+  

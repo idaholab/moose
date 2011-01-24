@@ -39,7 +39,7 @@ endif
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
 	ifneq (,$(findstring gcc,$(GXX-VERSION)))
-		libmesh_CXXFLAGS += --coverage -fbranch-probabilities
+		libmesh_CXXFLAGS += --coverage -fbranch-probabilities 
 		libmesh_LDFLAGS += --coverage
 	endif
 endif
@@ -139,7 +139,8 @@ doc:
 
 clean::
 	@rm -f $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
-	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" | xargs rm
+	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
+                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" | xargs rm
 
 # Clean only the opt intermediate files
 cleanopt::
