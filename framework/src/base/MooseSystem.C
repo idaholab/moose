@@ -1678,12 +1678,11 @@ MooseSystem::checkSystemsIntegrity()
     std::set<unsigned short> difference;
     bool global_kernels_exist = false;
     
-    global_kernels_exist = true; // FIXME
     std::set_difference (_element_subdomains.begin(), _element_subdomains.end(),
                        input_subdomains.begin(), input_subdomains.end(),
                        std::inserter(difference, difference.end()));
 
-    if (!global_kernels_exist && !difference.empty())
+    if (!_kernels[0].contains_global_kernel() && !difference.empty())
     {
       std::stringstream missing_block_ids;
 

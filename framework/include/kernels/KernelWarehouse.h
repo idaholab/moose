@@ -47,6 +47,12 @@ public:
 
   void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
 
+  /**
+   * Returns a boolean to indicate whether this warehouse is storing
+   * any global kernels
+   */
+  bool contains_global_kernel();
+  
 protected:
   /**
    * Kernels active on a block and in specified time

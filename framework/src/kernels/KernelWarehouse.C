@@ -77,3 +77,9 @@ KernelWarehouse::updateActiveKernels(Real t, Real dt, unsigned int subdomain_id)
     if((*it)->startTime() <= t + (1e-6 * dt) && (*it)->stopTime() >= t + (1e-6 * dt))
       _active_kernels.push_back(*it);
 }
+
+bool
+KernelWarehouse::contains_global_kernel()
+{
+  return !_global_kernels.empty();
+}
