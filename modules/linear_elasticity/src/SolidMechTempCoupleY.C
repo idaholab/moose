@@ -15,7 +15,8 @@ SolidMechTempCoupleY::SolidMechTempCoupleY(const std::string & name, InputParame
 Real
 SolidMechTempCoupleY::computeQpResidual()
 {
-  recomputeCouplingConstants();
+  if(!_constant_properties)
+    recomputeCouplingConstants();
 
   return -(_c1*(1+2*_c2)*_grad_test[_i][_qp](1)*_thermal_strain[_qp]);
 }
@@ -23,7 +24,8 @@ SolidMechTempCoupleY::computeQpResidual()
 Real
 SolidMechTempCoupleY::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  recomputeCouplingConstants();
+  if(!_constant_properties)
+    recomputeCouplingConstants();
 
   if(jvar == _temp_var)
     return -(_c1*(1+2*_c2)*_grad_test[_i][_qp](1)*_alpha[_qp]*_phi[_j][_qp]);

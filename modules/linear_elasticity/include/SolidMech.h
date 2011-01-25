@@ -19,6 +19,8 @@ class SolidMech : public Kernel
 public:
 
   SolidMech(const std::string & name, InputParameters parameters);
+
+  virtual void subdomainSetup();
   
   void recomputeConstants();
   
@@ -46,6 +48,8 @@ protected:
 
   MaterialProperty<Real> & _E_prop;
   MaterialProperty<Real> & _nu_prop;
+
+  bool _constant_properties;
 };
  
 

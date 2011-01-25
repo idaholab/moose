@@ -22,7 +22,8 @@ SolidMechZ::SolidMechZ(const std::string & name, InputParameters parameters)
 Real
 SolidMechZ::computeQpResidual()
   {
-    recomputeConstants();
+    if(!_constant_properties)
+      recomputeConstants();
 
     _strain(0,0) = _grad_x[_qp](0);
     _strain(1,1) = _grad_y[_qp](1);
@@ -41,7 +42,8 @@ SolidMechZ::computeQpResidual()
 Real
 SolidMechZ::computeQpJacobian()
   {
-    recomputeConstants();
+    if(!_constant_properties)
+      recomputeConstants();
 
     Real value = _c1*(_grad_test[_i][_qp]*(_B33*_grad_phi[_j][_qp]));
 
@@ -51,7 +53,8 @@ SolidMechZ::computeQpJacobian()
 Real
 SolidMechZ::computeQpOffDiagJacobian(unsigned int jvar)
   {
-    recomputeConstants();
+    if(!_constant_properties)
+      recomputeConstants();
     
     RealGradient value = 0;
 

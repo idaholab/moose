@@ -18,6 +18,8 @@ public:
 
   SolidMechTempCouple(const std::string & name, InputParameters parameters);
   
+  virtual void subdomainSetup();
+
   void recomputeCouplingConstants();
   
 protected:

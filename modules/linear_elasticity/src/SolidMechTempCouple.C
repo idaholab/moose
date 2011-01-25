@@ -16,12 +16,22 @@ SolidMechTempCouple::SolidMechTempCouple(const std::string & name, InputParamete
 {}
 
 void
-SolidMechTempCouple::recomputeCouplingConstants()
+SolidMechTempCouple::subdomainSetup()
+{
+  if(_constant_properties)
   {
-    recomputeConstants();
-
-    _c4 = _E/(1.-_nu);
-
-    if( 3 == _dim )
-      _c4 = _E/(1.-2.*_nu);
+    _qp = 0;
+    recomputeCouplingConstants();
   }
+}
+
+void
+SolidMechTempCouple::recomputeCouplingConstants()
+{
+  recomputeConstants();
+  
+  _c4 = _E/(1.-_nu);
+  
+  if( 3 == _dim )
+    _c4 = _E/(1.-2.*_nu);
+}
