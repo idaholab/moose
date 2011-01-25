@@ -1632,6 +1632,11 @@ MooseSystem::subdomainSetup(THREAD_ID tid, unsigned int block_id)
   for (std::vector<Material *>::iterator it = _face_data[tid]->_material.begin(); it != _face_data[tid]->_material.end(); ++it)
     (*it)->subdomainSetup();
 
+  // Need to reinitialize the material properties in case subdomain setup for a Kernel needs it
+  // TODO: This means we are doing one more materialReinit than is necessary.  Need to refactor this to
+  // keep that from happening
+  _element_data[tid]->reinitMaterials(_materials[tid].getMaterials(block_id));
+
   //Global Kernels
   KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
   KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
