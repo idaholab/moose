@@ -79,7 +79,15 @@ KernelWarehouse::updateActiveKernels(Real t, Real dt, unsigned int subdomain_id)
 }
 
 bool
-KernelWarehouse::contains_global_kernel()
+KernelWarehouse::subdomains_covered(std::set<unsigned int> & return_set)
 {
-  return !_global_kernels.empty();
+  if (!_global_kernels.empty())
+    return true;
+  else
+  {
+    for (std::map<unsigned int, std::vector<Kernel *> >::iterator it = _block_kernels.begin();
+         it != _block_kernels.end(); ++it)
+      return_set.insert(it->first);
+    return false;
+  }
 }

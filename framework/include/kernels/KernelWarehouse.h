@@ -48,10 +48,12 @@ public:
   void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
 
   /**
-   * Returns a boolean to indicate whether this warehouse is storing
-   * any global kernels
+   * This returns a boolean to indicate whether this warehouse contains kernels
+   * representing all of the subdomains, if not then the supplied set is filled in
+   * with the complete set of subdomains represented which may or may not represent
+   * the entire domain.
    */
-  bool contains_global_kernel();
+  bool subdomains_covered(std::set<unsigned int> & return_set);
   
 protected:
   /**

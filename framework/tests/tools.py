@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 from subprocess import *
 from socket import gethostname
 
@@ -63,7 +63,7 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error=''):
     try:
       # First make sure the dang thing runs
       stdout = executeCommand(command)
-      checkForFail(stdout, expect_error)
+      checkForFail(stdout)
       # Something is wrong so capture the output
     except:
       print stdout
@@ -73,12 +73,19 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error=''):
     command = 'time ' + command + ' --dofs ' + str(min_dofs)
   stdout = executeCommand(command)
   print stdout
+  if expect_error:
+    checkExpectError(stdout, expect_error)
   os.chdir(saved_cwd)
 
-def checkForFail(output, expect_error=''):
-  if expect_error != '' and output.find('ERROR') and output.find(expect_error):
-    assert True 
-  elif output.find('different') != -1 or output.find('ERROR') != -1 or output.find('command not found') != -1:
+def checkExpectError(output, expect_error):
+  if re.search(expect_error, output, re.IGNORECASE) == None:
+    print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
+    assert False
+  else: 
+    assert True
+
+def checkForFail(output):
+  if output.find('different') != -1 or output.find('ERROR') != -1 or output.find('command not found') != -1:
     assert False
 
 def executeExodiff(test_dir, out_files, abs_zero, relative_error):
@@ -114,5 +121,5 @@ def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=
 
 def executeAppExpectError(test_file, input_file, expect_error=''):
   test_dir = os.path.dirname(test_file)
-  executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error='')
+  executeApp(test_dir, input_file, 0, 0, expect_error)
   

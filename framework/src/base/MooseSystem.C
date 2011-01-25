@@ -1679,24 +1679,29 @@ MooseSystem::checkSystemsIntegrity()
 
   // Check kernel coverage of subdomains (blocks) in your mesh
   {
-    std::set<subdomain_id_type> input_subdomains;
-    std::set<unsigned short> difference;
-    bool global_kernels_exist = false;
-    
-    std::set_difference (_element_subdomains.begin(), _element_subdomains.end(),
-                       input_subdomains.begin(), input_subdomains.end(),
-                       std::inserter(difference, difference.end()));
+    std::set<unsigned int> input_subdomains;
 
-    if (!_kernels[0].contains_global_kernel() && !difference.empty())
+    bool global_kernels_exist = _kernels[0].subdomains_covered(input_subdomains);
+
+    if (!global_kernels_exist)
     {
-      std::stringstream missing_block_ids;
+      std::set<unsigned short> difference;
+      std::set_difference (_element_subdomains.begin(), _element_subdomains.end(),
+                           input_subdomains.begin(), input_subdomains.end(),
+                           std::inserter(difference, difference.end()));
 
-      std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned short>( missing_block_ids, " "));
+      if (!difference.empty())
+      {
+        std::stringstream missing_block_ids;
+        
+        std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned short>( missing_block_ids, " "));
       
-      mooseError("Each subdomain must contain at least one Kernel.\nThe following blocks lack an active kernel "
-                 + missing_block_ids.str());
+        mooseError("Each subdomain must contain at least one Kernel.\nThe following block(s) lack an active kernel: "
+                   + missing_block_ids.str());
+      }
     }
   }
+  
 
   // Check that BCs used in your simulation exist in your mesh
   {
@@ -1707,6 +1712,7 @@ MooseSystem::checkSystemsIntegrity()
     std::set_difference (input_bcs.begin(), input_bcs.end(),
                          simulation_bcs.begin(), simulation_bcs.end(),
                          std::inserter(difference, difference.end()));
+
     if (!difference.empty())
     {
       std::stringstream extra_boundary_ids;

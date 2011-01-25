@@ -59,7 +59,7 @@
 #include "Diff1Material.h"
 #include "Diff2Material.h"
 #include "MTMaterial.h"
-
+#include "StatefulMaterial.h"
 
 namespace MooseTest
 {
@@ -99,6 +99,7 @@ namespace MooseTest
     registerMaterial(Diff1Material);
     registerMaterial(Diff2Material);
     registerMaterial(MTMaterial);
+    registerMaterial(StatefulMaterial);
 
     //Registering the Boundary Conditions
     registerBoundaryCondition(MMSCoupledDirichletBC);

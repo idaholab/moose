@@ -39,7 +39,7 @@ InputParameters
 ExecutionerFactory::getValidParams(const std::string & name)
 {
   if( _name_to_params_pointer.find(name) == _name_to_params_pointer.end() )
-    mooseError(std::string("A _") + name + "_ is not registered Executioner ");
+    mooseError(std::string("A _") + name + "_ is not a registered Executioner ");
 
   return _name_to_params_pointer[name]();
 }
