@@ -202,10 +202,11 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
   ComputeInternalResiduals cr(*this, soln, residual);
   Threads::parallel_reduce(*getActiveLocalElementRange(), cr);
 
-  residual.close();
-
   if(needResidualCopy())
+  {
+    residual.close();
     residual.localize(_residual_copy);
+  }
 
   //Distribute any point loads
   computeDiracKernels(soln, &residual);

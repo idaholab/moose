@@ -218,10 +218,9 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
   ComputeInternalJacobians cij(*this, soln, jacobian);
   Threads::parallel_reduce(*getActiveLocalElementRange(), cij);
 
-  jacobian.close();
-
   if(needJacobianCopy())
   {
+    jacobian.close();  
     MatCopy(static_cast<PetscMatrix<Number> &>(jacobian).mat(), static_cast<PetscMatrix<Number> &>(*_jacobian_copy).mat(), DIFFERENT_NONZERO_PATTERN);
     _jacobian_copy->close();
   }
@@ -233,7 +232,7 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
   computeDiracKernels(soln, NULL, &jacobian);
   DUMMY_CONTACT_FLAG = false;
 
-  jacobian.close();
+//  jacobian.close();
 //  jacobian.print();
 
   //Dirichlet BCs
