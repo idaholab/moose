@@ -37,8 +37,11 @@
 #include "CLSHPlasticMaterial.h"
 #include "DeltaGamma.h"
 #include "CreepStrainAux.h"
+#include "Gravity.h"
 #include "LinearIsotropicMaterial.h"
+#include "LinearStrainHardening.h"
 #include "LSHPlasticMaterial.h"
+#include "PLC_LSH.h"
 #include "PlasticMaterial.h"
 #include "PlasticStrainAux.h"
 #include "PowerLawCreepMaterial.h"
@@ -49,8 +52,6 @@
 #include "StressAux.h"
 #include "StressDivergence.h"
 #include "StressOutput.h"
-#include "LinearStrainHardening.h"
-#include "PLC_LSH.h"
 
 #include "MaterialModel.h"
 
@@ -108,10 +109,13 @@ Elk::registerObjects()
   registerMaterial(CLSHPlasticMaterial);
   registerKernel(DeltaGamma);
   registerAux(CreepStrainAux);
+  registerKernel(Gravity);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
+  registerMaterial(LinearStrainHardening);
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(PlasticMaterial);
   registerAux(PlasticStrainAux);
+  registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreepMaterial);
   registerMaterial(PowerLawCreep);
@@ -121,8 +125,6 @@ Elk::registerObjects()
   registerKernel(StressDivergence);
   registerKernel(StressOutput);
   registerMaterial(MaterialModel);
-  registerMaterial(LinearStrainHardening);
-  registerMaterial(PLC_LSH);
 
   // phase_field
   registerKernel(AC);
