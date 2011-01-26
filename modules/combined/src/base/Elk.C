@@ -68,7 +68,8 @@
 #include "GradientBoxIC.h"
 
 // contact
-#include "ContactForce.h"
+#include "ContactMaster.h"
+#include "SlaveConstraint.h"
 
 void
 Elk::registerObjects()
@@ -139,5 +140,6 @@ Elk::registerObjects()
   registerInitialCondition(GradientBoxIC);
 
   // contact
-  registerBoundaryCondition(ContactForce);
+  registerDiracKernel(ContactMaster);
+  registerDiracKernel(SlaveConstraint);
 }
