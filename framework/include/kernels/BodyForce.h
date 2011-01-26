@@ -28,12 +28,14 @@ class BodyForce : public Kernel
 public:
 
   BodyForce(const std::string & name, InputParameters parameters);
-  
+
+  virtual ~BodyForce() {}
+
 protected:
   virtual Real computeQpResidual();
 
 private:
   Real _value;
 };
- 
+
 #endif

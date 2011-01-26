@@ -43,11 +43,11 @@ namespace libMesh
 template<>
 InputParameters validParams<Kernel>();
 
-/** 
+/**
  * The Kernel class is responsible for calculating the residuals for various
  * physics.
  * @nosubgrouping
- * 
+ *
  */
 class Kernel :
   public PDEBase,
@@ -55,25 +55,24 @@ class Kernel :
 {
 public:
 
-  /** 
+  /**
    * Factory constructor initializes all internal references needed for residual computation.
-   * 
+   *
    *
    * @param name The name of this kernel.
    * @param moose_system The moose_system this kernel is associated with
    * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
   Kernel(const std::string & name, InputParameters parameters);
-  
-  virtual ~Kernel()
-  {};
 
-  /** 
+  virtual ~Kernel() {}
+
+  /**
    * Computes the residual for the current element.
    */
   virtual void computeResidual();
 
-  /** 
+  /**
    * Computes the jacobian for the current element.
    */
   virtual void computeJacobian();
@@ -83,7 +82,7 @@ public:
    */
   virtual void computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar);
 
-  /** 
+  /**
    * Computes the volume integral for the current element.
    */
   virtual Real computeIntegral();
@@ -103,23 +102,23 @@ protected:
    * @name Basic Functionality
    */
   /*@{*/
-  /** 
+  /**
    * This is the virtual that derived classes should override for computing the residual.
    */
   virtual Real computeQpResidual()=0;
 
-  /** 
+  /**
    * This is the virtual that derived classes should override for computing the Jacobian.
    */
   virtual Real computeQpJacobian();
   /*@}*/
-  
-  /** 
+
+  /**
    * This is the virtual that derived classes should override for computing an off-diagonal jacobian component.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
-  /** 
+
+  /**
    * This is the virtual that derived classes should override for computing the volume integral of kernel.
    */
   virtual Real computeQpIntegral();
