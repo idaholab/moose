@@ -36,6 +36,9 @@ public:
 protected:
   const unsigned int _component;
   PenetrationLocator & _penetration_locator;
+
+  Real _penalty;
+  
   NumericVector<Number> & _residual_copy;
   SparseMatrix<Number> & _jacobian_copy;
 

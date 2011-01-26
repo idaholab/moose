@@ -31,8 +31,8 @@ InputParameters validParams<SlaveConstraint>()
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
-
   params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   return params;
 }
 
@@ -40,6 +40,7 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
   :DiracKernel(name, parameters),
    _component(getParam<Real>("component")),
    _penetration_locator(getPenetrationLocator(getParam<unsigned int>("master"), getParam<unsigned int>("boundary"))),
+   _penalty(getParam<Real>("penalty")),
    _residual_copy(residualCopy()),
    _jacobian_copy(jacobianCopy()),
    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
@@ -136,7 +137,7 @@ SlaveConstraint::computeQpResidual()
   Real constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * ( (_mesh.node(node->id())(_component)) - (pinfo->_closest_point(_component)) );
 
   return _phi[_i][_qp] * (
-                          1e8*(
+                          _penalty*(
                                (constraint_mag)
                               )
                           - (pinfo->_normal(_component)*res_mag)
@@ -177,7 +178,7 @@ SlaveConstraint::computeQpJacobian()
 
    return _phi[_i][_qp] * (
 //     (1e8 * pinfo->_normal(_component) * pinfo->_normal(_component) * -_phi[_j][_qp])
-     (pinfo->_normal(_component) * pinfo->_normal(_component) * 1e8 * _phi[_j][_qp])
+     (pinfo->_normal(_component) * pinfo->_normal(_component) * _penalty * _phi[_j][_qp])
      - (pinfo->_normal(_component) * pinfo->_normal(_component) * _jacobian_copy(dof_number, dof_number))
      );
 }
