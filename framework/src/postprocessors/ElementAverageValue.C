@@ -48,9 +48,6 @@ ElementAverageValue::getValue()
   Real integral = ElementIntegral::getValue();
   
   gatherSum(_volume);
-
-  if(_name == "porosity")
-    std::cout<<"Porosity: "<<integral / _volume<<std::endl;
   
   return integral / _volume;
 }

@@ -185,10 +185,7 @@ TransientExecutioner::takeStep(Real input_dt)
   if (last_solve_converged) 
   {
     _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
-    _moose_system.outputPostprocessors();
 
-    if(((_t_step+1)%_moose_system._interval == 0 || _reset_dt))
-      _moose_system.outputSystem(_t_step, _time);
   }
 
   if(last_solve_converged && input_dt == -1)
@@ -200,6 +197,10 @@ TransientExecutioner::takeStep(Real input_dt)
 void
 TransientExecutioner::endStep()
 {
+  _moose_system.outputPostprocessors();
+  if(((_t_step+1)%_moose_system._interval == 0 || _reset_dt))
+    _moose_system.outputSystem(_t_step, _time);
+    
   adaptMesh();
   _t_step++;
   _time_old = _time;

@@ -42,7 +42,6 @@ Real
 ElementIntegral::getValue()
 {
   gatherSum(_integral_value);
-  std::cout<<_integral_value<<std::endl;
   return _integral_value;
 }
 
