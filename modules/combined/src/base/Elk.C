@@ -50,6 +50,7 @@
 #include "PressureBC.h"
 #include "PLSHPlasticMaterial.h"
 #include "StressAux.h"
+#include "ElasticEnergyAux.h"
 #include "StressDivergence.h"
 #include "StressOutput.h"
 
@@ -122,6 +123,7 @@ Elk::registerObjects()
   registerBoundaryCondition(PlenumPressureBC);
   registerBoundaryCondition(PressureBC);
   registerAux(StressAux);
+  registerAux(ElasticEnergyAux);
   registerKernel(StressDivergence);
   registerKernel(StressOutput);
 
