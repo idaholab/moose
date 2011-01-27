@@ -32,21 +32,22 @@ InputParameters validParams<PLC_LSH>()
 
 
 PLC_LSH::PLC_LSH( const std::string & name,
-                              InputParameters parameters )
+                  InputParameters parameters )
   :MaterialModel( name, parameters ),
    _coefficient(parameters.get<Real>("coefficient")),
    _exponent(parameters.get<Real>("exponent")),
    _activation_energy(parameters.get<Real>("activation_energy")),
    _gas_constant(parameters.get<Real>("gas_constant")),
    _tolerance(parameters.get<Real>("tolerance")),
+
+   _yield_stress(parameters.get<Real>("yield_stress")),
+   _hardening_constant(parameters.get<Real>("hardening_constant")),
+
    _max_its(parameters.get<unsigned int>("max_its")),
    _output_iteration_info(getParam<bool>("output_iteration_info")),
 
    _creep_strain(declareProperty<RealTensorValue>("creep_strain")),
    _creep_strain_old(declarePropertyOld<RealTensorValue>("creep_strain")),
-
-   _yield_stress(parameters.get<Real>("yield_stress")),
-   _hardening_constant(parameters.get<Real>("hardening_constant")),
 
    _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
    _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain")),

@@ -97,7 +97,6 @@ wopsBiLinPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, 
 
 //calculate Q
     double Q = 1.5*(1/(1+(3*_shear_modulus/_hardening_constant))-R);
-    unsigned int iii = 0;
     unsigned int i, j, k, l;
     i = j = k = l = 0;
     double devdev[3][3][3][3];
