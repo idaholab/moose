@@ -29,6 +29,8 @@ public:
 
   virtual void execute();
 
+  void setPeriodicVars(PeriodicBoundary & p, const std::vector<std::string> & var_names);
+
 private:
   std::string _type;
 };

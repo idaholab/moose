@@ -29,7 +29,7 @@ InputParameters validParams<GenericPeriodicBlock>()
   params.addParam<std::vector<Real> >("translation", "Vector that translates coordinates on the primary boundary to coordinates on the secondary boundary.");
   params.addParam<std::vector<std::string> >("transform_func", "Functions that specify the transformation");
   params.addParam<std::vector<std::string> >("inv_transform_func", "Functions that specify the inverse transformation");
-  params.addParam<std::string>("variable", "Variable for the periodic boundary");
+  params.addParam<std::vector<std::string> >("variable", "Variable for the periodic boundary");
   return params;
 }
 
@@ -37,6 +37,13 @@ GenericPeriodicBlock::GenericPeriodicBlock(const std::string & name, InputParame
   :ParserBlock(name, params),
    _type(getType())
 {}
+
+void
+GenericPeriodicBlock::setPeriodicVars(PeriodicBoundary & p, const std::vector<std::string> & var_names)
+{
+  for (std::vector<std::string>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
+    p.set_variable(_moose_system.getVariableNumber(*it));
+}
 
 void
 GenericPeriodicBlock::execute() 
@@ -57,8 +64,7 @@ GenericPeriodicBlock::execute()
     PeriodicBoundary p(RealVectorValue(translation[0], translation[1], translation[2]));
     p.myboundary = getParamValue<unsigned int>("primary");
     p.pairedboundary = getParamValue<unsigned int>("secondary");
-    if (getParamValue<std::string>("variable") != std::string())
-      p.set_variable(_moose_system.getVariableNumber(getParamValue<std::string>("variable")));
+    setPeriodicVars(p, getParamValue<std::vector<std::string> >("variable"));
 
     system.get_dof_map().add_periodic_boundary(p);
   }
@@ -69,8 +75,7 @@ GenericPeriodicBlock::execute()
     FunctionPeriodicBoundary *pb = new FunctionPeriodicBoundary(_moose_system, fn_names);
     pb->myboundary = getParamValue<unsigned int>("primary");
     pb->pairedboundary = getParamValue<unsigned int>("secondary");
-    if (getParamValue<std::string>("variable") != std::string())
-      pb->set_variable(_moose_system.getVariableNumber(getParamValue<std::string>("variable")));
+    setPeriodicVars(*pb, getParamValue<std::vector<std::string> >("variable"));
 
     FunctionPeriodicBoundary *ipb = NULL;
     if (getParamValue<std::vector<std::string> >("inv_transform_func") != std::vector<std::string>())
@@ -82,8 +87,7 @@ GenericPeriodicBlock::execute()
       // these are switched, because we are forming the inverse translation
       ipb->myboundary = getParamValue<unsigned int>("secondary");
       ipb->pairedboundary = getParamValue<unsigned int>("primary");
-      if (getParamValue<std::string>("variable") != std::string())
-        ipb->set_variable(_moose_system.getVariableNumber(getParamValue<std::string>("variable")));
+      setPeriodicVars(*ipb, getParamValue<std::vector<std::string> >("variable"));
     }
     else
     {
@@ -97,6 +101,6 @@ GenericPeriodicBlock::execute()
   {
     mooseError("You have to specify either 'translation' or 'trans_func' in your period boundary section '" + _name + "'");
   }
-  
+
   visitChildren();
 }  
