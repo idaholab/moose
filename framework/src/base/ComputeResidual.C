@@ -166,14 +166,13 @@ namespace Moose
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
     Moose::perf_log.push("compute_residual()","Solve");
-    
+
     MooseSystem * moose_system = sys.get_equation_systems().parameters.get<MooseSystem *>("moose_system");
 
-    static bool first = true;
-    
+
     mooseAssert(moose_system != NULL, "Internal pointer to MooseSystem was not set");
     moose_system->computeResidual(soln, residual);
-    
+
     Moose::perf_log.pop("compute_residual()","Solve");
   }
 }
@@ -222,7 +221,7 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
   for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
   {
     short int id = *it;
-    
+
     BCIterator bc_it = _bcs[0].activeNodalBCsBegin(id);
     BCIterator bc_end = _bcs[0].activeNodalBCsEnd(id);
 
@@ -235,7 +234,7 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
   for(unsigned int i=0; i<n_nodes; i++)
   {
     unsigned int boundary_id = ids[i];
-  
+
     BCIterator bc_it = _bcs[0].activeNodalBCsBegin(boundary_id);
     BCIterator bc_end = _bcs[0].activeNodalBCsEnd(boundary_id);
 
@@ -254,7 +253,6 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
       }
     }
   }
-  
+
   residual.close();
 }
-
