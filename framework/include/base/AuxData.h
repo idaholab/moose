@@ -127,17 +127,17 @@ public:
   /**
    * Gradient of the variables at the elements.
    */
-  MooseArray<MooseArray<RealGradient> > _var_grads_element;
+  MooseArray<MooseArray<RealGradient> > & _var_grads_element;
 
   /**
    * Gradient of the variables at the elements.
    */
-  MooseArray<MooseArray<RealGradient> > _var_grads_old_element;
+  MooseArray<MooseArray<RealGradient> > & _var_grads_old_element;
 
   /**
    * Gradient of the variables at the elements at t-2.
    */
-  MooseArray<MooseArray<RealGradient> > _var_grads_older_element;
+  MooseArray<MooseArray<RealGradient> > & _var_grads_older_element;
 
 
   /**

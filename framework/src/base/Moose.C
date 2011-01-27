@@ -51,6 +51,7 @@
 
 #include "ConstantAux.h"
 #include "CoupledAux.h"
+#include "CoupledGradAux.h"
 #include "PenetrationAux.h"
 #include "NearestNodeDistanceAux.h"
 #include "NearestNodeValueAux.h"
@@ -213,6 +214,7 @@ Moose::registerObjects()
 
   registerAux(ConstantAux);
   registerAux(CoupledAux);
+  registerAux(CoupledGradAux);
   registerAux(PenetrationAux);
   registerAux(NearestNodeDistanceAux);
   registerAux(NearestNodeValueAux);

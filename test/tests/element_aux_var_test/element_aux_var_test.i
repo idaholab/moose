@@ -13,7 +13,7 @@
 []
 
 [AuxVariables]
-  active = 'one five three coupled_nine coupled_fifteen coupled coupled_nl'
+  active = 'one five three coupled_nine coupled_fifteen coupled coupled_nl coupled_grad_nl'
 
   [./one]
     order = CONSTANT
@@ -46,6 +46,11 @@
   [../]
 
   [./coupled_nl]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./coupled_grad_nl]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -115,6 +120,14 @@
     variable = coupled_nl
     type = CoupledAux
     value = 2
+    coupled = u
+  [../]
+
+  #Shows coupling of Element to non-linear grad
+  [./coupled_grad_nl]
+    variable = coupled_grad_nl
+    type = CoupledGradAux
+    value = '1 2 3'
     coupled = u
   [../]
 []
