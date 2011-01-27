@@ -62,7 +62,7 @@ protected:
   ColumnMajorMatrix _strain_increment;
   ColumnMajorMatrix _incremental_rotation;
   ColumnMajorMatrix _Uhat;
-  
+
 
   std::vector<ColumnMajorMatrix> _Fhat;
   std::vector<ColumnMajorMatrix> _Fbar;
@@ -77,14 +77,14 @@ protected:
 
   //virtual
   void computeProperties();
-  
-  
-  
+
+
+
   /// Modify increment for things like thermal strain
   virtual void modifyStrain();
 
   /// Compute the stress (sigma += deltaSigma)
-  virtual void computeStress();
+  virtual void computeStress() = 0;
 
   /// Rotate stress to current configuration
   virtual void finalizeStress();
@@ -120,10 +120,10 @@ protected:
     return _elasticity_tensor;
   }
 
-  
+
 private:
   ElasticityTensor * _elasticity_tensor;
- 
+
 };
 
 

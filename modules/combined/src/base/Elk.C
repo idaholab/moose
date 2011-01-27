@@ -35,8 +35,8 @@
 
 // solid_mechanics
 #include "CLSHPlasticMaterial.h"
-#include "DeltaGamma.h"
 #include "CreepStrainAux.h"
+#include "Elastic.h"
 #include "Gravity.h"
 #include "LinearIsotropicMaterial.h"
 #include "LinearStrainHardening.h"
@@ -53,7 +53,6 @@
 #include "StressDivergence.h"
 #include "StressOutput.h"
 
-#include "MaterialModel.h"
 
 // phase_field
 #include "AC.h"
@@ -108,8 +107,8 @@ Elk::registerObjects()
 
   // solid_mechanics
   registerMaterial(CLSHPlasticMaterial);
-  registerKernel(DeltaGamma);
   registerAux(CreepStrainAux);
+  registerMaterial(Elastic);
   registerKernel(Gravity);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerMaterial(LinearStrainHardening);
@@ -125,7 +124,6 @@ Elk::registerObjects()
   registerAux(StressAux);
   registerKernel(StressDivergence);
   registerKernel(StressOutput);
-  registerMaterial(MaterialModel);
 
   // phase_field
   registerKernel(AC);
