@@ -7,10 +7,11 @@ then
   echo "Did NOT run mooseunit because this is icestorm"
 else
   echo "Running mooseunit because this is NOT icestorm"
-  if [ -e ./moose_unit-opt ]
+  if [ -e ./moose_unit/moose_unit-opt ]
   then
-    ./moose_unit-opt
+    ./moose_unit/moose_unit-opt
   else
     echo "Executable missing!"
+    exit 1
   fi
 fi
