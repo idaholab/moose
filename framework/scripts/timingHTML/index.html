@@ -60,7 +60,7 @@
       <tr title="Time it took the test to execute"><td><b>Time:</b></td><td id="tb_timing"></td></tr>
       <tr title="Approx. time the test was run"><td><b>Date:</b></td><td id="tb_date"></td></tr>
       <tr title="Dofs passed to run_tests script with --dofs"><td><b>Dofs:</b></td><td id="tb_dofs"></td></tr>
-      <!-- TODO: when snout is up <tr title="Load average of the server when the test was run"><td><b>Load Average:</b></td><td id="tb_load"></td></tr>-->
+      <tr title="Load average of the server when the test was run"><td><b>Load Average:</b></td><td id="tb_load"></td></tr>
       </table>
     </div>
 
@@ -320,7 +320,7 @@ $(function () {
       $("#tb_timing").html(data[3]);
       $("#tb_date").html(data[4]);
       $("#tb_dofs").html(data[5]);
-      //$("#tb_load").html("Not Supported Yet");
+      $("#tb_load").html(data[6]);
     }
   });
 

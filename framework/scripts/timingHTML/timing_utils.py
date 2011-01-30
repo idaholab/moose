@@ -126,7 +126,8 @@ CREATE_TABLE = """create table timing
   revision int,
   date int,
   seconds real,
-  dofs int
+  dofs int,
+  load real
 );"""
 
 HELP_STRING = """Usage:
