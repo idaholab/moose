@@ -58,7 +58,7 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error=''):
   os.chdir(test_dir)
   command = TestHarness.exec_name + ' -i ' + input_file
   if (parallel):
-    command = 'mpiexec -np ' + str(parallel) + ' ' + command  
+    command = 'mpiexec -n ' + str(parallel) + ' ' + command  
   if (min_dofs):
     try:
       # First make sure the dang thing runs
@@ -110,7 +110,7 @@ def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0, 
   test_dir = os.path.dirname(test_file)
   delOldOutFiles(test_dir, out_files)
   executeApp(test_dir, input_file, min_dofs, parallel)
-  if (min_dofs == 0 and parallel == 0):
+  if (min_dofs == 0): #and parallel == 0):
     executeExodiff(test_dir, out_files, abs_zero, relative_error)
 
 def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=0, abs_zero=1e-11, relative_error=5.5e-6):

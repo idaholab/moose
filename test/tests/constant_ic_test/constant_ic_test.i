@@ -71,6 +71,7 @@
   type = Steady
   perf_log = true
   petsc_options = '-snes_mf_operator'
+  nl_rel_tol = 1e-10
 []
 
 [Output]

@@ -69,6 +69,7 @@
 [Executioner]
   type = Steady
   perf_log = true
+  nl_rel_tol = 1e-12
 []
 
 [Output]

@@ -73,6 +73,7 @@
 
   # These times will be sync'd in the output 
   sync_times = '10.5 20 30.5'
+  nl_rel_tol = 1e-12
 []
 
 [Output]

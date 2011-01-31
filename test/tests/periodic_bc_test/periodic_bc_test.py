@@ -14,4 +14,4 @@ def testtrapezoid(dofs=0, np=0):
   
 def testlevel1(dofs=0, np=0):
   tools.executeAppAndDiff(__file__,'periodic_level_1_test.i', \
-                          ['level1_0000.e', 'level1_0009.e', 'level1_0019.e'], dofs, np)
+                            ['level1_0000.e', 'level1_0009.e', 'level1_0019.e'], dofs, np)

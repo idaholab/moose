@@ -96,6 +96,7 @@
     max_h_level = 4
     error_estimator = KellyErrorEstimator
   [../]
+  nl_rel_tol = 1e-12	
 []
 
 [Output]
