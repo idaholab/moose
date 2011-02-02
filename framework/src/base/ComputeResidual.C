@@ -210,6 +210,8 @@ void MooseSystem::computeResidualInternal (const NumericVector<Number>& soln, Nu
   //Distribute any point loads
   computeDiracKernels(soln, &residual);
 
+  residual.close();
+
   //Dirichlet BCs
   std::vector<unsigned int> nodes;
   std::vector<short int> ids;

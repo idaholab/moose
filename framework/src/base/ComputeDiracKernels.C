@@ -196,11 +196,6 @@ void MooseSystem::computeDiracKernels(const NumericVector<Number>& soln, Numeric
     Threads::parallel_reduce(range, cd);
   }
 
-  if(residual)
-    residual->close();
-  else
-    jacobian->close();
-
   Moose::perf_log.pop("compute_dirac_kernels()","Solve");
 }
 

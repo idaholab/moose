@@ -123,6 +123,9 @@ class TestHarness:
     result = ''
     try:
       try:
+        s = test + " ..."
+        self.text_results_table += '\n' + s
+        sys.stdout.write(s)
         test_start = timeit.default_timer()
            
         # Capture stdout to a buffer object for the local function call
@@ -176,9 +179,9 @@ class TestHarness:
 
     # print the result of this test in table form
     self.results_table[test] = result
-    cnt = 70 - len(test + result) - 2
-    s = test + " " + '.'*cnt + " " + result
-    self.text_results_table += '\n' + s
+    cnt = 65 - len(test + result)
+    s = '.'*cnt + " " + result
+    self.text_results_table += s
     print s
 
     # print the output if verbose option is on or the test failed

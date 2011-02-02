@@ -232,7 +232,7 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
   computeDiracKernels(soln, NULL, &jacobian);
   DUMMY_CONTACT_FLAG = false;
 
-//  jacobian.close();
+  jacobian.close();
 //  jacobian.print();
 
   //Dirichlet BCs
