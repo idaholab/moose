@@ -126,6 +126,7 @@ class TestHarness:
         s = test + " ..."
         self.text_results_table += '\n' + s
         sys.stdout.write(s)
+	sys.stdout.flush()
         test_start = timeit.default_timer()
            
         # Capture stdout to a buffer object for the local function call
