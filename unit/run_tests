@@ -2,7 +2,7 @@
 # This script runs mooseunit on systems where it can run (not Icestorm)
 #
 
-if [ "`hostname -s`" == "icestorm" ]
+if [ "`hostname -s`" == "service0" ]
 then
   echo "Did NOT run mooseunit because this is icestorm"
 else
