@@ -143,7 +143,7 @@ public:
    * Initialize the EquationSystems object and add both the nonlinear and auxiliary systems
    * to that object for this MooseSystem
    */
-  EquationSystems * initEquationSystems();
+  virtual EquationSystems * initEquationSystems();
 
   /**
    * Returns a writable reference to the EquationSystems object held within this MooseSystem

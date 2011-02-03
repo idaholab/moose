@@ -90,14 +90,16 @@ PenetrationLocator::detectPenetration()
             Real distance;
             RealGradient normal;
             bool contact_point_on_side;
+            std::vector<std::vector<Real> > side_phi;
   
-            findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, distance, normal, contact_point_on_side);
+            findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
 
 //            info->_distance = normDistance(*elem, *side, node, closest_point, normal);
 
             info->_normal = normal;
             info->_closest_point_ref = contact_ref;
             info->_distance = distance;
+            info->_side_phi = side_phi;
             
             mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
             
@@ -116,8 +118,9 @@ PenetrationLocator::detectPenetration()
             Real distance;
             RealGradient normal;
             bool contact_point_on_side;
+            std::vector<std::vector<Real> > side_phi;
   
-            findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, distance, normal, contact_point_on_side);
+            findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
 
             if(contact_point_on_side)
             {
@@ -125,6 +128,7 @@ PenetrationLocator::detectPenetration()
               info->_closest_point_ref = contact_ref;
               info->_distance = distance;
               mooseAssert(info->_distance <= 0, "Error in PenetrationLocator: Slave node not contained in element but distance was positive!");
+              info->_side_phi = side_phi;
 
               info->_closest_point = contact_phys;
 
@@ -210,8 +214,9 @@ PenetrationLocator::detectPenetration()
               Real distance;
               RealGradient normal;
               bool contact_point_on_side;
+              std::vector<std::vector<Real> > side_phi;
   
-              findContactPoint(elem, side_num, node, true, contact_ref, contact_phys, distance, normal, contact_point_on_side);
+              findContactPoint(elem, side_num, node, true, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
 
               if(contact_point_on_side && _penetration_info[node.id()] &&
                  (
@@ -239,7 +244,8 @@ PenetrationLocator::detectPenetration()
                                                                     normal,
                                                                     distance,
                                                                     contact_phys,
-                                                                    contact_ref);
+                                                                    contact_ref,
+                                                                    side_phi);
               }
               else
               {
@@ -281,7 +287,7 @@ PenetrationLocator::penetrationDistance(unsigned int node_id)
  */
 void
 PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side_num, const Point & slave_point,
-                                     bool start_with_centroid, Point & contact_ref, Point & contact_phys,
+                                     bool start_with_centroid, Point & contact_ref, Point & contact_phys, std::vector<std::vector<Real> > & side_phi,
                                      Real & distance, RealGradient & normal, bool & contact_point_on_side)
 {
   unsigned int dim = master_elem->dim();
@@ -483,6 +489,14 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
   // This happens if the point is behind the face, but through the element
   if(!contained_in_elem && ((contact_phys - slave_point) * normal) > 0)
     contact_point_on_side = false;
+
+  
+  const std::vector<std::vector<Real> > & phi = fe->get_phi();
+
+  points[0] = contact_ref;
+  fe->reinit(side, &points);
+
+  side_phi = phi;
 
   delete side;
 //  delete fe;
@@ -724,7 +738,7 @@ PenetrationLocator::penetrationNormal(unsigned int node_id)
 }
 
 
-PenetrationLocator::PenetrationInfo::PenetrationInfo(Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref)
+PenetrationLocator::PenetrationInfo::PenetrationInfo(Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi)
   :_node(node),
    _elem(elem),
    _side(side),
@@ -732,7 +746,8 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(Node * node, Elem * elem, E
    _normal(norm),
    _distance(norm_distance),
    _closest_point(closest_point),
-   _closest_point_ref(closest_point_ref)
+   _closest_point_ref(closest_point_ref),
+   _side_phi(side_phi)
 {}
 
   
@@ -744,7 +759,8 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
     _normal(p._normal),
     _distance(p._distance),
     _closest_point(p._closest_point),
-    _closest_point_ref(p._closest_point_ref)
+    _closest_point_ref(p._closest_point_ref),
+    _side_phi(p._side_phi)
 {}
 
 PenetrationLocator::PenetrationInfo::~PenetrationInfo()
