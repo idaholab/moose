@@ -65,6 +65,8 @@ namespace MooseTest
 {
   void registerObjects()
   {
+    Moose::registerObjects();
+
     registerKernel(DiffMKernel);
     registerKernel(MatDiffusion);
     registerKernel(Convection);

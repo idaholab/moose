@@ -37,8 +37,6 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
 
-  Moose::registerObjects();
-
   MooseTest::registerObjects();
 
   MooseSystem moose_system;
