@@ -10,7 +10,6 @@
 #include "HeatConduction.h"
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionMaterial.h"
-#include "FluxBC.h"
 
 // navier_stokes
 #include "MassInviscidFlux.h"
@@ -43,7 +42,6 @@
 #include "LinearStrainHardening.h"
 #include "LSHPlasticMaterial.h"
 #include "PLC_LSH.h"
-#include "PlasticMaterial.h"
 #include "PlasticStrainAux.h"
 #include "PowerLawCreepMaterial.h"
 #include "PowerLawCreep.h"
@@ -88,7 +86,6 @@ Elk::registerObjects()
   registerKernel(HeatConduction);
   registerKernel(HeatConductionImplicitEuler);
   registerNamedMaterial(HeatConductionMaterial, "HeatConduction");
-  registerBoundaryCondition(FluxBC);
 
   // navier_stokes
   registerKernel(MassInviscidFlux);
@@ -120,7 +117,6 @@ Elk::registerObjects()
   registerNamedMaterial(LinearIsotropicMaterialRZ, "LinearIsotropicRZ");
   registerMaterial(LinearStrainHardening);
   registerMaterial(LSHPlasticMaterial);
-  registerMaterial(PlasticMaterial);
   registerAux(PlasticStrainAux);
   registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);
