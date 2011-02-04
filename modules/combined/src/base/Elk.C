@@ -37,6 +37,7 @@
 #include "CreepStrainAux.h"
 #include "Elastic.h"
 #include "Gravity.h"
+#include "GravityRZ.h"
 #include "LinearIsotropicMaterial.h"
 #include "LinearIsotropicMaterialRZ.h"
 #include "LinearStrainHardening.h"
@@ -113,6 +114,7 @@ Elk::registerObjects()
   registerAux(CreepStrainAux);
   registerMaterial(Elastic);
   registerKernel(Gravity);
+  registerKernel(GravityRZ);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerNamedMaterial(LinearIsotropicMaterialRZ, "LinearIsotropicRZ");
   registerMaterial(LinearStrainHardening);
