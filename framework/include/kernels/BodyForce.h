@@ -36,6 +36,8 @@ protected:
 
 private:
   Real _value;
+  const bool _has_function;
+  Function * const _function;
 };
 
 #endif
