@@ -61,9 +61,9 @@ LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVect
     ColumnMajorMatrix thermal_strain;
 
     Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
-    
+
     thermal_strain.setDiag(isotropic_strain);
-    
+
     elastic_strain -= thermal_strain;
   }
 
@@ -94,11 +94,22 @@ LinearIsotropicMaterial::computeProperties()
   for(_qp=0; _qp<_n_qpoints; _qp++)
   {
     _thermal_conductivity[_qp] = _input_thermal_conductivity;
-    
+
     _local_elasticity_tensor->calculate(_qp);
 
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
     computeStress(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp], _stress[_qp]);
+
+    if (_qp == 0)
+    {
+//       std::cout << "JDH DEBUG: strain, stress:\n";
+//       ColumnMajorMatrix total_strain(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
+//       // 1/2 * (strain + strain^T)
+//       total_strain += total_strain.transpose();
+//       total_strain *= 0.5;
+//       total_strain.print();
+//       _stress[_qp].print();
+    }
   }
 }

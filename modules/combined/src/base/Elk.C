@@ -39,6 +39,7 @@
 #include "Elastic.h"
 #include "Gravity.h"
 #include "LinearIsotropicMaterial.h"
+#include "LinearIsotropicMaterialRZ.h"
 #include "LinearStrainHardening.h"
 #include "LSHPlasticMaterial.h"
 #include "PLC_LSH.h"
@@ -52,6 +53,7 @@
 #include "StressAux.h"
 #include "ElasticEnergyAux.h"
 #include "StressDivergence.h"
+#include "StressDivergenceRZ.h"
 #include "StressOutput.h"
 
 
@@ -115,6 +117,7 @@ Elk::registerObjects()
   registerMaterial(Elastic);
   registerKernel(Gravity);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
+  registerNamedMaterial(LinearIsotropicMaterialRZ, "LinearIsotropicRZ");
   registerMaterial(LinearStrainHardening);
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(PlasticMaterial);
@@ -128,6 +131,7 @@ Elk::registerObjects()
   registerAux(StressAux);
   registerAux(ElasticEnergyAux);
   registerKernel(StressDivergence);
+  registerKernel(StressDivergenceRZ);
   registerKernel(StressOutput);
 
   // phase_field
