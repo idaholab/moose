@@ -29,8 +29,8 @@ PLSHPlasticMaterial::PLSHPlasticMaterial(std::string name,
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
-   _plastic_strain(declareProperty<ColumnMajorMatrix>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<ColumnMajorMatrix>("plastic_strain"))
+   _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain"))
 {
   _shear_modulus = _youngs_modulus / ((2*(1+_poissons_ratio)));
 
@@ -78,40 +78,40 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
     Real plastic_strain_increment = 0.;
     Real norm_residual = 10.;
 
-      if (_stress_old[_qp](1,1)> 240.)
+      if (_stress_old[_qp](1,1)> 50.)
       {
-        if (_stress_old[_qp](1,1)< 360.)
+        if (_stress_old[_qp](1,1)< 52.)
         {
-          _hardening_constant=1206.;
+          _hardening_constant=2000.;
         }
       }
      
-      if (_stress_old[_qp](1,1)> 360.)
+      if (_stress_old[_qp](1,1)> 52.)
       {
-        if (_stress_old[_qp](1,1)< 420.)
+        if (_stress_old[_qp](1,1)< 54.)
         {
-          _hardening_constant=800.;
+          _hardening_constant=1000.;
         }
       }
 
-      if (_stress_old[_qp](1,1)> 420.)
+      if (_stress_old[_qp](1,1)> 54.)
       {
-        if (_stress_old[_qp](1,1)< 1500.)
+        if (_stress_old[_qp](1,1)< 56.)
         {
-          _hardening_constant=400.;
+          _hardening_constant=100.;
         }
       }
       
      
-      if (_stress_old[_qp](1,1)> 1500.)
+      if (_stress_old[_qp](1,1)> 56.)
       {
-       _hardening_constant=400.;
+       _hardening_constant=100.;
       }
      
      
-        if (_stress_old[_qp](1,1)< 240.)
+        if (_stress_old[_qp](1,1)< 50.)
        {
-         _hardening_constant = 1206.;
+         _hardening_constant = 2000.;
        }
     
     
@@ -136,7 +136,8 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
     matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
     
     // update plastic strain
-    _plastic_strain[_qp] = _plastic_strain_old[_qp] + matrix_plastic_strain_increment;
+  matrix_plastic_strain_increment.fill(_plastic_strain[_qp]);
+  _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
     // calculate elastic strain
     elastic_strain = etotal_strain;
@@ -223,7 +224,7 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
     _hardening_variable[_qp] = 0.0;
     ColumnMajorMatrix A(3,3);
     A.zero();
-    _plastic_strain[_qp] = A;
+    A.fill(_plastic_strain[_qp]);
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;
   }
 

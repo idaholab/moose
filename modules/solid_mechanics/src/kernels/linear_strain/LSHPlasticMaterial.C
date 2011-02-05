@@ -29,8 +29,8 @@ LSHPlasticMaterial::LSHPlasticMaterial(std::string name,
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
-   _plastic_strain(declareProperty<ColumnMajorMatrix>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<ColumnMajorMatrix>("plastic_strain"))
+   _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain"))
 {
   _shear_modulus = _youngs_modulus / ((2*(1+_poissons_ratio)));
 
@@ -100,7 +100,8 @@ LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Column
     matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
     
     // update plastic strain
-    _plastic_strain[_qp] = _plastic_strain_old[_qp] + matrix_plastic_strain_increment;
+  matrix_plastic_strain_increment.fill(_plastic_strain[_qp]);
+  _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
     // calculate elastic strain
     elastic_strain = etotal_strain;
@@ -187,7 +188,7 @@ LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Column
     _hardening_variable[_qp] = 0.0;
     ColumnMajorMatrix A(3,3);
     A.zero();
-    _plastic_strain[_qp] = A;
+    A.fill(_plastic_strain[_qp]);
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;
   }
 
