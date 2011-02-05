@@ -161,10 +161,6 @@ if __name__ == '__main__':
     argv.remove('-d')
 
   if len(argv) > 0:
-    if gethostname() != 'helios' and gethostname() != 'Philip-Jagielskis-MacBook-Pro.local': #PJJ TODO just for testing
-      print "Don't generate json data because this isn't helios"
-      sys.exit(0)
-
     con = sqlite.connect(fname)
     for app in argv:
       print "generating json data for " + app + "."

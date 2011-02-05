@@ -24,12 +24,11 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
   # if we're running this from the build system we only want to run it once instead
   # of on all four targets. So bitten passes the --helios-only option, then this
   # script does nothing if it is not run on helios
-  if len(argv) == 2 and argv[1] == '--helios-only':
-    if gethostname() != 'helios':
+  if len(argv) == 2 and argv[1] == '--helios-only' and gethostname() != 'helios':
       print 'Syntax NOT generated because this is not helios'
       sys.exit(0)
-    else:
-      print 'Generating syntax, this is helios'
+  else:
+    print 'Generating syntax html'
 
   # Try to import the required modules and die gracefully if they don't load
   test_import_modules()
