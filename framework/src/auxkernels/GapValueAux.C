@@ -51,7 +51,5 @@ GapValueAux::computeValue()
     //The zero index is because we only have point that the phis are evaluated at
     gap_temp += slave_side_phi[i][0] * _moose_system._serialized_solution(slave_side_dof_indices[i]);
 
-  std::cout<<gap_temp<<std::endl;
-
   return gap_temp;
 }
