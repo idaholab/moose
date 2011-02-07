@@ -10,6 +10,10 @@ class CHSplit2ChemPot;
 template<>
 InputParameters validParams<CHSplit2ChemPot>();
 
+/**
+ * This file calculates the chemical potential in the split Cahn-Hilliard problem.  To create a new phase field model, just
+ * replace computeDFDC
+ */
 class CHSplit2ChemPot : public Kernel
 {
 public:
