@@ -104,7 +104,7 @@
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
 #include "RandomIC.h"
-//#include "FunctionIC.h"
+#include "FunctionIC.h"
 
 #include "Steady.h"
 #include "TransientExecutioner.h"
@@ -279,6 +279,7 @@ Moose::registerObjects()
   registerInitialCondition(ConstantIC);  
   registerInitialCondition(BoundingBoxIC);  
   registerInitialCondition(RandomIC);
+  registerInitialCondition(FunctionIC);
 
   registerExecutioner(Steady);
 
