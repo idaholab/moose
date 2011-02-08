@@ -60,6 +60,7 @@ endif
 #
 # source files
 srcfiles    := $(shell find $(CURR_DIR) -name *.C)
+csrcfiles    := $(shell find $(CURR_DIR) -name *.c)
 
 ifeq ($(MAKE_LIBRARY),yes)
 # THIS LINE SHOULD BE MADE MORE GENERIC
@@ -72,6 +73,7 @@ f90srcfiles := $(shell find $(CURR_DIR) -name *.f90)
 #
 # object files
 objects	    := $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
+cobjects	:= $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
 fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
@@ -104,27 +106,27 @@ all:: $(target)
 ifeq ($(MAKE_LIBRARY),yes)
 ifeq ($(enable-shared),yes)
 # Build dynamic library
-$(target): $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
 	@echo "Linking "$@"..."
-	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(fobjects) $(f90objects) $(objects) $(libmesh_LDFLAGS)
+	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(fobjects) $(f90objects) $(objects) $(cobjects) $(libmesh_LDFLAGS)
 else
 # Build static library
 ifeq ($(findstring darwin,$(hostos)),darwin)
-$(target): $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
 	@echo "Linking "$@"..."
-	@libtool -static -o $@ $(fobjects) $(f90objects) $(objects) 
+	@libtool -static -o $@ $(fobjects) $(f90objects) $(objects) $(cobjects) 
 else
-$(target): $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
 	@echo "Linking "$@"..."
-	@$(AR) rv $@ $(fobjects) $(f90objects) $(objects)
+	@$(AR) rv $@ $(fobjects) $(f90objects) $(objects) $(cobjects)
 endif
 endif
 else
 
 # Normal Executable
-$(target): $(fobjects) $(f90objects) $(objects) $(mesh_library) $(ADDITIONAL_DEPS)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects) $(mesh_library) $(ADDITIONAL_DEPS)
 	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS) 
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(cobjects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS) 
 
 endif
 

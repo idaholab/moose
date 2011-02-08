@@ -32,6 +32,7 @@
 #include "transient_system.h"
 #include "preconditioner.h"
 #include "print_trace.h"
+#include "mtwist.h"
 
 //Forward Declarations
 class MooseSystem;
@@ -253,6 +254,18 @@ namespace Moose
   const unsigned int ANY_BLOCK_ID = (unsigned int) -1;
 
   extern GetPot *command_line;
+
+  /* Wrappers for extern random number generator */
+  inline void seed(unsigned int s) 
+  {
+    mt_seed32new(s);
+  }
+  inline double rand()
+  {
+    // For now we will try the 64-bit values
+    return mt_ldrand();
+  }
+  
 }
 
 #endif //MOOSE_H
