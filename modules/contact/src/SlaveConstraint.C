@@ -147,14 +147,12 @@ SlaveConstraint::computeQpResidual()
 Real
 SlaveConstraint::computeQpJacobian()
 {
-  return 0;
-  
-  if(_i != _j)
-    return 0;
+//  if(_i != _j)
+//    return 0;
 
-   PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
-   Node * node = pinfo->_node;
-   long int dof_number = node->dof_number(0, _var_num, 0);
+  PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
+  Node * node = pinfo->_node;
+  long int dof_number = node->dof_number(0, _var_num, 0);
 
    /*
    RealVectorValue jac_vec;
@@ -174,11 +172,8 @@ SlaveConstraint::computeQpJacobian()
      );
    */
 
-   Real constraint_mag = pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id()));
+  Real constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * _phi[_j][_qp];
 
-   return _phi[_i][_qp] * (
-//     (1e8 * pinfo->_normal(_component) * pinfo->_normal(_component) * -_phi[_j][_qp])
-     (pinfo->_normal(_component) * pinfo->_normal(_component) * _penalty * _phi[_j][_qp])
-     - (pinfo->_normal(_component) * pinfo->_normal(_component) * _jacobian_copy(dof_number, dof_number))
-     );
+
+   return _phi[_i][_qp]*_penalty*constraint_mag;
 }
