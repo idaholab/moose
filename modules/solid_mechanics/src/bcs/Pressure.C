@@ -1,20 +1,20 @@
-#include "PressureBC.h"
+#include "Pressure.h"
 
 #include "Function.h"
 #include "Moose.h"
 
 template<>
-InputParameters validParams<PressureBC>()
+InputParameters validParams<Pressure>()
 {
   InputParameters params = validParams<BoundaryCondition>();
-  params.addRequiredParam<int>("component", "The component for the PressureBC");
+  params.addRequiredParam<int>("component", "The component for the Pressure");
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
   params.addParam<std::string>("function", "", "The function that describes the pressure");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-PressureBC::PressureBC(const std::string & name, InputParameters parameters)
+Pressure::Pressure(const std::string & name, InputParameters parameters)
   :BoundaryCondition(name, parameters),
    _component(getParam<int>("component")),
    _factor(getParam<Real>("factor")),
@@ -48,7 +48,7 @@ PressureBC::PressureBC(const std::string & name, InputParameters parameters)
 }
 
 Real
-PressureBC::computeQpResidual()
+Pressure::computeQpResidual()
 {
   Real factor = _factor;
   if (_has_function)
