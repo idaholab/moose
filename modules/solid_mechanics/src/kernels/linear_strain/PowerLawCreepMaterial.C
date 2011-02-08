@@ -47,8 +47,8 @@ PowerLawCreepMaterial::PowerLawCreepMaterial(std::string name,
    _total_strain_old(declarePropertyOld<ColumnMajorMatrix>("total_strain")),
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
-   _plastic_strain(declareProperty<ColumnMajorMatrix>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<ColumnMajorMatrix>("plastic_strain"))
+   _creep_strain(declareProperty<RealTensorValue>("creep_strain")),
+   _creep_strain_old(declarePropertyOld<RealTensorValue>("creep_strain"))
 {
   _shear_modulus = _youngs_modulus / ((2*(1+_poissons_ratio)));
   _identity.identity();  
@@ -94,21 +94,21 @@ PowerLawCreepMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Col
 // Use Newton sub-iteration to determine effective creep strain increment
   
     unsigned int it = 0;
-    Real plastic_residual = 10.;
-    Real plastic_strain_increment = 0.;
+    Real creep_residual = 10.;
+    Real creep_strain_increment = 0.;
     Real norm_residual = 10.;
     
     while(it < _max_its && norm_residual > _tolerance)
     {
  
-      Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*plastic_strain_increment, _exponent)*
+      Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*creep_strain_increment, _exponent)*
         std::exp(-_activation_energy/(_gas_constant*_temp[_qp]));       
       Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_exponent*
-        std::pow(effective_trial_stress-3.*_shear_modulus*plastic_strain_increment, _exponent-1.)*
+        std::pow(effective_trial_stress-3.*_shear_modulus*creep_strain_increment, _exponent-1.)*
         std::exp(-_activation_energy/(_gas_constant*_temp[_qp]));
-      plastic_residual = phi -  plastic_strain_increment/_dt;
-      norm_residual = std::abs(plastic_residual);
-      plastic_strain_increment = plastic_strain_increment + (plastic_residual / (1/_dt - dphi_ddelp));
+      creep_residual = phi -  creep_strain_increment/_dt;
+      norm_residual = std::abs(creep_residual);
+      creep_strain_increment = creep_strain_increment + (creep_residual / (1/_dt - dphi_ddelp));
 
       // iteration output
       if (_output_iteration_info == true)
@@ -117,8 +117,8 @@ PowerLawCreepMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Col
           <<" temp=" << _temp[_qp]
           <<" phi=" <<phi
           <<" dphi=" <<dphi_ddelp
-          <<" plas_res=" <<plastic_residual
-          <<" plas_strn_inc=" <<plastic_strain_increment
+          <<" plas_res=" <<creep_residual
+          <<" plas_strn_inc=" <<creep_strain_increment
           <<std::endl;
       
       it++;
@@ -129,15 +129,17 @@ PowerLawCreepMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Col
     // Avoid potential divide by zero - how should this be done?   
     if (effective_trial_stress < 0.01) effective_trial_stress = 0.01;
     
-    ColumnMajorMatrix matrix_plastic_strain_increment(dev_trial_stress);
-    matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
+    ColumnMajorMatrix matrix_creep_strain_increment(dev_trial_stress);
+    matrix_creep_strain_increment *= (1.5*creep_strain_increment/effective_trial_stress);
     
-    // update plastic strain
-    _plastic_strain[_qp] = _plastic_strain_old[_qp] + matrix_plastic_strain_increment;
+    // update creep strain
+    matrix_creep_strain_increment.fill(_creep_strain[_qp]);
+    _creep_strain[_qp] += _creep_strain_old[_qp];
 
     // calculate elastic strain
     elastic_strain = etotal_strain;
-    elastic_strain -= matrix_plastic_strain_increment;
+    elastic_strain.reshape(LIBMESH_DIM, LIBMESH_DIM);
+    elastic_strain -= matrix_creep_strain_increment;
     
     //  Jacobian multiplier of the stress    
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;

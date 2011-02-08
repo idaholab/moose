@@ -141,6 +141,7 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
 
     // calculate elastic strain
     elastic_strain = etotal_strain;
+    elastic_strain.reshape(LIBMESH_DIM, LIBMESH_DIM);
     elastic_strain -= matrix_plastic_strain_increment;
 
     

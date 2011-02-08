@@ -47,8 +47,8 @@ protected:
   MaterialProperty<ColumnMajorMatrix> & _total_strain_old;
   MaterialProperty<RealTensorValue> & _stress;  
   MaterialProperty<RealTensorValue> & _stress_old;  
-  MaterialProperty<ColumnMajorMatrix> & _plastic_strain;
-  MaterialProperty<ColumnMajorMatrix> & _plastic_strain_old;
+  MaterialProperty<RealTensorValue> & _creep_strain;
+  MaterialProperty<RealTensorValue> & _creep_strain_old;
   
   ColumnMajorMatrix _identity;  
 };
