@@ -60,6 +60,7 @@
 #include "GapValueAux.h"
 
 #include "EmptyFunction.h"
+#include "SolutionFunction.h"
 
 #include "TimeDerivative.h"
 #include "ImplicitEuler.h"
@@ -177,6 +178,7 @@ void
 Moose::registerObjects()
 {
   registerFunction(EmptyFunction);
+  registerFunction(SolutionFunction);
   registerFunction(ParsedFunction);
   registerFunction(ParsedGradFunction);
   registerFunction(PiecewiseLinear);
