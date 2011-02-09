@@ -501,6 +501,7 @@ Parser::fixupOptionalBlocks()
   optional_blocks.push_back(std::make_pair("AuxKernels", "BCs"));
   optional_blocks.push_back(std::make_pair("BCs", "AuxBCs"));
   optional_blocks.push_back(std::make_pair("Executioner", "Postprocessors"));
+  optional_blocks.push_back(std::make_pair("Mesh", "Functions"));
   
   // First see if the Optional Block exists
   for (i = optional_blocks.begin(); i != optional_blocks.end(); ++i)

@@ -41,6 +41,7 @@ VariablesBlock::VariablesBlock(const std::string & name, InputParameters params)
 {
   // Register execution prereqs
   addPrereq("Mesh");
+  addPrereq("Functions");
 }
 
 VariablesBlock::~VariablesBlock()
