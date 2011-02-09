@@ -62,6 +62,8 @@ SolutionFunction::~SolutionFunction()
 {
   delete _es;
   delete _mesh;
+  delete _serialized_solution;
+  delete _mesh_function;
 }
 
 Real
