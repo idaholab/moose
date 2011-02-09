@@ -3,9 +3,9 @@
 # Get the current stable version of moose
 svn co --quiet https://hpcsc/svn/herd/branches/stable/moose stable-moose
 
-# Find the version number
-version=`svn info stable-moose | perl -nle 'print $1 if /Last Changed Rev\D*(\d+)/'`
+# Merge trunk into the stable version
+svn merge https://hpcsc/svn/herd/trunk/moose stable-moose
 
-# Merge the trunk into the local copy
-svn merge -r $version https://hpcsc/svn/herd/trunk/moose stable-moose
+# Check it in!
+svn ci stable-moose
 
