@@ -18,8 +18,9 @@ template<>
 InputParameters validParams<RandomIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addRequiredParam<Real>("min", "Lower bound of the randomly generated values");
-  params.addRequiredParam<Real>("max", "Upper bound of the randomly generated values");
+  params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
+  params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
+  params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
   return params;
 }
 
@@ -31,13 +32,14 @@ RandomIC::RandomIC(const std::string & name,
    _range(_max - _min)
 {
   mooseAssert(_range > 0.0, "Min > Max for RandomIC!");
+  Moose::seed(getParam<unsigned int>("seed"));
 }
 
 Real
 RandomIC::value(const Point & /*p*/)
 {
   //Random number between 0 and 1
-  Real rand_num = (Real)rand() / (Real)RAND_MAX;
+  Real rand_num = Moose::rand();
 
   //Between 0 and range
   rand_num *= _range;
