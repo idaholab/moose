@@ -50,6 +50,8 @@ private:
   Real _mn_invalue;
   Real _mx_outvalue;
   Real _mn_outvalue;
+  Real _range_outvalue;
+  Real _range_invalue;
   Real _radius;
 
   Point _center;

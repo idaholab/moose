@@ -13,6 +13,8 @@ InputParameters validParams<RndSmoothCircleIC>()
   params.addRequiredParam<Real>("mn_invalue", "The min variable value inside the circle");
   params.addRequiredParam<Real>("mn_outvalue", "The min variable value outside the circle");
   params.addRequiredParam<Real>("radius", "The radius of a circle");
+  
+  params.addParam<unsigned int>("seed", 12345, "Seed value for the random number generator");
   return params;
 }
 
@@ -26,9 +28,15 @@ RndSmoothCircleIC::RndSmoothCircleIC(const std::string & name,
    _mn_invalue(parameters.get<Real>("mn_invalue")),
    _mx_outvalue(parameters.get<Real>("mx_outvalue")),
    _mn_outvalue(parameters.get<Real>("mn_outvalue")),
+   _range_invalue(_mx_invalue - _mn_invalue),
+   _range_outvalue(_mx_outvalue - _mn_outvalue),
    _radius(parameters.get<Real>("radius")),
    _center(_x1,_y1,_z1)
-{}
+{
+  mooseAssert(_range_invalue > 0.0, "Inside Min > Max for RndSmoothCircleIC!");
+  mooseAssert(_range_outvalue > 0.0, "Outside Min > Max for RndSmoothCircleIC!");
+  Moose::seed(getParam<unsigned int>("seed"));
+}
 
 Real
 RndSmoothCircleIC::value(const Point & p)
@@ -43,10 +51,10 @@ RndSmoothCircleIC::value(const Point & p)
   rad = sqrt(rad);
   
   //Random number between 0 and 1
-  Real rand_num = (Real)rand() / (Real)RAND_MAX;
+  Real rand_num = Moose::rand();
   
   if (rad <= _radius)
-    value = _mn_invalue + rand_num*(_mx_invalue - _mn_invalue);
+    value = _mn_invalue + rand_num*(_range_invalue);
   else if (rad < 1.5*_radius)
   {
     Real av_invalue = (_mn_invalue + _mx_invalue)/2.0;
@@ -54,7 +62,7 @@ RndSmoothCircleIC::value(const Point & p)
     value = av_outvalue + (av_invalue-av_outvalue)*(1+cos((rad-_radius)/_radius*2.0*3.14159))/2.0;
   }
   else
-    value = _mx_outvalue + rand_num*(_mx_outvalue - _mn_outvalue);
+    value = _mx_outvalue + rand_num*(_range_outvalue);
 
   return value;
   
