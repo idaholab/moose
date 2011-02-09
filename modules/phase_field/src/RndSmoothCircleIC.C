@@ -33,8 +33,8 @@ RndSmoothCircleIC::RndSmoothCircleIC(const std::string & name,
    _radius(parameters.get<Real>("radius")),
    _center(_x1,_y1,_z1)
 {
-  mooseAssert(_range_invalue > 0.0, "Inside Min > Max for RndSmoothCircleIC!");
-  mooseAssert(_range_outvalue > 0.0, "Outside Min > Max for RndSmoothCircleIC!");
+  mooseAssert(_range_invalue >= 0.0, "Inside Min > Max for RndSmoothCircleIC!");
+  mooseAssert(_range_outvalue >= 0.0, "Outside Min > Max for RndSmoothCircleIC!");
   Moose::seed(getParam<unsigned int>("seed"));
 }
 
