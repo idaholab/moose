@@ -71,7 +71,6 @@
 #include "SmoothCircleIC.h"
 #include "RndSmoothCircleIC.h"
 #include "RndBoundingBoxIC.h"
-#include "GradientBoxIC.h"
 
 // contact
 #include "ContactMaster.h"
@@ -149,7 +148,6 @@ Elk::registerObjects()
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
-  registerInitialCondition(GradientBoxIC);
 
   // contact
   registerDiracKernel(ContactMaster);
