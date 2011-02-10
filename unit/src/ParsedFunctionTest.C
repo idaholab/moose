@@ -22,22 +22,6 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 
-ParsedFunctionTest::ParsedFunctionTest()
-{
-  std::string argv("fake");
-
-  char *argv_p = const_cast<char *>(argv.c_str());
-  
-  init = new MooseInit(1, &argv_p);
-  m = new MooseSystem;
-}
-
-ParsedFunctionTest::~ParsedFunctionTest()
-{
-  delete m;
-//  delete init;  // GetPot double free???
-}
-
 void
 ParsedFunctionTest::basicConstructor()
 {

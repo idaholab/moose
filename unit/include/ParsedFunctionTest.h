@@ -35,9 +35,6 @@ class ParsedFunctionTest : public CppUnit::TestFixture
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  ParsedFunctionTest();
-  ~ParsedFunctionTest();
-  
   void basicConstructor();
   void advancedConstructor();
   void testVariables();
