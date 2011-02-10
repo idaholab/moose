@@ -33,7 +33,7 @@ UserForcingFunction::UserForcingFunction(const std::string & name,
 Real
 UserForcingFunction::f()
 {
-  return _func.value(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
+  return _func.value(_t, _q_point[_qp]);
 }
 
 Real

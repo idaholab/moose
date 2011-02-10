@@ -33,5 +33,5 @@ FunctionNeumannBC::FunctionNeumannBC(const std::string & name,
 Real
 FunctionNeumannBC::computeQpResidual()
 {
-  return -_test[_i][_qp] * _normals[_qp] * _func.gradient(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
+  return -_test[_i][_qp] * _normals[_qp] * _func.gradient(_t, _q_point[_qp]);
 }

@@ -34,7 +34,7 @@ class ParsedGradFunction : public ParsedFunction
   public:
     ParsedGradFunction(const std::string & name, InputParameters parameters);
 
-    virtual RealGradient gradient(Real t, Real x, Real y = 0, Real z = 0);
+    virtual RealGradient gradient(Real t, const Point & p);
 
   private:
     FunctionParser _parserx;

@@ -32,7 +32,7 @@ EmptyFunction::~EmptyFunction()
 }
 
 Real
-EmptyFunction::value(Real /*t*/, Real /*x*/, Real /*y*/, Real /*z*/)
+EmptyFunction::value(Real /*t*/, const Point & /*p*/)
 {
   return 0.0;
 }

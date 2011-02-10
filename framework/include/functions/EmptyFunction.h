@@ -32,7 +32,7 @@ public:
 
   virtual ~EmptyFunction();
 
-  virtual Real value(Real t, Real x, Real y = 0, Real z = 0);
+  virtual Real value(Real t, const Point & p);
 };
 
 #endif //EMPTYFUNCTION_H

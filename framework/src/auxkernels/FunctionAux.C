@@ -31,5 +31,5 @@ FunctionAux::FunctionAux(const std::string & name, InputParameters parameters)
 Real
 FunctionAux::computeValue()
 {
-  return _func.value(_t, (*_current_node)(0), (*_current_node)(1), (*_current_node)(2));
+  return _func.value(_t, (*_current_node));
 }

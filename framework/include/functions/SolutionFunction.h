@@ -42,7 +42,7 @@ public:
 
   virtual ~SolutionFunction();
 
-  virtual Real value(Real t, Real x, Real y = 0, Real z = 0);
+  virtual Real value(Real t, const Point & p);
 
 protected:
   std::string _mesh_file;

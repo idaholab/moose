@@ -89,23 +89,15 @@ ExactSolutionExecutioner::~ExactSolutionExecutioner()
 Number
 ExactSolutionExecutioner::exactSolution(const Point& p, const Parameters& /*parameters*/, const std::string& /*sys_name*/, const std::string& /*unknown_name*/)
 {
-  //TODO is this the right way to check dimensions?
-  Real x = p(0);
-  Real y = (LIBMESH_DIM > 1) ? p(1) : 0;
-  Real z = (LIBMESH_DIM > 2) ? p(2) : 0;
   Real t = _moose_system._t;
-  return _func.value(t, x, y, z);
+  return _func.value(t, p);
 }
 
 RealGradient
 ExactSolutionExecutioner::exactGrad(const Point& p, const Parameters& /*parameters*/, const std::string& /*sys_name*/, const std::string& /*unknown_name*/)
 {
-  //TODO is this the right way to check dimensions?
-  Real x = p(0);
-  Real y = (LIBMESH_DIM > 1) ? p(1) : 0;
-  Real z = (LIBMESH_DIM > 2) ? p(2) : 0;
   Real t = _moose_system._t;
-  return _func.gradient(t, x, y, z);
+  return _func.gradient(t, p);
 }
 
 void

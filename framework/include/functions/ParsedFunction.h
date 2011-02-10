@@ -47,9 +47,9 @@ class ParsedFunction : public Function
     /**
      * Created from MooseSystem via the FunctionFactory.
      */
-    ParsedFunction(const std::string & name, InputParameters parameters);
+  ParsedFunction(const std::string & name, InputParameters parameters);
 
-    virtual ~ParsedFunction();
+  virtual ~ParsedFunction();
 
     /**
      * Get the address to stick the value of the specified variable in. When you
@@ -63,13 +63,13 @@ class ParsedFunction : public Function
      *
      * @param var the name of the variable passed in the constructor.
      */
-    Real & getVarAddr(std::string var);
+  Real & getVarAddr(std::string var);
 
     /**
      * Evaluate the equation at the given location. For 1-D and 2-D equations
      * x and y are optional.
      */
-    virtual Real value(Real t, Real x, Real y = 0, Real z = 0);
+  virtual Real value(Real t, const Point & /*p*/);
 
   protected:
     /**
@@ -78,7 +78,7 @@ class ParsedFunction : public Function
      * defined. This method is called when the FunctionParser object is being
      * initialized in initializeParser before the function is parsed.
      */
-    void defineConstants(FunctionParser & fp);
+  void defineConstants(FunctionParser & fp);
 
     /**
      * Called from the constructor to initialize the underlying Function Parser.
@@ -97,15 +97,15 @@ class ParsedFunction : public Function
      *
      *        TODO: putting these values as constants would probably be faster
      */
-    void initializeParser(FunctionParser & fp, std::string equation,
-             std::vector<std::string> vars = std::vector<std::string>(0),
-             std::vector<Real> vals = std::vector<Real>(0));
+  void initializeParser(FunctionParser & fp, std::string equation,
+                        std::vector<std::string> vars = std::vector<std::string>(0),
+                        std::vector<Real> vals = std::vector<Real>(0));
 
-    std::vector<Real> _vals;
+  std::vector<Real> _vals;
 
-  private:
-    FunctionParser _parser;
-    std::map<std::string, Real*> _var_map;
+private:
+  FunctionParser _parser;
+  std::map<std::string, Real*> _var_map;
 };
 
 #endif //PARSEDFUNCTION_H

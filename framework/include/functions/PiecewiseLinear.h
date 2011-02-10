@@ -36,7 +36,7 @@ public:
   /**
    * This function will return a value based on the first input argument only.
    */
-  virtual Real value(Real t, Real x, Real y = 0, Real z = 0);
+  virtual Real value(Real t, const Point & p);
 
 private:
   LinearInterpolation _linear_interp;

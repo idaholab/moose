@@ -38,10 +38,7 @@ BodyForce::computeQpResidual()
   Real factor = _value;
   if (_has_function)
   {
-    factor *= _function->value(_t,
-                               _q_point[_qp](0),
-                               _q_point[_qp](1),
-                               _q_point[_qp](2));
+    factor *= _function->value(_t, _q_point[_qp]);
   }
   return -_test[_i][_qp]*factor;
 }

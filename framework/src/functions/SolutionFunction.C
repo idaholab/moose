@@ -67,9 +67,7 @@ SolutionFunction::~SolutionFunction()
 }
 
 Real
-SolutionFunction::value(Real t, Real x, Real y, Real z)
+SolutionFunction::value(Real t, const Point & p)
 {
-  Point p(x, y, z);
-  
   return (*_mesh_function)(p);
 }

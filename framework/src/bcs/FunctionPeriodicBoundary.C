@@ -44,13 +44,13 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt)
   switch (_dim)
   {
   case 1:
-    return Point(_tr_x.value(t, pt(0), pt(1), pt(2)));
+    return Point(_tr_x.value(t, pt));
 
   case 2:
-    return Point(_tr_x.value(t, pt(0), pt(1), pt(2)), _tr_y.value(t, pt(0), pt(1), pt(2)));
+    return Point(_tr_x.value(t, pt), _tr_y.value(t, pt));
 
   case 3:
-    return Point(_tr_x.value(t, pt(0), pt(1), pt(2)), _tr_y.value(t, pt(0), pt(1), pt(2)), _tr_z.value(t, pt(0), pt(1), pt(2)));
+    return Point(_tr_x.value(t, pt), _tr_y.value(t, pt), _tr_z.value(t, pt));
 
   default:
     mooseError("Unsupported dimension");

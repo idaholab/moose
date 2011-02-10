@@ -39,6 +39,6 @@ ElementH1SemiError::getValue()
 Real
 ElementH1SemiError::computeQpIntegral()
 {
-  RealGradient diff = _grad_u[_qp]-_func.gradient(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
+  RealGradient diff = _grad_u[_qp]-_func.gradient(_t, _q_point[_qp]);
   return diff*diff;
 }
