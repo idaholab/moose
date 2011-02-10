@@ -38,15 +38,15 @@ RndBoundingBoxIC::RndBoundingBoxIC(const std::string & name,
    _bottom_left(_x1,_y1,_z1),
    _top_right(_x2,_y2,_z2)
 {
-  mooseAssert(_range_invalue > 0.0, "Inside Min > Inside Max for RandomIC!");
-  mooseAssert(_range_outvalue > 0.0, "Outside Min > Outside Max for RandomIC!");
+  mooseAssert(_range_invalue >= 0.0, "Inside Min > Inside Max for RandomIC!");
+  mooseAssert(_range_outvalue >= 0.0, "Outside Min > Outside Max for RandomIC!");
 }
 
 Real
 RndBoundingBoxIC::value(const Point & p)
 {
   //Random number between 0 and 1
-  Real rand_num = (Real)rand() / (Real)RAND_MAX;
+  Real rand_num = Moose::rand();
   
   for(unsigned int i=0; i<LIBMESH_DIM; i++)
     if(p(i) < _bottom_left(i) || p(i) > _top_right(i))
