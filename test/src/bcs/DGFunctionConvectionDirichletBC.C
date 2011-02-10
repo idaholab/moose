@@ -33,7 +33,7 @@ DGFunctionConvectionDirichletBC::DGFunctionConvectionDirichletBC(const std::stri
 Real
 DGFunctionConvectionDirichletBC::computeQpResidual()
 {
-  Real fn = _func.value(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
+  Real fn = _func.value(_t, _q_point[_qp]);
   Real r = 0;
   if (_velocity * _normals[_qp] >= 0)
     {
