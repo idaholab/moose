@@ -150,6 +150,12 @@ protected:
 
   LinearInterpolation _time_ipol;               /// Piecewise linear definition of time stepping
   bool _use_time_ipol;                          /// true if we want to use piecewise-defined time stepping
+
+  /**
+   * Start and end time for mesh adaptivity
+   */
+  Real _adapt_start_time;
+  Real _adapt_end_time;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

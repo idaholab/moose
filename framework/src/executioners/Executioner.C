@@ -38,7 +38,7 @@ template<>
 InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<bool>("initial_mesh_rebalance", false, "Whether or not to try and rebalance the mesh at the beginning of the simulation based on the amount of time spent computing on each element");
+  params.addParam<bool>("initial_mesh_rebalance", false, "Whether or not to try and rebalance the mesh at the beginning of the simulation based on the amount of time spent computing on each element");  
   return params;
 }
 

@@ -52,6 +52,9 @@ InputParameters validParams<TransientExecutioner>()
   params.addParam<std::vector<Real> >("sync_times", sync_times, "A list of times that will be solved for provided they are within the simulation time");
   params.addParam<std::vector<Real> >("time_t", "The values of t");
   params.addParam<std::vector<Real> >("time_dt", "The values of dt");
+  params.addParam<Real>("adapt_start_time",0.0,"Start time for mesh adaptivity block");
+  params.addParam<Real>("adapt_end_time",1.0e30,"End time for mesh adaptivity block");
+
 
   return params;
 }
@@ -79,7 +82,9 @@ TransientExecutioner::TransientExecutioner(const std::string & name, InputParame
    _remaining_sync_time(true),
    _time_ipol( getParam<std::vector<Real> >("time_t"),
                getParam<std::vector<Real> >("time_dt") ),
-   _use_time_ipol(_time_ipol.getSampleSize() > 0)
+   _use_time_ipol(_time_ipol.getSampleSize() > 0),
+   _adapt_start_time(getParam<Real>("adapt_start_time")),
+   _adapt_end_time(getParam<Real>("adapt_end_time"))
 {
   const std::vector<Real> & time = getParam<std::vector<Real> >("time_t");
   if (_use_time_ipol)
@@ -200,8 +205,11 @@ TransientExecutioner::endStep()
   _moose_system.outputPostprocessors();
   if(((_t_step+1)%_moose_system._interval == 0 || _reset_dt))
     _moose_system.outputSystem(_t_step, _time);
-    
-  adaptMesh();
+
+  //Adapt mesh if between start and end times
+  if (_time > _adapt_start_time && _time < _adapt_end_time)
+    adaptMesh();
+  
   _t_step++;
   _time_old = _time;
 }
