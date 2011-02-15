@@ -12,21 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "InternalVolume.h"
+#include "InternalVolumeRZ.h"
 
 template <>
-InputParameters validParams<InternalVolume>()
+InputParameters validParams<InternalVolumeRZ>()
 {
-  InputParameters params = validParams<SideIntegral>();
-  params.addParam<unsigned int>("component", 0, "The component to use in the integration");
+  InputParameters params = validParams<InternalVolume>();
+  params.set<unsigned int>("component") = 1;
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-InternalVolume::InternalVolume(const std::string & name,
-                               InputParameters parameters)
-  : SideIntegral( name, parameters ),
-    _component( getParam<unsigned int>("component") )
+InternalVolumeRZ::InternalVolumeRZ(const std::string & name,
+                                   InputParameters parameters)
+  : InternalVolume( name, parameters )
 {}
 
 //    /              /
@@ -57,7 +56,7 @@ InternalVolume::InternalVolume(const std::string & name,
 //
 
 Real
-InternalVolume::computeQpIntegral()
+InternalVolumeRZ::computeQpIntegral()
 {
-  return -_q_point[_qp](_component)*_normals[_qp](_component);
+  return 2 * M_PI * _q_point[_qp](0) * InternalVolume::computeQpIntegral();
 }

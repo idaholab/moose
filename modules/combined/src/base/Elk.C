@@ -5,10 +5,14 @@
 #include "CoefDiffusion.h"
 #include "Convection.h"
 #include "InternalVolume.h"
+#include "InternalVolumeRZ.h"
+#include "NeumannRZ.h"
 
 // heat_conduction
 #include "HeatConduction.h"
+#include "HeatConductionRZ.h"
 #include "HeatConductionImplicitEuler.h"
+#include "HeatConductionImplicitEulerRZ.h"
 #include "HeatConductionMaterial.h"
 
 // navier_stokes
@@ -46,7 +50,8 @@
 #include "PlasticStrainAux.h"
 #include "PowerLawCreepMaterial.h"
 #include "PowerLawCreep.h"
-#include "PlenumPressureBC.h"
+#include "PlenumPressure.h"
+#include "PlenumPressureRZ.h"
 #include "Pressure.h"
 #include "PressureRZ.h"
 #include "PLSHPlasticMaterial.h"
@@ -83,10 +88,14 @@ Elk::registerObjects()
   registerKernel(CoefDiffusion);
   registerKernel(Convection);
   registerPostprocessor(InternalVolume);
+  registerPostprocessor(InternalVolumeRZ);
+  registerBoundaryCondition(NeumannRZ);
 
   // heat_conduction
   registerKernel(HeatConduction);
+  registerKernel(HeatConductionRZ);
   registerKernel(HeatConductionImplicitEuler);
+  registerKernel(HeatConductionImplicitEulerRZ);
   registerNamedMaterial(HeatConductionMaterial, "HeatConduction");
 
   // navier_stokes
@@ -125,7 +134,8 @@ Elk::registerObjects()
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreepMaterial);
   registerMaterial(PowerLawCreep);
-  registerBoundaryCondition(PlenumPressureBC);
+  registerBoundaryCondition(PlenumPressure);
+  registerBoundaryCondition(PlenumPressureRZ);
   registerBoundaryCondition(Pressure);
   registerBoundaryCondition(PressureRZ);
   registerAux(StressAux);

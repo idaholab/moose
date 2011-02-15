@@ -1,12 +1,12 @@
-#include "PlenumPressureBC.h"
+#include "PlenumPressure.h"
 
 #include "MooseSystem.h"
 
 template<>
-InputParameters validParams<PlenumPressureBC>()
+InputParameters validParams<PlenumPressure>()
 {
   InputParameters params = validParams<BoundaryCondition>();
-  params.addRequiredParam<int>("component", "The component for the PlenumPressureBC");
+  params.addRequiredParam<int>("component", "The component for the PlenumPressure");
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
   params.addParam<std::string>("material_input", "", "The name of the postprocessor value that holds the amount of material injected into the plenum.");
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
@@ -18,7 +18,7 @@ InputParameters validParams<PlenumPressureBC>()
   return params;
 }
 
-PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters parameters)
+PlenumPressure::PlenumPressure(const std::string & name, InputParameters parameters)
   :BoundaryCondition(name, parameters),
    _initialized(false),
    _n0(0),
@@ -55,13 +55,13 @@ PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters par
 }
 
 Real
-PlenumPressureBC::computeQpResidual()
+PlenumPressure::computeQpResidual()
 {
   return _my_value * (_normals[_qp](_component) * _phi[_i][_qp]);
 }
 
 void
-PlenumPressureBC::setup()
+PlenumPressure::setup()
 {
   if ( _initialized )
   {

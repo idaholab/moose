@@ -1,21 +1,21 @@
-#ifndef PLENUMPRESSUREBC_H
-#define PLENUMPRESSUREBC_H
+#ifndef PLENUMPRESSURE_H
+#define PLENUMPRESSURE_H
 
 #include "BoundaryCondition.h"
 
 //Forward Declarations
-class PlenumPressureBC;
+class PlenumPressure;
 
 template<>
-InputParameters validParams<PlenumPressureBC>();
+InputParameters validParams<PlenumPressure>();
 
-class PlenumPressureBC : public BoundaryCondition
+class PlenumPressure : public BoundaryCondition
 {
 public:
 
-  PlenumPressureBC(const std::string & name, InputParameters parameters);
+  PlenumPressure(const std::string & name, InputParameters parameters);
 
-  virtual ~PlenumPressureBC(){}
+  virtual ~PlenumPressure(){}
 
   virtual void setup();
 
@@ -48,4 +48,4 @@ protected:
 
 };
 
-#endif //PLENUMRESSUREBC_H
+#endif //PLENUMRESSURE_H

@@ -1,15 +1,15 @@
-#ifndef INTERNALVOLUME_H
-#define INTERNALVOLUME_H
+#ifndef INTERNALVOLUMERZ_H
+#define INTERNALVOLUMERZ_H
 
-#include "SideIntegral.h"
+#include "InternalVolume.h"
 
-class InternalVolume;
+class InternalVolumeRZ;
 
 template<>
-InputParameters validParams<InternalVolume>();
+InputParameters validParams<InternalVolumeRZ>();
 
 /**
- * This class computes the volume of an interior space.
+ * This class computes the volume of an interior space in RZ coordinates.
  *
  * This class relies on being handed sidesets that define a closed space.
  *
@@ -19,20 +19,18 @@ InputParameters validParams<InternalVolume>();
  * interior volume by including an interior and an exterior surface
  * in the same sideset.
  */
-class InternalVolume : public SideIntegral
+class InternalVolumeRZ : public InternalVolume
 {
 public:
 
-  InternalVolume( const std::string & name,
-                  InputParameters parameters );
+  InternalVolumeRZ( const std::string & name,
+                    InputParameters parameters );
 
-  virtual ~InternalVolume() {}
+  virtual ~InternalVolumeRZ() {}
 
 protected:
 
   virtual Real computeQpIntegral();
-
-  const unsigned int _component;
 
 };
 
