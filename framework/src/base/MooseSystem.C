@@ -2303,3 +2303,10 @@ MooseSystem::inputFileRecord( const std::vector<std::string> & in )
 {
   _input_file_record = in;
 }
+
+const std::vector<Material*> &
+MooseSystem::getMaterials( THREAD_ID tid, unsigned int block_id ) const
+{
+  mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
+  return _materials[tid].getMaterials(block_id);
+}

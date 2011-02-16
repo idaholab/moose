@@ -415,6 +415,8 @@ public:
    */
   void updateMaterials();
 
+  const std::vector<Material*> & getMaterials(THREAD_ID tid, unsigned int block_id) const;
+
   /**
    * Re-Initializes temporal discretization/transient control data.
    */

@@ -24,6 +24,7 @@
  * Typedef to hide implementation details
  */
 typedef std::map<int, std::vector<Material *> >::iterator MaterialIterator;
+typedef std::map<int, std::vector<Material *> >::const_iterator ConstMaterialIterator;
 
 
 class MaterialWarehouse
@@ -33,6 +34,7 @@ public:
   virtual ~MaterialWarehouse();
 
   std::vector<Material *> & getMaterials(unsigned int block_id);
+  const std::vector<Material *> & getMaterials(unsigned int block_id) const;
   std::vector<Material *> & getBoundaryMaterials(unsigned int boundary_id);
   std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);
 

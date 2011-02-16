@@ -46,6 +46,19 @@ MaterialWarehouse::getMaterials(unsigned int block_id)
   return mat_iter->second;
 }
 
+const std::vector<Material *> &
+MaterialWarehouse::getMaterials(unsigned int block_id) const
+{
+  ConstMaterialIterator mat_iter = _active_materials.find(block_id);
+  if (unlikely(mat_iter == _active_materials.end()))
+  {
+    std::stringstream oss;
+    oss << "Active Material Missing for block: " << block_id << "\n";
+    mooseError(oss.str());
+  }
+  return mat_iter->second;
+}
+
 std::vector<Material *> &
 MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
 {
