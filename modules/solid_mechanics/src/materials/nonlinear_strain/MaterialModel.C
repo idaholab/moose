@@ -1,6 +1,9 @@
 #include "MaterialModel.h"
 
 #include "IsotropicElasticityTensor.h"
+#include "VolumetricModel.h"
+
+#include "MooseSystem.h"
 
 template<>
 InputParameters validParams<MaterialModel>()
@@ -25,6 +28,7 @@ InputParameters validParams<MaterialModel>()
 MaterialModel::MaterialModel( const std::string & name,
                               InputParameters parameters )
   :Material( name, parameters ),
+   _initialized(false),
    _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
    _lambda_set( parameters.isParamValid("lambda") ),
    _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
@@ -44,6 +48,7 @@ MaterialModel::MaterialModel( const std::string & name,
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
+   _volumetric_models(0),
    _decomp_method( RashidApprox ),
    _alpha(getParam<Real>("thermal_expansion")),
    _stress(declareProperty<RealTensorValue>("stress")),
@@ -156,7 +161,7 @@ MaterialModel::MaterialModel( const std::string & name,
   iso->setShearModulus( _shear_modulus );
   iso->calculate(0);
   elasticityTensor( iso );
-  
+
   std::string increment_calculation = getParam<std::string>("increment_calculation");
   std::transform( increment_calculation.begin(), increment_calculation.end(),
                   increment_calculation.begin(), ::tolower );
@@ -173,7 +178,7 @@ MaterialModel::MaterialModel( const std::string & name,
     mooseError( "The options for the increment calculation are RashidApprox and Eigen.");
   }
 
-  
+
   //   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
   // _elasticity_tensor->print();
 
@@ -224,7 +229,7 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
     Fbar(2,2) += 1;
 
     _Fbar[_qp] = Fbar;
-    
+
 
     // Get Fbar^(-1)
     // Computing the inverse is generally a bad idea.
@@ -258,7 +263,7 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
     const Real factor( std::pow( det_Fhat_average/det_Fhat, third ) );
 
     Fhat[_qp] *= factor;
-    
+
   }
 }
 
@@ -285,7 +290,7 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
     ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
 
     Chat.eigen(eigen_value,eigen_vector);
-    
+
     for(int i = 0; i < ND; i++)
     {
       N1(i) = eigen_vector(i,0);
@@ -297,7 +302,7 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
     const Real lamda2 = std::sqrt(eigen_value(1));
     const Real lamda3 = std::sqrt(eigen_value(2));
 
-    
+
     const Real log1 = std::log(lamda1);
     const Real log2 = std::log(lamda2);
     const Real log3 = std::log(lamda3);
@@ -455,6 +460,10 @@ MaterialModel::modifyStrain()
     tStrain.setDiag( _alpha/_dt * (_temperature[_qp] - _temperature_old[_qp]) );
     _strain_increment -= tStrain;
   }
+  for (unsigned int i(0); i < _volumetric_models.size(); ++i)
+  {
+    _volumetric_models[i]->modifyStrain(_qp, _strain_increment);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -486,7 +495,7 @@ MaterialModel::computeStress()
   //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
-  
+
   _strain_increment.reshape(9, 1);
   ColumnMajorMatrix stress_new( *_elasticity_tensor * _strain_increment );
   _strain_increment.reshape(3, 3);
@@ -572,11 +581,10 @@ MaterialModel::computeProperties()
   // Compute the stretching to be handed to the constitutive evaluation
   // Handle volumetric locking along the way
 
- 
   _Fhat.resize(_n_qpoints);
-  
+
   computeIncrementalDeformationGradient(_Fhat);
-  
+
 
   for ( _qp = 0; _qp < _n_qpoints; ++_qp )
   {
@@ -748,7 +756,7 @@ MaterialModel::computePreconditioning()
 
   _Jacobian_mult[_qp] = *_elasticity_tensor;
 
-  
+
 /*
    std::cout << " I am in material model " << std::endl;
 
@@ -788,4 +796,27 @@ MaterialModel::computePreconditioning()
                  //_Jacobian_mult[_qp] =  _Jacobian_mult[_qp].transpose();*/
 
 
+}
+
+void
+MaterialModel::subdomainSetup()
+{
+
+  std::cout << "JDH DEBUG: in Setup\n";
+
+  if (!_initialized)
+  {
+    _initialized = true;
+
+    // Load in the volumetric models
+    const std::vector<Material*> mats = _moose_system.getMaterials( _tid, _block_id );
+    for (unsigned int i(0); i < mats.size(); ++i)
+    {
+      VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
+      if (vm)
+      {
+        _volumetric_models.push_back( vm );
+      }
+    }
+  }
 }

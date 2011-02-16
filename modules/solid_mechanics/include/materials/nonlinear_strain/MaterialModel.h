@@ -6,6 +6,7 @@
 // Forward declarations
 class ElasticityTensor;
 class MaterialModel;
+class VolumetricModel;
 
 template<>
 InputParameters validParams<MaterialModel>();
@@ -30,6 +31,8 @@ protected:
     Eigen        = 1
   };
 
+  bool _initialized;
+
   bool _bulk_modulus_set;
   bool _lambda_set;
   bool _poissons_ratio_set;
@@ -52,6 +55,10 @@ protected:
   const bool _has_temp;
   VariableValue & _temperature;
   VariableValue & _temperature_old;
+
+  const std::vector<std::string> _volumetric_model_names;
+  std::vector<VolumetricModel*> _volumetric_models;
+
   DecompMethod _decomp_method;
   const Real _alpha;
 
@@ -68,15 +75,10 @@ protected:
   std::vector<ColumnMajorMatrix> _Fbar;
 
 
-  /**
-   * The current quadrature point.
-   */
-  unsigned int _qp;
+  virtual void subdomainSetup();
 
 
-
-  //virtual
-  void computeProperties();
+  virtual void computeProperties();
 
 
 
