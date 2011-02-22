@@ -499,7 +499,6 @@ MaterialModel::computeStress()
   _strain_increment.reshape(9, 1);
   ColumnMajorMatrix stress_new( *_elasticity_tensor * _strain_increment );
   _strain_increment.reshape(3, 3);
-//   stress_new.reshape(3, 3);
   stress_new *= _dt;
   stress_new.fill(_stress[_qp]);
   _stress[_qp] += _stress_old[_qp];
@@ -801,8 +800,6 @@ MaterialModel::computePreconditioning()
 void
 MaterialModel::subdomainSetup()
 {
-
-  std::cout << "JDH DEBUG: in Setup\n";
 
   if (!_initialized)
   {
