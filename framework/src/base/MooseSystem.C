@@ -1017,6 +1017,7 @@ MooseSystem::addAuxKernel(std::string aux_name,
       active_auxs = _auxs[tid].getActiveNodalKernels();
     else
       active_auxs = _auxs[tid].getActiveElementKernels();
+    
 
     // Get a list of all the dependent variables that this AuxKernel will act on to
     // place it in the vector in the appropriate location
