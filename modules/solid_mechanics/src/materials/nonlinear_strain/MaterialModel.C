@@ -224,9 +224,7 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
 
     A -= Fbar;
 
-    Fbar(0,0) += 1;
-    Fbar(1,1) += 1;
-    Fbar(2,2) += 1;
+    Fbar.addDiag( 1 );
 
     _Fbar[_qp] = Fbar;
 
@@ -239,10 +237,7 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
     invertMatrix( Fbar, Fbar_inverse );
 
     Fhat[_qp] = A * Fbar_inverse;
-    Fhat[_qp](0,0) += 1;
-    Fhat[_qp](1,1) += 1;
-    Fhat[_qp](2,2) += 1;
-
+    Fhat[_qp].addDiag( 1 );
 
 
     // Now include the contribution for the integration of Fhat over the element
