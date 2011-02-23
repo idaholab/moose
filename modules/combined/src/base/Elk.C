@@ -2,6 +2,7 @@
 #include "MooseFactory.h"
 
 // misc
+#include "BodyForceRZ.h"
 #include "CoefDiffusion.h"
 #include "Convection.h"
 #include "InternalVolume.h"
@@ -85,6 +86,7 @@ void
 Elk::registerObjects()
 {
   // misc
+  registerKernel(BodyForceRZ);
   registerKernel(CoefDiffusion);
   registerKernel(Convection);
   registerPostprocessor(InternalVolume);
