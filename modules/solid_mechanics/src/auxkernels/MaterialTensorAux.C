@@ -25,7 +25,7 @@ MaterialTensorAux::MaterialTensorAux( const std::string & name,
   {
     mooseError("Neither an index nor a quantity listed for " + _name);
   }
-  else if ( _quantity_string == "vonmisis" )
+  else if ( _quantity_string == "vonmises" )
   {
     _quantity = MTA_VONMISES;
   }
