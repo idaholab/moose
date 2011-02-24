@@ -44,9 +44,9 @@
 #include "Gravity.h"
 #include "GravityRZ.h"
 #include "LinearIsotropicMaterial.h"
-#include "LinearIsotropicMaterialRZ.h"
 #include "LinearStrainHardening.h"
 #include "LSHPlasticMaterial.h"
+#include "LSHPlasticMaterialRZ.h"
 #include "PLC_LSH.h"
 #include "PlasticStrainAux.h"
 #include "PowerLawCreepMaterial.h"
@@ -131,6 +131,7 @@ Elk::registerObjects()
   registerNamedMaterial(LinearIsotropicMaterialRZ, "LinearIsotropicRZ");
   registerMaterial(LinearStrainHardening);
   registerMaterial(LSHPlasticMaterial);
+  registerMaterial(LSHPlasticMaterialRZ);
   registerAux(PlasticStrainAux);
   registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);

@@ -39,20 +39,20 @@ PLSHPlasticMaterial::PLSHPlasticMaterial(std::string name,
   _ebulk3 = _youngs_modulus/(1. - 2.*_poissons_ratio);
 
   _K = _ebulk3/3.;
-  
+
 }
 
 void
 PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
 {
   _total_strain[_qp] = total_strain;
-            
+
   ColumnMajorMatrix etotal_strain(total_strain);
   etotal_strain -= _total_strain_old[_qp];
-  
+
 
   ColumnMajorMatrix stress_old_b(_stress_old[_qp]);
-  
+
 // convert total_strain from 3x3 to 9x1
   etotal_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 // trial stress
@@ -60,19 +60,19 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
 // Change 9x1 to a 3x3
   trial_stress.reshape(LIBMESH_DIM, LIBMESH_DIM);
   trial_stress += stress_old_b;
-  
+
 // deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress(trial_stress);
   dev_trial_stress -= _identity*((trial_stress.tr())/3.0);
 // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
   Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
-  
+
 // determine if yield condition is satisfied
   Real yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
 
   if (yield_condition > 0.)  //then use newton iteration to determine effective plastic strain increment
-  {    
+  {
     unsigned int it = 0;
     Real plastic_residual = 10.;
     Real plastic_strain_increment = 0.;
@@ -85,7 +85,7 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
           _hardening_constant=2000.;
         }
       }
-     
+
       if (_stress_old[_qp](1,1)> 52.)
       {
         if (_stress_old[_qp](1,1)< 54.)
@@ -101,40 +101,40 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
           _hardening_constant=100.;
         }
       }
-      
-     
+
+
       if (_stress_old[_qp](1,1)> 56.)
       {
        _hardening_constant=100.;
       }
-     
-     
+
+
         if (_stress_old[_qp](1,1)< 50.)
        {
          _hardening_constant = 2000.;
        }
-    
-    
-    
+
+
+
     while(it < _max_its && norm_residual > _tolerance)
     {
       plastic_residual = effective_trial_stress - (3. * _shear_modulus * plastic_strain_increment) - _hardening_variable[_qp] - _yield_stress;
       norm_residual = std::abs(plastic_residual);
-      
+
       plastic_strain_increment = plastic_strain_increment + ((plastic_residual) / (3. * _shear_modulus + _hardening_constant));
-      
+
       _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_constant * plastic_strain_increment);
       it++;
-       
+
     }
-    
+
 
     if(it == _max_its)
       mooseError("Max sub-newton iteration hit during plasticity increment solve!");
 
     ColumnMajorMatrix matrix_plastic_strain_increment(dev_trial_stress);
     matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
-    
+
     // update plastic strain
   matrix_plastic_strain_increment.fill(_plastic_strain[_qp]);
   _plastic_strain[_qp] += _plastic_strain_old[_qp];
@@ -144,7 +144,7 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
     elastic_strain.reshape(LIBMESH_DIM, LIBMESH_DIM);
     elastic_strain -= matrix_plastic_strain_increment;
 
-    
+
 
 //calculate Jacobian
 //calculate R
@@ -178,7 +178,7 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
             for (j=0;j<3;j++)
               for (i=0;i<3;i++)
               {
-               IIdent[i][j][k][l] = xiden[i][j]*xiden[k][l];            
+               IIdent[i][j][k][l] = xiden[i][j]*xiden[k][l];
               }
 
 //define bold I identity matrix
@@ -206,7 +206,7 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
     _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
             for (l=0;l<3;l++)
               for (k=0;k<3;k++)
-                for (j=0;j<3;j++)          
+                for (j=0;j<3;j++)
                   for (i=0;i<3;i++)
                   {
                     unsigned int n = l*3 + k;
@@ -215,10 +215,10 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
                     _Jacobian_mult[_qp](n,m) = Jac[i][j][k][l];
                   }
 //    _Jacobian_mult[_qp] = *_local_elasticity_tensor;
-            
-//end of if    
+
+//end of if
   }
-  
+
   else
   {
     elastic_strain = etotal_strain;
@@ -229,24 +229,19 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;
   }
 
-  
-//end of computeStrain  
+
+//end of computeStrain
 }
 
 //computeStress
 void
-PLSHPlasticMaterial::computeStress(const RealVectorValue & x, const RealVectorValue & y, const RealVectorValue & z, RealTensorValue & stress)
+PLSHPlasticMaterial::computeStress(const ColumnMajorMatrix & strain,
+                                   RealTensorValue & stress)
 {
-  ColumnMajorMatrix total_strain(x,y,z);
-
-  // 1/2 * (strain + strain^T)
-  total_strain += total_strain.transpose();
-  total_strain *= 0.5;
-
   // Add in any extra strain components
   ColumnMajorMatrix elastic_strain;
 
-  computeStrain(total_strain, elastic_strain);
+  computeStrain(strain, elastic_strain);
 
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
@@ -263,9 +258,8 @@ PLSHPlasticMaterial::computeStress(const RealVectorValue & x, const RealVectorVa
 
   ColumnMajorMatrix stress_old_e(_stress_old[_qp]);
   stress_vector += stress_old_e;
-  
+
 
   // Fill the material properties
   stress_vector.fill(stress);
 }
-

@@ -18,16 +18,14 @@ class LinearIsotropicMaterial : public SolidMechanicsMaterial
 public:
   LinearIsotropicMaterial(const std::string & name,
                           InputParameters parameters);
-  
+
   virtual ~LinearIsotropicMaterial();
-  
+
 protected:
   virtual void computeProperties();
 
-  virtual void computeStress(const RealVectorValue & x,
-                     const RealVectorValue & y,
-                     const RealVectorValue & z,
-                     RealTensorValue & stress);
+  virtual void computeStress(const ColumnMajorMatrix & strain,
+                             RealTensorValue & stress);
 
   /**
    * Will always be passed to full symmetric strain tensor.
@@ -49,7 +47,7 @@ protected:
   Real _input_thermal_conductivity;
 
   Real _input_density;
-  
+
   ElasticityTensor * _local_elasticity_tensor;
 };
 

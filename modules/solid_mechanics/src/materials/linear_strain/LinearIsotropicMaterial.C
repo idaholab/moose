@@ -39,33 +39,16 @@ LinearIsotropicMaterial::~LinearIsotropicMaterial()
 }
 
 void
-LinearIsotropicMaterial::computeStress(const RealVectorValue & x, const RealVectorValue & y, const RealVectorValue & z, RealTensorValue & stress)
+LinearIsotropicMaterial::computeStress(const ColumnMajorMatrix & strain,
+                                       RealTensorValue & stress)
 {
-  ColumnMajorMatrix total_strain(x,y,z);
-
-  // 1/2 * (strain + strain^T)
-  total_strain += total_strain.transpose();
-  total_strain *= 0.5;
-
   // Add in any extra strain components
   ColumnMajorMatrix elastic_strain;
 
-  computeStrain(total_strain, elastic_strain);
+  computeStrain(strain, elastic_strain);
 
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
-
-  // Add in Isotropic Thermal Strain
-  if(_has_temp)
-  {
-    ColumnMajorMatrix thermal_strain;
-
-    Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
-
-    thermal_strain.setDiag(isotropic_strain);
-
-    elastic_strain -= thermal_strain;
-  }
 
   // Create column vector
   elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
@@ -99,17 +82,26 @@ LinearIsotropicMaterial::computeProperties()
 
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
-    computeStress(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp], _stress[_qp]);
 
-    if (_qp == 0)
+    ColumnMajorMatrix strain(_grad_disp_x[_qp],
+                             _grad_disp_y[_qp],
+                             _grad_disp_z[_qp]);
+
+    // 1/2 * (strain + strain^T)
+    strain += strain.transpose();
+    strain *= 0.5;
+
+    // Add in Isotropic Thermal Strain
+    if(_has_temp)
     {
-//       std::cout << "JDH DEBUG: strain, stress:\n";
-//       ColumnMajorMatrix total_strain(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
-//       // 1/2 * (strain + strain^T)
-//       total_strain += total_strain.transpose();
-//       total_strain *= 0.5;
-//       total_strain.print();
-//       _stress[_qp].print();
+      Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
+
+      strain(0,0) -= isotropic_strain;
+      strain(1,1) -= isotropic_strain;
+      strain(2,2) -= isotropic_strain;
     }
+
+    computeStress(strain, _stress[_qp]);
+
   }
 }

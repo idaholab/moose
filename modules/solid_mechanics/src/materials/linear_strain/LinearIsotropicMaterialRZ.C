@@ -54,16 +54,18 @@ LinearIsotropicMaterialRZ::computeProperties()
     strain(0,1) = 0.5*(_grad_disp_r[_qp](1) + _grad_disp_z[_qp](0));
     strain(1,0) = strain(0,1);
 
+    // Add in Isotropic Thermal Strain
+    if (_has_temp)
+    {
+      Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
+
+      strain(0,0) -= isotropic_strain;
+      strain(1,1) -= isotropic_strain;
+      strain(2,2) -= isotropic_strain;
+    }
+
     computeStress(strain, _stress[_qp]);
 
-    if (_qp == 0)
-    {
-//       std::cout << "JDH DEBUG: strain, stress:\n";
-//       std::cout << _grad_disp_r[_qp](0) << " " << _grad_disp_z[_qp](0) << std::endl;
-//       std::cout << _grad_disp_r[_qp](1) << " " << _grad_disp_z[_qp](1) << std::endl;
-//       strain.print();
-//       _stress[_qp].print();
-    }
   }
 }
 
@@ -77,16 +79,6 @@ LinearIsotropicMaterialRZ::computeStress(const ColumnMajorMatrix & strain, RealT
 
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
-
-  // Add in Isotropic Thermal Strain
-  if(_has_temp)
-  {
-    Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
-
-    elastic_strain(0,0) -= isotropic_strain;
-    elastic_strain(1,1) -= isotropic_strain;
-    elastic_strain(2,2) -= isotropic_strain;
-  }
 
   // Create column vector
   elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
