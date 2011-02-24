@@ -548,12 +548,14 @@ public:
 
   void inputFileRecord( const std::vector<std::string> & in );
 
+  void updateAuxVars(const NumericVector<Number>& soln);
+  void updateAuxVarsTs(const NumericVector<Number>& soln);
+  void updateAuxVarsInternal(const NumericVector<Number>& soln, std::vector<AuxWarehouse> & auxs);
+
 protected:
   void sizeEverything();
 
   virtual void computeResidualInternal (const NumericVector<Number>& soln, NumericVector<Number>& residual);
-
-  void updateAuxVars(const NumericVector<Number>& soln);
 
   void updateDisplacedMesh(const NumericVector<Number>& soln);
 
@@ -679,6 +681,7 @@ protected:
   std::vector<DGKernelWarehouse> _dg_kernels;
   std::vector<BCWarehouse> _bcs;
   std::vector<AuxWarehouse> _auxs;
+  std::vector<AuxWarehouse> _auxs_ts;
   std::vector<MaterialWarehouse> _materials;
   std::vector<StabilizerWarehouse> _stabilizers;
   std::vector<InitialConditionWarehouse> _ics;

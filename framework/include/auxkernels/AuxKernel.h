@@ -50,6 +50,8 @@ public:
 
   bool isNodal();
 
+  bool ts() { return _ts; }
+
 protected:
   virtual Real computeValue() = 0;
 
@@ -82,6 +84,8 @@ protected:
    * Current Node
    */
   const Node * & _current_node;
+
+  bool _ts;
 };
 
 #endif //AUXKERNEL_H

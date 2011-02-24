@@ -206,6 +206,9 @@ TransientExecutioner::endStep()
   if(((_t_step+1)%_moose_system._interval == 0 || _reset_dt))
     _moose_system.outputSystem(_t_step, _time);
 
+  // execute special aux kernels (ts) at the end of the time step
+  _moose_system.updateAuxVarsTs(*(_moose_system.getNonlinearSystem()->current_local_solution));
+
   //Adapt mesh if between start and end times
   if (_time > _adapt_start_time && _time < _adapt_end_time)
     adaptMesh();

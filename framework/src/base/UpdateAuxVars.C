@@ -24,7 +24,7 @@
 #include "mesh.h"
 #include "boundary_info.h"
 
-void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
+void MooseSystem::updateAuxVarsInternal(const NumericVector<Number>& soln, std::vector<AuxWarehouse> & auxs)
 {
   //If there aren't any auxiliary variables just return
   if(!_es->get_system<ExplicitSystem>("AuxiliarySystem").n_vars())
@@ -37,8 +37,8 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
   MeshBase::const_node_iterator nd     = _mesh->local_nodes_begin();
   MeshBase::const_node_iterator nd_end = _mesh->local_nodes_end();
 
-  AuxKernelIterator aux_begin = _auxs[0].activeNodalAuxKernelsBegin();
-  AuxKernelIterator aux_end = _auxs[0].activeNodalAuxKernelsEnd();
+  AuxKernelIterator aux_begin = auxs[0].activeNodalAuxKernelsBegin();
+  AuxKernelIterator aux_end = auxs[0].activeNodalAuxKernelsEnd();
   AuxKernelIterator aux_it = aux_begin;
 
   AuxKernelIterator block_nodal_aux_begin;
@@ -61,8 +61,8 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
   // Call setup on all of the Nodal block AuxKernels
   for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
   {
-    block_nodal_aux_begin = _auxs[0].activeBlockNodalAuxKernelsBegin(*subdomain_it);
-    block_nodal_aux_end = _auxs[0].activeBlockNodalAuxKernelsEnd(*subdomain_it);
+    block_nodal_aux_begin = auxs[0].activeBlockNodalAuxKernelsBegin(*subdomain_it);
+    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(*subdomain_it);
     for(block_nodal_aux_it = block_nodal_aux_begin; block_nodal_aux_it != block_nodal_aux_end; ++block_nodal_aux_it)
       (*block_nodal_aux_it)->setup();
   }
@@ -94,8 +94,8 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
   {
     short int id = *it;
     
-    aux_begin = _auxs[0].activeAuxBCsBegin(id);
-    aux_end = _auxs[0].activeAuxBCsEnd(id);
+    aux_begin = auxs[0].activeAuxBCsBegin(id);
+    aux_end = auxs[0].activeAuxBCsEnd(id);
 
     for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
       (*aux_it)->setup();
@@ -110,8 +110,8 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
 
   for(unsigned int i=0; i<n_nodes; i++)
   {
-    aux_begin = _auxs[0].activeAuxBCsBegin(ids[i]);
-    aux_end = _auxs[0].activeAuxBCsEnd(ids[i]);
+    aux_begin = auxs[0].activeAuxBCsBegin(ids[i]);
+    aux_end = auxs[0].activeAuxBCsEnd(ids[i]);
 
     if(aux_begin != aux_end)
     {
@@ -137,8 +137,8 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
   _es->get_system<ExplicitSystem>("AuxiliarySystem").update();
 
   // Update the element aux vars
-  aux_begin = _auxs[0].activeElementAuxKernelsBegin();
-  aux_end = _auxs[0].activeElementAuxKernelsEnd();
+  aux_begin = auxs[0].activeElementAuxKernelsBegin();
+  aux_end = auxs[0].activeElementAuxKernelsEnd();
   aux_it = aux_begin;
 
   for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
@@ -149,8 +149,8 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
   // Call setup on all of the Elemental block AuxKernels
   for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
   {
-    block_element_aux_begin = _auxs[0].activeBlockElementAuxKernelsBegin(*subdomain_it);
-    block_element_aux_end = _auxs[0].activeBlockElementAuxKernelsEnd(*subdomain_it);
+    block_element_aux_begin = auxs[0].activeBlockElementAuxKernelsBegin(*subdomain_it);
+    block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(*subdomain_it);
     for(block_element_aux_it = block_element_aux_begin; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
       (*block_element_aux_it)->setup();
   }
@@ -169,8 +169,8 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
     if(unlikely(_calculate_element_time))
       startElementTiming(elem->id());
 
-    block_element_aux_it =_auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
-    block_element_aux_end = _auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
+    block_element_aux_it =auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
+    block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
 
     if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
     {
@@ -193,8 +193,8 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
       (*aux_it)->computeAndStore();
 
     // Now do the block nodal aux kernels
-    block_nodal_aux_it =_auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
-    block_nodal_aux_end = _auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
+    block_nodal_aux_it =auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
     
     if(block_nodal_aux_it != block_nodal_aux_end)
     {
@@ -206,7 +206,7 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
         {
           reinitAuxKernels(0, soln, node);
           
-          for(block_nodal_aux_it =_auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+          for(block_nodal_aux_it =auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
               block_nodal_aux_it != block_nodal_aux_end;
               ++block_nodal_aux_it)
             (*block_nodal_aux_it)->computeAndStore();
@@ -223,4 +223,14 @@ void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
   _es->get_system<ExplicitSystem>("AuxiliarySystem").update();
 
   Moose::perf_log.pop("update_aux_vars()","Solve");
+}
+
+void MooseSystem::updateAuxVars(const NumericVector<Number>& soln)
+{
+  updateAuxVarsInternal(soln, _auxs);
+}
+
+void MooseSystem::updateAuxVarsTs(const NumericVector<Number>& soln)
+{
+  updateAuxVarsInternal(soln, _auxs_ts);
 }

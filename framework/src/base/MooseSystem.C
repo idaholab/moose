@@ -403,6 +403,7 @@ MooseSystem::sizeEverything()
   _dg_kernels.resize(n_threads);
   _bcs.resize(n_threads);
   _auxs.resize(n_threads);
+  _auxs_ts.resize(n_threads);
   _materials.resize(n_threads);
   _stabilizers.resize(n_threads);
   _ics.resize(n_threads);
@@ -1004,7 +1005,10 @@ MooseSystem::addAuxKernel(std::string aux_name,
     // See if this kernel applies only to specific blocks
     if(blk_ids.find(Moose::ANY_BLOCK_ID) == blk_ids.end())
     {
-      _auxs[tid].addAuxKernel(aux, blk_ids);
+      if (aux->ts())
+        _auxs_ts[tid].addAuxKernel(aux, blk_ids);
+      else
+        _auxs[tid].addAuxKernel(aux, blk_ids);
       return;
     }
 
@@ -1013,11 +1017,20 @@ MooseSystem::addAuxKernel(std::string aux_name,
     
     // Copy the active AuxKernels into a list for manipulation
     std::list<AuxKernel *> active_auxs;
-    if (aux->isNodal())
-      active_auxs = _auxs[tid].getActiveNodalKernels();
+    if (aux->ts())
+    {
+      if (aux->isNodal())
+        active_auxs = _auxs_ts[tid].getActiveNodalKernels();
+      else
+        active_auxs = _auxs_ts[tid].getActiveElementKernels();
+    }
     else
-      active_auxs = _auxs[tid].getActiveElementKernels();
-    
+    {
+      if (aux->isNodal())
+        active_auxs = _auxs[tid].getActiveNodalKernels();
+      else
+        active_auxs = _auxs[tid].getActiveElementKernels();
+    }
 
     // Get a list of all the dependent variables that this AuxKernel will act on to
     // place it in the vector in the appropriate location
@@ -1052,10 +1065,20 @@ MooseSystem::addAuxKernel(std::string aux_name,
       active_auxs.splice(new_aux_iter, active_auxs, *i);
 
     // Copy the list back into the Auxiliary Vector
-    if (aux->isNodal())
-      _auxs[tid].setActiveNodalKernels(active_auxs);
+    if (aux->ts())
+    {
+      if (aux->isNodal())
+        _auxs_ts[tid].setActiveNodalKernels(active_auxs);
+      else
+        _auxs_ts[tid].setActiveElementKernels(active_auxs);
+    }
     else
-      _auxs[tid].setActiveElementKernels(active_auxs);
+    {
+      if (aux->isNodal())
+        _auxs[tid].setActiveNodalKernels(active_auxs);
+      else
+        _auxs[tid].setActiveElementKernels(active_auxs);
+    }
   }
 }
 
@@ -1076,8 +1099,16 @@ MooseSystem::addAuxBC(std::string aux_name,
     aux = AuxFactory::instance()->create(aux_name, name, parameters);
 
     for (unsigned int i=0; i<boundaries.size(); ++i)
-      _auxs[tid].addActiveBC(boundaries[i], aux);
-    _auxs[tid].addBC(aux);
+    {
+      if (aux->ts())
+        _auxs_ts[tid].addActiveBC(boundaries[i], aux);
+      else
+        _auxs[tid].addActiveBC(boundaries[i], aux);
+    }
+    if (aux->ts())
+      _auxs_ts[tid].addBC(aux);
+    else
+      _auxs[tid].addBC(aux);
   }
 }
 

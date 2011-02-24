@@ -32,7 +32,9 @@ InputParameters validParams<AuxKernel>()
   // For use on the boundary only
   params.addParam<std::vector<unsigned int> >("boundary", "The list of variable names this Material is coupled to.");
   params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this aux kernel will be applied to");
-  
+
+  params.addParam<bool>("ts", false, "Set to one to execute only at the end of the time step");
+
   return params;
 }
 
@@ -45,7 +47,9 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
    _u(_nodal ? _aux_data._aux_var_vals_nodal[_var_num] : _aux_data._aux_var_vals_element[_var_num]),
    _u_old(_nodal ? _aux_data._aux_var_vals_old_nodal[_var_num] : _aux_data._aux_var_vals_old_element[_var_num]),
    _u_older(_nodal ? _aux_data._aux_var_vals_older_nodal[_var_num] : _aux_data._aux_var_vals_older_element[_var_num]),
-   _current_node(_moose_system._face_data[_tid]->_current_node)
+   _current_node(_moose_system._face_data[_tid]->_current_node),
+
+   _ts(getParam<bool>("ts"))
 {
   // If this variable isn't known yet... make it so
   _moose_system._element_data[_tid]->_aux_var_nums.insert(_var_num);
