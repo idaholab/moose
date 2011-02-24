@@ -39,7 +39,6 @@
 
 // solid_mechanics
 #include "CLSHPlasticMaterial.h"
-#include "CreepStrainAux.h"
 #include "Elastic.h"
 #include "Gravity.h"
 #include "GravityRZ.h"
@@ -47,8 +46,8 @@
 #include "LinearStrainHardening.h"
 #include "LSHPlasticMaterial.h"
 #include "LSHPlasticMaterialRZ.h"
+#include "MaterialTensorAux.h"
 #include "PLC_LSH.h"
-#include "PlasticStrainAux.h"
 #include "PowerLawCreepMaterial.h"
 #include "PowerLawCreep.h"
 #include "PlenumPressure.h"
@@ -56,12 +55,9 @@
 #include "Pressure.h"
 #include "PressureRZ.h"
 #include "PLSHPlasticMaterial.h"
-#include "StressAux.h"
-#include "VelocityGradientAux.h"
 #include "ElasticEnergyAux.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
-#include "StressOutput.h"
 
 
 // phase_field
@@ -123,7 +119,6 @@ Elk::registerObjects()
 
   // solid_mechanics
   registerMaterial(CLSHPlasticMaterial);
-  registerAux(CreepStrainAux);
   registerMaterial(Elastic);
   registerKernel(Gravity);
   registerKernel(GravityRZ);
@@ -132,7 +127,7 @@ Elk::registerObjects()
   registerMaterial(LinearStrainHardening);
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(LSHPlasticMaterialRZ);
-  registerAux(PlasticStrainAux);
+  registerAux(MaterialTensorAux);
   registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreepMaterial);
@@ -141,12 +136,9 @@ Elk::registerObjects()
   registerBoundaryCondition(PlenumPressureRZ);
   registerBoundaryCondition(Pressure);
   registerBoundaryCondition(PressureRZ);
-  registerAux(StressAux);
-  registerAux(VelocityGradientAux);
   registerAux(ElasticEnergyAux);
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
-  registerKernel(StressOutput);
 
   // phase_field
   registerKernel(AC);
