@@ -4,6 +4,9 @@ template<>
 InputParameters validParams<MassInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addCoupledVar("pv", "");
+  params.addCoupledVar("pu", "");
+  params.addCoupledVar("pw", "");
   return params;
 }
 

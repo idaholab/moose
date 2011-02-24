@@ -9,6 +9,11 @@ InputParameters validParams<NavierStokesMaterial>()
   params.set<Real>("R")=287.04; // J/kgK
   params.set<Real>("gamma")=1.405;
   params.set<Real>("Pr")=0.71;
+
+  params.addCoupledVar("u", "");
+  params.addCoupledVar("v", "");
+  params.addCoupledVar("w", "");
+  params.addCoupledVar("pe", "");
   
   return params;
 }

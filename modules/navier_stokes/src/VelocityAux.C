@@ -4,6 +4,8 @@ template<>
 InputParameters validParams<VelocityAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addCoupledVar("p", "");
+  params.addCoupledVar("momentum", "");
   return params;
 }
 

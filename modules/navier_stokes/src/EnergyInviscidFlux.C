@@ -4,6 +4,9 @@ template<>
 InputParameters validParams<EnergyInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addCoupledVar("u", "");
+  params.addCoupledVar("v", "");
+  params.addCoupledVar("w", "");
   return params;
 }
 

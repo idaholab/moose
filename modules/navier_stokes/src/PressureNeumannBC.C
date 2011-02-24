@@ -4,6 +4,10 @@ template<>
 InputParameters validParams<PressureNeumannBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
+  params.addCoupledVar("p", "");
+  params.addCoupledVar("pe", "");
+  params.addCoupledVar("pu", "");
+  params.addCoupledVar("pv", "");
   params.set<Real>("component");
   return params;
 }

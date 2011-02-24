@@ -6,6 +6,9 @@ InputParameters validParams<MomentumInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
   params.set<Real>("component") = -1;
+  params.addCoupledVar("u", "");
+  params.addCoupledVar("v", "");
+  params.addCoupledVar("w", "");
   return params;
 }
 
