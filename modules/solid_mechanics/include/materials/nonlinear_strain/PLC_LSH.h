@@ -45,9 +45,6 @@ protected:
   MaterialProperty<Real> & _hardening_variable_old;
 
 
-  ColumnMajorMatrix _identity;
-
-
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress();
 

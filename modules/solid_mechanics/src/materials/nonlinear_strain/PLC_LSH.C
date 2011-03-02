@@ -56,16 +56,6 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
 
 {
-
-  _identity.identity();
-
-/*  Below lines are only needed if defining a differnet elasticity tensor
-  IsotropicElasticityTensor * iso =  new IsotropicElasticityTensor;
-  iso->setLambda( _lambda );
-  iso->setShearModulus( _shear_modulus );
-  iso->calculate(0);
-  elasticityTensor( iso );
-*/
 }
 
 void
@@ -141,15 +131,20 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
   Real creep_residual = 10.;
   Real del_p = 0.;
   Real norm_residual = 10.;
+  Real exponential(1);
+  if (_has_temp)
+  {
+    exponential = std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));
+  }
 
   while(it < _max_its && norm_residual > _tolerance)
   {
 
     Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*del_p, _exponent)*
-      std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));
+      exponential;
     Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_exponent*
       std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _exponent-1.)*
-      std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));
+      exponential;
     creep_residual = phi -  del_p/_dt;
     norm_residual = std::abs(creep_residual);
     del_p = del_p + (creep_residual / (1/_dt - dphi_ddelp));
@@ -169,11 +164,17 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
     it++;
   }
 
-  if(it == _max_its) mooseError("Max sub-newton iteration hit during creep solve!");
+  if(it == _max_its)
+  {
+    mooseError("Max sub-newton iteration hit during creep solve!");
+  }
 
 
 // compute creep and elastic strain increments (avoid potential divide by zero - how should this be done)?
-  if (effective_trial_stress < 0.01) effective_trial_stress = 0.01;
+  if (effective_trial_stress < 0.01)
+  {
+    effective_trial_stress = 0.01;
+  }
   creep_strain_increment = dev_trial_stress;
   creep_strain_increment *= (1.5*del_p/effective_trial_stress);
 
@@ -230,7 +231,9 @@ PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
 
 
     if(jt == _max_its)
+    {
       mooseError("Max sub-newton iteration hit during plasticity increment solve!");
+    }
 
 
 // compute plastic and elastic strain increments (avoid potential divide by zero -
