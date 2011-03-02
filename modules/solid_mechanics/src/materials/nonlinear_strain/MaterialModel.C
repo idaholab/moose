@@ -732,7 +732,6 @@ MaterialModel::testMe()
 }
 #endif
 
-#if 0
 int
 MaterialModel::delta(int i, int j)
 {
@@ -742,7 +741,6 @@ MaterialModel::delta(int i, int j)
   else
     return 0;
 }
-#endif
 
 ////////////////////////////////////////////////////////////////////////
 
