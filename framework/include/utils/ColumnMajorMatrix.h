@@ -264,6 +264,11 @@ public:
   ColumnMajorMatrix & operator+=(const ColumnMajorMatrix & rhs);
 
   /**
+   * Matrix Tensor Addition Plus Assignment
+   */
+  ColumnMajorMatrix & operator+=(const TypeTensor<Real> & rhs);
+
+  /**
    * Matrix Matrix Subtraction plus assignment
    *
    * Note that this is faster than regular subtraction
@@ -661,6 +666,22 @@ ColumnMajorMatrix::operator+=(const ColumnMajorMatrix & rhs)
 
   for(unsigned int i=0; i<_n_entries; i++)
     _values[i] += rhs._values[i];
+
+  return *this;
+}
+
+inline ColumnMajorMatrix &
+ColumnMajorMatrix::operator+=(const TypeTensor<Real> & rhs)
+{
+  mooseAssert((_n_rows == LIBMESH_DIM) && (_n_cols == LIBMESH_DIM), "Cannot perform matrix addition and assignment!  The shapes of the two operands are not compatible!");
+
+  for (unsigned int j(0); j < LIBMESH_DIM; ++j)
+  {
+    for (unsigned int i(0); i < LIBMESH_DIM; ++i)
+    {
+      (*this)(i,j) += rhs(i,j);
+    }
+  }
 
   return *this;
 }
