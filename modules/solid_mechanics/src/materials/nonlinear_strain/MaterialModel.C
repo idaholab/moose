@@ -657,7 +657,7 @@ MaterialModel::invertMatrix( const ColumnMajorMatrix & A,
 }
 
 ////////////////////////////////////////////////////////////////////////
-
+#if 0
 void
 MaterialModel::testMe()
 {
@@ -730,8 +730,9 @@ MaterialModel::testMe()
   exit(0);
 
 }
+#endif
 
-
+#if 0
 int
 MaterialModel::delta(int i, int j)
 {
@@ -741,6 +742,7 @@ MaterialModel::delta(int i, int j)
   else
     return 0;
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 

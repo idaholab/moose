@@ -19,9 +19,9 @@ class PLC_LSH : public MaterialModel
 public:
   PLC_LSH( const std::string & name,
                  InputParameters parameters );
-  
+
 protected:
-  
+
   Real _coefficient;
   Real _exponent;
   Real _activation_energy;
@@ -32,25 +32,31 @@ protected:
 
   unsigned int _max_its;
   bool _output_iteration_info;
-  
+
   MaterialProperty<RealTensorValue> & _creep_strain;
-  
+
   MaterialProperty<RealTensorValue> & _creep_strain_old;
 
   MaterialProperty<RealTensorValue> & _plastic_strain;
-  
+
   MaterialProperty<RealTensorValue> & _plastic_strain_old;
 
-  MaterialProperty<Real> & _hardening_variable;  
+  MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
-  
+
 
   ColumnMajorMatrix _identity;
-  
-  
+
+
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress();
-  
+
+  void computeCreep(const ColumnMajorMatrix & stress_old,
+                    ColumnMajorMatrix & stress_new,
+                    ColumnMajorMatrix & creep_strain_increment);
+  void computeLSH( ColumnMajorMatrix & stress_new,
+                   ColumnMajorMatrix & creep_strain_increment );
+
 private:
 
 };

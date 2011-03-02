@@ -72,7 +72,7 @@ PowerLawCreep::computeStress()
 
   // compute deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress(stress_new);
-  dev_trial_stress.addDiag( -stress_new.tr()/3.0 );
+  dev_trial_stress.addDiag( -dev_trial_stress.tr()/3.0 );
 
   // compute effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
