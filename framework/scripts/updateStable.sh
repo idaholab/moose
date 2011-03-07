@@ -1,6 +1,7 @@
 #!/bin/bash
 
 hostname=`hostname -s`
+ARCH=${ARCH:-intel}
 
 if [ $hostname == 'helios' ]
 then
