@@ -7,20 +7,20 @@ InputParameters validParams<PLC_LSH>()
 {
   InputParameters params = validParams<MaterialModel>();
 
-  //   Power-law creep material parameters
+   // Power-law creep material parameters
    params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
    params.addRequiredParam<Real>("exponent", "Exponent in power-law equation");
    params.addRequiredParam<Real>("activation_energy", "Activation energy");
    params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
+   params.addParam<Real>("tau", 0.01, "Creep sub-iteration control parameter");
 
-  //  Sub-Newton Iteration control parameters
+   // Sub-Newton Iteration control parameters
    params.addParam<Real>("tolerance", 1e-5, "Convergence tolerance for sub-newtion iteration");
    params.addParam<unsigned int>("max_its", 10, "Maximum number of sub-newton iterations");
    params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
 
-   /*
-     Linear strain hardening parameters
-    */
+
+   // Linear strain hardening parameters
    params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
    params.addRequiredParam<Real>("hardening_constant", "Hardening slope");
    params.addParam<Real>("tolerance", 1e-5, "Sub-BiLin iteration tolerance");
@@ -38,6 +38,7 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _exponent(parameters.get<Real>("exponent")),
    _activation_energy(parameters.get<Real>("activation_energy")),
    _gas_constant(parameters.get<Real>("gas_constant")),
+   _tau(parameters.get<Real>("tau")),
    _tolerance(parameters.get<Real>("tolerance")),
 
    _yield_stress(parameters.get<Real>("yield_stress")),
@@ -52,8 +53,13 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
    _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain")),
 
+   _total_strain(declareProperty<RealTensorValue>("total_strain")),
+   _total_strain_old(declarePropertyOld<RealTensorValue>("total_strain")),
+
    _hardening_variable(declareProperty<Real>("hardening_variable")),
-   _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
+   _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
+
+   _del_p(declareProperty<Real>("del_p"))
 
 {
 }
@@ -86,6 +92,10 @@ PLC_LSH::computeStress()
   Real delS(_tolerance+1);
   unsigned int counter(0);
 
+  _total_strain_increment.fill( _total_strain[_qp] );
+  _total_strain[_qp] *= _dt;
+  _total_strain[_qp] += _total_strain_old[_qp];
+
   while (delS > _tolerance && counter++ < _max_its)
   {
     computeCreep( stress_old, stress_new, creep_strain_increment );
@@ -101,8 +111,6 @@ PLC_LSH::computeStress()
     delS = deltaS.doubleContraction(deltaS);
   }
 
-//   std::cout << "JDH DEBUG: " << counter << std::endl;
-
   stress_new.fill(_stress[_qp]);
 
 }
@@ -112,14 +120,11 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
                        ColumnMajorMatrix & stress_new,
                        ColumnMajorMatrix & creep_strain_increment )
 {
-
-  ColumnMajorMatrix stress_ave(stress_old);
-  stress_ave += stress_new;
-  stress_ave /= 2;
+  creep_strain_increment.zero();
 
 // compute deviatoric trial stress
-  ColumnMajorMatrix dev_trial_stress(stress_ave);
-  dev_trial_stress.addDiag( -stress_ave.tr()/3.0 );
+  ColumnMajorMatrix dev_trial_stress(stress_new);
+  dev_trial_stress.addDiag( -stress_new.tr()/3.0 );
 
 // compute effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -127,76 +132,119 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
 
 // Use Newton sub-iteration to determine effective creep strain increment
 
-  unsigned int it = 0;
-  Real creep_residual = 10.;
-  Real del_p = 0.;
-  Real norm_residual = 10.;
   Real exponential(1);
-  if (_has_temp)
+  Real delta_temp(_temperature[_qp]-_temperature_old[_qp]);
+
+  Real phiTest( _coefficient*std::pow(effective_trial_stress, _exponent) );
+  ColumnMajorMatrix dev_strain(_total_strain[_qp]);
+  dev_strain.addDiag( -dev_strain.tr()/3 );
+  Real epsTotal( dev_strain.doubleContraction(dev_strain) );
+  const Real ratio( epsTotal > 0 ? _dt * ( phiTest / ( _tau * epsTotal ) ) + 1 : 1 );
+
+  unsigned int num_steps( std::floor(ratio) );
+  num_steps = std::min( num_steps, unsigned(10) );
+//   const unsigned int num_steps( 1 );
+
+  const Real fraction( 1./num_steps );
+  const Real dt( _dt * fraction );
+  ColumnMajorMatrix delta_stress(stress_new);
+  delta_stress -= stress_old;
+  delta_stress *= 0.5*fraction;
+  ColumnMajorMatrix stress_last(stress_old);
+  ColumnMajorMatrix stress_ave(stress_last);
+  ColumnMajorMatrix stress_next;
+
+  Real del_p( fraction * _del_p[_qp] * _dt / (_dt_old > 0 ? _dt_old : 1) );
+  _del_p[_qp] = 0;
+
+  for ( unsigned int i_step(0); i_step < num_steps; ++i_step )
   {
-    exponential = std::exp(-_activation_energy/(_gas_constant*_temperature[_qp]));
-  }
+    const Real factor(Real(i_step+1) * fraction);
 
-  while(it < _max_its && norm_residual > _tolerance)
-  {
+    if (_has_temp)
+    {
+      exponential = std::exp(-_activation_energy/(_gas_constant *
+                                                  (_temperature_old[_qp] + factor*delta_temp)));
+    }
 
-    Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*del_p, _exponent)*
-      exponential;
-    Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_exponent*
-      std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _exponent-1.)*
-      exponential;
-    creep_residual = phi -  del_p/_dt;
-    norm_residual = std::abs(creep_residual);
-    del_p = del_p + (creep_residual / (1/_dt - dphi_ddelp));
+    stress_ave = stress_last;
+    stress_ave += delta_stress;
 
-    // iteration output
-    if (_output_iteration_info == true)
-      std::cout
-        <<" it=" <<it
-        <<" temperature=" << _temperature[_qp]
-        <<" trial stress=" <<effective_trial_stress
-        <<" phi=" <<phi
-        <<" dphi=" <<dphi_ddelp
-        <<" creep_res=" <<creep_residual
-        <<" del_p=" <<del_p
-        <<std::endl;
+// compute deviatoric trial stress
+    ColumnMajorMatrix dev_trial_stress(stress_ave);
+    dev_trial_stress.addDiag( -stress_ave.tr()/3.0 );
 
-    it++;
-  }
+// compute effective trial stress
+    Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
+    Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
 
-  if(it == _max_its)
-  {
-    mooseError("Max sub-newton iteration hit during creep solve!");
-  }
+    unsigned int it(0);
+    Real creep_residual(10);
+    while(std::abs(creep_residual) > _tolerance && it++ < _max_its)
+    {
 
+      Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*del_p, _exponent)*
+        exponential;
+      creep_residual = phi -  del_p/dt;
+
+      Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_exponent*
+        std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _exponent-1.)*
+        exponential;
+      del_p = del_p + (creep_residual / (1/dt - dphi_ddelp));
+
+      // iteration output
+      if (_output_iteration_info == true)
+        std::cout
+          << " it=" << it
+          << " temperature=" << _temperature_old[_qp] + factor*delta_temp
+          << " trial stress=" << effective_trial_stress
+          << " phi=" << phi
+          << " dphi=" << dphi_ddelp
+          << " creep_res=" << creep_residual
+          << " del_p=" << del_p
+          << std::endl;
+
+      ++it;
+    }
+
+    if(it == _max_its)
+    {
+      mooseError("Max sub-newton iteration hit during creep solve!");
+    }
 
 // compute creep and elastic strain increments (avoid potential divide by zero - how should this be done)?
-  if (effective_trial_stress < 0.01)
-  {
-    effective_trial_stress = 0.01;
-  }
-  creep_strain_increment = dev_trial_stress;
-  creep_strain_increment *= (1.5*del_p/effective_trial_stress);
+    if (effective_trial_stress < 0.01)
+    {
+      effective_trial_stress = 0.01;
+    }
+    ColumnMajorMatrix creep_strain_sub_increment( dev_trial_stress );
+    creep_strain_sub_increment *= (1.5*del_p/effective_trial_stress);
 
-  ColumnMajorMatrix elastic_strain_increment;
-  elastic_strain_increment = _strain_increment*_dt - creep_strain_increment;
+    ColumnMajorMatrix elastic_strain_increment(_strain_increment*dt - creep_strain_sub_increment);
 
-//compute stress increment
-  elastic_strain_increment.reshape(9, 1);
-  stress_new =  *elasticityTensor() * elastic_strain_increment;
+// compute stress increment
+    elastic_strain_increment.reshape(9, 1);
+    stress_next = *elasticityTensor() * elastic_strain_increment;
 
 // update stress and creep strain
-  stress_new.reshape(3, 3);
-  stress_new += _stress_old[_qp];
+    stress_next.reshape(3, 3);
+    stress_next += stress_last;
+    stress_last = stress_next;
+
+    creep_strain_increment += creep_strain_sub_increment;
+    _del_p[_qp] += del_p;
+  }
   creep_strain_increment.fill(_creep_strain[_qp]);
   _creep_strain[_qp] += _creep_strain_old[_qp];
 
+  stress_new = stress_next;
 }
 
 void
 PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
                      ColumnMajorMatrix & creep_strain_increment )
 {
+
 // compute deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress_p(stress_new);
   dev_trial_stress_p.addDiag( -stress_new.tr()/3.0 );

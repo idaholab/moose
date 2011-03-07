@@ -26,6 +26,7 @@ protected:
   Real _exponent;
   Real _activation_energy;
   Real _gas_constant;
+  Real _tau;
   Real _tolerance;
   Real _yield_stress;
   Real _hardening_constant;
@@ -34,15 +35,18 @@ protected:
   bool _output_iteration_info;
 
   MaterialProperty<RealTensorValue> & _creep_strain;
-
   MaterialProperty<RealTensorValue> & _creep_strain_old;
 
   MaterialProperty<RealTensorValue> & _plastic_strain;
-
   MaterialProperty<RealTensorValue> & _plastic_strain_old;
+
+  MaterialProperty<RealTensorValue> & _total_strain;
+  MaterialProperty<RealTensorValue> & _total_strain_old;
 
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
+
+  MaterialProperty<Real> & _del_p;
 
 
   /// Compute the stress (sigma += deltaSigma)

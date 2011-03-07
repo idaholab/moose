@@ -66,6 +66,7 @@ protected:
   MaterialProperty<RealTensorValue> & _stress_old;
 
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
+  ColumnMajorMatrix _total_strain_increment;
   ColumnMajorMatrix _strain_increment;
   ColumnMajorMatrix _incremental_rotation;
   ColumnMajorMatrix _Uhat;

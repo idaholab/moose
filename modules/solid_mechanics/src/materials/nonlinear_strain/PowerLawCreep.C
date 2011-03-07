@@ -135,19 +135,4 @@ PowerLawCreep::computeStress()
   creep_strain_increment.fill(_creep_strain[_qp]);
   _creep_strain[_qp] += _creep_strain_old[_qp];
 
-/*
-   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
-   elasticityTensor()->print();
-
-   std::cout << "STRAIN INCREMENT: " << _qp << "\n"
-             << _strain_increment(0,0) << " " << _strain_increment(0,1) << " " << _strain_increment(0,2) << std::endl
-             << _strain_increment(1,0) << " " << _strain_increment(1,1) << " " << _strain_increment(1,2) << std::endl
-             << _strain_increment(2,0) << " " << _strain_increment(2,1) << " " << _strain_increment(2,2) << std::endl;
-
-   std::cout << "STRESS: " << _qp << " at time " << _t << "\n"
-             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
-             << _stress[_qp](1,0) << " " << _stress[_qp](1,1) << " " << _stress[_qp](1,2) << std::endl
-             << _stress[_qp](2,0) << " " << _stress[_qp](2,1) << " " << _stress[_qp](2,2) << std::endl;
-*/
-
 }

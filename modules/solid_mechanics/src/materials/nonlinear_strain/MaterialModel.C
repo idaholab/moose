@@ -54,6 +54,7 @@ MaterialModel::MaterialModel( const std::string & name,
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
+   _total_strain_increment(3,3),
    _strain_increment(3,3),
    _incremental_rotation(3,3),
    _Uhat(3,3),
@@ -310,7 +311,7 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
 
     logUhat = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
 
-    _strain_increment = logUhat * (1.0 / _dt);
+    _total_strain_increment = logUhat * (1.0 / _dt);
 
     /*
     n1 = _incremental_rotation * N1;
@@ -320,7 +321,7 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
 
     logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
 
-    _strain_increment = logVhat * (1.0 / _dt);*/
+    _total_strain_increment = logVhat * (1.0 / _dt);*/
   }
   else
   {
@@ -383,15 +384,15 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
   const Real Byz = 0.25 * Ayz;
   const Real Bzz = 0.25 * Azz - 0.5;
 
-  _strain_increment(0,0) = -(Bxx*Axx + Bxy*Axy + Bxz*Axz) * dt_inv;
-  _strain_increment(0,1) = -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) * dt_inv;
-  _strain_increment(0,2) = -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) * dt_inv;
-  _strain_increment(1,1) = -(Bxy*Axy + Byy*Ayy + Byz*Ayz) * dt_inv;
-  _strain_increment(1,2) = -(Bxy*Axz + Byy*Ayz + Byz*Azz) * dt_inv;
-  _strain_increment(2,2) = -(Bxz*Axz + Byz*Ayz + Bzz*Azz) * dt_inv;
-  _strain_increment(1,0) = _strain_increment(0,1);
-  _strain_increment(2,0) = _strain_increment(0,2);
-  _strain_increment(2,1) = _strain_increment(1,2);
+  _total_strain_increment(0,0) = -(Bxx*Axx + Bxy*Axy + Bxz*Axz) * dt_inv;
+  _total_strain_increment(0,1) = -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) * dt_inv;
+  _total_strain_increment(0,2) = -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) * dt_inv;
+  _total_strain_increment(1,1) = -(Bxy*Axy + Byy*Ayy + Byz*Ayz) * dt_inv;
+  _total_strain_increment(1,2) = -(Bxy*Axz + Byy*Ayz + Byz*Azz) * dt_inv;
+  _total_strain_increment(2,2) = -(Bxz*Axz + Byz*Ayz + Bzz*Azz) * dt_inv;
+  _total_strain_increment(1,0) = _total_strain_increment(0,1);
+  _total_strain_increment(2,0) = _total_strain_increment(0,2);
+  _total_strain_increment(2,1) = _total_strain_increment(1,2);
 
 }
 
@@ -449,11 +450,11 @@ MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 void
 MaterialModel::modifyStrain()
 {
+  _strain_increment = _total_strain_increment;
   if ( _has_temp && _t_step != 0 )
   {
-    ColumnMajorMatrix tStrain;
-    tStrain.setDiag( _alpha/_dt * (_temperature[_qp] - _temperature_old[_qp]) );
-    _strain_increment -= tStrain;
+    const Real tStrain( _alpha/_dt * (_temperature[_qp] - _temperature_old[_qp]) );
+    _strain_increment.addDiag( -tStrain );
   }
   for (unsigned int i(0); i < _volumetric_models.size(); ++i)
   {
