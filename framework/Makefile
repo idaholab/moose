@@ -23,4 +23,3 @@ MAKE_LIBRARY	:= yes
 APPLICATION_NAME := moose
 
 include build.mk
-
