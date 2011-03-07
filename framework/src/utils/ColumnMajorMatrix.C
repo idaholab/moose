@@ -18,7 +18,8 @@ extern "C" void dsyev_ ( ... );
 ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols)
   : _n_rows(rows),
     _n_cols(cols),
-    _n_entries(rows*cols)
+    _n_entries(rows*cols),
+    _values(rows*cols, 0.0)
 {
   _values.resize(rows*cols);
 }
