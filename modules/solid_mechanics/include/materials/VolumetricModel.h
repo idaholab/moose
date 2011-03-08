@@ -24,7 +24,7 @@ class VolumetricModel : public Material
 public:
   VolumetricModel( const std::string & name,
                    InputParameters & parameters );
-  ~VolumetricModel();
+  virtual ~VolumetricModel();
 
   virtual void modifyStrain(const unsigned int qp,
                             ColumnMajorMatrix & strain_increment) = 0;
