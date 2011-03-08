@@ -153,7 +153,7 @@ void shallowCopyData(const std::set<std::string> & names,
 {
   for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
   {
-    std::string name = *it;
+    const std::string & name = *it;
     if (unlikely(data[name] == NULL))
       data[name] = data_from[name]->init();
     data[name]->shallowCopy(data_from[name]);
@@ -166,6 +166,20 @@ Material::materialReinit()
   unsigned int current_elem = _current_elem->id();
 
   _n_qpoints = _data._qrule->n_points();
+
+  for (std::map<std::string, PropertyValue *>::iterator it = _props.begin(); it != _props.end(); ++it)
+  {
+    mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
+    it->second->resize(_n_qpoints);
+  }
+
+  if (_has_stateful_props)
+  {
+    for (std::map<std::string, PropertyValue *>::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
+      it->second->resize(_n_qpoints);
+    for (std::map<std::string, PropertyValue *>::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+      it->second->resize(_n_qpoints);
+  }
 
   if (_has_stateful_props)
   {
@@ -182,20 +196,6 @@ Material::materialReinit()
     shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem][0]);
     shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem][0]);
     shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][0]);
-  }
-
-  for (std::map<std::string, PropertyValue *>::iterator it = _props.begin(); it != _props.end(); ++it)
-  {
-    mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
-    it->second->resize(_n_qpoints);
-  }
-
-  if (_has_stateful_props)
-  {
-    for (std::map<std::string, PropertyValue *>::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-      it->second->resize(_n_qpoints);
-    for (std::map<std::string, PropertyValue *>::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-      it->second->resize(_n_qpoints);
   }
 
   computeProperties();
