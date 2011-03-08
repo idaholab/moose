@@ -5,7 +5,7 @@ ARCH=${ARCH:-intel}
 
 if [ $hostname == 'helios' ]
 then
-  if [ $ARCH == '-gnu' ]
+  if [ $ARCH == 'gnu' ]
   then
     # Get the current stable version of moose
     svn co --quiet svn+ssh://hpcsc/herd/branches/stable/moose stable-moose
