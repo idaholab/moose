@@ -8,12 +8,21 @@
 template<>
 InputParameters validParams<MaterialModel>()
 {
+  //  In order to avoid an uninitialized memory warning, we first addParam
+  //    and then set.  We don't want to set an initial value in addParam
+  //    since that will also flag the parameter as having had a valid entry
+  //    given.
   InputParameters params = validParams<Material>();
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
+  params.set<Real>("bulk_modulus") = -7777;
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
+  params.set<Real>("lambda") = -7777;
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material");
+  params.set<Real>("poissons_ratio") = -7777;
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
+  params.set<Real>("shear_modulus") = -7777;
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
+  params.set<Real>("youngs_modulus") = -7777;
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -311,7 +320,8 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
 
     logUhat = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
 
-    _total_strain_increment = logUhat * (1.0 / _dt);
+    const Real dt_inv = _dt ? 1 / _dt : 1;
+    _total_strain_increment = logUhat * dt_inv;
 
     /*
     n1 = _incremental_rotation * N1;

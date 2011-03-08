@@ -143,7 +143,6 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
 
   unsigned int num_steps( std::floor(ratio) );
   num_steps = std::min( num_steps, unsigned(10) );
-//   const unsigned int num_steps( 1 );
 
   const Real fraction( 1./num_steps );
   const Real dt( _dt * fraction );
@@ -154,7 +153,11 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
   ColumnMajorMatrix stress_ave(stress_last);
   ColumnMajorMatrix stress_next;
 
-  Real del_p( fraction * _del_p[_qp] * _dt / (_dt_old > 0 ? _dt_old : 1) );
+  Real del_p(0);
+  if (_t_step > 1)
+  {
+    del_p = fraction * _del_p[_qp] * _dt / (_dt_old > 0 ? _dt_old : 1) ;
+  }
   _del_p[_qp] = 0;
 
   for ( unsigned int i_step(0); i_step < num_steps; ++i_step )
@@ -245,6 +248,14 @@ PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
                      ColumnMajorMatrix & creep_strain_increment )
 {
 
+  if (_t_step == 1)
+  {
+    _hardening_variable[_qp] =
+      _hardening_variable_old[_qp] = 0;
+    _plastic_strain[_qp] =
+      _plastic_strain_old[_qp] = 0;
+  }
+
 // compute deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress_p(stress_new);
   dev_trial_stress_p.addDiag( -stress_new.tr()/3.0 );
@@ -264,7 +275,7 @@ PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
     Real norm_residual = 10.;
 
 
-
+    _hardening_variable[_qp] = _hardening_variable_old[_qp];
     while(jt < _max_its && norm_residual > _tolerance)
     {
       plastic_residual = effective_trial_stress_p - (3. * _shear_modulus * scalar_plastic_strain_increment) - _hardening_variable[_qp] - _yield_stress;

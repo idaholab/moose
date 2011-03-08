@@ -83,6 +83,7 @@ LinearStrainHardening::computeStress()
     Real scalar_plastic_strain_increment = 0.;
     Real norm_residual = 10.;
 
+    _hardening_variable[_qp] = _hardening_variable_old[_qp];
     while(it < _max_its && norm_residual > _tolerance)
     {
       Real plastic_residual = effective_trial_stress - (3. * _shear_modulus * scalar_plastic_strain_increment) - _hardening_variable[_qp] - _yield_stress;
