@@ -30,7 +30,7 @@ InputParameters validParams<ContactMaster>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
-  
+
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -46,12 +46,12 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
    _vars(_x_var, _y_var, _z_var)
 {}
-           
+
 void
 ContactMaster::addPoints()
 {
   point_to_info.clear();
-  
+
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
@@ -73,17 +73,17 @@ ContactMaster::addPoints()
       for(unsigned int i=0; i<_dim; i++)
       {
         long int dof_number = node->dof_number(0, _vars(i), 0);
-        res_vec(i) = _residual_copy(dof_number);  
+        res_vec(i) = _residual_copy(dof_number);
       }
-  
+
       Real res_mag = pinfo->_normal * res_vec;
      */
-      
+
       if(pinfo->_distance > 0)
         _penetration_locator._has_penetrated[slave_node_num] = true;
-        
-    }  
-    
+
+    }
+
     if(_penetration_locator._has_penetrated[slave_node_num])
     {
       addPoint(pinfo->_elem, pinfo->_closest_point);
@@ -109,11 +109,11 @@ ContactMaster::computeQpResidual()
   for(unsigned int i=0; i<_dim; i++)
   {
     long int dof_number = node->dof_number(0, _vars(i), 0);
-    res_vec(i) = _residual_copy(dof_number);  
+    res_vec(i) = _residual_copy(dof_number);
   }
-  
+
   Real res_mag = pinfo->_normal * res_vec;
-  
+
   return _phi[_i][_qp]*pinfo->_normal(_component)*res_mag;
 }
 
@@ -121,7 +121,7 @@ Real
 ContactMaster::computeQpJacobian()
 {
   return 0;
-  
+
   if(_i != _j)
     return 0;
 
@@ -134,11 +134,10 @@ ContactMaster::computeQpJacobian()
   for(unsigned int i=0; i<_dim; i++)
   {
     long int dof_number = node->dof_number(0, _vars(i), 0);
-    jac_vec(i) = _jacobian_copy(dof_number, dof_number);  
+    jac_vec(i) = _jacobian_copy(dof_number, dof_number);
   }
 
   Real jac_mag = pinfo->_normal * jac_vec;
 
   return _phi[_i][_qp]*pinfo->_normal(_component)*jac_mag;
 }
-

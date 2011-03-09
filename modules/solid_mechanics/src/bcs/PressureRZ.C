@@ -1,8 +1,5 @@
 #include "PressureRZ.h"
 
-#include "Function.h"
-#include "Moose.h"
-
 template<>
 InputParameters validParams<PressureRZ>()
 {
