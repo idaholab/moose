@@ -42,7 +42,9 @@
 #include "Elastic.h"
 #include "Gravity.h"
 #include "GravityRZ.h"
+#include "LinearAnisotropicMaterial.h"
 #include "LinearIsotropicMaterial.h"
+#include "LinearIsotropicMaterialRZ.h"
 #include "LinearStrainHardening.h"
 #include "LSHPlasticMaterial.h"
 #include "LSHPlasticMaterialRZ.h"
@@ -122,6 +124,7 @@ Elk::registerObjects()
   registerMaterial(Elastic);
   registerKernel(Gravity);
   registerKernel(GravityRZ);
+  registerNamedMaterial(LinearAnisotropicMaterial, "LinearAnisotropic");
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerNamedMaterial(LinearIsotropicMaterialRZ, "LinearIsotropicRZ");
   registerMaterial(LinearStrainHardening);
