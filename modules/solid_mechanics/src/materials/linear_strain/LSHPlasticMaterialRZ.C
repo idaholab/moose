@@ -169,16 +169,16 @@ LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain, Colu
 //now define _Jacobian_mult[_qp], which is a colummajormatrix, in terms of Jac[i][j][k][l]
     double Jac9x9[9][9];
     _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
-            for (l=0;l<3;l++)
-              for (k=0;k<3;k++)
-                for (j=0;j<3;j++)
-                  for (i=0;i<3;i++)
-                  {
-                    unsigned int n = l*3 + k;
-                    unsigned int m = j*3 + i;
-                    Jac9x9[n][m] = Jac[i][j][k][l];
-                    _Jacobian_mult[_qp](n,m) = Jac[i][j][k][l];
-                  }
+    for (l=0;l<3;l++)
+      for (k=0;k<3;k++)
+        for (j=0;j<3;j++)
+          for (i=0;i<3;i++)
+          {
+            unsigned int n = l*3 + k;
+            unsigned int m = j*3 + i;
+            Jac9x9[n][m] = Jac[i][j][k][l];
+            _Jacobian_mult[_qp](n,m) = Jac[i][j][k][l];
+          }
 //    _Jacobian_mult[_qp] = *_local_elasticity_tensor;
 
 //end of if
