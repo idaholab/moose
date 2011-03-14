@@ -42,16 +42,16 @@ public:
    */
   virtual Real value(const Point & p);
 
-private:
+protected:
+
   Real _x1;
   Real _y1;
   Real _z1;
   Real _invalue;
   Real _outvalue;
   Real _radius;
-
   Point _center;
-  
+
 };
 
 #endif //SMOOTHCIRCLEIC_H
