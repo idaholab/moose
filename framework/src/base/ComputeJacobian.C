@@ -201,9 +201,9 @@ void MooseSystem::computeJacobian (const NumericVector<Number>& soln, SparseMatr
 #else
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
   // determines whether the option is set (true) or unset (false)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
-   MAT_KEEP_ZEROED_ROWS,
-   PETSC_TRUE);
+  //MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
+  //MAT_KEEP_ZEROED_ROWS,
+  //PETSC_TRUE);
 #endif
     
 #endif
@@ -415,9 +415,9 @@ void MooseSystem::computeJacobianBlock (const NumericVector<Number>& soln, Spars
 #else
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
   // determines whether the option is set (true) or unset (false)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
-   MAT_KEEP_ZEROED_ROWS,
-   PETSC_TRUE);
+  //MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
+  //MAT_KEEP_ZEROED_ROWS,
+  //PETSC_TRUE);
 #endif
 #endif
 

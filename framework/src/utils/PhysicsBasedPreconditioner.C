@@ -219,7 +219,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
     copyVarValues(mesh,sys,0,*u_system.solution,0,system_var,y);
   }
 
-
+  y.close();
 
   Moose::perf_log.pop("apply()","PhysicsBasedPreconditioner");
 }
