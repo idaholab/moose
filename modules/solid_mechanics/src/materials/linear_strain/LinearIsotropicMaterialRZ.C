@@ -1,9 +1,9 @@
 #include "LinearIsotropicMaterialRZ.h"
 
 // Elk Includes
-#include "ColumnMajorMatrix.h"
 #include "IsotropicElasticityTensorRZ.h"
 #include "SolidMechanicsMaterial.h"
+#include "VolumetricModel.h"
 
 template<>
 InputParameters validParams<LinearIsotropicMaterialRZ>()
@@ -18,13 +18,16 @@ InputParameters validParams<LinearIsotropicMaterialRZ>()
 }
 
 LinearIsotropicMaterialRZ::LinearIsotropicMaterialRZ(const std::string  & name,
-                                                                         InputParameters parameters)
+                                                     InputParameters parameters)
   :SolidMechanicsMaterialRZ(name, parameters),
    _youngs_modulus(getParam<Real>("youngs_modulus")),
    _poissons_ratio(getParam<Real>("poissons_ratio")),
    _t_ref(getParam<Real>("t_ref")),
    _alpha(getParam<Real>("thermal_expansion")),
-   _input_thermal_conductivity(getParam<Real>("thermal_conductivity"))
+   _input_thermal_conductivity(getParam<Real>("thermal_conductivity")),
+   _v_strain(declareProperty<ColumnMajorMatrix>("v_strain")),
+   _v_strain_old(declarePropertyOld<ColumnMajorMatrix>("v_strain")),
+   _local_elasticity_tensor(NULL)
 {
   IsotropicElasticityTensorRZ * t = new IsotropicElasticityTensorRZ;
   t->setYoungsModulus(_youngs_modulus);
@@ -62,6 +65,19 @@ LinearIsotropicMaterialRZ::computeProperties()
       strain(0,0) -= isotropic_strain;
       strain(1,1) -= isotropic_strain;
       strain(2,2) -= isotropic_strain;
+    }
+
+    const unsigned int num_vol_models(_volumetric_models.size());
+    if (num_vol_models)
+    {
+      _v_strain[_qp].zero();
+      for (unsigned int i(0); i < _volumetric_models.size(); ++i)
+      {
+        _volumetric_models[i]->modifyStrain(_qp, _v_strain[_qp]);
+      }
+      _v_strain[_qp] *= _dt;
+      _v_strain[_qp] += _v_strain_old[_qp];
+      strain += _v_strain[_qp];
     }
 
     computeStress(strain, _stress[_qp]);

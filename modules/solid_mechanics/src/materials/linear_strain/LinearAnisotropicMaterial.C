@@ -37,5 +37,6 @@ LinearAnisotropicMaterial::LinearAnisotropicMaterial(const std::string & name,
   aniso_elasticity_tensor->setSecondEulerAngle(_euler_angle_2);
   aniso_elasticity_tensor->setThirdEulerAngle(_euler_angle_3);
 
+  delete _local_elasticity_tensor;
   _local_elasticity_tensor = aniso_elasticity_tensor;
 }

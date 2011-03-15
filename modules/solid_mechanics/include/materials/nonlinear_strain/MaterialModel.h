@@ -56,7 +56,6 @@ protected:
   VariableValue & _temperature;
   VariableValue & _temperature_old;
 
-  const std::vector<std::string> _volumetric_model_names;
   std::vector<VolumetricModel*> _volumetric_models;
 
   DecompMethod _decomp_method;

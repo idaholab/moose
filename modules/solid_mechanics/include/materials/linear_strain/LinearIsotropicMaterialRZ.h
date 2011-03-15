@@ -48,6 +48,9 @@ protected:
 
   Real _input_density;
 
+  MaterialProperty<ColumnMajorMatrix> & _v_strain;
+  MaterialProperty<ColumnMajorMatrix> & _v_strain_old;
+
   ElasticityTensor * _local_elasticity_tensor;
 };
 

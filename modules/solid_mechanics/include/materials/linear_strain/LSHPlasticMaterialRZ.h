@@ -44,7 +44,6 @@ protected:
 
   MaterialProperty<ColumnMajorMatrix> & _total_strain;
   MaterialProperty<ColumnMajorMatrix> & _total_strain_old;
-  MaterialProperty<RealTensorValue> & _stress;
   MaterialProperty<RealTensorValue> & _stress_old;
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;

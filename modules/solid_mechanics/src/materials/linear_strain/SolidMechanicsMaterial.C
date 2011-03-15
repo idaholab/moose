@@ -1,5 +1,8 @@
 #include "SolidMechanicsMaterial.h"
 
+#include "MooseSystem.h"
+#include "VolumetricModel.h"
+
 template<>
 InputParameters validParams<SolidMechanicsMaterial>()
 {
@@ -18,6 +21,7 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, InputPa
    _grad_disp_z(_dim == 3 ? coupledGradient("disp_z") : _grad_zero),
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledValue("temp") : _zero),
+   _volumetric_models(0),
    _stress(declareProperty<RealTensorValue>("stress")),
    _elasticity_tensor(declareProperty<ColumnMajorMatrix>("elasticity_tensor")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
@@ -26,3 +30,24 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, InputPa
    _density(declareProperty<Real>("density")),
    _specific_heat(declareProperty<Real>("specific_heat"))
 {}
+
+void
+SolidMechanicsMaterial::subdomainSetup()
+{
+
+  if (!_initialized)
+  {
+    _initialized = true;
+
+    // Load in the volumetric models
+    const std::vector<Material*> mats = _moose_system.getMaterials( _tid, _block_id );
+    for (unsigned int i(0); i < mats.size(); ++i)
+    {
+      VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
+      if (vm)
+      {
+        _volumetric_models.push_back( vm );
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@
 #include "ColumnMajorMatrix.h"
 #include "IsotropicElasticityTensor.h"
 #include "SolidMechanicsMaterial.h"
+#include "VolumetricModel.h"
 
 template<>
 InputParameters validParams<LinearIsotropicMaterial>()
@@ -24,7 +25,8 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(const std::string  & name,
    _poissons_ratio(getParam<Real>("poissons_ratio")),
    _t_ref(getParam<Real>("t_ref")),
    _alpha(getParam<Real>("thermal_expansion")),
-   _input_thermal_conductivity(getParam<Real>("thermal_conductivity"))
+   _input_thermal_conductivity(getParam<Real>("thermal_conductivity")),
+   _local_elasticity_tensor(NULL)
 {
   IsotropicElasticityTensor * iso_elasticity_tensor = new IsotropicElasticityTensor;
   iso_elasticity_tensor->setYoungsModulus(_youngs_modulus);
@@ -100,6 +102,13 @@ LinearIsotropicMaterial::computeProperties()
       strain(1,1) -= isotropic_strain;
       strain(2,2) -= isotropic_strain;
     }
+
+    ColumnMajorMatrix v_strain(LIBMESH_DIM, LIBMESH_DIM);
+    for (unsigned int i(0); i < _volumetric_models.size(); ++i)
+    {
+      _volumetric_models[i]->modifyStrain(_qp, v_strain);
+    }
+    strain += v_strain * _dt;
 
     computeStress(strain, _stress[_qp]);
 

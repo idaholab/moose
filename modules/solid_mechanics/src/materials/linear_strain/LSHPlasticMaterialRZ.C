@@ -25,7 +25,6 @@ LSHPlasticMaterialRZ::LSHPlasticMaterialRZ(std::string name,
    _print_debug_info(getParam<bool>("print_debug_info")),
    _total_strain(declareProperty<ColumnMajorMatrix>("total_strain")),
    _total_strain_old(declarePropertyOld<ColumnMajorMatrix>("total_strain")),
-   _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
@@ -51,15 +50,13 @@ LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain, Colu
   etotal_strain -= _total_strain_old[_qp];
 
 
-  ColumnMajorMatrix stress_old_b(_stress_old[_qp]);
-
 // convert total_strain from 3x3 to 9x1
   etotal_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 // trial stress
   ColumnMajorMatrix trial_stress = (*_local_elasticity_tensor) * etotal_strain;
 // Change 9x1 to a 3x3
   trial_stress.reshape(LIBMESH_DIM, LIBMESH_DIM);
-  trial_stress += stress_old_b;
+  trial_stress += _stress_old[_qp];
 
 // deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress(trial_stress);

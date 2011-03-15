@@ -6,7 +6,7 @@
 
 //Forward Declarations
 class SolidMechanicsMaterial;
-class ElasticityTensor;
+class VolumetricModel;
 
 template<>
 InputParameters validParams<SolidMechanicsMaterial>();
@@ -18,14 +18,21 @@ class SolidMechanicsMaterial : public Material
 {
 public:
   SolidMechanicsMaterial(const std::string & name, InputParameters parameters);
-  
+
 protected:
+
+  virtual void subdomainSetup();
+
+  bool _initialized;
+
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;
   VariableGradient & _grad_disp_z;
 
   bool _has_temp;
   VariableValue & _temp;
+
+  std::vector<VolumetricModel*> _volumetric_models;
 
   MaterialProperty<RealTensorValue> & _stress;
   MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;

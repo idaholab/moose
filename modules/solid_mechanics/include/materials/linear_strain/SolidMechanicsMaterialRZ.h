@@ -6,7 +6,7 @@
 
 //Forward Declarations
 class SolidMechanicsMaterialRZ;
-class ElasticityTensor;
+class VolumetricModel;
 
 template<>
 InputParameters validParams<SolidMechanicsMaterialRZ>();
@@ -20,6 +20,11 @@ public:
   SolidMechanicsMaterialRZ(const std::string & name, InputParameters parameters);
 
 protected:
+
+  virtual void subdomainSetup();
+
+  bool _initialized;
+
   VariableValue & _disp_r;
   VariableValue & _disp_z;
 
@@ -28,6 +33,8 @@ protected:
 
   bool _has_temp;
   VariableValue & _temp;
+
+  std::vector<VolumetricModel*> _volumetric_models;
 
   MaterialProperty<RealTensorValue> & _stress;
   MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
