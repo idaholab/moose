@@ -6,7 +6,7 @@
 template<>
 InputParameters validParams<LSHPlasticMaterialRZ>()
 {
-   InputParameters params = validParams<LinearIsotropicMaterialRZ>();
+   InputParameters params = validParams<SolidMechanicsMaterialRZ>();
    params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
    params.addRequiredParam<Real>("hardening_constant", "Hardening slope");
    params.addParam<Real>("tolerance", 1e-5, "Sub-BiLin iteration tolerance");
@@ -16,8 +16,8 @@ InputParameters validParams<LSHPlasticMaterialRZ>()
 }
 
 LSHPlasticMaterialRZ::LSHPlasticMaterialRZ(std::string name,
-                                       InputParameters parameters)
-  :LinearIsotropicMaterialRZ(name, parameters),
+                                           InputParameters parameters)
+  :SolidMechanicsMaterialRZ(name, parameters),
    _yield_stress(parameters.get<Real>("yield_stress")),
    _hardening_constant(parameters.get<Real>("hardening_constant")),
    _tolerance(parameters.get<Real>("tolerance")),
@@ -25,7 +25,6 @@ LSHPlasticMaterialRZ::LSHPlasticMaterialRZ(std::string name,
    _print_debug_info(getParam<bool>("print_debug_info")),
    _total_strain(declareProperty<ColumnMajorMatrix>("total_strain")),
    _total_strain_old(declarePropertyOld<ColumnMajorMatrix>("total_strain")),
-   _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
    _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
@@ -42,7 +41,8 @@ LSHPlasticMaterialRZ::LSHPlasticMaterialRZ(std::string name,
 }
 
 void
-LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
+LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain,
+                                    ColumnMajorMatrix & elastic_strain)
 {
   _total_strain[_qp] = total_strain;
 
@@ -195,33 +195,3 @@ LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain, Colu
 //end of computeStrain
 }
 
-//computeStress
-void
-LSHPlasticMaterialRZ::computeStress(const ColumnMajorMatrix & strain,
-                                    RealTensorValue & stress)
-{
-  // Add in any extra strain components
-  ColumnMajorMatrix elastic_strain;
-
-  computeStrain(strain, elastic_strain);
-
-  // Save that off as the elastic strain
-  _elastic_strain[_qp] = elastic_strain;
-
-
-  // Create column vector
-  elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
-
-  // C * e
-  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * elastic_strain;
-
-  // Change 9x1 to a 3x3
-  stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
-
-  ColumnMajorMatrix stress_old_e(_stress_old[_qp]);
-  stress_vector += stress_old_e;
-
-
-  // Fill the material properties
-  stress_vector.fill(stress);
-}

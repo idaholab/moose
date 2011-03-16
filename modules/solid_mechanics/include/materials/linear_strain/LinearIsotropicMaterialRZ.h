@@ -22,9 +22,9 @@ public:
   virtual ~LinearIsotropicMaterialRZ();
 
 protected:
-  virtual void computeProperties();
 
   virtual void computeStress(const ColumnMajorMatrix & strain,
+                             const ElasticityTensor & elasticity_tensor,
                              RealTensorValue & stress);
 
   /**
@@ -33,25 +33,10 @@ protected:
    */
   virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);
 
-  /**
-   * The current quadrature point.
-   */
-  unsigned int _qp;
-
-  Real _youngs_modulus;
-  Real _poissons_ratio;
-
-  Real _t_ref;
-  Real _alpha;
-
   Real _input_thermal_conductivity;
 
   Real _input_density;
 
-  MaterialProperty<ColumnMajorMatrix> & _v_strain;
-  MaterialProperty<ColumnMajorMatrix> & _v_strain_old;
-
-  ElasticityTensor * _local_elasticity_tensor;
 };
 
 #endif //LINEARISOTROPICMATERIALRZ_H

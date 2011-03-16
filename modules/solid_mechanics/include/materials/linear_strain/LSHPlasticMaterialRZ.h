@@ -1,7 +1,7 @@
 #ifndef LSHPLASTICMATERIALRZ_H
 #define LSHPLASTICMATERIALRZ_H
 
-#include "LinearIsotropicMaterialRZ.h"
+#include "SolidMechanicsMaterialRZ.h"
 
 //Forward Declarations
 class LSHPlasticMaterialRZ;
@@ -12,7 +12,7 @@ InputParameters validParams<LSHPlasticMaterialRZ>();
 /**
  * Plastic material
  */
-class LSHPlasticMaterialRZ : public LinearIsotropicMaterialRZ
+class LSHPlasticMaterialRZ : public SolidMechanicsMaterialRZ
 {
 public:
   LSHPlasticMaterialRZ(std::string name,
@@ -24,9 +24,6 @@ protected:
    * What should come out is a modified strain tensor.
    */
   virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);
-  virtual void computeStress(const ColumnMajorMatrix & strain,
-                             RealTensorValue & stress);
-
 
   Real _yield_stress;
   Real _hardening_constant;
@@ -44,7 +41,6 @@ protected:
 
   MaterialProperty<ColumnMajorMatrix> & _total_strain;
   MaterialProperty<ColumnMajorMatrix> & _total_strain_old;
-  MaterialProperty<RealTensorValue> & _stress_old;
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
   MaterialProperty<RealTensorValue> & _plastic_strain;
