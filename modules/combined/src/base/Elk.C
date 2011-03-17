@@ -11,6 +11,7 @@
 #include "SideFluxIntegralRZ.h"
 
 // heat_conduction
+#include "ConvectiveFluxRZ.h"
 #include "HeatConduction.h"
 #include "HeatConductionRZ.h"
 #include "HeatConductionImplicitEuler.h"
@@ -94,6 +95,7 @@ Elk::registerObjects()
   registerPostprocessor(SideFluxIntegralRZ);
 
   // heat_conduction
+  registerBoundaryCondition(ConvectiveFluxRZ);
   registerKernel(HeatConduction);
   registerKernel(HeatConductionRZ);
   registerKernel(HeatConductionImplicitEuler);
