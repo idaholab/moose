@@ -8,6 +8,7 @@
 #include "InternalVolume.h"
 #include "InternalVolumeRZ.h"
 #include "NeumannRZ.h"
+#include "SideFluxIntegralRZ.h"
 
 // heat_conduction
 #include "HeatConduction.h"
@@ -90,6 +91,7 @@ Elk::registerObjects()
   registerPostprocessor(InternalVolume);
   registerPostprocessor(InternalVolumeRZ);
   registerBoundaryCondition(NeumannRZ);
+  registerPostprocessor(SideFluxIntegralRZ);
 
   // heat_conduction
   registerKernel(HeatConduction);
