@@ -37,7 +37,7 @@ PressureNeumannBC::pressure()
   Real _v_vel = _pv[_qp] / _p[_qp];
   Real _w_vel = _pw[_qp] / _p[_qp];
 
-  return (_gamma[_qp] - 1)*(_pe[_qp] - (0.5 * (_u_vel*_u_vel + _v_vel*_v_vel + _w_vel*_w_vel)));
+  return (_gamma[_qp] - 1)*(_pe[_qp] - (0.5 * _p[_qp] * (_u_vel*_u_vel + _v_vel*_v_vel + _w_vel*_w_vel)));
 }
 
 Real

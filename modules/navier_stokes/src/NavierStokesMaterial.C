@@ -14,6 +14,7 @@ InputParameters validParams<NavierStokesMaterial>()
   params.addCoupledVar("v", "");
   params.addCoupledVar("w", "");
   params.addCoupledVar("pe", "");
+  params.addCoupledVar("p", "");
   
   return params;
 }
@@ -22,7 +23,6 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
                                            InputParameters parameters)
   :Material(name, parameters),
     _has_u(isCoupled("u")),
-
     _u(coupledValue("u")),
     _grad_u(coupledGradient("u")),
     
@@ -38,6 +38,11 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _pe(coupledValue("pe")),
     _grad_pe(coupledGradient("pe")),
 
+   /* density, needed by pressure calculation */
+    _has_p(isCoupled("p")),
+    _p(coupledValue("p")),
+    _grad_p(coupledGradient("p")),
+   
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
     _pressure(declareProperty<Real>("pressure")),
@@ -48,7 +53,8 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _R(declareProperty<Real>("R")),
     _Pr(declareProperty<Real>("Pr")),
 
-    //Declared here but _not_ calculated here
+    // Declared here but _not_ calculated here
+    // (See e.g. derived class, bighorn/include/materials/FluidTC1.h)
     _dynamic_viscocity(declareProperty<Real>("dynamic_viscocity")),
     
     _R_param(getParam<Real>("R")),
@@ -100,7 +106,7 @@ NavierStokesMaterial::computeProperties()
 
     
     /******* Pressure *******/
-    _pressure[qp] = (_gamma_param - 1)*(_pe[qp] - (0.5 * (_u[qp]*_u[qp] + _v[qp]*_v[qp] + _w[qp]*_w[qp])));
+    _pressure[qp] = (_gamma_param - 1)*(_pe[qp] - (0.5 * _p[qp] * (_u[qp]*_u[qp] + _v[qp]*_v[qp] + _w[qp]*_w[qp])));
       
     _thermal_conductivity[qp] = (_c_p[qp] * _dynamic_viscocity[qp]) / _Pr[qp];
   }

@@ -27,6 +27,7 @@ MomentumViscousFlux::computeQpResidual()
   RealTensorValue & vst = _viscous_stress_tensor[_qp];
   
   RealVectorValue vec(vst(0,_component),vst(1,_component),vst(2,_component));
-  
+
+  // _component'th column of vst dotted with grad(phi)
   return vec*_grad_test[_i][_qp];
 }

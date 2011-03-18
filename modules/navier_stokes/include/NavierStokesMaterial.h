@@ -49,6 +49,11 @@ protected:
   VariableValue  & _pe;
   VariableGradient & _grad_pe;
 
+  /* density, needed by pressure calculation */
+  bool _has_p; 
+  VariableValue  & _p;
+  VariableGradient & _grad_p;
+  
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _pressure;
