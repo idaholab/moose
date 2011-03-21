@@ -99,6 +99,10 @@ public:
 
   virtual void dump();
 
+  // Output /////
+  virtual Output & out() { return _out; }
+  virtual void output();
+
 protected:
   Problem * _parent;
   Mesh & _mesh;
@@ -109,6 +113,9 @@ protected:
   int & _t_step;
   Real & _dt;
   Real _dt_old;
+
+  // Output system
+  Output _out;
 
   /**
    * For storing all-purpose global params 

@@ -84,6 +84,9 @@ public:
 
   virtual void dump();
 
+  virtual Output & out() { return _out; }
+  virtual void output();
+
 protected:
   std::map<std::string, Moose::SubProblem *> _subproblems;
   std::vector<std::string> _solve_order;
@@ -100,6 +103,9 @@ protected:
   int & _t_step;
   Real & _dt;
   Real _dt_old;
+
+  // Output system
+  Output _out;
 };
 
 }

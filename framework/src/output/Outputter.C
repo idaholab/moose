@@ -3,8 +3,8 @@
 
 namespace Moose {
 
-Outputter::Outputter(Problem & problem) :
-  _problem(problem)
+Outputter::Outputter(EquationSystems & es) :
+    _es(es)
 {
 }
 

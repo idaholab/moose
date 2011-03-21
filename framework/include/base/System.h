@@ -29,6 +29,7 @@ public:
   virtual Problem & problem() { return _problem; }
   virtual DofMap & dofMap() = 0;
 
+  virtual void init() = 0;
   virtual void update() = 0;
   virtual void solve() = 0;
 
@@ -79,7 +80,6 @@ public:
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
     _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
     _residual_old(_sys.add_vector("residual_old", false, GHOSTED))
-
   {
   }
 
@@ -119,6 +119,10 @@ public:
 
   virtual NumericVector<Number> & solutionUDot() { return _solution_u_dot; }
   virtual NumericVector<Number> & solutionDuDotDu() { return _solution_du_dot_du; }
+
+  virtual void init()
+  {
+  }
 
   virtual void update()
   {

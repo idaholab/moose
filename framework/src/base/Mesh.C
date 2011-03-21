@@ -13,9 +13,16 @@ Mesh::Mesh(int mesh_dim) :
     _is_changed(false),
     _active_local_elem_range(NULL),
     _active_node_range(NULL),
-    _local_node_range(NULL)
+    _local_node_range(NULL),
+    _bnd_node_range(NULL)
 {
 
+}
+
+Mesh::Mesh(const Mesh & other_mesh) :
+    _mesh(other_mesh._mesh)
+{
+  (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
 }
 
 Mesh::~Mesh()
@@ -23,6 +30,7 @@ Mesh::~Mesh()
   delete _active_local_elem_range;
   delete _active_node_range;
   delete _local_node_range;
+  delete _bnd_node_range;
 }
 
 void
@@ -51,7 +59,7 @@ void
 Mesh::meshChanged()
 {
   // Rebuild the boundary conditions
-  _mesh.boundary_info->build_node_list_from_side_list();
+  build_node_list_from_side_list();
 
   // Rebuild the active local element range
   delete _active_local_elem_range;

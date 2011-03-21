@@ -8,6 +8,8 @@
 
 namespace Moose {
 
+class DisplacedProblem;
+
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
@@ -15,7 +17,7 @@ namespace Moose {
 class MProblem : public SubProblem
 {
 public:
-  MProblem(Mesh &mesh, Problem * parent = NULL);
+  MProblem(Mesh & mesh, Problem * parent = NULL);
   virtual ~MProblem();
 
   virtual Order getQuadratureOrder() { return _quadrature_order; }
@@ -67,6 +69,12 @@ public:
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
 
+  // Displaced problem /////
+  virtual void initDisplacedProblem(const std::vector<std::string> & displacements);
+
+  // Output /////
+  virtual void output();
+
 protected:
   ImplicitSystem _nl;
   AuxiliarySystem _aux;
@@ -78,6 +86,11 @@ protected:
   std::vector<std::vector<Point> > _points;
 
   const Elem * _elem;
+
+  // Displaced mesh /////
+  Mesh * _displaced_mesh;
+  DisplacedProblem * _displaced_problem;
+  bool _output_displaced;                               /// true for outputing displaced problem
 
 public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)

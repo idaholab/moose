@@ -10,7 +10,8 @@ CoupledProblem::CoupledProblem(Mesh * mesh) :
     _eq(*mesh),
     _time(_eq.parameters.set<Real>("time")),
     _t_step(_eq.parameters.set<int>("t_step")),
-    _dt(_eq.parameters.set<Real>("dt"))
+    _dt(_eq.parameters.set<Real>("dt")),
+    _out(*this)
 {
   _eq.parameters.set<Problem *>("_problem") = this;
 }
@@ -188,5 +189,10 @@ CoupledProblem::dump()
     it->second->dump();
 }
 
+void
+CoupledProblem::output()
+{
+  _out.output();
+}
 
 } // namespace

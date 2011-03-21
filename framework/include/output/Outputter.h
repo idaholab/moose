@@ -2,6 +2,8 @@
 #define OUTPUTTER_H_
 
 #include <string>
+// libMesh
+#include "equation_systems.h"
 
 namespace Moose {
 
@@ -9,18 +11,16 @@ class Problem;
 
 class Outputter {
 public:
-  Outputter(Problem & problem);
+  Outputter(EquationSystems & es);
   virtual ~Outputter();
 
   /**
    * Outputs the data
    */
-  virtual void output(const std::string & file_base) = 0;
+  virtual void output(const std::string & file_base, Real time) = 0;
 
 protected:
-  Problem & _problem;
-
-  std::string _file_base;
+  EquationSystems & _es;
 };
 
 } // namespace

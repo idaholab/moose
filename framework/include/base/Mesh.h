@@ -20,6 +20,7 @@ class Mesh
 {
 public:
   Mesh(int mesh_dim);
+  Mesh(const Mesh & other_mesh);
   virtual ~Mesh();
 
   unsigned int dimension() { return _mesh.mesh_dimension(); }
@@ -28,6 +29,7 @@ public:
 
   void buildBoudndaryNodeList ();
   void build_node_list (std::vector< unsigned int > &nl, std::vector< short int > &il) const { _mesh.boundary_info->build_node_list(nl, il); }
+  void build_node_list_from_side_list() { _mesh.boundary_info->build_node_list_from_side_list(); }
 
   MeshBase::const_node_iterator local_nodes_begin() { return _mesh.local_nodes_begin(); }
   MeshBase::const_node_iterator local_nodes_end() { return _mesh.local_nodes_end(); }
@@ -57,9 +59,10 @@ public:
 
   operator libMesh::Mesh &(void) { return _mesh; }
 
-protected:
+public:
   libMesh::Mesh _mesh;
 
+protected:
   bool _is_changed;                   /// true if mesh is changed (i.e. after adaptivity step)
 
   /**

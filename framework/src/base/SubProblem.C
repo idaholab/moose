@@ -42,7 +42,8 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
     _transient(false),
     _time(_parent != this ? _parent->time() : _eq.parameters.set<Real>("time")),
     _t_step(_parent != this ? _parent->timeStep() : _eq.parameters.set<int>("t_step")),
-    _dt(_parent != this ? _parent->dt() : _eq.parameters.set<Real>("dt"))
+    _dt(_parent != this ? _parent->dt() : _eq.parameters.set<Real>("dt")),
+    _out(*this)
 {
   if (_parent == this)
   {
@@ -209,6 +210,12 @@ SubProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_I
 void
 SubProblem::dump()
 {
+}
+
+void
+SubProblem::output()
+{
+  _out.output();
 }
 
 } // namespace

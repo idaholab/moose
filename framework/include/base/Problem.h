@@ -76,13 +76,8 @@ public:
 
   // Output system /////
 
-  Output & out() { return _out; }
-
-  void output();
-
-protected:
-  // Output system
-  Output _out;
+  virtual Output & out() = 0;
+  virtual void output() = 0;
 };
 
 }

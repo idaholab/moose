@@ -142,18 +142,26 @@ GenericExecutionerBlock::execute()
     Moose::MProblem *mproblem = dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem());
     _parser_handle._problem = mproblem;
 
+    // FIXME: HACK! Can initialize displaced problem after we have instance of problem
+    ParserBlock * mesh_blk = _parser_handle.root()->locateBlock("Mesh");
+    if(mesh_blk->isParamValid("displacements"))
+    {
+      std::vector<std::string> displacements = mesh_blk->getParamValue<std::vector<std::string> >("displacements");
+      _parser_handle._problem->initDisplacedProblem(displacements);
+    }
+
     VariablesBlock * vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("Variables"));
     if (vars!= NULL)
       vars->execute();
     VariablesBlock * aux_vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("AuxVariables"));
     if (aux_vars!= NULL)
       aux_vars->execute();
+
     mproblem->init();
     if (vars != NULL)
       vars->copyNodalValues(mproblem->getNonlinearSystem());
     if (aux_vars != NULL)
       aux_vars->copyNodalValues(mproblem->getAuxiliarySystem());
-
   }
 
   visitChildren();

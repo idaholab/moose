@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+// libMesh
+#include "libmesh_common.h"
 
 namespace Moose {
 
@@ -24,6 +26,7 @@ protected:
   std::string _file_base;
 
   Problem & _problem;
+  Real & _time;
 
   std::vector<Outputter *> _outputters;
 };

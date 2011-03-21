@@ -1,5 +1,6 @@
 #include "MProblem.h"
 #include "Factory.h"
+#include "DisplacedProblem.h"
 
 namespace Moose {
 
@@ -13,11 +14,14 @@ std::string name(const std::string & name, unsigned int n)
   return os.str();
 }
 
-MProblem::MProblem(Mesh &mesh, Problem * parent/* = NULL*/) :
+MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
     SubProblem(mesh, parent),
     _nl(*_parent, name("nl", _n)),
     _aux(*_parent, name("aux", _n)),
-    _quadrature_order(CONSTANT)
+    _quadrature_order(CONSTANT),
+    _displaced_mesh(NULL),
+    _displaced_problem(NULL),
+    _output_displaced(true)
 {
   _sys.push_back(&_nl);
   _sys.push_back(&_aux);
@@ -36,6 +40,8 @@ MProblem::MProblem(Mesh &mesh, Problem * parent/* = NULL*/) :
 
 MProblem::~MProblem()
 {
+//  delete _displaced_mesh;
+  delete _displaced_problem;
 }
 
 void
@@ -93,6 +99,8 @@ void
 MProblem::addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
 {
   _nl.addVariable(var_name, type, active_subdomains);
+  if (_displaced_problem)
+    _displaced_problem->addVariable(var_name, type, active_subdomains);
 }
 
 void
@@ -113,6 +121,8 @@ void
 MProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
 {
   _aux.addVariable(var_name, type, active_subdomains);
+  if (_displaced_problem)
+    _displaced_problem->addAuxVariable(var_name, type, active_subdomains);
 }
 
 void
@@ -159,6 +169,13 @@ MProblem::init()
 {
   SubProblem::init();
   _quadrature_order = _nl.getMinQuadratureOrder();
+
+  _nl.init();
+  if (_displaced_problem)
+  {
+    _displaced_problem->init();
+    _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
+  }
 }
 
 void
@@ -223,6 +240,13 @@ void
 MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   _nl.solution(soln);
+
+  if (_displaced_problem != NULL)
+  {
+    _displaced_problem->serializeSolution(soln, _aux.solution());
+    _displaced_problem->updateMesh(soln, _aux.solution());
+  }
+
   _aux.compute();
   _nl.computeResidual(residual);
 }
@@ -231,8 +255,30 @@ void
 MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
 {
   _nl.solution(soln);
+
+  if (_displaced_problem != NULL)
+  {
+    _displaced_problem->serializeSolution(soln, _aux.solution());
+    _displaced_problem->updateMesh(soln, _aux.solution());
+  }
+
   _aux.compute();
   _nl.computeJacobian(jacobian);
+}
+
+void
+MProblem::initDisplacedProblem(const std::vector<std::string> & displacements)
+{
+  _displaced_mesh = new Mesh(_mesh);
+  _displaced_problem = new DisplacedProblem(*_displaced_mesh, _mesh, displacements);
+}
+
+void
+MProblem::output()
+{
+  _out.output();
+  if (_displaced_problem != NULL && _output_displaced)
+    _displaced_problem->output(_time);
 }
 
 } // namespace

@@ -12,7 +12,7 @@ namespace Moose {
 class ExplicitSystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
-  ExplicitSystem(SubProblem & problem, const std::string & name);
+  ExplicitSystem(Problem & problem, const std::string & name);
 
 protected:
 };

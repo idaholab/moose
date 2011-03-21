@@ -7,21 +7,24 @@
 #include "libmesh_common.h"
 #include "exodusII_io.h"
 
-
 namespace Moose {
 
 class ExodusOutput : public Outputter {
 public:
-  ExodusOutput(Problem & problem);
+  ExodusOutput(EquationSystems & es);
   virtual ~ExodusOutput();
 
-  virtual void output(const std::string & file_base);
+  virtual void output(const std::string & file_base, Real time);
+
+  virtual void meshChanged();
+  void sequence(bool state) { _seq = state; }
 
 protected:
   ExodusII_IO * _out;
 
-  int _num;                             // the number of timestep in the file
-  Real & _time;
+  bool _seq;
+  int _file_num;                        /// number of the file
+  int _num;                             /// the number of timestep within the file
 
   std::string getFileName(const std::string & file_base);
 };

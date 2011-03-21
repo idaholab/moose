@@ -91,26 +91,12 @@ MeshBlock::execute()
 //  mesh->print_info();
   }
 
-#if 0
-// uncomment when adding displaced mesh
-  if(isParamValid("displacements"))
+  if (isParamValid("displacements"))
   {
     std::vector<std::string> displacements = getParamValue<std::vector<std::string> >("displacements");
-
-    if(displacements.size() != mesh->mesh_dimension())
+    if (displacements.size() != _parser_handle._mesh->dimension())
       mooseError("Number of displacements and dimension of mesh MUST be the same!");
-
-    Mesh * displaced_mesh = _moose_system.initDisplacedMesh(displacements);
-
-    displaced_mesh->prepare_for_use(false);
-
-    (*displaced_mesh->boundary_info) = (*mesh->boundary_info);
-
-    displaced_mesh->boundary_info->build_node_list_from_side_list();
-
-    _moose_system.needSerializedSolution(true);
   }
-#endif
 
   // There is no executioner block, create the MProblem class by ourselves
   GenericExecutionerBlock * exec = dynamic_cast<GenericExecutionerBlock *>(locateBlock("Executioner"));
