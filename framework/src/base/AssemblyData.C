@@ -3,8 +3,10 @@
 // MOOSE includes
 #include "SubProblem.h"
 #include "ArbitraryQuadrature.h"
+
 // libMesh
 #include "quadrature_gauss.h"
+#include "fe_interface.h"
 
 AssemblyData::AssemblyData(MooseMesh & mesh) :
     _mesh(mesh),
@@ -97,6 +99,16 @@ AssemblyData::reinit(const Elem * elem)
   _current_elem = elem;
   for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
     it->second->reinit(elem);
+}
+
+void
+AssemblyData::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physical_points)
+{
+  std::vector<Point> reference_points;
+
+  FEInterface::inverse_map(_mesh.dimension(), FEType(), elem, physical_points, reference_points);
+
+  reinit(elem, reference_points);
 }
 
 void

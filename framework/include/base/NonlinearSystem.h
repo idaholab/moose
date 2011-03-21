@@ -5,6 +5,7 @@
 #include "KernelWarehouse.h"
 #include "BCWarehouse.h"
 #include "StabilizerWarehouse.h"
+#include "DiracKernelWarehouse.h"
 #include "DamperWarehouse.h"
 
 #include "transient_system.h"
@@ -32,6 +33,7 @@ public:
 
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
+  void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
   void addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
 
@@ -71,6 +73,8 @@ protected:
   void computeResidualInternal(NumericVector<Number> & residual);
   void finishResidual(NumericVector<Number> & residual);
 
+  void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
+
   NumericVector<Number> & _nl_solution;                 /// solution vector from nonlinear solver
 
   Real & _t;                                            /// time
@@ -85,6 +89,7 @@ protected:
   std::vector<KernelWarehouse> _kernels;                /// Kernel storage for each thread
   std::vector<BCWarehouse> _bcs;                        /// BC storage for each thread
   std::vector<StabilizerWarehouse> _stabilizers;        /// Stabilizers storage for each thread
+  std::vector<DiracKernelWarehouse> _dirac_kernels;     /// Dirac Kernel storage for each thread
   std::vector<DamperWarehouse> _dampers;                /// Dampers for each thread
 
   NumericVector<Number> * _increment_vec;               /// increment vector
@@ -93,6 +98,7 @@ protected:
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
+  friend class ComputeDiracThread;
   friend class ComputeDampingThread;
 };
 

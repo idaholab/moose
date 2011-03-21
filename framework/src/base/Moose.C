@@ -28,6 +28,8 @@
 #include "NearestNodeValueAux.h"
 #include "PenetrationAux.h"
 #include "ProcessorIDAux.h"
+// dirac kernels
+#include "ConstantPointSource.h"
 // ics
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
@@ -76,6 +78,7 @@
 #include "AddAuxBCAction.h"
 #include "AddAuxVariableAction.h"
 #include "AddBCAction.h"
+#include "AddDiracKernelAction.h"
 #include "AddICAction.h"
 #include "AddKernelAction.h"
 #include "AddPeriodicBCAction.h"
@@ -124,6 +127,8 @@ registerObjects()
   registerObject(FunctionDirichletBC);
   registerObject(FunctionNeumannBC);
   registerObject(MatchedValueBC);
+  // dirac kernels
+  registerObject(ConstantPointSource);
   // aux kernels
   registerObject(CoupledAux);
   registerObject(ConstantAux);
@@ -209,6 +214,7 @@ addActionTypes()
   registerActionName("add_aux_variable", false);
   registerActionName("add_aux_kernel", false);
   registerActionName("add_aux_bc", false);
+  registerActionName("add_dirac_kernel", false);
   registerActionName("add_ic", false);
   registerActionName("add_postprocessor", false);
   registerActionName("add_damper", false);
@@ -287,6 +293,9 @@ addActionTypes()
   /// AuxBCs
   action_warehouse.addDependency("add_aux_bc", "setup_pps_complete");
 
+  /// Dirac Kernels
+  action_warehouse.addDependency("add_dirac_kernel", "setup_pps_complete");
+
   /// Ouput
   action_warehouse.addDependency("setup_output", "setup_pps_complete");
 
@@ -331,7 +340,7 @@ registerActions()
   registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
   registerAction(AdaptivityAction, "Executioner/Adaptivity", "setup_adaptivity");
 
-  registerAction(EmptyAction, "DiracKernels/*", "no_action");  // TODO
+  registerAction(AddDiracKernelAction, "DiracKernels/*", "add_dirac_kernel");
 
   // NonParsedActions
   registerNonParsedAction(SetupDampersAction, "setup_dampers");

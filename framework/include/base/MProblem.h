@@ -50,10 +50,15 @@ public:
   virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid]->node(); }
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
+  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+
+  /// Fills "elems" with the elements that should be looped over for Dirac Kernels
+  virtual void getDiracElements(std::set<const Elem *> & elems);
+  virtual void clearDiracInfo();
 
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
 
@@ -81,6 +86,9 @@ public:
   void addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   AuxiliarySystem & getAuxiliarySystem() { return _aux; }
+
+  // Dirac /////
+  void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   // ICs /////
   void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name);

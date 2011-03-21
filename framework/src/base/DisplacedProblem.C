@@ -194,6 +194,30 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
   _aux.prepare(tid);
 }
 
+bool
+DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
+{
+  std::set<Point> & points_set = _dirac_kernel_info._points[elem];
+
+  bool have_points = points_set.size();
+
+  if(have_points)
+  {
+    std::vector<Point> points;
+    std::copy(points_set.begin(), points_set.end(), points.begin());
+
+    _asm_info[tid]->reinitAtPhysical(elem, points);
+
+    _nl.prepare(tid);
+    _aux.prepare(tid);
+
+    reinitElem(elem, tid);
+  }  
+
+  return have_points;
+}
+
+
 void
 DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
@@ -223,6 +247,18 @@ DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_
   _asm_info[tid]->reinit(node);
   _nl.reinitNodeFace(node, bnd_id, tid);
   _aux.reinitNodeFace(node, bnd_id, tid);
+}
+
+void
+DisplacedProblem::getDiracElements(std::set<const Elem *> & elems)
+{
+  elems =_dirac_kernel_info._elements;
+}
+
+void
+DisplacedProblem::clearDiracInfo()
+{
+  _dirac_kernel_info.clearPoints();
 }
 
 void

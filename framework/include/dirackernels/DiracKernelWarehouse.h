@@ -6,6 +6,11 @@
 #include <vector>
 
 /**
+ * Typedef to hide implementation details
+ */
+typedef std::vector<DiracKernel *>::iterator DiracKernelIterator;
+
+/**
  * Holds DiracKernels and provides some services
  */
 class DiracKernelWarehouse
@@ -14,10 +19,8 @@ public:
   DiracKernelWarehouse();
   virtual ~DiracKernelWarehouse();
 
-  /**
-   * Get the list of all dirac kernels
-   */
-  std::vector<DiracKernel *> & all();
+  DiracKernelIterator diracKernelsBegin();
+  DiracKernelIterator diracKernelsEnd();
 
   void addDiracKernel(DiracKernel *DiracKernel);
     

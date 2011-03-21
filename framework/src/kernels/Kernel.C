@@ -89,7 +89,6 @@ Kernel::computeResidual()
 {
   DenseVector<Number> & re = _var.residualBlock();
 
-  precalculateResidual();
   for (_i = 0; _i < _phi.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {

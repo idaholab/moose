@@ -14,6 +14,8 @@
 #include "TransientInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
+#include "SubProblemInterface.h"
+#include "MooseMesh.h"
 
 //libMesh includes
 #include "libmesh_common.h"
@@ -41,11 +43,10 @@ class DiracKernel :
   public FunctionInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
-  public GeometricSearchInterface
+  protected GeometricSearchInterface
 {
 public:
   DiracKernel(const std::string & name, InputParameters parameters);
-  
   virtual ~DiracKernel(){}
   
   /** 
@@ -57,6 +58,11 @@ public:
    * Computes the jacobian for the current element.
    */
   virtual void computeJacobian();
+
+  /**
+   * The variable number that this object operates on.
+   */
+  MooseVariable & variable() { return _var; }
 
   /**
    * This is where the DiracKernel should call addPoint() for each point it needs to have a
@@ -100,7 +106,6 @@ public:
   void clearPoints();
   
 protected:
-
   /**
    * Add the physical x,y,z point located in the element "elem" to the list of points
    * this DiracKernel will be asked to evaluate a value at.
@@ -113,18 +118,22 @@ protected:
    *
    * This spawns a search for the element containing that point!
    */
-  void addPoint(Point p);
-  
-  SubProblem & _problem;
+  void addPoint(Point p);  
 
-//  Moose::DiracKernelData & _dirac_kernel_data;
-//  Moose::DiracKernelInfo & _dirac_kernel_info;
-//
-//  /**
-//   * The name of the variable this DiracKernel acts on.
-//   */
-//  std::string _var_name;
-//
+  Problem & _problem;
+  SubProblemInterface & _subproblem;
+  SystemBase & _sys;
+
+  THREAD_ID _tid;
+
+  MooseVariable & _var;
+  MooseMesh & _mesh;
+
+  int _dim;
+
+  DiracKernelInfo & _dirac_kernel_info;
+
+
   /**
    * The list of elements that need distributions.
    */
@@ -134,52 +143,54 @@ protected:
    * The list of physical xyz Points that need to be evaluated in each element.
    */
   std::map<const Elem *, std::set<Point> > _points;
-//
-//  ////////////////////////
-//
-//  DofData & _dof_data;                          /// Convenience reference to the DofData object inside of MooseSystem
-//
-//  Moose::Array<Real> & _u;                      /// Holds the current solution at the current quadrature point.
-//  Real _u_node;                                 /// The value of _u at a nodal position.  Used by non-integrated boundaries.
-//
-//  Moose::Array<RealGradient> & _grad_u;         /// Holds the current solution gradient at the current quadrature point.
-//  Moose::Array<RealTensor> & _second_u;         /// Holds the current solution second derivative at the current quadrature point.
-//
-//  Moose::Array<Real> & _u_dot;                  /// Time derivative of u
-//  Moose::Array<Real> & _du_dot_du;              /// Derivative of u_dot wrt u
-//
-//  Moose::Array<Real> & _u_old;                  /// Holds the previous solution at the current quadrature point.
-//  MooseArray<RealGradient> & _grad_u_old;       /// Holds the previous solution gradient at the current quadrature point.
-//
-//  MooseArray<Real> & _u_older;                  /// Holds the t-2 solution at the current quadrature point.
-//  MooseArray<RealGradient> & _grad_u_older;     /// Holds the t-2 solution gradient at the current quadrature point.
-//
-//  /**
-//   * Interior test function.
-//   *
-//   * These are non-const so they can be modified for stabilization.
-//   */
-//  std::vector<std::vector<Real> > & _test;
-//
-//  /**
-//   * Gradient of interior test function.
-//   */
-//  const std::vector<std::vector<RealGradient> > & _grad_test;
-//
-//  /**
-//   * Second derivative of interior test function.
-//   */
-//  const std::vector<std::vector<RealTensor> > & _second_test;
-//
-//  /**
-//   * The points on the current element.
-//   */
-//  std::vector<Point> & _current_points;
+  
+  /**
+   * The points on the current element.
+   */
+  //std::vector<Point> & _current_points;
 
   /**
    * The current point.
    */
   Point _current_point;
+
+  const Elem * & _current_elem;
+
+  unsigned int _qp;
+  const std::vector< Point > & _q_point;
+  QBase * & _qrule;
+  const std::vector<Real> & _JxW;
+
+   unsigned int _i, _j;
+  // shape functions
+  const std::vector<std::vector<Real> > & _phi;
+  const std::vector<std::vector<RealGradient> > & _grad_phi;
+  const std::vector<std::vector<RealTensor> > & _second_phi;
+  // test functions
+  const std::vector<std::vector<Real> > & _test;
+  const std::vector<std::vector<RealGradient> > & _grad_test;
+  const std::vector<std::vector<RealTensor> > & _second_test;
+
+  VariableValue & _u;                                   /// Holds the solution at current quadrature points
+  VariableValue & _u_old;                               /// Holds the previous solution at the current quadrature point.
+  VariableValue & _u_older;                             /// Holds the t-2 solution at the current quadrature point.
+
+  VariableGradient & _grad_u;                               /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u_old;                           /// Holds the previous solution gradient at the current quadrature point.
+  VariableGradient & _grad_u_older;                         /// Holds the t-2 solution gradient at the current quadrature point.
+
+  VariableSecond & _second_u;
+  VariableSecond & _second_u_old;
+  VariableSecond & _second_u_older;
+
+  VariableValue & _u_dot;                               /// Time derivative of u
+  VariableValue & _du_dot_du;                           /// Derivative of u_dot wrt u
+
+  // Single Instance Variables
+  Real & _real_zero;
+  Array<Real> & _zero;
+  Array<RealGradient> & _grad_zero;
+  Array<RealTensor> & _second_zero;
 };
  
 #endif

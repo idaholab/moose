@@ -57,7 +57,12 @@ public:
   void reinit(const Elem * elem);
 
   /**
-   * Reinitialize the assembly data at specific point in the reference element.
+   * Reinitialize the assembly data at specific physical point in the given element.
+   */
+  void reinitAtPhysical(const Elem * elem, const std::vector<Point> & physical_points);
+
+  /**
+   * Reinitialize the assembly data at specific points in the reference element.
    */
   void reinit(const Elem * elem, const std::vector<Point> & reference_points);
   

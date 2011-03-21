@@ -1,15 +1,20 @@
 #ifndef SUBPROBLEMINTERFACE_H
 #define SUBPROBLEMINTERFACE_H
 
-#include <string>
+// Moose
 #include "MooseVariable.h"
 #include "ParallelUniqueId.h"
 #include "VariableWarehouse.h"
+#include "DiracKernelInfo.h"
+
 // libMesh
 #include "elem.h"
 #include "node.h"
 #include "MooseMesh.h"
 #include "equation_systems.h"
+
+// system
+#include <string>
 
 class MooseMesh;
 class GeometricSearchData;
@@ -33,9 +38,13 @@ public:
   virtual unsigned int & side(THREAD_ID tid) = 0;
   virtual const Elem * & sideElem(THREAD_ID tid) = 0;
   virtual const Node * & node(THREAD_ID tid) = 0;
+  virtual DiracKernelInfo & diracKernelInfo() { return _dirac_kernel_info; }
 
   // Geom Search
   virtual GeometricSearchData & geomSearchData() = 0;
+
+protected:
+  DiracKernelInfo _dirac_kernel_info;
 };
 
 #endif /* SUBPROBLEMINTERFACE_H */

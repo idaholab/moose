@@ -10,6 +10,7 @@
 #include "MaterialData.h"
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
+#include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 
 #include "nonlinear_solver.h"
@@ -17,6 +18,7 @@
 #include "dense_vector.h"
 #include "boundary_info.h"
 #include "petsc_matrix.h"
+#include "numeric_vector.h"
 #include "mesh.h"
 
 namespace Moose {
@@ -62,6 +64,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
   _kernels.resize(n_threads);
   _bcs.resize(n_threads);
   _stabilizers.resize(n_threads);
+  _dirac_kernels.resize(libMesh::n_threads());
   _dampers.resize(n_threads);
 }
 
@@ -150,6 +153,22 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
 }
 
 void
+NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
+
+    DiracKernel *kernel = static_cast<DiracKernel *>(Factory::instance()->create(kernel_name, name, parameters));
+    mooseAssert(kernel != NULL, "Not a Dirac Kernel object");
+
+    _dirac_kernels[tid].addDiracKernel(kernel);
+  }
+}
+
+
+void
 NonlinearSystem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -186,6 +205,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
   computeTimeDeriv();
   computeResidualInternal(residual);
   finishResidual(residual);
+  computeDiracContributions(&residual);
 
   Moose::perf_log.pop("compute_residual()","Solve");
 }
@@ -365,6 +385,8 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   Threads::parallel_reduce(elem_range, cj);
   jacobian.close();
 
+  computeDiracContributions(NULL, &jacobian);
+  
   // do nodal BC
   std::vector<unsigned int> nodes;
   std::vector<short int> ids;
@@ -581,6 +603,49 @@ NonlinearSystem::computeDamping(const NumericVector<Number>& update)
   Moose::perf_log.pop("compute_dampers()","Solve");
 
   return damping;
+}
+
+void
+NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
+                                           SparseMatrix<Number> * jacobian)
+{
+  Moose::perf_log.push("computeDiracContributions()","Solve");
+
+  _mproblem.clearDiracInfo();
+
+  std::set<const Elem *> dirac_elements;
+
+  // TODO: Need a threading fix... but it's complicated!
+  DiracKernelIterator dirac_kernel_begin = _dirac_kernels[0].diracKernelsBegin();
+  DiracKernelIterator dirac_kernel_end = _dirac_kernels[0].diracKernelsEnd();
+  DiracKernelIterator dirac_kernel_it = dirac_kernel_begin;
+
+  for(dirac_kernel_it=dirac_kernel_begin;dirac_kernel_it!=dirac_kernel_end;++dirac_kernel_it)
+  {
+    (*dirac_kernel_it)->clearPoints();
+    (*dirac_kernel_it)->addPoints();
+  }
+
+  if(dirac_kernel_begin != dirac_kernel_end)
+  {
+    ComputeDiracThread cd(_mproblem, *this, residual, jacobian);
+
+    _mproblem.getDiracElements(dirac_elements);
+
+    DistElemRange range(dirac_elements.begin(),
+                        dirac_elements.end(),
+                        1);
+    
+    Threads::parallel_reduce(range, cd);
+  }
+
+  if(residual)
+    residual->close();
+  else if(jacobian)
+    jacobian->close();
+
+  Moose::perf_log.pop("computeDiracContributions()","Solve");
+
 }
 
 void

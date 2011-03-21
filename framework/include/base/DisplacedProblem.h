@@ -51,10 +51,15 @@ public:
   // reinit /////
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
+  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+
+  /// Fills "elems" with the elements that should be looped over for Dirac Kernels
+  virtual void getDiracElements(std::set<const Elem *> & elems);
+  virtual void clearDiracInfo();
 
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
@@ -87,8 +92,6 @@ protected:
 
   std::vector<AssemblyData *> _asm_info;
 
-//  std::vector<DiracKernelData *> _dirac_kernel_data;
-//  DiracKernelInfo _dirac_kernel_info_displaced;
   GeometricSearchData _geometric_search_data;
 
   ExodusOutput _ex;

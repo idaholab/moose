@@ -118,6 +118,32 @@ MProblem::prepare(const Elem * elem, THREAD_ID tid)
   _aux.prepare(tid);
 }
 
+bool
+MProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
+{
+  std::set<Point> & points_set = _dirac_kernel_info._points[elem];
+
+  bool have_points = points_set.size();
+
+  if(have_points)
+  {
+    std::vector<Point> points(points_set.size());
+    std::copy(points_set.begin(), points_set.end(), points.begin());
+
+    _asm_info[tid]->reinitAtPhysical(elem, points);
+
+    _nl.prepare(tid);
+    _aux.prepare(tid);
+
+    reinitElem(elem, tid);
+  }
+  
+  if (_displaced_problem != NULL && (_reinit_displaced_elem))
+    have_points = have_points || _displaced_problem->reinitDirac(_displaced_mesh->elem(elem->id()), tid);
+
+  return have_points;
+}
+
 void
 MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
@@ -166,6 +192,38 @@ MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
   _aux.reinitNodeFace(node, bnd_id, tid);
 
 }
+
+void
+MProblem::getDiracElements(std::set<const Elem *> & elems)
+{
+  // First add in the undisplaced elements
+  elems =_dirac_kernel_info._elements;
+
+  if(_displaced_problem)
+  {
+    std::set<const Elem *> displaced_elements;
+    _displaced_problem->getDiracElements(displaced_elements);
+  
+    { // Use the ids from the displaced elements to get the undisplaced elements
+      // and add them to the list
+      std::set<const Elem *>::iterator it = displaced_elements.begin();
+      std::set<const Elem *>::iterator end = displaced_elements.end();
+      
+      for(;it != end; ++it)
+        elems.insert(_mesh.elem((*it)->id()));
+    }
+  }
+}
+
+void
+MProblem::clearDiracInfo()
+{
+  _dirac_kernel_info.clearPoints();
+
+  if(_displaced_problem)
+    _displaced_problem->clearDiracInfo();
+}
+
 
 void
 MProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
@@ -261,6 +319,24 @@ MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
   _aux.addBoundaryCondition(bc_name, name, parameters);
+}
+
+void
+MProblem::addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_nl;
+  }
+  _nl.addDiracKernel(kernel_name, name, parameters);
 }
 
 // Initial Conditions /////

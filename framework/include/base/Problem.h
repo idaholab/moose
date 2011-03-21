@@ -35,6 +35,7 @@ public:
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
+
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
@@ -43,6 +44,15 @@ public:
   // Materials /////
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid) = 0;
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid) = 0;
+
+  /// Returns true if the Problem has Dirac kernels it needs to compute on elem.
+  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid){ mooseError("Cannont reinit this Problem with arbitrary quadrature points!"); };
+
+  /// Fills "elems" with the elements that should be looped over for Dirac Kernels
+  virtual void getDiracElements(std::set<const Elem *> & elems){ mooseError("Cannont retrieve Dirac elements from this problem!"); };
+
+  /// Get's called before Dirac Kernels are asked to add the points they are supposed to be evaluated in
+  virtual void clearDiracInfo(){ mooseError("Cannont clear Dirac Info this problem!"); };
 
   // Solve /////
   virtual void init() = 0;
