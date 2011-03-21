@@ -37,7 +37,6 @@ InputParameters validParams<DiracKernel>();
  */
 class DiracKernel :
   public Object,
-  public Moose::Integrable,
   public Moose::Coupleable,
   public FunctionInterface,
   public Moose::TransientInterface,

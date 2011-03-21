@@ -9,8 +9,7 @@
 #include "quadrature.h"
 
 class IntegratedBC :
-  public BoundaryCondition,
-  public Moose::Integrable
+  public BoundaryCondition
 {
 public:
   IntegratedBC(const std::string & name, InputParameters parameters);

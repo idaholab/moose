@@ -22,7 +22,6 @@ class System;
 
 class Kernel :
   public Object,
-  public Moose::Integrable,
   public Moose::Coupleable,
   public FunctionInterface,
   public Moose::TransientInterface,
