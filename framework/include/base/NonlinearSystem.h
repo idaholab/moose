@@ -58,6 +58,7 @@ public:
   virtual NumericVector<Number> & solutionUDot() { return _solution_u_dot; }
   virtual NumericVector<Number> & solutionDuDotDu() { return _solution_du_dot_du; }
 
+  virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
       
   virtual NumericVector<Number> & residualCopy();

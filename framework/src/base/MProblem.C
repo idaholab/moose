@@ -548,12 +548,10 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
 {
   if (pps[0]._block_ids_with_postprocessors.size() > 0 || pps[0]._boundary_ids_with_postprocessors.size() > 0)
   {
-    // FIXME: this should go somewhere else
-//    if (_serialize_solution)
-//      serializeSolution(soln);
-//
-//    if (_has_displaced_mesh)
-//      updateDisplacedMesh(soln);
+    serializeSolution();
+
+    if (_displaced_problem != NULL)
+      _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
 
     _aux.compute();
 
@@ -962,4 +960,11 @@ MProblem::checkProblemIntegrity()
     
     _nl.checkBCCoverage(mesh_bcs);
   }
+}
+
+void
+MProblem::serializeSolution()
+{
+  _nl.serializeSolution();
+  _aux.serializeSolution();
 }

@@ -28,6 +28,7 @@ public:
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
 
+  virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
   
   virtual void compute();

@@ -688,10 +688,16 @@ NonlinearSystem::residualCopy()
 }
 
 void
-NonlinearSystem::set_solution(const NumericVector<Number> & soln)
+NonlinearSystem::serializeSolution()
 {
   if(_need_serialized_solution)
     _nl_solution.localize(_serialized_solution);
+ }
+
+void
+NonlinearSystem::set_solution(const NumericVector<Number> & soln)
+{
+  serializeSolution();
 }
 
 NumericVector<Number> &

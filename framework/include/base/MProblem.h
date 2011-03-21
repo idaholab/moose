@@ -148,6 +148,8 @@ public:
 
   void checkProblemIntegrity();
 
+  void serializeSolution();
+
 protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;

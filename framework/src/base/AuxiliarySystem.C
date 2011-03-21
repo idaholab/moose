@@ -149,12 +149,17 @@ AuxiliarySystem::serializedSolution()
 }
 
 void
+AuxiliarySystem::serializeSolution()
+{
+  if(_need_serialized_solution)
+    solution().localize(_serialized_solution);
+}
+
+void
 AuxiliarySystem::compute()
 {
   computeInternal(_auxs);
-
-  if(_need_serialized_solution)
-    solution().localize(_serialized_solution);
+  serializeSolution();
 }
 
 void
