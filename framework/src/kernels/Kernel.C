@@ -29,7 +29,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _test_var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
 
     _current_elem(_var.currentElem()),
-    _q_point(_var.points()),
+    _q_point(_var.qpoints()),
     _qrule(_var.qRule()),
     _JxW(_var.JxW()),
 

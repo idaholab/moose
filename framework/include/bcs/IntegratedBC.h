@@ -27,6 +27,7 @@ protected:
 
   unsigned int _qp;
   QBase * & _qrule;
+  const std::vector< Point > & _q_point;
   const std::vector<Real> & _JxW;
   unsigned int _i, _j;
 

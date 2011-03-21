@@ -18,10 +18,11 @@ Variable::Variable(unsigned int var_num, int dim, const FEType & fe_type, System
     _qrule(NULL),
     _fe(FEBase::build(dim, fe_type).release()),
     _elem(NULL),
-    _points(_fe->get_xyz()),
+    _qpoints(_fe->get_xyz()),
     _JxW(_fe->get_JxW()),
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi()),
+    _normals(_fe->get_normals()),
     _node(NULL)
 {
 }

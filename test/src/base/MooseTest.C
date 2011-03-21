@@ -22,6 +22,7 @@
 #include "DirichletBC.h"
 #include "NeumannBC.h"
 #include "FunctionDirichletBC.h"
+#include "FunctionNeumannBC.h"
 #include "MTBC.h"
 #include "MatchedValueBC.h"
 
@@ -61,6 +62,7 @@ void registerObjects()
   registerObject(DirichletBC);
   registerObject(NeumannBC);
   registerObject(FunctionDirichletBC);
+  registerObject(FunctionNeumannBC);
   registerObject(MTBC);
   registerObject(MatchedValueBC);
 

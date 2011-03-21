@@ -15,6 +15,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     _test_var(_problem.getVariable(0, parameters.get<std::string>("variable"))),
 
     _qrule(_var.qRule()),
+    _q_point(_var.qpoints()),
     _JxW(_var.JxW()),
 
     _phi(_var.phi()),

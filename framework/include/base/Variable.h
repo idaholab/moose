@@ -53,11 +53,12 @@ public:
   unsigned int & currentSide() { return _current_side; }
 
   QBase * & qRule() { return _qrule; }
-  const std::vector<Point> & points() { return _points; }
+  const std::vector<Point> & qpoints() { return _qpoints; }
   const std::vector<Real> & JxW() { return _JxW; }
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
+  const std::vector<Point> & normals() { return _normals; }
 
   VariableValue & sln() { return _u; }
   VariableValue & slnOld() { return _u_old; }
@@ -106,11 +107,12 @@ protected:
 
   std::vector<unsigned int> _dof_indices;
 
-  const std::vector<Point> & _points;
+  const std::vector<Point> & _qpoints;
   const std::vector<Real> & _JxW;
 
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
+  const std::vector<Point> & _normals;
 
   VariableValue _u;
   VariableValue _u_old;

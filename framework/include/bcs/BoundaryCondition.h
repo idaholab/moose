@@ -40,6 +40,8 @@ protected:
 
   const Elem * & _current_elem;
   unsigned int & _current_side;
+
+  const std::vector<Point> & _normals;
 };
 
 

@@ -60,15 +60,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [Executioner]
   type = Steady
   perf_log = true
