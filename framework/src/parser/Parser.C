@@ -207,6 +207,8 @@ Parser::Parser(const std::string &dump_string) :
   }
   else
     printUsage();
+
+  Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
 }
 
 Parser::~Parser()

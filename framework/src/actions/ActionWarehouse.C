@@ -15,6 +15,12 @@ ActionWarehouse::~ActionWarehouse()
 }
 
 void
+ActionWarehouse::clear()
+{
+  _action_blocks.clear();
+}
+
+void
 ActionWarehouse::registerName(std::string action, bool is_required)
 {
   _actions.addItem(action);

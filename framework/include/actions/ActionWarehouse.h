@@ -18,6 +18,8 @@ public:
   ActionWarehouse();
   ~ActionWarehouse();
 
+  void clear();
+
   void registerName(std::string action, bool is_required);
   void addDependency(std::string action, std::string pre_req);
   void addActionBlock(Action * blk);

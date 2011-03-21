@@ -58,6 +58,7 @@
 #include "ElementH1SemiError.h"
 #include "ElementIntegral.h"
 #include "ElementL2Error.h"
+#include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
 #include "PrintDOFs.h"
 #include "PrintDT.h"
@@ -165,6 +166,7 @@ registerObjects()
   registerObject(ElementH1SemiError);
   registerObject(ElementIntegral);
   registerObject(ElementL2Error);
+  registerObject(EmptyPostprocessor);
   registerObject(NodalVariableValue);
   registerObject(PrintDOFs);
   registerObject(PrintDT);

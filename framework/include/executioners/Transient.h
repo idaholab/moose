@@ -74,9 +74,11 @@ public:
    */
   virtual bool lastSolveConverged();
 
-protected:
   virtual void preExecute();
 
+  virtual void endStep();
+
+protected:
   MProblem _problem;
 
   int & _t_step;                        /// Current timestep.

@@ -26,8 +26,9 @@ SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters param
     Action(name, params)
 {
    std::cerr << "Constructing SetupMeshAction"
-            << "\nname: " << _name
-             << "\naction: " << _action << "\n\n";
+             << "\nname: " << _name
+             << "\naction: " << _action << "\n\n"
+             << "handle = " << &_parser_handle << std::endl;
 }
 
 void
@@ -35,7 +36,8 @@ SetupMeshAction::act()
 {
   std::cerr << "Acting on SetupMeshAction"
             << "\nname: " << _name
-            << "\naction: " << _action << "\n\n";
+            << "\naction: " << _action << "\n\n"
+            << "handle = " << &_parser_handle << std::endl;
 
 
 //  int mesh_dim = isParamValid("dim") ? getParam<int>("dim") : 1;

@@ -164,20 +164,26 @@ Transient::takeStep(Real input_dt)
   {
     _problem.computePostprocessors();
 
-    if (((_t_step + 1) % _problem.out().interval() == 0 || _reset_dt))
-      _problem.output();
-
-    _problem.outputPostprocessors();
-
-    if (_problem.adaptivity().isOn())
-    {
-      _problem.adaptMesh();
-      _problem.out().meshChanged();
-    }
-
-    _t_step++;
-    _time_old = _time;
+    endStep();
   }
+}
+
+void
+Transient::endStep()
+{
+  if (((_t_step + 1) % _problem.out().interval() == 0 || _reset_dt))
+    _problem.output();
+
+  _problem.outputPostprocessors();
+
+  if (_problem.adaptivity().isOn())
+  {
+    _problem.adaptMesh();
+    _problem.out().meshChanged();
+  }
+
+  _t_step++;
+  _time_old = _time;
 }
 
 Real

@@ -6,6 +6,7 @@
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
+#include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseMesh.h"
 
@@ -27,6 +28,7 @@ class AuxKernel :
   public FunctionInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
+  public PostprocessorInterface,
   protected GeometricSearchInterface
 {
 public:
