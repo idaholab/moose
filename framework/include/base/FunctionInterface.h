@@ -30,11 +30,9 @@ public:
   Function & getFunction(const std::string & name);
 
 private:
-  Moose::SubProblem & _func_problem;
-  THREAD_ID _func_tid;
-  //prefixed all member data with _func to prevent future Multiple Inheritance
-  //issues. The compiler will complain even though it's private data
-  InputParameters _func_params;
+  Moose::SubProblem & _subproblem;
+  THREAD_ID _tid;
+  InputParameters _params;
 };
 
 #endif //FUNCTIONINTERFACE_H_
