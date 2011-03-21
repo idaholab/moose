@@ -256,7 +256,6 @@ Material::computeQpProperties()
 void
 Material::updateDataState()
 {
-#if 0
   if (_qp_prev.size() != _qp_curr.size()) throw std::out_of_range("_qp_prev != _qp_curr");
 
   std::map<unsigned int, std::vector<QpData *> >::iterator i_prev = _qp_prev.begin();
@@ -267,7 +266,6 @@ Material::updateDataState()
          j_prev != i_prev->second.end();
          ++j_prev, ++j_curr)
       *j_prev = *j_curr;
-#endif
 
   if (_has_stateful_props)
   {
@@ -280,7 +278,6 @@ void
 Material::timeStepSetup()
 {}
 
-#if 0
 QpData *
 Material::createData()
 {
@@ -322,4 +319,3 @@ Material::getData(QP_Data_Type qp_data_type)
     return *v;
   }
 }
-#endif

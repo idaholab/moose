@@ -166,6 +166,7 @@ public:
 
   virtual void copySolutionsBackwards()
   {
+    _sys.update();
     *_sys.older_local_solution = *_sys.current_local_solution;
     *_sys.old_local_solution   = *_sys.current_local_solution;
   }

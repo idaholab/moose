@@ -18,6 +18,17 @@ class SubProblemInterface;
 class MaterialData;
 
 /**
+ * Holds a data structure used to compute material properties at a Quadrature point
+ */
+struct QpData
+{
+  virtual ~QpData(){}
+
+  inline virtual QpData& operator=(const QpData &) { return *this; }
+};
+
+
+/**
  * Holds material properties that are assigned to blocks.
  */
 class Material :
@@ -121,7 +132,7 @@ protected:
 //     }
 //  };
   
-//  enum QP_Data_Type { CURR, PREV };
+  enum QP_Data_Type { CURR, PREV };
 
   /**
    * All materials must override this virtual.
@@ -135,7 +146,6 @@ protected:
    */
   virtual void computeQpProperties();
 
-#if 0
   /**
    * This function is called to create the data structure that will be associated
    * with a quadrature point
@@ -147,7 +157,6 @@ protected:
    * the quadrature points on the current element
    */
   virtual std::vector<QpData *> & getData(QP_Data_Type qp_data_type);
-#endif
 
   /**
    * Block ID this material is active on.
@@ -187,10 +196,8 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
 
-#if 0
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
-#endif
 
   /**
    * Data structure to map names with values.

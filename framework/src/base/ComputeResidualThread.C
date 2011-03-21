@@ -2,6 +2,7 @@
 
 #include "NonlinearSystem.h"
 #include "Problem.h"
+#include "MProblem.h"
 
 // libmesh includes
 #include "threads.h"

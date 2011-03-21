@@ -810,19 +810,7 @@ MProblem::copyOldSolutions()
 void
 MProblem::onTimestepBegin()
 {
-  if (converged())
-    copyOldSolutions();
-  else
-    _nl.restoreSolutions();
-  _nl.update();
-
   _nl.onTimestepBegin();
-
-  if (converged())
-  {
-    // Update backward material data structures
-    updateMaterials();
-  }
 }
 
 void
@@ -843,7 +831,6 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
 
   _aux.compute();
-
   _nl.computeResidual(residual);
 }
 

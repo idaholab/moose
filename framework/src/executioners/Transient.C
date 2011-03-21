@@ -118,6 +118,14 @@ Transient::execute()
 void
 Transient::takeStep(Real input_dt)
 {
+  if (_converged)
+  {
+    _problem.copyOldSolutions();
+  }
+  else
+    _problem.getNonlinearSystem().restoreSolutions();
+  _problem.getNonlinearSystem().update();
+
   _dt_old = _dt;
   if (input_dt == -1.0)
     _dt = computeConstrainedDT();
@@ -125,6 +133,11 @@ Transient::takeStep(Real input_dt)
     _dt = input_dt;
 
   _problem.onTimestepBegin();
+  if (_converged)
+  {
+    // Update backward material data structures
+    _problem.updateMaterials();
+  }
 
   // Increment time
   _time = _time_old + _dt;
