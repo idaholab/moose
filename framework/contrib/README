@@ -1,9 +1,0 @@
-This directory is for 3rd party codes that are redistributed with MOOSE.  
-
-fparser/
-  /***************************************************************************\
-  |* Function Parser for C++ v4.2                                            *|
-  |*-------------------------------------------------------------------------*|
-  |* Copyright: Juha Nieminen, Joel Yliluoma                                 *|
-  |* License: lgpl v3 (http://www.gnu.org/copyleft/lesser.html)              *|
-  /***************************************************************************\
