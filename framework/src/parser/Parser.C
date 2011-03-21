@@ -57,7 +57,6 @@
 // libMesh
 #include "getpot.h"
 
-
 // Static Data initialization
 const std::string Parser::_show_tree = "--show_tree";
 
@@ -250,9 +249,9 @@ Parser::isSectionActive(const std::string & s,
   return retValue;
 }
 
-
+#if PARSER_ACTION == 1
 void
-Parser::parse_new(const std::string &input_filename)
+Parser::parse(const std::string &input_filename)
 {
   std::string curr_identifier;
   std::map<std::string, std::vector<std::string> > active_lists;
@@ -324,6 +323,8 @@ Parser::parse_new(const std::string &input_filename)
     }
   }
 }
+
+#else
 
 void
 Parser::parse(const std::string &input_filename)
@@ -433,6 +434,8 @@ Parser::parse(const std::string &input_filename)
 #endif
   }
 }
+
+#endif
 
 void
 Parser::buildFullTree( const std::string format )
@@ -761,8 +764,9 @@ Parser::fixupOptionalBlocks()
 #endif
 }
 
+#if PARSER_ACTION == 1
 void
-Parser::execute_new()
+Parser::execute()
 {
   /// Iterate over the actions inside of the ActionWarehouse
   /// TODO: Make this work instead of the parser block actions below
@@ -773,6 +777,7 @@ Parser::execute_new()
     (*a)->act();
 }
 
+#else
 
 void
 Parser::execute()
@@ -788,7 +793,6 @@ Parser::execute()
     if (blk)
       blk->execute();
   }
-
   
 //  ParserBlock * meshb = _input_tree->locateBlock("Mesh");
 //  if (meshb)
@@ -803,6 +807,8 @@ Parser::execute()
 //    outb->execute();
 
 }
+
+#endif
 
 void
 Parser::printTree()
@@ -847,6 +853,8 @@ void
 Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
   static const std::string global_params_block_name = "GlobalParams";
+
+#if PARSER_ACTION == 1
   static const std::string global_params_action_name = "set_global_params";
   ActionIterator act_iter = Moose::action_warehouse.actionBlocksWithActionBegin(global_params_action_name);
   GlobalParamsAction *global_params_block = NULL;
@@ -854,10 +862,14 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
   // We are grabbing only the first 
   if (act_iter != Moose::action_warehouse.actionBlocksWithActionEnd(global_params_action_name))
     global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
-  
-  //ParserBlock *parser_block = _input_tree != NULL ? _input_tree->locateBlock(global_params_block_name) : NULL;
-  //GlobalParamsBlock *global_params_block = parser_block != NULL ? dynamic_cast<GlobalParamsBlock *>(parser_block) : NULL;
 
+#else
+
+  ParserBlock *parser_block = _input_tree != NULL ? _input_tree->locateBlock(global_params_block_name) : NULL;
+  GlobalParamsBlock *global_params_block = parser_block != NULL ? dynamic_cast<GlobalParamsBlock *>(parser_block) : NULL;
+
+#endif
+  
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
   {
     bool found = false;
@@ -931,7 +943,13 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 }
 
 template<typename T>
-void Parser::setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block)
+void Parser::setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global,
+#if PARSER_ACTION == 1
+                                GlobalParamsAction
+#else
+                                GlobalParamsBlock
+#endif
+                                *global_block)
 {
   T value = _getpot_file(full_name.c_str(), param->get());
   
@@ -941,7 +959,13 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
 }
 
 template<typename T>
-void Parser::setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block)
+void Parser::setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global,
+#if PARSER_ACTION == 1
+                                GlobalParamsAction
+#else
+                                GlobalParamsBlock
+#endif
+                                *global_block)
 {
   int vec_size = _getpot_file.vector_variable_size(full_name.c_str());
 
@@ -960,7 +984,13 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
 }
 
 template<typename T>
-void Parser::setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block)
+void Parser::setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global,
+#if PARSER_ACTION == 1
+                                GlobalParamsAction
+#else
+                                GlobalParamsBlock
+#endif
+                                *global_block)
 {
   int vec_size = _getpot_file.vector_variable_size(full_name.c_str());
   int one_dim = pow(vec_size, 0.5);

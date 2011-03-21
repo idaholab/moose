@@ -1,10 +1,18 @@
 #ifndef PARSER_H_
 #define PARSER_H_
 
+// Set to 1 to use Actions, 0 for ParserBlocks
+#define PARSER_ACTION 1 
+
 #include <list>
 
 #include "ParserBlock.h"
+
+#if PARSER_ACTION == 1
 #include "GlobalParamsAction.h"
+#else
+#include "GlobalParamsBlock.h"
+#endif
 
 // libMesh
 #include "getpot.h"
@@ -46,14 +54,12 @@ public:
    * in the MOOSE derived application
    */
   void parse(const std::string &input_filename);
-  void parse_new(const std::string &input_filename);
   
   /**
    * This function initiates the traversal of the parse block tree which is each block is resposible
    * for creating and filling in various MOOSE based objects.
    */
   void execute();
-  void execute_new();
 
   /**
    * Prints the Parser Block tree
@@ -168,13 +174,33 @@ private:
    * since they are colled only from this Object
    */
   template<typename T>
-  void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
+  void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global,
+#if PARSER_ACTION == 1
+                                GlobalParamsAction
+#else
+                                GlobalParamsBlock
+#endif
+                          *global_block);
+  
   
   template<typename T>
-  void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
+  void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global,
+#if PARSER_ACTION == 1
+                                GlobalParamsAction
+#else
+                                GlobalParamsBlock
+#endif
+                          *global_block);
+  
 
   template<typename T>
-  void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block);
+  void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global,
+#if PARSER_ACTION == 1
+                                GlobalParamsAction
+#else
+                                GlobalParamsBlock
+#endif
+                          *global_block);
 
   /************************************
    * Private Data Members

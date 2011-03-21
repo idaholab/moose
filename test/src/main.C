@@ -9,8 +9,7 @@
 // Create a performance log
 PerfLog Moose::perf_log("Moose Test");
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   MooseInit init(argc, argv);
   MooseTest::registerObjects();
@@ -23,14 +22,8 @@ main(int argc, char *argv[])
   else
     p.printUsage();
 
-// '1' to use Actions '0' to use old Parsing System
-#if 1
-  p.parse_new(input_filename);
-  p.execute_new();
-#else
   p.parse(input_filename);
   p.execute();
-#endif
 
   Executioner *e = p.getExecutioner();
   e->execute();
