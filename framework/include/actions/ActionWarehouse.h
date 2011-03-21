@@ -23,7 +23,7 @@ public:
   void addActionBlock(Action * blk);
 
   ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
-  ActionIterator actionBlocksWithActionEnd();
+  ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
   
   /// Iterators to ordered Actions
   // TODO: Right now all Actions require a Parser pointer when setting up the problem.

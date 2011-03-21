@@ -29,7 +29,7 @@ CopyNodalVarsAction::act()
   for (std::map<std::string, SystemBase *>::iterator it = action_system.begin(); it != action_system.end(); ++it)
   {
     ActionIterator var_it = Moose::action_warehouse.actionBlocksWithActionBegin(it->first);
-    for ( ; var_it != Moose::action_warehouse.actionBlocksWithActionEnd(); ++var_it)
+    for ( ; var_it != Moose::action_warehouse.actionBlocksWithActionEnd(it->first); ++var_it)
     {
       if (AddVariableAction * var_action = dynamic_cast<AddVariableAction *>(*var_it))
       {

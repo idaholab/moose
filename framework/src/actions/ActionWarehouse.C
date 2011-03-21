@@ -43,14 +43,13 @@ ActionWarehouse::addActionBlock(Action * blk)
 ActionIterator
 ActionWarehouse::actionBlocksWithActionBegin(const std::string & action_name)
 {
-  _curr_action_name = action_name;
   return _action_blocks[action_name].begin();
 }
 
 ActionIterator
-ActionWarehouse::actionBlocksWithActionEnd()
+ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
 {
-  return _action_blocks[_curr_action_name].end();
+  return _action_blocks[action_name].end();
 }
 
 ActionIterator

@@ -97,7 +97,7 @@ SetupMeshAction::act()
 
   // There is no setup execution action satisfied, create the MProblem class by ourselves
   if (Moose::action_warehouse.actionBlocksWithActionBegin("setup_executioner") ==
-      Moose::action_warehouse.actionBlocksWithActionEnd())
+      Moose::action_warehouse.actionBlocksWithActionEnd("setup_executioner"))
     _parser_handle._problem = new MProblem(*mesh);
 }
 

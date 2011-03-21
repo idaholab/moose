@@ -103,7 +103,7 @@ CreateExecutionerAction::act()
     // FIXME: HACK! Can initialize displaced problem after we have instance of problem
     // TODO: Make this into another action
     ActionIterator mesh_it = Moose::action_warehouse.actionBlocksWithActionBegin("setup_mesh");
-    mooseAssert (mesh_it != Moose::action_warehouse.actionBlocksWithActionEnd(), "No Mesh Block Found!");
+    mooseAssert (mesh_it != Moose::action_warehouse.actionBlocksWithActionEnd("setup_mesh"), "No Mesh Block Found!");
     if ((*mesh_it)->isParamValid("displacements"))
     {
       std::vector<std::string> displacements = (*mesh_it)->getParam<std::vector<std::string> >("displacements");
