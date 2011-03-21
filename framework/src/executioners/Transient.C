@@ -142,7 +142,7 @@ Transient::takeStep(Real input_dt)
     std::cout << out.str() << std::endl;
   }
     
-  _problem.getNonlinearSystem().setScaling();
+//  _problem.getNonlinearSystem().setScaling();
 
   preSolve();
     

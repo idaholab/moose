@@ -50,7 +50,6 @@ public:
     unsigned int num_var_nums = var_nums.size();
     unsigned int num_aux_var_nums = aux_var_nums.size();
 
-
     unsigned int nonlinear_system_number = _problem._nl.sys().number();
     unsigned int aux_system_number = _problem._aux.sys().number();
 
@@ -190,9 +189,16 @@ DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & ty
 }
 
 void
-DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
+DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
+  _nl.prepare(tid);
+  _aux.prepare(tid);
+}
+
+void
+DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
+{
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
 }

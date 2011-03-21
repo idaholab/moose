@@ -36,6 +36,7 @@ namespace Moose {
   protected:
     NumericVector<Number> & _residual;
     ImplicitSystem & _sys;
+    std::set<Variable *> _vars;
 
   public:
     ComputeResidualThread(Problem & problem, ImplicitSystem & sys, NumericVector<Number> & residual) :
@@ -51,6 +52,12 @@ namespace Moose {
       _residual(x._residual),
       _sys(x._sys)
     {
+    }
+
+    virtual void preElement(const Elem *elem)
+    {
+      _vars.clear();
+      _problem.prepare(elem, _tid);
     }
 
     virtual void onElement(const Elem *elem)
@@ -70,13 +77,11 @@ namespace Moose {
       KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
       KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
       KernelIterator kernel_it = kernel_begin;
-      for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
-        (*kernel_it)->computeResidual();
 
-      for (std::vector<Variable *>::iterator it = _sys._vars[_tid].all().begin(); it != _sys._vars[_tid].all().end(); ++it)
+      for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
       {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        (*it)->add(_residual);
+        (*kernel_it)->computeResidual();
+        _vars.insert(&(*kernel_it)->variable());
       }
     }
 
@@ -88,12 +93,22 @@ namespace Moose {
 
     virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
     {
-      _problem.reinitElemFace(elem, side, bnd_id, _tid);
-      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-      for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
-        (*it)->computeResidual();
+      std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
+      if (bcs.size() > 0)
+      {
+        _problem.reinitElemFace(elem, side, bnd_id, _tid);
+        _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+        for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+        {
+          (*it)->computeResidual();
+          _vars.insert(&(*it)->variable());
+        }
+      }
+    }
 
-      for (std::set<Variable *>::iterator it = _sys._vars[_tid].boundaryVars(bnd_id).begin(); it != _sys._vars[_tid].boundaryVars(bnd_id).end(); ++it)
+    virtual void postElement(const Elem * /*elem*/)
+    {
+      for (std::set<Variable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
         (*it)->add(_residual);
@@ -113,6 +128,7 @@ namespace Moose {
     SparseMatrix<Number> & _jacobian;
     ImplicitSystem & _sys;
     Problem & _problem;
+    std::set<Variable *> _vars;
 
   public:
     ComputeJacobianThread(Problem & problem, ImplicitSystem & sys, SparseMatrix<Number> & jacobian) :
@@ -130,6 +146,12 @@ namespace Moose {
       _sys(x._sys),
       _problem(x._problem)
     {
+    }
+
+    virtual void preElement(const Elem *elem)
+    {
+      _vars.clear();
+      _problem.prepare(elem, _tid);
     }
 
     virtual void onElement(const Elem *elem)
@@ -150,12 +172,9 @@ namespace Moose {
       KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
       KernelIterator kernel_it = kernel_begin;
       for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
-        (*kernel_it)->computeJacobian(0, 0);
-
-      for (std::vector<Variable *>::iterator it = _sys._vars[_tid].all().begin(); it != _sys._vars[_tid].all().end(); ++it)
       {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        (*it)->add(_jacobian);
+        (*kernel_it)->computeJacobian(0, 0);
+        _vars.insert(&(*kernel_it)->variable());
       }
     }
 
@@ -170,15 +189,20 @@ namespace Moose {
       _problem.reinitElemFace(elem, side, bnd_id, _tid);
       _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
       for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
+      {
         (*it)->computeJacobian(0, 0);
+        _vars.insert(&(*it)->variable());
+      }
+    }
 
-      for (std::set<Variable *>::iterator it = _sys._vars[_tid].boundaryVars(bnd_id).begin(); it != _sys._vars[_tid].boundaryVars(bnd_id).end(); ++it)
+    virtual void postElement(const Elem * /*elem*/)
+    {
+      for (std::set<Variable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
         (*it)->add(_jacobian);
       }
     }
-
     void join(const ComputeJacobianThread & /*y*/)
     {
     }
@@ -191,6 +215,7 @@ ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
+    _nl_solution(_sys.add_vector("curr_sln", false, GHOSTED)),
     _dt(problem.dt()),
     _dt_old(problem.dtOld()),
     _t_step(problem.timeStep())
@@ -221,7 +246,6 @@ ImplicitSystem::converged()
 void
 ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<System *>("_sys") = this;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -232,19 +256,18 @@ ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & 
 
     std::set<unsigned int> blk_ids;
     if (!parameters.isParamValid("block"))
-      blk_ids = _var_map[&kernel->variable()];
+      blk_ids = _var_map[kernel->variable().number()];
     else
     {
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
-        if (_var_map[&kernel->variable()].count(blocks[i]) > 0 || _var_map[&kernel->variable()].count(Moose::ANY_BLOCK_ID) > 0)
+        if (_var_map[kernel->variable().number()].count(blocks[i]) > 0 || _var_map[kernel->variable().number()].count(Moose::ANY_BLOCK_ID) > 0)
           blk_ids.insert(blocks[i]);
         else
           mooseError("Kernel (" + kernel->name() + "): block outside of the domain of the variable");
       }
     }
-
     _kernels[tid].addKernel(kernel, blk_ids);
   }
 }
@@ -252,7 +275,6 @@ ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & 
 void
 ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<System *>("_sys") = this;
   std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
   for (unsigned int i=0; i<boundaries.size(); ++i)
@@ -272,8 +294,10 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
         _bcs[tid].addBC(boundaries[i], dynamic_cast<IntegratedBC *>(bc));
       else
         mooseError("Unknown type of BoudaryCondition object");
-      _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
-      _vars[tid].addBoundaryVars(boundaries[i], bc->getCoupledVars());
+
+      System * sys = parameters.get<System *>("_sys");
+      sys->vars(tid).addBoundaryVar(boundaries[i], &bc->variable());
+      sys->vars(tid).addBoundaryVars(boundaries[i], bc->getCoupledVars());
     }
   }
 }
@@ -281,8 +305,6 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
 void
 ImplicitSystem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<System *>("_sys") = this;
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -352,7 +374,7 @@ ImplicitSystem::onTimestepBegin()
     _solution_du_dot_du.zero();
     _solution_du_dot_du.close();
 
-    solution(solutionOld());                    // use old_solution for computing with correct solution vector
+    set_solution(solutionOld());                    // use old_solution for computing with correct solution vector
     computeResidualInternal(_residual_old);
     break;
 

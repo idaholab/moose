@@ -74,6 +74,13 @@ CoupledProblem::assembly(THREAD_ID tid)
 }
 
 void
+CoupledProblem::prepare(const Elem * elem, THREAD_ID tid)
+{
+  for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+    it->second->prepare(elem, tid);
+}
+
+void
 CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
   for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)

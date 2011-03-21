@@ -86,11 +86,12 @@ Kernel::computeResidual()
 {
   DenseVector<Number> & re = _var.residualBlock();
 
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
-    for (_i = 0; _i < _phi.size(); _i++)
+  precalculateResidual();
+  for (_i = 0; _i < _phi.size(); _i++)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
       re(_i) += _JxW[_qp]*computeQpResidual();
-  }
+    }
 }
 
 void
@@ -98,18 +99,23 @@ Kernel::computeJacobian(int /*i*/, int /*j*/)
 {
   DenseMatrix<Number> & ke = _var.jacobianBlock();
 
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
-    for (_i = 0; _i < _phi.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
+  for (_i = 0; _i < _phi.size(); _i++)
+    for (_j = 0; _j < _phi.size(); _j++)
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      {
         ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
-  }
+      }
 }
 
 Real
 Kernel::computeQpJacobian()
 {
   return 0;
+}
+
+void
+Kernel::precalculateResidual()
+{
 }
 
 unsigned int

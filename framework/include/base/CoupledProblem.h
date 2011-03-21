@@ -45,6 +45,7 @@ public:
   virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
 
   virtual AssemblyData & assembly(THREAD_ID tid);
+  virtual void prepare(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);

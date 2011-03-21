@@ -106,6 +106,7 @@ protected:
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
+  virtual void precalculateResidual();
 };
 
 template<>

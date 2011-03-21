@@ -97,6 +97,7 @@ public:
   {
 //    _moose_system.reinitKernels(_tid, _soln, elem, NULL);
 //    _moose_system._element_data[_tid]->reinitMaterials(_moose_system._materials[_tid].getMaterials(elem->subdomain_id()));
+    _problem.prepare(elem, _tid);
   }
 
   virtual void onElement(const Elem *elem)
@@ -273,7 +274,6 @@ SubProblem::addInitialCondition(const std::string & var_name, Real value)
 void
 SubProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
 {
-//  parameters.set<SubProblem *>("_subproblem") = this;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -307,6 +307,7 @@ SubProblem::addMaterial(const std::string & mat_name, const std::string & name, 
       Material *material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(material != NULL, "Not a Material object");
       _materials[tid].addMaterial(blocks[i], material);
+
       // boundary material
       parameters.set<bool>("_bnd") = true;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
@@ -362,7 +363,8 @@ SubProblem::initialCondition(EquationSystems& es, const std::string& system_name
 void
 SubProblem::updateMaterials()
 {
-
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    _materials[tid].updateMaterialDataState();
 }
 
 void

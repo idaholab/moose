@@ -39,14 +39,24 @@ System::getMinQuadratureOrder()
 }
 
 void
+System::prepare(THREAD_ID tid)
+{
+  for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  {
+    Variable *var = *it;
+    var->prepare();
+    var->sizeResidual();
+    var->sizeJacobianBlock();
+  }
+}
+
+void
 System::reinitElem(const Elem * elem, THREAD_ID tid)
 {
   for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     Variable *var = *it;
     var->reinit();
-    var->sizeResidual();
-    var->sizeJacobianBlock();
     var->computeElemValues();
   }
 }
@@ -60,8 +70,6 @@ System::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id
   {
     Variable *var = *it;
     var->reinit();
-    var->sizeResidual();
-    var->sizeJacobianBlock();
     var->computeElemValuesFace();
   }
 }

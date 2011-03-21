@@ -16,6 +16,7 @@ public:
   DisplacedSystem(ProblemInterface & problem, const std::string & name);
   virtual ~DisplacedSystem();
 
+  virtual void prepare(THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);

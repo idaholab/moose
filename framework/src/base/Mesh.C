@@ -20,7 +20,12 @@ Mesh::Mesh(int mesh_dim) :
 }
 
 Mesh::Mesh(const Mesh & other_mesh) :
-    _mesh(other_mesh._mesh)
+    _mesh(other_mesh._mesh),
+    _is_changed(false),
+    _active_local_elem_range(NULL),
+    _active_node_range(NULL),
+    _local_node_range(NULL),
+    _bnd_node_range(NULL)
 {
   (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
 }

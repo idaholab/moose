@@ -50,6 +50,7 @@ public:
 
   /// Get minimal quadrature order needed for integrating variables in this system
   virtual Order getMinQuadratureOrder();
+  virtual void prepare(THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
@@ -57,13 +58,16 @@ public:
 
   virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
 
+  VariableWarehouse & vars(THREAD_ID tid) { return _vars[tid]; }
+
 protected:
   ProblemInterface & _problem;
   Mesh & _mesh;
   std::string _name;
 
+  // TODO: move this to problem (that will keep track of which variable is where), System will only keep a list of variables that created and will free them in d-tor
   std::vector<VariableWarehouse> _vars;
-  std::map<Variable *, std::set<unsigned int> > _var_map;             /// The list of blocks for a given variable
+  std::map<unsigned int, std::set<unsigned int> > _var_map;             /// The list of blocks for a given variable number
 };
 
 
@@ -74,7 +78,7 @@ public:
   SystemTempl(ProblemInterface & problem, const std::string & name) :
     System(problem, name),
     _sys(problem.es().add_system<T>(_name)),
-    _solution(_sys.add_vector("curr_sln", false, GHOSTED)),
+    _solution(*_sys.solution),
     _solution_old(*_sys.old_local_solution),
     _solution_older(*_sys.older_local_solution),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
@@ -96,10 +100,10 @@ public:
       _vars[tid].add(var_name, var);
 
       if (active_subdomains == NULL)
-        _var_map[var].insert(Moose::ANY_BLOCK_ID);
+        _var_map[var_num].insert(Moose::ANY_BLOCK_ID);
       else
         for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
-          _var_map[var].insert(*it);
+          _var_map[var_num].insert(*it);
     }
   }
 
@@ -114,7 +118,6 @@ public:
   {
   }
 
-  virtual void solution(const NumericVector<Number> & soln) { _solution = soln; }
   virtual NumericVector<Number> & solution() { return _solution; }
   virtual NumericVector<Number> & solutionOld() { return _solution_old; }
   virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
@@ -124,7 +127,6 @@ public:
 
   virtual void init()
   {
-    _solution = (*_sys.current_local_solution);
   }
 
   virtual void update()

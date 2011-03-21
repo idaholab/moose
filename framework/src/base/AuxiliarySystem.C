@@ -42,10 +42,10 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
       _elem_vars[tid][var_name] = var;
 
     if (active_subdomains == NULL)
-      _var_map[var].insert(Moose::ANY_BLOCK_ID);
+      _var_map[var_num].insert(Moose::ANY_BLOCK_ID);
     else
       for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
-        _var_map[var].insert(*it);
+        _var_map[var_num].insert(*it);
   }
 }
 
@@ -64,13 +64,13 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
 
     std::set<unsigned int> blk_ids;
     if (!parameters.isParamValid("block"))
-      blk_ids = _var_map[&kernel->variable()];
+      blk_ids = _var_map[kernel->variable().number()];
     else
     {
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
-        if (_var_map[&kernel->variable()].count(blocks[i]) > 0 || _var_map[&kernel->variable()].count(Moose::ANY_BLOCK_ID) > 0)
+        if (_var_map[kernel->variable().number()].count(blocks[i]) > 0 || _var_map[kernel->variable().number()].count(Moose::ANY_BLOCK_ID) > 0)
           blk_ids.insert(blocks[i]);
         else
           mooseError("AuxKernel (" + kernel->name() + "): block outside of the domain of the variable");
@@ -114,8 +114,6 @@ AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
   {
     Variable *var = it->second;
     var->reinit();
-    var->sizeResidual();
-    var->sizeJacobianBlock();
     var->computeElemValues();
   }
 
@@ -123,8 +121,6 @@ AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
   {
     Variable *var = it->second;
     var->reinit_aux();
-    var->sizeResidual();
-    var->sizeJacobianBlock();
     var->computeElemValues();
   }
 }
@@ -267,6 +263,8 @@ AuxiliarySystem::compute()
   {
     const Elem * elem = *elem_it;
 
+    _problem.prepare(elem, 0);
+
     unsigned int cur_subdomain = elem->subdomain_id();
 
 //    if(unlikely(_calculate_element_time))
@@ -326,7 +324,7 @@ AuxiliarySystem::compute()
   }
 
   solution().close();
-  (*_sys.solution) = _solution;
+  _sys.update();
 
   Moose::perf_log.pop("update_aux_vars()","Solve");
 }

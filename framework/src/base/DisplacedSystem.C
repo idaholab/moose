@@ -14,14 +14,24 @@ DisplacedSystem::~DisplacedSystem()
 }
 
 void
+DisplacedSystem::prepare(THREAD_ID tid)
+{
+  for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  {
+    Variable *var = *it;
+    var->prepare();
+    var->sizeResidual();
+    var->sizeJacobianBlock();
+  }
+}
+
+void
 DisplacedSystem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
   for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     Variable *var = *it;
     var->reinit();
-//    var->sizeResidual();
-//    var->sizeJacobianBlock();
     var->computeElemValues();
   }
 }
@@ -35,8 +45,6 @@ DisplacedSystem::reinitElemFace(const Elem * elem, unsigned int side, unsigned i
   {
     Variable *var = *it;
     var->reinit();
-//    var->sizeResidual();
-//    var->sizeJacobianBlock();
     var->computeElemValuesFace();
   }
 }
@@ -67,7 +75,7 @@ DisplacedSystem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_I
     {
       var->reinit_node();
       var->computeNodalValues();
-    }
+   }
   }
 }
 

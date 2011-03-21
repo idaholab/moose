@@ -121,8 +121,6 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
 
     onElement(elem);
 
-//    postElement(elem);
-
     for (unsigned int side=0; side<elem->n_sides(); side++)
     {
       std::vector<short int> boundary_ids = _problem.mesh().boundary_ids (elem, side);
@@ -136,6 +134,8 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
       if (elem->neighbor(side) != NULL)
         onInternalSide(elem, side);
     } // sides
+    postElement(elem);
+
   } // range
 
   post();

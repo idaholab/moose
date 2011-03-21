@@ -47,6 +47,7 @@ Steady::execute()
   {
     _problem.getNonlinearSystem().setScaling();
     preSolve();
+    _problem.updateMaterials();
     _problem.solve();
     postSolve();
     _problem.update();

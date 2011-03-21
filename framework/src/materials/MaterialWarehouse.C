@@ -80,8 +80,6 @@ MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
 
 void MaterialWarehouse::updateMaterialDataState()
 {
-  // FIXME: uncomm
-#if 0
   for (MaterialIterator it = _active_materials.begin(); it != _active_materials.end(); ++it)
   {
     for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
@@ -99,7 +97,6 @@ void MaterialWarehouse::updateMaterialDataState()
       (*jt)->timeStepSetup();
     }
   }
-#endif
 }
 
 void

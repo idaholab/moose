@@ -31,6 +31,7 @@ public:
   virtual AssemblyData & assembly(THREAD_ID tid) = 0;
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid) = 0;
 
+  virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;

@@ -129,6 +129,12 @@ Variable::~Variable()
 }
 
 void
+Variable::prepare()
+{
+  _dof_map.dof_indices (_elem, _dof_indices, _var_num);
+}
+
+void
 Variable::reinit()
 {
   // copy shape functions into test functions (so they can be modified by stabilizers)
@@ -141,7 +147,6 @@ Variable::reinit()
   _grad_test_face = _grad_phi_face;
   _second_test_face = _second_phi_face;
 
-  _dof_map.dof_indices (_elem, _dof_indices, _var_num);
 }
 
 void
@@ -154,6 +159,7 @@ void
 Variable::reinit_aux()
 {
   reinit();
+  _dof_map.dof_indices (_elem, _dof_indices, _var_num);
   _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
 }
 
@@ -375,11 +381,14 @@ Variable::computeNodalValues()
   _nodal_u.resize(1);
   _nodal_u[0] = _sys.solution()(_nodal_dof_index);
 
-  _nodal_u_old.resize(1);
-  _nodal_u_old[0] = _sys.solutionOld()(_nodal_dof_index);
+  if (_problem.transient())
+  {
+    _nodal_u_old.resize(1);
+    _nodal_u_old[0] = _sys.solutionOld()(_nodal_dof_index);
 
-  _nodal_u_older.resize(1);
-  _nodal_u_older[0] = _sys.solutionOlder()(_nodal_dof_index);
+    _nodal_u_older.resize(1);
+    _nodal_u_older[0] = _sys.solutionOlder()(_nodal_dof_index);
+  }
 }
 
 Number

@@ -44,14 +44,29 @@ MProblem::~MProblem()
 }
 
 void
-MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
+MProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
+
+  _nl.prepare(tid);
+  _aux.prepare(tid);
+  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), tid);
+}
+
+void
+MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
+{
+  unsigned int n_points = _asm_info[tid]->qRule()->n_points();
+  _zero[tid].resize(n_points);
+  _grad_zero[tid].resize(n_points);
+  _second_zero[tid].resize(n_points);
+
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitElem(elem, tid);
+    _displaced_problem->reinitElem(_displaced_mesh->elem(elem->id()), tid);
 }
 
 void
@@ -62,7 +77,7 @@ MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_
   _aux.reinitElemFace(elem, side, bnd_id, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_face)
-    _displaced_problem->reinitElem(elem, tid);
+    _displaced_problem->reinitElemFace(_displaced_mesh->elem(elem->id()), side, bnd_id, tid);
 }
 
 void
@@ -73,7 +88,7 @@ MProblem::reinitNode(const Node * node, THREAD_ID tid)
   _aux.reinitNode(node, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitNode(node, tid);
+    _displaced_problem->reinitNode(&_displaced_mesh->node(node->id()), tid);
 }
 
 void
@@ -84,7 +99,7 @@ MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
   _aux.reinitNodeFace(node, bnd_id, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_face)
-    _displaced_problem->reinitNodeFace(node, bnd_id, tid);
+    _displaced_problem->reinitNodeFace(&_displaced_mesh->node(node->id()), bnd_id, tid);
 }
 
 void
@@ -111,7 +126,9 @@ MProblem::addKernel(const std::string & kernel_name, const std::string & name, I
     _reinit_displaced_elem = true;
   }
   else
+  {
     parameters.set<System *>("_sys") = &_nl;
+  }
   _nl.addKernel(kernel_name, name, parameters);
 }
 
@@ -119,13 +136,16 @@ void
 MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
+
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<System *>("_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_face = true;
   }
   else
+  {
     parameters.set<System *>("_sys") = &_nl;
+  }
   _nl.addBoundaryCondition(bc_name, name, parameters);
 }
 
@@ -147,7 +167,9 @@ MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name
     _reinit_displaced_elem = true;
   }
   else
+  {
     parameters.set<System *>("_sys") = &_aux;
+  }
   _aux.addKernel(kernel_name, name, parameters);
 }
 
@@ -161,7 +183,9 @@ MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string
     _reinit_displaced_face = true;
   }
   else
+  {
     parameters.set<System *>("_sys") = &_aux;
+  }
   _aux.addBoundaryCondition(bc_name, name, parameters);
 }
 
@@ -169,6 +193,7 @@ void
 MProblem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
+  parameters.set<System *>("_sys") = &_nl;
   _nl.addStabilizer(stabilizer_name, name, parameters);
 }
 
@@ -257,7 +282,7 @@ MProblem::onTimestepEnd()
 void
 MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
-  _nl.solution(soln);
+  _nl.set_solution(soln);
 
   if (_displaced_problem != NULL)
   {
@@ -272,7 +297,7 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
 void
 MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
 {
-  _nl.solution(soln);
+  _nl.set_solution(soln);
 
   if (_displaced_problem != NULL)
   {

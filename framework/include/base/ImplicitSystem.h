@@ -37,6 +37,9 @@ public:
   void setVarScaling(std::vector<Real> scaling);
   void setScaling();
 
+  virtual void set_solution(const NumericVector<Number> & soln) { _nl_solution = soln; }
+  virtual NumericVector<Number> & solution() { return _nl_solution; }
+
 public:
   SubProblem & _subproblem;
   // FIXME: make these protected and create getters/setters
@@ -48,6 +51,8 @@ protected:
   void computeTimeDeriv();
   void computeResidualInternal(NumericVector<Number> & residual);
   void finishResidual(NumericVector<Number> & residual);
+
+  NumericVector<Number> & _nl_solution;
 
   Real & _dt;
   Real & _dt_old;

@@ -84,6 +84,7 @@ public:
   Variable(unsigned int var_num, const FEType & fe_type, System & sys, AssemblyData & assembly_data);
   virtual ~Variable();
 
+  void prepare();
   void reinit();
   void reinit_node();
   void reinit_aux();

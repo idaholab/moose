@@ -70,7 +70,6 @@ public:
   template<typename T>
   MaterialProperty<T> & getPropertyOlder(const std::string & prop_name);
 
-#if 0
   /**
    * Updates the old (first) material properties to the current/new material properies (second)
    */
@@ -81,7 +80,15 @@ public:
    * for each active material block
    */
   virtual void timeStepSetup();
-#endif
+
+  // Coupling
+  virtual unsigned int coupled(const std::string & var_name);
+  virtual VariableValue & coupledValue(const std::string & var_name);
+  virtual VariableValue & coupledValueOld(const std::string & var_name);
+  virtual VariableValue & coupledValueOlder(const std::string & var_name);
+  virtual VariableGradient & coupledGradient(const std::string & var_name);
+  virtual VariableGradient & coupledGradientOld(const std::string & var_name);
+  virtual VariableGradient & coupledGradientOlder(const std::string & var_name);
 
   // Coupling
   virtual unsigned int coupled(const std::string & var_name);
@@ -127,7 +134,7 @@ protected:
 //     }
 //  };
   
-  enum QP_Data_Type { CURR, PREV };
+//  enum QP_Data_Type { CURR, PREV };
 
   /**
    * All materials must override this virtual.
@@ -149,10 +156,10 @@ protected:
   virtual QpData * createData();
 
   /**
-   * This function returns a reference to a standard vector of datastructures for all 
+   * This function returns a reference to a standard vector of datastructures for all
    * the quadrature points on the current element
    */
-  virtual std::vector<QpData *> & getData(QP_Data_Type qp_data_type); 
+  virtual std::vector<QpData *> & getData(QP_Data_Type qp_data_type);
 #endif
 
   /**
