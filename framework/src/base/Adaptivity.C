@@ -2,7 +2,7 @@
 #include "Moose.h"
 #include "Mesh.h"
 #include "SubProblem.h"
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 // libMesh
 #include "equation_systems.h"
 #include "kelly_error_estimator.h"

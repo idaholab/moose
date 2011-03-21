@@ -1,6 +1,6 @@
 #include "ComputeJacobianThread.h"
 
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 #include "Problem.h"
 
 // libmesh includes
@@ -9,7 +9,7 @@
 namespace Moose 
 {
 
-ComputeJacobianThread::ComputeJacobianThread(Problem & problem, ImplicitSystem & sys, SparseMatrix<Number> & jacobian) :
+ComputeJacobianThread::ComputeJacobianThread(Problem & problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
   ThreadedElementLoop<ConstElemRange>(problem, sys),
   _jacobian(jacobian),
   _sys(sys),

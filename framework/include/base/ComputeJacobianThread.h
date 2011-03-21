@@ -12,7 +12,7 @@ namespace Moose
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeJacobianThread(Problem & problem, ImplicitSystem & sys, SparseMatrix<Number> & jacobian);
+  ComputeJacobianThread(Problem & problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
@@ -27,7 +27,7 @@ public:
 
 protected:
   SparseMatrix<Number> & _jacobian;
-  ImplicitSystem & _sys;
+  NonlinearSystem & _sys;
   Problem & _problem;
   std::set<Variable *> _vars;
 };

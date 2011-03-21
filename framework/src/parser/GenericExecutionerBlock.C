@@ -174,7 +174,7 @@ GenericExecutionerBlock::execute()
 
 //    _moose_system._auto_scaling = getParamValue<bool>("auto_scaling");
 
-    Moose::ImplicitSystem & nl = _parser_handle._problem->getNonlinearSystem();
+    Moose::NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParamValue<std::string>("scheme")));
 
     blk= locateBlock("GlobalParams");

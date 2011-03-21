@@ -1,6 +1,6 @@
 #include "ComputeResidualThread.h"
 
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 #include "Problem.h"
 
 // libmesh includes
@@ -10,7 +10,7 @@ namespace Moose
 {
 
 ComputeResidualThread::ComputeResidualThread(Problem & problem,
-                                             ImplicitSystem & sys,
+                                             NonlinearSystem & sys,
                                              NumericVector<Number> & residual) :
   ThreadedElementLoop<ConstElemRange>(problem, sys),
   _residual(residual),

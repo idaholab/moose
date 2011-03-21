@@ -1,6 +1,6 @@
 #include "Moose.h"
 #include "Factory.h"
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 #include "PetscSupport.h"
 
 #include "ActionWarehouse.h"
@@ -264,7 +264,7 @@ registerActions()
 }
 
 void
-setSolverDefaults(ImplicitSystem & system)
+setSolverDefaults(NonlinearSystem & system)
 {
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::petscSetDefaults(system);

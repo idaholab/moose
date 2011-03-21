@@ -1,4 +1,4 @@
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Problem.h"
 #include "SubProblem.h"
@@ -31,7 +31,7 @@ namespace Moose {
     p->computeResidual(sys, soln, residual);
   }
 
-ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
+NonlinearSystem::NonlinearSystem(SubProblem & problem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(problem, name),
     _subproblem(problem),
     _last_rnorm(0),
@@ -57,19 +57,19 @@ ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
   _stabilizers.resize(libMesh::n_threads());
 }
 
-ImplicitSystem::~ImplicitSystem()
+NonlinearSystem::~NonlinearSystem()
 {
   delete _preconditioner;
 }
 
 bool
-ImplicitSystem::converged()
+NonlinearSystem::converged()
 {
   return _sys.nonlinear_solver->converged;
 }
 
 void
-ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -98,7 +98,7 @@ ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & 
 }
 
 void
-ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
+NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
@@ -128,7 +128,7 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
 }
 
 void
-ImplicitSystem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
+NonlinearSystem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
@@ -144,7 +144,7 @@ ImplicitSystem::addStabilizer(const std::string & stabilizer_name, const std::st
 }
 
 void
-ImplicitSystem::computeResidual(NumericVector<Number> & residual)
+NonlinearSystem::computeResidual(NumericVector<Number> & residual)
 {
   Moose::perf_log.push("compute_residual()","Solve");
 
@@ -156,7 +156,7 @@ ImplicitSystem::computeResidual(NumericVector<Number> & residual)
 }
 
 void
-ImplicitSystem::timeSteppingScheme(TimeSteppingScheme scheme)
+NonlinearSystem::timeSteppingScheme(TimeSteppingScheme scheme)
 {
   _time_stepping_scheme = scheme;
   switch (_time_stepping_scheme)
@@ -185,7 +185,7 @@ ImplicitSystem::timeSteppingScheme(TimeSteppingScheme scheme)
 }
 
 void
-ImplicitSystem::onTimestepBegin()
+NonlinearSystem::onTimestepBegin()
 {
   Real sum;
 
@@ -216,7 +216,7 @@ ImplicitSystem::onTimestepBegin()
 }
 
 void
-ImplicitSystem::computeTimeDeriv()
+NonlinearSystem::computeTimeDeriv()
 {
   switch (_time_stepping_scheme)
   {
@@ -263,7 +263,7 @@ ImplicitSystem::computeTimeDeriv()
 }
 
 void
-ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
+NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
 {
   residual.zero();
 
@@ -293,7 +293,7 @@ ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
 }
 
 void
-ImplicitSystem::finishResidual(NumericVector<Number> & residual)
+NonlinearSystem::finishResidual(NumericVector<Number> & residual)
 {
   switch (_time_stepping_scheme)
   {
@@ -308,7 +308,7 @@ ImplicitSystem::finishResidual(NumericVector<Number> & residual)
 }
 
 void
-ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
+NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 {
   Moose::perf_log.push("compute_jacobian()","Solve");
 #ifdef LIBMESH_HAVE_PETSC
@@ -352,7 +352,7 @@ ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 void
-ImplicitSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
 {
   Moose::perf_log.push("compute_jacobian_block()","Solve");
 
@@ -512,7 +512,7 @@ ImplicitSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::S
 }
 
 void
-ImplicitSystem::setVarScaling(std::vector<Real> scaling)
+NonlinearSystem::setVarScaling(std::vector<Real> scaling)
 {
 //  if(scaling.size() != _system->n_vars())
 //    mooseError("Error: Size of scaling factor vector not the same as the number of variables in the system!\n");
@@ -521,7 +521,7 @@ ImplicitSystem::setVarScaling(std::vector<Real> scaling)
 }
 
 void
-ImplicitSystem::setScaling()
+NonlinearSystem::setScaling()
 {
   std::vector<Real> one_scaling;
 
@@ -562,7 +562,7 @@ ImplicitSystem::setScaling()
 }
 
 void
-ImplicitSystem::printVarNorms()
+NonlinearSystem::printVarNorms()
 {
   TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);
 
@@ -577,7 +577,7 @@ ImplicitSystem::printVarNorms()
 }
 
 void
-ImplicitSystem::setPreconditioner(Preconditioner<Real> *pc)
+NonlinearSystem::setPreconditioner(Preconditioner<Real> *pc)
 {
   _preconditioner = pc;
 

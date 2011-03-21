@@ -12,7 +12,7 @@ namespace Moose
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(Problem & problem, ImplicitSystem & sys, NumericVector<Number> & residual);  
+  ComputeResidualThread(Problem & problem, NonlinearSystem & sys, NumericVector<Number> & residual);  
 
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
@@ -27,7 +27,7 @@ public:
 
 protected:
   NumericVector<Number> & _residual;
-  ImplicitSystem & _sys;
+  NonlinearSystem & _sys;
   std::set<Variable *> _vars;
 };
   

@@ -2,7 +2,7 @@
 #include "Moose.h"
 #include "Parser.h"
 #include "MProblem.h"
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 #include "Adaptivity.h"
 
 // libMesh includes
@@ -33,7 +33,7 @@ AdaptivityBlock::AdaptivityBlock(const std::string & name, InputParameters param
 void
 AdaptivityBlock::execute() 
 {
-  Moose::ImplicitSystem & system = _parser_handle._problem->getNonlinearSystem();
+  Moose::NonlinearSystem & system = _parser_handle._problem->getNonlinearSystem();
   
   Moose::Adaptivity & adapt = _parser_handle._problem->adaptivity();
 

@@ -27,11 +27,11 @@ typedef Real                     PostprocessorValue;
 #define mooseWarning(msg) do { std::cerr << "\n\n*** Warning ***\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << "\n" << std::endl; } while(0)
 
 
+class NonlinearSystem;
+class ActionWarehouse;
+
 namespace Moose
 {
-
-class ImplicitSystem;
-class ActionWarehouse;
 
 extern ActionWarehouse action_warehouse;
 /**
@@ -47,7 +47,7 @@ void registerObjects();
 void addActionTypes();
 void registerActions();
 
-void setSolverDefaults(ImplicitSystem & system);
+void setSolverDefaults(NonlinearSystem & system);
 
 /**
  * Framework-wide stuff

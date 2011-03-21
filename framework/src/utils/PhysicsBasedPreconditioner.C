@@ -15,7 +15,7 @@
 #include "PhysicsBasedPreconditioner.h"
 #include "Moose.h"
 #include "SubProblem.h"
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 
 //libMesh Includes
 #include "libmesh_common.h"

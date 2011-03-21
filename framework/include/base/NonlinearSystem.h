@@ -1,5 +1,5 @@
-#ifndef IMPLICITSYSTEM_H_
-#define IMPLICITSYSTEM_H_
+#ifndef NONLINEARSYSTEM_H_
+#define NONLINEARSYSTEM_H_
 
 #include "System.h"
 #include "KernelWarehouse.h"
@@ -14,11 +14,11 @@
 
 namespace Moose {
 
-class ImplicitSystem : public SystemTempl<TransientNonlinearImplicitSystem>
+class NonlinearSystem : public SystemTempl<TransientNonlinearImplicitSystem>
 {
 public:
-  ImplicitSystem(SubProblem & problem, const std::string & name);
-  virtual ~ImplicitSystem();
+  NonlinearSystem(SubProblem & problem, const std::string & name);
+  virtual ~NonlinearSystem();
 
   virtual bool converged();
 
@@ -79,4 +79,4 @@ protected:
 
 } // namespace
 
-#endif /* IMPLICITSYSTEM_H_ */
+#endif /* NONLINEARSYSTEM_H_ */

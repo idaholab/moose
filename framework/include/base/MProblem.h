@@ -3,7 +3,7 @@
 
 #include "SubProblem.h"
 #include "Mesh.h"
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "AssemblyData.h"
 
@@ -61,7 +61,7 @@ public:
 
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
-  ImplicitSystem & getNonlinearSystem() { return _nl; }
+  NonlinearSystem & getNonlinearSystem() { return _nl; }
 
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
@@ -87,7 +87,7 @@ public:
   virtual void output();
 
 protected:
-  ImplicitSystem _nl;
+  NonlinearSystem _nl;
   AuxiliarySystem _aux;
 
   // quadrature

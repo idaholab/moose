@@ -17,7 +17,7 @@
 #include "Moose.h"
 #include "Parser.h"
 #include "MProblem.h"
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 #include "PhysicsBasedPreconditioner.h"
 
 #include "string_to_enum.h"
@@ -44,7 +44,7 @@ PBPBlock::execute()
   if (_parser_handle._problem != NULL)
   {
     Moose::MProblem & subproblem = *_parser_handle._problem;
-    Moose::ImplicitSystem & nl = subproblem.getNonlinearSystem();
+    Moose::NonlinearSystem & nl = subproblem.getNonlinearSystem();
 
     unsigned int n_vars = nl.sys().n_vars();
 

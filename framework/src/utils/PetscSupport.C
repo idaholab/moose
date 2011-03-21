@@ -3,7 +3,7 @@
 #ifdef LIBMESH_HAVE_PETSC
 
 #include "Moose.h"
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 
 //libMesh Includes
 #include "libmesh_common.h"
@@ -58,7 +58,7 @@ namespace Moose
   
     PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy)
     {
-      ImplicitSystem *system = (ImplicitSystem *) dummy;      // C strikes
+      NonlinearSystem *system = (NonlinearSystem *) dummy;      // C strikes
 
       *reason = KSP_CONVERGED_ITERATING;
 
@@ -101,7 +101,7 @@ namespace Moose
 
     PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void * dummy)
     {
-      ImplicitSystem *system = (ImplicitSystem *) dummy;      // C strikes
+      NonlinearSystem *system = (NonlinearSystem *) dummy;      // C strikes
 
       // unused
       // TransientNonlinearImplicitSystem * system = dynamic_cast<TransientNonlinearImplicitSystem *>(&_equation_system->get_system("NonlinearSystem"));
@@ -176,7 +176,7 @@ namespace Moose
     }
 #endif
 
-    void petscSetDefaults(ImplicitSystem & system)
+    void petscSetDefaults(NonlinearSystem & system)
     {
       PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(system.sys().nonlinear_solver.get());
       SNES snes = petsc_solver->snes();

@@ -34,7 +34,7 @@ namespace Moose
 {
 
 class SubProblem;
-class ImplicitSystem;
+class NonlinearSystem;
 
 /**
  * Implements a segregated solve preconditioner.
@@ -89,7 +89,7 @@ public:
   
 protected:
   SubProblem & _subproblem;                                     /// Subproblem this preconditioner is part of
-  ImplicitSystem & _nl;                                         /// The nonlinear system this PBP is associated with (convenience reference)
+  NonlinearSystem & _nl;                                         /// The nonlinear system this PBP is associated with (convenience reference)
   std::vector<LinearImplicitSystem *> _systems;                 /// List of linear system that build up the preconditioner
   std::vector<Preconditioner<Number> *> _preconditioners;       /// Holds one Preconditioner object per small system to solve.
   std::vector<unsigned int> _solve_order;                       /// Holds the order the blocks are solved for.

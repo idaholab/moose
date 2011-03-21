@@ -3,7 +3,7 @@
 #include "Parser.h"
 #include "Moose.h"
 #include "FunctionPeriodicBoundary.h"
-#include "ImplicitSystem.h"
+#include "NonlinearSystem.h"
 #include "MProblem.h"
 
 #include "periodic_boundaries.h"
@@ -39,7 +39,7 @@ GenericPeriodicBlock::execute()
   if (_executed)
     return;
 
-  Moose::ImplicitSystem & nl = _parser_handle._problem->getNonlinearSystem();
+  Moose::NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
 
   if (getParamValue<std::vector<Real> >("translation") != std::vector<Real>())
   {

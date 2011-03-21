@@ -27,7 +27,7 @@
 
 namespace Moose {
 
-class ImplicitSystem;
+class NonlinearSystem;
 
 /**
  * Generic class for solving nonlinear problems
@@ -41,7 +41,7 @@ public:
 
   virtual Problem * parent() { return _parent; }
 
-  virtual ImplicitSystem & getNonlinearSystem() = 0;
+  virtual NonlinearSystem & getNonlinearSystem() = 0;
 
   /**
    * Get reference to all-purpose parameters
