@@ -12,10 +12,10 @@ InputParameters validParams<CHSplit2LaPl>()
 
 CHSplit2LaPl::CHSplit2LaPl(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
-   _kappa_name(getParam<std::string>("kappa_name")),
-   _kappa(getMaterialProperty<Real>(_kappa_name)),
    _c_var(coupled("c")),
-   _grad_c(coupledGradient("c"))
+   _grad_c(coupledGradient("c")),
+   _kappa_name(getParam<std::string>("kappa_name")),
+   _kappa(getMaterialProperty<Real>(_kappa_name))
 {}
 
 Real
