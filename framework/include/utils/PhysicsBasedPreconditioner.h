@@ -18,8 +18,6 @@
 //Global includes:
 #include<vector>
 
-#include "ImplicitSystem.h"
-
 //libMesh includes:
 #include "preconditioner.h"
 #include "system.h"
@@ -34,6 +32,9 @@ namespace libMesh
 
 namespace Moose
 {
+
+class SubProblem;
+class ImplicitSystem;
 
 /**
  * Implements a segregated solve preconditioner.
