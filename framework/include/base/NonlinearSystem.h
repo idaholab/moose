@@ -60,6 +60,10 @@ public:
 
   virtual void set_solution(const NumericVector<Number> & soln);
 
+  virtual NumericVector<Number> & solution() { return _solution; }
+  virtual NumericVector<Number> & solutionUDot() { return _solution_u_dot; }
+  virtual NumericVector<Number> & solutionDuDotDu() { return _solution_du_dot_du; }
+
   virtual const NumericVector<Number> * & currentSolution() { return _current_solution; }
 
   virtual void serializeSolution();
@@ -92,6 +96,7 @@ protected:
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
   const NumericVector<Number> * _current_solution;      /// solution vector from nonlinear solver
+  NumericVector<Number> & _solution;                    /// Raw non-ghosted solution vector
   NumericVector<Number> & _solution_u_dot;              /// solution vector for u^dot
   NumericVector<Number> & _solution_du_dot_du;          /// solution vector for {du^dot}\over{du}
   NumericVector<Number> & _residual_old;                /// residual evaluated at the old time step (need for Crank-Nicolson)

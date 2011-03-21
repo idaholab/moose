@@ -752,6 +752,7 @@ void
 MProblem::init()
 {
   SubProblem::init();
+  
   _mesh.applyMeshModifications();
   _mesh.meshChanged();
   init2();
@@ -765,7 +766,9 @@ MProblem::init2()
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _asm_info[tid]->createQRules(_quadrature_order);
 
+  _nl.update();
   _nl.init();
+
   if (_displaced_problem)
   {
     _displaced_problem->init();

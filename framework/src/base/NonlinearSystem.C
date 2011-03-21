@@ -45,6 +45,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
     _current_solution(NULL),
+    _solution(*_sys.solution.get()),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
     _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
     _residual_old(_sys.add_vector("residual_old", false, GHOSTED)),
@@ -84,6 +85,8 @@ NonlinearSystem::~NonlinearSystem()
 void
 NonlinearSystem::init()
 {
+  _current_solution = _sys.current_local_solution.get();
+  
   _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
   _residual_copy.init(_sys.n_dofs(), false, SERIAL);
 }
