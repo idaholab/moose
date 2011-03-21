@@ -51,6 +51,7 @@ public:
 
   // Solve /////
   virtual void init();
+  virtual void init2() { }
 
   virtual void update();
   virtual void solve();
@@ -127,7 +128,7 @@ public:
 protected:
   Problem * _parent;
   Mesh & _mesh;
-  EquationSystems _eq;
+  EquationSystems & _eq;
 
   bool _transient;
   Real & _time;

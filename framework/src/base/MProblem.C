@@ -16,8 +16,8 @@ std::string name(const std::string & name, unsigned int n)
 
 MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
     SubProblem(mesh, parent),
-    _nl(static_cast<SubProblem &>(*_parent), name("nl", _n)),
-    _aux(static_cast<SubProblem &>(*_parent), name("aux", _n)),
+    _nl(*this, name("nl", _n)),
+    _aux(*this, name("aux", _n)),
     _quadrature_order(CONSTANT),
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
@@ -130,6 +130,13 @@ void
 MProblem::init()
 {
   SubProblem::init();
+  init2();
+  setSolverDefaults(_nl);
+}
+
+void
+MProblem::init2()
+{
   _quadrature_order = _nl.getMinQuadratureOrder();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -142,8 +149,6 @@ MProblem::init()
     _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
   }
   _aux.init();
-
-  setSolverDefaults(_nl);
 }
 
 void
@@ -156,8 +161,6 @@ void
 MProblem::solve()
 {
   _nl.solve();
-
-  _nl.solution().print(std::cerr);
 }
 
 bool
@@ -203,6 +206,7 @@ void
 MProblem::onTimestepEnd()
 {
   _nl.printVarNorms();
+
 }
 
 void

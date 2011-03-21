@@ -31,7 +31,7 @@ public:
   virtual ~CoupledProblem();
 
   virtual EquationSystems & es() { return _eq; }
-//  Mesh & mesh() { return *_mesh; }
+  Mesh & mesh() { return *_mesh; }
 
   virtual Problem * parent() { return NULL; }
 

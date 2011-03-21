@@ -27,7 +27,7 @@ public:
   virtual ~Problem();
 
   virtual EquationSystems & es() = 0;
-//  virtual Mesh & mesh() = 0;
+  virtual Mesh & mesh() = 0;
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;

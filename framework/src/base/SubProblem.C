@@ -154,7 +154,7 @@ protected:
 SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
     _parent(parent == NULL ? this : parent),
     _mesh(mesh),
-    _eq(_mesh),
+    _eq(parent == NULL ? *new EquationSystems(_mesh) : parent->es()),
     _transient(false),
     _time(_parent != this ? _parent->time() : _eq.parameters.set<Real>("time")),
     _t_step(_parent != this ? _parent->timeStep() : _eq.parameters.set<int>("t_step")),
@@ -172,6 +172,7 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
     _t_step = 0;
     _dt = 0;
     _dt_old = _dt;
+    _eq.parameters.set<Problem *>("_problem") = this;
   }
 
   unsigned int n_threads = libMesh::n_threads();
@@ -192,7 +193,6 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
   _pps_jacobian.resize(n_threads);
   _pps_newtonit.resize(n_threads);
 
-  _eq.parameters.set<Problem *>("_problem") = this;
 }
 
 SubProblem::~SubProblem()

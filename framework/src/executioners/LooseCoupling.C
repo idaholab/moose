@@ -55,9 +55,6 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
   _t_step = 0;
   _dt = _input_dt;
   _time = getParam<Real>("start_time");
-  _problem.transient(true);
-
-  std::cout << "LooseCoupling" << std::endl;
 
   unsigned int n_problems = _input_files.size();
   _slave_parser.resize(n_problems);
@@ -76,16 +73,31 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     }
     _slave_parser[i]->parse(file_name);
   }
+  _problem.transient(true);
 
   // need variables upfront
   executeBlocks("Variables");
   executeBlocks("AuxVariables");
-  // execute the rest
-  for (std::vector<Parser *>::iterator it = _slave_parser.begin(); it != _slave_parser.end(); ++it)
-  {
-    ParserBlock * root = (*it)->root();
-    root->execute();
-  }
+
+  executeBlocks("Materials");
+  executeBlocks("Kernels");
+  executeBlocks("BCs");
+
+//  // execute the rest
+//  for (std::vector<Parser *>::iterator it = _slave_parser.begin(); it != _slave_parser.end(); ++it)
+//  {
+////    ParserBlock * root = (*it)->root();
+////    root->execute();
+//
+//    ParserBlock * blk;
+//
+//    blk = (*it)->root()->locateBlock("Materials");
+//    if (!blk) blk->execute();
+//    blk = (*it)->root()->locateBlock("Kernels");
+//    if (!blk) blk->execute();
+//    blk = (*it)->root()->locateBlock("BCs");
+//    if (!blk) blk->execute();
+//  }
 
   _problem.solveOrder(_solve_order);
   _problem.init();

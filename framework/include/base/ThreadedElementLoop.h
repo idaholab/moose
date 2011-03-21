@@ -76,7 +76,7 @@ public:
 
 protected:
   System & _system;
-  SubProblem & _problem;
+  Problem & _problem;
   THREAD_ID _tid;
 };
 
@@ -84,7 +84,7 @@ protected:
 template<typename RangeType>
 ThreadedElementLoop<RangeType>::ThreadedElementLoop(System & system) :
     _system(system),
-    _problem(system.problem())
+    _problem(*system.problem().parent())
 {
 }
 

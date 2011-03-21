@@ -103,6 +103,12 @@ CoupledProblem::init()
 {
   _eq.init();
   _eq.print_info();
+
+  for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  {
+    SubProblem * sp = it->second;
+    sp->init2();                        // obviously I ran out of proper names ;-)
+  }
 }
 
 void
