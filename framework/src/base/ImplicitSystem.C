@@ -440,8 +440,9 @@ ImplicitSystem::computeTimeDeriv()
 void
 ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
 {
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  residual.zero();
 
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeResidualThread cr(*problem().parent(), *this, residual);
   Threads::parallel_reduce(elem_range, cr);
   residual.close();
