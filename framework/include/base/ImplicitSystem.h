@@ -33,6 +33,12 @@ public:
 
   void onTimestepBegin();
 
+public:
+  // FIXME: make these protected and create getters/setters
+  Real _last_rnorm;
+  Real _l_abs_step_tol;
+  Real _initial_residual;
+
 protected:
   void computeTimeDeriv();
   void computeResidualInternal(NumericVector<Number> & residual);

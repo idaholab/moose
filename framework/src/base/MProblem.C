@@ -177,6 +177,8 @@ MProblem::init()
     _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
   }
   _aux.init();
+
+  setSolverDefaults(_nl);
 }
 
 void
@@ -227,8 +229,7 @@ MProblem::onTimestepBegin()
     updateMaterials();
   }
 
-  // FIXME: fix this
-//  Moose::setSolverDefaults(_moose_system, this);
+  Moose::setSolverDefaults(_nl);
 }
 
 void

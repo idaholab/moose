@@ -26,10 +26,14 @@
 namespace Moose
 {
 
+class ImplicitSystem;
+
 /**
  * Register objects that are in MOOSE 
  */
 void registerObjects();
+
+void setSolverDefaults(ImplicitSystem & system);
 
 /**
  * Framework-wide stuff

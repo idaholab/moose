@@ -2,7 +2,7 @@
 //#include "AdaptivityBlock.h"
 #include "Factory.h"
 #include "PetscSupport.h"
-//#include "Conversion.h"
+#include "Conversion.h"
 #include "Moose.h"
 #include "Parser.h"
 #include "Executioner.h"
@@ -61,7 +61,6 @@ GenericExecutionerBlock::execute()
 #endif
 
   InputParameters class_params = getClassParams();
-//  class_params.set<Moose::SubProblem *>("_subproblem") = _parser_handle._problem;
 
 #if 0
   class_params.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'
@@ -78,44 +77,7 @@ GenericExecutionerBlock::execute()
     class_params.set<unsigned int>("steps") = 0;
   
   _moose_system.initExecutioner(ExecutionerFactory::instance()->build(_type, "Executioner", _moose_system, class_params));
-  
-  EquationSystems *es = _moose_system.getEquationSystems();
-  es->parameters.set<Real> ("linear solver tolerance")
-    = getParamValue<Real>("l_tol");
-
-  es->parameters.set<Real> ("linear solver absolute step tolerance")
-    = getParamValue<Real>("l_abs_step_tol");
-
-  es->parameters.set<unsigned int> ("linear solver maximum iterations")
-    = getParamValue<unsigned int>("l_max_its");    
-  
-  es->parameters.set<unsigned int> ("nonlinear solver maximum iterations")
-    = getParamValue<unsigned int>("nl_max_its");
-    
-  es->parameters.set<unsigned int> ("nonlinear solver maximum function evaluations")
-    = getParamValue<unsigned int>("nl_max_funcs");
-    
-  es->parameters.set<Real> ("nonlinear solver absolute residual tolerance")
-    = getParamValue<Real>("nl_abs_tol");
-  
-  es->parameters.set<Real> ("nonlinear solver relative residual tolerance")
-    = getParamValue<Real>("nl_rel_tol");
-  
-  es->parameters.set<Real> ("nonlinear solver absolute step tolerance")
-    = getParamValue<Real>("nl_abs_step_tol");
-  
-  es->parameters.set<Real> ("nonlinear solver relative step tolerance")
-    = getParamValue<Real>("nl_rel_step_tol");
-
-  _moose_system._no_fe_reinit = getParamValue<bool>("no_fe_reinit");
-
-  if (!getParamValue<bool>("perf_log"))
-    Moose::perf_log.disable_logging();
-
-  _moose_system._auto_scaling = getParamValue<bool>("auto_scaling");
-
-  _moose_system.initTimeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParamValue<std::string>("scheme")));
-#endif
+  #endif
 
 #ifdef LIBMESH_HAVE_PETSC
   std::vector<std::string> petsc_options,  petsc_inames, petsc_values;
@@ -162,6 +124,45 @@ GenericExecutionerBlock::execute()
       vars->copyNodalValues(mproblem->getNonlinearSystem());
     if (aux_vars != NULL)
       aux_vars->copyNodalValues(mproblem->getAuxiliarySystem());
+
+    // solver params
+    EquationSystems & es = _parser_handle._problem->es();
+    es.parameters.set<Real> ("linear solver tolerance")
+      = getParamValue<Real>("l_tol");
+
+    es.parameters.set<Real> ("linear solver absolute step tolerance")
+      = getParamValue<Real>("l_abs_step_tol");
+
+    es.parameters.set<unsigned int> ("linear solver maximum iterations")
+      = getParamValue<unsigned int>("l_max_its");
+
+    es.parameters.set<unsigned int> ("nonlinear solver maximum iterations")
+      = getParamValue<unsigned int>("nl_max_its");
+
+    es.parameters.set<unsigned int> ("nonlinear solver maximum function evaluations")
+      = getParamValue<unsigned int>("nl_max_funcs");
+
+    es.parameters.set<Real> ("nonlinear solver absolute residual tolerance")
+      = getParamValue<Real>("nl_abs_tol");
+
+    es.parameters.set<Real> ("nonlinear solver relative residual tolerance")
+      = getParamValue<Real>("nl_rel_tol");
+
+    es.parameters.set<Real> ("nonlinear solver absolute step tolerance")
+      = getParamValue<Real>("nl_abs_step_tol");
+
+    es.parameters.set<Real> ("nonlinear solver relative step tolerance")
+      = getParamValue<Real>("nl_rel_step_tol");
+
+//    _moose_system._no_fe_reinit = getParamValue<bool>("no_fe_reinit");
+
+//    if (!getParamValue<bool>("perf_log"))
+//      Moose::perf_log.disable_logging();
+
+//    _moose_system._auto_scaling = getParamValue<bool>("auto_scaling");
+
+    Moose::ImplicitSystem & nl = _parser_handle._problem->getNonlinearSystem();
+    nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParamValue<std::string>("scheme")));
   }
 
   visitChildren();

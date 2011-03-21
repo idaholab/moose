@@ -3,7 +3,7 @@
 #ifdef LIBMESH_HAVE_PETSC
 
 #include "Moose.h"
-#include "Executioner.h"
+#include "ImplicitSystem.h"
 
 //libMesh Includes
 #include "libmesh_common.h"
@@ -15,6 +15,7 @@
 #include "petsc_matrix.h"
 #include "petsc_linear_solver.h"
 #include "petsc_preconditioner.h"
+#include "getpot.h"
 
 //PETSc includes
 #include <petsc.h>
@@ -27,7 +28,6 @@ namespace Moose
 {
   namespace PetscSupport
   {
-#if 0
     /** The following functionality is encapsulated in the Moose ExecutionBlock but
      * still needed by Pronghorn for the time being
      */
@@ -58,23 +58,23 @@ namespace Moose
   
     PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy)
     {
-      MooseSystem *moose_system = (MooseSystem *) dummy;      // C strikes
+      ImplicitSystem *system = (ImplicitSystem *) dummy;      // C strikes
 
       *reason = KSP_CONVERGED_ITERATING;
 
       //If it's the beginning of a new set of iterations, reset last_rnorm
-      if(!n)
-        moose_system->_last_rnorm = 1e99;
+      if (!n)
+        system->_last_rnorm = 1e99;
 
-      PetscReal norm_diff = std::fabs(rnorm - moose_system->_last_rnorm);
+      PetscReal norm_diff = std::fabs(rnorm - system->_last_rnorm);
   
-      if(norm_diff < moose_system->_l_abs_step_tol)
+      if(norm_diff < system->_l_abs_step_tol)
       {
         *reason = KSP_CONVERGED_RTOL;
         return(0);
       }
 
-      moose_system->_last_rnorm = rnorm;
+      system->_last_rnorm = rnorm;
 
       // From here, we want the default behavior of the KSPDefaultConverged
       // test, but we don't want PETSc to die in that function with a
@@ -101,7 +101,7 @@ namespace Moose
 
     PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void * dummy)
     {
-      MooseSystem *moose_system = (MooseSystem *) dummy;      // C strikes
+      ImplicitSystem *system = (ImplicitSystem *) dummy;      // C strikes
 
       // unused
       // TransientNonlinearImplicitSystem * system = dynamic_cast<TransientNonlinearImplicitSystem *>(&_equation_system->get_system("NonlinearSystem"));
@@ -115,7 +115,7 @@ namespace Moose
       {
         /* set parameter for default relative tolerance convergence test */
         snes->ttol = fnorm*snes->rtol;
-        moose_system->_initial_residual = fnorm;
+        system->_initial_residual = fnorm;
       }
       if (fnorm != fnorm)
       {
@@ -132,7 +132,7 @@ namespace Moose
         PetscInfo2(snes,"Exceeded maximum number of function evaluations: %D > %D\n",snes->nfuncs,snes->max_funcs);
         *reason = SNES_DIVERGED_FUNCTION_COUNT;
       }
-      else if(fnorm >= moose_system->_initial_residual * (1.0/snes->rtol))
+      else if(fnorm >= system->_initial_residual * (1.0/snes->rtol))
       {
         PetscInfo2(snes,"Nonlinear solve was blowing up!",snes->nfuncs,snes->max_funcs);
         *reason = SNES_DIVERGED_LS_FAILURE;
@@ -155,7 +155,8 @@ namespace Moose
     }
 
 
-    /**
+#if 0
+  /**
      * Called at the beginning of every nonlinear step (before Jacobian is formed)
      */
     PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt /*step*/)
@@ -173,22 +174,24 @@ namespace Moose
 
       return 0;
     }
+#endif
 
-    void petscSetDefaults(MooseSystem &moose_system, Executioner *executioner)
+    void petscSetDefaults(ImplicitSystem & system)
     {
-      PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(moose_system.getNonlinearSystem()->nonlinear_solver.get());
+      PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(system.sys().nonlinear_solver.get());
       SNES snes = petsc_solver->snes();
       KSP ksp;
       SNESGetKSP(snes, &ksp);
       KSPSetPreconditionerSide(ksp, PC_RIGHT);
       SNESSetMaxLinearSolveFailures(snes, 1000000);
 
-      if(moose_system.hasDampers())
-        SNESLineSearchSetPostCheck(snes, dampedCheck, moose_system.getEquationSystems());
+      // FIXME: uncomment when adding dampers
+//      if(moose_system.hasDampers())
+//        SNESLineSearchSetPostCheck(snes, dampedCheck, moose_system.getEquationSystems());
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-      KSPSetConvergenceTest(ksp, petscConverged, &moose_system);
-      SNESSetConvergenceTest(snes, petscNonlinearConverged, &moose_system);
+      KSPSetConvergenceTest(ksp, petscConverged, &system);
+      SNESSetConvergenceTest(snes, petscNonlinearConverged, &system);
 #else
 
       // In 3.0.0, the context pointer must actually be used, and the
@@ -199,17 +202,18 @@ namespace Moose
       {
         PetscErrorCode ierr = KSPSetConvergenceTest(ksp,
                                                     petscConverged,
-                                                    &moose_system,
+                                                    &system,
                                                     PETSC_NULL);
         CHKERRABORT(libMesh::COMM_WORLD,ierr);
       }
     
 #endif
     
-      SNESSetUpdate(snes, petscNewtonUpdate);
-      SNESSetApplicationContext(snes, (void *) executioner);
+//      SNESSetUpdate(snes, petscNewtonUpdate);
+//      SNESSetApplicationContext(snes, (void *) executioner);
     }
 
+#if 0
     PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * /*changed_w*/)
     {
       //w = updated solution = x+ scaling*y

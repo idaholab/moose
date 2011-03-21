@@ -1,5 +1,8 @@
 #include "Moose.h"
 #include "Factory.h"
+#include "ImplicitSystem.h"
+#include "PetscSupport.h"
+
 // objects that can be created by MOOSE
 #include "TimeDerivative.h"
 
@@ -30,6 +33,14 @@ registerObjects()
   registerObject(PiecewiseLinear);
 
   registered = true;
+}
+
+void
+setSolverDefaults(ImplicitSystem & system)
+{
+#ifdef LIBMESH_HAVE_PETSC
+  Moose::PetscSupport::petscSetDefaults(system);
+#endif //LIBMESH_HAVE_PETSC
 }
 
 } // namespace
