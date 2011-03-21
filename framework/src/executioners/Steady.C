@@ -25,6 +25,8 @@ Steady::~Steady()
 void
 Steady::execute()
 {
+  checkIntegrity();
+  
   _problem.adaptivity().initial();
   // FIXME: move in SubProblem
   //Update the geometric searches (has to be called after the problem is all set up)
@@ -68,3 +70,10 @@ Steady::execute()
   postExecute();
 }
   
+void
+Steady::checkIntegrity()
+{
+  // check to make sure that we don't have any time kernels in this simulation (Steady State)
+  if (_problem.getNonlinearSystem().containsTimeKernel())
+    mooseError("You have specified time kernels in your steady state simulation");
+}

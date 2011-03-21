@@ -12,6 +12,7 @@
 #include "ComputeJacobianThread.h"
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
+#include "TimeKernel.h"
 
 #include "nonlinear_solver.h"
 #include "quadrature_gauss.h"
@@ -787,4 +788,15 @@ NonlinearSystem::checkBCCoverage(const std::set<short> & mesh_bcs) const
     mooseError("The following boundary ids from your input file do not exist in the input mesh "
                + extra_boundary_ids.str());
   } 
+}
+
+bool
+NonlinearSystem::containsTimeKernel()
+{
+  bool time_kernels = false;
+  for (KernelIterator it = _kernels[0].allKernelsBegin(); it != _kernels[0].allKernelsEnd(); ++it)
+    if (dynamic_cast<TimeKernel *>(*it) != NULL)
+      time_kernels = true;
+
+  return time_kernels;
 }

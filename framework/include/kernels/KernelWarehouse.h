@@ -13,7 +13,6 @@
  */
 typedef std::vector<Kernel *>::iterator KernelIterator;
 
-
 /**
  * Holds kernels and provides some services
  */
@@ -28,7 +27,7 @@ public:
 
   KernelIterator activeKernelsBegin();
   KernelIterator activeKernelsEnd();
-
+  
   void addKernel(Kernel *kernel, const std::set<unsigned int> & block_ids);
 
   void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);

@@ -39,6 +39,8 @@ public:
 
   virtual Problem & problem() { return _problem; }
 
+  virtual void checkIntegrity();
+  
 protected:
   MProblem _problem;
 
