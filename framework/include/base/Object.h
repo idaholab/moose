@@ -4,7 +4,7 @@
 #include "InputParameters.h"
 
 /**
- * Every object that can be build by the factory should be derived from this class.
+ * Every object that can be built by the factory should be derived from this class.
  */
 class Object
 {

@@ -14,6 +14,7 @@
 
 #include "MeshBlock.h"
 #include "MeshGenerationBlock.h"
+#include "GenericMeshModifierBlock.h"
 #include "FunctionsBlock.h"
 #include "GenericFunctionsBlock.h"
 #include "VariablesBlock.h"
@@ -58,6 +59,7 @@ Parser::registerObjects()
 {
   registerNamedParserBlock(MeshBlock, "Mesh");
   registerNamedParserBlock(MeshGenerationBlock, "Mesh/Generation");
+  registerNamedParserBlock(GenericMeshModifierBlock, "Mesh/*");
   registerNamedParserBlock(FunctionsBlock, "Functions");
   registerNamedParserBlock(GenericFunctionsBlock, "Functions/*");
   registerNamedParserBlock(VariablesBlock, "Variables");

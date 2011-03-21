@@ -29,6 +29,8 @@
 #include "BoundingBoxIC.h"
 #include "FunctionIC.h"
 #include "RandomIC.h"
+// mesh modifiers
+#include "ElementDeleter.h"
 // executioners
 #include "Steady.h"
 #include "Transient.h"
@@ -97,6 +99,8 @@ registerObjects()
   registerObject(BoundingBoxIC);
   registerObject(FunctionIC);
   registerObject(RandomIC);
+  // Mesh Modifiers
+  registerObject(ElementDeleter);
   // executioners
   registerObject(Steady);
   registerObject(Transient);

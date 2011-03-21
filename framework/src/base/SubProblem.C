@@ -215,6 +215,8 @@ SubProblem::init()
 {
   _eq.init();
   _eq.print_info();
+  _mesh.applyMeshModifications();
+  _mesh.meshChanged();
 }
 
 void
@@ -257,7 +259,6 @@ SubProblem::copySolutionsBackwards()
 }
 
 // Initial Conditions /////
-
 void
 SubProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name)
 {

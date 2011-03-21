@@ -1,18 +1,23 @@
 #ifndef MESH_H_
 #define MESH_H_
 
+#include "InputParameters.h"
+
 // libMesh
 #include "mesh.h"
 #include "boundary_info.h"
 #include "elem_range.h"
 #include "node_range.h"
 
+//forward declaration
+class MeshModifier;
+
+
 namespace Moose
 {
 
 typedef StoredRange<MeshBase::node_iterator,             Node*>      NodeRange;
 typedef StoredRange<MeshBase::const_node_iterator, const Node*> ConstNodeRange;
-
 
 // NOTE: maybe inheritance would be better here
 //
@@ -68,6 +73,11 @@ public:
 
   operator libMesh::Mesh &(void) { return _mesh; }
 
+  // Mesh Modifiers /////
+  void addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters);
+  void applyMeshModifications();
+
+
 public:
   libMesh::Mesh _mesh;
 
@@ -90,6 +100,8 @@ protected:
    * A map of all of the current nodes to the elements that they are connected to.
    */
   std::vector<std::vector<unsigned int> > _node_to_elem_map;
+
+  std::vector<MeshModifier *> _mesh_modifiers;
 };
 
 } // namespace
