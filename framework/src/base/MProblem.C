@@ -434,6 +434,13 @@ MProblem::addMaterial(const std::string & mat_name, const std::string & name, In
   }
 }
 
+const std::vector<Material*> &
+MProblem::getMaterials(unsigned int block_id, THREAD_ID tid)
+{
+  mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
+  return _materials[tid].getMaterials(block_id);
+}
+
 void
 MProblem::updateMaterials()
 {
@@ -446,8 +453,8 @@ MProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(blk_id))
   {
-    std::vector<Material *> & mats = _materials[tid].getMaterials(blk_id);
-    for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+    const std::vector<Material *> & mats = _materials[tid].getMaterials(blk_id);
+    for (std::vector<Material *>::const_iterator it = mats.begin(); it != mats.end(); ++it)
       (*it)->reinit();
   }
 }
@@ -457,8 +464,8 @@ MProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID 
 {
   if (_materials[tid].hasBoundaryMaterials(blk_id))
   {
-    std::vector<Material *> & mats = _materials[tid].getBoundaryMaterials(blk_id);
-    for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+    const std::vector<Material *> & mats = _materials[tid].getBoundaryMaterials(blk_id);
+    for (std::vector<Material *>::const_iterator it = mats.begin(); it != mats.end(); ++it)
       (*it)->reinit(side);
   }
 }

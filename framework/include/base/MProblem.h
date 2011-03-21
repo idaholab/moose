@@ -98,6 +98,7 @@ public:
 
   // Materials /////
   void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  const std::vector<Material*> & getMaterials(unsigned int block_id, THREAD_ID tid);
   virtual void updateMaterials();
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);

@@ -40,7 +40,7 @@ MaterialWarehouse::hasNeighborMaterials(unsigned int boundary_id)
   return (_active_neighbor_materials.find(boundary_id) != _active_neighbor_materials.end());
 }
 
-std::vector<Material *> &
+const std::vector<Material *> &
 MaterialWarehouse::getMaterials(unsigned int block_id)
 {
   MaterialIterator mat_iter = _active_materials.find(block_id);

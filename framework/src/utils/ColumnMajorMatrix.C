@@ -1,10 +1,25 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "ColumnMajorMatrix.h"
 extern "C" void dsyev_ ( ... );
 
-ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols) :
-    _n_rows(rows),
+ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols)
+  : _n_rows(rows),
     _n_cols(cols),
-    _n_entries(rows*cols)
+    _n_entries(rows*cols),
+    _values(rows*cols, 0.0)
 {
   _values.resize(rows*cols);
 }
@@ -14,11 +29,11 @@ ColumnMajorMatrix::ColumnMajorMatrix(const ColumnMajorMatrix &rhs)
   *this = rhs;
 }
 
-ColumnMajorMatrix::ColumnMajorMatrix(const TypeTensor<Real> &rhs) :
-    _n_rows(LIBMESH_DIM),
-    _n_cols(LIBMESH_DIM),
-    _n_entries(LIBMESH_DIM*LIBMESH_DIM),
-    _values(LIBMESH_DIM*LIBMESH_DIM)
+ColumnMajorMatrix::ColumnMajorMatrix(const TypeTensor<Real> &rhs)
+  :_n_rows(LIBMESH_DIM),
+   _n_cols(LIBMESH_DIM),
+   _n_entries(LIBMESH_DIM*LIBMESH_DIM),
+   _values(LIBMESH_DIM*LIBMESH_DIM)
 {
   for (unsigned int j=0; j<LIBMESH_DIM; ++j)
     for (unsigned int i=0; i<LIBMESH_DIM; ++i)
@@ -35,11 +50,11 @@ ColumnMajorMatrix::ColumnMajorMatrix(const DenseVector<Real> &rhs)
    *this = rhs;
 }
 
-ColumnMajorMatrix::ColumnMajorMatrix(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3) :
-    _n_rows(LIBMESH_DIM),
-    _n_cols(LIBMESH_DIM),
-    _n_entries(LIBMESH_DIM*LIBMESH_DIM),
-    _values(LIBMESH_DIM*LIBMESH_DIM)
+ColumnMajorMatrix::ColumnMajorMatrix(const TypeVector<Real> & col1, const TypeVector<Real> & col2, const TypeVector<Real> & col3)
+  :_n_rows(LIBMESH_DIM),
+   _n_cols(LIBMESH_DIM),
+   _n_entries(LIBMESH_DIM*LIBMESH_DIM),
+   _values(LIBMESH_DIM*LIBMESH_DIM)
 {
   unsigned int entry = 0;
   for(unsigned int i=0; i<LIBMESH_DIM; i++)
@@ -52,12 +67,12 @@ ColumnMajorMatrix::ColumnMajorMatrix(const TypeVector<Real> & col1, const TypeVe
     _values[entry++] = col3(i);
 }
 
-ColumnMajorMatrix
-ColumnMajorMatrix::kronecker(const ColumnMajorMatrix &  rhs) const
-{
-  mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows, "Matrices must be the same shape for a kronecker product!");
 
-  ColumnMajorMatrix ret_matrix(_n_rows*_n_rows, rhs._n_cols*rhs._n_cols);
+ColumnMajorMatrix ColumnMajorMatrix::kronecker  (const ColumnMajorMatrix &  rhs) const
+ {
+   mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows, "Matrices must be the same shape for a kronecker product!");
+
+   ColumnMajorMatrix ret_matrix(_n_rows*_n_rows, rhs._n_cols*rhs._n_cols);
 
   for(unsigned int i = 0; i < _n_rows; i++)
     for(unsigned int j = 0; j < _n_cols; j++)
@@ -68,9 +83,13 @@ ColumnMajorMatrix::kronecker(const ColumnMajorMatrix &  rhs) const
    return ret_matrix;
 }
 
-ColumnMajorMatrix &
-ColumnMajorMatrix::operator=(const DenseMatrix<Real> &rhs)
-{
+
+
+
+
+ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseMatrix<Real> &rhs)
+ {
+
   _n_rows = rhs.m();
   _n_cols = rhs.n();
   _n_entries = rhs.m()*rhs.n();
@@ -78,29 +97,33 @@ ColumnMajorMatrix::operator=(const DenseMatrix<Real> &rhs)
 
   for (unsigned int j=0; j<_n_cols; ++j)
     for (unsigned int i=0; i<_n_rows; ++i)
-      (*this)(i, j) = rhs(i, j);
+         (*this)(i, j) = rhs(i, j);
 
-  return *this;
+    return *this;
 }
 
-ColumnMajorMatrix &
-ColumnMajorMatrix::operator=(const DenseVector<Real> &rhs)
-{
-  _n_rows = rhs.size();
-  _n_cols = 1;
-  _n_entries = rhs.size();
-  _values.resize(rhs.size());
 
-  for (unsigned int i=0; i<_n_rows; ++i)
-    (*this)(i) = rhs(i);
+ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseVector<Real> &rhs)
+ {
 
-  return *this;
+   _n_rows = rhs.size();
+   _n_cols = 1;
+   _n_entries = rhs.size();
+   _values.resize(rhs.size());
+
+
+    for (unsigned int i=0; i<_n_rows; ++i)
+      (*this)(i) = rhs(i);
+
+    return *this;
 }
+
+
 
 void
 ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) const
 {
-  mooseAssert(_n_rows == _n_cols, "Cannot solve eigen system of a non-square matrix!");
+   mooseAssert(_n_rows == _n_cols, "Cannot solve eigen system of a non-square matrix!");
 
   char jobz = 'V';
   char uplo = 'U';
@@ -154,4 +177,6 @@ ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) con
 
   if (return_value)
     mooseError("error in lapack eigen solve");
+
+
 }

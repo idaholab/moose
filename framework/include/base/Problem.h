@@ -18,6 +18,7 @@
 
 class MooseVariable;
 class Output;
+class Material;
 
 class Problem
 {
@@ -49,6 +50,7 @@ public:
   // Materials /////
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid) = 0;
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid) = 0;
+  virtual const std::vector<Material*> & getMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
 
   /// Returns true if the Problem has Dirac kernels it needs to compute on elem.
   virtual bool reinitDirac(const Elem * /*elem*/, THREAD_ID /*tid*/){ mooseError("Cannont reinit this Problem with arbitrary quadrature points!"); };

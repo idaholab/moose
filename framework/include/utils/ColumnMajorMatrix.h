@@ -1,3 +1,17 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #ifndef COLUMNMAJORMATRIX_H
 #define COLUMNMAJORMATRIX_H
 
@@ -250,6 +264,11 @@ public:
   ColumnMajorMatrix & operator+=(const ColumnMajorMatrix & rhs);
 
   /**
+   * Matrix Tensor Addition Plus Assignment
+   */
+  ColumnMajorMatrix & operator+=(const TypeTensor<Real> & rhs);
+
+  /**
    * Matrix Matrix Subtraction plus assignment
    *
    * Note that this is faster than regular subtraction
@@ -379,9 +398,13 @@ ColumnMajorMatrix::fill(DenseVector<Real> &rhs)
 {
   mooseAssert(_n_rows == rhs.size(), "Vectors must be the same shape for a fill!");
 
-  for (unsigned int i=0; i<_n_rows; ++i)
-    rhs(i) = (*this)(i);
+
+    for (unsigned int i=0; i<_n_rows; ++i)
+      rhs(i) = (*this)(i);
+
 }
+
+
 
 inline ColumnMajorMatrix
 ColumnMajorMatrix::transpose() const
@@ -401,33 +424,34 @@ ColumnMajorMatrix::transpose() const
 inline ColumnMajorMatrix
 ColumnMajorMatrix::deviatoric()
 {
-  ColumnMajorMatrix & s = (*this);
+    ColumnMajorMatrix & s = (*this);
 
-  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols), I(_n_rows, _n_cols);
+    ColumnMajorMatrix ret_matrix(_n_rows, _n_cols), I(_n_rows, _n_cols);
 
-  I.identity();
+    I.identity();
 
-  for(unsigned int i=0; i<_n_rows; i++)
-    for(unsigned int j=0; j<_n_cols; j++)
-      ret_matrix(i,j) = s(i,j) - I(i,j) * (s.tr()/3.0);
+    for(unsigned int i=0; i<_n_rows; i++)
+      for(unsigned int j=0; j<_n_cols; j++)
+        ret_matrix(i,j) = s(i,j) - I(i,j) * (s.tr()/3.0);
 
-  return ret_matrix;
+    return ret_matrix;
 }
 
 
 inline ColumnMajorMatrix
 ColumnMajorMatrix::abs()
 {
-  ColumnMajorMatrix & s = (*this);
+    ColumnMajorMatrix & s = (*this);
 
-  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
+    ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
 
-  for(unsigned int j=0; j<_n_cols; j++)
-    for(unsigned int i=0; i<_n_rows; i++)
-      ret_matrix(i,j) = std::abs(s(i,j));
+    for(unsigned int j=0; j<_n_cols; j++)
+      for(unsigned int i=0; i<_n_rows; i++)
+        ret_matrix(i,j) = std::abs(s(i,j));
 
-  return ret_matrix;
+    return ret_matrix;
 }
+
 
 inline void
 ColumnMajorMatrix::setDiag(Real value)
@@ -642,6 +666,22 @@ ColumnMajorMatrix::operator+=(const ColumnMajorMatrix & rhs)
 
   for(unsigned int i=0; i<_n_entries; i++)
     _values[i] += rhs._values[i];
+
+  return *this;
+}
+
+inline ColumnMajorMatrix &
+ColumnMajorMatrix::operator+=(const TypeTensor<Real> & rhs)
+{
+  mooseAssert((_n_rows == LIBMESH_DIM) && (_n_cols == LIBMESH_DIM), "Cannot perform matrix addition and assignment!  The shapes of the two operands are not compatible!");
+
+  for (unsigned int j(0); j < LIBMESH_DIM; ++j)
+  {
+    for (unsigned int i(0); i < LIBMESH_DIM; ++i)
+    {
+      (*this)(i,j) += rhs(i,j);
+    }
+  }
 
   return *this;
 }

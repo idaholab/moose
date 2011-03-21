@@ -68,7 +68,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _use_time_ipol(_time_ipol.getSampleSize() > 0)
 {
   _t_step = 0;
-  _dt = _input_dt;
+  _dt = 0;
   _time = getParam<Real>("start_time");
   _problem.transient(true);
 
