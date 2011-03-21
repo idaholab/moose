@@ -6,9 +6,6 @@
 #include "NonlinearSystem.h"
 #include "MProblem.h"
 
-// libMesh includes
-#include "periodic_boundaries.h"
-
 template<>
 InputParameters validParams<AddPeriodicBCAction>()
 {
@@ -18,13 +15,22 @@ InputParameters validParams<AddPeriodicBCAction>()
   params.addParam<std::vector<Real> >("translation", "Vector that translates coordinates on the primary boundary to coordinates on the secondary boundary.");
   params.addParam<std::vector<std::string> >("transform_func", "Functions that specify the transformation");
   params.addParam<std::vector<std::string> >("inv_transform_func", "Functions that specify the inverse transformation");
-  params.addParam<std::string>("variable", "Variable for the periodic boundary");
+  params.addParam<std::vector<std::string> >("variable", "Variable for the periodic boundary");
   return params;
 }
 
 AddPeriodicBCAction::AddPeriodicBCAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
+}
+
+void
+AddPeriodicBCAction::setPeriodicVars(PeriodicBoundary & p, const std::vector<std::string> & var_names)
+{
+  NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
+
+  for (std::vector<std::string>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
+    p.set_variable(nl.getVariable(0, (*it)).number());
 }
 
 void
@@ -40,8 +46,7 @@ AddPeriodicBCAction::act()
     PeriodicBoundary p(RealVectorValue(translation[0], translation[1], translation[2]));
     p.myboundary = getParam<unsigned int>("primary");
     p.pairedboundary = getParam<unsigned int>("secondary");
-    if (getParam<std::string>("variable") != std::string())
-      p.set_variable(nl.getVariable(0, getParam<std::string>("variable")).number());
+    setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
 
     nl.dofMap().add_periodic_boundary(p);
   }
@@ -52,8 +57,7 @@ AddPeriodicBCAction::act()
     FunctionPeriodicBoundary *pb = new FunctionPeriodicBoundary(*_parser_handle._problem, fn_names);
     pb->myboundary = getParam<unsigned int>("primary");
     pb->pairedboundary = getParam<unsigned int>("secondary");
-    if (getParam<std::string>("variable") != std::string())
-      pb->set_variable(nl.getVariable(0, getParam<std::string>("variable")).number());
+    setPeriodicVars(*pb, getParam<std::vector<std::string> >("variable"));
 
     FunctionPeriodicBoundary *ipb = NULL;
     if (getParam<std::vector<std::string> >("inv_transform_func") != std::vector<std::string>())
@@ -65,8 +69,7 @@ AddPeriodicBCAction::act()
       // these are switched, because we are forming the inverse translation
       ipb->myboundary = getParam<unsigned int>("secondary");
       ipb->pairedboundary = getParam<unsigned int>("primary");
-      if (getParam<std::string>("variable") != std::string())
-        ipb->set_variable(nl.getVariable(0, getParam<std::string>("variable")).number());
+      setPeriodicVars(*ipb, getParam<std::vector<std::string> >("variable"));
     }
     else
     {
