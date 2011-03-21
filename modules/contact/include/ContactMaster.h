@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONTACTMASTER_H_
-#define CONTACTMASTER_H_
+#ifndef CONTACTMASTER_H
+#define CONTACTMASTER_H
 
 // Moose Includes
 #include "DiracKernel.h"

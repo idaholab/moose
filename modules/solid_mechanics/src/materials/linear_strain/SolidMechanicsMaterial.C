@@ -1,6 +1,6 @@
 #include "SolidMechanicsMaterial.h"
+#include "Problem.h"
 
-#include "MooseSystem.h"
 #include "VolumetricModel.h"
 
 template<>
@@ -40,7 +40,7 @@ SolidMechanicsMaterial::subdomainSetup()
     _initialized = true;
 
     // Load in the volumetric models
-    const std::vector<Material*> mats = _moose_system.getMaterials( _tid, _block_id );
+    const std::vector<Material*> & mats = _problem.getMaterials( _block_id, _tid );
     for (unsigned int i(0); i < mats.size(); ++i)
     {
       VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
