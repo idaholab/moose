@@ -3,6 +3,7 @@
 // Moose includes
 #include "Moose.h"
 #include "Factory.h"
+#include "Parser.h"
 
 // libMesh includes
 #include "libmesh.h"
@@ -35,26 +36,18 @@ AuxVariablesBlock::execute()
   std::cerr << "Inside the AuxVariablesBlock Object\n";
 #endif
 
-//  TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
-  
   visitChildren();
-
-  // Add a temporary vector for general use
-//  system.add_vector("temp", false);
 
   ParserBlock * pb = locateBlock("BCs/Periodic");
 
   if (pb)
     pb->execute();
 
-//  _moose_system.init();
-//  _moose_system.getEquationSystems()->print_info();
-
-//  // Copy out nodal values is required (Variables Block)
-//  if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("Variables")))
-//    vars->copyNodalValues("NonlinearSystem");
-
+  _parser_handle._problem->init();
+  // Copy out nodal values is required (Variables Block)
+  if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("Variables")))
+    vars->copyNodalValues(_parser_handle._problem->getNonlinearSystem());
   // Aux Variables
-//  this->copyNodalValues("AuxiliarySystem");
+  copyNodalValues(_parser_handle._problem->getAuxiliarySystem());
 }
 

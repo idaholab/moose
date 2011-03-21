@@ -88,9 +88,12 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 void
 Transient::execute()
 {
-  _problem.init();
-
+  _problem.copySolutionsBackwards();
   preExecute();
+  _problem.update();
+  if (_output_initial)
+    _problem.output();
+
   // Start time loop...
   while(keepGoing()) 
   {

@@ -127,6 +127,7 @@ public:
   Moose::Mesh *_mesh;
   Moose::MProblem *_problem;
   Executioner *_executioner;
+  ExodusII_IO *_exreader;
 
 private:
   /**

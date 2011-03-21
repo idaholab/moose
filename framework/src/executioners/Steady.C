@@ -20,8 +20,6 @@ Steady::Steady(const std::string & name, InputParameters parameters) :
 void
 Steady::execute()
 {
-  _problem.init();
-
   preExecute();
   _problem.update();
   if (_output_initial)

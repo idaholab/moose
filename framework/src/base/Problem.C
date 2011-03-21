@@ -3,7 +3,6 @@
 #include "ImplicitSystem.h"
 
 // libMesh includes
-#include "exodusII_io.h"
 
 namespace Moose
 {
@@ -102,6 +101,11 @@ Problem::getVariable(THREAD_ID tid, const std::string & var_name)
     if (_sys[i]->hasVariable(var_name))
       return _sys[i]->getVariable(tid, var_name);
   mooseError("Unknown variable " + var_name);
+}
+
+void
+Problem::copySolutionsBackwards()
+{
 }
 
 // Initial Conditions /////

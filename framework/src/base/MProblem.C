@@ -112,6 +112,13 @@ MProblem::converged()
 }
 
 void
+MProblem::copySolutionsBackwards()
+{
+  _nl.copySolutionsBackwards();
+  _aux.copySolutionsBackwards();
+}
+
+void
 MProblem::onTimestepBegin()
 {
   if (converged())

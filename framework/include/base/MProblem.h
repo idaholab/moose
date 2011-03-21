@@ -33,6 +33,8 @@ public:
   virtual void onTimestepBegin();
   virtual void onTimestepEnd();
 
+  virtual void copySolutionsBackwards();
+
   // NL /////
   void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
@@ -40,12 +42,16 @@ public:
 
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
+  ImplicitSystem & getNonlinearSystem() { return _nl; }
+
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
   void addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   void addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
+
+  AuxiliarySystem & getAuxiliarySystem() { return _aux; }
 
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);

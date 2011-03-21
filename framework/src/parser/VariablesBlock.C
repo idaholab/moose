@@ -3,6 +3,7 @@
 // Moose includes
 #include "Moose.h"
 #include "GenericVariableBlock.h"
+#include "SubProblem.h"
 #include "Parser.h"
 
 // libMesh includes
@@ -51,9 +52,6 @@ VariablesBlock::execute()
   _moose_system._manual_scaling.reserve(n_activeChildren());
 */
 
-//  std::cout << "Adding NL" << std::endl;
-//  _parser_handle._nl = _parser_handle._sys = _parser_handle._problem->addImplicitSystem("nl");
-
   // Add variable blocks from the children nodes
   visitChildren();
 
@@ -73,25 +71,17 @@ VariablesBlock::execute()
 }
 
 void
-VariablesBlock::copyNodalValues(const std::string &/*system_name*/)
+VariablesBlock::copyNodalValues(Moose::SubProblem & sys)
 {
-  mooseError("VariablesBlock::copyNodalValues() not implemented");
-/*  System *system;
-  if (system_name == "NonlinearSystem")
-    system = _moose_system.getNonlinearSystem();
-  else
-    system = _moose_system.getAuxSystem();
-  
   // Iterate over the children and see if they need nodal values read
   for (std::vector<ParserBlock *>::iterator i = _children.begin(); i!=_children.end(); ++i)
   {
     if (GenericVariableBlock * var_block = dynamic_cast<GenericVariableBlock *>(*i))
     {
       std::pair<std::string, unsigned int> init_pair = var_block->initialValuePair();
-      if (init_pair.first != "") 
-        _moose_system.getExodusReader()->copy_nodal_solution(*system, init_pair.first, init_pair.second);
+      if (init_pair.first != "")
+        sys.copyNodalValues(*_parser_handle._exreader, init_pair.first, init_pair.second);
     }
   }
-*/
 }
 

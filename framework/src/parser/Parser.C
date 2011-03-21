@@ -26,6 +26,9 @@
 #include "GenericMaterialBlock.h"
 #include "OutputBlock.h"
 #include "GenericExecutionerBlock.h"
+#include "PreconditioningBlock.h"
+#include "PostprocessorsBlock.h"
+#include "GenericPostprocessorBlock.h"
 
 // libMesh
 #include "getpot.h"
@@ -67,14 +70,14 @@ Parser::registerObjects()
   registerNamedParserBlock(MaterialsBlock, "Materials");
   registerNamedParserBlock(GenericMaterialBlock, "Materials/*");
   registerNamedParserBlock(OutputBlock, "Output");
-//  registerNamedParserBlock(PreconditioningBlock, "Preconditioning");
+  registerNamedParserBlock(PreconditioningBlock, "Preconditioning");
 //  registerNamedParserBlock(PBPBlock, "Preconditioning/PBP");
 //  registerNamedParserBlock(PeriodicBlock, "BCs/Periodic");
 //  registerNamedParserBlock(GenericPeriodicBlock, "BCs/Periodic/*");
   registerNamedParserBlock(GenericExecutionerBlock, "Executioner");
 //  registerNamedParserBlock(AdaptivityBlock, "Executioner/Adaptivity");
-//  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors");
-//  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/*");
+  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors");
+  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/*");
 //  registerNamedParserBlock(DampersBlock, "Dampers");
 //  registerNamedParserBlock(GenericDamperBlock, "Dampers/*");
 //  registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");
@@ -90,6 +93,7 @@ Parser::Parser(const std::string &dump_string) :
     _mesh(NULL),
     _problem(NULL),
     _executioner(NULL),
+    _exreader(NULL),
     _input_filename(""),
     _dump_string(dump_string),
     _input_tree(NULL),
@@ -501,14 +505,12 @@ Parser::fixupOptionalBlocks()
   std::vector<std::pair<std::string, std::string> >::iterator i;
   ParserBlock *block_ptr;
 
-/*
   optional_blocks.push_back(std::make_pair("Variables", "Preconditioning"));
   optional_blocks.push_back(std::make_pair("Preconditioning", "AuxVariables"));
   optional_blocks.push_back(std::make_pair("Kernels", "AuxKernels"));
   optional_blocks.push_back(std::make_pair("AuxKernels", "BCs"));
   optional_blocks.push_back(std::make_pair("BCs", "AuxBCs"));
   optional_blocks.push_back(std::make_pair("Executioner", "Postprocessors"));
-*/
 
   // First see if the Optional Block exists
   for (i = optional_blocks.begin(); i != optional_blocks.end(); ++i)

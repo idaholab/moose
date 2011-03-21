@@ -12,6 +12,7 @@
 // libMesh
 #include "equation_systems.h"
 #include "dof_map.h"
+#include "exodusII_io.h"
 
 
 namespace Moose {
@@ -49,6 +50,8 @@ public:
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
+
+  virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
 
 protected:
   Problem & _problem;
@@ -109,8 +112,6 @@ public:
 
   virtual void init()
   {
-    *_sys.older_local_solution = *_sys.current_local_solution;
-    *_sys.old_local_solution   = *_sys.current_local_solution;
   }
 
   virtual void update()
@@ -123,6 +124,12 @@ public:
     _sys.solve();
   }
 
+  virtual void copySolutionsBackwards()
+  {
+    *_sys.older_local_solution = *_sys.current_local_solution;
+    *_sys.old_local_solution   = *_sys.current_local_solution;
+  }
+
   virtual void copyOldSolutions()
   {
     *_sys.older_local_solution = *_sys.old_local_solution;
@@ -133,6 +140,11 @@ public:
   {
     *_sys.current_local_solution = *_sys.old_local_solution;
     *_sys.solution = *_sys.old_local_solution;
+  }
+
+  virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep)
+  {
+    io.copy_nodal_solution(_sys, nodal_var_name, timestep);
   }
 
   T & sys() { return _sys; }

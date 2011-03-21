@@ -22,7 +22,7 @@ InputParameters validParams<MeshBlock>()
   params.addParam<int>("dim", "DEPRECATED - Mesh dim can be determined from the file read.");
   params.addParam<std::string>("file", "(no file supplied)", "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
-  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when spliting the mesh for a parallel computation");
+  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation");
   params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
 
@@ -52,13 +52,12 @@ MeshBlock::execute()
 
   if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
     gen_block->execute();
-//  else if (checkVariableProperties(&GenericVariableBlock::restartRequired)) 
-//    _moose_system.getExodusReader()->read(getParamValue<std::string>("file"));
-  else {
+  else
+  {
     _parser_handle._mesh = new Moose::Mesh(mesh_dim);
-    _parser_handle._mesh->read(getParamValue<std::string>("file"));
+    _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
+    _parser_handle._exreader->read(getParamValue<std::string>("file"));
   }
-
   // get convenience pointer to mesh object
   Moose::Mesh *mesh = _parser_handle._mesh;
 

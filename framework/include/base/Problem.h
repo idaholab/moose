@@ -59,6 +59,8 @@ public:
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
 
+  virtual void copySolutionsBackwards();
+
   Real & time() { return _time; }
   int & timeStep() { return _t_step; }
   Real & dt() { return _dt; }
