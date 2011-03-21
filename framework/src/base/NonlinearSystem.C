@@ -45,6 +45,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _dt(subproblem.dt()),
     _dt_old(subproblem.dtOld()),
     _t_step(subproblem.timeStep()),
+    _time_weight(subproblem.timeWeights()),
     _increment_vec(NULL),
     _preconditioner(NULL)
 {

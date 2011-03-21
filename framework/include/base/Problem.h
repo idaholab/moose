@@ -74,6 +74,7 @@ public:
   virtual int & timeStep() = 0;
   virtual Real & dt() = 0;
   virtual Real & dtOld() = 0;
+  virtual std::vector<Real> & timeWeights() { return _time_weights; }
 
   virtual void copySolutionsBackwards() = 0;
 
@@ -95,6 +96,7 @@ protected:
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
 
+  std::vector<Real> _time_weights;
 };
 
 #endif /* PROBLEM_H */

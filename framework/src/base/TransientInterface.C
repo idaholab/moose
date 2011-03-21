@@ -6,6 +6,7 @@ TransientInterface::TransientInterface(InputParameters & parameters) :
     _t(_ti_problem.time()),
     _t_step(_ti_problem.timeStep()),
     _dt(_ti_problem.dt()),
+    _time_weight(_ti_problem.timeWeights()),
     _is_transient(_ti_problem.transient())
 {
 }

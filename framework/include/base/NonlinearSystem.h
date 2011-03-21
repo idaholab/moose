@@ -74,7 +74,7 @@ protected:
   Real & _dt;                                           /// size of the time step
   Real & _dt_old;                                       /// previous time step size
   int & _t_step;                                        /// time step (number)
-  std::vector<Real> _time_weight;                       /// Coefficients (weights) for the time discretization
+  std::vector<Real> & _time_weight;                     /// Coefficients (weights) for the time discretization
   Moose::TimeSteppingScheme _time_stepping_scheme;      /// Time stepping scheme used for time discretization
   Real _time_stepping_order;                            /// The order of the time stepping scheme
 

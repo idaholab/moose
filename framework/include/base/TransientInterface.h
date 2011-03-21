@@ -19,6 +19,7 @@ protected:
   Real & _t;
   int & _t_step;
   Real & _dt;
+  std::vector<Real> & _time_weight;
 
   // NOTE: dunno if it is set properly in time of instantiation (might be a source of bugs)
   bool _is_transient;
