@@ -18,11 +18,11 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     _q_point(_problem.pointsFace(_tid)),
     _JxW(_problem.JxWFace(_tid)),
 
-    _phi(_var.phi()),
-    _grad_phi(_var.gradPhi()),
+    _phi(_var.phiFace()),
+    _grad_phi(_var.gradPhiFace()),
 
-    _test(_test_var.phi()),
-    _grad_test(_test_var.gradPhi()),
+    _test(_test_var.phiFace()),
+    _grad_test(_test_var.gradPhiFace()),
 
     _u(_var.sln()),
     _grad_u(_var.gradSln())
@@ -40,7 +40,10 @@ IntegratedBC::computeResidual()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _phi.size(); _i++)
+    {
       re(_i) += _JxW[_qp]*computeQpResidual();
+      std::cerr << "qp = " << _qp << " " << _JxW[_qp] << ", " << computeQpResidual() << std::endl;
+    }
 }
 
 void

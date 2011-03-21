@@ -127,31 +127,6 @@ MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string
 }
 
 void
-MProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
-{
-  parameters.set<SubProblem *>("_problem") = this;
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    parameters.set<THREAD_ID>("_tid") = tid;
-
-    std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
-    for (unsigned int i=0; i<blocks.size(); ++i)
-    {
-      parameters.set<unsigned int>("block_id") = blocks[i];
-
-      // volume material
-      Material *material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
-      mooseAssert(material != NULL, "Not a Material object");
-      _materials[tid].addMaterial(blocks[i], material);
-      // boundary material
-      Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
-      mooseAssert(bnd_material != NULL, "Not a Material object");
-      _materials[tid].addBoundaryMaterial(blocks[i], bnd_material);
-    }
-  }
-}
-
-void
 MProblem::init()
 {
   SubProblem::init();
@@ -181,6 +156,8 @@ void
 MProblem::solve()
 {
   _nl.solve();
+
+  _nl.solution().print(std::cerr);
 }
 
 bool

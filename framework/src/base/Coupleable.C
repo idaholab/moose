@@ -45,6 +45,12 @@ Coupleable::getCoupledValue(const std::string & var_name, unsigned int comp)
   return _coupled_vars[var_name][comp]->sln();
 }
 
+VariableGradient &
+Coupleable::getCoupledGradient(const std::string & var_name, unsigned int comp)
+{
+  return _coupled_vars[var_name][comp]->gradSln();
+}
+
 VariableValue &
 Coupleable::getCoupledNodalValue(const std::string & var_name, unsigned int comp)
 {

@@ -36,7 +36,7 @@ protected:
 
   // unknown
   const VariableValue & _u;
-  const VariableGrad & _grad_u;
+  const VariableGradient & _grad_u;
 
   virtual Real computeQpIntegral() = 0;
 };

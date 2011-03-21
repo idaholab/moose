@@ -49,9 +49,8 @@ NodalVariableValue::getValue()
 {
   Real value = 0;
 
-  // FIXME: PPS: variable nodal value
-//  if(_node.processor_id() == libMesh::processor_id())
-//    value = _problem.getVariableNodalValue(_node, _var_name);
+  if(_node.processor_id() == libMesh::processor_id())
+    value = _problem.getVariable(_tid, _var_name).getNodalValue(_node);
 
   gatherSum(value);
 

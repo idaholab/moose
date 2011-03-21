@@ -4,6 +4,7 @@
 
 #include "Diffusion.h"
 #include "CoupledForce.h"
+#include "CoupledConvection.h"
 #include "ForcingFn.h"
 #include "UserForcingFunction.h"
 #include "BodyForce.h"
@@ -54,6 +55,7 @@ void registerObjects()
   // Kernels
   registerObject(Diffusion);
   registerObject(CoupledForce);
+  registerObject(CoupledConvection);
   registerObject(ForcingFn);
   registerObject(UserForcingFunction);
   registerObject(BodyForce);

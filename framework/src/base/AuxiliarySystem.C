@@ -3,6 +3,7 @@
 #include "ImplicitSystem.h"
 #include "Factory.h"
 #include "AuxKernel.h"
+#include "MaterialData.h"
 
 #include "quadrature_gauss.h"
 
@@ -178,6 +179,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _problem._material_data[tid];
 
     AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
@@ -218,6 +220,8 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
     {
 //      parameters.set<THREAD_ID>("_tid") = tid;
       parameters.set<THREAD_ID>("_tid") = 0;
+      parameters.set<MaterialData *>("_material_data") = _problem._bnd_material_data[0];
+
       AuxKernel * bc = static_cast<AuxKernel *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 

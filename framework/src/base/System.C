@@ -59,9 +59,10 @@ System::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id
        ++it)
   {
     Variable *var = *it;
+    var->reinit();
     var->sizeResidual();
     var->sizeJacobianBlock();
-    var->reinit();
+    var->computeElemValuesFace();
   }
 }
 

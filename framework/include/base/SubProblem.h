@@ -83,6 +83,7 @@ public:
   virtual const std::vector<Real> & JxWFace(THREAD_ID tid) = 0;
 
   virtual FEBase * & getFE(THREAD_ID tid, const FEType & fe_type) = 0;
+  virtual FEBase * & getFEFace(THREAD_ID tid, const FEType & fe_type) = 0;
   virtual const Elem * & elem(THREAD_ID tid) = 0;
   virtual unsigned int & side(THREAD_ID tid) = 0;
   virtual const Elem * & sideElem(THREAD_ID tid) = 0;
@@ -102,9 +103,7 @@ public:
   Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   // Materials /////
-  MaterialProperties & materialProps() { return _material_props; }
-  MaterialProperties & materialPropsOld() { return _material_props_old; }
-  MaterialProperties & materialPropsOlder() { return _material_props_older; }
+  void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   virtual void updateMaterials();
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
@@ -152,16 +151,18 @@ protected:
   // Initial conditions
   std::map<std::string, InitialCondition *> _ics;
 
+public:
   // material properties
-  MaterialProperties _material_props;
-  MaterialProperties _material_props_old;
-  MaterialProperties _material_props_older;
+  std::vector<MaterialData *> _material_data;
+  std::vector<MaterialData *> _bnd_material_data;
+
+protected:
+  // materials
+  std::vector<MaterialWarehouse> _materials;
 
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
 
-  // materials
-  std::vector<MaterialWarehouse> _materials;
 
   // postprocessors
   std::vector<PostprocessorData> _pps_data;

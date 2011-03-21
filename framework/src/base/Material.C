@@ -1,6 +1,7 @@
 #include "Material.h"
 #include "Problem.h"
 #include "SubProblem.h"
+#include "MaterialData.h"
 
 // system includes
 #include <iostream>
@@ -18,14 +19,17 @@ Material::Material(const std::string & name, InputParameters parameters) :
   Object(name, parameters),
   _problem(*parameters.get<Moose::SubProblem *>("_problem")),
   _tid(parameters.get<THREAD_ID>("_tid")),
-  _qrule(_problem.qRule(_tid)),
-  _q_point(_problem.points(_tid)),
+  _bnd(parameters.get<bool>("_bnd")),
+  _material_data(*parameters.get<Moose::MaterialData *>("_material_data")),
+  _qrule(_bnd ? _problem.qRuleFace(_tid) : _problem.qRule(_tid)),
+  _q_point(_bnd ? _problem.pointsFace(_tid) : _problem.points(_tid)),
   _current_elem(_problem.elem(_tid)),
   _has_stateful_props(false),
   _block_id(parameters.get<unsigned int>("block_id")),
-  _props(_problem.materialProps()),
-  _props_old(_problem.materialPropsOld()),
-  _props_older(_problem.materialPropsOlder())
+
+  _props(_material_data.props()),
+  _props_old(_material_data.propsOld()),
+  _props_older(_material_data.propsOlder())
 {
   _props_elem       = new std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >;
   _props_elem_old   = new std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >;
@@ -60,35 +64,6 @@ Material::~Material()
   
   //std::for_each(_qp_prev.begin(), _qp_prev.end(), DeleteFunctor());
   //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
-
-  {
-    std::map<std::string, Moose::PropertyValue *>::iterator it;
-    for (it = _props.begin(); it != _props.end(); ++it)
-    {
-      if (it->second != NULL)
-      {
-        delete it->second;
-        it->second = NULL;
-      }
-    }
-
-    for (it = _props_old.begin(); it != _props_old.end(); ++it)
-    {
-      if (it->second != NULL)
-      {
-        delete it->second;
-        it->second = NULL;
-      }
-    }
-    for (it = _props_older.begin(); it != _props_older.end(); ++it)
-    {
-      if (it->second != NULL)
-      {
-        delete it->second;
-        it->second = NULL;
-      }
-    }
-  }
 
   {
     std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >::iterator i;

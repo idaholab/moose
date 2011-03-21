@@ -92,13 +92,13 @@
   [../]
 []
 
-#[Postprocessors]
-#  [./l2_err]
-#    type = ElementL2Error
-#    variable = u
-#    function = exact_fn
-#  [../]
-#[]
+[Postprocessors]
+  [./l2_err]
+    type = ElementL2Error
+    variable = u
+    function = exact_fn
+  [../]
+[]
 
 [Executioner]
   type = Transient

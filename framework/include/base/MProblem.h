@@ -30,6 +30,7 @@ public:
   virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _asm_info[tid]->JxWFace(); }
 
   virtual FEBase * & getFE(THREAD_ID tid, const FEType & fe_type) { return _asm_info[tid]->getFE(fe_type); }
+  virtual FEBase * & getFEFace(THREAD_ID tid, const FEType & fe_type) { return _asm_info[tid]->getFEFace(fe_type); }
   virtual const Elem * & elem(THREAD_ID tid) { return _asm_info[tid]->elem(); }
   virtual unsigned int & side(THREAD_ID tid) { return _asm_info[tid]->side(); }
   virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid]->sideElem(); }
@@ -69,9 +70,6 @@ public:
   void addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   AuxiliarySystem & getAuxiliarySystem() { return _aux; }
-
-  // Materials /////
-  void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);

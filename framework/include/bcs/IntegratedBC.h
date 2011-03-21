@@ -39,7 +39,7 @@ protected:
   const std::vector<std::vector<RealGradient> > & _grad_test;
   // unknown
   const VariableValue & _u;
-  const VariableGrad & _grad_u;
+  const VariableGradient & _grad_u;
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();

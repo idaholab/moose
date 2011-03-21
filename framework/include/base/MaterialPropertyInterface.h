@@ -11,6 +11,7 @@
 namespace Moose {
 
 class SubProblem;
+class MaterialData;
 
 /**
  * Any object that needs material properties has to inherit this interface
@@ -34,7 +35,8 @@ public:
 
 
 protected:
-  SubProblem & _subproblem;
+//  SubProblem & _subproblem;
+  MaterialData & _material_data;
   MaterialProperties & _material_props;
   MaterialProperties & _material_props_old;
   MaterialProperties & _material_props_older;

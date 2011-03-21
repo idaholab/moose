@@ -16,7 +16,7 @@
 
 
 typedef std::vector<Real>               VariableValue;
-typedef std::vector<RealGradient>       VariableGrad;
+typedef std::vector<RealGradient>       VariableGradient;
 
 
 namespace Moose
@@ -53,14 +53,17 @@ public:
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
+
+  const std::vector<std::vector<Real> > & phiFace() { return _phi_face; }
+  const std::vector<std::vector<RealGradient> > & gradPhiFace() { return _grad_phi_face; }
   const std::vector<Point> & normals() { return _normals; }
 
   VariableValue & sln() { return _u; }
   VariableValue & slnOld() { return _u_old; }
   VariableValue & slnOlder() { return _u_older; }
-  VariableGrad  & gradSln() { return _grad_u; }
-  VariableGrad  & gradSlnOld() { return _grad_u_old; }
-  VariableGrad  & gradSlnOlder() { return _grad_u_older; }
+  VariableGradient  & gradSln() { return _grad_u; }
+  VariableGradient  & gradSlnOld() { return _grad_u_old; }
+  VariableGradient  & gradSlnOlder() { return _grad_u_older; }
 
   VariableValue & uDot() { return _u_dot; }
   VariableValue & duDotDu() { return _du_dot_du; }
@@ -70,6 +73,8 @@ public:
   VariableValue & nodalSln() { return _nodal_u; }
 
   void computeElemValues();
+  void computeElemValuesFace();
+
   void computeNodalValues();
 
   void sizeResidual();
@@ -83,6 +88,8 @@ public:
   void add(NumericVector<Number> & residual);
   void add(SparseMatrix<Number> & jacobian);
 
+  Number getNodalValue(const Node & node);
+
 protected:
   THREAD_ID _tid;
   unsigned int _var_num;
@@ -94,6 +101,7 @@ protected:
 //  QBase * & _qrule;
 
   FEBase * & _fe;
+  FEBase * & _fe_face;
 
   const Elem * & _elem;
   unsigned int & _current_side;
@@ -105,14 +113,17 @@ protected:
 
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
+
+  const std::vector<std::vector<Real> > & _phi_face;
+  const std::vector<std::vector<RealGradient> > & _grad_phi_face;
   const std::vector<Point> & _normals;
 
   VariableValue _u;
   VariableValue _u_old;
   VariableValue _u_older;
-  VariableGrad  _grad_u;
-  VariableGrad  _grad_u_old;
-  VariableGrad  _grad_u_older;
+  VariableGradient  _grad_u;
+  VariableGradient  _grad_u_old;
+  VariableGradient  _grad_u_older;
 
   // time derivatives
   VariableValue _u_dot;
@@ -122,7 +133,7 @@ protected:
   const Node * & _node;
   unsigned int _nodal_dof_index;
   VariableValue _nodal_u;
-  VariableGrad  _nodal_grad_u;
+  VariableGradient  _nodal_grad_u;
 
   /**
    * Residual for this variable

@@ -3,6 +3,7 @@
 #include "ImplicitSystem.h"
 #include "Postprocessor.h"
 #include "ThreadedElementLoop.h"
+#include "MaterialData.h"
 
 // libMesh includes
 
@@ -177,6 +178,14 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
   _functions.resize(n_threads);
   _materials.resize(n_threads);
 
+  _material_data.resize(n_threads);
+  _bnd_material_data.resize(n_threads);
+  for (unsigned int i = 0; i < n_threads; i++)
+  {
+    _material_data[i] = new MaterialData();
+    _bnd_material_data[i] = new MaterialData();
+  }
+
   _pps_data.resize(n_threads);
   _pps.resize(n_threads);
   _pps_residual.resize(n_threads);
@@ -188,6 +197,12 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
 
 SubProblem::~SubProblem()
 {
+  unsigned int n_threads = libMesh::n_threads();
+  for (unsigned int i = 0; i < n_threads; i++)
+  {
+    delete _material_data[i];
+    delete _bnd_material_data[i];
+  }
 }
 
 void
@@ -267,6 +282,35 @@ Function &
 SubProblem::getFunction(const std::string & name, THREAD_ID tid)
 {
   return *_functions[tid][name];
+}
+
+void
+SubProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<SubProblem *>("_problem") = this;
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+    for (unsigned int i=0; i<blocks.size(); ++i)
+    {
+      parameters.set<unsigned int>("block_id") = blocks[i];
+
+      // volume material
+      parameters.set<bool>("_bnd") = false;
+      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
+      Material *material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      mooseAssert(material != NULL, "Not a Material object");
+      _materials[tid].addMaterial(blocks[i], material);
+      // boundary material
+      parameters.set<bool>("_bnd") = true;
+      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+      Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      mooseAssert(bnd_material != NULL, "Not a Material object");
+      _materials[tid].addBoundaryMaterial(blocks[i], bnd_material);
+    }
+  }
 }
 
 Number
@@ -360,6 +404,8 @@ SubProblem::addPostprocessor(std::string pp_name, const std::string & name, Inpu
 
     if(parameters.have_parameter<std::vector<unsigned int> >("boundary"))
     {
+      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+
       const std::vector<unsigned int> & boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
 //      if (!_pps_data[tid].hasPostprocessor(name))
@@ -376,6 +422,7 @@ SubProblem::addPostprocessor(std::string pp_name, const std::string & name, Inpu
     }
     else
     {
+      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
 //      if (!_pps_data[tid].hasPostprocessor(name))
 //      {
         Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));

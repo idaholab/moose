@@ -7,6 +7,7 @@
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "Variable.h"
 
 // libMesh
 #include "fe.h"
@@ -36,6 +37,7 @@ public:
 
   virtual unsigned int coupled(const std::string & var_name);
   virtual VariableValue & coupledValue(const std::string & var_name);
+  virtual VariableGradient  & coupledGradient(const std::string & var_name);
 
   /**
    * The variable number that this kernel operates on.
@@ -81,9 +83,9 @@ protected:
   VariableValue & _u_old;                               /// Holds the previous solution at the current quadrature point.
   VariableValue & _u_older;                             /// Holds the t-2 solution at the current quadrature point.
 
-  VariableGrad & _grad_u;                               /// Holds the solution gradient at the current quadrature points
-  VariableGrad & _grad_u_old;                           /// Holds the previous solution gradient at the current quadrature point.
-  VariableGrad & _grad_u_older;                         /// Holds the t-2 solution gradient at the current quadrature point.
+  VariableGradient & _grad_u;                               /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u_old;                           /// Holds the previous solution gradient at the current quadrature point.
+  VariableGradient & _grad_u_older;                         /// Holds the t-2 solution gradient at the current quadrature point.
 
   VariableValue & _u_dot;                               /// Time derivative of u
   VariableValue & _du_dot_du;                           /// Derivative of u_dot wrt u

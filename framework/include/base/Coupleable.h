@@ -16,6 +16,7 @@ public:
 protected:
   virtual unsigned int getCoupled(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & getCoupledValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & getCoupledGradient(const std::string & var_name, unsigned int comp = 0);
 
   virtual VariableValue & getCoupledNodalValue(const std::string & var_name, unsigned int comp = 0);
 

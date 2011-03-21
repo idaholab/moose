@@ -12,6 +12,7 @@
 // forward declarations
 namespace Moose {
 class SubProblem;
+class MaterialData;
 }
 
 /**
@@ -80,6 +81,8 @@ public:
 protected:
   Moose::SubProblem & _problem;
   THREAD_ID _tid;
+  bool _bnd;
+  Moose::MaterialData & _material_data;
 
   unsigned int _qp; 
 

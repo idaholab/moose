@@ -7,6 +7,7 @@
 #include "Factory.h"
 #include "ParallelUniqueId.h"
 #include "ThreadedElementLoop.h"
+#include "MaterialData.h"
 
 #include "nonlinear_solver.h"
 #include "quadrature_gauss.h"
@@ -208,6 +209,7 @@ ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _problem._material_data[tid];
 
     Kernel *kernel = static_cast<Kernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
@@ -243,6 +245,7 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
+      parameters.set<MaterialData *>("_material_data") = _problem._bnd_material_data[tid];
 
       BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");

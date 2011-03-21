@@ -1,13 +1,14 @@
 #include "MaterialPropertyInterface.h"
 #include "SubProblem.h"
+#include "MaterialData.h"
 
 namespace Moose {
 
 MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameters) :
-    _subproblem(*parameters.get<Moose::SubProblem *>("_problem")),
-    _material_props(_subproblem.materialProps()),
-    _material_props_old(_subproblem.materialPropsOld()),
-    _material_props_older(_subproblem.materialPropsOlder())
+    _material_data(*parameters.get<Moose::MaterialData *>("_material_data")),
+    _material_props(_material_data.props()),
+    _material_props_old(_material_data.propsOld()),
+    _material_props_older(_material_data.propsOlder())
 {
 }
 
