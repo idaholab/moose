@@ -9,6 +9,8 @@
 #include "UserForcingFunction.h"
 #include "BodyForce.h"
 #include "ImplicitEuler.h"
+#include "MatDiffusion.h"
+#include "DiffMKernel.h"
 
 #include "CoupledAux.h"
 #include "ConstantAux.h"
@@ -17,11 +19,15 @@
 #include "DirichletBC.h"
 #include "NeumannBC.h"
 #include "FunctionDirichletBC.h"
+#include "MTBC.h"
 
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
 
 #include "EmptyMaterial.h"
+#include "MTMaterial.h"
+#include "Diff1Material.h"
+#include "Diff2Material.h"
 
 namespace MooseTest
 {
@@ -36,6 +42,8 @@ void registerObjects()
   registerObject(UserForcingFunction);
   registerObject(BodyForce);
   registerObject(ImplicitEuler);
+  registerObject(MatDiffusion);
+  registerObject(DiffMKernel);
 
   // Aux kernels
   registerObject(CoupledAux);
@@ -46,6 +54,7 @@ void registerObjects()
   registerObject(DirichletBC);
   registerObject(NeumannBC);
   registerObject(FunctionDirichletBC);
+  registerObject(MTBC);
 
   // Initial Conditions 
   registerObject(ConstantIC);
@@ -53,6 +62,9 @@ void registerObjects()
 
   // Materials
   registerObject(EmptyMaterial);
+  registerObject(MTMaterial);
+  registerObject(Diff1Material);
+  registerObject(Diff2Material);
 }
 
 } // namespace

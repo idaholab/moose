@@ -1,6 +1,7 @@
 #include "GenericMaterialBlock.h"
 #include "Factory.h"
 #include "Parser.h"
+#include "MProblem.h"
 
 template<>
 InputParameters validParams<GenericMaterialBlock>()
@@ -25,6 +26,6 @@ GenericMaterialBlock::execute()
             << "\tname: " << getShortName() << std::endl;
 #endif
 
-//    _moose_system.addMaterial(_type, getShortName(), getClassParams());
+  _parser_handle._problem->addMaterial(_type, getShortName(), getClassParams());
 }
 

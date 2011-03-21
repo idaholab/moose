@@ -29,15 +29,28 @@ public:
   virtual EquationSystems & es() = 0;
   virtual Mesh & mesh() = 0;
 
+  // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
   virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
+  virtual Order getQuadratureOrder() = 0;
   virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid) = 0;
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid) = 0;
 
+  /// Returns currently processed element
+  /// (needed for materials)
+  virtual const Elem * & elem() = 0;
+
+  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid) = 0;
+
+  // Materials /////
+  virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid) = 0;
+  virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid) = 0;
+
+  // Solve /////
   virtual void init() = 0;
   virtual void update() = 0;
 

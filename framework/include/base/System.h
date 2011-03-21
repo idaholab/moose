@@ -46,6 +46,8 @@ public:
 
   virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
 
+  /// Get minimal quadrature order needed for integrating variables in this system
+  virtual Order getMinQuadratureOrder();
   virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);

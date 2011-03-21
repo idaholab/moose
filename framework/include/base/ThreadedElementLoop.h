@@ -111,13 +111,13 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
     const Elem* elem = *el;
     unsigned int cur_subdomain = elem->subdomain_id();
 
-//    preElement(elem);
-//
-//    if(cur_subdomain != subdomain)
-//    {
-//      subdomain = cur_subdomain;
-//      onDomainChanged(subdomain);
-//    }
+    preElement(elem);
+
+    if (cur_subdomain != subdomain)
+    {
+      subdomain = cur_subdomain;
+      onDomainChanged(subdomain);
+    }
 
     onElement(elem);
 

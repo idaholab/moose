@@ -43,12 +43,14 @@ public:
   virtual void shallowCopy (PropertyValue *rhs) = 0;
 };
 
+}
+
 /**
  * Concrete definition of a parameter value
  * for a specified type.
  */
 template <typename T>
-class MaterialProperty : public PropertyValue
+class MaterialProperty : public Moose::PropertyValue
 {
 public:
   /**
@@ -69,7 +71,7 @@ public:
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual PropertyValue *init ();
+  virtual Moose::PropertyValue *init ();
 
   /**
    * Resizes the property to the size n
@@ -112,7 +114,7 @@ MaterialProperty<T>::type ()
 }
 
 template <typename T>
-inline PropertyValue *
+inline Moose::PropertyValue *
 MaterialProperty<T>::init ()
 {
   MaterialProperty<T> *copy = new MaterialProperty<T>;
@@ -124,7 +126,7 @@ MaterialProperty<T>::init ()
 }
 
 template <>
-PropertyValue *
+Moose::PropertyValue *
 MaterialProperty<std::vector<Real> >::init ();
 
 template <typename T>
@@ -136,7 +138,7 @@ MaterialProperty<T>::resize (int n)
 
 template <typename T>
 inline void
-MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
+MaterialProperty<T>::shallowCopy (Moose::PropertyValue *rhs)
 {
   if (rhs == NULL)
     _value.resize(0);
@@ -145,6 +147,7 @@ MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
 }
 
 
+namespace Moose {
 
 /**
  * Container for storing material properties

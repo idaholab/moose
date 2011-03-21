@@ -3,9 +3,11 @@
 
 #include "Object.h"
 #include "MaterialProperty.h"
+#include "ParallelUniqueId.h"
 
 // libMesh includes
 #include "quadrature_gauss.h"
+#include "elem.h"
 
 // forward declarations
 namespace Moose {
@@ -29,27 +31,27 @@ public:
    */
   unsigned int blockID();
 
-#if 0
   /**
    * Causes the material to recompute all of it's values
    * at the quadrature points.  This is a helper in the base
    * class that does a bunch of common setup first then calls
    * computeProperties().
    */
-  void materialReinit();
+  void reinit();
 
   /**
    * Reinit version for side material
    */
-  void materialReinit(unsigned int side);
+  void reinit(unsigned int side);
 
+#if 0
   bool hasStatefulProperties();
 #endif
   /**
    * Retrieve the Constant Real valued property named "name"
    */
   template<typename T>
-  Moose::MaterialProperty<T> & getProperty(const std::string & prop_name);
+  MaterialProperty<T> & getProperty(const std::string & prop_name);
 
 #if 0
   /**
@@ -80,8 +82,14 @@ public:
 
 protected:
   Moose::SubProblem & _problem;
+  THREAD_ID _tid;
 
   unsigned int _qp; 
+
+  QBase * & _qrule;
+  const std::vector< Point > & _q_point;
+
+  const Elem * & _elem;
 
 #if 0
   /**
@@ -94,11 +102,6 @@ protected:
    * set to true if a stateful property is declared.
    */
   bool _has_stateful_props;
-
-  /**
-   * Current quadrature rule size
-   */
-  unsigned int _n_qpoints;
 
 // struct DeleteFunctor 
 //   {
@@ -163,7 +166,7 @@ protected:
    * to be retrieved using get().
    */
   template<typename T>
-  Moose::MaterialProperty<T> & declareProperty(const std::string & prop_name);
+  MaterialProperty<T> & declareProperty(const std::string & prop_name);
 
 #if 0
   /**
@@ -172,7 +175,7 @@ protected:
    * to be retrieved using getOld().
    */
   template<typename T>
-  Moose::MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
+  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
 
   /**
    * Declare the Real valued property named "name".
@@ -211,7 +214,7 @@ Material::have_property (const std::string& prop_name) const
   Moose::MaterialProperties::const_iterator it = _props.find(prop_name);
 
   if (it != _props.end())
-    if (dynamic_cast<const Moose::MaterialProperty<T>*>(it->second) != NULL)
+    if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
       return true;
 
   return false;
@@ -225,7 +228,7 @@ Material::have_property_old (const std::string& prop_name) const
   Material::const_iterator it = _props_old.find(prop_name);
 
   if (it != _props_old.end())
-    if (dynamic_cast<const Moose::MaterialProperty<T>*>(it->second) != NULL)
+    if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
       return true;
 
   return false;
@@ -238,7 +241,7 @@ Material::have_property_older (const std::string& prop_name) const
   Material::const_iterator it = _props_older.find(prop_name);
 
   if (it != _props_older.end())
-    if (dynamic_cast<const Moose::MaterialProperty<T>*>(it->second) != NULL)
+    if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
       return true;
 
   return false;
@@ -246,15 +249,15 @@ Material::have_property_older (const std::string& prop_name) const
 #endif
 
 template<typename T>
-Moose::MaterialProperty<T> &
+MaterialProperty<T> &
 Material::getProperty(const std::string & prop_name)
 {
   Moose::MaterialProperties::const_iterator it = _props.find(prop_name);
 
   if (it != _props.end())
   {
-    libmesh_assert (dynamic_cast<const Moose::MaterialProperty<T>*>(it->second) != NULL);
-    return *dynamic_cast<Moose::MaterialProperty<T>*>(it->second);
+    libmesh_assert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL);
+    return *dynamic_cast<MaterialProperty<T>*>(it->second);
   }
 
   mooseError("Material '" + name() + "' has no property named: " + prop_name + "\n\n");
@@ -262,7 +265,7 @@ Material::getProperty(const std::string & prop_name)
 
 #if 0
 template<typename T>
-Moose::MaterialProperty<T> &
+MaterialProperty<T> &
 Material::getPropertyOld(const std::string & prop_name)
 {
   Material::const_iterator it = _props_old.find(prop_name);
@@ -277,7 +280,7 @@ Material::getPropertyOld(const std::string & prop_name)
 }
 
 template<typename T>
-Moose::MaterialProperty<T> &
+MaterialProperty<T> &
 Material::getPropertyOlder(const std::string & prop_name)
 {
   Material::const_iterator it = _props_older.find(prop_name);
@@ -293,13 +296,13 @@ Material::getPropertyOlder(const std::string & prop_name)
 #endif
 
 template<typename T>
-Moose::MaterialProperty<T> &
+MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
   if (!this->have_property<T>(prop_name))
-    _props[prop_name] = new Moose::MaterialProperty<T>;
+    _props[prop_name] = new MaterialProperty<T>;
 
-  Moose::MaterialProperty<T> *prop = dynamic_cast<Moose::MaterialProperty<T>*>(_props[prop_name]);
+  MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_name]);
   mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
 
   return *prop;

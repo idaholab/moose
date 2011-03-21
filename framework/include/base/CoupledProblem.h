@@ -43,11 +43,16 @@ public:
   virtual bool hasVariable(const std::string & var_name);
   virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
 
+  virtual Order getQuadratureOrder();
   virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+
+  virtual const Elem * & elem() { return _elem; }
+
+  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
 
   // Solve /////
   virtual void init();
@@ -61,6 +66,10 @@ public:
   virtual Gradient initialGradient (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name);
 
   virtual void initialCondition(EquationSystems & es, const std::string & system_name);
+
+  // Materials /////
+  virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
+  virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
 
   // Transient /////
   virtual void transient(bool trans);
@@ -84,6 +93,7 @@ protected:
 
   Mesh * _mesh;
   EquationSystems _eq;
+  const Elem * _elem;
 
   bool _transient;
   Real & _time;

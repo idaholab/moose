@@ -5,6 +5,7 @@
 #include "Integrable.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
+#include "MaterialPropertyInterface.h"
 
 // libMesh
 #include "elem.h"
@@ -18,7 +19,8 @@ class SubProblem;
 class BoundaryCondition :
   public Object,
   public FunctionInterface,
-  public Moose::TransientInterface
+  public Moose::TransientInterface,
+  public Moose::MaterialPropertyInterface
 {
 public:
   BoundaryCondition(const std::string & name, InputParameters parameters);

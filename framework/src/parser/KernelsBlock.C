@@ -9,10 +9,13 @@ InputParameters validParams<KernelsBlock>()
 
 
 KernelsBlock::KernelsBlock(const std::string & name, InputParameters params) :
-  ParserBlock(name, params)
+    ParserBlock(name, params)
 {
   if (!_parser_handle._loose)
+  {
     addPrereq("Variables");
+    addPrereq("Materials");
+  }
 #if 0
   // Register execution prereqs
   addPrereq("Mesh");

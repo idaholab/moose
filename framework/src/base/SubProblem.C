@@ -52,7 +52,9 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
     _dt_old = _dt;
   }
 
-  _functions.resize(libMesh::n_threads());
+  unsigned int n_threads = libMesh::n_threads();
+  _functions.resize(n_threads);
+  _materials.resize(n_threads);
 
   _eq.parameters.set<Problem *>("_problem") = this;
 }
@@ -186,6 +188,22 @@ void
 SubProblem::updateMaterials()
 {
 
+}
+
+void
+SubProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
+{
+  std::vector<Material *> & mats = _materials[tid].getMaterials(blk_id);
+  for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+    (*it)->reinit();
+}
+
+void
+SubProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid)
+{
+  std::vector<Material *> & mats = _materials[tid].getBoundaryMaterials(blk_id);
+  for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+    (*it)->reinit(side);
 }
 
 void

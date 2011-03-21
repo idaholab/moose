@@ -23,6 +23,21 @@ System::getVariable(THREAD_ID tid, const std::string & var_name)
   return *_vars[tid].getVariable(var_name);
 }
 
+Order
+System::getMinQuadratureOrder()
+{
+  Order order = CONSTANT;
+  std::vector<Variable *> vars = _vars[0].all();
+  for (std::vector<Variable *>::iterator it = vars.begin(); it != vars.end(); ++it)
+  {
+    FEType fe_type = (*it)->feType();
+    if (fe_type.default_quadrature_order() > order)
+      order = fe_type.default_quadrature_order();
+  }
+
+  return order;
+}
+
 void
 System::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
 {

@@ -6,6 +6,7 @@
 
 #include "Moose.h"
 #include "MaterialProperty.h"
+#include "InputParameters.h"
 
 namespace Moose {
 
@@ -17,7 +18,7 @@ class SubProblem;
 class MaterialPropertyInterface
 {
 public:
-  MaterialPropertyInterface(SubProblem &problem);
+  MaterialPropertyInterface(InputParameters & parameters);
 
   /**
    * Retrieve the property named "name"
@@ -33,6 +34,7 @@ public:
 
 
 protected:
+  SubProblem & _subproblem;
   MaterialProperties & _material_props;
   MaterialProperties & _material_props_old;
   MaterialProperties & _material_props_older;

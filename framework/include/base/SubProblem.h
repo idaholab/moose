@@ -8,6 +8,7 @@
 #include "Function.h"
 #include "ParallelUniqueId.h"
 #include "Problem.h"
+#include "MaterialWarehouse.h"
 
 // libMesh include
 #include "equation_systems.h"
@@ -70,27 +71,31 @@ public:
   void transient(bool trans) { _transient = trans; }
   bool transient() { return _transient; }
 
+  //
+  virtual QBase * & qRule(THREAD_ID tid) = 0;
+  virtual std::vector<Point> & points(THREAD_ID tid) = 0;
+
   // ICs /////
   void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name);
   void addInitialCondition(const std::string & var_name, Real value); 
-
-  // Functions /////
-  void addFunction(std::string type, const std::string & name, InputParameters parameters);
-  Function & getFunction(const std::string & name, THREAD_ID tid = 0);
-
 
   Number initialValue (const Point & p, const Parameters & parameters, const std::string & /*sys_name*/, const std::string & var_name);
   Gradient initialGradient (const Point & p, const Parameters & /*parameters*/, const std::string & /*sys_name*/, const std::string & var_name);
 
   void initialCondition(EquationSystems & es, const std::string & system_name);
 
-  // Materials /////
+  // Functions /////
+  void addFunction(std::string type, const std::string & name, InputParameters parameters);
+  Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
+  // Materials /////
   MaterialProperties & materialProps() { return _material_props; }
   MaterialProperties & materialPropsOld() { return _material_props_old; }
   MaterialProperties & materialPropsOlder() { return _material_props_older; }
 
   virtual void updateMaterials();
+  virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
+  virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
 
   virtual void dump();
 
@@ -98,7 +103,6 @@ protected:
   Problem * _parent;
   Mesh & _mesh;
   EquationSystems _eq;
-
 
   bool _transient;
   Real & _time;
@@ -126,6 +130,9 @@ protected:
 
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
+
+  // materials
+  std::vector<MaterialWarehouse> _materials;
 };
 
 

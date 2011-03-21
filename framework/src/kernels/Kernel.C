@@ -21,6 +21,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     Moose::Coupleable(parameters),
     FunctionInterface(parameters),
     Moose::TransientInterface(parameters),
+    Moose::MaterialPropertyInterface(parameters),
     _problem(*parameters.get<Moose::SubProblem *>("_problem")),
     _sys(*parameters.get<Moose::System *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),

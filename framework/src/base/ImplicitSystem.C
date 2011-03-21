@@ -55,14 +55,12 @@ namespace Moose {
     virtual void onElement(const Elem *elem)
     {
       const unsigned int dim = _sys._mesh.dimension();
+      unsigned int cur_subdomain = elem->subdomain_id();
 
       QGauss qrule (dim, FIFTH);
       _problem.attachQuadratureRule(&qrule, _tid);
       _problem.reinitElem(elem, _tid);
-
-      unsigned int subdomain = elem->subdomain_id();
-      _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
-
+      _problem.reinitMaterials(cur_subdomain, _tid);
 
       KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
       KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
@@ -77,6 +75,12 @@ namespace Moose {
       }
     }
 
+    virtual void onDomainChanged(short int subdomain)
+    {
+      _problem.subdomainSetup(subdomain, _tid);
+      _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
+    }
+
     virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
     {
       const unsigned int dim = _sys._mesh.dimension();
@@ -84,6 +88,7 @@ namespace Moose {
       _problem.attachQuadratureRule(&qrule_face, _tid);
 
       _problem.reinitElemFace(elem, side, bnd_id, _tid);
+      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
       for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
         (*it)->computeResidual();
 
@@ -129,14 +134,12 @@ namespace Moose {
     virtual void onElement(const Elem *elem)
     {
       const unsigned int dim = _sys._mesh.dimension();
+      unsigned int cur_subdomain = elem->subdomain_id();
 
-      QGauss qrule (dim, FIFTH);
+      QGauss qrule (dim, _problem.getQuadratureOrder());
       _problem.attachQuadratureRule(&qrule, _tid);
       _problem.reinitElem(elem, _tid);
-
-      unsigned int subdomain = elem->subdomain_id();
-      _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
-
+      _problem.reinitMaterials(cur_subdomain, _tid);
 
       KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
       KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
@@ -151,6 +154,12 @@ namespace Moose {
       }
     }
 
+    virtual void onDomainChanged(short int subdomain)
+    {
+      _problem.subdomainSetup(subdomain, _tid);
+      _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
+    }
+
     virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
     {
       const unsigned int dim = _sys._mesh.dimension();
@@ -158,6 +167,7 @@ namespace Moose {
       _problem.attachQuadratureRule(&qrule_face, _tid);
 
       _problem.reinitElemFace(elem, side, bnd_id, _tid);
+      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
       for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
         (*it)->computeJacobian(0, 0);
 

@@ -64,6 +64,12 @@ CoupledProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   mooseError("Unknown variable " + var_name);
 }
 
+Order
+CoupledProblem::getQuadratureOrder()
+{
+  return CONSTANT;                      // FIXME: grab this from subproblems
+}
+
 void
 CoupledProblem::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
 {
@@ -74,6 +80,7 @@ CoupledProblem::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
 void
 CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
+  _elem = elem;
   for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElem(elem, tid);
 }
@@ -81,6 +88,7 @@ CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 CoupledProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
+  _elem = elem;
   for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElemFace(elem, side, bnd_id, tid);
 }
@@ -97,6 +105,11 @@ CoupledProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID
 {
   for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNodeFace(node, bnd_id, tid);
+}
+
+void
+CoupledProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
+{
 }
 
 void
@@ -141,6 +154,16 @@ void
 CoupledProblem::initialCondition(EquationSystems & es, const std::string & system_name)
 {
   _map[system_name]->initialCondition(es, system_name);
+}
+
+void
+CoupledProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
+{
+}
+
+void
+CoupledProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid)
+{
 }
 
 void

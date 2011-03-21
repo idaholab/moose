@@ -3,15 +3,18 @@
 
 namespace Moose {
 
-MaterialPropertyInterface::MaterialPropertyInterface(SubProblem &problem) :
-  _material_props(problem.materialProps()),
-  _material_props_old(problem.materialPropsOld()),
-  _material_props_older(problem.materialPropsOlder())
+MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameters) :
+    _subproblem(*parameters.get<Moose::SubProblem *>("_problem")),
+    _material_props(_subproblem.materialProps()),
+    _material_props_old(_subproblem.materialPropsOld()),
+    _material_props_older(_subproblem.materialPropsOlder())
 {
 }
 
+} // namespace
+
 template <>
-PropertyValue *
+Moose::PropertyValue *
 MaterialProperty<std::vector<Real> >::init ()
 {
   MaterialProperty<std::vector<Real> > *copy = new MaterialProperty<std::vector<Real> >;
@@ -22,4 +25,3 @@ MaterialProperty<std::vector<Real> >::init ()
   return copy;
 }
 
-} // namespace

@@ -17,6 +17,11 @@ InputParameters validParams<Material>()
 Material::Material(const std::string & name, InputParameters parameters) :
   Object(name, parameters),
   _problem(*parameters.get<Moose::SubProblem *>("_problem")),
+  _tid(parameters.get<THREAD_ID>("_tid")),
+  _qrule(_problem.qRule(_tid)),
+  _q_point(_problem.points(_tid)),
+  _elem(_problem.elem()),
+
 //  _has_stateful_props(false),
   _block_id(parameters.get<unsigned int>("block_id")),
   _props(_problem.materialProps())
@@ -135,116 +140,116 @@ Material::blockID()
   return _block_id;
 }
 
-#if 0
-void shallowCopyData(const std::set<std::string> & names,
-                     std::map<std::string, PropertyValue *> & data,
-                     std::map<std::string, PropertyValue *> & data_from)
-{
-  for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
-  {
-    std::string name = *it;
-    if (data[name] == NULL)
-      data[name] = data_from[name]->init();
-    data[name]->shallowCopy(data_from[name]);
-  }
-}
+//void shallowCopyData(const std::set<std::string> & names,
+//                     std::map<std::string, PropertyValue *> & data,
+//                     std::map<std::string, PropertyValue *> & data_from)
+//{
+//  for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+//  {
+//    std::string name = *it;
+//    if (data[name] == NULL)
+//      data[name] = data_from[name]->init();
+//    data[name]->shallowCopy(data_from[name]);
+//  }
+//}
 
 void
-Material::materialReinit()
+Material::reinit()
 {
-  unsigned int current_elem = _current_elem->id();
+//  unsigned int current_elem = _current_elem->id();
 
-  _n_qpoints = _data._qrule->n_points();
+//  _n_qpoints = _data._qrule->n_points();
 
-  if (_has_stateful_props)
-  {
-    // initialize elemental data
-    for (std::set<std::string>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
-    {
-      std::string name = *it;
+//  if (_has_stateful_props)
+//  {
+//    // initialize elemental data
+//    for (std::set<std::string>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
+//    {
+//      std::string name = *it;
+//
+//      if ((*_props_elem)[current_elem][0][name] == NULL) (*_props_elem)[current_elem][0][name] = _props[name]->init();
+//      if ((*_props_elem_old)[current_elem][0][name] == NULL) (*_props_elem_old)[current_elem][0][name] = _props[name]->init();
+//      if ((*_props_elem_older)[current_elem][0][name] == NULL) (*_props_elem_older)[current_elem][0][name] = _props[name]->init();
+//    }
+//
+//    shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem][0]);
+//    shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem][0]);
+//    shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][0]);
+//  }
 
-      if ((*_props_elem)[current_elem][0][name] == NULL) (*_props_elem)[current_elem][0][name] = _props[name]->init();
-      if ((*_props_elem_old)[current_elem][0][name] == NULL) (*_props_elem_old)[current_elem][0][name] = _props[name]->init();
-      if ((*_props_elem_older)[current_elem][0][name] == NULL) (*_props_elem_older)[current_elem][0][name] = _props[name]->init();
-    }
-
-    shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem][0]);
-    shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem][0]);
-    shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][0]);
-  }
-
-  for (std::map<std::string, PropertyValue *>::iterator it = _props.begin(); it != _props.end(); ++it)
+  for (Moose::MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
   {
     mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
-    it->second->resize(_n_qpoints);
+    it->second->resize(_qrule->n_points());
   }
 
-  if (_has_stateful_props)
-  {
-    for (std::map<std::string, PropertyValue *>::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-      it->second->resize(_n_qpoints);
-    for (std::map<std::string, PropertyValue *>::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-      it->second->resize(_n_qpoints);
-  }
+//  if (_has_stateful_props)
+//  {
+//    for (std::map<std::string, PropertyValue *>::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
+//      it->second->resize(_n_qpoints);
+//    for (std::map<std::string, PropertyValue *>::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+//      it->second->resize(_n_qpoints);
+//  }
 
   computeProperties();
 
-  if (_has_stateful_props)
-  {
-    shallowCopyData(_stateful_props, (*_props_elem)[current_elem][0], _props);
-    shallowCopyData(_stateful_props, (*_props_elem_old)[current_elem][0], _props_old);
-    shallowCopyData(_stateful_props, (*_props_elem_older)[current_elem][0], _props_older);
-  }
+//  if (_has_stateful_props)
+//  {
+//    shallowCopyData(_stateful_props, (*_props_elem)[current_elem][0], _props);
+//    shallowCopyData(_stateful_props, (*_props_elem_old)[current_elem][0], _props_old);
+//    shallowCopyData(_stateful_props, (*_props_elem_older)[current_elem][0], _props_older);
+//  }
 }
 
 void
-Material::materialReinit(unsigned int side)
+Material::reinit(unsigned int side)
 {
-  unsigned int current_elem = _current_elem->id();
+//  unsigned int current_elem = _current_elem->id();
 
-  _n_qpoints = _data._qrule->n_points();
+//  _n_qpoints = _data._qrule->n_points();
 
-  if (_has_stateful_props)
-  {
-    // initialize elemental data
-    for (std::set<std::string>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
-    {
-      std::string name = *it;
+//  if (_has_stateful_props)
+//  {
+//    // initialize elemental data
+//    for (std::set<std::string>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
+//    {
+//      std::string name = *it;
+//
+//      if ((*_props_elem)[current_elem][side][name] == NULL) (*_props_elem)[current_elem][side][name] = _props[name]->init();
+//      if ((*_props_elem_old)[current_elem][side][name] == NULL) (*_props_elem_old)[current_elem][side][name] = _props[name]->init();
+//      if ((*_props_elem_older)[current_elem][side][name] == NULL) (*_props_elem_older)[current_elem][side][name] = _props[name]->init();
+//    }
+//
+//    shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem][side]);
+//    shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem][side]);
+//    shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][side]);
+//  }
 
-      if ((*_props_elem)[current_elem][side][name] == NULL) (*_props_elem)[current_elem][side][name] = _props[name]->init();
-      if ((*_props_elem_old)[current_elem][side][name] == NULL) (*_props_elem_old)[current_elem][side][name] = _props[name]->init();
-      if ((*_props_elem_older)[current_elem][side][name] == NULL) (*_props_elem_older)[current_elem][side][name] = _props[name]->init();
-    }
-
-    shallowCopyData(_stateful_props, _props, (*_props_elem)[current_elem][side]);
-    shallowCopyData(_stateful_props, _props_old, (*_props_elem_old)[current_elem][side]);
-    shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][side]);
-  }
-
-  for (std::map<std::string, PropertyValue *>::iterator it = _props.begin(); it != _props.end(); ++it)
+  for (Moose::MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
   {
     mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
-    it->second->resize(_n_qpoints);
+    it->second->resize(_qrule->n_points());
   }
 
-  if (_has_stateful_props)
-  {
-    for (std::map<std::string, PropertyValue *>::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-      it->second->resize(_n_qpoints);
-    for (std::map<std::string, PropertyValue *>::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-      it->second->resize(_n_qpoints);
-  }
+//  if (_has_stateful_props)
+//  {
+//    for (std::map<std::string, PropertyValue *>::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
+//      it->second->resize(_n_qpoints);
+//    for (std::map<std::string, PropertyValue *>::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+//      it->second->resize(_n_qpoints);
+//  }
   
   computeProperties();
 
-  if (_has_stateful_props)
-  {
-    shallowCopyData(_stateful_props, (*_props_elem)[current_elem][side], _props);
-    shallowCopyData(_stateful_props, (*_props_elem_old)[current_elem][side], _props_old);
-    shallowCopyData(_stateful_props, (*_props_elem_older)[current_elem][side], _props_older);
-  }
+//  if (_has_stateful_props)
+//  {
+//    shallowCopyData(_stateful_props, (*_props_elem)[current_elem][side], _props);
+//    shallowCopyData(_stateful_props, (*_props_elem_old)[current_elem][side], _props_old);
+//    shallowCopyData(_stateful_props, (*_props_elem_older)[current_elem][side], _props_older);
+//  }
 }
 
+#if 0
 bool
 Material::hasStatefulProperties()
 {
@@ -255,8 +260,8 @@ Material::hasStatefulProperties()
 void
 Material::computeProperties()
 {
-//  for (_qp = 0; _qp < _n_qpoints; ++_qp)
-//    computeQpProperties();
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    computeQpProperties();
 }
 
 void

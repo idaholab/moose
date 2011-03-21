@@ -6,6 +6,7 @@
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
+#include "MaterialPropertyInterface.h"
 
 // libMesh
 #include "fe.h"
@@ -23,7 +24,8 @@ class Kernel :
   public Moose::Integrable,
   public Moose::Coupleable,
   public FunctionInterface,
-  public Moose::TransientInterface
+  public Moose::TransientInterface,
+  public Moose::MaterialPropertyInterface
 {
 public:
   Kernel(const std::string & name, InputParameters parameters);

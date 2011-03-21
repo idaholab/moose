@@ -10,10 +10,13 @@ InputParameters validParams<MaterialsBlock>()
 
 
 MaterialsBlock::MaterialsBlock(const std::string & name, InputParameters params) :
-  ParserBlock(name, params)
+    ParserBlock(name, params)
 {
   if (!_parser_handle._loose)
+  {
     addPrereq("Variables");
+//    addPrereq("AuxVariables");
+  }
 #if 0
   // Register Materials prereqs
   addPrereq("Mesh");
