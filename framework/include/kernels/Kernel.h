@@ -60,6 +60,7 @@ protected:
 
   Moose::Variable & _var;
   Moose::Variable & _test_var;
+  int _dim;
 
   const Elem * & _current_elem;
 

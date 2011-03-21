@@ -53,6 +53,7 @@ protected:
   Moose::AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
   Moose::Variable & _var;
+  int _dim;
 
   QBase * & _qrule;
   const std::vector<Real> & _JxW;

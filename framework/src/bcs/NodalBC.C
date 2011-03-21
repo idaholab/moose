@@ -11,7 +11,7 @@ InputParameters validParams<NodalBC>()
 
 NodalBC::NodalBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
-    _node(_var.node()),
+    _current_node(_var.node()),
     _u(_var.nodalSln())
 {
 }

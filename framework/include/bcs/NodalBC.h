@@ -21,7 +21,7 @@ public:
   virtual VariableValue & coupledValue(const std::string & var_name);
 
 protected:
-  const Node * & _node;
+  const Node * & _current_node;
 
   unsigned int _qp;
   VariableValue & _u;

@@ -35,6 +35,7 @@ public:
 protected:
   Moose::SubProblem & _problem;
   Moose::Variable & _var;
+  int _dim;
 
   unsigned int _boundary_id;
 

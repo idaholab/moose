@@ -3,7 +3,6 @@
 #include "Factory.h"
 
 #include "Diffusion.h"
-#include "Coupled.h"
 #include "CoupledForce.h"
 #include "ForcingFn.h"
 #include "UserForcingFunction.h"
@@ -14,9 +13,20 @@
 #include "GaussContForcing.h"
 #include "CoefDiffusion.h"
 #include "Convection.h"
+#include "PolyDiffusion.h"
+#include "PolyConvection.h"
+#include "PolyForcing.h"
+#include "PolyReaction.h"
+#include "MMSImplicitEuler.h"
+#include "MMSDiffusion.h"
+#include "MMSConvection.h"
+#include "MMSForcing.h"
+#include "MMSReaction.h"
 
 #include "CoupledAux.h"
 #include "ConstantAux.h"
+#include "PolyConstantAux.h"
+#include "MMSConstantAux.h"
 #include "FunctionAux.h"
 
 #include "DirichletBC.h"
@@ -25,6 +35,8 @@
 #include "FunctionNeumannBC.h"
 #include "MTBC.h"
 #include "MatchedValueBC.h"
+#include "PolyCoupledDirichletBC.h"
+#include "MMSCoupledDirichletBC.h"
 
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
@@ -41,7 +53,6 @@ void registerObjects()
 {
   // Kernels
   registerObject(Diffusion);
-  registerObject(Coupled);
   registerObject(CoupledForce);
   registerObject(ForcingFn);
   registerObject(UserForcingFunction);
@@ -52,10 +63,21 @@ void registerObjects()
   registerObject(GaussContForcing);
   registerObject(CoefDiffusion);
   registerObject(Convection);
+  registerObject(PolyDiffusion);
+  registerObject(PolyConvection);
+  registerObject(PolyForcing);
+  registerObject(PolyReaction);
+  registerObject(MMSImplicitEuler);
+  registerObject(MMSDiffusion);
+  registerObject(MMSConvection);
+  registerObject(MMSForcing);
+  registerObject(MMSReaction);
 
   // Aux kernels
   registerObject(CoupledAux);
   registerObject(ConstantAux);
+  registerObject(PolyConstantAux);
+  registerObject(MMSConstantAux);
   registerObject(FunctionAux);
 
   // Boundary Conditions
@@ -65,6 +87,8 @@ void registerObjects()
   registerObject(FunctionNeumannBC);
   registerObject(MTBC);
   registerObject(MatchedValueBC);
+  registerObject(PolyCoupledDirichletBC);
+  registerObject(MMSCoupledDirichletBC);
 
   // Initial Conditions 
   registerObject(ConstantIC);
