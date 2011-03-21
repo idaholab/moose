@@ -194,17 +194,23 @@ SubProblem::updateMaterials()
 void
 SubProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
 {
-  std::vector<Material *> & mats = _materials[tid].getMaterials(blk_id);
-  for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
-    (*it)->reinit();
+  if (_materials[tid].hasMaterials(blk_id))
+  {
+    std::vector<Material *> & mats = _materials[tid].getMaterials(blk_id);
+    for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+      (*it)->reinit();
+  }
 }
 
 void
 SubProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid)
 {
-  std::vector<Material *> & mats = _materials[tid].getBoundaryMaterials(blk_id);
-  for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
-    (*it)->reinit(side);
+  if (_materials[tid].hasBoundaryMaterials(blk_id))
+  {
+    std::vector<Material *> & mats = _materials[tid].getBoundaryMaterials(blk_id);
+    for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+      (*it)->reinit(side);
+  }
 }
 
 void

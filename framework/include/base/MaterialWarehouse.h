@@ -18,6 +18,10 @@ public:
   MaterialWarehouse();
   virtual ~MaterialWarehouse();
 
+  bool hasMaterials(unsigned int block_id);
+  bool hasBoundaryMaterials(unsigned int boundary_id);
+  bool hasNeighborMaterials(unsigned int boundary_id);
+
   std::vector<Material *> & getMaterials(unsigned int block_id);
   std::vector<Material *> & getBoundaryMaterials(unsigned int boundary_id);
   std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);

@@ -21,6 +21,24 @@ MaterialWarehouse::~MaterialWarehouse()
       delete (*k);
 }
 
+bool
+MaterialWarehouse::hasMaterials(unsigned int block_id)
+{
+  return (_active_materials.find(block_id) != _active_materials.end());
+}
+
+bool
+MaterialWarehouse::hasBoundaryMaterials(unsigned int boundary_id)
+{
+  return (_active_boundary_materials.find(boundary_id) != _active_boundary_materials.end());
+}
+
+bool
+MaterialWarehouse::hasNeighborMaterials(unsigned int boundary_id)
+{
+  return (_active_neighbor_materials.find(boundary_id) != _active_neighbor_materials.end());
+}
+
 std::vector<Material *> &
 MaterialWarehouse::getMaterials(unsigned int block_id)
 {
