@@ -23,10 +23,8 @@ Steady::execute()
   preExecute();
   _problem.update();
   if (_output_initial)
-  {
     _problem.output();
-    _time += 1.0;
-  }
+  _time = 1.0;           // should be inside the previous if-statement, but to preserve backward compatible behavior, it has to be like this ;(
 
   preSolve();
   _problem.solve();

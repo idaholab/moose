@@ -57,12 +57,6 @@ Kernel::~Kernel()
 {
 }
 
-unsigned int
-Kernel::variable()
-{
-  return _var.number();
-}
-
 Real
 Kernel::startTime()
 {

@@ -15,6 +15,7 @@ System::System(SubProblem & problem, const std::string & name) :
     _name(name)
 {
   _vars.resize(libMesh::n_threads());
+  _boundary_vars.resize(libMesh::n_threads());
 }
 
 Variable &
@@ -47,11 +48,13 @@ System::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-System::reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid)
+System::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  for (std::map<std::string, Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
+  for (std::set<Variable *>::iterator it = _boundary_vars[tid][bnd_id].begin();
+       it != _boundary_vars[tid][bnd_id].end();
+       ++it)
   {
-    Variable *var = it->second;
+    Variable *var = *it;
     var->sizeResidual();
     var->sizeJacobianBlock();
     var->reinit (elem, side);
@@ -64,6 +67,22 @@ System::reinitNode(const Node * node, THREAD_ID tid)
   for (std::map<std::string, Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
   {
     Variable *var = it->second;
+    if (var->feType().family == LAGRANGE)
+    {
+      var->reinit (node);
+      var->computeNodalValues();
+    }
+  }
+}
+
+void
+System::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+{
+  for (std::set<Variable *>::iterator it = _boundary_vars[tid][bnd_id].begin();
+       it != _boundary_vars[tid][bnd_id].end();
+       ++it)
+  {
+    Variable *var = *it;
     if (var->feType().family == LAGRANGE)
     {
       var->reinit (node);

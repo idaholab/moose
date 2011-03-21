@@ -1,14 +1,6 @@
 [Mesh]
-  [./Generation]
-    dim = 2
-    nx = 2
-    ny = 2
-    xmin = 0
-    xmax = 1
-    ymin = 0
-    ymax = 1
-  [../]
-#  uniform_refine = 1
+  # dim = 2  -> DEPRECATED 
+  file = square.e
 []
 
 [Variables]
@@ -35,14 +27,14 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 3
+    boundary = 1
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 2
     value = 1
   [../]
 []
@@ -64,7 +56,10 @@
 
 [Output]
   file_base = out
+  output_initial = true
+  interval = 1
   exodus = true
   print_linear_residuals = true
 []
-
+   
+    

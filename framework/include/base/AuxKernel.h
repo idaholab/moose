@@ -34,6 +34,8 @@ public:
 
   void compute(NumericVector<Number> & sln);
 
+  Moose::Variable & variable() { return _var; }
+
   bool isNodal();
 
   // Coupleable /////

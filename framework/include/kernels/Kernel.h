@@ -36,7 +36,7 @@ public:
   /**
    * The variable number that this kernel operates on.
    */
-  unsigned int variable();
+  Moose::Variable & variable() { return _var; }
 
   /**
    * The time, after which this kernel will be active.

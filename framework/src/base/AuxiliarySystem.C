@@ -225,6 +225,7 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 
       _nodal_bcs[boundaries[i]].push_back(bc);
+      _boundary_vars[0][boundaries[i]].insert(&bc->variable());
     }
   }
 }
@@ -295,7 +296,7 @@ AuxiliarySystem::compute()
       Node * node = &_mesh.node(nodes[i]);
 
       // nonlinear variables
-      _problem.reinitNode(node, 0);
+      _problem.reinitNodeFace(node, boundary_id, 0);
 
       for (std::vector<AuxKernel *>::iterator it = _nodal_bcs[boundary_id].begin(); it != _nodal_bcs[boundary_id].end(); ++it)
         (*it)->compute(solution());

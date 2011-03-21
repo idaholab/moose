@@ -24,6 +24,8 @@ public:
 
   unsigned int boundaryId() { return _boundary_id; }
 
+  Moose::Variable & variable() { return _var; }
+
 protected:
   Moose::SubProblem & _problem;
   Moose::Variable & _var;

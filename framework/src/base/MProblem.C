@@ -31,10 +31,10 @@ MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-MProblem::reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid)
+MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  _nl.reinitElemFace(elem, side, tid);
-  _aux.reinitElemFace(elem, side, tid);
+  _nl.reinitElemFace(elem, side, bnd_id, tid);
+  _aux.reinitElemFace(elem, side, bnd_id, tid);
 }
 
 void
@@ -42,6 +42,13 @@ MProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _nl.reinitNode(node, tid);
   _aux.reinitNode(node, tid);
+}
+
+void
+MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+{
+  _nl.reinitNodeFace(node, bnd_id, tid);
+  _aux.reinitNodeFace(node, bnd_id, tid);
 }
 
 void

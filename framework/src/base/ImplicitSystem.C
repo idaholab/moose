@@ -88,25 +88,22 @@ namespace Moose {
 
         for (unsigned int side=0; side<elem->n_sides(); side++)
         {
-          if (elem->neighbor(side) == NULL)
+          std::vector<short int> boundary_ids = _sys._mesh.boundary_ids (elem, side);
+
+          if (boundary_ids.size() > 0)
           {
-            std::vector<short int> boundary_ids = _sys._mesh.boundary_ids (elem, side);
-
-            if (boundary_ids.size() > 0)
+            for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
             {
-              _problem.reinitElemFace(elem, side, tid);
+              short int bnd_id = *it;
 
-              for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-              {
-                short int side_id = *it;
-                for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[tid][side_id].begin(); it != _sys._bcs[tid][side_id].end(); ++it)
-                  (*it)->computeResidual();
-              }
+              _problem.reinitElemFace(elem, side, bnd_id, tid);
+              for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[tid][bnd_id].begin(); it != _sys._bcs[tid][bnd_id].end(); ++it)
+                (*it)->computeResidual();
 
-              for (std::map<std::string, Variable *>::iterator it = _sys._vars[tid].begin(); it != _sys._vars[tid].end(); ++it)
+              for (std::set<Variable *>::iterator it = _sys._boundary_vars[tid][bnd_id].begin(); it != _sys._boundary_vars[tid][bnd_id].end(); ++it)
               {
                 Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-                it->second->add(_residual);
+                (*it)->add(_residual);
               }
             }
           }
@@ -222,26 +219,20 @@ namespace Moose {
         // BCs
         for (unsigned int side=0; side<elem->n_sides(); side++)
         {
-          if (elem->neighbor(side) == NULL)
+          std::vector<short int> boundary_ids = _sys._mesh.boundary_ids (elem, side);
+
+          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           {
-            std::vector<short int> boundary_ids = _sys._mesh.boundary_ids (elem, side);
+            short int bnd_id = *it;
 
-            if (boundary_ids.size() > 0)
+            _problem.reinitElemFace(elem, side, bnd_id, tid);
+            for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[tid][bnd_id].begin(); it != _sys._bcs[tid][bnd_id].end(); ++it)
+              (*it)->computeJacobian(0, 0);
+
+            for (std::set<Variable *>::iterator it = _sys._boundary_vars[tid][bnd_id].begin(); it != _sys._boundary_vars[tid][bnd_id].end(); ++it)
             {
-              _problem.reinitElemFace(elem, side, tid);
-
-              for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-              {
-                short int side_id = *it;
-                for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[tid][side_id].begin(); it != _sys._bcs[tid][side_id].end(); ++it)
-                  (*it)->computeJacobian(0, 0);
-              }
-
-              for (std::map<std::string, Variable *>::iterator it = _sys._vars[tid].begin(); it != _sys._vars[tid].end(); ++it)
-              {
-                Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-                it->second->add(_jacobian);
-              }
+              Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+              (*it)->add(_jacobian);
             }
           }
         }
@@ -296,13 +287,13 @@ ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & 
 
     std::set<unsigned int> blk_ids;
     if (!parameters.isParamValid("block"))
-      blk_ids = _var_map[kernel->variable()];
+      blk_ids = _var_map[&kernel->variable()];
     else
     {
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
-        if (_var_map[kernel->variable()].count(blocks[i]) > 0 || _var_map[kernel->variable()].count(Moose::ANY_BLOCK_ID) > 0)
+        if (_var_map[&kernel->variable()].count(blocks[i]) > 0 || _var_map[&kernel->variable()].count(Moose::ANY_BLOCK_ID) > 0)
           blk_ids.insert(blocks[i]);
         else
           mooseError("Kernel (" + kernel->name() + "): block outside of the domain of the variable");
@@ -333,6 +324,7 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
         _bcs[tid][boundaries[i]].push_back(dynamic_cast<IntegratedBC *>(bc));
       else
         mooseError("Unknown type of BoudaryCondition object");
+      _boundary_vars[tid][boundaries[i]].insert(&bc->variable());
     }
   }
 }
@@ -455,8 +447,6 @@ ImplicitSystem::computeTimeDeriv()
 void
 ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
 {
-//  const unsigned int dim = _mesh.dimension();
-
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
   ComputeResidualThread cr(residual, *this);
@@ -464,13 +454,6 @@ ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
   residual.close();
 
   // do nodal BC
-//  _mesh.buildBoudndaryNodeList();
-//
-//  ComputeBndResidualThread cbr(residual, *this);
-//  ConstNodeRange & node_range = *_mesh.getBoundaryNodeRange();
-//  Threads::parallel_reduce(node_range, cbr);
-//  residual.close();
-
   std::vector<unsigned int> nodes;
   std::vector<short int> ids;
   _mesh.build_node_list(nodes, ids);
@@ -482,7 +465,7 @@ ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
     Node * node = &_mesh.node(nodes[i]);
 
     // reinit variables in nodes
-    _problem.reinitNode(node, 0);
+    _problem.reinitNodeFace(node, boundary_id, 0);
 
     for (std::vector<NodalBC *>::iterator it = _nodal_bcs[0][boundary_id].begin(); it != _nodal_bcs[0][boundary_id].end(); ++it)
       (*it)->computeResidual(residual);
@@ -538,7 +521,7 @@ ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     unsigned int boundary_id = ids[i];
     Node * node = &_mesh.node(nodes[i]);
 
-    _problem.reinitNode(node, 0);
+    _problem.reinitNodeFace(node, boundary_id, 0);
 
     for (std::vector<NodalBC *>::iterator it = _nodal_bcs[0][boundary_id].begin(); it != _nodal_bcs[0][boundary_id].end(); ++it)
       (*it)->computeJacobian(jacobian);

@@ -41,8 +41,9 @@ public:
 
   virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid) = 0;
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
+  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid) = 0;
 
   // Solve /////
   virtual void init();

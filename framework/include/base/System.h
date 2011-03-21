@@ -47,8 +47,9 @@ public:
 
   virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid);
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
+  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
 
   virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
 
@@ -57,11 +58,10 @@ protected:
   Mesh & _mesh;
   std::string _name;
 
-  std::vector<std::map<std::string, Variable *> > _vars;
-  /**
-   * The list of blocks for a given variable number
-   */
-  std::map<unsigned int, std::set<unsigned int> > _var_map;
+  std::vector<std::map<std::string, Variable *> > _vars;                /// list of all variables
+  std::map<Variable *, std::set<unsigned int> > _var_map;             /// The list of blocks for a given variable number
+
+  std::vector<std::map<unsigned int, std::set<Variable *> > > _boundary_vars;         /// Map to variables that need to be evaluated on a boundary
 };
 
 
@@ -95,10 +95,10 @@ public:
       _vars[tid][var_name] = var;
 
       if (active_subdomains == NULL)
-        _var_map[var_num].insert(Moose::ANY_BLOCK_ID);
+        _var_map[var].insert(Moose::ANY_BLOCK_ID);
       else
         for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
-          _var_map[var_num].insert(*it);
+          _var_map[var].insert(*it);
     }
   }
 

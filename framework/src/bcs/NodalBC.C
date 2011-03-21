@@ -14,7 +14,6 @@ NodalBC::NodalBC(const std::string & name, InputParameters parameters) :
     _node(_var.node()),
     _u(_var.nodalSln())
 {
-
 }
 
 NodalBC::~NodalBC()
