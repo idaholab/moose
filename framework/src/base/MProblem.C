@@ -19,6 +19,7 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _quadrature_order(CONSTANT),
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
+    _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _output_displaced(true)
@@ -64,7 +65,9 @@ MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
   _aux.reinitElem(elem, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
+  {
     _displaced_problem->reinitElem(_displaced_mesh->elem(elem->id()), tid);
+  }
 }
 
 void
@@ -75,7 +78,9 @@ MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_
   _aux.reinitElemFace(elem, side, bnd_id, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_face)
+  {
     _displaced_problem->reinitElemFace(_displaced_mesh->elem(elem->id()), side, bnd_id, tid);
+  }
 }
 
 void
@@ -326,7 +331,7 @@ void
 MProblem::initDisplacedProblem(const std::vector<std::string> & displacements)
 {
   _displaced_mesh = new MooseMesh(_mesh);
-  _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, _mesh, displacements);
+  _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, displacements);
 }
 
 void
@@ -335,4 +340,11 @@ MProblem::output()
   SubProblem::output();
   if (_displaced_problem != NULL && _output_displaced)
     _displaced_problem->output(_time);
+}
+
+void
+MProblem::adaptMesh()
+{
+  SubProblem::adaptMesh();
+  _geometric_search_data.update();
 }

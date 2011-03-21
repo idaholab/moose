@@ -3,7 +3,6 @@
 DisplacedSystem::DisplacedSystem(ProblemInterface & problem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(problem, name)
 {
-
 }
 
 DisplacedSystem::~DisplacedSystem()

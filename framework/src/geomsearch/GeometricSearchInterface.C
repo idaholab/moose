@@ -2,9 +2,10 @@
 #include "GeometricSearchData.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
+#include "SystemBase.h"
 
 GeometricSearchInterface::GeometricSearchInterface(InputParameters & params) :
-    _geometric_search_data(*params.get<GeometricSearchData *>("_geometric_search_data"))
+    _geometric_search_data(params.get<SystemBase *>("_sys")->problem().geomSearchData())
 {
 }
 

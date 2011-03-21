@@ -51,7 +51,6 @@ SubProblem::SubProblem(MooseMesh & mesh, Problem * parent) :
     _t_step(_parent != this ? _parent->timeStep() : _eq.parameters.set<int>("t_step")),
     _dt(_parent != this ? _parent->dt() : _eq.parameters.set<Real>("dt")),
     _out(*this),
-    _geometric_search_data(*this, _mesh),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
     _postprocessor_ensight_output(false),

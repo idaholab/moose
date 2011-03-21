@@ -10,6 +10,7 @@
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
 #include "Function.h"
+#include "GeometricSearchData.h"
 // libMesh
 #include "equation_systems.h"
 #include "numeric_vector.h"
@@ -88,6 +89,8 @@ public:
   virtual Output & out() { return _out; }
   virtual void output();
 
+  virtual GeometricSearchData & geomSearchData() { return *_geometric_search_data; }
+
 protected:
   std::map<std::string, SubProblem *> _subproblems;
   std::vector<std::string> _solve_order;
@@ -106,6 +109,9 @@ protected:
 
   // Output system
   Output _out;
+
+  // FIXME: this should not be here, right now it is here for satisfying the interface (which is not very clean - because of this). understand?
+  GeometricSearchData * _geometric_search_data;
 };
 
 #endif /* COUPLEDPROBLEM_H_ */

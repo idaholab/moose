@@ -15,7 +15,6 @@
 #include "DiracKernelInfo.h"
 #include "DiracKernelData.h"
 #include "FormattedTable.h"
-#include "GeometricSearchData.h"
 #include "Adaptivity.h"
 
 // libMesh include
@@ -167,7 +166,6 @@ public:
   // material properties
   std::vector<MaterialData *> _material_data;
   std::vector<MaterialData *> _bnd_material_data;
-  GeometricSearchData _geometric_search_data;
 
 protected:
   // materials

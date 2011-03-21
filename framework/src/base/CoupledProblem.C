@@ -8,7 +8,8 @@ CoupledProblem::CoupledProblem(MooseMesh * mesh) :
     _time(_eq.parameters.set<Real>("time")),
     _t_step(_eq.parameters.set<int>("t_step")),
     _dt(_eq.parameters.set<Real>("dt")),
-    _out(*this)
+    _out(*this),
+    _geometric_search_data(NULL)
 {
   _eq.parameters.set<Problem *>("_problem") = this;
 }

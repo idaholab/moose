@@ -56,7 +56,6 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
   {
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _subproblem._material_data[tid];
-    parameters.set<GeometricSearchData *>("_geometric_search_data") = &_subproblem._geometric_search_data;
 
     AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
@@ -96,7 +95,6 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
     {
       parameters.set<THREAD_ID>("_tid") = tid;
       parameters.set<MaterialData *>("_material_data") = _subproblem._bnd_material_data[tid];
-      parameters.set<GeometricSearchData *>("_geometric_search_data") = &_subproblem._geometric_search_data;
 
       std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 

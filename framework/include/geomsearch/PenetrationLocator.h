@@ -18,6 +18,7 @@
 //Forward Declarations
 class SubProblem;
 class MooseMesh;
+class GeometricSearchData;
 
 class PenetrationLocator
 {

@@ -1,6 +1,8 @@
 #ifndef SYSTEMBASE_H
 #define SYSTEMBASE_H
 
+#include <vector>
+
 #include "Kernel.h"
 #include "NodalBC.h"
 #include "IntegratedBC.h"
@@ -9,11 +11,15 @@
 #include "ProblemInterface.h"
 #include "MooseMesh.h"
 #include "VariableWarehouse.h"
+#include "AssemblyData.h"
+#include "ParallelUniqueId.h"
 
 // libMesh
 #include "equation_systems.h"
 #include "dof_map.h"
 #include "exodusII_io.h"
+#include "quadrature.h"
+#include "point.h"
 
 
 class MooseVariable;
@@ -30,6 +36,13 @@ public:
   virtual void init() = 0;
   virtual void update() = 0;
   virtual void solve() = 0;
+
+  virtual QBase * & qRule(THREAD_ID tid) { return _problem.assembly(tid).qRule(); }
+  virtual const std::vector<Point> & points(THREAD_ID tid) { return _problem.assembly(tid).qPoints(); }
+  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _problem.assembly(tid).JxW(); }
+  virtual QBase * & qRuleFace(THREAD_ID tid) { return _problem.assembly(tid).qRuleFace(); }
+  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _problem.assembly(tid).qPointsFace(); }
+  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _problem.assembly(tid).JxWFace(); }
 
   virtual void copyOldSolutions() = 0;
   virtual void restoreSolutions() = 0;

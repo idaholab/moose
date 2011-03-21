@@ -37,6 +37,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_problem.mesh()),
     _dim(_mesh.dimension()),
+
     _q_point(_problem.points(_tid)),
     _qrule(_problem.qRule(_tid)),
     _JxW(_problem.JxW(_tid)),

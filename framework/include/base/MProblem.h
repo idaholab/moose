@@ -6,6 +6,7 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "AssemblyData.h"
+#include "GeometricSearchData.h"
 
 class DisplacedProblem;
 
@@ -77,8 +78,12 @@ public:
   // Displaced problem /////
   virtual void initDisplacedProblem(const std::vector<std::string> & displacements);
 
+  virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
+
   // Output /////
   virtual void output();
+
+  virtual void adaptMesh();
 
 protected:
   NonlinearSystem _nl;
@@ -91,9 +96,12 @@ protected:
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;
   DisplacedProblem * _displaced_problem;
+  GeometricSearchData _geometric_search_data;
+
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
   bool _output_displaced;                               /// true for outputting displaced problem
+
 
 public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)

@@ -80,12 +80,12 @@ protected:
 };
 
 
-DisplacedProblem::DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, MooseMesh & mesh, const std::vector<std::string> & displacements) :
+DisplacedProblem::DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements) :
     ProblemInterface(),
     _problem(problem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),
-    _ref_mesh(mesh),
+    _ref_mesh(_problem.mesh()),
     _displacements(displacements),
     _nl(*this, "DisplacedSystem"),
     _aux(*this, "DisplacedAuxSystem"),

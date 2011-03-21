@@ -28,7 +28,7 @@ Steady::execute()
   _problem.adaptivity().initial();
   // FIXME: move in SubProblem
   //Update the geometric searches (has to be called after the problem is all set up)
-  _problem._geometric_search_data.update();
+  _problem.geomSearchData().update();
 
   preExecute();
   _problem.update();

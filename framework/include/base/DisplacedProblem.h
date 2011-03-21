@@ -21,7 +21,7 @@ class DisplacedProblem :
   public ProblemInterface
 {
 public:
-  DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, MooseMesh & mesh, const std::vector<std::string> & displacements);
+  DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements);
   virtual ~DisplacedProblem();
 
   virtual EquationSystems & es() { return _eq; }
@@ -62,6 +62,8 @@ public:
 
   // Transient /////
   virtual bool transient();
+
+  virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
 protected:
   SubProblem & _problem;

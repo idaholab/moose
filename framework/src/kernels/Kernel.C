@@ -30,9 +30,9 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _dim(_problem.mesh().dimension()),
 
     _current_elem(_var.currentElem()),
-    _q_point(_problem.points(_tid)),
-    _qrule(_problem.qRule(_tid)),
-    _JxW(_problem.JxW(_tid)),
+    _q_point(_sys.points(_tid)),
+    _qrule(_sys.qRule(_tid)),
+    _JxW(_sys.JxW(_tid)),
 
     _phi(_var.phi()),
     _grad_phi(_var.gradPhi()),

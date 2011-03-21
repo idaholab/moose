@@ -6,6 +6,7 @@
 #include "NearestNodeLocator.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
+#include "GeometricSearchData.h"
 
 #include "boundary_info.h"
 #include "elem.h"

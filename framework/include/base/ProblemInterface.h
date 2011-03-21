@@ -13,6 +13,7 @@
 
 class MooseMesh;
 class MooseVariable;
+class GeometricSearchData;
 
 class ProblemInterface
 {
@@ -36,6 +37,9 @@ public:
 
   // Transient /////
   virtual bool transient() = 0;
+
+  // Geom Search
+  virtual GeometricSearchData & geomSearchData() = 0;
 };
 
 #endif /* PROBLEMINTERFACE_H */
