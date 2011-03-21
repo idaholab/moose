@@ -115,16 +115,25 @@ AuxWarehouse::addActiveBC(unsigned int boundary_id, AuxKernel *aux)
 void
 AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<unsigned int> block_ids)
 {
-  for(std::set<unsigned int>::iterator it = block_ids.begin();
-      it != block_ids.end();
-      ++it)
+  for(std::set<unsigned int>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
   {
     unsigned int id = *it;
-    
-    if(aux->isNodal())
-      _active_block_nodal_aux_kernels[id].push_back(aux);
+
+    if (id == Moose::ANY_BLOCK_ID)
+    {
+      if(aux->isNodal())
+        _active_nodal_aux_kernels.push_back(aux);
+      else
+        _active_element_aux_kernels.push_back(aux);
+    }
     else
-      _active_block_element_aux_kernels[id].push_back(aux);
+    {
+      if(aux->isNodal())
+        _active_block_nodal_aux_kernels[id].push_back(aux);
+      else
+        _active_block_element_aux_kernels[id].push_back(aux);
+    }
+
   }
 }
 

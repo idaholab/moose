@@ -52,6 +52,7 @@ protected:
   virtual Real computeValue() = 0;
 
   Moose::SubProblem & _problem;
+  Moose::System & _sys;
   Moose::AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
   Moose::Variable & _var;

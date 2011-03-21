@@ -20,7 +20,7 @@ class SubProblem;
 class NearestNodeLocator
 {
 public:
-  NearestNodeLocator(SubProblem & probem, Mesh & mesh, unsigned int boundary1, unsigned int boundary2);
+  NearestNodeLocator(Mesh & mesh, unsigned int boundary1, unsigned int boundary2);
 
   /**
    * This is the main method that is going to start the search.
@@ -49,8 +49,6 @@ protected:
     Node * _nearest_node;
     Real _distance;
   };
-
-  SubProblem & _subproblem;
 
   Mesh & _mesh;
 

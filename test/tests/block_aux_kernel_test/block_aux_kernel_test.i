@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = gap_test.e
 []
 
@@ -157,5 +156,3 @@
   interval = 1
   exodus = true
 []
-   
-    

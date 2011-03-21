@@ -13,12 +13,11 @@ namespace Moose {
 
 const unsigned int NearestNodeLocator::_patch_size = 20;
 
-NearestNodeLocator::NearestNodeLocator(SubProblem & problem, Mesh & mesh, unsigned int boundary1, unsigned int boundary2) :
-    _subproblem(problem),
-   _mesh(mesh),
-   _boundary1(boundary1),
-   _boundary2(boundary2),
-   _first(true)
+NearestNodeLocator::NearestNodeLocator(Mesh & mesh, unsigned int boundary1, unsigned int boundary2) :
+    _mesh(mesh),
+    _boundary1(boundary1),
+    _boundary2(boundary2),
+    _first(true)
 {}
 
 class ComparePair

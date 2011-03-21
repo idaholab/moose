@@ -14,6 +14,7 @@ InputParameters validParams<AuxKernel>()
 {
   InputParameters params = validParams<Object>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this object applies to");
+  params.addPrivateParam<bool>("use_displaced_mesh", false);
   // For use on the boundary only
   params.addParam<std::vector<unsigned int> >("boundary", "The list of variable names this Material is coupled to.");
   params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this aux kernel will be applied to");
@@ -28,9 +29,10 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     Moose::TransientInterface(parameters),
     Moose::GeometricSearchInterface(parameters),
     _problem(*parameters.get<Moose::SubProblem *>("_problem")),
+    _sys(*parameters.get<Moose::System *>("_sys")),
     _aux_sys(*parameters.get<Moose::AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _dim(_problem.mesh().dimension()),
     _qrule(_problem.qRule(_tid)),
     _JxW(_problem.JxW(_tid)),

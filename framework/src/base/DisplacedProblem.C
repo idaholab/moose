@@ -1,5 +1,6 @@
 #include "DisplacedProblem.h"
 #include "Problem.h"
+#include "SubProblem.h"
 
 namespace Moose
 {
@@ -32,14 +33,14 @@ public:
     {
       std::string displacement_name = displacement_variables[i];
 
-      if(_problem._nl_sys.has_variable(displacement_name))
+      if(_problem._nl.sys().has_variable(displacement_name))
       {
-         var_nums.push_back(_problem._nl_sys.variable_number(displacement_name));
+         var_nums.push_back(_problem._nl.sys().variable_number(displacement_name));
          var_nums_directions.push_back(i);
       }
-      else if(_problem._aux_sys.has_variable(displacement_name))
+      else if(_problem._aux.sys().has_variable(displacement_name))
       {
-         aux_var_nums.push_back(_problem._aux_sys.variable_number(displacement_name));
+         aux_var_nums.push_back(_problem._aux.sys().variable_number(displacement_name));
          aux_var_nums_directions.push_back(i);
       }
       else
@@ -50,8 +51,8 @@ public:
     unsigned int num_aux_var_nums = aux_var_nums.size();
 
 
-    unsigned int nonlinear_system_number = _problem._nl_sys.number();
-    unsigned int aux_system_number = _problem._aux_sys.number();
+    unsigned int nonlinear_system_number = _problem._nl.sys().number();
+    unsigned int aux_system_number = _problem._aux.sys().number();
 
     NodeRange::const_iterator nd = range.begin();
 
@@ -83,15 +84,17 @@ protected:
 };
 
 
-DisplacedProblem::DisplacedProblem(Mesh & displaced_mesh, Mesh & mesh, const std::vector<std::string> & displacements) :
+DisplacedProblem::DisplacedProblem(SubProblem & problem, Mesh & displaced_mesh, Mesh & mesh, const std::vector<std::string> & displacements) :
+    _problem(problem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),
     _ref_mesh(mesh),
     _displacements(displacements),
-    _nl_sys(_eq.add_system<ExplicitSystem>("DisplacedSystem")),
-    _aux_sys(_eq.add_system<ExplicitSystem>("DisplacedAuxSystem")),
+    _nl(_problem, "DisplacedSystem"),
+    _aux(_problem, "DisplacedAuxSystem"),
     _nl_solution(NumericVector<Number>::build().release()),
     _aux_solution(NumericVector<Number>::build().release()),
+    _geometric_search_data(_problem, _mesh),
     _ex(_eq)
 {
   _mesh.prepare();
@@ -110,8 +113,8 @@ void
 DisplacedProblem::init()
 {
   _eq.init();
-  _nl_solution->init(_nl_sys.n_dofs(), false, SERIAL);
-  _aux_solution->init(_aux_sys.n_dofs(), false, SERIAL);
+  _nl_solution->init(_nl.sys().n_dofs(), false, SERIAL);
+  _aux_solution->init(_aux.sys().n_dofs(), false, SERIAL);
 }
 
 void
@@ -126,27 +129,70 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
 {
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
-  (*_nl_sys.solution) = soln;
-  (*_aux_sys.solution) = aux_soln;
+  (*_nl.sys().solution) = soln;
+  (*_aux.sys().solution) = aux_soln;
 
   Threads::parallel_for(*_mesh.getActiveNodeRange(), UpdateDisplacedMeshThread(*this));
 
   Moose::perf_log.pop("updateDisplacedMesh()","Solve");
 
   // Update the geometric searches that depend on the displaced mesh
-//  _geometric_search_data_displaced.update();
+  _geometric_search_data.update();
+}
+
+Variable &
+DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
+{
+  if (_nl.hasVariable(var_name))
+    return _nl.getVariable(tid, var_name);
+  else if (_aux.hasVariable(var_name))
+    return _aux.getVariable(tid, var_name);
+  else
+    mooseError("No variable with name '" + var_name + "'");
 }
 
 void
 DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
 {
-  _nl_sys.add_variable(var_name, type, active_subdomains);
+  _nl.addVariable(var_name, type, active_subdomains);
+//  unsigned int var_num = _nl_sys.add_variable(var_name, type, active_subdomains);
+//  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+//  {
+//    Moose::Variable * var = new Moose::Variable(tid, var_num, type, *this);
+//    _vars[tid].add(var_name, var);
+//
+////    if (active_subdomains == NULL)
+////      _var_map[var].insert(Moose::ANY_BLOCK_ID);
+////    else
+////      for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+////        _var_map[var].insert(*it);
+////  }
+//  }
 }
 
 void
 DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
 {
-  _aux_sys.add_variable(var_name, type, active_subdomains);
+  _aux.addVariable(var_name, type, active_subdomains);
+//  unsigned int var_num = _aux_sys.add_variable(var_name, type, active_subdomains);
+//  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+//  {
+//    Moose::Variable * var = new Moose::Variable(tid, var_num, type, *this);
+//    _vars[tid].add(var_name, var);
+//
+////    if (active_subdomains == NULL)
+////      _var_map[var].insert(Moose::ANY_BLOCK_ID);
+////    else
+////      for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+////        _var_map[var].insert(*it);
+////  }
+//  }
+}
+
+void
+DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
+{
+  std::cerr << "DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)" << std::endl;
 }
 
 void

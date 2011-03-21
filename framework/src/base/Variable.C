@@ -182,7 +182,6 @@ Variable::add(SparseMatrix<Number> & jacobian)
 void
 Variable::computeElemValues()
 {
-//  unsigned int nqp = _qrule->n_points();
   unsigned int nqp = _problem.qRule(_tid)->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);

@@ -96,7 +96,7 @@ protected:
   // Displaced mesh /////
   Mesh * _displaced_mesh;
   DisplacedProblem * _displaced_problem;
-  bool _output_displaced;                               /// true for outputing displaced problem
+  bool _output_displaced;                               /// true for outputting displaced problem
 
 public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)

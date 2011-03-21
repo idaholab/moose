@@ -48,6 +48,8 @@ MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
+  if (_displaced_problem != NULL)
+    _displaced_problem->reinitElem(elem, tid);
 }
 
 void
@@ -94,6 +96,11 @@ void
 MProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
+  std::cerr << "displ = " << parameters.get<bool>("use_displaced_mesh") << std::endl;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+    parameters.set<System *>("_sys") = &_displaced_problem->nlSys();
+  else
+    parameters.set<System *>("_sys") = &_nl;
   _nl.addKernel(kernel_name, name, parameters);
 }
 
@@ -101,6 +108,10 @@ void
 MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+    parameters.set<System *>("_sys") = &_displaced_problem->nlSys();
+  else
+    parameters.set<System *>("_sys") = &_nl;
   _nl.addBoundaryCondition(bc_name, name, parameters);
 }
 
@@ -116,6 +127,11 @@ void
 MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
+  std::cerr << "AUX: displ = " << parameters.get<bool>("use_displaced_mesh") << std::endl;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+    parameters.set<System *>("_sys") = &_displaced_problem->auxSys();
+  else
+    parameters.set<System *>("_sys") = &_aux;
   _aux.addKernel(kernel_name, name, parameters);
 }
 
@@ -123,6 +139,11 @@ void
 MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
+  std::cerr << "AUXBC: displ = " << parameters.get<bool>("use_displaced_mesh") << std::endl;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+    parameters.set<System *>("_sys") = &_displaced_problem->auxSys();
+  else
+    parameters.set<System *>("_sys") = &_aux;
   _aux.addBoundaryCondition(bc_name, name, parameters);
 }
 
@@ -249,7 +270,7 @@ void
 MProblem::initDisplacedProblem(const std::vector<std::string> & displacements)
 {
   _displaced_mesh = new Mesh(_mesh);
-  _displaced_problem = new DisplacedProblem(*_displaced_mesh, _mesh, displacements);
+  _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, _mesh, displacements);
 }
 
 void

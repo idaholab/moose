@@ -34,6 +34,7 @@ public:
 
 protected:
   Moose::SubProblem & _problem;
+  Moose::System & _sys;
   THREAD_ID _tid;
   Moose::Variable & _var;
   int _dim;

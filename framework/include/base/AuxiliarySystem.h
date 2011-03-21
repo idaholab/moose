@@ -38,12 +38,7 @@ protected:
   // Variables
   std::vector<std::map<std::string, Variable *> > _nodal_vars;
   std::vector<std::map<std::string, Variable *> > _elem_vars;
-
-//  std::vector<AuxWarehouse> _kernels;
-
-  std::vector<std::vector<AuxKernel *> > _nodal_kernels;
-  std::vector<std::vector<AuxKernel *> > _elem_kernels;
-  std::map<unsigned int, std::vector<AuxKernel *> > _nodal_bcs;
+  std::vector<AuxWarehouse> _auxs;
 
   // data
   struct AuxData
