@@ -42,6 +42,8 @@ public:
   virtual void set_solution(const NumericVector<Number> & soln) { _nl_solution = soln; }
   virtual NumericVector<Number> & solution() { return _nl_solution; }
 
+  virtual void init();
+
   void setPreconditioner(Preconditioner<Real> *pc);
 
 public:

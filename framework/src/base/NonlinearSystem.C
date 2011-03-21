@@ -586,6 +586,14 @@ NonlinearSystem::printVarNorms()
 }
 
 void
+NonlinearSystem::init()
+{
+  // use computed initial condition
+  _nl_solution = *_sys.current_local_solution;
+  _nl_solution.close();
+}
+
+void
 NonlinearSystem::setPreconditioner(Preconditioner<Real> *pc)
 {
   _preconditioner = pc;
