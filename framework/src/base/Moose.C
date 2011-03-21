@@ -20,6 +20,7 @@
 #include "FunctionDirichletBC.h"
 #include "FunctionNeumannBC.h"
 #include "MatchedValueBC.h"
+#include "VacuumBC.h"
 
 // auxkernels
 #include "CoupledAux.h"
@@ -129,6 +130,7 @@ registerObjects()
   registerObject(FunctionDirichletBC);
   registerObject(FunctionNeumannBC);
   registerObject(MatchedValueBC);
+  registerObject(VacuumBC);
   // dirac kernels
   registerObject(ConstantPointSource);
 
