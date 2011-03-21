@@ -43,10 +43,10 @@ KernelValue::computeJacobian(int /*i*/, int /*j*/)
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    for (_i = 0; _i < _phi.size(); _i++)
+    for (_j = 0; _j < _phi.size(); _j++)
     {
       _value = precomputeQpJacobian();
-      for (_j = 0; _j < _phi.size(); _j++)
+      for (_i = 0; _i < _phi.size(); _i++)
         ke(_i, _j) += _JxW[_qp]*_value*_test[_i][_qp];
     }
   }

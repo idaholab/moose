@@ -20,9 +20,9 @@ InputParameters validParams<Executioner>()
 }
 
 Executioner::Executioner(const std::string & name, InputParameters parameters) :
-  MooseObject(name, parameters),
-  _mesh(getParam<MooseMesh *>("_mesh")),
-  _output_initial(false)
+    MooseObject(name, parameters),
+    _mesh(getParam<MooseMesh *>("_mesh")),
+    _output_initial(false)
 {
 }
 

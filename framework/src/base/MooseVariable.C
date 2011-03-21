@@ -145,7 +145,6 @@ MooseVariable::reinit()
   _test_face = _phi_face;
   _grad_test_face = _grad_phi_face;
   _second_test_face = _second_phi_face;
-
 }
 
 void
