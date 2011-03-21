@@ -503,6 +503,56 @@ ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 void
+ImplicitSystem::setVarScaling(std::vector<Real> scaling)
+{
+//  if(scaling.size() != _system->n_vars())
+//    mooseError("Error: Size of scaling factor vector not the same as the number of variables in the system!\n");
+//
+//  _scaling_factor = scaling;
+}
+
+void
+ImplicitSystem::setScaling()
+{
+  std::vector<Real> one_scaling;
+
+  // Reset the scaling to all 1's so we can compute the true residual
+  for(unsigned int var = 0; var < _sys.n_vars(); var++)
+    one_scaling.push_back(1.0);
+  setVarScaling(one_scaling);
+
+  computeResidual(*_sys.rhs);
+
+  // FIXME: fix this
+//  _old_initial_residual_norm = _initial_residual_norm;
+  Real _initial_residual_norm = _sys.rhs->l2_norm();
+
+  std::cout<<"  True Initial Nonlinear Residual: "<<_initial_residual_norm<<std::endl;
+
+  // FIXME: fix this
+  // Set the scaling to manual scaling
+//  setVarScaling(_manual_scaling);
+
+//  if (_moose_system._auto_scaling)
+//  {
+//    std::vector<Real> scaling;
+//
+//    // Compute the new scaling
+//    for(unsigned int var = 0; var < _moose_system.getNonlinearSystem()->n_vars(); var++)
+//    {
+//      Real norm = _moose_system.getNonlinearSystem()->calculate_norm(*_moose_system.getNonlinearSystem()->rhs,var,DISCRETE_L2);
+//
+//      if(norm != 0)
+//        scaling.push_back(1.0/norm);
+//      else
+//        scaling.push_back(1.0);
+//    }
+//
+//    _moose_system.setVarScaling(scaling);
+//  }
+}
+
+void
 ImplicitSystem::printVarNorms()
 {
   TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);

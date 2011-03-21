@@ -1,5 +1,6 @@
 #include "Conversion.h"
 #include <map>
+#include <algorithm>
 
 namespace Moose {
 

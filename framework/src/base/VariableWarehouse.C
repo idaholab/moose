@@ -8,6 +8,8 @@ VariableWarehouse::VariableWarehouse()
 
 VariableWarehouse::~VariableWarehouse()
 {
+  for (std::vector<Variable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
+    delete *it;
 }
 
 void

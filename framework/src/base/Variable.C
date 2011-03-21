@@ -132,6 +132,10 @@ Variable::reinit()
   _test = _phi;
   _grad_test = _grad_phi;
 
+  // FIXME: move to face reinit
+  _test_face = _phi_face;
+  _grad_test_face = _grad_phi_face;
+
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
 }
 

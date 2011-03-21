@@ -38,12 +38,14 @@ Steady::execute()
   if (_output_initial)
   {
     _problem.output();
+    _problem.outputPostprocessors();
   }
   _time = 1.0;           // should be inside the previous if-statement, but to preserve backward compatible behavior, it has to be like this ;(
 
   // Define the refinement loop
   for(unsigned int r_step=0; r_step<=_steps; r_step++)
   {
+    _problem.getNonlinearSystem().setScaling();
     preSolve();
     _problem.solve();
     postSolve();
@@ -51,8 +53,8 @@ Steady::execute()
 
     // TODO: check if the solve converged
     _problem.computePostprocessors();
-    _problem.outputPostprocessors();
     _problem.output();
+    _problem.outputPostprocessors();
 
     if(r_step != _steps)
       _problem.adaptMesh();

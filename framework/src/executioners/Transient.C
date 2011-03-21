@@ -98,7 +98,10 @@ Transient::execute()
   _problem.update();
   _problem.computePostprocessors();
   if (_output_initial)
+  {
     _problem.output();
+    _problem.outputPostprocessors();
+  }
 
   // Start time loop...
   while(keepGoing()) 
@@ -135,8 +138,7 @@ Transient::takeStep(Real input_dt)
     std::cout << out.str() << std::endl;
   }
     
-  // FIXME: FIX THIS
-//  setScaling();
+  _problem.getNonlinearSystem().setScaling();
 
   preSolve();
     

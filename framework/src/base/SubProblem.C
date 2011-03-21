@@ -204,6 +204,9 @@ SubProblem::~SubProblem()
     delete _material_data[i];
     delete _bnd_material_data[i];
   }
+
+  if (_parent == this)
+    delete &_eq;
 }
 
 void
@@ -352,7 +355,6 @@ SubProblem::initialGradient (const Point& p,
 void
 SubProblem::initialCondition(EquationSystems& es, const std::string& system_name)
 {
-//  ExplicitSystem & system = parent()->es().get_system<ExplicitSystem>(system_name);
   ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
   system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
 }
@@ -570,6 +572,9 @@ SubProblem::outputPostprocessors()
     std::cout<<std::endl;
   }
 
+  // FIXME: if exodus output is enabled?
+  _out.outputPps(_pps_output_table);
+
   if (_postprocessor_csv_output)
     _pps_output_table.printCSV(_out.fileBase() + ".csv");
 
@@ -605,8 +610,6 @@ void
 SubProblem::output()
 {
   _out.output();
-  // FIXME: if exodus output is enabled?
-  _out.outputPps(_pps_output_table);
 }
 
 void

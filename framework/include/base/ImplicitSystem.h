@@ -34,6 +34,9 @@ public:
 
   void onTimestepBegin();
 
+  void setVarScaling(std::vector<Real> scaling);
+  void setScaling();
+
 public:
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;

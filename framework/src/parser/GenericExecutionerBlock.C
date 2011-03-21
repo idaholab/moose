@@ -63,8 +63,6 @@ GenericExecutionerBlock::execute()
 
   InputParameters class_params = getClassParams();
 
-  class_params.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'
-
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This paramter
   // is held in the child block Adaptivity and needs to be pulled early
   ParserBlock *adaptivity_block = locateBlock("Executioner/Adaptivity");
@@ -82,8 +80,6 @@ GenericExecutionerBlock::execute()
   petsc_inames = getParamValue<std::vector<std::string> >("petsc_options_iname");
   petsc_values = getParamValue<std::vector<std::string> >("petsc_options_value");
 
-//  _moose_system._l_abs_step_tol = getParamValue<Real>("l_abs_step_tol");
-  
   if (petsc_inames.size() != petsc_values.size())
     mooseError("Petsc names and options from input file are not the same length");
 
@@ -161,10 +157,13 @@ GenericExecutionerBlock::execute()
     es.parameters.set<Real> ("nonlinear solver relative step tolerance")
       = getParamValue<Real>("nl_rel_step_tol");
 
+#ifdef LIBMESH_HAVE_PETSC
+    mproblem->getNonlinearSystem()._l_abs_step_tol = getParamValue<Real>("l_abs_step_tol");
+#endif
 //    _moose_system._no_fe_reinit = getParamValue<bool>("no_fe_reinit");
 
-//    if (!getParamValue<bool>("perf_log"))
-//      Moose::perf_log.disable_logging();
+    if (!getParamValue<bool>("perf_log"))
+      Moose::perf_log.disable_logging();
 
 //    _moose_system._auto_scaling = getParamValue<bool>("auto_scaling");
 

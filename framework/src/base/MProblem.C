@@ -138,7 +138,6 @@ MProblem::init()
 {
   SubProblem::init();
   init2();
-  setSolverDefaults(_nl);
 }
 
 void
@@ -167,6 +166,7 @@ MProblem::update()
 void
 MProblem::solve()
 {
+  setSolverDefaults(_nl);
   Moose::perf_log.push("solve()","Solve");
   _nl.solve();
   Moose::perf_log.pop("solve()","Solve");
@@ -207,15 +207,12 @@ MProblem::onTimestepBegin()
     // Update backward material data structures
     updateMaterials();
   }
-
-  Moose::setSolverDefaults(_nl);
 }
 
 void
 MProblem::onTimestepEnd()
 {
   _nl.printVarNorms();
-
 }
 
 void
