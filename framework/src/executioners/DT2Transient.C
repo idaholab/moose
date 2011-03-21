@@ -81,10 +81,10 @@ DT2Transient::preSolve()
   TransientExplicitSystem & aux_sys = _problem.getAuxiliarySystem().sys();
 
   // save solution vectors
-  *_u_saved = *nl_sys.solution;
+  *_u_saved = *nl_sys.current_local_solution;
   *_u_older_saved = *nl_sys.older_local_solution;
 
-  *_aux_saved = *aux_sys.current_local_solution;
+  *_aux_saved = *aux_sys.solution;
   *_aux_older_saved = *aux_sys.older_local_solution;
 
   _u_saved->close();
@@ -105,23 +105,20 @@ DT2Transient::postSolve()
   if (_converged)
   {
     // save the solution (for time step with dt)
-    *_u1 = *nl_sys.solution;
+    *_u1 = *nl_sys.current_local_solution;
     _u1->close();
     
-    *_aux1 = *aux_sys.solution;
+    *_aux1 = *aux_sys.current_local_solution;
     _aux1->close();
     
     // take two steps with dt/2
     std::cout << "Taking two dt/2 time steps" << std::endl;
 
     // go back in time
-    *nl_sys.solution = *_u_saved;
-    *aux_sys.solution = *_aux_saved;
-    nl_sys.solution->close();
-    aux_sys.solution->close();
-
-    nl_sys.update();
-    aux_sys.update();
+    *nl_sys.current_local_solution = *_u_saved;
+    *aux_sys.current_local_solution = *_aux_saved;
+    nl_sys.current_local_solution->close();
+    aux_sys.current_local_solution->close();
 
     _time -= _dt_full;
 
@@ -142,6 +139,7 @@ DT2Transient::postSolve()
     if (!_converged) return;
     nl_sys.update();
 
+    _problem.copyOldSolutions();
     _problem.computePostprocessors();
 
     // 2. step
@@ -156,7 +154,7 @@ DT2Transient::postSolve()
     if (!_converged) return;
     nl_sys.update();
     
-    *_u2 = *nl_sys.solution;
+    *_u2 = *nl_sys.current_local_solution;
     _u2->close();
 
     // compute error
@@ -201,18 +199,18 @@ DT2Transient::computeDT()
     else
       _dt = new_dt;
     
-    *nl_sys.solution = *_u1;
+    *nl_sys.current_local_solution= *_u1;
     *nl_sys.old_local_solution = *_u1;
     *nl_sys.older_local_solution = *_u_saved;
 
-    *aux_sys.solution = *_aux1;
+    *aux_sys.current_local_solution = *_aux1;
     *aux_sys.old_local_solution = *_aux1;
     *aux_sys.older_local_solution = *_aux_saved;
 
-    nl_sys.solution->close();
+    nl_sys.current_local_solution->close();
     nl_sys.old_local_solution->close();
     nl_sys.older_local_solution->close();
-    aux_sys.solution->close();
+    aux_sys.current_local_solution->close();
     aux_sys.old_local_solution->close();
     aux_sys.older_local_solution->close();
   }
@@ -222,24 +220,21 @@ DT2Transient::computeDT()
     _time -= _dt;
 
     // recover initial state
-    *nl_sys.solution = *_u_saved;
+    *nl_sys.current_local_solution = *_u_saved;
     *nl_sys.old_local_solution = *_u_saved;
     *nl_sys.older_local_solution = *_u_older_saved;
 
-    *aux_sys.solution = *_aux_saved;
+    *aux_sys.current_local_solution = *_aux_saved;
     *aux_sys.old_local_solution = *_aux_saved;
     *aux_sys.older_local_solution = *_aux_older_saved;
 
-    nl_sys.current_local_solution->close();
+    nl_sys.solution->close();
     nl_sys.old_local_solution->close();
     nl_sys.older_local_solution->close();
-    aux_sys.current_local_solution->close();
+    aux_sys.solution->close();
     aux_sys.old_local_solution->close();
     aux_sys.older_local_solution->close();
   }
-
-  nl_sys.update();
-  aux_sys.update();
 
   return Transient::computeDT();
 }
