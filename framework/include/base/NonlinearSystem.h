@@ -49,6 +49,10 @@ public:
   void printVarNorms();
 
   void timeSteppingScheme(Moose::TimeSteppingScheme scheme);
+  /**
+   * Get the order of used time integration scheme
+   */
+  Real getTimeSteppingOrder() { return _time_stepping_order; }
 
   void onTimestepBegin();
 

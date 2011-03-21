@@ -23,6 +23,7 @@
 #include "CN2AdvDiffReaction1.h"
 #include "Diffusion0.h"
 #include "ForcingFunctionXYZ0.h"
+#include "TEJumpFFN.h"
 
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
@@ -32,6 +33,9 @@
 #include "MMSCoupledDirichletBC.h"
 #include "DirichletBCfuncXYZ0.h"
 #include "DirichletBCfuncXYZ1.h"
+#include "TEJumpBC.h"
+
+#include "TEIC.h"
 
 #include "EmptyMaterial.h"
 #include "MTMaterial.h"
@@ -67,6 +71,7 @@ void registerObjects()
   registerObject(AdvDiffReaction1);
   registerObject(CN2AdvDiffReaction1);
   registerObject(ForcingFunctionXYZ0);
+  registerObject(TEJumpFFN);
 
   // Aux kernels
   registerObject(PolyConstantAux);
@@ -78,6 +83,10 @@ void registerObjects()
   registerObject(MMSCoupledDirichletBC);
   registerObject(DirichletBCfuncXYZ0);
   registerObject(DirichletBCfuncXYZ1);
+  registerObject(TEJumpBC);
+
+  // Initial conditions
+  registerObject(TEIC);
 
   // Materials
   registerObject(EmptyMaterial);

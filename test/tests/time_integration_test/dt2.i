@@ -84,7 +84,6 @@
 
 [Executioner]
   type = DT2Transient
-#  type = Transient
   
   perf_log = true
   petsc_options = '-snes_mf_operator'

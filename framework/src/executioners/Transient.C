@@ -145,7 +145,6 @@ Transient::takeStep(Real input_dt)
   preSolve();
     
   Moose::perf_log.push("solve()","Solve");
-  // System Solve
   _problem.solve();
   Moose::perf_log.pop("solve()","Solve");
 

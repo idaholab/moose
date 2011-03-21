@@ -47,6 +47,7 @@
 #include "Transient.h"
 #include "LooseCoupling.h"
 #include "SolutionTimeAdaptive.h"
+#include "DT2Transient.h"
 // functions
 #include "ParsedFunction.h"
 #include "ParsedGradFunction.h"
@@ -158,6 +159,7 @@ registerObjects()
   registerObject(Transient);
   registerObject(LooseCoupling);
   registerObject(SolutionTimeAdaptive);
+  registerObject(DT2Transient);
   // functions
   registerObject(ParsedFunction);
   registerObject(ParsedGradFunction);
