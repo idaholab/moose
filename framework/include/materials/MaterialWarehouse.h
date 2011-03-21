@@ -23,8 +23,8 @@ public:
   bool hasNeighborMaterials(unsigned int boundary_id);
 
   const std::vector<Material *> & getMaterials(unsigned int block_id);
-  std::vector<Material *> & getBoundaryMaterials(unsigned int boundary_id);
-  std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);
+  const std::vector<Material *> & getBoundaryMaterials(unsigned int boundary_id);
+  const std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);
 
   MaterialIterator activeMaterialsBegin() { return _active_materials.begin(); }
   MaterialIterator activeMaterialsEnd() { return _active_materials.end(); }

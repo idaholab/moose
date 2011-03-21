@@ -292,6 +292,22 @@ NonlinearSystem::onTimestepBegin()
 }
 
 void
+NonlinearSystem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
+{
+  //Global Kernels
+  KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
+  KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
+  for(KernelIterator kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+    (*kernel_it)->subdomainSetup();
+
+  //Stabilizers
+  StabilizerIterator stabilizer_begin = _stabilizers[tid].activeStabilizersBegin();
+  StabilizerIterator stabilizer_end = _stabilizers[tid].activeStabilizersEnd();
+  for(StabilizerIterator stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+    (*stabilizer_it)->subdomainSetup();
+}
+
+void
 NonlinearSystem::computeTimeDeriv()
 {
   switch (_time_stepping_scheme)

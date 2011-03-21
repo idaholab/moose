@@ -28,15 +28,14 @@ ComputeResidualThread::preElement(const Elem *elem)
 {
   _vars.clear();
   _problem.prepare(elem, _tid);
+  _problem.reinitElem(elem, _tid);
 }
 
 void
 ComputeResidualThread::onElement(const Elem *elem)
 {
-  unsigned int cur_subdomain = elem->subdomain_id();
-
-  _problem.reinitElem(elem, _tid);
-  _problem.reinitMaterials(cur_subdomain, _tid);
+  unsigned int subdomain = elem->subdomain_id();
+  _problem.reinitMaterials(subdomain, _tid);
 
   //Stabilizers
   StabilizerIterator stabilizer_begin = _sys._stabilizers[_tid].activeStabilizersBegin();

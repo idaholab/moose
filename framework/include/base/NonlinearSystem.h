@@ -52,6 +52,8 @@ public:
 
   void onTimestepBegin();
 
+  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
+
   virtual void set_solution(const NumericVector<Number> & soln);
   
   virtual NumericVector<Number> & solution() { return _nl_solution; }

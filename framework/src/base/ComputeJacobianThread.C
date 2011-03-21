@@ -25,16 +25,15 @@ ComputeJacobianThread::preElement(const Elem *elem)
 {
   _vars.clear();
   _problem.prepare(elem, _tid);
+  _problem.reinitElem(elem, _tid);
 }
 
 void
 ComputeJacobianThread::onElement(const Elem *elem)
 {
-  unsigned int cur_subdomain = elem->subdomain_id();
+  unsigned int subdomain = elem->subdomain_id();
+  _problem.reinitMaterials(subdomain, _tid);
   
-  _problem.reinitElem(elem, _tid);
-  _problem.reinitMaterials(cur_subdomain, _tid);
-
   //Stabilizers
   StabilizerIterator stabilizer_begin = _sys._stabilizers[_tid].activeStabilizersBegin();
   StabilizerIterator stabilizer_end = _sys._stabilizers[_tid].activeStabilizersEnd();

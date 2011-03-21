@@ -329,8 +329,8 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
         subdomain = cur_subdomain;
 
 //        _element_data[0]->_material = _materials[0].getMaterials(subdomain);
-//        for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-//          (*aux_it)->subdomainSetup();
+        for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
+          (*aux_it)->subdomainSetup();
       }
     }
 
