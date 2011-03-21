@@ -301,11 +301,14 @@ registerActions()
   registerAction(AddKernelAction, "Kernels/*", "add_kernel");
   registerAction(AddKernelAction, "AuxKernels/*", "add_aux_kernel");
   registerAction(AddBCAction, "BCs/*", "add_bc");
-  registerAction(EmptyAction, "BCs/Periodic", "no_action");
+  registerAction(EmptyAction, "BCs/Periodic", "no_action");  // placeholder
   registerAction(AddPeriodicBCAction, "BCs/Periodic/*", "add_periodic_bc");
   registerAction(AddBCAction, "AuxBCs/*", "add_aux_bc");
   registerAction(AddMaterialAction, "Materials/*", "add_material");
   registerAction(AddPostprocessorAction, "Postprocessors/*", "add_postprocessor");
+  registerAction(EmptyAction, "Postprocessors/Residual", "no_action");   // placeholder
+  registerAction(EmptyAction, "Postprocessors/Jacobian", "no_action");   // placeholder
+  registerAction(EmptyAction, "Postprocessors/NewtonIter", "no_action"); // placeholder
   registerAction(AddPostprocessorAction, "Postprocessors/Residual/*", "add_postprocessor");
   registerAction(AddPostprocessorAction, "Postprocessors/Jacobian/*", "add_postprocessor");
   registerAction(AddPostprocessorAction, "Postprocessors/NewtonIter/*", "add_postprocessor");

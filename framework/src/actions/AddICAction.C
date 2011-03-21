@@ -30,5 +30,6 @@ AddICAction::act()
 
   // The variable name will be the second to last element in the path name
   std::string & parent = elements[elements.size()-2];
+  std::cout << "Parent: " << parent << "\n";
   _parser_handle._problem->addInitialCondition(_type, getShortName(), _moose_object_pars, parent);
 }

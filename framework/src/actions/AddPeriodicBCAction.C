@@ -30,10 +30,10 @@ AddPeriodicBCAction::AddPeriodicBCAction(const std::string & name, InputParamete
 void
 AddPeriodicBCAction::act() 
 {
-#ifdef DEBUG
+//#ifdef DEBUG
   std::cerr << "Acting on AddPeriodicBCAction\n"
             << "\tname: " << getShortName() << "\n";
-#endif
+//#endif
   
   NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
 

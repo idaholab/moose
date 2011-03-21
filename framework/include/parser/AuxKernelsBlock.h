@@ -12,7 +12,7 @@ class AuxKernelsBlock: public ParserBlock
 {
 public:
   AuxKernelsBlock(const std::string & name, InputParameters params);
-
+  
   virtual void execute();
 };
 

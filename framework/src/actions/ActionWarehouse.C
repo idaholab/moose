@@ -53,14 +53,14 @@ ActionWarehouse::allActionsBegin(Parser * p_ptr)
   // Clear the current Action vector so that we can fill it up with new ordered actions
   _ordered_actions.clear();
 
-#ifdef DEBUG
+//#ifdef DEBUG
   std::cerr << "Ordered Actions:\n";
-#endif
+//#endif
   
   std::vector<std::set<std::string> > _ordered_names = _actions.getSortedValuesSets();
   for (std::vector<std::set<std::string> >::iterator i = _ordered_names.begin(); i != _ordered_names.end(); ++i)
   {
-#ifdef DEBUG
+//#ifdef DEBUG
     std::cerr << "(";
     unsigned int jj = 0;
     for (std::set<std::string>::iterator j = i->begin(); j != i->end(); ++j)
@@ -69,7 +69,7 @@ ActionWarehouse::allActionsBegin(Parser * p_ptr)
       std::cerr << *j;
     }
     std::cerr << ")\n";
-#endif
+//#endif
     
     for (std::set<std::string>::iterator j = i->begin(); j != i->end(); ++j)
     {
@@ -81,10 +81,10 @@ ActionWarehouse::allActionsBegin(Parser * p_ptr)
           mooseError(std::string("Unsatisified Action \"") + *j + "\" found during MOOSE problem setup");
       
       
-#ifdef DEBUG
+//#ifdef DEBUG
       for (std::vector<Action *>::iterator k = _action_blocks[*j].begin(); k != _action_blocks[*j].end(); ++k)
         std::cerr << "\t" << (*k)->getAction() << "\n";
-#endif
+//#endif
       // append all the Actions that satisfy this "action" onto the end of the ordered_vector
       _ordered_actions.insert(_ordered_actions.end(), _action_blocks[*j].begin(), _action_blocks[*j].end());
     }

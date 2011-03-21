@@ -835,12 +835,12 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
   static const std::string global_params_block_name = "GlobalParams";
   static const std::string global_params_action_name = "set_global_params";
-//  ActionIterator act_iter = Moose::action_warehouse.actionBlocksWithActionBegin(global_params_action_name);
+  ActionIterator act_iter = Moose::action_warehouse.actionBlocksWithActionBegin(global_params_action_name);
   GlobalParamsAction *global_params_block = NULL;
 
   // We are grabbing only the first 
-//  if (act_iter != Moose::action_warehouse.actionBlocksWithActionEnd())
-//    global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
+  if (act_iter != Moose::action_warehouse.actionBlocksWithActionEnd())
+    global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
   
   //ParserBlock *parser_block = _input_tree != NULL ? _input_tree->locateBlock(global_params_block_name) : NULL;
   //GlobalParamsBlock *global_params_block = parser_block != NULL ? dynamic_cast<GlobalParamsBlock *>(parser_block) : NULL;
