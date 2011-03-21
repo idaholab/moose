@@ -6,8 +6,6 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MProblem.h"
-#include "VariablesBlock.h"
-#include "AdaptivityBlock.h"
 #include "ActionWarehouse.h"
 
 template<>

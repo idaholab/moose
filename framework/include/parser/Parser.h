@@ -6,13 +6,7 @@
 
 #include <list>
 
-#include "ParserBlock.h"
-
-#if PARSER_ACTION == 1
 #include "GlobalParamsAction.h"
-#else
-#include "GlobalParamsBlock.h"
-#endif
 
 // libMesh
 #include "getpot.h"
@@ -26,11 +20,6 @@ class Executioner;
 class Parser
 {
 public:
-  static void registerObjects();
-protected:
-  static bool registered;
-
-public:
   /**
    * Default constructor that initializes the parser and looks for the option to dump
    * the registered objects
@@ -43,12 +32,12 @@ public:
   virtual ~Parser();
 
   /**
-   * Determines whether a particular parser block is marked as active
+   * Determines whether a particular block is marked as active
    * in the input file
    */
   bool isSectionActive(const std::string & section_name,
                        const std::map<std::string, std::vector<std::string> > & active_lists) const;
-
+  
   /**
    * Parse an input file consisting of getpot syntax and setup objects
    * in the MOOSE derived application
@@ -60,46 +49,6 @@ public:
    * for creating and filling in various MOOSE based objects.
    */
   void execute();
-
-  /**
-   * Prints the Parser Block tree
-   */
-  void printTree();
-
-  /**
-   * This function is called to track a parser block that is unable to execute because it's
-   * prerequesites have not been satisfied.  The parser object will be in charge of executing
-   * this block at a later time.
-   */
-  inline void deferExecution(ParserBlock * pb_ptr)
-  {
-    _deferred_execution.push_back(pb_ptr);
-  }
-
-  inline std::list<ParserBlock *> & getDeferredList()
-  {
-    return _deferred_execution;
-  }
-  
-  inline void markExecuted(const std::string & pb_name)
-  {
-    _executed_blocks.insert(pb_name);
-  }
-
-  inline bool isExecuted(const std::string & pb_name)
-  {
-    return _executed_blocks.find(pb_name) != _executed_blocks.end();
-  }
-
-  inline std::set<std::string>::iterator getExecutedSetBegin()
-  {
-    return _executed_blocks.begin();
-  }
-
-  inline std::set<std::string>::iterator getExecutedSetEnd()
-  {
-    return _executed_blocks.end();
-  }
 
   /**
    * This function will split the passed in string on a set of delimiters appending the substrings
@@ -138,8 +87,6 @@ public:
    */
   void printUsage() const;
 
-  ParserBlock * root() { return _input_tree; }
-
   static void checkFileReadable(const std::string & filename);
   
   static void checkFileWritable(const std::string & filename);
@@ -172,33 +119,15 @@ private:
    * since they are colled only from this Object
    */
   template<typename T>
-  void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global,
-#if PARSER_ACTION == 1
-                                GlobalParamsAction
-#else
-                                GlobalParamsBlock
-#endif
-                          *global_block);
+  void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
   
   
   template<typename T>
-  void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global,
-#if PARSER_ACTION == 1
-                                GlobalParamsAction
-#else
-                                GlobalParamsBlock
-#endif
-                          *global_block);
+  void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
   
 
   template<typename T>
-  void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global,
-#if PARSER_ACTION == 1
-                                GlobalParamsAction
-#else
-                                GlobalParamsBlock
-#endif
-                          *global_block);
+  void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block);
 
   /************************************
    * Private Data Members
@@ -208,17 +137,9 @@ private:
   const std::string _dump_string;
   const static std::string _show_tree;
 
-  /**
-   * Pointer to the parser block tree built from the call to "parse"
-   */
-  ParserBlock *_input_tree;
-  
   bool _getpot_initialized;
   bool _tree_printed;
   GetPot _getpot_file;
-
-  std::list<ParserBlock *> _deferred_execution;
-  std::set<std::string> _executed_blocks;
 };
 
 #endif //PARSER_H

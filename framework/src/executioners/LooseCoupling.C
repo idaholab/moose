@@ -3,7 +3,6 @@
 #include "CoupledProblem.h"
 #include "SubProblem.h"
 #include "MProblem.h"
-#include "ParserBlock.h"
 
 template<>
 InputParameters validParams<LooseCoupling>()
@@ -109,13 +108,13 @@ LooseCoupling::~LooseCoupling()
 void
 LooseCoupling::executeBlocks(const std::string & name)
 {
-  for (std::vector<Parser *>::iterator it = _slave_parser.begin(); it != _slave_parser.end(); ++it)
-  {
-    ParserBlock * root = (*it)->root();
-    ParserBlock *block = root->locateBlock(name);
-    if (block != NULL)
-      block->execute();
-  }
+//  for (std::vector<Parser *>::iterator it = _slave_parser.begin(); it != _slave_parser.end(); ++it)
+//  {
+//    ParserBlock * root = (*it)->root();
+//    ParserBlock *block = root->locateBlock(name);
+//    if (block != NULL)
+//      block->execute();
+//  }
 }
 
 void

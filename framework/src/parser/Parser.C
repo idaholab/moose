@@ -6,7 +6,6 @@
 #include "Parser.h"
 #include "MooseInit.h"
 #include "InputParameters.h"
-#include "ParserBlockFactory.h"
 
 #include "ActionFactory.h"
 #include "Action.h"
@@ -18,40 +17,6 @@
 #include "Executioner.h"
 #include "Moose.h"
 
-#include "MeshBlock.h"
-#include "MeshGenerationBlock.h"
-#include "GenericMeshModifierBlock.h"
-#include "FunctionsBlock.h"
-#include "GenericFunctionsBlock.h"
-#include "VariablesBlock.h"
-#include "GenericVariableBlock.h"
-#include "KernelsBlock.h"
-#include "GenericKernelBlock.h"
-#include "BCsBlock.h"
-#include "GenericBCBlock.h"
-#include "GenericICBlock.h"
-#include "AuxVariablesBlock.h"
-#include "AuxKernelsBlock.h"
-#include "GenericAuxKernelBlock.h"	
-#include "MaterialsBlock.h"
-#include "GenericMaterialBlock.h"
-#include "OutputBlock.h"
-#include "GenericExecutionerBlock.h"
-#include "PreconditioningBlock.h"
-#include "PBPBlock.h"
-#include "PostprocessorsBlock.h"
-#include "GenericPostprocessorBlock.h"
-#include "PeriodicBlock.h"
-#include "GenericPeriodicBlock.h"
-#include "DampersBlock.h"
-#include "GenericDamperBlock.h"
-#include "DiracKernelsBlock.h"
-#include "GenericDiracKernelBlock.h"
-#include "StabilizersBlock.h"
-#include "GenericStabilizerBlock.h"
-#include "GlobalParamsBlock.h"
-#include "AdaptivityBlock.h"
-
 #include "GlobalParamsAction.h"
 
 // libMesh
@@ -59,115 +24,6 @@
 
 // Static Data initialization
 const std::string Parser::_show_tree = "--show_tree";
-
-bool Parser::registered = false;
-
-void
-Parser::registerObjects()
-{
-  registerNamedParserBlock(MeshBlock, "Mesh");
-  registerNamedParserBlock(MeshGenerationBlock, "Mesh/Generation");
-  registerNamedParserBlock(GenericMeshModifierBlock, "Mesh/*");
-  registerNamedParserBlock(FunctionsBlock, "Functions");
-  registerNamedParserBlock(GenericFunctionsBlock, "Functions/*");
-  registerNamedParserBlock(VariablesBlock, "Variables");
-  registerNamedParserBlock(GenericVariableBlock, "Variables/*");
-  registerNamedParserBlock(GenericICBlock, "Variables/*/InitialCondition");
-  registerNamedParserBlock(AuxVariablesBlock, "AuxVariables");
-  registerNamedParserBlock(GenericICBlock, "AuxVariables/*/InitialCondition");
-  // Reuse the GenericVariableBlock for AuxVariables/*
-  registerNamedParserBlock(GenericVariableBlock, "AuxVariables/*");
-  registerNamedParserBlock(KernelsBlock, "Kernels");
-  registerNamedParserBlock(GenericKernelBlock, "Kernels/*");
-//  registerNamedParserBlock(DGKernelsBlock, "DGKernels");
-//  registerNamedParserBlock(GenericDGKernelBlock, "DGKernels/*");
-  registerNamedParserBlock(AuxKernelsBlock, "AuxKernels");
-  registerNamedParserBlock(GenericAuxKernelBlock, "AuxKernels/*");
-  registerNamedParserBlock(BCsBlock, "BCs");
-  registerNamedParserBlock(GenericBCBlock, "BCs/*");
-  // Reuse the BCsBlock for AuxBCs
-  registerNamedParserBlock(BCsBlock, "AuxBCs");
-  // Reuse the GenericBCBlock for AuxBCs/*
-  registerNamedParserBlock(GenericBCBlock, "AuxBCs/*");
-  registerNamedParserBlock(StabilizersBlock, "Stabilizers");
-  registerNamedParserBlock(GenericStabilizerBlock, "Stabilizers/*");
-  registerNamedParserBlock(MaterialsBlock, "Materials");
-  registerNamedParserBlock(GenericMaterialBlock, "Materials/*");
-  registerNamedParserBlock(OutputBlock, "Output");
-  registerNamedParserBlock(PreconditioningBlock, "Preconditioning");
-  registerNamedParserBlock(PBPBlock, "Preconditioning/PBP");
-  registerNamedParserBlock(PeriodicBlock, "BCs/Periodic");
-  registerNamedParserBlock(GenericPeriodicBlock, "BCs/Periodic/*");
-  registerNamedParserBlock(GenericExecutionerBlock, "Executioner");
-  registerNamedParserBlock(AdaptivityBlock, "Executioner/Adaptivity");
-  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors");
-  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/*");
-  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/Residual");
-  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/Residual/*");
-  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/Jacobian");
-  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/Jacobian/*");
-  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/NewtonIter");
-  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/NewtonIter/*");
-  registerNamedParserBlock(DampersBlock, "Dampers");
-  registerNamedParserBlock(GenericDamperBlock, "Dampers/*");
-  registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");
-  registerNamedParserBlock(DiracKernelsBlock, "DiracKernels");
-  registerNamedParserBlock(GenericDiracKernelBlock, "DiracKernels/*");
-
-//   registerNamedAction(MeshBlock, "Mesh");
-//   registerNamedAction(MeshGenerationBlock, "Mesh/Generation");
-//   registerNamedAction(GenericMeshModifierBlock, "Mesh/*");
-//   registerNamedAction(FunctionsBlock, "Functions");
-//   registerNamedAction(GenericFunctionsBlock, "Functions/*");
-//   registerNamedAction(VariablesBlock, "Variables");
-//   registerNamedAction(GenericVariableBlock, "Variables/*");
-//   registerNamedAction(GenericICBlock, "Variables/*/InitialCondition");
-//   registerNamedAction(AuxVariablesBlock, "AuxVariables");
-//   registerNamedAction(GenericICBlock, "AuxVariables/*/InitialCondition");
-//   // Reuse the GenericVariableBlock for AuxVariables/*
-//   registerNamedAction(GenericVariableBlock, "AuxVariables/*");
-//   registerNamedAction(KernelsBlock, "Kernels");
-//   registerNamedAction(GenericKernelBlock, "Kernels/*");
-// //  registerNamedAction(DGKernelsBlock, "DGKernels");
-// //  registerNamedAction(GenericDGKernelBlock, "DGKernels/*");
-//   registerNamedAction(AuxKernelsBlock, "AuxKernels");
-//   registerNamedAction(GenericAuxKernelBlock, "AuxKernels/*");
-//   registerNamedAction(BCsBlock, "BCs");
-//   registerNamedAction(GenericBCBlock, "BCs/*");
-//   // Reuse the BCsBlock for AuxBCs
-//   registerNamedAction(BCsBlock, "AuxBCs");
-//   // Reuse the GenericBCBlock for AuxBCs/*
-//   registerNamedAction(GenericBCBlock, "AuxBCs/*");
-//   registerNamedAction(StabilizersBlock, "Stabilizers");
-//   registerNamedAction(GenericStabilizerBlock, "Stabilizers/*");
-//   registerNamedAction(MaterialsBlock, "Materials");
-//   registerNamedAction(GenericMaterialBlock, "Materials/*");
-//   registerNamedAction(OutputBlock, "Output");
-//   registerNamedAction(PreconditioningBlock, "Preconditioning");
-// //  registerNamedAction(PBPBlock, "Preconditioning/PBP");
-//   registerNamedAction(PeriodicBlock, "BCs/Periodic");
-//   registerNamedAction(GenericPeriodicBlock, "BCs/Periodic/*");
-//   registerNamedAction(GenericExecutionerBlock, "Executioner");
-//   registerNamedAction(AdaptivityBlock, "Executioner/Adaptivity");
-//   registerNamedAction(PostprocessorsBlock, "Postprocessors");
-//   registerNamedAction(GenericPostprocessorBlock, "Postprocessors/*");
-//   registerNamedAction(PostprocessorsBlock, "Postprocessors/Residual");
-//   registerNamedAction(GenericPostprocessorBlock, "Postprocessors/Residual/*");
-//   registerNamedAction(PostprocessorsBlock, "Postprocessors/Jacobian");
-//   registerNamedAction(GenericPostprocessorBlock, "Postprocessors/Jacobian/*");
-//   registerNamedAction(PostprocessorsBlock, "Postprocessors/NewtonIter");
-//   registerNamedAction(GenericPostprocessorBlock, "Postprocessors/NewtonIter/*");
-//   registerNamedAction(DampersBlock, "Dampers");
-//   registerNamedAction(GenericDamperBlock, "Dampers/*");
-//   registerNamedAction(GlobalParamsBlock, "GlobalParams");
-//   registerNamedAction(DiracKernelsBlock, "DiracKernels");
-//   registerNamedAction(GenericDiracKernelBlock, "DiracKernels/*");
-
-  
-  registered = true;
-}
-
-///////////////
 
 Parser::Parser(const std::string &dump_string) :
     _mesh(NULL),
@@ -177,13 +33,9 @@ Parser::Parser(const std::string &dump_string) :
     _loose(false),
     _input_filename(""),
     _dump_string(dump_string),
-    _input_tree(NULL),
     _getpot_initialized(false),
     _tree_printed(false)
 {
-  if (!registered)
-    registerObjects();
-
   if (Moose::command_line != NULL)
   {
     if (Moose::command_line->search("-h") || Moose::command_line->search("--help"))
@@ -213,9 +65,6 @@ Parser::Parser(const std::string &dump_string) :
 
 Parser::~Parser()
 {
-  if (_input_tree != NULL)
-    delete _input_tree;
-
   delete _exreader;
 }
 
@@ -251,7 +100,6 @@ Parser::isSectionActive(const std::string & s,
   return retValue;
 }
 
-#if PARSER_ACTION == 1
 void
 Parser::parse(const std::string &input_filename)
 {
@@ -326,8 +174,8 @@ Parser::parse(const std::string &input_filename)
   }
 }
 
-#else
 
+#if 0
 void
 Parser::parse(const std::string &input_filename)
 {
@@ -664,10 +512,12 @@ Parser::buildFullTree( const std::string format )
   }
 #endif
 
+/*  
   if (format == "yaml")
     _input_tree->printBlockYAML();
   else // "dump" is all that's left
     _input_tree->printBlockData();
+*/
 }
 
 
@@ -716,58 +566,6 @@ Parser::getExecutioner()
 }
 
 void
-Parser::fixupOptionalBlocks()
-{
-#if 1
-  /* Create a vector of Optional Blocks to fill in if they don't exist in the parsed tree.
-   * The pairs should consist of the required block followed by the optional block.  The optional
-   * block will be inserted into the tree immediately following the required block.
-   */
-  std::vector<std::pair<std::string, std::string> > optional_blocks;
-  std::vector<std::pair<std::string, std::string> >::iterator i;
-  ParserBlock *block_ptr;
-
-//  optional_blocks.push_back(std::make_pair("Mesh", ""));
-//  optional_blocks.push_back(std::make_pair("Variables", "Preconditioning"));
-//  optional_blocks.push_back(std::make_pair("Preconditioning", "AuxVariables"));
-//  optional_blocks.push_back(std::make_pair("Kernels", "AuxKernels"));
-//  optional_blocks.push_back(std::make_pair("AuxKernels", "BCs"));
-//  optional_blocks.push_back(std::make_pair("BCs", "AuxBCs"));
-//  optional_blocks.push_back(std::make_pair("Executioner", "Postprocessors"));
-//  optional_blocks.push_back(std::make_pair("Variables", "AuxVariables"));
-
-  // First see if the Optional Block exists
-  for (i = optional_blocks.begin(); i != optional_blocks.end(); ++i)
-  {
-    if (_input_tree->locateBlock(i->second) == NULL)
-    {
-      // Get a pointer to the required block to prepare for insertion
-      // The newly constructed block will be the sibling before this block
-      // which means it better exist and it better not be the root
-      block_ptr = _input_tree->locateBlock(i->first);
-      if (block_ptr == NULL || block_ptr->_parent == NULL)
-        mooseError("Major Error in ParserBlock Structure!\nPlease make sure that your input file does not contain ""Windows"" line endings");
-
-      ParserBlock::PBChildIterator position =
-        find(block_ptr->_parent->_children.begin(), block_ptr->_parent->_children.end(), block_ptr);
-
-      if (position == block_ptr->_parent->_children.end())
-        mooseError(("Unable to find required block " + i->first + " for optional block insertion").c_str());
-
-
-      InputParameters params = ParserBlockFactory::instance()->getValidParams(i->second);
-      params.set<ParserBlock *>("parent") = block_ptr->_parent;
-      params.set<Parser *>("parser_handle") = this;
-
-      // Increment one past this location so the new element be inserted afterwards
-      block_ptr->_parent->_children.insert(++position, ParserBlockFactory::instance()->add(i->second, params));
-    }
-  }
-#endif
-}
-
-#if PARSER_ACTION == 1
-void
 Parser::execute()
 {
   /// Iterate over the actions inside of the ActionWarehouse
@@ -777,48 +575,6 @@ Parser::execute()
        a != Moose::action_warehouse.allActionsEnd();
        ++a)
     (*a)->act();
-}
-
-#else
-
-void
-Parser::execute()
-{
-  _executed_blocks.clear();
-//  _input_tree->execute();
-
-  std::string nm[] = { "Mesh", "Executioner", "Output" };
-  std::vector<std::string> block_names(nm, nm + sizeof(nm) / sizeof(std::string));
-  for (std::vector<std::string>::iterator it = block_names.begin(); it != block_names.end(); ++it)
-  {
-    ParserBlock * blk = _input_tree->locateBlock(*it);
-    if (blk)
-      blk->execute();
-  }
-  
-//  ParserBlock * meshb = _input_tree->locateBlock("Mesh");
-//  if (meshb)
-//    meshb->execute();
-//
-//  ParserBlock * exeb = _input_tree->locateBlock("Executioner");
-//  if (exeb)
-//    exeb->execute();
-//
-//  ParserBlock * outb = _input_tree->locateBlock("Output");
-//  if (outb)
-//    outb->execute();
-
-}
-
-#endif
-
-void
-Parser::printTree()
-{
-  if (_tree_printed)
-    return;
-  _input_tree->printBlockData();
-  _tree_printed = true;
 }
 
 void

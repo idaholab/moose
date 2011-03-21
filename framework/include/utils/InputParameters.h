@@ -10,7 +10,6 @@
 
 
 class MooseObject;
-class ParserBlock;
 class GlobalParamsAction;
 class Parser;
 
@@ -150,7 +149,6 @@ public:
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters validParams<MooseObject>();
-  friend InputParameters validParams<ParserBlock>();
   friend InputParameters validParams<GlobalParamsAction>();
   friend class ParserBlock;
   friend class Parser;
