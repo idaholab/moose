@@ -15,6 +15,7 @@
 #include "Reaction.h"
 #include "RealPropertyOutput.h"
 // bcs
+#include "ConvectiveFluxBC.h"
 #include "DirichletBC.h"
 #include "NeumannBC.h"
 #include "FunctionDirichletBC.h"
@@ -125,6 +126,7 @@ registerObjects()
   registerObject(Reaction);
   registerObject(RealPropertyOutput);
   // bcs
+  registerObject(ConvectiveFluxBC);
   registerObject(DirichletBC);
   registerObject(NeumannBC);
   registerObject(FunctionDirichletBC);
