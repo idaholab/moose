@@ -14,9 +14,8 @@
 
 #include "SlaveConstraint.h"
 
-#if 0
 // Moose includes
-#include "MooseSystem.h"
+#include "SystemBase.h"
 
 // libmesh includes
 #include "plane.h"
@@ -42,8 +41,7 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
    _component(getParam<Real>("component")),
    _penetration_locator(getPenetrationLocator(getParam<unsigned int>("master"), getParam<unsigned int>("boundary"))),
    _penalty(getParam<Real>("penalty")),
-   _residual_copy(residualCopy()),
-   _jacobian_copy(jacobianCopy()),
+   _residual_copy(_sys.residualCopy()),
    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
@@ -68,7 +66,7 @@ SlaveConstraint::addPoints()
 
     Node * node = pinfo->_node;
 
-    if(_moose_system.DUMMY_CONTACT_FLAG)
+    if(_sys.currentlyComputingJacobian())
     {
       /*
       RealVectorValue res_vec;
@@ -89,14 +87,17 @@ SlaveConstraint::addPoints()
 //      }
 //      else
         if(pinfo->_distance > 0)
+        {
+//          std::cout<<slave_node_num<<": "<<pinfo->_distance<<std::endl;
           _penetration_locator._has_penetrated[slave_node_num] = true;
+        }
     }
 
     if(_penetration_locator._has_penetrated[slave_node_num] && node->processor_id() == libMesh::processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
 
-      std::vector<unsigned int> & connected_elems = _moose_system.node_to_elem_map[slave_node_num];
+      std::vector<unsigned int> & connected_elems = _mesh.nodeToElemMap()[slave_node_num];
 
       Elem * elem = NULL;
 
@@ -137,6 +138,8 @@ SlaveConstraint::computeQpResidual()
 
   Real constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * ( (_mesh.node(node->id())(_component)) - (pinfo->_closest_point(_component)) );
 
+//  std::cout<<node->id()<<":: "<<constraint_mag<<std::endl;
+
   return _phi[_i][_qp] * (
                           _penalty*(
                                (constraint_mag)
@@ -150,7 +153,7 @@ SlaveConstraint::computeQpJacobian()
 {
   PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
   Node * node = pinfo->_node;
-  long int dof_number = node->dof_number(0, _var_num, 0);
+  long int dof_number = node->dof_number(0, _var.number(), 0);
 
    
 //  RealVectorValue jac_vec;
@@ -178,5 +181,3 @@ SlaveConstraint::computeQpJacobian()
   
   return _phi[_i][_qp] * ( _penalty*constraint_mag);
 }
-
-#endif

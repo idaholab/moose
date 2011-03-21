@@ -15,8 +15,6 @@
 #ifndef SLAVECONSTRAINT_H
 #define SLAVECONSTRAINT_H
 
-#if 0
-
 // Moose Includes
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
@@ -42,7 +40,6 @@ protected:
   Real _penalty;
   
   NumericVector<Number> & _residual_copy;
-  SparseMatrix<Number> & _jacobian_copy;
 
   std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;
 
@@ -52,7 +49,5 @@ protected:
 
   RealVectorValue _vars;
 };
-
-#endif
 
 #endif //SLAVECONSTRAINT_H

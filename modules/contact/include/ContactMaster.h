@@ -15,8 +15,6 @@
 #ifndef CONTACTMASTER_H_
 #define CONTACTMASTER_H_
 
-#if 0
-
 // Moose Includes
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
@@ -37,11 +35,10 @@ public:
   virtual Real computeQpJacobian();
 protected:
   const unsigned int _component;
-  Moose::PenetrationLocator & _penetration_locator;
+  PenetrationLocator & _penetration_locator;
   NumericVector<Number> & _residual_copy;
-  SparseMatrix<Number> & _jacobian_copy;
 
-  std::map<Point, Moose::PenetrationLocator::PenetrationInfo *> point_to_info;
+  std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;
 
   unsigned int _x_var;
   unsigned int _y_var;
@@ -49,7 +46,5 @@ protected:
 
   RealVectorValue _vars;
 };
-
-#endif
 
 #endif //CONTACTMASTER_H

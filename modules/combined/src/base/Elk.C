@@ -161,8 +161,7 @@ Elk::registerObjects()
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
 
-  // FIXME: uncomment
   // contact
-//  registerDiracKernel(ContactMaster);
-//  registerDiracKernel(SlaveConstraint);
+  registerDiracKernel(ContactMaster);
+  registerDiracKernel(SlaveConstraint);
 }

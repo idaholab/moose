@@ -13,8 +13,8 @@
 /****************************************************************/
 
 #include "ContactMaster.h"
+#include "SystemBase.h"
 
-#if 0
 // libmesh includes
 #include "sparse_matrix.h"
 
@@ -37,8 +37,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
     DiracKernel(name, parameters),
     _component(getParam<Real>("component")),
     _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
-    _residual_copy(residualCopy()),
-    _jacobian_copy(jacobianCopy()),
+    _residual_copy(_sys.residualCopy()),
     _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
     _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
     _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
@@ -63,7 +62,7 @@ ContactMaster::addPoints()
 
     Node * node = pinfo->_node;
 
-    if(_moose_system.DUMMY_CONTACT_FLAG)
+    if(_sys.currentlyComputingJacobian())
     {/*
       RealVectorValue res_vec;
 
@@ -79,9 +78,8 @@ ContactMaster::addPoints()
 
       if(pinfo->_distance > 0)
         _penetration_locator._has_penetrated[slave_node_num] = true;
-
-    }
-
+    }  
+    
     if(_penetration_locator._has_penetrated[slave_node_num])
     {
       addPoint(pinfo->_elem, pinfo->_closest_point);
@@ -112,6 +110,8 @@ ContactMaster::computeQpResidual()
 
   Real res_mag = pinfo->_normal * res_vec;
 
+//  std::cout<<node->id()<<":: "<<res_mag<<std::endl;
+
   return _phi[_i][_qp]*pinfo->_normal(_component)*res_mag;
 }
 
@@ -119,7 +119,7 @@ Real
 ContactMaster::computeQpJacobian()
 {
   return 0;
-
+/*  
   if(_i != _j)
     return 0;
 
@@ -138,6 +138,5 @@ ContactMaster::computeQpJacobian()
   Real jac_mag = pinfo->_normal * jac_vec;
 
   return _phi[_i][_qp]*pinfo->_normal(_component)*jac_mag;
+*/
 }
-
-#endif
