@@ -779,18 +779,19 @@ MProblem::copySolutionsBackwards()
 }
 
 void
+MProblem::copyOldSolutions()
+{
+  _nl.copyOldSolutions();
+  _aux.copyOldSolutions();
+}
+
+void
 MProblem::onTimestepBegin()
 {
   if (converged())
-  {
-    // Update backward time solution vectors
-    _nl.copyOldSolutions();
-    _aux.copyOldSolutions();
-  }
+    copyOldSolutions();
   else
-  {
     _nl.restoreSolutions();
-  }
   _nl.update();
 
   _nl.onTimestepBegin();

@@ -68,6 +68,8 @@ public:
   virtual void onTimestepEnd();
 
   virtual void copySolutionsBackwards();
+  // Update backward time solution vectors
+  virtual void copyOldSolutions();
 
   // NL /////
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
