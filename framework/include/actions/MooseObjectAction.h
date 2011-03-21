@@ -24,6 +24,6 @@ protected:
 };
 
 template<>
-InputParameters validParams<Action>();
+InputParameters validParams<MooseObjectAction>();
 
-#endif // ACTION_H
+#endif // MOOSEOBJECTACTION_H
