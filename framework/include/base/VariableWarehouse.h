@@ -21,6 +21,8 @@ public:
 
   void add(const std::string & var_name, Variable *var);
   void addBoundaryVar(unsigned int bnd, Variable *var);
+  /// Convenience function for adding coupled vars at once
+  void addBoundaryVars(unsigned int bnd, const std::map<std::string, std::vector<Variable *> > & vars);
 
   Variable *getVariable(const std::string & var_name);
 

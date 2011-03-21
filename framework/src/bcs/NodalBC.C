@@ -25,7 +25,7 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
 {
   unsigned int & dof_idx = _var.nodalDofIndex();
   _qp = 0;
-  residual.set(dof_idx, computeNodeResidual());
+  residual.set(dof_idx, computeQpResidual());
 }
 
 void
@@ -37,3 +37,14 @@ NodalBC::computeJacobian(SparseMatrix<Number> & jacobian)
   jacobian.zero_rows(zero_rows, 1.0);
 }
 
+unsigned int
+NodalBC::coupled(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupled(var_name);
+}
+
+VariableValue &
+NodalBC::coupledValue(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledNodalValue(var_name);
+}

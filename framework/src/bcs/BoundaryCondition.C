@@ -14,6 +14,7 @@ InputParameters validParams<BoundaryCondition>()
 
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
+    Moose::Coupleable(parameters),
     FunctionInterface(parameters),
     Moose::TransientInterface(parameters),
     Moose::MaterialPropertyInterface(parameters),
@@ -22,7 +23,8 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 
     _current_elem(_var.currentElem()),
-    _current_side(_var.currentSide()){
+    _current_side(_var.currentSide())
+{
 }
 
 BoundaryCondition::~BoundaryCondition()

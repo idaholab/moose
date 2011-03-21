@@ -20,6 +20,7 @@
 #include "NeumannBC.h"
 #include "FunctionDirichletBC.h"
 #include "MTBC.h"
+#include "MatchedValueBC.h"
 
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
@@ -55,6 +56,7 @@ void registerObjects()
   registerObject(NeumannBC);
   registerObject(FunctionDirichletBC);
   registerObject(MTBC);
+  registerObject(MatchedValueBC);
 
   // Initial Conditions 
   registerObject(ConstantIC);

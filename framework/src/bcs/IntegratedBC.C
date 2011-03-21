@@ -61,3 +61,14 @@ IntegratedBC::computeQpJacobian()
   return 0;
 }
 
+unsigned int
+IntegratedBC::coupled(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupled(var_name);
+}
+
+VariableValue &
+IntegratedBC::coupledValue(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledValue(var_name);
+}

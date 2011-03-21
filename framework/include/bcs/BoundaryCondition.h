@@ -3,6 +3,7 @@
 
 #include "Object.h"
 #include "Integrable.h"
+#include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -18,6 +19,7 @@ class SubProblem;
 
 class BoundaryCondition :
   public Object,
+  public Moose::Coupleable,
   public FunctionInterface,
   public Moose::TransientInterface,
   public Moose::MaterialPropertyInterface

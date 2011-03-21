@@ -21,7 +21,7 @@ DirichletBC::~DirichletBC()
 }
 
 Real
-DirichletBC::computeNodeResidual()
+DirichletBC::computeQpResidual()
 {
   return _u[_qp] - _value;
 }

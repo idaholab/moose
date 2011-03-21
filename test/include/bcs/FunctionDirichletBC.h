@@ -28,7 +28,7 @@ protected:
   /**
    * returns (u - the function)
    */
-  virtual Real computeNodeResidual();
+  virtual Real computeQpResidual();
 
 private:
   Function & _func;

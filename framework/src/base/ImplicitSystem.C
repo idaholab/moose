@@ -253,6 +253,8 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
     parameters.set<unsigned int>("_boundary_id") = boundaries[i];
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
+      parameters.set<THREAD_ID>("_tid") = tid;
+
       BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
 
@@ -263,6 +265,7 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
       else
         mooseError("Unknown type of BoudaryCondition object");
       _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
+      _vars[tid].addBoundaryVars(boundaries[i], bc->getCoupledVars());
     }
   }
 }

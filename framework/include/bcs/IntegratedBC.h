@@ -8,7 +8,9 @@
 #include "fe.h"
 #include "quadrature.h"
 
-class IntegratedBC : public BoundaryCondition, public Moose::Integrable
+class IntegratedBC :
+  public BoundaryCondition,
+  public Moose::Integrable
 {
 public:
   IntegratedBC(const std::string & name, InputParameters parameters);
@@ -16,6 +18,9 @@ public:
 
   virtual void computeResidual();
   virtual void computeJacobian(int i, int j);
+
+  virtual unsigned int coupled(const std::string & var_name);
+  virtual VariableValue & coupledValue(const std::string & var_name);
 
 protected:
   Moose::Variable & _test_var;

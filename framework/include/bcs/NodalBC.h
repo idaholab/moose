@@ -17,13 +17,16 @@ public:
   virtual void computeResidual(NumericVector<Number> & residual);
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
 
+  virtual unsigned int coupled(const std::string & var_name);
+  virtual VariableValue & coupledValue(const std::string & var_name);
+
 protected:
   const Node * & _node;
 
   unsigned int _qp;
   VariableValue & _u;
 
-  virtual Real computeNodeResidual() = 0;
+  virtual Real computeQpResidual() = 0;
 };
 
 template<>

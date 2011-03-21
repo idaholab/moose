@@ -23,7 +23,7 @@ FunctionDirichletBC::f()
 }
 
 Real
-FunctionDirichletBC::computeNodeResidual()
+FunctionDirichletBC::computeQpResidual()
 {
   return _u[_qp]-f();
 }

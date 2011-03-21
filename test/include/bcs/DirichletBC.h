@@ -10,7 +10,7 @@ public:
   virtual ~DirichletBC();
 
 protected:
-  virtual Real computeNodeResidual();
+  virtual Real computeQpResidual();
 
   Real _value;
 };
