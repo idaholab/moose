@@ -28,6 +28,11 @@ public:
   virtual EquationSystems & es() = 0;
   virtual Problem * parent() = 0;
 
+  /**
+   * Get reference to all-purpose parameters
+   */
+  Parameters & parameters() { return _pars; }
+
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
@@ -103,6 +108,8 @@ public:
   Array<Array<RealTensor> > _second_zero;
 
 protected:
+  Parameters _pars;                                     /// For storing all-purpose global params
+
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
 

@@ -27,11 +27,6 @@ public:
   MProblem(MooseMesh & mesh, Problem * parent = NULL);
   virtual ~MProblem();
 
-  /**
-   * Get reference to all-purpose parameters
-   */
-  Parameters & parameters() { return _pars; }
-
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
 
@@ -153,8 +148,6 @@ public:
 protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;
-
-  Parameters _pars;                                     /// For storing all-purpose global params
 
   // quadrature
   Order _quadrature_order;                              /// Quadrature order required by all variables to integrated over them.
