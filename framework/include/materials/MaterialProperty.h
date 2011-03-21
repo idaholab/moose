@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Array.h"
+#include "MooseArray.h"
 #include "ColumnMajorMatrix.h"
 
 #include "libmesh_common.h"
@@ -54,12 +54,12 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  Array<T> & get () { return _value; }
+  MooseArray<T> & get () { return _value; }
 
   /**
    * @returns a writeable reference to the parameter value.
    */
-  Array<T> & set () { return _value; }
+  MooseArray<T> & set () { return _value; }
 
   /**
    * String identifying the type of parameter stored.
@@ -98,7 +98,7 @@ private:
   /**
    * Stored parameter value.
    */
-  Array<T> _value;
+  MooseArray<T> _value;
 };
 
 

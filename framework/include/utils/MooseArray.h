@@ -4,26 +4,26 @@
 #include "Moose.h"
 
 template<typename T>
-class Array
+class MooseArray
 {
 public:
   /**
    * Default constructor.  Doesn't initialize anything.
    */
-  Array();
+  MooseArray();
 
   /**
    * @param size The initial size of the array.
    */
   explicit
-  Array(const unsigned int size);
+  MooseArray(const unsigned int size);
 
   /**
    * @param size The initial size of the array.
    * @param default_value The default value to set.
    */
   explicit
-  Array(const unsigned int size, const T & default_value);
+  MooseArray(const unsigned int size, const T & default_value);
 
   /**
    * Sets all values of the array to the passed in value
@@ -90,7 +90,7 @@ public:
    * else.  This is because the data pointer will get overriden
    * here.
    */
-  void shallowCopy(const Array & rhs);
+  void shallowCopy(const MooseArray & rhs);
 
 private:
 
@@ -113,7 +113,7 @@ private:
 template<typename T>
 inline
 void
-Array<T>::setAllValues(const T & value)
+MooseArray<T>::setAllValues(const T & value)
 {
   for(unsigned int i=0; i<_size; i++)
     _data[i] = value;
@@ -122,14 +122,14 @@ Array<T>::setAllValues(const T & value)
 template<typename T>
 inline
 void
-Array<T>::resize(const unsigned int size)
+MooseArray<T>::resize(const unsigned int size)
 {
   if(size <= _allocated_size)
     _size = size;
   else
   {
     T * new_pointer = new T[size];
-    mooseAssert(new_pointer, "Failed to allocate Array memory!");
+    mooseAssert(new_pointer, "Failed to allocate MooseArray memory!");
 
     if (_data != NULL)
       delete [] _data;
@@ -142,14 +142,14 @@ Array<T>::resize(const unsigned int size)
 template<typename T>
 inline
 void
-Array<T>::resize(const unsigned int size, const T & default_value)
+MooseArray<T>::resize(const unsigned int size, const T & default_value)
 {
   if (size <= _allocated_size)
     _size = size;
   else
   {
     T * new_pointer = new T[size];
-    mooseAssert(new_pointer, "Failed to allocate Array memory!");
+    mooseAssert(new_pointer, "Failed to allocate MooseArray memory!");
 
     if (_data != NULL)
       delete [] _data;
@@ -166,7 +166,7 @@ Array<T>::resize(const unsigned int size, const T & default_value)
 template<typename T>
 inline
 unsigned int
-Array<T>::size()
+MooseArray<T>::size()
 {
   return _size;
 }
@@ -174,9 +174,9 @@ Array<T>::size()
 template<typename T>
 inline
 T &
-Array<T>::operator[](const unsigned int i)
+MooseArray<T>::operator[](const unsigned int i)
 {
-  mooseAssert(i < _size, "Access out of bounds in Array!");
+  mooseAssert(i < _size, "Access out of bounds in MooseArray!");
   
   return _data[i];
 }
@@ -184,9 +184,9 @@ Array<T>::operator[](const unsigned int i)
 template<typename T>
 inline
 const T &
-Array<T>::operator[](const unsigned int i) const
+MooseArray<T>::operator[](const unsigned int i) const
 {
-  mooseAssert(i < _size, "Access out of bounds in Array!");
+  mooseAssert(i < _size, "Access out of bounds in MooseArray!");
   
   return _data[i];
 }
@@ -194,7 +194,7 @@ Array<T>::operator[](const unsigned int i) const
 template<typename T>
 inline
 void
-Array<T>::shallowCopy(const Array & rhs)
+MooseArray<T>::shallowCopy(const MooseArray & rhs)
 {
   _data = rhs._data;
   _size = rhs._size;
@@ -204,7 +204,7 @@ Array<T>::shallowCopy(const Array & rhs)
 
 template <class T>
 void
-freeDoubleArray(Array<Array<T> > &a)
+freeDoubleMooseArray(MooseArray<MooseArray<T> > &a)
 {
   for (unsigned int i = 0; i < a.size(); i++)
     a[i].release();

@@ -43,7 +43,7 @@ protected:
 
   virtual Real computeQpResidual();
 
-  Array<Real> _value;
+  MooseArray<Real> _value;
 };
 
 #endif //KERNELSECOND_H

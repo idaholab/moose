@@ -5,7 +5,7 @@
 #include <map>
 
 #include "Moose.h"
-#include "Array.h"
+#include "MooseArray.h"
 // libMesh
 #include "elem.h"
 #include "point.h"

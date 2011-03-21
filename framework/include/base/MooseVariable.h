@@ -1,7 +1,7 @@
 #ifndef MOOSEVARIABLE_H
 #define MOOSEVARIABLE_H
 
-#include "Array.h"
+#include "MooseArray.h"
 #include "ParallelUniqueId.h"
 
 // libMesh
@@ -15,9 +15,9 @@
 #include "node.h"
 
 
-typedef Array<Real>               VariableValue;
-typedef Array<RealGradient>       VariableGradient;
-typedef Array<RealTensor>         VariableSecond;
+typedef MooseArray<Real>               VariableValue;
+typedef MooseArray<RealGradient>       VariableGradient;
+typedef MooseArray<RealTensor>         VariableSecond;
 
 
 class AssemblyData;

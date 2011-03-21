@@ -4,7 +4,7 @@
 #include "MooseObject.h"
 #include "MooseVariable.h"
 #include "ParallelUniqueId.h"
-#include "Array.h"
+#include "MooseArray.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -57,9 +57,9 @@ protected:
 
   // Single Instance Variables
   Real & _real_zero;
-  Array<Real> & _zero;
-  Array<RealGradient> & _grad_zero;
-  Array<RealTensor> & _second_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
 };
 
 

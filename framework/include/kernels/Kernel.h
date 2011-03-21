@@ -104,9 +104,9 @@ protected:
 
   // Single Instance Variables
   Real & _real_zero;
-  Array<Real> & _zero;
-  Array<RealGradient> & _grad_zero;
-  Array<RealTensor> & _second_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();

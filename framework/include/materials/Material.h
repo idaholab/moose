@@ -111,7 +111,7 @@ protected:
 
 // struct DeleteFunctor 
 //   {
-//     void operator()(const std::pair<const unsigned int, MooseArray<QpData *> > & p) const
+//     void operator()(const std::pair<const unsigned int, MooseMooseArray<QpData *> > & p) const
 //     {
 //       //for(MooseArray<QpData *>::iterator i = p.second.begin(); i != p.second.end(); ++i)
 //       //  delete *i;
@@ -207,9 +207,9 @@ protected:
 
   // Single Instance Variables
   Real & _real_zero;
-  Array<Real> & _zero;
-  Array<RealGradient> & _grad_zero;
-  Array<RealTensor> & _second_zero;
+  MooseArray<Real> & _zero;
+  MooseArray<RealGradient> & _grad_zero;
+  MooseArray<RealTensor> & _second_zero;
 };
 
 

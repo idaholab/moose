@@ -2,7 +2,7 @@
 #define DIRACKERNELDATA_H
 
 #include "Moose.h"
-#include "Array.h"
+#include "MooseArray.h"
 // libMesh
 #include "point.h"
 #include "elem.h"

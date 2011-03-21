@@ -103,10 +103,10 @@ public:
   /**
    * Convenience zeros
    */
-  Array<Real> _real_zero;
-  Array<Array<Real> > _zero;
-  Array<Array<RealGradient> > _grad_zero;
-  Array<Array<RealTensor> > _second_zero;
+  MooseArray<Real> _real_zero;
+  MooseArray<MooseArray<Real> > _zero;
+  MooseArray<MooseArray<RealGradient> > _grad_zero;
+  MooseArray<MooseArray<RealTensor> > _second_zero;
 
 protected:
   Parameters _pars;                                     /// For storing all-purpose global params
