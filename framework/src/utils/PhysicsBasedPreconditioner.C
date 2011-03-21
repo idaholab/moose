@@ -186,6 +186,8 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
         _nl.sys().number(),system_var,y);
   }
 
+  y.close();
+
   Moose::perf_log.pop("apply()","PhysicsBasedPreconditioner");
 }
 

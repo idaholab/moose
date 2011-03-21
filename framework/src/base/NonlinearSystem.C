@@ -406,9 +406,9 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 #else
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
   // determines whether the option is set (true) or unset (false)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
-   MAT_KEEP_ZEROED_ROWS,
-   PETSC_TRUE);
+//  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
+//   MAT_KEEP_ZEROED_ROWS,
+//   PETSC_TRUE);
 #endif
 #endif
 
@@ -456,9 +456,9 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
 #else
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
   // determines whether the option is set (true) or unset (false)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
-   MAT_KEEP_ZEROED_ROWS,
-   PETSC_TRUE);
+//  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
+//   MAT_KEEP_ZEROED_ROWS,
+//   PETSC_TRUE);
 #endif
 #endif
 
