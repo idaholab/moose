@@ -21,7 +21,8 @@ typedef StoredRange<MeshBase::const_node_iterator, const Node*> ConstNodeRange;
 class MooseMesh
 {
 public:
-  MooseMesh(int mesh_dim=-1);
+  MooseMesh();
+  MooseMesh(int mesh_dim);
   MooseMesh(const MooseMesh & other_mesh);
   virtual ~MooseMesh();
 

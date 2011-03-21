@@ -51,7 +51,8 @@ CreateMeshAction::act()
   // from the parent block
   if (isParamValid("dim"))
     mesh_dim = getParam<int>("dim");
-  
+
+  mooseAssert(mesh_dim >=1 && mesh_dim <=3, "Unable to generate mesh for unknown dimension\n");
   MooseMesh *mesh = new MooseMesh(mesh_dim);
   
   switch (mesh_dim)

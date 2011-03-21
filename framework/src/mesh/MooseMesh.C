@@ -7,6 +7,16 @@
 #include "mesh_tools.h"
 #include "mesh_refinement.h"
 
+MooseMesh::MooseMesh() :
+    _mesh(),
+    _is_changed(false),
+    _active_local_elem_range(NULL),
+    _active_node_range(NULL),
+    _local_node_range(NULL),
+    _bnd_node_range(NULL)
+{
+}
+
 MooseMesh::MooseMesh(int mesh_dim) :
     _mesh(mesh_dim),
     _is_changed(false),
@@ -15,7 +25,6 @@ MooseMesh::MooseMesh(int mesh_dim) :
     _local_node_range(NULL),
     _bnd_node_range(NULL)
 {
-
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
