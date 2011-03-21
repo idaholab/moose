@@ -51,7 +51,7 @@ public:
   Real stopTime();
 
 protected:
-  Moose::SubProblem & _subproblem;
+  Moose::SubProblem & _problem;
   Moose::System & _sys;
 
   THREAD_ID _tid;

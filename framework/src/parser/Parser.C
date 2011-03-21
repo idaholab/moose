@@ -7,6 +7,10 @@
 #include "Init.h"
 #include "InputParameters.h"
 #include "ParserBlockFactory.h"
+#include "MProblem.h"
+#include "Mesh.h"
+#include "Executioner.h"
+#include "Moose.h"
 
 #include "MeshBlock.h"
 #include "MeshGenerationBlock.h"
@@ -133,10 +137,7 @@ Parser::~Parser()
   if (_input_tree != NULL)
     delete _input_tree;
 
-  // cleanup objects
-  delete _mesh;
-  delete _problem;
-  delete _executioner;
+  delete _exreader;
 }
 
 void
@@ -494,23 +495,33 @@ Parser::getPotHandle() const
   return _getpot_initialized ? &_getpot_file : NULL;
 }
 
+Executioner *
+Parser::getExecutioner()
+{
+  mooseAssert(_executioner != NULL, "Executioner is NULL!");
+  return _executioner;
+}
+
 void
 Parser::fixupOptionalBlocks()
 {
+#if 0
   /* Create a vector of Optional Blocks to fill in if they don't exist in the parsed tree.
    * The pairs should consist of the required block followed by the optional block.  The optional
-   * block will be inserted into the tree immediatly following the required block.
+   * block will be inserted into the tree immediately following the required block.
    */
   std::vector<std::pair<std::string, std::string> > optional_blocks;
   std::vector<std::pair<std::string, std::string> >::iterator i;
   ParserBlock *block_ptr;
 
-  optional_blocks.push_back(std::make_pair("Variables", "Preconditioning"));
-  optional_blocks.push_back(std::make_pair("Preconditioning", "AuxVariables"));
-  optional_blocks.push_back(std::make_pair("Kernels", "AuxKernels"));
-  optional_blocks.push_back(std::make_pair("AuxKernels", "BCs"));
-  optional_blocks.push_back(std::make_pair("BCs", "AuxBCs"));
-  optional_blocks.push_back(std::make_pair("Executioner", "Postprocessors"));
+//  optional_blocks.push_back(std::make_pair("Mesh", ""));
+//  optional_blocks.push_back(std::make_pair("Variables", "Preconditioning"));
+//  optional_blocks.push_back(std::make_pair("Preconditioning", "AuxVariables"));
+//  optional_blocks.push_back(std::make_pair("Kernels", "AuxKernels"));
+//  optional_blocks.push_back(std::make_pair("AuxKernels", "BCs"));
+//  optional_blocks.push_back(std::make_pair("BCs", "AuxBCs"));
+//  optional_blocks.push_back(std::make_pair("Executioner", "Postprocessors"));
+  optional_blocks.push_back(std::make_pair("Variables", "AuxVariables"));
 
   // First see if the Optional Block exists
   for (i = optional_blocks.begin(); i != optional_blocks.end(); ++i)
@@ -539,6 +550,7 @@ Parser::fixupOptionalBlocks()
       block_ptr->_parent->_children.insert(++position, ParserBlockFactory::instance()->add(i->second, params));
     }
   }
+#endif
 }
 
 

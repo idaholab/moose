@@ -84,7 +84,7 @@ GenericVariableBlock::execute()
 
   // Set initial condition
   Real initial = getParamValue<Real>("initial_condition");
-  if (initial > _abs_zero_tol || initial < -_abs_zero_tol) 
+  if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
     _parser_handle._problem->addInitialCondition(var_name, initial);
 
 #if 0

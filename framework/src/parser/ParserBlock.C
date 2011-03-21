@@ -36,7 +36,8 @@ ParserBlock::ParserBlock(const std::string & name, InputParameters params) :
   _name(name),
   _parser_handle(*params.get<Parser *>("parser_handle")),
   _getpot_handle(_parser_handle.getPotHandle()),
-  _block_params(params)
+  _block_params(params),
+  _executed(false)
 {
   if (_getpot_handle)
   {
@@ -130,6 +131,8 @@ ParserBlock::execute()
       std::cout << (*i)->getID() << "\n";
     mooseError("*******************************************************************************");
   }
+
+  _executed = true;
 }
 
 unsigned int

@@ -24,11 +24,13 @@ InputParameters validParams<VariablesBlock>()
 
 
 VariablesBlock::VariablesBlock(const std::string & name, InputParameters params) :
-  ParserBlock(name, params),
-  _cm(NULL)
+    ParserBlock(name, params),
+    _cm(NULL)
 {
+#if 0
   // Register execution prereqs
   addPrereq("Mesh");
+#endif
 }
 
 VariablesBlock::~VariablesBlock()
@@ -43,31 +45,37 @@ VariablesBlock::execute()
   std::cerr << "Inside the VariablesBlock Object\n";
 #endif
 
+  if (!_executed)
+  {
 /*
-  _moose_system.initEquationSystems();
-  _moose_system.initDataStructures();
+    _moose_system.initEquationSystems();
+    _moose_system.initDataStructures();
 
-  TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
+    TransientNonlinearImplicitSystem &system = *_moose_system.getNonlinearSystem();
 
-  _moose_system._manual_scaling.reserve(n_activeChildren());
+    _moose_system._manual_scaling.reserve(n_activeChildren());
 */
 
-  // Add variable blocks from the children nodes
-  visitChildren();
+    // Add variable blocks from the children nodes
+    visitChildren();
 
 /*
-  // FIXME: should be inside MooseSystem
-  _cm = new CouplingMatrix(system.n_vars());
+    // FIXME: should be inside MooseSystem
+    _cm = new CouplingMatrix(system.n_vars());
+
+    for(unsigned int i=0; i<system.n_vars(); i++)
+      for(unsigned int j=0; j<system.n_vars(); j++)
+        (*_cm)(i, j) = ( i == j ? 1 : 0);
   
-  for(unsigned int i=0; i<system.n_vars(); i++)
-    for(unsigned int j=0; j<system.n_vars(); j++)
-      (*_cm)(i, j) = ( i == j ? 1 : 0);
-
-  system.get_dof_map()._dof_coupling = _cm;
+    system.get_dof_map()._dof_coupling = _cm;
 */
-  /** If requested, nodal values are copied out after the equation systems are initialized.
-   *  This call is made from the AuxVariables Block
-   */
+
+    /** If requested, nodal values are copied out after the equation systems are initialized.
+     *  This call is made from the AuxVariables Block
+     */
+
+    _executed = true;
+  }
 }
 
 void

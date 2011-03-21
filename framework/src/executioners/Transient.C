@@ -42,6 +42,7 @@ InputParameters validParams<Transient>()
 
 Transient::Transient(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
+    _problem(*_mesh),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_time),
@@ -83,6 +84,10 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   while (_remaining_sync_time && *_curr_sync_time_iter < _time)
     if (++_curr_sync_time_iter == _sync_times.end())
       _remaining_sync_time = false;
+}
+
+Transient::~Transient()
+{
 }
 
 void

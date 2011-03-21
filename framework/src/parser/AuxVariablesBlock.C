@@ -4,6 +4,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "Parser.h"
+#include "MProblem.h"
 
 // libMesh includes
 #include "libmesh.h"
@@ -21,12 +22,14 @@ InputParameters validParams<AuxVariablesBlock>()
 }
 
 AuxVariablesBlock::AuxVariablesBlock(const std::string & name, InputParameters params) :
-  VariablesBlock(name, params)
+    VariablesBlock(name, params)
 {
+#if 0
   // Register execution prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
 //  addPrereq("Preconditioning");
+#endif
 }
 
 void
@@ -36,18 +39,23 @@ AuxVariablesBlock::execute()
   std::cerr << "Inside the AuxVariablesBlock Object\n";
 #endif
 
-  visitChildren();
+  if (!_executed)
+  {
+    visitChildren();
 
-  ParserBlock * pb = locateBlock("BCs/Periodic");
+    ParserBlock * pb = locateBlock("BCs/Periodic");
 
-  if (pb)
-    pb->execute();
+    if (pb)
+      pb->execute();
 
-  _parser_handle._problem->init();
-  // Copy out nodal values is required (Variables Block)
-  if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("Variables")))
-    vars->copyNodalValues(_parser_handle._problem->getNonlinearSystem());
-  // Aux Variables
-  copyNodalValues(_parser_handle._problem->getAuxiliarySystem());
+    _parser_handle._problem->init();
+    // Copy out nodal values is required (Variables Block)
+    if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("Variables")))
+      vars->copyNodalValues(_parser_handle._problem->getNonlinearSystem());
+    // Aux Variables
+    copyNodalValues(_parser_handle._problem->getAuxiliarySystem());
+
+    _executed = true;
+  }
 }
 

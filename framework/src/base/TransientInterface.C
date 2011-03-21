@@ -5,10 +5,10 @@ namespace Moose
 {
 
 TransientInterface::TransientInterface(InputParameters & parameters) :
-    _subproblem(*parameters.get<Moose::SubProblem *>("_subproblem")),
-    _t(_subproblem.time()),
-    _t_step(_subproblem.timeStep()),
-    _dt(_subproblem.dt())
+    _problem(*parameters.get<Moose::SubProblem *>("_problem")),
+    _t(_problem.time()),
+    _t_step(_problem.timeStep()),
+    _dt(_problem.dt())
 {
 
 }
@@ -17,4 +17,4 @@ TransientInterface::~TransientInterface()
 {
 }
 
-}
+} // namespace

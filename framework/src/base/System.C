@@ -9,7 +9,7 @@
 namespace Moose {
 
 
-System::System(SubProblem & problem, const std::string & name) :
+System::System(Problem & problem, const std::string & name) :
     _problem(problem),
     _mesh(problem.mesh()),
     _name(name)

@@ -15,7 +15,7 @@ namespace Moose {
   {
   protected:
     AuxiliarySystem & _sys;
-    SubProblem & _problem;
+    Problem & _problem;
 
   public:
     ComputeNodalAuxThread(AuxiliarySystem & sys) :
@@ -44,7 +44,7 @@ namespace Moose {
   {
   protected:
     AuxiliarySystem & _sys;
-    SubProblem & _problem;
+    Problem & _problem;
 
   public:
     ComputeElemAuxThread(AuxiliarySystem & sys) :
@@ -143,7 +143,7 @@ namespace Moose {
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(SubProblem & problem, const std::string & name) :
+AuxiliarySystem::AuxiliarySystem(Problem & problem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(problem, name)
 {
   _sys.attach_init_function(Moose::initial_condition);

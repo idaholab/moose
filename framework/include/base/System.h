@@ -6,7 +6,7 @@
 #include "IntegratedBC.h"
 #include "InitialCondition.h"
 
-#include "SubProblem.h"
+#include "Problem.h"
 #include "Mesh.h"
 #include "VariableWarehouse.h"
 
@@ -23,10 +23,10 @@ class Variable;
 class System
 {
 public:
-  System(SubProblem & problem, const std::string & name);
+  System(Problem & problem, const std::string & name);
 
   virtual unsigned int number() = 0;
-  virtual SubProblem & problem() { return _problem; }
+  virtual Problem & problem() { return _problem; }
   virtual DofMap & dofMap() = 0;
 
   virtual void update() = 0;
@@ -55,7 +55,7 @@ public:
   virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
 
 protected:
-  SubProblem & _problem;
+  Problem & _problem;
   Mesh & _mesh;
   std::string _name;
 
@@ -68,9 +68,9 @@ template<typename T>
 class SystemTempl : public System
 {
 public:
-  SystemTempl(SubProblem & problem, const std::string & name) :
+  SystemTempl(Problem & problem, const std::string & name) :
     System(problem, name),
-    _sys(problem.es().add_system<T>(name)),
+    _sys(problem.es().add_system<T>(_name)),
     _solution(_sys.add_vector("curr_sln", false, GHOSTED)),
     _solution_old(*_sys.old_local_solution),
     _solution_older(*_sys.older_local_solution),
@@ -117,10 +117,6 @@ public:
 
   virtual NumericVector<Number> & solutionUDot() { return _solution_u_dot; }
   virtual NumericVector<Number> & solutionDuDotDu() { return _solution_du_dot_du; }
-
-  virtual void init()
-  {
-  }
 
   virtual void update()
   {

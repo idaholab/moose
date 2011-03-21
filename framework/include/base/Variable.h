@@ -22,7 +22,7 @@ typedef std::vector<RealGradient>       VariableGrad;
 namespace Moose
 {
 
-class SubProblem;
+class Problem;
 class System;
 
 
@@ -91,7 +91,7 @@ protected:
   unsigned int _var_num;
   int _dim;
   FEType _fe_type;
-  SubProblem & _problem;
+  Problem & _problem;
   System &_sys;
 
   const DofMap & _dof_map;

@@ -23,12 +23,14 @@ InputParameters validParams<PostprocessorsBlock>()
 PostprocessorsBlock::PostprocessorsBlock(const std::string & name, InputParameters params)
   :ParserBlock(name, params)
 {
+#if 0
   // Register execution prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
   addPrereq("Preconditioning");
   addPrereq("AuxVariables");
   addPrereq("Materials");
+#endif
 }
 
 void

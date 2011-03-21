@@ -10,9 +10,6 @@ public:
   MeshGenerationBlock(const std::string & name, InputParameters params);
 
   virtual void execute();
-  
-private:
-  bool _executed;
 };
 
 template<>

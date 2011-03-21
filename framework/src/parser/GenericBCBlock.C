@@ -1,6 +1,7 @@
 #include "GenericBCBlock.h"
 #include "Factory.h"
 #include "Parser.h"
+#include "MProblem.h"
 
 template<>
 InputParameters validParams<GenericBCBlock>()

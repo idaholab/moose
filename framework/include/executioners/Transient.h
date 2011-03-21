@@ -4,6 +4,8 @@
 #include "Moose.h"
 #include "Executioner.h"
 #include "LinearInterpolation.h"
+#include "MProblem.h"
+
 #include "mesh_function.h"
 
 // LibMesh includes
@@ -36,6 +38,10 @@ public:
    * @return Whether or not the solve was successful.
    */
   Transient(const std::string & name, InputParameters parameters);
+
+  virtual ~Transient();
+
+  virtual Moose::Problem & problem() { return _problem; }
 
   /**
    * This will call solve() on the NonlinearSystem.
@@ -71,6 +77,8 @@ public:
 
 protected:
   virtual void preExecute();
+
+  Moose::MProblem _problem;
 
   int & _t_step;                        /// Current timestep.
   Real & _time;                         /// Current time

@@ -3,6 +3,7 @@
 
 #include "Moose.h"
 #include "Executioner.h"
+#include "MProblem.h"
 
 // LibMesh includes
 #include <parameters.h>
@@ -29,12 +30,18 @@ public:
    */
   Steady(const std::string & name, InputParameters parameters);
 
+  virtual ~Steady();
+
   /**
    * This will call solve() on the NonlinearSystem.
    */
   virtual void execute();
 
+  virtual Moose::Problem & problem() { return _problem; }
+
 protected:
+  Moose::MProblem _problem;
+
   // not a real time, but we need to distinguish between initial condition and the solution (which we do by faking time)
   // this is only for outputting purposes
   Real & _time;

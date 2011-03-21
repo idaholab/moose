@@ -5,9 +5,9 @@
 
 namespace Moose {
 
-Output::Output(SubProblem & problem) :
-  _file_base("out"),
-  _problem(problem)
+Output::Output(Problem & problem) :
+    _file_base("out"),
+    _problem(problem)
 {
 }
 

@@ -3,6 +3,12 @@
   file = square.e
 []
 
+[Executioner]
+  type = Steady
+  perf_log = true
+  petsc_options = '-snes_mf_operator'
+[]
+
 [Variables]
   active = 'u'
 
@@ -46,12 +52,6 @@
     type = EmptyMaterial
     block = 1
   [../]
-[]
-
-[Executioner]
-  type = Steady
-  perf_log = true
-  petsc_options = '-snes_mf_operator'
 []
 
 [Output]

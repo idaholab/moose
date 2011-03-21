@@ -1,7 +1,9 @@
 #include "OutputBlock.h"
 #include "Moose.h"
 #include "Parser.h"
+#include "Executioner.h"
 #include "Output.h"
+#include "MProblem.h"
 
 #include "exodusII_io.h"
 #include "mesh.h"
@@ -42,6 +44,8 @@ InputParameters validParams<OutputBlock>()
 OutputBlock::OutputBlock(const std::string & name, InputParameters params) :
   ParserBlock(name, params)
 {
+  addPrereq("Executioner");
+#if 0
   // Register Output prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
@@ -53,6 +57,7 @@ OutputBlock::OutputBlock(const std::string & name, InputParameters params) :
 //  addPrereq("AuxBCs");
   addPrereq("Materials");
   addPrereq("Executioner");
+#endif
 }
 
 void
@@ -62,12 +67,18 @@ OutputBlock::execute()
   std::cerr << "Inside the OutputBlock Object\n";
 #endif
 
-  Moose::Output & output = _parser_handle._problem->out();
+  // FIXME: uncomm
+  Executioner * exec = _parser_handle._executioner;
+  Moose::Problem & problem = exec->problem();
+  Moose::Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
+
+  //  Moose::Output & output = _parser_handle._problem->out();
   output.fileBase(getParamValue<std::string>("file_base"));
   if (getParamValue<bool>("exodus"))
-  	output.addExodus();
+    output.addExodus();
 
-  _parser_handle._executioner->outputInitial(getParamValue<bool>("output_initial"));
+//  _parser_handle._executioner->outputInitial(getParamValue<bool>("output_initial"));
+  exec->outputInitial(getParamValue<bool>("output_initial"));
 
 #if 0
   _moose_system._interval = getParamValue<int>("interval");

@@ -6,8 +6,6 @@ namespace Moose {
 ExplicitSystem::ExplicitSystem(SubProblem & problem, const std::string & name) :
   SystemTempl<TransientExplicitSystem>(problem, name)
 {
-//  _eq.parameters.set<ExplicitSystem>("_sys") = this;
-
 }
 
 } // namespace

@@ -5,11 +5,11 @@
 
 namespace Moose {
 
-class SubProblem;
+class Problem;
 
 class Outputter {
 public:
-  Outputter(SubProblem & problem);
+  Outputter(Problem & problem);
   virtual ~Outputter();
 
   /**
@@ -18,7 +18,7 @@ public:
   virtual void output(const std::string & file_base) = 0;
 
 protected:
-  SubProblem & _problem;
+  Problem & _problem;
 
   std::string _file_base;
 };

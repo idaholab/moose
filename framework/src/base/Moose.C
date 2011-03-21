@@ -5,6 +5,7 @@
 
 #include "Steady.h"
 #include "Transient.h"
+#include "LooseCoupling.h"
 
 #include "ParsedFunction.h"
 #include "PiecewiseLinear.h"
@@ -23,6 +24,7 @@ registerObjects()
 
   registerObject(Steady);
   registerObject(Transient);
+  registerObject(LooseCoupling);
 
   registerObject(ParsedFunction);
   registerObject(PiecewiseLinear);

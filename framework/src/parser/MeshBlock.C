@@ -2,7 +2,9 @@
 #include "MeshBlock.h"
 #include "Parser.h"
 #include "GenericVariableBlock.h"
+#include "GenericExecutionerBlock.h"
 #include "Init.h"
+#include "MProblem.h"
 
 // libMesh includes
 #include "mesh.h"
@@ -15,12 +17,14 @@
 #include "mesh_tools.h"
 
 
+const std::string no_file_supplied("(no file supplied)");
+
 template<>
 InputParameters validParams<MeshBlock>()
 {
   InputParameters params = validParams<ParserBlock>();
   params.addParam<int>("dim", "DEPRECATED - Mesh dim can be determined from the file read.");
-  params.addParam<std::string>("file", "(no file supplied)", "The name of the mesh file to read (required unless using dynamic generation)");
+  params.addParam<std::string>("file", no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
   params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation");
   params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
@@ -31,7 +35,7 @@ InputParameters validParams<MeshBlock>()
 
 
 MeshBlock::MeshBlock(const std::string & name, InputParameters params) :
-  ParserBlock(name, params)
+    ParserBlock(name, params)
 {
 }
 
@@ -52,7 +56,7 @@ MeshBlock::execute()
 
   if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
     gen_block->execute();
-  else
+  else if (getParamValue<std::string>("file") != no_file_supplied)
   {
     _parser_handle._mesh = new Moose::Mesh(mesh_dim);
     _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
@@ -60,6 +64,9 @@ MeshBlock::execute()
   }
   // get convenience pointer to mesh object
   Moose::Mesh *mesh = _parser_handle._mesh;
+
+  if (mesh != NULL)
+  {
 
   // FIXME: second order
 //  if (getParamValue<bool>("second_order"))
@@ -82,6 +89,7 @@ MeshBlock::execute()
   mesh->meshChanged();
 
 //  mesh->print_info();
+  }
 
 #if 0
 // uncomment when adding displaced mesh
@@ -104,7 +112,10 @@ MeshBlock::execute()
   }
 #endif
 
-  _parser_handle._problem = new Moose::MProblem(*mesh);
+  // There is no executioner block, create the MProblem class by ourselves
+  GenericExecutionerBlock * exec = dynamic_cast<GenericExecutionerBlock *>(locateBlock("Executioner"));
+  if (exec == NULL)
+    _parser_handle._problem = new Moose::MProblem(*mesh);
 
   visitChildren();
 }

@@ -2,6 +2,7 @@
 #include "Factory.h"
 #include "Moose.h"
 #include "Parser.h"
+#include "MProblem.h"
 
 template<>
 InputParameters validParams<GenericFunctionsBlock>()

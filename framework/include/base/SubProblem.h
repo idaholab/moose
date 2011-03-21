@@ -6,8 +6,8 @@
 #include "InitialCondition.h"
 #include "MaterialProperty.h"
 #include "Function.h"
-#include "Output.h"
 #include "ParallelUniqueId.h"
+#include "Problem.h"
 
 // libMesh include
 #include "equation_systems.h"
@@ -22,11 +22,14 @@ namespace Moose {
  * Generic class for solving nonlinear problems
  *
  */
-class SubProblem
+class SubProblem : public Problem
 {
 public:
-  SubProblem(Mesh &mesh);
+  SubProblem(Mesh &mesh, Problem * parent = NULL);
   virtual ~SubProblem();
+
+  virtual Problem * parent() { return _parent; }
+  virtual NonlinearImplicitSystem * nl() = 0;
 
   /**
    * Get reference to all-purpose parameters
@@ -39,11 +42,11 @@ public:
   virtual bool hasVariable(const std::string & var_name);
   virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
 
-  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid) = 0;
-  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
-  virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
-  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid) = 0;
+//  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid) = 0;
+//  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
+//  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
+//  virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
+//  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid) = 0;
 
   // Solve /////
   virtual void init();
@@ -62,19 +65,13 @@ public:
 
   virtual void copySolutionsBackwards();
 
-  Real & time() { return _time; }
-  int & timeStep() { return _t_step; }
-  Real & dt() { return _dt; }
-  Real & dtOld() { return _dt_old; }
+  virtual Real & time() { return _time; }
+  virtual int & timeStep() { return _t_step; }
+  virtual Real & dt() { return _dt; }
+  virtual Real & dtOld() { return _dt_old; }
 
   void transient(bool trans) { _transient = trans; }
   bool transient() { return _transient; }
-
-  // Output system /////
-
-  Output & out() { return _out; }
-
-  void output();
 
   // ICs /////
   void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name);
@@ -91,8 +88,8 @@ public:
   void initialCondition(EquationSystems & es, const std::string & system_name);
 
   ////
-  virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual) = 0;
-  virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian) = 0;
+//  virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual) = 0;
+//  virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian) = 0;
 
   // Materials /////
 
@@ -102,9 +99,13 @@ public:
 
   virtual void updateMaterials();
 
+  virtual void dump();
+
 protected:
+  Problem * _parent;
   Mesh & _mesh;
   EquationSystems _eq;
+
 
   bool _transient;
   Real & _time;
@@ -132,9 +133,6 @@ protected:
 
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
-
-  // Output system
-  Output _out;
 };
 
 

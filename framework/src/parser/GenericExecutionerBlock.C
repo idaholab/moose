@@ -5,6 +5,8 @@
 //#include "Conversion.h"
 #include "Moose.h"
 #include "Parser.h"
+#include "Executioner.h"
+#include "MProblem.h"
 
 template<>
 InputParameters validParams<GenericExecutionerBlock>()
@@ -40,19 +42,25 @@ GenericExecutionerBlock::GenericExecutionerBlock(const std::string & name, Input
   ParserBlock(name, params),
   _type(getType())
 {
+  addPrereq("Mesh");
+#if 0
   // Register execution prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
 //  addPrereq("AuxVariables");
-
+#endif
   setClassParams(Factory::instance()->getValidParams(_type));
 }
 
 void
 GenericExecutionerBlock::execute() 
 {
+#ifdef DEBUG
+  std::cerr << "Inside the GenericExecutionerBlock Object\n";
+#endif
+
   InputParameters class_params = getClassParams();
-  class_params.set<Moose::SubProblem *>("_subproblem") = _parser_handle._problem;
+//  class_params.set<Moose::SubProblem *>("_subproblem") = _parser_handle._problem;
 
 #if 0
   class_params.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'
@@ -126,7 +134,10 @@ GenericExecutionerBlock::execute()
     PetscOptionsSetValue(petsc_inames[i].c_str(), petsc_values[i].c_str());
 #endif //LIBMESH_HAVE_PETSC
 
+  class_params.set<Moose::Mesh *>("_mesh") = _parser_handle._mesh;
   _parser_handle._executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", class_params));
+//  if (dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem()) != NULL)
+//    _parser_handle._problem = dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem());
 
   visitChildren();
 }

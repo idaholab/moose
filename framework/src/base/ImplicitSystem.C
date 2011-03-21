@@ -1,5 +1,6 @@
 #include "ImplicitSystem.h"
 #include "AuxiliarySystem.h"
+#include "Problem.h"
 #include "SubProblem.h"
 #include "Variable.h"
 #include "PetscSupport.h"
@@ -17,13 +18,13 @@ namespace Moose {
 
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
   {
-    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
+    Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
     p->computeJacobian(sys, soln, jacobian);
   }
 
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
-    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
+    Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
     p->computeResidual(sys, soln, residual);
   }
 
@@ -56,11 +57,11 @@ namespace Moose {
       const unsigned int dim = _sys._mesh.dimension();
 
       QGauss qrule (dim, FIFTH);
-      _subproblem.attachQuadratureRule(&qrule, _tid);
-      _subproblem.reinitElem(elem, _tid);
+      _problem.attachQuadratureRule(&qrule, _tid);
+      _problem.reinitElem(elem, _tid);
 
       unsigned int subdomain = elem->subdomain_id();
-      _sys._kernels[_tid].updateActiveKernels(_subproblem.time(), _subproblem.dt(), subdomain);
+      _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
 
 
       KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
@@ -80,9 +81,9 @@ namespace Moose {
     {
       const unsigned int dim = _sys._mesh.dimension();
       QGauss qrule_face (dim-1, FIFTH);
-      _subproblem.attachQuadratureRule(&qrule_face, _tid);
+      _problem.attachQuadratureRule(&qrule_face, _tid);
 
-      _subproblem.reinitElemFace(elem, side, bnd_id, _tid);
+      _problem.reinitElemFace(elem, side, bnd_id, _tid);
       for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid][bnd_id].begin(); it != _sys._bcs[_tid][bnd_id].end(); ++it)
         (*it)->computeResidual();
 
@@ -105,7 +106,7 @@ namespace Moose {
   protected:
     SparseMatrix<Number> & _jacobian;
     ImplicitSystem & _sys;
-    SubProblem & _problem;
+    Problem & _problem;
 
   public:
     ComputeJacobianThread(SparseMatrix<Number> & jacobian, ImplicitSystem & sys) :
@@ -130,11 +131,11 @@ namespace Moose {
       const unsigned int dim = _sys._mesh.dimension();
 
       QGauss qrule (dim, FIFTH);
-      _subproblem.attachQuadratureRule(&qrule, _tid);
-      _subproblem.reinitElem(elem, _tid);
+      _problem.attachQuadratureRule(&qrule, _tid);
+      _problem.reinitElem(elem, _tid);
 
       unsigned int subdomain = elem->subdomain_id();
-      _sys._kernels[_tid].updateActiveKernels(_subproblem.time(), _subproblem.dt(), subdomain);
+      _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
 
 
       KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
@@ -154,9 +155,9 @@ namespace Moose {
     {
       const unsigned int dim = _sys._mesh.dimension();
       QGauss qrule_face (dim-1, FIFTH);
-      _subproblem.attachQuadratureRule(&qrule_face, _tid);
+      _problem.attachQuadratureRule(&qrule_face, _tid);
 
-      _subproblem.reinitElemFace(elem, side, bnd_id, _tid);
+      _problem.reinitElemFace(elem, side, bnd_id, _tid);
       for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid][bnd_id].begin(); it != _sys._bcs[_tid][bnd_id].end(); ++it)
         (*it)->computeJacobian(0, 0);
 
@@ -173,7 +174,7 @@ namespace Moose {
   };
 
 
-ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
+ImplicitSystem::ImplicitSystem(Problem & problem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(problem, name),
     _dt(problem.dt()),
     _dt_old(problem.dtOld()),

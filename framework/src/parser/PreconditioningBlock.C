@@ -26,9 +26,11 @@ InputParameters validParams<PreconditioningBlock>()
 PreconditioningBlock::PreconditioningBlock(const std::string & name, InputParameters params)
   :ParserBlock(name, params)
 {
+#if 0
   // Register the Preconditioning Prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
+#endif
 }
 
 void

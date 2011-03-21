@@ -28,8 +28,7 @@ InputParameters validParams<MeshGenerationBlock>()
 
 
 MeshGenerationBlock::MeshGenerationBlock(const std::string & name, InputParameters params) :
-  ParserBlock(name, params),
-  _executed(false)
+  ParserBlock(name, params)
 {
 }
 

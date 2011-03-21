@@ -6,7 +6,7 @@ namespace Moose {
 } // namespace
 
 FunctionInterface::FunctionInterface(InputParameters & params) :
-    _subproblem(*params.get<Moose::SubProblem *>("_subproblem")),
+    _problem(*params.get<Moose::SubProblem *>("_problem")),
     _tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
     _params(params)
 {
@@ -15,6 +15,6 @@ FunctionInterface::FunctionInterface(InputParameters & params) :
 Function &
 FunctionInterface::getFunction( const std::string & name )
 {
-  return _subproblem.getFunction(_params.get<std::string>(name), _tid);
+  return _problem.getFunction(_params.get<std::string>(name), _tid);
 }
 

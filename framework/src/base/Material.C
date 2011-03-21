@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "Problem.h"
 #include "SubProblem.h"
 
 // system includes
@@ -15,7 +16,7 @@ InputParameters validParams<Material>()
 
 Material::Material(const std::string & name, InputParameters parameters) :
   Object(name, parameters),
-  _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
+  _problem(*parameters.get<Moose::SubProblem *>("_problem")),
 //  _has_stateful_props(false),
   _block_id(parameters.get<unsigned int>("block_id")),
   _props(_problem.materialProps())

@@ -30,7 +30,7 @@ public:
   Function & getFunction(const std::string & name);
 
 private:
-  Moose::SubProblem & _subproblem;
+  Moose::SubProblem & _problem;
   THREAD_ID _tid;
   InputParameters _params;
 };

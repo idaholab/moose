@@ -1,6 +1,7 @@
 #include "GenericKernelBlock.h"
 #include "Factory.h"
 #include "Parser.h"
+#include "MProblem.h"
 
 template<>
 InputParameters validParams<GenericKernelBlock>()
@@ -13,8 +14,8 @@ InputParameters validParams<GenericKernelBlock>()
 
 
 GenericKernelBlock::GenericKernelBlock(const std::string & name, InputParameters params) :
-  ParserBlock(name, params),
-  _type(getType())
+    ParserBlock(name, params),
+    _type(getType())
 {
   setClassParams(Factory::instance()->getValidParams(_type));
 }

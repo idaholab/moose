@@ -1,5 +1,6 @@
 #include "Kernel.h"
 #include "Variable.h"
+#include "Problem.h"
 #include "SubProblem.h"
 #include "System.h"
 
@@ -20,7 +21,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     Moose::Coupleable(parameters),
     FunctionInterface(parameters),
     Moose::TransientInterface(parameters),
-    _subproblem(*parameters.get<Moose::SubProblem *>("_subproblem")),
+    _problem(*parameters.get<Moose::SubProblem *>("_problem")),
     _sys(*parameters.get<Moose::System *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),

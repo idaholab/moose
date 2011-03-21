@@ -7,7 +7,8 @@
 #include <string>
 
 namespace Moose {
-class SubProblem;
+class Mesh;
+class Problem;
 }
 
 /**
@@ -39,13 +40,12 @@ public:
    */
   virtual void execute() = 0;
 
+  virtual Moose::Problem & problem() = 0;
+
   void outputInitial(bool out_init) { _output_initial = out_init; }
 
 protected:
-  /**
-   * Reference to a problem being solved
-   */
-  Moose::SubProblem & _problem;
+  Moose::Mesh * _mesh;
 
   bool _output_initial;				/// output initial condition if true   
 

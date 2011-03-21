@@ -3,13 +3,24 @@
 
 namespace Moose {
 
-MProblem::MProblem(Mesh &mesh) :
-    SubProblem(mesh),
-    _nl(*this, "nl"),
-    _aux(*this, "aux")
+unsigned int MProblem::_n = 0;
+
+static
+std::string name(const std::string & name, unsigned int n)
+{
+  std::ostringstream os;
+  os << name << n;
+  return os.str();
+}
+
+MProblem::MProblem(Mesh &mesh, Problem * parent/* = NULL*/) :
+    SubProblem(mesh, parent),
+    _nl(*_parent, name("nl", _n)),
+    _aux(*_parent, name("aux", _n))
 {
   _sys.push_back(&_nl);
   _sys.push_back(&_aux);
+  _n++;
 }
 
 MProblem::~MProblem()
@@ -52,15 +63,6 @@ MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 }
 
 void
-MProblem::init()
-{
-  SubProblem::init();
-
-  _nl.init();
-  _aux.init();
-}
-
-void
 MProblem::addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
 {
   _nl.addVariable(var_name, type, active_subdomains);
@@ -69,14 +71,14 @@ MProblem::addVariable(const std::string & var_name, const FEType & type, const s
 void
 MProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SubProblem *>("_problem") = this;
   _nl.addKernel(kernel_name, name, parameters);
 }
 
 void
 MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SubProblem *>("_problem") = this;
   _nl.addBoundaryCondition(bc_name, name, parameters);
 }
 
@@ -89,14 +91,14 @@ MProblem::addAuxVariable(const std::string & var_name, const FEType & type, cons
 void
 MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SubProblem *>("_problem") = this;
   _aux.addKernel(kernel_name, name, parameters);
 }
 
 void
 MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SubProblem *>("_problem") = this;
   _aux.addBoundaryCondition(bc_name, name, parameters);
 }
 

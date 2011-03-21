@@ -1,18 +1,21 @@
 #ifndef PARSER_H_
 #define PARSER_H_
 
+#include <list>
+
 #include "ParserBlock.h"
 #include "GlobalParamsBlock.h"
 
-#include "Mesh.h"
-#include "MProblem.h"
-#include "System.h"
-#include "Executioner.h"
-
 // libMesh
 #include "getpot.h"
+#include "exodusII_io.h"
 
-#include <list>
+namespace Moose {
+  class Mesh;
+  class MProblem;
+}
+class Executioner;
+
 
 class Parser
 {
@@ -108,7 +111,7 @@ public:
   /**
    * Get the executioner
    */
-  Executioner & getExecutioner() { mooseAssert(_executioner != NULL, "Executioner is NULL!"); return *_executioner; }
+  Executioner * getExecutioner();
 
   /**
    * This function attempts to extract values from the input file based on the contents of
@@ -122,12 +125,15 @@ public:
    */
   void printUsage() const;
 
+  ParserBlock * root() { return _input_tree; }
+
 public:
   // data created while running execute()
   Moose::Mesh *_mesh;
-  Moose::MProblem *_problem;
+  Moose::MProblem * _problem;
   Executioner *_executioner;
-  ExodusII_IO *_exreader;
+
+  ExodusII_IO *_exreader;                               /// auxiliary object for restart
 
 private:
   /**

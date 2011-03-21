@@ -26,7 +26,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     Coupleable(parameters),
     FunctionInterface(parameters),
     Moose::TransientInterface(parameters),
-    _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
+    _problem(*parameters.get<Moose::SubProblem *>("_problem")),
     _aux_sys(*parameters.get<Moose::AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),

@@ -1,5 +1,4 @@
 #include "Steady.h"
-#include "SubProblem.h"
 
 #include "equation_systems.h"
 
@@ -13,7 +12,12 @@ InputParameters validParams<Steady>()
 
 Steady::Steady(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
+    _problem(*_mesh),
     _time(_problem.time())
+{
+}
+
+Steady::~Steady()
 {
 }
 

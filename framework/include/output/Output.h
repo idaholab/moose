@@ -6,12 +6,12 @@
 
 namespace Moose {
 
-class SubProblem;
+class Problem;
 class Outputter;
 
 class Output {
 public:
-  Output(SubProblem & problem);
+  Output(Problem & problem);
   virtual ~Output();
 
   void addExodus();
@@ -23,7 +23,7 @@ public:
 protected:
   std::string _file_base;
 
-  SubProblem & _problem;
+  Problem & _problem;
 
   std::vector<Outputter *> _outputters;
 };

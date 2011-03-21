@@ -15,16 +15,16 @@ namespace Moose {
 class MProblem : public SubProblem
 {
 public:
-  MProblem(Mesh &mesh);
+  MProblem(Mesh &mesh, Problem * parent = NULL);
   virtual ~MProblem();
+
+  virtual NonlinearImplicitSystem * nl() { return &_nl.sys(); }
 
   virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
-
-  virtual void init();
 
   virtual void update();
 
@@ -61,6 +61,9 @@ public:
 protected:
   ImplicitSystem _nl;
   AuxiliarySystem _aux;
+
+public:
+  static unsigned int _n;                               // number of instances of MProblem (to distinguish Systems when coupling problems together)
 };
 
 } // namespace

@@ -182,6 +182,11 @@ protected:
    * Variable which lets a block tell whether or not it is executing under deferred execution
    */
 
+  /**
+   * true if the block was already executed
+   */
+  bool _executed;
+
 };
 
 template<>

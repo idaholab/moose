@@ -12,6 +12,7 @@ InputParameters validParams<BCsBlock>()
 BCsBlock::BCsBlock(const std::string & name, InputParameters params) :
   ParserBlock(name, params)
 {
+#if 0
   // Register BCs/AuxBCs prereqs
   addPrereq("Mesh");
   addPrereq("Variables");
@@ -19,6 +20,7 @@ BCsBlock::BCsBlock(const std::string & name, InputParameters params) :
 //  addPrereq("AuxVariables");
   addPrereq("Kernels");
 //  addPrereq("AuxKernels");
+#endif
 }
 
 void
