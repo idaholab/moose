@@ -31,7 +31,9 @@ namespace Moose
 {
 
 class ImplicitSystem;
+class ActionWarehouse;
 
+extern ActionWarehouse action_warehouse;
 /**
  * Perflog to be used by applications.
  * If the application prints this in the end they will get performance info.
@@ -42,6 +44,8 @@ extern PerfLog perf_log;
  * Register objects that are in MOOSE 
  */
 void registerObjects();
+void addActionTypes();
+void registerActions();
 
 void setSolverDefaults(ImplicitSystem & system);
 

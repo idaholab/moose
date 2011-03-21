@@ -7,6 +7,11 @@
 #include "Init.h"
 #include "InputParameters.h"
 #include "ParserBlockFactory.h"
+
+#include "ActionFactory.h"
+#include "Action.h"
+#include "ActionWarehouse.h"
+
 #include "MProblem.h"
 #include "Mesh.h"
 #include "Executioner.h"
@@ -107,6 +112,56 @@ Parser::registerObjects()
   registerNamedParserBlock(DiracKernelsBlock, "DiracKernels");
   registerNamedParserBlock(GenericDiracKernelBlock, "DiracKernels/*");
 
+//   registerNamedAction(MeshBlock, "Mesh");
+//   registerNamedAction(MeshGenerationBlock, "Mesh/Generation");
+//   registerNamedAction(GenericMeshModifierBlock, "Mesh/*");
+//   registerNamedAction(FunctionsBlock, "Functions");
+//   registerNamedAction(GenericFunctionsBlock, "Functions/*");
+//   registerNamedAction(VariablesBlock, "Variables");
+//   registerNamedAction(GenericVariableBlock, "Variables/*");
+//   registerNamedAction(GenericICBlock, "Variables/*/InitialCondition");
+//   registerNamedAction(AuxVariablesBlock, "AuxVariables");
+//   registerNamedAction(GenericICBlock, "AuxVariables/*/InitialCondition");
+//   // Reuse the GenericVariableBlock for AuxVariables/*
+//   registerNamedAction(GenericVariableBlock, "AuxVariables/*");
+//   registerNamedAction(KernelsBlock, "Kernels");
+//   registerNamedAction(GenericKernelBlock, "Kernels/*");
+// //  registerNamedAction(DGKernelsBlock, "DGKernels");
+// //  registerNamedAction(GenericDGKernelBlock, "DGKernels/*");
+//   registerNamedAction(AuxKernelsBlock, "AuxKernels");
+//   registerNamedAction(GenericAuxKernelBlock, "AuxKernels/*");
+//   registerNamedAction(BCsBlock, "BCs");
+//   registerNamedAction(GenericBCBlock, "BCs/*");
+//   // Reuse the BCsBlock for AuxBCs
+//   registerNamedAction(BCsBlock, "AuxBCs");
+//   // Reuse the GenericBCBlock for AuxBCs/*
+//   registerNamedAction(GenericBCBlock, "AuxBCs/*");
+//   registerNamedAction(StabilizersBlock, "Stabilizers");
+//   registerNamedAction(GenericStabilizerBlock, "Stabilizers/*");
+//   registerNamedAction(MaterialsBlock, "Materials");
+//   registerNamedAction(GenericMaterialBlock, "Materials/*");
+//   registerNamedAction(OutputBlock, "Output");
+//   registerNamedAction(PreconditioningBlock, "Preconditioning");
+// //  registerNamedAction(PBPBlock, "Preconditioning/PBP");
+//   registerNamedAction(PeriodicBlock, "BCs/Periodic");
+//   registerNamedAction(GenericPeriodicBlock, "BCs/Periodic/*");
+//   registerNamedAction(GenericExecutionerBlock, "Executioner");
+//   registerNamedAction(AdaptivityBlock, "Executioner/Adaptivity");
+//   registerNamedAction(PostprocessorsBlock, "Postprocessors");
+//   registerNamedAction(GenericPostprocessorBlock, "Postprocessors/*");
+//   registerNamedAction(PostprocessorsBlock, "Postprocessors/Residual");
+//   registerNamedAction(GenericPostprocessorBlock, "Postprocessors/Residual/*");
+//   registerNamedAction(PostprocessorsBlock, "Postprocessors/Jacobian");
+//   registerNamedAction(GenericPostprocessorBlock, "Postprocessors/Jacobian/*");
+//   registerNamedAction(PostprocessorsBlock, "Postprocessors/NewtonIter");
+//   registerNamedAction(GenericPostprocessorBlock, "Postprocessors/NewtonIter/*");
+//   registerNamedAction(DampersBlock, "Dampers");
+//   registerNamedAction(GenericDamperBlock, "Dampers/*");
+//   registerNamedAction(GlobalParamsBlock, "GlobalParams");
+//   registerNamedAction(DiracKernelsBlock, "DiracKernels");
+//   registerNamedAction(GenericDiracKernelBlock, "DiracKernels/*");
+
+  
   registered = true;
 }
 
@@ -211,10 +266,13 @@ Parser::parse(const std::string &input_filename)
       if (last == curr_block->_children.rend() || (*last)->getID() != curr_identifier)
       {
         InputParameters params = ParserBlockFactory::instance()->getValidParams(curr_identifier);
+        InputParameters params2 = ActionFactory::instance()->getValidParams(curr_identifier);
         params.set<ParserBlock *>("parent") = curr_block;
         params.set<Parser *>("parser_handle") = this;
 
         curr_block->_children.push_back(ParserBlockFactory::instance()->add(curr_identifier, params));
+        Moose::action_warehouse.addActionBlock(ActionFactory::instance()->add(curr_identifier, params));
+        
       }
 
       curr_block = *(curr_block->_children.rbegin());
@@ -577,6 +635,16 @@ Parser::fixupOptionalBlocks()
 void
 Parser::execute()
 {
+  /// Iterate over the actions inside of the ActionWarehouse
+  /// TODO: Make this work instead of the parser block actions below
+/*  
+  for (ActionIterator a = Moose::action_warehouse.allActionsBegin();
+       a != Moose::action_warehouse.allActionsEnd();
+       ++a)
+    (*a)->act();
+*/
+  
+
   _executed_blocks.clear();
 //  _input_tree->execute();
 
@@ -589,6 +657,7 @@ Parser::execute()
       blk->execute();
   }
 
+  
 //  ParserBlock * meshb = _input_tree->locateBlock("Mesh");
 //  if (meshb)
 //    meshb->execute();

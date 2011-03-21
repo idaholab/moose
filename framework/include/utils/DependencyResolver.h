@@ -1,17 +1,3 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
-
 #ifndef DEPENDENCYRESOLVER_H
 #define DEPENDENCYRESOLVER_H
 
@@ -20,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 #include "Moose.h"
 
@@ -171,7 +158,15 @@ DependencyResolver<T>::getSortedValues()
      * a cyclic dependency somewhere in the map
      */
     if (difference.empty())
-      mooseError("Cyclic dependency detected in the Dependency Resolver");
+    {
+      std::ostringstream oss;
+      oss << "Cyclic dependency detected in the Dependency Resolver.  Remaining items are:\n";
+      for (typename std::multimap<T, T>::iterator j = depends.begin(); j != depends.end(); ++j)
+        oss << j->first << " -> " << j->second << "\n";
+      mooseError(oss.str());
+    }
+    
+    
 
     /* Now remove items from the temporary map that have been "resolved" */
     for (typename std::multimap<T, T>::iterator iter = depends.begin(); iter != depends.end();)

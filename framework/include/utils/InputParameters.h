@@ -148,6 +148,7 @@ public:
   friend InputParameters validParams<GlobalParamsBlock>();
   friend class ParserBlock;
   friend class Parser;
+  friend class Action;
 
 public:
   // Private constructor so that InputParameters can only be created in certain places.
