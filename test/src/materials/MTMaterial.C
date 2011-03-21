@@ -18,6 +18,5 @@ MTMaterial::MTMaterial(const std::string & name, InputParameters parameters) :
 void
 MTMaterial::computeQpProperties()
 {
-  std::cerr << "MT[" << _elem->id() << "]: qp = " << _qp << ", val = " << _q_point[_qp](0) + _value << std::endl;
   _mat_prop[_qp] = _q_point[_qp](0) + _value;              // x + value
 }

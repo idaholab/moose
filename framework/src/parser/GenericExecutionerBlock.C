@@ -173,6 +173,25 @@ GenericExecutionerBlock::execute()
 
     Moose::ImplicitSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParamValue<std::string>("scheme")));
+
+    ParserBlock * mats = locateBlock("Materials");
+    if (mats)
+      mats->execute();
+
+    ParserBlock * kernels = locateBlock("Kernels");
+    if (kernels)
+      kernels->execute();
+
+    ParserBlock * bcs = locateBlock("BCs");
+    if (bcs)
+      bcs->execute();
+
+    ParserBlock * auxkernels = locateBlock("AuxKernels");
+    if (auxkernels)
+      auxkernels->execute();
+    ParserBlock * auxbcs = locateBlock("AuxBCs");
+    if (auxbcs)
+      auxbcs->execute();
   }
 
   visitChildren();

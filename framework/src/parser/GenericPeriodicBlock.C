@@ -36,6 +36,9 @@ GenericPeriodicBlock::execute()
             << "\tname: " << getShortName() << "\n";
 #endif
   
+  if (_executed)
+    return;
+
   Moose::ImplicitSystem & nl = _parser_handle._problem->getNonlinearSystem();
 
   if (getParamValue<std::vector<Real> >("translation") != std::vector<Real>())
@@ -88,4 +91,6 @@ GenericPeriodicBlock::execute()
   }
   
   visitChildren();
+
+  _executed = true;
 }  

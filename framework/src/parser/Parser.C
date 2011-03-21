@@ -561,7 +561,20 @@ void
 Parser::execute()
 {
   _executed_blocks.clear();
-  _input_tree->execute();
+//  _input_tree->execute();
+
+  ParserBlock * meshb = _input_tree->locateBlock("Mesh");
+  if (meshb)
+    meshb->execute();
+
+  ParserBlock * exeb = _input_tree->locateBlock("Executioner");
+  if (exeb)
+    exeb->execute();
+
+  ParserBlock * outb = _input_tree->locateBlock("Output");
+  if (outb)
+    outb->execute();
+
 }
 
 void
