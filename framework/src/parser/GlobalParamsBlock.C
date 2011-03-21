@@ -12,19 +12,21 @@ InputParameters validParams<GlobalParamsBlock>()
   params.addPrivateParam<ParserBlock *>("parent");
   params.addPrivateParam<Parser *>("parser_handle");
   params.addPrivateParam<std::string>("type", "GlobalParams");
-
   return params;
 }
 
-
 GlobalParamsBlock::GlobalParamsBlock(const std::string & name, InputParameters params) :
-  ParserBlock(name, params)
-{
-}
+    ParserBlock(name, params)
+{}
 
 void
 GlobalParamsBlock::execute() 
 {
-  visitChildren();
-}
+#ifdef DEBUG
+  std::cerr << "Inside the GlobalParamsBlock Object\n";
+#endif
 
+  visitChildren();
+}  
+
+  

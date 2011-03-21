@@ -4,6 +4,7 @@
 // libMesh includes
 #include "print_trace.h"
 #include "libmesh_common.h"
+#include "perf_log.h"
 
 typedef Real                     PostprocessorValue;
 
@@ -29,6 +30,12 @@ namespace Moose
 {
 
 class ImplicitSystem;
+
+/**
+ * Perflog to be used by applications.
+ * If the application prints this in the end they will get performance info.
+ */
+extern PerfLog perf_log;
 
 /**
  * Register objects that are in MOOSE 

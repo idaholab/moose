@@ -174,27 +174,42 @@ GenericExecutionerBlock::execute()
     Moose::ImplicitSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParamValue<std::string>("scheme")));
 
-    ParserBlock * mats = locateBlock("Materials");
-    if (mats)
-      mats->execute();
+    ParserBlock * blk;
 
-    ParserBlock * kernels = locateBlock("Kernels");
-    if (kernels)
-      kernels->execute();
-    ParserBlock * bcs = locateBlock("BCs");
-    if (bcs)
-      bcs->execute();
+    blk= locateBlock("GlobalParams");
+    if (blk)
+      blk->execute();
 
-    ParserBlock * auxkernels = locateBlock("AuxKernels");
-    if (auxkernels)
-      auxkernels->execute();
-    ParserBlock * auxbcs = locateBlock("AuxBCs");
-    if (auxbcs)
-      auxbcs->execute();
+    blk = locateBlock("Materials");
+    if (blk)
+      blk->execute();
 
-    ParserBlock * pps = locateBlock("Postprocessors");
-    if (pps)
-      pps->execute();
+    blk = locateBlock("Kernels");
+    if (blk)
+      blk->execute();
+    blk = locateBlock("BCs");
+    if (blk)
+      blk->execute();
+    blk= locateBlock("DiracKernels");
+    if (blk)
+      blk->execute();
+    blk= locateBlock("Dampers");
+    if (blk)
+      blk->execute();
+    blk= locateBlock("Stabilizers");
+    if (blk)
+      blk->execute();
+
+    blk= locateBlock("AuxKernels");
+    if (blk)
+      blk->execute();
+    blk = locateBlock("AuxBCs");
+    if (blk)
+      blk->execute();
+
+    blk = locateBlock("Postprocessors");
+    if (blk)
+      blk->execute();
   }
 
   visitChildren();

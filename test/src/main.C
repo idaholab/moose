@@ -3,6 +3,12 @@
 #include "Executioner.h"
 #include "MooseTest.h"
 
+// libMesh includes
+#include "perf_log.h"
+
+// Create a performance log
+PerfLog Moose::perf_log("Moose Test");
+
 int
 main(int argc, char *argv[])
 {

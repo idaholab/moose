@@ -160,6 +160,7 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
     _t_step(_parent != this ? _parent->timeStep() : _eq.parameters.set<int>("t_step")),
     _dt(_parent != this ? _parent->dt() : _eq.parameters.set<Real>("dt")),
     _out(*this),
+    _geometric_search_data(*this, _mesh),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
     _postprocessor_ensight_output(false),
@@ -192,7 +193,6 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
   _pps_residual.resize(n_threads);
   _pps_jacobian.resize(n_threads);
   _pps_newtonit.resize(n_threads);
-
 }
 
 SubProblem::~SubProblem()
@@ -578,6 +578,21 @@ SubProblem::outputPostprocessors()
   if (_postprocessor_gnuplot_output)
     _pps_output_table.makeGnuplot(_out.fileBase(), _gnuplot_format);
 }
+
+void
+SubProblem::addDiracKernel(std::string dirac_kernel_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<SubProblem *>("_problem") = this;
+
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    DiracKernel * dk = static_cast<DiracKernel *>(Factory::instance()->create(dirac_kernel_name, name, parameters));
+    _dirac_kernels[tid].addDiracKernel(dk);
+  }
+}
+
 
 void
 SubProblem::dump()

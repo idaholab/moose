@@ -6,6 +6,12 @@
 // objects that can be created by MOOSE
 #include "TimeDerivative.h"
 
+// auxkernels
+#include "NearestNodeDistanceAux.h"
+#include "NearestNodeValueAux.h"
+#include "PenetrationAux.h"
+#include "ProcessorIDAux.h"
+
 #include "Steady.h"
 #include "Transient.h"
 #include "LooseCoupling.h"
@@ -44,6 +50,12 @@ registerObjects()
     return;
 
   registerObject(TimeDerivative);
+
+  // aux kernels
+  registerObject(NearestNodeDistanceAux);
+  registerObject(NearestNodeValueAux);
+  registerObject(PenetrationAux);
+  registerObject(ProcessorIDAux);
 
   registerObject(Steady);
   registerObject(Transient);

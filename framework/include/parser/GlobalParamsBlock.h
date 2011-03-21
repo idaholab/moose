@@ -1,9 +1,15 @@
-#ifndef GLOBALPARAMSBLOCK_H
-#define GLOBALPARAMSBLOCK_H
+#ifndef GLOBALPARAMSBLOCK_H_
+#define GLOBALPARAMSBLOCK_H_
 
 #include "ParserBlock.h"
+#include "Moose.h"
 
-class GlobalParamsBlock : public ParserBlock
+class GlobalParamsBlock;
+
+template<>
+InputParameters validParams<GlobalParamsBlock>();
+
+class GlobalParamsBlock: public ParserBlock
 {
 public:
   GlobalParamsBlock(const std::string & name, InputParameters params);
@@ -31,8 +37,5 @@ public:
     return getBlockParams().set<std::vector<std::vector<T> > >(name);
   }
 };
-
-template<>
-InputParameters validParams<GlobalParamsBlock>();
 
 #endif //GLOBALPARAMSBLOCK_H

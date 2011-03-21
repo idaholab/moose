@@ -35,6 +35,13 @@
 #include "GenericPostprocessorBlock.h"
 #include "PeriodicBlock.h"
 #include "GenericPeriodicBlock.h"
+#include "DampersBlock.h"
+#include "GenericDamperBlock.h"
+#include "DiracKernelsBlock.h"
+#include "GenericDiracKernelBlock.h"
+#include "StabilizersBlock.h"
+#include "GenericStabilizerBlock.h"
+#include "GlobalParamsBlock.h"
 
 // libMesh
 #include "getpot.h"
@@ -71,8 +78,8 @@ Parser::registerObjects()
   registerNamedParserBlock(BCsBlock, "AuxBCs");
   // Reuse the GenericBCBlock for AuxBCs/*
   registerNamedParserBlock(GenericBCBlock, "AuxBCs/*");
-//  registerNamedParserBlock(StabilizersBlock, "Stabilizers");
-//  registerNamedParserBlock(GenericStabilizerBlock, "Stabilizers/*");
+  registerNamedParserBlock(StabilizersBlock, "Stabilizers");
+  registerNamedParserBlock(GenericStabilizerBlock, "Stabilizers/*");
   registerNamedParserBlock(MaterialsBlock, "Materials");
   registerNamedParserBlock(GenericMaterialBlock, "Materials/*");
   registerNamedParserBlock(OutputBlock, "Output");
@@ -90,11 +97,11 @@ Parser::registerObjects()
   registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/Jacobian/*");
   registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/NewtonIter");
   registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/NewtonIter/*");
-//  registerNamedParserBlock(DampersBlock, "Dampers");
-//  registerNamedParserBlock(GenericDamperBlock, "Dampers/*");
-//  registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");
-//  registerNamedParserBlock(DiracKernelsBlock, "DiracKernels");
-//  registerNamedParserBlock(GenericDiracKernelBlock, "DiracKernels/*");
+  registerNamedParserBlock(DampersBlock, "Dampers");
+  registerNamedParserBlock(GenericDamperBlock, "Dampers/*");
+  registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");
+  registerNamedParserBlock(DiracKernelsBlock, "DiracKernels");
+  registerNamedParserBlock(GenericDiracKernelBlock, "DiracKernels/*");
 
   registered = true;
 }

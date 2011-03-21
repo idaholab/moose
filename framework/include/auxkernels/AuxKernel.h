@@ -6,6 +6,7 @@
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
+#include "GeometricSearchInterface.h"
 
 //forward declarations
 class AuxKernel;
@@ -25,7 +26,8 @@ class AuxKernel :
   public Object,
   public Moose::Coupleable,
   public FunctionInterface,
-  public Moose::TransientInterface
+  public Moose::TransientInterface,
+  protected Moose::GeometricSearchInterface
 {
 public:
   /**

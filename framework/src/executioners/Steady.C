@@ -24,6 +24,10 @@ Steady::~Steady()
 void
 Steady::execute()
 {
+  // FIXME: move in SubProblem
+  //Update the geometric searches (has to be called after the problem is all set up)
+  _problem._geometric_search_data.update();
+
   preExecute();
   _problem.update();
 

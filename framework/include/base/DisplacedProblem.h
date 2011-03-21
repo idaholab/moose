@@ -47,6 +47,12 @@ protected:
   NumericVector<Number> * _nl_solution;
   NumericVector<Number> * _aux_solution;
 
+//  std::vector<ElementData *> _element_data_displaced;
+//  std::vector<FaceData *> _face_data_displaced;
+//  std::vector<DiracKernelData *> _dirac_kernel_data;
+//  DiracKernelInfo _dirac_kernel_info_displaced;
+//  GeometricSearchData _geometric_search_data_displaced;
+
   ExodusOutput _ex;
 
   friend class UpdateDisplacedMeshThread;

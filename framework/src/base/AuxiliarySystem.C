@@ -4,6 +4,7 @@
 #include "Factory.h"
 #include "AuxKernel.h"
 #include "MaterialData.h"
+#include "GeometricSearchData.h"
 
 #include "quadrature_gauss.h"
 
@@ -180,6 +181,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
   {
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _problem._material_data[tid];
+    parameters.set<GeometricSearchData *>("_geometric_search_data") = &_problem._geometric_search_data;
 
     AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
@@ -221,6 +223,7 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
 //      parameters.set<THREAD_ID>("_tid") = tid;
       parameters.set<THREAD_ID>("_tid") = 0;
       parameters.set<MaterialData *>("_material_data") = _problem._bnd_material_data[0];
+      parameters.set<GeometricSearchData *>("_geometric_search_data") = &_problem._geometric_search_data;
 
       AuxKernel * bc = static_cast<AuxKernel *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");

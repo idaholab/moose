@@ -11,7 +11,11 @@
 #include "MaterialWarehouse.h"
 #include "PostprocessorData.h"
 #include "PostprocessorWarehouse.h"
+#include "DiracKernelWarehouse.h"
+#include "DiracKernelInfo.h"
+#include "DiracKernelData.h"
 #include "FormattedTable.h"
+#include "GeometricSearchData.h"
 
 // libMesh include
 #include "equation_systems.h"
@@ -76,6 +80,7 @@ public:
   bool transient() { return _transient; }
 
   //
+  virtual Order getQuadratureOrder() = 0;
   virtual QBase * & qRule(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & points(THREAD_ID tid) = 0;
   virtual const std::vector<Real> & JxW(THREAD_ID tid) = 0;
@@ -119,6 +124,9 @@ public:
   virtual void computePostprocessors(int pps_type = Moose::PPS_TIMESTEP);
   virtual void outputPostprocessors();
 
+  // Dirac Kernels /////
+  void addDiracKernel(std::string dirac_kernel_name, const std::string & name, InputParameters parameters);
+
   virtual void dump();
 
   // Output /////
@@ -156,6 +164,7 @@ public:
   // material properties
   std::vector<MaterialData *> _material_data;
   std::vector<MaterialData *> _bnd_material_data;
+  GeometricSearchData _geometric_search_data;
 
 protected:
   // materials
@@ -184,6 +193,10 @@ public:
   bool _postprocessor_gnuplot_output;
   std::string _gnuplot_format;
 
+protected:
+  std::vector<DiracKernelWarehouse> _dirac_kernels;
+  DiracKernelInfo _dirac_kernel_info;
+  std::vector<DiracKernelData *> _dirac_kernel_data;
 
 };
 
