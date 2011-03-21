@@ -8,6 +8,7 @@
 
 #include "SubProblem.h"
 #include "Mesh.h"
+#include "VariableWarehouse.h"
 
 // libMesh
 #include "equation_systems.h"
@@ -58,10 +59,8 @@ protected:
   Mesh & _mesh;
   std::string _name;
 
-  std::vector<std::map<std::string, Variable *> > _vars;                /// list of all variables
-  std::map<Variable *, std::set<unsigned int> > _var_map;             /// The list of blocks for a given variable number
-
-  std::vector<std::map<unsigned int, std::set<Variable *> > > _boundary_vars;         /// Map to variables that need to be evaluated on a boundary
+  std::vector<VariableWarehouse> _vars;
+  std::map<Variable *, std::set<unsigned int> > _var_map;             /// The list of blocks for a given variable
 };
 
 
@@ -92,7 +91,7 @@ public:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       Moose::Variable * var = new Moose::Variable(var_num, _mesh.dimension(), type, *this);
-      _vars[tid][var_name] = var;
+      _vars[tid].add(var_name, var);
 
       if (active_subdomains == NULL)
         _var_map[var].insert(Moose::ANY_BLOCK_ID);

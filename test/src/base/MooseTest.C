@@ -12,6 +12,7 @@
 
 #include "CoupledAux.h"
 #include "ConstantAux.h"
+#include "FunctionAux.h"
 
 #include "DirichletBC.h"
 #include "NeumannBC.h"
@@ -39,6 +40,7 @@ void registerObjects()
   // Aux kernels
   registerObject(CoupledAux);
   registerObject(ConstantAux);
+  registerObject(FunctionAux);
 
   // Boundary Conditions
   registerObject(DirichletBC);

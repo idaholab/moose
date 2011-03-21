@@ -4,6 +4,7 @@
 #include "Object.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
+#include "FunctionInterface.h"
 
 //forward declarations
 class AuxKernel;
@@ -21,7 +22,8 @@ class AuxiliarySystem;
  */
 class AuxKernel :
   public Object,
-  public Moose::Coupleable
+  public Moose::Coupleable,
+  public FunctionInterface
 {
 public:
   /**
@@ -54,9 +56,11 @@ protected:
   const std::vector<Real> & _JxW;
 
   const Elem * & _current_elem;
+  const Node * & _current_node;
 
   Real & _current_volume;
 
+  Real & _t;
 
   /**
    * true if the kernel nodal, false if it is elemental

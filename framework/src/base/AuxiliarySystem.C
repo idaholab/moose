@@ -80,7 +80,7 @@ namespace Moose {
           //Compute the area of the element
           _sys._data[tid]._current_volume = 0;
           //Just use any old JxW... they are all actually the same
-          Variable * var = _sys._vars[tid].begin()->second;
+          Variable * var = *(_sys._vars[tid].all().begin());
           const std::vector<Real> & jxw = var->JxW();
 
 //        if (_problem.geomType() == Moose::XYZ)
@@ -166,7 +166,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     Variable * var = new Variable(var_num, _mesh.dimension(), type, *this);
-    _vars[tid][var_name] = var;
+    _vars[tid].add(var_name, var);
     if (var->feType().family == LAGRANGE)
       _nodal_vars[tid][var_name] = var;
     else
@@ -225,7 +225,8 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 
       _nodal_bcs[boundaries[i]].push_back(bc);
-      _boundary_vars[0][boundaries[i]].insert(&bc->variable());
+//      _boundary_vars[0][boundaries[i]].insert(&bc->variable());
+      _vars[0].addBoundaryVar(boundaries[i], &bc->variable());
     }
   }
 }

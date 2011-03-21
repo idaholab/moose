@@ -15,21 +15,20 @@ System::System(SubProblem & problem, const std::string & name) :
     _name(name)
 {
   _vars.resize(libMesh::n_threads());
-  _boundary_vars.resize(libMesh::n_threads());
 }
 
 Variable &
 System::getVariable(THREAD_ID tid, const std::string & var_name)
 {
-  return *_vars[tid][var_name];
+  return *_vars[tid].getVariable(var_name);
 }
 
 void
 System::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
 {
-  for (std::map<std::string, Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
+  for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
-    Variable *var = it->second;
+    Variable *var = *it;
     var->attachQuadratureRule (qrule);
   }
 }
@@ -37,9 +36,9 @@ System::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
 void
 System::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  for (std::map<std::string, Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
+  for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
-    Variable *var = it->second;
+    Variable *var = *it;
     var->reinit(elem);
     var->sizeResidual();
     var->sizeJacobianBlock();
@@ -50,8 +49,8 @@ System::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 System::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  for (std::set<Variable *>::iterator it = _boundary_vars[tid][bnd_id].begin();
-       it != _boundary_vars[tid][bnd_id].end();
+  for (std::set<Variable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
+       it != _vars[tid].boundaryVars(bnd_id).end();
        ++it)
   {
     Variable *var = *it;
@@ -64,9 +63,9 @@ System::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id
 void
 System::reinitNode(const Node * node, THREAD_ID tid)
 {
-  for (std::map<std::string, Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
+  for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
-    Variable *var = it->second;
+    Variable *var = *it;
     if (var->feType().family == LAGRANGE)
     {
       var->reinit (node);
@@ -78,8 +77,8 @@ System::reinitNode(const Node * node, THREAD_ID tid)
 void
 System::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
-  for (std::set<Variable *>::iterator it = _boundary_vars[tid][bnd_id].begin();
-       it != _boundary_vars[tid][bnd_id].end();
+  for (std::set<Variable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
+       it != _vars[tid].boundaryVars(bnd_id).end();
        ++it)
   {
     Variable *var = *it;

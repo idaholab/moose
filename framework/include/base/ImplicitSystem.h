@@ -26,9 +26,6 @@ public:
   void computeResidual(NumericVector<Number> & residual);
   void computeJacobian(SparseMatrix<Number> &  jacobian);
 
-  std::map<std::string, Variable *>::iterator varsBegin(THREAD_ID tid = 0) { return _vars[tid].begin(); }
-  std::map<std::string, Variable *>::iterator varsEnd(THREAD_ID tid = 0) { return _vars[tid].end(); }
-
   void printVarNorms();
 
   void timeSteppingScheme(TimeSteppingScheme scheme);

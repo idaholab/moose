@@ -34,9 +34,6 @@ public:
 
   virtual void compute();
 
-  std::map<std::string, Variable *>::iterator varsBegin(THREAD_ID tid = 0) { return _vars[tid].begin(); }
-  std::map<std::string, Variable *>::iterator varsEnd(THREAD_ID tid = 0) { return _vars[tid].end(); }
-
 protected:
   // Variables
   std::vector<std::map<std::string, Variable *> > _nodal_vars;

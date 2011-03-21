@@ -5,6 +5,7 @@
 #include "PetscSupport.h"
 #include "Factory.h"
 #include "ParallelUniqueId.h"
+#include "ThreadedElementLoop.h"
 
 #include "nonlinear_solver.h"
 #include "quadrature_gauss.h"
@@ -28,86 +29,67 @@ namespace Moose {
 
   // threads ////////////////////////////
 
-  class ComputeResidualThread
+  class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
   {
   protected:
     NumericVector<Number> & _residual;
     ImplicitSystem & _sys;
-    SubProblem & _problem;
 
   public:
     ComputeResidualThread(NumericVector<Number> & residual, ImplicitSystem & sys) :
+      ThreadedElementLoop<ConstElemRange>(sys),
       _residual(residual),
-      _sys(sys),
-      _problem(sys.problem())
+      _sys(sys)
     {
     }
 
     // Splitting Constructor
-    ComputeResidualThread(ComputeResidualThread & x, Threads::split) :
+    ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
+      ThreadedElementLoop<ConstElemRange>(x, split),
       _residual(x._residual),
-      _sys(x._sys),
-      _problem(x._problem)
+      _sys(x._sys)
     {
     }
 
-    void operator() (const ConstElemRange & range)
+    virtual void onElement(const Elem *elem)
     {
-      ParallelUniqueId puid;
-      THREAD_ID tid = puid.id;
-
       const unsigned int dim = _sys._mesh.dimension();
 
-      for (ConstElemRange::const_iterator el = range.begin() ; el != range.end(); ++el)
+      QGauss qrule (dim, FIFTH);
+      _subproblem.attachQuadratureRule(&qrule, _tid);
+      _subproblem.reinitElem(elem, _tid);
+
+      unsigned int subdomain = elem->subdomain_id();
+      _sys._kernels[_tid].updateActiveKernels(_subproblem.time(), _subproblem.dt(), subdomain);
+
+
+      KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
+      KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
+      KernelIterator kernel_it = kernel_begin;
+      for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
+        (*kernel_it)->computeResidual();
+
+      for (std::vector<Variable *>::iterator it = _sys._vars[_tid].all().begin(); it != _sys._vars[_tid].all().end(); ++it)
       {
-        const Elem* elem = *el;
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        (*it)->add(_residual);
+      }
+    }
 
-        unsigned int subdomain = elem->subdomain_id();
+    virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
+    {
+      const unsigned int dim = _sys._mesh.dimension();
+      QGauss qrule_face (dim-1, FIFTH);
+      _subproblem.attachQuadratureRule(&qrule_face, _tid);
 
-        QGauss qrule (dim, FIFTH);
-        _problem.attachQuadratureRule(&qrule, tid);
-        _problem.reinitElem(elem, tid);
+      _subproblem.reinitElemFace(elem, side, bnd_id, _tid);
+      for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid][bnd_id].begin(); it != _sys._bcs[_tid][bnd_id].end(); ++it)
+        (*it)->computeResidual();
 
-        _sys._kernels[tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
-
-        KernelIterator kernel_begin = _sys._kernels[tid].activeKernelsBegin();
-        KernelIterator kernel_end = _sys._kernels[tid].activeKernelsEnd();
-        KernelIterator kernel_it = kernel_begin;
-        for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
-          (*kernel_it)->computeResidual();
-
-        for (std::map<std::string, Variable *>::iterator it = _sys._vars[tid].begin(); it != _sys._vars[tid].end(); ++it)
-        {
-          Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          it->second->add(_residual);
-        }
-
-        // BCs
-        QGauss qrule_face (dim-1, FIFTH);
-        _problem.attachQuadratureRule(&qrule_face, tid);
-
-        for (unsigned int side=0; side<elem->n_sides(); side++)
-        {
-          std::vector<short int> boundary_ids = _sys._mesh.boundary_ids (elem, side);
-
-          if (boundary_ids.size() > 0)
-          {
-            for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-            {
-              short int bnd_id = *it;
-
-              _problem.reinitElemFace(elem, side, bnd_id, tid);
-              for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[tid][bnd_id].begin(); it != _sys._bcs[tid][bnd_id].end(); ++it)
-                (*it)->computeResidual();
-
-              for (std::set<Variable *>::iterator it = _sys._boundary_vars[tid][bnd_id].begin(); it != _sys._boundary_vars[tid][bnd_id].end(); ++it)
-              {
-                Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-                (*it)->add(_residual);
-              }
-            }
-          }
-        }
+      for (std::set<Variable *>::iterator it = _sys._vars[_tid].boundaryVars(bnd_id).begin(); it != _sys._vars[_tid].boundaryVars(bnd_id).end(); ++it)
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        (*it)->add(_residual);
       }
     }
 
@@ -116,50 +98,9 @@ namespace Moose {
     }
   };
 
-  class ComputeBndResidualThread
-  {
-  protected:
-    NumericVector<Number> & _residual;
-    ImplicitSystem & _sys;
-
-  public:
-    ComputeBndResidualThread(NumericVector<Number> & residual, ImplicitSystem & sys) :
-      _residual(residual),
-      _sys(sys)
-    {
-    }
-
-    // Splitting Constructor
-    ComputeBndResidualThread(ComputeBndResidualThread & x, Threads::split) :
-      _residual(x._residual),
-      _sys(x._sys)
-    {
-    }
-
-    void operator() (const ConstNodeRange & range)
-    {
-      ParallelUniqueId puid;
-      THREAD_ID tid = puid.id;
-
-      for (ConstNodeRange::const_iterator node_it = range.begin() ; node_it != range.end(); ++node_it)
-      {
-        const Node * node = *node_it;
-
-        {
-          Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          std::cerr << "[" << tid << "] doing " << node->id() << std::endl;
-        }
-      }
-    }
-
-    void join(const ComputeBndResidualThread & /*y*/)
-    {
-    }
-  };
-
   // Jacobian ////////
 
-  class ComputeJacobianThread
+  class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
   {
   protected:
     SparseMatrix<Number> & _jacobian;
@@ -168,6 +109,7 @@ namespace Moose {
 
   public:
     ComputeJacobianThread(SparseMatrix<Number> & jacobian, ImplicitSystem & sys) :
+      ThreadedElementLoop<ConstElemRange>(sys),
       _jacobian(jacobian),
       _sys(sys),
       _problem(sys.problem())
@@ -175,67 +117,53 @@ namespace Moose {
     }
 
     // Splitting Constructor
-    ComputeJacobianThread(ComputeJacobianThread & x, Threads::split) :
+    ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split) :
+      ThreadedElementLoop<ConstElemRange>(x, split),
       _jacobian(x._jacobian),
       _sys(x._sys),
       _problem(x._problem)
     {
     }
 
-    void operator() (const ConstElemRange & range)
+    virtual void onElement(const Elem *elem)
     {
-      ParallelUniqueId puid;
-      THREAD_ID tid = puid.id;
-
       const unsigned int dim = _sys._mesh.dimension();
 
-      for (ConstElemRange::const_iterator el = range.begin() ; el != range.end(); ++el)
+      QGauss qrule (dim, FIFTH);
+      _subproblem.attachQuadratureRule(&qrule, _tid);
+      _subproblem.reinitElem(elem, _tid);
+
+      unsigned int subdomain = elem->subdomain_id();
+      _sys._kernels[_tid].updateActiveKernels(_subproblem.time(), _subproblem.dt(), subdomain);
+
+
+      KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
+      KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
+      KernelIterator kernel_it = kernel_begin;
+      for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
+        (*kernel_it)->computeJacobian(0, 0);
+
+      for (std::vector<Variable *>::iterator it = _sys._vars[_tid].all().begin(); it != _sys._vars[_tid].all().end(); ++it)
       {
-        const Elem* elem = *el;
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        (*it)->add(_jacobian);
+      }
+    }
 
-        unsigned int subdomain = elem->subdomain_id();
+    virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
+    {
+      const unsigned int dim = _sys._mesh.dimension();
+      QGauss qrule_face (dim-1, FIFTH);
+      _subproblem.attachQuadratureRule(&qrule_face, _tid);
 
-        QGauss qrule (dim, FIFTH);
-        _problem.attachQuadratureRule(&qrule, tid);
-        _problem.reinitElem(elem, tid);
+      _subproblem.reinitElemFace(elem, side, bnd_id, _tid);
+      for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid][bnd_id].begin(); it != _sys._bcs[_tid][bnd_id].end(); ++it)
+        (*it)->computeJacobian(0, 0);
 
-        _sys._kernels[tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
-
-        KernelIterator kernel_begin = _sys._kernels[tid].activeKernelsBegin();
-        KernelIterator kernel_end = _sys._kernels[tid].activeKernelsEnd();
-        KernelIterator kernel_it = kernel_begin;
-        for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
-          (*kernel_it)->computeJacobian(0, 0);
-
-        for (std::map<std::string, Variable *>::iterator it = _sys._vars[tid].begin(); it != _sys._vars[tid].end(); ++it)
-        {
-          Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          it->second->add(_jacobian);
-        }
-
-        QGauss qrule_face (dim-1, FIFTH);
-        _problem.attachQuadratureRule(&qrule_face, tid);
-
-        // BCs
-        for (unsigned int side=0; side<elem->n_sides(); side++)
-        {
-          std::vector<short int> boundary_ids = _sys._mesh.boundary_ids (elem, side);
-
-          for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-          {
-            short int bnd_id = *it;
-
-            _problem.reinitElemFace(elem, side, bnd_id, tid);
-            for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[tid][bnd_id].begin(); it != _sys._bcs[tid][bnd_id].end(); ++it)
-              (*it)->computeJacobian(0, 0);
-
-            for (std::set<Variable *>::iterator it = _sys._boundary_vars[tid][bnd_id].begin(); it != _sys._boundary_vars[tid][bnd_id].end(); ++it)
-            {
-              Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-              (*it)->add(_jacobian);
-            }
-          }
-        }
+      for (std::set<Variable *>::iterator it = _sys._vars[_tid].boundaryVars(bnd_id).begin(); it != _sys._vars[_tid].boundaryVars(bnd_id).end(); ++it)
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        (*it)->add(_jacobian);
       }
     }
 
@@ -324,7 +252,8 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
         _bcs[tid][boundaries[i]].push_back(dynamic_cast<IntegratedBC *>(bc));
       else
         mooseError("Unknown type of BoudaryCondition object");
-      _boundary_vars[tid][boundaries[i]].insert(&bc->variable());
+//      _boundary_vars[tid][boundaries[i]].insert(&bc->variable());
+      _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
     }
   }
 }
@@ -535,9 +464,9 @@ ImplicitSystem::printVarNorms()
   TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);
 
   std::cout << "Norm of each nonlinear variable:" << std::endl;
-  for (std::map<std::string, Variable *>::iterator it = varsBegin(); it != varsEnd(); ++it)
+  for (std::vector<Variable *>::iterator it = _vars[0].all().begin(); it != _vars[0].all().end(); ++it)
   {
-    Variable *var = it->second;
+    Variable *var = *it;
     unsigned int var_num = var->number();
     std::cout << s.variable_name(var_num) << ": "
               << s.calculate_norm(*s.rhs,var_num,DISCRETE_L2) << std::endl;
