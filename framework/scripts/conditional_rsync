@@ -1,0 +1,11 @@
+#!/bin/bash
+# This script wraps rsync and ensures it only executes on helios
+# This is useful for generating documentation and rsyncing it on only one server
+
+if [ "`hostname -s`" == "helios" ]
+then
+  rsync $*
+  echo "Ran rsync on helios"
+else
+  echo "Did NOT run rsync because hostname is not helios"
+fi
