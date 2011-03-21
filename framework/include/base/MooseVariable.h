@@ -113,6 +113,9 @@ public:
   std::vector<std::vector<RealTensor> > & secondTestFace() { return _second_test_face; }
   const std::vector<Point> & normals() { return _normals; }
 
+  // damping
+  VariableValue & increment() { return _increment; }
+
   VariableValue & sln() { return _u; }
   VariableValue & slnOld() { return _u_old; }
   VariableValue & slnOlder() { return _u_older; }
@@ -136,6 +139,8 @@ public:
   void computeElemValuesFace();
 
   void computeNodalValues();
+
+  void computeDamping(const NumericVector<Number> & increment_vec);
 
   void sizeResidual();
   void sizeJacobianBlock();
@@ -213,6 +218,9 @@ protected:
   VariableValue _nodal_u;
   VariableValue _nodal_u_old;
   VariableValue _nodal_u_older;
+
+  // damping
+  VariableValue _increment;
 
   /**
    * Residual for this variable

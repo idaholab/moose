@@ -3,6 +3,7 @@
 #ifdef LIBMESH_HAVE_PETSC
 
 #include "Moose.h"
+#include "MProblem.h"
 #include "NonlinearSystem.h"
 
 //libMesh Includes
@@ -155,6 +156,37 @@ namespace Moose
     }
 
 
+    PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * /*changed_w*/)
+    {
+      //w = updated solution = x+ scaling*y
+      //x = current solution
+      //y = updates.
+
+      int ierr = 0;
+      Real damping = 1.0;
+
+      MProblem & problem = *static_cast<MProblem *>(lsctx);
+      TransientNonlinearImplicitSystem & system = problem.getNonlinearSystem().sys();
+
+      // The whole deal here is that we need ghosted versions of these vectors.
+      // So to do that I'm going to duplicate current_local_solution (which has the ghosting we want).
+      // Then stuff values into the duplicates
+      // Then "close()" the vectors which updates their ghosted vaulues.
+
+      PetscVector<Number>  ghosted_y(y);
+      PetscVector<Number>  ghosted_w(w);
+
+      damping = problem.computeDamping(ghosted_w, ghosted_y);
+
+      if(damping < 1.0)
+      {
+        VecScale(y, damping);
+        *changed_y = PETSC_TRUE;
+      }
+
+      return(ierr);
+    }
+
 #if 0
   /**
      * Called at the beginning of every nonlinear step (before Jacobian is formed)
@@ -176,22 +208,23 @@ namespace Moose
     }
 #endif
 
-    void petscSetDefaults(NonlinearSystem & system)
+    void petscSetDefaults(MProblem & problem)
     {
-      PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(system.sys().nonlinear_solver.get());
+      // dig out Petsc solver
+      NonlinearSystem & nl = problem.getNonlinearSystem();
+      PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
       SNES snes = petsc_solver->snes();
       KSP ksp;
       SNESGetKSP(snes, &ksp);
       KSPSetPreconditionerSide(ksp, PC_RIGHT);
       SNESSetMaxLinearSolveFailures(snes, 1000000);
 
-      // FIXME: uncomment when adding dampers
-//      if(moose_system.hasDampers())
-//        SNESLineSearchSetPostCheck(snes, dampedCheck, moose_system.getEquationSystems());
+      if (problem.hasDampers())
+        SNESLineSearchSetPostCheck(snes, dampedCheck, &problem);
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-      KSPSetConvergenceTest(ksp, petscConverged, &system);
-      SNESSetConvergenceTest(snes, petscNonlinearConverged, &system);
+      KSPSetConvergenceTest(ksp, petscConverged, &nl);
+      SNESSetConvergenceTest(snes, petscNonlinearConverged, &nl);
 #else
 
       // In 3.0.0, the context pointer must actually be used, and the
@@ -202,7 +235,7 @@ namespace Moose
       {
         PetscErrorCode ierr = KSPSetConvergenceTest(ksp,
                                                     petscConverged,
-                                                    &system,
+                                                    &nl,
                                                     PETSC_NULL);
         CHKERRABORT(libMesh::COMM_WORLD,ierr);
       }
@@ -212,61 +245,6 @@ namespace Moose
 //      SNESSetUpdate(snes, petscNewtonUpdate);
 //      SNESSetApplicationContext(snes, (void *) executioner);
     }
-
-#if 0
-    PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * /*changed_w*/)
-    {
-      //w = updated solution = x+ scaling*y
-      //x = current solution
-      //y = updates.
-
-      int ierr = 0;
-      Real damping = 1.0;
-
-      EquationSystems * equation_systems = static_cast<EquationSystems *>(lsctx);
-
-      MooseSystem * moose_system = equation_systems->parameters.get<MooseSystem *>("moose_system");
-
-      TransientNonlinearImplicitSystem& system =
-        equation_systems->get_system<TransientNonlinearImplicitSystem> ("NonlinearSystem");
-
-      // The whole deal here is that we need ghosted versions of these vectors.
-      // So to do that I'm going to duplicate current_local_solution (which has the ghosting we want).
-      // Then stuff values into the duplicates
-      // Then "close()" the vectors which updates their ghosted vaulues.
-      
-      Vec current_local_solution = static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec();    
-
-      Vec ghosted_w;
-      Vec ghosted_y;
-
-      VecDuplicate(current_local_solution, &ghosted_w);
-      VecDuplicate(current_local_solution, &ghosted_y);
-
-      VecCopy(w, ghosted_w);
-      VecCopy(y, ghosted_y);
-
-      PetscVector<Number>  ghosted_update_vec_y(ghosted_y);
-      PetscVector<Number>  ghosted_update_vec_w(ghosted_w);
-
-      ghosted_update_vec_y.close();
-      ghosted_update_vec_w.close();
-
-      damping = moose_system->computeDamping(ghosted_update_vec_w, ghosted_update_vec_y);
-
-      if(damping < 1.0)
-      {
-        std::cout<<"Damping Factor: "<<damping<<std::endl;
-        VecScale(y, damping);
-        *changed_y = PETSC_TRUE;
-      }
-
-      VecDestroy(ghosted_w);
-      VecDestroy(ghosted_y);
-
-      return(ierr);
-    }
-#endif
   }
 }
 

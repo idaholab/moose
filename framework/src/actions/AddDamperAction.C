@@ -1,6 +1,7 @@
 #include "AddDamperAction.h"
 #include "Factory.h"
 #include "Parser.h"
+#include "MProblem.h"
 
 template<>
 InputParameters validParams<AddDamperAction>()
@@ -22,5 +23,5 @@ AddDamperAction::act()
             << "\tname:" << getShortName() << ":";
 #endif
   
-//  _moose_system.addDamper(_type, getShortName(), getClassParams());
+  _parser_handle._problem->addDamper(_type, getShortName(), _moose_object_pars);
 }

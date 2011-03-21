@@ -1,5 +1,4 @@
 #include "ComputeJacobianThread.h"
-
 #include "NonlinearSystem.h"
 #include "Problem.h"
 

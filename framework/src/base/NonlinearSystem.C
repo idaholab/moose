@@ -10,6 +10,7 @@
 #include "MaterialData.h"
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
+#include "ComputeDampingThread.h"
 
 #include "nonlinear_solver.h"
 #include "quadrature_gauss.h"
@@ -44,6 +45,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _dt(subproblem.dt()),
     _dt_old(subproblem.dtOld()),
     _t_step(subproblem.timeStep()),
+    _increment_vec(NULL),
     _preconditioner(NULL)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
@@ -54,9 +56,11 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
   _time_weight.resize(3);
   timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
 
-  _kernels.resize(libMesh::n_threads());
-  _bcs.resize(libMesh::n_threads());
-  _stabilizers.resize(libMesh::n_threads());
+  unsigned int n_threads = libMesh::n_threads();
+  _kernels.resize(n_threads);
+  _bcs.resize(n_threads);
+  _stabilizers.resize(n_threads);
+  _dampers.resize(n_threads);
 }
 
 NonlinearSystem::~NonlinearSystem()
@@ -149,6 +153,19 @@ NonlinearSystem::addStabilizer(const std::string & stabilizer_name, const std::s
       _stabilizers[tid].addBlockStabilizer(parameters.get<unsigned int>("block_id"), stabilizer);
     else
       _stabilizers[tid].addStabilizer(stabilizer);
+  }
+}
+
+void
+NonlinearSystem::addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters)
+{
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
+
+    Damper * damper = static_cast<Damper *>(Factory::instance()->create(damper_name, name, parameters));
+    _dampers[tid].addDamper(damper);
   }
 }
 
@@ -531,6 +548,32 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   Moose::perf_log.pop("compute_jacobian_block()","Solve");
 }
 
+Real
+NonlinearSystem::computeDamping(const NumericVector<Number>& update)
+{
+  Moose::perf_log.push("compute_dampers()","Solve");
+
+  // Default to no damping
+  Real damping = 1.0;
+
+  DamperIterator damper_begin = _dampers[0].dampersBegin();
+  DamperIterator damper_end = _dampers[0].dampersEnd();
+  DamperIterator damper_it = damper_begin;
+
+  if(damper_begin != damper_end)
+  {
+    ComputeDampingThread cid(_problem, *this, update);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
+    damping = cid.damping();
+  }
+
+  Parallel::min(damping);
+
+  Moose::perf_log.pop("compute_dampers()","Solve");
+
+  return damping;
+}
+
 void
 NonlinearSystem::setVarScaling(std::vector<Real> scaling)
 {
@@ -602,4 +645,23 @@ NonlinearSystem::setPreconditioner(Preconditioner<Real> *pc)
   // We don't want to be computing the big Jacobian!
   _sys.nonlinear_solver->jacobian = NULL;
   _sys.nonlinear_solver->attach_preconditioner(pc);
+}
+
+void
+NonlinearSystem::setupDampers()
+{
+  _increment_vec = &_sys.add_vector("u_increment", true, GHOSTED);
+}
+
+void
+NonlinearSystem::reinitDampers(const NumericVector<Number>& increment, THREAD_ID tid)
+{
+  *_increment_vec = increment;
+
+  // FIXME: be smart here and compute only variables with dampers (need to add some book keeping)
+  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  {
+    MooseVariable *var = *it;
+    var->computeDamping(*_increment_vec);
+  }
 }

@@ -64,7 +64,8 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
-    _output_displaced(true)
+    _output_displaced(true),
+    _has_dampers(false)
 {
   _n++;
 
@@ -604,6 +605,23 @@ MProblem::outputPostprocessors()
 
 }
 
+void
+MProblem::addDamper(std::string damper_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblemInterface *>("_subproblem") = this;
+  parameters.set<SystemBase *>("_sys") = &_nl;
+
+  _has_dampers = true;
+  _nl.addDamper(damper_name, name, parameters);
+}
+
+void
+MProblem::setupDampers()
+{
+  _nl.setupDampers();
+}
+
 bool
 MProblem::hasVariable(const std::string & var_name)
 {
@@ -661,7 +679,7 @@ MProblem::update()
 void
 MProblem::solve()
 {
-  Moose::setSolverDefaults(_nl);
+  Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
   _nl.solve();
   Moose::perf_log.pop("solve()","Solve");
@@ -755,6 +773,26 @@ MProblem::computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System
 
   _aux.compute();
   _nl.computeJacobianBlock(jacobian, precond_system, ivar, jvar);
+}
+
+Real
+MProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
+{
+  Moose::perf_log.push("compute_dampers()","Solve");
+
+  // Default to no damping
+  Real damping = 1.0;
+
+  if (_has_dampers)
+  {
+    _nl.set_solution(soln);
+    _aux.compute();
+    damping = _nl.computeDamping(update);
+  }
+
+  Moose::perf_log.pop("compute_dampers()","Solve");
+
+  return damping;
 }
 
 void

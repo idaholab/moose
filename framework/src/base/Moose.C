@@ -67,6 +67,9 @@
 #include "SideIntegral.h"
 // stabilizers
 #include "ConvectionDiffusionSUPG.h"
+// dampers
+#include "ConstantDamper.h"
+#include "MaxIncrement.h"
 
 // Actions
 #include "AddMeshModifierAction.h"
@@ -92,6 +95,7 @@
 #include "GlobalParamsAction.h"
 #include "SetupPBPAction.h"
 #include "AdaptivityAction.h"
+#include "SetupDampersAction.h"
 
 namespace Moose {
 
@@ -166,6 +170,9 @@ registerObjects()
   registerObject(SideIntegral);
   // stabilizers
   registerObject(ConvectionDiffusionSUPG);
+  // dampers
+  registerObject(ConstantDamper);
+  registerObject(MaxIncrement);
 
   addActionTypes();
   registerActions();
@@ -188,6 +195,7 @@ addActionTypes()
   registerActionName("init_problem", true);
   registerActionName("copy_nodal_vars", true);
   registerActionName("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
+  registerActionName("setup_dampers", true);
   
   /// Additional Actions
   registerActionName("no_action", false);  // Used for Empty Action placeholders
@@ -248,7 +256,8 @@ addActionTypes()
   action_warehouse.addDependency("ready_to_init", "add_preconditioning");
   
   /// InitProblem
-  action_warehouse.addDependency("init_problem", "ready_to_init");
+  action_warehouse.addDependency("setup_dampers", "ready_to_init");
+  action_warehouse.addDependency("init_problem", "setup_dampers");
   action_warehouse.addDependency("copy_nodal_vars", "init_problem");
 
   /// Materials
@@ -319,15 +328,16 @@ registerActions()
 
   registerAction(EmptyAction, "DiracKernels/*", "no_action");  // TODO
   
+  registerNonParsedAction(SetupDampersAction, "setup_dampers");
   registerNonParsedAction(InitProblemAction, "init_problem");
   registerNonParsedAction(CopyNodalVarsAction, "copy_nodal_vars");
 }
 
 void
-setSolverDefaults(NonlinearSystem & system)
+setSolverDefaults(MProblem & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
-  Moose::PetscSupport::petscSetDefaults(system);
+  Moose::PetscSupport::petscSetDefaults(problem);
 #endif //LIBMESH_HAVE_PETSC
 }
 

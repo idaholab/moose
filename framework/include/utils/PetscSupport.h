@@ -8,7 +8,7 @@
 // libMesh
 #include "petsc_nonlinear_solver.h"
 
-class NonlinearSystem;
+class MProblem;
 
 namespace Moose 
 {
@@ -19,7 +19,7 @@ namespace Moose
 //    PetscErrorCode petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy);
 //    PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void *dummy);
     
-    void petscSetDefaults(NonlinearSystem & system);
+    void petscSetDefaults(MProblem & problem);
     
 //    PetscErrorCode petscPhysicsBasedLineSearch(SNES snes,void *lsctx,Vec x,Vec f,Vec g,Vec y,Vec w, PetscReal fnorm,PetscReal *ynorm,PetscReal *gnorm,PetscTruth *flag);
 //    PetscErrorCode dampedCheck(SNES snes, Vec x, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * changed_w);

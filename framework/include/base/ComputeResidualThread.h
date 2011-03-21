@@ -6,6 +6,9 @@
 // libMesh includes
 #include "elem_range.h"
 
+class NonlinearSystem;
+
+
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:

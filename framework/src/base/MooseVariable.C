@@ -389,6 +389,22 @@ MooseVariable::computeNodalValues()
   }
 }
 
+void
+MooseVariable::computeDamping(const NumericVector<Number> & increment_vec)
+{
+  unsigned int nqp = _qrule->n_points();
+
+  _increment.resize(nqp);
+  // Compute the increment at each quadrature point
+  unsigned int num_dofs = _dof_indices.size();
+  for(unsigned int qp=0; qp<nqp; qp++)
+  {
+    _increment[qp]=0;
+    for (unsigned int i=0; i<num_dofs; i++)
+      _increment[qp] +=  _phi[i][qp]*increment_vec(_dof_indices[i]);
+  }
+}
+
 Number
 MooseVariable::getNodalValue(const Node & node)
 {

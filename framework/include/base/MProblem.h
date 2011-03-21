@@ -109,10 +109,20 @@ public:
   virtual void computePostprocessors(int pps_type = Moose::PPS_TIMESTEP);
   virtual void outputPostprocessors();
 
+  // Dampers /////
+  void addDamper(std::string damper_name, const std::string & name, InputParameters parameters);
+  void setupDampers();
+
+  /**
+   * Whether or not this system has dampers.
+   */
+  bool hasDampers() { return _has_dampers; }
+
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
   virtual void computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
+  virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   // Displaced problem /////
   virtual void initDisplacedProblem(const std::vector<std::string> & displacements);
@@ -180,6 +190,8 @@ protected:
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
   bool _output_displaced;                               /// true for outputting displaced problem
+
+  bool _has_dampers;                                    /// Whether or not this system has any Dampers associated with it.
 
 public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)
