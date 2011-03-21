@@ -24,6 +24,13 @@ public:
   void setErrorEstimator(const std::string &error_estimator_name);
   void setErrorNorm(SystemNorm &sys_norm);
 
+  /**
+   * Perform initial adaptivity steps
+   *
+   * FIXME: better name
+   */
+  void initial();
+
   void adaptMesh();
 
   bool isOn() { return _mesh_refinement_on; }
@@ -48,6 +55,9 @@ protected:
    * Error vector for use with the error estimator.
    */
   ErrorVector * _error;
+
+
+  unsigned int _initial_steps;                          // the number of adaptivity steps to do at the beginning of simulation
 
 };
 

@@ -10,6 +10,9 @@ include $(LIBMESH_DIR)/Make.common
 libmesh_CXXFLAGS     += -MD
 libmesh_CFLAGS       += -MD
 
+# treat these warnings as errors
+libmesh_CXXFLAGS     += -Werror=return-type -Werror=reorder
+
 # Fortran baggage
 mpif77_command := $(libmesh_F77)
 

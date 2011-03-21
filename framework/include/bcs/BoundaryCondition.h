@@ -31,6 +31,8 @@ public:
 
   MooseVariable & variable() { return _var; }
 
+  unsigned int coupledComponents(const std::string & varname);
+
 protected:
   SubProblem & _problem;
   SystemBase & _sys;

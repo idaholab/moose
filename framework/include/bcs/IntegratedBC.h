@@ -22,10 +22,10 @@ public:
    */
   void computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar);
 
-  virtual unsigned int coupled(const std::string & var_name);
-  virtual VariableValue & coupledValue(const std::string & var_name);
-  virtual VariableValue & coupledDot(const std::string & var_name);
-  virtual VariableGradient  & coupledGradient(const std::string & var_name);
+  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient  & coupledGradient(const std::string & var_name, unsigned int comp = 0);
 
 protected:
   MooseVariable & _test_var;
@@ -39,12 +39,15 @@ protected:
   // shape functions
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
+  const std::vector<std::vector<RealTensor> > & _second_phi;
   // test functions
   const std::vector<std::vector<Real> > & _test;
   const std::vector<std::vector<RealGradient> > & _grad_test;
+  const std::vector<std::vector<RealTensor> > & _second_test;
   // unknown
   const VariableValue & _u;
   const VariableGradient & _grad_u;
+  const VariableSecond & _second_u;
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();

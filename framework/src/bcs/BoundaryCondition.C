@@ -43,3 +43,8 @@ BoundaryCondition::~BoundaryCondition()
 {
 }
 
+unsigned int
+BoundaryCondition::coupledComponents(const std::string & varname)
+{
+  return Coupleable::coupledComponents(varname);
+}

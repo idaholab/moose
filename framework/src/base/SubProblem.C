@@ -248,7 +248,7 @@ SubProblem::initialGradient (const Point& p,
 void
 SubProblem::initialCondition(EquationSystems& es, const std::string& system_name)
 {
-  ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
+  System & system = es.get_system(system_name);
   system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
 }
 
@@ -515,5 +515,4 @@ SubProblem::adaptMesh()
   _eq.reinit();
   _mesh.meshChanged();
   _geometric_search_data.update();
-  _out.meshChanged();
 }

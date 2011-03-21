@@ -20,12 +20,15 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 
     _phi(_var.phiFace()),
     _grad_phi(_var.gradPhiFace()),
+    _second_phi(_var.secondPhi()),
 
     _test(_test_var.testFace()),
     _grad_test(_test_var.gradTestFace()),
+    _second_test(_var.secondTest()),
 
     _u(_var.sln()),
-    _grad_u(_var.gradSln())
+    _grad_u(_var.gradSln()),
+    _second_u(_var.secondSln())
 {
 }
 
@@ -89,25 +92,25 @@ IntegratedBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 }
 
 unsigned int
-IntegratedBC::coupled(const std::string & var_name)
+IntegratedBC::coupled(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupled(var_name);
+  return Coupleable::getCoupled(var_name, comp);
 }
 
 VariableValue &
-IntegratedBC::coupledValue(const std::string & var_name)
+IntegratedBC::coupledValue(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledValue(var_name);
+  return Coupleable::getCoupledValue(var_name, comp);
 }
 
 VariableValue &
-IntegratedBC::coupledDot(const std::string & var_name)
+IntegratedBC::coupledDot(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledDot(var_name);
+  return Coupleable::getCoupledDot(var_name, comp);
 }
 
 VariableGradient &
-IntegratedBC::coupledGradient(const std::string & var_name)
+IntegratedBC::coupledGradient(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledGradient(var_name);
+  return Coupleable::getCoupledGradient(var_name, comp);
 }

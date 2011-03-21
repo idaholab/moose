@@ -25,6 +25,7 @@ Steady::~Steady()
 void
 Steady::execute()
 {
+  _problem.adaptivity().initial();
   // FIXME: move in SubProblem
   //Update the geometric searches (has to be called after the problem is all set up)
   _problem._geometric_search_data.update();
@@ -58,7 +59,10 @@ Steady::execute()
     _problem.outputPostprocessors();
 
     if(r_step != _steps)
+    {
       _problem.adaptMesh();
+      _problem.out().meshChanged();
+    }
   }
 
   postExecute();

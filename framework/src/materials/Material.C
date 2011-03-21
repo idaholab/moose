@@ -321,43 +321,49 @@ Material::getData(QP_Data_Type qp_data_type)
 #endif
 
 unsigned int
-Material::coupled(const std::string & var_name)
+Material::coupledComponents(const std::string & varname)
 {
-  return Coupleable::getCoupled(var_name);
+  return Coupleable::coupledComponents(varname);
+}
+
+unsigned int
+Material::coupled(const std::string & var_name, unsigned int comp)
+{
+  return Coupleable::getCoupled(var_name, comp);
 }
 
 VariableValue &
-Material::coupledValue(const std::string & var_name)
+Material::coupledValue(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledValue(var_name);
+  return Coupleable::getCoupledValue(var_name, comp);
 }
 
 VariableValue &
-Material::coupledValueOld(const std::string & var_name)
+Material::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledValueOld(var_name);
+  return Coupleable::getCoupledValueOld(var_name, comp);
 }
 
 VariableValue &
-Material::coupledValueOlder(const std::string & var_name)
+Material::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledValueOlder(var_name);
+  return Coupleable::getCoupledValueOlder(var_name, comp);
 }
 
 VariableGradient &
-Material::coupledGradient(const std::string & var_name)
+Material::coupledGradient(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledGradient(var_name);
+  return Coupleable::getCoupledGradient(var_name, comp);
 }
 
 VariableGradient  &
-Material::coupledGradientOld(const std::string & var_name)
+Material::coupledGradientOld(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledGradientOld(var_name);
+  return Coupleable::getCoupledGradientOld(var_name, comp);
 }
 
 VariableGradient  &
-Material::coupledGradientOlder(const std::string & var_name)
+Material::coupledGradientOlder(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledGradientOlder(var_name);
+  return Coupleable::getCoupledGradientOlder(var_name, comp);
 }

@@ -14,7 +14,8 @@ Adaptivity::Adaptivity(SubProblem & subproblem) :
     _mesh_refinement_on(false),
     _mesh_refinement(NULL),
     _error_estimator(NULL),
-    _error(NULL)
+    _error(NULL),
+    _initial_steps(0)
 {
 }
 
@@ -31,7 +32,7 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   EquationSystems & es = _subproblem.es();
   es.parameters.set<bool>("adaptivity") = true;
   es.parameters.set<unsigned int>("steps") = steps;
-  es.parameters.set<unsigned int>("initial_adaptivity") = initial_steps;
+  _initial_steps = initial_steps;
   _mesh_refinement_on = true;
 
   _error = new ErrorVector;
@@ -55,6 +56,18 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 {
   mooseAssert(_error_estimator != NULL, "error_estimator not initialized. Did you call init_adaptivity()?");
   _error_estimator->error_norm = sys_norm;
+}
+
+void
+Adaptivity::initial()
+{
+  // NOTE: this might go eventually somewhere else
+  for(unsigned int i=0; i<_initial_steps; i++)
+  {
+    _subproblem.adaptMesh();
+    //reproject the initial condition
+    _subproblem.initialCondition(_subproblem.es(), _subproblem.getNonlinearSystem().sys().name());
+  }
 }
 
 void

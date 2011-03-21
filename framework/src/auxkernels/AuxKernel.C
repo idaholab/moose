@@ -83,25 +83,31 @@ AuxKernel::isNodal()
 }
 
 unsigned int
-AuxKernel::coupled(const std::string & var_name)
+AuxKernel::coupledComponents(const std::string & varname)
 {
-  return Coupleable::getCoupled(var_name);
+  return Coupleable::coupledComponents(varname);
+}
+
+unsigned int
+AuxKernel::coupled(const std::string & var_name, unsigned int comp)
+{
+  return Coupleable::getCoupled(var_name, comp);
 }
 
 VariableValue &
-AuxKernel::coupledValue(const std::string & var_name)
+AuxKernel::coupledValue(const std::string & var_name, unsigned int comp)
 {
   if (isNodal())
-    return Coupleable::getCoupledNodalValue(var_name);
+    return Coupleable::getCoupledNodalValue(var_name, comp);
   else
-    return Coupleable::getCoupledValue(var_name);
+    return Coupleable::getCoupledValue(var_name, comp);
 }
 
 VariableGradient &
-AuxKernel::coupledGradient(const std::string & var_name)
+AuxKernel::coupledGradient(const std::string & var_name, unsigned int comp)
 {
   if (isNodal())
     mooseError("Nodal variables do not have gradients");
   else
-    return Coupleable::getCoupledGradient(var_name);
+    return Coupleable::getCoupledGradient(var_name, comp);
 }

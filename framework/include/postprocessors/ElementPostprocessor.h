@@ -2,6 +2,7 @@
 #define ELEMENTPOSTPROCESSOR_H
 
 #include "Postprocessor.h"
+#include "Coupleable.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -18,6 +19,7 @@ InputParameters validParams<ElementPostprocessor>();
 
 class ElementPostprocessor :
   public Postprocessor,
+  public Coupleable,
   public TransientInterface,
   public MaterialPropertyInterface
 {
@@ -27,6 +29,17 @@ public:
   unsigned int blockID() { return _block_id; }
 
   virtual Real computeIntegral();
+
+  unsigned int coupledComponents(const std::string & varname);
+  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
+
+  virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValueOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValueOlder(const std::string & var_name, unsigned int comp = 0);
+
+  virtual VariableGradient  & coupledGradient(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient  & coupledGradientOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient  & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
 protected:
   /**

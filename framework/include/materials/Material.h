@@ -82,13 +82,14 @@ public:
   virtual void timeStepSetup();
 
   // Coupling
-  virtual unsigned int coupled(const std::string & var_name);
-  virtual VariableValue & coupledValue(const std::string & var_name);
-  virtual VariableValue & coupledValueOld(const std::string & var_name);
-  virtual VariableValue & coupledValueOlder(const std::string & var_name);
-  virtual VariableGradient & coupledGradient(const std::string & var_name);
-  virtual VariableGradient & coupledGradientOld(const std::string & var_name);
-  virtual VariableGradient & coupledGradientOlder(const std::string & var_name);
+  unsigned int coupledComponents(const std::string & varname);
+  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValueOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValueOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradient(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradientOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
 protected:
   SubProblem & _problem;

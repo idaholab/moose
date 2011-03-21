@@ -38,13 +38,13 @@ NodalBC::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 unsigned int
-NodalBC::coupled(const std::string & var_name)
+NodalBC::coupled(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupled(var_name);
+  return Coupleable::getCoupled(var_name, comp);
 }
 
 VariableValue &
-NodalBC::coupledValue(const std::string & var_name)
+NodalBC::coupledValue(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledNodalValue(var_name);
+  return Coupleable::getCoupledNodalValue(var_name, comp);
 }

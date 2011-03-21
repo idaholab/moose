@@ -94,6 +94,7 @@ void
 Transient::execute()
 {
   _problem.copySolutionsBackwards();
+  _problem.adaptivity().initial();
 
   //Update the geometric searches (has to be called after the problem is all set up)
   _problem._geometric_search_data.update();
@@ -171,7 +172,10 @@ Transient::takeStep(Real input_dt)
     _problem.outputPostprocessors();
 
     if (_problem.adaptivity().isOn())
+    {
       _problem.adaptMesh();
+      _problem.out().meshChanged();
+    }
 
     _t_step++;
     _time_old = _time;

@@ -144,19 +144,49 @@ Kernel::precalculateResidual()
 }
 
 unsigned int
-Kernel::coupled(const std::string & var_name)
+Kernel::coupledComponents(const std::string & varname)
 {
-  return Coupleable::getCoupled(var_name);
+  return Coupleable::coupledComponents(varname);
+}
+
+unsigned int
+Kernel::coupled(const std::string & var_name, unsigned int comp)
+{
+  return Coupleable::getCoupled(var_name, comp);
 }
 
 VariableValue &
-Kernel::coupledValue(const std::string & var_name)
+Kernel::coupledValue(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledValue(var_name);
+  return Coupleable::getCoupledValue(var_name, comp);
+}
+
+VariableValue &
+Kernel::coupledValueOld(const std::string & var_name, unsigned int comp)
+{
+  return Coupleable::getCoupledValueOld(var_name, comp);
+}
+
+VariableValue &
+Kernel::coupledValueOlder(const std::string & var_name, unsigned int comp)
+{
+  return Coupleable::getCoupledValueOlder(var_name, comp);
 }
 
 VariableGradient &
-Kernel::coupledGradient(const std::string & var_name)
+Kernel::coupledGradient(const std::string & var_name, unsigned int comp)
 {
-  return Coupleable::getCoupledGradient(var_name);
+  return Coupleable::getCoupledGradient(var_name, comp);
+}
+
+VariableGradient &
+Kernel::coupledGradientOld(const std::string & var_name, unsigned int comp)
+{
+  return Coupleable::getCoupledGradientOld(var_name, comp);
+}
+
+VariableGradient &
+Kernel::coupledGradientOlder(const std::string & var_name, unsigned int comp)
+{
+  return Coupleable::getCoupledGradientOlder(var_name, comp);
 }

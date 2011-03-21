@@ -20,6 +20,8 @@ protected:
    */
   virtual bool isCoupled(const std::string & varname, unsigned int i = 0);
 
+  unsigned int coupledComponents(const std::string & varname);
+
   virtual unsigned int getCoupled(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & getCoupledValue(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & getCoupledValueOld(const std::string & var_name, unsigned int comp = 0);

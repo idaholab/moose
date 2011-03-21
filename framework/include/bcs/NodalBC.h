@@ -17,8 +17,8 @@ public:
   virtual void computeResidual(NumericVector<Number> & residual);
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
 
-  virtual unsigned int coupled(const std::string & var_name);
-  virtual VariableValue & coupledValue(const std::string & var_name);
+  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
 
 protected:
   const Node * & _current_node;

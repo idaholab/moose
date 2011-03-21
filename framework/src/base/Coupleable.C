@@ -42,6 +42,12 @@ Coupleable::isCoupled(const std::string & varname, unsigned int i)
 }
 
 unsigned int
+Coupleable::coupledComponents(const std::string & varname)
+{
+  return _coupled_vars[varname].size();
+}
+
+unsigned int
 Coupleable::getCoupled(const std::string & var_name, unsigned int comp)
 {
   return _coupled_vars[var_name][comp]->number();
