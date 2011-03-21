@@ -1,7 +1,7 @@
 #ifndef DISPLACEDPROBLEM_H
 #define DISPLACEDPROBLEM_H
 
-#include "ProblemInterface.h"
+#include "SubProblem.h"
 #include "MooseMesh.h"
 #include "ExodusOutput.h"
 #include "DisplacedSystem.h"
@@ -12,13 +12,12 @@
 #include "explicit_system.h"
 #include "numeric_vector.h"
 
-class Problem;
-class SubProblem;
+class SubProblemInterface;
 class MooseVariable;
 class AssemblyData;
 
 class DisplacedProblem :
-  public ProblemInterface
+  public SubProblemInterface
 {
 public:
   DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements);
@@ -26,9 +25,8 @@ public:
 
   virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
+  virtual Problem * parent() { return _subproblem.parent(); }
   MooseMesh & refMesh() { return _ref_mesh; }
-  virtual Problem * parent() { return NULL; }           // for future
-  virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
 
   DisplacedSystem & nlSys() { return _nl; }
   DisplacedSystem & auxSys() { return _aux; }
@@ -48,7 +46,7 @@ public:
   virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
   // Output /////
-  virtual void output(Real time);
+  virtual void output();
 
   // reinit /////
 
@@ -58,15 +56,24 @@ public:
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
 
-  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
+  virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
+  virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
+  virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
+  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _asm_info[tid]->JxW(); }
+  virtual QBase * & qRuleFace(THREAD_ID tid) { return _asm_info[tid]->qRuleFace(); }
+  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _asm_info[tid]->qPointsFace(); }
+  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _asm_info[tid]->JxWFace(); }
+  virtual const Elem * & elem(THREAD_ID tid) { return _asm_info[tid]->elem(); }
+  virtual unsigned int & side(THREAD_ID tid) { return _asm_info[tid]->side(); }
+  virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid]->sideElem(); }
+  virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid]->node(); }
 
-  // Transient /////
-  virtual bool transient();
-
+  // Geom Search /////
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
 protected:
-  SubProblem & _problem;
+  Problem & _problem;
+  SubProblem & _subproblem;
   MooseMesh & _mesh;
   EquationSystems _eq;
   MooseMesh & _ref_mesh;                               /// reference mesh
@@ -85,6 +92,7 @@ protected:
   GeometricSearchData _geometric_search_data;
 
   ExodusOutput _ex;
+
 
   friend class UpdateDisplacedMeshThread;
 };

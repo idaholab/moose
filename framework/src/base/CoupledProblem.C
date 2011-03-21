@@ -8,8 +8,7 @@ CoupledProblem::CoupledProblem(MooseMesh * mesh) :
     _time(_eq.parameters.set<Real>("time")),
     _t_step(_eq.parameters.set<int>("t_step")),
     _dt(_eq.parameters.set<Real>("dt")),
-    _out(*this),
-    _geometric_search_data(NULL)
+    _out(*this)
 {
   _eq.parameters.set<Problem *>("_problem") = this;
 }
@@ -19,13 +18,13 @@ CoupledProblem::~CoupledProblem()
 }
 
 void
-CoupledProblem::addSubProblem(const std::string & file_name, SubProblem *subproblem)
+CoupledProblem::addSubProblem(const std::string & file_name, MProblem *subproblem)
 {
   _subproblems[file_name] = subproblem;
   _map[subproblem->getNonlinearSystem().sys().name()] = subproblem;
 }
 
-SubProblem *
+MProblem *
 CoupledProblem::subProblem(const std::string & name)
 {
   return _subproblems[name];
@@ -40,9 +39,9 @@ CoupledProblem::solveOrder(const std::vector<std::string> & solve_order)
 bool
 CoupledProblem::hasVariable(const std::string & var_name)
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
   {
-    SubProblem * problem = it->second;
+    MProblem * problem = it->second;
     if (problem->hasVariable(var_name))
       return true;
   }
@@ -53,9 +52,9 @@ CoupledProblem::hasVariable(const std::string & var_name)
 MooseVariable &
 CoupledProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
   {
-    SubProblem * problem = it->second;
+    MProblem * problem = it->second;
     if (problem->hasVariable(var_name))
       return problem->getVariable(tid, var_name);
   }
@@ -63,46 +62,38 @@ CoupledProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   mooseError("Unknown variable " + var_name);
 }
 
-AssemblyData &
-CoupledProblem::assembly(THREAD_ID tid)
-{
-  // FIXME
-  SubProblem * problem = _subproblems[0];
-  return problem->assembly(tid);
-}
-
 void
 CoupledProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->prepare(elem, tid);
 }
 
 void
 CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElem(elem, tid);
 }
 
 void
 CoupledProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElemFace(elem, side, bnd_id, tid);
 }
 
 void
 CoupledProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNode(node, tid);
 }
 
 void
 CoupledProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNodeFace(node, bnd_id, tid);
 }
 
@@ -117,9 +108,9 @@ CoupledProblem::init()
   _eq.init();
   _eq.print_info();
 
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
   {
-    SubProblem * sp = it->second;
+    MProblem * sp = it->second;
     sp->init2();                        // obviously I ran out of proper names ;-)
   }
 }
@@ -127,7 +118,7 @@ CoupledProblem::init()
 void
 CoupledProblem::update()
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->update();
 }
 
@@ -192,22 +183,22 @@ void
 CoupledProblem::transient(bool trans)
 {
   _transient = trans;
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->transient(trans);
 }
 
 void
 CoupledProblem::copySolutionsBackwards()
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->copySolutionsBackwards();
 }
 
 void
 CoupledProblem::dump()
 {
-  for (std::map<std::string, SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
-    it->second->dump();
+//  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+//    it->second->dump();
 }
 
 void

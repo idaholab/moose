@@ -3,6 +3,8 @@
 // MOOSE includes
 #include "SubProblem.h"
 #include "ArbitraryQuadrature.h"
+// libMesh
+#include "quadrature_gauss.h"
 
 AssemblyData::AssemblyData(MooseMesh & mesh) :
     _mesh(mesh),

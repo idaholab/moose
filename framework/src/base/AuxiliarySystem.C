@@ -1,6 +1,5 @@
 #include "AuxiliarySystem.h"
-#include "SubProblem.h"
-#include "NonlinearSystem.h"
+#include "MProblem.h"
 #include "Factory.h"
 #include "AuxKernel.h"
 #include "MaterialData.h"
@@ -12,13 +11,12 @@
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(SubProblem & problem, const std::string & name) :
-    SystemTempl<TransientExplicitSystem>(problem, name),
-    _subproblem(problem)
+AuxiliarySystem::AuxiliarySystem(MProblem & subproblem, const std::string & name) :
+    SystemTempl<TransientExplicitSystem>(subproblem, name),
+    _mproblem(subproblem)
 {
   _sys.attach_init_function(Moose::initial_condition);
 
-  _vars.resize(libMesh::n_threads());
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
 
@@ -33,7 +31,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
   unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseVariable * var = new MooseVariable(var_num, type, *this, _problem.assembly(tid));
+    MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid));
     _vars[tid].add(var_name, var);
     if (var->feType().family == LAGRANGE)
       _nodal_vars[tid][var_name] = var;
@@ -55,7 +53,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _subproblem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
 
     AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
@@ -94,7 +92,7 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
-      parameters.set<MaterialData *>("_material_data") = _subproblem._bnd_material_data[tid];
+      parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
 
       std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
@@ -175,11 +173,11 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
 //  SubdomainIterator subdomain_end = _element_subdomains.end();
 //  SubdomainIterator subdomain_it;
 
-//  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-//    (*aux_it)->setup();
-//
-//  aux_it = aux_begin;
-//
+  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
+    (*aux_it)->setup();
+
+  aux_it = aux_begin;
+
 //  // Call setup on all of the Nodal block AuxKernels
 //  for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
 //  {
@@ -210,18 +208,18 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
 
   //Boundary AuxKernels
 
-//  const std::set<short int> & boundary_ids = _mesh->boundary_info->get_boundary_ids();
-//
-//  for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-//  {
-//    short int id = *it;
-//
-//    aux_begin = auxs[0].activeAuxBCsBegin(id);
-//    aux_end = auxs[0].activeAuxBCsEnd(id);
-//
-//    for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-//      (*aux_it)->setup();
-//  }
+  const std::set<short int> & boundary_ids = _mesh.get_boundary_ids();
+
+  for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+  {
+    short int id = *it;
+
+    aux_begin = _auxs[0].activeAuxBCsBegin(id);
+    aux_end = _auxs[0].activeAuxBCsEnd(id);
+
+    for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
+      (*aux_it)->setup();
+  }
 
   std::vector<unsigned int> nodes;
   std::vector<short int> ids;
@@ -260,9 +258,9 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
   aux_end = auxs[0].activeElementAuxKernelsEnd();
   aux_it = aux_begin;
 
-//  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-//    (*aux_it)->setup();
-//
+  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
+    (*aux_it)->setup();
+
 //  aux_it = aux_begin;
 //
 //  // Call setup on all of the Elemental block AuxKernels
@@ -297,10 +295,10 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
     if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
     {
       _problem.reinitElem(elem, 0);
-      _subproblem.reinitMaterials(elem->subdomain_id(), 0);
+      _problem.reinitMaterials(elem->subdomain_id(), 0);
 
       //Compute the area of the element
-      _data[0]._current_volume = _problem.assembly(0).computeVolume();
+      _data[0]._current_volume = _subproblem.assembly(0).computeVolume();
 
       if(cur_subdomain != subdomain)
       {

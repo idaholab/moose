@@ -13,7 +13,8 @@
 #include "elem.h"
 
 // forward declarations
-class SubProblem;
+class MooseMesh;
+class SubProblemInterface;
 class MaterialData;
 
 /**
@@ -91,8 +92,11 @@ public:
   virtual VariableGradient & coupledGradientOld(const std::string & var_name, unsigned int comp = 0);
   virtual VariableGradient & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
+  virtual void setup() { }
+
 protected:
-  SubProblem & _problem;
+  Problem & _problem;
+  SubProblemInterface & _subproblem;
   THREAD_ID _tid;
   bool _bnd;
   MaterialData & _material_data;
@@ -106,6 +110,7 @@ protected:
 
   const Elem * & _current_elem;
 
+  MooseMesh & _mesh;
   unsigned int _dim;
 
   /**

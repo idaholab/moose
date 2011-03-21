@@ -7,13 +7,16 @@
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
+#include "GeometricSearchInterface.h"
 
 // libMesh
 #include "elem.h"
 #include "vector_value.h"
 
 class MooseVariable;
-class SubProblem;
+class MooseMesh;
+class Problem;
+class SubProblemInterface;
 
 class BoundaryCondition :
   public MooseObject,
@@ -21,7 +24,8 @@ class BoundaryCondition :
   public FunctionInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
-  public PostprocessorInterface
+  public PostprocessorInterface,
+  protected GeometricSearchInterface
 {
 public:
   BoundaryCondition(const std::string & name, InputParameters parameters);
@@ -33,11 +37,15 @@ public:
 
   unsigned int coupledComponents(const std::string & varname);
 
+  virtual void setup() { }
+
 protected:
-  SubProblem & _problem;
+  Problem & _problem;
+  SubProblemInterface & _subproblem;
   SystemBase & _sys;
   THREAD_ID _tid;
   MooseVariable & _var;
+  MooseMesh & _mesh;
   int _dim;
 
   unsigned int _boundary_id;

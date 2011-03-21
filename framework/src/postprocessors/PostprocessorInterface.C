@@ -3,7 +3,7 @@
 #include "SubProblem.h"
 
 PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
-    _pi_problem(*params.get<SubProblem *>("_problem")),
+    _pi_problem(*params.get<Problem *>("_problem")),
     _pi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0)
 {}
 

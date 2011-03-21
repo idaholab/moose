@@ -80,7 +80,7 @@ OutputBlock::execute()
   if (_parser_handle._problem != NULL)
   {
     // TODO: handle this thru Problem interface
-    SubProblem & mproblem = *_parser_handle._problem;
+    MProblem & mproblem = *_parser_handle._problem;
     mproblem._postprocessor_screen_output = getParamValue<bool>("postprocessor_screen");
     mproblem._postprocessor_csv_output = getParamValue<bool>("postprocessor_csv");
     mproblem._postprocessor_ensight_output = getParamValue<bool>("postprocessor_ensight");

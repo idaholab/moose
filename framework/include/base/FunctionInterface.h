@@ -4,7 +4,7 @@
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
 
-class SubProblem;
+class Problem;
 class Function;
 
 /**
@@ -27,7 +27,7 @@ public:
   Function & getFunction(const std::string & name);
 
 private:
-  SubProblem & _problem;
+  Problem & _problem;
   THREAD_ID _tid;
   InputParameters _params;
 };

@@ -12,7 +12,8 @@
 #include "libmesh_common.h"
 #include "parallel.h"
 
-class SubProblem;
+class Problem;
+class SubProblemInterface;
 
 //Forward Declarations
 class Postprocessor;
@@ -61,7 +62,8 @@ public:
   }
 
 protected:
-  SubProblem & _problem;
+  Problem & _problem;
+  SubProblemInterface & _subproblem;
   THREAD_ID _tid;
 };
  

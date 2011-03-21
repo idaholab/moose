@@ -6,6 +6,7 @@
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
 
 // libMesh
@@ -13,15 +14,16 @@
 #include "quadrature.h"
 
 class MooseVariable;
-class SubProblem;
-class SystemBase;
+class Problem;
+class SubProblemInterface;
 
 class Kernel :
   public MooseObject,
   public Coupleable,
   public FunctionInterface,
   public TransientInterface,
-  public MaterialPropertyInterface
+  public MaterialPropertyInterface,
+  protected GeometricSearchInterface
 {
 public:
   Kernel(const std::string & name, InputParameters parameters);
@@ -41,9 +43,9 @@ public:
   virtual VariableValue & coupledValueOld(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & coupledValueOlder(const std::string & var_name, unsigned int comp = 0);
 
-  virtual VariableGradient  & coupledGradient(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient  & coupledGradientOld(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient  & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradient(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradientOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * The variable number that this kernel operates on.
@@ -60,8 +62,11 @@ public:
    */
   Real stopTime();
 
+  virtual void setup() { }
+
 protected:
-  SubProblem & _problem;
+  Problem & _problem;
+  SubProblemInterface & _subproblem;
   SystemBase & _sys;
 
   THREAD_ID _tid;

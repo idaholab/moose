@@ -81,8 +81,9 @@ protected:
 
 
 DisplacedProblem::DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements) :
-    ProblemInterface(),
-    _problem(problem),
+    SubProblemInterface(),
+    _problem(*problem.parent()),
+    _subproblem(problem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),
     _ref_mesh(_problem.mesh()),
@@ -91,7 +92,7 @@ DisplacedProblem::DisplacedProblem(SubProblem & problem, MooseMesh & displaced_m
     _aux(*this, "DisplacedAuxSystem"),
     _nl_solution(NumericVector<Number>::build().release()),
     _aux_solution(NumericVector<Number>::build().release()),
-    _geometric_search_data(_problem, _mesh),
+    _geometric_search_data(_subproblem, _mesh),
     _ex(_eq)
 {
   _mesh.prepare();
@@ -99,8 +100,9 @@ DisplacedProblem::DisplacedProblem(SubProblem & problem, MooseMesh & displaced_m
 
   _ex.sequence(true);
 
-  _asm_info.resize(libMesh::n_threads());
-  for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
+  unsigned int n_threads = libMesh::n_threads();
+  _asm_info.resize(n_threads);
+  for (unsigned int i = 0; i < n_threads; ++i)
     _asm_info[i] = new AssemblyData(_mesh);
 }
 
@@ -122,10 +124,9 @@ DisplacedProblem::init()
   _nl_solution->init(_nl.sys().n_dofs(), false, SERIAL);
   _aux_solution->init(_aux.sys().n_dofs(), false, SERIAL);
 
-  Order qorder = _problem.getQuadratureOrder();
+  Order qorder = _subproblem.getQuadratureOrder();
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _asm_info[tid]->createQRules(qorder);
-
 }
 
 void
@@ -225,21 +226,10 @@ DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_
 }
 
 void
-DisplacedProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
-{
-}
-
-bool
-DisplacedProblem::transient()
-{
-  return _problem.transient();
-}
-
-void
-DisplacedProblem::output(Real time)
+DisplacedProblem::output()
 {
   // FIXME: use proper file_base
-  _ex.output("out_displaced", time);
+  _ex.output("out_displaced", _subproblem.time());
   _ex.meshChanged();
 }
 

@@ -14,7 +14,7 @@
 
 #include "PhysicsBasedPreconditioner.h"
 #include "Moose.h"
-#include "SubProblem.h"
+#include "MProblem.h"
 #include "NonlinearSystem.h"
 
 //libMesh Includes
@@ -27,10 +27,10 @@
 #include "sparse_matrix.h"
 
 
-PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (SubProblem & subproblem) :
+PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (MProblem & mproblem) :
     Preconditioner<Number>(),
-    _subproblem(subproblem),
-    _nl(subproblem.getNonlinearSystem())
+    _mproblem(mproblem),
+    _nl(mproblem.getNonlinearSystem())
 {
   unsigned int num_systems = _nl.sys().n_vars();
   _systems.resize(num_systems);
@@ -58,7 +58,7 @@ PhysicsBasedPreconditioner::addSystem(unsigned int var, std::vector<unsigned int
 {
   std::string var_name = _nl.sys().variable_name(var);
 
-  LinearImplicitSystem & precond_system = _nl.problem().es().add_system<LinearImplicitSystem>(var_name+"_system");
+  LinearImplicitSystem & precond_system = _mproblem.es().add_system<LinearImplicitSystem>(var_name+"_system");
   precond_system.assemble_before_solve = false;
   precond_system.add_variable(var_name+"_prec", _nl.sys().variable(var).type());
   _systems[var] = &precond_system;
@@ -107,13 +107,13 @@ PhysicsBasedPreconditioner::init ()
     preconditioner->init();
     
     //Compute the diagonal block... storing the result in the system matrix
-    _subproblem.computeJacobianBlock(*u_system.matrix,u_system,system_var,system_var);
+    _mproblem.computeJacobianBlock(*u_system.matrix,u_system,system_var,system_var);
 
     for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
       std::string coupled_name = _nl.sys().variable_name(coupled_var);
-      _subproblem.computeJacobianBlock(*_off_diag_mats[system_var][diag], u_system, system_var, coupled_var);
+      _mproblem.computeJacobianBlock(*_off_diag_mats[system_var][diag], u_system, system_var, coupled_var);
     }
   }
 
@@ -128,7 +128,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
   // -2 to take into account the Nonlinear system and the Auxilliary System
   const unsigned int num_systems = _systems.size();
   
-  MooseMesh & mesh = _nl.problem().mesh();
+  MooseMesh & mesh = _mproblem.mesh();
 
   //Zero out the solution vectors
   for(unsigned int sys=0; sys<num_systems; sys++)

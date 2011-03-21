@@ -15,5 +15,5 @@ PrintDOFs::PrintDOFs(const std::string & name, InputParameters parameters) :
 Real
 PrintDOFs::getValue()
 {
-  return _problem.es().n_dofs();
+  return _subproblem.es().n_dofs();
 }

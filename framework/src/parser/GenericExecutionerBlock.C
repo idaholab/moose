@@ -211,6 +211,16 @@ GenericExecutionerBlock::execute()
     blk = locateBlock("Postprocessors");
     if (blk)
       blk->execute();
+    blk = locateBlock("Postprocessors/Residual");
+    if (blk)
+      blk->execute();
+    blk = locateBlock("Postprocessors/Jacobian");
+    if (blk)
+      blk->execute();
+    blk = locateBlock("Postprocessors/NewtonIter");
+    if (blk)
+      blk->execute();
+
   }
 
   visitChildren();

@@ -50,6 +50,8 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
+  virtual void setup() { }
+
   /**
    * This pure virtual must be overridden by derived classes!
    *
@@ -59,8 +61,7 @@ public:
   virtual void computeTestFunctions() = 0;
 
 protected:
-  SubProblem & _problem;
-  SystemBase & _sys;
+  SubProblem & _subproblem;
   THREAD_ID _tid;
 
   MooseVariable & _var;

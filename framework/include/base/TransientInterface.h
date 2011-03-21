@@ -4,7 +4,7 @@
 #include "InputParameters.h"
 
 
-class SubProblem;
+class Problem;
 
 class TransientInterface
 {
@@ -13,7 +13,7 @@ public:
   virtual ~TransientInterface();
 
 private:
-  SubProblem & _ti_problem;
+  Problem & _ti_problem;
 
 protected:
   Real & _t;

@@ -28,6 +28,7 @@ public:
   unsigned int dimension() { return _mesh.mesh_dimension(); }
 
   std::vector<short int> boundary_ids (const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
+  const std::set<short int> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }
 
   void buildBoudndaryNodeList ();
   void build_node_list (std::vector< unsigned int > &nl, std::vector< short int > &il) const { _mesh.boundary_info->build_node_list(nl, il); }

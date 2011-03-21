@@ -13,17 +13,15 @@
 #include "numeric_vector.h"
 
 class AuxKernel;
-class SubProblem;
+class MProblem;
 
 class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
-  AuxiliarySystem(SubProblem & problem, const std::string & name);
+  AuxiliarySystem(MProblem & subproblem, const std::string & name);
 
   virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
-
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
-
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
@@ -34,7 +32,7 @@ public:
 protected:
   virtual void computeInternal(std::vector<AuxWarehouse> & auxs);
 
-  SubProblem & _subproblem;
+  MProblem & _mproblem;
   // Variables
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;

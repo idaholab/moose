@@ -1,4 +1,5 @@
 #include "Problem.h"
+#include "Factory.h"
 
 Problem::Problem()
 {
@@ -8,9 +9,28 @@ Problem::Problem()
   _zero.resize(n_threads);
   _grad_zero.resize(n_threads);
   _second_zero.resize(n_threads);
+
+  _functions.resize(n_threads);
 }
 
 Problem::~Problem()
 {
 }
 
+void
+Problem::addFunction(std::string type, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    Function * func = static_cast<Function *>(Factory::instance()->create(type, name, parameters));
+    _functions[tid][name] = func;
+  }
+}
+
+Function &
+Problem::getFunction(const std::string & name, THREAD_ID tid)
+{
+  return *_functions[tid][name];
+}

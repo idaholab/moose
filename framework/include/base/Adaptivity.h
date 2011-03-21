@@ -9,13 +9,13 @@
 #include "error_vector.h"
 #include "error_estimator.h"
 
-class SubProblem;
+class MProblem;
 class MooseMesh;
 
 class Adaptivity
 {
 public:
-  Adaptivity(SubProblem & subproblem);
+  Adaptivity(MProblem & subproblem);
   virtual ~Adaptivity();
 
   void init(unsigned int steps, unsigned int initial_steps);
@@ -36,7 +36,7 @@ public:
   bool isOn() { return _mesh_refinement_on; }
 
 protected:
-  SubProblem & _subproblem;
+  MProblem & _subproblem;
   MooseMesh & _mesh;
 
   bool _mesh_refinement_on;

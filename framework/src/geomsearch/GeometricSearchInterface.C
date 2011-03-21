@@ -5,7 +5,7 @@
 #include "SystemBase.h"
 
 GeometricSearchInterface::GeometricSearchInterface(InputParameters & params) :
-    _geometric_search_data(params.get<SystemBase *>("_sys")->problem().geomSearchData())
+    _geometric_search_data(params.get<SubProblemInterface *>("_subproblem")->geomSearchData())
 {
 }
 

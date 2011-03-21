@@ -10,6 +10,8 @@
 #include "MooseMesh.h"
 
 //forward declarations
+class Problem;
+class SubProblemInterface;
 class AuxKernel;
 class AuxiliarySystem;
 
@@ -40,6 +42,8 @@ public:
 
   MooseVariable & variable() { return _var; }
 
+  virtual void setup() { }
+
   bool isNodal();
 
   bool ts() { return _ts; }
@@ -53,8 +57,8 @@ public:
 protected:
   virtual Real computeValue() = 0;
 
-  SubProblem & _problem;
-  SystemBase & _sys;
+  Problem & _problem;
+  SubProblemInterface & _subproblem;
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
   MooseVariable & _var;

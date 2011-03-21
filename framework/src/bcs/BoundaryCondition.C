@@ -1,4 +1,5 @@
 #include "BoundaryCondition.h"
+#include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariable.h"
@@ -21,11 +22,14 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
-    _problem(*parameters.get<SubProblem *>("_problem")),
+    GeometricSearchInterface(parameters),
+    _problem(*parameters.get<Problem *>("_problem")),
+    _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _dim(_problem.mesh().dimension()),
+    _mesh(_problem.mesh()),
+    _dim(_mesh.dimension()),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 
     _current_elem(_var.currentElem()),

@@ -26,7 +26,7 @@ GenericDiracKernelBlock::execute()
             << "\tname:" << getShortName() << ":";
 #endif
   
-  _parser_handle._problem->addDiracKernel(_type, getShortName(), getClassParams());
+//  _parser_handle._problem->addDiracKernel(_type, getShortName(), getClassParams());
 
   // Add the dirac_kernels to the system
   visitChildren();

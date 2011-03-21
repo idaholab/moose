@@ -8,11 +8,11 @@
 #include "IntegratedBC.h"
 #include "InitialCondition.h"
 
-#include "ProblemInterface.h"
 #include "MooseMesh.h"
 #include "VariableWarehouse.h"
 #include "AssemblyData.h"
 #include "ParallelUniqueId.h"
+#include "SubProblemInterface.h"
 
 // libMesh
 #include "equation_systems.h"
@@ -27,22 +27,15 @@ class MooseVariable;
 class SystemBase
 {
 public:
-  SystemBase(ProblemInterface & problem, const std::string & name);
+  SystemBase(SubProblemInterface & subproblem, const std::string & name);
 
   virtual unsigned int number() = 0;
-  virtual ProblemInterface & problem() { return _problem; }
+  virtual SubProblemInterface & subproblem() { return _subproblem; }
   virtual DofMap & dofMap() = 0;
 
   virtual void init() = 0;
   virtual void update() = 0;
   virtual void solve() = 0;
-
-  virtual QBase * & qRule(THREAD_ID tid) { return _problem.assembly(tid).qRule(); }
-  virtual const std::vector<Point> & points(THREAD_ID tid) { return _problem.assembly(tid).qPoints(); }
-  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _problem.assembly(tid).JxW(); }
-  virtual QBase * & qRuleFace(THREAD_ID tid) { return _problem.assembly(tid).qRuleFace(); }
-  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _problem.assembly(tid).qPointsFace(); }
-  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _problem.assembly(tid).JxWFace(); }
 
   virtual void copyOldSolutions() = 0;
   virtual void restoreSolutions() = 0;
@@ -69,16 +62,14 @@ public:
 
   virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
 
-  VariableWarehouse & vars(THREAD_ID tid) { return _vars[tid]; }
-
 protected:
-  ProblemInterface & _problem;
+  Problem & _problem;
+  SubProblemInterface & _subproblem;
   MooseMesh & _mesh;
   std::string _name;
 
-  // TODO: move this to problem (that will keep track of which variable is where), System will only keep a list of variables that created and will free them in d-tor
   std::vector<VariableWarehouse> _vars;
-  std::map<unsigned int, std::set<unsigned int> > _var_map;             /// The list of blocks for a given variable number
+  std::map<unsigned int, std::set<unsigned int> > _var_map;
 };
 
 
@@ -86,15 +77,15 @@ template<typename T>
 class SystemTempl : public SystemBase
 {
 public:
-  SystemTempl(ProblemInterface & problem, const std::string & name) :
-    SystemBase(problem, name),
-    _sys(problem.es().add_system<T>(_name)),
-    _solution(*_sys.solution),
-    _solution_old(*_sys.old_local_solution),
-    _solution_older(*_sys.older_local_solution),
-    _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
-    _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
-    _residual_old(_sys.add_vector("residual_old", false, GHOSTED))
+  SystemTempl(SubProblemInterface & subproblem, const std::string & name) :
+      SystemBase(subproblem, name),
+      _sys(subproblem.es().add_system<T>(_name)),
+      _solution(*_sys.solution),
+      _solution_old(*_sys.old_local_solution),
+      _solution_older(*_sys.older_local_solution),
+      _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
+      _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
+      _residual_old(_sys.add_vector("residual_old", false, GHOSTED))
   {
   }
 
@@ -107,7 +98,7 @@ public:
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      MooseVariable * var = new MooseVariable(var_num, type, *this, _problem.assembly(tid));
+      MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid));
       _vars[tid].add(var_name, var);
 
       if (active_subdomains == NULL)

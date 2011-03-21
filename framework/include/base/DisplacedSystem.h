@@ -2,15 +2,17 @@
 #define DISPLACEDSYSTEM_H_
 
 #include "SystemBase.h"
-
 // libMesh include
 #include "explicit_system.h"
 #include "transient_system.h"
 
+class DisplacedProblem;
+
+
 class DisplacedSystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
-  DisplacedSystem(ProblemInterface & problem, const std::string & name);
+  DisplacedSystem(DisplacedProblem & problem, const std::string & name);
   virtual ~DisplacedSystem();
 
   virtual void prepare(THREAD_ID tid);

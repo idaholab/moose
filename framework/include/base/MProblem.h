@@ -2,11 +2,17 @@
 #define MPROBLEM_H
 
 #include "SubProblem.h"
+#include "SubProblemInterface.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "AssemblyData.h"
 #include "GeometricSearchData.h"
+#include "MaterialWarehouse.h"
+#include "PostprocessorWarehouse.h"
+#include "PostprocessorData.h"
+#include "Output.h"
+#include "Adaptivity.h"
 
 class DisplacedProblem;
 
@@ -14,11 +20,20 @@ class DisplacedProblem;
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
  */
-class MProblem : public SubProblem
+class MProblem :
+  public SubProblem
 {
 public:
   MProblem(MooseMesh & mesh, Problem * parent = NULL);
   virtual ~MProblem();
+
+  /**
+   * Get reference to all-purpose parameters
+   */
+  Parameters & parameters() { return _pars; }
+
+  virtual bool hasVariable(const std::string & var_name);
+  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
 
   virtual Order getQuadratureOrder() { return _quadrature_order; }
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
@@ -67,8 +82,32 @@ public:
 
   AuxiliarySystem & getAuxiliarySystem() { return _aux; }
 
+  // ICs /////
+  void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name);
+  void addInitialCondition(const std::string & var_name, Real value);
+
+  Number initialValue (const Point & p, const Parameters & parameters, const std::string & /*sys_name*/, const std::string & var_name);
+  Gradient initialGradient (const Point & p, const Parameters & /*parameters*/, const std::string & /*sys_name*/, const std::string & var_name);
+
+  void initialCondition(EquationSystems & es, const std::string & system_name);
+
+  // Materials /////
+  void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void updateMaterials();
+  virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
+  virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
+
   // Stabilization /////
   void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
+
+  // Postprocessors /////
+  virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, Moose::PostprocessorType pps_type = Moose::PPS_TIMESTEP);
+  /**
+   * Get a reference to the value associated with the postprocessor.
+   */
+  Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
+  virtual void computePostprocessors(int pps_type = Moose::PPS_TIMESTEP);
+  virtual void outputPostprocessors();
 
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);
@@ -81,17 +120,57 @@ public:
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
   // Output /////
+  virtual Output & out() { return _out; }
   virtual void output();
 
+  // Adaptivity /////
+  Adaptivity & adaptivity() { return _adaptivity; }
   virtual void adaptMesh();
 
 protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;
 
+  Parameters _pars;                                     /// For storing all-purpose global params
+
   // quadrature
   Order _quadrature_order;                              /// Quadrature order required by all variables to integrated over them.
   std::vector<AssemblyData *> _asm_info;
+
+  // Initial conditions
+  std::map<std::string, InitialCondition *> _ics;
+
+  // material properties
+  std::vector<MaterialData *> _material_data;
+  std::vector<MaterialData *> _bnd_material_data;
+
+  // materials
+  std::vector<MaterialWarehouse> _materials;
+
+  // postprocessors
+  std::vector<PostprocessorData> _pps_data;
+  std::vector<PostprocessorWarehouse> _pps;             // pps calculated every time step
+  std::vector<PostprocessorWarehouse> _pps_residual;    // pps calculated every residual evaluation
+  std::vector<PostprocessorWarehouse> _pps_jacobian;    // pps calculated every jacobian evaluation
+  std::vector<PostprocessorWarehouse> _pps_newtonit;    // pps calculated every newton iteration
+  FormattedTable _pps_output_table;
+
+  void computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps);
+
+  // TODO: PPS output subsystem, and this will go away
+  // postprocessor output
+public:
+  bool _postprocessor_screen_output;
+  bool _postprocessor_csv_output;
+  bool _postprocessor_ensight_output;
+  bool _postprocessor_gnuplot_output;
+  std::string _gnuplot_format;
+
+protected:
+  // Output system
+  Output _out;
+
+  Adaptivity _adaptivity;
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;
@@ -102,9 +181,11 @@ protected:
   bool _reinit_displaced_face;
   bool _output_displaced;                               /// true for outputting displaced problem
 
-
 public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)
+
+  friend class AuxiliarySystem;
+  friend class NonlinearSystem;
 };
 
 #endif /* MPROBLEM_H */

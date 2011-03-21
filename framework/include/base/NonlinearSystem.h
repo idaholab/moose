@@ -12,11 +12,17 @@
 #include "sparse_matrix.h"
 #include "preconditioner.h"
 
+class MProblem;
 
+/**
+ * Nonlinear system to be solved
+ *
+ * It is a part of MProblem ;-)
+ */
 class NonlinearSystem : public SystemTempl<TransientNonlinearImplicitSystem>
 {
 public:
-  NonlinearSystem(SubProblem & problem, const std::string & name);
+  NonlinearSystem(MProblem & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
   virtual void init();
@@ -42,12 +48,10 @@ public:
   virtual void set_solution(const NumericVector<Number> & soln) { _nl_solution = soln; }
   virtual NumericVector<Number> & solution() { return _nl_solution; }
 
-  virtual void init();
-
   void setPreconditioner(Preconditioner<Real> *pc);
 
 public:
-  SubProblem & _subproblem;
+  MProblem & _mproblem;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _l_abs_step_tol;
@@ -58,20 +62,20 @@ protected:
   void computeResidualInternal(NumericVector<Number> & residual);
   void finishResidual(NumericVector<Number> & residual);
 
-  NumericVector<Number> & _nl_solution;
+  NumericVector<Number> & _nl_solution;                 /// solution vector from nonlinear solver
 
-  Real & _t;
-  Real & _dt;
-  Real & _dt_old;
-  int & _t_step;
+  Real & _t;                                            /// time
+  Real & _dt;                                           /// size of the time step
+  Real & _dt_old;                                       /// previous time step size
+  int & _t_step;                                        /// time step (number)
   std::vector<Real> _time_weight;                       /// Coefficients (weights) for the time discretization
-  Moose::TimeSteppingScheme _time_stepping_scheme;             /// Time stepping scheme used for time discretization
+  Moose::TimeSteppingScheme _time_stepping_scheme;      /// Time stepping scheme used for time discretization
   Real _time_stepping_order;                            /// The order of the time stepping scheme
 
   // holders
-  std::vector<KernelWarehouse> _kernels;
-  std::vector<BCWarehouse> _bcs;
-  std::vector<StabilizerWarehouse> _stabilizers;
+  std::vector<KernelWarehouse> _kernels;                /// Kernel storage for each thread
+  std::vector<BCWarehouse> _bcs;                        /// BC storage for each thread
+  std::vector<StabilizerWarehouse> _stabilizers;        /// Stabilizers storage for each thread
 
   Preconditioner<Real> * _preconditioner;               /// Preconditioner
 

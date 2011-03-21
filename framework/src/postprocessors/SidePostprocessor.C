@@ -15,12 +15,12 @@ SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters p
     MaterialPropertyInterface(parameters),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
-    _q_point(_problem.pointsFace(_tid)),
-    _qrule(_problem.qRuleFace(_tid)),
-    _JxW(_problem.JxWFace(_tid)),
+    _q_point(_subproblem.pointsFace(_tid)),
+    _qrule(_subproblem.qRuleFace(_tid)),
+    _JxW(_subproblem.JxWFace(_tid)),
     _normals(_var.normals()),
-    _current_elem(_problem.elem(_tid)),
-    _current_side_elem(_problem.sideElem(_tid)),
+    _current_elem(_subproblem.elem(_tid)),
+    _current_side_elem(_subproblem.sideElem(_tid)),
     _u(_var.sln()),
     _grad_u(_var.gradSln())
 {}

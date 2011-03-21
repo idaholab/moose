@@ -1,6 +1,7 @@
 #include "DisplacedSystem.h"
+#include "DisplacedProblem.h"
 
-DisplacedSystem::DisplacedSystem(ProblemInterface & problem, const std::string & name) :
+DisplacedSystem::DisplacedSystem(DisplacedProblem & problem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(problem, name)
 {
 }

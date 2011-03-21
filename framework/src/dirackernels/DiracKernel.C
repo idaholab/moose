@@ -25,7 +25,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
 //            *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data_displaced[parameters.get<THREAD_ID>("_tid")] :
 //            *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data[parameters.get<THREAD_ID>("_tid")]
 //           ),
-    _problem(*parameters.get<SubProblem *>("_problem"))
+    _problem(*parameters.get<SubProblem *>("_subproblem"))
 //    _dirac_kernel_data(_use_displaced_mesh ? *_moose_system._dirac_kernel_data_displaced[_tid] : *_moose_system._dirac_kernel_data[_tid]),
 //    _dirac_kernel_info(_use_displaced_mesh ? _moose_system._dirac_kernel_info_displaced : _moose_system._dirac_kernel_info),
 //    _var_name(getParam<std::string>("variable")),

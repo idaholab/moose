@@ -7,12 +7,14 @@
 #include "quadrature_gauss.h"
 
 
-SystemBase::SystemBase(ProblemInterface & problem, const std::string & name) :
-    _problem(problem),
-    _mesh(problem.mesh()),
-    _name(name)
+SystemBase::SystemBase(SubProblemInterface & subproblem, const std::string & name) :
+    _problem(*subproblem.parent()),
+    _subproblem(subproblem),
+    _mesh(subproblem.mesh()),
+    _name(name),
+    _vars(libMesh::n_threads()),
+    _var_map()
 {
-  _vars.resize(libMesh::n_threads());
 }
 
 MooseVariable &

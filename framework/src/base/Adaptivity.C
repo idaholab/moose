@@ -1,14 +1,14 @@
 #include "Adaptivity.h"
 #include "Moose.h"
 #include "MooseMesh.h"
-#include "SubProblem.h"
+#include "MProblem.h"
 #include "NonlinearSystem.h"
 // libMesh
 #include "equation_systems.h"
 #include "kelly_error_estimator.h"
 #include "fourth_error_estimators.h"
 
-Adaptivity::Adaptivity(SubProblem & subproblem) :
+Adaptivity::Adaptivity(MProblem & subproblem) :
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),

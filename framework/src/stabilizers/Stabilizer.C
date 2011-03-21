@@ -15,16 +15,15 @@ InputParameters validParams<Stabilizer>()
 Stabilizer::Stabilizer(const std::string & name, InputParameters parameters) :
   MooseObject(name, parameters),
   MaterialPropertyInterface(parameters),
-  _problem(*parameters.get<SubProblem *>("_problem")),
-  _sys(*parameters.get<SystemBase *>("_sys")),
+  _subproblem(*parameters.get<SubProblem *>("_subproblem")),
   _tid(parameters.get<THREAD_ID>("_tid")),
 
-  _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+  _var(_subproblem.getVariable(_tid, parameters.get<std::string>("variable"))),
   _current_elem(_var.currentElem()),
 
-  _q_point(_sys.points(_tid)),
-  _qrule(_sys.qRule(_tid)),
-  _JxW(_sys.JxW(_tid)),
+  _q_point(_subproblem.points(_tid)),
+  _qrule(_subproblem.qRule(_tid)),
+  _JxW(_subproblem.JxW(_tid)),
 
   _phi(_var.phi()),
   _grad_phi(_var.gradPhi()),

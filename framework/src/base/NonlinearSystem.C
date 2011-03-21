@@ -1,7 +1,7 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "SubProblem.h"
+#include "MProblem.h"
 #include "MooseVariable.h"
 #include "PetscSupport.h"
 #include "Factory.h"
@@ -33,17 +33,17 @@ namespace Moose {
 
 } // namespace Moose
 
-NonlinearSystem::NonlinearSystem(SubProblem & problem, const std::string & name) :
-    SystemTempl<TransientNonlinearImplicitSystem>(problem, name),
-    _subproblem(problem),
+NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name) :
+    SystemTempl<TransientNonlinearImplicitSystem>(subproblem, name),
+    _mproblem(subproblem),
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
     _nl_solution(_sys.add_vector("curr_sln", false, GHOSTED)),
-    _t(problem.time()),
-    _dt(problem.dt()),
-    _dt_old(problem.dtOld()),
-    _t_step(problem.timeStep()),
+    _t(subproblem.time()),
+    _dt(subproblem.dt()),
+    _dt_old(subproblem.dtOld()),
+    _t_step(subproblem.timeStep()),
     _preconditioner(NULL)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
@@ -67,6 +67,7 @@ NonlinearSystem::~NonlinearSystem()
 void
 NonlinearSystem::init()
 {
+  // use computed initial condition
   _nl_solution = *_sys.current_local_solution;
   _nl_solution.close();
 }
@@ -83,7 +84,7 @@ NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string &
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _subproblem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
 
     Kernel *kernel = static_cast<Kernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
@@ -117,7 +118,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
-      parameters.set<MaterialData *>("_material_data") = _subproblem._bnd_material_data[tid];
+      parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
 
       BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
@@ -129,9 +130,8 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
       else
         mooseError("Unknown type of BoudaryCondition object");
 
-      SystemBase * sys = parameters.get<SystemBase *>("_sys");
-      sys->vars(tid).addBoundaryVar(boundaries[i], &bc->variable());
-      sys->vars(tid).addBoundaryVars(boundaries[i], bc->getCoupledVars());
+      _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
+      _vars[tid].addBoundaryVars(boundaries[i], bc->getCoupledVars());
     }
   }
 }
@@ -142,7 +142,7 @@ NonlinearSystem::addStabilizer(const std::string & stabilizer_name, const std::s
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _subproblem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
 
     Stabilizer * stabilizer = static_cast<Stabilizer *>(Factory::instance()->create(stabilizer_name, name, parameters));
     if (parameters.have_parameter<unsigned int>("block_id"))
@@ -277,7 +277,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   residual.zero();
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeResidualThread cr(*problem().parent(), *this, residual);
+  ComputeResidualThread cr(_problem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
   residual.close();
 
@@ -335,7 +335,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-  ComputeJacobianThread cj(*problem().parent(), *this, jacobian);
+  ComputeJacobianThread cj(_problem, *this, jacobian);
   Threads::parallel_reduce(elem_range, cj);
   jacobian.close();
 
@@ -484,6 +484,17 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   std::vector<short int> ids;
   _mesh.build_node_list(nodes, ids);
 
+  const std::set<short int> & boundary_ids = _mesh.get_boundary_ids();
+
+  for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+  {
+    short int id = *it;
+
+    std::vector<NodalBC *> & bcs = _bcs[0].getNodalBCs(id);
+    for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+      (*it)->setup();
+  }
+
   const unsigned int n_nodes = nodes.size();
 
   for(unsigned int i=0; i<n_nodes; i++)
@@ -576,21 +587,11 @@ NonlinearSystem::printVarNorms()
   TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);
 
   std::cout << "Norm of each nonlinear variable:" << std::endl;
-  for (std::vector<MooseVariable *>::iterator it = _vars[0].all().begin(); it != _vars[0].all().end(); ++it)
+  for (unsigned int var_num = 0; var_num < _sys.n_vars(); var_num++)
   {
-    MooseVariable *var = *it;
-    unsigned int var_num = var->number();
     std::cout << s.variable_name(var_num) << ": "
               << s.calculate_norm(*s.rhs,var_num,DISCRETE_L2) << std::endl;
   }
-}
-
-void
-NonlinearSystem::init()
-{
-  // use computed initial condition
-  _nl_solution = *_sys.current_local_solution;
-  _nl_solution.close();
 }
 
 void

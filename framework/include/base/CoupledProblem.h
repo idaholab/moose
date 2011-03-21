@@ -10,7 +10,7 @@
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
 #include "Function.h"
-#include "GeometricSearchData.h"
+#include "Output.h"
 // libMesh
 #include "equation_systems.h"
 #include "numeric_vector.h"
@@ -18,7 +18,7 @@
 #include "transient_system.h"
 #include "nonlinear_implicit_system.h"
 
-class SubProblem;
+class MProblem;
 class MooseVariable;
 class MooseMesh;
 
@@ -33,8 +33,8 @@ public:
 
   virtual Problem * parent() { return NULL; }
 
-  void addSubProblem(const std::string & file_name, SubProblem *subproblem);
-  SubProblem *subProblem(const std::string & name);
+  void addSubProblem(const std::string & file_name, MProblem *subproblem);
+  MProblem *subProblem(const std::string & name);
 
   void solveOrder(const std::vector<std::string> & solve_order);
 
@@ -42,7 +42,6 @@ public:
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
 
-  virtual AssemblyData & assembly(THREAD_ID tid);
   virtual void prepare(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
@@ -89,14 +88,12 @@ public:
   virtual Output & out() { return _out; }
   virtual void output();
 
-  virtual GeometricSearchData & geomSearchData() { return *_geometric_search_data; }
-
 protected:
-  std::map<std::string, SubProblem *> _subproblems;
+  std::map<std::string, MProblem *> _subproblems;
   std::vector<std::string> _solve_order;
 
   /// Keep track of the correspondence between libMesh objects and Moose objects
-  std::map<std::string, SubProblem *> _map;
+  std::map<std::string, MProblem *> _map;
 
   MooseMesh * _mesh;
   EquationSystems _eq;
@@ -109,9 +106,6 @@ protected:
 
   // Output system
   Output _out;
-
-  // FIXME: this should not be here, right now it is here for satisfying the interface (which is not very clean - because of this). understand?
-  GeometricSearchData * _geometric_search_data;
 };
 
 #endif /* COUPLEDPROBLEM_H_ */

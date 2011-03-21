@@ -21,7 +21,7 @@ typedef Array<RealTensor>         VariableSecond;
 
 
 class AssemblyData;
-class ProblemInterface;
+class Problem;
 class SystemBase;
 
 #if 0
@@ -155,7 +155,7 @@ public:
 protected:
   THREAD_ID _tid;
   unsigned int _var_num;
-  ProblemInterface & _problem;
+  Problem & _problem;
   SystemBase & _sys;
 
   const DofMap & _dof_map;

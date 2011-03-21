@@ -31,7 +31,7 @@ namespace libMesh
 }
 
 
-class SubProblem;
+class MProblem;
 class NonlinearSystem;
 
 /**
@@ -43,7 +43,7 @@ public:
   /**
    *  Constructor. Initializes PhysicsBasedPreconditioner data structures
    */
-  PhysicsBasedPreconditioner (SubProblem & subproblem);
+  PhysicsBasedPreconditioner (MProblem & mproblem);
     
   /**
    * Destructor.
@@ -86,7 +86,7 @@ public:
                      const unsigned int to_system, const unsigned int to_var, NumericVector<Number> & to_vector);
   
 protected:
-  SubProblem & _subproblem;                                     /// Subproblem this preconditioner is part of
+  MProblem & _mproblem;                                     /// Subproblem this preconditioner is part of
   NonlinearSystem & _nl;                                         /// The nonlinear system this PBP is associated with (convenience reference)
   std::vector<LinearImplicitSystem *> _systems;                 /// List of linear system that build up the preconditioner
   std::vector<Preconditioner<Number> *> _preconditioners;       /// Holds one Preconditioner object per small system to solve.

@@ -15,9 +15,9 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     BoundaryCondition(name, parameters),
     _test_var(_problem.getVariable(0, parameters.get<std::string>("variable"))),
 
-    _qrule(_sys.qRuleFace(_tid)),
-    _q_point(_sys.pointsFace(_tid)),
-    _JxW(_sys.JxWFace(_tid)),
+    _qrule(_subproblem.qRuleFace(_tid)),
+    _q_point(_subproblem.pointsFace(_tid)),
+    _JxW(_subproblem.JxWFace(_tid)),
 
     _phi(_var.phiFace()),
     _grad_phi(_var.gradPhiFace()),

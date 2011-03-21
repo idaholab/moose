@@ -7,12 +7,14 @@ template<>
 InputParameters validParams<Postprocessor>()
 {
   InputParameters params = validParams<MooseObject>();
+  params.addPrivateParam<bool>("use_displaced_mesh", false);
   return params;
 }
 
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    _problem(*parameters.get<SubProblem *>("_problem")),
+    _problem(*parameters.get<Problem *>("_problem")),
+    _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
     _tid(parameters.get<THREAD_ID>("_tid"))
 //   _local_name(name),
 //   _local_tid(parameters.get<THREAD_ID>("_tid")),
