@@ -9,17 +9,17 @@
 ComputeResidualThread::ComputeResidualThread(Problem & problem,
                                              NonlinearSystem & sys,
                                              NumericVector<Number> & residual) :
-  ThreadedElementLoop<ConstElemRange>(problem, sys),
-  _residual(residual),
-  _sys(sys)
+    ThreadedElementLoop<ConstElemRange>(problem, sys),
+    _residual(residual),
+    _sys(sys)
 {
 }
 
 // Splitting Constructor
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
-  ThreadedElementLoop<ConstElemRange>(x, split),
-  _residual(x._residual),
-  _sys(x._sys)
+    ThreadedElementLoop<ConstElemRange>(x, split),
+    _residual(x._residual),
+    _sys(x._sys)
 {
 }
 
