@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<CreateMeshAction>()
 {
-  InputParameters params = validParams<ParserBlock>();
+  InputParameters params = validParams<Action>();
   params.addParam<int>("dim", "The dimension of the mesh to be generated");
   params.addParam<int>("nx", 1, "Number of elements in the X direction");
   params.addParam<int>("ny", 1, "Number of elements in the Y direction");

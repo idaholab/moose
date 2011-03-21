@@ -11,7 +11,7 @@ const std::string SetupMeshAction::no_file_supplied("(no file supplied)");
 template<>
 InputParameters validParams<SetupMeshAction>()
 {
-  InputParameters params = validParams<ParserBlock>();
+  InputParameters params = validParams<Action>();
 //  params.addParam<int>("dim", "DEPRECATED - Mesh dim can be determined from the file read.");
   params.addParam<std::string>("file", SetupMeshAction::no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
