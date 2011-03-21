@@ -277,6 +277,53 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
     }
   }
 
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+
+  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
+
+  for (ConstElemRange::const_iterator elem_it = elem_range.begin() ; elem_it != elem_range.end(); ++elem_it)
+  {
+    const Elem * elem = *elem_it;
+
+    _problem.prepare(elem, 0);
+
+    unsigned int cur_subdomain = elem->subdomain_id();
+
+//    if(unlikely(_calculate_element_time))
+//      startElementTiming(elem->id());
+
+    // Now do the block nodal aux kernels
+    block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
+
+    if(block_nodal_aux_it != block_nodal_aux_end)
+    {
+      for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
+      {
+        Node & node = *elem->get_node(nd);
+
+        if(node.processor_id() == libMesh::processor_id())
+        {
+          _problem.reinitNode(&node, 0);
+
+          for(block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+              block_nodal_aux_it != block_nodal_aux_end;
+              ++block_nodal_aux_it)
+            (*block_nodal_aux_it)->compute();
+        }
+      }
+    }
+
+
+    for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
+      (*aux_it)->compute();
+
+//    if(unlikely(_calculate_element_time))
+//      stopElementTiming(elem->id());
+  }
+
+  _sys.update();
+
   // Update the element aux vars
   aux_begin = auxs[0].activeElementAuxKernelsBegin();
   aux_end = auxs[0].activeElementAuxKernelsEnd();
@@ -295,12 +342,6 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
     for(block_element_aux_it = block_element_aux_begin; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
       (*block_element_aux_it)->setup();
   }
-
-//  MeshBase::const_element_iterator       el     = _mesh->active_local_elements_begin();
-//  const MeshBase::const_element_iterator end_el = _mesh->active_local_elements_end();
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-
-  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
   for (ConstElemRange::const_iterator elem_it = elem_range.begin() ; elem_it != elem_range.end(); ++elem_it)
   {
