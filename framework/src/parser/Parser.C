@@ -84,6 +84,12 @@ Parser::registerObjects()
 //  registerNamedParserBlock(AdaptivityBlock, "Executioner/Adaptivity");
   registerNamedParserBlock(PostprocessorsBlock, "Postprocessors");
   registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/*");
+  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/Residual");
+  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/Residual/*");
+  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/Jacobian");
+  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/Jacobian/*");
+  registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/NewtonIter");
+  registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/NewtonIter/*");
 //  registerNamedParserBlock(DampersBlock, "Dampers");
 //  registerNamedParserBlock(GenericDamperBlock, "Dampers/*");
 //  registerNamedParserBlock(GlobalParamsBlock, "GlobalParams");

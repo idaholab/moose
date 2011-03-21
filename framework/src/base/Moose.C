@@ -14,6 +14,23 @@
 #include "ParsedGradFunction.h"
 #include "PiecewiseLinear.h"
 
+// PPS
+#include "AverageElementSize.h"
+#include "AverageNodalVariableValue.h"
+#include "ElementAverageValue.h"
+#include "ElementH1Error.h"
+#include "ElementH1SemiError.h"
+#include "ElementIntegral.h"
+#include "ElementL2Error.h"
+#include "NodalVariableValue.h"
+#include "PrintDOFs.h"
+#include "PrintDT.h"
+#include "PrintNumElems.h"
+#include "PrintNumNodes.h"
+#include "Reporter.h"
+#include "SideFluxIntegral.h"
+
+
 namespace Moose {
 
 static bool registered = false;
@@ -33,6 +50,21 @@ registerObjects()
   registerObject(ParsedFunction);
   registerObject(ParsedGradFunction);
   registerObject(PiecewiseLinear);
+  // PPS
+  registerObject(AverageElementSize);
+  registerObject(AverageNodalVariableValue);
+  registerObject(ElementAverageValue);
+  registerObject(ElementH1Error);
+  registerObject(ElementH1SemiError);
+  registerObject(ElementIntegral);
+  registerObject(ElementL2Error);
+  registerObject(NodalVariableValue);
+  registerObject(PrintDOFs);
+  registerObject(PrintDT);
+  registerObject(PrintNumElems);
+  registerObject(PrintNumNodes);
+  registerObject(Reporter);
+  registerObject(SideFluxIntegral);
 
   registered = true;
 }

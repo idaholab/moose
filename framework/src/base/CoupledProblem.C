@@ -158,6 +158,23 @@ CoupledProblem::initialCondition(EquationSystems & es, const std::string & syste
 }
 
 void
+CoupledProblem::computePostprocessors(int pps_type)
+{
+}
+
+void
+CoupledProblem::outputPostprocessors()
+{
+}
+
+Real &
+CoupledProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
+{
+  static Real pps;
+  return pps;
+}
+
+void
 CoupledProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
 {
 }

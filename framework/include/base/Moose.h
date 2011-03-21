@@ -5,6 +5,8 @@
 #include "print_trace.h"
 #include "libmesh_common.h"
 
+typedef Real                     PostprocessorValue;
+
 /**
  * A function to call when you need the whole program to die and spit out a message
  */
@@ -44,6 +46,15 @@ enum TimeSteppingScheme
   IMPLICIT_EULER,
   BDF2,
   CRANK_NICOLSON
+};
+
+// Bit mask flags to be able to combine them through or-operator (|)
+enum PostprocessorType
+{
+  PPS_RESIDUAL = 0x01,
+  PPS_JACOBIAN = 0x02,
+  PPS_TIMESTEP = 0x04,
+  PPS_NEWTONIT = 0x08
 };
 
 const unsigned int ANY_BLOCK_ID = (unsigned int) -1;

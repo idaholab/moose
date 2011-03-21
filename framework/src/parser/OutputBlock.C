@@ -77,23 +77,25 @@ OutputBlock::execute()
 
   exec->outputInitial(getParamValue<bool>("output_initial"));
 
+  Moose::SubProblem & mproblem = *_parser_handle._problem;
+  mproblem._postprocessor_screen_output = getParamValue<bool>("postprocessor_screen");
+  mproblem._postprocessor_csv_output = getParamValue<bool>("postprocessor_csv");
+  mproblem._postprocessor_ensight_output = getParamValue<bool>("postprocessor_ensight");
+  mproblem._postprocessor_gnuplot_output = getParamValue<bool>("postprocessor_gnuplot");
+  mproblem._gnuplot_format = getParamValue<std::string>("gnuplot_format");
+
 #if 0
   _moose_system._interval = getParamValue<int>("interval");
   _moose_system._gmv_output = getParamValue<bool>("gmv");
   _moose_system._tecplot_output = getParamValue<bool>("tecplot");
   _moose_system._tecplot_binary_output = getParamValue<bool>("tecplot_binary");
   _moose_system._xda_output = getParamValue<bool>("xda");
-  _moose_system._postprocessor_screen_output = getParamValue<bool>("postprocessor_screen");
-  _moose_system._postprocessor_csv_output = getParamValue<bool>("postprocessor_csv");
-  _moose_system._postprocessor_ensight_output = getParamValue<bool>("postprocessor_ensight");
-  _moose_system._postprocessor_gnuplot_output = getParamValue<bool>("postprocessor_gnuplot");
-  _moose_system._gnuplot_format = getParamValue<std::string>("gnuplot_format");
   _moose_system._print_out_info = getParamValue<bool>("print_out_info");
+#endif
 
 #ifdef LIBMESH_HAVE_PETSC
-  if (getParamValue<bool>("print_linear_residuals"))
-    PetscOptionsSetValue("-ksp_monitor", PETSC_NULL);
-#endif
+//  if (getParamValue<bool>("print_linear_residuals"))
+//    PetscOptionsSetValue("-ksp_monitor", PETSC_NULL);
 #endif
 
   visitChildren();

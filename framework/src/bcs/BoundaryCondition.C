@@ -19,7 +19,8 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     Moose::TransientInterface(parameters),
     Moose::MaterialPropertyInterface(parameters),
     _problem(*parameters.get<Moose::SubProblem *>("_problem")),
-    _var(_problem.getVariable(0, parameters.get<std::string>("variable"))),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _dim(_var.dimension()),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 

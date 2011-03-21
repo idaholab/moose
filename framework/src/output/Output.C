@@ -35,4 +35,11 @@ Output::output()
   }
 }
 
+void
+Output::outputPps(const FormattedTable & table)
+{
+  for (unsigned int i = 0; i < _outputters.size(); i++)
+    _outputters[i]->outputPps(_file_base, table, _time);
+}
+
 } // namespace

@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 
+#include "Moose.h"
 #include "Problem.h"
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
@@ -66,6 +67,11 @@ public:
   virtual Gradient initialGradient (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name);
 
   virtual void initialCondition(EquationSystems & es, const std::string & system_name);
+
+  // Postprocessors /////
+  virtual void computePostprocessors(int pps_type = Moose::PPS_TIMESTEP);
+  virtual void outputPostprocessors();
+  virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
 
   // Materials /////
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);

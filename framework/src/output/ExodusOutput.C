@@ -47,6 +47,59 @@ ExodusOutput::output(const std::string & file_base, Real time)
 }
 
 void
+ExodusOutput::outputPps(const std::string & file_base, const FormattedTable & table, Real time)
+{
+  const std::map<Real, std::map<std::string, Real> > & data = table.getData();
+
+  // iterators
+  std::map<Real, std::map<std::string, Real> >::const_iterator i(data.end());
+  if ( i == data.begin() )
+  {
+    return;
+  }
+  --i;
+  const Real TIME_TOL(1e-12);
+  if (std::abs((time - i->first)/time) > TIME_TOL)
+  {
+    // Try to find a match
+    for ( i = data.begin(); i != data.end(); ++i )
+    {
+      if (std::abs((time - i->first)/time) < TIME_TOL)
+      {
+        break;
+      }
+    }
+    if ( i == data.end() )
+    {
+      --i;
+      std::cerr << "Input time: " << time
+                << "\nTable time: " << i->first << std::endl;
+      mooseError("Time mismatch in outputting Exodus global variables\n"
+                 "Have the postprocessor values been computed with the correct time?");
+    }
+  }
+  const std::map<std::string, Real> & tmp = i->second;
+  std::vector<Real> global_vars;
+  std::vector<std::string> global_var_names;
+  for (std::map<std::string, Real>::const_iterator ii(tmp.begin()); ii != tmp.end(); ++ii)
+  {
+    global_var_names.push_back( ii->first );
+    global_vars.push_back( ii->second );
+  }
+
+  if (global_vars.size() != global_var_names.size())
+  {
+    mooseError("Error in outputting global vars to exodus.");
+  }
+
+  if (_out == NULL)
+    _out = new ExodusII_IO(_es.get_mesh());
+
+  _out->write_global_data( global_vars, global_var_names );
+}
+
+
+void
 ExodusOutput::meshChanged()
 {
   _file_num++;

@@ -26,8 +26,14 @@ Steady::execute()
 {
   preExecute();
   _problem.update();
+
+  // FIXME: for backward compatibility
+  _problem.computePostprocessors();
+
   if (_output_initial)
+  {
     _problem.output();
+  }
   _time = 1.0;           // should be inside the previous if-statement, but to preserve backward compatible behavior, it has to be like this ;(
 
   preSolve();
@@ -36,6 +42,8 @@ Steady::execute()
   _problem.update();
 
   // TODO: check if the solve converged
+  _problem.computePostprocessors();
+  _problem.outputPostprocessors();
   _problem.output();
 
   postExecute();

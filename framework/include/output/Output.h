@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "FormattedTable.h"
 // libMesh
 #include "libmesh_common.h"
 
@@ -19,8 +20,11 @@ public:
   void addExodus();
 
   void output();
+  // FIXME: right now, it is here - might go somewhere else?
+  void outputPps(const FormattedTable & table);
 
   void fileBase(const std::string & file_base) { _file_base = file_base; }
+  std::string & fileBase() { return _file_base; }
 
 protected:
   std::string _file_base;

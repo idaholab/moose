@@ -16,7 +16,7 @@ public:
   virtual ~TransientInterface();
 
 private:
-  Moose::SubProblem & _problem;
+  Moose::SubProblem & _ti_problem;
 
 protected:
   Real & _t;

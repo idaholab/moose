@@ -181,7 +181,6 @@ GenericExecutionerBlock::execute()
     ParserBlock * kernels = locateBlock("Kernels");
     if (kernels)
       kernels->execute();
-
     ParserBlock * bcs = locateBlock("BCs");
     if (bcs)
       bcs->execute();
@@ -192,6 +191,10 @@ GenericExecutionerBlock::execute()
     ParserBlock * auxbcs = locateBlock("AuxBCs");
     if (auxbcs)
       auxbcs->execute();
+
+    ParserBlock * pps = locateBlock("Postprocessors");
+    if (pps)
+      pps->execute();
   }
 
   visitChildren();

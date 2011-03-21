@@ -9,6 +9,9 @@
 #include "ParallelUniqueId.h"
 #include "Problem.h"
 #include "MaterialWarehouse.h"
+#include "PostprocessorData.h"
+#include "PostprocessorWarehouse.h"
+#include "FormattedTable.h"
 
 // libMesh include
 #include "equation_systems.h"
@@ -97,6 +100,15 @@ public:
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
 
+  // Postprocessors /////
+  virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, Moose::PostprocessorType pps_type = Moose::PPS_TIMESTEP);
+  /**
+   * Get a reference to the value associated with the postprocessor.
+   */
+  Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
+  virtual void computePostprocessors(int pps_type = Moose::PPS_TIMESTEP);
+  virtual void outputPostprocessors();
+
   virtual void dump();
 
   // Output /////
@@ -140,6 +152,27 @@ protected:
 
   // materials
   std::vector<MaterialWarehouse> _materials;
+
+  // postprocessors
+  std::vector<PostprocessorData> _pps_data;
+  std::vector<PostprocessorWarehouse> _pps;             // pps calculated every time step
+  std::vector<PostprocessorWarehouse> _pps_residual;    // pps calculated every residual evaluation
+  std::vector<PostprocessorWarehouse> _pps_jacobian;    // pps calculated every jacobian evaluation
+  std::vector<PostprocessorWarehouse> _pps_newtonit;    // pps calculated every newton iteration
+  FormattedTable _pps_output_table;
+
+  void computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps);
+
+  // TODO: PPS output subsystem, and this will go away
+  // postprocessor output
+public:
+  bool _postprocessor_screen_output;
+  bool _postprocessor_csv_output;
+  bool _postprocessor_ensight_output;
+  bool _postprocessor_gnuplot_output;
+  std::string _gnuplot_format;
+
+
 };
 
 

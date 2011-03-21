@@ -37,6 +37,9 @@ public:
   MeshBase::const_element_iterator active_local_elements_begin() { return _mesh.active_local_elements_begin(); }
   const MeshBase::const_element_iterator active_local_elements_end() { return _mesh.active_local_elements_end(); }
 
+  virtual unsigned int n_nodes () const { return _mesh.n_nodes(); }
+  virtual unsigned int n_elem () const { return _mesh.n_elem(); }
+
   virtual const Node & node (const unsigned int i) const { return _mesh.node(i); }
   virtual Node & node (const unsigned int i) { return _mesh.node(i); }
 

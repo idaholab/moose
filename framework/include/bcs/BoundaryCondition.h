@@ -28,12 +28,13 @@ public:
   BoundaryCondition(const std::string & name, InputParameters parameters);
   virtual ~BoundaryCondition();
 
-  unsigned int boundaryId() { return _boundary_id; }
+  unsigned int boundaryID() { return _boundary_id; }
 
   Moose::Variable & variable() { return _var; }
 
 protected:
   Moose::SubProblem & _problem;
+  THREAD_ID _tid;
   Moose::Variable & _var;
   int _dim;
 

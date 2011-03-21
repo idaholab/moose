@@ -278,7 +278,7 @@ MProblem::initDisplacedProblem(const std::vector<std::string> & displacements)
 void
 MProblem::output()
 {
-  _out.output();
+  SubProblem::output();
   if (_displaced_problem != NULL && _output_displaced)
     _displaced_problem->output(_time);
 }

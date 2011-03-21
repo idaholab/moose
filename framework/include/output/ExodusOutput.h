@@ -2,6 +2,7 @@
 #define EXODUSOUTPUTTER_H_
 
 #include "Outputter.h"
+#include "FormattedTable.h"
 
 // libMesh
 #include "libmesh_common.h"
@@ -15,6 +16,7 @@ public:
   virtual ~ExodusOutput();
 
   virtual void output(const std::string & file_base, Real time);
+  virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
 
   virtual void meshChanged();
   void sequence(bool state) { _seq = state; }
