@@ -21,16 +21,13 @@
  */
 
 // Moose Includes
+#include "MooseInit.h"
 #include "Parser.h"
 #include "Executioner.h"
-#include "MooseSystem.h"
 
 // Example 3 Includes
-#include "MooseFactory.h"
+#include "Factory.h"
 #include "Convection.h"
-
-// C++ include files
-#include <iostream>
 
 // libMesh includes
 #include "perf_log.h"
@@ -43,13 +40,11 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
   
-  MooseSystem moose_system;
-
   Moose::registerObjects();
 
   registerKernel(Convection);
 
-  Parser p(moose_system);
+  Parser p;
   
   std::string input_filename = "";
   if ( Moose::command_line->search("-i") )
@@ -60,7 +55,6 @@ int main (int argc, char** argv)
   p.parse(input_filename);
   p.execute();
 
-  Executioner &e = moose_system.getExecutioner();
-  e.setup();
-  e.execute();
+  Executioner *e = p.getExecutioner();
+  e->execute();
 }

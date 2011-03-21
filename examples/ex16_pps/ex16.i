@@ -1,7 +1,7 @@
 [Mesh]
-  dim = 2
-
   [./Generation]
+    dim = 2	
+
     nx = 10
     ny = 10
     
@@ -67,15 +67,6 @@
     variable = forced
     boundary = '0 1 2 3'
     function = bc_func
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0
   [../]
 []
 

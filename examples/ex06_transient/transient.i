@@ -80,15 +80,6 @@
 
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [Executioner]
   type = Transient   # Here we use the Transient Executioner
   perf_log = true

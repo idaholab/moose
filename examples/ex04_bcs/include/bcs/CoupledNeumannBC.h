@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "BoundaryCondition.h"
+#include "IntegratedBC.h"
 
 #ifndef COUPLEDNEUMANNBC_H
 #define COUPLEDNEUMANNBC_H
@@ -27,7 +27,7 @@ InputParameters validParams<CoupledNeumannBC>();
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class CoupledNeumannBC : public BoundaryCondition
+class CoupledNeumannBC : public IntegratedBC
 {
 public:
 

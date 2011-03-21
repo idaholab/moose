@@ -19,14 +19,14 @@
 template<>
 InputParameters validParams<TransientHalf>()
 {
-  InputParameters params = validParams<TransientExecutioner>();
+  InputParameters params = validParams<Transient>();
   params.addParam<Real>("ratio", 0.5, "The ratio used to calculate the next timestep");
   params.addParam<Real>("min_dt", 0.01, "The smallest timestep we will allow");
   return params;
 }
 
 TransientHalf::TransientHalf(const std::string & name, InputParameters parameters)
-  :TransientExecutioner(name, parameters),
+  :Transient(name, parameters),
    _ratio(getParam<Real>("ratio")),
    _min_dt(getParam<Real>("min_dt"))
 {}

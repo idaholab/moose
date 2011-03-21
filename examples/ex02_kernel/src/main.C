@@ -19,16 +19,13 @@
  */
 
 //Moose Includes
+#include "MooseInit.h"
 #include "Parser.h"
 #include "Executioner.h"
-#include "MooseSystem.h"
-#include "MooseFactory.h"        // <- New include for registration
+#include "Factory.h"              // <- New include for registration
 
 // Example 2 Includes
 #include "Convection.h"           // <- New include for our custom kernel
-
-// C++ include files
-#include <iostream>
 
 // libMesh includes
 #include "perf_log.h"
@@ -41,24 +38,25 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
 
-  MooseSystem moose_system;
-
   Moose::registerObjects();
+
   // Register any custom objects you have built on the MOOSE Framework
   registerKernel(Convection);  // <- registration
 
-  Parser p(moose_system);
-  
+  // Create a parser object
+  Parser p;
+
   std::string input_filename = "";
   if ( Moose::command_line->search("-i") )
     input_filename = Moose::command_line->next(input_filename);
   else
-    mooseError("Must specify an input file using -i");      
+    p.printUsage();
 
   p.parse(input_filename);
   p.execute();
 
-  Executioner &e = moose_system.getExecutioner();
-  e.setup();
-  e.execute();
+  Executioner *e = p.getExecutioner();
+  e->execute();
+
+  return 0;
 }

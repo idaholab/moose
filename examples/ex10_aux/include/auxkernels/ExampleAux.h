@@ -42,9 +42,9 @@ public:
 protected:
   virtual Real computeValue();
 
-  Real _value;
-
   VariableValue & _coupled_val;
+  
+  Real _value;
 };
 
 #endif //EXAMPLEAUX_H

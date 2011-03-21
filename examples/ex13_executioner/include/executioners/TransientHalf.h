@@ -15,7 +15,7 @@
 #ifndef TRANSIENTHALF_H
 #define TRANSIENTHALF_H
 
-#include "TransientExecutioner.h"
+#include "Transient.h"
 
 // Forward Declarations
 class TransientHalf;
@@ -23,7 +23,7 @@ class TransientHalf;
 template<>
 InputParameters validParams<TransientHalf>();
 
-class TransientHalf: public TransientExecutioner
+class TransientHalf: public Transient
 {
 public:
 

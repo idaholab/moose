@@ -1,6 +1,7 @@
 [Mesh]
-  dim = 2
   [./Generation]
+    dim = 2	
+
     xmin = 0.0
     xmax = 1.0
     nx = 10
@@ -44,15 +45,6 @@
     variable = diffusion
     boundary = 2
     value = 1
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0
   [../]
 []
 

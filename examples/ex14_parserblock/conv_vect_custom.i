@@ -18,18 +18,14 @@
   [../]
 []
 
-[Kernels]
-  active = 'ConvectionDiffusion'
-
-  # This is our new custom Convection Diffusion "Meta" block
-  # that adds multiple kernels into our simulation
-  #
-  # Convection and Diffusion kernels on the first variable
-  # Diffusion kernel on the second variable
-  # The Convection kernel is coupled to the Diffusion kernel on the second variable
-  [./ConvectionDiffusion]
+# This is our new custom Convection Diffusion "Meta" block
+# that adds multiple kernels into our simulation
+#
+# Convection and Diffusion kernels on the first variable
+# Diffusion kernel on the second variable
+# The Convection kernel is coupled to the Diffusion kernel on the second variable
+[ConvectionDiffusion]
     variables = 'convected diffused'
-  [../]
 []
 
 [BCs]
@@ -65,15 +61,6 @@
     value = 1
   [../]
 
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
 []
 
 [Executioner]

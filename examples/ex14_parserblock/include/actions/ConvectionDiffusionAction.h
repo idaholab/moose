@@ -12,23 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONVECTIONDIFFUSIONBLOCK_H
-#define CONVECTIONDIFFUSIONBLOCK_H
+#ifndef CONVECTIONDIFFUSIONACTION_H
+#define CONVECTIONDIFFUSIONACTION_H
 
-#include "ParserBlock.h"
+#include "Action.h"
 
-//Forward Declarations
-class ConvectionDiffusionBlock;
-
-template<>
-InputParameters validParams<ConvectionDiffusionBlock>();
-
-class ConvectionDiffusionBlock: public ParserBlock
+class ConvectionDiffusionAction : public Action
 {
 public:
-  ConvectionDiffusionBlock(const std::string & name, InputParameters params);
+  ConvectionDiffusionAction(const std::string & name, InputParameters params);
 
-  virtual void execute();
+  virtual void act();
 };
 
-#endif //CONVECTIONDIFFUSIONBLOCK_H
+template<>
+InputParameters validParams<ConvectionDiffusionAction>();
+
+#endif //CONVECTIONDIFFUSIONACTION_H

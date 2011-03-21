@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
   Executioner *e = p.getExecutioner();
   e->execute();
   delete e;
-  
 
   return 0;
 }

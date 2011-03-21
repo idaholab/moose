@@ -71,7 +71,6 @@
     boundary = '2'
     value = 10
   [../]
-
 []
 
 [Materials]

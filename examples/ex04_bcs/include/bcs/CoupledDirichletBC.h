@@ -15,7 +15,7 @@
 #ifndef COUPLEDDIRICHLETBC_H
 #define COUPLEDDIRICHLETBC_H
 
-#include "BoundaryCondition.h"
+#include "NodalBC.h"
 
 //Forward Declarations
 class CoupledDirichletBC;
@@ -26,7 +26,7 @@ InputParameters validParams<CoupledDirichletBC>();
 /**
  * Implements a coupled Dirichlet BC where u = value * some_var on the boundary.
  */
-class CoupledDirichletBC : public BoundaryCondition
+class CoupledDirichletBC : public NodalBC
 {
 public:
 

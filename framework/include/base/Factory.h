@@ -24,6 +24,7 @@
 #define registerDumper(name)                      registerObject(name)
 #define registerDiracKernel(name)                 registerObject(name)
 #define registerExecutioner(name)                 registerObject(name)
+#define registerFunction(name)                    registerObject(name)
 
 #define registerNamedKernel(obj, name)                 registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)      registerNamedObject(obj, name)

@@ -17,7 +17,7 @@
 template<>
 InputParameters validParams<CoupledNeumannBC>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
+  InputParameters params = validParams<IntegratedBC>();
 
   // Here we are adding a parameter that will be extracted from the input file by the Parser
   params.addParam<Real>("value", 0.0, "Value multiplied by the coupled value on the boundary");
@@ -26,7 +26,7 @@ InputParameters validParams<CoupledNeumannBC>()
 }
 
 CoupledNeumannBC::CoupledNeumannBC(const std::string & name, InputParameters parameters)
- :BoundaryCondition(name, parameters),
+ :IntegratedBC(name, parameters),
   _value(getParam<Real>("value")),
   _some_var_val(coupledValue("some_var"))
 {}
