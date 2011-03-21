@@ -890,12 +890,19 @@ void
 MProblem::adaptMesh()
 {
   _adaptivity.adaptMesh();
+  meshChanged();
+}
 
+void
+MProblem::meshChanged()
+{
   // mesh changed
   _eq.reinit();
   _mesh.meshChanged();
   _geometric_search_data.update();
-  // FIXME: udpate geom_search data in displaced problem
+
+  if(_displaced_problem != NULL)
+    _displaced_problem->meshChanged();
 }
 
 void

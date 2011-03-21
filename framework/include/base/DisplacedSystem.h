@@ -12,7 +12,7 @@ class DisplacedProblem;
 class DisplacedSystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
-  DisplacedSystem(DisplacedProblem & problem, const std::string & name);
+  DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name);
   virtual ~DisplacedSystem();
 
   virtual void prepare(THREAD_ID tid);
@@ -20,6 +20,15 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+
+  /// Return the residual copy from the NonlinearSystem
+  virtual NumericVector<Number> & residualCopy() { return _undisplaced_system.residualCopy(); }
+
+  /// Return whether or not the NonlinearSystem is currently computing a Jacobian matrix
+  virtual bool currentlyComputingJacobian() { return _undisplaced_system.currentlyComputingJacobian(); }
+  
+protected:
+  SystemBase & _undisplaced_system;
 };
 
 #endif /* DISPLACEDSYSTEM_H_ */

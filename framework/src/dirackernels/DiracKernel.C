@@ -35,6 +35,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
 
     _current_elem(_var.currentElem()),
     _q_point(_subproblem.points(_tid)),
+    _physical_point(_subproblem.physicalPoints(_tid)),
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
 
@@ -73,11 +74,11 @@ DiracKernel::computeResidual()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    _current_point=_q_point[_qp];
+    _current_point=_physical_point[_qp];
     if(isActiveAtPoint(_current_elem, _current_point))
     {
       for (_i = 0; _i < _phi.size(); _i++)
-      re(_i) += computeQpResidual();
+        re(_i) += computeQpResidual();
     }
   }
 }
@@ -89,7 +90,7 @@ DiracKernel::computeJacobian()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    _current_point=_q_point[_qp];
+    _current_point=_physical_point[_qp];
     if(isActiveAtPoint(_current_elem, _current_point))
       for (_i = 0; _i < _phi.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
@@ -127,7 +128,7 @@ DiracKernel::addPoint(Point p)
 bool
 DiracKernel::hasPointsOnElem(const Elem * elem)
 {
-  return _elements.count(elem) != 0;
+  return _elements.count(_mesh.elem(elem->id())) != 0;
 }
 
 bool
@@ -135,22 +136,6 @@ DiracKernel::isActiveAtPoint(const Elem * elem, const Point & p)
 {
   return _points[elem].count(p) != 0;
 }
-
-//NumericVector<Number> &
-//DiracKernel::residualCopy()
-//{
-//  _moose_system.needResidualCopy(true);
-//
-//  return _moose_system._residual_copy;
-//}
-//
-//SparseMatrix<Number> &
-//DiracKernel::jacobianCopy()
-//{
-//  _moose_system.needJacobianCopy(true);
-//
-//  return *_moose_system._jacobian_copy;
-//}
 
 void
 DiracKernel::clearPoints()

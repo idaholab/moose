@@ -20,6 +20,7 @@ public:
   FEBase * & getFE(FEType type);
   QBase * & qRule() { return _qrule; }
   const std::vector<Point> & qPoints() { return _q_points; }
+  const std::vector<Point> & physicalPoints() { return _current_physical_points; }
   const std::vector<Real> & JxW() { return _JxW; }
 
   FEBase * & getFEFace(FEType type);
@@ -97,7 +98,7 @@ protected:
 
   const Node * _current_node;
 
-
+  std::vector<Point> _current_physical_points;  /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
 };
 
 #endif /* ASSEMBLYDATA_H */

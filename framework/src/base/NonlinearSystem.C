@@ -45,13 +45,15 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
     _nl_solution(_sys.add_vector("curr_sln", false, GHOSTED)),
+    _residual_copy(*NumericVector<Number>::build().release()),
     _t(subproblem.time()),
     _dt(subproblem.dt()),
     _dt_old(subproblem.dtOld()),
     _t_step(subproblem.timeStep()),
     _time_weight(subproblem.timeWeights()),
     _increment_vec(NULL),
-    _preconditioner(NULL)
+    _preconditioner(NULL),
+    _need_residual_copy(false)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
@@ -77,6 +79,8 @@ NonlinearSystem::~NonlinearSystem()
 void
 NonlinearSystem::init()
 {
+  _residual_copy.init(_sys.n_dofs(), false, SERIAL);
+
   // use computed initial condition
   _nl_solution = *_sys.current_local_solution;
   _nl_solution.close();
@@ -206,7 +210,6 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
   computeTimeDeriv();
   computeResidualInternal(residual);
   finishResidual(residual);
-  computeDiracContributions(&residual);
 
   Moose::perf_log.pop("compute_residual()","Solve");
 }
@@ -326,6 +329,15 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeResidualThread cr(_problem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
+
+  if(_need_residual_copy)
+  {
+    residual.close();
+    residual.localize(_residual_copy);    
+  }
+  
+  computeDiracContributions(&residual);
+
   residual.close();
 
   // do nodal BC
@@ -367,6 +379,9 @@ void
 NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 {
   Moose::perf_log.push("compute_jacobian()","Solve");
+
+  _currently_computing_jacobian = true;
+  
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
@@ -384,9 +399,10 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
   ComputeJacobianThread cj(_problem, *this, jacobian);
   Threads::parallel_reduce(elem_range, cj);
-  jacobian.close();
 
   computeDiracContributions(NULL, &jacobian);
+
+  jacobian.close();  
   
   // do nodal BC
   std::vector<unsigned int> nodes;
@@ -405,6 +421,8 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       (*it)->computeJacobian(jacobian);
   }
   jacobian.close();
+
+  _currently_computing_jacobian = false;
 
   Moose::perf_log.pop("compute_jacobian()","Solve");
 }
@@ -640,13 +658,14 @@ NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
     Threads::parallel_reduce(range, cd);
   }
 
-  if(residual)
-    residual->close();
-  else if(jacobian)
-    jacobian->close();
-
   Moose::perf_log.pop("computeDiracContributions()","Solve");
+}
 
+NumericVector<Number> &
+NonlinearSystem::residualCopy()
+{
+  _need_residual_copy = true;
+  return _residual_copy;
 }
 
 void

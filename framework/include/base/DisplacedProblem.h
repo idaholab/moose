@@ -7,6 +7,8 @@
 #include "DisplacedSystem.h"
 #include "AssemblyData.h"
 #include "GeometricSearchData.h"
+#include "MProblem.h"
+
 // libMesh
 #include "equation_systems.h"
 #include "explicit_system.h"
@@ -20,12 +22,12 @@ class DisplacedProblem :
   public SubProblemInterface
 {
 public:
-  DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements);
+  DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements);
   virtual ~DisplacedProblem();
 
   virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
-  virtual Problem * parent() { return _subproblem.parent(); }
+  virtual Problem * parent() { return _mproblem.parent(); }
   MooseMesh & refMesh() { return _ref_mesh; }
 
   DisplacedSystem & nlSys() { return _nl; }
@@ -48,6 +50,9 @@ public:
   // Output /////
   virtual void output();
 
+  // Adaptivity /////
+  virtual void meshChanged();
+
   // reinit /////
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
@@ -64,6 +69,7 @@ public:
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
   virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
+  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) { return _asm_info[tid]->physicalPoints(); }
   virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _asm_info[tid]->JxW(); }
   virtual QBase * & qRuleFace(THREAD_ID tid) { return _asm_info[tid]->qRuleFace(); }
   virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _asm_info[tid]->qPointsFace(); }
@@ -78,7 +84,7 @@ public:
 
 protected:
   Problem & _problem;
-  SubProblem & _subproblem;
+  MProblem & _mproblem;
   MooseMesh & _mesh;
   EquationSystems _eq;
   MooseMesh & _ref_mesh;                               /// reference mesh

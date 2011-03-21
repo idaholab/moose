@@ -50,6 +50,8 @@ public:
 
   virtual void set_solution(const NumericVector<Number> & soln) { _nl_solution = soln; }
   virtual NumericVector<Number> & solution() { return _nl_solution; }
+  
+  virtual NumericVector<Number> & residualCopy();
 
   void setPreconditioner(Preconditioner<Real> *pc);
 
@@ -77,6 +79,8 @@ protected:
 
   NumericVector<Number> & _nl_solution;                 /// solution vector from nonlinear solver
 
+  NumericVector<Number> & _residual_copy;               /// Copy of the residual vector
+
   Real & _t;                                            /// time
   Real & _dt;                                           /// size of the time step
   Real & _dt_old;                                       /// previous time step size
@@ -95,6 +99,8 @@ protected:
   NumericVector<Number> * _increment_vec;               /// increment vector
 
   Preconditioner<Real> * _preconditioner;               /// Preconditioner
+
+  bool _need_residual_copy;                             /// Whether or not a copy of the residual needs to be made
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;

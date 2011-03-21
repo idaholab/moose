@@ -158,6 +158,7 @@ protected:
 
   unsigned int _qp;
   const std::vector< Point > & _q_point;
+  const std::vector< Point > & _physical_point;
   QBase * & _qrule;
   const std::vector<Real> & _JxW;
 

@@ -12,6 +12,7 @@ SystemBase::SystemBase(SubProblemInterface & subproblem, const std::string & nam
     _subproblem(subproblem),
     _mesh(subproblem.mesh()),
     _name(name),
+    _currently_computing_jacobian(false),
     _vars(libMesh::n_threads()),
     _var_map()
 {

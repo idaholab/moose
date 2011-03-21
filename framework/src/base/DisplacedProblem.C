@@ -80,19 +80,19 @@ protected:
 };
 
 
-DisplacedProblem::DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements) :
+DisplacedProblem::DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements) :
     SubProblemInterface(),
-    _problem(*problem.parent()),
-    _subproblem(problem),
+    _problem(*mproblem.parent()),
+    _mproblem(mproblem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),
-    _ref_mesh(_subproblem.mesh()),
+    _ref_mesh(_mproblem.mesh()),
     _displacements(displacements),
-    _nl(*this, "DisplacedSystem"),
-    _aux(*this, "DisplacedAuxSystem"),
+    _nl(*this, _mproblem.getNonlinearSystem(), "DisplacedSystem"),
+    _aux(*this, _mproblem.getAuxiliarySystem(), "DisplacedAuxSystem"),
     _nl_solution(NumericVector<Number>::build().release()),
     _aux_solution(NumericVector<Number>::build().release()),
-    _geometric_search_data(_subproblem, _mesh),
+    _geometric_search_data(_mproblem, _mesh),
     _ex(_eq)
 {
   _mesh.prepare();
@@ -121,10 +121,12 @@ DisplacedProblem::init()
   _eq.init();
   _eq.print_info(std::cout);
 
+  _mesh.meshChanged();
+
   _nl_solution->init(_nl.sys().n_dofs(), false, SERIAL);
   _aux_solution->init(_aux.sys().n_dofs(), false, SERIAL);
 
-  Order qorder = _subproblem.getQuadratureOrder();
+  Order qorder = _mproblem.getQuadratureOrder();
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _asm_info[tid]->createQRules(qorder);
 }
@@ -146,10 +148,10 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
 
   Threads::parallel_for(*_mesh.getActiveNodeRange(), UpdateDisplacedMeshThread(*this));
 
-  Moose::perf_log.pop("updateDisplacedMesh()","Solve");
-
   // Update the geometric searches that depend on the displaced mesh
   _geometric_search_data.update();
+
+  Moose::perf_log.pop("updateDisplacedMesh()","Solve");
 }
 
 bool
@@ -203,7 +205,7 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
   if(have_points)
   {
-    std::vector<Point> points;
+    std::vector<Point> points(points_set.size());
     std::copy(points_set.begin(), points_set.end(), points.begin());
 
     _asm_info[tid]->reinitAtPhysical(elem, points);
@@ -265,7 +267,16 @@ void
 DisplacedProblem::output()
 {
   // FIXME: use proper file_base
-  _ex.output("out_displaced", _subproblem.time());
+  _ex.output("out_displaced", _mproblem.time());
   _ex.meshChanged();
+}
+
+void
+DisplacedProblem::meshChanged()
+{
+  // mesh changed
+  _eq.reinit();
+  _mesh.meshChanged();
+  _geometric_search_data.update();
 }
 

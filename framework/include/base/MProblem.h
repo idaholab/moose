@@ -39,6 +39,7 @@ public:
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
   virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
+  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) { return _asm_info[tid]->physicalPoints(); }
   virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _asm_info[tid]->JxW(); }
   virtual QBase * & qRuleFace(THREAD_ID tid) { return _asm_info[tid]->qRuleFace(); }
   virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _asm_info[tid]->qPointsFace(); }
@@ -144,6 +145,7 @@ public:
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
   virtual void adaptMesh();
+  virtual void meshChanged();
 
   void checkProblemIntegrity();
 

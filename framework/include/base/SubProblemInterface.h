@@ -30,6 +30,7 @@ public:
   virtual AssemblyData & assembly(THREAD_ID tid) = 0;
   virtual QBase * & qRule(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & points(THREAD_ID tid) = 0;
+  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) = 0;
   virtual const std::vector<Real> & JxW(THREAD_ID tid) = 0;
   virtual QBase * & qRuleFace(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & pointsFace(THREAD_ID tid) = 0;
@@ -43,6 +44,7 @@ public:
   // Geom Search
   virtual GeometricSearchData & geomSearchData() = 0;
 
+  virtual void meshChanged() { mooseError("This system does not support changing the mesh"); }
 protected:
   DiracKernelInfo _dirac_kernel_info;
 };

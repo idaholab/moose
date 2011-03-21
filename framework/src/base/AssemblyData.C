@@ -109,6 +109,9 @@ AssemblyData::reinitAtPhysical(const Elem * elem, const std::vector<Point> & phy
   FEInterface::inverse_map(_mesh.dimension(), FEType(), elem, physical_points, reference_points);
 
   reinit(elem, reference_points);
+
+  // Save off the physical points
+  _current_physical_points = physical_points;
 }
 
 void

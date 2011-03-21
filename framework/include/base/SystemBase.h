@@ -47,7 +47,12 @@ public:
   virtual NumericVector<Number> & solutionUDot() = 0;
   virtual NumericVector<Number> & solutionDuDotDu() = 0;
 
+  virtual NumericVector<Number> & residualCopy() { mooseError("This system does not support getting a copy of the residual"); }
+
+  virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
+
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL) = 0;
+
   virtual bool hasVariable(const std::string & var_name) = 0;
 
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
@@ -68,6 +73,8 @@ protected:
   SubProblemInterface & _subproblem;
   MooseMesh & _mesh;
   std::string _name;
+  
+  bool _currently_computing_jacobian;    /// Whether or not the system is currently computing the Jacobian matrix
 
   std::vector<VariableWarehouse> _vars;
   std::map<unsigned int, std::set<unsigned int> > _var_map;
