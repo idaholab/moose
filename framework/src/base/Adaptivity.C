@@ -38,6 +38,8 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   _mesh_refinement_on = true;
 
   _error = new ErrorVector;
+
+  _mesh_refinement->set_periodic_boundaries_ptr(_subproblem.getNonlinearSystem().dofMap().get_periodic_boundaries());
 }
 
 void
