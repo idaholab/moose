@@ -34,6 +34,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     GeometricSearchInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),
     _aux_sys(*parameters.get<AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -55,6 +56,8 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _current_volume(_aux_sys._data[_tid]._current_volume),
     _nodal(_var.feType().family == LAGRANGE),
 
+    _solution(_sys.solution()),
+
     _ts(getParam<bool>("ts")),
 
     _real_zero(_problem._real_zero[_tid]),
@@ -65,13 +68,13 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 }
 
 void
-AuxKernel::compute(NumericVector<Number> & sln)
+AuxKernel::compute()
 {
   if (isNodal())
   {
     unsigned int & dof_idx = _var.nodalDofIndex();
     _qp = 0;
-    sln.set(dof_idx, computeValue());
+    _solution.set(dof_idx, computeValue());
   }
   else
   {
@@ -80,7 +83,7 @@ AuxKernel::compute(NumericVector<Number> & sln)
       value += _JxW[_qp]*computeValue();
 
     unsigned int & dof_idx = _var.nodalDofIndex();
-    sln.set(dof_idx, value / _current_volume);
+    _solution.set(dof_idx, value / _current_volume);
   }
 }
 

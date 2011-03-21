@@ -100,7 +100,6 @@ Transient::execute()
   _problem.updateGeomSearch();
 
   preExecute();
-  _problem.update();
   _problem.computePostprocessors();
   if (_output_initial)
   {

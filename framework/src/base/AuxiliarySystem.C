@@ -218,7 +218,7 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
       _problem.reinitNode(node, 0);
 
       for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-        (*aux_it)->compute(solution());
+        (*aux_it)->compute();
 
 //      if(unlikely(_calculate_element_time))
 //        stopNodeTiming(node->id());
@@ -264,7 +264,7 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
         _problem.reinitNodeFace(&node, ids[i], 0);
 
         for(aux_it=aux_begin; aux_it != aux_end; ++aux_it)
-          (*aux_it)->compute(solution());
+          (*aux_it)->compute();
       }
 
 //      if(unlikely(_calculate_element_time))
@@ -330,10 +330,10 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
     }
 
     for(; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
-      (*block_element_aux_it)->compute(solution());
+      (*block_element_aux_it)->compute();
 
     for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-      (*aux_it)->compute(solution());
+      (*aux_it)->compute();
 
     // Now do the block nodal aux kernels
     block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
@@ -352,7 +352,7 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
           for(block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
               block_nodal_aux_it != block_nodal_aux_end;
               ++block_nodal_aux_it)
-            (*block_nodal_aux_it)->compute(solution());
+            (*block_nodal_aux_it)->compute();
         }
       }
     }

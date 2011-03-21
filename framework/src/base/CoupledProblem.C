@@ -116,13 +116,6 @@ CoupledProblem::init()
 }
 
 void
-CoupledProblem::update()
-{
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
-    it->second->update();
-}
-
-void
 CoupledProblem::computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
   _map[sys.name()]->computeResidual(sys, soln, residual);

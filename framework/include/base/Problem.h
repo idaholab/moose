@@ -61,7 +61,6 @@ public:
 
   // Solve /////
   virtual void init() = 0;
-  virtual void update() = 0;
 
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual) = 0;
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian) = 0;

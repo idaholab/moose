@@ -60,7 +60,6 @@ public:
 
   virtual void init();
   virtual void init2();
-  virtual void update();
   virtual void solve();
   virtual bool converged();
 

@@ -41,7 +41,7 @@ public:
 
   virtual ~AuxKernel() {}
 
-  void compute(NumericVector<Number> & sln);
+  void compute();
 
   MooseVariable & variable() { return _var; }
 
@@ -56,6 +56,7 @@ protected:
 
   Problem & _problem;
   SubProblemInterface & _subproblem;
+  SystemBase & _sys;
   SystemBase & _nl_sys;
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
@@ -76,10 +77,9 @@ protected:
 
   Real & _current_volume;
 
-  /**
-   * true if the kernel nodal, false if it is elemental
-   */
-  bool _nodal;
+  bool _nodal;                                          /// true if the kernel nodal, false if it is elemental
+
+  NumericVector<Number> & _solution;                    /// reference to the solution vector of auxiliary system
 
   unsigned int _qp;
 

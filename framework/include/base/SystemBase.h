@@ -44,6 +44,7 @@ public:
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
   virtual NumericVector<Number> & solutionOlder() = 0;
+
   virtual NumericVector<Number> & solutionUDot() = 0;
   virtual NumericVector<Number> & solutionDuDotDu() = 0;
 
@@ -98,9 +99,7 @@ public:
       _solution(*_sys.solution),
       _solution_old(*_sys.old_local_solution),
       _solution_older(*_sys.older_local_solution),
-      _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
-      _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
-      _residual_old(_sys.add_vector("residual_old", false, GHOSTED))
+      _dummy_sln(NULL)
   {
   }
 
@@ -140,8 +139,8 @@ public:
   virtual NumericVector<Number> & solutionOld() { return _solution_old; }
   virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
 
-  virtual NumericVector<Number> & solutionUDot() { return _solution_u_dot; }
-  virtual NumericVector<Number> & solutionDuDotDu() { return _solution_du_dot_du; }
+  virtual NumericVector<Number> & solutionUDot() { return *_dummy_sln; }
+  virtual NumericVector<Number> & solutionDuDotDu() { return *_dummy_sln; }
 
   virtual NumericVector<Number> & getVector(std::string name) { return _sys.get_vector(name); }
 
@@ -193,9 +192,7 @@ protected:
   NumericVector<Number> & _solution_old;
   NumericVector<Number> & _solution_older;
 
-  NumericVector<Number> & _solution_u_dot;
-  NumericVector<Number> & _solution_du_dot_du;
-  NumericVector<Number> & _residual_old;                /// residual evaluated at the old time step
+  NumericVector<Number> * _dummy_sln;                     /// to satisfy the interface
 };
 
 #endif /* SYSTEMBASE_H */

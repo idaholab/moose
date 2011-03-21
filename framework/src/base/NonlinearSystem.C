@@ -44,7 +44,10 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
-    _nl_solution(_sys.add_vector("curr_sln", false, GHOSTED)),
+    _nl_solution(*_sys.current_local_solution),
+    _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
+    _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
+    _residual_old(_sys.add_vector("residual_old", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _residual_copy(*NumericVector<Number>::build().release()),
     _t(subproblem.time()),
@@ -83,10 +86,6 @@ NonlinearSystem::init()
 {
   _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
   _residual_copy.init(_sys.n_dofs(), false, SERIAL);
-
-  // use computed initial condition
-  _nl_solution = *_sys.current_local_solution;
-  _nl_solution.close();
 }
 
 bool
@@ -691,8 +690,6 @@ NonlinearSystem::residualCopy()
 void
 NonlinearSystem::set_solution(const NumericVector<Number> & soln)
 {
-  _nl_solution = soln;
-  
   if(_need_serialized_solution)
     _nl_solution.localize(_serialized_solution);
 }

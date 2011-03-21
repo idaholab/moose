@@ -121,7 +121,6 @@ void
 LooseCoupling::execute()
 {
   _problem.copySolutionsBackwards();
-  _problem.update();
 
   if (_output_initial)
     _problem.output();

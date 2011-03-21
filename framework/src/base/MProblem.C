@@ -752,18 +752,13 @@ MProblem::init2()
 }
 
 void
-MProblem::update()
-{
-  _nl.update();
-}
-
-void
 MProblem::solve()
 {
   Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
   _nl.solve();
   Moose::perf_log.pop("solve()","Solve");
+  _nl.update();
 }
 
 bool
@@ -840,7 +835,7 @@ MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector
 }
 
 void
-MProblem::computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+MProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
 {
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(_nl.solution(), _aux.solution());

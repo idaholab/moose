@@ -33,7 +33,6 @@ Steady::execute()
   _problem.geomSearchData().update();
 
   preExecute();
-  _problem.update();
 
   // FIXME: for backward compatibility
   _problem.computePostprocessors();
@@ -52,7 +51,6 @@ Steady::execute()
     _problem.updateMaterials();
     _problem.solve();
     postSolve();
-    _problem.update();
 
     // TODO: check if the solve converged
     _problem.computePostprocessors();

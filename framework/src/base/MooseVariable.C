@@ -2,6 +2,7 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "AssemblyData.h"
+#include "NonlinearSystem.h"
 
 // libMesh
 #include "numeric_vector.h"
@@ -109,6 +110,9 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _elem(_assembly.elem()),
     _current_side(_assembly.side()),
 
+    _is_nl(dynamic_cast<NonlinearSystem *>(&sys) != NULL),
+    _has_second_derivatives(fe_type.family == CLOUGH || fe_type.family == HERMITE),
+
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi()),
     _second_phi(_fe->get_d2phi()),
@@ -205,23 +209,24 @@ MooseVariable::add(SparseMatrix<Number> & jacobian)
 void
 MooseVariable::computeElemValues()
 {
-  bool has_second_derivatives = (feType().family == CLOUGH || feType().family == HERMITE);
-
   unsigned int nqp = _qrule->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
-  if (has_second_derivatives)
+  if (_has_second_derivatives)
     _second_u.resize(nqp);
   if (_problem.transient())
   {
-    _u_dot.resize(nqp);
-    _du_dot_du.resize(nqp);
+    if (_is_nl)
+    {
+      _u_dot.resize(nqp);
+      _du_dot_du.resize(nqp);
+    }
 
     _u_old.resize(nqp);
     _u_older.resize(nqp);
     _grad_u_old.resize(nqp);
     _grad_u_older.resize(nqp);
-    if (has_second_derivatives)
+    if (_has_second_derivatives)
     {
       _second_u_old.resize(nqp);
       _second_u_older.resize(nqp);
@@ -232,19 +237,22 @@ MooseVariable::computeElemValues()
   {
     _u[i] = 0;
     _grad_u[i] = 0;
-    if (has_second_derivatives)
+    if (_has_second_derivatives)
       _second_u[i] = 0;
 
     if (_problem.transient())
     {
-      _u_dot[i] = 0;
-      _du_dot_du[i] = 0;
+      if (_is_nl)
+      {
+        _u_dot[i] = 0;
+        _du_dot_du[i] = 0;
+      }
 
       _u_old[i] = 0;
       _u_older[i] = 0;
       _grad_u_old[i] = 0;
       _grad_u_older[i] = 0;
-      if (has_second_derivatives)
+      if (_has_second_derivatives)
       {
         _second_u_old[i] = 0;
         _second_u_older[i] = 0;
@@ -274,19 +282,22 @@ MooseVariable::computeElemValues()
 
       _u[qp]      += phi_local * soln_local;
       _grad_u[qp] += dphi_local * soln_local;
-      if (has_second_derivatives)
+      if (_has_second_derivatives)
         _second_u[qp] += d2phi_local * soln_local;
 
       if (_problem.transient())
       {
-        _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
-        _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
+        if (_is_nl)
+        {
+          _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
+          _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
+        }
 
         _u_old[qp]        += phi_local * soln_old_local;
         _u_older[qp]      += phi_local * soln_older_local;
         _grad_u_old[qp]   += dphi_local * soln_old_local;
         _grad_u_older[qp] += dphi_local * soln_older_local;
-        if (has_second_derivatives)
+        if (_has_second_derivatives)
         {
           _second_u_old[qp] += d2phi_local * soln_old_local;
           _second_u_older[qp] += d2phi_local * soln_older_local;
@@ -299,22 +310,24 @@ MooseVariable::computeElemValues()
 void
 MooseVariable::computeElemValuesFace()
 {
-  bool has_second_derivatives = (feType().family == CLOUGH || feType().family == HERMITE);
   unsigned int nqp = _qrule_face->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
-  if (has_second_derivatives)
+  if (_has_second_derivatives)
     _second_u.resize(nqp);
   if (_problem.transient())
   {
-    _u_dot.resize(nqp);
-    _du_dot_du.resize(nqp);
+    if (_is_nl)
+    {
+      _u_dot.resize(nqp);
+      _du_dot_du.resize(nqp);
+    }
 
     _u_old.resize(nqp);
     _u_older.resize(nqp);
     _grad_u_old.resize(nqp);
     _grad_u_older.resize(nqp);
-    if (has_second_derivatives)
+    if (_has_second_derivatives)
     {
       _second_u_old.resize(nqp);
       _second_u_older.resize(nqp);
@@ -328,14 +341,17 @@ MooseVariable::computeElemValuesFace()
 
     if (_problem.transient())
     {
-      _u_dot[i] = 0;
-      _du_dot_du[i] = 0;
+      if (_is_nl)
+      {
+        _u_dot[i] = 0;
+        _du_dot_du[i] = 0;
+      }
 
       _u_old[i] = 0;
       _u_older[i] = 0;
       _grad_u_old[i] = 0;
       _grad_u_older[i] = 0;
-      if (has_second_derivatives)
+      if (_has_second_derivatives)
       {
         _second_u_old[i] = 0;
         _second_u_older[i] = 0;
@@ -365,19 +381,22 @@ MooseVariable::computeElemValuesFace()
 
       _u[qp]      += phi_local * soln_local;
       _grad_u[qp] += dphi_local * soln_local;
-      if (has_second_derivatives)
+      if (_has_second_derivatives)
         _second_u[qp] += d2phi_local * soln_local;
 
       if (_problem.transient())
       {
-        _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
-        _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
+        if (_is_nl)
+        {
+          _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
+          _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
+        }
 
         _u_old[qp]        += phi_local * soln_old_local;
         _u_older[qp]      += phi_local * soln_older_local;
         _grad_u_old[qp]   += dphi_local * soln_old_local;
         _grad_u_older[qp] += dphi_local * soln_older_local;
-        if (has_second_derivatives)
+        if (_has_second_derivatives)
         {
           _second_u_old[qp] += d2phi_local * soln_old_local;
           _second_u_older[qp] += d2phi_local * soln_older_local;

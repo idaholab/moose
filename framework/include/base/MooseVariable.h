@@ -180,6 +180,9 @@ protected:
 
   std::vector<unsigned int> _dof_indices;
 
+  bool _is_nl;
+  bool _has_second_derivatives;
+
 //  const std::vector<Point> & _qpoints;
 //  const std::vector<Point> & _qpoints_face;
 

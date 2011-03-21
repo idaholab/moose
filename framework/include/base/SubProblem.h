@@ -31,7 +31,6 @@ public:
   virtual MooseMesh & mesh() { return _mesh; }
 
   virtual void init();
-  virtual void update() = 0;
   virtual void solve() = 0;
   virtual bool converged() = 0;
 
