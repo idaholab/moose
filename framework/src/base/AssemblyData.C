@@ -1,5 +1,8 @@
 #include "AssemblyData.h"
+
+// MOOSE includes
 #include "SubProblem.h"
+#include "ArbitraryQuadrature.h"
 
 namespace Moose
 {
@@ -9,6 +12,8 @@ AssemblyData::AssemblyData(Mesh & mesh) :
 
     _fe_helper(getFE(FEType(FIRST, LAGRANGE))),
     _qrule(NULL),
+    _qrule_volume(NULL),
+    _qrule_arbitrary(NULL),
     _q_points(_fe_helper->get_xyz()),
     _JxW(_fe_helper->get_JxW()),
 
@@ -54,15 +59,31 @@ AssemblyData::getFEFace(FEType type)
   return _fe_face[type];
 }
 
-
 void
-AssemblyData::attachQuadratureRule(Order o)
+AssemblyData::createQRules(Order o)
 {
-  _qrule = new QGauss(_mesh.dimension(), o);
+  _qrule_volume = new QGauss(_mesh.dimension(), o);
+  _qrule_face = new QGauss(_mesh.dimension() - 1, o);
+  _qrule_arbitrary = new ArbitraryQuadrature(_mesh.dimension(), o);
+
+  setVolumeQRule(_qrule_volume);
+  setFaceQRule(_qrule_face);
+}
+  
+void
+AssemblyData::setVolumeQRule(QBase * qrule)
+{
+  _qrule = qrule;
+  
   for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
     it->second->attach_quadrature_rule(_qrule);
+}
 
-  _qrule_face = new QGauss(_mesh.dimension() - 1, o);
+void
+AssemblyData::setFaceQRule(QBase * qrule)
+{
+  _qrule_face = qrule;
+  
   for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
     it->second->attach_quadrature_rule(_qrule_face);
 }
@@ -70,6 +91,24 @@ AssemblyData::attachQuadratureRule(Order o)
 void
 AssemblyData::reinit(const Elem * elem)
 {
+  // Make sure the qrule is the right one
+  if(_qrule != _qrule_volume)
+    setVolumeQRule(_qrule_volume);
+
+  _current_elem = elem;
+  for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
+    it->second->reinit(elem);
+}
+
+void
+AssemblyData::reinit(const Elem * elem, const std::vector<Point> & reference_points)
+{
+  // Make sure the qrule is the right one
+  if(_qrule != _qrule_arbitrary)
+    setVolumeQRule(_qrule_arbitrary);
+
+  _qrule_arbitrary->setPoints(reference_points);
+  
   _current_elem = elem;
   for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
     it->second->reinit(elem);

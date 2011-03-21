@@ -4,6 +4,8 @@
 #include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "Mesh.h"
+#include "Problem.h"
+#include "System.h"
 
 namespace Moose {
 

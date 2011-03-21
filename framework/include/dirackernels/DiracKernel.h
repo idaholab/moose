@@ -8,7 +8,12 @@
 #include "DiracKernelData.h"
 #include "DiracKernelInfo.h"
 #include "Object.h"
+#include "Integrable.h"
+#include "Coupleable.h"
+#include "FunctionInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "TransientInterface.h"
+#include "Variable.h"
 
 //libMesh includes
 #include "libmesh_common.h"
@@ -30,7 +35,13 @@ InputParameters validParams<DiracKernel>();
  *
  * This is common in point sources / sinks and various other algorithms.
  */
-class DiracKernel : public Object
+class DiracKernel :
+  public Object,
+  public Moose::Integrable,
+  public Moose::Coupleable,
+  public FunctionInterface,
+  public Moose::TransientInterface,
+  public Moose::MaterialPropertyInterface
 {
 public:
   DiracKernel(const std::string & name, InputParameters parameters);

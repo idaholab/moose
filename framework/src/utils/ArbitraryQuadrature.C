@@ -14,7 +14,9 @@
 
 #include "ArbitraryQuadrature.h"
 
-
+namespace Moose
+{
+  
 ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d,
                                          const Order o)
   : QBase(d,o)
@@ -55,3 +57,4 @@ ArbitraryQuadrature::init_3D(const ElemType _type,
   this->_p_level = p_level;
 }
 
+}

@@ -210,7 +210,7 @@ MProblem::init2()
   _quadrature_order = _nl.getMinQuadratureOrder();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _asm_info[tid]->attachQuadratureRule(_quadrature_order);
+    _asm_info[tid]->createQRules(_quadrature_order);
 
   _nl.init();
   if (_displaced_problem)

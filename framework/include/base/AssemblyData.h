@@ -1,15 +1,19 @@
 #ifndef ASSEMBLYDATA_H_
 #define ASSEMBLYDATA_H_
 
+// libMesh includes
 #include "fe.h"
 #include "quadrature.h"
 #include "elem.h"
 #include "node.h"
 
+
 namespace Moose
 {
 
+// MOOSE Forward Declares
 class Mesh;
+class ArbitraryQuadrature;  
 
 class AssemblyData
 {
@@ -35,9 +39,32 @@ public:
 
   const Node * & node() { return _current_node; }
 
-  void attachQuadratureRule(Order o);
+  /**
+   * Creates the volume, face and arbitrary qrules based on the Order passed in.
+   */
+  void createQRules(Order o);
+
+  /**
+   * Set the qrule to be used for volume integration.
+   *
+   * Note: This is normally set internally, only use if you know what you are doing!
+   */
+  void setVolumeQRule(QBase * qrule);
+
+  /**
+   * Set the qrule to be used for face integration.
+   *
+   * Note: This is normally set internally, only use if you know what you are doing!
+   */
+  void setFaceQRule(QBase * qrule);
 
   void reinit(const Elem * elem);
+
+  /**
+   * Reinitialize the assembly data at specific point in the reference element.
+   */
+  void reinit(const Elem * elem, const std::vector<Point> & reference_points);
+  
   void reinit(const Elem * elem, unsigned int side);
   void reinit(const Node * node);
 
@@ -49,6 +76,9 @@ protected:
   std::map<FEType, FEBase *> _fe;               /// types of finite elements
   FEBase * _fe_helper;                          /// helper object for transforming coordinates
   QBase * _qrule;
+  QBase * _qrule_volume;
+  ArbitraryQuadrature * _qrule_arbitrary;
+  
   const std::vector<Point> & _q_points;
   const std::vector<Real> & _JxW;
 

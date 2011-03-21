@@ -15,6 +15,10 @@ InputParameters validParams<DiracKernel>()
 
 DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
+    Moose::Coupleable(parameters),
+    FunctionInterface(parameters),
+    Moose::TransientInterface(parameters),
+    Moose::MaterialPropertyInterface(parameters),
 //  : PDEBase(name, parameters,
 //            (parameters.get<MooseSystem *>("_moose_system")->hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")) ?
 //            *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data_displaced[parameters.get<THREAD_ID>("_tid")] :

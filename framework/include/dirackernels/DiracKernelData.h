@@ -8,15 +8,17 @@
 #include "elem.h"
 #include "numeric_vector.h"
 
-//Forward Declarations
-class ArbitraryQuadrature;
-
 namespace libMesh
 {
   template <class T> class NumericVector;
 }
 
-namespace Moose {
+namespace Moose
+{
+  
+//Forward Declarations
+class ArbitraryQuadrature;
+
 
 class DiracKernelData //: public QuadraturePointData
 {

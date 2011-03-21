@@ -127,7 +127,7 @@ DisplacedProblem::init()
 
   Order qorder = _problem.getQuadratureOrder();
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _asm_info[tid]->attachQuadratureRule(qorder);
+    _asm_info[tid]->createQRules(qorder);
 
 }
 

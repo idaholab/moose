@@ -71,6 +71,7 @@ protected:
   VariableGradient  _grad_u;
   VariableGradient  _grad_u_old;
   VariableGradient  _grad_u_older;
+  VariableValue _u_update;
 
   // time derivatives
   VariableValue _u_dot;
