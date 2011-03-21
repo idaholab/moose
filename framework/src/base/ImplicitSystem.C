@@ -84,7 +84,7 @@ namespace Moose {
       _problem.attachQuadratureRule(&qrule_face, _tid);
 
       _problem.reinitElemFace(elem, side, bnd_id, _tid);
-      for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid][bnd_id].begin(); it != _sys._bcs[_tid][bnd_id].end(); ++it)
+      for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
         (*it)->computeResidual();
 
       for (std::set<Variable *>::iterator it = _sys._vars[_tid].boundaryVars(bnd_id).begin(); it != _sys._vars[_tid].boundaryVars(bnd_id).end(); ++it)
@@ -158,7 +158,7 @@ namespace Moose {
       _problem.attachQuadratureRule(&qrule_face, _tid);
 
       _problem.reinitElemFace(elem, side, bnd_id, _tid);
-      for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid][bnd_id].begin(); it != _sys._bcs[_tid][bnd_id].end(); ++it)
+      for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
         (*it)->computeJacobian(0, 0);
 
       for (std::set<Variable *>::iterator it = _sys._vars[_tid].boundaryVars(bnd_id).begin(); it != _sys._vars[_tid].boundaryVars(bnd_id).end(); ++it)
@@ -190,7 +190,6 @@ ImplicitSystem::ImplicitSystem(Problem & problem, const std::string & name) :
 
   _kernels.resize(libMesh::n_threads());
   _bcs.resize(libMesh::n_threads());
-  _nodal_bcs.resize(libMesh::n_threads());
 }
 
 ImplicitSystem::~ImplicitSystem()
@@ -248,12 +247,11 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
 
       if (dynamic_cast<NodalBC *>(bc) != NULL)
-        _nodal_bcs[tid][boundaries[i]].push_back(dynamic_cast<NodalBC *>(bc));
+        _bcs[tid].addNodalBC(boundaries[i], dynamic_cast<NodalBC *>(bc));
       else if (dynamic_cast<IntegratedBC *>(bc) != NULL)
-        _bcs[tid][boundaries[i]].push_back(dynamic_cast<IntegratedBC *>(bc));
+        _bcs[tid].addBC(boundaries[i], dynamic_cast<IntegratedBC *>(bc));
       else
         mooseError("Unknown type of BoudaryCondition object");
-//      _boundary_vars[tid][boundaries[i]].insert(&bc->variable());
       _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
     }
   }
@@ -397,7 +395,7 @@ ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
     // reinit variables in nodes
     _problem.reinitNodeFace(node, boundary_id, 0);
 
-    for (std::vector<NodalBC *>::iterator it = _nodal_bcs[0][boundary_id].begin(); it != _nodal_bcs[0][boundary_id].end(); ++it)
+    for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
       (*it)->computeResidual(residual);
   }
   residual.close();
@@ -453,7 +451,7 @@ ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
     _problem.reinitNodeFace(node, boundary_id, 0);
 
-    for (std::vector<NodalBC *>::iterator it = _nodal_bcs[0][boundary_id].begin(); it != _nodal_bcs[0][boundary_id].end(); ++it)
+    for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
       (*it)->computeJacobian(jacobian);
   }
   jacobian.close();

@@ -18,8 +18,6 @@ public:
   MProblem(Mesh &mesh, Problem * parent = NULL);
   virtual ~MProblem();
 
-  virtual NonlinearImplicitSystem * nl() { return &_nl.sys(); }
-
   virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);

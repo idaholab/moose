@@ -505,7 +505,7 @@ Parser::getExecutioner()
 void
 Parser::fixupOptionalBlocks()
 {
-#if 0
+#if 1
   /* Create a vector of Optional Blocks to fill in if they don't exist in the parsed tree.
    * The pairs should consist of the required block followed by the optional block.  The optional
    * block will be inserted into the tree immediately following the required block.

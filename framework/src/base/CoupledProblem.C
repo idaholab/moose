@@ -23,7 +23,7 @@ void
 CoupledProblem::addSubProblem(const std::string & file_name, SubProblem *subproblem)
 {
   _subproblems[file_name] = subproblem;
-  _map[subproblem->nl()->name()] = subproblem;
+  _map[subproblem->getNonlinearSystem().sys().name()] = subproblem;
 }
 
 SubProblem *

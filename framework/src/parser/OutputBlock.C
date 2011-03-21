@@ -67,17 +67,14 @@ OutputBlock::execute()
   std::cerr << "Inside the OutputBlock Object\n";
 #endif
 
-  // FIXME: uncomm
   Executioner * exec = _parser_handle._executioner;
   Moose::Problem & problem = exec->problem();
   Moose::Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
-  //  Moose::Output & output = _parser_handle._problem->out();
   output.fileBase(getParamValue<std::string>("file_base"));
   if (getParamValue<bool>("exodus"))
     output.addExodus();
 
-//  _parser_handle._executioner->outputInitial(getParamValue<bool>("output_initial"));
   exec->outputInitial(getParamValue<bool>("output_initial"));
 
 #if 0

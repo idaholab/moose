@@ -8,7 +8,6 @@ namespace Moose {
 
 ExodusOutput::ExodusOutput(Problem & problem) :
   Outputter(problem),
-//  _out(problem.mesh()),
   _out(NULL),
   _num(0),
   _time(_problem.time())

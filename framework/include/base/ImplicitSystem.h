@@ -3,6 +3,7 @@
 
 #include "System.h"
 #include "KernelWarehouse.h"
+#include "BCWarehouse.h"
 
 #include "transient_system.h"
 #include "nonlinear_implicit_system.h"
@@ -46,9 +47,7 @@ protected:
 
   // holders
   std::vector<KernelWarehouse> _kernels;
-
-  std::vector<std::map<unsigned int, std::vector<IntegratedBC *> > > _bcs;
-  std::vector<std::map<unsigned int, std::vector<NodalBC *> > > _nodal_bcs;
+  std::vector<BCWarehouse> _bcs;
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;

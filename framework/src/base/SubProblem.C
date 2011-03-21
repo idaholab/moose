@@ -7,27 +7,27 @@
 namespace Moose
 {
 
-Number initial_value (const Point& p,
-                      const Parameters& parameters,
-                      const std::string& sys_name,
-                      const std::string& var_name)
+Number initial_value (const Point & p,
+                      const Parameters & parameters,
+                      const std::string & sys_name,
+                      const std::string & var_name)
 {
   Problem * problem = parameters.get<Problem *>("_problem");
   mooseAssert(problem != NULL, "Internal pointer to _problem was not set");
   return problem->initialValue(p, parameters, sys_name, var_name);
 }
 
-Gradient initial_gradient (const Point& p,
-                           const Parameters& parameters,
-                           const std::string& sys_name,
-                           const std::string& var_name)
+Gradient initial_gradient (const Point & p,
+                           const Parameters & parameters,
+                           const std::string & sys_name,
+                           const std::string & var_name)
 {
   Problem * problem = parameters.get<Problem *>("_problem");
   mooseAssert(problem != NULL, "Internal pointer to _problem was not set");
   return problem->initialGradient(p, parameters, sys_name, var_name);
 }
 
-void initial_condition(EquationSystems& es, const std::string& system_name)
+void initial_condition(EquationSystems & es, const std::string & system_name)
 {
   Problem * problem = es.parameters.get<Problem *>("_problem");
   mooseAssert(problem != NULL, "Internal pointer to MooseSystem was not set");
@@ -35,16 +35,16 @@ void initial_condition(EquationSystems& es, const std::string& system_name)
 }
 
 
-SubProblem::SubProblem(Mesh &mesh, Problem * parent) :
+SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
     _parent(parent == NULL ? this : parent),
     _mesh(mesh),
     _eq(_mesh),
     _transient(false),
-    _time(_parent ? _parent->time() : _eq.parameters.set<Real>("time")),
-    _t_step(_parent ? _parent->timeStep() : _eq.parameters.set<int>("t_step")),
-    _dt(_parent ? _parent->dt() : _eq.parameters.set<Real>("dt"))
+    _time(_parent != this ? _parent->time() : _eq.parameters.set<Real>("time")),
+    _t_step(_parent != this ? _parent->timeStep() : _eq.parameters.set<int>("t_step")),
+    _dt(_parent != this ? _parent->dt() : _eq.parameters.set<Real>("dt"))
 {
-  if (!_parent)
+  if (_parent == this)
   {
     _time = 0.0;
     _t_step = 0;
@@ -52,10 +52,9 @@ SubProblem::SubProblem(Mesh &mesh, Problem * parent) :
     _dt_old = _dt;
   }
 
-//  _eq.parameters.set<SubProblem *>("_subproblem") = this;
-//  _eq.parameters.set<Problem *>("_problem") = this;
-
   _functions.resize(libMesh::n_threads());
+
+  _eq.parameters.set<Problem *>("_problem") = this;
 }
 
 SubProblem::~SubProblem()

@@ -18,6 +18,8 @@
 
 namespace Moose {
 
+class ImplicitSystem;
+
 /**
  * Generic class for solving nonlinear problems
  *
@@ -29,7 +31,8 @@ public:
   virtual ~SubProblem();
 
   virtual Problem * parent() { return _parent; }
-  virtual NonlinearImplicitSystem * nl() = 0;
+
+  virtual ImplicitSystem & getNonlinearSystem() = 0;
 
   /**
    * Get reference to all-purpose parameters
@@ -41,12 +44,6 @@ public:
 
   virtual bool hasVariable(const std::string & var_name);
   virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
-
-//  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid) = 0;
-//  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
-//  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
-//  virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
-//  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid) = 0;
 
   // Solve /////
   virtual void init();
@@ -86,10 +83,6 @@ public:
   Gradient initialGradient (const Point & p, const Parameters & /*parameters*/, const std::string & /*sys_name*/, const std::string & var_name);
 
   void initialCondition(EquationSystems & es, const std::string & system_name);
-
-  ////
-//  virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual) = 0;
-//  virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian) = 0;
 
   // Materials /////
 

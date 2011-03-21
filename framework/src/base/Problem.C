@@ -6,7 +6,6 @@ namespace Moose
 Problem::Problem() :
     _out(*this)
 {
-
 }
 
 Problem::~Problem()

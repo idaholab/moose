@@ -39,8 +39,8 @@ InputParameters validParams<GenericExecutionerBlock>()
 
 
 GenericExecutionerBlock::GenericExecutionerBlock(const std::string & name, InputParameters params) :
-  ParserBlock(name, params),
-  _type(getType())
+    ParserBlock(name, params),
+    _type(getType())
 {
   addPrereq("Mesh");
 #if 0
@@ -136,8 +136,8 @@ GenericExecutionerBlock::execute()
 
   class_params.set<Moose::Mesh *>("_mesh") = _parser_handle._mesh;
   _parser_handle._executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", class_params));
-//  if (dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem()) != NULL)
-//    _parser_handle._problem = dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem());
+  if (dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem()) != NULL)
+    _parser_handle._problem = dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem());
 
   visitChildren();
 }

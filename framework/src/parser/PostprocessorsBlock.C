@@ -20,9 +20,10 @@ InputParameters validParams<PostprocessorsBlock>()
   return validParams<ParserBlock>();
 }
 
-PostprocessorsBlock::PostprocessorsBlock(const std::string & name, InputParameters params)
-  :ParserBlock(name, params)
+PostprocessorsBlock::PostprocessorsBlock(const std::string & name, InputParameters params) :
+    ParserBlock(name, params)
 {
+  addPrereq("Executioner");
 #if 0
   // Register execution prereqs
   addPrereq("Mesh");
