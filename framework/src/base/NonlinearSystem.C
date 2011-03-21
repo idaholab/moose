@@ -64,6 +64,13 @@ NonlinearSystem::~NonlinearSystem()
   delete _preconditioner;
 }
 
+void
+NonlinearSystem::init()
+{
+  _nl_solution = *_sys.current_local_solution;
+  _nl_solution.close();
+}
+
 bool
 NonlinearSystem::converged()
 {

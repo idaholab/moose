@@ -13,6 +13,7 @@
 #include "BodyForce.h"
 #include "ImplicitEuler.h"
 #include "Reaction.h"
+#include "RealPropertyOutput.h"
 // bcs
 #include "DirichletBC.h"
 #include "NeumannBC.h"
@@ -102,6 +103,7 @@ registerObjects()
   registerObject(BodyForce);
   registerObject(ImplicitEuler);
   registerObject(Reaction);
+  registerObject(RealPropertyOutput);
   // bcs
   registerObject(DirichletBC);
   registerObject(NeumannBC);

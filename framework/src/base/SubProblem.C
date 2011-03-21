@@ -4,6 +4,7 @@
 #include "Postprocessor.h"
 #include "ComputePostprocessorsThread.h"
 #include "MaterialData.h"
+#include "AuxiliarySystem.h"
 
 // libMesh includes
 
@@ -206,6 +207,10 @@ SubProblem::addMaterial(const std::string & mat_name, const std::string & name, 
       Material *bnd_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
       mooseAssert(bnd_material != NULL, "Not a Material object");
       _materials[tid].addBoundaryMaterial(blocks[i], bnd_material);
+
+      // FIXME: fix this terrible and dirty hack
+      SystemBase * sys = _sys[0];
+      sys->vars(tid).addBoundaryVars(blocks[i], bnd_material->getCoupledVars());
     }
   }
 }
@@ -348,7 +353,8 @@ SubProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & 
 //
 //    if (_has_displaced_mesh)
 //      updateDisplacedMesh(soln);
-//
+
+    static_cast<AuxiliarySystem *>(_sys[1])->compute();
 //    updateAuxVars(soln);
 
     ComputePostprocessorsThread cppt(*this, getNonlinearSystem(), getNonlinearSystem().solution(), pps);
