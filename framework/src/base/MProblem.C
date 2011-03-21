@@ -239,7 +239,9 @@ MProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
     // Need to reinitialize the material properties in case subdomain setup for a Kernel needs it
     // TODO: This means we are doing one more materialReinit than is necessary.  Need to refactor this to
     // keep that from happening
-    reinitMaterials(subdomain, tid);
+
+    // FIXME: cannot do this b/c variables are not computed => potential NaNs will pop-up
+//    reinitMaterials(subdomain, tid);
   }
 
   _nl.subdomainSetup(subdomain, tid);

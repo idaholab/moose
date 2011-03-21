@@ -107,9 +107,11 @@ SystemBase::reinitNode(const Node * node, THREAD_ID tid)
 void
 SystemBase::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
-  for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
+/*  for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
        it != _vars[tid].boundaryVars(bnd_id).end();
        ++it)
+*/
+  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     MooseVariable *var = *it;
     if (var->feType().family == LAGRANGE)

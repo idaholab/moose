@@ -96,6 +96,10 @@ Kernel::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       re(_i) += _JxW[_qp]*computeQpResidual();
+#ifdef DEBUG
+      if(libmesh_isnan(re(_i)))
+        mooseError("NaN in Kernel Residual for: " + _name);
+#endif //DEBUG
     }
 }
 

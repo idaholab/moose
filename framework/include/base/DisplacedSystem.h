@@ -23,7 +23,7 @@ public:
 
   virtual NumericVector<Number> & getVector(std::string name);
   
-  virtual const NumericVector<Number> & serializedSolution() { return _undisplaced_system.serializedSolution(); }
+  virtual NumericVector<Number> & serializedSolution() { return _undisplaced_system.serializedSolution(); }
 
   /// Return the residual copy from the NonlinearSystem
   virtual NumericVector<Number> & residualCopy() { return _undisplaced_system.residualCopy(); }

@@ -313,6 +313,29 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
 //    if(unlikely(_calculate_element_time))
 //      startElementTiming(elem->id());
 
+    // Now do the block nodal aux kernels
+    block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
+
+    if(block_nodal_aux_it != block_nodal_aux_end)
+    {
+      for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
+      {
+        Node & node = *elem->get_node(nd);
+
+        if(node.processor_id() == libMesh::processor_id())
+        {
+          _problem.reinitNode(&node, 0);
+
+          for(block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+              block_nodal_aux_it != block_nodal_aux_end;
+              ++block_nodal_aux_it)
+            (*block_nodal_aux_it)->compute();
+        }
+      }
+    }
+
+
     block_element_aux_it = auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
     block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
 
@@ -339,28 +362,6 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
 
     for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
       (*aux_it)->compute();
-
-    // Now do the block nodal aux kernels
-    block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
-    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
-
-    if(block_nodal_aux_it != block_nodal_aux_end)
-    {
-      for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
-      {
-        Node & node = *elem->get_node(nd);
-
-        if(node.processor_id() == libMesh::processor_id())
-        {
-          _problem.reinitNode(&node, 0);
-
-          for(block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
-              block_nodal_aux_it != block_nodal_aux_end;
-              ++block_nodal_aux_it)
-            (*block_nodal_aux_it)->compute();
-        }
-      }
-    }
 
 //    if(unlikely(_calculate_element_time))
 //      stopElementTiming(elem->id());

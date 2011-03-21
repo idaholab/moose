@@ -52,7 +52,7 @@ public:
   virtual NumericVector<Number> & getVector(std::string name) = 0;
 
   /// Returns a reference to a serialized version of the solution vector for this subproblem
-  virtual const NumericVector<Number> & serializedSolution() = 0;
+  virtual NumericVector<Number> & serializedSolution() = 0;
 
   virtual NumericVector<Number> & residualCopy() { mooseError("This system does not support getting a copy of the residual"); }
 
