@@ -11,6 +11,7 @@ InputParameters validParams<NodalBC>()
 
 NodalBC::NodalBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
+    Coupleable(parameters, true),
     _current_node(_var.node()),
     _u(_var.nodalSln())
 {
@@ -35,16 +36,4 @@ NodalBC::computeJacobian(SparseMatrix<Number> & jacobian)
   std::vector<int> zero_rows(1);
   zero_rows[0] = _var.nodalDofIndex();
   jacobian.zero_rows(zero_rows, 1.0);
-}
-
-unsigned int
-NodalBC::coupled(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupled(var_name, comp);
-}
-
-VariableValue &
-NodalBC::coupledValue(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledNodalValue(var_name, comp);
 }

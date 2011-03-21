@@ -15,7 +15,7 @@ InputParameters validParams<DiracKernel>()
 
 DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    Coupleable(parameters),
+    Coupleable(parameters, false),
     FunctionInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),

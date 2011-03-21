@@ -2,13 +2,15 @@
 #define NODALBC_H
 
 #include "BoundaryCondition.h"
-#include "MooseVariable.h"
+#include "Coupleable.h"
 
 // libMesh
 #include "numeric_vector.h"
 #include "sparse_matrix.h"
 
-class NodalBC : public BoundaryCondition
+class NodalBC :
+  public BoundaryCondition,
+  public Coupleable
 {
 public:
   NodalBC(const std::string & name, InputParameters parameters);
@@ -16,9 +18,6 @@ public:
 
   virtual void computeResidual(NumericVector<Number> & residual);
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
-
-  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
 
 protected:
   const Node * & _current_node;

@@ -17,7 +17,7 @@ InputParameters validParams<Material>()
 
 Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    Coupleable(parameters),
+    Coupleable(parameters, false),
     TransientInterface(parameters),
     PostprocessorInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
@@ -321,51 +321,3 @@ Material::getData(QP_Data_Type qp_data_type)
   }
 }
 #endif
-
-unsigned int
-Material::coupledComponents(const std::string & varname)
-{
-  return Coupleable::coupledComponents(varname);
-}
-
-unsigned int
-Material::coupled(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupled(var_name, comp);
-}
-
-VariableValue &
-Material::coupledValue(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledValue(var_name, comp);
-}
-
-VariableValue &
-Material::coupledValueOld(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledValueOld(var_name, comp);
-}
-
-VariableValue &
-Material::coupledValueOlder(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledValueOlder(var_name, comp);
-}
-
-VariableGradient &
-Material::coupledGradient(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledGradient(var_name, comp);
-}
-
-VariableGradient  &
-Material::coupledGradientOld(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledGradientOld(var_name, comp);
-}
-
-VariableGradient  &
-Material::coupledGradientOlder(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledGradientOlder(var_name, comp);
-}

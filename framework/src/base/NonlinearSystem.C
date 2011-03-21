@@ -128,14 +128,21 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
 
       if (dynamic_cast<NodalBC *>(bc) != NULL)
-        _bcs[tid].addNodalBC(boundaries[i], dynamic_cast<NodalBC *>(bc));
+      {
+        NodalBC * nbc = dynamic_cast<NodalBC *>(bc);
+        _bcs[tid].addNodalBC(boundaries[i], nbc);
+        _vars[tid].addBoundaryVars(boundaries[i], nbc->getCoupledVars());
+      }
       else if (dynamic_cast<IntegratedBC *>(bc) != NULL)
-        _bcs[tid].addBC(boundaries[i], dynamic_cast<IntegratedBC *>(bc));
+      {
+        IntegratedBC * ibc = dynamic_cast<IntegratedBC *>(bc);
+        _bcs[tid].addBC(boundaries[i], ibc);
+        _vars[tid].addBoundaryVars(boundaries[i], ibc->getCoupledVars());
+      }
       else
         mooseError("Unknown type of BoudaryCondition object");
 
       _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
-      _vars[tid].addBoundaryVars(boundaries[i], bc->getCoupledVars());
     }
   }
 }

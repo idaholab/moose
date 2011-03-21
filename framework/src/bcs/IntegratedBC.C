@@ -13,6 +13,7 @@ InputParameters validParams<IntegratedBC>()
 
 IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
+    Coupleable(parameters, false),
     _test_var(_problem.getVariable(0, parameters.get<std::string>("variable"))),
 
     _qrule(_subproblem.qRuleFace(_tid)),
@@ -90,28 +91,4 @@ Real
 IntegratedBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0;
-}
-
-unsigned int
-IntegratedBC::coupled(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupled(var_name, comp);
-}
-
-VariableValue &
-IntegratedBC::coupledValue(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledValue(var_name, comp);
-}
-
-VariableValue &
-IntegratedBC::coupledDot(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledDot(var_name, comp);
-}
-
-VariableGradient &
-IntegratedBC::coupledGradient(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledGradient(var_name, comp);
 }

@@ -3,7 +3,8 @@
 #include "Problem.h"
 #include "SubProblemInterface.h"
 
-Coupleable::Coupleable(InputParameters & parameters)
+Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
+    _nodal(nodal)
 {
   SubProblemInterface & problem = *parameters.get<SubProblemInterface *>("_subproblem");
   Problem & topproblem = *problem.parent();
@@ -32,9 +33,9 @@ Coupleable::Coupleable(InputParameters & parameters)
 }
 
 bool
-Coupleable::isCoupled(const std::string & varname, unsigned int i)
+Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 {
-  std::map<std::string, std::vector<MooseVariable *> >::iterator it = _coupled_vars.find(varname);
+  std::map<std::string, std::vector<MooseVariable *> >::iterator it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
     return (i < it->second.size());
   else
@@ -42,74 +43,104 @@ Coupleable::isCoupled(const std::string & varname, unsigned int i)
 }
 
 unsigned int
-Coupleable::coupledComponents(const std::string & varname)
+Coupleable::coupledComponents(const std::string & var_name)
 {
-  return _coupled_vars[varname].size();
+  return _coupled_vars[var_name].size();
 }
 
 unsigned int
-Coupleable::getCoupled(const std::string & var_name, unsigned int comp)
+Coupleable::coupled(const std::string & var_name, unsigned int comp)
 {
   return _coupled_vars[var_name][comp]->number();
 }
 
 VariableValue &
-Coupleable::getCoupledValue(const std::string & var_name, unsigned int comp)
+Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->sln();
+  if (_nodal)
+    return _coupled_vars[var_name][comp]->nodalSln();
+  else
+    return _coupled_vars[var_name][comp]->sln();
 }
 
 VariableValue &
-Coupleable::getCoupledValueOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->slnOld();
+  if (_nodal)
+    return _coupled_vars[var_name][comp]->nodalSlnOld();
+  else
+    return _coupled_vars[var_name][comp]->slnOld();
 }
 
 VariableValue &
-Coupleable::getCoupledValueOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->slnOlder();
+  if (_nodal)
+    return _coupled_vars[var_name][comp]->nodalSlnOlder();
+  else
+    return _coupled_vars[var_name][comp]->slnOlder();
 }
 
 VariableValue &
-Coupleable::getCoupledDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->uDot();
+  if (_nodal)
+    mooseError("Nodal variables do not have u_dot defined");
+  else
+    return _coupled_vars[var_name][comp]->uDot();
 }
 
 
 VariableGradient &
-Coupleable::getCoupledGradient(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->gradSln();
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+  else
+    return _coupled_vars[var_name][comp]->gradSln();
 }
 
 VariableGradient &
-Coupleable::getCoupledGradientOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->gradSlnOld();
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+  else
+    return _coupled_vars[var_name][comp]->gradSlnOld();
 }
 
 VariableGradient &
-Coupleable::getCoupledGradientOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->gradSlnOlder();
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+  else
+    return _coupled_vars[var_name][comp]->gradSlnOlder();
 }
 
-VariableValue &
-Coupleable::getCoupledNodalValue(const std::string & var_name, unsigned int comp)
+VariableSecond &
+Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->nodalSln();
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+  else
+    return _coupled_vars[var_name][comp]->secondSln();
 }
 
-VariableValue &
-Coupleable::getCoupledNodalValueOld(const std::string & var_name, unsigned int comp)
+VariableSecond &
+Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->nodalSlnOld();
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+  else
+    return _coupled_vars[var_name][comp]->secondSlnOld();
 }
 
-VariableValue &
-Coupleable::getCoupledNodalValueOlder(const std::string & var_name, unsigned int comp)
+VariableSecond &
+Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
 {
-  return _coupled_vars[var_name][comp]->nodalSlnOlder();
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+  else
+    return _coupled_vars[var_name][comp]->secondSlnOlder();
 }

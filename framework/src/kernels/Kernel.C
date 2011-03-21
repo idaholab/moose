@@ -19,7 +19,7 @@ InputParameters validParams<Kernel>()
 
 Kernel::Kernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    Coupleable(parameters),
+    Coupleable(parameters, false),
     FunctionInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
@@ -143,52 +143,4 @@ Kernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 void
 Kernel::precalculateResidual()
 {
-}
-
-unsigned int
-Kernel::coupledComponents(const std::string & varname)
-{
-  return Coupleable::coupledComponents(varname);
-}
-
-unsigned int
-Kernel::coupled(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupled(var_name, comp);
-}
-
-VariableValue &
-Kernel::coupledValue(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledValue(var_name, comp);
-}
-
-VariableValue &
-Kernel::coupledValueOld(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledValueOld(var_name, comp);
-}
-
-VariableValue &
-Kernel::coupledValueOlder(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledValueOlder(var_name, comp);
-}
-
-VariableGradient &
-Kernel::coupledGradient(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledGradient(var_name, comp);
-}
-
-VariableGradient &
-Kernel::coupledGradientOld(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledGradientOld(var_name, comp);
-}
-
-VariableGradient &
-Kernel::coupledGradientOlder(const std::string & var_name, unsigned int comp)
-{
-  return Coupleable::getCoupledGradientOlder(var_name, comp);
 }

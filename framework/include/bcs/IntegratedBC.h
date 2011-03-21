@@ -2,6 +2,7 @@
 #define INTEGRATEDBC_H
 
 #include "BoundaryCondition.h"
+#include "Coupleable.h"
 #include "MooseVariable.h"
 
 // libMesh
@@ -9,7 +10,8 @@
 #include "quadrature.h"
 
 class IntegratedBC :
-  public BoundaryCondition
+  public BoundaryCondition,
+  public Coupleable
 {
 public:
   IntegratedBC(const std::string & name, InputParameters parameters);
@@ -21,11 +23,6 @@ public:
    * Computes d-ivar-residual / d-jvar... storing the result in Ke.
    */
   void computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar);
-
-  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient  & coupledGradient(const std::string & var_name, unsigned int comp = 0);
 
 protected:
   MooseVariable & _test_var;

@@ -17,7 +17,6 @@ InputParameters validParams<BoundaryCondition>()
 
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
-    Coupleable(parameters),
     FunctionInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
@@ -45,10 +44,4 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
 
 BoundaryCondition::~BoundaryCondition()
 {
-}
-
-unsigned int
-BoundaryCondition::coupledComponents(const std::string & varname)
-{
-  return Coupleable::coupledComponents(varname);
 }

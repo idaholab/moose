@@ -2,30 +2,32 @@
 #define BOUNDARYCONDITION_H
 
 #include "MooseObject.h"
-#include "Coupleable.h"
+#include "MooseVariable.h"
+#include "ParallelUniqueId.h"
+#include "Array.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
-
 // libMesh
 #include "elem.h"
 #include "vector_value.h"
+#include "tensor_value.h"
 
 class MooseVariable;
 class MooseMesh;
 class Problem;
 class SubProblemInterface;
+class SystemBase;
 
 class BoundaryCondition :
   public MooseObject,
-  public Coupleable,
   public FunctionInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
   public PostprocessorInterface,
-  protected GeometricSearchInterface
+  public GeometricSearchInterface
 {
 public:
   BoundaryCondition(const std::string & name, InputParameters parameters);
@@ -34,8 +36,6 @@ public:
   unsigned int boundaryID() { return _boundary_id; }
 
   MooseVariable & variable() { return _var; }
-
-  unsigned int coupledComponents(const std::string & varname);
 
   virtual void setup() { }
 

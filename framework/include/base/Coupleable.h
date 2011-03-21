@@ -8,7 +8,7 @@
 class Coupleable
 {
 public:
-  Coupleable(InputParameters & parameters);
+  Coupleable(InputParameters & parameters, bool nodal);
 
   std::map<std::string, std::vector<MooseVariable *> > & getCoupledVars() { return _coupled_vars; }
 
@@ -18,25 +18,27 @@ protected:
    *
    * @param name The name the kernel wants to refer to the variable as.
    */
-  virtual bool isCoupled(const std::string & varname, unsigned int i = 0);
+  virtual bool isCoupled(const std::string & var_name, unsigned int i = 0);
 
-  unsigned int coupledComponents(const std::string & varname);
+  unsigned int coupledComponents(const std::string & var_name);
 
-  virtual unsigned int getCoupled(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & getCoupledValue(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & getCoupledValueOld(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & getCoupledValueOlder(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & getCoupledDot(const std::string & var_name, unsigned int comp = 0);
+  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValueOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledValueOlder(const std::string & var_name, unsigned int comp = 0);
 
-  virtual VariableGradient & getCoupledGradient(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient & getCoupledGradientOld(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient & getCoupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradient(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradientOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
-  virtual VariableValue & getCoupledNodalValue(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & getCoupledNodalValueOld(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & getCoupledNodalValueOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableSecond & coupledSecond(const std::string & var_name, unsigned int i = 0);
+  virtual VariableSecond & coupledSecondOld(const std::string & var_name, unsigned int i = 0);
+  virtual VariableSecond & coupledSecondOlder(const std::string & var_name, unsigned int i = 0);
+
+  virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
 
   std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;
+  bool _nodal;
 };
 
 #endif /* COUPLEABLE_H */
