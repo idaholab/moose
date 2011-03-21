@@ -42,12 +42,6 @@ AuxVariablesBlock::execute()
   if (!_executed)
   {
     visitChildren();
-
-    ParserBlock * pb = locateBlock("BCs/Periodic");
-
-    if (pb)
-      pb->execute();
-
     _executed = true;
   }
 }

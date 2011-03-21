@@ -119,6 +119,16 @@ GenericExecutionerBlock::execute()
     if (aux_vars!= NULL)
       aux_vars->execute();
 
+    // handle functions
+    ParserBlock * fns = locateBlock("Functions");
+    if (fns)
+      fns->execute();
+
+    // handle periodic BCs
+    ParserBlock * pb = locateBlock("BCs/Periodic");
+    if (pb)
+      pb->execute();
+
     mproblem->init();
     if (vars != NULL)
       vars->copyNodalValues(mproblem->getNonlinearSystem());

@@ -33,6 +33,8 @@
 #include "PreconditioningBlock.h"
 #include "PostprocessorsBlock.h"
 #include "GenericPostprocessorBlock.h"
+#include "PeriodicBlock.h"
+#include "GenericPeriodicBlock.h"
 
 // libMesh
 #include "getpot.h"
@@ -76,8 +78,8 @@ Parser::registerObjects()
   registerNamedParserBlock(OutputBlock, "Output");
   registerNamedParserBlock(PreconditioningBlock, "Preconditioning");
 //  registerNamedParserBlock(PBPBlock, "Preconditioning/PBP");
-//  registerNamedParserBlock(PeriodicBlock, "BCs/Periodic");
-//  registerNamedParserBlock(GenericPeriodicBlock, "BCs/Periodic/*");
+  registerNamedParserBlock(PeriodicBlock, "BCs/Periodic");
+  registerNamedParserBlock(GenericPeriodicBlock, "BCs/Periodic/*");
   registerNamedParserBlock(GenericExecutionerBlock, "Executioner");
 //  registerNamedParserBlock(AdaptivityBlock, "Executioner/Adaptivity");
   registerNamedParserBlock(PostprocessorsBlock, "Postprocessors");

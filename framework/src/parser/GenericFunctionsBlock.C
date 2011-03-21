@@ -16,8 +16,6 @@ GenericFunctionsBlock::GenericFunctionsBlock(const std::string & name, InputPara
     _type(getType())
 {
   setClassParams(Factory::instance()->getValidParams(_type));
-
-  //add variables as prerequisite when we add coupling?
 }
 
 void

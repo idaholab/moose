@@ -11,6 +11,9 @@
 #include "ImplicitEuler.h"
 #include "MatDiffusion.h"
 #include "DiffMKernel.h"
+#include "GaussContForcing.h"
+#include "CoefDiffusion.h"
+#include "Convection.h"
 
 #include "CoupledAux.h"
 #include "ConstantAux.h"
@@ -45,6 +48,9 @@ void registerObjects()
   registerObject(ImplicitEuler);
   registerObject(MatDiffusion);
   registerObject(DiffMKernel);
+  registerObject(GaussContForcing);
+  registerObject(CoefDiffusion);
+  registerObject(Convection);
 
   // Aux kernels
   registerObject(CoupledAux);

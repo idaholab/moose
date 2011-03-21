@@ -9,6 +9,7 @@ InputParameters validParams<FunctionsBlock>()
 FunctionsBlock::FunctionsBlock(const std::string & name, InputParameters params) :
     ParserBlock(name, params)
 {
+  addPrereq("Executioner");
 }
 
 void

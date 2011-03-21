@@ -16,6 +16,7 @@ BCsBlock::BCsBlock(const std::string & name, InputParameters params) :
   {
     addPrereq("Variables");
     addPrereq("Materials");
+    addPrereq("Functions");
   }
 #if 0
   // Register BCs/AuxBCs prereqs
