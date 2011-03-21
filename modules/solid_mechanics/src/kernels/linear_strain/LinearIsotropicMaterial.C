@@ -13,7 +13,7 @@ InputParameters validParams<LinearIsotropicMaterial>()
   params.addRequiredParam<Real>("poissons_ratio", "Poisson's Ratio");
   params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
-  params.addParam<Real>("thermal_conductivity", 0.0, "The thermal conductivity coeffecient.");
+  params.addParam<Real>("thermal_conductivity", 0.0, "The thermal conductivity coefficient.");
   return params;
 }
 

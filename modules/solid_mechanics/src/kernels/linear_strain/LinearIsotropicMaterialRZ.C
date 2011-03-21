@@ -56,8 +56,6 @@ LinearIsotropicMaterialRZ::computeProperties()
 
     computeStress(strain, _stress[_qp]);
 
-//    std::cerr << "LIMRZ: qp = " << _qp << "r = " << _grad_disp_r[_qp] << ", z " << _grad_disp_z[_qp];
-
 //    if (_qp == 0)
 //    {
 //       std::cout << "JDH DEBUG: strain, stress:\n";
