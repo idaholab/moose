@@ -18,6 +18,8 @@
 #define registerAction(tplt, name, action)      ActionFactory::instance()->reg<tplt>(name, action)
 #define registerNonParsedAction(tplt, action)   ActionFactory::instance()->regNonParsed<tplt>(action)
 
+// TODO: This will change when action_warehouse is moved inside of some system
+#define addActionNameDependency(action, depends_on)       Moose::action_warehouse.addDependency(action, depends_on)
 
 /**
  * Typedef for function to build objects
