@@ -143,12 +143,14 @@ MooseVariable::reinit()
   // copy shape functions into test functions (so they can be modified by stabilizers)
   _test = _phi;
   _grad_test = _grad_phi;
-  _second_test = _second_phi;
+  if (_has_second_derivatives)
+    _second_test = _second_phi;
 
   // FIXME: move to face reinit
   _test_face = _phi_face;
   _grad_test_face = _grad_phi_face;
-  _second_test_face = _second_phi_face;
+  if (_has_second_derivatives)
+    _second_test_face = _second_phi_face;
 }
 
 void
@@ -459,5 +461,4 @@ MooseVariable::getNodalValueOlder(const Node & node)
 {
   unsigned int dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solutionOlder()(dof);
-
 }
