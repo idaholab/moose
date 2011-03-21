@@ -25,6 +25,8 @@ public:
   
   virtual NumericVector<Number> & serializedSolution() { return _undisplaced_system.serializedSolution(); }
 
+  virtual const NumericVector<Number> * & currentSolution() { return _undisplaced_system.currentSolution(); }
+
   /// Return the residual copy from the NonlinearSystem
   virtual NumericVector<Number> & residualCopy() { return _undisplaced_system.residualCopy(); }
 

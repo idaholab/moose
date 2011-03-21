@@ -28,6 +28,8 @@ public:
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
 
+  virtual const NumericVector<Number> * & currentSolution() { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
+
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
   
@@ -39,6 +41,7 @@ protected:
 
   MProblem & _mproblem;
 
+  const NumericVector<Number> * _current_solution;      /// solution vector from nonlinear solver
   NumericVector<Number> & _serialized_solution;         /// Serialized version of the solution vector
 
   bool _need_serialized_solution;                       /// Whether or not a copy of the residual needs to be made

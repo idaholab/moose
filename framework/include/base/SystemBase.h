@@ -41,6 +41,12 @@ public:
   virtual void copyOldSolutions() = 0;
   virtual void restoreSolutions() = 0;
 
+  /**
+   * The solution vector that is currently being operated on.
+   * This is typically a ghosted vector that comes in from the Nonlinear solver.
+   */
+  virtual const NumericVector<Number> * & currentSolution() = 0;
+  
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
   virtual NumericVector<Number> & solutionOlder() = 0;
@@ -134,7 +140,7 @@ public:
   virtual void computeVariables(const NumericVector<Number>& /*soln*/)
   {
   }
-
+  
   virtual NumericVector<Number> & solution() { return _solution; }
   virtual NumericVector<Number> & solutionOld() { return _solution_old; }
   virtual NumericVector<Number> & solutionOlder() { return _solution_older; }

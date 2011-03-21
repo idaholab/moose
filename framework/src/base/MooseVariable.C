@@ -62,7 +62,7 @@ VariableData::computeValues()
   for (unsigned int i = 0; i < num_dofs; i++)
   {
     int idx = _dof_indices[i];
-    Real soln_local = _sys.solution()(idx);
+    Real soln_local = (*_sys.currentSolution())(idx);
     Real soln_old_local;
     Real soln_older_local;
 
@@ -268,7 +268,7 @@ MooseVariable::computeElemValues()
   for (unsigned int i = 0; i < num_dofs; i++)
   {
     int idx = _dof_indices[i];
-    Real soln_local = _sys.solution()(idx);
+    Real soln_local = (*_sys.currentSolution())(idx);
     Real soln_old_local;
     Real soln_older_local;
 
@@ -367,7 +367,7 @@ MooseVariable::computeElemValuesFace()
   for (unsigned int i = 0; i < num_dofs; i++)
   {
     int idx = _dof_indices[i];
-    Real soln_local = _sys.solution()(idx);
+    Real soln_local = (*_sys.currentSolution())(idx);
     Real soln_old_local;
     Real soln_older_local;
 
@@ -414,7 +414,7 @@ void
 MooseVariable::computeNodalValues()
 {
   _nodal_u.resize(1);
-  _nodal_u[0] = _sys.solution()(_nodal_dof_index);
+  _nodal_u[0] = (*_sys.currentSolution())(_nodal_dof_index);
 
   if (_problem.transient())
   {
@@ -446,7 +446,7 @@ Number
 MooseVariable::getNodalValue(const Node & node)
 {
   unsigned int dof = node.dof_number(_sys.number(), _var_num, 0);
-  return _sys.solution()(dof);
+  return (*_sys.currentSolution())(dof);
 
 }
 

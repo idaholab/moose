@@ -580,7 +580,7 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
 
     _aux.compute();
 
-    ComputePostprocessorsThread cppt(*this, getNonlinearSystem(), getNonlinearSystem().solution(), pps);
+    ComputePostprocessorsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps);
     cppt(*_mesh.getActiveLocalElementRange());
 
     // Store element postprocessors values
