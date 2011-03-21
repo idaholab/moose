@@ -324,6 +324,7 @@ AuxiliarySystem::compute()
 
   solution().close();
   (*_sys.solution) = _solution;
+//  (*_sys.current_local_solution) = _solution;
 }
 
 } // namespace

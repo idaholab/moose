@@ -176,6 +176,7 @@ MProblem::init()
     _displaced_problem->init();
     _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
   }
+  _aux.init();
 }
 
 void

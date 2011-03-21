@@ -9,8 +9,8 @@ InputParameters validParams<ConstantIC>()
 }
 
 ConstantIC::ConstantIC(const std::string & name, InputParameters parameters) :
-  InitialCondition(name, parameters),
-  _value(getParam<Real>("value"))
+    InitialCondition(name, parameters),
+    _value(getParam<Real>("value"))
 {
 }
 

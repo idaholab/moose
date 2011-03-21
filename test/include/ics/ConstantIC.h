@@ -41,7 +41,7 @@ public:
    */
   virtual Real value(const Point & p);
 
-private:
+protected:
   Real _value;
 };
 

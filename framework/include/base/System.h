@@ -122,6 +122,7 @@ public:
 
   virtual void init()
   {
+    _solution = (*_sys.current_local_solution);
   }
 
   virtual void update()
