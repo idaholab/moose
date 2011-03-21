@@ -15,6 +15,8 @@
 #ifndef COLUMNMAJORMATRIXTEST_H
 #define COLUMNMAJORMATRIXTEST_H
 
+
+
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
