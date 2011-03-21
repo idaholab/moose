@@ -13,6 +13,7 @@
 #include "sparse_matrix.h"
 #include "preconditioner.h"
 
+class libMesh::Mesh;
 class MProblem;
 
 /**
@@ -55,6 +56,8 @@ public:
 
   void setupDampers();
   void reinitDampers(const NumericVector<Number>& increment, THREAD_ID tid);
+
+  void checkKernelCoverage(const std::set<subdomain_id_type> & mesh_subdomains) const;
 
 public:
   MProblem & _mproblem;

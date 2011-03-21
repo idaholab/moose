@@ -821,3 +821,18 @@ MProblem::adaptMesh()
   _geometric_search_data.update();
   // FIXME: udpate geom_search data in displaced problem
 }
+
+void
+MProblem::checkProblemIntegrity()
+{
+  std::set<subdomain_id_type> mesh_subdomains;
+  
+  const MeshBase::element_iterator el_end = _mesh._mesh.elements_end();
+  for (MeshBase::element_iterator el = _mesh._mesh.elements_begin(); el != el_end; ++el)
+    mesh_subdomains.insert((*el)->subdomain_id());
+
+  // Check kernel coverage of subdomains (blocks) in the mesh
+  _nl.checkKernelCoverage(mesh_subdomains);
+
+  // TODO: Finish other system checks here
+}

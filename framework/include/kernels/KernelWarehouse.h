@@ -33,6 +33,14 @@ public:
 
   void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
 
+ /**
+   * This returns a boolean to indicate whether this warehouse contains kernels
+   * representing all of the subdomains, if not then the supplied set is filled in
+   * with the complete set of subdomains represented which may or may not represent
+   * the entire domain.
+   */
+  bool subdomains_covered(std::set<unsigned int> & return_set) const;
+  
 protected:
   std::vector<Kernel *> _active_kernels;                                /// Kernels active on a block and in specified time
   std::vector<Kernel *> _all_kernels;                                   /// All instances of kernels

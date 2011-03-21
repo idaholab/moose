@@ -96,6 +96,7 @@
 #include "SetupPBPAction.h"
 #include "AdaptivityAction.h"
 #include "SetupDampersAction.h"
+#include "CheckIntegrityAction.h"
 
 namespace Moose {
 
@@ -196,6 +197,7 @@ addActionTypes()
   registerActionName("copy_nodal_vars", true);
   registerActionName("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
   registerActionName("setup_dampers", true);
+  registerActionName("check_integrity", true);
   
   /// Additional Actions
   registerActionName("no_action", false);  // Used for Empty Action placeholders
@@ -287,6 +289,9 @@ addActionTypes()
 
   /// Ouput
   action_warehouse.addDependency("setup_output", "setup_pps_complete");
+
+  /// Check Integrity
+  action_warehouse.addDependency("check_integrity", "setup_output");
   
 }
 
@@ -327,10 +332,12 @@ registerActions()
   registerAction(AdaptivityAction, "Executioner/Adaptivity", "setup_adaptivity");
 
   registerAction(EmptyAction, "DiracKernels/*", "no_action");  // TODO
-  
+
+  // NonParsedActions
   registerNonParsedAction(SetupDampersAction, "setup_dampers");
   registerNonParsedAction(InitProblemAction, "init_problem");
   registerNonParsedAction(CopyNodalVarsAction, "copy_nodal_vars");
+  registerNonParsedAction(CheckIntegrityAction, "check_integrity");
 }
 
 void

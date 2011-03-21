@@ -17,6 +17,7 @@
 #include "dense_vector.h"
 #include "boundary_info.h"
 #include "petsc_matrix.h"
+#include "mesh.h"
 
 namespace Moose {
 
@@ -671,5 +672,32 @@ NonlinearSystem::reinitDampers(const NumericVector<Number>& increment, THREAD_ID
   {
     MooseVariable *var = *it;
     var->computeDamping(*_increment_vec);
+  }
+}
+
+void
+NonlinearSystem::checkKernelCoverage(const std::set<subdomain_id_type> & mesh_subdomains) const
+{
+  // Check kernel coverage of subdomains (blocks) in your mesh
+  std::set<unsigned int> input_subdomains;
+
+  bool global_kernels_exist = _kernels[0].subdomains_covered(input_subdomains);
+
+  if (!global_kernels_exist)
+  {
+    std::set<unsigned int> difference;
+    std::set_difference (mesh_subdomains.begin(), mesh_subdomains.end(),
+                         input_subdomains.begin(), input_subdomains.end(),
+                         std::inserter(difference, difference.end()));
+
+    if (!difference.empty())
+    {
+      std::stringstream missing_block_ids;
+        
+      std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned int>( missing_block_ids, " "));
+      
+      mooseError("Each subdomain must contain at least one Kernel.\nThe following block(s) lack an active kernel: "
+                 + missing_block_ids.str());
+    }
   }
 }

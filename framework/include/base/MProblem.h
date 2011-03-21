@@ -137,6 +137,8 @@ public:
   Adaptivity & adaptivity() { return _adaptivity; }
   virtual void adaptMesh();
 
+  void checkProblemIntegrity();
+
 protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;

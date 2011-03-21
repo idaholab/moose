@@ -62,3 +62,19 @@ KernelWarehouse::updateActiveKernels(Real t, Real dt, unsigned int subdomain_id)
     if((*it)->startTime() <= t + (1e-6 * dt) && (*it)->stopTime() >= t + (1e-6 * dt))
       _active_kernels.push_back(*it);
 }
+
+bool
+KernelWarehouse::subdomains_covered(std::set<unsigned int> & return_set) const
+{
+  return_set.clear();
+  
+  if (!_global_kernels.empty())
+    return true;
+  else
+  {
+    for (std::map<unsigned int, std::vector<Kernel *> >::const_iterator it = _block_kernels.begin();
+         it != _block_kernels.end(); ++it)
+      return_set.insert(it->first);
+    return false;
+  }
+}
