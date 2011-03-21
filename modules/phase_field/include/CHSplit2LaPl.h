@@ -23,7 +23,7 @@ protected:
 
 private:
   unsigned int _c_var;
-  MooseArray<RealGradient> & _grad_c;
+  VariableGradient & _grad_c;
   
   std::string _kappa_name;
   MaterialProperty<Real> & _kappa;

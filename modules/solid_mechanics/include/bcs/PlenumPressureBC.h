@@ -1,7 +1,7 @@
 #ifndef PLENUMPRESSUREBC_H
 #define PLENUMPRESSUREBC_H
 
-#include "BoundaryCondition.h"
+#include "IntegratedBC.h"
 
 //Forward Declarations
 class PlenumPressureBC;
@@ -9,7 +9,7 @@ class PlenumPressureBC;
 template<>
 InputParameters validParams<PlenumPressureBC>();
 
-class PlenumPressureBC : public BoundaryCondition
+class PlenumPressureBC : public IntegratedBC
 {
 public:
 

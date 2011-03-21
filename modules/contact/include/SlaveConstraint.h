@@ -15,6 +15,8 @@
 #ifndef SLAVECONSTRAINT_H
 #define SLAVECONSTRAINT_H
 
+#if 0
+
 // Moose Includes
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
@@ -50,5 +52,7 @@ protected:
 
   RealVectorValue _vars;
 };
- 
+
+#endif
+
 #endif //SLAVECONSTRAINT_H

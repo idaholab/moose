@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<ThermalBC>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
+  InputParameters params = validParams<NodalBC>();
   params.set<Real>("initial")=0.0;
   params.set<Real>("final")=0.0;
   params.set<Real>("duration")=0.0;
@@ -13,7 +13,7 @@ InputParameters validParams<ThermalBC>()
 }
 
 ThermalBC::ThermalBC(const std::string & name, InputParameters parameters)
-  :BoundaryCondition(name, parameters),
+  :NodalBC(name, parameters),
     _p_var(coupled("p")),
     _p(coupledValue("p")),
     _u_vel_var(coupled("u")),

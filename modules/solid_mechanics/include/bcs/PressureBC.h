@@ -1,7 +1,7 @@
 #ifndef PRESSUREBC_H
 #define PRESSUREBC_H
 
-#include "BoundaryCondition.h"
+#include "IntegratedBC.h"
 
 //Forward Declarations
 class Function;
@@ -10,7 +10,7 @@ class PressureBC;
 template<>
 InputParameters validParams<PressureBC>();
 
-class PressureBC : public BoundaryCondition
+class PressureBC : public IntegratedBC
 {
 public:
 

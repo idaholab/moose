@@ -2,6 +2,7 @@
 #define MATERIALMODEL_H
 
 #include "Material.h"
+#include "ColumnMajorMatrix.h"
 
 // Forward declarations
 class ElasticityTensor;

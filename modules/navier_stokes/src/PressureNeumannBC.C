@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<PressureNeumannBC>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
+  InputParameters params = validParams<IntegratedBC>();
   params.addCoupledVar("p", "");
   params.addCoupledVar("pe", "");
   params.addCoupledVar("pu", "");
@@ -13,7 +13,7 @@ InputParameters validParams<PressureNeumannBC>()
 }
 
 PressureNeumannBC::PressureNeumannBC(const std::string & name, InputParameters parameters)
-  :BoundaryCondition(name, parameters),
+  :IntegratedBC(name, parameters),
     _p(coupledValue("p")),
     _pe(coupledValue("pe")),
     _pu(coupledValue("pu")),

@@ -1,11 +1,9 @@
 #include "PlenumPressureBC.h"
 
-#include "MooseSystem.h"
-
 template<>
 InputParameters validParams<PlenumPressureBC>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
+  InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<int>("component", "The component for the PlenumPressureBC");
   params.addParam<Real>("initial_pressure", 0, "The initial pressure in the plenum.  If not given, a zero initial pressure will be used.");
   params.addParam<std::string>("material_input", "", "The name of the postprocessor value that holds the amount of material injected into the plenum.");
@@ -19,7 +17,7 @@ InputParameters validParams<PlenumPressureBC>()
 }
 
 PlenumPressureBC::PlenumPressureBC(const std::string & name, InputParameters parameters)
-  :BoundaryCondition(name, parameters),
+  :IntegratedBC(name, parameters),
    _initialized(false),
    _n0(0),
    _component(getParam<int>("component")),

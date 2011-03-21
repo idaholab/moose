@@ -1,5 +1,5 @@
 #include "Elk.h"
-#include "MooseFactory.h"
+#include "Factory.h"
 
 // misc
 #include "BodyForceRZ.h"
@@ -100,7 +100,7 @@ Elk::registerObjects()
   registerKernel(HeatConductionRZ);
   registerKernel(HeatConductionImplicitEuler);
   registerKernel(HeatConductionImplicitEulerRZ);
-  registerNamedMaterial(HeatConductionMaterial, "HeatConduction");
+  registerMaterial(HeatConductionMaterial);
 
   // navier_stokes
   registerKernel(MassInviscidFlux);
@@ -128,7 +128,7 @@ Elk::registerObjects()
   registerMaterial(Elastic);
   registerKernel(Gravity);
   registerKernel(GravityRZ);
-  registerNamedMaterial(LinearAnisotropicMaterial, "LinearAnisotropic");
+  registerNamedMaterial(LinearAnisotropicMaterial);
   registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
   registerNamedMaterial(LinearIsotropicMaterialRZ, "LinearIsotropicRZ");
   registerMaterial(LinearStrainHardening);
@@ -161,7 +161,8 @@ Elk::registerObjects()
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
 
+  // FIXME: uncomment
   // contact
-  registerDiracKernel(ContactMaster);
-  registerDiracKernel(SlaveConstraint);
+//  registerDiracKernel(ContactMaster);
+//  registerDiracKernel(SlaveConstraint);
 }

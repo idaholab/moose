@@ -14,6 +14,7 @@
 
 #include "SlaveConstraint.h"
 
+#if 0
 // Moose includes
 #include "MooseSystem.h"
 
@@ -177,3 +178,5 @@ SlaveConstraint::computeQpJacobian()
   
   return _phi[_i][_qp] * ( _penalty*constraint_mag);
 }
+
+#endif

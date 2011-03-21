@@ -9,6 +9,7 @@ class CHSplit1;
 
 template<>
 InputParameters validParams<CHSplit1>();
+
 /**
  * CHSplit1 calculates the c residual of the split Cahn-Hilliard equation
  */

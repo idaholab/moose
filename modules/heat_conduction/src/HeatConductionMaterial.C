@@ -14,21 +14,20 @@ InputParameters validParams<HeatConductionMaterial>()
   return params;
 }
 
-HeatConductionMaterial::HeatConductionMaterial(const std::string & name,
-                   InputParameters parameters)
-  :Material(name, parameters),
+HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputParameters parameters) :
+    Material(name, parameters),
 
-   _has_temp(isCoupled("temp")),
-   _temp(_has_temp ? coupledValue("temp") : _zero),
+    _has_temp(isCoupled("temp")),
+    _temp(_has_temp ? coupledValue("temp") : _zero),
 
-   _my_thermal_conductivity(getParam<Real>("thermal_conductivity")),
-   _my_specific_heat(getParam<Real>("specific_heat")),
-   _my_density(getParam<Real>("density")),
+    _my_thermal_conductivity(getParam<Real>("thermal_conductivity")),
+    _my_specific_heat(getParam<Real>("specific_heat")),
+    _my_density(getParam<Real>("density")),
 
-   _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-   _specific_heat(declareProperty<Real>("specific_heat")),
-   _density(declareProperty<Real>("density"))
-  {}
+    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+    _specific_heat(declareProperty<Real>("specific_heat")),
+    _density(declareProperty<Real>("density"))
+{}
 
 void
 HeatConductionMaterial::computeProperties()

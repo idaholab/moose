@@ -1,6 +1,5 @@
 #include "StressDivergence.h"
-
-#include "Material.h"
+#include "ColumnMajorMatrix.h"
 
 template<>
 InputParameters validParams<StressDivergence>()

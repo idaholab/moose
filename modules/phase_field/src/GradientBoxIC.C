@@ -49,11 +49,7 @@ GradientBoxIC::value(const Point & p)
     if(p(i) < _bottom_left(i) || p(i) > _top_right(i))
       return (_mx_value+_mn_value)/2.0;
 
-  //If not out of bounds
-  if (_grad_sign > 0)
-    return _mn_value + _range*p(_grad_direction)/(_top_right(_grad_direction) - _bottom_left(_grad_direction));
-  else 
-    return _mx_value - _range*p(_grad_direction)/(_top_right(_grad_direction) - _bottom_left(_grad_direction));
+  return _mn_value + _grad_sign*_range*p(_grad_direction)/(_top_right(_grad_direction) - _bottom_left(_grad_direction));
   
 }
 

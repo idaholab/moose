@@ -1,5 +1,5 @@
 #include "ElasticEnergyAux.h"
-
+#include "ColumnMajorMatrix.h"
 
 template<>
 InputParameters validParams<ElasticEnergyAux>()

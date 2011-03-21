@@ -14,6 +14,7 @@
 
 #include "ContactMaster.h"
 
+#if 0
 // libmesh includes
 #include "sparse_matrix.h"
 
@@ -32,16 +33,16 @@ InputParameters validParams<ContactMaster>()
   return params;
 }
 
-ContactMaster::ContactMaster(const std::string & name, InputParameters parameters)
-  :DiracKernel(name, parameters),
-   _component(getParam<Real>("component")),
-   _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
-   _residual_copy(residualCopy()),
-   _jacobian_copy(jacobianCopy()),
-   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
-   _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
-   _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
-   _vars(_x_var, _y_var, _z_var)
+ContactMaster::ContactMaster(const std::string & name, InputParameters parameters) :
+    DiracKernel(name, parameters),
+    _component(getParam<Real>("component")),
+    _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
+    _residual_copy(residualCopy()),
+    _jacobian_copy(jacobianCopy()),
+    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
+    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
+    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+    _vars(_x_var, _y_var, _z_var)
 {}
 
 void
@@ -138,3 +139,5 @@ ContactMaster::computeQpJacobian()
 
   return _phi[_i][_qp]*pinfo->_normal(_component)*jac_mag;
 }
+
+#endif

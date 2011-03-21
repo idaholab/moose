@@ -1,7 +1,7 @@
 #ifndef THERMALBC_H
 #define THERMALBC_H
 
-#include "BoundaryCondition.h"
+#include "NodalBC.h"
 #include "Material.h"
 
 
@@ -11,7 +11,7 @@ class ThermalBC;
 template<>
 InputParameters validParams<ThermalBC>();
 
-class ThermalBC : public BoundaryCondition
+class ThermalBC : public NodalBC
 {
 public:
 
