@@ -15,7 +15,7 @@ template<typename RangeType>
 class ThreadedElementLoop
 {
 public:
-  ThreadedElementLoop(System & system);
+  ThreadedElementLoop(Problem & problem, System & system);
 
   ThreadedElementLoop(ThreadedElementLoop & x, Threads::split split);
 
@@ -82,9 +82,9 @@ protected:
 
 
 template<typename RangeType>
-ThreadedElementLoop<RangeType>::ThreadedElementLoop(System & system) :
+ThreadedElementLoop<RangeType>::ThreadedElementLoop(Problem & problem, System & system) :
     _system(system),
-    _problem(*system.problem().parent())
+    _problem(problem)
 {
 }
 

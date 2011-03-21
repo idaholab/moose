@@ -42,15 +42,15 @@ void initial_condition(EquationSystems & es, const std::string & system_name)
 class ComputePostprocessorsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputePostprocessorsThread(System & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps) :
-    ThreadedElementLoop<ConstElemRange>(sys),
+  ComputePostprocessorsThread(Problem & problem, System & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps) :
+    ThreadedElementLoop<ConstElemRange>(problem, sys),
      _soln(in_soln),
      _pps(pps)
   {}
 
   // Splitting Constructor
   ComputePostprocessorsThread(ComputePostprocessorsThread & x, Threads::split) :
-    ThreadedElementLoop<ConstElemRange>(x._system),
+    ThreadedElementLoop<ConstElemRange>(x._problem, x._system),
     _soln(x._soln),
     _pps(x._pps)
   {
@@ -457,7 +457,7 @@ SubProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & 
 //
 //    updateAuxVars(soln);
 
-    ComputePostprocessorsThread cppt(getNonlinearSystem(), getNonlinearSystem().solution(), pps);
+    ComputePostprocessorsThread cppt(*this, getNonlinearSystem(), getNonlinearSystem().solution(), pps);
     cppt(*_mesh.getActiveLocalElementRange());
 
     // Store element postprocessors values

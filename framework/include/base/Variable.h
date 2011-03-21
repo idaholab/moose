@@ -22,10 +22,11 @@ typedef std::vector<RealGradient>       VariableGradient;
 namespace Moose
 {
 
-class SubProblem;
+class AssemblyData;
+class ProblemInterface;
 class System;
 
-
+#if 0
 class VariableData
 {
 public:
@@ -50,7 +51,7 @@ protected:
 
   void computeValues();
 
-  SubProblem & _problem;
+  ProblemInterface & _problem;
   System & _sys;
   FEBase * & _fe;
   QBase * & _qrule;
@@ -74,12 +75,12 @@ protected:
   VariableValue _u_dot;
   VariableValue _du_dot_du;
 };
-
+#endif
 
 class Variable
 {
 public:
-  Variable(THREAD_ID tid, unsigned int var_num, const FEType & fe_type, System & sys);
+  Variable(unsigned int var_num, const FEType & fe_type, System & sys, AssemblyData & assembly_data);
   virtual ~Variable();
 
   void reinit();
@@ -96,10 +97,6 @@ public:
 
   const Elem * & currentElem() { return _elem; }
   unsigned int & currentSide() { return _current_side; }
-
-//  QBase * & qRule() { return _qrule; }
-//  const std::vector<Point> & qpoints() { return _qpoints; }
-//  const std::vector<Real> & JxW() { return _JxW; }
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
@@ -147,10 +144,14 @@ public:
 protected:
   THREAD_ID _tid;
   unsigned int _var_num;
-  SubProblem & _problem;
-  System &_sys;
+  ProblemInterface & _problem;
+  System & _sys;
 
   const DofMap & _dof_map;
+  AssemblyData & _assembly;
+
+  QBase * & _qrule;
+  QBase * & _qrule_face;
 
   FEBase * & _fe;
   FEBase * & _fe_face;
@@ -161,7 +162,10 @@ protected:
   std::vector<unsigned int> _dof_indices;
 
 //  const std::vector<Point> & _qpoints;
+//  const std::vector<Point> & _qpoints_face;
+
 //  const std::vector<Real> & _JxW;
+//  const std::vector<Real> & _JxW_face;
 
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;

@@ -38,8 +38,8 @@ namespace Moose {
     ImplicitSystem & _sys;
 
   public:
-    ComputeResidualThread(NumericVector<Number> & residual, ImplicitSystem & sys) :
-      ThreadedElementLoop<ConstElemRange>(sys),
+    ComputeResidualThread(Problem & problem, ImplicitSystem & sys, NumericVector<Number> & residual) :
+      ThreadedElementLoop<ConstElemRange>(problem, sys),
       _residual(residual),
       _sys(sys)
     {
@@ -115,11 +115,11 @@ namespace Moose {
     Problem & _problem;
 
   public:
-    ComputeJacobianThread(SparseMatrix<Number> & jacobian, ImplicitSystem & sys) :
-      ThreadedElementLoop<ConstElemRange>(sys),
+    ComputeJacobianThread(Problem & problem, ImplicitSystem & sys, SparseMatrix<Number> & jacobian) :
+      ThreadedElementLoop<ConstElemRange>(problem, sys),
       _jacobian(jacobian),
       _sys(sys),
-      _problem(sys.problem())
+      _problem(problem)
     {
     }
 
@@ -187,6 +187,7 @@ namespace Moose {
 
 ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(problem, name),
+    _subproblem(problem),
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
@@ -224,7 +225,7 @@ ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _problem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _subproblem._material_data[tid];
 
     Kernel *kernel = static_cast<Kernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
@@ -260,7 +261,7 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
-      parameters.set<MaterialData *>("_material_data") = _problem._bnd_material_data[tid];
+      parameters.set<MaterialData *>("_material_data") = _subproblem._bnd_material_data[tid];
 
       BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
@@ -285,7 +286,7 @@ ImplicitSystem::addStabilizer(const std::string & stabilizer_name, const std::st
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _problem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _subproblem._material_data[tid];
 
     Stabilizer * stabilizer = static_cast<Stabilizer *>(Factory::instance()->create(stabilizer_name, name, parameters));
     if (parameters.have_parameter<unsigned int>("block_id"))
@@ -419,7 +420,7 @@ ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
 {
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-  ComputeResidualThread cr(residual, *this);
+  ComputeResidualThread cr(*problem().parent(), *this, residual);
   Threads::parallel_reduce(elem_range, cr);
   residual.close();
 
@@ -477,7 +478,7 @@ ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-  ComputeJacobianThread cj(jacobian, *this);
+  ComputeJacobianThread cj(*problem().parent(), *this, jacobian);
   Threads::parallel_reduce(elem_range, cj);
   jacobian.close();
 

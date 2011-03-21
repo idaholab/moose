@@ -1,6 +1,7 @@
 #include "Variable.h"
 #include "SubProblem.h"
 #include "System.h"
+#include "AssemblyData.h"
 
 // libMesh
 #include "numeric_vector.h"
@@ -8,6 +9,7 @@
 
 namespace Moose {
 
+#if 0
 // VariableData /////
 
 VariableData::VariableData(THREAD_ID tid, const FEType & fe_type, System & sys) :
@@ -92,23 +94,22 @@ VariableData::computeValues()
     }
   }
 }
-
+#endif
 
 // Variable /////
 
-Variable::Variable(THREAD_ID tid, unsigned int var_num, const FEType & fe_type, System & sys) :
-    _tid(tid),
+Variable::Variable(unsigned int var_num, const FEType & fe_type, System & sys, AssemblyData & assembly_data) :
     _var_num(var_num),
     _problem(sys.problem()),
     _sys(sys),
     _dof_map(sys.dofMap()),
-//    _qrule(_problem.qRule(_tid)),
-    _fe(_problem.getFE(_tid, fe_type)),
-    _fe_face(_problem.getFEFace(_tid, fe_type)),
-    _elem(_problem.elem(_tid)),
-    _current_side(_problem.side(_tid)),
-//    _qpoints(_fe->get_xyz()),
-//    _JxW(_fe->get_JxW()),
+    _assembly(assembly_data),
+    _qrule(_assembly.qRule()),
+    _qrule_face(_assembly.qRuleFace()),
+    _fe(_assembly.getFE(fe_type)),
+    _fe_face(_assembly.getFEFace(fe_type)),
+    _elem(_assembly.elem()),
+    _current_side(_assembly.side()),
 
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi()),
@@ -117,7 +118,7 @@ Variable::Variable(THREAD_ID tid, unsigned int var_num, const FEType & fe_type, 
     _grad_phi_face(_fe_face->get_dphi()),
     _normals(_fe_face->get_normals()),
 
-    _node(_problem.node(_tid))
+    _node(_assembly.node())
 {
 }
 
@@ -182,7 +183,7 @@ Variable::add(SparseMatrix<Number> & jacobian)
 void
 Variable::computeElemValues()
 {
-  unsigned int nqp = _problem.qRule(_tid)->n_points();
+  unsigned int nqp = _qrule->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
   if (_problem.transient())
@@ -254,8 +255,7 @@ Variable::computeElemValues()
 void
 Variable::computeElemValuesFace()
 {
-//  unsigned int nqp = _qrule->n_points();
-  unsigned int nqp = _problem.qRuleFace(_tid)->n_points();
+  unsigned int nqp = _qrule_face->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
   if (_problem.transient())

@@ -9,12 +9,12 @@
 namespace Moose
 {
 
-class SubProblem;
+class Mesh;
 
 class AssemblyData
 {
 public:
-  AssemblyData(SubProblem & problem);
+  AssemblyData(Mesh & mesh);
   virtual ~AssemblyData();
 
   FEBase * & getFE(FEType type);
@@ -41,8 +41,10 @@ public:
   void reinit(const Elem * elem, unsigned int side);
   void reinit(const Node * node);
 
+  Real computeVolume();
+
 protected:
-  SubProblem & _problem;
+  Mesh & _mesh;
 
   std::map<FEType, FEBase *> _fe;               /// types of finite elements
   FEBase * _fe_helper;                          /// helper object for transforming coordinates

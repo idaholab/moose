@@ -4,6 +4,7 @@
 #include "Factory.h"
 #include "AuxKernel.h"
 #include "MaterialData.h"
+#include "AssemblyData.h"
 #include "GeometricSearchData.h"
 
 #include "quadrature_gauss.h"
@@ -14,10 +15,10 @@ namespace Moose {
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(SubProblem & problem, const std::string & name) :
-    SystemTempl<TransientExplicitSystem>(problem, name)
+    SystemTempl<TransientExplicitSystem>(problem, name),
+    _subproblem(problem)
 {
   _sys.attach_init_function(Moose::initial_condition);
-//  _sys.add_vector("temp");
 
   _vars.resize(libMesh::n_threads());
   _nodal_vars.resize(libMesh::n_threads());
@@ -33,7 +34,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
   unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    Variable * var = new Variable(tid, var_num, type, *this);
+    Variable * var = new Variable(var_num, type, *this, _problem.assembly(tid));
     _vars[tid].add(var_name, var);
     if (var->feType().family == LAGRANGE)
       _nodal_vars[tid][var_name] = var;
@@ -55,8 +56,8 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _problem._material_data[tid];
-    parameters.set<GeometricSearchData *>("_geometric_search_data") = &_problem._geometric_search_data;
+    parameters.set<MaterialData *>("_material_data") = _subproblem._material_data[tid];
+    parameters.set<GeometricSearchData *>("_geometric_search_data") = &_subproblem._geometric_search_data;
 
     AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
@@ -91,8 +92,8 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
-      parameters.set<MaterialData *>("_material_data") = _problem._bnd_material_data[0];
-      parameters.set<GeometricSearchData *>("_geometric_search_data") = &_problem._geometric_search_data;
+      parameters.set<MaterialData *>("_material_data") = _subproblem._bnd_material_data[tid];
+      parameters.set<GeometricSearchData *>("_geometric_search_data") = &_subproblem._geometric_search_data;
 
       std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
@@ -278,26 +279,8 @@ AuxiliarySystem::compute()
     {
       _problem.reinitElem(elem, 0);
 
-      // FIXME: move to asminfo
       //Compute the area of the element
-      _data[0]._current_volume = 0;
-
-      const std::vector<Real> & jxw = _problem.JxW(0);
-
-//        if (_problem.geomType() == Moose::XYZ)
-//        {
-        for (unsigned int qp = 0; qp < _problem.qRule(0)->n_points(); qp++)
-          _data[0]._current_volume += jxw[qp];
-
-//        }
-//        else if (_problem.geomType() == Moose::CYLINDRICAL)
-//        {
-//          const std::vector<Point> & q_point = *(_element_data._q_point.begin()->second);
-//          for (unsigned int qp = 0; qp < _element_data._qrule->n_points(); qp++)
-//            _current_volume += q_point[qp](0) * jxw[qp];
-//        }
-//        else
-//          mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
+      _data[0]._current_volume = _problem.assembly(0).computeVolume();
 
       if(cur_subdomain != subdomain)
       {

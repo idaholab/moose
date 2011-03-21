@@ -6,7 +6,7 @@
 #include "IntegratedBC.h"
 #include "InitialCondition.h"
 
-#include "SubProblem.h"
+#include "ProblemInterface.h"
 #include "Mesh.h"
 #include "VariableWarehouse.h"
 
@@ -23,10 +23,10 @@ class Variable;
 class System
 {
 public:
-  System(SubProblem & problem, const std::string & name);
+  System(ProblemInterface & problem, const std::string & name);
 
   virtual unsigned int number() = 0;
-  virtual SubProblem & problem() { return _problem; }
+  virtual ProblemInterface & problem() { return _problem; }
   virtual DofMap & dofMap() = 0;
 
   virtual void init() = 0;
@@ -58,7 +58,7 @@ public:
   virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
 
 protected:
-  SubProblem & _problem;
+  ProblemInterface & _problem;
   Mesh & _mesh;
   std::string _name;
 
@@ -71,7 +71,7 @@ template<typename T>
 class SystemTempl : public System
 {
 public:
-  SystemTempl(SubProblem & problem, const std::string & name) :
+  SystemTempl(ProblemInterface & problem, const std::string & name) :
     System(problem, name),
     _sys(problem.es().add_system<T>(_name)),
     _solution(_sys.add_vector("curr_sln", false, GHOSTED)),
@@ -92,7 +92,7 @@ public:
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      Moose::Variable * var = new Moose::Variable(tid, var_num, type, *this);
+      Moose::Variable * var = new Moose::Variable(var_num, type, *this, _problem.assembly(tid));
       _vars[tid].add(var_name, var);
 
       if (active_subdomains == NULL)

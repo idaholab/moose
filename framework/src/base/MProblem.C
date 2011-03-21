@@ -21,6 +21,8 @@ MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
     _quadrature_order(CONSTANT),
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
+    _reinit_displaced_elem(false),
+    _reinit_displaced_face(false),
     _output_displaced(true)
 {
   _sys.push_back(&_nl);
@@ -29,7 +31,7 @@ MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
 
   _asm_info.resize(libMesh::n_threads());
   for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
-    _asm_info[i] = new AssemblyData(*this);
+    _asm_info[i] = new AssemblyData(_mesh);
 }
 
 MProblem::~MProblem()
@@ -45,10 +47,10 @@ void
 MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
-
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
-  if (_displaced_problem != NULL)
+
+  if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitElem(elem, tid);
 }
 
@@ -56,32 +58,39 @@ void
 MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem, side);
-
   _nl.reinitElemFace(elem, side, bnd_id, tid);
   _aux.reinitElemFace(elem, side, bnd_id, tid);
+
+  if (_displaced_problem != NULL && _reinit_displaced_face)
+    _displaced_problem->reinitElem(elem, tid);
 }
 
 void
 MProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
-
   _nl.reinitNode(node, tid);
   _aux.reinitNode(node, tid);
+
+  if (_displaced_problem != NULL && _reinit_displaced_elem)
+    _displaced_problem->reinitNode(node, tid);
 }
 
 void
 MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
-
   _nl.reinitNodeFace(node, bnd_id, tid);
   _aux.reinitNodeFace(node, bnd_id, tid);
+
+  if (_displaced_problem != NULL && _reinit_displaced_face)
+    _displaced_problem->reinitNodeFace(node, bnd_id, tid);
 }
 
 void
 MProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
 {
+  // FIXME: call displaced_problem->subdomainSetup() ?
 }
 
 void
@@ -96,9 +105,11 @@ void
 MProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
-  std::cerr << "displ = " << parameters.get<bool>("use_displaced_mesh") << std::endl;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
     parameters.set<System *>("_sys") = &_displaced_problem->nlSys();
+    _reinit_displaced_elem = true;
+  }
   else
     parameters.set<System *>("_sys") = &_nl;
   _nl.addKernel(kernel_name, name, parameters);
@@ -109,7 +120,10 @@ MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & 
 {
   parameters.set<SubProblem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
     parameters.set<System *>("_sys") = &_displaced_problem->nlSys();
+    _reinit_displaced_face = true;
+  }
   else
     parameters.set<System *>("_sys") = &_nl;
   _nl.addBoundaryCondition(bc_name, name, parameters);
@@ -127,9 +141,11 @@ void
 MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
-  std::cerr << "AUX: displ = " << parameters.get<bool>("use_displaced_mesh") << std::endl;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
     parameters.set<System *>("_sys") = &_displaced_problem->auxSys();
+    _reinit_displaced_elem = true;
+  }
   else
     parameters.set<System *>("_sys") = &_aux;
   _aux.addKernel(kernel_name, name, parameters);
@@ -139,9 +155,11 @@ void
 MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
-  std::cerr << "AUXBC: displ = " << parameters.get<bool>("use_displaced_mesh") << std::endl;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
     parameters.set<System *>("_sys") = &_displaced_problem->auxSys();
+    _reinit_displaced_face = true;
+  }
   else
     parameters.set<System *>("_sys") = &_aux;
   _aux.addBoundaryCondition(bc_name, name, parameters);

@@ -65,6 +65,14 @@ CoupledProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   mooseError("Unknown variable " + var_name);
 }
 
+AssemblyData &
+CoupledProblem::assembly(THREAD_ID tid)
+{
+  // FIXME
+  Moose::SubProblem * problem = _subproblems[0];
+  return problem->assembly(tid);
+}
+
 void
 CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {

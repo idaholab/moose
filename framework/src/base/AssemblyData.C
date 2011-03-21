@@ -4,8 +4,8 @@
 namespace Moose
 {
 
-AssemblyData::AssemblyData(SubProblem & problem) :
-    _problem(problem),
+AssemblyData::AssemblyData(Mesh & mesh) :
+    _mesh(mesh),
 
     _fe_helper(getFE(FEType(FIRST, LAGRANGE))),
     _qrule(NULL),
@@ -40,7 +40,7 @@ FEBase * &
 AssemblyData::getFE(FEType type)
 {
   if (!_fe[type])
-    _fe[type] = FEBase::build(_problem.mesh().dimension(), type).release();
+    _fe[type] = FEBase::build(_mesh.dimension(), type).release();
 
   return _fe[type];
 }
@@ -49,7 +49,7 @@ FEBase * &
 AssemblyData::getFEFace(FEType type)
 {
   if (!_fe_face[type])
-    _fe_face[type] = FEBase::build(_problem.mesh().dimension(), type).release();
+    _fe_face[type] = FEBase::build(_mesh.dimension(), type).release();
 
   return _fe_face[type];
 }
@@ -58,11 +58,11 @@ AssemblyData::getFEFace(FEType type)
 void
 AssemblyData::attachQuadratureRule(Order o)
 {
-  _qrule = new QGauss(_problem.mesh().dimension(), o);
+  _qrule = new QGauss(_mesh.dimension(), o);
   for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
     it->second->attach_quadrature_rule(_qrule);
 
-  _qrule_face = new QGauss(_problem.mesh().dimension() - 1, o);
+  _qrule_face = new QGauss(_mesh.dimension() - 1, o);
   for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
     it->second->attach_quadrature_rule(_qrule_face);
 }
@@ -93,6 +93,27 @@ void
 AssemblyData::reinit(const Node * node)
 {
   _current_node = node;
+}
+
+Real
+AssemblyData::computeVolume()
+{
+  Real current_volume = 0;
+
+//  if (_problem.geomType() == Moose::XYZ)
+//  {
+    for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+      current_volume += _JxW[qp];
+//  }
+//  else if (_problem.geomType() == Moose::CYLINDRICAL)
+//  {
+//    for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+//      current_volume += _q_points[qp](0) * _JxW[qp];
+//  }
+//  else
+//    mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
+
+    return current_volume;
 }
 
 } // namespace

@@ -17,7 +17,6 @@ class AuxKernel;
 namespace Moose {
 
 class SubProblem;
-class ImplicitSystem;
 
 class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 {
@@ -35,6 +34,7 @@ public:
   virtual void compute();
 
 protected:
+  SubProblem & _subproblem;
   // Variables
   std::vector<std::map<std::string, Variable *> > _nodal_vars;
   std::vector<std::map<std::string, Variable *> > _elem_vars;

@@ -85,13 +85,14 @@ protected:
 
 
 DisplacedProblem::DisplacedProblem(SubProblem & problem, Mesh & displaced_mesh, Mesh & mesh, const std::vector<std::string> & displacements) :
+    ProblemInterface(),
     _problem(problem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),
     _ref_mesh(mesh),
     _displacements(displacements),
-    _nl(_problem, "DisplacedSystem"),
-    _aux(_problem, "DisplacedAuxSystem"),
+    _nl(*this, "DisplacedSystem"),
+    _aux(*this, "DisplacedAuxSystem"),
     _nl_solution(NumericVector<Number>::build().release()),
     _aux_solution(NumericVector<Number>::build().release()),
     _geometric_search_data(_problem, _mesh),
@@ -101,20 +102,34 @@ DisplacedProblem::DisplacedProblem(SubProblem & problem, Mesh & displaced_mesh, 
   _mesh.build_node_list_from_side_list();
 
   _ex.sequence(true);
+
+  _asm_info.resize(libMesh::n_threads());
+  for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
+    _asm_info[i] = new AssemblyData(_mesh);
 }
 
 DisplacedProblem::~DisplacedProblem()
 {
   delete _nl_solution;
   delete _aux_solution;
+
+  for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
+    delete _asm_info[i];
 }
 
 void
 DisplacedProblem::init()
 {
   _eq.init();
+  _eq.print_info(std::cout);
+
   _nl_solution->init(_nl.sys().n_dofs(), false, SERIAL);
   _aux_solution->init(_aux.sys().n_dofs(), false, SERIAL);
+
+  Order qorder = _problem.getQuadratureOrder();
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _asm_info[tid]->attachQuadratureRule(qorder);
+
 }
 
 void
@@ -140,6 +155,17 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
   _geometric_search_data.update();
 }
 
+bool
+DisplacedProblem::hasVariable(const std::string & var_name)
+{
+  if (_nl.hasVariable(var_name))
+    return true;
+  else if (_aux.hasVariable(var_name))
+    return true;
+  else
+    return false;
+}
+
 Variable &
 DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
@@ -155,44 +181,55 @@ void
 DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
 {
   _nl.addVariable(var_name, type, active_subdomains);
-//  unsigned int var_num = _nl_sys.add_variable(var_name, type, active_subdomains);
-//  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-//  {
-//    Moose::Variable * var = new Moose::Variable(tid, var_num, type, *this);
-//    _vars[tid].add(var_name, var);
-//
-////    if (active_subdomains == NULL)
-////      _var_map[var].insert(Moose::ANY_BLOCK_ID);
-////    else
-////      for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
-////        _var_map[var].insert(*it);
-////  }
-//  }
 }
 
 void
 DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
 {
   _aux.addVariable(var_name, type, active_subdomains);
-//  unsigned int var_num = _aux_sys.add_variable(var_name, type, active_subdomains);
-//  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-//  {
-//    Moose::Variable * var = new Moose::Variable(tid, var_num, type, *this);
-//    _vars[tid].add(var_name, var);
-//
-////    if (active_subdomains == NULL)
-////      _var_map[var].insert(Moose::ANY_BLOCK_ID);
-////    else
-////      for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
-////        _var_map[var].insert(*it);
-////  }
-//  }
 }
 
 void
 DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  std::cerr << "DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)" << std::endl;
+  _asm_info[tid]->reinit(elem);
+  _nl.reinitElem(elem, tid);
+  _aux.reinitElem(elem, tid);
+}
+
+void
+DisplacedProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
+{
+  _asm_info[tid]->reinit(elem, side);
+  _nl.reinitElemFace(elem, side, bnd_id, tid);
+  _aux.reinitElemFace(elem, side, bnd_id, tid);
+}
+
+void
+DisplacedProblem::reinitNode(const Node * node, THREAD_ID tid)
+{
+  _asm_info[tid]->reinit(node);
+  _nl.reinitNode(node, tid);
+  _aux.reinitNode(node, tid);
+}
+
+void
+DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+{
+  _asm_info[tid]->reinit(node);
+  _nl.reinitNodeFace(node, bnd_id, tid);
+  _aux.reinitNodeFace(node, bnd_id, tid);
+}
+
+void
+DisplacedProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
+{
+}
+
+bool
+DisplacedProblem::transient()
+{
+  return _problem.transient();
 }
 
 void

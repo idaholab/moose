@@ -4,6 +4,7 @@
 #include "Output.h"
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
+#include "ProblemInterface.h"
 #include "MaterialProperty.h"
 #include "Function.h"
 #include "Mesh.h"
@@ -20,25 +21,11 @@ namespace Moose
 
 class Variable;
 
-class Problem
+class Problem : public ProblemInterface
 {
 public:
   Problem();
   virtual ~Problem();
-
-  virtual EquationSystems & es() = 0;
-  virtual Mesh & mesh() = 0;
-
-  // Variables /////
-  virtual bool hasVariable(const std::string & var_name) = 0;
-  virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
-
-  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
-  virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
-  virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid) = 0;
-
-  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid) = 0;
 
   // Materials /////
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid) = 0;

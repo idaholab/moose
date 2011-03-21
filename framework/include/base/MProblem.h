@@ -22,6 +22,7 @@ public:
   virtual ~MProblem();
 
   virtual Order getQuadratureOrder() { return _quadrature_order; }
+  virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
   virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
   virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _asm_info[tid]->JxW(); }
@@ -29,8 +30,6 @@ public:
   virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _asm_info[tid]->qPointsFace(); }
   virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _asm_info[tid]->JxWFace(); }
 
-  virtual FEBase * & getFE(THREAD_ID tid, const FEType & fe_type) { return _asm_info[tid]->getFE(fe_type); }
-  virtual FEBase * & getFEFace(THREAD_ID tid, const FEType & fe_type) { return _asm_info[tid]->getFEFace(fe_type); }
   virtual const Elem * & elem(THREAD_ID tid) { return _asm_info[tid]->elem(); }
   virtual unsigned int & side(THREAD_ID tid) { return _asm_info[tid]->side(); }
   virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid]->sideElem(); }
@@ -96,6 +95,8 @@ protected:
   // Displaced mesh /////
   Mesh * _displaced_mesh;
   DisplacedProblem * _displaced_problem;
+  bool _reinit_displaced_elem;
+  bool _reinit_displaced_face;
   bool _output_displaced;                               /// true for outputting displaced problem
 
 public:
