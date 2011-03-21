@@ -40,6 +40,7 @@
 #include "ParsedGradFunction.h"
 #include "PiecewiseLinear.h"
 #include "SolutionFunction.h"
+#include "SphereFunction.h"
 // materials
 #include "GenericConstantMaterial.h"
 // PPS
@@ -110,6 +111,7 @@ registerObjects()
   registerObject(ParsedGradFunction);
   registerObject(PiecewiseLinear);
   registerObject(SolutionFunction);
+  registerObject(SphereFunction);
   // materials
   registerObject(GenericConstantMaterial);
   // PPS

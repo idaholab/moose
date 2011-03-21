@@ -3,6 +3,7 @@
 
   [./element_deleter]
     type = ElementDeleter
+    function = mesh_damage_sphere
   [../]
 []
 
@@ -12,6 +13,16 @@
   [./u]
     order = FIRST
     family = LAGRANGE
+  [../]
+[]
+
+[Functions]
+  [./mesh_damage_sphere]
+    type = SphereFunction
+    x_center = 0.0043
+    y_center = 0.0
+    z_center = 0.025
+    radius = 0.0012
   [../]
 []
 
