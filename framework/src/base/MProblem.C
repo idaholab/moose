@@ -310,14 +310,12 @@ MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector
 }
 
 void
-MProblem::computeJacobianBlock(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+MProblem::computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
 {
-  _nl.set_solution(soln);
-
   if (_displaced_problem != NULL)
   {
-    _displaced_problem->serializeSolution(soln, _aux.solution());
-    _displaced_problem->updateMesh(soln, _aux.solution());
+    _displaced_problem->serializeSolution(_nl.solution(), _aux.solution());
+    _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
   }
 
   _aux.compute();

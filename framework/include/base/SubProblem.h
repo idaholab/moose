@@ -62,6 +62,8 @@ public:
   virtual void solve();
   virtual bool converged() = 0;
 
+  virtual void computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar) = 0;
+
   // Time stepping /////
 
   /**
