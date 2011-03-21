@@ -58,6 +58,10 @@ protected:
   std::string _name;
 
   std::vector<std::map<std::string, Variable *> > _vars;
+  /**
+   * The list of blocks for a given variable number
+   */
+  std::map<unsigned int, std::set<unsigned int> > _var_map;
 };
 
 
@@ -89,6 +93,12 @@ public:
     {
       Moose::Variable * var = new Moose::Variable(var_num, _mesh.dimension(), type, *this);
       _vars[tid][var_name] = var;
+
+      if (active_subdomains == NULL)
+        _var_map[var_num].insert(Moose::ANY_BLOCK_ID);
+      else
+        for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+          _var_map[var_num].insert(*it);
     }
   }
 

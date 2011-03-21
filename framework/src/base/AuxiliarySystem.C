@@ -184,6 +184,22 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
 
     AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
+
+//    std::set<unsigned int> blk_ids;
+//    if (!parameters.isParamValid("block"))
+//      blk_ids = _aux_var_map[aux->variable()];
+//    else
+//    {
+//      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+//      for (unsigned int i=0; i<blocks.size(); ++i)
+//      {
+//        if (_aux_var_map[aux->variable()].count(blocks[i]) > 0 || _aux_var_map[aux->variable()].count(Moose::ANY_BLOCK_ID) > 0)
+//          blk_ids.insert(blocks[i]);
+//        else
+//          mooseError("AuxKernel (" + aux->name() + "): block outside of the domain of the variable");
+//      }
+//    }
+
     if (kernel->isNodal())
       _nodal_kernels[tid].push_back(kernel);
     else

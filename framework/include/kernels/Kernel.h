@@ -33,6 +33,21 @@ public:
   virtual unsigned int coupled(const std::string & var_name);
   virtual VariableValue & coupledValue(const std::string & var_name);
 
+  /**
+   * The variable number that this kernel operates on.
+   */
+  unsigned int variable();
+
+  /**
+   * The time, after which this kernel will be active.
+   */
+  Real startTime();
+
+  /**
+   * The time, after which this kernel will be inactive.
+   */
+  Real stopTime();
+
 protected:
   Moose::SubProblem & _problem;
   Moose::System & _sys;
@@ -70,6 +85,8 @@ protected:
   VariableValue & _u_dot;                               /// Time derivative of u
   VariableValue & _du_dot_du;                           /// Derivative of u_dot wrt u
 
+  Real _start_time;                                     /// The time, after which this kernel will be active.
+  Real _stop_time;                                      /// The time, after which this kernel will be inactive.
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();

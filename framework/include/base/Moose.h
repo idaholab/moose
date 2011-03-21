@@ -31,12 +31,18 @@ namespace Moose
  */
 void registerObjects();
 
+/**
+ * Framework-wide stuff
+ */
+
 enum TimeSteppingScheme
 {
   IMPLICIT_EULER,
   BDF2,
   CRANK_NICOLSON
 };
+
+const unsigned int ANY_BLOCK_ID = (unsigned int) -1;
 
 }
 

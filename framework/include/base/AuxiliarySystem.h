@@ -3,6 +3,7 @@
 
 #include <set>
 #include "System.h"
+#include "AuxWarehouse.h"
 
 // libMesh include
 #include "equation_systems.h"
@@ -37,15 +38,15 @@ public:
   std::map<std::string, Variable *>::iterator varsEnd(THREAD_ID tid = 0) { return _vars[tid].end(); }
 
 protected:
-  // holders
+  // Variables
   std::vector<std::map<std::string, Variable *> > _nodal_vars;
-  std::vector<std::vector<AuxKernel *> > _nodal_kernels;
-
-  std::map<unsigned int, std::vector<AuxKernel *> > _nodal_bcs;
-
-  // elemental
   std::vector<std::map<std::string, Variable *> > _elem_vars;
+
+//  std::vector<AuxWarehouse> _kernels;
+
+  std::vector<std::vector<AuxKernel *> > _nodal_kernels;
   std::vector<std::vector<AuxKernel *> > _elem_kernels;
+  std::map<unsigned int, std::vector<AuxKernel *> > _nodal_bcs;
 
   // data
   struct AuxData

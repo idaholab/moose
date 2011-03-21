@@ -2,6 +2,7 @@
 #define IMPLICITSYSTEM_H_
 
 #include "System.h"
+#include "KernelWarehouse.h"
 
 #include "transient_system.h"
 #include "nonlinear_implicit_system.h"
@@ -47,7 +48,7 @@ protected:
   Real _time_stepping_order;                            /// The order of the time stepping scheme
 
   // holders
-  std::vector<std::vector<Kernel *> > _kernels;
+  std::vector<KernelWarehouse> _kernels;
 
   std::vector<std::map<unsigned int, std::vector<IntegratedBC *> > > _bcs;
   std::vector<std::map<unsigned int, std::vector<NodalBC *> > > _nodal_bcs;

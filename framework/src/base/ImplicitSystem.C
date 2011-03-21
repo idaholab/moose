@@ -62,12 +62,19 @@ namespace Moose {
       {
         const Elem* elem = *el;
 
+        unsigned int subdomain = elem->subdomain_id();
+
         QGauss qrule (dim, FIFTH);
         _problem.attachQuadratureRule(&qrule, tid);
         _problem.reinitElem(elem, tid);
 
-        for (std::vector<Kernel *>::iterator it = _sys._kernels[tid].begin(); it != _sys._kernels[tid].end(); ++it)
-          (*it)->computeResidual();
+        _sys._kernels[tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
+
+        KernelIterator kernel_begin = _sys._kernels[tid].activeKernelsBegin();
+        KernelIterator kernel_end = _sys._kernels[tid].activeKernelsEnd();
+        KernelIterator kernel_it = kernel_begin;
+        for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
+          (*kernel_it)->computeResidual();
 
         for (std::map<std::string, Variable *>::iterator it = _sys._vars[tid].begin(); it != _sys._vars[tid].end(); ++it)
         {
@@ -189,19 +196,25 @@ namespace Moose {
       {
         const Elem* elem = *el;
 
+        unsigned int subdomain = elem->subdomain_id();
+
         QGauss qrule (dim, FIFTH);
         _problem.attachQuadratureRule(&qrule, tid);
         _problem.reinitElem(elem, tid);
 
-        for (std::vector<Kernel *>::iterator it = _sys._kernels[tid].begin(); it != _sys._kernels[tid].end(); ++it)
-          (*it)->computeJacobian(0, 0);
+        _sys._kernels[tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
+
+        KernelIterator kernel_begin = _sys._kernels[tid].activeKernelsBegin();
+        KernelIterator kernel_end = _sys._kernels[tid].activeKernelsEnd();
+        KernelIterator kernel_it = kernel_begin;
+        for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
+          (*kernel_it)->computeJacobian(0, 0);
 
         for (std::map<std::string, Variable *>::iterator it = _sys._vars[tid].begin(); it != _sys._vars[tid].end(); ++it)
         {
           Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
           it->second->add(_jacobian);
         }
-
 
         QGauss qrule_face (dim-1, FIFTH);
         _problem.attachQuadratureRule(&qrule_face, tid);
@@ -280,7 +293,23 @@ ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & 
 
     Kernel *kernel = static_cast<Kernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
-    _kernels[tid].push_back(kernel);
+
+    std::set<unsigned int> blk_ids;
+    if (!parameters.isParamValid("block"))
+      blk_ids = _var_map[kernel->variable()];
+    else
+    {
+      std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
+      for (unsigned int i=0; i<blocks.size(); ++i)
+      {
+        if (_var_map[kernel->variable()].count(blocks[i]) > 0 || _var_map[kernel->variable()].count(Moose::ANY_BLOCK_ID) > 0)
+          blk_ids.insert(blocks[i]);
+        else
+          mooseError("Kernel (" + kernel->name() + "): block outside of the domain of the variable");
+      }
+    }
+
+    _kernels[tid].addKernel(kernel, blk_ids);
   }
 }
 
