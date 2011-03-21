@@ -36,9 +36,11 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
 
     _phi(_var.phi()),
     _grad_phi(_var.gradPhi()),
+    _second_phi(_var.secondPhi()),
 
     _test(_var.test()),
     _grad_test(_var.gradTest()),
+    _second_test(_var.secondTest()),
 
     _u(_var.sln()),
     _u_old(_var.slnOld()),
@@ -46,12 +48,20 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _grad_u(_var.gradSln()),
     _grad_u_old(_var.gradSlnOld()),
     _grad_u_older(_var.gradSlnOlder()),
+    _second_u(_var.secondSln()),
+    _second_u_old(_var.secondSlnOld()),
+    _second_u_older(_var.secondSlnOlder()),
 
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu()),
 
     _start_time(parameters.get<Real>("start_time")),
-    _stop_time(parameters.get<Real>("stop_time"))
+    _stop_time(parameters.get<Real>("stop_time")),
+
+    _real_zero(_problem._real_zero[_tid]),
+    _zero(_problem._zero[_tid]),
+    _grad_zero(_problem._grad_zero[_tid]),
+    _second_zero(_problem._second_zero[_tid])
 {
 }
 

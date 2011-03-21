@@ -33,6 +33,16 @@ Coupleable::Coupleable(InputParameters & parameters)
   }
 }
 
+bool
+Coupleable::isCoupled(const std::string & varname, unsigned int i)
+{
+  std::map<std::string, std::vector<Variable *> >::iterator it = _coupled_vars.find(varname);
+  if (it != _coupled_vars.end())
+    return (i < it->second.size());
+  else
+    return false;
+}
+
 unsigned int
 Coupleable::getCoupled(const std::string & var_name, unsigned int comp)
 {
@@ -45,16 +55,53 @@ Coupleable::getCoupledValue(const std::string & var_name, unsigned int comp)
   return _coupled_vars[var_name][comp]->sln();
 }
 
+VariableValue &
+Coupleable::getCoupledValueOld(const std::string & var_name, unsigned int comp)
+{
+  return _coupled_vars[var_name][comp]->slnOld();
+}
+
+VariableValue &
+Coupleable::getCoupledValueOlder(const std::string & var_name, unsigned int comp)
+{
+  return _coupled_vars[var_name][comp]->slnOlder();
+}
+
+
 VariableGradient &
 Coupleable::getCoupledGradient(const std::string & var_name, unsigned int comp)
 {
   return _coupled_vars[var_name][comp]->gradSln();
 }
 
+VariableGradient &
+Coupleable::getCoupledGradientOld(const std::string & var_name, unsigned int comp)
+{
+  return _coupled_vars[var_name][comp]->gradSlnOld();
+}
+
+VariableGradient &
+Coupleable::getCoupledGradientOlder(const std::string & var_name, unsigned int comp)
+{
+  return _coupled_vars[var_name][comp]->gradSlnOlder();
+}
+
 VariableValue &
 Coupleable::getCoupledNodalValue(const std::string & var_name, unsigned int comp)
 {
   return _coupled_vars[var_name][comp]->nodalSln();
+}
+
+VariableValue &
+Coupleable::getCoupledNodalValueOld(const std::string & var_name, unsigned int comp)
+{
+  return _coupled_vars[var_name][comp]->nodalSlnOld();
+}
+
+VariableValue &
+Coupleable::getCoupledNodalValueOlder(const std::string & var_name, unsigned int comp)
+{
+  return _coupled_vars[var_name][comp]->nodalSlnOlder();
 }
 
 } // namespace

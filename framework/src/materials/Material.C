@@ -17,19 +17,28 @@ InputParameters validParams<Material>()
 
 Material::Material(const std::string & name, InputParameters parameters) :
   Object(name, parameters),
+  Moose::Coupleable(parameters),
+  Moose::TransientInterface(parameters),
   _problem(*parameters.get<Moose::SubProblem *>("_problem")),
   _tid(parameters.get<THREAD_ID>("_tid")),
   _bnd(parameters.get<bool>("_bnd")),
   _material_data(*parameters.get<Moose::MaterialData *>("_material_data")),
   _qrule(_bnd ? _problem.qRuleFace(_tid) : _problem.qRule(_tid)),
+  _JxW(_bnd ? _problem.JxWFace(_tid) : _problem.JxW(_tid)),
   _q_point(_bnd ? _problem.pointsFace(_tid) : _problem.points(_tid)),
   _current_elem(_problem.elem(_tid)),
+  _dim(_problem.mesh().dimension()),
   _has_stateful_props(false),
   _block_id(parameters.get<unsigned int>("block_id")),
 
   _props(_material_data.props()),
   _props_old(_material_data.propsOld()),
-  _props_older(_material_data.propsOlder())
+  _props_older(_material_data.propsOlder()),
+
+  _real_zero(_problem._real_zero[_tid]),
+  _zero(_problem._zero[_tid]),
+  _grad_zero(_problem._grad_zero[_tid]),
+  _second_zero(_problem._second_zero[_tid])
 {
   _props_elem       = new std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >;
   _props_elem_old   = new std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >;
@@ -128,7 +137,7 @@ void
 Material::reinit()
 {
   unsigned int current_elem = _current_elem->id();
-  unsigned int n_qpoints = _qrule->n_points();
+  _n_qpoints = _qrule->n_points();
 
   if (_has_stateful_props)
   {
@@ -150,15 +159,15 @@ Material::reinit()
   for (Moose::MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
   {
     mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
-    it->second->resize(n_qpoints);
+    it->second->resize(_n_qpoints);
   }
 
   if (_has_stateful_props)
   {
     for (Moose::MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-      it->second->resize(n_qpoints);
+      it->second->resize(_n_qpoints);
     for (Moose::MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-      it->second->resize(n_qpoints);
+      it->second->resize(_n_qpoints);
   }
 
   computeProperties();
@@ -175,7 +184,7 @@ void
 Material::reinit(unsigned int side)
 {
   unsigned int current_elem = _current_elem->id();
-  unsigned int n_qpoints = _qrule->n_points();
+  _n_qpoints = _qrule->n_points();
 
   if (_has_stateful_props)
   {
@@ -197,15 +206,15 @@ Material::reinit(unsigned int side)
   for (Moose::MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
   {
     mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
-    it->second->resize(_qrule->n_points());
+    it->second->resize(_n_qpoints);
   }
 
   if (_has_stateful_props)
   {
     for (Moose::MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-      it->second->resize(n_qpoints);
+      it->second->resize(_n_qpoints);
     for (Moose::MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-      it->second->resize(n_qpoints);
+      it->second->resize(_n_qpoints);
   }
   
   computeProperties();
@@ -309,3 +318,45 @@ Material::getData(QP_Data_Type qp_data_type)
 }
 #endif 
 
+
+unsigned int
+Material::coupled(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupled(var_name);
+}
+
+VariableValue &
+Material::coupledValue(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledValue(var_name);
+}
+
+VariableValue &
+Material::coupledValueOld(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledValueOld(var_name);
+}
+
+VariableValue &
+Material::coupledValueOlder(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledValueOlder(var_name);
+}
+
+VariableGradient &
+Material::coupledGradient(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledGradient(var_name);
+}
+
+VariableGradient  &
+Material::coupledGradientOld(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledGradientOld(var_name);
+}
+
+VariableGradient  &
+Material::coupledGradientOlder(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledGradientOlder(var_name);
+}

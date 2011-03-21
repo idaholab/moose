@@ -27,6 +27,7 @@ class AuxKernel :
   public Moose::Coupleable,
   public FunctionInterface,
   public Moose::TransientInterface,
+  public Moose::MaterialPropertyInterface,
   protected Moose::GeometricSearchInterface
 {
 public:
@@ -47,6 +48,7 @@ public:
   // Coupleable /////
   virtual unsigned int coupled(const std::string & var_name);
   virtual VariableValue & coupledValue(const std::string & var_name);
+  virtual VariableGradient  & coupledGradient(const std::string & var_name);
 
 protected:
   virtual Real computeValue() = 0;
@@ -73,6 +75,11 @@ protected:
 
   unsigned int _qp;
 
+  // Single Instance Variables
+  Real & _real_zero;
+  Array<Real> & _zero;
+  Array<RealGradient> & _grad_zero;
+  Array<RealTensor> & _second_zero;
 };
 
 #endif //AUXKERNEL_H

@@ -64,6 +64,15 @@ public:
 
   virtual Output & out() = 0;
   virtual void output() = 0;
+
+public:
+  /**
+   * Convenience zeros
+   */
+  Array<Real> _real_zero;
+  Array<Array<Real> > _zero;
+  Array<Array<RealGradient> > _grad_zero;
+  Array<Array<RealTensor> > _second_zero;
 };
 
 }

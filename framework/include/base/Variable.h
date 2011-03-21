@@ -15,8 +15,9 @@
 #include "node.h"
 
 
-typedef std::vector<Real>               VariableValue;
-typedef std::vector<RealGradient>       VariableGradient;
+typedef Array<Real>               VariableValue;
+typedef Array<RealGradient>       VariableGradient;
+typedef Array<RealTensor>         VariableSecond;
 
 
 namespace Moose
@@ -100,13 +101,17 @@ public:
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
+  const std::vector<std::vector<RealTensor> > & secondPhi() { return _second_phi; }
   std::vector<std::vector<Real> > & test() { return _test; }
   std::vector<std::vector<RealGradient> > & gradTest() { return _grad_test; }
+  std::vector<std::vector<RealTensor> > & secondTest() { return _second_test; }
 
   const std::vector<std::vector<Real> > & phiFace() { return _phi_face; }
   const std::vector<std::vector<RealGradient> > & gradPhiFace() { return _grad_phi_face; }
+  const std::vector<std::vector<RealTensor> > & secondPhiFace() { return _second_phi_face; }
   std::vector<std::vector<Real> > & testFace() { return _test_face; }
   std::vector<std::vector<RealGradient> > & gradTestFace() { return _grad_test_face; }
+  std::vector<std::vector<RealTensor> > & secondTestFace() { return _second_test_face; }
   const std::vector<Point> & normals() { return _normals; }
 
   VariableValue & sln() { return _u; }
@@ -115,6 +120,9 @@ public:
   VariableGradient  & gradSln() { return _grad_u; }
   VariableGradient  & gradSlnOld() { return _grad_u_old; }
   VariableGradient  & gradSlnOlder() { return _grad_u_older; }
+  VariableSecond & secondSln() { return _second_u; }
+  VariableSecond & secondSlnOld() { return _second_u_old; }
+  VariableSecond & secondSlnOlder() { return _second_u_older; }
 
   VariableValue & uDot() { return _u_dot; }
   VariableValue & duDotDu() { return _du_dot_du; }
@@ -122,6 +130,8 @@ public:
   const Node * & node() { return _node; }
   unsigned int & nodalDofIndex() { return _nodal_dof_index; }
   VariableValue & nodalSln() { return _nodal_u; }
+  VariableValue & nodalSlnOld() { return _nodal_u_old; }
+  VariableValue & nodalSlnOlder() { return _nodal_u_older; }
 
   void computeElemValues();
   void computeElemValuesFace();
@@ -140,6 +150,8 @@ public:
   void add(SparseMatrix<Number> & jacobian);
 
   Number getNodalValue(const Node & node);
+  Number getNodalValueOld(const Node & node);
+  Number getNodalValueOlder(const Node & node);
 
 protected:
   THREAD_ID _tid;
@@ -169,13 +181,17 @@ protected:
 
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
+  const std::vector<std::vector<RealTensor> > & _second_phi;
   std::vector<std::vector<Real> > _test;
   std::vector<std::vector<RealGradient> > _grad_test;
+  std::vector<std::vector<RealTensor> > _second_test;
 
   const std::vector<std::vector<Real> > & _phi_face;
   const std::vector<std::vector<RealGradient> > & _grad_phi_face;
+  const std::vector<std::vector<RealTensor> > & _second_phi_face;
   std::vector<std::vector<Real> > _test_face;
   std::vector<std::vector<RealGradient> > _grad_test_face;
+  std::vector<std::vector<RealTensor> > _second_test_face;
   const std::vector<Point> & _normals;
 
   VariableValue _u;
@@ -184,6 +200,9 @@ protected:
   VariableGradient  _grad_u;
   VariableGradient  _grad_u_old;
   VariableGradient  _grad_u_older;
+  VariableSecond _second_u;
+  VariableSecond _second_u_old;
+  VariableSecond _second_u_older;
 
   // time derivatives
   VariableValue _u_dot;
@@ -193,7 +212,8 @@ protected:
   const Node * & _node;
   unsigned int _nodal_dof_index;
   VariableValue _nodal_u;
-  VariableGradient  _nodal_grad_u;
+  VariableValue _nodal_u_old;
+  VariableValue _nodal_u_older;
 
   /**
    * Residual for this variable

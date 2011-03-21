@@ -27,6 +27,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     Coupleable(parameters),
     FunctionInterface(parameters),
     Moose::TransientInterface(parameters),
+    Moose::MaterialPropertyInterface(parameters),
     Moose::GeometricSearchInterface(parameters),
     _problem(*parameters.get<Moose::SubProblem *>("_problem")),
     _sys(*parameters.get<Moose::System *>("_sys")),
@@ -39,7 +40,12 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _current_elem(_var.currentElem()),
     _current_node(_var.node()),
     _current_volume(_aux_sys._data[_tid]._current_volume),
-    _nodal(_var.feType().family == LAGRANGE)
+    _nodal(_var.feType().family == LAGRANGE),
+
+    _real_zero(_problem._real_zero[_tid]),
+    _zero(_problem._zero[_tid]),
+    _grad_zero(_problem._grad_zero[_tid]),
+    _second_zero(_problem._second_zero[_tid])
 {
 }
 
@@ -82,4 +88,13 @@ AuxKernel::coupledValue(const std::string & var_name)
     return Coupleable::getCoupledNodalValue(var_name);
   else
     return Coupleable::getCoupledValue(var_name);
+}
+
+VariableGradient &
+AuxKernel::coupledGradient(const std::string & var_name)
+{
+  if (isNodal())
+    mooseError("Nodal variables do not have gradients");
+  else
+    return Coupleable::getCoupledGradient(var_name);
 }

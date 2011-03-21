@@ -12,9 +12,26 @@
  */
 #define stringifyName(name) #name
 #define registerObject(name)                      Factory::instance()->reg<name>(stringifyName(name))
+#define registerNamedObject(obj, name)            Factory::instance()->reg<obj>(name)
 
-#define registerKernel(name)                      Factory::instance()->reg<name>(stringifyName(name))
-#define registerBoundaryCondition(name)           Factory::instance()->reg<name>(stringifyName(name))
+// for backward compatibility
+#define registerKernel(name)                      registerObject(name)
+#define registerBoundaryCondition(name)           registerObject(name)
+#define registerAux(name)                         registerObject(name)
+#define registerMaterial(name)                    registerObject(name)
+#define registerPostprocessor(name)               registerObject(name)
+#define registerInitialCondition(name)            registerObject(name)
+#define registerDumper(name)                      registerObject(name)
+#define registerDiracKernel(name)                 registerObject(name)
+
+#define registerNamedKernel(obj, name)                 registerNamedObject(obj, name)
+#define registerNamedBoundaryCondition(obj, name)      registerNamedObject(obj, name)
+#define registerNamedAux(obj, name)                    registerNamedObject(obj, name)
+#define registerNamedMaterial(obj, name)               registerNamedObject(obj, name)
+#define registerNamedPostprocessor(obj, name)          registerNamedObject(obj, name)
+#define registerNamedInitialCondition(obj, name)       registerNamedObject(obj, name)
+#define registerNamedDumper(obj, name)                 registerNamedObject(obj, name)
+#define registerNamedDiracKernel(obj, name)            registerNamedObject(obj, name)
 
 
 /**

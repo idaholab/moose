@@ -11,7 +11,6 @@
 // Forward Declarations
 namespace Moose {
   class SubProblem;
-}
 
 class PostprocessorInterface
 {
@@ -27,5 +26,7 @@ private:
   Moose::SubProblem & _pi_problem;
   THREAD_ID _pi_tid;
 };
+
+} // namespace
 
 #endif //POSTPROCESSORINTERFACE_H_

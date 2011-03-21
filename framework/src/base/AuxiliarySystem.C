@@ -278,6 +278,7 @@ AuxiliarySystem::compute()
     if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
     {
       _problem.reinitElem(elem, 0);
+      _subproblem.reinitMaterials(elem->subdomain_id(), 0);
 
       //Compute the area of the element
       _data[0]._current_volume = _problem.assembly(0).computeVolume();

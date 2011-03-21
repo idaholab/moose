@@ -1,7 +1,5 @@
 #include "Array.h"
-
-//#include "ColumnMajorMatrix.h"
-
+#include "ColumnMajorMatrix.h"
 // libMesh Includes
 #include "vector_value.h"
 #include "tensor_value.h"
@@ -66,7 +64,7 @@ template class Array<RealTensorValue>;
 template class Array<Array<RealTensorValue> >;
 template class Array<Array<Array<RealTensorValue> > >;
 
-//template class Array<ColumnMajorMatrix>;
+template class Array<ColumnMajorMatrix>;
 template class Array<Array<Array<Real> > >;
 
 template class Array<std::vector<Real> >;

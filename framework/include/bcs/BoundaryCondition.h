@@ -7,6 +7,7 @@
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "PostprocessorInterface.h"
 
 // libMesh
 #include "elem.h"
@@ -22,7 +23,8 @@ class BoundaryCondition :
   public Moose::Coupleable,
   public FunctionInterface,
   public Moose::TransientInterface,
-  public Moose::MaterialPropertyInterface
+  public Moose::MaterialPropertyInterface,
+  public Moose::PostprocessorInterface
 {
 public:
   BoundaryCondition(const std::string & name, InputParameters parameters);
@@ -45,6 +47,12 @@ protected:
   unsigned int & _current_side;
 
   const std::vector<Point> & _normals;
+
+  // Single Instance Variables
+  Real & _real_zero;
+  Array<Real> & _zero;
+  Array<RealGradient> & _grad_zero;
+  Array<RealTensor> & _second_zero;
 };
 
 

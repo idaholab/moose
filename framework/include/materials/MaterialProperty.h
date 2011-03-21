@@ -4,8 +4,10 @@
 #include <vector>
 
 #include "Array.h"
+#include "ColumnMajorMatrix.h"
 
 #include "libmesh_common.h"
+
 
 namespace Moose {
 
@@ -43,7 +45,7 @@ public:
   virtual void shallowCopy (PropertyValue *rhs) = 0;
 };
 
-}
+} // namespace
 
 /**
  * Concrete definition of a parameter value
@@ -128,6 +130,10 @@ MaterialProperty<T>::init ()
 template <>
 Moose::PropertyValue *
 MaterialProperty<std::vector<Real> >::init ();
+
+template <>
+Moose::PropertyValue *
+MaterialProperty<ColumnMajorMatrix>::init ();
 
 template <typename T>
 inline void

@@ -20,6 +20,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     FunctionInterface(parameters),
     Moose::TransientInterface(parameters),
     Moose::MaterialPropertyInterface(parameters),
+    Moose::PostprocessorInterface(parameters),
     _problem(*parameters.get<Moose::SubProblem *>("_problem")),
     _sys(*parameters.get<Moose::System *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -29,7 +30,12 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
 
     _current_elem(_var.currentElem()),
     _current_side(_var.currentSide()),
-    _normals(_var.normals())
+    _normals(_var.normals()),
+
+    _real_zero(_problem._real_zero[_tid]),
+    _zero(_problem._zero[_tid]),
+    _grad_zero(_problem._grad_zero[_tid]),
+    _second_zero(_problem._second_zero[_tid])
 {
 }
 

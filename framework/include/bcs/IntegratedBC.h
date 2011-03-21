@@ -21,6 +21,7 @@ public:
 
   virtual unsigned int coupled(const std::string & var_name);
   virtual VariableValue & coupledValue(const std::string & var_name);
+  virtual VariableGradient  & coupledGradient(const std::string & var_name);
 
 protected:
   Moose::Variable & _test_var;

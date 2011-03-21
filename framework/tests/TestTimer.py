@@ -46,7 +46,7 @@ class TestTimer(TestHarness):
         timing = float(result[:-1])
         sum_time += timing
         num += 1
-        data.append( (app, test, rev, timestamp, timing, dofs) )
+        data.append( (app, test, rev, timestamp, timing, dofs, load) )
       except:
         parse_failed = True     #ignore with error message, and don't do average
         print 'ERROR: no timing info in string: ' + result
@@ -54,11 +54,11 @@ class TestTimer(TestHarness):
     # Don't compute the average if some failed
     if self.all_passed and not parse_failed and num > 0:
       average = sum_time / num
-      data.append( (app, '_average_'+app, rev, timestamp, average, dofs) )
+      data.append( (app, '_average_'+app, rev, timestamp, average, dofs, load) )
 
     # to prevent duplicates delete possible old values first
     cr.execute('delete from timing where app_name = ? and revision = ?', (app, rev))
-    cr.executemany('insert into timing values (?,?,?,?,?,?)', data)
+    cr.executemany('insert into timing values (?,?,?,?,?,?,?)', data)
     con.commit()
 
   def addOptions(self, parser):

@@ -75,3 +75,9 @@ IntegratedBC::coupledValue(const std::string & var_name)
 {
   return Moose::Coupleable::getCoupledValue(var_name);
 }
+
+VariableGradient &
+IntegratedBC::coupledGradient(const std::string & var_name)
+{
+  return Moose::Coupleable::getCoupledGradient(var_name);
+}

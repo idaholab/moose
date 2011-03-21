@@ -16,7 +16,7 @@ InputParameters validParams<GeneralPostprocessor>();
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
 class GeneralPostprocessor :
   public Postprocessor,
-  protected PostprocessorInterface
+  protected Moose::PostprocessorInterface
 {
 public:
   GeneralPostprocessor(const std::string & name, InputParameters parameters);

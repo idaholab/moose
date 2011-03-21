@@ -2,6 +2,8 @@
 #define MATERIAL_H_
 
 #include "Object.h"
+#include "Coupleable.h"
+#include "TransientInterface.h"
 #include "MaterialProperty.h"
 #include "ParallelUniqueId.h"
 
@@ -18,7 +20,10 @@ class MaterialData;
 /**
  * Holds material properties that are assigned to blocks.
  */
-class Material : public Object
+class Material :
+  public Object,
+  public Moose::Coupleable,
+  public Moose::TransientInterface
 {
 public:
   Material(const std::string & name, InputParameters parameters);
@@ -78,6 +83,15 @@ public:
   virtual void timeStepSetup();
 #endif
 
+  // Coupling
+  virtual unsigned int coupled(const std::string & var_name);
+  virtual VariableValue & coupledValue(const std::string & var_name);
+  virtual VariableValue & coupledValueOld(const std::string & var_name);
+  virtual VariableValue & coupledValueOlder(const std::string & var_name);
+  virtual VariableGradient & coupledGradient(const std::string & var_name);
+  virtual VariableGradient & coupledGradientOld(const std::string & var_name);
+  virtual VariableGradient & coupledGradientOlder(const std::string & var_name);
+
 protected:
   Moose::SubProblem & _problem;
   THREAD_ID _tid;
@@ -87,9 +101,13 @@ protected:
   unsigned int _qp; 
 
   QBase * & _qrule;
+  const std::vector<Real> & _JxW;
   const std::vector< Point > & _q_point;
+  unsigned int _n_qpoints;
 
   const Elem * & _current_elem;
+
+  unsigned int _dim;
 
   /**
    * Whether or not this material has stateful properties.  This will get automatically
@@ -192,6 +210,12 @@ protected:
   std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> > * _props_elem;
   std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> > * _props_elem_old;
   std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> > * _props_elem_older;
+
+  // Single Instance Variables
+  Real & _real_zero;
+  Array<Real> & _zero;
+  Array<RealGradient> & _grad_zero;
+  Array<RealTensor> & _second_zero;
 };
 
 

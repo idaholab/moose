@@ -113,9 +113,11 @@ Variable::Variable(unsigned int var_num, const FEType & fe_type, System & sys, A
 
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi()),
+    _second_phi(_fe->get_d2phi()),
 
     _phi_face(_fe_face->get_phi()),
     _grad_phi_face(_fe_face->get_dphi()),
+    _second_phi_face(_fe_face->get_d2phi()),
     _normals(_fe_face->get_normals()),
 
     _node(_assembly.node())
@@ -132,10 +134,12 @@ Variable::reinit()
   // copy shape functions into test functions (so they can be modified by stabilizers)
   _test = _phi;
   _grad_test = _grad_phi;
+  _second_test = _second_phi;
 
   // FIXME: move to face reinit
   _test_face = _phi_face;
   _grad_test_face = _grad_phi_face;
+  _second_test_face = _second_phi_face;
 
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
 }
@@ -183,9 +187,13 @@ Variable::add(SparseMatrix<Number> & jacobian)
 void
 Variable::computeElemValues()
 {
+  bool has_second_derivatives = (feType().family == CLOUGH || feType().family == HERMITE);
+
   unsigned int nqp = _qrule->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
+  if (has_second_derivatives)
+    _second_u.resize(nqp);
   if (_problem.transient())
   {
     _u_dot.resize(nqp);
@@ -193,15 +201,21 @@ Variable::computeElemValues()
 
     _u_old.resize(nqp);
     _u_older.resize(nqp);
-
     _grad_u_old.resize(nqp);
     _grad_u_older.resize(nqp);
+    if (has_second_derivatives)
+    {
+      _second_u_old.resize(nqp);
+      _second_u_older.resize(nqp);
+    }
   }
 
   for (unsigned int i = 0; i < nqp; ++i)
   {
     _u[i] = 0;
     _grad_u[i] = 0;
+    if (has_second_derivatives)
+      _second_u[i] = 0;
 
     if (_problem.transient())
     {
@@ -210,9 +224,13 @@ Variable::computeElemValues()
 
       _u_old[i] = 0;
       _u_older[i] = 0;
-
       _grad_u_old[i] = 0;
       _grad_u_older[i] = 0;
+      if (has_second_derivatives)
+      {
+        _second_u_old[i] = 0;
+        _second_u_older[i] = 0;
+      }
     }
   }
 
@@ -234,9 +252,12 @@ Variable::computeElemValues()
     {
       Real phi_local = _phi[i][qp];
       RealGradient dphi_local = _grad_phi[i][qp];
+      RealTensor d2phi_local = _second_phi[i][qp];
 
       _u[qp]      += phi_local * soln_local;
       _grad_u[qp] += dphi_local * soln_local;
+      if (has_second_derivatives)
+        _second_u[qp] += d2phi_local * soln_local;
 
       if (_problem.transient())
       {
@@ -247,6 +268,11 @@ Variable::computeElemValues()
         _u_older[qp]      += phi_local * soln_older_local;
         _grad_u_old[qp]   += dphi_local * soln_old_local;
         _grad_u_older[qp] += dphi_local * soln_older_local;
+        if (has_second_derivatives)
+        {
+          _second_u_old[qp] += d2phi_local * soln_old_local;
+          _second_u_older[qp] += d2phi_local * soln_older_local;
+        }
       }
     }
   }
@@ -255,9 +281,12 @@ Variable::computeElemValues()
 void
 Variable::computeElemValuesFace()
 {
+  bool has_second_derivatives = (feType().family == CLOUGH || feType().family == HERMITE);
   unsigned int nqp = _qrule_face->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
+  if (has_second_derivatives)
+    _second_u.resize(nqp);
   if (_problem.transient())
   {
     _u_dot.resize(nqp);
@@ -265,9 +294,13 @@ Variable::computeElemValuesFace()
 
     _u_old.resize(nqp);
     _u_older.resize(nqp);
-
     _grad_u_old.resize(nqp);
     _grad_u_older.resize(nqp);
+    if (has_second_derivatives)
+    {
+      _second_u_old.resize(nqp);
+      _second_u_older.resize(nqp);
+    }
   }
 
   for (unsigned int i = 0; i < nqp; ++i)
@@ -282,9 +315,13 @@ Variable::computeElemValuesFace()
 
       _u_old[i] = 0;
       _u_older[i] = 0;
-
       _grad_u_old[i] = 0;
       _grad_u_older[i] = 0;
+      if (has_second_derivatives)
+      {
+        _second_u_old[i] = 0;
+        _second_u_older[i] = 0;
+      }
     }
   }
 
@@ -306,9 +343,12 @@ Variable::computeElemValuesFace()
     {
       Real phi_local = _phi_face[i][qp];
       RealGradient dphi_local = _grad_phi_face[i][qp];
+      RealTensor d2phi_local = _second_phi_face[i][qp];
 
       _u[qp]      += phi_local * soln_local;
       _grad_u[qp] += dphi_local * soln_local;
+      if (has_second_derivatives)
+        _second_u[qp] += d2phi_local * soln_local;
 
       if (_problem.transient())
       {
@@ -319,6 +359,11 @@ Variable::computeElemValuesFace()
         _u_older[qp]      += phi_local * soln_older_local;
         _grad_u_old[qp]   += dphi_local * soln_old_local;
         _grad_u_older[qp] += dphi_local * soln_older_local;
+        if (has_second_derivatives)
+        {
+          _second_u_old[qp] += d2phi_local * soln_old_local;
+          _second_u_older[qp] += d2phi_local * soln_older_local;
+        }
       }
     }
   }
@@ -329,6 +374,12 @@ Variable::computeNodalValues()
 {
   _nodal_u.resize(1);
   _nodal_u[0] = _sys.solution()(_nodal_dof_index);
+
+  _nodal_u_old.resize(1);
+  _nodal_u_old[0] = _sys.solutionOld()(_nodal_dof_index);
+
+  _nodal_u_older.resize(1);
+  _nodal_u_older[0] = _sys.solutionOlder()(_nodal_dof_index);
 }
 
 Number
@@ -339,4 +390,19 @@ Variable::getNodalValue(const Node & node)
 
 }
 
+Number
+Variable::getNodalValueOld(const Node & node)
+{
+  unsigned int dof = node.dof_number(_sys.number(), _var_num, 0);
+  return _sys.solutionOld()(dof);
+
+}
+
+Number
+Variable::getNodalValueOlder(const Node & node)
+{
+  unsigned int dof = node.dof_number(_sys.number(), _var_num, 0);
+  return _sys.solutionOlder()(dof);
+
+}
 } // namespace
