@@ -29,13 +29,17 @@ public:
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
 
   virtual void compute();
+  virtual void compute_ts();
 
 protected:
+  virtual void computeInternal(std::vector<AuxWarehouse> & auxs);
+
   SubProblem & _subproblem;
   // Variables
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
   std::vector<AuxWarehouse> _auxs;
+  std::vector<AuxWarehouse> _auxs_ts;                           // aux_kernels executed at the end of time step
 
   // data
   struct AuxData

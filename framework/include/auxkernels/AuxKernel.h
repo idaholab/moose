@@ -42,6 +42,8 @@ public:
 
   bool isNodal();
 
+  bool ts() { return _ts; }
+
   // Coupleable /////
   unsigned int coupledComponents(const std::string & varname);
   virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
@@ -78,6 +80,8 @@ protected:
   bool _nodal;
 
   unsigned int _qp;
+
+  bool _ts;
 
   // Single Instance Variables
   Real & _real_zero;

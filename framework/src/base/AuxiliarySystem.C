@@ -23,6 +23,7 @@ AuxiliarySystem::AuxiliarySystem(SubProblem & problem, const std::string & name)
   _elem_vars.resize(libMesh::n_threads());
 
   _auxs.resize(libMesh::n_threads());
+  _auxs_ts.resize(libMesh::n_threads());
   _data.resize(libMesh::n_threads());
 }
 
@@ -74,7 +75,11 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
           mooseError("AuxKernel (" + kernel->name() + "): block outside of the domain of the variable");
       }
     }
-    _auxs[tid].addAuxKernel(kernel, blk_ids);
+
+    if (kernel->ts())
+      _auxs_ts[tid].addAuxKernel(kernel, blk_ids);
+    else
+      _auxs[tid].addAuxKernel(kernel, blk_ids);
   }
 }
 
@@ -98,8 +103,16 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
       AuxKernel * bc = static_cast<AuxKernel *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 
-      _auxs[tid].addActiveBC(boundaries[i], bc);
-      _auxs[tid].addBC(bc);
+      if (bc->ts())
+      {
+        _auxs_ts[tid].addActiveBC(boundaries[i], bc);
+        _auxs_ts[tid].addBC(bc);
+      }
+      else
+      {
+        _auxs[tid].addActiveBC(boundaries[i], bc);
+        _auxs[tid].addBC(bc);
+      }
       _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
     }
   }
@@ -126,6 +139,18 @@ AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 AuxiliarySystem::compute()
 {
+  computeInternal(_auxs);
+}
+
+void
+AuxiliarySystem::compute_ts()
+{
+  computeInternal(_auxs_ts);
+}
+
+void
+AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
+{
   //If there aren't any auxiliary variables just return
   if(_sys.n_vars() == 0)
     return;
@@ -136,8 +161,8 @@ AuxiliarySystem::compute()
 
   ConstNodeRange & node_range = *_mesh.getLocalNodeRange();
 
-  AuxKernelIterator aux_begin = _auxs[0].activeNodalAuxKernelsBegin();
-  AuxKernelIterator aux_end = _auxs[0].activeNodalAuxKernelsEnd();
+  AuxKernelIterator aux_begin = auxs[0].activeNodalAuxKernelsBegin();
+  AuxKernelIterator aux_end = auxs[0].activeNodalAuxKernelsEnd();
   AuxKernelIterator aux_it = aux_begin;
 
   AuxKernelIterator block_nodal_aux_begin;
@@ -160,8 +185,8 @@ AuxiliarySystem::compute()
 //  // Call setup on all of the Nodal block AuxKernels
 //  for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
 //  {
-//    block_nodal_aux_begin = _auxs[0].activeBlockNodalAuxKernelsBegin(*subdomain_it);
-//    block_nodal_aux_end = _auxs[0].activeBlockNodalAuxKernelsEnd(*subdomain_it);
+//    block_nodal_aux_begin = auxs[0].activeBlockNodalAuxKernelsBegin(*subdomain_it);
+//    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(*subdomain_it);
 //    for(block_nodal_aux_it = block_nodal_aux_begin; block_nodal_aux_it != block_nodal_aux_end; ++block_nodal_aux_it)
 //      (*block_nodal_aux_it)->setup();
 //  }
@@ -193,8 +218,8 @@ AuxiliarySystem::compute()
 //  {
 //    short int id = *it;
 //
-//    aux_begin = _auxs[0].activeAuxBCsBegin(id);
-//    aux_end = _auxs[0].activeAuxBCsEnd(id);
+//    aux_begin = auxs[0].activeAuxBCsBegin(id);
+//    aux_end = auxs[0].activeAuxBCsEnd(id);
 //
 //    for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
 //      (*aux_it)->setup();
@@ -209,8 +234,8 @@ AuxiliarySystem::compute()
 
   for(unsigned int i=0; i<n_nodes; i++)
   {
-    aux_begin = _auxs[0].activeAuxBCsBegin(ids[i]);
-    aux_end = _auxs[0].activeAuxBCsEnd(ids[i]);
+    aux_begin = auxs[0].activeAuxBCsBegin(ids[i]);
+    aux_end = auxs[0].activeAuxBCsEnd(ids[i]);
 
     if(aux_begin != aux_end)
     {
@@ -233,8 +258,8 @@ AuxiliarySystem::compute()
   }
 
   // Update the element aux vars
-  aux_begin = _auxs[0].activeElementAuxKernelsBegin();
-  aux_end = _auxs[0].activeElementAuxKernelsEnd();
+  aux_begin = auxs[0].activeElementAuxKernelsBegin();
+  aux_end = auxs[0].activeElementAuxKernelsEnd();
   aux_it = aux_begin;
 
 //  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
@@ -245,8 +270,8 @@ AuxiliarySystem::compute()
 //  // Call setup on all of the Elemental block AuxKernels
 //  for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
 //  {
-//    block_element_aux_begin = _auxs[0].activeBlockElementAuxKernelsBegin(*subdomain_it);
-//    block_element_aux_end = _auxs[0].activeBlockElementAuxKernelsEnd(*subdomain_it);
+//    block_element_aux_begin = auxs[0].activeBlockElementAuxKernelsBegin(*subdomain_it);
+//    block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(*subdomain_it);
 //    for(block_element_aux_it = block_element_aux_begin; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
 //      (*block_element_aux_it)->setup();
 //  }
@@ -268,8 +293,8 @@ AuxiliarySystem::compute()
 //    if(unlikely(_calculate_element_time))
 //      startElementTiming(elem->id());
 
-    block_element_aux_it =_auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
-    block_element_aux_end = _auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
+    block_element_aux_it = auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
+    block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
 
     if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
     {
@@ -296,8 +321,8 @@ AuxiliarySystem::compute()
       (*aux_it)->compute(solution());
 
     // Now do the block nodal aux kernels
-    block_nodal_aux_it =_auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
-    block_nodal_aux_end = _auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
+    block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
 
     if(block_nodal_aux_it != block_nodal_aux_end)
     {
@@ -309,7 +334,7 @@ AuxiliarySystem::compute()
         {
           _problem.reinitNode(&node, 0);
 
-          for(block_nodal_aux_it =_auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
+          for(block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
               block_nodal_aux_it != block_nodal_aux_end;
               ++block_nodal_aux_it)
             (*block_nodal_aux_it)->compute(solution());
