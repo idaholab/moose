@@ -12,28 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PreconditioningBlock.h"
-#include "InputParameters.h"
-#include "Parser.h"
-#include "Moose.h"
+#ifndef PBPBLOCK_H
+#define PBPBLOCK_H
 
+#include "ParserBlock.h"
+
+//Forward Declarations
+class PBPBlock;
 template<>
-InputParameters validParams<PreconditioningBlock>()
-{
-  return validParams<ParserBlock>();
-}
+InputParameters validParams<PBPBlock>();
 
-PreconditioningBlock::PreconditioningBlock(const std::string & name, InputParameters params) :
-    ParserBlock(name, params)
+class PBPBlock: public ParserBlock
 {
-//  // Register the Preconditioning Prereqs
-//  addPrereq("Mesh");
-//  addPrereq("Variables");
-}
+public:
+  PBPBlock(const std::string & name, InputParameters params);
 
-void
-PreconditioningBlock::execute() 
-{
-  // Execute the preconditioning block
-  visitChildren();
-}  
+  virtual void execute();
+};
+
+
+  
+
+#endif //PBPBLOCK_H

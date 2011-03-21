@@ -38,9 +38,11 @@ ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
     _nl_solution(_sys.add_vector("curr_sln", false, GHOSTED)),
+    _t(problem.time()),
     _dt(problem.dt()),
     _dt_old(problem.dtOld()),
-    _t_step(problem.timeStep())
+    _t_step(problem.timeStep()),
+    _preconditioner(NULL)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
@@ -57,6 +59,7 @@ ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
 
 ImplicitSystem::~ImplicitSystem()
 {
+  delete _preconditioner;
 }
 
 bool
@@ -349,6 +352,166 @@ ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 void
+ImplicitSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+{
+  Moose::perf_log.push("compute_jacobian_block()","Solve");
+
+#ifdef LIBMESH_HAVE_PETSC
+  //Necessary for speed
+#if PETSC_VERSION_LESS_THAN(3,0,0)
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+#else
+  // In Petsc 3.0.0, MatSetOption has three args...the third arg
+  // determines whether the option is set (true) or unset (false)
+  MatSetOption(static_cast<PetscMatrix<Number> &>(_jacobian).mat(),
+   MAT_KEEP_ZEROED_ROWS,
+   PETSC_TRUE);
+#endif
+#endif
+
+/*
+    Threads::parallel_for(ConstElemRange(Moose::mesh->active_local_elements_begin(),
+                                         Moose::mesh->active_local_elements_end(),1),
+                          ComputeInternalJacobianBlocks(soln, jacobian, precond_system, ivar, jvar));
+*/
+  {
+    unsigned int tid = 0;
+
+    MeshBase::const_element_iterator el = _mesh.active_local_elements_begin();
+    const MeshBase::const_element_iterator end_el = _mesh.active_local_elements_end();
+
+    StabilizerIterator stabilizer_begin = _stabilizers[tid].activeStabilizersBegin();
+    StabilizerIterator stabilizer_end = _stabilizers[tid].activeStabilizersEnd();
+    StabilizerIterator stabilizer_it = stabilizer_begin;
+
+    unsigned int subdomain = std::numeric_limits<unsigned int>::max();
+
+    DofMap & dof_map = precond_system.get_dof_map();
+    DenseMatrix<Number> Ke;
+    std::vector<unsigned int> dof_indices;
+
+    jacobian.zero();
+
+    for (; el != end_el; ++el)
+    {
+      const Elem* elem = *el;
+      unsigned int cur_subdomain = elem->subdomain_id();
+
+      std::set<Variable *> vars;
+
+      _problem.reinitElem(elem, tid);
+
+      dof_map.dof_indices(elem, dof_indices);
+
+      if(dof_indices.size())
+      {
+        Ke.resize(dof_indices.size(),dof_indices.size());
+
+        if(cur_subdomain != subdomain)
+        {
+          subdomain = cur_subdomain;
+          _problem.subdomainSetup(subdomain, tid);
+          _kernels[tid].updateActiveKernels(_t, _dt, cur_subdomain);
+        }
+
+        _problem.parent()->reinitMaterials(cur_subdomain, tid);
+
+        //Stabilizers
+        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+          (*stabilizer_it)->computeTestFunctions();
+
+        //Kernels
+        KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
+        KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
+        KernelIterator kernel_it = kernel_begin;
+
+        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+        {
+          Kernel * kernel = *kernel_it;
+
+          if(kernel->variable().number() == ivar)
+            kernel->computeOffDiagJacobian(Ke, jvar);
+        }
+
+        for (unsigned int side=0; side<elem->n_sides(); side++)
+        {
+          std::vector<short int> boundary_ids = _mesh.boundary_ids(elem, side);
+
+          if (boundary_ids.size() > 0)
+          {
+            for (std::vector<short int>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+            {
+              short int bnd_id = *it;
+
+              std::vector<IntegratedBC *> bcs = _bcs[tid].getBCs(bnd_id);
+              if (bcs.size() > 0)
+              {
+                _problem.reinitElemFace(elem, side, bnd_id, tid);
+                _problem.parent()->reinitMaterialsFace(elem->subdomain_id(), side, tid);
+
+                for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+                {
+                  IntegratedBC * bc = *it;
+                  if(bc->variable().number() == ivar)
+                    bc->computeJacobianBlock(Ke,ivar,jvar);
+                }
+              }
+            }
+          }
+        }
+
+        dof_map.constrain_element_matrix (Ke, dof_indices, false);
+        jacobian.add_matrix(Ke, dof_indices);
+      }
+    }
+  }
+
+  jacobian.close();
+
+  //Dirichlet BCs
+  std::vector<int> zero_rows;
+
+  std::vector<unsigned int> nodes;
+  std::vector<short int> ids;
+  _mesh.build_node_list(nodes, ids);
+
+  const unsigned int n_nodes = nodes.size();
+
+  for(unsigned int i=0; i<n_nodes; i++)
+  {
+    unsigned int boundary_id = ids[i];
+
+    std::vector<NodalBC *> & bcs = _bcs[0].getNodalBCs(boundary_id);
+    if(bcs.size() > 0)
+    {
+      Node & node = _mesh.node(nodes[i]);
+
+      if(node.processor_id() == libMesh::processor_id())
+      {
+        _problem.parent()->reinitNodeFace(&node, boundary_id, 0);
+
+        for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
+        {
+          //The first zero is for the variable number... there is only one variable in each mini-system
+          //The second zero only works with Lagrange elements!
+          if((*it)->variable().number() == ivar)
+            zero_rows.push_back(node.dof_number(precond_system.number(), 0, 0));
+        }
+      }
+    }
+  }
+
+  jacobian.close();
+
+  //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
+  jacobian.zero_rows(zero_rows, 1.0);
+
+  jacobian.close();
+
+  Moose::perf_log.pop("compute_jacobian_block()","Solve");
+}
+
+void
 ImplicitSystem::setVarScaling(std::vector<Real> scaling)
 {
 //  if(scaling.size() != _system->n_vars())
@@ -411,6 +574,16 @@ ImplicitSystem::printVarNorms()
     std::cout << s.variable_name(var_num) << ": "
               << s.calculate_norm(*s.rhs,var_num,DISCRETE_L2) << std::endl;
   }
+}
+
+void
+ImplicitSystem::setPreconditioner(Preconditioner<Real> *pc)
+{
+  _preconditioner = pc;
+
+  // We don't want to be computing the big Jacobian!
+  _sys.nonlinear_solver->jacobian = NULL;
+  _sys.nonlinear_solver->attach_preconditioner(pc);
 }
 
 } // namespace

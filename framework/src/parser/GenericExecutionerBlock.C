@@ -97,18 +97,20 @@ GenericExecutionerBlock::execute()
     Moose::MProblem *mproblem = dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem());
     _parser_handle._problem = mproblem;
 
+    ParserBlock * blk;
+
     // FIXME: HACK! Can initialize displaced problem after we have instance of problem
-    ParserBlock * mesh_blk = _parser_handle.root()->locateBlock("Mesh");
-    if(mesh_blk->isParamValid("displacements"))
+    blk = _parser_handle.root()->locateBlock("Mesh");
+    if(blk->isParamValid("displacements"))
     {
-      std::vector<std::string> displacements = mesh_blk->getParamValue<std::vector<std::string> >("displacements");
+      std::vector<std::string> displacements = blk->getParamValue<std::vector<std::string> >("displacements");
       _parser_handle._problem->initDisplacedProblem(displacements);
     }
 
     // handle functions
-    ParserBlock * fns = locateBlock("Functions");
-    if (fns)
-      fns->execute();
+    blk = locateBlock("Functions");
+    if (blk)
+      blk->execute();
 
     VariablesBlock * vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("Variables"));
     if (vars!= NULL)
@@ -118,11 +120,16 @@ GenericExecutionerBlock::execute()
       aux_vars->execute();
 
     // handle periodic BCs
-    ParserBlock * pb = locateBlock("BCs/Periodic");
-    if (pb)
-      pb->execute();
+    blk = locateBlock("BCs/Periodic");
+    if (blk)
+      blk->execute();
+
+    blk = locateBlock("Preconditioning");
+    if (blk)
+      blk->execute();
 
     mproblem->init();
+
     if (vars != NULL)
       vars->copyNodalValues(mproblem->getNonlinearSystem());
     if (aux_vars != NULL)
@@ -169,8 +176,6 @@ GenericExecutionerBlock::execute()
 
     Moose::ImplicitSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParamValue<std::string>("scheme")));
-
-    ParserBlock * blk;
 
     blk= locateBlock("GlobalParams");
     if (blk)

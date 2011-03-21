@@ -33,6 +33,10 @@ public:
 
   virtual void computeResidual();
   virtual void computeJacobian(int i, int j);
+  /**
+   * Computes d-residual / d-jvar... storing the result in Ke.
+   */
+  virtual void computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar);
 
   virtual unsigned int coupled(const std::string & var_name);
   virtual VariableValue & coupledValue(const std::string & var_name);
@@ -105,6 +109,12 @@ protected:
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
+
+  /**
+   * This is the virtual that derived classes should override for computing an off-diagonal jacobian component.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
   virtual void precalculateResidual();
 };
 

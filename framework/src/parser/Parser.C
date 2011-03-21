@@ -32,6 +32,7 @@
 #include "OutputBlock.h"
 #include "GenericExecutionerBlock.h"
 #include "PreconditioningBlock.h"
+#include "PBPBlock.h"
 #include "PostprocessorsBlock.h"
 #include "GenericPostprocessorBlock.h"
 #include "PeriodicBlock.h"
@@ -87,7 +88,7 @@ Parser::registerObjects()
   registerNamedParserBlock(GenericMaterialBlock, "Materials/*");
   registerNamedParserBlock(OutputBlock, "Output");
   registerNamedParserBlock(PreconditioningBlock, "Preconditioning");
-//  registerNamedParserBlock(PBPBlock, "Preconditioning/PBP");
+  registerNamedParserBlock(PBPBlock, "Preconditioning/PBP");
   registerNamedParserBlock(PeriodicBlock, "BCs/Periodic");
   registerNamedParserBlock(GenericPeriodicBlock, "BCs/Periodic/*");
   registerNamedParserBlock(GenericExecutionerBlock, "Executioner");

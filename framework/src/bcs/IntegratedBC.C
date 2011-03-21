@@ -58,8 +58,32 @@ IntegratedBC::computeJacobian(int /*i*/, int /*j*/)
   }
 }
 
+void
+IntegratedBC::computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar)
+{
+//  Moose::perf_log.push("computeJacobianBlock()","IntegratedBC");
+
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    for (_i=0; _i<_phi.size(); _i++)
+      for (_j=0; _j<_phi.size(); _j++)
+      {
+        if (ivar == jvar)
+          Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+        else
+          Ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);
+      }
+
+//  Moose::perf_log.pop("computeJacobianBlock()","IntegratedBC");
+}
+
 Real
 IntegratedBC::computeQpJacobian()
+{
+  return 0;
+}
+
+Real
+IntegratedBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0;
 }

@@ -10,6 +10,7 @@
 #include "nonlinear_implicit_system.h"
 #include "numeric_vector.h"
 #include "sparse_matrix.h"
+#include "preconditioner.h"
 
 namespace Moose {
 
@@ -27,6 +28,7 @@ public:
 
   void computeResidual(NumericVector<Number> & residual);
   void computeJacobian(SparseMatrix<Number> &  jacobian);
+  void computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
 
   void printVarNorms();
 
@@ -39,6 +41,8 @@ public:
 
   virtual void set_solution(const NumericVector<Number> & soln) { _nl_solution = soln; }
   virtual NumericVector<Number> & solution() { return _nl_solution; }
+
+  void setPreconditioner(Preconditioner<Real> *pc);
 
 public:
   SubProblem & _subproblem;
@@ -54,6 +58,7 @@ protected:
 
   NumericVector<Number> & _nl_solution;
 
+  Real & _t;
   Real & _dt;
   Real & _dt_old;
   int & _t_step;
@@ -65,6 +70,8 @@ protected:
   std::vector<KernelWarehouse> _kernels;
   std::vector<BCWarehouse> _bcs;
   std::vector<StabilizerWarehouse> _stabilizers;
+
+  Preconditioner<Real> * _preconditioner;               /// Preconditioner
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
