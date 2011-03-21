@@ -42,4 +42,18 @@ Output::outputPps(const FormattedTable & table)
     _outputters[i]->outputPps(_file_base, table, _time);
 }
 
+void
+Output::meshChanged()
+{
+  for (unsigned int i = 0; i < _outputters.size(); i++)
+    _outputters[i]->meshChanged();
+}
+
+void
+Output::sequence(bool state)
+{
+  for (unsigned int i = 0; i < _outputters.size(); i++)
+    _outputters[i]->sequence(state);
+}
+
 } // namespace

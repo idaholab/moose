@@ -124,16 +124,16 @@ DisplacedProblem::serializeSolution(const NumericVector<Number> & soln, const Nu
 void
 DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
 {
-//  Moose::perf_log.push("updateDisplacedMesh()","Solve");
+  Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
   (*_nl_sys.solution) = soln;
   (*_aux_sys.solution) = aux_soln;
 
   Threads::parallel_for(*_mesh.getActiveNodeRange(), UpdateDisplacedMeshThread(*this));
 
-//  Moose::perf_log.pop("updateDisplacedMesh()","Solve");
+  Moose::perf_log.pop("updateDisplacedMesh()","Solve");
 
-//  // Update the geometric searches that depend on the displaced mesh
+  // Update the geometric searches that depend on the displaced mesh
 //  _geometric_search_data_displaced.update();
 }
 
@@ -152,7 +152,8 @@ DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & ty
 void
 DisplacedProblem::output(Real time)
 {
-  _ex.output("out_displaced_", time);
+  // FIXME: use proper file_base
+  _ex.output("out_displaced", time);
   _ex.meshChanged();
 }
 

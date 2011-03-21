@@ -8,6 +8,7 @@
 #include "Executioner.h"
 #include "MProblem.h"
 #include "VariablesBlock.h"
+#include "AdaptivityBlock.h"
 
 template<>
 InputParameters validParams<GenericExecutionerBlock>()
@@ -62,7 +63,6 @@ GenericExecutionerBlock::execute()
 
   InputParameters class_params = getClassParams();
 
-#if 0
   class_params.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'
 
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This paramter
@@ -76,9 +76,6 @@ GenericExecutionerBlock::execute()
   else
     class_params.set<unsigned int>("steps") = 0;
   
-  _moose_system.initExecutioner(ExecutionerFactory::instance()->build(_type, "Executioner", _moose_system, class_params));
-  #endif
-
 #ifdef LIBMESH_HAVE_PETSC
   std::vector<std::string> petsc_options,  petsc_inames, petsc_values;
   petsc_options = getParamValue<std::vector<std::string> >("petsc_options");

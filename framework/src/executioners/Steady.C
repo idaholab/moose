@@ -13,6 +13,7 @@ InputParameters validParams<Steady>()
 Steady::Steady(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*_mesh),
+    _steps(getParam<unsigned int>("steps")),
     _time(_problem.time())
 {
 }
@@ -40,15 +41,22 @@ Steady::execute()
   }
   _time = 1.0;           // should be inside the previous if-statement, but to preserve backward compatible behavior, it has to be like this ;(
 
-  preSolve();
-  _problem.solve();
-  postSolve();
-  _problem.update();
+  // Define the refinement loop
+  for(unsigned int r_step=0; r_step<=_steps; r_step++)
+  {
+    preSolve();
+    _problem.solve();
+    postSolve();
+    _problem.update();
 
-  // TODO: check if the solve converged
-  _problem.computePostprocessors();
-  _problem.outputPostprocessors();
-  _problem.output();
+    // TODO: check if the solve converged
+    _problem.computePostprocessors();
+    _problem.outputPostprocessors();
+    _problem.output();
+
+    if(r_step != _steps)
+      _problem.adaptMesh();
+  }
 
   postExecute();
 }

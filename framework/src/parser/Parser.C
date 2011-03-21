@@ -42,6 +42,7 @@
 #include "StabilizersBlock.h"
 #include "GenericStabilizerBlock.h"
 #include "GlobalParamsBlock.h"
+#include "AdaptivityBlock.h"
 
 // libMesh
 #include "getpot.h"
@@ -88,7 +89,7 @@ Parser::registerObjects()
   registerNamedParserBlock(PeriodicBlock, "BCs/Periodic");
   registerNamedParserBlock(GenericPeriodicBlock, "BCs/Periodic/*");
   registerNamedParserBlock(GenericExecutionerBlock, "Executioner");
-//  registerNamedParserBlock(AdaptivityBlock, "Executioner/Adaptivity");
+  registerNamedParserBlock(AdaptivityBlock, "Executioner/Adaptivity");
   registerNamedParserBlock(PostprocessorsBlock, "Postprocessors");
   registerNamedParserBlock(GenericPostprocessorBlock, "Postprocessors/*");
   registerNamedParserBlock(PostprocessorsBlock, "Postprocessors/Residual");
@@ -576,17 +577,26 @@ Parser::execute()
   _executed_blocks.clear();
 //  _input_tree->execute();
 
-  ParserBlock * meshb = _input_tree->locateBlock("Mesh");
-  if (meshb)
-    meshb->execute();
+  std::string nm[] = { "Mesh", "Executioner", "Output" };
+  std::vector<std::string> block_names(nm, nm + sizeof(nm) / sizeof(std::string));
+  for (std::vector<std::string>::iterator it = block_names.begin(); it != block_names.end(); ++it)
+  {
+    ParserBlock * blk = _input_tree->locateBlock(*it);
+    if (blk)
+      blk->execute();
+  }
 
-  ParserBlock * exeb = _input_tree->locateBlock("Executioner");
-  if (exeb)
-    exeb->execute();
-
-  ParserBlock * outb = _input_tree->locateBlock("Output");
-  if (outb)
-    outb->execute();
+//  ParserBlock * meshb = _input_tree->locateBlock("Mesh");
+//  if (meshb)
+//    meshb->execute();
+//
+//  ParserBlock * exeb = _input_tree->locateBlock("Executioner");
+//  if (exeb)
+//    exeb->execute();
+//
+//  ParserBlock * outb = _input_tree->locateBlock("Output");
+//  if (outb)
+//    outb->execute();
 
 }
 

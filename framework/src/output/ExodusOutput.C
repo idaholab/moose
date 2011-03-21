@@ -28,6 +28,7 @@ ExodusOutput::getFileName(const std::string & file_base)
   exodus_stream_file_base << file_base;
   if (_seq)
   {
+    exodus_stream_file_base << "_";
     OSSRealzeroright(exodus_stream_file_base, 4, 0, _file_num);
   }
 

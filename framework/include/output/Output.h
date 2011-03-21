@@ -26,6 +26,9 @@ public:
   void fileBase(const std::string & file_base) { _file_base = file_base; }
   std::string & fileBase() { return _file_base; }
 
+  void meshChanged();
+  void sequence(bool state);
+
 protected:
   std::string _file_base;
 

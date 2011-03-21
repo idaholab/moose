@@ -140,10 +140,10 @@ Transient::takeStep(Real input_dt)
 
   preSolve();
     
-//  Moose::perf_log.push("solve()","Solve");
+  Moose::perf_log.push("solve()","Solve");
   // System Solve
   _problem.solve();
-//  Moose::perf_log.pop("solve()","Solve");
+  Moose::perf_log.pop("solve()","Solve");
 
   _converged = _problem.converged();
 
@@ -158,15 +158,15 @@ Transient::takeStep(Real input_dt)
   if (last_solve_converged) 
   {
     _problem.computePostprocessors();
-    _problem.outputPostprocessors();
 
 //    if (((_t_step + 1) % _moose_system._interval == 0 || _reset_dt))
       _problem.output();
-  }
 
-  if (last_solve_converged)
-  {
-//    adaptMesh();
+    _problem.outputPostprocessors();
+
+    if (_problem.adaptivity().isOn())
+      _problem.adaptMesh();
+
     _t_step++;
     _time_old = _time;
   }

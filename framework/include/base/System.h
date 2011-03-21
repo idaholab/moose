@@ -46,6 +46,7 @@ public:
   virtual bool hasVariable(const std::string & var_name) = 0;
 
   virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual int nVariables() = 0;
 
   /// Get minimal quadrature order needed for integrating variables in this system
   virtual Order getMinQuadratureOrder();
@@ -106,6 +107,8 @@ public:
   {
     return _sys.has_variable(var_name);
   }
+
+  virtual int nVariables() { return _sys.n_vars(); }
 
   virtual void computeVariables(const NumericVector<Number>& /*soln*/)
   {

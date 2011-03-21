@@ -16,6 +16,7 @@
 #include "DiracKernelData.h"
 #include "FormattedTable.h"
 #include "GeometricSearchData.h"
+#include "Adaptivity.h"
 
 // libMesh include
 #include "equation_systems.h"
@@ -133,6 +134,10 @@ public:
   virtual Output & out() { return _out; }
   virtual void output();
 
+  // Adaptivity /////
+  Adaptivity & adaptivity() { return _adaptivity; }
+  virtual void adaptMesh();
+
 protected:
   Problem * _parent;
   Mesh & _mesh;
@@ -198,6 +203,7 @@ protected:
   DiracKernelInfo _dirac_kernel_info;
   std::vector<DiracKernelData *> _dirac_kernel_data;
 
+  Adaptivity _adaptivity;
 };
 
 

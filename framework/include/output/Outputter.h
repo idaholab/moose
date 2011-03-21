@@ -21,6 +21,9 @@ public:
   virtual void output(const std::string & file_base, Real time) = 0;
   virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time) = 0;
 
+  virtual void meshChanged() = 0;
+  virtual void sequence(bool state) = 0;
+
 protected:
   EquationSystems & _es;
 };

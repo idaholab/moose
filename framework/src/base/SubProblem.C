@@ -165,7 +165,8 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
     _postprocessor_csv_output(false),
     _postprocessor_ensight_output(false),
     _postprocessor_gnuplot_output(false),
-    _gnuplot_format("ps")
+    _gnuplot_format("ps"),
+    _adaptivity(*this)
 {
   if (_parent == this)
   {
@@ -541,7 +542,7 @@ SubProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & 
 void
 SubProblem::computePostprocessors(int pps_type)
 {
-//  Moose::perf_log.push("compute_postprocessors()","Solve");
+  Moose::perf_log.push("compute_postprocessors()","Solve");
 
   // This resets stuff so that id 0 is the first id
   ParallelUniqueId::reinitialize();
@@ -553,7 +554,7 @@ SubProblem::computePostprocessors(int pps_type)
   if ((pps_type & Moose::PPS_TIMESTEP) == Moose::PPS_TIMESTEP)
     computePostprocessorsInternal(_pps);
 
-//  Moose::perf_log.pop("compute_postprocessors()","Solve");
+  Moose::perf_log.pop("compute_postprocessors()","Solve");
 }
 
 void
@@ -577,6 +578,7 @@ SubProblem::outputPostprocessors()
 
   if (_postprocessor_gnuplot_output)
     _pps_output_table.makeGnuplot(_out.fileBase(), _gnuplot_format);
+
 }
 
 void
@@ -603,7 +605,21 @@ void
 SubProblem::output()
 {
   _out.output();
+  // FIXME: if exodus output is enabled?
   _out.outputPps(_pps_output_table);
 }
+
+void
+SubProblem::adaptMesh()
+{
+  _adaptivity.adaptMesh();
+
+  // mesh changed
+  _eq.reinit();
+  _mesh.meshChanged();
+  _geometric_search_data.update();
+  _out.meshChanged();
+}
+
 
 } // namespace

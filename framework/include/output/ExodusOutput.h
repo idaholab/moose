@@ -19,7 +19,7 @@ public:
   virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
 
   virtual void meshChanged();
-  void sequence(bool state) { _seq = state; }
+  virtual void sequence(bool state) { _seq = state; }
 
 protected:
   ExodusII_IO * _out;
