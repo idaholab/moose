@@ -14,9 +14,6 @@
 
 #include "ContactMaster.h"
 
-// Moose includes
-#include "MooseSystem.h"
-
 // libmesh includes
 #include "sparse_matrix.h"
 

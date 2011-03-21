@@ -142,7 +142,6 @@ SlaveConstraint::computeQpResidual()
                               )
                           - (pinfo->_normal(_component)*res_mag)
                          );
-  
 }
 
 Real
