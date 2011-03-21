@@ -4,14 +4,12 @@
 // libMesh
 #include "exodusII_io.h"
 
-namespace Moose {
-
 ExodusOutput::ExodusOutput(EquationSystems & es) :
-  Outputter(es),
-  _out(NULL),
-  _seq(false),
-  _file_num(0),
-  _num(0)
+    Outputter(es),
+    _out(NULL),
+    _seq(false),
+    _file_num(0),
+    _num(0)
 {
 }
 
@@ -109,5 +107,3 @@ ExodusOutput::meshChanged()
   delete _out;
   _out = NULL;
 }
-
-} // namespace

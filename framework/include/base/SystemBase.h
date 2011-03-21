@@ -1,5 +1,5 @@
-#ifndef SYSTEM_H_
-#define SYSTEM_H_
+#ifndef SYSTEMBASE_H
+#define SYSTEMBASE_H
 
 #include "Kernel.h"
 #include "NodalBC.h"
@@ -7,7 +7,7 @@
 #include "InitialCondition.h"
 
 #include "ProblemInterface.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "VariableWarehouse.h"
 
 // libMesh
@@ -16,14 +16,12 @@
 #include "exodusII_io.h"
 
 
-namespace Moose {
+class MooseVariable;
 
-class Variable;
-
-class System
+class SystemBase
 {
 public:
-  System(ProblemInterface & problem, const std::string & name);
+  SystemBase(ProblemInterface & problem, const std::string & name);
 
   virtual unsigned int number() = 0;
   virtual ProblemInterface & problem() { return _problem; }
@@ -45,7 +43,7 @@ public:
   virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL) = 0;
   virtual bool hasVariable(const std::string & var_name) = 0;
 
-  virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
   virtual int nVariables() = 0;
 
   /// Get minimal quadrature order needed for integrating variables in this system
@@ -62,7 +60,7 @@ public:
 
 protected:
   ProblemInterface & _problem;
-  Mesh & _mesh;
+  MooseMesh & _mesh;
   std::string _name;
 
   // TODO: move this to problem (that will keep track of which variable is where), System will only keep a list of variables that created and will free them in d-tor
@@ -72,11 +70,11 @@ protected:
 
 
 template<typename T>
-class SystemTempl : public System
+class SystemTempl : public SystemBase
 {
 public:
   SystemTempl(ProblemInterface & problem, const std::string & name) :
-    System(problem, name),
+    SystemBase(problem, name),
     _sys(problem.es().add_system<T>(_name)),
     _solution(*_sys.solution),
     _solution_old(*_sys.old_local_solution),
@@ -96,7 +94,7 @@ public:
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      Moose::Variable * var = new Moose::Variable(var_num, type, *this, _problem.assembly(tid));
+      MooseVariable * var = new MooseVariable(var_num, type, *this, _problem.assembly(tid));
       _vars[tid].add(var_name, var);
 
       if (active_subdomains == NULL)
@@ -178,6 +176,4 @@ protected:
   NumericVector<Number> & _residual_old;                /// residual evaluated at the old time step
 };
 
-} // namespace
-
-#endif /* SYSTEM_H_ */
+#endif /* SYSTEMBASE_H */

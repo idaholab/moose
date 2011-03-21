@@ -1,5 +1,5 @@
-#ifndef ARRAY_H_
-#define ARRAY_H_
+#ifndef ARRAY_H
+#define ARRAY_H
 
 #include "Moose.h"
 

@@ -2,8 +2,6 @@
 
 #include "ArbitraryQuadrature.h"
 
-namespace Moose {
-
 DiracKernelData::DiracKernelData() :
     _arbitrary_qrule(NULL)
 {
@@ -34,5 +32,3 @@ DiracKernelData::reinit(const NumericVector<Number>& soln, const Elem * elem)
 {
 //  QuadraturePointData::reinit(soln, elem);
 }
-
-} // namespace

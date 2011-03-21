@@ -1,5 +1,5 @@
-#ifndef INPUTPARAMETERS_H_
-#define INPUTPARAMETERS_H_
+#ifndef INPUTPARAMETERS_H
+#define INPUTPARAMETERS_H
 
 #include <vector>
 #include <set>
@@ -9,7 +9,7 @@
 #include "parameters.h"
 
 
-class Object;
+class MooseObject;
 class ParserBlock;
 class GlobalParamsBlock;
 class Parser;
@@ -143,7 +143,7 @@ public:
   }
 
   // These are the only objects allowed to _create_ InputParameters
-  friend InputParameters validParams<Object>();
+  friend InputParameters validParams<MooseObject>();
   friend InputParameters validParams<ParserBlock>();
   friend InputParameters validParams<GlobalParamsBlock>();
   friend class ParserBlock;
@@ -281,4 +281,4 @@ namespace libMesh
 
 } // libMesh
 
-#endif /* INPUTPARAMETERS_H_ */
+#endif /* INPUTPARAMETERS_H */

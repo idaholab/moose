@@ -1,7 +1,7 @@
-#ifndef MATERIAL_H_
-#define MATERIAL_H_
+#ifndef MATERIAL_H
+#define MATERIAL_H
 
-#include "Object.h"
+#include "MooseObject.h"
 #include "Coupleable.h"
 #include "TransientInterface.h"
 #include "MaterialProperty.h"
@@ -12,18 +12,16 @@
 #include "elem.h"
 
 // forward declarations
-namespace Moose {
 class SubProblem;
 class MaterialData;
-}
 
 /**
  * Holds material properties that are assigned to blocks.
  */
 class Material :
-  public Object,
-  public Moose::Coupleable,
-  public Moose::TransientInterface
+  public MooseObject,
+  public Coupleable,
+  public TransientInterface
 {
 public:
   Material(const std::string & name, InputParameters parameters);
@@ -91,10 +89,10 @@ public:
   virtual VariableGradient & coupledGradientOlder(const std::string & var_name);
 
 protected:
-  Moose::SubProblem & _problem;
+  SubProblem & _problem;
   THREAD_ID _tid;
   bool _bnd;
-  Moose::MaterialData & _material_data;
+  MaterialData & _material_data;
 
   unsigned int _qp; 
 
@@ -201,13 +199,13 @@ protected:
    */
   std::set<std::string> _stateful_props;
 
-  Moose::MaterialProperties & _props;
-  Moose::MaterialProperties & _props_old;
-  Moose::MaterialProperties & _props_older;
+  MaterialProperties & _props;
+  MaterialProperties & _props_old;
+  MaterialProperties & _props_older;
 
-  std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> > * _props_elem;
-  std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> > * _props_elem_old;
-  std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> > * _props_elem_older;
+  std::map<unsigned int, std::map<unsigned int, MaterialProperties> > * _props_elem;
+  std::map<unsigned int, std::map<unsigned int, MaterialProperties> > * _props_elem_old;
+  std::map<unsigned int, std::map<unsigned int, MaterialProperties> > * _props_elem_older;
 
   // Single Instance Variables
   Real & _real_zero;
@@ -221,7 +219,7 @@ template <typename T>
 inline bool
 Material::have_property (const std::string & prop_name) const
 {
-  Moose::MaterialProperties::const_iterator it = _props.find(prop_name);
+  MaterialProperties::const_iterator it = _props.find(prop_name);
 
   if (it != _props.end())
     if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
@@ -234,7 +232,7 @@ template <typename T>
 inline bool
 Material::have_property_old (const std::string & prop_name) const
 {
-  Moose::MaterialProperties::const_iterator it = _props_old.find(prop_name);
+  MaterialProperties::const_iterator it = _props_old.find(prop_name);
 
   if (it != _props_old.end())
     if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
@@ -247,7 +245,7 @@ template <typename T>
 inline bool
 Material::have_property_older (const std::string & prop_name) const
 {
-  Moose::MaterialProperties::const_iterator it = _props_older.find(prop_name);
+  MaterialProperties::const_iterator it = _props_older.find(prop_name);
 
   if (it != _props_older.end())
     if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
@@ -260,7 +258,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::getProperty(const std::string & prop_name)
 {
-  Moose::MaterialProperties::const_iterator it = _props.find(prop_name);
+  MaterialProperties::const_iterator it = _props.find(prop_name);
 
   if (it != _props.end())
   {
@@ -275,7 +273,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::getPropertyOld(const std::string & prop_name)
 {
-  Moose::MaterialProperties::const_iterator it = _props_old.find(prop_name);
+  MaterialProperties::const_iterator it = _props_old.find(prop_name);
 
   if (it != _props_old.end())
   {
@@ -290,7 +288,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::getPropertyOlder(const std::string & prop_name)
 {
-  Moose::MaterialProperties::const_iterator it = _props_older.find(prop_name);
+  MaterialProperties::const_iterator it = _props_older.find(prop_name);
 
   if (it != _props_older.end())
   {

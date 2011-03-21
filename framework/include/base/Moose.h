@@ -1,5 +1,5 @@
-#ifndef MOOSE_H_
-#define MOOSE_H_
+#ifndef MOOSE_H
+#define MOOSE_H
 
 // libMesh includes
 #include "print_trace.h"
@@ -34,6 +34,7 @@ namespace Moose
 {
 
 extern ActionWarehouse action_warehouse;
+
 /**
  * Perflog to be used by applications.
  * If the application prints this in the end they will get performance info.
@@ -83,6 +84,6 @@ inline double rand()
   return mt_ldrand();
 }
 
-} // namespace
+} // namespace Moose
 
-#endif /* MOOSE_H_ */
+#endif /* MOOSE_H */

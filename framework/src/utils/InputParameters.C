@@ -117,5 +117,3 @@ InputParameters::isPrivate(const std::string &name) const
 {
   return _private_params.find(name) != _private_params.end();
 }
-
-

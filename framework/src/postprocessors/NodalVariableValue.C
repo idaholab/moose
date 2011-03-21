@@ -1,5 +1,5 @@
 #include "NodalVariableValue.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "SubProblem.h"
 
 // libMesh

@@ -4,8 +4,6 @@
 #include "Outputter.h"
 #include "ExodusOutput.h"
 
-namespace Moose {
-
 Output::Output(Problem & problem) :
     _file_base("out"),
     _problem(problem),
@@ -55,5 +53,3 @@ Output::sequence(bool state)
   for (unsigned int i = 0; i < _outputters.size(); i++)
     _outputters[i]->sequence(state);
 }
-
-} // namespace

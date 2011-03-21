@@ -1,5 +1,5 @@
-#ifndef OUTPUT_H_
-#define OUTPUT_H_
+#ifndef OUTPUT_H
+#define OUTPUT_H
 
 #include <string>
 #include <vector>
@@ -7,12 +7,11 @@
 // libMesh
 #include "libmesh_common.h"
 
-namespace Moose {
-
 class Problem;
 class Outputter;
 
-class Output {
+class Output
+{
 public:
   Output(Problem & problem);
   virtual ~Output();
@@ -41,7 +40,5 @@ protected:
 
   std::vector<Outputter *> _outputters;
 };
-
-} // namespace
 
 #endif /* OUTPUTTER_H_ */

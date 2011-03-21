@@ -2,7 +2,6 @@
 #include "Factory.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
-
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
 
@@ -13,6 +12,7 @@
 #include "UserForcingFunction.h"
 #include "BodyForce.h"
 #include "ImplicitEuler.h"
+#include "Reaction.h"
 // bcs
 #include "DirichletBC.h"
 #include "NeumannBC.h"
@@ -100,6 +100,7 @@ registerObjects()
   registerObject(UserForcingFunction);
   registerObject(BodyForce);
   registerObject(ImplicitEuler);
+  registerObject(Reaction);
   // bcs
   registerObject(DirichletBC);
   registerObject(NeumannBC);
@@ -162,7 +163,7 @@ registerObjects()
 void
 addActionTypes()
 {
-  
+
   action_warehouse.addAction("no_depends");
   action_warehouse.addAction("no_action");
 
@@ -273,4 +274,4 @@ setSolverDefaults(NonlinearSystem & system)
 
 ActionWarehouse action_warehouse;
 
-} // namespace
+} // namespace Moose

@@ -1,5 +1,5 @@
-#ifndef PIECEWISELINEAR_H_
-#define PIECEWISELINEAR_H_
+#ifndef PIECEWISELINEAR_H
+#define PIECEWISELINEAR_H
 
 #include "Function.h"
 #include "LinearInterpolation.h"

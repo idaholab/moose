@@ -1,14 +1,11 @@
-#ifndef AVERAGENODALVARIABLEVALUE_H_
-#define AVERAGENODALVARIABLEVALUE_H_
+#ifndef AVERAGENODALVARIABLEVALUE_H
+#define AVERAGENODALVARIABLEVALUE_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
 class AverageNodalVariableValue;
-
-namespace Moose {
-  class Mesh;
-}
+class MooseMesh;
 
 template<>
 InputParameters validParams<AverageNodalVariableValue>();
@@ -27,7 +24,7 @@ public:
   virtual Real getValue();
 
 protected:
-  Moose::Mesh & _mesh;
+  MooseMesh & _mesh;
   std::string _var_name;
   unsigned int _nodesetid;
 

@@ -1,5 +1,5 @@
-#ifndef PRINTNODES_H_
-#define PRINTNODES_H_
+#ifndef PRINTNODES_H
+#define PRINTNODES_H
 
 #include "GeneralPostprocessor.h"
 
@@ -23,4 +23,4 @@ public:
   virtual Real getValue();
 };
 
-#endif //PRINTNODES_H_
+#endif //PRINTNODES_H

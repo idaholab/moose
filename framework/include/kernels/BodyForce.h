@@ -1,5 +1,5 @@
-#ifndef BODYFORCE_H_
-#define BODYFORCE_H_
+#ifndef BODYFORCE_H
+#define BODYFORCE_H
 
 #include "Kernel.h"
 

@@ -1,5 +1,5 @@
-#ifndef PARALLELUNIQUEID_H_
-#define PARALLELUNIQUEID_H_
+#ifndef PARALLELUNIQUEID_H
+#define PARALLELUNIQUEID_H
 
 #include "libmesh_common.h"
 #include "threads.h"

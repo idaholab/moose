@@ -1,5 +1,5 @@
-#ifndef SUPGBASE_H_
-#define SUPGBASE_H_
+#ifndef SUPGBASE_H
+#define SUPGBASE_H
 
 #include "Moose.h"
 #include "Stabilizer.h"

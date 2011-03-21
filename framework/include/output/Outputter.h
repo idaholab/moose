@@ -1,16 +1,15 @@
-#ifndef OUTPUTTER_H_
-#define OUTPUTTER_H_
+#ifndef OUTPUTTER_H
+#define OUTPUTTER_H
 
 #include <string>
 #include "FormattedTable.h"
 // libMesh
 #include "equation_systems.h"
 
-namespace Moose {
-
 class Problem;
 
-class Outputter {
+class Outputter
+{
 public:
   Outputter(EquationSystems & es);
   virtual ~Outputter();
@@ -28,6 +27,4 @@ protected:
   EquationSystems & _es;
 };
 
-} // namespace
-
-#endif /* OUTPUTTER_H_ */
+#endif /* OUTPUTTER_H */

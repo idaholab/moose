@@ -1,5 +1,5 @@
-#ifndef EMPTYPOSTPROCESSOR_H_
-#define EMPTYPOSTPROCESSOR_H_
+#ifndef EMPTYPOSTPROCESSOR_H
+#define EMPTYPOSTPROCESSOR_H
 
 #include "GeneralPostprocessor.h"
 

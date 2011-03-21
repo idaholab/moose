@@ -1,22 +1,22 @@
 #include "Stabilizer.h"
 #include "SubProblem.h"
-#include "System.h"
-#include "Variable.h"
+#include "SystemBase.h"
+#include "MooseVariable.h"
 
 template<>
 InputParameters validParams<Stabilizer>()
 {
-  InputParameters params = validParams<Object>();
+  InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable this Stabilizer will act on.");
   return params;
 }
 
 
 Stabilizer::Stabilizer(const std::string & name, InputParameters parameters) :
-  Object(name, parameters),
-  Moose::MaterialPropertyInterface(parameters),
-  _problem(*parameters.get<Moose::SubProblem *>("_problem")),
-  _sys(*parameters.get<Moose::System *>("_sys")),
+  MooseObject(name, parameters),
+  MaterialPropertyInterface(parameters),
+  _problem(*parameters.get<SubProblem *>("_problem")),
+  _sys(*parameters.get<SystemBase *>("_sys")),
   _tid(parameters.get<THREAD_ID>("_tid")),
 
   _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),

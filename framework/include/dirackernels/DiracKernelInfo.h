@@ -1,5 +1,5 @@
-#ifndef DIRACKERNELINFO_H_
-#define DIRACKERNELINFO_H_
+#ifndef DIRACKERNELINFO_H
+#define DIRACKERNELINFO_H
 
 #include <set>
 #include <map>
@@ -14,8 +14,6 @@ namespace libMesh
 {
   template <class T> class NumericVector;
 }
-
-namespace Moose {
 
 class DiracKernelInfo
 {
@@ -41,7 +39,5 @@ public:
    */
   void clearPoints();
 };
-
-} // namespace
 
 #endif //DIRACKERNELINFO_H_

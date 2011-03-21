@@ -1,11 +1,8 @@
-#ifndef TRANSIENTINTERFACE_H_
-#define TRANSIENTINTERFACE_H_
+#ifndef TRANSIENTINTERFACE_H
+#define TRANSIENTINTERFACE_H
 
 #include "InputParameters.h"
 
-
-namespace Moose
-{
 
 class SubProblem;
 
@@ -16,14 +13,12 @@ public:
   virtual ~TransientInterface();
 
 private:
-  Moose::SubProblem & _ti_problem;
+  SubProblem & _ti_problem;
 
 protected:
   Real & _t;
   int & _t_step;
   Real & _dt;
 };
-
-}
 
 #endif /* TRANSIENTINTERFACE_H_ */

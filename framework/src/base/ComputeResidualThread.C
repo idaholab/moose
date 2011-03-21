@@ -6,23 +6,22 @@
 // libmesh includes
 #include "threads.h"
 
-namespace Moose 
-{
-
 ComputeResidualThread::ComputeResidualThread(Problem & problem,
                                              NonlinearSystem & sys,
                                              NumericVector<Number> & residual) :
   ThreadedElementLoop<ConstElemRange>(problem, sys),
   _residual(residual),
   _sys(sys)
-{}
+{
+}
 
 // Splitting Constructor
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
   ThreadedElementLoop<ConstElemRange>(x, split),
   _residual(x._residual),
   _sys(x._sys)
-{}
+{
+}
 
 void
 ComputeResidualThread::preElement(const Elem *elem)
@@ -83,7 +82,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, short int
 void
 ComputeResidualThread::postElement(const Elem * /*elem*/)
 {
-  for (std::set<Variable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
+  for (std::set<MooseVariable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     (*it)->add(_residual);
@@ -92,7 +91,5 @@ ComputeResidualThread::postElement(const Elem * /*elem*/)
 
 void
 ComputeResidualThread::join(const ComputeResidualThread & /*y*/)
-{}
-  
-} // namespace Moose
-
+{
+}

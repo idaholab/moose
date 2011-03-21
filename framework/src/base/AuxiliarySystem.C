@@ -10,8 +10,6 @@
 #include "quadrature_gauss.h"
 
 
-namespace Moose {
-
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(SubProblem & problem, const std::string & name) :
@@ -34,7 +32,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
   unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    Variable * var = new Variable(var_num, type, *this, _problem.assembly(tid));
+    MooseVariable * var = new MooseVariable(var_num, type, *this, _problem.assembly(tid));
     _vars[tid].add(var_name, var);
     if (var->feType().family == LAGRANGE)
       _nodal_vars[tid][var_name] = var;
@@ -110,16 +108,16 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
 void
 AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  for (std::map<std::string, Variable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
+  for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
   {
-    Variable *var = it->second;
+    MooseVariable *var = it->second;
     var->reinit();
     var->computeElemValues();
   }
 
-  for (std::map<std::string, Variable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
+  for (std::map<std::string, MooseVariable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
   {
-    Variable *var = it->second;
+    MooseVariable *var = it->second;
     var->reinit_aux();
     var->computeElemValues();
   }
@@ -328,5 +326,3 @@ AuxiliarySystem::compute()
 
   Moose::perf_log.pop("update_aux_vars()","Solve");
 }
-
-} // namespace

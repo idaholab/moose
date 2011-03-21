@@ -1,5 +1,5 @@
-#ifndef CONVECTIONDIFFUSIONSUPG_H_
-#define CONVECTIONDIFFUSIONSUPG_H_
+#ifndef CONVECTIONDIFFUSIONSUPG_H
+#define CONVECTIONDIFFUSIONSUPG_H
 
 #include "Moose.h"
 #include "SUPGBase.h"
@@ -69,4 +69,4 @@ protected:
   Real _vel_mag;
 };
 
-#endif //CONVECTIONDIFFUSIONSUPG_H_
+#endif //CONVECTIONDIFFUSIONSUPG_H

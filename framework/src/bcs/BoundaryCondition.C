@@ -1,12 +1,12 @@
 #include "BoundaryCondition.h"
 #include "SubProblem.h"
-#include "System.h"
-#include "Variable.h"
+#include "SystemBase.h"
+#include "MooseVariable.h"
 
 template<>
 InputParameters validParams<BoundaryCondition>()
 {
-  InputParameters params = validParams<Object>();
+  InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
@@ -15,14 +15,14 @@ InputParameters validParams<BoundaryCondition>()
 
 
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
-    Object(name, parameters),
-    Moose::Coupleable(parameters),
+    MooseObject(name, parameters),
+    Coupleable(parameters),
     FunctionInterface(parameters),
-    Moose::TransientInterface(parameters),
-    Moose::MaterialPropertyInterface(parameters),
-    Moose::PostprocessorInterface(parameters),
-    _problem(*parameters.get<Moose::SubProblem *>("_problem")),
-    _sys(*parameters.get<Moose::System *>("_sys")),
+    TransientInterface(parameters),
+    MaterialPropertyInterface(parameters),
+    PostprocessorInterface(parameters),
+    _problem(*parameters.get<SubProblem *>("_problem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _dim(_problem.mesh().dimension()),

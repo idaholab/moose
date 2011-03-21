@@ -1,5 +1,5 @@
-#ifndef PRINTELEMS_H_
-#define PRINTELEMS_H_
+#ifndef PRINTELEMS_H
+#define PRINTELEMS_H
 
 #include "GeneralPostprocessor.h"
 
@@ -24,4 +24,4 @@ public:
   virtual Real getValue();
 };
 
-#endif //PRINTELEMS_H_
+#endif //PRINTELEMS_H

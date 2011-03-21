@@ -11,9 +11,6 @@
 /// Typedef to hide implementation details
 typedef std::vector<Action *>::iterator ActionIterator;
 
-namespace Moose
-{
-
 class ActionWarehouse
 {
 public:
@@ -40,8 +37,5 @@ private:
   /// This memeber holds the ordered Actions
   std::vector<Action *> _ordered_actions;
 };
-
-} // Namespace Moose
-
 
 #endif // ACTIONWAREHOUSE_H

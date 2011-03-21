@@ -1,6 +1,6 @@
 #include "Moose.h"
 #include "ElementPostprocessor.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 #include "SubProblem.h"
 
 template<>
@@ -14,7 +14,7 @@ InputParameters validParams<ElementPostprocessor>()
 
 ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
-    Moose::TransientInterface(parameters),
+    TransientInterface(parameters),
     _block_id(parameters.get<unsigned int>("block")),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _q_point(_problem.points(_tid)),

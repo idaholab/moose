@@ -1,8 +1,8 @@
-#ifndef INTEGRATEDBC_H_
-#define INTEGRATEDBC_H_
+#ifndef INTEGRATEDBC_H
+#define INTEGRATEDBC_H
 
 #include "BoundaryCondition.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 
 // libMesh
 #include "fe.h"
@@ -28,7 +28,7 @@ public:
   virtual VariableGradient  & coupledGradient(const std::string & var_name);
 
 protected:
-  Moose::Variable & _test_var;
+  MooseVariable & _test_var;
 
   unsigned int _qp;
   QBase * & _qrule;

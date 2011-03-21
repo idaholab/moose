@@ -1,5 +1,5 @@
-#ifndef STABILIZERWAREHOUSE_H_
-#define STABILIZERWAREHOUSE_H_
+#ifndef STABILIZERWAREHOUSE_H
+#define STABILIZERWAREHOUSE_H
 
 #include "Stabilizer.h"
 

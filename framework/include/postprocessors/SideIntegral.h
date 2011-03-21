@@ -1,5 +1,5 @@
-#ifndef SIDEINTEGRAL_H_
-#define SIDEINTEGRAL_H_
+#ifndef SIDEINTEGRAL_H
+#define SIDEINTEGRAL_H
 
 #include "SidePostprocessor.h"
 

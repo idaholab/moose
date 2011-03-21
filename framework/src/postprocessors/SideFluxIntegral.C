@@ -10,7 +10,7 @@ InputParameters validParams<SideFluxIntegral>()
 
 SideFluxIntegral::SideFluxIntegral(const std::string & name, InputParameters parameters) :
     SideIntegral(name, parameters),
-    Moose::MaterialPropertyInterface(parameters),
+    MaterialPropertyInterface(parameters),
     _diffusivity(parameters.get<std::string>("diffusivity")),
     _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
 {}

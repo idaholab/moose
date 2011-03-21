@@ -1,7 +1,7 @@
-#ifndef AUXKERNEL_H_
-#define AUXKERNEL_H_
+#ifndef AUXKERNEL_H
+#define AUXKERNEL_H
 
-#include "Object.h"
+#include "MooseObject.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
@@ -10,25 +10,21 @@
 
 //forward declarations
 class AuxKernel;
+class AuxiliarySystem;
 
 template<>
 InputParameters validParams<AuxKernel>();
-
-namespace Moose
-{
-class AuxiliarySystem;
-}
 
 /** 
  * AuxKernels compute values at nodes.
  */
 class AuxKernel :
-  public Object,
-  public Moose::Coupleable,
+  public MooseObject,
+  public Coupleable,
   public FunctionInterface,
-  public Moose::TransientInterface,
-  public Moose::MaterialPropertyInterface,
-  protected Moose::GeometricSearchInterface
+  public TransientInterface,
+  public MaterialPropertyInterface,
+  protected GeometricSearchInterface
 {
 public:
   /**
@@ -41,7 +37,7 @@ public:
 
   void compute(NumericVector<Number> & sln);
 
-  Moose::Variable & variable() { return _var; }
+  MooseVariable & variable() { return _var; }
 
   bool isNodal();
 
@@ -53,11 +49,11 @@ public:
 protected:
   virtual Real computeValue() = 0;
 
-  Moose::SubProblem & _problem;
-  Moose::System & _sys;
-  Moose::AuxiliarySystem & _aux_sys;
+  SubProblem & _problem;
+  SystemBase & _sys;
+  AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
-  Moose::Variable & _var;
+  MooseVariable & _var;
   int _dim;
 
   QBase * & _qrule;

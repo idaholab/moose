@@ -1,15 +1,15 @@
-#ifndef OBJECT_H_
-#define OBJECT_H_
+#ifndef MOOSEOBJECT_H
+#define MOOSEOBJECT_H
 
 #include "InputParameters.h"
 
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class Object
+class MooseObject
 {
 public:
-  Object(const std::string & name, InputParameters parameters);
+  MooseObject(const std::string & name, InputParameters parameters);
 
   const std::string & name() { return _name; }
 
@@ -23,4 +23,4 @@ protected:
   InputParameters _pars;
 };
 
-#endif /* OBJECT_H_ */
+#endif /* MOOSEOBJECT_H_*/

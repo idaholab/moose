@@ -90,11 +90,11 @@ GenericExecutionerBlock::execute()
     PetscOptionsSetValue(petsc_inames[i].c_str(), petsc_values[i].c_str());
 #endif //LIBMESH_HAVE_PETSC
 
-  class_params.set<Moose::Mesh *>("_mesh") = _parser_handle._mesh;
+  class_params.set<MooseMesh *>("_mesh") = _parser_handle._mesh;
   _parser_handle._executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", class_params));
-  if (dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem()) != NULL)
+  if (dynamic_cast<MProblem *>(&_parser_handle._executioner->problem()) != NULL)
   {
-    Moose::MProblem *mproblem = dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem());
+    MProblem *mproblem = dynamic_cast<MProblem *>(&_parser_handle._executioner->problem());
     _parser_handle._problem = mproblem;
 
     ParserBlock * blk;
@@ -174,7 +174,7 @@ GenericExecutionerBlock::execute()
 
 //    _moose_system._auto_scaling = getParamValue<bool>("auto_scaling");
 
-    Moose::NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
+    NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParamValue<std::string>("scheme")));
 
     blk= locateBlock("GlobalParams");

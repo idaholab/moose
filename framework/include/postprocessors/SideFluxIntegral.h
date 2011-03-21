@@ -1,5 +1,5 @@
-#ifndef SIDEFLUXINTEGRAL_H_
-#define SIDEFLUXINTEGRAL_H_
+#ifndef SIDEFLUXINTEGRAL_H
+#define SIDEFLUXINTEGRAL_H
 
 #include "SideIntegral.h"
 #include "MaterialPropertyInterface.h"
@@ -15,7 +15,7 @@ InputParameters validParams<SideFluxIntegral>();
  */
 class SideFluxIntegral :
   public SideIntegral,
-  public Moose::MaterialPropertyInterface
+  public MaterialPropertyInterface
 {
 public:
   SideFluxIntegral(const std::string & name, InputParameters parameters);
@@ -27,4 +27,4 @@ protected:
   MaterialProperty<Real> & _diffusion_coef;
 };
  
-#endif // SIDEFLUXINTEGRAL_H_
+#endif // SIDEFLUXINTEGRAL_H

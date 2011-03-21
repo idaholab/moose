@@ -1,5 +1,5 @@
 #include "NodalBC.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 
 
 template<>
@@ -40,11 +40,11 @@ NodalBC::computeJacobian(SparseMatrix<Number> & jacobian)
 unsigned int
 NodalBC::coupled(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupled(var_name);
+  return Coupleable::getCoupled(var_name);
 }
 
 VariableValue &
 NodalBC::coupledValue(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledNodalValue(var_name);
+  return Coupleable::getCoupledNodalValue(var_name);
 }

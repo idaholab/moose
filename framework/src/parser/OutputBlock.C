@@ -6,7 +6,7 @@
 #include "MProblem.h"
 
 #include "exodusII_io.h"
-#include "mesh.h"
+#include "MooseMesh.h"
 
 #ifdef LIBMESH_HAVE_PETSC
 //#include "PetscSupport.h"
@@ -68,8 +68,8 @@ OutputBlock::execute()
 #endif
 
   Executioner * exec = _parser_handle._executioner;
-  Moose::Problem & problem = exec->problem();
-  Moose::Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
+  Problem & problem = exec->problem();
+  Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
   output.fileBase(getParamValue<std::string>("file_base"));
   if (getParamValue<bool>("exodus"))
@@ -80,14 +80,14 @@ OutputBlock::execute()
   if (_parser_handle._problem != NULL)
   {
     // TODO: handle this thru Problem interface
-    Moose::SubProblem & mproblem = *_parser_handle._problem;
+    SubProblem & mproblem = *_parser_handle._problem;
     mproblem._postprocessor_screen_output = getParamValue<bool>("postprocessor_screen");
     mproblem._postprocessor_csv_output = getParamValue<bool>("postprocessor_csv");
     mproblem._postprocessor_ensight_output = getParamValue<bool>("postprocessor_ensight");
     mproblem._postprocessor_gnuplot_output = getParamValue<bool>("postprocessor_gnuplot");
     mproblem._gnuplot_format = getParamValue<std::string>("gnuplot_format");
 
-    Moose::Adaptivity & adapt = mproblem.adaptivity();
+    Adaptivity & adapt = mproblem.adaptivity();
     if (adapt.isOn())
       output.sequence(true);
 

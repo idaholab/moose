@@ -1,6 +1,6 @@
 #include "NearestNodeLocator.h"
 #include "Moose.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "SubProblem.h"
 
 #include <queue>
@@ -9,11 +9,9 @@
 #include "elem.h"
 #include "plane.h"
 
-namespace Moose {
-
 const unsigned int NearestNodeLocator::_patch_size = 20;
 
-NearestNodeLocator::NearestNodeLocator(Mesh & mesh, unsigned int boundary1, unsigned int boundary2) :
+NearestNodeLocator::NearestNodeLocator(MooseMesh & mesh, unsigned int boundary1, unsigned int boundary2) :
     _mesh(mesh),
     _boundary1(boundary1),
     _boundary2(boundary2),
@@ -162,5 +160,3 @@ NearestNodeLocator::NearestNodeInfo::NearestNodeInfo() :
     _nearest_node(NULL),
     _distance(std::numeric_limits<Real>::max())
 {}
-
-}

@@ -1,5 +1,5 @@
-#ifndef DIRICHLETBC_H_
-#define DIRICHLETBC_H_
+#ifndef DIRICHLETBC_H
+#define DIRICHLETBC_H
 
 #include "NodalBC.h"
 

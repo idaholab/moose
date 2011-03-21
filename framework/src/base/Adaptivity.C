@@ -1,15 +1,12 @@
 #include "Adaptivity.h"
 #include "Moose.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
 // libMesh
 #include "equation_systems.h"
 #include "kelly_error_estimator.h"
 #include "fourth_error_estimators.h"
-
-namespace Moose
-{
 
 Adaptivity::Adaptivity(SubProblem & subproblem) :
     _subproblem(subproblem),
@@ -74,6 +71,4 @@ Adaptivity::adaptMesh()
     // Perform refinement and coarsening
     _mesh_refinement->refine_and_coarsen_elements();
   }
-}
-
 }

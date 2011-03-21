@@ -2,7 +2,7 @@
 #include "AuxiliarySystem.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 #include "PetscSupport.h"
 #include "Factory.h"
 #include "ParallelUniqueId.h"
@@ -31,6 +31,8 @@ namespace Moose {
     p->computeResidual(sys, soln, residual);
   }
 
+} // namespace Moose
+
 NonlinearSystem::NonlinearSystem(SubProblem & problem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(problem, name),
     _subproblem(problem),
@@ -50,7 +52,7 @@ NonlinearSystem::NonlinearSystem(SubProblem & problem, const std::string & name)
   _sys.attach_init_function(Moose::initial_condition);
 
   _time_weight.resize(3);
-  timeSteppingScheme(IMPLICIT_EULER);                   // default time stepping scheme
+  timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
 
   _kernels.resize(libMesh::n_threads());
   _bcs.resize(libMesh::n_threads());
@@ -120,7 +122,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
       else
         mooseError("Unknown type of BoudaryCondition object");
 
-      System * sys = parameters.get<System *>("_sys");
+      SystemBase * sys = parameters.get<SystemBase *>("_sys");
       sys->vars(tid).addBoundaryVar(boundaries[i], &bc->variable());
       sys->vars(tid).addBoundaryVars(boundaries[i], bc->getCoupledVars());
     }
@@ -156,7 +158,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
 }
 
 void
-NonlinearSystem::timeSteppingScheme(TimeSteppingScheme scheme)
+NonlinearSystem::timeSteppingScheme(Moose::TimeSteppingScheme scheme)
 {
   _time_stepping_scheme = scheme;
   switch (_time_stepping_scheme)
@@ -397,7 +399,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
       const Elem* elem = *el;
       unsigned int cur_subdomain = elem->subdomain_id();
 
-      std::set<Variable *> vars;
+      std::set<MooseVariable *> vars;
 
       _problem.reinitElem(elem, tid);
 
@@ -567,9 +569,9 @@ NonlinearSystem::printVarNorms()
   TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);
 
   std::cout << "Norm of each nonlinear variable:" << std::endl;
-  for (std::vector<Variable *>::iterator it = _vars[0].all().begin(); it != _vars[0].all().end(); ++it)
+  for (std::vector<MooseVariable *>::iterator it = _vars[0].all().begin(); it != _vars[0].all().end(); ++it)
   {
-    Variable *var = *it;
+    MooseVariable *var = *it;
     unsigned int var_num = var->number();
     std::cout << s.variable_name(var_num) << ": "
               << s.calculate_norm(*s.rhs,var_num,DISCRETE_L2) << std::endl;
@@ -585,5 +587,3 @@ NonlinearSystem::setPreconditioner(Preconditioner<Real> *pc)
   _sys.nonlinear_solver->jacobian = NULL;
   _sys.nonlinear_solver->attach_preconditioner(pc);
 }
-
-} // namespace

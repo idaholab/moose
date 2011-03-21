@@ -1,5 +1,5 @@
-#ifndef PROBLEM_H_
-#define PROBLEM_H_
+#ifndef PROBLEM_H
+#define PROBLEM_H
 
 #include "Output.h"
 #include "ParallelUniqueId.h"
@@ -7,7 +7,7 @@
 #include "ProblemInterface.h"
 #include "MaterialProperty.h"
 #include "Function.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 // libMesh
 #include "libmesh_common.h"
 #include "equation_systems.h"
@@ -16,10 +16,7 @@
 #include "node.h"
 #include "nonlinear_implicit_system.h"
 
-namespace Moose
-{
-
-class Variable;
+class MooseVariable;
 
 class Problem : public ProblemInterface
 {
@@ -75,6 +72,4 @@ public:
   Array<Array<RealTensor> > _second_zero;
 };
 
-}
-
-#endif /* PROBLEM_H_ */
+#endif /* PROBLEM_H */

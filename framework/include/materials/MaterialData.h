@@ -1,10 +1,7 @@
-#ifndef MATERIALDATA_H_
-#define MATERIALDATA_H_
+#ifndef MATERIALDATA_H
+#define MATERIALDATA_H
 
 #include "MaterialProperty.h"
-
-namespace Moose
-{
 
 class MaterialData
 {
@@ -51,7 +48,5 @@ protected:
   MaterialProperties _props_older;
 
 };
-
-} // namespace
 
 #endif /* MATERIALDATA_H_ */

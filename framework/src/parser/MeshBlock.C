@@ -3,11 +3,11 @@
 #include "Parser.h"
 #include "GenericVariableBlock.h"
 #include "GenericExecutionerBlock.h"
-#include "Init.h"
+#include "MooseInit.h"
 #include "MProblem.h"
 
 // libMesh includes
-#include "mesh.h"
+#include "MooseMesh.h"
 #include "exodusII_io.h"
 #include "boundary_info.h"
 #include "getpot.h"
@@ -58,12 +58,12 @@ MeshBlock::execute()
     gen_block->execute();
   else if (getParamValue<std::string>("file") != no_file_supplied)
   {
-    _parser_handle._mesh = new Moose::Mesh(mesh_dim);
+    _parser_handle._mesh = new MooseMesh(mesh_dim);
     _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
     _parser_handle._exreader->read(getParamValue<std::string>("file"));
   }
   // get convenience pointer to mesh object
-  Moose::Mesh *mesh = _parser_handle._mesh;
+  MooseMesh *mesh = _parser_handle._mesh;
 
   if (mesh != NULL)
   {
@@ -101,7 +101,7 @@ MeshBlock::execute()
   // There is no executioner block, create the MProblem class by ourselves
   GenericExecutionerBlock * exec = dynamic_cast<GenericExecutionerBlock *>(locateBlock("Executioner"));
   if (exec == NULL)
-    _parser_handle._problem = new Moose::MProblem(*mesh);
+    _parser_handle._problem = new MProblem(*mesh);
 
   visitChildren();
 }

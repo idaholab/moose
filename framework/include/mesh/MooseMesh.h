@@ -1,5 +1,5 @@
-#ifndef MESH_H_
-#define MESH_H_
+#ifndef MOOSEMESH_H
+#define MOOSEMESH_H
 
 #include "InputParameters.h"
 
@@ -13,20 +13,17 @@
 class MeshModifier;
 
 
-namespace Moose
-{
-
 typedef StoredRange<MeshBase::node_iterator,             Node*>      NodeRange;
 typedef StoredRange<MeshBase::const_node_iterator, const Node*> ConstNodeRange;
 
 // NOTE: maybe inheritance would be better here
 //
-class Mesh
+class MooseMesh
 {
 public:
-  Mesh(int mesh_dim);
-  Mesh(const Mesh & other_mesh);
-  virtual ~Mesh();
+  MooseMesh(int mesh_dim);
+  MooseMesh(const MooseMesh & other_mesh);
+  virtual ~MooseMesh();
 
   unsigned int dimension() { return _mesh.mesh_dimension(); }
 
@@ -104,6 +101,4 @@ protected:
   std::vector<MeshModifier *> _mesh_modifiers;
 };
 
-} // namespace
-
-#endif /* MESH_H_ */
+#endif /* MOOSEMESH_H */

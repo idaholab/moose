@@ -3,12 +3,12 @@
 template<>
 InputParameters validParams<Function>()
 {
-  InputParameters params = validParams<Object>();
+  InputParameters params = validParams<MooseObject>();
   return params;
 }
 
 Function::Function(const std::string & name, InputParameters parameters) :
-    Object(name, parameters)
+    MooseObject(name, parameters)
 {
 }
 

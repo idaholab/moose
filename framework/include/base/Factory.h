@@ -1,10 +1,10 @@
-#ifndef FACTORY_H_
-#define FACTORY_H_
+#ifndef FACTORY_H
+#define FACTORY_H
 
 #include <vector>
 
 #include "Moose.h"
-#include "Object.h"
+#include "MooseObject.h"
 #include "InputParameters.h"
 
 /**
@@ -37,7 +37,7 @@
 /**
  * Typedef for function to build objects
  */
-typedef Object * (*buildPtr)(const std::string & name, InputParameters parameters);
+typedef MooseObject * (*buildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef for validParams
@@ -49,7 +49,7 @@ typedef InputParameters (*paramsPtr)();
  * Build an object of type T
  */
 template<class T>
-Object * buildObject(const std::string & name, InputParameters parameters)
+MooseObject * buildObject(const std::string & name, InputParameters parameters)
 {
   return new T(name, parameters);
 }
@@ -77,11 +77,11 @@ public:
 
   InputParameters getValidParams(const std::string & name);
 
-  virtual Object *create(const std::string & obj_name, const std::string & name, InputParameters parameters);
+  virtual MooseObject *create(const std::string & obj_name, const std::string & name, InputParameters parameters);
 
 protected:
   std::map<std::string, buildPtr>  _name_to_build_pointer;
   std::map<std::string, paramsPtr> _name_to_params_pointer;
 };
 
-#endif /* FACTORY_H_ */
+#endif /* FACTORY_H */

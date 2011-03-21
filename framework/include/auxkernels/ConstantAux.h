@@ -1,5 +1,5 @@
-#ifndef CONSTANTAUX_H_
-#define CONSTANTAUX_H_
+#ifndef CONSTANTAUX_H
+#define CONSTANTAUX_H
 
 #include "AuxKernel.h"
 
@@ -31,4 +31,4 @@ protected:
   Real _value;
 };
 
-#endif //CONSTANTAUX_H_
+#endif //CONSTANTAUX_H

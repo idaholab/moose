@@ -1,5 +1,5 @@
-#ifndef SPHEREFUNCTION_H_
-#define SPHEREFUNCTION_H_
+#ifndef SPHEREFUNCTION_H
+#define SPHEREFUNCTION_H
 
 #include "Function.h"
 
@@ -26,4 +26,4 @@ private:
   Real _outside;
 };
 
-#endif //SPHEREFUNCTION_H_
+#endif //SPHEREFUNCTION_H

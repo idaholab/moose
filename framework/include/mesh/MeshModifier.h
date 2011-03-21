@@ -1,10 +1,10 @@
 #ifndef MESHMODIFIER_H
 #define MESHMODIFIER_H
 
-#include "Object.h"
-#include "mesh.h"
+#include "MooseObject.h"
+#include "MooseMesh.h"
 
-class MeshModifier : public Object
+class MeshModifier : public MooseObject
 {
 public:
   MeshModifier(const std::string & name, InputParameters parameters);

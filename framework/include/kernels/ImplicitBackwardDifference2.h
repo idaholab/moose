@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef IMPLICITBD2
-#define IMPLICITBD2
+#ifndef IMPLICITBACKWARDDIFFERENCE2_H
+#define IMPLICITBACKWARDDIFFERENCE2_H
 
 #include "TimeDerivative.h"
 
@@ -35,4 +35,4 @@ protected:
   bool _start_with_be;
 };
 
-#endif //IMPLICITBD2
+#endif //IMPLICITBACKWARDDIFFERENCE2_H

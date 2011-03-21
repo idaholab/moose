@@ -1,4 +1,4 @@
-#include "Init.h"
+#include "MooseInit.h"
 #include "Parser.h"
 #include "Executioner.h"
 #include "MooseTest.h"
@@ -12,7 +12,7 @@ PerfLog Moose::perf_log("Moose Test");
 int
 main(int argc, char *argv[])
 {
-  Moose::Init init(argc, argv);
+  MooseInit init(argc, argv);
   MooseTest::registerObjects();
 
   Parser p;

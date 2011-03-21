@@ -1,8 +1,7 @@
-#ifndef BOUNDARYCONDITION_H_
-#define BOUNDARYCONDITION_H_
+#ifndef BOUNDARYCONDITION_H
+#define BOUNDARYCONDITION_H
 
-#include "Object.h"
-#include "Integrable.h"
+#include "MooseObject.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
@@ -13,18 +12,16 @@
 #include "elem.h"
 #include "vector_value.h"
 
-namespace Moose {
-class Variable;
+class MooseVariable;
 class SubProblem;
-}
 
 class BoundaryCondition :
-  public Object,
-  public Moose::Coupleable,
+  public MooseObject,
+  public Coupleable,
   public FunctionInterface,
-  public Moose::TransientInterface,
-  public Moose::MaterialPropertyInterface,
-  public Moose::PostprocessorInterface
+  public TransientInterface,
+  public MaterialPropertyInterface,
+  public PostprocessorInterface
 {
 public:
   BoundaryCondition(const std::string & name, InputParameters parameters);
@@ -32,13 +29,13 @@ public:
 
   unsigned int boundaryID() { return _boundary_id; }
 
-  Moose::Variable & variable() { return _var; }
+  MooseVariable & variable() { return _var; }
 
 protected:
-  Moose::SubProblem & _problem;
-  Moose::System & _sys;
+  SubProblem & _problem;
+  SystemBase & _sys;
   THREAD_ID _tid;
-  Moose::Variable & _var;
+  MooseVariable & _var;
   int _dim;
 
   unsigned int _boundary_id;

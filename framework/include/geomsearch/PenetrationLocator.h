@@ -1,12 +1,12 @@
-#ifndef PENETRATIONLOCATOR_H_
-#define PENETRATIONLOCATOR_H_
+#ifndef PENETRATIONLOCATOR_H
+#define PENETRATIONLOCATOR_H
 
 // Moose includes
 #include "GeometricSearchInterface.h"
 
 // libmesh includes
 #include "libmesh_common.h"
-#include "mesh.h"
+#include "MooseMesh.h"
 #include "vector_value.h"
 #include "point.h"
 #include "fe_type.h"
@@ -15,16 +15,14 @@
 #include <vector>
 #include <map>
 
-namespace Moose {
-
 //Forward Declarations
 class SubProblem;
-class Mesh;
+class MooseMesh;
 
 class PenetrationLocator
 {
 public:
-  PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, Mesh & mesh, unsigned int master, unsigned int slave);
+  PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, unsigned int master, unsigned int slave);
   ~PenetrationLocator();
   void detectPenetration();
 
@@ -64,7 +62,7 @@ public:
   int intersect2D_Segments( Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point* I0, Point* I1 );
   int inSegment(Point P, Point SP0, Point SP1);
   
-  Mesh & _mesh;
+  MooseMesh & _mesh;
   unsigned int _master_boundary;
   unsigned int _slave_boundary;
 
@@ -80,8 +78,6 @@ public:
 
   std::map<unsigned int, bool> _has_penetrated;
 };
-
-} // namespace
 
 #endif //PENETRATIONLOCATOR_H_
 

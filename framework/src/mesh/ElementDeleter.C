@@ -9,7 +9,7 @@
 
 
 ElementDeleter::ElementDeleter(const std::string & name, InputParameters parameters) :
-  MeshModifier(name, parameters)
+    MeshModifier(name, parameters)
 
 // TODO: Make this work
 //  FunctionInterface(parameters)
@@ -117,6 +117,3 @@ ElementDeleter::removeAllElemBCs(Mesh & mesh, Elem * elem)
   for (unsigned int i=0; i<elem->n_sides(); ++i)
     mesh.boundary_info->remove_side(elem, i);
 }
-
-
-

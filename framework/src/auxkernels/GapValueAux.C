@@ -14,7 +14,7 @@
 
 #include "GapValueAux.h"
 
-#include "mesh.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<GapValueAux>()
@@ -38,7 +38,7 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
 Real
 GapValueAux::computeValue()
 {
-  Moose::PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
   Elem * slave_side = pinfo->_side;
   std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;

@@ -1,5 +1,5 @@
-#ifndef CONSTANTIC_H_
-#define CONSTANTIC_H_
+#ifndef CONSTANTIC_H
+#define CONSTANTIC_H
 
 #include "InitialCondition.h"
 
@@ -45,4 +45,4 @@ protected:
   Real _value;
 };
 
-#endif //CONSTANTIC_H_
+#endif //CONSTANTIC_H

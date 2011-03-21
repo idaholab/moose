@@ -1,15 +1,13 @@
-#ifndef GEOMETRICSEARCHDATA_H_
-#define GEOMETRICSEARCHDATA_H_
+#ifndef GEOMETRICSEARCHDATA_H
+#define GEOMETRICSEARCHDATA_H
 
 //libmesh includes
-#include "mesh.h"
+#include "MooseMesh.h"
 
 #include <map>
 
-namespace Moose {
-
 //Forward Declarations
-class Mesh;
+class MooseMesh;
 class SubProblem;
 class PenetrationLocator;
 class NearestNodeLocator;
@@ -17,7 +15,7 @@ class NearestNodeLocator;
 class GeometricSearchData
 {
 public:
-  GeometricSearchData(SubProblem & subproblem, Mesh & mesh);
+  GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh);
 
   PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave);
 
@@ -32,11 +30,9 @@ public:
 
 protected:
   SubProblem & _subproblem;
-  Mesh & _mesh;
+  MooseMesh & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> _nearest_node_locators;
 };
-
-} // namespace
 
 #endif //GEOMETRICSEARCHDATA_H

@@ -1,13 +1,11 @@
-#ifndef MPROBLEM_H_
-#define MPROBLEM_H_
+#ifndef MPROBLEM_H
+#define MPROBLEM_H
 
 #include "SubProblem.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "AssemblyData.h"
-
-namespace Moose {
 
 class DisplacedProblem;
 
@@ -18,7 +16,7 @@ class DisplacedProblem;
 class MProblem : public SubProblem
 {
 public:
-  MProblem(Mesh & mesh, Problem * parent = NULL);
+  MProblem(MooseMesh & mesh, Problem * parent = NULL);
   virtual ~MProblem();
 
   virtual Order getQuadratureOrder() { return _quadrature_order; }
@@ -95,7 +93,7 @@ protected:
   std::vector<AssemblyData *> _asm_info;
 
   // Displaced mesh /////
-  Mesh * _displaced_mesh;
+  MooseMesh * _displaced_mesh;
   DisplacedProblem * _displaced_problem;
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
@@ -105,6 +103,4 @@ public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)
 };
 
-} // namespace
-
-#endif /* MPROBLEM_H_ */
+#endif /* MPROBLEM_H */

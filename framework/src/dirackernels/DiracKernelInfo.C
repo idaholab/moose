@@ -1,8 +1,5 @@
 #include "DiracKernelInfo.h"
 
-namespace Moose {
-
-
 DiracKernelInfo::DiracKernelInfo()
 {
 }
@@ -23,6 +20,4 @@ DiracKernelInfo::clearPoints()
 {
   _elements.clear();
   _points.clear();
-}
-
 }

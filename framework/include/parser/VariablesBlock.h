@@ -7,9 +7,7 @@
 #include "dof_map.h"
 #include "coupling_matrix.h"
 
-namespace Moose {
-class System;
-}
+class SystemBase;
 
 class VariablesBlock : public ParserBlock
 {
@@ -18,7 +16,7 @@ public:
   virtual ~VariablesBlock();
 
   virtual void execute();
-  virtual void copyNodalValues(Moose::System & sys);
+  virtual void copyNodalValues(SystemBase & sys);
 
 protected:
   CouplingMatrix * _cm;

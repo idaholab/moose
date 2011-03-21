@@ -33,7 +33,6 @@ InputParameters validParams<LooseCoupling>()
 LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _shared_mesh(_mesh != NULL),
-//    _mesh(getParam<Moose::Mesh *>("_mesh")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _solve_order(getParam<std::vector<std::string> >("solve_order")),
     _problem(_mesh),
@@ -66,7 +65,7 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     _slave_parser[i] = new Parser;
     if (_shared_mesh)
     {
-      Moose::MProblem * subproblem = new Moose::MProblem(*_mesh, &_problem);
+      MProblem * subproblem = new MProblem(*_mesh, &_problem);
       _problem.addSubProblem(file_name, subproblem);
       _slave_parser[i]->_loose = true;
       _slave_parser[i]->_problem = subproblem;
@@ -150,7 +149,7 @@ LooseCoupling::execute()
     {
       std::string problem_name = *it;
 
-      Moose::SubProblem & subproblem = *_problem.subProblem(problem_name);
+      SubProblem & subproblem = *_problem.subProblem(problem_name);
 
       subproblem.onTimestepBegin();
 

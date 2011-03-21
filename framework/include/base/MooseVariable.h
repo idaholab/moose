@@ -1,5 +1,5 @@
-#ifndef VARIABLE_H_
-#define VARIABLE_H_
+#ifndef MOOSEVARIABLE_H
+#define MOOSEVARIABLE_H
 
 #include "Array.h"
 #include "ParallelUniqueId.h"
@@ -20,18 +20,15 @@ typedef Array<RealGradient>       VariableGradient;
 typedef Array<RealTensor>         VariableSecond;
 
 
-namespace Moose
-{
-
 class AssemblyData;
 class ProblemInterface;
-class System;
+class SystemBase;
 
 #if 0
 class VariableData
 {
 public:
-  VariableData(THREAD_ID tid, const FEType & fe_type, System & sys);
+  VariableData(THREAD_ID tid, const FEType & fe_type, SystemBase & sys);
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
@@ -53,7 +50,7 @@ protected:
   void computeValues();
 
   ProblemInterface & _problem;
-  System & _sys;
+  SystemBase & _sys;
   FEBase * & _fe;
   QBase * & _qrule;
 
@@ -79,11 +76,11 @@ protected:
 };
 #endif
 
-class Variable
+class MooseVariable
 {
 public:
-  Variable(unsigned int var_num, const FEType & fe_type, System & sys, AssemblyData & assembly_data);
-  virtual ~Variable();
+  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, AssemblyData & assembly_data);
+  virtual ~MooseVariable();
 
   void prepare();
   void reinit();
@@ -159,7 +156,7 @@ protected:
   THREAD_ID _tid;
   unsigned int _var_num;
   ProblemInterface & _problem;
-  System & _sys;
+  SystemBase & _sys;
 
   const DofMap & _dof_map;
   AssemblyData & _assembly;
@@ -224,6 +221,4 @@ protected:
   DenseMatrix<Number> _Ke;
 };
 
-}
-
-#endif /* VARIABLE_H_ */
+#endif /* MOOSEVARIABLE_H */

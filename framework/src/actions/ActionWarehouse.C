@@ -1,8 +1,5 @@
 #include "ActionWarehouse.h"
 
-namespace Moose
-{
-
 ActionWarehouse::ActionWarehouse() :
     _ordered_actions(NULL)
 {
@@ -68,7 +65,3 @@ ActionWarehouse::allActionsEnd()
 {
   return _ordered_actions.end();
 }
-
-
-
-} // namespace Moose

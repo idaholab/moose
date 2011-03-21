@@ -1,5 +1,5 @@
-#ifndef DIRACKERNELWAREHOUSE_H_
-#define DIRACKERNELWAREHOUSE_H_
+#ifndef DIRACKERNELWAREHOUSE_H
+#define DIRACKERNELWAREHOUSE_H
 
 #include "DiracKernel.h"
 
@@ -25,4 +25,4 @@ protected:
   std::vector<DiracKernel *> _dirac_kernels;
 };
 
-#endif // DIRACKERNELWAREHOUSE_H_
+#endif // DIRACKERNELWAREHOUSE_H

@@ -1,5 +1,5 @@
-#ifndef COLUMNMAJORMATRIX_H_
-#define COLUMNMAJORMATRIX_H_
+#ifndef COLUMNMAJORMATRIX_H
+#define COLUMNMAJORMATRIX_H
 
 #include "Moose.h"
 
@@ -706,4 +706,4 @@ ColumnMajorMatrix::operator!=(const ColumnMajorMatrix & rhs) const
   return !(*this == rhs);
 }
 
-#endif //COLUMNMAJORMATRIX_H_
+#endif //COLUMNMAJORMATRIX_H

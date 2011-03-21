@@ -6,9 +6,6 @@
 // libmesh includes
 #include "threads.h"
 
-namespace Moose 
-{
-
 ComputeJacobianThread::ComputeJacobianThread(Problem & problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
   ThreadedElementLoop<ConstElemRange>(problem, sys),
   _jacobian(jacobian),
@@ -78,7 +75,7 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int
 void
 ComputeJacobianThread::postElement(const Elem * /*elem*/)
 {
-  for (std::set<Variable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
+  for (std::set<MooseVariable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     (*it)->add(_jacobian);
@@ -88,6 +85,3 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
 void ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)
 {
 }
-  
-} // namespace Moose
-

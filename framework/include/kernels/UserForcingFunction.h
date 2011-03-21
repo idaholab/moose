@@ -1,5 +1,5 @@
-#ifndef USERFORCINGFUNCTION_H_
-#define USERFORCINGFUNCTION_H_
+#ifndef USERFORCINGFUNCTION_H
+#define USERFORCINGFUNCTION_H
 
 #include "Kernel.h"
 
@@ -35,4 +35,4 @@ protected:
   Function & _func;
 };
 
-#endif //USERFORCINGFUNCTION_H_
+#endif //USERFORCINGFUNCTION_H

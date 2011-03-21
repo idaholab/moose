@@ -1,8 +1,5 @@
 #include "Problem.h"
 
-namespace Moose
-{
-
 Problem::Problem()
 {
   unsigned int n_threads = libMesh::n_threads();
@@ -17,6 +14,3 @@ Problem::~Problem()
 {
 }
 
-
-
-} // namespace

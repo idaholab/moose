@@ -1,8 +1,8 @@
-#ifndef SUBPROBLEM_H_
-#define SUBPROBLEM_H_
+#ifndef SUBPROBLEM_H
+#define SUBPROBLEM_H
 
-#include "Mesh.h"
-#include "Variable.h"
+#include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "InitialCondition.h"
 #include "MaterialProperty.h"
 #include "Function.h"
@@ -25,8 +25,6 @@
 #include "numeric_vector.h"
 #include "sparse_matrix.h"
 
-namespace Moose {
-
 class NonlinearSystem;
 
 /**
@@ -36,7 +34,7 @@ class NonlinearSystem;
 class SubProblem : public Problem
 {
 public:
-  SubProblem(Mesh &mesh, Problem * parent = NULL);
+  SubProblem(MooseMesh &mesh, Problem * parent = NULL);
   virtual ~SubProblem();
 
   virtual Problem * parent() { return _parent; }
@@ -49,10 +47,10 @@ public:
   Parameters & parameters() { return _pars; }
 
   EquationSystems & es() { return _eq; }
-  Mesh & mesh() { return _mesh; }
+  MooseMesh & mesh() { return _mesh; }
 
   virtual bool hasVariable(const std::string & var_name);
-  virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
 
   // Solve /////
   virtual void init();
@@ -140,7 +138,7 @@ public:
 
 protected:
   Problem * _parent;
-  Mesh & _mesh;
+  MooseMesh & _mesh;
   EquationSystems & _eq;
 
   bool _transient;
@@ -160,7 +158,7 @@ protected:
   /**
    * List of systems being solved. Allocations/deallocations are responsibilities of derived classes
    */
-  std::vector<System *> _sys;
+  std::vector<SystemBase *> _sys;
 
   // Initial conditions
   std::map<std::string, InitialCondition *> _ics;
@@ -207,8 +205,12 @@ protected:
 };
 
 
+namespace Moose
+{
+
 void initial_condition(EquationSystems& es, const std::string& system_name);
 
-} // namespace
+} // namespace Moose
+
 
 #endif /* SUBPROBLEM_H_ */

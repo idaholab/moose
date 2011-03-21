@@ -1,12 +1,10 @@
-#ifndef ELEMENTH1SEMIERROR_H_
-#define ELEMENTH1SEMIERROR_H_
+#ifndef ELEMENTH1SEMIERROR_H
+#define ELEMENTH1SEMIERROR_H
 
 #include "ElementIntegral.h"
 #include "FunctionInterface.h"
 
-namespace Moose {
-  class Function;
-}
+class Function;
 
 //Forward Declarations
 class ElementH1SemiError;
@@ -33,4 +31,4 @@ protected:
   Function & _func;
 };
 
-#endif //ELEMENTH1SEMIERROR_H_
+#endif //ELEMENTH1SEMIERROR_H

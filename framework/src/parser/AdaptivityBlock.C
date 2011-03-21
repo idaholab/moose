@@ -33,9 +33,9 @@ AdaptivityBlock::AdaptivityBlock(const std::string & name, InputParameters param
 void
 AdaptivityBlock::execute() 
 {
-  Moose::NonlinearSystem & system = _parser_handle._problem->getNonlinearSystem();
+  NonlinearSystem & system = _parser_handle._problem->getNonlinearSystem();
   
-  Moose::Adaptivity & adapt = _parser_handle._problem->adaptivity();
+  Adaptivity & adapt = _parser_handle._problem->adaptivity();
 
   adapt.init(getParamValue<unsigned int>("steps"), getParamValue<unsigned int>("initial_adaptivity"));
 

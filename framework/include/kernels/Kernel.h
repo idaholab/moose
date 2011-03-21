@@ -1,31 +1,27 @@
-#ifndef KERNEL_H_
-#define KERNEL_H_
+#ifndef KERNEL_H
+#define KERNEL_H
 
-#include "Object.h"
-#include "Integrable.h"
+#include "MooseObject.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 
 // libMesh
 #include "fe.h"
 #include "quadrature.h"
 
-
-namespace Moose {
-class Variable;
+class MooseVariable;
 class SubProblem;
-class System;
-}
+class SystemBase;
 
 class Kernel :
-  public Object,
-  public Moose::Coupleable,
+  public MooseObject,
+  public Coupleable,
   public FunctionInterface,
-  public Moose::TransientInterface,
-  public Moose::MaterialPropertyInterface
+  public TransientInterface,
+  public MaterialPropertyInterface
 {
 public:
   Kernel(const std::string & name, InputParameters parameters);
@@ -45,7 +41,7 @@ public:
   /**
    * The variable number that this kernel operates on.
    */
-  Moose::Variable & variable() { return _var; }
+  MooseVariable & variable() { return _var; }
 
   /**
    * The time, after which this kernel will be active.
@@ -58,12 +54,12 @@ public:
   Real stopTime();
 
 protected:
-  Moose::SubProblem & _problem;
-  Moose::System & _sys;
+  SubProblem & _problem;
+  SystemBase & _sys;
 
   THREAD_ID _tid;
 
-  Moose::Variable & _var;
+  MooseVariable & _var;
   int _dim;
 
   const Elem * & _current_elem;

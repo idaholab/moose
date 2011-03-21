@@ -18,9 +18,6 @@
 // Local includes
 #include "quadrature.h"
 
-namespace Moose
-{
-  
 /**
  * Implements a fake quadrature rule where you can specify the points
  * (in the reference domain) of the quadrature points.
@@ -54,7 +51,5 @@ class ArbitraryQuadrature : public QBase
   void init_3D (const ElemType _type=INVALID_ELEM,
 		unsigned int p_level=0);
 };
-
-} // namespace Moose
 
 #endif // ARBITRARYQUADRATURE_H

@@ -1,5 +1,5 @@
-#ifndef AUXWAREHOUSE_H_
-#define AUXWAREHOUSE_H_
+#ifndef AUXWAREHOUSE_H
+#define AUXWAREHOUSE_H
 
 #include <vector>
 #include <map>
@@ -60,4 +60,4 @@ protected:
   std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
 };
 
-#endif // AUXWAREHOUSE_H_
+#endif // AUXWAREHOUSE_H

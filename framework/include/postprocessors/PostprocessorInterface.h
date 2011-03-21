@@ -1,5 +1,5 @@
-#ifndef POSTPROCESSORINTERFACE_H_
-#define POSTPROCESSORINTERFACE_H_
+#ifndef POSTPROCESSORINTERFACE_H
+#define POSTPROCESSORINTERFACE_H
 
 #include <map>
 #include <string>
@@ -9,8 +9,7 @@
 #include "ParallelUniqueId.h"
 
 // Forward Declarations
-namespace Moose {
-  class SubProblem;
+class SubProblem;
 
 class PostprocessorInterface
 {
@@ -23,10 +22,8 @@ public:
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
 private:
-  Moose::SubProblem & _pi_problem;
+  SubProblem & _pi_problem;
   THREAD_ID _pi_tid;
 };
-
-} // namespace
 
 #endif //POSTPROCESSORINTERFACE_H_

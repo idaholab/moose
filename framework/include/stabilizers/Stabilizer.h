@@ -1,11 +1,11 @@
-#ifndef STABILIZER_H_
-#define STABILIZER_H_
+#ifndef STABILIZER_H
+#define STABILIZER_H
 
 // System includes
 #include <string>
 
 #include "Moose.h"
-#include "Object.h"
+#include "MooseObject.h"
 #include "ParallelUniqueId.h"
 #include "MaterialPropertyInterface.h"
 // libMesh
@@ -22,18 +22,16 @@ class Stabilizer;
 template<>
 InputParameters validParams<Stabilizer>();
 
-namespace Moose {
-  class SubProblem;
-  class System;
-  class Variable;
-}
+class SubProblem;
+class SystemBase;
+class MooseVariable;
 
 /**
  * Stabilizers compute modified test function spaces to stabilize oscillating solutions.
  */
 class Stabilizer :
-  public Object,
-  protected Moose::MaterialPropertyInterface
+  public MooseObject,
+  protected MaterialPropertyInterface
 {
 public:
   /**
@@ -50,7 +48,7 @@ public:
   /**
    * The variable number that this kernel operates on.
    */
-  Moose::Variable & variable() { return _var; }
+  MooseVariable & variable() { return _var; }
 
   /**
    * This pure virtual must be overridden by derived classes!
@@ -61,11 +59,11 @@ public:
   virtual void computeTestFunctions() = 0;
 
 protected:
-  Moose::SubProblem & _problem;
-  Moose::System & _sys;
+  SubProblem & _problem;
+  SystemBase & _sys;
   THREAD_ID _tid;
 
-  Moose::Variable & _var;
+  MooseVariable & _var;
 
   const Elem * & _current_elem;
 
@@ -91,4 +89,4 @@ protected:
   std::vector<std::vector<RealGradient> > & _grad_test;
 };
 
-#endif //STABILIZER_H_
+#endif //STABILIZER_H

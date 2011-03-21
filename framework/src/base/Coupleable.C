@@ -3,8 +3,6 @@
 #include "Problem.h"
 #include "SubProblem.h"
 
-namespace Moose {
-
 Coupleable::Coupleable(InputParameters & parameters)
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_problem");
@@ -36,7 +34,7 @@ Coupleable::Coupleable(InputParameters & parameters)
 bool
 Coupleable::isCoupled(const std::string & varname, unsigned int i)
 {
-  std::map<std::string, std::vector<Variable *> >::iterator it = _coupled_vars.find(varname);
+  std::map<std::string, std::vector<MooseVariable *> >::iterator it = _coupled_vars.find(varname);
   if (it != _coupled_vars.end())
     return (i < it->second.size());
   else
@@ -109,5 +107,3 @@ Coupleable::getCoupledNodalValueOlder(const std::string & var_name, unsigned int
 {
   return _coupled_vars[var_name][comp]->nodalSlnOlder();
 }
-
-} // namespace

@@ -1,8 +1,6 @@
 #include "FunctionPeriodicBoundary.h"
 #include "SubProblem.h"
 
-namespace Moose {
-
 /**
  */
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(SubProblem & subproblem, std::vector<std::string> fn_names) :
@@ -46,5 +44,3 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt)
 
   return pt;
 }
-
-} // namespace

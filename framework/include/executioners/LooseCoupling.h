@@ -1,8 +1,8 @@
-#ifndef LOOSECOUPLING_H_
-#define LOOSECOUPLING_H_
+#ifndef LOOSECOUPLING_H
+#define LOOSECOUPLING_H
 
 #include "Executioner.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "CoupledProblem.h"
 
 class LooseCoupling : public Executioner
@@ -13,7 +13,7 @@ public:
 
   virtual void execute();
 
-  virtual Moose::Problem & problem() { return _problem; }
+  virtual Problem & problem() { return _problem; }
 
 protected:
   bool _shared_mesh;
@@ -21,7 +21,7 @@ protected:
   std::vector<std::string> _input_files;
   std::vector<std::string> _solve_order;
 
-  Moose::CoupledProblem _problem;
+  CoupledProblem _problem;
 
   int & _t_step;                        /// Current timestep.
   Real & _time;                         /// Current time

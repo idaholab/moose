@@ -1,15 +1,13 @@
-#ifndef EXECUTIONER_H_
-#define EXECUTIONER_H_
+#ifndef EXECUTIONER_H
+#define EXECUTIONER_H
 
-#include "Object.h"
+#include "MooseObject.h"
 
 // System includes
 #include <string>
 
-namespace Moose {
-class Mesh;
+class MooseMesh;
 class Problem;
-}
 
 /**
  * Executioners are objects that do the actual work of solving your problem.
@@ -20,7 +18,7 @@ class Problem;
  * for the NonlinearSystem once... where Transient Executioners call solve()
  * multiple times... i.e. once per timestep.
  */
-class Executioner : public Object
+class Executioner : public MooseObject
 {
 public:
   /**
@@ -40,12 +38,12 @@ public:
    */
   virtual void execute() = 0;
 
-  virtual Moose::Problem & problem() = 0;
+  virtual Problem & problem() = 0;
 
   void outputInitial(bool out_init) { _output_initial = out_init; }
 
 protected:
-  Moose::Mesh * _mesh;
+  MooseMesh * _mesh;
 
   bool _output_initial;				/// output initial condition if true   
 

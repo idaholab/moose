@@ -1,14 +1,11 @@
 #ifndef DISPLACEDSYSTEM_H_
 #define DISPLACEDSYSTEM_H_
 
-#include "System.h"
+#include "SystemBase.h"
 
 // libMesh include
 #include "explicit_system.h"
 #include "transient_system.h"
-
-namespace Moose
-{
 
 class DisplacedSystem : public SystemTempl<TransientExplicitSystem>
 {
@@ -22,7 +19,5 @@ public:
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
 };
-
-}
 
 #endif /* DISPLACEDSYSTEM_H_ */

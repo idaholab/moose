@@ -1,5 +1,5 @@
-#ifndef FORMATTEDTABLE_H_
-#define FORMATTEDTABLE_H_
+#ifndef FORMATTEDTABLE_H
+#define FORMATTEDTABLE_H
 
 #include "libmesh_common.h"
 #include "exodusII_io.h"

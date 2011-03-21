@@ -1,5 +1,5 @@
-#ifndef PENETRATIONAUX_H_
-#define PENETRATIONAUX_H_
+#ifndef PENETRATIONAUX_H
+#define PENETRATIONAUX_H
 
 #include "AuxKernel.h"
 #include "PenetrationLocator.h"
@@ -31,7 +31,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  Moose::PenetrationLocator & _penetration_locator;
+  PenetrationLocator & _penetration_locator;
 };
 
 #endif //PENETRATIONAUX_H

@@ -1,5 +1,5 @@
-#ifndef TIMEKERNEL_H_
-#define TIMEKERNEL_H_
+#ifndef TIMEKERNEL_H
+#define TIMEKERNEL_H
 
 #include "Kernel.h"
 
@@ -19,4 +19,4 @@ public:
   TimeKernel(const std::string & name, InputParameters parameters);
 };
 
-#endif //TIMEKERNEL
+#endif //TIMEKERNEL_H

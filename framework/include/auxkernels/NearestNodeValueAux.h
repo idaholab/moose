@@ -1,5 +1,5 @@
-#ifndef NEARESTNODEVALUEAUX_H_
-#define NEARESTNODEVALUEAUX_H_
+#ifndef NEARESTNODEVALUEAUX_H
+#define NEARESTNODEVALUEAUX_H
 
 #include "AuxKernel.h"
 #include "NearestNodeLocator.h"
@@ -30,9 +30,9 @@ public:
 protected:
   virtual Real computeValue();
 
-  Moose::NearestNodeLocator & _nearest_node;
+  NearestNodeLocator & _nearest_node;
 
   unsigned int _paired_variable;
 };
 
-#endif //NEARESTNODEVALUEAUX_H_
+#endif //NEARESTNODEVALUEAUX_H

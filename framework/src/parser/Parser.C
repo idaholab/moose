@@ -4,7 +4,7 @@
 #include <iomanip>
 
 #include "Parser.h"
-#include "Init.h"
+#include "MooseInit.h"
 #include "InputParameters.h"
 #include "ParserBlockFactory.h"
 
@@ -13,7 +13,7 @@
 #include "ActionWarehouse.h"
 
 #include "MProblem.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "Executioner.h"
 #include "Moose.h"
 

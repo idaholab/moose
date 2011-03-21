@@ -1,5 +1,5 @@
-#ifndef AVERAGEELEMENTSIZE_H_
-#define AVERAGEELEMENTSIZE_H_
+#ifndef AVERAGEELEMENTSIZE_H
+#define AVERAGEELEMENTSIZE_H
 
 #include "ElementAverageValue.h"
 
@@ -28,4 +28,4 @@ protected:
   int _elems;
 };
  
-#endif // AVERAGEELEMENTSIZE_H_
+#endif // AVERAGEELEMENTSIZE_H

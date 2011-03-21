@@ -20,7 +20,7 @@ Factory::getValidParams(const std::string & name)
   return params;
 }
 
-Object *
+MooseObject *
 Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters)
 {
   if (_name_to_build_pointer.find(obj_name) != _name_to_build_pointer.end())

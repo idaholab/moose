@@ -1,5 +1,5 @@
-#ifndef ADAPTIVITY_H_
-#define ADAPTIVITY_H_
+#ifndef ADAPTIVITY_H
+#define ADAPTIVITY_H
 
 #include <string>
 
@@ -9,11 +9,8 @@
 #include "error_vector.h"
 #include "error_estimator.h"
 
-namespace Moose
-{
-
 class SubProblem;
-class Mesh;
+class MooseMesh;
 
 class Adaptivity
 {
@@ -33,7 +30,7 @@ public:
 
 protected:
   SubProblem & _subproblem;
-  Mesh & _mesh;
+  MooseMesh & _mesh;
 
   bool _mesh_refinement_on;
 
@@ -79,6 +76,4 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
   }
 }
 
-}
-
-#endif /* ADAPTIVITY_H_ */
+#endif /* ADAPTIVITY_H */

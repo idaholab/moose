@@ -2,7 +2,7 @@
 
 // Moose includes
 #include "Moose.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 
 // C++ includes
 #include <vector>
@@ -12,13 +12,13 @@
 template<>
 InputParameters validParams<Executioner>()
 {
-  InputParameters params = validParams<Object>();
+  InputParameters params = validParams<MooseObject>();
   return params;
 }
 
 Executioner::Executioner(const std::string & name, InputParameters parameters) :
-  Object(name, parameters),
-  _mesh(getParam<Moose::Mesh *>("_mesh")),
+  MooseObject(name, parameters),
+  _mesh(getParam<MooseMesh *>("_mesh")),
   _output_initial(false)
 {
 }

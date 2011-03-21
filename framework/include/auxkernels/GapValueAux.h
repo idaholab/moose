@@ -35,7 +35,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  Moose::PenetrationLocator & _penetration_locator;
+  PenetrationLocator & _penetration_locator;
 
   unsigned int _paired_variable;
 };

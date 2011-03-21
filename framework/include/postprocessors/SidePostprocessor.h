@@ -1,8 +1,8 @@
-#ifndef SIDEPOSTPROCESSOR_H_
-#define SIDEPOSTPROCESSOR_H_
+#ifndef SIDEPOSTPROCESSOR_H
+#define SIDEPOSTPROCESSOR_H
 
 #include "Postprocessor.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 
 //Forward Declarations
 class SidePostprocessor;
@@ -21,7 +21,7 @@ public:
   virtual Real computeIntegral();
 
 protected:
-  Moose::Variable & _var;
+  MooseVariable & _var;
 
   unsigned int _boundary_id;
 

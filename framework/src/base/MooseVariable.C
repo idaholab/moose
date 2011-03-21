@@ -1,18 +1,16 @@
-#include "Variable.h"
+#include "MooseVariable.h"
 #include "SubProblem.h"
-#include "System.h"
+#include "SystemBase.h"
 #include "AssemblyData.h"
 
 // libMesh
 #include "numeric_vector.h"
 #include "dof_map.h"
 
-namespace Moose {
-
 #if 0
 // VariableData /////
 
-VariableData::VariableData(THREAD_ID tid, const FEType & fe_type, System & sys) :
+VariableData::VariableData(THREAD_ID tid, const FEType & fe_type, SystemBase & sys) :
     _problem(sys.problem()),
     _sys(sys),
     _fe(_problem.getFE(tid, fe_type)),
@@ -98,7 +96,7 @@ VariableData::computeValues()
 
 // Variable /////
 
-Variable::Variable(unsigned int var_num, const FEType & fe_type, System & sys, AssemblyData & assembly_data) :
+MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, AssemblyData & assembly_data) :
     _var_num(var_num),
     _problem(sys.problem()),
     _sys(sys),
@@ -124,18 +122,18 @@ Variable::Variable(unsigned int var_num, const FEType & fe_type, System & sys, A
 {
 }
 
-Variable::~Variable()
+MooseVariable::~MooseVariable()
 {
 }
 
 void
-Variable::prepare()
+MooseVariable::prepare()
 {
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
 }
 
 void
-Variable::reinit()
+MooseVariable::reinit()
 {
   // copy shape functions into test functions (so they can be modified by stabilizers)
   _test = _phi;
@@ -150,13 +148,13 @@ Variable::reinit()
 }
 
 void
-Variable::reinit_node()
+MooseVariable::reinit_node()
 {
   _nodal_dof_index = _node->dof_number(_sys.number(), _var_num, 0);
 }
 
 void
-Variable::reinit_aux()
+MooseVariable::reinit_aux()
 {
   reinit();
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
@@ -164,34 +162,34 @@ Variable::reinit_aux()
 }
 
 void
-Variable::sizeResidual()
+MooseVariable::sizeResidual()
 {
   _Re.resize(_dof_indices.size());
   _Re.zero();
 }
 
 void
-Variable::sizeJacobianBlock()
+MooseVariable::sizeJacobianBlock()
 {
   _Ke.resize(_dof_indices.size(), _dof_indices.size());
 }
 
 void
-Variable::add(NumericVector<Number> & residual)
+MooseVariable::add(NumericVector<Number> & residual)
 {
   _dof_map.constrain_element_vector(_Re, _dof_indices, false);
   residual.add_vector(_Re, _dof_indices);
 }
 
 void
-Variable::add(SparseMatrix<Number> & jacobian)
+MooseVariable::add(SparseMatrix<Number> & jacobian)
 {
   _dof_map.constrain_element_matrix(_Ke, _dof_indices, false);
   jacobian.add_matrix(_Ke, _dof_indices);
 }
 
 void
-Variable::computeElemValues()
+MooseVariable::computeElemValues()
 {
   bool has_second_derivatives = (feType().family == CLOUGH || feType().family == HERMITE);
 
@@ -285,7 +283,7 @@ Variable::computeElemValues()
 }
 
 void
-Variable::computeElemValuesFace()
+MooseVariable::computeElemValuesFace()
 {
   bool has_second_derivatives = (feType().family == CLOUGH || feType().family == HERMITE);
   unsigned int nqp = _qrule_face->n_points();
@@ -376,7 +374,7 @@ Variable::computeElemValuesFace()
 }
 
 void
-Variable::computeNodalValues()
+MooseVariable::computeNodalValues()
 {
   _nodal_u.resize(1);
   _nodal_u[0] = _sys.solution()(_nodal_dof_index);
@@ -392,7 +390,7 @@ Variable::computeNodalValues()
 }
 
 Number
-Variable::getNodalValue(const Node & node)
+MooseVariable::getNodalValue(const Node & node)
 {
   unsigned int dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solution()(dof);
@@ -400,7 +398,7 @@ Variable::getNodalValue(const Node & node)
 }
 
 Number
-Variable::getNodalValueOld(const Node & node)
+MooseVariable::getNodalValueOld(const Node & node)
 {
   unsigned int dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solutionOld()(dof);
@@ -408,10 +406,9 @@ Variable::getNodalValueOld(const Node & node)
 }
 
 Number
-Variable::getNodalValueOlder(const Node & node)
+MooseVariable::getNodalValueOlder(const Node & node)
 {
   unsigned int dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solutionOlder()(dof);
 
 }
-} // namespace

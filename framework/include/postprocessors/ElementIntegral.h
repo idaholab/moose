@@ -1,5 +1,5 @@
-#ifndef ELEMENTINTEGRAL_H_
-#define ELEMENTINTEGRAL_H_
+#ifndef ELEMENTINTEGRAL_H
+#define ELEMENTINTEGRAL_H
 
 #include "ElementPostprocessor.h"
 

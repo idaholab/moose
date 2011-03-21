@@ -1,13 +1,13 @@
 #include "Kernel.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "System.h"
+#include "SystemBase.h"
 
 template<>
 InputParameters validParams<Kernel>()
 {
-  InputParameters p = validParams<Object>();
+  InputParameters p = validParams<MooseObject>();
   p.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   p.addPrivateParam<bool>("use_displaced_mesh", false);
   p.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
@@ -18,13 +18,13 @@ InputParameters validParams<Kernel>()
 
 
 Kernel::Kernel(const std::string & name, InputParameters parameters) :
-    Object(name, parameters),
-    Moose::Coupleable(parameters),
+    MooseObject(name, parameters),
+    Coupleable(parameters),
     FunctionInterface(parameters),
-    Moose::TransientInterface(parameters),
-    Moose::MaterialPropertyInterface(parameters),
-    _problem(*parameters.get<Moose::SubProblem *>("_problem")),
-    _sys(*parameters.get<Moose::System *>("_sys")),
+    TransientInterface(parameters),
+    MaterialPropertyInterface(parameters),
+    _problem(*parameters.get<SubProblem *>("_problem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _dim(_problem.mesh().dimension()),
@@ -146,17 +146,17 @@ Kernel::precalculateResidual()
 unsigned int
 Kernel::coupled(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupled(var_name);
+  return Coupleable::getCoupled(var_name);
 }
 
 VariableValue &
 Kernel::coupledValue(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledValue(var_name);
+  return Coupleable::getCoupledValue(var_name);
 }
 
 VariableGradient &
 Kernel::coupledGradient(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledGradient(var_name);
+  return Coupleable::getCoupledGradient(var_name);
 }

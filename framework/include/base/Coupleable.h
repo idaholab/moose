@@ -1,17 +1,16 @@
-#ifndef COUPLEABLE_H_
-#define COUPLEABLE_H_
+#ifndef COUPLEABLE_H
+#define COUPLEABLE_H
 
-#include "Variable.h"
+#include "MooseVariable.h"
 #include "InputParameters.h"
 
-namespace Moose {
 
 class Coupleable
 {
 public:
   Coupleable(InputParameters & parameters);
 
-  std::map<std::string, std::vector<Variable *> > & getCoupledVars() { return _coupled_vars; }
+  std::map<std::string, std::vector<MooseVariable *> > & getCoupledVars() { return _coupled_vars; }
 
 protected:
   /**
@@ -35,9 +34,7 @@ protected:
   virtual VariableValue & getCoupledNodalValueOld(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & getCoupledNodalValueOlder(const std::string & var_name, unsigned int comp = 0);
 
-  std::map<std::string, std::vector<Variable *> > _coupled_vars;
+  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;
 };
 
-} // namespace
-
-#endif /* COUPLEABLE_H_ */
+#endif /* COUPLEABLE_H */

@@ -1,5 +1,5 @@
-#ifndef KERNELVALUE_H_
-#define KERNELVALUE_H_
+#ifndef KERNELVALUE_H
+#define KERNELVALUE_H
 
 // local includes
 #include "Kernel.h"
@@ -61,4 +61,4 @@ protected:
   Real _value;
 };
 
-#endif //KERNELVALUE_H_
+#endif //KERNELVALUE_H

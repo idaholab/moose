@@ -6,9 +6,6 @@
 // libMesh includes
 #include "elem_range.h"
 
-namespace Moose
-{
-
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
@@ -28,9 +25,7 @@ public:
 protected:
   NumericVector<Number> & _residual;
   NonlinearSystem & _sys;
-  std::set<Variable *> _vars;
+  std::set<MooseVariable *> _vars;
 };
-  
-}
 
 #endif //COMPUTERESIDUALTHREAD_H

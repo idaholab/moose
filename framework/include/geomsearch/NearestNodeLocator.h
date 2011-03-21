@@ -1,17 +1,15 @@
-#ifndef NEARESTNODELOCATOR_H_
-#define NEARESTNODELOCATOR_H_
+#ifndef NEARESTNODELOCATOR_H
+#define NEARESTNODELOCATOR_H
 
 #include "libmesh_common.h"
 
 #include <vector>
 #include <map>
 
-#include "mesh.h"
+#include "MooseMesh.h"
 #include "vector_value.h"
 
-namespace Moose {
-
-class Mesh;
+class MooseMesh;
 class SubProblem;
 
 /**
@@ -20,7 +18,7 @@ class SubProblem;
 class NearestNodeLocator
 {
 public:
-  NearestNodeLocator(Mesh & mesh, unsigned int boundary1, unsigned int boundary2);
+  NearestNodeLocator(MooseMesh & mesh, unsigned int boundary1, unsigned int boundary2);
 
   /**
    * This is the main method that is going to start the search.
@@ -50,7 +48,7 @@ protected:
     Real _distance;
   };
 
-  Mesh & _mesh;
+  MooseMesh & _mesh;
 
 public:
   std::map<unsigned int, NearestNodeInfo> _nearest_node_info;
@@ -67,7 +65,5 @@ public:
   // The following parameter controls the patch size that is searched for each nearest neighbor
   static const unsigned int _patch_size;
 };
-
-} // namespace
 
 #endif //NEARESTNODELOCATOR_H_

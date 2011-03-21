@@ -1,5 +1,5 @@
-#ifndef PRINTDT_H_
-#define PRINTDT_H_
+#ifndef PRINTDT_H
+#define PRINTDT_H
 
 #include "GeneralPostprocessor.h"
 
@@ -23,4 +23,4 @@ public:
   virtual Real getValue();
 };
 
-#endif //PRINTDT_H_
+#endif //PRINTDT_H

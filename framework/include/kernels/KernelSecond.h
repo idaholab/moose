@@ -1,5 +1,5 @@
-#ifndef KERNELSECOND_H_
-#define KERNELSECOND_H_
+#ifndef KERNELSECOND_H
+#define KERNELSECOND_H
 
 // local includes
 #include "Kernel.h"
@@ -46,4 +46,4 @@ protected:
   Array<Real> _value;
 };
 
-#endif //KERNELVALUE_H_
+#endif //KERNELSECOND_H

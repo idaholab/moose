@@ -1,5 +1,5 @@
-#ifndef MATERIALPROPERTY_H_
-#define MATERIALPROPERTY_H_
+#ifndef MATERIALPROPERTY_H
+#define MATERIALPROPERTY_H
 
 #include <vector>
 
@@ -8,8 +8,6 @@
 
 #include "libmesh_common.h"
 
-
-namespace Moose {
 
 /**
  * Abstract definition of a property value.
@@ -45,14 +43,12 @@ public:
   virtual void shallowCopy (PropertyValue *rhs) = 0;
 };
 
-} // namespace
-
 /**
  * Concrete definition of a parameter value
  * for a specified type.
  */
 template <typename T>
-class MaterialProperty : public Moose::PropertyValue
+class MaterialProperty : public PropertyValue
 {
 public:
   /**
@@ -73,7 +69,7 @@ public:
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual Moose::PropertyValue *init ();
+  virtual PropertyValue *init ();
 
   /**
    * Resizes the property to the size n
@@ -116,7 +112,7 @@ MaterialProperty<T>::type ()
 }
 
 template <typename T>
-inline Moose::PropertyValue *
+inline PropertyValue *
 MaterialProperty<T>::init ()
 {
   MaterialProperty<T> *copy = new MaterialProperty<T>;
@@ -128,11 +124,11 @@ MaterialProperty<T>::init ()
 }
 
 template <>
-Moose::PropertyValue *
+PropertyValue *
 MaterialProperty<std::vector<Real> >::init ();
 
 template <>
-Moose::PropertyValue *
+PropertyValue *
 MaterialProperty<ColumnMajorMatrix>::init ();
 
 template <typename T>
@@ -144,7 +140,7 @@ MaterialProperty<T>::resize (int n)
 
 template <typename T>
 inline void
-MaterialProperty<T>::shallowCopy (Moose::PropertyValue *rhs)
+MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
 {
   if (rhs == NULL)
     _value.resize(0);
@@ -152,8 +148,6 @@ MaterialProperty<T>::shallowCopy (Moose::PropertyValue *rhs)
     _value.shallowCopy(dynamic_cast<const MaterialProperty<T>*>(rhs)->_value);
 }
 
-
-namespace Moose {
 
 /**
  * Container for storing material properties
@@ -173,7 +167,5 @@ public:
    */
   typedef std::map<std::string, PropertyValue *>::const_iterator const_iterator;
 };
-
-} // namespace
 
 #endif

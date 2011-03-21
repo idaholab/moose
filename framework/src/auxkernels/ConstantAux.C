@@ -9,8 +9,8 @@ InputParameters validParams<ConstantAux>()
 }
 
 ConstantAux::ConstantAux(const std::string & name, InputParameters parameters) :
-  AuxKernel(name, parameters),
-  _value(getParam<Real>("value"))
+    AuxKernel(name, parameters),
+    _value(getParam<Real>("value"))
 {
 }
 

@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "Factory.h"
 #include "MeshModifier.h"
 
@@ -7,10 +7,7 @@
 #include "mesh_tools.h"
 #include "mesh_refinement.h"
 
-namespace Moose
-{
-
-Mesh::Mesh(int mesh_dim) :
+MooseMesh::MooseMesh(int mesh_dim) :
     _mesh(mesh_dim),
     _is_changed(false),
     _active_local_elem_range(NULL),
@@ -21,7 +18,7 @@ Mesh::Mesh(int mesh_dim) :
 
 }
 
-Mesh::Mesh(const Mesh & other_mesh) :
+MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _mesh(other_mesh._mesh),
     _is_changed(false),
     _active_local_elem_range(NULL),
@@ -32,7 +29,7 @@ Mesh::Mesh(const Mesh & other_mesh) :
   (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
 }
 
-Mesh::~Mesh()
+MooseMesh::~MooseMesh()
 {
   delete _active_local_elem_range;
   delete _active_node_range;
@@ -41,13 +38,13 @@ Mesh::~Mesh()
 }
 
 void
-Mesh::read(const std::string file_name)
+MooseMesh::read(const std::string file_name)
 {
   _mesh.read(file_name);
 }
 
 void
-Mesh::prepare()
+MooseMesh::prepare()
 {
   _mesh.prepare_for_use(false);
 
@@ -56,14 +53,14 @@ Mesh::prepare()
 }
 
 void
-Mesh::uniformlyRefine(int level)
+MooseMesh::uniformlyRefine(int level)
 {
   MeshRefinement mesh_refinement(_mesh);
   mesh_refinement.uniformly_refine(level);
 }
 
 void
-Mesh::meshChanged()
+MooseMesh::meshChanged()
 {
   // Rebuild the boundary conditions
   build_node_list_from_side_list();
@@ -97,13 +94,13 @@ Mesh::meshChanged()
 }
 
 void
-Mesh::buildBoudndaryNodeList()
+MooseMesh::buildBoudndaryNodeList()
 {
   _mesh.boundary_info->build_node_list(_bnd_nodes, _bnd_ids);
 }
 
 ConstElemRange *
-Mesh::getActiveLocalElementRange()
+MooseMesh::getActiveLocalElementRange()
 {
   if (!_active_local_elem_range)
   {
@@ -115,7 +112,7 @@ Mesh::getActiveLocalElementRange()
 }
 
 NodeRange *
-Mesh::getActiveNodeRange()
+MooseMesh::getActiveNodeRange()
 {
   if (!_active_node_range)
   {
@@ -127,7 +124,7 @@ Mesh::getActiveNodeRange()
 }
 
 ConstNodeRange *
-Mesh::getLocalNodeRange()
+MooseMesh::getLocalNodeRange()
 {
   if (!_local_node_range)
   {
@@ -139,7 +136,7 @@ Mesh::getLocalNodeRange()
 }
 
 ConstNodeRange *
-Mesh::getBoundaryNodeRange()
+MooseMesh::getBoundaryNodeRange()
 {
   if (!_bnd_node_range)
   {
@@ -150,19 +147,17 @@ Mesh::getBoundaryNodeRange()
   return _bnd_node_range;
 }
 
-// Mesh Modifiers /////
+// MooseMesh Modifiers /////
 void
-Mesh::addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters)
+MooseMesh::addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters)
 {
   _mesh_modifiers.push_back(static_cast<MeshModifier *>(Factory::instance()->create(mod_name, name, parameters)));
 }
 
 void
-Mesh::applyMeshModifications()
+MooseMesh::applyMeshModifications()
 {
   for (std::vector<MeshModifier *>::iterator i = _mesh_modifiers.begin(); i != _mesh_modifiers.end(); ++i)
     (*i)->modifyMesh(_mesh);
 }
 
-  
-} // namespace

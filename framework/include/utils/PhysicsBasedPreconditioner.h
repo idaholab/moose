@@ -30,8 +30,6 @@ namespace libMesh
   class MeshBase;
 }
 
-namespace Moose
-{
 
 class SubProblem;
 class NonlinearSystem;
@@ -105,7 +103,5 @@ protected:
    */
   std::vector<std::vector<SparseMatrix<Number> *> > _off_diag_mats;
 };
-
-} // namespace Moose
 
 #endif //PHYSICSBASEDPRECONDITIONER_H

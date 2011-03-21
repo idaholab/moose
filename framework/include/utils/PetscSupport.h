@@ -1,5 +1,5 @@
-#ifndef PETSCSUPPORT_H_
-#define PETSCSUPPORT_H_
+#ifndef PETSCSUPPORT_H
+#define PETSCSUPPORT_H
 
 #include "libmesh.h"
 
@@ -8,10 +8,10 @@
 // libMesh
 #include "petsc_nonlinear_solver.h"
 
+class NonlinearSystem;
+
 namespace Moose 
 {
-  class NonlinearSystem;
-
   namespace PetscSupport
   {
 //    void petscParseOptions(GetPot & input_file);
@@ -28,4 +28,4 @@ namespace Moose
 
 #endif //LIBMESH_HAVE_PETSC
 
-#endif //PETSCSUPPORT_H_
+#endif //PETSCSUPPORT_H

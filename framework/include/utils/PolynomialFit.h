@@ -1,5 +1,5 @@
-#ifndef POLYNOMIALFIT_H_
-#define POLYNOMIALFIT_H_
+#ifndef POLYNOMIALFIT_H
+#define POLYNOMIALFIT_H
 
 #include <vector>
 #include <fstream>
@@ -75,4 +75,4 @@ private:
   static int _file_number;
 };
 
-#endif //POLYNOMIALFIT_H_
+#endif //POLYNOMIALFIT_H

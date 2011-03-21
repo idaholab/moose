@@ -1,7 +1,7 @@
 #include "MeshGenerationBlock.h"
 #include "Moose.h"
 #include "Parser.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "getpot.h"
@@ -52,7 +52,7 @@ MeshGenerationBlock::execute()
   else
     mooseError("You must provide ""dim"" in the Mesh or Mesh/Generation block");
   
-  Moose::Mesh *mesh = new Moose::Mesh(mesh_dim);
+  MooseMesh *mesh = new MooseMesh(mesh_dim);
   
   switch (mesh_dim)
   {

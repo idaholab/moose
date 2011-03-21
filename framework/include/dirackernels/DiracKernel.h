@@ -1,5 +1,5 @@
-#ifndef DIRACKERNEL_H_
-#define DIRACKERNEL_H_
+#ifndef DIRACKERNEL_H
+#define DIRACKERNEL_H
 
 #include <string>
 
@@ -7,13 +7,12 @@
 #include "Moose.h"
 #include "DiracKernelData.h"
 #include "DiracKernelInfo.h"
-#include "Object.h"
-#include "Integrable.h"
+#include "MooseObject.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 
 //libMesh includes
 #include "libmesh_common.h"
@@ -36,11 +35,11 @@ InputParameters validParams<DiracKernel>();
  * This is common in point sources / sinks and various other algorithms.
  */
 class DiracKernel :
-  public Object,
-  public Moose::Coupleable,
+  public MooseObject,
+  public Coupleable,
   public FunctionInterface,
-  public Moose::TransientInterface,
-  public Moose::MaterialPropertyInterface
+  public TransientInterface,
+  public MaterialPropertyInterface
 {
 public:
   DiracKernel(const std::string & name, InputParameters parameters);
@@ -114,7 +113,7 @@ protected:
    */
   void addPoint(Point p);
   
-  Moose::SubProblem & _problem;
+  SubProblem & _problem;
 
 //  Moose::DiracKernelData & _dirac_kernel_data;
 //  Moose::DiracKernelInfo & _dirac_kernel_info;

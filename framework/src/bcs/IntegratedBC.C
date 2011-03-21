@@ -1,6 +1,6 @@
 #include "IntegratedBC.h"
 #include "SubProblem.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 
 
 template<>
@@ -91,23 +91,23 @@ IntegratedBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 unsigned int
 IntegratedBC::coupled(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupled(var_name);
+  return Coupleable::getCoupled(var_name);
 }
 
 VariableValue &
 IntegratedBC::coupledValue(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledValue(var_name);
+  return Coupleable::getCoupledValue(var_name);
 }
 
 VariableValue &
 IntegratedBC::coupledDot(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledDot(var_name);
+  return Coupleable::getCoupledDot(var_name);
 }
 
 VariableGradient &
 IntegratedBC::coupledGradient(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledGradient(var_name);
+  return Coupleable::getCoupledGradient(var_name);
 }

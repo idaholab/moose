@@ -6,8 +6,6 @@
 #include "point.h"
 #include "periodic_boundaries.h"
 
-namespace Moose {
-
 class SubProblem;
 
 /**
@@ -45,7 +43,5 @@ protected:
   Function * _tr_y;
   Function * _tr_z;
 };
-
-} // namespace
 
 #endif //FUNCTIONPERIODICBOUNDARY_H

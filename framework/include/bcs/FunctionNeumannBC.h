@@ -1,5 +1,5 @@
-#ifndef FUNCTIONNEUMANNBC_H_
-#define FUNCTIONNEUMANNBC_H_
+#ifndef FUNCTIONNEUMANNBC_H
+#define FUNCTIONNEUMANNBC_H
 
 #include "IntegratedBC.h"
 

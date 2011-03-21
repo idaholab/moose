@@ -1,5 +1,5 @@
-#ifndef KERNELGRAD_H_
-#define KERNELGRAD_H_
+#ifndef KERNELGRAD_H
+#define KERNELGRAD_H
 
 // local includes
 #include "Kernel.h"
@@ -61,4 +61,4 @@ protected:
   RealGradient _value;
 };
 
-#endif //KERNELVALUE_H
+#endif //KERNELGRAD_H

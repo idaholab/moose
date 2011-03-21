@@ -1,15 +1,13 @@
-#ifndef ELEMENTPOSTPROCESSOR_H_
-#define ELEMENTPOSTPROCESSOR_H_
+#ifndef ELEMENTPOSTPROCESSOR_H
+#define ELEMENTPOSTPROCESSOR_H
 
 #include "Postprocessor.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 #include "TransientInterface.h"
 // libMesh
 #include "elem.h"
 
-namespace Moose {
-  class Variable;
-}
+class MooseVariable;
 
 //Forward Declarations
 class ElementPostprocessor;
@@ -19,7 +17,7 @@ InputParameters validParams<ElementPostprocessor>();
 
 class ElementPostprocessor :
   public Postprocessor,
-  public Moose::TransientInterface
+  public TransientInterface
 {
 public:
   ElementPostprocessor(const std::string & name, InputParameters parameters);
@@ -34,7 +32,7 @@ protected:
    */
   unsigned int _block_id;
 
-  Moose::Variable & _var;
+  MooseVariable & _var;
 
   unsigned int _qp;
   const std::vector< Point > & _q_point;

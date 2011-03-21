@@ -10,10 +10,8 @@
 #include "getpot.h"
 #include "exodusII_io.h"
 
-namespace Moose {
-  class Mesh;
-  class MProblem;
-}
+class MooseMesh;
+class MProblem;
 class Executioner;
 
 
@@ -129,8 +127,8 @@ public:
 
 public:
   // data created while running execute()
-  Moose::Mesh *_mesh;
-  Moose::MProblem * _problem;
+  MooseMesh *_mesh;
+  MProblem * _problem;
   Executioner *_executioner;
 
   ExodusII_IO *_exreader;                               /// auxiliary object for restart

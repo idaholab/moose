@@ -6,9 +6,6 @@
 // libMesh includes
 #include "elem_range.h"
 
-namespace Moose
-{
-
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
@@ -29,9 +26,7 @@ protected:
   SparseMatrix<Number> & _jacobian;
   NonlinearSystem & _sys;
   Problem & _problem;
-  std::set<Variable *> _vars;
+  std::set<MooseVariable *> _vars;
 };
   
-}
-
 #endif //COMPUTEJACOBIANTHREAD_H

@@ -1,5 +1,5 @@
-#ifndef TIMEDERIVATIVE_H_
-#define TIMEDERIVATIVE_H_
+#ifndef TIMEDERIVATIVE_H
+#define TIMEDERIVATIVE_H
 
 #include "TimeKernel.h"
 
@@ -24,4 +24,4 @@ protected:
 //  std::vector<Real> & _time_weight;
 };
 
-#endif //TIMEDERIVATIVE_H_
+#endif //TIMEDERIVATIVE_H

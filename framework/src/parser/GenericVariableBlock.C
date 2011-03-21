@@ -52,7 +52,7 @@ GenericVariableBlock::execute()
             << "\tfamily: " << getParamValue<std::string>("family") << std::endl;
 #endif
 
-  Moose::MProblem *prob = _parser_handle._problem;
+  MProblem *prob = _parser_handle._problem;
 
   is_variables_block = Parser::pathContains(_name, "Variables");
   if (is_variables_block)

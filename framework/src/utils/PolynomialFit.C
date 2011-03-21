@@ -169,5 +169,3 @@ PolynomialFit::getSampleSize()
 {
   return _x.size();
 }
-
-  

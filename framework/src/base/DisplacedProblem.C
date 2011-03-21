@@ -2,9 +2,6 @@
 #include "Problem.h"
 #include "SubProblem.h"
 
-namespace Moose
-{
-
 class UpdateDisplacedMeshThread
 {
 public:
@@ -77,13 +74,13 @@ public:
 
 protected:
   DisplacedProblem & _problem;
-  Mesh & _ref_mesh;
+  MooseMesh & _ref_mesh;
   const NumericVector<Number> & _nl_soln;
   const NumericVector<Number> & _aux_soln;
 };
 
 
-DisplacedProblem::DisplacedProblem(SubProblem & problem, Mesh & displaced_mesh, Mesh & mesh, const std::vector<std::string> & displacements) :
+DisplacedProblem::DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, MooseMesh & mesh, const std::vector<std::string> & displacements) :
     ProblemInterface(),
     _problem(problem),
     _mesh(displaced_mesh),
@@ -165,7 +162,7 @@ DisplacedProblem::hasVariable(const std::string & var_name)
     return false;
 }
 
-Variable &
+MooseVariable &
 DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   if (_nl.hasVariable(var_name))
@@ -246,5 +243,3 @@ DisplacedProblem::output(Real time)
   _ex.meshChanged();
 }
 
-
-} // namespace

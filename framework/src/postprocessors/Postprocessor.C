@@ -6,13 +6,13 @@
 template<>
 InputParameters validParams<Postprocessor>()
 {
-  InputParameters params = validParams<Object>();
+  InputParameters params = validParams<MooseObject>();
   return params;
 }
 
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
-    Object(name, parameters),
-    _problem(*parameters.get<Moose::SubProblem *>("_problem")),
+    MooseObject(name, parameters),
+    _problem(*parameters.get<SubProblem *>("_problem")),
     _tid(parameters.get<THREAD_ID>("_tid"))
 //   _local_name(name),
 //   _local_tid(parameters.get<THREAD_ID>("_tid")),

@@ -1,5 +1,5 @@
-#ifndef KERNELWAREHOUSE_H_
-#define KERNELWAREHOUSE_H_
+#ifndef KERNELWAREHOUSE_H
+#define KERNELWAREHOUSE_H
 
 #include <vector>
 #include <map>
@@ -40,4 +40,4 @@ protected:
   std::map<unsigned int, std::vector<Kernel *> > _block_kernels;        /// Kernels that live on a specified block
 };
 
-#endif // KERNELWAREHOUSE_H_
+#endif // KERNELWAREHOUSE_H

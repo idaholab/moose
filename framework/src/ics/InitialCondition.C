@@ -9,7 +9,7 @@ InputParameters validParams<InitialCondition>()
 }
 
 InitialCondition::InitialCondition(const std::string & name, InputParameters parameters) :
-    Object(name, parameters),
+    MooseObject(name, parameters),
     FunctionInterface(parameters),
     _var_name(getParam<std::string>("var_name"))
 {

@@ -3,11 +3,9 @@
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
 #include "SubProblem.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 
-namespace Moose {
-
-GeometricSearchData::GeometricSearchData(SubProblem & subproblem, Mesh & mesh) :
+GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh) :
     _subproblem(subproblem),
     _mesh(mesh)
 {}
@@ -63,5 +61,3 @@ GeometricSearchData::getNearestNodeLocator(unsigned int master, unsigned int sla
 
   return *nnl;
 }
-
-} // namespace

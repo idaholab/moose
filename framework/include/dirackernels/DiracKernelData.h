@@ -13,9 +13,6 @@ namespace libMesh
   template <class T> class NumericVector;
 }
 
-namespace Moose
-{
-  
 //Forward Declarations
 class ArbitraryQuadrature;
 
@@ -53,7 +50,5 @@ public:
    */
   std::vector<Point> _current_points;
 };
-
-} // namespace
 
 #endif //DIRACKERNELDATA_H

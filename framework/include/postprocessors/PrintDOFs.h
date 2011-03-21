@@ -1,5 +1,5 @@
-#ifndef PRINTDOFS_H_
-#define PRINTDOFS_H_
+#ifndef PRINTDOFS_H
+#define PRINTDOFS_H
 
 #include "GeneralPostprocessor.h"
 
@@ -23,4 +23,4 @@ public:
   virtual Real getValue();
 };
 
-#endif //PRINTDOFS_H_
+#endif //PRINTDOFS_H

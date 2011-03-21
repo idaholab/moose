@@ -29,7 +29,6 @@ InputParameters validParams<Transient>();
 class Transient: public Executioner
 {
 public:
-
   /**
    * Constructor
    *
@@ -41,7 +40,7 @@ public:
 
   virtual ~Transient();
 
-  virtual Moose::Problem & problem() { return _problem; }
+  virtual Problem & problem() { return _problem; }
 
   /**
    * This will call solve() on the NonlinearSystem.
@@ -78,7 +77,7 @@ public:
 protected:
   virtual void preExecute();
 
-  Moose::MProblem _problem;
+  MProblem _problem;
 
   int & _t_step;                        /// Current timestep.
   Real & _time;                         /// Current time

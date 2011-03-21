@@ -1,13 +1,11 @@
-#ifndef THREADEDELEMENTLOOP_H_
-#define THREADEDELEMENTLOOP_H_
+#ifndef THREADEDELEMENTLOOP_H
+#define THREADEDELEMENTLOOP_H
 
 #include "Moose.h"
 #include "ParallelUniqueId.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "Problem.h"
-#include "System.h"
-
-namespace Moose {
+#include "SystemBase.h"
 
 /**
  * Base class for assembling-like calculations
@@ -17,7 +15,7 @@ template<typename RangeType>
 class ThreadedElementLoop
 {
 public:
-  ThreadedElementLoop(Problem & problem, System & system);
+  ThreadedElementLoop(Problem & problem, SystemBase & system);
 
   ThreadedElementLoop(ThreadedElementLoop & x, Threads::split split);
 
@@ -77,14 +75,14 @@ public:
   virtual void onInternalSide(const Elem *elem, unsigned int side);
 
 protected:
-  System & _system;
+  SystemBase & _system;
   Problem & _problem;
   THREAD_ID _tid;
 };
 
 
 template<typename RangeType>
-ThreadedElementLoop<RangeType>::ThreadedElementLoop(Problem & problem, System & system) :
+ThreadedElementLoop<RangeType>::ThreadedElementLoop(Problem & problem, SystemBase & system) :
     _system(system),
     _problem(problem)
 {
@@ -192,7 +190,5 @@ void
 ThreadedElementLoop<RangeType>::onInternalSide(const Elem * /*elem*/, unsigned int /*side*/)
 {
 }
-
-} // namespace
 
 #endif //THREADEDELEMENTLOOP_H_

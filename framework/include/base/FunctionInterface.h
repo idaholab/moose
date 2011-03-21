@@ -1,13 +1,10 @@
-#ifndef FUNCTIONINTERFACE_H_
-#define FUNCTIONINTERFACE_H_
+#ifndef FUNCTIONINTERFACE_H
+#define FUNCTIONINTERFACE_H
 
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
 
-namespace Moose {
 class SubProblem;
-} // namespace
-
 class Function;
 
 /**
@@ -30,7 +27,7 @@ public:
   Function & getFunction(const std::string & name);
 
 private:
-  Moose::SubProblem & _problem;
+  SubProblem & _problem;
   THREAD_ID _tid;
   InputParameters _params;
 };

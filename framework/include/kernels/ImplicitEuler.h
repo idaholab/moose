@@ -1,5 +1,5 @@
-#ifndef IMPLICITEULER_H_
-#define IMPLICITEULER_H_
+#ifndef IMPLICITEULER_H
+#define IMPLICITEULER_H
 
 #include "TimeDerivative.h"
 
@@ -19,4 +19,4 @@ protected:
   virtual Real computeQpJacobian();
 
 };
-#endif //IMPLICITEULER_H_
+#endif //IMPLICITEULER_H

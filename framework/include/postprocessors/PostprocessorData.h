@@ -1,10 +1,9 @@
-#ifndef POSTPROCESSORDATA_H_
-#define POSTPROCESSORDATA_H_
+#ifndef POSTPROCESSORDATA_H
+#define POSTPROCESSORDATA_H
 
 #include <map>
 //MOOSE includes
 #include "Moose.h"
-
 
 class PostprocessorData
 {
@@ -23,4 +22,4 @@ protected:
   std::map<std::string, PostprocessorValue> _values;
 };
 
-#endif //POSTPROCESSORDATA_H_
+#endif //POSTPROCESSORDATA_H

@@ -1,5 +1,5 @@
-#ifndef COUPLEDAUX_H_
-#define COUPLEDAUX_H_
+#ifndef COUPLEDAUX_H
+#define COUPLEDAUX_H
 
 #include "AuxKernel.h"
 
@@ -35,4 +35,4 @@ protected:
   VariableValue & _coupled_val;
 };
 
-#endif //COUPLEDAUX_H_
+#endif //COUPLEDAUX_H

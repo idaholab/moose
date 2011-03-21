@@ -1,8 +1,8 @@
-#ifndef DISPLACEDPROBLEM_H_
-#define DISPLACEDPROBLEM_H_
+#ifndef DISPLACEDPROBLEM_H
+#define DISPLACEDPROBLEM_H
 
 #include "ProblemInterface.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "ExodusOutput.h"
 #include "DisplacedSystem.h"
 #include "AssemblyData.h"
@@ -12,24 +12,21 @@
 #include "explicit_system.h"
 #include "numeric_vector.h"
 
-namespace Moose
-{
-
 class Problem;
 class SubProblem;
-class Variable;
+class MooseVariable;
 class AssemblyData;
 
 class DisplacedProblem :
   public ProblemInterface
 {
 public:
-  DisplacedProblem(SubProblem & problem, Mesh & displaced_mesh, Mesh & mesh, const std::vector<std::string> & displacements);
+  DisplacedProblem(SubProblem & problem, MooseMesh & displaced_mesh, MooseMesh & mesh, const std::vector<std::string> & displacements);
   virtual ~DisplacedProblem();
 
   virtual EquationSystems & es() { return _eq; }
-  virtual Mesh & mesh() { return _mesh; }
-  Mesh & refMesh() { return _ref_mesh; }
+  virtual MooseMesh & mesh() { return _mesh; }
+  MooseMesh & refMesh() { return _ref_mesh; }
   virtual Problem * parent() { return NULL; }           // for future
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
 
@@ -46,7 +43,7 @@ public:
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name);
-  virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
   virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
@@ -68,9 +65,9 @@ public:
 
 protected:
   SubProblem & _problem;
-  Mesh & _mesh;
+  MooseMesh & _mesh;
   EquationSystems _eq;
-  Mesh & _ref_mesh;                               /// reference mesh
+  MooseMesh & _ref_mesh;                               /// reference mesh
   std::vector<std::string> _displacements;
 
   DisplacedSystem _nl;
@@ -89,7 +86,5 @@ protected:
 
   friend class UpdateDisplacedMeshThread;
 };
-
-}
 
 #endif /* DISPLACEDPROBLEM_H_ */

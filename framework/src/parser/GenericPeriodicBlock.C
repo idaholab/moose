@@ -39,7 +39,7 @@ GenericPeriodicBlock::execute()
   if (_executed)
     return;
 
-  Moose::NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
+  NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
 
   if (getParamValue<std::vector<Real> >("translation") != std::vector<Real>())
   {
@@ -58,19 +58,19 @@ GenericPeriodicBlock::execute()
   {
     std::vector<std::string> fn_names = getParamValue<std::vector<std::string> >("transform_func");
 
-    Moose::FunctionPeriodicBoundary *pb = new Moose::FunctionPeriodicBoundary(*_parser_handle._problem, fn_names);
+    FunctionPeriodicBoundary *pb = new FunctionPeriodicBoundary(*_parser_handle._problem, fn_names);
     pb->myboundary = getParamValue<unsigned int>("primary");
     pb->pairedboundary = getParamValue<unsigned int>("secondary");
     if (getParamValue<std::string>("variable") != std::string())
       pb->set_variable(nl.getVariable(0, getParamValue<std::string>("variable")).number());
 
-    Moose::FunctionPeriodicBoundary *ipb = NULL;
+    FunctionPeriodicBoundary *ipb = NULL;
     if (getParamValue<std::vector<std::string> >("inv_transform_func") != std::vector<std::string>())
     {
       // asymmetric translation vector
       std::vector<std::string> inv_fn_names = getParamValue<std::vector<std::string> >("inv_transform_func");
 
-      ipb = new Moose::FunctionPeriodicBoundary(*_parser_handle._problem, inv_fn_names);
+      ipb = new FunctionPeriodicBoundary(*_parser_handle._problem, inv_fn_names);
       // these are switched, because we are forming the inverse translation
       ipb->myboundary = getParamValue<unsigned int>("secondary");
       ipb->pairedboundary = getParamValue<unsigned int>("primary");
@@ -80,7 +80,7 @@ GenericPeriodicBlock::execute()
     else
     {
       // symmetric translation vector
-      ipb = new Moose::FunctionPeriodicBoundary(*pb, true);
+      ipb = new FunctionPeriodicBoundary(*pb, true);
     }
 
     nl.dofMap().add_periodic_boundary(pb, ipb);

@@ -1,5 +1,5 @@
-#ifndef BOUNDINGBOXIC_H_
-#define BOUNDINGBOXIC_H_
+#ifndef BOUNDINGBOXIC_H
+#define BOUNDINGBOXIC_H
 
 #include "InitialCondition.h"
 

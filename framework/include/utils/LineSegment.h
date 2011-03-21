@@ -1,5 +1,5 @@
-#ifndef LINESEGMENT_H_
-#define LINESEGMENT_H_
+#ifndef LINESEGMENT_H
+#define LINESEGMENT_H
 
 // libMesh includes
 #include "point.h"
@@ -45,4 +45,4 @@ class LineSegment
   Point _p0, _p1;
 };
 
-#endif // LINESEGMENT_H_
+#endif // LINESEGMENT_H

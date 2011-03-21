@@ -1,5 +1,5 @@
-#ifndef POSTPROCESSORWAREHOUSE_H_
-#define POSTPROCESSORWAREHOUSE_H_
+#ifndef POSTPROCESSORWAREHOUSE_H
+#define POSTPROCESSORWAREHOUSE_H
 
 #include "Postprocessor.h"
 
@@ -55,4 +55,4 @@ protected:
   std::vector<Postprocessor *> _all_postprocessors;
 };
 
-#endif // POSTPROCESSORWAREHOUSE_H_
+#endif // POSTPROCESSORWAREHOUSE_H

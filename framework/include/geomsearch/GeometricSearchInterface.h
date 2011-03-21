@@ -1,9 +1,7 @@
-#ifndef GEOMETRICSEARCHINTERFACE_H_
-#define GEOMETRICSEARCHINTERFACE_H_
+#ifndef GEOMETRICSEARCHINTERFACE_H
+#define GEOMETRICSEARCHINTERFACE_H
 
 #include "InputParameters.h"
-
-namespace Moose {
 
 // Forward Declarations
 class GeometricSearchData;
@@ -29,7 +27,5 @@ public:
 protected:
   GeometricSearchData & _geometric_search_data;
 };
-
-} // namespace
 
 #endif //GEOMETRICSEARCHINTERFACE_H_

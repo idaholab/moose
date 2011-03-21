@@ -1,5 +1,5 @@
 #include "StabilizerWarehouse.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 
 StabilizerWarehouse::StabilizerWarehouse()
 {

@@ -43,8 +43,8 @@ PBPBlock::execute()
 {
   if (_parser_handle._problem != NULL)
   {
-    Moose::MProblem & subproblem = *_parser_handle._problem;
-    Moose::NonlinearSystem & nl = subproblem.getNonlinearSystem();
+    MProblem & subproblem = *_parser_handle._problem;
+    NonlinearSystem & nl = subproblem.getNonlinearSystem();
 
     unsigned int n_vars = nl.sys().n_vars();
 
@@ -68,7 +68,7 @@ PBPBlock::execute()
     }
 
     // build preconditioner
-    Moose::PhysicsBasedPreconditioner *precond = new Moose::PhysicsBasedPreconditioner(subproblem);
+    PhysicsBasedPreconditioner *precond = new PhysicsBasedPreconditioner(subproblem);
 
     // Add all of the preconditioning systems
     for(unsigned int var = 0; var < n_vars; var++)

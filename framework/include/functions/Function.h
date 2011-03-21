@@ -1,7 +1,7 @@
-#ifndef FUNCTION_H_
-#define FUNCTION_H_
+#ifndef FUNCTION_H
+#define FUNCTION_H
 
-#include "Object.h"
+#include "MooseObject.h"
 // libMesh
 #include "vector_value.h"
 #include "point.h"
@@ -15,7 +15,7 @@ InputParameters validParams<Function>();
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class Function : public Object
+class Function : public MooseObject
 {
 public:
   Function(const std::string & name, InputParameters parameters);

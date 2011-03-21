@@ -3,8 +3,6 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 
-namespace Moose {
-
 GeometricSearchInterface::GeometricSearchInterface(InputParameters & params) :
     _geometric_search_data(*params.get<GeometricSearchData *>("_geometric_search_data"))
 {
@@ -21,6 +19,3 @@ GeometricSearchInterface::getNearestNodeLocator(unsigned int master, unsigned in
 {
   return _geometric_search_data.getNearestNodeLocator(master, slave);
 }
-
-} // namespace
-

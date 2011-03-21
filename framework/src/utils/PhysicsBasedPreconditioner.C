@@ -27,8 +27,6 @@
 #include "sparse_matrix.h"
 
 
-namespace Moose {
-
 PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (SubProblem & subproblem) :
     Preconditioner<Number>(),
     _subproblem(subproblem),
@@ -130,7 +128,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
   // -2 to take into account the Nonlinear system and the Auxilliary System
   const unsigned int num_systems = _systems.size();
   
-  Mesh & mesh = _nl.problem().mesh();
+  MooseMesh & mesh = _nl.problem().mesh();
 
   //Zero out the solution vectors
   for(unsigned int sys=0; sys<num_systems; sys++)
@@ -224,5 +222,3 @@ PhysicsBasedPreconditioner::copyVarValues(MeshBase & mesh,
     }
   }
 }  
-
-} // namespace Moose

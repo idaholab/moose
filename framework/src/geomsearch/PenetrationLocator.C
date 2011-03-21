@@ -4,7 +4,7 @@
 #include "ArbitraryQuadrature.h"
 #include "LineSegment.h"
 #include "NearestNodeLocator.h"
-#include "Mesh.h"
+#include "MooseMesh.h"
 #include "SubProblem.h"
 
 #include "boundary_info.h"
@@ -14,9 +14,7 @@
 #include "dense_matrix.h"
 #include "dense_vector.h"
 
-namespace Moose {
-
-PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, Mesh & mesh, unsigned int master, unsigned int slave) :
+PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, unsigned int master, unsigned int slave) :
     _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master),
@@ -757,5 +755,3 @@ PenetrationLocator::PenetrationInfo::~PenetrationInfo()
 {
   delete _side;
 }   
-
-} // namespace

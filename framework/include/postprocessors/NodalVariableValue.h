@@ -1,13 +1,11 @@
-#ifndef NODALVARIABLEVALUE_H_
-#define NODALVARIABLEVALUE_H_
+#ifndef NODALVARIABLEVALUE_H
+#define NODALVARIABLEVALUE_H
 
 #include "GeneralPostprocessor.h"
 // libMesh
 #include "node.h"
 
-namespace Moose {
-  class Mesh;
-}
+class MooseMesh;
 
 //Forward Declarations
 class NodalVariableValue;
@@ -29,9 +27,9 @@ public:
   virtual Real getValue();
 
 protected:
-  Moose::Mesh & _mesh;
+  MooseMesh & _mesh;
   std::string _var_name;
   Node & _node;
 };
 
-#endif //NODALVARIABLEVALUE_H_
+#endif //NODALVARIABLEVALUE_H

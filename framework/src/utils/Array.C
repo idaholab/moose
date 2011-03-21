@@ -69,5 +69,3 @@ template class Array<Array<Array<Real> > >;
 
 template class Array<std::vector<Real> >;
 template class Array<DenseMatrix<Real> >;
-
-

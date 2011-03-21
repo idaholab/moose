@@ -2,8 +2,6 @@
 #include "Factory.h"
 #include "DisplacedProblem.h"
 
-namespace Moose {
-
 unsigned int MProblem::_n = 0;
 
 static
@@ -14,7 +12,7 @@ std::string name(const std::string & name, unsigned int n)
   return os.str();
 }
 
-MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
+MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     SubProblem(mesh, parent),
     _nl(*this, name("nl", _n)),
     _aux(*this, name("aux", _n)),
@@ -122,12 +120,12 @@ MProblem::addKernel(const std::string & kernel_name, const std::string & name, I
   parameters.set<SubProblem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<System *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_elem = true;
   }
   else
   {
-    parameters.set<System *>("_sys") = &_nl;
+    parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addKernel(kernel_name, name, parameters);
 }
@@ -139,12 +137,12 @@ MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & 
 
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<System *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_face = true;
   }
   else
   {
-    parameters.set<System *>("_sys") = &_nl;
+    parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addBoundaryCondition(bc_name, name, parameters);
 }
@@ -163,12 +161,12 @@ MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name
   parameters.set<SubProblem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<System *>("_sys") = &_displaced_problem->auxSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
     _reinit_displaced_elem = true;
   }
   else
   {
-    parameters.set<System *>("_sys") = &_aux;
+    parameters.set<SystemBase *>("_sys") = &_aux;
   }
   _aux.addKernel(kernel_name, name, parameters);
 }
@@ -179,12 +177,12 @@ MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string
   parameters.set<SubProblem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<System *>("_sys") = &_displaced_problem->auxSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
     _reinit_displaced_face = true;
   }
   else
   {
-    parameters.set<System *>("_sys") = &_aux;
+    parameters.set<SystemBase *>("_sys") = &_aux;
   }
   _aux.addBoundaryCondition(bc_name, name, parameters);
 }
@@ -193,7 +191,7 @@ void
 MProblem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<SubProblem *>("_problem") = this;
-  parameters.set<System *>("_sys") = &_nl;
+  parameters.set<SystemBase *>("_sys") = &_nl;
   _nl.addStabilizer(stabilizer_name, name, parameters);
 }
 
@@ -230,7 +228,7 @@ MProblem::update()
 void
 MProblem::solve()
 {
-  setSolverDefaults(_nl);
+  Moose::setSolverDefaults(_nl);
   Moose::perf_log.push("solve()","Solve");
   _nl.solve();
   Moose::perf_log.pop("solve()","Solve");
@@ -325,7 +323,7 @@ MProblem::computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System
 void
 MProblem::initDisplacedProblem(const std::vector<std::string> & displacements)
 {
-  _displaced_mesh = new Mesh(_mesh);
+  _displaced_mesh = new MooseMesh(_mesh);
   _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, _mesh, displacements);
 }
 
@@ -336,5 +334,3 @@ MProblem::output()
   if (_displaced_problem != NULL && _output_displaced)
     _displaced_problem->output(_time);
 }
-
-} // namespace

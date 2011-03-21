@@ -1,8 +1,8 @@
-#ifndef NODALBC_H_
-#define NODALBC_H_
+#ifndef NODALBC_H
+#define NODALBC_H
 
 #include "BoundaryCondition.h"
-#include "Variable.h"
+#include "MooseVariable.h"
 
 // libMesh
 #include "numeric_vector.h"

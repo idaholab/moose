@@ -16,7 +16,7 @@
 #include "SolutionFunction.h"
 
 // libmesh includes
-#include "mesh.h"
+#include "MooseMesh.h"
 #include "equation_systems.h"
 #include "mesh_function.h"
 #include "numeric_vector.h"

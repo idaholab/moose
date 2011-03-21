@@ -1,5 +1,5 @@
-#ifndef FUNCTIONAUX_H_
-#define FUNCTIONAUX_H_
+#ifndef FUNCTIONAUX_H
+#define FUNCTIONAUX_H
 
 #include "AuxKernel.h"
 #include "Function.h"
@@ -30,4 +30,4 @@ protected:
   Function & _func;
 };
 
-#endif // FUNCTIONAUX_H_
+#endif // FUNCTIONAUX_H

@@ -1,5 +1,5 @@
-#ifndef DIFFUSION_H_
-#define DIFFUSION_H_
+#ifndef DIFFUSION_H
+#define DIFFUSION_H
 
 #include "Kernel.h"
 

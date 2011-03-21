@@ -1,5 +1,5 @@
-#ifndef REPORTER_H_
-#define REPORTER_H_
+#ifndef REPORTER_H
+#define REPORTER_H
 
 #include "GeneralPostprocessor.h"
 

@@ -21,7 +21,6 @@ CoupledAux::CoupledAux(const std::string & name, InputParameters parameters) :
 {
 }
 
-
 Real
 CoupledAux::computeValue()
 {

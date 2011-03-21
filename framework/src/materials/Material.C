@@ -9,40 +9,40 @@
 template<>
 InputParameters validParams<Material>()
 {
-  InputParameters params = validParams<Object>();
+  InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::vector<unsigned int> >("block", "The id of the block (subdomain) that this material represents.");
   return params;
 }
 
 
 Material::Material(const std::string & name, InputParameters parameters) :
-  Object(name, parameters),
-  Moose::Coupleable(parameters),
-  Moose::TransientInterface(parameters),
-  _problem(*parameters.get<Moose::SubProblem *>("_problem")),
-  _tid(parameters.get<THREAD_ID>("_tid")),
-  _bnd(parameters.get<bool>("_bnd")),
-  _material_data(*parameters.get<Moose::MaterialData *>("_material_data")),
-  _qrule(_bnd ? _problem.qRuleFace(_tid) : _problem.qRule(_tid)),
-  _JxW(_bnd ? _problem.JxWFace(_tid) : _problem.JxW(_tid)),
-  _q_point(_bnd ? _problem.pointsFace(_tid) : _problem.points(_tid)),
-  _current_elem(_problem.elem(_tid)),
-  _dim(_problem.mesh().dimension()),
-  _has_stateful_props(false),
-  _block_id(parameters.get<unsigned int>("block_id")),
+    MooseObject(name, parameters),
+    Coupleable(parameters),
+    TransientInterface(parameters),
+    _problem(*parameters.get<SubProblem *>("_problem")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _bnd(parameters.get<bool>("_bnd")),
+    _material_data(*parameters.get<MaterialData *>("_material_data")),
+    _qrule(_bnd ? _problem.qRuleFace(_tid) : _problem.qRule(_tid)),
+    _JxW(_bnd ? _problem.JxWFace(_tid) : _problem.JxW(_tid)),
+    _q_point(_bnd ? _problem.pointsFace(_tid) : _problem.points(_tid)),
+    _current_elem(_problem.elem(_tid)),
+    _dim(_problem.mesh().dimension()),
+    _has_stateful_props(false),
+    _block_id(parameters.get<unsigned int>("block_id")),
 
-  _props(_material_data.props()),
-  _props_old(_material_data.propsOld()),
-  _props_older(_material_data.propsOlder()),
+    _props(_material_data.props()),
+    _props_old(_material_data.propsOld()),
+    _props_older(_material_data.propsOlder()),
 
-  _real_zero(_problem._real_zero[_tid]),
-  _zero(_problem._zero[_tid]),
-  _grad_zero(_problem._grad_zero[_tid]),
-  _second_zero(_problem._second_zero[_tid])
+    _real_zero(_problem._real_zero[_tid]),
+    _zero(_problem._zero[_tid]),
+    _grad_zero(_problem._grad_zero[_tid]),
+    _second_zero(_problem._second_zero[_tid])
 {
-  _props_elem       = new std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >;
-  _props_elem_old   = new std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >;
-  _props_elem_older = new std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >;
+  _props_elem       = new std::map<unsigned int, std::map<unsigned int, MaterialProperties> >;
+  _props_elem_old   = new std::map<unsigned int, std::map<unsigned int, MaterialProperties> >;
+  _props_elem_older = new std::map<unsigned int, std::map<unsigned int, MaterialProperties> >;
 
 /*
   for (unsigned int i = 0; i < _coupled_to.size(); i++)
@@ -75,13 +75,13 @@ Material::~Material()
   //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
 
   {
-    std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >::iterator i;
+    std::map<unsigned int, std::map<unsigned int, MaterialProperties> >::iterator i;
     for (i = _props_elem->begin(); i != _props_elem->end(); ++i)
     {
-      std::map<unsigned int, Moose::MaterialProperties>::iterator j;
+      std::map<unsigned int, MaterialProperties>::iterator j;
       for (j = i->second.begin(); j != i->second.end(); ++j)
       {
-        Moose::MaterialProperties::iterator k;
+        MaterialProperties::iterator k;
         for (k = j->second.begin(); k != j->second.end(); ++k)
           delete k->second;
       }
@@ -90,10 +90,10 @@ Material::~Material()
 
     for (i = _props_elem_old->begin(); i != _props_elem_old->end(); ++i)
     {
-      std::map<unsigned int, Moose::MaterialProperties>::iterator j;
+      std::map<unsigned int, MaterialProperties>::iterator j;
       for (j = i->second.begin(); j != i->second.end(); ++j)
       {
-        Moose::MaterialProperties::iterator k;
+        MaterialProperties::iterator k;
         for (k = j->second.begin(); k != j->second.end(); ++k)
           delete k->second;
       }
@@ -102,10 +102,10 @@ Material::~Material()
 
     for (i = _props_elem_older->begin(); i != _props_elem_older->end(); ++i)
     {
-      std::map<unsigned int, Moose::MaterialProperties>::iterator j;
+      std::map<unsigned int, MaterialProperties>::iterator j;
       for (j = i->second.begin(); j != i->second.end(); ++j)
       {
-        Moose::MaterialProperties::iterator k;
+        MaterialProperties::iterator k;
         for (k = j->second.begin(); k != j->second.end(); ++k)
           delete k->second;
       }
@@ -121,8 +121,8 @@ Material::blockID()
 }
 
 void shallowCopyData(const std::set<std::string> & names,
-                     Moose::MaterialProperties & data,
-                     Moose::MaterialProperties & data_from)
+                     MaterialProperties & data,
+                     MaterialProperties & data_from)
 {
   for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
   {
@@ -156,7 +156,7 @@ Material::reinit()
     shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][0]);
   }
 
-  for (Moose::MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
+  for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
   {
     mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
     it->second->resize(_n_qpoints);
@@ -164,9 +164,9 @@ Material::reinit()
 
   if (_has_stateful_props)
   {
-    for (Moose::MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
+    for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
       it->second->resize(_n_qpoints);
-    for (Moose::MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+    for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
       it->second->resize(_n_qpoints);
   }
 
@@ -203,7 +203,7 @@ Material::reinit(unsigned int side)
     shallowCopyData(_stateful_props, _props_older, (*_props_elem_older)[current_elem][side]);
   }
 
-  for (Moose::MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
+  for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
   {
     mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
     it->second->resize(_n_qpoints);
@@ -211,9 +211,9 @@ Material::reinit(unsigned int side)
 
   if (_has_stateful_props)
   {
-    for (Moose::MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
+    for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
       it->second->resize(_n_qpoints);
-    for (Moose::MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+    for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
       it->second->resize(_n_qpoints);
   }
   
@@ -322,41 +322,41 @@ Material::getData(QP_Data_Type qp_data_type)
 unsigned int
 Material::coupled(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupled(var_name);
+  return Coupleable::getCoupled(var_name);
 }
 
 VariableValue &
 Material::coupledValue(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledValue(var_name);
+  return Coupleable::getCoupledValue(var_name);
 }
 
 VariableValue &
 Material::coupledValueOld(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledValueOld(var_name);
+  return Coupleable::getCoupledValueOld(var_name);
 }
 
 VariableValue &
 Material::coupledValueOlder(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledValueOlder(var_name);
+  return Coupleable::getCoupledValueOlder(var_name);
 }
 
 VariableGradient &
 Material::coupledGradient(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledGradient(var_name);
+  return Coupleable::getCoupledGradient(var_name);
 }
 
 VariableGradient  &
 Material::coupledGradientOld(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledGradientOld(var_name);
+  return Coupleable::getCoupledGradientOld(var_name);
 }
 
 VariableGradient  &
 Material::coupledGradientOlder(const std::string & var_name)
 {
-  return Moose::Coupleable::getCoupledGradientOlder(var_name);
+  return Coupleable::getCoupledGradientOlder(var_name);
 }

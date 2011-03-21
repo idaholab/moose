@@ -1,5 +1,5 @@
-#ifndef STEADY_H_
-#define STEADY_H_
+#ifndef STEADY_H
+#define STEADY_H
 
 #include "Moose.h"
 #include "Executioner.h"
@@ -37,10 +37,10 @@ public:
    */
   virtual void execute();
 
-  virtual Moose::Problem & problem() { return _problem; }
+  virtual Problem & problem() { return _problem; }
 
 protected:
-  Moose::MProblem _problem;
+  MProblem _problem;
 
   unsigned int _steps;
 

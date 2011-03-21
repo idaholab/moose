@@ -1,6 +1,6 @@
 #include "NearestNodeValueAux.h"
 
-#include "mesh.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<NearestNodeValueAux>()

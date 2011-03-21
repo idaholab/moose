@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<AuxKernel>()
 {
-  InputParameters params = validParams<Object>();
+  InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this object applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   // For use on the boundary only
@@ -23,15 +23,15 @@ InputParameters validParams<AuxKernel>()
 }
 
 AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
-    Object(name, parameters),
+    MooseObject(name, parameters),
     Coupleable(parameters),
     FunctionInterface(parameters),
-    Moose::TransientInterface(parameters),
-    Moose::MaterialPropertyInterface(parameters),
-    Moose::GeometricSearchInterface(parameters),
-    _problem(*parameters.get<Moose::SubProblem *>("_problem")),
-    _sys(*parameters.get<Moose::System *>("_sys")),
-    _aux_sys(*parameters.get<Moose::AuxiliarySystem *>("_aux_sys")),
+    TransientInterface(parameters),
+    MaterialPropertyInterface(parameters),
+    GeometricSearchInterface(parameters),
+    _problem(*parameters.get<SubProblem *>("_problem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _aux_sys(*parameters.get<AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _dim(_problem.mesh().dimension()),

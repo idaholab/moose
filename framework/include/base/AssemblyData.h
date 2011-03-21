@@ -1,5 +1,5 @@
-#ifndef ASSEMBLYDATA_H_
-#define ASSEMBLYDATA_H_
+#ifndef ASSEMBLYDATA_H
+#define ASSEMBLYDATA_H
 
 // libMesh includes
 #include "fe.h"
@@ -7,18 +7,14 @@
 #include "elem.h"
 #include "node.h"
 
-
-namespace Moose
-{
-
 // MOOSE Forward Declares
-class Mesh;
+class MooseMesh;
 class ArbitraryQuadrature;  
 
 class AssemblyData
 {
 public:
-  AssemblyData(Mesh & mesh);
+  AssemblyData(MooseMesh & mesh);
   virtual ~AssemblyData();
 
   FEBase * & getFE(FEType type);
@@ -71,7 +67,7 @@ public:
   Real computeVolume();
 
 protected:
-  Mesh & _mesh;
+  MooseMesh & _mesh;
 
   std::map<FEType, FEBase *> _fe;               /// types of finite elements
   FEBase * _fe_helper;                          /// helper object for transforming coordinates
@@ -99,6 +95,4 @@ protected:
 
 };
 
-} // namespace
-
-#endif /* ASSEMBLYDATA_H_ */
+#endif /* ASSEMBLYDATA_H */

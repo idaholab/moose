@@ -1,21 +1,18 @@
-#ifndef POSTPROCESSOR_H_
-#define POSTPROCESSOR_H_
+#ifndef POSTPROCESSOR_H
+#define POSTPROCESSOR_H
 
 #include <string>
 
 //MOOSE includes
 #include "Moose.h"
-#include "Object.h"
+#include "MooseObject.h"
 #include "ParallelUniqueId.h"
 
 //libMesh includes
 #include "libmesh_common.h"
 #include "parallel.h"
-//#include "ValidParams.h"
 
-namespace Moose {
-  class SubProblem;
-}
+class SubProblem;
 
 //Forward Declarations
 class Postprocessor;
@@ -25,7 +22,7 @@ template<>
 InputParameters validParams<Postprocessor>();
 
 class Postprocessor :
-  public Object
+  public MooseObject
 {
 public:
   Postprocessor(const std::string & name, InputParameters parameters);
@@ -51,11 +48,6 @@ public:
    */
   virtual PostprocessorValue getValue() = 0;
 
-//  /**
-//   * returns the name of this object
-//   */
-//  virtual const std::string & name();
-  
   /**
    * Gather the parallel sum of the variable passed in.
    *
@@ -69,7 +61,7 @@ public:
   }
 
 protected:
-  Moose::SubProblem & _problem;
+  SubProblem & _problem;
   THREAD_ID _tid;
 };
  

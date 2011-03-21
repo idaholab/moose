@@ -1,5 +1,5 @@
-#ifndef SIDEAVERAGEVALUE_H_
-#define SIDEAVERAGEVALUE_H_
+#ifndef SIDEAVERAGEVALUE_H
+#define SIDEAVERAGEVALUE_H
 
 #include "SideIntegral.h"
 

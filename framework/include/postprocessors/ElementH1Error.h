@@ -1,12 +1,10 @@
-#ifndef ELEMENTH1ERROR_H_
-#define ELEMENTH1ERROR_H_
+#ifndef ELEMENTH1ERROR_H
+#define ELEMENTH1ERROR_H
 
 #include "ElementIntegral.h"
 #include "FunctionInterface.h"
 
-namespace Moose {
-  class Function;
-}
+class Function;
 
 //Forward Declarations
 class ElementH1Error;
@@ -34,4 +32,4 @@ protected:
   Function & _func;
 };
 
-#endif //ELEMENTH1ERROR_H_
+#endif //ELEMENTH1ERROR_H

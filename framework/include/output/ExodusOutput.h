@@ -1,5 +1,5 @@
-#ifndef EXODUSOUTPUTTER_H_
-#define EXODUSOUTPUTTER_H_
+#ifndef EXODUSOUTPUTTER_H
+#define EXODUSOUTPUTTER_H
 
 #include "Outputter.h"
 #include "FormattedTable.h"
@@ -8,9 +8,8 @@
 #include "libmesh_common.h"
 #include "exodusII_io.h"
 
-namespace Moose {
-
-class ExodusOutput : public Outputter {
+class ExodusOutput : public Outputter
+{
 public:
   ExodusOutput(EquationSystems & es);
   virtual ~ExodusOutput();
@@ -30,7 +29,5 @@ protected:
 
   std::string getFileName(const std::string & file_base);
 };
-
-} // namespace
 
 #endif /* OUTPUTTER_H_ */

@@ -1,5 +1,5 @@
-#ifndef MATERIALPROPERTYINTERFACE_H_
-#define MATERIALPROPERTYINTERFACE_H_
+#ifndef MATERIALPROPERTYINTERFACE_H
+#define MATERIALPROPERTYINTERFACE_H
 
 #include <map>
 #include <string>
@@ -7,8 +7,6 @@
 #include "Moose.h"
 #include "MaterialProperty.h"
 #include "InputParameters.h"
-
-namespace Moose {
 
 class SubProblem;
 class MaterialData;
@@ -35,7 +33,6 @@ public:
 
 
 protected:
-//  SubProblem & _subproblem;
   MaterialData & _material_data;
   MaterialProperties & _material_props;
   MaterialProperties & _material_props_old;
@@ -88,6 +85,5 @@ MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
   mooseError("Material has no property named: " + name);
 }
 
-} // namespace
 
-#endif //MATERIALPROPERTYINTERFACE_H_
+#endif //MATERIALPROPERTYINTERFACE_H

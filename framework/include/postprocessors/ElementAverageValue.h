@@ -1,5 +1,5 @@
-#ifndef ELEMENTAVERAGEVALUE_H_
-#define ELEMENTAVERAGEVALUE_H_
+#ifndef ELEMENTAVERAGEVALUE_H
+#define ELEMENTAVERAGEVALUE_H
 
 #include "ElementIntegral.h"
 

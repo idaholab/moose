@@ -1,7 +1,7 @@
-#ifndef INITIALCONDITION_H_
-#define INITIALCONDITION_H_
+#ifndef INITIALCONDITION_H
+#define INITIALCONDITION_H
 
-#include "Object.h"
+#include "MooseObject.h"
 #include "FunctionInterface.h"
 
 // System includes
@@ -21,7 +21,7 @@ InputParameters validParams<InitialCondition>();
  * InitialConditions are objects that set the initial value of variables.
  */
 class InitialCondition :
-  public Object,
+  public MooseObject,
   public FunctionInterface
 {
 public:

@@ -8,7 +8,7 @@
 
 // libMesh includes
 #include "libmesh.h"
-#include "mesh.h"
+#include "MooseMesh.h"
 #include "equation_systems.h"
 #include "nonlinear_solver.h"
 #include "nonlinear_implicit_system.h"

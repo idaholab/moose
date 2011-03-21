@@ -1,8 +1,8 @@
-#ifndef AUXILIARYSYSTEM_H_
-#define AUXILIARYSYSTEM_H_
+#ifndef AUXILIARYSYSTEM_H
+#define AUXILIARYSYSTEM_H
 
 #include <set>
-#include "System.h"
+#include "SystemBase.h"
 #include "AuxWarehouse.h"
 
 // libMesh include
@@ -13,9 +13,6 @@
 #include "numeric_vector.h"
 
 class AuxKernel;
-
-namespace Moose {
-
 class SubProblem;
 
 class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
@@ -36,8 +33,8 @@ public:
 protected:
   SubProblem & _subproblem;
   // Variables
-  std::vector<std::map<std::string, Variable *> > _nodal_vars;
-  std::vector<std::map<std::string, Variable *> > _elem_vars;
+  std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
+  std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
   std::vector<AuxWarehouse> _auxs;
 
   // data
@@ -45,16 +42,14 @@ protected:
   {
     Real _current_volume;
 
-    friend class ::AuxKernel;
+    friend class AuxKernel;
   };
 
   std::vector<AuxData> _data;
 
-  friend class ::AuxKernel;
+  friend class AuxKernel;
   friend class ComputeNodalAuxThread;
   friend class ComputeElemAuxThread;
 };
 
-}
-
-#endif /* EXPLICITSYSTEM_H_ */
+#endif /* EXPLICITSYSTEM_H */

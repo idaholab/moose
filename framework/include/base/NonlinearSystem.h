@@ -1,7 +1,7 @@
-#ifndef NONLINEARSYSTEM_H_
-#define NONLINEARSYSTEM_H_
+#ifndef NONLINEARSYSTEM_H
+#define NONLINEARSYSTEM_H
 
-#include "System.h"
+#include "SystemBase.h"
 #include "KernelWarehouse.h"
 #include "BCWarehouse.h"
 #include "StabilizerWarehouse.h"
@@ -12,7 +12,6 @@
 #include "sparse_matrix.h"
 #include "preconditioner.h"
 
-namespace Moose {
 
 class NonlinearSystem : public SystemTempl<TransientNonlinearImplicitSystem>
 {
@@ -32,7 +31,7 @@ public:
 
   void printVarNorms();
 
-  void timeSteppingScheme(TimeSteppingScheme scheme);
+  void timeSteppingScheme(Moose::TimeSteppingScheme scheme);
 
   void onTimestepBegin();
 
@@ -63,7 +62,7 @@ protected:
   Real & _dt_old;
   int & _t_step;
   std::vector<Real> _time_weight;                       /// Coefficients (weights) for the time discretization
-  TimeSteppingScheme _time_stepping_scheme;             /// Time stepping scheme used for time discretization
+  Moose::TimeSteppingScheme _time_stepping_scheme;             /// Time stepping scheme used for time discretization
   Real _time_stepping_order;                            /// The order of the time stepping scheme
 
   // holders
@@ -77,6 +76,4 @@ protected:
   friend class ComputeJacobianThread;
 };
 
-} // namespace
-
-#endif /* NONLINEARSYSTEM_H_ */
+#endif /* NONLINEARSYSTEM_H */

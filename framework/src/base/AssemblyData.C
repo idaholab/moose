@@ -4,10 +4,7 @@
 #include "SubProblem.h"
 #include "ArbitraryQuadrature.h"
 
-namespace Moose
-{
-
-AssemblyData::AssemblyData(Mesh & mesh) :
+AssemblyData::AssemblyData(MooseMesh & mesh) :
     _mesh(mesh),
 
     _fe_helper(getFE(FEType(FIRST, LAGRANGE))),
@@ -154,5 +151,3 @@ AssemblyData::computeVolume()
 
     return current_volume;
 }
-
-} // namespace

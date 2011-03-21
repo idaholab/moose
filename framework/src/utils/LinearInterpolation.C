@@ -4,10 +4,9 @@
 
 int LinearInterpolation::_file_number = 0;
 
-LinearInterpolation::LinearInterpolation(const std::vector<double> & x,
-                                         const std::vector<double> & y)
-  :_x(x),
-   _y(y)
+LinearInterpolation::LinearInterpolation(const std::vector<double> & x, const std::vector<double> & y) :
+    _x(x),
+    _y(y)
 {
 
   mooseAssert( x.size() == y.size(),

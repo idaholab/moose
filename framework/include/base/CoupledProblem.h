@@ -1,5 +1,5 @@
-#ifndef COUPLEDPROBLEM_H_
-#define COUPLEDPROBLEM_H_
+#ifndef COUPLEDPROBLEM_H
+#define COUPLEDPROBLEM_H
 
 #include <vector>
 #include <string>
@@ -17,21 +17,18 @@
 #include "transient_system.h"
 #include "nonlinear_implicit_system.h"
 
-namespace Moose
-{
-
 class SubProblem;
-class Variable;
-class Mesh;
+class MooseVariable;
+class MooseMesh;
 
-class CoupledProblem : public Moose::Problem
+class CoupledProblem : public Problem
 {
 public:
-  CoupledProblem(Mesh * mesh);
+  CoupledProblem(MooseMesh * mesh);
   virtual ~CoupledProblem();
 
   virtual EquationSystems & es() { return _eq; }
-  Mesh & mesh() { return *_mesh; }
+  MooseMesh & mesh() { return *_mesh; }
 
   virtual Problem * parent() { return NULL; }
 
@@ -42,7 +39,7 @@ public:
 
   // API /////
   virtual bool hasVariable(const std::string & var_name);
-  virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
 
   virtual AssemblyData & assembly(THREAD_ID tid);
   virtual void prepare(const Elem * elem, THREAD_ID tid);
@@ -92,13 +89,13 @@ public:
   virtual void output();
 
 protected:
-  std::map<std::string, Moose::SubProblem *> _subproblems;
+  std::map<std::string, SubProblem *> _subproblems;
   std::vector<std::string> _solve_order;
 
   /// Keep track of the correspondence between libMesh objects and Moose objects
-  std::map<std::string, Moose::SubProblem *> _map;
+  std::map<std::string, SubProblem *> _map;
 
-  Mesh * _mesh;
+  MooseMesh * _mesh;
   EquationSystems _eq;
 
   bool _transient;
@@ -110,7 +107,5 @@ protected:
   // Output system
   Output _out;
 };
-
-}
 
 #endif /* COUPLEDPROBLEM_H_ */

@@ -2,7 +2,7 @@
 #include "Factory.h"
 #include "NonlinearSystem.h"
 #include "Postprocessor.h"
-#include "ThreadedElementLoop.h"
+#include "ComputePostprocessorsThread.h"
 #include "MaterialData.h"
 
 // libMesh includes
@@ -37,122 +37,11 @@ void initial_condition(EquationSystems & es, const std::string & system_name)
   problem->initialCondition(es, system_name);
 }
 
-
-//
-class ComputePostprocessorsThread : public ThreadedElementLoop<ConstElemRange>
-{
-public:
-  ComputePostprocessorsThread(Problem & problem, System & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
-     _soln(in_soln),
-     _pps(pps)
-  {}
-
-  // Splitting Constructor
-  ComputePostprocessorsThread(ComputePostprocessorsThread & x, Threads::split) :
-    ThreadedElementLoop<ConstElemRange>(x._problem, x._system),
-    _soln(x._soln),
-    _pps(x._pps)
-  {
-  }
-
-  virtual void pre()
-  {
-    //Initialize side and element post processors
-
-    std::set<unsigned int>::iterator block_begin = _pps[_tid]._block_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator block_end = _pps[_tid]._block_ids_with_postprocessors.end();
-    std::set<unsigned int>::iterator block_it = block_begin;
-
-    for (block_it=block_begin;block_it!=block_end;++block_it)
-    {
-      unsigned int block_id = *block_it;
-
-      PostprocessorIterator postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(block_id);
-      PostprocessorIterator postprocessor_end = _pps[_tid].elementPostprocessorsEnd(block_id);
-      PostprocessorIterator postprocessor_it = postprocessor_begin;
-
-      for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
-        (*postprocessor_it)->initialize();
-    }
-
-    std::set<unsigned int>::iterator boundary_begin = _pps[_tid]._boundary_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator boundary_end = _pps[_tid]._boundary_ids_with_postprocessors.end();
-    std::set<unsigned int>::iterator boundary_it = boundary_begin;
-
-    for (boundary_it=boundary_begin;boundary_it!=boundary_end;++boundary_it)
-    {
-      //note: for threaded applications where the elements get broken up it
-      //may be more efficient to initialize these on demand inside the loop
-      PostprocessorIterator side_postprocessor_begin = _pps[_tid].sidePostprocessorsBegin(*boundary_it);
-      PostprocessorIterator side_postprocessor_end = _pps[_tid].sidePostprocessorsEnd(*boundary_it);
-      PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
-
-      for (side_postprocessor_it=side_postprocessor_begin;side_postprocessor_it!=side_postprocessor_end;++side_postprocessor_it)
-        (*side_postprocessor_it)->initialize();
-    }
-  }
-
-  virtual void preElement(const Elem * elem)
-  {
-//    _moose_system.reinitKernels(_tid, _soln, elem, NULL);
-//    _moose_system._element_data[_tid]->reinitMaterials(_moose_system._materials[_tid].getMaterials(elem->subdomain_id()));
-    _problem.prepare(elem, _tid);
-  }
-
-  virtual void onElement(const Elem *elem)
-  {
-    unsigned int subdomain = elem->subdomain_id();
-
-    _problem.reinitElem(elem, _tid);
-    _problem.reinitMaterials(subdomain, _tid);
-
-
-    //Global Postprocessors
-    PostprocessorIterator postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(Moose::ANY_BLOCK_ID);
-    PostprocessorIterator postprocessor_end = _pps[_tid].elementPostprocessorsEnd(Moose::ANY_BLOCK_ID);
-    PostprocessorIterator postprocessor_it = postprocessor_begin;
-
-    for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
-      (*postprocessor_it)->execute();
-
-    postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(subdomain);
-    postprocessor_end = _pps[_tid].elementPostprocessorsEnd(subdomain);
-    postprocessor_it = postprocessor_begin;
-
-    for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
-      (*postprocessor_it)->execute();
-  }
-
-  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
-  {
-    PostprocessorIterator side_postprocessor_begin = _pps[_tid].sidePostprocessorsBegin(bnd_id);
-    PostprocessorIterator side_postprocessor_end = _pps[_tid].sidePostprocessorsEnd(bnd_id);
-    PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
-
-    if (side_postprocessor_begin != side_postprocessor_end)
-    {
-      _problem.reinitElemFace(elem, side, bnd_id, _tid);
-      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-
-      for (; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
-        (*side_postprocessor_it)->execute();
-    }
-  }
-
-  void join(const ComputePostprocessorsThread & /*y*/)
-  {
-  }
-
-protected:
-  const NumericVector<Number>& _soln;
-  std::vector<PostprocessorWarehouse> & _pps;
-};
-
+} // namespace Moose
 
 // SubProblem /////
 
-SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
+SubProblem::SubProblem(MooseMesh & mesh, Problem * parent) :
     _parent(parent == NULL ? this : parent),
     _mesh(mesh),
     _eq(parent == NULL ? *new EquationSystems(_mesh) : parent->es()),
@@ -222,14 +111,14 @@ SubProblem::init()
 void
 SubProblem::update()
 {
-  for (std::vector<System *>::iterator it = _sys.begin(); it != _sys.end(); ++it)
+  for (std::vector<SystemBase *>::iterator it = _sys.begin(); it != _sys.end(); ++it)
     (*it)->update();
 }
 
 void
 SubProblem::solve()
 {
-  for (std::vector<System *>::iterator it = _sys.begin(); it != _sys.end(); ++it)
+  for (std::vector<SystemBase *>::iterator it = _sys.begin(); it != _sys.end(); ++it)
     (*it)->solve();
 }
 
@@ -244,7 +133,7 @@ SubProblem::hasVariable(const std::string & var_name)
   return false;
 }
 
-Variable &
+MooseVariable &
 SubProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   for (unsigned int i = 0; i < _sys.size(); i++)
@@ -628,6 +517,3 @@ SubProblem::adaptMesh()
   _geometric_search_data.update();
   _out.meshChanged();
 }
-
-
-} // namespace

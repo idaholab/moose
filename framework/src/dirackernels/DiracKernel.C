@@ -8,23 +8,23 @@
 template<>
 InputParameters validParams<DiracKernel>()
 {
-  InputParameters params = validParams<Object>();
+  InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   return params;
 }
 
 DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
-    Object(name, parameters),
-    Moose::Coupleable(parameters),
+    MooseObject(name, parameters),
+    Coupleable(parameters),
     FunctionInterface(parameters),
-    Moose::TransientInterface(parameters),
-    Moose::MaterialPropertyInterface(parameters),
+    TransientInterface(parameters),
+    MaterialPropertyInterface(parameters),
 //  : PDEBase(name, parameters,
 //            (parameters.get<MooseSystem *>("_moose_system")->hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")) ?
 //            *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data_displaced[parameters.get<THREAD_ID>("_tid")] :
 //            *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data[parameters.get<THREAD_ID>("_tid")]
 //           ),
-    _problem(*parameters.get<Moose::SubProblem *>("_problem"))
+    _problem(*parameters.get<SubProblem *>("_problem"))
 //    _dirac_kernel_data(_use_displaced_mesh ? *_moose_system._dirac_kernel_data_displaced[_tid] : *_moose_system._dirac_kernel_data[_tid]),
 //    _dirac_kernel_info(_use_displaced_mesh ? _moose_system._dirac_kernel_info_displaced : _moose_system._dirac_kernel_info),
 //    _var_name(getParam<std::string>("variable")),

@@ -1,5 +1,5 @@
-#ifndef CONSTANTPOINTSOURCE_H_
-#define CONSTANTPOINTSOURCE_H_
+#ifndef CONSTANTPOINTSOURCE_H
+#define CONSTANTPOINTSOURCE_H
 
 // Moose Includes
 #include "DiracKernel.h"
