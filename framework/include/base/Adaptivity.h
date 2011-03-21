@@ -31,6 +31,8 @@ public:
    */
   void initial();
 
+  unsigned int getSteps() const;
+
   void adaptMesh();
 
   bool isOn() { return _mesh_refinement_on; }

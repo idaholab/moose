@@ -5,15 +5,13 @@
 template<>
 InputParameters validParams<Steady>()
 {
-  InputParameters params = validParams<Executioner>();
-  return params;
+  return validParams<Executioner>();
 }
 
 
 Steady::Steady(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*_mesh),
-    _steps(getParam<unsigned int>("steps")),
     _time(_problem.time())
 {
 }
@@ -25,6 +23,8 @@ Steady::~Steady()
 void
 Steady::execute()
 {
+  std::cerr << "Time: " << _time << "\n";
+  
   checkIntegrity();
   
   _problem.adaptivity().initial();
@@ -45,8 +45,9 @@ Steady::execute()
   _time = 1.0;           // should be inside the previous if-statement, but to preserve backward compatible behavior, it has to be like this ;(
 
   // Define the refinement loop
-  for(unsigned int r_step=0; r_step<=_steps; r_step++)
-  {
+  unsigned int steps = _problem.adaptivity().getSteps();
+  for(unsigned int r_step=0; r_step<=steps; r_step++)
+  { 
     preSolve();
     _problem.updateMaterials();
     _problem.solve();
@@ -57,10 +58,16 @@ Steady::execute()
     _problem.output();
     _problem.outputPostprocessors();
 
-    if(r_step != _steps)
+    _problem.getNonlinearSystem().printVarNorms();
+
+    std::cout << "\n";
+    
+    if(r_step != steps)
     {
       _problem.adaptMesh();
       _problem.out().meshChanged();
+      // TODO: This should come out automatically when meshChanged is called
+      _problem.mesh().print_info();
     }
   }
 
