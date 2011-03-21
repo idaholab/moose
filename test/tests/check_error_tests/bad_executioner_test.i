@@ -38,15 +38,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 # Test for bad executioner
 [Executioner]
   type = Foo

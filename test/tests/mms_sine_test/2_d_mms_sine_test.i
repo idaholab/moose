@@ -2,7 +2,7 @@
 #This is for u = sin(a*x*y*z*t)
 [Mesh]
  [./Generation] #We are generating our own Mesh
-   dim = 2   
+   dim = 2
    nx = 8
    ny = 8
    x min = 0
@@ -78,15 +78,6 @@
     variable = u
     boundary = '0 1 2 3'
  #   value = sin(a*x*y*z*t)
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0 #This is 0 because we are creating our own Mesh
   [../]
 []
 

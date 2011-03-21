@@ -10,7 +10,6 @@
 []
 
 [Mesh]
-  dim = 2
   file = square.e
 #  init_unif_refine = 6
 []
@@ -78,15 +77,6 @@
   [./diff_v]
     type = Diffusion
     variable = v
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
   [../]
 []
 

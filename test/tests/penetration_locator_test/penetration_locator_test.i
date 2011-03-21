@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = 2dcontact_collide.e
 #  uniform_refine = 1
 []
@@ -69,15 +68,6 @@
     variable = u
     boundary = 4
     value = 1
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = '1 2'
   [../]
 []
 

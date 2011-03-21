@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
 []
 
@@ -60,4 +59,3 @@
   interval = 1
   exodus = true
 []
-

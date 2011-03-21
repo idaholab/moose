@@ -1,4 +1,4 @@
-[Mesh]    
+[Mesh]   
   [./Generation]
     dim = 2
     nx = 3

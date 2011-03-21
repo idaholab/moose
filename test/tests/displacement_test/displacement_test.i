@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
 
   displacements = 'u u'
@@ -38,15 +37,6 @@
     variable = u
     boundary = 2
     value = 1
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
   [../]
 []
 

@@ -132,15 +132,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = '1 2'
-  [../]
-[]
-
 [Executioner]
   type = Transient
   perf_log = true
@@ -156,3 +147,5 @@
   interval = 1
   exodus = true
 []
+   
+    

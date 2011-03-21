@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
 #  init_unif_refine = 6
 []
@@ -78,15 +77,6 @@
     variable = v
     boundary = 2
     value = 0
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
   [../]
 []
 

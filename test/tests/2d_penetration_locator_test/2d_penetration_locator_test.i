@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = 2d_contact_test.e
 #  uniform_refine = 1
 []

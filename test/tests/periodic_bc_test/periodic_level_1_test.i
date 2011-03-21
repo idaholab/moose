@@ -75,15 +75,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0
-  [../]
-[]
-
 [Executioner]
   type = Transient
   perf_log = true

@@ -36,12 +36,3 @@
     value = 1
   [../]
 []
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]

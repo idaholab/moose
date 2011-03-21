@@ -92,15 +92,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [Postprocessors]
   active = 'l2 node1 node4'
   

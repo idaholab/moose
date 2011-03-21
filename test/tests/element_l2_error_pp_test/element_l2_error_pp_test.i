@@ -74,15 +74,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0 #since we're generating our own mesh, the materials block must be 0
-  [../]
-[]
-
 [Executioner]
   type = Steady
   perf_log = true

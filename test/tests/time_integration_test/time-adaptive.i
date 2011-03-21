@@ -1,6 +1,6 @@
 [Mesh]
-  dim = 2
   [./Generation]
+    dim = 2
     xmin = -1
     xmax = 1
     ymin = -1
@@ -55,15 +55,6 @@
     type = TEJumpBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0
   [../]
 []
 

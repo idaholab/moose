@@ -22,15 +22,6 @@
   interval = 1
   exodus = true
 []
-   
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
 
 [Executioner]
   type = Steady
@@ -39,7 +30,6 @@
 []
 
 [Mesh]
-  dim = 2
   file = square.e
 []
 

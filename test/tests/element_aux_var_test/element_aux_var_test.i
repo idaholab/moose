@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
 []
 
@@ -13,7 +12,7 @@
 []
 
 [AuxVariables]
-  active = 'one five three coupled_nine coupled_fifteen coupled coupled_nl'
+  active = 'one five three coupled_nine coupled_fifteen coupled coupled_nl coupled_grad_nl'
 
   [./one]
     order = CONSTANT
@@ -46,6 +45,11 @@
   [../]
 
   [./coupled_nl]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./coupled_grad_nl]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -117,6 +121,14 @@
     value = 2
     coupled = u
   [../]
+
+  #Shows coupling of Element to non-linear grad
+  [./coupled_grad_nl]
+    variable = coupled_grad_nl
+    type = CoupledGradAux
+    value = '1 2 3'
+    coupled = u
+  [../]
 []
 
 [BCs]
@@ -145,15 +157,6 @@
     variable = five
     boundary = '1 2'
     value = 5
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
   [../]
 []
 

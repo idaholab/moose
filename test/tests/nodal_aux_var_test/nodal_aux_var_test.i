@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
 []
 
@@ -92,15 +91,6 @@
     variable = five
     boundary = '1 2'
     value = 5
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
   [../]
 []
 

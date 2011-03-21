@@ -68,15 +68,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0
-  [../]
-[]
-
 [Postprocessors]
   active = 'dt l2'
   

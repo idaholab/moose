@@ -38,16 +38,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  # Test for bad Material
-  [./empty]
-    type = Foo
-    block = 1
-  [../]
-[]
-
 [Executioner]
   type = Steady
   perf_log = true

@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = 3d_penetration_test.e
 #  uniform_refine = 1
 []

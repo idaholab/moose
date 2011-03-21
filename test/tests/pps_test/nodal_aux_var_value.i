@@ -83,15 +83,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0
-  [../]
-[]
-
 [Postprocessors]
   active = 'node4v node4v1'
   

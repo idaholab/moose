@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
 
 #  do not use uniform refine, we are using adaptive refining
@@ -64,15 +63,6 @@
     variable = u
     boundary = '2'
     value = 0
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
   [../]
 []
 

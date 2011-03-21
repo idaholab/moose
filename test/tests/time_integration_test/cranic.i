@@ -1,6 +1,6 @@
 [Mesh]
   [./Generation]
-    dim = 2	
+    dim = 2
     xmin = -1
     xmax = 1
     ymin = -1
@@ -80,15 +80,6 @@
     variable = u
     boundary = 1
     value = 1
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0
   [../]
 []
 

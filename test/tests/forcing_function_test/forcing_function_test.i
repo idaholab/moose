@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
   uniform_refine = 4
 []
@@ -54,15 +53,6 @@
     variable = u
     boundary = '2'
     value = 0
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
   [../]
 []
 

@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = steady_out.e
 []
 
@@ -44,15 +43,6 @@
     variable = u
     boundary = 2
     value = 1
-  [../]
-[]
-
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
   [../]
 []
 

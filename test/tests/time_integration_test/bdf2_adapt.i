@@ -83,15 +83,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 0
-  [../]
-[]
-
 [Postprocessors]
   [./l2_err]
     type = ElementL2Error

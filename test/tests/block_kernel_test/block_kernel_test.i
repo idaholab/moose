@@ -1,6 +1,4 @@
-
 [Mesh]
-  dim = 2
   file = rectangle.e
 []
 
@@ -47,15 +45,6 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = '1 2'
-  [../]
-[]
-
 [Executioner]
   type = Steady
   perf_log = true
@@ -72,3 +61,5 @@
   interval = 1
   exodus = true
 []
+   
+    

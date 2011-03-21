@@ -1,6 +1,6 @@
 [Mesh]
   [./Generation]
-        dim = 2
+    dim = 2
   	xmin = 0
   	xmax = 1
   	ymin = 0
