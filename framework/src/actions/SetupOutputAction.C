@@ -97,5 +97,10 @@ SetupOutputAction::act()
 //    PetscOptionsSetValue("-ksp_monitor", PETSC_NULL);
 #endif
 
-
+ // Test to make sure that the user can write to the directory specified in file_base
+  std::string base = "./" + getParam<std::string>("file_base");
+  base = base.substr(0, base.find_last_of('/'));
+  if (access(base.c_str(), W_OK) == -1)
+    mooseError("Can not write to directory: " + base + " for file base: " + getParam<std::string>("file_base"));
+ 
 }

@@ -16,7 +16,7 @@ def no_output_dir_test():
   tools.executeAppExpectError(__file__,'no_output_dir_test.i',"Can not write to directory: \S+ for file base: \S+")
 
 def missing_mesh_test():
-  tools.executeAppExpectError(__file__,'missing_mesh_test.i',"cannot locate specified file:\s+\w+")
+  tools.executeAppExpectError(__file__,'missing_mesh_test.i',"Unable to open file \S+")
 
 def bad_material_block_test():
   tools.executeAppExpectError(__file__,'bad_material_block_test.i','Material block \S+ specified in the input file does not exist')

@@ -263,7 +263,7 @@ Parser::parse(const std::string &input_filename)
 
   _input_filename = input_filename;
   
-  checkInputFile();
+  checkFileReadable(input_filename);
   
   // GetPot object
   _getpot_file.parse_input_file(_input_filename);
@@ -335,7 +335,7 @@ Parser::parse(const std::string &input_filename)
 
   _input_filename = input_filename;
   
-  checkInputFile();
+  checkFileReadble(input_filename);
   
   // GetPot object
   _getpot_file.parse_input_file(_input_filename);
@@ -820,14 +820,23 @@ Parser::printTree()
 }
 
 void
-Parser::checkInputFile()
+Parser::checkFileReadable(const std::string & filename)
 {
-  std::ifstream in(_input_filename.c_str(), std::ifstream::in);
+  std::ifstream in(filename.c_str(), std::ifstream::in);
   if (in.fail())
-    mooseError((std::string("Unable to open file \"") + _input_filename
+    mooseError((std::string("Unable to open file \"") + filename
                 + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
 
   in.close();
+}
+
+void
+Parser::checkFileWritable(const std::string & filename)
+{
+  std::ofstream out(filename.c_str(), std::ofstream::out);
+  if (out.fail())
+    mooseError((std::string("Unable to open file \"") + filename
+                + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
 }
 
 void

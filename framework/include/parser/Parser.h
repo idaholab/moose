@@ -140,6 +140,10 @@ public:
 
   ParserBlock * root() { return _input_tree; }
 
+  static void checkFileReadable(const std::string & filename);
+  
+  static void checkFileWritable(const std::string & filename);
+
 public:
   // data created while running execute()
   MooseMesh *_mesh;
@@ -162,12 +166,6 @@ private:
    * original human readable format, and "yaml" are supported.
    */
   void buildFullTree( const std::string format );
-
-  /**
-   * This function check for the existance and readability of the input file and throws a
-   * MOOSE error if there is a problem
-   */
-  void checkInputFile();
   
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file

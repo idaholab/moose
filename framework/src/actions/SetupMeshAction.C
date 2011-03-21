@@ -49,15 +49,16 @@ SetupMeshAction::act()
   
   //if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
   //  gen_block->execute();
-  
-  if (getParam<std::string>("file") != no_file_supplied)
+  std::string mesh_file = getParam<std::string>("file");
+  if (mesh_file != no_file_supplied)
   {
+    Parser::checkFileReadable(mesh_file);
     mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
     _parser_handle._mesh = new MooseMesh();
     // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
     // to only perform the copy nodal variables action when using the Exodus reader
     _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
-    _parser_handle._exreader->read(getParam<std::string>("file"));
+    _parser_handle._exreader->read(mesh_file);
   }
   // get convenience pointer to mesh object
   MooseMesh *mesh = _parser_handle._mesh;
