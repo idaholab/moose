@@ -18,6 +18,7 @@ public:
 
   unsigned int boundaryID() { return _boundary_id; }
 
+  virtual Real computeIntegral();
 
 protected:
   Moose::Variable & _var;
@@ -26,16 +27,18 @@ protected:
 
   unsigned int _qp;
   const std::vector< Point > & _q_point;
+  QBase * & _qrule;
+  const std::vector<Real> & _JxW;
   const std::vector<Point> & _normals;
+
+  const Elem * & _current_elem;
+  const Elem * & _current_side_elem;
 
   // unknown
   const VariableValue & _u;
   const VariableGrad & _grad_u;
 
-  /**
-   * Override the pure virtual... this function should NOT be overridden by other SidePostprocessors
-   */
-  virtual Real computeQpResidual() { return 0; }
+  virtual Real computeQpIntegral() = 0;
 };
 
 #endif

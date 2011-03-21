@@ -76,7 +76,7 @@ public:
 
 protected:
   System & _system;
-  Problem & _problem;
+  SubProblem & _problem;
   THREAD_ID _tid;
 };
 

@@ -96,6 +96,7 @@ Transient::execute()
   _problem.copySolutionsBackwards();
   preExecute();
   _problem.update();
+  _problem.computePostprocessors();
   if (_output_initial)
     _problem.output();
 
@@ -156,8 +157,8 @@ Transient::takeStep(Real input_dt)
   // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
   if (last_solve_converged) 
   {
-//    _moose_system.computePostprocessors(*(_moose_system.getNonlinearSystem()->current_local_solution));
-//    _moose_system.outputPostprocessors();
+    _problem.computePostprocessors();
+    _problem.outputPostprocessors();
 
 //    if (((_t_step + 1) % _moose_system._interval == 0 || _reset_dt))
       _problem.output();

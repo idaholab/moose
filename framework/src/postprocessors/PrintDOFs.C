@@ -1,5 +1,5 @@
 #include "PrintDOFs.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 template<>
 InputParameters validParams<PrintDOFs>()

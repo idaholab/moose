@@ -23,8 +23,7 @@ void
 SideAverageValue::execute()
 {
   SideIntegral::execute();
-  // FIXME: current_side_elem
-//  _volume += _current_side_elem->volume();
+  _volume += _current_side_elem->volume();
 }
 
 Real

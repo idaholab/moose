@@ -3,7 +3,7 @@
 
 namespace Moose {
 
-ExplicitSystem::ExplicitSystem(Problem & problem, const std::string & name) :
+ExplicitSystem::ExplicitSystem(SubProblem & problem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(problem, name)
 {
 }

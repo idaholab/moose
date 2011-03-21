@@ -1,6 +1,6 @@
 #include "AverageNodalVariableValue.h"
 #include "Mesh.h"
-#include "Problem.h"
+#include "SubProblem.h"
 // libMesh
 #include "boundary_info.h"
 

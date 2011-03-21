@@ -22,32 +22,34 @@ typedef std::vector<RealGradient>       VariableGrad;
 namespace Moose
 {
 
-class Problem;
+class SubProblem;
 class System;
 
 
 class Variable
 {
 public:
-  Variable(unsigned int var_num, int dim, const FEType & fe_type, System & sys);
+  Variable(THREAD_ID tid, unsigned int var_num, const FEType & fe_type, System & sys);
   virtual ~Variable();
 
-  void attachQuadratureRule(QBase *qrule);
+  void reinit();
+  void reinit_node();
+  void reinit_aux();
 
-  void reinit(const Elem *elem);
-  void reinit(const Elem *elem, unsigned int side);
-
-  void reinit(const Node * node);
-
-  void reinit_aux(const Elem *elem);
+//  void reinit(const Elem *elem);
+//  void reinit(const Elem *elem, unsigned int side);
+//
+//  void reinit(const Node * node);
+//
+//  void reinit_aux(const Elem *elem);
 
   /**
    * Get variable number
    */
   unsigned int number() { return _var_num; }
-  int dimension() { return _dim; }
+//  int dimension() { return _dim; }
 
-  const FEType & feType() { return _fe_type; }
+  const FEType feType() { return _fe->get_fe_type(); }
 
   const Elem * & currentElem() { return _elem; }
   unsigned int & currentSide() { return _current_side; }
@@ -89,21 +91,19 @@ public:
   void add(SparseMatrix<Number> & jacobian);
 
 protected:
+  THREAD_ID _tid;
   unsigned int _var_num;
-  int _dim;
-  FEType _fe_type;
-  Problem & _problem;
+  SubProblem & _problem;
   System &_sys;
 
   const DofMap & _dof_map;
 
-  // This is not really a variable thing
-  QBase *_qrule;
+  QBase * & _qrule;
 
-  FEBase * _fe;
+  FEBase * & _fe;
 
-  const Elem * _elem;
-  unsigned int _current_side;
+  const Elem * & _elem;
+  unsigned int & _current_side;
 
   std::vector<unsigned int> _dof_indices;
 
@@ -126,7 +126,7 @@ protected:
   VariableValue _du_dot_du;
 
   // nodal stuff
-  const Node * _node;
+  const Node * & _node;
   unsigned int _nodal_dof_index;
   VariableValue _nodal_u;
   VariableGrad  _nodal_grad_u;

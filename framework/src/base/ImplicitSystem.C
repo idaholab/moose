@@ -184,7 +184,7 @@ namespace Moose {
   };
 
 
-ImplicitSystem::ImplicitSystem(Problem & problem, const std::string & name) :
+ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(problem, name),
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),

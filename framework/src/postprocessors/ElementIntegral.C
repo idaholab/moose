@@ -21,8 +21,7 @@ ElementIntegral::initialize()
 void
 ElementIntegral::execute()
 {
-  // FIXME: computeItegral
-//  _integral_value += computeIntegral();
+  _integral_value += computeIntegral();
 }
 
 Real

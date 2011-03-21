@@ -20,7 +20,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
   _tid(parameters.get<THREAD_ID>("_tid")),
   _qrule(_problem.qRule(_tid)),
   _q_point(_problem.points(_tid)),
-  _current_elem(_problem.elem()),
+  _current_elem(_problem.elem(_tid)),
   _has_stateful_props(false),
   _block_id(parameters.get<unsigned int>("block_id")),
   _props(_problem.materialProps()),

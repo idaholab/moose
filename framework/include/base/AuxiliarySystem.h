@@ -22,7 +22,7 @@ class ImplicitSystem;
 class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
-  AuxiliarySystem(Problem & problem, const std::string & name);
+  AuxiliarySystem(SubProblem & problem, const std::string & name);
 
   virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 

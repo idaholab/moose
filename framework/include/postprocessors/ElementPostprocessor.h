@@ -25,7 +25,9 @@ public:
   ElementPostprocessor(const std::string & name, InputParameters parameters);
 
   unsigned int blockID() { return _block_id; }
-  
+
+  virtual Real computeIntegral();
+
 protected:
   /**
    * The block ID this postprocessor works on
@@ -36,6 +38,8 @@ protected:
 
   unsigned int _qp;
   const std::vector< Point > & _q_point;
+  QBase * & _qrule;
+  const std::vector<Real> & _JxW;
 
   const Elem * & _current_elem;
 
@@ -47,10 +51,7 @@ protected:
   VariableGrad & _grad_u_old;                           /// Holds the previous solution gradient at the current quadrature point.
   VariableGrad & _grad_u_older;                         /// Holds the t-2 solution gradient at the current quadrature point.
 
-  /**
-   * Override the pure virtual... this function should NOT be overridden by other ElementPostprocessors
-   */
-  virtual Real computeQpResidual() { return 0; };
+  virtual Real computeQpIntegral() = 0;
 };
  
 #endif

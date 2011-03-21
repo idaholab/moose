@@ -1,9 +1,9 @@
 #include "PostprocessorInterface.h"
 #include "PostprocessorData.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
-    _pi_problem(*params.get<Moose::Problem *>("_problem")),
+    _pi_problem(*params.get<Moose::SubProblem *>("_problem")),
     _pi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0)
 {}
 

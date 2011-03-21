@@ -10,7 +10,7 @@
 
 // Forward Declarations
 namespace Moose {
-  class Problem;
+  class SubProblem;
 }
 
 class PostprocessorInterface
@@ -24,7 +24,7 @@ public:
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
 private:
-  Moose::Problem & _pi_problem;
+  Moose::SubProblem & _pi_problem;
   THREAD_ID _pi_tid;
 };
 

@@ -14,7 +14,7 @@
 //#include "ValidParams.h"
 
 namespace Moose {
-  class Problem;
+  class SubProblem;
 }
 
 //Forward Declarations
@@ -69,7 +69,7 @@ public:
   }
 
 protected:
-  Moose::Problem & _problem;
+  Moose::SubProblem & _problem;
   THREAD_ID _tid;
 };
  

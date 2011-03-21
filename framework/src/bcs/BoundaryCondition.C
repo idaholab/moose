@@ -21,7 +21,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _problem(*parameters.get<Moose::SubProblem *>("_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _dim(_var.dimension()),
+    _dim(_problem.mesh().dimension()),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 
     _current_elem(_var.currentElem()),

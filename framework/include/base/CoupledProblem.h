@@ -31,7 +31,7 @@ public:
   virtual ~CoupledProblem();
 
   virtual EquationSystems & es() { return _eq; }
-  Mesh & mesh() { return *_mesh; }
+//  Mesh & mesh() { return *_mesh; }
 
   virtual Problem * parent() { return NULL; }
 
@@ -50,8 +50,6 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
-
-  virtual const Elem * & elem() { return _elem; }
 
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
 
@@ -102,7 +100,6 @@ protected:
 
   Mesh * _mesh;
   EquationSystems _eq;
-  const Elem * _elem;
 
   bool _transient;
   Real & _time;

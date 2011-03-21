@@ -15,7 +15,7 @@ namespace Moose {
 class ImplicitSystem : public SystemTempl<TransientNonlinearImplicitSystem>
 {
 public:
-  ImplicitSystem(Problem & problem, const std::string & name);
+  ImplicitSystem(SubProblem & problem, const std::string & name);
   virtual ~ImplicitSystem();
 
   virtual bool converged();

@@ -1,5 +1,5 @@
 #include "PrintDT.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 template<>
 InputParameters validParams<PrintDT>()

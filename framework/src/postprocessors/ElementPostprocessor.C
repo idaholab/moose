@@ -1,12 +1,13 @@
 #include "Moose.h"
 #include "ElementPostprocessor.h"
 #include "Variable.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 template<>
 InputParameters validParams<ElementPostprocessor>()
 {
   InputParameters params = validParams<Postprocessor>();
+  params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   params.addParam<unsigned int>("block", Moose::ANY_BLOCK_ID, "block ID where the postprocessor works");
   return params;
 }
@@ -17,7 +18,9 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     _block_id(parameters.get<unsigned int>("block")),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _q_point(_var.qpoints()),
-    _current_elem(_problem.elem()),
+    _qrule(_var.qRule()),
+    _JxW(_var.JxW()),
+    _current_elem(_problem.elem(_tid)),
     _u(_var.sln()),
     _u_old(_var.slnOld()),
     _u_older(_var.slnOlder()),
@@ -26,3 +29,14 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     _grad_u_older(_var.gradSlnOlder())
 {
 }
+
+Real
+ElementPostprocessor::computeIntegral()
+{
+  Real sum = 0;
+
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+      sum += _JxW[_qp]*computeQpIntegral();
+  return sum;
+}
+

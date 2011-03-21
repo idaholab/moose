@@ -9,7 +9,7 @@
 namespace Moose {
 
 
-System::System(Problem & problem, const std::string & name) :
+System::System(SubProblem & problem, const std::string & name) :
     _problem(problem),
     _mesh(problem.mesh()),
     _name(name)
@@ -38,15 +38,15 @@ System::getMinQuadratureOrder()
   return order;
 }
 
-void
-System::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
-{
-  for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
-  {
-    Variable *var = *it;
-    var->attachQuadratureRule (qrule);
-  }
-}
+//void
+//System::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
+//{
+//  for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+//  {
+//    Variable *var = *it;
+//    var->attachQuadratureRule (qrule);
+//  }
+//}
 
 void
 System::reinitElem(const Elem * elem, THREAD_ID tid)
@@ -54,7 +54,7 @@ System::reinitElem(const Elem * elem, THREAD_ID tid)
   for (std::vector<Variable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     Variable *var = *it;
-    var->reinit(elem);
+    var->reinit();
     var->sizeResidual();
     var->sizeJacobianBlock();
     var->computeElemValues();
@@ -71,7 +71,7 @@ System::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id
     Variable *var = *it;
     var->sizeResidual();
     var->sizeJacobianBlock();
-    var->reinit (elem, side);
+    var->reinit();
   }
 }
 
@@ -83,7 +83,7 @@ System::reinitNode(const Node * node, THREAD_ID tid)
     Variable *var = *it;
     if (var->feType().family == LAGRANGE)
     {
-      var->reinit (node);
+      var->reinit_node();
       var->computeNodalValues();
     }
   }
@@ -99,7 +99,7 @@ System::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
     Variable *var = *it;
     if (var->feType().family == LAGRANGE)
     {
-      var->reinit (node);
+      var->reinit_node();
       var->computeNodalValues();
     }
   }

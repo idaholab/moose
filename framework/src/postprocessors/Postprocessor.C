@@ -1,5 +1,5 @@
 #include "Postprocessor.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 // libMesh includes
 
@@ -12,7 +12,7 @@ InputParameters validParams<Postprocessor>()
 
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
-    _problem(*parameters.get<Moose::Problem *>("_problem")),
+    _problem(*parameters.get<Moose::SubProblem *>("_problem")),
     _tid(parameters.get<THREAD_ID>("_tid"))
 //   _local_name(name),
 //   _local_tid(parameters.get<THREAD_ID>("_tid")),

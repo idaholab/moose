@@ -28,7 +28,9 @@
 #include "PrintNumElems.h"
 #include "PrintNumNodes.h"
 #include "Reporter.h"
+#include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
+#include "SideIntegral.h"
 
 
 namespace Moose {
@@ -64,7 +66,9 @@ registerObjects()
   registerObject(PrintNumElems);
   registerObject(PrintNumNodes);
   registerObject(Reporter);
+  registerObject(SideAverageValue);
   registerObject(SideFluxIntegral);
+  registerObject(SideIntegral);
 
   registered = true;
 }

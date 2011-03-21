@@ -143,7 +143,7 @@ namespace Moose {
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(Problem & problem, const std::string & name) :
+AuxiliarySystem::AuxiliarySystem(SubProblem & problem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(problem, name)
 {
   _sys.attach_init_function(Moose::initial_condition);
@@ -165,7 +165,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
   unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    Variable * var = new Variable(var_num, _mesh.dimension(), type, *this);
+    Variable * var = new Variable(tid, var_num, type, *this);
     _vars[tid].add(var_name, var);
     if (var->feType().family == LAGRANGE)
       _nodal_vars[tid][var_name] = var;
@@ -237,7 +237,7 @@ AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
   for (std::map<std::string, Variable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
   {
     Variable *var = it->second;
-    var->reinit(elem);
+    var->reinit();
     var->sizeResidual();
     var->sizeJacobianBlock();
     var->computeElemValues();
@@ -246,7 +246,7 @@ AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
   for (std::map<std::string, Variable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
   {
     Variable *var = it->second;
-    var->reinit_aux(elem);
+    var->reinit_aux();
     var->sizeResidual();
     var->sizeJacobianBlock();
     var->computeElemValues();

@@ -30,7 +30,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _aux_sys(*parameters.get<Moose::AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _dim(_var.dimension()),
+    _dim(_problem.mesh().dimension()),
     _qrule(_var.qRule()),
     _JxW(_var.JxW()),
     _current_elem(_var.currentElem()),

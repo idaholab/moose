@@ -81,7 +81,6 @@ CoupledProblem::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
 void
 CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  _elem = elem;
   for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElem(elem, tid);
 }
@@ -89,7 +88,6 @@ CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 CoupledProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  _elem = elem;
   for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElemFace(elem, side, bnd_id, tid);
 }

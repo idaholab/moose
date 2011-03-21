@@ -1,5 +1,5 @@
 #include "PrintNumElems.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 template<>
 InputParameters validParams<PrintNumElems>()

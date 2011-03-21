@@ -77,12 +77,16 @@ OutputBlock::execute()
 
   exec->outputInitial(getParamValue<bool>("output_initial"));
 
-  Moose::SubProblem & mproblem = *_parser_handle._problem;
-  mproblem._postprocessor_screen_output = getParamValue<bool>("postprocessor_screen");
-  mproblem._postprocessor_csv_output = getParamValue<bool>("postprocessor_csv");
-  mproblem._postprocessor_ensight_output = getParamValue<bool>("postprocessor_ensight");
-  mproblem._postprocessor_gnuplot_output = getParamValue<bool>("postprocessor_gnuplot");
-  mproblem._gnuplot_format = getParamValue<std::string>("gnuplot_format");
+  if (_parser_handle._problem != NULL)
+  {
+    // TODO: handle this thru Problem interface
+    Moose::SubProblem & mproblem = *_parser_handle._problem;
+    mproblem._postprocessor_screen_output = getParamValue<bool>("postprocessor_screen");
+    mproblem._postprocessor_csv_output = getParamValue<bool>("postprocessor_csv");
+    mproblem._postprocessor_ensight_output = getParamValue<bool>("postprocessor_ensight");
+    mproblem._postprocessor_gnuplot_output = getParamValue<bool>("postprocessor_gnuplot");
+    mproblem._gnuplot_format = getParamValue<std::string>("gnuplot_format");
+  }
 
 #if 0
   _moose_system._interval = getParamValue<int>("interval");

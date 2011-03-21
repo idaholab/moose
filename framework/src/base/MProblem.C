@@ -16,9 +16,10 @@ std::string name(const std::string & name, unsigned int n)
 
 MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
     SubProblem(mesh, parent),
-    _nl(*_parent, name("nl", _n)),
-    _aux(*_parent, name("aux", _n)),
+    _nl(static_cast<SubProblem &>(*_parent), name("nl", _n)),
+    _aux(static_cast<SubProblem &>(*_parent), name("aux", _n)),
     _quadrature_order(CONSTANT),
+    _asm_info(libMesh::n_threads(), AssemblyData(*this)),
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
     _output_displaced(true)
@@ -27,15 +28,16 @@ MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
   _sys.push_back(&_aux);
   _n++;
 
-  unsigned int n_threads = libMesh::n_threads();
-  _qrule.resize(n_threads);
-  _fe.resize(n_threads);
-  _points.resize(n_threads);
-  for (unsigned int i = 0; i < _fe.size(); ++i)
-  {
-    _fe[i] = FEBase::build(_mesh.dimension(), FEType(FIRST, LAGRANGE)).release();
-    _points[i] = _fe[i]->get_xyz();
-  }
+//  unsigned int n_threads = libMesh::n_threads();
+//  _asm_info.resize(n_threads);
+//  _qrule.resize(n_threads);
+//  _fe.resize(n_threads);
+//  _points.resize(n_threads);
+//  for (unsigned int i = 0; i < _fe.size(); ++i)
+//  {
+//    _fe[i] = FEBase::build(_mesh.dimension(), FEType(FIRST, LAGRANGE)).release();
+//    _points[i] = _fe[i]->get_xyz();
+//  }
 }
 
 MProblem::~MProblem()
@@ -47,19 +49,20 @@ MProblem::~MProblem()
 void
 MProblem::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
 {
-  _qrule[tid] = qrule;
-  _fe[tid]->attach_quadrature_rule(qrule);
-
-  _nl.attachQuadratureRule(qrule, tid);
-  _aux.attachQuadratureRule(qrule, tid);
+  _asm_info[tid].attachQuadratureRule(qrule);
+//  _qrule[tid] = qrule;
+//  _fe[tid]->attach_quadrature_rule(qrule);
+//  _nl.attachQuadratureRule(qrule, tid);
+//  _aux.attachQuadratureRule(qrule, tid);
 }
 
 void
 MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  _elem = elem;
-  _fe[tid]->reinit(elem);
-  _points[tid] = _fe[tid]->get_xyz();
+  _asm_info[tid].reinit(elem);
+//  _elem = elem;
+//  _fe[tid]->reinit(elem);
+//  _points[tid] = _fe[tid]->get_xyz();
 
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
@@ -68,9 +71,10 @@ MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  _elem = elem;
-  _fe[tid]->reinit(elem, side);
-  _points[tid] = _fe[tid]->get_xyz();
+//  _elem = elem;
+//  _fe[tid]->reinit(elem, side);
+//  _points[tid] = _fe[tid]->get_xyz();
+  _asm_info[tid].reinit(elem, side);
 
   _nl.reinitElemFace(elem, side, bnd_id, tid);
   _aux.reinitElemFace(elem, side, bnd_id, tid);
@@ -79,6 +83,8 @@ MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_
 void
 MProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
+  _asm_info[tid].reinit(node);
+
   _nl.reinitNode(node, tid);
   _aux.reinitNode(node, tid);
 }
@@ -86,12 +92,14 @@ MProblem::reinitNode(const Node * node, THREAD_ID tid)
 void
 MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
+  _asm_info[tid].reinit(node);
+
   _nl.reinitNodeFace(node, bnd_id, tid);
   _aux.reinitNodeFace(node, bnd_id, tid);
 }
 
 void
-MProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
+MProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
 {
 }
 

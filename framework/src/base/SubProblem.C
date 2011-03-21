@@ -172,7 +172,6 @@ SubProblem::SubProblem(Mesh & mesh, Problem * parent) :
     _postprocessor_ensight_output(false),
     _postprocessor_gnuplot_output(false),
     _gnuplot_format("ps")
-
 {
   if (_parent == this)
   {
@@ -280,9 +279,9 @@ SubProblem::getFunction(const std::string & name, THREAD_ID tid)
 
 Number
 SubProblem::initialValue (const Point& p,
-                       const Parameters& /*parameters*/,
-                       const std::string& /*sys_name*/,
-                       const std::string& var_name)
+                          const Parameters& /*parameters*/,
+                          const std::string& /*sys_name*/,
+                          const std::string& var_name)
 {
 //  ParallelUniqueId puid;
 //  unsigned int tid = puid.id;
@@ -316,7 +315,8 @@ SubProblem::initialGradient (const Point& p,
 void
 SubProblem::initialCondition(EquationSystems& es, const std::string& system_name)
 {
-  ExplicitSystem & system = parent()->es().get_system<ExplicitSystem>(system_name);
+//  ExplicitSystem & system = parent()->es().get_system<ExplicitSystem>(system_name);
+  ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
   system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
 }
 
@@ -360,7 +360,7 @@ SubProblem::addPostprocessor(std::string pp_name, const std::string & name, Inpu
   default: pps = &_pps; break;
   }
 
-  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblem *>("_problem") = this;
 
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {

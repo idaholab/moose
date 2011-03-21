@@ -6,7 +6,7 @@
 #include "IntegratedBC.h"
 #include "InitialCondition.h"
 
-#include "Problem.h"
+#include "SubProblem.h"
 #include "Mesh.h"
 #include "VariableWarehouse.h"
 
@@ -23,10 +23,10 @@ class Variable;
 class System
 {
 public:
-  System(Problem & problem, const std::string & name);
+  System(SubProblem & problem, const std::string & name);
 
   virtual unsigned int number() = 0;
-  virtual Problem & problem() { return _problem; }
+  virtual SubProblem & problem() { return _problem; }
   virtual DofMap & dofMap() = 0;
 
   virtual void init() = 0;
@@ -49,7 +49,7 @@ public:
 
   /// Get minimal quadrature order needed for integrating variables in this system
   virtual Order getMinQuadratureOrder();
-  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
+//  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
@@ -58,7 +58,7 @@ public:
   virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
 
 protected:
-  Problem & _problem;
+  SubProblem & _problem;
   Mesh & _mesh;
   std::string _name;
 
@@ -71,7 +71,7 @@ template<typename T>
 class SystemTempl : public System
 {
 public:
-  SystemTempl(Problem & problem, const std::string & name) :
+  SystemTempl(SubProblem & problem, const std::string & name) :
     System(problem, name),
     _sys(problem.es().add_system<T>(_name)),
     _solution(_sys.add_vector("curr_sln", false, GHOSTED)),
@@ -92,7 +92,7 @@ public:
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      Moose::Variable * var = new Moose::Variable(var_num, _mesh.dimension(), type, *this);
+      Moose::Variable * var = new Moose::Variable(tid, var_num, type, *this);
       _vars[tid].add(var_name, var);
 
       if (active_subdomains == NULL)
