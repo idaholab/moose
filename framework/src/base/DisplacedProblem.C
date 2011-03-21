@@ -86,7 +86,7 @@ DisplacedProblem::DisplacedProblem(SubProblem & problem, MooseMesh & displaced_m
     _subproblem(problem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),
-    _ref_mesh(_problem.mesh()),
+    _ref_mesh(_subproblem.mesh()),
     _displacements(displacements),
     _nl(*this, "DisplacedSystem"),
     _aux(*this, "DisplacedAuxSystem"),

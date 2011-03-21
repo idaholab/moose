@@ -30,6 +30,7 @@ public:
   SystemBase(SubProblemInterface & subproblem, const std::string & name);
 
   virtual unsigned int number() = 0;
+  virtual MooseMesh & mesh() { return _mesh; }
   virtual SubProblemInterface & subproblem() { return _subproblem; }
   virtual DofMap & dofMap() = 0;
 

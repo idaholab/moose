@@ -14,6 +14,7 @@
 #include "quadrature.h"
 
 class MooseVariable;
+class MooseMesh;
 class Problem;
 class SubProblemInterface;
 
@@ -61,6 +62,7 @@ protected:
   THREAD_ID _tid;
 
   MooseVariable & _var;
+  MooseMesh & _mesh;
   int _dim;
 
   const Elem * & _current_elem;

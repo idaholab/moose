@@ -27,7 +27,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _mesh(_problem.mesh()),
+    _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 

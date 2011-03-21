@@ -123,7 +123,7 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
 
     for (unsigned int side=0; side<elem->n_sides(); side++)
     {
-      std::vector<short int> boundary_ids = _problem.mesh().boundary_ids (elem, side);
+      std::vector<short int> boundary_ids = _system.mesh().boundary_ids (elem, side);
 
       if (boundary_ids.size() > 0)
       {

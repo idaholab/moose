@@ -26,7 +26,6 @@ public:
   virtual ~Problem();
 
   virtual EquationSystems & es() = 0;
-  virtual MooseMesh & mesh() = 0;
   virtual Problem * parent() = 0;
 
   // Variables /////

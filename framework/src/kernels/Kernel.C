@@ -29,7 +29,8 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _dim(_problem.mesh().dimension()),
+    _mesh(_subproblem.mesh()),
+    _dim(_mesh.dimension()),
 
     _current_elem(_var.currentElem()),
     _q_point(_subproblem.points(_tid)),

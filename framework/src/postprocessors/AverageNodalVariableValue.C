@@ -15,7 +15,7 @@ InputParameters validParams<AverageNodalVariableValue>()
 
 AverageNodalVariableValue::AverageNodalVariableValue(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
-    _mesh(_problem.mesh()),
+    _mesh(_subproblem.mesh()),
     _var_name(parameters.get<std::string>("variable")),
     _nodesetid(parameters.get<unsigned int>("nodeset"))
 {

@@ -29,7 +29,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _JxW(_bnd ? _subproblem.JxWFace(_tid) : _subproblem.JxW(_tid)),
     _q_point(_bnd ? _subproblem.pointsFace(_tid) : _subproblem.points(_tid)),
     _current_elem(_subproblem.elem(_tid)),
-    _mesh(_problem.mesh()),
+    _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _has_stateful_props(false),
     _block_id(parameters.get<unsigned int>("block_id")),
