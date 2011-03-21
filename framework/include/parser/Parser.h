@@ -4,7 +4,7 @@
 #include <list>
 
 #include "ParserBlock.h"
-#include "GlobalParamsBlock.h"
+#include "GlobalParamsAction.h"
 
 // libMesh
 #include "getpot.h"
@@ -48,7 +48,7 @@ public:
    * for creating and filling in various MOOSE based objects.
    */
   void execute();
-  void new_execute();
+  void execute_new();
 
   /**
    * Prints the Parser Block tree
@@ -163,13 +163,13 @@ private:
    * since they are colled only from this Object
    */
   template<typename T>
-  void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsBlock *global_block);
+  void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
   
   template<typename T>
-  void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsBlock *global_block);
+  void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
 
   template<typename T>
-  void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsBlock *global_block);
+  void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block);
 
   /************************************
    * Private Data Members

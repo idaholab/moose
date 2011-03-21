@@ -23,9 +23,10 @@ main(int argc, char *argv[])
   else
     p.printUsage();
 
+// Make '1' to use Actions  
 #if 0
-  p.new_parse(input_filename);
-  p.new_execute();
+  p.parse_new(input_filename);
+  p.execute_new();
 #else
   p.parse(input_filename);
   p.execute();

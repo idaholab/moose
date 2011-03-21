@@ -20,8 +20,10 @@ public:
   void addDependency(std::string action, std::string pre_req);
   void addActionBlock(Action * blk);
 
+  ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
+  ActionIterator actionBlocksWithActionEnd();
+  
   /// Iterators to ordered Actions
-
   // TODO: Right now all Actions require a Parser pointer when setting up the problem.
   //       In order to build Actions on the fly inside of the factory we'll need this
   //       pointer when the parser iterates over the Actions.  We might be able
@@ -41,6 +43,9 @@ private:
 
   /// The vector of ordered actions out of the dependency resolver
   std::vector<Action *> _ordered_actions;
+
+  /// Used to store the action name for the current active action Block iterator
+  std::string _curr_action_name;
 };
 
 #endif // ACTIONWAREHOUSE_H

@@ -2,6 +2,7 @@
 #include "Parser.h"
 #include "MooseMesh.h"
 #include "MProblem.h"
+#include "ActionWarehouse.h"
 
 // libMesh includes
 #include "exodusII_io.h"
@@ -92,13 +93,9 @@ SetupMeshAction::act()
       mooseError("Number of displacements and dimension of mesh MUST be the same!");
   }
 
-  // There is no executioner block, create the MProblem class by ourselves
-
-  //GenericExecutionerBlock * exec = dynamic_cast<GenericExecutionerBlock *>(locateBlock("Executioner"));
-  //if (exec == NULL)
-
-
-  // TODO: Make a new action to create a problem
-  _parser_handle._problem = new MProblem(*mesh);
+  // There is no setup execution action satisfied, create the MProblem class by ourselves
+  if (Moose::action_warehouse.actionBlocksWithActionBegin("setup_executioner") ==
+      Moose::action_warehouse.actionBlocksWithActionEnd())
+    _parser_handle._problem = new MProblem(*mesh);
 }
 

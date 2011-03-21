@@ -1,13 +1,9 @@
 #ifndef ADDICACTION_H
 #define ADDICACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
-#include "Action.h"
+#include "MooseObjectAction.h"
 
-#include <string>
-
-class AddICAction : public Action
+class AddICAction : public MooseObjectAction
 {
 public:
   AddICAction(const std::string & name, InputParameters params);

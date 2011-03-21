@@ -52,6 +52,8 @@
 #include "GlobalParamsBlock.h"
 #include "AdaptivityBlock.h"
 
+#include "GlobalParamsAction.h"
+
 // libMesh
 #include "getpot.h"
 
@@ -217,12 +219,15 @@ Parser::~Parser()
 }
 
 bool
-Parser::isSectionActive(const std::string & section_name, const InputParameters & params) const
+Parser::isSectionActive(const std::string & s, const InputParameters & params) const
 {
   bool retValue = false;
 
-  if (section_name.find_last_of('/') == std::string::npos)
+  // Base Level is always active
+  if (s.find_last_of('/') == std::string::npos)
     return true;
+  
+  std::string short_name = s.substr(s.find_last_of('/') != std::string::npos ? s.find_last_of('/') + 1 : 0);
   
   std::vector<std::string> active = params.get<std::vector<std::string> >("active");
   try
@@ -230,7 +235,7 @@ Parser::isSectionActive(const std::string & section_name, const InputParameters 
     if (active.at(0) == "__all__")
       retValue = true;
     else
-      retValue = std::find(active.begin(), active.end(), section_name) != active.end();
+      retValue = std::find(active.begin(), active.end(), short_name) != active.end();
   }
   catch (std::out_of_range)
   {}
@@ -259,7 +264,7 @@ Parser::parse_new(const std::string &input_filename)
    * section names.  We use this to get the "active" blocks which determine which
    * child blocks (Actions) will be created.
    */
-  InputParameters base_action_params = validParams<Action>();
+  InputParameters base_action_params;
 
   /**
    * The section_names function returns a list of section names including all
@@ -278,32 +283,37 @@ Parser::parse_new(const std::string &input_filename)
 
     // Extract the block parameters before constructing the action
     InputParameters params = ActionFactory::instance()->getValidParams(*i);
+
+    // If this is a base level block it is active and we need to reset the base_action_params
+    if (curr_identifier.find_last_of('/') == std::string::npos)
+      base_action_params = validParams<Action>();
     
     // Before we build any objects we need to make sure that the section they are in is active
     // and that they aren't an unregistered parent (signified by an empty params object)
-    if (!isSectionActive(curr_identifier, base_action_params) || params.n_parameters() == 0)
-      continue;
-
-    params.set<Parser *>("parser_handle") = this;
-    
-    extractParams(curr_identifier, params);
-    std::cout << params << "\n";
-
-    // Create the Action
-    Action * action = ActionFactory::instance()->create(curr_identifier, params);
-
-    // extract the MooseObject params if necessary
-    MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-    if (moose_object_action)
+    if (isSectionActive(curr_identifier, base_action_params) && params.n_parameters() != 0)
     {
-      extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
-      std::cout << "Moose Object Params:\n" << moose_object_action->getMooseObjectParams();
-    }
+      params.set<Parser *>("parser_handle") = this;
     
-    // add it to the warehouse
-    Moose::action_warehouse.addActionBlock(action);
+      extractParams(curr_identifier, params);
+      std::cout << params << "\n";
+
+      // Create the Action
+      Action * action = ActionFactory::instance()->create(curr_identifier, params);
+
+      // extract the MooseObject params if necessary
+      MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+      if (moose_object_action)
+      {
+        extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
+        std::cout << "Moose Object Params:\n" << moose_object_action->getMooseObjectParams();
+      }
+    
+      // add it to the warehouse
+      Moose::action_warehouse.addActionBlock(action);
+    }
 
     // Last we need to grab our base_action_params, i.e. "active" for the next nested level
+    base_action_params = validParams<Action>();
     extractParams(curr_identifier, base_action_params);
   }
 }
@@ -745,7 +755,7 @@ Parser::fixupOptionalBlocks()
 }
 
 void
-Parser::new_execute()
+Parser::execute_new()
 {
   /// Iterate over the actions inside of the ActionWarehouse
   /// TODO: Make this work instead of the parser block actions below
@@ -829,9 +839,17 @@ Parser::printUsage() const
 void
 Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
-  const std::string global_params_block_name = "GlobalParams";
-  ParserBlock *parser_block = _input_tree != NULL ? _input_tree->locateBlock(global_params_block_name) : NULL;
-  GlobalParamsBlock *global_params_block = parser_block != NULL ? dynamic_cast<GlobalParamsBlock *>(parser_block) : NULL;
+  static const std::string global_params_block_name = "GlobalParams";
+  static const std::string global_params_action_name = "set_global_params";
+//  ActionIterator act_iter = Moose::action_warehouse.actionBlocksWithActionBegin(global_params_action_name);
+  GlobalParamsAction *global_params_block = NULL;
+
+  // We are grabbing only the first 
+//  if (act_iter != Moose::action_warehouse.actionBlocksWithActionEnd())
+//    global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
+  
+  //ParserBlock *parser_block = _input_tree != NULL ? _input_tree->locateBlock(global_params_block_name) : NULL;
+  //GlobalParamsBlock *global_params_block = parser_block != NULL ? dynamic_cast<GlobalParamsBlock *>(parser_block) : NULL;
 
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
   {
@@ -906,7 +924,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 }
 
 template<typename T>
-void Parser::setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsBlock *global_block)
+void Parser::setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block)
 {
   T value = _getpot_file(full_name.c_str(), param->get());
   
@@ -916,7 +934,7 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
 }
 
 template<typename T>
-void Parser::setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsBlock *global_block)
+void Parser::setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block)
 {
   int vec_size = _getpot_file.vector_variable_size(full_name.c_str());
 
@@ -935,7 +953,7 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
 }
 
 template<typename T>
-void Parser::setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsBlock *global_block)
+void Parser::setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block)
 {
   int vec_size = _getpot_file.vector_variable_size(full_name.c_str());
   int one_dim = pow(vec_size, 0.5);

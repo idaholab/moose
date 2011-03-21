@@ -76,14 +76,19 @@
 #include "AddKernelAction.h"
 #include "AddPeriodicBCAction.h"
 #include "AddVariableAction.h"
+#include "AddPostprocessorAction.h"
+#include "AddDamperAction.h"
+#include "AddStabilizerAction.h"
+#include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
 #include "CreateMeshAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
 #include "SetupMeshAction.h"
 #include "SetupOutputAction.h"
-#include "SetupPeriodicBCAction.h"
 #include "AddMaterialAction.h"
+#include "GlobalParamsAction.h"
+#include "SetupPBPAction.h"
 
 namespace Moose {
 
@@ -176,27 +181,31 @@ addActionTypes()
   registerActionName("add_variable", true);
   registerActionName("add_kernel", true);
   registerActionName("add_bc", true);
-  registerActionName("add_material", true);
   registerActionName("setup_executioner", true);
   registerActionName("setup_output", true);
   registerActionName("init_problem", true);
-
+  
   /// Additional Actions
+  registerActionName("set_global_params", false);
   registerActionName("create_mesh", false);
   registerActionName("modify_mesh", false);
+  registerActionName("add_material", false);
   registerActionName("add_function", false);
   registerActionName("add_aux_variable", false);
   registerActionName("add_aux_kernel", false);
   registerActionName("add_aux_bc", false);
   registerActionName("add_ic", false);
   registerActionName("add_postprocessor", false);
-  registerActionName("setup_periodic_bc", false);
+  registerActionName("add_damper", false);
+  registerActionName("add_stabilizer", false);
   registerActionName("add_periodic_bc", false);
+  registerActionName("add_preconditioning", false);
 
   // Dummy Actions (useful for dependencies)
   registerActionName("setup_mesh_complete", false);
   registerActionName("setup_function_complete", false);
-  registerActionName("variable_setup_complete", false);
+  registerActionName("setup_variable_complete", false);
+  registerActionName("ready_to_init", false);
   registerActionName("setup_pps_complete", false);
 
   /**************************/
@@ -206,31 +215,46 @@ addActionTypes()
   action_warehouse.addDependency("setup_mesh", "create_mesh");
   action_warehouse.addDependency("modify_mesh", "setup_mesh");
   action_warehouse.addDependency("setup_mesh_complete", "setup_mesh");
+
+  /// Executioner
+  action_warehouse.addDependency("setup_executioner", "setup_mesh_complete");
   
   /// Functions
-  action_warehouse.addDependency("add_function", "setup_mesh_complete");
-  action_warehouse.addDependency("setup_function_complete", "setup_mesh_complete");
+  action_warehouse.addDependency("add_function", "setup_executioner");
+  action_warehouse.addDependency("setup_function_complete", "add_function");
   
   /// Variable Actions
   action_warehouse.addDependency("add_variable", "setup_function_complete");
   
   /// AuxVariable Actions
   action_warehouse.addDependency("add_aux_variable", "setup_function_complete");
-  action_warehouse.addDependency("variable_setup_complete", "add_variable");
+  action_warehouse.addDependency("setup_variable_complete", "add_aux_variable");
 
+  /// ICs
+  action_warehouse.addDependency("add_ic", "setup_variable_complete");
+
+  /// PeriodicBCs
+  action_warehouse.addDependency("add_periodic_bc", "setup_variable_complete");
+
+  /// Preconditioning
+  action_warehouse.addDependency("add_preconditioning", "add_periodic_bc");
+  action_warehouse.addDependency("ready_to_init", "add_preconditioning");
+  
   /// InitProblem
-  action_warehouse.addDependency("init_problem", "variable_setup_complete");
-  action_warehouse.addDependency("setup_executioner", "init_problem");
+  action_warehouse.addDependency("init_problem", "ready_to_init");
 
   /// Materials
-  action_warehouse.addDependency("add_material", "setup_executioner");
+  action_warehouse.addDependency("add_material", "init_problem");
 
   /// Postprocessors
   action_warehouse.addDependency("add_postprocessor", "add_material");
   action_warehouse.addDependency("setup_pps_complete", "add_postprocessor");
 
-  /// ICs
-  action_warehouse.addDependency("add_ic", "setup_pps_complete");
+  /// Dampers
+  action_warehouse.addDependency("add_damper", "setup_pps_complete");
+
+  /// Stabilizers
+  action_warehouse.addDependency("add_stabilizer", "setup_pps_complete");
 
   /// Kernels
   action_warehouse.addDependency("add_kernel", "setup_pps_complete");
@@ -240,56 +264,52 @@ addActionTypes()
 
   /// BCs
   action_warehouse.addDependency("add_bc", "setup_pps_complete");
-  action_warehouse.addDependency("setup_periodic_bc", "setup_pps_complete");
-  action_warehouse.addDependency("add_periodic_bc", "setup_periodic_bc");
 
   /// AuxBCs
   action_warehouse.addDependency("add_aux_bc", "setup_pps_complete");
 
-  
-
-  // Executioner
-
+  /// Ouput
   action_warehouse.addDependency("setup_output", "setup_pps_complete");
+  
 }
 
 void
 registerActions()
 {
-  registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh"); // DONE
-  registerAction(SetupMeshAction, "Mesh", "setup_mesh"); // DONE
-  registerAction(EmptyAction, "Functions/*", "add_function");  // TODO
-  registerAction(AddVariableAction, "Variables/*", "add_variable");   // DONE
-  registerAction(AddVariableAction, "AuxVariables/*", "add_aux_variable");  // DONE
-  registerAction(AddKernelAction, "Kernels/*", "add_kernel"); // DONE
-  registerAction(AddKernelAction, "AuxKernels/*", "add_aux_kernel");  // DONE
-  registerAction(AddBCAction, "BCs/*", "add_bc");  // DONE
-  registerAction(AddBCAction, "AuxBCs/*", "add_aux_bc");  // DONE
-  registerAction(AddMaterialAction, "Materials/*", "add_material");  // DONE
-  registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");   //DONE
-  registerAction(SetupOutputAction, "Output", "setup_output"); // DONE
+  registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
+  registerAction(SetupMeshAction, "Mesh", "setup_mesh");
+  registerAction(AddFunctionAction, "Functions/*", "add_function");
+  registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");
+  registerAction(SetupOutputAction, "Output", "setup_output");
+  registerAction(GlobalParamsAction, "GlobalParams", "set_global_params");
   
-  
-//  registerAction(EmptyAction, "Postprocessors", "no_action");  // REMOVE
-  registerAction(EmptyAction, "Postprocessors/*", "no_action");  // TODO
-  registerAction(EmptyAction, "Postprocessors/Residual", "no_action");  // TODO
-  registerAction(EmptyAction, "Postprocessors/Residual/*", "no_action");  // TODO
-  registerAction(EmptyAction, "Postprocessors/Jacobian", "no_action");  // TODO
-  registerAction(EmptyAction, "Postprocessors/Jacobian/*", "no_action");  // TODO
-  registerAction(EmptyAction, "Postprocessors/NewtonIter", "no_action");  // TODO
-  registerAction(EmptyAction, "Postprocessors/NewtonIter/*", "no_action");  // TODO
-//  registerAction(EmptyAction, "Dampers", "no_action");  // REMOVE
-  registerAction(EmptyAction, "Dampers/*", "no_action");  // TODO
-  registerAction(EmptyAction, "GlobalParams", "no_action");  // TODO
-//  registerAction(EmptyAction, "DiracKernels", "no_action");  // REMOVE
-  registerAction(EmptyAction, "DiracKernels/*", "no_action");  // TODO
-  registerAction(EmptyAction, "Preconditioning/PBP", "no_action");  // TODO
-  registerAction(EmptyAction, "BCs/Periodic", "no_action");  // TODO
-  registerAction(EmptyAction, "BCs/Periodic/*", "no_action");  // TODO
-  registerAction(EmptyAction, "Stabilizers/*", "no_action");  // TODO
+
+  /// MooseObjectActions
+  registerAction(AddVariableAction, "Variables/*", "add_variable");
+  registerAction(AddVariableAction, "AuxVariables/*", "add_aux_variable");
+  registerAction(AddICAction, "Variables/*/InitialCondition", "add_ic");
+  registerAction(AddICAction, "AuxVariables/*/InitialCondition", "add_ic");
+  registerAction(AddKernelAction, "Kernels/*", "add_kernel");
+  registerAction(AddKernelAction, "AuxKernels/*", "add_aux_kernel");
+  registerAction(AddBCAction, "BCs/*", "add_bc");
+  registerAction(AddPeriodicBCAction, "BCs/Periodic/*", "add_periodic_bc");
+  registerAction(AddBCAction, "AuxBCs/*", "add_aux_bc");
+  registerAction(AddMaterialAction, "Materials/*", "add_material");
+  registerAction(AddPostprocessorAction, "Postprocessors/*", "add_postprocessor");
+  registerAction(AddPostprocessorAction, "Postprocessors/Residual/*", "add_postprocessor");
+  registerAction(AddPostprocessorAction, "Postprocessors/Jacobian/*", "add_postprocessor");
+  registerAction(AddPostprocessorAction, "Postprocessors/NewtonIter/*", "add_postprocessor");
+  registerAction(AddDamperAction, "Dampers/*", "add_damper");
+  registerAction(AddStabilizerAction, "Stabilizers/*", "add_stabilizer");
+  registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
+
+
+
   registerAction(EmptyAction, "Executioner/Adaptivity", "no_action");   // TODO
-  registerAction(EmptyAction, "Variables/*/InitialCondition", "add_ic");   // TODO
-  registerAction(EmptyAction, "AuxVariables/*/InitialCondition", "add_ic");  //TODO
+
+  
+  
+  registerAction(EmptyAction, "DiracKernels/*", "no_action");  // TODO
   registerAction(EmptyAction, "Mesh/*", "modify_mesh");  // TODO
 
   registerNonParsedAction(InitProblemAction, "init_problem");
