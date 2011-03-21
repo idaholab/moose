@@ -15,15 +15,13 @@ InputParameters validParams<BoundaryCondition>()
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
     FunctionInterface(parameters),
+    Moose::TransientInterface(parameters),
     _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
     _var(_problem.getVariable(0, parameters.get<std::string>("variable"))),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 
     _current_elem(_var.currentElem()),
-    _current_side(_var.currentSide()),
-
-    _t(_problem.time())
-{
+    _current_side(_var.currentSide()){
 }
 
 BoundaryCondition::~BoundaryCondition()

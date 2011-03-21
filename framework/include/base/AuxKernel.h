@@ -5,6 +5,7 @@
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
+#include "TransientInterface.h"
 
 //forward declarations
 class AuxKernel;
@@ -23,7 +24,8 @@ class AuxiliarySystem;
 class AuxKernel :
   public Object,
   public Moose::Coupleable,
-  public FunctionInterface
+  public FunctionInterface,
+  public Moose::TransientInterface
 {
 public:
   /**
@@ -59,8 +61,6 @@ protected:
   const Node * & _current_node;
 
   Real & _current_volume;
-
-  Real & _t;
 
   /**
    * true if the kernel nodal, false if it is elemental

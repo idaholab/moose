@@ -19,7 +19,8 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
     Moose::Coupleable(parameters),
     FunctionInterface(parameters),
-    _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
+    Moose::TransientInterface(parameters),
+    _subproblem(*parameters.get<Moose::SubProblem *>("_subproblem")),
     _sys(*parameters.get<Moose::System *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
@@ -29,8 +30,6 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _q_point(_var.points()),
     _qrule(_var.qRule()),
     _JxW(_var.JxW()),
-
-    _t(_problem.time()),
 
     _phi(_var.phi()),
     _grad_phi(_var.gradPhi()),

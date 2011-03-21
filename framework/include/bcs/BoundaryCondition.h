@@ -4,6 +4,7 @@
 #include "Object.h"
 #include "Integrable.h"
 #include "FunctionInterface.h"
+#include "TransientInterface.h"
 
 // libMesh
 #include "elem.h"
@@ -16,7 +17,8 @@ class SubProblem;
 
 class BoundaryCondition :
   public Object,
-  public FunctionInterface
+  public FunctionInterface,
+  public Moose::TransientInterface
 {
 public:
   BoundaryCondition(const std::string & name, InputParameters parameters);
@@ -34,8 +36,6 @@ protected:
 
   const Elem * & _current_elem;
   unsigned int & _current_side;
-
-  Real & _t;
 };
 
 

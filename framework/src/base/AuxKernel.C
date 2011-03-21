@@ -25,6 +25,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
     Coupleable(parameters),
     FunctionInterface(parameters),
+    Moose::TransientInterface(parameters),
     _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
     _aux_sys(*parameters.get<Moose::AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -34,7 +35,6 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _current_elem(_var.currentElem()),
     _current_node(_var.node()),
     _current_volume(_aux_sys._data[_tid]._current_volume),
-    _t(_problem.time()),
     _nodal(_var.feType().family == LAGRANGE)
 {
 }

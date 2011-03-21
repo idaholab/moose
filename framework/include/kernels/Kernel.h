@@ -5,6 +5,7 @@
 #include "Integrable.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
+#include "TransientInterface.h"
 
 // libMesh
 #include "fe.h"
@@ -21,7 +22,8 @@ class Kernel :
   public Object,
   public Moose::Integrable,
   public Moose::Coupleable,
-  public FunctionInterface
+  public FunctionInterface,
+  public Moose::TransientInterface
 {
 public:
   Kernel(const std::string & name, InputParameters parameters);
@@ -49,7 +51,7 @@ public:
   Real stopTime();
 
 protected:
-  Moose::SubProblem & _problem;
+  Moose::SubProblem & _subproblem;
   Moose::System & _sys;
 
   THREAD_ID _tid;
@@ -64,9 +66,7 @@ protected:
   QBase * & _qrule;
   const std::vector<Real> & _JxW;
 
-  Real & _t;
-
-  unsigned int _i, _j;
+   unsigned int _i, _j;
   // shape functions
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
