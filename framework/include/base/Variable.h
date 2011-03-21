@@ -36,13 +36,6 @@ public:
   void reinit_node();
   void reinit_aux();
 
-//  void reinit(const Elem *elem);
-//  void reinit(const Elem *elem, unsigned int side);
-//
-//  void reinit(const Node * node);
-//
-//  void reinit_aux(const Elem *elem);
-
   /**
    * Get variable number
    */
@@ -54,9 +47,9 @@ public:
   const Elem * & currentElem() { return _elem; }
   unsigned int & currentSide() { return _current_side; }
 
-  QBase * & qRule() { return _qrule; }
-  const std::vector<Point> & qpoints() { return _qpoints; }
-  const std::vector<Real> & JxW() { return _JxW; }
+//  QBase * & qRule() { return _qrule; }
+//  const std::vector<Point> & qpoints() { return _qpoints; }
+//  const std::vector<Real> & JxW() { return _JxW; }
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
@@ -98,7 +91,7 @@ protected:
 
   const DofMap & _dof_map;
 
-  QBase * & _qrule;
+//  QBase * & _qrule;
 
   FEBase * & _fe;
 
@@ -107,8 +100,8 @@ protected:
 
   std::vector<unsigned int> _dof_indices;
 
-  const std::vector<Point> & _qpoints;
-  const std::vector<Real> & _JxW;
+//  const std::vector<Point> & _qpoints;
+//  const std::vector<Real> & _JxW;
 
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;

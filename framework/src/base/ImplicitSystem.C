@@ -54,11 +54,8 @@ namespace Moose {
 
     virtual void onElement(const Elem *elem)
     {
-      const unsigned int dim = _sys._mesh.dimension();
       unsigned int cur_subdomain = elem->subdomain_id();
 
-      QGauss qrule (dim, FIFTH);
-      _problem.attachQuadratureRule(&qrule, _tid);
       _problem.reinitElem(elem, _tid);
       _problem.reinitMaterials(cur_subdomain, _tid);
 
@@ -83,10 +80,6 @@ namespace Moose {
 
     virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
     {
-      const unsigned int dim = _sys._mesh.dimension();
-      QGauss qrule_face (dim-1, FIFTH);
-      _problem.attachQuadratureRule(&qrule_face, _tid);
-
       _problem.reinitElemFace(elem, side, bnd_id, _tid);
       _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
       for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
@@ -133,11 +126,8 @@ namespace Moose {
 
     virtual void onElement(const Elem *elem)
     {
-      const unsigned int dim = _sys._mesh.dimension();
       unsigned int cur_subdomain = elem->subdomain_id();
 
-      QGauss qrule (dim, _problem.getQuadratureOrder());
-      _problem.attachQuadratureRule(&qrule, _tid);
       _problem.reinitElem(elem, _tid);
       _problem.reinitMaterials(cur_subdomain, _tid);
 
@@ -162,10 +152,6 @@ namespace Moose {
 
     virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
     {
-      const unsigned int dim = _sys._mesh.dimension();
-      QGauss qrule_face (dim-1, FIFTH);
-      _problem.attachQuadratureRule(&qrule_face, _tid);
-
       _problem.reinitElemFace(elem, side, bnd_id, _tid);
       _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
       for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)

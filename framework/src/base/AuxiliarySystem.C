@@ -15,7 +15,7 @@ namespace Moose {
   {
   protected:
     AuxiliarySystem & _sys;
-    Problem & _problem;
+    SubProblem & _problem;
 
   public:
     ComputeNodalAuxThread(AuxiliarySystem & sys) :
@@ -44,7 +44,7 @@ namespace Moose {
   {
   protected:
     AuxiliarySystem & _sys;
-    Problem & _problem;
+    SubProblem & _problem;
 
   public:
     ComputeElemAuxThread(AuxiliarySystem & sys) :
@@ -73,19 +73,16 @@ namespace Moose {
 //      {
 //        reinitAuxKernels(0, soln, *elem);
 
-          QGauss qrule (dim, FIFTH);
-          _problem.attachQuadratureRule(&qrule, tid);
           _problem.reinitElem(elem, tid);
 
           //Compute the area of the element
           _sys._data[tid]._current_volume = 0;
-          //Just use any old JxW... they are all actually the same
-          Variable * var = *(_sys._vars[tid].all().begin());
-          const std::vector<Real> & jxw = var->JxW();
+
+          const std::vector<Real> & jxw = _problem.JxW(tid);
 
 //        if (_problem.geomType() == Moose::XYZ)
 //        {
-            for (unsigned int qp = 0; qp < var->qRule()->n_points(); qp++)
+            for (unsigned int qp = 0; qp < _problem.qRule(tid)->n_points(); qp++)
               _sys._data[tid]._current_volume += jxw[qp];
 //        }
 //        else if (_problem.geomType() == Moose::CYLINDRICAL)

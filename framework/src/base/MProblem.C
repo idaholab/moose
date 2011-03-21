@@ -19,7 +19,6 @@ MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
     _nl(static_cast<SubProblem &>(*_parent), name("nl", _n)),
     _aux(static_cast<SubProblem &>(*_parent), name("aux", _n)),
     _quadrature_order(CONSTANT),
-    _asm_info(libMesh::n_threads(), AssemblyData(*this)),
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
     _output_displaced(true)
@@ -28,41 +27,24 @@ MProblem::MProblem(Mesh & mesh, Problem * parent/* = NULL*/) :
   _sys.push_back(&_aux);
   _n++;
 
-//  unsigned int n_threads = libMesh::n_threads();
-//  _asm_info.resize(n_threads);
-//  _qrule.resize(n_threads);
-//  _fe.resize(n_threads);
-//  _points.resize(n_threads);
-//  for (unsigned int i = 0; i < _fe.size(); ++i)
-//  {
-//    _fe[i] = FEBase::build(_mesh.dimension(), FEType(FIRST, LAGRANGE)).release();
-//    _points[i] = _fe[i]->get_xyz();
-//  }
+  _asm_info.resize(libMesh::n_threads());
+  for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
+    _asm_info[i] = new AssemblyData(*this);
 }
 
 MProblem::~MProblem()
 {
+  for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
+    delete _asm_info[i];
+
 //  delete _displaced_mesh;
   delete _displaced_problem;
 }
 
 void
-MProblem::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
-{
-  _asm_info[tid].attachQuadratureRule(qrule);
-//  _qrule[tid] = qrule;
-//  _fe[tid]->attach_quadrature_rule(qrule);
-//  _nl.attachQuadratureRule(qrule, tid);
-//  _aux.attachQuadratureRule(qrule, tid);
-}
-
-void
 MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  _asm_info[tid].reinit(elem);
-//  _elem = elem;
-//  _fe[tid]->reinit(elem);
-//  _points[tid] = _fe[tid]->get_xyz();
+  _asm_info[tid]->reinit(elem);
 
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
@@ -71,10 +53,7 @@ MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-//  _elem = elem;
-//  _fe[tid]->reinit(elem, side);
-//  _points[tid] = _fe[tid]->get_xyz();
-  _asm_info[tid].reinit(elem, side);
+  _asm_info[tid]->reinit(elem, side);
 
   _nl.reinitElemFace(elem, side, bnd_id, tid);
   _aux.reinitElemFace(elem, side, bnd_id, tid);
@@ -83,7 +62,7 @@ MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_
 void
 MProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
-  _asm_info[tid].reinit(node);
+  _asm_info[tid]->reinit(node);
 
   _nl.reinitNode(node, tid);
   _aux.reinitNode(node, tid);
@@ -92,7 +71,7 @@ MProblem::reinitNode(const Node * node, THREAD_ID tid)
 void
 MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
-  _asm_info[tid].reinit(node);
+  _asm_info[tid]->reinit(node);
 
   _nl.reinitNodeFace(node, bnd_id, tid);
   _aux.reinitNodeFace(node, bnd_id, tid);
@@ -177,6 +156,9 @@ MProblem::init()
 {
   SubProblem::init();
   _quadrature_order = _nl.getMinQuadratureOrder();
+
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _asm_info[tid]->attachQuadratureRule(_quadrature_order);
 
   _nl.init();
   if (_displaced_problem)

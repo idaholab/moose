@@ -100,11 +100,8 @@ public:
 
   virtual void onElement(const Elem *elem)
   {
-    const unsigned int dim = _problem.mesh().dimension();
     unsigned int subdomain = elem->subdomain_id();
 
-    QGauss qrule (dim, FIFTH);
-    _problem.attachQuadratureRule(&qrule, _tid);
     _problem.reinitElem(elem, _tid);
     _problem.reinitMaterials(subdomain, _tid);
 
@@ -133,11 +130,6 @@ public:
 
     if (side_postprocessor_begin != side_postprocessor_end)
     {
-//      _moose_system.reinitBCs(_tid, _soln, elem, side, bnd_id);
-      const unsigned int dim = _problem.mesh().dimension();
-      QGauss qrule_face (dim-1, FIFTH);
-      _problem.attachQuadratureRule(&qrule_face, _tid);
-
       _problem.reinitElemFace(elem, side, bnd_id, _tid);
       _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 

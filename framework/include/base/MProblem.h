@@ -22,21 +22,23 @@ public:
   virtual ~MProblem();
 
   virtual Order getQuadratureOrder() { return _quadrature_order; }
-  virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid].qRule(); }
-  virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid].qPoints(); }
-  virtual FEBase * & getFE(THREAD_ID tid, const FEType & fe_type) { return _asm_info[tid].getFE(fe_type); }
-  virtual const Elem * & elem(THREAD_ID tid) { return _asm_info[tid].elem(); }
-  virtual unsigned int & side(THREAD_ID tid) { return _asm_info[tid].side(); }
-  virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid].sideElem(); }
-  virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid].node(); }
+  virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
+  virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
+  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _asm_info[tid]->JxW(); }
+  virtual QBase * & qRuleFace(THREAD_ID tid) { return _asm_info[tid]->qRuleFace(); }
+  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _asm_info[tid]->qPointsFace(); }
+  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _asm_info[tid]->JxWFace(); }
 
-  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
+  virtual FEBase * & getFE(THREAD_ID tid, const FEType & fe_type) { return _asm_info[tid]->getFE(fe_type); }
+  virtual const Elem * & elem(THREAD_ID tid) { return _asm_info[tid]->elem(); }
+  virtual unsigned int & side(THREAD_ID tid) { return _asm_info[tid]->side(); }
+  virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid]->sideElem(); }
+  virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid]->node(); }
+
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
-
-//  virtual const Elem * & elem() { return _elem; }
 
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
 
@@ -87,14 +89,7 @@ protected:
 
   // quadrature
   Order _quadrature_order;                              /// Quadrature order required by all variables to integrated over them.
-//  std::vector<QBase *> _qrule;
-//  std::vector<FEBase *> _fe;                            /// helper object for transforming coordinates
-//  std::vector<std::vector<Point> > _points;
-
-  std::vector<AssemblyData> _asm_info;
-
-
-//  const Elem * _elem;
+  std::vector<AssemblyData *> _asm_info;
 
   // Displaced mesh /////
   Mesh * _displaced_mesh;

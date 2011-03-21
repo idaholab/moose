@@ -18,9 +18,15 @@ public:
   virtual ~AssemblyData();
 
   FEBase * & getFE(FEType type);
-
   QBase * & qRule() { return _qrule; }
   const std::vector<Point> & qPoints() { return _q_points; }
+  const std::vector<Real> & JxW() { return _JxW; }
+
+  FEBase * & getFEFace(FEType type);
+  QBase * & qRuleFace() { return _qrule_face; }
+  const std::vector<Point> & qPointsFace() { return _q_points_face; }
+  const std::vector<Real> & JxWFace() { return _JxW_face; }
+
   const std::vector<Point> & normals() { return _normals; }
 
   const Elem * & elem() { return _current_elem; }
@@ -29,7 +35,7 @@ public:
 
   const Node * & node() { return _current_node; }
 
-  void attachQuadratureRule(QBase *qrule);
+  void attachQuadratureRule(Order o);
 
   void reinit(const Elem * elem);
   void reinit(const Elem * elem, unsigned int side);
@@ -37,11 +43,18 @@ public:
 
 protected:
   SubProblem & _problem;
-  std::map<FEType, FEBase *> _fe;               /// types of finite elements
 
+  std::map<FEType, FEBase *> _fe;               /// types of finite elements
   FEBase * _fe_helper;                          /// helper object for transforming coordinates
   QBase * _qrule;
   const std::vector<Point> & _q_points;
+  const std::vector<Real> & _JxW;
+
+  std::map<FEType, FEBase *> _fe_face;          /// types of finite elements
+  FEBase * _fe_face_helper;                          /// helper object for transforming coordinates
+  QBase * _qrule_face;
+  const std::vector<Point> & _q_points_face;
+  const std::vector<Real> & _JxW_face;
   const std::vector<Point> & _normals;          /// Normal vectors at the quadrature points.
 
 

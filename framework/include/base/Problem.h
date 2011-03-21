@@ -33,8 +33,6 @@ public:
   virtual bool hasVariable(const std::string & var_name) = 0;
   virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
-  virtual Order getQuadratureOrder() = 0;
-  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid) = 0;
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;

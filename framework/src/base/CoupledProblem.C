@@ -65,19 +65,6 @@ CoupledProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   mooseError("Unknown variable " + var_name);
 }
 
-Order
-CoupledProblem::getQuadratureOrder()
-{
-  return CONSTANT;                      // FIXME: grab this from subproblems
-}
-
-void
-CoupledProblem::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
-{
-  for (std::map<std::string, Moose::SubProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
-    it->second->attachQuadratureRule(qrule, tid);
-}
-
 void
 CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {

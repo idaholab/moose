@@ -14,12 +14,12 @@ Variable::Variable(THREAD_ID tid, unsigned int var_num, const FEType & fe_type, 
     _problem(sys.problem()),
     _sys(sys),
     _dof_map(sys.dofMap()),
-    _qrule(_problem.qRule(_tid)),
+//    _qrule(_problem.qRule(_tid)),
     _fe(_problem.getFE(_tid, fe_type)),
     _elem(_problem.elem(_tid)),
     _current_side(_problem.side(_tid)),
-    _qpoints(_fe->get_xyz()),
-    _JxW(_fe->get_JxW()),
+//    _qpoints(_fe->get_xyz()),
+//    _JxW(_fe->get_JxW()),
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi()),
     _normals(_fe->get_normals()),
@@ -37,31 +37,6 @@ Variable::reinit()
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
 }
 
-
-//void
-//Variable::reinit(const Elem *elem)
-//{
-//  _elem = elem;
-//  _fe->reinit(elem);
-//  _dof_map.dof_indices (_elem, _dof_indices, _var_num);
-//}
-
-//void
-//Variable::reinit(const Elem *elem, unsigned int side)
-//{
-//  _elem = elem;
-//  _current_side = side;
-//  _fe->reinit(elem, side);
-//  _dof_map.dof_indices (_elem, _dof_indices, _var_num);
-//}
-
-//void
-//Variable::reinit(const Node * node)
-//{
-//  _node = node;
-//  _nodal_dof_index = node->dof_number(_sys.number(), _var_num, 0);
-//}
-
 void
 Variable::reinit_node()
 {
@@ -74,13 +49,6 @@ Variable::reinit_aux()
   reinit();
   _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
 }
-
-//void
-//Variable::reinit_aux(const Elem *elem)
-//{
-//  reinit(elem);
-//  _nodal_dof_index = elem->dof_number(_sys.number(), _var_num, 0);
-//}
 
 void
 Variable::sizeResidual()
@@ -112,7 +80,8 @@ Variable::add(SparseMatrix<Number> & jacobian)
 void
 Variable::computeElemValues()
 {
-  unsigned int nqp = _qrule->n_points();
+//  unsigned int nqp = _qrule->n_points();
+  unsigned int nqp = _problem.qRule(_tid)->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
   if (_problem.transient())
