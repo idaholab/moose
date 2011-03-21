@@ -23,12 +23,18 @@ main(int argc, char *argv[])
   else
     p.printUsage();
 
+#if 0
+  p.new_parse(input_filename);
+  p.new_execute();
+#else
   p.parse(input_filename);
   p.execute();
+#endif
 
   Executioner *e = p.getExecutioner();
   e->execute();
   delete e;
+  
 
   return 0;
 }

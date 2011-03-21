@@ -3,16 +3,19 @@
 
 #include "InputParameters.h"
 #include "Moose.h"
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 #include <string>
 
-class AddKernelAction : public Action
+class AddKernelAction : public MooseObjectAction
 {
 public:
   AddKernelAction(const std::string & name, InputParameters params);
 
   virtual void act();
+
+private:
+  bool is_kernels_action;
 };
 
 template<>

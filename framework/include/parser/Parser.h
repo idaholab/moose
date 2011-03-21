@@ -34,17 +34,21 @@ public:
    */
   virtual ~Parser();
 
+  bool isSectionActive(const std::string & section_name, const InputParameters & params) const;
+
   /**
    * Parse an input file consisting of getpot syntax and setup objects
    * in the MOOSE derived application
    */
   void parse(const std::string &input_filename);
+  void parse_new(const std::string &input_filename);
   
   /**
    * This function initiates the traversal of the parse block tree which is each block is resposible
    * for creating and filling in various MOOSE based objects.
    */
   void execute();
+  void new_execute();
 
   /**
    * Prints the Parser Block tree

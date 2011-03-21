@@ -83,6 +83,7 @@
 #include "SetupMeshAction.h"
 #include "SetupOutputAction.h"
 #include "SetupPeriodicBCAction.h"
+#include "AddMaterialAction.h"
 
 namespace Moose {
 
@@ -167,106 +168,131 @@ registerObjects()
 void
 addActionTypes()
 {
+  /**************************/
+  /**** Register Actions ****/
+  /**************************/
+  /// Minimal Problem
+  registerActionName("setup_mesh", true);
+  registerActionName("add_variable", true);
+  registerActionName("add_kernel", true);
+  registerActionName("add_bc", true);
+  registerActionName("add_material", true);
+  registerActionName("setup_executioner", true);
+  registerActionName("setup_output", true);
+  registerActionName("init_problem", true);
 
-  action_warehouse.addAction("no_depends");
-  action_warehouse.addAction("no_action");
+  /// Additional Actions
+  registerActionName("create_mesh", false);
+  registerActionName("modify_mesh", false);
+  registerActionName("add_function", false);
+  registerActionName("add_aux_variable", false);
+  registerActionName("add_aux_kernel", false);
+  registerActionName("add_aux_bc", false);
+  registerActionName("add_ic", false);
+  registerActionName("add_postprocessor", false);
+  registerActionName("setup_periodic_bc", false);
+  registerActionName("add_periodic_bc", false);
 
+  // Dummy Actions (useful for dependencies)
+  registerActionName("setup_mesh_complete", false);
+  registerActionName("setup_function_complete", false);
+  registerActionName("variable_setup_complete", false);
+  registerActionName("setup_pps_complete", false);
+
+  /**************************/
+  /****** Dependencies ******/
+  /**************************/
   /// Mesh Actions
-  action_warehouse.addAction("create_mesh", "no_depends", false);
-  action_warehouse.addAction("setup_mesh", "create_mesh");
-  action_warehouse.addAction("modify_mesh", "create_mesh", false);
-
+  action_warehouse.addDependency("setup_mesh", "create_mesh");
+  action_warehouse.addDependency("modify_mesh", "setup_mesh");
+  action_warehouse.addDependency("setup_mesh_complete", "setup_mesh");
+  
   /// Functions
-  action_warehouse.addAction("add_function", "modify_mesh", false);
+  action_warehouse.addDependency("add_function", "setup_mesh_complete");
+  action_warehouse.addDependency("setup_function_complete", "setup_mesh_complete");
   
   /// Variable Actions
-  action_warehouse.addAction("add_function", "modify_mesh");
-  action_warehouse.addAction("add_variable", "variables_block");
+  action_warehouse.addDependency("add_variable", "setup_function_complete");
   
   /// AuxVariable Actions
-  action_warehouse.addAction("aux_variables_block", "add_variable", false);
-  action_warehouse.addAction("add_aux_variable", "aux_variables_block", false);
+  action_warehouse.addDependency("add_aux_variable", "setup_function_complete");
+  action_warehouse.addDependency("variable_setup_complete", "add_variable");
+
+  /// InitProblem
+  action_warehouse.addDependency("init_problem", "variable_setup_complete");
+  action_warehouse.addDependency("setup_executioner", "init_problem");
+
+  /// Materials
+  action_warehouse.addDependency("add_material", "setup_executioner");
+
+  /// Postprocessors
+  action_warehouse.addDependency("add_postprocessor", "add_material");
+  action_warehouse.addDependency("setup_pps_complete", "add_postprocessor");
 
   /// ICs
-  action_warehouse.addAction("add_ic", "add_aux_variable", false);
+  action_warehouse.addDependency("add_ic", "setup_pps_complete");
 
   /// Kernels
-  action_warehouse.addAction("kernels_block", "add_ic");
-  action_warehouse.addAction("add_kernel", "kernels_block");
+  action_warehouse.addDependency("add_kernel", "setup_pps_complete");
 
-  // BCs
-  action_warehouse.addAction("bcs_block", "add_kernel");
-  action_warehouse.addAction("add_bc", "bcs_block");
-  action_warehouse.addAction("setup_periodic_bc", "bcs_block", false);
-  action_warehouse.addAction("add_periodic_bc", "setup_periodic_bc", false);
+  /// AuxKernels
+  action_warehouse.addDependency("add_aux_kernel", "setup_pps_complete");
 
-  // AuxBCs
-  action_warehouse.addAction("aux_bcs_block", "add_bc", false);
-  action_warehouse.addAction("add_aux_bc", "aux_bcs_block", false);
+  /// BCs
+  action_warehouse.addDependency("add_bc", "setup_pps_complete");
+  action_warehouse.addDependency("setup_periodic_bc", "setup_pps_complete");
+  action_warehouse.addDependency("add_periodic_bc", "setup_periodic_bc");
 
-  // Init Problem
-  action_warehouse.addAction("init_problem", "setup_mesh", false);
+  /// AuxBCs
+  action_warehouse.addDependency("add_aux_bc", "setup_pps_complete");
+
   
+
   // Executioner
-  action_warehouse.addAction("setup_executioner", "init_problem");
-  action_warehouse.addAction("setup_output", "setup_executioner");
+
+  action_warehouse.addDependency("setup_output", "setup_pps_complete");
 }
 
 void
 registerActions()
 {
-  registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
-  registerAction(SetupMeshAction, "Mesh", "setup_mesh");
+  registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh"); // DONE
+  registerAction(SetupMeshAction, "Mesh", "setup_mesh"); // DONE
+  registerAction(EmptyAction, "Functions/*", "add_function");  // TODO
+  registerAction(AddVariableAction, "Variables/*", "add_variable");   // DONE
+  registerAction(AddVariableAction, "AuxVariables/*", "add_aux_variable");  // DONE
+  registerAction(AddKernelAction, "Kernels/*", "add_kernel"); // DONE
+  registerAction(AddKernelAction, "AuxKernels/*", "add_aux_kernel");  // DONE
+  registerAction(AddBCAction, "BCs/*", "add_bc");  // DONE
+  registerAction(AddBCAction, "AuxBCs/*", "add_aux_bc");  // DONE
+  registerAction(AddMaterialAction, "Materials/*", "add_material");  // DONE
+  registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");   //DONE
+  registerAction(SetupOutputAction, "Output", "setup_output"); // DONE
   
-  registerAction(EmptyAction, "Mesh/*", "no_action");  // TODO
+  
+//  registerAction(EmptyAction, "Postprocessors", "no_action");  // REMOVE
+  registerAction(EmptyAction, "Postprocessors/*", "no_action");  // TODO
+  registerAction(EmptyAction, "Postprocessors/Residual", "no_action");  // TODO
+  registerAction(EmptyAction, "Postprocessors/Residual/*", "no_action");  // TODO
+  registerAction(EmptyAction, "Postprocessors/Jacobian", "no_action");  // TODO
+  registerAction(EmptyAction, "Postprocessors/Jacobian/*", "no_action");  // TODO
+  registerAction(EmptyAction, "Postprocessors/NewtonIter", "no_action");  // TODO
+  registerAction(EmptyAction, "Postprocessors/NewtonIter/*", "no_action");  // TODO
+//  registerAction(EmptyAction, "Dampers", "no_action");  // REMOVE
+  registerAction(EmptyAction, "Dampers/*", "no_action");  // TODO
+  registerAction(EmptyAction, "GlobalParams", "no_action");  // TODO
+//  registerAction(EmptyAction, "DiracKernels", "no_action");  // REMOVE
+  registerAction(EmptyAction, "DiracKernels/*", "no_action");  // TODO
+  registerAction(EmptyAction, "Preconditioning/PBP", "no_action");  // TODO
+  registerAction(EmptyAction, "BCs/Periodic", "no_action");  // TODO
+  registerAction(EmptyAction, "BCs/Periodic/*", "no_action");  // TODO
+  registerAction(EmptyAction, "Stabilizers/*", "no_action");  // TODO
+  registerAction(EmptyAction, "Executioner/Adaptivity", "no_action");   // TODO
+  registerAction(EmptyAction, "Variables/*/InitialCondition", "add_ic");   // TODO
+  registerAction(EmptyAction, "AuxVariables/*/InitialCondition", "add_ic");  //TODO
+  registerAction(EmptyAction, "Mesh/*", "modify_mesh");  // TODO
 
-  registerAction(EmptyAction, "Functions", "no_action");
-  registerAction(EmptyAction, "Functions/*", "no_action");
-
-  registerAction(EmptyAction, "Variables", "no_action");
-  registerAction(AddVariableAction, "Variables/*", "add_variable");
-
-  registerAction(EmptyAction, "Variables/*/InitialCondition", "no_action");
-  registerAction(EmptyAction, "AuxVariables", "no_action");
-  registerAction(EmptyAction, "AuxVariables/*/InitialCondition", "no_action");
-  // Reuse the GenericVariableBlock for AuxVariables/*
-  registerAction(EmptyAction, "AuxVariables/*", "no_action");
-  registerAction(EmptyAction, "Kernels", "no_action");
-  registerAction(EmptyAction, "Kernels/*", "no_action");
-//  registerAction(EmptyAction, "DGKernels", "no_action");
-//  registerAction(EmptyAction, "DGKernels/*", "no_action");
-  registerAction(EmptyAction, "AuxKernels", "no_action");
-  registerAction(EmptyAction, "AuxKernels/*", "no_action");
-  registerAction(EmptyAction, "BCs", "no_action");
-  registerAction(EmptyAction, "BCs/*", "no_action");
-  // Reuse the BCsBlock for AuxBCs
-  registerAction(EmptyAction, "AuxBCs", "no_action");
-  // Reuse the GenericBCBlock for AuxBCs/*
-  registerAction(EmptyAction, "AuxBCs/*", "no_action");
-  registerAction(EmptyAction, "Stabilizers", "no_action");
-  registerAction(EmptyAction, "Stabilizers/*", "no_action");
-  registerAction(EmptyAction, "Materials", "no_action");
-  registerAction(EmptyAction, "Materials/*", "no_action");
-  registerAction(EmptyAction, "Output", "no_action");
-  registerAction(EmptyAction, "Preconditioning", "no_action");
-  registerAction(EmptyAction, "Preconditioning/PBP", "no_action");
-  registerAction(EmptyAction, "BCs/Periodic", "no_action");
-  registerAction(EmptyAction, "BCs/Periodic/*", "no_action");
-  registerAction(EmptyAction, "Executioner", "no_action");
-  registerAction(EmptyAction, "Executioner/Adaptivity", "no_action");
-  registerAction(EmptyAction, "Postprocessors", "no_action");
-  registerAction(EmptyAction, "Postprocessors/*", "no_action");
-  registerAction(EmptyAction, "Postprocessors/Residual", "no_action");
-  registerAction(EmptyAction, "Postprocessors/Residual/*", "no_action");
-  registerAction(EmptyAction, "Postprocessors/Jacobian", "no_action");
-  registerAction(EmptyAction, "Postprocessors/Jacobian/*", "no_action");
-  registerAction(EmptyAction, "Postprocessors/NewtonIter", "no_action");
-  registerAction(EmptyAction, "Postprocessors/NewtonIter/*", "no_action");
-  registerAction(EmptyAction, "Dampers", "no_action");
-  registerAction(EmptyAction, "Dampers/*", "no_action");
-  registerAction(EmptyAction, "GlobalParams", "no_action");
-  registerAction(EmptyAction, "DiracKernels", "no_action");
-  registerAction(EmptyAction, "DiracKernels/*", "no_action");
+  registerNonParsedAction(InitProblemAction, "init_problem");
 }
 
 void

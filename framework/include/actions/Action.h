@@ -19,11 +19,18 @@ public:
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
 
   inline InputParameters & getParams() { return _pars; }
+
+  /**
+   * Returns the short name which is the final string after the last delimiter for the
+   * current ParserBlock
+   *
+   * TODO: Rename this method to getName, the normal name (ID) should be getPath
+   */
+  std::string getShortName() const;
   
 protected:
   std::string _action;
   Parser & _parser_handle;
-//  Action & _parent;
 };
 
 template<>

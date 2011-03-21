@@ -113,6 +113,15 @@ InputParameters::isParamValid(const std::string &name) const
 }
 
 bool
+InputParameters::areAllRequiredParamsValid() const
+{
+  for (Parameters::const_iterator it = this->begin(); it != this->end(); ++it)
+    if (isParamRequired(it->first) && !isParamValid(it->first))
+      return false;
+  return true;
+}
+
+bool
 InputParameters::isPrivate(const std::string &name) const
 {
   return _private_params.find(name) != _private_params.end();

@@ -1,13 +1,9 @@
 #ifndef CREATEEXECUTIONERACTION_H
 #define CREATEEXECUTIONERACTION_H
 
-#include "InputParameters.h"
-#include "Moose.h"
-#include "Action.h"
+#include "MooseObjectAction.h"
 
-#include <string>
-
-class CreateExecutionerAction : public Action
+class CreateExecutionerAction : public MooseObjectAction
 {
 public:
   CreateExecutionerAction(const std::string & name, InputParameters params);

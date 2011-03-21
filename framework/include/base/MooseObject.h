@@ -18,6 +18,9 @@ public:
   template <typename T>
   const T & getParam(const std::string & name) { return _pars.get<T>(name); }
 
+  template <typename T>
+  const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
+  
 protected:
   std::string _name;
   InputParameters _pars;

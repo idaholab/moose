@@ -9,11 +9,7 @@ InputParameters validParams<Action>()
 
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
   params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
-  params.addParam<std::string>("type", "A string representing the object type that this ParserBlock will hold if applicable");
   params.addPrivateParam<Parser *>("parser_handle");
-//  params.addPrivateParam<Action *>("parent");
-
- 
   return params;
 }
 
@@ -22,7 +18,11 @@ Action::Action(const std::string & name, InputParameters params) :
     MooseObject(name, params),
     _action(getParam<std::string>("action")),
     _parser_handle(*getParam<Parser *>("parser_handle"))
-//    _parent(*getParam<Action *>("parent"))
 {
 }
 
+std::string
+Action::getShortName() const
+{
+  return _name.substr(_name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') + 1 : 0);
+}

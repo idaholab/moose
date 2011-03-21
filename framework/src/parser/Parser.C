@@ -10,6 +10,7 @@
 
 #include "ActionFactory.h"
 #include "Action.h"
+#include "MooseObjectAction.h"
 #include "ActionWarehouse.h"
 
 #include "MProblem.h"
@@ -215,6 +216,98 @@ Parser::~Parser()
   delete _exreader;
 }
 
+bool
+Parser::isSectionActive(const std::string & section_name, const InputParameters & params) const
+{
+  bool retValue = false;
+
+  if (section_name.find_last_of('/') == std::string::npos)
+    return true;
+  
+  std::vector<std::string> active = params.get<std::vector<std::string> >("active");
+  try
+  {
+    if (active.at(0) == "__all__")
+      retValue = true;
+    else
+      retValue = std::find(active.begin(), active.end(), section_name) != active.end();
+  }
+  catch (std::out_of_range)
+  {}
+
+  return retValue;
+}
+
+
+void
+Parser::parse_new(const std::string &input_filename)
+{
+  std::string curr_identifier;
+  
+  _input_filename = input_filename;
+  
+  checkInputFile();
+  
+  // GetPot object
+  _getpot_file.parse_input_file(_input_filename);
+  _getpot_initialized = true;
+
+  _section_names = _getpot_file.get_section_names();
+
+  /**
+   * This is our base InputParameters object which will be extracted for all
+   * section names.  We use this to get the "active" blocks which determine which
+   * child blocks (Actions) will be created.
+   */
+  InputParameters base_action_params = validParams<Action>();
+
+  /**
+   * The section_names function returns a list of section names including all
+   * all parent names of any nested sections.  We will exploit the fact that they are ordered
+   * i.e.
+   * Variables/
+   * Variables/u
+   * to construct our active lists as we build our objects.  Base level sections are _always_
+   * active.
+   */
+  for (std::vector<std::string>::iterator i=_section_names.begin(); i != _section_names.end(); ++i)
+  {
+    curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
+
+    std::cout << *i << "\n";
+
+    // Extract the block parameters before constructing the action
+    InputParameters params = ActionFactory::instance()->getValidParams(*i);
+    
+    // Before we build any objects we need to make sure that the section they are in is active
+    // and that they aren't an unregistered parent (signified by an empty params object)
+    if (!isSectionActive(curr_identifier, base_action_params) || params.n_parameters() == 0)
+      continue;
+
+    params.set<Parser *>("parser_handle") = this;
+    
+    extractParams(curr_identifier, params);
+    std::cout << params << "\n";
+
+    // Create the Action
+    Action * action = ActionFactory::instance()->create(curr_identifier, params);
+
+    // extract the MooseObject params if necessary
+    MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    if (moose_object_action)
+    {
+      extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
+      std::cout << "Moose Object Params:\n" << moose_object_action->getMooseObjectParams();
+    }
+    
+    // add it to the warehouse
+    Moose::action_warehouse.addActionBlock(action);
+
+    // Last we need to grab our base_action_params, i.e. "active" for the next nested level
+    extractParams(curr_identifier, base_action_params);
+  }
+}
+
 void
 Parser::parse(const std::string &input_filename)
 {
@@ -266,14 +359,14 @@ Parser::parse(const std::string &input_filename)
       if (last == curr_block->_children.rend() || (*last)->getID() != curr_identifier)
       {
         InputParameters params = ParserBlockFactory::instance()->getValidParams(curr_identifier);
-        InputParameters params2 = ActionFactory::instance()->getValidParams(curr_identifier);
+//        InputParameters params2 = ActionFactory::instance()->getValidParams(curr_identifier);
         params.set<ParserBlock *>("parent") = curr_block;
         params.set<Parser *>("parser_handle") = this;
    
-        params2.set<Parser *>("parser_handle") = this;
+//        params2.set<Parser *>("parser_handle") = this;
         
         curr_block->_children.push_back(ParserBlockFactory::instance()->add(curr_identifier, params));
-        Moose::action_warehouse.addActionBlock(ActionFactory::instance()->add(curr_identifier, params2));
+//        Moose::action_warehouse.addActionBlock(ActionFactory::instance()->create(curr_identifier, params2));
 
         // TODO Fill in parameters of Action Blocks
 //        extractParams(curr_identifier, params2);
@@ -290,8 +383,9 @@ Parser::parse(const std::string &input_filename)
 
   }
 
+  /*
   // Extract params for Action Blocks
-  for (ActionIterator a = Moose::action_warehouse.allActionsBegin();
+  for (ActionIterator a = Moose::action_warehouse.allActionsBegin(this);
        a != Moose::action_warehouse.allActionsEnd();
        ++a)
   {
@@ -299,6 +393,7 @@ Parser::parse(const std::string &input_filename)
     //std::cerr << "Extracting Params for: " << (*a)->name() << "\n";
     extractParams((*a)->name(), (*a)->getParams());
   }
+  */
   
   
 
@@ -649,20 +744,22 @@ Parser::fixupOptionalBlocks()
 #endif
 }
 
-
 void
-Parser::execute()
+Parser::new_execute()
 {
   /// Iterate over the actions inside of the ActionWarehouse
   /// TODO: Make this work instead of the parser block actions below
   
-  for (ActionIterator a = Moose::action_warehouse.allActionsBegin();
+  for (ActionIterator a = Moose::action_warehouse.allActionsBegin(this);
        a != Moose::action_warehouse.allActionsEnd();
        ++a)
     (*a)->act();
+}
 
-  
 
+void
+Parser::execute()
+{
   _executed_blocks.clear();
 //  _input_tree->execute();
 

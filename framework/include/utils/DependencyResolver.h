@@ -30,9 +30,18 @@ public:
   void addItem(const T & value);
   
   /**
-   * Returns a reference to a sorted vector of values
+   * Returns a vector of sets that represent dependency resolved values.  Items in the same
+   * set have no dependence upon one and other.
+   */
+  const std::vector<std::set<T> > & getSortedValuesSets();
+
+  /**
+   * This function also returns dependency resolved values but with a simplier single vector interface.
+   * Some information may be lost as values at the same level that don't depend on one and other can't
+   * be represented in a single vector.  This isn't a problem in practice though.
    */
   const std::vector<T> & getSortedValues();
+
 
 private:
   /**
@@ -55,9 +64,14 @@ private:
   std::set<T> _independent_items;
 
   /**
-   * The sorted vector
+   * The sorted vector of sets
    */
-  std::vector<T> _ordered_items;
+  std::vector<std::set<T> > _ordered_items;
+
+  /**
+   * The sorted vector (if requested)
+   */
+  std::vector<T> _ordered_items_vector;
 };
 
 
@@ -115,8 +129,8 @@ DependencyResolver<T>::addItem(const T & value)
 }
 
 template <typename T>
-const std::vector<T> &
-DependencyResolver<T>::getSortedValues()
+const std::vector<std::set<T> > &
+DependencyResolver<T>::getSortedValuesSets()
 {
   /* Make a copy of the map to work on since we will remove values from the map*/
   std::multimap<T, T> depends = _depends;
@@ -178,12 +192,26 @@ DependencyResolver<T>::getSortedValues()
     }
 
     /* Add the current set of resolved items to the ordered vector */
-    std::copy(difference.begin(), difference.end(), std::back_inserter(_ordered_items));
+    _ordered_items.push_back(difference);
+    //std::copy(difference.begin(), difference.end(), std::back_inserter(_ordered_items));
   }
 
   return _ordered_items;
 }
 
+template <typename T>
+const std::vector<T> &
+DependencyResolver<T>::getSortedValues()
+{
+  _ordered_items_vector.clear();
+  
+  getSortedValuesSets();
 
+  typename std::vector<std::set<T> >::iterator iter = _ordered_items.begin();
+  for ( ; iter != _ordered_items.end(); ++iter)
+    std::copy(iter->begin(), iter->end(), std::back_inserter(_ordered_items_vector));
 
-#endif
+  return _ordered_items_vector;
+}
+  
+#endif // DEPENDENCYRESOLVER_H

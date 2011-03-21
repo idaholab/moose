@@ -14,7 +14,7 @@ public:
 
   virtual void act();
 
-  static const std::string no_file_supplied; // = "(no file supplied)";
+  static const std::string no_file_supplied;
 };
 
 template<>

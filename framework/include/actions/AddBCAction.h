@@ -3,11 +3,11 @@
 
 #include "InputParameters.h"
 #include "Moose.h"
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 #include <string>
 
-class AddBCAction : public Action
+class AddBCAction : public MooseObjectAction
 {
 public:
   AddBCAction(const std::string & name, InputParameters params);

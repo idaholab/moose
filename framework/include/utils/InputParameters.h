@@ -113,6 +113,12 @@ public:
   bool isParamValid(const std::string &name) const;
 
   /**
+   * This method returns true if all of the parameters in this object are valid
+   * (i.e. isParamValid(name) == true - for all parameters)
+   */
+  bool areAllRequiredParamsValid() const;
+
+  /**
    * Returns a boolean indicating whether the specified parameter is private or not
    */
   bool isPrivate(const std::string &name) const;

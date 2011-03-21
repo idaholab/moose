@@ -16,25 +16,30 @@ class ActionWarehouse
 public:
   ActionWarehouse();
 
-  void addAction(std::string action);
-  void addAction(std::string action, std::string pre_req, bool is_required=false);
+  void registerName(std::string action, bool is_required);
+  void addDependency(std::string action, std::string pre_req);
   void addActionBlock(Action * blk);
 
   /// Iterators to ordered Actions
-  ActionIterator allActionsBegin();
+
+  // TODO: Right now all Actions require a Parser pointer when setting up the problem.
+  //       In order to build Actions on the fly inside of the factory we'll need this
+  //       pointer when the parser iterates over the Actions.  We might be able
+  //       to make this cleaner later
+  ActionIterator allActionsBegin(Parser * p_ptr);
   ActionIterator allActionsEnd();
 
 private:
-  /// This memeber holds the list of registered actions for error checking
-  std::set<std::string> _registered_actions;
+  /// The list of registered actions and a flag indicating whether or not they are required
+  std::map<std::string, bool> _registered_actions;
 
-  /// This member holds pointers to the actual parsed input file blocks
+  /// Pointers to the actual parsed input file blocks
   std::map<std::string, std::vector<Action *> > _action_blocks;
 
   /// The dependency resolver
   DependencyResolver<std::string> _actions;
 
-  /// This memeber holds the ordered Actions
+  /// The vector of ordered actions out of the dependency resolver
   std::vector<Action *> _ordered_actions;
 };
 
