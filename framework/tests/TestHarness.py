@@ -36,6 +36,7 @@ class TestHarness:
 
     self.all_passed = True
     self.num_tests = 0
+    self.num_passed = 0
 
     # map of tests to results
     self.results_table = {}
@@ -180,6 +181,8 @@ class TestHarness:
 
     # print the result of this test in table form
     self.results_table[test] = result
+    if result == 'OK':
+      self.num_passed += 1
     cnt = 65 - len(test + result)
     s = '.'*cnt + " " + result
     self.text_results_table += s
@@ -209,7 +212,7 @@ class TestHarness:
       print self.text_results_table
 
     print '-'*70
-    print 'Ran ' + str(self.num_tests) + ' tests in ' + str(round(self.testing_time)) + 's\n'
+    print 'Ran ' + str(self.num_tests) + ' tests in ' + str(round(self.testing_time)) + 's (' + str(self.num_passed) + '/' + str(self.num_tests) + ' passed)\n'
 
   # deprecated because it violates the coding standard's naming scheme
   def run_tests_and_exit(self, check_icestorm=True):
