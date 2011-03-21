@@ -22,6 +22,7 @@ public:
 
   void registerName(std::string action, bool is_required);
   void addDependency(std::string action, std::string pre_req);
+  void addDependencySets(const std::string & action_sets);
   void addActionBlock(Action * blk);
 
   ActionIterator actionBlocksWithActionBegin(const std::string & action_name);

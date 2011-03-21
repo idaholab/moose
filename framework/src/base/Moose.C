@@ -231,10 +231,12 @@ addActionTypes()
   registerActionName("setup_variable_complete", false);
   registerActionName("ready_to_init", false);
   registerActionName("setup_pps_complete", false);
-
+  
   /**************************/
   /****** Dependencies ******/
   /**************************/
+
+/*  
   /// Mesh Actions
   action_warehouse.addDependency("setup_mesh", "create_mesh");
   action_warehouse.addDependency("add_mesh_modifier", "setup_mesh");
@@ -303,8 +305,38 @@ addActionTypes()
 
   /// Check Integrity
   action_warehouse.addDependency("check_integrity", "setup_output");
+*/
+
+  /**
+   * The following is the default set of action dependencies for a basic MOOSE problem.  The formatting
+   * of this string is important.  Each line represents a set of dependencies that depend on the previous
+   * line.  Items on the same line have equal weight and can be executed in any order.  */
+  action_warehouse.addDependencySets(
+"(create_mesh, set_global_params)"
+"(setup_mesh)"
+"(add_mesh_modifier, setup_mesh_complete)"
+"(setup_executioner)"
+"(setup_adaptivity)"
+"(add_function)"
+"(setup_function_complete)"
+"(add_aux_variable, add_variable)"
+"(setup_variable_complete)"
+"(add_ic, add_periodic_bc)"
+"(add_preconditioning)"
+"(ready_to_init)"
+"(setup_dampers)"
+"(init_problem)"
+"(copy_nodal_vars)"
+"(add_material)"
+"(add_postprocessor)"
+"(setup_pps_complete)"
+"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_stabilizer, setup_output)"
+"(check_integrity)"
+);
   
 }
+
+
 
 void
 registerActions()

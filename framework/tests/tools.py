@@ -2,7 +2,7 @@ import os, sys, re
 from subprocess import *
 from socket import gethostname
 
-from TestHarness import TestHarness
+from TestHarness import TestHarness, ExodiffException
 from LeakDetector import LeakDetector
 import CSVDiffer
 
@@ -115,10 +115,10 @@ def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0, 
   if (min_dofs == 0): #and parallel == 0):
     try:
       executeExodiff(test_dir, out_files, abs_zero, relative_error)
-    except:
+    except AssertionError:
       # We need to catch the failed exodiff and throw a different exception so we know it wasn't a normal failure
       # What a hack!
-      raise Exception()
+      raise ExodiffException()
 
 def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=0, abs_zero=1e-11, relative_error=5.5e-6):
   test_dir = os.path.dirname(test_file)

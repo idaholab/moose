@@ -7,6 +7,9 @@ from ExcelWriter import ExcelWriter
 
 import timeit, inspect, StringIO
 
+class ExodiffException(Exception):
+  pass
+
 class TestHarness:
   # static variable so the helper functions can access the executable name
   # using only the class name (not an instance) from tools.py
@@ -155,7 +158,7 @@ class TestHarness:
       except AssertionError:
         self.all_passed = False
         result = 'FAILED'
-      except:
+      except ExodiffException:
         # A regular exception means that the program ran but produced different output
         self.all_passed = False
         result = 'FAILED (DIFF)'

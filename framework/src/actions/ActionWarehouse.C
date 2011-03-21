@@ -37,6 +37,27 @@ ActionWarehouse::addDependency(std::string action, std::string pre_req)
 }
 
 void
+ActionWarehouse::addDependencySets(const std::string & action_sets)
+{
+  std::vector<std::string> sets, prev_names, action_names;
+  Parser::tokenize(action_sets, sets, "()");
+
+  for (unsigned int i=0; i<sets.size(); ++i)
+  {
+    action_names.clear();
+    Parser::tokenize(sets[i], action_names, ", ");
+    for (unsigned int j=0; j<action_names.size(); ++j)
+    {
+      // Each line should depend on each item in the previous line
+      for (unsigned int k=0; k<prev_names.size(); ++k)
+        addDependency(action_names[j], prev_names[k]);
+    }
+    // Copy the the current items to the previous items for the next iteration
+    std::swap(action_names, prev_names);
+  }
+}
+
+void
 ActionWarehouse::addActionBlock(Action * blk)
 {
   std::string action_name = blk->getAction();
