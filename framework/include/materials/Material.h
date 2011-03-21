@@ -90,15 +90,6 @@ public:
   virtual VariableGradient & coupledGradientOld(const std::string & var_name);
   virtual VariableGradient & coupledGradientOlder(const std::string & var_name);
 
-  // Coupling
-  virtual unsigned int coupled(const std::string & var_name);
-  virtual VariableValue & coupledValue(const std::string & var_name);
-  virtual VariableValue & coupledValueOld(const std::string & var_name);
-  virtual VariableValue & coupledValueOlder(const std::string & var_name);
-  virtual VariableGradient & coupledGradient(const std::string & var_name);
-  virtual VariableGradient & coupledGradientOld(const std::string & var_name);
-  virtual VariableGradient & coupledGradientOlder(const std::string & var_name);
-
 protected:
   Moose::SubProblem & _problem;
   THREAD_ID _tid;

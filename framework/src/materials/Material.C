@@ -337,24 +337,6 @@ Material::coupledValueOld(const std::string & var_name)
   return Moose::Coupleable::getCoupledValueOld(var_name);
 }
 
-unsigned int
-Material::coupled(const std::string & var_name)
-{
-  return Moose::Coupleable::getCoupled(var_name);
-}
-
-VariableValue &
-Material::coupledValue(const std::string & var_name)
-{
-  return Moose::Coupleable::getCoupledValue(var_name);
-}
-
-VariableValue &
-Material::coupledValueOld(const std::string & var_name)
-{
-  return Moose::Coupleable::getCoupledValueOld(var_name);
-}
-
 VariableValue &
 Material::coupledValueOlder(const std::string & var_name)
 {
