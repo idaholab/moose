@@ -13,4 +13,7 @@ public:
   
 };
 
+template<>
+InputParameters validParams<MeshModifier>();
+
 #endif /* MESHMODIFIER_H */

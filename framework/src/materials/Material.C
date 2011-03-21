@@ -11,6 +11,8 @@ InputParameters validParams<Material>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::vector<unsigned int> >("block", "The id of the block (subdomain) that this material represents.");
+
+  params.addPrivateParam<std::string>("built_by_action", "add_material");
   return params;
 }
 

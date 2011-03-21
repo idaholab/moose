@@ -31,19 +31,11 @@ InputParameters validParams<CreateMeshAction>()
 CreateMeshAction::CreateMeshAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
-   std::cerr << "Constructing CreateMeshAction"
-            << "\nname: " << _name
-             << "\naction: " << _action << "\n\n";
 }
 
 void
 CreateMeshAction::act()
 {
-  std::cerr << "Acting on CreateMeshAction"
-            << "\nname: " << _name
-            << "\naction: " << _action << "\n\n";
-
-
   ElemType elem_type = Utility::string_to_enum<ElemType>(getParam<std::string>("elem_type"));
   int mesh_dim = -1;
 
@@ -91,8 +83,6 @@ CreateMeshAction::act()
     mooseError("Unable to generate mesh for unknown dimension\n");
   }
   
-  //_executed = true;
-
   _parser_handle._mesh = mesh;
 
 }

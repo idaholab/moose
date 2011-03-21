@@ -79,8 +79,6 @@
 
 // Actions
 #include "AddMeshModifierAction.h"
-#include "AddAuxBCAction.h"
-#include "AddAuxVariableAction.h"
 #include "AddBCAction.h"
 #include "AddDiracKernelAction.h"
 #include "AddICAction.h"

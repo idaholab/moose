@@ -12,7 +12,7 @@ InputParameters validParams<MooseObjectAction>()
 MooseObjectAction::MooseObjectAction(const std::string & name, InputParameters params) :
     Action(name, params),
     _type(getParam<std::string>("type")),
-    _moose_object_pars(Factory::instance()->getValidParams(_type))  
+    _moose_object_pars(Factory::instance()->getValidParams(_type))
 {
 }
 

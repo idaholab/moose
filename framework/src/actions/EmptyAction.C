@@ -11,15 +11,9 @@ InputParameters validParams<EmptyAction>()
 EmptyAction::EmptyAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
-   std::cerr << "Constructing EmptyAction"
-            << "\nname: " << _name
-             << "\naction: " << _action << "\n\n";
 }
 
 void
 EmptyAction::act()
 {
-  std::cerr << "Acting on EmptyAction"
-            << "\nname: " << _name
-            << "\naction: " << _action << "\n\n";
 }

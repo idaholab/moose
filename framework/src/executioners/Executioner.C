@@ -14,6 +14,8 @@ InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<unsigned int>("steps", 0);
+
+  params.addPrivateParam<std::string>("built_by_action", "setup_executioner");
   return params;
 }
 

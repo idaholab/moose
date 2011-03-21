@@ -42,18 +42,11 @@ InputParameters validParams<CreateExecutionerAction>()
 CreateExecutionerAction::CreateExecutionerAction(const std::string & name, InputParameters params) :
     MooseObjectAction(name, params)
 {
-   std::cerr << "Constructing CreateExecutionerAction"
-            << "\nname: " << _name
-             << "\naction: " << _action << "\n\n";
 }
 
 void
 CreateExecutionerAction::act()
 {
-  std::cerr << "Acting on CreateExecutionerAction"
-            << "\nname: " << _name
-            << "\naction: " << _action << "\n\n";
-
   //InputParameters class_params = getClassParams();
 
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This paramter

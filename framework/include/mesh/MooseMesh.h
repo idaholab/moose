@@ -75,8 +75,8 @@ public:
   void addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters);
   void applyMeshModifications();
 
-
-public:
+  inline void print_info(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
+  
   libMesh::Mesh _mesh;
 
 protected:

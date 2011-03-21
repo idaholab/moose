@@ -21,6 +21,8 @@ InputParameters validParams<Damper>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this damper operates on");
+  
+  params.addPrivateParam<std::string>("built_by_action", "add_damper");
   return params;
 }
 

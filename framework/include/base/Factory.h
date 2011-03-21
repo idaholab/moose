@@ -46,6 +46,10 @@ typedef MooseObject * (*buildPtr)(const std::string & name, InputParameters para
  */
 typedef InputParameters (*paramsPtr)();
 
+/**
+ * Typedef for registered Object iterator
+ */
+typedef std::map<std::string, paramsPtr>::iterator registeredMooseObjectIterator;
 
 /**
  * Build an object of type T
@@ -81,9 +85,17 @@ public:
 
   virtual MooseObject *create(const std::string & obj_name, const std::string & name, InputParameters parameters);
 
+  registeredMooseObjectIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
+  registeredMooseObjectIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
+  
 protected:
   std::map<std::string, buildPtr>  _name_to_build_pointer;
   std::map<std::string, paramsPtr> _name_to_params_pointer;
+
+private:
+  // Private constructor for singleton pattern
+  Factory() {}
+  
 };
 
 #endif /* FACTORY_H */

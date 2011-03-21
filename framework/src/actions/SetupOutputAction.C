@@ -42,21 +42,11 @@ InputParameters validParams<SetupOutputAction>()
 SetupOutputAction::SetupOutputAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
-   std::cerr << "Constructing SetupOutputAction"
-            << "\nname: " << _name
-             << "\naction: " << _action << "\n\n";
 }
 
 void
 SetupOutputAction::act()
 {
-  std::cerr << "Acting on SetupOutputAction"
-            << "\nname: " << _name
-            << "\naction: " << _action << "\n\n";
-#ifdef DEBUG
-  std::cerr << "Inside the OutputBlock Object\n";
-#endif
-
   Executioner * exec = _parser_handle._executioner;
   Problem & problem = exec->problem();
   Output & output = problem.out();                       // can't use use this with coupled problems on different meshes

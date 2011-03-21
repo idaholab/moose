@@ -15,13 +15,6 @@
 #include "quadrature.h"
 #include "vector_value.h"
 
-
-//forward declarations
-class Stabilizer;
-
-template<>
-InputParameters validParams<Stabilizer>();
-
 class SubProblem;
 class SystemBase;
 class MooseVariable;
@@ -89,5 +82,8 @@ protected:
    */
   std::vector<std::vector<RealGradient> > & _grad_test;
 };
+
+template<>
+InputParameters validParams<Stabilizer>();
 
 #endif //STABILIZER_H

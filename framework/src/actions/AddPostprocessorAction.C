@@ -26,11 +26,5 @@ AddPostprocessorAction::AddPostprocessorAction(const std::string & name, InputPa
 void
 AddPostprocessorAction::act() 
 {
-#ifdef DEBUG
-  std::cerr << "Acting on AddPostprocessorAction Object\n";
-  std::cerr << "Postprocessor:" << _type << ":"
-            << "\tname:" << getShortName() << ":";
-#endif
-  
   _parser_handle._problem->addPostprocessor(_type, getShortName(), _moose_object_pars, _pps_type);
 }

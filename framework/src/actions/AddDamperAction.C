@@ -6,7 +6,7 @@
 template<>
 InputParameters validParams<AddDamperAction>()
 {
-  return validParams<MooseObjectAction>();
+   return validParams<MooseObjectAction>();
 }
 
 AddDamperAction::AddDamperAction(const std::string & name, InputParameters params) :
@@ -17,11 +17,5 @@ AddDamperAction::AddDamperAction(const std::string & name, InputParameters param
 void
 AddDamperAction::act() 
 {
-#ifdef DEBUG
-  std::cerr << "Acting on AddDamperAction\n";
-  std::cerr << "Damper:" << _type << ":"
-            << "\tname:" << getShortName() << ":";
-#endif
-  
   _parser_handle._problem->addDamper(_type, getShortName(), _moose_object_pars);
 }

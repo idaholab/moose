@@ -1,5 +1,5 @@
-#ifndef ADDSTABILIZERACTION_H_
-#define ADDSTABILIZERACTION_H_
+#ifndef ADDSTABILIZERACTION_H
+#define ADDSTABILIZERACTION_H
 
 #include "MooseObjectAction.h"
 

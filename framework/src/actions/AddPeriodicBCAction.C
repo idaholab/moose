@@ -29,12 +29,7 @@ AddPeriodicBCAction::AddPeriodicBCAction(const std::string & name, InputParamete
 
 void
 AddPeriodicBCAction::act() 
-{
-//#ifdef DEBUG
-  std::cerr << "Acting on AddPeriodicBCAction\n"
-            << "\tname: " << getShortName() << "\n";
-//#endif
-  
+{  
   NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
 
   if (getParam<std::vector<Real> >("translation") != std::vector<Real>())

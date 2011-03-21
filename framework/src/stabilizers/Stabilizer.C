@@ -8,6 +8,8 @@ InputParameters validParams<Stabilizer>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable this Stabilizer will act on.");
+
+  params.addPrivateParam<std::string>("built_by_action", "add_stabilizer");
   return params;
 }
 

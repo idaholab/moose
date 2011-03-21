@@ -15,15 +15,7 @@
 class Problem;
 class SubProblemInterface;
 
-//Forward Declarations
-class Postprocessor;
-
-
-template<>
-InputParameters validParams<Postprocessor>();
-
-class Postprocessor :
-  public MooseObject
+class Postprocessor : public MooseObject
 {
 public:
   Postprocessor(const std::string & name, InputParameters parameters);
@@ -66,5 +58,8 @@ protected:
   SubProblemInterface & _subproblem;
   THREAD_ID _tid;
 };
- 
+
+template<>
+InputParameters validParams<Postprocessor>();
+
 #endif

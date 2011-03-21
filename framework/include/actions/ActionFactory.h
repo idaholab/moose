@@ -2,6 +2,8 @@
 #define ACTIONFACTORY_H_
 
 #include <vector>
+#include <map>
+#include <set>
 
 #include "Moose.h"
 #include "Action.h"
@@ -27,6 +29,10 @@ typedef Action * (*buildActionPtr)(const std::string & name, InputParameters par
  */
 typedef InputParameters (*paramsActionPtr)();
 
+/**
+ * Typedef for registered Action iterator
+ */
+typedef std::map<std::string, std::string>::iterator registeredActionIterator;
 
 /**
  * Build an object of type T
@@ -65,11 +71,14 @@ public:
   template<typename T>
   void regNonParsed(const std::string & action_name)
   {
-    OStringStream name;
+    std::ostringstream name;
 
-    name << "non_parsed";
-    OSSRealzeroleft(name,2,0,_not_parsed_name_number++);
-    
+    name << action_name << "_";
+    name.width(2);
+    name.fill('0');
+    name << _not_parsed_name_number++;
+
+    _non_parsed.insert(name.str());
     reg<T>(name.str(), action_name);
   }
   
@@ -87,10 +96,16 @@ public:
    */
   bool buildAllBuildableActions(const std::string & action_name, Parser * p_ptr);
 
+  registeredActionIterator registeredActionsBegin() { return _name_to_action_map.begin(); }
+  registeredActionIterator registeredActionsEnd() { return _name_to_action_map.end(); }
+
+  bool isParsed(const std::string & name) const { return _non_parsed.find(name) == _non_parsed.end(); }
+  
 protected:
   std::map<std::string, buildActionPtr>  _name_to_build_pointer;
   std::map<std::string, paramsActionPtr> _name_to_params_pointer;
   std::map<std::string, std::string> _name_to_action_map;
+  std::set<std::string> _non_parsed;
   std::multimap<std::string, std::string> _action_to_name_map;
 
   std::vector<std::string> _registered_parser_block_names;

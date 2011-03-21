@@ -4,6 +4,8 @@ template<>
 InputParameters validParams<Function>()
 {
   InputParameters params = validParams<MooseObject>();
+
+  params.addPrivateParam<std::string>("built_by_action", "add_function");
   return params;
 }
 

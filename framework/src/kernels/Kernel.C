@@ -7,13 +7,15 @@
 template<>
 InputParameters validParams<Kernel>()
 {
-  InputParameters p = validParams<MooseObject>();
-  p.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
-  p.addPrivateParam<bool>("use_displaced_mesh", false);
-  p.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
-  p.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");
-  p.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which this kernel will no longer be active.");
-  return p;
+  InputParameters params = validParams<MooseObject>();
+  params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
+  params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
+  params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");
+  params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which this kernel will no longer be active.");
+
+  params.addPrivateParam<bool>("use_displaced_mesh", false);
+  params.addPrivateParam<std::string>("built_by_action", "add_kernel");
+  return params;
 }
 
 

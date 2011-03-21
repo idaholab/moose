@@ -38,18 +38,11 @@ AddVariableAction::AddVariableAction(const std::string & name, InputParameters p
     _timestep_to_read(2)
   
 {
-   std::cerr << "Constructing AddVariableAction"
-            << "\nname: " << _name
-             << "\naction: " << _action << "\n\n";
 }
 
 void
 AddVariableAction::act()
 {
-  std::cerr << "Acting on AddVariableAction"
-            << "\nname: " << _name
-            << "\naction: " << _action << "\n\n";
-
   std::string var_name = getShortName();
   MProblem *prob = _parser_handle._problem;
   bool is_variables_block = Parser::pathContains(_name, "Variables");

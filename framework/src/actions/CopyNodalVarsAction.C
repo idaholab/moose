@@ -14,9 +14,6 @@ InputParameters validParams<CopyNodalVarsAction>()
 CopyNodalVarsAction::CopyNodalVarsAction(const std::string & name, InputParameters params) :
   Action(name, params)
 {
-     std::cerr << "Constructing CopyNodalVarsAction"
-               << "\nname: " << _name
-               << "\naction: " << _action << "\n\n";
 }
 
 void

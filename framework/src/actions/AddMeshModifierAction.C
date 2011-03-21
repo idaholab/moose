@@ -16,12 +16,6 @@ AddMeshModifierAction::AddMeshModifierAction(const std::string & name, InputPara
 void
 AddMeshModifierAction::act() 
 {
-#ifdef DEBUG
-  std::cerr << "Acting on AddMeshModifierAction\n";
-  std::cerr << "MeshModifier:" << _type << ":"
-            << "\tname:" << getShortName() << std::endl;
-#endif
-
   _parser_handle._mesh->addMeshModifer(_type, getShortName(), _moose_object_pars);
 }
 

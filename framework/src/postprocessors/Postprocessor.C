@@ -7,7 +7,9 @@ template<>
 InputParameters validParams<Postprocessor>()
 {
   InputParameters params = validParams<MooseObject>();
+  
   params.addPrivateParam<bool>("use_displaced_mesh", false);
+  params.addPrivateParam<std::string>("built_by_action", "add_postprocessor");
   return params;
 }
 

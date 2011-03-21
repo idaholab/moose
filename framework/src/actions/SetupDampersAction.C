@@ -15,18 +15,11 @@ InputParameters validParams<SetupDampersAction>()
 SetupDampersAction::SetupDampersAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
-   std::cerr << "Constructing SetupDampersAction"
-            << "\nname: " << _name
-             << "\naction: " << _action << "\n\n";
 }
 
 void
 SetupDampersAction::act()
 {
-  std::cerr << "Acting on SetupDampersAction"
-            << "\nname: " << _name
-            << "\naction: " << _action << "\n\n";
-
   // if we have add_damper action, we will setup dampers ;-)
   ActionIterator it_beg = Moose::action_warehouse.actionBlocksWithActionBegin("add_damper");
   ActionIterator it_end = Moose::action_warehouse.actionBlocksWithActionEnd("add_damper");

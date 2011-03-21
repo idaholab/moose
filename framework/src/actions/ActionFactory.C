@@ -50,7 +50,12 @@ ActionFactory::getValidParams(const std::string & name)
   if( _name_to_params_pointer.find(generic_identifier) == _name_to_params_pointer.end() )
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
-  return _name_to_params_pointer[generic_identifier]();
+  InputParameters params = _name_to_params_pointer[generic_identifier]();
+
+  // Inject the "built_by_action" param
+  params.set<std::string>("built_by_action") = _name_to_action_map[name];
+
+  return params;
 }
 
 std::string

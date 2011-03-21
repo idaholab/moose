@@ -1,5 +1,5 @@
-#ifndef ADDPOSTPROCESSORACTION_H_
-#define ADDPOSTPROCESSORACTION_H_
+#ifndef ADDPOSTPROCESSORACTION_H
+#define ADDPOSTPROCESSORACTION_H
 
 #include "MooseObjectAction.h"
 
@@ -17,4 +17,4 @@ protected:
 template<>
 InputParameters validParams<AddPostprocessorAction>();  
 
-#endif //ADDPOSTPROCESSORACTION_H_
+#endif //ADDPOSTPROCESSORACTION_H

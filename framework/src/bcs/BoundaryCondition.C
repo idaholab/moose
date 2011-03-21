@@ -11,6 +11,8 @@ InputParameters validParams<BoundaryCondition>()
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addRequiredParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+
+  params.addPrivateParam<std::string>("built_by_action", "add_bc");
   return params;
 }
 

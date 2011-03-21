@@ -36,5 +36,4 @@ public:
 template<>
 InputParameters validParams<GlobalParamsAction>();
 
-
 #endif //GLOBALPARAMSACTION_H

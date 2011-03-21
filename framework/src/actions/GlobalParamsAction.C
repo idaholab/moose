@@ -15,14 +15,12 @@ InputParameters validParams<GlobalParamsAction>()
 
 GlobalParamsAction::GlobalParamsAction(const std::string & name, InputParameters params) :
     Action(name, params)
-{}
+{
+}
 
 void
 GlobalParamsAction::act() 
 {
-#ifdef DEBUG
-  std::cerr << "Inside the GlobalParamsBlock Object\n";
-#endif
 }  
 
   

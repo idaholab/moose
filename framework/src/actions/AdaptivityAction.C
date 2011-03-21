@@ -29,7 +29,8 @@ InputParameters validParams<AdaptivityAction>()
 
 AdaptivityAction::AdaptivityAction(const std::string & name, InputParameters params) :
     Action(name, params)
-{}
+{
+}
 
 void
 AdaptivityAction::act() 

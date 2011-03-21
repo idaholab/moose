@@ -25,20 +25,11 @@ InputParameters validParams<SetupMeshAction>()
 SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
-   std::cerr << "Constructing SetupMeshAction"
-             << "\nname: " << _name
-             << "\naction: " << _action << "\n\n"
-             << "handle = " << &_parser_handle << std::endl;
 }
 
 void
 SetupMeshAction::act()
 {
-  std::cerr << "Acting on SetupMeshAction"
-            << "\nname: " << _name
-            << "\naction: " << _action << "\n\n"
-            << "handle = " << &_parser_handle << std::endl;
-
 
 //  int mesh_dim = isParamValid("dim") ? getParam<int>("dim") : 1;
 
@@ -88,7 +79,7 @@ SetupMeshAction::act()
 
   mesh->meshChanged();
 
-//  mesh->print_info();
+  mesh->print_info();
   }
 
   if (isParamValid("displacements"))

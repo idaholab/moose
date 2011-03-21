@@ -18,10 +18,5 @@ AddFunctionAction::AddFunctionAction(const std::string & name, InputParameters p
 void
 AddFunctionAction::act() 
 {
-#ifdef DEBUG
-  std::cerr << "Acting on AddFunctionAction\n";
-  std::cerr << "\tFunction: " << getShortName() << "\n";
-#endif
-
   _parser_handle._problem->addFunction(_type, getShortName(), _moose_object_pars);
 }

@@ -113,6 +113,8 @@ private:
    * original human readable format, and "yaml" are supported.
    */
   void buildFullTree( const std::string format );
+
+  void printInputParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
   
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file

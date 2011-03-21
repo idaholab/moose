@@ -5,6 +5,8 @@ InputParameters validParams<InitialCondition>()
 {
   InputParameters params;
   params.addParam<std::string>("var_name", "The variable this InitialCondtion is supposed to provide values for.");
+
+  params.addPrivateParam<std::string>("built_by_action", "add_ic");
   return params;
 }
 

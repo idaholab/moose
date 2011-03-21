@@ -11,18 +11,11 @@ InputParameters validParams<AddKernelAction>()
 AddKernelAction::AddKernelAction(const std::string & name, InputParameters params) :
     MooseObjectAction(name, params)
 {
-   std::cerr << "Constructing AddKernelAction"
-            << "\nname: " << _name
-             << "\naction: " << _action << "\n\n";
 }
 
 void
 AddKernelAction::act()
 {
-  std::cerr << "Acting on AddKernelAction"
-            << "\nname: " << _name
-            << "\naction: " << _action << "\n\n";
-
   is_kernels_action = Parser::pathContains(_name, "Kernels");
 
   if (is_kernels_action)

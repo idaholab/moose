@@ -9,6 +9,7 @@
 
 #include "ActionFactory.h"
 #include "Action.h"
+#include "Factory.h"
 #include "MooseObjectAction.h"
 #include "ActionWarehouse.h"
 
@@ -124,8 +125,6 @@ Parser::parse(const std::string &input_filename)
   for (std::vector<std::string>::iterator i=_section_names.begin(); i != _section_names.end(); ++i)
   {
     curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
-
-    std::cout << *i << "\n";
 
     // Extract the block parameters before constructing the action
     InputParameters params = ActionFactory::instance()->getValidParams(*i);
@@ -290,6 +289,45 @@ Parser::parse(const std::string &input_filename)
 void
 Parser::buildFullTree( const std::string format )
 {
+  for (registeredActionIterator act_obj = ActionFactory::instance()->registeredActionsBegin();
+       act_obj != ActionFactory::instance()->registeredActionsEnd();
+       ++act_obj)
+  {
+    InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_obj->first);
+    const std::string & action_name = act_obj->second;
+
+    std::vector<InputParameters *> params_ptrs(2);
+    params_ptrs[0] = &action_obj_params;
+
+    if (action_obj_params.have_parameter<std::string>("built_by_action") &&
+        action_obj_params.get<std::string>("built_by_action") == action_name &&
+        ActionFactory::instance()->isParsed(act_obj->first))
+    {
+      params_ptrs[1] = NULL;
+      printInputParameterData(act_obj->first, NULL, params_ptrs);
+    }
+    
+    
+    for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
+         moose_obj != Factory::instance()->registeredObjectsEnd();
+         ++moose_obj)
+    {
+      InputParameters moose_obj_params = (moose_obj->second)();
+      
+      if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
+          moose_obj_params.get<std::string>("built_by_action") == action_name)
+      { 
+        params_ptrs[1] = &moose_obj_params;
+        printInputParameterData(act_obj->first, &(moose_obj->first), params_ptrs);
+      }
+    }
+  }
+  
+
+  
+  
+  
+  
 #if 0
   std::string prefix;
   ParserBlock *curr_block;
@@ -518,6 +556,59 @@ Parser::buildFullTree( const std::string format )
   else // "dump" is all that's left
     _input_tree->printBlockData();
 */
+}
+
+
+void
+Parser::printInputParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs)
+{
+  std::ostream & out = std::cout;
+  std::vector<std::string> elements;
+  Parser::tokenize(name, elements);
+
+  std::string spacing = "";
+  for (unsigned int i=0; i<elements.size(); ++i)
+    spacing += "  ";
+
+  
+  out << "\n" << spacing << "block name: " << name << "\n";
+  
+  if (type)
+  {
+    out << spacing << "type: " << *type << "\n";
+    std::string class_desc = param_ptrs[1]->getClassDescription();
+    if (class_desc != "")
+      out << spacing << "description: " << class_desc << "\n";
+  }
+  
+  
+  out << spacing << "{\n";
+  
+  out << spacing << "  Valid Parameters:\n";
+
+  for (unsigned int i=0; i<param_ptrs.size() && param_ptrs[i]; ++i)
+  {
+    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
+    {
+      // First make sure we want to see this parameter
+      if (param_ptrs[i]->isPrivate(iter->first)) 
+        continue;
+
+      // Block params may be required and will have a doc string
+      std::string required = param_ptrs[i]->isParamRequired(iter->first) || iter->first == "type" ? "*" : " ";
+      std::string valid = param_ptrs[i]->isParamValid(iter->first) ? " (valid)" : " ";
+
+      out << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
+    
+      iter->second->print(out);
+
+      out << valid << "\n" << spacing << "    " << std::setw(30) << " " << "    " << param_ptrs[i]->getDocString(iter->first) << "\n";
+    }
+  }
+  
+//  visitChildren(&ParserBlock::printBlockData, true, false);
+
+  out << spacing << "}\n";
 }
 
 
