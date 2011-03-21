@@ -1,7 +1,7 @@
 #include "Init.h"
 #include "Parser.h"
 #include "Executioner.h"
-#include "App.h"
+#include "MooseTest.h"
 
 #if 0
 //////
@@ -93,7 +93,7 @@ int
 main(int argc, char *argv[])
 {
   Init init(argc, argv);
-  App::registerObjects();
+  MooseTest::registerObjects();
 
   libMesh::Mesh mesh(2);
 //  mesh.read(mesh_file_name);
@@ -126,8 +126,8 @@ main(int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
-  Init init(argc, argv);
-  App::registerObjects();
+  Moose::Init init(argc, argv);
+  MooseTest::registerObjects();
 
   Parser p;
 

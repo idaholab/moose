@@ -8,7 +8,7 @@
 #include "coupling_matrix.h"
 
 namespace Moose {
-class SubProblem;
+class System;
 }
 
 class VariablesBlock : public ParserBlock
@@ -18,7 +18,7 @@ public:
   virtual ~VariablesBlock();
 
   virtual void execute();
-  virtual void copyNodalValues(Moose::SubProblem & sys);
+  virtual void copyNodalValues(Moose::System & sys);
 
 protected:
   CouplingMatrix * _cm;

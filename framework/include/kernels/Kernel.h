@@ -13,14 +13,14 @@
 
 namespace Moose {
 class Variable;
-class Problem;
 class SubProblem;
+class System;
 }
 
 class Kernel :
   public Object,
-  public Integrable,
-  public Coupleable,
+  public Moose::Integrable,
+  public Moose::Coupleable,
   public FunctionInterface
 {
 public:
@@ -34,8 +34,8 @@ public:
   virtual VariableValue & coupledValue(const std::string & var_name);
 
 protected:
-  Moose::Problem & _problem;
-  Moose::SubProblem & _sys;
+  Moose::SubProblem & _problem;
+  Moose::System & _sys;
 
   THREAD_ID _tid;
 

@@ -1,5 +1,5 @@
 #include "Steady.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 #include "equation_systems.h"
 

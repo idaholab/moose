@@ -52,7 +52,7 @@ void
 GenericExecutionerBlock::execute() 
 {
   InputParameters class_params = getClassParams();
-  class_params.set<Moose::Problem *>("_problem") = _parser_handle._problem;
+  class_params.set<Moose::SubProblem *>("_subproblem") = _parser_handle._problem;
 
 #if 0
   class_params.set<THREAD_ID>("_tid") = 0;            // have to set '_tid'

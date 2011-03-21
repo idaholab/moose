@@ -3,8 +3,8 @@
 
 namespace Moose {
 
-MProblem::MProblem(Moose::Mesh &mesh) :
-    Problem(mesh),
+MProblem::MProblem(Mesh &mesh) :
+    SubProblem(mesh),
     _nl(*this, "nl"),
     _aux(*this, "aux")
 {
@@ -47,7 +47,7 @@ MProblem::reinitNode(const Node * node, THREAD_ID tid)
 void
 MProblem::init()
 {
-  Problem::init();
+  SubProblem::init();
 
   _nl.init();
   _aux.init();
@@ -62,14 +62,14 @@ MProblem::addVariable(const std::string & var_name, const FEType & type, const s
 void
 MProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
   _nl.addKernel(kernel_name, name, parameters);
 }
 
 void
 MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
   _nl.addBoundaryCondition(bc_name, name, parameters);
 }
 
@@ -82,14 +82,14 @@ MProblem::addAuxVariable(const std::string & var_name, const FEType & type, cons
 void
 MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
   _aux.addKernel(kernel_name, name, parameters);
 }
 
 void
 MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
   _aux.addBoundaryCondition(bc_name, name, parameters);
 }
 

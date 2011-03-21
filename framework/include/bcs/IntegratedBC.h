@@ -8,7 +8,7 @@
 #include "fe.h"
 #include "quadrature.h"
 
-class IntegratedBC : public BoundaryCondition, public Integrable
+class IntegratedBC : public BoundaryCondition, public Moose::Integrable
 {
 public:
   IntegratedBC(const std::string & name, InputParameters parameters);

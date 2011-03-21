@@ -1,5 +1,5 @@
 #include "Material.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 // system includes
 #include <iostream>
@@ -15,14 +15,14 @@ InputParameters validParams<Material>()
 
 Material::Material(const std::string & name, InputParameters parameters) :
   Object(name, parameters),
-  _problem(*parameters.get<Moose::Problem *>("_problem")),
+  _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
 //  _has_stateful_props(false),
   _block_id(parameters.get<unsigned int>("block_id")),
   _props(_problem.materialProps())
 //  _props_old(_material_data._props_old),
 //  _props_older(_material_data._props_older)
 {
-  _props_elem       = new std::map<unsigned int, std::map<unsigned int, MaterialProperties> >;
+  _props_elem       = new std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >;
 //  _props_elem_old   = new std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >;
 //  _props_elem_older = new std::map<unsigned int, std::map<unsigned int, std::map<std::string, PropertyValue *> > >;
 
@@ -57,7 +57,7 @@ Material::~Material()
   //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
 
   {
-    std::map<std::string, PropertyValue *>::iterator it;
+    std::map<std::string, Moose::PropertyValue *>::iterator it;
     for (it = _props.begin(); it != _props.end(); ++it)
     {
       if (it->second != NULL)
@@ -87,13 +87,13 @@ Material::~Material()
   }
 
   {
-    std::map<unsigned int, std::map<unsigned int, MaterialProperties> >::iterator i;
+    std::map<unsigned int, std::map<unsigned int, Moose::MaterialProperties> >::iterator i;
     for (i = _props_elem->begin(); i != _props_elem->end(); ++i)
     {
-      std::map<unsigned int, MaterialProperties>::iterator j;
+      std::map<unsigned int, Moose::MaterialProperties>::iterator j;
       for (j = i->second.begin(); j != i->second.end(); ++j)
       {
-        MaterialProperties::iterator k;
+        Moose::MaterialProperties::iterator k;
         for (k = j->second.begin(); k != j->second.end(); ++k)
           delete k->second;
       }

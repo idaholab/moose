@@ -1,7 +1,7 @@
 #include "Kernel.h"
 #include "Variable.h"
-#include "Problem.h"
 #include "SubProblem.h"
+#include "System.h"
 
 template<>
 InputParameters validParams<Kernel>()
@@ -15,10 +15,10 @@ InputParameters validParams<Kernel>()
 
 Kernel::Kernel(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
-    Coupleable(parameters),
+    Moose::Coupleable(parameters),
     FunctionInterface(parameters),
-    _problem(*parameters.get<Moose::Problem *>("_problem")),
-    _sys(*parameters.get<Moose::SubProblem *>("_sys")),
+    _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
+    _sys(*parameters.get<Moose::System *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _test_var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
@@ -86,11 +86,11 @@ Kernel::computeQpJacobian()
 unsigned int
 Kernel::coupled(const std::string & var_name)
 {
-  return Coupleable::getCoupled(var_name);
+  return Moose::Coupleable::getCoupled(var_name);
 }
 
 VariableValue &
 Kernel::coupledValue(const std::string & var_name)
 {
-  return Coupleable::getCoupledValue(var_name);
+  return Moose::Coupleable::getCoupledValue(var_name);
 }

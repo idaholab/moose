@@ -7,6 +7,8 @@
 
 #include "libmesh_common.h"
 
+namespace Moose {
+
 /**
  * Abstract definition of a property value.
  */
@@ -162,5 +164,7 @@ public:
    */
   typedef std::map<std::string, PropertyValue *>::const_iterator const_iterator;
 };
+
+} // namespace
 
 #endif

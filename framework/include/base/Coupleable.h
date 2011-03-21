@@ -4,6 +4,8 @@
 #include "Variable.h"
 #include "InputParameters.h"
 
+namespace Moose {
+
 class Coupleable
 {
 public:
@@ -15,7 +17,9 @@ protected:
 
   virtual VariableValue & getCoupledNodalValue(const std::string & var_name, unsigned int comp = 0);
 
-  std::map<std::string, std::vector<Moose::Variable *> > _coupled_vars;
+  std::map<std::string, std::vector<Variable *> > _coupled_vars;
 };
+
+} // namespace
 
 #endif /* COUPLEABLE_H_ */

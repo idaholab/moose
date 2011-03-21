@@ -62,7 +62,7 @@ OutputBlock::execute()
   std::cerr << "Inside the OutputBlock Object\n";
 #endif
 
-  Output & output = _parser_handle._problem->out();
+  Moose::Output & output = _parser_handle._problem->out();
   output.fileBase(getParamValue<std::string>("file_base"));
   if (getParamValue<bool>("exodus"))
   	output.addExodus();

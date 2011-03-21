@@ -2,22 +2,23 @@
 #include "Moose.h"
 #include "ParallelUniqueId.h"
 
+namespace Moose {
+
 Init::Init(int argc, char *argv[]) :
 	LibMeshInit(argc, argv)
 {
   ParallelUniqueId::initialize();
-  Moose::command_line = new GetPot(argc, argv);
+  command_line = new GetPot(argc, argv);
 
-  Moose::registerObjects();
+  registerObjects();
 }
 
 Init::~Init()
 {
-  delete Moose::command_line;
+  delete command_line;
 }
 
-namespace Moose {
 
-  GetPot *command_line = NULL;
+GetPot *command_line = NULL;
 
-}
+} // namespace

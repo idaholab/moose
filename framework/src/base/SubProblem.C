@@ -1,75 +1,192 @@
 #include "SubProblem.h"
 #include "Factory.h"
-#include "Problem.h"
-#include "Variable.h"
+#include "ImplicitSystem.h"
 
-// libMesh
-#include "quadrature_gauss.h"
+// libMesh includes
 
-namespace Moose {
-
-
-SubProblem::SubProblem(Problem & problem, const std::string & name) :
-    _problem(problem),
-    _mesh(problem.mesh()),
-    _name(name)
+namespace Moose
 {
-  _vars.resize(libMesh::n_threads());
+
+Number initial_value (const Point& p,
+                      const Parameters& parameters,
+                      const std::string& sys_name,
+                      const std::string& var_name)
+{
+  SubProblem * problem = parameters.get<SubProblem *>("_subproblem");
+  mooseAssert(problem != NULL, "Internal pointer to _problem was not set");
+  return problem->initialValue(p, parameters, sys_name, var_name);
 }
 
-Moose::Variable &
+Gradient initial_gradient (const Point& p,
+                           const Parameters& parameters,
+                           const std::string& sys_name,
+                           const std::string& var_name)
+{
+  SubProblem * problem = parameters.get<SubProblem *>("_subproblem");
+  mooseAssert(problem != NULL, "Internal pointer to _problem was not set");
+  return problem->initialGradient(p, parameters, sys_name, var_name);
+}
+
+void initial_condition(EquationSystems& es, const std::string& system_name)
+{
+  SubProblem * problem = es.parameters.get<SubProblem *>("_subproblem");
+  mooseAssert(problem != NULL, "Internal pointer to MooseSystem was not set");
+  problem->initialCondition(es, system_name);
+}
+
+
+SubProblem::SubProblem(Mesh &mesh) :
+    _mesh(mesh),
+    _eq(_mesh),
+    _transient(false),
+    _time(_eq.parameters.set<Real>("time")),
+    _t_step(_eq.parameters.set<int>("t_step")),
+    _dt(_eq.parameters.set<Real>("dt")),
+    _out(*this)
+{
+  _time = 0.0;
+  _t_step = 0;
+  _dt = 0;
+  _dt_old = _dt;
+
+  _eq.parameters.set<SubProblem *>("_subproblem") = this;
+
+  _functions.resize(libMesh::n_threads());
+}
+
+SubProblem::~SubProblem()
+{
+}
+
+void
+SubProblem::init()
+{
+  _eq.init();
+  _eq.print_info();
+}
+
+void
+SubProblem::update()
+{
+  for (std::vector<System *>::iterator it = _sys.begin(); it != _sys.end(); ++it)
+    (*it)->update();
+}
+
+void
+SubProblem::solve()
+{
+  for (std::vector<System *>::iterator it = _sys.begin(); it != _sys.end(); ++it)
+    (*it)->solve();
+}
+
+void
+SubProblem::output()
+{
+  _out.output();
+}
+
+bool
+SubProblem::hasVariable(const std::string & var_name)
+{
+  for (unsigned int i = 0; i < _sys.size(); i++)
+    if (_sys[i]->hasVariable(var_name))
+      return true;
+  return false;
+}
+
+Variable &
 SubProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
-  return *_vars[tid][var_name];
+  for (unsigned int i = 0; i < _sys.size(); i++)
+    if (_sys[i]->hasVariable(var_name))
+      return _sys[i]->getVariable(tid, var_name);
+  mooseError("Unknown variable " + var_name);
 }
 
 void
-SubProblem::attachQuadratureRule(QBase *qrule, THREAD_ID tid)
+SubProblem::copySolutionsBackwards()
 {
-  for (std::map<std::string, Moose::Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
-  {
-    Moose::Variable *var = it->second;
-    var->attachQuadratureRule (qrule);
-  }
+}
+
+// Initial Conditions /////
+
+void
+SubProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name)
+{
+  parameters.set<std::string>("var_name") = var_name;
+  _ics[var_name] = static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters));
 }
 
 void
-SubProblem::reinitElem(const Elem * elem, THREAD_ID tid)
+SubProblem::addInitialCondition(const std::string & var_name, Real value)
 {
-  for (std::map<std::string, Moose::Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
-  {
-    Moose::Variable *var = it->second;
-    var->reinit(elem);
-    var->sizeResidual();
-    var->sizeJacobianBlock();
-    var->computeElemValues();
-  }
+  _eq.parameters.set<Real>("initial_" + var_name) = value;
 }
 
 void
-SubProblem::reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid)
+SubProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
 {
-  for (std::map<std::string, Moose::Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
+  parameters.set<SubProblem *>("_subproblem") = this;
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    Moose::Variable *var = it->second;
-    var->sizeResidual();
-    var->sizeJacobianBlock();
-    var->reinit (elem, side);
+    parameters.set<THREAD_ID>("_tid") = tid;
+    Function * func = static_cast<Function *>(Factory::instance()->create(type, name, parameters));
+    _functions[tid][name] = func;
   }
 }
 
-void
-SubProblem::reinitNode(const Node * node, THREAD_ID tid)
+Function &
+SubProblem::getFunction(const std::string & name, THREAD_ID tid)
 {
-  for (std::map<std::string, Moose::Variable *>::iterator it = _vars[tid].begin(); it != _vars[tid].end(); ++it)
-  {
-    Moose::Variable *var = it->second;
-    if (var->feType().family == LAGRANGE)
-    {
-      var->reinit (node);
-      var->computeNodalValues();
-    }
-  }
+  return *_functions[tid][name];
+}
+
+Number
+SubProblem::initialValue (const Point& p,
+                       const Parameters& /*parameters*/,
+                       const std::string& /*sys_name*/,
+                       const std::string& var_name)
+{
+//  ParallelUniqueId puid;
+//  unsigned int tid = puid.id;
+
+  // Try to grab an InitialCondition object for this variable.
+  if (_ics.find(var_name) != _ics.end())
+    return _ics[var_name]->value(p);
+
+  if (_eq.parameters.have_parameter<Real>("initial_"+var_name))
+    return _eq.parameters.get<Real>("initial_"+var_name);
+
+  return 0;
+}
+
+Gradient
+SubProblem::initialGradient (const Point& p,
+                          const Parameters& /*parameters*/,
+                          const std::string& /*sys_name*/,
+                          const std::string& var_name)
+{
+//  ParallelUniqueId puid;
+//  unsigned int tid = puid.id;
+
+  // Try to grab an InitialCondition object for this variable.
+  if (_ics.find(var_name) != _ics.end())
+    return _ics[var_name]->gradient(p);
+
+  return RealGradient();
+}
+
+void
+SubProblem::initialCondition(EquationSystems& es, const std::string& system_name)
+{
+  ExplicitSystem & system = _eq.get_system<ExplicitSystem>(system_name);
+  system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
+}
+
+void
+SubProblem::updateMaterials()
+{
+
 }
 
 } // namespace

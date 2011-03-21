@@ -1,10 +1,12 @@
 #include "ExodusOutput.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 // libMesh
 #include "exodusII_io.h"
 
-ExodusOutput::ExodusOutput(Moose::Problem & problem) :
+namespace Moose {
+
+ExodusOutput::ExodusOutput(SubProblem & problem) :
   Outputter(problem),
   _out(problem.mesh()),
   _num(0),
@@ -31,3 +33,4 @@ ExodusOutput::output(const std::string & file_base)
   _out.write_element_data(_problem.es());
 }
 
+} // namespace

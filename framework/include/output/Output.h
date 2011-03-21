@@ -5,14 +5,13 @@
 #include <vector>
 
 namespace Moose {
-class Problem;
-}
 
+class SubProblem;
 class Outputter;
 
 class Output {
 public:
-  Output(Moose::Problem & problem);
+  Output(SubProblem & problem);
   virtual ~Output();
 
   void addExodus();
@@ -24,9 +23,11 @@ public:
 protected:
   std::string _file_base;
 
-  Moose::Problem & _problem;
+  SubProblem & _problem;
 
   std::vector<Outputter *> _outputters;
 };
+
+} // namespace
 
 #endif /* OUTPUTTER_H_ */

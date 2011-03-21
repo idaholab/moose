@@ -4,12 +4,12 @@
 #include <string>
 
 namespace Moose {
-class Problem;
-}
+
+class SubProblem;
 
 class Outputter {
 public:
-  Outputter(Moose::Problem & problem);
+  Outputter(SubProblem & problem);
   virtual ~Outputter();
 
   /**
@@ -18,9 +18,11 @@ public:
   virtual void output(const std::string & file_base) = 0;
 
 protected:
-  Moose::Problem & _problem;
+  SubProblem & _problem;
 
   std::string _file_base;
 };
+
+} // namespace
 
 #endif /* OUTPUTTER_H_ */

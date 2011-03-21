@@ -1,7 +1,7 @@
 #ifndef IMPLICITSYSTEM_H_
 #define IMPLICITSYSTEM_H_
 
-#include "SubProblem.h"
+#include "System.h"
 
 #include "transient_system.h"
 #include "nonlinear_implicit_system.h"
@@ -10,10 +10,10 @@
 
 namespace Moose {
 
-class ImplicitSystem : public SubProblemTempl<TransientNonlinearImplicitSystem>
+class ImplicitSystem : public SystemTempl<TransientNonlinearImplicitSystem>
 {
 public:
-  ImplicitSystem(Problem & problem, const std::string & name);
+  ImplicitSystem(SubProblem & problem, const std::string & name);
   virtual ~ImplicitSystem();
 
   virtual bool converged();
@@ -25,8 +25,8 @@ public:
   void computeResidual(NumericVector<Number> & residual);
   void computeJacobian(SparseMatrix<Number> &  jacobian);
 
-  std::map<std::string, Moose::Variable *>::iterator varsBegin(THREAD_ID tid = 0) { return _vars[tid].begin(); }
-  std::map<std::string, Moose::Variable *>::iterator varsEnd(THREAD_ID tid = 0) { return _vars[tid].end(); }
+  std::map<std::string, Variable *>::iterator varsBegin(THREAD_ID tid = 0) { return _vars[tid].begin(); }
+  std::map<std::string, Variable *>::iterator varsEnd(THREAD_ID tid = 0) { return _vars[tid].end(); }
 
   void printVarNorms();
 
@@ -56,6 +56,6 @@ protected:
   friend class ComputeJacobianThread;
 };
 
-}
+} // namespace
 
 #endif /* IMPLICITSYSTEM_H_ */

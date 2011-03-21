@@ -6,7 +6,7 @@
 
 #include "Mesh.h"
 #include "MProblem.h"
-#include "SubProblem.h"
+#include "System.h"
 #include "Executioner.h"
 
 // libMesh

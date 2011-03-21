@@ -1,168 +1,144 @@
 #ifndef SUBPROBLEM_H_
 #define SUBPROBLEM_H_
 
-#include "Kernel.h"
-#include "NodalBC.h"
-#include "IntegratedBC.h"
-#include "InitialCondition.h"
-
-#include "Problem.h"
 #include "Mesh.h"
+#include "Variable.h"
+#include "InitialCondition.h"
+#include "MaterialProperty.h"
+#include "Function.h"
+#include "Output.h"
+#include "ParallelUniqueId.h"
 
-// libMesh
+// libMesh include
 #include "equation_systems.h"
-#include "dof_map.h"
-#include "exodusII_io.h"
-
+#include "transient_system.h"
+#include "nonlinear_implicit_system.h"
+#include "numeric_vector.h"
+#include "sparse_matrix.h"
 
 namespace Moose {
 
-class Variable;
-//class Problem;
-
+/**
+ * Generic class for solving nonlinear problems
+ *
+ */
 class SubProblem
 {
 public:
-  SubProblem(Problem & problem, const std::string & name);
+  SubProblem(Mesh &mesh);
+  virtual ~SubProblem();
 
-  virtual unsigned int number() = 0;
-  virtual Problem & problem() { return _problem; }
-  virtual DofMap & dofMap() = 0;
+  /**
+   * Get reference to all-purpose parameters
+   */
+  Parameters & parameters() { return _pars; }
 
-  virtual void update() = 0;
-  virtual void solve() = 0;
+  EquationSystems & es() { return _eq; }
+  Mesh & mesh() { return _mesh; }
 
-  virtual void copyOldSolutions() = 0;
-  virtual void restoreSolutions() = 0;
+  virtual bool hasVariable(const std::string & var_name);
+  virtual Variable & getVariable(THREAD_ID tid, const std::string & var_name);
 
-  virtual NumericVector<Number> & solution() = 0;
-  virtual NumericVector<Number> & solutionOld() = 0;
-  virtual NumericVector<Number> & solutionOlder() = 0;
-  virtual NumericVector<Number> & solutionUDot() = 0;
-  virtual NumericVector<Number> & solutionDuDotDu() = 0;
+  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid) = 0;
+  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+  virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL) = 0;
-  virtual bool hasVariable(const std::string & var_name) = 0;
+  // Solve /////
+  virtual void init();
 
-  virtual Moose::Variable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual void update();
+  virtual void solve();
+  virtual bool converged() = 0;
 
-  virtual void attachQuadratureRule(QBase *qrule, THREAD_ID tid);
-  virtual void reinitElem(const Elem * elem, THREAD_ID tid);
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, THREAD_ID tid);
-  virtual void reinitNode(const Node * node, THREAD_ID tid);
+  // Time stepping /////
 
-  virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
+  /**
+   *
+   */
+  virtual void onTimestepBegin() = 0;
+  virtual void onTimestepEnd() = 0;
+
+  virtual void copySolutionsBackwards();
+
+  Real & time() { return _time; }
+  int & timeStep() { return _t_step; }
+  Real & dt() { return _dt; }
+  Real & dtOld() { return _dt_old; }
+
+  void transient(bool trans) { _transient = trans; }
+  bool transient() { return _transient; }
+
+  // Output system /////
+
+  Output & out() { return _out; }
+
+  void output();
+
+  // ICs /////
+  void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name);
+  void addInitialCondition(const std::string & var_name, Real value); 
+
+  // Functions /////
+  void addFunction(std::string type, const std::string & name, InputParameters parameters);
+  Function & getFunction(const std::string & name, THREAD_ID tid = 0);
+
+
+  Number initialValue (const Point & p, const Parameters & parameters, const std::string & /*sys_name*/, const std::string & var_name);
+  Gradient initialGradient (const Point & p, const Parameters & /*parameters*/, const std::string & /*sys_name*/, const std::string & var_name);
+
+  void initialCondition(EquationSystems & es, const std::string & system_name);
+
+  ////
+  virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual) = 0;
+  virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian) = 0;
+
+  // Materials /////
+
+  MaterialProperties & materialProps() { return _material_props; }
+  MaterialProperties & materialPropsOld() { return _material_props_old; }
+  MaterialProperties & materialPropsOlder() { return _material_props_older; }
+
+  virtual void updateMaterials();
 
 protected:
-  Problem & _problem;
   Mesh & _mesh;
-  std::string _name;
+  EquationSystems _eq;
 
-  std::vector<std::map<std::string, Moose::Variable *> > _vars;
+  bool _transient;
+  Real & _time;
+  int & _t_step;
+  Real & _dt;
+  Real _dt_old;
+
+  /**
+   * For storing all-purpose global params 
+   */
+  Parameters _pars;
+
+  /**
+   * List of systems being solved. Allocations/deallocations are responsibilities of derived classes
+   */
+  std::vector<System *> _sys;
+
+  // Initial conditions
+  std::map<std::string, InitialCondition *> _ics;
+
+  // material properties
+  MaterialProperties _material_props;
+  MaterialProperties _material_props_old;
+  MaterialProperties _material_props_older;
+
+  // functions
+  std::vector<std::map<std::string, Function *> > _functions;
+
+  // Output system
+  Output _out;
 };
 
 
-template<typename T>
-class SubProblemTempl : public SubProblem
-{
-public:
-  SubProblemTempl(Problem & problem, const std::string & name) :
-    SubProblem(problem, name),
-    _sys(problem.es().add_system<T>(name)),
-    _solution(_sys.add_vector("curr_sln", false, GHOSTED)),
-    _solution_old(*_sys.old_local_solution),
-    _solution_older(*_sys.older_local_solution),
-    _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
-    _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
-    _residual_old(_sys.add_vector("residual_old", false, GHOSTED))
+void initial_condition(EquationSystems& es, const std::string& system_name);
 
-  {
-  }
-
-  virtual ~SubProblemTempl()
-  {
-  }
-
-  virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL)
-  {
-    unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      Moose::Variable * var = new Moose::Variable(var_num, _mesh.dimension(), type, *this);
-      _vars[tid][var_name] = var;
-    }
-  }
-
-  virtual bool hasVariable(const std::string & var_name)
-  {
-    return _sys.has_variable(var_name);
-  }
-
-  virtual void computeVariables(const NumericVector<Number>& /*soln*/)
-  {
-  }
-
-  virtual void solution(const NumericVector<Number> & soln) { _solution = soln; }
-  virtual NumericVector<Number> & solution() { return _solution; }
-  virtual NumericVector<Number> & solutionOld() { return _solution_old; }
-  virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
-
-  virtual NumericVector<Number> & solutionUDot() { return _solution_u_dot; }
-  virtual NumericVector<Number> & solutionDuDotDu() { return _solution_du_dot_du; }
-
-  virtual void init()
-  {
-  }
-
-  virtual void update()
-  {
-    _sys.update();
-  }
-
-  virtual void solve()
-  {
-    _sys.solve();
-  }
-
-  virtual void copySolutionsBackwards()
-  {
-    *_sys.older_local_solution = *_sys.current_local_solution;
-    *_sys.old_local_solution   = *_sys.current_local_solution;
-  }
-
-  virtual void copyOldSolutions()
-  {
-    *_sys.older_local_solution = *_sys.old_local_solution;
-    *_sys.old_local_solution = *_sys.current_local_solution;
-  }
-
-  virtual void restoreSolutions()
-  {
-    *_sys.current_local_solution = *_sys.old_local_solution;
-    *_sys.solution = *_sys.old_local_solution;
-  }
-
-  virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep)
-  {
-    io.copy_nodal_solution(_sys, nodal_var_name, timestep);
-  }
-
-  T & sys() { return _sys; }
-  virtual unsigned int number() { return _sys.number(); }
-  virtual DofMap & dofMap() { return _sys.get_dof_map(); }
-
-protected:
-  T & _sys;
-
-  NumericVector<Number> & _solution;
-  NumericVector<Number> & _solution_old;
-  NumericVector<Number> & _solution_older;
-
-  NumericVector<Number> & _solution_u_dot;
-  NumericVector<Number> & _solution_du_dot_du;
-  NumericVector<Number> & _residual_old;                /// residual evaluated at the old time step
-};
-
-}
+} // namespace
 
 #endif /* SUBPROBLEM_H_ */

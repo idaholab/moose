@@ -22,14 +22,14 @@ typedef std::vector<RealGradient>       VariableGrad;
 namespace Moose
 {
 
-class Problem;
 class SubProblem;
+class System;
 
 
 class Variable
 {
 public:
-  Variable(unsigned int var_num, int dim, const FEType & fe_type, SubProblem & sys);
+  Variable(unsigned int var_num, int dim, const FEType & fe_type, System & sys);
   virtual ~Variable();
 
   void attachQuadratureRule(QBase *qrule);
@@ -91,8 +91,8 @@ protected:
   unsigned int _var_num;
   int _dim;
   FEType _fe_type;
-  Problem & _problem;
-  SubProblem &_sys;
+  SubProblem & _problem;
+  System &_sys;
 
   const DofMap & _dof_map;
 

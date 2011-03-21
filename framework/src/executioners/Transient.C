@@ -3,7 +3,7 @@
 //Moose includes
 #include "Kernel.h"
 #include "Factory.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 //libMesh includes
 #include "implicit_system.h"

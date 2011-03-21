@@ -2,7 +2,7 @@
 
 //local includes
 #include "Moose.h"
-#include "Problem.h"
+#include "SubProblem.h"
 #include "AuxiliarySystem.h"
 
 //libmesh includes
@@ -24,7 +24,7 @@ InputParameters validParams<AuxKernel>()
 AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
     Coupleable(parameters),
-    _problem(*parameters.get<Moose::Problem *>("_problem")),
+    _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
     _aux_sys(*parameters.get<Moose::AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),

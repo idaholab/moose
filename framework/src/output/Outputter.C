@@ -1,7 +1,9 @@
 #include "Outputter.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
-Outputter::Outputter(Moose::Problem & problem) :
+namespace Moose {
+
+Outputter::Outputter(SubProblem & problem) :
   _problem(problem)
 {
 }
@@ -9,3 +11,5 @@ Outputter::Outputter(Moose::Problem & problem) :
 Outputter::~Outputter()
 {
 }
+
+} // namespace

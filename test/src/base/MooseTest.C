@@ -1,4 +1,4 @@
-#include "App.h"
+#include "MooseTest.h"
 #include "Moose.h"
 #include "Factory.h"
 
@@ -22,7 +22,7 @@
 
 #include "EmptyMaterial.h"
 
-namespace App
+namespace MooseTest
 {
 
 void registerObjects()
@@ -53,4 +53,4 @@ void registerObjects()
   registerObject(EmptyMaterial);
 }
 
-}
+} // namespace

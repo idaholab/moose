@@ -1,7 +1,7 @@
 #ifndef MPROBLEM_H_
 #define MPROBLEM_H_
 
-#include "Problem.h"
+#include "SubProblem.h"
 #include "Mesh.h"
 #include "ImplicitSystem.h"
 #include "AuxiliarySystem.h"
@@ -9,10 +9,10 @@
 namespace Moose {
 
 /**
- * Specialization of Problem for solving nonlinear equations plus auxiliary equations
+ * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
  */
-class MProblem : public Problem
+class MProblem : public SubProblem
 {
 public:
   MProblem(Mesh &mesh);
@@ -62,6 +62,6 @@ protected:
   AuxiliarySystem _aux;
 };
 
-}
+} // namespace
 
 #endif /* MPROBLEM_H_ */

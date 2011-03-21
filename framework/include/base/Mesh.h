@@ -10,8 +10,8 @@
 namespace Moose
 {
 
-  typedef StoredRange<MeshBase::node_iterator,             Node*>      NodeRange;
-  typedef StoredRange<MeshBase::const_node_iterator, const Node*> ConstNodeRange;
+typedef StoredRange<MeshBase::node_iterator,             Node*>      NodeRange;
+typedef StoredRange<MeshBase::const_node_iterator, const Node*> ConstNodeRange;
 
 
 // NOTE: maybe inheritance would be better here
@@ -80,6 +80,6 @@ protected:
   std::vector<std::vector<unsigned int> > _node_to_elem_map;
 };
 
-}
+} // namespace
 
 #endif /* MESH_H_ */

@@ -2,7 +2,7 @@
 #define AUXILIARYSYSTEM_H_
 
 #include <set>
-#include "SubProblem.h"
+#include "System.h"
 
 // libMesh include
 #include "equation_systems.h"
@@ -11,17 +11,17 @@
 
 #include "numeric_vector.h"
 
-class Problem;
 class AuxKernel;
 
 namespace Moose {
 
+class SubProblem;
 class ImplicitSystem;
 
-class AuxiliarySystem : public SubProblemTempl<TransientExplicitSystem>
+class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
-  AuxiliarySystem(Problem & problem, const std::string & name);
+  AuxiliarySystem(SubProblem & problem, const std::string & name);
 
   virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
@@ -33,8 +33,8 @@ public:
 
   virtual void compute();
 
-  std::map<std::string, Moose::Variable *>::iterator varsBegin(THREAD_ID tid = 0) { return _vars[tid].begin(); }
-  std::map<std::string, Moose::Variable *>::iterator varsEnd(THREAD_ID tid = 0) { return _vars[tid].end(); }
+  std::map<std::string, Variable *>::iterator varsBegin(THREAD_ID tid = 0) { return _vars[tid].begin(); }
+  std::map<std::string, Variable *>::iterator varsEnd(THREAD_ID tid = 0) { return _vars[tid].end(); }
 
 protected:
   // holders

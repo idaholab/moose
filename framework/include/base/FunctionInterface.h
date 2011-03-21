@@ -5,8 +5,8 @@
 #include "ParallelUniqueId.h"
 
 namespace Moose {
-class Problem;
-}
+class SubProblem;
+} // namespace
 
 class Function;
 
@@ -30,7 +30,7 @@ public:
   Function & getFunction(const std::string & name);
 
 private:
-  Moose::Problem & _func_problem;
+  Moose::SubProblem & _func_problem;
   THREAD_ID _func_tid;
   //prefixed all member data with _func to prevent future Multiple Inheritance
   //issues. The compiler will complain even though it's private data

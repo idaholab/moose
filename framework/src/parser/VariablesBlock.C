@@ -3,7 +3,7 @@
 // Moose includes
 #include "Moose.h"
 #include "GenericVariableBlock.h"
-#include "SubProblem.h"
+#include "System.h"
 #include "Parser.h"
 
 // libMesh includes
@@ -71,7 +71,7 @@ VariablesBlock::execute()
 }
 
 void
-VariablesBlock::copyNodalValues(Moose::SubProblem & sys)
+VariablesBlock::copyNodalValues(Moose::System & sys)
 {
   // Iterate over the children and see if they need nodal values read
   for (std::vector<ParserBlock *>::iterator i = _children.begin(); i!=_children.end(); ++i)

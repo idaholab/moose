@@ -135,4 +135,4 @@ Mesh::getBoundaryNodeRange()
   return _bnd_node_range;
 }
 
-}
+} // namespace

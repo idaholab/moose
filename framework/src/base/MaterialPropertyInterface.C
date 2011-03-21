@@ -1,7 +1,9 @@
 #include "MaterialPropertyInterface.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
-MaterialPropertyInterface::MaterialPropertyInterface(Moose::Problem &problem) :
+namespace Moose {
+
+MaterialPropertyInterface::MaterialPropertyInterface(SubProblem &problem) :
   _material_props(problem.materialProps()),
   _material_props_old(problem.materialPropsOld()),
   _material_props_older(problem.materialPropsOlder())
@@ -20,3 +22,4 @@ MaterialProperty<std::vector<Real> >::init ()
   return copy;
 }
 
+} // namespace

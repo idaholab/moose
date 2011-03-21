@@ -1,5 +1,5 @@
 #include "AuxiliarySystem.h"
-#include "Problem.h"
+#include "SubProblem.h"
 #include "ImplicitSystem.h"
 #include "Factory.h"
 #include "AuxKernel.h"
@@ -15,7 +15,7 @@ namespace Moose {
   {
   protected:
     AuxiliarySystem & _sys;
-    Problem & _problem;
+    SubProblem & _problem;
 
   public:
     ComputeNodalAuxThread(AuxiliarySystem & sys) :
@@ -44,7 +44,7 @@ namespace Moose {
   {
   protected:
     AuxiliarySystem & _sys;
-    Problem & _problem;
+    SubProblem & _problem;
 
   public:
     ComputeElemAuxThread(AuxiliarySystem & sys) :
@@ -143,8 +143,8 @@ namespace Moose {
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(Problem & problem, const std::string & name) :
-    SubProblemTempl<TransientExplicitSystem>(problem, name)
+AuxiliarySystem::AuxiliarySystem(SubProblem & problem, const std::string & name) :
+    SystemTempl<TransientExplicitSystem>(problem, name)
 {
   _sys.attach_init_function(Moose::initial_condition);
 //  _sys.add_vector("temp");
@@ -165,7 +165,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
   unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    Moose::Variable * var = new Moose::Variable(var_num, _mesh.dimension(), type, *this);
+    Variable * var = new Variable(var_num, _mesh.dimension(), type, *this);
     _vars[tid][var_name] = var;
     if (var->feType().family == LAGRANGE)
       _nodal_vars[tid][var_name] = var;
@@ -216,18 +216,18 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
 void
 AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  for (std::map<std::string, Moose::Variable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
+  for (std::map<std::string, Variable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
   {
-    Moose::Variable *var = it->second;
+    Variable *var = it->second;
     var->reinit(elem);
     var->sizeResidual();
     var->sizeJacobianBlock();
     var->computeElemValues();
   }
 
-  for (std::map<std::string, Moose::Variable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
+  for (std::map<std::string, Variable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
   {
-    Moose::Variable *var = it->second;
+    Variable *var = it->second;
     var->reinit_aux(elem);
     var->sizeResidual();
     var->sizeJacobianBlock();

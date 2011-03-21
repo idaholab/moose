@@ -1,10 +1,12 @@
 #include "Coupleable.h"
 #include "Moose.h"
-#include "Problem.h"
+#include "SubProblem.h"
+
+namespace Moose {
 
 Coupleable::Coupleable(InputParameters & parameters)
 {
-  Moose::Problem & problem = *parameters.get<Moose::Problem *>("_problem");
+  SubProblem & subproblem = *parameters.get<SubProblem *>("_subproblem");
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
   // Coupling
@@ -19,8 +21,8 @@ Coupleable::Coupleable(InputParameters & parameters)
       for (unsigned int i = 0; i < vars.size(); i++)
       {
         std::string coupled_var_name = vars[i];
-        if (problem.hasVariable(coupled_var_name))
-          _coupled_vars[name].push_back(&problem.getVariable(tid, coupled_var_name));
+        if (subproblem.hasVariable(coupled_var_name))
+          _coupled_vars[name].push_back(&subproblem.getVariable(tid, coupled_var_name));
         else
           mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
       }
@@ -45,3 +47,5 @@ Coupleable::getCoupledNodalValue(const std::string & var_name, unsigned int comp
 {
   return _coupled_vars[var_name][comp]->nodalSln();
 }
+
+} // namespace

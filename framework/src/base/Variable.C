@@ -1,6 +1,6 @@
 #include "Variable.h"
-#include "Problem.h"
 #include "SubProblem.h"
+#include "System.h"
 
 // libMesh
 #include "numeric_vector.h"
@@ -8,7 +8,7 @@
 
 namespace Moose {
 
-Variable::Variable(unsigned int var_num, int dim, const FEType & fe_type, SubProblem & sys) :
+Variable::Variable(unsigned int var_num, int dim, const FEType & fe_type, System & sys) :
     _var_num(var_num),
     _dim(dim),
     _fe_type(fe_type),

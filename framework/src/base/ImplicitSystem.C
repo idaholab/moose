@@ -1,6 +1,6 @@
 #include "ImplicitSystem.h"
 #include "AuxiliarySystem.h"
-#include "Problem.h"
+#include "SubProblem.h"
 #include "Variable.h"
 #include "PetscSupport.h"
 #include "Factory.h"
@@ -16,13 +16,13 @@ namespace Moose {
 
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
   {
-    Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
+    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
     p->computeJacobian(sys, soln, jacobian);
   }
 
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
-    Problem * p = sys.get_equation_systems().parameters.get<Problem *>("_problem");
+    SubProblem * p = sys.get_equation_systems().parameters.get<SubProblem *>("_subproblem");
     p->computeResidual(sys, soln, residual);
   }
 
@@ -33,7 +33,7 @@ namespace Moose {
   protected:
     NumericVector<Number> & _residual;
     ImplicitSystem & _sys;
-    Problem & _problem;
+    SubProblem & _problem;
 
   public:
     ComputeResidualThread(NumericVector<Number> & residual, ImplicitSystem & sys) :
@@ -160,7 +160,7 @@ namespace Moose {
   protected:
     SparseMatrix<Number> & _jacobian;
     ImplicitSystem & _sys;
-    Problem & _problem;
+    SubProblem & _problem;
 
   public:
     ComputeJacobianThread(SparseMatrix<Number> & jacobian, ImplicitSystem & sys) :
@@ -240,12 +240,9 @@ namespace Moose {
     }
   };
 
-}
 
-namespace Moose {
-
-ImplicitSystem::ImplicitSystem(Problem & problem, const std::string & name) :
-    SubProblemTempl<TransientNonlinearImplicitSystem>(problem, name),
+ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
+    SystemTempl<TransientNonlinearImplicitSystem>(problem, name),
     _dt(problem.dt()),
     _dt_old(problem.dtOld()),
     _t_step(problem.timeStep())
@@ -276,7 +273,7 @@ ImplicitSystem::converged()
 void
 ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<SubProblem *>("_sys") = this;
+  parameters.set<System *>("_sys") = this;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -290,7 +287,7 @@ ImplicitSystem::addKernel(const  std::string & kernel_name, const std::string & 
 void
 ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<SubProblem *>("_sys") = this;
+  parameters.set<System *>("_sys") = this;
   std::vector<unsigned int> boundaries = parameters.get<std::vector<unsigned int> >("boundary");
 
   for (unsigned int i=0; i<boundaries.size(); ++i)
@@ -526,9 +523,9 @@ ImplicitSystem::printVarNorms()
   TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);
 
   std::cout << "Norm of each nonlinear variable:" << std::endl;
-  for (std::map<std::string, Moose::Variable *>::iterator it = varsBegin(); it != varsEnd(); ++it)
+  for (std::map<std::string, Variable *>::iterator it = varsBegin(); it != varsEnd(); ++it)
   {
-    Moose::Variable *var = it->second;
+    Variable *var = it->second;
     unsigned int var_num = var->number();
     std::cout << s.variable_name(var_num) << ": "
               << s.calculate_norm(*s.rhs,var_num,DISCRETE_L2) << std::endl;

@@ -8,8 +8,8 @@
 #include "MaterialProperty.h"
 
 namespace Moose {
-class Problem;
-}
+
+class SubProblem;
 
 /**
  * Any object that needs material properties has to inherit this interface
@@ -17,7 +17,7 @@ class Problem;
 class MaterialPropertyInterface
 {
 public:
-  MaterialPropertyInterface(Moose::Problem &problem);
+  MaterialPropertyInterface(SubProblem &problem);
 
   /**
    * Retrieve the property named "name"
@@ -83,5 +83,7 @@ MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 
   mooseError("Material has no property named: " + name);
 }
+
+} // namespace
 
 #endif //MATERIALPROPERTYINTERFACE_H_

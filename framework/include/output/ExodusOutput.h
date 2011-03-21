@@ -7,9 +7,12 @@
 #include "libmesh_common.h"
 #include "exodusII_io.h"
 
+
+namespace Moose {
+
 class ExodusOutput : public Outputter {
 public:
-  ExodusOutput(Moose::Problem & problem);
+  ExodusOutput(SubProblem & problem);
   virtual ~ExodusOutput();
 
   virtual void output(const std::string & file_base);
@@ -23,5 +26,7 @@ protected:
 
   std::string getFileName(const std::string & file_base);
 };
+
+} // namespace
 
 #endif /* OUTPUTTER_H_ */

@@ -2,7 +2,7 @@
 
 // Moose includes
 #include "Moose.h"
-#include "Problem.h"
+#include "SubProblem.h"
 
 // C++ includes
 #include <vector>
@@ -13,13 +13,13 @@ template<>
 InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<Object>();
-  params.addPrivateParam<Moose::Problem *>("_problem");
+  params.addPrivateParam<Moose::SubProblem *>("_subproblem");
   return params;
 }
 
 Executioner::Executioner(const std::string & name, InputParameters parameters) :
   Object(name, parameters),
-  _problem(*parameters.get<Moose::Problem *>("_problem")),
+  _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
   _output_initial(false)
 {
 }

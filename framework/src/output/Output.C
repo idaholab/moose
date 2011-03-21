@@ -3,8 +3,9 @@
 #include "Outputter.h"
 #include "ExodusOutput.h"
 
+namespace Moose {
 
-Output::Output(Moose::Problem & problem) :
+Output::Output(SubProblem & problem) :
   _file_base("out"),
   _problem(problem)
 {
@@ -32,3 +33,4 @@ Output::output()
   }
 }
 
+} // namespace

@@ -11,7 +11,7 @@
 
 namespace Moose {
 class Variable;
-class Problem;
+class SubProblem;
 }
 
 class BoundaryCondition :
@@ -25,7 +25,7 @@ public:
   unsigned int boundaryId() { return _boundary_id; }
 
 protected:
-  Moose::Problem & _problem;
+  Moose::SubProblem & _problem;
   Moose::Variable & _var;
 
   unsigned int _boundary_id;

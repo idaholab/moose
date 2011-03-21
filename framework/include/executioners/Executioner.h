@@ -7,7 +7,7 @@
 #include <string>
 
 namespace Moose {
-class Problem;
+class SubProblem;
 }
 
 /**
@@ -45,7 +45,7 @@ protected:
   /**
    * Reference to a problem being solved
    */
-  Moose::Problem & _problem;
+  Moose::SubProblem & _problem;
 
   bool _output_initial;				/// output initial condition if true   
 

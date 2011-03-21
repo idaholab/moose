@@ -1,5 +1,5 @@
 #include "IntegratedBC.h"
-#include "Problem.h"
+#include "SubProblem.h"
 #include "Variable.h"
 
 

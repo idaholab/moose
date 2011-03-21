@@ -1,5 +1,5 @@
 #include "BoundaryCondition.h"
-#include "Problem.h"
+#include "SubProblem.h"
 #include "Variable.h"
 
 template<>
@@ -15,7 +15,7 @@ InputParameters validParams<BoundaryCondition>()
 BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters parameters) :
     Object(name, parameters),
     FunctionInterface(parameters),
-    _problem(*parameters.get<Moose::Problem *>("_problem")),
+    _problem(*parameters.get<Moose::SubProblem *>("_subproblem")),
     _var(_problem.getVariable(0, parameters.get<std::string>("variable"))),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 

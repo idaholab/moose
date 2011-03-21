@@ -21,7 +21,7 @@ class AuxiliarySystem;
  */
 class AuxKernel :
   public Object,
-  public Coupleable
+  public Moose::Coupleable
 {
 public:
   /**
@@ -43,7 +43,7 @@ public:
 protected:
   virtual Real computeValue() = 0;
 
-  Moose::Problem & _problem;
+  Moose::SubProblem & _problem;
   Moose::AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
   Moose::Variable & _var;

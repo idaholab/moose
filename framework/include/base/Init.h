@@ -4,6 +4,8 @@
 #include "libmesh.h"
 #include "getpot.h"
 
+namespace Moose {
+
 class Init: public LibMeshInit {
 public:
   Init(int argc, char *argv[]);
@@ -12,9 +14,8 @@ public:
 protected:
 };
 
-namespace Moose {
 
-  extern GetPot *command_line;
+extern GetPot *command_line;
 
 }
 
