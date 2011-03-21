@@ -27,6 +27,16 @@ SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
   return *var;
 }
 
+const std::set<subdomain_id_type> *
+SystemBase::getVariableBlocks(unsigned int var_number)
+{
+  mooseAssert(_var_map.find(var_number) != _var_map.end(), "Variable does not exist.");
+  if (_var_map[var_number].empty())
+    return NULL;
+  else
+    return & _var_map[var_number];
+}
+
 Order
 SystemBase::getMinQuadratureOrder()
 {

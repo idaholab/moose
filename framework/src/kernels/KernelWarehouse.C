@@ -11,16 +11,21 @@ KernelWarehouse::~KernelWarehouse()
 }
 
 void
-KernelWarehouse::addKernel(Kernel *kernel, const std::set<unsigned int> & block_ids)
+KernelWarehouse::addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids)
 {
   _all_kernels.push_back(kernel);
-  for (std::set<unsigned int>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+
+  if (block_ids.empty())
   {
-    unsigned int blk_id = *it;
-    if (blk_id == Moose::ANY_BLOCK_ID)
-      _global_kernels.push_back(kernel);
-    else
+    _global_kernels.push_back(kernel);
+  }
+  else
+  {
+    for (std::set<subdomain_id_type>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+    {
+      subdomain_id_type blk_id = *it;
       _block_kernels[blk_id].push_back(kernel);
+    }
   }
 }
 
@@ -64,7 +69,7 @@ KernelWarehouse::updateActiveKernels(Real t, Real dt, unsigned int subdomain_id)
 }
 
 bool
-KernelWarehouse::subdomains_covered(std::set<unsigned int> & return_set) const
+KernelWarehouse::subdomains_covered(std::set<subdomain_id_type> & return_set) const
 {
   return_set.clear();
   

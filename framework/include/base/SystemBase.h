@@ -62,6 +62,7 @@ public:
   virtual bool hasVariable(const std::string & var_name) = 0;
 
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual const std::set<subdomain_id_type> * getVariableBlocks(unsigned int var_number);
   virtual int nVariables() = 0;
 
   /// Get minimal quadrature order needed for integrating variables in this system
@@ -83,7 +84,7 @@ protected:
   bool _currently_computing_jacobian;    /// Whether or not the system is currently computing the Jacobian matrix
 
   std::vector<VariableWarehouse> _vars;
-  std::map<unsigned int, std::set<unsigned int> > _var_map;
+  std::map<unsigned int, std::set<subdomain_id_type> > _var_map;
 };
 
 
@@ -117,7 +118,7 @@ public:
       _vars[tid].add(var_name, var);
 
       if (active_subdomains == NULL)
-        _var_map[var_num].insert(Moose::ANY_BLOCK_ID);
+        _var_map[var_num] = std::set<subdomain_id_type>();
       else
         for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
           _var_map[var_num].insert(*it);

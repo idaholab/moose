@@ -48,7 +48,7 @@ public:
   void addBC(AuxKernel *aux);
   void addActiveBC(unsigned int boundary_id, AuxKernel *aux);
 
-  void addAuxKernel(AuxKernel *aux, std::set<unsigned int> block_ids);
+  void addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids);
 
 protected:
   std::vector<AuxKernel *> _active_nodal_aux_kernels;

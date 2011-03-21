@@ -113,27 +113,26 @@ AuxWarehouse::addActiveBC(unsigned int boundary_id, AuxKernel *aux)
 }
 
 void
-AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<unsigned int> block_ids)
+AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids)
 {
-  for(std::set<unsigned int>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+  if (block_ids.empty())
   {
-    unsigned int id = *it;
-
-    if (id == Moose::ANY_BLOCK_ID)
-    {
-      if(aux->isNodal())
-        _active_nodal_aux_kernels.push_back(aux);
-      else
-        _active_element_aux_kernels.push_back(aux);
-    }
+    if(aux->isNodal())
+      _active_nodal_aux_kernels.push_back(aux);
     else
+      _active_element_aux_kernels.push_back(aux);
+  }
+  else
+  {
+    for(std::set<subdomain_id_type>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
     {
+      subdomain_id_type id = *it;
+
       if(aux->isNodal())
         _active_block_nodal_aux_kernels[id].push_back(aux);
       else
         _active_block_element_aux_kernels[id].push_back(aux);
     }
-
   }
 }
 

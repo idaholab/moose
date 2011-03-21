@@ -60,7 +60,10 @@ PhysicsBasedPreconditioner::addSystem(unsigned int var, std::vector<unsigned int
 
   LinearImplicitSystem & precond_system = _mproblem.es().add_system<LinearImplicitSystem>(var_name+"_system");
   precond_system.assemble_before_solve = false;
-  precond_system.add_variable(var_name+"_prec", _nl.sys().variable(var).type());
+
+  const std::set<subdomain_id_type> * active_subdomains = _nl.getVariableBlocks(var);
+  precond_system.add_variable(var_name+"_prec", _nl.sys().variable(var).type(), active_subdomains);
+
   _systems[var] = &precond_system;
   _pre_type[var] = type;
 

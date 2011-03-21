@@ -28,7 +28,7 @@ public:
   KernelIterator activeKernelsBegin();
   KernelIterator activeKernelsEnd();
   
-  void addKernel(Kernel *kernel, const std::set<unsigned int> & block_ids);
+  void addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids);
 
   void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
 
@@ -38,7 +38,7 @@ public:
    * with the complete set of subdomains represented which may or may not represent
    * the entire domain.
    */
-  bool subdomains_covered(std::set<unsigned int> & return_set) const;
+  bool subdomains_covered(std::set<subdomain_id_type> & return_set) const;
   
 protected:
   std::vector<Kernel *> _active_kernels;                                /// Kernels active on a block and in specified time

@@ -6,6 +6,7 @@
 #include "libmesh_common.h"
 #include "perf_log.h"
 #include "mtwist.h"
+#include "id_types.h"
 
 typedef Real                     PostprocessorValue;
 
@@ -70,7 +71,7 @@ enum PostprocessorType
   PPS_NEWTONIT = 0x08
 };
 
-const unsigned int ANY_BLOCK_ID = (unsigned int) -1;
+const subdomain_id_type ANY_BLOCK_ID = (subdomain_id_type) -1;
 
 /* Wrappers for extern random number generator */
 inline void seed(unsigned int s)

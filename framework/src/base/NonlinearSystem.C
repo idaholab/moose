@@ -106,7 +106,7 @@ NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string &
     Kernel *kernel = static_cast<Kernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
-    std::set<unsigned int> blk_ids;
+    std::set<subdomain_id_type> blk_ids;
     if (!parameters.isParamValid("block"))
       blk_ids = _var_map[kernel->variable().number()];
     else
@@ -114,7 +114,7 @@ NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string &
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
-        if (_var_map[kernel->variable().number()].count(blocks[i]) > 0 || _var_map[kernel->variable().number()].count(Moose::ANY_BLOCK_ID) > 0)
+        if (_var_map[kernel->variable().number()].count(blocks[i]) > 0 || _var_map[kernel->variable().number()].size() == 0)
           blk_ids.insert(blocks[i]);
         else
           mooseError("Kernel (" + kernel->name() + "): block outside of the domain of the variable");
@@ -748,13 +748,13 @@ void
 NonlinearSystem::checkKernelCoverage(const std::set<subdomain_id_type> & mesh_subdomains) const
 {
   // Check kernel coverage of subdomains (blocks) in your mesh
-  std::set<unsigned int> input_subdomains;
+  std::set<subdomain_id_type> input_subdomains;
 
   bool global_kernels_exist = _kernels[0].subdomains_covered(input_subdomains);
 
   if (!global_kernels_exist)
   {
-    std::set<unsigned int> difference;
+    std::set<subdomain_id_type> difference;
     std::set_difference (mesh_subdomains.begin(), mesh_subdomains.end(),
                          input_subdomains.begin(), input_subdomains.end(),
                          std::inserter(difference, difference.end()));

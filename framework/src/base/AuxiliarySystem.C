@@ -48,7 +48,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
       _elem_vars[tid][var_name] = var;
 
     if (active_subdomains == NULL)
-      _var_map[var_num].insert(Moose::ANY_BLOCK_ID);
+      _var_map[var_num] = std::set<subdomain_id_type>();
     else
       for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
         _var_map[var_num].insert(*it);
@@ -67,7 +67,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
     AuxKernel *kernel = static_cast<AuxKernel *>(Factory::instance()->create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
 
-    std::set<unsigned int> blk_ids;
+    std::set<subdomain_id_type> blk_ids;
     if (!parameters.isParamValid("block"))
       blk_ids = _var_map[kernel->variable().number()];
     else
@@ -75,7 +75,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
       std::vector<unsigned int> blocks = parameters.get<std::vector<unsigned int> >("block");
       for (unsigned int i=0; i<blocks.size(); ++i)
       {
-        if (_var_map[kernel->variable().number()].count(blocks[i]) > 0 || _var_map[kernel->variable().number()].count(Moose::ANY_BLOCK_ID) > 0)
+        if (_var_map[kernel->variable().number()].count(blocks[i]) > 0 || _var_map[kernel->variable().number()].size() == 0)
           blk_ids.insert(blocks[i]);
         else
           mooseError("AuxKernel (" + kernel->name() + "): block outside of the domain of the variable");
