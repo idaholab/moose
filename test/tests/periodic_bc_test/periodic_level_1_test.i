@@ -78,6 +78,7 @@
   perf_log = true
   dt = 1
   num_steps = 20
+  nl_rel_tol = 1e-10
 
   [./Adaptivity]
     refine_fraction = .80
