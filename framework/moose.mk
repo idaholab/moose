@@ -1,5 +1,6 @@
 moose_DIRS	:= $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
-moose_INCLUDE 	:= $(foreach i, $(moose_DIRS), -I$(i))
+contrib_DIRS    := $(shell find $(MOOSE_DIR)/contrib/*/include -type d -not -path "*/.svn*")
+moose_INCLUDE 	:= $(foreach i, $(moose_DIRS) $(contrib_DIRS), -I$(i))
 
 moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(static_libext)
 ifeq ($(enable-shared),yes)
@@ -14,15 +15,17 @@ endif
 
 # source files
 moose_srcfiles    := $(shell find $(MOOSE_DIR) -name *.C)
+moose_csrcfiles   := $(shell find $(MOOSE_DIR) -name *.c)
 moose_fsrcfiles   := $(shell find $(MOOSE_DIR) -name *.f)
 moose_f90srcfiles := $(shell find $(MOOSE_DIR) -name *.f90)
 
 # object files
 moose_objects	    := $(patsubst %.C, %.$(obj-suffix), $(moose_srcfiles))
+moose_cobjects	  := $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
 moose_fobjects    := $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
 moose_f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
 
-$(moose_LIB): $(moose_objects) $(moose_fobjects) $(moose_f90objects)
+$(moose_LIB): $(moose_objects) $(moose_cobjects) $(moose_fobjects) $(moose_f90objects)
 	$(MAKE) -C $(MOOSE_DIR)
 
 -include $(MOOSE_DIR)/src/*/*.d

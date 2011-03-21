@@ -55,7 +55,7 @@ class ParsedFunction : public Function
      * Evaluate the equation at the given location. For 1-D and 2-D equations
      * x and y are optional.
      */
-    virtual Real value(Real t, Real x, Real y = 0, Real z = 0);
+    virtual Real value(Real t, const Point & pt);
 
   protected:
     /**

@@ -67,6 +67,12 @@ Coupleable::getCoupledValueOlder(const std::string & var_name, unsigned int comp
   return _coupled_vars[var_name][comp]->slnOlder();
 }
 
+VariableValue &
+Coupleable::getCoupledDot(const std::string & var_name, unsigned int comp)
+{
+  return _coupled_vars[var_name][comp]->uDot();
+}
+
 
 VariableGradient &
 Coupleable::getCoupledGradient(const std::string & var_name, unsigned int comp)

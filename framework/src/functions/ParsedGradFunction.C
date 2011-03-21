@@ -22,12 +22,12 @@ ParsedGradFunction::ParsedGradFunction(const std::string & name, InputParameters
 }
 
 RealGradient
-ParsedGradFunction::gradient(Real t, Real x, Real y, Real z)
+ParsedGradFunction::gradient(Real t, const Point & pt)
 {
   _vals[0] = t;
-  _vals[1] = x;
-  _vals[2] = y;
-  _vals[3] = z;
+  _vals[1] = pt(0);
+  _vals[2] = pt(1);
+  _vals[3] = pt(2);
 
   return RealGradient(_parserx.Eval(&(_vals[0])),
                       _parsery.Eval(&(_vals[0])),

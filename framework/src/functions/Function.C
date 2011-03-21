@@ -17,7 +17,7 @@ Function::~Function()
 }
 
 RealGradient 
-Function::gradient(Real /*t*/, Real /*x*/, Real /*y*/, Real /*z*/)
+Function::gradient(Real /*t*/, const Point & /*p*/)
 {
   return RealGradient(0, 0, 0);
 }

@@ -27,6 +27,8 @@
 // ics
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
+#include "FunctionIC.h"
+#include "RandomIC.h"
 // executioners
 #include "Steady.h"
 #include "Transient.h"
@@ -35,6 +37,9 @@
 #include "ParsedFunction.h"
 #include "ParsedGradFunction.h"
 #include "PiecewiseLinear.h"
+#include "SolutionFunction.h"
+// materials
+#include "GenericConstantMaterial.h"
 // PPS
 #include "AverageElementSize.h"
 #include "AverageNodalVariableValue.h"
@@ -90,6 +95,8 @@ registerObjects()
   // Initial Conditions
   registerObject(ConstantIC);
   registerObject(BoundingBoxIC);
+  registerObject(FunctionIC);
+  registerObject(RandomIC);
   // executioners
   registerObject(Steady);
   registerObject(Transient);
@@ -98,6 +105,9 @@ registerObjects()
   registerObject(ParsedFunction);
   registerObject(ParsedGradFunction);
   registerObject(PiecewiseLinear);
+  registerObject(SolutionFunction);
+  // materials
+  registerObject(GenericConstantMaterial);
   // PPS
   registerObject(AverageElementSize);
   registerObject(AverageNodalVariableValue);

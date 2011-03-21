@@ -25,6 +25,7 @@ protected:
   virtual VariableValue & getCoupledValue(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & getCoupledValueOld(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & getCoupledValueOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & getCoupledDot(const std::string & var_name, unsigned int comp = 0);
 
   virtual VariableGradient & getCoupledGradient(const std::string & var_name, unsigned int comp = 0);
   virtual VariableGradient & getCoupledGradientOld(const std::string & var_name, unsigned int comp = 0);

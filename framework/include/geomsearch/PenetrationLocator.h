@@ -37,7 +37,7 @@ public:
   class PenetrationInfo 
   {
   public:
-    PenetrationInfo(Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref);
+    PenetrationInfo(Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi);
 
     PenetrationInfo(const PenetrationInfo & p);
 
@@ -50,12 +50,13 @@ public:
     Real _distance;
     Point _closest_point;
     Point _closest_point_ref;
+    std::vector<std::vector<Real> > _side_phi;
   };
 
   SubProblem & _subproblem;
 
   void findContactPoint(const Elem * master_elem, unsigned int side_num, const Point & slave_point,
-                        bool start_with_centroid, Point & contact_ref, Point & contact_phys,
+                        bool start_with_centroid, Point & contact_ref, Point & contact_phys, std::vector<std::vector<Real> > & side_phi,
                         Real & distance, RealGradient & normal, bool & contact_point_on_side);
 
   Real normDistance(const Elem & elem, const Elem & side, const Node & p0, Point & closest_point, RealVectorValue & normal);

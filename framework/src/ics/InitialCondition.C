@@ -9,8 +9,9 @@ InputParameters validParams<InitialCondition>()
 }
 
 InitialCondition::InitialCondition(const std::string & name, InputParameters parameters) :
-  Object(name, parameters),
-  _var_name(getParam<std::string>("var_name"))
+    Object(name, parameters),
+    FunctionInterface(parameters),
+    _var_name(getParam<std::string>("var_name"))
 {
 }
 

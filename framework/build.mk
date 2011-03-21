@@ -39,11 +39,15 @@ endif
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
 	ifneq (,$(findstring gcc,$(GXX-VERSION)))
-		libmesh_CXXFLAGS += --coverage
+		libmesh_CXXFLAGS += --coverage -fbranch-probabilities 
 		libmesh_LDFLAGS += --coverage
 	endif
 endif
 
+# link with gcov support, but do now generate data for this build
+# if you wanted code coverage data for moose, but you wanted to run
+# the tests in moose_test you would make moose with coverage=true
+# and moose_test with just linkcoverage=true
 ifeq ($(linkcoverage),true)
 	ifneq (,$(findstring gcc,$(GXX-VERSION)))
 		libmesh_LDFLAGS += --coverage
@@ -56,6 +60,7 @@ endif
 #
 # source files
 srcfiles    := $(shell find $(CURR_DIR) -name *.C)
+csrcfiles    := $(shell find $(CURR_DIR) -name *.c)
 
 ifeq ($(MAKE_LIBRARY),yes)
 # THIS LINE SHOULD BE MADE MORE GENERIC
@@ -68,6 +73,7 @@ f90srcfiles := $(shell find $(CURR_DIR) -name *.f90)
 #
 # object files
 objects	    := $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
+cobjects	:= $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
 fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
@@ -100,27 +106,27 @@ all:: $(target)
 ifeq ($(MAKE_LIBRARY),yes)
 ifeq ($(enable-shared),yes)
 # Build dynamic library
-$(target): $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
 	@echo "Linking "$@"..."
-	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(fobjects) $(f90objects) $(objects) $(libmesh_LDFLAGS)
+	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(fobjects) $(f90objects) $(objects) $(cobjects) $(libmesh_LDFLAGS)
 else
 # Build static library
 ifeq ($(findstring darwin,$(hostos)),darwin)
-$(target): $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
 	@echo "Linking "$@"..."
-	@libtool -static -o $@ $(fobjects) $(f90objects) $(objects) 
+	@libtool -static -o $@ $(fobjects) $(f90objects) $(objects) $(cobjects) 
 else
-$(target): $(fobjects) $(f90objects) $(objects)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
 	@echo "Linking "$@"..."
-	@$(AR) rv $@ $(fobjects) $(f90objects) $(objects)
+	@$(AR) rv $@ $(fobjects) $(f90objects) $(objects) $(cobjects)
 endif
 endif
 else
 
 # Normal Executable
-$(target): $(fobjects) $(f90objects) $(objects) $(mesh_library) $(ADDITIONAL_DEPS)
+$(target): $(fobjects) $(f90objects) $(objects) $(cobjects) $(mesh_library) $(ADDITIONAL_DEPS)
 	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS) 
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(cobjects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS) 
 
 endif
 
@@ -135,7 +141,24 @@ doc:
 
 clean::
 	@rm -f $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
-	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" | xargs rm
+	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
+                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" | xargs rm
+
+# Clean only the opt intermediate files
+cleanopt::
+	@rm -f $(APPLICATION_NAME)-opt* lib$(APPLICATION_NAME)-opt*
+	@find . -name "*opt.o" -or -name "*opt.d" | xargs rm
+
+# Clean only the dbg intermediate files
+cleandbg::
+	@rm -f $(APPLICATION_NAME)-dbg* lib$(APPLICATION_NAME)-dbg*
+	@find . -name "*dbg.o" -or -name "*dbg.d" | xargs rm
+
+# Clean only the prof intermediate files
+cleanpro::
+	@rm -f $(APPLICATION_NAME)-pro* lib$(APPLICATION_NAME)-pro*
+	@find . -name "*pro.o" -or -name "*pro.d" | xargs rm
+
 
 cleanall::
 	$(MAKE) clean

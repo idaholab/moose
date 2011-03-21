@@ -2,6 +2,7 @@
 #define INITIALCONDITION_H_
 
 #include "Object.h"
+#include "FunctionInterface.h"
 
 // System includes
 #include <string>
@@ -19,7 +20,9 @@ InputParameters validParams<InitialCondition>();
 /**
  * InitialConditions are objects that set the initial value of variables.
  */
-class InitialCondition : public Object
+class InitialCondition :
+  public Object,
+  public FunctionInterface
 {
 public:
   /**
@@ -28,8 +31,7 @@ public:
    * @param name The name given to the initial condition in the input file.
    * @param parameters The parameters object holding data for the class to use.
    */
-  InitialCondition(const std::string & name,
-                   InputParameters parameters);
+  InitialCondition(const std::string & name, InputParameters parameters);
 
   virtual ~InitialCondition();
 

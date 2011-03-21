@@ -23,7 +23,7 @@ PiecewiseLinear::~PiecewiseLinear()
 }
 
 Real
-PiecewiseLinear::value(Real t, Real, Real, Real)
+PiecewiseLinear::value(Real t, const Point &)
 {
   return _scale_factor * _linear_interp.sample( t );
 }

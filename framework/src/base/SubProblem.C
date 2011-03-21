@@ -261,6 +261,7 @@ SubProblem::copySolutionsBackwards()
 void
 SubProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name)
 {
+  parameters.set<SubProblem *>("_problem") = this;
   parameters.set<std::string>("var_name") = var_name;
   _ics[var_name] = static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters));
 }
@@ -274,6 +275,7 @@ SubProblem::addInitialCondition(const std::string & var_name, Real value)
 void
 SubProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
 {
+  parameters.set<SubProblem *>("_problem") = this;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;

@@ -5,6 +5,7 @@
 #include "print_trace.h"
 #include "libmesh_common.h"
 #include "perf_log.h"
+#include "mtwist.h"
 
 typedef Real                     PostprocessorValue;
 
@@ -66,6 +67,18 @@ enum PostprocessorType
 
 const unsigned int ANY_BLOCK_ID = (unsigned int) -1;
 
+/* Wrappers for extern random number generator */
+inline void seed(unsigned int s)
+{
+  mt_seed32new(s);
 }
+
+inline double rand()
+{
+  // For now we will try the 64-bit values
+  return mt_ldrand();
+}
+
+} // namespace
 
 #endif /* MOOSE_H_ */

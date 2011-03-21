@@ -76,11 +76,11 @@ ParsedFunction::getVarAddr(std::string var)
 }
 
 Real
-ParsedFunction::value(Real t, Real x, Real y, Real z)
+ParsedFunction::value(Real t, const Point & pt)
 {
   _vals[0] = t;
-  _vals[1] = x;
-  _vals[2] = y;
-  _vals[3] = z;
+  _vals[1] = pt(0);
+  _vals[2] = pt(1);
+  _vals[3] = pt(2);
   return _parser.Eval(&(_vals[0]));
 }

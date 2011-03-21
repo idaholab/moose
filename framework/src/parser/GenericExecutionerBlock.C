@@ -105,17 +105,17 @@ GenericExecutionerBlock::execute()
       _parser_handle._problem->initDisplacedProblem(displacements);
     }
 
+    // handle functions
+    ParserBlock * fns = locateBlock("Functions");
+    if (fns)
+      fns->execute();
+
     VariablesBlock * vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("Variables"));
     if (vars!= NULL)
       vars->execute();
     VariablesBlock * aux_vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("AuxVariables"));
     if (aux_vars!= NULL)
       aux_vars->execute();
-
-    // handle functions
-    ParserBlock * fns = locateBlock("Functions");
-    if (fns)
-      fns->execute();
 
     // handle periodic BCs
     ParserBlock * pb = locateBlock("BCs/Periodic");

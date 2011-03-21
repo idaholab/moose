@@ -25,6 +25,6 @@ ElementL2Error::getValue()
 Real
 ElementL2Error::computeQpIntegral()
 {
-  Real diff = _u[_qp]-_func.value(_t, _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
+  Real diff = _u[_qp]-_func.value(_t, _q_point[_qp]);
   return diff*diff;
 }

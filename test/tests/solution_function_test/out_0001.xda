@@ -1,0 +1,20 @@
+libMesh-0.7.0+	 # File Format Identifier
+2	 # No. of Equation Systems
+AuxiliarySystem	 # Name, System No. 1
+TransientExplicit	 # Type, System No. 1
+1	 # No. of Variables in System "AuxiliarySystem"
+u_aux	 #   Name, Variable No. 0, System "AuxiliarySystem"
+1	 #     Approximation Order, Variable "u_aux", System "AuxiliarySystem"
+0	 #     FE Family, Variable "u_aux", System "AuxiliarySystem"
+0	 # No. of Additional Vectors, System "AuxiliarySystem"
+NonlinearSystem	 # Name, System No. 0
+TransientNonlinearImplicit	 # Type, System No. 0
+1	 # No. of Variables in System "NonlinearSystem"
+u	 #   Name, Variable No. 0, System "NonlinearSystem"
+1	 #     Approximation Order, Variable "u", System "NonlinearSystem"
+0	 #     FE Family, Variable "u", System "NonlinearSystem"
+0	 # No. of Additional Vectors, System "NonlinearSystem"
+9	 # vector length
+2.00000000000000000e+00 2.50000000000000000e+00 2.50000000000000000e+00 2.00000000000000000e+00 2.50000000000000000e+00 2.00000000000000000e+00 3.00000000000000000e+00 3.00000000000000000e+00 3.00000000000000000e+00 	 # System "AuxiliarySystem" Solution Vector
+9	 # vector length
+-1.74853573784521755e-20 5.00000000000000000e-01 4.99999999999999944e-01 -1.74853573784521755e-20 5.00000000000000000e-01 -1.74853573784521755e-20 1.00000000000000000e+00 1.00000000000000000e+00 1.00000000000000000e+00 	 # System "NonlinearSystem" Solution Vector
