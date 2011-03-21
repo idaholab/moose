@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DISPLACEDSYSTEM_H_
-#define DISPLACEDSYSTEM_H_
+#ifndef DISPLACEDSYSTEM_H
+#define DISPLACEDSYSTEM_H
 
 #include "SystemBase.h"
 // libMesh include
@@ -51,4 +51,4 @@ protected:
   SystemBase & _undisplaced_system;
 };
 
-#endif /* DISPLACEDSYSTEM_H_ */
+#endif /* DISPLACEDSYSTEM_H */

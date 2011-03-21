@@ -38,4 +38,4 @@ protected:
   Point _p;
 };
  
-#endif //CONSTANTPOINTSOURCE_H_
+#endif //CONSTANTPOINTSOURCE_H

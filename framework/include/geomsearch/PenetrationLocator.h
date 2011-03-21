@@ -94,5 +94,5 @@ public:
   std::map<unsigned int, bool> _has_penetrated;
 };
 
-#endif //PENETRATIONLOCATOR_H_
+#endif //PENETRATIONLOCATOR_H
 

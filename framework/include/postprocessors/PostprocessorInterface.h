@@ -40,4 +40,4 @@ private:
   THREAD_ID _pi_tid;
 };
 
-#endif //POSTPROCESSORINTERFACE_H_
+#endif //POSTPROCESSORINTERFACE_H

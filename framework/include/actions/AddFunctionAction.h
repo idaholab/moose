@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDFUNCTIONACTION_H_
-#define ADDFUNCTIONACTION_H_
+#ifndef ADDFUNCTIONACTION_H
+#define ADDFUNCTIONACTION_H
 
 #include "MooseObjectAction.h"
 
@@ -31,4 +31,4 @@ public:
 template<>
 InputParameters validParams<AddFunctionAction>();
 
-#endif //ADDFUNCTIONACTION_H_
+#endif //ADDFUNCTIONACTION_H

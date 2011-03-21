@@ -70,4 +70,4 @@ protected:
   Point _top_right;
 };
 
-#endif //BOUNDINGBOXIC_H_
+#endif //BOUNDINGBOXIC_H

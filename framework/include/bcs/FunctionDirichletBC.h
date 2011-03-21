@@ -48,4 +48,4 @@ private:
   Function & _func;
 };
 
-#endif //FUNCTIONDIRICHLETBC_H_
+#endif //FUNCTIONDIRICHLETBC_H

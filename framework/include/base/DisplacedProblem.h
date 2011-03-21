@@ -117,4 +117,4 @@ protected:
   friend class UpdateDisplacedMeshThread;
 };
 
-#endif /* DISPLACEDPROBLEM_H_ */
+#endif /* DISPLACEDPROBLEM_H */

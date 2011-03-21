@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GLOBALPARAMSACTION_H_
-#define GLOBALPARAMSACTION_H_
+#ifndef GLOBALPARAMSACTION_H
+#define GLOBALPARAMSACTION_H
 
 #include "Action.h"
 #include "Moose.h"

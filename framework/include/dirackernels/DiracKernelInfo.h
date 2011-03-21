@@ -54,4 +54,4 @@ public:
   void clearPoints();
 };
 
-#endif //DIRACKERNELINFO_H_
+#endif //DIRACKERNELINFO_H

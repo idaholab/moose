@@ -61,4 +61,4 @@ protected:
 template<>
 InputParameters validParams<LooseCoupling>();
 
-#endif /* LOOSECOUPLING_H_ */
+#endif /* LOOSECOUPLING_H */

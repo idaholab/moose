@@ -72,4 +72,4 @@ protected:
 template<>
 InputParameters validParams<IntegratedBC>();
 
-#endif /* INTEGRATEDBC_H_ */
+#endif /* INTEGRATEDBC_H */

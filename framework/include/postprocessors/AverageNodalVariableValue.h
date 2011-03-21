@@ -45,4 +45,4 @@ protected:
   std::vector<unsigned int> _node_ids;
 };
 
-#endif //AVERAGENODALVARIABLEVALUE_H_
+#endif //AVERAGENODALVARIABLEVALUE_H

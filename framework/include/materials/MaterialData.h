@@ -63,4 +63,4 @@ protected:
 
 };
 
-#endif /* MATERIALDATA_H_ */
+#endif /* MATERIALDATA_H */

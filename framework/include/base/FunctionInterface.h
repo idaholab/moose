@@ -46,4 +46,4 @@ private:
   InputParameters _params;
 };
 
-#endif //FUNCTIONINTERFACE_H_
+#endif //FUNCTIONINTERFACE_H

@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADAPTIVITYACTION_H_
-#define ADAPTIVITYACTION_H_
+#ifndef ADAPTIVITYACTION_H
+#define ADAPTIVITYACTION_H
 
 #include "Action.h"
 
@@ -30,4 +30,4 @@ public:
 template<>
 InputParameters validParams<AdaptivityAction>();
 
-#endif //ADAPTIVITYACTION_H_
+#endif //ADAPTIVITYACTION_H

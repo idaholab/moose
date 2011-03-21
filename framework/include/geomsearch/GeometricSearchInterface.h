@@ -42,4 +42,4 @@ protected:
   GeometricSearchData & _geometric_search_data;
 };
 
-#endif //GEOMETRICSEARCHINTERFACE_H_
+#endif //GEOMETRICSEARCHINTERFACE_H

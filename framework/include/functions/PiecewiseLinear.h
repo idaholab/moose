@@ -44,4 +44,4 @@ private:
 
 };
 
-#endif //PIECEWISELINEAR_H_
+#endif //PIECEWISELINEAR_H

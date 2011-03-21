@@ -87,4 +87,4 @@ void initial_condition(EquationSystems & es, const std::string & system_name);
 } // namespace Moose
 
 
-#endif /* SUBPROBLEM_H_ */
+#endif /* SUBPROBLEM_H */

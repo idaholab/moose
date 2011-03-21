@@ -121,4 +121,4 @@ protected:
   Output _out;
 };
 
-#endif /* COUPLEDPROBLEM_H_ */
+#endif /* COUPLEDPROBLEM_H */

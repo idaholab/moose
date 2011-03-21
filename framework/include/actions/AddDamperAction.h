@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDDAMPERACTION_H_
-#define ADDDAMPERACTION_H_
+#ifndef ADDDAMPERACTION_H
+#define ADDDAMPERACTION_H
 
 #include "MooseObjectAction.h"
 
@@ -28,4 +28,4 @@ public:
 template<>
 InputParameters validParams<AddDamperAction>();
 
-#endif //ADDDAMPERACTION_H_
+#endif //ADDDAMPERACTION_H

@@ -44,4 +44,4 @@ protected:
   std::string getFileName(const std::string & file_base);
 };
 
-#endif /* OUTPUTTER_H_ */
+#endif /* OUTPUTTER_H */

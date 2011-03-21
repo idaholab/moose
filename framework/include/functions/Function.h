@@ -45,4 +45,4 @@ public:
 template<>
 InputParameters validParams<Function>();
 
-#endif //FUNCTION_H_
+#endif //FUNCTION_H

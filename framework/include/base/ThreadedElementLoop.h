@@ -205,4 +205,4 @@ ThreadedElementLoop<RangeType>::onInternalSide(const Elem * /*elem*/, unsigned i
 {
 }
 
-#endif //THREADEDELEMENTLOOP_H_
+#endif //THREADEDELEMENTLOOP_H

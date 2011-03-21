@@ -136,4 +136,4 @@ protected:
 template<>
 InputParameters validParams<Kernel>();
 
-#endif /* KERNEL_H_ */
+#endif /* KERNEL_H */

@@ -92,4 +92,4 @@ protected:
 template<>
 InputParameters validParams<Executioner>();
 
-#endif //EXECUTIONER_H_
+#endif //EXECUTIONER_H

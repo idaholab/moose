@@ -12,11 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PARSER_H_
-#define PARSER_H_
-
-// Set to 1 to use Actions, 0 for ParserBlocks
-#define PARSER_ACTION 1 
+#ifndef PARSER_H
+#define PARSER_H
 
 #include <list>
 

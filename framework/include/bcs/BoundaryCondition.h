@@ -80,4 +80,4 @@ protected:
 template<>
 InputParameters validParams<BoundaryCondition>();
 
-#endif /* BOUNDARYCONDITION_H_ */
+#endif /* BOUNDARYCONDITION_H */

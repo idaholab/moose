@@ -55,4 +55,4 @@ protected:
   std::vector<Outputter *> _outputters;
 };
 
-#endif /* OUTPUTTER_H_ */
+#endif /* OUTPUTTER_H */

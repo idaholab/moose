@@ -34,4 +34,4 @@ extern GetPot *command_line;
 
 } // namespace Moose
 
-#endif /* INIT_H_ */
+#endif /* MOOSEINIT_H */

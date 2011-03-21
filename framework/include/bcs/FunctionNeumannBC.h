@@ -36,4 +36,4 @@ protected:
   Function & _func;
 };
 
-#endif // FUNCTIONNEUMANNBC_H_
+#endif // FUNCTIONNEUMANNBC_H

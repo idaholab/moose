@@ -47,4 +47,4 @@ protected:
   InputParameters _pars;
 };
 
-#endif /* MOOSEOBJECT_H_*/
+#endif /* MOOSEOBJECT_H*/

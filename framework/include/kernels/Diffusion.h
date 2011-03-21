@@ -35,4 +35,4 @@ protected:
 };
 
 
-#endif /* DIFFUSION_H_ */
+#endif /* DIFFUSION_H */

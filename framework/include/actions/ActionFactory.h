@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ACTIONFACTORY_H_
-#define ACTIONFACTORY_H_
+#ifndef ACTIONFACTORY_H
+#define ACTIONFACTORY_H
 
 #include <vector>
 #include <map>
@@ -133,4 +133,4 @@ private:
   ActionFactory();
 };
 
-#endif /* ACTIONFACTORY_H_ */
+#endif /* ACTIONFACTORY_H */

@@ -40,4 +40,4 @@ protected:
   bool _is_transient;
 };
 
-#endif /* TRANSIENTINTERFACE_H_ */
+#endif /* TRANSIENTINTERFACE_H */

@@ -45,4 +45,4 @@ protected:
 template<>
 InputParameters validParams<NodalBC>();
 
-#endif /* NODALBC_H_ */
+#endif /* NODALBC_H */

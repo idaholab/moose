@@ -47,4 +47,4 @@ protected:
   std::map<unsigned int, std::set<MooseVariable *> > _boundary_vars;         /// Map to variables that need to be evaluated on a boundary
 };
 
-#endif // KERNELWAREHOUSE_H_
+#endif // KERNELWAREHOUSE_H

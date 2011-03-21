@@ -45,4 +45,4 @@ protected:
 template<>
 InputParameters validParams<NeumannBC>();
 
-#endif //NEUMANNBC_H_
+#endif //NEUMANNBC_H

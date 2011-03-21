@@ -32,4 +32,4 @@ protected:
 template<>
 InputParameters validParams<DirichletBC>();
 
-#endif /* DIRICHLETBC_H_ */
+#endif /* DIRICHLETBC_H */

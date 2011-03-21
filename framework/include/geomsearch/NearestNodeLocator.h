@@ -80,4 +80,4 @@ public:
   static const unsigned int _patch_size;
 };
 
-#endif //NEARESTNODELOCATOR_H_
+#endif //NEARESTNODELOCATOR_H
