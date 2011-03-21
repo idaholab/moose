@@ -5,8 +5,7 @@
 template<>
 InputParameters validParams<AddKernelAction>()
 {
-  InputParameters params = validParams<MooseObjectAction>();
-  return params;
+  return validParams<MooseObjectAction>();
 }
 
 AddKernelAction::AddKernelAction(const std::string & name, InputParameters params) :

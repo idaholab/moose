@@ -5,10 +5,7 @@
 template<>
 InputParameters validParams<AddBCAction>()
 {
-  InputParameters params = validParams<MooseObjectAction>();
-  params.addRequiredParam<std::string>("variable", "The BC Name used in your model");
-  params.addRequiredParam<std::vector<int> >("boundary", "The boundary number from your input mesh which corresponds to this boundary");
-  return params;
+  return validParams<MooseObjectAction>();
 }
 
 AddBCAction::AddBCAction(const std::string & name, InputParameters params) :
