@@ -6,6 +6,7 @@
 #include "MooseObject.h"
 
 #include <string>
+#include <ostream>
 
 class Action : public MooseObject
 {
@@ -23,14 +24,24 @@ public:
   /**
    * Returns the short name which is the final string after the last delimiter for the
    * current ParserBlock
-   *
-   * TODO: Rename this method to getName, the normal name (ID) should be getPath
    */
   std::string getShortName() const;
+
+  void printInputFile(const std::string * prev_name);
   
 protected:
+  /// Helper method for adding Params pointers to be printed out in syntax dumps
+  virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
+  
+  ///Output stream which the print_* functions print to. Defaults to std::cout 
+  static std::ostream * _out;
+  
   std::string _action;
   Parser & _parser_handle;
+
+private:
+  /// Helper method for printing the parts of the InputFile Syntax
+  void printCloseAndOpen(const std::string * prev_name, const std::string & curr_name) const;
 };
 
 template<>

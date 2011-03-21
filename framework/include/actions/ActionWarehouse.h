@@ -7,6 +7,7 @@
 
 #include "DependencyResolver.h"
 #include "Action.h"
+#include "EmptyAction.h"
 
 /// Typedef to hide implementation details
 typedef std::vector<Action *>::iterator ActionIterator;
@@ -15,6 +16,7 @@ class ActionWarehouse
 {
 public:
   ActionWarehouse();
+  ~ActionWarehouse();
 
   void registerName(std::string action, bool is_required);
   void addDependency(std::string action, std::string pre_req);
@@ -31,6 +33,9 @@ public:
   ActionIterator allActionsBegin(Parser * p_ptr);
   ActionIterator allActionsEnd();
 
+  ActionIterator inputFileActionsBegin();
+  ActionIterator inputFileActionsEnd();
+
 private:
   /// The list of registered actions and a flag indicating whether or not they are required
   std::map<std::string, bool> _registered_actions;
@@ -43,9 +48,11 @@ private:
 
   /// The vector of ordered actions out of the dependency resolver
   std::vector<Action *> _ordered_actions;
-
+  
   /// Used to store the action name for the current active action Block iterator
   std::string _curr_action_name;
+
+  EmptyAction *_empty_action;
 };
 
 #endif // ACTIONWAREHOUSE_H

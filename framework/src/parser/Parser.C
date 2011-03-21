@@ -310,6 +310,19 @@ Parser::parse_new(const std::string &input_filename)
     extractParams(curr_identifier, active_list_params);
     active_lists[curr_identifier] = active_list_params.get<std::vector<std::string> >("active");
   }
+
+  // Print the input file syntax if requested
+  if (Moose::command_line && Moose::command_line->search(_show_tree))
+  {
+    const std::string * prev_name = NULL;
+    for (ActionIterator a = Moose::action_warehouse.inputFileActionsBegin();
+         a != Moose::action_warehouse.inputFileActionsEnd();
+         ++a)
+    {
+      (*a)->printInputFile(prev_name);
+      prev_name = &((*a)->name());
+    }
+  }
 }
 
 void

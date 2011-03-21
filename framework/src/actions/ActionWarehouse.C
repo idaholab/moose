@@ -3,8 +3,15 @@
 #include "Parser.h"
 
 ActionWarehouse::ActionWarehouse() :
-    _ordered_actions(NULL)
+  _ordered_actions(NULL),
+  _empty_action(NULL)
 {
+}
+
+ActionWarehouse::~ActionWarehouse()
+{
+  if (_empty_action)
+    delete _empty_action;
 }
 
 void
@@ -46,6 +53,41 @@ ActionWarehouse::actionBlocksWithActionEnd()
   return _action_blocks[_curr_action_name].end();
 }
 
+ActionIterator
+ActionWarehouse::inputFileActionsBegin()
+{
+  if (!_empty_action)
+    _empty_action = new EmptyAction("", validParams<Action>());
+  
+  std::map<std::string, std::vector<Action *> >::iterator iter;
+  
+  // We'll use a map to reorder for us
+  std::map<std::string, Action *> input_file_blocks;
+  std::map<std::string, Action *>::iterator i;
+  
+  for (iter = _action_blocks.begin(); iter != _action_blocks.end(); ++iter)
+    for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
+      input_file_blocks[(*j)->name()] = *j;
+
+  _ordered_actions.clear();
+  for (i = input_file_blocks.begin(); i != input_file_blocks.end(); ++i)
+  {
+    std::cerr << i->second->name() << '\n';
+    _ordered_actions.push_back(i->second);
+  }
+  
+  // We'll push one more "empty" action onto the end so that when we print the input syntax
+  // everything will get closed off without any odd tail calls.
+  _ordered_actions.push_back(_empty_action);
+  
+  return _ordered_actions.begin();
+}
+
+ActionIterator
+ActionWarehouse::inputFileActionsEnd()
+{
+  return _ordered_actions.end();
+}
 
 ActionIterator
 ActionWarehouse::allActionsBegin(Parser * p_ptr)

@@ -17,6 +17,8 @@ public:
   inline InputParameters & getMooseObjectParams() { return _moose_object_pars; }
   
 protected:
+  virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
+  
   std::string _type;
   InputParameters _moose_object_pars;
 };
