@@ -7,6 +7,7 @@
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "GeometricSearchInterface.h"
+#include "MooseMesh.h"
 
 //forward declarations
 class AuxKernel;
@@ -54,10 +55,16 @@ protected:
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
   MooseVariable & _var;
+  MooseMesh & _mesh;
   int _dim;
 
+  const std::vector< Point > & _q_point;
   QBase * & _qrule;
   const std::vector<Real> & _JxW;
+
+  VariableValue & _u;                                   /// Holds the solution at current quadrature points
+  VariableValue & _u_old;                               /// Holds the previous solution at the current quadrature point.
+  VariableValue & _u_older;                             /// Holds the t-2 solution at the current quadrature point.
 
   const Elem * & _current_elem;
   const Node * & _current_node;

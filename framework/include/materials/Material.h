@@ -4,6 +4,7 @@
 #include "MooseObject.h"
 #include "Coupleable.h"
 #include "TransientInterface.h"
+#include "PostprocessorInterface.h"
 #include "MaterialProperty.h"
 #include "ParallelUniqueId.h"
 
@@ -21,7 +22,8 @@ class MaterialData;
 class Material :
   public MooseObject,
   public Coupleable,
-  public TransientInterface
+  public TransientInterface,
+  public PostprocessorInterface
 {
 public:
   Material(const std::string & name, InputParameters parameters);

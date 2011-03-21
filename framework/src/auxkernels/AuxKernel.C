@@ -34,9 +34,16 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _aux_sys(*parameters.get<AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _dim(_problem.mesh().dimension()),
+    _mesh(_problem.mesh()),
+    _dim(_mesh.dimension()),
+    _q_point(_problem.points(_tid)),
     _qrule(_problem.qRule(_tid)),
     _JxW(_problem.JxW(_tid)),
+
+    _u(_var.sln()),
+    _u_old(_var.slnOld()),
+    _u_older(_var.slnOlder()),
+
     _current_elem(_var.currentElem()),
     _current_node(_var.node()),
     _current_volume(_aux_sys._data[_tid]._current_volume),

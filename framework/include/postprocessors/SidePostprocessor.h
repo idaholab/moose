@@ -3,6 +3,7 @@
 
 #include "Postprocessor.h"
 #include "MooseVariable.h"
+#include "MaterialPropertyInterface.h"
 
 //Forward Declarations
 class SidePostprocessor;
@@ -11,7 +12,8 @@ template<>
 InputParameters validParams<SidePostprocessor>();
 
 class SidePostprocessor :
-  public Postprocessor
+  public Postprocessor,
+  public MaterialPropertyInterface
 {
 public:
   SidePostprocessor(const std::string & name, InputParameters parameters);

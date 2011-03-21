@@ -12,6 +12,7 @@
 #include "FunctionInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
+#include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
 
 //libMesh includes
@@ -39,7 +40,8 @@ class DiracKernel :
   public Coupleable,
   public FunctionInterface,
   public TransientInterface,
-  public MaterialPropertyInterface
+  public MaterialPropertyInterface,
+  public GeometricSearchInterface
 {
 public:
   DiracKernel(const std::string & name, InputParameters parameters);

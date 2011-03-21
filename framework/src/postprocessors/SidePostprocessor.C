@@ -12,6 +12,7 @@ InputParameters validParams<SidePostprocessor>()
 
 SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
+    MaterialPropertyInterface(parameters),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
     _q_point(_problem.pointsFace(_tid)),

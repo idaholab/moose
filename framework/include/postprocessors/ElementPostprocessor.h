@@ -4,6 +4,7 @@
 #include "Postprocessor.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
+#include "MaterialPropertyInterface.h"
 // libMesh
 #include "elem.h"
 
@@ -17,7 +18,8 @@ InputParameters validParams<ElementPostprocessor>();
 
 class ElementPostprocessor :
   public Postprocessor,
-  public TransientInterface
+  public TransientInterface,
+  public MaterialPropertyInterface
 {
 public:
   ElementPostprocessor(const std::string & name, InputParameters parameters);

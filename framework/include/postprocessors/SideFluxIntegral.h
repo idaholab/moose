@@ -14,8 +14,7 @@ InputParameters validParams<SideFluxIntegral>();
  * This postprocessor computes a side integral of the mass flux.
  */
 class SideFluxIntegral :
-  public SideIntegral,
-  public MaterialPropertyInterface
+  public SideIntegral
 {
 public:
   SideFluxIntegral(const std::string & name, InputParameters parameters);

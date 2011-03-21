@@ -19,6 +19,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     Coupleable(parameters),
     TransientInterface(parameters),
+    PostprocessorInterface(parameters),
     _problem(*parameters.get<SubProblem *>("_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _bnd(parameters.get<bool>("_bnd")),

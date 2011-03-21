@@ -19,6 +19,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     FunctionInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
+    GeometricSearchInterface(parameters),
 //  : PDEBase(name, parameters,
 //            (parameters.get<MooseSystem *>("_moose_system")->hasDisplacedMesh() && parameters.get<bool>("use_displaced_mesh")) ?
 //            *parameters.get<MooseSystem *>("_moose_system")->_dirac_kernel_data_displaced[parameters.get<THREAD_ID>("_tid")] :
