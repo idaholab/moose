@@ -13,7 +13,9 @@
 
 AuxiliarySystem::AuxiliarySystem(MProblem & subproblem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(subproblem, name),
-    _mproblem(subproblem)
+    _mproblem(subproblem),
+    _serialized_solution(*NumericVector<Number>::build().release()),
+    _need_serialized_solution(false)
 {
   _sys.attach_init_function(Moose::initial_condition);
 
@@ -23,6 +25,12 @@ AuxiliarySystem::AuxiliarySystem(MProblem & subproblem, const std::string & name
   _auxs.resize(libMesh::n_threads());
   _auxs_ts.resize(libMesh::n_threads());
   _data.resize(libMesh::n_threads());
+}
+
+void
+AuxiliarySystem::init()
+{
+  _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
 }
 
 void
@@ -133,10 +141,20 @@ AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
   }
 }
 
+NumericVector<Number> &
+AuxiliarySystem::serializedSolution()
+{
+  _need_serialized_solution = true;
+  return _serialized_solution;
+}
+
 void
 AuxiliarySystem::compute()
 {
   computeInternal(_auxs);
+
+  if(_need_serialized_solution)
+    solution().localize(_serialized_solution);
 }
 
 void

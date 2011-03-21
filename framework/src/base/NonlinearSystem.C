@@ -45,6 +45,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
     _nl_solution(_sys.add_vector("curr_sln", false, GHOSTED)),
+    _serialized_solution(*NumericVector<Number>::build().release()),
     _residual_copy(*NumericVector<Number>::build().release()),
     _t(subproblem.time()),
     _dt(subproblem.dt()),
@@ -53,6 +54,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _time_weight(subproblem.timeWeights()),
     _increment_vec(NULL),
     _preconditioner(NULL),
+    _need_serialized_solution(false),
     _need_residual_copy(false)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
@@ -79,6 +81,7 @@ NonlinearSystem::~NonlinearSystem()
 void
 NonlinearSystem::init()
 {
+  _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
   _residual_copy.init(_sys.n_dofs(), false, SERIAL);
 
   // use computed initial condition
@@ -203,9 +206,24 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 }
 
 void
+NonlinearSystem::addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual)
+{
+  NumericVector<Number> * vec = &_sys.add_vector(vector_name, project, type);
+
+  if(zero_for_residual)
+    _vecs_to_zero_for_residual.push_back(vec);
+}
+
+
+void
 NonlinearSystem::computeResidual(NumericVector<Number> & residual)
 {
   Moose::perf_log.push("compute_residual()","Solve");
+
+  for(std::vector<NumericVector<Number> *>::iterator it = _vecs_to_zero_for_residual.begin();
+      it != _vecs_to_zero_for_residual.end();
+      ++it)
+    (*it)->zero();
 
   computeTimeDeriv();
   computeResidualInternal(residual);
@@ -666,6 +684,22 @@ NonlinearSystem::residualCopy()
 {
   _need_residual_copy = true;
   return _residual_copy;
+}
+
+void
+NonlinearSystem::set_solution(const NumericVector<Number> & soln)
+{
+  _nl_solution = soln;
+  
+  if(_need_serialized_solution)
+    _nl_solution.localize(_serialized_solution);
+}
+
+NumericVector<Number> &
+NonlinearSystem::serializedSolution()
+{
+  _need_serialized_solution = true;
+  return _serialized_solution;
 }
 
 void

@@ -292,12 +292,14 @@ MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name
   {
     parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_elem = true;
   }
   else
   {
     parameters.set<SubProblemInterface *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
+    parameters.set<SystemBase *>("_nl_sys") = &_nl;
   }
   _aux.addKernel(kernel_name, name, parameters);
 }
@@ -311,12 +313,14 @@ MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string
 
     parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_face = true;
   }
   else
   {
     parameters.set<SubProblemInterface *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
+    parameters.set<SystemBase *>("_nl_sys") = &_nl;
   }
   _aux.addBoundaryCondition(bc_name, name, parameters);
 }
@@ -811,14 +815,12 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
 {
   _nl.set_solution(soln);
   computePostprocessors(Moose::PPS_RESIDUAL);
-
+  
   if (_displaced_problem != NULL)
-  {
-    _displaced_problem->serializeSolution(soln, _aux.solution());
     _displaced_problem->updateMesh(soln, _aux.solution());
-  }
 
   _aux.compute();
+
   _nl.computeResidual(residual);
 }
 
@@ -829,10 +831,7 @@ MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector
   computePostprocessors(Moose::PPS_JACOBIAN);
 
   if (_displaced_problem != NULL)
-  {
-    _displaced_problem->serializeSolution(soln, _aux.solution());
     _displaced_problem->updateMesh(soln, _aux.solution());
-  }
 
   _aux.compute();
   _nl.computeJacobian(jacobian);
@@ -842,10 +841,7 @@ void
 MProblem::computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
 {
   if (_displaced_problem != NULL)
-  {
-    _displaced_problem->serializeSolution(_nl.solution(), _aux.solution());
     _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
-  }
 
   _aux.compute();
   _nl.computeJacobianBlock(jacobian, precond_system, ivar, jvar);

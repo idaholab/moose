@@ -21,6 +21,10 @@ public:
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
 
+  virtual NumericVector<Number> & getVector(std::string name);
+  
+  virtual const NumericVector<Number> & serializedSolution() { return _undisplaced_system.serializedSolution(); }
+
   /// Return the residual copy from the NonlinearSystem
   virtual NumericVector<Number> & residualCopy() { return _undisplaced_system.residualCopy(); }
 

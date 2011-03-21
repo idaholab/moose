@@ -15,6 +15,7 @@ class Problem;
 class SubProblemInterface;
 class AuxKernel;
 class AuxiliarySystem;
+class SystemBase;
 
 template<>
 InputParameters validParams<AuxKernel>();
@@ -55,6 +56,7 @@ protected:
 
   Problem & _problem;
   SubProblemInterface & _subproblem;
+  SystemBase & _nl_sys;
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
   MooseVariable & _var;

@@ -37,6 +37,10 @@ protected:
 
   PenetrationLocator & _penetration_locator;
 
+  const NumericVector<Number> & _serialized_solution;
+
+  DofMap & _dof_map;
+
   unsigned int _paired_variable;
 };
 

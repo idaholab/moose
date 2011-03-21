@@ -33,6 +33,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     GeometricSearchInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
+    _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),
     _aux_sys(*parameters.get<AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
 

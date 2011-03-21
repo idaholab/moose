@@ -8,8 +8,8 @@ public:
   UpdateDisplacedMeshThread(DisplacedProblem & problem) :
       _problem(problem),
       _ref_mesh(_problem.refMesh()),
-      _nl_soln(*_problem._nl_solution),
-      _aux_soln(*_problem._aux_solution)
+      _nl_soln(_problem._nl_serialized_solution),
+      _aux_soln(_problem._aux_serialized_solution)
   {
   }
 
@@ -30,14 +30,14 @@ public:
     {
       std::string displacement_name = displacement_variables[i];
 
-      if(_problem._nl.sys().has_variable(displacement_name))
+      if(_problem._displaced_nl.sys().has_variable(displacement_name))
       {
-         var_nums.push_back(_problem._nl.sys().variable_number(displacement_name));
+         var_nums.push_back(_problem._displaced_nl.sys().variable_number(displacement_name));
          var_nums_directions.push_back(i);
       }
-      else if(_problem._aux.sys().has_variable(displacement_name))
+      else if(_problem._displaced_aux.sys().has_variable(displacement_name))
       {
-         aux_var_nums.push_back(_problem._aux.sys().variable_number(displacement_name));
+         aux_var_nums.push_back(_problem._displaced_aux.sys().variable_number(displacement_name));
          aux_var_nums_directions.push_back(i);
       }
       else
@@ -47,8 +47,8 @@ public:
     unsigned int num_var_nums = var_nums.size();
     unsigned int num_aux_var_nums = aux_var_nums.size();
 
-    unsigned int nonlinear_system_number = _problem._nl.sys().number();
-    unsigned int aux_system_number = _problem._aux.sys().number();
+    unsigned int nonlinear_system_number = _problem._displaced_nl.sys().number();
+    unsigned int aux_system_number = _problem._displaced_aux.sys().number();
 
     NodeRange::const_iterator nd = range.begin();
 
@@ -88,10 +88,10 @@ DisplacedProblem::DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_me
     _eq(displaced_mesh),
     _ref_mesh(_mproblem.mesh()),
     _displacements(displacements),
-    _nl(*this, _mproblem.getNonlinearSystem(), "DisplacedSystem"),
-    _aux(*this, _mproblem.getAuxiliarySystem(), "DisplacedAuxSystem"),
-    _nl_solution(NumericVector<Number>::build().release()),
-    _aux_solution(NumericVector<Number>::build().release()),
+    _displaced_nl(*this, _mproblem.getNonlinearSystem(), "DisplacedSystem"),
+    _displaced_aux(*this, _mproblem.getAuxiliarySystem(), "DisplacedAuxSystem"),
+    _nl_serialized_solution(_mproblem.getNonlinearSystem().serializedSolution()),
+    _aux_serialized_solution(_mproblem.getAuxiliarySystem().serializedSolution()),
     _geometric_search_data(_mproblem, _mesh),
     _ex(_eq)
 {
@@ -108,9 +108,6 @@ DisplacedProblem::DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_me
 
 DisplacedProblem::~DisplacedProblem()
 {
-  delete _nl_solution;
-  delete _aux_solution;
-
   for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
     delete _asm_info[i];
 }
@@ -123,19 +120,9 @@ DisplacedProblem::init()
 
   _mesh.meshChanged();
 
-  _nl_solution->init(_nl.sys().n_dofs(), false, SERIAL);
-  _aux_solution->init(_aux.sys().n_dofs(), false, SERIAL);
-
   Order qorder = _mproblem.getQuadratureOrder();
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _asm_info[tid]->createQRules(qorder);
-}
-
-void
-DisplacedProblem::serializeSolution(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
-{
-  soln.localize(*_nl_solution);
-  aux_soln.localize(*_aux_solution);
 }
 
 void
@@ -143,8 +130,8 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
 {
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
-  (*_nl.sys().solution) = soln;
-  (*_aux.sys().solution) = aux_soln;
+  (*_displaced_nl.sys().solution) = soln;
+  (*_displaced_aux.sys().solution) = aux_soln;
 
   Threads::parallel_for(*_mesh.getActiveNodeRange(), UpdateDisplacedMeshThread(*this));
 
@@ -157,9 +144,9 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
 bool
 DisplacedProblem::hasVariable(const std::string & var_name)
 {
-  if (_nl.hasVariable(var_name))
+  if (_displaced_nl.hasVariable(var_name))
     return true;
-  else if (_aux.hasVariable(var_name))
+  else if (_displaced_aux.hasVariable(var_name))
     return true;
   else
     return false;
@@ -168,10 +155,10 @@ DisplacedProblem::hasVariable(const std::string & var_name)
 MooseVariable &
 DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
-  if (_nl.hasVariable(var_name))
-    return _nl.getVariable(tid, var_name);
-  else if (_aux.hasVariable(var_name))
-    return _aux.getVariable(tid, var_name);
+  if (_displaced_nl.hasVariable(var_name))
+    return _displaced_nl.getVariable(tid, var_name);
+  else if (_displaced_aux.hasVariable(var_name))
+    return _displaced_aux.getVariable(tid, var_name);
   else
     mooseError("No variable with name '" + var_name + "'");
 }
@@ -179,21 +166,21 @@ DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 void
 DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains)
 {
-  _nl.addVariable(var_name, type, scale_factor, active_subdomains);
+  _displaced_nl.addVariable(var_name, type, scale_factor, active_subdomains);
 }
 
 void
 DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
 {
-  _aux.addVariable(var_name, type, 1.0, active_subdomains);
+  _displaced_aux.addVariable(var_name, type, 1.0, active_subdomains);
 }
 
 void
 DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
-  _nl.prepare(tid);
-  _aux.prepare(tid);
+  _displaced_nl.prepare(tid);
+  _displaced_aux.prepare(tid);
 }
 
 bool
@@ -210,8 +197,8 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
     _asm_info[tid]->reinitAtPhysical(elem, points);
 
-    _nl.prepare(tid);
-    _aux.prepare(tid);
+    _displaced_nl.prepare(tid);
+    _displaced_aux.prepare(tid);
 
     reinitElem(elem, tid);
   }  
@@ -223,32 +210,32 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 void
 DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  _nl.reinitElem(elem, tid);
-  _aux.reinitElem(elem, tid);
+  _displaced_nl.reinitElem(elem, tid);
+  _displaced_aux.reinitElem(elem, tid);
 }
 
 void
 DisplacedProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem, side);
-  _nl.reinitElemFace(elem, side, bnd_id, tid);
-  _aux.reinitElemFace(elem, side, bnd_id, tid);
+  _displaced_nl.reinitElemFace(elem, side, bnd_id, tid);
+  _displaced_aux.reinitElemFace(elem, side, bnd_id, tid);
 }
 
 void
 DisplacedProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
-  _nl.reinitNode(node, tid);
-  _aux.reinitNode(node, tid);
+  _displaced_nl.reinitNode(node, tid);
+  _displaced_aux.reinitNode(node, tid);
 }
 
 void
 DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
-  _nl.reinitNodeFace(node, bnd_id, tid);
-  _aux.reinitNodeFace(node, bnd_id, tid);
+  _displaced_nl.reinitNodeFace(node, bnd_id, tid);
+  _displaced_aux.reinitNodeFace(node, bnd_id, tid);
 }
 
 void

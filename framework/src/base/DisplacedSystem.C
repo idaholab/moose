@@ -76,3 +76,13 @@ DisplacedSystem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_I
    }
   }
 }
+
+NumericVector<Number> &
+DisplacedSystem::getVector(std::string name)
+{
+  if(_sys.have_vector(name))
+    return _sys.get_vector(name);
+  else
+    return _undisplaced_system.getVector(name);
+}
+

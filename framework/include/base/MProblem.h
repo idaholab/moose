@@ -111,6 +111,7 @@ public:
 
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, Moose::PostprocessorType pps_type = Moose::PPS_TIMESTEP);
+  
   /**
    * Get a reference to the value associated with the postprocessor.
    */

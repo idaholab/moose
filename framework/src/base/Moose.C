@@ -20,6 +20,7 @@
 #include "FunctionDirichletBC.h"
 #include "FunctionNeumannBC.h"
 #include "MatchedValueBC.h"
+
 // auxkernels
 #include "CoupledAux.h"
 #include "ConstantAux.h"
@@ -28,6 +29,8 @@
 #include "NearestNodeValueAux.h"
 #include "PenetrationAux.h"
 #include "ProcessorIDAux.h"
+#include "GapValueAux.h"
+
 // dirac kernels
 #include "ConstantPointSource.h"
 // ics
@@ -130,6 +133,7 @@ registerObjects()
   registerObject(MatchedValueBC);
   // dirac kernels
   registerObject(ConstantPointSource);
+
   // aux kernels
   registerObject(CoupledAux);
   registerObject(ConstantAux);
@@ -138,6 +142,8 @@ registerObjects()
   registerObject(NearestNodeValueAux);
   registerObject(PenetrationAux);
   registerObject(ProcessorIDAux);
+  registerObject(GapValueAux);
+
   // Initial Conditions
   registerObject(ConstantIC);
   registerObject(BoundingBoxIC);

@@ -20,12 +20,16 @@ class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 public:
   AuxiliarySystem(MProblem & subproblem, const std::string & name);
 
+  virtual void init();
+
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
 
+  virtual NumericVector<Number> & serializedSolution();
+  
   virtual void compute();
   virtual void compute_ts();
 
@@ -33,6 +37,11 @@ protected:
   virtual void computeInternal(std::vector<AuxWarehouse> & auxs);
 
   MProblem & _mproblem;
+
+  NumericVector<Number> & _serialized_solution;         /// Serialized version of the solution vector
+
+  bool _need_serialized_solution;                       /// Whether or not a copy of the residual needs to be made
+
   // Variables
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;

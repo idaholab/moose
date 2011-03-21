@@ -30,15 +30,11 @@ public:
   virtual Problem * parent() { return _mproblem.parent(); }
   MooseMesh & refMesh() { return _ref_mesh; }
 
-  DisplacedSystem & nlSys() { return _nl; }
-  DisplacedSystem & auxSys() { return _aux; }
+  DisplacedSystem & nlSys() { return _displaced_nl; }
+  DisplacedSystem & auxSys() { return _displaced_aux; }
 
   virtual void init();
 
-  /**
-   * Serialize the solution
-   */
-  virtual void serializeSolution(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
 
   // Variables /////
@@ -90,11 +86,11 @@ protected:
   MooseMesh & _ref_mesh;                               /// reference mesh
   std::vector<std::string> _displacements;
 
-  DisplacedSystem _nl;
-  DisplacedSystem _aux;
+  DisplacedSystem _displaced_nl;
+  DisplacedSystem _displaced_aux;
 
-  NumericVector<Number> * _nl_solution;
-  NumericVector<Number> * _aux_solution;
+  const NumericVector<Number> & _nl_serialized_solution;
+  const NumericVector<Number> & _aux_serialized_solution;
 
   std::vector<AssemblyData *> _asm_info;
 

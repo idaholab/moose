@@ -37,6 +37,9 @@ public:
   void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
   void addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
 
+  /// Adds a vector to the system
+  void addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual);
+
   void computeResidual(NumericVector<Number> & residual);
   void computeJacobian(SparseMatrix<Number> &  jacobian);
   void computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
@@ -48,9 +51,12 @@ public:
 
   void onTimestepBegin();
 
-  virtual void set_solution(const NumericVector<Number> & soln) { _nl_solution = soln; }
-  virtual NumericVector<Number> & solution() { return _nl_solution; }
+  virtual void set_solution(const NumericVector<Number> & soln);
   
+  virtual NumericVector<Number> & solution() { return _nl_solution; }
+
+  virtual NumericVector<Number> & serializedSolution();
+      
   virtual NumericVector<Number> & residualCopy();
 
   void setPreconditioner(Preconditioner<Real> *pc);
@@ -79,6 +85,8 @@ protected:
 
   NumericVector<Number> & _nl_solution;                 /// solution vector from nonlinear solver
 
+  NumericVector<Number> & _serialized_solution;         /// Serialized version of the solution vector
+
   NumericVector<Number> & _residual_copy;               /// Copy of the residual vector
 
   Real & _t;                                            /// time
@@ -100,7 +108,11 @@ protected:
 
   Preconditioner<Real> * _preconditioner;               /// Preconditioner
 
+  bool _need_serialized_solution;                       /// Whether or not a copy of the residual needs to be made
+
   bool _need_residual_copy;                             /// Whether or not a copy of the residual needs to be made
+
+  std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;   /// NumericVectors that will be zeroed before a residual computation
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;

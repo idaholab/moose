@@ -47,6 +47,12 @@ public:
   virtual NumericVector<Number> & solutionUDot() = 0;
   virtual NumericVector<Number> & solutionDuDotDu() = 0;
 
+  /// Get a raw NumericVector
+  virtual NumericVector<Number> & getVector(std::string name) = 0;
+
+  /// Returns a reference to a serialized version of the solution vector for this subproblem
+  virtual const NumericVector<Number> & serializedSolution() = 0;
+
   virtual NumericVector<Number> & residualCopy() { mooseError("This system does not support getting a copy of the residual"); }
 
   virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
@@ -135,6 +141,8 @@ public:
 
   virtual NumericVector<Number> & solutionUDot() { return _solution_u_dot; }
   virtual NumericVector<Number> & solutionDuDotDu() { return _solution_du_dot_du; }
+
+  virtual NumericVector<Number> & getVector(std::string name) { return _sys.get_vector(name); }
 
   virtual void init()
   {

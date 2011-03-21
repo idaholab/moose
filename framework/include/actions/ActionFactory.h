@@ -12,7 +12,7 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerActionName(name, is_required)   action_warehouse.registerName(name, is_required)
+#define registerActionName(name, is_required)   Moose::action_warehouse.registerName(name, is_required)
 #define registerAction(tplt, name, action)      ActionFactory::instance()->reg<tplt>(name, action)
 #define registerNonParsedAction(tplt, action)   ActionFactory::instance()->regNonParsed<tplt>(action)
 
