@@ -159,7 +159,7 @@ Transient::takeStep(Real input_dt)
   {
     _problem.computePostprocessors();
 
-//    if (((_t_step + 1) % _moose_system._interval == 0 || _reset_dt))
+    if (((_t_step + 1) % _problem.out().interval() == 0 || _reset_dt))
       _problem.output();
 
     _problem.outputPostprocessors();
@@ -182,7 +182,16 @@ Transient::computeConstrainedDT()
     _dt = _input_dt;
   }
 
-  Real dt_cur = computeDT();
+//  // If start up steps are needed
+//  if(_t_step == 1 && _n_startup_steps > 1)
+//    _dt = _input_dt/(double)(_n_startup_steps);
+//  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
+//    _dt = _input_dt;
+
+  Real dt_cur = _dt;
+  //After startup steps, compute new dt
+  if (_t_step > _n_startup_steps)
+    dt_cur = computeDT();
 
   // Don't let the time step size exceed maximum time step size
   if (dt_cur > _dtmax)
@@ -238,12 +247,12 @@ Transient::computeDT()
   }
   else
   {
-    // If start up steps are needed
-    if(_t_step == 1 && _n_startup_steps > 1)
-      return _dt/(double)(_n_startup_steps);
-    else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
-      return _dt*(double)(_n_startup_steps);
-    else
+//    // If start up steps are needed
+//    if(_t_step == 1 && _n_startup_steps > 1)
+//      return _dt/(double)(_n_startup_steps);
+//    else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
+//      return _dt*(double)(_n_startup_steps);
+//    else
       return _dt;
   }
 }

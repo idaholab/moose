@@ -127,6 +127,13 @@ MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string
 }
 
 void
+MProblem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<SubProblem *>("_problem") = this;
+  _nl.addStabilizer(stabilizer_name, name, parameters);
+}
+
+void
 MProblem::init()
 {
   SubProblem::init();
@@ -160,7 +167,9 @@ MProblem::update()
 void
 MProblem::solve()
 {
+  Moose::perf_log.push("solve()","Solve");
   _nl.solve();
+  Moose::perf_log.pop("solve()","Solve");
 }
 
 bool

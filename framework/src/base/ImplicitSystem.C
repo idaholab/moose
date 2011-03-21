@@ -60,6 +60,13 @@ namespace Moose {
       _problem.reinitElem(elem, _tid);
       _problem.reinitMaterials(cur_subdomain, _tid);
 
+      //Stabilizers
+      StabilizerIterator stabilizer_begin = _sys._stabilizers[_tid].activeStabilizersBegin();
+      StabilizerIterator stabilizer_end = _sys._stabilizers[_tid].activeStabilizersEnd();
+      StabilizerIterator stabilizer_it = stabilizer_begin;
+      for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+        (*stabilizer_it)->computeTestFunctions();
+
       KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
       KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
       KernelIterator kernel_it = kernel_begin;
@@ -132,6 +139,13 @@ namespace Moose {
       _problem.reinitElem(elem, _tid);
       _problem.reinitMaterials(cur_subdomain, _tid);
 
+      //Stabilizers
+      StabilizerIterator stabilizer_begin = _sys._stabilizers[_tid].activeStabilizersBegin();
+      StabilizerIterator stabilizer_end = _sys._stabilizers[_tid].activeStabilizersEnd();
+      StabilizerIterator stabilizer_it = stabilizer_begin;
+      for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+        (*stabilizer_it)->computeTestFunctions();
+
       KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
       KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
       KernelIterator kernel_it = kernel_begin;
@@ -190,6 +204,7 @@ ImplicitSystem::ImplicitSystem(SubProblem & problem, const std::string & name) :
 
   _kernels.resize(libMesh::n_threads());
   _bcs.resize(libMesh::n_threads());
+  _stabilizers.resize(libMesh::n_threads());
 }
 
 ImplicitSystem::~ImplicitSystem()
@@ -263,11 +278,33 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
 }
 
 void
+ImplicitSystem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<System *>("_sys") = this;
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _problem._material_data[tid];
+
+    Stabilizer * stabilizer = static_cast<Stabilizer *>(Factory::instance()->create(stabilizer_name, name, parameters));
+    if (parameters.have_parameter<unsigned int>("block_id"))
+      _stabilizers[tid].addBlockStabilizer(parameters.get<unsigned int>("block_id"), stabilizer);
+    else
+      _stabilizers[tid].addStabilizer(stabilizer);
+  }
+}
+
+void
 ImplicitSystem::computeResidual(NumericVector<Number> & residual)
 {
+  Moose::perf_log.push("compute_residual()","Solve");
+
   computeTimeDeriv();
   computeResidualInternal(residual);
   finishResidual(residual);
+
+  Moose::perf_log.pop("compute_residual()","Solve");
 }
 
 void
@@ -424,6 +461,7 @@ ImplicitSystem::finishResidual(NumericVector<Number> & residual)
 void
 ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 {
+  Moose::perf_log.push("compute_jacobian()","Solve");
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
@@ -460,6 +498,8 @@ ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       (*it)->computeJacobian(jacobian);
   }
   jacobian.close();
+
+  Moose::perf_log.pop("compute_jacobian()","Solve");
 }
 
 void
@@ -474,7 +514,6 @@ ImplicitSystem::printVarNorms()
     unsigned int var_num = var->number();
     std::cout << s.variable_name(var_num) << ": "
               << s.calculate_norm(*s.rhs,var_num,DISCRETE_L2) << std::endl;
-
   }
 }
 

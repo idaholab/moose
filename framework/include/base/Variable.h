@@ -26,6 +26,56 @@ class SubProblem;
 class System;
 
 
+class VariableData
+{
+public:
+  VariableData(THREAD_ID tid, const FEType & fe_type, System & sys);
+
+  const std::vector<std::vector<Real> > & phi() { return _phi; }
+  const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
+  std::vector<std::vector<Real> > & test() { return _test; }
+  std::vector<std::vector<RealGradient> > & gradTest() { return _grad_test; }
+
+  VariableValue & sln() { return _u; }
+  VariableValue & slnOld() { return _u_old; }
+  VariableValue & slnOlder() { return _u_older; }
+  VariableGradient  & gradSln() { return _grad_u; }
+  VariableGradient  & gradSlnOld() { return _grad_u_old; }
+  VariableGradient  & gradSlnOlder() { return _grad_u_older; }
+
+  VariableValue & uDot() { return _u_dot; }
+  VariableValue & duDotDu() { return _du_dot_du; }
+
+protected:
+
+  void computeValues();
+
+  SubProblem & _problem;
+  System & _sys;
+  FEBase * & _fe;
+  QBase * & _qrule;
+
+  std::vector<unsigned int> _dof_indices;
+
+  const std::vector<std::vector<Real> > & _phi;
+  const std::vector<std::vector<RealGradient> > & _grad_phi;
+
+  std::vector<std::vector<Real> > _test;
+  std::vector<std::vector<RealGradient> > _grad_test;
+
+  VariableValue _u;
+  VariableValue _u_old;
+  VariableValue _u_older;
+  VariableGradient  _grad_u;
+  VariableGradient  _grad_u_old;
+  VariableGradient  _grad_u_older;
+
+  // time derivatives
+  VariableValue _u_dot;
+  VariableValue _du_dot_du;
+};
+
+
 class Variable
 {
 public:
@@ -53,9 +103,13 @@ public:
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
+  std::vector<std::vector<Real> > & test() { return _test; }
+  std::vector<std::vector<RealGradient> > & gradTest() { return _grad_test; }
 
   const std::vector<std::vector<Real> > & phiFace() { return _phi_face; }
   const std::vector<std::vector<RealGradient> > & gradPhiFace() { return _grad_phi_face; }
+  std::vector<std::vector<Real> > & testFace() { return _test_face; }
+  std::vector<std::vector<RealGradient> > & gradTestFace() { return _grad_test_face; }
   const std::vector<Point> & normals() { return _normals; }
 
   VariableValue & sln() { return _u; }
@@ -98,8 +152,6 @@ protected:
 
   const DofMap & _dof_map;
 
-//  QBase * & _qrule;
-
   FEBase * & _fe;
   FEBase * & _fe_face;
 
@@ -113,9 +165,13 @@ protected:
 
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
+  std::vector<std::vector<Real> > _test;
+  std::vector<std::vector<RealGradient> > _grad_test;
 
   const std::vector<std::vector<Real> > & _phi_face;
   const std::vector<std::vector<RealGradient> > & _grad_phi_face;
+  std::vector<std::vector<Real> > _test_face;
+  std::vector<std::vector<RealGradient> > _grad_test_face;
   const std::vector<Point> & _normals;
 
   VariableValue _u;

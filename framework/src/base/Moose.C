@@ -11,15 +11,14 @@
 #include "NearestNodeValueAux.h"
 #include "PenetrationAux.h"
 #include "ProcessorIDAux.h"
-
+// executioners
 #include "Steady.h"
 #include "Transient.h"
 #include "LooseCoupling.h"
-
+// functions
 #include "ParsedFunction.h"
 #include "ParsedGradFunction.h"
 #include "PiecewiseLinear.h"
-
 // PPS
 #include "AverageElementSize.h"
 #include "AverageNodalVariableValue.h"
@@ -37,7 +36,8 @@
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
 #include "SideIntegral.h"
-
+// stabilizers
+#include "ConvectionDiffusionSUPG.h"
 
 namespace Moose {
 
@@ -81,6 +81,8 @@ registerObjects()
   registerObject(SideAverageValue);
   registerObject(SideFluxIntegral);
   registerObject(SideIntegral);
+  // stabilizers
+  registerObject(ConvectionDiffusionSUPG);
 
   registered = true;
 }

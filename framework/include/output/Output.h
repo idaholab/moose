@@ -26,6 +26,9 @@ public:
   void fileBase(const std::string & file_base) { _file_base = file_base; }
   std::string & fileBase() { return _file_base; }
 
+  void interval(int interval) { _interval = interval; }
+  int interval() { return _interval; }
+
   void meshChanged();
   void sequence(bool state);
 
@@ -34,6 +37,7 @@ protected:
 
   Problem & _problem;
   Real & _time;
+  int _interval;
 
   std::vector<Outputter *> _outputters;
 };

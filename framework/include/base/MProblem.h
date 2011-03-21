@@ -72,6 +72,9 @@ public:
 
   AuxiliarySystem & getAuxiliarySystem() { return _aux; }
 
+  // Stabilization /////
+  void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
+
   ////
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);

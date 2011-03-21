@@ -4,6 +4,7 @@
 #include "System.h"
 #include "KernelWarehouse.h"
 #include "BCWarehouse.h"
+#include "StabilizerWarehouse.h"
 
 #include "transient_system.h"
 #include "nonlinear_implicit_system.h"
@@ -21,8 +22,8 @@ public:
   virtual bool converged();
 
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
-
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
+  void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
 
   void computeResidual(NumericVector<Number> & residual);
   void computeJacobian(SparseMatrix<Number> &  jacobian);
@@ -54,6 +55,7 @@ protected:
   // holders
   std::vector<KernelWarehouse> _kernels;
   std::vector<BCWarehouse> _bcs;
+  std::vector<StabilizerWarehouse> _stabilizers;
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;

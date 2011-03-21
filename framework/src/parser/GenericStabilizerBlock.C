@@ -1,6 +1,7 @@
 #include "GenericStabilizerBlock.h"
 #include "Factory.h"
 #include "Parser.h"
+#include "MProblem.h"
 
 template<>
 InputParameters validParams<GenericStabilizerBlock>()
@@ -20,5 +21,6 @@ GenericStabilizerBlock::GenericStabilizerBlock(const std::string & name, InputPa
 void
 GenericStabilizerBlock::execute() 
 {
-//  _moose_system.addStabilizer(_type, getShortName(), getClassParams());
+  if (_parser_handle._problem != NULL)
+    _parser_handle._problem->addStabilizer(_type, getShortName(), getClassParams());
 }

@@ -91,8 +91,9 @@ OutputBlock::execute()
     if (adapt.isOn())
       output.sequence(true);
 
+    output.interval(getParamValue<int>("interval"));
+
 #if 0
-    _moose_system._interval = getParamValue<int>("interval");
     _moose_system._gmv_output = getParamValue<bool>("gmv");
     _moose_system._tecplot_output = getParamValue<bool>("tecplot");
     _moose_system._tecplot_binary_output = getParamValue<bool>("tecplot_binary");

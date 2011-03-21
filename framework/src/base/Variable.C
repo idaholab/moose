@@ -8,6 +8,94 @@
 
 namespace Moose {
 
+// VariableData /////
+
+VariableData::VariableData(THREAD_ID tid, const FEType & fe_type, System & sys) :
+    _problem(sys.problem()),
+    _sys(sys),
+    _fe(_problem.getFE(tid, fe_type)),
+    _qrule(_problem.qRule(tid)),
+    _phi(_fe->get_phi()),
+    _grad_phi(_fe->get_dphi())
+{
+
+}
+
+void
+VariableData::computeValues()
+{
+  unsigned int nqp = _qrule->n_points();
+  _u.resize(nqp);
+  _grad_u.resize(nqp);
+  if (_problem.transient())
+  {
+    _u_dot.resize(nqp);
+    _du_dot_du.resize(nqp);
+
+    _u_old.resize(nqp);
+    _u_older.resize(nqp);
+
+    _grad_u_old.resize(nqp);
+    _grad_u_older.resize(nqp);
+  }
+
+  for (unsigned int i = 0; i < nqp; ++i)
+  {
+    _u[i] = 0;
+    _grad_u[i] = 0;
+
+    if (_problem.transient())
+    {
+      _u_dot[i] = 0;
+      _du_dot_du[i] = 0;
+
+      _u_old[i] = 0;
+      _u_older[i] = 0;
+
+      _grad_u_old[i] = 0;
+      _grad_u_older[i] = 0;
+    }
+  }
+
+  unsigned int num_dofs = _dof_indices.size();
+  for (unsigned int i = 0; i < num_dofs; i++)
+  {
+    int idx = _dof_indices[i];
+    Real soln_local = _sys.solution()(idx);
+    Real soln_old_local;
+    Real soln_older_local;
+
+    if (_problem.transient())
+    {
+      soln_old_local = _sys.solutionOld()(idx);
+      soln_older_local = _sys.solutionOlder()(idx);
+    }
+
+    for (unsigned int qp = 0; qp < nqp; qp++)
+    {
+      Real phi_local = _phi[i][qp];
+      RealGradient dphi_local = _grad_phi[i][qp];
+
+      _u[qp]      += phi_local * soln_local;
+      _grad_u[qp] += dphi_local * soln_local;
+
+      if (_problem.transient())
+      {
+        _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
+        _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
+
+        _u_old[qp]        += phi_local * soln_old_local;
+        _u_older[qp]      += phi_local * soln_older_local;
+        _grad_u_old[qp]   += dphi_local * soln_old_local;
+        _grad_u_older[qp] += dphi_local * soln_older_local;
+      }
+    }
+  }
+}
+
+
+// Variable /////
+
 Variable::Variable(THREAD_ID tid, unsigned int var_num, const FEType & fe_type, System & sys) :
     _tid(tid),
     _var_num(var_num),
@@ -40,6 +128,10 @@ Variable::~Variable()
 void
 Variable::reinit()
 {
+  // copy shape functions into test functions (so they can be modified by stabilizers)
+  _test = _phi;
+  _grad_test = _grad_phi;
+
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
 }
 

@@ -21,8 +21,8 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     _phi(_var.phiFace()),
     _grad_phi(_var.gradPhiFace()),
 
-    _test(_test_var.phiFace()),
-    _grad_test(_test_var.gradPhiFace()),
+    _test(_test_var.testFace()),
+    _grad_test(_test_var.gradTestFace()),
 
     _u(_var.sln()),
     _grad_u(_var.gradSln())
@@ -42,21 +42,20 @@ IntegratedBC::computeResidual()
     for (_i = 0; _i < _phi.size(); _i++)
     {
       re(_i) += _JxW[_qp]*computeQpResidual();
-      std::cerr << "qp = " << _qp << " " << _JxW[_qp] << ", " << computeQpResidual() << std::endl;
     }
 }
 
 void
 IntegratedBC::computeJacobian(int /*i*/, int /*j*/)
 {
-//  DenseMatrix<Number> & ke = _var.jacobianBlock();
-//
-//  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-//  {
-//    for (_i = 0; _i < _phi.size(); _i++)
-//      for (_j = 0; _j < _phi.size(); _j++)
-//        ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
-//  }
+  DenseMatrix<Number> & ke = _var.jacobianBlock();
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    for (_i = 0; _i < _phi.size(); _i++)
+      for (_j = 0; _j < _phi.size(); _j++)
+        ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
+  }
 }
 
 Real

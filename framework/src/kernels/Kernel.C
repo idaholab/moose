@@ -37,8 +37,8 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _phi(_var.phi()),
     _grad_phi(_var.gradPhi()),
 
-    _test(_test_var.phi()),
-    _grad_test(_test_var.gradPhi()),
+    _test(_test_var.test()),
+    _grad_test(_test_var.gradTest()),
 
     _u(_var.sln()),
     _u_old(_var.slnOld()),
