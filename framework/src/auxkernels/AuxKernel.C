@@ -56,7 +56,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _current_volume(_aux_sys._data[_tid]._current_volume),
     _nodal(_var.feType().family == LAGRANGE),
 
-    _solution(_sys.solution()),
+    _solution(_aux_sys.solution()),
 
     _ts(getParam<bool>("ts")),
 
