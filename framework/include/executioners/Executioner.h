@@ -47,6 +47,11 @@ protected:
 
   bool _output_initial;				/// output initial condition if true   
 
+  /**
+   * Initial Residual Variables
+   */
+  Real _initial_residual_norm;
+  Real _old_initial_residual_norm;
 
   /**
    * Override this for actions that should take place before execution
