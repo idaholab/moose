@@ -269,9 +269,15 @@ Parser::parse(const std::string &input_filename)
         InputParameters params2 = ActionFactory::instance()->getValidParams(curr_identifier);
         params.set<ParserBlock *>("parent") = curr_block;
         params.set<Parser *>("parser_handle") = this;
-
+   
+        params2.set<Parser *>("parser_handle") = this;
+        
         curr_block->_children.push_back(ParserBlockFactory::instance()->add(curr_identifier, params));
-        Moose::action_warehouse.addActionBlock(ActionFactory::instance()->add(curr_identifier, params));
+        Moose::action_warehouse.addActionBlock(ActionFactory::instance()->add(curr_identifier, params2));
+
+        // TODO Fill in parameters of Action Blocks
+//        extractParams(curr_identifier, params2);
+//        std::cout << "Curr_identifier: " << curr_identifier << "\n" <<  params2;
         
       }
 
@@ -283,6 +289,18 @@ Parser::parse(const std::string &input_filename)
     extractParams(curr_block->getID(), curr_block->getClassParams());
 
   }
+
+  // Extract params for Action Blocks
+  for (ActionIterator a = Moose::action_warehouse.allActionsBegin();
+       a != Moose::action_warehouse.allActionsEnd();
+       ++a)
+  {
+    
+    //std::cerr << "Extracting Params for: " << (*a)->name() << "\n";
+    extractParams((*a)->name(), (*a)->getParams());
+  }
+  
+  
 
   // This will throw a mooseError if the active lists aren't all used up
   _input_tree->checkActiveUsed();
@@ -637,12 +655,12 @@ Parser::execute()
 {
   /// Iterate over the actions inside of the ActionWarehouse
   /// TODO: Make this work instead of the parser block actions below
-/*  
+  
   for (ActionIterator a = Moose::action_warehouse.allActionsBegin();
        a != Moose::action_warehouse.allActionsEnd();
        ++a)
     (*a)->act();
-*/
+
   
 
   _executed_blocks.clear();

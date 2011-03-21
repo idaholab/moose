@@ -1,9 +1,8 @@
 #3_d_mms_sine_test.i
 #This is for u = sin(a*x*y*z*t)
 [Mesh]
-  dim = 3
-
  [./Generation] #We are generating our own Mesh
+   dim = 3
    nx = 4
    ny = 4
    nz = 4

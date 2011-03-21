@@ -1,7 +1,6 @@
 [Mesh]
-  dim = 2
-
   [./Generation]
+    dim = 2
     nx = 10
     ny = 10
     

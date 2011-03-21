@@ -1,9 +1,8 @@
 #2_d_mms_sine_postprocessor_test.i
 #This is for u = sin(a*x*y*z*t)
 [Mesh]
-  dim = 2
-
  [./Generation] #We are generating our own Mesh
+   dim = 2   
    nx = 8
    ny = 8
    x min = 0 

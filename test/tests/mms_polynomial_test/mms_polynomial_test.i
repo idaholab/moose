@@ -1,9 +1,8 @@
 #MMS.i
 #This is for u = a*x^3*y*t+b*y^2*z+e*x*y*z^4
 [Mesh]
-  dim = 3
-  generated = true
  [./Generation] #We are generating our own Mesh
+   dim = 3
    nx = 3
    ny = 3
    nz = 3

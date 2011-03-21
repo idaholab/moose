@@ -3,10 +3,11 @@
 
 #include "InputParameters.h"
 #include "Moose.h"
+#include "MooseObject.h"
 
 #include <string>
 
-class Action 
+class Action : public MooseObject
 {
 public:
   Action(const std::string & name, InputParameters params);
@@ -15,10 +16,14 @@ public:
 
   const std::string & getAction() { return _action; }
 
+  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+
+  inline InputParameters & getParams() { return _pars; }
+  
 protected:
-  std::string _name;
   std::string _action;
-  InputParameters _params;
+  Parser & _parser_handle;
+//  Action & _parent;
 };
 
 template<>

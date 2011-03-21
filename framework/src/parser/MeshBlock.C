@@ -126,7 +126,7 @@ MeshBlock::autoResizeProblem(Mesh *mesh, MeshRefinement &mesh_refinement)
     mesh_refinement.uniformly_refine();
   return true;
 }
-
+ 
 bool
 MeshBlock::checkVariableProperties(bool (GenericVariableBlock::*property)() const)
 {

@@ -168,8 +168,8 @@ addActionTypes()
   action_warehouse.addAction("no_action");
 
   /// Mesh Actions
-  action_warehouse.addAction("setup_mesh", "no_depends");
-  action_warehouse.addAction("create_mesh", "setup_mesh", false);
+  action_warehouse.addAction("create_mesh", "no_depends", false);
+  action_warehouse.addAction("setup_mesh", "create_mesh");
   action_warehouse.addAction("modify_mesh", "create_mesh", false);
 
   /// Functions
@@ -211,8 +211,9 @@ addActionTypes()
 void
 registerActions()
 {
-  registerAction(SetupMeshAction, "Mesh", "setup_mesh");
   registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
+  registerAction(SetupMeshAction, "Mesh", "setup_mesh");
+  
   registerAction(EmptyAction, "Mesh/*", "no_action");  // TODO
 
   registerAction(EmptyAction, "Functions", "no_action");

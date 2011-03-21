@@ -13,6 +13,8 @@ public:
   SetupMeshAction(const std::string & name, InputParameters params);
 
   virtual void act();
+
+  static const std::string no_file_supplied; // = "(no file supplied)";
 };
 
 template<>
