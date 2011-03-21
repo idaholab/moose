@@ -1,0 +1,29 @@
+#include "FunctionDirichletBC.h"
+#include "Function.h"
+
+template<>
+InputParameters validParams<FunctionDirichletBC>()
+{
+  InputParameters params = validParams<NodalBC>();
+//  params.set<bool>("_integrated") = false;
+  params.addRequiredParam<std::string>("function", "The forcing function.");
+  return params;
+}
+
+FunctionDirichletBC::FunctionDirichletBC(const std::string & name, InputParameters parameters) :
+    NodalBC(name, parameters),
+    _func(getFunction("function"))
+{
+}
+
+Real
+FunctionDirichletBC::f()
+{
+  return _func.value(_t, (*_node)(0), (*_node)(1), (*_node)(2));
+}
+
+Real
+FunctionDirichletBC::computeNodeResidual()
+{
+  return _u[_qp]-f();
+}

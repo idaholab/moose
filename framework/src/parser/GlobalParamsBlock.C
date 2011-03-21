@@ -1,0 +1,30 @@
+#include "GlobalParamsBlock.h"
+
+template<>
+InputParameters validParams<GlobalParamsBlock>()
+{
+  InputParameters params;
+  std::vector<std::string> blocks(1);
+  blocks[0] = "__all__";
+
+  /* GlobalParams should not have children or other standard public block attributes */
+  params.addPrivateParam<std::vector<std::string> >("active", blocks);
+  params.addPrivateParam<ParserBlock *>("parent");
+  params.addPrivateParam<Parser *>("parser_handle");
+  params.addPrivateParam<std::string>("type", "GlobalParams");
+
+  return params;
+}
+
+
+GlobalParamsBlock::GlobalParamsBlock(const std::string & name, InputParameters params) :
+  ParserBlock(name, params)
+{
+}
+
+void
+GlobalParamsBlock::execute() 
+{
+  visitChildren();
+}
+

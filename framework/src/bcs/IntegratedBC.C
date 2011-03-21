@@ -1,0 +1,63 @@
+#include "IntegratedBC.h"
+#include "Problem.h"
+#include "Variable.h"
+
+
+template<>
+InputParameters validParams<IntegratedBC>()
+{
+  return validParams<BoundaryCondition>();
+}
+
+
+IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters) :
+    BoundaryCondition(name, parameters),
+    _test_var(_problem.getVariable(0, parameters.get<std::string>("variable"))),
+
+    _qrule(_var.qRule()),
+    _JxW(_var.JxW()),
+
+    _phi(_var.phi()),
+    _grad_phi(_var.gradPhi()),
+
+    _test(_test_var.phi()),
+    _grad_test(_test_var.gradPhi()),
+
+    _u(_var.sln()),
+    _grad_u(_var.gradSln())
+{
+}
+
+IntegratedBC::~IntegratedBC()
+{
+}
+
+void
+IntegratedBC::computeResidual()
+{
+  DenseVector<Number> &re = _var.residualBlock();
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < _phi.size(); _i++)
+      re(_i) += _JxW[_qp]*computeQpResidual();
+}
+
+void
+IntegratedBC::computeJacobian(int /*i*/, int /*j*/)
+{
+  DenseMatrix<Number> & ke = _var.jacobianBlock();
+
+//  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+//  {
+//    for (_i = 0; _i < _phi.size(); _i++)
+//      for (_j = 0; _j < _phi.size(); _j++)
+//        ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
+//  }
+}
+
+Real
+IntegratedBC::computeQpJacobian()
+{
+  return 0;
+}
+
