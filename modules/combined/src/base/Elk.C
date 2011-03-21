@@ -128,9 +128,9 @@ Elk::registerObjects()
   registerMaterial(Elastic);
   registerKernel(Gravity);
   registerKernel(GravityRZ);
-  registerNamedMaterial(LinearAnisotropicMaterial);
-  registerNamedMaterial(LinearIsotropicMaterial, "LinearIsotropic");
-  registerNamedMaterial(LinearIsotropicMaterialRZ, "LinearIsotropicRZ");
+  registerMaterial(LinearAnisotropicMaterial);
+  registerMaterial(LinearIsotropicMaterial);
+  registerMaterial(LinearIsotropicMaterialRZ);
   registerMaterial(LinearStrainHardening);
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(LSHPlasticMaterialRZ);

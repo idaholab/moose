@@ -6,7 +6,7 @@
 template<>
 InputParameters validParams<Pressure>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
+  InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<int>("component", "The component for the Pressure");
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
   params.addParam<std::string>("function", "", "The function that describes the pressure");
@@ -15,7 +15,7 @@ InputParameters validParams<Pressure>()
 }
 
 Pressure::Pressure(const std::string & name, InputParameters parameters)
-  :BoundaryCondition(name, parameters),
+  :IntegratedBC(name, parameters),
    _component(getParam<int>("component")),
    _factor(getParam<Real>("factor")),
    _has_function(getParam<std::string>("function") != ""),
