@@ -143,8 +143,6 @@ Transient::takeStep(Real input_dt)
     std::cout << out.str() << std::endl;
   }
     
-//  _problem.getNonlinearSystem().setScaling();
-
   preSolve();
     
   Moose::perf_log.push("solve()","Solve");

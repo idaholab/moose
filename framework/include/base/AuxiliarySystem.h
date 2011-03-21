@@ -20,7 +20,7 @@ class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 public:
   AuxiliarySystem(MProblem & subproblem, const std::string & name);
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 

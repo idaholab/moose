@@ -233,11 +233,11 @@ MProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
 }
 
 void
-MProblem::addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
+MProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
 {
-  _nl.addVariable(var_name, type, active_subdomains);
+  _nl.addVariable(var_name, type, scale_factor, active_subdomains);
   if (_displaced_problem)
-    _displaced_problem->addVariable(var_name, type, active_subdomains);
+    _displaced_problem->addVariable(var_name, type, scale_factor, active_subdomains);
 }
 
 void
@@ -279,7 +279,7 @@ MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & 
 void
 MProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
 {
-  _aux.addVariable(var_name, type, active_subdomains);
+  _aux.addVariable(var_name, type, 1.0, active_subdomains);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable(var_name, type, active_subdomains);
 }

@@ -48,7 +48,6 @@ Steady::execute()
   // Define the refinement loop
   for(unsigned int r_step=0; r_step<=_steps; r_step++)
   {
-    _problem.getNonlinearSystem().setScaling();
     preSolve();
     _problem.updateMaterials();
     _problem.solve();

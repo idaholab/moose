@@ -42,7 +42,7 @@ public:
   // Variables /////
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
-  virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
   // Output /////

@@ -25,7 +25,7 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
   params.addParam<bool>        ("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
-  params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
+//  params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
   params.addParam<std::string> ("scheme",          "backward-euler",  "Time integration scheme used.");
 
   //params.addPrivateParam<unsigned int>("steps", 0);  // This is initial adaptivity steps - it'll be set
@@ -186,8 +186,6 @@ CreateExecutionerAction::act()
 
     if (!getParam<bool>("perf_log"))
       Moose::perf_log.disable_logging();
-
-//    _moose_system._auto_scaling = getParam<bool>("auto_scaling");
 
     NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<std::string>("scheme")));

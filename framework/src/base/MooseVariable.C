@@ -118,7 +118,8 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _second_phi_face(_fe_face->get_d2phi()),
     _normals(_fe_face->get_normals()),
 
-    _node(_assembly.node())
+    _node(_assembly.node()),
+    _scaling_factor(1.0)
 {
 }
 
@@ -178,14 +179,28 @@ void
 MooseVariable::add(NumericVector<Number> & residual)
 {
   _dof_map.constrain_element_vector(_Re, _dof_indices, false);
-  residual.add_vector(_Re, _dof_indices);
+  if (_scaling_factor != 1.0)
+  {
+    DenseVector<Number> re(_Re);
+    re.scale(_scaling_factor);
+    residual.add_vector(re, _dof_indices);
+  }
+  else
+    residual.add_vector(_Re, _dof_indices);
 }
 
 void
 MooseVariable::add(SparseMatrix<Number> & jacobian)
 {
   _dof_map.constrain_element_matrix(_Ke, _dof_indices, false);
-  jacobian.add_matrix(_Ke, _dof_indices);
+  if (_scaling_factor != 1.0)
+  {
+    DenseMatrix<Number> ke(_Ke);
+    ke.scale(_scaling_factor);
+    jacobian.add_matrix(ke, _dof_indices);
+  }
+  else
+    jacobian.add_matrix(_Ke, _dof_indices);
 }
 
 void

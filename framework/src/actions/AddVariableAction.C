@@ -51,30 +51,29 @@ AddVariableAction::act()
             << "\naction: " << _action << "\n\n";
 
   std::string var_name = getShortName();
-  bool is_variables_block;
-
   MProblem *prob = _parser_handle._problem;
-
-  is_variables_block = Parser::pathContains(_name, "Variables");
+  bool is_variables_block = Parser::pathContains(_name, "Variables");
   if (is_variables_block)
   {
-
     std::set<subdomain_id_type> blocks;
     std::vector<unsigned int> block_param = getParam<std::vector<unsigned int> >("block");
     for (std::vector<unsigned int>::iterator it = block_param.begin(); it != block_param.end(); ++it)
       blocks.insert(*it);
+    Real scale_factor = getParam<Real>("scaling");
 
     if (blocks.empty())
-	{
-      prob->addVariable(var_name,
-                        FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                               Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))));
-	}
-	else
+    {
       prob->addVariable(var_name,
                         FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
                                Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
-                               &blocks);
+                        scale_factor);
+    }
+    else
+      prob->addVariable(var_name,
+                        FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
+                               Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
+                        scale_factor,
+                        &blocks);
   }
   else
   {
@@ -87,18 +86,6 @@ AddVariableAction::act()
   Real initial = getParam<Real>("initial_condition");
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
     _parser_handle._problem->addInitialCondition(var_name, initial);
-
-#if 0
-  Uncomment when adding Scaling
-  if (is_variables_block) 
-  {
-    // Manual Scaling
-    unsigned int var_number= system->variable_number(var_name);
-    _moose_system._manual_scaling.push_back(getParam<Real>("scaling"));
-    // This variable number should go in the same vector position as the manual scaling vector
-    libmesh_assert(var_number == _moose_system._manual_scaling.size()-1);
-  }
-#endif
 
   // retrieve initial conditions from exodus file
   _variable_to_read = getParam<std::string>("initial_from_file_var");

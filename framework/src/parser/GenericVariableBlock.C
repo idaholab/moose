@@ -62,18 +62,21 @@ GenericVariableBlock::execute()
     std::vector<unsigned int> block_param = getParamValue<std::vector<unsigned int> >("block");
     for (std::vector<unsigned int>::iterator it = block_param.begin(); it != block_param.end(); ++it)
       blocks.insert(*it);
+    Real scale_factor = getParamValue<Real>("scaling");
 
     if (blocks.empty())
 	{
       prob->addVariable(var_name,
                         FEType(Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
-                               Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family"))));
+                               Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family"))),
+                        scale_factor);
 	}
 	else
       prob->addVariable(var_name,
                         FEType(Utility::string_to_enum<Order>(getParamValue<std::string>("order")),
                                Utility::string_to_enum<FEFamily>(getParamValue<std::string>("family"))),
-                               &blocks);
+                        scale_factor,
+                        &blocks);
   }
   else
   {
@@ -86,18 +89,6 @@ GenericVariableBlock::execute()
   Real initial = getParamValue<Real>("initial_condition");
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
     _parser_handle._problem->addInitialCondition(var_name, initial);
-
-#if 0
-  Uncomment when adding Scaling
-  if (is_variables_block) 
-  {
-    // Manual Scaling
-    unsigned int var_number= system->variable_number(var_name);
-    _moose_system._manual_scaling.push_back(getParamValue<Real>("scaling"));
-    // This variable number should go in the same vector position as the manual scaling vector
-    libmesh_assert(var_number == _moose_system._manual_scaling.size()-1);
-  }
-#endif
 
   // retrieve initial conditions from exodus file
   _variable_to_read = getParamValue<std::string>("initial_from_file_var");

@@ -175,15 +175,15 @@ DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 void
-DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
+DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains)
 {
-  _nl.addVariable(var_name, type, active_subdomains);
+  _nl.addVariable(var_name, type, scale_factor, active_subdomains);
 }
 
 void
 DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
 {
-  _aux.addVariable(var_name, type, active_subdomains);
+  _aux.addVariable(var_name, type, 1.0, active_subdomains);
 }
 
 void

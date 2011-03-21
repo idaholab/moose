@@ -157,6 +157,9 @@ public:
   Number getNodalValueOld(const Node & node);
   Number getNodalValueOlder(const Node & node);
 
+  void scalingFactor(Real factor) { _scaling_factor = factor; }
+  Real scalingFactor() { return _scaling_factor; }
+
 protected:
   THREAD_ID _tid;
   unsigned int _var_num;
@@ -227,6 +230,8 @@ protected:
    */
   DenseVector<Number> _Re;
   DenseMatrix<Number> _Ke;
+
+  Real _scaling_factor;
 };
 
 #endif /* MOOSEVARIABLE_H */

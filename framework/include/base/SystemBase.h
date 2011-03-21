@@ -47,7 +47,7 @@ public:
   virtual NumericVector<Number> & solutionUDot() = 0;
   virtual NumericVector<Number> & solutionDuDotDu() = 0;
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL) = 0;
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL) = 0;
   virtual bool hasVariable(const std::string & var_name) = 0;
 
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
@@ -94,12 +94,13 @@ public:
   {
   }
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL)
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL)
   {
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid));
+      var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
 
       if (active_subdomains == NULL)
