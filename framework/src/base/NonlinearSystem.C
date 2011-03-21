@@ -45,7 +45,6 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
     _current_solution(NULL),
-    _solution(*_sys.solution.get()),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
     _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
     _residual_old(_sys.add_vector("residual_old", false, GHOSTED)),
@@ -270,16 +269,20 @@ NonlinearSystem::onTimestepBegin()
 
   switch (_time_stepping_scheme)
   {
-  case Moose::CRANK_NICOLSON:
-    _solution_u_dot = solutionOld();
-    _solution_u_dot *= -2.0 / _dt;
-    _solution_u_dot.close();
+    case Moose::CRANK_NICOLSON:
+      _solution_u_dot = solutionOld();
+      _solution_u_dot *= -2.0 / _dt;
+      _solution_u_dot.close();
 
-    _solution_du_dot_du.zero();
-    _solution_du_dot_du.close();
-
-    set_solution(solutionOld());                    // use old_solution for computing with correct solution vector
-    computeResidualInternal(_residual_old);
+      _solution_du_dot_du.zero();
+      _solution_du_dot_du.close();
+      
+      {
+        const NumericVector<Real> * current_solution = currentSolution();
+        set_solution(solutionOld());                    // use old_solution for computing with correct solution vector
+        computeResidualInternal(_residual_old);
+        set_solution(*current_solution);                    // reset the solution vector
+      }
     break;
 
   case Moose::BDF2:
@@ -316,7 +319,7 @@ NonlinearSystem::computeTimeDeriv()
   switch (_time_stepping_scheme)
   {
   case Moose::IMPLICIT_EULER:
-    _solution_u_dot = solution();
+    _solution_u_dot = *currentSolution();
     _solution_u_dot -= solutionOld();
     _solution_u_dot /= _dt;
 
@@ -324,7 +327,7 @@ NonlinearSystem::computeTimeDeriv()
     break;
 
   case Moose::CRANK_NICOLSON:
-    _solution_u_dot = solution();
+    _solution_u_dot = *currentSolution();
     _solution_u_dot *= 2. / _dt;
 
     _solution_du_dot_du = 1.0/_dt;
@@ -334,7 +337,7 @@ NonlinearSystem::computeTimeDeriv()
     if (_t_step == 1)
     {
       // Use backward-euler for the first step
-      _solution_u_dot = solution();
+      _solution_u_dot = *currentSolution();
       _solution_u_dot -= solutionOld();
       _solution_u_dot /= _dt;
 
@@ -343,7 +346,7 @@ NonlinearSystem::computeTimeDeriv()
     else
     {
       _solution_u_dot.zero();
-      _solution_u_dot.add(_time_weight[0], solution());
+      _solution_u_dot.add(_time_weight[0], *currentSolution());
       _solution_u_dot.add(_time_weight[1], solutionOld());
       _solution_u_dot.add(_time_weight[2], solutionOlder());
       _solution_u_dot.scale(1./_dt);
@@ -387,11 +390,14 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     unsigned int boundary_id = ids[i];
     Node * node = &_mesh.node(nodes[i]);
 
-    // reinit variables in nodes
-    _problem.reinitNodeFace(node, boundary_id, 0);
+    if(node->processor_id() == libMesh::processor_id())
+    {
+      // reinit variables in nodes
+      _problem.reinitNodeFace(node, boundary_id, 0);
 
-    for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
-      (*it)->computeResidual(residual);
+      for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
+        (*it)->computeResidual(residual);
+    }
   }
   residual.close();
 }
@@ -445,17 +451,25 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   std::vector<short int> ids;
   _mesh.build_node_list(nodes, ids);
 
+  std::vector<int> zero_rows;
+
   const unsigned int n_nodes = nodes.size();
   for (unsigned int i = 0; i < n_nodes; i++)
   {
     unsigned int boundary_id = ids[i];
     Node * node = &_mesh.node(nodes[i]);
 
-    _problem.reinitNodeFace(node, boundary_id, 0);
-
-    for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
-      (*it)->computeJacobian(jacobian);
+    if(node->processor_id() == libMesh::processor_id())
+    {
+      _problem.reinitNodeFace(node, boundary_id, 0);
+    
+      for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
+        zero_rows.push_back((*it)->variable().nodalDofIndex());
+    }
   }
+
+  jacobian.zero_rows(zero_rows, 1.0);
+  
   jacobian.close();
 
   _currently_computing_jacobian = false;

@@ -576,7 +576,7 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     serializeSolution();
 
     if (_displaced_problem != NULL)
-      _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
+      _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
     _aux.compute();
 
@@ -772,7 +772,7 @@ MProblem::init2()
   if (_displaced_problem)
   {
     _displaced_problem->init();
-    _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
+    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
   }
   _aux.init();
 }
@@ -840,7 +840,7 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
   computePostprocessors(Moose::PPS_RESIDUAL);
   
   if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh(soln, _aux.solution());
+    _displaced_problem->updateMesh(soln, *_aux.currentSolution());
 
   _aux.compute();
 
@@ -854,7 +854,7 @@ MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector
   computePostprocessors(Moose::PPS_JACOBIAN);
 
   if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh(soln, _aux.solution());
+    _displaced_problem->updateMesh(soln, *_aux.currentSolution());
 
   _aux.compute();
   _nl.computeJacobian(jacobian);
@@ -864,7 +864,7 @@ void
 MProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
 {
   if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh(_nl.solution(), _aux.solution());
+    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
   _aux.compute();
   _nl.computeJacobianBlock(jacobian, precond_system, ivar, jvar);

@@ -32,8 +32,5 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
 void
 NodalBC::computeJacobian(SparseMatrix<Number> & jacobian)
 {
-  // zero the row and put 1.0 on the diagonal
-  std::vector<int> zero_rows(1);
-  zero_rows[0] = _var.nodalDofIndex();
-  jacobian.zero_rows(zero_rows, 1.0);
+  mooseError("This shouldn't be called!");
 }
