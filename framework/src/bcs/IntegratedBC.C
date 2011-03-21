@@ -45,8 +45,8 @@ IntegratedBC::computeResidual()
 void
 IntegratedBC::computeJacobian(int /*i*/, int /*j*/)
 {
-  DenseMatrix<Number> & ke = _var.jacobianBlock();
-
+//  DenseMatrix<Number> & ke = _var.jacobianBlock();
+//
 //  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
 //  {
 //    for (_i = 0; _i < _phi.size(); _i++)

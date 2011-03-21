@@ -64,7 +64,7 @@ namespace Moose {
       {
         const Elem * elem = *elem_it;
 
-        unsigned int cur_subdomain = elem->subdomain_id();
+//        unsigned int cur_subdomain = elem->subdomain_id();
 
 //      block_element_aux_it =_auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
 //      block_element_aux_end = _auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);

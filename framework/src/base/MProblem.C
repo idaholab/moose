@@ -144,7 +144,7 @@ MProblem::onTimestepEnd()
 }
 
 void
-MProblem::computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number>& soln, NumericVector<Number>& residual)
+MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   _nl.solution(soln);
   _aux.compute();
@@ -152,7 +152,7 @@ MProblem::computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Num
 }
 
 void
-MProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
+MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
 {
   _nl.solution(soln);
   _aux.compute();

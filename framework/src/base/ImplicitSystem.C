@@ -291,7 +291,7 @@ ImplicitSystem::addBoundaryCondition(const std::string & bc_name, const std::str
   for (unsigned int i=0; i<boundaries.size(); ++i)
   {
     parameters.set<unsigned int>("_boundary_id") = boundaries[i];
-    for (int tid = 0; tid < libMesh::n_threads(); tid++)
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
@@ -368,7 +368,7 @@ ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
 }
 
 void
-ImplicitSystem::finishResidual(NumericVector<Number> & residual)
+ImplicitSystem::finishResidual(NumericVector<Number> & /*residual*/)
 {
 
 }
@@ -389,7 +389,6 @@ ImplicitSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 #endif
 #endif
 
-  const unsigned int dim = _mesh.dimension();
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
   ComputeJacobianThread cj(jacobian, *this);

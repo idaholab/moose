@@ -73,7 +73,7 @@ VariablesBlock::execute()
 }
 
 void
-VariablesBlock::copyNodalValues(const std::string &system_name)
+VariablesBlock::copyNodalValues(const std::string &/*system_name*/)
 {
   mooseError("VariablesBlock::copyNodalValues() not implemented");
 /*  System *system;
