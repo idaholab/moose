@@ -69,6 +69,7 @@ PlenumPressureBC::setup()
     if (_output)
     {
       *_output = _my_value;
+//      std::cerr << "PPBC1 = " << _my_value << ", " << factor << ", " << pressure << ", " << _volume << std::endl;
     }
   }
   else
@@ -84,6 +85,7 @@ PlenumPressureBC::setup()
     if (_output)
     {
       *_output = _my_value;
+//      std::cerr << "PPBC2 = " << _my_value << std::endl;
     }
   }
 }
