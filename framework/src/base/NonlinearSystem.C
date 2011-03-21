@@ -766,3 +766,25 @@ NonlinearSystem::checkKernelCoverage(const std::set<subdomain_id_type> & mesh_su
     }
   }
 }
+
+void
+NonlinearSystem::checkBCCoverage(const std::set<short> & mesh_bcs) const
+{
+  // Check that BCs used in your simulation exist in your mesh
+  std::set<short> input_bcs, difference;
+  
+  _bcs[0].activeBoundaries(input_bcs);  // get the boundaries from the simulation (input file)
+  std::set_difference (input_bcs.begin(), input_bcs.end(),
+                       mesh_bcs.begin(), mesh_bcs.end(),
+                       std::inserter(difference, difference.end()));
+
+  if (!difference.empty())
+  {
+    std::stringstream extra_boundary_ids;
+    
+    std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned short>( extra_boundary_ids, " "));
+    
+    mooseError("The following boundary ids from your input file do not exist in the input mesh "
+               + extra_boundary_ids.str());
+  } 
+}

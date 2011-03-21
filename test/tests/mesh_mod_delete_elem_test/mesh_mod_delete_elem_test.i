@@ -36,7 +36,7 @@
 []
 
 [BCs]
-  active = 'left right'
+  active = ' '
 
   [./left]
     type = DirichletBC

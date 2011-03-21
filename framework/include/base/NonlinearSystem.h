@@ -60,6 +60,7 @@ public:
   void reinitDampers(const NumericVector<Number>& increment, THREAD_ID tid);
 
   void checkKernelCoverage(const std::set<subdomain_id_type> & mesh_subdomains) const;
+  void checkBCCoverage(const std::set<short> & mesh_bcs) const;
 
 public:
   MProblem & _mproblem;

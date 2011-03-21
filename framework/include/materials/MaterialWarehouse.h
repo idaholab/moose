@@ -26,6 +26,9 @@ public:
   std::vector<Material *> & getBoundaryMaterials(unsigned int boundary_id);
   std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);
 
+  MaterialIterator activeMaterialsBegin() { return _active_materials.begin(); }
+  MaterialIterator activeMaterialsEnd() { return _active_materials.end(); }
+  
   void updateMaterialDataState();
 
   void addMaterial(int block_id, Material *material);

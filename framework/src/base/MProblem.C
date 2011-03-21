@@ -910,5 +910,26 @@ MProblem::checkProblemIntegrity()
   // Check kernel coverage of subdomains (blocks) in the mesh
   _nl.checkKernelCoverage(mesh_subdomains);
 
-  // TODO: Finish other system checks here
+  // Check materials
+  bool adaptivity = _adaptivity.isOn();
+  for (MaterialIterator i = _materials[0].activeMaterialsBegin(); i != _materials[0].activeMaterialsEnd(); ++i)
+  {
+    for (std::vector<Material *>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+      if ((*j)->hasStatefulProperties() && adaptivity)
+        mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
+    
+    if (mesh_subdomains.find(i->first) == mesh_subdomains.end())
+    {
+      std::stringstream oss;
+      oss << "Material block \"" << i->first << "\" specified in the input file does not exist";
+      mooseError (oss.str());
+    }
+  }
+
+  // Check that BCs used in your simulation exist in your mesh
+  {
+    const std::set<short> & mesh_bcs = _mesh._mesh.boundary_info->get_boundary_ids();
+    
+    _nl.checkBCCoverage(mesh_bcs);
+  }
 }
