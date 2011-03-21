@@ -134,6 +134,7 @@ public:
   Executioner *_executioner;
 
   ExodusII_IO *_exreader;                               /// auxiliary object for restart
+  bool _loose;                                          /// true if parsing input file with loose syntax
 
 private:
   /**
@@ -187,7 +188,6 @@ private:
 
   std::list<ParserBlock *> _deferred_execution;
   std::set<std::string> _executed_blocks;
-
 };
 
 #endif //PARSER_H

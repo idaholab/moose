@@ -48,13 +48,6 @@ AuxVariablesBlock::execute()
     if (pb)
       pb->execute();
 
-    _parser_handle._problem->init();
-    // Copy out nodal values is required (Variables Block)
-    if (VariablesBlock * vars = dynamic_cast<VariablesBlock *>(locateBlock("Variables")))
-      vars->copyNodalValues(_parser_handle._problem->getNonlinearSystem());
-    // Aux Variables
-    copyNodalValues(_parser_handle._problem->getAuxiliarySystem());
-
     _executed = true;
   }
 }

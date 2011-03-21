@@ -27,7 +27,8 @@ VariablesBlock::VariablesBlock(const std::string & name, InputParameters params)
     ParserBlock(name, params),
     _cm(NULL)
 {
-  addPrereq("Executioner");
+  if (!_parser_handle._loose)
+    addPrereq("Executioner");
 #if 0
   // Register execution prereqs
   addPrereq("Mesh");

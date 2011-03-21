@@ -21,7 +21,7 @@
 []
 
 [Output]
-  file_base = out
+  file_base = out_same
   output_initial = true
   interval = 1
   exodus = true

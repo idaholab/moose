@@ -1,4 +1,5 @@
 #include "KernelsBlock.h"
+#include "Parser.h"
 
 template<>
 InputParameters validParams<KernelsBlock>()
@@ -10,7 +11,8 @@ InputParameters validParams<KernelsBlock>()
 KernelsBlock::KernelsBlock(const std::string & name, InputParameters params) :
   ParserBlock(name, params)
 {
-  addPrereq("Executioner");
+  if (!_parser_handle._loose)
+    addPrereq("Variables");
 #if 0
   // Register execution prereqs
   addPrereq("Mesh");

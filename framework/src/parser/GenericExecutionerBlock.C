@@ -7,6 +7,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "MProblem.h"
+#include "VariablesBlock.h"
 
 template<>
 InputParameters validParams<GenericExecutionerBlock>()
@@ -137,7 +138,23 @@ GenericExecutionerBlock::execute()
   class_params.set<Moose::Mesh *>("_mesh") = _parser_handle._mesh;
   _parser_handle._executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", class_params));
   if (dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem()) != NULL)
-    _parser_handle._problem = dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem());
+  {
+    Moose::MProblem *mproblem = dynamic_cast<Moose::MProblem *>(&_parser_handle._executioner->problem());
+    _parser_handle._problem = mproblem;
+
+    VariablesBlock * vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("Variables"));
+    if (vars!= NULL)
+      vars->execute();
+    VariablesBlock * aux_vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("AuxVariables"));
+    if (aux_vars!= NULL)
+      aux_vars->execute();
+    mproblem->init();
+    if (vars != NULL)
+      vars->copyNodalValues(mproblem->getNonlinearSystem());
+    if (aux_vars != NULL)
+      aux_vars->copyNodalValues(mproblem->getAuxiliarySystem());
+
+  }
 
   visitChildren();
 }

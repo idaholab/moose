@@ -71,6 +71,7 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     {
       Moose::MProblem * subproblem = new Moose::MProblem(*_mesh, &_problem);
       _problem.addSubProblem(file_name, subproblem);
+      _slave_parser[i]->_loose = true;
       _slave_parser[i]->_problem = subproblem;
     }
     _slave_parser[i]->parse(file_name);

@@ -1,5 +1,6 @@
 #include "MaterialsBlock.h"
 #include "Factory.h"
+#include "Parser.h"
 
 template<>
 InputParameters validParams<MaterialsBlock>()
@@ -11,7 +12,8 @@ InputParameters validParams<MaterialsBlock>()
 MaterialsBlock::MaterialsBlock(const std::string & name, InputParameters params) :
   ParserBlock(name, params)
 {
-  addPrereq("Executioner");
+  if (!_parser_handle._loose)
+    addPrereq("Variables");
 #if 0
   // Register Materials prereqs
   addPrereq("Mesh");
