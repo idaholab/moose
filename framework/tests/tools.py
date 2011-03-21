@@ -75,6 +75,8 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error=''):
   print stdout
   if expect_error:
     checkExpectError(stdout, expect_error)
+  else:
+    checkForFail(stdout)
   os.chdir(saved_cwd)
 
 def checkExpectError(output, expect_error):
@@ -111,7 +113,12 @@ def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0, 
   delOldOutFiles(test_dir, out_files)
   executeApp(test_dir, input_file, min_dofs, parallel)
   if (min_dofs == 0): #and parallel == 0):
-    executeExodiff(test_dir, out_files, abs_zero, relative_error)
+    try:
+      executeExodiff(test_dir, out_files, abs_zero, relative_error)
+    except:
+      # We need to catch the failed exodiff and throw a different exception so we know it wasn't a normal failure
+      # What a hack!
+      raise Exception()
 
 def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=0, abs_zero=1e-11, relative_error=5.5e-6):
   test_dir = os.path.dirname(test_file)

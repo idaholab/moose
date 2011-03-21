@@ -155,6 +155,10 @@ class TestHarness:
       except AssertionError:
         self.all_passed = False
         result = 'FAILED'
+      except:
+        # A regular exception means that the program ran but produced different output
+        self.all_passed = False
+        result = 'FAILED (DIFF)'
     finally:
       sys.stdout = saved_stdout
       test_end = timeit.default_timer()
@@ -189,7 +193,7 @@ class TestHarness:
     print s
 
     # print the output if verbose option is on or the test failed
-    if self.options.verbose or result == 'FAILED':
+    if self.options.verbose or result.find('FAILED') != -1:
       print '*'*100 + '\n' + '*'*41 + '  FAILED OUTPUT  ' + '*'*42 + '\n' + '*'*100 + '\n' + output
       #print s
 
