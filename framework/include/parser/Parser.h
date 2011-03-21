@@ -34,7 +34,12 @@ public:
    */
   virtual ~Parser();
 
-  bool isSectionActive(const std::string & section_name, const InputParameters & params) const;
+  /**
+   * Determines whether a particular parser block is marked as active
+   * in the input file
+   */
+  bool isSectionActive(const std::string & section_name,
+                       const std::map<std::string, std::vector<std::string> > & active_lists) const;
 
   /**
    * Parse an input file consisting of getpot syntax and setup objects

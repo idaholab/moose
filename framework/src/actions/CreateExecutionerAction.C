@@ -8,6 +8,7 @@
 #include "MProblem.h"
 #include "VariablesBlock.h"
 #include "AdaptivityBlock.h"
+#include "ActionWarehouse.h"
 
 template<>
 InputParameters validParams<CreateExecutionerAction>()
@@ -26,6 +27,9 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<bool>        ("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
   params.addParam<std::string> ("scheme",          "backward-euler",  "Time integration scheme used.");
+
+  //params.addPrivateParam<unsigned int>("steps", 0);  // This is initial adaptivity steps - it'll be set
+                                                     // in the adaptivity block later but needs to be here now
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options");
@@ -68,7 +72,7 @@ CreateExecutionerAction::act()
   else
     class_params.set<unsigned int>("steps") = 0;
 */
-  _moose_object_pars.set<unsigned int>("steps") = 0;
+  //_moose_object_pars.set<unsigned int>("steps") = 0;
   
 #ifdef LIBMESH_HAVE_PETSC
   std::vector<std::string> petsc_options,  petsc_inames, petsc_values;
@@ -95,16 +99,16 @@ CreateExecutionerAction::act()
 
 //    ParserBlock * blk;
 
-//  TODO: displaced problem
-/*    
+    
     // FIXME: HACK! Can initialize displaced problem after we have instance of problem
-    blk = _parser_handle.root()->locateBlock("Mesh");
-    if(blk->isParamValid("displacements"))
+    // TODO: Make this into another action
+    ActionIterator mesh_it = Moose::action_warehouse.actionBlocksWithActionBegin("setup_mesh");
+    mooseAssert (mesh_it != Moose::action_warehouse.actionBlocksWithActionEnd(), "No Mesh Block Found!");
+    if ((*mesh_it)->isParamValid("displacements"))
     {
-      std::vector<std::string> displacements = blk->getParam<std::vector<std::string> >("displacements");
+      std::vector<std::string> displacements = (*mesh_it)->getParam<std::vector<std::string> >("displacements");
       _parser_handle._problem->initDisplacedProblem(displacements);
     }
-*/
 
 /*    
     // handle functions

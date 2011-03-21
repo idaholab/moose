@@ -23,8 +23,8 @@ main(int argc, char *argv[])
   else
     p.printUsage();
 
-// Make '1' to use Actions  
-#if 0
+// '1' to use Actions '0' to use old Parsing System
+#if 1
   p.parse_new(input_filename);
   p.execute_new();
 #else

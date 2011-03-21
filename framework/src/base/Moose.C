@@ -69,6 +69,7 @@
 #include "ConvectionDiffusionSUPG.h"
 
 // Actions
+#include "AddMeshModifierAction.h"
 #include "AddAuxBCAction.h"
 #include "AddAuxVariableAction.h"
 #include "AddBCAction.h"
@@ -84,11 +85,13 @@
 #include "CreateMeshAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
+#include "CopyNodalVarsAction.h"
 #include "SetupMeshAction.h"
 #include "SetupOutputAction.h"
 #include "AddMaterialAction.h"
 #include "GlobalParamsAction.h"
 #include "SetupPBPAction.h"
+#include "AdaptivityAction.h"
 
 namespace Moose {
 
@@ -180,15 +183,17 @@ addActionTypes()
   registerActionName("setup_mesh", true);
   registerActionName("add_variable", true);
   registerActionName("add_kernel", true);
-  registerActionName("add_bc", true);
   registerActionName("setup_executioner", true);
   registerActionName("setup_output", true);
   registerActionName("init_problem", true);
+  registerActionName("copy_nodal_vars", true);
+  registerActionName("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
   
   /// Additional Actions
+  registerActionName("no_action", false);  // Used for Empty Action placeholders
   registerActionName("set_global_params", false);
   registerActionName("create_mesh", false);
-  registerActionName("modify_mesh", false);
+  registerActionName("add_mesh_modifier", false);
   registerActionName("add_material", false);
   registerActionName("add_function", false);
   registerActionName("add_aux_variable", false);
@@ -200,8 +205,9 @@ addActionTypes()
   registerActionName("add_stabilizer", false);
   registerActionName("add_periodic_bc", false);
   registerActionName("add_preconditioning", false);
+  registerActionName("setup_adaptivity", false);
 
-  // Dummy Actions (useful for dependencies)
+  // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
   registerActionName("setup_function_complete", false);
   registerActionName("setup_variable_complete", false);
@@ -213,14 +219,15 @@ addActionTypes()
   /**************************/
   /// Mesh Actions
   action_warehouse.addDependency("setup_mesh", "create_mesh");
-  action_warehouse.addDependency("modify_mesh", "setup_mesh");
+  action_warehouse.addDependency("add_mesh_modifier", "setup_mesh");
   action_warehouse.addDependency("setup_mesh_complete", "setup_mesh");
 
   /// Executioner
   action_warehouse.addDependency("setup_executioner", "setup_mesh_complete");
+  action_warehouse.addDependency("setup_adaptivity", "setup_executioner");
   
   /// Functions
-  action_warehouse.addDependency("add_function", "setup_executioner");
+  action_warehouse.addDependency("add_function", "setup_adaptivity");
   action_warehouse.addDependency("setup_function_complete", "add_function");
   
   /// Variable Actions
@@ -242,9 +249,10 @@ addActionTypes()
   
   /// InitProblem
   action_warehouse.addDependency("init_problem", "ready_to_init");
+  action_warehouse.addDependency("copy_nodal_vars", "init_problem");
 
   /// Materials
-  action_warehouse.addDependency("add_material", "init_problem");
+  action_warehouse.addDependency("add_material", "copy_nodal_vars");
 
   /// Postprocessors
   action_warehouse.addDependency("add_postprocessor", "add_material");
@@ -285,6 +293,7 @@ registerActions()
   
 
   /// MooseObjectActions
+  registerAction(AddMeshModifierAction, "Mesh/*", "add_mesh_modifier");
   registerAction(AddVariableAction, "Variables/*", "add_variable");
   registerAction(AddVariableAction, "AuxVariables/*", "add_aux_variable");
   registerAction(AddICAction, "Variables/*/InitialCondition", "add_ic");
@@ -292,6 +301,7 @@ registerActions()
   registerAction(AddKernelAction, "Kernels/*", "add_kernel");
   registerAction(AddKernelAction, "AuxKernels/*", "add_aux_kernel");
   registerAction(AddBCAction, "BCs/*", "add_bc");
+  registerAction(EmptyAction, "BCs/Periodic", "no_action");
   registerAction(AddPeriodicBCAction, "BCs/Periodic/*", "add_periodic_bc");
   registerAction(AddBCAction, "AuxBCs/*", "add_aux_bc");
   registerAction(AddMaterialAction, "Materials/*", "add_material");
@@ -302,17 +312,12 @@ registerActions()
   registerAction(AddDamperAction, "Dampers/*", "add_damper");
   registerAction(AddStabilizerAction, "Stabilizers/*", "add_stabilizer");
   registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
+  registerAction(AdaptivityAction, "Executioner/Adaptivity", "setup_adaptivity");
 
-
-
-  registerAction(EmptyAction, "Executioner/Adaptivity", "no_action");   // TODO
-
-  
-  
   registerAction(EmptyAction, "DiracKernels/*", "no_action");  // TODO
-  registerAction(EmptyAction, "Mesh/*", "modify_mesh");  // TODO
-
+  
   registerNonParsedAction(InitProblemAction, "init_problem");
+  registerNonParsedAction(CopyNodalVarsAction, "copy_nodal_vars");
 }
 
 void

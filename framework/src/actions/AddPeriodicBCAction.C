@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<AddPeriodicBCAction>()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = validParams<Action>();
   params.addRequiredParam<unsigned int>("primary", "Boundary ID associated with the primary boundary.");
   params.addRequiredParam<unsigned int>("secondary", "Boundary ID associated with the secondary boundary.");
   params.addParam<std::vector<Real> >("translation", "Vector that translates coordinates on the primary boundary to coordinates on the secondary boundary.");
@@ -23,7 +23,7 @@ InputParameters validParams<AddPeriodicBCAction>()
 }
 
 AddPeriodicBCAction::AddPeriodicBCAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+    Action(name, params)
 {
 }
 
@@ -31,8 +31,7 @@ void
 AddPeriodicBCAction::act() 
 {
 #ifdef DEBUG
-  std::cerr << "Acting on AddPeriodicBCAction\n";
-  std::cerr << "BC: " << _type
+  std::cerr << "Acting on AddPeriodicBCAction\n"
             << "\tname: " << getShortName() << "\n";
 #endif
   

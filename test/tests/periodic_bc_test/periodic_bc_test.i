@@ -46,7 +46,6 @@
 
   [./Periodic]
     [./x]
-      type = DirichletBC
       variable = u
       primary = 3
       secondary = 1
@@ -54,7 +53,6 @@
     [../]
 
     [./y]
-      type = DirichletBC
       variable = u
       primary = 0
       secondary = 2

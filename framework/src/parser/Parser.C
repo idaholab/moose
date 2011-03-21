@@ -219,17 +219,24 @@ Parser::~Parser()
 }
 
 bool
-Parser::isSectionActive(const std::string & s, const InputParameters & params) const
+Parser::isSectionActive(const std::string & s,
+                        const std::map<std::string, std::vector<std::string> > & active_lists) const
 {
   bool retValue = false;
+  size_t found = s.find_last_of('/');
 
   // Base Level is always active
-  if (s.find_last_of('/') == std::string::npos)
+  if (found == std::string::npos)
+    return true;
+
+  std::string parent = s.substr(0, found);
+  std::string short_name = s.substr(found+1);
+
+  std::map<std::string, std::vector<std::string> >::const_iterator pos = active_lists.find(parent);
+  if (pos == active_lists.end())  // If value is missing them the current block is active
     return true;
   
-  std::string short_name = s.substr(s.find_last_of('/') != std::string::npos ? s.find_last_of('/') + 1 : 0);
-  
-  std::vector<std::string> active = params.get<std::vector<std::string> >("active");
+  std::vector<std::string> active = pos->second;
   try
   {
     if (active.at(0) == "__all__")
@@ -248,7 +255,13 @@ void
 Parser::parse_new(const std::string &input_filename)
 {
   std::string curr_identifier;
+  std::map<std::string, std::vector<std::string> > active_lists;
+  InputParameters active_list_params = validParams<Action>();
   
+  // vector for initializing active blocks
+  std::vector<std::string> all(1);
+  all[0] = "__all__";
+
   _input_filename = input_filename;
   
   checkInputFile();
@@ -259,22 +272,6 @@ Parser::parse_new(const std::string &input_filename)
 
   _section_names = _getpot_file.get_section_names();
 
-  /**
-   * This is our base InputParameters object which will be extracted for all
-   * section names.  We use this to get the "active" blocks which determine which
-   * child blocks (Actions) will be created.
-   */
-  InputParameters base_action_params;
-
-  /**
-   * The section_names function returns a list of section names including all
-   * all parent names of any nested sections.  We will exploit the fact that they are ordered
-   * i.e.
-   * Variables/
-   * Variables/u
-   * to construct our active lists as we build our objects.  Base level sections are _always_
-   * active.
-   */
   for (std::vector<std::string>::iterator i=_section_names.begin(); i != _section_names.end(); ++i)
   {
     curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
@@ -284,18 +281,14 @@ Parser::parse_new(const std::string &input_filename)
     // Extract the block parameters before constructing the action
     InputParameters params = ActionFactory::instance()->getValidParams(*i);
 
-    // If this is a base level block it is active and we need to reset the base_action_params
-    if (curr_identifier.find_last_of('/') == std::string::npos)
-      base_action_params = validParams<Action>();
-    
     // Before we build any objects we need to make sure that the section they are in is active
     // and that they aren't an unregistered parent (signified by an empty params object)
-    if (isSectionActive(curr_identifier, base_action_params) && params.n_parameters() != 0)
+    if (isSectionActive(curr_identifier, active_lists) && params.n_parameters() != 0)
     {
       params.set<Parser *>("parser_handle") = this;
     
       extractParams(curr_identifier, params);
-      std::cout << params << "\n";
+//      std::cout << params << "\n";
 
       // Create the Action
       Action * action = ActionFactory::instance()->create(curr_identifier, params);
@@ -305,16 +298,17 @@ Parser::parse_new(const std::string &input_filename)
       if (moose_object_action)
       {
         extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
-        std::cout << "Moose Object Params:\n" << moose_object_action->getMooseObjectParams();
+//        std::cout << "Moose Object Params:\n" << moose_object_action->getMooseObjectParams();
       }
     
       // add it to the warehouse
       Moose::action_warehouse.addActionBlock(action);
     }
 
-    // Last we need to grab our base_action_params, i.e. "active" for the next nested level
-    base_action_params = validParams<Action>();
-    extractParams(curr_identifier, base_action_params);
+    // Extract and save the current "active" list in the datastructure
+    active_list_params.set<std::vector<std::string> >("active") = all;
+    extractParams(curr_identifier, active_list_params);
+    active_lists[curr_identifier] = active_list_params.get<std::vector<std::string> >("active");
   }
 }
 

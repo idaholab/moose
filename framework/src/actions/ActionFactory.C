@@ -10,6 +10,12 @@ ActionFactory *ActionFactory::instance()
   return instance;
 } 
 
+// Private Constructor
+ActionFactory::ActionFactory() :
+  _not_parsed_name_number(0)
+{
+}
+
 ActionFactory:: ~ActionFactory()
 {
   for (std::vector<Action *>::iterator i=_active_parser_blocks.begin(); i!=_active_parser_blocks.end(); ++i)

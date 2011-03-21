@@ -65,11 +65,10 @@ public:
   template<typename T>
   void regNonParsed(const std::string & action_name)
   {
-    static unsigned int not_parsed_name_number = 0;
     OStringStream name;
 
     name << "non_parsed";
-    OSSRealzeroleft(name,2,0,not_parsed_name_number);
+    OSSRealzeroleft(name,2,0,_not_parsed_name_number++);
     
     reg<T>(name.str(), action_name);
   }
@@ -96,10 +95,11 @@ protected:
 
   std::vector<std::string> _registered_parser_block_names;
   std::vector<Action *> _active_parser_blocks;
+  unsigned int _not_parsed_name_number;
 
 private:
   // Private constructor for singleton pattern
-  ActionFactory() {}
+  ActionFactory();
 };
 
 #endif /* ACTIONFACTORY_H_ */
