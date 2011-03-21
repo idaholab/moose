@@ -140,6 +140,7 @@ public:
   // Output /////
   virtual Output & out() { return _out; }
   virtual void output();
+  virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
 
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }

@@ -29,6 +29,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png"); 
   params.addParam<bool>("print_out_info", false, "Specifies that you would like to see more verbose output information on STDOUT");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
+  params.addParam<bool>("output_displaced", false, "Requests that displaced mesh files are written at each solve");
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
@@ -66,6 +67,8 @@ SetupOutputAction::act()
     mproblem._postprocessor_ensight_output = getParam<bool>("postprocessor_ensight");
     mproblem._postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
     mproblem._gnuplot_format = getParam<std::string>("gnuplot_format");
+
+    mproblem.outputDisplaced(getParam<bool>("output_displaced"));
 
     Adaptivity & adapt = mproblem.adaptivity();
     if (adapt.isOn())

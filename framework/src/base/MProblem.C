@@ -64,7 +64,7 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
-    _output_displaced(true),
+    _output_displaced(false),
     _has_dampers(false)
 {
   _n++;
