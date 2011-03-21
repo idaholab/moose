@@ -59,12 +59,10 @@ public:
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
 
-  NumericVector<Number> * _u_dot_soln;          /// solution vector for the time derivative (u_dot)
-  NumericVector<Number> * _du_dot_du_soln;      /// solution vector for the derivative of u_dot
-
   Real & time() { return _time; }
   int & timeStep() { return _t_step; }
   Real & dt() { return _dt; }
+  Real & dtOld() { return _dt_old; }
 
   void transient(bool trans) { _transient = trans; }
   bool transient() { return _transient; }
@@ -109,6 +107,7 @@ protected:
   Real & _time;
   int & _t_step;
   Real & _dt;
+  Real _dt_old;
 
   /**
    * For storing all-purpose global params 

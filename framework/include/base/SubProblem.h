@@ -70,7 +70,8 @@ public:
     _solution_old(*_sys.old_local_solution),
     _solution_older(*_sys.older_local_solution),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
-    _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED))
+    _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
+    _residual_old(_sys.add_vector("residual_old", false, GHOSTED))
 
   {
   }
@@ -147,6 +148,7 @@ protected:
 
   NumericVector<Number> & _solution_u_dot;
   NumericVector<Number> & _solution_du_dot_du;
+  NumericVector<Number> & _residual_old;                /// residual evaluated at the old time step
 };
 
 }

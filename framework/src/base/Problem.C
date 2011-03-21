@@ -48,6 +48,7 @@ Problem::Problem(Moose::Mesh &mesh) :
   _time = 0.0;
   _t_step = 0;
   _dt = 0;
+  _dt_old = _dt;
 
   _eq.parameters.set<Problem *>("_problem") = this;
 

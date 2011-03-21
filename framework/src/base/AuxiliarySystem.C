@@ -143,9 +143,8 @@ namespace Moose {
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(Problem & problem, ImplicitSystem & nl, const std::string & name) :
-  SubProblemTempl<TransientExplicitSystem>(problem, name),
-  _nl(nl)
+AuxiliarySystem::AuxiliarySystem(Problem & problem, const std::string & name) :
+    SubProblemTempl<TransientExplicitSystem>(problem, name)
 {
   _sys.attach_init_function(Moose::initial_condition);
 //  _sys.add_vector("temp");

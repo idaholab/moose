@@ -31,6 +31,13 @@ namespace Moose
  */
 void registerObjects();
 
+enum TimeSteppingScheme
+{
+  IMPLICIT_EULER,
+  BDF2,
+  CRANK_NICOLSON
+};
+
 }
 
 #endif /* MOOSE_H_ */

@@ -6,7 +6,7 @@ namespace Moose {
 MProblem::MProblem(Moose::Mesh &mesh) :
     Problem(mesh),
     _nl(*this, "nl"),
-    _aux(*this, _nl, "aux")
+    _aux(*this, "aux")
 {
   _sys.push_back(&_nl);
   _sys.push_back(&_aux);
@@ -126,6 +126,7 @@ MProblem::onTimestepBegin()
   }
   _nl.update();
 
+  _nl.onTimestepBegin();
 
   if (converged())
   {

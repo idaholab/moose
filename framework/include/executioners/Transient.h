@@ -72,32 +72,12 @@ public:
 protected:
   virtual void preExecute();
 
-  /**
-   * Current timestep.
-   *
-   * Please don't modify this directly!
-   */
-  int & _t_step;
-
-  /**
-   * Current time.
-   *
-   * Please don't modify this directly!
-   */
-  Real & _time;
+  int & _t_step;                        /// Current timestep.
+  Real & _time;                         /// Current time
   Real _time_old;
-
-  /**
-   * The dt from the input file.
-   */
-  Real _input_dt;
-  
-  /**
-   * Current delta t... or timestep size.
-   *
-   * Please don't modify this directly!
-   */
-  Real & _dt;
+  Real _input_dt;                       /// The dt from the input file.
+  Real & _dt;                           /// Current delta t... or timestep size.
+  Real & _dt_old;
 
   Real _prev_dt;
   bool _reset_dt;

@@ -14,7 +14,7 @@ SubProblem::SubProblem(Problem & problem, const std::string & name) :
     _mesh(problem.mesh()),
     _name(name)
 {
-
+  _vars.resize(libMesh::n_threads());
 }
 
 Moose::Variable &

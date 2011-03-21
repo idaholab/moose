@@ -245,14 +245,19 @@ namespace Moose {
 namespace Moose {
 
 ImplicitSystem::ImplicitSystem(Problem & problem, const std::string & name) :
-    SubProblemTempl<TransientNonlinearImplicitSystem>(problem, name)
+    SubProblemTempl<TransientNonlinearImplicitSystem>(problem, name),
+    _dt(problem.dt()),
+    _dt_old(problem.dtOld()),
+    _t_step(problem.timeStep())
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
 
   _sys.attach_init_function(Moose::initial_condition);
 
-  _vars.resize(libMesh::n_threads());
+  _time_weight.resize(3);
+  timeSteppingScheme(IMPLICIT_EULER);                   // default time stepping scheme
+
   _kernels.resize(libMesh::n_threads());
   _bcs.resize(libMesh::n_threads());
   _nodal_bcs.resize(libMesh::n_threads());
@@ -315,15 +320,107 @@ ImplicitSystem::computeResidual(NumericVector<Number> & residual)
 }
 
 void
+ImplicitSystem::timeSteppingScheme(TimeSteppingScheme scheme)
+{
+  _time_stepping_scheme = scheme;
+  switch (_time_stepping_scheme)
+  {
+  case Moose::IMPLICIT_EULER:
+    _time_weight[0] = 1;
+    _time_weight[1] = 0;
+    _time_weight[2] = 0;
+    _time_stepping_order = 1;
+    break;
+
+  case Moose::CRANK_NICOLSON:
+    _time_weight[0] = 1;
+    _time_weight[1] = 0;
+    _time_weight[2] = 0;
+    _time_stepping_order = 2;
+    break;
+
+  case Moose::BDF2:
+    _time_weight[0] = 0;
+    _time_weight[1] = -1.;
+    _time_weight[2] = 1.;
+    _time_stepping_order = 2;
+    break;
+  }
+}
+
+void
+ImplicitSystem::onTimestepBegin()
+{
+  Real sum;
+
+  switch (_time_stepping_scheme)
+  {
+  case Moose::CRANK_NICOLSON:
+    _solution_u_dot = solutionOld();
+    _solution_u_dot *= -2.0 / _dt;
+    _solution_u_dot.close();
+
+    _solution_du_dot_du.zero();
+    _solution_du_dot_du.close();
+
+    solution(solutionOld());                    // use old_solution for computing with correct solution vector
+    computeResidualInternal(_residual_old);
+    break;
+
+  case Moose::BDF2:
+    sum = _dt+_dt_old;
+    _time_weight[0] = 1.+_dt/sum;
+    _time_weight[1] =-sum/_dt_old;
+    _time_weight[2] =_dt*_dt/_dt_old/sum;
+    break;
+
+  default:
+    break;
+  }
+}
+
+void
 ImplicitSystem::computeTimeDeriv()
 {
-  // FIXME: add other time stepping schemes
-  _solution_u_dot = solution();
-  _solution_u_dot -= solutionOld();
-  _solution_u_dot /= _problem.dt();
+  switch (_time_stepping_scheme)
+  {
+  case Moose::IMPLICIT_EULER:
+    _solution_u_dot = solution();
+    _solution_u_dot -= solutionOld();
+    _solution_u_dot /= _dt;
 
-  _solution_du_dot_du = 1.0 / _problem.dt();
+    _solution_du_dot_du = 1.0 / _dt;
+    break;
 
+  case Moose::CRANK_NICOLSON:
+    _solution_u_dot = solution();
+    _solution_u_dot *= 2. / _dt;
+
+    _solution_du_dot_du = 1.0/_dt;
+    break;
+
+  case Moose::BDF2:
+    if (_t_step == 1)
+    {
+      // Use backward-euler for the first step
+      _solution_u_dot = solution();
+      _solution_u_dot -= solutionOld();
+      _solution_u_dot /= _dt;
+
+      _solution_du_dot_du = 1.0/_dt;
+    }
+    else
+    {
+      _solution_u_dot.zero();
+      _solution_u_dot.add(_time_weight[0], solution());
+      _solution_u_dot.add(_time_weight[1], solutionOld());
+      _solution_u_dot.add(_time_weight[2], solutionOlder());
+      _solution_u_dot.scale(1./_dt);
+
+      _solution_du_dot_du = _time_weight[0]/_dt;
+    }
+    break;
+  }
 
   _solution_u_dot.close();
   _solution_du_dot_du.close();
@@ -368,9 +465,18 @@ ImplicitSystem::computeResidualInternal(NumericVector<Number> & residual)
 }
 
 void
-ImplicitSystem::finishResidual(NumericVector<Number> & /*residual*/)
+ImplicitSystem::finishResidual(NumericVector<Number> & residual)
 {
+  switch (_time_stepping_scheme)
+  {
+  case Moose::CRANK_NICOLSON:
+    residual.add(_residual_old);
+    residual.close();
+    break;
 
+  default:
+    break;
+  }
 }
 
 void

@@ -21,7 +21,7 @@ class ImplicitSystem;
 class AuxiliarySystem : public SubProblemTempl<TransientExplicitSystem>
 {
 public:
-  AuxiliarySystem(Problem & problem, ImplicitSystem & nl, const std::string & name);
+  AuxiliarySystem(Problem & problem, const std::string & name);
 
   virtual void addVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
@@ -37,8 +37,6 @@ public:
   std::map<std::string, Moose::Variable *>::iterator varsEnd(THREAD_ID tid = 0) { return _vars[tid].end(); }
 
 protected:
-  ImplicitSystem & _nl;
-
   // holders
   std::vector<std::map<std::string, Variable *> > _nodal_vars;
   std::vector<std::vector<AuxKernel *> > _nodal_kernels;

@@ -30,11 +30,21 @@ public:
 
   void printVarNorms();
 
+  void timeSteppingScheme(TimeSteppingScheme scheme);
+
+  void onTimestepBegin();
 
 protected:
   void computeTimeDeriv();
   void computeResidualInternal(NumericVector<Number> & residual);
   void finishResidual(NumericVector<Number> & residual);
+
+  Real & _dt;
+  Real & _dt_old;
+  int & _t_step;
+  std::vector<Real> _time_weight;                       /// Coefficients (weights) for the time discretization
+  TimeSteppingScheme _time_stepping_scheme;             /// Time stepping scheme used for time discretization
+  Real _time_stepping_order;                            /// The order of the time stepping scheme
 
   // holders
   std::vector<std::vector<Kernel *> > _kernels;

@@ -47,6 +47,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _time_old(_time),
     _input_dt(getParam<Real>("dt")),
     _dt(_problem.dt()),
+    _dt_old(_problem.dtOld()),
     _prev_dt(-1),
     _reset_dt(false),
     _end_time(getParam<Real>("end_time")),
@@ -62,7 +63,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _curr_sync_time_iter(_sync_times.begin()),
     _remaining_sync_time(true),
     _time_ipol(getParam<std::vector<Real> >("time_t"),
-               getParam<std::vector<Real> >("time_dt") ),
+               getParam<std::vector<Real> >("time_dt")),
     _use_time_ipol(_time_ipol.getSampleSize() > 0)
 {
   _t_step = 0;
@@ -101,6 +102,7 @@ Transient::execute()
 void
 Transient::takeStep(Real input_dt)
 {
+  _dt_old = _dt;
   if (input_dt == -1.0)
     _dt = computeConstrainedDT();
   else
