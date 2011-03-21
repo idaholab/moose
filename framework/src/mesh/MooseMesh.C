@@ -49,6 +49,10 @@ MooseMesh::prepare()
 
   // If using ParallelMesh this will delete non-local elements from the current processor
   _mesh.delete_remote_elements();
+
+  const MeshBase::element_iterator el_end = _mesh.elements_end();
+  for (MeshBase::element_iterator el = _mesh.elements_begin(); el != el_end; ++el)
+    _mesh_subdomains.insert((*el)->subdomain_id());
 }
 
 void

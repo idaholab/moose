@@ -12,6 +12,7 @@
 //forward declaration
 class MeshModifier;
 
+typedef std::set<subdomain_id_type>::const_iterator SubdomainIterator;
 
 //typedef StoredRange<MeshBase::node_iterator,             Node*>      NodeRange;
 //typedef StoredRange<MeshBase::const_node_iterator, const Node*> ConstNodeRange;
@@ -63,6 +64,8 @@ public:
   ConstNodeRange * getLocalNodeRange();
   ConstNodeRange * getBoundaryNodeRange();
 
+  const std::set<subdomain_id_type> & meshSubdomains() { return _mesh_subdomains; }
+
   void read(const std::string file_name);
 
   void prepare();
@@ -98,6 +101,8 @@ protected:
    * A map of all of the current nodes to the elements that they are connected to.
    */
   std::vector<std::vector<unsigned int> > _node_to_elem_map;
+
+  std::set<subdomain_id_type> _mesh_subdomains;
 
   std::vector<MeshModifier *> _mesh_modifiers;
 };
