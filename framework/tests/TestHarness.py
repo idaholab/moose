@@ -7,6 +7,9 @@ from ExcelWriter import ExcelWriter
 
 import timeit, inspect, StringIO
 
+class ExodiffException(Exception):
+  pass
+
 class TestHarness:
   # static variable so the helper functions can access the executable name
   # using only the class name (not an instance) from tools.py
@@ -36,6 +39,7 @@ class TestHarness:
 
     self.all_passed = True
     self.num_tests = 0
+    self.num_passed = 0
 
     # map of tests to results
     self.results_table = {}
@@ -154,6 +158,10 @@ class TestHarness:
       except AssertionError:
         self.all_passed = False
         result = 'FAILED'
+      except ExodiffException:
+        # A regular exception means that the program ran but produced different output
+        self.all_passed = False
+        result = 'FAILED (DIFF)'
     finally:
       sys.stdout = saved_stdout
       test_end = timeit.default_timer()
@@ -180,13 +188,15 @@ class TestHarness:
 
     # print the result of this test in table form
     self.results_table[test] = result
+    if result == 'OK':
+      self.num_passed += 1
     cnt = 65 - len(test + result)
     s = '.'*cnt + " " + result
     self.text_results_table += s
     print s
 
     # print the output if verbose option is on or the test failed
-    if self.options.verbose or result == 'FAILED':
+    if self.options.verbose or result.find('FAILED') != -1:
       print '*'*100 + '\n' + '*'*41 + '  FAILED OUTPUT  ' + '*'*42 + '\n' + '*'*100 + '\n' + output
       #print s
 
@@ -209,7 +219,7 @@ class TestHarness:
       print self.text_results_table
 
     print '-'*70
-    print 'Ran ' + str(self.num_tests) + ' tests in ' + str(round(self.testing_time)) + 's\n'
+    print 'Ran ' + str(self.num_tests) + ' tests in ' + str(round(self.testing_time)) + 's (' + str(self.num_passed) + '/' + str(self.num_tests) + ' passed)\n'
 
   # deprecated because it violates the coding standard's naming scheme
   def run_tests_and_exit(self, check_icestorm=True):
