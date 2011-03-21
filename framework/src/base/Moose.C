@@ -5,12 +5,28 @@
 
 // objects that can be created by MOOSE
 #include "TimeDerivative.h"
-
+#include "Diffusion.h"
+#include "CoupledForce.h"
+#include "UserForcingFunction.h"
+#include "BodyForce.h"
+#include "ImplicitEuler.h"
+// bcs
+#include "DirichletBC.h"
+#include "NeumannBC.h"
+#include "FunctionDirichletBC.h"
+#include "FunctionNeumannBC.h"
+#include "MatchedValueBC.h"
 // auxkernels
+#include "CoupledAux.h"
+#include "ConstantAux.h"
+#include "FunctionAux.h"
 #include "NearestNodeDistanceAux.h"
 #include "NearestNodeValueAux.h"
 #include "PenetrationAux.h"
 #include "ProcessorIDAux.h"
+// ics
+#include "ConstantIC.h"
+#include "BoundingBoxIC.h"
 // executioners
 #include "Steady.h"
 #include "Transient.h"
@@ -51,16 +67,34 @@ registerObjects()
 
   registerObject(TimeDerivative);
 
+  // kernels
+  registerObject(Diffusion);
+  registerObject(CoupledForce);
+  registerObject(UserForcingFunction);
+  registerObject(BodyForce);
+  registerObject(ImplicitEuler);
+  // bcs
+  registerObject(DirichletBC);
+  registerObject(NeumannBC);
+  registerObject(FunctionDirichletBC);
+  registerObject(FunctionNeumannBC);
+  registerObject(MatchedValueBC);
   // aux kernels
+  registerObject(CoupledAux);
+  registerObject(ConstantAux);
+  registerObject(FunctionAux);
   registerObject(NearestNodeDistanceAux);
   registerObject(NearestNodeValueAux);
   registerObject(PenetrationAux);
   registerObject(ProcessorIDAux);
-
+  // Initial Conditions
+  registerObject(ConstantIC);
+  registerObject(BoundingBoxIC);
+  // executioners
   registerObject(Steady);
   registerObject(Transient);
   registerObject(LooseCoupling);
-
+  // functions
   registerObject(ParsedFunction);
   registerObject(ParsedGradFunction);
   registerObject(PiecewiseLinear);

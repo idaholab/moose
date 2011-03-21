@@ -2,13 +2,8 @@
 #include "Moose.h"
 #include "Factory.h"
 
-#include "Diffusion.h"
-#include "CoupledForce.h"
 #include "CoupledConvection.h"
 #include "ForcingFn.h"
-#include "UserForcingFunction.h"
-#include "BodyForce.h"
-#include "ImplicitEuler.h"
 #include "MatDiffusion.h"
 #include "DiffMKernel.h"
 #include "GaussContForcing.h"
@@ -24,23 +19,12 @@
 #include "MMSForcing.h"
 #include "MMSReaction.h"
 
-#include "CoupledAux.h"
-#include "ConstantAux.h"
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
-#include "FunctionAux.h"
 
-#include "DirichletBC.h"
-#include "NeumannBC.h"
-#include "FunctionDirichletBC.h"
-#include "FunctionNeumannBC.h"
 #include "MTBC.h"
-#include "MatchedValueBC.h"
 #include "PolyCoupledDirichletBC.h"
 #include "MMSCoupledDirichletBC.h"
-
-#include "ConstantIC.h"
-#include "BoundingBoxIC.h"
 
 #include "EmptyMaterial.h"
 #include "MTMaterial.h"
@@ -53,13 +37,8 @@ namespace MooseTest
 void registerObjects()
 {
   // Kernels
-  registerObject(Diffusion);
-  registerObject(CoupledForce);
   registerObject(CoupledConvection);
   registerObject(ForcingFn);
-  registerObject(UserForcingFunction);
-  registerObject(BodyForce);
-  registerObject(ImplicitEuler);
   registerObject(MatDiffusion);
   registerObject(DiffMKernel);
   registerObject(GaussContForcing);
@@ -76,25 +55,13 @@ void registerObjects()
   registerObject(MMSReaction);
 
   // Aux kernels
-  registerObject(CoupledAux);
-  registerObject(ConstantAux);
   registerObject(PolyConstantAux);
   registerObject(MMSConstantAux);
-  registerObject(FunctionAux);
 
   // Boundary Conditions
-  registerObject(DirichletBC);
-  registerObject(NeumannBC);
-  registerObject(FunctionDirichletBC);
-  registerObject(FunctionNeumannBC);
   registerObject(MTBC);
-  registerObject(MatchedValueBC);
   registerObject(PolyCoupledDirichletBC);
   registerObject(MMSCoupledDirichletBC);
-
-  // Initial Conditions 
-  registerObject(ConstantIC);
-  registerObject(BoundingBoxIC);
 
   // Materials
   registerObject(EmptyMaterial);
