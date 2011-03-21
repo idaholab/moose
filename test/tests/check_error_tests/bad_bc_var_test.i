@@ -40,7 +40,7 @@
 
 [Materials]
   active = empty
-t
+
   [./empty]
     type = EmptyMaterial
     block = 1

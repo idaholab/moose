@@ -18,7 +18,10 @@ SystemBase::SystemBase(ProblemInterface & problem, const std::string & name) :
 MooseVariable &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
-  return *_vars[tid].getVariable(var_name);
+  MooseVariable * var = _vars[tid].getVariable(var_name);
+  if (var == NULL)
+    mooseError("variable " + var_name + " does not exist in this system");
+  return *var;
 }
 
 Order

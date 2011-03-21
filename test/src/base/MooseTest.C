@@ -30,6 +30,7 @@
 #include "MTMaterial.h"
 #include "Diff1Material.h"
 #include "Diff2Material.h"
+#include "StatefulMaterial.h"
 
 namespace MooseTest
 {
@@ -68,6 +69,7 @@ void registerObjects()
   registerObject(MTMaterial);
   registerObject(Diff1Material);
   registerObject(Diff2Material);
+  registerObject(StatefulMaterial);
 }
 
 } // namespace

@@ -1,16 +1,16 @@
 import tools
 
 def bad_kernel_test():
-  tools.executeAppExpectError(__file__,'bad_kernel_test.i',"A \w+ is not a registered Kernel")
+  tools.executeAppExpectError(__file__,'bad_kernel_test.i',"A '\w+' is not a registered object")
 
 def bad_bc_test():
-  tools.executeAppExpectError(__file__,'bad_bc_test.i',"A \w+ is not a registered BC")
+  tools.executeAppExpectError(__file__,'bad_bc_test.i',"A '\w+' is not a registered object")
 
 def bad_material_test():
-  tools.executeAppExpectError(__file__,'bad_material_test.i',"A \w+ is not a registered Material")
+  tools.executeAppExpectError(__file__,'bad_material_test.i',"A '\w+' is not a registered object")
 
 def bad_executioner_test():
-  tools.executeAppExpectError(__file__,'bad_executioner_test.i',"A \w+ is not a registered Executioner")
+  tools.executeAppExpectError(__file__,'bad_executioner_test.i',"A '\w+' is not a registered object")
 
 def no_output_dir_test():
   tools.executeAppExpectError(__file__,'no_output_dir_test.i',"Can not write to directory: \S+ for file base: \S+")
