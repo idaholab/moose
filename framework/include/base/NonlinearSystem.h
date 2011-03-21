@@ -29,6 +29,7 @@ public:
   virtual ~NonlinearSystem();
 
   virtual void init();
+  
   virtual bool converged();
 
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);

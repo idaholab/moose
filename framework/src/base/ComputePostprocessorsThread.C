@@ -15,8 +15,7 @@ ComputePostprocessorsThread::ComputePostprocessorsThread(ComputePostprocessorsTh
     ThreadedElementLoop<ConstElemRange>(x._problem, x._system),
     _soln(x._soln),
     _pps(x._pps)
-{
-}
+{}
 
 void
 ComputePostprocessorsThread::pre()

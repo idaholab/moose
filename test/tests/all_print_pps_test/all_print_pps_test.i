@@ -85,4 +85,5 @@
   interval = 1
   exodus = false
   postprocessor_csv = true
+  output_initial = true
 []

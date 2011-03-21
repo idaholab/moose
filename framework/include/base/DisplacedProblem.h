@@ -76,6 +76,7 @@ public:
   virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid]->node(); }
 
   // Geom Search /////
+  virtual void updateGeomSearch();
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
 protected:

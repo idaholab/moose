@@ -251,6 +251,12 @@ DisplacedProblem::clearDiracInfo()
 }
 
 void
+DisplacedProblem::updateGeomSearch()
+{
+  _geometric_search_data.update();
+}
+
+void
 DisplacedProblem::output()
 {
   // FIXME: use proper file_base

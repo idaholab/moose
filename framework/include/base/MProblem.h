@@ -134,6 +134,8 @@ public:
   // Displaced problem /////
   virtual void initDisplacedProblem(const std::vector<std::string> & displacements);
 
+  virtual void updateGeomSearch();
+
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
   // Output /////

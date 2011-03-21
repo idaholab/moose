@@ -42,6 +42,7 @@ public:
   virtual DiracKernelInfo & diracKernelInfo() { return _dirac_kernel_info; }
 
   // Geom Search
+  virtual void updateGeomSearch() = 0;
   virtual GeometricSearchData & geomSearchData() = 0;
 
   virtual void meshChanged() { mooseError("This system does not support changing the mesh"); }

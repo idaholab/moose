@@ -529,6 +529,7 @@ MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputP
 //      {
         Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
         (*pps)[tid].addPostprocessor(pp);
+
 //      }
 //      else
 //        mooseError("Duplicate postprocessor name '" + name + "'");
@@ -873,6 +874,15 @@ MProblem::initDisplacedProblem(const std::vector<std::string> & displacements)
 {
   _displaced_mesh = new MooseMesh(_mesh);
   _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, displacements);
+}
+
+void
+MProblem::updateGeomSearch()
+{
+  _geometric_search_data.update();
+  
+  if(_displaced_problem)
+    _displaced_problem->updateGeomSearch();
 }
 
 void

@@ -97,7 +97,7 @@ Transient::execute()
   _problem.adaptivity().initial();
 
   //Update the geometric searches (has to be called after the problem is all set up)
-  _problem.geomSearchData().update();
+  _problem.updateGeomSearch();
 
   preExecute();
   _problem.update();
