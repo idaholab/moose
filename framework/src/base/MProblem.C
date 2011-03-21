@@ -625,19 +625,6 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
 
     _pps_data[0].storeValue(name, value);
   }
-
-  // Store values into table
-  PostprocessorIterator postprocessor_begin = _pps[0].allPostprocessorsBegin();
-  PostprocessorIterator postprocessor_end = _pps[0].allPostprocessorsEnd();
-  PostprocessorIterator postprocessor_it = postprocessor_begin;
-
-  for (postprocessor_it = postprocessor_begin; postprocessor_it != postprocessor_end; ++postprocessor_it)
-  {
-    std::string name = (*postprocessor_it)->name();
-    Real value = _pps_data[0].getPostprocessorValue(name);
-
-    _pps_output_table.addData(name, value, _time);
-  }
 }
 
 void
@@ -661,6 +648,19 @@ MProblem::computePostprocessors(int pps_type)
 void
 MProblem::outputPostprocessors()
 {
+  // Store values into table
+  PostprocessorIterator postprocessor_begin = _pps[0].allPostprocessorsBegin();
+  PostprocessorIterator postprocessor_end = _pps[0].allPostprocessorsEnd();
+  PostprocessorIterator postprocessor_it = postprocessor_begin;
+
+  for (postprocessor_it = postprocessor_begin; postprocessor_it != postprocessor_end; ++postprocessor_it)
+  {
+    std::string name = (*postprocessor_it)->name();
+    Real value = _pps_data[0].getPostprocessorValue(name);
+
+    _pps_output_table.addData(name, value, _time);
+  }
+
   if (_pps_output_table.empty())
     return;
 
