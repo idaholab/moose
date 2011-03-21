@@ -10,8 +10,10 @@ include $(LIBMESH_DIR)/Make.common
 libmesh_CXXFLAGS     += -MD
 libmesh_CFLAGS       += -MD
 
-# treat these warnings as errors
-libmesh_CXXFLAGS     += -Werror=return-type -Werror=reorder
+# treat these warnings as errors (This doesn't seem to be necessary for Intel)
+ifneq (,$(findstring gcc,$(GXX-VERSION)))
+  libmesh_CXXFLAGS     += -Werror=return-type -Werror=reorder
+endif
 
 # Fortran baggage
 mpif77_command := $(libmesh_F77)
