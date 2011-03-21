@@ -6,6 +6,7 @@
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
 
@@ -23,6 +24,7 @@ class Kernel :
   public Coupleable,
   public FunctionInterface,
   public TransientInterface,
+  public PostprocessorInterface,
   public MaterialPropertyInterface,
   protected GeometricSearchInterface
 {

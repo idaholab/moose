@@ -24,6 +24,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     Coupleable(parameters, false),
     FunctionInterface(parameters),
     TransientInterface(parameters),
+    PostprocessorInterface(parameters),
     MaterialPropertyInterface(parameters),
     GeometricSearchInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
