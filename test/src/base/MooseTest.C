@@ -18,6 +18,11 @@
 #include "MMSConvection.h"
 #include "MMSForcing.h"
 #include "MMSReaction.h"
+#include "AdvDiffReaction1.h"
+#include "Advection0.h"
+#include "CN2AdvDiffReaction1.h"
+#include "Diffusion0.h"
+#include "ForcingFunctionXYZ0.h"
 
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
@@ -25,12 +30,15 @@
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
 #include "MMSCoupledDirichletBC.h"
+#include "DirichletBCfuncXYZ0.h"
+#include "DirichletBCfuncXYZ1.h"
 
 #include "EmptyMaterial.h"
 #include "MTMaterial.h"
 #include "Diff1Material.h"
 #include "Diff2Material.h"
 #include "StatefulMaterial.h"
+#include "StatefulTest.h"
 
 namespace MooseTest
 {
@@ -54,6 +62,11 @@ void registerObjects()
   registerObject(MMSConvection);
   registerObject(MMSForcing);
   registerObject(MMSReaction);
+  registerObject(Diffusion0);
+  registerObject(Advection0);
+  registerObject(AdvDiffReaction1);
+  registerObject(CN2AdvDiffReaction1);
+  registerObject(ForcingFunctionXYZ0);
 
   // Aux kernels
   registerObject(PolyConstantAux);
@@ -63,6 +76,8 @@ void registerObjects()
   registerObject(MTBC);
   registerObject(PolyCoupledDirichletBC);
   registerObject(MMSCoupledDirichletBC);
+  registerObject(DirichletBCfuncXYZ0);
+  registerObject(DirichletBCfuncXYZ1);
 
   // Materials
   registerObject(EmptyMaterial);
@@ -70,6 +85,7 @@ void registerObjects()
   registerObject(Diff1Material);
   registerObject(Diff2Material);
   registerObject(StatefulMaterial);
+  registerObject(StatefulTest);
 }
 
 } // namespace
