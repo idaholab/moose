@@ -911,21 +911,42 @@ MProblem::checkProblemIntegrity()
   _nl.checkKernelCoverage(mesh_subdomains);
 
   // Check materials
-  bool adaptivity = _adaptivity.isOn();
-  for (MaterialIterator i = _materials[0].activeMaterialsBegin(); i != _materials[0].activeMaterialsEnd(); ++i)
-  {
-    for (std::vector<Material *>::iterator j = i->second.begin(); j != i->second.end(); ++j)
-      if ((*j)->hasStatefulProperties() && adaptivity)
-        mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
-    
-    if (mesh_subdomains.find(i->first) == mesh_subdomains.end())
+  { 
+    bool adaptivity = _adaptivity.isOn();
+    std::set<subdomain_id_type> local_mesh_subs(mesh_subdomains);
+    /**
+     * If a material is specified for any block in the simulation, then all blocks must
+     * have a material specified.
+     */
+    bool check_material_coverage = false;
+    for (MaterialIterator i = _materials[0].activeMaterialsBegin(); i != _materials[0].activeMaterialsEnd(); ++i)
     {
-      std::stringstream oss;
-      oss << "Material block \"" << i->first << "\" specified in the input file does not exist";
-      mooseError (oss.str());
+      for (std::vector<Material *>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+        if ((*j)->hasStatefulProperties() && adaptivity)
+          mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
+    
+      if (mesh_subdomains.find(i->first) == mesh_subdomains.end())
+      {
+        std::stringstream oss;
+        oss << "Material block \"" << i->first << "\" specified in the input file does not exist";
+        mooseError (oss.str());
+      }
+
+      local_mesh_subs.erase(i->first);
+      check_material_coverage = true;
+    }
+
+    // Check Material Coverage
+    if (check_material_coverage && !local_mesh_subs.empty())
+    {
+      std::stringstream extra_subdomain_ids;
+      /// <unsigned int> is necessary to print subdomain_id_types in the statement below
+      std::copy (local_mesh_subs.begin(), local_mesh_subs.end(), std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
+      
+      mooseError("The following blocks from your input mesh do not contain on active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
     }
   }
-
+  
   // Check that BCs used in your simulation exist in your mesh
   {
     const std::set<short> & mesh_bcs = _mesh._mesh.boundary_info->get_boundary_ids();

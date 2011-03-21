@@ -21,6 +21,9 @@ def missing_mesh_test():
 def bad_material_block_test():
   tools.executeAppExpectError(__file__,'bad_material_block_test.i','Material block \S+ specified in the input file does not exist')
 
+def missing_material_test():
+  tools.executeAppExpectError(__file__,'missing_material_test.i',"The following blocks from your input mesh do not contain on active material: \d+")
+  
 def bad_kernel_var_test():
   tools.executeAppExpectError(__file__,'bad_kernel_var_test.i','variable foo does not exist in this system')
 
