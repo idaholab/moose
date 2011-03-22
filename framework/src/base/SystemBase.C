@@ -110,7 +110,7 @@ SystemBase::reinitNode(const Node * node, THREAD_ID tid)
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     MooseVariable *var = *it;
-    if (var->feType().family == LAGRANGE)
+    if (var->isNodal())
     {
       var->reinit_node();
       var->computeNodalValues();
@@ -128,7 +128,7 @@ SystemBase::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     MooseVariable *var = *it;
-    if (var->feType().family == LAGRANGE)
+    if (var->isNodal())
     {
       var->reinit_node();
       var->computeNodalValues();

@@ -109,6 +109,8 @@ public:
 
   const FEType feType() { return _fe->get_fe_type(); }
 
+  bool isNodal();
+
   const Elem * & currentElem() { return _elem; }
   unsigned int & currentSide() { return _current_side; }
 

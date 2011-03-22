@@ -145,6 +145,13 @@ MooseVariable::~MooseVariable()
 {
 }
 
+bool
+MooseVariable::isNodal()
+{
+  // FIXME: improve this fix (currently we use only monomials as elemental variables)
+  return feType().family != MONOMIAL;
+}
+
 void
 MooseVariable::prepare()
 {
