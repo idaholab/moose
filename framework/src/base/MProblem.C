@@ -195,7 +195,7 @@ MProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
 
-  unsigned int n_points = _asm_info[tid]->qRule()->n_points();
+  unsigned int n_points = 1;
   _zero[tid].resize(n_points, 0);
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
@@ -212,7 +212,7 @@ MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
 
-  unsigned int n_points = _asm_info[tid]->qRule()->n_points();
+  unsigned int n_points = 1;
   _zero[tid].resize(n_points, 0);
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
