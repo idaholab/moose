@@ -15,8 +15,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <list>
-
 #include "GlobalParamsAction.h"
 
 // libMesh
@@ -27,19 +25,11 @@ class MooseMesh;
 class MProblem;
 class Executioner;
 
-
 class Parser
 {
 public:
-  /**
-   * Default constructor that initializes the parser and looks for the option to dump
-   * the registered objects
-   */
-  Parser(const std::string &dump_string="--dump");
+  Parser();
 
-  /**
-   * Destructor to remove the dynamically generated Parse Tree
-   */
   virtual ~Parser();
 
   /**
@@ -69,6 +59,8 @@ public:
                        std::vector<std::string> & elements,
                        const std::string &delims = "/");
 
+  std::string trim(std::string str, const std::string &white_space);
+  
   /**
    * This function tokenizes a path and checks to see if it contains the string to look for
    */
@@ -113,6 +105,16 @@ public:
 
 private:
   /**
+   * This function initializes the command line options recognized by MOOSE based applications
+   */
+  void initOptions();
+
+  /**
+   * Searches the command line for the given option name (multiple syntaxes supported)
+   */
+  bool searchCommandLine(const std::string &option_name);
+  
+  /**
    * This function inserts blocks into the tree which are optional in the input file but are
    * necessary for the correct execution of MOOSE based applications.
    */
@@ -123,9 +125,11 @@ private:
    * parameter specifies how to print the resulting parse tree. Only "dump", the
    * original human readable format, and "yaml" are supported.
    */
-  void buildFullTree( const std::string format );
+  void buildFullTree( void (Parser::*action)(const std::string &name, const std::string *type, std::vector<InputParameters *> & param_ptrs) );
 
   void printInputParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
+
+  void printYAMLParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
   
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
@@ -145,13 +149,16 @@ private:
   /************************************
    * Private Data Members
    ************************************/
-  std::string _input_filename;
-  std::vector<std::string> _section_names;
-  const std::string _dump_string;
-  const static std::string _show_tree;
+  struct CLIOption
+  {
+    std::string desc;
+    std::vector<std::string> cli_syntax;
+    bool required;
+  };
+  
+  std::map<std::string, CLIOption> _cli_options;
 
   bool _getpot_initialized;
-  bool _tree_printed;
   GetPot _getpot_file;
 };
 

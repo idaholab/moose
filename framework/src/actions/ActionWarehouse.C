@@ -111,10 +111,9 @@ ActionWarehouse::inputFileActionsBegin()
 
   _ordered_actions.clear();
   for (i = input_file_blocks.begin(); i != input_file_blocks.end(); ++i)
-  {
-    std::cerr << i->second->name() << '\n';
     _ordered_actions.push_back(i->second);
-  }
+
+  std::sort(_ordered_actions.begin(), _ordered_actions.end(), InputFileSort());
   
   // We'll push one more "empty" action onto the end so that when we print the input syntax
   // everything will get closed off without any odd tail calls.
@@ -181,3 +180,33 @@ ActionWarehouse::allActionsEnd()
 {
   return _ordered_actions.end();
 }
+
+ActionWarehouse::InputFileSort::InputFileSort() 
+{ 
+  _o.reserve(8); 
+  _o.push_back("Mesh"); 
+  _o.push_back("Variables"); 
+  _o.push_back("AuxVariables"); 
+  _o.push_back("Kernels"); 
+  _o.push_back("AuxKernels"); 
+  _o.push_back("BCs"); 
+  _o.push_back("AuxBCs"); 
+  _o.push_back("Materials"); 
+  _o.push_back("Postprocessors"); 
+  _o.push_back("Executioner"); 
+  _o.push_back("Output"); 
+}     
+     
+bool 
+ActionWarehouse::InputFileSort::operator() (Action *a, Action *b) 
+{ 
+  std::vector<std::string> elements; 
+  std::string short_a, short_b; 
+  Parser::tokenize(a->name(), elements); 
+  short_a = elements[0]; 
+  elements.clear(); 
+  Parser::tokenize(b->name(), elements); 
+  short_b = elements[0]; 
+   
+  return std::find(_o.begin(), _o.end(), short_a) - std::find(_o.begin(), _o.end(), short_b) >= 0 ? false : true; 
+} 

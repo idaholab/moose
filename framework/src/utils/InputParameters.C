@@ -51,6 +51,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_private_params = rhs._private_params;
   this->_valid_params = rhs._valid_params;
   this->_coupled_vars = rhs._coupled_vars;
+  this->_seen_in_input = rhs._seen_in_input;
 
   return *this;
 }
@@ -104,6 +105,7 @@ void
 InputParameters::seenInInputFile(const std::string &name)
 {
   _valid_params.insert(name);
+  _seen_in_input.insert(name);
 }
 
 const std::string &
@@ -125,6 +127,12 @@ InputParameters::isParamValid(const std::string &name) const
 {
   return _valid_params.find(name) != _valid_params.end();
 }
+
+bool 
+InputParameters::wasSeenInInput(const std::string &name) const 
+{ 
+  return _seen_in_input.find(name) != _seen_in_input.end(); 
+} 
 
 bool
 InputParameters::areAllRequiredParamsValid() const

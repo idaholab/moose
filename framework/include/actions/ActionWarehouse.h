@@ -70,6 +70,17 @@ private:
   std::string _curr_action_name;
 
   EmptyAction *_empty_action;
+
+  // Functor for sorting input file syntax 
+  class InputFileSort 
+  {  
+  public: 
+    InputFileSort(); 
+    bool operator() (Action *a, Action *b); 
+    
+  private: 
+    std::vector<std::string> _o; 
+  }; 
 };
 
 #endif // ACTIONWAREHOUSE_H

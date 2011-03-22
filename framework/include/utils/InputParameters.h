@@ -125,6 +125,12 @@ public:
    */
   bool isParamValid(const std::string &name) const;
 
+  /** 
+   * This method returns a truth value to indicate whether a parameter was seen in the input 
+   * file or not 
+   */ 
+  bool wasSeenInInput(const std::string &name) const;
+
   /**
    * This method returns true if all of the parameters in this object are valid
    * (i.e. isParamValid(name) == true - for all parameters)
@@ -187,6 +193,11 @@ private:
   std::set<std::string> _private_params;
 
   /**
+   * The set of parameters seen in the input file only
+   */
+  std::set<std::string> _seen_in_input;
+  
+  /**
    * The coupled variables set
    */
   std::set<std::string> _coupled_vars;
@@ -243,19 +254,71 @@ InputParameters validParams()
 }
 
 namespace libMesh
-{
-
+{ 
   template<>
   inline
-  void InputParameters::Parameter<std::vector<bool> >::print (std::ostream& /*os*/) const
-  {
+  void InputParameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostream& os) const 
+  { 
+    for (unsigned int i=0; i<_value.size(); i++) 
+      for (unsigned int j=0; i<_value[i].size(); j++) 
+        os << _value[i][j] << " "; 
+  } 
+
+  template<> 
+  inline 
+  void InputParameters::Parameter<std::vector<int> >::print (std::ostream& os) const 
+  { 
+    for (unsigned int i=0; i<_value.size(); i++) 
+      os << _value[i] << " "; 
+  } 
+
+  template<> 
+  inline 
+  void InputParameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream& os) const 
+  { 
+    for (unsigned int i=0; i<_value[i].size(); i++) 
+      for (unsigned int j=0; i<_value[j].size(); j++) 
+        os << _value[i][j] << " "; 
+  } 
+
+  template<> 
+  inline 
+  void InputParameters::Parameter<std::vector<std::vector<bool> > >::print (std::ostream& os) const 
+  { 
+    for (unsigned int i=0; i<_value.size(); i++) 
+      for (unsigned int j=0; i<_value[i].size(); j++) 
+        os << _value[i][j] << " "; 
+  } 
+
+  template<> 
+  inline 
+  void InputParameters::Parameter<std::vector<std::string> >::print (std::ostream& os) const 
+  { 
+    for (unsigned int i=0; i<_value.size(); i++) 
+      os << _value[i] << " "; 
+  } 
+
+  template<> 
+  inline 
+  void InputParameters::Parameter<std::vector<bool> >::print (std::ostream& os) const 
+  { 
+    for (unsigned int i=0; i<_value.size(); i++) 
+      os << _value[i] << " "; 
   }
 
-  template<>
-  inline
-  void InputParameters::Parameter<std::vector<int> >::print (std::ostream& /*os*/) const
-  {
-  }
+  template<> 
+  inline 
+  void InputParameters::Parameter<std::vector<float> >::print (std::ostream& os) const 
+  { 
+    for (unsigned int i=0; i<_value.size(); i++) 
+      os << _value[i] << " "; 
+  } 
+
+  template<> 
+  inline 
+  void InputParameters::Parameter<std::map<std::string, unsigned int> >::print (std::ostream& /*os*/) const 
+  { 
+  } 
 
   template<>
   inline
@@ -272,31 +335,6 @@ namespace libMesh
     for (unsigned int i=0; i<_value.size(); i++)
       os << _value[i] << " ";
   }
-
-  template<>
-  inline
-  void InputParameters::Parameter<std::vector<std::vector<bool> > >::print (std::ostream& /*os*/) const
-  {
-  }
-
-  template<>
-  inline
-  void InputParameters::Parameter<std::vector<std::vector<Real> > >::print (std::ostream& /*os*/) const
-  {
-  }
-
-  template<>
-  inline
-  void InputParameters::Parameter<std::vector<std::vector<int> > >::print (std::ostream& /*os*/) const
-  {
-  }
-
-  template<>
-  inline
-  void InputParameters::Parameter<std::vector<std::string> >::print (std::ostream& /*os*/) const
-  {
-  }
-
 } // libMesh
 
 #endif /* INPUTPARAMETERS_H */
