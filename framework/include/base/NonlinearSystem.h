@@ -28,7 +28,6 @@
 #include "sparse_matrix.h"
 #include "preconditioner.h"
 
-class libMesh::Mesh;
 class MProblem;
 
 /**
