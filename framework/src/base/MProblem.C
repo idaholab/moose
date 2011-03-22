@@ -162,9 +162,9 @@ void
 MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
   unsigned int n_points = _asm_info[tid]->qRule()->n_points();
-  _zero[tid].resize(n_points);
-  _grad_zero[tid].resize(n_points);
-  _second_zero[tid].resize(n_points);
+  _zero[tid].resize(n_points, 0);
+  _grad_zero[tid].resize(n_points, 0);
+  _second_zero[tid].resize(n_points, 0);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitElem(_displaced_mesh->elem(elem->id()), tid);
@@ -177,6 +177,12 @@ void
 MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem, side);
+
+  unsigned int n_points = _asm_info[tid]->qRule()->n_points();
+  _zero[tid].resize(n_points, 0);
+  _grad_zero[tid].resize(n_points, 0);
+  _second_zero[tid].resize(n_points, 0);
+  
   if (_displaced_problem != NULL && _reinit_displaced_face)
     _displaced_problem->reinitElemFace(_displaced_mesh->elem(elem->id()), side, bnd_id, tid);
 
@@ -188,6 +194,12 @@ void
 MProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
+
+  unsigned int n_points = _asm_info[tid]->qRule()->n_points();
+  _zero[tid].resize(n_points, 0);
+  _grad_zero[tid].resize(n_points, 0);
+  _second_zero[tid].resize(n_points, 0);
+  
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNode(&_displaced_mesh->node(node->id()), tid);
 
@@ -199,6 +211,12 @@ void
 MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
+
+  unsigned int n_points = _asm_info[tid]->qRule()->n_points();
+  _zero[tid].resize(n_points, 0);
+  _grad_zero[tid].resize(n_points, 0);
+  _second_zero[tid].resize(n_points, 0);
+  
   if (_displaced_problem != NULL && _reinit_displaced_face)
     _displaced_problem->reinitNodeFace(&_displaced_mesh->node(node->id()), bnd_id, tid);
 
