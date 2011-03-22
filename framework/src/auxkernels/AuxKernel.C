@@ -54,6 +54,8 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _tid(parameters.get<THREAD_ID>("_tid")),
 
     _var(_aux_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _nodal(_var.feType().family == LAGRANGE),
+
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 
@@ -61,14 +63,13 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
 
-    _u(_var.sln()),
-    _u_old(_var.slnOld()),
-    _u_older(_var.slnOlder()),
+    _u(_nodal ? _var.nodalSln() : _var.sln()),
+    _u_old(_nodal ? _var.nodalSlnOld() : _var.slnOld()),
+    _u_older(_nodal ? _var.nodalSlnOlder() : _var.slnOlder()),
 
     _current_elem(_var.currentElem()),
     _current_node(_var.node()),
     _current_volume(_aux_sys._data[_tid]._current_volume),
-    _nodal(_var.feType().family == LAGRANGE),
 
     _solution(_aux_sys.solution()),
 

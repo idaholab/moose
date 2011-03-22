@@ -75,6 +75,7 @@ protected:
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
   MooseVariable & _var;
+  bool _nodal;                                          /// true if the kernel nodal, false if it is elemental
   MooseMesh & _mesh;
   int _dim;
 
@@ -90,8 +91,6 @@ protected:
   const Node * & _current_node;
 
   Real & _current_volume;
-
-  bool _nodal;                                          /// true if the kernel nodal, false if it is elemental
 
   NumericVector<Number> & _solution;                    /// reference to the solution vector of auxiliary system
 
