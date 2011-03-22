@@ -33,9 +33,8 @@ AverageNodalVariableValue::AverageNodalVariableValue(const std::string & name, I
     _var_name(parameters.get<std::string>("variable")),
     _nodesetid(parameters.get<unsigned int>("nodeset"))
 {
-  std::vector<unsigned int> nodes;
-  std::vector<short int> ids;
-  _mesh.build_node_list(nodes, ids);
+  const std::vector<unsigned int> & nodes = _mesh.getNodeListNodes();
+  const std::vector<short int> & ids = _mesh.getNodeListIds();
 
   for (unsigned int i = 0; i < nodes.size(); i++)
   {

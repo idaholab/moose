@@ -45,8 +45,10 @@ public:
   std::vector<short int> boundary_ids (const Elem *const elem, const unsigned short int side) const { return _mesh.boundary_info->boundary_ids(elem, side); }
   const std::set<short int> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }
 
-  void buildBoudndaryNodeList ();
-  void build_node_list (std::vector< unsigned int > &nl, std::vector< short int > &il) const { _mesh.boundary_info->build_node_list(nl, il); }
+  void buildNodeList ();
+  const std::vector<unsigned int> & getNodeListNodes() { return _bnd_nodes; }
+  const std::vector<short int> & getNodeListIds() { return _bnd_ids; }
+
   void build_node_list_from_side_list() { _mesh.boundary_info->build_node_list_from_side_list(); }
   void build_side_list(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
   unsigned int side_with_boundary_id(const Elem * const elem, const unsigned short int boundary_id) const { return _mesh.boundary_info->side_with_boundary_id(elem, boundary_id); }
@@ -108,6 +110,7 @@ protected:
   ConstNodeRange * _local_node_range;
   ConstNodeRange * _bnd_node_range;
 
+  /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
   std::vector<unsigned int> _bnd_nodes;
   std::vector<short int> _bnd_ids;
 

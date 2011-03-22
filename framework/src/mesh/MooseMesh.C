@@ -67,6 +67,8 @@ MooseMesh::prepare()
   const MeshBase::element_iterator el_end = _mesh.elements_end();
   for (MeshBase::element_iterator el = _mesh.elements_begin(); el != el_end; ++el)
     _mesh_subdomains.insert((*el)->subdomain_id());
+
+  buildNodeList();
 }
 
 void
@@ -106,13 +108,17 @@ MooseMesh::meshChanged()
   //Update the node to elem map
   MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
 
+  buildNodeList();
+
   // Lets the output system know that the mesh has changed recently.
   _is_changed = true;
 }
 
 void
-MooseMesh::buildBoudndaryNodeList()
+MooseMesh::buildNodeList()
 {
+  _bnd_nodes.clear();
+  _bnd_ids.clear();
   _mesh.boundary_info->build_node_list(_bnd_nodes, _bnd_ids);
 }
 

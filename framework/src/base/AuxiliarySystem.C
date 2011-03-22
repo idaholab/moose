@@ -259,11 +259,8 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
       (*aux_it)->setup();
   }
 
-  std::vector<unsigned int> nodes;
-  std::vector<short int> ids;
-
-  _mesh.build_node_list(nodes, ids);
-
+  const std::vector<unsigned int> & nodes = _mesh.getNodeListNodes();
+  const std::vector<short int> & ids = _mesh.getNodeListIds();
   const unsigned int n_nodes = nodes.size();
 
   for(unsigned int i=0; i<n_nodes; i++)

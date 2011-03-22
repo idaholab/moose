@@ -394,10 +394,8 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   residual.close();
 
   // do nodal BC
-  std::vector<unsigned int> nodes;
-  std::vector<short int> ids;
-  _mesh.build_node_list(nodes, ids);
-
+  const std::vector<unsigned int> & nodes = _mesh.getNodeListNodes();
+  const std::vector<short int> & ids = _mesh.getNodeListIds();
   const unsigned int n_nodes = nodes.size();
   for (unsigned int i = 0; i < n_nodes; i++)
   {
@@ -461,9 +459,8 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   jacobian.close();  
   
   // do nodal BC
-  std::vector<unsigned int> nodes;
-  std::vector<short int> ids;
-  _mesh.build_node_list(nodes, ids);
+  const std::vector<unsigned int> & nodes = _mesh.getNodeListNodes();
+  const std::vector<short int> & ids = _mesh.getNodeListIds();
 
   std::vector<int> zero_rows;
 
@@ -611,10 +608,8 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   //Dirichlet BCs
   std::vector<int> zero_rows;
 
-  std::vector<unsigned int> nodes;
-  std::vector<short int> ids;
-  _mesh.build_node_list(nodes, ids);
-
+  const std::vector<unsigned int> & nodes = _mesh.getNodeListNodes();
+  const std::vector<short int> & ids = _mesh.getNodeListIds();
   const std::set<short int> & boundary_ids = _mesh.get_boundary_ids();
 
   for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
