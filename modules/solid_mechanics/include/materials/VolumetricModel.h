@@ -19,6 +19,9 @@
 
 class ColumnMajorMatrix;
 
+template<>
+InputParameters validParams<VolumetricModel>();
+
 class VolumetricModel : public Material
 {
 public:
