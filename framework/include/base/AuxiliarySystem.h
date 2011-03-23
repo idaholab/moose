@@ -33,6 +33,7 @@ class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
   AuxiliarySystem(MProblem & subproblem, const std::string & name);
+  virtual ~AuxiliarySystem();
 
   virtual void init();
 

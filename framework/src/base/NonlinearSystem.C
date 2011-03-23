@@ -93,6 +93,8 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
 NonlinearSystem::~NonlinearSystem()
 {
   delete _preconditioner;
+  delete &_serialized_solution;
+  delete &_residual_copy;
 }
 
 void

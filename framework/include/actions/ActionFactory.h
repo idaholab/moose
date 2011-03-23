@@ -68,6 +68,8 @@ class ActionFactory
 public:
   static ActionFactory *instance();
 
+  static void release();
+
   virtual ~ActionFactory();
 
   template<typename T>
@@ -116,7 +118,7 @@ public:
   registeredActionIterator registeredActionsEnd() { return _name_to_action_map.end(); }
 
   bool isParsed(const std::string & name) const { return _non_parsed.find(name) == _non_parsed.end(); }
-  
+
 protected:
   std::map<std::string, buildActionPtr>  _name_to_build_pointer;
   std::map<std::string, paramsActionPtr> _name_to_params_pointer;
@@ -127,6 +129,8 @@ protected:
   std::vector<std::string> _registered_parser_block_names;
   std::vector<Action *> _active_parser_blocks;
   unsigned int _not_parsed_name_number;
+
+  static ActionFactory *_instance;
 
 private:
   // Private constructor for singleton pattern

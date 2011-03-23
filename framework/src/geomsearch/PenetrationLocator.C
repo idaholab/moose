@@ -42,6 +42,9 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
 PenetrationLocator::~PenetrationLocator()
 {
   delete fe;
+
+  for (std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_info.begin(); it != _penetration_info.end(); ++it)
+    delete it->second;
 }
 
 void

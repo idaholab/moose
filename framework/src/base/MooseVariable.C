@@ -143,6 +143,26 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
 
 MooseVariable::~MooseVariable()
 {
+  _u.release();
+  _u_old.release();
+  _u_older.release();
+
+  _grad_u.release();
+  _grad_u_old.release();
+  _grad_u_older.release();
+
+  _second_u.release();
+  _second_u_old.release();
+  _second_u_older.release();
+
+  _u_dot.release();
+  _du_dot_du.release();
+
+  _nodal_u.release();
+  _nodal_u_old.release();
+  _nodal_u_older.release();
+
+  _increment.release();
 }
 
 bool

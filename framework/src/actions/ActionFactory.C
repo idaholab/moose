@@ -15,14 +15,21 @@
 #include "ActionFactory.h"
 #include "Parser.h"
 
+ActionFactory *ActionFactory::_instance = NULL;
+
 ActionFactory *ActionFactory::instance()
 {
-  static ActionFactory *instance;
-  if (!instance)
-    instance = new ActionFactory;
+  if (!_instance)
+    _instance = new ActionFactory;
 
-  return instance;
+  return _instance;
 } 
+
+void
+ActionFactory::release()
+{
+  delete _instance;
+}
 
 // Private Constructor
 ActionFactory::ActionFactory() :

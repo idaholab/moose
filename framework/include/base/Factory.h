@@ -84,6 +84,8 @@ class Factory
 public:
   static Factory *instance();
 
+  static void release();
+
   template<typename T>
   void reg(const std::string & name)
   {
@@ -106,6 +108,8 @@ public:
 protected:
   std::map<std::string, buildPtr>  _name_to_build_pointer;
   std::map<std::string, paramsPtr> _name_to_params_pointer;
+
+  static Factory *_instance;
 
 private:
   // Private constructor for singleton pattern

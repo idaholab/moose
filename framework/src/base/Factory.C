@@ -14,14 +14,20 @@
 
 #include "Factory.h"
 
+Factory * Factory::_instance = NULL;
 
 Factory *Factory::instance()
 {
-  static Factory *instance;
-  if (!instance)
-    instance = new Factory;
+  if (!_instance)
+    _instance = new Factory;
 
-  return instance;
+  return _instance;
+}
+
+void
+Factory::release()
+{
+  delete _instance;
 }
 
 InputParameters

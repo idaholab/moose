@@ -24,8 +24,7 @@ ActionWarehouse::ActionWarehouse() :
 
 ActionWarehouse::~ActionWarehouse()
 {
-  if (_empty_action)
-    delete _empty_action;
+  delete _empty_action;
 }
 
 void

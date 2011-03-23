@@ -24,6 +24,23 @@ GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & me
     _mesh(mesh)
 {}
 
+GeometricSearchData::~GeometricSearchData()
+{
+  for (std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = _penetration_locators.begin();
+      it != _penetration_locators.end();
+      ++it)
+  {
+    delete it->second;
+  }
+
+  for (std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator it = _nearest_node_locators.begin();
+      it != _nearest_node_locators.end();
+      ++it)
+  {
+    delete it->second;
+  }
+}
+
 void
 GeometricSearchData::update()
 {

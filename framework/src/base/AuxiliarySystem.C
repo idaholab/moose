@@ -41,6 +41,11 @@ AuxiliarySystem::AuxiliarySystem(MProblem & subproblem, const std::string & name
   _data.resize(libMesh::n_threads());
 }
 
+AuxiliarySystem::~AuxiliarySystem()
+{
+  delete &_serialized_solution;
+}
+
 void
 AuxiliarySystem::init()
 {

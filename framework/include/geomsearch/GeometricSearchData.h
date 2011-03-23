@@ -30,6 +30,7 @@ class GeometricSearchData
 {
 public:
   GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh);
+  virtual ~GeometricSearchData();
 
   PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave);
 

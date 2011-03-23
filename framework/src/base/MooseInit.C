@@ -15,6 +15,8 @@
 #include "MooseInit.h"
 #include "Moose.h"
 #include "ParallelUniqueId.h"
+#include "Factory.h"
+#include "ActionFactory.h"
 
 MooseInit::MooseInit(int argc, char *argv[]) :
 	LibMeshInit(argc, argv)
@@ -28,6 +30,8 @@ MooseInit::MooseInit(int argc, char *argv[]) :
 MooseInit::~MooseInit()
 {
   delete Moose::command_line;
+  Factory::release();
+  ActionFactory::release();
 }
 
 namespace Moose

@@ -51,7 +51,8 @@ AssemblyData::~AssemblyData()
     delete it->second;
   for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
     delete it->second;
-  delete _qrule;
+  delete _qrule_volume;
+  delete _qrule_arbitrary;
   delete _qrule_face;
   delete _current_side_elem;
 }
