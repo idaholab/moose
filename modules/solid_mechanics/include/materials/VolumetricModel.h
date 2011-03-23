@@ -19,6 +19,8 @@
 
 class ColumnMajorMatrix;
 
+class VolumetricModel;
+
 template<>
 InputParameters validParams<VolumetricModel>();
 
