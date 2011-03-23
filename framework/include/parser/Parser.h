@@ -37,7 +37,7 @@ public:
    * in the input file
    */
   bool isSectionActive(const std::string & section_name,
-                       const std::map<std::string, std::vector<std::string> > & active_lists) const;
+                       const std::map<std::string, std::vector<std::string> > & active_lists);
   
   /**
    * Parse an input file consisting of getpot syntax and setup objects
@@ -157,6 +157,10 @@ private:
   };
   
   std::map<std::string, CLIOption> _cli_options;
+
+  // Contains all of the sections that are not active during the parse phase so that blocks
+  // nested more than one level deep can detect that the grandparent is not active
+  std::set<std::string> _inactive_strings;
 
   bool _getpot_initialized;
   GetPot _getpot_file;

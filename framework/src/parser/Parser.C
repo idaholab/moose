@@ -119,10 +119,9 @@ Parser::initOptions()
 
 bool
 Parser::isSectionActive(const std::string & s,
-                        const std::map<std::string, std::vector<std::string> > & active_lists) const
+                        const std::map<std::string, std::vector<std::string> > & active_lists)
 {
   bool retValue = false;
-  static std::set<std::string> deactive_strings;
   size_t found = s.find_last_of('/');
 
   // Base Level is always active
@@ -147,13 +146,13 @@ Parser::isSectionActive(const std::string & s,
   }
 
   // Finally see if any of the deactive strings are partially contained in this path
-  for (std::set<std::string>::iterator i = deactive_strings.begin(); i != deactive_strings.end(); ++i)
+  for (std::set<std::string>::iterator i = _inactive_strings.begin(); i != _inactive_strings.end(); ++i)
     if (s.find(*i) != std::string::npos)
       retValue = false;
   
   // If this section is not active - then keep track of it for future checks
   if (!retValue)
-    deactive_strings.insert(s);
+    _inactive_strings.insert(s);
 
   return retValue;
 }
@@ -189,6 +188,7 @@ Parser::parse(const std::string &input_filename)
   // GetPot object
   _getpot_file.parse_input_file(input_filename);
   _getpot_initialized = true;
+  _inactive_strings.clear();
 
   section_names = _getpot_file.get_section_names();
 
