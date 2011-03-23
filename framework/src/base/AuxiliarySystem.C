@@ -330,10 +330,6 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
       }
     }
 
-
-    for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-      (*aux_it)->compute();
-
 //    if(unlikely(_calculate_element_time))
 //      stopElementTiming(elem->id());
   }
