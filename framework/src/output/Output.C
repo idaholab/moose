@@ -19,6 +19,7 @@
 #include "ExodusOutput.h"
 #include "GMVOutput.h"
 #include "XDAOutput.h"
+#include "TecplotOutput.h"
 
 Output::Output(Problem & problem) :
     _file_base("out"),
@@ -45,6 +46,14 @@ Output::add(Output::Type type)
 
   case GMV:
     o = new GMVOutput(_problem.es());
+    break;
+
+  case TECPLOT:
+    o = new TecplotOutput(_problem.es(), false);
+    break;
+
+  case TECPLOT_BIN:
+    o = new TecplotOutput(_problem.es(), true);
     break;
 
   case XDA:
