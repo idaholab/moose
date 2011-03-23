@@ -35,10 +35,12 @@
 #define registerMaterial(name)                    registerObject(name)
 #define registerPostprocessor(name)               registerObject(name)
 #define registerInitialCondition(name)            registerObject(name)
-#define registerDumper(name)                      registerObject(name)
+#define registerDamper(name)                      registerObject(name)
 #define registerDiracKernel(name)                 registerObject(name)
 #define registerExecutioner(name)                 registerObject(name)
 #define registerFunction(name)                    registerObject(name)
+#define registerMeshModifier(name)                registerObject(name)
+#define registerStabilizer(name)                  registerObject(name)
 
 #define registerNamedKernel(obj, name)                 registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)      registerNamedObject(obj, name)

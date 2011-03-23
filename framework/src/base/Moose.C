@@ -36,6 +36,13 @@
 #include "FunctionNeumannBC.h"
 #include "MatchedValueBC.h"
 #include "VacuumBC.h"
+#include "DashpotBC.h"
+#include "DirichletPostprocessorBC.h"
+#include "FunctionDirichletBC.h"
+#include "SinDirichletBC.h"
+#include "SinNeumannBC.h"
+#include "VectorNeumannBC.h"
+#include "WeakGradientBC.h"
 
 // auxkernels
 #include "CoupledAux.h"
@@ -130,81 +137,89 @@ registerObjects()
   if (registered)
     return;
 
-  registerObject(TimeDerivative);
-
   // kernels
-  registerObject(Diffusion);
-  registerObject(CoupledForce);
-  registerObject(UserForcingFunction);
-  registerObject(BodyForce);
-  registerObject(ImplicitEuler);
-  registerObject(Reaction);
-  registerObject(RealPropertyOutput);
+  registerKernel(TimeDerivative);
+  registerKernel(Diffusion);
+  registerKernel(CoupledForce);
+  registerKernel(UserForcingFunction);
+  registerKernel(BodyForce);
+  registerKernel(ImplicitEuler);
+  registerKernel(Reaction);
+  registerKernel(RealPropertyOutput);
+  
   // bcs
-  registerObject(ConvectiveFluxBC);
-  registerObject(DirichletBC);
-  registerObject(NeumannBC);
-  registerObject(FunctionDirichletBC);
-  registerObject(FunctionNeumannBC);
-  registerObject(MatchedValueBC);
-  registerObject(VacuumBC);
+  registerBoundaryCondition(ConvectiveFluxBC);
+  registerBoundaryCondition(DirichletBC);
+  registerBoundaryCondition(NeumannBC);
+  registerBoundaryCondition(FunctionDirichletBC);
+  registerBoundaryCondition(FunctionNeumannBC);
+  registerBoundaryCondition(MatchedValueBC);
+  registerBoundaryCondition(VacuumBC);
+  
+  registerBoundaryCondition(DashpotBC);
+  registerBoundaryCondition(DirichletPostprocessorBC);
+  registerBoundaryCondition(SinDirichletBC);
+  registerBoundaryCondition(SinNeumannBC);
+  registerBoundaryCondition(VectorNeumannBC);
+  registerBoundaryCondition(WeakGradientBC);
+  
   // dirac kernels
-  registerObject(ConstantPointSource);
+  registerDiracKernel(ConstantPointSource);
 
   // aux kernels
-  registerObject(CoupledAux);
-  registerObject(ConstantAux);
-  registerObject(FunctionAux);
-  registerObject(NearestNodeDistanceAux);
-  registerObject(NearestNodeValueAux);
-  registerObject(PenetrationAux);
-  registerObject(ProcessorIDAux);
-  registerObject(GapValueAux);
+  registerAux(CoupledAux);
+  registerAux(ConstantAux);
+  registerAux(FunctionAux);
+  registerAux(NearestNodeDistanceAux);
+  registerAux(NearestNodeValueAux);
+  registerAux(PenetrationAux);
+  registerAux(ProcessorIDAux);
+  registerAux(GapValueAux);
 
   // Initial Conditions
-  registerObject(ConstantIC);
-  registerObject(BoundingBoxIC);
-  registerObject(FunctionIC);
-  registerObject(RandomIC);
+  registerInitialCondition(ConstantIC);
+  registerInitialCondition(BoundingBoxIC);
+  registerInitialCondition(FunctionIC);
+  registerInitialCondition(RandomIC);
   // Mesh Modifiers
-  registerObject(ElementDeleter);
+  registerMeshModifier(ElementDeleter);
   // executioners
-  registerObject(Steady);
-  registerObject(Transient);
-  registerObject(LooseCoupling);
-  registerObject(SolutionTimeAdaptive);
-  registerObject(DT2Transient);
+  registerExecutioner(Steady);
+  registerExecutioner(Transient);
+  registerExecutioner(LooseCoupling);
+  registerExecutioner(SolutionTimeAdaptive);
+  registerExecutioner(DT2Transient);
   // functions
-  registerObject(ParsedFunction);
-  registerObject(ParsedGradFunction);
-  registerObject(PiecewiseLinear);
-  registerObject(SolutionFunction);
-  registerObject(SphereFunction);
+  registerFunction(ParsedFunction);
+  registerFunction(ParsedGradFunction);
+  registerFunction(PiecewiseLinear);
+  registerFunction(SolutionFunction);
+  registerFunction(SphereFunction);
   // materials
-  registerObject(GenericConstantMaterial);
+  registerMaterial(GenericConstantMaterial);
   // PPS
-  registerObject(AverageElementSize);
-  registerObject(AverageNodalVariableValue);
-  registerObject(ElementAverageValue);
-  registerObject(ElementH1Error);
-  registerObject(ElementH1SemiError);
-  registerObject(ElementIntegral);
-  registerObject(ElementL2Error);
-  registerObject(EmptyPostprocessor);
-  registerObject(NodalVariableValue);
-  registerObject(PrintDOFs);
-  registerObject(PrintDT);
-  registerObject(PrintNumElems);
-  registerObject(PrintNumNodes);
-  registerObject(Reporter);
-  registerObject(SideAverageValue);
-  registerObject(SideFluxIntegral);
-  registerObject(SideIntegral);
+  registerPostprocessor(AverageElementSize);
+  registerPostprocessor(AverageNodalVariableValue);
+  registerPostprocessor(ElementAverageValue);
+  registerPostprocessor(ElementH1Error);
+  registerPostprocessor(ElementH1SemiError);
+  registerPostprocessor(ElementIntegral);
+  registerPostprocessor(ElementL2Error);
+  registerPostprocessor(EmptyPostprocessor);
+  registerPostprocessor(NodalVariableValue);
+  registerPostprocessor(PrintDOFs);
+  registerPostprocessor(PrintDT);
+  registerPostprocessor(PrintNumElems);
+  registerPostprocessor(PrintNumNodes);
+  registerPostprocessor(Reporter);
+  registerPostprocessor(SideAverageValue);
+  registerPostprocessor(SideFluxIntegral);
+  registerPostprocessor(SideIntegral);
   // stabilizers
-  registerObject(ConvectionDiffusionSUPG);
+  registerStabilizer(ConvectionDiffusionSUPG);
   // dampers
-  registerObject(ConstantDamper);
-  registerObject(MaxIncrement);
+  registerDamper(ConstantDamper);
+  registerDamper(MaxIncrement);
 
   addActionTypes();
   registerActions();
