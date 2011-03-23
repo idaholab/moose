@@ -129,11 +129,11 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
 
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi()),
-    _second_phi(_fe->get_d2phi()),
+    _second_phi(_has_second_derivatives ? _fe->get_d2phi() : _second_test_face),
 
     _phi_face(_fe_face->get_phi()),
     _grad_phi_face(_fe_face->get_dphi()),
-    _second_phi_face(_fe_face->get_d2phi()),
+    _second_phi_face(_has_second_derivatives ? _fe_face->get_d2phi() : _second_test),
     _normals(_fe_face->get_normals()),
 
     _node(_assembly.node()),
@@ -323,7 +323,10 @@ MooseVariable::computeElemValues()
     {
       Real phi_local = _phi[i][qp];
       RealGradient dphi_local = _grad_phi[i][qp];
-      RealTensor d2phi_local = _second_phi[i][qp];
+      RealTensor d2phi_local;
+
+      if (_has_second_derivatives)
+        d2phi_local = _second_phi[i][qp];
 
       _u[qp]      += phi_local * soln_local;
       _grad_u[qp] += dphi_local * soln_local;
@@ -422,7 +425,10 @@ MooseVariable::computeElemValuesFace()
     {
       Real phi_local = _phi_face[i][qp];
       RealGradient dphi_local = _grad_phi_face[i][qp];
-      RealTensor d2phi_local = _second_phi_face[i][qp];
+      RealTensor d2phi_local;
+
+      if (_has_second_derivatives)
+        d2phi_local = _second_phi_face[i][qp];
 
       _u[qp]      += phi_local * soln_local;
       _grad_u[qp] += dphi_local * soln_local;
