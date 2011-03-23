@@ -29,6 +29,7 @@
 #include "PressureNeumannBC.h"
 #include "ThermalBC.h"
 #include "VelocityAux.h"
+#include "ImposedVelocityBC.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -113,6 +114,7 @@ Elk::registerObjects()
   registerBoundaryCondition(PressureNeumannBC);
   registerBoundaryCondition(ThermalBC);
   registerAux(VelocityAux);
+  registerBoundaryCondition(ImposedVelocityBC);
 
   // linear_elasticity
   registerKernel(SolidMechX);
