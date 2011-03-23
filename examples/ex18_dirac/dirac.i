@@ -3,7 +3,6 @@
   file = square.e
   uniform_refine = 4
 []
-
 [Variables]
   active = 'convected'
 
@@ -12,7 +11,6 @@
     family = LAGRANGE
   [../]
 []
-
 [Kernels]
   active = 'diff conv'
 

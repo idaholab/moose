@@ -28,5 +28,5 @@ include ../test.mk
 ###############################################################################
 # Additional special case targets should be added here
 
-test:
+test: $(APPLICATION_NAME)-$(METHOD)
 	$(call TEST_exodiff,conv_vect_custom.i,out.e)
