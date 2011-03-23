@@ -17,6 +17,7 @@
 
 #include "Outputter.h"
 #include "ExodusOutput.h"
+#include "GMVOutput.h"
 
 Output::Output(Problem & problem) :
     _file_base("out"),
@@ -32,9 +33,23 @@ Output::~Output()
 }
 
 void
-Output::addExodus()
+Output::add(Output::Type type)
 {
-  Outputter *o = new ExodusOutput(_problem.es());
+  Outputter *o = NULL;
+  switch (type)
+  {
+  case EXODUS:
+    o = new ExodusOutput(_problem.es());
+    break;
+
+  case GMV:
+    o = new GMVOutput(_problem.es());
+    break;
+
+  default:
+    mooseError("I do not know how to build and unknown outputter");
+  }
+
   _outputters.push_back(o);
 }
 

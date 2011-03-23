@@ -67,8 +67,16 @@ SetupOutputAction::act()
   Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
   output.fileBase(getParam<std::string>("file_base"));
-  if (getParam<bool>("exodus"))
-    output.addExodus();
+
+  if (getParam<bool>("exodus")) output.add(Output::EXODUS);
+  if (getParam<bool>("gmv")) output.add(Output::GMV);
+  if (getParam<bool>("tecplot")) output.add(Output::TECPLOT);
+  if (getParam<bool>("tecplot_binary")) output.add(Output::TECPLOT_BIN);
+  if (getParam<bool>("xda")) output.add(Output::XDA);
+
+#if 0
+    _moose_system._print_out_info = getParam<bool>("print_out_info");
+#endif
 
   exec->outputInitial(getParam<bool>("output_initial"));
 
@@ -89,14 +97,6 @@ SetupOutputAction::act()
       output.sequence(true);
 
     output.interval(getParam<int>("interval"));
-
-#if 0
-    _moose_system._gmv_output = getParam<bool>("gmv");
-    _moose_system._tecplot_output = getParam<bool>("tecplot");
-    _moose_system._tecplot_binary_output = getParam<bool>("tecplot_binary");
-    _moose_system._xda_output = getParam<bool>("xda");
-    _moose_system._print_out_info = getParam<bool>("print_out_info");
-#endif
   }
 
 #ifdef LIBMESH_HAVE_PETSC

@@ -12,55 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef OUTPUT_H
-#define OUTPUT_H
+#ifndef GMVOUTPUTTER_H
+#define GMVOUTPUTTER_H
 
-#include <string>
-#include <vector>
+#include "Outputter.h"
 #include "FormattedTable.h"
+
 // libMesh
 #include "libmesh_common.h"
+#include "gmv_io.h"
 
-class Problem;
-class Outputter;
-
-class Output
+class GMVOutput : public Outputter
 {
 public:
-  enum Type {
-    EXODUS,
-    GMV,
-    TECPLOT,
-    TECPLOT_BIN,
-    XDA
-  };
+  GMVOutput(EquationSystems & es);
+  virtual ~GMVOutput();
 
-  Output(Problem & problem);
-  virtual ~Output();
+  virtual void output(const std::string & file_base, Real time);
+  virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
 
-  void add(Type type);
-
-  void output();
-  // FIXME: right now, it is here - might go somewhere else?
-  void outputPps(const FormattedTable & table);
-
-  void fileBase(const std::string & file_base) { _file_base = file_base; }
-  std::string & fileBase() { return _file_base; }
-
-  void interval(int interval) { _interval = interval; }
-  int interval() { return _interval; }
-
-  void meshChanged();
-  void sequence(bool state);
+  virtual void meshChanged();
+  virtual void sequence(bool state);
 
 protected:
-  std::string _file_base;
+  GMVIO * _out;
 
-  Problem & _problem;
-  Real & _time;
-  int _interval;
+  int _file_num;                        /// number of the file
 
-  std::vector<Outputter *> _outputters;
+  std::string getFileName(const std::string & file_base);
 };
 
 #endif /* OUTPUTTER_H */
