@@ -122,6 +122,7 @@ Parser::isSectionActive(const std::string & s,
                         const std::map<std::string, std::vector<std::string> > & active_lists) const
 {
   bool retValue = false;
+  static std::set<std::string> deactive_strings;
   size_t found = s.find_last_of('/');
 
   // Base Level is always active
@@ -137,13 +138,22 @@ Parser::isSectionActive(const std::string & s,
   
   std::vector<std::string> active = pos->second;
 
-  if (active.size() > 0)
+  if (!active.empty())
   {
     if (active[0] == "__all__")
       retValue = true;
     else
       retValue = std::find(active.begin(), active.end(), short_name) != active.end();
   }
+
+  // Finally see if any of the deactive strings are partially contained in this path
+  for (std::set<std::string>::iterator i = deactive_strings.begin(); i != deactive_strings.end(); ++i)
+    if (s.find(*i) != std::string::npos)
+      retValue = false;
+  
+  // If this section is not active - then keep track of it for future checks
+  if (!retValue)
+    deactive_strings.insert(s);
 
   return retValue;
 }
