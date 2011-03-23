@@ -8,6 +8,7 @@ InputParameters validParams<PressureNeumannBC>()
   params.addCoupledVar("pe", "");
   params.addCoupledVar("pu", "");
   params.addCoupledVar("pv", "");
+  params.addCoupledVar("pw", "");
   params.set<Real>("component");
   return params;
 }
