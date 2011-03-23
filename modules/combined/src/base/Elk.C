@@ -12,11 +12,13 @@
 
 // heat_conduction
 #include "ConvectiveFluxRZ.h"
+#include "GapHeatPointSourceMaster.h"
 #include "HeatConduction.h"
 #include "HeatConductionRZ.h"
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionImplicitEulerRZ.h"
 #include "HeatConductionMaterial.h"
+
 
 // navier_stokes
 #include "MassInviscidFlux.h"
@@ -102,6 +104,7 @@ Elk::registerObjects()
   registerKernel(HeatConductionImplicitEuler);
   registerKernel(HeatConductionImplicitEulerRZ);
   registerMaterial(HeatConductionMaterial);
+  registerDiracKernel(GapHeatPointSourceMaster);
 
   // navier_stokes
   registerKernel(MassInviscidFlux);
