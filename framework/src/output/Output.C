@@ -18,6 +18,7 @@
 #include "Outputter.h"
 #include "ExodusOutput.h"
 #include "GMVOutput.h"
+#include "XDAOutput.h"
 
 Output::Output(Problem & problem) :
     _file_base("out"),
@@ -44,6 +45,10 @@ Output::add(Output::Type type)
 
   case GMV:
     o = new GMVOutput(_problem.es());
+    break;
+
+  case XDA:
+    o = new XDAOutput(_problem.es());
     break;
 
   default:
