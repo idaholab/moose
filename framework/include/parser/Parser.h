@@ -90,7 +90,7 @@ public:
    */
   void printUsage() const;
 
-  static void checkFileReadable(const std::string & filename);
+  static void checkFileReadable(const std::string & filename, bool check_line_endings = false);
   
   static void checkFileWritable(const std::string & filename);
 

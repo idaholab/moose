@@ -41,3 +41,6 @@ def invalid_steady_exec_test():
 
 def stateful_adaptive_error_test():
   tools.executeAppExpectError(__file__,'stateful_adaptive_error_test.i','Cannot use Material classes with stateful properties while utilizing adaptivity')
+
+def windows_line_endings_test():
+  tools.executeAppExpectError(__file__,'windows_line_endings.i',"\S+ contains Windows\(DOS\) line endings")

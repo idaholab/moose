@@ -184,7 +184,7 @@ Parser::parse(const std::string &input_filename)
   std::vector<std::string> all(1);
   all[0] = "__all__";
   
-  checkFileReadable(input_filename);
+  checkFileReadable(input_filename, true);
   
   // GetPot object
   _getpot_file.parse_input_file(input_filename);
@@ -195,7 +195,7 @@ Parser::parse(const std::string &input_filename)
   for (std::vector<std::string>::iterator i=section_names.begin(); i != section_names.end(); ++i)
   {
     curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
-
+    
     // Extract the block parameters before constructing the action
     InputParameters params = ActionFactory::instance()->getValidParams(*i);
 
@@ -454,13 +454,23 @@ Parser::execute()
 }
 
 void
-Parser::checkFileReadable(const std::string & filename)
+Parser::checkFileReadable(const std::string & filename, bool check_line_endings)
 {
   std::ifstream in(filename.c_str(), std::ifstream::in);
   if (in.fail())
     mooseError((std::string("Unable to open file \"") + filename
                 + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
 
+  if (check_line_endings)
+  {
+    std::istream_iterator<char> iter(in);
+    std::istream_iterator<char> eos;
+    in >> std::noskipws;
+    while (iter != eos)
+      if (*iter++ == '\r')
+        mooseError(filename + " contains Windows(DOS) line endings which are not supported.");
+  }
+  
   in.close();
 }
 
@@ -471,6 +481,8 @@ Parser::checkFileWritable(const std::string & filename)
   if (out.fail())
     mooseError((std::string("Unable to open file \"") + filename
                 + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
+
+  out.close();
 }
 
 void
