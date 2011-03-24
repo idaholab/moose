@@ -717,8 +717,10 @@ NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
     DistElemRange range(dirac_elements.begin(),
                         dirac_elements.end(),
                         1);
-    
-    Threads::parallel_reduce(range, cd);
+    // TODO: Make Dirac work thread!
+    //Threads::parallel_reduce(range, cd);
+
+    cd(range);
   }
 
   Moose::perf_log.pop("computeDiracContributions()","Solve");

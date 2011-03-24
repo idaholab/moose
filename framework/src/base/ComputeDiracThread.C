@@ -44,6 +44,14 @@ ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split sp
 {}
 
 void
+ComputeDiracThread::pre()
+{
+  // Force TID=0 because we run this object _NON THREADED_
+  // Take this out if we ever get Dirac's working with threads!
+  _tid = 0;
+}
+
+void
 ComputeDiracThread::preElement(const Elem * /*elem*/)
 {
   _vars.clear();
