@@ -27,6 +27,7 @@ InputParameters validParams<MaterialModel>()
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen).");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
+  params.addParam<Real>("cracking_strain", "The strain threshold beyond which cracking occurs.  Must be positive.");
   return params;
 }
 
@@ -46,6 +47,8 @@ MaterialModel::MaterialModel( const std::string & name,
    _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
    _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
    _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
+   _cracking_strain( parameters.isParamValid("cracking_strain") ?
+                     (getParam<Real>("cracking_strain") > 0 ? getParam<Real>("cracking_strain") : -1) : -1 ),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(_dim > 1 ? coupledGradient("disp_y") : _grad_zero),
    _grad_disp_z(_dim > 2 ? coupledGradient("disp_z") : _grad_zero),
@@ -60,6 +63,10 @@ MaterialModel::MaterialModel( const std::string & name,
    _alpha(getParam<Real>("thermal_expansion")),
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
+   _total_strain(declareProperty<RealTensorValue>("total_strain")),
+   _total_strain_old(declarePropertyOld<RealTensorValue>("total_strain")),
+   _crack_flags(NULL),
+   _crack_flags_old(NULL),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _total_strain_increment(3,3),
    _strain_increment(3,3),
@@ -186,6 +193,11 @@ MaterialModel::MaterialModel( const std::string & name,
     mooseError( "The options for the increment calculation are RashidApprox and Eigen.");
   }
 
+  if (_cracking_strain > 0)
+  {
+    _crack_flags = &declareProperty<RealVectorValue>("crack_flags");
+    _crack_flags_old = &declarePropertyOld<RealVectorValue>("crack_flags");
+  }
 
   //   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
   // _elasticity_tensor->print();
@@ -458,6 +470,10 @@ MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 void
 MaterialModel::modifyStrain()
 {
+  _total_strain_increment.fill( _total_strain[_qp] );
+  _total_strain[_qp] *= _dt;
+  _total_strain[_qp] += _total_strain_old[_qp];
+
   _strain_increment = _total_strain_increment;
   if ( _has_temp && _t_step != 0 )
   {
@@ -528,20 +544,69 @@ void
 MaterialModel::finalizeStress()
 {
   // Using the incremental rotation, update the stress to the current configuration (R*T*R^T)
-  _stress[_qp] = rotateSymmetricTensor( _incremental_rotation, _stress[_qp] );
+  rotateSymmetricTensor( _incremental_rotation, _stress[_qp], _stress[_qp] );
 
 //   std::cout << "STRESS: " << _qp << "\n"
 //             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
 //             << _stress[_qp](1,0) << " " << _stress[_qp](1,1) << " " << _stress[_qp](1,2) << std::endl
 //             << _stress[_qp](2,0) << " " << _stress[_qp](2,1) << " " << _stress[_qp](2,2) << std::endl;
 
+  if (_cracking_strain > 0)
+  {
+    // Adjust stress for a smeared crack
+    ColumnMajorMatrix e_vec(3,3);
+    ColumnMajorMatrix principal_strain(3,1);
+    ColumnMajorMatrix t_strain(_total_strain[_qp] );
+    t_strain.eigen( principal_strain, e_vec );
+
+    const Real tiny(1e-8);
+    for (unsigned int i(0); i < 3; ++i)
+    {
+      if (principal_strain(i,0) > _cracking_strain)
+      {
+        (*_crack_flags)[_qp](i) = tiny;
+      }
+      else
+      {
+        (*_crack_flags)[_qp](i) = 1;
+      }
+      (*_crack_flags)[_qp](i) = std::min((*_crack_flags)[_qp](i), (*_crack_flags_old)[_qp](i));
+    }
+    RealVectorValue crack_flags( (*_crack_flags)[_qp] );
+    for (unsigned int i(0); i < 3; ++i)
+    {
+      if (principal_strain(i,0) < 0)
+      {
+        crack_flags(i) = 1;
+      }
+      else
+      {
+        crack_flags(i) = (*_crack_flags)[_qp](i);
+      }
+    }
+    // Form transformation matrix R*E*R^T
+    ColumnMajorMatrix trans(3,3);
+    for (unsigned int j(0); j < 3; ++j)
+    {
+      for (unsigned int i(0); i < 3; ++i)
+      {
+        for (unsigned int k(0); k < 3; ++k)
+        {
+          trans(i,j) += e_vec(i,k) * crack_flags(k) * e_vec(j,k);
+        }
+      }
+    }
+    rotateSymmetricTensor( trans, _stress[_qp], _stress[_qp] );
+  }
+
 }
 
 ////////////////////////////////////////////////////////////////////////
 
-RealTensorValue
+void
 MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
-                                      const RealTensorValue & T )
+                                      const RealTensorValue & T,
+                                      RealTensorValue & result )
 {
 
   //     R           T         Rt
@@ -561,7 +626,7 @@ MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
   const Real T21 = R(2,0)*T(0,1) + R(2,1)*T(1,1) + R(2,2)*T(2,1);
   const Real T22 = R(2,0)*T(0,2) + R(2,1)*T(1,2) + R(2,2)*T(2,2);
 
-  return RealTensorValue(
+  result = RealTensorValue(
     T00 * R(0,0) + T01 * R(0,1) + T02 * R(0,2),
     T00 * R(1,0) + T01 * R(1,1) + T02 * R(1,2),
     T00 * R(2,0) + T01 * R(2,1) + T02 * R(2,2),
@@ -817,6 +882,21 @@ MaterialModel::subdomainSetup()
       if (vm)
       {
         _volumetric_models.push_back( vm );
+      }
+    }
+
+
+    if (_cracking_strain > 0)
+    {
+      // Initialize crack flags
+      for (unsigned int i(0); i < _n_qpoints; ++i)
+      {
+        (*_crack_flags)[i](0) =
+          (*_crack_flags)[i](1) =
+          (*_crack_flags)[i](2) =
+          (*_crack_flags_old)[i](0) =
+          (*_crack_flags_old)[i](1) =
+          (*_crack_flags_old)[i](2) = 1;
       }
     }
   }

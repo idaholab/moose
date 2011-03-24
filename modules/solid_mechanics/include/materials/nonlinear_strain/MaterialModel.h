@@ -23,6 +23,14 @@ public:
 
   void testMe();
 
+  static Real detMatrix( const ColumnMajorMatrix & A );
+
+  static void invertMatrix( const ColumnMajorMatrix & A,
+                            ColumnMajorMatrix & Ainv );
+
+  static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const RealTensorValue & T,
+                                     RealTensorValue & result );
+
 protected:
 
   enum DecompMethod
@@ -45,6 +53,8 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
+  Real _cracking_strain;
+
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;
   VariableGradient & _grad_disp_z;
@@ -63,6 +73,12 @@ protected:
 
   MaterialProperty<RealTensorValue> & _stress;
   MaterialProperty<RealTensorValue> & _stress_old;
+
+  MaterialProperty<RealTensorValue> & _total_strain;
+  MaterialProperty<RealTensorValue> & _total_strain_old;
+
+  MaterialProperty<RealVectorValue> * _crack_flags;
+  MaterialProperty<RealVectorValue> * _crack_flags_old;
 
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
   ColumnMajorMatrix _total_strain_increment;
@@ -105,13 +121,6 @@ protected:
                    const VariableGradient & grad_y,
                    const VariableGradient & grad_z,
                    ColumnMajorMatrix & A );
-
-  Real detMatrix( const ColumnMajorMatrix & A );
-
-  void invertMatrix( const ColumnMajorMatrix & A,
-                     ColumnMajorMatrix & Ainv );
-
-  RealTensorValue rotateSymmetricTensor( const ColumnMajorMatrix & R, const RealTensorValue & T );
 
   void
   elasticityTensor( ElasticityTensor * e );

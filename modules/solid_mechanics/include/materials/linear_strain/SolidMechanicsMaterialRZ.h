@@ -27,11 +27,15 @@ protected:
 
   virtual void subdomainSetup();
 
-  virtual void computeStress(const ColumnMajorMatrix & strain,
+  virtual void computeStress(const ColumnMajorMatrix & total_strain,
+                             const ColumnMajorMatrix & strain,
                              const ElasticityTensor & elasticity_tensor,
                              RealTensorValue & stress);
 
   virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain) = 0;
+
+  virtual void computeCracking(const ColumnMajorMatrix & strain,
+                               RealTensorValue & stress);
 
   bool _initialized;
 
@@ -43,6 +47,8 @@ protected:
   const Real _youngs_modulus;
   const Real _poissons_ratio;
   const Real _shear_modulus;
+
+  const Real _cracking_strain;
 
   const Real _t_ref;
   const Real _alpha;
@@ -60,6 +66,8 @@ protected:
 
   MaterialProperty<RealTensorValue> & _stress;
   MaterialProperty<RealTensorValue> & _stress_old;
+  MaterialProperty<RealVectorValue> * _crack_flags;
+  MaterialProperty<RealVectorValue> * _crack_flags_old;
   MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
   MaterialProperty<ColumnMajorMatrix> & _elastic_strain;

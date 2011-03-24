@@ -40,9 +40,6 @@ protected:
   MaterialProperty<RealTensorValue> & _plastic_strain;
   MaterialProperty<RealTensorValue> & _plastic_strain_old;
 
-  MaterialProperty<RealTensorValue> & _total_strain;
-  MaterialProperty<RealTensorValue> & _total_strain_old;
-
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
 

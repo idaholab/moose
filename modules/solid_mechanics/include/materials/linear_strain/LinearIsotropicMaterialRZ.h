@@ -23,7 +23,8 @@ public:
 
 protected:
 
-  virtual void computeStress(const ColumnMajorMatrix & strain,
+  virtual void computeStress(const ColumnMajorMatrix & total_strain,
+                             const ColumnMajorMatrix & strain,
                              const ElasticityTensor & elasticity_tensor,
                              RealTensorValue & stress);
 

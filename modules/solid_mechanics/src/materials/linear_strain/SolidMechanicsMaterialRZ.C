@@ -1,6 +1,7 @@
 #include "SolidMechanicsMaterialRZ.h"
 
 #include "IsotropicElasticityTensorRZ.h"
+#include "MaterialModel.h"
 #include "Problem.h"
 #include "VolumetricModel.h"
 
@@ -15,6 +16,7 @@ InputParameters validParams<SolidMechanicsMaterialRZ>()
   params.addRequiredCoupledVar("disp_r", "The r displacement");
   params.addRequiredCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
+  params.addParam<Real>("cracking_strain", "The strain threshold beyond which cracking occurs.  Must be positive.");
   return params;
 }
 
@@ -25,6 +27,8 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _youngs_modulus(getParam<Real>("youngs_modulus")),
    _poissons_ratio(getParam<Real>("poissons_ratio")),
    _shear_modulus(0.5*_youngs_modulus/(1+_poissons_ratio)),
+   _cracking_strain( parameters.isParamValid("cracking_strain") ?
+                     (getParam<Real>("cracking_strain") > 0 ? getParam<Real>("cracking_strain") : -1) : -1 ),
    _t_ref(getParam<Real>("t_ref")),
    _alpha(getParam<Real>("thermal_expansion")),
    _disp_r(coupledValue("disp_r")),
@@ -36,6 +40,8 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _volumetric_models(0),
    _stress(declareProperty<RealTensorValue>("stress")),
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
+   _crack_flags(NULL),
+   _crack_flags_old(NULL),
    _elasticity_tensor(declareProperty<ColumnMajorMatrix>("elasticity_tensor")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _elastic_strain(declareProperty<ColumnMajorMatrix>("elastic_strain")),
@@ -48,6 +54,13 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
   t->setPoissonsRatio(_poissons_ratio);
 
   _local_elasticity_tensor = t;
+
+  if (_cracking_strain > 0)
+  {
+    _crack_flags = &declareProperty<RealVectorValue>("crack_flags");
+    _crack_flags_old = &declarePropertyOld<RealVectorValue>("crack_flags");
+  }
+
 }
 
 SolidMechanicsMaterialRZ::~SolidMechanicsMaterialRZ()
@@ -73,6 +86,20 @@ SolidMechanicsMaterialRZ::subdomainSetup()
         _volumetric_models.push_back( vm );
       }
     }
+
+    if (_cracking_strain > 0)
+    {
+      // Initialize crack flags
+      for (unsigned int i(0); i < _n_qpoints; ++i)
+      {
+        (*_crack_flags)[i](0) =
+          (*_crack_flags)[i](1) =
+          (*_crack_flags)[i](2) =
+          (*_crack_flags_old)[i](0) =
+          (*_crack_flags_old)[i](1) =
+          (*_crack_flags_old)[i](2) = 1;
+      }
+    }
   }
 }
 
@@ -85,12 +112,14 @@ SolidMechanicsMaterialRZ::computeProperties()
 
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
-    ColumnMajorMatrix strain;
-    strain(0,0) = _grad_disp_r[_qp](0);
-    strain(1,1) = _grad_disp_z[_qp](1);
-    strain(2,2) = _disp_r[_qp]/_q_point[_qp](0);
-    strain(0,1) = 0.5*(_grad_disp_r[_qp](1) + _grad_disp_z[_qp](0));
-    strain(1,0) = strain(0,1);
+    ColumnMajorMatrix total_strain;
+    total_strain(0,0) = _grad_disp_r[_qp](0);
+    total_strain(1,1) = _grad_disp_z[_qp](1);
+    total_strain(2,2) = _disp_r[_qp]/_q_point[_qp](0);
+    total_strain(0,1) = 0.5*(_grad_disp_r[_qp](1) + _grad_disp_z[_qp](0));
+    total_strain(1,0) = total_strain(0,1);
+
+    ColumnMajorMatrix strain(total_strain);
 
     // Add in Isotropic Thermal Strain
     if (_has_temp)
@@ -115,13 +144,15 @@ SolidMechanicsMaterialRZ::computeProperties()
       strain += _v_strain[_qp];
     }
 
-    computeStress(strain, *_local_elasticity_tensor, _stress[_qp]);
+    computeStress(total_strain,
+                  strain, *_local_elasticity_tensor, _stress[_qp]);
 
   }
 }
 
 void
-SolidMechanicsMaterialRZ::computeStress(const ColumnMajorMatrix & strain,
+SolidMechanicsMaterialRZ::computeStress(const ColumnMajorMatrix & total_strain,
+                                        const ColumnMajorMatrix & strain,
                                         const ElasticityTensor & elasticity_tensor,
                                         RealTensorValue & stress)
 {
@@ -147,4 +178,58 @@ SolidMechanicsMaterialRZ::computeStress(const ColumnMajorMatrix & strain,
 
   // Fill the material properties
   stress_vector.fill(stress);
+
+  computeCracking( total_strain, stress );
+}
+
+void
+SolidMechanicsMaterialRZ::computeCracking( const ColumnMajorMatrix & strain,
+                                           RealTensorValue & stress )
+{
+  if (_cracking_strain > 0)
+  {
+    // Adjust stress for a smeared crack
+    ColumnMajorMatrix e_vec(3,3);
+    ColumnMajorMatrix principal_strain(3,1);
+    strain.eigen( principal_strain, e_vec );
+
+    const Real tiny(1e-8);
+    for (unsigned int i(0); i < 3; ++i)
+    {
+      if (principal_strain(i,0) > _cracking_strain)
+      {
+        (*_crack_flags)[_qp](i) = tiny;
+      }
+      else
+      {
+        (*_crack_flags)[_qp](i) = 1;
+      }
+      (*_crack_flags)[_qp](i) = std::min((*_crack_flags)[_qp](i), (*_crack_flags_old)[_qp](i));
+    }
+    RealVectorValue crack_flags( (*_crack_flags)[_qp] );
+    for (unsigned int i(0); i < 3; ++i)
+    {
+      if (principal_strain(i,0) < 0)
+      {
+        crack_flags(i) = 1;
+      }
+      else
+      {
+        crack_flags(i) = (*_crack_flags)[_qp](i);
+      }
+    }
+    // Form transformation matrix R*E*R^T
+    ColumnMajorMatrix trans(3,3);
+    for (unsigned int j(0); j < 3; ++j)
+    {
+      for (unsigned int i(0); i < 3; ++i)
+      {
+        for (unsigned int k(0); k < 3; ++k)
+        {
+          trans(i,j) += e_vec(i,k) * crack_flags(k) * e_vec(j,k);
+        }
+      }
+    }
+    MaterialModel::rotateSymmetricTensor( trans, stress, stress );
+  }
 }

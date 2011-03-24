@@ -53,9 +53,6 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
    _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain")),
 
-   _total_strain(declareProperty<RealTensorValue>("total_strain")),
-   _total_strain_old(declarePropertyOld<RealTensorValue>("total_strain")),
-
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
 
@@ -91,10 +88,6 @@ PLC_LSH::computeStress()
   ColumnMajorMatrix stress_new_last( stress_new );
   Real delS(_tolerance+1);
   unsigned int counter(0);
-
-  _total_strain_increment.fill( _total_strain[_qp] );
-  _total_strain[_qp] *= _dt;
-  _total_strain[_qp] += _total_strain_old[_qp];
 
   while (delS > _tolerance && counter++ < _max_its)
   {
