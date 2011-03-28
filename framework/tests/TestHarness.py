@@ -114,7 +114,9 @@ class TestHarness:
         supported_args = set(inspect.getargspec(address)[0])
         testname = module_name + '.' + routine
         # See if this test function supports benchmarking or parallel requests
-        if ((self.arg_string.find('dofs') >= 0 and not 'dofs' in supported_args) or (self.arg_string.find('np') >=0 and not 'np' in supported_args)):
+        if ((self.arg_string.find('dofs') >= 0 and not 'dofs' in supported_args) or 
+            (self.arg_string.find('np') >=0 and not 'np' in supported_args) or 
+            (self.arg_string.find('n_threads') >=0 and not 'n_threads' in supported_args)):
           self.runTest(testname, address, True)
         else:
           self.runTest(testname, address)
@@ -240,6 +242,7 @@ class TestHarness:
     parser.add_option("--opt", action="store_const", dest="method", const="opt", help="test the app_name-opt binary")
     parser.add_option("--dbg", action="store_const", dest="method", const="dbg", help="test the app_name-dbg binary")
     parser.add_option("--dev", action="store_const", dest="method", const="dev", help="test the app_name-dev binary")
+    parser.add_option("--n_threads", type="int", dest="n_threads", action="callback", callback=buildArgVector, help="specify the number of threads to be used")
     self.addOptions(parser)
 
     (options, args) = parser.parse_args(argv[1:])

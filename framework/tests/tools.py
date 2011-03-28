@@ -53,7 +53,7 @@ def delOldOutFiles(test_dir, out_files):
     except:
       pass
 
-def executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error=''):
+def executeApp(test_dir, input_file, min_dofs=0, parallel=0, n_threads=0, expect_error=''):
   saved_cwd = os.getcwd()
   os.chdir(test_dir)
   command = TestHarness.exec_name + ' -i ' + input_file
@@ -71,6 +71,9 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0, expect_error=''):
 
     # Now we can safely capture the timing
     command = 'time ' + command + ' --dofs ' + str(min_dofs)
+    
+  if (n_threads):
+    command += ' --n_threads=' + str(n_threads)
   stdout = executeCommand(command)
   print stdout
   if expect_error:
@@ -108,10 +111,10 @@ def diffCSV(test_dir, out_files):
     print msgs
     assert False
 
-def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0, abs_zero=1e-11, relative_error=5.5e-6):
+def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0, n_threads=0, abs_zero=1e-11, relative_error=5.5e-6):
   test_dir = os.path.dirname(test_file)
   delOldOutFiles(test_dir, out_files)
-  executeApp(test_dir, input_file, min_dofs, parallel)
+  executeApp(test_dir, input_file, min_dofs, parallel, n_threads)
   if (min_dofs == 0): #and parallel == 0):
     try:
       executeExodiff(test_dir, out_files, abs_zero, relative_error)
@@ -120,13 +123,13 @@ def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0, 
       # What a hack!
       raise ExodiffException()
 
-def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=0, abs_zero=1e-11, relative_error=5.5e-6):
+def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=0, n_threads=0, abs_zero=1e-11, relative_error=5.5e-6):
   test_dir = os.path.dirname(test_file)
   delOldOutFiles(test_dir, out_files)
-  executeApp(test_dir, input_file, min_dofs=0, parallel=0)
+  executeApp(test_dir, input_file, min_dofs, parallel, n_threads)
   diffCSV(test_dir, out_files)
 
 def executeAppExpectError(test_file, input_file, expect_error=''):
   test_dir = os.path.dirname(test_file)
-  executeApp(test_dir, input_file, 0, 0, expect_error)
+  executeApp(test_dir, input_file, 0, 0, 0, expect_error)
   
