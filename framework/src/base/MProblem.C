@@ -597,7 +597,8 @@ MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputP
 Real &
 MProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 {
-  return _pps_data[tid].getPostprocessorValue(name);
+  // Todo: This is hardcoded to zero because we only compute postprocessors serially now.
+  return _pps_data[0].getPostprocessorValue(name);
 }
 
 void

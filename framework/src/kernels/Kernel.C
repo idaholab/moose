@@ -127,6 +127,10 @@ Kernel::computeJacobian(int /*i*/, int /*j*/)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
         ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
+#ifdef DEBUG
+      if(libmesh_isnan(ke(_i, _j)))
+        mooseError("NaN in Kernel Jacobian for: " + _name);
+#endif //DEBUG
       }
 }
 

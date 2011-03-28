@@ -34,6 +34,10 @@ ComputePostprocessorsThread::ComputePostprocessorsThread(ComputePostprocessorsTh
 void
 ComputePostprocessorsThread::pre()
 {
+  // Force TID=0 because we run this object _NON THREADED_
+  // Take this out if we ever get PP's working with threads!
+  _tid = 0;
+
   //Initialize side and element post processors
 
   std::set<unsigned int>::iterator block_begin = _pps[_tid]._block_ids_with_postprocessors.begin();
