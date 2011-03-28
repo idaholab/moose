@@ -69,6 +69,8 @@ MooseMesh::prepare()
     _mesh_subdomains.insert((*el)->subdomain_id());
 
   buildNodeList();
+
+  cacheInfo();
 }
 
 void
@@ -109,6 +111,8 @@ MooseMesh::meshChanged()
   MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
 
   buildNodeList();
+
+  cacheInfo();
 
   // Lets the output system know that the mesh has changed recently.
   _is_changed = true;
@@ -184,3 +188,22 @@ MooseMesh::applyMeshModifications()
     (*i)->modifyMesh(_mesh);
 }
 
+void
+MooseMesh::cacheInfo()
+{
+  for (MeshBase::element_iterator el = _mesh.local_elements_begin(); el != _mesh.local_elements_end(); ++el)
+  {
+    Elem * elem = *el;
+    for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
+    {
+      Node & node = *elem->get_node(nd);
+      _block_node_list[node.id()].push_back(elem->subdomain_id());
+    }
+  }
+}
+
+std::vector<subdomain_id_type> &
+MooseMesh::getNodeBlockIds(const Node & node)
+{
+  return _block_node_list[node.id()];
+}

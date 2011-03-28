@@ -89,7 +89,9 @@ AuxKernel::compute()
   {
     unsigned int & dof_idx = _var.nodalDofIndex();
     _qp = 0;
-    _solution.set(dof_idx, computeValue());
+    Real value = computeValue();
+    _solution.set(dof_idx, value);              // update value in solution vector
+    _var.setNodalValue(value);                  // and update variable data, which is referenced by other kernels, so the value is up-to-date
   }
   else
   {

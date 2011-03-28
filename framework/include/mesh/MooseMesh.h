@@ -46,8 +46,8 @@ public:
   const std::set<short int> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }
 
   void buildNodeList ();
-  const std::vector<unsigned int> & getNodeListNodes() { return _bnd_nodes; }
-  const std::vector<short int> & getNodeListIds() { return _bnd_ids; }
+  const std::vector<unsigned int> & getBoundaryNodeListNodes() { return _bnd_nodes; }
+  const std::vector<short int> & getBoundaryNodeListIds() { return _bnd_ids; }
 
   void build_node_list_from_side_list() { _mesh.boundary_info->build_node_list_from_side_list(); }
   void build_side_list(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
@@ -96,6 +96,8 @@ public:
 
   inline void print_info(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
   
+  std::vector<subdomain_id_type> & getNodeBlockIds(const Node & node);
+
   libMesh::Mesh _mesh;
 
 protected:
@@ -122,6 +124,10 @@ protected:
   std::set<subdomain_id_type> _mesh_subdomains;
 
   std::vector<MeshModifier *> _mesh_modifiers;
+
+  std::map<unsigned int, std::vector<subdomain_id_type> > _block_node_list;              /// list of nodes that belongs to a specified block (domain)
+
+  void cacheInfo();
 };
 
 #endif /* MOOSEMESH_H */

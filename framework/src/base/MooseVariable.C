@@ -474,6 +474,12 @@ MooseVariable::computeNodalValues()
 }
 
 void
+MooseVariable::setNodalValue(Number value)
+{
+  _nodal_u[0] = value;
+}
+
+void
 MooseVariable::computeDamping(const NumericVector<Number> & increment_vec)
 {
   unsigned int nqp = _qrule->n_points();

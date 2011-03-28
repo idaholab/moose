@@ -61,8 +61,8 @@ PenetrationLocator::detectPenetration()
   _mesh.build_side_list(elem_list, side_list, id_list);
 
   // Data structures to hold the Nodal Boundary conditions
-  const std::vector<unsigned int> & node_list = _mesh.getNodeListNodes();
-  const std::vector<short int> & node_boundary_list = _mesh.getNodeListIds();
+  const std::vector<unsigned int> & node_list = _mesh.getBoundaryNodeListNodes();
+  const std::vector<short int> & node_boundary_list = _mesh.getBoundaryNodeListIds();
 
   const unsigned int n_nodes = node_list.size();
   const unsigned int n_elems = elem_list.size();

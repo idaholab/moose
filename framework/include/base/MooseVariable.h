@@ -155,6 +155,7 @@ public:
   void computeElemValuesFace();
 
   void computeNodalValues();
+  void setNodalValue(Number value);
 
   void computeDamping(const NumericVector<Number> & increment_vec);
 

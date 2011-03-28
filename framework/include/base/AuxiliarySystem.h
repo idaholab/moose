@@ -43,7 +43,7 @@ public:
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
 
-  virtual const NumericVector<Number> * & currentSolution() { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
+  virtual const NumericVector<Number> * & currentSolution() { _current_solution = _sys.solution.get(); return _current_solution; }
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
@@ -53,6 +53,10 @@ public:
 
 protected:
   virtual void computeInternal(std::vector<AuxWarehouse> & auxs);
+
+  void setupKernels(AuxKernelIterator & begin, AuxKernelIterator & end);
+  void computeNodalVars(std::vector<AuxWarehouse> & auxs);
+  void computeElementalVars(std::vector<AuxWarehouse> & auxs);
 
   MProblem & _mproblem;
 

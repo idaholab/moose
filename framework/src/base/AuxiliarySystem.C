@@ -187,51 +187,40 @@ AuxiliarySystem::compute_ts()
   computeInternal(_auxs_ts);
 }
 
+inline
 void
-AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
+AuxiliarySystem::setupKernels(AuxKernelIterator & begin, AuxKernelIterator & end)
 {
-  //If there aren't any auxiliary variables just return
-  if(_sys.n_vars() == 0)
-    return;
+  for(AuxKernelIterator it = begin; it != end; ++it)
+    (*it)->setup();
+}
 
-  Moose::perf_log.push("update_aux_vars()","Solve");
-
-  //Nodal AuxKernels
-
-  ConstNodeRange & node_range = *_mesh.getLocalNodeRange();
-
+void
+AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
+{
   AuxKernelIterator aux_begin = auxs[0].activeNodalAuxKernelsBegin();
   AuxKernelIterator aux_end = auxs[0].activeNodalAuxKernelsEnd();
-  AuxKernelIterator aux_it = aux_begin;
-
-  AuxKernelIterator block_nodal_aux_begin;
-  AuxKernelIterator block_nodal_aux_end;
-  AuxKernelIterator block_nodal_aux_it;
-
-  AuxKernelIterator block_element_aux_begin;
-  AuxKernelIterator block_element_aux_end;
-  AuxKernelIterator block_element_aux_it;
 
   SubdomainIterator subdomain_begin = _mesh.meshSubdomains().begin();
   SubdomainIterator subdomain_end = _mesh.meshSubdomains().end();
   SubdomainIterator subdomain_it;
 
-  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-    (*aux_it)->setup();
+  bool have_block_kernels = false;
 
-  aux_it = aux_begin;
-
+  // Call setup() on global kernels
+  setupKernels(aux_begin, aux_end);
   // Call setup on all of the Nodal block AuxKernels
   for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
   {
-    block_nodal_aux_begin = auxs[0].activeBlockNodalAuxKernelsBegin(*subdomain_it);
-    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(*subdomain_it);
-    for(block_nodal_aux_it = block_nodal_aux_begin; block_nodal_aux_it != block_nodal_aux_end; ++block_nodal_aux_it)
-      (*block_nodal_aux_it)->setup();
+    AuxKernelIterator block_nodal_aux_begin = auxs[0].activeBlockNodalAuxKernelsBegin(*subdomain_it);
+    AuxKernelIterator block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(*subdomain_it);
+    setupKernels(block_nodal_aux_begin, block_nodal_aux_end);
+    have_block_kernels |= (block_nodal_aux_begin != block_nodal_aux_end);
   }
 
-  if(aux_begin != aux_end)
+  if (aux_begin != aux_end || have_block_kernels)
   {
+    ConstNodeRange & node_range = *_mesh.getLocalNodeRange();
     for (ConstNodeRange::const_iterator node_it = node_range.begin() ; node_it != node_range.end(); ++node_it)
     {
       const Node * node = *node_it;
@@ -241,8 +230,19 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
 
       _problem.reinitNode(node, 0);
 
-      for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
+      // compute global aux kernels
+      for(AuxKernelIterator aux_it = aux_begin; aux_it != aux_end; ++aux_it)
         (*aux_it)->compute();
+
+      const std::vector<subdomain_id_type> & block_ids = _mesh.getNodeBlockIds(*node);
+      for (std::vector<subdomain_id_type>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
+      {
+        AuxKernelIterator block_nodal_aux_begin = auxs[0].activeBlockNodalAuxKernelsBegin(*block_it);
+        AuxKernelIterator block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(*block_it);
+
+        for(AuxKernelIterator aux_it = block_nodal_aux_begin; aux_it != block_nodal_aux_end; ++aux_it)
+          (*aux_it)->compute();
+      }
 
 //      if(unlikely(_calculate_element_time))
 //        stopNodeTiming(node->id());
@@ -260,12 +260,11 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
     aux_begin = _auxs[0].activeAuxBCsBegin(id);
     aux_end = _auxs[0].activeAuxBCsEnd(id);
 
-    for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-      (*aux_it)->setup();
+    setupKernels(aux_begin, aux_end);
   }
 
-  const std::vector<unsigned int> & nodes = _mesh.getNodeListNodes();
-  const std::vector<short int> & ids = _mesh.getNodeListIds();
+  const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
+  const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
   const unsigned int n_nodes = nodes.size();
 
   for(unsigned int i=0; i<n_nodes; i++)
@@ -284,7 +283,7 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
       {
         _problem.reinitNodeFace(&node, ids[i], 0);
 
-        for(aux_it=aux_begin; aux_it != aux_end; ++aux_it)
+        for(AuxKernelIterator aux_it=aux_begin; aux_it != aux_end; ++aux_it)
           (*aux_it)->compute();
       }
 
@@ -292,108 +291,45 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
 //        stopNodeTiming(node.id());
     }
   }
+}
 
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-
-  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
-
-  for (ConstElemRange::const_iterator elem_it = elem_range.begin() ; elem_it != elem_range.end(); ++elem_it)
-  {
-    const Elem * elem = *elem_it;
-
-    _problem.prepare(elem, 0);
-
-    unsigned int cur_subdomain = elem->subdomain_id();
-
-//    if(unlikely(_calculate_element_time))
-//      startElementTiming(elem->id());
-
-    // Now do the block nodal aux kernels
-    block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
-    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
-
-    if(block_nodal_aux_it != block_nodal_aux_end)
-    {
-      for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
-      {
-        Node & node = *elem->get_node(nd);
-
-        if(node.processor_id() == libMesh::processor_id())
-        {
-          _problem.reinitNode(&node, 0);
-
-          for(block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
-              block_nodal_aux_it != block_nodal_aux_end;
-              ++block_nodal_aux_it)
-            (*block_nodal_aux_it)->compute();
-        }
-      }
-    }
-
-//    if(unlikely(_calculate_element_time))
-//      stopElementTiming(elem->id());
-  }
-
-  _sys.update();
-
+void
+AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
+{
   // Update the element aux vars
-  aux_begin = auxs[0].activeElementAuxKernelsBegin();
-  aux_end = auxs[0].activeElementAuxKernelsEnd();
-  aux_it = aux_begin;
+  AuxKernelIterator aux_begin = auxs[0].activeElementAuxKernelsBegin();
+  AuxKernelIterator aux_end = auxs[0].activeElementAuxKernelsEnd();
+  setupKernels(aux_begin, aux_end);
 
-  for(aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-    (*aux_it)->setup();
-
-  aux_it = aux_begin;
+  SubdomainIterator subdomain_begin = _mesh.meshSubdomains().begin();
+  SubdomainIterator subdomain_end = _mesh.meshSubdomains().end();
+  SubdomainIterator subdomain_it;
 
   // Call setup on all of the Elemental block AuxKernels
   for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
   {
-    block_element_aux_begin = auxs[0].activeBlockElementAuxKernelsBegin(*subdomain_it);
-    block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(*subdomain_it);
-    for(block_element_aux_it = block_element_aux_begin; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
-      (*block_element_aux_it)->setup();
+    AuxKernelIterator block_element_aux_begin = auxs[0].activeBlockElementAuxKernelsBegin(*subdomain_it);
+    AuxKernelIterator block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(*subdomain_it);
+    setupKernels(block_element_aux_begin, block_element_aux_end);
   }
 
+  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   for (ConstElemRange::const_iterator elem_it = elem_range.begin() ; elem_it != elem_range.end(); ++elem_it)
   {
     const Elem * elem = *elem_it;
-
-    _problem.prepare(elem, 0);
 
     unsigned int cur_subdomain = elem->subdomain_id();
 
 //    if(unlikely(_calculate_element_time))
 //      startElementTiming(elem->id());
 
-    // Now do the block nodal aux kernels
-    block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
-    block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(cur_subdomain);
-
-    if(block_nodal_aux_it != block_nodal_aux_end)
-    {
-      for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
-      {
-        Node & node = *elem->get_node(nd);
-
-        if(node.processor_id() == libMesh::processor_id())
-        {
-          _problem.reinitNode(&node, 0);
-
-          for(block_nodal_aux_it = auxs[0].activeBlockNodalAuxKernelsBegin(cur_subdomain);
-              block_nodal_aux_it != block_nodal_aux_end;
-              ++block_nodal_aux_it)
-            (*block_nodal_aux_it)->compute();
-        }
-      }
-    }
-
-
-    block_element_aux_it = auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
-    block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
+    AuxKernelIterator block_element_aux_it = auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
+    AuxKernelIterator block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
 
     if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
     {
+      _problem.prepare(elem, 0);
       _problem.reinitElem(elem, 0);
       _problem.reinitMaterials(elem->subdomain_id(), 0);
 
@@ -404,22 +340,36 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
       {
         subdomain = cur_subdomain;
 
-//        _element_data[0]->_material = _materials[0].getMaterials(subdomain);
-        for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
+        for(AuxKernelIterator aux_it=aux_begin;aux_it!=aux_end;aux_it++)
           (*aux_it)->subdomainSetup();
       }
+
+      // block
+      for(; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
+        (*block_element_aux_it)->compute();
+
+      // global
+      for(AuxKernelIterator aux_it=aux_begin;aux_it!=aux_end;aux_it++)
+        (*aux_it)->compute();
     }
-
-    for(; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
-      (*block_element_aux_it)->compute();
-
-    for(aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-      (*aux_it)->compute();
 
 //    if(unlikely(_calculate_element_time))
 //      stopElementTiming(elem->id());
   }
+}
 
+void
+AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
+{
+  //If there aren't any auxiliary variables just return
+  if(_sys.n_vars() == 0)
+    return;
+
+  Moose::perf_log.push("update_aux_vars()","Solve");
+
+  computeNodalVars(auxs);
+  _sys.update();
+  computeElementalVars(auxs);
   solution().close();
   _sys.update();
 

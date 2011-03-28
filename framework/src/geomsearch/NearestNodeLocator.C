@@ -56,8 +56,8 @@ NearestNodeLocator::findNodes()
     _first=false;
     
     // Data strcutres to hold the Nodal Boundary conditions
-    const std::vector<unsigned int> & node_list = _mesh.getNodeListNodes();
-    const std::vector<short int> & node_boundary_list = _mesh.getNodeListIds();
+    const std::vector<unsigned int> & node_list = _mesh.getBoundaryNodeListNodes();
+    const std::vector<short int> & node_boundary_list = _mesh.getBoundaryNodeListIds();
 
     const unsigned int n_nodes = node_list.size();
 
