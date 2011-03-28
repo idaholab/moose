@@ -14,13 +14,13 @@ SolidMechImplicitEuler::SolidMechImplicitEuler(const std::string & name, InputPa
 
 Real
 SolidMechImplicitEuler::computeQpResidual()
-  {
-    return _density[_qp]*SecondDerivativeImplicitEuler::computeQpResidual();
-  }
+{
+  return _density[_qp]*SecondDerivativeImplicitEuler::computeQpResidual();
+}
 
 Real
 SolidMechImplicitEuler::computeQpJacobian()
-  {
-    return _density[_qp]*SecondDerivativeImplicitEuler::computeQpJacobian();
-  }
-  
+{
+  return _density[_qp]*SecondDerivativeImplicitEuler::computeQpJacobian();
+}
+
