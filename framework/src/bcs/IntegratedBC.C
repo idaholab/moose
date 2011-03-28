@@ -28,7 +28,7 @@ InputParameters validParams<IntegratedBC>()
 IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
     Coupleable(parameters, false),
-    _test_var(_problem.getVariable(0, parameters.get<std::string>("variable"))),
+    _test_var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
 
     _qrule(_subproblem.qRuleFace(_tid)),
     _q_point(_subproblem.pointsFace(_tid)),
