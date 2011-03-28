@@ -25,7 +25,7 @@ class NonlinearSystem;
 class ComputeDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeDampingThread(Problem & problem, NonlinearSystem & sys, const NumericVector<Number> & update);
+  ComputeDampingThread(Problem & problem, NonlinearSystem & sys);
 
   // Splitting Constructor
   ComputeDampingThread(ComputeDampingThread & x, Threads::split split);
@@ -39,7 +39,6 @@ public:
 
 protected:
   Real _damping;
-  const NumericVector<Number> & _update;
   NonlinearSystem & _nl;
 };
 

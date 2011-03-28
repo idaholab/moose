@@ -86,7 +86,7 @@ public:
   void setPreconditioner(Preconditioner<Real> *pc);
 
   void setupDampers();
-  void reinitDampers(const NumericVector<Number>& increment, THREAD_ID tid);
+  void reinitDampers(THREAD_ID tid);
 
   /// System Integrity Checks
   void checkKernelCoverage(const std::set<subdomain_id_type> & mesh_subdomains) const;

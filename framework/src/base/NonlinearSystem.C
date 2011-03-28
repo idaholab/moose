@@ -675,7 +675,8 @@ NonlinearSystem::computeDamping(const NumericVector<Number>& update)
 
   if(damper_begin != damper_end)
   {
-    ComputeDampingThread cid(_problem, *this, update);
+    *_increment_vec = update;
+    ComputeDampingThread cid(_problem, *this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
     damping = cid.damping();
   }
@@ -784,10 +785,8 @@ NonlinearSystem::setupDampers()
 }
 
 void
-NonlinearSystem::reinitDampers(const NumericVector<Number>& increment, THREAD_ID tid)
+NonlinearSystem::reinitDampers(THREAD_ID tid)
 {
-  *_increment_vec = increment;
-
   // FIXME: be smart here and compute only variables with dampers (need to add some book keeping)
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {

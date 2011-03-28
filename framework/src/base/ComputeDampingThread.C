@@ -20,11 +20,9 @@
 #include "threads.h"
 
 ComputeDampingThread::ComputeDampingThread(Problem & problem,
-                                           NonlinearSystem & sys,
-                                           const NumericVector<Number> & update) :
+                                           NonlinearSystem & sys) :
     ThreadedElementLoop<ConstElemRange>(problem, sys),
     _damping(1.0),
-    _update(update),
     _nl(sys)
 {
 }
@@ -33,7 +31,6 @@ ComputeDampingThread::ComputeDampingThread(Problem & problem,
 ComputeDampingThread::ComputeDampingThread(ComputeDampingThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _damping(1.0),
-    _update(x._update),
     _nl(x._nl)
 {
 }
@@ -48,7 +45,7 @@ void
 ComputeDampingThread::onElement(const Elem *elem)
 {
   _problem.reinitElem(elem, _tid);
-  _nl.reinitDampers(_update, _tid);
+  _nl.reinitDampers(_tid);
 
   DamperIterator damper_begin = _nl._dampers[_tid].dampersBegin();
   DamperIterator damper_end = _nl._dampers[_tid].dampersEnd();
