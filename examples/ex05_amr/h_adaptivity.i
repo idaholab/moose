@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
 
   # Start out with an initial refinement so we have the option to coarsen back

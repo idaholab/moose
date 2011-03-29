@@ -35,9 +35,7 @@ public:
    * constructor.
    */
   CoupledDirichletBC(const std::string & name, InputParameters parameters);
-    
-  virtual ~CoupledDirichletBC(){}
-
+  
 protected:
   virtual Real computeQpResidual();
 

@@ -1,5 +1,4 @@
 [Mesh]
-  dim = 2
   file = square.e
   uniform_refine = 4
 []
