@@ -23,6 +23,7 @@
 #include "AssemblyData.h"
 #include "GeometricSearchData.h"
 #include "MaterialWarehouse.h"
+#include "MaterialPropertyStorage.h"
 #include "PostprocessorWarehouse.h"
 #include "PostprocessorData.h"
 #include "Output.h"
@@ -178,6 +179,9 @@ protected:
   std::map<std::string, InitialCondition *> _ics;
 
   // material properties
+  MaterialPropertyStorage _material_props;
+  MaterialPropertyStorage _bnd_material_props;
+
   std::vector<MaterialData *> _material_data;
   std::vector<MaterialData *> _bnd_material_data;
 

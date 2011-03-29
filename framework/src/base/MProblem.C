@@ -96,8 +96,8 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
   _bnd_material_data.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; i++)
   {
-    _material_data[i] = new MaterialData();
-    _bnd_material_data[i] = new MaterialData();
+    _material_data[i] = new MaterialData(_material_props);
+    _bnd_material_data[i] = new MaterialData(_bnd_material_props);
   }
 
   _pps_data.resize(n_threads);
@@ -496,6 +496,12 @@ MProblem::updateMaterials()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _materials[tid].updateMaterialDataState();
+
+  if (_material_data[0]->hasStatefulProperties())
+  {
+    _material_props.shift();
+    _bnd_material_props.shift();
+  }
 }
 
 void
@@ -503,9 +509,8 @@ MProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(blk_id))
   {
-    const std::vector<Material *> & mats = _materials[tid].getMaterials(blk_id);
-    for (std::vector<Material *>::const_iterator it = mats.begin(); it != mats.end(); ++it)
-      (*it)->reinit();
+    const Elem * & elem = _asm_info[tid]->elem();
+    _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id), _asm_info[tid]->qRule()->n_points(), *elem, 0);
   }
 }
 
@@ -514,9 +519,8 @@ MProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID 
 {
   if (_materials[tid].hasBoundaryMaterials(blk_id))
   {
-    const std::vector<Material *> & mats = _materials[tid].getBoundaryMaterials(blk_id);
-    for (std::vector<Material *>::const_iterator it = mats.begin(); it != mats.end(); ++it)
-      (*it)->reinit(side);
+    const Elem * & elem = _asm_info[tid]->elem();
+    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(blk_id), _asm_info[tid]->qRuleFace()->n_points(), *elem, side);
   }
 }
 
@@ -964,6 +968,9 @@ MProblem::checkProblemIntegrity()
   // Check materials
   { 
     bool adaptivity = _adaptivity.isOn();
+    if (_material_data[0]->hasStatefulProperties() && adaptivity)
+      mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
+
     std::set<subdomain_id_type> local_mesh_subs(mesh_subdomains);
     /**
      * If a material is specified for any block in the simulation, then all blocks must
@@ -972,10 +979,6 @@ MProblem::checkProblemIntegrity()
     bool check_material_coverage = false;
     for (MaterialIterator i = _materials[0].activeMaterialsBegin(); i != _materials[0].activeMaterialsEnd(); ++i)
     {
-      for (std::vector<Material *>::iterator j = i->second.begin(); j != i->second.end(); ++j)
-        if ((*j)->hasStatefulProperties() && adaptivity)
-          mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
-    
       if (mesh_subdomains.find(i->first) == mesh_subdomains.end())
       {
         std::stringstream oss;

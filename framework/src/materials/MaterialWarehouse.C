@@ -54,7 +54,7 @@ MaterialWarehouse::hasNeighborMaterials(unsigned int boundary_id)
   return (_active_neighbor_materials.find(boundary_id) != _active_neighbor_materials.end());
 }
 
-const std::vector<Material *> &
+std::vector<Material *> &
 MaterialWarehouse::getMaterials(unsigned int block_id)
 {
   MaterialIterator mat_iter = _active_materials.find(block_id);
@@ -67,7 +67,7 @@ MaterialWarehouse::getMaterials(unsigned int block_id)
   return mat_iter->second;
 }
 
-const std::vector<Material *> &
+std::vector<Material *> &
 MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
 {
   MaterialIterator mat_iter = _active_boundary_materials.find(boundary_id);
@@ -80,7 +80,7 @@ MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
   return mat_iter->second;
 }
 
-const std::vector<Material *> &
+std::vector<Material *> &
 MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
 {
   MaterialIterator mat_iter = _active_neighbor_materials.find(boundary_id);

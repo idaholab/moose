@@ -1,0 +1,96 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "MaterialData.h"
+#include "Material.h"
+#include "MaterialPropertyStorage.h"
+
+void shallowCopyData(const std::set<std::string> & names,
+                     MaterialProperties & data,
+                     MaterialProperties & data_from)
+{
+  for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+  {
+    std::string name = *it;
+    if (data[name] == NULL)
+      data[name] = data_from[name]->init();
+    data[name]->shallowCopy(data_from[name]);
+  }
+}
+
+
+MaterialData::MaterialData(MaterialPropertyStorage & storage) :
+    _storage(storage),
+    _has_stateful_props(false)
+{
+}
+
+bool
+MaterialData::hasStatefulProperties()
+{
+  return _has_stateful_props;
+}
+
+
+void
+MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
+{
+  unsigned int elem_id = elem.id();
+
+  if (_has_stateful_props)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+
+    // initialize elemental data
+    for (std::set<std::string>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
+    {
+      std::string name = *it;
+
+      if (_storage.props()[elem_id][side][name] == NULL) _storage.props()[elem_id][side][name] = _props[name]->init();
+      if (_storage.propsOld()[elem_id][side][name] == NULL) _storage.propsOld()[elem_id][side][name] = _props[name]->init();
+      if (_storage.propsOlder()[elem_id][side][name] == NULL) _storage.propsOlder()[elem_id][side][name] = _props[name]->init();
+    }
+
+    shallowCopyData(_stateful_props, _props, _storage.props()[elem_id][side]);
+    shallowCopyData(_stateful_props, _props_old, _storage.propsOld()[elem_id][side]);
+    shallowCopyData(_stateful_props, _props_older, _storage.propsOlder()[elem_id][side]);
+  }
+
+  for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
+  {
+    mooseAssert(it->second != NULL, "Internal error in Material::materialReinit");
+    it->second->resize(n_qpoints);
+  }
+
+  if (_has_stateful_props)
+  {
+    for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
+      it->second->resize(n_qpoints);
+    for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+      it->second->resize(n_qpoints);
+  }
+
+  // iterate over materials and compute their properties
+  for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
+    (*it)->computeProperties();
+
+  if (_has_stateful_props)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+
+    shallowCopyData(_stateful_props, _storage.props()[elem_id][side], _props);
+    shallowCopyData(_stateful_props, _storage.propsOld()[elem_id][side], _props_old);
+    shallowCopyData(_stateful_props, _storage.propsOlder()[elem_id][side], _props_older);
+  }
+}
