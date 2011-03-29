@@ -78,8 +78,8 @@ ContactMaster::addPoints()
 
       if(pinfo->_distance > 0)
         _penetration_locator._has_penetrated[slave_node_num] = true;
-    }  
-    
+    }
+
     if(_penetration_locator._has_penetrated[slave_node_num])
     {
       addPoint(pinfo->_elem, pinfo->_closest_point);
@@ -119,7 +119,7 @@ Real
 ContactMaster::computeQpJacobian()
 {
   return 0;
-/*  
+/*
   if(_i != _j)
     return 0;
 
