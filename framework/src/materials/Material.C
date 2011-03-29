@@ -44,6 +44,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _qrule(_bnd ? _subproblem.qRuleFace(_tid) : _subproblem.qRule(_tid)),
     _JxW(_bnd ? _subproblem.JxWFace(_tid) : _subproblem.JxW(_tid)),
     _q_point(_bnd ? _subproblem.pointsFace(_tid) : _subproblem.points(_tid)),
+    _n_qpoints(0),
     _current_elem(_subproblem.elem(_tid)),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
@@ -89,7 +90,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
 Material::~Material()
 {
   // TODO: Implement destructor to clean up after the _qp_prev and _qp_curr data objects
-  
+
   //std::for_each(_qp_prev.begin(), _qp_prev.end(), DeleteFunctor());
   //std::for_each(_qp_curr.begin(), _qp_curr.end(), DeleteFunctor());
 
@@ -235,7 +236,7 @@ Material::reinit(unsigned int side)
     for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
       it->second->resize(_n_qpoints);
   }
-  
+
   computeProperties();
 
   if (_has_stateful_props)
