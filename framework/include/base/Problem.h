@@ -53,6 +53,7 @@ public:
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid) = 0;
+  virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
 

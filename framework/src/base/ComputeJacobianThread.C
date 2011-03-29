@@ -35,17 +35,19 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
 {}
 
 void
-ComputeJacobianThread::preElement(const Elem *elem)
+ComputeJacobianThread::onElement(const Elem *elem)
 {
   _vars.clear();
   _problem.prepare(elem, _tid);
   _problem.reinitElem(elem, _tid);
-}
 
-void
-ComputeJacobianThread::onElement(const Elem *elem)
-{
   unsigned int subdomain = elem->subdomain_id();
+  if (subdomain != _subdomain)
+  {
+    _problem.subdomainSetup(subdomain, _tid);
+    _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
+  }
+
   _problem.reinitMaterials(subdomain, _tid);
   
   //Stabilizers
@@ -66,16 +68,14 @@ ComputeJacobianThread::onElement(const Elem *elem)
 }
 
 void
-ComputeJacobianThread::onDomainChanged(short int subdomain)
-{
-  _problem.subdomainSetup(subdomain, _tid);
-  _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
-}
-
-void
 ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
 {
   _problem.reinitElemFace(elem, side, bnd_id, _tid);
+
+  unsigned int subdomain = elem->subdomain_id();
+  if (subdomain != _subdomain)
+    _problem.subdomainSetupSide(subdomain, _tid);
+
   _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
   for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
   {

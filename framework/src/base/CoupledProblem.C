@@ -117,6 +117,11 @@ CoupledProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
 }
 
 void
+CoupledProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
+{
+}
+
+void
 CoupledProblem::init()
 {
   _eq.init();

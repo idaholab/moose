@@ -52,14 +52,10 @@ ComputeDiracThread::pre()
 }
 
 void
-ComputeDiracThread::preElement(const Elem * /*elem*/)
+ComputeDiracThread::onElement(const Elem * elem)
 {
   _vars.clear();
-}
-  
-void
-ComputeDiracThread::onElement(const Elem *elem)
-{
+
   bool has_dirac_kernels_on_elem = _problem.reinitDirac(elem, _tid);
 
   if(has_dirac_kernels_on_elem)

@@ -30,9 +30,7 @@ public:
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
   
-  virtual void preElement(const Elem *elem);
   virtual void onElement(const Elem *elem);
-  virtual void onDomainChanged(short int subdomain);
   virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
   virtual void postElement(const Elem * /*elem*/);
   

@@ -74,17 +74,13 @@ ComputePostprocessorsThread::pre()
 }
 
 void
-ComputePostprocessorsThread::preElement(const Elem * elem)
-{
-  _problem.prepare(elem, _tid);
-  _problem.reinitElem(elem, _tid);
-  _problem.reinitMaterials(elem->subdomain_id(), _tid);
-}
-
-void
-ComputePostprocessorsThread::onElement(const Elem *elem)
+ComputePostprocessorsThread::onElement(const Elem * elem)
 {
   unsigned int subdomain = elem->subdomain_id();
+
+  _problem.prepare(elem, _tid);
+  _problem.reinitElem(elem, _tid);
+  _problem.reinitMaterials(subdomain, _tid);
 
   //Global Postprocessors
   PostprocessorIterator postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(Moose::ANY_BLOCK_ID);

@@ -36,14 +36,9 @@ ComputeDampingThread::ComputeDampingThread(ComputeDampingThread & x, Threads::sp
 }
 
 void
-ComputeDampingThread::preElement(const Elem *elem)
-{
-  _problem.prepare(elem, _tid);
-}
-
-void
 ComputeDampingThread::onElement(const Elem *elem)
 {
+  _problem.prepare(elem, _tid);
   _problem.reinitElem(elem, _tid);
   _nl.reinitDampers(_tid);
 

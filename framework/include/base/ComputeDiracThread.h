@@ -36,7 +36,6 @@ public:
   ComputeDiracThread(ComputeDiracThread & x, Threads::split);
 
   virtual void pre();
-  virtual void preElement(const Elem * /*elem*/);
   virtual void onElement(const Elem *elem);
   virtual void postElement(const Elem * /*elem*/);
 

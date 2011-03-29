@@ -63,6 +63,7 @@ public:
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
 
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
+  virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid);
 
   // Solve /////
   virtual void init();

@@ -72,6 +72,7 @@ public:
   virtual void clearDiracInfo();
 
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
+  virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid);
 
   virtual void init();
   virtual void init2();

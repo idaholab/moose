@@ -46,13 +46,6 @@ public:
   virtual void post();
 
   /**
-   * Called before an element assembly
-   *
-   * @param elem - active element
-   */
-  virtual void preElement(const Elem *elem);
-
-  /**
    * Assembly of the element (not including surface assembly)
    *
    * @param elem - active element
@@ -65,13 +58,6 @@ public:
    * @param elem - active element
    */
   virtual void postElement(const Elem *elem);
-
-  /**
-   * Called when subdomain has changed
-   *
-   * @param subdomain - ID of the new subdomain
-   */
-  virtual void onDomainChanged(short int subdomain);
 
   /**
    * Called when doing boundary assembling
@@ -92,6 +78,7 @@ protected:
   SystemBase & _system;
   Problem & _problem;
   THREAD_ID _tid;
+  unsigned int _subdomain;
 };
 
 
@@ -118,20 +105,12 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
 
   pre();
 
-  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
+  _subdomain = std::numeric_limits<unsigned int>::max();
   typename RangeType::const_iterator el = range.begin();
   for (el = range.begin() ; el != range.end(); ++el)
   {
     const Elem* elem = *el;
     unsigned int cur_subdomain = elem->subdomain_id();
-
-    preElement(elem);
-
-    if (cur_subdomain != subdomain)
-    {
-      subdomain = cur_subdomain;
-      onDomainChanged(subdomain);
-    }
 
     onElement(elem);
 
@@ -150,6 +129,7 @@ ThreadedElementLoop<RangeType>::operator () (const RangeType & range)
     } // sides
     postElement(elem);
 
+    _subdomain = cur_subdomain;
   } // range
 
   post();
@@ -171,12 +151,6 @@ ThreadedElementLoop<RangeType>::post()
 
 template<typename RangeType>
 void
-ThreadedElementLoop<RangeType>::preElement(const Elem * /*elem*/)
-{
-}
-
-template<typename RangeType>
-void
 ThreadedElementLoop<RangeType>::onElement(const Elem * /*elem*/)
 {
 }
@@ -184,12 +158,6 @@ ThreadedElementLoop<RangeType>::onElement(const Elem * /*elem*/)
 template<typename RangeType>
 void
 ThreadedElementLoop<RangeType>::postElement(const Elem * /*elem*/)
-{
-}
-
-template<typename RangeType>
-void
-ThreadedElementLoop<RangeType>::onDomainChanged(short int /*subdomain*/)
 {
 }
 

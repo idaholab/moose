@@ -39,17 +39,19 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
 }
 
 void
-ComputeResidualThread::preElement(const Elem *elem)
+ComputeResidualThread::onElement(const Elem *elem)
 {
   _vars.clear();
   _problem.prepare(elem, _tid);
   _problem.reinitElem(elem, _tid);
-}
 
-void
-ComputeResidualThread::onElement(const Elem *elem)
-{
   unsigned int subdomain = elem->subdomain_id();
+  if (subdomain != _subdomain)
+  {
+    _problem.subdomainSetup(subdomain, _tid);
+    _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
+  }
+
   _problem.reinitMaterials(subdomain, _tid);
 
   //Stabilizers
@@ -71,19 +73,17 @@ ComputeResidualThread::onElement(const Elem *elem)
 }
 
 void
-ComputeResidualThread::onDomainChanged(short int subdomain)
-{
-  _problem.subdomainSetup(subdomain, _tid);
-  _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
-}
-
-void
 ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
 {
   std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
   if (bcs.size() > 0)
   {
     _problem.reinitElemFace(elem, side, bnd_id, _tid);
+
+    unsigned int subdomain = elem->subdomain_id();
+    if (subdomain != _subdomain)
+      _problem.subdomainSetupSide(subdomain, _tid);
+
     _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
     for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)

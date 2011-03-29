@@ -265,8 +265,6 @@ MProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
     // call subdomainSetup
     for (std::vector<Material *>::const_iterator it = _materials[tid].getMaterials(subdomain).begin(); it != _materials[tid].getMaterials(subdomain).end(); ++it)
       (*it)->subdomainSetup();
-    for (std::vector<Material *>::const_iterator it = _materials[tid].getBoundaryMaterials(subdomain).begin(); it != _materials[tid].getBoundaryMaterials(subdomain).end(); ++it)
-      (*it)->subdomainSetup();
 
     // Need to reinitialize the material properties in case subdomain setup for a Kernel needs it
     // TODO: This means we are doing one more materialReinit than is necessary.  Need to refactor this to
@@ -280,6 +278,18 @@ MProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
 
   // FIXME: call displaced_problem->subdomainSetup() ?
   //        When adding possibility with materials being evaluated on displaced mesh
+}
+
+void
+MProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
+{
+  if (_materials[tid].hasBoundaryMaterials(subdomain))
+  {
+    // call subdomainSetup
+    for (std::vector<Material *>::const_iterator it = _materials[tid].getBoundaryMaterials(subdomain).begin(); it != _materials[tid].getBoundaryMaterials(subdomain).end(); ++it)
+      (*it)->subdomainSetup();
+
+  }
 }
 
 void

@@ -30,7 +30,6 @@ public:
   // Splitting Constructor
   ComputeDampingThread(ComputeDampingThread & x, Threads::split split);
 
-  virtual void preElement(const Elem *elem);
   virtual void onElement(const Elem *elem);
 
   void join(const ComputeDampingThread & /*y*/);
