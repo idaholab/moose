@@ -44,7 +44,6 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _qrule(_bnd ? _subproblem.qRuleFace(_tid) : _subproblem.qRule(_tid)),
     _JxW(_bnd ? _subproblem.JxWFace(_tid) : _subproblem.JxW(_tid)),
     _q_point(_bnd ? _subproblem.pointsFace(_tid) : _subproblem.points(_tid)),
-    _n_qpoints(0),
     _current_elem(_subproblem.elem(_tid)),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
