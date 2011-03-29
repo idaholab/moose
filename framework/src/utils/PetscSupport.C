@@ -182,16 +182,17 @@ namespace Moose
       MProblem & problem = *static_cast<MProblem *>(lsctx);
       TransientNonlinearImplicitSystem & system = problem.getNonlinearSystem().sys();
 
-      // The whole deal here is that we need ghosted versions of these vectors.
+      // The whole deal here is that we need ghosted versions of vectors y and w (they are parallel, but not ghosted).
       // So to do that I'm going to duplicate current_local_solution (which has the ghosting we want).
       // Then stuff values into the duplicates
       // Then "close()" the vectors which updates their ghosted vaulues.
 
-      PetscVector<Number>  ghosted_y(y);
-      PetscVector<Number>  ghosted_w(w);
+      PetscVector<Number>  ghosted_y(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
+      VecCopy(y, ghosted_y.vec());
+      PetscVector<Number>  ghosted_w(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
+      VecCopy(w, ghosted_w.vec());
 
       damping = problem.computeDamping(ghosted_w, ghosted_y);
-
       if(damping < 1.0)
       {
         VecScale(y, damping);
