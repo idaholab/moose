@@ -235,9 +235,9 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
   ColumnMajorMatrix Fhat_average;
   Real volume(0);
 
-  _Fbar.resize(_n_qpoints);
+  _Fbar.resize(_qrule->n_points());
 
-  for ( _qp= 0; _qp < _n_qpoints; ++_qp )
+  for ( _qp= 0; _qp < _qrule->n_points(); ++_qp )
   {
     fillMatrix( _grad_disp_x, _grad_disp_y, _grad_disp_z, A );
     fillMatrix( _grad_disp_x_old, _grad_disp_y_old, _grad_disp_z_old, Fbar);
@@ -272,7 +272,7 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
 
 
   // Finalize volumetric locking correction
-  for ( _qp=0; _qp < _n_qpoints; ++_qp )
+  for ( _qp=0; _qp < _qrule->n_points(); ++_qp )
   {
     const Real det_Fhat( detMatrix( Fhat[_qp] ) );
     const Real factor( std::pow( det_Fhat_average/det_Fhat, third ) );
@@ -649,12 +649,12 @@ MaterialModel::computeProperties()
   // Compute the stretching to be handed to the constitutive evaluation
   // Handle volumetric locking along the way
 
-  _Fhat.resize(_n_qpoints);
+  _Fhat.resize(_qrule->n_points());
 
   computeIncrementalDeformationGradient(_Fhat);
 
 
-  for ( _qp = 0; _qp < _n_qpoints; ++_qp )
+  for ( _qp = 0; _qp < _qrule->n_points(); ++_qp )
   {
 
     computeStrainAndRotationIncrement(_Fhat[_qp]);
@@ -889,7 +889,7 @@ MaterialModel::subdomainSetup()
     if (_cracking_strain > 0)
     {
       // Initialize crack flags
-      for (unsigned int i(0); i < _n_qpoints; ++i)
+      for (unsigned int i(0); i < _qrule->n_points(); ++i)
       {
         (*_crack_flags)[i](0) =
           (*_crack_flags)[i](1) =

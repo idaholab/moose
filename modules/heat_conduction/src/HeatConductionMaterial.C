@@ -32,7 +32,7 @@ HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputPa
 void
 HeatConductionMaterial::computeProperties()
 {
-  for(unsigned int qp=0; qp<_n_qpoints; ++qp)
+  for(unsigned int qp=0; qp<_qrule->n_points(); ++qp)
   {
     _density[qp] = _my_density;
     _thermal_conductivity[qp] = _my_thermal_conductivity;

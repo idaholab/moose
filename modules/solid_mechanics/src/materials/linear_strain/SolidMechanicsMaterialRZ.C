@@ -90,7 +90,7 @@ SolidMechanicsMaterialRZ::subdomainSetup()
     if (_cracking_strain > 0)
     {
       // Initialize crack flags
-      for (unsigned int i(0); i < _n_qpoints; ++i)
+      for (unsigned int i(0); i < _qrule->n_points(); ++i)
       {
         (*_crack_flags)[i](0) =
           (*_crack_flags)[i](1) =
@@ -106,7 +106,7 @@ SolidMechanicsMaterialRZ::subdomainSetup()
 void
 SolidMechanicsMaterialRZ::computeProperties()
 {
-  for(_qp=0; _qp<_n_qpoints; ++_qp)
+  for(_qp=0; _qp<_qrule->n_points(); ++_qp)
   {
     _local_elasticity_tensor->calculate(_qp);
 

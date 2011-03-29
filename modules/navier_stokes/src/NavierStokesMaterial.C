@@ -76,7 +76,7 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
 void
 NavierStokesMaterial::computeProperties()
 {  
-  for (unsigned int qp=0; qp<_n_qpoints; qp++)
+  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
   {  
     _gamma[qp] = _gamma_param;
     _R[qp] = _R_param;

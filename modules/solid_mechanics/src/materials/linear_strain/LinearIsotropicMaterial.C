@@ -76,7 +76,7 @@ LinearIsotropicMaterial::computeStrain(const ColumnMajorMatrix & total_strain, C
 void
 LinearIsotropicMaterial::computeProperties()
 {
-  for(_qp=0; _qp<_n_qpoints; _qp++)
+  for(_qp=0; _qp<_qrule->n_points(); _qp++)
   {
     _thermal_conductivity[_qp] = _input_thermal_conductivity;
 
