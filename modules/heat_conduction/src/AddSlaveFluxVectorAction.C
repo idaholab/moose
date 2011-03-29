@@ -1,0 +1,20 @@
+#include "AddSlaveFluxVectorAction.h"
+#include "Parser.h"
+#include "MProblem.h"
+
+template<>
+InputParameters validParams<AddSlaveFluxVectorAction>()
+{
+  return validParams<Action>();
+}
+
+AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const std::string & name, InputParameters params) :
+    Action(name, params)
+{
+}
+
+void
+AddSlaveFluxVectorAction::act()
+{
+  _parser_handle._problem->getNonlinearSystem().addVector("slave_flux", false, GHOSTED, true);
+}

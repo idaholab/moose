@@ -1,5 +1,7 @@
 #include "Elk.h"
 #include "Factory.h"
+#include "ActionWarehouse.h"
+#include "ActionFactory.h"
 
 // misc
 #include "BodyForceRZ.h"
@@ -11,8 +13,11 @@
 #include "SideFluxIntegralRZ.h"
 
 // heat_conduction
+#include "AddSlaveFluxVectorAction.h"
 #include "ConvectiveFluxRZ.h"
 #include "GapHeatPointSourceMaster.h"
+#include "GapHeatTransfer.h"
+#include "GapHeatTransferRZ.h"
 #include "HeatConduction.h"
 #include "HeatConductionRZ.h"
 #include "HeatConductionImplicitEuler.h"
@@ -98,7 +103,15 @@ Elk::registerObjects()
   registerPostprocessor(SideFluxIntegralRZ);
 
   // heat_conduction
+  // This registers an action to add the "slave_flux" vector to the system at the right time
+  registerActionName("add_slave_flux_vector", true);
+  addActionNameDependency("add_slave_flux_vector", "ready_to_init");
+  addActionNameDependency("init_problem", "add_slave_flux_vector");
+  registerNonParsedAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
+
   registerBoundaryCondition(ConvectiveFluxRZ);
+  registerBoundaryCondition(GapHeatTransfer);
+  registerBoundaryCondition(GapHeatTransferRZ);
   registerKernel(HeatConduction);
   registerKernel(HeatConductionRZ);
   registerKernel(HeatConductionImplicitEuler);

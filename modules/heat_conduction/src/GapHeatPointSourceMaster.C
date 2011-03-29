@@ -15,7 +15,7 @@ InputParameters validParams<GapHeatPointSourceMaster>()
 GapHeatPointSourceMaster::GapHeatPointSourceMaster(const std::string & name, InputParameters parameters)
   :DiracKernel(name, parameters),
    _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
-   _slave_flux(_sys.getVector("pellet_flux"))
+   _slave_flux(_sys.getVector("slave_flux"))
 {}
 
 void
