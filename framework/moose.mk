@@ -7,7 +7,7 @@ ifeq ($(enable-shared),yes)
 	moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD)$(shared_libext)
 endif
 
-libmesh_INCLUDE += $(moose_INCLUDE)
+libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
 LIBS += $(moose_LIB)
 ifeq ($(enable-shared),yes)
 	LIBS += -Wl,-rpath,$(MOOSE_DIR)
