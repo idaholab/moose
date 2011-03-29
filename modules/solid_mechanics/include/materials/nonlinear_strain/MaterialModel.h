@@ -77,6 +77,7 @@ protected:
   MaterialProperty<RealTensorValue> & _total_strain;
   MaterialProperty<RealTensorValue> & _total_strain_old;
 
+  bool _crack_flags_initialized;
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
 

@@ -65,6 +65,7 @@ MaterialModel::MaterialModel( const std::string & name,
    _stress_old(declarePropertyOld<RealTensorValue>("stress")),
    _total_strain(declareProperty<RealTensorValue>("total_strain")),
    _total_strain_old(declarePropertyOld<RealTensorValue>("total_strain")),
+   _crack_flags_initialized(false),
    _crack_flags(NULL),
    _crack_flags_old(NULL),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
@@ -646,6 +647,28 @@ MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 void
 MaterialModel::computeProperties()
 {
+  if (!_crack_flags_initialized)
+  {
+    if (_cracking_strain > 0)
+    {
+
+      std::cerr << "SS: _crack_flags = " << & _crack_flags << std::endl;
+
+      // Initialize crack flags
+      for (unsigned int i(0); i < _qrule->n_points(); ++i)
+      {
+        (*_crack_flags)[i](0) =
+          (*_crack_flags)[i](1) =
+          (*_crack_flags)[i](2) =
+          (*_crack_flags_old)[i](0) =
+          (*_crack_flags_old)[i](1) =
+          (*_crack_flags_old)[i](2) = 1;
+      }
+    }
+
+    _crack_flags_initialized = true;
+  }
+
   // Compute the stretching to be handed to the constitutive evaluation
   // Handle volumetric locking along the way
 
@@ -869,7 +892,6 @@ MaterialModel::computePreconditioning()
 void
 MaterialModel::subdomainSetup()
 {
-
   if (!_initialized)
   {
     _initialized = true;
@@ -882,21 +904,6 @@ MaterialModel::subdomainSetup()
       if (vm)
       {
         _volumetric_models.push_back( vm );
-      }
-    }
-
-
-    if (_cracking_strain > 0)
-    {
-      // Initialize crack flags
-      for (unsigned int i(0); i < _qrule->n_points(); ++i)
-      {
-        (*_crack_flags)[i](0) =
-          (*_crack_flags)[i](1) =
-          (*_crack_flags)[i](2) =
-          (*_crack_flags_old)[i](0) =
-          (*_crack_flags_old)[i](1) =
-          (*_crack_flags_old)[i](2) = 1;
       }
     }
   }
