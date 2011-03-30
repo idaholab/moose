@@ -14,10 +14,6 @@
 
 #include "ExampleDiffusion.h"
 
-// If we use a material pointer we need to include the
-// material class
-#include "Material.h"
-
 /**
  * This function defines the valid parameters for
  * this Kernel and their default values
