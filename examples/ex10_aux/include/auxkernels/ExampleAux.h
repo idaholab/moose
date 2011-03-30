@@ -37,8 +37,6 @@ public:
    */
   ExampleAux(const std::string & name, InputParameters parameters);
 
-  virtual ~ExampleAux() {}
-  
 protected:
   virtual Real computeValue();
 
