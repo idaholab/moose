@@ -17,6 +17,7 @@
 #include "DisplacedProblem.h"
 #include "MaterialData.h"
 #include "ComputePostprocessorsThread.h"
+#include "ActionWarehouse.h"
 
 unsigned int MProblem::_n = 0;
 
@@ -970,7 +971,9 @@ MProblem::meshChanged()
 void
 MProblem::checkProblemIntegrity()
 {
+  // Check for unsatisfied actions
   const std::set<subdomain_id_type> & mesh_subdomains = _mesh.meshSubdomains();
+  Moose::action_warehouse.checkUnsatisfiedActions();  
   
   // Check kernel coverage of subdomains (blocks) in the mesh
   _nl.checkKernelCoverage(mesh_subdomains);

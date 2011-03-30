@@ -18,7 +18,8 @@
 
 ActionWarehouse::ActionWarehouse() :
   _ordered_actions(NULL),
-  _empty_action(NULL)
+  _empty_action(NULL),
+  _generator_valid(false)
 {
 }
 
@@ -31,6 +32,7 @@ void
 ActionWarehouse::clear()
 {
   _action_blocks.clear();
+  _generator_valid = false;
 }
 
 void
@@ -127,58 +129,109 @@ ActionWarehouse::inputFileActionsEnd()
   return _ordered_actions.end();
 }
 
-ActionIterator
-ActionWarehouse::allActionsBegin(Parser * p_ptr)
-{
-  // Clear the current Action vector so that we can fill it up with new ordered actions
-  _ordered_actions.clear();
+Action *
+ActionWarehouse::allActionsBegin(Parser *p_ptr)
+{ 
+  _ordered_names = _actions.getSortedValues();
 
-#ifdef DEBUG
-  std::cerr << "Ordered Actions:\n";
-#endif
+  _i = _ordered_names.begin();
+  
+  buildBuildableActions(p_ptr);
+
+  _j = _action_blocks[*_i].begin();
+
+  _generator_valid = true;
+  return allActionsNext(p_ptr, true);
+}
+
+
+Action *
+ActionWarehouse::allActionsNext(Parser *p_ptr, bool very_first)
+{
+  if (!_generator_valid)
+    mooseError("Action generator invalid in ActionWarehouse\n");
+  
+  if (!very_first)
+    ++_j;
+  while (_j == _action_blocks[*_i].end())
+    if (++_i == _ordered_names.end())
+    {
+      _generator_valid = false;
+      return NULL;
+    }
+    else
+    {
+      buildBuildableActions(p_ptr);
+      _j = _action_blocks[*_i].begin();
+    }
+  return *_j;
+}
+
+void
+ActionWarehouse::buildBuildableActions(Parser *p_ptr)
+{
+  if (_registered_actions[*_i] && _action_blocks[*_i].empty())
+    if (!ActionFactory::instance()->buildAllBuildableActions(*_i, p_ptr))
+      _unsatisfied_dependencies.insert(*_i);
+}
+
+void
+ActionWarehouse::checkUnsatisfiedActions() const
+{
+  std::stringstream oss;
+  bool empty = true;
+  
+  for (std::set<std::string>::const_iterator i = _unsatisfied_dependencies.begin(); i != _unsatisfied_dependencies.end(); ++i)
+  {
+    if (_action_blocks.find(*i) == _action_blocks.end())
+    {
+      if (empty)
+        empty = false;
+      else
+        oss << " ";
+      oss << *i;
+    }
+  }
+
+  if (!empty)
+    mooseError(std::string("The following unsatisfied actions where found while setting up the MOOSE problem:\n")
+               + oss.str() + "\n");
+}
+
+void
+ActionWarehouse::printActionDependencySets()
+{
+  std::cout << "Ordered Actions:\n";
   
   std::vector<std::set<std::string> > _ordered_names = _actions.getSortedValuesSets();
-  for (std::vector<std::set<std::string> >::iterator i = _ordered_names.begin(); i != _ordered_names.end(); ++i)
+  for (std::vector<std::set<std::string> >::const_iterator i = _ordered_names.begin(); i != _ordered_names.end(); ++i)
   {
-#ifdef DEBUG
-    std::cerr << "(";
+    std::cout << "(";
     unsigned int jj = 0;
-    for (std::set<std::string>::iterator j = i->begin(); j != i->end(); ++j)
+    for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
     {
-      if (jj++) std::cerr << ", ";
-      std::cerr << *j;
+      if (jj++) std::cout << ", ";
+      std::cout << *j;
     }
-    std::cerr << ")\n";
-#endif
+    std::cout << ")\n";
     
-    for (std::set<std::string>::iterator j = i->begin(); j != i->end(); ++j)
+    for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
     {
       // Check to see if this action_name is required and there are no blocks
       // to satisfy it
-      if (_registered_actions[*j] && _action_blocks[*j].size() == 0)
+//      if (_registered_actions[*j] && _action_blocks[*j].size() == 0)
         // See if the factory has any Actions it can build on the fly to satisfy this action_name
-        if (!ActionFactory::instance()->buildAllBuildableActions(*j, p_ptr))
-          mooseError(std::string("Unsatisified Action \"") + *j + "\" found during MOOSE problem setup");
+//        if (!ActionFactory::instance()->buildAllBuildableActions(*j, p_ptr))
+//          unsatisfied_dependencies.insert(*j);
       
-      
-#ifdef DEBUG
-      for (std::vector<Action *>::iterator k = _action_blocks[*j].begin(); k != _action_blocks[*j].end(); ++k)
-        std::cerr << "\t" << (*k)->getAction() << "\n";
-#endif
-      // append all the Actions that satisfy this "action" onto the end of the ordered_vector
-      _ordered_actions.insert(_ordered_actions.end(), _action_blocks[*j].begin(), _action_blocks[*j].end());
+      for (std::vector<Action *>::const_iterator k = _action_blocks[*j].begin(); k != _action_blocks[*j].end(); ++k)
+        std::cout << "\t" << (*k)->getAction() << "\n";
+
     }
   }
-  
-  
-  return _ordered_actions.begin();
 }
 
-ActionIterator
-ActionWarehouse::allActionsEnd()
-{
-  return _ordered_actions.end();
-}
+
 
 ActionWarehouse::InputFileSort::InputFileSort() 
 { 

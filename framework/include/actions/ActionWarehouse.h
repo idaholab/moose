@@ -39,21 +39,34 @@ public:
   void addDependencySets(const std::string & action_sets);
   void addActionBlock(Action * blk);
 
+  /**
+   * This method checks the actions stored in the warehouse against the list of required resgistered
+   * actions to see if all of them have been satisified.  It should be called before running
+   * a MOOSE problem
+   */
+  void checkUnsatisfiedActions() const;
+
+  void printActionDependencySets();
+  
   ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
   ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
   
-  /// Iterators to ordered Actions
+  /// Generators to ordered Actions in this Warehouse
   // TODO: Right now all Actions require a Parser pointer when setting up the problem.
   //       In order to build Actions on the fly inside of the factory we'll need this
   //       pointer when the parser iterates over the Actions.  We might be able
-  //       to make this cleaner later
-  ActionIterator allActionsBegin(Parser * p_ptr);
-  ActionIterator allActionsEnd();
-
+  //       to make this cleaner later.
+  /// This method initiates the generator and returns the first ordered action
+  Action * allActionsBegin(Parser * p_ptr);
+  /// This method is a generator function that returns the next ordered action
+  Action * allActionsNext(Parser * p_ptr, bool very_first = false);
+  
   ActionIterator inputFileActionsBegin();
   ActionIterator inputFileActionsEnd();
 
 private:
+  void buildBuildableActions(Parser * p_ptr);
+  
   /// The list of registered actions and a flag indicating whether or not they are required
   std::map<std::string, bool> _registered_actions;
 
@@ -65,11 +78,20 @@ private:
 
   /// The vector of ordered actions out of the dependency resolver
   std::vector<Action *> _ordered_actions;
+
+  std::vector<std::string> _ordered_names;
   
   /// Used to store the action name for the current active action Block iterator
   std::string _curr_action_name;
 
   EmptyAction *_empty_action;
+
+  /// Use to store the current list of unsatisfied dependencies
+  std::set<std::string> _unsatisfied_dependencies;
+
+  std::vector<std::string>::iterator _i;
+  std::vector<Action *>::iterator _j;
+  bool _generator_valid;
 
   // Functor for sorting input file syntax 
   class InputFileSort 

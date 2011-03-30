@@ -263,6 +263,7 @@ addActionTypes()
   registerActionName("add_periodic_bc", false);
   registerActionName("add_preconditioning", false);
   registerActionName("setup_adaptivity", false);
+  registerActionName("meta_action", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -351,6 +352,7 @@ addActionTypes()
    * of this string is important.  Each line represents a set of dependencies that depend on the previous
    * line.  Items on the same line have equal weight and can be executed in any order.  */
   action_warehouse.addDependencySets(
+"(meta_action)"    
 "(create_mesh, set_global_params)"
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"

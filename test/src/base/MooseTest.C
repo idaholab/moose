@@ -1,6 +1,7 @@
 #include "MooseTest.h"
 #include "Moose.h"
 #include "Factory.h"
+#include "ActionFactory.h"
 
 #include "CoupledConvection.h"
 #include "ForcingFn.h"
@@ -43,6 +44,8 @@
 #include "Diff2Material.h"
 #include "StatefulMaterial.h"
 #include "StatefulTest.h"
+
+#include "ConvDiffMetaAction.h"
 
 namespace MooseTest
 {
@@ -95,6 +98,8 @@ void registerObjects()
   registerObject(Diff2Material);
   registerObject(StatefulMaterial);
   registerObject(StatefulTest);
+
+  registerAction(ConvDiffMetaAction, "ConvectionDiffusion", "meta_action");
 }
 
 } // namespace

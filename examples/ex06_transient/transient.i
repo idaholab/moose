@@ -59,8 +59,6 @@
     variable = convected
     boundary = '2'
     value = 1
-
-    some_var = diffused
   [../]
 
   [./left_diffused]
