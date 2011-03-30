@@ -21,7 +21,7 @@
   active = 'convected_ie example_diff conv diffused_ie diff'
 
   [./convected_ie]
-    type = ImplicitEuler
+    type = TimeDerivative
     variable = convected
   [../]
 
@@ -38,7 +38,7 @@
   [../]
 
   [./diffused_ie]
-    type = ImplicitEuler
+    type = TimeDerivative
     variable = diffused
   [../]
 
