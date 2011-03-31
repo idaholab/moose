@@ -50,6 +50,7 @@ protected:
   virtual VariableSecond & coupledSecondOlder(const std::string & var_name, unsigned int i = 0);
 
   virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
 
 private:
   MooseVariable *getVar(const std::string & var_name, unsigned int comp);

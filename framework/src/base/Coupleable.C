@@ -118,6 +118,15 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
     return getVar(var_name, comp)->uDot();
 }
 
+VariableValue &
+Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp = 0)
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have du_dot_du defined");
+  else
+    return getVar(var_name, comp)->duDotDu();
+}
+
 
 VariableGradient &
 Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
