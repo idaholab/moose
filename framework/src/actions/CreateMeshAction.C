@@ -27,7 +27,7 @@ template<>
 InputParameters validParams<CreateMeshAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<int>("dim", "The dimension of the mesh to be generated");
+  params.addRequiredParam<int>("dim", "The dimension of the mesh to be generated");
   params.addParam<int>("nx", 1, "Number of elements in the X direction");
   params.addParam<int>("ny", 1, "Number of elements in the Y direction");
   params.addParam<int>("nz", 1, "Number of elements in the Z direction");
@@ -37,7 +37,7 @@ InputParameters validParams<CreateMeshAction>()
   params.addParam<Real>("xmax", 1.0, "Upper X Coordinate of the generated mesh");
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
-  params.addParam<std::string>("elem_type", "QUAD4", "The type of element from libMesh to generate");
+  params.addParam<std::string>("elem_type", "The type of element from libMesh to generate");
   return params;
 }
 
@@ -50,16 +50,27 @@ CreateMeshAction::CreateMeshAction(const std::string & name, InputParameters par
 void
 CreateMeshAction::act()
 {
-  ElemType elem_type = Utility::string_to_enum<ElemType>(getParam<std::string>("elem_type"));
-  int mesh_dim = -1;
+   int mesh_dim = -1;
+   std::string elem_type_str;
 
   // dim must be passed in the Generation block - we are no longer retrieving the dimension
   // from the parent block
-  if (isParamValid("dim"))
-    mesh_dim = getParam<int>("dim");
-
-  mooseAssert(mesh_dim >=1 && mesh_dim <=3, "Unable to generate mesh for unknown dimension\n");
-  MooseMesh *mesh = new MooseMesh(mesh_dim);
+  mesh_dim = getParam<int>("dim");
+  if (isParamValid("elem_type"))
+    elem_type_str = getParam<std::string>("elem_type");
+  else
+    switch (mesh_dim)
+    {
+    case 1: elem_type_str = "EDGE2"; break;
+    case 2: elem_type_str = "QUAD4"; break;
+    case 3: elem_type_str = "HEX8"; break;
+    default:
+      mooseError("Unable to generate mesh for unknown dimension");
+    }
+  
+  ElemType elem_type = Utility::string_to_enum<ElemType>(elem_type_str);
+ 
+   MooseMesh *mesh = new MooseMesh(mesh_dim);
   
   switch (mesh_dim)
   {
@@ -93,9 +104,7 @@ CreateMeshAction::act()
                                       getParam<Real>("zmax"),
                                       elem_type);
     break;
-  default:
-    mooseError("Unable to generate mesh for unknown dimension\n");
-  }
+   }
   
   _parser_handle._mesh = mesh;
 
