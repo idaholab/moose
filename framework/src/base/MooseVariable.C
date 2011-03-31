@@ -179,6 +179,12 @@ MooseVariable::prepare()
 }
 
 void
+MooseVariable::prepare_aux()
+{
+  _Re.resize(0);
+}
+
+void
 MooseVariable::reinit()
 {
   // copy shape functions into test functions (so they can be modified by stabilizers)
@@ -249,6 +255,13 @@ MooseVariable::add(SparseMatrix<Number> & jacobian)
   }
   else
     jacobian.add_matrix(_Ke, _dof_indices);
+}
+
+void
+MooseVariable::insert(NumericVector<Number> & residual)
+{
+  if (_Re.size() > 0)
+    residual.set(_nodal_dof_index, _Re(0));
 }
 
 void
@@ -476,7 +489,14 @@ MooseVariable::computeNodalValues()
 void
 MooseVariable::setNodalValue(Number value)
 {
-  _nodal_u[0] = value;
+  _nodal_u[0] = value;                  // update variable nodal value
+}
+
+void
+MooseVariable::storeAuxValue(Number value)
+{
+  _Re.resize(1);
+  _Re(0) = value;
 }
 
 void

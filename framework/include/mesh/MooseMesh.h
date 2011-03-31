@@ -96,7 +96,7 @@ public:
 
   inline void print_info(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
   
-  std::vector<subdomain_id_type> & getNodeBlockIds(const Node & node);
+  std::set<subdomain_id_type> & getNodeBlockIds(const Node & node);
 
   libMesh::Mesh _mesh;
 
@@ -125,7 +125,7 @@ protected:
 
   std::vector<MeshModifier *> _mesh_modifiers;
 
-  std::map<unsigned int, std::vector<subdomain_id_type> > _block_node_list;              /// list of nodes that belongs to a specified block (domain)
+  std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;              /// list of nodes that belongs to a specified block (domain)
 
   void cacheInfo();
 };

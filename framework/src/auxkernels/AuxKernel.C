@@ -85,22 +85,20 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 void
 AuxKernel::compute()
 {
+  Real value = 0;
   if (isNodal())
   {
-    unsigned int & dof_idx = _var.nodalDofIndex();
     _qp = 0;
-    Real value = computeValue();
-    _solution.set(dof_idx, value);              // update value in solution vector
-    _var.setNodalValue(value);                  // and update variable data, which is referenced by other kernels, so the value is up-to-date
+    value = computeValue();
+    _var.setNodalValue(value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
+    _var.storeAuxValue(value);
   }
   else
   {
-    Real value = 0.;
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
       value += _JxW[_qp]*computeValue();
-
-    unsigned int & dof_idx = _var.nodalDofIndex();
-    _solution.set(dof_idx, value / _current_volume);
+    value /= _current_volume;
+    _var.storeAuxValue(value);
   }
 }
 

@@ -97,6 +97,7 @@ public:
   virtual ~MooseVariable();
 
   void prepare();
+  void prepare_aux();
   void reinit();
   void reinit_node();
   void reinit_aux();
@@ -156,6 +157,7 @@ public:
 
   void computeNodalValues();
   void setNodalValue(Number value);
+  void storeAuxValue(Number value);
 
   void computeDamping(const NumericVector<Number> & increment_vec);
 
@@ -169,6 +171,8 @@ public:
 
   void add(NumericVector<Number> & residual);
   void add(SparseMatrix<Number> & jacobian);
+
+  void insert(NumericVector<Number> & residual);
 
   Number getNodalValue(const Node & node);
   Number getNodalValueOld(const Node & node);

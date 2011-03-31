@@ -19,9 +19,11 @@
 #include "MaterialData.h"
 #include "AssemblyData.h"
 #include "GeometricSearchData.h"
+#include "ComputeNodalAuxVarsThread.h"
+#include "ComputeElemAuxVarsThread.h"
 
 #include "quadrature_gauss.h"
-
+#include "node_range.h"
 
 // AuxiliarySystem ////////
 
@@ -198,77 +200,80 @@ AuxiliarySystem::setupKernels(AuxKernelIterator & begin, AuxKernelIterator & end
 void
 AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 {
-  AuxKernelIterator aux_begin = auxs[0].activeNodalAuxKernelsBegin();
-  AuxKernelIterator aux_end = auxs[0].activeNodalAuxKernelsEnd();
-
   SubdomainIterator subdomain_begin = _mesh.meshSubdomains().begin();
   SubdomainIterator subdomain_end = _mesh.meshSubdomains().end();
   SubdomainIterator subdomain_it;
 
+  // Do we have some kernels to evaluate?
+  AuxKernelIterator aux_begin = auxs[0].activeNodalAuxKernelsBegin();
+  AuxKernelIterator aux_end = auxs[0].activeNodalAuxKernelsEnd();
   bool have_block_kernels = false;
-
-  // Call setup() on global kernels
-  setupKernels(aux_begin, aux_end);
-  // Call setup on all of the Nodal block AuxKernels
   for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
   {
     AuxKernelIterator block_nodal_aux_begin = auxs[0].activeBlockNodalAuxKernelsBegin(*subdomain_it);
     AuxKernelIterator block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(*subdomain_it);
-    setupKernels(block_nodal_aux_begin, block_nodal_aux_end);
     have_block_kernels |= (block_nodal_aux_begin != block_nodal_aux_end);
   }
 
   if (aux_begin != aux_end || have_block_kernels)
   {
-    ConstNodeRange & node_range = *_mesh.getLocalNodeRange();
-    for (ConstNodeRange::const_iterator node_it = node_range.begin() ; node_it != node_range.end(); ++node_it)
+    // Run setup() on kernels (could run in parallel, but needs a separate thread since split and join
+    // are called multiple times and we need to call setup() just once)
+
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      const Node * node = *node_it;
+      AuxKernelIterator aux_begin = auxs[tid].activeNodalAuxKernelsBegin();
+      AuxKernelIterator aux_end = auxs[tid].activeNodalAuxKernelsEnd();
 
-//      if(unlikely(_calculate_element_time))
-//        startNodeTiming(node->id());
-
-      _problem.reinitNode(node, 0);
-
-      // compute global aux kernels
-      for(AuxKernelIterator aux_it = aux_begin; aux_it != aux_end; ++aux_it)
-        (*aux_it)->compute();
-
-      const std::vector<subdomain_id_type> & block_ids = _mesh.getNodeBlockIds(*node);
-      for (std::vector<subdomain_id_type>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
+      // Call setup() on global kernels
+      setupKernels(aux_begin, aux_end);
+      // Call setup on all of the Nodal block AuxKernels
+      for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
       {
-        AuxKernelIterator block_nodal_aux_begin = auxs[0].activeBlockNodalAuxKernelsBegin(*block_it);
-        AuxKernelIterator block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(*block_it);
-
-        for(AuxKernelIterator aux_it = block_nodal_aux_begin; aux_it != block_nodal_aux_end; ++aux_it)
-          (*aux_it)->compute();
+        AuxKernelIterator block_nodal_aux_begin = auxs[tid].activeBlockNodalAuxKernelsBegin(*subdomain_it);
+        AuxKernelIterator block_nodal_aux_end = auxs[tid].activeBlockNodalAuxKernelsEnd(*subdomain_it);
+        setupKernels(block_nodal_aux_begin, block_nodal_aux_end);
+        have_block_kernels |= (block_nodal_aux_begin != block_nodal_aux_end);
       }
-
-//      if(unlikely(_calculate_element_time))
-//        stopNodeTiming(node->id());
     }
+
+    /// Now do the computation in parallel
+    ConstNodeRange & range = *_mesh.getLocalNodeRange();
+    ComputeNodalAuxVarsThread navt(_problem, *this, auxs);
+    Threads::parallel_reduce(range, navt);
   }
 
   //Boundary AuxKernels
 
+  // call setup() on all threads (also can run in parallel, see above for nodal kernels for details)
   const std::set<short int> & boundary_ids = _mesh.get_boundary_ids();
-
-  for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    short int id = *it;
+    for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+    {
+      short int id = *it;
 
-    aux_begin = _auxs[0].activeAuxBCsBegin(id);
-    aux_end = _auxs[0].activeAuxBCsEnd(id);
+      aux_begin = auxs[tid].activeAuxBCsBegin(id);
+      aux_end = auxs[tid].activeAuxBCsEnd(id);
 
-    setupKernels(aux_begin, aux_end);
+      setupKernels(aux_begin, aux_end);
+    }
   }
 
+  // after converting this into NodeRange, we can run it in parallel
   const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
   const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
   const unsigned int n_nodes = nodes.size();
 
   for(unsigned int i=0; i<n_nodes; i++)
   {
+    // prepare variables
+    for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[0].begin(); it != _nodal_vars[0].end(); ++it)
+    {
+      MooseVariable * var = it->second;
+      var->prepare_aux();
+    }
+
     aux_begin = auxs[0].activeAuxBCsBegin(ids[i]);
     aux_end = auxs[0].activeAuxBCsEnd(ids[i]);
 
@@ -290,72 +295,43 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 //      if(unlikely(_calculate_element_time))
 //        stopNodeTiming(node.id());
     }
+
+    // update the solution vector
+    for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[0].begin(); it != _nodal_vars[0].end(); ++it)
+    {
+      MooseVariable * var = it->second;
+      var->insert(solution());
+    }
   }
 }
 
 void
 AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
 {
-  // Update the element aux vars
-  AuxKernelIterator aux_begin = auxs[0].activeElementAuxKernelsBegin();
-  AuxKernelIterator aux_end = auxs[0].activeElementAuxKernelsEnd();
-  setupKernels(aux_begin, aux_end);
-
-  SubdomainIterator subdomain_begin = _mesh.meshSubdomains().begin();
-  SubdomainIterator subdomain_end = _mesh.meshSubdomains().end();
-  SubdomainIterator subdomain_it;
-
-  // Call setup on all of the Elemental block AuxKernels
-  for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
+  // Call setup() on all threads
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    AuxKernelIterator block_element_aux_begin = auxs[0].activeBlockElementAuxKernelsBegin(*subdomain_it);
-    AuxKernelIterator block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(*subdomain_it);
-    setupKernels(block_element_aux_begin, block_element_aux_end);
-  }
+    AuxKernelIterator aux_begin = auxs[tid].activeElementAuxKernelsBegin();
+    AuxKernelIterator aux_end = auxs[tid].activeElementAuxKernelsEnd();
+    setupKernels(aux_begin, aux_end);
 
-  unsigned int subdomain = std::numeric_limits<unsigned int>::max();
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  for (ConstElemRange::const_iterator elem_it = elem_range.begin() ; elem_it != elem_range.end(); ++elem_it)
-  {
-    const Elem * elem = *elem_it;
+    SubdomainIterator subdomain_begin = _mesh.meshSubdomains().begin();
+    SubdomainIterator subdomain_end = _mesh.meshSubdomains().end();
+    SubdomainIterator subdomain_it;
 
-    unsigned int cur_subdomain = elem->subdomain_id();
-
-//    if(unlikely(_calculate_element_time))
-//      startElementTiming(elem->id());
-
-    AuxKernelIterator block_element_aux_it = auxs[0].activeBlockElementAuxKernelsBegin(cur_subdomain);
-    AuxKernelIterator block_element_aux_end = auxs[0].activeBlockElementAuxKernelsEnd(cur_subdomain);
-
-    if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
+    // Call setup on all of the Elemental block AuxKernels
+    for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
     {
-      _problem.prepare(elem, 0);
-      _problem.reinitElem(elem, 0);
-      _problem.reinitMaterials(elem->subdomain_id(), 0);
-
-      //Compute the area of the element
-      _data[0]._current_volume = _subproblem.assembly(0).computeVolume();
-
-      if(cur_subdomain != subdomain)
-      {
-        subdomain = cur_subdomain;
-
-        for(AuxKernelIterator aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-          (*aux_it)->subdomainSetup();
-      }
-
-      // block
-      for(; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
-        (*block_element_aux_it)->compute();
-
-      // global
-      for(AuxKernelIterator aux_it=aux_begin;aux_it!=aux_end;aux_it++)
-        (*aux_it)->compute();
+      AuxKernelIterator block_element_aux_begin = auxs[tid].activeBlockElementAuxKernelsBegin(*subdomain_it);
+      AuxKernelIterator block_element_aux_end = auxs[tid].activeBlockElementAuxKernelsEnd(*subdomain_it);
+      setupKernels(block_element_aux_begin, block_element_aux_end);
     }
-
-//    if(unlikely(_calculate_element_time))
-//      stopElementTiming(elem->id());
   }
+
+  /// Now do the computation in parallel
+  ConstElemRange & range = *_mesh.getActiveLocalElementRange();
+  ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
+  Threads::parallel_reduce(range, eavt);
 }
 
 void

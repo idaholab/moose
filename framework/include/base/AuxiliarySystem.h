@@ -82,8 +82,8 @@ protected:
   std::vector<AuxData> _data;
 
   friend class AuxKernel;
-  friend class ComputeNodalAuxThread;
-  friend class ComputeElemAuxThread;
+  friend class ComputeNodalAuxVarsThread;
+  friend class ComputeElemAuxVarsThread;
 };
 
 #endif /* EXPLICITSYSTEM_H */

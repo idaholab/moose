@@ -21,6 +21,9 @@
 #include "mesh_tools.h"
 #include "mesh_refinement.h"
 
+static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
+
+
 MooseMesh::MooseMesh(int mesh_dim) :
     _mesh(mesh_dim),
     _is_changed(false),
@@ -132,7 +135,7 @@ MooseMesh::getActiveLocalElementRange()
   if (!_active_local_elem_range)
   {
     _active_local_elem_range = new ConstElemRange(_mesh.active_local_elements_begin(),
-                                                  _mesh.active_local_elements_end(), 1);
+                                                  _mesh.active_local_elements_end(), GRAIN_SIZE);
   }
 
   return _active_local_elem_range;
@@ -144,7 +147,7 @@ MooseMesh::getActiveNodeRange()
   if (!_active_node_range)
   {
     _active_node_range = new NodeRange(_mesh.active_nodes_begin(),
-                                       _mesh.active_nodes_end(), 1);
+                                       _mesh.active_nodes_end(), GRAIN_SIZE);
   }
 
   return _active_node_range;
@@ -156,7 +159,7 @@ MooseMesh::getLocalNodeRange()
   if (!_local_node_range)
   {
     _local_node_range = new ConstNodeRange(_mesh.local_nodes_begin(),
-                                           _mesh.local_nodes_end(), 1);
+                                           _mesh.local_nodes_end(), GRAIN_SIZE);
   }
 
   return _local_node_range;
@@ -168,7 +171,7 @@ MooseMesh::getBoundaryNodeRange()
   if (!_bnd_node_range)
   {
 //    _bnd_node_range = new ConstNodeRange(_bnd_nodes.begin(),
-//                                         _bnd_nodes.end(), 1);
+//                                         _bnd_nodes.end(), GRAIN_SIZE);
   }
 
   return _bnd_node_range;
@@ -197,12 +200,12 @@ MooseMesh::cacheInfo()
     for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
     {
       Node & node = *elem->get_node(nd);
-      _block_node_list[node.id()].push_back(elem->subdomain_id());
+      _block_node_list[node.id()].insert(elem->subdomain_id());
     }
   }
 }
 
-std::vector<subdomain_id_type> &
+std::set<subdomain_id_type> &
 MooseMesh::getNodeBlockIds(const Node & node)
 {
   return _block_node_list[node.id()];
