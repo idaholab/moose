@@ -119,7 +119,7 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 }
 
 VariableValue &
-Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp = 0)
+Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
     mooseError("Nodal variables do not have du_dot_du defined");
