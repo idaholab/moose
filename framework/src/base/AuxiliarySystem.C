@@ -170,7 +170,7 @@ AuxiliarySystem::serializedSolution()
 void
 AuxiliarySystem::serializeSolution()
 {
-  if(_need_serialized_solution)
+  if(_need_serialized_solution && _sys.n_dofs() > 0)            // libMesh does not like serializing of empty vectors
     solution().localize(_serialized_solution);
 }
 
