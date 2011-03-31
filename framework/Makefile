@@ -23,4 +23,5 @@ MOOSE_DIR	?= $(shell pwd)
 MAKE_LIBRARY	:= yes
 APPLICATION_NAME := moose
 
-include build.mk
+include build.mk 
+
