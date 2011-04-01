@@ -19,7 +19,7 @@ public:
 
 protected:
 /**
- * Generic gap heat transfer model, with h_gap = h_radiation + h_conduction + h_contact
+ * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
  */
 
   virtual Real computeQpResidual();
@@ -37,9 +37,8 @@ protected:
   VariableValue & _gap_temp;
   
   const Real _gap_conductivity;
-  const Real _roughness_1;
-  const Real _roughness_2;
 
+  Real _min_gap;
   Real _max_gap;
 };
 

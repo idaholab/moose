@@ -10,9 +10,8 @@ InputParameters validParams<GapHeatTransfer>()
   params.addRequiredCoupledVar("gap_distance", "Distance across the gap");
   params.addRequiredCoupledVar("gap_temp", "Temperature on the other side of the gap");
   params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
-  params.addParam<Real>("roughness_1", 1e-6, "The roughness value for this surface");
-  params.addParam<Real>("roughness_2", 1e-6, "The roughness value for the opposite surface");
-  params.addParam<Real>("max_gap", -99999, "A maximum gap size");
+  params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
+  params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
   return params;
 }
 
@@ -22,11 +21,11 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
    _gap_distance(coupledValue("gap_distance")),
    _gap_temp(coupledValue("gap_temp")),
    _gap_conductivity(getParam<Real>("gap_conductivity")),
-   _roughness_1(getParam<Real>("roughness_1")),
-   _roughness_2(getParam<Real>("roughness_2")),
+   _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap"))
 {
 }
+
 
 Real
 GapHeatTransfer::computeQpResidual()
@@ -45,6 +44,7 @@ GapHeatTransfer::computeQpResidual()
   
   return _phi[_i][_qp]*grad_t;
 }
+
 
 Real
 GapHeatTransfer::computeQpJacobian()
@@ -66,7 +66,7 @@ Real
 GapHeatTransfer::h_conduction()
 {
   Real gap_L = gapLength();
-  return gapK()/gap_L;  
+ return gapK()/(gap_L + _min_gap);  
 }
 
 
@@ -87,18 +87,15 @@ GapHeatTransfer::h_radiation()
 Real
 GapHeatTransfer::gapLength()
 {
-  Real gap_L = _gap_distance[_qp];
-
-  if(gap_L < -99999)
+  Real gap_L = -(_gap_distance[_qp]);
+  
+  if(gap_L > _max_gap)
   {
     gap_L = _max_gap;
   }
-
-  gap_L = std::abs(std::min(0.0, gap_L));
-
-  if(gap_L < 1.5*(_roughness_1 + _roughness_2))
-    gap_L = 1.5*(_roughness_1 + _roughness_2);
-
+  
+  gap_L = (std::max(0.0, gap_L));
+  
   return gap_L;
 }
 
@@ -106,7 +103,6 @@ GapHeatTransfer::gapLength()
 Real
 GapHeatTransfer::gapK()
 {
-  
   return _gap_conductivity;
 }
 
