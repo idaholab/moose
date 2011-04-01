@@ -36,7 +36,7 @@ typedef Real                     PostprocessorValue;
 #ifdef NDEBUG
 #define mooseAssert(asserted, msg)
 #else
-#define mooseAssert(asserted, msg)  do { if (!(asserted)) { std::cerr << "\n\nAssertion `" #asserted "' failed.\n" << msg << std::endl; libmesh_error(); } } while(0)
+#define mooseAssert(asserted, msg)  do { if (!(asserted)) { std::cerr << "\n\nAssertion `" #asserted "' failed\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << std::endl; libmesh_error(); } } while(0)
 #endif
 
 #define mooseWarning(msg) do { std::cerr << "\n\n*** Warning ***\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << "\n" << std::endl; } while(0)
@@ -57,7 +57,7 @@ extern ActionWarehouse action_warehouse;
 extern PerfLog perf_log;
 
 /**
- * Register objects that are in MOOSE 
+ * Register objects that are in MOOSE
  */
 void registerObjects();
 void addActionTypes();
