@@ -92,16 +92,19 @@ MooseMesh::meshChanged()
   // Rebuild the active local element range
   delete _active_local_elem_range;
   _active_local_elem_range = NULL;
-
   // Rebuild the node range
   delete _active_node_range;
   _active_node_range = NULL;
+  // Rebuild the local node range
+  delete _local_node_range;
+  _local_node_range = NULL;
 
   // Calling this function will rebuild the range.
   getActiveLocalElementRange();
-
   // Calling this function will rebuild the range.
   getActiveNodeRange();
+  // Calling this function will rebuild the range.
+  getLocalNodeRange();
 
   // Print out information about the adapted mesh if requested
 //  if (_print_mesh_changed)
