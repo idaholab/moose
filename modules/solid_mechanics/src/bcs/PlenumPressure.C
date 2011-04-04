@@ -18,7 +18,6 @@ InputParameters validParams<PlenumPressure>()
 
 PlenumPressure::PlenumPressure(const std::string & name, InputParameters parameters)
   :IntegratedBC(name, parameters),
-   _initialized(false),
    _n0(0),
    _component(getParam<int>("component")),
    _initial_pressure(getParam<Real>("initial_pressure")),
@@ -58,32 +57,30 @@ PlenumPressure::computeQpResidual()
   return _my_value * (_normals[_qp](_component) * _phi[_i][_qp]);
 }
 
-void
-PlenumPressure::setup()
-{
-  if ( _initialized )
+void PlenumPressure::initialSetup()
+{  
+  _n0 = _initial_pressure * _volume / (_R * _temperature);
+
+  if ( _initial_He )
   {
-    const Real pressure = (_n0 + _material_input) * _R * _temperature / _volume;
-    const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
-    _my_value = factor * pressure;
-    if (_output)
-    {
-      *_output = _my_value;
-    }
+    *_initial_He = _n0;
   }
-  else
+  const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
+  _my_value = factor * _initial_pressure;
+  if (_output)
   {
-    _initialized = true;
-    _n0 = _initial_pressure * _volume / (_R * _temperature);
-    if ( _initial_He )
-    {
-      *_initial_He = _n0;
-    }
-    const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
-    _my_value = factor * _initial_pressure;
-    if (_output)
-    {
-      *_output = _my_value;
-    }
+    *_output = _my_value;
+  }
+}
+
+void
+PlenumPressure::residualSetup()
+{
+  const Real pressure = (_n0 + _material_input) * _R * _temperature / _volume;
+  const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
+  _my_value = factor * pressure;
+  if (_output)
+  {
+    *_output = _my_value;
   }
 }

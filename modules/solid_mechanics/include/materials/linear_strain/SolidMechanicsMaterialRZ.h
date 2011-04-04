@@ -25,7 +25,7 @@ protected:
 
   virtual void computeProperties();
 
-  virtual void subdomainSetup();
+  virtual void initialSetup();
 
   virtual void computeStress(const ColumnMajorMatrix & total_strain,
                              const ColumnMajorMatrix & strain,
@@ -36,8 +36,6 @@ protected:
 
   virtual void computeCracking(const ColumnMajorMatrix & strain,
                                RealTensorValue & stress);
-
-  bool _initialized;
 
   /**
    * The current quadrature point.

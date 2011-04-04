@@ -32,22 +32,22 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, InputPa
 {}
 
 void
-SolidMechanicsMaterial::subdomainSetup()
+SolidMechanicsMaterial::initialSetup()
 {
+  // Load in the volumetric models
+  const std::vector<Material*> * mats_p;
+  if(_bnd)
+    mats_p = &_problem.getFaceMaterials( _block_id, _tid );
+  else
+    mats_p = &_problem.getMaterials( _block_id, _tid );
 
-  if (!_initialized)
+  const std::vector<Material*> & mats = *mats_p;
+  for (unsigned int i(0); i < mats.size(); ++i)
   {
-    _initialized = true;
-
-    // Load in the volumetric models
-    const std::vector<Material*> & mats = _problem.getMaterials( _block_id, _tid );
-    for (unsigned int i(0); i < mats.size(); ++i)
+    VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
+    if (vm)
     {
-      VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
-      if (vm)
-      {
-        _volumetric_models.push_back( vm );
-      }
+      _volumetric_models.push_back( vm );
     }
   }
 }

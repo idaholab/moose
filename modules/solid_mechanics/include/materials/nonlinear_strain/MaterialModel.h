@@ -39,8 +39,6 @@ protected:
     Eigen        = 1
   };
 
-  bool _initialized;
-
   bool _bulk_modulus_set;
   bool _lambda_set;
   bool _poissons_ratio_set;
@@ -91,7 +89,7 @@ protected:
   std::vector<ColumnMajorMatrix> _Fbar;
 
 
-  virtual void subdomainSetup();
+  virtual void initialSetup();
 
 
   virtual void computeProperties();

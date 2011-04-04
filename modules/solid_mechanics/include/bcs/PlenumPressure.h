@@ -17,13 +17,13 @@ public:
 
   virtual ~PlenumPressure(){}
 
-  virtual void setup();
+  virtual void initialSetup();
+
+  virtual void residualSetup();
 
 protected:
 
   virtual Real computeQpResidual();
-
-  bool _initialized;
 
   Real _n0; // The initial number of moles of gas.
 

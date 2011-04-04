@@ -23,7 +23,6 @@ InputParameters validParams<SolidMechanicsMaterialRZ>()
 SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
                                                    InputParameters parameters)
   :Material(name, parameters),
-   _initialized(false),
    _youngs_modulus(getParam<Real>("youngs_modulus")),
    _poissons_ratio(getParam<Real>("poissons_ratio")),
    _shear_modulus(0.5*_youngs_modulus/(1+_poissons_ratio)),
@@ -69,36 +68,23 @@ SolidMechanicsMaterialRZ::~SolidMechanicsMaterialRZ()
 }
 
 void
-SolidMechanicsMaterialRZ::subdomainSetup()
+SolidMechanicsMaterialRZ::initialSetup()
 {
+  // Load in the volumetric models
+  const std::vector<Material*> * mats_p;
+  if(_bnd)
+    mats_p = &_problem.getFaceMaterials( _block_id, _tid );
+  else
+    mats_p = &_problem.getMaterials( _block_id, _tid );
 
-  if (!_initialized)
+  const std::vector<Material*> & mats = *mats_p;
+      
+  for (unsigned int i(0); i < mats.size(); ++i)
   {
-    _initialized = true;
-
-    // Load in the volumetric models
-    const std::vector<Material*> & mats = _problem.getMaterials( _block_id, _tid );
-    for (unsigned int i(0); i < mats.size(); ++i)
+    VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
+    if (vm)
     {
-      VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
-      if (vm)
-      {
-        _volumetric_models.push_back( vm );
-      }
-    }
-
-    if (_cracking_strain > 0)
-    {
-      // Initialize crack flags
-      for (unsigned int i(0); i < _qrule->n_points(); ++i)
-      {
-        (*_crack_flags)[i](0) =
-          (*_crack_flags)[i](1) =
-          (*_crack_flags)[i](2) =
-          (*_crack_flags_old)[i](0) =
-          (*_crack_flags_old)[i](1) =
-          (*_crack_flags_old)[i](2) = 1;
-      }
+      _volumetric_models.push_back( vm );
     }
   }
 }
@@ -106,6 +92,21 @@ SolidMechanicsMaterialRZ::subdomainSetup()
 void
 SolidMechanicsMaterialRZ::computeProperties()
 {
+  
+  if (_t_step == 1 && _cracking_strain > 0)
+  {
+    // Initialize crack flags
+    for (unsigned int i(0); i < _qrule->n_points(); ++i)
+    {
+      (*_crack_flags)[i](0) =
+        (*_crack_flags)[i](1) =
+        (*_crack_flags)[i](2) =
+        (*_crack_flags_old)[i](0) =
+        (*_crack_flags_old)[i](1) =
+        (*_crack_flags_old)[i](2) = 1;
+    }
+  }
+  
   for(_qp=0; _qp<_qrule->n_points(); ++_qp)
   {
     _local_elasticity_tensor->calculate(_qp);

@@ -21,9 +21,7 @@ public:
 
 protected:
 
-  virtual void subdomainSetup();
-
-  bool _initialized;
+  virtual void initialSetup();
 
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;

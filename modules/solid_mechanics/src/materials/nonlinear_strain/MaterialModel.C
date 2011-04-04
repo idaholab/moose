@@ -36,7 +36,6 @@ InputParameters validParams<MaterialModel>()
 MaterialModel::MaterialModel( const std::string & name,
                               InputParameters parameters )
   :Material( name, parameters ),
-   _initialized(false),
    _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
    _lambda_set( parameters.isParamValid("lambda") ),
    _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
@@ -887,21 +886,16 @@ MaterialModel::computePreconditioning()
 }
 
 void
-MaterialModel::subdomainSetup()
+MaterialModel::initialSetup()
 {
-  if (!_initialized)
+  // Load in the volumetric models
+  const std::vector<Material*> & mats = _problem.getMaterials( _block_id, _tid );
+  for (unsigned int i(0); i < mats.size(); ++i)
   {
-    _initialized = true;
-
-    // Load in the volumetric models
-    const std::vector<Material*> & mats = _problem.getMaterials( _block_id, _tid );
-    for (unsigned int i(0); i < mats.size(); ++i)
+    VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
+    if (vm)
     {
-      VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
-      if (vm)
-      {
-        _volumetric_models.push_back( vm );
-      }
+      _volumetric_models.push_back( vm );
     }
   }
 }
