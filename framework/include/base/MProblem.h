@@ -168,6 +168,8 @@ public:
   virtual void adaptMesh();
   virtual void meshChanged();
 
+  void setPrintMeshChanged(bool state = true) { _print_mesh_changed = state; }
+
   void checkProblemIntegrity();
 
   void serializeSolution();
@@ -217,6 +219,7 @@ protected:
   Output _out;
 
   Adaptivity _adaptivity;
+  bool _print_mesh_changed;
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;

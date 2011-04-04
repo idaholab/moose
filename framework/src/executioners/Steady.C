@@ -70,9 +70,8 @@ Steady::execute()
     {
       _problem.adaptMesh();
       _problem.out().meshChanged();
-      // TODO: This should come out automatically when meshChanged is called
-      _problem.mesh().print_info();
     }
+    _time += 1.0;                       // change the "time" so we get the right output
   }
 
   postExecute();

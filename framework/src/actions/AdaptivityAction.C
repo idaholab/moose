@@ -51,7 +51,8 @@ AdaptivityAction::act()
 {
   NonlinearSystem & system = _parser_handle._problem->getNonlinearSystem();
   
-  Adaptivity & adapt = _parser_handle._problem->adaptivity();
+  MProblem & mproblem = *_parser_handle._problem;
+  Adaptivity & adapt = mproblem.adaptivity();
 
   _parser_handle._executioner->parameters().set<unsigned int>("steps") = getParam<unsigned int>("steps");
 
@@ -63,8 +64,7 @@ AdaptivityAction::act()
   adapt.setParam("coarsen fraction", getParam<Real>("coarsen_fraction"));
   adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));
 
-  // FIXME: enable this
-//  _moose_system.setPrintMeshChanged(getParam<bool>("print_changed_info"));
+  mproblem.setPrintMeshChanged(getParam<bool>("print_changed_info"));
 
   const std::vector<std::string> & weight_names = getParam<std::vector<std::string> >("weight_names");
   const std::vector<Real> & weight_values = getParam<std::vector<Real> >("weight_values");

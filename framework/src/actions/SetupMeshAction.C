@@ -93,7 +93,7 @@ SetupMeshAction::act()
 
   mesh->meshChanged();
 
-  mesh->print_info();
+  mesh->printInfo();
   }
 
   if (isParamValid("displacements"))

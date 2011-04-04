@@ -94,7 +94,7 @@ public:
   void addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters);
   void applyMeshModifications();
 
-  inline void print_info(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
+  inline void printInfo(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
   
   std::set<subdomain_id_type> & getNodeBlockIds(const Node & node);
 
