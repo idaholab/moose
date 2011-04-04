@@ -57,7 +57,6 @@ GapHeatTransfer::computeQpJacobian()
   grad_t = (_u[_qp] - _gap_temp[_qp]) * h_gap;
   dgrad_t = _phi[_j][_qp] * h_gap;
 
-  // Check this: Should we be multiplying by phi twice?
   return _phi[_i][_qp]*dgrad_t;
 }
 
