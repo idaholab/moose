@@ -42,6 +42,11 @@ public:
   virtual ~NonlinearSystem();
 
   virtual void init();
+
+  // Setup Functions ////
+  virtual void initialSetupBCs();
+  virtual void initialSetupKernels();
+  virtual void timestepSetup();
   
   virtual bool converged();
 

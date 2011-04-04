@@ -49,6 +49,9 @@ public:
   virtual DofMap & dofMap() = 0;
 
   virtual void init() = 0;
+
+  /// Called only once, just before the solve begins so objects can do some precalculations
+  virtual void initializeObjects() {};
   virtual void update() = 0;
   virtual void solve() = 0;
 

@@ -38,6 +38,12 @@ public:
   AuxWarehouse();
   virtual ~AuxWarehouse();
 
+  // Setup /////
+  void initialSetup();
+  void timestepSetup();
+  void residualSetup();
+  void jacobianSetup();
+
   AuxKernelIterator activeNodalAuxKernelsBegin();
   AuxKernelIterator activeNodalAuxKernelsEnd();
 
@@ -52,6 +58,9 @@ public:
 
   AuxKernelIterator activeBlockElementAuxKernelsBegin(unsigned int block);
   AuxKernelIterator activeBlockElementAuxKernelsEnd(unsigned int block);
+
+  AuxKernelIterator allAuxKernelsBegin();
+  AuxKernelIterator allAuxKernelsEnd();
 
   std::list<AuxKernel *> getActiveNodalKernels();
   std::list<AuxKernel *> getActiveElementKernels();
@@ -72,6 +81,8 @@ protected:
   std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;
   std::map<unsigned int, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;
   std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
+
+  std::vector<AuxKernel *> _all_aux_kernels;
 };
 
 #endif // AUXWAREHOUSE_H

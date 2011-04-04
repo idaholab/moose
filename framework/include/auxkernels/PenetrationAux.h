@@ -40,8 +40,6 @@ public:
 
   virtual ~PenetrationAux() {}
 
-  virtual void setup();
-  
 protected:
   virtual Real computeValue();
 

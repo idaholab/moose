@@ -49,6 +49,35 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
 }
 
 void
+PostprocessorWarehouse::initialSetup()
+{
+  for(PostprocessorIterator i=allPostprocessorsBegin(); i!=allPostprocessorsEnd(); ++i)
+    (*i)->initialSetup();
+}
+
+void
+PostprocessorWarehouse::timestepSetup()
+{
+  for(PostprocessorIterator i=allPostprocessorsBegin(); i!=allPostprocessorsEnd(); ++i)
+    (*i)->timestepSetup();
+}
+
+void
+PostprocessorWarehouse::residualSetup()
+{
+  for(PostprocessorIterator i=allPostprocessorsBegin(); i!=allPostprocessorsEnd(); ++i)
+    (*i)->residualSetup();
+}
+
+void
+PostprocessorWarehouse::jacobianSetup()
+{
+  for(PostprocessorIterator i=allPostprocessorsBegin(); i!=allPostprocessorsEnd(); ++i)
+    (*i)->jacobianSetup();
+}
+
+
+void
 PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 {
   _all_postprocessors.push_back(postprocessor);

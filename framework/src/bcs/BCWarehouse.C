@@ -30,6 +30,54 @@ BCWarehouse::~BCWarehouse()
 }
 
 void
+BCWarehouse::initialSetup()
+{
+  for (std::map<unsigned int, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
+    for(unsigned int i=0; i<curr->second.size(); i++)
+      (curr->second)[i]->initialSetup();      
+
+  for (std::map<unsigned int, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)  
+    for(unsigned int i=0; i<curr->second.size(); i++)
+      (curr->second)[i]->initialSetup();
+}
+
+void
+BCWarehouse::timestepSetup()
+{
+  for (std::map<unsigned int, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
+    for(unsigned int i=0; i<curr->second.size(); i++)
+      (curr->second)[i]->timestepSetup();      
+
+  for (std::map<unsigned int, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)  
+    for(unsigned int i=0; i<curr->second.size(); i++)
+      (curr->second)[i]->timestepSetup();
+}
+
+void
+BCWarehouse::residualSetup()
+{
+  for (std::map<unsigned int, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
+    for(unsigned int i=0; i<curr->second.size(); i++)
+      (curr->second)[i]->residualSetup();      
+
+  for (std::map<unsigned int, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)  
+    for(unsigned int i=0; i<curr->second.size(); i++)
+      (curr->second)[i]->residualSetup();
+}
+
+void
+BCWarehouse::jacobianSetup()
+{
+  for (std::map<unsigned int, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
+    for(unsigned int i=0; i<curr->second.size(); i++)
+      (curr->second)[i]->jacobianSetup();      
+
+  for (std::map<unsigned int, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)  
+    for(unsigned int i=0; i<curr->second.size(); i++)
+      (curr->second)[i]->jacobianSetup();
+}
+
+void
 BCWarehouse::addBC(unsigned int boundary_id, IntegratedBC *bc)
 {
   _bcs[boundary_id].push_back(bc);

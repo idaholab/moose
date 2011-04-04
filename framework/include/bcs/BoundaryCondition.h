@@ -51,8 +51,6 @@ public:
 
   MooseVariable & variable() { return _var; }
 
-  virtual void setup() { }
-
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;

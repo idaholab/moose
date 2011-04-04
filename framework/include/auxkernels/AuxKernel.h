@@ -59,8 +59,6 @@ public:
 
   MooseVariable & variable() { return _var; }
 
-  virtual void setup() { }
-
   bool isNodal();
 
   bool ts() { return _ts; }

@@ -36,6 +36,71 @@ MaterialWarehouse::~MaterialWarehouse()
       delete (*k);
 }
 
+
+void
+MaterialWarehouse::initialSetup()
+{
+  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->initialSetup();
+
+  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->initialSetup();
+
+  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->initialSetup();
+}
+
+void
+MaterialWarehouse::timestepSetup()
+{
+  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->timestepSetup();
+
+  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->timestepSetup();
+
+  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->timestepSetup();
+}
+
+void
+MaterialWarehouse::residualSetup()
+{
+  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->residualSetup();
+
+  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->residualSetup();
+
+  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->residualSetup();
+}
+
+void
+MaterialWarehouse::jacobianSetup()
+{
+  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->jacobianSetup();
+
+  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->jacobianSetup();
+
+  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+      (*k)->jacobianSetup();
+}
+
 bool
 MaterialWarehouse::hasMaterials(unsigned int block_id)
 {

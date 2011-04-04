@@ -106,6 +106,30 @@ NonlinearSystem::init()
   _residual_copy.init(_sys.n_dofs(), false, SERIAL);
 }
 
+void
+NonlinearSystem::initialSetupBCs()
+{
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+    _bcs[i].initialSetup();
+}
+
+void
+NonlinearSystem::initialSetupKernels()
+{
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+    _kernels[i].initialSetup();
+}
+
+void
+NonlinearSystem::timestepSetup()
+{
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
+    _kernels[i].timestepSetup();
+    _bcs[i].timestepSetup();
+  }
+}
+
 bool
 NonlinearSystem::converged()
 {
@@ -381,6 +405,13 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
 {
   residual.zero();
 
+  // residualSetup() /////
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
+    _kernels[i].residualSetup();
+    _bcs[i].residualSetup();
+  }
+  
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeResidualThread cr(_problem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
@@ -450,6 +481,13 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 //   PETSC_TRUE);
 #endif
 #endif
+
+  // jacobianSetup /////
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
+    _kernels[i].jacobianSetup();
+    _bcs[i].jacobianSetup();
+  }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
@@ -613,15 +651,6 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
   const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
   const std::set<short int> & boundary_ids = _mesh.get_boundary_ids();
-
-  for(std::set<short int>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-  {
-    short int id = *it;
-
-    std::vector<NodalBC *> & bcs = _bcs[0].getNodalBCs(id);
-    for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
-      (*it)->setup();
-  }
 
   const unsigned int n_nodes = nodes.size();
 

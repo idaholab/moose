@@ -60,7 +60,11 @@ public:
   virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid]->sideElem(); }
   virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid]->node(); }
 
+  virtual void initialSetup();
+  virtual void timestepSetup();
+  
   virtual void prepare(const Elem * elem, THREAD_ID tid);
+
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
@@ -87,11 +91,10 @@ public:
   virtual void copyOldSolutions();
 
   // NL /////
+  NonlinearSystem & getNonlinearSystem() { return _nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
-
-  NonlinearSystem & getNonlinearSystem() { return _nl; }
 
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
@@ -114,7 +117,8 @@ public:
 
   // Materials /////
   void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
-  const std::vector<Material*> & getMaterials(unsigned int block_id, THREAD_ID tid);
+  virtual const std::vector<Material*> & getMaterials(unsigned int block_id, THREAD_ID tid);
+  virtual const std::vector<Material*> & getFaceMaterials(unsigned int block_id, THREAD_ID tid);
   virtual void updateMaterials();
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);

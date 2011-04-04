@@ -37,6 +37,11 @@ public:
 
   virtual void init();
 
+  virtual void initialSetup();
+  virtual void timestepSetup();
+  virtual void residualSetup();
+  virtual void jacobianSetup();
+
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
@@ -54,7 +59,6 @@ public:
 protected:
   virtual void computeInternal(std::vector<AuxWarehouse> & auxs);
 
-  void setupKernels(AuxKernelIterator & begin, AuxKernelIterator & end);
   void computeNodalVars(std::vector<AuxWarehouse> & auxs);
   void computeElementalVars(std::vector<AuxWarehouse> & auxs);
 

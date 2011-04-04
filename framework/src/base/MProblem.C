@@ -122,6 +122,51 @@ MProblem::~MProblem()
   delete _displaced_problem;
 }
 
+
+void MProblem::initialSetup()
+{
+  copySolutionsBackwards();
+  adaptivity().initial();
+
+  //Update the geometric searches (has to be called after the problem is all set up)
+  updateGeomSearch();
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _materials[i].initialSetup();
+    _pps[i].initialSetup();
+    _pps_residual[i].initialSetup();
+    _pps_jacobian[i].initialSetup();
+    _pps_newtonit[i].initialSetup();
+  }
+
+  computePostprocessors();
+  if (_output_initial)
+  {
+    output();
+    outputPostprocessors();
+  }
+
+  _aux.initialSetup();
+  _nl.initialSetupBCs();
+  _nl.initialSetupKernels();
+}
+
+void MProblem::timestepSetup()
+{
+  unsigned int n_threads = libMesh::n_threads();
+
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _materials[i].timestepSetup();
+  }
+
+  _aux.timestepSetup();
+  _nl.timestepSetup();
+}
+
 void
 MProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
@@ -502,6 +547,13 @@ MProblem::getMaterials(unsigned int block_id, THREAD_ID tid)
   return _materials[tid].getMaterials(block_id);
 }
 
+const std::vector<Material*> &
+MProblem::getFaceMaterials(unsigned int block_id, THREAD_ID tid)
+{
+  mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
+  return _materials[tid].getBoundaryMaterials(block_id);
+}
+
 void
 MProblem::updateMaterials()
 {
@@ -704,15 +756,22 @@ MProblem::computePostprocessors(int pps_type)
 {
   Moose::perf_log.push("compute_postprocessors()","Solve");
 
-  // This resets stuff so that id 0 is the first id
-  ParallelUniqueId::reinitialize();
-
+  /* TODO: Remove the 0 when we actually thread these guys! */
   if ((pps_type & Moose::PPS_RESIDUAL) == Moose::PPS_RESIDUAL)
+  {
+    _pps_residual[0].residualSetup();
     computePostprocessorsInternal(_pps_residual);
+  }
   if ((pps_type & Moose::PPS_JACOBIAN) == Moose::PPS_JACOBIAN)
+  {
+    _pps_residual[0].jacobianSetup();
     computePostprocessorsInternal(_pps_jacobian);
+  }
   if ((pps_type & Moose::PPS_TIMESTEP) == Moose::PPS_TIMESTEP)
+  {
+    _pps_residual[0].timestepSetup();
     computePostprocessorsInternal(_pps);
+  }
 
   Moose::perf_log.pop("compute_postprocessors()","Solve");
 }
@@ -878,7 +937,16 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
 
+  unsigned int n_threads = libMesh::n_threads();
+
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _materials[i].residualSetup();
+  }
+
+  _aux.residualSetup();
   _aux.compute();
+  
   _nl.computeResidual(residual);
 }
 
@@ -891,6 +959,14 @@ MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
 
+  unsigned int n_threads = libMesh::n_threads();
+
+  for(unsigned int i=0; i<n_threads; i++)
+  {
+    _materials[i].jacobianSetup();
+  }
+
+  _aux.jacobianSetup();
   _aux.compute();
   _nl.computeJacobian(jacobian);
 }

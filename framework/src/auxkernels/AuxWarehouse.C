@@ -30,6 +30,34 @@ AuxWarehouse::~AuxWarehouse()
     delete *j;
 }
 
+void
+AuxWarehouse::initialSetup()
+{
+  for(AuxKernelIterator i=allAuxKernelsBegin(); i!=allAuxKernelsEnd(); ++i)
+    (*i)->initialSetup();
+}
+
+void
+AuxWarehouse::timestepSetup()
+{
+  for(AuxKernelIterator i=allAuxKernelsBegin(); i!=allAuxKernelsEnd(); ++i)
+    (*i)->timestepSetup();
+}
+
+void
+AuxWarehouse::residualSetup()
+{
+  for(AuxKernelIterator i=allAuxKernelsBegin(); i!=allAuxKernelsEnd(); ++i)
+    (*i)->residualSetup();
+}
+
+void
+AuxWarehouse::jacobianSetup()
+{
+  for(AuxKernelIterator i=allAuxKernelsBegin(); i!=allAuxKernelsEnd(); ++i)
+    (*i)->jacobianSetup();
+}
+
 AuxKernelIterator
 AuxWarehouse::activeNodalAuxKernelsBegin()
 {
@@ -117,18 +145,21 @@ AuxWarehouse::setActiveElementKernels(std::list<AuxKernel *> &auxs)
 void
 AuxWarehouse::addBC(AuxKernel *aux)
 {
+  _all_aux_kernels.push_back(aux);
   _aux_bcs.push_back(aux);
 }
 
 void
 AuxWarehouse::addActiveBC(unsigned int boundary_id, AuxKernel *aux)
 {
+  _all_aux_kernels.push_back(aux);
   _active_bcs[boundary_id].push_back(aux);
 }
 
 void
 AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids)
 {
+  _all_aux_kernels.push_back(aux);
   if (block_ids.empty())
   {
     if(aux->isNodal())
@@ -150,3 +181,14 @@ AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids
   }
 }
 
+AuxKernelIterator
+AuxWarehouse::allAuxKernelsBegin()
+{
+  return _all_aux_kernels.begin();
+}
+
+AuxKernelIterator
+AuxWarehouse::allAuxKernelsEnd()
+{
+  return _all_aux_kernels.end();
+}

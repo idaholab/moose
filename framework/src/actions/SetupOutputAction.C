@@ -79,6 +79,7 @@ SetupOutputAction::act()
 #endif
 
   exec->outputInitial(getParam<bool>("output_initial"));
+  problem.outputInitial(getParam<bool>("output_initial"));
 
   if (_parser_handle._problem != NULL)
   {

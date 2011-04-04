@@ -57,8 +57,6 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
-  virtual void setup() { }
-
   /**
    * This pure virtual must be overridden by derived classes!
    *

@@ -36,6 +36,12 @@ public:
   KernelWarehouse();
   virtual ~KernelWarehouse();
 
+  // Setup /////
+  void initialSetup();
+  void timestepSetup();
+  void residualSetup();
+  void jacobianSetup();
+
   KernelIterator allKernelsBegin();
   KernelIterator allKernelsEnd();
 

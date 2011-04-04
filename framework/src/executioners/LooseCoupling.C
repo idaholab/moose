@@ -134,7 +134,7 @@ LooseCoupling::executeBlocks(const std::string & name)
 void
 LooseCoupling::execute()
 {
-  _problem.copySolutionsBackwards();
+  _problem.initialSetup();
 
   if (_output_initial)
     _problem.output();
@@ -169,6 +169,8 @@ LooseCoupling::execute()
     //  setScaling();
 
   //    preSolve();
+
+      subproblem.timestepSetup();
 
     //  Moose::perf_log.push("solve()","Solve");
       // System Solve

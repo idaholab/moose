@@ -28,6 +28,12 @@ public:
   BCWarehouse();
   virtual ~BCWarehouse();
 
+  // Setup /////
+  void initialSetup();
+  void timestepSetup();
+  void residualSetup();
+  void jacobianSetup();
+
   void addBC(unsigned int boundary_id, IntegratedBC *bc);
   void addNodalBC(unsigned int boundary_id, NodalBC *bc);
 

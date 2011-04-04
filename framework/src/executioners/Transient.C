@@ -107,20 +107,10 @@ Transient::~Transient()
 void
 Transient::execute()
 {
-  _problem.copySolutionsBackwards();
-  _problem.adaptivity().initial();
-
-  //Update the geometric searches (has to be called after the problem is all set up)
-  _problem.updateGeomSearch();
+  _problem.initialSetup();
 
   preExecute();
-  _problem.computePostprocessors();
-  if (_output_initial)
-  {
-    _problem.output();
-    _problem.outputPostprocessors();
-  }
-
+  
   // Start time loop...
   while(keepGoing()) 
   {
@@ -170,7 +160,9 @@ Transient::takeStep(Real input_dt)
   }
     
   preSolve();
-    
+
+  _problem.timestepSetup();
+
   Moose::perf_log.push("solve()","Solve");
   _problem.solve();
   Moose::perf_log.pop("solve()","Solve");
@@ -344,6 +336,6 @@ Transient::lastSolveConverged()
 void
 Transient::preExecute()
 {
-
+  Executioner::preExecute();
 }
 

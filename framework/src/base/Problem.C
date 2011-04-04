@@ -15,7 +15,8 @@
 #include "Problem.h"
 #include "Factory.h"
 
-Problem::Problem()
+Problem::Problem():
+    _output_initial(false)
 {
   unsigned int n_threads = libMesh::n_threads();
 

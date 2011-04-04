@@ -29,9 +29,6 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
 { 
 }
 
-void PenetrationAux::setup()
-{}  
-
 Real
 PenetrationAux::computeValue()
 {

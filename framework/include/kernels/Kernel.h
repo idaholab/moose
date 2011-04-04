@@ -68,8 +68,6 @@ public:
    */
   Real stopTime();
 
-  virtual void setup() { }
-
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;

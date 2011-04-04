@@ -74,8 +74,6 @@ public:
    */
   virtual void timeStepSetup();
 
-  virtual void setup() { }
-
   /**
    * All materials must override this virtual.
    * This is where they fill up the vectors with values.

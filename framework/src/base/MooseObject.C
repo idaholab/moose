@@ -19,8 +19,3 @@ MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
     _pars(parameters)
 {
 }
-
-void
-MooseObject::subdomainSetup()
-{
-}

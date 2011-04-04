@@ -39,8 +39,6 @@ public:
 
   virtual ~NearestNodeValueAux() {}
 
-  virtual void setup();
-
 protected:
   virtual Real computeValue();
 

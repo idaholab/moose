@@ -25,6 +25,34 @@ KernelWarehouse::~KernelWarehouse()
 }
 
 void
+KernelWarehouse::initialSetup()
+{
+  for(KernelIterator i=allKernelsBegin(); i!=allKernelsEnd(); ++i)
+    (*i)->initialSetup();
+}
+
+void
+KernelWarehouse::timestepSetup()
+{
+  for(KernelIterator i=allKernelsBegin(); i!=allKernelsEnd(); ++i)
+    (*i)->timestepSetup();
+}
+
+void
+KernelWarehouse::residualSetup()
+{
+  for(KernelIterator i=allKernelsBegin(); i!=allKernelsEnd(); ++i)
+    (*i)->residualSetup();
+}
+
+void
+KernelWarehouse::jacobianSetup()
+{
+  for(KernelIterator i=allKernelsBegin(); i!=allKernelsEnd(); ++i)
+    (*i)->jacobianSetup();
+}
+
+void
 KernelWarehouse::addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids)
 {
   _all_kernels.push_back(kernel);

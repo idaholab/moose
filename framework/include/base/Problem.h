@@ -52,6 +52,9 @@ public:
   virtual bool hasVariable(const std::string & var_name) = 0;
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
+  virtual void initialSetup() {};
+  virtual void timestepSetup() {};
+
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid) = 0;
   virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid) = 0;
 
@@ -66,6 +69,7 @@ public:
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid) = 0;
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid) = 0;
   virtual const std::vector<Material*> & getMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
+  virtual const std::vector<Material*> & getFaceMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
 
   /// Returns true if the Problem has Dirac kernels it needs to compute on elem.
   virtual bool reinitDirac(const Elem * /*elem*/, THREAD_ID /*tid*/){ mooseError("Cannont reinit this Problem with arbitrary quadrature points!"); };
@@ -113,6 +117,7 @@ public:
 
   virtual Output & out() = 0;
   virtual void output() = 0;
+  void outputInitial(bool out_init) { _output_initial = out_init; }
 
 public:
   /**
@@ -130,6 +135,8 @@ protected:
   std::vector<std::map<std::string, Function *> > _functions;
 
   std::vector<Real> _time_weights;
+
+  bool _output_initial;				/// output initial condition if true
 };
 
 #endif /* PROBLEM_H */

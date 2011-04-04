@@ -36,6 +36,12 @@ public:
   PostprocessorWarehouse();
   virtual ~PostprocessorWarehouse();
 
+  // Setup /////
+  void initialSetup();
+  void timestepSetup();
+  void residualSetup();
+  void jacobianSetup();
+
   PostprocessorIterator elementPostprocessorsBegin(unsigned int block_id);
   PostprocessorIterator elementPostprocessorsEnd(unsigned int block_id);
 

@@ -41,21 +41,10 @@ Steady::execute()
   
   checkIntegrity();
   
-  _problem.adaptivity().initial();
-  // FIXME: move in SubProblem
-  //Update the geometric searches (has to be called after the problem is all set up)
-  _problem.geomSearchData().update();
-
+  _problem.initialSetup();
+  
   preExecute();
 
-  // FIXME: for backward compatibility
-  _problem.computePostprocessors();
-
-  if (_output_initial)
-  {
-    _problem.output();
-    _problem.outputPostprocessors();
-  }
   _time = 1.0;           // should be inside the previous if-statement, but to preserve backward compatible behavior, it has to be like this ;(
 
   // Define the refinement loop
@@ -64,6 +53,7 @@ Steady::execute()
   { 
     preSolve();
     _problem.updateMaterials();
+    _problem.timestepSetup();
     _problem.solve();
     postSolve();
 

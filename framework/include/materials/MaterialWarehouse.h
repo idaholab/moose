@@ -32,6 +32,12 @@ public:
   MaterialWarehouse();
   virtual ~MaterialWarehouse();
 
+  // Setup /////
+  void initialSetup();
+  void timestepSetup();
+  void residualSetup();
+  void jacobianSetup();
+
   bool hasMaterials(unsigned int block_id);
   bool hasBoundaryMaterials(unsigned int boundary_id);
   bool hasNeighborMaterials(unsigned int boundary_id);

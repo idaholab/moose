@@ -71,6 +71,8 @@ DT2Transient::preExecute()
   _aux1 = &aux_sys.add_vector("aux1", true, GHOSTED);
   _aux_saved = &aux_sys.add_vector("aux_saved", false, GHOSTED);
   _aux_older_saved = &aux_sys.add_vector("aux_older_saved", false, GHOSTED);
+
+  Transient::preExecute();
 }
 
 void

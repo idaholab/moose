@@ -34,13 +34,21 @@ public:
 
   template <typename T>
   const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
-  
-  /**
-   * This virtual gets called every time the subdomain changes.  This is useful for doing pre-calcualtions
-   * that should only be done once per subdomain.  In particular this is where references to material
-   * property vectors should be initialized.
-   */
-  virtual void subdomainSetup();
+
+  /// Gets called at the beginning of the simulation before this object is asked to do its job
+  virtual void initialSetup() {}
+
+  /// Gets called at the beginning of the timestep before this object is asked to do its job
+  virtual void timestepSetup() {}
+
+  /// Gets called just before the jacobian is computed and before this object is asked to do its job
+  virtual void jacobianSetup() {}
+
+  /// Gets called just before the residual is computed and before this object is asked to do its job
+  virtual void residualSetup() {}
+
+  /// Gets called when the subdomain changes (ie in a jacobian or residual loop) and before this object is asked to do its job
+  virtual void subdomainSetup() {}
 
 protected:
   std::string _name;
