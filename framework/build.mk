@@ -72,7 +72,7 @@ ifeq ($(CURR_DIR),$(MOOSE_DIR))
 	exodiffsrc  := $(shell find $(CURR_DIR)/contrib/exodiff -name *.C)
 	exodiffobj  := $(patsubst %.C, %.$(obj-suffix), $(exodiffsrc))
 	srcfiles    := $(filter-out $(exodiffsrc), $(srcfiles))
-	exodiff	    := $(CURR_DIR)/'contrib/exodiff/exodiff'
+	exodiff	    := $(CURR_DIR)/contrib/exodiff/exodiff
 endif
 
 ifeq ($(MAKE_LIBRARY),yes)
@@ -124,7 +124,7 @@ all:: $(target) $(exodiff)
 
 $(exodiff): $(exodiffobj)
 	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(exodiffobj) -o $@ $(libmesh_LIBS) $(libmsh_LDFLAGS)
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(exodiffobj) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
 
 ifeq ($(MAKE_LIBRARY),yes)
 ifeq ($(enable-shared),yes)
