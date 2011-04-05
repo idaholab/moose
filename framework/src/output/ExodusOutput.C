@@ -22,7 +22,7 @@ ExodusOutput::ExodusOutput(EquationSystems & es) :
     Outputter(es),
     _out(NULL),
     _seq(false),
-    _file_num(0),
+    _file_num(-1),
     _num(0)
 {
 }
@@ -52,7 +52,10 @@ void
 ExodusOutput::output(const std::string & file_base, Real time)
 {
   if (_out == NULL)
+  {
     _out = new ExodusII_IO(_es.get_mesh());
+    _file_num++;
+  }
 
   _num++;
   _out->write_timestep(getFileName(file_base), _es, _num, time);
@@ -115,7 +118,6 @@ ExodusOutput::outputPps(const std::string & file_base, const FormattedTable & ta
 void
 ExodusOutput::meshChanged()
 {
-  _file_num++;
   _num = 0;
 
   delete _out;

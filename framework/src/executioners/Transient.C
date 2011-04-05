@@ -189,9 +189,10 @@ void
 Transient::endStep()
 {
   if (((_t_step + 1) % _problem.out().interval() == 0 || _reset_dt))
+  {
     _problem.output();
-
-  _problem.outputPostprocessors();
+    _problem.outputPostprocessors();
+  }
 
   if (_problem.adaptivity().isOn())
   {
