@@ -65,7 +65,15 @@ endif
 #
 # source files
 srcfiles    := $(shell find $(CURR_DIR) -name *.C)
-csrcfiles    := $(shell find $(CURR_DIR) -name *.c)
+csrcfiles   := $(shell find $(CURR_DIR) -name *.c)
+
+# Contrib packages that should not be compiled into Moose
+ifeq ($(CURR_DIR),$(MOOSE_DIR))
+	exodiffsrc  := $(shell find $(CURR_DIR)/contrib/exodiff -name *.C)
+	exodiffobj  := $(patsubst %.C, %.$(obj-suffix), $(exodiffsrc))
+	srcfiles    := $(filter-out $(exodiffsrc), $(srcfiles))
+	exodiff	    := $(CURR_DIR)/'contrib/exodiff/exodiff'
+endif
 
 ifeq ($(MAKE_LIBRARY),yes)
 # THIS LINE SHOULD BE MADE MORE GENERIC
@@ -112,7 +120,11 @@ endif
 ###############################################################################
 # Build Rules:
 #
-all:: $(target)
+all:: $(target) $(exodiff)
+
+$(exodiff): $(exodiffobj)
+	@echo "Linking "$@"..."
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(exodiffobj) -o $@ $(libmesh_LIBS) $(libmsh_LDFLAGS)
 
 ifeq ($(MAKE_LIBRARY),yes)
 ifeq ($(enable-shared),yes)
@@ -151,7 +163,7 @@ doc:
 	doxygen doc/Doxyfile
 
 clean::
-	@rm -f $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
+	@rm -f $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
 	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" | xargs rm
 

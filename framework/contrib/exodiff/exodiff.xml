@@ -1,0 +1,41 @@
+<product name="Exodiff" version="votd">
+  
+  <CPPFLAGS if_option="gnu2.96 or gnu3.1ip or gnu3.1gm or gnu3.2">
+    -DLINUX -DGNU
+  </CPPFLAGS>
+  
+  <!-- two ways to get the netcdf and exodus libs:
+  
+       1) set environment variables to add appropriate -I's and -L's, or
+       
+       2) comment out the include and libs blocks, uncomment the requires
+          blocks, check the product name callouts (NetCDF, Exodus for
+          alegra and netcdf|netcdf, exodusii|exoIIv2c for sierra), and then
+          add
+            
+            -a /path/to/netcdf.xml -a /path/to/exodus.xml
+          
+          to the build line.  If desired, version="..." attributes can
+          be added to the requires callouts.  Note that for sierra, one will
+          have to be add the following to the build line
+          
+            -a /home/sntools/Src/Sierra/Sierra/votd/Sierra/Config/Sierra_resources.xml
+            -a "-s Sierra"
+   -->
+  
+  <provides name="exodiff" type="executable">
+    
+    <files glob="*.C"/>
+    <local_include/>
+    
+    <!--requires product="NetCDF"/>
+    <requires product="Exodus"/-->
+    <!--requires product="netcdf|netcdf"/>
+    <requires product="exodusii|exoIIv2c"/-->
+    
+    <include> \$(NETCDF_INCL) \$(EXODUS_INCL) </include>
+    <libs> \$(NETCDF_LIBS) \$(EXODUS_LIBS) -lexoIIv2c -lnetcdf </libs>
+  
+  </provides>
+  
+</product>
