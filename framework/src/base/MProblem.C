@@ -143,6 +143,8 @@ void MProblem::initialSetup()
     _pps_newtonit[i].initialSetup();
   }
 
+  _aux.initialSetup();
+  
   computePostprocessors();
   if (_output_initial)
   {
@@ -150,7 +152,6 @@ void MProblem::initialSetup()
     outputPostprocessors();
   }
 
-  _aux.initialSetup();
   _nl.initialSetupBCs();
   _nl.initialSetupKernels();
 }
