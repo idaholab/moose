@@ -30,7 +30,7 @@ InputParameters validParams<GapValueAux>()
 GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _penetration_locator(getPenetrationLocator(parameters.get<unsigned int>("paired_boundary"), getParam<std::vector<unsigned int> >("boundary")[0])),
-    _serialized_solution(_nl_sys.serializedSolution()),
+    _serialized_solution(_nl_sys.currentSolution()),
     _dof_map(_nl_sys.dofMap()),
     _paired_variable(coupled("paired_variable"))
 {
@@ -51,7 +51,7 @@ GapValueAux::computeValue()
 
   for(unsigned int i=0; i<slave_side_dof_indices.size(); i++)
     //The zero index is because we only have one point that the phis are evaluated at
-    gap_temp += slave_side_phi[i][0] * _serialized_solution(slave_side_dof_indices[i]);
+    gap_temp += slave_side_phi[i][0] * (*_serialized_solution)(slave_side_dof_indices[i]);
 
   return gap_temp;
 }

@@ -35,8 +35,10 @@
 #include "quadrature.h"
 #include "point.h"
 
-
 class MooseVariable;
+
+/// Free function used for a libMesh callback
+void extraSendList(std::vector<unsigned int> & send_list, void * context);
 
 class SystemBase
 {
@@ -78,6 +80,9 @@ public:
   virtual NumericVector<Number> & serializedSolution() = 0;
 
   virtual NumericVector<Number> & residualCopy() { mooseError("This system does not support getting a copy of the residual"); }
+
+  /// Will modify the send_list to add all of the extra ghosted dofs for this system
+  virtual void augmentSendList(std::vector<unsigned int> & send_list) = 0;
 
   virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
 

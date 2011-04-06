@@ -88,6 +88,8 @@ public:
       
   virtual NumericVector<Number> & residualCopy();
 
+  void augmentSendList(std::vector<unsigned int> & send_list);
+
   void setPreconditioner(Preconditioner<Real> *pc);
 
   void setupDampers();

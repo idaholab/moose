@@ -32,7 +32,7 @@ class SubProblem;
 class NearestNodeLocator
 {
 public:
-  NearestNodeLocator(MooseMesh & mesh, unsigned int boundary1, unsigned int boundary2);
+  NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, unsigned int boundary1, unsigned int boundary2);
 
   /**
    * This is the main method that is going to start the search.
@@ -49,7 +49,14 @@ public:
    */
   Node * nearestNode(unsigned int node_id);
 
+  /**
+   * Returns the list of slave nodes this Locator is tracking.
+   */
+  std::vector<unsigned int> & slaveNodes() { return _slave_nodes; }
+
 protected:
+  SubProblem & _subproblem;
+
   /**
    * Data structure used to hold nearest node info.
    */
@@ -72,7 +79,6 @@ public:
 
   bool _first;
   std::vector<unsigned int> _slave_nodes;
-  std::vector<unsigned int> _master_nodes;
 
   std::map<unsigned int, std::vector<unsigned int> > _neighbor_nodes;
 

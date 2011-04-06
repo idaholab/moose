@@ -52,7 +52,9 @@ public:
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
-  
+
+  void augmentSendList(std::vector<unsigned int> & send_list);
+
   virtual void compute();
   virtual void compute_ts();
 

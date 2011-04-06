@@ -64,6 +64,8 @@ public:
   virtual void timestepSetup();
   
   virtual void prepare(const Elem * elem, THREAD_ID tid);
+  
+  virtual void addGhostedElem(unsigned int elem_id);
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
@@ -232,6 +234,7 @@ protected:
 
   bool _has_dampers;                                    /// Whether or not this system has any Dampers associated with it.
 
+  std::set<unsigned int> _ghosted_elems;                /// Elements that should have Dofs ghosted to the local processor
 public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)
 

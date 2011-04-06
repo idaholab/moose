@@ -26,6 +26,12 @@ DisplacedSystem::~DisplacedSystem()
 }
 
 void
+DisplacedSystem::init()
+{
+  dofMap().attach_extra_send_list_function(&extraSendList, this);
+}
+
+void
 DisplacedSystem::prepare(THREAD_ID tid)
 {
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)

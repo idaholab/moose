@@ -30,7 +30,7 @@ InputParameters validParams<NearestNodeValueAux>()
 NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _nearest_node(getNearestNodeLocator(parameters.get<unsigned int>("paired_boundary"), getParam<std::vector<unsigned int> >("boundary")[0])),
-    _serialized_solution(_nl_sys.serializedSolution()),
+    _serialized_solution(_nl_sys.currentSolution()),
     _paired_variable(coupled("paired_variable"))
 {
   if(getParam<std::vector<unsigned int> >("boundary").size() > 1)
@@ -45,5 +45,5 @@ NearestNodeValueAux::computeValue()
   mooseAssert(nearest != NULL, "I do not have the nearest node for you");
   long int dof_number = nearest->dof_number(_nl_sys.number(), _paired_variable, 0);
 
-  return _serialized_solution(dof_number);
+  return (*_serialized_solution)(dof_number);
 }

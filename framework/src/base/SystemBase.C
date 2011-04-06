@@ -20,6 +20,12 @@
 // libMesh
 #include "quadrature_gauss.h"
 
+/// Free function used for a libMesh callback
+void extraSendList(std::vector<unsigned int> & send_list, void * context)
+{
+  SystemBase * sys = static_cast<SystemBase *>(context);
+  sys->augmentSendList(send_list);
+}
 
 SystemBase::SystemBase(SubProblemInterface & subproblem, const std::string & name) :
     _problem(*subproblem.parent()),

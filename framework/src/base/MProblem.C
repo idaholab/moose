@@ -132,6 +132,9 @@ void MProblem::initialSetup()
   //Update the geometric searches (has to be called after the problem is all set up)
   updateGeomSearch();
 
+  // Call reinit to get the ghosted vectors correct now that some geometric search has been done
+  _eq.reinit();
+
   unsigned int n_threads = libMesh::n_threads();
 
   for(unsigned int i=0; i<n_threads; i++)
@@ -178,6 +181,12 @@ MProblem::prepare(const Elem * elem, THREAD_ID tid)
 
   _nl.prepare(tid);
   _aux.prepare(tid);
+}
+
+void
+MProblem::addGhostedElem(unsigned int elem_id)
+{
+  _ghosted_elems.insert(elem_id);
 }
 
 bool
@@ -857,6 +866,7 @@ MProblem::getVariable(THREAD_ID tid, const std::string & var_name)
     mooseError("Unknown variable " + var_name);
 }
 
+
 void
 MProblem::init()
 {
@@ -884,6 +894,7 @@ MProblem::init2()
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
   }
   _aux.init();
+
 }
 
 void

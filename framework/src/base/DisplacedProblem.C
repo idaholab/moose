@@ -129,6 +129,9 @@ DisplacedProblem::~DisplacedProblem()
 void
 DisplacedProblem::init()
 {
+  _displaced_nl.init();
+  _displaced_aux.init();
+  
   _eq.init();
   _eq.print_info(std::cout);
 

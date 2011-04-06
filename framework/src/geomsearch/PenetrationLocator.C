@@ -60,205 +60,144 @@ PenetrationLocator::detectPenetration()
   // Retrieve the Element Boundary data structures from the mesh
   _mesh.build_side_list(elem_list, side_list, id_list);
 
-  // Data structures to hold the Nodal Boundary conditions
-  const std::vector<unsigned int> & node_list = _mesh.getBoundaryNodeListNodes();
-  const std::vector<short int> & node_boundary_list = _mesh.getBoundaryNodeListIds();
+  // Grab the slave nodes we need to worry about from the NearestNodeLocator
+  const std::vector<unsigned int> & node_list = _nearest_node.slaveNodes();
+  
+//  const std::vector<short int> & node_boundary_list = _mesh.getBoundaryNodeListIds();
 
   const unsigned int n_nodes = node_list.size();
   const unsigned int n_elems = elem_list.size();
 
   for(unsigned int i=0; i<n_nodes; i++)
   {
-    unsigned int boundary_id = node_boundary_list[i];
-
-    if(boundary_id == _slave_boundary)
+    Node & node = _mesh.node(node_list[i]);
+    
+    // See if we already have info about this node
+    if(_penetration_info[node.id()])
     {
-      Node & node = _mesh.node(node_list[i]);
-/*      
-      if(node.processor_id() == libMesh::processor_id())
+      PenetrationInfo * info = _penetration_info[node.id()];
+
+      Elem * elem = info->_elem;
+      Elem * side = info->_side;
+
+      // See if the same element still contains this point
+      if(elem->contains_point(node))
       {
-*/
-        // See if we already have info about this node
-        if(_penetration_info[node.id()])
-        {
-          PenetrationInfo * info = _penetration_info[node.id()];
-
-          Elem * elem = info->_elem;
-          Elem * side = info->_side;
-
-          // See if the same element still contains this point
-          if(elem->contains_point(node))
-          {
-            Point contact_ref = info->_closest_point_ref;
-            Point contact_phys;
-            Real distance;
-            RealGradient normal;
-            bool contact_point_on_side;
-            std::vector<std::vector<Real> > side_phi;
+        Point contact_ref = info->_closest_point_ref;
+        Point contact_phys;
+        Real distance;
+        RealGradient normal;
+        bool contact_point_on_side;
+        std::vector<std::vector<Real> > side_phi;
   
-            findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+        findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
 
-//            info->_distance = normDistance(*elem, *side, node, closest_point, normal);
-
-            info->_normal = normal;
-            info->_closest_point_ref = contact_ref;
-            info->_distance = distance;
-            info->_side_phi = side_phi;
+        info->_normal = normal;
+        info->_closest_point_ref = contact_ref;
+        info->_distance = distance;
+        info->_side_phi = side_phi;
             
-            mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
+        mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
             
-            info->_closest_point = contact_phys;
+        info->_closest_point = contact_phys;
 
-            // I hate continues but this is actually cleaner than anything I can think of
-            continue;
+        // I hate continues but this is actually cleaner than anything I can think of
+        continue;
+      }
+      else
+      {
+        // See if this element still has the same one across from it
+            
+        Point contact_ref = info->_closest_point_ref;
+        Point contact_phys;
+        Real distance;
+        RealGradient normal;
+        bool contact_point_on_side;
+        std::vector<std::vector<Real> > side_phi;
+  
+        findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+
+        if(contact_point_on_side)
+        {
+          info->_normal = normal;
+          info->_closest_point_ref = contact_ref;
+          info->_distance = distance;
+          mooseAssert(info->_distance <= 0, "Error in PenetrationLocator: Slave node not contained in element but distance was positive!");
+          info->_side_phi = side_phi;
+
+          info->_closest_point = contact_phys;
+
+          continue;
+        }
+        else
+        {
+          delete _penetration_info[node.id()];
+          _penetration_info[node.id()] = NULL;
+        }
+      }
+    } 
+          
+    Node * closest_node = _nearest_node.nearestNode(node.id());    
+    Real closest_distance = _nearest_node.distance(node.id());
+    std::vector<unsigned int> & closest_elems = _mesh.nodeToElemMap()[closest_node->id()];
+
+    for(unsigned int j=0; j<closest_elems.size(); j++)
+    {          
+      unsigned int elem_id = closest_elems[j];
+      Elem * elem = _mesh.elem(elem_id);
+            
+      for(unsigned int m=0; m<n_elems; m++)
+      {
+        if(elem_list[m] == elem_id && id_list[m] == _master_boundary)
+        {
+          unsigned int side_num = side_list[m];
+              
+          Elem *side = (elem->build_side(side_num)).release();
+              
+          Point contact_ref;
+          Point contact_phys;
+          Real distance;
+          RealGradient normal;
+          bool contact_point_on_side;
+          std::vector<std::vector<Real> > side_phi;
+  
+          findContactPoint(elem, side_num, node, true, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+
+          if(contact_point_on_side && _penetration_info[node.id()] &&
+             (
+               (std::abs(_penetration_info[node.id()]->_distance) > std::abs(distance)) ||
+               (_penetration_info[node.id()]->_distance < 0 && distance > 0)
+               )
+            )
+          {
+            delete _penetration_info[node.id()];
+            _penetration_info[node.id()] = NULL;
+          }
+
+          if(contact_point_on_side && (!_penetration_info[node.id()] ||
+                                       (
+                                         (std::abs(_penetration_info[node.id()]->_distance) > std::abs(distance)) ||
+                                         (_penetration_info[node.id()]->_distance < 0 && distance > 0)
+                                         )
+               )
+            )
+          {
+            _penetration_info[node.id()] =  new PenetrationInfo(&node,
+                                                                elem,
+                                                                side,
+                                                                side_num,
+                                                                normal,
+                                                                distance,
+                                                                contact_phys,
+                                                                contact_ref,
+                                                                side_phi);
           }
           else
           {
-            // See if this element still has the same one across from it
-//            Real distance = normDistance(*elem, *side, node, closest_point, normal);
-            
-            Point contact_ref = info->_closest_point_ref;
-            Point contact_phys;
-            Real distance;
-            RealGradient normal;
-            bool contact_point_on_side;
-            std::vector<std::vector<Real> > side_phi;
-  
-            findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
-
-            if(contact_point_on_side)
-            {
-              info->_normal = normal;
-              info->_closest_point_ref = contact_ref;
-              info->_distance = distance;
-              mooseAssert(info->_distance <= 0, "Error in PenetrationLocator: Slave node not contained in element but distance was positive!");
-              info->_side_phi = side_phi;
-
-              info->_closest_point = contact_phys;
-
-              continue;
-            }
-            else
-            {
-              delete _penetration_info[node.id()];
-              _penetration_info[node.id()] = NULL;
-            }
-          }
-        } 
-          
-        Node * closest_node = _nearest_node.nearestNode(node.id());
-        
-        Real closest_distance = _nearest_node.distance(node.id());
-        /*
-        for(unsigned int k=0; k<n_nodes; k++)  
-        {
-          unsigned int other_boundary_id = node_boundary_list[k];
-
-          if(other_boundary_id == _master_boundary)
-          {
-            Node * cur_node = _mesh.node_ptr(node_list[k]);
-                                             
-            Real distance = ((*cur_node) - node).size();
-
-            if(distance < closest_distance)
-            {
-              closest_distance = distance;
-              closest_node = cur_node;
-            }
+            delete side;
           }
         }
-        */
-        std::vector<unsigned int> & slave_elems = _mesh.nodeToElemMap()[node.id()];
-
-        bool a_slave_elem_on_this_processor = false;
-        
-        for(unsigned int j=0; j<slave_elems.size(); j++)
-        {
-          unsigned int elem_id = slave_elems[j];
-          Elem * elem = _mesh.elem(elem_id);
-
-          if(elem->processor_id() == libMesh::processor_id())
-            a_slave_elem_on_this_processor = true;
-        }
-
-        std::vector<unsigned int> & closest_elems = _mesh.nodeToElemMap()[closest_node->id()];
-
-        bool a_closest_elem_on_this_processor = false;
-        
-        for(unsigned int j=0; j<closest_elems.size(); j++)
-        {
-          unsigned int elem_id = closest_elems[j];
-          Elem * elem = _mesh.elem(elem_id);
-
-          if(elem->processor_id() == libMesh::processor_id())
-            a_closest_elem_on_this_processor = true;
-        }
-
-        // If none of the potential interactions are on this processor... we don't need to worry
-        // about this contact interaction
-        if(!a_slave_elem_on_this_processor && !a_closest_elem_on_this_processor)
-          continue;
-
-        for(unsigned int j=0; j<closest_elems.size(); j++)
-        {          
-          unsigned int elem_id = closest_elems[j];
-          Elem * elem = _mesh.elem(elem_id);
-            
-          for(unsigned int m=0; m<n_elems; m++)
-          {
-            if(elem_list[m] == elem_id && id_list[m] == _master_boundary)
-            {
-              unsigned int side_num = side_list[m];
-              
-              Elem *side = (elem->build_side(side_num)).release();
-              
-//              Real distance = normDistance(*elem, *side, node, closest_point, normal);
-              Point contact_ref;
-              Point contact_phys;
-              Real distance;
-              RealGradient normal;
-              bool contact_point_on_side;
-              std::vector<std::vector<Real> > side_phi;
-  
-              findContactPoint(elem, side_num, node, true, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
-
-              if(contact_point_on_side && _penetration_info[node.id()] &&
-                 (
-                  (std::abs(_penetration_info[node.id()]->_distance) > std::abs(distance)) ||
-                  (_penetration_info[node.id()]->_distance < 0 && distance > 0)
-                 )
-                )
-              {
-                delete _penetration_info[node.id()];
-                _penetration_info[node.id()] = NULL;
-              }
-
-              if(contact_point_on_side && (!_penetration_info[node.id()] ||
-                                           (
-                                             (std::abs(_penetration_info[node.id()]->_distance) > std::abs(distance)) ||
-                                             (_penetration_info[node.id()]->_distance < 0 && distance > 0)
-                                           )
-                                          )
-                )
-              {
-                _penetration_info[node.id()] =  new PenetrationInfo(&node,
-                                                                    elem,
-                                                                    side,
-                                                                    side_num,
-                                                                    normal,
-                                                                    distance,
-                                                                    contact_phys,
-                                                                    contact_ref,
-                                                                    side_phi);
-              }
-              else
-              {
-                delete side;
-              }
-            }
-          }
-        }
-//      }
+      }
     }
   }        
 

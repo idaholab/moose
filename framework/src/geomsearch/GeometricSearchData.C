@@ -86,7 +86,7 @@ GeometricSearchData::getNearestNodeLocator(unsigned int master, unsigned int sla
 
   if(!nnl)
   {
-    nnl = new NearestNodeLocator(_mesh, master, slave);
+    nnl = new NearestNodeLocator(_subproblem, _mesh, master, slave);
     _nearest_node_locators[std::pair<unsigned int, unsigned int>(master, slave)] = nnl;
   }
 

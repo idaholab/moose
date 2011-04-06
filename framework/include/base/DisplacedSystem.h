@@ -29,6 +29,8 @@ public:
   DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name);
   virtual ~DisplacedSystem();
 
+  virtual void init();
+
   virtual void prepare(THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
@@ -43,6 +45,8 @@ public:
 
   /// Return the residual copy from the NonlinearSystem
   virtual NumericVector<Number> & residualCopy() { return _undisplaced_system.residualCopy(); }
+
+  virtual void augmentSendList(std::vector<unsigned int> & send_list){ _undisplaced_system.augmentSendList(send_list); }
 
   /// Return whether or not the NonlinearSystem is currently computing a Jacobian matrix
   virtual bool currentlyComputingJacobian() { return _undisplaced_system.currentlyComputingJacobian(); }

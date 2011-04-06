@@ -123,6 +123,7 @@ ElementDeleter::modifyMesh(Mesh & mesh)
     
   }
 
+  mesh.prepare_for_use();
 }
 
 void

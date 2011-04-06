@@ -51,6 +51,8 @@ AuxiliarySystem::~AuxiliarySystem()
 void
 AuxiliarySystem::init()
 {
+  dofMap().attach_extra_send_list_function(&extraSendList, this);
+
   _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
 }
 
@@ -202,6 +204,28 @@ AuxiliarySystem::serializeSolution()
 {
   if(_need_serialized_solution && _sys.n_dofs() > 0)            // libMesh does not like serializing of empty vectors
     solution().localize(_serialized_solution);
+}
+
+void
+AuxiliarySystem::augmentSendList(std::vector<unsigned int> & send_list)
+{
+  std::set<unsigned int> & ghosted_elems = _mproblem._ghosted_elems;
+
+  send_list.reserve(send_list.size() + ghosted_elems.size() + 1);
+
+  DofMap & dof_map = dofMap();
+
+  std::vector<unsigned int> dof_indices;
+
+  for(std::set<unsigned int>::iterator elem_id = ghosted_elems.begin();
+      elem_id != ghosted_elems.end();
+      ++elem_id)
+  {
+    dof_map.dof_indices(_mesh.elem(*elem_id), dof_indices);
+
+    for(unsigned int i=0; i<dof_indices.size(); i++)
+      send_list.push_back(dof_indices[i]);
+  }  
 }
 
 void
