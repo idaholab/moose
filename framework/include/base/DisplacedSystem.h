@@ -45,6 +45,7 @@ public:
 
   /// Return the residual copy from the NonlinearSystem
   virtual NumericVector<Number> & residualCopy() { return _undisplaced_system.residualCopy(); }
+  virtual NumericVector<Number> & residualGhosted() { return _undisplaced_system.residualGhosted(); }
 
   virtual void augmentSendList(std::vector<unsigned int> & send_list){ _undisplaced_system.augmentSendList(send_list); }
 

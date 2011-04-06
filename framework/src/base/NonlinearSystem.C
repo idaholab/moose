@@ -62,6 +62,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
     _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
     _residual_old(_sys.add_vector("residual_old", false, GHOSTED)),
+    _residual_ghosted(_sys.add_vector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _residual_copy(*NumericVector<Number>::build().release()),
     _t(subproblem.time()),
@@ -422,6 +423,13 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     residual.close();
     residual.localize(_residual_copy);    
   }
+
+  if(_need_residual_ghosted)
+  {
+    residual.close();
+    _residual_ghosted = residual;
+    _residual_ghosted.close();
+  }
   
   computeDiracContributions(&residual);
 
@@ -762,6 +770,13 @@ NonlinearSystem::residualCopy()
 {
   _need_residual_copy = true;
   return _residual_copy;
+}
+
+NumericVector<Number> &
+NonlinearSystem::residualGhosted()
+{
+  _need_residual_ghosted = true;
+  return _residual_ghosted;
 }
 
 void

@@ -87,6 +87,7 @@ public:
   virtual NumericVector<Number> & serializedSolution();
       
   virtual NumericVector<Number> & residualCopy();
+  virtual NumericVector<Number> & residualGhosted();
 
   void augmentSendList(std::vector<unsigned int> & send_list);
 
@@ -118,6 +119,7 @@ protected:
   NumericVector<Number> & _solution_u_dot;              /// solution vector for u^dot
   NumericVector<Number> & _solution_du_dot_du;          /// solution vector for {du^dot}\over{du}
   NumericVector<Number> & _residual_old;                /// residual evaluated at the old time step (need for Crank-Nicolson)
+  NumericVector<Number> & _residual_ghosted;            /// ghosted form of the residual
 
   NumericVector<Number> & _serialized_solution;         /// Serialized version of the solution vector
 
@@ -145,6 +147,7 @@ protected:
   bool _need_serialized_solution;                       /// Whether or not a copy of the residual needs to be made
 
   bool _need_residual_copy;                             /// Whether or not a copy of the residual needs to be made
+  bool _need_residual_ghosted;                          /// Whether or not a ghosted copy of the residual needs to be made
 
   std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;   /// NumericVectors that will be zeroed before a residual computation
 
