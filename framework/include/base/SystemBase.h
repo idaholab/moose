@@ -209,6 +209,7 @@ public:
   virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep)
   {
     io.copy_nodal_solution(_sys, nodal_var_name, timestep);
+    _solution.close();
   }
 
   T & sys() { return _sys; }
