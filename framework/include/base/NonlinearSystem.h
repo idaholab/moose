@@ -41,6 +41,8 @@ public:
   NonlinearSystem(MProblem & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
+  /// Should be called before EquationSystems::init()
+  virtual void preInit();
   virtual void init();
 
   // Setup Functions ////

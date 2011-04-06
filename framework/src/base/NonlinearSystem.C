@@ -35,6 +35,7 @@
 #include "petsc_matrix.h"
 #include "numeric_vector.h"
 #include "mesh.h"
+#include "coupling_matrix.h"
 
 namespace Moose {
 
@@ -96,6 +97,18 @@ NonlinearSystem::~NonlinearSystem()
   delete _preconditioner;
   delete &_serialized_solution;
   delete &_residual_copy;
+}
+
+void
+NonlinearSystem::preInit()
+{
+  CouplingMatrix * cm = new CouplingMatrix(_sys.n_vars());
+
+  for(unsigned int i=0; i<_sys.n_vars(); i++)
+    for(unsigned int j=0; j<_sys.n_vars(); j++)
+      (*cm)(i, j) = ( i == j ? 1 : 0);
+
+  _sys.get_dof_map()._dof_coupling = cm;
 }
 
 void

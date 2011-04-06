@@ -870,6 +870,8 @@ MProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 void
 MProblem::init()
 {
+  _nl.preInit();
+  
   SubProblem::init();
   
   _mesh.applyMeshModifications();
