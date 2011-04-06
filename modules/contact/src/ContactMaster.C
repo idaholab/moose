@@ -37,7 +37,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
     DiracKernel(name, parameters),
     _component(getParam<Real>("component")),
     _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
-    _residual_copy(_sys.residualCopy()),
+    _residual_copy(_sys.residualGhosted()),
     _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
     _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
     _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),

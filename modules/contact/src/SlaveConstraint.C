@@ -41,7 +41,7 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
    _component(getParam<Real>("component")),
    _penetration_locator(getPenetrationLocator(getParam<unsigned int>("master"), getParam<unsigned int>("boundary"))),
    _penalty(getParam<Real>("penalty")),
-   _residual_copy(_sys.residualCopy()),
+   _residual_copy(_sys.residualGhosted()),
    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),

@@ -24,7 +24,6 @@ GapHeatPointSourceMaster::addPoints()
   point_to_info.clear();
 
   _slave_flux.close();
-  _slave_flux.localize(_localized_slave_flux);
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -51,7 +50,7 @@ GapHeatPointSourceMaster::computeQpResidual()
   Node * node = pinfo->_node;
   long int dof_number = node->dof_number(0, _var.number(), 0);
 
-  return -_phi[_i][_qp] * _localized_slave_flux[dof_number];
+  return -_phi[_i][_qp] * _slave_flux(dof_number);
 }
 
 Real
