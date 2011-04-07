@@ -22,6 +22,9 @@ MooseInit::MooseInit(int argc, char *argv[]) :
 	LibMeshInit(argc, argv)
 {
   ParallelUniqueId::initialize();
+
+  std::cout << "Using " << libMesh::n_threads() << " thread(s)" << std::endl;
+
   Moose::command_line = new GetPot(argc, argv);
 
   Moose::registerObjects();
