@@ -19,6 +19,9 @@ except:
 # another file
 global TestHarness
 
+# prepend path to included exodiff package
+os.environ['PATH'] = os.path.abspath('..') + '/moose/contrib/exodiff' + ':' + os.getenv('PATH')
+
 ################################################################################
 ############# this function is used by the run_tests scripts ###################
 ################################################################################
