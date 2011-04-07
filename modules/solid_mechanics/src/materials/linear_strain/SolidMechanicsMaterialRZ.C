@@ -73,12 +73,16 @@ SolidMechanicsMaterialRZ::initialSetup()
   // Load in the volumetric models
   const std::vector<Material*> * mats_p;
   if(_bnd)
+  {
     mats_p = &_problem.getFaceMaterials( _block_id, _tid );
+  }
   else
+  {
     mats_p = &_problem.getMaterials( _block_id, _tid );
+  }
 
   const std::vector<Material*> & mats = *mats_p;
-      
+
   for (unsigned int i(0); i < mats.size(); ++i)
   {
     VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
@@ -92,7 +96,7 @@ SolidMechanicsMaterialRZ::initialSetup()
 void
 SolidMechanicsMaterialRZ::computeProperties()
 {
-  
+
   if (_t_step == 1 && _cracking_strain > 0)
   {
     // Initialize crack flags
@@ -106,8 +110,8 @@ SolidMechanicsMaterialRZ::computeProperties()
         (*_crack_flags_old)[i](2) = 1;
     }
   }
-  
-  for(_qp=0; _qp<_qrule->n_points(); ++_qp)
+
+  for(_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
     _local_elasticity_tensor->calculate(_qp);
 

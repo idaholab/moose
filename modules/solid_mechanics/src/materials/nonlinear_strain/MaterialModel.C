@@ -645,23 +645,18 @@ MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 void
 MaterialModel::computeProperties()
 {
-  if (_t_step == 1)
+  if (_t_step == 1 && _cracking_strain > 0)
   {
-    if (_cracking_strain > 0)
+
+    // Initialize crack flags
+    for (unsigned int i(0); i < _qrule->n_points(); ++i)
     {
-
-      std::cerr << "SS: _crack_flags = " << & _crack_flags << std::endl;
-
-      // Initialize crack flags
-      for (unsigned int i(0); i < _qrule->n_points(); ++i)
-      {
-        (*_crack_flags)[i](0) =
-          (*_crack_flags)[i](1) =
-          (*_crack_flags)[i](2) =
-          (*_crack_flags_old)[i](0) =
-          (*_crack_flags_old)[i](1) =
-          (*_crack_flags_old)[i](2) = 1;
-      }
+      (*_crack_flags)[i](0) =
+        (*_crack_flags)[i](1) =
+        (*_crack_flags)[i](2) =
+        (*_crack_flags_old)[i](0) =
+        (*_crack_flags_old)[i](1) =
+        (*_crack_flags_old)[i](2) = 1;
     }
   }
 
