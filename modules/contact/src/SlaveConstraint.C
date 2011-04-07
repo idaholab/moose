@@ -27,7 +27,7 @@ InputParameters validParams<SlaveConstraint>()
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<unsigned int>("boundary", "The slave boundary");
   params.addRequiredParam<unsigned int>("master", "The master boundary");
-  params.addRequiredParam<Real>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -38,7 +38,7 @@ InputParameters validParams<SlaveConstraint>()
 
 SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters parameters)
   :DiracKernel(name, parameters),
-   _component(getParam<Real>("component")),
+   _component(getParam<unsigned int>("component")),
    _penetration_locator(getPenetrationLocator(getParam<unsigned int>("master"), getParam<unsigned int>("boundary"))),
    _penalty(getParam<Real>("penalty")),
    _residual_copy(_sys.residualGhosted()),
@@ -155,16 +155,16 @@ SlaveConstraint::computeQpJacobian()
   Node * node = pinfo->_node;
   long int dof_number = node->dof_number(0, _var.number(), 0);
 
-   
+
 //  RealVectorValue jac_vec;
-   
+
   // Build up jac vector
 //  for(unsigned int i=0; i<_dim; i++)
 //  {
 //    unsigned int dof_row = _dof_data._var_dof_indices[_var_num][_i];
 //    unsigned int dof_col = _dof_data._var_dof_indices[_var_num][_j];
-    
-//    Real jac_value = _jacobian_copy(dof_row, dof_col);  
+
+//    Real jac_value = _jacobian_copy(dof_row, dof_col);
 //  }
 
 //    Real jac_mag = pinfo->_normal(_component) * jac_value;
@@ -178,6 +178,6 @@ SlaveConstraint::computeQpJacobian()
   Real constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * _phi[_j][_qp];
 
 
-  
+
   return _phi[_i][_qp] * ( _penalty*constraint_mag);
 }

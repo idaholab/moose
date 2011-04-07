@@ -24,7 +24,7 @@ InputParameters validParams<ContactMaster>()
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<unsigned int>("boundary", "The master boundary");
   params.addRequiredParam<unsigned int>("slave", "The slave boundary");
-  params.addRequiredParam<Real>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -35,7 +35,7 @@ InputParameters validParams<ContactMaster>()
 
 ContactMaster::ContactMaster(const std::string & name, InputParameters parameters) :
     DiracKernel(name, parameters),
-    _component(getParam<Real>("component")),
+    _component(getParam<unsigned int>("component")),
     _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
     _residual_copy(_sys.residualGhosted()),
     _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),

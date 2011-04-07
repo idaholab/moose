@@ -50,6 +50,7 @@
 // solid_mechanics
 #include "CLSHPlasticMaterial.h"
 #include "Elastic.h"
+#include "ElasticEnergyAux.h"
 #include "Gravity.h"
 #include "GravityRZ.h"
 #include "LinearAnisotropicMaterial.h"
@@ -67,7 +68,6 @@
 #include "Pressure.h"
 #include "PressureRZ.h"
 #include "PLSHPlasticMaterial.h"
-#include "ElasticEnergyAux.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
 
@@ -87,6 +87,7 @@
 #include "RndBoundingBoxIC.h"
 
 // contact
+#include "ContactAction.h"
 #include "ContactMaster.h"
 #include "SlaveConstraint.h"
 
@@ -180,6 +181,7 @@ Elk::registerObjects()
   registerInitialCondition(RndBoundingBoxIC);
 
   // contact
+  registerAction(ContactAction, "Contact/*", "add_dirac_kernel");
   registerDiracKernel(ContactMaster);
   registerDiracKernel(SlaveConstraint);
 }
