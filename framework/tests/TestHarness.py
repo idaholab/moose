@@ -69,8 +69,8 @@ class TestHarness:
     msg = self.getFailMessage()
     if msg:
       print msg
-      exit(1)
-    exit(0)
+      sys.exit(1)
+    sys.exit(0)
 
   # override this function if you need to do stuff before the tests are run
   def preRun(self):
