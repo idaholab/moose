@@ -62,7 +62,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _current_solution(NULL),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
     _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
-    _residual_old(_sys.add_vector("residual_old", false, GHOSTED)),
+    _residual_old(NULL),
     _residual_ghosted(_sys.add_vector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _residual_copy(*NumericVector<Number>::build().release()),
@@ -302,6 +302,8 @@ NonlinearSystem::timeSteppingScheme(Moose::TimeSteppingScheme scheme)
     break;
 
   case Moose::CRANK_NICOLSON:
+    _residual_old = &_sys.add_vector("residual_old", true, GHOSTED);
+
     _time_weight[0] = 1;
     _time_weight[1] = 0;
     _time_weight[2] = 0;
@@ -335,7 +337,7 @@ NonlinearSystem::onTimestepBegin()
       {
         const NumericVector<Real> * current_solution = currentSolution();
         set_solution(solutionOld());                    // use old_solution for computing with correct solution vector
-        computeResidualInternal(_residual_old);
+        computeResidualInternal(*_residual_old);
         set_solution(*current_solution);                    // reset the solution vector
       }
     break;
@@ -475,7 +477,7 @@ NonlinearSystem::finishResidual(NumericVector<Number> & residual)
   switch (_time_stepping_scheme)
   {
   case Moose::CRANK_NICOLSON:
-    residual.add(_residual_old);
+    residual.add(*_residual_old);
     residual.close();
     break;
 
