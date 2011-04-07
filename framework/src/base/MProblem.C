@@ -126,15 +126,23 @@ MProblem::~MProblem()
 
 void MProblem::initialSetup()
 {
+  Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
   copySolutionsBackwards();
-  adaptivity().initial();
+  Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
 
+  Moose::setup_perf_log.push("adaptivity().initial()","Setup");
+  adaptivity().initial();
+  Moose::setup_perf_log.pop("adaptivity().initial()","Setup");
+
+  Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
   //Update the geometric searches (has to be called after the problem is all set up)
   updateGeomSearch();
+  Moose::setup_perf_log.pop("Initial updateGeomSearch()","Setup");
 
+  Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
   // Call reinit to get the ghosted vectors correct now that some geometric search has been done
   _eq.reinit();
-
+  Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
   unsigned int n_threads = libMesh::n_threads();
 
   for(unsigned int i=0; i<n_threads; i++)
@@ -147,16 +155,24 @@ void MProblem::initialSetup()
   }
 
   _aux.initialSetup();
-  
+
+  Moose::setup_perf_log.push("Initial computePostprocessors()","Setup");
   computePostprocessors();
+  Moose::setup_perf_log.pop("Initial computePostprocessors()","Setup");
+
+  
+  Moose::setup_perf_log.push("Output Initial Condition","Setup");
   if (_output_initial)
   {
     output();
     outputPostprocessors();
   }
+  Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   _nl.initialSetupBCs();
   _nl.initialSetupKernels();
+
+  Moose::setup_perf_log.print_log();
 }
 
 void MProblem::timestepSetup()
@@ -871,23 +887,36 @@ void
 MProblem::init()
 {
   _nl.preInit();
-  
+
+  Moose::setup_perf_log.push("eq.init()","Setup");
   SubProblem::init();
+  Moose::setup_perf_log.pop("eq.init()","Setup");
   
+  Moose::setup_perf_log.push("mesh.applyMeshModifications()","Setup");
   _mesh.applyMeshModifications();
+  Moose::setup_perf_log.pop("mesh.applyMeshModifications()","Setup");
+  
+  Moose::setup_perf_log.push("MProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();
+  Moose::setup_perf_log.pop("MProblem::init::meshChanged()","Setup");
+  
   init2();
 }
 
 void
 MProblem::init2()
 {
+  Moose::setup_perf_log.push("getMinQuadratureOrder()","Setup");
   _quadrature_order = _nl.getMinQuadratureOrder();
-
+  Moose::setup_perf_log.pop("getMinQuadratureOrder()","Setup");
+  
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _asm_info[tid]->createQRules(_quadrature_order);
 
+  Moose::setup_perf_log.push("NonlinearSystem::update()","Setup");
   _nl.update();
+  Moose::setup_perf_log.pop("NonlinearSystem::update()","Setup");
+  
   _nl.init();
 
   if (_displaced_problem)
@@ -1019,8 +1048,13 @@ MProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<
 void
 MProblem::initDisplacedProblem(const std::vector<std::string> & displacements)
 {
+  Moose::setup_perf_log.push("Create displaced_mesh","Setup");
   _displaced_mesh = new MooseMesh(_mesh);
+  Moose::setup_perf_log.pop("Create displaced_mesh","Setup");
+
+  Moose::setup_perf_log.push("Create DisplacedProblem","Setup");
   _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, displacements);
+  Moose::setup_perf_log.pop("Create DisplacedProblem","Setup");
 }
 
 void

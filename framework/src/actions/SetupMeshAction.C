@@ -65,7 +65,11 @@ SetupMeshAction::act()
     // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
     // to only perform the copy nodal variables action when using the Exodus reader
     _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
+
+    Moose::setup_perf_log.push("Read Mesh","Setup");
     _parser_handle._exreader->read(mesh_file);
+    Moose::setup_perf_log.pop("Read Mesh","Setup");
+
   }
   // get convenience pointer to mesh object
   MooseMesh *mesh = _parser_handle._mesh;
@@ -81,19 +85,25 @@ SetupMeshAction::act()
 //  if (getParam<std::string>("partitioner") == "linear")
 //    mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
 
-  mesh->prepare();
+    Moose::setup_perf_log.push("Prepare Mesh","Setup");
+    mesh->prepare();
+    Moose::setup_perf_log.pop("Prepare Mesh","Setup");
 
-  // uniformly refine mesh
-  mesh->uniformlyRefine(getParam<int>("uniform_refine"));
+    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
+    // uniformly refine mesh
+    mesh->uniformlyRefine(getParam<int>("uniform_refine"));
+    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
 
-  // FIXME: autosize problem
+    // FIXME: autosize problem
 //  MeshRefinement mesh_refinement(*mesh);
 //  if (!autoResizeProblem(mesh, mesh_refinement))
 //    mesh_refinement.uniformly_refine(getParam<int>("uniform_refine"));
-
-  mesh->meshChanged();
-
-  mesh->printInfo();
+    
+    Moose::setup_perf_log.push("Initial meshChanged()","Setup");
+    mesh->meshChanged();
+    Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
+    
+    mesh->printInfo();
   }
 
   if (isParamValid("displacements"))
@@ -106,6 +116,10 @@ SetupMeshAction::act()
   // There is no setup execution action satisfied, create the MProblem class by ourselves
   if (Moose::action_warehouse.actionBlocksWithActionBegin("setup_executioner") ==
       Moose::action_warehouse.actionBlocksWithActionEnd("setup_executioner"))
+  {
+    Moose::setup_perf_log.push("Create MProblem","Setup");
     _parser_handle._problem = new MProblem(*mesh);
+    Moose::setup_perf_log.pop("Create MProblem","Setup");
+  }
 }
 

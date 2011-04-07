@@ -434,4 +434,6 @@ setSolverDefaults(MProblem & problem)
 
 ActionWarehouse action_warehouse;
 
+PerfLog setup_perf_log("Setup");
+
 } // namespace Moose

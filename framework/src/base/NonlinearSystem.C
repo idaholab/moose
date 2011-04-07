@@ -116,9 +116,20 @@ NonlinearSystem::init()
 {
   dofMap().attach_extra_send_list_function(&extraSendList, this); 
   _current_solution = _sys.current_local_solution.get();
-  
-  _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
-  _residual_copy.init(_sys.n_dofs(), false, SERIAL);
+
+  if(_need_serialized_solution)
+  {
+    Moose::setup_perf_log.push("Init serialized_solution","Setup");
+    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+    Moose::setup_perf_log.pop("Init serialized_solution","Setup");
+  }
+
+  if(_need_residual_copy)
+  {
+    Moose::setup_perf_log.push("Init residual_copy","Setup");
+    _residual_copy.init(_sys.n_dofs(), false, SERIAL);
+    Moose::setup_perf_log.pop("Init residual_copy","Setup");
+  }
 }
 
 void

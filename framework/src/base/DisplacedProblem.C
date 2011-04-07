@@ -131,13 +131,21 @@ DisplacedProblem::init()
 {
   _displaced_nl.init();
   _displaced_aux.init();
-  
+
+  Moose::setup_perf_log.push("DisplacedProblem::init::eq.init()","Setup");
   _eq.init();
+  Moose::setup_perf_log.pop("DisplacedProblem::init::eq.init()","Setup");
+
   _eq.print_info(std::cout);
 
+  Moose::setup_perf_log.push("DisplacedProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();
+  Moose::setup_perf_log.pop("DisplacedProblem::init::meshChanged()","Setup");
 
+  Moose::setup_perf_log.push("DisplacedProblem::init::getQuadratureOrder()","Setup");
   Order qorder = _mproblem.getQuadratureOrder();
+  Moose::setup_perf_log.pop("DisplacedProblem::init::getQuadratureOrder()","Setup");
+  
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _asm_info[tid]->createQRules(qorder);
 }

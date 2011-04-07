@@ -96,7 +96,9 @@ CreateExecutionerAction::act()
 #endif //LIBMESH_HAVE_PETSC
 
   _moose_object_pars.set<MooseMesh *>("_mesh") = _parser_handle._mesh;
+  Moose::setup_perf_log.push("Create Executioner","Setup");
   _parser_handle._executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
+  Moose::setup_perf_log.pop("Create Executioner","Setup");
   if (dynamic_cast<MProblem *>(&_parser_handle._executioner->problem()) != NULL)
   {
     MProblem *mproblem = dynamic_cast<MProblem *>(&_parser_handle._executioner->problem());
@@ -190,7 +192,10 @@ CreateExecutionerAction::act()
 //    _moose_system._no_fe_reinit = getParam<bool>("no_fe_reinit");
 
     if (!getParam<bool>("perf_log"))
+    {
       Moose::perf_log.disable_logging();
+      Moose::setup_perf_log.disable_logging();
+    }
 
     NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<std::string>("scheme")));

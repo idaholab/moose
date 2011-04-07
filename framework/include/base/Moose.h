@@ -57,6 +57,11 @@ extern ActionWarehouse action_warehouse;
 extern PerfLog perf_log;
 
 /**
+ * PerfLog to be used during setup.  This log will get printed just before the first solve.
+ */
+extern PerfLog setup_perf_log;
+
+/**
  * Register objects that are in MOOSE
  */
 void registerObjects();
