@@ -172,10 +172,8 @@ LooseCoupling::execute()
 
       subproblem.timestepSetup();
 
-    //  Moose::perf_log.push("solve()","Solve");
       // System Solve
       subproblem.solve();
-    //  Moose::perf_log.pop("solve()","Solve");
 
   //    _converged = subproblem.converged();
 

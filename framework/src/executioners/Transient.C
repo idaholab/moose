@@ -162,10 +162,7 @@ Transient::takeStep(Real input_dt)
   preSolve();
 
   _problem.timestepSetup();
-
-  Moose::perf_log.push("solve()","Solve");
   _problem.solve();
-  Moose::perf_log.pop("solve()","Solve");
 
   _converged = _problem.converged();
 
