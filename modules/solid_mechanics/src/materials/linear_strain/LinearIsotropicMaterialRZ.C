@@ -59,6 +59,7 @@ LinearIsotropicMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain,
 {
   elastic_strain = total_strain;
   //Jacobian multiplier of the stress
+  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
   _Jacobian_mult[_qp] = *_local_elasticity_tensor;
 }
 

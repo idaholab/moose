@@ -142,6 +142,7 @@ PowerLawCreepMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Col
     elastic_strain -= matrix_creep_strain_increment;
 
     //  Jacobian multiplier of the stress
+    _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;
 
 }

@@ -835,7 +835,7 @@ MaterialModel::delta(int i, int j)
 void
 MaterialModel::computePreconditioning()
 {
-
+  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
   _Jacobian_mult[_qp] = *_elasticity_tensor;
 
 

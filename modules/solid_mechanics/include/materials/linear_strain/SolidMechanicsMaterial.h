@@ -3,7 +3,6 @@
 
 #include "Material.h"
 
-
 //Forward Declarations
 class SolidMechanicsMaterial;
 class VolumetricModel;
@@ -20,7 +19,6 @@ public:
   SolidMechanicsMaterial(const std::string & name, InputParameters parameters);
 
 protected:
-
   virtual void initialSetup();
 
   VariableGradient & _grad_disp_x;

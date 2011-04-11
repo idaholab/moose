@@ -49,6 +49,8 @@ CLSHPlasticMaterial::CLSHPlasticMaterial(std::string name,
 void
 CLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
 {
+  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
+
   _total_strain[_qp] = total_strain;
 
   ColumnMajorMatrix etotal_strain(total_strain);

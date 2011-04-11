@@ -45,6 +45,8 @@ LSHPlasticMaterial::LSHPlasticMaterial(std::string name,
 void
 LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
 {
+  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
+
   _total_strain[_qp] = total_strain;
 
   ColumnMajorMatrix etotal_strain(total_strain);
@@ -104,6 +106,7 @@ LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Column
   _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
     // calculate elastic strain
+    elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
     elastic_strain = etotal_strain;
     elastic_strain.reshape(LIBMESH_DIM, LIBMESH_DIM);
     elastic_strain -= matrix_plastic_strain_increment;
@@ -168,7 +171,6 @@ LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Column
 
 //now define _Jacobian_mult[_qp], which is a colummajormatrix, in terms of Jac[i][j][k][l]
     double Jac9x9[9][9];
-    _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
             for (l=0;l<3;l++)
               for (k=0;k<3;k++)
                 for (j=0;j<3;j++)
@@ -191,6 +193,7 @@ LSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Column
     ColumnMajorMatrix A(3,3);
     A.zero();
     A.fill(_plastic_strain[_qp]);
+
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;
   }
 

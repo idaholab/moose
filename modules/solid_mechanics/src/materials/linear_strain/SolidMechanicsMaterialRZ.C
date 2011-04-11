@@ -115,6 +115,7 @@ SolidMechanicsMaterialRZ::computeProperties()
   {
     _local_elasticity_tensor->calculate(_qp);
 
+    _elasticity_tensor[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
     ColumnMajorMatrix total_strain;

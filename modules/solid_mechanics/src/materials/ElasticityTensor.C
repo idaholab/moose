@@ -21,5 +21,3 @@ ElasticityTensor::calculateDerivative(unsigned int /*qp*/, unsigned int /*i*/)
   ColumnMajorMatrix m(9, 9);
   return m;
 }
-
-
