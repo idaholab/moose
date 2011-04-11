@@ -235,6 +235,8 @@ protected:
   bool _has_dampers;                                    /// Whether or not this system has any Dampers associated with it.
 
   std::set<unsigned int> _ghosted_elems;                /// Elements that should have Dofs ghosted to the local processor
+
+  PerfLog _solve_only_perf_log;                      /// Only times the solve
 public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)
 

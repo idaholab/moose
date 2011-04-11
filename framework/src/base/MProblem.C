@@ -81,7 +81,8 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _output_displaced(false),
-    _has_dampers(false)
+    _has_dampers(false),
+    _solve_only_perf_log("Solve Only")
 {
   _n++;
 
@@ -933,7 +934,9 @@ MProblem::solve()
 {
   Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
+  _solve_only_perf_log.push("solve");
   _nl.solve();
+  _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");
   _nl.update();
 }
