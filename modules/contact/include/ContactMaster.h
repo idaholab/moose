@@ -42,6 +42,7 @@ public:
   virtual void addPoints();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
 protected:
   const unsigned int _component;
   const ContactModel _model;
