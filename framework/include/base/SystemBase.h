@@ -32,6 +32,7 @@
 #include "equation_systems.h"
 #include "dof_map.h"
 #include "exodusII_io.h"
+#include "nonlinear_implicit_system.h"
 #include "quadrature.h"
 #include "point.h"
 
@@ -65,7 +66,7 @@ public:
    * This is typically a ghosted vector that comes in from the Nonlinear solver.
    */
   virtual const NumericVector<Number> * & currentSolution() = 0;
-  
+
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
   virtual NumericVector<Number> & solutionOlder() = 0;
@@ -110,7 +111,7 @@ protected:
   SubProblemInterface & _subproblem;
   MooseMesh & _mesh;
   std::string _name;
-  
+
   bool _currently_computing_jacobian;    /// Whether or not the system is currently computing the Jacobian matrix
 
   std::vector<VariableWarehouse> _vars;
@@ -163,7 +164,7 @@ public:
   virtual void computeVariables(const NumericVector<Number>& /*soln*/)
   {
   }
-  
+
   virtual NumericVector<Number> & solution() { return _solution; }
   virtual NumericVector<Number> & solutionOld() { return _solution_old; }
   virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
@@ -185,6 +186,25 @@ public:
   virtual void solve()
   {
     _sys.solve();
+  }
+
+  unsigned int n_nonlinear_iterations()
+  {
+    libMesh::NonlinearImplicitSystem * s = dynamic_cast<libMesh::NonlinearImplicitSystem*>(&_sys);
+    if (s)
+    {
+      return s->n_nonlinear_iterations();
+    }
+    return 0;
+  }
+  Real final_nonlinear_residual()
+  {
+    libMesh::NonlinearImplicitSystem * s = dynamic_cast<libMesh::NonlinearImplicitSystem*>(&_sys);
+    if (s)
+    {
+      return s->final_nonlinear_residual();
+    }
+    return 0;
   }
 
   virtual void copySolutionsBackwards()

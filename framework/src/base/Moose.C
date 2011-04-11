@@ -91,6 +91,8 @@
 #include "PrintDT.h"
 #include "PrintNumElems.h"
 #include "PrintNumNodes.h"
+#include "PrintNumNonlinearIters.h"
+#include "PrintResidual.h"
 #include "Reporter.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
@@ -146,7 +148,7 @@ registerObjects()
   registerKernel(ImplicitEuler);
   registerKernel(Reaction);
   registerKernel(RealPropertyOutput);
-  
+
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
   registerBoundaryCondition(DirichletBC);
@@ -155,14 +157,14 @@ registerObjects()
   registerBoundaryCondition(FunctionNeumannBC);
   registerBoundaryCondition(MatchedValueBC);
   registerBoundaryCondition(VacuumBC);
-  
+
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(DirichletPostprocessorBC);
   registerBoundaryCondition(SinDirichletBC);
   registerBoundaryCondition(SinNeumannBC);
   registerBoundaryCondition(VectorNeumannBC);
   registerBoundaryCondition(WeakGradientBC);
-  
+
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
 
@@ -211,6 +213,8 @@ registerObjects()
   registerPostprocessor(PrintDT);
   registerPostprocessor(PrintNumElems);
   registerPostprocessor(PrintNumNodes);
+  registerPostprocessor(PrintNumNonlinearIters);
+  registerPostprocessor(PrintResidual);
   registerPostprocessor(Reporter);
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
@@ -244,7 +248,7 @@ addActionTypes()
   registerActionName("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
   registerActionName("setup_dampers", true);
   registerActionName("check_integrity", true);
-  
+
   /// Additional Actions
   registerActionName("no_action", false);  // Used for Empty Action placeholders
   registerActionName("set_global_params", false);
@@ -271,12 +275,12 @@ addActionTypes()
   registerActionName("setup_variable_complete", false);
   registerActionName("ready_to_init", false);
   registerActionName("setup_pps_complete", false);
-  
+
   /**************************/
   /****** Dependencies ******/
   /**************************/
 
-/*  
+/*
   /// Mesh Actions
   action_warehouse.addDependency("setup_mesh", "create_mesh");
   action_warehouse.addDependency("add_mesh_modifier", "setup_mesh");
@@ -285,14 +289,14 @@ addActionTypes()
   /// Executioner
   action_warehouse.addDependency("setup_executioner", "setup_mesh_complete");
   action_warehouse.addDependency("setup_adaptivity", "setup_executioner");
-  
+
   /// Functions
   action_warehouse.addDependency("add_function", "setup_adaptivity");
   action_warehouse.addDependency("setup_function_complete", "add_function");
-  
+
   /// Variable Actions
   action_warehouse.addDependency("add_variable", "setup_function_complete");
-  
+
   /// AuxVariable Actions
   action_warehouse.addDependency("add_aux_variable", "setup_function_complete");
   action_warehouse.addDependency("setup_variable_complete", "add_aux_variable");
@@ -306,7 +310,7 @@ addActionTypes()
   /// Preconditioning
   action_warehouse.addDependency("add_preconditioning", "add_periodic_bc");
   action_warehouse.addDependency("ready_to_init", "add_preconditioning");
-  
+
   /// InitProblem
   action_warehouse.addDependency("setup_dampers", "ready_to_init");
   action_warehouse.addDependency("init_problem", "setup_dampers");
@@ -352,7 +356,7 @@ addActionTypes()
    * of this string is important.  Each line represents a set of dependencies that depend on the previous
    * line.  Items on the same line have equal weight and can be executed in any order.  */
   action_warehouse.addDependencySets(
-"(meta_action)"    
+"(meta_action)"
 "(create_mesh, set_global_params)"
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
@@ -374,7 +378,7 @@ addActionTypes()
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_stabilizer, setup_output)"
 "(check_integrity)"
 );
-  
+
 }
 
 
@@ -388,7 +392,7 @@ registerActions()
   registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");
   registerAction(SetupOutputAction, "Output", "setup_output");
   registerAction(GlobalParamsAction, "GlobalParams", "set_global_params");
-  
+
 
   /// MooseObjectActions
   registerAction(AddMeshModifierAction, "Mesh/*", "add_mesh_modifier");

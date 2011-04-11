@@ -62,9 +62,9 @@ public:
 
   virtual void initialSetup();
   virtual void timestepSetup();
-  
+
   virtual void prepare(const Elem * elem, THREAD_ID tid);
-  
+
   virtual void addGhostedElem(unsigned int elem_id);
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
@@ -130,7 +130,7 @@ public:
 
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, Moose::PostprocessorType pps_type = Moose::PPS_TIMESTEP);
-  
+
   /**
    * Get a reference to the value associated with the postprocessor.
    */
@@ -176,9 +176,21 @@ public:
 
   void serializeSolution();
 
+  virtual unsigned int n_nonlinear_iterations()
+  {
+    return _nl_iterations;
+  }
+  virtual Real final_nonlinear_residual()
+  {
+    return _nl_residual;
+  }
+
 protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;
+
+  unsigned int _nl_iterations;
+  Real _nl_residual;
 
   // quadrature
   Order _quadrature_order;                              /// Quadrature order required by all variables to integrated over them.

@@ -161,7 +161,7 @@ void MProblem::initialSetup()
   computePostprocessors();
   Moose::setup_perf_log.pop("Initial computePostprocessors()","Setup");
 
-  
+
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
   if (_output_initial)
   {
@@ -225,7 +225,7 @@ MProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
     reinitElem(elem, tid);
   }
-  
+
   if (_displaced_problem != NULL && (_reinit_displaced_elem))
     have_points = have_points || _displaced_problem->reinitDirac(_displaced_mesh->elem(elem->id()), tid);
 
@@ -256,7 +256,7 @@ MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_
   _zero[tid].resize(n_points, 0);
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
-  
+
   if (_displaced_problem != NULL && _reinit_displaced_face)
     _displaced_problem->reinitElemFace(_displaced_mesh->elem(elem->id()), side, bnd_id, tid);
 
@@ -273,7 +273,7 @@ MProblem::reinitNode(const Node * node, THREAD_ID tid)
   _zero[tid].resize(n_points, 0);
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
-  
+
   if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNode(&_displaced_mesh->node(node->id()), tid);
 
@@ -290,7 +290,7 @@ MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
   _zero[tid].resize(n_points, 0);
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
-  
+
   if (_displaced_problem != NULL && _reinit_displaced_face)
     _displaced_problem->reinitNodeFace(&_displaced_mesh->node(node->id()), bnd_id, tid);
 
@@ -309,12 +309,12 @@ MProblem::getDiracElements(std::set<const Elem *> & elems)
   {
     std::set<const Elem *> displaced_elements;
     _displaced_problem->getDiracElements(displaced_elements);
-  
+
     { // Use the ids from the displaced elements to get the undisplaced elements
       // and add them to the list
       std::set<const Elem *>::iterator it = displaced_elements.begin();
       std::set<const Elem *>::iterator end = displaced_elements.end();
-      
+
       for(;it != end; ++it)
         elems.insert(_mesh.elem((*it)->id()));
     }
@@ -892,15 +892,15 @@ MProblem::init()
   Moose::setup_perf_log.push("eq.init()","Setup");
   SubProblem::init();
   Moose::setup_perf_log.pop("eq.init()","Setup");
-  
+
   Moose::setup_perf_log.push("mesh.applyMeshModifications()","Setup");
   _mesh.applyMeshModifications();
   Moose::setup_perf_log.pop("mesh.applyMeshModifications()","Setup");
-  
+
   Moose::setup_perf_log.push("MProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();
   Moose::setup_perf_log.pop("MProblem::init::meshChanged()","Setup");
-  
+
   init2();
 }
 
@@ -910,14 +910,14 @@ MProblem::init2()
   Moose::setup_perf_log.push("getMinQuadratureOrder()","Setup");
   _quadrature_order = _nl.getMinQuadratureOrder();
   Moose::setup_perf_log.pop("getMinQuadratureOrder()","Setup");
-  
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _asm_info[tid]->createQRules(_quadrature_order);
 
   Moose::setup_perf_log.push("NonlinearSystem::update()","Setup");
   _nl.update();
   Moose::setup_perf_log.pop("NonlinearSystem::update()","Setup");
-  
+
   _nl.init();
 
   if (_displaced_problem)
@@ -936,6 +936,8 @@ MProblem::solve()
   Moose::perf_log.push("solve()","Solve");
   _solve_only_perf_log.push("solve");
   _nl.solve();
+  _nl_iterations = _nl.n_nonlinear_iterations();
+  _nl_residual = _nl.final_nonlinear_residual();
   _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");
   _nl.update();
@@ -980,7 +982,7 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
 {
   _nl.set_solution(soln);
   computePostprocessors(Moose::PPS_RESIDUAL);
-  
+
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
 
@@ -993,7 +995,7 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
 
   _aux.residualSetup();
   _aux.compute();
-  
+
   _nl.computeResidual(residual);
 }
 
@@ -1064,7 +1066,7 @@ void
 MProblem::updateGeomSearch()
 {
   _geometric_search_data.update();
-  
+
   if(_displaced_problem)
     _displaced_problem->updateGeomSearch();
 }
@@ -1107,13 +1109,13 @@ MProblem::checkProblemIntegrity()
 {
   // Check for unsatisfied actions
   const std::set<subdomain_id_type> & mesh_subdomains = _mesh.meshSubdomains();
-  Moose::action_warehouse.checkUnsatisfiedActions();  
-  
+  Moose::action_warehouse.checkUnsatisfiedActions();
+
   // Check kernel coverage of subdomains (blocks) in the mesh
   _nl.checkKernelCoverage(mesh_subdomains);
 
   // Check materials
-  { 
+  {
     bool adaptivity = _adaptivity.isOn();
     if (_material_data[0]->hasStatefulProperties() && adaptivity)
       mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
@@ -1143,15 +1145,15 @@ MProblem::checkProblemIntegrity()
       std::stringstream extra_subdomain_ids;
       /// <unsigned int> is necessary to print subdomain_id_types in the statement below
       std::copy (local_mesh_subs.begin(), local_mesh_subs.end(), std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
-      
+
       mooseError("The following blocks from your input mesh do not contain on active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
     }
   }
-  
+
   // Check that BCs used in your simulation exist in your mesh
   {
     const std::set<short> & mesh_bcs = _mesh._mesh.boundary_info->get_boundary_ids();
-    
+
     _nl.checkBCCoverage(mesh_bcs);
   }
 }

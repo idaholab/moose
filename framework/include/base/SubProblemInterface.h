@@ -54,6 +54,8 @@ public:
   virtual const Elem * & sideElem(THREAD_ID tid) = 0;
   virtual const Node * & node(THREAD_ID tid) = 0;
   virtual DiracKernelInfo & diracKernelInfo() { return _dirac_kernel_info; }
+  virtual Real final_nonlinear_residual() { return 0; }
+  virtual unsigned int n_nonlinear_iterations() { return 0; }
 
   // Geom Search
   virtual void updateGeomSearch() = 0;
