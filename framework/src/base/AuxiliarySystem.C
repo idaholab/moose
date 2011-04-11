@@ -244,6 +244,7 @@ AuxiliarySystem::compute_ts()
 void
 AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 {
+  Moose::perf_log.push("update_aux_vars_nodal()","Solve");
   SubdomainIterator subdomain_begin = _mesh.meshSubdomains().begin();
   SubdomainIterator subdomain_end = _mesh.meshSubdomains().end();
   SubdomainIterator subdomain_it;
@@ -265,9 +266,10 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
     ComputeNodalAuxVarsThread navt(_problem, *this, auxs);
     Threads::parallel_reduce(range, navt);
   }
+  Moose::perf_log.pop("update_aux_vars_nodal()","Solve");
 
   //Boundary AuxKernels
-
+  Moose::perf_log.push("update_aux_vars_nodal_bcs()","Solve");
   // after converting this into NodeRange, we can run it in parallel
   const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
   const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
@@ -311,14 +313,17 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
       var->insert(solution());
     }
   }
+  Moose::perf_log.pop("update_aux_vars_nodal_bcs()","Solve");
 }
 
 void
 AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
 {
+  Moose::perf_log.push("update_aux_vars_elemental()","Solve");
   ConstElemRange & range = *_mesh.getActiveLocalElementRange();
   ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
   Threads::parallel_reduce(range, eavt);
+  Moose::perf_log.pop("update_aux_vars_elemental()","Solve");
 }
 
 void
@@ -328,13 +333,10 @@ AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
   if(_sys.n_vars() == 0)
     return;
 
-  Moose::perf_log.push("update_aux_vars()","Solve");
 
   computeNodalVars(auxs);
   _sys.update();
   computeElementalVars(auxs);
   solution().close();
   _sys.update();
-
-  Moose::perf_log.pop("update_aux_vars()","Solve");
 }
