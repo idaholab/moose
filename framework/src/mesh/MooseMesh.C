@@ -47,10 +47,20 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
 
 MooseMesh::~MooseMesh()
 {
+  freeBndNodes();
+
   delete _active_local_elem_range;
   delete _active_node_range;
   delete _local_node_range;
   delete _bnd_node_range;
+}
+
+void
+MooseMesh::freeBndNodes()
+{
+  // free memory
+  for (std::vector<BndNode *>::iterator it = _bnd_nodes.begin(); it != _bnd_nodes.end(); ++it)
+    delete (*it);
 }
 
 void
@@ -89,6 +99,11 @@ MooseMesh::meshChanged()
   // Rebuild the boundary conditions
   build_node_list_from_side_list();
 
+  //Update the node to elem map
+  MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
+  buildNodeList();
+  cacheInfo();
+
   // Rebuild the active local element range
   delete _active_local_elem_range;
   _active_local_elem_range = NULL;
@@ -98,13 +113,15 @@ MooseMesh::meshChanged()
   // Rebuild the local node range
   delete _local_node_range;
   _local_node_range = NULL;
+  // Rebuild the boundary node range
+  delete _bnd_node_range;
+  _bnd_node_range = NULL;
 
-  // Calling this function will rebuild the range.
+  // Rebuild the ranges
   getActiveLocalElementRange();
-  // Calling this function will rebuild the range.
   getActiveNodeRange();
-  // Calling this function will rebuild the range.
   getLocalNodeRange();
+  getBoundaryNodeRange();
 
   // Print out information about the adapted mesh if requested
 //  if (_print_mesh_changed)
@@ -113,13 +130,6 @@ MooseMesh::meshChanged()
 //    _mesh->print_info();
 //  }
 
-  //Update the node to elem map
-  MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
-
-  buildNodeList();
-
-  cacheInfo();
-
   // Lets the output system know that the mesh has changed recently.
   _is_changed = true;
 }
@@ -127,9 +137,17 @@ MooseMesh::meshChanged()
 void
 MooseMesh::buildNodeList()
 {
-  _bnd_nodes.clear();
-  _bnd_ids.clear();
-  _mesh.boundary_info->build_node_list(_bnd_nodes, _bnd_ids);
+  freeBndNodes();
+
+  /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
+  std::vector<unsigned int> nodes;
+  std::vector<short int> ids;
+  _mesh.boundary_info->build_node_list(nodes, ids);
+
+  int n = nodes.size();
+  _bnd_nodes.resize(n);
+  for (int i = 0; i < n; i++)
+    _bnd_nodes[i] = new BndNode(&_mesh.node(nodes[i]), ids[i]);
 }
 
 ConstElemRange *
@@ -168,13 +186,13 @@ MooseMesh::getLocalNodeRange()
   return _local_node_range;
 }
 
-ConstNodeRange *
+ConstBndNodeRange *
 MooseMesh::getBoundaryNodeRange()
 {
   if (!_bnd_node_range)
   {
-//    _bnd_node_range = new ConstNodeRange(_bnd_nodes.begin(),
-//                                         _bnd_nodes.end(), GRAIN_SIZE);
+    _bnd_node_range = new ConstBndNodeRange(bnd_nodes_begin(),
+                                            bnd_nodes_end(), GRAIN_SIZE);
   }
 
   return _bnd_node_range;
@@ -212,4 +230,21 @@ std::set<subdomain_id_type> &
 MooseMesh::getNodeBlockIds(const Node & node)
 {
   return _block_node_list[node.id()];
+}
+
+
+// default begin() accessor
+bnd_node_iterator
+MooseMesh::bnd_nodes_begin ()
+{
+  Predicates::NotNull<bnd_node_iterator_imp> p;
+  return bnd_node_iterator(_bnd_nodes.begin(), _bnd_nodes.end(), p);
+}
+
+// default end() accessor
+bnd_node_iterator
+MooseMesh::bnd_nodes_end ()
+{
+  Predicates::NotNull<bnd_node_iterator_imp> p;
+  return bnd_node_iterator(_bnd_nodes.end(), _bnd_nodes.end(), p);
 }

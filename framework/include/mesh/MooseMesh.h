@@ -16,6 +16,7 @@
 #define MOOSEMESH_H
 
 #include "InputParameters.h"
+#include "BndNode.h"
 
 // libMesh
 #include "mesh.h"
@@ -27,9 +28,6 @@
 class MeshModifier;
 
 typedef std::set<subdomain_id_type>::const_iterator SubdomainIterator;
-
-//typedef StoredRange<MeshBase::node_iterator,             Node*>      NodeRange;
-//typedef StoredRange<MeshBase::const_node_iterator, const Node*> ConstNodeRange;
 
 // NOTE: maybe inheritance would be better here
 //
@@ -46,8 +44,9 @@ public:
   const std::set<short int> & get_boundary_ids () const { return _mesh.boundary_info->get_boundary_ids(); }
 
   void buildNodeList ();
-  const std::vector<unsigned int> & getBoundaryNodeListNodes() { return _bnd_nodes; }
-  const std::vector<short int> & getBoundaryNodeListIds() { return _bnd_ids; }
+
+  virtual bnd_node_iterator bnd_nodes_begin ();
+  virtual bnd_node_iterator bnd_nodes_end ();
 
   void build_node_list_from_side_list() { _mesh.boundary_info->build_node_list_from_side_list(); }
   void build_side_list(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il) { _mesh.boundary_info->build_side_list(el, sl, il); }
@@ -78,7 +77,7 @@ public:
   ConstElemRange * getActiveLocalElementRange();
   NodeRange * getActiveNodeRange();
   ConstNodeRange * getLocalNodeRange();
-  ConstNodeRange * getBoundaryNodeRange();
+  ConstBndNodeRange * getBoundaryNodeRange();
 
   const std::set<subdomain_id_type> & meshSubdomains() { return _mesh_subdomains; }
 
@@ -110,11 +109,7 @@ protected:
   ConstElemRange * _active_local_elem_range;
   NodeRange * _active_node_range;
   ConstNodeRange * _local_node_range;
-  ConstNodeRange * _bnd_node_range;
-
-  /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
-  std::vector<unsigned int> _bnd_nodes;
-  std::vector<short int> _bnd_ids;
+  ConstBndNodeRange * _bnd_node_range;
 
   /**
    * A map of all of the current nodes to the elements that they are connected to.
@@ -125,9 +120,14 @@ protected:
 
   std::vector<MeshModifier *> _mesh_modifiers;
 
-  std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;              /// list of nodes that belongs to a specified block (domain)
+  std::vector<BndNode *> _bnd_nodes;                                        /// array of boundary nodes
+  typedef std::vector<BndNode *>::iterator             bnd_node_iterator_imp;
+  typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
+
+  std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;        /// list of nodes that belongs to a specified block (domain)
 
   void cacheInfo();
+  void freeBndNodes();
 };
 
 #endif /* MOOSEMESH_H */

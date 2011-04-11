@@ -64,15 +64,12 @@ NearestNodeLocator::findNodes()
     std::vector<unsigned int> trial_master_nodes;
     
     // Data strcutres to hold the Nodal Boundary conditions
-    const std::vector<unsigned int> & node_list = _mesh.getBoundaryNodeListNodes();
-    const std::vector<short int> & node_boundary_list = _mesh.getBoundaryNodeListIds();
-
-    const unsigned int n_nodes = node_list.size();
-
-    for(unsigned int i=0; i<n_nodes; i++)
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
     {
-      unsigned int boundary_id = node_boundary_list[i];
-      unsigned int node_id = node_list[i];
+      const BndNode * bnode = *nd;
+      unsigned int boundary_id = bnode->_bnd_id;
+      unsigned int node_id = bnode->_node->id();
 
       if(boundary_id == _boundary1)
         trial_master_nodes.push_back(node_id);

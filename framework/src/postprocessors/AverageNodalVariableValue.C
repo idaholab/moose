@@ -33,13 +33,13 @@ AverageNodalVariableValue::AverageNodalVariableValue(const std::string & name, I
     _var_name(parameters.get<std::string>("variable")),
     _nodesetid(parameters.get<unsigned int>("nodeset"))
 {
-  const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
-  const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
-
-  for (unsigned int i = 0; i < nodes.size(); i++)
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
-    if (ids[i] == int(_nodesetid))
-      _node_ids.push_back(nodes[i]);
+    const BndNode * bnode = *nd;
+
+    if ((unsigned int) bnode->_bnd_id == _nodesetid)
+      _node_ids.push_back(bnode->_node->id());
   }
 }
 

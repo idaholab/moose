@@ -271,12 +271,12 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
   //Boundary AuxKernels
   Moose::perf_log.push("update_aux_vars_nodal_bcs()","Solve");
   // after converting this into NodeRange, we can run it in parallel
-  const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
-  const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
-  const unsigned int n_nodes = nodes.size();
-
-  for(unsigned int i=0; i<n_nodes; i++)
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
+    const BndNode * bnode = *nd;
+    short int boundary_id = bnode->_bnd_id;
+
     // prepare variables
     for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[0].begin(); it != _nodal_vars[0].end(); ++it)
     {
@@ -284,19 +284,19 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
       var->prepare_aux();
     }
 
-    aux_begin = auxs[0].activeAuxBCsBegin(ids[i]);
-    aux_end = auxs[0].activeAuxBCsEnd(ids[i]);
+    aux_begin = auxs[0].activeAuxBCsBegin(boundary_id);
+    aux_end = auxs[0].activeAuxBCsEnd(boundary_id);
 
     if(aux_begin != aux_end)
     {
-      Node & node = _mesh.node(nodes[i]);
+      Node * node = bnode->_node;
 
 //      if(unlikely(_calculate_element_time))
 //        startNodeTiming(node.id());
 
-      if(node.processor_id() == libMesh::processor_id())
+      if(node->processor_id() == libMesh::processor_id())
       {
-        _problem.reinitNodeFace(&node, ids[i], 0);
+        _problem.reinitNodeFace(node, boundary_id, 0);
 
         for(AuxKernelIterator aux_it=aux_begin; aux_it != aux_end; ++aux_it)
           (*aux_it)->compute();

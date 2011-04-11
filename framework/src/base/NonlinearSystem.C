@@ -469,13 +469,12 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   Moose::perf_log.pop("residual.close3()","Solve");
 
   // do nodal BC
-  const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
-  const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
-  const unsigned int n_nodes = nodes.size();
-  for (unsigned int i = 0; i < n_nodes; i++)
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
-    unsigned int boundary_id = ids[i];
-    Node * node = &_mesh.node(nodes[i]);
+    const BndNode * bnode = *nd;
+    short int boundary_id = bnode->_bnd_id;
+    Node * node = bnode->_node;
 
     if(node->processor_id() == libMesh::processor_id())
     {
@@ -486,6 +485,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
         (*it)->computeResidual(residual);
     }
   }
+
   Moose::perf_log.push("residual.close4()","Solve");
   residual.close();
   Moose::perf_log.pop("residual.close4()","Solve");
@@ -544,16 +544,14 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   jacobian.close();  
   
   // do nodal BC
-  const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
-  const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
-
   std::vector<int> zero_rows;
 
-  const unsigned int n_nodes = nodes.size();
-  for (unsigned int i = 0; i < n_nodes; i++)
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
-    unsigned int boundary_id = ids[i];
-    Node * node = &_mesh.node(nodes[i]);
+    const BndNode * bnode = *nd;
+    unsigned int boundary_id = bnode->_bnd_id;
+    Node * node = bnode->_node;
 
     if(node->processor_id() == libMesh::processor_id())
     {
@@ -693,24 +691,19 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   //Dirichlet BCs
   std::vector<int> zero_rows;
 
-  const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
-  const std::vector<short int> & ids = _mesh.getBoundaryNodeListIds();
-  const std::set<short int> & boundary_ids = _mesh.get_boundary_ids();
-
-  const unsigned int n_nodes = nodes.size();
-
-  for(unsigned int i=0; i<n_nodes; i++)
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
   {
-    unsigned int boundary_id = ids[i];
+    const BndNode * bnode = *nd;
+    unsigned int boundary_id = bnode->_bnd_id;
+    Node * node = bnode->_node;
 
     std::vector<NodalBC *> & bcs = _bcs[0].getNodalBCs(boundary_id);
     if(bcs.size() > 0)
     {
-      Node & node = _mesh.node(nodes[i]);
-
-      if(node.processor_id() == libMesh::processor_id())
+      if(node->processor_id() == libMesh::processor_id())
       {
-        _problem.parent()->reinitNodeFace(&node, boundary_id, 0);
+        _problem.parent()->reinitNodeFace(node, boundary_id, 0);
 
         for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
         {
@@ -718,7 +711,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
           //The second zero only works with Lagrange elements!
           if((*it)->variable().number() == ivar)
           {
-            zero_rows.push_back(node.dof_number(precond_system.number(), 0, 0));
+            zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
           }
         }
       }
