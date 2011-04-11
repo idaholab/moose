@@ -74,7 +74,8 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _increment_vec(NULL),
     _preconditioner(NULL),
     _need_serialized_solution(false),
-    _need_residual_copy(false)
+    _need_residual_copy(false),
+    _need_residual_ghosted(false)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;

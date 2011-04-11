@@ -98,7 +98,7 @@ def checkForFail(output):
 
 def executeExodiff(test_dir, out_files, abs_zero, relative_error):
   for file in out_files:
-    command = 'exodiff -F ' + str(abs_zero) + ' -use_old_floor -t ' + str(relative_error) + ' ' + os.path.join(test_dir,file) + ' ' + os.path.join(test_dir,'gold',file)
+    command = 'exodiff -m -F ' + str(abs_zero) + ' -use_old_floor -t ' + str(relative_error) + ' ' + os.path.join(test_dir,file) + ' ' + os.path.join(test_dir,'gold',file)
     print command
     stdout = executeCommand(command)
     print stdout
