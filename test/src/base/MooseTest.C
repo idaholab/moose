@@ -44,6 +44,7 @@
 #include "Diff2Material.h"
 #include "StatefulMaterial.h"
 #include "StatefulTest.h"
+#include "StatefulSpatialTest.h"
 
 #include "ConvDiffMetaAction.h"
 
@@ -98,6 +99,7 @@ void registerObjects()
   registerObject(Diff2Material);
   registerObject(StatefulMaterial);
   registerObject(StatefulTest);
+  registerObject(StatefulSpatialTest);
 
   registerAction(ConvDiffMetaAction, "ConvectionDiffusion", "meta_action");
 }

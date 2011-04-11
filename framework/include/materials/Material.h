@@ -80,6 +80,11 @@ public:
    */
   virtual void computeProperties();
 
+  /**
+   * Initialize stateful properties (if material has some)
+   */
+  virtual void initStatefulProperties();
+
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;

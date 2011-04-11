@@ -44,7 +44,7 @@ public:
    * Clone this value.  Useful in copy-construction.
    * Must be reimplemented in derived classes.
    */
-  virtual PropertyValue *init () = 0;
+  virtual PropertyValue *init (int size) = 0;
 
   virtual int size () = 0;
 
@@ -83,7 +83,7 @@ public:
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual PropertyValue *init ();
+  virtual PropertyValue *init (int size);
 
   /**
    * Resizes the property to the size n
@@ -127,23 +127,20 @@ MaterialProperty<T>::type ()
 
 template <typename T>
 inline PropertyValue *
-MaterialProperty<T>::init ()
+MaterialProperty<T>::init (int size)
 {
   MaterialProperty<T> *copy = new MaterialProperty<T>;
-  libmesh_assert (copy != NULL);
-
-  copy->_value.resize(_value.size(), 0);
-
+  copy->_value.resize(size, 0);
   return copy;
 }
 
 template <>
 PropertyValue *
-MaterialProperty<std::vector<Real> >::init ();
+MaterialProperty<std::vector<Real> >::init (int size);
 
 template <>
 PropertyValue *
-MaterialProperty<ColumnMajorMatrix>::init ();
+MaterialProperty<ColumnMajorMatrix>::init (int size);
 
 template <typename T>
 inline void
@@ -156,10 +153,8 @@ template <typename T>
 inline void
 MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
 {
-  if (rhs == NULL)
-    _value.resize(0);
-  else
-    _value.shallowCopy(dynamic_cast<const MaterialProperty<T>*>(rhs)->_value);
+  mooseAssert(rhs != NULL, "Assigning NULL?");
+  _value.shallowCopy(dynamic_cast<const MaterialProperty<T>*>(rhs)->_value);
 }
 
 

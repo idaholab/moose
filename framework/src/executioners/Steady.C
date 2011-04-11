@@ -57,7 +57,6 @@ Steady::execute()
     _problem.solve();
     postSolve();
 
-    // TODO: check if the solve converged
     _problem.computePostprocessors();
     _problem.output();
     _problem.outputPostprocessors();

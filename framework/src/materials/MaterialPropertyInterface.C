@@ -26,29 +26,20 @@ MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameter
 
 template <>
 PropertyValue *
-MaterialProperty<std::vector<Real> >::init ()
+MaterialProperty<std::vector<Real> >::init (int size)
 {
   MaterialProperty<std::vector<Real> > *copy = new MaterialProperty<std::vector<Real> >;
-  libmesh_assert (copy != NULL);
-
-  copy->_value.resize(_value.size());
-
+  copy->_value.resize(size);
   return copy;
 }
 
 template <>
 PropertyValue *
-MaterialProperty<ColumnMajorMatrix>::init ()
+MaterialProperty<ColumnMajorMatrix>::init (int size)
 {
   MaterialProperty<ColumnMajorMatrix> *copy = new MaterialProperty<ColumnMajorMatrix>;
-  libmesh_assert (copy != NULL);
-
-  copy->_value.resize(_value.size());
-
-  for (unsigned int i(0); i < _value.size(); ++i)
-  {
+  copy->_value.resize(size);
+  for (unsigned int i(0); i < size; ++i)
     (*copy)[i].zero();
-  }
-
   return copy;
 }

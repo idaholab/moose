@@ -317,10 +317,18 @@ ColumnMajorMatrix::numEntries() const
 inline void
 ColumnMajorMatrix::reshape(unsigned int rows, unsigned int cols)
 {
-  mooseAssert(cols * rows == _n_entries, "Error!  Trying to change shape to something that doesn't match the current number of entries");
-
-  _n_rows = rows;
-  _n_cols = cols;
+  if (cols * rows == _n_entries)
+  {
+    _n_rows = rows;
+    _n_cols = cols;
+  }
+  else
+  {
+    _n_rows = rows;
+    _n_cols = cols;
+    _n_entries = _n_rows * _n_cols;
+    _values.resize(_n_entries);
+  }
 }
 
 inline Real &

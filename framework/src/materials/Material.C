@@ -99,6 +99,11 @@ Material::computeProperties()
 }
 
 void
+Material::initStatefulProperties()
+{
+}
+
+void
 Material::computeQpProperties()
 {
 }

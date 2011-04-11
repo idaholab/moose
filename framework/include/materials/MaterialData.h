@@ -60,7 +60,14 @@ public:
 //    }
 //  }
 
+  /**
+   * Size the properties
+   */
+  void size(unsigned int n_qpoints);
+
   bool hasStatefulProperties();
+
+  void initStatefulProps(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side = 0);
 
   /**
    * Declare the Real valued property named "name".
@@ -95,6 +102,8 @@ public:
 
 protected:
   MaterialPropertyStorage & _storage;
+
+  bool _sized;
 
   /**
    * Whether or not this material has stateful properties.  This will get automatically

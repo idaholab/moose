@@ -25,6 +25,9 @@ ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols)
 }
 
 ColumnMajorMatrix::ColumnMajorMatrix(const ColumnMajorMatrix &rhs)
+  : _n_rows(LIBMESH_DIM),
+    _n_cols(LIBMESH_DIM),
+    _n_entries(_n_cols*_n_cols)
 {
   *this = rhs;
 }
@@ -41,11 +44,17 @@ ColumnMajorMatrix::ColumnMajorMatrix(const TypeTensor<Real> &rhs)
 }
 
 ColumnMajorMatrix::ColumnMajorMatrix(const DenseMatrix<Real> &rhs)
+  : _n_rows(LIBMESH_DIM),
+    _n_cols(LIBMESH_DIM),
+    _n_entries(_n_cols*_n_cols)
 {
    *this = rhs;
 }
 
 ColumnMajorMatrix::ColumnMajorMatrix(const DenseVector<Real> &rhs)
+: _n_rows(LIBMESH_DIM),
+  _n_cols(LIBMESH_DIM),
+  _n_entries(_n_cols*_n_cols)
 {
    *this = rhs;
 }
@@ -88,7 +97,9 @@ ColumnMajorMatrix ColumnMajorMatrix::kronecker  (const ColumnMajorMatrix &  rhs)
 
 
 ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseMatrix<Real> &rhs)
- {
+{
+  mooseAssert(_n_rows == rhs.m(), "different number of rows");
+  mooseAssert(_n_cols == rhs.n(), "different number of cols");
 
   _n_rows = rhs.m();
   _n_cols = rhs.n();
@@ -104,7 +115,9 @@ ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseMatrix<Real> &rhs)
 
 
 ColumnMajorMatrix & ColumnMajorMatrix::operator=(const DenseVector<Real> &rhs)
- {
+{
+  mooseAssert(_n_rows == rhs.size(), "different number of rows");
+  mooseAssert(_n_cols == 1, "different number of cols");
 
    _n_rows = rhs.size();
    _n_cols = 1;

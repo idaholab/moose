@@ -44,14 +44,6 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  // prepare variables
-//  for (int vn = 0; vn < _sys.nVariables(); ++vn)
-//  {
-//    const std::string & var_name = _sys.sys().variable_name(vn);
-//    MooseVariable & var = _sys.getVariable(_tid, var_name);
-//    var.prepare_nodal(range.size());
-//  }
-
   for (ConstNodeRange::const_iterator node_it = range.begin() ; node_it != range.end(); ++node_it)
   {
     const Node * node = *node_it;
@@ -61,17 +53,7 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
     {
       MooseVariable * var = it->second;
       var->prepare_aux();
-
-//      {
-//        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-//        std::cerr << "[" << libMesh::processor_id() << "]: Thread #" << _tid << " var " << var->number() << " size = " << range.size() << std::endl;
-//      }
     }
-
-//    {
-//      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-//      std::cerr << "[" << libMesh::processor_id() << "]: Thread #" << _tid << " is doing node " << node->id() << std::endl;
-//    }
 
 //  if(unlikely(_calculate_element_time))
 //    startNodeTiming(node->id());
@@ -101,12 +83,6 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
     // We are done, so update the solution vector
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-//      for (int vn = 0; vn < _sys.nVariables(); ++vn)
-//      {
-//        const std::string & var_name = _sys.sys().variable_name(vn);
-//        MooseVariable & var = _sys.getVariable(_tid, var_name);
-//        var.insert(_sys.solution());
-//      }
       for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
       {
         MooseVariable * var = it->second;

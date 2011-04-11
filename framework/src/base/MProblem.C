@@ -129,9 +129,37 @@ MProblem::~MProblem()
 
 void MProblem::initialSetup()
 {
+  unsigned int n_threads = libMesh::n_threads();
+
   Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
   copySolutionsBackwards();
   Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
+
+  if (_material_data[0]->hasStatefulProperties())
+  {
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    for (ConstElemRange::const_iterator el = elem_range.begin() ; el != elem_range.end(); ++el)
+    {
+      const Elem * elem = *el;
+      subdomain_id_type blk_id = elem->subdomain_id();
+
+      mooseAssert(_materials[0].hasMaterials(blk_id), "No materials on subdomain block " + elem->id());
+      _asm_info[0]->reinit(elem);
+      unsigned int n_points = _asm_info[0]->qRule()->n_points();
+      _material_data[0]->initStatefulProps(_materials[0].getMaterials(blk_id), n_points, *elem);
+
+      for (unsigned int side=0; side<elem->n_sides(); side++)
+      {
+        mooseAssert(_materials[0].hasBoundaryMaterials(blk_id), "No face materials on subdomain block " + elem->id());
+        _asm_info[0]->reinit(elem, side);
+        unsigned int n_points = _asm_info[0]->qRuleFace()->n_points();
+        _bnd_material_data[0]->initStatefulProps(_materials[0].getBoundaryMaterials(blk_id), n_points, *elem, side);
+      }
+    }
+  }
+  else
+  {
+  }
 
   Moose::setup_perf_log.push("adaptivity().initial()","Setup");
   adaptivity().initial();
@@ -146,7 +174,6 @@ void MProblem::initialSetup()
   // Call reinit to get the ghosted vectors correct now that some geometric search has been done
   _eq.reinit();
   Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
-  unsigned int n_threads = libMesh::n_threads();
 
   for(unsigned int i=0; i<n_threads; i++)
   {
@@ -692,7 +719,7 @@ MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputP
 }
 
 Real &
-MProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
+MProblem::getPostprocessorValue(const std::string & name, THREAD_ID /*tid*/)
 {
   // Todo: This is hardcoded to zero because we only compute postprocessors serially now.
   return _pps_data[0].getPostprocessorValue(name);
