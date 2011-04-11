@@ -27,6 +27,8 @@ public:
   MaterialPropertyStorage();
   virtual ~MaterialPropertyStorage();
 
+  void releaseProperties();
+
   void shift();
 
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & props() { return *_props_elem; }

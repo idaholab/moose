@@ -23,43 +23,46 @@ MaterialPropertyStorage::MaterialPropertyStorage()
 
 MaterialPropertyStorage::~MaterialPropertyStorage()
 {
+  delete _props_elem;
+  delete _props_elem_old;
+  delete _props_elem_older;
+}
+
+void
+MaterialPropertyStorage::releaseProperties()
+{
+  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> >::iterator i;
+  for (i = _props_elem->begin(); i != _props_elem->end(); ++i)
   {
-    HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> >::iterator i;
-    for (i = _props_elem->begin(); i != _props_elem->end(); ++i)
+    HashMap<unsigned int, MaterialProperties>::iterator j;
+    for (j = i->second.begin(); j != i->second.end(); ++j)
     {
-      HashMap<unsigned int, MaterialProperties>::iterator j;
-      for (j = i->second.begin(); j != i->second.end(); ++j)
-      {
-        MaterialProperties::iterator k;
-        for (k = j->second.begin(); k != j->second.end(); ++k)
-          delete k->second;
-      }
+      MaterialProperties::iterator k;
+      for (k = j->second.begin(); k != j->second.end(); ++k)
+        delete k->second;
     }
-    delete _props_elem;
+  }
 
-    for (i = _props_elem_old->begin(); i != _props_elem_old->end(); ++i)
+  for (i = _props_elem_old->begin(); i != _props_elem_old->end(); ++i)
+  {
+    HashMap<unsigned int, MaterialProperties>::iterator j;
+    for (j = i->second.begin(); j != i->second.end(); ++j)
     {
-      HashMap<unsigned int, MaterialProperties>::iterator j;
-      for (j = i->second.begin(); j != i->second.end(); ++j)
-      {
-        MaterialProperties::iterator k;
-        for (k = j->second.begin(); k != j->second.end(); ++k)
-          delete k->second;
-      }
+      MaterialProperties::iterator k;
+      for (k = j->second.begin(); k != j->second.end(); ++k)
+        delete k->second;
     }
-    delete _props_elem_old;
+  }
 
-    for (i = _props_elem_older->begin(); i != _props_elem_older->end(); ++i)
+  for (i = _props_elem_older->begin(); i != _props_elem_older->end(); ++i)
+  {
+    HashMap<unsigned int, MaterialProperties>::iterator j;
+    for (j = i->second.begin(); j != i->second.end(); ++j)
     {
-      HashMap<unsigned int, MaterialProperties>::iterator j;
-      for (j = i->second.begin(); j != i->second.end(); ++j)
-      {
-        MaterialProperties::iterator k;
-        for (k = j->second.begin(); k != j->second.end(); ++k)
-          delete k->second;
-      }
+      MaterialProperties::iterator k;
+      for (k = j->second.begin(); k != j->second.end(); ++k)
+        delete k->second;
     }
-    delete _props_elem_older;
   }
 }
 

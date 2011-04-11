@@ -114,12 +114,24 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
 
 MProblem::~MProblem()
 {
+  bool stateful_props = _material_data[0]->hasStatefulProperties();
+
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; i++)
   {
     delete _asm_info[i];
-    delete _material_data[i];
-    delete _bnd_material_data[i];
+
+    if (!stateful_props)
+    {
+      delete _material_data[i];
+      delete _bnd_material_data[i];
+    }
+  }
+
+  if (stateful_props)
+  {
+    _material_props.releaseProperties();
+    _bnd_material_props.releaseProperties();
   }
 
 //  delete _displaced_mesh;

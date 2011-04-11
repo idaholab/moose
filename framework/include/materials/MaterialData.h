@@ -28,6 +28,8 @@ class MaterialData
 public:
   MaterialData(MaterialPropertyStorage & storage);
 
+  virtual ~MaterialData();
+
 //  virtual ~MaterialData()
 //  {
 //    {

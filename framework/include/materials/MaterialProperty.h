@@ -65,6 +65,11 @@ template <typename T>
 class MaterialProperty : public PropertyValue
 {
 public:
+  virtual ~MaterialProperty()
+  {
+    _value.release();
+  }
+
   /**
    * @returns a read-only reference to the parameter value.
    */

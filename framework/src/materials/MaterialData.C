@@ -36,6 +36,16 @@ MaterialData::MaterialData(MaterialPropertyStorage & storage) :
 {
 }
 
+MaterialData::~MaterialData()
+{
+  for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
+    delete it->second;
+  for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
+    delete it->second;
+  for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+    delete it->second;
+}
+
 bool
 MaterialData::hasStatefulProperties()
 {
