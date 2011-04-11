@@ -25,6 +25,15 @@ class ContactMaster;
 template<>
 InputParameters validParams<ContactMaster>();
 
+enum ContactModel
+{
+  CM_INVALID,
+  CM_FRICTIONLESS,
+  CM_GLUED,
+  CM_COULOMB,
+  CM_TIED
+};
+
 class ContactMaster : public DiracKernel
 {
 public:
@@ -35,6 +44,7 @@ public:
   virtual Real computeQpJacobian();
 protected:
   const unsigned int _component;
+  const ContactModel _model;
   PenetrationLocator & _penetration_locator;
   NumericVector<Number> & _residual_copy;
 
@@ -46,5 +56,7 @@ protected:
 
   RealVectorValue _vars;
 };
+
+ContactModel contactModel(const std::string & the_name);
 
 #endif //CONTACTMASTER_H

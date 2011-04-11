@@ -28,21 +28,28 @@ InputParameters validParams<ContactMaster>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
 ContactMaster::ContactMaster(const std::string & name, InputParameters parameters) :
-    DiracKernel(name, parameters),
-    _component(getParam<unsigned int>("component")),
-    _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
-    _residual_copy(_sys.residualGhosted()),
-    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
-    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
-    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
-    _vars(_x_var, _y_var, _z_var)
-{}
+  DiracKernel(name, parameters),
+  _component(getParam<unsigned int>("component")),
+  _model(contactModel(getParam<std::string>("model"))),
+  _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
+  _residual_copy(_sys.residualGhosted()),
+  _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
+  _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
+  _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+  _vars(_x_var, _y_var, _z_var)
+{
+  if (_model == CM_GLUED)
+  {
+    _penetration_locator.setUpdate(false);
+  }
+}
 
 void
 ContactMaster::addPoints()
@@ -99,20 +106,33 @@ ContactMaster::computeQpResidual()
 //  std::cout<<_residual_copy(dof_number)<<std::endl;
 
 //  std::cout<<node->id()<<": "<<_residual_copy(dof_number)<<std::endl;
+  Real resid(0);
   RealVectorValue res_vec;
-
-  // Build up residual vector
-  for(unsigned int i=0; i<_dim; i++)
+  switch(_model)
   {
-    long int dof_number = node->dof_number(0, _vars(i), 0);
-    res_vec(i) = _residual_copy(dof_number);
-  }
+  case CM_FRICTIONLESS:
+    // Build up residual vector
+    for(unsigned int i=0; i<_dim; i++)
+    {
+      long int dof_number = node->dof_number(0, _vars(i), 0);
+      res_vec(i) = _residual_copy(dof_number);
+    }
 
-  Real res_mag = pinfo->_normal * res_vec;
+    resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
+    break;
+
+  case CM_GLUED:
+  case CM_TIED:
+    resid = _residual_copy(node->dof_number(0, _component, 0));
+    break;
+
+  default:
+    mooseError("Invalid or unavailable contact model");
+  }
 
 //  std::cout<<node->id()<<":: "<<res_mag<<std::endl;
 
-  return _phi[_i][_qp]*pinfo->_normal(_component)*res_mag;
+  return _phi[_i][_qp] * resid;
 }
 
 Real
@@ -139,4 +159,35 @@ ContactMaster::computeQpJacobian()
 
   return _phi[_i][_qp]*pinfo->_normal(_component)*jac_mag;
 */
+}
+
+ContactModel
+contactModel(const std::string & the_name)
+{
+  ContactModel model(CM_INVALID);
+  std::string name(the_name);
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  if ("frictionless" == name)
+  {
+    model = CM_FRICTIONLESS;
+  }
+  else if ("glued" == name)
+  {
+    model = CM_GLUED;
+  }
+  else if ("coulomb" == name)
+  {
+    model = CM_COULOMB;
+  }
+  else if ("tied" == name)
+  {
+    model = CM_TIED;
+  }
+  else
+  {
+    std::string err("Invalid contact model found: ");
+    err += name;
+    mooseError( err );
+  }
+  return model;
 }

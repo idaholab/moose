@@ -13,6 +13,7 @@ InputParameters validParams<ContactAction>()
   params.addRequiredParam<std::string>("disp_y", "The y displacement");
   params.addParam<std::string>("disp_z", "", "The z displacement");
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<std::string>("model", "frictionless", "The contact model to use");
   return params;
 }
 
@@ -23,7 +24,8 @@ ContactAction::ContactAction(const std::string & name, InputParameters params) :
   _disp_x(getParam<std::string>("disp_x")),
   _disp_y(getParam<std::string>("disp_y")),
   _disp_z(getParam<std::string>("disp_z")),
-  _penalty(getParam<Real>("penalty"))
+  _penalty(getParam<Real>("penalty")),
+  _model(getParam<std::string>("model"))
 {
 }
 
@@ -39,6 +41,7 @@ ContactAction::act()
 
   // Create master objects
   InputParameters params;
+  params.set<std::string>("model") = _model;
   params.set<unsigned int>("boundary") = _master;
   params.set<unsigned int>("slave") = _slave;
   params.addCoupledVar("disp_x", "The x displacement");

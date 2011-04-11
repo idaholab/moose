@@ -31,6 +31,8 @@ InputParameters validParams<SlaveConstraint>()
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addParam<std::string>("model", "frictionless", "The contact model to use");
+
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   return params;
@@ -39,6 +41,7 @@ InputParameters validParams<SlaveConstraint>()
 SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters parameters)
   :DiracKernel(name, parameters),
    _component(getParam<unsigned int>("component")),
+   _model(contactModel(getParam<std::string>("model"))),
    _penetration_locator(getPenetrationLocator(getParam<unsigned int>("master"), getParam<unsigned int>("boundary"))),
    _penalty(getParam<Real>("penalty")),
    _residual_copy(_sys.residualGhosted()),
@@ -51,7 +54,7 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
 void
 SlaveConstraint::addPoints()
 {
-  point_to_info.clear();
+  _point_to_info.clear();
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -111,7 +114,7 @@ SlaveConstraint::addPoints()
       mooseAssert(elem, "Couldn't find an element on this processor that is attached to the slave node!");
 
       addPoint(elem, *node);
-      point_to_info[*node] = pinfo;
+      _point_to_info[*node] = pinfo;
     }
   }
 }
@@ -119,39 +122,52 @@ SlaveConstraint::addPoints()
 Real
 SlaveConstraint::computeQpResidual()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
+  PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
   Node * node = pinfo->_node;
 
-//  if(node->id() == 36)
-  //   std::cout<<"Constraining"<<std::endl;
-
+  Real resid(0);
   RealVectorValue res_vec;
-
-  // Build up residual vector
-  for(unsigned int i=0; i<_dim; i++)
+  Real constraint_mag(0);
+  RealVectorValue distance_vec;
+  switch(_model)
   {
-    long int dof_number = node->dof_number(0, _vars(i), 0);
-    res_vec(i) = _residual_copy(dof_number);
+  case CM_FRICTIONLESS:
+
+    constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * ( (_mesh.node(node->id())(_component)) - (pinfo->_closest_point(_component)) );
+
+    // Build up residual vector
+    for(unsigned int i=0; i<_dim; i++)
+    {
+      long int dof_number = node->dof_number(0, _vars(i), 0);
+      res_vec(i) = _residual_copy(dof_number);
+    }
+
+    resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
+    break;
+
+  case CM_GLUED:
+  case CM_TIED:
+    distance_vec = _mesh.node(node->id()) - pinfo->_closest_point;
+    constraint_mag = distance_vec(_component);
+    resid = _residual_copy(node->dof_number(0, _component, 0));
+    break;
+
+  default:
+    mooseError("Invalid or unavailable contact model");
   }
-
-  Real res_mag = pinfo->_normal * res_vec;
-
-  Real constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * ( (_mesh.node(node->id())(_component)) - (pinfo->_closest_point(_component)) );
 
 //  std::cout<<node->id()<<":: "<<constraint_mag<<std::endl;
 
   return _phi[_i][_qp] * (
-                          _penalty*(
-                               (constraint_mag)
-                              )
-                          - (pinfo->_normal(_component)*res_mag)
+                          _penalty*(constraint_mag)
+                          - resid
                          );
 }
 
 Real
 SlaveConstraint::computeQpJacobian()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
+  PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
   Node * node = pinfo->_node;
   long int dof_number = node->dof_number(0, _var.number(), 0);
 

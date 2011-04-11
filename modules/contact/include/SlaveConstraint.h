@@ -15,6 +15,8 @@
 #ifndef SLAVECONSTRAINT_H
 #define SLAVECONSTRAINT_H
 
+#include "ContactMaster.h" // For the ContactModel
+
 // Moose Includes
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
@@ -35,13 +37,14 @@ public:
   virtual Real computeQpJacobian();
 protected:
   const unsigned int _component;
+  const ContactModel _model;
   PenetrationLocator & _penetration_locator;
 
   Real _penalty;
-  
+
   NumericVector<Number> & _residual_copy;
 
-  std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;
+  std::map<Point, PenetrationLocator::PenetrationInfo *> _point_to_info;
 
   unsigned int _x_var;
   unsigned int _y_var;
