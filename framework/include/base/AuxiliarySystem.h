@@ -89,6 +89,7 @@ protected:
 
   friend class AuxKernel;
   friend class ComputeNodalAuxVarsThread;
+  friend class ComputeNodalAuxBcsThread;
   friend class ComputeElemAuxVarsThread;
 };
 

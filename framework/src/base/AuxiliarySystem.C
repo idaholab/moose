@@ -20,6 +20,7 @@
 #include "AssemblyData.h"
 #include "GeometricSearchData.h"
 #include "ComputeNodalAuxVarsThread.h"
+#include "ComputeNodalAuxBcsThread.h"
 #include "ComputeElemAuxVarsThread.h"
 
 #include "quadrature_gauss.h"
@@ -244,7 +245,6 @@ AuxiliarySystem::compute_ts()
 void
 AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 {
-  Moose::perf_log.push("update_aux_vars_nodal()","Solve");
   SubdomainIterator subdomain_begin = _mesh.meshSubdomains().begin();
   SubdomainIterator subdomain_end = _mesh.meshSubdomains().end();
   SubdomainIterator subdomain_it;
@@ -260,6 +260,7 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
     have_block_kernels |= (block_nodal_aux_begin != block_nodal_aux_end);
   }
 
+  Moose::perf_log.push("update_aux_vars_nodal()","Solve");
   if (aux_begin != aux_end || have_block_kernels)
   {
     ConstNodeRange & range = *_mesh.getLocalNodeRange();
@@ -272,47 +273,8 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
   Moose::perf_log.push("update_aux_vars_nodal_bcs()","Solve");
   // after converting this into NodeRange, we can run it in parallel
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
-  {
-    const BndNode * bnode = *nd;
-    short int boundary_id = bnode->_bnd_id;
-
-    // prepare variables
-    for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[0].begin(); it != _nodal_vars[0].end(); ++it)
-    {
-      MooseVariable * var = it->second;
-      var->prepare_aux();
-    }
-
-    aux_begin = auxs[0].activeAuxBCsBegin(boundary_id);
-    aux_end = auxs[0].activeAuxBCsEnd(boundary_id);
-
-    if(aux_begin != aux_end)
-    {
-      Node * node = bnode->_node;
-
-//      if(unlikely(_calculate_element_time))
-//        startNodeTiming(node.id());
-
-      if(node->processor_id() == libMesh::processor_id())
-      {
-        _problem.reinitNodeFace(node, boundary_id, 0);
-
-        for(AuxKernelIterator aux_it=aux_begin; aux_it != aux_end; ++aux_it)
-          (*aux_it)->compute();
-      }
-
-//      if(unlikely(_calculate_element_time))
-//        stopNodeTiming(node.id());
-    }
-
-    // update the solution vector
-    for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[0].begin(); it != _nodal_vars[0].end(); ++it)
-    {
-      MooseVariable * var = it->second;
-      var->insert(solution());
-    }
-  }
+  ComputeNodalAuxBcsThread nabt(_problem, *this, auxs);
+  Threads::parallel_reduce(bnd_nodes, nabt);
   Moose::perf_log.pop("update_aux_vars_nodal_bcs()","Solve");
 }
 
