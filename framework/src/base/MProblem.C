@@ -66,6 +66,8 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     SubProblem(mesh, parent),
     _nl(*this, name("nl", _n)),
     _aux(*this, name("aux", _n)),
+    _nl_iterations(0),
+    _nl_residual(0),
     _quadrature_order(CONSTANT),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
