@@ -110,7 +110,6 @@ DisplacedProblem::DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_me
     _ex(_eq)
 {
   _mesh.prepare();
-  _mesh.build_node_list_from_side_list();
 
   _ex.sequence(true);
 

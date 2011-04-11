@@ -84,6 +84,7 @@ public:
   void read(const std::string file_name);
 
   void prepare();
+  void update();
 
   void uniformlyRefine(int level);
 

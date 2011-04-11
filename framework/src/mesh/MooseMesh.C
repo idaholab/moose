@@ -81,8 +81,17 @@ MooseMesh::prepare()
   for (MeshBase::element_iterator el = _mesh.elements_begin(); el != el_end; ++el)
     _mesh_subdomains.insert((*el)->subdomain_id());
 
-  buildNodeList();
+  update();
+}
 
+void
+MooseMesh::update()
+{
+  // Rebuild the boundary conditions
+  build_node_list_from_side_list();
+  //Update the node to elem map
+  MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
+  buildNodeList();
   cacheInfo();
 }
 
@@ -96,13 +105,7 @@ MooseMesh::uniformlyRefine(int level)
 void
 MooseMesh::meshChanged()
 {
-  // Rebuild the boundary conditions
-  build_node_list_from_side_list();
-
-  //Update the node to elem map
-  MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
-  buildNodeList();
-  cacheInfo();
+  update();
 
   // Rebuild the active local element range
   delete _active_local_elem_range;
