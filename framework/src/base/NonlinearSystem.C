@@ -446,20 +446,26 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
 
   if(_need_residual_copy)
   {
+    Moose::perf_log.push("residual.close1()","Solve");
     residual.close();
+    Moose::perf_log.pop("residual.close1()","Solve");
     residual.localize(_residual_copy);    
   }
 
   if(_need_residual_ghosted)
   {
+    Moose::perf_log.push("residual.close2()","Solve");
     residual.close();
+    Moose::perf_log.pop("residual.close2()","Solve");
     _residual_ghosted = residual;
     _residual_ghosted.close();
   }
   
   computeDiracContributions(&residual);
 
+  Moose::perf_log.push("residual.close3()","Solve");
   residual.close();
+  Moose::perf_log.pop("residual.close3()","Solve");
 
   // do nodal BC
   const std::vector<unsigned int> & nodes = _mesh.getBoundaryNodeListNodes();
@@ -479,7 +485,10 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
         (*it)->computeResidual(residual);
     }
   }
+  Moose::perf_log.push("residual.close4()","Solve");
   residual.close();
+  Moose::perf_log.pop("residual.close4()","Solve");
+
 }
 
 void
