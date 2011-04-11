@@ -43,11 +43,11 @@ public:
 
   Real penetrationDistance(unsigned int node_id);
   RealVectorValue penetrationNormal(unsigned int node_id);
-  
+
   /**
    * Data structure used to hold penetation information
    */
-  class PenetrationInfo 
+  class PenetrationInfo
   {
   public:
     PenetrationInfo(Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi);
@@ -76,13 +76,13 @@ public:
 
   int intersect2D_Segments( Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point* I0, Point* I1 );
   int inSegment(Point P, Point SP0, Point SP1);
-  
+
   MooseMesh & _mesh;
   unsigned int _master_boundary;
   unsigned int _slave_boundary;
 
-  FEType fe_type;
-  FEBase * fe;
+  FEType _fe_type;
+  FEBase * _fe;
 
   NearestNodeLocator & _nearest_node;
 
@@ -92,6 +92,11 @@ public:
   std::map<unsigned int, PenetrationInfo *> _penetration_info;
 
   std::map<unsigned int, bool> _has_penetrated;
+
+  void setUpdate(bool update);
+
+protected:
+  bool _update_location; // Update the penetration location for nodes found last time
 };
 
 #endif //PENETRATIONLOCATOR_H

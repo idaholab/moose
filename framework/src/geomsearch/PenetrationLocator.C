@@ -34,14 +34,15 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _mesh(mesh),
     _master_boundary(master),
     _slave_boundary(slave),
-    fe_type(),
-    fe(FEBase::build(_mesh.dimension()-1, fe_type).release()),
-    _nearest_node(geom_search_data.getNearestNodeLocator(master, slave))
+    _fe_type(),
+    _fe(FEBase::build(_mesh.dimension()-1, _fe_type).release()),
+    _nearest_node(geom_search_data.getNearestNodeLocator(master, slave)),
+    _update_location(true)
 {}
 
 PenetrationLocator::~PenetrationLocator()
 {
-  delete fe;
+  delete _fe;
 
   for (std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_info.begin(); it != _penetration_info.end(); ++it)
     delete it->second;
@@ -62,24 +63,55 @@ PenetrationLocator::detectPenetration()
 
   // Grab the slave nodes we need to worry about from the NearestNodeLocator
   const std::vector<unsigned int> & node_list = _nearest_node.slaveNodes();
-  
+
 //  const std::vector<short int> & node_boundary_list = _mesh.getBoundaryNodeListIds();
 
   const unsigned int n_nodes = node_list.size();
   const unsigned int n_elems = elem_list.size();
 
-  for(unsigned int i=0; i<n_nodes; i++)
+  for(unsigned int i=0; i<n_nodes; ++i)
   {
     Node & node = _mesh.node(node_list[i]);
-    
+
     // See if we already have info about this node
     if(_penetration_info[node.id()])
     {
       PenetrationInfo * info = _penetration_info[node.id()];
 
       Elem * elem = info->_elem;
-      Elem * side = info->_side;
 
+      if (!_update_location)
+      {
+        Point contact_ref = info->_closest_point_ref;
+        Point contact_phys;
+        Real distance;
+        RealGradient normal;
+        bool contact_point_on_side;
+        std::vector<std::vector<Real> > side_phi;
+
+        // Slave position must be the previous contact point
+        // Use the previous reference coordinates
+        std::vector<Point> points(1);
+        points[0] = contact_ref;
+        _fe->reinit(info->_side, &points);
+        const std::vector<Point> & slave_pos = _fe->get_xyz();
+
+        findContactPoint(elem, info->_side_num, slave_pos[0],
+                         false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+
+        info->_normal = normal;
+        // info->_closest_point_ref = contact_ref;
+        // info->_distance = distance;
+        info->_side_phi = side_phi;
+
+        mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
+
+        info->_closest_point = contact_phys;
+
+        continue;
+      }
+
+      Elem * side = info->_side;
       // See if the same element still contains this point
       if(elem->contains_point(node))
       {
@@ -89,16 +121,16 @@ PenetrationLocator::detectPenetration()
         RealGradient normal;
         bool contact_point_on_side;
         std::vector<std::vector<Real> > side_phi;
-  
+
         findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
 
         info->_normal = normal;
         info->_closest_point_ref = contact_ref;
         info->_distance = distance;
         info->_side_phi = side_phi;
-            
+
         mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
-            
+
         info->_closest_point = contact_phys;
 
         // I hate continues but this is actually cleaner than anything I can think of
@@ -107,14 +139,14 @@ PenetrationLocator::detectPenetration()
       else
       {
         // See if this element still has the same one across from it
-            
+
         Point contact_ref = info->_closest_point_ref;
         Point contact_phys;
         Real distance;
         RealGradient normal;
         bool contact_point_on_side;
         std::vector<std::vector<Real> > side_phi;
-  
+
         findContactPoint(elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
 
         if(contact_point_on_side)
@@ -135,35 +167,35 @@ PenetrationLocator::detectPenetration()
           _penetration_info[node.id()] = NULL;
         }
       }
-    } 
-          
-    Node * closest_node = _nearest_node.nearestNode(node.id());    
+    }
+
+    Node * closest_node = _nearest_node.nearestNode(node.id());
     Real closest_distance = _nearest_node.distance(node.id());
     std::vector<unsigned int> & closest_elems = _mesh.nodeToElemMap()[closest_node->id()];
 
     for(unsigned int j=0; j<closest_elems.size(); j++)
-    {          
+    {
       unsigned int elem_id = closest_elems[j];
       Elem * elem = _mesh.elem(elem_id);
-            
+
       for(unsigned int m=0; m<n_elems; m++)
       {
         if(elem_list[m] == elem_id && id_list[m] == _master_boundary)
         {
           unsigned int side_num = side_list[m];
-              
+
           Elem *side = (elem->build_side(side_num)).release();
-              
+
           Point contact_ref;
           Point contact_phys;
           Real distance;
           RealGradient normal;
           bool contact_point_on_side;
           std::vector<std::vector<Real> > side_phi;
-  
+
           findContactPoint(elem, side_num, node, true, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
 
-          if(contact_point_on_side && _penetration_info[node.id()] &&
+          if(contact_point_on_side && _penetration_info[node.id()] && _update_location &&
              (
                (std::abs(_penetration_info[node.id()]->_distance) > std::abs(distance)) ||
                (_penetration_info[node.id()]->_distance < 0 && distance > 0)
@@ -199,7 +231,7 @@ PenetrationLocator::detectPenetration()
         }
       }
     }
-  }        
+  }
 
   Moose::perf_log.pop("detectPenetration()","Solve");
 }
@@ -208,7 +240,7 @@ Real
 PenetrationLocator::penetrationDistance(unsigned int node_id)
 {
   PenetrationInfo * info = _penetration_info[node_id];
-  
+
   if (info)
     return info->_distance;
   else
@@ -234,40 +266,37 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
                                      Real & distance, RealGradient & normal, bool & contact_point_on_side)
 {
   unsigned int dim = master_elem->dim();
-  
+
   Elem * side = master_elem->build_side(side_num, false).release();
 
-//  FEType fe_type;
-//  FEBase * fe = FEBase::build(dim-1, fe_type).release();
+  const std::vector<Point> & phys_point = _fe->get_xyz();
 
-  const std::vector<Point> & phys_point = fe->get_xyz();
+  const std::vector<RealGradient> & dxyz_dxi = _fe->get_dxyzdxi();
+  const std::vector<RealGradient> & d2xyz_dxi2 = _fe->get_d2xyzdxi2();
+  const std::vector<RealGradient> & d2xyz_dxieta = _fe->get_d2xyzdxideta();
 
-  const std::vector<RealGradient> & dxyz_dxi = fe->get_dxyzdxi();
-  const std::vector<RealGradient> & d2xyz_dxi2 = fe->get_d2xyzdxi2();
-  const std::vector<RealGradient> & d2xyz_dxieta = fe->get_d2xyzdxideta();
-  
-  const std::vector<RealGradient> & dxyz_deta = fe->get_dxyzdeta();
-  const std::vector<RealGradient> & d2xyz_deta2 = fe->get_d2xyzdeta2();
-  const std::vector<RealGradient> & d2xyz_detaxi = fe->get_d2xyzdxideta();
-  
+  const std::vector<RealGradient> & dxyz_deta = _fe->get_dxyzdeta();
+  const std::vector<RealGradient> & d2xyz_deta2 = _fe->get_d2xyzdeta2();
+  const std::vector<RealGradient> & d2xyz_detaxi = _fe->get_d2xyzdxideta();
+
   Point ref_point;
 
   if(start_with_centroid)
-    ref_point = FEInterface::inverse_map(dim-1, fe_type, side, side->centroid());
+    ref_point = FEInterface::inverse_map(dim-1, _fe_type, side, side->centroid());
   else
     ref_point = contact_ref;
 
   std::vector<Point> points(1);
   points[0] = ref_point;
-  fe->reinit(side, &points);
+  _fe->reinit(side, &points);
   RealGradient d = slave_point - phys_point[0];
 
   Real update_size = 9999999;
 
   //Least squares
   for(unsigned int it=0; it<3 && update_size > TOLERANCE*1e3; it++)
-  {    
-    
+  {
+
     DenseMatrix<Real> jac(dim-1, dim-1);
 
     jac(0,0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
@@ -275,7 +304,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
     if(dim-1 == 2)
     {
       jac(1,0) = -(dxyz_dxi[0] * dxyz_deta[0]);
-  
+
       jac(0,1) = -(dxyz_deta[0] * dxyz_dxi[0]);
       jac(1,1) = -(dxyz_deta[0] * dxyz_deta[0]);
     }
@@ -290,28 +319,28 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
     DenseVector<Real> update(dim-1);
 
     jac.lu_solve(rhs, update);
-    
+
     ref_point(0) -= update(0);
 
     if(dim-1 == 2)
       ref_point(1) -= update(1);
 
     points[0] = ref_point;
-    fe->reinit(side, &points);
+    _fe->reinit(side, &points);
     d = slave_point - phys_point[0];
-    
+
     update_size = update.l2_norm();
   }
- 
+
   update_size = 9999999;
 
   unsigned nit=0;
-  
+
   // Newton Loop
   for(; nit<12 && update_size > TOLERANCE*TOLERANCE; nit++)
-  {    
+  {
     RealGradient d = slave_point - phys_point[0];
-    
+
     DenseMatrix<Real> jac(dim-1, dim-1);
 
     jac(0,0) = (d2xyz_dxi2[0]*d)-(dxyz_dxi[0] * dxyz_dxi[0]);
@@ -319,13 +348,13 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
     if(dim-1 == 2)
     {
       jac(1,0) = (d2xyz_dxieta[0]*d)-(dxyz_dxi[0] * dxyz_deta[0]);
-  
+
       jac(0,1) = (d2xyz_detaxi[0]*d)-(dxyz_deta[0] * dxyz_dxi[0]);
       jac(1,1) = (d2xyz_deta2[0]*d)-(dxyz_deta[0] * dxyz_deta[0]);
     }
 
     DenseVector<Real> rhs(dim-1);
-    
+
     rhs(0) = -dxyz_dxi[0]*d;
 
     if(dim-1 == 2)
@@ -334,14 +363,14 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
     DenseVector<Real> update(dim-1);
 
     jac.lu_solve(rhs, update);
-    
+
     ref_point(0) += update(0);
 
     if(dim-1 == 2)
       ref_point(1) += update(1);
 
     points[0] = ref_point;
-    fe->reinit(side, &points);
+    _fe->reinit(side, &points);
     d = slave_point - phys_point[0];
 
     update_size = update.l2_norm();
@@ -351,7 +380,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
     std::cerr<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
 
   bool contained_in_elem = master_elem->contains_point(slave_point);
-  
+
   contact_ref = ref_point;
   contact_phys = phys_point[0];
   distance = d.size();
@@ -370,7 +399,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
     normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
     normal /= normal.size();
   }
-    
+
   contact_point_on_side = FEInterface::on_reference_element(ref_point, side->type());
 
   // This can happen if the element is distorted
@@ -378,7 +407,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
   {
     Point closest_point;
     Real closest_distance = 999999;
-    
+
     if(dim-1 == 2)
     {
       for(unsigned int ss=0; ss<side->n_sides(); ss++)
@@ -387,7 +416,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
 
         std::vector<Point> vertices;
         vertices.reserve(2);
-        
+
         for(unsigned int ssn=0; ssn<sideside->n_nodes(); ssn++)
         {
           if(sideside->is_vertex(ssn))
@@ -397,7 +426,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
         LineSegment ls(vertices[0], vertices[1]);
 
         Point cur_closest_point;
-        
+
         bool on_segment = ls.closest_normal_point(slave_point, cur_closest_point);
 
         if(on_segment && (cur_closest_point - slave_point).size() < closest_distance)
@@ -412,7 +441,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
       for(unsigned int sn=0; sn<side->n_nodes(); sn++)
       {
         Node * node = side->get_node(sn);
-        
+
         if((slave_point-*node).size() < closest_distance)
         {
           closest_distance = (slave_point-*node).size();
@@ -421,7 +450,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
       }
     }
 
-    contact_ref = FEInterface::inverse_map(dim-1, fe_type, side, closest_point);
+    contact_ref = FEInterface::inverse_map(dim-1, _fe_type, side, closest_point);
     contact_phys = closest_point;
     distance = closest_distance;
     normal =  closest_point - slave_point;
@@ -433,11 +462,11 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
   if(!contained_in_elem && ((contact_phys - slave_point) * normal) > 0)
     contact_point_on_side = false;
 
-  
-  const std::vector<std::vector<Real> > & phi = fe->get_phi();
+
+  const std::vector<std::vector<Real> > & phi = _fe->get_phi();
 
   points[0] = contact_ref;
-  fe->reinit(side, &points);
+  _fe->reinit(side, &points);
 
   side_phi = phi;
 
@@ -451,10 +480,10 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
   Real d;
   unsigned int dim = _mesh.dimension();
 
-  Point p1 = side.point(0);    
+  Point p1 = side.point(0);
   Point p2 = side.point(1);
   Point p3;
-  
+
   if (dim == 2)
   {
     //Create a point that is just off in the z axis.
@@ -503,14 +532,14 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
     /********* Computes an Average Normal in 2D *************/
 
     if(dim == 2)
-    {    
+    {
       Real dedge = 9999999999;
       unsigned int side_node_num = 0;
-    
+
       for(unsigned int n=0; n<side.n_nodes(); n++)
       {
         Real cur_distance = (p0 - side.point(n)).size();
-      
+
         if(cur_distance < dedge)
         {
           dedge = cur_distance;
@@ -521,7 +550,7 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
       std::map<unsigned int, unsigned int> elems_to_sides;
 
       Real blend_length = side.hmax()*2e-1;
-    
+
       if(dedge < blend_length)
       {
         Node * node = side.get_node(side_node_num);
@@ -535,37 +564,37 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
 
           elems_to_sides[connected_elem->id()] = _mesh.side_with_boundary_id(connected_elem, _master_boundary);
         }
-      
+
         std::map<unsigned int, unsigned int>::iterator elems_it = elems_to_sides.begin();
         std::map<unsigned int, unsigned int>::iterator elems_end = elems_to_sides.end();
 
         Point neighbor_normal;
         Point my_normal;
-      
+
         for(; elems_it != elems_end; ++elems_it)
         {
           Elem * connected_elem = _mesh.elem(elems_it->first);
-        
+
           FEType fe_type;
           AutoPtr<FEBase> fe(FEBase::build(_mesh.dimension(), fe_type));
           ArbitraryQuadrature arbitrary_qrule(_mesh.dimension()-1, _subproblem.getQuadratureOrder());
           fe->attach_quadrature_rule(&arbitrary_qrule);
           const std::vector<Point>& normals = fe->get_normals();
-      
-          { 
+
+          {
             Point mapped = libMesh::FEInterface::inverse_map (2, fe_type, connected_elem, *node);
             std::vector<Point> mapped_points;
             mapped_points.push_back(mapped);
             arbitrary_qrule.setPoints(mapped_points);
             fe->reinit(connected_elem, elems_it->second);
-          }      
+          }
 
           if(connected_elem->id() == elem.id())
             my_normal = normals[0];
           else
             neighbor_normal = normals[0];
         }
-      
+
         Real theta = (-0.5*(1.0/blend_length)*dedge)+0.5;
         normal = (neighbor_normal*theta)+(my_normal*(1-theta));
       }
@@ -575,7 +604,7 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
   else if(elem.contains_point(p0))  // If the point is in the element but the plane point wasn't...
   {
     std::cout<<"junk!"<<std::endl;
-    
+
     d = 9999999999;
     unsigned int neighbor_num = 0;
     for(unsigned int n=0; n<side.n_nodes(); n++)
@@ -600,8 +629,8 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
       Node * node = side.get_node(neighbor_num);
 
 //      std::cout<<node->id()<<std::endl;
-      
-      
+
+
 
       unsigned int nside = 0;
 
@@ -614,32 +643,32 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
 
 //      std::cout<<nside<<std::endl;
       nside = 3;
-      
+
       AutoPtr<Elem> neighbor_side(neighbor->build_side(nside));
-      
+
       FEType fe_type;
       AutoPtr<FEBase> fe(FEBase::build(_moose_system.getDim(), fe_type));
       ArbitraryQuadrature arbitrary_qrule(_moose_system.getDim()-1, _moose_system._max_quadrature_order);
       fe->attach_quadrature_rule(&arbitrary_qrule);
       const std::vector<Point>& normals = fe->get_normals();
-      
-      { 
+
+      {
         Point mapped = libMesh::FEInterface::inverse_map (2, fe_type, neighbor, *node);
         std::vector<Point> mapped_points;
         mapped_points.push_back(mapped);
         arbitrary_qrule.setPoints(mapped_points);
         fe->reinit(neighbor, nside);
-      }      
+      }
 
       Point neighbor_normal = normals[0];
 
-      { 
+      {
         Point mapped = libMesh::FEInterface::inverse_map (2, fe_type, &elem, *node);
         std::vector<Point> mapped_points;
         mapped_points.push_back(mapped);
         arbitrary_qrule.setPoints(mapped_points);
         fe->reinit(&elem, nside);
-      }      
+      }
 
       Point my_normal = normals[0];
 
@@ -650,13 +679,13 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
 //      Real theta = (-0.5e4*dedge)+0.5;
 
       Real theta = 0.5;
-      
-      
+
+
 //      std::cout<<"new: "<<(neighbor_normal*theta)+(my_normal*(1-theta))<<std::endl;
       normal = (neighbor_normal*theta)+(my_normal*(1-theta));
 
 //      std::cout<<normal<<std::endl;
-      
+
 //      std::cout<<normal<<std::endl;
   }
 */
@@ -664,7 +693,7 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
   {
     d = 9999999999;
   }
-  
+
   return d;
 }
 
@@ -672,12 +701,18 @@ PenetrationLocator::normDistance(const Elem & elem, const Elem & side, const Nod
 RealVectorValue
 PenetrationLocator::penetrationNormal(unsigned int node_id)
 {
-  std::map<unsigned int, PenetrationInfo *>::const_iterator found_it;
+  std::map<unsigned int, PenetrationInfo *>::const_iterator found_it( _penetration_info.find(node_id) );
 
-  if ((found_it = _penetration_info.find(node_id)) != _penetration_info.end())
+  if (found_it != _penetration_info.end())
     return found_it->second->_normal;
   else
     return RealVectorValue(0, 0, 0);
+}
+
+void
+PenetrationLocator::setUpdate( bool update )
+{
+  _update_location = update;
 }
 
 
@@ -693,11 +728,12 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(Node * node, Elem * elem, E
    _side_phi(side_phi)
 {}
 
-  
+
 PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) :
     _node(p._node),
     _elem(p._elem),
-    _side(p._side),
+    _side(p._side), // Which one now owns _side?  There will be trouble if (when)
+                    // both delete _side
     _side_num(p._side_num),
     _normal(p._normal),
     _distance(p._distance),
@@ -709,4 +745,5 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
 PenetrationLocator::PenetrationInfo::~PenetrationInfo()
 {
   delete _side;
-}   
+}
+
