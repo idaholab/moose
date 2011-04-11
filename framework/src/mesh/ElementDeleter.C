@@ -32,6 +32,7 @@ ElementDeleter::ElementDeleter(const std::string & name, InputParameters paramet
 void
 ElementDeleter::modifyMesh(Mesh & mesh)
 {
+#if 0
   // TODO: Move the initialization of the function to the contructor - this will require having
   // the problem and functions parsed earlier
   // Function & func = getFunction("function");
@@ -39,8 +40,13 @@ ElementDeleter::modifyMesh(Mesh & mesh)
   // For now lets just make up a function
   // We'll start with a small sphere located at 0.0043 0 0.025 with radius 0.0012
 
+  // this is Cody's version for pellets.e
   Point center(0.0043, 0, 0.025);
   Real radius_squard = 0.0012*0.0012;
+
+  // This is David's version that throws cyclic dependency (for generated mesh)
+  Point center(0.0, 0.0, 0.05);
+  Real radius_squard = 0.25*0.25;
 
   unsigned int cube_map[6] = {5, 3, 4, 1, 2, 0};
   unsigned int quad_map[4] = {2, 3, 0, 1};
@@ -124,6 +130,7 @@ ElementDeleter::modifyMesh(Mesh & mesh)
   }
 
   mesh.prepare_for_use();
+#endif
 }
 
 void

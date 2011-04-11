@@ -1,5 +1,18 @@
 [Mesh]
-  file = pellets.e
+#  file = pellets.e
+
+  [./Generation]
+    dim = 3
+    xmin = 0
+    xmax = 1
+    ymin = 0
+    ymax = 1  
+    zmin = 0
+    zmax = 0.1  
+    nx = 4
+    ny = 4
+    nz = 2
+  [../]
 
   [./element_deleter]
     type = ElementDeleter
