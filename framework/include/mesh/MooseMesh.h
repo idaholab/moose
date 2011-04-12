@@ -86,7 +86,8 @@ public:
   void prepare();
   void update();
 
-  void uniformlyRefine(int level);
+  inline void setInitRefineLevel(int level) { _init_refinement_level = level; }
+  void uniformlyRefine(int level=0);
 
   operator libMesh::Mesh &(void) { return _mesh; }
 
@@ -103,6 +104,8 @@ public:
 protected:
   bool _is_changed;                   /// true if mesh is changed (i.e. after adaptivity step)
 
+  int _init_refinement_level;
+  
   /**
    * A range for use with TBB.  We do this so that it doesn't have
    * to get rebuilt all the time (which takes time).

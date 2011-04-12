@@ -117,6 +117,7 @@
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
 #include "CreateMeshAction.h"
+#include "ReadMeshAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
 #include "CopyNodalVarsAction.h"
@@ -253,6 +254,7 @@ addActionTypes()
   registerActionName("no_action", false);  // Used for Empty Action placeholders
   registerActionName("set_global_params", false);
   registerActionName("create_mesh", false);
+  registerActionName("read_mesh", false);
   registerActionName("add_mesh_modifier", false);
   registerActionName("add_material", false);
   registerActionName("add_function", false);
@@ -357,7 +359,7 @@ addActionTypes()
    * line.  Items on the same line have equal weight and can be executed in any order.  */
   action_warehouse.addDependencySets(
 "(meta_action)"
-"(create_mesh, set_global_params)"
+"(create_mesh, read_mesh, set_global_params)"
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
 "(setup_executioner)"
@@ -387,7 +389,7 @@ void
 registerActions()
 {
   registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
-  registerAction(SetupMeshAction, "Mesh", "setup_mesh");
+  registerAction(ReadMeshAction, "Mesh", "read_mesh");
   registerAction(AddFunctionAction, "Functions/*", "add_function");
   registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");
   registerAction(SetupOutputAction, "Output", "setup_output");
@@ -422,6 +424,7 @@ registerActions()
   registerAction(AddDiracKernelAction, "DiracKernels/*", "add_dirac_kernel");
 
   // NonParsedActions
+  registerNonParsedAction(SetupMeshAction, "setup_mesh");
   registerNonParsedAction(SetupDampersAction, "setup_dampers");
   registerNonParsedAction(InitProblemAction, "init_problem");
   registerNonParsedAction(CopyNodalVarsAction, "copy_nodal_vars");

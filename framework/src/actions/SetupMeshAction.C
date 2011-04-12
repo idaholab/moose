@@ -18,21 +18,16 @@
 #include "MProblem.h"
 #include "ActionWarehouse.h"
 
-// libMesh includes
-#include "exodusII_io.h"
-
-const std::string SetupMeshAction::no_file_supplied("(no file supplied)");
-
 template<>
 InputParameters validParams<SetupMeshAction>()
 {
   InputParameters params = validParams<Action>();
-//  params.addParam<int>("dim", "DEPRECATED - Mesh dim can be determined from the file read.");
-  params.addParam<std::string>("file", SetupMeshAction::no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
-  params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
-  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation");
-  params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
-  params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
+
+  // FIXME: Make this work (requires double registration in ActionFactory)
+//  params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
+//  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation");
+//  params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
+  
   return params;
 }
 
@@ -42,94 +37,49 @@ SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters param
 }
 
 
-MooseMesh *
-SetupMeshAction::createMesh(bool save_exreader)
+void
+SetupMeshAction::setupMesh(MooseMesh *mesh)
 {
-  /**
-   * We will use the mesh object to read the file to cut down on
-   * I/O conntention.  We still need to use the Exodus reader though
-   * for copy_nodal_solutions
-   */
-
-  MooseMesh * mesh = NULL;
-
-  if(save_exreader)
-    mesh = _parser_handle._mesh;
-
-  std::string mesh_file = getParam<std::string>("file");
-  if (mesh_file != no_file_supplied)
-  {
-    Parser::checkFileReadable(mesh_file);
-    mesh = new MooseMesh();
-
-    if(save_exreader)
-    {
-      // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
-      // to only perform the copy nodal variables action when using the Exodus reader
-      _parser_handle._exreader = new ExodusII_IO(*mesh);
-
-      Moose::setup_perf_log.push("Read Mesh","Setup");
-      _parser_handle._exreader->read(mesh_file);
-      Moose::setup_perf_log.pop("Read Mesh","Setup");
-    }
-    else
-      ExodusII_IO(*mesh).read(mesh_file);
-  }
-
-  if (mesh != NULL)
-  {
-
   // FIXME: second order
-//  if (getParam<bool>("second_order"))
-//    mesh->all_second_order(true);
-
+  //  if (getParam<bool>("second_order"))
+  //    mesh->all_second_order(true);
+	
   // FIXME: usage of partitioners
-//  if (getParam<std::string>("partitioner") == "linear")
-//    mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+  //  if (getParam<std::string>("partitioner") == "linear")
+  //    mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+  
+  Moose::setup_perf_log.push("Prepare Mesh","Setup");
+  mesh->prepare();
+  Moose::setup_perf_log.pop("Prepare Mesh","Setup");
 
-    Moose::setup_perf_log.push("Prepare Mesh","Setup");
-    mesh->prepare();
-    Moose::setup_perf_log.pop("Prepare Mesh","Setup");
+  Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
+  // uniformly refine mesh
+  mesh->uniformlyRefine();
+  Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
 
-    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-    // uniformly refine mesh
-    mesh->uniformlyRefine(getParam<int>("uniform_refine"));
-    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
-
-    // FIXME: autosize problem
-//  MeshRefinement mesh_refinement(*mesh);
-//  if (!autoResizeProblem(mesh, mesh_refinement))
-//    mesh_refinement.uniformly_refine(getParam<int>("uniform_refine"));
+  // FIXME: autosize problem
+  //  MeshRefinement mesh_refinement(*mesh);
+  //  if (!autoResizeProblem(mesh, mesh_refinement))
+  //    mesh_refinement.uniformly_refine(getParam<int>("uniform_refine"));
     
-    Moose::setup_perf_log.push("Initial meshChanged()","Setup");
-    mesh->meshChanged();
-    Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
+  Moose::setup_perf_log.push("Initial meshChanged()","Setup");
+  mesh->meshChanged();
+  Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
     
-    mesh->printInfo();
-  }
-
-  return mesh;
+  mesh->printInfo();
 }
 
-    
 void
 SetupMeshAction::act()
 {
-  mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
+  if (_parser_handle._mesh)
+    setupMesh(_parser_handle._mesh);
+  else
+    mooseError("No mesh file was supplied and no generation block was provided");
 
-  // Create the mesh and save it off
-  _parser_handle._mesh = createMesh(true);
-
-  if (isParamValid("displacements"))
-  {
-    // Create the displaced mesh
-    _parser_handle._displaced_mesh = createMesh(false);
-    
-    std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
-    if (displacements.size() != _parser_handle._mesh->dimension())
-      mooseError("Number of displacements and dimension of mesh MUST be the same!");
-  }
-
+  if (_parser_handle._displaced_mesh)
+    setupMesh(_parser_handle._displaced_mesh);
+  
   // There is no setup execution action satisfied, create the MProblem class by ourselves
   if (Moose::action_warehouse.actionBlocksWithActionBegin("setup_executioner") ==
       Moose::action_warehouse.actionBlocksWithActionEnd("setup_executioner"))

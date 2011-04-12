@@ -1,0 +1,81 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "ReadMeshAction.h"
+#include "Parser.h"
+#include "MooseMesh.h"
+#include "MProblem.h"
+#include "ActionWarehouse.h"
+
+// libMesh includes
+#include "exodusII_io.h"
+
+const std::string ReadMeshAction::no_file_supplied("(no file supplied)");
+
+template<>
+InputParameters validParams<ReadMeshAction>()
+{
+  InputParameters params = validParams<Action>();
+  params.addParam<std::string>("file", ReadMeshAction::no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
+  params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
+  params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
+  return params;
+}
+
+ReadMeshAction::ReadMeshAction(const std::string & name, InputParameters params) :
+    Action(name, params)
+{
+}
+
+void
+ReadMeshAction::act()
+{ 
+  std::string mesh_file = getParam<std::string>("file");
+  if (mesh_file != no_file_supplied)
+  {
+    mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
+    // Create the mesh and save it off
+    Parser::checkFileReadable(mesh_file);
+    _parser_handle._mesh = new MooseMesh();
+
+    // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
+    // to only perform the copy nodal variables action when using the Exodus reader
+    _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
+    
+    Moose::setup_perf_log.push("Read Mesh","Setup");
+    _parser_handle._exreader->read(mesh_file);
+    Moose::setup_perf_log.pop("Read Mesh","Setup");
+
+    if (isParamValid("displacements"))
+    {
+      // Create the displaced mesh
+      _parser_handle._displaced_mesh = new MooseMesh();
+
+      ExodusII_IO temp_reader(*_parser_handle._displaced_mesh);
+      Moose::setup_perf_log.push("Read Displaced Mesh","Setup");
+      temp_reader.read(mesh_file);
+      Moose::setup_perf_log.pop("Read Displaced Mesh","Setup");
+      
+      std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
+      if (displacements.size() != _parser_handle._mesh->dimension())
+        mooseError("Number of displacements and dimension of mesh MUST be the same!");
+    }   
+  }
+
+  // TODO: This should be handled in SetupMeshAction...
+  mooseAssert(_parser_handle._mesh != NULL, "Mesh hasn't been created");
+  _parser_handle._mesh->setInitRefineLevel(getParam<int>("uniform_refine"));
+  if (_parser_handle._displaced_mesh)
+    _parser_handle._displaced_mesh->setInitRefineLevel(getParam<int>("uniform_refine"));
+}

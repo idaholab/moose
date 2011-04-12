@@ -27,6 +27,7 @@ static const int GRAIN_SIZE = 1;     // the grain_size does not have much influe
 MooseMesh::MooseMesh(int mesh_dim) :
     _mesh(mesh_dim),
     _is_changed(false),
+    _init_refinement_level(0),
     _active_local_elem_range(NULL),
     _active_node_range(NULL),
     _local_node_range(NULL),
@@ -37,6 +38,7 @@ MooseMesh::MooseMesh(int mesh_dim) :
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _mesh(other_mesh._mesh),
     _is_changed(false),
+    _init_refinement_level(other_mesh._init_refinement_level),
     _active_local_elem_range(NULL),
     _active_node_range(NULL),
     _local_node_range(NULL),
@@ -99,7 +101,10 @@ void
 MooseMesh::uniformlyRefine(int level)
 {
   MeshRefinement mesh_refinement(_mesh);
-  mesh_refinement.uniformly_refine(level);
+  if (level)
+    mesh_refinement.uniformly_refine(level);
+  else if (_init_refinement_level)
+    mesh_refinement.uniformly_refine(_init_refinement_level);
 }
 
 void

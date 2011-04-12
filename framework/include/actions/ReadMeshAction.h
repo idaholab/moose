@@ -12,29 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPMESHACTION_H
-#define SETUPMESHACTION_H
+#ifndef READMESHACTION_H
+#define READMESHACTION_H
 
 #include "InputParameters.h"
 #include "Moose.h"
 #include "Action.h"
 
-//Forward Declaration
-class MooseMesh;
+#include "MooseMesh.h"
 
-class SetupMeshAction : public Action
+#include <string>
+
+class ReadMeshAction : public Action
 {
 public:
-  SetupMeshAction(const std::string & name, InputParameters params);
+  ReadMeshAction(const std::string & name, InputParameters params);
   
   virtual void act();
 
-private:
-
-  void setupMesh(MooseMesh *mesh);
+  static const std::string no_file_supplied;
 };
 
 template<>
-InputParameters validParams<SetupMeshAction>();
+InputParameters validParams<ReadMeshAction>();
 
-#endif // SETUPMESHACTION_H
+#endif // READMESHACTION_H
