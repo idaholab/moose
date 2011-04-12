@@ -80,7 +80,7 @@ PenetrationLocator::detectPenetration()
 
       Elem * elem = info->_elem;
 
-      if (!_update_location)
+      if (!_update_location && info->_distance > 0)
       {
         Point contact_ref = info->_closest_point_ref;
         Point contact_phys;
