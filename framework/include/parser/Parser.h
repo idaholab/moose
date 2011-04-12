@@ -97,6 +97,7 @@ public:
 public:
   // data created while running execute()
   MooseMesh *_mesh;
+  MooseMesh *_displaced_mesh;
   MProblem * _problem;
   Executioner *_executioner;
 

@@ -19,6 +19,8 @@
 #include "Moose.h"
 #include "Action.h"
 
+#include "MooseMesh.h"
+
 #include <string>
 
 class SetupMeshAction : public Action
@@ -26,6 +28,8 @@ class SetupMeshAction : public Action
 public:
   SetupMeshAction(const std::string & name, InputParameters params);
 
+  MooseMesh * createMesh(bool save_exreader);
+  
   virtual void act();
 
   static const std::string no_file_supplied;

@@ -114,7 +114,7 @@ CreateExecutionerAction::act()
     if ((*mesh_it)->isParamValid("displacements"))
     {
       std::vector<std::string> displacements = (*mesh_it)->getParam<std::vector<std::string> >("displacements");
-      _parser_handle._problem->initDisplacedProblem(displacements);
+      _parser_handle._problem->initDisplacedProblem(_parser_handle._displaced_mesh, displacements);
     }
 
 /*    

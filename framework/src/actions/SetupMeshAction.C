@@ -41,38 +41,41 @@ SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters param
 {
 }
 
-void
-SetupMeshAction::act()
+
+MooseMesh *
+SetupMeshAction::createMesh(bool save_exreader)
 {
-
-//  int mesh_dim = isParamValid("dim") ? getParam<int>("dim") : 1;
-
   /**
    * We will use the mesh object to read the file to cut down on
    * I/O conntention.  We still need to use the Exodus reader though
    * for copy_nodal_solutions
    */
 
-  
-  //if (ParserBlock *gen_block = locateBlock("Mesh/Generation"))
-  //  gen_block->execute();
+  MooseMesh * mesh = NULL;
+
+  if(save_exreader)
+    mesh = _parser_handle._mesh;
+
   std::string mesh_file = getParam<std::string>("file");
   if (mesh_file != no_file_supplied)
   {
     Parser::checkFileReadable(mesh_file);
     mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
-    _parser_handle._mesh = new MooseMesh();
-    // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
-    // to only perform the copy nodal variables action when using the Exodus reader
-    _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
+    mesh = new MooseMesh();
 
-    Moose::setup_perf_log.push("Read Mesh","Setup");
-    _parser_handle._exreader->read(mesh_file);
-    Moose::setup_perf_log.pop("Read Mesh","Setup");
+    if(save_exreader)
+    {
+      // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
+      // to only perform the copy nodal variables action when using the Exodus reader
+      _parser_handle._exreader = new ExodusII_IO(*mesh);
 
+      Moose::setup_perf_log.push("Read Mesh","Setup");
+      _parser_handle._exreader->read(mesh_file);
+      Moose::setup_perf_log.pop("Read Mesh","Setup");
+    }
+    else
+      ExodusII_IO(*mesh).read(mesh_file);
   }
-  // get convenience pointer to mesh object
-  MooseMesh *mesh = _parser_handle._mesh;
 
   if (mesh != NULL)
   {
@@ -106,8 +109,21 @@ SetupMeshAction::act()
     mesh->printInfo();
   }
 
+  return mesh;
+}
+
+    
+void
+SetupMeshAction::act()
+{
+  // Create the mesh and save it off
+  _parser_handle._mesh = createMesh(true);
+
   if (isParamValid("displacements"))
   {
+    // Create the displaced mesh
+    _parser_handle._displaced_mesh = createMesh(false);
+    
     std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
     if (displacements.size() != _parser_handle._mesh->dimension())
       mooseError("Number of displacements and dimension of mesh MUST be the same!");
@@ -118,7 +134,7 @@ SetupMeshAction::act()
       Moose::action_warehouse.actionBlocksWithActionEnd("setup_executioner"))
   {
     Moose::setup_perf_log.push("Create MProblem","Setup");
-    _parser_handle._problem = new MProblem(*mesh);
+    _parser_handle._problem = new MProblem(*_parser_handle._mesh);
     Moose::setup_perf_log.pop("Create MProblem","Setup");
   }
 }

@@ -1092,11 +1092,9 @@ MProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<
 }
 
 void
-MProblem::initDisplacedProblem(const std::vector<std::string> & displacements)
+MProblem::initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements)
 {
-  Moose::setup_perf_log.push("Create displaced_mesh","Setup");
-  _displaced_mesh = new MooseMesh(_mesh);
-  Moose::setup_perf_log.pop("Create displaced_mesh","Setup");
+  _displaced_mesh = displaced_mesh;
 
   Moose::setup_perf_log.push("Create DisplacedProblem","Setup");
   _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, displacements);

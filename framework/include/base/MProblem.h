@@ -154,7 +154,7 @@ public:
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   // Displaced problem /////
-  virtual void initDisplacedProblem(const std::vector<std::string> & displacements);
+  virtual void initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements);
 
   virtual void updateGeomSearch();
 
