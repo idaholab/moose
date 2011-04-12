@@ -60,7 +60,6 @@ SetupMeshAction::createMesh(bool save_exreader)
   if (mesh_file != no_file_supplied)
   {
     Parser::checkFileReadable(mesh_file);
-    mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
     mesh = new MooseMesh();
 
     if(save_exreader)
@@ -116,6 +115,8 @@ SetupMeshAction::createMesh(bool save_exreader)
 void
 SetupMeshAction::act()
 {
+  mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
+
   // Create the mesh and save it off
   _parser_handle._mesh = createMesh(true);
 
