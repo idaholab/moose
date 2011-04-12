@@ -13,9 +13,12 @@
 /****************************************************************/
 
 #include "ExodusOutput.h"
+
+#include "ActionWarehouse.h"
 #include "Problem.h"
 
 // libMesh
+#include "exodusII.h"
 #include "exodusII_io.h"
 
 ExodusOutput::ExodusOutput(EquationSystems & es) :
@@ -23,7 +26,8 @@ ExodusOutput::ExodusOutput(EquationSystems & es) :
     _out(NULL),
     _seq(false),
     _file_num(-1),
-    _num(0)
+    _num(0),
+    _ex_initialized(false)
 {
 }
 
@@ -60,6 +64,11 @@ ExodusOutput::output(const std::string & file_base, Real time)
   _num++;
   _out->write_timestep(getFileName(file_base), _es, _num, time);
   _out->write_element_data(_es);
+  if ( !_ex_initialized )
+  {
+    _ex_initialized = true;
+    outputInput();
+  }
 }
 
 void
@@ -109,7 +118,9 @@ ExodusOutput::outputPps(const std::string & file_base, const FormattedTable & ta
   }
 
   if (_out == NULL)
+  {
     _out = new ExodusII_IO(_es.get_mesh());
+  }
 
   _out->write_global_data( global_vars, global_var_names );
 }
@@ -122,4 +133,58 @@ ExodusOutput::meshChanged()
 
   delete _out;
   _out = NULL;
+}
+
+void
+ExodusOutput::outputInput()
+{
+  std::stringstream ss;
+  std::ostream * previous_ostream( Action::getOStream() );
+  Action::setOStream( ss );
+  const std::string * prev_name( NULL );
+  for (ActionIterator a = Moose::action_warehouse.inputFileActionsBegin();
+       a != Moose::action_warehouse.inputFileActionsEnd();
+       ++a)
+  {
+    (*a)->printInputFile(prev_name);
+    prev_name = &((*a)->name());
+  }
+  Action::setOStream( *previous_ostream );
+
+  std::vector<std::string> input_file_record;
+  input_file_record.push_back("####################");
+  input_file_record.push_back("# Created by MOOSE #");
+  input_file_record.push_back("####################");
+  std::string s;
+  while (std::getline(ss, s))
+  {
+    // MAX_LINE_LENGTH is from ExodusII
+    if ( s.length() > MAX_LINE_LENGTH )
+    {
+      const std::string continuation("...");
+      const size_t cont_len(continuation.length());
+      size_t num_lines = s.length() / (MAX_LINE_LENGTH - cont_len) + 1;
+      std::string split_line;
+      for (size_t j(0), l_begin(0); j < num_lines; ++j, l_begin+=MAX_LINE_LENGTH-cont_len)
+      {
+        size_t l_len = MAX_LINE_LENGTH-cont_len;
+        if (s.length() < l_begin + l_len )
+        {
+          l_len = s.length() - l_begin;
+        }
+        split_line = s.substr( l_begin, l_len );
+        if ( l_begin + l_len != s.length())
+        {
+          split_line += continuation;
+        }
+        input_file_record.push_back(split_line);
+      }
+    }
+    else
+    {
+      input_file_record.push_back(s);
+    }
+  }
+
+  _out->write_information_records( input_file_record );
 }

@@ -30,6 +30,7 @@ public:
 
   virtual void output(const std::string & file_base, Real time);
   virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
+  virtual void outputInput();
 
   virtual void meshChanged();
   virtual void sequence(bool state) { _seq = state; }
@@ -40,7 +41,7 @@ protected:
   bool _seq;
   int _file_num;                        /// number of the file
   int _num;                             /// the number of timestep within the file
-
+  bool _ex_initialized;                 /// whether the qa info (input file) has been written
   std::string getFileName(const std::string & file_base);
 };
 

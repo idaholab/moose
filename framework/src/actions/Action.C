@@ -28,7 +28,7 @@ InputParameters validParams<Action>()
 
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
   params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
-  params.addPrivateParam<std::string>("action"); 
+  params.addPrivateParam<std::string>("action");
   params.addPrivateParam<Parser *>("parser_handle");
   return params;
 }
@@ -76,7 +76,7 @@ Action::printInputFile(const std::string * prev_name)
   printCloseAndOpen(prev_name, _name);
   if (_name == "")
     return;
-  
+
   int index = _name.find_last_of("/");
   if (index == (int)_name.npos)
     index = 0;
@@ -90,10 +90,10 @@ Action::printInputFile(const std::string * prev_name)
 
   for (unsigned int i=0; i<param_ptrs.size(); ++i)
   {
-    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
+    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter)
     {
       // We only want non-private valid params
-      if (param_ptrs[i]->isPrivate(iter->first) || !param_ptrs[i]->isParamValid(iter->first)) 
+      if (param_ptrs[i]->isPrivate(iter->first) || !param_ptrs[i]->isParamValid(iter->first))
         continue;
 
       // Don't print active if it is the default all, that means it's not in the input file
@@ -115,7 +115,7 @@ Action::printInputFile(const std::string * prev_name)
       }
 
       out << "\n" << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
-    
+
       // Print the parameter's value to a stringstream.
       ss.str("");
       iter->second->print(ss);
@@ -134,6 +134,8 @@ Action::printInputFile(const std::string * prev_name)
 void
 Action::printCloseAndOpen(const std::string * prev_name, const std::string & curr_name) const
 {
+  std::ostream & out = *_out;
+
   std::string empty;
   std::vector<std::string> prev_elements, curr_elements;
 
@@ -153,7 +155,7 @@ Action::printCloseAndOpen(const std::string * prev_name, const std::string & cur
       ++num_to_open;
     else
       ++same_elements;
-  
+
   num_to_close = prev_elements.size() - same_elements;
 
   // Close off previous blocks if necessary
@@ -173,4 +175,16 @@ Action::printCloseAndOpen(const std::string * prev_name, const std::string & cur
     std::string spacing(i*2, ' ');
     out << "\n" << spacing << "[" << curr_elements[i] << "]";
   }
+}
+
+void
+Action::setOStream( std::ostream & ostream )
+{
+  _out = &ostream;
+}
+
+std::ostream *
+Action::getOStream()
+{
+  return _out;
 }

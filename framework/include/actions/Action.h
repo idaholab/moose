@@ -42,14 +42,17 @@ public:
   std::string getShortName() const;
 
   void printInputFile(const std::string * prev_name);
-  
+
+  static void setOStream( std::ostream & ostream );
+  static std::ostream * getOStream();
+
 protected:
   /// Helper method for adding Params pointers to be printed out in syntax dumps
   virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
-  
-  ///Output stream which the print_* functions print to. Defaults to std::cout 
+
+  ///Output stream which the print_* functions print to. Defaults to std::cout
   static std::ostream * _out;
-  
+
   std::string _action;
   Parser & _parser_handle;
 
