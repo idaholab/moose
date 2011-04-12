@@ -5,6 +5,44 @@
 
 namespace MathUtils 
 {
+  inline Real poly2Log(Real x, Real tol, int deriv)
+  {
+    Real c1=1.0/tol;
+    Real c2=std::log(tol) - 1.0;
+
+    Real value=0.0;
+      
+    if (deriv == 0)
+    {
+      if(x<tol)
+        value =  c1*x + c2;
+      else
+        value =  std::log(x);
+    }
+    else if (deriv == 1)
+    {
+      if(x<tol)
+        value =  c1;
+      else
+        value =  1.0/x;
+    }
+    else if (deriv == 2)
+    {
+      if(x<tol)
+        value =  0.0;
+      else
+        value =  -1.0/(x*x);
+    }
+    else if (deriv == 3)
+    {
+      if(x<tol)
+        value =  0.0;
+      else
+        value =  2.0/(x*x*x);
+    }
+    
+    return value;
+  }
 
   inline Real polyLog(Real x, Real tol, int deriv)
   {
