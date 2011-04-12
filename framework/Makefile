@@ -16,7 +16,6 @@
 # Note: Make sure that there is no whitespace after the word 'yes' if enabling
 # an application
 ###############################################################################
-
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)
 
