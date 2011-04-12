@@ -39,6 +39,7 @@
 
 Parser::Parser():
   _mesh(NULL),
+  _displaced_mesh(NULL),
   _problem(NULL),
   _executioner(NULL),
   _exreader(NULL),
