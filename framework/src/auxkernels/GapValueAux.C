@@ -41,17 +41,30 @@ GapValueAux::computeValue()
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
-  Elem * slave_side = pinfo->_side;
-  std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
-  std::vector<unsigned int> slave_side_dof_indices;
-
-  _dof_map.dof_indices(slave_side, slave_side_dof_indices ,_paired_variable);
-
   Real gap_temp = 0.0;
 
-  for(unsigned int i=0; i<slave_side_dof_indices.size(); i++)
-    //The zero index is because we only have one point that the phis are evaluated at
-    gap_temp += slave_side_phi[i][0] * (*_serialized_solution)(slave_side_dof_indices[i]);
+  if (pinfo)
+  {
+    Elem * slave_side = pinfo->_side;
+    std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
+    std::vector<unsigned int> slave_side_dof_indices;
 
+    _dof_map.dof_indices(slave_side, slave_side_dof_indices ,_paired_variable);
+
+    for(unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
+    {
+      //The zero index is because we only have one point that the phis are evaluated at
+      gap_temp += slave_side_phi[i][0] * (*_serialized_solution)(slave_side_dof_indices[i]);
+    }
+  }
+  else
+  {
+    std::stringstream msg;
+    msg << "No penetration information found for node ";
+    msg << _current_node->id();
+    msg << " on processor ";
+    msg << libMesh::processor_id();
+    mooseWarning( msg.str() );
+  }
   return gap_temp;
 }
