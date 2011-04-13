@@ -84,6 +84,7 @@ public:
   ConstBndNodeRange * getBoundaryNodeRange();
 
   const std::set<subdomain_id_type> & meshSubdomains() { return _mesh_subdomains; }
+  const std::set<short> & meshBoundaryIds() { return _mesh_boundary_ids; }
 
   void read(const std::string file_name);
 

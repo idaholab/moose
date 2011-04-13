@@ -100,7 +100,7 @@ public:
 
   /// System Integrity Checks
   void checkKernelCoverage(const std::set<subdomain_id_type> & mesh_subdomains) const;
-  void checkBCCoverage(const std::set<short> & mesh_bcs) const;
+  void checkBCCoverage() const;
   bool containsTimeKernel();
 
 public:

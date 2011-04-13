@@ -921,14 +921,17 @@ NonlinearSystem::checkKernelCoverage(const std::set<subdomain_id_type> & mesh_su
 }
 
 void
-NonlinearSystem::checkBCCoverage(const std::set<short> & mesh_bcs) const
+NonlinearSystem::checkBCCoverage() const
 {
   // Check that BCs used in your simulation exist in your mesh
   std::set<short> input_bcs, difference;
   
-  _bcs[0].activeBoundaries(input_bcs);  // get the boundaries from the simulation (input file)
+  // get the boundaries from the simulation (input file)
+  _bcs[0].activeBoundaries(input_bcs);  
+
+  // _mesh is from SystemBase...
   std::set_difference (input_bcs.begin(), input_bcs.end(),
-                       mesh_bcs.begin(), mesh_bcs.end(),
+                       _mesh.meshBoundaryIds().begin(), _mesh.meshBoundaryIds().end(),
                        std::inserter(difference, difference.end()));
 
   if (!difference.empty())
@@ -941,6 +944,8 @@ NonlinearSystem::checkBCCoverage(const std::set<short> & mesh_bcs) const
                + extra_boundary_ids.str());
   } 
 }
+
+
 
 bool
 NonlinearSystem::containsTimeKernel()

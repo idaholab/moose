@@ -1203,11 +1203,7 @@ MProblem::checkProblemIntegrity()
   }
 
   // Check that BCs used in your simulation exist in your mesh
-  {
-    const std::set<short> & mesh_bcs = _mesh._mesh.boundary_info->get_boundary_ids();
-
-    _nl.checkBCCoverage(mesh_bcs);
-  }
+  _nl.checkBCCoverage();
 }
 
 void
