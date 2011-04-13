@@ -278,6 +278,8 @@ namespace {
     case EX_SIDE_SET:
       inquiry = EX_INQ_SIDE_SETS;
       break;
+    default:
+      ; // Make compiler not complain about "unhandled" enumerations
     }
     SMART_ASSERT(inquiry > 0);
     return inquire_int(file_id, inquiry);
