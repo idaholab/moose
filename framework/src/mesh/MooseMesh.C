@@ -20,6 +20,7 @@
 #include "boundary_info.h"
 #include "mesh_tools.h"
 #include "mesh_refinement.h"
+#include "parallel.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -80,11 +81,58 @@ MooseMesh::prepare()
   _mesh.prepare_for_use(false);
 
   // If using ParallelMesh this will delete non-local elements from the current processor
+  // If using SerialMesh, this function is a no-op.
   _mesh.delete_remote_elements();
 
+  // Collect (local) subdomain IDs
   const MeshBase::element_iterator el_end = _mesh.elements_end();
   for (MeshBase::element_iterator el = _mesh.elements_begin(); el != el_end; ++el)
     _mesh_subdomains.insert((*el)->subdomain_id());
+
+  // Collect (local) boundary IDs
+  const std::set<short>& local_bids = _mesh.boundary_info->get_boundary_ids();
+  _mesh_boundary_ids.insert(local_bids.begin(), local_bids.end());
+
+  // Communicate subdomain and boundary IDs if this is a parallel mesh
+  if (!_mesh.is_serial())
+    {
+      // Subdomain size before
+      std::cout << "(before) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
+      
+      // Pack our subdomain IDs into a vector
+      std::vector<subdomain_id_type> mesh_subdomains_vector(_mesh_subdomains.begin(), 
+							    _mesh_subdomains.end());
+
+      // Gather them all into an enlarged vector
+      Parallel::allgather(mesh_subdomains_vector);
+
+      // Attempt to insert any new IDs into the set (any existing ones will be skipped)
+      _mesh_subdomains.insert(mesh_subdomains_vector.begin(), 
+			      mesh_subdomains_vector.end());
+
+      // Subdomain size after
+      std::cout << "(after) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
+
+
+
+
+      // Boundary ID size before
+      std::cout << "(before) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
+
+      // Pack our boundary IDs into a vector for communication
+      std::vector<short> mesh_boundary_ids_vector(_mesh_boundary_ids.begin(),
+						  _mesh_boundary_ids.end());
+
+      // Gather them all into an enlarged vector
+      Parallel::allgather(mesh_boundary_ids_vector);
+
+      // Attempt to insert any new IDs into the set (any existing ones will be skipped)
+      _mesh_boundary_ids.insert(mesh_boundary_ids_vector.begin(),
+				mesh_boundary_ids_vector.end());
+      
+      // Boundary ID size after
+      std::cout << "(after) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
+    }
 
   update();
 }

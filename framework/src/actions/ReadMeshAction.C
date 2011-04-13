@@ -20,6 +20,7 @@
 
 // libMesh includes
 #include "exodusII_io.h"
+#include "nemesis_io.h"
 
 const std::string ReadMeshAction::no_file_supplied("(no file supplied)");
 
@@ -30,6 +31,7 @@ InputParameters validParams<ReadMeshAction>()
   params.addParam<std::string>("file", ReadMeshAction::no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
   params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
+  params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   return params;
 }
 
@@ -45,17 +47,26 @@ ReadMeshAction::act()
   if (mesh_file != no_file_supplied)
   {
     mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
+    
     // Create the mesh and save it off
-    Parser::checkFileReadable(mesh_file);
     _parser_handle._mesh = new MooseMesh();
 
-    // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
-    // to only perform the copy nodal variables action when using the Exodus reader
-    _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
-    
-    Moose::setup_perf_log.push("Read Mesh","Setup");
-    _parser_handle._exreader->read(mesh_file);
-    Moose::setup_perf_log.pop("Read Mesh","Setup");
+    if (getParam<bool>("nemesis"))
+    {
+      Nemesis_IO(*_parser_handle._mesh).read(mesh_file); 
+    }
+    else // not reading Nemesis files
+    {
+      Parser::checkFileReadable(mesh_file);
+
+      // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
+      // to only perform the copy nodal variables action when using the Exodus reader
+      _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
+  
+      Moose::setup_perf_log.push("Read Mesh","Setup");
+      _parser_handle._exreader->read(mesh_file);
+      Moose::setup_perf_log.pop("Read Mesh","Setup");
+    }
 
     if (isParamValid("displacements"))
     {
