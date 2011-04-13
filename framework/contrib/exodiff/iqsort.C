@@ -128,8 +128,8 @@ void swap_(int v[], int i, int j)
     j = right - 1;
 
     for ( ; ; ) {
-      while (v[iv[++i]] < v[pivot]);
-      while (v[iv[--j]] > v[pivot]);
+      while (v[iv[++i]] < v[pivot]) {};
+      while (v[iv[--j]] > v[pivot]) {};
       if (i < j) {
         swap_(iv, i, j);
       } else {
@@ -170,8 +170,27 @@ void swap_(int v[], int i, int j)
   }
 }
 
+  /* Go to some extra trouble to not name these variables if they aren't used
+     to avoid compiler warnings. */
   template <typename T>
-  void check(const T v[], int iv[], int N)
+  void check(
+const T 
+#if defined(DEBUG_QSORT)
+v
+#endif
+[], 
+
+int
+#if defined(DEBUG_QSORT)
+iv
+#endif
+[], 
+
+int
+#if defined(DEBUG_QSORT)
+N
+#endif
+)
   {
 #if defined(DEBUG_QSORT)
   fprintf(stderr, "Checking sort of %d values\n", N+1);
