@@ -84,7 +84,8 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _reinit_displaced_face(false),
     _output_displaced(false),
     _has_dampers(false),
-    _solve_only_perf_log("Solve Only")
+    _solve_only_perf_log("Solve Only"),
+    _output_setup_log_early(false)
 {
   _n++;
 
@@ -226,7 +227,8 @@ void MProblem::initialSetup()
   _nl.initialSetupBCs();
   _nl.initialSetupKernels();
 
-  Moose::setup_perf_log.print_log();
+  if (_output_setup_log_early)
+    Moose::setup_perf_log.print_log();
 }
 
 void MProblem::timestepSetup()

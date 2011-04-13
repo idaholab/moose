@@ -176,6 +176,8 @@ public:
 
   void serializeSolution();
 
+  inline void setEarlyPerfLogPrint(bool val) { _output_setup_log_early = val; }
+  
   virtual unsigned int n_nonlinear_iterations()
   {
     return _nl_iterations;
@@ -248,7 +250,8 @@ protected:
 
   std::set<unsigned int> _ghosted_elems;                /// Elements that should have Dofs ghosted to the local processor
 
-  PerfLog _solve_only_perf_log;                      /// Only times the solve
+  PerfLog _solve_only_perf_log;                         /// Only times the solve
+  bool _output_setup_log_early;                         /// Determines if the setup log is printed before the first time step
 public:
   static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)
 
