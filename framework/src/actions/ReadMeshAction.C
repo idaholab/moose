@@ -21,6 +21,7 @@
 // libMesh includes
 #include "exodusII_io.h"
 #include "nemesis_io.h"
+#include "parallel_mesh.h"
 
 const std::string ReadMeshAction::no_file_supplied("(no file supplied)");
 
@@ -53,7 +54,9 @@ ReadMeshAction::act()
 
     if (getParam<bool>("nemesis"))
     {
-      Nemesis_IO(*_parser_handle._mesh).read(mesh_file); 
+      // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
+      ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(_parser_handle._mesh->_mesh);
+      Nemesis_IO(pmesh).read(mesh_file); 
     }
     else // not reading Nemesis files
     {
