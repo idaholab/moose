@@ -95,6 +95,8 @@ public:
 
   operator libMesh::Mesh &(void) { return _mesh; }
 
+  MeshBase & getMesh() { return _mesh; }
+  
   // Mesh Modifiers /////
   void addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters);
   void applyMeshModifications();
