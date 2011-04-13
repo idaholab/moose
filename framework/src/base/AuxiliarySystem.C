@@ -54,7 +54,9 @@ AuxiliarySystem::init()
 {
   dofMap().attach_extra_send_list_function(&extraSendList, this);
 
-  _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+
+  if(_need_serialized_solution)
+    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
 }
 
 void
@@ -233,7 +235,9 @@ void
 AuxiliarySystem::compute()
 {
   computeInternal(_auxs);
-  serializeSolution();
+
+  if(_need_serialized_solution)
+    serializeSolution();
 }
 
 void

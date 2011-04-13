@@ -182,10 +182,22 @@ void MProblem::initialSetup()
   updateGeomSearch();
   Moose::setup_perf_log.pop("Initial updateGeomSearch()","Setup");
 
-  Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
-  // Call reinit to get the ghosted vectors correct now that some geometric search has been done
-  _eq.reinit();
-  Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
+  Moose::setup_perf_log.push("Initial updateActiveSemiLocalNodeRange()","Setup");  
+  _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
+  if(_displaced_mesh)
+  {
+    _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
+    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+  }
+  Moose::setup_perf_log.pop("Initial updateActiveSemiLocalNodeRange()","Setup");
+
+  if(_ghosted_elems.size())
+  {
+    Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
+    // Call reinit to get the ghosted vectors correct now that some geometric search has been done
+    _eq.reinit();
+    Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
+  }
 
   for(unsigned int i=0; i<n_threads; i++)
   {
@@ -244,7 +256,8 @@ MProblem::prepare(const Elem * elem, THREAD_ID tid)
 void
 MProblem::addGhostedElem(unsigned int elem_id)
 {
-  _ghosted_elems.insert(elem_id);
+  if(_mesh.elem(elem_id)->processor_id() != libMesh::processor_id())
+    _ghosted_elems.insert(elem_id);
 }
 
 bool
@@ -962,10 +975,8 @@ MProblem::init2()
   _nl.init();
 
   if (_displaced_problem)
-  {
     _displaced_problem->init();
-    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
-  }
+  
   _aux.init();
 
 }

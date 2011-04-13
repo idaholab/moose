@@ -28,6 +28,7 @@
 class MeshModifier;
 
 typedef std::set<subdomain_id_type>::const_iterator SubdomainIterator;
+typedef StoredRange<std::set<Node *>::iterator, Node*> SemiLocalNodeRange;
 
 // NOTE: maybe inheritance would be better here
 //
@@ -74,8 +75,11 @@ public:
 
   void meshChanged();
 
+  void updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems);
+
   ConstElemRange * getActiveLocalElementRange();
   NodeRange * getActiveNodeRange();
+  SemiLocalNodeRange * getActiveSemiLocalNodeRange();
   ConstNodeRange * getLocalNodeRange();
   ConstBndNodeRange * getBoundaryNodeRange();
 
@@ -106,11 +110,15 @@ protected:
 
   int _init_refinement_level;
   
+  /// Used for generating the semilocal node range
+  std::set<Node *> _semilocal_node_list;
+
   /**
    * A range for use with TBB.  We do this so that it doesn't have
    * to get rebuilt all the time (which takes time).
    */
   ConstElemRange * _active_local_elem_range;
+  SemiLocalNodeRange * _active_semilocal_node_range;  /// active local + active ghosted
   NodeRange * _active_node_range;
   ConstNodeRange * _local_node_range;
   ConstBndNodeRange * _bnd_node_range;

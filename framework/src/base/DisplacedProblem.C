@@ -22,12 +22,12 @@ public:
   UpdateDisplacedMeshThread(DisplacedProblem & problem) :
       _problem(problem),
       _ref_mesh(_problem.refMesh()),
-      _nl_soln(_problem._nl_serialized_solution),
-      _aux_soln(_problem._aux_serialized_solution)
+      _nl_soln(*_problem._nl_solution),
+      _aux_soln(*_problem._aux_solution)
   {
   }
 
-  void operator() (const NodeRange & range) const
+  void operator() (const SemiLocalNodeRange & range) const
   {
     ParallelUniqueId puid;
 
@@ -64,7 +64,7 @@ public:
     unsigned int nonlinear_system_number = _problem._displaced_nl.sys().number();
     unsigned int aux_system_number = _problem._displaced_aux.sys().number();
 
-    NodeRange::const_iterator nd = range.begin();
+    SemiLocalNodeRange::const_iterator nd = range.begin();
 
     for (nd = range.begin() ; nd != range.end(); ++nd)
     {
@@ -104,8 +104,6 @@ DisplacedProblem::DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_me
     _displacements(displacements),
     _displaced_nl(*this, _mproblem.getNonlinearSystem(), "DisplacedSystem"),
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), "DisplacedAuxSystem"),
-    _nl_serialized_solution(_mproblem.getNonlinearSystem().serializedSolution()),
-    _aux_serialized_solution(_mproblem.getAuxiliarySystem().serializedSolution()),
     _geometric_search_data(_mproblem, _mesh),
     _ex(_eq)
 {
@@ -157,7 +155,10 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
   (*_displaced_nl.sys().solution) = soln;
   (*_displaced_aux.sys().solution) = aux_soln;
 
-  Threads::parallel_for(*_mesh.getActiveNodeRange(), UpdateDisplacedMeshThread(*this));
+  _nl_solution = &soln;
+  _aux_solution = &aux_soln;
+
+  Threads::parallel_for(*_mesh.getActiveSemiLocalNodeRange(), UpdateDisplacedMeshThread(*this));
 
   // Update the geometric searches that depend on the displaced mesh
   _geometric_search_data.update();

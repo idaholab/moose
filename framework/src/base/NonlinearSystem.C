@@ -841,7 +841,9 @@ void
 NonlinearSystem::set_solution(const NumericVector<Number> & soln)
 {
   _current_solution = &soln;
-  serializeSolution();
+
+  if(_need_serialized_solution)
+    serializeSolution();
 }
 
 NumericVector<Number> &

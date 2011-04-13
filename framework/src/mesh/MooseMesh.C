@@ -29,6 +29,7 @@ MooseMesh::MooseMesh(int mesh_dim) :
     _is_changed(false),
     _init_refinement_level(0),
     _active_local_elem_range(NULL),
+    _active_semilocal_node_range(NULL),
     _active_node_range(NULL),
     _local_node_range(NULL),
     _bnd_node_range(NULL)
@@ -40,6 +41,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _is_changed(false),
     _init_refinement_level(other_mesh._init_refinement_level),
     _active_local_elem_range(NULL),
+    _active_semilocal_node_range(NULL),
     _active_node_range(NULL),
     _local_node_range(NULL),
     _bnd_node_range(NULL)
@@ -53,6 +55,7 @@ MooseMesh::~MooseMesh()
 
   delete _active_local_elem_range;
   delete _active_node_range;
+  delete _active_semilocal_node_range;
   delete _local_node_range;
   delete _bnd_node_range;
 }
@@ -118,6 +121,9 @@ MooseMesh::meshChanged()
   // Rebuild the node range
   delete _active_node_range;
   _active_node_range = NULL;
+  // Rebuild the semilocal range
+  delete _active_semilocal_node_range;
+  _active_semilocal_node_range = NULL;
   // Rebuild the local node range
   delete _local_node_range;
   _local_node_range = NULL;
@@ -140,6 +146,39 @@ MooseMesh::meshChanged()
 
   // Lets the output system know that the mesh has changed recently.
   _is_changed = true;
+}
+
+void
+MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems)
+{
+  _semilocal_node_list.clear();
+    
+  ConstNodeRange * local_nodes = getLocalNodeRange();
+  
+  // First add the local nodes
+  for(ConstNodeRange::const_iterator it=local_nodes->begin();
+      it != local_nodes->end();
+      ++it)
+    _semilocal_node_list.insert(const_cast<Node *>(*it));
+
+  // Now add the nodes connected to ghosted_elems
+  for(std::set<unsigned int>::iterator it=ghosted_elems.begin();
+      it!=ghosted_elems.end();
+      ++it)
+  {
+    Elem * elem = _mesh.elem(*it);
+    for(unsigned int n=0; n<elem->n_nodes(); n++)
+    {
+      Node * node = elem->get_node(n);
+
+      _semilocal_node_list.insert(node);
+    }
+  }
+
+  delete _active_semilocal_node_range;
+
+  // Now create the actual range
+  _active_semilocal_node_range = new SemiLocalNodeRange(_semilocal_node_list.begin(), _semilocal_node_list.end());
 }
 
 void
@@ -180,6 +219,21 @@ MooseMesh::getActiveNodeRange()
   }
 
   return _active_node_range;
+}
+
+SemiLocalNodeRange *
+MooseMesh::getActiveSemiLocalNodeRange()
+{
+  mooseAssert(_active_semilocal_node_range, "_active_semilocal_node_range has not been created yet!");
+/*
+  if (!_active_node_range)
+  {
+    _active_semilocal_node_range = new NodeRange(_mesh.local_nodes_begin(),
+                                                 _mesh.local_nodes_end(), GRAIN_SIZE);
+  }
+ */
+
+  return _active_semilocal_node_range;
 }
 
 ConstNodeRange *
