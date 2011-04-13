@@ -97,7 +97,7 @@ MooseMesh::prepare()
   if (!_mesh.is_serial())
     {
       // Subdomain size before
-      std::cout << "(before) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
+      // std::cout << "(before) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
       
       // Pack our subdomain IDs into a vector
       std::vector<subdomain_id_type> mesh_subdomains_vector(_mesh_subdomains.begin(), 
@@ -111,13 +111,13 @@ MooseMesh::prepare()
 			      mesh_subdomains_vector.end());
 
       // Subdomain size after
-      std::cout << "(after) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
+      // std::cout << "(after) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
 
 
 
 
       // Boundary ID size before
-      std::cout << "(before) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
+      // std::cout << "(before) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
 
       // Pack our boundary IDs into a vector for communication
       std::vector<short> mesh_boundary_ids_vector(_mesh_boundary_ids.begin(),
@@ -131,7 +131,7 @@ MooseMesh::prepare()
 				mesh_boundary_ids_vector.end());
       
       // Boundary ID size after
-      std::cout << "(after) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
+      // std::cout << "(after) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
     }
 
   update();
