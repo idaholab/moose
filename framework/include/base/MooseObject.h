@@ -16,6 +16,7 @@
 #define MOOSEOBJECT_H
 
 #include "InputParameters.h"
+#include "ExecStore.h"
 
 /**
  * Every object that can be built by the factory should be derived from this class.
@@ -50,9 +51,13 @@ public:
   /// Gets called when the subdomain changes (ie in a jacobian or residual loop) and before this object is asked to do its job
   virtual void subdomainSetup() {}
 
+  virtual ExecFlagType execFlag() { return _exec_flags; }
+  virtual void execFlag(ExecFlagType type) { _exec_flags = type; }
+
 protected:
   std::string _name;
   InputParameters _pars;
+  ExecFlagType _exec_flags;
 };
 
 #endif /* MOOSEOBJECT_H*/

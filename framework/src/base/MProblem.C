@@ -1026,8 +1026,7 @@ MProblem::onTimestepBegin()
 void
 MProblem::onTimestepEnd()
 {
-  _aux.compute_ts();
-
+  _aux.compute(EXEC_TIMESTEP);
   _nl.printVarNorms();
 }
 

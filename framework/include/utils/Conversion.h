@@ -16,6 +16,7 @@
 #define CONVERSION_H
 
 #include "Moose.h"
+#include "ExecStore.h"
 
 namespace Moose {
 
@@ -24,6 +25,9 @@ namespace Moose {
 
   template<>
   TimeSteppingScheme stringToEnum<TimeSteppingScheme>(const std::string & s);
+
+  template<>
+  ExecFlagType stringToEnum<ExecFlagType>(const std::string & s);
 
 }
 

@@ -39,8 +39,6 @@ AuxiliarySystem::AuxiliarySystem(MProblem & subproblem, const std::string & name
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
 
-  _auxs.resize(libMesh::n_threads());
-  _auxs_ts.resize(libMesh::n_threads());
   _data.resize(libMesh::n_threads());
 }
 
@@ -63,28 +61,34 @@ void
 AuxiliarySystem::initialSetup()
 {
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
-    _auxs[i].initialSetup();
+  {
+    _auxs(EXEC_RESIDUAL)[i].initialSetup();
+    _auxs(EXEC_TIMESTEP)[i].initialSetup();
+  }
 }
 
 void
 AuxiliarySystem::timestepSetup()
 {
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
-    _auxs[i].timestepSetup();
+  {
+    _auxs(EXEC_RESIDUAL)[i].timestepSetup();
+    _auxs(EXEC_TIMESTEP)[i].timestepSetup();
+  }
 }
 
 void
 AuxiliarySystem::residualSetup()
 {
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
-    _auxs[i].residualSetup();
+    _auxs(EXEC_RESIDUAL)[i].residualSetup();
 }
 
 void
 AuxiliarySystem::jacobianSetup()
 {
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
-    _auxs[i].jacobianSetup();
+    _auxs(EXEC_RESIDUAL)[i].jacobianSetup();
 }
 
 void
@@ -136,10 +140,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
       }
     }
 
-    if (kernel->ts())
-      _auxs_ts[tid].addAuxKernel(kernel, blk_ids);
-    else
-      _auxs[tid].addAuxKernel(kernel, blk_ids);
+    _auxs(kernel->execFlag())[tid].addAuxKernel(kernel, blk_ids);
   }
 }
 
@@ -162,16 +163,9 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
       AuxKernel * bc = static_cast<AuxKernel *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 
-      if (bc->ts())
-      {
-        _auxs_ts[tid].addActiveBC(boundaries[i], bc);
-        _auxs_ts[tid].addBC(bc);
-      }
-      else
-      {
-        _auxs[tid].addActiveBC(boundaries[i], bc);
-        _auxs[tid].addBC(bc);
-      }
+      _auxs(bc->execFlag())[tid].addActiveBC(boundaries[i], bc);
+      _auxs(bc->execFlag())[tid].addBC(bc);
+
       _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
     }
   }
@@ -232,18 +226,20 @@ AuxiliarySystem::augmentSendList(std::vector<unsigned int> & send_list)
 }
 
 void
-AuxiliarySystem::compute()
+AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
 {
-  computeInternal(_auxs);
+  //If there aren't any auxiliary variables just return
+  if(_sys.n_vars() == 0)
+    return;
+
+  computeNodalVars(_auxs(type));
+  _sys.update();
+  computeElementalVars(_auxs(type));
+  solution().close();
+  _sys.update();
 
   if(_need_serialized_solution)
     serializeSolution();
-}
-
-void
-AuxiliarySystem::compute_ts()
-{
-  computeInternal(_auxs_ts);
 }
 
 void
@@ -290,19 +286,4 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
   ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
   Threads::parallel_reduce(range, eavt);
   Moose::perf_log.pop("update_aux_vars_elemental()","Solve");
-}
-
-void
-AuxiliarySystem::computeInternal(std::vector<AuxWarehouse> & auxs)
-{
-  //If there aren't any auxiliary variables just return
-  if(_sys.n_vars() == 0)
-    return;
-
-
-  computeNodalVars(auxs);
-  _sys.update();
-  computeElementalVars(auxs);
-  solution().close();
-  _sys.update();
 }

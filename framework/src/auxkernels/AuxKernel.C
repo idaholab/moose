@@ -29,7 +29,6 @@ InputParameters validParams<AuxKernel>()
   InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this object applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
-  params.addParam<bool>("ts", false, "Set to one to execute only at the end of the time step");
   // For use on the boundary only
   params.addParam<std::vector<unsigned int> >("boundary", "The list of variable names this Material is coupled to.");
   params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this aux kernel will be applied to");
@@ -72,8 +71,6 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _current_volume(_aux_sys._data[_tid]._current_volume),
 
     _solution(_aux_sys.solution()),
-
-    _ts(getParam<bool>("ts")),
 
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),

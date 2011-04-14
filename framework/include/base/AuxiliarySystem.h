@@ -17,6 +17,7 @@
 
 #include <set>
 #include "SystemBase.h"
+#include "ExecStore.h"
 #include "AuxWarehouse.h"
 
 // libMesh include
@@ -55,12 +56,9 @@ public:
 
   void augmentSendList(std::vector<unsigned int> & send_list);
 
-  virtual void compute();
-  virtual void compute_ts();
+  virtual void compute(ExecFlagType type = EXEC_RESIDUAL);
 
 protected:
-  virtual void computeInternal(std::vector<AuxWarehouse> & auxs);
-
   void computeNodalVars(std::vector<AuxWarehouse> & auxs);
   void computeElementalVars(std::vector<AuxWarehouse> & auxs);
 
@@ -74,8 +72,8 @@ protected:
   // Variables
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
-  std::vector<AuxWarehouse> _auxs;
-  std::vector<AuxWarehouse> _auxs_ts;                           // aux_kernels executed at the end of time step
+
+  ExecStore<AuxWarehouse> _auxs;
 
   // data
   struct AuxData

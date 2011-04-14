@@ -61,8 +61,6 @@ public:
 
   bool isNodal();
 
-  bool ts() { return _ts; }
-
 protected:
   virtual Real computeValue() = 0;
 
@@ -93,8 +91,6 @@ protected:
   NumericVector<Number> & _solution;                    /// reference to the solution vector of auxiliary system
 
   unsigned int _qp;
-
-  bool _ts;
 
   // Single Instance Variables
   Real & _real_zero;

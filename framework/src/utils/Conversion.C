@@ -19,6 +19,7 @@
 namespace Moose {
 
   std::map<std::string, TimeSteppingScheme> timesteppingscheme_type_to_enum;
+  std::map<std::string, ExecFlagType> execstore_type_to_enum;
 
   void initTimeSteppingMap()
   {
@@ -30,6 +31,17 @@ namespace Moose {
       timesteppingscheme_type_to_enum["BDF2"]           = BDF2;
     }
   }
+
+  void initExecStoreType()
+  {
+    if (execstore_type_to_enum.empty())
+    {
+      execstore_type_to_enum["RESIDUAL"] = EXEC_RESIDUAL;
+      execstore_type_to_enum["JACOBIAN"] = EXEC_JACOBIAN;
+      execstore_type_to_enum["TIMESTEP"] = EXEC_TIMESTEP;
+    }
+  }
+
 
   template<>
   TimeSteppingScheme stringToEnum(const std::string & s)
@@ -43,6 +55,20 @@ namespace Moose {
       mooseError("Unknown time stepping scheme");
 
     return timesteppingscheme_type_to_enum[upper];
+  }
+
+  template<>
+  ExecFlagType stringToEnum(const std::string & s)
+  {
+    initExecStoreType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!execstore_type_to_enum.count(upper))
+      mooseError("Unknown execution flag");
+
+    return execstore_type_to_enum[upper];
   }
 
 }

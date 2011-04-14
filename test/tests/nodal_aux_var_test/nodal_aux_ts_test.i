@@ -74,7 +74,7 @@
     type = CoupledAux
     value = 2
     coupled = u
-    ts = 1 
+    execute_on = timestep
   [../]
 []
 
