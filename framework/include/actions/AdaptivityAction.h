@@ -15,9 +15,9 @@
 #ifndef ADAPTIVITYACTION_H
 #define ADAPTIVITYACTION_H
 
-#ifdef LIBMESH_ENABLE_AMR
-
 #include "Action.h"
+
+#ifdef LIBMESH_ENABLE_AMR
 
 class AdaptivityAction: public Action
 {

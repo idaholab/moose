@@ -15,6 +15,8 @@
 #ifndef ADAPTIVITY_H
 #define ADAPTIVITY_H
 
+#include "Moose.h"
+
 #ifdef LIBMESH_ENABLE_AMR
 
 #include <string>

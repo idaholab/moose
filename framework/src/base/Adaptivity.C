@@ -14,8 +14,6 @@
 
 #include "Adaptivity.h"
 
-#ifdef LIBMESH_ENABLE_AMR
-
 #include "Moose.h"
 #include "MooseMesh.h"
 #include "MProblem.h"
@@ -24,6 +22,8 @@
 #include "equation_systems.h"
 #include "kelly_error_estimator.h"
 #include "fourth_error_estimators.h"
+
+#ifdef LIBMESH_ENABLE_AMR
 
 Adaptivity::Adaptivity(MProblem & subproblem) :
     _subproblem(subproblem),

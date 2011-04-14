@@ -16,6 +16,7 @@
 #define MOOSE_H
 
 // libMesh includes
+#include "libmesh_config.h"
 #include "print_trace.h"
 #include "libmesh_common.h"
 #include "perf_log.h"
