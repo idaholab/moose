@@ -70,17 +70,21 @@ ComputeJacobianThread::onElement(const Elem *elem)
 void
 ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
 {
-  _problem.reinitElemFace(elem, side, bnd_id, _tid);
-
-  unsigned int subdomain = elem->subdomain_id();
-  if (subdomain != _subdomain)
-    _problem.subdomainSetupSide(subdomain, _tid);
-
-  _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-  for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
+  std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
+  if (bcs.size() > 0)
   {
-    (*it)->computeJacobian(0, 0);
-    _vars.insert(&(*it)->variable());
+    _problem.reinitElemFace(elem, side, bnd_id, _tid);
+
+    unsigned int subdomain = elem->subdomain_id();
+    if (subdomain != _subdomain)
+      _problem.subdomainSetupSide(subdomain, _tid);
+
+    _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+    for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
+    {
+      (*it)->computeJacobian(0, 0);
+      _vars.insert(&(*it)->variable());
+    }
   }
 }
 
