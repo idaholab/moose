@@ -38,7 +38,7 @@ XDAOutput::getFileName(const std::string & file_base)
 
 
 void
-XDAOutput::output(const std::string & file_base, Real time)
+XDAOutput::output(const std::string & file_base, Real /*time*/)
 {
   MeshBase & mesh = _es.get_mesh();
 
@@ -48,7 +48,7 @@ XDAOutput::output(const std::string & file_base, Real time)
 }
 
 void
-XDAOutput::outputPps(const std::string & file_base, const FormattedTable & table, Real time)
+XDAOutput::outputPps(const std::string & /*file_base*/, const FormattedTable & /*table*/, Real /*time*/)
 {
   // XDA does not support PPS values
 }
@@ -60,7 +60,7 @@ XDAOutput::meshChanged()
 }
 
 void
-XDAOutput::sequence(bool state)
+XDAOutput::sequence(bool /*state*/)
 {
   // do nothing, XDA files are always sequences
 }
