@@ -31,6 +31,6 @@ NeumannBC::NeumannBC(const std::string & name, InputParameters parameters) :
 Real
 NeumannBC::computeQpResidual()
 {
-  return -_phi[_i][_qp]*_value;
+  return -_test[_i][_qp]*_value;
 }
 
