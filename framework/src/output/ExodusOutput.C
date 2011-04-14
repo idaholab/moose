@@ -72,7 +72,7 @@ ExodusOutput::output(const std::string & file_base, Real time)
 }
 
 void
-ExodusOutput::outputPps(const std::string & file_base, const FormattedTable & table, Real time)
+ExodusOutput::outputPps(const std::string & /*file_base*/, const FormattedTable & table, Real time)
 {
   const std::map<Real, std::map<std::string, Real> > & data = table.getData();
 
