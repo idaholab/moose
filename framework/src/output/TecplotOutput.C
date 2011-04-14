@@ -41,7 +41,7 @@ TecplotOutput::getFileName(const std::string & file_base)
 
 
 void
-TecplotOutput::output(const std::string & file_base, Real time)
+TecplotOutput::output(const std::string & file_base, Real /*time*/)
 {
   TecplotIO out(_es.get_mesh(), _binary);
 
@@ -50,7 +50,7 @@ TecplotOutput::output(const std::string & file_base, Real time)
 }
 
 void
-TecplotOutput::outputPps(const std::string & file_base, const FormattedTable & table, Real time)
+TecplotOutput::outputPps(const std::string & /*file_base*/, const FormattedTable & /*table*/, Real /*time*/)
 {
   // Tecplot does not support PPS values
 }
@@ -62,7 +62,7 @@ TecplotOutput::meshChanged()
 }
 
 void
-TecplotOutput::sequence(bool state)
+TecplotOutput::sequence(bool /*state*/)
 {
   // do nothing, Tecplot files are always sequences
 }
