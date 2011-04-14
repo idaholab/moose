@@ -18,6 +18,11 @@
 #include "InputParameters.h"
 #include "ExecStore.h"
 
+class MooseObject;
+
+template<>
+InputParameters validParams<MooseObject>();
+
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
