@@ -107,8 +107,6 @@ DisplacedProblem::DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_me
     _geometric_search_data(_mproblem, _mesh),
     _ex(_eq)
 {
-  _mesh.prepare();
-
   _ex.sequence(true);
 
   unsigned int n_threads = libMesh::n_threads();
