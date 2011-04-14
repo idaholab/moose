@@ -200,15 +200,22 @@ void
 MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems)
 {
   _semilocal_node_list.clear();
-    
-  ConstNodeRange * local_nodes = getLocalNodeRange();
-  
-  // First add the local nodes
-  for(ConstNodeRange::const_iterator it=local_nodes->begin();
-      it != local_nodes->end();
-      ++it)
-    _semilocal_node_list.insert(const_cast<Node *>(*it));
 
+  // First add the nodes connected to local elems
+  ConstElemRange * active_local_elems = getActiveLocalElementRange();
+  for(ConstElemRange::const_iterator it=active_local_elems->begin();
+      it!=active_local_elems->end();
+      ++it)
+  {
+    const Elem * elem = *it;
+    for(unsigned int n=0; n<elem->n_nodes(); n++)
+    {
+      Node * node = elem->get_node(n);
+
+      _semilocal_node_list.insert(node);
+    }
+  }
+  
   // Now add the nodes connected to ghosted_elems
   for(std::set<unsigned int>::iterator it=ghosted_elems.begin();
       it!=ghosted_elems.end();
