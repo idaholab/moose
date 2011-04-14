@@ -22,6 +22,7 @@
 #include "mesh_refinement.h"
 #include "parallel.h"
 #include "mesh_communication.h"
+#include "parallel_mesh.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
