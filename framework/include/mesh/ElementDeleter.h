@@ -19,6 +19,12 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
+class ElementDeleter;
+
+template<>
+InputParameters validParams<ElementDeleter>();
+
+
 class ElementDeleter : public MeshModifier
 // TODO: Make this work
 //                     , FunctionInterface

@@ -21,6 +21,13 @@
 #include "elem.h"
 #include "boundary_info.h"
 
+template<>
+InputParameters validParams<ElementDeleter>()
+{
+  InputParameters params = validParams<MeshModifier>();
+  return params;
+}
+
 
 ElementDeleter::ElementDeleter(const std::string & name, InputParameters parameters) :
     MeshModifier(name, parameters)
