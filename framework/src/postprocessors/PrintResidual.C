@@ -31,5 +31,5 @@ PrintResidual::PrintResidual(const std::string & name, InputParameters parameter
 Real
 PrintResidual::getValue()
 {
-  return _subproblem.final_nonlinear_residual();
+  return _subproblem.finalNonlinearResidual();
 }

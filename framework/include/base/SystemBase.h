@@ -188,25 +188,6 @@ public:
     _sys.solve();
   }
 
-  unsigned int n_nonlinear_iterations()
-  {
-    libMesh::NonlinearImplicitSystem * s = dynamic_cast<libMesh::NonlinearImplicitSystem*>(&_sys);
-    if (s)
-    {
-      return s->n_nonlinear_iterations();
-    }
-    return 0;
-  }
-  Real final_nonlinear_residual()
-  {
-    libMesh::NonlinearImplicitSystem * s = dynamic_cast<libMesh::NonlinearImplicitSystem*>(&_sys);
-    if (s)
-    {
-      return s->final_nonlinear_residual();
-    }
-    return 0;
-  }
-
   virtual void copySolutionsBackwards()
   {
     _sys.update();

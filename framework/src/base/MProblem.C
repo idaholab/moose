@@ -66,8 +66,6 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     SubProblem(mesh, parent),
     _nl(*this, name("nl", _n)),
     _aux(*this, name("aux", _n)),
-    _nl_iterations(0),
-    _nl_residual(0),
     _quadrature_order(CONSTANT),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
@@ -990,8 +988,6 @@ MProblem::solve()
   Moose::perf_log.push("solve()","Solve");
   _solve_only_perf_log.push("solve");
   _nl.solve();
-  _nl_iterations = _nl.n_nonlinear_iterations();
-  _nl_residual = _nl.final_nonlinear_residual();
   _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");
   _nl.update();

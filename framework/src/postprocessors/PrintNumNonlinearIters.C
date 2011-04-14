@@ -31,5 +31,5 @@ PrintNumNonlinearIters::PrintNumNonlinearIters(const std::string & name, InputPa
 Real
 PrintNumNonlinearIters::getValue()
 {
-  return _subproblem.n_nonlinear_iterations();
+  return _subproblem.nNonlinearIterations();
 }

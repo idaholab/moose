@@ -75,7 +75,9 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _preconditioner(NULL),
     _need_serialized_solution(false),
     _need_residual_copy(false),
-    _need_residual_ghosted(false)
+    _need_residual_ghosted(false),
+    _n_iters(0),
+    _final_residual(0.)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
@@ -131,6 +133,15 @@ NonlinearSystem::init()
     _residual_copy.init(_sys.n_dofs(), false, SERIAL);
     Moose::setup_perf_log.pop("Init residual_copy","Setup");
   }
+}
+
+void
+NonlinearSystem::solve()
+{
+  _sys.solve();
+  // store info about the solve
+  _n_iters = _sys.n_nonlinear_iterations();
+  _final_residual = _sys.final_nonlinear_residual();
 }
 
 void

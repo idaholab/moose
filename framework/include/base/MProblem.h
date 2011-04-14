@@ -84,6 +84,8 @@ public:
   virtual void init2();
   virtual void solve();
   virtual bool converged();
+  virtual unsigned int nNonlinearIterations() { return _nl.nNonlinearIterations(); }
+  virtual Real finalNonlinearResidual() { return _nl.finalNonlinearResidual(); }
 
   virtual void onTimestepBegin();
   virtual void onTimestepEnd();
@@ -178,21 +180,9 @@ public:
 
   inline void setEarlyPerfLogPrint(bool val) { _output_setup_log_early = val; }
   
-  virtual unsigned int n_nonlinear_iterations()
-  {
-    return _nl_iterations;
-  }
-  virtual Real final_nonlinear_residual()
-  {
-    return _nl_residual;
-  }
-
 protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;
-
-  unsigned int _nl_iterations;
-  Real _nl_residual;
 
   // quadrature
   Order _quadrature_order;                              /// Quadrature order required by all variables to integrated over them.

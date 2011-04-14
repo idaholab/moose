@@ -44,6 +44,7 @@ public:
   /// Should be called before EquationSystems::init()
   virtual void preInit();
   virtual void init();
+  virtual void solve();
 
   // Setup Functions ////
   virtual void initialSetupBCs();
@@ -103,6 +104,17 @@ public:
   void checkBCCoverage() const;
   bool containsTimeKernel();
 
+  /**
+   * Return the number of non-linear iterations
+   */
+  unsigned int nNonlinearIterations() { return _n_iters; }
+
+  /**
+   * Return the final nonlinear residual
+   */
+  Real finalNonlinearResidual() { return _final_residual; }
+
+
 public:
   MProblem & _mproblem;
   // FIXME: make these protected and create getters/setters
@@ -152,6 +164,9 @@ protected:
   bool _need_residual_ghosted;                          /// Whether or not a ghosted copy of the residual needs to be made
 
   std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;   /// NumericVectors that will be zeroed before a residual computation
+
+  unsigned int _n_iters;
+  Real _final_residual;
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
