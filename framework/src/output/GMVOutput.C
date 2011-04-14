@@ -41,7 +41,7 @@ GMVOutput::getFileName(const std::string & file_base)
 
 
 void
-GMVOutput::output(const std::string & file_base, Real time)
+GMVOutput::output(const std::string & file_base, Real /*time*/)
 {
   GMVIO out(_es.get_mesh());
 
@@ -50,7 +50,7 @@ GMVOutput::output(const std::string & file_base, Real time)
 }
 
 void
-GMVOutput::outputPps(const std::string & file_base, const FormattedTable & table, Real time)
+GMVOutput::outputPps(const std::string & /*file_base*/, const FormattedTable & /*table*/, Real /*time*/)
 {
   // GMV does not support PPS values
 }
@@ -62,7 +62,7 @@ GMVOutput::meshChanged()
 }
 
 void
-GMVOutput::sequence(bool state)
+GMVOutput::sequence(bool /*state*/)
 {
   // do nothing, GMV files are always sequences
 }
