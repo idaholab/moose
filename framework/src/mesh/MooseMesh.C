@@ -81,7 +81,7 @@ MooseMesh::prepare()
 {
   // If we are using a truly Parallel mesh (like Nemesis) then we might not even have neighbors!
   if(parallel())
-    MeshCommunication().gather_neighboring_elements(_mesh);
+    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
   
   _mesh.prepare_for_use(false);
 
