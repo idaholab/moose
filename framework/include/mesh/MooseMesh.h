@@ -70,8 +70,10 @@ public:
   virtual Elem * elem(const unsigned int i) const { return _mesh.elem(i); }
 
   bool changed() { return _is_changed; }
-
   void changed(bool state) { _is_changed = state; }
+
+  bool parallel() { return _is_parallel; }
+  void parallel(bool state) { _is_parallel = state; }
 
   void meshChanged();
 
@@ -113,6 +115,8 @@ public:
 
 protected:
   bool _is_changed;                   /// true if mesh is changed (i.e. after adaptivity step)
+
+  bool _is_parallel;           /// True if using a TRUE parallel mesh (ie Nemesis)
 
   int _init_refinement_level;
   

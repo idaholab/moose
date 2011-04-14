@@ -21,6 +21,7 @@
 #include "mesh_tools.h"
 #include "mesh_refinement.h"
 #include "parallel.h"
+#include "mesh_communication.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -78,6 +79,10 @@ MooseMesh::read(const std::string file_name)
 void
 MooseMesh::prepare()
 {
+  // If we are using a truly Parallel mesh (like Nemesis) then we might not even have neighbors!
+  if(parallel())
+    MeshCommunication().gather_neighboring_elements(_mesh);
+  
   _mesh.prepare_for_use(false);
 
   // If using ParallelMesh this will delete non-local elements from the current processor
