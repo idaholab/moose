@@ -40,7 +40,7 @@ ContactAction::act()
   }
 
   // Create master objects
-  InputParameters params;
+  InputParameters params = validParams<DiracKernel>();
   params.set<std::string>("model") = _model;
   params.set<unsigned int>("boundary") = _master;
   params.set<unsigned int>("slave") = _slave;
