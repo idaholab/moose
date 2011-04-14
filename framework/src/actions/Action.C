@@ -35,7 +35,8 @@ InputParameters validParams<Action>()
 
 
 Action::Action(const std::string & name, InputParameters params) :
-    MooseObject(name, params),
+    _name(name),
+    _pars(params),
     _action(getParam<std::string>("action")),
     _parser_handle(*getParam<Parser *>("parser_handle"))
 {

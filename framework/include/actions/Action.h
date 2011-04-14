@@ -22,14 +22,24 @@
 #include <string>
 #include <ostream>
 
-class Action : public MooseObject
+class Action
 {
 public:
   Action(const std::string & name, InputParameters params);
 
   virtual void act() = 0;
 
+  const std::string & name() { return _name; }
+
+  InputParameters & parameters() { return _pars; }
+
   const std::string & getAction() { return _action; }
+
+  template <typename T>
+  const T & getParam(const std::string & name) { return _pars.get<T>(name); }
+
+  template <typename T>
+  const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
 
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
 
@@ -52,6 +62,9 @@ protected:
 
   ///Output stream which the print_* functions print to. Defaults to std::cout
   static std::ostream * _out;
+
+  std::string _name;
+  InputParameters _pars;
 
   std::string _action;
   Parser & _parser_handle;
