@@ -419,7 +419,10 @@ registerActions()
   registerAction(AddDamperAction, "Dampers/*", "add_damper");
   registerAction(AddStabilizerAction, "Stabilizers/*", "add_stabilizer");
   registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
+  
+#ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "Executioner/Adaptivity", "setup_adaptivity");
+#endif
 
   registerAction(AddDiracKernelAction, "DiracKernels/*", "add_dirac_kernel");
 

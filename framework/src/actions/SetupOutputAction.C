@@ -93,9 +93,11 @@ SetupOutputAction::act()
 
     mproblem.outputDisplaced(getParam<bool>("output_displaced"));
 
+#ifdef LIBMESH_ENABLE_AMR
     Adaptivity & adapt = mproblem.adaptivity();
     if (adapt.isOn())
       output.sequence(true);
+#endif //LIBMESH_ENABLE_AMR
 
     output.interval(getParam<int>("interval"));
   }

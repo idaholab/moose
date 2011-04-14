@@ -15,6 +15,8 @@
 #ifndef ADAPTIVITYACTION_H
 #define ADAPTIVITYACTION_H
 
+#ifdef LIBMESH_ENABLE_AMR
+
 #include "Action.h"
 
 class AdaptivityAction: public Action
@@ -29,5 +31,7 @@ public:
 
 template<>
 InputParameters validParams<AdaptivityAction>();
+
+#endif //LIBMESH_ENABLE_AMR
 
 #endif //ADAPTIVITYACTION_H

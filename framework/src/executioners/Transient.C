@@ -191,11 +191,13 @@ Transient::endStep()
     _problem.outputPostprocessors();
   }
 
+#ifdef LIBMESH_ENABLE_AMR
   if (_problem.adaptivity().isOn())
   {
     _problem.adaptMesh();
     _problem.out().meshChanged();
   }
+#endif
 
   _t_step++;
   _time_old = _time;

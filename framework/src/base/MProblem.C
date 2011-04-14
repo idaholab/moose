@@ -73,7 +73,9 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _postprocessor_gnuplot_output(false),
     _gnuplot_format("ps"),
     _out(*this),
+#ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
+#endif
     _print_mesh_changed(false),
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
@@ -172,9 +174,11 @@ void MProblem::initialSetup()
   {
   }
 
+#ifdef LIBMESH_ENABLE_AMR
   Moose::setup_perf_log.push("adaptivity().initial()","Setup");
   adaptivity().initial();
   Moose::setup_perf_log.pop("adaptivity().initial()","Setup");
+#endif //LIBMESH_ENABLE_AMR
 
   Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
   //Update the geometric searches (has to be called after the problem is all set up)
@@ -984,6 +988,8 @@ MProblem::init2()
 void
 MProblem::solve()
 {
+  std::cerr<<"Got here!!"<<std::endl;
+  
   Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
   _solve_only_perf_log.push("solve");
@@ -1126,12 +1132,14 @@ MProblem::output()
     _displaced_problem->output();
 }
 
+#ifdef LIBMESH_ENABLE_AMR
 void
 MProblem::adaptMesh()
 {
   _adaptivity.adaptMesh();
   meshChanged();
 }
+#endif //LIBMESH_ENABLE_AMR
 
 void
 MProblem::meshChanged()
@@ -1163,9 +1171,11 @@ MProblem::checkProblemIntegrity()
 
   // Check materials
   {
+#ifdef LIBMESH_ENABLE_AMR
     bool adaptivity = _adaptivity.isOn();
     if (_material_data[0]->hasStatefulProperties() && adaptivity)
       mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
+#endif
 
     std::set<subdomain_id_type> local_mesh_subs(mesh_subdomains);
     /**

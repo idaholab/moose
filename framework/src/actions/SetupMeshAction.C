@@ -52,10 +52,12 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   mesh->prepare();
   Moose::setup_perf_log.pop("Prepare Mesh","Setup");
 
+#ifdef LIBMESH_ENABLE_AMR
   Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
   // uniformly refine mesh
   mesh->uniformlyRefine();
   Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+#endif //LIBMESH_ENABLE_AMR
 
   // FIXME: autosize problem
   //  MeshRefinement mesh_refinement(*mesh);

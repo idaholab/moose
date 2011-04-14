@@ -15,6 +15,8 @@
 #ifndef ADAPTIVITY_H
 #define ADAPTIVITY_H
 
+#ifdef LIBMESH_ENABLE_AMR
+
 #include <string>
 
 // libMesh
@@ -101,5 +103,6 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
     // TODO: spit out some warning/error
   }
 }
+#endif //LIBMESH_ENABLE_AMR
 
 #endif /* ADAPTIVITY_H */

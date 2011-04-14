@@ -92,7 +92,10 @@ public:
   void update();
 
   inline void setInitRefineLevel(int level) { _init_refinement_level = level; }
+
+#ifdef LIBMESH_ENABLE_AMR
   void uniformlyRefine(int level=0);
+#endif
 
   operator libMesh::Mesh &(void) { return _mesh; }
 

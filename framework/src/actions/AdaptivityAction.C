@@ -13,6 +13,9 @@
 /****************************************************************/
 
 #include "AdaptivityAction.h"
+
+#ifdef LIBMESH_ENABLE_AMR
+
 #include "Moose.h"
 #include "Parser.h"
 #include "MProblem.h"
@@ -52,6 +55,7 @@ AdaptivityAction::act()
   NonlinearSystem & system = _parser_handle._problem->getNonlinearSystem();
   
   MProblem & mproblem = *_parser_handle._problem;
+  
   Adaptivity & adapt = mproblem.adaptivity();
 
   _parser_handle._executioner->parameters().set<unsigned int>("steps") = getParam<unsigned int>("steps");
@@ -104,3 +108,4 @@ AdaptivityAction::getSteps()
   return params.have_parameter<unsigned int>("steps") ? params.get<unsigned int>("steps") : 0;
 }
 
+#endif //LIBMESH_ENABLE_AMR

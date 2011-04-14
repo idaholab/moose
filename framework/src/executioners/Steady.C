@@ -47,10 +47,13 @@ Steady::execute()
 
   _time = 1.0;           // should be inside the previous if-statement, but to preserve backward compatible behavior, it has to be like this ;(
 
+#ifdef LIBMESH_ENABLE_AMR
+
   // Define the refinement loop
   unsigned int steps = _problem.adaptivity().getSteps();
   for(unsigned int r_step=0; r_step<=steps; r_step++)
   { 
+#endif //LIBMESH_ENABLE_AMR
     preSolve();
     _problem.updateMaterials();
     _problem.timestepSetup();
@@ -65,6 +68,7 @@ Steady::execute()
 
     std::cout << "\n";
     
+#ifdef LIBMESH_ENABLE_AMR
     if(r_step != steps)
     {
       _problem.adaptMesh();
@@ -72,6 +76,7 @@ Steady::execute()
     }
     _time += 1.0;                       // change the "time" so we get the right output
   }
+#endif
 
   postExecute();
 }

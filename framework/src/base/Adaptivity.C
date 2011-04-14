@@ -13,6 +13,9 @@
 /****************************************************************/
 
 #include "Adaptivity.h"
+
+#ifdef LIBMESH_ENABLE_AMR
+
 #include "Moose.h"
 #include "MooseMesh.h"
 #include "MProblem.h"
@@ -108,3 +111,5 @@ Adaptivity::adaptMesh()
     _mesh_refinement->refine_and_coarsen_elements();
   }
 }
+
+#endif //LIBMESH_ENABLE_AMR

@@ -148,6 +148,7 @@ MooseMesh::update()
   cacheInfo();
 }
 
+#ifdef LIBMESH_ENABLE_AMR
 void
 MooseMesh::uniformlyRefine(int level)
 {
@@ -157,6 +158,7 @@ MooseMesh::uniformlyRefine(int level)
   else if (_init_refinement_level)
     mesh_refinement.uniformly_refine(_init_refinement_level);
 }
+#endif //LIBMESH_ENABLE_AMR
 
 void
 MooseMesh::meshChanged()

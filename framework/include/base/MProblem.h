@@ -167,9 +167,11 @@ public:
   virtual void output();
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
 
+#ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
   virtual void adaptMesh();
+#endif //LIBMESH_ENABLE_AMR
   virtual void meshChanged();
 
   void setPrintMeshChanged(bool state = true) { _print_mesh_changed = state; }
@@ -224,7 +226,10 @@ protected:
   // Output system
   Output _out;
 
+#ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
+#endif
+  
   bool _print_mesh_changed;
 
   // Displaced mesh /////
