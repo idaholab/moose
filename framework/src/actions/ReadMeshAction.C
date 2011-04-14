@@ -75,10 +75,21 @@ ReadMeshAction::act()
     {
       // Create the displaced mesh
       _parser_handle._displaced_mesh = new MooseMesh();
-
-      ExodusII_IO temp_reader(*_parser_handle._displaced_mesh);
+      
       Moose::setup_perf_log.push("Read Displaced Mesh","Setup");
-      temp_reader.read(mesh_file);
+
+      if (getParam<bool>("nemesis"))
+	{
+	  // Nemesis_IO only takes a reference to ParallelMesh
+	  ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(_parser_handle._displaced_mesh->getMesh());
+	  Nemesis_IO(pmesh).read(mesh_file); 
+	}
+      else // not reading Nemesis files
+	{
+	  ExodusII_IO temp_reader(*_parser_handle._displaced_mesh);
+	  temp_reader.read(mesh_file);
+	}
+
       Moose::setup_perf_log.pop("Read Displaced Mesh","Setup");
       
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
