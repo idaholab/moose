@@ -163,23 +163,23 @@ doc:
 	doxygen doc/Doxyfile
 
 clean::
-	@rm -f $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
+	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
 	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" | xargs rm
 
 # Clean only the opt intermediate files
 cleanopt::
-	@rm -f $(APPLICATION_NAME)-opt* lib$(APPLICATION_NAME)-opt*
+	@rm -fr $(APPLICATION_NAME)-opt* lib$(APPLICATION_NAME)-opt*
 	@find . -name "*opt.o" -or -name "*opt.d" | xargs rm
 
 # Clean only the dbg intermediate files
 cleandbg::
-	@rm -f $(APPLICATION_NAME)-dbg* lib$(APPLICATION_NAME)-dbg*
+	@rm -fr $(APPLICATION_NAME)-dbg* lib$(APPLICATION_NAME)-dbg*
 	@find . -name "*dbg.o" -or -name "*dbg.d" | xargs rm
 
 # Clean only the prof intermediate files
 cleanpro::
-	@rm -f $(APPLICATION_NAME)-pro* lib$(APPLICATION_NAME)-pro*
+	@rm -fr $(APPLICATION_NAME)-pro* lib$(APPLICATION_NAME)-pro*
 	@find . -name "*pro.o" -or -name "*pro.d" | xargs rm
 
 
