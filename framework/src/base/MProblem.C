@@ -185,7 +185,7 @@ void MProblem::initialSetup()
   updateGeomSearch();
   Moose::setup_perf_log.pop("Initial updateGeomSearch()","Setup");
 
-  Moose::setup_perf_log.push("Initial updateActiveSemiLocalNodeRange()","Setup");  
+  Moose::setup_perf_log.push("Initial updateActiveSemiLocalNodeRange()","Setup");
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
   if(_displaced_mesh)
   {
@@ -980,7 +980,7 @@ MProblem::init2()
 
   if (_displaced_problem)
     _displaced_problem->init();
-  
+
   _aux.init();
 
 }
@@ -988,8 +988,6 @@ MProblem::init2()
 void
 MProblem::solve()
 {
-  std::cerr<<"Got here!!"<<std::endl;
-  
   Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
   _solve_only_perf_log.push("solve");
