@@ -58,6 +58,9 @@ public:
   virtual void update() = 0;
   virtual void solve() = 0;
 
+  virtual void copyOldSolutions() = 0;
+  virtual void restoreSolutions() = 0;
+
   /**
    * The solution vector that is currently being operated on.
    * This is typically a ghosted vector that comes in from the Nonlinear solver.
@@ -124,6 +127,8 @@ public:
       SystemBase(subproblem, name),
       _sys(subproblem.es().add_system<T>(_name)),
       _solution(*_sys.solution),
+      _solution_old(*_sys.old_local_solution),
+      _solution_older(*_sys.older_local_solution),
       _dummy_sln(NULL)
   {
   }
@@ -161,6 +166,8 @@ public:
   }
 
   virtual NumericVector<Number> & solution() { return _solution; }
+  virtual NumericVector<Number> & solutionOld() { return _solution_old; }
+  virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
 
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_sln; }
   virtual NumericVector<Number> & solutionDuDotDu() { return *_dummy_sln; }
@@ -181,6 +188,25 @@ public:
     _sys.solve();
   }
 
+  virtual void copySolutionsBackwards()
+  {
+    _sys.update();
+    *_sys.older_local_solution = *_sys.current_local_solution;
+    *_sys.old_local_solution   = *_sys.current_local_solution;
+  }
+
+  virtual void copyOldSolutions()
+  {
+    *_sys.older_local_solution = *_sys.old_local_solution;
+    *_sys.old_local_solution = *_sys.current_local_solution;
+  }
+
+  virtual void restoreSolutions()
+  {
+    *_sys.current_local_solution = *_sys.old_local_solution;
+    *_sys.solution = *_sys.old_local_solution;
+  }
+
   virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep)
   {
     io.copy_nodal_solution(_sys, nodal_var_name, timestep);
@@ -195,6 +221,8 @@ protected:
   T & _sys;
 
   NumericVector<Number> & _solution;
+  NumericVector<Number> & _solution_old;
+  NumericVector<Number> & _solution_older;
 
   NumericVector<Number> * _dummy_sln;                     /// to satisfy the interface
 };

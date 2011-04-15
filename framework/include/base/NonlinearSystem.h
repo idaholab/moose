@@ -41,17 +41,10 @@ public:
   NonlinearSystem(MProblem & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
-  virtual NumericVector<Number> & solutionOld() { return _solution_old; }
-  virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
-
   /// Should be called before EquationSystems::init()
   virtual void preInit();
   virtual void init();
   virtual void solve();
-
-  virtual void copySolutionsBackwards();
-  virtual void copyOldSolutions();
-  virtual void restoreSolutions();
 
   // Setup Functions ////
   virtual void initialSetupBCs();
@@ -137,8 +130,6 @@ protected:
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
   const NumericVector<Number> * _current_solution;      /// solution vector from nonlinear solver
-  NumericVector<Number> & _solution_old;
-  NumericVector<Number> & _solution_older;
   NumericVector<Number> & _solution_u_dot;              /// solution vector for u^dot
   NumericVector<Number> & _solution_du_dot_du;          /// solution vector for {du^dot}\over{du}
   NumericVector<Number> * _residual_old;                /// residual evaluated at the old time step (need for Crank-Nicolson)

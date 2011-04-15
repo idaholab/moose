@@ -31,9 +31,6 @@
 AuxiliarySystem::AuxiliarySystem(MProblem & subproblem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(subproblem, name),
     _mproblem(subproblem),
-    _current_solution(NULL),
-    _solution_old(*_sys.old_local_solution),
-    _solution_older(*_sys.older_local_solution),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _need_serialized_solution(false)
 {
@@ -58,21 +55,6 @@ AuxiliarySystem::init()
 
   if(_need_serialized_solution)
     _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
-}
-
-void
-AuxiliarySystem::copySolutionsBackwards()
-{
-  _sys.update();
-  *_sys.older_local_solution = *_sys.current_local_solution;
-  *_sys.old_local_solution   = *_sys.current_local_solution;
-}
-
-void
-AuxiliarySystem::copyOldSolutions()
-{
-  *_sys.older_local_solution = *_sys.old_local_solution;
-  *_sys.old_local_solution = *_sys.current_local_solution;
 }
 
 void

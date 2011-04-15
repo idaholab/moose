@@ -36,13 +36,7 @@ public:
   AuxiliarySystem(MProblem & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
-  virtual NumericVector<Number> & solutionOld() { return _solution_old; }
-  virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
-
   virtual void init();
-
-  virtual void copySolutionsBackwards();
-  virtual void copyOldSolutions();
 
   virtual void initialSetup();
   virtual void timestepSetup();
@@ -71,8 +65,6 @@ protected:
   MProblem & _mproblem;
 
   const NumericVector<Number> * _current_solution;      /// solution vector from nonlinear solver
-  NumericVector<Number> & _solution_old;
-  NumericVector<Number> & _solution_older;
   NumericVector<Number> & _serialized_solution;         /// Serialized version of the solution vector
 
   bool _need_serialized_solution;                       /// Whether or not a copy of the residual needs to be made

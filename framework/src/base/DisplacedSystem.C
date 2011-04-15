@@ -16,7 +16,7 @@
 #include "DisplacedProblem.h"
 
 DisplacedSystem::DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name) :
-    SystemTempl<ExplicitSystem>(problem, name),
+    SystemTempl<TransientExplicitSystem>(problem, name),
     _undisplaced_system(undisplaced_system)
 {
 }

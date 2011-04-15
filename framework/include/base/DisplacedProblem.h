@@ -104,6 +104,9 @@ protected:
   DisplacedSystem _displaced_nl;
   DisplacedSystem _displaced_aux;
 
+  const NumericVector<Number> * _nl_solution;
+  const NumericVector<Number> * _aux_solution;
+
   std::vector<AssemblyData *> _asm_info;
 
   GeometricSearchData _geometric_search_data;
