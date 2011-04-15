@@ -23,7 +23,7 @@
 class DisplacedProblem;
 
 
-class DisplacedSystem : public SystemTempl<TransientExplicitSystem>
+class DisplacedSystem : public SystemTempl<ExplicitSystem>
 {
 public:
   DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name);
@@ -40,6 +40,9 @@ public:
   virtual NumericVector<Number> & getVector(std::string name);
   
   virtual NumericVector<Number> & serializedSolution() { return _undisplaced_system.serializedSolution(); }
+
+  virtual NumericVector<Number> & solutionOld() { return _undisplaced_system.solutionOld(); }
+  virtual NumericVector<Number> & solutionOlder() { return _undisplaced_system.solutionOlder(); }
 
   virtual const NumericVector<Number> * & currentSolution() { return _undisplaced_system.currentSolution(); }
 

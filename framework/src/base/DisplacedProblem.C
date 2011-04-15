@@ -22,8 +22,8 @@ public:
   UpdateDisplacedMeshThread(DisplacedProblem & problem) :
       _problem(problem),
       _ref_mesh(_problem.refMesh()),
-      _nl_soln(*_problem._nl_solution),
-      _aux_soln(*_problem._aux_solution)
+      _nl_soln(_problem._displaced_nl.solution()),
+      _aux_soln(_problem._displaced_aux.solution())
   {
   }
 
@@ -152,9 +152,6 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
 
   (*_displaced_nl.sys().solution) = soln;
   (*_displaced_aux.sys().solution) = aux_soln;
-
-  _nl_solution = &soln;
-  _aux_solution = &aux_soln;
 
   Threads::parallel_for(*_mesh.getActiveSemiLocalNodeRange(), UpdateDisplacedMeshThread(*this));
 

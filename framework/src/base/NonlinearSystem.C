@@ -60,6 +60,8 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
     _current_solution(NULL),
+    _solution_old(*_sys.old_local_solution),
+    _solution_older(*_sys.older_local_solution),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
     _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
     _residual_old(NULL),
@@ -142,6 +144,28 @@ NonlinearSystem::solve()
   // store info about the solve
   _n_iters = _sys.n_nonlinear_iterations();
   _final_residual = _sys.final_nonlinear_residual();
+}
+
+void
+NonlinearSystem::copySolutionsBackwards()
+{
+  _sys.update();
+  *_sys.older_local_solution = *_sys.current_local_solution;
+  *_sys.old_local_solution   = *_sys.current_local_solution;
+}
+
+void
+NonlinearSystem::copyOldSolutions()
+{
+  *_sys.older_local_solution = *_sys.old_local_solution;
+  *_sys.old_local_solution = *_sys.current_local_solution;
+}
+
+void
+NonlinearSystem::restoreSolutions()
+{
+  *_sys.current_local_solution = *_sys.old_local_solution;
+  *_sys.solution = *_sys.old_local_solution;
 }
 
 void
