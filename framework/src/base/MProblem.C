@@ -115,7 +115,7 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
 
 MProblem::~MProblem()
 {
-  bool stateful_props = _material_data[0]->hasStatefulProperties();
+  bool stateful_props = _material_props.hasStatefulProperties();
 
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; i++)
@@ -148,7 +148,7 @@ void MProblem::initialSetup()
   copySolutionsBackwards();
   Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
 
-  if (_material_data[0]->hasStatefulProperties())
+  if (_material_props.hasStatefulProperties())
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     for (ConstElemRange::const_iterator el = elem_range.begin() ; el != elem_range.end(); ++el)
@@ -646,7 +646,7 @@ MProblem::updateMaterials()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _materials[tid].updateMaterialDataState();
 
-  if (_material_data[0]->hasStatefulProperties())
+  if (_material_props.hasStatefulProperties())
   {
     _material_props.shift();
     _bnd_material_props.shift();
@@ -1171,7 +1171,7 @@ MProblem::checkProblemIntegrity()
   {
 #ifdef LIBMESH_ENABLE_AMR
     bool adaptivity = _adaptivity.isOn();
-    if (_material_data[0]->hasStatefulProperties() && adaptivity)
+    if (_material_props.hasStatefulProperties() && adaptivity)
       mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
 #endif
 

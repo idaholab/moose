@@ -14,7 +14,9 @@
 
 #include "MaterialPropertyStorage.h"
 
-MaterialPropertyStorage::MaterialPropertyStorage()
+MaterialPropertyStorage::MaterialPropertyStorage() :
+    _has_stateful_props(false),
+    _has_older_prop(false)
 {
   _props_elem       = new HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> >;
   _props_elem_old   = new HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> >;
@@ -69,10 +71,16 @@ MaterialPropertyStorage::releaseProperties()
 void
 MaterialPropertyStorage::shift()
 {
-  // shift the properties back in time and reuse older for current (save reallocations etc.)
-  HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > * tmp = _props_elem_older;
-
-  _props_elem_older = _props_elem_old;
-  _props_elem_old = _props_elem;
-  _props_elem = tmp;
+  if (_has_older_prop)
+  {
+    // shift the properties back in time and reuse older for current (save reallocations etc.)
+    HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > * tmp = _props_elem_older;
+    _props_elem_older = _props_elem_old;
+    _props_elem_old = _props_elem;
+    _props_elem = tmp;
+  }
+  else
+  {
+    std::swap(_props_elem, _props_elem_old);
+  }
 }

@@ -17,10 +17,10 @@
 
 #include <vector>
 #include "MaterialProperty.h"
+#include "MaterialPropertyStorage.h"
 #include "elem.h"
 
 class Material;
-class MaterialPropertyStorage;
 
 /// Proxy for accessing MaterialPropertyStorage
 class MaterialData
@@ -67,8 +67,6 @@ public:
    */
   void size(unsigned int n_qpoints);
 
-  bool hasStatefulProperties();
-
   void initStatefulProps(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side = 0);
 
   /**
@@ -106,12 +104,6 @@ protected:
   MaterialPropertyStorage & _storage;
 
   bool _sized;
-
-  /**
-   * Whether or not this material has stateful properties.  This will get automatically
-   * set to true if a stateful property is declared.
-   */
-  bool _has_stateful_props;
 
   /**
    * Data structure to map names with values.
@@ -190,7 +182,7 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOld(const std::string & prop_name)
 {
-  _has_stateful_props = true;
+  _storage.hasStatefulProperties() = true;
   _stateful_props.insert(prop_name);
 
   if (!this->have_property_old<T>(prop_name))
@@ -206,7 +198,8 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOlder(const std::string & prop_name)
 {
-  _has_stateful_props = true;
+  _storage.hasStatefulProperties() = true;
+  _storage.hasOlderProperties() = true;
   _stateful_props.insert(prop_name);
 
   if (!this->have_property_older<T>(prop_name))

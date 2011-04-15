@@ -31,6 +31,9 @@ public:
 
   void shift();
 
+  bool & hasStatefulProperties() { return _has_stateful_props; }
+  bool & hasOlderProperties() { return _has_older_prop; }
+
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & props() { return *_props_elem; }
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOld() { return *_props_elem_old; }
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > & propsOlder() { return *_props_elem_older; }
@@ -40,6 +43,18 @@ protected:
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > * _props_elem;
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > * _props_elem_old;
   HashMap<unsigned int, HashMap<unsigned int, MaterialProperties> > * _props_elem_older;
+
+  /**
+   * Whether or not we have stateful properties.  This will get automatically
+   * set to true if a stateful property is declared.
+   */
+  bool _has_stateful_props;
+
+  /**
+   * True if any material requires older properties to be computed.  This will get automatically
+   * set to true if a older stateful property is declared.
+   */
+  bool _has_older_prop;
 };
 
 

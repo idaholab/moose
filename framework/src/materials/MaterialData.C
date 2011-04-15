@@ -14,7 +14,6 @@
 
 #include "MaterialData.h"
 #include "Material.h"
-#include "MaterialPropertyStorage.h"
 
 void shallowCopyData(const std::set<std::string> & names,
                      MaterialProperties & data,
@@ -31,8 +30,7 @@ void shallowCopyData(const std::set<std::string> & names,
 
 MaterialData::MaterialData(MaterialPropertyStorage & storage) :
     _storage(storage),
-    _sized(false),
-    _has_stateful_props(false)
+    _sized(false)
 {
 }
 
@@ -46,12 +44,6 @@ MaterialData::~MaterialData()
     delete it->second;
 }
 
-bool
-MaterialData::hasStatefulProperties()
-{
-  return _has_stateful_props;
-}
-
 void
 MaterialData::size(unsigned int n_qpoints)
 {
@@ -59,14 +51,16 @@ MaterialData::size(unsigned int n_qpoints)
     if (it->second != NULL)
       it->second->resize(n_qpoints);
 
-  if (_has_stateful_props)
+  if (_storage.hasStatefulProperties())
   {
     for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
       if (it->second != NULL)
         it->second->resize(n_qpoints);
-    for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-      if (it->second != NULL)
-        it->second->resize(n_qpoints);
+
+    if (_storage.hasStatefulProperties())
+      for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
+        if (it->second != NULL)
+          it->second->resize(n_qpoints);
   }
   _sized = true;
 }
@@ -90,7 +84,7 @@ MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, con
     _sized = true;
   }
 
-  if (_has_stateful_props)
+  if (_storage.hasStatefulProperties())
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
@@ -101,24 +95,27 @@ MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, con
       // also allocating the right amount of memory, so we do not have to resize, etc.
       if (_storage.props()[elem_id][side][name] == NULL) _storage.props()[elem_id][side][name] = _props[name]->init(n_qpoints);
       if (_storage.propsOld()[elem_id][side][name] == NULL) _storage.propsOld()[elem_id][side][name] = _props_old[name]->init(n_qpoints);
-      if (_storage.propsOlder()[elem_id][side][name] == NULL) _storage.propsOlder()[elem_id][side][name] = _props_old[name]->init(n_qpoints);
+      if (_storage.hasOlderProperties())
+        if (_storage.propsOlder()[elem_id][side][name] == NULL) _storage.propsOlder()[elem_id][side][name] = _props_old[name]->init(n_qpoints);
     }
 
     shallowCopyData(_stateful_props, _props, _storage.props()[elem_id][side]);
     shallowCopyData(_stateful_props, _props_old, _storage.propsOld()[elem_id][side]);
-    shallowCopyData(_stateful_props, _props_older, _storage.propsOlder()[elem_id][side]);
+    if (_storage.hasOlderProperties())
+      shallowCopyData(_stateful_props, _props_older, _storage.propsOlder()[elem_id][side]);
   }
 
   // iterate over materials and compute their properties
   for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
     (*it)->computeProperties();
 
-  if (_has_stateful_props)
+  if (_storage.hasStatefulProperties())
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
     shallowCopyData(_stateful_props, _storage.props()[elem_id][side], _props);
     shallowCopyData(_stateful_props, _storage.propsOld()[elem_id][side], _props_old);
-    shallowCopyData(_stateful_props, _storage.propsOlder()[elem_id][side], _props_older);
+    if (_storage.hasOlderProperties())
+      shallowCopyData(_stateful_props, _storage.propsOlder()[elem_id][side], _props_older);
   }
 }
