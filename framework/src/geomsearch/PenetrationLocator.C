@@ -111,7 +111,6 @@ PenetrationLocator::detectPenetration()
         continue;
       }
 
-      Elem * side = info->_side;
       // See if the same element still contains this point
       if(elem->contains_point(node))
       {
@@ -170,8 +169,9 @@ PenetrationLocator::detectPenetration()
     }
 
     Node * closest_node = _nearest_node.nearestNode(node.id());
-    Real closest_distance = _nearest_node.distance(node.id());
     std::vector<unsigned int> & closest_elems = _mesh.nodeToElemMap()[closest_node->id()];
+    std::vector<PenetrationInfo*> p_info;
+
 
     for(unsigned int j=0; j<closest_elems.size(); j++)
     {
@@ -195,7 +195,17 @@ PenetrationLocator::detectPenetration()
 
           findContactPoint(elem, side_num, node, true, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
 
-          if(contact_point_on_side && _penetration_info[node.id()] && _update_location &&
+          PenetrationInfo * pen_info =  new PenetrationInfo(&node,
+                                                            elem,
+                                                            side,
+                                                            side_num,
+                                                            normal,
+                                                            distance,
+                                                            contact_phys,
+                                                            contact_ref,
+                                                            side_phi);
+
+          if(contact_point_on_side && _penetration_info[node.id()] &&
              (
                (std::abs(_penetration_info[node.id()]->_distance) > std::abs(distance)) ||
                (_penetration_info[node.id()]->_distance < 0 && distance > 0)
@@ -214,22 +224,85 @@ PenetrationLocator::detectPenetration()
                )
             )
           {
-            _penetration_info[node.id()] =  new PenetrationInfo(&node,
-                                                                elem,
-                                                                side,
-                                                                side_num,
-                                                                normal,
-                                                                distance,
-                                                                contact_phys,
-                                                                contact_ref,
-                                                                side_phi);
+            _penetration_info[node.id()] = pen_info;
           }
           else
           {
-            delete side;
+            p_info.push_back( pen_info );
           }
         }
       }
+    }
+    if (!_penetration_info[node.id()] && p_info.size() > 1)
+    {
+      // No face is clearly above/below this node.
+      // See if we need to force a match.
+
+      // Restrict the parametric coordinates to the domain of the face
+      for ( unsigned int j(0); j < p_info.size(); ++j )
+      {
+        for ( unsigned int k(0); k < p_info[j]->_elem->dim(); ++k )
+        {
+          if ( p_info[j]->_closest_point_ref(k) < -1 )
+          {
+            p_info[j]->_closest_point_ref(k) = -1;
+          }
+          if ( p_info[j]->_closest_point_ref(k) > 1 )
+          {
+            p_info[j]->_closest_point_ref(k) = 1;
+          }
+        }
+      }
+      // Find the element/face closest to the node
+      unsigned int closest_index(0);
+      std::vector<Point> points(1);
+      points[0] = p_info[0]->_closest_point_ref;
+      _fe->reinit(p_info[0]->_side, &points);
+      Point closest_coor = _fe->get_xyz()[0];
+      Real dist = (closest_coor - node).size();
+      for ( unsigned int j(1); j < p_info.size(); ++j )
+      {
+        points[0] = p_info[j]->_closest_point_ref;
+        _fe->reinit(p_info[j]->_side, &points);
+        const Point coor = _fe->get_xyz()[0];
+        Real dist2 = (coor - node).size();
+        if (dist2 < dist)
+        {
+          dist = dist2;
+          closest_coor = coor;
+          closest_index = j;
+        }
+      }
+
+      // We now have the index for the closest face.
+      for ( unsigned int j(0); j < p_info.size(); ++j )
+      {
+
+        if ( j != closest_index )
+        {
+          Point contact_ref;
+          Point contact_phys;
+          Real distance;
+          RealGradient normal;
+          bool contact_point_on_side(false);
+          std::vector<std::vector<Real> > side_phi;
+
+          findContactPoint(p_info[j]->_elem, p_info[j]->_side_num, closest_coor, true, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+          if ( contact_point_on_side )
+          {
+            // We have found a match.  This node is in contact.
+            _penetration_info[node.id()] = p_info[closest_index];
+            // Set the entry in p_info to NULL so that we don't delete it (it is now
+            // owned by _penetration_info).
+            p_info[closest_index] = NULL;
+            break;
+          }
+        }
+      }
+    }
+    for ( unsigned int j(0); j < p_info.size(); ++j )
+    {
+      delete p_info[j];
     }
   }
 

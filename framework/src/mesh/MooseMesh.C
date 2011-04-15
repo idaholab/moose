@@ -85,7 +85,7 @@ MooseMesh::prepare()
   // If we are using a truly Parallel mesh (like Nemesis) then we might not even have neighbors!
   if(parallel())
     MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
-  
+
   _mesh.prepare_for_use(false);
 
   // If using ParallelMesh this will delete non-local elements from the current processor
@@ -106,16 +106,16 @@ MooseMesh::prepare()
     {
       // Subdomain size before
       // std::cout << "(before) _mesh_subdomains.size()=" << _mesh_subdomains.size() << std::endl;
-      
+
       // Pack our subdomain IDs into a vector
-      std::vector<subdomain_id_type> mesh_subdomains_vector(_mesh_subdomains.begin(), 
+      std::vector<subdomain_id_type> mesh_subdomains_vector(_mesh_subdomains.begin(),
 							    _mesh_subdomains.end());
 
       // Gather them all into an enlarged vector
       Parallel::allgather(mesh_subdomains_vector);
 
       // Attempt to insert any new IDs into the set (any existing ones will be skipped)
-      _mesh_subdomains.insert(mesh_subdomains_vector.begin(), 
+      _mesh_subdomains.insert(mesh_subdomains_vector.begin(),
 			      mesh_subdomains_vector.end());
 
       // Subdomain size after
@@ -137,7 +137,7 @@ MooseMesh::prepare()
       // Attempt to insert any new IDs into the set (any existing ones will be skipped)
       _mesh_boundary_ids.insert(mesh_boundary_ids_vector.begin(),
 				mesh_boundary_ids_vector.end());
-      
+
       // Boundary ID size after
       // std::cout << "(after) _mesh_boundary_ids.size()=" << _mesh_boundary_ids.size() << std::endl;
     }
@@ -151,6 +151,7 @@ MooseMesh::update()
   // Rebuild the boundary conditions
   build_node_list_from_side_list();
   //Update the node to elem map
+  _node_to_elem_map.clear();
   MeshTools::build_nodes_to_elem_map(_mesh, _node_to_elem_map);
   buildNodeList();
   cacheInfo();
@@ -225,7 +226,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems
       _semilocal_node_list.insert(node);
     }
   }
-  
+
   // Now add the nodes connected to ghosted_elems
   for(std::set<unsigned int>::iterator it=ghosted_elems.begin();
       it!=ghosted_elems.end();
