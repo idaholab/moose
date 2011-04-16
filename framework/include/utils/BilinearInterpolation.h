@@ -51,16 +51,11 @@ public:
 
   void GetNeigbourIndices(std::vector<Real> inArr, Real x ,int& lowerX ,int& upperX );
   
-
-  
-  
 private:
 
   std::vector<Real> _xAxis;
   std::vector<Real> _yAxis;
   ColumnMajorMatrix _zSurface;
-  
-
   static int _file_number;
 };
 
