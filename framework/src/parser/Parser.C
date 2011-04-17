@@ -456,7 +456,7 @@ Parser::execute()
   Action *action = Moose::action_warehouse.allActionsBegin(this);
   do
     action->act();
-  while (action = Moose::action_warehouse.allActionsNext(this));
+  while ( (action = Moose::action_warehouse.allActionsNext(this)) );
 
          /*
   for (ActionIterator a = Moose::action_warehouse.allActionsBegin(this);
