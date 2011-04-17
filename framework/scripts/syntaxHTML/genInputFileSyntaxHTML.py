@@ -49,22 +49,22 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
 
   data = commands.getoutput( fname + " --yaml" )
 
-  #test if YAML DATA is in the output. This is so we can give a clear error
-  #message if the program doesn't run to completion (instead of an IndexError)
+  # test if YAML DATA is in the output. This is so we can give a clear error
+  # message if the program doesn't run to completion (instead of an IndexError)
   if data.find( 'YAML DATA' ) < 0:
     print 'File Data' + '-'*50 + '\n' + data
     print 'End File Data' + '-'*46
     print 'ERROR: The yaml data is not being printed by: ' + fname
     sys.exit(1)
 
-  #ignore the first part of the file, up to START YAML DATA
+  # ignore the first part of the file, up to START YAML DATA
   data = data.split('**START YAML DATA**\n')[1]
-  #ignore the last part of the file, after END YAML DATA
+  # ignore the last part of the file, after END YAML DATA
   data = data.split('**END YAML DATA**')[0]
   
-  #ignore root node, start displaying all it's child nodes
+  # ignore root node, start displaying all it's child nodes
   data = yaml.load( data )
-  data = data[0]['subblocks']
+  #data = data[0]['subblocks']
 
   # perform some changes to the data, like renaming executioners to their type
   data = massage_data( data )

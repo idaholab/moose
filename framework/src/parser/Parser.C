@@ -64,6 +64,11 @@ Parser::Parser():
     {
       //important: start and end yaml data delimiters used by python
       std::cout << "**START YAML DATA**\n";
+      std::cout << "  - name: TODO\n";
+      std::cout << "    desc:\n";
+      std::cout << "    type:\n";
+      std::cout << "    parameters:\n";
+      std::cout << "    subblocks:\n";
       buildFullTree( &Parser::printYAMLParameterData );
       std::cout << "**END YAML DATA**\n";
       exit(0);
@@ -451,7 +456,7 @@ Parser::execute()
   Action *action = Moose::action_warehouse.allActionsBegin(this);
   do
     action->act();
-  while ( (action = Moose::action_warehouse.allActionsNext(this)) );
+  while (action = Moose::action_warehouse.allActionsNext(this));
 
          /*
   for (ActionIterator a = Moose::action_warehouse.allActionsBegin(this);
