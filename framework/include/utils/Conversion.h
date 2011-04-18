@@ -29,6 +29,16 @@ namespace Moose {
   template<>
   ExecFlagType stringToEnum<ExecFlagType>(const std::string & s);
 
+  // conversion to string
+  template<typename T>
+  std::string
+  stringify(const T & t)
+  {
+    std::ostringstream os;
+    os << t;
+    return os.str();
+  }
+
 }
 
 #endif //CONVERSION_H

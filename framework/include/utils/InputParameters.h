@@ -57,6 +57,13 @@ public:
    */
   std::string getClassDescription() const;
 
+  template<typename T >
+  T & set (const std::string & name)
+  {
+    _seen_in_input.insert(name);
+    return Parameters::set<T>(name);
+  }
+
   /**
    * This method adds a parameter and documentation string to the InputParameters
    * object that will be extracted from the input file.  If the parameter is

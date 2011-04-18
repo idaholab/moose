@@ -80,9 +80,9 @@ ConvDiffMetaAction::act()
   {
     InputParameters & params = moose_object_action->getMooseObjectParams();
     params.set<std::string>("variable") = variables[0];
-  }
   // add it to the warehouse
   Moose::action_warehouse.addActionBlock(action);
+  }
 
   // Setup our Diffusion Kernel on the "v" variable
   action = ActionFactory::instance()->create("Kernels/diff_v", action_params);
@@ -106,6 +106,9 @@ ConvDiffMetaAction::act()
     params.set<std::string>("variable") = variables[0];
     vel_vec_variable.push_back(variables[1]);
     params.set<std::vector<std::string> >("some_variable") = vel_vec_variable;
+
+    params.set<Real>("x") = 0;
+    params.set<Real>("y") = 0;
   }
   // add it to the warehouse
   Moose::action_warehouse.addActionBlock(action);

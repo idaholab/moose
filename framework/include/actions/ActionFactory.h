@@ -101,6 +101,7 @@ public:
   }
   
   Action * create(const std::string & name, InputParameters params);
+  Action * createNonParsed(const std::string & name, InputParameters params);
 
   InputParameters getValidParams(const std::string & name);
 

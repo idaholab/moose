@@ -455,8 +455,13 @@ Parser::execute()
 {
   Action *action = Moose::action_warehouse.allActionsBegin(this);
   do
+  {
+    // if the action is MOOSE object-based, check tht params are valid
+    MooseObjectAction * mo_action = dynamic_cast<MooseObjectAction *>(action);
+    if (mo_action != NULL)
+      checkParams(mo_action->name(), mo_action->getMooseObjectParams());
     action->act();
-  while ( (action = Moose::action_warehouse.allActionsNext(this)) );
+  } while ( (action = Moose::action_warehouse.allActionsNext(this)) );
 
          /*
   for (ActionIterator a = Moose::action_warehouse.allActionsBegin(this);
@@ -561,51 +566,78 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         in_global = true;
       }
     }
-    
-    if (!found && p.isParamRequired(it->first))
+
+    if (found)
+    {
+      InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
+      InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
+      InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
+      InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
+      InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
+      InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
+      InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
+      InputParameters::Parameter<std::vector<unsigned int>  > * vec_uint_param  = dynamic_cast<InputParameters::Parameter<std::vector<unsigned int> >*>(it->second);
+      InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
+      InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
+      InputParameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
+      InputParameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
+      InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
+
+      if (real_param)
+        setScalarParameter<Real>(full_name, it->first, real_param, in_global, global_params_block);
+      else if (int_param)
+        setScalarParameter<int>(full_name, it->first, int_param, in_global, global_params_block);
+      else if (uint_param)
+        setScalarParameter<unsigned int>(full_name, it->first, uint_param, in_global, global_params_block);
+      else if (bool_param)
+        setScalarParameter<bool>(full_name, it->first, bool_param, in_global, global_params_block);
+      else if (string_param)
+        setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
+      else if (vec_real_param)
+        setVectorParameter<Real>(full_name, it->first, vec_real_param, in_global, global_params_block);
+      else if (vec_int_param)
+        setVectorParameter<int>(full_name, it->first, vec_int_param, in_global, global_params_block);
+      else if (vec_uint_param)
+        setVectorParameter<unsigned int>(full_name, it->first, vec_uint_param, in_global, global_params_block);
+      else if (vec_bool_param)
+        setVectorParameter<bool>(full_name, it->first, vec_bool_param, in_global, global_params_block);
+      else if (vec_string_param)
+        setVectorParameter<std::string>(full_name, it->first, vec_string_param, in_global, global_params_block);
+      else if (tensor_real_param)
+        setTensorParameter<Real>(full_name, it->first, tensor_real_param, in_global, global_params_block);
+      else if (tensor_int_param)
+        setTensorParameter<int>(full_name, it->first, tensor_int_param, in_global, global_params_block);
+      else if (tensor_bool_param)
+        setTensorParameter<bool>(full_name, it->first, tensor_bool_param, in_global, global_params_block);
+    }
+  }
+}
+
+void
+Parser::checkParams(const std::string & prefix, InputParameters &p)
+{
+  static const std::string global_params_block_name = "GlobalParams";
+
+  static const std::string global_params_action_name = "set_global_params";
+  ActionIterator act_iter = Moose::action_warehouse.actionBlocksWithActionBegin(global_params_action_name);
+  GlobalParamsAction *global_params_block = NULL;
+
+  // We are grabbing only the first
+  if (act_iter != Moose::action_warehouse.actionBlocksWithActionEnd(global_params_action_name))
+    global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
+
+  for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
+  {
+    bool found = false;
+    bool in_global = false;
+    std::string orig_name = prefix + "/" + it->first;
+    std::string full_name = orig_name;
+
+    if (!p.wasSeenInInput(it->first) && p.isParamRequired(it->first))
+    {
       // The parameter is required but missing
       mooseError("The required parameter '" + orig_name + "' is missing\n");
-    
-    InputParameters::Parameter<Real> * real_param = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
-    InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
-    InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
-    InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
-    InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
-    InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
-    InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
-    InputParameters::Parameter<std::vector<unsigned int>  > * vec_uint_param  = dynamic_cast<InputParameters::Parameter<std::vector<unsigned int> >*>(it->second);
-    InputParameters::Parameter<std::vector<bool>  > * vec_bool_param  = dynamic_cast<InputParameters::Parameter<std::vector<bool> >*>(it->second);
-    InputParameters::Parameter<std::vector<std::string> > * vec_string_param = dynamic_cast<InputParameters::Parameter<std::vector<std::string> >*>(it->second);
-    InputParameters::Parameter<std::vector<std::vector<Real> > > * tensor_real_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<Real> > >*>(it->second);
-    InputParameters::Parameter<std::vector<std::vector<int> > >  * tensor_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<int> > >*>(it->second);
-    InputParameters::Parameter<std::vector<std::vector<bool> > > * tensor_bool_param = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<bool> > >*>(it->second);
-    
-    if (real_param)
-      setScalarParameter<Real>(full_name, it->first, real_param, in_global, global_params_block);
-    else if (int_param)
-      setScalarParameter<int>(full_name, it->first, int_param, in_global, global_params_block);
-    else if (uint_param)
-      setScalarParameter<unsigned int>(full_name, it->first, uint_param, in_global, global_params_block);
-    else if (bool_param)
-      setScalarParameter<bool>(full_name, it->first, bool_param, in_global, global_params_block);
-    else if (string_param)
-      setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
-    else if (vec_real_param)
-      setVectorParameter<Real>(full_name, it->first, vec_real_param, in_global, global_params_block);
-    else if (vec_int_param)
-      setVectorParameter<int>(full_name, it->first, vec_int_param, in_global, global_params_block);
-    else if (vec_uint_param)
-      setVectorParameter<unsigned int>(full_name, it->first, vec_uint_param, in_global, global_params_block);
-    else if (vec_bool_param)
-      setVectorParameter<bool>(full_name, it->first, vec_bool_param, in_global, global_params_block);
-    else if (vec_string_param)
-      setVectorParameter<std::string>(full_name, it->first, vec_string_param, in_global, global_params_block);
-    else if (tensor_real_param)
-      setTensorParameter<Real>(full_name, it->first, tensor_real_param, in_global, global_params_block);
-    else if (tensor_int_param)
-      setTensorParameter<int>(full_name, it->first, tensor_int_param, in_global, global_params_block);
-    else if (tensor_bool_param)
-      setTensorParameter<bool>(full_name, it->first, tensor_bool_param, in_global, global_params_block);
+    }
   }
 }
 

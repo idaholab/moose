@@ -277,7 +277,7 @@ addActionTypes()
   registerActionName("setup_mesh_complete", false);
   registerActionName("setup_function_complete", false);
   registerActionName("setup_variable_complete", false);
-  registerActionName("ready_to_init", false);
+  registerActionName("ready_to_init", true);
   registerActionName("setup_pps_complete", false);
 
   /**************************/
@@ -431,6 +431,7 @@ registerActions()
   // NonParsedActions
   registerNonParsedAction(SetupMeshAction, "setup_mesh");
   registerNonParsedAction(SetupDampersAction, "setup_dampers");
+  registerNonParsedAction(EmptyAction, "ready_to_init");
   registerNonParsedAction(InitProblemAction, "init_problem");
   registerNonParsedAction(CopyNodalVarsAction, "copy_nodal_vars");
   registerNonParsedAction(CheckIntegrityAction, "check_integrity");

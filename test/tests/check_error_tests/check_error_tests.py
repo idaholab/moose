@@ -36,6 +36,9 @@ def incomplete_kernel_block_coverage_test():
 def missing_mesh_bcs_test():
   tools.executeAppExpectError(__file__,'missing_mesh_bcs_test.i','The following boundary ids from your input file do not exist in the input mesh \d+')
 
+def missing_required_param_test():
+  tools.executeAppExpectError(__file__,'missing_required_param_test.i',"The required parameter '\S+' is missing")
+
 def invalid_steady_exec_test():
   tools.executeAppExpectError(__file__,'invalid_steady_exec_test.i','You have specified time kernels in your steady state simulation')
 
