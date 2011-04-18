@@ -91,6 +91,9 @@
 #include "ContactMaster.h"
 #include "SlaveConstraint.h"
 
+// thermal contact
+#include "ThermalContactAction.h"
+
 void
 Elk::registerObjects()
 {
@@ -102,13 +105,6 @@ Elk::registerObjects()
   registerPostprocessor(InternalVolumeRZ);
   registerBoundaryCondition(NeumannRZ);
   registerPostprocessor(SideFluxIntegralRZ);
-
-  // heat_conduction
-  // This registers an action to add the "slave_flux" vector to the system at the right time
-  registerActionName("add_slave_flux_vector", true);
-  addActionNameDependency("add_slave_flux_vector", "ready_to_init");
-  addActionNameDependency("init_problem", "add_slave_flux_vector");
-  registerNonParsedAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
 
   registerBoundaryCondition(ConvectiveFluxRZ);
   registerBoundaryCondition(GapHeatTransfer);
@@ -184,4 +180,15 @@ Elk::registerObjects()
   registerAction(ContactAction, "Contact/*", "add_dirac_kernel");
   registerDiracKernel(ContactMaster);
   registerDiracKernel(SlaveConstraint);
+
+  // thermal contact
+  registerAction(ThermalContactAction, "ThermalContact/*", "meta_action");
+
+  // heat_conduction
+  // This registers an action to add the "slave_flux" vector to the system at the right time
+  registerActionName("add_slave_flux_vector", false);
+  addActionNameDependency("add_slave_flux_vector", "ready_to_init");
+  addActionNameDependency("init_problem", "add_slave_flux_vector");
+  registerNonParsedAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
+
 }
