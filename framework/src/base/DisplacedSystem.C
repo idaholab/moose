@@ -44,7 +44,7 @@ DisplacedSystem::prepare(THREAD_ID tid)
 }
 
 void
-DisplacedSystem::reinitElem(const Elem * elem, THREAD_ID tid)
+DisplacedSystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
@@ -55,7 +55,7 @@ DisplacedSystem::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-DisplacedSystem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
+DisplacedSystem::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, unsigned int bnd_id, THREAD_ID tid)
 {
   for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
        it != _vars[tid].boundaryVars(bnd_id).end();
@@ -68,7 +68,7 @@ DisplacedSystem::reinitElemFace(const Elem * elem, unsigned int side, unsigned i
 }
 
 void
-DisplacedSystem::reinitNode(const Node * node, THREAD_ID tid)
+DisplacedSystem::reinitNode(const Node * /*node*/, THREAD_ID tid)
 {
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
@@ -82,7 +82,7 @@ DisplacedSystem::reinitNode(const Node * node, THREAD_ID tid)
 }
 
 void
-DisplacedSystem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+DisplacedSystem::reinitNodeFace(const Node * /*node*/, unsigned int bnd_id, THREAD_ID tid)
 {
   for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
        it != _vars[tid].boundaryVars(bnd_id).end();

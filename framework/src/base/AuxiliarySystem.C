@@ -172,7 +172,7 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
 }
 
 void
-AuxiliarySystem::reinitElem(const Elem * elem, THREAD_ID tid)
+AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
   for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
   {

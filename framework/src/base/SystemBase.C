@@ -85,7 +85,7 @@ SystemBase::prepare(THREAD_ID tid)
 }
 
 void
-SystemBase::reinitElem(const Elem * elem, THREAD_ID tid)
+SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
@@ -96,7 +96,7 @@ SystemBase::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-SystemBase::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
+SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, unsigned int /*bnd_id*/, THREAD_ID tid)
 {
 /*  for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
       it != _vars[tid].boundaryVars(bnd_id).end();
@@ -111,7 +111,7 @@ SystemBase::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bn
 }
 
 void
-SystemBase::reinitNode(const Node * node, THREAD_ID tid)
+SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 {
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
@@ -125,7 +125,7 @@ SystemBase::reinitNode(const Node * node, THREAD_ID tid)
 }
 
 void
-SystemBase::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+SystemBase::reinitNodeFace(const Node * /*node*/, unsigned int /*bnd_id*/, THREAD_ID tid)
 {
 /*  for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
        it != _vars[tid].boundaryVars(bnd_id).end();
