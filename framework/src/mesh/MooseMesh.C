@@ -30,7 +30,7 @@ static const int GRAIN_SIZE = 1;     // the grain_size does not have much influe
 MooseMesh::MooseMesh(int mesh_dim) :
     _mesh(mesh_dim),
     _is_changed(false),
-    _is_parallel(false),
+    //_is_parallel(false),
     _init_refinement_level(0),
     _active_local_elem_range(NULL),
     _active_semilocal_node_range(NULL),
@@ -43,7 +43,7 @@ MooseMesh::MooseMesh(int mesh_dim) :
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _mesh(other_mesh._mesh),
     _is_changed(false),
-    _is_parallel(false),
+    //_is_parallel(false),
     _init_refinement_level(other_mesh._init_refinement_level),
     _active_local_elem_range(NULL),
     _active_semilocal_node_range(NULL),
@@ -82,9 +82,10 @@ MooseMesh::read(const std::string file_name)
 void
 MooseMesh::prepare()
 {
+  // This is now done in Nemesis_IO::read()
   // If we are using a truly Parallel mesh (like Nemesis) then we might not even have neighbors!
-  if(parallel())
-    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
+//  if(parallel())
+//    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
 
   _mesh.prepare_for_use(false);
 

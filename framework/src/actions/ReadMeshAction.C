@@ -57,7 +57,7 @@ ReadMeshAction::act()
       // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
       ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(_parser_handle._mesh->getMesh());
       Nemesis_IO(pmesh).read(mesh_file);
-      _parser_handle._mesh->parallel(true);
+      //_parser_handle._mesh->parallel(true); // This is redundant because we have Mesh::is_serial()
     }
     else // not reading Nemesis files
     {
