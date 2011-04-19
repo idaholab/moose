@@ -67,7 +67,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   Moose::setup_perf_log.push("Initial meshChanged()","Setup");
   mesh->meshChanged();
   Moose::setup_perf_log.pop("Initial meshChanged()","Setup");
-    
+
   mesh->printInfo();
 }
 

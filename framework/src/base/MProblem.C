@@ -264,6 +264,15 @@ MProblem::addGhostedElem(unsigned int elem_id)
     _ghosted_elems.insert(elem_id);
 }
 
+void
+MProblem::addGhostedBoundary(unsigned int boundary_id)
+{
+  _mesh.addGhostedBoundary(boundary_id);
+
+  if(_displaced_problem)
+    _displaced_mesh->addGhostedBoundary(boundary_id);
+}
+
 bool
 MProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 {

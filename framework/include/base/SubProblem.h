@@ -69,6 +69,9 @@ public:
   /// Will make sure that all dofs connected to elem_id are ghosted to this processor
   virtual void addGhostedElem(unsigned int elem_id) = 0;
 
+  /// Will make sure that all necessary elements from boundary_id are ghosted to this processor
+  virtual void addGhostedBoundary(unsigned int boundary_id) = 0;
+  
 protected:
   Problem * _parent;
   MooseMesh & _mesh;

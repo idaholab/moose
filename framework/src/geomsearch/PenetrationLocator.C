@@ -184,7 +184,7 @@ PenetrationLocator::detectPenetration()
         {
           unsigned int side_num = side_list[m];
 
-          Elem *side = (elem->build_side(side_num)).release();
+          Elem *side = (elem->build_side(side_num,false)).release();
 
           Point contact_ref;
           Point contact_phys;
@@ -526,7 +526,7 @@ PenetrationLocator::findContactPoint(const Elem * master_elem, unsigned int side
     {
       for(unsigned int ss=0; ss<side->n_sides(); ss++)
       {
-        AutoPtr<Elem> sideside = side->build_side(ss);
+        AutoPtr<Elem> sideside = side->build_side(ss,false);
 
         std::vector<Point> vertices;
         vertices.reserve(2);

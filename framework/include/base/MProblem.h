@@ -66,6 +66,7 @@ public:
   virtual void prepare(const Elem * elem, THREAD_ID tid);
 
   virtual void addGhostedElem(unsigned int elem_id);
+  virtual void addGhostedBoundary(unsigned int boundary_id);
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);

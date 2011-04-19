@@ -33,6 +33,7 @@ InputParameters validParams<ReadMeshAction>()
   params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
   params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
+  params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
   return params;
 }
 
@@ -98,6 +99,15 @@ ReadMeshAction::act()
         mooseError("Number of displacements and dimension of mesh MUST be the same!");
     }   
   }
+
+  std::vector<unsigned int> ghosted_boundaries = getParam<std::vector<unsigned int > >("ghosted_boundaries");
+  
+  for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
+  {
+    _parser_handle._mesh->addGhostedBoundary(ghosted_boundaries[i]);
+    if (isParamValid("displacements"))
+      _parser_handle._displaced_mesh->addGhostedBoundary(ghosted_boundaries[i]);
+  }    
 
   // TODO: This should be handled in SetupMeshAction...
   mooseAssert(_parser_handle._mesh != NULL, "Mesh hasn't been created");

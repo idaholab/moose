@@ -95,6 +95,11 @@ public:
 
   inline void setInitRefineLevel(int level) { _init_refinement_level = level; }
 
+  /// This will add the boundary ids 
+  void addGhostedBoundary(unsigned int boundary_id) { _ghosted_boundaries.insert(boundary_id); }
+
+  std::set<unsigned int> & getGhostedBoundaries() { return _ghosted_boundaries; }
+
 #ifdef LIBMESH_ENABLE_AMR
   void uniformlyRefine(int level=0);
 #endif
@@ -161,6 +166,8 @@ protected:
 
   std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;        /// list of nodes that belongs to a specified block (domain)
 
+  std::set<unsigned int> _ghosted_boundaries;
+  
   void cacheInfo();
   void freeBndNodes();
 };

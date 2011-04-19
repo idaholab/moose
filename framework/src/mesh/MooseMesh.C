@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "Factory.h"
 #include "MeshModifier.h"
+#include "GatherNearbyElements.h"
 
 // libMesh
 #include "boundary_info.h"
@@ -86,9 +87,11 @@ MooseMesh::prepare()
   // If we are using a truly Parallel mesh (like Nemesis) then we might not even have neighbors!
 //  if(parallel())
 //    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
+  if(!_mesh.is_serial())
+    Moose::gatherNearbyElements(*this, _ghosted_boundaries);
 
   _mesh.prepare_for_use(false);
-
+  
   // If using ParallelMesh this will delete non-local elements from the current processor
   // If using SerialMesh, this function is a no-op.
   _mesh.delete_remote_elements();
