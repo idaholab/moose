@@ -1,5 +1,6 @@
 // Moose
 #include "MooseMesh.h"
+#include "Moose.h"
 
 // libMesh
 #include "boundary_info.h"
@@ -55,6 +56,7 @@ FaceNeighborMask[] = { 1,    // face 0 neighbor
 
 void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> boundaries_to_ghost)
 {
+  Moose::setup_perf_log.push("gatherNearbyElements()","Setup");
 
   ParallelMesh & mesh = libmesh_cast_ref<ParallelMesh&>(moose_mesh.getMesh());
   
@@ -189,7 +191,7 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 
   }
   
-  if (true)
+  if (false)
     libMesh::out << "[" << libMesh::processor_id() << "] "
 	          << "mesh.n_nodes()=" << mesh.n_nodes() << ", "
 	          << "my_interface_node_list.size()=" << my_interface_node_list.size()
@@ -287,9 +289,6 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 	  const unsigned int	
 	    their_interface_node_list_size = common_interface_node_list.size();
 
-          std::cerr<<"their_interface_node_list_size: "<<their_interface_node_list_size<<std::endl;
-          
-	  
 	  // we now have the interface node list from processor source_pid_idx.
 	  // now we can find all of our elements which touch any of these nodes
 	  // and send copies back to this processor.  however, we can make our
@@ -308,15 +307,13 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 	     common_interface_node_list.end());
           */
 	  
-	  if (true)
+	  if (false)
 	    libMesh::out << "[" << libMesh::processor_id() << "] "
 		          << "my_interface_node_list.size()="       << my_interface_node_list.size()
 		          << ", [" << source_pid_idx << "] "
 		          << "their_interface_node_list.size()="    << their_interface_node_list_size
 		          << ", common_interface_node_list.size()=" << common_interface_node_list.size()
 		          << std::endl;
-
-          std::cerr<<libMesh::processor_id()<<": common_inl: "<<common_interface_node_list.size()<<std::endl;
 
 	  // Check for quick return?
 	  if (common_interface_node_list.empty())
@@ -349,8 +346,6 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 	    }
 	  // otherwise, this really *is* an adjacent processor.
 	  adjacent_processors.push_back(source_pid_idx);
-
-          std::cerr<<libMesh::processor_id()<<": Added adjacent processor!"<<std::endl;
 
 
 	  // Now we need to see which of our elements touch the nodes in the list.
@@ -401,9 +396,6 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 			  elem = family_tree[leaf];
 			  elements_to_send.insert (elem);
                           
-                          std::cerr<<libMesh::processor_id()<<": Sending elem: "<<elem->id()<<std::endl;
-                      
-			  
 			  for (unsigned int n=0; n<elem->n_nodes(); n++)
 			    connected_nodes.insert (elem->get_node(n));		  
 			}		    
@@ -560,8 +552,6 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 			     node_list_tag);	  
 	  n_elem_replies_received++;
 
-          std::cerr<<libMesh::processor_id()<<": Received elems: "<<elements_received.size()<<std::endl;          
-	  
 	  if (elements_received.empty())
 	    continue;
 	  
@@ -600,8 +590,6 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 	      // is not in the mesh.  We rely on that here, so it better not change!
 	      Elem *elem = mesh.elem(packed_elem.id());
 
-                std::cerr<<libMesh::processor_id()<<": packed elem: "<<packed_elem.id()<<std::endl;          
-	  
 	      // if we already have this element, make sure its properties match
 	      // but then go on
 	      if (elem)
@@ -660,8 +648,6 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
                   // Make sure we insert it using insert_extra_ghost_elem()
                   // This will keep it from being deleted by delete_remote_elements()
 		  mesh.insert_extra_ghost_elem(elem);
-
-                  std::cerr<<libMesh::processor_id()<<": inserted elem: "<<elem->id()<<std::endl;
 		}
 	  
 	      // properly position cnt for the next element 
@@ -761,6 +747,8 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 
   // unregister MPI datatypes
   packed_node_datatype.free();
+
+  Moose::setup_perf_log.pop("gatherNearbyElements()","Setup");
 }
 
 }
