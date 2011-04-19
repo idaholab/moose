@@ -34,6 +34,8 @@ InputParameters validParams<ReadMeshAction>()
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
   params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
+  params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
+  
   return params;
 }
 
@@ -73,6 +75,8 @@ ReadMeshAction::act()
       Moose::setup_perf_log.pop("Read Mesh","Setup");
     }
 
+    _parser_handle._mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
+
     if (isParamValid("displacements"))
     {
       // Create the displaced mesh
@@ -97,6 +101,8 @@ ReadMeshAction::act()
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
       if (displacements.size() != _parser_handle._mesh->dimension())
         mooseError("Number of displacements and dimension of mesh MUST be the same!");
+
+      _parser_handle._displaced_mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
     }   
   }
 
