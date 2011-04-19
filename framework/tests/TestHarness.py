@@ -68,7 +68,7 @@ class TestHarness:
 
     msg = self.getFailMessage()
     if msg:
-      print msg
+      print BOLD + RED + msg + RESET
       sys.exit(1)
     sys.exit(0)
 
@@ -132,7 +132,7 @@ class TestHarness:
         s = test + " ..."
         self.text_results_table += '\n' + s
         sys.stdout.write(s)
-	sys.stdout.flush()
+        sys.stdout.flush()
         test_start = timeit.default_timer()
            
         # Capture stdout to a buffer object for the local function call
@@ -193,9 +193,9 @@ class TestHarness:
     if result == 'OK':
       self.num_passed += 1
     cnt = 65 - len(test + result)
-    s = '.'*cnt + " " + result
+    s = '.'*cnt + ' ' + result
     self.text_results_table += s
-    print s
+    print self.colorify(s)
 
     # print the output if verbose option is on or the test failed
     if self.options.verbose or result.find('FAILED') != -1:
@@ -218,7 +218,7 @@ class TestHarness:
     # print it in it's entirety here at the bottom
     if self.options.verbose or not self.all_passed:
       print '\n\nFull Result Table:\n' + '-'*70
-      print self.text_results_table
+      print self.colorify(self.text_results_table)
 
     print '-'*70
     print 'Ran ' + str(self.num_tests) + ' tests in ' + str(round(self.testing_time)) + 's (' + str(self.num_passed) + '/' + str(self.num_tests) + ' passed)\n'
@@ -242,6 +242,7 @@ class TestHarness:
     parser.add_option("--opt", action="store_const", dest="method", const="opt", help="test the app_name-opt binary")
     parser.add_option("--dbg", action="store_const", dest="method", const="dbg", help="test the app_name-dbg binary")
     parser.add_option("--dev", action="store_const", dest="method", const="dev", help="test the app_name-dev binary")
+    parser.add_option("-c", "--colored", action="store_true", dest="colored", default=False, help="Show colored output")
     parser.add_option("--n_threads", type="int", dest="n_threads", action="callback", callback=buildArgVector, help="specify the number of threads to be used")
     self.addOptions(parser)
 
@@ -253,3 +254,20 @@ class TestHarness:
   # override this method to add custom options to the parser
   def addOptions(self, parser):
     pass
+
+  def colorify(self, str):
+    if self.options.colored:
+      str = str.replace('OK', BOLD+GREEN+'OK'+RESET)
+      str = str.replace('skipped', BOLD+'skipped'+RESET)
+      str = str.replace('FAILED (DIFF)', BOLD+YELLOW+'FAILED (DIFF)'+RESET)
+      str = str.replace('FAILED', BOLD+RED+'FAILED'+RESET)
+
+    return str
+
+
+# ANSI color codes for colored terminal output
+RESET  = '\033[0m'
+BOLD   = '\033[1m'
+RED    = '\033[31m'
+GREEN  = '\033[32m'
+YELLOW = '\033[33m'
