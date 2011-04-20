@@ -310,27 +310,6 @@ PenetrationLocator::detectPenetration()
             _fe->reinit(p_info[closest_index]->_side, &points);
             p_info[closest_index]->_side_phi = _fe->get_phi();
 
-
-//             if (node.id() == 38797)
-//             {
-//               std::cerr << "JDH DEBUG: data for node 38797:\n"
-//                         << "Elem: " << p_info[closest_index]->_elem->id() << "\n"
-//                         << "Normal: " << p_info[closest_index]->_normal << "\n"
-//                         << "Distance: " << p_info[closest_index]->_distance << "\n"
-//                         << "Closest point: " << p_info[closest_index]->_closest_point << "\n"
-//                         << "          ref: " << p_info[closest_index]->_closest_point_ref << "\n"
-//                         << "Side phi: ";
-//               for (unsigned int jj(0); jj < p_info[closest_index]->_side_phi.size(); ++jj)
-//               {
-//                 for (unsigned int kk(0); kk < p_info[closest_index]->_side_phi[jj].size(); ++kk)
-//                 {
-//                   std::cerr << p_info[closest_index]->_side_phi[jj][kk] << " ";
-//                 }
-//                 std::cerr << "\n";
-//               }
-//               std::cerr << std::endl;
-//             }
-
             _penetration_info[node.id()] = p_info[closest_index];
             // Set the entry in p_info to NULL so that we don't delete it (it is now
             // owned by _penetration_info).
