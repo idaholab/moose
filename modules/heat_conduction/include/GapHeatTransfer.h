@@ -27,15 +27,18 @@ protected:
   virtual Real h_conduction();
   virtual Real h_contact();
   virtual Real h_radiation();
+  virtual Real dh_conduction();
+  virtual Real dh_contact();
+  virtual Real dh_radiation();
   virtual Real gapK();
   virtual Real gapLength();
-  
+
 
   NumericVector<Number> & _slave_flux;
 
   VariableValue & _gap_distance;
   VariableValue & _gap_temp;
-  
+
   const Real _gap_conductivity;
 
   Real _min_gap;

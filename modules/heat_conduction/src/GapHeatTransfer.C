@@ -32,7 +32,7 @@ GapHeatTransfer::computeQpResidual()
 {
   Real h_gap = 0.0;
   Real grad_t = 0.0;
-  
+
   h_gap = h_conduction() + h_contact() + h_radiation();
   grad_t = (_u[_qp] - _gap_temp[_qp]) * h_gap;
 
@@ -41,23 +41,37 @@ GapHeatTransfer::computeQpResidual()
     Threads::spin_mutex::scoped_lock lock(slave_flux_mutex);
     _slave_flux.add(_var.dofIndices()[_i], _JxW[_qp]*_phi[_i][_qp]*grad_t);
   }
-  
-  return _phi[_i][_qp]*grad_t;
+
+//   if (!libmesh_isnan(grad_t))
+//   {
+//   }
+//   else
+//   {
+//     std::cerr << "NaN found at " << __LINE__ << " in " << __FILE__ << "!\n"
+//               << "Processor: " << libMesh::processor_id() << "\n"
+//               << "_u[_qp]: " << _u[_qp] << "\n"
+//               << "_gap_temp[_qp]: " << _gap_temp[_qp] << "\n"
+//               << "h_gap: " << h_gap << "\n"
+//               << "h_conduction(): " << h_conduction() << "\n"
+//               << "Elem: " << _current_elem->id() << "\n"
+//               << "Qp: " << _qp << "\n"
+//               << "Qpoint: " << _q_point[_qp] << "\n"
+//               << std::endl;
+//   }
+
+  return _test[_i][_qp]*grad_t;
 }
 
 
 Real
 GapHeatTransfer::computeQpJacobian()
 {
-  Real h_gap = 0.0;
-  Real grad_t = 0.0;
-  Real dgrad_t = 0.0;
+  Real h_gap = h_conduction() + h_contact() + h_radiation();
+//   Real dh_gap = dh_conduction() + dh_contact() + dh_radiation();
+//   Real dgrad_t = ((_u[_qp] - _gap_temp[_qp]) * dh_gap + h_gap) * _phi[_j][_qp];
 
-  h_gap = h_conduction() + h_contact() + h_radiation();
-  grad_t = (_u[_qp] - _gap_temp[_qp]) * h_gap;
-  dgrad_t = _phi[_j][_qp] * h_gap;
-
-  return _phi[_i][_qp]*dgrad_t;
+//   return _test[_i][_qp]*dgrad_t;
+  return _test[_i][_qp] * h_gap * _phi[_j][_qp];
 }
 
 
@@ -65,21 +79,42 @@ Real
 GapHeatTransfer::h_conduction()
 {
   Real gap_L = gapLength();
- return gapK()/(gap_L + _min_gap);  
+ return gapK()/(gap_L + _min_gap);
 }
 
 
 Real
 GapHeatTransfer::h_contact()
 {
-  return 0.0;  
+  return 0.0;
 }
 
 
 Real
 GapHeatTransfer::h_radiation()
 {
-  return 0.0;  
+  return 0.0;
+}
+
+
+Real
+GapHeatTransfer::dh_conduction()
+{
+  return 0;
+}
+
+
+Real
+GapHeatTransfer::dh_contact()
+{
+  return 0.0;
+}
+
+
+Real
+GapHeatTransfer::dh_radiation()
+{
+  return 0.0;
 }
 
 
@@ -87,14 +122,14 @@ Real
 GapHeatTransfer::gapLength()
 {
   Real gap_L = -(_gap_distance[_qp]);
-  
+
   if(gap_L > _max_gap)
   {
     gap_L = _max_gap;
   }
-  
+
   gap_L = (std::max(0.0, gap_L));
-  
+
   return gap_L;
 }
 
