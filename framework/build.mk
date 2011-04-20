@@ -166,6 +166,7 @@ clean::
 	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
 	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" | xargs rm
+	@rm -fr *.mod
 
 # Clean only the opt intermediate files
 cleanopt::
