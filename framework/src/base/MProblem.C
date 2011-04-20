@@ -194,7 +194,11 @@ void MProblem::initialSetup()
   }
   Moose::setup_perf_log.pop("Initial updateActiveSemiLocalNodeRange()","Setup");
 
-  if(_ghosted_elems.size())
+  // Need to see if _any_ processor has ghosted elems
+  unsigned int ghosted = _ghosted_elems.size();
+  Parallel::sum(ghosted);
+  
+  if(ghosted)
   {
     Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
     // Call reinit to get the ghosted vectors correct now that some geometric search has been done

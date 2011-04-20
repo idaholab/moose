@@ -18,6 +18,9 @@
 #include "utility.h"
 #include "remote_elem.h"
 
+// System
+#include <list>
+
 namespace Moose
 {
 
@@ -54,7 +57,7 @@ FaceNeighborMask[] = { 1,    // face 0 neighbor
                        32 }; // face 5 neighbor
 
 
-void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> boundaries_to_ghost)
+void gatherNearbyElements (MooseMesh & moose_mesh, const std::set<unsigned int> & boundaries_to_ghost, const std::vector<Real> & inflation)
 {
   Moose::setup_perf_log.push("gatherNearbyElements()","Setup");
 
@@ -63,7 +66,67 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
   // Don't need to do anything if there is
   // only one processor.
   if (libMesh::n_processors() == 1)
-    return;  
+    return;
+
+  // First, let's communicate our min and max x,y,z positions so we can see which processors
+  // own pieces of the mesh that are near to us.
+  MeshTools::BoundingBox my_box = MeshTools::processor_bounding_box(mesh, libMesh::processor_id());
+
+  // The idea is that we're going to put one entry in each one of these vectors then
+  // allgather them so we have the min/max values for every processor
+  std::vector<Real> max_x(libMesh::n_processors());
+  std::vector<Real> min_x(libMesh::n_processors());
+  std::vector<Real> max_y(libMesh::n_processors());
+  std::vector<Real> min_y(libMesh::n_processors());
+  std::vector<Real> max_z(libMesh::n_processors());
+  std::vector<Real> min_z(libMesh::n_processors());
+
+  // Set my entries in the vector
+  max_x[libMesh::processor_id()] = std::max(my_box.first(0), my_box.second(0));
+  min_x[libMesh::processor_id()] = std::min(my_box.first(0), my_box.second(0));
+
+  max_y[libMesh::processor_id()] = std::max(my_box.first(1), my_box.second(1));
+  min_y[libMesh::processor_id()] = std::min(my_box.first(1), my_box.second(1));
+
+  max_z[libMesh::processor_id()] = std::max(my_box.first(2), my_box.second(2));
+  min_z[libMesh::processor_id()] = std::min(my_box.first(2), my_box.second(2));
+
+  // The true is because we know that every processor has the same vector length
+  // (this is more efficient)
+  Parallel::allgather(max_x, true);
+  Parallel::allgather(min_x, true);
+
+  Parallel::allgather(max_y, true);
+  Parallel::allgather(min_y, true);
+
+  Parallel::allgather(max_z, true);
+  Parallel::allgather(min_z, true);
+
+  // These are distances to allow for "nearby" processors
+  // If a processor's bounding box is within this distance
+  // then we will consider doing communication with it.
+  Real distance_x = 0;
+  Real distance_y = 0;
+  Real distance_z = 0;
+
+  if(inflation.size() > 0)
+    distance_x = inflation[0];  
+
+  if(inflation.size() > 1)
+    distance_y = inflation[1];
+
+  if(inflation.size() > 2)
+    distance_z = inflation[2];
+
+  // Build an inflated BoundingBox so we can see if it intersects with other
+  // processor's bounding boxes in a moment.
+  MeshTools::BoundingBox my_inflated_box(Point(my_box.first(0)-distance_x,
+                                               my_box.first(1)-distance_y,
+                                               my_box.first(2)-distance_z),
+                                         Point(my_box.second(0)+distance_x,
+                                               my_box.second(1)+distance_y,
+                                               my_box.second(2)+distance_z));
+                                         
 
   //------------------------------------------------------------------
   // The purpose of this function is to provide neighbor data structure
@@ -114,12 +177,16 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
     element_neighbors_tag = Parallel::Communicator_World.get_unique_tag(31416);
 
   // A list of all the processors which *may* contain neighboring elements.
-  // (for development simplicity, just make this the identity map)
+  // We're going to analyze the bounding box distances to figure out who is closest to us
+  // and only communicate with them.
   std::vector<unsigned int> adjacent_processors;
   for (unsigned int pid=0; pid<libMesh::n_processors(); pid++)
+  {
     if (pid != libMesh::processor_id())
+    {
       adjacent_processors.push_back (pid);
-
+    }
+  }
 
   const unsigned int n_adjacent_processors = adjacent_processors.size();
 
@@ -297,6 +364,9 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 	  // my_interface_node_list.  we can do this in place as a set
 	  // intersection.
 
+          // Make a list so we can efficiently remove nodes
+          // we'll copy it back out to a vector after we're finished manipulating it.
+
           /*  DRG: Later we should do a check here to see if the incoming nodes are geometrically close to our interface nodes....
 	  common_interface_node_list.erase
 	    (std::set_intersection (my_interface_node_list.begin(),
@@ -306,6 +376,16 @@ void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> bounda
 				    common_interface_node_list.begin()),
 	     common_interface_node_list.end());
           */
+                // First build a BoundingBox for the remote processor so we can see if the bounding boxes intersect
+          MeshTools::BoundingBox pid_inflated_box(Point(min_x[source_pid_idx]-distance_x,
+                                                        min_y[source_pid_idx]-distance_y,
+                                                        min_z[source_pid_idx]-distance_z),
+                                                  Point(max_x[source_pid_idx]+distance_x,
+                                                        max_y[source_pid_idx]+distance_y,
+                                                        max_z[source_pid_idx]+distance_z));
+
+          if(!my_inflated_box.intersect(pid_inflated_box))
+            common_interface_node_list.clear();
 	  
 	  if (false)
 	    libMesh::out << "[" << libMesh::processor_id() << "] "

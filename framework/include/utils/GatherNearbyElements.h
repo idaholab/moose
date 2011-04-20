@@ -1,5 +1,5 @@
 namespace Moose
 {
-  void gatherNearbyElements (MooseMesh & moose_mesh, std::set<unsigned int> boundaries_to_ghost);
+  void gatherNearbyElements (MooseMesh & moose_mesh, const std::set<unsigned int> & boundaries_to_ghost, const std::vector<Real> & inflation);
 }
 

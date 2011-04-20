@@ -34,6 +34,7 @@ InputParameters validParams<ReadMeshAction>()
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
   params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
+  params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
   params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
   
   return params;
@@ -115,6 +116,14 @@ ReadMeshAction::act()
       _parser_handle._displaced_mesh->addGhostedBoundary(ghosted_boundaries[i]);
   }    
 
+  if(isParamValid("ghosted_boundaries_inflation"))
+  {
+    std::vector<Real> ghosted_boundaries_inflation = getParam<std::vector<Real> >("ghosted_boundaries_inflation");
+    _parser_handle._mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
+    if (isParamValid("displacements"))    
+      _parser_handle._displaced_mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
+  }
+  
   // TODO: This should be handled in SetupMeshAction...
   mooseAssert(_parser_handle._mesh != NULL, "Mesh hasn't been created");
   _parser_handle._mesh->setInitRefineLevel(getParam<int>("uniform_refine"));

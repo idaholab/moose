@@ -95,10 +95,16 @@ public:
 
   inline void setInitRefineLevel(int level) { _init_refinement_level = level; }
 
-  /// This will add the boundary ids 
+  /// This will add the boundary ids to be ghosted to this processor
   void addGhostedBoundary(unsigned int boundary_id) { _ghosted_boundaries.insert(boundary_id); }
 
+  /// This sets the inflation amount for the bounding box for each partition for use in
+  /// ghosting boundaries
+  void setGhostedBoundaryInflation(const std::vector<Real> & inflation) { _ghosted_boundaries_inflation = inflation; }
+
   std::set<unsigned int> & getGhostedBoundaries() { return _ghosted_boundaries; }
+
+  std::vector<Real> & getGhostedBoundaryInflation() { return _ghosted_boundaries_inflation; }
 
 #ifdef LIBMESH_ENABLE_AMR
   void uniformlyRefine(int level=0);
@@ -167,6 +173,7 @@ protected:
   std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;        /// list of nodes that belongs to a specified block (domain)
 
   std::set<unsigned int> _ghosted_boundaries;
+  std::vector<Real> _ghosted_boundaries_inflation;
   
   void cacheInfo();
   void freeBndNodes();

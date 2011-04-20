@@ -87,8 +87,9 @@ MooseMesh::prepare()
   // If we are using a truly Parallel mesh (like Nemesis) then we might not even have neighbors!
 //  if(parallel())
 //    MeshCommunication().gather_neighboring_elements(libmesh_cast_ref<ParallelMesh&>(getMesh()));
+//
   if(!_mesh.is_serial())
-    Moose::gatherNearbyElements(*this, _ghosted_boundaries);
+    Moose::gatherNearbyElements(*this, _ghosted_boundaries, _ghosted_boundaries_inflation);
 
   _mesh.prepare_for_use(false);
   
@@ -96,8 +97,22 @@ MooseMesh::prepare()
   // If using SerialMesh, this function is a no-op.
   _mesh.delete_remote_elements();
 
+  
+
   // Collect (local) subdomain IDs
   const MeshBase::element_iterator el_end = _mesh.elements_end();
+
+  unsigned int num_elems = 0;
+  for (MeshBase::element_iterator el = _mesh.elements_begin(); el != el_end; ++el)
+    num_elems++;
+
+//  std::cerr<<libMesh::processor_id()<<": num_elems: "<<num_elems<<std::endl;
+
+  Parallel::sum(num_elems);
+
+//  std::cout<<"Total elems: "<<num_elems<<std::endl;
+  
+  
   for (MeshBase::element_iterator el = _mesh.elements_begin(); el != el_end; ++el)
     _mesh_subdomains.insert((*el)->subdomain_id());
 
