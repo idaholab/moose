@@ -40,8 +40,6 @@ public:
    */
   VacuumBC(const std::string & name, InputParameters parameters);
 
-  virtual ~VacuumBC(){}
-
 protected:
   virtual Real computeQpResidual();
   

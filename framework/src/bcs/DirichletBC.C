@@ -30,10 +30,6 @@ DirichletBC::DirichletBC(const std::string & name, InputParameters parameters) :
 
 }
 
-DirichletBC::~DirichletBC()
-{
-}
-
 Real
 DirichletBC::computeQpResidual()
 {

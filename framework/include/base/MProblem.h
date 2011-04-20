@@ -241,6 +241,7 @@ protected:
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
   bool _output_displaced;                               /// true for outputting displaced problem
+  bool _input_file_saved;                               /// whether input file has been written
 
   bool _has_dampers;                                    /// Whether or not this system has any Dampers associated with it.
 

@@ -84,7 +84,7 @@ private:
   /// Used to store the action name for the current active action Block iterator
   std::string _curr_action_name;
 
-  EmptyAction *_empty_action;
+  Action * _empty_action;
 
   /// Use to store the current list of unsatisfied dependencies
   std::set<std::string> _unsatisfied_dependencies;

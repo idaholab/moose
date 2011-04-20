@@ -21,6 +21,11 @@
 
 #include <string>
 
+class EmptyAction;
+
+template<>
+InputParameters validParams<EmptyAction>();
+
 class EmptyAction : public Action
 {
 public:
@@ -28,8 +33,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<EmptyAction>();
 
 #endif // EMPTYACTION_H

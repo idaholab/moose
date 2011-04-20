@@ -31,6 +31,8 @@ class MooseObject
 public:
   MooseObject(const std::string & name, InputParameters parameters);
 
+  virtual ~MooseObject() { }
+
   const std::string & name() { return _name; }
 
   InputParameters & parameters() { return _pars; }

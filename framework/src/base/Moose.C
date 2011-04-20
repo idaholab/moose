@@ -435,6 +435,9 @@ registerActions()
   registerNonParsedAction(InitProblemAction, "init_problem");
   registerNonParsedAction(CopyNodalVarsAction, "copy_nodal_vars");
   registerNonParsedAction(CheckIntegrityAction, "check_integrity");
+
+  registerActionName("finish_input_file_output", false);
+  registerNonParsedAction(EmptyAction, "finish_input_file_output");
 }
 
 void

@@ -31,10 +31,6 @@ NodalBC::NodalBC(const std::string & name, InputParameters parameters) :
 {
 }
 
-NodalBC::~NodalBC()
-{
-}
-
 void
 NodalBC::computeResidual(NumericVector<Number> & residual)
 {

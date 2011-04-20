@@ -41,8 +41,6 @@ public:
    */
   VectorNeumannBC(const std::string & name, InputParameters parameters);
   
- virtual ~VectorNeumannBC(){}
-
 protected:
   virtual Real computeQpResidual();
   

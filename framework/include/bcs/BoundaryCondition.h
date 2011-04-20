@@ -45,7 +45,6 @@ class BoundaryCondition :
 {
 public:
   BoundaryCondition(const std::string & name, InputParameters parameters);
-  virtual ~BoundaryCondition();
 
   unsigned int boundaryID() { return _boundary_id; }
 

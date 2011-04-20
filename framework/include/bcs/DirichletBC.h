@@ -17,19 +17,21 @@
 
 #include "NodalBC.h"
 
+class DirichletBC;
+
+template<>
+InputParameters validParams<DirichletBC>();
+
+
 class DirichletBC : public NodalBC
 {
 public:
   DirichletBC(const std::string & name, InputParameters parameters);
-  virtual ~DirichletBC();
 
 protected:
   virtual Real computeQpResidual();
 
   Real _value;
 };
-
-template<>
-InputParameters validParams<DirichletBC>();
 
 #endif /* DIRICHLETBC_H */

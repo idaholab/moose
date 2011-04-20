@@ -30,8 +30,6 @@ class MatchedValueBC : public NodalBC
 {
 public:
   MatchedValueBC(const std::string & name, InputParameters parameters);
-    
-  virtual ~MatchedValueBC() {}
 
 protected:
   virtual Real computeQpResidual();

@@ -37,8 +37,6 @@ public:
    */
   DashpotBC(const std::string & name, InputParameters parameters);
   
-virtual ~DashpotBC() {}
-
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

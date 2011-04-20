@@ -17,7 +17,6 @@
 #include "Parser.h"
 
 ActionWarehouse::ActionWarehouse() :
-  _ordered_actions(NULL),
   _empty_action(NULL),
   _generator_valid(false)
 {
@@ -25,8 +24,6 @@ ActionWarehouse::ActionWarehouse() :
 
 ActionWarehouse::~ActionWarehouse()
 {
-  if (_empty_action)
-    delete _empty_action;
 }
 
 void
@@ -98,9 +95,6 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
 ActionIterator
 ActionWarehouse::inputFileActionsBegin()
 {
-  if (!_empty_action)
-    _empty_action = new EmptyAction("", validParams<Action>());
-  
   std::map<std::string, std::vector<Action *> >::iterator iter;
   
   // We'll use a map to reorder for us
@@ -118,7 +112,12 @@ ActionWarehouse::inputFileActionsBegin()
   std::sort(_ordered_actions.begin(), _ordered_actions.end(), InputFileSort());
   
   // We'll push one more "empty" action onto the end so that when we print the input syntax
-  // everything will get closed off without any odd tail calls.
+  // everything will get closed off without any odd tail calls.  Had to do delayed construction
+  if (_empty_action == NULL)
+  {
+    InputParameters pars = validParams<EmptyAction>();
+    _empty_action = ActionFactory::instance()->createNonParsed("finish_input_file_output", pars);       // no memory leak here, this action gets deleted in Actionfactory
+  }
   _ordered_actions.push_back(_empty_action);
   
   return _ordered_actions.begin();
@@ -236,7 +235,7 @@ ActionWarehouse::printActionDependencySets()
 
 ActionWarehouse::InputFileSort::InputFileSort() 
 { 
-  _o.reserve(8); 
+  _o.reserve(11);
   _o.push_back("Mesh"); 
   _o.push_back("Variables"); 
   _o.push_back("AuxVariables"); 

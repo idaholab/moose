@@ -84,6 +84,13 @@ Output::outputPps(const FormattedTable & table)
 }
 
 void
+Output::outputInput()
+{
+  for (unsigned int i = 0; i < _outputters.size(); i++)
+    _outputters[i]->outputInput();
+}
+
+void
 Output::meshChanged()
 {
   for (unsigned int i = 0; i < _outputters.size(); i++)

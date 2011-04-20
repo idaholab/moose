@@ -33,6 +33,12 @@ class MooseMesh;
 class Problem;
 class SubProblemInterface;
 
+
+class Kernel;
+
+template<>
+InputParameters validParams<Kernel>();
+
 class Kernel :
   public MooseObject,
   public Coupleable,
@@ -44,7 +50,6 @@ class Kernel :
 {
 public:
   Kernel(const std::string & name, InputParameters parameters);
-  virtual ~Kernel();
 
   virtual void computeResidual();
   virtual void computeJacobian(int i, int j);
@@ -130,8 +135,5 @@ protected:
 
   virtual void precalculateResidual();
 };
-
-template<>
-InputParameters validParams<Kernel>();
 
 #endif /* KERNEL_H */

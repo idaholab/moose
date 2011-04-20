@@ -37,8 +37,6 @@ public:
    */
   SinNeumannBC(const std::string & name, InputParameters parameters);
   
-virtual ~SinNeumannBC() {}
-
 protected:
   virtual Real computeQpResidual();
   

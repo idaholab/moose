@@ -48,10 +48,6 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 {
 }
 
-IntegratedBC::~IntegratedBC()
-{
-}
-
 void
 IntegratedBC::computeResidual()
 {

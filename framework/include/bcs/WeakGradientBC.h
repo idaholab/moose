@@ -38,8 +38,6 @@ public:
    */
   WeakGradientBC(const std::string & name, InputParameters parameters);
   
-virtual ~WeakGradientBC() {}
-
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

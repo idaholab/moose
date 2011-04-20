@@ -85,10 +85,6 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
 {
 }
 
-Kernel::~Kernel()
-{
-}
-
 Real
 Kernel::startTime()
 {

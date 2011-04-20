@@ -33,8 +33,6 @@ public:
    */
   ConvectiveFluxBC(const std::string & name, InputParameters parameters);
   
-  virtual ~ConvectiveFluxBC() {}
-
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

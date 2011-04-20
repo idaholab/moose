@@ -41,7 +41,6 @@ protected:
   bool _seq;
   int _file_num;                        /// number of the file
   int _num;                             /// the number of timestep within the file
-  bool _ex_initialized;                 /// whether the qa info (input file) has been written
   std::string getFileName(const std::string & file_base);
 };
 

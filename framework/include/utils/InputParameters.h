@@ -209,10 +209,11 @@ private:
 template <typename T>
 void InputParameters::addRequiredParam(const std::string &name, const std::string &doc_string)
 {
-  Parameters::set<T>(name);
+  Parameters::set<T>(name) = T();                       // initialize the value
   _required_params.insert(name);
   _doc_string[name] = doc_string;
 }
+
 
 template <typename T>
 void InputParameters::addParam(const std::string &name, const T &value, const std::string &doc_string)
@@ -225,14 +226,14 @@ void InputParameters::addParam(const std::string &name, const T &value, const st
 template <typename T>
 void InputParameters::addParam(const std::string &name, const std::string &doc_string)
 {
-  Parameters::set<T>(name);
+  Parameters::set<T>(name) = T();                       // initialize the value
   _doc_string[name] = doc_string;
 }
 
 template <typename T>
 void InputParameters::addPrivateParam(const std::string &name)
 {
-  Parameters::set<T>(name);
+  Parameters::set<T>(name) = T();                       // initialize the value
   _private_params.insert(name);
 }
 

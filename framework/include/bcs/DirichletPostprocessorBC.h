@@ -36,8 +36,6 @@ public:
    * constructor.
    */
   DirichletPostprocessorBC(const std::string & name, InputParameters parameters);
-    
-  virtual ~DirichletPostprocessorBC() {}
 
 protected:
   virtual Real computeQpResidual();

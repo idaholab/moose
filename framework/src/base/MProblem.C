@@ -83,6 +83,7 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _output_displaced(false),
+    _input_file_saved(false),
     _has_dampers(false),
     _solve_only_perf_log("Solve Only"),
     _output_setup_log_early(false)
@@ -1145,6 +1146,14 @@ MProblem::output()
   _out.output();
   if (_displaced_problem != NULL && _output_displaced)
     _displaced_problem->output();
+
+  // save the input file if we did not do so already
+  if (!_input_file_saved)
+  {
+    _out.outputInput();
+    _input_file_saved = true;
+  }
+
 }
 
 #ifdef LIBMESH_ENABLE_AMR

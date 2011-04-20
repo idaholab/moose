@@ -16,6 +16,8 @@
 
 #include "ActionWarehouse.h"
 #include "Problem.h"
+#include "ActionFactory.h"
+#include "MooseObjectAction.h"
 
 // libMesh
 #include "exodusII.h"
@@ -26,8 +28,7 @@ ExodusOutput::ExodusOutput(EquationSystems & es) :
     _out(NULL),
     _seq(false),
     _file_num(-1),
-    _num(0),
-    _ex_initialized(false)
+    _num(0)
 {
 }
 
@@ -64,11 +65,6 @@ ExodusOutput::output(const std::string & file_base, Real time)
   _num++;
   _out->write_timestep(getFileName(file_base), _es, _num, time);
   _out->write_element_data(_es);
-  if ( !_ex_initialized )
-  {
-    _ex_initialized = true;
-    outputInput();
-  }
 }
 
 void
@@ -138,6 +134,9 @@ ExodusOutput::meshChanged()
 void
 ExodusOutput::outputInput()
 {
+  if (_out == NULL)
+    _out = new ExodusII_IO(_es.get_mesh());
+
   std::stringstream ss;
   std::ostream * previous_ostream( Action::getOStream() );
   Action::setOStream( ss );
@@ -146,8 +145,11 @@ ExodusOutput::outputInput()
        a != Moose::action_warehouse.inputFileActionsEnd();
        ++a)
   {
-    (*a)->printInputFile(prev_name);
-    prev_name = &((*a)->name());
+    if (ActionFactory::instance()->isParsed((*a)->name()))
+    {
+      (*a)->printInputFile(prev_name);
+      prev_name = &((*a)->name());
+    }
   }
   Action::setOStream( *previous_ostream );
 
