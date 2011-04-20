@@ -135,6 +135,10 @@ MProblem::~MProblem()
     _bnd_material_props.releaseProperties();
   }
 
+  // ICS
+  for (std::map<std::string, InitialCondition *>::iterator it = _ics.begin(); it != _ics.end(); ++it)
+    delete it->second;
+
 //  delete _displaced_mesh;
   delete _displaced_problem;
 }

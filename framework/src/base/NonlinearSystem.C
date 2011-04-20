@@ -35,7 +35,6 @@
 #include "petsc_matrix.h"
 #include "numeric_vector.h"
 #include "mesh.h"
-#include "coupling_matrix.h"
 
 namespace Moose {
 
@@ -59,6 +58,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
+    _cm(NULL),
     _current_solution(NULL),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
     _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
@@ -97,6 +97,8 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
 
 NonlinearSystem::~NonlinearSystem()
 {
+  delete _cm;
+
   delete _preconditioner;
   delete &_serialized_solution;
   delete &_residual_copy;
@@ -105,13 +107,13 @@ NonlinearSystem::~NonlinearSystem()
 void
 NonlinearSystem::preInit()
 {
-  CouplingMatrix * cm = new CouplingMatrix(_sys.n_vars());
+  _cm = new CouplingMatrix(_sys.n_vars());
 
   for(unsigned int i=0; i<_sys.n_vars(); i++)
     for(unsigned int j=0; j<_sys.n_vars(); j++)
-      (*cm)(i, j) = ( i == j ? 1 : 0);
+      (*_cm)(i, j) = ( i == j ? 1 : 0);
 
-  _sys.get_dof_map()._dof_coupling = cm;
+  _sys.get_dof_map()._dof_coupling = _cm;
 }
 
 void

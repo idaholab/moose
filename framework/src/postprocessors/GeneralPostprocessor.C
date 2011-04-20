@@ -17,9 +17,7 @@
 template<>
 InputParameters validParams<GeneralPostprocessor>()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<Postprocessor>();
-
+  InputParameters params = validParams<Postprocessor>();
   return params;
 }
 

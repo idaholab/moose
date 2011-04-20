@@ -27,6 +27,8 @@ class Action
 public:
   Action(const std::string & name, InputParameters params);
 
+  virtual ~Action() {}                  // empty virtual destructor for proper memory release
+
   virtual void act() = 0;
 
   const std::string & name() { return _name; }

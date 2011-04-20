@@ -27,6 +27,7 @@
 #include "numeric_vector.h"
 #include "sparse_matrix.h"
 #include "preconditioner.h"
+#include "coupling_matrix.h"
 
 class MProblem;
 
@@ -128,6 +129,8 @@ protected:
   void finishResidual(NumericVector<Number> & residual);
 
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
+
+  CouplingMatrix * _cm;
 
   const NumericVector<Number> * _current_solution;      /// solution vector from nonlinear solver
   NumericVector<Number> & _solution_u_dot;              /// solution vector for u^dot

@@ -38,6 +38,9 @@ Adaptivity::Adaptivity(MProblem & subproblem) :
 
 Adaptivity::~Adaptivity()
 {
+  delete _mesh_refinement;
+  delete _error;
+  delete _error_estimator;
 }
 
 void

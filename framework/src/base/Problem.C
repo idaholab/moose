@@ -41,6 +41,10 @@ Problem::~Problem()
   _zero.release();
   _grad_zero.release();
   _second_zero.release();
+
+  for (unsigned int i = 0; i < n_threads; i++)
+    for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
+      delete it->second;
 }
 
 void
