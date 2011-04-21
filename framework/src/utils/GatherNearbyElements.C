@@ -81,26 +81,15 @@ void gatherNearbyElements (MooseMesh & moose_mesh, const std::set<unsigned int> 
   std::vector<Real> max_z(libMesh::n_processors());
   std::vector<Real> min_z(libMesh::n_processors());
 
-  // Set my entries in the vector
-  max_x[libMesh::processor_id()] = std::max(my_box.first(0), my_box.second(0));
-  min_x[libMesh::processor_id()] = std::min(my_box.first(0), my_box.second(0));
+  // Communicate my bounding box to everyone else
+  Parallel::allgather( my_box.first(0),min_x);
+  Parallel::allgather(my_box.second(0),max_x);
 
-  max_y[libMesh::processor_id()] = std::max(my_box.first(1), my_box.second(1));
-  min_y[libMesh::processor_id()] = std::min(my_box.first(1), my_box.second(1));
+  Parallel::allgather( my_box.first(1),min_y);
+  Parallel::allgather(my_box.second(1),max_y);
 
-  max_z[libMesh::processor_id()] = std::max(my_box.first(2), my_box.second(2));
-  min_z[libMesh::processor_id()] = std::min(my_box.first(2), my_box.second(2));
-
-  // The true is because we know that every processor has the same vector length
-  // (this is more efficient)
-  Parallel::allgather(max_x, true);
-  Parallel::allgather(min_x, true);
-
-  Parallel::allgather(max_y, true);
-  Parallel::allgather(min_y, true);
-
-  Parallel::allgather(max_z, true);
-  Parallel::allgather(min_z, true);
+  Parallel::allgather( my_box.first(2),min_z);
+  Parallel::allgather(my_box.second(2),max_z);
 
   // These are distances to allow for "nearby" processors
   // If a processor's bounding box is within this distance
