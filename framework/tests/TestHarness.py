@@ -68,7 +68,7 @@ class TestHarness:
 
     msg = self.getFailMessage()
     if msg:
-      print BOLD + RED + msg + RESET
+      print self.colorify(msg)
       sys.exit(1)
     sys.exit(0)
 
@@ -207,7 +207,7 @@ class TestHarness:
   def getFailMessage(self):
     if self.all_passed:
       return ''
-    return 'FAILED '
+    return 'FAILED'
 
   # override this function if you need to do stuff after the tests are run
   def postRun(self):
