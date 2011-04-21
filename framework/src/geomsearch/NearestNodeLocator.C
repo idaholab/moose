@@ -19,9 +19,11 @@
 
 #include <queue>
 
+// libMesh
 #include "boundary_info.h"
 #include "elem.h"
 #include "plane.h"
+#include "mesh_tools.h"
 
 const unsigned int NearestNodeLocator::_patch_size = 20;
 
@@ -64,6 +66,37 @@ NearestNodeLocator::findNodes()
     // are in the "neighborhood" of the slave node
     std::vector<unsigned int> trial_slave_nodes;
     std::vector<unsigned int> trial_master_nodes;
+
+
+    // Build a bounding box.  No reason to consider nodes outside of our inflated BB
+    MeshTools::BoundingBox * my_inflated_box = NULL;
+      
+    std::vector<Real> & inflation = _mesh.getGhostedBoundaryInflation();
+
+    // This means there was a user specified inflation... so we can build a BB
+    if(inflation.size() > 0)
+    {
+      MeshTools::BoundingBox my_box = MeshTools::processor_bounding_box(mesh, libMesh::processor_id());
+
+      Real distance_x = 0;
+      Real distance_y = 0;
+      Real distance_z = 0;
+      
+      distance_x = inflation[0];  
+
+      if(inflation.size() > 1)
+        distance_y = inflation[1];
+
+      if(inflation.size() > 2)
+        distance_z = inflation[2];
+
+      my_inflated_box = new MeshTools::BoundingBox(Point(my_box.first(0)-distance_x,
+                                                         my_box.first(1)-distance_y,
+                                                         my_box.first(2)-distance_z),
+                                                   Point(my_box.second(0)+distance_x,
+                                                         my_box.second(1)+distance_y,
+                                                         my_box.second(2)+distance_z));
+    }
     
     // Data strcutres to hold the Nodal Boundary conditions
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -73,11 +106,18 @@ NearestNodeLocator::findNodes()
       unsigned int boundary_id = bnode->_bnd_id;
       unsigned int node_id = bnode->_node->id();
 
-      if(boundary_id == _boundary1)
-        trial_master_nodes.push_back(node_id);
-      else if(boundary_id == _boundary2)
-        trial_slave_nodes.push_back(node_id);
+      // If we have a BB only consider saving this node if it's in our inflated BB
+      if(!my_inflated_box || (my_inflated_box->contains_point(*bnode->_node)))
+      {
+        if(boundary_id == _boundary1)
+          trial_master_nodes.push_back(node_id);
+        else if(boundary_id == _boundary2)
+          trial_slave_nodes.push_back(node_id);
+      }
     }
+
+    // don't need the BB anymore
+    delete my_inflated_box;
 
     unsigned int n_slave_nodes = trial_slave_nodes.size();
     unsigned int n_master_nodes = trial_master_nodes.size();
