@@ -79,7 +79,8 @@ Real
 GapHeatTransfer::h_conduction()
 {
   Real gap_L = gapLength();
- return gapK()/(gap_L + _min_gap);
+
+  return gapK()/gap_L;  
 }
 
 
@@ -127,9 +128,9 @@ GapHeatTransfer::gapLength()
   {
     gap_L = _max_gap;
   }
-
-  gap_L = (std::max(0.0, gap_L));
-
+  
+  gap_L = std::max(_min_gap, gap_L);
+  
   return gap_L;
 }
 
