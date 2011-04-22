@@ -193,10 +193,7 @@ void MProblem::initialSetup()
   Moose::setup_perf_log.push("Initial updateActiveSemiLocalNodeRange()","Setup");
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
   if(_displaced_mesh)
-  {
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
-    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
-  }
   Moose::setup_perf_log.pop("Initial updateActiveSemiLocalNodeRange()","Setup");
 
   // Need to see if _any_ processor has ghosted elems
@@ -210,6 +207,9 @@ void MProblem::initialSetup()
     _eq.reinit();
     Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
   }
+
+  if(_displaced_mesh)
+    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
   for(unsigned int i=0; i<n_threads; i++)
   {
