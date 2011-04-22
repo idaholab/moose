@@ -59,8 +59,6 @@ FaceNeighborMask[] = { 1,    // face 0 neighbor
 
 void gatherNearbyElements (MooseMesh & moose_mesh, const std::set<unsigned int> & boundaries_to_ghost, const std::vector<Real> & inflation)
 {
-  Moose::setup_perf_log.push("gatherNearbyElements()","Setup");
-
   ParallelMesh & mesh = libmesh_cast_ref<ParallelMesh&>(moose_mesh.getMesh());
   
   // Don't need to do anything if there is
@@ -68,6 +66,9 @@ void gatherNearbyElements (MooseMesh & moose_mesh, const std::set<unsigned int> 
   if (libMesh::n_processors() == 1)
     return;
 
+  Moose::setup_perf_log.push("gatherNearbyElements()","Setup");
+
+  
   // First, let's communicate our min and max x,y,z positions so we can see which processors
   // own pieces of the mesh that are near to us.
   MeshTools::BoundingBox my_box = MeshTools::processor_bounding_box(mesh, libMesh::processor_id());
