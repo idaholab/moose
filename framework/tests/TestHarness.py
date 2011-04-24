@@ -207,7 +207,9 @@ class TestHarness:
   def getFailMessage(self):
     if self.all_passed:
       return ''
-    return 'FAILED'
+
+    # Leave a space for additional messages by subclasses
+    return 'FAILED '
 
   # override this function if you need to do stuff after the tests are run
   def postRun(self):
@@ -242,7 +244,7 @@ class TestHarness:
     parser.add_option("--opt", action="store_const", dest="method", const="opt", help="test the app_name-opt binary")
     parser.add_option("--dbg", action="store_const", dest="method", const="dbg", help="test the app_name-dbg binary")
     parser.add_option("--dev", action="store_const", dest="method", const="dev", help="test the app_name-dev binary")
-    parser.add_option("-c", "--colored", action="store_true", dest="colored", default=False, help="Show colored output")
+    parser.add_option("-c", "--no-color", action="store_false", dest="colored", default=True, help="Do not show colored output")
     parser.add_option("--n_threads", type="int", dest="n_threads", action="callback", callback=buildArgVector, help="specify the number of threads to be used")
     self.addOptions(parser)
 
@@ -251,12 +253,12 @@ class TestHarness:
     # also the arg_string made from joining the arguments in the arg_vector
     return (options, args, ','.join(arg_vector))
 
-  # override this method to add custom options to the parser
+  # override this method to add custom options to the test harness
   def addOptions(self, parser):
     pass
 
   def colorify(self, str):
-    if self.options.colored:
+    if self.options.colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
       str = str.replace('OK', BOLD+GREEN+'OK'+RESET)
       str = str.replace('skipped', BOLD+'skipped'+RESET)
       str = str.replace('FAILED (DIFF)', BOLD+YELLOW+'FAILED (DIFF)'+RESET)
