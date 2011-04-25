@@ -12,29 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTRESIDUAL_H
-#define PRINTRESIDUAL_H
+#ifndef PRINTELAPSEDTIME_H
+#define PRINTELAPSEDTIME_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PrintResidual;
+class PrintElapsedTime;
 
 template<>
-InputParameters validParams<PrintResidual>();
+InputParameters validParams<PrintElapsedTime>();
 
-class PrintResidual : public GeneralPostprocessor
+class PrintElapsedTime : public GeneralPostprocessor
 {
 public:
-  PrintResidual(const std::string & name, InputParameters parameters);
+  PrintElapsedTime(const std::string & name, InputParameters parameters);
 
   virtual void initialize() {}
   virtual void execute() {}
 
   /**
-   * This will return the final nonlinear residual.
+   * This will return the elapsed wall time.
    */
   virtual Real getValue();
 };
 
-#endif //PRINTRESIDUAL_H
+#endif //PRINTELAPSEDTIME_H

@@ -27,12 +27,12 @@ class PrintDT : public GeneralPostprocessor
 {
 public:
   PrintDT(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize() {}
   virtual void execute() {}
 
   /**
-   * This will return the degrees of freedom in the system.
+   * This will return the current time step size.
    */
   virtual Real getValue();
 };

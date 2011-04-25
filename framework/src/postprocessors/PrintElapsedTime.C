@@ -12,29 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PRINTRESIDUAL_H
-#define PRINTRESIDUAL_H
+#include "PrintElapsedTime.h"
 
-#include "GeneralPostprocessor.h"
-
-//Forward Declarations
-class PrintResidual;
+#include "MProblem.h"
+#include "SubProblem.h"
 
 template<>
-InputParameters validParams<PrintResidual>();
-
-class PrintResidual : public GeneralPostprocessor
+InputParameters validParams<PrintElapsedTime>()
 {
-public:
-  PrintResidual(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<GeneralPostprocessor>();
+  return params;
+}
 
-  virtual void initialize() {}
-  virtual void execute() {}
+PrintElapsedTime::PrintElapsedTime(const std::string & name, InputParameters parameters) :
+  GeneralPostprocessor(name, parameters)
+{}
 
-  /**
-   * This will return the final nonlinear residual.
-   */
-  virtual Real getValue();
-};
-
-#endif //PRINTRESIDUAL_H
+Real
+PrintElapsedTime::getValue()
+{
+  return Moose::perf_log.get_elapsed_time();
+}

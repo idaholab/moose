@@ -90,6 +90,7 @@
 #include "NodalVariableValue.h"
 #include "PrintDOFs.h"
 #include "PrintDT.h"
+#include "PrintElapsedTime.h"
 #include "PrintNumElems.h"
 #include "PrintNumNodes.h"
 #include "PrintNumNonlinearIters.h"
@@ -214,6 +215,7 @@ registerObjects()
   registerPostprocessor(NodalVariableValue);
   registerPostprocessor(PrintDOFs);
   registerPostprocessor(PrintDT);
+  registerPostprocessor(PrintElapsedTime);
   registerPostprocessor(PrintNumElems);
   registerPostprocessor(PrintNumNodes);
   registerPostprocessor(PrintNumNonlinearIters);
@@ -421,7 +423,7 @@ registerActions()
   registerAction(AddDamperAction, "Dampers/*", "add_damper");
   registerAction(AddStabilizerAction, "Stabilizers/*", "add_stabilizer");
   registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
-  
+
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "Executioner/Adaptivity", "setup_adaptivity");
 #endif
