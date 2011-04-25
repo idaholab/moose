@@ -49,3 +49,12 @@ SideAverageValue::getValue()
   
   return integral / _volume;
 }
+
+
+void
+SideAverageValue::threadJoin(const Postprocessor & y)
+{
+  SideIntegral::threadJoin(y);
+  const SideAverageValue & pps = dynamic_cast<const SideAverageValue &>(y);
+  _volume += pps._volume;
+}

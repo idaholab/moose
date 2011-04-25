@@ -25,7 +25,7 @@ public:
   virtual void act();
 
 protected:
-  Moose::PostprocessorType _pps_type;
+  ExecFlagType _pps_type;
 };
 
 template<>

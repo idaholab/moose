@@ -93,7 +93,7 @@ public:
   virtual void initialCondition(EquationSystems & es, const std::string & system_name) = 0;
 
   // Postprocessors /////
-  virtual void computePostprocessors(int pps_type = Moose::PPS_TIMESTEP) = 0;
+  virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP) = 0;
   virtual void outputPostprocessors() = 0;
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0) = 0;
 

@@ -54,3 +54,11 @@ AverageElementSize::getValue()
 
   return integral / _elems;
 }
+
+void
+AverageElementSize::threadJoin(const Postprocessor & y)
+{
+  ElementAverageValue::threadJoin(y);
+  const AverageElementSize & pps = dynamic_cast<const AverageElementSize &>(y);
+  _elems += pps._elems;
+}

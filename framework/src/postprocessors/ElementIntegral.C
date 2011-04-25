@@ -45,6 +45,13 @@ ElementIntegral::getValue()
   return _integral_value;
 }
 
+void
+ElementIntegral::threadJoin(const Postprocessor & y)
+{
+  const ElementIntegral & pps = dynamic_cast<const ElementIntegral &>(y);
+  _integral_value += pps._integral_value;
+}
+
 Real
 ElementIntegral::computeQpIntegral()
 {

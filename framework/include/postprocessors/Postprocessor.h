@@ -56,7 +56,7 @@ public:
   virtual PostprocessorValue getValue() = 0;
 
   /**
-   * Gather the parallel sum of the variable passed in.
+   * Gather the parallel sum of the variable passed in. It HAS to take care of values across all threads and CPUs (we DO hybrid parallelism!)
    *
    * After calling this, the variable that was passed in will hold the gathered value.
    */
@@ -66,6 +66,9 @@ public:
     // TODO: Gather threaded values as well
     Parallel::sum(value);
   }
+
+  virtual void threadJoin(const Postprocessor & /*pps*/) { }
+
 
 protected:
   Problem & _problem;

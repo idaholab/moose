@@ -28,13 +28,11 @@ AddPostprocessorAction::AddPostprocessorAction(const std::string & name, InputPa
     MooseObjectAction(name, params)
 {
   if (_parser_handle.pathContains(_name, "Residual"))
-    _pps_type = Moose::PPS_RESIDUAL;
+    _pps_type = EXEC_RESIDUAL;
   else if (_parser_handle.pathContains(_name, "Jacobian"))
-    _pps_type = Moose::PPS_JACOBIAN;
-  else if (_parser_handle.pathContains(_name, "NewtonIter"))
-    _pps_type = Moose::PPS_NEWTONIT;
+    _pps_type = EXEC_JACOBIAN;
   else
-    _pps_type = Moose::PPS_TIMESTEP;
+    _pps_type = EXEC_TIMESTEP;
 }
 
 void

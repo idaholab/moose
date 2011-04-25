@@ -45,6 +45,13 @@ SideIntegral::getValue()
   return _integral_value;
 }
 
+void
+SideIntegral::threadJoin(const Postprocessor & y)
+{
+  const SideIntegral & pps = dynamic_cast<const SideIntegral &>(y);
+  _integral_value += pps._integral_value;
+}
+
 Real
 SideIntegral::computeQpIntegral()
 {

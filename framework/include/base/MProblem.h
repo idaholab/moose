@@ -132,13 +132,13 @@ public:
   void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
 
   // Postprocessors /////
-  virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, Moose::PostprocessorType pps_type = Moose::PPS_TIMESTEP);
+  virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type = EXEC_TIMESTEP);
 
   /**
    * Get a reference to the value associated with the postprocessor.
    */
   Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
-  virtual void computePostprocessors(int pps_type = Moose::PPS_TIMESTEP);
+  virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
   virtual void outputPostprocessors();
 
   // Dampers /////
@@ -206,10 +206,7 @@ protected:
 
   // postprocessors
   std::vector<PostprocessorData> _pps_data;
-  std::vector<PostprocessorWarehouse> _pps;             // pps calculated every time step
-  std::vector<PostprocessorWarehouse> _pps_residual;    // pps calculated every residual evaluation
-  std::vector<PostprocessorWarehouse> _pps_jacobian;    // pps calculated every jacobian evaluation
-  std::vector<PostprocessorWarehouse> _pps_newtonit;    // pps calculated every newton iteration
+  ExecStore<PostprocessorWarehouse> _pps;
   FormattedTable _pps_output_table;
 
   void computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps);

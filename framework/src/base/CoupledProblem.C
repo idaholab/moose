@@ -165,7 +165,7 @@ CoupledProblem::initialCondition(EquationSystems & es, const std::string & syste
 }
 
 void
-CoupledProblem::computePostprocessors(int pps_type)
+CoupledProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
 {
 }
 

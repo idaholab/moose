@@ -44,9 +44,11 @@ public:
 
   PostprocessorIterator elementPostprocessorsBegin(unsigned int block_id);
   PostprocessorIterator elementPostprocessorsEnd(unsigned int block_id);
+  std::vector<Postprocessor *> & elementPostprocessors(unsigned int block_id) { return _element_postprocessors[block_id]; }
 
   PostprocessorIterator sidePostprocessorsBegin(unsigned int boundary_id);
   PostprocessorIterator sidePostprocessorsEnd(unsigned int boundary_id);
+  std::vector<Postprocessor *> & sidePostprocessors(unsigned int boundary_id) { return _side_postprocessors[boundary_id]; }
 
   PostprocessorIterator genericPostprocessorsBegin();
   PostprocessorIterator genericPostprocessorsEnd();

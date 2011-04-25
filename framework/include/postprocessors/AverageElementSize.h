@@ -37,6 +37,7 @@ public:
   virtual Real computeIntegral();
 
   virtual Real getValue();
+  virtual void threadJoin(const Postprocessor & y);
 
 protected:
   int _elems;

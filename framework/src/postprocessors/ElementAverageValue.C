@@ -51,3 +51,11 @@ ElementAverageValue::getValue()
   
   return integral / _volume;
 }
+
+void
+ElementAverageValue::threadJoin(const Postprocessor & y)
+{
+  ElementIntegral::threadJoin(y);
+  const ElementAverageValue & pps = dynamic_cast<const ElementAverageValue &>(y);
+  _volume += pps._volume;
+}

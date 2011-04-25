@@ -29,7 +29,6 @@ public:
   ComputePostprocessorsThread(Problem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<PostprocessorWarehouse> & pps);
   ComputePostprocessorsThread(ComputePostprocessorsThread & x, Threads::split);                 // Splitting Constructor
 
-  virtual void pre();
   virtual void onElement(const Elem *elem);
   virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
 

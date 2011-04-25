@@ -19,6 +19,8 @@
 #include "ComputePostprocessorsThread.h"
 #include "ActionWarehouse.h"
 
+#include "ElementH1Error.h"
+
 unsigned int MProblem::_n = 0;
 
 namespace Moose
@@ -108,10 +110,6 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
   }
 
   _pps_data.resize(n_threads);
-  _pps.resize(n_threads);
-  _pps_residual.resize(n_threads);
-  _pps_jacobian.resize(n_threads);
-  _pps_newtonit.resize(n_threads);
 }
 
 MProblem::~MProblem()
@@ -214,10 +212,9 @@ void MProblem::initialSetup()
   for(unsigned int i=0; i<n_threads; i++)
   {
     _materials[i].initialSetup();
-    _pps[i].initialSetup();
-    _pps_residual[i].initialSetup();
-    _pps_jacobian[i].initialSetup();
-    _pps_newtonit[i].initialSetup();
+    _pps(EXEC_RESIDUAL)[i].initialSetup();
+    _pps(EXEC_JACOBIAN)[i].initialSetup();
+    _pps(EXEC_TIMESTEP)[i].initialSetup();
   }
 
   _aux.initialSetup();
@@ -701,17 +698,8 @@ MProblem::addStabilizer(const std::string & stabilizer_name, const std::string &
 }
 
 void
-MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, Moose::PostprocessorType pps_type)
+MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type/* = EXEC_TIMESTEP*/)
 {
-  std::vector<PostprocessorWarehouse> * pps;
-  switch (pps_type)
-  {
-  case Moose::PPS_RESIDUAL: pps = &_pps_residual; break;
-  case Moose::PPS_JACOBIAN: pps = &_pps_jacobian; break;
-  case Moose::PPS_NEWTONIT: pps = &_pps_newtonit; break;
-  default: pps = &_pps; break;
-  }
-
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -741,7 +729,7 @@ MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputP
         {
           parameters.set<unsigned int>("_boundary_id") = boundaries[i];
           Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
-          (*pps)[tid].addPostprocessor(pp);
+          _pps(type)[tid].addPostprocessor(pp);
         }
 //      }
 //      else
@@ -756,7 +744,7 @@ MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputP
 //      if (!_pps_data[tid].hasPostprocessor(name))
 //      {
         Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
-        (*pps)[tid].addPostprocessor(pp);
+        _pps(type)[tid].addPostprocessor(pp);
 
 //      }
 //      else
@@ -766,10 +754,9 @@ MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputP
 }
 
 Real &
-MProblem::getPostprocessorValue(const std::string & name, THREAD_ID /*tid*/)
+MProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 {
-  // Todo: This is hardcoded to zero because we only compute postprocessors serially now.
-  return _pps_data[0].getPostprocessorValue(name);
+  return _pps_data[tid].getPostprocessorValue(name);
 }
 
 void
@@ -784,8 +771,45 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
 
     _aux.compute();
 
+    // init
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    {
+      std::set<unsigned int>::iterator block_begin = pps[tid]._block_ids_with_postprocessors.begin();
+      std::set<unsigned int>::iterator block_end = pps[tid]._block_ids_with_postprocessors.end();
+      std::set<unsigned int>::iterator block_it = block_begin;
+
+      for (block_it=block_begin;block_it!=block_end;++block_it)
+      {
+        unsigned int block_id = *block_it;
+
+        PostprocessorIterator postprocessor_begin = pps[tid].elementPostprocessorsBegin(block_id);
+        PostprocessorIterator postprocessor_end = pps[tid].elementPostprocessorsEnd(block_id);
+        PostprocessorIterator postprocessor_it = postprocessor_begin;
+
+        for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+          (*postprocessor_it)->initialize();
+      }
+
+      std::set<unsigned int>::iterator boundary_begin = pps[tid]._boundary_ids_with_postprocessors.begin();
+      std::set<unsigned int>::iterator boundary_end = pps[tid]._boundary_ids_with_postprocessors.end();
+      std::set<unsigned int>::iterator boundary_it = boundary_begin;
+
+      for (boundary_it=boundary_begin;boundary_it!=boundary_end;++boundary_it)
+      {
+        //note: for threaded applications where the elements get broken up it
+        //may be more efficient to initialize these on demand inside the loop
+        PostprocessorIterator side_postprocessor_begin = pps[tid].sidePostprocessorsBegin(*boundary_it);
+        PostprocessorIterator side_postprocessor_end = pps[tid].sidePostprocessorsEnd(*boundary_it);
+        PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
+
+        for (side_postprocessor_it=side_postprocessor_begin;side_postprocessor_it!=side_postprocessor_end;++side_postprocessor_it)
+          (*side_postprocessor_it)->initialize();
+      }
+    }
+
+    // compute
     ComputePostprocessorsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps);
-    cppt(*_mesh.getActiveLocalElementRange());
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
     // Store element postprocessors values
     std::set<unsigned int>::iterator block_ids_begin = pps[0]._block_ids_with_postprocessors.begin();
@@ -796,19 +820,21 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     {
       unsigned int block_id = *block_ids_it;
 
-      PostprocessorIterator element_postprocessor_begin = pps[0].elementPostprocessorsBegin(block_id);
-      PostprocessorIterator element_postprocessor_end = pps[0].elementPostprocessorsEnd(block_id);
-      PostprocessorIterator element_postprocessor_it = element_postprocessor_begin;
-
+      std::vector<Postprocessor *> & element_postprocessors = pps[0].elementPostprocessors(block_id);
       // Store element postprocessors values
-      for (element_postprocessor_it=element_postprocessor_begin;
-          element_postprocessor_it!=element_postprocessor_end;
-          ++element_postprocessor_it)
+      for (unsigned int i = 0; i < element_postprocessors.size(); ++i)
       {
-        std::string name = (*element_postprocessor_it)->name();
-        Real value = (*element_postprocessor_it)->getValue();
+        Postprocessor *ps = element_postprocessors[i];
+        std::string name = ps->name();
 
-        _pps_data[0].storeValue(name, value);
+        // join across the threads (gather the value in thread #0)
+        for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+          ps->threadJoin(*pps[tid].elementPostprocessors(block_id)[i]);
+
+        Real value = ps->getValue();
+        // store the value in each thread
+        for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+          _pps_data[tid].storeValue(name, value);
       }
     }
 
@@ -821,18 +847,21 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     {
       unsigned int boundary_id = *boundary_ids_it;
 
-      PostprocessorIterator side_postprocessor_begin = pps[0].sidePostprocessorsBegin(boundary_id);
-      PostprocessorIterator side_postprocessor_end = pps[0].sidePostprocessorsEnd(boundary_id);
-      PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
-
-      for (side_postprocessor_it=side_postprocessor_begin;
-          side_postprocessor_it!=side_postprocessor_end;
-          ++side_postprocessor_it)
+      std::vector<Postprocessor *> & side_postprocessors = pps[0].sidePostprocessors(boundary_id);
+      for (unsigned int i = 0; i < side_postprocessors.size(); ++i)
       {
-        std::string name = (*side_postprocessor_it)->name();
-        Real value = (*side_postprocessor_it)->getValue();
+        Postprocessor *ps = side_postprocessors[i];
+        std::string name = ps->name();
 
-        _pps_data[0].storeValue(name, value);
+        // join across the threads (gather the value in thread #0)
+        for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+          ps->threadJoin(*pps[tid].sidePostprocessors(boundary_id)[i]);
+
+        Real value = ps->getValue();
+
+        // store the value in each thread
+        for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+          _pps_data[tid].storeValue(name, value);
       }
     }
   }
@@ -851,31 +880,20 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     (*generic_postprocessor_it)->execute();
     Real value = (*generic_postprocessor_it)->getValue();
 
-    _pps_data[0].storeValue(name, value);
+    // store the value in each thread
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+      _pps_data[tid].storeValue(name, value);
   }
 }
 
 void
-MProblem::computePostprocessors(int pps_type)
+MProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
 {
   Moose::perf_log.push("compute_postprocessors()","Solve");
 
-  /* TODO: Remove the 0 when we actually thread these guys! */
-  if ((pps_type & Moose::PPS_RESIDUAL) == Moose::PPS_RESIDUAL)
-  {
-    _pps_residual[0].residualSetup();
-    computePostprocessorsInternal(_pps_residual);
-  }
-  if ((pps_type & Moose::PPS_JACOBIAN) == Moose::PPS_JACOBIAN)
-  {
-    _pps_residual[0].jacobianSetup();
-    computePostprocessorsInternal(_pps_jacobian);
-  }
-  if ((pps_type & Moose::PPS_TIMESTEP) == Moose::PPS_TIMESTEP)
-  {
-    _pps_residual[0].timestepSetup();
-    computePostprocessorsInternal(_pps);
-  }
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _pps(type)[tid].residualSetup();
+  computePostprocessorsInternal(_pps(type));
 
   Moose::perf_log.pop("compute_postprocessors()","Solve");
 }
@@ -884,8 +902,8 @@ void
 MProblem::outputPostprocessors()
 {
   // Store values into table
-  PostprocessorIterator postprocessor_begin = _pps[0].allPostprocessorsBegin();
-  PostprocessorIterator postprocessor_end = _pps[0].allPostprocessorsEnd();
+  PostprocessorIterator postprocessor_begin = _pps(EXEC_TIMESTEP)[0].allPostprocessorsBegin();
+  PostprocessorIterator postprocessor_end = _pps(EXEC_TIMESTEP)[0].allPostprocessorsEnd();
   PostprocessorIterator postprocessor_it = postprocessor_begin;
 
   for (postprocessor_it = postprocessor_begin; postprocessor_it != postprocessor_end; ++postprocessor_it)
@@ -917,7 +935,6 @@ MProblem::outputPostprocessors()
 
   if (_postprocessor_gnuplot_output)
     _pps_output_table.makeGnuplot(_out.fileBase(), _gnuplot_format);
-
 }
 
 void
@@ -1052,7 +1069,7 @@ void
 MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   _nl.set_solution(soln);
-  computePostprocessors(Moose::PPS_RESIDUAL);
+  computePostprocessors(EXEC_RESIDUAL);
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -1074,7 +1091,7 @@ void
 MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
 {
   _nl.set_solution(soln);
-  computePostprocessors(Moose::PPS_JACOBIAN);
+  computePostprocessors(EXEC_JACOBIAN);
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
