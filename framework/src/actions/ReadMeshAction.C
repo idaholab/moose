@@ -36,6 +36,7 @@ InputParameters validParams<ReadMeshAction>()
   params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
   params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
+  params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
   
   return params;
 }
@@ -55,6 +56,7 @@ ReadMeshAction::act()
     
     // Create the mesh and save it off
     _parser_handle._mesh = new MooseMesh();
+    _parser_handle._mesh->setPatchSize(getParam<unsigned int>("patch_size"));    
 
     if (getParam<bool>("nemesis"))
     {
@@ -82,6 +84,7 @@ ReadMeshAction::act()
     {
       // Create the displaced mesh
       _parser_handle._displaced_mesh = new MooseMesh();
+      _parser_handle._displaced_mesh->setPatchSize(getParam<unsigned int>("patch_size"));
       
       Moose::setup_perf_log.push("Read Displaced Mesh","Setup");
 

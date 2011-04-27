@@ -28,7 +28,8 @@ class SlaveNeighborhoodThread
 public:
   SlaveNeighborhoodThread(const MeshBase & mesh,
                           const std::vector<unsigned int> & trial_master_nodes,
-                          const std::vector<std::vector<unsigned int> > & node_to_elem_map);
+                          const std::vector<std::vector<unsigned int> > & node_to_elem_map,
+                          const unsigned int patch_size);
   
   
   // Splitting Constructor
@@ -56,6 +57,9 @@ protected:
 
   // Node to elem map
   const std::vector<std::vector<unsigned int> > & _node_to_elem_map;
+
+  // The number of nodes to keep
+  unsigned int _patch_size;
 };
 
 #endif //SLAVENEIGHBORHOODTHREAD_H

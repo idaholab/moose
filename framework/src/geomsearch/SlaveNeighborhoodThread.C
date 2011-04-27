@@ -36,14 +36,14 @@ public:
   }
 };
 
-const unsigned int _patch_size = 20;
-
 SlaveNeighborhoodThread::SlaveNeighborhoodThread(const MeshBase & mesh,
                                                  const std::vector<unsigned int> & trial_master_nodes,
-                                                 const std::vector<std::vector<unsigned int> > & node_to_elem_map) :
+                                                 const std::vector<std::vector<unsigned int> > & node_to_elem_map,
+                                                 const unsigned int patch_size) :
   _mesh(mesh),
   _trial_master_nodes(trial_master_nodes),
-  _node_to_elem_map(node_to_elem_map)
+  _node_to_elem_map(node_to_elem_map),
+  _patch_size(patch_size)
 {
 }
 
@@ -51,7 +51,8 @@ SlaveNeighborhoodThread::SlaveNeighborhoodThread(const MeshBase & mesh,
 SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split split) :
   _mesh(x._mesh),
   _trial_master_nodes(x._trial_master_nodes),
-  _node_to_elem_map(x._node_to_elem_map)
+  _node_to_elem_map(x._node_to_elem_map),
+  _patch_size(x._patch_size)
 {
 }
 

@@ -115,7 +115,7 @@ NearestNodeLocator::findNodes()
 
     NodeIdRange trial_slave_node_range(trial_slave_nodes.begin(), trial_slave_nodes.end(), 1);
 
-    SlaveNeighborhoodThread snt(_mesh, trial_master_nodes, node_to_elem_map);
+    SlaveNeighborhoodThread snt(_mesh, trial_master_nodes, node_to_elem_map, _mesh.getPatchSize());
 
     Threads::parallel_reduce(trial_slave_node_range, snt);
 

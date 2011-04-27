@@ -106,6 +106,9 @@ public:
 
   std::vector<Real> & getGhostedBoundaryInflation() { return _ghosted_boundaries_inflation; }
 
+  void setPatchSize(const unsigned int patch_size) { _patch_size = patch_size; }
+  unsigned int getPatchSize() { return _patch_size; }
+
 #ifdef LIBMESH_ENABLE_AMR
   void uniformlyRefine(int level=0);
 #endif
@@ -174,6 +177,11 @@ protected:
 
   std::set<unsigned int> _ghosted_boundaries;
   std::vector<Real> _ghosted_boundaries_inflation;
+
+  /**
+   * The number of nodes to consider in the NearestNode neighborhood.
+   */
+  unsigned int _patch_size;
   
   void cacheInfo();
   void freeBndNodes();

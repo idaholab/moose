@@ -37,7 +37,8 @@ MooseMesh::MooseMesh(int mesh_dim) :
     _active_semilocal_node_range(NULL),
     _active_node_range(NULL),
     _local_node_range(NULL),
-    _bnd_node_range(NULL)
+    _bnd_node_range(NULL),
+    _patch_size(40)
 {
 }
 
@@ -50,7 +51,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _active_semilocal_node_range(NULL),
     _active_node_range(NULL),
     _local_node_range(NULL),
-    _bnd_node_range(NULL)
+    _bnd_node_range(NULL),
+    _patch_size(40)
 {
   (*_mesh.boundary_info) = (*other_mesh._mesh.boundary_info);
 }
