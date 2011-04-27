@@ -529,7 +529,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
-#if PETSC_VERSION_LESS_THAN(3,0,0)
+#if PETSC_VERSION_LESS_THAN(3,1,0)
   MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
 #else
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
@@ -591,7 +591,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
 
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
-#if PETSC_VERSION_LESS_THAN(3,0,0)
+#if PETSC_VERSION_LESS_THAN(3,1,0)
   MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
 #else
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
