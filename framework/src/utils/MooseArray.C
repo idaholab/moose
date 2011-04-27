@@ -68,7 +68,6 @@ template class MooseArray<VectorValue<Real> >;
 template class MooseArray<MooseArray<VectorValue<Real> > >;
 template class MooseArray<MooseArray<MooseArray<VectorValue<Real> > > >;
 
-//template class MooseArray<VectorValue<RealTensor> >;
 template class MooseArray<MooseArray<VectorValue<RealTensor> > >;
 template class MooseArray<MooseArray<MooseArray<VectorValue<RealTensor> > > >;
 

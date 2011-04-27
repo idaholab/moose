@@ -47,7 +47,7 @@ public:
    * @param pt - point on the 'source' boundary
    * @return point on the paired boundary
    */
-  virtual Point get_corresponding_pos(const Point & pt);
+  virtual Point get_corresponding_pos(const Point & pt) const;
 
 protected:
   int _dim;

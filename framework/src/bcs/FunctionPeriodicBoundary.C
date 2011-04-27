@@ -37,7 +37,7 @@ FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundar
 }
 
 Point
-FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt)
+FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
 {
   Real t = 0.;
   Point p;
