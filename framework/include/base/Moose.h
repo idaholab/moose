@@ -22,6 +22,7 @@
 #include "perf_log.h"
 #include "mtwist.h"
 #include "id_types.h"
+#include "stored_range.h"
 
 typedef Real                     PostprocessorValue;
 
@@ -45,6 +46,8 @@ typedef Real                     PostprocessorValue;
 
 class MProblem;
 class ActionWarehouse;
+
+typedef StoredRange<std::vector<unsigned int>::iterator, unsigned int> NodeIdRange;
 
 namespace Moose
 {

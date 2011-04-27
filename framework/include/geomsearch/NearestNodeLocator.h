@@ -15,13 +15,18 @@
 #ifndef NEARESTNODELOCATOR_H
 #define NEARESTNODELOCATOR_H
 
+// Moose
+#include "Moose.h"
+#include "MooseMesh.h"
+#include "vector_value.h"
+
+// libMesh
 #include "libmesh_common.h"
 
+// System
 #include <vector>
 #include <map>
 
-#include "MooseMesh.h"
-#include "vector_value.h"
 
 class MooseMesh;
 class SubProblem;
@@ -33,6 +38,8 @@ class NearestNodeLocator
 {
 public:
   NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, unsigned int boundary1, unsigned int boundary2);
+
+  ~NearestNodeLocator();
 
   /**
    * This is the main method that is going to start the search.
@@ -47,15 +54,12 @@ public:
   /**
    * Valid to call this after findNodes() has been called to get a pointer to the nearest node.
    */
-  Node * nearestNode(unsigned int node_id);
+  const Node * nearestNode(unsigned int node_id);
 
   /**
    * Returns the list of slave nodes this Locator is tracking.
    */
   std::vector<unsigned int> & slaveNodes() { return _slave_nodes; }
-
-protected:
-  SubProblem & _subproblem;
 
   /**
    * Data structure used to hold nearest node info.
@@ -65,11 +69,16 @@ protected:
   public:
     NearestNodeInfo();
 
-    Node * _nearest_node;
+    const Node * _nearest_node;
     Real _distance;
   };
 
+protected:
+  SubProblem & _subproblem;
+
   MooseMesh & _mesh;
+
+  NodeIdRange * _slave_node_range;
 
 public:
   std::map<unsigned int, NearestNodeInfo> _nearest_node_info;

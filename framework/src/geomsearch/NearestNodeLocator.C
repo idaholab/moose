@@ -16,8 +16,8 @@
 #include "Moose.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
-
-#include <queue>
+#include "SlaveNeighborhoodThread.h"
+#include "NearestNodeThread.h"
 
 // libMesh
 #include "boundary_info.h"
@@ -25,7 +25,6 @@
 #include "plane.h"
 #include "mesh_tools.h"
 
-const unsigned int NearestNodeLocator::_patch_size = 20;
 
 NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, unsigned int boundary1, unsigned int boundary2) :
     _subproblem(subproblem),
@@ -35,27 +34,20 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh
     _first(true)
 {}
 
-class ComparePair
+NearestNodeLocator::~NearestNodeLocator()
 {
-public:
-  bool operator()(std::pair<unsigned int, Real> & p1, std::pair<unsigned int, Real> & p2)
-  {
-    if(p1.second > p2.second)
-      return true;
-
-    return false;
-  }
-};
+  delete _slave_node_range;
+}
 
 void
 NearestNodeLocator::findNodes()
 {
   Moose::perf_log.push("NearestNodeLocator::findNodes()","Solve");
 
-  Mesh & mesh = _mesh._mesh;
-
-  _nearest_node_info.clear();
-
+  /**
+   * If this is the first time through we're going to build up a "neighborhood" of nodes
+   * surrounding each of the slave nodes.  This will speed searching later.
+   */
   if(_first)
   {
     _first=false;
@@ -76,7 +68,7 @@ NearestNodeLocator::findNodes()
     // This means there was a user specified inflation... so we can build a BB
     if(inflation.size() > 0)
     {
-      MeshTools::BoundingBox my_box = MeshTools::processor_bounding_box(mesh, libMesh::processor_id());
+      MeshTools::BoundingBox my_box = MeshTools::processor_bounding_box(_mesh, libMesh::processor_id());
 
       Real distance_x = 0;
       Real distance_y = 0;
@@ -119,164 +111,33 @@ NearestNodeLocator::findNodes()
     // don't need the BB anymore
     delete my_inflated_box;
 
-    unsigned int n_slave_nodes = trial_slave_nodes.size();
-    unsigned int n_master_nodes = trial_master_nodes.size();
-
     std::vector<std::vector<unsigned int> > & node_to_elem_map = _mesh.nodeToElemMap();
 
-    unsigned int processor_id = libMesh::processor_id();
+    NodeIdRange trial_slave_node_range(trial_slave_nodes.begin(), trial_slave_nodes.end(), 1);
 
-    /**
-     * Save a patch of nodes that are close to each of the slave nodes to speed the search algorithm
-     * TODO: This needs to be updated at some point in time.  If the hits into this data structure approach "the end"
-     * then it may be time to update
-     */
-    for(unsigned int i=0; i<n_slave_nodes; i++)
-    {
-      unsigned int node_id = trial_slave_nodes[i];
+    SlaveNeighborhoodThread snt(_mesh, trial_master_nodes, node_to_elem_map);
 
-      std::priority_queue<std::pair<unsigned int, Real>, std::vector<std::pair<unsigned int, Real> >, ComparePair> neighbors;
+    Threads::parallel_reduce(trial_slave_node_range, snt);
 
-      Node & node = _mesh.node(node_id);
+    _slave_nodes = snt._slave_nodes;
+    _neighbor_nodes = snt._neighbor_nodes;
 
-      for(unsigned int k=0; k<n_master_nodes; k++)
-      {
-        unsigned int master_id = trial_master_nodes[k];
-        Node * cur_node = &_mesh.node(master_id);
-        Real distance = ((*cur_node) - node).size();
+    for(std::set<unsigned int>::iterator it = snt._ghosted_elems.begin();
+        it != snt._ghosted_elems.end();
+        ++it)
+      _subproblem.addGhostedElem(*it);
 
-        neighbors.push(std::make_pair(master_id, distance));
-      }
+    // Cache the slave_node_range so we don't have to build it each time
+    _slave_node_range = new NodeIdRange(_slave_nodes.begin(), _slave_nodes.end(), 1);
+  }
 
-      std::vector<unsigned int> neighbor_nodes;// = _neighbor_nodes[node_id];
+  _nearest_node_info.clear();
 
-      unsigned int patch_size = std::min(_patch_size, static_cast<unsigned int>(neighbors.size()));
-      neighbor_nodes.resize(patch_size);
-      
-      for(unsigned int t=0; t<patch_size; t++)
-      {
-        std::pair<unsigned int, Real> neighbor_info = neighbors.top();
-        neighbors.pop();
+  NearestNodeThread nnt(_mesh, _neighbor_nodes);
 
-        neighbor_nodes[t] = neighbor_info.first;
-      }
+  Threads::parallel_reduce(*_slave_node_range, nnt);
 
-      /**
-       * Now see if _this_ processor needs to keep track of this slave and it's neighbors
-       * We're going to see if this processor owns the slave, any of the neighborhood nodes
-       * or any of the elements connected to either set.  If it does then we're going to ghost
-       * all of the elements connected to the slave node and the neighborhood nodes to this processor.
-       * This is a very conservative approach that we might revisit later.
-       */
-
-      bool need_to_track = false;
-
-      if(_mesh.node(node_id).processor_id() == processor_id)
-        need_to_track = true;
-      else
-      {
-        { // See if we own any of the elements connected to the slave node
-          std::vector<unsigned int> & elems_connected_to_node = node_to_elem_map[node_id];
-          
-          for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-            if(_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
-            {
-              need_to_track = true;
-              break; // Break out of element loop
-            }
-        }
-
-        if(!need_to_track)
-        { // Now check the neighbor nodes to see if we own any of them
-          for(unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
-          {
-            unsigned int neighbor_node_id = neighbor_nodes[neighbor_it];
-            
-            if(_mesh.node(neighbor_node_id).processor_id() == processor_id)
-              need_to_track = true;
-            else // Now see if we own any of the elements connected to the neighbor nodes
-            {
-              std::vector<unsigned int> & elems_connected_to_node = node_to_elem_map[neighbor_node_id];
-              
-              for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-                if(_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
-                {
-                  need_to_track = true;
-                  break; // Break out of element loop
-                }
-            }
-            
-            if(need_to_track)
-              break; // Breaking out of neighbor loop
-          }
-        }
-      }
-
-      if(need_to_track)
-      {
-        // Add this node as a slave node to search in the future
-        _slave_nodes.push_back(node_id);
-
-        // Set it's neighbors
-        _neighbor_nodes[node_id] = neighbor_nodes;
-        
-        { // Add the elements connected to the slave node to the ghosted list
-          std::vector<unsigned int> & elems_connected_to_node = node_to_elem_map[node_id];
-
-          for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-            _subproblem.addGhostedElem(elems_connected_to_node[elem_id_it]);
-        }
-
-        // Now add elements connected to the neighbor nodes to the ghosted list
-        for(unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
-        {
-          std::vector<unsigned int> & elems_connected_to_node = node_to_elem_map[neighbor_nodes[neighbor_it]];
-
-          for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-            _subproblem.addGhostedElem(elems_connected_to_node[elem_id_it]);
-        }
-      }
-    }
-  }    
-
-  unsigned int n_slave_nodes = _slave_nodes.size();
-
-  for(unsigned int i=0; i<n_slave_nodes; i++)
-  {
-    unsigned int node_id = _slave_nodes[i];
-    
-    Node & node = _mesh.node(node_id);
-
-    Node * closest_node = NULL;
-    Real closest_distance = std::numeric_limits<Real>::max();
-
-    std::vector<unsigned int> & neighbor_nodes = _neighbor_nodes[node_id];
-
-    unsigned int n_neighbor_nodes = neighbor_nodes.size();
-
-    for(unsigned int k=0; k<n_neighbor_nodes; k++)
-    {
-      Node * cur_node = &_mesh.node(neighbor_nodes[k]);
-      Real distance = ((*cur_node) - node).size();
-
-      if(distance < closest_distance)
-      {
-        closest_distance = distance;
-        closest_node = cur_node;
-      }
-    }
-
-    if(closest_distance == std::numeric_limits<Real>::max())
-      mooseError("Unable to find nearest node!");
-
-    NearestNodeInfo & info = _nearest_node_info[node.id()];
-
-    if(closest_distance < info._distance)
-    {
-      info._nearest_node = closest_node;
-      info._distance = closest_distance;
-    }
-  }  
+  _nearest_node_info = nnt._nearest_node_info;
 
   Moose::perf_log.pop("NearestNodeLocator::findNodes()","Solve");
 }
@@ -288,7 +149,7 @@ NearestNodeLocator::distance(unsigned int node_id)
 }
 
 
-Node *
+const Node *
 NearestNodeLocator::nearestNode(unsigned int node_id)
 {
   return _nearest_node_info[node_id]._nearest_node;
