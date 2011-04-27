@@ -261,8 +261,10 @@ class TestHarness:
     if self.options.colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
       str = str.replace('OK', BOLD+GREEN+'OK'+RESET)
       str = str.replace('skipped', BOLD+'skipped'+RESET)
-      str = str.replace('FAILED (DIFF)', BOLD+YELLOW+'FAILED (DIFF)'+RESET)
-      str = str.replace('FAILED', BOLD+RED+'FAILED'+RESET)
+      if str.find("FAILED (DIFF)") != -1:
+        str = str.replace('FAILED (DIFF)', BOLD+YELLOW+'FAILED (DIFF)'+RESET)
+      else:
+        str = str.replace('FAILED', BOLD+RED+'FAILED'+RESET)
 
     return str
 
