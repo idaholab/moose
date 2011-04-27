@@ -50,12 +50,12 @@ public:
   class PenetrationInfo
   {
   public:
-    PenetrationInfo(Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi);
+    PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi);
 
     PenetrationInfo(const PenetrationInfo & p);
 
     ~PenetrationInfo();
-    Node * _node;
+    const Node * _node;
     Elem * _elem;
     Elem * _side;
     unsigned int _side_num;
@@ -78,7 +78,9 @@ public:
   unsigned int _slave_boundary;
 
   FEType _fe_type;
-  FEBase * _fe;
+
+  // One FE for each thread
+  std::vector<FEBase * > _fe;
 
   NearestNodeLocator & _nearest_node;
 

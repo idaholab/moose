@@ -62,6 +62,12 @@ public:
   std::vector<unsigned int> & slaveNodes() { return _slave_nodes; }
 
   /**
+   * Returns the NodeIdRange of slave nodes to be used for calling threaded
+   * functions operating on the slave nodes.
+   */
+  NodeIdRange & slaveNodeRange() { return *_slave_node_range; }
+
+  /**
    * Data structure used to hold nearest node info.
    */
   class NearestNodeInfo
