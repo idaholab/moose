@@ -826,8 +826,6 @@ NonlinearSystem::augmentSendList(std::vector<unsigned int> & send_list)
 {
   std::set<unsigned int> & ghosted_elems = _mproblem._ghosted_elems;
 
-  send_list.reserve(send_list.size() + ghosted_elems.size() + 1);
-
   DofMap & dof_map = dofMap();
 
   std::vector<unsigned int> dof_indices;
@@ -839,7 +837,9 @@ NonlinearSystem::augmentSendList(std::vector<unsigned int> & send_list)
     dof_map.dof_indices(_mesh.elem(*elem_id), dof_indices);
 
     for(unsigned int i=0; i<dof_indices.size(); i++)
-      send_list.push_back(dof_indices[i]);
+      // Only need to ghost it if it's actually not on this processor
+      if(dof_indices[i] < dof_map.first_dof() || dof_indices[i] >= dof_map.end_dof())
+        send_list.push_back(dof_indices[i]);
   }  
 }
 
