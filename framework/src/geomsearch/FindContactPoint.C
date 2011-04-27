@@ -141,10 +141,10 @@ findContactPoint(FEBase * _fe, FEType & _fe_type, const Elem * master_elem, unsi
 
     update_size = update.l2_norm();
   }
-
+/*
   if(nit == 12 && update_size > TOLERANCE*TOLERANCE)
     std::cerr<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
-
+*/
   bool contained_in_elem = master_elem->contains_point(slave_point);
 
   contact_ref = ref_point;
