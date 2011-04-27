@@ -68,10 +68,6 @@ public:
 
   SubProblem & _subproblem;
 
-  void findContactPoint(const Elem * master_elem, unsigned int side_num, const Point & slave_point,
-                        bool start_with_centroid, Point & contact_ref, Point & contact_phys, std::vector<std::vector<Real> > & side_phi,
-                        Real & distance, RealGradient & normal, bool & contact_point_on_side);
-
   Real normDistance(const Elem & elem, const Elem & side, const Node & p0, Point & closest_point, RealVectorValue & normal);
 
   int intersect2D_Segments( Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point* I0, Point* I1 );
