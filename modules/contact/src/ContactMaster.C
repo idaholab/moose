@@ -67,7 +67,7 @@ ContactMaster::addPoints()
     if(!pinfo)
       continue;
 
-    Node * node = pinfo->_node;
+    const Node * node = pinfo->_node;
 
     if(_sys.currentlyComputingJacobian())
     {/*
@@ -99,7 +99,7 @@ Real
 ContactMaster::computeQpResidual()
 {
   PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
-  Node * node = pinfo->_node;
+  const Node * node = pinfo->_node;
 //  std::cout<<node->id()<<std::endl;
 //  long int dof_number = node->dof_number(0, _var_num, 0);
 //  std::cout<<dof_number<<std::endl;

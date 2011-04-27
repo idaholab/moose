@@ -36,7 +36,7 @@ GapHeatPointSourceMaster::addPoints()
     if(!pinfo)
       continue;
 
-    Node * node = pinfo->_node;
+    const Node * node = pinfo->_node;
 
     addPoint(pinfo->_elem, pinfo->_closest_point);
     point_to_info[pinfo->_closest_point] = pinfo;
@@ -47,7 +47,7 @@ Real
 GapHeatPointSourceMaster::computeQpResidual()
 {
   PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
-  Node * node = pinfo->_node;
+  const Node * node = pinfo->_node;
   long int dof_number = node->dof_number(0, _var.number(), 0);
 
   return -_phi[_i][_qp] * _slave_flux(dof_number);

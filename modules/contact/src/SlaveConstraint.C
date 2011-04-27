@@ -67,7 +67,7 @@ SlaveConstraint::addPoints()
     if(!pinfo)
       continue;
 
-    Node * node = pinfo->_node;
+    const Node * node = pinfo->_node;
 
     if(_sys.currentlyComputingJacobian())
     {
@@ -123,7 +123,7 @@ Real
 SlaveConstraint::computeQpResidual()
 {
   PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
-  Node * node = pinfo->_node;
+  const Node * node = pinfo->_node;
 
   Real resid(0);
   RealVectorValue res_vec;
@@ -168,7 +168,7 @@ Real
 SlaveConstraint::computeQpJacobian()
 {
   PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
-  Node * node = pinfo->_node;
+  const Node * node = pinfo->_node;
   long int dof_number = node->dof_number(0, _var.number(), 0);
 
 
