@@ -5,7 +5,7 @@
 
 namespace MathUtils 
 {
-  inline Real poly2Log(Real x, Real tol, int deriv)
+  inline Real poly1Log(Real x, Real tol, int deriv)
   {
     Real c1=1.0/tol;
     Real c2=std::log(tol) - 1.0;
@@ -44,7 +44,7 @@ namespace MathUtils
     return value;
   }
 
-  inline Real polyLog(Real x, Real tol, int deriv)
+  inline Real poly2Log(Real x, Real tol, int deriv)
   {
     Real c1=-0.5/(tol*tol);
     Real c2=2.0/tol;
@@ -84,7 +84,7 @@ namespace MathUtils
     return value;
   }
 
-  inline Real advPolyLog(Real x, Real tol, int order)
+  inline Real poly3Log(Real x, Real tol, int order)
   {
     Real c1 = 1.0/(3.0*tol*tol*tol);
     Real c2 = -3.0/(2.0*tol*tol);
