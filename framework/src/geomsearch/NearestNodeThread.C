@@ -25,7 +25,7 @@ NearestNodeThread::NearestNodeThread(const MeshBase & mesh,
 }
 
 // Splitting Constructor
-NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split split) :
+NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*split*/) :
   _mesh(x._mesh),
   _neighbor_nodes(x._neighbor_nodes)
 {

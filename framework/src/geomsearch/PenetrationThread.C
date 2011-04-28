@@ -53,7 +53,7 @@ PenetrationThread::PenetrationThread(const MeshBase & mesh,
 }
 
 // Splitting Constructor
-PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split split) :
+PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*split*/) :
   _mesh(x._mesh),
   _master_boundary(x._master_boundary),
   _slave_boundary(x._slave_boundary),
@@ -198,7 +198,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
       // and which sides are on those boundaries in MooseMesh!  That way we can look this information up directly!
       for(unsigned int m=0; m<_n_elems; m++)
       {
-        if(_elem_list[m] == elem_id && _id_list[m] == _master_boundary)
+        if(_elem_list[m] == elem_id && _id_list[m] == static_cast<short>(_master_boundary))
         {
           unsigned int side_num = _side_list[m];
 
@@ -346,5 +346,5 @@ PenetrationThread::operator() (const NodeIdRange & range)
 }
 
 void
-PenetrationThread::join(const PenetrationThread & other)
+PenetrationThread::join(const PenetrationThread & /*other*/)
 {}
