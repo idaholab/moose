@@ -31,7 +31,7 @@ ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(Problem & problem,
 }
 
 // Splitting Constructor
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split) :
+ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split /*split*/) :
     _problem(x._problem),
     _sys(x._sys),
     _auxs(x._auxs)
