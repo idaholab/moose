@@ -78,7 +78,7 @@ DT2Transient::preExecute()
 void
 DT2Transient::preSolve()
 {
-  NonlinearSystem & nl = _problem.getNonlinearSystem();
+  /*NonlinearSystem & nl =*/ _problem.getNonlinearSystem(); // returned reference is not used for anything?
   TransientNonlinearImplicitSystem & nl_sys = _problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _problem.getAuxiliarySystem().sys();
 
@@ -101,7 +101,7 @@ DT2Transient::preSolve()
 void
 DT2Transient::postSolve()
 {
-  NonlinearSystem & nl = _problem.getNonlinearSystem();
+  /*NonlinearSystem & nl =*/ _problem.getNonlinearSystem(); // returned reference is not used for anything?
   TransientNonlinearImplicitSystem & nl_sys = _problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _problem.getAuxiliarySystem().sys();
   if (_converged)

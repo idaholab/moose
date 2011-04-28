@@ -31,7 +31,7 @@ ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(Problem & problem,
 }
 
 // Splitting Constructor
-ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split) :
+ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split /*split*/) :
     _problem(x._problem),
     _sys(x._sys),
     _auxs(x._auxs)

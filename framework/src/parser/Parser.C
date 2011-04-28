@@ -628,8 +628,8 @@ Parser::checkParams(const std::string & prefix, InputParameters &p)
 
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
   {
-    bool found = false;
-    bool in_global = false;
+    // bool found = false; // This variable is unused?!
+    // bool in_global = false; // This variable is unused?!
     std::string orig_name = prefix + "/" + it->first;
     std::string full_name = orig_name;
 

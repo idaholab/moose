@@ -112,12 +112,12 @@ CoupledProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID
 }
 
 void
-CoupledProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
+CoupledProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
 {
 }
 
 void
-CoupledProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
+CoupledProblem::subdomainSetupSide(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
 {
 }
 
@@ -165,7 +165,7 @@ CoupledProblem::initialCondition(EquationSystems & es, const std::string & syste
 }
 
 void
-CoupledProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
+CoupledProblem::computePostprocessors(ExecFlagType /*type = EXEC_TIMESTEP*/)
 {
 }
 
@@ -175,19 +175,19 @@ CoupledProblem::outputPostprocessors()
 }
 
 Real &
-CoupledProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
+CoupledProblem::getPostprocessorValue(const std::string & /*name*/, THREAD_ID /*tid*/)
 {
   static Real pps;
   return pps;
 }
 
 void
-CoupledProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
+CoupledProblem::reinitMaterials(unsigned int /*blk_id*/, THREAD_ID /*tid*/)
 {
 }
 
 void
-CoupledProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid)
+CoupledProblem::reinitMaterialsFace(unsigned int /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/)
 {
 }
 

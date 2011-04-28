@@ -39,7 +39,7 @@ MaterialProperty<ColumnMajorMatrix>::init (int size)
 {
   MaterialProperty<ColumnMajorMatrix> *copy = new MaterialProperty<ColumnMajorMatrix>;
   copy->_value.resize(size);
-  for (unsigned int i(0); i < size; ++i)
+  for (unsigned int i(0); i < static_cast<unsigned>(size); ++i)
     (*copy)[i].zero();
   return copy;
 }

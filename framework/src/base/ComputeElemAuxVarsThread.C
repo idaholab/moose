@@ -30,7 +30,7 @@ ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(MProblem & mproblem,
 }
 
 // Splitting Constructor
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split) :
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/) :
     _mproblem(x._mproblem),
     _sys(x._sys),
     _auxs(x._auxs)

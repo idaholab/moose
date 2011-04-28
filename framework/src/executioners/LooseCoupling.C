@@ -120,7 +120,7 @@ LooseCoupling::~LooseCoupling()
 }
 
 void
-LooseCoupling::executeBlocks(const std::string & name)
+LooseCoupling::executeBlocks(const std::string & /*name*/)
 {
 //  for (std::vector<Parser *>::iterator it = _slave_parser.begin(); it != _slave_parser.end(); ++it)
 //  {

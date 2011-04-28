@@ -380,7 +380,7 @@ NonlinearSystem::onTimestepBegin()
 }
 
 void
-NonlinearSystem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
+NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 {
   //Global Kernels
   KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();

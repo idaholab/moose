@@ -48,7 +48,7 @@ SlaveNeighborhoodThread::SlaveNeighborhoodThread(const MeshBase & mesh,
 }
 
 // Splitting Constructor
-SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split split) :
+SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split /*split*/) :
   _mesh(x._mesh),
   _trial_master_nodes(x._trial_master_nodes),
   _node_to_elem_map(x._node_to_elem_map),
