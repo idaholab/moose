@@ -32,6 +32,7 @@ class Output
 public:
   enum Type {
     EXODUS,
+    NEMESIS,
     GMV,
     TECPLOT,
     TECPLOT_BIN,

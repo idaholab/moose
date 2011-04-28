@@ -18,6 +18,7 @@
 
 #include "Outputter.h"
 #include "ExodusOutput.h"
+#include "NemesisOutput.h"
 #include "GMVOutput.h"
 #include "XDAOutput.h"
 #include "TecplotOutput.h"
@@ -45,6 +46,10 @@ Output::add(Output::Type type)
   {
   case EXODUS:
     o = new ExodusOutput(_problem.es());
+    break;
+    
+  case NEMESIS:
+    o = new NemesisOutput(_problem.es());
     break;
 
   case GMV:

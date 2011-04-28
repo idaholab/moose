@@ -12,35 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef OUTPUTTER_H
-#define OUTPUTTER_H
+#ifndef NEMESISOUTPUTTER_H
+#define NEMESISOUTPUTTER_H
 
+#include "Outputter.h"
 #include "FormattedTable.h"
+
 // libMesh
-#include "equation_systems.h"
+#include "libmesh_common.h"
+#include "nemesis_io.h"
 
-#include <string>
-
-class Problem;
-
-class Outputter
+class NemesisOutput : public Outputter
 {
 public:
-  Outputter(EquationSystems & es);
-  virtual ~Outputter();
+  NemesisOutput(EquationSystems & es);
+  virtual ~NemesisOutput();
 
-  /**
-   * Outputs the data
-   */
-  virtual void output(const std::string & file_base, Real time) = 0;
-  virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time) = 0;
-  virtual void outputInput() {}
+  virtual void output(const std::string & file_base, Real time);
+  virtual void outputPps(const std::string & file_base, const FormattedTable & table, Real time);
+  virtual void outputInput();
 
-  virtual void meshChanged() = 0;
-  virtual void sequence(bool state) = 0;
+  virtual void meshChanged();
+  virtual void sequence(bool state) { _seq = state; }
 
 protected:
-  EquationSystems & _es;
+  Nemesis_IO * _out;
+
+  bool _seq;
+  int _file_num;                        /// number of the file
+  int _num;                             /// the number of timestep within the file
+  std::string getFileName(const std::string & file_base);
 };
 
 #endif /* OUTPUTTER_H */

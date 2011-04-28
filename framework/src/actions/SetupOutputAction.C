@@ -31,6 +31,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<std::string>("file_base", "out", "The desired solution output name without an extension");
   params.addParam<int>("interval", 1, "The iterval at which timesteps are output to the solution file");
   params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)");
+  params.addParam<bool>("nemesis", false, "Specifies that you would like Nemesis output solution file(s)");
   params.addParam<bool>("gmv", false, "Specifies that you would like GMV output solution file(s)");
   params.addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)");
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
@@ -69,6 +70,7 @@ SetupOutputAction::act()
   output.fileBase(getParam<std::string>("file_base"));
 
   if (getParam<bool>("exodus")) output.add(Output::EXODUS);
+  if (getParam<bool>("nemesis")) output.add(Output::NEMESIS);
   if (getParam<bool>("gmv")) output.add(Output::GMV);
   if (getParam<bool>("tecplot")) output.add(Output::TECPLOT);
   if (getParam<bool>("tecplot_binary")) output.add(Output::TECPLOT_BIN);
