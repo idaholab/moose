@@ -41,8 +41,6 @@ protected:
   MooseMesh & _mesh;
   std::string _var_name;
   unsigned int _nodesetid;
-
-  std::vector<unsigned int> _node_ids;
 };
 
 #endif //AVERAGENODALVARIABLEVALUE_H

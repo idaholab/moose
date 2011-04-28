@@ -125,6 +125,8 @@ public:
   
   std::set<subdomain_id_type> & getNodeBlockIds(const Node & node);
 
+  std::vector<unsigned int> & getNodeList(short int nodeset_id) { return _node_set_nodes[nodeset_id]; }
+
   libMesh::Mesh _mesh;
 
 protected:
@@ -174,6 +176,8 @@ protected:
   typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
 
   std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;        /// list of nodes that belongs to a specified block (domain)
+
+  std::map<short int, std::vector<unsigned int> > _node_set_nodes;              /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> <array of node ids>
 
   std::set<unsigned int> _ghosted_boundaries;
   std::vector<Real> _ghosted_boundaries_inflation;

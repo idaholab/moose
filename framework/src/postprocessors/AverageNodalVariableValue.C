@@ -33,25 +33,18 @@ AverageNodalVariableValue::AverageNodalVariableValue(const std::string & name, I
     _var_name(parameters.get<std::string>("variable")),
     _nodesetid(parameters.get<unsigned int>("nodeset"))
 {
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
-  {
-    const BndNode * bnode = *nd;
-
-    if ((unsigned int) bnode->_bnd_id == _nodesetid)
-      _node_ids.push_back(bnode->_node->id());
-  }
 }
 
 Real
 AverageNodalVariableValue::getValue()
 {
   Real avg = 0;
-  int n = _node_ids.size();
+  std::vector<unsigned int> & nodeset = _mesh.getNodeList(_nodesetid);
+  int n = nodeset.size();
   for (int i = 0; i < n; i++)
   {
-    if(_mesh.node(_node_ids[i]).processor_id() == libMesh::processor_id())
-      avg += _problem.getVariable(_tid, _var_name).getNodalValue(_mesh.node(_node_ids[i]));
+    if(_mesh.node(nodeset[i]).processor_id() == libMesh::processor_id())
+      avg += _problem.getVariable(_tid, _var_name).getNodalValue(_mesh.node(nodeset[i]));
   }
 
   gatherSum(avg);  

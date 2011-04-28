@@ -74,6 +74,10 @@ MooseMesh::freeBndNodes()
   // free memory
   for (std::vector<BndNode *>::iterator it = _bnd_nodes.begin(); it != _bnd_nodes.end(); ++it)
     delete (*it);
+
+  for (std::map<short int, std::vector<unsigned int> >::iterator it = _node_set_nodes.begin(); it != _node_set_nodes.end(); ++it)
+    it->second.clear();
+  _node_set_nodes.clear();
 }
 
 void
@@ -279,7 +283,10 @@ MooseMesh::buildNodeList()
   int n = nodes.size();
   _bnd_nodes.resize(n);
   for (int i = 0; i < n; i++)
+  {
     _bnd_nodes[i] = new BndNode(&_mesh.node(nodes[i]), ids[i]);
+    _node_set_nodes[ids[i]].push_back(nodes[i]);
+  }
 }
 
 ConstElemRange *
