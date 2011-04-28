@@ -182,7 +182,7 @@ public:
   void serializeSolution();
 
   inline void setEarlyPerfLogPrint(bool val) { _output_setup_log_early = val; }
-  
+
 protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;
@@ -227,7 +227,7 @@ protected:
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
 #endif
-  
+
   bool _print_mesh_changed;
 
   // Displaced mesh /////

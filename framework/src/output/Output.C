@@ -13,7 +13,8 @@
 /****************************************************************/
 
 #include "Output.h"
-#include "Problem.h"
+#include "MProblem.h"
+#include "NonlinearSystem.h"
 
 #include "Outputter.h"
 #include "ExodusOutput.h"
@@ -24,7 +25,9 @@
 Output::Output(Problem & problem) :
     _file_base("out"),
     _problem(problem),
-    _time(_problem.time())
+    _time(_problem.time()),
+    _dt(_problem.dt()),
+    _iteration_plot_start_time(std::numeric_limits<Real>::max())
 {
 }
 
@@ -75,6 +78,52 @@ Output::output()
     _outputters[i]->output(_file_base, _time);
   }
 }
+
+void
+Output::timestepSetup()
+{
+#ifdef LIBMESH_HAVE_PETSC
+  MProblem * mproblem( dynamic_cast<MProblem*>(&_problem) );
+  if (_time >= _iteration_plot_start_time && mproblem)
+  {
+    NonlinearSystem & nl = mproblem->getNonlinearSystem();
+    PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+    SNES snes = petsc_solver->snes();
+#if PETSC_VERSION_LESS_THAN(2,3,3)
+    PetscErrorCode ierr =
+      SNESSetMonitor (snes, Output::iterationOutput, this, PETSC_NULL);
+#else
+    // API name change in PETSc 2.3.3
+    PetscErrorCode ierr =
+      SNESMonitorSet (snes, Output::iterationOutput, this, PETSC_NULL);
+#endif
+    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  }
+#endif
+}
+
+#ifdef LIBMESH_HAVE_PETSC
+PetscErrorCode
+Output::iterationOutput(SNES, PetscInt its, PetscReal /*fnorm*/, void * _output)
+{
+  Output * output = static_cast<Output*>(_output);
+  mooseAssert(output, "Error in iterationOutput");
+  if (output->_time >= output->_iteration_plot_start_time && its )
+  {
+    // Create an output time.  The time will be larger than the time of the previous
+    // solution, and it will increase with each iteration.  Using 1e-3 indicates that
+    // after 1000 nonlinear iterations, we'll overrun the next solution time.  That
+    // should be more than enough.
+    Real iteration_time( (output->_time-output->_dt) + its * output->_dt * 1e-3 );
+    std::cout << "  Writing iteration plot for NL step " << its << " at time " << iteration_time << std::endl;
+    for (unsigned int i(0); i < output->_outputters.size(); ++i)
+    {
+      output->_outputters[i]->output(output->_file_base, iteration_time);
+    }
+  }
+  return 0;
+}
+#endif
 
 void
 Output::outputPps(const FormattedTable & table)

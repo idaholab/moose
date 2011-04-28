@@ -21,6 +21,9 @@
 // libMesh
 #include "libmesh_common.h"
 
+//PETSc includes
+#include "petsc_nonlinear_solver.h"
+
 class Problem;
 class Outputter;
 
@@ -40,7 +43,14 @@ public:
 
   void add(Type type);
 
+  void timestepSetup();
+
   void output();
+
+#ifdef LIBMESH_HAVE_PETSC
+  static PetscErrorCode iterationOutput(SNES, PetscInt its, PetscReal fnorm, void *);
+#endif
+
   // FIXME: right now, it is here - might go somewhere else?
   void outputPps(const FormattedTable & table);
   void outputInput();
@@ -54,12 +64,23 @@ public:
   void meshChanged();
   void sequence(bool state);
 
+  void iterationPlotStartTime(Real t)
+  {
+    _iteration_plot_start_time = t;
+  }
+  Real iterationPlotStartTime()
+  {
+    return _iteration_plot_start_time;
+  }
+
 protected:
   std::string _file_base;
 
   Problem & _problem;
   Real & _time;
+  Real & _dt;
   int _interval;
+  Real _iteration_plot_start_time;
 
   std::vector<Outputter *> _outputters;
 };

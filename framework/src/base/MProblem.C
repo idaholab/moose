@@ -197,7 +197,7 @@ void MProblem::initialSetup()
   // Need to see if _any_ processor has ghosted elems
   unsigned int ghosted = _ghosted_elems.size();
   Parallel::sum(ghosted);
-  
+
   if(ghosted)
   {
     Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
@@ -250,6 +250,7 @@ void MProblem::timestepSetup()
 
   _aux.timestepSetup();
   _nl.timestepSetup();
+  _out.timestepSetup();
 }
 
 void

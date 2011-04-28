@@ -23,7 +23,6 @@
 #include "exodusII_io.h"
 #include "MooseMesh.h"
 
-
 template<>
 InputParameters validParams<SetupOutputAction>()
 {
@@ -36,11 +35,11 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)");
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
-  params.addParam<bool>("postprocessor_screen", true, "Specifies that you would like PostProcessor output to the screen (stdout)"); 
-  params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma seperated values file"); 
-  params.addParam<bool>("postprocessor_ensight", false, "Specifies that you would like a PostProcessor ensight output file"); 
-  params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output"); 
-  params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png"); 
+  params.addParam<bool>("postprocessor_screen", true, "Specifies that you would like PostProcessor output to the screen (stdout)");
+  params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma seperated values file");
+  params.addParam<bool>("postprocessor_ensight", false, "Specifies that you would like a PostProcessor ensight output file");
+  params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output");
+  params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png");
   params.addParam<bool>("print_out_info", false, "Specifies that you would like to see more verbose output information on STDOUT");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
   params.addParam<bool>("output_displaced", false, "Requests that displaced mesh files are written at each solve");
@@ -48,8 +47,9 @@ InputParameters validParams<SetupOutputAction>()
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
 #endif
-  
-  
+
+  params.addParam<Real>("iteration_plot_start_time", std::numeric_limits<Real>::max(), "Specifies a time after which the solution will be written following each nonlinear iteration");
+
   return params;
 }
 
@@ -100,6 +100,8 @@ SetupOutputAction::act()
 #endif //LIBMESH_ENABLE_AMR
 
     output.interval(getParam<int>("interval"));
+    output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
+
   }
 
 #ifdef LIBMESH_HAVE_PETSC
@@ -112,5 +114,5 @@ SetupOutputAction::act()
   base = base.substr(0, base.find_last_of('/'));
   if (access(base.c_str(), W_OK) == -1)
     mooseError("Can not write to directory: " + base + " for file base: " + getParam<std::string>("file_base"));
- 
+
 }
