@@ -208,7 +208,7 @@ class TestHarness:
     if self.all_passed:
       return ''
 
-    # Leave a space for additional messages by subclasses
+    # Leave a space so appending messages always works for subclasses
     return 'FAILED '
 
   # override this function if you need to do stuff after the tests are run
