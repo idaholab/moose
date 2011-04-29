@@ -30,16 +30,43 @@
 class MProblem;
 class MooseMesh;
 
+/**
+ * Takes care of everything related to mesh adaptivity
+ *
+ */
 class Adaptivity
 {
 public:
   Adaptivity(MProblem & subproblem);
   virtual ~Adaptivity();
 
+  /**
+   * Initialize the initial adaptivity ;-)
+   *
+   * @param steps TODO: describe me
+   * @param initial_steps number of steps to do in the initial adaptivity
+   */
   void init(unsigned int steps, unsigned int initial_steps);
+
+  /**
+   * Set adaptivity parameter
+   *
+   * @param param_name the name of the parameter
+   * @param param_value the value of parameter
+   */
   template<typename T>
   void setParam(const std::string & param_name, const T & param_value);
-  void setErrorEstimator(const std::string &error_estimator_name);
+
+  /**
+   * Set the error estimator
+   *
+   * @param error_estimator_name the name of the error estimator (currently: Laplacian and Kelly)
+   */
+  void setErrorEstimator(const std::string & error_estimator_name);
+
+  /**
+   * Set the error norm (FIXME: improve description)
+   */
   void setErrorNorm(SystemNorm &sys_norm);
 
   /**
@@ -49,41 +76,38 @@ public:
    */
   void initial();
 
+  /**
+   * Pull out the number of steps previously set by calling init()
+   *
+   * @return the number of steps
+   */
   unsigned int getSteps() const;
 
+  /**
+   * Adapts the mesh based on the error estimator used
+   */
   void adaptMesh();
 
+  /**
+   * Is adaptivity on?
+   *
+   * @return true if we do mesh adaptivity, otherwise false
+   */
   bool isOn() { return _mesh_refinement_on; }
 
 protected:
   MProblem & _subproblem;
   MooseMesh & _mesh;
 
-  bool _mesh_refinement_on;
+  bool _mesh_refinement_on;                     /// on/off flag reporting if the adaptivity is being used
+  MeshRefinement * _mesh_refinement;            /// A mesh refinement object to be used either with initial refinement or with Adaptivity.
+  ErrorEstimator * _error_estimator;            /// Error estimator to be used by the apps.
+  ErrorVector * _error;                         /// Error vector for use with the error estimator.
 
-  /**
-   * A mesh refinement object to be used either with initial refinement or with Adaptivity.
-   */
-  MeshRefinement * _mesh_refinement;
-
-  /**
-   * Error estimator to be used by the apps.
-   */
-  ErrorEstimator * _error_estimator;
-
-  /**
-   * Error vector for use with the error estimator.
-   */
-  ErrorVector * _error;
-
-
-  unsigned int _initial_steps;                          // the number of adaptivity steps to do at the beginning of simulation
+  unsigned int _initial_steps;                  /// the number of adaptivity steps to do at the beginning of simulation
 
 };
 
-/**
- * Set parameters for adaptivity
- */
 template<typename T>
 void
 Adaptivity::setParam(const std::string &param_name, const T &param_value)
