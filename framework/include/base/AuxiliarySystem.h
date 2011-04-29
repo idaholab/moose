@@ -30,6 +30,10 @@
 class AuxKernel;
 class MProblem;
 
+/**
+ * A system that holds auxiliary variables
+ *
+ */
 class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
@@ -44,7 +48,20 @@ public:
   virtual void jacobianSetup();
 
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+
+  /**
+   * Adds an auxiliary kernel
+   * @param kernel_name The type of the kernel
+   * @param name The name of the kernel
+   * @param parameters Parameters for this kernel
+   */
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  /**
+   * Adds an auxiliary boundary condition
+   * @param bc_name The type of the BC
+   * @param name The name of the BC
+   * @param parameters Parameters of the BC
+   */
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
@@ -56,6 +73,10 @@ public:
 
   void augmentSendList(std::vector<unsigned int> & send_list);
 
+  /**
+   * Compute auxiliary variables
+   * @param type Time flag of which variables should be computed
+   */
   virtual void compute(ExecFlagType type = EXEC_RESIDUAL);
 
 protected:

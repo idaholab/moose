@@ -52,12 +52,50 @@ public:
   virtual void initialSetupKernels();
   virtual void timestepSetup();
 
+  /**
+   * Returns the convergence state
+   * @return true if converged, otherwise false
+   */
   virtual bool converged();
 
+  /**
+   * Adds a kernel
+   * @param kernel_name The type of the kernel
+   * @param name The name of the kernel
+   * @param parameters Kernel parameters
+   */
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a boundary condition
+   * @param bc_name The type of the boundary condition
+   * @param name The name of the boundary condition
+   * @param parameters Boundary condition parameters
+   */
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a Dirac kernal
+   * @param kernel_name The type of the dirac kernel
+   * @param name The name of the Dirac kernel
+   * @param parameters Dirac kernel parameters
+   */
   void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a stabilizer
+   * @param stabilizer_name The type of the stabilizer
+   * @param name The name of the stabilizer
+   * @param parameters Stabilizer parameters
+   */
   void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a damper
+   * @param damper_name The type of the damper
+   * @param name The name of the damper
+   * @param parameters Damper parameters
+   */
   void addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
 
   /// Adds a vector to the system
@@ -65,21 +103,58 @@ public:
 
   void setInitialSolution();
 
+  /**
+   * Computes residual
+   * @param residual Residual is formed in here
+   */
   void computeResidual(NumericVector<Number> & residual);
+  /**
+   * Computes Jacobian
+   * @param jacobian Jacobian is formed in here
+   */
   void computeJacobian(SparseMatrix<Number> &  jacobian);
+  /**
+   * Computes a Jacobian block. Used by Physics-based preconditioning
+   * @param jacobian Where the block is stored
+   * @param precond_system libMesh system that is used for the block Jacobian
+   * @param ivar number of i-th variable
+   * @param jvar number of j-th variable
+   */
   void computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
+
+  /**
+   * Compute damping
+   * @param update
+   * @return returns The damping factor
+   */
   Real computeDamping(const NumericVector<Number>& update);
 
+  /**
+   * Print the L2-norm of variable residuals
+   */
   void printVarNorms();
 
+  /**
+   * Sets the time-stepping scheme
+   * @param scheme Time-stepping scheme to be set
+   */
   void timeSteppingScheme(Moose::TimeSteppingScheme scheme);
+
   /**
    * Get the order of used time integration scheme
    */
   Real getTimeSteppingOrder() { return _time_stepping_order; }
 
+  /**
+   * Called at the beginning of th time step
+   */
   void onTimestepBegin();
 
+  /**
+   * Called from assembling when we hit a new subdomain
+   * @param subdomain ID of the new subdomain
+   * @param tid Thread ID
+   */
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
 
   virtual void set_solution(const NumericVector<Number> & soln);
@@ -97,9 +172,20 @@ public:
 
   void augmentSendList(std::vector<unsigned int> & send_list);
 
+  /**
+   * Sets a preconditioner
+   * @param pc The preconditioner to be set
+   */
   void setPreconditioner(Preconditioner<Real> *pc);
 
+  /**
+   * Setup damping stuff (called before we actually start)
+   */
   void setupDampers();
+  /**
+   * Reinit dampers. Called before we use damping
+   * @param tid Thread ID
+   */
   void reinitDampers(THREAD_ID tid);
 
   /// System Integrity Checks
@@ -126,13 +212,26 @@ public:
   Real _initial_residual;
 
 protected:
+  /**
+   * Computes the time derivative vector
+   */
   void computeTimeDeriv();
+
+  /**
+   * Compute the residual
+   * @param residual[out] Residual is formed here
+   */
   void computeResidualInternal(NumericVector<Number> & residual);
+
+  /**
+   * Completes the assembly of residual
+   * @param residual[out] Residual is formed here
+   */
   void finishResidual(NumericVector<Number> & residual);
 
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
-  CouplingMatrix * _cm;
+  CouplingMatrix * _cm;                                 /// Coupling matirx for variables. It is diagonal, since we do only block diagonal preconditioning.
 
   const NumericVector<Number> * _current_solution;      /// solution vector from nonlinear solver
   NumericVector<Number> & _solution_u_dot;              /// solution vector for u^dot
