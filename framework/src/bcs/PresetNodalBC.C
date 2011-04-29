@@ -12,36 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SinDirichletBC.h"
+#include "PresetNodalBC.h"
 
 template<>
-InputParameters validParams<SinDirichletBC>()
+InputParameters validParams<PresetNodalBC>()
 {
-  InputParameters params = validParams<NodalBC>();
-  params.set<Real>("initial")=0.0;
-  params.set<Real>("final")=0.0;
-  params.set<Real>("duration")=0.0;
-
-  return params;
+  InputParameters p = validParams<NodalBC>();
+  return p;
 }
 
-SinDirichletBC::SinDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
-    _initial(getParam<Real>("initial")),
-    _final(getParam<Real>("final")),
-    _duration(getParam<Real>("duration"))
+
+PresetNodalBC::PresetNodalBC(const std::string & name, InputParameters parameters) :
+  NodalBC(name, parameters)
 {
+
+}
+
+void
+PresetNodalBC::computeValue(NumericVector<Number> & current_solution)
+{
+  unsigned int & dof_idx = _var.nodalDofIndex();
+  _qp = 0;
+  current_solution.set(dof_idx, computeQpValue());
 }
 
 Real
-SinDirichletBC::computeQpResidual()
+PresetNodalBC::computeQpResidual()
 {
-  Real value;
-
-  if(_t < _duration)
-    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
-  else
-    value = _final;
-
-  return _u[_qp]- value;
+  return _u[_qp] - computeQpValue();
 }

@@ -40,7 +40,7 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
 }
 
 void
-NodalBC::computeJacobian(SparseMatrix<Number> & jacobian)
+NodalBC::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
 {
   mooseError("This shouldn't be called!");
 }

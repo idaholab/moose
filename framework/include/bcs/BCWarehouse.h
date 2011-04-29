@@ -20,6 +20,7 @@
 
 #include "IntegratedBC.h"
 #include "NodalBC.h"
+#include "PresetNodalBC.h"
 
 
 class BCWarehouse
@@ -36,6 +37,7 @@ public:
 
   void addBC(unsigned int boundary_id, IntegratedBC *bc);
   void addNodalBC(unsigned int boundary_id, NodalBC *bc);
+  void addPresetNodalBC(unsigned int boundary_id, PresetNodalBC *bc);
 
   /**
    * Get boundary conditions on a specified boundary id
@@ -45,12 +47,17 @@ public:
    * Get nodal boundary conditions on a specified boundary id
    */
   std::vector<NodalBC *> & getNodalBCs(unsigned int boundary_id);
+  /**
+   * Get nodal boundary conditions on a specified boundary id
+   */
+  std::vector<PresetNodalBC *> & getPresetNodalBCs(unsigned int boundary_id);
 
   void activeBoundaries(std::set<short> & set_buffer) const;
 
 protected:
   std::map<unsigned int, std::vector<IntegratedBC *> > _bcs;
   std::map<unsigned int, std::vector<NodalBC *> > _nodal_bcs;
+  std::map<unsigned int, std::vector<PresetNodalBC *> > _preset_nodal_bcs;
 };
 
 #endif // BCWAREHOUSE_H

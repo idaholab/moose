@@ -51,7 +51,7 @@ public:
   virtual void initialSetupBCs();
   virtual void initialSetupKernels();
   virtual void timestepSetup();
-  
+
   virtual bool converged();
 
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
@@ -62,6 +62,8 @@ public:
 
   /// Adds a vector to the system
   void addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual);
+
+  void setInitialSolution();
 
   void computeResidual(NumericVector<Number> & residual);
   void computeJacobian(SparseMatrix<Number> &  jacobian);
@@ -89,7 +91,7 @@ public:
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
-      
+
   virtual NumericVector<Number> & residualCopy();
   virtual NumericVector<Number> & residualGhosted();
 

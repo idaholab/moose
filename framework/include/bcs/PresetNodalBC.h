@@ -12,36 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SinDirichletBC.h"
+#ifndef PRESETNODALBC_H
+#define PRESETNODALBC_H
+
+#include "NodalBC.h"
+
+class PresetNodalBC;
 
 template<>
-InputParameters validParams<SinDirichletBC>()
+InputParameters validParams<PresetNodalBC>();
+
+
+class PresetNodalBC : public NodalBC
 {
-  InputParameters params = validParams<NodalBC>();
-  params.set<Real>("initial")=0.0;
-  params.set<Real>("final")=0.0;
-  params.set<Real>("duration")=0.0;
+public:
+  PresetNodalBC(const std::string & name, InputParameters parameters);
 
-  return params;
-}
+  void computeValue(NumericVector<Number> & current_solution);
 
-SinDirichletBC::SinDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
-    _initial(getParam<Real>("initial")),
-    _final(getParam<Real>("final")),
-    _duration(getParam<Real>("duration"))
-{
-}
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpValue() = 0;
 
-Real
-SinDirichletBC::computeQpResidual()
-{
-  Real value;
+};
 
-  if(_t < _duration)
-    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
-  else
-    value = _final;
-
-  return _u[_qp]- value;
-}
+#endif /* PRESETBC_H */

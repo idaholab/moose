@@ -90,7 +90,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
     pinfo_mutex.lock();
     PenetrationLocator::PenetrationInfo * & info = _penetration_info[node.id()];
     pinfo_mutex.unlock();
-    
+
     // See if we already have info about this node
     if(info)
     {

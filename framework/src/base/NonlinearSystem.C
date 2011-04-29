@@ -119,7 +119,7 @@ NonlinearSystem::preInit()
 void
 NonlinearSystem::init()
 {
-  dofMap().attach_extra_send_list_function(&extraSendList, this); 
+  dofMap().attach_extra_send_list_function(&extraSendList, this);
   _current_solution = _sys.current_local_solution.get();
 
   if(_need_serialized_solution)
@@ -140,6 +140,8 @@ NonlinearSystem::init()
 void
 NonlinearSystem::solve()
 {
+  // Initialize the solution vector with known values from nodal bcs
+  setInitialSolution();
   _sys.solve();
   // store info about the solve
   _n_iters = _sys.n_nonlinear_iterations();
@@ -220,6 +222,12 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
 
       BoundaryCondition * bc = static_cast<BoundaryCondition *>(Factory::instance()->create(bc_name, name, parameters));
       mooseAssert(bc != NULL, "Not a BoundaryCondition object");
+
+      if (dynamic_cast<PresetNodalBC*>(bc) != NULL)
+      {
+        PresetNodalBC * pnbc = dynamic_cast<PresetNodalBC*>(bc);
+        _bcs[tid].addPresetNodalBC(boundaries[i], pnbc);
+      }
 
       if (dynamic_cast<NodalBC *>(bc) != NULL)
       {
@@ -358,7 +366,7 @@ NonlinearSystem::onTimestepBegin()
 
       _solution_du_dot_du.zero();
       _solution_du_dot_du.close();
-      
+
       {
         const NumericVector<Real> * current_solution = currentSolution();
         set_solution(solutionOld());                    // use old_solution for computing with correct solution vector
@@ -377,6 +385,35 @@ NonlinearSystem::onTimestepBegin()
   default:
     break;
   }
+
+}
+
+void
+NonlinearSystem::setInitialSolution()
+{
+
+  NumericVector<Number> & initial_solution( solution() );
+
+  // do nodal BC
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
+  {
+    const BndNode * bnode = *nd;
+    short int boundary_id = bnode->_bnd_id;
+    Node * node = bnode->_node;
+
+    if(node->processor_id() == libMesh::processor_id())
+    {
+      // reinit variables in nodes
+      _problem.reinitNodeFace(node, boundary_id, 0);
+
+      for (std::vector<PresetNodalBC *>::iterator it = _bcs[0].getPresetNodalBCs(boundary_id).begin(); it != _bcs[0].getPresetNodalBCs(boundary_id).end(); ++it)
+        (*it)->computeValue(initial_solution);
+    }
+  }
+
+  update();
+
 }
 
 void
@@ -453,7 +490,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     _kernels[i].residualSetup();
     _bcs[i].residualSetup();
   }
-  
+
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeResidualThread cr(_problem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
@@ -463,7 +500,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     Moose::perf_log.push("residual.close1()","Solve");
     residual.close();
     Moose::perf_log.pop("residual.close1()","Solve");
-    residual.localize(_residual_copy);    
+    residual.localize(_residual_copy);
   }
 
   if(_need_residual_ghosted)
@@ -474,7 +511,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     _residual_ghosted = residual;
     _residual_ghosted.close();
   }
-  
+
   computeDiracContributions(&residual);
 
   Moose::perf_log.push("residual.close3()","Solve");
@@ -526,7 +563,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   Moose::perf_log.push("compute_jacobian()","Solve");
 
   _currently_computing_jacobian = true;
-  
+
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
@@ -558,8 +595,8 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
   computeDiracContributions(NULL, &jacobian);
 
-  jacobian.close();  
-  
+  jacobian.close();
+
   // do nodal BC
   std::vector<int> zero_rows;
 
@@ -573,14 +610,14 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     if(node->processor_id() == libMesh::processor_id())
     {
       _problem.reinitNodeFace(node, boundary_id, 0);
-    
+
       for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
         zero_rows.push_back((*it)->variable().nodalDofIndex());
     }
   }
 
   jacobian.zero_rows(zero_rows, 1.0);
-  
+
   jacobian.close();
 
   _currently_computing_jacobian = false;
@@ -848,7 +885,7 @@ NonlinearSystem::augmentSendList(std::vector<unsigned int> & send_list)
       // Only need to ghost it if it's actually not on this processor
       if(dof_indices[i] < dof_map.first_dof() || dof_indices[i] >= dof_map.end_dof())
         send_list.push_back(dof_indices[i]);
-  }  
+  }
 }
 
 void
@@ -932,9 +969,9 @@ NonlinearSystem::checkKernelCoverage(const std::set<subdomain_id_type> & mesh_su
     if (!difference.empty())
     {
       std::stringstream missing_block_ids;
-        
+
       std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned int>( missing_block_ids, " "));
-      
+
       mooseError("Each subdomain must contain at least one Kernel.\nThe following block(s) lack an active kernel: "
                  + missing_block_ids.str());
     }
@@ -946,9 +983,9 @@ NonlinearSystem::checkBCCoverage() const
 {
   // Check that BCs used in your simulation exist in your mesh
   std::set<short> input_bcs, difference;
-  
+
   // get the boundaries from the simulation (input file)
-  _bcs[0].activeBoundaries(input_bcs);  
+  _bcs[0].activeBoundaries(input_bcs);
 
   // _mesh is from SystemBase...
   std::set_difference (input_bcs.begin(), input_bcs.end(),
@@ -958,12 +995,12 @@ NonlinearSystem::checkBCCoverage() const
   if (!difference.empty())
   {
     std::stringstream extra_boundary_ids;
-    
+
     std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned short>( extra_boundary_ids, " "));
-    
+
     mooseError("The following boundary ids from your input file do not exist in the input mesh "
                + extra_boundary_ids.str());
-  } 
+  }
 }
 
 

@@ -12,36 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SinDirichletBC.h"
+#include "FunctionPresetBC.h"
+#include "Function.h"
 
 template<>
-InputParameters validParams<SinDirichletBC>()
+InputParameters validParams<FunctionPresetBC>()
 {
-  InputParameters params = validParams<NodalBC>();
-  params.set<Real>("initial")=0.0;
-  params.set<Real>("final")=0.0;
-  params.set<Real>("duration")=0.0;
-
+  InputParameters params = validParams<PresetNodalBC>();
+  params.addRequiredParam<std::string>("function", "The forcing function.");
   return params;
 }
 
-SinDirichletBC::SinDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
-    _initial(getParam<Real>("initial")),
-    _final(getParam<Real>("final")),
-    _duration(getParam<Real>("duration"))
+FunctionPresetBC::FunctionPresetBC(const std::string & name, InputParameters parameters) :
+    PresetNodalBC(name, parameters),
+    _func(getFunction("function"))
 {
 }
 
 Real
-SinDirichletBC::computeQpResidual()
+FunctionPresetBC::computeQpValue()
 {
-  Real value;
-
-  if(_t < _duration)
-    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
-  else
-    value = _final;
-
-  return _u[_qp]- value;
+  return _func.value(_t, *_current_node);
 }

@@ -12,36 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SinDirichletBC.h"
+#ifndef FUNCTIONPRESETBC_H
+#define FUNCTIONPRESETBC_H
+
+#include "PresetNodalBC.h"
+
+//Forward Declarations
+class FunctionPresetBC;
+class Function;
 
 template<>
-InputParameters validParams<SinDirichletBC>()
+InputParameters validParams<FunctionPresetBC>();
+
+/**
+ * Defines a boundary condition that forces the value to be a user specified
+ * function at the boundary.
+ */
+class FunctionPresetBC : public PresetNodalBC
 {
-  InputParameters params = validParams<NodalBC>();
-  params.set<Real>("initial")=0.0;
-  params.set<Real>("final")=0.0;
-  params.set<Real>("duration")=0.0;
+public:
+  FunctionPresetBC(const std::string & name, InputParameters parameters);
 
-  return params;
-}
+protected:
+  /**
+   * Evaluate the function at the current quadrature point and timestep.
+   */
+  virtual Real computeQpValue();
 
-SinDirichletBC::SinDirichletBC(const std::string & name, InputParameters parameters) :
-    NodalBC(name, parameters),
-    _initial(getParam<Real>("initial")),
-    _final(getParam<Real>("final")),
-    _duration(getParam<Real>("duration"))
-{
-}
+private:
+  Function & _func;
+};
 
-Real
-SinDirichletBC::computeQpResidual()
-{
-  Real value;
-
-  if(_t < _duration)
-    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
-  else
-    value = _final;
-
-  return _u[_qp]- value;
-}
+#endif //FUNCTIONPRESETBC_H
