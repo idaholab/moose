@@ -44,6 +44,7 @@ ContactAction::act()
   params.set<std::string>("model") = _model;
   params.set<unsigned int>("boundary") = _master;
   params.set<unsigned int>("slave") = _slave;
+  params.set<Real>("penalty") = _penalty;
   params.addCoupledVar("disp_x", "The x displacement");
   params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
   params.addCoupledVar("disp_y", "The y displacement");
@@ -71,7 +72,6 @@ ContactAction::act()
 
   params.set<unsigned int>("boundary") = _slave;
   params.set<unsigned int>("master") = _master;
-  params.set<Real>("penalty") = _penalty;
   for (unsigned int i(0); i < dim; ++i)
   {
     params.set<unsigned int>("component") = i;

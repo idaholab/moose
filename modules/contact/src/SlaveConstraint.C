@@ -104,7 +104,7 @@ SlaveConstraint::addPoints()
 
       Elem * elem = NULL;
 
-      for(unsigned int i=0; i<connected_elems.size() && !elem; i++)
+      for(unsigned int i=0; i<connected_elems.size() && !elem; ++i)
       {
         Elem * cur_elem = _mesh.elem(connected_elems[i]);
         if(cur_elem->processor_id() == libMesh::processor_id())
@@ -127,6 +127,13 @@ SlaveConstraint::computeQpResidual()
 
   Real resid(0);
   RealVectorValue res_vec;
+  // Build up residual vector
+  for(unsigned int i=0; i<_dim; ++i)
+  {
+    int dof_number = node->dof_number(0, _vars(i), 0);
+    res_vec(i) = _residual_copy(dof_number);
+  }
+
   Real constraint_mag(0);
   RealVectorValue distance_vec;
   switch(_model)
@@ -135,13 +142,6 @@ SlaveConstraint::computeQpResidual()
 
     constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * ( (_mesh.node(node->id())(_component)) - (pinfo->_closest_point(_component)) );
 
-    // Build up residual vector
-    for(unsigned int i=0; i<_dim; i++)
-    {
-      long int dof_number = node->dof_number(0, _vars(i), 0);
-      res_vec(i) = _residual_copy(dof_number);
-    }
-
     resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
     break;
 
@@ -149,7 +149,7 @@ SlaveConstraint::computeQpResidual()
   case CM_TIED:
     distance_vec = _mesh.node(node->id()) - pinfo->_closest_point;
     constraint_mag = distance_vec(_component);
-    resid = _residual_copy(node->dof_number(0, _component, 0));
+    resid = res_vec(_component);
     break;
 
   default:
@@ -192,7 +192,6 @@ SlaveConstraint::computeQpJacobian()
    */
 
   Real constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * _phi[_j][_qp];
-
 
 
   return _phi[_i][_qp] * ( _penalty*constraint_mag);

@@ -47,6 +47,9 @@ protected:
   const unsigned int _component;
   const ContactModel _model;
   PenetrationLocator & _penetration_locator;
+
+  Real _penalty;
+
   NumericVector<Number> & _residual_copy;
 
   std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;

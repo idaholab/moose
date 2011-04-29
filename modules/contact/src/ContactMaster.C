@@ -31,6 +31,7 @@ InputParameters validParams<ContactMaster>()
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
   params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   return params;
 }
 
@@ -39,6 +40,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
   _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
+  _penalty(getParam<Real>("penalty")),
   _residual_copy(_sys.residualGhosted()),
   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
   _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
@@ -67,7 +69,7 @@ ContactMaster::addPoints()
     if(!pinfo)
       continue;
 
-    const Node * node = pinfo->_node;
+//     const Node * node = pinfo->_node;
 
     if(_sys.currentlyComputingJacobian())
     {/*
@@ -108,29 +110,31 @@ ContactMaster::computeQpResidual()
 //  std::cout<<node->id()<<": "<<_residual_copy(dof_number)<<std::endl;
   Real resid(0);
   RealVectorValue res_vec;
+  // Build up residual vector
+  for(int i=0; i<_dim; ++i)
+  {
+    long int dof_number = node->dof_number(0, _vars(i), 0);
+    res_vec(i) = _residual_copy(dof_number);
+  }
+  Real constraint_mag(0);
+  RealVectorValue distance_vec;
   switch(_model)
   {
   case CM_FRICTIONLESS:
-    // Build up residual vector
-    for(unsigned int i=0; i<_dim; i++)
-    {
-      long int dof_number = node->dof_number(0, _vars(i), 0);
-      res_vec(i) = _residual_copy(dof_number);
-    }
 
     resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
     break;
 
   case CM_GLUED:
   case CM_TIED:
-    resid = _residual_copy(node->dof_number(0, _component, 0));
+    resid = res_vec(_component);
+    distance_vec = _mesh.node(node->id()) - pinfo->_closest_point;
+    constraint_mag = distance_vec(_component);
     break;
 
   default:
     mooseError("Invalid or unavailable contact model");
   }
-
-//  std::cout<<node->id()<<":: "<<res_mag<<std::endl;
 
   return _phi[_i][_qp] * resid;
 }
@@ -138,6 +142,9 @@ ContactMaster::computeQpResidual()
 Real
 ContactMaster::computeQpJacobian()
 {
+
+//   return _test[_i][_qp] * _penalty * _phi[_j][_qp];
+
   return 0;
 /*
   if(_i != _j)
