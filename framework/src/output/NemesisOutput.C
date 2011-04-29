@@ -57,8 +57,12 @@ NemesisOutput::output(const std::string & file_base, Real time)
 {
   if (_out == NULL)
   {
+#if LIBMESH_ENABLE_PARMESH    
     _out = new Nemesis_IO(libmesh_cast_ref<ParallelMesh&>(_es.get_mesh()));
     _file_num++;
+#else
+   mooseError("Nemesis not supported when compiled without --enable-parmesh");                      
+#endif                          
   }
 
   _num++;
