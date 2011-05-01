@@ -78,6 +78,8 @@ class TestHarness:
             os.chdir(saved_cwd)
             sys.path.pop()
 
+    # Wait for all tests to finish
+    self.runner.join()
     self.cleanupAndExit()
 
   # Create the command line string to run
