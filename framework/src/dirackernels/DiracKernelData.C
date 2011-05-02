@@ -42,7 +42,7 @@ DiracKernelData::init()
 }
 
 void
-DiracKernelData::reinit(const NumericVector<Number>& soln, const Elem * elem)
+DiracKernelData::reinit(const NumericVector<Number>& /*soln*/, const Elem * /*elem*/)
 {
 //  QuadraturePointData::reinit(soln, elem);
 }

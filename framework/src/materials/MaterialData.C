@@ -66,7 +66,7 @@ MaterialData::size(unsigned int n_qpoints)
 }
 
 void
-MaterialData::initStatefulProps(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::initStatefulProps(std::vector<Material *> & mats, unsigned int n_qpoints, const Elem & /*elem*/, unsigned int /*side = 0*/)
 {
   size(n_qpoints);
   for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)

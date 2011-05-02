@@ -37,7 +37,11 @@ ElementDeleter::ElementDeleter(const std::string & name, InputParameters paramet
 {}
 
 void
-ElementDeleter::modifyMesh(Mesh & mesh)
+ElementDeleter::modifyMesh(Mesh & 
+#if 0
+mesh
+#endif
+)
 {
 #if 0
   // TODO: Move the initialization of the function to the contructor - this will require having
