@@ -128,7 +128,9 @@ PenetrationThread::operator() (const NodeIdRange & range)
       }
 
       // See if the same element still contains this point
-      if(elem->contains_point(node))
+      // The default tolerance is TOLERANCE, 1e-6.  Bump that up to something more
+      // forgiving of slight movement of slave nodes.
+      if(elem->contains_point(node, 100*TOLERANCE))
       {
         Point contact_ref = info->_closest_point_ref;
         Point contact_phys;
@@ -144,7 +146,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
         info->_distance = distance;
         info->_side_phi = side_phi;
 
-        mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
+//         mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
 
         info->_closest_point = contact_phys;
 
@@ -251,6 +253,9 @@ PenetrationThread::operator() (const NodeIdRange & range)
         }
       }
     }
+
+
+    // if we didn't find a match and there are two or more candidates...
     if (!info && p_info.size() > 1)
     {
       // No face is clearly above/below this node.
