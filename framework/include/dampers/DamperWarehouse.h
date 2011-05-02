@@ -21,11 +21,6 @@
 #include <map>
 #include <set>
 
-/**
- * Typedef to hide implementation details
- */
-typedef std::vector<Damper *>::iterator DamperIterator;
-
 
 /**
  * Holds dampers and provides some services
@@ -36,8 +31,7 @@ public:
   DamperWarehouse();
   virtual ~DamperWarehouse();
 
-  DamperIterator dampersBegin();
-  DamperIterator dampersEnd();
+  const std::vector<Damper *> & all() { return _dampers; }
 
   /**
    * Adds a damper

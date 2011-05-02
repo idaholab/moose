@@ -794,11 +794,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number>& update)
   // Default to no damping
   Real damping = 1.0;
 
-  DamperIterator damper_begin = _dampers[0].dampersBegin();
-  DamperIterator damper_end = _dampers[0].dampersEnd();
-  DamperIterator damper_it = damper_begin;
-
-  if(damper_begin != damper_end)
+  if(_dampers[0].all().size() > 0)
   {
     *_increment_vec = update;
     ComputeDampingThread cid(_problem, *this);

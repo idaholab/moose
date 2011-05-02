@@ -42,11 +42,9 @@ ComputeDampingThread::onElement(const Elem *elem)
   _problem.reinitElem(elem, _tid);
   _nl.reinitDampers(_tid);
 
-  DamperIterator damper_begin = _nl._dampers[_tid].dampersBegin();
-  DamperIterator damper_end = _nl._dampers[_tid].dampersEnd();
-  DamperIterator damper_it = damper_begin;
-
-  for(damper_it=damper_begin;damper_it!=damper_end;++damper_it)
+  for(std::vector<Damper *>::const_iterator damper_it = _nl._dampers[_tid].all().begin();
+      damper_it != _nl._dampers[_tid].all().end();
+      ++damper_it)
   {
     Real cur_damping = (*damper_it)->computeDamping();
     if(cur_damping < _damping)

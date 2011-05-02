@@ -21,8 +21,7 @@ DamperWarehouse::DamperWarehouse()
 
 DamperWarehouse::~DamperWarehouse()
 {
-  DamperIterator j;
-  for (j=_dampers.begin(); j!=_dampers.end(); ++j)
+  for (std::vector<Damper *>::const_iterator j = _dampers.begin(); j != _dampers.end(); ++j)
     delete *j;
 }
 
@@ -30,16 +29,4 @@ void
 DamperWarehouse::addDamper(Damper *damper)
 {
   _dampers.push_back(damper);
-}
-
-DamperIterator
-DamperWarehouse::dampersBegin()
-{
-  return _dampers.begin();
-}
-
-DamperIterator
-DamperWarehouse::dampersEnd()
-{
-  return _dampers.end();
 }
