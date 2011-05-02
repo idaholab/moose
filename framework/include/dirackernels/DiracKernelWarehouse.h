@@ -36,10 +36,14 @@ public:
   DiracKernelIterator diracKernelsBegin();
   DiracKernelIterator diracKernelsEnd();
 
+  /**
+   * Adds a dirac kernel
+   * @param DiracKernel Kernel being added
+   */
   void addDiracKernel(DiracKernel *DiracKernel);
     
 protected:
-  std::vector<DiracKernel *> _dirac_kernels;
+  std::vector<DiracKernel *> _dirac_kernels;            ///< All dirac kernels
 };
 
 #endif // DIRACKERNELWAREHOUSE_H

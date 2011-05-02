@@ -19,12 +19,19 @@
 
 #include "libmesh_common.h"
 
+/// Execution flags - when is the oject executed/evaluated
 enum ExecFlagType {
-  EXEC_RESIDUAL,
-  EXEC_JACOBIAN,
-  EXEC_TIMESTEP
+  EXEC_RESIDUAL,                /// Object is evaluated in every residual computation
+  EXEC_JACOBIAN,                /// Object is evaluated in every jacobian computation
+  EXEC_TIMESTEP                 /// Object is evaluated every time step
 };
 
+
+/**
+ * The class for storing warehouses that holds objects that are being evaluated at different times
+ *
+ * Currently we can do only Post-processors and AuxKernels, but this object will help to extend the other subsystems.
+ */
 template<typename T>
 class ExecStore
 {
@@ -36,6 +43,7 @@ public:
   {
   }
 
+  /// Parenthesis operator for accessing the warehouses for different times
   std::vector<T> &
   operator()(ExecFlagType type)
   {
@@ -49,12 +57,10 @@ public:
     }
   }
 
-  void resize(int size);
-
 protected:
-  std::vector<T> _obj_res;                      // executed every residual evaluation
-  std::vector<T> _obj_jac;                      // executed every jacobian evaluation
-  std::vector<T> _obj_timestep;                 // executed at the end of every time step
+  std::vector<T> _obj_res;                      ///< executed every residual evaluation
+  std::vector<T> _obj_jac;                      ///< executed every jacobian evaluation
+  std::vector<T> _obj_timestep;                 ///< executed at the end of every time step
 };
 
 #endif /* EXECSTORE_H */

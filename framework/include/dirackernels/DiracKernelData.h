@@ -30,8 +30,10 @@ namespace libMesh
 //Forward Declarations
 class ArbitraryQuadrature;
 
-
-class DiracKernelData //: public QuadraturePointData
+/**
+ * TODO
+ */
+class DiracKernelData
 {
 public:
   DiracKernelData();

@@ -33,13 +33,31 @@ public:
 
   virtual ~MooseObject() { }
 
+  /**
+   * Get the name of the object
+   * @return The name of the object
+   */
   const std::string & name() { return _name; }
 
+  /**
+   * Get the parameters of the object
+   * @return The parameters of the object
+   */
   InputParameters & parameters() { return _pars; }
 
+  /**
+   * Retrieve a parameter for the object
+   * @param name The name of the parameter
+   * @return The value of the parameter
+   */
   template <typename T>
   const T & getParam(const std::string & name) { return _pars.get<T>(name); }
 
+  /**
+   * Retrieve a parameter for the object (const version)
+   * @param name The name of the parameter
+   * @return The value of the parameter
+   */
   template <typename T>
   const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
 
@@ -58,13 +76,15 @@ public:
   /// Gets called when the subdomain changes (ie in a jacobian or residual loop) and before this object is asked to do its job
   virtual void subdomainSetup() {}
 
+  /// Get the execution falg for the object
   virtual ExecFlagType execFlag() { return _exec_flags; }
+  /// Set the execution flag for the object
   virtual void execFlag(ExecFlagType type) { _exec_flags = type; }
 
 protected:
-  std::string _name;
-  InputParameters _pars;
-  ExecFlagType _exec_flags;
+  std::string _name;                            ///< the name of the object
+  InputParameters _pars;                        ///< parameters
+  ExecFlagType _exec_flags;                     ///< execution flag (when is the object executed/evaluated)
 };
 
 #endif /* MOOSEOBJECT_H*/

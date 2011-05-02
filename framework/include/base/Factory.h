@@ -84,10 +84,21 @@ MooseObject * buildObject(const std::string & name, InputParameters parameters)
 class Factory
 {
 public:
+  /**
+   * Get the instance of the factory
+   * @return Pointer to the factory instance
+   */
   static Factory *instance();
 
+  /**
+   * Release the memory allocated by this factory
+   */
   static void release();
 
+  /**
+   * Register a new object
+   * @param name Name of the object to register
+   */
   template<typename T>
   void reg(const std::string & name)
   {
@@ -100,8 +111,20 @@ public:
       mooseError("Object '" + name + "' already registered.");
   }
 
+  /**
+   * Get valid parameters for the object
+   * @param name Name of the object whose parameter we are requesting
+   * @return Parameters of the object
+   */
   InputParameters getValidParams(const std::string & name);
 
+  /**
+   * Build an object (must be registered)
+   * @param obj_name Type of the object being constructed
+   * @param name Name for the object
+   * @param parameters Parameters this object should have
+   * @return The created object
+   */
   virtual MooseObject *create(const std::string & obj_name, const std::string & name, InputParameters parameters);
 
   registeredMooseObjectIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }

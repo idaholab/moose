@@ -18,12 +18,24 @@
 #include "MooseVariable.h"
 #include "InputParameters.h"
 
-
+/**
+ * Interface for objects that needs coupling capabilities
+ *
+ */
 class Coupleable
 {
 public:
+  /**
+   * Constructing the object
+   * @param parameters Parameters that come from constructing the object
+   * @param nodal true if we need to couple with nodal values, otherwise false
+   */
   Coupleable(InputParameters & parameters, bool nodal);
 
+  /**
+   * Get the list of coupled variables
+   * @return The list of coupled variables
+   */
   std::map<std::string, std::vector<MooseVariable *> > & getCoupledVars() { return _coupled_vars; }
 
 protected:
@@ -34,6 +46,11 @@ protected:
    */
   virtual bool isCoupled(const std::string & var_name, unsigned int i = 0);
 
+  /**
+   * Number of coupled components
+   * @param var_name Name of the variable
+   * @return number of components this variable has (usually 1)
+   */
   unsigned int coupledComponents(const std::string & var_name);
 
   virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
@@ -56,8 +73,8 @@ private:
   MooseVariable *getVar(const std::string & var_name, unsigned int comp);
 
 protected:
-  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;
-  bool _nodal;
+  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;   ///< Coupled vars whose values we provide
+  bool _nodal;                                                          ///< true if we provide coupling to nodal values
 };
 
 #endif /* COUPLEABLE_H */

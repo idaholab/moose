@@ -20,6 +20,10 @@
 
 class Problem;
 
+/**
+ * Interface for objects that needs transient capabilities
+ *
+ */
 class TransientInterface
 {
 public:
@@ -30,11 +34,11 @@ private:
   Problem & _ti_problem;
 
 protected:
-  Real & _t;
-  int & _t_step;
-  Real & _dt;
-  Real & _dt_old;
-  std::vector<Real> & _time_weight;
+  Real & _t;                                            ///< Time
+  int & _t_step;                                        ///< The number of the time step
+  Real & _dt;                                           ///< Time step size
+  Real & _dt_old;                                       ///< Size of the old time step
+  std::vector<Real> & _time_weight;                     ///< Time weights for time-stepping schemes (like BDF2, ...)
 
   // NOTE: dunno if it is set properly in time of instantiation (might be a source of bugs)
   bool _is_transient;

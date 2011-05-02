@@ -18,6 +18,12 @@
 #include "libmesh.h"
 #include "getpot.h"
 
+/**
+ * Initialization object for any MOOSE-based application
+ *
+ * This object must be created in the main() of any MOOSE-based application so
+ * everything is properly initialized and finalized.
+ */
 class MooseInit : public LibMeshInit
 {
 public:

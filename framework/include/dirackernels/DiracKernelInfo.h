@@ -29,6 +29,9 @@ namespace libMesh
   template <class T> class NumericVector;
 }
 
+/**
+ * TODO
+ */
 class DiracKernelInfo
 {
 public:
@@ -36,6 +39,11 @@ public:
   virtual ~DiracKernelInfo();
 
 public:
+  /**
+   * Adds a point source
+   * @param elem Element
+   * @param p Point
+   */
   void addPoint(const Elem * elem, Point p);
 
   /**
