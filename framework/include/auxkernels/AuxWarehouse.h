@@ -71,12 +71,6 @@ public:
   void setActiveElementKernels(std::list<AuxKernel *> &auxs);
 
   /**
-   * Adds a boundary condition
-   * @param aux Boundary condition being added
-   */
-  void addBC(AuxKernel *aux);
-
-  /**
    * Adds a boundary condition aux kernel
    * @param boundary_id Boundary ID this kernel works on
    * @param aux BC kernel being added
@@ -91,15 +85,14 @@ public:
   void addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids);
 
 protected:
-  std::vector<AuxKernel *> _active_nodal_aux_kernels;
-  std::vector<AuxKernel *> _active_element_aux_kernels;
+  std::vector<AuxKernel *> _all_aux_kernels;                                                    /// all aux kernels (kernels and BCs)
 
-  std::vector<AuxKernel *> _aux_bcs;
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;
-  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
+  std::vector<AuxKernel *> _active_nodal_aux_kernels;                                           /// nodal kernels active everywhere
+  std::vector<AuxKernel *> _active_element_aux_kernels;                                         /// elemental kernels active everywhere
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;            /// nodal kernels active on a block
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;          /// elemental kernels active on a block
 
-  std::vector<AuxKernel *> _all_aux_kernels;                                                    /// all aux kernels
+  std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;                                /// aux boundary conditions
 };
 
 #endif // AUXWAREHOUSE_H

@@ -164,7 +164,6 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
       mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
 
       _auxs(bc->execFlag())[tid].addActiveBC(boundaries[i], bc);
-      _auxs(bc->execFlag())[tid].addBC(bc);
 
       _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
     }

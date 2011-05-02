@@ -20,13 +20,7 @@ AuxWarehouse::AuxWarehouse()
 
 AuxWarehouse::~AuxWarehouse()
 {
-  for(AuxKernelIterator j=_active_nodal_aux_kernels.begin(); j!=_active_nodal_aux_kernels.end(); ++j)
-    delete *j;
-
-  for(AuxKernelIterator j=_active_element_aux_kernels.begin(); j!=_active_element_aux_kernels.end(); ++j)
-    delete *j;
-
-  for(AuxKernelIterator j=_aux_bcs.begin(); j!=_aux_bcs.end(); ++j)
+  for(AuxKernelIterator j=_all_aux_kernels.begin(); j!=_all_aux_kernels.end(); ++j)
     delete *j;
 }
 
@@ -140,13 +134,6 @@ void
 AuxWarehouse::setActiveElementKernels(std::list<AuxKernel *> &auxs)
 {
   _active_element_aux_kernels.assign(auxs.begin(), auxs.end());
-}
-
-void
-AuxWarehouse::addBC(AuxKernel *aux)
-{
-  _all_aux_kernels.push_back(aux);
-  _aux_bcs.push_back(aux);
 }
 
 void
