@@ -1214,8 +1214,7 @@ MProblem::checkProblemIntegrity()
   // Check materials
   {
 #ifdef LIBMESH_ENABLE_AMR
-    bool adaptivity = _adaptivity.isOn();
-    if (_material_props.hasStatefulProperties() && adaptivity)
+    if (_material_props.hasStatefulProperties() && _adaptivity.isOn())
       mooseError("Cannot use Material classes with stateful properties while utilizing adaptivity!");
 #endif
 
@@ -1225,16 +1224,16 @@ MProblem::checkProblemIntegrity()
      * have a material specified.
      */
     bool check_material_coverage = false;
-    for (MaterialIterator i = _materials[0].activeMaterialsBegin(); i != _materials[0].activeMaterialsEnd(); ++i)
+    for (std::set<int>::const_iterator i = _materials[0].blocks().begin(); i != _materials[0].blocks().end(); ++i)
     {
-      if (mesh_subdomains.find(i->first) == mesh_subdomains.end())
+      if (mesh_subdomains.find(*i) == mesh_subdomains.end())
       {
         std::stringstream oss;
-        oss << "Material block \"" << i->first << "\" specified in the input file does not exist";
+        oss << "Material block \"" << *i << "\" specified in the input file does not exist";
         mooseError (oss.str());
       }
 
-      local_mesh_subs.erase(i->first);
+      local_mesh_subs.erase(*i);
       check_material_coverage = true;
     }
 

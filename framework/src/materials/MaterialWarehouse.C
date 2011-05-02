@@ -23,15 +23,15 @@ MaterialWarehouse::MaterialWarehouse()
 
 MaterialWarehouse::~MaterialWarehouse()
 {
-  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       delete (*k);
 
-  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       delete (*k);
 
-  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       delete (*k);
 }
@@ -40,15 +40,15 @@ MaterialWarehouse::~MaterialWarehouse()
 void
 MaterialWarehouse::initialSetup()
 {
-  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->initialSetup();
 
-  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->initialSetup();
 
-  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->initialSetup();
 }
@@ -56,15 +56,15 @@ MaterialWarehouse::initialSetup()
 void
 MaterialWarehouse::timestepSetup()
 {
-  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->timestepSetup();
 
-  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->timestepSetup();
 
-  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->timestepSetup();
 }
@@ -72,15 +72,15 @@ MaterialWarehouse::timestepSetup()
 void
 MaterialWarehouse::residualSetup()
 {
-  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->residualSetup();
 
-  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->residualSetup();
 
-  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->residualSetup();
 }
@@ -88,15 +88,15 @@ MaterialWarehouse::residualSetup()
 void
 MaterialWarehouse::jacobianSetup()
 {
-  for (MaterialIterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->jacobianSetup();
 
-  for (MaterialIterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->jacobianSetup();
 
-  for (MaterialIterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->jacobianSetup();
 }
@@ -122,7 +122,7 @@ MaterialWarehouse::hasNeighborMaterials(unsigned int boundary_id)
 std::vector<Material *> &
 MaterialWarehouse::getMaterials(unsigned int block_id)
 {
-  MaterialIterator mat_iter = _active_materials.find(block_id);
+  std::map<int, std::vector<Material *> >::iterator mat_iter = _active_materials.find(block_id);
   if (unlikely(mat_iter == _active_materials.end()))
   {
     std::stringstream oss;
@@ -135,7 +135,7 @@ MaterialWarehouse::getMaterials(unsigned int block_id)
 std::vector<Material *> &
 MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
 {
-  MaterialIterator mat_iter = _active_boundary_materials.find(boundary_id);
+  std::map<int, std::vector<Material *> >::iterator mat_iter = _active_boundary_materials.find(boundary_id);
   if (unlikely(mat_iter == _active_boundary_materials.end()))
   {
     std::stringstream oss;
@@ -148,7 +148,7 @@ MaterialWarehouse::getBoundaryMaterials(unsigned int boundary_id)
 std::vector<Material *> &
 MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
 {
-  MaterialIterator mat_iter = _active_neighbor_materials.find(boundary_id);
+  std::map<int, std::vector<Material *> >::iterator mat_iter = _active_neighbor_materials.find(boundary_id);
   if (unlikely(mat_iter == _active_neighbor_materials.end()))
   {
     std::stringstream oss;
@@ -160,7 +160,7 @@ MaterialWarehouse::getNeighborMaterials(unsigned int boundary_id)
 
 void MaterialWarehouse::updateMaterialDataState()
 {
-  for (MaterialIterator it = _active_materials.begin(); it != _active_materials.end(); ++it)
+  for (std::map<int, std::vector<Material *> >::iterator it = _active_materials.begin(); it != _active_materials.end(); ++it)
   {
     for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
     {
@@ -169,7 +169,7 @@ void MaterialWarehouse::updateMaterialDataState()
     }
   }
 
-  for (MaterialIterator it = _active_boundary_materials.begin(); it != _active_boundary_materials.end(); ++it)
+  for (std::map<int, std::vector<Material *> >::iterator it = _active_boundary_materials.begin(); it != _active_boundary_materials.end(); ++it)
   {
     for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
     {
@@ -182,16 +182,19 @@ void MaterialWarehouse::updateMaterialDataState()
 void
 MaterialWarehouse::addMaterial(int block_id, Material *material)
 {
+  _blocks.insert(block_id);
   _active_materials[block_id].push_back(material);
 }
 
 void MaterialWarehouse::addBoundaryMaterial(int block_id, Material *material)
 {
+  _blocks.insert(block_id);
   _active_boundary_materials[block_id].push_back(material);
 }
 
 void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
 {
+  _blocks.insert(block_id);
   _active_neighbor_materials[block_id].push_back(material);
 }
 
