@@ -39,10 +39,6 @@ class RunParallel():
 
     self.jobs[job_index] = (p, command, test, clock() + test[MAX_TIME])
 
-    #p.wait()
-    #self.returnToTestHarness(job_index)
-
-
   ## Return control the the test harness by finalizing the test output and calling the callback
   def returnToTestHarness(self, job_index):
     (p, command, test, time) = self.jobs[job_index]
@@ -76,11 +72,6 @@ class RunParallel():
         job_index += 1
 
       sleep(0.05) # sleep for 50ms
-
-
-  ## Check to make sure none of the running processes are out of time
-  #def checkTimes(self):
-    #pass
 
   ## Wait until all processes are done, then return
   def join(self):

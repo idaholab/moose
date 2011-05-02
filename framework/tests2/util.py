@@ -9,10 +9,18 @@ def runCommand(cmd):
     output = 'ERROR: ' + output
   return output
 
-## print a colorified test result
-def printResult(test_name, result, options):
+## print an optionally colorified test result
+#
+# The test will not be colored if
+# 1) options.colored is False,
+# 2) the environment variable BITTEN_NOCOLOR is true, or
+# 3) the color parameter is False.
+def printResult(test_name, result, options, color=True):
   cnt = 79 - len(test_name + result)
-  print test_name + '.'*cnt + ' ' + colorify(result, options)
+  if color:
+    return test_name + '.'*cnt + ' ' + colorify(result, options)
+  else:
+    return test_name + '.'*cnt + ' ' + result
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.

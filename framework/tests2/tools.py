@@ -1,6 +1,7 @@
-import os, sys, re, inspect, types
+import os, sys, re, inspect, types, errno
 from socket import gethostname
-from optparse import OptionParser
+from optparse import OptionParser, OptionGroup
+#from optparse import OptionG
 from timeit import default_timer as clock
 
 from options import *
@@ -31,12 +32,15 @@ def runTests(argv, app_name):
 class TestHarness:
   
   def __init__(self, argv, app_name):
-    self.initialize(argv, app_name)
     self.test_table = []
 
     self.num_passed = 0
     self.num_failed = 0
     self.num_skipped = 0
+
+    self.file = None
+
+    self.initialize(argv, app_name)
 
   def findAndRunTests(self):
     self.start_time = clock()
@@ -144,7 +148,7 @@ class TestHarness:
   # OK means it passed, skipped means skipped, anything else means it failed
   def handleTestResult(self, test, output, result):
     self.test_table.append( (test, output, result) )
-    printResult( test[TEST_NAME], result, self.options)
+    print printResult(test[TEST_NAME], result, self.options)
 
     if result == 'OK':
       self.num_passed += 1
@@ -153,7 +157,30 @@ class TestHarness:
     else:
       self.num_failed += 1
 
+    if self.options.verbose or ('FAILED' in result and not self.options.quiet):
+      print output
+
+    if result != 'skipped':
+      if self.options.file:
+        self.file.write(printResult( test[TEST_NAME], result, self.options, color=False) + '\n')
+        self.file.write(output)
+
+      if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result == 'OK'):
+        fname = os.path.join(self.output_dir, test[TEST_NAME] + '.' + result[:6] + '.txt')
+        f = open(fname, 'w')
+        f.write(printResult( test[TEST_NAME], result, self.options, color=False) + '\n')
+        f.write(output)
+        f.close()
+
+  # Print final results, close open files, and exit with the correct error code
   def cleanupAndExit(self):
+    # Print the results table again if a bunch of output was spewed to the screen between
+    # tests as they were running
+    if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
+      print '\n\nFinal Test Results:\n' + ('-' * 80)
+      for (test, output, result) in self.test_table:
+        print printResult(test[TEST_NAME], result, self.options)
+
     time = clock() - self.start_time
     print '-' * 80
     print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
@@ -162,6 +189,9 @@ class TestHarness:
     summary += ', <b>%d skipped</b>, '
     summary += '<r>%d FAILED</r>' if self.num_failed else '<b>%d failed</b>'
     print colorify( summary % (self.num_passed, self.num_skipped, self.num_failed), self.options, html=True )
+
+    if self.file:
+      self.file.close()
 
     if self.num_failed == 0:
       sys.exit(0)
@@ -187,15 +217,43 @@ class TestHarness:
     # Emulate the standard Nose RegEx for consistency
     self.test_match = re.compile(r"(?:^|\b|[_-])[Tt]est")
 
+    # Save the output dir since the current working directory changes during tests
+    self.output_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), self.options.output_dir)
+
+    # Create the output dir if they ask for it. It is easier to ask for forgiveness than permission
+    if self.options.output_dir:
+      try:
+        os.makedirs(self.output_dir)
+      except OSError as ex:
+        if ex.errno == errno.EEXIST: pass
+        else: raise
+
+    # Open the file to redirect output to and set the quiet option for file output
+    if self.options.file:
+      self.file = open(os.path.join(self.output_dir, self.options.file), 'w')
+    if self.options.file or self.options.fail_files or self.options.sep_files:
+      self.options.quiet = True
+
+
   ## Parse command line options and assign them to self.options
   def parseCLArgs(self, argv):
     parser = OptionParser()
-    parser.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show more output [default=FALSE]')
     parser.add_option('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
     parser.add_option('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
     parser.add_option('--dev', action='store_const', dest='method', const='dev', help='test the app_name-dev binary')
     parser.add_option('-j', '--jobs', action='store', type='int', dest='jobs', default=1, help='run test binaries in parallel')
     parser.add_option("-c", "--no-color", action="store_false", dest="colored", default=True, help="Do not show colored output")
+
+    outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
+    outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
+    outputgroup.add_option('-q', '--quiet', action='store_true', dest='quiet', default=False, help='only show the result of every test, don\'t show test output even if it fails')
+    outputgroup.add_option('-o', '--output-dir', action='store', dest='output_dir', default='', metavar='DIR', help='Save all output files in the directory, and create it if necessary')
+    outputgroup.add_option('-f', '--file', action='store', dest='file', default=None, metavar='FILE', help='Write verbose output of each test to FILE and quiet output to terminal')
+    outputgroup.add_option('-s', '--sep-files', action='store_true', dest='sep_files', default=False, metavar='FILE', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
+    outputgroup.add_option('--sep-files-ok', action='store_true', dest='ok_files', default=False, metavar='FILE', help='Write the output of each passed test to a separate file')
+    outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
+
+    parser.add_option_group(outputgroup)
 
     (self.options, self.tests) = parser.parse_args(argv[1:])
     self.checkCLArgs()
@@ -203,7 +261,9 @@ class TestHarness:
   ## Called after options are parsed from the command line
   # Exit if options don't make any sense, print warnings if they are merely weird
   def checkCLArgs(self):
-    pass
+    opts = self.options
+    if opts.output_dir and not (opts.file or opts.sep_files or opts.fail_files or opts.ok_files):
+      print 'WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option'
 
 
 # Notes:
