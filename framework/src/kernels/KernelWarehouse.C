@@ -20,35 +20,35 @@ KernelWarehouse::KernelWarehouse()
 
 KernelWarehouse::~KernelWarehouse()
 {
-  for (KernelIterator i=_all_kernels.begin(); i!=_all_kernels.end(); ++i)
+  for (std::vector<Kernel *>::const_iterator i = _all_kernels.begin(); i != _all_kernels.end(); ++i)
     delete *i;
 }
 
 void
 KernelWarehouse::initialSetup()
 {
-  for(KernelIterator i=allKernelsBegin(); i!=allKernelsEnd(); ++i)
+  for (std::vector<Kernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->initialSetup();
 }
 
 void
 KernelWarehouse::timestepSetup()
 {
-  for(KernelIterator i=allKernelsBegin(); i!=allKernelsEnd(); ++i)
+  for (std::vector<Kernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->timestepSetup();
 }
 
 void
 KernelWarehouse::residualSetup()
 {
-  for(KernelIterator i=allKernelsBegin(); i!=allKernelsEnd(); ++i)
+  for (std::vector<Kernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->residualSetup();
 }
 
 void
 KernelWarehouse::jacobianSetup()
 {
-  for(KernelIterator i=allKernelsBegin(); i!=allKernelsEnd(); ++i)
+  for (std::vector<Kernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->jacobianSetup();
 }
 
@@ -71,41 +71,17 @@ KernelWarehouse::addKernel(Kernel *kernel, const std::set<subdomain_id_type> & b
   }
 }
 
-KernelIterator
-KernelWarehouse::allKernelsBegin()
-{
-  return _all_kernels.begin();
-}
-
-KernelIterator
-KernelWarehouse::allKernelsEnd()
-{
-  return _all_kernels.end();
-}
-
-KernelIterator
-KernelWarehouse::activeKernelsBegin()
-{
-  return _active_kernels.begin();
-}
-
-KernelIterator
-KernelWarehouse::activeKernelsEnd()
-{
-  return _active_kernels.end();
-}
-
 void
 KernelWarehouse::updateActiveKernels(Real t, Real dt, unsigned int subdomain_id)
 {
   _active_kernels.clear();
 
   // add kernels that live everywhere
-  for (KernelIterator it = _global_kernels.begin(); it != _global_kernels.end(); ++it)
+  for (std::vector<Kernel *>::const_iterator it = _global_kernels.begin(); it != _global_kernels.end(); ++it)
     if((*it)->startTime() <= t + (1e-6 * dt) && (*it)->stopTime() >= t + (1e-6 * dt))
       _active_kernels.push_back(*it);
   // then kernels that live on a specified block
-  for (KernelIterator it = _block_kernels[subdomain_id].begin(); it != _block_kernels[subdomain_id].end(); ++it)
+  for (std::vector<Kernel *>::const_iterator it = _block_kernels[subdomain_id].begin(); it != _block_kernels[subdomain_id].end(); ++it)
     if((*it)->startTime() <= t + (1e-6 * dt) && (*it)->stopTime() >= t + (1e-6 * dt))
       _active_kernels.push_back(*it);
 }

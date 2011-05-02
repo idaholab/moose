@@ -57,10 +57,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
   for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
     (*stabilizer_it)->computeTestFunctions();
 
-  KernelIterator kernel_begin = _sys._kernels[_tid].activeKernelsBegin();
-  KernelIterator kernel_end = _sys._kernels[_tid].activeKernelsEnd();
-  KernelIterator kernel_it = kernel_begin;
-  for (kernel_it = kernel_begin; kernel_it != kernel_end; ++kernel_it)
+  for (std::vector<Kernel *>::const_iterator kernel_it = _sys._kernels[_tid].active().begin(); kernel_it != _sys._kernels[_tid].active().end(); ++kernel_it)
   {
     (*kernel_it)->computeJacobian(0, 0);
     _vars.insert(&(*kernel_it)->variable());

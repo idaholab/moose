@@ -420,9 +420,7 @@ void
 NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 {
   //Global Kernels
-  KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
-  KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
-  for(KernelIterator kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+  for(std::vector<Kernel *>::const_iterator kernel_it = _kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
     (*kernel_it)->subdomainSetup();
 
   //Stabilizers
@@ -699,11 +697,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
           (*stabilizer_it)->computeTestFunctions();
 
         //Kernels
-        KernelIterator kernel_begin = _kernels[tid].activeKernelsBegin();
-        KernelIterator kernel_end = _kernels[tid].activeKernelsEnd();
-        KernelIterator kernel_it = kernel_begin;
-
-        for(kernel_it=kernel_begin;kernel_it!=kernel_end;kernel_it++)
+        for(std::vector<Kernel *>::const_iterator kernel_it=_kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
         {
           Kernel * kernel = *kernel_it;
 
@@ -1003,7 +997,7 @@ bool
 NonlinearSystem::containsTimeKernel()
 {
   bool time_kernels = false;
-  for (KernelIterator it = _kernels[0].allKernelsBegin(); it != _kernels[0].allKernelsEnd(); ++it)
+  for (std::vector<Kernel *>::const_iterator it = _kernels[0].all().begin(); it != _kernels[0].all().end(); ++it)
     if (dynamic_cast<TimeKernel *>(*it) != NULL)
       time_kernels = true;
 

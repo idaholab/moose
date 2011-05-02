@@ -23,11 +23,6 @@
 
 
 /**
- * Typedef to hide implementation details
- */
-typedef std::vector<Kernel *>::iterator KernelIterator;
-
-/**
  * Holds kernels and provides some services
  */
 class KernelWarehouse
@@ -42,14 +37,31 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  KernelIterator allKernelsBegin();
-  KernelIterator allKernelsEnd();
+  /**
+   * Get list of all kernels
+   * @return The list of all active kernels
+   */
+  const std::vector<Kernel *> & all() { return _all_kernels; }
 
-  KernelIterator activeKernelsBegin();
-  KernelIterator activeKernelsEnd();
+  /**
+   * Get the list of all active kernels
+   * @return The list of all active kernels
+   */
+  const std::vector<Kernel *> & active() { return _active_kernels; }
   
+  /**
+   * Add a kernels
+   * @param kernel Kernel being added
+   * @param block_ids Set of active domain where the kernel is defined
+   */
   void addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids);
 
+  /**
+   * Update the list of active kernels
+   * @param t Time
+   * @param dt Time step size
+   * @param subdomain_id Domain ID
+   */
   void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
 
  /**
