@@ -115,6 +115,10 @@ ExodusOutput::outputPps(const std::string & /*file_base*/, const FormattedTable 
 
   if (_out == NULL)
   {
+    // FIXME: If _out==NULL and we create it here and immediately call
+    // write_global_data() it will fail because it's not initialized.
+    // Therefore this should probably be an error, and the check could
+    // go at the beginning of the function.
     _out = new ExodusII_IO(_es.get_mesh());
   }
 
