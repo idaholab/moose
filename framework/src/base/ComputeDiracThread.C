@@ -60,11 +60,9 @@ ComputeDiracThread::onElement(const Elem * elem)
 
   if(has_dirac_kernels_on_elem)
   {
-    DiracKernelIterator dirac_kernel_begin = _sys._dirac_kernels[_tid].diracKernelsBegin();
-    DiracKernelIterator dirac_kernel_end = _sys._dirac_kernels[_tid].diracKernelsEnd();
-    DiracKernelIterator dirac_kernel_it = dirac_kernel_begin;
-
-    for(dirac_kernel_it=dirac_kernel_begin;dirac_kernel_it!=dirac_kernel_end;++dirac_kernel_it)
+    for(std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys._dirac_kernels[_tid].all().begin();
+        dirac_kernel_it != _sys._dirac_kernels[_tid].all().end();
+        ++dirac_kernel_it)
     {
       DiracKernel * dirac = *dirac_kernel_it;
     

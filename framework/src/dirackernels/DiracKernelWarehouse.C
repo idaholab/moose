@@ -25,18 +25,6 @@ DiracKernelWarehouse::~DiracKernelWarehouse()
     delete *i;
 }
 
-DiracKernelIterator
-DiracKernelWarehouse::diracKernelsBegin()
-{
-  return _dirac_kernels.begin();
-}
-
-DiracKernelIterator
-DiracKernelWarehouse::diracKernelsEnd()
-{
-  return _dirac_kernels.end();
-}
-
 void
 DiracKernelWarehouse::addDiracKernel(DiracKernel *DiracKernel)
 {

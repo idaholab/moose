@@ -820,17 +820,15 @@ NonlinearSystem::computeDiracContributions(NumericVector<Number> * residual,
   std::set<const Elem *> dirac_elements;
 
   // TODO: Need a threading fix... but it's complicated!
-  DiracKernelIterator dirac_kernel_begin = _dirac_kernels[0].diracKernelsBegin();
-  DiracKernelIterator dirac_kernel_end = _dirac_kernels[0].diracKernelsEnd();
-  DiracKernelIterator dirac_kernel_it = dirac_kernel_begin;
-
-  for(dirac_kernel_it=dirac_kernel_begin;dirac_kernel_it!=dirac_kernel_end;++dirac_kernel_it)
+  for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _dirac_kernels[0].all().begin();
+      dirac_kernel_it != _dirac_kernels[0].all().end();
+      ++dirac_kernel_it)
   {
     (*dirac_kernel_it)->clearPoints();
     (*dirac_kernel_it)->addPoints();
   }
 
-  if(dirac_kernel_begin != dirac_kernel_end)
+  if (_dirac_kernels[0].all().size() > 0)
   {
     ComputeDiracThread cd(_mproblem, *this, residual, jacobian);
 
