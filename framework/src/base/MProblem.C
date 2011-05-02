@@ -763,7 +763,7 @@ MProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 void
 MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps)
 {
-  if (pps[0]._block_ids_with_postprocessors.size() > 0 || pps[0]._boundary_ids_with_postprocessors.size() > 0)
+  if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0)
   {
     serializeSolution();
 
@@ -775,35 +775,27 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     // init
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      std::set<unsigned int>::iterator block_begin = pps[tid]._block_ids_with_postprocessors.begin();
-      std::set<unsigned int>::iterator block_end = pps[tid]._block_ids_with_postprocessors.end();
-      std::set<unsigned int>::iterator block_it = block_begin;
-
-      for (block_it=block_begin;block_it!=block_end;++block_it)
+      for (std::set<unsigned int>::const_iterator block_it = pps[tid].blocks().begin();
+          block_it != pps[tid].blocks().end();
+          ++block_it)
       {
         unsigned int block_id = *block_it;
 
-        PostprocessorIterator postprocessor_begin = pps[tid].elementPostprocessorsBegin(block_id);
-        PostprocessorIterator postprocessor_end = pps[tid].elementPostprocessorsEnd(block_id);
-        PostprocessorIterator postprocessor_it = postprocessor_begin;
-
-        for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+        for (std::vector<Postprocessor *>::const_iterator postprocessor_it = pps[tid].elementPostprocessors(block_id).begin();
+            postprocessor_it != pps[tid].elementPostprocessors(block_id).end();
+            ++postprocessor_it)
           (*postprocessor_it)->initialize();
       }
 
-      std::set<unsigned int>::iterator boundary_begin = pps[tid]._boundary_ids_with_postprocessors.begin();
-      std::set<unsigned int>::iterator boundary_end = pps[tid]._boundary_ids_with_postprocessors.end();
-      std::set<unsigned int>::iterator boundary_it = boundary_begin;
-
-      for (boundary_it=boundary_begin;boundary_it!=boundary_end;++boundary_it)
+      for (std::set<unsigned int>::const_iterator boundary_it = pps[tid].boundaryIds().begin();
+          boundary_it != pps[tid].boundaryIds().end();
+          ++boundary_it)
       {
         //note: for threaded applications where the elements get broken up it
         //may be more efficient to initialize these on demand inside the loop
-        PostprocessorIterator side_postprocessor_begin = pps[tid].sidePostprocessorsBegin(*boundary_it);
-        PostprocessorIterator side_postprocessor_end = pps[tid].sidePostprocessorsEnd(*boundary_it);
-        PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
-
-        for (side_postprocessor_it=side_postprocessor_begin;side_postprocessor_it!=side_postprocessor_end;++side_postprocessor_it)
+        for (std::vector<Postprocessor *>::const_iterator side_postprocessor_it = pps[tid].sidePostprocessors(*boundary_it).begin();
+            side_postprocessor_it != pps[tid].sidePostprocessors(*boundary_it).end();
+            ++side_postprocessor_it)
           (*side_postprocessor_it)->initialize();
       }
     }
@@ -813,15 +805,13 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
     // Store element postprocessors values
-    std::set<unsigned int>::iterator block_ids_begin = pps[0]._block_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator block_ids_end = pps[0]._block_ids_with_postprocessors.end();
-    std::set<unsigned int>::iterator block_ids_it = block_ids_begin;
-
-    for (; block_ids_it != block_ids_end; ++block_ids_it)
+    for (std::set<unsigned int>::const_iterator block_ids_it = pps[0].blocks().begin();
+        block_ids_it != pps[0].blocks().end();
+        ++block_ids_it)
     {
       unsigned int block_id = *block_ids_it;
 
-      std::vector<Postprocessor *> & element_postprocessors = pps[0].elementPostprocessors(block_id);
+      const std::vector<Postprocessor *> & element_postprocessors = pps[0].elementPostprocessors(block_id);
       // Store element postprocessors values
       for (unsigned int i = 0; i < element_postprocessors.size(); ++i)
       {
@@ -840,15 +830,13 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     }
 
     // Store side postprocessors values
-    std::set<unsigned int>::iterator boundary_ids_begin = pps[0]._boundary_ids_with_postprocessors.begin();
-    std::set<unsigned int>::iterator boundary_ids_end = pps[0]._boundary_ids_with_postprocessors.end();
-    std::set<unsigned int>::iterator boundary_ids_it = boundary_ids_begin;
-
-    for (; boundary_ids_it != boundary_ids_end; ++boundary_ids_it)
+    for (std::set<unsigned int>::const_iterator boundary_ids_it = pps[0].boundaryIds().begin();
+        boundary_ids_it != pps[0].boundaryIds().end();
+        ++boundary_ids_it)
     {
       unsigned int boundary_id = *boundary_ids_it;
 
-      std::vector<Postprocessor *> & side_postprocessors = pps[0].sidePostprocessors(boundary_id);
+      const std::vector<Postprocessor *> & side_postprocessors = pps[0].sidePostprocessors(boundary_id);
       for (unsigned int i = 0; i < side_postprocessors.size(); ++i)
       {
         Postprocessor *ps = side_postprocessors[i];
@@ -868,12 +856,8 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
   }
 
   // Compute and store generic postprocessors values
-  PostprocessorIterator generic_postprocessor_begin = pps[0].genericPostprocessorsBegin();
-  PostprocessorIterator generic_postprocessor_end = pps[0].genericPostprocessorsEnd();
-  PostprocessorIterator generic_postprocessor_it = generic_postprocessor_begin;
-
-  for (generic_postprocessor_it =generic_postprocessor_begin;
-      generic_postprocessor_it!=generic_postprocessor_end;
+  for (std::vector<Postprocessor *>::const_iterator generic_postprocessor_it = pps[0].genericPostprocessors().begin();
+      generic_postprocessor_it != pps[0].genericPostprocessors().end();
       ++generic_postprocessor_it)
   {
     std::string name = (*generic_postprocessor_it)->name();
@@ -903,11 +887,9 @@ void
 MProblem::outputPostprocessors()
 {
   // Store values into table
-  PostprocessorIterator postprocessor_begin = _pps(EXEC_TIMESTEP)[0].allPostprocessorsBegin();
-  PostprocessorIterator postprocessor_end = _pps(EXEC_TIMESTEP)[0].allPostprocessorsEnd();
-  PostprocessorIterator postprocessor_it = postprocessor_begin;
-
-  for (postprocessor_it = postprocessor_begin; postprocessor_it != postprocessor_end; ++postprocessor_it)
+  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(EXEC_TIMESTEP)[0].all().begin();
+      postprocessor_it != _pps(EXEC_TIMESTEP)[0].all().end();
+      ++postprocessor_it)
   {
     std::string name = (*postprocessor_it)->name();
     Real value = _pps_data[0].getPostprocessorValue(name);

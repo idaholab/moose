@@ -41,34 +41,28 @@ ComputePostprocessorsThread::onElement(const Elem * elem)
   _problem.reinitMaterials(subdomain, _tid);
 
   //Global Postprocessors
-  PostprocessorIterator postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(Moose::ANY_BLOCK_ID);
-  PostprocessorIterator postprocessor_end = _pps[_tid].elementPostprocessorsEnd(Moose::ANY_BLOCK_ID);
-  PostprocessorIterator postprocessor_it = postprocessor_begin;
-
-  for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps[_tid].elementPostprocessors(Moose::ANY_BLOCK_ID).begin();
+      postprocessor_it != _pps[_tid].elementPostprocessors(Moose::ANY_BLOCK_ID).end();
+      ++postprocessor_it)
     (*postprocessor_it)->execute();
 
-  postprocessor_begin = _pps[_tid].elementPostprocessorsBegin(subdomain);
-  postprocessor_end = _pps[_tid].elementPostprocessorsEnd(subdomain);
-  postprocessor_it = postprocessor_begin;
-
-  for (postprocessor_it=postprocessor_begin;postprocessor_it!=postprocessor_end;++postprocessor_it)
+  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps[_tid].elementPostprocessors(subdomain).begin();
+      postprocessor_it != _pps[_tid].elementPostprocessors(subdomain).end();
+      ++postprocessor_it)
     (*postprocessor_it)->execute();
 }
 
 void
 ComputePostprocessorsThread::onBoundary(const Elem *elem, unsigned int side, short int bnd_id)
 {
-  PostprocessorIterator side_postprocessor_begin = _pps[_tid].sidePostprocessorsBegin(bnd_id);
-  PostprocessorIterator side_postprocessor_end = _pps[_tid].sidePostprocessorsEnd(bnd_id);
-  PostprocessorIterator side_postprocessor_it = side_postprocessor_begin;
-
-  if (side_postprocessor_begin != side_postprocessor_end)
+  if (_pps[_tid].sidePostprocessors(bnd_id).size() > 0)
   {
     _problem.reinitElemFace(elem, side, bnd_id, _tid);
     _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
-    for (; side_postprocessor_it!=side_postprocessor_end; ++side_postprocessor_it)
+    for (std::vector<Postprocessor *>::const_iterator side_postprocessor_it = _pps[_tid].sidePostprocessors(bnd_id).begin();
+        side_postprocessor_it != _pps[_tid].sidePostprocessors(bnd_id).end();
+        ++side_postprocessor_it)
       (*side_postprocessor_it)->execute();
   }
 }

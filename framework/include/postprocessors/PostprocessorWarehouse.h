@@ -21,11 +21,6 @@
 #include <map>
 #include <set>
 
-/**
- * Typedef to hide implementation details
- */
-typedef std::vector<Postprocessor *>::iterator PostprocessorIterator;
-
 
 /**
  * Holds postprocessors and provides some services
@@ -42,32 +37,49 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  PostprocessorIterator elementPostprocessorsBegin(unsigned int block_id);
-  PostprocessorIterator elementPostprocessorsEnd(unsigned int block_id);
-  std::vector<Postprocessor *> & elementPostprocessors(unsigned int block_id) { return _element_postprocessors[block_id]; }
+  /**
+   * Get the list of all  elemental postprocessors
+   * @param block_id Block ID
+   * @return The list of all elemental postprocessors
+   */
+  const std::vector<Postprocessor *> & elementPostprocessors(unsigned int block_id) { return _element_postprocessors[block_id]; }
 
-  PostprocessorIterator sidePostprocessorsBegin(unsigned int boundary_id);
-  PostprocessorIterator sidePostprocessorsEnd(unsigned int boundary_id);
-  std::vector<Postprocessor *> & sidePostprocessors(unsigned int boundary_id) { return _side_postprocessors[boundary_id]; }
+  /**
+   * Get the list of side postprocessors
+   * @param boundary_id Boundary ID
+   * @return The list of side postprocessors
+   */
+  const std::vector<Postprocessor *> & sidePostprocessors(unsigned int boundary_id) { return _side_postprocessors[boundary_id]; }
 
-  PostprocessorIterator genericPostprocessorsBegin();
-  PostprocessorIterator genericPostprocessorsEnd();
+  /**
+   * Get the list general postprocessors
+   * @return The list of general postprocessors
+   */
+  const std::vector<Postprocessor *> & genericPostprocessors() { return _generic_postprocessors; }
 
-  PostprocessorIterator allPostprocessorsBegin();
-  PostprocessorIterator allPostprocessorsEnd();
+  /**
+   * Get the list of all postprocessors
+   * @return The list of all postprocessors
+   */
+  const std::vector<Postprocessor *> & all() { return _all_postprocessors; }
 
-
+  /**
+   * Add a postprocessor
+   * @param postprocessor Postprocessor being added
+   */
   void addPostprocessor(Postprocessor *postprocessor);
 
   /**
-   * All of the block ids that have postprocessors specified to act on them.
+   * Get the list of blocks with postprocessors
+   * @return The list of block IDs with postprocessors
    */
-  std::set<unsigned int> _block_ids_with_postprocessors;
+  const std::set<unsigned int> & blocks() { return _block_ids_with_postprocessors; }
 
   /**
-   * All of the boundary ids that have postprocessors specified to act on them.
+   * Get the list of boundary IDs with postprocessors
+   * @return The list of boundary IDs with postprocessors
    */
-  std::set<unsigned int> _boundary_ids_with_postprocessors;
+  const std::set<unsigned int> & boundaryIds() { return _boundary_ids_with_postprocessors; }
 
 protected:
   std::map<unsigned int, std::vector<Postprocessor *> > _element_postprocessors;
@@ -75,6 +87,10 @@ protected:
 
   std::vector<Postprocessor *> _generic_postprocessors;
   std::vector<Postprocessor *> _all_postprocessors;
+
+  std::set<unsigned int> _block_ids_with_postprocessors;                ///< All of the block ids that have postprocessors specified to act on them
+  std::set<unsigned int> _boundary_ids_with_postprocessors;             ///< All of the boundary ids that have postprocessors specified to act on them
+
 };
 
 #endif // POSTPROCESSORWAREHOUSE_H

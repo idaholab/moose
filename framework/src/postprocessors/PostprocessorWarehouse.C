@@ -26,7 +26,7 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
     std::map<unsigned int, std::vector<Postprocessor *> >::iterator j;
     for (j=_element_postprocessors.begin(); j!=_element_postprocessors.end(); ++j)
     {
-      PostprocessorIterator k;
+      std::vector<Postprocessor *>::iterator k;
       for (k=j->second.begin(); k!=j->second.end(); ++k)
         delete *k;
     }
@@ -37,7 +37,7 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
     std::map<unsigned int, std::vector<Postprocessor *> >::iterator j;
     for (j=_side_postprocessors.begin(); j!=_side_postprocessors.end(); ++j)
     {
-      PostprocessorIterator k;
+      std::vector<Postprocessor *>::iterator k;
       for (k=j->second.begin(); k!=j->second.end(); ++k)
         delete *k;
     }
@@ -51,28 +51,28 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
 void
 PostprocessorWarehouse::initialSetup()
 {
-  for(PostprocessorIterator i=allPostprocessorsBegin(); i!=allPostprocessorsEnd(); ++i)
+  for(std::vector<Postprocessor *>::const_iterator i=all().begin(); i!=all().end(); ++i)
     (*i)->initialSetup();
 }
 
 void
 PostprocessorWarehouse::timestepSetup()
 {
-  for(PostprocessorIterator i=allPostprocessorsBegin(); i!=allPostprocessorsEnd(); ++i)
+  for(std::vector<Postprocessor *>::const_iterator i=all().begin(); i!=all().end(); ++i)
     (*i)->timestepSetup();
 }
 
 void
 PostprocessorWarehouse::residualSetup()
 {
-  for(PostprocessorIterator i=allPostprocessorsBegin(); i!=allPostprocessorsEnd(); ++i)
+  for(std::vector<Postprocessor *>::const_iterator i=all().begin(); i!=all().end(); ++i)
     (*i)->residualSetup();
 }
 
 void
 PostprocessorWarehouse::jacobianSetup()
 {
-  for(PostprocessorIterator i=allPostprocessorsBegin(); i!=allPostprocessorsEnd(); ++i)
+  for(std::vector<Postprocessor *>::const_iterator i=all().begin(); i!=all().end(); ++i)
     (*i)->jacobianSetup();
 }
 
@@ -99,52 +99,4 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     // FIXME: generic pps multithreaded
     _generic_postprocessors.push_back(postprocessor);
   }
-}
-
-PostprocessorIterator
-PostprocessorWarehouse::elementPostprocessorsBegin(unsigned int block_id)
-{
-  return _element_postprocessors[block_id].begin();
-}
-
-PostprocessorIterator
-PostprocessorWarehouse::elementPostprocessorsEnd(unsigned int block_id)
-{
-  return _element_postprocessors[block_id].end();
-}
-
-PostprocessorIterator
-PostprocessorWarehouse::sidePostprocessorsBegin(unsigned int boundary_id)
-{
-  return _side_postprocessors[boundary_id].begin();
-}
-
-PostprocessorIterator
-PostprocessorWarehouse::sidePostprocessorsEnd(unsigned int boundary_id)
-{
-  return _side_postprocessors[boundary_id].end();
-}
-
-PostprocessorIterator
-PostprocessorWarehouse::genericPostprocessorsBegin()
-{
-  return _generic_postprocessors.begin();
-}
-
-PostprocessorIterator
-PostprocessorWarehouse::genericPostprocessorsEnd()
-{
-  return _generic_postprocessors.end();
-}
-
-PostprocessorIterator
-PostprocessorWarehouse::allPostprocessorsBegin()
-{
-  return _all_postprocessors.begin();
-}
-
-PostprocessorIterator
-PostprocessorWarehouse::allPostprocessorsEnd()
-{
-  return _all_postprocessors.end();
 }
