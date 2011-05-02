@@ -24,6 +24,9 @@ class MaxIncrement;
 template<>
 InputParameters validParams<MaxIncrement>();
 
+/**
+ * TODO
+ */
 class MaxIncrement : public Damper
 {
 public:

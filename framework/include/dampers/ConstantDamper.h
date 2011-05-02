@@ -24,6 +24,11 @@ class ConstantDamper;
 template<>
 InputParameters validParams<ConstantDamper>();
 
+/**
+ * Simple constant damper
+ *
+ * Modifies the npn-linear step by a constant damping factor
+ */
 class ConstantDamper : public Damper
 {
 public:

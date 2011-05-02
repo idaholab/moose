@@ -35,6 +35,10 @@ class MooseVariable;
 template<>
 InputParameters validParams<Damper>();
 
+/**
+ * Base class for deriving dampers
+ *
+ */
 class Damper :
   public MooseObject,
   protected MaterialPropertyInterface
@@ -59,56 +63,27 @@ protected:
   SubProblemInterface & _subproblem;
   SystemBase & _sys;
 
-  THREAD_ID _tid;
+  THREAD_ID _tid;                                       ///< Thread ID
 
-  MooseVariable & _var;
+  MooseVariable & _var;                                 ///< Non-linear variable this damper works on
 
-  const Elem * & _current_elem;
+  const Elem * & _current_elem;                         ///< Current element
 
-  unsigned int _qp;
-  const std::vector< Point > & _q_point;
-  QBase * & _qrule;
-  const std::vector<Real> & _JxW;
+  unsigned int _qp;                                     ///< Quadrature point index
+  const std::vector< Point > & _q_point;                ///< Quadrature points
+  QBase * & _qrule;                                     ///< Quadrature rule
+  const std::vector<Real> & _JxW;                       ///< Transformed Jacobina weights
 
-  /**
-   * The current newton increment.
-   */
-  VariableValue & _u_increment;
+  VariableValue & _u_increment;                         ///< The current newton increment
+  VariableValue & _u;                                   ///< Holds the current solution at the current quadrature point
+  VariableValue & _u_old;                               ///< Holds the previous solution at the current quadrature point
+  VariableValue & _u_older;                             ///< Holds the t-2 solution at the current quadrature point
 
-  /**
-   * Holds the current solution at the current quadrature point.
-   */
-  VariableValue & _u;
+  VariableGradient & _grad_u;                           ///< Holds the current solution gradient at the current quadrature point
+  VariableGradient & _grad_u_old;                       ///< Holds the previous solution gradient at the current quadrature point
+  VariableGradient & _grad_u_older;                     ///< Holds the t-2 solution gradient at the current quadrature point
 
-  /**
-   * Holds the previous solution at the current quadrature point.
-   */
-  VariableValue & _u_old;
-
-  /**
-   * Holds the t-2 solution at the current quadrature point.
-   */
-  VariableValue & _u_older;
-
-  /**
-   * Holds the current solution gradient at the current quadrature point.
-   */
-  VariableGradient & _grad_u;
-
-  /**
-   * Holds the previous solution gradient at the current quadrature point.
-   */
-  VariableGradient & _grad_u_old;
-
-  /**
-   * Holds the t-2 solution gradient at the current quadrature point.
-   */
-  VariableGradient & _grad_u_older;
-
-  /**
-   * Holds the current solution second derivative at the current quadrature point.
-   */
-  VariableSecond & _second_u;
+  VariableSecond & _second_u;                           ///< Holds the current solution second derivative at the current quadrature point
 };
  
 #endif

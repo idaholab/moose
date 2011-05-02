@@ -39,10 +39,14 @@ public:
   DamperIterator dampersBegin();
   DamperIterator dampersEnd();
 
+  /**
+   * Adds a damper
+   * @param damper Damper being added
+   */
   void addDamper(Damper *damper);
 
 protected:
-  std::vector<Damper *> _dampers;
+  std::vector<Damper *> _dampers;                       ///< The list of all dampers
 };
 
 #endif // DAMPERWAREHOUSE_H
