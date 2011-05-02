@@ -244,23 +244,17 @@ AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
 void
 AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 {
-  SubdomainIterator subdomain_begin = _mesh.meshSubdomains().begin();
-  SubdomainIterator subdomain_end = _mesh.meshSubdomains().end();
-  SubdomainIterator subdomain_it;
-
   // Do we have some kernels to evaluate?
-  AuxKernelIterator aux_begin = auxs[0].activeNodalAuxKernelsBegin();
-  AuxKernelIterator aux_end = auxs[0].activeNodalAuxKernelsEnd();
   bool have_block_kernels = false;
-  for(subdomain_it = subdomain_begin; subdomain_it != subdomain_end; ++subdomain_it)
+  for(std::set<subdomain_id_type>::const_iterator subdomain_it = _mesh.meshSubdomains().begin();
+      subdomain_it != _mesh.meshSubdomains().end();
+      ++subdomain_it)
   {
-    AuxKernelIterator block_nodal_aux_begin = auxs[0].activeBlockNodalAuxKernelsBegin(*subdomain_it);
-    AuxKernelIterator block_nodal_aux_end = auxs[0].activeBlockNodalAuxKernelsEnd(*subdomain_it);
-    have_block_kernels |= (block_nodal_aux_begin != block_nodal_aux_end);
+    have_block_kernels |= (auxs[0].activeBlockNodalKernels(*subdomain_it).size() > 0);
   }
 
   Moose::perf_log.push("update_aux_vars_nodal()","Solve");
-  if (aux_begin != aux_end || have_block_kernels)
+  if (auxs[0].activeNodalKernels().size() > 0 || have_block_kernels)
   {
     ConstNodeRange & range = *_mesh.getLocalNodeRange();
     ComputeNodalAuxVarsThread navt(_problem, *this, auxs);

@@ -57,10 +57,7 @@ ComputeNodalAuxBcsThread::operator() (const ConstBndNodeRange & range)
       var->prepare_aux();
     }
 
-    AuxKernelIterator aux_begin = _auxs[_tid].activeAuxBCsBegin(boundary_id);
-    AuxKernelIterator aux_end = _auxs[_tid].activeAuxBCsEnd(boundary_id);
-
-    if(aux_begin != aux_end)
+    if(_auxs[_tid].activeBCs(boundary_id).size() > 0)
     {
       Node * node = bnode->_node;
 
@@ -71,7 +68,9 @@ ComputeNodalAuxBcsThread::operator() (const ConstBndNodeRange & range)
       {
         _problem.reinitNodeFace(node, boundary_id, _tid);
 
-        for(AuxKernelIterator aux_it=aux_begin; aux_it != aux_end; ++aux_it)
+        for (std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeBCs(boundary_id).begin();
+            aux_it != _auxs[_tid].activeBCs(boundary_id).end();
+            ++aux_it)
           (*aux_it)->compute();
       }
 

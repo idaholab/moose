@@ -27,7 +27,6 @@
 //forward declaration
 class MeshModifier;
 
-typedef std::set<subdomain_id_type>::const_iterator SubdomainIterator;
 typedef StoredRange<std::set<Node *>::iterator, Node*> SemiLocalNodeRange;
 
 // NOTE: maybe inheritance would be better here

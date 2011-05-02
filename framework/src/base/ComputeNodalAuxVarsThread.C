@@ -61,19 +61,17 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
     _problem.reinitNode(node, _tid);
 
     // compute global aux kernels
-    AuxKernelIterator aux_begin = _auxs[_tid].activeNodalAuxKernelsBegin();
-    AuxKernelIterator aux_end = _auxs[_tid].activeNodalAuxKernelsEnd();
-    for(AuxKernelIterator aux_it = aux_begin; aux_it != aux_end; ++aux_it)
+    for (std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeNodalKernels().begin();
+        aux_it != _auxs[_tid].activeNodalKernels().end();
+        ++aux_it)
       (*aux_it)->compute();
 
     const std::set<subdomain_id_type> & block_ids = _sys.mesh().getNodeBlockIds(*node);
     for (std::set<subdomain_id_type>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
     {
-//      std::cerr << "blk = " << (int) *block_it << std::endl;
-      AuxKernelIterator block_nodal_aux_begin = _auxs[_tid].activeBlockNodalAuxKernelsBegin(*block_it);
-      AuxKernelIterator block_nodal_aux_end = _auxs[_tid].activeBlockNodalAuxKernelsEnd(*block_it);
-
-      for(AuxKernelIterator aux_it = block_nodal_aux_begin; aux_it != block_nodal_aux_end; ++aux_it)
+      for(std::vector<AuxKernel*>::const_iterator aux_it = _auxs[_tid].activeBlockNodalKernels(*block_it).begin();
+          aux_it != _auxs[_tid].activeBlockNodalKernels(*block_it).end();
+          ++aux_it)
         (*aux_it)->compute();
     }
 

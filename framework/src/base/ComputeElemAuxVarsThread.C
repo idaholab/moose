@@ -43,9 +43,6 @@ ComputeElemAuxVarsThread::operator() (const ConstElemRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  AuxKernelIterator aux_begin = _auxs[_tid].activeElementAuxKernelsBegin();
-  AuxKernelIterator aux_end = _auxs[_tid].activeElementAuxKernelsEnd();
-
   unsigned int subdomain = std::numeric_limits<unsigned int>::max();
   for (ConstElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
   {
@@ -63,10 +60,7 @@ ComputeElemAuxVarsThread::operator() (const ConstElemRange & range)
 //    if(unlikely(_calculate_element_time))
 //      startElementTiming(elem->id());
 
-    AuxKernelIterator block_element_aux_it = _auxs[_tid].activeBlockElementAuxKernelsBegin(cur_subdomain);
-    AuxKernelIterator block_element_aux_end = _auxs[_tid].activeBlockElementAuxKernelsEnd(cur_subdomain);
-
-    if(block_element_aux_it != block_element_aux_end || aux_begin != aux_end)
+    if(_auxs[_tid].activeBlockElementKernels(cur_subdomain).size() > 0 || _auxs[_tid].activeElementKernels().size() > 0)
     {
       _mproblem.prepare(elem, _tid);
       _mproblem.reinitElem(elem, _tid);
@@ -79,16 +73,23 @@ ComputeElemAuxVarsThread::operator() (const ConstElemRange & range)
       {
         subdomain = cur_subdomain;
 
-        for(AuxKernelIterator aux_it=aux_begin;aux_it!=aux_end;aux_it++)
+        // TODO: No subdomain setup for block elemental aux-kernels?
+
+        for(std::vector<AuxKernel *>::const_iterator aux_it=_auxs[_tid].activeElementKernels().begin();
+            aux_it != _auxs[_tid].activeElementKernels().end();
+            aux_it++)
           (*aux_it)->subdomainSetup();
       }
 
       // block
-      for(; block_element_aux_it != block_element_aux_end; ++block_element_aux_it)
+      for(std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(cur_subdomain).begin();
+          block_element_aux_it != _auxs[_tid].activeBlockElementKernels(cur_subdomain).end(); ++block_element_aux_it)
         (*block_element_aux_it)->compute();
 
       // global
-      for(AuxKernelIterator aux_it=aux_begin;aux_it!=aux_end;aux_it++)
+      for(std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeElementKernels().begin();
+          aux_it!=_auxs[_tid].activeElementKernels().end();
+          aux_it++)
         (*aux_it)->compute();
     }
 

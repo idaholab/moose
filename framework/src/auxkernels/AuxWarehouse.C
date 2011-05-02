@@ -20,120 +20,36 @@ AuxWarehouse::AuxWarehouse()
 
 AuxWarehouse::~AuxWarehouse()
 {
-  for(AuxKernelIterator j=_all_aux_kernels.begin(); j!=_all_aux_kernels.end(); ++j)
+  for (std::vector<AuxKernel *>::const_iterator j = all().begin(); j != all().end(); ++j)
     delete *j;
 }
 
 void
 AuxWarehouse::initialSetup()
 {
-  for(AuxKernelIterator i=allAuxKernelsBegin(); i!=allAuxKernelsEnd(); ++i)
+  for (std::vector<AuxKernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->initialSetup();
 }
 
 void
 AuxWarehouse::timestepSetup()
 {
-  for(AuxKernelIterator i=allAuxKernelsBegin(); i!=allAuxKernelsEnd(); ++i)
+  for (std::vector<AuxKernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->timestepSetup();
 }
 
 void
 AuxWarehouse::residualSetup()
 {
-  for(AuxKernelIterator i=allAuxKernelsBegin(); i!=allAuxKernelsEnd(); ++i)
+  for (std::vector<AuxKernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->residualSetup();
 }
 
 void
 AuxWarehouse::jacobianSetup()
 {
-  for(AuxKernelIterator i=allAuxKernelsBegin(); i!=allAuxKernelsEnd(); ++i)
+  for (std::vector<AuxKernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
     (*i)->jacobianSetup();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeNodalAuxKernelsBegin()
-{
-  return _active_nodal_aux_kernels.begin();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeNodalAuxKernelsEnd()
-{
-  return _active_nodal_aux_kernels.end();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeElementAuxKernelsBegin()
-{
-  return _active_element_aux_kernels.begin();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeElementAuxKernelsEnd()
-{
-  return _active_element_aux_kernels.end();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeAuxBCsBegin(unsigned int boundary_id)
-{
-  return _active_bcs[boundary_id].begin();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeAuxBCsEnd(unsigned int boundary_id)
-{
-  return _active_bcs[boundary_id].end();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeBlockNodalAuxKernelsBegin(unsigned int block)
-{
-  return _active_block_nodal_aux_kernels[block].begin();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeBlockNodalAuxKernelsEnd(unsigned int block)
-{
-  return _active_block_nodal_aux_kernels[block].end();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeBlockElementAuxKernelsBegin(unsigned int block)
-{
-  return _active_block_element_aux_kernels[block].begin();
-}
-
-AuxKernelIterator
-AuxWarehouse::activeBlockElementAuxKernelsEnd(unsigned int block)
-{
-  return _active_block_element_aux_kernels[block].end();
-}
-
-std::list<AuxKernel *>
-AuxWarehouse::getActiveNodalKernels()
-{
-  return std::list<AuxKernel *>(_active_nodal_aux_kernels.begin(), _active_nodal_aux_kernels.end());
-}
-
-std::list<AuxKernel *>
-AuxWarehouse::getActiveElementKernels()
-{
-  return std::list<AuxKernel *>(_active_element_aux_kernels.begin(), _active_element_aux_kernels.end());
-}
-
-void
-AuxWarehouse::setActiveNodalKernels(std::list<AuxKernel *> &auxs)
-{
-  _active_nodal_aux_kernels.assign(auxs.begin(), auxs.end());
-}
-
-void
-AuxWarehouse::setActiveElementKernels(std::list<AuxKernel *> &auxs)
-{
-  _active_element_aux_kernels.assign(auxs.begin(), auxs.end());
 }
 
 void
@@ -166,16 +82,4 @@ AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids
         _active_block_element_aux_kernels[id].push_back(aux);
     }
   }
-}
-
-AuxKernelIterator
-AuxWarehouse::allAuxKernelsBegin()
-{
-  return _all_aux_kernels.begin();
-}
-
-AuxKernelIterator
-AuxWarehouse::allAuxKernelsEnd()
-{
-  return _all_aux_kernels.end();
 }

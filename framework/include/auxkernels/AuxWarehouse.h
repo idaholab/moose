@@ -24,12 +24,6 @@
 
 
 /**
- * Typedef to hide implementation details
- */
-typedef std::vector<AuxKernel *>::iterator AuxKernelIterator;
-
-
-/**
  * Warehouse for storing auxiliary kernels
  *
  * Used inside auxiliary system to store aux. kernels
@@ -46,29 +40,15 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  AuxKernelIterator activeNodalAuxKernelsBegin();
-  AuxKernelIterator activeNodalAuxKernelsEnd();
+  const std::vector<AuxKernel *> & all() { return _all_aux_kernels; }
 
-  AuxKernelIterator activeElementAuxKernelsBegin();
-  AuxKernelIterator activeElementAuxKernelsEnd();
+  const std::vector<AuxKernel *> & activeNodalKernels() { return _active_nodal_aux_kernels; }
+  const std::vector<AuxKernel *> & activeElementKernels() { return _active_element_aux_kernels; }
 
-  AuxKernelIterator activeAuxBCsBegin(unsigned int boundary_id);
-  AuxKernelIterator activeAuxBCsEnd(unsigned int boundary_id);
+  const std::vector<AuxKernel *> & activeBlockNodalKernels(unsigned int block) { return _active_block_nodal_aux_kernels[block]; }
+  const std::vector<AuxKernel *> & activeBlockElementKernels(unsigned int block) { return _active_block_element_aux_kernels[block]; }
 
-  AuxKernelIterator activeBlockNodalAuxKernelsBegin(unsigned int block);
-  AuxKernelIterator activeBlockNodalAuxKernelsEnd(unsigned int block);
-
-  AuxKernelIterator activeBlockElementAuxKernelsBegin(unsigned int block);
-  AuxKernelIterator activeBlockElementAuxKernelsEnd(unsigned int block);
-
-  AuxKernelIterator allAuxKernelsBegin();
-  AuxKernelIterator allAuxKernelsEnd();
-
-  std::list<AuxKernel *> getActiveNodalKernels();
-  std::list<AuxKernel *> getActiveElementKernels();
-
-  void setActiveNodalKernels(std::list<AuxKernel *> &auxs);
-  void setActiveElementKernels(std::list<AuxKernel *> &auxs);
+  const std::vector<AuxKernel *> & activeBCs(unsigned int boundary_id) { return _active_bcs[boundary_id]; }
 
   /**
    * Adds a boundary condition aux kernel
