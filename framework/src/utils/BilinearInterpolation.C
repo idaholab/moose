@@ -31,37 +31,10 @@
 #include "libmesh_common.h"
 #include "Moose.h"
 
-
-
 int BilinearInterpolation::_file_number = 0;
 
-BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & xAxis, const std::vector<Real> & yAxis, const ColumnMajorMatrix &  zSurface) : _xAxis(xAxis), _yAxis(yAxis), _zSurface(zSurface)
+BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x, const std::vector<Real> & y, const ColumnMajorMatrix & z): _xAxis(x), _yAxis(y), _zSurface(z)
 {
-/*  std::cout << _xAxis[0] << "  xAxis0 from BilinearInterpolation" << std::endl;
-  std::cout << _xAxis[1] << "  xAxis1 from BilinearInterpolation" << std::endl;
-  std::cout << _xAxis[2] << "  xAxis2 from BilinearInterpolation" << std::endl;
-  std::cout << _xAxis[3] << "  xAxis3 from BilinearInterpolation" << std::endl;
-  std::cout << _yAxis[0] << "  yAxis0 from BilinearInterpolation" << std::endl;
-  std::cout << _yAxis[1] << "  yAxis1 from BilinearInterpolation" << std::endl;
-  std::cout << _yAxis[2] << "  yAxis2 from BilinearInterpolation" << std::endl;
-  std::cout << _yAxis[3] << "  yAxis3 from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(0,0) << "  z(0,0) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(0,1) << "  z(0,1) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(0,2) << "  z(0,2) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(0,3) << "  z(0,3) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(1,0) << "  z(1,0) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(1,1) << "  z(1,1) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(1,2) << "  z(1,2) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(1,3) << "  z(1,3) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(2,0) << "  z(2,0) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(2,1) << "  z(2,1) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(2,2) << "  z(2,2) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(2,3) << "  z(2,3) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(3,0) << "  z(3,0) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(3,1) << "  z(3,1) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(3,2) << "  z(3,2) from BilinearInterpolation" << std::endl;
-  std::cout << _zSurface(3,3) << "  z(3,3) from BilinearInterpolation" << std::endl;
-*/  
 }
 
 void BilinearInterpolation::GetNeigbourIndices(std::vector<Real> inArr, Real x ,int& lowerX ,int& upperX )

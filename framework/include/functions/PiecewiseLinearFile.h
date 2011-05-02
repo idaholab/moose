@@ -12,45 +12,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PIECEWISEBILINEAR_H
-#define PIECEWISEBILINEAR_H
+#ifndef PIECEWISELINEARFILE_H
+#define PIECEWISELINEARFILE_H
 
 #include "Function.h"
-#include "BilinearInterpolation.h"
-#include "ColumnMajorMatrix.h"
+#include "LinearInterpolation.h"
 
-class PiecewiseBilinear;
+class PiecewiseLinearFile;
 
 template<>
-InputParameters validParams<PiecewiseBilinear>();
+InputParameters validParams<PiecewiseLinearFile>();
 
 /**
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class PiecewiseBilinear : public Function
+class PiecewiseLinearFile : public Function
 {
 public:
-  PiecewiseBilinear(const std::string & name, InputParameters parameters);
-  virtual ~PiecewiseBilinear();
+  PiecewiseLinearFile(const std::string & name, InputParameters parameters);
+  virtual ~PiecewiseLinearFile();
 
   /**
    * This function will return a value based on the first input argument only.
    */
   virtual Real value(Real t, const Point & pt);
 
-
-
 private:
-  BilinearInterpolation * _bilinear_interp;
+  LinearInterpolation * _linear_interp;
   const std::string _file_name;
-  const int _axis;
   Real _scale_factor;
+  void parse( std::vector<Real> & x, std::vector<Real> & y );
 
-
-  void parse( std::vector<Real> & x,
-              std::vector<Real> & y,
-              ColumnMajorMatrix & z);
 };
 
-#endif //PIECEWISEBILINEAR_H
+#endif //PIECEWISELINEARFILE_H

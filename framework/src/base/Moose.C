@@ -77,6 +77,7 @@
 #include "SolutionFunction.h"
 #include "SphereFunction.h"
 #include "PiecewiseBilinear.h"
+#include "PiecewiseLinearFile.h"
 // materials
 #include "GenericConstantMaterial.h"
 // PPS
@@ -204,6 +205,7 @@ registerObjects()
   registerFunction(SolutionFunction);
   registerFunction(SphereFunction);
   registerFunction(PiecewiseBilinear);
+  registerFunction(PiecewiseLinearFile);
   // materials
   registerMaterial(GenericConstantMaterial);
   // PPS

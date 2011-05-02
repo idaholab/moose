@@ -44,15 +44,18 @@ template<>
 InputParameters validParams<PiecewiseBilinear>()
 {
   InputParameters params = validParams<Function>();
-  params.addRequiredParam<std::string>("yourFileName", "File holding power factor data");
-//  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
+  params.addRequiredParam<std::string>("yourFileName", "File holding your csv data for use with PiecewiseBilinear");
+  params.addParam<int>("axis", 2, "The axis used (0, 1, or 2 for x, y, or z).");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the axis values");
   return params;
 }
 
 PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters parameters) :
   Function(name, parameters),
   _bilinear_interp( NULL ),
-  _file_name( getParam<std::string>("yourFileName") )
+  _file_name( getParam<std::string>("yourFileName") ),
+  _axis(parameters.get<int>("axis")),
+  _scale_factor( getParam<Real>("scale_factor") )
 {
   std::vector<Real> x;
   std::vector<Real> y;
@@ -72,11 +75,7 @@ PiecewiseBilinear::~PiecewiseBilinear()
 Real
 PiecewiseBilinear::value( Real t, const Point & p)
 {
-//  std::cout << "t " << t << std::endl;
-//  std::cout << "p(2) " << p(2) << std::endl;
-  
-  return  _bilinear_interp->sample( p(2), t );
-  
+  return  _bilinear_interp->sample( _scale_factor*p(_axis), t );
 }
 
 void
@@ -84,11 +83,10 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
                           std::vector<Real> & y,
                           ColumnMajorMatrix & z)
 {
-
   std::ifstream file(_file_name.c_str());
    std::string line;
    unsigned int linenum = 0;
-   unsigned int itemnum;
+   unsigned int itemnum = 0;
    std::vector<Real> data;
      
    while (getline (file, line))
@@ -109,10 +107,13 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
              
      }
    }
+//   std::cout << " linenum " << linenum << std::endl;
+//   std::cout << " itemnum " << itemnum << std::endl;
 
    x.resize(itemnum-1);
    y.resize(linenum-1);
-   z.reshape(itemnum-1, linenum-1);
+//   z.reshape(itemnum-1, linenum-1);
+   z.reshape(linenum-1,itemnum-1);
    unsigned int offset(0);
    // Extract the first line's data (the x axis data)
    for (unsigned int j(0); j < itemnum-1; ++j)
@@ -132,7 +133,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
        z(i,j) = data[offset];
        ++offset;
      }
-   }
+   }   
    if (data.size() != offset)
    {
      std::cerr << "ERROR! Data mismatch!" << std::endl;
