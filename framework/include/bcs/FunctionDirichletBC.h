@@ -44,7 +44,7 @@ protected:
    */
   virtual Real computeQpResidual();
 
-  Function & _func;                             /// the function being used for evaluation
+  Function & _func;                             ///< the function being used for evaluation
 };
 
 #endif //FUNCTIONDIRICHLETBC_H

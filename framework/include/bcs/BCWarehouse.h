@@ -61,9 +61,9 @@ public:
   void activeBoundaries(std::set<short> & bnds) const;
 
 protected:
-  std::map<unsigned int, std::vector<IntegratedBC *> > _bcs;                    /// integrated boundary conditions on a boundary
-  std::map<unsigned int, std::vector<NodalBC *> > _nodal_bcs;                   /// nodal boundary conditions on a boundary
-  std::map<unsigned int, std::vector<PresetNodalBC *> > _preset_nodal_bcs;      /// presetting nodal boundary condition on a boundary
+  std::map<unsigned int, std::vector<IntegratedBC *> > _bcs;                    ///< integrated boundary conditions on a boundary
+  std::map<unsigned int, std::vector<NodalBC *> > _nodal_bcs;                   ///< nodal boundary conditions on a boundary
+  std::map<unsigned int, std::vector<PresetNodalBC *> > _preset_nodal_bcs;      ///< presetting nodal boundary condition on a boundary
 };
 
 #endif // BCWAREHOUSE_H

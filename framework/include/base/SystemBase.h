@@ -201,12 +201,12 @@ protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;
   MooseMesh & _mesh;
-  std::string _name;                            /// The name of this system
+  std::string _name;                                                    ///< The name of this system
 
-  bool _currently_computing_jacobian;           /// Whether or not the system is currently computing the Jacobian matrix
+  bool _currently_computing_jacobian;                                   ///< Whether or not the system is currently computing the Jacobian matrix
 
-  std::vector<VariableWarehouse> _vars;         /// Variable warehouses (one for each thread)
-  std::map<unsigned int, std::set<subdomain_id_type> > _var_map;        /// Map of variables (variable id -> array of subdomains where it lives)
+  std::vector<VariableWarehouse> _vars;                                 ///< Variable warehouses (one for each thread)
+  std::map<unsigned int, std::set<subdomain_id_type> > _var_map;        ///< Map of variables (variable id -> array of subdomains where it lives)
 };
 
 /**

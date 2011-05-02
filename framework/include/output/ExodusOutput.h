@@ -39,8 +39,8 @@ protected:
   ExodusII_IO * _out;
 
   bool _seq;
-  int _file_num;                        /// number of the file
-  int _num;                             /// the number of timestep within the file
+  int _file_num;                        ///< number of the file
+  int _num;                             ///< the number of timestep within the file
   std::string getFileName(const std::string & file_base);
 };
 

@@ -231,43 +231,43 @@ protected:
 
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
-  CouplingMatrix * _cm;                                 /// Coupling matirx for variables. It is diagonal, since we do only block diagonal preconditioning.
+  CouplingMatrix * _cm;                                 ///< Coupling matirx for variables. It is diagonal, since we do only block diagonal preconditioning.
 
-  const NumericVector<Number> * _current_solution;      /// solution vector from nonlinear solver
-  NumericVector<Number> & _solution_u_dot;              /// solution vector for u^dot
-  NumericVector<Number> & _solution_du_dot_du;          /// solution vector for {du^dot}\over{du}
-  NumericVector<Number> * _residual_old;                /// residual evaluated at the old time step (need for Crank-Nicolson)
-  NumericVector<Number> & _residual_ghosted;            /// ghosted form of the residual
+  const NumericVector<Number> * _current_solution;      ///< solution vector from nonlinear solver
+  NumericVector<Number> & _solution_u_dot;              ///< solution vector for u^dot
+  NumericVector<Number> & _solution_du_dot_du;          ///< solution vector for {du^dot}\over{du}
+  NumericVector<Number> * _residual_old;                ///< residual evaluated at the old time step (need for Crank-Nicolson)
+  NumericVector<Number> & _residual_ghosted;            ///< ghosted form of the residual
 
-  NumericVector<Number> & _serialized_solution;         /// Serialized version of the solution vector
+  NumericVector<Number> & _serialized_solution;         ///< Serialized version of the solution vector
 
-  NumericVector<Number> & _residual_copy;               /// Copy of the residual vector
+  NumericVector<Number> & _residual_copy;               ///< Copy of the residual vector
 
-  Real & _t;                                            /// time
-  Real & _dt;                                           /// size of the time step
-  Real & _dt_old;                                       /// previous time step size
-  int & _t_step;                                        /// time step (number)
-  std::vector<Real> & _time_weight;                     /// Coefficients (weights) for the time discretization
-  Moose::TimeSteppingScheme _time_stepping_scheme;      /// Time stepping scheme used for time discretization
-  Real _time_stepping_order;                            /// The order of the time stepping scheme
+  Real & _t;                                            ///< time
+  Real & _dt;                                           ///< size of the time step
+  Real & _dt_old;                                       ///< previous time step size
+  int & _t_step;                                        ///< time step (number)
+  std::vector<Real> & _time_weight;                     ///< Coefficients (weights) for the time discretization
+  Moose::TimeSteppingScheme _time_stepping_scheme;      ///< Time stepping scheme used for time discretization
+  Real _time_stepping_order;                            ///< The order of the time stepping scheme
 
   // holders
-  std::vector<KernelWarehouse> _kernels;                /// Kernel storage for each thread
-  std::vector<BCWarehouse> _bcs;                        /// BC storage for each thread
-  std::vector<StabilizerWarehouse> _stabilizers;        /// Stabilizers storage for each thread
-  std::vector<DiracKernelWarehouse> _dirac_kernels;     /// Dirac Kernel storage for each thread
-  std::vector<DamperWarehouse> _dampers;                /// Dampers for each thread
+  std::vector<KernelWarehouse> _kernels;                ///< Kernel storage for each thread
+  std::vector<BCWarehouse> _bcs;                        ///< BC storage for each thread
+  std::vector<StabilizerWarehouse> _stabilizers;        ///< Stabilizers storage for each thread
+  std::vector<DiracKernelWarehouse> _dirac_kernels;     ///< Dirac Kernel storage for each thread
+  std::vector<DamperWarehouse> _dampers;                ///< Dampers for each thread
 
-  NumericVector<Number> * _increment_vec;               /// increment vector
+  NumericVector<Number> * _increment_vec;               ///< increment vector
 
-  Preconditioner<Real> * _preconditioner;               /// Preconditioner
+  Preconditioner<Real> * _preconditioner;               ///< Preconditioner
 
-  bool _need_serialized_solution;                       /// Whether or not a copy of the residual needs to be made
+  bool _need_serialized_solution;                       ///< Whether or not a copy of the residual needs to be made
 
-  bool _need_residual_copy;                             /// Whether or not a copy of the residual needs to be made
-  bool _need_residual_ghosted;                          /// Whether or not a ghosted copy of the residual needs to be made
+  bool _need_residual_copy;                             ///< Whether or not a copy of the residual needs to be made
+  bool _need_residual_ghosted;                          ///< Whether or not a ghosted copy of the residual needs to be made
 
-  std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;   /// NumericVectors that will be zeroed before a residual computation
+  std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;   ///< NumericVectors that will be zeroed before a residual computation
 
   unsigned int _n_iters;
   Real _final_residual;

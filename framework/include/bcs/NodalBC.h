@@ -42,10 +42,10 @@ public:
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
 
 protected:
-  const Node * & _current_node;                                 /// current node being processed
+  const Node * & _current_node;                                 ///< current node being processed
 
-  unsigned int _qp;                                             /// Quadrature point index
-  VariableValue & _u;                                           /// Value of the unknown variable this BC is action on
+  unsigned int _qp;                                             ///< Quadrature point index
+  VariableValue & _u;                                           ///< Value of the unknown variable this BC is action on
 
   virtual Real computeQpResidual() = 0;
 };

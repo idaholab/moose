@@ -76,12 +76,12 @@ protected:
   NumericVector<Number> * _u_saved, * _u_older_saved;
   NumericVector<Number> * _aux1, * _aux_saved, * _aux_older_saved;
 
-  Real _dt_full;                        /// dt of the big step
+  Real _dt_full;                        ///< dt of the big step
 
-  Real _error;                          /// global relative time discretization error estimate
-  Real _e_tol;                          /// error tolerance
-  Real _e_max;                          /// maximal error
-  Real _max_increase;                          /// maximum increase ratio
+  Real _error;                          ///< global relative time discretization error estimate
+  Real _e_tol;                          ///< error tolerance
+  Real _e_max;                          ///< maximal error
+  Real _max_increase;                   ///< maximum increase ratio
 
 };
 

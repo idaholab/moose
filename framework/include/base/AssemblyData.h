@@ -155,30 +155,30 @@ public:
 protected:
   MooseMesh & _mesh;
 
-  std::map<FEType, FEBase *> _fe;               /// types of finite elements
-  FEBase * _fe_helper;                          /// helper object for transforming coordinates
-  QBase * _qrule;                               /// current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
-  QBase * _qrule_volume;                        /// volumetric quadrature for the element
-  ArbitraryQuadrature * _qrule_arbitrary;       /// arbitrary quadrature rule used within the element interior
+  std::map<FEType, FEBase *> _fe;               ///< types of finite elements
+  FEBase * _fe_helper;                          ///< helper object for transforming coordinates
+  QBase * _qrule;                               ///< current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
+  QBase * _qrule_volume;                        ///< volumetric quadrature for the element
+  ArbitraryQuadrature * _qrule_arbitrary;       ///< arbitrary quadrature rule used within the element interior
   
-  const std::vector<Point> & _q_points;         /// reference to the list of quadrature points
-  const std::vector<Real> & _JxW;               /// reference to the list of transformed jacobian weights
+  const std::vector<Point> & _q_points;         ///< reference to the list of quadrature points
+  const std::vector<Real> & _JxW;               ///< reference to the list of transformed jacobian weights
 
-  std::map<FEType, FEBase *> _fe_face;          /// types of finite elements
-  FEBase * _fe_face_helper;                     /// helper object for transforming coordinates
-  QBase * _qrule_face;                          /// quadrature rule used on faces
-  const std::vector<Point> & _q_points_face;    /// reference to the quadrature points on a face
-  const std::vector<Real> & _JxW_face;          /// reference to the transformed jacobian weights on a face
-  const std::vector<Point> & _normals;          /// Normal vectors at the quadrature points.
+  std::map<FEType, FEBase *> _fe_face;          ///< types of finite elements
+  FEBase * _fe_face_helper;                     ///< helper object for transforming coordinates
+  QBase * _qrule_face;                          ///< quadrature rule used on faces
+  const std::vector<Point> & _q_points_face;    ///< reference to the quadrature points on a face
+  const std::vector<Real> & _JxW_face;          ///< reference to the transformed jacobian weights on a face
+  const std::vector<Point> & _normals;          ///< Normal vectors at the quadrature points.
 
 
-  const Elem * _current_elem;                   /// The current "element" we are currently on.
-  unsigned int _current_side;                   /// The current side of the selected element (valid only when working with sides)
-  const Elem * _current_side_elem;              /// The current "element" making up the side we are currently on.
+  const Elem * _current_elem;                   ///< The current "element" we are currently on.
+  unsigned int _current_side;                   ///< The current side of the selected element (valid only when working with sides)
+  const Elem * _current_side_elem;              ///< The current "element" making up the side we are currently on.
 
-  const Node * _current_node;                   /// The current node we are working with
+  const Node * _current_node;                   ///< The current node we are working with
 
-  std::vector<Point> _current_physical_points;  /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
+  std::vector<Point> _current_physical_points;  ///< This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
 };
 
 #endif /* ASSEMBLYDATA_H */

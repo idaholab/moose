@@ -129,14 +129,14 @@ public:
   MooseArray<MooseArray<RealTensor> > _second_zero;
 
 protected:
-  Parameters _pars;                                     /// For storing all-purpose global params
+  Parameters _pars;                                             ///< For storing all-purpose global params
 
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
 
   std::vector<Real> _time_weights;
 
-  bool _output_initial;				/// output initial condition if true
+  bool _output_initial;                                         ///< output initial condition if true
 };
 
 #endif /* PROBLEM_H */

@@ -98,7 +98,7 @@ protected:
   MProblem & _mproblem;
   MooseMesh & _mesh;
   EquationSystems _eq;
-  MooseMesh & _ref_mesh;                               /// reference mesh
+  MooseMesh & _ref_mesh;                               ///< reference mesh
   std::vector<std::string> _displacements;
 
   DisplacedSystem _displaced_nl;

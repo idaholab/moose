@@ -188,7 +188,7 @@ protected:
   AuxiliarySystem _aux;
 
   // quadrature
-  Order _quadrature_order;                              /// Quadrature order required by all variables to integrated over them.
+  Order _quadrature_order;                              ///< Quadrature order required by all variables to integrated over them.
   std::vector<AssemblyData *> _asm_info;
 
   // Initial conditions
@@ -237,17 +237,17 @@ protected:
 
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
-  bool _output_displaced;                               /// true for outputting displaced problem
-  bool _input_file_saved;                               /// whether input file has been written
+  bool _output_displaced;                               ///< true for outputting displaced problem
+  bool _input_file_saved;                               ///< whether input file has been written
 
-  bool _has_dampers;                                    /// Whether or not this system has any Dampers associated with it.
+  bool _has_dampers;                                    ///< Whether or not this system has any Dampers associated with it.
 
-  std::set<unsigned int> _ghosted_elems;                /// Elements that should have Dofs ghosted to the local processor
+  std::set<unsigned int> _ghosted_elems;                ///< Elements that should have Dofs ghosted to the local processor
 
-  PerfLog _solve_only_perf_log;                         /// Only times the solve
-  bool _output_setup_log_early;                         /// Determines if the setup log is printed before the first time step
+  PerfLog _solve_only_perf_log;                         ///< Only times the solve
+  bool _output_setup_log_early;                         ///< Determines if the setup log is printed before the first time step
 public:
-  static unsigned int _n;                               /// number of instances of MProblem (to distinguish Systems when coupling problems together)
+  static unsigned int _n;                               ///< number of instances of MProblem (to distinguish Systems when coupling problems together)
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;

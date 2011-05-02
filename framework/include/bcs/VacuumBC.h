@@ -45,7 +45,7 @@ protected:
   
   virtual Real computeQpJacobian();
 
-  Real _alpha;                                  /// Ratio of u to du/dn
+  Real _alpha;                                  ///< Ratio of u to du/dn
 };
 
 #endif //VACUUMBC_H

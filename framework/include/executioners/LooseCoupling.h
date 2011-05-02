@@ -37,11 +37,11 @@ protected:
 
   CoupledProblem _problem;
 
-  int & _t_step;                        /// Current timestep.
-  Real & _time;                         /// Current time
+  int & _t_step;                        ///< Current timestep.
+  Real & _time;                         ///< Current time
   Real _time_old;
-  Real _input_dt;                       /// The dt from the input file.
-  Real & _dt;                           /// Current delta t... or timestep size.
+  Real _input_dt;                       ///< The dt from the input file.
+  Real & _dt;                           ///< Current delta t... or timestep size.
   Real & _dt_old;
 
   Real _prev_dt;

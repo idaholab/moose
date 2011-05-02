@@ -41,7 +41,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  Function & _func;                             /// Function being used to compute the value of this kernel
+  Function & _func;                             ///< Function being used to compute the value of this kernel
 };
 
 #endif // FUNCTIONAUX_H

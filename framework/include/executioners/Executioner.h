@@ -59,7 +59,7 @@ public:
 protected:
   MooseMesh * _mesh;
 
-  bool _output_initial;				/// output initial condition if true   
+  bool _output_initial;				///< output initial condition if true
 
   /**
    * Initial Residual Variables

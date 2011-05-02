@@ -39,8 +39,8 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  std::string _postprocessor_name;                              /// Value of u on the boundary (from postprocessor).
-  Real & _value;                                                /// postprocessor value being set
+  std::string _postprocessor_name;                              ///< Value of u on the boundary (from postprocessor).
+  Real & _value;                                                ///< postprocessor value being set
 };
 
 #endif //DIRICHLETPOSTPROCESSORBC_H

@@ -106,8 +106,8 @@ public:
   MProblem * _problem;
   Executioner *_executioner;
 
-  ExodusII_IO *_exreader;                               /// auxiliary object for restart
-  bool _loose;                                          /// true if parsing input file with loose syntax
+  ExodusII_IO *_exreader;                               ///< auxiliary object for restart
+  bool _loose;                                          ///< true if parsing input file with loose syntax
 
 private:
   /**

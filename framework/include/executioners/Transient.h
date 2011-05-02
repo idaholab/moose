@@ -95,11 +95,11 @@ public:
 protected:
   MProblem _problem;
 
-  int & _t_step;                        /// Current timestep.
-  Real & _time;                         /// Current time
+  int & _t_step;                        ///< Current timestep.
+  Real & _time;                         ///< Current time
   Real _time_old;
-  Real _input_dt;                       /// The dt from the input file.
-  Real & _dt;                           /// Current delta t... or timestep size.
+  Real _input_dt;                       ///< The dt from the input file.
+  Real & _dt;                           ///< Current delta t... or timestep size.
   Real & _dt_old;
 
   Real _prev_dt;
@@ -128,8 +128,8 @@ protected:
   std::vector<Real>::iterator _curr_sync_time_iter;
   bool _remaining_sync_time;
 
-  LinearInterpolation _time_ipol;               /// Piecewise linear definition of time stepping
-  bool _use_time_ipol;                          /// true if we want to use piecewise-defined time stepping
+  LinearInterpolation _time_ipol;               ///< Piecewise linear definition of time stepping
+  bool _use_time_ipol;                          ///< true if we want to use piecewise-defined time stepping
 };
 
 #endif //TRANSIENTEXECUTIONER_H

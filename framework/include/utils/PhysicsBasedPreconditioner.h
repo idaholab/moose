@@ -86,13 +86,13 @@ public:
                      const unsigned int to_system, const unsigned int to_var, NumericVector<Number> & to_vector);
   
 protected:
-  MProblem & _mproblem;                                     /// Subproblem this preconditioner is part of
-  NonlinearSystem & _nl;                                         /// The nonlinear system this PBP is associated with (convenience reference)
-  std::vector<LinearImplicitSystem *> _systems;                 /// List of linear system that build up the preconditioner
-  std::vector<Preconditioner<Number> *> _preconditioners;       /// Holds one Preconditioner object per small system to solve.
-  std::vector<unsigned int> _solve_order;                       /// Holds the order the blocks are solved for.
-  std::vector<PreconditionerType> _pre_type;                    /// Which preconditioner to use for each solve.
-  std::vector<std::vector<unsigned int> > _off_diag;            /// Holds which off diagonal blocks to compute.
+  MProblem & _mproblem;                                         ///< Subproblem this preconditioner is part of
+  NonlinearSystem & _nl;                                        ///< The nonlinear system this PBP is associated with (convenience reference)
+  std::vector<LinearImplicitSystem *> _systems;                 ///< List of linear system that build up the preconditioner
+  std::vector<Preconditioner<Number> *> _preconditioners;       ///< Holds one Preconditioner object per small system to solve.
+  std::vector<unsigned int> _solve_order;                       ///< Holds the order the blocks are solved for.
+  std::vector<PreconditionerType> _pre_type;                    ///< Which preconditioner to use for each solve.
+  std::vector<std::vector<unsigned int> > _off_diag;            ///< Holds which off diagonal blocks to compute.
 
   /**
    * Holds pointers to the off-diagonal matrices.

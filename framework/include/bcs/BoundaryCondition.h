@@ -70,17 +70,17 @@ protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;
   SystemBase & _sys;
-  THREAD_ID _tid;                                       /// thread id
-  MooseVariable & _var;                                 /// variable this BC works on
-  MooseMesh & _mesh;                                    /// Mesh this BC is defined on
-  int _dim;                                             /// dimension of the mesh
+  THREAD_ID _tid;                                       ///< thread id
+  MooseVariable & _var;                                 ///< variable this BC works on
+  MooseMesh & _mesh;                                    ///< Mesh this BC is defined on
+  int _dim;                                             ///< dimension of the mesh
 
-  unsigned int _boundary_id;                            /// boundary ID this BC is active on
+  unsigned int _boundary_id;                            ///< boundary ID this BC is active on
 
-  const Elem * & _current_elem;                         /// current element (valid only for integrated BCs)
-  unsigned int & _current_side;                         /// current side of the current element (valid only for integrated BCs)
+  const Elem * & _current_elem;                         ///< current element (valid only for integrated BCs)
+  unsigned int & _current_side;                         ///< current side of the current element (valid only for integrated BCs)
 
-  const std::vector<Point> & _normals;                  /// normals at quadrature points (valid only for integrated BCs)
+  const std::vector<Point> & _normals;                  ///< normals at quadrature points (valid only for integrated BCs)
 
   // Single Instance Variables
   Real & _real_zero;

@@ -42,9 +42,9 @@ public:
   std::set<MooseVariable *> &boundaryVars(unsigned int bnd);
 
 protected:
-  std::vector<MooseVariable *> _vars;                                        /// list of all variables
-  std::map<std::string, MooseVariable *> _var_name;                          ///
-  std::map<unsigned int, std::set<MooseVariable *> > _boundary_vars;         /// Map to variables that need to be evaluated on a boundary
+  std::vector<MooseVariable *> _vars;                                        ///< list of all variables
+  std::map<std::string, MooseVariable *> _var_name;                          ///<
+  std::map<unsigned int, std::set<MooseVariable *> > _boundary_vars;         ///< Map to variables that need to be evaluated on a boundary
 };
 
 #endif // KERNELWAREHOUSE_H

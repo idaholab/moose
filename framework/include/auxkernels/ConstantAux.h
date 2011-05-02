@@ -42,7 +42,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  Real _value;                                  /// the value being set for the current node/element
+  Real _value;                                  ///< the value being set for the current node/element
 };
 
 #endif //CONSTANTAUX_H

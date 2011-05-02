@@ -42,11 +42,11 @@ public:
 protected:
   virtual Real computeValue();
 
-  Real _value;                                  /// The value being set for this kernel
-  std::string _operator;                        /// Operator being applied on this variable and coupled variable
+  Real _value;                                  ///< The value being set for this kernel
+  std::string _operator;                        ///< Operator being applied on this variable and coupled variable
 
-  int _coupled;                                 /// The number of the coupled variable
-  VariableValue & _coupled_val;                 /// Coupled variable
+  int _coupled;                                 ///< The number of the coupled variable
+  VariableValue & _coupled_val;                 ///< Coupled variable
 };
 
 #endif //COUPLEDAUX_H

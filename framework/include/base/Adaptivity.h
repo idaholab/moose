@@ -99,12 +99,12 @@ protected:
   MProblem & _subproblem;
   MooseMesh & _mesh;
 
-  bool _mesh_refinement_on;                     /// on/off flag reporting if the adaptivity is being used
-  MeshRefinement * _mesh_refinement;            /// A mesh refinement object to be used either with initial refinement or with Adaptivity.
-  ErrorEstimator * _error_estimator;            /// Error estimator to be used by the apps.
-  ErrorVector * _error;                         /// Error vector for use with the error estimator.
+  bool _mesh_refinement_on;                     ///< on/off flag reporting if the adaptivity is being used
+  MeshRefinement * _mesh_refinement;            ///< A mesh refinement object to be used either with initial refinement or with Adaptivity.
+  ErrorEstimator * _error_estimator;            ///< Error estimator to be used by the apps.
+  ErrorVector * _error;                         ///< Error vector for use with the error estimator.
 
-  unsigned int _initial_steps;                  /// the number of adaptivity steps to do at the beginning of simulation
+  unsigned int _initial_steps;                  ///< the number of adaptivity steps to do at the beginning of simulation
 
 };
 

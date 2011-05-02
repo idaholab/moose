@@ -34,8 +34,8 @@ public:
   virtual void sequence(bool state);
 
 protected:
-  int _file_num;                        /// number of the file
-  bool _binary;                         /// true if outputing in binary format
+  int _file_num;                        ///< number of the file
+  bool _binary;                         ///< true if outputing in binary format
 
   std::string getFileName(const std::string & file_base);
 };

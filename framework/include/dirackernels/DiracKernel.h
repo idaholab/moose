@@ -186,20 +186,20 @@ protected:
   const std::vector<std::vector<RealGradient> > & _grad_test;
   const std::vector<std::vector<RealTensor> > & _second_test;
 
-  VariableValue & _u;                                   /// Holds the solution at current quadrature points
-  VariableValue & _u_old;                               /// Holds the previous solution at the current quadrature point.
-  VariableValue & _u_older;                             /// Holds the t-2 solution at the current quadrature point.
+  VariableValue & _u;                                   ///< Holds the solution at current quadrature points
+  VariableValue & _u_old;                               ///< Holds the previous solution at the current quadrature point.
+  VariableValue & _u_older;                             ///< Holds the t-2 solution at the current quadrature point.
 
-  VariableGradient & _grad_u;                               /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u_old;                           /// Holds the previous solution gradient at the current quadrature point.
-  VariableGradient & _grad_u_older;                         /// Holds the t-2 solution gradient at the current quadrature point.
+  VariableGradient & _grad_u;                           ///< Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u_old;                       ///< Holds the previous solution gradient at the current quadrature point.
+  VariableGradient & _grad_u_older;                     ///< Holds the t-2 solution gradient at the current quadrature point.
 
   VariableSecond & _second_u;
   VariableSecond & _second_u_old;
   VariableSecond & _second_u_older;
 
-  VariableValue & _u_dot;                               /// Time derivative of u
-  VariableValue & _du_dot_du;                           /// Derivative of u_dot wrt u
+  VariableValue & _u_dot;                               ///< Time derivative of u
+  VariableValue & _du_dot_du;                           ///< Derivative of u_dot wrt u
 
   // Single Instance Variables
   Real & _real_zero;

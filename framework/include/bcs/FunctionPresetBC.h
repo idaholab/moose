@@ -39,7 +39,7 @@ protected:
    */
   virtual Real computeQpValue();
 
-  Function & _func;                             /// function being used for evaluation of this BC
+  Function & _func;                             ///< function being used for evaluation of this BC
 };
 
 #endif //FUNCTIONPRESETBC_H

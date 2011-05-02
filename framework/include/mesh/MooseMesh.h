@@ -130,7 +130,7 @@ public:
   libMesh::Mesh _mesh;
 
 protected:
-  bool _is_changed;                   /// true if mesh is changed (i.e. after adaptivity step)
+  bool _is_changed;                   ///< true if mesh is changed (i.e. after adaptivity step)
 
   // bool _is_parallel;           /// True if using a TRUE parallel mesh (ie Nemesis)
 
@@ -144,7 +144,7 @@ protected:
    * to get rebuilt all the time (which takes time).
    */
   ConstElemRange * _active_local_elem_range;
-  SemiLocalNodeRange * _active_semilocal_node_range;  /// active local + active ghosted
+  SemiLocalNodeRange * _active_semilocal_node_range;  ///< active local + active ghosted
   NodeRange * _active_node_range;
   ConstNodeRange * _local_node_range;
   ConstBndNodeRange * _bnd_node_range;
@@ -171,13 +171,13 @@ protected:
 
   std::vector<MeshModifier *> _mesh_modifiers;
 
-  std::vector<BndNode *> _bnd_nodes;                                        /// array of boundary nodes
+  std::vector<BndNode *> _bnd_nodes;                                            ///< array of boundary nodes
   typedef std::vector<BndNode *>::iterator             bnd_node_iterator_imp;
   typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
 
-  std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;        /// list of nodes that belongs to a specified block (domain)
+  std::map<unsigned int, std::set<subdomain_id_type> > _block_node_list;        ///< list of nodes that belongs to a specified block (domain)
 
-  std::map<short int, std::vector<unsigned int> > _node_set_nodes;              /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> <array of node ids>
+  std::map<short int, std::vector<unsigned int> > _node_set_nodes;              ///< list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> <array of node ids>
 
   std::set<unsigned int> _ghosted_boundaries;
   std::vector<Real> _ghosted_boundaries_inflation;
