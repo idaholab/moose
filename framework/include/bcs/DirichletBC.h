@@ -22,7 +22,11 @@ class DirichletBC;
 template<>
 InputParameters validParams<DirichletBC>();
 
-
+/**
+ * Boundary condition of a Dirichlet type
+ *
+ * Sets the value in the node
+ */
 class DirichletBC : public NodalBC
 {
 public:
@@ -31,7 +35,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  Real _value;
+  Real _value;                                  /// the value for this BC
 };
 
 #endif /* DIRICHLETBC_H */

@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<FunctionNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addRequiredParam<std::string>("function", "The forcing function.");
+  params.addRequiredParam<std::string>("function", "The function.");
   return params;
 }
 

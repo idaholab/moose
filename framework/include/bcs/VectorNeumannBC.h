@@ -44,11 +44,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   
-private:
-  /**
-   * Vector to dot with the normal.
-   */
-  VectorValue<Real> _value;
+  VectorValue<Real> _value;                             /// Vector to dot with the normal.
 };
 
 #endif //NEUMANNBC_H

@@ -23,6 +23,15 @@
 #include "fe.h"
 #include "quadrature.h"
 
+
+class IntegratedBC;
+
+template<>
+InputParameters validParams<IntegratedBC>();
+
+/**
+ * Base class for deriving any boundary condition of a integrated type
+ */
 class IntegratedBC :
   public BoundaryCondition,
   public Coupleable
@@ -40,24 +49,24 @@ public:
 protected:
   MooseVariable & _test_var;
 
-  unsigned int _qp;
-  QBase * & _qrule;
-  const std::vector< Point > & _q_point;
-  const std::vector<Real> & _JxW;
-  unsigned int _i, _j;
+  unsigned int _qp;                                                     /// quadrature point index
+  QBase * & _qrule;                                                     /// active quadrature rule
+  const std::vector< Point > & _q_point;                                /// active quadrature points
+  const std::vector<Real> & _JxW;                                       /// transformed Jacobian weights
+  unsigned int _i, _j;                                                  /// i-th, j-th index for enumerating test and shape functions
 
   // shape functions
-  const std::vector<std::vector<Real> > & _phi;
-  const std::vector<std::vector<RealGradient> > & _grad_phi;
-  const std::vector<std::vector<RealTensor> > & _second_phi;
+  const std::vector<std::vector<Real> > & _phi;                         /// shape function values (in QPs)
+  const std::vector<std::vector<RealGradient> > & _grad_phi;            /// gradients of shape functions (in QPs)
+  const std::vector<std::vector<RealTensor> > & _second_phi;            /// second derivatives of shape functions (in QPs)
   // test functions
-  const std::vector<std::vector<Real> > & _test;
-  const std::vector<std::vector<RealGradient> > & _grad_test;
-  const std::vector<std::vector<RealTensor> > & _second_test;
+  const std::vector<std::vector<Real> > & _test;                        /// test function values (in QPs)
+  const std::vector<std::vector<RealGradient> > & _grad_test;           /// gradients of test functions  (in QPs)
+  const std::vector<std::vector<RealTensor> > & _second_test;           /// second derivatives of test functions (in QPs)
   // unknown
-  const VariableValue & _u;
-  const VariableGradient & _grad_u;
-  const VariableSecond & _second_u;
+  const VariableValue & _u;                                             /// the values of the unknown variable this BC is acting on
+  const VariableGradient & _grad_u;                                     /// the gradient of the unknown variable this BC is acting on
+  const VariableSecond & _second_u;                                     /// the second derivative of the unknown variable this BC is acting on
 
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
@@ -67,8 +76,5 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 };
-
-template<>
-InputParameters validParams<IntegratedBC>();
 
 #endif /* INTEGRATEDBC_H */

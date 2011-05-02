@@ -42,11 +42,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   
-private:
-  /**
-   * Value of grad(u) on the boundary.
-   */
-  Real _value;
+  Real _value;                                  /// Value of grad(u) on the boundary.
 };
 
 #endif //WEAKGRADIENTBC_H

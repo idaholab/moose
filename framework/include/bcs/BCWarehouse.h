@@ -22,7 +22,9 @@
 #include "NodalBC.h"
 #include "PresetNodalBC.h"
 
-
+/**
+ * Warehouse for storing boundary conditions (for non-linear variables)
+ */
 class BCWarehouse
 {
 public:
@@ -48,16 +50,20 @@ public:
    */
   std::vector<NodalBC *> & getNodalBCs(unsigned int boundary_id);
   /**
-   * Get nodal boundary conditions on a specified boundary id
+   * Get presetting (;-)) nodal boundary conditions on a specified boundary id
    */
   std::vector<PresetNodalBC *> & getPresetNodalBCs(unsigned int boundary_id);
 
-  void activeBoundaries(std::set<short> & set_buffer) const;
+  /**
+   * Get list of active boundaries
+   * @param bnds[out] set of boundaries that are active
+   */
+  void activeBoundaries(std::set<short> & bnds) const;
 
 protected:
-  std::map<unsigned int, std::vector<IntegratedBC *> > _bcs;
-  std::map<unsigned int, std::vector<NodalBC *> > _nodal_bcs;
-  std::map<unsigned int, std::vector<PresetNodalBC *> > _preset_nodal_bcs;
+  std::map<unsigned int, std::vector<IntegratedBC *> > _bcs;                    /// integrated boundary conditions on a boundary
+  std::map<unsigned int, std::vector<NodalBC *> > _nodal_bcs;                   /// nodal boundary conditions on a boundary
+  std::map<unsigned int, std::vector<PresetNodalBC *> > _preset_nodal_bcs;      /// presetting nodal boundary condition on a boundary
 };
 
 #endif // BCWAREHOUSE_H

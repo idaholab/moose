@@ -25,9 +25,10 @@ InputParameters validParams<DirichletPostprocessorBC>()
 
 DirichletPostprocessorBC::DirichletPostprocessorBC(const std::string & name, InputParameters parameters) :
     NodalBC(name, parameters),
-      _postprocessor_name(getParam<std::string>("postprocessor_name")),
-      _value(getPostprocessorValue(_postprocessor_name))
-{}
+    _postprocessor_name(getParam<std::string>("postprocessor_name")),
+    _value(getPostprocessorValue(_postprocessor_name))
+{
+}
 
 Real
 DirichletPostprocessorBC::computeQpResidual()

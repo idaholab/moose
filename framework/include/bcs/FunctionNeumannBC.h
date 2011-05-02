@@ -24,7 +24,9 @@ class Function;
 template<>
 InputParameters validParams<FunctionNeumannBC>();
 
-
+/**
+ * Boundary condition of a Neumann style whose value is computed by a user-defined function
+ */
 class FunctionNeumannBC : public IntegratedBC
 {
 public:
@@ -33,7 +35,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  Function & _func;
+  Function & _func;                             /// the function being used for setting the value
 };
 
 #endif // FUNCTIONNEUMANNBC_H

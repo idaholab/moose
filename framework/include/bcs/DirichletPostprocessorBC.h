@@ -30,7 +30,6 @@ InputParameters validParams<DirichletPostprocessorBC>();
 class DirichletPostprocessorBC : public NodalBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -40,13 +39,8 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-private:
-  /**
-   * Value of u on the boundary (from postprocessor).
-   */
-  std::string _postprocessor_name;
-  
-  Real & _value;
+  std::string _postprocessor_name;                              /// Value of u on the boundary (from postprocessor).
+  Real & _value;                                                /// postprocessor value being set
 };
 
 #endif //DIRICHLETPOSTPROCESSORBC_H

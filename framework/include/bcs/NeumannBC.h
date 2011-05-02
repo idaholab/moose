@@ -40,10 +40,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   
-  /**
-   * Value of grad(u) on the boundary.
-   */
-  Real _value;
+  Real _value;                                                  /// Value of grad(u) on the boundary.
 };
 
 

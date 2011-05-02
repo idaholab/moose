@@ -27,6 +27,10 @@ class NodalBC;
 template<>
 InputParameters validParams<NodalBC>();
 
+/**
+ * Base class for deriving any boundary condition that works at nodes
+ *
+ */
 class NodalBC :
   public BoundaryCondition,
   public Coupleable
@@ -38,10 +42,10 @@ public:
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
 
 protected:
-  const Node * & _current_node;
+  const Node * & _current_node;                                 /// current node being processed
 
-  unsigned int _qp;
-  VariableValue & _u;
+  unsigned int _qp;                                             /// Quadrature point index
+  VariableValue & _u;                                           /// Value of the unknown variable this BC is action on
 
   virtual Real computeQpResidual() = 0;
 };

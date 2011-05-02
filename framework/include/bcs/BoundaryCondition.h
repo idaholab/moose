@@ -34,7 +34,15 @@ class MooseMesh;
 class Problem;
 class SubProblemInterface;
 class SystemBase;
+class BoundaryCondition;
 
+template<>
+InputParameters validParams<BoundaryCondition>();
+
+/**
+ * Base class for creating new types of boundary conditions
+ *
+ */
 class BoundaryCondition :
   public MooseObject,
   public FunctionInterface,
@@ -46,25 +54,33 @@ class BoundaryCondition :
 public:
   BoundaryCondition(const std::string & name, InputParameters parameters);
 
+  /**
+   * Gets boundary ID this BC is active on
+   * @return the boudanry ID
+   */
   unsigned int boundaryID() { return _boundary_id; }
 
+  /**
+   * Gets the varaible this BC is actve on
+   * @return the variable
+   */
   MooseVariable & variable() { return _var; }
 
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;
   SystemBase & _sys;
-  THREAD_ID _tid;
-  MooseVariable & _var;
-  MooseMesh & _mesh;
-  int _dim;
+  THREAD_ID _tid;                                       /// thread id
+  MooseVariable & _var;                                 /// variable this BC works on
+  MooseMesh & _mesh;                                    /// Mesh this BC is defined on
+  int _dim;                                             /// dimension of the mesh
 
-  unsigned int _boundary_id;
+  unsigned int _boundary_id;                            /// boundary ID this BC is active on
 
-  const Elem * & _current_elem;
-  unsigned int & _current_side;
+  const Elem * & _current_elem;                         /// current element (valid only for integrated BCs)
+  unsigned int & _current_side;                         /// current side of the current element (valid only for integrated BCs)
 
-  const std::vector<Point> & _normals;
+  const std::vector<Point> & _normals;                  /// normals at quadrature points (valid only for integrated BCs)
 
   // Single Instance Variables
   Real & _real_zero;
@@ -72,9 +88,5 @@ protected:
   MooseArray<RealGradient> & _grad_zero;
   MooseArray<RealTensor> & _second_zero;
 };
-
-
-template<>
-InputParameters validParams<BoundaryCondition>();
 
 #endif /* BOUNDARYCONDITION_H */

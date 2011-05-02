@@ -114,11 +114,14 @@ BCWarehouse::getPresetNodalBCs(unsigned int boundary_id)
 }
 
 void
-BCWarehouse::activeBoundaries(std::set<short> & set_buffer) const
+BCWarehouse::activeBoundaries(std::set<short> & bnds) const
 {
   for (std::map<unsigned int, std::vector<IntegratedBC *> >::const_iterator curr = _bcs.begin(); curr != _bcs.end(); ++curr)
-      set_buffer.insert(curr->first);
+    bnds.insert(curr->first);
 
   for (std::map<unsigned int, std::vector<NodalBC *> >::const_iterator curr = _nodal_bcs.begin(); curr != _nodal_bcs.end(); ++curr)
-      set_buffer.insert(curr->first);
+    bnds.insert(curr->first);
+
+  for (std::map<unsigned int, std::vector<PresetNodalBC *> >::const_iterator curr = _preset_nodal_bcs.begin(); curr != _preset_nodal_bcs.end(); ++curr)
+    bnds.insert(curr->first);
 }
