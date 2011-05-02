@@ -56,11 +56,12 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
 void
 ContactMaster::addPoints()
 {
-  point_to_info.clear();
+  _point_to_info.clear();
+
+  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
-
   for(; it!=end; ++it)
   {
     unsigned int slave_node_num = it->first;
@@ -86,13 +87,16 @@ ContactMaster::addPoints()
      */
 
       if(pinfo->_distance > 0)
-        _penetration_locator._has_penetrated[slave_node_num] = true;
+      {
+        has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+      }
     }
 
-    if(_penetration_locator._has_penetrated[slave_node_num])
+    std::map<unsigned int, bool>::iterator it( has_penetrated.find( slave_node_num ) );
+    if(it != has_penetrated.end() && it->second == true )
     {
       addPoint(pinfo->_elem, pinfo->_closest_point);
-      point_to_info[pinfo->_closest_point] = pinfo;
+      _point_to_info[pinfo->_closest_point] = pinfo;
     }
   }
 }
@@ -100,7 +104,7 @@ ContactMaster::addPoints()
 Real
 ContactMaster::computeQpResidual()
 {
-  PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
+  PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
 //  std::cout<<node->id()<<std::endl;
 //  long int dof_number = node->dof_number(0, _var_num, 0);
@@ -136,14 +140,12 @@ ContactMaster::computeQpResidual()
     mooseError("Invalid or unavailable contact model");
   }
 
-  return _phi[_i][_qp] * resid;
+  return _test[_i][_qp] * resid;
 }
 
 Real
 ContactMaster::computeQpJacobian()
 {
-
-//   return _test[_i][_qp] * _penalty * _phi[_j][_qp];
 
   return 0;
 /*

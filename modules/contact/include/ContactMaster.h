@@ -52,7 +52,7 @@ protected:
 
   NumericVector<Number> & _residual_copy;
 
-  std::map<Point, PenetrationLocator::PenetrationInfo *> point_to_info;
+  std::map<Point, PenetrationLocator::PenetrationInfo *> _point_to_info;
 
   unsigned int _x_var;
   unsigned int _y_var;

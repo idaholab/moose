@@ -56,9 +56,10 @@ SlaveConstraint::addPoints()
 {
   _point_to_info.clear();
 
+  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
-
   for(; it!=end; ++it)
   {
     unsigned int slave_node_num = it->first;
@@ -92,11 +93,12 @@ SlaveConstraint::addPoints()
         if(pinfo->_distance > 0)
         {
 //          std::cout<<slave_node_num<<": "<<pinfo->_distance<<std::endl;
-          _penetration_locator._has_penetrated[slave_node_num] = true;
+          has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
         }
     }
 
-    if(_penetration_locator._has_penetrated[slave_node_num] && node->processor_id() == libMesh::processor_id())
+    std::map<unsigned int, bool>::iterator it( has_penetrated.find( slave_node_num ) );
+    if(it != has_penetrated.end() && it->second == true && node->processor_id() == libMesh::processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
 
@@ -125,31 +127,30 @@ SlaveConstraint::computeQpResidual()
   PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
 
-  Real resid(0);
   RealVectorValue res_vec;
   // Build up residual vector
-  for(unsigned int i=0; i<_dim; ++i)
+  for(int i=0; i<_dim; ++i)
   {
     int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
 
-  Real constraint_mag(0);
-  RealVectorValue distance_vec;
+  const RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+  const RealVectorValue pen_force(_penalty * distance_vec);
+  Real resid(0);
   switch(_model)
   {
   case CM_FRICTIONLESS:
 
-    constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * ( (_mesh.node(node->id())(_component)) - (pinfo->_closest_point(_component)) );
+    resid = pinfo->_normal(_component) * (pinfo->_normal * ( pen_force - res_vec ));
 
-    resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
     break;
 
   case CM_GLUED:
   case CM_TIED:
-    distance_vec = _mesh.node(node->id()) - pinfo->_closest_point;
-    constraint_mag = distance_vec(_component);
-    resid = res_vec(_component);
+
+    resid = pen_force(_component) - res_vec(_component);
+
     break;
 
   default:
@@ -158,18 +159,15 @@ SlaveConstraint::computeQpResidual()
 
 //  std::cout<<node->id()<<":: "<<constraint_mag<<std::endl;
 
-  return _phi[_i][_qp] * (
-                          _penalty*(constraint_mag)
-                          - resid
-                         );
+  return _test[_i][_qp] * resid;
 }
 
 Real
 SlaveConstraint::computeQpJacobian()
 {
   PenetrationLocator::PenetrationInfo * pinfo = _point_to_info[_current_point];
-  const Node * node = pinfo->_node;
-  long int dof_number = node->dof_number(0, _var.number(), 0);
+//   const Node * node = pinfo->_node;
+//   long int dof_number = node->dof_number(0, _var.number(), 0);
 
 
 //  RealVectorValue jac_vec;
@@ -191,8 +189,23 @@ SlaveConstraint::computeQpJacobian()
      );
    */
 
-  Real constraint_mag =  pinfo->_normal(_component) * pinfo->_normal(_component) * _phi[_j][_qp];
+  Real term(0);
 
+  switch(_model)
+  {
+  case CM_FRICTIONLESS:
 
-  return _phi[_i][_qp] * ( _penalty*constraint_mag);
+    term =  _penalty * (pinfo->_normal(_component) * pinfo->_normal(_component));
+    break;
+
+  case CM_GLUED:
+  case CM_TIED:
+    term = _penalty;
+    break;
+
+  default:
+    mooseError("Invalid or unavailable contact model");
+  }
+
+  return _test[_i][_qp] * term * _phi[_j][_qp];
 }
