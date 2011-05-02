@@ -25,7 +25,8 @@ template<>
 InputParameters validParams<ProcessorIDAux>();
 
 /** 
- * ProcessorID auxiliary value
+ * ProcessorID auxiliary value (can be used only as an elemental kernel)
+ *
  */
 class ProcessorIDAux : public AuxKernel
 {

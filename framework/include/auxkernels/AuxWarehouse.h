@@ -30,7 +30,9 @@ typedef std::vector<AuxKernel *>::iterator AuxKernelIterator;
 
 
 /**
- * TODO: describe me
+ * Warehouse for storing auxiliary kernels
+ *
+ * Used inside auxiliary system to store aux. kernels
  */
 class AuxWarehouse
 {
@@ -68,9 +70,24 @@ public:
   void setActiveNodalKernels(std::list<AuxKernel *> &auxs);
   void setActiveElementKernels(std::list<AuxKernel *> &auxs);
 
+  /**
+   * Adds a boundary condition
+   * @param aux Boundary condition being added
+   */
   void addBC(AuxKernel *aux);
+
+  /**
+   * Adds a boundary condition aux kernel
+   * @param boundary_id Boundary ID this kernel works on
+   * @param aux BC kernel being added
+   */
   void addActiveBC(unsigned int boundary_id, AuxKernel *aux);
 
+  /**
+   * Adds an auxiliary kernel
+   * @param aux Kernel being added
+   * @param block_ids Set of subdomain this kernel is active on
+   */
   void addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids);
 
 protected:
@@ -82,7 +99,7 @@ protected:
   std::map<unsigned int, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;
   std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;
 
-  std::vector<AuxKernel *> _all_aux_kernels;
+  std::vector<AuxKernel *> _all_aux_kernels;                                                    /// all aux kernels
 };
 
 #endif // AUXWAREHOUSE_H
