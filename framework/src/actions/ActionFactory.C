@@ -15,8 +15,12 @@
 #include "ActionFactory.h"
 #include "Parser.h"
 
+// Static Member initialization
 ActionFactory *ActionFactory::_instance = NULL;
 
+unsigned int ActionFactory::_unique_id = 0;
+
+// Action Factory Members
 ActionFactory *ActionFactory::instance()
 {
   if (!_instance)
@@ -31,31 +35,79 @@ ActionFactory::release()
   delete _instance;
 }
 
-// Private Constructor
-ActionFactory::ActionFactory() :
-  _not_parsed_name_number(0)
+ActionFactory::~ActionFactory()
 {
-}
-
-ActionFactory:: ~ActionFactory()
-{
-  for (std::vector<Action *>::iterator i=_active_parser_blocks.begin(); i!=_active_parser_blocks.end(); ++i)
-    delete *i;
 }
 
 Action *
 ActionFactory::create(const std::string & name, InputParameters params)
 {
-  Action * action_block;
-  std::string generic_identifier = ActionFactory::instance()->isRegistered(name);
-
-  params.set<std::string>("action") = _name_to_action_map[generic_identifier];
+  std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
+  BuildInfo *build_info = NULL;
   
-  action_block = (*_name_to_build_pointer[generic_identifier])(name, params);
-  _active_parser_blocks.push_back(action_block);
+  std::string generic_identifier = ActionFactory::instance()->isRegistered(name);
+  iters = _name_to_build_info.equal_range(generic_identifier);
 
-  return action_block;
+  // Find the Action that matches the one we have registered based on unique_id
+  unsigned short count = 0;
+  for (ActionFactory::iterator it = iters.first; it != iters.second; ++it)
+  {
+    ++count;
+    if (params.have_parameter<unsigned int>("unique_id") && it->second._unique_id == params.get<unsigned int>("unique_id"))
+    {
+      build_info = &(it->second);
+      break;
+    }
+  }
+  // For backwards compatibility - If there is only one Action registered but it doesn't contain a unique_id that
+  // matches - then it surely it must still be the correct one
+  if (count == 1 && !build_info)
+    build_info = &(iters.first->second);
+  
+  if (!build_info)
+    mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
+
+  // action_blocks.push_back((*it->second._build_pointer)(name, p));
+  params.set<std::string>("action") = build_info->_action_name;
+  return (*build_info->_build_pointer)(name, params);
 }
+  
+  
+//   Action * action_block;
+//   std::string generic_identifier = ActionFactory::instance()->isRegistered(name);
+
+//   params.set<std::string>("action") = _name_to_action_map[generic_identifier];
+ 
+//   action_block = (*_name_to_build_pointer[generic_identifier])(name, params);
+//   _active_parser_blocks.push_back(action_block);
+
+//   return action_block;
+
+
+//   std::multimap<std::string, BuildInfo>::iterator it;
+//   std::pair<std::multimap<std::string, BuildInfo>::iterator, std::multimap<std::string, BuildInfo>::iterator> iters;
+  
+//   std::vector<Action *> action_blocks;
+//   std::string generic_identifier = ActionFactory::instance()->isRegistered(name);
+
+//   iters = _name_to_build_info.equal_range(generic_identifier);
+  
+//   for (it = iters.first; it != iters.second; ++it)
+//   {
+//     InputParameters p = params;
+//     p.set<std::string>("action") = it->second._action_name;
+//     action_blocks.push_back((*it->second._build_pointer)(name, p));
+//   }
+
+  
+//   //params.set<std::string>("action") = _name_to_action_map[generic_identifier];
+  
+// //  action_block = (*_name_to_build_pointer[generic_identifier])(name, params);
+// //  _active_parser_blocks.push_back(action_block);
+
+//   return action_blocks;
+// }
+
 
 Action *
 ActionFactory::createNonParsed(const std::string & name, InputParameters params)
@@ -76,27 +128,50 @@ ActionFactory::createNonParsed(const std::string & name, InputParameters params)
   return NULL;
 }
 
+
+std::vector<InputParameters>
+ActionFactory::getAllValidParams(const std::string & name)
+{
+  std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
+  std::vector<InputParameters> all_params;
+  bool is_parent;
+  
+  std::string generic_identifier = ActionFactory::instance()->isRegistered(name, &is_parent);
+  
+  // If the is_parent variable is set, that means that this block was not explicitly registered.
+  // We and we will return an empty vector
+  if (!is_parent)
+  {
+    iters = _name_to_build_info.equal_range(generic_identifier);
+  
+    if (iters.first == iters.second)
+      mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
+
+    for (ActionFactory::iterator it = iters.first; it != iters.second; ++it)
+    {
+      InputParameters params = (*it->second._params_pointer)();
+
+      // Inject the "built_by_action" param and the "unique_id" param
+      params.addPrivateParam<std::string>("built_by_action", it->second._action_name);
+      params.addPrivateParam<unsigned int>("unique_id", it->second._unique_id);
+      
+      all_params.push_back(params);
+    }
+  }
+  
+  return all_params;
+}
+
 InputParameters
 ActionFactory::getValidParams(const std::string & name)
 {
-  bool is_parent;
-  std::string generic_identifier = ActionFactory::instance()->isRegistered(name, &is_parent);
+  std::vector<InputParameters> all = getAllValidParams(name);
+  if (all.size() != 1)
+    mooseWarning(name + " is double registered in the ActionFactory but you are only retreiving parameters for one object.\nPlease call ""getAllValidParams()"" instead.");
 
-  // If the is_parent variable is set that means that this block was not registered and we will
-  // just return an empty Parameters object and have the parser deal with it
-  if (is_parent)
-    return InputParameters();
-  
-  if( _name_to_params_pointer.find(generic_identifier) == _name_to_params_pointer.end() )
-    mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
-
-  InputParameters params = _name_to_params_pointer[generic_identifier]();
-
-  // Inject the "built_by_action" param
-  params.addPrivateParam<std::string>("built_by_action", _name_to_action_map[name]);
-
-  return params;
+  return all[0];
 }
+
 
 std::string
 ActionFactory::isRegistered(const std::string & real_id, bool * is_parent)
@@ -111,16 +186,16 @@ ActionFactory::isRegistered(const std::string & real_id, bool * is_parent)
   if (is_parent == NULL)
     is_parent = &local_is_parent;  // Just so we don't have to keep checking below when we want to set the value
 
-  std::map<std::string, paramsActionPtr>::reverse_iterator i;
+  std::multimap<std::string, BuildInfo>::reverse_iterator it;
   std::vector<std::string> real_elements, reg_elements;
   std::string return_value;
 
   Parser::tokenize(real_id, real_elements);
 
   *is_parent = false;
-  for (i=_name_to_params_pointer.rbegin(); i!=_name_to_params_pointer.rend(); ++i)
+  for (it=_name_to_build_info.rbegin(); it != _name_to_build_info.rend(); ++it)
   {
-    std::string reg_id = i->first;
+    std::string reg_id = it->first;
     if (reg_id == real_id)
     {
       *is_parent = false;
@@ -173,15 +248,21 @@ ActionFactory::buildAllBuildableActions(const std::string & action, Parser * p_p
 
   for (it = iters.first; it != iters.second; ++it)
   {
-    InputParameters params = getValidParams(it->second);
-    // FIXME: HACK
-    params.set<Parser *>("parser_handle") = p_ptr;
+    std::vector<InputParameters> all_params = getAllValidParams(it->second);
 
-    if (params.areAllRequiredParamsValid())
+    for (std::vector<InputParameters>::iterator jt = all_params.begin(); jt != all_params.end(); ++jt)
     {
-      Moose::action_warehouse.addActionBlock(create(it->second, params));
-      ret_value = true;
+      
+      // FIXME: HACK
+      jt->set<Parser *>("parser_handle") = p_ptr;
+
+      if (jt->areAllRequiredParamsValid())
+      {
+        Moose::action_warehouse.addActionBlock(create(it->second, *jt));
+        ret_value = true;
+      }
     }
+    
   }
 
   return ret_value;

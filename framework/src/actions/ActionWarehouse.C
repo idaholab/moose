@@ -114,7 +114,7 @@ ActionWarehouse::inputFileActionsBegin()
   // We'll push one more "empty" action onto the end so that when we print the input syntax
   // everything will get closed off without any odd tail calls.  Had to do delayed construction
   if (_empty_action == NULL)
-  {
+  { 
     InputParameters pars = validParams<EmptyAction>();
     _empty_action = ActionFactory::instance()->createNonParsed("finish_input_file_output", pars);       // no memory leak here, this action gets deleted in Actionfactory
   }

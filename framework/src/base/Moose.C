@@ -399,6 +399,7 @@ registerActions()
 {
   registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
   registerAction(ReadMeshAction, "Mesh", "read_mesh");
+  registerAction(SetupMeshAction, "Mesh", "setup_mesh");
   registerAction(AddFunctionAction, "Functions/*", "add_function");
   registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");
   registerAction(SetupOutputAction, "Output", "setup_output");
@@ -436,7 +437,6 @@ registerActions()
   registerAction(AddDiracKernelAction, "DiracKernels/*", "add_dirac_kernel");
 
   // NonParsedActions
-  registerNonParsedAction(SetupMeshAction, "setup_mesh");
   registerNonParsedAction(SetupDampersAction, "setup_dampers");
   registerNonParsedAction(EmptyAction, "ready_to_init");
   registerNonParsedAction(InitProblemAction, "init_problem");

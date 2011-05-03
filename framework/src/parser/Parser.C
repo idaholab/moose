@@ -203,26 +203,32 @@ Parser::parse(const std::string &input_filename)
     curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
     
     // Extract the block parameters before constructing the action
-    InputParameters params = ActionFactory::instance()->getValidParams(*i);
+    // There may be more than one Action registered for a given section in which case we need to
+    // build them all
+    std::vector<InputParameters> all_params = ActionFactory::instance()->getAllValidParams(*i);
 
     // Before we build any objects we need to make sure that the section they are in is active
-    // and that they aren't an unregistered parent (signified by an empty params object)
-    if (isSectionActive(curr_identifier, active_lists) && params.n_parameters() != 0)
+    // and that they aren't an unregistered parent (signified by an empty vector)
+    if (isSectionActive(curr_identifier, active_lists) && !all_params.empty())
     {
-      params.set<Parser *>("parser_handle") = this;
+      for (std::vector<InputParameters>::iterator it = all_params.begin(); it != all_params.end(); ++it)
+      {
+        InputParameters params = *it;
+        params.set<Parser *>("parser_handle") = this;
     
-      extractParams(curr_identifier, params);
+        extractParams(curr_identifier, params);
 
-      // Create the Action
-      Action * action = ActionFactory::instance()->create(curr_identifier, params);
+        // Create the Action
+        Action * action = ActionFactory::instance()->create(curr_identifier, params);
 
-      // extract the MooseObject params if necessary
-      MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-      if (moose_object_action)
-        extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
+        // extract the MooseObject params if necessary
+        MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+        if (moose_object_action)
+          extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
     
-      // add it to the warehouse
-      Moose::action_warehouse.addActionBlock(action);
+        // add it to the warehouse
+        Moose::action_warehouse.addActionBlock(action);
+      }
     }
 
     // Extract and save the current "active" list in the datastructure
@@ -253,36 +259,41 @@ Parser::parse(const std::string &input_filename)
 void
 Parser::buildFullTree( void (Parser::*data_printer)(const std::string &name, const std::string *type, std::vector<InputParameters *> & param_ptrs) )
 {
-  for (registeredActionIterator act_obj = ActionFactory::instance()->registeredActionsBegin();
-       act_obj != ActionFactory::instance()->registeredActionsEnd();
+  for (ActionFactory::iterator act_obj = ActionFactory::instance()->begin();
+       act_obj != ActionFactory::instance()->end();
        ++act_obj)
   {
-    InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_obj->first);
-    const std::string & action_name = act_obj->second;
+    std::vector<InputParameters> all_action_params = ActionFactory::instance()->getAllValidParams(act_obj->first);
 
-    std::vector<InputParameters *> params_ptrs(2);
-    params_ptrs[0] = &action_obj_params;
-
-    if (action_obj_params.have_parameter<std::string>("built_by_action") &&
-        action_obj_params.get<std::string>("built_by_action") == action_name &&
-        ActionFactory::instance()->isParsed(act_obj->first))
+    for (std::vector<InputParameters>::iterator it = all_action_params.begin(); it != all_action_params.end(); ++it)
     {
-      params_ptrs[1] = NULL;
-      (this->*data_printer)(act_obj->first, NULL, params_ptrs);
-    }
+      InputParameters action_obj_params = *it;
+      const std::string & action_name = act_obj->second._action_name;
+
+      std::vector<InputParameters *> params_ptrs(2);
+      params_ptrs[0] = &action_obj_params;
+
+      if (action_obj_params.have_parameter<std::string>("built_by_action") &&
+          action_obj_params.get<std::string>("built_by_action") == action_name &&
+          ActionFactory::instance()->isParsed(act_obj->first))
+      {
+        params_ptrs[1] = NULL;
+        (this->*data_printer)(act_obj->first, NULL, params_ptrs);
+      }
     
     
-    for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
-         moose_obj != Factory::instance()->registeredObjectsEnd();
-         ++moose_obj)
-    {
-      InputParameters moose_obj_params = (moose_obj->second)();
+      for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
+           moose_obj != Factory::instance()->registeredObjectsEnd();
+           ++moose_obj)
+      {
+        InputParameters moose_obj_params = (moose_obj->second)();
       
-      if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
-          moose_obj_params.get<std::string>("built_by_action") == action_name)
-      { 
-        params_ptrs[1] = &moose_obj_params;
-        (this->*data_printer)(act_obj->first, &(moose_obj->first), params_ptrs);
+        if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
+            moose_obj_params.get<std::string>("built_by_action") == action_name)
+        { 
+          params_ptrs[1] = &moose_obj_params;
+          (this->*data_printer)(act_obj->first, &(moose_obj->first), params_ptrs);
+        }
       }
     }
   }

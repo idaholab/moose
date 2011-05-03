@@ -35,6 +35,9 @@
 // TODO: This will change when action_warehouse is moved inside of some system
 #define addActionNameDependency(action, depends_on)       Moose::action_warehouse.addDependency(action, depends_on)
 
+// Forward Declaration
+class ActionFactory;
+
 /**
  * Typedef for function to build objects
  */
@@ -45,10 +48,6 @@ typedef Action * (*buildActionPtr)(const std::string & name, InputParameters par
  */
 typedef InputParameters (*paramsActionPtr)();
 
-/**
- * Typedef for registered Action iterator
- */
-typedef std::map<std::string, std::string>::iterator registeredActionIterator;
 
 /**
  * Build an object of type T
@@ -59,9 +58,8 @@ Action * buildAction(const std::string & name, InputParameters parameters)
   return new T(name, parameters);
 }
 
-
 /**
- * Generic factory class for build all sorts of objects
+ * Specialized factory for generaric Action System objects
  */
 class ActionFactory
 {
@@ -69,21 +67,23 @@ public:
   static ActionFactory *instance();
 
   static void release();
-
+  
   virtual ~ActionFactory();
 
   template<typename T>
   void reg(const std::string & name, const std::string & action_name)
   {
-    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
-    {
-      _name_to_build_pointer[name] = &buildAction<T>;
-      _name_to_params_pointer[name] = &validParams<T>;
-      _name_to_action_map[name] = action_name;
-      _action_to_name_map.insert(std::make_pair(action_name, name));
-    }
-    else
-      mooseError("Action '" + name + "' already registered.");
+    BuildInfo build_info;
+    build_info._build_pointer = &buildAction<T>;
+    build_info._params_pointer = &validParams<T>;
+    build_info._action_name = action_name;
+    build_info._unique_id = _unique_id++;
+    _name_to_build_info.insert(std::make_pair(name, build_info));
+    
+    //_name_to_build_pointer.insert(std::make_pair(name, &buildAction<T>));
+    //_name_to_params_pointer.insert(std::make_pair(name, &validParams<T>));
+    //_name_to_action_map.insert(std::make_pair(name, action_name));
+    _action_to_name_map.insert(std::make_pair(action_name, name));
   }
 
   template<typename T>
@@ -94,7 +94,7 @@ public:
     name << action_name << "_";
     name.width(2);
     name.fill('0');
-    name << _not_parsed_name_number++;
+    name << _unique_id;
 
     _non_parsed.insert(name.str());
     reg<T>(name.str(), action_name);
@@ -104,6 +104,7 @@ public:
   Action * createNonParsed(const std::string & name, InputParameters params);
 
   InputParameters getValidParams(const std::string & name);
+  std::vector<InputParameters> getAllValidParams(const std::string & name);
 
   std::string isRegistered(const std::string & real_id, bool * is_parent = NULL);
 
@@ -115,27 +116,80 @@ public:
    */
   bool buildAllBuildableActions(const std::string & action_name, Parser * p_ptr);
 
-  registeredActionIterator registeredActionsBegin() { return _name_to_action_map.begin(); }
-  registeredActionIterator registeredActionsEnd() { return _name_to_action_map.end(); }
+  class BuildInfo
+  {
+  public:
+    buildActionPtr _build_pointer;
+    paramsActionPtr _params_pointer;
+    std::string _action_name;
+    unsigned int _unique_id;
+  };
+  
+  /**
+   * Typedef for registered Action iterator
+   **/
+  typedef std::multimap<std::string, BuildInfo>::iterator iterator;
+  typedef std::multimap<std::string, BuildInfo>::const_iterator const_iterator;
 
-  bool isParsed(const std::string & name) const { return _non_parsed.find(name) == _non_parsed.end(); }
+  iterator begin();
+  const_iterator begin() const;
 
-protected:
-  std::map<std::string, buildActionPtr>  _name_to_build_pointer;
-  std::map<std::string, paramsActionPtr> _name_to_params_pointer;
-  std::map<std::string, std::string> _name_to_action_map;
+  iterator end();
+  const_iterator end() const;
+
+  bool isParsed(const std::string & name) const;
+  
+  std::multimap<std::string, BuildInfo> _name_to_build_info;
+//  std::multimap<std::string, buildActionPtr>  _name_to_build_pointer;
+//  std::multimap<std::string, paramsActionPtr> _name_to_params_pointer;
+//  std::multimap<std::string, std::string> _name_to_action_map;
+  
   std::set<std::string> _non_parsed;
   std::multimap<std::string, std::string> _action_to_name_map;
 
   std::vector<std::string> _registered_parser_block_names;
-  std::vector<Action *> _active_parser_blocks;
-  unsigned int _not_parsed_name_number;
+//  std::vector<Action *> _active_parser_blocks;
 
-  static ActionFactory *_instance;
+  
+  static unsigned int _unique_id;        ///< Unique ID for identifing multiple registrations
+  
+  static ActionFactory *_instance;       ///< Pointer to the singleton instance
 
 private:
   // Private constructor for singleton pattern
-  ActionFactory();
+  ActionFactory() {}
 };
+
+// -----------------------------------------------------------------------------
+// ActionFactory class inline methods
+inline
+ActionFactory::iterator ActionFactory::begin()
+{
+  return _name_to_build_info.begin();
+}
+
+inline
+ActionFactory::const_iterator ActionFactory::begin() const
+{
+  return _name_to_build_info.begin();
+}
+
+inline
+ActionFactory::iterator ActionFactory::end()
+{
+  return _name_to_build_info.begin();
+}
+
+inline
+ActionFactory::const_iterator ActionFactory::end() const
+{
+  return _name_to_build_info.begin();
+}
+
+inline
+bool ActionFactory::isParsed(const std::string & name) const
+{
+  return _non_parsed.find(name) == _non_parsed.end();
+}
 
 #endif /* ACTIONFACTORY_H */
