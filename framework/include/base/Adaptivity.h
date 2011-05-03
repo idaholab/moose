@@ -70,6 +70,11 @@ public:
   void setErrorNorm(SystemNorm &sys_norm);
 
   /**
+   *
+   */
+  void setPrintMeshChanged(bool state = true) { _print_mesh_changed = state; }
+
+  /**
    * Perform initial adaptivity steps
    *
    * FIXME: better name
@@ -95,6 +100,13 @@ public:
    */
   bool isOn() { return _mesh_refinement_on; }
 
+  /**
+   * Sets the time when the adaptivity is active
+   * @param start_time The time when adaptivity starts
+   * @param stop_time The time when adaptivity stops
+   */
+  void setTimeActive(Real start_time, Real stop_time);
+
 protected:
   MProblem & _subproblem;
   MooseMesh & _mesh;
@@ -104,8 +116,13 @@ protected:
   ErrorEstimator * _error_estimator;            ///< Error estimator to be used by the apps.
   ErrorVector * _error;                         ///< Error vector for use with the error estimator.
 
+  bool _print_mesh_changed;                     ///< True if we want to print out info when mesh has changed
+
   unsigned int _initial_steps;                  ///< the number of adaptivity steps to do at the beginning of simulation
 
+  Real & _t;                                    ///< Time
+  Real _start_time;                             ///< When adaptivity start
+  Real _stop_time;                              ///< When adaptivity stops
 };
 
 template<typename T>

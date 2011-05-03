@@ -36,7 +36,9 @@ InputParameters validParams<AdaptivityAction>()
   params.addParam<Real> ("coarsen_fraction",                   0.0, "The fraction of elements or error to coarsen. Should be between 0 and 1.");
   params.addParam<unsigned int> ("max_h_level",                0, "Maximum number of times a single element can be refined. If 0 then infinite.");
   params.addParam<std::string> ("error_estimator",             "KellyErrorEstimator", "The class name of the error estimator you want to use.");
-  params.addParam<bool> ("print_changed_info",                 false, "Determines whether information about the mesh is printed when adapativity occors");
+  params.addParam<bool> ("print_changed_info",                 false, "Determines whether information about the mesh is printed when adapativity occurs");
+  params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that adaptivity will be active after.");
+  params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which adaptivity will no longer be active.");
 
   params.addParam<std::vector<std::string> > ("weight_names", "List of names of variables that will be associated with weight_values");
   params.addParam<std::vector<Real> > ("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by");
@@ -68,7 +70,7 @@ AdaptivityAction::act()
   adapt.setParam("coarsen fraction", getParam<Real>("coarsen_fraction"));
   adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));
 
-  mproblem.setPrintMeshChanged(getParam<bool>("print_changed_info"));
+  adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
 
   const std::vector<std::string> & weight_names = getParam<std::vector<std::string> >("weight_names");
   const std::vector<Real> & weight_values = getParam<std::vector<Real> >("weight_values");
@@ -98,6 +100,8 @@ AdaptivityAction::act()
 
     adapt.setErrorNorm(sys_norm);
   }
+
+  adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
 }
 
 unsigned int

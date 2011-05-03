@@ -175,8 +175,6 @@ public:
 #endif //LIBMESH_ENABLE_AMR
   virtual void meshChanged();
 
-  void setPrintMeshChanged(bool state = true) { _print_mesh_changed = state; }
-
   void checkProblemIntegrity();
 
   void serializeSolution();
@@ -227,8 +225,6 @@ protected:
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
 #endif
-
-  bool _print_mesh_changed;
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;

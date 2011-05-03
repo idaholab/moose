@@ -78,7 +78,6 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
-    _print_mesh_changed(false),
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
     _geometric_search_data(*this, _mesh),
@@ -1175,12 +1174,6 @@ MProblem::meshChanged()
 
   if(_displaced_problem != NULL)
     _displaced_problem->meshChanged();
-
-  if (_print_mesh_changed)
-  {
-    std::cout << "\nMesh Changed:\n";
-    _mesh.printInfo();
-  }
 }
 
 void

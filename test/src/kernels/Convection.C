@@ -24,11 +24,11 @@ Convection::Convection(const std::string & name, InputParameters parameters) :
 Real
 Convection::computeQpResidual()
 {
-  return - _grad_test[_i][_qp] * (_velocity * _u[_qp]);
+  return _test[_i][_qp]*(_velocity*_grad_u[_qp]);
 }
 
 Real
 Convection::computeQpJacobian()
 {
-  return - _grad_test[_i][_qp] * (_velocity * _test[_j][_qp]);
+  return _test[_i][_qp]*(_velocity*_grad_phi[_j][_qp]);
 }

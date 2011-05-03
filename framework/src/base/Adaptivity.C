@@ -32,7 +32,11 @@ Adaptivity::Adaptivity(MProblem & subproblem) :
     _mesh_refinement(NULL),
     _error_estimator(NULL),
     _error(NULL),
-    _initial_steps(0)
+    _print_mesh_changed(false),
+    _initial_steps(0),
+    _t(_subproblem.time()),
+    _start_time(-std::numeric_limits<Real>::max()),
+    _stop_time(std::numeric_limits<Real>::max())
 {
 }
 
@@ -102,7 +106,7 @@ Adaptivity::initial()
 void
 Adaptivity::adaptMesh()
 {
-  if (_mesh_refinement_on)
+  if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time))
   {
     // Compute the error for each active element
     _error_estimator->estimate_error(_subproblem.getNonlinearSystem().sys(), *_error);
@@ -112,7 +116,20 @@ Adaptivity::adaptMesh()
 
     // Perform refinement and coarsening
     _mesh_refinement->refine_and_coarsen_elements();
+
+    if (_print_mesh_changed)
+    {
+      std::cout << "\nMesh Changed:\n";
+      _mesh.printInfo();
+    }
   }
+}
+
+void
+Adaptivity::setTimeActive(Real start_time, Real stop_time)
+{
+  _start_time = start_time;
+  _stop_time = stop_time;
 }
 
 #endif //LIBMESH_ENABLE_AMR
