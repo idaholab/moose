@@ -22,7 +22,11 @@
 template<>
 InputParameters validParams<CopyNodalVarsAction>()
 {
-  return validParams<Action>();
+  InputParameters params = validParams<Action>();
+  params.addParam<int>("initial_from_file_timestep", 2, "Gives the timestep for which to read a solution from a file for a given variable");
+  params.addParam<std::string>("initial_from_file_var", "Gives the name of a variable for which to read an initial condition from a mesh file");
+  
+  return params;
 }
 
 CopyNodalVarsAction::CopyNodalVarsAction(const std::string & name, InputParameters params) :
@@ -33,21 +37,18 @@ CopyNodalVarsAction::CopyNodalVarsAction(const std::string & name, InputParamete
 void
 CopyNodalVarsAction::act() 
 {
-  std::map<std::string, SystemBase *> action_system;
-  action_system["add_variable"] = &_parser_handle._problem->getNonlinearSystem();
-  action_system["add_aux_variable"] = &_parser_handle._problem->getAuxiliarySystem();
-   
-  for (std::map<std::string, SystemBase *>::iterator it = action_system.begin(); it != action_system.end(); ++it)
+  SystemBase * system;
+  
+  if (isParamValid("initial_from_file_var"))
   {
-    ActionIterator var_it = Moose::action_warehouse.actionBlocksWithActionBegin(it->first);
-    for ( ; var_it != Moose::action_warehouse.actionBlocksWithActionEnd(it->first); ++var_it)
-    {
-      if (AddVariableAction * var_action = dynamic_cast<AddVariableAction *>(*var_it))
-      {
-        std::pair<std::string, unsigned int> init_pair = var_action->initialValuePair();
-        if (init_pair.first != "")
-          it->second->copyNodalValues(*_parser_handle._exreader, init_pair.first, init_pair.second);
-      }
-    }
+    // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
+    if (getAction() == "copy_nodal_vars")
+      system = &_parser_handle._problem->getNonlinearSystem();
+    else
+      system = &_parser_handle._problem->getAuxiliarySystem();
+
+    system->copyNodalValues(*_parser_handle._exreader,
+                            getParam<std::string>("initial_from_file_var"),
+                            getParam<int>("initial_from_file_timestep"));
   }
 }

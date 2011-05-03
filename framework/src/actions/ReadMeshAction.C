@@ -70,6 +70,7 @@ ReadMeshAction::act()
 
       // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
       // to only perform the copy nodal variables action when using the Exodus reader
+      // IMPORTANT: When unhacking this make sure to fix CopyNodalVarsAction as well
       _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
   
       Moose::setup_perf_log.push("Read Mesh","Setup");

@@ -82,7 +82,7 @@ private:
   std::vector<std::string> _ordered_names;
   
   /// Used to store the action name for the current active action Block iterator
-  std::string _curr_action_name;
+  //std::string _curr_action_name;
 
   Action * _empty_action;
 

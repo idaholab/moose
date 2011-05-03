@@ -38,8 +38,6 @@ InputParameters validParams<AddVariableAction>()
   params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for this variable");
   params.addParam<Real>("initial_condition", 0.0, "Specifies the initial condition for this variable");
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
-  params.addParam<int>("initial_from_file_timestep", 2, "Gives the timestep for which to read a solution from a file for a given variable");
-  params.addParam<std::string>("initial_from_file_var", "Gives the name of a variable for which to read an initial condition from a mesh file");
   params.addParam<std::vector<unsigned int> >("block", "The block id where this variable lives");
 
   return params;
@@ -93,10 +91,6 @@ AddVariableAction::act()
   Real initial = getParam<Real>("initial_condition");
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
     _parser_handle._problem->addInitialCondition(var_name, initial);
-
-  // retrieve initial conditions from exodus file
-  _variable_to_read = getParam<std::string>("initial_from_file_var");
-  _timestep_to_read = getParam<int>("initial_from_file_timestep");
 }
 
 bool
@@ -115,11 +109,4 @@ AddVariableAction::autoResizeable() const
     return true;
   else
     return false;
-}
-
-
-std::pair<std::string, unsigned int>
-AddVariableAction::initialValuePair() const
-{
-  return std::pair<std::string, unsigned int>(_variable_to_read, _timestep_to_read);
 }

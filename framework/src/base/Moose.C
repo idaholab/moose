@@ -255,6 +255,7 @@ addActionTypes()
   registerActionName("setup_output", true);
   registerActionName("init_problem", true);
   registerActionName("copy_nodal_vars", true);
+  registerActionName("copy_nodal_aux_vars", true);
   registerActionName("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
   registerActionName("setup_dampers", true);
   registerActionName("check_integrity", true);
@@ -314,7 +315,7 @@ addActionTypes()
 "(ready_to_init)"
 "(setup_dampers)"
 "(init_problem)"
-"(copy_nodal_vars)"
+"(copy_nodal_vars, copy_nodal_aux_vars)"
 "(add_material)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
@@ -340,29 +341,33 @@ addActionTypes()
  * if similar logic can work in multiple cases
  *
  * Example:
- * "add_variable" <-----                       -> [Variables/*]
+ * "add_variable" <-----                       -> [Variables/ *]
  *                       \                   /
  *                         AddVariableAction
  *                       /                   \
- * "add_aux_variable" <-                       -> [AuxVariables/*]
+ * "add_aux_variable" <-                       -> [AuxVariables/ *]
  *
  */
 void
 registerActions()
 {
   registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
-  registerAction(ReadMeshAction, "Mesh", "read_mesh");
+  registerAction(ReadMeshAction, "Mesh", "read_mesh");  
   registerAction(SetupMeshAction, "Mesh", "setup_mesh");
   registerAction(AddFunctionAction, "Functions/*", "add_function");
   registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");
   registerAction(SetupOutputAction, "Output", "setup_output");
   registerAction(GlobalParamsAction, "GlobalParams", "set_global_params");
 
-
   /// MooseObjectActions
   registerAction(AddMeshModifierAction, "Mesh/*", "add_mesh_modifier");
+
+  /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "Variables/*", "add_variable");
+  registerAction(CopyNodalVarsAction, "Variables/*", "copy_nodal_vars");
   registerAction(AddVariableAction, "AuxVariables/*", "add_aux_variable");
+  registerAction(CopyNodalVarsAction, "AuxVariables/*", "copy_nodal_aux_vars");
+
   registerAction(AddICAction, "Variables/*/InitialCondition", "add_ic");
   registerAction(AddICAction, "AuxVariables/*/InitialCondition", "add_ic");
   registerAction(AddKernelAction, "Kernels/*", "add_kernel");
@@ -393,7 +398,6 @@ registerActions()
   registerNonParsedAction(SetupDampersAction, "setup_dampers");
   registerNonParsedAction(EmptyAction, "ready_to_init");
   registerNonParsedAction(InitProblemAction, "init_problem");
-  registerNonParsedAction(CopyNodalVarsAction, "copy_nodal_vars");
   registerNonParsedAction(CheckIntegrityAction, "check_integrity");
 
   registerActionName("finish_input_file_output", false);
