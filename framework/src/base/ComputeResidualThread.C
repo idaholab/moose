@@ -55,10 +55,9 @@ ComputeResidualThread::onElement(const Elem *elem)
   _problem.reinitMaterials(subdomain, _tid);
 
   //Stabilizers
-  StabilizerIterator stabilizer_begin = _sys._stabilizers[_tid].activeStabilizersBegin();
-  StabilizerIterator stabilizer_end = _sys._stabilizers[_tid].activeStabilizersEnd();
-  StabilizerIterator stabilizer_it = stabilizer_begin;
-  for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+  for (std::vector<Stabilizer *>::const_iterator stabilizer_it=_sys._stabilizers[_tid].active().begin();
+      stabilizer_it != _sys._stabilizers[_tid].active().end();
+      stabilizer_it++)
     (*stabilizer_it)->computeTestFunctions();
 
   for (std::vector<Kernel *>::const_iterator kernel_it = _sys._kernels[_tid].active().begin(); kernel_it != _sys._kernels[_tid].active().end(); ++kernel_it)

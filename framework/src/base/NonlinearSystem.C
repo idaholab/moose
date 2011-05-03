@@ -424,9 +424,9 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
     (*kernel_it)->subdomainSetup();
 
   //Stabilizers
-  StabilizerIterator stabilizer_begin = _stabilizers[tid].activeStabilizersBegin();
-  StabilizerIterator stabilizer_end = _stabilizers[tid].activeStabilizersEnd();
-  for(StabilizerIterator stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+  for(std::vector<Stabilizer *>::const_iterator stabilizer_it = _stabilizers[tid].active().begin();
+      stabilizer_it != _stabilizers[tid].active().end();
+      stabilizer_it++)
     (*stabilizer_it)->subdomainSetup();
 }
 
@@ -656,10 +656,6 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
     MeshBase::const_element_iterator el = _mesh.active_local_elements_begin();
     const MeshBase::const_element_iterator end_el = _mesh.active_local_elements_end();
 
-    StabilizerIterator stabilizer_begin = _stabilizers[tid].activeStabilizersBegin();
-    StabilizerIterator stabilizer_end = _stabilizers[tid].activeStabilizersEnd();
-    StabilizerIterator stabilizer_it = stabilizer_begin;
-
     unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     DofMap & dof_map = precond_system.get_dof_map();
@@ -693,7 +689,9 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
         _problem.parent()->reinitMaterials(cur_subdomain, tid);
 
         //Stabilizers
-        for(stabilizer_it=stabilizer_begin;stabilizer_it!=stabilizer_end;stabilizer_it++)
+        for(std::vector<Stabilizer *>::const_iterator stabilizer_it = _stabilizers[tid].active().begin();
+            stabilizer_it != _stabilizers[tid].active().end();
+            stabilizer_it++)
           (*stabilizer_it)->computeTestFunctions();
 
         //Kernels

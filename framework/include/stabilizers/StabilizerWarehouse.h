@@ -17,12 +17,6 @@
 
 #include "Stabilizer.h"
 
-/**
- * Typedef to hide implementation details
- */
-typedef std::vector<Stabilizer *>::iterator StabilizerIterator;
-
-
 class StabilizerWarehouse
 {
 public:
@@ -31,13 +25,12 @@ public:
 
   bool isStabilized(unsigned int var_num);
 
-  StabilizerIterator activeStabilizersBegin();
-  StabilizerIterator activeStabilizersEnd();
+  const std::vector<Stabilizer *> & active() { return _active_stabilizers; }
 
-  StabilizerIterator blockStabilizersBegin(unsigned int block_id);
-  StabilizerIterator blockStabilizersEnd(unsigned int block_id);
+  const std::vector<Stabilizer *> & blockStabilizers(unsigned int block_id) { return _block_stabilizers[block_id]; }
 
   void addStabilizer(Stabilizer *stabilizer);
+
   void addBlockStabilizer(unsigned int block_id, Stabilizer *stabilizer);
 
 protected:
