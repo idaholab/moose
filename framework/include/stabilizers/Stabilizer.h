@@ -32,8 +32,14 @@
 class SubProblem;
 class SystemBase;
 class MooseVariable;
+class Stabilizer;
+
+template<>
+InputParameters validParams<Stabilizer>();
 
 /**
+ * Base class for deriving new stabiler objects
+ *
  * Stabilizers compute modified test function spaces to stabilize oscillating solutions.
  */
 class Stabilizer :
@@ -45,7 +51,6 @@ public:
    * Constructor
    *
    * @param name The name given to the initial condition in the input file.
-   * @param moose_system The reference to the MooseSystem that this object is contained within
    * @param parameters The parameters object holding data for the class to use.
    */
   Stabilizer(const std::string & name, InputParameters parameters);
@@ -67,18 +72,18 @@ public:
 
 protected:
   SubProblem & _subproblem;
-  THREAD_ID _tid;
+  THREAD_ID _tid;                                       ///< thread ID
 
-  MooseVariable & _var;
+  MooseVariable & _var;                                 ///< variable this stabilizer acts on
 
-  const Elem * & _current_elem;
+  const Elem * & _current_elem;                         ///< current element we work on
 
-  unsigned int _qp;
-  const std::vector< Point > & _q_point;
-  QBase * & _qrule;
-  const std::vector<Real> & _JxW;
+  unsigned int _qp;                                     ///< quadrature point index
+  const std::vector< Point > & _q_point;                ///< quadrature points
+  QBase * & _qrule;                                     ///< quadrature rule
+  const std::vector<Real> & _JxW;                       ///< transformed Jacobian weights
 
-   unsigned int _i, _j;
+   unsigned int _i, _j;                                 ///< i-th and j-th index for enumerating test and shape functions
    // shape functions
    const std::vector<std::vector<Real> > & _phi;
    const std::vector<std::vector<RealGradient> > & _grad_phi;
@@ -94,8 +99,5 @@ protected:
    */
   std::vector<std::vector<RealGradient> > & _grad_test;
 };
-
-template<>
-InputParameters validParams<Stabilizer>();
 
 #endif //STABILIZER_H

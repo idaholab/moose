@@ -43,7 +43,6 @@ public:
    * Constructor
    *
    * @param name The name given to the initial condition in the input file.
-   * @param moose_system The reference to the MooseSystem that this object is contained within
    * @param parameters The parameters object holding data for the class to use.
    */
   SUPGBase(const std::string & name, InputParameters parameters);
@@ -63,15 +62,8 @@ protected:
    */
   virtual void computeTausAndVelocities() = 0;
   
-  /**
-   * The velocity at each quadrature point.
-   */
-  std::vector<RealVectorValue> _velocity;
-
-  /**
-   * The Taus at each quadrature point.
-   */
-  std::vector<Real> _tau;
+  std::vector<RealVectorValue> _velocity;                       ///< The velocity at each quadrature point
+  std::vector<Real> _tau;                                       ///< The Taus at each quadrature point
 };
 
 #endif //SUPGBASE_H
