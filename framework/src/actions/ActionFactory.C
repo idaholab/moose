@@ -72,43 +72,6 @@ ActionFactory::create(const std::string & name, InputParameters params)
   return (*build_info->_build_pointer)(name, params);
 }
   
-  
-//   Action * action_block;
-//   std::string generic_identifier = ActionFactory::instance()->isRegistered(name);
-
-//   params.set<std::string>("action") = _name_to_action_map[generic_identifier];
- 
-//   action_block = (*_name_to_build_pointer[generic_identifier])(name, params);
-//   _active_parser_blocks.push_back(action_block);
-
-//   return action_block;
-
-
-//   std::multimap<std::string, BuildInfo>::iterator it;
-//   std::pair<std::multimap<std::string, BuildInfo>::iterator, std::multimap<std::string, BuildInfo>::iterator> iters;
-  
-//   std::vector<Action *> action_blocks;
-//   std::string generic_identifier = ActionFactory::instance()->isRegistered(name);
-
-//   iters = _name_to_build_info.equal_range(generic_identifier);
-  
-//   for (it = iters.first; it != iters.second; ++it)
-//   {
-//     InputParameters p = params;
-//     p.set<std::string>("action") = it->second._action_name;
-//     action_blocks.push_back((*it->second._build_pointer)(name, p));
-//   }
-
-  
-//   //params.set<std::string>("action") = _name_to_action_map[generic_identifier];
-  
-// //  action_block = (*_name_to_build_pointer[generic_identifier])(name, params);
-// //  _active_parser_blocks.push_back(action_block);
-
-//   return action_blocks;
-// }
-
-
 Action *
 ActionFactory::createNonParsed(const std::string & name, InputParameters params)
 {

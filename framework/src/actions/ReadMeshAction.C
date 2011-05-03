@@ -30,7 +30,6 @@ InputParameters validParams<ReadMeshAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::string>("file", ReadMeshAction::no_file_supplied, "The name of the mesh file to read (required unless using dynamic generation)");
-  params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
   params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
   params.addParam<bool>("nemesis", false, "If nemesis=true and file=foo.e, actually reads foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, where N = # CPUs, with NemesisIO.");
   params.addParam<std::vector<unsigned int> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
@@ -127,9 +126,5 @@ ReadMeshAction::act()
       _parser_handle._displaced_mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
   }
   
-  // TODO: This should be handled in SetupMeshAction...
   mooseAssert(_parser_handle._mesh != NULL, "Mesh hasn't been created");
-  _parser_handle._mesh->setInitRefineLevel(getParam<int>("uniform_refine"));
-  if (_parser_handle._displaced_mesh)
-    _parser_handle._displaced_mesh->setInitRefineLevel(getParam<int>("uniform_refine"));
 }

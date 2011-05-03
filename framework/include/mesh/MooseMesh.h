@@ -92,8 +92,6 @@ public:
   void prepare();
   void update();
 
-  inline void setInitRefineLevel(int level) { _init_refinement_level = level; }
-
   /// This will add the boundary ids to be ghosted to this processor
   void addGhostedBoundary(unsigned int boundary_id) { _ghosted_boundaries.insert(boundary_id); }
 
@@ -132,8 +130,6 @@ protected:
   bool _is_changed;                   ///< true if mesh is changed (i.e. after adaptivity step)
 
   // bool _is_parallel;           /// True if using a TRUE parallel mesh (ie Nemesis)
-
-  int _init_refinement_level;
   
   /// Used for generating the semilocal node range
   std::set<Node *> _semilocal_node_list;

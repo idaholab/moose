@@ -290,82 +290,14 @@ addActionTypes()
   /**************************/
   /****** Dependencies ******/
   /**************************/
-
-/*
-  /// Mesh Actions
-  action_warehouse.addDependency("setup_mesh", "create_mesh");
-  action_warehouse.addDependency("add_mesh_modifier", "setup_mesh");
-  action_warehouse.addDependency("setup_mesh_complete", "setup_mesh");
-
-  /// Executioner
-  action_warehouse.addDependency("setup_executioner", "setup_mesh_complete");
-  action_warehouse.addDependency("setup_adaptivity", "setup_executioner");
-
-  /// Functions
-  action_warehouse.addDependency("add_function", "setup_adaptivity");
-  action_warehouse.addDependency("setup_function_complete", "add_function");
-
-  /// Variable Actions
-  action_warehouse.addDependency("add_variable", "setup_function_complete");
-
-  /// AuxVariable Actions
-  action_warehouse.addDependency("add_aux_variable", "setup_function_complete");
-  action_warehouse.addDependency("setup_variable_complete", "add_aux_variable");
-
-  /// ICs
-  action_warehouse.addDependency("add_ic", "setup_variable_complete");
-
-  /// PeriodicBCs
-  action_warehouse.addDependency("add_periodic_bc", "setup_variable_complete");
-
-  /// Preconditioning
-  action_warehouse.addDependency("add_preconditioning", "add_periodic_bc");
-  action_warehouse.addDependency("ready_to_init", "add_preconditioning");
-
-  /// InitProblem
-  action_warehouse.addDependency("setup_dampers", "ready_to_init");
-  action_warehouse.addDependency("init_problem", "setup_dampers");
-  action_warehouse.addDependency("copy_nodal_vars", "init_problem");
-
-  /// Materials
-  action_warehouse.addDependency("add_material", "copy_nodal_vars");
-
-  /// Postprocessors
-  action_warehouse.addDependency("add_postprocessor", "add_material");
-  action_warehouse.addDependency("setup_pps_complete", "add_postprocessor");
-
-  /// Dampers
-  action_warehouse.addDependency("add_damper", "setup_pps_complete");
-
-  /// Stabilizers
-  action_warehouse.addDependency("add_stabilizer", "setup_pps_complete");
-
-  /// Kernels
-  action_warehouse.addDependency("add_kernel", "setup_pps_complete");
-
-  /// AuxKernels
-  action_warehouse.addDependency("add_aux_kernel", "setup_pps_complete");
-
-  /// BCs
-  action_warehouse.addDependency("add_bc", "setup_pps_complete");
-
-  /// AuxBCs
-  action_warehouse.addDependency("add_aux_bc", "setup_pps_complete");
-
-  /// Dirac Kernels
-  action_warehouse.addDependency("add_dirac_kernel", "setup_pps_complete");
-
-  /// Ouput
-  action_warehouse.addDependency("setup_output", "setup_pps_complete");
-
-  /// Check Integrity
-  action_warehouse.addDependency("check_integrity", "setup_output");
-*/
-
   /**
    * The following is the default set of action dependencies for a basic MOOSE problem.  The formatting
    * of this string is important.  Each line represents a set of dependencies that depend on the previous
-   * line.  Items on the same line have equal weight and can be executed in any order.  */
+   * line.  Items on the same line have equal weight and can be executed in any order.
+   *
+   * Additional dependencies can be inserted later inside of user applications with calls to
+   * ActionWarehouse::addDependency("action_name", "pre_req")
+   */
   action_warehouse.addDependencySets(
 "(meta_action)"
 "(create_mesh, read_mesh, set_global_params)"
@@ -391,8 +323,6 @@ addActionTypes()
 );
 
 }
-
-
 
 void
 registerActions()

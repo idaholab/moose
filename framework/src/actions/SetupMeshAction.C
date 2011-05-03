@@ -23,10 +23,9 @@ InputParameters validParams<SetupMeshAction>()
 {
   InputParameters params = validParams<Action>();
 
-  // FIXME: Make this work (requires double registration in ActionFactory)
-//  params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
-//  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation");
-//  params.addParam<int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
+  params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
+  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation");
+  params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
   
   return params;
 }
@@ -53,10 +52,14 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   Moose::setup_perf_log.pop("Prepare Mesh","Setup");
 
 #ifdef LIBMESH_ENABLE_AMR
-  Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-  // uniformly refine mesh
-  mesh->uniformlyRefine();
-  Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+  unsigned int level = getParam<unsigned int>("uniform_refine");
+  if (level)
+  {
+    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
+    // uniformly refine mesh
+    mesh->uniformlyRefine(level);
+    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+  }
 #endif //LIBMESH_ENABLE_AMR
 
   // FIXME: autosize problem
