@@ -324,6 +324,29 @@ addActionTypes()
 
 }
 
+/**
+ * Multiple Action class can be associated with a single input file section, in which case all associated Actions
+ * will be created and "acted" on when the associated inputfile section is seen.
+ *
+ * Example: 
+ * "setup_mesh" <---> SetupMeshAction <-
+ *                                       \  
+ *                                        [Mesh]      
+ *                                       /
+ * "read_mesh"  <---> ReadMeshAction  <-
+ *
+ * 
+ * Action classes can also be registered to act on more than one input file section for a different action_name
+ * if similar logic can work in multiple cases
+ *
+ * Example:
+ * "add_variable" <-----                       -> [Variables/*]
+ *                       \                   /
+ *                         AddVariableAction
+ *                       /                   \
+ * "add_aux_variable" <-                       -> [AuxVariables/*]
+ *
+ */
 void
 registerActions()
 {
