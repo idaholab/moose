@@ -102,6 +102,9 @@ public:
   virtual Output & out() { return _out; }
   virtual void output();
 
+  // Restart //////
+  virtual void restartFromFile(const std::string & file_name);
+
 protected:
   std::map<std::string, MProblem *> _subproblems;
   std::vector<std::string> _solve_order;

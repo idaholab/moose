@@ -130,6 +130,11 @@ protected:
 
   LinearInterpolation _time_ipol;               ///< Piecewise linear definition of time stepping
   bool _use_time_ipol;                          ///< true if we want to use piecewise-defined time stepping
+
+  /**
+   * Restart the problem if required by user
+   */
+  void restartMe();
 };
 
 #endif //TRANSIENTEXECUTIONER_H

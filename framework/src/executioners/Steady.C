@@ -40,6 +40,8 @@ Steady::execute()
   std::cerr << "Time: " << _time << "\n";
   
   checkIntegrity();
+
+  restartMe();
   
   _problem.initialSetup();
   
@@ -87,4 +89,12 @@ Steady::checkIntegrity()
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
   if (_problem.getNonlinearSystem().containsTimeKernel())
     mooseError("You have specified time kernels in your steady state simulation");
+}
+
+void
+Steady::restartMe()
+{
+  if (_restart_sln_file_name.empty())
+    return;
+  _problem.restartFromFile(_restart_sln_file_name);
 }

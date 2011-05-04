@@ -28,6 +28,7 @@ InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<unsigned int>("steps", 0);
+  params.addParam<std::string>("restart_soln_file", "Solution file used for restart (XDA)");
 
   params.addPrivateParam<std::string>("built_by_action", "setup_executioner");
   return params;
@@ -38,7 +39,8 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
     _mesh(getParam<MooseMesh *>("_mesh")),
     _output_initial(false),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
-    _old_initial_residual_norm(std::numeric_limits<Real>::max())
+    _old_initial_residual_norm(std::numeric_limits<Real>::max()),
+    _restart_sln_file_name(getParam<std::string>("restart_soln_file"))
 {
 }
 

@@ -1252,3 +1252,10 @@ MProblem::serializeSolution()
   _nl.serializeSolution();
   _aux.serializeSolution();
 }
+
+void
+MProblem::restartFromFile(const std::string & file_name)
+{
+  _eq.read(file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
+  _nl.update();
+}

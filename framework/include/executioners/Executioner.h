@@ -67,6 +67,9 @@ protected:
   Real _initial_residual_norm;
   Real _old_initial_residual_norm;
 
+  // Restart
+  std::string _restart_sln_file_name;
+
   /**
    * Override this for actions that should take place before execution
    */

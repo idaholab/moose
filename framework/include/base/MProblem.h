@@ -168,6 +168,9 @@ public:
   virtual void output();
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
 
+  // Restart //////
+  virtual void restartFromFile(const std::string & file_name);
+
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }

@@ -107,6 +107,8 @@ Transient::~Transient()
 void
 Transient::execute()
 {
+  restartMe();
+
   _problem.initialSetup();
 
   preExecute();
@@ -339,3 +341,11 @@ Transient::preExecute()
   Executioner::preExecute();
 }
 
+
+void
+Transient::restartMe()
+{
+  if (_restart_sln_file_name.empty())
+    return;
+  _problem.restartFromFile(_restart_sln_file_name);
+}
