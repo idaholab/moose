@@ -18,7 +18,8 @@
 
 ActionWarehouse::ActionWarehouse() :
   _empty_action(NULL),
-  _generator_valid(false)
+  _generator_valid(false),
+  _parser_ptr(NULL)
 {
 }
 
@@ -129,50 +130,14 @@ ActionWarehouse::inputFileActionsEnd()
   return _ordered_actions.end();
 }
 
-Action *
-ActionWarehouse::allActionsBegin(Parser *p_ptr)
-{ 
-  _ordered_names = _actions.getSortedValues();
-
-  _i = _ordered_names.begin();
-  
-  buildBuildableActions(p_ptr);
-
-  _j = _action_blocks[*_i].begin();
-
-  _generator_valid = true;
-  return allActionsNext(p_ptr, true);
-}
-
-
-Action *
-ActionWarehouse::allActionsNext(Parser *p_ptr, bool very_first)
-{
-  if (!_generator_valid)
-    mooseError("Action generator invalid in ActionWarehouse\n");
-  
-  if (!very_first)
-    ++_j;
-  while (_j == _action_blocks[*_i].end())
-    if (++_i == _ordered_names.end())
-    {
-      _generator_valid = false;
-      return NULL;
-    }
-    else
-    {
-      buildBuildableActions(p_ptr);
-      _j = _action_blocks[*_i].begin();
-    }
-  return *_j;
-}
-
 void
-ActionWarehouse::buildBuildableActions(Parser *p_ptr)
+ActionWarehouse::buildBuildableActions(const std::string &action_name)
 {
-  if (_registered_actions[*_i] && _action_blocks[*_i].empty())
-    if (!ActionFactory::instance()->buildAllBuildableActions(*_i, p_ptr))
-      _unsatisfied_dependencies.insert(*_i);
+  mooseAssert(_parser_ptr != NULL, "Parser Pointer NULL in ActionWarehouse");
+  
+  if (_registered_actions[action_name] && _action_blocks[action_name].empty())
+    if (!ActionFactory::instance()->buildAllBuildableActions(action_name, _parser_ptr))
+      _unsatisfied_dependencies.insert(action_name);
 }
 
 void
@@ -231,7 +196,90 @@ ActionWarehouse::printActionDependencySets()
   }
 }
 
+ActionWarehouse::iterator
+ActionWarehouse::begin()
+{
+  if (_generator_valid)
+    mooseError("Cannont create two active iterators on ActionWarehouse at the same time");
+  
+  return iterator (*this);
+}
 
+ActionWarehouse::iterator
+ActionWarehouse::end()
+{
+  return iterator (*this, true);
+}
+
+//--------------------------------------------------------------------------
+// Iterator methods
+ActionWarehouse::iterator::iterator(ActionWarehouse & act_wh, bool end)
+  :_act_wh(act_wh),
+   _first(true),
+   _end(end)
+{
+  _act_wh._ordered_names = _act_wh._actions.getSortedValues();
+
+  // current action name
+  _i = _act_wh._ordered_names.begin();
+  
+  _act_wh.buildBuildableActions(*_i);
+
+  _j = _act_wh._action_blocks[*_i].begin();
+  
+  _act_wh._generator_valid = true;
+
+  // Advanced to the first item
+  this->operator++();
+}
+
+bool
+ActionWarehouse::iterator::operator==(const ActionWarehouse::iterator &rhs) const
+{
+  return !operator!=(rhs);
+}
+
+bool
+ActionWarehouse::iterator::operator!=(const ActionWarehouse::iterator &rhs) const
+{
+  return _end != rhs._end;
+}
+
+ActionWarehouse::iterator &
+ActionWarehouse::iterator::operator++()
+{
+  mooseAssert(_act_wh._generator_valid, "Action iterator invalid in ActionWarehouse\n");
+
+  if (_first)
+    _first = false;
+  else
+    ++_j;
+  while (_j == _act_wh._action_blocks[*_i].end())
+    if (++_i == _act_wh._ordered_names.end())
+    {
+      _act_wh._generator_valid = false;
+      _end = true;
+      break;
+    }
+    else
+    {
+      _act_wh.buildBuildableActions(*_i);
+      _j = _act_wh._action_blocks[*_i].begin();
+    }
+  
+  return *this;
+}
+
+Action *
+ActionWarehouse::iterator::operator*()
+{
+  mooseAssert(_act_wh._generator_valid, "Action iterator invalid in ActionWarehouse\n");
+
+  return *_j;
+}
+
+//--------------------------------------------------------------------------
+// Functor methods
 
 ActionWarehouse::InputFileSort::InputFileSort() 
 { 
@@ -247,8 +295,8 @@ ActionWarehouse::InputFileSort::InputFileSort()
   _o.push_back("Postprocessors"); 
   _o.push_back("Executioner"); 
   _o.push_back("Output"); 
-}     
-     
+}
+
 bool 
 ActionWarehouse::InputFileSort::operator() (Action *a, Action *b) 
 { 
@@ -261,4 +309,4 @@ ActionWarehouse::InputFileSort::operator() (Action *a, Action *b)
   short_b = elements[0]; 
    
   return std::find(_o.begin(), _o.end(), short_a) - std::find(_o.begin(), _o.end(), short_b) >= 0 ? false : true; 
-} 
+}

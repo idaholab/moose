@@ -218,6 +218,9 @@ Parser::parse(const std::string &input_filename)
     
         extractParams(curr_identifier, params);
 
+        // Check Action Parameters Now
+        checkParams(curr_identifier, params);
+
         // Create the Action
         Action * action = ActionFactory::instance()->create(curr_identifier, params);
 
@@ -464,6 +467,25 @@ Parser::getExecutioner()
 void
 Parser::execute()
 {
+  // Need to make sure that the parser pointer is set before we iterate through the warehouse
+  // TODO: Rip the Parser Pointer out of the warehouse
+  Moose::action_warehouse.setParserPointer(this);
+  for (ActionWarehouse::iterator i = Moose::action_warehouse.begin();
+       i != Moose::action_warehouse.end();
+       ++i)
+  {
+    // Delay the InputParameters check of MOOSE based objects until just before "acting"
+    // so that Meta-Actions can complete the build of parameters as necessary
+    MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*i);
+    if (moose_obj_action != NULL)
+      checkParams(moose_obj_action->name(), moose_obj_action->getMooseObjectParams());
+
+    // Act!
+    (*i)->act();
+  }
+  
+  
+/*
   Action *action = Moose::action_warehouse.allActionsBegin(this);
   do
   {
@@ -473,7 +495,7 @@ Parser::execute()
       checkParams(mo_action->name(), mo_action->getMooseObjectParams());
     action->act();
   } while ( (action = Moose::action_warehouse.allActionsNext(this)) );
-
+*/
          /*
   for (ActionIterator a = Moose::action_warehouse.allActionsBegin(this);
        a != Moose::action_warehouse.allActionsEnd();

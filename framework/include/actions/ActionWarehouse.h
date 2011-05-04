@@ -34,6 +34,7 @@ public:
 
   void clear();
 
+  void setParserPointer(Parser * p_ptr) { _parser_ptr = p_ptr; }
   void registerName(std::string action, bool is_required);
   void addDependency(std::string action, std::string pre_req);
   void addDependencySets(const std::string & action_sets);
@@ -50,22 +51,39 @@ public:
   
   ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
   ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
-  
-  /// Generators to ordered Actions in this Warehouse
-  // TODO: Right now all Actions require a Parser pointer when setting up the problem.
-  //       In order to build Actions on the fly inside of the factory we'll need this
-  //       pointer when the parser iterates over the Actions.  We might be able
-  //       to make this cleaner later.
-  /// This method initiates the generator and returns the first ordered action
-  Action * allActionsBegin(Parser * p_ptr);
-  /// This method is a generator function that returns the next ordered action
-  Action * allActionsNext(Parser * p_ptr, bool very_first = false);
+
+  /**
+   * Iterator class for returning the Actions stored in this warehouse in order.
+   * This class is necessary to support the Meta-action capability supported by the
+   * ActionWarehouse.  Meta-Actions can add new Actions to the warehouse while
+   * maintaining proper order and a valid iterator.
+   */
+  class iterator
+  {
+  public:
+    iterator(ActionWarehouse & act_wh, bool end=false);
+    bool operator==(const iterator &rhs) const;
+    bool operator!=(const iterator &rhs) const;
+    iterator & operator++();
+    Action * operator*();  
+    
+  private:
+    ActionWarehouse & _act_wh;
+    bool _first;
+    bool _end;
+    std::vector<std::string>::iterator _i;
+    std::vector<Action *>::iterator _j;
+  };
+  friend class iterator;
+
+  iterator begin();
+  iterator end();
   
   ActionIterator inputFileActionsBegin();
   ActionIterator inputFileActionsEnd();
 
 private:
-  void buildBuildableActions(Parser * p_ptr);
+  void buildBuildableActions(const std::string &action_name);
   
   /// The list of registered actions and a flag indicating whether or not they are required
   std::map<std::string, bool> _registered_actions;
@@ -79,20 +97,24 @@ private:
   /// The vector of ordered actions out of the dependency resolver
   std::vector<Action *> _ordered_actions;
 
+  /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
   
-  /// Used to store the action name for the current active action Block iterator
-  //std::string _curr_action_name;
-
   Action * _empty_action;
 
   /// Use to store the current list of unsatisfied dependencies
   std::set<std::string> _unsatisfied_dependencies;
 
-  std::vector<std::string>::iterator _i;
-  std::vector<Action *>::iterator _j;
+  /**
+   *  Flag to indicate whether or not there is an active iterator on this class.
+   *  There can only be a single active iterator because of the potential for
+   *  meta Actions to add new Actions into the warehouse on the fly
+   */
   bool _generator_valid;
 
+  /// Pointer to the active parser for this Warehouse instance
+  Parser * _parser_ptr;
+  
   // Functor for sorting input file syntax 
   class InputFileSort 
   {  
