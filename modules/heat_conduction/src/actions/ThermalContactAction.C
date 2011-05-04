@@ -82,18 +82,22 @@ ThermalContactAction::addAuxVariables()
   [../]
   */
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AuxVariables/*");
-  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  std::vector<InputParameters> action_params = ActionFactory::instance()->getAllValidParams("AuxVariables/*");
+
 
   // We need to add the variables only once
   if (n == 0)
   {
-    // gap_value
-    Action *action = ActionFactory::instance()->create("AuxVariables/" + GAP_VALUE_VAR_NAME, action_params);
-    Moose::action_warehouse.addActionBlock(action);
-    // penetration
-    action = ActionFactory::instance()->create("AuxVariables/" + PENETRATION_VAR_NAME, action_params);
-    Moose::action_warehouse.addActionBlock(action);
+    for (unsigned int i=0; i<action_params.size(); ++i)
+    {
+      action_params[i].set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+      // gap_value
+      Action *action = ActionFactory::instance()->create("AuxVariables/" + GAP_VALUE_VAR_NAME, action_params[i]);
+      Moose::action_warehouse.addActionBlock(action);
+      // penetration
+      action = ActionFactory::instance()->create("AuxVariables/" + PENETRATION_VAR_NAME, action_params[i]);
+      Moose::action_warehouse.addActionBlock(action);
+    }
   }
 }
 
