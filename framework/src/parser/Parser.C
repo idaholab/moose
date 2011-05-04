@@ -661,15 +661,15 @@ Parser::checkParams(const std::string & prefix, InputParameters &p)
 
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
   {
-    // bool found = false; // This variable is unused?!
-    // bool in_global = false; // This variable is unused?!
     std::string orig_name = prefix + "/" + it->first;
     std::string full_name = orig_name;
 
     if (!p.wasSeenInInput(it->first) && p.isParamRequired(it->first))
     {
       // The parameter is required but missing
-      mooseError("The required parameter '" + orig_name + "' is missing\n");
+      std::string doc = p.getDocString(it->first);
+      mooseError("The required parameter '" + orig_name + "' is missing\nDoc String: \"" +
+                 p.getDocString(it->first) + "\"");
     }
   }
 }
