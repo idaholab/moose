@@ -121,6 +121,12 @@ Parser::initOptions()
   cli_opt.required = false;
   _cli_options["YAML"] = cli_opt;
 
+  syntax.clear();
+  cli_opt.desc = "Runs the specified number of threads (Intel TBB) per process";
+  syntax.push_back("--n_threads");
+  cli_opt.cli_syntax = syntax;
+  cli_opt.required = false;
+  _cli_options["Threads"] = cli_opt;
 }
 
 bool
@@ -255,6 +261,7 @@ Parser::parse(const std::string &input_filename)
       (*a)->printInputFile(prev_name);
       prev_name = &((*a)->name());
     }
+    std::cout << std::endl << std::endl;
   }
 }
 
@@ -483,25 +490,6 @@ Parser::execute()
     // Act!
     (*i)->act();
   }
-  
-  
-/*
-  Action *action = Moose::action_warehouse.allActionsBegin(this);
-  do
-  {
-    // if the action is MOOSE object-based, check tht params are valid
-    MooseObjectAction * mo_action = dynamic_cast<MooseObjectAction *>(action);
-    if (mo_action != NULL)
-      checkParams(mo_action->name(), mo_action->getMooseObjectParams());
-    action->act();
-  } while ( (action = Moose::action_warehouse.allActionsNext(this)) );
-*/
-         /*
-  for (ActionIterator a = Moose::action_warehouse.allActionsBegin(this);
-       a != Moose::action_warehouse.allActionsEnd();
-       ++a)
-    (*a)->act();
-         */
 }
 
 void

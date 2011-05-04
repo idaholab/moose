@@ -99,25 +99,28 @@ ActionWarehouse::inputFileActionsBegin()
   std::map<std::string, std::vector<Action *> >::iterator iter;
   
   // We'll use a map to reorder for us
-  std::map<std::string, Action *> input_file_blocks;
-  std::map<std::string, Action *>::iterator i;
-  
-  for (iter = _action_blocks.begin(); iter != _action_blocks.end(); ++iter)
-    for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
-      input_file_blocks[(*j)->name()] = *j;
+//  std::map<std::string, Action *> input_file_blocks;
+//  std::map<std::string, Action *>::iterator i;
 
   _ordered_actions.clear();
-  for (i = input_file_blocks.begin(); i != input_file_blocks.end(); ++i)
-    _ordered_actions.push_back(i->second);
+  for (iter = _action_blocks.begin(); iter != _action_blocks.end(); ++iter)
+    for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
+//      input_file_blocks[(*j)->name()] = *j;
+        _ordered_actions.push_back(*j);
+
+//  _ordered_actions.clear();
+//  for (i = input_file_blocks.begin(); i != input_file_blocks.end(); ++i)
+//    _ordered_actions.push_back(i->second);
 
   std::sort(_ordered_actions.begin(), _ordered_actions.end(), InputFileSort());
+
   
   // We'll push one more "empty" action onto the end so that when we print the input syntax
   // everything will get closed off without any odd tail calls.  Had to do delayed construction
   if (_empty_action == NULL)
   { 
     InputParameters pars = validParams<EmptyAction>();
-    _empty_action = ActionFactory::instance()->createNonParsed("finish_input_file_output", pars);       // no memory leak here, this action gets deleted in Actionfactory
+    _empty_action = ActionFactory::instance()->create("", pars);       // no memory leak here, this action gets deleted in Actionfactory
   }
   _ordered_actions.push_back(_empty_action);
   

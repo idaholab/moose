@@ -74,15 +74,19 @@ Action::printInputFile(const std::string * prev_name)
     offset -= 2;
   }
 
-  printCloseAndOpen(prev_name, _name);
-  if (_name == "")
-    return;
+  /* Not double registered (names don't match) */
+  if (prev_name == NULL || *prev_name != _name)
+  {
+    printCloseAndOpen(prev_name, _name);
+    if (_name == "")
+      return;
 
-  int index = _name.find_last_of("/");
-  if (index == (int)_name.npos)
-    index = 0;
-  std::string block_name = _name.substr(index);
-  out << "\n" << spacing << "[" << forward << block_name << "]";
+    int index = _name.find_last_of("/");
+    if (index == (int)_name.npos)
+      index = 0;
+    std::string block_name = _name.substr(index);
+    out << "\n" << spacing << "[" << forward << block_name << "]";
+  }
 
   std::vector<InputParameters *> param_ptrs;
   addParamsPtrs(param_ptrs);
@@ -139,10 +143,10 @@ Action::printCloseAndOpen(const std::string * prev_name, const std::string & cur
 
   std::string empty;
   std::vector<std::string> prev_elements, curr_elements;
-
+  
   if (!prev_name)
     prev_name = &empty;
-
+  
   Parser::tokenize(*prev_name, prev_elements);
   Parser::tokenize(curr_name, curr_elements);
 
