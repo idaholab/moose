@@ -55,21 +55,26 @@ ConvDiffMetaAction::act()
   //*******************************************//
   //**************** Variables ****************//
   //*******************************************//  
-  InputParameters action_params = ActionFactory::instance()->getValidParams("Variables/*");
-  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  std::vector<InputParameters> variable_params = ActionFactory::instance()->getAllValidParams("Variables/*");
 
-  // Creat and Add First Variable Action
-  action = ActionFactory::instance()->create("Variables/" + variables[0], action_params);
-  Moose::action_warehouse.addActionBlock(action);
+  for (unsigned int i=0; i<variable_params.size(); ++i)
+  {
+    variable_params[i].set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+
+    // Creat and Add First Variable Action
+    action = ActionFactory::instance()->create("Variables/" + variables[0], variable_params[i]);
+    Moose::action_warehouse.addActionBlock(action);
   
-  // Create and Add Second Variable Action
-  action = ActionFactory::instance()->create("Variables/" + variables[1], action_params);
-  Moose::action_warehouse.addActionBlock(action);
+    // Create and Add Second Variable Action
+    action = ActionFactory::instance()->create("Variables/" + variables[1], variable_params[i]);
+    Moose::action_warehouse.addActionBlock(action);
+  }
+  
 
   //*******************************************//
   //**************** Kernels ******************//
   //*******************************************//
-  action_params = ActionFactory::instance()->getValidParams("Kernels/*");
+  InputParameters action_params = ActionFactory::instance()->getValidParams("Kernels/*");
   action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
 
   // Setup our Diffusion Kernel on the "u" variable

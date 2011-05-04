@@ -130,7 +130,7 @@ ActionFactory::getValidParams(const std::string & name)
 {
   std::vector<InputParameters> all = getAllValidParams(name);
   if (all.size() != 1)
-    mooseWarning(name + " is double registered in the ActionFactory but you are only retreiving parameters for one object.\nPlease call ""getAllValidParams()"" instead.");
+    mooseError(name + " is double registered in the ActionFactory but you are only retreiving parameters for one object.\nPlease call ""getAllValidParams()"" instead.");
 
   return all[0];
 }
