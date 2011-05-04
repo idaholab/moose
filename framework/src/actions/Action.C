@@ -16,9 +16,6 @@
 
 #include "Parser.h"
 
-// Static initialization
-std::ostream * Action::_out = &std::cout;
-
 template<>
 InputParameters validParams<Action>()
 {
@@ -55,9 +52,8 @@ Action::addParamsPtrs(std::vector<InputParameters *> & param_ptrs)
 }
 
 void
-Action::printInputFile(const std::string * prev_name)
+Action::printInputFile(const std::string * prev_name, std::ostream & out)
 {
-  std::ostream & out = *_out;
   std::vector<std::string> elements;
   Parser::tokenize(_name, elements);
   std::stringstream ss;
@@ -77,7 +73,7 @@ Action::printInputFile(const std::string * prev_name)
   /* Not double registered (names don't match) */
   if (prev_name == NULL || *prev_name != _name)
   {
-    printCloseAndOpen(prev_name, _name);
+    printCloseAndOpen(prev_name, _name, out);
     if (_name == "")
       return;
 
@@ -137,10 +133,8 @@ Action::printInputFile(const std::string * prev_name)
 
 
 void
-Action::printCloseAndOpen(const std::string * prev_name, const std::string & curr_name) const
+Action::printCloseAndOpen(const std::string * prev_name, const std::string & curr_name, std::ostream & out) const
 {
-  std::ostream & out = *_out;
-
   std::string empty;
   std::vector<std::string> prev_elements, curr_elements;
   
@@ -180,16 +174,4 @@ Action::printCloseAndOpen(const std::string * prev_name, const std::string & cur
     std::string spacing(i*2, ' ');
     out << "\n" << spacing << "[" << curr_elements[i] << "]";
   }
-}
-
-void
-Action::setOStream( std::ostream & ostream )
-{
-  _out = &ostream;
-}
-
-std::ostream *
-Action::getOStream()
-{
-  return _out;
 }

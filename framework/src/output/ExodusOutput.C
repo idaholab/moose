@@ -142,20 +142,7 @@ ExodusOutput::outputInput()
     _out = new ExodusII_IO(_es.get_mesh());
 
   std::stringstream ss;
-  std::ostream * previous_ostream( Action::getOStream() );
-  Action::setOStream( ss );
-  const std::string * prev_name( NULL );
-  for (ActionIterator a = Moose::action_warehouse.inputFileActionsBegin();
-       a != Moose::action_warehouse.inputFileActionsEnd();
-       ++a)
-  {
-    if (ActionFactory::instance()->isParsed((*a)->name()))
-    {
-      (*a)->printInputFile(prev_name);
-      prev_name = &((*a)->name());
-    }
-  }
-  Action::setOStream( *previous_ostream );
+  Moose::action_warehouse.printInputFile(ss);
 
   std::vector<std::string> input_file_record;
   input_file_record.push_back("####################");

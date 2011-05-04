@@ -53,17 +53,11 @@ public:
    */
   std::string getShortName() const;
 
-  void printInputFile(const std::string * prev_name);
-
-  static void setOStream( std::ostream & ostream );
-  static std::ostream * getOStream();
-
+  void printInputFile(const std::string * prev_name, std::ostream & out);
+  
 protected:
   /// Helper method for adding Params pointers to be printed out in syntax dumps
   virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
-
-  ///Output stream which the print_* functions print to. Defaults to std::cout
-  static std::ostream * _out;
 
   std::string _name;
   InputParameters _pars;
@@ -73,7 +67,7 @@ protected:
 
 private:
   /// Helper method for printing the parts of the InputFile Syntax
-  void printCloseAndOpen(const std::string * prev_name, const std::string & curr_name) const;
+  void printCloseAndOpen(const std::string * prev_name, const std::string & curr_name, std::ostream & out) const;
 };
 
 template<>

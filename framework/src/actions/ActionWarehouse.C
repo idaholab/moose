@@ -93,44 +93,40 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
   return _action_blocks[action_name].end();
 }
 
-ActionIterator
-ActionWarehouse::inputFileActionsBegin()
+void
+ActionWarehouse::printInputFile(std::ostream & out)
 {
   std::map<std::string, std::vector<Action *> >::iterator iter;
-  
-  // We'll use a map to reorder for us
-//  std::map<std::string, Action *> input_file_blocks;
-//  std::map<std::string, Action *>::iterator i;
 
   _ordered_actions.clear();
   for (iter = _action_blocks.begin(); iter != _action_blocks.end(); ++iter)
     for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
-//      input_file_blocks[(*j)->name()] = *j;
-        _ordered_actions.push_back(*j);
-
-//  _ordered_actions.clear();
-//  for (i = input_file_blocks.begin(); i != input_file_blocks.end(); ++i)
-//    _ordered_actions.push_back(i->second);
+      _ordered_actions.push_back(*j);
 
   std::sort(_ordered_actions.begin(), _ordered_actions.end(), InputFileSort());
-
   
   // We'll push one more "empty" action onto the end so that when we print the input syntax
   // everything will get closed off without any odd tail calls.  Had to do delayed construction
   if (_empty_action == NULL)
   { 
     InputParameters pars = validParams<EmptyAction>();
-    _empty_action = ActionFactory::instance()->create("", pars);       // no memory leak here, this action gets deleted in Actionfactory
+    // no memory leak here, this action gets deleted in Actionfactory
+    _empty_action = ActionFactory::instance()->create("", pars);
   }
   _ordered_actions.push_back(_empty_action);
-  
-  return _ordered_actions.begin();
-}
 
-ActionIterator
-ActionWarehouse::inputFileActionsEnd()
-{
-  return _ordered_actions.end();
+  // Print it out!
+  const std::string * prev_name (NULL);
+  for (std::vector<Action* >::iterator i = _ordered_actions.begin();
+       i != _ordered_actions.end();
+       ++i)
+  {
+    if (ActionFactory::instance()->isParsed((*i)->name()))
+    {
+      (*i)->printInputFile(prev_name, out);
+      prev_name = &((*i)->name());
+    }
+  }
 }
 
 void
@@ -288,11 +284,13 @@ ActionWarehouse::iterator::operator*()
 
 ActionWarehouse::InputFileSort::InputFileSort() 
 { 
-  _o.reserve(11);
-  _o.push_back("Mesh"); 
+  _o.reserve(13);
+  _o.push_back("Mesh");
+  _o.push_back("Functions");
   _o.push_back("Variables"); 
-  _o.push_back("AuxVariables"); 
-  _o.push_back("Kernels"); 
+  _o.push_back("AuxVariables");
+  _o.push_back("Kernels");
+  _o.push_back("DiracKernels");
   _o.push_back("AuxKernels"); 
   _o.push_back("BCs"); 
   _o.push_back("AuxBCs"); 

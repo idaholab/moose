@@ -254,13 +254,7 @@ Parser::parse(const std::string &input_filename)
   if (Moose::command_line && searchCommandLine("ShowTree"))
   {
     const std::string * prev_name = NULL;
-    for (ActionIterator a = Moose::action_warehouse.inputFileActionsBegin();
-         a != Moose::action_warehouse.inputFileActionsEnd();
-         ++a)
-    {
-      (*a)->printInputFile(prev_name);
-      prev_name = &((*a)->name());
-    }
+    Moose::action_warehouse.printInputFile(std::cout);
     std::cout << std::endl << std::endl;
   }
 }

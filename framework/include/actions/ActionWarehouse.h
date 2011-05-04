@@ -18,6 +18,7 @@
 #include <string>
 #include <set>
 #include <map>
+#include <ostream>
 
 #include "DependencyResolver.h"
 #include "Action.h"
@@ -78,9 +79,8 @@ public:
 
   iterator begin();
   iterator end();
-  
-  ActionIterator inputFileActionsBegin();
-  ActionIterator inputFileActionsEnd();
+
+  void printInputFile(std::ostream & stream);
 
 private:
   void buildBuildableActions(const std::string &action_name);
