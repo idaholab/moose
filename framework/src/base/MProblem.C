@@ -18,6 +18,7 @@
 #include "MaterialData.h"
 #include "ComputePostprocessorsThread.h"
 #include "ActionWarehouse.h"
+#include "Conversion.h"
 
 #include "ElementH1Error.h"
 
@@ -175,6 +176,9 @@ void MProblem::initialSetup()
   else
   {
   }
+
+  // RUN initial postprocessors
+  computePostprocessors(EXEC_INITIAL);
 
 #ifdef LIBMESH_ENABLE_AMR
   Moose::setup_perf_log.push("adaptivity().initial()","Setup");
@@ -710,6 +714,11 @@ MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputP
     parameters.set<SubProblemInterface *>("_subproblem") = this;
   }
 
+  // Parameter 'execute_on' needs to override the 'type' arg
+  // TODO: remove this when we get rid of residual/jacobian sub-block in the input file
+  if (parameters.wasSeenInInput("execute_on"))
+    type = Moose::stringToEnum<ExecFlagType>(parameters.get<std::string>("execute_on"));
+
   for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -888,6 +897,16 @@ MProblem::outputPostprocessors()
   // Store values into table
   for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(EXEC_TIMESTEP)[0].all().begin();
       postprocessor_it != _pps(EXEC_TIMESTEP)[0].all().end();
+      ++postprocessor_it)
+  {
+    std::string name = (*postprocessor_it)->name();
+    Real value = _pps_data[0].getPostprocessorValue(name);
+
+    _pps_output_table.addData(name, value, _time);
+  }
+  // Add values of initial PPSes
+  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(EXEC_INITIAL)[0].all().begin();
+      postprocessor_it != _pps(EXEC_INITIAL)[0].all().end();
       ++postprocessor_it)
   {
     std::string name = (*postprocessor_it)->name();

@@ -36,6 +36,7 @@ namespace Moose {
   {
     if (execstore_type_to_enum.empty())
     {
+      execstore_type_to_enum["INITIAL"]  = EXEC_INITIAL;
       execstore_type_to_enum["RESIDUAL"] = EXEC_RESIDUAL;
       execstore_type_to_enum["JACOBIAN"] = EXEC_JACOBIAN;
       execstore_type_to_enum["TIMESTEP"] = EXEC_TIMESTEP;
