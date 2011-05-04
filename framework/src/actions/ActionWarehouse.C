@@ -218,6 +218,8 @@ ActionWarehouse::iterator::iterator(ActionWarehouse & act_wh, bool end)
    _first(true),
    _end(end)
 {
+  if (end) return;
+    
   _act_wh._ordered_names = _act_wh._actions.getSortedValues();
 
   // current action name
