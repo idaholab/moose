@@ -32,5 +32,5 @@ InitProblemAction::InitProblemAction(const std::string & name, InputParameters p
 void
 InitProblemAction::act()
 {  
-  _parser_handle._problem->init();
+  _problem->init();
 }

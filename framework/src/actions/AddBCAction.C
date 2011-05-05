@@ -31,7 +31,7 @@ void
 AddBCAction::act()
 {
   if (Parser::pathContains(_name, "BCs"))
-    _parser_handle._problem->addBoundaryCondition(_type, getShortName(), _moose_object_pars);
+    _problem->addBoundaryCondition(_type, getShortName(), _moose_object_pars);
   else
-    _parser_handle._problem->addAuxBoundaryCondition(_type, getShortName(), _moose_object_pars);  
+    _problem->addAuxBoundaryCondition(_type, getShortName(), _moose_object_pars);
 }

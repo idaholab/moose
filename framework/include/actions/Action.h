@@ -65,6 +65,8 @@ protected:
   std::string _action;
   Parser & _parser_handle;
 
+  MProblem * & _problem;                  ///< Convenience reference to a problem this action works on
+
 private:
   /// Helper method for printing the parts of the InputFile Syntax
   void printCloseAndOpen(const std::string * prev_name, const std::string & curr_name, std::ostream & out) const;

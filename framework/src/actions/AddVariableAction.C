@@ -56,7 +56,6 @@ void
 AddVariableAction::act()
 {
   std::string var_name = getShortName();
-  MProblem *prob = _parser_handle._problem;
   bool is_variables_block = Parser::pathContains(_name, "Variables");
   if (is_variables_block)
   {
@@ -68,29 +67,29 @@ AddVariableAction::act()
 
     if (blocks.empty())
     {
-      prob->addVariable(var_name,
-                        FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                               Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
-                        scale_factor);
+      _problem->addVariable(var_name,
+                           FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
+                                  Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
+                           scale_factor);
     }
     else
-      prob->addVariable(var_name,
-                        FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                               Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
-                        scale_factor,
-                        &blocks);
+      _problem->addVariable(var_name,
+                           FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
+                                  Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
+                           scale_factor,
+                           &blocks);
   }
   else
   {
-    prob->addAuxVariable(var_name,
-                         FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                                Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))));
+    _problem->addAuxVariable(var_name,
+                            FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
+                                   Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))));
   }
 
   // Set initial condition
   Real initial = getParam<Real>("initial_condition");
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
-    _parser_handle._problem->addInitialCondition(var_name, initial);
+    _problem->addInitialCondition(var_name, initial);
 }
 
 bool

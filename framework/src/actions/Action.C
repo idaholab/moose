@@ -35,7 +35,8 @@ Action::Action(const std::string & name, InputParameters params) :
     _name(name),
     _pars(params),
     _action(getParam<std::string>("action")),
-    _parser_handle(*getParam<Parser *>("parser_handle"))
+    _parser_handle(*getParam<Parser *>("parser_handle")),
+    _problem(_parser_handle._problem)
 {
 }
 

@@ -32,5 +32,5 @@ AddFunctionAction::AddFunctionAction(const std::string & name, InputParameters p
 void
 AddFunctionAction::act() 
 {
-  _parser_handle._problem->addFunction(_type, getShortName(), _moose_object_pars);
+  _problem->addFunction(_type, getShortName(), _moose_object_pars);
 }

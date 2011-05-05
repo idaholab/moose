@@ -33,5 +33,5 @@ AddStabilizerAction::AddStabilizerAction(const std::string & name, InputParamete
 void
 AddStabilizerAction::act() 
 {
-  _parser_handle._problem->addStabilizer(_type, getShortName(), _moose_object_pars);
+  _problem->addStabilizer(_type, getShortName(), _moose_object_pars);
 }

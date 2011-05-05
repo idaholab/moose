@@ -43,9 +43,9 @@ CopyNodalVarsAction::act()
   {
     // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
     if (getAction() == "copy_nodal_vars")
-      system = &_parser_handle._problem->getNonlinearSystem();
+      system = &_problem->getNonlinearSystem();
     else
-      system = &_parser_handle._problem->getAuxiliarySystem();
+      system = &_problem->getAuxiliarySystem();
 
     system->copyNodalValues(*_parser_handle._exreader,
                             getParam<std::string>("initial_from_file_var"),

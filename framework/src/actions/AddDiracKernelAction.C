@@ -31,5 +31,5 @@ AddDiracKernelAction::AddDiracKernelAction(const std::string & name, InputParame
 void
 AddDiracKernelAction::act()
 {
-  _parser_handle._problem->addDiracKernel(_type, getShortName(), _moose_object_pars);
+  _problem->addDiracKernel(_type, getShortName(), _moose_object_pars);
 }

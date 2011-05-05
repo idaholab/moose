@@ -41,7 +41,7 @@ AddPeriodicBCAction::AddPeriodicBCAction(const std::string & name, InputParamete
 void
 AddPeriodicBCAction::setPeriodicVars(PeriodicBoundary & p, const std::vector<std::string> & var_names)
 {
-  NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
+  NonlinearSystem & nl = _problem->getNonlinearSystem();
 
   for (std::vector<std::string>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
     p.set_variable(nl.getVariable(0, (*it)).number());
@@ -50,7 +50,7 @@ AddPeriodicBCAction::setPeriodicVars(PeriodicBoundary & p, const std::vector<std
 void
 AddPeriodicBCAction::act() 
 {  
-  NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
+  NonlinearSystem & nl = _problem->getNonlinearSystem();
 
   if (getParam<std::vector<Real> >("translation") != std::vector<Real>())
   {
@@ -68,7 +68,7 @@ AddPeriodicBCAction::act()
   {
     std::vector<std::string> fn_names = getParam<std::vector<std::string> >("transform_func");
 
-    FunctionPeriodicBoundary *pb = new FunctionPeriodicBoundary(*_parser_handle._problem, fn_names);
+    FunctionPeriodicBoundary *pb = new FunctionPeriodicBoundary(*_problem, fn_names);
     pb->myboundary = getParam<unsigned int>("primary");
     pb->pairedboundary = getParam<unsigned int>("secondary");
     setPeriodicVars(*pb, getParam<std::vector<std::string> >("variable"));
@@ -79,7 +79,7 @@ AddPeriodicBCAction::act()
       // asymmetric translation vector
       std::vector<std::string> inv_fn_names = getParam<std::vector<std::string> >("inv_transform_func");
 
-      ipb = new FunctionPeriodicBoundary(*_parser_handle._problem, inv_fn_names);
+      ipb = new FunctionPeriodicBoundary(*_problem, inv_fn_names);
       // these are switched, because we are forming the inverse translation
       ipb->myboundary = getParam<unsigned int>("secondary");
       ipb->pairedboundary = getParam<unsigned int>("primary");

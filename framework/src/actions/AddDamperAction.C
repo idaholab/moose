@@ -31,5 +31,5 @@ AddDamperAction::AddDamperAction(const std::string & name, InputParameters param
 void
 AddDamperAction::act() 
 {
-  _parser_handle._problem->addDamper(_type, getShortName(), _moose_object_pars);
+  _problem->addDamper(_type, getShortName(), _moose_object_pars);
 }

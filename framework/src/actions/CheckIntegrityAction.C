@@ -32,5 +32,5 @@ CheckIntegrityAction::CheckIntegrityAction(const std::string & name, InputParame
 void
 CheckIntegrityAction::act()
 {
-  _parser_handle._problem->checkProblemIntegrity();
+  _problem->checkProblemIntegrity();
 }

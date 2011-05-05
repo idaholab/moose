@@ -38,5 +38,5 @@ AddPostprocessorAction::AddPostprocessorAction(const std::string & name, InputPa
 void
 AddPostprocessorAction::act() 
 {
-  _parser_handle._problem->addPostprocessor(_type, getShortName(), _moose_object_pars, _pps_type);
+  _problem->addPostprocessor(_type, getShortName(), _moose_object_pars, _pps_type);
 }

@@ -54,11 +54,9 @@ AdaptivityAction::AdaptivityAction(const std::string & name, InputParameters par
 void
 AdaptivityAction::act() 
 {
-  NonlinearSystem & system = _parser_handle._problem->getNonlinearSystem();
+  NonlinearSystem & system = _problem->getNonlinearSystem();
   
-  MProblem & mproblem = *_parser_handle._problem;
-  
-  Adaptivity & adapt = mproblem.adaptivity();
+  Adaptivity & adapt = _problem->adaptivity();
 
   _parser_handle._executioner->parameters().set<unsigned int>("steps") = getParam<unsigned int>("steps");
 

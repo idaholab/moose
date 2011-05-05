@@ -30,5 +30,5 @@ AddMaterialAction::AddMaterialAction(const std::string & name, InputParameters p
 void
 AddMaterialAction::act()
 {
-  _parser_handle._problem->addMaterial(_type, getShortName(), _moose_object_pars);
+  _problem->addMaterial(_type, getShortName(), _moose_object_pars);
 }

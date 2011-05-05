@@ -33,7 +33,7 @@ AddKernelAction::act()
   is_kernels_action = Parser::pathContains(_name, "Kernels");
 
   if (is_kernels_action)
-    _parser_handle._problem->addKernel(_type, getShortName(), _moose_object_pars);
+    _problem->addKernel(_type, getShortName(), _moose_object_pars);
   else
-    _parser_handle._problem->addAuxKernel(_type, getShortName(), _moose_object_pars);
+    _problem->addAuxKernel(_type, getShortName(), _moose_object_pars);
 }
