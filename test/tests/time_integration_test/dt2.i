@@ -85,7 +85,6 @@
 [Executioner]
   type = DT2Transient
   
-  perf_log = true
   petsc_options = '-snes_mf_operator'
 
   nl_rel_tol = 1e-7
@@ -100,8 +99,6 @@
   
   e_max = 3e-1
   e_tol = 1e-1
-     
-  perf_log = true
 []
 
 [Output]
@@ -110,4 +107,5 @@
   postprocessor_csv = true
   interval = 1
   exodus = true
+  perf_log = true
 []

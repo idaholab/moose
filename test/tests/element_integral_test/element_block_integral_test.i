@@ -40,7 +40,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
   petsc_options = '-snes_mf_operator'
 []
 
@@ -69,4 +68,5 @@
   interval = 1
   exodus = false
   postprocessor_csv = true
+  perf_log = true
 []

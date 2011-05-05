@@ -81,8 +81,6 @@
   # this is the filename where the dofs and norm values will be printed
   norm_file = dofs
 
-  perf_log = true
-
   [./Adaptivity]
     # if the refine fraction is 1 it will refine every element
     # remember < 1 means only refine that percentage of elements
@@ -128,4 +126,5 @@
   file_base = out
   interval = 1
   exodus = true
+  perf_log = true
 []

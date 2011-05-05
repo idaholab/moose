@@ -63,7 +63,6 @@
 
 [Executioner]
   type = Transient
-  perf_log = true
   dt = 0.5
   num_steps = 6
 []
@@ -72,5 +71,6 @@
   file_base = out_wedge
   interval = 1
   exodus = true
+  perf_log = true
 []
 

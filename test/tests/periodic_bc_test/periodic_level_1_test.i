@@ -75,7 +75,6 @@
 
 [Executioner]
   type = Transient
-  perf_log = true
   dt = 1
   num_steps = 20
   nl_rel_tol = 1e-10
@@ -93,5 +92,6 @@
   file_base = level1
   interval = 1
   exodus = true
+  perf_log = true
 []
 

@@ -27,7 +27,7 @@
 typedef Real                     PostprocessorValue;
 
 /**
- * A function to call when you need the whole program to die and spit out a message
+ * MOOSE wrapped versions of useful libMesh macros (see libmesh_common.h)
  */
 #ifndef NDEBUG
 #define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); libmesh_error(); } while(0)
@@ -42,6 +42,10 @@ typedef Real                     PostprocessorValue;
 #endif
 
 #define mooseWarning(msg) do { std::cerr << "\n\n*** Warning ***\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << "\n" << std::endl; } while(0)
+
+#define mooseDoOnce(do_this) do { static bool did_this_already = false; if (!did_this_already) { did_this_already = true; do_this; } } while (0)
+
+#define mooseDeprecated() mooseDoOnce(std::cout << "*** Warning, This code is deprecated, and likely to be removed in future library versions! " << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;)
 
 
 class MProblem;

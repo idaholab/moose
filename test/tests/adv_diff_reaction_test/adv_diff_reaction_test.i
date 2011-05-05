@@ -105,7 +105,6 @@
 
 [Executioner]
   type                 = Steady
-  perf_log             = true
   nl_rel_tol               = 1.e-10
   petsc_options        = '-snes_mf_operator -ksp_monitor'
   petsc_options_iname  = '-pc_type -pc_factor_levels -pc_factor_mat_ordering_type'
@@ -118,4 +117,5 @@
   output_initial = true
   exodus = true
   #tecplot = true
+  perf_log             = true
 []

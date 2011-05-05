@@ -80,7 +80,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
 []
 
 [Postprocessors]
@@ -103,4 +102,5 @@
   exodus = false
   postprocessor_csv = true
   output_initial = true
+  perf_log = true
 []

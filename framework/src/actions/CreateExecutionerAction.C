@@ -37,12 +37,16 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
   params.addParam<bool>        ("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
-  params.addParam<bool>        ("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
 //  params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
   params.addParam<std::string> ("scheme",          "backward-euler",  "Time integration scheme used.");
 
   //params.addPrivateParam<unsigned int>("steps", 0);  // This is initial adaptivity steps - it'll be set
                                                      // in the adaptivity block later but needs to be here now
+
+  /// DEPRECATED -> Moved to output block
+  params.addParam<bool>("perf_log", false, "Specifies whether or not the Performance log should be printed");
+  params.addParam<bool>("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
+
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options");
@@ -192,18 +196,32 @@ CreateExecutionerAction::act()
 #endif
 //    _moose_system._no_fe_reinit = getParam<bool>("no_fe_reinit");
 
-    if (!getParam<bool>("perf_log"))
-    {
-      Moose::perf_log.disable_logging();
-      Moose::setup_perf_log.disable_logging();
-    }
-
-    /// Determines whether we see the perf log early in a run or not
-    _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
-
     NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<std::string>("scheme")));
 
+  //------------------------------------------------------------
+  // DEPRECATED 5/6/2011 - will be removed later
+
+  if (_pars.wasSeenInInput("perf_log"))
+  {
+    mooseDeprecated();
+    std::cout << "The \"perf_log\" option has been moved to the output block.\n\n"; 
+  }
+  if (_pars.wasSeenInInput("show_setup_log_early"))
+  {
+    mooseDeprecated();
+    std::cout << "The \"show_setup_log_early\" option has been moved to the output block.\n\n";
+  }  
+  
+  if (!getParam<bool>("perf_log"))
+  {
+    Moose::perf_log.disable_logging();
+    Moose::setup_perf_log.disable_logging();
+  }
+  // Determines whether we see the perf log early in a run or not
+  _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
+  //------------------------------------------------------------
+    
 /*    
     blk= locateBlock("GlobalParams");
     if (blk)

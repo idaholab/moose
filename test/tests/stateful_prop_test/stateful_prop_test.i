@@ -67,7 +67,6 @@
 
 [Executioner]
   type = Transient
-  perf_log = true
   petsc_options = '-snes_mf_operator'
 
   l_max_its = 10
@@ -82,5 +81,6 @@
   output_initial = true
   interval = 1
   exodus = true
+  perf_log = true
 []
     

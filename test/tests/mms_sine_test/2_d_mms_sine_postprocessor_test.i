@@ -97,7 +97,6 @@
   type = Transient
   dt = .1
   num_steps = 5
-  perf_log = true
   petsc_options = '-snes_mf_operator'
 []
 
@@ -123,4 +122,5 @@
   exodus = false
   output_initial = true
   postprocessor_csv = true 
+  perf_log = true
 []

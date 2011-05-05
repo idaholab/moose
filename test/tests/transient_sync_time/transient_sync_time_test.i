@@ -63,7 +63,6 @@
 
 [Executioner]
   type = Transient
-  perf_log = true
 
   dt = 1
   start_time = 0
@@ -79,4 +78,5 @@
   interval = 1
   exodus = true
   postprocessor_csv = true
+  perf_log = true
 []

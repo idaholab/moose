@@ -69,7 +69,6 @@
 [Executioner]
   type = SolutionTimeAdaptive
   
-  perf_log = true
   petsc_options = '-snes_mf_operator'
 
   nl_abs_tol = 1e-15
@@ -82,8 +81,6 @@
   dt = 0.15
   dtmax = 0.1
   dtmax = 0.25
-     
-  perf_log = true
 []
 
 [Output]
@@ -92,5 +89,6 @@
   postprocessor_csv = true
   interval = 1
   exodus = true
+  perf_log = true
 []
 

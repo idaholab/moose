@@ -54,7 +54,6 @@
 [Executioner]
   type = Transient
   dt = 1
-  perf_log = true
   petsc_options = '-snes_mf_operator'
   
   # Adaptivity is on
@@ -68,6 +67,7 @@
   interval = 1
   exodus = true
   print_linear_residuals = true
+  perf_log = true
 []
    
     

@@ -58,7 +58,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
   nl_rel_tol = 1e-12
 []
 
@@ -66,4 +65,5 @@
   file_base = out
   interval = 1
   exodus = true
+  perf_log = true
 []

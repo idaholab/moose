@@ -55,7 +55,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
 #  solve_type = 'PJFNK'
 #  preconditioner = 'AMG'
 
@@ -73,6 +72,7 @@
   output_initial = true
   interval = 1
   exodus = true
+  perf_log = true
 []
    
     

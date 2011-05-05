@@ -94,7 +94,6 @@
 [Executioner]
   type = Transient
   scheme = 'crank-nicolson'
-  perf_log = true
   petsc_options = '-snes_mf_operator'
 
   start_time = 0.0
@@ -113,4 +112,5 @@
   output_initial = false
   interval = 1
   exodus = true
+  perf_log = true
 []
