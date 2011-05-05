@@ -1,5 +1,10 @@
+# Use the exodus file for restarting the problem:
+# - restart one variable
+# - and have one extra variable
+#
+
 [Mesh]
-  file = out_part1_0005_mesh.xda
+  file = out_part1.e
 []
 
 [Functions]
@@ -15,17 +20,22 @@
 []
 
 [Variables]
-  active = 'u'
+  active = 'u v'
 
   [./u]
     order = FIRST
     family = LAGRANGE
+    initial_from_file_var = u
+    initial_from_file_timestep = 6
+  [../]
+  
+  [./v]
+    order = FIRST
+    family = LAGRANGE  
   [../]
 []
 
 [Kernels]
-  active = 'diff ffn'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -36,28 +46,45 @@
     variable = u
     function = forcing_fn
   [../]
+
+  [./diff_v]
+    type = Diffusion
+    variable = v
+  [../]
 []
 
 [BCs]
   [./all]
     type = FunctionDirichletBC
     variable = u
-    boundary = '0 1 2 3'
+    boundary = '255 1 2 3'
     function = exact_fn 
+  [../]
+
+  [./left_v]
+    type = DirichletBC
+    variable = v
+    boundary = '3'
+    value = 0 
+  [../]
+
+  [./right_v]
+    type = DirichletBC
+    variable = v
+    boundary = '1'
+    value = 1
   [../]
 []
 
 [Executioner]
   type = Steady
+  perf_log = true
   petsc_options = '-snes_mf_operator'
-  
-  restart_soln_file = out_part1_0005.xda
 []
 
 [Output]
-  file_base = out_part2
+  file_base = out_nodal_var_restart
   output_initial = true
   interval = 1
   exodus = true
-  perf_log = true
 []

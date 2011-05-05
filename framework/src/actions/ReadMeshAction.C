@@ -57,6 +57,9 @@ ReadMeshAction::act()
     _parser_handle._mesh = new MooseMesh();
     _parser_handle._mesh->setPatchSize(getParam<unsigned int>("patch_size"));    
 
+    Parser::checkFileReadable(mesh_file);
+
+    Moose::setup_perf_log.push("Read Mesh","Setup");
     if (getParam<bool>("nemesis"))
     {
       // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
@@ -66,17 +69,18 @@ ReadMeshAction::act()
     }
     else // not reading Nemesis files
     {
-      Parser::checkFileReadable(mesh_file);
-
-      // FIXME: We need to support more input formats than Exodus - When we do we'll have to take care
-      // to only perform the copy nodal variables action when using the Exodus reader
-      // IMPORTANT: When unhacking this make sure to fix CopyNodalVarsAction as well
-      _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
-  
-      Moose::setup_perf_log.push("Read Mesh","Setup");
-      _parser_handle._exreader->read(mesh_file);
-      Moose::setup_perf_log.pop("Read Mesh","Setup");
+      // if reading ExodusII, read it through a reader and save it off, since it will be used in possible "copy nodal vars" action
+      // NOTE: the other reader that can do copy nodal values is GMVIO, but GMV is _pretty_ old right now (May 2011)
+      if (mesh_file.rfind(".exd") < mesh_file.size() ||
+          mesh_file.rfind(".e") < mesh_file.size())
+      {
+        _parser_handle._exreader = new ExodusII_IO(*_parser_handle._mesh);
+        _parser_handle._exreader->read(mesh_file);
+      }
+      else
+        _parser_handle._mesh->read(mesh_file);
     }
+    Moose::setup_perf_log.pop("Read Mesh","Setup");
 
     _parser_handle._mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
 
@@ -89,16 +93,16 @@ ReadMeshAction::act()
       Moose::setup_perf_log.push("Read Displaced Mesh","Setup");
 
       if (getParam<bool>("nemesis"))
-	{
-	  // Nemesis_IO only takes a reference to ParallelMesh
-	  ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(_parser_handle._displaced_mesh->getMesh());
-	  Nemesis_IO(pmesh).read(mesh_file); 
-	}
+      {
+        // Nemesis_IO only takes a reference to ParallelMesh
+        ParallelMesh& pmesh = libmesh_cast_ref<ParallelMesh&>(_parser_handle._displaced_mesh->getMesh());
+        Nemesis_IO(pmesh).read(mesh_file);
+      }
       else // not reading Nemesis files
-	{
-	  ExodusII_IO temp_reader(*_parser_handle._displaced_mesh);
-	  temp_reader.read(mesh_file);
-	}
+      {
+        // Here we are fine with read, since we are not doing "copy_nodal_vars" on displaced mesh (yet ;-))
+        _parser_handle._displaced_mesh->read(mesh_file);
+      }
 
       Moose::setup_perf_log.pop("Read Displaced Mesh","Setup");
       
