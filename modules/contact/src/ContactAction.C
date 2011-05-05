@@ -67,7 +67,7 @@ ContactAction::act()
     name << _name;
     name << "_master_";
     name << i;
-    _problem.addDiracKernel("ContactMaster", name.str(), params);
+    _problem->addDiracKernel("ContactMaster", name.str(), params);
   }
 
   params.set<unsigned int>("boundary") = _slave;
@@ -80,6 +80,6 @@ ContactAction::act()
     name << _name;
     name << "_slave_";
     name << i;
-    _problem.addDiracKernel("SlaveConstraint", name.str(), params);
+    _problem->addDiracKernel("SlaveConstraint", name.str(), params);
   }
 }
