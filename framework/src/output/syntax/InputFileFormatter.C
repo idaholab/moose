@@ -24,11 +24,12 @@ InputFileFormatter::InputFileFormatter(std::ostream & out, bool dump_mode)
 }
 
 void
-InputFileFormatter::print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) const
+InputFileFormatter::print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs)
 {
   std::vector<std::string> elements;
   Parser::tokenize(name, elements);
   std::stringstream ss;
+  std::set<std::string> seen_it;
 
   std::string quotes   = "";
   std::string spacing  = "";
@@ -61,6 +62,13 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
     if (param_ptrs[i] == NULL) continue;
     for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter)
     {
+      if (_seen_it[name].find(iter->first) != _seen_it[name].end())
+        continue;
+
+      // Insert it into our set so we know not to print the same paramter again if this block is registered
+      // multiple times
+      _seen_it[name].insert(iter->first);
+      
       // We only want non-private params unless we are in dump mode
       if (param_ptrs[i]->isPrivate(iter->first) || (!_dump_mode && !param_ptrs[i]->isParamValid(iter->first)))
         continue;
@@ -85,8 +93,12 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
 
 
       _out << "\n" << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
+      size_t l_offset = 30;
       if (_dump_mode && param_ptrs[i]->isParamRequired(iter->first))
+      {
         _out << "(required)";
+        l_offset -= 10;
+      }
       else if (!_dump_mode || param_ptrs[i]->isParamValid(iter->first))
       {
         // Print the parameter's value to a stringstream.
@@ -95,10 +107,27 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
         // If the value has spaces, surround it with quotes, otherwise no quotes
         std::string value = Parser::trim(ss.str());
         if (value.find(' ') != std::string::npos)
+        {
           quotes = "'";
+          l_offset -= 2;
+        }
         else
           quotes = "";
         _out << quotes << value << quotes;
+        l_offset -= value.size();
+      }
+      // Documentation string
+      if (_dump_mode)
+      {
+        std::vector<std::string> elements;
+        std::string doc = param_ptrs[i]->getDocString(iter->first);
+        if (doc != "")
+        {
+          Parser::tokenize(doc, elements, 68, " \t");
+          _out << std::right << std::setw(l_offset) << "# " << elements[0];
+          for (unsigned int i=1; i<elements.size(); ++i)
+            _out << " ...\n" << "  " << std::setw(63) << "# " << elements[i];
+        }
       }
     }
   }

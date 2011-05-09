@@ -287,28 +287,36 @@ void
 Parser::buildFullTree()
 {
   std::string prev_name = "";
-  unsigned int counter = 0;
   std::vector<InputParameters *> params_ptrs(2);
+  std::vector<std::pair<std::string, std::string> > all_names;
 
   _syntax_formatter->preamble();
-  
+
+  // Reserve a little space so we don't have to reallocate too many times
+  all_names.reserve(100);
   for (ActionFactory::iterator act_obj = ActionFactory::instance()->begin();
        act_obj != ActionFactory::instance()->end();
        ++act_obj)
+    all_names.push_back(std::pair<std::string, std::string>(act_obj->first, act_obj->second._action_name));  
+
+  // Sort the Actions (well just the names and the action_name)
+  std::sort(all_names.begin(), all_names.end(), InputFileSort());
+
+  for (std::vector<std::pair<std::string, std::string> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
   {
-    std::vector<InputParameters> all_action_params = ActionFactory::instance()->getAllValidParams(act_obj->first);
+    std::vector<InputParameters> all_action_params = ActionFactory::instance()->getAllValidParams(act_names->first);
 
     for (std::vector<InputParameters>::iterator it = all_action_params.begin(); it != all_action_params.end(); ++it)
     {
       InputParameters action_obj_params = *it;
-      const std::string & action_name = act_obj->second._action_name;
-      std::string act_name = act_obj->first;
+      const std::string & action_name = act_names->second;
+      std::string act_name = act_names->first;
       
       params_ptrs[0] = &action_obj_params;
       
       if (action_obj_params.have_parameter<std::string>("built_by_action") &&
           action_obj_params.get<std::string>("built_by_action") == action_name &&
-          ActionFactory::instance()->isParsed(act_obj->first))
+          ActionFactory::instance()->isParsed(act_name))
       {
         params_ptrs[1] = NULL;
         
@@ -353,17 +361,18 @@ Parser::buildFullTree()
 }
 
 void
-Parser::tokenize(const std::string &str, std::vector<std::string> &elements, const std::string &delims)
+Parser::tokenize(const std::string &str, std::vector<std::string> &elements, unsigned int min_len, const std::string &delims)
 {
   std::string::size_type last_pos = str.find_first_not_of(delims, 0);
-  std::string::size_type pos = str.find_first_of(delims, last_pos);
-
+  std::string::size_type pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
+  
   while (pos != std::string::npos || last_pos != std::string::npos)
   {
     elements.push_back(str.substr(last_pos, pos - last_pos));
     // skip delims between tokens
     last_pos = str.find_first_not_of(delims, pos);
-    pos = str.find_first_of(delims, last_pos);
+    if (last_pos == std::string::npos) break;
+    pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
   }
 }
 
@@ -380,7 +389,7 @@ bool Parser::pathContains(const std::string &expression,
 {
   std::vector<std::string> elements;
   
-  tokenize(expression, elements, delims);
+  tokenize(expression, elements, 0, delims);
 
   std::vector<std::string>::iterator found_it = std::find(elements.begin(), elements.end(), string_to_find);
   if (found_it != elements.end())
@@ -643,4 +652,67 @@ void Parser::setTensorParameter(const std::string & full_name, const std::string
         global_block->setTensorParam<T>(short_name)[i][j] = param->get()[i][j];
     }
   }
+}
+
+
+//--------------------------------------------------------------------------
+// Input File Sorter Functor methods
+
+Parser::InputFileSort::InputFileSort() 
+{ 
+  _o.reserve(13);
+  _o.push_back("Mesh");
+  _o.push_back("Functions");
+  _o.push_back("Preconditioning");
+  _o.push_back("Variables"); 
+  _o.push_back("AuxVariables");
+  _o.push_back("Kernels");
+  _o.push_back("DiracKernels");
+  _o.push_back("AuxKernels");
+  _o.push_back("Dampers");
+  _o.push_back("Stabilizers");
+  _o.push_back("BCs"); 
+  _o.push_back("AuxBCs"); 
+  _o.push_back("Materials"); 
+  _o.push_back("Postprocessors"); 
+  _o.push_back("Executioner"); 
+  _o.push_back("Output"); 
+}
+
+bool 
+Parser::InputFileSort::operator() (Action *a, Action *b) const
+{ 
+  std::vector<std::string> elements; 
+  std::string short_a, short_b; 
+  Parser::tokenize(a->name(), elements); 
+  short_a = elements[0]; 
+  elements.clear(); 
+  Parser::tokenize(b->name(), elements); 
+  short_b = elements[0];
+
+  return sorter(short_a, short_b) >= 0 ? false : true;
+}
+
+bool
+Parser::InputFileSort::operator() (const std::pair<std::string, std::string> &a, const std::pair<std::string, std::string> &b) const
+{
+  std::vector<std::string> elements;
+  std::string short_a, short_b;
+  Parser::tokenize(a.first, elements);
+  short_a = elements[0];
+  elements.clear();
+  Parser::tokenize(b.first, elements);
+  short_b = elements[0];
+
+  int ret = sorter(short_a, short_b);
+  if (ret == 0)
+    return a.first.size() > b.first.size() ? false : true;
+  else
+    return ret > 0 ? false : true;
+}
+
+int
+Parser::InputFileSort::sorter(const std::string &a, const std::string &b) const
+{
+  return std::find(_o.begin(), _o.end(), a) - std::find(_o.begin(), _o.end(), b);
 }

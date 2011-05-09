@@ -54,12 +54,12 @@ void
 ActionWarehouse::addDependencySets(const std::string & action_sets)
 {
   std::vector<std::string> sets, prev_names, action_names;
-  Parser::tokenize(action_sets, sets, "()");
+  Parser::tokenize(action_sets, sets, 1, "()");
 
   for (unsigned int i=0; i<sets.size(); ++i)
   {
     action_names.clear();
-    Parser::tokenize(sets[i], action_names, ", ");
+    Parser::tokenize(sets[i], action_names, 0, ", ");
     for (unsigned int j=0; j<action_names.size(); ++j)
     {
       // Each line should depend on each item in the previous line
@@ -103,7 +103,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
     for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
       _ordered_actions.push_back(*j);
 
-  std::sort(_ordered_actions.begin(), _ordered_actions.end(), InputFileSort());
+  std::sort(_ordered_actions.begin(), _ordered_actions.end(), Parser::InputFileSort());
   
   // We'll push one more "empty" action onto the end so that when we print the input syntax
   // everything will get closed off without any odd tail calls.  Had to do delayed construction
@@ -116,7 +116,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
   _ordered_actions.push_back(_empty_action);
 
   mooseAssert (_parser_ptr != NULL, "Parser is NULL in ActionWarehouse");
-  _parser_ptr->initSyntaxFormatter(Parser::INPUT_FILE, out);
+  _parser_ptr->initSyntaxFormatter(Parser::INPUT_FILE, false, out);
   
   // Print it out!
 
@@ -285,39 +285,4 @@ ActionWarehouse::iterator::operator*()
   mooseAssert(_act_wh._generator_valid, "Action iterator invalid in ActionWarehouse\n");
 
   return *_j;
-}
-
-//--------------------------------------------------------------------------
-// Functor methods
-
-ActionWarehouse::InputFileSort::InputFileSort() 
-{ 
-  _o.reserve(13);
-  _o.push_back("Mesh");
-  _o.push_back("Functions");
-  _o.push_back("Variables"); 
-  _o.push_back("AuxVariables");
-  _o.push_back("Kernels");
-  _o.push_back("DiracKernels");
-  _o.push_back("AuxKernels"); 
-  _o.push_back("BCs"); 
-  _o.push_back("AuxBCs"); 
-  _o.push_back("Materials"); 
-  _o.push_back("Postprocessors"); 
-  _o.push_back("Executioner"); 
-  _o.push_back("Output"); 
-}
-
-bool 
-ActionWarehouse::InputFileSort::operator() (Action *a, Action *b) 
-{ 
-  std::vector<std::string> elements; 
-  std::string short_a, short_b; 
-  Parser::tokenize(a->name(), elements); 
-  short_a = elements[0]; 
-  elements.clear(); 
-  Parser::tokenize(b->name(), elements); 
-  short_b = elements[0]; 
-   
-  return std::find(_o.begin(), _o.end(), short_a) - std::find(_o.begin(), _o.end(), short_b) >= 0 ? false : true; 
 }

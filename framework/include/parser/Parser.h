@@ -60,12 +60,14 @@ public:
 
   /**
    * This function will split the passed in string on a set of delimiters appending the substrings
-   * to the passed in vector.  The delimiters default to "/" but may be supplied as well
+   * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In addition
+   * if min_len is supplied, the minimum token length will be greater than the supplied value.
    */
   static void tokenize(const std::string &str,
                        std::vector<std::string> & elements,
+                       unsigned int min_len = 1,
                        const std::string &delims = "/");
-
+  
   /**
    * Standard scripting languague trim function
    */
@@ -131,6 +133,20 @@ public:
 
   ExodusII_IO *_exreader;                               ///< auxiliary object for restart
   bool _loose;                                          ///< true if parsing input file with loose syntax
+
+  /// Functor for sorting input file syntax in MOOSE desired order
+  class InputFileSort 
+  {  
+  public: 
+    InputFileSort(); 
+    bool operator() (Action *a, Action *b) const; 
+    bool operator() (const std::pair<std::string, std::string> &a, const std::pair<std::string, std::string> &b) const;
+    
+  private:
+    int sorter(const std::string &a, const std::string &b) const;
+    std::vector<std::string> _o; 
+  }; 
+
 
 private:
   /**

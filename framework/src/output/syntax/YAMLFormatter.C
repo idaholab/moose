@@ -24,7 +24,7 @@ YAMLFormatter::YAMLFormatter(std::ostream & out, bool dump_mode)
 }
 
 void
-YAMLFormatter::preamble() const
+YAMLFormatter::preamble()
 {
   //important: start and end yaml data delimiters used by python
   _out << "**START YAML DATA**\n";
@@ -36,17 +36,21 @@ YAMLFormatter::preamble() const
 }
 
 void
-YAMLFormatter::postscript() const
+YAMLFormatter::postscript()
 {
   _out << "**END YAML DATA**\n";
 }
 
 void
-YAMLFormatter::print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) const
+YAMLFormatter::print(const std::string & name, const std::string * /*prev_name*/, std::vector<InputParameters *> & param_ptrs)
 {
   std::vector<std::string> elements;
   Parser::tokenize(name, elements);
 
+  // If name is empty - abort or Python will freak
+  if (name == "")
+    return;
+  
   std::string spacing = "";
   for (unsigned int i=0; i<elements.size(); ++i)
     spacing += "  ";

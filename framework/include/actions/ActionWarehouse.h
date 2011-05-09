@@ -114,17 +114,6 @@ private:
 
   /// Pointer to the active parser for this Warehouse instance
   Parser * _parser_ptr;
-  
-  // Functor for sorting input file syntax 
-  class InputFileSort 
-  {  
-  public: 
-    InputFileSort(); 
-    bool operator() (Action *a, Action *b); 
-    
-  private: 
-    std::vector<std::string> _o; 
-  }; 
 };
 
 #endif // ACTIONWAREHOUSE_H

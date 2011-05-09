@@ -22,9 +22,9 @@ class YAMLFormatter : public SyntaxFormatterInterface
 public:
   YAMLFormatter(std::ostream & out, bool dump_mode);
 
-  virtual void preamble() const;
-  virtual void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) const;
-  virtual void postscript() const;
+  virtual void preamble();
+  virtual void print(const std::string & name, const std::string * /*prev_name*/, std::vector<InputParameters *> & param_ptrs);
+  virtual void postscript();
   
 protected:
   /// Helper method for printing the parts of the InputFile Syntax

@@ -22,11 +22,16 @@ class InputFileFormatter : public SyntaxFormatterInterface
 public:
   InputFileFormatter(std::ostream & out, bool dump_mode);
 
-  virtual void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) const;
+  virtual void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs);
 
 protected:
   /// Helper method for printing the parts of the InputFile Syntax
   void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
+
+private:
+  /// Holds the names of the paramters we've seen for a parsed block so they don't get printed twice
+  std::map<std::string, std::set<std::string> > _seen_it;
+  
 };
 
 #endif /* INPUTFILEFORMATTER_H */

@@ -26,9 +26,9 @@ public:
   SyntaxFormatterInterface(std::ostream & out, bool dump_mode=false);
   virtual ~SyntaxFormatterInterface();
 
-  virtual void preamble() const {}
-  virtual void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) const = 0;
-  virtual void postscript() const {}
+  virtual void preamble() {}
+  virtual void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) = 0;
+  virtual void postscript() {}
   
 protected:
   std::ostream & _out;
