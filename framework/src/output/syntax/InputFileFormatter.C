@@ -55,12 +55,7 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
     std::string block_name = name.substr(index);
     _out << "\n" << spacing << "[" << forward << block_name << "]";
   }
-
-//  std::vector<InputParameters *> param_ptrs;
-//  addParamsPtrs(param_ptrs);
-  //param_ptrs.push_back(&_pars);
-  //param_ptrs.push_back(&_class_params);
-
+  
   for (unsigned int i=0; i<param_ptrs.size(); ++i)
   {
     if (param_ptrs[i] == NULL) continue;

@@ -66,6 +66,9 @@ public:
                        std::vector<std::string> & elements,
                        const std::string &delims = "/");
 
+  /**
+   * Standard scripting languague trim function
+   */
   static std::string trim(std::string str,
                           const std::string &white_space = " \t\n\v\f\r");
   
@@ -75,7 +78,11 @@ public:
   static bool pathContains(const std::string &expression,
                            const std::string &string_to_find,
                            const std::string &delims = "/");
-    
+
+  static void checkFileReadable(const std::string & filename, bool check_line_endings = false);
+  
+  static void checkFileWritable(const std::string & filename);
+  
   /**
    * Return a reference to the getpot object to extract options from the input file
    */
@@ -103,10 +110,9 @@ public:
    */
   void printUsage() const;
 
-  static void checkFileReadable(const std::string & filename, bool check_line_endings = false);
-  
-  static void checkFileWritable(const std::string & filename);
-
+  /**
+   * Creates a syntax formatter for printing
+   */
   void initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out = std::cout);
 
   /// Wrapper for syntax formatter print interface
@@ -138,21 +144,9 @@ private:
   bool searchCommandLine(const std::string &option_name);
   
   /**
-   * This function inserts blocks into the tree which are optional in the input file but are
-   * necessary for the correct execution of MOOSE based applications.
+   * Use MOOSE Factories to construct a full parse tree for documentation or echoing input. 
    */
-//  void fixupOptionalBlocks();
-
-  /**
-   * Use MOOSE Factories to construct a full parse tree for documentation. Format
-   * parameter specifies how to print the resulting parse tree. Only "dump", the
-   * original human readable format, and "yaml" are supported.
-   */
-  void buildFullTree(/* void (Parser::*action)(const std::string &name, const std::string *type, std::vector<InputParameters *> & param_ptrs)*/ );
-
-//  void printInputParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
-
-//  void printYAMLParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
+  void buildFullTree();
   
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file

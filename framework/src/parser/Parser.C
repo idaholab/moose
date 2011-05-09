@@ -220,7 +220,7 @@ Parser::parse(const std::string &input_filename)
     std::vector<InputParameters> all_params = ActionFactory::instance()->getAllValidParams(*i);
 
     // Before we build any objects we need to make sure that the section they are in is active
-    // and that they aren't an unregistered parent (signified by an empty vector)
+    // and that they aren't an unregistered parent (signified by an empty parameters vector)
     if (isSectionActive(curr_identifier, active_lists) && !all_params.empty())
     {
       for (std::vector<InputParameters>::iterator it = all_params.begin(); it != all_params.end(); ++it)
@@ -259,7 +259,6 @@ Parser::parse(const std::string &input_filename)
   // Print the input file syntax if requested
   if (Moose::command_line && searchCommandLine("ShowTree"))
   {
-//    const std::string * prev_name = NULL;
     Moose::action_warehouse.printInputFile(std::cout);
     std::cout << std::endl << std::endl;
   }
@@ -285,7 +284,7 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostre
 }
 
 void
-Parser::buildFullTree(/* void (Parser::*data_printer)(const std::string &name, const std::string *type, std::vector<InputParameters *> & param_ptrs)*/ )
+Parser::buildFullTree()
 {
   std::string prev_name = "";
   unsigned int counter = 0;
@@ -311,18 +310,10 @@ Parser::buildFullTree(/* void (Parser::*data_printer)(const std::string &name, c
           action_obj_params.get<std::string>("built_by_action") == action_name &&
           ActionFactory::instance()->isParsed(act_obj->first))
       {
-        
-        //std::ostringstream name;
-//        name << act_obj->first; // << "_";
-//        name << counter++;
-        
         params_ptrs[1] = NULL;
-        //(this->*data_printer)(act_obj->first, NULL, params_ptrs);
+        
         _syntax_formatter->print(act_name, prev_name == "" ? NULL : &prev_name, params_ptrs);
 
-
-//        std::cout << name.str() << "\t" << prev_name << "\n";
-        
         prev_name = act_name;
       }
       
@@ -343,21 +334,11 @@ Parser::buildFullTree(/* void (Parser::*data_printer)(const std::string &name, c
             pos = act_name.size();
           name = act_name.substr(0, pos) + moose_obj->first;
           
-          
-//          name << act_obj->first << moose_obj->first;  // << "_";
-//          name << counter++;
-
           moose_obj_params.set<std::string>("type") = moose_obj->first;
-          moose_obj_params.seenInInputFile("type");
-          
-//          std::cout << moose_obj->first << "\n";
+          moose_obj_params.seenInInputFile("type");          
           params_ptrs[1] = &moose_obj_params;
-          //(this->*data_printer)(act_obj->first, &(moose_obj->first), params_ptrs);
+
           _syntax_formatter->print(name, &prev_name, params_ptrs);
-
-
-          
-//          std::cout << name.str() << "\t" << prev_name << "\n";
           
           prev_name = name;
         }
@@ -371,118 +352,6 @@ Parser::buildFullTree(/* void (Parser::*data_printer)(const std::string &name, c
   _syntax_formatter->postscript();
 }
 
-/*
-void
-Parser::printInputParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs)
-{
-  std::ostream & out = std::cout;
-  std::vector<std::string> elements;
-  Parser::tokenize(name, elements);
-
-  std::string spacing = "";
-  for (unsigned int i=0; i<elements.size(); ++i)
-    spacing += "  ";
-
-  
-  out << "\n" << spacing << "block name: " << name << "\n";
-  
-  if (type)
-  {
-    out << spacing << "type: " << *type << "\n";
-    std::string class_desc = param_ptrs[1]->getClassDescription();
-    if (class_desc != "")
-      out << spacing << "description: " << class_desc << "\n";
-  }
-  
-  
-  out << spacing << "{\n";
-  
-  out << spacing << "  Valid Parameters:\n";
-
-  for (unsigned int i=0; i<param_ptrs.size() && param_ptrs[i]; ++i)
-  {
-    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
-    {
-      // First make sure we want to see this parameter
-      if (param_ptrs[i]->isPrivate(iter->first)) 
-        continue;
-
-      // Block params may be required and will have a doc string
-      std::string required = param_ptrs[i]->isParamRequired(iter->first) || iter->first == "type" ? "*" : " ";
-      std::string valid = param_ptrs[i]->isParamValid(iter->first) ? " (valid)" : " ";
-
-      out << spacing << "    " << std::left << std::setw(30) << required + iter->first << ": ";
-    
-      iter->second->print(out);
-
-      out << valid << "\n" << spacing << "    " << std::setw(30) << " " << "    " << param_ptrs[i]->getDocString(iter->first) << "\n";
-    }
-  }
-  
-//  visitChildren(&ParserBlock::printBlockData, true, false);
-
-  out << spacing << "}\n";
-}
-*/
- /*
-void
-Parser::printYAMLParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs)
-{
-  std::ostream & out = std::cout;
-  std::vector<std::string> elements;
-  Parser::tokenize(name, elements);
-
-  std::string spacing = "";
-  for (unsigned int i=0; i<elements.size(); ++i)
-    spacing += "  ";
-
-  out << spacing << "- name: " << name << "\n";
-  spacing += "  ";
-
-  std::string class_desc, type_str;
-  if (type)
-  {
-    class_desc = param_ptrs[1]->getClassDescription();
-    type_str = *type;
-  }
-  
-  //will print "" if there is no type or desc, which translates to None in python
-  out << spacing << "desc: !!str " << class_desc << "\n";
-  out << spacing << "type: " << type_str << "\n";
-  
-  out << spacing << "parameters:\n";
-  std::string subblocks = spacing + "subblocks: \n";
-  spacing += "  ";
-
-  for (unsigned int i=0; i<param_ptrs.size() && param_ptrs[i]; ++i)
-  {
-    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
-    {
-      std::string name = iter->first;
-      // First make sure we want to see this parameter, also block active and type
-      if (param_ptrs[i]->isPrivate(iter->first) || name == "active" || name == "type") 
-        continue;
-
-      // Block params may be required and will have a doc string
-      std::string required = param_ptrs[i]->isParamRequired(iter->first) ? "Yes" : "No";
-
-      out << spacing << "- name: " << name << "\n";
-      out << spacing << "  required: " << required << "\n";
-      out << spacing << "  default: !!str ";
-
-      //prints the value, which is the default value when dumping the tree
-      //because it hasn't been changed
-      iter->second->print(out);
-
-      out << "\n" << spacing << "  description: |\n    " << spacing
-                << param_ptrs[i]->getDocString(iter->first) << "\n";
-    }
-  }
-
-  //if there aren't any sub blocks it will just parse as None in python
-  out << subblocks;
-}
- */
 void
 Parser::tokenize(const std::string &str, std::vector<std::string> &elements, const std::string &delims)
 {
@@ -775,4 +644,3 @@ void Parser::setTensorParameter(const std::string & full_name, const std::string
     }
   }
 }
-
