@@ -12,52 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Action.h"
-
+#include "InputFileFormatter.h"
 #include "Parser.h"
 
-template<>
-InputParameters validParams<Action>()
+#include <sstream>
+#include <vector>
+
+InputFileFormatter::InputFileFormatter(std::ostream & out, bool dump_mode)
+  :SyntaxFormatterInterface(out, dump_mode)
 {
-  InputParameters params;
-  std::vector<std::string> blocks(1);
-  blocks[0] = "__all__";
-
-  // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
-  params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
-  params.addPrivateParam<std::string>("action");
-  params.addPrivateParam<Parser *>("parser_handle");
-  return params;
-}
-
-
-Action::Action(const std::string & name, InputParameters params) :
-    _name(name),
-    _pars(params),
-    _action(getParam<std::string>("action")),
-    _parser_handle(*getParam<Parser *>("parser_handle")),
-    _problem(_parser_handle._problem)
-{
-}
-
-std::string
-Action::getShortName() const
-{
-  return _name.substr(_name.find_last_of('/') != std::string::npos ? _name.find_last_of('/') + 1 : 0);
 }
 
 void
-Action::addParamsPtrs(std::vector<InputParameters *> & param_ptrs)
-{
-  param_ptrs.push_back(&_pars);
-}
-
-/*
-void
-Action::printInputFile(const std::string * prev_name, std::ostream & out)
+InputFileFormatter::print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) const
 {
   std::vector<std::string> elements;
-  Parser::tokenize(_name, elements);
+  Parser::tokenize(name, elements);
   std::stringstream ss;
 
   std::string quotes   = "";
@@ -72,35 +42,36 @@ Action::printInputFile(const std::string * prev_name, std::ostream & out)
     offset -= 2;
   }
 
-  // Not double registered (names don't match)
-  if (prev_name == NULL || *prev_name != _name)
+  /* Not double registered (names don't match) */
+  if (prev_name == NULL || *prev_name != name)
   {
-    printCloseAndOpen(prev_name, _name, out);
-    if (_name == "")
+    printCloseAndOpen(name, prev_name);
+    if (name == "")
       return;
 
-    int index = _name.find_last_of("/");
-    if (index == (int)_name.npos)
+    int index = name.find_last_of("/");
+    if (index == (int)name.npos)
       index = 0;
-    std::string block_name = _name.substr(index);
-    out << "\n" << spacing << "[" << forward << block_name << "]";
+    std::string block_name = name.substr(index);
+    _out << "\n" << spacing << "[" << forward << block_name << "]";
   }
 
-  std::vector<InputParameters *> param_ptrs;
-  addParamsPtrs(param_ptrs);
+//  std::vector<InputParameters *> param_ptrs;
+//  addParamsPtrs(param_ptrs);
   //param_ptrs.push_back(&_pars);
   //param_ptrs.push_back(&_class_params);
 
   for (unsigned int i=0; i<param_ptrs.size(); ++i)
   {
+    if (param_ptrs[i] == NULL) continue;
     for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter)
     {
-      // We only want non-private valid params
-      if (param_ptrs[i]->isPrivate(iter->first) || !param_ptrs[i]->isParamValid(iter->first))
+      // We only want non-private params unless we are in dump mode
+      if (param_ptrs[i]->isPrivate(iter->first) || (!_dump_mode && !param_ptrs[i]->isParamValid(iter->first)))
         continue;
 
-      // Don't print active if it is the default all, that means it's not in the input file
-      if (iter->first == "active")
+      // Don't print active if it is the default all, that means it's not in the input file - unless of course we are in dump mode
+      if (!_dump_mode && iter->first == "active")
       {
         libMesh::Parameters::Parameter<std::vector<std::string> > * val = dynamic_cast<libMesh::Parameters::Parameter<std::vector<std::string> >*>(iter->second);
         const std::vector<std::string> & active = val->get();
@@ -117,26 +88,29 @@ Action::printInputFile(const std::string * prev_name, std::ostream & out)
           continue;
       }
 
-      out << "\n" << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
 
-      // Print the parameter's value to a stringstream.
-      ss.str("");
-      iter->second->print(ss);
-      // If the value has spaces, surround it with quotes, otherwise no quotes
-      std::string value = ss.str();
-      if (value.find(' ') != std::string::npos)
-        quotes = "'";
-      else
-        quotes = "";
-      out << quotes << value << quotes;
+      _out << "\n" << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
+      if (_dump_mode && param_ptrs[i]->isParamRequired(iter->first))
+        _out << "(required)";
+      else if (!_dump_mode || param_ptrs[i]->isParamValid(iter->first))
+      {
+        // Print the parameter's value to a stringstream.
+        ss.str("");
+        iter->second->print(ss);
+        // If the value has spaces, surround it with quotes, otherwise no quotes
+        std::string value = Parser::trim(ss.str());
+        if (value.find(' ') != std::string::npos)
+          quotes = "'";
+        else
+          quotes = "";
+        _out << quotes << value << quotes;
+      }
     }
   }
 }
-*/
 
-/*
 void
-Action::printCloseAndOpen(const std::string * prev_name, const std::string & curr_name, std::ostream & out) const
+InputFileFormatter::printCloseAndOpen(const std::string & name, const std::string * prev_name) const
 {
   std::string empty;
   std::vector<std::string> prev_elements, curr_elements;
@@ -145,7 +119,7 @@ Action::printCloseAndOpen(const std::string * prev_name, const std::string & cur
     prev_name = &empty;
   
   Parser::tokenize(*prev_name, prev_elements);
-  Parser::tokenize(curr_name, curr_elements);
+  Parser::tokenize(name, curr_elements);
 
   int num_to_close=0;
   int num_to_open=0;
@@ -167,15 +141,14 @@ Action::printCloseAndOpen(const std::string * prev_name, const std::string & cur
     std::string backdot("[]");
     if (spacing.size())
       backdot = "[../]";
-    out << "\n" << spacing << backdot;
+    _out << "\n" << spacing << backdot;
   }
-  out << "\n";
+  _out << "\n";
 
   // Open new blocks if necessary
   for (int i=0; i<num_to_open-1; ++i)
   {
     std::string spacing(i*2, ' ');
-    out << "\n" << spacing << "[" << curr_elements[i] << "]";
+    _out << "\n" << spacing << "[" << curr_elements[i] << "]";
   }
 }
-*/

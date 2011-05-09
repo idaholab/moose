@@ -16,6 +16,7 @@
 #define PARSER_H
 
 #include "GlobalParamsAction.h"
+#include "SyntaxFormatterInterface.h"
 
 // libMesh
 #include "getpot.h"
@@ -28,6 +29,12 @@ class Executioner;
 class Parser
 {
 public:
+  enum SyntaxFormatterType
+  {
+    INPUT_FILE,
+    YAML
+  };
+
   Parser();
 
   virtual ~Parser();
@@ -59,7 +66,8 @@ public:
                        std::vector<std::string> & elements,
                        const std::string &delims = "/");
 
-  std::string trim(std::string str, const std::string &white_space);
+  static std::string trim(std::string str,
+                          const std::string &white_space = " \t\n\v\f\r");
   
   /**
    * This function tokenizes a path and checks to see if it contains the string to look for
@@ -99,6 +107,15 @@ public:
   
   static void checkFileWritable(const std::string & filename);
 
+  void initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out = std::cout);
+
+  /// Wrapper for syntax formatter print interface
+  inline void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs)
+  {
+    mooseAssert(_syntax_formatter != NULL, "Syntax Formatter is NULL in Parser");
+    _syntax_formatter->print(name, prev_name, param_ptrs);
+  }
+
 public:
   // data created while running execute()
   MooseMesh *_mesh;
@@ -124,18 +141,18 @@ private:
    * This function inserts blocks into the tree which are optional in the input file but are
    * necessary for the correct execution of MOOSE based applications.
    */
-  void fixupOptionalBlocks();
+//  void fixupOptionalBlocks();
 
   /**
    * Use MOOSE Factories to construct a full parse tree for documentation. Format
    * parameter specifies how to print the resulting parse tree. Only "dump", the
    * original human readable format, and "yaml" are supported.
    */
-  void buildFullTree( void (Parser::*action)(const std::string &name, const std::string *type, std::vector<InputParameters *> & param_ptrs) );
+  void buildFullTree(/* void (Parser::*action)(const std::string &name, const std::string *type, std::vector<InputParameters *> & param_ptrs)*/ );
 
-  void printInputParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
+//  void printInputParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
 
-  void printYAMLParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
+//  void printYAMLParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs);
   
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
@@ -161,6 +178,8 @@ private:
     std::vector<std::string> cli_syntax;
     bool required;
   };
+
+  SyntaxFormatterInterface * _syntax_formatter;
   
   std::map<std::string, CLIOption> _cli_options;
 

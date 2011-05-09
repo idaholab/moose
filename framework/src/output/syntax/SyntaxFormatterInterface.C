@@ -12,32 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEOBJECTACTION_H
-#define MOOSEOBJECTACTION_H
+#include "SyntaxFormatterInterface.h"
 
-#include "InputParameters.h"
-#include "Moose.h"
-#include "Action.h"
-
-#include <string>
-
-class MooseObjectAction : public Action
+SyntaxFormatterInterface::SyntaxFormatterInterface(std::ostream & out, bool dump_mode)
+  :_out(out),
+   _dump_mode(dump_mode)
+   
 {
-public:
-  MooseObjectAction(const std::string & name, InputParameters params);
+}
 
-  virtual void act() = 0;
-
-  inline InputParameters & getMooseObjectParams() { return _moose_object_pars; }
-
-  virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
-  
-protected:
-  std::string _type;
-  InputParameters _moose_object_pars;
-};
-
-template<>
-InputParameters validParams<MooseObjectAction>();
-
-#endif // MOOSEOBJECTACTION_H
+SyntaxFormatterInterface::~SyntaxFormatterInterface()
+{
+}

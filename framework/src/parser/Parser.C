@@ -34,6 +34,9 @@
 
 #include "GlobalParamsAction.h"
 
+#include "InputFileFormatter.h"
+#include "YAMLFormatter.h"
+
 // libMesh
 #include "getpot.h"
 
@@ -44,9 +47,14 @@ Parser::Parser():
   _executioner(NULL),
   _exreader(NULL),
   _loose(false),
+  _syntax_formatter(NULL),
   _getpot_initialized(false)
 {
   initOptions();
+
+  // Need to make sure that the parser pointer is set in the warehouse for various functions
+  // TODO: Rip the Parser Pointer out of the warehouse
+  Moose::action_warehouse.setParserPointer(this);
   
   if (Moose::command_line != NULL)
   {
@@ -57,20 +65,16 @@ Parser::Parser():
     }
     if (searchCommandLine("Dump"))
     {
-      buildFullTree( &Parser::printInputParameterData );
+      initSyntaxFormatter(INPUT_FILE, true);
+      
+      buildFullTree( /*&Parser::printInputParameterData*/ );
       exit(0);
     }
     if (searchCommandLine("YAML"))
     {
-      //important: start and end yaml data delimiters used by python
-      std::cout << "**START YAML DATA**\n";
-      std::cout << "  - name: TODO\n";
-      std::cout << "    desc:\n";
-      std::cout << "    type:\n";
-      std::cout << "    parameters:\n";
-      std::cout << "    subblocks:\n";
-      buildFullTree( &Parser::printYAMLParameterData );
-      std::cout << "**END YAML DATA**\n";
+      initSyntaxFormatter(YAML, true);
+      
+      buildFullTree( /*&Parser::printYAMLParameterData*/ );
       exit(0);
     }
   }
@@ -83,6 +87,8 @@ Parser::Parser():
 Parser::~Parser()
 {
   delete _exreader;
+  if (_syntax_formatter)
+    delete _syntax_formatter;
 }
 
 void
@@ -253,16 +259,40 @@ Parser::parse(const std::string &input_filename)
   // Print the input file syntax if requested
   if (Moose::command_line && searchCommandLine("ShowTree"))
   {
-    const std::string * prev_name = NULL;
+//    const std::string * prev_name = NULL;
     Moose::action_warehouse.printInputFile(std::cout);
     std::cout << std::endl << std::endl;
   }
 }
 
+void
+Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out)
+{
+  if (_syntax_formatter)
+    delete _syntax_formatter;
+
+  switch (type)
+  {
+  case INPUT_FILE:
+    _syntax_formatter = new InputFileFormatter(out, dump_mode);
+    break;
+  case YAML:
+    _syntax_formatter = new YAMLFormatter(out, dump_mode);
+    break;
+  default:
+    mooseError("Unrecognized Syntax Formatter requested");
+  } 
+}
 
 void
-Parser::buildFullTree( void (Parser::*data_printer)(const std::string &name, const std::string *type, std::vector<InputParameters *> & param_ptrs) )
+Parser::buildFullTree(/* void (Parser::*data_printer)(const std::string &name, const std::string *type, std::vector<InputParameters *> & param_ptrs)*/ )
 {
+  std::string prev_name = "";
+  unsigned int counter = 0;
+  std::vector<InputParameters *> params_ptrs(2);
+
+  _syntax_formatter->preamble();
+  
   for (ActionFactory::iterator act_obj = ActionFactory::instance()->begin();
        act_obj != ActionFactory::instance()->end();
        ++act_obj)
@@ -273,19 +303,29 @@ Parser::buildFullTree( void (Parser::*data_printer)(const std::string &name, con
     {
       InputParameters action_obj_params = *it;
       const std::string & action_name = act_obj->second._action_name;
-
-      std::vector<InputParameters *> params_ptrs(2);
+      std::string act_name = act_obj->first;
+      
       params_ptrs[0] = &action_obj_params;
-
+      
       if (action_obj_params.have_parameter<std::string>("built_by_action") &&
           action_obj_params.get<std::string>("built_by_action") == action_name &&
           ActionFactory::instance()->isParsed(act_obj->first))
       {
+        
+        //std::ostringstream name;
+//        name << act_obj->first; // << "_";
+//        name << counter++;
+        
         params_ptrs[1] = NULL;
-        (this->*data_printer)(act_obj->first, NULL, params_ptrs);
+        //(this->*data_printer)(act_obj->first, NULL, params_ptrs);
+        _syntax_formatter->print(act_name, prev_name == "" ? NULL : &prev_name, params_ptrs);
+
+
+//        std::cout << name.str() << "\t" << prev_name << "\n";
+        
+        prev_name = act_name;
       }
-    
-    
+      
       for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
            moose_obj != Factory::instance()->registeredObjectsEnd();
            ++moose_obj)
@@ -294,16 +334,44 @@ Parser::buildFullTree( void (Parser::*data_printer)(const std::string &name, con
       
         if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
             moose_obj_params.get<std::string>("built_by_action") == action_name)
-        { 
+        {
+          std::string name;
+          size_t pos = 0;
+          if (act_name[act_name.size()-1] == '*')
+            pos = act_name.size()-1;
+          else
+            pos = act_name.size();
+          name = act_name.substr(0, pos) + moose_obj->first;
+          
+          
+//          name << act_obj->first << moose_obj->first;  // << "_";
+//          name << counter++;
+
+          moose_obj_params.set<std::string>("type") = moose_obj->first;
+          moose_obj_params.seenInInputFile("type");
+          
+//          std::cout << moose_obj->first << "\n";
           params_ptrs[1] = &moose_obj_params;
-          (this->*data_printer)(act_obj->first, &(moose_obj->first), params_ptrs);
+          //(this->*data_printer)(act_obj->first, &(moose_obj->first), params_ptrs);
+          _syntax_formatter->print(name, &prev_name, params_ptrs);
+
+
+          
+//          std::cout << name.str() << "\t" << prev_name << "\n";
+          
+          prev_name = name;
         }
       }
     }
   }
+  params_ptrs[0] = NULL;
+  params_ptrs[1] = NULL;
+  _syntax_formatter->print("", &prev_name, params_ptrs);
+
+  _syntax_formatter->postscript();
 }
 
-
+/*
 void
 Parser::printInputParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs)
 {
@@ -355,8 +423,8 @@ Parser::printInputParameterData(const std::string & name, const std::string * ty
 
   out << spacing << "}\n";
 }
-
-
+*/
+ /*
 void
 Parser::printYAMLParameterData(const std::string & name, const std::string * type, std::vector<InputParameters *> & param_ptrs)
 {
@@ -414,7 +482,7 @@ Parser::printYAMLParameterData(const std::string & name, const std::string * typ
   //if there aren't any sub blocks it will just parse as None in python
   out << subblocks;
 }
-
+ */
 void
 Parser::tokenize(const std::string &str, std::vector<std::string> &elements, const std::string &delims)
 {
@@ -468,9 +536,6 @@ Parser::getExecutioner()
 void
 Parser::execute()
 {
-  // Need to make sure that the parser pointer is set before we iterate through the warehouse
-  // TODO: Rip the Parser Pointer out of the warehouse
-  Moose::action_warehouse.setParserPointer(this);
   for (ActionWarehouse::iterator i = Moose::action_warehouse.begin();
        i != Moose::action_warehouse.end();
        ++i)

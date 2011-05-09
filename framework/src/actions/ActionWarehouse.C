@@ -115,16 +115,24 @@ ActionWarehouse::printInputFile(std::ostream & out)
   }
   _ordered_actions.push_back(_empty_action);
 
+  mooseAssert (_parser_ptr != NULL, "Parser is NULL in ActionWarehouse");
+  _parser_ptr->initSyntaxFormatter(Parser::INPUT_FILE, out);
+  
   // Print it out!
-  const std::string * prev_name (NULL);
+
+  std::string prev_name = "";
   for (std::vector<Action* >::iterator i = _ordered_actions.begin();
        i != _ordered_actions.end();
        ++i)
   {
-    if (ActionFactory::instance()->isParsed((*i)->name()))
+    std::string name ((*i)->name());
+
+    if (ActionFactory::instance()->isParsed(name))
     {
-      (*i)->printInputFile(prev_name, out);
-      prev_name = &((*i)->name());
+      std::vector<InputParameters *> param_ptrs;
+      (*i)->addParamsPtrs(param_ptrs);
+      _parser_ptr->print(name, prev_name == "" ? NULL : &prev_name, param_ptrs);
+      prev_name = name;
     }
   }
 }

@@ -177,13 +177,13 @@ ActionFactory::const_iterator ActionFactory::begin() const
 inline
 ActionFactory::iterator ActionFactory::end()
 {
-  return _name_to_build_info.begin();
+  return _name_to_build_info.end();
 }
 
 inline
 ActionFactory::const_iterator ActionFactory::end() const
 {
-  return _name_to_build_info.begin();
+  return _name_to_build_info.end();
 }
 
 inline
