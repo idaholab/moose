@@ -98,31 +98,25 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
       if (!_update_location && info->_distance > 0)
       {
-        Point contact_ref = info->_closest_point_ref;
-        Point contact_phys;
-        Real distance;
-        RealGradient normal;
-        bool contact_point_on_side;
-        std::vector<std::vector<Real> > side_phi;
+        const Point contact_ref = info->_closest_point_ref;
+        const Real distance = info->_distance;
+        bool contact_point_on_side(false);
 
         // Slave position must be the previous contact point
         // Use the previous reference coordinates
         std::vector<Point> points(1);
         points[0] = contact_ref;
         _fe->reinit(info->_side, &points);
-        const std::vector<Point> & slave_pos = _fe->get_xyz();
+        const std::vector<Point> slave_pos = _fe->get_xyz();
 
-        Moose::findContactPoint(_fe, _fe_type, elem, info->_side_num, slave_pos[0],
-                                false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+        Moose::findContactPoint(*info, _fe, _fe_type, slave_pos[0],
+                                false, contact_point_on_side);
 
-        info->_normal = normal;
-        // info->_closest_point_ref = contact_ref;
-        // info->_distance = distance;
-        info->_side_phi = side_phi;
+        // Restore the original reference coordinates
+        info->_closest_point_ref = contact_ref;
+        info->_distance = distance;
 
         mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
-
-        info->_closest_point = contact_phys;
 
         continue;
       }
@@ -132,23 +126,10 @@ PenetrationThread::operator() (const NodeIdRange & range)
       // forgiving of slight movement of slave nodes.
       if(elem->contains_point(node, 100*TOLERANCE))
       {
-        Point contact_ref = info->_closest_point_ref;
-        Point contact_phys;
-        Real distance;
-        RealGradient normal;
-        bool contact_point_on_side;
-        std::vector<std::vector<Real> > side_phi;
+        bool contact_point_on_side(false);
 
-        Moose::findContactPoint(_fe, _fe_type, elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
-
-        info->_normal = normal;
-        info->_closest_point_ref = contact_ref;
-        info->_distance = distance;
-        info->_side_phi = side_phi;
-
-//         mooseAssert(info->_distance >= 0, "Error in PenetrationLocator: Slave node contained in element but contact distance was negative!");
-
-        info->_closest_point = contact_phys;
+        Moose::findContactPoint(*info, _fe, _fe_type, node,
+                                false, contact_point_on_side);
 
         // I hate continues but this is actually cleaner than anything I can think of
         continue;
@@ -164,18 +145,12 @@ PenetrationThread::operator() (const NodeIdRange & range)
         bool contact_point_on_side;
         std::vector<std::vector<Real> > side_phi;
 
-        Moose::findContactPoint(_fe, _fe_type, elem, info->_side_num, node, false, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+        Moose::findContactPoint(*info, _fe, _fe_type, node,
+                                false, contact_point_on_side);
 
         if(contact_point_on_side)
         {
-          info->_normal = normal;
-          info->_closest_point_ref = contact_ref;
-          info->_distance = distance;
           mooseAssert(info->_distance <= 0, "Error in PenetrationLocator: Slave node not contained in element but distance was positive!");
-          info->_side_phi = side_phi;
-
-          info->_closest_point = contact_phys;
-
           continue;
         }
         else
@@ -198,7 +173,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
       // TODO: This is a horribly inefficient way to do this!  We need to cache information about which boundary ids elements are connected to
       // and which sides are on those boundaries in MooseMesh!  That way we can look this information up directly!
-      for(unsigned int m=0; m<_n_elems; m++)
+      for(unsigned int m=0; m<_n_elems; ++m)
       {
         if(_elem_list[m] == elem_id && _id_list[m] == static_cast<short>(_master_boundary))
         {
@@ -212,18 +187,27 @@ PenetrationThread::operator() (const NodeIdRange & range)
           RealGradient normal;
           bool contact_point_on_side;
           std::vector<std::vector<Real> > side_phi;
+          std::vector<RealGradient> dxyzdxi;
+          std::vector<RealGradient> dxyzdeta;
+          std::vector<RealGradient> d2xyzdxideta;
 
-          Moose::findContactPoint(_fe, _fe_type, elem, side_num, node, true, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+          PenetrationLocator::PenetrationInfo * pen_info =
+            new PenetrationLocator::PenetrationInfo(&node,
+                                                    elem,
+                                                    side,
+                                                    side_num,
+                                                    normal,
+                                                    distance,
+                                                    contact_phys,
+                                                    contact_ref,
+                                                    side_phi,
+                                                    dxyzdxi,
+                                                    dxyzdeta,
+                                                    d2xyzdxideta);
 
-          PenetrationLocator::PenetrationInfo * pen_info =  new PenetrationLocator::PenetrationInfo(&node,
-                                                                                                    elem,
-                                                                                                    side,
-                                                                                                    side_num,
-                                                                                                    normal,
-                                                                                                    distance,
-                                                                                                    contact_phys,
-                                                                                                    contact_ref,
-                                                                                                    side_phi);
+
+          Moose::findContactPoint(*pen_info, _fe, _fe_type, node,
+                                  true, contact_point_on_side);
 
           if(contact_point_on_side && info &&
              (
@@ -310,11 +294,12 @@ PenetrationThread::operator() (const NodeIdRange & range)
           bool contact_point_on_side(false);
           std::vector<std::vector<Real> > side_phi;
 
-          Moose::findContactPoint(_fe, _fe_type, p_info[j]->_elem, p_info[j]->_side_num, closest_coor, true, contact_ref, contact_phys, side_phi, distance, normal, contact_point_on_side);
+          Moose::findContactPoint(*p_info[j], _fe, _fe_type, closest_coor,
+                                  true, contact_point_on_side);
           if ( contact_point_on_side )
           {
             // We have found a match.  This node is in contact.
-            p_info[closest_index]->_closest_point = closest_coor;
+            p_info[closest_index]->_closest_point = p_info[j]->_closest_point;
             p_info[closest_index]->_distance = (p_info[closest_index]->_distance > 0 ? 1 : -1) * dist;
             Point normal(closest_coor - node);
             const Real len(normal.size());
@@ -332,6 +317,9 @@ PenetrationThread::operator() (const NodeIdRange & range)
             points[0] = p_info[closest_index]->_closest_point_ref;
             _fe->reinit(p_info[closest_index]->_side, &points);
             p_info[closest_index]->_side_phi = _fe->get_phi();
+            p_info[closest_index]->_dxyzdxi = _fe->get_dxyzdxi();
+            p_info[closest_index]->_dxyzdeta = _fe->get_dxyzdeta();
+            p_info[closest_index]->_d2xyzdxideta = _fe->get_d2xyzdxideta();
 
             info = p_info[closest_index];
             // Set the entry in p_info to NULL so that we don't delete it (it is now

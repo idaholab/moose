@@ -37,12 +37,12 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
   // This is a time savings so that the thread objects don't do this themselves multiple times
   _fe.resize(libMesh::n_threads());
   for(unsigned int i=0; i < libMesh::n_threads(); i++)
-    _fe[i] = FEBase::build(_mesh.dimension()-1, _fe_type).release();  
+    _fe[i] = FEBase::build(_mesh.dimension()-1, _fe_type).release();
 }
 
 PenetrationLocator::~PenetrationLocator()
 {
-  for(unsigned int i=0; i < libMesh::n_threads(); i++)  
+  for(unsigned int i=0; i < libMesh::n_threads(); i++)
     delete _fe[i];
 
   for (std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_info.begin(); it != _penetration_info.end(); ++it)
@@ -113,7 +113,7 @@ PenetrationLocator::setUpdate( bool update )
 }
 
 
-PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi)
+PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta)
   :_node(node),
    _elem(elem),
    _side(side),
@@ -122,7 +122,10 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, Elem * e
    _distance(norm_distance),
    _closest_point(closest_point),
    _closest_point_ref(closest_point_ref),
-   _side_phi(side_phi)
+   _side_phi(side_phi),
+   _dxyzdxi(dxyzdxi),
+   _dxyzdeta(dxyzdeta),
+   _d2xyzdxideta(d2xyzdxideta)
 {}
 
 
@@ -136,7 +139,10 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _distance(p._distance),
     _closest_point(p._closest_point),
     _closest_point_ref(p._closest_point_ref),
-    _side_phi(p._side_phi)
+    _side_phi(p._side_phi),
+    _dxyzdxi(p._dxyzdxi),
+    _dxyzdeta(p._dxyzdeta),
+    _d2xyzdxideta(p._d2xyzdxideta)
 {}
 
 PenetrationLocator::PenetrationInfo::~PenetrationInfo()

@@ -1,6 +1,7 @@
 
 // Moose
 #include "Moose.h"
+#include "PenetrationLocator.h"
 
 // libMesh
 #include "elem.h"
@@ -14,9 +15,11 @@ namespace libMesh
 
 namespace Moose
 {
+
 void
-findContactPoint(FEBase * _fe, FEType & _fe_type, const Elem * master_elem, unsigned int side_num, const Point & slave_point,
-                 bool start_with_centroid, Point & contact_ref, Point & contact_phys, std::vector<std::vector<Real> > & side_phi,
-                 Real & distance, RealGradient & normal, bool & contact_point_on_side);
+findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
+                 FEBase * _fe, FEType & _fe_type, const Point & slave_point,
+                 bool start_with_centroid, bool & contact_point_on_side);
+
 }
 

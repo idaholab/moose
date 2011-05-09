@@ -13,7 +13,7 @@
 
 namespace Moose
 {
-  
+
 /**
  * Finds the closest point (called the contact point) on the master_elem on side "side" to the slave_point.
  *
@@ -27,13 +27,15 @@ namespace Moose
  * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the element.
  */
 void
-findContactPoint(FEBase * _fe, FEType & _fe_type, const Elem * master_elem, unsigned int side_num, const Point & slave_point,
-                 bool start_with_centroid, Point & contact_ref, Point & contact_phys, std::vector<std::vector<Real> > & side_phi,
-                 Real & distance, RealGradient & normal, bool & contact_point_on_side)
+findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
+                 FEBase * _fe, FEType & _fe_type, const Point & slave_point,
+                 bool start_with_centroid, bool & contact_point_on_side)
 {
+  const Elem * master_elem = p_info._elem;
+
   unsigned int dim = master_elem->dim();
 
-  Elem * side = master_elem->build_side(side_num, false).release();
+  const Elem * side = p_info._side;
 
   const std::vector<Point> & phys_point = _fe->get_xyz();
 
@@ -50,7 +52,7 @@ findContactPoint(FEBase * _fe, FEType & _fe_type, const Elem * master_elem, unsi
   if(start_with_centroid)
     ref_point = FEInterface::inverse_map(dim-1, _fe_type, side, side->centroid());
   else
-    ref_point = contact_ref;
+    ref_point = p_info._closest_point_ref;
 
   std::vector<Point> points(1);
   points[0] = ref_point;
@@ -60,7 +62,7 @@ findContactPoint(FEBase * _fe, FEType & _fe_type, const Elem * master_elem, unsi
   Real update_size = 9999999;
 
   //Least squares
-  for(unsigned int it=0; it<3 && update_size > TOLERANCE*1e3; it++)
+  for(unsigned int it=0; it<3 && update_size > TOLERANCE*1e3; ++it)
   {
 
     DenseMatrix<Real> jac(dim-1, dim-1);
@@ -141,29 +143,30 @@ findContactPoint(FEBase * _fe, FEType & _fe_type, const Elem * master_elem, unsi
 
     update_size = update.l2_norm();
   }
+
 /*
   if(nit == 12 && update_size > TOLERANCE*TOLERANCE)
     std::cerr<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
 */
   bool contained_in_elem = master_elem->contains_point(slave_point);
 
-  contact_ref = ref_point;
-  contact_phys = phys_point[0];
-  distance = d.size();
+  p_info._closest_point_ref = ref_point;
+  p_info._closest_point = phys_point[0];
+  p_info._distance = d.size();
 
   // If the point is outside the element the distance is negative
   if(!contained_in_elem)
-    distance = -distance;
+    p_info._distance = -p_info._distance;
 
   if(dim-1 == 2)
   {
-    normal = dxyz_dxi[0].cross(dxyz_deta[0]);
-    normal /= normal.size();
+    p_info._normal = dxyz_dxi[0].cross(dxyz_deta[0]);
+    p_info._normal /= p_info._normal.size();
   }
   else
   {
-    normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
-    normal /= normal.size();
+    p_info._normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
+    p_info._normal /= p_info._normal.size();
   }
 
   contact_point_on_side = FEInterface::on_reference_element(ref_point, side->type());
@@ -216,27 +219,31 @@ findContactPoint(FEBase * _fe, FEType & _fe_type, const Elem * master_elem, unsi
       }
     }
 
-    contact_ref = FEInterface::inverse_map(dim-1, _fe_type, side, closest_point);
-    contact_phys = closest_point;
-    distance = closest_distance;
-    normal =  closest_point - slave_point;
-    normal /= normal.size();
+    p_info._closest_point_ref = FEInterface::inverse_map(dim-1, _fe_type, side, closest_point);
+    p_info._closest_point = closest_point;
+    p_info._distance = closest_distance;
+    p_info._normal =  closest_point - slave_point;
+    p_info._normal /= p_info._normal.size();
     contact_point_on_side = true;
   }
 
   // This happens if the point is behind the face, but through the element
-  if(!contained_in_elem && ((contact_phys - slave_point) * normal) > 0)
+  if(!contained_in_elem && ((p_info._closest_point - slave_point) * p_info._normal) > 0)
+  {
     contact_point_on_side = false;
+  }
 
 
   const std::vector<std::vector<Real> > & phi = _fe->get_phi();
 
-  points[0] = contact_ref;
+  points[0] = p_info._closest_point_ref;
   _fe->reinit(side, &points);
 
-  side_phi = phi;
+  p_info._side_phi = phi;
+  p_info._dxyzdxi = dxyz_dxi;
+  p_info._dxyzdeta = dxyz_deta;
+  p_info._d2xyzdxideta = d2xyz_dxieta;
 
-  delete side;
 }
 
 } //namespace Moose

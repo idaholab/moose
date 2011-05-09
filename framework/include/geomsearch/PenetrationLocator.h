@@ -50,7 +50,7 @@ public:
   class PenetrationInfo
   {
   public:
-    PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi);
+    PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta);
 
     PenetrationInfo(const PenetrationInfo & p);
 
@@ -64,6 +64,9 @@ public:
     Point _closest_point;
     Point _closest_point_ref;
     std::vector<std::vector<Real> > _side_phi;
+    std::vector<RealGradient> _dxyzdxi;
+    std::vector<RealGradient> _dxyzdeta;
+    std::vector<RealGradient> _d2xyzdxideta;
   };
 
   SubProblem & _subproblem;
