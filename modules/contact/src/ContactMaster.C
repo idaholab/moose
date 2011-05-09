@@ -120,8 +120,8 @@ ContactMaster::computeQpResidual()
     long int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
-  Real constraint_mag(0);
-  RealVectorValue distance_vec;
+//   const RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+//   const RealVectorValue pen_force(_penalty * distance_vec);
   switch(_model)
   {
   case CM_FRICTIONLESS:
@@ -132,8 +132,7 @@ ContactMaster::computeQpResidual()
   case CM_GLUED:
   case CM_TIED:
     resid = res_vec(_component);
-    distance_vec = _mesh.node(node->id()) - pinfo->_closest_point;
-    constraint_mag = distance_vec(_component);
+//     resid -= pen_force(_component);
     break;
 
   default:
@@ -146,6 +145,8 @@ ContactMaster::computeQpResidual()
 Real
 ContactMaster::computeQpJacobian()
 {
+
+//   return _phi[_i][_qp] * _penalty * _test[_j][_qp];
 
   return 0;
 /*
