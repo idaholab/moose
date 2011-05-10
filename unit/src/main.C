@@ -45,7 +45,10 @@ int main(int argc, char **argv)
 
   runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
 
-  bool wasSucessful = runner.run("", false, true, false);
+  bool wasSucessful = runner.run(/*testPath=*/"", 
+				 /*doWait=*/false, 
+				 /*doPrintResult=*/true, 
+				 /*doPrintProgress=*/false);
 
   if (out.is_open())
     out.close();
