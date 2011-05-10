@@ -187,6 +187,8 @@ public:
   void add(NumericVector<Number> & residual);
   /// Add the jacobian part into 'jacobian'
   void add(SparseMatrix<Number> & jacobian);
+  /// Add the jacobian part into 'jacobian' but with specific dof map and dof indices (used by PBP)
+  void add(SparseMatrix<Number> & jacobian, const DofMap & dof_map, std::vector<unsigned int> & dof_indices);
 
   void insert(NumericVector<Number> & residual);
 

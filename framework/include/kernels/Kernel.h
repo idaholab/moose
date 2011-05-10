@@ -56,7 +56,7 @@ public:
   /**
    * Computes d-residual / d-jvar... storing the result in Ke.
    */
-  virtual void computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar);
+  virtual void computeOffDiagJacobian(unsigned int jvar);
 
   /**
    * The variable number that this kernel operates on.

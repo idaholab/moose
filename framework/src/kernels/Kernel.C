@@ -131,18 +131,20 @@ Kernel::computeJacobian(int /*i*/, int /*j*/)
 }
 
 void
-Kernel::computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar)
+Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
+
+  DenseMatrix<Number> & ke = _var.jacobianBlock();
 
   for (_i=0; _i<_phi.size(); _i++)
     for (_j=0; _j<_phi.size(); _j++)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
       {
         if(jvar == _var.number())
-          Ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+          ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
         else
-          Ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);
+          ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);
       }
 
 //  Moose::perf_log.pop("computeOffDiagJacobian()",_name);

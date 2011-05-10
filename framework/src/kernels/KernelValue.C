@@ -69,9 +69,11 @@ KernelValue::computeJacobian(int /*i*/, int /*j*/)
 }
 
 void
-KernelValue::computeOffDiagJacobian(DenseMatrix<Number> & Ke, unsigned int jvar)
+KernelValue::computeOffDiagJacobian(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
+
+  DenseMatrix<Number> & Ke = _var.jacobianBlock();
 
   for (_j=0; _j<_phi.size(); _j++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)

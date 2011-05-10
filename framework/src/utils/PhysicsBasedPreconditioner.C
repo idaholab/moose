@@ -108,9 +108,9 @@ PhysicsBasedPreconditioner::init ()
 
     Preconditioner<Number> * preconditioner = _preconditioners[system_var];
     preconditioner->init();
-    
+
     //Compute the diagonal block... storing the result in the system matrix
-    _mproblem.computeJacobianBlock(*u_system.matrix,u_system,system_var,system_var);
+    _mproblem.computeJacobianBlock(*u_system.matrix, u_system, system_var, system_var);
 
     for(unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
     {
@@ -128,7 +128,6 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 {
   Moose::perf_log.push("apply()","PhysicsBasedPreconditioner");
 
-  // -2 to take into account the Nonlinear system and the Auxilliary System
   const unsigned int num_systems = _systems.size();
   
   MooseMesh & mesh = _mproblem.mesh();
@@ -168,10 +167,10 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
       rhs.scale(-1.0);
       rhs.close();
     }
-    
+
     //Apply the preconditioner to the small system
     _preconditioners[system_var]->apply(*u_system.rhs,*u_system.solution);
-    
+
     //Copy solution from small system into the big one
     //copyVarValues(mesh,sys,0,*u_system.solution,0,system_var,y);
   }

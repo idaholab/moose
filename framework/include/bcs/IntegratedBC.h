@@ -42,9 +42,9 @@ public:
   virtual void computeResidual();
   virtual void computeJacobian(int i, int j);
   /**
-   * Computes d-ivar-residual / d-jvar... storing the result in Ke.
+   * Computes d-ivar-residual / d-jvar...
    */
-  void computeJacobianBlock(DenseMatrix<Number> & Ke, unsigned int ivar, unsigned int jvar);
+  void computeJacobianBlock(unsigned int ivar, unsigned int jvar);
 
 protected:
   MooseVariable & _test_var;

@@ -258,6 +258,20 @@ MooseVariable::add(SparseMatrix<Number> & jacobian)
 }
 
 void
+MooseVariable::add(SparseMatrix<Number> & jacobian, const DofMap & dof_map, std::vector<unsigned int> & dof_indices)
+{
+  dof_map.constrain_element_matrix(_Ke, dof_indices, false);
+  if (_scaling_factor != 1.0)
+  {
+    DenseMatrix<Number> ke(_Ke);
+    ke.scale(_scaling_factor);
+    jacobian.add_matrix(ke, dof_indices);
+  }
+  else
+    jacobian.add_matrix(_Ke, dof_indices);
+}
+
+void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
   if (_Re.size() > 0)

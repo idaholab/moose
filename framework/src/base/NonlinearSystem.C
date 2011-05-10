@@ -659,7 +659,6 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
     unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
     DofMap & dof_map = precond_system.get_dof_map();
-    DenseMatrix<Number> Ke;
     std::vector<unsigned int> dof_indices;
 
     jacobian.zero();
@@ -669,15 +668,14 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
       const Elem* elem = *el;
       unsigned int cur_subdomain = elem->subdomain_id();
 
-      std::set<MooseVariable *> vars;
-
+      _problem.prepare(elem, tid);
       _problem.reinitElem(elem, tid);
 
       dof_map.dof_indices(elem, dof_indices);
 
       if(dof_indices.size())
       {
-        Ke.resize(dof_indices.size(),dof_indices.size());
+        std::set<MooseVariable *> vars;
 
         if(cur_subdomain != subdomain)
         {
@@ -700,7 +698,10 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
           Kernel * kernel = *kernel_it;
 
           if(kernel->variable().number() == ivar)
-            kernel->computeOffDiagJacobian(Ke, jvar);
+          {
+            kernel->computeOffDiagJacobian(jvar);
+            vars.insert(&kernel->variable());
+          }
         }
 
         for (unsigned int side=0; side<elem->n_sides(); side++)
@@ -723,15 +724,18 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                 {
                   IntegratedBC * bc = *it;
                   if(bc->variable().number() == ivar)
-                    bc->computeJacobianBlock(Ke,ivar,jvar);
+                  {
+                    bc->computeJacobianBlock(ivar,jvar);
+                    vars.insert(&bc->variable());
+                  }
                 }
               }
             }
           }
         }
 
-        dof_map.constrain_element_matrix (Ke, dof_indices, false);
-        jacobian.add_matrix(Ke, dof_indices);
+        for (std::set<MooseVariable *>::iterator it = vars.begin(); it != vars.end(); ++it)
+          (*it)->add(jacobian, dof_map, dof_indices);
       }
     }
   }
