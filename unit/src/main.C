@@ -37,21 +37,25 @@ int main(int argc, char **argv)
   runner.addTest(suite);
   std::ofstream out;
 
+  // If you run with --xml, output will be sent to an xml file instead of the screen
   if (argc == 2 && std::string(argv[1]) == std::string("--xml")) 
   {
     runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), out ) );
     out.open("test_results.xml");
   }
 
-  runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
+  else
+  {
+    // Note: upon calling setOutputter, any previous outputter is
+    // destroyed. The TextTestRunner assumes ownership of the outputter, so you
+    // don't have to worry about deleting it.
+    runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
+  }
 
   bool wasSucessful = runner.run(/*testPath=*/"", 
 				 /*doWait=*/false, 
 				 /*doPrintResult=*/true, 
 				 /*doPrintProgress=*/false);
 
-  if (out.is_open())
-    out.close();
-  
   return wasSucessful ? 0 : 1;
 }
