@@ -61,7 +61,7 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0, n_threads=0, expect
   os.chdir(test_dir)
   command = TestHarness.exec_name + ' -i ' + input_file
   if (parallel):
-    command = 'mpiexec -n ' + str(parallel) + ' ' + command  
+    command = 'mpiexec -n ' + str(parallel) + ' ' + command
   if (min_dofs):
     try:
       # First make sure the dang thing runs
@@ -74,7 +74,7 @@ def executeApp(test_dir, input_file, min_dofs=0, parallel=0, n_threads=0, expect
 
     # Now we can safely capture the timing
     command = 'time ' + command + ' --dofs ' + str(min_dofs)
-    
+
   if (n_threads):
     command += ' --n_threads=' + str(n_threads)
   stdout = executeCommand(command)
@@ -89,7 +89,7 @@ def checkExpectError(output, expect_error):
   if re.search(expect_error, output, re.IGNORECASE) == None:
     print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
     assert False
-  else: 
+  else:
     assert True
 
 def checkForFail(output):
@@ -135,4 +135,4 @@ def executeAppAndDiffCSV(test_file, input_file, out_files, min_dofs=0, parallel=
 def executeAppExpectError(test_file, input_file, expect_error=''):
   test_dir = os.path.dirname(test_file)
   executeApp(test_dir, input_file, 0, 0, 0, expect_error)
-  
+

@@ -87,7 +87,7 @@ class TestHarness:
       if (self.test_match.search(dirpath)):
         for file in filenames:
           # See if there were other arguments (test names) passed on the command line
-          if (file[-2:] == 'py' and 
+          if (file[-2:] == 'py' and
               self.test_match.search(file) and
               (len(self.leftovers) == 0 or len([item for item in self.leftovers if re.match(item, file)]) == 1)):
 
@@ -100,7 +100,7 @@ class TestHarness:
 
   # takes a module name (.py file) and runs all the tests in it
   def inspectAndTest(self, dirpath, module_name):
-    saved_cwd = os.getcwd()  
+    saved_cwd = os.getcwd()
     sys.path.append(os.path.abspath(dirpath))
     os.chdir(dirpath)
 
@@ -110,17 +110,17 @@ class TestHarness:
     # inspect the routine and look for test functions
     for routine, address in inspect.getmembers(module, inspect.isroutine):
       if self.test_match.search(routine):
-                 
+
         supported_args = set(inspect.getargspec(address)[0])
         testname = module_name + '.' + routine
         # See if this test function supports benchmarking or parallel requests
-        if ((self.arg_string.find('dofs') >= 0 and not 'dofs' in supported_args) or 
-            (self.arg_string.find('np') >=0 and not 'np' in supported_args) or 
+        if ((self.arg_string.find('dofs') >= 0 and not 'dofs' in supported_args) or
+            (self.arg_string.find('np') >=0 and not 'np' in supported_args) or
             (self.arg_string.find('n_threads') >=0 and not 'n_threads' in supported_args)):
           self.runTest(testname, address, True)
         else:
           self.runTest(testname, address)
-                        
+
     os.chdir(saved_cwd)
     sys.path.pop()
 
@@ -134,7 +134,7 @@ class TestHarness:
         sys.stdout.write(s)
         sys.stdout.flush()
         test_start = timeit.default_timer()
-           
+
         # Capture stdout to a buffer object for the local function call
         saved_stdout = sys.stdout
         capture = StringIO.StringIO()
@@ -168,7 +168,7 @@ class TestHarness:
       sys.stdout = saved_stdout
       test_end = timeit.default_timer()
       output = capture.getvalue()
-      
+
       # We can skip established tests with the "pass" keyword in our
       # python driver files in which case no output is produced.
       # In this case we want to notify the user that the test was actually
@@ -229,11 +229,11 @@ class TestHarness:
   def run_tests_and_exit(self, check_icestorm=True):
     self.runTestsAndExit(check_icestorm)
 
-  def getOptions(self, argv): 
+  def getOptions(self, argv):
     # Callback function
     arg_vector = []
     def buildArgVector(option, opt_str, value, parser):
-      arg_vector.append(option.dest + '=' +  str(value)) 
+      arg_vector.append(option.dest + '=' +  str(value))
 
     parser = OptionParser()
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="show more output [default=FALSE]")
