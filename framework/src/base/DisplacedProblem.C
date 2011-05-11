@@ -122,6 +122,13 @@ DisplacedProblem::~DisplacedProblem()
 }
 
 void
+DisplacedProblem::createQRules(QuadratureType type, Order order)
+{
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _asm_info[tid]->createQRules(type, order);
+}
+
+void
 DisplacedProblem::init()
 {
   _displaced_nl.init();
@@ -137,12 +144,6 @@ DisplacedProblem::init()
   _mesh.meshChanged();
   Moose::setup_perf_log.pop("DisplacedProblem::init::meshChanged()","Setup");
 
-  Moose::setup_perf_log.push("DisplacedProblem::init::getQuadratureOrder()","Setup");
-  Order qorder = _mproblem.getQuadratureOrder();
-  Moose::setup_perf_log.pop("DisplacedProblem::init::getQuadratureOrder()","Setup");
-  
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _asm_info[tid]->createQRules(qorder);
 }
 
 void

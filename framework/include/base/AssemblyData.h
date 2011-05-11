@@ -102,7 +102,7 @@ public:
   /**
    * Creates the volume, face and arbitrary qrules based on the Order passed in.
    */
-  void createQRules(Order o);
+  void createQRules(QuadratureType type, Order o);
 
   /**
    * Set the qrule to be used for volume integration.

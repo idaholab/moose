@@ -45,6 +45,7 @@ public:
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
 
+  virtual void createQRules(QuadratureType type, Order order);
   virtual Order getQuadratureOrder() { return _quadrature_order; }
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }

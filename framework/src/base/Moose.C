@@ -133,6 +133,7 @@
 #include "AdaptivityAction.h"
 #include "SetupDampersAction.h"
 #include "CheckIntegrityAction.h"
+#include "SetupQuadratureAction.h"
 
 namespace Moose {
 
@@ -259,6 +260,7 @@ addActionTypes()
   registerActionName("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
   registerActionName("setup_dampers", true);
   registerActionName("check_integrity", true);
+  registerActionName("setup_quadrature", true);
 
   /// Additional Actions
   registerActionName("no_action", false);  // Used for Empty Action placeholders
@@ -313,6 +315,7 @@ addActionTypes()
 "(add_ic, add_periodic_bc)"
 "(add_preconditioning)"
 "(ready_to_init)"
+"(setup_quadrature)"
 "(setup_dampers)"
 "(init_problem)"
 "(copy_nodal_vars, copy_nodal_aux_vars)"
@@ -387,6 +390,7 @@ registerActions()
   registerAction(AddDamperAction, "Dampers/*", "add_damper");
   registerAction(AddStabilizerAction, "Stabilizers/*", "add_stabilizer");
   registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
+  registerAction(SetupQuadratureAction, "Executioner/Quadrature", "setup_quadrature");
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "Executioner/Adaptivity", "setup_adaptivity");

@@ -12,42 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONVERSION_H
-#define CONVERSION_H
+#ifndef SETUPQUADRATUREACTION_H_
+#define SETUPQUADRATUREACTION_H_
 
-#include "Moose.h"
-#include "ExecStore.h"
+#include "Action.h"
 // libMesh
 #include "enum_order.h"
 #include "enum_quadrature_type.h"
 
-namespace Moose {
+class SetupQuadratureAction;
 
-  template<typename T>
-  T stringToEnum(const std::string & s);
+template<>
+InputParameters validParams<SetupQuadratureAction>();
 
-  template<>
-  TimeSteppingScheme stringToEnum<TimeSteppingScheme>(const std::string & s);
+/**
+ * Sets the quadrature
+ */
+class SetupQuadratureAction : public Action
+{
+public:
+  SetupQuadratureAction(const std::string & name, InputParameters parameters);
+  virtual ~SetupQuadratureAction();
 
-  template<>
-  ExecFlagType stringToEnum<ExecFlagType>(const std::string & s);
+protected:
+  virtual void act();
 
-  template<>
-  QuadratureType stringToEnum<QuadratureType>(const std::string & s);
+  QuadratureType _type;
+  Order _order;
+};
 
-  template<>
-  Order stringToEnum<Order>(const std::string & s);
 
-  // conversion to string
-  template<typename T>
-  std::string
-  stringify(const T & t)
-  {
-    std::ostringstream os;
-    os << t;
-    return os.str();
-  }
-
-}
-
-#endif //CONVERSION_H
+#endif /* SETUPQUADRATUREACTION_H_ */

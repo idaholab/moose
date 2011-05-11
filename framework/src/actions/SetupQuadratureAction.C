@@ -12,42 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONVERSION_H
-#define CONVERSION_H
+#include "SetupQuadratureAction.h"
+#include "Conversion.h"
+#include "MProblem.h"
 
-#include "Moose.h"
-#include "ExecStore.h"
-// libMesh
-#include "enum_order.h"
-#include "enum_quadrature_type.h"
+template<>
+InputParameters validParams<SetupQuadratureAction>()
+{
+  InputParameters params = validParams<Action>();
 
-namespace Moose {
+  params.addParam<std::string>("type", "GAUSS", "Type of the quadrature rule");
+  params.addParam<std::string>("order", "AUTO", "Order of the quadrature");
 
-  template<typename T>
-  T stringToEnum(const std::string & s);
-
-  template<>
-  TimeSteppingScheme stringToEnum<TimeSteppingScheme>(const std::string & s);
-
-  template<>
-  ExecFlagType stringToEnum<ExecFlagType>(const std::string & s);
-
-  template<>
-  QuadratureType stringToEnum<QuadratureType>(const std::string & s);
-
-  template<>
-  Order stringToEnum<Order>(const std::string & s);
-
-  // conversion to string
-  template<typename T>
-  std::string
-  stringify(const T & t)
-  {
-    std::ostringstream os;
-    os << t;
-    return os.str();
-  }
-
+  return params;
 }
 
-#endif //CONVERSION_H
+SetupQuadratureAction::SetupQuadratureAction(const std::string & name, InputParameters parameters) :
+    Action(name, parameters),
+    _type(Moose::stringToEnum<QuadratureType>(getParam<std::string>("type"))),
+    _order(Moose::stringToEnum<Order>(getParam<std::string>("order")))
+{
+}
+
+SetupQuadratureAction::~SetupQuadratureAction()
+{
+}
+
+void
+SetupQuadratureAction::act()
+{
+  _problem->createQRules(_type, _order);
+}

@@ -977,6 +977,26 @@ MProblem::getVariable(THREAD_ID tid, const std::string & var_name)
     mooseError("Unknown variable " + var_name);
 }
 
+void
+MProblem::createQRules(QuadratureType type, Order order)
+{
+  if (order == INVALID_ORDER)
+  {
+    // automatically determine the integration order
+    Moose::setup_perf_log.push("getMinQuadratureOrder()","Setup");
+    _quadrature_order = _nl.getMinQuadratureOrder();
+    Moose::setup_perf_log.pop("getMinQuadratureOrder()","Setup");
+  }
+  else
+    _quadrature_order = order;
+
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _asm_info[tid]->createQRules(type, _quadrature_order);
+
+  if (_displaced_problem)
+    _displaced_problem->createQRules(type, _quadrature_order);
+}
+
 
 void
 MProblem::init()
@@ -1001,13 +1021,6 @@ MProblem::init()
 void
 MProblem::init2()
 {
-  Moose::setup_perf_log.push("getMinQuadratureOrder()","Setup");
-  _quadrature_order = _nl.getMinQuadratureOrder();
-  Moose::setup_perf_log.pop("getMinQuadratureOrder()","Setup");
-
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _asm_info[tid]->createQRules(_quadrature_order);
-
   Moose::setup_perf_log.push("NonlinearSystem::update()","Setup");
   _nl.update();
   Moose::setup_perf_log.pop("NonlinearSystem::update()","Setup");

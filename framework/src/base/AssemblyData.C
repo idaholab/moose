@@ -76,10 +76,10 @@ AssemblyData::getFEFace(FEType type)
 }
 
 void
-AssemblyData::createQRules(Order o)
+AssemblyData::createQRules(QuadratureType type, Order o)
 {
-  _qrule_volume = new QGauss(_mesh.dimension(), o);
-  _qrule_face = new QGauss(_mesh.dimension() - 1, o);
+  _qrule_volume = QBase::build(type, _mesh.dimension(), o).release();
+  _qrule_face = QBase::build(type, _mesh.dimension() - 1, o).release();
   _qrule_arbitrary = new ArbitraryQuadrature(_mesh.dimension(), o);
 
   setVolumeQRule(_qrule_volume);

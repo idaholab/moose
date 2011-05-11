@@ -15,11 +15,13 @@
 #include "Conversion.h"
 #include <map>
 #include <algorithm>
+#include "string_to_enum.h"
 
 namespace Moose {
 
   std::map<std::string, TimeSteppingScheme> timesteppingscheme_type_to_enum;
   std::map<std::string, ExecFlagType> execstore_type_to_enum;
+  std::map<std::string, QuadratureType> quadrature_type_to_enum;
 
   void initTimeSteppingMap()
   {
@@ -40,6 +42,20 @@ namespace Moose {
       execstore_type_to_enum["RESIDUAL"] = EXEC_RESIDUAL;
       execstore_type_to_enum["JACOBIAN"] = EXEC_JACOBIAN;
       execstore_type_to_enum["TIMESTEP"] = EXEC_TIMESTEP;
+    }
+  }
+
+  void initQuadratureType()
+  {
+    if (quadrature_type_to_enum.empty())
+    {
+      quadrature_type_to_enum["CLOUGH"]   = QCLOUGH;
+      quadrature_type_to_enum["CONICAL"]  = QCONICAL;
+      quadrature_type_to_enum["GAUSS"]    = QGAUSS;
+      quadrature_type_to_enum["GRID"]     = QGRID;
+      quadrature_type_to_enum["MONOMIAL"] = QMONOMIAL;
+      quadrature_type_to_enum["SIMPSON"]  = QSIMPSON;
+      quadrature_type_to_enum["TRAP"]     = QTRAP;
     }
   }
 
@@ -70,6 +86,33 @@ namespace Moose {
       mooseError("Unknown execution flag");
 
     return execstore_type_to_enum[upper];
+  }
+
+  template<>
+  QuadratureType stringToEnum<QuadratureType>(const std::string & s)
+  {
+    initQuadratureType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!quadrature_type_to_enum.count(upper))
+      mooseError("Unknown quadrature type");
+
+    return quadrature_type_to_enum[upper];
+
+  }
+
+  template<>
+  Order stringToEnum<Order>(const std::string & s)
+  {
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (upper.compare("AUTO") == 0)
+      return INVALID_ORDER;
+    else
+      return Utility::string_to_enum<Order>(upper);
   }
 
 }

@@ -47,6 +47,7 @@ public:
   DisplacedSystem & nlSys() { return _displaced_nl; }
   DisplacedSystem & auxSys() { return _displaced_aux; }
 
+  virtual void createQRules(QuadratureType type, Order order);
   virtual void init();
 
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
