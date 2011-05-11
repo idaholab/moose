@@ -17,6 +17,9 @@
 
 #include "SyntaxFormatterInterface.h"
 
+// This class is a big hack job - and probably should be refacted into a tree data structure so that printing
+// is more consistent and simple
+
 class InputFileFormatter : public SyntaxFormatterInterface
 {
 public:

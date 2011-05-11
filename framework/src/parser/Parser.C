@@ -314,17 +314,7 @@ Parser::buildFullTree()
       
       params_ptrs[0] = &action_obj_params;
       
-      if (action_obj_params.have_parameter<std::string>("built_by_action") &&
-          action_obj_params.get<std::string>("built_by_action") == action_name &&
-          ActionFactory::instance()->isParsed(act_name))
-      {
-        params_ptrs[1] = NULL;
-        
-        _syntax_formatter->print(act_name, prev_name == "" ? NULL : &prev_name, params_ptrs);
-
-        prev_name = act_name;
-      }
-      
+      bool print_once = false;
       for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
            moose_obj != Factory::instance()->registeredObjectsEnd();
            ++moose_obj)
@@ -334,13 +324,19 @@ Parser::buildFullTree()
         if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
             moose_obj_params.get<std::string>("built_by_action") == action_name)
         {
+          print_once = true;
           std::string name;
           size_t pos = 0;
           if (act_name[act_name.size()-1] == '*')
             pos = act_name.size()-1;
           else
             pos = act_name.size();
-          name = act_name.substr(0, pos) + moose_obj->first;
+
+          // Executioner syntax is non standard - we'll hack it here
+          if (act_name == "Executioner")
+            name = "Executioner";
+          else
+            name = act_name.substr(0, pos) + moose_obj->first;
           
           moose_obj_params.set<std::string>("type") = moose_obj->first;
           moose_obj_params.seenInInputFile("type");          
@@ -351,6 +347,18 @@ Parser::buildFullTree()
           prev_name = name;
         }
       }
+
+      if (!print_once && action_obj_params.have_parameter<std::string>("built_by_action") &&
+          action_obj_params.get<std::string>("built_by_action") == action_name &&
+          ActionFactory::instance()->isParsed(act_name))
+      {
+        params_ptrs[1] = NULL;
+        
+        _syntax_formatter->print(act_name, prev_name == "" ? NULL : &prev_name, params_ptrs);
+
+        prev_name = act_name;
+      }
+
     }
   }
   params_ptrs[0] = NULL;

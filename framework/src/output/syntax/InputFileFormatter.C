@@ -44,7 +44,7 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
   }
 
   /* Not double registered (names don't match) */
-  if (prev_name == NULL || *prev_name != name)
+  if (prev_name == NULL || *prev_name != name || *prev_name == "Executioner")
   {
     printCloseAndOpen(name, prev_name);
     if (name == "")
@@ -64,13 +64,9 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
     {
       if (_seen_it[name].find(iter->first) != _seen_it[name].end())
         continue;
-
-      // Insert it into our set so we know not to print the same paramter again if this block is registered
-      // multiple times
-      _seen_it[name].insert(iter->first);
       
       // We only want non-private params unless we are in dump mode
-      if (param_ptrs[i]->isPrivate(iter->first) || (!_dump_mode && !param_ptrs[i]->isParamValid(iter->first)))
+      if ((_dump_mode && param_ptrs[i]->isPrivate(iter->first)) || ((!_dump_mode && !param_ptrs[i]->isParamValid(iter->first))))
         continue;
 
       // Don't print active if it is the default all, that means it's not in the input file - unless of course we are in dump mode
@@ -91,6 +87,9 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
           continue;
       }
 
+      // Insert it into our set so we know not to print the same paramter again if this block is registered
+      // multiple times
+//      _seen_it[name].insert(iter->first);
 
       _out << "\n" << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
       size_t l_offset = 30;
@@ -155,9 +154,16 @@ InputFileFormatter::printCloseAndOpen(const std::string & name, const std::strin
       ++num_to_open;
     else
       ++same_elements;
+  
+  // Executioner syntax is different - we'll hack it here!
+  if (name == "Executioner" && *prev_name == "Executioner")
+  {
+    num_to_open += 1;
+    same_elements -= 1;
+  }
 
   num_to_close = prev_elements.size() - same_elements;
-
+  
   // Close off previous blocks if necessary
   for (int i=1; i<=num_to_close; ++i)
   {
@@ -170,9 +176,9 @@ InputFileFormatter::printCloseAndOpen(const std::string & name, const std::strin
   _out << "\n";
 
   // Open new blocks if necessary
-  for (int i=0; i<num_to_open-1; ++i)
+  for (unsigned int i=curr_elements.size()-num_to_open; i<curr_elements.size()-1 && !curr_elements.empty(); ++i)
   {
     std::string spacing(i*2, ' ');
-    _out << "\n" << spacing << "[" << curr_elements[i] << "]";
+    _out << "\n" << spacing << "[" << (i == 0 ? "" : "./") << curr_elements[i] << "]";
   }
 }
