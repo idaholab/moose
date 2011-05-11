@@ -343,8 +343,6 @@ Parser::buildFullTree()
           moose_obj_params.set<std::string>("type") = moose_obj->first;
           moose_obj_params.seenInInputFile("type");          
           params_ptrs[1] = &moose_obj_params;
-
-          std::cout << name << "\n";
           
           _syntax_formatter->print(name, &prev_name, params_ptrs);
           
