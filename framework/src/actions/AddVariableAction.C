@@ -91,21 +91,3 @@ AddVariableAction::act()
   if (initial > _abs_zero_tol || initial < -_abs_zero_tol)
     _problem->addInitialCondition(var_name, initial);
 }
-
-bool
-AddVariableAction::restartRequired() const
-{
-  if (getParam<std::string>("initial_from_file_var") == "") 
-    return false;
-  else 
-    return true;
-}
-
-bool
-AddVariableAction::autoResizeable() const
-{
-  if (getParam<std::string>("order") == "FIRST" && getParam<std::string>("family") == "LAGRANGE")
-    return true;
-  else
-    return false;
-}
