@@ -335,6 +335,8 @@ Parser::buildFullTree()
           // Executioner syntax is non standard - we'll hack it here
           if (act_name == "Executioner")
             name = "Executioner";
+          else if (act_name.find("InitialCondition") != std::string::npos)
+            name = act_name;
           else
             name = act_name.substr(0, pos) + moose_obj->first;
           
@@ -342,6 +344,8 @@ Parser::buildFullTree()
           moose_obj_params.seenInInputFile("type");          
           params_ptrs[1] = &moose_obj_params;
 
+          std::cout << name << "\n";
+          
           _syntax_formatter->print(name, &prev_name, params_ptrs);
           
           prev_name = name;

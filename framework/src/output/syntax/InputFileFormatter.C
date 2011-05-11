@@ -44,7 +44,7 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
   }
 
   /* Not double registered (names don't match) */
-  if (prev_name == NULL || *prev_name != name || *prev_name == "Executioner")
+  if (prev_name == NULL || *prev_name != name || *prev_name == "Executioner" || prev_name->find("InitialCondition") != std::string::npos)
   {
     printCloseAndOpen(name, prev_name);
     if (name == "")
@@ -147,16 +147,21 @@ InputFileFormatter::printCloseAndOpen(const std::string & name, const std::strin
   int num_to_close=0;
   int num_to_open=0;
   int same_elements=0;
+  bool first_mismatch = false;
   for (unsigned int i=0; i<curr_elements.size(); ++i)
     if (i >= prev_elements.size())
       ++num_to_open;
-    else if (prev_elements[i] != curr_elements[i])
+    else if (prev_elements[i] != curr_elements[i] || first_mismatch)
+    {
       ++num_to_open;
+      first_mismatch = true;
+    }
     else
       ++same_elements;
   
   // Executioner syntax is different - we'll hack it here!
-  if (name == "Executioner" && *prev_name == "Executioner")
+  if ((name == "Executioner" && *prev_name == "Executioner") ||
+      (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos))
   {
     num_to_open += 1;
     same_elements -= 1;
