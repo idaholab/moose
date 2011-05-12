@@ -170,7 +170,7 @@ Parser::isSectionActive(const std::string & s,
   
   // If this section is not active - then keep track of it for future checks
   if (!retValue)
-    _inactive_strings.insert(s);
+    _inactive_strings.insert(s + "/");
 
   return retValue;
 }
