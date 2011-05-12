@@ -70,56 +70,59 @@ ExodusOutput::output(const std::string & file_base, Real time)
 void
 ExodusOutput::outputPps(const std::string & /*file_base*/, const FormattedTable & table, Real time)
 {
-  const std::map<Real, std::map<std::string, Real> > & data = table.getData();
+  if (_out == NULL)
+    mooseError("Error attempting to write postprocessor information to uninitialized file!");
 
-  // iterators
-  std::map<Real, std::map<std::string, Real> >::const_iterator i(data.end());
-  if ( i == data.begin() )
-  {
+  // Check to see if the FormattedTable is empty, if so, return
+  if (table.getData().empty())
     return;
-  }
-  --i;
-  const Real TIME_TOL(1e-12);
-  if (std::abs((time - i->first)/time) > TIME_TOL)
-  {
-    // Try to find a match
-    for ( i = data.begin(); i != data.end(); ++i )
+
+  // Search through the map, find a time in the table which matches the input time.
+  // Note: search in reverse, since the input time is most likely to be the most recent time.
+  const Real time_tol = 1.e-12;
+
+  std::map<Real, std::map<std::string, Real> >::const_reverse_iterator
+    rit  = table.getData().rbegin(),
+    rend = table.getData().rend();
+
+  for (; rit != rend; ++rit)
     {
-      if (std::abs((time - i->first)/time) < TIME_TOL)
-      {
+      // Difference between input time and the time stored in the table
+      Real time_diff = std::abs((time - (*rit).first));
+
+      // Get relative difference, but don't divide by zero!
+      if ( std::abs(time) > 0.)
+        time_diff /= std::abs(time);
+
+      // Break out of the loop if we found the right time
+      if (time_diff < time_tol)
         break;
-      }
     }
-    if ( i == data.end() )
+
+  // If we didn't find anything, print an error message
+  if ( rit == rend )
     {
-      --i;
       std::cerr << "Input time: " << time
-                << "\nTable time: " << i->first << std::endl;
-      mooseError("Time mismatch in outputting Exodus global variables\n"
+                << "\nLatest Table time: " << (*(table.getData().rbegin())).first << std::endl;
+      mooseError("Time mismatch in outputting Nemesis global variables\n"
                  "Have the postprocessor values been computed with the correct time?");
     }
-  }
-  const std::map<std::string, Real> & tmp = i->second;
+
+  // Otherwise, fill local vectors with name/value information and write to file.
+  const std::map<std::string, Real> & tmp = (*rit).second;
+
   std::vector<Real> global_vars;
   std::vector<std::string> global_var_names;
-  for (std::map<std::string, Real>::const_iterator ii(tmp.begin()); ii != tmp.end(); ++ii)
-  {
-    global_var_names.push_back( ii->first );
-    global_vars.push_back( ii->second );
-  }
+  global_vars.reserve(tmp.size());
+  global_var_names.reserve(tmp.size());
 
-  if (global_vars.size() != global_var_names.size())
+  for (std::map<std::string, Real>::const_iterator ii = tmp.begin();
+       ii != tmp.end(); ++ii)
   {
-    mooseError("Error in outputting global vars to exodus.");
-  }
-
-  if (_out == NULL)
-  {
-    // FIXME: If _out==NULL and we create it here and immediately call
-    // write_global_data() it will fail because it's not initialized.
-    // Therefore this should probably be an error, and the check could
-    // go at the beginning of the function.
-    _out = new ExodusII_IO(_es.get_mesh());
+    // Push back even though we know the exact size, saves us keeping
+    // track of one more index.
+    global_var_names.push_back( (*ii).first );
+    global_vars.push_back( (*ii).second );
   }
 
   _out->write_global_data( global_vars, global_var_names );
