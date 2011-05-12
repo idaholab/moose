@@ -433,6 +433,9 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 void
 NonlinearSystem::computeTimeDeriv()
 {
+  if (!_problem.transient())
+    return;
+
   switch (_time_stepping_scheme)
   {
   case Moose::IMPLICIT_EULER:
