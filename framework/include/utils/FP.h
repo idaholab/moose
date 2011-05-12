@@ -12,37 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseInit.h"
-#include "Moose.h"
-#include "ParallelUniqueId.h"
-#include "Factory.h"
-#include "ActionFactory.h"
-// PETSc
-#include "petscsys.h"
+#ifndef FP_H
+#define FP_H
 
-MooseInit::MooseInit(int argc, char *argv[]) :
-	LibMeshInit(argc, argv)
-{
-  PetscPushSignalHandler(NULL, NULL);           // get rid off Petsc error handler
-  ParallelUniqueId::initialize();
+namespace Moose {
 
-  std::cout << "Using " << libMesh::n_threads() << " thread(s)" << std::endl;
-
-  Moose::command_line = new GetPot(argc, argv);
-
-  Moose::registerObjects();
-}
-
-MooseInit::~MooseInit()
-{
-  delete Moose::command_line;
-  Factory::release();
-  ActionFactory::release();
-}
-
-namespace Moose
-{
-
-GetPot *command_line = NULL;
+/**
+ * Enable/disable reporting of floating-point exceptions
+ * @param on
+ */
+void enableFPE(bool on = true);
 
 }
+
+#endif /* FP_H */

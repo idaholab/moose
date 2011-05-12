@@ -27,6 +27,7 @@
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 #include "TimeKernel.h"
+#include "FP.h"
 
 #include "nonlinear_solver.h"
 #include "quadrature_gauss.h"
@@ -309,6 +310,8 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
 {
   Moose::perf_log.push("compute_residual()","Solve");
 
+  Moose::enableFPE();
+
   for(std::vector<NumericVector<Number> *>::iterator it = _vecs_to_zero_for_residual.begin();
       it != _vecs_to_zero_for_residual.end();
       ++it)
@@ -317,6 +320,8 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
   computeTimeDeriv();
   computeResidualInternal(residual);
   finishResidual(residual);
+
+  Moose::enableFPE(false);
 
   Moose::perf_log.pop("compute_residual()","Solve");
 }
@@ -563,6 +568,8 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 {
   Moose::perf_log.push("compute_jacobian()","Solve");
 
+  Moose::enableFPE();
+
   _currently_computing_jacobian = true;
 
 #ifdef LIBMESH_HAVE_PETSC
@@ -623,6 +630,8 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
   _currently_computing_jacobian = false;
 
+  Moose::enableFPE(false);
+
   Moose::perf_log.pop("compute_jacobian()","Solve");
 }
 
@@ -630,6 +639,8 @@ void
 NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
 {
   Moose::perf_log.push("compute_jacobian_block()","Solve");
+
+  Moose::enableFPE();
 
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
@@ -781,6 +792,8 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   jacobian.zero_rows(zero_rows, 1.0);
 
   jacobian.close();
+
+  Moose::enableFPE(false);
 
   Moose::perf_log.pop("compute_jacobian_block()","Solve");
 }

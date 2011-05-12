@@ -57,11 +57,6 @@ IntegratedBC::computeResidual()
     for (_i = 0; _i < _phi.size(); _i++)
     {
       re(_i) += _JxW[_qp]*computeQpResidual();
-#ifdef DEBUG
-      if(libmesh_isnan(re(_i)))
-        mooseError("NaN in Boundary Condition Residual for: " + _name);
-#endif //DEBUG
-
     }
 }
 
@@ -75,12 +70,7 @@ IntegratedBC::computeJacobian(int /*i*/, int /*j*/)
     for (_i = 0; _i < _phi.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
       {
-        
         ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
-#ifdef DEBUG
-      if(libmesh_isnan(ke(_i, _j)))
-        mooseError("NaN in Boundary Condition Jacobian for: " + _name);
-#endif //DEBUG
       }
   }
 }

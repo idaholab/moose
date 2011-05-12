@@ -106,10 +106,6 @@ Kernel::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       re(_i) += _JxW[_qp]*computeQpResidual();
-#ifdef DEBUG
-      if(libmesh_isnan(re(_i)))
-        mooseError("NaN in Kernel Residual for: " + _name);
-#endif //DEBUG
     }
 }
 
@@ -123,10 +119,6 @@ Kernel::computeJacobian(int /*i*/, int /*j*/)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
         ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
-#ifdef DEBUG
-      if(libmesh_isnan(ke(_i, _j)))
-        mooseError("NaN in Kernel Jacobian for: " + _name);
-#endif //DEBUG
       }
 }
 
