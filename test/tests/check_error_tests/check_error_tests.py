@@ -50,3 +50,7 @@ def stateful_adaptive_error_test():
 
 def windows_line_endings_test():
   tools.executeAppExpectError(__file__,'windows_line_endings.i',"\S+ contains Windows\(DOS\) line endings")
+
+def nan_test():
+  tools.executeAppExpectError(__file__,'nan_test.i',"Floating point exception")
+  

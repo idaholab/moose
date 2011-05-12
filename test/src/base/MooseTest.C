@@ -25,6 +25,7 @@
 #include "Diffusion0.h"
 #include "ForcingFunctionXYZ0.h"
 #include "TEJumpFFN.h"
+#include "NanKernel.h"
 
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
@@ -76,6 +77,7 @@ void registerObjects()
   registerObject(CN2AdvDiffReaction1);
   registerObject(ForcingFunctionXYZ0);
   registerObject(TEJumpFFN);
+  registerObject(NanKernel);
 
   // Aux kernels
   registerObject(PolyConstantAux);
