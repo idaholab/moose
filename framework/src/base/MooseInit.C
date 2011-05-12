@@ -17,6 +17,9 @@
 #include "ParallelUniqueId.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+// PETSc
+#include "petscsys.h"
+
 
 MooseInit::MooseInit(int argc, char *argv[]) :
 	LibMeshInit(argc, argv)
