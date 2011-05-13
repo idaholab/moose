@@ -13,7 +13,7 @@
 /****************************************************************/
 
 /**
- * Example 13: Physics Based Preconditioning
+ * Example 12: Physics Based Preconditioning
  * This example shows how to enable the use of more advanced preconditioning
  * with the optional Kernel::computeQpOffDiagJacobian method and input PBP block
  */
@@ -26,7 +26,7 @@
 // libMesh includes
 #include "perf_log.h"
 
-PerfLog Moose::perf_log("Example13: Physics Based Preconditioning");
+PerfLog Moose::perf_log("Example12: Physics Based Preconditioning");
 
 int main (int argc, char** argv)
 {
