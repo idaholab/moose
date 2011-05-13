@@ -53,7 +53,9 @@ Pressure::computeQpResidual()
   Real factor = _factor;
 
   if (_has_function)
+  {
     factor *= _function->value(_t, _q_point[_qp]);
+  }
 
   return factor * (_normals[_qp](_component) * _phi[_i][_qp]);
 }
