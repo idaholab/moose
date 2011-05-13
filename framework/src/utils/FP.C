@@ -14,6 +14,7 @@
 
 #include "FP.h"
 #include <stdlib.h>
+#include <signal.h>
 #include <iostream>
 #ifdef __APPLE__
 #include <xmmintrin.h>
