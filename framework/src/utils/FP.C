@@ -54,7 +54,7 @@ void enableFPE(bool on/* = true*/)
     _MM_SET_EXCEPTION_MASK(flags & ~_MM_MASK_INVALID);
     signal(SIGFPE, handleFPE);
 #elif __linux__
-    feenableexcept(FE_ALL_EXCEPT);
+    feenableexcept(FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INVALID);
     signal(SIGFPE, handleFPE);
 #endif
   }
@@ -64,7 +64,7 @@ void enableFPE(bool on/* = true*/)
     _MM_SET_EXCEPTION_MASK(flags);
     signal(SIGFPE, 0);
 #elif __linux__
-    fedisableexcept(FE_ALL_EXCEPT);
+    fedisableexcept(FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INVALID);
     signal(SIGFPE, SIG_IGN);
 #endif
   }
