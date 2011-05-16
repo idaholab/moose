@@ -168,6 +168,13 @@ private:
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are colled only from this Object
    */
+
+  /**
+   * This function extracts parameters from the command line in name=value format.  Note
+   * that the name should be fully qualified (i.e. BCs/left/value=10)
+   */
+  void buildCommandLineVarsVector();
+  
   template<typename T>
   void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
   
@@ -196,7 +203,7 @@ private:
   // Contains all of the sections that are not active during the parse phase so that blocks
   // nested more than one level deep can detect that the grandparent is not active
   std::set<std::string> _inactive_strings;
-
+  std::set<std::string> _command_line_vars;
   bool _getpot_initialized;
   GetPot _getpot_file;
 };

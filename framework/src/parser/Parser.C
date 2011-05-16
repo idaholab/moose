@@ -196,6 +196,9 @@ Parser::parse(const std::string &input_filename)
   std::map<std::string, std::vector<std::string> > active_lists;
   std::vector<std::string> section_names;
   InputParameters active_list_params = validParams<Action>();
+
+  // Build Command Line Vars Vector
+  buildCommandLineVarsVector();
   
   // vector for initializing active blocks
   std::vector<std::string> all(1);
@@ -472,6 +475,20 @@ Parser::checkFileWritable(const std::string & filename)
 }
 
 void
+Parser::buildCommandLineVarsVector()
+{
+  if (Moose::command_line == NULL)
+    return;
+  
+  for(const char* var; (var = Moose::command_line->next_nominus()) != NULL; )
+  {
+    std::vector<std::string> name_value_pairs;
+    tokenize(var, name_value_pairs, 0, "=");
+    _command_line_vars.insert(name_value_pairs[0]);
+  }
+}
+
+void
 Parser::printUsage() const
 {
   // Grab the first item out of argv
@@ -517,8 +534,9 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     std::string orig_name = prefix + "/" + it->first;
     std::string full_name = orig_name;
 
-    // Mark parameters appearing in the input file
-    if (_getpot_file.have_variable(full_name.c_str()))
+    // Mark parameters appearing in the input file or command line
+    if (_getpot_file.have_variable(full_name.c_str())
+      || (Moose::command_line && Moose::command_line->have_variable(full_name.c_str())))
     {
       p.seenInInputFile(it->first);
       found = true; 
@@ -612,7 +630,16 @@ Parser::checkParams(const std::string & prefix, InputParameters &p)
 template<typename T>
 void Parser::setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block)
 {
-  T value = _getpot_file(full_name.c_str(), param->get());
+  GetPot *gp;
+  
+  // See if this variable was passed on the command line (and previously stored in the CLI vars vector)
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_command_line_vars.find(full_name) != _command_line_vars.end())
+    gp = Moose::command_line;
+  else
+    gp = &_getpot_file;
+  
+  T value = (*gp)(full_name.c_str(), param->get());
   
   param->set() = value;
   if (in_global)
@@ -622,13 +649,22 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
 template<typename T>
 void Parser::setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block)
 {
-  int vec_size = _getpot_file.vector_variable_size(full_name.c_str());
+  GetPot *gp;
+  
+  // See if this variable was passed on the command line (and previously stored in the CLI vars vector)
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_command_line_vars.find(full_name) != _command_line_vars.end())
+    gp = Moose::command_line;
+  else
+    gp = &_getpot_file;
+  
+  int vec_size = gp->vector_variable_size(full_name.c_str());
 
-  if (_getpot_file.have_variable(full_name.c_str()))
+  if (gp->have_variable(full_name.c_str()))
     param->set().resize(vec_size);
     
   for (int i=0; i<vec_size; ++i)
-    param->set()[i] = _getpot_file(full_name.c_str(), param->get()[i], i);
+    param->set()[i] = (*gp)(full_name.c_str(), param->get()[i], i);
 
   if (in_global)
   {
@@ -641,7 +677,16 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
 template<typename T>
 void Parser::setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block)
 {
-  int vec_size = _getpot_file.vector_variable_size(full_name.c_str());
+  GetPot *gp;
+  
+  // See if this variable was passed on the command line (and previously stored in the CLI vars vector)
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_command_line_vars.find(full_name) != _command_line_vars.end())
+    gp = Moose::command_line;
+  else
+    gp = &_getpot_file;
+  
+  int vec_size = gp->vector_variable_size(full_name.c_str());
   int one_dim = pow(vec_size, 0.5);
 
   param->set().resize(one_dim);
@@ -649,7 +694,7 @@ void Parser::setTensorParameter(const std::string & full_name, const std::string
   {
     param->set()[i].resize(one_dim);
     for (int j=0; j<one_dim; ++j)
-      param->set()[i][j] = _getpot_file(full_name.c_str(), param->get()[i][j], i*one_dim+j);
+      param->set()[i][j] = (*gp)(full_name.c_str(), param->get()[i][j], i*one_dim+j);
   }
 
   if (in_global)
