@@ -27,8 +27,12 @@ public:
   virtual void postscript();
   
 protected:
-  /// Helper method for printing the parts of the InputFile Syntax
-//  void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
+  
+  /// Helper method for printing the parts of the YAML Syntax
+  void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
+
+private:
+  bool first;
 };
 
 #endif /* YAMLFORMATTER_H */

@@ -19,7 +19,8 @@
 #include <vector>
 
 YAMLFormatter::YAMLFormatter(std::ostream & out, bool dump_mode)
-  :SyntaxFormatterInterface(out, dump_mode)
+  :SyntaxFormatterInterface(out, dump_mode),
+   first(true)
 {
 }
 
@@ -28,11 +29,7 @@ YAMLFormatter::preamble()
 {
   //important: start and end yaml data delimiters used by python
   _out << "**START YAML DATA**\n";
-  _out << "  - name: TODO\n";
-  _out << "    desc:\n";
-  _out << "    type:\n";
-  _out << "    parameters:\n";
-  _out << "    subblocks:\n";
+  first = true;
 }
 
 void
@@ -42,36 +39,70 @@ YAMLFormatter::postscript()
 }
 
 void
-YAMLFormatter::print(const std::string & name, const std::string * /*prev_name*/, std::vector<InputParameters *> & param_ptrs)
+YAMLFormatter::print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs)
 {
-  std::vector<std::string> elements;
-  Parser::tokenize(name, elements);
-
-  // If name is empty - abort or Python will freak
-  if (name == "")
-    return;
+  std::string empty;
   
+  if (!prev_name)
+    prev_name = &empty;
+  
+  std::vector<std::string> elements, prev_elements;
+  Parser::tokenize(name, elements);
   std::string spacing = "";
   for (unsigned int i=0; i<elements.size(); ++i)
     spacing += "  ";
-
-  _out << spacing << "- name: " << name << "\n";
-  spacing += "  ";
-
-  std::string class_desc, type_str;
-  if (param_ptrs[1] != NULL)
+  Parser::tokenize(*prev_name, prev_elements);
+  std::string prev_spacing = "";
+  for (unsigned int i=0; i<prev_elements.size(); ++i)
+    prev_spacing += "  ";
+/*
+  if (prev_name != NULL && (*prev_name != name || ))
   {
-    class_desc = param_ptrs[1]->getClassDescription();
-    type_str = param_ptrs[1]->get<std::string>("type");
+    Parser::tokenize(*prev_name, prev_elements);
+    std::string prev_spacing = "";
+    for (unsigned int i=0; i<prev_elements.size(); ++i)
+      prev_spacing += "  ";
+    _out << prev_spacing << "  subblocks: \n";
+  } 
+*/
+  if (prev_name == NULL || *prev_name != name || *prev_name == "Executioner" || prev_name->find("InitialCondition") != std::string::npos)
+  {
+    if (first)
+      first = false;
+    else
+      _out << prev_spacing << "  subblocks: \n";
+    printCloseAndOpen(name, prev_name);
+    // If name is empty - abort or Python will freak
+    if (name == "")
+      return;
+    _out << spacing << "- name: " << name << "\n";
+    spacing += "  ";
+
+    
+    std::string class_desc, type_str;
+    if (param_ptrs[1] != NULL)
+    {
+      class_desc = param_ptrs[1]->getClassDescription();
+      type_str = param_ptrs[1]->get<std::string>("type");
+    }
+    
+    //will print "" if there is no type or desc, which translates to None in python
+    _out << spacing << "desc: !!str " << class_desc << "\n";
+    _out << spacing << "type: " << type_str << "\n";
+    
+    _out << spacing << "parameters:\n";
+  }
+  else
+  {
+//    Parser::tokenize(*prev_name, prev_elements);
+//    std::string prev_spacing = "";
+//    for (unsigned int i=0; i<prev_elements.size(); ++i)
+//      prev_spacing += "  ";
+//    _out << prev_spacing << "  subblocks: \n";
+    
+    spacing += "  ";
   }
   
-  //will print "" if there is no type or desc, which translates to None in python
-  _out << spacing << "desc: !!str " << class_desc << "\n";
-  _out << spacing << "type: " << type_str << "\n";
-  
-  _out << spacing << "parameters:\n";
-  std::string subblocks = spacing + "subblocks: \n";
-  spacing += "  ";
 
   for (unsigned int i=0; i<param_ptrs.size() && param_ptrs[i]; ++i)
   {
@@ -85,19 +116,90 @@ YAMLFormatter::print(const std::string & name, const std::string * /*prev_name*/
       // Block params may be required and will have a doc string
       std::string required = param_ptrs[i]->isParamRequired(iter->first) ? "Yes" : "No";
 
-      _out << spacing << "- name: " << name << "\n";
-      _out << spacing << "  required: " << required << "\n";
-      _out << spacing << "  default: !!str ";
+      _out << spacing << "  - name: " << name << "\n";
+      _out << spacing << "    required: " << required << "\n";
+      _out << spacing << "    default: !!str ";
 
       //prints the value, which is the default value when dumping the tree
       //because it hasn't been changed
       iter->second->print(_out);
 
-      _out << "\n" << spacing << "  description: |\n    " << spacing
+      _out << "\n" << spacing << "    description: |\n      " << spacing
                 << param_ptrs[i]->getDocString(iter->first) << "\n";
     }
   }
-
-  //if there aren't any sub blocks it will just parse as None in python
-  _out << subblocks;
+  
+//  out << spacing << "subblocks: \n";
 }
+
+void
+YAMLFormatter::printCloseAndOpen(const std::string & name, const std::string * prev_name) const
+{
+  std::string empty;
+  std::vector<std::string> prev_elements, curr_elements;
+  
+  if (!prev_name)
+    prev_name = &empty;
+  
+  Parser::tokenize(*prev_name, prev_elements);
+  Parser::tokenize(name, curr_elements);
+
+  int num_to_close=0;
+  int num_to_open=0;
+  int same_elements=0;
+  bool first_mismatch = false;
+  for (unsigned int i=0; i<curr_elements.size(); ++i)
+    if (i >= prev_elements.size())
+      ++num_to_open;
+    else if (prev_elements[i] != curr_elements[i] || first_mismatch)
+    {
+      ++num_to_open;
+      first_mismatch = true;
+    }
+    else
+      ++same_elements;
+  
+  // Executioner syntax is different - we'll hack it here!
+  if ((name == "Executioner" && *prev_name == "Executioner") ||
+      (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos))
+  {
+    num_to_open += 1;
+    same_elements -= 1;
+  }
+
+  num_to_close = prev_elements.size() - same_elements;
+
+  // Open new blocks if necessary
+  std::string spacing = "";
+  std::string partial_name = "";
+  bool ran_once = false;
+  for (unsigned int i=0; i<curr_elements.size()-num_to_open; ++i)
+  {
+    spacing += "  ";
+    if (i)
+    {
+      
+      partial_name += "/";
+    }
+    partial_name += curr_elements[i];
+  }
+  
+  for (unsigned int i=curr_elements.size()-num_to_open; i<curr_elements.size()-1 && !curr_elements.empty(); ++i)
+  {
+    spacing += "  ";
+    if (i)
+    {
+
+      partial_name += "/";
+    }
+    partial_name += curr_elements[i];
+    
+    ran_once = true;
+    _out << spacing << "- name: " << partial_name << "\n";
+    _out << spacing << "  desc: !!str\n";
+    _out << spacing << "  type:\n";
+    _out << spacing << "  parameters:\n";
+    _out << spacing << "  subblocks:\n";
+  }
+}
+
