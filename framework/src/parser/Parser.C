@@ -216,6 +216,7 @@ Parser::parse(const std::string &input_filename)
   for (std::vector<std::string>::iterator i=section_names.begin(); i != section_names.end(); ++i)
   {
     curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
+    std::cout << curr_identifier << "\n";
     
     // Extract the block parameters before constructing the action
     // There may be more than one Action registered for a given section in which case we need to
@@ -255,15 +256,45 @@ Parser::parse(const std::string &input_filename)
     active_lists[curr_identifier] = active_list_params.get<std::vector<std::string> >("active");
   }
 
-  // TODO: Check active used?
-  // This will throw a mooseError if the active lists aren't all used up
-  // _input_tree->checkActiveUsed();
+  // Check to make sure that all sections in the input file that are explicitly listed are actually present
+  checkActiveUsed(section_names, active_lists);
 
   // Print the input file syntax if requested
   if (Moose::command_line && searchCommandLine("ShowTree"))
   {
     Moose::action_warehouse.printInputFile(std::cout);
     std::cout << std::endl << std::endl;
+  }
+}
+
+void
+Parser::checkActiveUsed(std::vector<std::string > & sections,
+                        const std::map<std::string, std::vector<std::string> > & active_lists)
+{
+  std::set<std::string> active_lists_set;
+  std::vector<std::string> difference;
+
+  for (std::map<std::string, std::vector<std::string> >::const_iterator i = active_lists.begin();
+       i != active_lists.end(); ++i)
+    for (std::vector<std::string>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
+    {
+      active_lists_set.insert(i->first);
+      if (*j != "__all__")
+        active_lists_set.insert(i->first + "/" + *j);
+    }
+
+  std::sort(sections.begin(), sections.end());
+
+  std::set_difference(active_lists_set.begin(), active_lists_set.end(), sections.begin(), sections.end(),
+                      std::inserter(difference, difference.end()));
+
+  if (!difference.empty())
+  {
+    std::ostringstream oss;
+    oss << "One or more active lists in the input file are missing a referenced section:\n";
+    for (std::vector<std::string>::iterator i = difference.begin(); i != difference.end();  ++i)
+      oss << *i << "\n";
+    mooseError(oss.str());
   }
 }
 

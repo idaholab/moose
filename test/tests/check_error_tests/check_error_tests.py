@@ -42,6 +42,9 @@ def missing_req_par_moose_obj_test():
 def missing_req_par_action_obj_test():
   tools.executeAppExpectError(__file__,'missing_req_par_action_obj_test.i',"The required parameter '\S+' is missing")
 
+def missing_active_section_test():
+  tools.executeAppExpectError(__file__,'missing_active_section.i',"One or more active lists in the input file are missing a referenced section")
+
 def invalid_steady_exec_test():
   tools.executeAppExpectError(__file__,'invalid_steady_exec_test.i','You have specified time kernels in your steady state simulation')
 

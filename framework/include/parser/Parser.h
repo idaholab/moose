@@ -51,7 +51,14 @@ public:
    * in the MOOSE derived application
    */
   void parse(const std::string &input_filename);
-  
+
+  /**
+   * This function checks to make sure that the active lists (active=*) are used up in the supplied
+   * input file.
+   */
+  void checkActiveUsed(std::vector<std::string > & sections,
+                       const std::map<std::string, std::vector<std::string> > & active_lists);
+
   /**
    * This function initiates the traversal of the parse block tree which is each block is resposible
    * for creating and filling in various MOOSE based objects.
