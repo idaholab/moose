@@ -106,6 +106,18 @@ def executeExodiff(test_dir, out_files, abs_zero, relative_error):
 #    if stdout.find('different') != -1 or stdout.find('ERROR') != -1 or stdout.find('command not found') != -1:
 #      assert False
 
+""" Not totally smart, just copy'n'paste of executeExodiff
+"""
+def executeExodiffCmp(test_dir, out_files, cmp_file, abs_zero, relative_error):
+  for file in out_files:
+    command = 'exodiff -m -f ' + os.path.join(test_dir,cmp_file) + ' -F ' + str(abs_zero) + ' -use_old_floor -t ' + str(relative_error) + ' ' + os.path.join(test_dir,file) + ' ' + os.path.join(test_dir,'gold',file)
+    print command
+    stdout = executeCommand(command)
+    print stdout
+    checkForFail(stdout)
+#    if stdout.find('different') != -1 or stdout.find('ERROR') != -1 or stdout.find('command not found') != -1:
+#      assert False
+
 def diffCSV(test_dir, out_files):
   differ = CSVDiffer.CSVDiffer(test_dir, out_files)
   msgs = differ.diff()
@@ -121,6 +133,18 @@ def executeAppAndDiff(test_file, input_file, out_files, min_dofs=0, parallel=0, 
   if (min_dofs == 0): #and parallel == 0):
     try:
       executeExodiff(test_dir, out_files, abs_zero, relative_error)
+    except AssertionError:
+      # We need to catch the failed exodiff and throw a different exception so we know it wasn't a normal failure
+      # What a hack!
+      raise ExodiffException()
+
+def executeAppAndCustomDiff(test_file, input_file, out_files, cmp_file, min_dofs=0, parallel=0, n_threads=0, abs_zero=1e-11, relative_error=5.5e-6):
+  test_dir = os.path.dirname(test_file)
+  delOldOutFiles(test_dir, out_files)
+  executeApp(test_dir, input_file, min_dofs, parallel, n_threads)
+  if (min_dofs == 0): #and parallel == 0):
+    try:
+      executeExodiffCmp(test_dir, out_files, cmp_file, abs_zero, relative_error)
     except AssertionError:
       # We need to catch the failed exodiff and throw a different exception so we know it wasn't a normal failure
       # What a hack!
