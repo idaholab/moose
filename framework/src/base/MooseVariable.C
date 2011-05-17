@@ -136,7 +136,6 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _second_phi_face(_has_second_derivatives ? _fe_face->get_d2phi() : _second_test),
     _normals(_fe_face->get_normals()),
 
-    _has_nodal_value(false),
     _node(_assembly.node()),
     _scaling_factor(1.0)
 {
@@ -182,7 +181,6 @@ MooseVariable::prepare()
 void
 MooseVariable::prepare_aux()
 {
-  _has_nodal_value = false;
 }
 
 void
@@ -205,7 +203,12 @@ void
 MooseVariable::reinit_node()
 {
   if (_node->n_dofs(_sys.number(), _var_num) > 0)
+  {
     _nodal_dof_index = _node->dof_number(_sys.number(), _var_num, 0);
+    _is_defined = true;
+  }
+  else
+    _is_defined = false;
 }
 
 void
@@ -214,7 +217,12 @@ MooseVariable::reinit_aux()
   reinit();
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
   if (_elem->n_dofs(_sys.number(), _var_num) > 0)
+  {
     _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
+    _is_defined = true;
+  }
+  else
+    _is_defined = false;
 }
 
 void
@@ -275,7 +283,7 @@ MooseVariable::add(SparseMatrix<Number> & jacobian, const DofMap & dof_map, std:
 void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
-  if (_has_nodal_value)
+  if (_is_defined)
     residual.set(_nodal_dof_index, _nodal_u[0]);
 }
 
@@ -488,16 +496,19 @@ MooseVariable::computeElemValuesFace()
 void
 MooseVariable::computeNodalValues()
 {
-  _nodal_u.resize(1);
-  _nodal_u[0] = (*_sys.currentSolution())(_nodal_dof_index);
-
-  if (_problem.transient())
+  if (_is_defined)
   {
-    _nodal_u_old.resize(1);
-    _nodal_u_old[0] = _sys.solutionOld()(_nodal_dof_index);
+    _nodal_u.resize(1);
+    _nodal_u[0] = (*_sys.currentSolution())(_nodal_dof_index);
 
-    _nodal_u_older.resize(1);
-    _nodal_u_older[0] = _sys.solutionOlder()(_nodal_dof_index);
+    if (_problem.transient())
+    {
+      _nodal_u_old.resize(1);
+      _nodal_u_old[0] = _sys.solutionOld()(_nodal_dof_index);
+
+      _nodal_u_older.resize(1);
+      _nodal_u_older[0] = _sys.solutionOlder()(_nodal_dof_index);
+    }
   }
 }
 
@@ -506,7 +517,6 @@ MooseVariable::setNodalValue(Number value)
 {
   _nodal_u.resize(1);
   _nodal_u[0] = value;                  // update variable nodal value
-  _has_nodal_value = true;
 }
 
 void

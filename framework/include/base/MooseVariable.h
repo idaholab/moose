@@ -266,7 +266,7 @@ protected:
   VariableValue _du_dot_du;                                             ///< derivative of u_dot wrt u
 
   // nodal stuff
-  bool _has_nodal_value;                                                ///< Variable may or may not have a value defined at a node
+  bool _is_defined;                                                     /// < If the variable is defined in the node
   const Node * & _node;
   unsigned int _nodal_dof_index;
   VariableValue _nodal_u;
