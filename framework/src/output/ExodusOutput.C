@@ -18,6 +18,7 @@
 #include "Problem.h"
 #include "ActionFactory.h"
 #include "MooseObjectAction.h"
+#include "MooseInit.h"
 
 // libMesh
 #include "exodusII.h"
@@ -141,46 +142,66 @@ ExodusOutput::meshChanged()
 void
 ExodusOutput::outputInput()
 {
+  std::vector<std::string> input_file_record;
+  std::string s;
+  
   if (_out == NULL)
     _out = new ExodusII_IO(_es.get_mesh());
-
-  std::stringstream ss;
-  Moose::action_warehouse.printInputFile(ss);
-
-  std::vector<std::string> input_file_record;
+  
   input_file_record.push_back("####################");
   input_file_record.push_back("# Created by MOOSE #");
   input_file_record.push_back("####################");
-  std::string s;
-  while (std::getline(ss, s))
+
   {
-    // MAX_LINE_LENGTH is from ExodusII
-    if ( s.length() > MAX_LINE_LENGTH )
+    std::stringstream ss;   
+    // Grab the command line arguments first
+    Moose::command_line->print("", ss, 1);
+    
+    input_file_record.push_back("### Command Line Arguments ###");
+    while (std::getline(ss, s))
     {
-      const std::string continuation("...");
-      const size_t cont_len(continuation.length());
-      size_t num_lines = s.length() / (MAX_LINE_LENGTH - cont_len) + 1;
-      std::string split_line;
-      for (size_t j(0), l_begin(0); j < num_lines; ++j, l_begin+=MAX_LINE_LENGTH-cont_len)
-      {
-        size_t l_len = MAX_LINE_LENGTH-cont_len;
-        if (s.length() < l_begin + l_len )
-        {
-          l_len = s.length() - l_begin;
-        }
-        split_line = s.substr( l_begin, l_len );
-        if ( l_begin + l_len != s.length())
-        {
-          split_line += continuation;
-        }
-        input_file_record.push_back(split_line);
-      }
-    }
-    else
-    {
+      mooseAssert(s.length() <= MAX_LINE_LENGTH, "Command line argument length too long to fit into Exodus Record");
       input_file_record.push_back(s);
     }
   }
+  
+  {
+    std::stringstream ss;   
+    // Save the input file into our string stream
+    Moose::action_warehouse.printInputFile(ss);
+
+    input_file_record.push_back("### Input File ###");
+    while (std::getline(ss, s))
+    {
+      // MAX_LINE_LENGTH is from ExodusII
+      if ( s.length() > MAX_LINE_LENGTH )
+      {
+        const std::string continuation("...");
+        const size_t cont_len(continuation.length());
+        size_t num_lines = s.length() / (MAX_LINE_LENGTH - cont_len) + 1;
+        std::string split_line;
+        for (size_t j(0), l_begin(0); j < num_lines; ++j, l_begin+=MAX_LINE_LENGTH-cont_len)
+        {
+          size_t l_len = MAX_LINE_LENGTH-cont_len;
+          if (s.length() < l_begin + l_len )
+          {
+            l_len = s.length() - l_begin;
+          }
+          split_line = s.substr( l_begin, l_len );
+          if ( l_begin + l_len != s.length())
+          {
+            split_line += continuation;
+          }
+          input_file_record.push_back(split_line);
+        }
+      }
+      else
+      {
+        input_file_record.push_back(s);
+      }
+    }
+  }
+  
 
   _out->write_information_records( input_file_record );
 }
