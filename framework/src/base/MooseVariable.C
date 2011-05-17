@@ -181,6 +181,7 @@ MooseVariable::prepare()
 void
 MooseVariable::prepare_aux()
 {
+  _has_nodal_value = false;
 }
 
 void
@@ -283,7 +284,7 @@ MooseVariable::add(SparseMatrix<Number> & jacobian, const DofMap & dof_map, std:
 void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
-  if (_is_defined)
+  if (_has_nodal_value)
     residual.set(_nodal_dof_index, _nodal_u[0]);
 }
 
@@ -517,6 +518,7 @@ MooseVariable::setNodalValue(Number value)
 {
   _nodal_u.resize(1);
   _nodal_u[0] = value;                  // update variable nodal value
+  _has_nodal_value = true;
 }
 
 void

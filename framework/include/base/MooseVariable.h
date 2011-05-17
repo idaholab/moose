@@ -266,7 +266,8 @@ protected:
   VariableValue _du_dot_du;                                             ///< derivative of u_dot wrt u
 
   // nodal stuff
-  bool _is_defined;                                                     /// < If the variable is defined in the node
+  bool _is_defined;                                                     ///< If the variable is defined at the node (used in compute nodal values)
+  bool _has_nodal_value;                                                ///< If true, the nodal value gets inserted on calling insert()
   const Node * & _node;
   unsigned int _nodal_dof_index;
   VariableValue _nodal_u;
