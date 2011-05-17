@@ -29,6 +29,8 @@
 
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
+#include "DoNothingAux.h"
+#include "MultipleUpdateAux.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -82,6 +84,8 @@ void registerObjects()
   // Aux kernels
   registerObject(PolyConstantAux);
   registerObject(MMSConstantAux);
+  registerObject(DoNothingAux);
+  registerObject(MultipleUpdateAux);
 
   // Boundary Conditions
   registerObject(MTBC);

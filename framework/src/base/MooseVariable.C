@@ -136,6 +136,7 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _second_phi_face(_has_second_derivatives ? _fe_face->get_d2phi() : _second_test),
     _normals(_fe_face->get_normals()),
 
+    _has_nodal_value(false),
     _node(_assembly.node()),
     _scaling_factor(1.0)
 {
@@ -181,7 +182,7 @@ MooseVariable::prepare()
 void
 MooseVariable::prepare_aux()
 {
-  _Re.resize(0);
+  _has_nodal_value = false;
 }
 
 void
@@ -274,8 +275,8 @@ MooseVariable::add(SparseMatrix<Number> & jacobian, const DofMap & dof_map, std:
 void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
-  if (_Re.size() > 0)
-    residual.set(_nodal_dof_index, _Re(0));
+  if (_has_nodal_value)
+    residual.set(_nodal_dof_index, _nodal_u[0]);
 }
 
 void
@@ -503,14 +504,9 @@ MooseVariable::computeNodalValues()
 void
 MooseVariable::setNodalValue(Number value)
 {
+  _nodal_u.resize(1);
   _nodal_u[0] = value;                  // update variable nodal value
-}
-
-void
-MooseVariable::storeAuxValue(Number value)
-{
-  _Re.resize(1);
-  _Re(0) = value;
+  _has_nodal_value = true;
 }
 
 void

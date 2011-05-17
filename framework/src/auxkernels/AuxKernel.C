@@ -88,14 +88,13 @@ AuxKernel::compute()
     _qp = 0;
     value = computeValue();
     _var.setNodalValue(value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
-    _var.storeAuxValue(value);
   }
   else
   {
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
       value += _JxW[_qp]*computeValue();
     value /= _current_volume;
-    _var.storeAuxValue(value);
+    _var.setNodalValue(value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
   }
 }
 

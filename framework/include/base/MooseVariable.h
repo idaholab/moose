@@ -168,8 +168,6 @@ public:
   void computeNodalValues();
   /// Set the nodal value for this variable (to keep everything up to date
   void setNodalValue(Number value);
-  /// Store the value of aux variable
-  void storeAuxValue(Number value);
   /// Compute damping for this variable based on increment_vec
   void computeDamping(const NumericVector<Number> & increment_vec);
 
@@ -268,6 +266,7 @@ protected:
   VariableValue _du_dot_du;                                             ///< derivative of u_dot wrt u
 
   // nodal stuff
+  bool _has_nodal_value;                                                ///< Variable may or may not have a value defined at a node
   const Node * & _node;
   unsigned int _nodal_dof_index;
   VariableValue _nodal_u;
