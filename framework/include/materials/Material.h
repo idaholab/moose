@@ -20,6 +20,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "MaterialProperty.h"
+#include "MaterialPropertyInterface.h"
 #include "MaterialData.h"
 #include "ParallelUniqueId.h"
 
@@ -28,6 +29,7 @@
 #include "elem.h"
 
 // forward declarations
+class Material;
 class MooseMesh;
 class SubProblemInterface;
 
@@ -42,6 +44,9 @@ struct QpData
 };
 
 
+template<>
+InputParameters validParams<Material>();
+
 /**
  * Holds material properties that are assigned to blocks.
  */
@@ -49,6 +54,7 @@ class Material :
   public MooseObject,
   public Coupleable,
   public TransientInterface,
+  public MaterialPropertyInterface,
   public PostprocessorInterface
 {
 public:
@@ -84,6 +90,18 @@ public:
    * Initialize stateful properties (if material has some)
    */
   virtual void initStatefulProperties();
+
+  /**
+   * Retrieve the property named "name"
+   */
+  template<typename T>
+  MaterialProperty<T> & getMaterialProperty(const std::string & name);
+
+  template<typename T>
+  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+
+  template<typename T>
+  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
 protected:
   Problem & _problem;
@@ -184,7 +202,34 @@ protected:
 };
 
 
-template<>
-InputParameters validParams<Material>();
+template<typename T>
+MaterialProperty<T> &
+Material::getMaterialProperty(const std::string & name)
+{
+  // TODO: remove me when adding dep-resolver
+  std::cerr << "Material " << this->name() << " needs a '" << name << "' material property" << std::endl;
+
+  // TODO: create a dependency here
+
+  return declareProperty<T>(name);      // the property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
+}
+
+template<typename T>
+MaterialProperty<T> &
+Material::getMaterialPropertyOld(const std::string & name)
+{
+  // TODO: create the dependency here
+
+  return declarePropertyOld<T>(name);   // see getMaterialProperty
+}
+
+template<typename T>
+MaterialProperty<T> &
+Material::getMaterialPropertyOlder(const std::string & name)
+{
+  // TODO: create a dependency here
+
+  return declarePropertyOlder<T>(name); // see getMaterialProperty
+}
 
 #endif //MATERIAL_H

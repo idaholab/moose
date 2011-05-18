@@ -48,6 +48,7 @@
 #include "StatefulMaterial.h"
 #include "StatefulTest.h"
 #include "StatefulSpatialTest.h"
+#include "CoupledMaterial.h"
 
 #include "ConvDiffMetaAction.h"
 
@@ -106,6 +107,7 @@ void registerObjects()
   registerObject(StatefulMaterial);
   registerObject(StatefulTest);
   registerObject(StatefulSpatialTest);
+  registerMaterial(CoupledMaterial);
 
   registerAction(ConvDiffMetaAction, "ConvectionDiffusion", "meta_action");
 }
