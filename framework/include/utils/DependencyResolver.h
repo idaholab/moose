@@ -56,6 +56,7 @@ public:
    */
   const std::vector<T> & getSortedValues();
 
+  bool operator() (const T & a, const T & b);
 
 private:
   /**
@@ -227,5 +228,25 @@ DependencyResolver<T>::getSortedValues()
 
   return _ordered_items_vector;
 }
-  
+
+template <typename T>
+bool
+DependencyResolver<T>::operator() (const T & a, const T & b)
+{
+  if (_ordered_items_vector.empty())
+    getSortedValues();
+
+  typename std::vector<T>::const_iterator a_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), a);
+  typename std::vector<T>::const_iterator b_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), b);
+
+  // it's possible that a and/or b are not in the resolver in which case
+  // we want those values to come out first
+  if (a_it == _ordered_items_vector.end())
+    return true;
+  else if (b_it == _ordered_items_vector.end())
+    return false;
+  else 
+    return a_it < b_it;  // Yes - compare the iterators...
+}
+
 #endif // DEPENDENCYRESOLVER_H
