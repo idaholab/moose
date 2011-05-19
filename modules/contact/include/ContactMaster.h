@@ -39,6 +39,8 @@ class ContactMaster : public DiracKernel
 public:
   ContactMaster(const std::string & name, InputParameters parameters);
 
+  virtual void jacobianSetup();
+
   virtual void addPoints();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

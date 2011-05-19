@@ -54,6 +54,27 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
 }
 
 void
+ContactMaster::jacobianSetup()
+{
+  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+
+  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  
+  for(; it!=end; ++it)
+  {
+    unsigned int slave_node_num = it->first;
+    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+
+    if(!pinfo)
+      continue;
+
+    if(pinfo->_distance > 0)
+      has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+  }
+}
+
+void
 ContactMaster::addPoints()
 {
   _point_to_info.clear();
@@ -69,28 +90,6 @@ ContactMaster::addPoints()
 
     if(!pinfo)
       continue;
-
-//     const Node * node = pinfo->_node;
-
-    if(_sys.currentlyComputingJacobian())
-    {/*
-      RealVectorValue res_vec;
-
-      // Build up residual vector
-      for(unsigned int i=0; i<_dim; i++)
-      {
-        long int dof_number = node->dof_number(0, _vars(i), 0);
-        res_vec(i) = _residual_copy(dof_number);
-      }
-
-      Real res_mag = pinfo->_normal * res_vec;
-     */
-
-      if(pinfo->_distance > 0)
-      {
-        has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
-      }
-    }
 
     std::map<unsigned int, bool>::iterator it( has_penetrated.find( slave_node_num ) );
     if(it != has_penetrated.end() && it->second == true )

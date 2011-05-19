@@ -52,6 +52,27 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
 {}
 
 void
+SlaveConstraint::jacobianSetup()
+{
+  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+
+  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  
+  for(; it!=end; ++it)
+  {
+    unsigned int slave_node_num = it->first;
+    PenetrationLocator::PenetrationInfo * pinfo = it->second;
+
+    if(!pinfo)
+      continue;
+
+    if(pinfo->_distance > 0)
+      has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+  }
+}
+
+void
 SlaveConstraint::addPoints()
 {
   _point_to_info.clear();
@@ -69,33 +90,6 @@ SlaveConstraint::addPoints()
       continue;
 
     const Node * node = pinfo->_node;
-
-    if(_sys.currentlyComputingJacobian())
-    {
-      /*
-      RealVectorValue res_vec;
-
-      // Build up residual vector
-      for(unsigned int i=0; i<_dim; i++)
-      {
-        long int dof_number = node->dof_number(0, _vars(i), 0);
-        res_vec(i) = _residual_copy(dof_number);
-      }
-
-      Real res_mag = pinfo->_normal * res_vec;
-      */
-
-//      if(res_mag < 0 && _penetration_locator._has_penetrated[slave_node_num])
-//      {
-//        _penetration_locator._has_penetrated[slave_node_num] = false;
-//      }
-//      else
-        if(pinfo->_distance > 0)
-        {
-//          std::cout<<slave_node_num<<": "<<pinfo->_distance<<std::endl;
-          has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
-        }
-    }
 
     std::map<unsigned int, bool>::iterator it( has_penetrated.find( slave_node_num ) );
     if(it != has_penetrated.end() && it->second == true && node->processor_id() == libMesh::processor_id())

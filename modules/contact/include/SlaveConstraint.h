@@ -32,6 +32,8 @@ class SlaveConstraint : public DiracKernel
 public:
   SlaveConstraint(const std::string & name, InputParameters parameters);
 
+  virtual void jacobianSetup();
+
   virtual void addPoints();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
