@@ -46,6 +46,8 @@ protected:
   const Real _poissons_ratio;
   const Real _shear_modulus;
 
+  const bool _large_strain;
+
   const Real _cracking_strain;
 
   const Real _t_ref;

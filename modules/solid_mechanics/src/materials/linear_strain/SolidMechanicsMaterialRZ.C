@@ -13,6 +13,7 @@ InputParameters validParams<SolidMechanicsMaterialRZ>()
   params.addRequiredParam<Real>("poissons_ratio", "Poisson's Ratio");
   params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
+  params.addParam<bool>("large_strain", false, "Whether to include large strain terms");
   params.addRequiredCoupledVar("disp_r", "The r displacement");
   params.addRequiredCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
@@ -26,6 +27,7 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _youngs_modulus(getParam<Real>("youngs_modulus")),
    _poissons_ratio(getParam<Real>("poissons_ratio")),
    _shear_modulus(0.5*_youngs_modulus/(1+_poissons_ratio)),
+   _large_strain(getParam<bool>("large_strain")),
    _cracking_strain( parameters.isParamValid("cracking_strain") ?
                      (getParam<Real>("cracking_strain") > 0 ? getParam<Real>("cracking_strain") : -1) : -1 ),
    _t_ref(getParam<Real>("t_ref")),
@@ -123,6 +125,16 @@ SolidMechanicsMaterialRZ::computeProperties()
     total_strain(1,1) = _grad_disp_z[_qp](1);
     total_strain(2,2) = _disp_r[_qp]/_q_point[_qp](0);
     total_strain(0,1) = 0.5*(_grad_disp_r[_qp](1) + _grad_disp_z[_qp](0));
+    if (_large_strain)
+    {
+      total_strain(0,0) += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](0) +
+                                _grad_disp_z[_qp](0)*_grad_disp_z[_qp](0));
+      total_strain(1,1) += 0.5*(_grad_disp_r[_qp](1)*_grad_disp_r[_qp](1) +
+                                _grad_disp_z[_qp](1)*_grad_disp_z[_qp](1));
+      total_strain(2,2) += 0.5*(total_strain(2,2)*total_strain(2,2));
+      total_strain(0,1) += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](1) +
+                                _grad_disp_z[_qp](0)*_grad_disp_z[_qp](1));
+    }
     total_strain(1,0) = total_strain(0,1);
 
     ColumnMajorMatrix strain(total_strain);
