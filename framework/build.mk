@@ -64,8 +64,13 @@ endif
 ##############################################################################
 #
 # source files
-srcfiles    := $(shell find $(CURR_DIR) -name *.C)
-csrcfiles   := $(shell find $(CURR_DIR) -name *.c)
+SRC_DIRS    := $(CURR_DIR)/src
+ifneq ($(wildcard $(CURR_DIR)/contrib),)
+	SRC_DIRS  += $(CURR_DIR)/contrib
+endif
+
+srcfiles    := $(shell find $(SRC_DIRS) -name *.C)
+csrcfiles   := $(shell find $(SRC_DIRS) -name *.c)
 
 # Contrib packages that should not be compiled into Moose
 ifeq ($(CURR_DIR),$(MOOSE_DIR))
@@ -80,8 +85,8 @@ ifeq ($(MAKE_LIBRARY),yes)
 srcfiles    := $(filter-out ./src/main.C, $(srcfiles))
 endif
 
-fsrcfiles   := $(shell find $(CURR_DIR) -name *.f)
-f90srcfiles := $(shell find $(CURR_DIR) -name *.f90)
+fsrcfiles   := $(shell find $(SRC_DIRS) -name *.f)
+f90srcfiles := $(shell find $(SRC_DIRS) -name *.f90)
 
 #
 # object files
