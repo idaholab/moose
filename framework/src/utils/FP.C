@@ -26,10 +26,23 @@
  * Floating point exception handler
  *
  */
-void handleFPE(int /*sig*/)
+void handleFPE(int /*signo*/, siginfo_t *info, void * /*context*/)
 {
   std::cout << std::endl;
-  std::cout << "Floating point exception signaled!" << std::endl;
+  std::cout << "Floating point exception signaled (";
+  switch (info->si_code)
+  {
+    case FPE_INTDIV: std::cerr << "integer divide by zero"; break;
+    case FPE_INTOVF: std::cerr << "integer overflow"; break;
+    case FPE_FLTDIV: std::cerr << "floating point divide by zero"; break;
+    case FPE_FLTOVF: std::cerr << "floating point overflow"; break;
+    case FPE_FLTUND: std::cerr << "floating point underflow"; break;
+    case FPE_FLTRES: std::cerr << "floating point inexact result"; break;
+    case FPE_FLTINV: std::cerr << "invalid floating point operation"; break;
+    case FPE_FLTSUB: std::cerr << "subscript out of range"; break;
+  }
+  std::cout << ")!" << std::endl;
+
   std::cout << std::endl;
   std::cout << "To track this down, compile debug version, start debugger, set breakpoint for 'handleFPE' and run" << std::endl;
   std::cout << "In gdb do:" << std::endl;
@@ -49,24 +62,32 @@ void enableFPE(bool on/* = true*/)
 
   if (on)
   {
+    struct sigaction new_action, old_action;
+
 #ifdef __APPLE__
     flags = _MM_GET_EXCEPTION_MASK();           // store the flags
     _MM_SET_EXCEPTION_MASK(flags & ~_MM_MASK_INVALID);
-    signal(SIGFPE, handleFPE);
 #elif __linux__
-    feenableexcept(FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INVALID);
-    signal(SIGFPE, handleFPE);
+    feenableexcept(FE_DIVBYZERO | FE_INVALID);
 #endif
+
+    // Set up the structure to specify the new action.
+    new_action.sa_sigaction = handleFPE;
+    sigemptyset (&new_action.sa_mask);
+    new_action.sa_flags = SA_SIGINFO;
+
+    sigaction (SIGFPE, NULL, &old_action);
+    if (old_action.sa_handler != SIG_IGN)
+      sigaction (SIGFPE, &new_action, NULL);
   }
   else
   {
 #ifdef __APPLE__
     _MM_SET_EXCEPTION_MASK(flags);
-    signal(SIGFPE, 0);
 #elif __linux__
-    fedisableexcept(FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INVALID);
-    signal(SIGFPE, SIG_IGN);
+    fedisableexcept(FE_DIVBYZERO | FE_INVALID);
 #endif
+    signal(SIGFPE, 0);
   }
 #endif // DEBUG
 }
