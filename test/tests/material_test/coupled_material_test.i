@@ -5,14 +5,12 @@
   	xmax = 1
   	ymin = 0
   	ymax = 1
-  	nx = 4
-  	ny = 4
+  	nx = 10
+  	ny = 10
   [../]
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -20,29 +18,33 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = MatDiffusion
     variable = u
-    prop_name = some_prop
+    prop_name = mp1
+  [../]
+
+  [./conv]
+    type = MatConvection
+    variable = u
+    x = 1
+    y = 0
+    mat_prop = some_prop
   [../]
 []
 
 [BCs]
-  active = 'left right'
+  [./right]
+    type = NeumannBC
+    variable = u
+    boundary = 1
+    value = 1
+  [../]
 
   [./left]
     type = DirichletBC
     variable = u
     boundary = 3
-    value = 1
-  [../]
-
-  [./right]
-    type = DirichletBC
-    variable = u
-    boundary = 1
     value = 0
   [../]
 []
@@ -52,12 +54,15 @@
   [./mat2]
     type = CoupledMaterial
     block = 0
-    mat_prop = matp
+    mat_prop = some_prop
+    coupled_mat_prop = mp1
   [../]
 
   [./mat1]
-    type = MTMaterial
+    type = GenericConstantMaterial
     block = 0
+    prop_names = 'mp1'
+    prop_values = '2'
   [../]  
 []
 
@@ -67,7 +72,7 @@
 []
 
 [Output]
-  file_base = out
+  file_base = out_coupled
   output_initial = true
   interval = 1
   exodus = true

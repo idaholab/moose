@@ -3,26 +3,27 @@
 
 #include "Material.h"
 
+class CoupledMaterial;
+
+template<>
+InputParameters validParams<CoupledMaterial>();
 
 /**
- * A material that coupled a material property
+ * A material that couples a material property
  */
 class CoupledMaterial : public Material
 {
 public:
-  CoupledMaterial(const std::string & name,
-                  InputParameters parameters);
+  CoupledMaterial(const std::string & name, InputParameters parameters);
   
 protected:
   virtual void computeProperties();
 
-  MaterialProperty<Real> & _my_prop;
-
   std::string _mat_prop_name;
+  MaterialProperty<Real> & _mat_prop;
+
+  std::string _coupled_mat_prop_name;
   MaterialProperty<Real> & _coupled_mat_prop;
 };
-
-template<>
-InputParameters validParams<CoupledMaterial>();
 
 #endif //COUPLEDMATERIAL_H
