@@ -28,6 +28,12 @@ public:
   DiracKernelWarehouse();
   virtual ~DiracKernelWarehouse();
 
+  // Setup /////
+  void initialSetup();
+  void timestepSetup();
+  void residualSetup();
+  void jacobianSetup();
+  
   /**
    * Get the list of all dirac kernels
    * @return The list of all dirac kernels

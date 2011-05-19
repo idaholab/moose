@@ -160,7 +160,10 @@ void
 NonlinearSystem::initialSetupKernels()
 {
   for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
     _kernels[i].initialSetup();
+    _dirac_kernels[i].initialSetup();
+  }
 }
 
 void
@@ -170,6 +173,7 @@ NonlinearSystem::timestepSetup()
   {
     _kernels[i].timestepSetup();
     _bcs[i].timestepSetup();
+    _dirac_kernels[i].timestepSetup();
   }
 }
 
@@ -495,6 +499,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   {
     _kernels[i].residualSetup();
     _bcs[i].residualSetup();
+    _dirac_kernels[i].residualSetup();
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -594,6 +599,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   {
     _kernels[i].jacobianSetup();
     _bcs[i].jacobianSetup();
+    _dirac_kernels[i].jacobianSetup();
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();

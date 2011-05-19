@@ -26,6 +26,35 @@ DiracKernelWarehouse::~DiracKernelWarehouse()
 }
 
 void
+DiracKernelWarehouse::initialSetup()
+{
+  for(unsigned int i=0; i<_dirac_kernels.size(); i++)
+    _dirac_kernels[i]->initialSetup();
+}
+
+void
+DiracKernelWarehouse::timestepSetup()
+{
+  for(unsigned int i=0; i<_dirac_kernels.size(); i++)
+    _dirac_kernels[i]->timestepSetup();
+}
+
+void
+DiracKernelWarehouse::residualSetup()
+{
+  for(unsigned int i=0; i<_dirac_kernels.size(); i++)
+    _dirac_kernels[i]->residualSetup();
+}
+
+void
+DiracKernelWarehouse::jacobianSetup()
+{
+  for(unsigned int i=0; i<_dirac_kernels.size(); i++)
+    _dirac_kernels[i]->jacobianSetup();
+}
+
+
+void
 DiracKernelWarehouse::addDiracKernel(DiracKernel *DiracKernel)
 {
   _dirac_kernels.push_back(DiracKernel);
