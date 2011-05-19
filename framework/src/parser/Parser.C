@@ -216,7 +216,6 @@ Parser::parse(const std::string &input_filename)
   for (std::vector<std::string>::iterator i=section_names.begin(); i != section_names.end(); ++i)
   {
     curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
-    std::cout << curr_identifier << "\n";
     
     // Extract the block parameters before constructing the action
     // There may be more than one Action registered for a given section in which case we need to

@@ -214,7 +214,7 @@ void MProblem::initialSetup()
 
   for(unsigned int i=0; i<n_threads; i++)
   {
-    _materials[i].initialSetup();
+    _materials[i].initialSetup(_mat_prop_depends);
     _pps(EXEC_RESIDUAL)[i].initialSetup();
     _pps(EXEC_JACOBIAN)[i].initialSetup();
     _pps(EXEC_TIMESTEP)[i].initialSetup();

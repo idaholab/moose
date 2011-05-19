@@ -22,6 +22,7 @@
 #include "Function.h"
 #include "MooseMesh.h"
 #include "SubProblemInterface.h"
+#include "DependencyResolver.h"
 // libMesh
 #include "libmesh_common.h"
 #include "equation_systems.h"
@@ -70,6 +71,8 @@ public:
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid) = 0;
   virtual const std::vector<Material*> & getMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
   virtual const std::vector<Material*> & getFaceMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
+  // No need for a virtual function here
+  void addMaterialPropertyDependency(const std::string & depends_on, const std::string & independent);
 
   /// Returns true if the Problem has Dirac kernels it needs to compute on elem.
   virtual bool reinitDirac(const Elem * /*elem*/, THREAD_ID /*tid*/){ mooseError("Cannont reinit this Problem with arbitrary quadrature points!"); };
@@ -140,6 +143,8 @@ protected:
   std::vector<Real> _time_weights;
 
   bool _output_initial;                                         ///< output initial condition if true
+
+  DependencyResolver<std::string> _mat_prop_depends;
 };
 
 #endif /* PROBLEM_H */

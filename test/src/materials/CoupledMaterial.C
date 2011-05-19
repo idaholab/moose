@@ -24,6 +24,6 @@ CoupledMaterial::computeProperties()
 {
   for (_qp = 0; _qp < _q_point.size(); ++_qp)
   {
-    _mat_prop[_qp] = _coupled_mat_prop[_qp] * 4.0;              // MAGIC! (number)
+    _mat_prop[_qp] = 4.0/_coupled_mat_prop[_qp];       // This will produce a NaN if evaluated out of order
   }
 }

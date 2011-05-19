@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "MaterialWarehouse.h"
+#include "DependencyResolver.h"
 
 // FIXME: !
 #define unlikely(a) a
@@ -38,8 +39,10 @@ MaterialWarehouse::~MaterialWarehouse()
 
 
 void
-MaterialWarehouse::initialSetup()
+MaterialWarehouse::initialSetup(DependencyResolver<std::string> & _mat_prop_depends)
 {
+  sortMaterials(_mat_prop_depends);
+  
   for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
       (*k)->initialSetup();
@@ -198,3 +201,31 @@ void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
   _active_neighbor_materials[block_id].push_back(material);
 }
 
+void
+MaterialWarehouse::sortMaterials(DependencyResolver<std::string> & _mat_prop_depends)
+{
+  std::map<int, std::vector<Material *> > new_order;
+  
+  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)  
+  {
+    const std::vector<std::string> & sorted_names = _mat_prop_depends.getSortedValues();
+    std::vector<Material *> *materials = new std::vector<Material *>();
+
+    for (std::vector<std::string>::const_iterator name_iter=sorted_names.begin(); name_iter != sorted_names.end(); ++name_iter)
+      for (std::vector<Material *>::iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
+        if (*name_iter == (*mat_iter)->name())
+        {
+          materials->push_back(*mat_iter);
+        }
+    
+    // grab the materials that don't have any depends and put them in the front
+    for (std::vector<Material *>::iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
+      if (std::find(materials->begin(), materials->end(), *mat_iter) == materials->end())
+        materials->insert(materials->begin(), *mat_iter);
+
+    new_order[j->first] = *materials;
+  }
+
+  // Swap out the new order with the old order
+  _active_materials.swap(new_order);
+}

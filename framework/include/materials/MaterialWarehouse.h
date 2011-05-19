@@ -20,6 +20,8 @@
 
 #include "Material.h"
 
+// Forward Declaration
+template <class T> class DependencyResolver;
 
 class MaterialWarehouse
 {
@@ -28,7 +30,7 @@ public:
   virtual ~MaterialWarehouse();
 
   // Setup /////
-  void initialSetup();
+  void initialSetup(DependencyResolver<std::string> & _mat_prop_depends);
   void timestepSetup();
   void residualSetup();
   void jacobianSetup();
@@ -61,6 +63,9 @@ protected:
   std::map<int, std::vector<Material *> > _active_neighbor_materials;   ///< A list of neighbor materials associated with the block (subdomain) (for DG)
 
   std::set<int> _blocks;                                                ///< Set of blocks where materials are defined
+
+private:
+  void sortMaterials(DependencyResolver<std::string> & _mat_prop_depends);
 };
 
 #endif // MATERIALWAREHOUSE_H

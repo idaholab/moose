@@ -23,6 +23,7 @@
 #include "MaterialPropertyInterface.h"
 #include "MaterialData.h"
 #include "ParallelUniqueId.h"
+#include "Problem.h"
 
 // libMesh includes
 #include "quadrature_gauss.h"
@@ -207,8 +208,9 @@ MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & name)
 {
   // TODO: remove me when adding dep-resolver
-  std::cerr << "Material " << this->name() << " needs a '" << name << "' material property" << std::endl;
+  //  std::cerr << "Material " << this->name() << " needs a '" << name << "' material property" << std::endl;
 
+  _problem.addMaterialPropertyDependency(this->name(), name);
   // TODO: create a dependency here
 
   return declareProperty<T>(name);      // the property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
@@ -219,7 +221,7 @@ MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & name)
 {
   // TODO: create the dependency here
-
+  _problem.addMaterialPropertyDependency(this->name(), name);
   return declarePropertyOld<T>(name);   // see getMaterialProperty
 }
 
@@ -228,7 +230,7 @@ MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & name)
 {
   // TODO: create a dependency here
-
+  _problem.addMaterialPropertyDependency(this->name(), name);
   return declarePropertyOlder<T>(name); // see getMaterialProperty
 }
 
