@@ -209,6 +209,10 @@ MaterialWarehouse::sortMaterials(DependencyResolver<std::string> & _mat_prop_dep
   for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)  
   {
     const std::vector<std::string> & sorted_names = _mat_prop_depends.getSortedValues();
+
+    for (unsigned int i=0; i<sorted_names.size(); ++i)
+      std::cout << sorted_names[i] << "\n";
+    
     std::vector<Material *> *materials = new std::vector<Material *>();
 
     for (std::vector<std::string>::const_iterator name_iter=sorted_names.begin(); name_iter != sorted_names.end(); ++name_iter)
@@ -227,5 +231,7 @@ MaterialWarehouse::sortMaterials(DependencyResolver<std::string> & _mat_prop_dep
   }
 
   // Swap out the new order with the old order
+
+  // TODO: this isn't done yet!
   _active_materials.swap(new_order);
 }
