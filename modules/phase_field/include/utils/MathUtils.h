@@ -123,7 +123,23 @@ namespace MathUtils
     }
     return value;
   }
-  
+
+  inline Real TaylorLog(Real x)
+  {
+    Real y = (x-1)/(x+1);
+    Real val=1.0;
+    for (unsigned int i=0; i<5; ++i)
+    {
+      int exponent = i+2;
+      
+      val += 1.0/(2.0*(i+1.0)+1.0)*std::pow(y,exponent);
+    }
+    
+
+    val *= 2*y;
+
+    return val;
+  }
 }
 
 #endif //MATHUTILS_H
