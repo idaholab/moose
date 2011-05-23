@@ -54,6 +54,7 @@
 #include "PenetrationAux.h"
 #include "ProcessorIDAux.h"
 #include "GapValueAux.h"
+#include "MaterialRealAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -185,6 +186,7 @@ registerObjects()
   registerAux(PenetrationAux);
   registerAux(ProcessorIDAux);
   registerAux(GapValueAux);
+  registerAux(MaterialRealAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
