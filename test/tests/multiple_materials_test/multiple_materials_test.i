@@ -24,6 +24,19 @@
   [../]
 []
 
+[AuxVariables]
+active = 'diff1 diff2'
+  [./diff1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./diff2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   active = 'diff1 diff2'
 
@@ -37,6 +50,21 @@
     type = DiffMKernel
     variable = v
     mat_prop = diff2
+  [../]
+[]
+
+[AuxKernels]
+active = 'diff1 diff2'
+  [./diff1]
+    type = MaterialRealAux
+    variable = diff1
+    matpro = diff1
+  [../]
+
+  [./diff2]
+    type = MaterialRealAux
+    variable = diff2
+    matpro = diff2
   [../]
 []
 

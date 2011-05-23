@@ -19,6 +19,14 @@
   [../]
 []
 
+[AuxVariables]
+active = 'mat'
+  [./mat]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   active = 'diff'
 
@@ -26,6 +34,15 @@
     type = MatDiffusion
     variable = u
     prop_name = matp
+  [../]
+[]
+
+[AuxKernels]
+active = 'mat'
+  [./mat]
+    type = MaterialRealAux
+    variable = mat
+    matpro = matp
   [../]
 []
 
