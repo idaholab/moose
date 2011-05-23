@@ -233,5 +233,5 @@ MaterialWarehouse::sortMaterials(DependencyResolver<std::string> & _mat_prop_dep
   // Swap out the new order with the old order
 
   // TODO: this isn't done yet!
-  _active_materials.swap(new_order);
+  //_active_materials.swap(new_order);
 }
