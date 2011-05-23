@@ -30,7 +30,7 @@ public:
   virtual ~MaterialWarehouse();
 
   // Setup /////
-  void initialSetup(DependencyResolver<std::string> & _mat_prop_depends);
+  void initialSetup();
   void timestepSetup();
   void residualSetup();
   void jacobianSetup();
@@ -56,7 +56,7 @@ public:
    * @return The list of subdomain IDs
    */
   const std::set<int> & blocks() { return _blocks; }
-
+  
 protected:
   std::map<int, std::vector<Material *> > _active_materials;            ///< A list of material associated with the block (subdomain)
   std::map<int, std::vector<Material *> > _active_boundary_materials;   ///< A list of boundary materials associated with the block (subdomain)
@@ -65,7 +65,7 @@ protected:
   std::set<int> _blocks;                                                ///< Set of blocks where materials are defined
 
 private:
-  void sortMaterials(DependencyResolver<std::string> & _mat_prop_depends);
+  void sortMaterials();
 };
 
 #endif // MATERIALWAREHOUSE_H

@@ -120,3 +120,21 @@ MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, con
       shallowCopyData(_stateful_props, _storage.propsOlder()[elem_id][side], _props_older);
   }
 }
+
+bool
+MaterialData::have_property_name(const std::string & prop_name) const
+{
+  return _props.find(prop_name) != _props.end();
+}
+
+bool
+MaterialData::have_property_name_old(const std::string & prop_name) const
+{
+  return _props.find(prop_name) != _props.end();
+}
+
+bool
+MaterialData::have_property_name_older(const std::string & prop_name) const
+{
+  return _props.find(prop_name) != _props.end();
+}

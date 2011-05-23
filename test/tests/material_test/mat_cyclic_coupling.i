@@ -21,7 +21,7 @@
   [./diff]
     type = MatDiffusion
     variable = u
-    prop_name = mp1
+    prop_name = some_prop
   [../]
 
   [./conv]
@@ -29,7 +29,7 @@
     variable = u
     x = 1
     y = 0
-    mat_prop = some_prop
+    mat_prop = some_other_prop
   [../]
 []
 
@@ -55,14 +55,14 @@
     type = CoupledMaterial
     block = 0
     mat_prop = 'some_prop'
-    coupled_mat_prop = 'mp1'
+    coupled_mat_prop = 'some_other_prop'
   [../]
 
   [./mat1]
-    type = GenericConstantMaterial
+    type = CoupledMaterial
     block = 0
-    prop_names = 'mp1'
-    prop_values = '2'
+    mat_prop = 'some_other_prop'
+    coupled_mat_prop = 'some_prop'
   [../]  
 []
 

@@ -39,9 +39,9 @@ MaterialWarehouse::~MaterialWarehouse()
 
 
 void
-MaterialWarehouse::initialSetup(DependencyResolver<std::string> & _mat_prop_depends)
+MaterialWarehouse::initialSetup()
 {
-  sortMaterials(_mat_prop_depends);
+  sortMaterials();
   
   for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
     for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
@@ -202,36 +202,37 @@ void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
 }
 
 void
-MaterialWarehouse::sortMaterials(DependencyResolver<std::string> & _mat_prop_depends)
-{
-  std::map<int, std::vector<Material *> > new_order;
-  
+MaterialWarehouse::sortMaterials()
+{ 
   for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)  
   {
-    const std::vector<std::string> & sorted_names = _mat_prop_depends.getSortedValues();
+    DependencyResolver<Material *> resolver;
 
-    for (unsigned int i=0; i<sorted_names.size(); ++i)
-      std::cout << sorted_names[i] << "\n";
     
-    std::vector<Material *> *materials = new std::vector<Material *>();
-
-    for (std::vector<std::string>::const_iterator name_iter=sorted_names.begin(); name_iter != sorted_names.end(); ++name_iter)
-      for (std::vector<Material *>::iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
-        if (*name_iter == (*mat_iter)->name())
+    /**
+     * For each block we have to run through the dependency list since
+     * the property provided by a material can change from block to block
+     * which can change the dependencies
+     */
+    for (std::vector<Material *>::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
+    {
+      const std::set<std::string> & depend_props = (*mat_iter)->getPropertyDependencies();
+       
+      for (std::set<std::string>::const_iterator prop_iter=depend_props.begin(); prop_iter != depend_props.end(); ++prop_iter)
+      {
+        // Ask each active material if they supply this property
+        for (std::vector<Material *>::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
         {
-          materials->push_back(*mat_iter);
+          // Don't check THIS material for a coupled property
+          if (mat_iter == mat_iter2) continue;
+           
+          if ((*mat_iter2)->have_property_name(*prop_iter))
+            resolver.insertDependency(*mat_iter, *mat_iter2);
         }
+      } 
+    }
     
-    // grab the materials that don't have any depends and put them in the front
-    for (std::vector<Material *>::iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
-      if (std::find(materials->begin(), materials->end(), *mat_iter) == materials->end())
-        materials->insert(materials->begin(), *mat_iter);
-
-    new_order[j->first] = *materials;
+    // Sort based on dependencies
+    std::sort(j->second.begin(), j->second.end(), resolver);    
   }
-
-  // Swap out the new order with the old order
-
-  // TODO: this isn't done yet!
-  //_active_materials.swap(new_order);
 }

@@ -65,8 +65,3 @@ Problem::getFunction(const std::string & name, THREAD_ID tid)
   return *_functions[tid][name];
 }
 
-void
-Problem::addMaterialPropertyDependency(const std::string & depends_on, const std::string & independent)
-{
-  _mat_prop_depends.insertDependency(depends_on, independent);
-}

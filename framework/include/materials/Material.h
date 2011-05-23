@@ -93,6 +93,18 @@ public:
   virtual void initStatefulProperties();
 
   /**
+   * Check for property named "prop_name"
+   */
+  inline bool have_property_name(const std::string & prop_name) const
+  { return _material_data.have_property_name(prop_name); }
+
+  inline bool have_property_name_old(const std::string & prop_name) const
+  { return _material_data.have_property_name_old(prop_name); }
+  
+  inline bool have_property_name_older(const std::string & prop_name) const
+  { return _material_data.have_property_name_older(prop_name); }
+  
+  /**
    * Retrieve the property named "name"
    */
   template<typename T>
@@ -104,6 +116,9 @@ public:
   template<typename T>
   MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
+  const std::set<std::string> &
+  getPropertyDependencies() const { return _depend_props; }
+  
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;
@@ -121,6 +136,8 @@ protected:
 
   MooseMesh & _mesh;
   unsigned int _dim;
+  
+  std::set<std::string> _depend_props;
 
 // struct DeleteFunctor 
 //   {
@@ -207,31 +224,24 @@ template<typename T>
 MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & name)
 {
-  // TODO: remove me when adding dep-resolver
-  //  std::cerr << "Material " << this->name() << " needs a '" << name << "' material property" << std::endl;
-
-  _problem.addMaterialPropertyDependency(this->name(), name);
-  // TODO: create a dependency here
-
-  return declareProperty<T>(name);      // the property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
+  _depend_props.insert(name);
+  return declareProperty<T>(name);      ///< the property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
 }
 
 template<typename T>
 MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & name)
 {
-  // TODO: create the dependency here
-  _problem.addMaterialPropertyDependency(this->name(), name);
-  return declarePropertyOld<T>(name);   // see getMaterialProperty
+  _depend_props.insert(name);
+  return declarePropertyOld<T>(name);
 }
 
 template<typename T>
 MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & name)
 {
-  // TODO: create a dependency here
-  _problem.addMaterialPropertyDependency(this->name(), name);
-  return declarePropertyOlder<T>(name); // see getMaterialProperty
+  _depend_props.insert(name);
+  return declarePropertyOlder<T>(name);
 }
 
 #endif //MATERIAL_H
