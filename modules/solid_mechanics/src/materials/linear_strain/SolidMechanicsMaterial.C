@@ -25,6 +25,8 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, InputPa
    _stress(declareProperty<RealTensorValue>("stress")),
    _elasticity_tensor(declareProperty<ColumnMajorMatrix>("elasticity_tensor")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
+   _d_strain_dT(3,3),
+   _d_stress_dT(declareProperty<RealTensorValue>("d_stress_dT")),
    _elastic_strain(declareProperty<ColumnMajorMatrix>("elastic_strain")),
    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
    _density(declareProperty<Real>("density")),

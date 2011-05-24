@@ -33,6 +33,13 @@ protected:
   MaterialProperty<RealTensorValue> & _stress;
   MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
+
+  // Accumulate derivatives of strain tensors with respect to Temperature into this
+  ColumnMajorMatrix _d_strain_dT;
+
+  // The derivative of the stress with respect to Temperature
+  MaterialProperty<RealTensorValue> & _d_stress_dT;
+
   MaterialProperty<ColumnMajorMatrix> & _elastic_strain;
 
   MaterialProperty<Real> & _thermal_conductivity;
