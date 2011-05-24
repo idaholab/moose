@@ -67,6 +67,8 @@ MaterialModel::MaterialModel( const std::string & name,
    _crack_flags(NULL),
    _crack_flags_old(NULL),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
+   _d_strain_dT(3,3),
+   _d_stress_dT(declareProperty<RealTensorValue>("d_stress_dT")),
    _total_strain_increment(3,3),
    _strain_increment(3,3),
    _incremental_rotation(3,3),
@@ -478,6 +480,9 @@ MaterialModel::modifyStrain()
   {
     const Real tStrain( _alpha/_dt * (_temperature[_qp] - _temperature_old[_qp]) );
     _strain_increment.addDiag( -tStrain );
+
+    _d_strain_dT.zero();
+    _d_strain_dT.addDiag( -_alpha/_dt );
   }
   for (unsigned int i(0); i < _volumetric_models.size(); ++i)
   {
@@ -837,6 +842,12 @@ MaterialModel::computePreconditioning()
 {
   _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
   _Jacobian_mult[_qp] = *_elasticity_tensor;
+
+  _d_strain_dT.reshape(9, 1);
+  ColumnMajorMatrix d_stress_dT( *_elasticity_tensor * _d_strain_dT );
+  _d_strain_dT.reshape(3, 3);
+  d_stress_dT *= _dt;
+  d_stress_dT.fill(_d_stress_dT[_qp]);
 
 
 /*

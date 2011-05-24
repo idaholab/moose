@@ -79,6 +79,13 @@ protected:
   MaterialProperty<RealVectorValue> * _crack_flags_old;
 
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
+
+  // Accumulate derivatives of strain tensors with respect to Temperature into this
+  ColumnMajorMatrix _d_strain_dT;
+
+  // The derivative of the stress with respect to Temperature
+  MaterialProperty<RealTensorValue> & _d_stress_dT;
+  
   ColumnMajorMatrix _total_strain_increment;
   ColumnMajorMatrix _strain_increment;
   ColumnMajorMatrix _incremental_rotation;

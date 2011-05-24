@@ -10,6 +10,7 @@ InputParameters validParams<StressDivergence>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addCoupledVar("temp", "The temperature");
 
   params.set<bool>("use_displaced_mesh") = true;
 
@@ -21,13 +22,16 @@ StressDivergence::StressDivergence(const std::string & name, InputParameters par
   :Kernel(name, parameters),
    _stress(getMaterialProperty<RealTensorValue>("stress")),
    _Jacobian_mult(getMaterialProperty<ColumnMajorMatrix>("Jacobian_mult")),
+   _d_stress_dT(getMaterialProperty<RealTensorValue>("d_stress_dT")),
    _component(getParam<Real>("component")),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
    _zdisp_coupled(isCoupled("disp_z")),
+   _temp_coupled(isCoupled("temp")),
    _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
    _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
-   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0)
+   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+   _temp_var(_temp_coupled ? coupled("temp") : 0)
 {}
         
 Real
@@ -85,5 +89,9 @@ StressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
     }
     return value * _grad_test[_i][_qp];
   }
+
+  if ( _temp_coupled && jvar == _temp_var )
+    return ((_d_stress_dT[_qp] * _phi[_j][_qp]) * _grad_test[_i][_qp])(_component);
+      
   return 0;
 }
