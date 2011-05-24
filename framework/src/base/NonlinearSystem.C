@@ -795,7 +795,10 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
   jacobian.close();
 
   //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
-  jacobian.zero_rows(zero_rows, 1.0);
+  if(ivar == jvar)
+    jacobian.zero_rows(zero_rows, 1.0);
+  else
+    jacobian.zero_rows(zero_rows, 0.0);
 
   jacobian.close();
 
