@@ -161,7 +161,7 @@ YAMLFormatter::printCloseAndOpen(const std::string & name, const std::string * p
   
   // Executioner syntax is different - we'll hack it here!
   if ((name == "Executioner" && *prev_name == "Executioner") ||
-      (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos))
+      (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos) || name == "Executioner/Adaptivity")
   {
     num_to_open += 1;
     same_elements -= 1;
