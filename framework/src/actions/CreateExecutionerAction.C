@@ -36,24 +36,19 @@ InputParameters validParams<CreateExecutionerAction>()
   params.addParam<Real>        ("nl_abs_step_tol", 1.0e-50,  "Nonlinear Absolute step Tolerance");
   params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
   params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
-  params.addParam<bool>        ("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
+
 //  params.addParam<bool>        ("auto_scaling",    false,    "Turns on automatic variable scaling");
   params.addParam<std::string> ("scheme",          "backward-euler",  "Time integration scheme used.");
 
   //params.addPrivateParam<unsigned int>("steps", 0);  // This is initial adaptivity steps - it'll be set
                                                      // in the adaptivity block later but needs to be here now
 
-  /// DEPRECATED -> Moved to output block
-  params.addParam<bool>("perf_log", false, "Specifies whether or not the Performance log should be printed");
-  params.addParam<bool>("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
-
-
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<std::vector<std::string> >("petsc_options", "Singleton Petsc options");
   params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of Petsc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of Petsc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
-  
+
   return params;
 }
 
@@ -72,7 +67,7 @@ CreateExecutionerAction::act()
   // is held in the child block Adaptivity and needs to be pulled early
 
   // TODO: Fix Adaptivity block
-/*  
+/*
   ParserBlock *adaptivity_block = locateBlock("Executioner/Adaptivity");
   if (adaptivity_block != NULL)
   {
@@ -83,7 +78,7 @@ CreateExecutionerAction::act()
     class_params.set<unsigned int>("steps") = 0;
 */
   //_moose_object_pars.set<unsigned int>("steps") = 0;
-  
+
 #ifdef LIBMESH_HAVE_PETSC
   std::vector<std::string> petsc_options,  petsc_inames, petsc_values;
   petsc_options = getParam<std::vector<std::string> >("petsc_options");
@@ -95,7 +90,7 @@ CreateExecutionerAction::act()
 
   for (unsigned int i=0; i<petsc_options.size(); ++i)
     PetscOptionsSetValue(petsc_options[i].c_str(), PETSC_NULL);
-  
+
   for (unsigned int i=0; i<petsc_inames.size(); ++i)
     PetscOptionsSetValue(petsc_inames[i].c_str(), petsc_values[i].c_str());
 #endif //LIBMESH_HAVE_PETSC
@@ -111,7 +106,7 @@ CreateExecutionerAction::act()
 
 //    ParserBlock * blk;
 
-    
+
     // FIXME: HACK! Can initialize displaced problem after we have instance of problem
     // TODO: Make this into another action
     ActionIterator mesh_it = Moose::action_warehouse.actionBlocksWithActionBegin("read_mesh");
@@ -122,14 +117,14 @@ CreateExecutionerAction::act()
       _parser_handle._problem->initDisplacedProblem(_parser_handle._displaced_mesh, displacements);
     }
 
-/*    
+/*
     // handle functions
     blk = locateBlock("Functions");
     if (blk)
       blk->execute();
 */
 
-/*    
+/*
     VariablesBlock * vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("Variables"));
     if (vars!= NULL)
       vars->execute();
@@ -139,8 +134,8 @@ CreateExecutionerAction::act()
 */
 
 
-// TODO: periodic BCs    
-/*    
+// TODO: periodic BCs
+/*
     // handle periodic BCs
     blk = locateBlock("BCs/Periodic");
     if (blk)
@@ -199,30 +194,9 @@ CreateExecutionerAction::act()
     NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<std::string>("scheme")));
 
-  //------------------------------------------------------------
-  // DEPRECATED 5/6/2011 - will be removed later
+//------------------------------------------------------------
 
-  if (_pars.wasSeenInInput("perf_log"))
-  {
-    mooseDeprecated();
-    std::cout << "The \"perf_log\" option has been moved to the output block.\n\n"; 
-  }
-  if (_pars.wasSeenInInput("show_setup_log_early"))
-  {
-    mooseDeprecated();
-    std::cout << "The \"show_setup_log_early\" option has been moved to the output block.\n\n";
-  }  
-  
-  if (!getParam<bool>("perf_log"))
-  {
-    Moose::perf_log.disable_logging();
-    Moose::setup_perf_log.disable_logging();
-  }
-  // Determines whether we see the perf log early in a run or not
-  _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
-  //------------------------------------------------------------
-    
-/*    
+/*
     blk= locateBlock("GlobalParams");
     if (blk)
       blk->execute();
@@ -259,5 +233,5 @@ CreateExecutionerAction::act()
       blk->execute();
 */
   }
-  
+
 }

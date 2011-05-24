@@ -53,7 +53,7 @@ InputParameters validParams<SetupOutputAction>()
 
   params.addParam<bool>("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
-  
+
   return params;
 }
 
@@ -75,7 +75,7 @@ SetupOutputAction::act()
 
   /// Determines whether we see the perf log early in a run or not
   _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
-  
+
   Executioner * exec = _parser_handle._executioner;
   Problem & problem = exec->problem();
   Output & output = problem.out();                       // can't use use this with coupled problems on different meshes

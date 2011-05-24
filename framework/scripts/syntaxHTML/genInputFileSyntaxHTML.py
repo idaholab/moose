@@ -108,6 +108,8 @@ def massage_data( data ):
   for block in data:
     name =  block['name']
     if name == 'Executioner' or name == 'InitialCondition':
+      if type == 'None':
+        type = 'ALL'
       block['name'] += ' (' + str(block['type']) + ')'
   return data
 
