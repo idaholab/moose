@@ -42,6 +42,9 @@ REL_ERR     = 'rel_err'         # Relative error value passed to the exodiff too
 EXO_OPTS = { ABS_ZERO : 1e-11, 
              REL_ERR : 5.5e-6 }
 
+# Test Ordering
+PREREQ = 'testname'
+
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],
              CSVDIFF : [],
@@ -59,7 +62,8 @@ DEFAULTS = { EXODIFF : [],
              TIME_DOFS : 4000,
              TIME_GOLD : None,
              EXO_OPTIONS : EXO_OPTS,
-             GOLD_DIR : 'gold'
+             GOLD_DIR : 'gold',
+             PREREQ : None
              # TEST_DIR is automatically populated to the location of the py file
              # TEST_NAME is automatically populated to module_name.dict_name
 }

@@ -3,6 +3,7 @@ from time import sleep
 from timeit import default_timer as clock
 
 from options import *
+from tempfile import TemporaryFile
 
 ## This class provides an interface to run commands in parallel
 #
@@ -10,9 +11,6 @@ from options import *
 # options. When the test is finished running it will call harness.testOutputAndFinish
 # to complete the test. Be sure to call join() to make sure all the tests are finished.
 #
-# If processes ever lock up when running jobs that produce a lot of output, the first place
-# to looks is:
-# http://stackoverflow.com/questions/5582933/need-to-avoid-subprocess-deadlock-without-communicate
 class RunParallel():
 
   ## Return this return code if the process must be killed because of timeout
@@ -35,21 +33,28 @@ class RunParallel():
 
     job_index = self.jobs.index(None) # find an empty slot
     log( 'Command %d started: %s' % (job_index, command) )
-    p = Popen([command],stdout=PIPE,stderr=STDOUT, close_fds=True, shell=True)
 
-    self.jobs[job_index] = (p, command, test, clock() + test[MAX_TIME])
+    # It seems that using PIPE doesn't work very well when launching multiple jobs.
+    # It deadlocks rather easy.  Instead we will use temporary files
+    # to hold the output as it is produced
+    f = TemporaryFile()
+    p = Popen([command],stdout=f,stderr=STDOUT,close_fds=False, shell=True)
+
+    self.jobs[job_index] = (p, command, test, clock() + test[MAX_TIME], f)
 
   ## Return control the the test harness by finalizing the test output and calling the callback
   def returnToTestHarness(self, job_index):
-    (p, command, test, time) = self.jobs[job_index]
-    
+    (p, command, test, time, f) = self.jobs[job_index]
+
     log( 'Command %d done:    %s' % (job_index, command) )
     if p.poll() == None: # process has not completed, it timed out
       p.terminate()
       self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, p.stdout.read())
     else:
       output = 'Running command: ' + command + '\n'
-      output += p.communicate()[0]
+      f.seek(0)
+      output += f.read()
+      f.close()
       self.harness.testOutputAndFinish(test, p.returncode, output)
 
     self.jobs[job_index] = None
@@ -65,7 +70,7 @@ class RunParallel():
       job_index = 0
       for tuple in self.jobs:
         if tuple != None:
-          (p, command, test, time) = tuple
+          (p, command, test, time, f) = tuple
           if p.poll() != None or now > time:
             test_completed = True
             self.returnToTestHarness(job_index)
