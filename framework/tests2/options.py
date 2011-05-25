@@ -43,7 +43,7 @@ EXO_OPTS = { ABS_ZERO : 1e-11,
              REL_ERR : 5.5e-6 }
 
 # Test Ordering
-PREREQ = 'testname'
+PREREQ = 'prereq'
 
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],

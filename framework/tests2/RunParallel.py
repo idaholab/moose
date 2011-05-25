@@ -4,6 +4,8 @@ from timeit import default_timer as clock
 
 from options import *
 from tempfile import TemporaryFile
+from Queue import Queue
+import os, sys
 
 ## This class provides an interface to run commands in parallel
 #
@@ -24,12 +26,23 @@ class RunParallel():
     # None means no job is running in this slot
     self.jobs = [None] * max_processes
 
+    # Queue for jobs needing a prereq
+    self.queue = Queue()
+
+    # Jobs that have been finished
+    self.finished_jobs = set()
+
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
   def run(self, test, command):
 
     # Wait for a job to finish if the jobs queue is full
     if self.jobs.count(None) == 0:
       self.spinwait()
+
+    # Make sure the job doesn't have an unsatisfied prereq
+    if test[PREREQ] != None and not test[PREREQ] in self.finished_jobs:
+      self.queue.put([test, command, os.getcwd()])
+      return
 
     job_index = self.jobs.index(None) # find an empty slot
     log( 'Command %d started: %s' % (job_index, command) )
@@ -42,10 +55,21 @@ class RunParallel():
 
     self.jobs[job_index] = (p, command, test, clock() + test[MAX_TIME], f)
 
+  def startReadyJobs(self):
+    for i in range(0, self.queue.qsize()):
+      (test, command, dirpath) = self.queue.get()
+      saved_dir = os.getcwd()
+      sys.path.append(os.path.abspath(dirpath))
+      os.chdir(dirpath)
+      self.run(test, command)
+      os.chdir(saved_dir)
+      sys.path.pop()
+
   ## Return control the the test harness by finalizing the test output and calling the callback
   def returnToTestHarness(self, job_index):
     (p, command, test, time, f) = self.jobs[job_index]
 
+    self.finished_jobs.add(test[TEST_NAME])
     log( 'Command %d done:    %s' % (job_index, command) )
     if p.poll() == None: # process has not completed, it timed out
       p.terminate()
@@ -74,6 +98,7 @@ class RunParallel():
           if p.poll() != None or now > time:
             test_completed = True
             self.returnToTestHarness(job_index)
+            self.startReadyJobs()
         job_index += 1
 
       sleep(0.05) # sleep for 50ms

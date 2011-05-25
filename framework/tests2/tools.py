@@ -69,6 +69,8 @@ class TestHarness:
                 test = DEFAULTS.copy()
                 test.update(test_opts)
                 test.update( { TEST_NAME : testname, TEST_DIR : test_dir } )
+                if test[PREREQ] != None:
+                  test[PREREQ] = module_name + '.' + test[PREREQ]
 
                 if self.checkIfRunTest(test):
                   self.prepareTest(test)
