@@ -109,40 +109,52 @@ class TestHarness:
   ## Finish the test by inspecting the raw output 
   def testOutputAndFinish(self, test, retcode, output):
     reason = ''
-    
-    # Check the general error message and program crash possibilities
-    if len( filter( lambda x: x in output, test[ERRORS] ) ) > 0:
-      reason = 'ERRMSG'
-    elif test[EXPECT_ERR] != None and test[EXPECT_ERR] not in output:
-      reason = 'NO EXPECTED ERR'
-    elif retcode == RunParallel.TIMEOUT:
-      reason = 'TIMEOUT'
-    elif retcode != 0 and not test[SHOULD_CRASH]:
-      reason = 'CRASH'
-    elif retcode > 0 and test[SHOULD_CRASH]:
-      reason = 'NO CRASH'
-    else:  # Now test more involved things like CSV and EXODIFF
-      for file in test[EXODIFF]:
-        command = 'exodiff -m -F ' + str(test[EXO_OPTIONS][ABS_ZERO]) + ' -use_old_floor -t ' + str(test[EXO_OPTIONS][REL_ERR]) \
-                  + ' ' + os.path.join(test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file)
-        exo_output = runCommand(command)
-        output += 'Running exodiff: ' + command + '\n' + exo_output
 
-        if 'different' in exo_output or 'ERROR' in exo_output:
-          reason = 'EXODIFF'
-          break;
+    # Expected errors might do a lot of things including crash so we
+    # will handle them seperately
+    if test[EXPECT_ERR] != None:
+      if not self.checkExpectError(output, test[EXPECT_ERR]):
+        reason = 'NO EXPECTED ERR'
+    else:
+      # Check the general error message and program crash possibilities
+      if len( filter( lambda x: x in output, test[ERRORS] ) ) > 0:
+        reason = 'ERRMSG'
+      elif test[EXPECT_ERR] != None and test[EXPECT_ERR] not in output:
+        reason = 'NO EXPECTED ERR'
+      elif retcode == RunParallel.TIMEOUT:
+        reason = 'TIMEOUT'
+      elif retcode != 0 and not test[SHOULD_CRASH]:
+        reason = 'CRASH'
+      elif retcode > 0 and test[SHOULD_CRASH]:
+        reason = 'NO CRASH'
+      else:  # Now test more involved things like CSV and EXODIFF
+        for file in test[EXODIFF]:
+          command = 'exodiff -m -F ' + str(test[EXO_OPTIONS][ABS_ZERO]) + ' -use_old_floor -t ' + str(test[EXO_OPTIONS][REL_ERR]) \
+                    + ' ' + os.path.join(test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file)
+          exo_output = runCommand(command)
+          output += 'Running exodiff: ' + command + '\n' + exo_output
 
-      # if still no errors, diff CSVs
-      if reason == '' and len(test[CSVDIFF]) > 0:
-        differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF] )
-        msg = differ.diff()
-        output += 'Running CSVDiffer.py\n' + msg
-        if msg != '':
-          reason = 'CSVDIFF'
-    
+          if 'different' in exo_output or 'ERROR' in exo_output:
+            reason = 'EXODIFF'
+            break;
+
+        # if still no errors, diff CSVs
+        if reason == '' and len(test[CSVDIFF]) > 0:
+          differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF] )
+          msg = differ.diff()
+          output += 'Running CSVDiffer.py\n' + msg
+          if msg != '':
+            reason = 'CSVDIFF'
+
     result = 'OK' if reason == '' else 'FAILED (%s)' % reason
     self.handleTestResult(test, output, result)
 
+  def checkExpectError(self, output, expect_error):
+    if re.search(expect_error, output, re.IGNORECASE) == None:
+      #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
+      return False
+    else:
+      return True
 
   ## Update global variables and print output based on the test result
   # OK means it passed, skipped means skipped, anything else means it failed
