@@ -1,5 +1,5 @@
 [Output]
-  file_base = 2d_diffusion_out
+  file_base = 2d_diffusion_reverse_out
   output_initial = true
   interval = 1
   exodus = true

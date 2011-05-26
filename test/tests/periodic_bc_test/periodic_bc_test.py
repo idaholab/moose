@@ -15,3 +15,24 @@ def testtrapezoid(dofs=0, np=0, n_threads=0):
 def testlevel1(dofs=0, np=0, n_threads=0):
   tools.executeAppAndDiff(__file__,'periodic_level_1_test.i', \
                           ['level1_0000.e', 'level1_0009.e', 'level1_0019.e'], dofs, np, n_threads)
+
+try:
+  from options import *
+
+  testperiodic = { INPUT : 'periodic_bc_test.i',
+                   EXODIFF : ['out.e'] }
+
+  testwedge = { INPUT : 'wedge.i',
+                EXODIFF : ['out_wedge.e'] }
+
+  testwedgesys = { INPUT : 'wedge_sys.i',
+                   EXODIFF : ['out_wedge_sys.e'] }
+
+  testtrapezoid = { INPUT : 'trapezoid.i',
+                    EXODIFF : ['out_trapezoid.e'] }
+
+  testlevel1 = { INPUT : 'periodic_level_1_test.i',
+                 EXODIFF : ['level1_0000.e', 'level1_0009.e', 'level1_0019.e'] }
+
+except:
+  pass

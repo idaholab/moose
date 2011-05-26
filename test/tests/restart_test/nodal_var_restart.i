@@ -4,7 +4,7 @@
 #
 
 [Mesh]
-  file = out_part1.e
+  file = out_nodal_part1.e
 []
 
 [Functions]
