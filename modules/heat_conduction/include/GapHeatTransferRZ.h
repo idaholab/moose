@@ -21,6 +21,8 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+  virtual Real computeSlaveFluxContribution(Real grad_t);
 };
 
 #endif //GAPHEATTRANSFERRZ_H

@@ -33,6 +33,7 @@ protected:
   virtual Real gapK();
   virtual Real gapLength();
 
+  virtual Real computeSlaveFluxContribution(Real grad_t);
 
   NumericVector<Number> & _slave_flux;
 

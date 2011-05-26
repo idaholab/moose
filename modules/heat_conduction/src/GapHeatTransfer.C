@@ -39,7 +39,8 @@ GapHeatTransfer::computeQpResidual()
   // This is keeping track of this residual contribution so it can be used as the flux on the other side of the gap.
   {
     Threads::spin_mutex::scoped_lock lock(slave_flux_mutex);
-    _slave_flux.add(_var.dofIndices()[_i], _JxW[_qp]*_phi[_i][_qp]*grad_t);
+    const Real slave_flux = computeSlaveFluxContribution(grad_t);
+    _slave_flux.add(_var.dofIndices()[_i], slave_flux);
   }
 
 //   if (!libmesh_isnan(grad_t))
@@ -62,6 +63,11 @@ GapHeatTransfer::computeQpResidual()
   return _test[_i][_qp]*grad_t;
 }
 
+Real
+GapHeatTransfer::computeSlaveFluxContribution( Real grad_t )
+{
+  return _JxW[_qp] * _phi[_i][_qp] * grad_t;
+}
 
 Real
 GapHeatTransfer::computeQpJacobian()
@@ -80,7 +86,7 @@ GapHeatTransfer::h_conduction()
 {
   Real gap_L = gapLength();
 
-  return gapK()/gap_L;  
+  return gapK()/gap_L;
 }
 
 
@@ -128,9 +134,9 @@ GapHeatTransfer::gapLength()
   {
     gap_L = _max_gap;
   }
-  
+
   gap_L = std::max(_min_gap, gap_L);
-  
+
   return gap_L;
 }
 

@@ -23,3 +23,9 @@ GapHeatTransferRZ::computeQpJacobian()
 {
   return 2 * M_PI * _q_point[_qp](0) * GapHeatTransfer::computeQpJacobian();
 }
+
+Real
+GapHeatTransferRZ::computeSlaveFluxContribution(Real grad_t)
+{
+  return 2 * M_PI * _q_point[_qp](0) * GapHeatTransfer::computeSlaveFluxContribution( grad_t );
+}

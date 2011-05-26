@@ -10,7 +10,9 @@
 #include "InternalVolume.h"
 #include "InternalVolumeRZ.h"
 #include "NeumannRZ.h"
+#include "SideAverageValueRZ.h"
 #include "SideFluxIntegralRZ.h"
+#include "SideIntegralRZ.h"
 
 // heat_conduction
 #include "AddSlaveFluxVectorAction.h"
@@ -104,7 +106,9 @@ Elk::registerObjects()
   registerPostprocessor(InternalVolume);
   registerPostprocessor(InternalVolumeRZ);
   registerBoundaryCondition(NeumannRZ);
+  registerPostprocessor(SideAverageValueRZ);
   registerPostprocessor(SideFluxIntegralRZ);
+  registerPostprocessor(SideIntegralRZ);
 
   registerBoundaryCondition(ConvectiveFluxRZ);
   registerBoundaryCondition(GapHeatTransfer);
