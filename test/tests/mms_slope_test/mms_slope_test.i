@@ -67,7 +67,7 @@
 []
 
 [Executioner]
-  type = ExactSolutionExecutioner
+  type = Steady
 
   # This is the exact solution, if you compute h1 error it must provide a gradient
   function = u_func
