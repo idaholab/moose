@@ -42,9 +42,9 @@ protected:
   // also specify "pu" as the momentum variable to use.
 
   // So as not to be redundant with indexing, we'll just couple to all the momentums...
-  VariableValue & _pu; // solution variable
-  VariableValue & _pv; // solution variable
-  VariableValue & _pw; // solution variable
+  VariableValue & _rhou; // solution variable
+  VariableValue & _rhov; // solution variable
+  VariableValue & _rhow; // solution variable
 
   VariableValue & _u_vel; // nodal aux
   VariableValue & _v_vel; // nodal aux

@@ -27,7 +27,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _p;
+  VariableValue & _rho;
   VariableValue & _momentum;
 
 };

@@ -45,27 +45,10 @@ protected:
   VariableValue  & _w;
   VariableGradient & _grad_w;
 
-//  bool _has_pe;
-//  VariableValue  & _pe;
-//  VariableGradient & _grad_pe;
-
-  /* density, needed by pressure calculation */
-//  bool _has_p; 
-//  VariableValue  & _p;
-//  VariableGradient & _grad_p;
-
-  /* specific heat at constant volume, now and AuxVariable which needs to be coupled in */
-  bool _has_c_v; 
-  VariableValue  & _c_v;
-  
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   MaterialProperty<Real> & _thermal_conductivity;
-  // MaterialProperty<Real> & _pressure; // now computed as an AuxVariable
-  // MaterialProperty<Real> & _temperature; // now computed as an AuxVariable
-  // MaterialProperty<RealGradient> & _temperature_gradient; // grad(T), not T itself actually needed by EnergyViscousFlux kernel
 
   MaterialProperty<Real> & _gamma;
-  // MaterialProperty<Real> & _c_v; // _c_v made into a Nodal AuxVariable
   MaterialProperty<Real> & _c_p;
   MaterialProperty<Real> & _R;
   MaterialProperty<Real> & _Pr;
@@ -77,6 +60,10 @@ protected:
   Real _Pr_param;
 
   std::vector<VariableGradient *> _vel_grads;
+
+  // Specific heat at constant volume, treated as a single
+  // constant value.
+  Real _cv;
 };
 
 #endif //NAVIERSTOKESMATERIAL_H

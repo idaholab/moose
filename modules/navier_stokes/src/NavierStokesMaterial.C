@@ -6,12 +6,6 @@ InputParameters validParams<NavierStokesMaterial>()
   InputParameters params = validParams<Material>();
 
   //Default is Air
-  
-  // Raw libmesh style
-  //params.set<Real>("R")=287.04; // J/kgK
-  //params.set<Real>("gamma")=1.4;
-  //params.set<Real>("Pr")=0.71;
-
   params.addRequiredParam<Real>("R", "Gas constant.");
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
   params.addRequiredParam<Real>("Pr", "Prandtl number.");
@@ -19,14 +13,17 @@ InputParameters validParams<NavierStokesMaterial>()
   params.addRequiredCoupledVar("u", "");
   params.addRequiredCoupledVar("v", "");
   params.addCoupledVar("w", ""); // not required in 2D
-  params.addRequiredCoupledVar("c_v", ""); // c_v is now a aux variable, we may need it to compute e.g. c_p = g * c_v?
+
+  // Parameters with default values
+  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
 
   return params;
 }
 
 NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
                                            InputParameters parameters)
-  :Material(name, parameters),
+    :
+    Material(name, parameters),
     _has_u(isCoupled("u")),
     _u(coupledValue("u")),
     _grad_u(coupledGradient("u")),
@@ -38,28 +35,11 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _has_w(isCoupled("w")),
     _w(_has_w ? coupledValue("w") : _zero),
     _grad_w(_has_w ? coupledGradient("w") : _grad_zero),
-    
-//    _has_pe(isCoupled("pe")),
-//    _pe(coupledValue("pe")),
-//    _grad_pe(coupledGradient("pe")),
-
-   /* density, needed by pressure calculation */
-//    _has_p(isCoupled("p")),
-//    _p(coupledValue("p")),
-//    _grad_p(coupledGradient("p")),
-
-   /* Specific heat, now a nodal aux variable */
-    _has_c_v(isCoupled("c_v")),
-    _c_v(coupledValue("c_v")),
    
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-   //_pressure(declareProperty<Real>("pressure")),
-   //_temperature(declareProperty<Real>("temperature")), // this is now a nodal aux variable
-   //_temperature_gradient(declareProperty<RealGradient>("temperature_gradient")),
 
     _gamma(declareProperty<Real>("gamma")),
-   // _c_v(declareProperty<Real>("c_v")), // _c_v made into a Nodal AuxVariable
     _c_p(declareProperty<Real>("c_p")),
     _R(declareProperty<Real>("R")),
     _Pr(declareProperty<Real>("Pr")),
@@ -70,7 +50,8 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     
     _R_param(getParam<Real>("R")),
     _gamma_param(getParam<Real>("gamma")),
-    _Pr_param(getParam<Real>("Pr"))
+    _Pr_param(getParam<Real>("Pr")),
+    _cv(getParam<Real>("cv"))
   {
     //Load these up in a vector for convenience
     _vel_grads.resize(3);
@@ -93,8 +74,8 @@ NavierStokesMaterial::computeProperties()
     _R[qp] = _R_param;
     _Pr[qp] = _Pr_param;
 
-    // _c_v[qp] = _R[qp] / (_gamma_param - 1); // Now an aux variable
-    _c_p[qp] = _gamma_param * _c_v[qp];
+    // Specific heat at constant pressure
+    _c_p[qp] = _gamma_param * _cv;
 
     /******* Viscous Stress Tensor *******/
     //Technically... this _is_ the transpose (since we are loading these by rows)

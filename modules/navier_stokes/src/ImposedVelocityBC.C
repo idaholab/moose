@@ -8,7 +8,7 @@ InputParameters validParams<ImposedVelocityBC>()
   InputParameters params = validParams<NodalBC>();
 
   // Declare variables as coupled...
-  params.addRequiredCoupledVar("p", "");
+  params.addRequiredCoupledVar("rho", "");
   
   // New style.  Note, addRequiredParam is a templated function, templated
   // on the type of the parameter being added. (Second string argument is optional documentation.)
@@ -23,7 +23,7 @@ InputParameters validParams<ImposedVelocityBC>()
 // Constructor, be sure to call the base class constructor first!
 ImposedVelocityBC::ImposedVelocityBC(const std::string & name, InputParameters parameters)
   :NodalBC(name, parameters),
-   _p(coupledValue("p")),
+   _rho(coupledValue("rho")),
    _desired_velocity(getParam<Real>("desired_velocity"))
   {}
 
@@ -34,6 +34,6 @@ Real ImposedVelocityBC::computeQpResidual()
 {
   // Return the difference between the current momentum and the desired value
   // (rho*u) - rho*desired_velocity
-  return _u[_qp] - (_p[_qp] * _desired_velocity);
+  return _u[_qp] - (_rho[_qp] * _desired_velocity);
 }
 

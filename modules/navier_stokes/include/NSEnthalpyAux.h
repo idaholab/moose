@@ -34,11 +34,11 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _p;
-  VariableValue & _pe;
+  VariableValue & _rho;
+  VariableValue & _rhoe;
   VariableValue & _pressure;
 
   Real _gamma;
 };
 
-#endif //VELOCITYAUX_H
+#endif // NSENTHALPYAUX_H

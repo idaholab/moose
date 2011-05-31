@@ -21,11 +21,11 @@ InputParameters validParams<NodalMomentumInviscidFlux>()
   
   // Required "coupled" variables, only the numerical index of these
   // variables is required, not their actual value.
-  params.addRequiredCoupledVar("p", "");
-  params.addRequiredCoupledVar("pu", "");
-  params.addRequiredCoupledVar("pv", "");
-  params.addCoupledVar("pw", ""); // only required in 3D
-  params.addRequiredCoupledVar("pe", "");
+  params.addRequiredCoupledVar("rho", "");
+  params.addRequiredCoupledVar("rhou", "");
+  params.addRequiredCoupledVar("rhov", "");
+  params.addCoupledVar("rhow", ""); // only required in 3D
+  params.addRequiredCoupledVar("rhoe", "");
   
   return params;
 }
@@ -43,11 +43,11 @@ NodalMomentumInviscidFlux::NodalMomentumInviscidFlux(const std::string & name, I
    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
    _component(getParam<int>("component")),
    _gamma(getParam<Real>("gamma")),
-   _p_var_number( coupled("p") ),
-   _pu_var_number( coupled("pu") ),
-   _pv_var_number( coupled("pv") ),
-   _pw_var_number( _dim == 3 ? coupled("pw") : libMesh::invalid_uint),
-   _pe_var_number( coupled("pe") )
+   _rho_var_number( coupled("rho") ),
+   _rhou_var_number( coupled("rhou") ),
+   _rhov_var_number( coupled("rhov") ),
+   _rhow_var_number( _dim == 3 ? coupled("rhow") : libMesh::invalid_uint),
+   _rhoe_var_number( coupled("rhoe") )
 {
 }
 
@@ -94,7 +94,7 @@ NodalMomentumInviscidFlux::computeQpJacobian()
 Real
 NodalMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _p_var_number)
+  if (jvar == _rho_var_number)
   {
     // std::cout << "Density: " << "_component=" << _component << ", jvar=" << jvar << std::endl;
 
@@ -128,18 +128,18 @@ NodalMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
   
   // Handle off-diagonal derivatives wrt momentums
-  else if ((jvar == _pu_var_number) || (jvar == _pv_var_number) || (jvar == _pw_var_number))
+  else if ((jvar == _rhou_var_number) || (jvar == _rhov_var_number) || (jvar == _rhow_var_number))
   {
     // Start with the velocity vector
     RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
     // Map jvar into jlocal = {0,1,2}, regardless of how Moose has numbered things.
-    // Can't do a case statement here since _pu_var_number, etc. are not constants...
+    // Can't do a case statement here since _rhou_var_number, etc. are not constants...
     unsigned jlocal = 0;
     
-    if (jvar == _pv_var_number)
+    if (jvar == _rhov_var_number)
       jlocal = 1;
-    else if (jvar == _pw_var_number)
+    else if (jvar == _rhow_var_number)
       jlocal = 2;
 
     // Create a vector according to the following three rules:
@@ -158,7 +158,7 @@ NodalMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
     return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
   }
 
-  else if (jvar == _pe_var_number)
+  else if (jvar == _rhoe_var_number)
   {
     // std::cout << "Total energy: " << "_component=" << _component << ", jvar=" << jvar << std::endl;
     

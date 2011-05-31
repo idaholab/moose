@@ -37,9 +37,9 @@ protected:
   
   // Variable numberings for off-diagonal couplings
   unsigned _rho_var_number;
-  unsigned _pu_var_number;
-  unsigned _pv_var_number;
-  unsigned _pw_var_number;
+  unsigned _rhou_var_number;
+  unsigned _rhov_var_number;
+  unsigned _rhow_var_number;
 
   // Variable couplings for off-diagonal Jacobian terms
   VariableValue& _rho_u;

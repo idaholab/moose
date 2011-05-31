@@ -4,19 +4,19 @@ template<>
 InputParameters validParams<VelocityAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addCoupledVar("p", "");
+  params.addCoupledVar("rho", "");
   params.addCoupledVar("momentum", "");
   return params;
 }
 
 VelocityAux::VelocityAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
-   _p(coupledValue("p")),
+   _rho(coupledValue("rho")),
    _momentum(coupledValue("momentum"))
 {}
 
 Real
 VelocityAux::computeValue()
 {
-  return _momentum[_qp] / _p[_qp];
+  return _momentum[_qp] / _rho[_qp];
 }

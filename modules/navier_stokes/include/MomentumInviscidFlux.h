@@ -30,11 +30,11 @@ protected:
 
   VariableValue & _pressure;
 
-  unsigned _p_var_number;
-  unsigned _pu_var_number;
-  unsigned _pv_var_number;
-  unsigned _pw_var_number;
-  unsigned _pe_var_number;
+  unsigned _rho_var_number;
+  unsigned _rhou_var_number;
+  unsigned _rhov_var_number;
+  unsigned _rhow_var_number;
+  unsigned _rhoe_var_number;
 
 };
  

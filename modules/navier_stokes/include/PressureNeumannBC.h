@@ -30,14 +30,6 @@ protected:
   virtual Real computeQpResidual();
   
 
-  //VariableValue & _p;
-
-  //VariableValue & _pe;
-
-  //VariableValue & _pu;
-  //VariableValue & _pv;
-  //VariableValue & _pw;
-
   VariableValue & _pressure; // Aux Var
   
   int _component;

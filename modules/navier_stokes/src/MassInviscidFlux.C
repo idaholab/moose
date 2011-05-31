@@ -6,9 +6,9 @@ InputParameters validParams<MassInviscidFlux>()
   InputParameters params = validParams<Kernel>();
   
   // Required variables
-  params.addRequiredCoupledVar("pu", "");
-  params.addRequiredCoupledVar("pv", "");
-  params.addCoupledVar("pw", "");
+  params.addRequiredCoupledVar("rhou", "");
+  params.addRequiredCoupledVar("rhov", "");
+  params.addCoupledVar("rhow", "");
   
   // When computing the Jacobian, we need velocities alone.  Let's be 
   // consistent with other kernels that use Nodal Aux values for these
@@ -22,20 +22,20 @@ InputParameters validParams<MassInviscidFlux>()
 }
 
 MassInviscidFlux::MassInviscidFlux(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
-    _pu_var(coupled("pu")),
-    _pu(coupledValue("pu")),
-    _pv_var(coupled("pv")),
-    _pv(coupledValue("pv")),
-    _pw_var(_dim == 3 ? coupled("pw") : std::numeric_limits<unsigned int>::max()),
-   _pw(_dim == 3 ? coupledValue("pw") : _zero),
-    _u_vel_var(coupled("u")),
-    _u_vel(coupledValue("u")),
-    _v_vel_var(coupled("v")),
-    _v_vel(coupledValue("v")),
-    _w_vel_var(_dim == 3 ? coupled("w") : std::numeric_limits<unsigned int>::max()),
-    _w_vel(_dim == 3 ? coupledValue("w") : _zero)
-  {}
+    :Kernel(name, parameters),
+     _rhou_var_number(coupled("rhou")),
+     _rhou(coupledValue("rhou")),
+     _rhov_var_number(coupled("rhov")),
+     _rhov(coupledValue("rhov")),
+     _rhow_var_number(_dim == 3 ? coupled("rhow") : std::numeric_limits<unsigned int>::max()),
+     _rhow(_dim == 3 ? coupledValue("rhow") : _zero),
+     _u_vel_var(coupled("u")),
+     _u_vel(coupledValue("u")),
+     _v_vel_var(coupled("v")),
+     _v_vel(coupledValue("v")),
+     _w_vel_var(_dim == 3 ? coupled("w") : std::numeric_limits<unsigned int>::max()),
+     _w_vel(_dim == 3 ? coupledValue("w") : _zero)
+{}
 
 
 
@@ -43,7 +43,7 @@ Real
 MassInviscidFlux::computeQpResidual()
 {
   // vec = rho*U
-  RealVectorValue vec(_pu[_qp],_pv[_qp],_pw[_qp]);
+  RealVectorValue vec(_rhou[_qp],_rhov[_qp],_rhow[_qp]);
 
   // -(rho*U) * grad(phi), negative sign comes from integration-by-parts
   return -(vec*_grad_test[_i][_qp]);
@@ -76,17 +76,17 @@ MassInviscidFlux::computeQpJacobian()
 Real
 MassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _pu_var)
+  if(jvar == _rhou_var_number)
   {
     RealVectorValue vec(_phi[_j][_qp],0,0);
     return -(vec*_grad_test[_i][_qp]);
   }
-  else if(jvar == _pv_var)
+  else if(jvar == _rhov_var_number)
   {
     RealVectorValue vec(0,_phi[_j][_qp],0);
     return -(vec*_grad_test[_i][_qp]);
   }
-  else if(jvar == _pw_var)
+  else if(jvar == _rhow_var_number)
   {
     RealVectorValue vec(0,0,_phi[_j][_qp]);
     return -(vec*_grad_test[_i][_qp]);

@@ -27,11 +27,11 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _p;
+  VariableValue & _rho;
   VariableValue & _u_vel;
   VariableValue & _v_vel;
   VariableValue & _w_vel;
-  VariableValue & _pe;
+  VariableValue & _rhoe;
 
   Real _gamma;
 };

@@ -34,15 +34,15 @@ protected:
   // structure.  That is, even if the derivative of this kernel
   // wrt rho is nonzero, it may not depend on rho explicitly.
   // Therefore we need only the index, not the variable value.
-  unsigned _p_var_number;
-  unsigned _pu_var_number;
-  unsigned _pv_var_number;
-  unsigned _pw_var_number;
+  unsigned _rho_var_number;
+  unsigned _rhou_var_number;
+  unsigned _rhov_var_number;
+  unsigned _rhow_var_number;
 
   // If enthalpy is a nodal aux, we need rho to compute rho*U*H
   // in the residual.  If enthalpy is not a nodal aux, we need
   // rho to compute enthalpy.  So basically we need it either way...
-  VariableValue & _p;
+  VariableValue & _rho;
   VariableValue & _enthalpy;
 };
  

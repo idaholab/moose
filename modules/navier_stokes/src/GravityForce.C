@@ -6,7 +6,7 @@ InputParameters validParams<GravityForce>()
   InputParameters params = validParams<Kernel>();
 
   // This term is coupled to the density
-  params.addRequiredCoupledVar("p", "");
+  params.addRequiredCoupledVar("rho", "");
 
   // Defaults to earth gravity
   params.addParam<Real>("acceleration", -9.80665, "The acceleration due to gravity.");
@@ -16,8 +16,8 @@ InputParameters validParams<GravityForce>()
 
 GravityForce::GravityForce(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
-    _p_var(coupled("p")),
-    _p(coupledValue("p")),
+    _rho_var(coupled("rho")),
+    _rho(coupledValue("rho")),
     _acceleration(getParam<Real>("acceleration"))
   {}
 
@@ -25,13 +25,13 @@ Real
 GravityForce::computeQpResidual()
 {
   // -rho * g * phi
-  return -_p[_qp]*_acceleration*_test[_i][_qp];
+  return -_rho[_qp]*_acceleration*_test[_i][_qp];
 }
 
 Real
 GravityForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _p_var)
+  if(jvar == _rho_var)
   {
     return -_phi[_j][_qp]*_acceleration*_test[_i][_qp];
   }

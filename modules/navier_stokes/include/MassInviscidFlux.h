@@ -21,14 +21,14 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _pu_var;
-  VariableValue & _pu;
+  unsigned int _rhou_var_number;
+  VariableValue & _rhou;
 
-  unsigned int _pv_var;
-  VariableValue & _pv;
+  unsigned int _rhov_var_number;
+  VariableValue & _rhov;
 
-  unsigned int _pw_var;
-  VariableValue & _pw;
+  unsigned int _rhow_var_number;
+  VariableValue & _rhow;
 
   unsigned int _u_vel_var;
   VariableValue & _u_vel;

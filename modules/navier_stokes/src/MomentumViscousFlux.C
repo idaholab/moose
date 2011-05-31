@@ -30,9 +30,9 @@ MomentumViscousFlux::MomentumViscousFlux(const std::string & name, InputParamete
    _rho(coupledValue("rho")),
    _grad_rho(coupledGradient("rho")),
    _rho_var_number( coupled("rho") ),
-   _pu_var_number( coupled("rhou") ),
-   _pv_var_number( coupled("rhov") ),
-   _pw_var_number( _dim == 3 ? coupled("rhow") : libMesh::invalid_uint),
+   _rhou_var_number( coupled("rhou") ),
+   _rhov_var_number( coupled("rhov") ),
+   _rhow_var_number( _dim == 3 ? coupled("rhow") : libMesh::invalid_uint),
    _rho_u(coupledValue("rhou")),
    _grad_rho_u(coupledGradient("rhou")),
    _rho_v(coupledValue("rhov")),
@@ -254,7 +254,7 @@ MomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   }
 
   // Handle off-diagonal derivatives wrt momentums
-  else if ((jvar == _pu_var_number) || (jvar == _pv_var_number) || (jvar == _pw_var_number))
+  else if ((jvar == _rhou_var_number) || (jvar == _rhov_var_number) || (jvar == _rhow_var_number))
   {
     // Kinematic viscosity, mu/rho
     Real nu = _dynamic_viscosity[_qp] / _rho[_qp];
@@ -265,9 +265,9 @@ MomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     // Map jvar into beta = {0,1,2}, regardless of how Moose has numbered things.
     unsigned beta = 0;
     
-    if (jvar == _pv_var_number)
+    if (jvar == _rhov_var_number)
       beta = 1;
-    else if (jvar == _pw_var_number)
+    else if (jvar == _rhow_var_number)
       beta = 2;
 
     // Make sure we are really doing off-diagonal couplings here

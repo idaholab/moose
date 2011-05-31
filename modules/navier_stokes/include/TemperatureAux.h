@@ -14,11 +14,6 @@ InputParameters validParams<TemperatureAux>();
  * and the velocity magnitude (e_i = internal energy, e_t = total energy):
  * T = e_i / c_v
  *   = (e_t - |u|^2/2) / c_v
- *
- * WARNING: DO NOT USE THIS CLASS, TEMPERATURE REQUIRES SPECIFIC HEAT,
- * A MATERIAL PROPERTY.  MATERIAL PROPERTIES ARE NOT AVAILABLE FOR
- * CALCULATIONS WITHIN AUX KERNELS.  INSTEAD, WE TREAT TEMPERATURE
- * ITSELF AS A MATERIAL PROPERTY.
  */
 class TemperatureAux : public AuxKernel
 {
@@ -36,18 +31,16 @@ protected:
   virtual Real computeValue();
 
   // The temperature depends on velocities and total energy
-  VariableValue & _p;
+  VariableValue & _rho;
   VariableValue & _u_vel;
   VariableValue & _v_vel;
   VariableValue & _w_vel;
-  VariableValue & _pe;
+  VariableValue & _rhoe;
 
-  // No!  AuxVariables cannot use MaterialProperties in their computation, so
-  // this cannot be here!
-  // MaterialProperty<Real> & _c_v;
+  // Specific heat at constant volume, treated as a single
+  // constant value.
+  Real _cv;
 
-  // This is now an AuxVariable
-  VariableValue & _c_v;
 };
 
 #endif //VELOCITYAUX_H

@@ -6,9 +6,9 @@ InputParameters validParams<NSMomentumInviscidFluxAux>()
   InputParameters params = validParams<AuxKernel>();
   
   // Mark variables as required as necessary
-  params.addRequiredCoupledVar("pu", "");
-  params.addRequiredCoupledVar("pv", "");
-  params.addCoupledVar("pw", ""); // Only required in 3D...
+  params.addRequiredCoupledVar("rhou", "");
+  params.addRequiredCoupledVar("rhov", "");
+  params.addCoupledVar("rhow", ""); // Only required in 3D...
 
   params.addRequiredCoupledVar("u", "");
   params.addRequiredCoupledVar("v", "");
@@ -27,9 +27,9 @@ InputParameters validParams<NSMomentumInviscidFluxAux>()
 
 NSMomentumInviscidFluxAux::NSMomentumInviscidFluxAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
-   _pu(coupledValue("pu")),
-   _pv(coupledValue("pv")),
-   _pw(_dim == 3 ? coupledValue("pw") : _zero),
+   _rhou(coupledValue("rhou")),
+   _rhov(coupledValue("rhov")),
+   _rhow(_dim == 3 ? coupledValue("rhow") : _zero),
    _u_vel(coupledValue("u")),
    _v_vel(coupledValue("v")),
    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
@@ -44,7 +44,7 @@ NSMomentumInviscidFluxAux::NSMomentumInviscidFluxAux(const std::string & name, I
 Real
 NSMomentumInviscidFluxAux::computeValue()
 {
-  RealVectorValue mom_vec(_pu[_qp], _pv[_qp], _pw[_qp]);
+  RealVectorValue mom_vec(_rhou[_qp], _rhov[_qp], _rhow[_qp]);
   RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   
   // (rho * u_i) * u_j + \delta_{ij} * P 

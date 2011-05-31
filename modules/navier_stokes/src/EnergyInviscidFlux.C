@@ -16,10 +16,10 @@ InputParameters validParams<EnergyInviscidFlux>()
 
   // Required "coupled" variables, only the numerical index of these
   // variables is required, not their actual value.
-  params.addRequiredCoupledVar("p", "");
-  params.addRequiredCoupledVar("pu", "");
-  params.addRequiredCoupledVar("pv", "");
-  params.addCoupledVar("pw", ""); // only required in 3D
+  params.addRequiredCoupledVar("rho", "");
+  params.addRequiredCoupledVar("rhou", "");
+  params.addRequiredCoupledVar("rhov", "");
+  params.addCoupledVar("rhow", ""); // only required in 3D
   
   // Require this *or* rho, but not both?
   params.addRequiredCoupledVar("enthalpy", "");
@@ -34,11 +34,11 @@ EnergyInviscidFlux::EnergyInviscidFlux(const std::string & name, InputParameters
    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
    _pressure(coupledValue("pressure")),
    _gamma(getParam<Real>("gamma")),
-   _p_var_number( coupled("p") ),
-   _pu_var_number( coupled("pu") ),
-   _pv_var_number( coupled("pv") ),
-   _pw_var_number( _dim == 3 ? coupled("pw") : libMesh::invalid_uint),
-   _p(coupledValue("p")),
+   _rho_var_number( coupled("rho") ),
+   _rhou_var_number( coupled("rhou") ),
+   _rhov_var_number( coupled("rhov") ),
+   _rhow_var_number( _dim == 3 ? coupled("rhow") : libMesh::invalid_uint),
+   _rho(coupledValue("rho")),
    _enthalpy(coupledValue("enthalpy"))
 {}
 
@@ -59,7 +59,7 @@ EnergyInviscidFlux::computeQpResidual()
   // vec *= (_u[_qp] + _pressure[_qp]);
 
   // Multiply vector U by the scalar rho * H
-  vec *= (_p[_qp] * _enthalpy[_qp]);
+  vec *= (_rho[_qp] * _enthalpy[_qp]);
 
   // Return -1 * vec * grad(phi_i)
   return -(vec*_grad_test[_i][_qp]);
@@ -91,20 +91,20 @@ EnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
   // Real total_enthalpy = (_u[_qp] + _pressure[_qp]) / _p[_qp];
   
   // Derivative wrt density
-  if (jvar == _p_var_number)
+  if (jvar == _rho_var_number)
   {
     return -((0.5*(_gamma-1)*V2 - _enthalpy[_qp]) * _phi[_j][_qp] * (vel * _grad_test[_i][_qp]));
   }
   
   // Derivatives wrt momentums
-  else if ((jvar == _pu_var_number) || (jvar == _pv_var_number) || (jvar == _pw_var_number))
+  else if ((jvar == _rhou_var_number) || (jvar == _rhov_var_number) || (jvar == _rhow_var_number))
   {
     // Map jvar into jlocal = {0,1,2}, regardless of how Moose has numbered things.
     unsigned jlocal = 0;
     
-    if (jvar == _pv_var_number)
+    if (jvar == _rhov_var_number)
       jlocal = 1;
-    else if (jvar == _pw_var_number)
+    else if (jvar == _rhow_var_number)
       jlocal = 2;
 
     // Scale the velocity vector by the scalar (1-gamma)*vel(jlocal)

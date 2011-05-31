@@ -21,8 +21,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _p_var;
-  VariableValue & _p;
+  unsigned int _rho_var;
+  VariableValue & _rho;
 
   Real _acceleration;
 };
