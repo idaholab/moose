@@ -33,6 +33,7 @@ protected:
 
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   MaterialProperty<Real> &_thermal_conductivity;
+  MaterialProperty<Real> & _dynamic_viscosity;
 
   // Variable numberings for off-diagonal couplings
   unsigned _rho_var_number;
