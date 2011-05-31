@@ -42,7 +42,7 @@ MomentumInviscidFlux::computeQpResidual()
 {
   // For _component = k,
   
-  // (rho*U_k) * U
+  // (rho*U) * U_k = (rho*U_k) * U <- we write it this way
   RealVectorValue vec(_u[_qp]*_u_vel[_qp],   // (rho*U_k) * U_1
 		      _u[_qp]*_v_vel[_qp],   // (rho*U_k) * U_2
 		      _u[_qp]*_w_vel[_qp]);  // (rho*U_k) * U_3
@@ -60,7 +60,15 @@ MomentumInviscidFlux::computeQpResidual()
 Real
 MomentumInviscidFlux::computeQpJacobian()
 {
-  RealVectorValue vec(_phi[_j][_qp]*_u_vel[_qp],_phi[_j][_qp]*_v_vel[_qp],_phi[_j][_qp]*_w_vel[_qp]);
+  // FIXME: Not sure about these values, also, does not take into 
+  // account that pressure P=P(U) and therefore should make some
+  // contribution here as well...
+
+  // For _component = k,
+  // Derivative wrt (rho*U_k)
+  RealVectorValue vec(_phi[_j][_qp]*_u_vel[_qp],
+		      _phi[_j][_qp]*_v_vel[_qp],
+		      _phi[_j][_qp]*_w_vel[_qp]);
 
   return -(vec*_grad_test[_i][_qp]);
 }
@@ -68,21 +76,26 @@ MomentumInviscidFlux::computeQpJacobian()
 Real
 MomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  // The value returned is the same, the value of jvar just determines the index
+  Real val = _u[_qp] * _phi[_j][_qp];
+
+  // Derivative wrt u_vel doesn't make sense... u_vel is not an independent variable
   if(jvar == _u_vel_var)
   {
-    RealVectorValue vec(_u[_qp]*_phi[_j][_qp],0,0);
+    RealVectorValue vec(val,0,0);
     return -(vec*_grad_test[_i][_qp]);
   }
   else if(jvar == _v_vel_var)
   {
-    RealVectorValue vec(0,_u[_qp]*_phi[_j][_qp],0);
+    RealVectorValue vec(0,val,0);
     return -(vec*_grad_test[_i][_qp]);
   }
   else if(jvar == _w_vel_var)
   {
-    RealVectorValue vec(0,0,_u[_qp]*_phi[_j][_qp]);
+    RealVectorValue vec(0,0,val);
     return -(vec*_grad_test[_i][_qp]);
   }
 
+  // For all other variables, the derivative is zero...
   return 0;
 }

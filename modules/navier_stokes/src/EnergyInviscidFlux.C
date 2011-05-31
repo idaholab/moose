@@ -40,7 +40,7 @@ EnergyInviscidFlux::computeQpResidual()
   // U
   RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
-  // ( rho*E + P ) * U
+  // ( rho*E + P ) * U = (rho * total enthalpy * velocity)
   vec *= (_u[_qp] + _pressure[_qp]);
 
   // -( rho*E + P ) * U * grad(phi)

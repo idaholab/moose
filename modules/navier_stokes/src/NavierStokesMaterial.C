@@ -12,12 +12,6 @@ InputParameters validParams<NavierStokesMaterial>()
   //params.set<Real>("gamma")=1.4;
   //params.set<Real>("Pr")=0.71;
 
-  // If you want to define this here, use these lines, otherwise if you
-  // only want a single value coming from the input file, use the addRequiredParam syntax
-  // params.addParam<Real>("R", 287, "Gas constant.");
-  // params.addParam<Real>("gamma", 1.4, "Ratio of specific heats.");
-  // params.addParam<Real>("Pr", 0.71, "Prandtl number.");
-
   params.addRequiredParam<Real>("R", "Gas constant.");
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
   params.addRequiredParam<Real>("Pr", "Prandtl number.");
@@ -25,8 +19,6 @@ InputParameters validParams<NavierStokesMaterial>()
   params.addRequiredCoupledVar("u", "");
   params.addRequiredCoupledVar("v", "");
   params.addCoupledVar("w", ""); // not required in 2D
-  //params.addCoupledVar("pe", "");
-  //params.addrequiredCoupledVar("p", "");
   params.addRequiredCoupledVar("c_v", ""); // c_v is now a aux variable, we may need it to compute e.g. c_p = g * c_v?
 
   return params;

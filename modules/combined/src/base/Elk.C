@@ -44,6 +44,8 @@
 #include "SpecificHeatConstantVolumeAux.h"
 #include "LinearIC.h"
 #include "NSPressureAux.h"
+#include "NSMomentumInviscidFluxAux.h"
+#include "NodalMomentumInviscidFlux.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -142,6 +144,8 @@ Elk::registerObjects()
   registerAux(SpecificHeatConstantVolumeAux);
   registerInitialCondition(LinearIC);
   registerAux(NSPressureAux);
+  registerAux(NSMomentumInviscidFluxAux);
+  registerKernel(NodalMomentumInviscidFlux);
 
   // linear_elasticity
   registerKernel(SolidMechX);

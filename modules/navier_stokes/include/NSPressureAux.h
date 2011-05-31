@@ -1,5 +1,5 @@
-#ifndef NSPRESSURE_H
-#define NSPRESSURE_H
+#ifndef NSPRESSUREAUX_H
+#define NSPRESSUREAUX_H
 
 #include "AuxKernel.h"
 
@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<NSPressureAux>();
 
 /** 
- * Velocity auxiliary value
+ * Nodal auxiliary variable, for computing pressure at the nodes
  */
 class NSPressureAux : public AuxKernel
 {

@@ -13,7 +13,7 @@ InputParameters validParams<NSPressureAux>()
   params.addRequiredCoupledVar("pe", "");
   
   // Parameters with default values
-  params.addParam<Real>("gamma", 1.4, "Ratio of specific heats");
+  params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
 
   return params;
 }
