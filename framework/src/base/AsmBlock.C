@@ -64,18 +64,21 @@ AsmBlock::addResidual(NumericVector<Number> & residual)
 {
   for (unsigned int var = 0; var < _sys.nVariables(); ++var)
   {
-    _dof_map.constrain_element_vector(_sub_Re[var], _sub_dof_indices[var], false);
-
-    // FIXME: ugly
-    Real scaling_factor = _sys._vars[_tid].all()[var]->scalingFactor();
-    if (scaling_factor != 1.0)
+    if (_sub_dof_indices[var].size() > 0)
     {
-      DenseVector<Number> re(_sub_Re[var]);
-      re.scale(scaling_factor);
-      residual.add_vector(re, _sub_dof_indices[var]);
+      _dof_map.constrain_element_vector(_sub_Re[var], _sub_dof_indices[var], false);
+
+      // FIXME: ugly
+      Real scaling_factor = _sys._vars[_tid].all()[var]->scalingFactor();
+      if (scaling_factor != 1.0)
+      {
+        DenseVector<Number> re(_sub_Re[var]);
+        re.scale(scaling_factor);
+        residual.add_vector(re, _sub_dof_indices[var]);
+      }
+      else
+        residual.add_vector(_sub_Re[var], _sub_dof_indices[var]);
     }
-    else
-      residual.add_vector(_sub_Re[var], _sub_dof_indices[var]);
   }
 }
 
@@ -88,21 +91,23 @@ AsmBlock::addJacobian(SparseMatrix<Number> & jacobian)
     {
       if ((*_cm)(ivar, jvar) != 0)
       {
-        _dof_map.constrain_element_matrix(_sub_Ke[ivar][jvar], _sub_dof_indices[ivar], _sub_dof_indices[jvar], false);
-
-        // FIXME: ugly
-        Real scaling_factor = _sys._vars[_tid].all()[ivar]->scalingFactor();
-        if (scaling_factor != 1.0)
+        if ((_sub_dof_indices[ivar].size() > 0) && (_sub_dof_indices[jvar].size() > 0))
         {
-          DenseMatrix<Number> ke(_sub_Ke[ivar][jvar]);
-          ke.scale(scaling_factor);
-          jacobian.add_matrix(ke, _sub_dof_indices[ivar], _sub_dof_indices[jvar]);
+          _dof_map.constrain_element_matrix(_sub_Ke[ivar][jvar], _sub_dof_indices[ivar], _sub_dof_indices[jvar], false);
+
+          // FIXME: ugly
+          Real scaling_factor = _sys._vars[_tid].all()[ivar]->scalingFactor();
+          if (scaling_factor != 1.0)
+          {
+            DenseMatrix<Number> ke(_sub_Ke[ivar][jvar]);
+            ke.scale(scaling_factor);
+            jacobian.add_matrix(ke, _sub_dof_indices[ivar], _sub_dof_indices[jvar]);
+          }
+          else
+            jacobian.add_matrix(_sub_Ke[ivar][jvar], _sub_dof_indices[ivar], _sub_dof_indices[jvar]);
         }
-        else
-          jacobian.add_matrix(_sub_Ke[ivar][jvar], _sub_dof_indices[ivar], _sub_dof_indices[jvar]);
       }
     }
   }
-
 }
 
