@@ -48,9 +48,9 @@ GapHeatPointSourceMaster::computeQpResidual()
 {
   PenetrationLocator::PenetrationInfo * pinfo = point_to_info[_current_point];
   const Node * node = pinfo->_node;
-  long int dof_number = node->dof_number(0, _var.number(), 0);
+  long int dof_number = node->dof_number(_sys.number(), _var.number(), 0);
 
-  return -_phi[_i][_qp] * _slave_flux(dof_number);
+  return -_test[_i][_qp] * _slave_flux(dof_number);
 }
 
 Real
