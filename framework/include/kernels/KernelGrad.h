@@ -52,7 +52,7 @@ public:
   /** 
    * Computes the jacobian for the current element.
    */
-  virtual void computeJacobian(int i, int j);
+  virtual void computeJacobian();
 
   /**
    * Computes d-residual / d-jvar...

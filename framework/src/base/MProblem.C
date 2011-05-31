@@ -260,11 +260,29 @@ void
 MProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
+
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
     _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), tid);
 
+  _nl.prepareAssembly(elem, tid);
   _nl.prepare(tid);
   _aux.prepare(tid);
+}
+
+void
+MProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _nl.addResidual(residual, tid);
+  if(_displaced_problem)
+    _displaced_problem->addResidual(residual, tid);
+}
+
+void
+MProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _nl.addJacobian(jacobian, tid);
+  if(_displaced_problem)
+    _displaced_problem->addJacobian(jacobian, tid);
 }
 
 void
@@ -290,6 +308,7 @@ MProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
   bool have_points = points_set.size();
 
+  _nl.prepareAssembly(elem, tid);
   if(have_points)
   {
     std::vector<Point> points(points_set.size());
@@ -997,6 +1016,11 @@ MProblem::createQRules(QuadratureType type, Order order)
     _displaced_problem->createQRules(type, _quadrature_order);
 }
 
+AsmBlock &
+MProblem::asmBlock(THREAD_ID tid)
+{
+  return _nl.asmBlock(tid);
+}
 
 void
 MProblem::init()
@@ -1031,7 +1055,6 @@ MProblem::init2()
     _displaced_problem->init();
 
   _aux.init();
-
 }
 
 void

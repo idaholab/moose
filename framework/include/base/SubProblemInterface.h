@@ -20,13 +20,14 @@
 #include "ParallelUniqueId.h"
 #include "VariableWarehouse.h"
 #include "DiracKernelInfo.h"
-
+#include "MooseMesh.h"
+#include "AsmBlock.h"
 // libMesh
 #include "elem.h"
 #include "node.h"
-#include "MooseMesh.h"
 #include "equation_systems.h"
-
+#include "dense_subvector.h"
+#include "dense_submatrix.h"
 // system
 #include <string>
 
@@ -40,6 +41,10 @@ public:
   virtual EquationSystems & es() = 0;
   virtual MooseMesh & mesh() = 0;
   virtual Problem * parent() = 0;
+
+  virtual AsmBlock & asmBlock(THREAD_ID tid) = 0;
+  virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
 
   virtual AssemblyData & assembly(THREAD_ID tid) = 0;
   virtual QBase * & qRule(THREAD_ID tid) = 0;

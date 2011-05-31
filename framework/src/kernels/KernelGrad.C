@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "KernelGrad.h"
+#include "SubProblemInterface.h"
 #include "Moose.h"
 
 template<>
@@ -37,7 +38,7 @@ KernelGrad::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","KernelGrad");
   
-  DenseVector<Number> & re = _var.residualBlock();
+  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
   {
@@ -50,11 +51,11 @@ KernelGrad::computeResidual()
 }
 
 void
-KernelGrad::computeJacobian(int /*i*/, int /*j*/)
+KernelGrad::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()",_name);
 
-  DenseMatrix<Number> & ke = _var.jacobianBlock();
+  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), _var.number());
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
   {
@@ -74,18 +75,18 @@ KernelGrad::computeOffDiagJacobian(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
 
-  DenseMatrix<Number> & Ke = _var.jacobianBlock();
+  DenseMatrix<Number> & Ke = _asmb.jacobianBlock(_var.number(), jvar);
 
   for (_j=0; _j<_phi.size(); _j++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
     {
       Real off_diag_value;
-      
+
       if(jvar == _var.number())
         _value = precomputeQpJacobian();
       else
         off_diag_value = computeQpOffDiagJacobian(jvar);
-      
+
       for (_i=0; _i<_phi.size(); _i++)
       {
         if(jvar == _var.number())

@@ -10,6 +10,11 @@
     order = FIRST
     family = LAGRANGE
   [../]
+
+  [./v]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [Kernels]

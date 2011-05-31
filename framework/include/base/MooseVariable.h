@@ -120,7 +120,7 @@ public:
 
   /// Current element this variable is evaluated at
   const Elem * & currentElem() { return _elem; }
-  /// Current side this varaible is being evalued on
+  /// Current side this variable is being evaluated on
   unsigned int & currentSide() { return _current_side; }
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
@@ -164,29 +164,15 @@ public:
   void computeElemValues();
   /// COmpute values at facial quadrature points
   void computeElemValuesFace();
-  /// Compute nodal values of this varaible
+  /// Compute nodal values of this variable
   void computeNodalValues();
   /// Set the nodal value for this variable (to keep everything up to date
   void setNodalValue(Number value);
   /// Compute damping for this variable based on increment_vec
   void computeDamping(const NumericVector<Number> & increment_vec);
 
-  /// Size the dense vector that keeps the residual contributions
-  void sizeResidual();
-  /// Size the dense matrix that keeps the jacobian contributions
-  void sizeJacobianBlock();
-  /// get DOF indices for currently selectd element
+  /// get DOF indices for currently selected element
   std::vector<unsigned int> & dofIndices() { return _dof_indices; }
-
-  DenseVector<Number> & residualBlock() { return _Re; }
-  DenseMatrix<Number> & jacobianBlock() { return _Ke; }
-
-  /// Add the residual part into 'residual'
-  void add(NumericVector<Number> & residual);
-  /// Add the jacobian part into 'jacobian'
-  void add(SparseMatrix<Number> & jacobian);
-  /// Add the jacobian part into 'jacobian' but with specific dof map and dof indices (used by PBP)
-  void add(SparseMatrix<Number> & jacobian, const DofMap & dof_map, std::vector<unsigned int> & dof_indices);
 
   void insert(NumericVector<Number> & residual);
 
@@ -276,9 +262,6 @@ protected:
 
   // damping
   VariableValue _increment;
-
-  DenseVector<Number> _Re;                                              ///< Residual for this variable
-  DenseMatrix<Number> _Ke;                                              ///< Jacobian for this variable
 
   Real _scaling_factor;                                                 ///< scaling factor for this variable
 };

@@ -16,6 +16,7 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariable.h"
+#include "AsmBlock.h"
 
 
 template<>
@@ -28,7 +29,8 @@ InputParameters validParams<IntegratedBC>()
 IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
     Coupleable(parameters, false),
-    _test_var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
+    _asmb(_subproblem.asmBlock(_tid)),
+    _test_var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
 
     _qrule(_subproblem.qRuleFace(_tid)),
     _q_point(_subproblem.pointsFace(_tid)),
@@ -51,7 +53,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 void
 IntegratedBC::computeResidual()
 {
-  DenseVector<Number> &re = _var.residualBlock();
+  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _phi.size(); _i++)
@@ -61,9 +63,9 @@ IntegratedBC::computeResidual()
 }
 
 void
-IntegratedBC::computeJacobian(int /*i*/, int /*j*/)
+IntegratedBC::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _var.jacobianBlock();
+  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -76,17 +78,17 @@ IntegratedBC::computeJacobian(int /*i*/, int /*j*/)
 }
 
 void
-IntegratedBC::computeJacobianBlock(unsigned int ivar, unsigned int jvar)
+IntegratedBC::computeJacobianBlock(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeJacobianBlock()","IntegratedBC");
 
-  DenseMatrix<Number> & ke = _var.jacobianBlock();
+  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), jvar);
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     for (_i=0; _i<_phi.size(); _i++)
       for (_j=0; _j<_phi.size(); _j++)
       {
-        if (ivar == jvar)
+        if (_var.number() == jvar)
           ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
         else
           ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);

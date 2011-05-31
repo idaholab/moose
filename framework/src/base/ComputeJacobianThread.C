@@ -37,7 +37,6 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
 void
 ComputeJacobianThread::onElement(const Elem *elem)
 {
-  _vars.clear();
   _problem.prepare(elem, _tid);
   _problem.reinitElem(elem, _tid);
 
@@ -56,10 +55,11 @@ ComputeJacobianThread::onElement(const Elem *elem)
       stabilizer_it++)
     (*stabilizer_it)->computeTestFunctions();
 
+  // there is a block in the matrix we need to fill in
   for (std::vector<Kernel *>::const_iterator kernel_it = _sys._kernels[_tid].active().begin(); kernel_it != _sys._kernels[_tid].active().end(); ++kernel_it)
   {
-    (*kernel_it)->computeJacobian(0, 0);
-    _vars.insert(&(*kernel_it)->variable());
+    Kernel * kernel = *kernel_it;
+    kernel->computeJacobian();
   }
 }
 
@@ -78,8 +78,7 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int
     _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
     for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
     {
-      (*it)->computeJacobian(0, 0);
-      _vars.insert(&(*it)->variable());
+      (*it)->computeJacobian();
     }
   }
 }
@@ -87,11 +86,8 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int
 void
 ComputeJacobianThread::postElement(const Elem * /*elem*/)
 {
-  for (std::set<MooseVariable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    (*it)->add(_jacobian);
-  }
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  _problem.addJacobian(_jacobian, _tid);
 }
 
 void ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)

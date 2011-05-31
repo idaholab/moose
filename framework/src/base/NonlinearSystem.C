@@ -28,7 +28,7 @@
 #include "ComputeDampingThread.h"
 #include "TimeKernel.h"
 #include "FP.h"
-
+// libMesh
 #include "nonlinear_solver.h"
 #include "quadrature_gauss.h"
 #include "dense_vector.h"
@@ -36,6 +36,10 @@
 #include "petsc_matrix.h"
 #include "numeric_vector.h"
 #include "mesh.h"
+#include "dense_subvector.h"
+#include "dense_submatrix.h"
+#include "dof_map.h"
+
 
 namespace Moose {
 
@@ -59,6 +63,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
+    _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
     _current_solution(NULL),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
@@ -89,11 +94,15 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
   timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
 
   unsigned int n_threads = libMesh::n_threads();
+  _asm_block.resize(n_threads);
   _kernels.resize(n_threads);
   _bcs.resize(n_threads);
   _stabilizers.resize(n_threads);
   _dirac_kernels.resize(libMesh::n_threads());
   _dampers.resize(n_threads);
+
+  for (THREAD_ID tid = 0; tid < n_threads; ++tid)
+    _asm_block[tid] = new AsmBlock(*this, couplingMatrix(), tid);
 }
 
 NonlinearSystem::~NonlinearSystem()
@@ -106,13 +115,42 @@ NonlinearSystem::~NonlinearSystem()
 }
 
 void
+NonlinearSystem::setCoupling(Moose::CouplingType type)
+{
+  _coupling = type;
+}
+
+void NonlinearSystem::couplingMatrix(CouplingMatrix * cm)
+{
+  _coupling = Moose::COUPLING_CUSTOM;
+  delete _cm;
+  _cm = cm;
+}
+
+void
 NonlinearSystem::preInit()
 {
-  _cm = new CouplingMatrix(_sys.n_vars());
+  switch (_coupling)
+  {
+  case Moose::COUPLING_DIAG:
+    _cm = new CouplingMatrix(_sys.n_vars());
+    for(unsigned int i=0; i<_sys.n_vars(); i++)
+      for(unsigned int j=0; j<_sys.n_vars(); j++)
+        (*_cm)(i, j) = ( i == j ? 1 : 0);
+    break;
 
-  for(unsigned int i=0; i<_sys.n_vars(); i++)
-    for(unsigned int j=0; j<_sys.n_vars(); j++)
-      (*_cm)(i, j) = ( i == j ? 1 : 0);
+  // for full jacobian
+  case Moose::COUPLING_FULL:
+    _cm = new CouplingMatrix(_sys.n_vars());
+    for(unsigned int i=0; i<_sys.n_vars(); i++)
+      for(unsigned int j=0; j<_sys.n_vars(); j++)
+        (*_cm)(i, j) = 1;
+    break;
+
+  case Moose::COUPLING_CUSTOM:
+    // do nothing, _cm was already set through couplingMatrix() call
+    break;
+  }
 
   _sys.get_dof_map()._dof_coupling = _cm;
 }
@@ -136,6 +174,27 @@ NonlinearSystem::init()
     _residual_copy.init(_sys.n_dofs(), false, SERIAL);
     Moose::setup_perf_log.pop("Init residual_copy","Setup");
   }
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    _asm_block[tid]->init();
+}
+
+void
+NonlinearSystem::prepareAssembly(const Elem * elem, THREAD_ID tid)
+{
+  _asm_block[tid]->prepare(elem);
+}
+
+void
+NonlinearSystem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _asm_block[tid]->addResidual(residual);
+}
+
+void
+NonlinearSystem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _asm_block[tid]->addJacobian(jacobian);
 }
 
 void
@@ -550,7 +609,6 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   Moose::perf_log.push("residual.close4()","Solve");
   residual.close();
   Moose::perf_log.pop("residual.close4()","Solve");
-
 }
 
 void
@@ -678,7 +736,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
 
     unsigned int subdomain = std::numeric_limits<unsigned int>::max();
 
-    DofMap & dof_map = precond_system.get_dof_map();
+    const DofMap & dof_map = precond_system.get_dof_map();
     std::vector<unsigned int> dof_indices;
 
     jacobian.zero();
@@ -695,8 +753,6 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
 
       if(dof_indices.size())
       {
-        std::set<MooseVariable *> vars;
-
         if(cur_subdomain != subdomain)
         {
           subdomain = cur_subdomain;
@@ -718,10 +774,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
           Kernel * kernel = *kernel_it;
 
           if(kernel->variable().number() == ivar)
-          {
             kernel->computeOffDiagJacobian(jvar);
-            vars.insert(&kernel->variable());
-          }
         }
 
         for (unsigned int side=0; side<elem->n_sides(); side++)
@@ -744,18 +797,23 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                 {
                   IntegratedBC * bc = *it;
                   if(bc->variable().number() == ivar)
-                  {
-                    bc->computeJacobianBlock(ivar,jvar);
-                    vars.insert(&bc->variable());
-                  }
+                    bc->computeJacobianBlock(jvar);
                 }
               }
             }
           }
         }
 
-        for (std::set<MooseVariable *>::iterator it = vars.begin(); it != vars.end(); ++it)
-          (*it)->add(jacobian, dof_map, dof_indices);
+        // NOTE: We have to bypass AsmBlock here, since it works with the large system and we need to put our stuff inside another (small) system
+        // Can't think of an easier solution than simply almost "replicating" the code here.  I have the special dof_map, dof_indicies, so I just
+        // use the piece of AsmBlock and do whatever I need to do with it.
+
+        // grab the sub-block
+        DenseMatrix<Number> & ke = _asm_block[tid]->jacobianBlock(ivar, jvar);
+        // stick it into the matrix
+        dof_map.constrain_element_matrix(ke, dof_indices, false);
+        // FIXME: add variable scaling here
+        jacobian.add_matrix(ke, dof_indices);
       }
     }
   }

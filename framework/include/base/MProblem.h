@@ -47,6 +47,7 @@ public:
 
   virtual void createQRules(QuadratureType type, Order order);
   virtual Order getQuadratureOrder() { return _quadrature_order; }
+  virtual AsmBlock & asmBlock(THREAD_ID tid);
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
   virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
@@ -156,6 +157,9 @@ public:
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
   virtual void computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
+
+  virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
 
   // Displaced problem /////
   virtual void initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements);

@@ -40,7 +40,6 @@ protected:
   SparseMatrix<Number> & _jacobian;
   NonlinearSystem & _sys;
   Problem & _problem;
-  std::set<MooseVariable *> _vars;
 };
   
 #endif //COMPUTEJACOBIANTHREAD_H

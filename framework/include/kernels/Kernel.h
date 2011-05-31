@@ -22,13 +22,13 @@
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
+#include "AsmBlock.h"
 #include "MooseVariable.h"
 
 // libMesh
 #include "fe.h"
 #include "quadrature.h"
 
-class MooseVariable;
 class MooseMesh;
 class Problem;
 class SubProblemInterface;
@@ -52,7 +52,7 @@ public:
   Kernel(const std::string & name, InputParameters parameters);
 
   virtual void computeResidual();
-  virtual void computeJacobian(int i, int j);
+  virtual void computeJacobian();
   /**
    * Computes d-residual / d-jvar... storing the result in Ke.
    */
@@ -80,6 +80,7 @@ protected:
 
   THREAD_ID _tid;
 
+  AsmBlock & _asmb;
   MooseVariable & _var;
   MooseMesh & _mesh;
   int _dim;

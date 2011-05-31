@@ -227,61 +227,6 @@ MooseVariable::reinit_aux()
 }
 
 void
-MooseVariable::sizeResidual()
-{
-  _Re.resize(_dof_indices.size());
-  _Re.zero();
-}
-
-void
-MooseVariable::sizeJacobianBlock()
-{
-  _Ke.resize(_dof_indices.size(), _dof_indices.size());
-}
-
-void
-MooseVariable::add(NumericVector<Number> & residual)
-{
-  _dof_map.constrain_element_vector(_Re, _dof_indices, false);
-  if (_scaling_factor != 1.0)
-  {
-    DenseVector<Number> re(_Re);
-    re.scale(_scaling_factor);
-    residual.add_vector(re, _dof_indices);
-  }
-  else
-    residual.add_vector(_Re, _dof_indices);
-}
-
-void
-MooseVariable::add(SparseMatrix<Number> & jacobian)
-{
-  _dof_map.constrain_element_matrix(_Ke, _dof_indices, false);
-  if (_scaling_factor != 1.0)
-  {
-    DenseMatrix<Number> ke(_Ke);
-    ke.scale(_scaling_factor);
-    jacobian.add_matrix(ke, _dof_indices);
-  }
-  else
-    jacobian.add_matrix(_Ke, _dof_indices);
-}
-
-void
-MooseVariable::add(SparseMatrix<Number> & jacobian, const DofMap & dof_map, std::vector<unsigned int> & dof_indices)
-{
-  dof_map.constrain_element_matrix(_Ke, dof_indices, false);
-  if (_scaling_factor != 1.0)
-  {
-    DenseMatrix<Number> ke(_Ke);
-    ke.scale(_scaling_factor);
-    jacobian.add_matrix(ke, dof_indices);
-  }
-  else
-    jacobian.add_matrix(_Ke, dof_indices);
-}
-
-void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)

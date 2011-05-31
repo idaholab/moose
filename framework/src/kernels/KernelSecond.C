@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "KernelSecond.h"
+#include "SubProblemInterface.h"
 
 template<>
 InputParameters validParams<KernelSecond>()
@@ -36,7 +37,7 @@ KernelSecond::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","KernelSecond");
   
-  DenseVector<Number> & re = _var.residualBlock();
+  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
 
   _value.resize(_qrule->n_points());
   precalculateResidual();

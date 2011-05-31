@@ -111,14 +111,21 @@ DisplacedProblem::DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_me
 
   unsigned int n_threads = libMesh::n_threads();
   _asm_info.resize(n_threads);
+  _asm_block.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
+  {
     _asm_info[i] = new AssemblyData(_mesh);
+    _asm_block[i] = new AsmBlock(_displaced_nl, _mproblem.getNonlinearSystem().couplingMatrix(), i);
+  }
 }
 
 DisplacedProblem::~DisplacedProblem()
 {
   for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
+  {
     delete _asm_info[i];
+    delete _asm_block[i];
+  }
 }
 
 void
@@ -131,6 +138,9 @@ DisplacedProblem::createQRules(QuadratureType type, Order order)
 void
 DisplacedProblem::init()
 {
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    _asm_block[tid]->init();
+
   _displaced_nl.init();
   _displaced_aux.init();
 
@@ -203,6 +213,8 @@ void
 DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
+
+  _asm_block[tid]->prepare(elem);
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
 }
@@ -214,6 +226,7 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
   bool have_points = points_set.size();
 
+  _asm_block[tid]->prepare(elem);
   if(have_points)
   {
     std::vector<Point> points(points_set.size());
@@ -272,6 +285,24 @@ void
 DisplacedProblem::clearDiracInfo()
 {
   _dirac_kernel_info.clearPoints();
+}
+
+AsmBlock &
+DisplacedProblem::asmBlock(THREAD_ID tid)
+{
+  return *_asm_block[tid];
+}
+
+void
+DisplacedProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _asm_block[tid]->addResidual(residual);
+}
+
+void
+DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _asm_block[tid]->addJacobian(jacobian);
 }
 
 void

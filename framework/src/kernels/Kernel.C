@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "Kernel.h"
+#include "AsmBlock.h"
 #include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
@@ -45,6 +46,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
+    _asmb(_subproblem.asmBlock(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
@@ -100,9 +102,10 @@ Kernel::stopTime()
 void
 Kernel::computeResidual()
 {
-  DenseVector<Number> & re = _var.residualBlock();
+  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
 
-  for (_i = 0; _i < _phi.size(); _i++)
+  precalculateResidual();
+  for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       re(_i) += _JxW[_qp]*computeQpResidual();
@@ -110,11 +113,11 @@ Kernel::computeResidual()
 }
 
 void
-Kernel::computeJacobian(int /*i*/, int /*j*/)
+Kernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _var.jacobianBlock();
+  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), _var.number());
 
-  for (_i = 0; _i < _phi.size(); _i++)
+  for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
@@ -127,9 +130,9 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
 
-  DenseMatrix<Number> & ke = _var.jacobianBlock();
+  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), jvar);
 
-  for (_i=0; _i<_phi.size(); _i++)
+  for (_i=0; _i<_test.size(); _i++)
     for (_j=0; _j<_phi.size(); _j++)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
       {

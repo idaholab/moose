@@ -79,8 +79,6 @@ SystemBase::prepare(THREAD_ID tid)
   {
     MooseVariable *var = *it;
     var->prepare();
-    var->sizeResidual();
-    var->sizeJacobianBlock();
   }
 }
 

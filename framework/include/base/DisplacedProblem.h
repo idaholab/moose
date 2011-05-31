@@ -77,6 +77,10 @@ public:
   virtual void getDiracElements(std::set<const Elem *> & elems);
   virtual void clearDiracInfo();
 
+  virtual AsmBlock & asmBlock(THREAD_ID tid);
+  virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
   virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
@@ -108,6 +112,7 @@ protected:
   const NumericVector<Number> * _nl_solution;
   const NumericVector<Number> * _aux_solution;
 
+  std::vector<AsmBlock *> _asm_block;                   ///<
   std::vector<AssemblyData *> _asm_info;
 
   GeometricSearchData _geometric_search_data;

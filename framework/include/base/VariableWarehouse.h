@@ -38,8 +38,8 @@ public:
    */
   void add(const std::string & var_name, MooseVariable *var);
   /**
-   * Add a boundary varaible
-   * @param bnd The boundary id where this varaible is defined
+   * Add a boundary variable
+   * @param bnd The boundary id where this variable is defined
    * @param var The variable
    */
   void addBoundaryVar(unsigned int bnd, MooseVariable *var);
@@ -48,22 +48,22 @@ public:
 
   /**
    * Get a variable from the warehouse
-   * @param var_name The name of the varaible to retrieve
+   * @param var_name The name of the variable to retrieve
    * @return The retrieved variable
    */
-  MooseVariable *getVariable(const std::string & var_name);
+  MooseVariable * getVariable(const std::string & var_name);
 
   /**
    * Get the list of all variables
    * @return The list of variables
    */
-  std::vector<MooseVariable *> &all();
+  std::vector<MooseVariable *> & all();
   /**
-   * Get the list of variables that needs to be reinitialized on a given boudanry
+   * Get the list of variables that needs to be reinitialized on a given boundary
    * @param bnd The boundary ID
    * @return The list of variables
    */
-  std::set<MooseVariable *> &boundaryVars(unsigned int bnd);
+  std::set<MooseVariable *> & boundaryVars(unsigned int bnd);
 
 protected:
   std::vector<MooseVariable *> _vars;                                        ///< list of all variables

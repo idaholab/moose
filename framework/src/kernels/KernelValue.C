@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "KernelValue.h"
+#include "SubProblemInterface.h"
 
 template<>
 InputParameters validParams<KernelValue>()
@@ -36,7 +37,7 @@ KernelValue::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","KernelGrad");
   
-  DenseVector<Number> & re = _var.residualBlock();
+  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -49,11 +50,11 @@ KernelValue::computeResidual()
 }
 
 void
-KernelValue::computeJacobian(int /*i*/, int /*j*/)
+KernelValue::computeJacobian()
 {
 //  Moose::perf_log.push("computeJacobian()",_name);
 
-  DenseMatrix<Number> & ke = _var.jacobianBlock();
+  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -73,7 +74,7 @@ KernelValue::computeOffDiagJacobian(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
 
-  DenseMatrix<Number> & Ke = _var.jacobianBlock();
+  DenseMatrix<Number> & Ke = _asmb.jacobianBlock(_var.number(), jvar);
 
   for (_j=0; _j<_phi.size(); _j++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)

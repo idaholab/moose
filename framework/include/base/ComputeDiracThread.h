@@ -45,7 +45,6 @@ protected:
   NumericVector<Number> * _residual;
   SparseMatrix<Number> * _jacobian;
   NonlinearSystem & _sys;
-  std::set<MooseVariable *> _vars;
 };
 
 #endif //COMPUTEDIRACTHREAD_H

@@ -12,34 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTERESIDUALTHREAD_H
-#define COMPUTERESIDUALTHREAD_H
+#ifndef SETUPSINGLEMATRIXACTION_H
+#define SETUPSINGLEMATRIXACTION_H
 
-#include "ThreadedElementLoop.h"
+#include "Action.h"
 
-// libMesh includes
-#include "elem_range.h"
+class SetupSingleMatrixAction;
 
-class NonlinearSystem;
+template<>
+InputParameters validParams<SetupSingleMatrixAction>();
 
-
-class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
+/**
+ * Action to setup single matrix Jacobian (or Jacobian approximate)
+ *
+ */
+class SetupSingleMatrixAction: public Action
 {
 public:
-  ComputeResidualThread(Problem & problem, NonlinearSystem & sys, NumericVector<Number> & residual);  
+  SetupSingleMatrixAction(const std::string & name, InputParameters params);
 
-  // Splitting Constructor
-  ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
-
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
-  virtual void postElement(const Elem * /*elem*/);
-
-  void join(const ComputeResidualThread & /*y*/);
-
-protected:
-  NumericVector<Number> & _residual;
-  NonlinearSystem & _sys;
+  virtual void act();
 };
 
-#endif //COMPUTERESIDUALTHREAD_H
+#endif //SETUPSINGLEMATRIXACTION_H

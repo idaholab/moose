@@ -108,7 +108,7 @@ public:
   virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
 
   /**
-   * Adds a variable to the sysstem
+   * Adds a variable to the system
    *
    * @param var_name name of the variable
    * @param type FE type of the variable
@@ -146,7 +146,7 @@ public:
    * Get the number of variables in this system
    * @return the number of variables
    */
-  virtual int nVariables() = 0;
+  virtual unsigned int nVariables() = 0;
 
   /// Get minimal quadrature order needed for integrating variables in this system
   virtual Order getMinQuadratureOrder();
@@ -207,6 +207,10 @@ protected:
 
   std::vector<VariableWarehouse> _vars;                                 ///< Variable warehouses (one for each thread)
   std::map<unsigned int, std::set<subdomain_id_type> > _var_map;        ///< Map of variables (variable id -> array of subdomains where it lives)
+
+
+  // FIXME: remove this!
+  friend class AsmBlock;
 };
 
 /**
@@ -252,7 +256,7 @@ public:
     return _sys.has_variable(var_name);
   }
 
-  virtual int nVariables() { return _sys.n_vars(); }
+  virtual unsigned int nVariables() { return _sys.n_vars(); }
 
   virtual void computeVariables(const NumericVector<Number>& /*soln*/)
   {

@@ -41,7 +41,6 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
 void
 ComputeResidualThread::onElement(const Elem *elem)
 {
-  _vars.clear();
   _problem.prepare(elem, _tid);
   _problem.reinitElem(elem, _tid);
 
@@ -61,10 +60,7 @@ ComputeResidualThread::onElement(const Elem *elem)
     (*stabilizer_it)->computeTestFunctions();
 
   for (std::vector<Kernel *>::const_iterator kernel_it = _sys._kernels[_tid].active().begin(); kernel_it != _sys._kernels[_tid].active().end(); ++kernel_it)
-  {
     (*kernel_it)->computeResidual();
-    _vars.insert(&(*kernel_it)->variable());
-  }
 }
 
 void
@@ -82,21 +78,15 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, short int
     _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
     for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
-    {
       (*it)->computeResidual();
-      _vars.insert(&(*it)->variable());
-    }
   }
 }
 
 void
 ComputeResidualThread::postElement(const Elem * /*elem*/)
 {
-  for (std::set<MooseVariable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    (*it)->add(_residual);
-  }
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  _problem.addResidual(_residual, _tid);
 }
 
 void

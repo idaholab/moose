@@ -54,8 +54,6 @@ ComputeDiracThread::pre()
 void
 ComputeDiracThread::onElement(const Elem * elem)
 {
-  _vars.clear();
-
   bool has_dirac_kernels_on_elem = _problem.reinitDirac(elem, _tid);
 
   if(has_dirac_kernels_on_elem)
@@ -68,8 +66,6 @@ ComputeDiracThread::onElement(const Elem * elem)
     
       if(dirac->hasPointsOnElem(elem))
       {
-        _vars.insert(&dirac->variable());
-
         if(_residual)
           dirac->computeResidual();
         else
@@ -82,14 +78,11 @@ ComputeDiracThread::onElement(const Elem * elem)
 void
 ComputeDiracThread::postElement(const Elem * /*elem*/)
 {
-  for (std::set<MooseVariable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    if(_residual)
-      (*it)->add(*_residual);
-    else
-      (*it)->add(*_jacobian);
-  }
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  if (_residual)
+    _problem.addResidual(*_residual, _tid);
+  else
+    _problem.addJacobian(*_jacobian, _tid);
 }
 
 void

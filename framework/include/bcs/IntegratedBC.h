@@ -17,12 +17,12 @@
 
 #include "BoundaryCondition.h"
 #include "Coupleable.h"
+#include "AsmBlock.h"
 #include "MooseVariable.h"
 
 // libMesh
 #include "fe.h"
 #include "quadrature.h"
-
 
 class IntegratedBC;
 
@@ -40,13 +40,14 @@ public:
   IntegratedBC(const std::string & name, InputParameters parameters);
 
   virtual void computeResidual();
-  virtual void computeJacobian(int i, int j);
+  virtual void computeJacobian();
   /**
    * Computes d-ivar-residual / d-jvar...
    */
-  void computeJacobianBlock(unsigned int ivar, unsigned int jvar);
+  void computeJacobianBlock(unsigned int jvar);
 
 protected:
+  AsmBlock & _asmb;
   MooseVariable & _test_var;
 
   unsigned int _qp;                                                     ///< quadrature point index

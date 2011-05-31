@@ -98,6 +98,13 @@ enum PostprocessorType
   PPS_NEWTONIT = 0x08
 };
 
+enum CouplingType
+{
+  COUPLING_DIAG,
+  COUPLING_FULL,
+  COUPLING_CUSTOM
+};
+
 const subdomain_id_type ANY_BLOCK_ID = (subdomain_id_type) -1;
 
 /* Wrappers for extern random number generator */
