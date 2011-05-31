@@ -30,14 +30,6 @@ protected:
   // *momentum* not essential values of velocity.
   VariableValue & _p;
 
-  // We also need to couple to the momentum variables
-  VariableValue & _pu;
-  VariableValue & _pv;
-  VariableValue & _pw;
-
-  // The equation we are currently operating on, set in the input file
-  unsigned _component;
-
   // The desired value for the velocity component
   Real _desired_velocity;
 };

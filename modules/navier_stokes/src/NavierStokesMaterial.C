@@ -6,16 +6,29 @@ InputParameters validParams<NavierStokesMaterial>()
   InputParameters params = validParams<Material>();
 
   //Default is Air
-  params.set<Real>("R")=287.04; // J/kgK
-  params.set<Real>("gamma")=1.405;
-  params.set<Real>("Pr")=0.71;
-
-  params.addCoupledVar("u", "");
-  params.addCoupledVar("v", "");
-  params.addCoupledVar("w", "");
-  params.addCoupledVar("pe", "");
-  params.addCoupledVar("p", "");
   
+  // Raw libmesh style
+  //params.set<Real>("R")=287.04; // J/kgK
+  //params.set<Real>("gamma")=1.4;
+  //params.set<Real>("Pr")=0.71;
+
+  // If you want to define this here, use these lines, otherwise if you
+  // only want a single value coming from the input file, use the addRequiredParam syntax
+  // params.addParam<Real>("R", 287, "Gas constant.");
+  // params.addParam<Real>("gamma", 1.4, "Ratio of specific heats.");
+  // params.addParam<Real>("Pr", 0.71, "Prandtl number.");
+
+  params.addRequiredParam<Real>("R", "Gas constant.");
+  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
+  params.addRequiredParam<Real>("Pr", "Prandtl number.");
+
+  params.addRequiredCoupledVar("u", "");
+  params.addRequiredCoupledVar("v", "");
+  params.addCoupledVar("w", ""); // not required in 2D
+  //params.addCoupledVar("pe", "");
+  //params.addrequiredCoupledVar("p", "");
+  params.addRequiredCoupledVar("c_v", ""); // c_v is now a aux variable, we may need it to compute e.g. c_p = g * c_v?
+
   return params;
 }
 
@@ -34,21 +47,27 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _w(_has_w ? coupledValue("w") : _zero),
     _grad_w(_has_w ? coupledGradient("w") : _grad_zero),
     
-    _has_pe(isCoupled("pe")),
-    _pe(coupledValue("pe")),
-    _grad_pe(coupledGradient("pe")),
+//    _has_pe(isCoupled("pe")),
+//    _pe(coupledValue("pe")),
+//    _grad_pe(coupledGradient("pe")),
 
    /* density, needed by pressure calculation */
-    _has_p(isCoupled("p")),
-    _p(coupledValue("p")),
-    _grad_p(coupledGradient("p")),
+//    _has_p(isCoupled("p")),
+//    _p(coupledValue("p")),
+//    _grad_p(coupledGradient("p")),
+
+   /* Specific heat, now a nodal aux variable */
+    _has_c_v(isCoupled("c_v")),
+    _c_v(coupledValue("c_v")),
    
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-    _pressure(declareProperty<Real>("pressure")),
+   //_pressure(declareProperty<Real>("pressure")),
+   //_temperature(declareProperty<Real>("temperature")), // this is now a nodal aux variable
+   //_temperature_gradient(declareProperty<RealGradient>("temperature_gradient")),
 
     _gamma(declareProperty<Real>("gamma")),
-    _c_v(declareProperty<Real>("c_v")),
+   // _c_v(declareProperty<Real>("c_v")), // _c_v made into a Nodal AuxVariable
     _c_p(declareProperty<Real>("c_p")),
     _R(declareProperty<Real>("R")),
     _Pr(declareProperty<Real>("Pr")),
@@ -82,7 +101,7 @@ NavierStokesMaterial::computeProperties()
     _R[qp] = _R_param;
     _Pr[qp] = _Pr_param;
 
-    _c_v[qp] = _R[qp] / (_gamma_param - 1);
+    // _c_v[qp] = _R[qp] / (_gamma_param - 1); // Now an aux variable
     _c_p[qp] = _gamma_param * _c_v[qp];
 
     /******* Viscous Stress Tensor *******/
@@ -104,11 +123,32 @@ NavierStokesMaterial::computeProperties()
     
     _viscous_stress_tensor[qp] = grad_outter_u;
 
-    
+    // Velocity vector, squared
+    // Real V2 = _u[qp]*_u[qp] + _v[qp]*_v[qp] + _w[qp]*_w[qp];
+
     /******* Pressure *******/
-    _pressure[qp] = (_gamma_param - 1)*(_pe[qp] - (0.5 * _p[qp] * (_u[qp]*_u[qp] + _v[qp]*_v[qp] + _w[qp]*_w[qp])));
+    // _pressure[qp] = (_gamma_param - 1)*(_pe[qp] - 0.5 * _p[qp] * V2); // Now computed as an aux kernel
       
+    /******* Temperature = (Internal Energy) / c_v *******/
+    // If temperature is needed, it should be obtained from its AuxVariable
+    // _temperature[qp] = ((_pe[qp]/_p[qp]) - 0.5*V2) / _c_v[qp]; 
+    
+    /******* Temperature Gradient *******/
+    // This is non-trivial to compute directly, and I have a feeling that's the wrong 
+    // way to do it anyway...
+    // _temperature_gradient[qp] = RealGradient(dTdx, dTdy, dTdz);
+
+    // Pr = (mu * cp) / k  ==>  k = (mu * cp) / Pr 
     _thermal_conductivity[qp] = (_c_p[qp] * _dynamic_viscocity[qp]) / _Pr[qp];
+
+    // Tabulated values of thermal conductivity vs. Temperature (k increases slightly with T):
+    // T (K)    k (W/m-K)
+    // 273      0.0243
+    // 373      0.0314
+    // 473      0.0386
+    // 573      0.0454
+    // 673      0.0515
+    
   }
 }
 

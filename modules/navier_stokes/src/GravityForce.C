@@ -4,7 +4,13 @@ template<>
 InputParameters validParams<GravityForce>()
 {
   InputParameters params = validParams<Kernel>();
-  params.set<Real>("acceleration") = -9.80665;
+
+  // This term is coupled to the density
+  params.addRequiredCoupledVar("p", "");
+
+  // Defaults to earth gravity
+  params.addParam<Real>("acceleration", -9.80665, "The acceleration due to gravity.");
+
   return params;
 }
 
@@ -18,6 +24,7 @@ GravityForce::GravityForce(const std::string & name, InputParameters parameters)
 Real
 GravityForce::computeQpResidual()
 {
+  // -rho * g * phi
   return -_p[_qp]*_acceleration*_test[_i][_qp];
 }
 

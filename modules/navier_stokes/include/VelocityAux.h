@@ -29,6 +29,7 @@ protected:
 
   VariableValue & _p;
   VariableValue & _momentum;
+
 };
 
 #endif //VELOCITYAUX_H

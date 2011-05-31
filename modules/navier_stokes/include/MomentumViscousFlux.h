@@ -20,7 +20,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  int _component;
+  unsigned _component;
 
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
 };

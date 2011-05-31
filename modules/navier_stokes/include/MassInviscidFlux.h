@@ -29,6 +29,15 @@ protected:
 
   unsigned int _pw_var;
   VariableValue & _pw;
+
+  unsigned int _u_vel_var;
+  VariableValue & _u_vel;
+
+  unsigned int _v_vel_var;
+  VariableValue & _v_vel;
+
+  unsigned int _w_vel_var;
+  VariableValue & _w_vel;
 };
  
 #endif

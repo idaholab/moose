@@ -39,6 +39,11 @@
 #include "ThermalBC.h"
 #include "VelocityAux.h"
 #include "ImposedVelocityBC.h"
+#include "TemperatureAux.h"
+#include "Temperature.h"
+#include "SpecificHeatConstantVolumeAux.h"
+#include "LinearIC.h"
+#include "NSPressureAux.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -128,10 +133,15 @@ Elk::registerObjects()
   registerKernel(EnergyViscousFlux);
   registerKernel(GravityPower);
   registerKernel(GravityForce);
+  registerKernel(Temperature);
   registerBoundaryCondition(PressureNeumannBC);
   registerBoundaryCondition(ThermalBC);
   registerAux(VelocityAux);
   registerBoundaryCondition(ImposedVelocityBC);
+  registerAux(TemperatureAux);
+  registerAux(SpecificHeatConstantVolumeAux);
+  registerInitialCondition(LinearIC);
+  registerAux(NSPressureAux);
 
   // linear_elasticity
   registerKernel(SolidMechX);

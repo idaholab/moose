@@ -4,9 +4,20 @@ template<>
 InputParameters validParams<MassInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addCoupledVar("pv", "");
-  params.addCoupledVar("pu", "");
+  
+  // Required variables
+  params.addRequiredCoupledVar("pu", "");
+  params.addRequiredCoupledVar("pv", "");
   params.addCoupledVar("pw", "");
+  
+  // When computing the Jacobian, we need velocities alone.  Let's be 
+  // consistent with other kernels that use Nodal Aux values for these
+  // variables...
+  params.addRequiredCoupledVar("u", "");
+  params.addRequiredCoupledVar("v", "");
+  params.addCoupledVar("w", "");
+
+  
   return params;
 }
 
@@ -17,25 +28,42 @@ MassInviscidFlux::MassInviscidFlux(const std::string & name, InputParameters par
     _pv_var(coupled("pv")),
     _pv(coupledValue("pv")),
     _pw_var(_dim == 3 ? coupled("pw") : std::numeric_limits<unsigned int>::max()),
-    _pw(_dim == 3 ? coupledValue("pw") : _zero)
+   _pw(_dim == 3 ? coupledValue("pw") : _zero),
+    _u_vel_var(coupled("u")),
+    _u_vel(coupledValue("u")),
+    _v_vel_var(coupled("v")),
+    _v_vel(coupledValue("v")),
+    _w_vel_var(_dim == 3 ? coupled("w") : std::numeric_limits<unsigned int>::max()),
+    _w_vel(_dim == 3 ? coupledValue("w") : _zero)
   {}
+
+
 
 Real
 MassInviscidFlux::computeQpResidual()
 {
+  // vec = rho*U
   RealVectorValue vec(_pu[_qp],_pv[_qp],_pw[_qp]);
 
+  // -(rho*U) * grad(phi), negative sign comes from integration-by-parts
   return -(vec*_grad_test[_i][_qp]);
 }
+
+
 
 Real
 MassInviscidFlux::computeQpJacobian()
 {
   //Essentially a vector of the velocities
-  RealVectorValue vec(_pu[_qp]/_u[_qp],_pv[_qp]/_u[_qp],_pw[_qp]/_u[_qp]);
+  //RealVectorValue vec(_pu[_qp]/_u[_qp],_pv[_qp]/_u[_qp],_pw[_qp]/_u[_qp]);
 
-  return -(_phi[_j][_qp]*vec*_grad_test[_i][_qp]);
+  // Let's be consistent and use aux vars to reconstruct the velocity vector
+  RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+
+  return -(_phi[_j][_qp] * vec * _grad_test[_i][_qp]);
 }
+
+
 
 Real
 MassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)

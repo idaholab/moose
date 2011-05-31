@@ -32,9 +32,13 @@ protected:
 
   unsigned int _temp_var;
   VariableGradient & _grad_temp;
+  
+  // Debugging
+  VariableValue & _temp;
 
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   MaterialProperty<Real> &_thermal_conductivity;
+  // MaterialProperty<Real> &_temperature;
 };
  
 #endif

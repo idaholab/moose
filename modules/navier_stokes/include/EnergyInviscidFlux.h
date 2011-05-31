@@ -2,7 +2,6 @@
 #define ENERGYINVISCIDFLUX_H
 
 #include "Kernel.h"
-#include "Material.h"
 
 //Forward Declarations
 class EnergyInviscidFlux;
@@ -30,7 +29,11 @@ protected:
   unsigned int _w_vel_var;
   VariableValue & _w_vel;
 
-  MaterialProperty<Real> & _pressure;
+  //MaterialProperty<Real> & _pressure; // Now an AuxKernel
+
+  unsigned int _pressure_var;
+  VariableValue & _pressure;
+
 };
  
 #endif

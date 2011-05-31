@@ -5,6 +5,14 @@ template<>
 InputParameters validParams<Temperature>()
 {
   InputParameters params = validParams<Kernel>();
+
+  // Make coupled variables required in the input file
+  params.addRequiredCoupledVar("u", "");
+  params.addRequiredCoupledVar("v", "");
+  params.addCoupledVar("w", ""); // only required in 3D
+  params.addRequiredCoupledVar("pe", "");
+  params.addRequiredCoupledVar("p", "");
+
   return params;
 }
 
@@ -34,6 +42,7 @@ Temperature::computeQpResidual()
 
   value *= et - ((vec * vec) / 2.0);
 
+  // L2-projection
   return (_u[_qp]-value)*_test[_i][_qp];
 }
 

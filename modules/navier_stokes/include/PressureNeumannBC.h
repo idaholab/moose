@@ -23,23 +23,26 @@ protected:
 
   /**
    * This is here because materials don't yet work on boundaries!
+   * Pressure is now computed as an Aux var
    */
-  Real pressure();
+  //Real pressure();
   
   virtual Real computeQpResidual();
   
 
-  VariableValue & _p;
+  //VariableValue & _p;
 
-  VariableValue & _pe;
+  //VariableValue & _pe;
 
-  VariableValue & _pu;
-  VariableValue & _pv;
-  VariableValue & _pw;
+  //VariableValue & _pu;
+  //VariableValue & _pv;
+  //VariableValue & _pw;
 
+  VariableValue & _pressure; // Aux Var
+  
   int _component;
 
-  MaterialProperty<Real> & _gamma;
+  MaterialProperty<Real> & _gamma; // Integrated BC, so can use Mat. properties
 };
 
 #endif //PRESSURENEUMANNBC_H

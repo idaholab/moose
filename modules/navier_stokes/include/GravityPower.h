@@ -2,7 +2,6 @@
 #define GRAVITYPOWER_H
 
 #include "Kernel.h"
-#include "Material.h"
 
 //Forward Declarations
 class GravityPower;
@@ -20,8 +19,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _pv_var;
-  VariableValue & _pv;
+  unsigned int _momentum_var;
+  VariableValue & _momentum;
 
   Real _acceleration;
 };

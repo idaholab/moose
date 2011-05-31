@@ -2,7 +2,6 @@
 #define MOMENTUMINVISCIDFLUX_H
 
 #include "Kernel.h"
-#include "Material.h"
 
 
 //ForwardDeclarations
@@ -33,7 +32,11 @@ protected:
 
   int _component;
 
-  MaterialProperty<Real> & _pressure;
+  // MaterialProperty<Real> & _pressure; // Now an Aux var
+
+  unsigned int _pressure_var;
+  VariableValue & _pressure;
+
 };
  
 #endif

@@ -5,10 +5,15 @@ template<>
 InputParameters validParams<MomentumInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.set<Real>("component") = -1;
-  params.addCoupledVar("u", "");
-  params.addCoupledVar("v", "");
+
+  // Required parameters
+  params.addRequiredParam<Real>("component", "");
+  
+  // Required copuled variables
+  params.addRequiredCoupledVar("u", "");
+  params.addRequiredCoupledVar("v", "");
   params.addCoupledVar("w", "");
+  params.addRequiredCoupledVar("pressure", "");
   return params;
 }
 
@@ -21,24 +26,36 @@ MomentumInviscidFlux::MomentumInviscidFlux(const std::string & name, InputParame
    _w_vel_var(_dim == 3 ? coupled("w") : 0),
    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
    _component(getParam<Real>("component")),
-   _pressure(getMaterialProperty<Real>("pressure"))
+   _pressure_var(coupled("pressure")),
+   _pressure(coupledValue("pressure"))
+   //_pressure(getMaterialProperty<Real>("pressure"))// now an aux var
 {
-  if(_component < 0)
-  {
-    std::cout<<"Must select a component for MomentumInviscidFlux"<<std::endl;
-    libmesh_error();
-  }
+//  if(_component < 0)
+//  {
+//    std::cout<<"Must select a component for MomentumInviscidFlux"<<std::endl;
+//    libmesh_error();
+//  }
 }
 
 Real
 MomentumInviscidFlux::computeQpResidual()
 {
-  RealVectorValue vec(_u[_qp]*_u_vel[_qp],_u[_qp]*_v_vel[_qp],_u[_qp]*_w_vel[_qp]);
+  // For _component = k,
+  
+  // (rho*U_k) * U
+  RealVectorValue vec(_u[_qp]*_u_vel[_qp],   // (rho*U_k) * U_1
+		      _u[_qp]*_v_vel[_qp],   // (rho*U_k) * U_2
+		      _u[_qp]*_w_vel[_qp]);  // (rho*U_k) * U_3
 
+  // (rho*U_k) * U + e_k * P [ e_k unit vector in k-direction ]
   vec(_component) += _pressure[_qp];
 
+  // -((rho*U_k) * U + e_k * P) * grad(phi)
   return -(vec*_grad_test[_i][_qp]);
 }
+
+
+
 
 Real
 MomentumInviscidFlux::computeQpJacobian()
