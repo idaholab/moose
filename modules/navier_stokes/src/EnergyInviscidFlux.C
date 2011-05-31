@@ -20,26 +20,26 @@ InputParameters validParams<EnergyInviscidFlux>()
   params.addRequiredCoupledVar("pu", "");
   params.addRequiredCoupledVar("pv", "");
   params.addCoupledVar("pw", ""); // only required in 3D
+  
+  // Require this *or* rho, but not both?
+  params.addRequiredCoupledVar("enthalpy", "");
 
   return params;
 }
 
 EnergyInviscidFlux::EnergyInviscidFlux(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
-   //_u_vel_var(coupled("u")),
    _u_vel(coupledValue("u")),
-   //_v_vel_var(coupled("v")),
    _v_vel(coupledValue("v")),
-   //_w_vel_var(_dim == 3 ? coupled("w") : std::numeric_limits<unsigned int>::max()),
    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
-   //_pressure_var(coupled("pressure")),
    _pressure(coupledValue("pressure")),
    _gamma(getParam<Real>("gamma")),
    _p_var_number( coupled("p") ),
    _pu_var_number( coupled("pu") ),
    _pv_var_number( coupled("pv") ),
    _pw_var_number( _dim == 3 ? coupled("pw") : libMesh::invalid_uint),
-   _p(coupledValue("p"))
+   _p(coupledValue("p")),
+   _enthalpy(coupledValue("enthalpy"))
 {}
 
 
@@ -56,7 +56,10 @@ EnergyInviscidFlux::computeQpResidual()
   RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   
   // Multiply vector U by the scalar value (rho*E + P) to get rho * U * H
-  vec *= (_u[_qp] + _pressure[_qp]);
+  // vec *= (_u[_qp] + _pressure[_qp]);
+
+  // Multiply vector U by the scalar rho * H
+  vec *= (_p[_qp] * _enthalpy[_qp]);
 
   // Return -1 * vec * grad(phi_i)
   return -(vec*_grad_test[_i][_qp]);
@@ -85,12 +88,12 @@ EnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
   Real V2 = vel.size_sq();
 
   // TODO, make enthalpy a nodal aux?
-  Real total_enthalpy = (_u[_qp] + _pressure[_qp]) / _p[_qp];
+  // Real total_enthalpy = (_u[_qp] + _pressure[_qp]) / _p[_qp];
   
   // Derivative wrt density
   if (jvar == _p_var_number)
   {
-    return -((0.5*(_gamma-1)*V2 - total_enthalpy) * _phi[_j][_qp] * (vel * _grad_test[_i][_qp]));
+    return -((0.5*(_gamma-1)*V2 - _enthalpy[_qp]) * _phi[_j][_qp] * (vel * _grad_test[_i][_qp]));
   }
   
   // Derivatives wrt momentums
@@ -108,7 +111,7 @@ EnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
     vel *= (1.-_gamma)*vel(jlocal);
 
     // Add in the enthalpy in the jlocal'th entry
-    vel(jlocal) += total_enthalpy;
+    vel(jlocal) += _enthalpy[_qp];
 
     // Return -1 * (vel * grad(phi_i)) * phi_j
     return -(vel*_grad_test[_i][_qp]) * _phi[_j][_qp];

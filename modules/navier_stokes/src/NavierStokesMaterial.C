@@ -66,7 +66,7 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
 
     // Declared here but _not_ calculated here
     // (See e.g. derived class, bighorn/include/materials/FluidTC1.h)
-    _dynamic_viscocity(declareProperty<Real>("dynamic_viscocity")),
+    _dynamic_viscosity(declareProperty<Real>("dynamic_viscosity")),
     
     _R_param(getParam<Real>("R")),
     _gamma_param(getParam<Real>("gamma")),
@@ -82,7 +82,7 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
 
 
 /**
- * Must be called _after_ the child class computes dynamic_viscocity.
+ * Must be called _after_ the child class computes dynamic_viscosity.
  */
 void
 NavierStokesMaterial::computeProperties()
@@ -111,7 +111,7 @@ NavierStokesMaterial::computeProperties()
     for(unsigned int i=0;i<3;i++)
       grad_outter_u(i,i) -= (2.0/3.0) * div_vel;
 
-    grad_outter_u *= _dynamic_viscocity[qp];
+    grad_outter_u *= _dynamic_viscosity[qp];
     
     _viscous_stress_tensor[qp] = grad_outter_u;
 
@@ -131,7 +131,7 @@ NavierStokesMaterial::computeProperties()
     // _temperature_gradient[qp] = RealGradient(dTdx, dTdy, dTdz);
 
     // Pr = (mu * cp) / k  ==>  k = (mu * cp) / Pr 
-    _thermal_conductivity[qp] = (_c_p[qp] * _dynamic_viscocity[qp]) / _Pr[qp];
+    _thermal_conductivity[qp] = (_c_p[qp] * _dynamic_viscosity[qp]) / _Pr[qp];
 
     // Tabulated values of thermal conductivity vs. Temperature (k increases slightly with T):
     // T (K)    k (W/m-K)

@@ -70,7 +70,7 @@ protected:
   MaterialProperty<Real> & _R;
   MaterialProperty<Real> & _Pr;
 
-  MaterialProperty<Real> & _dynamic_viscocity;
+  MaterialProperty<Real> & _dynamic_viscosity;
   
   Real _R_param;
   Real _gamma_param;

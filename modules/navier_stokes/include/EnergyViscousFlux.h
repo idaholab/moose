@@ -19,26 +19,47 @@ public:
   
 protected:
   virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _u_vel_var;
   VariableValue & _u_vel;
-
-  unsigned int _v_vel_var;
   VariableValue & _v_vel;
-
-  unsigned int _w_vel_var;
   VariableValue & _w_vel;
 
   unsigned int _temp_var;
   VariableGradient & _grad_temp;
   
-  // Debugging
   VariableValue & _temp;
 
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   MaterialProperty<Real> &_thermal_conductivity;
-  // MaterialProperty<Real> &_temperature;
+
+  // Variable numberings for off-diagonal couplings
+  unsigned _rho_var_number;
+  unsigned _rhou_var_number;
+  unsigned _rhov_var_number;
+  unsigned _rhow_var_number;
+  unsigned _rhoe_var_number;
+
+  // Variable couplings for Jacobian terms
+  
+  VariableValue& _rho;
+  VariableValue& _rho_u;
+  VariableValue& _rho_v;
+  VariableValue& _rho_w;
+  VariableValue& _rho_e;
+
+  // Gradients
+  VariableGradient& _grad_rho;
+  VariableGradient& _grad_rho_u;
+  VariableGradient& _grad_rho_v;
+  VariableGradient& _grad_rho_w;
+  VariableGradient& _grad_rho_e;
+
+
+  // Specific heat at constant volume, treated as a single
+  // constant value.
+  Real _cv;
 };
  
 #endif

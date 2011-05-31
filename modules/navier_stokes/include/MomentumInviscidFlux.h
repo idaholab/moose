@@ -21,21 +21,20 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _u_vel_var;
   VariableValue & _u_vel;
-
-  unsigned int _v_vel_var;
   VariableValue & _v_vel;
-
-  unsigned int _w_vel_var;
   VariableValue & _w_vel;
 
   int _component;
+  Real _gamma;
 
-  // MaterialProperty<Real> & _pressure; // Now an Aux var
-
-  unsigned int _pressure_var;
   VariableValue & _pressure;
+
+  unsigned _p_var_number;
+  unsigned _pu_var_number;
+  unsigned _pv_var_number;
+  unsigned _pw_var_number;
+  unsigned _pe_var_number;
 
 };
  

@@ -19,17 +19,11 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
-  // unsigned int _u_vel_var;
+  
+  // Aux Variables needed in the computation of the residual.
   VariableValue & _u_vel;
-
-  // unsigned int _v_vel_var;
   VariableValue & _v_vel;
-
-  // unsigned int _w_vel_var;
   VariableValue & _w_vel;
-
-  // unsigned int _pressure_var;
   VariableValue & _pressure;
   
   // Global parameter
@@ -45,9 +39,11 @@ protected:
   unsigned _pv_var_number;
   unsigned _pw_var_number;
 
-  // Unless we make enthalpy a nodal aux variable, the off-diagonal
-  // derivatives will depend on _rho
+  // If enthalpy is a nodal aux, we need rho to compute rho*U*H
+  // in the residual.  If enthalpy is not a nodal aux, we need
+  // rho to compute enthalpy.  So basically we need it either way...
   VariableValue & _p;
+  VariableValue & _enthalpy;
 };
  
 #endif

@@ -46,6 +46,7 @@
 #include "NSPressureAux.h"
 #include "NSMomentumInviscidFluxAux.h"
 #include "NodalMomentumInviscidFlux.h"
+#include "NSEnthalpyAux.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -146,6 +147,7 @@ Elk::registerObjects()
   registerAux(NSPressureAux);
   registerAux(NSMomentumInviscidFluxAux);
   registerKernel(NodalMomentumInviscidFlux);
+  registerAux(NSEnthalpyAux);
 
   // linear_elasticity
   registerKernel(SolidMechX);
