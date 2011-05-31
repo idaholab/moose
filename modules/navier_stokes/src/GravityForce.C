@@ -9,7 +9,7 @@ InputParameters validParams<GravityForce>()
   params.addRequiredCoupledVar("rho", "");
 
   // Defaults to earth gravity
-  params.addParam<Real>("acceleration", -9.80665, "The acceleration due to gravity.");
+  params.addRequiredParam<Real>("acceleration", "The body force vector component.");
 
   return params;
 }

@@ -17,6 +17,7 @@ public:
 
 protected:
   virtual Real computeQpResidual();
+  // virtual Real computeQpJacobian(); // on-diagonal Jacobian is zero
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   unsigned int _momentum_var;

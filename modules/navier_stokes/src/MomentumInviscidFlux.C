@@ -56,15 +56,15 @@ MomentumInviscidFlux::computeQpResidual()
 {
   // For _component = k,
   
-  // (rho*U) * U_k = (rho*U_k) * U <- we write it this way
-  RealVectorValue vec(_u[_qp]*_u_vel[_qp],   // (rho*U_k) * U_1
-		      _u[_qp]*_v_vel[_qp],   // (rho*U_k) * U_2
-		      _u[_qp]*_w_vel[_qp]);  // (rho*U_k) * U_3
+  // (rho*u) * u_k = (rho*u_k) * u <- we write it this way
+  RealVectorValue vec(_u[_qp]*_u_vel[_qp],   // (U_k) * u_1
+		      _u[_qp]*_v_vel[_qp],   // (U_k) * u_2
+		      _u[_qp]*_w_vel[_qp]);  // (U_k) * u_3
 
-  // (rho*U_k) * U + e_k * P [ e_k unit vector in k-direction ]
+  // (rho*u_k) * u + e_k * P [ e_k = unit vector in k-direction ]
   vec(_component) += _pressure[_qp];
 
-  // -((rho*U_k) * U + e_k * P) * grad(phi)
+  // -((rho*u_k) * u + e_k * P) * grad(phi)
   return -(vec*_grad_test[_i][_qp]);
 }
 

@@ -42,7 +42,6 @@
 #include "TemperatureAux.h"
 #include "Temperature.h"
 #include "SpecificHeatConstantVolumeAux.h"
-#include "LinearIC.h"
 #include "NSPressureAux.h"
 #include "NSMomentumInviscidFluxAux.h"
 #include "NodalMomentumInviscidFlux.h"
@@ -143,7 +142,6 @@ Elk::registerObjects()
   registerBoundaryCondition(ImposedVelocityBC);
   registerAux(TemperatureAux);
   registerAux(SpecificHeatConstantVolumeAux);
-  registerInitialCondition(LinearIC);
   registerAux(NSPressureAux);
   registerAux(NSMomentumInviscidFluxAux);
   registerKernel(NodalMomentumInviscidFlux);

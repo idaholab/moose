@@ -8,8 +8,8 @@ InputParameters validParams<GravityPower>()
   // This term is coupled to the momentum variable for whichever equation this is
   params.addRequiredCoupledVar("momentum", "");
   
-  // Defaults to earth gravity
-  params.addParam<Real>("acceleration", -9.80665, "The acceleration due to gravity.");
+  // Don't hard-code any defaults here, its too hard to keep all your defaults synchronized.
+  params.addRequiredParam<Real>("acceleration", "The body force vector component.");
 
   return params;
 }
@@ -33,7 +33,7 @@ GravityPower::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _momentum_var)
   {
-    return -_phi[_j][_qp]*_acceleration*_test[_i][_qp];
+    return -_phi[_j][_qp] * _acceleration * _test[_i][_qp];
   }
 
   return 0;
