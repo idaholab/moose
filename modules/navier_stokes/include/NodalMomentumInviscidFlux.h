@@ -15,6 +15,11 @@ InputParameters validParams<NodalMomentumInviscidFlux>();
  * vector in the momentum equation using only Nodal AuxVariables.
  * This approach is known to work better for solving compressible
  * flows of this sort.
+ *
+ * TODO: Figure out if we should use only nodal values for Jacobian entries as well?
+ *       Figure out a better way to handle having large numbers of nodal Aux variables elegantly.
+ *       Port the Jacobian changes back to MomentumInviscidFlux class
+ *       Write up some latex documentation for these terms
  */
 class NodalMomentumInviscidFlux : public Kernel
 {
@@ -40,9 +45,16 @@ protected:
   int _component;
   Real _gamma;
 
-
-//  unsigned int _pressure_var;
-//  VariableValue & _pressure;
+  // The variable numberings, assigned by Moose, for variables
+  // which are "coupled" to this kernel in the sense of the Jacobian
+  // structure.  That is, even though the derivative of this kernel
+  // wrt rho is nonzero, it does not depend on rho explicitly.
+  // Therefore we need only the index, not the variable value.
+  unsigned _p_var_number;
+  unsigned _pu_var_number;
+  unsigned _pv_var_number;
+  unsigned _pw_var_number;
+  unsigned _pe_var_number;
 };
  
 #endif // NODALMOMENTUMINVISCIDFLUX_H

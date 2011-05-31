@@ -54,13 +54,21 @@ MassInviscidFlux::computeQpResidual()
 Real
 MassInviscidFlux::computeQpJacobian()
 {
-  //Essentially a vector of the velocities
-  //RealVectorValue vec(_pu[_qp]/_u[_qp],_pv[_qp]/_u[_qp],_pw[_qp]/_u[_qp]);
-
-  // Let's be consistent and use aux vars to reconstruct the velocity vector
-  RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-  return -(_phi[_j][_qp] * vec * _grad_test[_i][_qp]);
+  // This seems weird at first glance, but remember we have to differentiate
+  // wrt the *conserved* variables 
+  //
+  // [ U_0 ] = [ rho       ]
+  // [ U_1 ] = [ rho * u_1 ]
+  // [ U_2 ] = [ rho * u_2 ]
+  // [ U_3 ] = [ rho * u_3 ]
+  // [ U_4 ] = [ rho * E   ] 
+  //
+  // and the inviscid mass flux residual, in terms of these variables, is:
+  //
+  // f(U) = ( U_k * dphi_i/dx_k ), summation over k=1,2,3
+  //
+  // ie. does not depend on U_0, the on-diagonal Jacobian component.
+  return 0.;
 }
 
 

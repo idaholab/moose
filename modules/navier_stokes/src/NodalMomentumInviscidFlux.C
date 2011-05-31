@@ -5,11 +5,12 @@ InputParameters validParams<NodalMomentumInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
 
-  // Required copuled variables
+  // Required coupled aux variables
   params.addRequiredCoupledVar("F1", "");
   params.addRequiredCoupledVar("F2", "");
   params.addCoupledVar("F3", ""); // only required in 3D
 
+  // Add required coupled velocity aux variables 
   params.addRequiredCoupledVar("u", "");
   params.addRequiredCoupledVar("v", "");
   params.addCoupledVar("w", ""); // only required in 3D
@@ -17,6 +18,14 @@ InputParameters validParams<NodalMomentumInviscidFlux>()
   // Required parameters
   params.addRequiredParam<int>("component", "");
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
+  
+  // Required "coupled" variables, only the numerical index of these
+  // variables is required, not their actual value.
+  params.addRequiredCoupledVar("p", "");
+  params.addRequiredCoupledVar("pu", "");
+  params.addRequiredCoupledVar("pv", "");
+  params.addCoupledVar("pw", ""); // only required in 3D
+  params.addRequiredCoupledVar("pe", "");
   
   return params;
 }
@@ -33,7 +42,12 @@ NodalMomentumInviscidFlux::NodalMomentumInviscidFlux(const std::string & name, I
    _v_vel(coupledValue("v")),
    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
    _component(getParam<int>("component")),
-   _gamma(getParam<Real>("gamma"))
+   _gamma(getParam<Real>("gamma")),
+   _p_var_number( coupled("p") ),
+   _pu_var_number( coupled("pu") ),
+   _pv_var_number( coupled("pv") ),
+   _pw_var_number( _dim == 3 ? coupled("pw") : libMesh::invalid_uint),
+   _pe_var_number( coupled("pe") )
 {
 }
 
@@ -78,30 +92,84 @@ NodalMomentumInviscidFlux::computeQpJacobian()
 
 
 Real
-NodalMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+NodalMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  if (jvar == _p_var_number)
+  {
+    // std::cout << "Density: " << "_component=" << _component << ", jvar=" << jvar << std::endl;
 
-// Not yet implemented
-//  // The value returned is the same, the value of jvar just determines the index
-//  Real val = _u[_qp] * _phi[_j][_qp];
-//
-//  // Derivative wrt u_vel doesn't make sense... u_vel is not an independent variable
-//  if(jvar == _u_vel_var)
-//  {
-//    RealVectorValue vec(val,0,0);
-//    return -(vec*_grad_test[_i][_qp]);
-//  }
-//  else if(jvar == _v_vel_var)
-//  {
-//    RealVectorValue vec(0,val,0);
-//    return -(vec*_grad_test[_i][_qp]);
-//  }
-//  else if(jvar == _w_vel_var)
-//  {
-//    RealVectorValue vec(0,0,val);
-//    return -(vec*_grad_test[_i][_qp]);
-//  }
+    // Derivative of inviscid flux kernel wrt density:
+    // x-mom: (-u_1^2 + (g-1)/2*V^2, -u_1*u_2            , -u_1*u_3            ) * grad(phi_i) * phi_j
+    // y-mom: (-u_2*u_1            , -u_2^2 + (g-1)/2*V^2, -u_2*u_3            ) * grad(phi_i) * phi_j
+    // z-mom: (-u_3*u_1            , -u_3*u_2            , -u_3^2 + (g-1)/2*V^2) * grad(phi_i) * phi_j
+    //
+    // In terms of the flux Jacobian entries from Ben's dissertation, these entries
+    // come from the first column, in particular:
+    //
+    // x-mom: (A_1(2,1), A_2(2,1), A_3(2,1)) * grad(phi_i) * phi_j
+    // y-mom: (A_1(3,1), A_2(3,1), A_3(3,1)) * grad(phi_i) * phi_j
+    // z-mom: (A_1(4,1), A_2(4,1), A_3(4,1)) * grad(phi_i) * phi_j
+    
+    // Start with the velocity vector
+    RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+    
+    // Velocity vector magnitude, squared
+    Real V2 = vec.size_sq();
+    
+    // Scale velocity vector by -1 * vec(_component)
+    vec *= -vec(_component);
 
-  // For all other variables, the derivative is zero...
+    // Add to the _component'th entry the quantity (gamma-1)/2 * V2
+    vec(_component) += 0.5 * (_gamma-1.) * V2;
+
+    // Return  -1 * (vec*grad(phi)) * phi_j
+    return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
+  }
+
+  
+  // Handle off-diagonal derivatives wrt momentums
+  else if ((jvar == _pu_var_number) || (jvar == _pv_var_number) || (jvar == _pw_var_number))
+  {
+    // Start with the velocity vector
+    RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+
+    // Map jvar into jlocal = {0,1,2}, regardless of how Moose has numbered things.
+    // Can't do a case statement here since _pu_var_number, etc. are not constants...
+    unsigned jlocal = 0;
+    
+    if (jvar == _pv_var_number)
+      jlocal = 1;
+    else if (jvar == _pw_var_number)
+      jlocal = 2;
+
+    // Create a vector according to the following three rules:
+    RealVectorValue vec;
+    
+    // .) u_component is in entry jlocal
+    vec(jlocal) = vel(_component);
+    
+    // .) (1-gamma)*u_jlocal is in entry _component
+    vec(_component) = (1.-_gamma) * vel(jlocal);
+
+    // .) 0 is in the remaining component
+    // ...
+    
+    // Return -1*result * grad(phi_i) * phi_j
+    return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
+  }
+
+  else if (jvar == _pe_var_number)
+  {
+    // std::cout << "Total energy: " << "_component=" << _component << ", jvar=" << jvar << std::endl;
+    
+    // The derivative of P(U) wrt to rho*E is simply (gamma-1), a constant
+    RealVectorValue vec;
+    vec(_component) = _gamma - 1.;
+
+    // Return -1*result * grad(phi_i) * phi_j
+    return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
+  }
+
+  // We shouldn't get here... jvar should have matched one of the if statements above!
   return 0;
 }
