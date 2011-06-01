@@ -26,7 +26,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters paramet
    _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
    _volume( getPostprocessorValue(getParam<std::string>("volume"))),
    _startup_time( getParam<Real>("startup_time")),
-   _initial_He( getParam<std::string>("output_initial_moles") != "" ? &getPostprocessorValue(getParam<std::string>("output_initial_moles")) : NULL ),
+   _initial_moles( getParam<std::string>("output_initial_moles") != "" ? &getPostprocessorValue(getParam<std::string>("output_initial_moles")) : NULL ),
    _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL ),
    _my_value(0)
 {
@@ -58,12 +58,12 @@ PlenumPressure::computeQpResidual()
 }
 
 void PlenumPressure::initialSetup()
-{  
+{
   _n0 = _initial_pressure * _volume / (_R * _temperature);
 
-  if ( _initial_He )
+  if ( _initial_moles )
   {
-    *_initial_He = _n0;
+    *_initial_moles = _n0;
   }
   const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
   _my_value = factor * _initial_pressure;

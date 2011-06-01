@@ -73,9 +73,13 @@
 #include "PowerLawCreepMaterial.h"
 #include "PowerLawCreep.h"
 #include "PlenumPressure.h"
+#include "PlenumPressureAction.h"
 #include "PlenumPressureRZ.h"
+#include "PlenumPressureRZAction.h"
 #include "Pressure.h"
+#include "PressureAction.h"
 #include "PressureRZ.h"
+#include "PressureRZAction.h"
 #include "PLSHPlasticMaterial.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
@@ -172,10 +176,23 @@ Elk::registerObjects()
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreepMaterial);
   registerMaterial(PowerLawCreep);
+
   registerBoundaryCondition(PlenumPressure);
+  registerAction(EmptyAction, "BCs/PlenumPressure", "no_action");
+  registerAction(PlenumPressureAction, "BCs/PlenumPressure/*", "add_bc");
+
   registerBoundaryCondition(PlenumPressureRZ);
+  registerAction(EmptyAction, "BCs/PlenumPressureRZ", "no_action");
+  registerAction(PlenumPressureRZAction, "BCs/PlenumPressureRZ/*", "add_bc");
+
   registerBoundaryCondition(Pressure);
+  registerAction(EmptyAction, "BCs/Pressure", "no_action");
+  registerAction(PressureAction, "BCs/Pressure/*", "add_bc");
+
   registerBoundaryCondition(PressureRZ);
+  registerAction(EmptyAction, "BCs/PressureRZ", "no_action");
+  registerAction(PressureRZAction, "BCs/PressureRZ/*", "add_bc");
+
   registerAux(ElasticEnergyAux);
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);

@@ -41,7 +41,7 @@ protected:
 
   const Real _startup_time;
 
-  PostprocessorValue * const _initial_He;
+  PostprocessorValue * const _initial_moles;
   PostprocessorValue * const _output;
 
   Real _my_value;
