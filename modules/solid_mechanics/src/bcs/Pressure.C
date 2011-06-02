@@ -57,5 +57,5 @@ Pressure::computeQpResidual()
     factor *= _function->value(_t, _q_point[_qp]);
   }
 
-  return factor * (_normals[_qp](_component) * _phi[_i][_qp]);
+  return factor * (_normals[_qp](_component) * _test[_i][_qp]);
 }

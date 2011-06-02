@@ -131,7 +131,7 @@ Real
 ContactMaster::computeQpJacobian()
 {
 
-//   return _phi[_i][_qp] * _penalty * _test[_j][_qp];
+//   return _test[_i][_qp] * _penalty * _phi[_j][_qp];
 
   return 0;
 /*
@@ -152,7 +152,7 @@ ContactMaster::computeQpJacobian()
 
   Real jac_mag = pinfo->_normal * jac_vec;
 
-  return _phi[_i][_qp]*pinfo->_normal(_component)*jac_mag;
+  return _test[_i][_qp]*pinfo->_normal(_component)*jac_mag;
 */
 }
 

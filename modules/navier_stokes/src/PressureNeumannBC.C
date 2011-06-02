@@ -22,5 +22,5 @@ PressureNeumannBC::PressureNeumannBC(const std::string & name, InputParameters p
 Real
 PressureNeumannBC::computeQpResidual()
 {
-  return _pressure[_qp] * _normals[_qp](_component) * _phi[_i][_qp];
+  return _pressure[_qp] * _normals[_qp](_component) * _test[_i][_qp];
 }

@@ -66,7 +66,7 @@ GapHeatTransfer::computeQpResidual()
 Real
 GapHeatTransfer::computeSlaveFluxContribution( Real grad_t )
 {
-  return _JxW[_qp] * _phi[_i][_qp] * grad_t;
+  return _JxW[_qp] * _test[_i][_qp] * grad_t;
 }
 
 Real

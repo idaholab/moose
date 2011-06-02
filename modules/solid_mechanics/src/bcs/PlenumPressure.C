@@ -54,7 +54,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters paramet
 Real
 PlenumPressure::computeQpResidual()
 {
-  return _my_value * (_normals[_qp](_component) * _phi[_i][_qp]);
+  return _my_value * (_normals[_qp](_component) * _test[_i][_qp]);
 }
 
 void PlenumPressure::initialSetup()

@@ -164,7 +164,7 @@ SlaveConstraint::computeQpJacobian()
 
 //    Real jac_mag = pinfo->_normal(_component) * jac_value;
 /*
-   return _phi[_i][_qp] * (
+   return _test[_i][_qp] * (
      (1e8*-_phi[_j][_qp])
      -_jacobian_copy(dof_number, dof_number)
      );
