@@ -192,8 +192,11 @@ MooseVariable::reinit()
   _grad_test = _grad_phi;
   if (_has_second_derivatives)
     _second_test = _second_phi;
+}
 
-  // FIXME: move to face reinit
+void
+MooseVariable::reinitFace()
+{
   _test_face = _phi_face;
   _grad_test_face = _grad_phi_face;
   if (_has_second_derivatives)

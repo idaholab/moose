@@ -105,6 +105,7 @@ public:
   void prepare();
   void prepare_aux();
   void reinit();
+  void reinitFace();
   void reinit_node();
   void reinit_aux();
 

@@ -336,11 +336,11 @@ MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
 
-  if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitElem(_displaced_mesh->elem(elem->id()), tid);
-
   _nl.reinitElem(elem, tid);
   _aux.reinitElem(elem, tid);
+
+  if (_displaced_problem != NULL && _reinit_displaced_elem)
+    _displaced_problem->reinitElem(_displaced_mesh->elem(elem->id()), tid);
 }
 
 void
@@ -353,11 +353,11 @@ MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
 
-  if (_displaced_problem != NULL && _reinit_displaced_face)
-    _displaced_problem->reinitElemFace(_displaced_mesh->elem(elem->id()), side, bnd_id, tid);
-
   _nl.reinitElemFace(elem, side, bnd_id, tid);
   _aux.reinitElemFace(elem, side, bnd_id, tid);
+
+  if (_displaced_problem != NULL && _reinit_displaced_face)
+    _displaced_problem->reinitElemFace(_displaced_mesh->elem(elem->id()), side, bnd_id, tid);
 }
 
 void

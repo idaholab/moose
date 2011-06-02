@@ -103,7 +103,7 @@ SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, unsigne
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     MooseVariable *var = *it;
-    var->reinit();
+    var->reinitFace();
     var->computeElemValuesFace();
   }
 }
