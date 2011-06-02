@@ -44,11 +44,11 @@ ConvectiveFluxBC::computeQpResidual()
   else
     value = _final;
     
-  return -(_phi[_i][_qp]*_rate*(value - _u[_qp]));
+  return -(_test[_i][_qp]*_rate*(value - _u[_qp]));
 }
   
 Real
 ConvectiveFluxBC::computeQpJacobian()
 {
-  return -(_phi[_i][_qp]*_rate*(-_phi[_j][_qp]));
+  return -(_test[_i][_qp]*_rate*(-_phi[_j][_qp]));
 }

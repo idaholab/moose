@@ -39,5 +39,5 @@ RealPropertyOutput::computeQpResidual()
 Real
 RealPropertyOutput::computeQpJacobian()
 {
-  return _test[_i][_qp]*_test[_j][_qp];
+  return _test[_i][_qp]*_phi[_j][_qp];
 }

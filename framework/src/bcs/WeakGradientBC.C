@@ -30,12 +30,12 @@ WeakGradientBC::WeakGradientBC(const std::string & name, InputParameters paramet
 Real
 WeakGradientBC::computeQpResidual()
 {
-  return (_grad_u[_qp]*_normals[_qp])*_phi[_i][_qp];
+  return (_grad_u[_qp]*_normals[_qp])*_test[_i][_qp];
 }
 
 Real
 WeakGradientBC::computeQpJacobian()
 {
-  return (_grad_phi[_j][_qp]*_normals[_qp])*_phi[_i][_qp];
+  return (_grad_phi[_j][_qp]*_normals[_qp])*_test[_i][_qp];
 }
 

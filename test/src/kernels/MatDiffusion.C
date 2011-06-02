@@ -25,5 +25,5 @@ MatDiffusion::computeQpResidual()
 Real
 MatDiffusion::computeQpJacobian()
 {
-  return _diff[_qp] * _grad_test[_i][_qp] * _grad_test[_j][_qp];
+  return _diff[_qp] * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }

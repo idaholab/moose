@@ -36,5 +36,5 @@ Real Convection::computeQpResidual()
 
 Real Convection::computeQpJacobian()
 {
-  return _test[_i][_qp]*(_some_variable[_qp]*_grad_test[_j][_qp]);
+  return _test[_i][_qp]*(_some_variable[_qp]*_grad_phi[_j][_qp]);
 }

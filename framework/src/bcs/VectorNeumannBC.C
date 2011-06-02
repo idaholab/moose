@@ -36,6 +36,6 @@ VectorNeumannBC::VectorNeumannBC(const std::string & name, InputParameters param
 Real
 VectorNeumannBC::computeQpResidual()
 {
-  return -_phi[_i][_qp]*(_value*_normals[_qp]);
+  return -_test[_i][_qp]*(_value*_normals[_qp]);
 }
 

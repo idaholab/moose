@@ -41,6 +41,6 @@ SinNeumannBC::computeQpResidual()
   else
     value = _final;  
 
-  return -_phi[_i][_qp]*value;
+  return -_test[_i][_qp]*value;
 }
 
