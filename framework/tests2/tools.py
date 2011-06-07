@@ -67,8 +67,14 @@ class TestHarness:
                 # insert default values where none provided
                 testname = module_name + '.' + test_name
                 test = DEFAULTS.copy()
+
+                # EXO_OPTIONS is a nested dictionary we have to be careful about getting "ALL" the keys
+                if EXO_OPTIONS in test_opts:
+                  test[EXO_OPTIONS].update(test_opts[EXO_OPTIONS])
+                  del test_opts[EXO_OPTIONS]
                 test.update(test_opts)
                 test.update( { TEST_NAME : testname, TEST_DIR : test_dir } )
+
                 if test[PREREQ] != None:
                   test[PREREQ] = module_name + '.' + test[PREREQ]
 
