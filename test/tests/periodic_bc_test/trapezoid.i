@@ -5,8 +5,8 @@
 
 [Functions]
   active = '
-    tr_x tr_y tr_z
-    itr_x itr_y itr_z'
+    tr_x tr_y
+    itr_x itr_y'
     
   [./tr_x]
     type = ParsedFunction
@@ -18,22 +18,12 @@
     value = x*sin(pi/3)
   [../]
 
-  [./tr_z]
-    type = ParsedFunction
-    value = 0
-  [../]
-  
   [./itr_x]
     type = ParsedFunction
     value = -x/cos(pi/3)
   [../]
 
   [./itr_y]
-    type = ParsedFunction
-    value = 0
-  [../]
-
-  [./itr_z]
     type = ParsedFunction
     value = 0
   [../]
@@ -78,8 +68,8 @@
     [./x]
       primary = 1
       secondary = 4
-      transform_func = 'tr_x tr_y tr_z'
-      inv_transform_func = 'itr_x itr_y itr_z'
+      transform_func = 'tr_x tr_y'
+      inv_transform_func = 'itr_x itr_y'
     [../]
   [../]
 []
