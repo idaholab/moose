@@ -23,9 +23,9 @@ protected:
    * Will always be passed to full symmetric strain tensor.
    * What should come out is a modified strain tensor.
    */
-  virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);
-  virtual void computeStress(const ColumnMajorMatrix & strain,
-                             RealTensorValue & stress);
+  virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
+  virtual void computeStress(const SymmTensor & strain,
+                             SymmTensor & stress);
 
 
   Real _yield_stress;
@@ -44,14 +44,14 @@ protected:
   Real _ebulk3;
   Real _K;
 
-  MaterialProperty<ColumnMajorMatrix> & _total_strain;
-  MaterialProperty<ColumnMajorMatrix> & _total_strain_old;
-  MaterialProperty<RealTensorValue> & _stress;
-  MaterialProperty<RealTensorValue> & _stress_old;
+  MaterialProperty<SymmTensor> & _total_strain;
+  MaterialProperty<SymmTensor> & _total_strain_old;
+  MaterialProperty<SymmTensor> & _stress;
+  MaterialProperty<SymmTensor> & _stress_old;
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
-  MaterialProperty<RealTensorValue> & _plastic_strain;
-  MaterialProperty<RealTensorValue> & _plastic_strain_old;
+  MaterialProperty<SymmTensor> & _plastic_strain;
+  MaterialProperty<SymmTensor> & _plastic_strain_old;
 
   ColumnMajorMatrix _identity;
 };

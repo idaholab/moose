@@ -33,8 +33,8 @@ PowerLawCreep::PowerLawCreep( const std::string & name,
    _max_its(parameters.get<unsigned int>("max_its")),
    _output_iteration_info(getParam<bool>("output_iteration_info")),
 
-   _creep_strain(declareProperty<RealTensorValue>("creep_strain")),
-   _creep_strain_old(declarePropertyOld<RealTensorValue>("creep_strain"))
+   _creep_strain(declareProperty<SymmTensor>("creep_strain")),
+   _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain"))
 {
 
 /*  Below lines are only needed if defining a different elasticity tensor
@@ -60,12 +60,13 @@ PowerLawCreep::computeStress()
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
 
-  const ColumnMajorMatrix stress_old(_stress_old[_qp]);
+  const ColumnMajorMatrix stress_old(_stress_old[_qp].columnMajorMatrix());
 
   // compute trial stress
-  _strain_increment.reshape(9, 1);
-  ColumnMajorMatrix stress_new( *elasticityTensor() * _strain_increment );
-  _strain_increment.reshape(3, 3);
+  ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
+  str_inc.reshape(9, 1);
+  ColumnMajorMatrix stress_new( *elasticityTensor() * str_inc );
+//   _strain_increment.reshape(3, 3);
   stress_new.reshape(3, 3);
   stress_new *= _dt;
   stress_new += stress_old;
@@ -122,7 +123,7 @@ PowerLawCreep::computeStress()
   ColumnMajorMatrix creep_strain_increment(dev_trial_stress);
   creep_strain_increment *= (1.5*del_p/effective_trial_stress);
 
-  ColumnMajorMatrix elastic_strain_increment(_strain_increment*_dt);
+  ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*_dt);
   elastic_strain_increment -= creep_strain_increment;
 
   //  compute stress increment
@@ -130,9 +131,10 @@ PowerLawCreep::computeStress()
   stress_new =  *elasticityTensor() * elastic_strain_increment;
 
   // update stress and creep strain
-  stress_new.fill(_stress[_qp]);
+//   stress_new.fill(_stress[_qp]);
+  _stress[_qp] = stress_new;
   _stress[_qp] += _stress_old[_qp];
-  creep_strain_increment.fill(_creep_strain[_qp]);
+  _creep_strain[_qp] = creep_strain_increment;
   _creep_strain[_qp] += _creep_strain_old[_qp];
 
 }

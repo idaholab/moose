@@ -30,7 +30,7 @@ protected:
 
   virtual Real computeValue();
 
-  MaterialProperty<RealTensorValue> & _tensor;
+  MaterialProperty<SymmTensor> & _tensor;
   const int _index;
   std::string _quantity_string;
   MTA_ENUM _quantity;

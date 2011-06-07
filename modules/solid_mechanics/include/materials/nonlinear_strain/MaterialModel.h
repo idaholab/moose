@@ -3,6 +3,8 @@
 
 #include "Material.h"
 
+#include "SymmTensor.h"
+
 // Forward declarations
 class ElasticityTensor;
 class MaterialModel;
@@ -30,6 +32,8 @@ public:
 
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const RealTensorValue & T,
                                      RealTensorValue & result );
+  static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
+                                     SymmTensor & result );
 
 protected:
 
@@ -69,11 +73,11 @@ protected:
   DecompMethod _decomp_method;
   const Real _alpha;
 
-  MaterialProperty<RealTensorValue> & _stress;
-  MaterialProperty<RealTensorValue> & _stress_old;
+  MaterialProperty<SymmTensor> & _stress;
+  MaterialProperty<SymmTensor> & _stress_old;
 
-  MaterialProperty<RealTensorValue> & _total_strain;
-  MaterialProperty<RealTensorValue> & _total_strain_old;
+  MaterialProperty<SymmTensor> & _total_strain;
+  MaterialProperty<SymmTensor> & _total_strain_old;
 
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
@@ -85,9 +89,9 @@ protected:
 
   // The derivative of the stress with respect to Temperature
   MaterialProperty<RealTensorValue> & _d_stress_dT;
-  
-  ColumnMajorMatrix _total_strain_increment;
-  ColumnMajorMatrix _strain_increment;
+
+  SymmTensor _total_strain_increment;
+  SymmTensor _strain_increment;
   ColumnMajorMatrix _incremental_rotation;
   ColumnMajorMatrix _Uhat;
 

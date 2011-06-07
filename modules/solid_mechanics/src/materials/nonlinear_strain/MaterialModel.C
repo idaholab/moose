@@ -60,17 +60,17 @@ MaterialModel::MaterialModel( const std::string & name,
    _volumetric_models(0),
    _decomp_method( RashidApprox ),
    _alpha(getParam<Real>("thermal_expansion")),
-   _stress(declareProperty<RealTensorValue>("stress")),
-   _stress_old(declarePropertyOld<RealTensorValue>("stress")),
-   _total_strain(declareProperty<RealTensorValue>("total_strain")),
-   _total_strain_old(declarePropertyOld<RealTensorValue>("total_strain")),
+   _stress(declareProperty<SymmTensor>("stress")),
+   _stress_old(declarePropertyOld<SymmTensor>("stress")),
+   _total_strain(declareProperty<SymmTensor>("total_strain")),
+   _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
    _crack_flags(NULL),
    _crack_flags_old(NULL),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _d_strain_dT(3,3),
    _d_stress_dT(declareProperty<RealTensorValue>("d_stress_dT")),
-   _total_strain_increment(3,3),
-   _strain_increment(3,3),
+   _total_strain_increment(0),
+   _strain_increment(0),
    _incremental_rotation(3,3),
    _Uhat(3,3),
    _elasticity_tensor(NULL)
@@ -405,15 +405,12 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
   const Real Byz = 0.25 * Ayz;
   const Real Bzz = 0.25 * Azz - 0.5;
 
-  _total_strain_increment(0,0) = -(Bxx*Axx + Bxy*Axy + Bxz*Axz) * dt_inv;
-  _total_strain_increment(0,1) = -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) * dt_inv;
-  _total_strain_increment(0,2) = -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) * dt_inv;
-  _total_strain_increment(1,1) = -(Bxy*Axy + Byy*Ayy + Byz*Ayz) * dt_inv;
-  _total_strain_increment(1,2) = -(Bxy*Axz + Byy*Ayz + Byz*Azz) * dt_inv;
-  _total_strain_increment(2,2) = -(Bxz*Axz + Byz*Ayz + Bzz*Azz) * dt_inv;
-  _total_strain_increment(1,0) = _total_strain_increment(0,1);
-  _total_strain_increment(2,0) = _total_strain_increment(0,2);
-  _total_strain_increment(2,1) = _total_strain_increment(1,2);
+  _total_strain_increment.xx( -(Bxx*Axx + Bxy*Axy + Bxz*Axz) * dt_inv );
+  _total_strain_increment.xy( -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) * dt_inv );
+  _total_strain_increment.zx( -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) * dt_inv );
+  _total_strain_increment.yy( -(Bxy*Axy + Byy*Ayy + Byz*Ayz) * dt_inv );
+  _total_strain_increment.yz( -(Bxy*Axz + Byy*Ayz + Byz*Azz) * dt_inv );
+  _total_strain_increment.zz( -(Bxz*Axz + Byz*Ayz + Bzz*Azz) * dt_inv );
 
 }
 
@@ -471,7 +468,7 @@ MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 void
 MaterialModel::modifyStrain()
 {
-  _total_strain_increment.fill( _total_strain[_qp] );
+  _total_strain[_qp] = _total_strain_increment;
   _total_strain[_qp] *= _dt;
   _total_strain[_qp] += _total_strain_old[_qp];
 
@@ -520,11 +517,14 @@ MaterialModel::computeStress()
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
 
-  _strain_increment.reshape(9, 1);
-  ColumnMajorMatrix stress_new( *_elasticity_tensor * _strain_increment );
-  _strain_increment.reshape(3, 3);
+//   _strain_increment.reshape(9, 1);
+  ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
+  str_inc.reshape(9, 1);
+  ColumnMajorMatrix stress_new( *_elasticity_tensor * str_inc );
+//   _strain_increment.reshape(3, 3);
   stress_new *= _dt;
-  stress_new.fill(_stress[_qp]);
+//   stress_new.fill(_stress[_qp]);
+  _stress[_qp] = stress_new;
   _stress[_qp] += _stress_old[_qp];
 
   //   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
@@ -560,7 +560,7 @@ MaterialModel::finalizeStress()
     // Adjust stress for a smeared crack
     ColumnMajorMatrix e_vec(3,3);
     ColumnMajorMatrix principal_strain(3,1);
-    ColumnMajorMatrix t_strain(_total_strain[_qp] );
+    ColumnMajorMatrix t_strain(_total_strain[_qp].columnMajorMatrix());
     t_strain.eigen( principal_strain, e_vec );
 
     const Real tiny(1e-8);
@@ -642,6 +642,40 @@ MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
     T20 * R(0,0) + T21 * R(0,1) + T22 * R(0,2),
     T20 * R(1,0) + T21 * R(1,1) + T22 * R(1,2),
     T20 * R(2,0) + T21 * R(2,1) + T22 * R(2,2) );
+
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
+                                      const SymmTensor & T,
+                                      SymmTensor & result )
+{
+
+  //     R           T         Rt
+  //  00 01 02   00 01 02   00 10 20
+  //  10 11 12 * 10 11 12 * 01 11 21
+  //  20 21 22   20 21 22   02 12 22
+  //
+  const Real T00 = R(0,0)*T.xx() + R(0,1)*T.xy() + R(0,2)*T.zx();
+  const Real T01 = R(0,0)*T.xy() + R(0,1)*T.yy() + R(0,2)*T.yz();
+  const Real T02 = R(0,0)*T.zx() + R(0,1)*T.yz() + R(0,2)*T.zz();
+
+  const Real T10 = R(1,0)*T.xx() + R(1,1)*T.xy() + R(1,2)*T.zx();
+  const Real T11 = R(1,0)*T.xy() + R(1,1)*T.yy() + R(1,2)*T.yz();
+  const Real T12 = R(1,0)*T.zx() + R(1,1)*T.yz() + R(1,2)*T.zz();
+
+  const Real T20 = R(2,0)*T.xx() + R(2,1)*T.xy() + R(2,2)*T.zx();
+  const Real T21 = R(2,0)*T.xy() + R(2,1)*T.yy() + R(2,2)*T.yz();
+  const Real T22 = R(2,0)*T.zx() + R(2,1)*T.yz() + R(2,2)*T.zz();
+
+  result.xx( T00 * R(0,0) + T01 * R(0,1) + T02 * R(0,2) );
+  result.yy( T10 * R(1,0) + T11 * R(1,1) + T12 * R(1,2) );
+  result.zz( T20 * R(2,0) + T21 * R(2,1) + T22 * R(2,2) );
+  result.xy( T00 * R(1,0) + T01 * R(1,1) + T02 * R(1,2) );
+  result.yz( T10 * R(2,0) + T11 * R(2,1) + T12 * R(2,2) );
+  result.zx( T00 * R(2,0) + T01 * R(2,1) + T02 * R(2,2) );
 
 }
 

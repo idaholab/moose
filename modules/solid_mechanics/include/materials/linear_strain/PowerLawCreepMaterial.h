@@ -24,9 +24,9 @@ protected:
    * Will always be passed a full symmetric strain tensor.
    * What should come out is a modified strain tensor.
    */
-  virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);
-  virtual void computeStress(const ColumnMajorMatrix & strain,
-                             RealTensorValue & stress);
+  virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
+  virtual void computeStress(const SymmTensor & strain,
+                             SymmTensor & stress);
 
 
   Real _coefficient;
@@ -43,14 +43,12 @@ protected:
 
   Real _shear_modulus;
 
-  MaterialProperty<ColumnMajorMatrix> & _total_strain;
-  MaterialProperty<ColumnMajorMatrix> & _total_strain_old;
-  MaterialProperty<RealTensorValue> & _stress;
-  MaterialProperty<RealTensorValue> & _stress_old;
-  MaterialProperty<RealTensorValue> & _creep_strain;
-  MaterialProperty<RealTensorValue> & _creep_strain_old;
-
-  ColumnMajorMatrix _identity;
+  MaterialProperty<SymmTensor> & _total_strain;
+  MaterialProperty<SymmTensor> & _total_strain_old;
+  MaterialProperty<SymmTensor> & _stress;
+  MaterialProperty<SymmTensor> & _stress_old;
+  MaterialProperty<SymmTensor> & _creep_strain;
+  MaterialProperty<SymmTensor> & _creep_strain_old;
 };
 
 #endif //POWERLAWCREEPMATERIAL_H

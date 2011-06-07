@@ -39,15 +39,15 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledValue("temp") : _zero),
    _volumetric_models(0),
-   _stress(declareProperty<RealTensorValue>("stress")),
-   _stress_old(declarePropertyOld<RealTensorValue>("stress")),
+   _stress(declareProperty<SymmTensor>("stress")),
+   _stress_old(declarePropertyOld<SymmTensor>("stress")),
    _crack_flags(NULL),
    _crack_flags_old(NULL),
    _elasticity_tensor(declareProperty<ColumnMajorMatrix>("elasticity_tensor")),
    _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
-   _elastic_strain(declareProperty<ColumnMajorMatrix>("elastic_strain")),
-   _v_strain(declareProperty<ColumnMajorMatrix>("v_strain")),
-   _v_strain_old(declarePropertyOld<ColumnMajorMatrix>("v_strain")),
+   _elastic_strain(declareProperty<SymmTensor>("elastic_strain")),
+   _v_strain(declareProperty<SymmTensor>("v_strain")),
+   _v_strain_old(declarePropertyOld<SymmTensor>("v_strain")),
    _local_elasticity_tensor(NULL)
 {
   IsotropicElasticityTensorRZ * t = new IsotropicElasticityTensorRZ;
@@ -117,36 +117,35 @@ SolidMechanicsMaterialRZ::computeProperties()
   {
     _local_elasticity_tensor->calculate(_qp);
 
-    _elasticity_tensor[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
-    ColumnMajorMatrix total_strain;
-    total_strain(0,0) = _grad_disp_r[_qp](0);
-    total_strain(1,1) = _grad_disp_z[_qp](1);
-    total_strain(2,2) = _disp_r[_qp]/_q_point[_qp](0);
-    total_strain(0,1) = 0.5*(_grad_disp_r[_qp](1) + _grad_disp_z[_qp](0));
+    ColumnMajorMatrix tot_strain;
+    tot_strain(0,0) = _grad_disp_r[_qp](0);
+    tot_strain(1,1) = _grad_disp_z[_qp](1);
+    tot_strain(2,2) = _disp_r[_qp]/_q_point[_qp](0);
+    tot_strain(0,1) = 0.5*(_grad_disp_r[_qp](1) + _grad_disp_z[_qp](0));
     if (_large_strain)
     {
-      total_strain(0,0) += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](0) +
-                                _grad_disp_z[_qp](0)*_grad_disp_z[_qp](0));
-      total_strain(1,1) += 0.5*(_grad_disp_r[_qp](1)*_grad_disp_r[_qp](1) +
-                                _grad_disp_z[_qp](1)*_grad_disp_z[_qp](1));
-      total_strain(2,2) += 0.5*(total_strain(2,2)*total_strain(2,2));
-      total_strain(0,1) += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](1) +
-                                _grad_disp_z[_qp](0)*_grad_disp_z[_qp](1));
+      tot_strain(0,0) += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](0) +
+                              _grad_disp_z[_qp](0)*_grad_disp_z[_qp](0));
+      tot_strain(1,1) += 0.5*(_grad_disp_r[_qp](1)*_grad_disp_r[_qp](1) +
+                              _grad_disp_z[_qp](1)*_grad_disp_z[_qp](1));
+      tot_strain(2,2) += 0.5*(tot_strain(2,2)*tot_strain(2,2));
+      tot_strain(0,1) += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](1) +
+                              _grad_disp_z[_qp](0)*_grad_disp_z[_qp](1));
     }
-    total_strain(1,0) = total_strain(0,1);
+    tot_strain(1,0) = tot_strain(0,1);
 
-    ColumnMajorMatrix strain(total_strain);
+    SymmTensor total_strain;
+    total_strain = tot_strain;
+    SymmTensor strain( total_strain );
 
     // Add in Isotropic Thermal Strain
     if (_has_temp)
     {
       Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
 
-      strain(0,0) -= isotropic_strain;
-      strain(1,1) -= isotropic_strain;
-      strain(2,2) -= isotropic_strain;
+      strain.addDiag( -isotropic_strain );
     }
 
     const unsigned int num_vol_models(_volumetric_models.size());
@@ -169,47 +168,41 @@ SolidMechanicsMaterialRZ::computeProperties()
 }
 
 void
-SolidMechanicsMaterialRZ::computeStress(const ColumnMajorMatrix & total_strain,
-                                        const ColumnMajorMatrix & strain,
+SolidMechanicsMaterialRZ::computeStress(const SymmTensor & total_strain,
+                                        const SymmTensor & strain,
                                         const ElasticityTensor & elasticity_tensor,
-                                        RealTensorValue & stress)
+                                        SymmTensor & stress)
 {
   // Add in any extra strain components
-  ColumnMajorMatrix elastic_strain;
+  SymmTensor elastic_strain;
 
   computeStrain(strain, elastic_strain);
 
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
 
-
-  // Create column vector
-  elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
-
   // C * e
-  ColumnMajorMatrix stress_vector = elasticity_tensor * elastic_strain;
-
-  // Change 9x1 to a 3x3
-  stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
-
-  stress_vector += _stress_old[_qp];
+  ColumnMajorMatrix el_strn( elastic_strain.columnMajorMatrix() );
+  el_strn.reshape( 9, 1 );
+  ColumnMajorMatrix stress_vector = elasticity_tensor * el_strn;
 
   // Fill the material properties
-  stress_vector.fill(stress);
+  stress = stress_vector;
+  stress += _stress_old[_qp];
 
   computeCracking( total_strain, stress );
 }
 
 void
-SolidMechanicsMaterialRZ::computeCracking( const ColumnMajorMatrix & strain,
-                                           RealTensorValue & stress )
+SolidMechanicsMaterialRZ::computeCracking( const SymmTensor & strain,
+                                           SymmTensor & stress )
 {
   if (_cracking_strain > 0)
   {
     // Adjust stress for a smeared crack
     ColumnMajorMatrix e_vec(3,3);
     ColumnMajorMatrix principal_strain(3,1);
-    strain.eigen( principal_strain, e_vec );
+    strain.columnMajorMatrix().eigen( principal_strain, e_vec );
 
     const Real tiny(1e-8);
     for (unsigned int i(0); i < 3; ++i)

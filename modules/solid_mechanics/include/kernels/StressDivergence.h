@@ -23,7 +23,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  MaterialProperty<RealTensorValue> & _stress;
+  MaterialProperty<SymmTensor> & _stress;
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
   MaterialProperty<RealTensorValue> & _d_stress_dT;
 
@@ -34,7 +34,7 @@ private:
   const bool _ydisp_coupled;
   const bool _zdisp_coupled;
   const bool _temp_coupled;
-  
+
   const unsigned int _xdisp_var;
   const unsigned int _ydisp_var;
   const unsigned int _zdisp_var;

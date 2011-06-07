@@ -14,7 +14,7 @@ InputParameters validParams<MaterialTensorAux>()
 MaterialTensorAux::MaterialTensorAux( const std::string & name,
                                       InputParameters parameters )
   :AuxKernel( name, parameters ),
-   _tensor( getMaterialProperty<RealTensorValue>( getParam<std::string>("tensor") ) ),
+   _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) ),
    _index( getParam<int>("index") ),
    _quantity_string( getParam<std::string>("quantity") ),
    _quantity( MTA_COMPONENT )
@@ -65,70 +65,48 @@ Real
 MaterialTensorAux::computeValue()
 {
   Real value(0);
-  RealTensorValue & tensor( _tensor[_qp] );
+  const SymmTensor & tensor( _tensor[_qp] );
   if (_quantity == MTA_COMPONENT)
   {
-    unsigned i(0), j(0); // xx
-    if ( _index == 1 ) // yy
-    {
-      i = j = 1;
-    }
-    else if ( _index == 2 ) // zz
-    {
-      i = j = 2;
-    }
-    else if ( _index == 3 ) // xy
-    {
-      j = 1;
-    }
-    else if ( _index == 4 ) // yz
-    {
-      i = 1;
-      j = 2;
-    }
-    else if ( _index == 5 ) // zx
-    {
-      j = 2;
-    }
-    value = tensor(i,j);
+    value = tensor.component(_index);
   }
   else if ( _quantity == MTA_VONMISES )
   {
     value = std::sqrt(0.5*(
-                        std::pow(tensor(0,0) - tensor(1,1), 2) +
-                        std::pow(tensor(1,1) - tensor(2,2), 2) +
-                        std::pow(tensor(2,2) - tensor(0,0), 2) + 6 * (
-                          std::pow(tensor(0,1), 2) +
-                          std::pow(tensor(1,2), 2) +
-                          std::pow(tensor(2,0), 2))));
+                           std::pow(tensor.xx() - tensor.yy(), 2) +
+                           std::pow(tensor.yy() - tensor.zz(), 2) +
+                           std::pow(tensor.zz() - tensor.xx(), 2) + 6 * (
+                           std::pow(tensor.xy(), 2) +
+                           std::pow(tensor.yz(), 2) +
+                           std::pow(tensor.zx(), 2))));
   }
   else if ( _quantity == MTA_HYDROSTATIC )
   {
-    value = tensor.tr()/3;
+    value = tensor.trace()/3;
   }
   else if ( _quantity == MTA_FIRSTINVARIANT )
   {
-    value = tensor.tr();
+    value = tensor.trace();
   }
   else if ( _quantity == MTA_SECONDINVARIANT )
   {
     value =
-      tensor(0,0)*tensor(1,1) +
-      tensor(1,1)*tensor(2,2) +
-      tensor(2,2)*tensor(0,0) -
-      tensor(0,1)*tensor(1,0) -
-      tensor(1,2)*tensor(2,1) -
-      tensor(2,0)*tensor(0,2);
+      tensor.xx()*tensor.yy() +
+      tensor.yy()*tensor.zz() +
+      tensor.zz()*tensor.xx() -
+      tensor.xy()*tensor.xy() -
+      tensor.yz()*tensor.yz() -
+      tensor.zx()*tensor.zx();
   }
   else if ( _quantity == MTA_THIRDINVARIANT )
   {
     value =
-      tensor(0,0)*tensor(1,1)*tensor(2,2) -
-      tensor(0,0)*tensor(1,2)*tensor(2,1) +
-      tensor(0,1)*tensor(2,0)*tensor(1,2) -
-      tensor(0,1)*tensor(1,0)*tensor(2,2) +
-      tensor(0,2)*tensor(1,0)*tensor(2,1) -
-      tensor(0,2)*tensor(2,0)*tensor(1,1);
+      tensor.xx()*tensor.yy()*tensor.zz() -
+      tensor.xx()*tensor.yz()*tensor.yz() +
+      tensor.xy()*tensor.zx()*tensor.yz() -
+      tensor.xy()*tensor.xy()*tensor.zz() +
+      tensor.zx()*tensor.xy()*tensor.yz() -
+      tensor.zx()*tensor.zx()*tensor.yy();
   }
   else
   {

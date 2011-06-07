@@ -3,7 +3,7 @@
 
 #include "Material.h"
 
-class ColumnMajorMatrix;
+class SymmTensor;
 
 class VolumetricModel;
 
@@ -18,7 +18,7 @@ public:
   virtual ~VolumetricModel();
 
   virtual void modifyStrain(const unsigned int qp,
-                            ColumnMajorMatrix & strain_increment) = 0;
+                            SymmTensor & strain_increment) = 0;
 
 };
 

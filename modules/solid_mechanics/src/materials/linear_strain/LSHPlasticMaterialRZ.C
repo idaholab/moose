@@ -23,12 +23,12 @@ LSHPlasticMaterialRZ::LSHPlasticMaterialRZ(std::string name,
    _tolerance(parameters.get<Real>("tolerance")),
    _max_its(parameters.get<unsigned int>("max_its")),
    _print_debug_info(getParam<bool>("print_debug_info")),
-   _total_strain(declareProperty<ColumnMajorMatrix>("total_strain")),
-   _total_strain_old(declarePropertyOld<ColumnMajorMatrix>("total_strain")),
+   _total_strain(declareProperty<SymmTensor>("total_strain")),
+   _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
-   _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain"))
+   _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain"))
 {
   _shear_modulus = _youngs_modulus / ((2*(1+_poissons_ratio)));
 
@@ -41,24 +41,22 @@ LSHPlasticMaterialRZ::LSHPlasticMaterialRZ(std::string name,
 }
 
 void
-LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain,
-                                    ColumnMajorMatrix & elastic_strain)
+LSHPlasticMaterialRZ::computeStrain(const SymmTensor & total_strain,
+                                    SymmTensor & elastic_strain)
 {
-  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
-
   _total_strain[_qp] = total_strain;
 
-  ColumnMajorMatrix etotal_strain(total_strain);
-  etotal_strain -= _total_strain_old[_qp];
+  ColumnMajorMatrix etotal_strain(total_strain.columnMajorMatrix());
+  etotal_strain -= _total_strain_old[_qp].columnMajorMatrix();
 
 
 // convert total_strain from 3x3 to 9x1
-  etotal_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
+  etotal_strain.reshape(9, 1);
 // trial stress
   ColumnMajorMatrix trial_stress = (*_local_elasticity_tensor) * etotal_strain;
 // Change 9x1 to a 3x3
-  trial_stress.reshape(LIBMESH_DIM, LIBMESH_DIM);
-  trial_stress += _stress_old[_qp];
+  trial_stress.reshape(3, 3);
+  trial_stress += _stress_old[_qp].columnMajorMatrix();
 
 // deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress(trial_stress);
@@ -99,12 +97,11 @@ LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain,
     matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
 
     // update plastic strain
-  matrix_plastic_strain_increment.fill(_plastic_strain[_qp]);
-  _plastic_strain[_qp] += _plastic_strain_old[_qp];
+    _plastic_strain[_qp] = matrix_plastic_strain_increment;
+    _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
     // calculate elastic strain
     elastic_strain = etotal_strain;
-    elastic_strain.reshape(LIBMESH_DIM, LIBMESH_DIM);
     elastic_strain -= matrix_plastic_strain_increment;
 
 
@@ -167,7 +164,7 @@ LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain,
 
 //now define _Jacobian_mult[_qp], which is a colummajormatrix, in terms of Jac[i][j][k][l]
     double Jac9x9[9][9];
-    _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
+    _Jacobian_mult[_qp].reshape(9, 9);
     for (l=0;l<3;l++)
       for (k=0;k<3;k++)
         for (j=0;j<3;j++)
@@ -187,9 +184,7 @@ LSHPlasticMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain,
   {
     elastic_strain = etotal_strain;
     _hardening_variable[_qp] = 0.0;
-    ColumnMajorMatrix A(3,3);
-    A.zero();
-    A.fill(_plastic_strain[_qp]);
+    _plastic_strain[_qp].zero();
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;
   }
 

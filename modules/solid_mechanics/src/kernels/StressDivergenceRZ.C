@@ -18,7 +18,7 @@ InputParameters validParams<StressDivergenceRZ>()
 
 StressDivergenceRZ::StressDivergenceRZ(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
-   _stress(getMaterialProperty<RealTensorValue>("stress")),
+   _stress(getMaterialProperty<SymmTensor>("stress")),
    _Jacobian_mult(getMaterialProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _component(getParam<Real>("component")),
    _rdisp_coupled(isCoupled("disp_r")),
@@ -96,7 +96,7 @@ StressDivergenceRZ::computeQpJacobian()
 }
 
 Real
-StressDivergenceRZ::computeQpOffDiagJacobian(unsigned int jvar)
+StressDivergenceRZ::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
 //   unsigned int coupled_component = 0;
 

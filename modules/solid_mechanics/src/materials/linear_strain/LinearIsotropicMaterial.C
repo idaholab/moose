@@ -41,11 +41,11 @@ LinearIsotropicMaterial::~LinearIsotropicMaterial()
 }
 
 void
-LinearIsotropicMaterial::computeStress(const ColumnMajorMatrix & strain,
-                                       RealTensorValue & stress)
+LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
+                                       SymmTensor & stress)
 {
   // Add in any extra strain components
-  ColumnMajorMatrix elastic_strain;
+  SymmTensor elastic_strain;
 
   computeStrain(strain, elastic_strain);
 
@@ -53,20 +53,22 @@ LinearIsotropicMaterial::computeStress(const ColumnMajorMatrix & strain,
   _elastic_strain[_qp] = elastic_strain;
 
   // Create column vector
-  elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
+  ColumnMajorMatrix el_strain( elastic_strain.columnMajorMatrix() );
+  el_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 
   // C * e
-  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * elastic_strain;
+  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * el_strain;
 
   // Change 9x1 to a 3x3
-  stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
+//   stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
 
   // Fill the material properties
-  stress_vector.fill(stress);
+//   stress_vector.fill(stress);
+  stress = stress_vector;
 }
 
 void
-LinearIsotropicMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
+LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
 {
   elastic_strain = total_strain;
   //Jacobian multiplier of the stress
@@ -87,30 +89,30 @@ LinearIsotropicMaterial::computeProperties()
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
 
-    ColumnMajorMatrix strain(_grad_disp_x[_qp],
-                             _grad_disp_y[_qp],
-                             _grad_disp_z[_qp]);
+    ColumnMajorMatrix strn(_grad_disp_x[_qp],
+                           _grad_disp_y[_qp],
+                           _grad_disp_z[_qp]);
 
-    // 1/2 * (strain + strain^T)
-    strain += strain.transpose();
-    strain *= 0.5;
+    // 1/2 * (strn + strn^T)
+    strn += strn.transpose();
+    strn *= 0.5;
 
     // Add in Isotropic Thermal Strain
     if(_has_temp)
     {
       Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
 
-      strain(0,0) -= isotropic_strain;
-      strain(1,1) -= isotropic_strain;
-      strain(2,2) -= isotropic_strain;
+      strn.addDiag( -isotropic_strain );
     }
 
-    ColumnMajorMatrix v_strain(LIBMESH_DIM, LIBMESH_DIM);
+    SymmTensor v_strain(0);
     for (unsigned int i(0); i < _volumetric_models.size(); ++i)
     {
       _volumetric_models[i]->modifyStrain(_qp, v_strain);
     }
-    strain += v_strain * _dt;
+    SymmTensor strain( v_strain );
+    strain *= _dt;
+    strain += strn;
 
     computeStress(strain, _stress[_qp]);
 

@@ -31,9 +31,9 @@ protected:
   unsigned int _max_its;
   bool _output_iteration_info;
 
-  MaterialProperty<RealTensorValue> & _creep_strain;
+  MaterialProperty<SymmTensor> & _creep_strain;
 
-  MaterialProperty<RealTensorValue> & _creep_strain_old;
+  MaterialProperty<SymmTensor> & _creep_strain_old;
 
 
   /// Compute the stress (sigma += deltaSigma)

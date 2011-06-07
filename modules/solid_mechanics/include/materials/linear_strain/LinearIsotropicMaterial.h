@@ -24,14 +24,14 @@ public:
 protected:
   virtual void computeProperties();
 
-  virtual void computeStress(const ColumnMajorMatrix & strain,
-                             RealTensorValue & stress);
+  virtual void computeStress(const SymmTensor & strain,
+                             SymmTensor & stress);
 
   /**
    * Will always be passed to full symmetric strain tensor.
    * What should come out is a modified strain tensor.
    */
-  virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);
+  virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
 
   /**
    * The current quadrature point.

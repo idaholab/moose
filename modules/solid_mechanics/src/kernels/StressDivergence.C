@@ -20,7 +20,7 @@ InputParameters validParams<StressDivergence>()
 
 StressDivergence::StressDivergence(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
-   _stress(getMaterialProperty<RealTensorValue>("stress")),
+   _stress(getMaterialProperty<SymmTensor>("stress")),
    _Jacobian_mult(getMaterialProperty<ColumnMajorMatrix>("Jacobian_mult")),
    _d_stress_dT(getMaterialProperty<RealTensorValue>("d_stress_dT")),
    _component(getParam<Real>("component")),
@@ -33,16 +33,16 @@ StressDivergence::StressDivergence(const std::string & name, InputParameters par
    _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
    _temp_var(_temp_coupled ? coupled("temp") : 0)
 {}
-        
+
 Real
 StressDivergence::computeQpResidual()
 {
-  return _stress[_qp].row(_component) * _grad_test[_i][_qp];
+  return _stress[_qp].rowDot(_component, _grad_test[_i][_qp]);
 }
 
 Real
 StressDivergence::computeQpJacobian()
-{ 
+{
   RealVectorValue value;
   for(unsigned int j = 0; j<LIBMESH_DIM; ++j)
     for(unsigned int i = 0; i<LIBMESH_DIM; ++i)
@@ -91,7 +91,9 @@ StressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
   }
 
   if ( _temp_coupled && jvar == _temp_var )
+  {
     return ((_d_stress_dT[_qp] * _phi[_j][_qp]) * _grad_test[_i][_qp])(_component);
-      
+  }
+
   return 0;
 }

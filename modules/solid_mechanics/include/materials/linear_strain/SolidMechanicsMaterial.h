@@ -30,7 +30,7 @@ protected:
 
   std::vector<VolumetricModel*> _volumetric_models;
 
-  MaterialProperty<RealTensorValue> & _stress;
+  MaterialProperty<SymmTensor> & _stress;
   MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
 
@@ -40,7 +40,7 @@ protected:
   // The derivative of the stress with respect to Temperature
   MaterialProperty<RealTensorValue> & _d_stress_dT;
 
-  MaterialProperty<ColumnMajorMatrix> & _elastic_strain;
+  MaterialProperty<SymmTensor> & _elastic_strain;
 
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _density;

@@ -8,7 +8,7 @@
 template<>
 InputParameters validParams<LinearAnisotropicMaterial>()
 {
-    
+
   InputParameters params = validParams<LinearIsotropicMaterial>();
   params.addRequiredParam<Real>("material_constant_c11", "Material modulus C11");
   params.addRequiredParam<Real>("material_constant_c12", "Material modulus C12");

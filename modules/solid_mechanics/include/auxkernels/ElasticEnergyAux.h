@@ -19,7 +19,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  MaterialProperty<RealTensorValue> & _stress;
+  MaterialProperty<SymmTensor> & _stress;
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;
   VariableGradient & _grad_disp_z;

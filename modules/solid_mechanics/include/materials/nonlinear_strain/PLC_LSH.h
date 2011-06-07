@@ -34,11 +34,11 @@ protected:
   unsigned int _max_its;
   bool _output_iteration_info;
 
-  MaterialProperty<RealTensorValue> & _creep_strain;
-  MaterialProperty<RealTensorValue> & _creep_strain_old;
+  MaterialProperty<SymmTensor> & _creep_strain;
+  MaterialProperty<SymmTensor> & _creep_strain_old;
 
-  MaterialProperty<RealTensorValue> & _plastic_strain;
-  MaterialProperty<RealTensorValue> & _plastic_strain_old;
+  MaterialProperty<SymmTensor> & _plastic_strain;
+  MaterialProperty<SymmTensor> & _plastic_strain_old;
 
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;

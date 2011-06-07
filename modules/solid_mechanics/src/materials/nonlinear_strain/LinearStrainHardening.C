@@ -39,8 +39,8 @@ LinearStrainHardening::LinearStrainHardening( const std::string & name,
    _yield_stress(parameters.get<Real>("yield_stress")),
    _hardening_constant(parameters.get<Real>("hardening_constant")),
 
-   _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain")),
+   _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain")),
 
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
@@ -48,7 +48,6 @@ LinearStrainHardening::LinearStrainHardening( const std::string & name,
 
 
 {
-  _identity.identity();
 }
 
 
@@ -56,19 +55,21 @@ void
 LinearStrainHardening::computeStress()
 
 {
-  const ColumnMajorMatrix stress_old(_stress_old[_qp]);
+  const ColumnMajorMatrix stress_old(_stress_old[_qp].columnMajorMatrix());
 
   // compute trial stress
-  _strain_increment.reshape(9, 1);
-  ColumnMajorMatrix stress_new( *elasticityTensor() * _strain_increment );
-  _strain_increment.reshape(3, 3);
+//   _strain_increment.reshape(9, 1);
+  ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
+  str_inc.reshape(9, 1);
+  ColumnMajorMatrix stress_new( *elasticityTensor() * str_inc );
+//   _strain_increment.reshape(3, 3);
   stress_new.reshape(3, 3);
   stress_new *= _dt;
   stress_new += stress_old;
 
   // compute deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress(stress_new);
-  dev_trial_stress -= _identity*((stress_new.tr())/3.0);
+  dev_trial_stress.addDiag( -stress_new.tr()/3.0 );
 
   // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -110,30 +111,30 @@ LinearStrainHardening::computeStress()
     ColumnMajorMatrix plastic_strain_increment(dev_trial_stress);
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress);
 
-    ColumnMajorMatrix elastic_strain_increment;
-    elastic_strain_increment = _strain_increment*_dt - plastic_strain_increment;
+    ColumnMajorMatrix elastic_strain_increment( _strain_increment.columnMajorMatrix()*_dt - plastic_strain_increment );
 
     // compute stress increment
     elastic_strain_increment.reshape(9, 1);
     stress_new =  *elasticityTensor() * elastic_strain_increment;
 
     // update stress and plastic strain
-    stress_new.fill(_stress[_qp]);
+//     stress_new.fill(_stress[_qp]);
+    _stress[_qp] = stress_new;
     _stress[_qp] += _stress_old[_qp];
-    plastic_strain_increment.fill(_plastic_strain[_qp]);
+    _plastic_strain[_qp] = plastic_strain_increment;
     _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
   } // end of if statement
   else
   {
-    ColumnMajorMatrix elastic_strain_increment(_strain_increment*_dt);
+    ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*_dt);
 
     // compute stress increment
     elastic_strain_increment.reshape(9, 1);
     stress_new =  *elasticityTensor() * elastic_strain_increment;
 
     // update stress and plastic strain
-    stress_new.fill(_stress[_qp]);
+    _stress[_qp] = stress_new;
     _stress[_qp] += _stress_old[_qp];
 
   } // end of else

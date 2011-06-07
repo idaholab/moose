@@ -23,18 +23,16 @@ PLSHPlasticMaterial::PLSHPlasticMaterial(std::string name,
    _tolerance(parameters.get<Real>("tolerance")),
    _max_its(parameters.get<unsigned int>("max_its")),
    _print_debug_info(getParam<bool>("print_debug_info")),
-   _total_strain(declareProperty<ColumnMajorMatrix>("total_strain")),
-   _total_strain_old(declarePropertyOld<ColumnMajorMatrix>("total_strain")),
-   _stress(declareProperty<RealTensorValue>("stress")),
-   _stress_old(declarePropertyOld<RealTensorValue>("stress")),
+   _total_strain(declareProperty<SymmTensor>("total_strain")),
+   _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
+   _stress(declareProperty<SymmTensor>("stress")),
+   _stress_old(declarePropertyOld<SymmTensor>("stress")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
-   _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain"))
+   _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain"))
 {
   _shear_modulus = _youngs_modulus / ((2*(1+_poissons_ratio)));
-
-  _identity.identity();
 
   _ebulk3 = _youngs_modulus/(1. - 2.*_poissons_ratio);
 
@@ -43,17 +41,18 @@ PLSHPlasticMaterial::PLSHPlasticMaterial(std::string name,
 }
 
 void
-PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
+PLSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
+                                   SymmTensor & elastic_strain)
 {
   _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
 
   _total_strain[_qp] = total_strain;
 
-  ColumnMajorMatrix etotal_strain(total_strain);
-  etotal_strain -= _total_strain_old[_qp];
+  ColumnMajorMatrix etotal_strain(total_strain.columnMajorMatrix());
+  etotal_strain -= _total_strain_old[_qp].columnMajorMatrix();
 
 
-  ColumnMajorMatrix stress_old_b(_stress_old[_qp]);
+  ColumnMajorMatrix stress_old_b(_stress_old[_qp].columnMajorMatrix());
 
 // convert total_strain from 3x3 to 9x1
   etotal_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
@@ -65,7 +64,7 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
 
 // deviatoric trial stress
   ColumnMajorMatrix dev_trial_stress(trial_stress);
-  dev_trial_stress -= _identity*((trial_stress.tr())/3.0);
+  dev_trial_stress.addDiag( -trial_stress.tr()/3.0 );
 // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
   Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
@@ -138,12 +137,11 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
     matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
 
     // update plastic strain
-  matrix_plastic_strain_increment.fill(_plastic_strain[_qp]);
-  _plastic_strain[_qp] += _plastic_strain_old[_qp];
+    _plastic_strain[_qp] = matrix_plastic_strain_increment;
+    _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
     // calculate elastic strain
     elastic_strain = etotal_strain;
-    elastic_strain.reshape(LIBMESH_DIM, LIBMESH_DIM);
     elastic_strain -= matrix_plastic_strain_increment;
 
 
@@ -225,9 +223,7 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
   {
     elastic_strain = etotal_strain;
     _hardening_variable[_qp] = 0.0;
-    ColumnMajorMatrix A(3,3);
-    A.zero();
-    A.fill(_plastic_strain[_qp]);
+    _plastic_strain[_qp].zero();
     _Jacobian_mult[_qp] = *_local_elasticity_tensor;
   }
 
@@ -237,11 +233,11 @@ PLSHPlasticMaterial::computeStrain(const ColumnMajorMatrix & total_strain, Colum
 
 //computeStress
 void
-PLSHPlasticMaterial::computeStress(const ColumnMajorMatrix & strain,
-                                   RealTensorValue & stress)
+PLSHPlasticMaterial::computeStress(const SymmTensor & strain,
+                                   SymmTensor & stress)
 {
   // Add in any extra strain components
-  ColumnMajorMatrix elastic_strain;
+  SymmTensor elastic_strain;
 
   computeStrain(strain, elastic_strain);
 
@@ -249,19 +245,12 @@ PLSHPlasticMaterial::computeStress(const ColumnMajorMatrix & strain,
   _elastic_strain[_qp] = elastic_strain;
 
 
-  // Create column vector
-  elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
-
   // C * e
-  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * elastic_strain;
-
-  // Change 9x1 to a 3x3
-  stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
-
-  ColumnMajorMatrix stress_old_e(_stress_old[_qp]);
-  stress_vector += stress_old_e;
-
+  ColumnMajorMatrix el_strn( elastic_strain.columnMajorMatrix() );
+  el_strn.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
+  ColumnMajorMatrix stress_vector(*_local_elasticity_tensor * el_strn);
 
   // Fill the material properties
-  stress_vector.fill(stress);
+  stress = stress_vector;
+  stress += _stress_old[_qp];
 }

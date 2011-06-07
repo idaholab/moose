@@ -25,41 +25,36 @@ LinearIsotropicMaterialRZ::~LinearIsotropicMaterialRZ()
 }
 
 void
-LinearIsotropicMaterialRZ::computeStress(const ColumnMajorMatrix & total_strain,
-                                         const ColumnMajorMatrix & strain,
+LinearIsotropicMaterialRZ::computeStress(const SymmTensor & total_strain,
+                                         const SymmTensor & strain,
                                          const ElasticityTensor & elasticity_tensor,
-                                         RealTensorValue & stress)
+                                         SymmTensor & stress)
 {
 
-  ColumnMajorMatrix elastic_strain;
+  SymmTensor elastic_strain;
 
   computeStrain(strain, elastic_strain);
 
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
 
-  // Create column vector
-  elastic_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
-
   // C * e
-  ColumnMajorMatrix stress_vector( elasticity_tensor * elastic_strain );
-
-  // Change 9x1 to a 3x3
-  stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
+  ColumnMajorMatrix el_strn( elastic_strain.columnMajorMatrix() );
+  el_strn.reshape( 9, 1 );
+  ColumnMajorMatrix stress_vector( elasticity_tensor * el_strn );
 
   // Fill the material properties
-  stress_vector.fill(stress);
+  stress = stress_vector;
 
   computeCracking( total_strain, stress );
 
 }
 
 void
-LinearIsotropicMaterialRZ::computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain)
+LinearIsotropicMaterialRZ::computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
 {
   elastic_strain = total_strain;
   //Jacobian multiplier of the stress
-  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
   _Jacobian_mult[_qp] = *_local_elasticity_tensor;
 }
 

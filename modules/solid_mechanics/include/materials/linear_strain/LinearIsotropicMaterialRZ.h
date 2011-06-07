@@ -23,16 +23,16 @@ public:
 
 protected:
 
-  virtual void computeStress(const ColumnMajorMatrix & total_strain,
-                             const ColumnMajorMatrix & strain,
+  virtual void computeStress(const SymmTensor & total_strain,
+                             const SymmTensor & strain,
                              const ElasticityTensor & elasticity_tensor,
-                             RealTensorValue & stress);
+                             SymmTensor & stress);
 
   /**
    * Will always be passed to full symmetric strain tensor.
    * What should come out is a modified strain tensor.
    */
-  virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain);
+  virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
 
   Real _input_thermal_conductivity;
 

@@ -47,11 +47,11 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _max_its(parameters.get<unsigned int>("max_its")),
    _output_iteration_info(getParam<bool>("output_iteration_info")),
 
-   _creep_strain(declareProperty<RealTensorValue>("creep_strain")),
-   _creep_strain_old(declarePropertyOld<RealTensorValue>("creep_strain")),
+   _creep_strain(declareProperty<SymmTensor>("creep_strain")),
+   _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain")),
 
-   _plastic_strain(declareProperty<RealTensorValue>("plastic_strain")),
-   _plastic_strain_old(declarePropertyOld<RealTensorValue>("plastic_strain")),
+   _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
+   _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain")),
 
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
@@ -74,12 +74,14 @@ PLC_LSH::computeStress()
   //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
-  const ColumnMajorMatrix stress_old(_stress_old[_qp]);
+  const ColumnMajorMatrix stress_old(_stress_old[_qp].columnMajorMatrix());
 
 // compute trial stress
-  _strain_increment.reshape(9, 1);
-  ColumnMajorMatrix stress_new( *elasticityTensor() * _strain_increment );
-  _strain_increment.reshape(3, 3);
+//   _strain_increment.reshape(9, 1);
+  ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
+  str_inc.reshape(9,1);
+  ColumnMajorMatrix stress_new( *elasticityTensor() * str_inc );
+//   _strain_increment.reshape(3, 3);
   stress_new.reshape(3, 3);
   stress_new *= _dt;
   stress_new += stress_old;
@@ -104,7 +106,8 @@ PLC_LSH::computeStress()
     delS = deltaS.doubleContraction(deltaS);
   }
 
-  stress_new.fill(_stress[_qp]);
+//   stress_new.fill(_stress[_qp]);
+  _stress[_qp] = stress_new;
 
 }
 
@@ -129,7 +132,7 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
   Real delta_temp(_temperature[_qp]-_temperature_old[_qp]);
 
   Real phiTest( _coefficient*std::pow(effective_trial_stress, _exponent) );
-  ColumnMajorMatrix dev_strain(_total_strain[_qp]);
+  ColumnMajorMatrix dev_strain(_total_strain[_qp].columnMajorMatrix());
   dev_strain.addDiag( -dev_strain.tr()/3 );
   Real epsTotal( dev_strain.doubleContraction(dev_strain) );
   const Real ratio( epsTotal > 0 ? _dt * ( phiTest / ( _tau * epsTotal ) ) + 1 : 1 );
@@ -216,7 +219,7 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
     ColumnMajorMatrix creep_strain_sub_increment( dev_trial_stress );
     creep_strain_sub_increment *= (1.5*del_p/effective_trial_stress);
 
-    ColumnMajorMatrix elastic_strain_increment(_strain_increment*dt - creep_strain_sub_increment);
+    ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*dt - creep_strain_sub_increment);
 
 // compute stress increment
     elastic_strain_increment.reshape(9, 1);
@@ -230,7 +233,7 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
     creep_strain_increment += creep_strain_sub_increment;
     _del_p[_qp] += del_p;
   }
-  creep_strain_increment.fill(_creep_strain[_qp]);
+  _creep_strain[_qp] = creep_strain_increment;
   _creep_strain[_qp] += _creep_strain_old[_qp];
 
   stress_new = stress_next;
@@ -296,8 +299,7 @@ PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
     ColumnMajorMatrix plastic_strain_increment(dev_trial_stress_p);
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress_p);
 
-    ColumnMajorMatrix elastic_strain_increment_p;
-    elastic_strain_increment_p = _strain_increment*_dt - plastic_strain_increment - creep_strain_increment;
+    ColumnMajorMatrix elastic_strain_increment_p( _strain_increment.columnMajorMatrix()*_dt - plastic_strain_increment - creep_strain_increment );
 
 //compute stress increment
     elastic_strain_increment_p.reshape(9, 1);
@@ -305,8 +307,8 @@ PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
 
 // update stress and plastic strain
     stress_new.reshape(3, 3);
-    stress_new += _stress_old[_qp];
-    plastic_strain_increment.fill(_plastic_strain[_qp]);
+    stress_new += _stress_old[_qp].columnMajorMatrix();
+    _plastic_strain[_qp] = plastic_strain_increment;
     _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
   }//end of if statement

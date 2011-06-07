@@ -27,15 +27,15 @@ protected:
 
   virtual void initialSetup();
 
-  virtual void computeStress(const ColumnMajorMatrix & total_strain,
-                             const ColumnMajorMatrix & strain,
+  virtual void computeStress(const SymmTensor & total_strain,
+                             const SymmTensor & strain,
                              const ElasticityTensor & elasticity_tensor,
-                             RealTensorValue & stress);
+                             SymmTensor & stress);
 
-  virtual void computeStrain(const ColumnMajorMatrix & total_strain, ColumnMajorMatrix & elastic_strain) = 0;
+  virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain) = 0;
 
-  virtual void computeCracking(const ColumnMajorMatrix & strain,
-                               RealTensorValue & stress);
+  virtual void computeCracking(const SymmTensor & strain,
+                               SymmTensor & stress);
 
   /**
    * The current quadrature point.
@@ -64,15 +64,15 @@ protected:
 
   std::vector<VolumetricModel*> _volumetric_models;
 
-  MaterialProperty<RealTensorValue> & _stress;
-  MaterialProperty<RealTensorValue> & _stress_old;
+  MaterialProperty<SymmTensor> & _stress;
+  MaterialProperty<SymmTensor> & _stress_old;
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
   MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
-  MaterialProperty<ColumnMajorMatrix> & _elastic_strain;
-  MaterialProperty<ColumnMajorMatrix> & _v_strain;
-  MaterialProperty<ColumnMajorMatrix> & _v_strain_old;
+  MaterialProperty<SymmTensor> & _elastic_strain;
+  MaterialProperty<SymmTensor> & _v_strain;
+  MaterialProperty<SymmTensor> & _v_strain_old;
 
   ElasticityTensor * _local_elasticity_tensor;
 

@@ -23,7 +23,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  MaterialProperty<RealTensorValue> & _stress;
+  MaterialProperty<SymmTensor> & _stress;
   MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
 
 private:
