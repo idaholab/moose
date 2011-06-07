@@ -14,6 +14,7 @@
 
 #include "MooseArray.h"
 #include "ColumnMajorMatrix.h"
+#include "SymmTensor.h"
 // libMesh Includes
 #include "vector_value.h"
 #include "tensor_value.h"
@@ -43,14 +44,14 @@ MooseArray<T>::MooseArray(const unsigned int size, const T & default_value) :
 {
   resize(size);
 
-  setAllValues(default_value);  
+  setAllValues(default_value);
 }
 
 template<typename T>
 void
 MooseArray<T>::release()
 {
-  if (_data != NULL) 
+  if (_data != NULL)
   {
     delete [] _data;
     _data = NULL;
@@ -82,3 +83,5 @@ template class MooseArray<MooseArray<MooseArray<Real> > >;
 
 template class MooseArray<std::vector<Real> >;
 template class MooseArray<DenseMatrix<Real> >;
+
+template class MooseArray<SymmTensor>;

@@ -180,17 +180,18 @@ public:
    * Returns the number of columns
    */
   unsigned int m() const;
-  
+
   /**
    * Returns eigen system solve for a symmetrix real matrix
    */
   void eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) const;
-  
+
 
   /**
    * Returns a reference to the raw data pointer
    */
   Real * rawData();
+  const Real * rawData() const;
 
   /**
    * Kronecker Product
@@ -544,6 +545,12 @@ ColumnMajorMatrix::m() const
 
 inline Real *
 ColumnMajorMatrix::rawData()
+{
+  return &_values[0];
+}
+
+inline const Real *
+ColumnMajorMatrix::rawData() const
 {
   return &_values[0];
 }

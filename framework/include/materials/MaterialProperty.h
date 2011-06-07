@@ -19,6 +19,7 @@
 
 #include "MooseArray.h"
 #include "ColumnMajorMatrix.h"
+#include "SymmTensor.h"
 
 #include "libmesh_common.h"
 
@@ -146,6 +147,10 @@ MaterialProperty<std::vector<Real> >::init (int size);
 template <>
 PropertyValue *
 MaterialProperty<ColumnMajorMatrix>::init (int size);
+
+template <>
+PropertyValue *
+MaterialProperty<SymmTensor>::init (int size);
 
 template <typename T>
 inline void
