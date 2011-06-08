@@ -22,8 +22,22 @@ public:
     _yz(init),
     _zx(init)
   {}
+  SymmTensor(const ColumnMajorMatrix & cmm) :
+    _xx( cmm.numEntries() == 9 ? cmm(0,0) : 0 ),
+    _yy( cmm.numEntries() == 9 ? cmm(1,1) : 0 ),
+    _zz( cmm.numEntries() == 9 ? cmm(2,2) : 0 ),
+    _xy( cmm.numEntries() == 9 ? cmm(0,1) : 0 ),
+    _yz( cmm.numEntries() == 9 ? cmm(1,2) : 0 ),
+    _zx( cmm.numEntries() == 9 ? cmm(2,0) : 0 )
+  {
+    if (cmm.numEntries() != 9)
+    {
+      mooseError("Cannot create SymmTensor from ColumnMajorMatrix.  Wrong number of entries.");
+    }
+  }
 
   ~SymmTensor() {}
+
 
   Real rowDot(const unsigned int r,
               const libMesh::TypeVector<Real> & v) const
@@ -208,6 +222,13 @@ public:
     return *rVal;
   }
 
+  Real doubleContraction( const SymmTensor & rhs ) const
+  {
+    return _xx*rhs._xx + _yy*rhs._yy + _zz*rhs._zz +
+      2*(_xy*rhs._xy + _yz*rhs._yz + _zx*rhs._zx);
+  }
+
+
 
   void xx( Real xx )
   {
@@ -285,6 +306,17 @@ public:
     _xy += t._xy;
     _yz += t._yz;
     _zx += t._zx;
+    return *this;
+  }
+
+  SymmTensor & operator-=(const SymmTensor & t)
+  {
+    _xx -= t._xx;
+    _yy -= t._yy;
+    _zz -= t._zz;
+    _xy -= t._xy;
+    _yz -= t._yz;
+    _zx -= t._zx;
     return *this;
   }
 

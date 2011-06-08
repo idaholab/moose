@@ -138,12 +138,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
       {
         // See if this element still has the same one across from it
 
-        Point contact_ref = info->_closest_point_ref;
-        Point contact_phys;
-        Real distance;
-        RealGradient normal;
         bool contact_point_on_side;
-        std::vector<std::vector<Real> > side_phi;
 
         Moose::findContactPoint(*info, _fe, _fe_type, node,
                                 false, contact_point_on_side);
@@ -335,6 +330,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
     {
       delete p_info[j];
     }
+
   }
 }
 
