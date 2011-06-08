@@ -63,7 +63,7 @@ LSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
   trial_stress += stress_old_b;
 
 // deviatoric trial stress
-  ColumnMajorMatrix dev_trial_stress(trial_stress);
+  SymmTensor dev_trial_stress(trial_stress);
   dev_trial_stress.addDiag( -trial_stress.tr()/3.0 );
 // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -97,7 +97,7 @@ LSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
     if(it == _max_its)
       mooseError("Max sub-newton iteration hit during plasticity increment solve!");
 
-    ColumnMajorMatrix matrix_plastic_strain_increment(dev_trial_stress);
+    SymmTensor matrix_plastic_strain_increment(dev_trial_stress);
     matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
 
     // update plastic strain

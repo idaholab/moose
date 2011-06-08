@@ -68,7 +68,7 @@ LinearStrainHardening::computeStress()
   stress_new += stress_old;
 
   // compute deviatoric trial stress
-  ColumnMajorMatrix dev_trial_stress(stress_new);
+  SymmTensor dev_trial_stress(stress_new);
   dev_trial_stress.addDiag( -stress_new.tr()/3.0 );
 
   // effective trial stress
@@ -108,17 +108,16 @@ LinearStrainHardening::computeStress()
     {
       effective_trial_stress = 0.01;
     }
-    ColumnMajorMatrix plastic_strain_increment(dev_trial_stress);
+    SymmTensor plastic_strain_increment(dev_trial_stress);
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress);
 
-    ColumnMajorMatrix elastic_strain_increment( _strain_increment.columnMajorMatrix()*_dt - plastic_strain_increment );
+    ColumnMajorMatrix elastic_strain_increment( _strain_increment.columnMajorMatrix()*_dt - plastic_strain_increment.columnMajorMatrix() );
 
     // compute stress increment
     elastic_strain_increment.reshape(9, 1);
     stress_new =  *elasticityTensor() * elastic_strain_increment;
 
     // update stress and plastic strain
-//     stress_new.fill(_stress[_qp]);
     _stress[_qp] = stress_new;
     _stress[_qp] += _stress_old[_qp];
     _plastic_strain[_qp] = plastic_strain_increment;

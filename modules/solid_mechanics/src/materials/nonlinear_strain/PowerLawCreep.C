@@ -66,14 +66,13 @@ PowerLawCreep::computeStress()
   ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
   str_inc.reshape(9, 1);
   ColumnMajorMatrix stress_new( *elasticityTensor() * str_inc );
-//   _strain_increment.reshape(3, 3);
   stress_new.reshape(3, 3);
   stress_new *= _dt;
   stress_new += stress_old;
 
   // compute deviatoric trial stress
-  ColumnMajorMatrix dev_trial_stress(stress_new);
-  dev_trial_stress.addDiag( -dev_trial_stress.tr()/3.0 );
+  SymmTensor dev_trial_stress(stress_new);
+  dev_trial_stress.addDiag( -dev_trial_stress.trace()/3.0 );
 
   // compute effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -120,18 +119,17 @@ PowerLawCreep::computeStress()
   {
     effective_trial_stress = 0.01;
   }
-  ColumnMajorMatrix creep_strain_increment(dev_trial_stress);
+  SymmTensor creep_strain_increment(dev_trial_stress);
   creep_strain_increment *= (1.5*del_p/effective_trial_stress);
 
   ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*_dt);
-  elastic_strain_increment -= creep_strain_increment;
+  elastic_strain_increment -= creep_strain_increment.columnMajorMatrix();
 
   //  compute stress increment
   elastic_strain_increment.reshape(9, 1);
   stress_new =  *elasticityTensor() * elastic_strain_increment;
 
   // update stress and creep strain
-//   stress_new.fill(_stress[_qp]);
   _stress[_qp] = stress_new;
   _stress[_qp] += _stress_old[_qp];
   _creep_strain[_qp] = creep_strain_increment;

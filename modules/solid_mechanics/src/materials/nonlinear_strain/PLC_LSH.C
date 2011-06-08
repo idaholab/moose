@@ -86,7 +86,7 @@ PLC_LSH::computeStress()
   stress_new *= _dt;
   stress_new += stress_old;
 
-  ColumnMajorMatrix creep_strain_increment;
+  SymmTensor creep_strain_increment;
   ColumnMajorMatrix stress_new_last( stress_new );
   Real delS(_tolerance+1);
   unsigned int counter(0);
@@ -114,12 +114,12 @@ PLC_LSH::computeStress()
 void
 PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
                        ColumnMajorMatrix & stress_new,
-                       ColumnMajorMatrix & creep_strain_increment )
+                       SymmTensor & creep_strain_increment )
 {
   creep_strain_increment.zero();
 
 // compute deviatoric trial stress
-  ColumnMajorMatrix dev_trial_stress(stress_new);
+  SymmTensor dev_trial_stress(stress_new);
   dev_trial_stress.addDiag( -stress_new.tr()/3.0 );
 
 // compute effective trial stress
@@ -170,7 +170,7 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
     stress_ave += delta_stress;
 
 // compute deviatoric trial stress
-    ColumnMajorMatrix dev_trial_stress(stress_ave);
+    SymmTensor dev_trial_stress(stress_ave);
     dev_trial_stress.addDiag( -stress_ave.tr()/3.0 );
 
 // compute effective trial stress
@@ -216,10 +216,10 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
     {
       effective_trial_stress = 0.01;
     }
-    ColumnMajorMatrix creep_strain_sub_increment( dev_trial_stress );
+    SymmTensor creep_strain_sub_increment( dev_trial_stress );
     creep_strain_sub_increment *= (1.5*del_p/effective_trial_stress);
 
-    ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*dt - creep_strain_sub_increment);
+    ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*dt - creep_strain_sub_increment.columnMajorMatrix());
 
 // compute stress increment
     elastic_strain_increment.reshape(9, 1);
@@ -241,7 +241,7 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
 
 void
 PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
-                     ColumnMajorMatrix & creep_strain_increment )
+                     const SymmTensor & creep_strain_increment )
 {
 
   if (_t_step == 1)
@@ -299,7 +299,7 @@ PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
     ColumnMajorMatrix plastic_strain_increment(dev_trial_stress_p);
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress_p);
 
-    ColumnMajorMatrix elastic_strain_increment_p( _strain_increment.columnMajorMatrix()*_dt - plastic_strain_increment - creep_strain_increment );
+    ColumnMajorMatrix elastic_strain_increment_p( _strain_increment.columnMajorMatrix()*_dt - plastic_strain_increment - creep_strain_increment.columnMajorMatrix() );
 
 //compute stress increment
     elastic_strain_increment_p.reshape(9, 1);

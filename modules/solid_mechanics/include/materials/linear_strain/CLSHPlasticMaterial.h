@@ -53,7 +53,6 @@ protected:
   MaterialProperty<SymmTensor> & _plastic_strain;
   MaterialProperty<SymmTensor> & _plastic_strain_old;
 
-  ColumnMajorMatrix _identity;
 };
 
 #endif //CLSHPLASTICMATERIAL_H

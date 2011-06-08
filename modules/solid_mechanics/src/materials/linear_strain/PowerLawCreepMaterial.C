@@ -73,7 +73,7 @@ PowerLawCreepMaterial::computeStrain(const SymmTensor & total_strain,
   trial_stress += stress_old_b;
 
   // deviatoric trial stress
-  ColumnMajorMatrix dev_trial_stress(trial_stress);
+  SymmTensor dev_trial_stress(trial_stress);
   dev_trial_stress.addDiag( -trial_stress.tr()/3.0 );
 // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -129,7 +129,7 @@ PowerLawCreepMaterial::computeStrain(const SymmTensor & total_strain,
     // Avoid potential divide by zero - how should this be done?
     if (effective_trial_stress < 0.01) effective_trial_stress = 0.01;
 
-    ColumnMajorMatrix matrix_creep_strain_increment(dev_trial_stress);
+    SymmTensor matrix_creep_strain_increment(dev_trial_stress);
     matrix_creep_strain_increment *= (1.5*creep_strain_increment/effective_trial_stress);
 
     // update creep strain

@@ -51,9 +51,9 @@ protected:
 
   void computeCreep(const ColumnMajorMatrix & stress_old,
                     ColumnMajorMatrix & stress_new,
-                    ColumnMajorMatrix & creep_strain_increment);
+                    SymmTensor & creep_strain_increment);
   void computeLSH( ColumnMajorMatrix & stress_new,
-                   ColumnMajorMatrix & creep_strain_increment );
+                   const SymmTensor & creep_strain_increment );
 
 private:
 
