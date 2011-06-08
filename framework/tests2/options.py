@@ -38,9 +38,11 @@ TIME_GOLD = 'time_gold'         # The gold file to exodiff output for timing run
 EXO_OPTIONS = 'exo_options'     # This variable contains a list of options for the exodiff tool
 ABS_ZERO    = 'abs_zero'        # Absolute zero value passed to the exodiff tool
 REL_ERR     = 'rel_err'         # Relative error value passed to the exodiff tool
+CUSTOM_CMP  = 'custom_cmp'      # Custom comparison file
 
 EXO_OPTS = { ABS_ZERO : 1e-11, 
-             REL_ERR : 5.5e-6 }
+             REL_ERR : 5.5e-6,
+             CUSTOM_CMP : None }
 
 # Test Ordering
 PREREQ = 'prereq'

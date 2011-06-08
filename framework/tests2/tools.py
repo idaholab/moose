@@ -1,4 +1,4 @@
-import os, sys, re, inspect, types, errno
+import os, sys, re, inspect, types, errno, pprint
 from socket import gethostname
 from optparse import OptionParser, OptionGroup
 #from optparse import OptionG
@@ -64,14 +64,22 @@ class TestHarness:
             # look for dicts that match the test regex
             for test_name, test_opts in inspect.getmembers(module):
               if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
+                pp = pprint.PrettyPrinter()
+                
                 # insert default values where none provided
                 testname = module_name + '.' + test_name
                 test = DEFAULTS.copy()
 
-                # EXO_OPTIONS is a nested dictionary we have to be careful about getting "ALL" the keys
-                if EXO_OPTIONS in test_opts:
-                  test[EXO_OPTIONS].update(test_opts[EXO_OPTIONS])
-                  del test_opts[EXO_OPTIONS]
+                # nested dictionaries have to be copied seperately
+                for (key, value) in test.iteritems():
+                  if type(value) == dict:
+                    my_dict = DEFAULTS[key].copy()
+                    if key in test_opts:
+                      my_dict.update(test_opts[key])
+                      test[key] = my_dict
+                      del test_opts[key]
+                
+                # Now update all the base level keys
                 test.update(test_opts)
                 test.update( { TEST_NAME : testname, TEST_DIR : test_dir } )
 
@@ -137,7 +145,10 @@ class TestHarness:
         reason = 'NO CRASH'
       else:  # Now test more involved things like CSV and EXODIFF
         for file in test[EXODIFF]:
-          command = 'exodiff -m -F ' + str(test[EXO_OPTIONS][ABS_ZERO]) + ' -use_old_floor -t ' + str(test[EXO_OPTIONS][REL_ERR]) \
+          custom_cmp = ''
+          if test[EXO_OPTIONS][CUSTOM_CMP] != None:
+             custom_cmp = ' -f ' + os.path.join(test[TEST_DIR], test[EXODIFF][CUSTOM_CMP])
+          command = 'exodiff -m' + custom_cmp + ' -F ' + str(test[EXO_OPTIONS][ABS_ZERO]) + ' -use_old_floor -t ' + str(test[EXO_OPTIONS][REL_ERR]) \
                     + ' ' + os.path.join(test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file)
           exo_output = runCommand(command)
           output += 'Running exodiff: ' + command + '\n' + exo_output
