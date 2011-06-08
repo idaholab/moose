@@ -120,6 +120,11 @@ class TestHarness:
     if test[SKIP]:
       self.handleTestResult(test, '', 'skipped')
       return False
+    platform = set()
+    platform.add('ALL')
+    platform.add((os.uname()[0]).upper())
+    if test[PLATFORM] not in platform:
+      self.handleTestResult(test, '', 'skipped')
     return True
 
   ## Finish the test by inspecting the raw output 

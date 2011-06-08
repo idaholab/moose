@@ -7,6 +7,7 @@ SKIP     = 'skip'               # Set to True to skip the test
 MAX_TIME = 'max_time'           # Test will fail if it exceeds this time in seconds (accuracy ~1s)
 TEST_NAME = 'testname'          # The name of the test as it appears in output, this is
                                 # set to module_name.dict_name by default
+PLATFORM = 'platform'           # set to 'ALL', 'DARWIN', 'LINUX' as appropriate
 
 # Types of tests
 EXODIFF      = 'exodiff'        # A list of files to exodiff
@@ -51,6 +52,7 @@ PREREQ = 'prereq'
 DEFAULTS = { EXODIFF : [],
              CSVDIFF : [],
              ERRORS : ['ERROR', 'command not found', 'erminate called after throwing an instance of'],
+             PLATFORM : 'ALL',
              SHOULD_CRASH : False,
              EXPECT_ERR : None,
              GROUP : [],
