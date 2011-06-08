@@ -3,7 +3,7 @@
 
 # General options
 INPUT    = 'input'              # The input.i file to use
-SKIP     = 'skip'               # Print "skipped" instead of running this test
+SKIP     = 'skip'               # Set to True to skip the test
 MAX_TIME = 'max_time'           # Test will fail if it exceeds this time in seconds (accuracy ~1s)
 TEST_NAME = 'testname'          # The name of the test as it appears in output, this is
                                 # set to module_name.dict_name by default
