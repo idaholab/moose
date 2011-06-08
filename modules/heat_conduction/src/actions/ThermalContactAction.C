@@ -19,6 +19,9 @@ InputParameters validParams<ThermalContactAction>()
   params.addRequiredParam<std::string>("variable", "The variable for thermal contact");
   params.addRequiredParam<unsigned int>("master", "The master surface");
   params.addRequiredParam<unsigned int>("slave", "The slave surface");
+  params.addParam<std::string>("disp_x", "The x displacement");
+  params.addParam<std::string>("disp_y", "The y displacement");
+  params.addParam<std::string>("disp_z", "The z displacement");
 
   return params;
 }
@@ -33,11 +36,14 @@ ThermalContactAction::addBcs()
 {
   /*
    * [./gap2]
-   *   type = GapHeatTransferLWR
+   *   type = GapHeatTransfer
    *   variable = temp
    *   boundary = 10
    *   gap_distance = penetration
    *   gap_temp = gap_value
+   *   disp_x = disp_x
+   *   disp_y = disp_y
+   *   disp_z = disp_z
    * [../]
    */
 
@@ -63,6 +69,25 @@ ThermalContactAction::addBcs()
   params.set<std::vector<std::string> >("gap_temp") = vars;
   std::vector<unsigned int> bnds(1, getParam<unsigned int>("slave"));
   params.set<std::vector<unsigned int> >("boundary") = bnds;
+
+  if (isParamValid("disp_x"))
+  {
+    params.addCoupledVar("disp_x", "The x displacement");
+    std::vector<std::string> disp_x(1, getParam<std::string>("disp_x"));
+    params.set< std::vector<std::string> >("disp_x") = disp_x;
+  }
+  if (isParamValid("disp_y"))
+  {
+    params.addCoupledVar("disp_y", "The y displacement");
+    std::vector<std::string> disp_y(1, getParam<std::string>("disp_y"));
+    params.set< std::vector<std::string> >("disp_y") = disp_y;
+  }
+  if (isParamValid("disp_z"))
+  {
+    params.addCoupledVar("disp_z", "The z displacement");
+    std::vector<std::string> disp_z(1, getParam<std::string>("disp_z"));
+    params.set< std::vector<std::string> >("disp_z") = disp_z;
+  }
 
   // add it to the warehouse
   Moose::action_warehouse.addActionBlock(action);

@@ -24,6 +24,7 @@ protected:
 
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned jvar);
   virtual Real h_conduction();
   virtual Real h_contact();
   virtual Real h_radiation();
@@ -31,7 +32,7 @@ protected:
   virtual Real dh_contact();
   virtual Real dh_radiation();
   virtual Real gapK();
-  virtual Real gapLength();
+  virtual Real gapLength() const;
 
   virtual Real computeSlaveFluxContribution(Real grad_t);
 
@@ -44,6 +45,16 @@ protected:
 
   Real _min_gap;
   Real _max_gap;
+
+private:
+  const bool _xdisp_coupled;
+  const bool _ydisp_coupled;
+  const bool _zdisp_coupled;
+
+  const unsigned int _xdisp_var;
+  const unsigned int _ydisp_var;
+  const unsigned int _zdisp_var;
+
 };
 
 #endif //GAPHEATTRANSFER_H
