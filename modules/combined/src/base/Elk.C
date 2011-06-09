@@ -212,7 +212,7 @@ Elk::registerObjects()
   registerInitialCondition(RndBoundingBoxIC);
 
   // contact
-  registerAction(ContactAction, "Contact/*", "add_dirac_kernel");
+  registerAction(ContactAction, "Contact/*", "meta_action");
   registerDiracKernel(ContactMaster);
   registerDiracKernel(SlaveConstraint);
 

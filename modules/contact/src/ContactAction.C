@@ -1,5 +1,7 @@
 #include "ContactAction.h"
 
+#include "ActionFactory.h"
+#include "MooseObjectAction.h"
 #include "MProblem.h"
 #include "Parser.h"
 
@@ -39,47 +41,90 @@ ContactAction::act()
     ++dim;
   }
 
+  InputParameters action_params = ActionFactory::instance()->getValidParams("DiracKernels/*");
+  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+
   // Create master objects
-  InputParameters params = validParams<DiracKernel>();
-  params.set<std::string>("model") = _model;
-  params.set<unsigned int>("boundary") = _master;
-  params.set<unsigned int>("slave") = _slave;
-  params.set<Real>("penalty") = _penalty;
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
-  params.addCoupledVar("disp_z", "The z displacement");
-  if (dim == 3)
-  {
-    params.set<std::vector<std::string> >("disp_z") = std::vector<std::string>(1, _disp_z);
-  }
+  action_params.set<std::string>("type") = "ContactMaster";
   std::vector<std::string> vars;
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
-  params.set<bool>("use_displaced_mesh") = true;
+  std::string short_name(_name);
+  // Chop off "Contact/"
+  short_name.erase(0, 8);
   for (unsigned int i(0); i < dim; ++i)
   {
-    params.set<unsigned int>("component") = i;
-    params.set<std::string>("variable") = vars[i];
     std::stringstream name;
-    name << _name;
+    name << "DiracKernels/";
+    name << short_name;
     name << "_master_";
     name << i;
-    _problem->addDiracKernel("ContactMaster", name.str(), params);
-  }
+    Action *action = ActionFactory::instance()->create(name.str(), action_params);
 
-  params.set<unsigned int>("boundary") = _slave;
-  params.set<unsigned int>("master") = _master;
-  for (unsigned int i(0); i < dim; ++i)
-  {
+    MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    mooseAssert (moose_object_action, "Dynamic Cast failed");
+
+    InputParameters & params = moose_object_action->getMooseObjectParams();
+
+    params.set<std::string>("model") = _model;
+    params.set<unsigned int>("boundary") = _master;
+    params.set<unsigned int>("slave") = _slave;
+    params.set<Real>("penalty") = _penalty;
+    params.addCoupledVar("disp_x", "The x displacement");
+    params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
+    params.addCoupledVar("disp_y", "The y displacement");
+    params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
+    params.addCoupledVar("disp_z", "The z displacement");
+    if (dim == 3)
+    {
+      params.set<std::vector<std::string> >("disp_z") = std::vector<std::string>(1, _disp_z);
+    }
+
+    params.set<bool>("use_displaced_mesh") = true;
     params.set<unsigned int>("component") = i;
     params.set<std::string>("variable") = vars[i];
+
+    // add it to the warehouse
+    Moose::action_warehouse.addActionBlock(action);
+  }
+
+  // Create slave objects
+  action_params.set<std::string>("type") = "SlaveConstraint";
+  for (unsigned int i(0); i < dim; ++i)
+  {
     std::stringstream name;
-    name << _name;
+    name << "DiracKernels/";
+    name << short_name;
     name << "_slave_";
     name << i;
-    _problem->addDiracKernel("SlaveConstraint", name.str(), params);
+    Action *action = ActionFactory::instance()->create(name.str(), action_params);
+
+    MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    mooseAssert (moose_object_action, "Dynamic Cast failed");
+
+    InputParameters & params = moose_object_action->getMooseObjectParams();
+
+    params.set<std::string>("model") = _model;
+    params.set<unsigned int>("boundary") = _slave;
+    params.set<unsigned int>("master") = _master;
+    params.set<Real>("penalty") = _penalty;
+    params.addCoupledVar("disp_x", "The x displacement");
+    params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
+    params.addCoupledVar("disp_y", "The y displacement");
+    params.set<std::vector<std::string> >("disp_y") = std::vector<std::string>(1, _disp_y);
+    params.addCoupledVar("disp_z", "The z displacement");
+    if (dim == 3)
+    {
+      params.set<std::vector<std::string> >("disp_z") = std::vector<std::string>(1, _disp_z);
+    }
+
+    params.set<bool>("use_displaced_mesh") = true;
+    params.set<unsigned int>("component") = i;
+    params.set<std::string>("variable") = vars[i];
+
+    // add it to the warehouse
+    Moose::action_warehouse.addActionBlock(action);
   }
+
 }
