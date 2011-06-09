@@ -57,6 +57,9 @@ public:
    */
   void setShearModulus(const Real k);
 
+  virtual Real stiffness( const unsigned i, const unsigned j,
+                          const RealGradient & test,
+                          const RealGradient & phi );
 protected:
 
   bool _lambda_set, _mu_set, _E_set, _nu_set, _k_set;

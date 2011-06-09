@@ -2,6 +2,7 @@
 #define SYMMELASTICITYTENSOR_H
 
 #include "SymmTensor.h"
+#include "vector_value.h"
 
 /**
  * This class defines a basic set of capabilities any elasticity tensor should have.
@@ -30,6 +31,10 @@ public:
   virtual ColumnMajorMatrix calculateDerivative(unsigned int qp, unsigned int i);
 
   virtual void multiply( const SymmTensor & x, SymmTensor & b );
+
+  virtual Real stiffness( const unsigned i, const unsigned j,
+                          const RealGradient & test,
+                          const RealGradient & phi );
 
 protected:
 

@@ -63,3 +63,59 @@ SymmElasticityTensor::generalMultiply( const SymmTensor & x, SymmTensor & b )
   b.zx() = _val[ 5]*xx + _val[10]*yy + _val[14]*zz + 2*(_val[17]*xy + _val[19]*yz + _val[20]*zx);
 }
 
+Real
+SymmElasticityTensor::stiffness( const unsigned ii, const unsigned jj,
+                                 const RealGradient & test,
+                                 const RealGradient & phi )
+{
+  unsigned i(ii);
+  unsigned j(jj);
+  if ( i > j )
+  {
+    i = jj;
+    j = ii;
+  }
+  RealGradient b;
+  if (0 == i && 0 == j)
+  {
+    b(0) = _val[ 0]*phi(0) + _val[ 3]*phi(1) + _val[ 5]*phi(2);
+    b(1) = _val[ 3]*phi(0) + _val[15]*phi(1) + _val[17]*phi(2);
+    b(2) = _val[ 5]*phi(0) + _val[17]*phi(1) + _val[20]*phi(2);
+  }
+  else if (1 == i && 1 == j)
+  {
+    b(0) = _val[15]*phi(0) + _val[ 8]*phi(1) + _val[16]*phi(2);
+    b(1) = _val[ 8]*phi(0) + _val[ 6]*phi(1) + _val[ 9]*phi(2);
+    b(2) = _val[16]*phi(0) + _val[ 9]*phi(2) + _val[18]*phi(2);
+  }
+  else if (2 == i && 2 == j)
+  {
+    b(0) = _val[20]*phi(0) + _val[19]*phi(1) + _val[14]*phi(2);
+    b(1) = _val[19]*phi(0) + _val[18]*phi(1) + _val[13]*phi(2);
+    b(2) = _val[14]*phi(0) + _val[13]*phi(1) + _val[11]*phi(2);
+  }
+  else if (0 == i && 1 == j)
+  {
+    b(0) = _val[ 3]*phi(0) + _val[ 1]*phi(1) + _val[ 4]*phi(2);
+    b(1) = _val[15]*phi(0) + _val[ 8]*phi(1) + _val[16]*phi(2);
+    b(2) = _val[17]*phi(0) + _val[10]*phi(1) + _val[19]*phi(2);
+  }
+  else if (1 == i && 2 == j)
+  {
+    b(0) = _val[17]*phi(0) + _val[16]*phi(1) + _val[14]*phi(2);
+    b(1) = _val[10]*phi(0) + _val[10]*phi(1) + _val[ 7]*phi(2);
+    b(2) = _val[19]*phi(0) + _val[18]*phi(1) + _val[13]*phi(2);
+  }
+  else if (0 == i && 2 == j)
+  {
+    b(0) = _val[ 5]*phi(0) + _val[ 4]*phi(1) + _val[ 2]*phi(2);
+    b(1) = _val[17]*phi(0) + _val[16]*phi(1) + _val[12]*phi(2);
+    b(2) = _val[20]*phi(0) + _val[19]*phi(1) + _val[14]*phi(2);
+  }
+  else
+  {
+    mooseError( "Wrong index in stiffness calculation" );
+  }
+  return test * b;
+}
+

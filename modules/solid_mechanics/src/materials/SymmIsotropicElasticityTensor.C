@@ -102,3 +102,59 @@ SymmIsotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
   _val[ 1] = _val[ 2] = _val[ 7] = C12;
   _val[15] = _val[18] = _val[20] = C44;
 }
+
+Real
+SymmIsotropicElasticityTensor::stiffness( const unsigned ii, const unsigned jj,
+                                          const RealGradient & test,
+                                          const RealGradient & phi )
+{
+  unsigned i(ii);
+  unsigned j(jj);
+  if ( i > j )
+  {
+    i = jj;
+    j = ii;
+  }
+  RealGradient b;
+  if (0 == i && 0 == j)
+  {
+    b(0) = _val[ 0]*phi(0);
+    b(1) = _val[15]*phi(1);
+    b(2) = _val[20]*phi(2);
+  }
+  else if (1 == i && 1 == j)
+  {
+    b(0) = _val[15]*phi(0);
+    b(1) = _val[ 6]*phi(1);
+    b(2) = _val[18]*phi(2);
+  }
+  else if (2 == i && 2 == j)
+  {
+    b(0) = _val[20]*phi(0);
+    b(1) = _val[18]*phi(1);
+    b(2) = _val[11]*phi(2);
+  }
+  else if (0 == i && 1 == j)
+  {
+    b(0) = _val[ 1]*phi(1);
+    b(1) = _val[15]*phi(0);
+    b(2) = 0;
+  }
+  else if (1 == i && 2 == j)
+  {
+    b(0) = 0;
+    b(1) = _val[ 7]*phi(2);
+    b(2) = _val[18]*phi(1);
+  }
+  else if (0 == i && 2 == j)
+  {
+    b(0) = _val[ 2]*phi(2);
+    b(1) = 0;
+    b(2) = _val[20]*phi(0);
+  }
+  else
+  {
+    mooseError( "Wrong index in stiffness calculation" );
+  }
+  return test * b;
+}
