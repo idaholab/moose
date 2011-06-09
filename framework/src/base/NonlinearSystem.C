@@ -28,6 +28,7 @@
 #include "ComputeDampingThread.h"
 #include "TimeKernel.h"
 #include "FP.h"
+#include "DisplacedProblem.h"
 // libMesh
 #include "nonlinear_solver.h"
 #include "quadrature_gauss.h"
@@ -814,6 +815,13 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
         dof_map.constrain_element_matrix(ke, dof_indices, false);
         // FIXME: add variable scaling here
         jacobian.add_matrix(ke, dof_indices);
+
+        if (_mproblem._displaced_problem != NULL)
+        {
+          DenseMatrix<Number> & ke = _mproblem._displaced_problem->asmBlock(tid).jacobianBlock(ivar, jvar);
+          dof_map.constrain_element_matrix(ke, dof_indices, false);
+          jacobian.add_matrix(ke, dof_indices);
+        }
       }
     }
   }

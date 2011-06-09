@@ -169,7 +169,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
     }
 
     //Apply the preconditioner to the small system
-    _preconditioners[system_var]->apply(*u_system.rhs,*u_system.solution);
+    _preconditioners[system_var]->apply(*u_system.rhs, *u_system.solution);
 
     //Copy solution from small system into the big one
     //copyVarValues(mesh,sys,0,*u_system.solution,0,system_var,y);
