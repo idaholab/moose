@@ -1,6 +1,7 @@
 #include "PressureAction.h"
 
-#include "Pressure.h"
+#include "ActionFactory.h"
+#include "MooseObjectAction.h"
 
 #include "MProblem.h"
 #include "Parser.h"
@@ -40,25 +41,41 @@ PressureAction::act()
     ++dim;
   }
 
-  InputParameters params = validParams<Pressure>();
-  params.set<std::vector<unsigned int> >("boundary") = _boundary;
-  params.set<Real>("factor") = _factor;
-  params.set<std::string>("function") = _function;
-
+  InputParameters action_params = ActionFactory::instance()->getValidParams("BCs/*");
+  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  action_params.set<std::string>("type") = _kernel_name;
   std::vector<std::string> vars;
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
-  params.set<bool>("use_displaced_mesh") = true;
+  std::string short_name(_name);
+  // Chop off "BCs/Pressure/"
+  short_name.erase(0, 4+_kernel_name.size());
   for (unsigned int i(0); i < dim; ++i)
   {
-    params.set<int>("component") = i;
-    params.set<std::string>("variable") = vars[i];
     std::stringstream name;
-    name << _name;
+    name << "BCs/";
+    name << short_name;
     name << "_";
     name << i;
-    _problem->addBoundaryCondition(_kernel_name, name.str(), params);
+    Action *action = ActionFactory::instance()->create(name.str(), action_params);
+
+    MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    mooseAssert (moose_object_action, "Dynamic Cast failed");
+
+    InputParameters & params = moose_object_action->getMooseObjectParams();
+
+    params.set<std::vector<unsigned int> >("boundary") = _boundary;
+    params.set<Real>("factor") = _factor;
+    params.set<std::string>("function") = _function;
+
+    params.set<bool>("use_displaced_mesh") = true;
+
+    params.set<int>("component") = i;
+    params.set<std::string>("variable") = vars[i];
+
+    // add it to the warehouse
+    Moose::action_warehouse.addActionBlock(action);
   }
 
 }

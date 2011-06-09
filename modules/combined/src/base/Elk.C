@@ -179,19 +179,19 @@ Elk::registerObjects()
 
   registerBoundaryCondition(PlenumPressure);
   registerAction(EmptyAction, "BCs/PlenumPressure", "no_action");
-  registerAction(PlenumPressureAction, "BCs/PlenumPressure/*", "add_bc");
+  registerAction(PlenumPressureAction, "BCs/PlenumPressure/*", "meta_action");
 
   registerBoundaryCondition(PlenumPressureRZ);
   registerAction(EmptyAction, "BCs/PlenumPressureRZ", "no_action");
-  registerAction(PlenumPressureRZAction, "BCs/PlenumPressureRZ/*", "add_bc");
+  registerAction(PlenumPressureRZAction, "BCs/PlenumPressureRZ/*", "meta_action");
 
   registerBoundaryCondition(Pressure);
   registerAction(EmptyAction, "BCs/Pressure", "no_action");
-  registerAction(PressureAction, "BCs/Pressure/*", "add_bc");
+  registerAction(PressureAction, "BCs/Pressure/*", "meta_action");
 
   registerBoundaryCondition(PressureRZ);
   registerAction(EmptyAction, "BCs/PressureRZ", "no_action");
-  registerAction(PressureRZAction, "BCs/PressureRZ/*", "add_bc");
+  registerAction(PressureRZAction, "BCs/PressureRZ/*", "meta_action");
 
   registerAux(ElasticEnergyAux);
   registerKernel(StressDivergence);
