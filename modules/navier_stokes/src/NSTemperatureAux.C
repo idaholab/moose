@@ -1,7 +1,7 @@
-#include "TemperatureAux.h"
+#include "NSTemperatureAux.h"
 
 template<>
-InputParameters validParams<TemperatureAux>()
+InputParameters validParams<NSTemperatureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   
@@ -20,7 +20,7 @@ InputParameters validParams<TemperatureAux>()
 
 
 
-TemperatureAux::TemperatureAux(const std::string & name, InputParameters parameters)
+NSTemperatureAux::NSTemperatureAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
    _rho(coupledValue("rho")),
    _u_vel(coupledValue("u")),
@@ -32,7 +32,7 @@ TemperatureAux::TemperatureAux(const std::string & name, InputParameters paramet
 
 
 Real
-TemperatureAux::computeValue()
+NSTemperatureAux::computeValue()
 {
   Real V2 = 
     _u_vel[_qp]*_u_vel[_qp] + 

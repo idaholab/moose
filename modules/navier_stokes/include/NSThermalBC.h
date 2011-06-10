@@ -1,23 +1,23 @@
-#ifndef THERMALBC_H
-#define THERMALBC_H
+#ifndef NSTHERMALBC_H
+#define NSTHERMALBC_H
 
 #include "NodalBC.h"
 #include "Material.h"
 
 
 //Forward Declarations
-class ThermalBC;
+class NSThermalBC;
 
 template<>
-InputParameters validParams<ThermalBC>();
+InputParameters validParams<NSThermalBC>();
 
-class ThermalBC : public NodalBC
+class NSThermalBC : public NodalBC
 {
 public:
 
-  ThermalBC(const std::string & name, InputParameters parameters);
+  NSThermalBC(const std::string & name, InputParameters parameters);
   
-  virtual ~ThermalBC(){}
+  virtual ~NSThermalBC(){}
 
 protected:
   // Computes the temperature based on ideal gas equation of state,

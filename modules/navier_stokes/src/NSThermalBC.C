@@ -1,7 +1,7 @@
-#include "ThermalBC.h"
+#include "NSThermalBC.h"
 
 template<>
-InputParameters validParams<ThermalBC>()
+InputParameters validParams<NSThermalBC>()
 {
   InputParameters params = validParams<NodalBC>();
 
@@ -16,7 +16,7 @@ InputParameters validParams<ThermalBC>()
   return params;
 }
 
-ThermalBC::ThermalBC(const std::string & name, InputParameters parameters)
+NSThermalBC::NSThermalBC(const std::string & name, InputParameters parameters)
   :NodalBC(name, parameters),
    _rho_var(coupled("rho")),
    _rho(coupledValue("rho")),
@@ -30,7 +30,7 @@ ThermalBC::ThermalBC(const std::string & name, InputParameters parameters)
 
 
 Real
-ThermalBC::computeQpResidual()
+NSThermalBC::computeQpResidual()
 {
   Real value;
 

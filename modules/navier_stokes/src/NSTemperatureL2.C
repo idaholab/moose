@@ -1,8 +1,8 @@
-#include "Temperature.h"
+#include "NSTemperatureL2.h"
  
 
 template<>
-InputParameters validParams<Temperature>()
+InputParameters validParams<NSTemperatureL2>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -16,7 +16,7 @@ InputParameters validParams<Temperature>()
   return params;
 }
 
-Temperature::Temperature(const std::string & name, InputParameters parameters)
+NSTemperatureL2::NSTemperatureL2(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
     _p_var(coupled("p")),
     _p(coupledValue("p")),
@@ -32,7 +32,7 @@ Temperature::Temperature(const std::string & name, InputParameters parameters)
 {}
 
 Real
-Temperature::computeQpResidual()
+NSTemperatureL2::computeQpResidual()
 {
   Real value = 1.0/_c_v[_qp];
 
@@ -48,7 +48,7 @@ Temperature::computeQpResidual()
 
 
 Real
-Temperature::computeQpJacobian()
+NSTemperatureL2::computeQpJacobian()
 {
   Real value = 1.0/_c_v[_qp];
 
@@ -62,7 +62,7 @@ Temperature::computeQpJacobian()
 }
 
 Real
-Temperature::computeQpOffDiagJacobian(unsigned int jvar)
+NSTemperatureL2::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _p_var)
   {

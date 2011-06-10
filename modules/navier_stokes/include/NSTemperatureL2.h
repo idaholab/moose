@@ -1,20 +1,20 @@
-#ifndef TEMPERATURE_H
-#define TEMPERATURE_H
+#ifndef NSTEMPERATUREL2_H
+#define NSTEMPERATUREL2_H
 
 #include "Kernel.h"
 #include "Material.h"
 
 //Forward Declarations
-class Temperature;
+class NSTemperatureL2;
 
 template<>
-InputParameters validParams<Temperature>();
+InputParameters validParams<NSTemperatureL2>();
 
-class Temperature : public Kernel
+class NSTemperatureL2 : public Kernel
 {
 public:
 
-  Temperature(const std::string & name, InputParameters parameters);
+  NSTemperatureL2(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();

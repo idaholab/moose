@@ -1,8 +1,8 @@
-#include "ImposedVelocityBC.h"
+#include "NSImposedVelocityBC.h"
 
 // Full specialization of the validParams function for this object
 template<>
-InputParameters validParams<ImposedVelocityBC>()
+InputParameters validParams<NSImposedVelocityBC>()
 {
   // Initialize the params object from the base class
   InputParameters params = validParams<NodalBC>();
@@ -21,7 +21,7 @@ InputParameters validParams<ImposedVelocityBC>()
 
 
 // Constructor, be sure to call the base class constructor first!
-ImposedVelocityBC::ImposedVelocityBC(const std::string & name, InputParameters parameters)
+NSImposedVelocityBC::NSImposedVelocityBC(const std::string & name, InputParameters parameters)
   :NodalBC(name, parameters),
    _rho(coupledValue("rho")),
    _desired_velocity(getParam<Real>("desired_velocity"))
@@ -30,7 +30,7 @@ ImposedVelocityBC::ImposedVelocityBC(const std::string & name, InputParameters p
 
 
 // Specialization of the computeQpResidual function for this class
-Real ImposedVelocityBC::computeQpResidual()
+Real NSImposedVelocityBC::computeQpResidual()
 {
   // Return the difference between the current momentum and the desired value
   // (rho*u) - rho*desired_velocity

@@ -1,7 +1,7 @@
-#include "VelocityAux.h"
+#include "NSVelocityAux.h"
 
 template<>
-InputParameters validParams<VelocityAux>()
+InputParameters validParams<NSVelocityAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addCoupledVar("rho", "");
@@ -9,14 +9,14 @@ InputParameters validParams<VelocityAux>()
   return params;
 }
 
-VelocityAux::VelocityAux(const std::string & name, InputParameters parameters)
+NSVelocityAux::NSVelocityAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
    _rho(coupledValue("rho")),
    _momentum(coupledValue("momentum"))
 {}
 
 Real
-VelocityAux::computeValue()
+NSVelocityAux::computeValue()
 {
   return _momentum[_qp] / _rho[_qp];
 }

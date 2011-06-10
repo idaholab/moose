@@ -33,14 +33,14 @@
 #include "MomentumViscousFlux.h"
 #include "EnergyInviscidFlux.h"
 #include "EnergyViscousFlux.h"
-#include "GravityPower.h"
-#include "GravityForce.h"
-#include "PressureNeumannBC.h"
-#include "ThermalBC.h"
-#include "VelocityAux.h"
-#include "ImposedVelocityBC.h"
-#include "TemperatureAux.h"
-#include "Temperature.h"
+#include "NSGravityPower.h"
+#include "NSGravityForce.h"
+#include "NSPressureNeumannBC.h"
+#include "NSThermalBC.h"
+#include "NSVelocityAux.h"
+#include "NSImposedVelocityBC.h"
+#include "NSTemperatureAux.h"
+#include "NSTemperatureL2.h"
 #include "SpecificHeatConstantVolumeAux.h"
 #include "NSPressureAux.h"
 #include "NSMomentumInviscidFluxAux.h"
@@ -142,14 +142,14 @@ Elk::registerObjects()
   registerKernel(MomentumViscousFlux);
   registerKernel(EnergyInviscidFlux);
   registerKernel(EnergyViscousFlux);
-  registerKernel(GravityPower);
-  registerKernel(GravityForce);
-  registerKernel(Temperature);
-  registerBoundaryCondition(PressureNeumannBC);
-  registerBoundaryCondition(ThermalBC);
-  registerAux(VelocityAux);
-  registerBoundaryCondition(ImposedVelocityBC);
-  registerAux(TemperatureAux);
+  registerKernel(NSGravityPower);
+  registerKernel(NSGravityForce);
+  registerKernel(NSTemperatureL2);
+  registerBoundaryCondition(NSPressureNeumannBC);
+  registerBoundaryCondition(NSThermalBC);
+  registerAux(NSVelocityAux);
+  registerBoundaryCondition(NSImposedVelocityBC);
+  registerAux(NSTemperatureAux);
   registerAux(SpecificHeatConstantVolumeAux);
   registerAux(NSPressureAux);
   registerAux(NSMomentumInviscidFluxAux);

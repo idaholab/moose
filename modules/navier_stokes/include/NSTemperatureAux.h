@@ -1,13 +1,13 @@
-#ifndef TEMPERATUREAUX_H
-#define TEMPERATUREAUX_H
+#ifndef NSTEMPERATUREAUX_H
+#define NSTEMPERATUREAUX_H
 
 #include "AuxKernel.h"
 
-//Forward Declarations
-class TemperatureAux;
+// Forward Declarations
+class NSTemperatureAux;
 
 template<>
-InputParameters validParams<TemperatureAux>();
+InputParameters validParams<NSTemperatureAux>();
 
 /** 
  * Temperature is an auxiliary value computed from the total energy
@@ -15,7 +15,7 @@ InputParameters validParams<TemperatureAux>();
  * T = e_i / c_v
  *   = (e_t - |u|^2/2) / c_v
  */
-class TemperatureAux : public AuxKernel
+class NSTemperatureAux : public AuxKernel
 {
 public:
 
@@ -23,9 +23,9 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  TemperatureAux(const std::string & name, InputParameters parameters);
+  NSTemperatureAux(const std::string & name, InputParameters parameters);
 
-  virtual ~TemperatureAux() {}
+  virtual ~NSTemperatureAux() {}
   
 protected:
   virtual Real computeValue();
@@ -43,4 +43,4 @@ protected:
 
 };
 
-#endif //VELOCITYAUX_H
+#endif // NSTEMPERATUREAUX_H

@@ -1,25 +1,25 @@
-#ifndef IMPOSEDVELOCITYBC_H
-#define IMPOSEDVELOCITYBC_H
+#ifndef NSIMPOSEDVELOCITYBC_H
+#define NSIMPOSEDVELOCITYBC_H
 
 // The base class definition (part of MOOSE)
 #include "NodalBC.h"
 
 //Forward Declarations
-class ImposedVelocityBC;
+class NSImposedVelocityBC;
 
 
 // Specialization required of all user-level Moose objects
 template<>
-InputParameters validParams<ImposedVelocityBC>();
+InputParameters validParams<NSImposedVelocityBC>();
 
-class ImposedVelocityBC : public NodalBC
+class NSImposedVelocityBC : public NodalBC
 {
 public:
   // Constructor
-  ImposedVelocityBC(const std::string & name, InputParameters parameters);
+  NSImposedVelocityBC(const std::string & name, InputParameters parameters);
 
   // Destructor, better be virtual
-  virtual ~ImposedVelocityBC(){}
+  virtual ~NSImposedVelocityBC(){}
 
 protected:
 
@@ -35,4 +35,4 @@ protected:
 };
 
 
-#endif // IMPOSEDVELOCITYBC_H
+#endif // NSIMPOSEDVELOCITYBC_H

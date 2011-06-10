@@ -1,7 +1,7 @@
-#include "PressureNeumannBC.h"
+#include "NSPressureNeumannBC.h"
 
 template<>
-InputParameters validParams<PressureNeumannBC>()
+InputParameters validParams<NSPressureNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredCoupledVar("pressure", "");
@@ -11,7 +11,7 @@ InputParameters validParams<PressureNeumannBC>()
   return params;
 }
 
-PressureNeumannBC::PressureNeumannBC(const std::string & name, InputParameters parameters)
+NSPressureNeumannBC::NSPressureNeumannBC(const std::string & name, InputParameters parameters)
   :IntegratedBC(name, parameters),
    _pressure(coupledValue("pressure")),
    _component(getParam<Real>("component")),
@@ -20,7 +20,7 @@ PressureNeumannBC::PressureNeumannBC(const std::string & name, InputParameters p
 }
 
 Real
-PressureNeumannBC::computeQpResidual()
+NSPressureNeumannBC::computeQpResidual()
 {
   return _pressure[_qp] * _normals[_qp](_component) * _test[_i][_qp];
 }

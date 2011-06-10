@@ -1,7 +1,7 @@
-#include "GravityPower.h"
+#include "NSGravityPower.h"
  
 template<>
-InputParameters validParams<GravityPower>()
+InputParameters validParams<NSGravityPower>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -14,7 +14,7 @@ InputParameters validParams<GravityPower>()
   return params;
 }
 
-GravityPower::GravityPower(const std::string & name, InputParameters parameters)
+NSGravityPower::NSGravityPower(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
     _momentum_var(coupled("momentum")),
     _momentum(coupledValue("momentum")),
@@ -22,14 +22,14 @@ GravityPower::GravityPower(const std::string & name, InputParameters parameters)
   {}
 
 Real
-GravityPower::computeQpResidual()
+NSGravityPower::computeQpResidual()
 {
   // -(rho * U * g) * phi
   return -_momentum[_qp]*_acceleration*_test[_i][_qp];
 }
 
 Real
-GravityPower::computeQpOffDiagJacobian(unsigned int jvar)
+NSGravityPower::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _momentum_var)
   {

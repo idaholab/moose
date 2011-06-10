@@ -1,7 +1,7 @@
-#include "GravityForce.h"
+#include "NSGravityForce.h"
  
 template<>
-InputParameters validParams<GravityForce>()
+InputParameters validParams<NSGravityForce>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -14,7 +14,7 @@ InputParameters validParams<GravityForce>()
   return params;
 }
 
-GravityForce::GravityForce(const std::string & name, InputParameters parameters)
+NSGravityForce::NSGravityForce(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
     _rho_var(coupled("rho")),
     _rho(coupledValue("rho")),
@@ -22,14 +22,14 @@ GravityForce::GravityForce(const std::string & name, InputParameters parameters)
   {}
 
 Real
-GravityForce::computeQpResidual()
+NSGravityForce::computeQpResidual()
 {
   // -rho * g * phi
   return -_rho[_qp]*_acceleration*_test[_i][_qp];
 }
 
 Real
-GravityForce::computeQpOffDiagJacobian(unsigned int jvar)
+NSGravityForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _rho_var)
   {

@@ -1,23 +1,23 @@
-#ifndef PRESSURENEUMANNBC_H
-#define PRESSURENEUMANNBC_H
+#ifndef NSPRESSURENEUMANNBC_H
+#define NSPRESSURENEUMANNBC_H
 
 #include "IntegratedBC.h"
 #include "Material.h"
 
 
 //Forward Declarations
-class PressureNeumannBC;
+class NSPressureNeumannBC;
 
 template<>
-InputParameters validParams<PressureNeumannBC>();
+InputParameters validParams<NSPressureNeumannBC>();
 
-class PressureNeumannBC : public IntegratedBC
+class NSPressureNeumannBC : public IntegratedBC
 {
 public:
 
-  PressureNeumannBC(const std::string & name, InputParameters parameters);
+  NSPressureNeumannBC(const std::string & name, InputParameters parameters);
 
-  virtual ~PressureNeumannBC(){}
+  virtual ~NSPressureNeumannBC(){}
 
 protected:
 

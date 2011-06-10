@@ -1,19 +1,19 @@
-#ifndef GRAVITYPOWER_H
-#define GRAVITYPOWER_H
+#ifndef NSGRAVITYPOWER_H
+#define NSGRAVITYPOWER_H
 
 #include "Kernel.h"
 
 //Forward Declarations
-class GravityPower;
+class NSGravityPower;
 
 template<>
-InputParameters validParams<GravityPower>();
+InputParameters validParams<NSGravityPower>();
 
-class GravityPower : public Kernel
+class NSGravityPower : public Kernel
 {
 public:
 
-  GravityPower(const std::string & name, InputParameters parameters);
+  NSGravityPower(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
