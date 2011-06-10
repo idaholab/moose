@@ -33,6 +33,7 @@ protected:
   virtual Real dh_radiation();
   virtual Real gapK();
   virtual Real gapLength() const;
+  virtual Real dgapLength(Real normalComponent) const;
 
   virtual Real computeSlaveFluxContribution(Real grad_t);
 

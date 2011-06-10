@@ -81,10 +81,7 @@ GapHeatTransfer::computeQpJacobian()
 {
   Real h_gap = h_conduction() + h_contact() + h_radiation();
   Real dh_gap = dh_conduction() + dh_contact() + dh_radiation();
-  Real dgrad_t = ((_u[_qp] - _gap_temp[_qp]) * dh_gap + h_gap) * _phi[_j][_qp];
-
-  return _test[_i][_qp]*dgrad_t;
-//   return _test[_i][_qp] * h_gap * _phi[_j][_qp];
+  return _test[_i][_qp] * ((_u[_qp] - _gap_temp[_qp]) * dh_gap + h_gap) * _phi[_j][_qp];
 }
 
 Real
@@ -132,15 +129,20 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 
     const Real gapL = gapLength();
     // THIS IS NOT THE NORMAL WE WANT.
-    // WE NEED THE NORMAL FROM THE CONSTRAINT, THE NORMAL FROM THE MASTER SURFACE.
-    // HOW TO GET IT?
+    // WE NEED THE NORMAL FROM THE CONSTRAINT, THE NORMAL FROM THE
+    // MASTER SURFACE.  HOWEVER, THIS IS TRICKY SINCE THE NORMAL
+    // FROM THE MASTER SURFACE WAS COMPUTED FOR A POINT ASSOCIATED
+    // WITH A SLAVE NODE.  NOW WE ARE AT A SLAVE INTEGRATION POINT.
+    //
+    // HOW DO WE GET THE NORMAL WE NEED?
     //
     // Until we have the normal we want,
     //   we'll hope that the one we have is close to the negative of the one we want.
     const Point & normal( _normals[_qp] );
-    dRdx = -gapK()/(gapL*gapL) * (-(normal(coupled_component)));
+    const Real dgap = dgapLength( -normal(coupled_component) );
+    dRdx = -(_u[_qp]-_gap_temp[_qp])*gapK()/(gapL*gapL) * dgap;
   }
-  return _test[_i][_qp] * dRdx * _phi[_i][_qp];
+  return dRdx * _test[_i][_qp];
 }
 
 
@@ -201,6 +203,21 @@ GapHeatTransfer::gapLength() const
   gap_L = std::max(_min_gap, gap_L);
 
   return gap_L;
+}
+
+Real
+GapHeatTransfer::dgapLength( Real normalComponent ) const
+{
+  Real gap_L = -(_gap_distance[_qp]);
+
+  Real dgap(0);
+
+  if ( _min_gap < gap_L && gap_L < _max_gap)
+  {
+    dgap = normalComponent;
+  }
+
+  return dgap;
 }
 
 
