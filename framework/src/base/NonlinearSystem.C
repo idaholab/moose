@@ -537,8 +537,8 @@ NonlinearSystem::setInitialSolution()
     }
   }
 
+  _sys.solution->close();
   update();
-
 }
 
 void

@@ -232,7 +232,9 @@ AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
     return;
 
   computeNodalVars(_auxs(type));
+  solution().close();
   _sys.update();
+
   computeElementalVars(_auxs(type));
   solution().close();
   _sys.update();
