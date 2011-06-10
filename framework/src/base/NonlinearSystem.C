@@ -80,6 +80,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _time_weight(subproblem.timeWeights()),
     _increment_vec(NULL),
     _preconditioner(NULL),
+    _use_finite_differenced_preconditioner(false),
     _need_serialized_solution(false),
     _need_residual_copy(false),
     _need_residual_ghosted(false),
@@ -121,7 +122,7 @@ NonlinearSystem::setCoupling(Moose::CouplingType type)
   _coupling = type;
 }
 
-void NonlinearSystem::couplingMatrix(CouplingMatrix * cm)
+void NonlinearSystem::setCouplingMatrix(CouplingMatrix * cm)
 {
   _coupling = Moose::COUPLING_CUSTOM;
   delete _cm;
@@ -203,10 +204,19 @@ NonlinearSystem::solve()
 {
   // Initialize the solution vector with known values from nodal bcs
   setInitialSolution();
+
+  if(_use_finite_differenced_preconditioner)
+    setupFiniteDifferencedPreconditioner();
+
   _sys.solve();
   // store info about the solve
   _n_iters = _sys.n_nonlinear_iterations();
   _final_residual = _sys.final_nonlinear_residual();
+}
+
+void
+NonlinearSystem::initialSetup()
+{
 }
 
 void
@@ -236,6 +246,52 @@ NonlinearSystem::timestepSetup()
     _dirac_kernels[i].timestepSetup();
   }
 }
+
+void
+NonlinearSystem::setupFiniteDifferencedPreconditioner()
+{
+  // Make sure that libMesh isn't going to override our preconditioner
+  _sys.nonlinear_solver->jacobian = NULL;
+
+  PetscNonlinearSolver<Number> & petsc_nonlinear_solver =
+    dynamic_cast<PetscNonlinearSolver<Number>&>(*_sys.nonlinear_solver);
+    
+  // Pointer to underlying PetscMatrix type
+  PetscMatrix<Number>* petsc_mat =
+    dynamic_cast<PetscMatrix<Number>*>(_sys.matrix);
+
+  Moose::compute_jacobian(*_sys.current_local_solution,
+                          *petsc_mat,
+                          _sys);
+
+  petsc_mat->close();
+    
+  if (!petsc_mat)
+  {
+    std::cerr << "Could not convert to Petsc matrix." << std::endl;
+    libmesh_error();
+  }
+    
+  PetscErrorCode ierr=0;
+  ISColoring iscoloring;
+  MatFDColoring fdcoloring;
+    
+  ierr = MatGetColoring(petsc_mat->mat(), MATCOLORING_LF, &iscoloring);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+
+  MatFDColoringCreate(petsc_mat->mat(),iscoloring,&fdcoloring);
+  ISColoringDestroy(iscoloring);
+  MatFDColoringSetFromOptions(fdcoloring);
+  MatFDColoringSetFunction(fdcoloring,
+                           (PetscErrorCode (*)(void))&libMesh::__libmesh_petsc_snes_residual,
+                           &petsc_nonlinear_solver);
+  SNESSetJacobian(petsc_nonlinear_solver.snes(),
+                  petsc_mat->mat(),
+                  petsc_mat->mat(),
+                  SNESDefaultComputeJacobianColor,
+                  fdcoloring);
+}
+
 
 bool
 NonlinearSystem::converged()

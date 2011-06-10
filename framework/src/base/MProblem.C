@@ -240,6 +240,8 @@ void MProblem::initialSetup()
 
   if (_output_setup_log_early)
     Moose::setup_perf_log.print_log();
+
+  _nl.initialSetup();
 }
 
 void MProblem::timestepSetup()

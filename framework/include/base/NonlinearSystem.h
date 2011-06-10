@@ -53,7 +53,7 @@ public:
    * Set custom coupling matrix
    * @param cm coupling matrix to be set
    */
-  void couplingMatrix(CouplingMatrix * cm);
+  void setCouplingMatrix(CouplingMatrix * cm);
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
   /// Should be called before EquationSystems::init()
@@ -62,9 +62,12 @@ public:
   virtual void solve();
 
   // Setup Functions ////
+  virtual void initialSetup();
   virtual void initialSetupBCs();
   virtual void initialSetupKernels();
   virtual void timestepSetup();
+
+  void setupFiniteDifferencedPreconditioner();
 
   virtual void prepareAssembly(const Elem * elem, THREAD_ID tid);
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
@@ -199,6 +202,12 @@ public:
   void setPreconditioner(Preconditioner<Real> *pc);
 
   /**
+   * If called with true this system will use a finite differenced form of
+   * the Jacobian as the preconditioner
+   */
+  void useFiniteDifferencedPreconditioner(bool use=true) { _use_finite_differenced_preconditioner = use; }
+
+  /**
    * Setup damping stuff (called before we actually start)
    */
   void setupDampers();
@@ -283,6 +292,8 @@ protected:
   NumericVector<Number> * _increment_vec;               ///< increment vector
 
   Preconditioner<Real> * _preconditioner;               ///< Preconditioner
+
+  bool _use_finite_differenced_preconditioner;          /// Whether or not to use a finite differenced preconditioner
 
   bool _need_serialized_solution;                       ///< Whether or not a copy of the residual needs to be made
 

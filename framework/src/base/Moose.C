@@ -136,6 +136,7 @@
 #include "CheckIntegrityAction.h"
 #include "SetupQuadratureAction.h"
 #include "SetupSingleMatrixAction.h"
+#include "SetupFiniteDifferencePreconditionerAction.h"
 
 namespace Moose {
 
@@ -394,6 +395,7 @@ registerActions()
   registerAction(AddStabilizerAction, "Stabilizers/*", "add_stabilizer");
   registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
   registerAction(SetupSingleMatrixAction, "Preconditioning/SingleMatrix", "add_preconditioning");
+  registerAction(SetupFiniteDifferencePreconditionerAction, "Preconditioning/FDP", "add_preconditioning");
   registerAction(SetupQuadratureAction, "Executioner/Quadrature", "setup_quadrature");
 
 #ifdef LIBMESH_ENABLE_AMR

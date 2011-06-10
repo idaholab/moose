@@ -84,7 +84,7 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int
 }
 
 void
-ComputeJacobianThread::postElement(const Elem * /*elem*/)
+ComputeJacobianThread::postElement(const Elem * elem)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
   _problem.addJacobian(_jacobian, _tid);

@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SetupSingleMatrixAction.h"
+#include "SetupFiniteDifferencePreconditionerAction.h"
 #include "Moose.h"
 #include "Parser.h"
 #include "MProblem.h"
@@ -21,31 +21,33 @@
 #include "string_to_enum.h"
 
 template<>
-InputParameters validParams<SetupSingleMatrixAction>()
+InputParameters validParams<SetupFiniteDifferencePreconditionerAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("preconditioner", "The type of preconditioner you want to use ie: LU, ILU, AMG, etc.");
   
   params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same possition in off_diag_colum.");
   params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same possition in off_diag_row.");
+
   params.addParam<bool>("full", false, "Set to true if you want the full set of couplings.  Simply for convenience so you don't have to set every off_diag_row and off_diag_column combination.");
   
-return params;
+  return params;
 }
 
-SetupSingleMatrixAction::SetupSingleMatrixAction(const std::string & name, InputParameters params) :
+SetupFiniteDifferencePreconditionerAction::SetupFiniteDifferencePreconditionerAction(const std::string & name, InputParameters params) :
     Action(name, params)
 {
 }
 
 void
-SetupSingleMatrixAction::act()
+SetupFiniteDifferencePreconditionerAction::act()
 {
   MProblem & subproblem = *_parser_handle._problem;
   NonlinearSystem & nl = subproblem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
 
   CouplingMatrix * cm = new CouplingMatrix(n_vars);
+
   bool full = getParam<bool>("full");
   
   if(!full)
@@ -71,4 +73,7 @@ SetupSingleMatrixAction::act()
   }
 
   nl.setCouplingMatrix(cm);
+
+  // Set the jacobian to null so that libMesh won't override our finite differenced jacobian
+  nl.useFiniteDifferencedPreconditioner(true);
 }  

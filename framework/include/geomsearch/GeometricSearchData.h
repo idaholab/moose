@@ -43,7 +43,7 @@ public:
    */
   void update();
 
-protected:
+//protected:
   SubProblem & _subproblem;
   MooseMesh & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;

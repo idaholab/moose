@@ -163,6 +163,7 @@ public:
 
   // Displaced problem /////
   virtual void initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements);
+  virtual DisplacedProblem * getDisplacedProblem() { return _displaced_problem; }
 
   virtual void updateGeomSearch();
 
