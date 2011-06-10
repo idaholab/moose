@@ -51,6 +51,7 @@
 //#include "NSViscousFluxBase.h" // don't register, abstract base class
 #include "NSMomentumViscousFlux.h"
 #include "NSEnergyViscousFlux.h"
+#include "NSMomentumInviscidFluxWithGradP.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -160,6 +161,7 @@ Elk::registerObjects()
   // registerKernel(NSViscousFluxBase); // don't register, abstract base class
   registerKernel(NSMomentumViscousFlux);
   registerKernel(NSEnergyViscousFlux);
+  registerKernel(NSMomentumInviscidFluxWithGradP);
 
   // linear_elasticity
   registerKernel(SolidMechX);

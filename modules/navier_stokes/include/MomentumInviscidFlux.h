@@ -4,7 +4,7 @@
 #include "Kernel.h"
 
 
-//ForwardDeclarations
+// ForwardDeclarations
 class MomentumInviscidFlux;
 
 template<>
@@ -21,21 +21,22 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  // Coupled variables
   VariableValue & _u_vel;
   VariableValue & _v_vel;
   VariableValue & _w_vel;
+  VariableValue & _pressure;
 
+  // Parameters
   int _component;
   Real _gamma;
 
-  VariableValue & _pressure;
-
+  // Variable numbers
   unsigned _rho_var_number;
   unsigned _rhou_var_number;
   unsigned _rhov_var_number;
   unsigned _rhow_var_number;
   unsigned _rhoe_var_number;
-
 };
  
 #endif

@@ -35,12 +35,17 @@ InputParameters validParams<MomentumInviscidFlux>()
 
 MomentumInviscidFlux::MomentumInviscidFlux(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
+   // Coupled variables
    _u_vel(coupledValue("u")),
    _v_vel(coupledValue("v")),
    _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+   _pressure(coupledValue("pressure")),
+   
+   // Parameters
    _component(getParam<Real>("component")),
    _gamma(getParam<Real>("gamma")),
-   _pressure(coupledValue("pressure")),
+
+   // Variable numbers
    _rho_var_number( coupled("rho") ),
    _rhou_var_number( coupled("rhou") ),
    _rhov_var_number( coupled("rhov") ),

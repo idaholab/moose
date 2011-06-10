@@ -171,7 +171,7 @@ void EnergyThermalFlux::recalculate_gradient_and_hessian()
   Real U04 = U03*U0; // rho^4
   
   // This temporary will be used several times in the Hessian
-  const Real temp = -1./U02/_cv;
+  const Real tmp = -1./U02/_cv;
 
   // ...
 
@@ -179,11 +179,11 @@ void EnergyThermalFlux::recalculate_gradient_and_hessian()
 
   // Gradient entries...
 
-  _dTdU[0] =  (U4 - (mom2/U0))*temp;
-  _dTdU[1] =  U1*temp;               
-  _dTdU[2] =  U2*temp;               
-  _dTdU[3] =  U3*temp;               
-  _dTdU[4] = -U0*temp;
+  _dTdU[0] =  (U4 - (mom2/U0))*tmp;
+  _dTdU[1] =  U1*tmp;               
+  _dTdU[2] =  U2*tmp;               
+  _dTdU[3] =  U3*tmp;               
+  _dTdU[4] = -U0*tmp;
     
   
 
@@ -196,18 +196,18 @@ void EnergyThermalFlux::recalculate_gradient_and_hessian()
 
   // Row 1
   _hessian[1][0] = 2.*U1/U03/_cv;
-  _hessian[1][1] = temp;
+  _hessian[1][1] = tmp;
 
   // Row 2
   _hessian[2][0] = 2.*U2/U03/_cv;
-  _hessian[2][2] = temp;
+  _hessian[2][2] = tmp;
 
   // Row 3
   _hessian[3][0] = 2.*U3/U03/_cv;
-  _hessian[3][3] = temp;
+  _hessian[3][3] = tmp;
   
   // Row 4
-  _hessian[4][0] = temp;
+  _hessian[4][0] = tmp;
 }
 
 
@@ -217,7 +217,7 @@ void EnergyThermalFlux::recalculate_gradient_and_hessian()
 Real EnergyThermalFlux::get_hess(unsigned i, unsigned j)
 {
   // If in lower triangle, OK
-  if (i<=j)
+  if (i>=j)
     return _hessian[i][j];
 
   // Otherwise, convert passed in upper-triangular entry to
