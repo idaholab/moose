@@ -1,8 +1,8 @@
-#include "MomentumInviscidFlux.h"
+#include "NSMomentumInviscidFlux.h"
  
 
 template<>
-InputParameters validParams<MomentumInviscidFlux>()
+InputParameters validParams<NSMomentumInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -33,7 +33,7 @@ InputParameters validParams<MomentumInviscidFlux>()
 
 
 
-MomentumInviscidFlux::MomentumInviscidFlux(const std::string & name, InputParameters parameters)
+NSMomentumInviscidFlux::NSMomentumInviscidFlux(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
    // Coupled variables
    _u_vel(coupledValue("u")),
@@ -57,7 +57,7 @@ MomentumInviscidFlux::MomentumInviscidFlux(const std::string & name, InputParame
 
 
 Real
-MomentumInviscidFlux::computeQpResidual()
+NSMomentumInviscidFlux::computeQpResidual()
 {
   // For _component = k,
   
@@ -77,7 +77,7 @@ MomentumInviscidFlux::computeQpResidual()
 
 
 Real
-MomentumInviscidFlux::computeQpJacobian()
+NSMomentumInviscidFlux::computeQpJacobian()
 {
   RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   
@@ -105,7 +105,7 @@ MomentumInviscidFlux::computeQpJacobian()
 
 
 Real
-MomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
+NSMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _rho_var_number)
   {

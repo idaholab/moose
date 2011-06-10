@@ -1,20 +1,20 @@
-#ifndef MOMENTUMINVISCIDFLUX_H
-#define MOMENTUMINVISCIDFLUX_H
+#ifndef NSMOMENTUMINVISCIDFLUX_H
+#define NSMOMENTUMINVISCIDFLUX_H
 
 #include "Kernel.h"
 
 
 // ForwardDeclarations
-class MomentumInviscidFlux;
+class NSMomentumInviscidFlux;
 
 template<>
-InputParameters validParams<MomentumInviscidFlux>();
+InputParameters validParams<NSMomentumInviscidFlux>();
 
-class MomentumInviscidFlux : public Kernel
+class NSMomentumInviscidFlux : public Kernel
 {
 public:
 
-  MomentumInviscidFlux(const std::string & name, InputParameters parameters);
+  NSMomentumInviscidFlux(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

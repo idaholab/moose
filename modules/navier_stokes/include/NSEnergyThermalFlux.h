@@ -1,13 +1,13 @@
-#ifndef ENERGYTHERMALFLUX_H
-#define ENERGYTHERMALFLUX_H
+#ifndef NSENERGYTHERMALFLUX_H
+#define NSENERGYTHERMALFLUX_H
 
 #include "Kernel.h"
 
 // ForwardDeclarations
-class EnergyThermalFlux;
+class NSEnergyThermalFlux;
 
 template<>
-InputParameters validParams<EnergyThermalFlux>();
+InputParameters validParams<NSEnergyThermalFlux>();
 
 
 /**
@@ -15,11 +15,11 @@ InputParameters validParams<EnergyThermalFlux>();
  * terms for the k * grad(T) * grad(phi) term in the Navier-Stokes
  * energy equation.
  */
-class EnergyThermalFlux : public Kernel
+class NSEnergyThermalFlux : public Kernel
 {
 public:
 
-  EnergyThermalFlux(const std::string & name, InputParameters parameters);
+  NSEnergyThermalFlux(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

@@ -1,7 +1,7 @@
-#include "EnergyThermalFlux.h"
+#include "NSEnergyThermalFlux.h"
 
 template<>
-InputParameters validParams<EnergyThermalFlux>()
+InputParameters validParams<NSEnergyThermalFlux>()
 {
   InputParameters params = validParams<Kernel>();
   
@@ -25,7 +25,7 @@ InputParameters validParams<EnergyThermalFlux>()
 
 
 
-EnergyThermalFlux::EnergyThermalFlux(const std::string & name, InputParameters parameters)
+NSEnergyThermalFlux::NSEnergyThermalFlux(const std::string & name, InputParameters parameters)
     : Kernel(name, parameters),
       
       // Coupled variable values
@@ -75,7 +75,7 @@ EnergyThermalFlux::EnergyThermalFlux(const std::string & name, InputParameters p
 
 
 Real
-EnergyThermalFlux::computeQpResidual()
+NSEnergyThermalFlux::computeQpResidual()
 {
   // k * grad(T) * grad(phi)
   return _thermal_conductivity[_qp] * (_grad_temp[_qp] * _grad_test[_i][_qp]);
@@ -86,7 +86,7 @@ EnergyThermalFlux::computeQpResidual()
 
 
 Real
-EnergyThermalFlux::computeQpJacobian()
+NSEnergyThermalFlux::computeQpJacobian()
 {
   // The "on-diagonal" Jacobian for the energy equation
   // corresponds to variable number 4.
@@ -97,7 +97,7 @@ EnergyThermalFlux::computeQpJacobian()
 
 
 Real
-EnergyThermalFlux::computeQpOffDiagJacobian(unsigned int jvar)
+NSEnergyThermalFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Map jvar into the numbering expected by this->compute_jacobain_value()
   unsigned var_number = 99; // invalid
@@ -120,7 +120,7 @@ EnergyThermalFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
 
 
-Real EnergyThermalFlux::compute_jacobian_value(unsigned var_number)
+Real NSEnergyThermalFlux::compute_jacobian_value(unsigned var_number)
 {
   // Recompute gradient and Hessian data at this quadrature point.
   this->recalculate_gradient_and_hessian();
@@ -156,7 +156,7 @@ Real EnergyThermalFlux::compute_jacobian_value(unsigned var_number)
 
 
 
-void EnergyThermalFlux::recalculate_gradient_and_hessian()
+void NSEnergyThermalFlux::recalculate_gradient_and_hessian()
 {
   // Convenience variables
   Real U0 = _rho[_qp];
@@ -214,7 +214,7 @@ void EnergyThermalFlux::recalculate_gradient_and_hessian()
 
 
 
-Real EnergyThermalFlux::get_hess(unsigned i, unsigned j)
+Real NSEnergyThermalFlux::get_hess(unsigned i, unsigned j)
 {
   // If in lower triangle, OK
   if (i>=j)

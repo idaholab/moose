@@ -1,19 +1,19 @@
-#ifndef ENERGYINVISCIDFLUX_H
-#define ENERGYINVISCIDFLUX_H
+#ifndef NSENERGYINVISCIDFLUX_H
+#define NSENERGYINVISCIDFLUX_H
 
 #include "Kernel.h"
 
-//Forward Declarations
-class EnergyInviscidFlux;
+// Forward Declarations
+class NSEnergyInviscidFlux;
 
 template<>
-InputParameters validParams<EnergyInviscidFlux>();
+InputParameters validParams<NSEnergyInviscidFlux>();
 
-class EnergyInviscidFlux : public Kernel
+class NSEnergyInviscidFlux : public Kernel
 {
 public:
 
-  EnergyInviscidFlux(const std::string & name, InputParameters parameters);
+  NSEnergyInviscidFlux(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

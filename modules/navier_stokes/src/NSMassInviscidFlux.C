@@ -1,7 +1,7 @@
-#include "MassInviscidFlux.h"
+#include "NSMassInviscidFlux.h"
 
 template<>
-InputParameters validParams<MassInviscidFlux>()
+InputParameters validParams<NSMassInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
   
@@ -21,7 +21,7 @@ InputParameters validParams<MassInviscidFlux>()
   return params;
 }
 
-MassInviscidFlux::MassInviscidFlux(const std::string & name, InputParameters parameters)
+NSMassInviscidFlux::NSMassInviscidFlux(const std::string & name, InputParameters parameters)
     :Kernel(name, parameters),
      _rhou_var_number(coupled("rhou")),
      _rhou(coupledValue("rhou")),
@@ -40,7 +40,7 @@ MassInviscidFlux::MassInviscidFlux(const std::string & name, InputParameters par
 
 
 Real
-MassInviscidFlux::computeQpResidual()
+NSMassInviscidFlux::computeQpResidual()
 {
   // vec = rho*U
   RealVectorValue vec(_rhou[_qp],_rhov[_qp],_rhow[_qp]);
@@ -52,7 +52,7 @@ MassInviscidFlux::computeQpResidual()
 
 
 Real
-MassInviscidFlux::computeQpJacobian()
+NSMassInviscidFlux::computeQpJacobian()
 {
   // This seems weird at first glance, but remember we have to differentiate
   // wrt the *conserved* variables 
@@ -74,7 +74,7 @@ MassInviscidFlux::computeQpJacobian()
 
 
 Real
-MassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
+NSMassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _rhou_var_number)
   {

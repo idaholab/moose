@@ -1,20 +1,20 @@
-#ifndef MASSINVISCIDFLUX_H
-#define MASSINVISCIDFLUX_H
+#ifndef NSMASSINVISCIDFLUX_H
+#define NSMASSINVISCIDFLUX_H
 
 #include "Kernel.h"
 
 
-//Forward Declarations
-class MassInviscidFlux;
+// Forward Declarations
+class NSMassInviscidFlux;
 
 template<>
-InputParameters validParams<MassInviscidFlux>();
+InputParameters validParams<NSMassInviscidFlux>();
 
-class MassInviscidFlux : public Kernel
+class NSMassInviscidFlux : public Kernel
 {
 public:
 
-  MassInviscidFlux(const std::string & name, InputParameters parameters);
+  NSMassInviscidFlux(const std::string & name, InputParameters parameters);
   
 protected:
   virtual Real computeQpResidual();

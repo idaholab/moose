@@ -28,9 +28,9 @@
 
 
 // navier_stokes
-#include "MassInviscidFlux.h"
-#include "MomentumInviscidFlux.h"
-#include "EnergyInviscidFlux.h"
+#include "NSMassInviscidFlux.h"
+#include "NSMomentumInviscidFlux.h"
+#include "NSEnergyInviscidFlux.h"
 #include "NSGravityPower.h"
 #include "NSGravityForce.h"
 #include "NSPressureNeumannBC.h"
@@ -41,8 +41,7 @@
 #include "NSTemperatureL2.h"
 #include "NSPressureAux.h"
 #include "NSEnthalpyAux.h"
-#include "EnergyThermalFlux.h"
-//#include "NSViscousFluxBase.h" // don't register, abstract base class
+#include "NSEnergyThermalFlux.h"
 #include "NSMomentumViscousFlux.h"
 #include "NSEnergyViscousFlux.h"
 #include "NSMomentumInviscidFluxWithGradP.h"
@@ -132,9 +131,9 @@ Elk::registerObjects()
   registerDiracKernel(GapHeatPointSourceMaster);
 
   // navier_stokes
-  registerKernel(MassInviscidFlux);
-  registerKernel(MomentumInviscidFlux);
-  registerKernel(EnergyInviscidFlux);
+  registerKernel(NSMassInviscidFlux);
+  registerKernel(NSMomentumInviscidFlux);
+  registerKernel(NSEnergyInviscidFlux);
   registerKernel(NSGravityPower);
   registerKernel(NSGravityForce);
   registerKernel(NSTemperatureL2);
@@ -145,8 +144,7 @@ Elk::registerObjects()
   registerAux(NSTemperatureAux);
   registerAux(NSPressureAux);
   registerAux(NSEnthalpyAux);
-  registerKernel(EnergyThermalFlux);
-  // registerKernel(NSViscousFluxBase); // don't register, abstract base class
+  registerKernel(NSEnergyThermalFlux);
   registerKernel(NSMomentumViscousFlux);
   registerKernel(NSEnergyViscousFlux);
   registerKernel(NSMomentumInviscidFluxWithGradP);

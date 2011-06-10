@@ -1,7 +1,7 @@
-#include "EnergyInviscidFlux.h"
+#include "NSEnergyInviscidFlux.h"
  
 template<>
-InputParameters validParams<EnergyInviscidFlux>()
+InputParameters validParams<NSEnergyInviscidFlux>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -27,7 +27,7 @@ InputParameters validParams<EnergyInviscidFlux>()
   return params;
 }
 
-EnergyInviscidFlux::EnergyInviscidFlux(const std::string & name, InputParameters parameters)
+NSEnergyInviscidFlux::NSEnergyInviscidFlux(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
    _u_vel(coupledValue("u")),
    _v_vel(coupledValue("v")),
@@ -46,7 +46,7 @@ EnergyInviscidFlux::EnergyInviscidFlux(const std::string & name, InputParameters
 
 
 Real
-EnergyInviscidFlux::computeQpResidual()
+NSEnergyInviscidFlux::computeQpResidual()
 {
   // H = total enthalpy = E + P/rho
   // => rho * u * H = rho * u ( E + P/rho)
@@ -69,7 +69,7 @@ EnergyInviscidFlux::computeQpResidual()
 
 
 Real
-EnergyInviscidFlux::computeQpJacobian()
+NSEnergyInviscidFlux::computeQpJacobian()
 {
   // Derivative of this kernel wrt rho*E
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -82,7 +82,7 @@ EnergyInviscidFlux::computeQpJacobian()
 
 
 Real
-EnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
+NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real V2 = vel.size_sq();
