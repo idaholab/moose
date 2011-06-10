@@ -24,7 +24,8 @@ template<>
 InputParameters validParams<SetupFiniteDifferencePreconditionerAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<std::string>("preconditioner", "The type of preconditioner you want to use ie: LU, ILU, AMG, etc.");
+  // TODO: Make this work with the preconditioner being passed here
+//  params.addRequiredParam<std::string>("preconditioner", "The type of preconditioner you want to use ie: LU, ILU, AMG, etc.");
   
   params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same possition in off_diag_colum.");
   params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same possition in off_diag_row.");
@@ -42,6 +43,9 @@ SetupFiniteDifferencePreconditionerAction::SetupFiniteDifferencePreconditionerAc
 void
 SetupFiniteDifferencePreconditionerAction::act()
 {
+  if(libMesh::n_processors() > 1)
+    mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");
+  
   MProblem & subproblem = *_parser_handle._problem;
   NonlinearSystem & nl = subproblem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
