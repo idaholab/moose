@@ -117,14 +117,24 @@ class TestHarness:
   # If the test is not to be run for any reason, print skipped as the result and return False,
   # otherwise return True
   def checkIfRunTest(self, test):
+    # Check for skipped tests
     if test[SKIP]:
       self.handleTestResult(test, '', 'skipped')
       return False
+
+    # Check for matching platform
     platform = set()
     platform.add('ALL')
     platform.add((os.uname()[0]).upper())
     if test[PLATFORM] not in platform:
       self.handleTestResult(test, '', 'skipped')
+      return False
+
+    # Check for heavy tests
+    if test[HEAVY] and not self.options.heavy_tests:
+      self.handleTestResult(test, '', 'skipped (HEAVY)')
+      return False
+
     return True
 
   ## Finish the test by inspecting the raw output 
@@ -188,7 +198,7 @@ class TestHarness:
 
     if result == 'OK':
       self.num_passed += 1
-    elif result == 'skipped':
+    elif 'skipped' in result:
       self.num_skipped += 1
     else:
       self.num_failed += 1
@@ -196,13 +206,13 @@ class TestHarness:
     if self.options.verbose or ('FAILED' in result and not self.options.quiet):
       print output
 
-    if result != 'skipped':
+    if not 'skipped' in result:
       if self.options.file:
         self.file.write(printResult( test[TEST_NAME], result, self.options, color=False) + '\n')
         self.file.write(output)
 
       if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result == 'OK'):
-        fname = os.path.join(self.output_dir, test[TEST_NAME] + '.' + result[:6] + '.txt')
+        fname = os.path.join(test[TEST_DIR], test[TEST_NAME] + '.' + result[:6] + '.txt')
         f = open(fname, 'w')
         f.write(printResult( test[TEST_NAME], result, self.options, color=False) + '\n')
         f.write(output)
@@ -288,6 +298,7 @@ class TestHarness:
     outputgroup.add_option('-s', '--sep-files', action='store_true', dest='sep_files', default=False, metavar='FILE', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
     outputgroup.add_option('--sep-files-ok', action='store_true', dest='ok_files', default=False, metavar='FILE', help='Write the output of each passed test to a separate file')
     outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
+    outputgroup.add_option('--heavy', action='store_true', dest='heavy_tests', default=False, help='Run normal tests and tests marked with HEAVY : True')
 
     parser.add_option_group(outputgroup)
 
