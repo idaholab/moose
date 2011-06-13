@@ -57,9 +57,9 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
 
-    _phi(_var.phi()),
-    _grad_phi(_var.gradPhi()),
-    _second_phi(_var.secondPhi()),
+    _phi(_asmb.phi()),
+    _grad_phi(_asmb.gradPhi()),
+    _second_phi(_asmb.secondPhi()),
 
     _test(_var.test()),
     _grad_test(_var.gradTest()),
@@ -95,7 +95,7 @@ DiracKernel::computeResidual()
     _current_point=_physical_point[_qp];
     if(isActiveAtPoint(_current_elem, _current_point))
     {
-      for (_i = 0; _i < _phi.size(); _i++)
+      for (_i = 0; _i < _test.size(); _i++)
         re(_i) += computeQpResidual();
     }
   }
@@ -110,7 +110,7 @@ DiracKernel::computeJacobian()
   {
     _current_point=_physical_point[_qp];
     if(isActiveAtPoint(_current_elem, _current_point))
-      for (_i = 0; _i < _phi.size(); _i++)
+      for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
         {
           ke(_i, _j) += computeQpJacobian();

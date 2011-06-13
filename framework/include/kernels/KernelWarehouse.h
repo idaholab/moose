@@ -48,7 +48,14 @@ public:
    * @return The list of all active kernels
    */
   const std::vector<Kernel *> & active() { return _active_kernels; }
-  
+
+  /**
+   * Get the list of all active kernels for a variable
+   * @param var The variable number
+   * @return The list of all active kernels
+   */
+  const std::vector<Kernel *> & activeVar(unsigned int var) { return _active_var_kernels[var]; }
+
   /**
    * Add a kernels
    * @param kernel Kernel being added
@@ -74,6 +81,7 @@ public:
   
 protected:
   std::vector<Kernel *> _active_kernels;                                ///< Kernels active on a block and in specified time
+  std::map<unsigned int, std::vector<Kernel *> > _active_var_kernels;   ///< Kernels active on a block and in specified time per variable
   std::vector<Kernel *> _all_kernels;                                   ///< All instances of kernels
   std::vector<Kernel *> _global_kernels;                                ///< Kernels that live everywhere (on the whole domain)
   std::map<unsigned int, std::vector<Kernel *> > _block_kernels;        ///< Kernels that live on a specified block

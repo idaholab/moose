@@ -1,3 +1,8 @@
+#
+# This is not very strong test since the problem being solved is linear, so the difference between
+# full Jacobian and block diagonal preconditioner are not that big
+#
+
 [Mesh]
   [./Generation]
   	dim = 2
@@ -5,30 +10,25 @@
   	xmax = 1
   	ymin = 0
   	ymax = 1
-  	nx = 2
-  	ny = 2
+  	nx = 10
+  	ny = 10
+  	elem_type = QUAD9
   [../]
 []
 
 [Variables]
-#  active = 'u v'
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
 
   [./v]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 []
 
 [Preconditioning]
-#  active = 'SingleMatrix'
-  active = ' '
-
   [./SingleMatrix]
     preconditioner  = 'LU'
     off_diag_row    = 'u'
@@ -37,18 +37,17 @@
 []
 
 [Kernels]
-#  active = 'diff_u conv_v diff_v'
-  active = 'diff_u'
+  active = 'diff_u conv_u diff_v'
 
   [./diff_u]
     type = Diffusion
     variable = u
   [../]
 
-  [./conv_v]
+  [./conv_u]
     type = CoupledForce
-    variable = v
-    v = u
+    variable = u
+    v = v
   [../]
 
   [./diff_v]
@@ -58,8 +57,7 @@
 []
 
 [BCs]
-#  active = 'left_u right_u left_v'
-  active = 'left_u right_u'
+  active = 'left_u right_u left_v'
 
   [./left_u]
     type = DirichletBC

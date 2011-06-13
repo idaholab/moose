@@ -73,6 +73,8 @@ public:
    */
   Real stopTime();
 
+  SubProblemInterface & subProblem() { return _subproblem; }
+
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;

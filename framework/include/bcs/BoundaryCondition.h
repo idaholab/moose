@@ -56,15 +56,17 @@ public:
 
   /**
    * Gets boundary ID this BC is active on
-   * @return the boudanry ID
+   * @return the boundary ID
    */
   unsigned int boundaryID() { return _boundary_id; }
 
   /**
-   * Gets the varaible this BC is actve on
+   * Gets the variable this BC is active on
    * @return the variable
    */
   MooseVariable & variable() { return _var; }
+
+  SubProblemInterface & subProblem() { return _subproblem; }
 
 protected:
   Problem & _problem;

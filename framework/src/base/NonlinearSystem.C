@@ -24,6 +24,7 @@
 #include "MaterialData.h"
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
+#include "ComputeFullJacobianThread.h"
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 #include "TimeKernel.h"
@@ -132,20 +133,21 @@ void NonlinearSystem::setCouplingMatrix(CouplingMatrix * cm)
 void
 NonlinearSystem::preInit()
 {
+  unsigned int n_vars = _sys.n_vars();
   switch (_coupling)
   {
   case Moose::COUPLING_DIAG:
-    _cm = new CouplingMatrix(_sys.n_vars());
-    for(unsigned int i=0; i<_sys.n_vars(); i++)
-      for(unsigned int j=0; j<_sys.n_vars(); j++)
-        (*_cm)(i, j) = ( i == j ? 1 : 0);
+    _cm = new CouplingMatrix(n_vars);
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
+        (*_cm)(i, j) = (i == j ? 1 : 0);
     break;
 
   // for full jacobian
   case Moose::COUPLING_FULL:
-    _cm = new CouplingMatrix(_sys.n_vars());
-    for(unsigned int i=0; i<_sys.n_vars(); i++)
-      for(unsigned int j=0; j<_sys.n_vars(); j++)
+    _cm = new CouplingMatrix(n_vars);
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
         (*_cm)(i, j) = 1;
     break;
 
@@ -155,6 +157,13 @@ NonlinearSystem::preInit()
   }
 
   _sys.get_dof_map()._dof_coupling = _cm;
+
+  // I want the blocks to go by columns first to reduce copying of shape function in assembling "full" Jacobian
+  _cm_entry.clear();
+  for (unsigned int j = 0; j < n_vars; ++j)
+    for (unsigned int i = 0; i < n_vars; ++i)
+      if ((*_cm)(i, j) != 0)
+        _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
 }
 
 void
@@ -718,9 +727,23 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  switch (_coupling)
+  {
+  case Moose::COUPLING_DIAG:
+    {
+      ComputeJacobianThread cj(_problem, *this, jacobian);
+      Threads::parallel_reduce(elem_range, cj);
+    }
+    break;
 
-  ComputeJacobianThread cj(_problem, *this, jacobian);
-  Threads::parallel_reduce(elem_range, cj);
+  default:
+  case Moose::COUPLING_CUSTOM:
+    {
+      ComputeFullJacobianThread cj(_problem, *this, jacobian);
+      Threads::parallel_reduce(elem_range, cj);
+    }
+    break;
+  }
 
   computeDiracContributions(NULL, &jacobian);
 
@@ -831,7 +854,10 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
           Kernel * kernel = *kernel_it;
 
           if(kernel->variable().number() == ivar)
+          {
+            kernel->subProblem().prepareShapes(jvar, tid);
             kernel->computeOffDiagJacobian(jvar);
+          }
         }
 
         for (unsigned int side=0; side<elem->n_sides(); side++)
@@ -854,7 +880,10 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                 {
                   IntegratedBC * bc = *it;
                   if(bc->variable().number() == ivar)
+                  {
+                    bc->subProblem().prepareFaceShapes(jvar, tid);
                     bc->computeJacobianBlock(jvar);
+                  }
                 }
               }
             }

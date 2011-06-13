@@ -12,44 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "KernelSecond.h"
-#include "SubProblemInterface.h"
+#ifndef COMPUTEFULLJACOBIANTHREAD_H
+#define COMPUTEFULLJACOBIANTHREAD_H
 
-template<>
-InputParameters validParams<KernelSecond>()
+#include "ComputeJacobianThread.h"
+
+// libMesh includes
+#include "elem_range.h"
+
+class NonlinearSystem;
+
+class ComputeFullJacobianThread : public ComputeJacobianThread
 {
-  InputParameters params = validParams<Kernel>();
-  return params;
-}
+public:
+  ComputeFullJacobianThread(Problem & problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
 
-
-KernelSecond::KernelSecond(const std::string & name, InputParameters parameters):
-  Kernel(name, parameters)
-{
-}
-
-KernelSecond::~KernelSecond()
-{
-}
-
-void
-KernelSecond::computeResidual()
-{
-//  Moose::perf_log.push("computeResidual()","KernelSecond");
+  // Splitting Constructor
+  ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split);
   
-  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
-
-  _value.resize(_qrule->n_points());
-  precalculateResidual();
-  for (_i=0; _i<_test.size(); _i++)
-    for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      re(_i) += _JxW[_qp]*(_value[_qp]*_second_test[_i][_qp].tr());
+  void join(const ComputeJacobianThread & /*y*/);
   
-//  Moose::perf_log.pop("computeResidual()","KernelSecond");
-}
-
-Real
-KernelSecond::computeQpResidual()
-{
-  return 0;
-}
+protected:
+  virtual void computeJacobian();
+  virtual void computeFaceJacobian(short int bnd_id);
+};
+  
+#endif //COMPUTEFULLJACOBIANTHREAD_H

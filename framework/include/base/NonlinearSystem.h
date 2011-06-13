@@ -56,6 +56,8 @@ public:
   void setCouplingMatrix(CouplingMatrix * cm);
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
+  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
+
   /// Should be called before EquationSystems::init()
   virtual void preInit();
   virtual void init();
@@ -262,6 +264,7 @@ protected:
 
   Moose::CouplingType _coupling;                        ///< Type of variable coupling
   CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.
+  std::vector<std::pair<unsigned int, unsigned int> > _cm_entry; ///< Entries in the coupling matrix
 
   const NumericVector<Number> * _current_solution;      ///< solution vector from nonlinear solver
   NumericVector<Number> & _solution_u_dot;              ///< solution vector for u^dot
@@ -307,6 +310,7 @@ protected:
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;
+  friend class ComputeFullJacobianThread;
   friend class ComputeDiracThread;
   friend class ComputeDampingThread;
 };

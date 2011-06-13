@@ -75,15 +75,29 @@ void
 KernelWarehouse::updateActiveKernels(Real t, Real dt, unsigned int subdomain_id)
 {
   _active_kernels.clear();
+  _active_var_kernels.clear();
 
   // add kernels that live everywhere
   for (std::vector<Kernel *>::const_iterator it = _global_kernels.begin(); it != _global_kernels.end(); ++it)
-    if((*it)->startTime() <= t + (1e-6 * dt) && (*it)->stopTime() >= t + (1e-6 * dt))
-      _active_kernels.push_back(*it);
+  {
+    Kernel * kernel = *it;
+    if (kernel->startTime() <= t + (1e-6 * dt) && kernel->stopTime() >= t + (1e-6 * dt))
+    {
+      _active_kernels.push_back(kernel);
+      _active_var_kernels[kernel->variable().number()].push_back(kernel);
+    }
+  }
+
   // then kernels that live on a specified block
   for (std::vector<Kernel *>::const_iterator it = _block_kernels[subdomain_id].begin(); it != _block_kernels[subdomain_id].end(); ++it)
-    if((*it)->startTime() <= t + (1e-6 * dt) && (*it)->stopTime() >= t + (1e-6 * dt))
-      _active_kernels.push_back(*it);
+  {
+    Kernel * kernel = *it;
+    if (kernel->startTime() <= t + (1e-6 * dt) && kernel->stopTime() >= t + (1e-6 * dt))
+    {
+      _active_kernels.push_back(kernel);
+      _active_var_kernels[kernel->variable().number()].push_back(kernel);
+    }
+  }
 }
 
 bool

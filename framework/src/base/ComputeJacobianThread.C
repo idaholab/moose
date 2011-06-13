@@ -35,6 +35,28 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
 {}
 
 void
+ComputeJacobianThread::computeJacobian()
+{
+  for (std::vector<Kernel *>::const_iterator kernel_it = _sys._kernels[_tid].active().begin(); kernel_it != _sys._kernels[_tid].active().end(); ++kernel_it)
+  {
+    Kernel * kernel = *kernel_it;
+    kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
+    kernel->computeJacobian();
+  }
+}
+
+void
+ComputeJacobianThread::computeFaceJacobian(short int bnd_id)
+{
+  for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
+  {
+    IntegratedBC * bc = *it;
+    bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
+    bc->computeJacobian();
+  }
+}
+
+void
 ComputeJacobianThread::onElement(const Elem *elem)
 {
   _problem.prepare(elem, _tid);
@@ -55,12 +77,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
       stabilizer_it++)
     (*stabilizer_it)->computeTestFunctions();
 
-  // there is a block in the matrix we need to fill in
-  for (std::vector<Kernel *>::const_iterator kernel_it = _sys._kernels[_tid].active().begin(); kernel_it != _sys._kernels[_tid].active().end(); ++kernel_it)
-  {
-    Kernel * kernel = *kernel_it;
-    kernel->computeJacobian();
-  }
+  computeJacobian();
 }
 
 void
@@ -76,10 +93,8 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int
       _problem.subdomainSetupSide(subdomain, _tid);
 
     _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
-    for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
-    {
-      (*it)->computeJacobian();
-    }
+
+    computeFaceJacobian(bnd_id);
   }
 }
 

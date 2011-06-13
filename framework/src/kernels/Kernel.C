@@ -56,9 +56,9 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
 
-    _phi(_var.phi()),
-    _grad_phi(_var.gradPhi()),
-    _second_phi(_var.secondPhi()),
+    _phi(_asmb.phi()),
+    _grad_phi(_asmb.gradPhi()),
+    _second_phi(_asmb.secondPhi()),
 
     _test(_var.test()),
     _grad_test(_var.gradTest()),

@@ -36,9 +36,9 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     _q_point(_subproblem.pointsFace(_tid)),
     _JxW(_subproblem.JxWFace(_tid)),
 
-    _phi(_var.phiFace()),
-    _grad_phi(_var.gradPhiFace()),
-    _second_phi(_var.secondPhi()),
+    _phi(_asmb.phiFace()),
+    _grad_phi(_asmb.gradPhiFace()),
+    _second_phi(_asmb.secondPhi()),
 
     _test(_test_var.testFace()),
     _grad_test(_test_var.gradTestFace()),
@@ -56,7 +56,7 @@ IntegratedBC::computeResidual()
   DenseVector<Number> & re = _asmb.residualBlock(_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    for (_i = 0; _i < _phi.size(); _i++)
+    for (_i = 0; _i < _test.size(); _i++)
     {
       re(_i) += _JxW[_qp]*computeQpResidual();
     }
@@ -69,7 +69,7 @@ IntegratedBC::computeJacobian()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    for (_i = 0; _i < _phi.size(); _i++)
+    for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
       {
         ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
@@ -85,7 +85,7 @@ IntegratedBC::computeJacobianBlock(unsigned int jvar)
   DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), jvar);
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_i=0; _i<_phi.size(); _i++)
+    for (_i=0; _i<_test.size(); _i++)
       for (_j=0; _j<_phi.size(); _j++)
       {
         if (_var.number() == jvar)

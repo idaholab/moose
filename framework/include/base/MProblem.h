@@ -160,6 +160,8 @@ public:
 
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+  virtual void prepareShapes(unsigned int var, THREAD_ID tid);
+  virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid);
 
   // Displaced problem /////
   virtual void initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements);

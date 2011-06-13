@@ -60,6 +60,28 @@ AsmBlock::prepare(const Elem * elem)
 }
 
 void
+AsmBlock::copyShapes(unsigned int var)
+{
+  // FIXME: ugly
+  MooseVariable * v = _sys._vars[_tid].all()[var];
+
+  _phi = v->phi();
+  _grad_phi = v->gradPhi();
+  _second_phi = v->secondPhi();
+}
+
+void
+AsmBlock::copyFaceShapes(unsigned int var)
+{
+  // FIXME: ugly
+  MooseVariable * v = _sys._vars[_tid].all()[var];
+
+  _phi_face = v->phiFace();
+  _grad_phi_face = v->gradPhiFace();
+  _second_phi_face = v->secondPhiFace();
+}
+
+void
 AsmBlock::addResidual(NumericVector<Number> & residual)
 {
   for (unsigned int var = 0; var < _sys.nVariables(); ++var)

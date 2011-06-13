@@ -69,7 +69,10 @@ ComputeDiracThread::onElement(const Elem * elem)
         if(_residual)
           dirac->computeResidual();
         else
+        {
+          dirac->subProblem().prepareShapes(dirac->variable().number(), _tid);
           dirac->computeJacobian();
+        }
       }
     }
   }

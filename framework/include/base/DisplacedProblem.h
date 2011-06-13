@@ -80,6 +80,8 @@ public:
   virtual AsmBlock & asmBlock(THREAD_ID tid);
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+  virtual void prepareShapes(unsigned int var, THREAD_ID tid);
+  virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid);
 
   virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
   virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }

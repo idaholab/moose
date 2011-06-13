@@ -306,6 +306,18 @@ DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
+DisplacedProblem::prepareShapes(unsigned int var, THREAD_ID tid)
+{
+  _asm_block[tid]->copyShapes(var);
+}
+
+void
+DisplacedProblem::prepareFaceShapes(unsigned int var, THREAD_ID tid)
+{
+  _asm_block[tid]->copyFaceShapes(var);
+}
+
+void
 DisplacedProblem::updateGeomSearch()
 {
   _geometric_search_data.update();

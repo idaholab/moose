@@ -79,6 +79,8 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
+  SubProblemInterface & subProblem() { return _subproblem; }
+
   /**
    * This is where the DiracKernel should call addPoint() for each point it needs to have a
    * value distributed at.

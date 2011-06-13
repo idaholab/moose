@@ -40,6 +40,9 @@ protected:
   SparseMatrix<Number> & _jacobian;
   NonlinearSystem & _sys;
   Problem & _problem;
+
+  virtual void computeJacobian();
+  virtual void computeFaceJacobian(short int bnd_id);
 };
   
 #endif //COMPUTEJACOBIANTHREAD_H

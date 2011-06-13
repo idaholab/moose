@@ -288,6 +288,18 @@ MProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
+MProblem::prepareShapes(unsigned int var, THREAD_ID tid)
+{
+  _nl.asmBlock(tid).copyShapes(var);
+}
+
+void
+MProblem::prepareFaceShapes(unsigned int var, THREAD_ID tid)
+{
+  _nl.asmBlock(tid).copyFaceShapes(var);
+}
+
+void
 MProblem::addGhostedElem(unsigned int elem_id)
 {
   if(_mesh.elem(elem_id)->processor_id() != libMesh::processor_id())
