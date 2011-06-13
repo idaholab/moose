@@ -270,8 +270,18 @@ Transient::computeDT()
 {
   if (!lastSolveConverged())
   {
-    std::cout<<"Solve failed... cutting timestep"<<std::endl;
-    return _dt / 2.0;
+    //std::cout<<"Solve failed... cutting timestep"<<std::endl;
+    //return _dt / 2.0;
+
+    // Instead of blindly cutting timestep, respect dtmin.
+    if (_dt <= _dtmin)
+      mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
+    
+    if (0.5 * _dt >= _dtmin)
+      return 0.5 * _dt;
+
+    else // (0.5 * _dt < _dtmin)
+      return _dtmin;
   }
   
   if (_use_time_ipol)
