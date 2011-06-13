@@ -1,22 +1,10 @@
-import tools
+from options import *
 
-def testdirichlet(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'2d_diffusion_test.i',['out.e'], dofs, np, n_threads)
+testdirichlet = { INPUT : '2d_diffusion_test.i',
+                   EXODIFF : ['out.e'] }
 
-def testneumann(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'2d_diffusion_neumannbc_test.i',['neumannbc_out.e'], dofs, np, n_threads)
+testneumann   = { INPUT : '2d_diffusion_neumannbc_test.i',
+                   EXODIFF : ['neumannbc_out.e'] }
 
-
-try: # temporary to test the new test harness
-  from options import *
-
-  testdirichlet = { INPUT : '2d_diffusion_test.i',
-                     EXODIFF : ['out.e'] }
-
-  testneumann   = { INPUT : '2d_diffusion_neumannbc_test.i',
-                     EXODIFF : ['neumannbc_out.e'] }
-
-except:
-  pass
 
 

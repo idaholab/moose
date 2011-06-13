@@ -1,38 +1,17 @@
-import tools
+from options import *
 
-def testperiodic(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'periodic_bc_test.i',['out.e'], dofs, np, n_threads)
+testperiodic = { INPUT : 'periodic_bc_test.i',
+                 EXODIFF : ['out.e'] }
 
-def testwedge(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'wedge.i',['out_wedge.e'], dofs, np, n_threads)
+testwedge = { INPUT : 'wedge.i',
+              EXODIFF : ['out_wedge.e'] }
 
-def testwedgesys(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'wedge_sys.i',['out_wedge_sys.e'], dofs, np, n_threads)
+testwedgesys = { INPUT : 'wedge_sys.i',
+                 EXODIFF : ['out_wedge_sys.e'] }
 
-def testtrapezoid(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'trapezoid.i',['out_trapezoid.e'], dofs, np, n_threads)
-  
-def testlevel1(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'periodic_level_1_test.i', \
-                          ['level1_0000.e', 'level1_0009.e', 'level1_0019.e'], dofs, np, n_threads)
+testtrapezoid = { INPUT : 'trapezoid.i',
+                  EXODIFF : ['out_trapezoid.e'] }
 
-try:
-  from options import *
+testlevel1 = { INPUT : 'periodic_level_1_test.i',
+               EXODIFF : ['level1_0000.e', 'level1_0009.e', 'level1_0019.e'] }
 
-  testperiodic = { INPUT : 'periodic_bc_test.i',
-                   EXODIFF : ['out.e'] }
-
-  testwedge = { INPUT : 'wedge.i',
-                EXODIFF : ['out_wedge.e'] }
-
-  testwedgesys = { INPUT : 'wedge_sys.i',
-                   EXODIFF : ['out_wedge_sys.e'] }
-
-  testtrapezoid = { INPUT : 'trapezoid.i',
-                    EXODIFF : ['out_trapezoid.e'] }
-
-  testlevel1 = { INPUT : 'periodic_level_1_test.i',
-                 EXODIFF : ['level1_0000.e', 'level1_0009.e', 'level1_0019.e'] }
-
-except:
-  pass

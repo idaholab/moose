@@ -11,8 +11,8 @@ class CSVDiffer:
     for out_file in out_files:
       # Check for an easy mistake to make
       if out_file[-2:] == '.e':
-        self.msg += 'Diffing ' + out_file + '\n'
-        self.msg += 'WARNING: Are you sure you want to use csv diff on a .e file?\n'
+        print 'Diffing ' + out_file
+        print 'WARNING: Are you sure you want to use csv diff on a .e file?\n'
 
       try:
         f1 = open( os.path.join(test_dir,out_file) )

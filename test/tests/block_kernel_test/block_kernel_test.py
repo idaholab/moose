@@ -1,19 +1,8 @@
-import tools
+from options import *
 
-def test(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'block_kernel_test.i',['out.e'], dofs, np, n_threads)
+test = { INPUT : 'block_kernel_test.i',
+         EXODIFF : ['out.e'] }
 
-def testvars(dofs=0, np=0, n_threads=0):
-  tools.executeAppAndDiff(__file__,'block_vars.i',['out_vars.e'], dofs, np, n_threads)
-  
-try:
-  from options import *
+testvars = { INPUT : 'block_vars.i',
+             EXODIFF : ['out_vars.e'] }
 
-  test = { INPUT : 'block_kernel_test.i',
-           EXODIFF : ['out.e'] }
-
-  testvars = { INPUT : 'block_vars.i',
-               EXODIFF : ['out_vars.e'] }
-
-except:
-  pass
