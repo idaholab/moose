@@ -127,7 +127,7 @@ class TestHarness:
     platform.add('ALL')
     platform.add((os.uname()[0]).upper())
     if test[PLATFORM] not in platform:
-      self.handleTestResult(test, '', 'skipped')
+      self.handleTestResult(test, '', 'skipped (PLATFORM)')
       return False
 
     # Check for heavy tests

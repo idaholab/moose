@@ -88,6 +88,8 @@ class RunParallel():
   # When a process exits (or times out) call returnToTestHarness and return from
   # this function.
   def spinwait(self):
+    self.startReadyJobs()
+
     test_completed = False
     while not test_completed:
       now = clock()
@@ -98,7 +100,6 @@ class RunParallel():
           if p.poll() != None or now > time:
             test_completed = True
             self.returnToTestHarness(job_index)
-            self.startReadyJobs()
         job_index += 1
 
       sleep(0.05) # sleep for 50ms
@@ -113,6 +114,6 @@ class RunParallel():
 LOG = []
 LOG_ON = False
 def log(msg):
-  LOG.append(msg)
   if LOG_ON:
+    LOG.append(msg)
     print msg
