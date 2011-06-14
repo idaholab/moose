@@ -13,7 +13,7 @@ import os, sys
 # options. When the test is finished running it will call harness.testOutputAndFinish
 # to complete the test. Be sure to call join() to make sure all the tests are finished.
 #
-class RunParallel():
+class RunParallel:
 
   ## Return this return code if the process must be killed because of timeout
   TIMEOUT = -999999

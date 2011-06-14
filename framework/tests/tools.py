@@ -171,7 +171,10 @@ class TestHarness:
           if msg != '':
             reason = 'CSVDIFF'
 
-    result = 'OK' if reason == '' else 'FAILED (%s)' % reason
+    if reason == '':
+      result = 'OK' 
+    else:
+      result = 'FAILED (%s)' % reason
     self.handleTestResult(test, output, result)
 
   def checkExpectError(self, output, expect_error):
@@ -222,9 +225,15 @@ class TestHarness:
     print '-' * 80
     print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
 
-    summary = '<g>%d passed</g>' if self.num_passed else '<b>%d passed</b>'
+    if self.num_passed:
+      summary = '<g>%d passed</g>'
+    else:
+      summary = '<b>%d passed</b>'
     summary += ', <b>%d skipped</b>, '
-    summary += '<r>%d FAILED</r>' if self.num_failed else '<b>%d failed</b>'
+    if self.num_failed:
+      summary += '<r>%d FAILED</r>'
+    else:
+      summary += '<b>%d failed</b>'
     print colorify( summary % (self.num_passed, self.num_skipped, self.num_failed), self.options, html=True )
 
     if self.file:
@@ -261,7 +270,7 @@ class TestHarness:
     if self.options.output_dir:
       try:
         os.makedirs(self.output_dir)
-      except OSError as ex:
+      except OSError, ex:
         if ex.errno == errno.EEXIST: pass
         else: raise
 
