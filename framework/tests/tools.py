@@ -299,6 +299,8 @@ class TestHarness:
     outputgroup.add_option('--sep-files-ok', action='store_true', dest='ok_files', default=False, metavar='FILE', help='Write the output of each passed test to a separate file')
     outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
     outputgroup.add_option('--heavy', action='store_true', dest='heavy_tests', default=False, help='Run normal tests and tests marked with HEAVY : True')
+    outputgroup.add_option('--dofs', action='store', dest='dofs', default=0, help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
+
 
     parser.add_option_group(outputgroup)
 
