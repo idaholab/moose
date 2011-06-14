@@ -84,6 +84,13 @@ CoupledProblem::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
+CoupledProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid)
+{
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+    it->second->prepare(elem, ivar, jvar, tid);
+}
+
+void
 CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
   for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)

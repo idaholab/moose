@@ -219,6 +219,16 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
   _displaced_aux.prepare(tid);
 }
 
+void
+DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid)
+{
+  _asm_info[tid]->reinit(elem);
+
+  _asm_block[tid]->prepareBlock(elem, ivar, jvar);
+  _displaced_nl.prepare(tid);
+  _displaced_aux.prepare(tid);
+}
+
 bool
 DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 {

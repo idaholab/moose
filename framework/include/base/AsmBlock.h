@@ -35,6 +35,7 @@ public:
   void init();
 
   void prepare(const Elem * elem);
+  void prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar);
 
   void copyShapes(unsigned int var);
   void copyFaceShapes(unsigned int var);
@@ -44,6 +45,8 @@ public:
 
   DenseVector<Number> & residualBlock(unsigned int var_num) { return _sub_Re[var_num]; }
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar) { return _sub_Ke[ivar][jvar]; }
+
+  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
@@ -56,6 +59,7 @@ public:
 protected:
   SystemBase & _sys;
   CouplingMatrix * & _cm;                                       ///< Reference to coupling matrix
+  std::vector<std::pair<unsigned int, unsigned int> > _cm_entry; ///< Entries in the coupling matrix
   const DofMap & _dof_map;                                      ///< DOF map
   THREAD_ID _tid;                                               ///< Thread number (id)
 

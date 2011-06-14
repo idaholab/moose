@@ -32,6 +32,14 @@ void
 AsmBlock::init()
 {
   unsigned int n_vars = _sys.nVariables();
+
+  // I want the blocks to go by columns first to reduce copying of shape function in assembling "full" Jacobian
+  _cm_entry.clear();
+  for (unsigned int j = 0; j < n_vars; ++j)
+    for (unsigned int i = 0; i < n_vars; ++i)
+      if ((*_cm)(i, j) != 0)
+        _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
+
   _sub_dof_indices.resize(n_vars);
   _sub_Re.resize(n_vars);
 
@@ -47,16 +55,32 @@ AsmBlock::prepare(const Elem * elem)
   for (unsigned int ivar = 0; ivar < n_vars; ivar++)
     _dof_map.dof_indices(elem, _sub_dof_indices[ivar], ivar);
 
+  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  {
+    unsigned int ivar = (*it).first;
+    unsigned int jvar = (*it).second;
+
+    _sub_Ke[ivar][jvar].resize(_sub_dof_indices[ivar].size(), _sub_dof_indices[jvar].size());
+    _sub_Ke[ivar][jvar].zero();
+  }
+
   for (unsigned int ivar = 0; ivar < n_vars; ivar++)
   {
-    for (unsigned int jvar = 0; jvar < n_vars; jvar++)
-    {
-      _sub_Ke[ivar][jvar].resize(_sub_dof_indices[ivar].size(), _sub_dof_indices[jvar].size());
-      _sub_Ke[ivar][jvar].zero();
-    }
     _sub_Re[ivar].resize(_sub_dof_indices[ivar].size());
     _sub_Re[ivar].zero();
   }
+}
+
+void
+AsmBlock::prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar)
+{
+  _dof_map.dof_indices(elem, _sub_dof_indices[ivar], ivar);
+
+  _sub_Ke[ivar][jvar].resize(_sub_dof_indices[ivar].size(), _sub_dof_indices[jvar].size());
+  _sub_Ke[ivar][jvar].zero();
+
+  _sub_Re[ivar].resize(_sub_dof_indices[ivar].size());
+  _sub_Re[ivar].zero();
 }
 
 void

@@ -157,13 +157,6 @@ NonlinearSystem::preInit()
   }
 
   _sys.get_dof_map()._dof_coupling = _cm;
-
-  // I want the blocks to go by columns first to reduce copying of shape function in assembling "full" Jacobian
-  _cm_entry.clear();
-  for (unsigned int j = 0; j < n_vars; ++j)
-    for (unsigned int i = 0; i < n_vars; ++i)
-      if ((*_cm)(i, j) != 0)
-        _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
 }
 
 void
@@ -194,6 +187,12 @@ void
 NonlinearSystem::prepareAssembly(const Elem * elem, THREAD_ID tid)
 {
   _asm_block[tid]->prepare(elem);
+}
+
+void
+NonlinearSystem::prepareAssembly(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid)
+{
+  _asm_block[tid]->prepareBlock(elem, ivar, jvar);
 }
 
 void
@@ -826,7 +825,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
       const Elem* elem = *el;
       unsigned int cur_subdomain = elem->subdomain_id();
 
-      _problem.prepare(elem, tid);
+      _problem.prepare(elem, ivar, jvar, tid);
       _problem.reinitElem(elem, tid);
 
       dof_map.dof_indices(elem, dof_indices);

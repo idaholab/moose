@@ -67,6 +67,7 @@ public:
   // reinit /////
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
+  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid);
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);

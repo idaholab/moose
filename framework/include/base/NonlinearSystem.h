@@ -56,7 +56,7 @@ public:
   void setCouplingMatrix(CouplingMatrix * cm);
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
-  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
+  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries(THREAD_ID tid) { return _asm_block[tid]->couplingEntries(); }
 
   /// Should be called before EquationSystems::init()
   virtual void preInit();
@@ -72,6 +72,7 @@ public:
   void setupFiniteDifferencedPreconditioner();
 
   virtual void prepareAssembly(const Elem * elem, THREAD_ID tid);
+  virtual void prepareAssembly(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid);
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
 
@@ -264,7 +265,6 @@ protected:
 
   Moose::CouplingType _coupling;                        ///< Type of variable coupling
   CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.
-  std::vector<std::pair<unsigned int, unsigned int> > _cm_entry; ///< Entries in the coupling matrix
 
   const NumericVector<Number> * _current_solution;      ///< solution vector from nonlinear solver
   NumericVector<Number> & _solution_u_dot;              ///< solution vector for u^dot

@@ -33,7 +33,7 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread &
 void
 ComputeFullJacobianThread::computeJacobian()
 {
-  std::vector<std::pair<unsigned int, unsigned int> > & ce = _sys.couplingEntries();
+  std::vector<std::pair<unsigned int, unsigned int> > & ce = _sys.couplingEntries(_tid);
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
     unsigned int ivar = (*it).first;
@@ -55,7 +55,7 @@ ComputeFullJacobianThread::computeJacobian()
 void
 ComputeFullJacobianThread::computeFaceJacobian(short int bnd_id)
 {
-  std::vector<std::pair<unsigned int, unsigned int> > & ce = _sys.couplingEntries();
+  std::vector<std::pair<unsigned int, unsigned int> > & ce = _sys.couplingEntries(_tid);
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
     unsigned int ivar = (*it).first;
