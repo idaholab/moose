@@ -72,8 +72,13 @@ class RunParallel:
     self.finished_jobs.add(test[TEST_NAME])
     log( 'Command %d done:    %s' % (job_index, command) )
     if p.poll() == None: # process has not completed, it timed out
+      f.seek(0)
+      data = f.read()
+      data += '\n###########################################################################\n' + \
+          'Process terminated by test harness' + \
+          '\n###########################################################################\n'
       p.terminate()
-      self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, p.stdout.read())
+      self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, data)
     else:
       output = 'Running command: ' + command + '\n'
       f.seek(0)
