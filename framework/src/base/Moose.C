@@ -135,7 +135,7 @@
 #include "SetupDampersAction.h"
 #include "CheckIntegrityAction.h"
 #include "SetupQuadratureAction.h"
-#include "SetupSingleMatrixAction.h"
+#include "SetupSMPAction.h"
 #include "SetupFiniteDifferencePreconditionerAction.h"
 
 namespace Moose {
@@ -394,7 +394,7 @@ registerActions()
   registerAction(AddDamperAction, "Dampers/*", "add_damper");
   registerAction(AddStabilizerAction, "Stabilizers/*", "add_stabilizer");
   registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
-  registerAction(SetupSingleMatrixAction, "Preconditioning/SingleMatrix", "add_preconditioning");
+  registerAction(SetupSMPAction, "Preconditioning/SMP", "add_preconditioning");
   registerAction(SetupFiniteDifferencePreconditionerAction, "Preconditioning/FDP", "add_preconditioning");
   registerAction(SetupQuadratureAction, "Executioner/Quadrature", "setup_quadrature");
 

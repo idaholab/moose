@@ -12,24 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPSINGLEMATRIXACTION_H
-#define SETUPSINGLEMATRIXACTION_H
+#ifndef SETUPSMPACTION_H
+#define SETUPSMPACTION_H
 
 #include "Action.h"
 
-class SetupSingleMatrixAction;
+class SetupSMPAction;
 
 template<>
-InputParameters validParams<SetupSingleMatrixAction>();
+InputParameters validParams<SetupSMPAction>();
 
 /**
  * Action to setup single matrix Jacobian (or Jacobian approximate)
  *
  */
-class SetupSingleMatrixAction: public Action
+class SetupSMPAction: public Action
 {
 public:
-  SetupSingleMatrixAction(const std::string & name, InputParameters params);
+  SetupSMPAction(const std::string & name, InputParameters params);
 
   virtual void act();
 };

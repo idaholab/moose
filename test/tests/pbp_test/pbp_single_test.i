@@ -29,8 +29,7 @@
 []
 
 [Preconditioning]
-  [./SingleMatrix]
-    preconditioner  = 'LU'
+  [./SMP]
     off_diag_row    = 'u'
     off_diag_column = 'v'
   [../]
