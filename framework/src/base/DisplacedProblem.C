@@ -316,6 +316,12 @@ DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
+DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+{
+  _asm_block[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
+}
+
+void
 DisplacedProblem::prepareShapes(unsigned int var, THREAD_ID tid)
 {
   _asm_block[tid]->copyShapes(var);

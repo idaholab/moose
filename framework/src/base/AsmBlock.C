@@ -157,3 +157,20 @@ AsmBlock::addJacobian(SparseMatrix<Number> & jacobian)
   }
 }
 
+void
+AsmBlock::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices)
+{
+  DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar);
+  // stick it into the matrix
+  dof_map.constrain_element_matrix(ke, dof_indices, false);
+
+  Real scaling_factor = _sys._vars[_tid].all()[ivar]->scalingFactor();
+  if (scaling_factor != 1.0)
+  {
+    DenseMatrix<Number> scaled_ke(ke);
+    scaled_ke.scale(scaling_factor);
+    jacobian.add_matrix(scaled_ke, dof_indices);
+  }
+  else
+    jacobian.add_matrix(ke, dof_indices);
+}

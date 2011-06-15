@@ -208,6 +208,12 @@ NonlinearSystem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
+NonlinearSystem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+{
+  _asm_block[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
+}
+
+void
 NonlinearSystem::solve()
 {
   // Initialize the solution vector with known values from nodal bcs
@@ -889,23 +895,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
           }
         }
 
-        // NOTE: We have to bypass AsmBlock here, since it works with the large system and we need to put our stuff inside another (small) system
-        // Can't think of an easier solution than simply almost "replicating" the code here.  I have the special dof_map, dof_indicies, so I just
-        // use the piece of AsmBlock and do whatever I need to do with it.
-
-        // grab the sub-block
-        DenseMatrix<Number> & ke = _asm_block[tid]->jacobianBlock(ivar, jvar);
-        // stick it into the matrix
-        dof_map.constrain_element_matrix(ke, dof_indices, false);
-        // FIXME: add variable scaling here
-        jacobian.add_matrix(ke, dof_indices);
-
-        if (_mproblem._displaced_problem != NULL)
-        {
-          DenseMatrix<Number> & ke = _mproblem._displaced_problem->asmBlock(tid).jacobianBlock(ivar, jvar);
-          dof_map.constrain_element_matrix(ke, dof_indices, false);
-          jacobian.add_matrix(ke, dof_indices);
-        }
+        _problem.addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
       }
     }
   }

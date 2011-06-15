@@ -75,6 +75,7 @@ public:
   virtual void prepareAssembly(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid);
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
 
   AsmBlock & asmBlock(THREAD_ID tid) { return *_asm_block[tid]; }
 

@@ -90,6 +90,7 @@ public:
 
   virtual void addResidual(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }
   virtual void addJacobian(SparseMatrix<Number> & /*jacobian*/, THREAD_ID /*tid*/) { }
+  virtual void addJacobianBlock(SparseMatrix<Number> & /*jacobian*/, unsigned int /*ivar*/, unsigned int /*jvar*/, const DofMap & /*dof_map*/, std::vector<unsigned int> & /*dof_indices*/, THREAD_ID /*tid*/) { }
 
   // Initial conditions /////
   virtual Number initialValue (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name) = 0;

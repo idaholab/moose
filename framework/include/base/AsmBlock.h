@@ -42,6 +42,7 @@ public:
 
   void addResidual(NumericVector<Number> & residual);
   void addJacobian(SparseMatrix<Number> & jacobian);
+  void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices);
 
   DenseVector<Number> & residualBlock(unsigned int var_num) { return _sub_Re[var_num]; }
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar) { return _sub_Ke[ivar][jvar]; }
