@@ -22,7 +22,7 @@ MOOSE_DIR	?= $(shell pwd)
 MAKE_LIBRARY	:= yes
 APPLICATION_NAME := moose
 
-include build.mk 
+include build.mk
 
 ###############################################################################
 # Additional special case targets should be added here
