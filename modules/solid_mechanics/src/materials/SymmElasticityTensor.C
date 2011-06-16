@@ -20,33 +20,8 @@ SymmElasticityTensor::calculate(unsigned int qp)
   }
 }
 
-ColumnMajorMatrix
-SymmElasticityTensor::calculateDerivative(unsigned int /*qp*/, unsigned int /*i*/)
-{
-  ColumnMajorMatrix m(9, 9);
-  return m;
-}
-
 void
-SymmElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b )
-{
-  const Real xx = x.xx();
-  const Real yy = x.yy();
-  const Real zz = x.zz();
-  const Real xy = x.xy();
-  const Real yz = x.yz();
-  const Real zx = x.zx();
-
-  b.xx() = _val[ 0]*xx + _val[ 1]*yy + _val[ 2]*zz;
-  b.yy() = _val[ 1]*xx + _val[ 6]*yy + _val[ 7]*zz;
-  b.zz() = _val[ 2]*xx + _val[ 7]*yy + _val[11]*zz;
-  b.xy() = 2*_val[15]*xy;
-  b.yz() = 2*_val[18]*yz;
-  b.zx() = 2*_val[20]*zx;
-}
-
-void
-SymmElasticityTensor::generalMultiply( const SymmTensor & x, SymmTensor & b )
+SymmElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) const
 {
   const Real xx = x.xx();
   const Real yy = x.yy();
@@ -61,6 +36,14 @@ SymmElasticityTensor::generalMultiply( const SymmTensor & x, SymmTensor & b )
   b.xy() = _val[ 3]*xx + _val[ 8]*yy + _val[12]*zz + 2*(_val[15]*xy + _val[16]*yz + _val[17]*zx);
   b.yz() = _val[ 4]*xx + _val[ 9]*yy + _val[13]*zz + 2*(_val[16]*xy + _val[18]*yz + _val[19]*zx);
   b.zx() = _val[ 5]*xx + _val[10]*yy + _val[14]*zz + 2*(_val[17]*xy + _val[19]*yz + _val[20]*zx);
+}
+
+SymmTensor
+SymmElasticityTensor::operator*( const SymmTensor & x ) const
+{
+  SymmTensor b;
+  multiply( x, b );
+  return b;
 }
 
 Real
@@ -86,7 +69,7 @@ SymmElasticityTensor::stiffness( const unsigned ii, const unsigned jj,
   {
     b(0) = _val[15]*phi(0) + _val[ 8]*phi(1) + _val[16]*phi(2);
     b(1) = _val[ 8]*phi(0) + _val[ 6]*phi(1) + _val[ 9]*phi(2);
-    b(2) = _val[16]*phi(0) + _val[ 9]*phi(2) + _val[18]*phi(2);
+    b(2) = _val[16]*phi(0) + _val[ 9]*phi(1) + _val[18]*phi(2);
   }
   else if (2 == i && 2 == j)
   {
@@ -102,8 +85,8 @@ SymmElasticityTensor::stiffness( const unsigned ii, const unsigned jj,
   }
   else if (1 == i && 2 == j)
   {
-    b(0) = _val[17]*phi(0) + _val[16]*phi(1) + _val[14]*phi(2);
-    b(1) = _val[10]*phi(0) + _val[10]*phi(1) + _val[ 7]*phi(2);
+    b(0) = _val[17]*phi(0) + _val[16]*phi(1) + _val[12]*phi(2);
+    b(1) = _val[10]*phi(0) + _val[ 9]*phi(1) + _val[ 7]*phi(2);
     b(2) = _val[19]*phi(0) + _val[18]*phi(1) + _val[13]*phi(2);
   }
   else if (0 == i && 2 == j)
@@ -114,8 +97,157 @@ SymmElasticityTensor::stiffness( const unsigned ii, const unsigned jj,
   }
   else
   {
-    mooseError( "Wrong index in stiffness calculation" );
+    std::stringstream s;
+    s << "Wrong index in stiffness calculation: ";
+    s << i << " " << j;
+    mooseError( s.str() );
   }
   return test * b;
 }
 
+void
+SymmElasticityTensor::calculateEntries(unsigned int /*qp*/)
+{
+  mooseError( "calculateEntries must be called on a derived class" );
+}
+
+void
+SymmElasticityTensor::convertFrom9x9( const ColumnMajorMatrix & input )
+{
+  if ( input.numEntries() != 81 )
+  {
+    mooseError( "Cannot convert from ColumnMajorMatrix (wrong size)" );
+  }
+
+  _val[ 0] = input(0,0);
+  _val[ 1] = input(0,4);
+  _val[ 2] = input(0,8);
+  _val[ 3] = input(0,1);
+  _val[ 4] = input(0,5);
+  _val[ 5] = input(0,2);
+
+  _val[ 6] = input(4,4);
+  _val[ 7] = input(4,8);
+  _val[ 8] = input(4,3);
+  _val[ 9] = input(4,5);
+  _val[10] = input(4,6);
+
+  _val[11] = input(8,8);
+  _val[12] = input(8,3);
+  _val[13] = input(8,5);
+  _val[14] = input(8,6);
+
+  _val[15] = input(1,1);
+  _val[16] = input(1,5);
+  _val[17] = input(1,2);
+
+  _val[18] = input(5,5);
+  _val[19] = input(5,6);
+
+  _val[20] = input(2,2);
+}
+
+ColumnMajorMatrix
+SymmElasticityTensor::columnMajorMatrix6x6() const
+{
+  ColumnMajorMatrix cmm(6,6);
+  unsigned count(0);
+  for (unsigned i(0); i < 6; ++i)
+  {
+    for (unsigned j(i); j < 6; ++j)
+    {
+      cmm(i,j) = cmm(j,i) = _val[count++];
+    }
+  }
+  return cmm;
+}
+
+ColumnMajorMatrix
+SymmElasticityTensor::columnMajorMatrix9x9() const
+{
+  ColumnMajorMatrix cmm(9,9);
+  cmm(0,0)            = _val[ 0];
+  cmm(0,1) = cmm(1,0) = _val[ 3];
+  cmm(0,2) = cmm(2,0) = _val[ 5];
+  cmm(0,3) = cmm(3,0) = _val[ 3];
+  cmm(0,4) = cmm(4,0) = _val[ 1];
+  cmm(0,5) = cmm(5,0) = _val[ 4];
+  cmm(0,6) = cmm(6,0) = _val[ 5];
+  cmm(0,7) = cmm(7,0) = _val[ 4];
+  cmm(0,8) = cmm(8,0) = _val[ 2];
+
+  cmm(1,1)            = _val[15];
+  cmm(1,2) = cmm(2,1) = _val[17];
+  cmm(1,3) = cmm(3,1) = _val[15];
+  cmm(1,4) = cmm(4,1) = _val[ 8];
+  cmm(1,5) = cmm(5,1) = _val[16];
+  cmm(1,6) = cmm(6,1) = _val[17];
+  cmm(1,7) = cmm(7,1) = _val[16];
+  cmm(1,8) = cmm(8,1) = _val[12];
+
+  cmm(2,2)            = _val[20];
+  cmm(2,3) = cmm(3,2) = _val[17];
+  cmm(2,4) = cmm(4,2) = _val[10];
+  cmm(2,5) = cmm(5,2) = _val[19];
+  cmm(2,6) = cmm(6,2) = _val[20];
+  cmm(2,7) = cmm(7,2) = _val[19];
+  cmm(2,8) = cmm(8,2) = _val[14];
+
+  cmm(3,3) =            _val[15];
+  cmm(3,4) = cmm(4,3) = _val[ 8];
+  cmm(3,5) = cmm(5,3) = _val[16];
+  cmm(3,6) = cmm(6,3) = _val[17];
+  cmm(3,7) = cmm(7,3) = _val[16];
+  cmm(3,8) = cmm(8,3) = _val[12];
+
+  cmm(4,4)            = _val[ 6];
+  cmm(4,5) = cmm(5,4) = _val[ 9];
+  cmm(4,6) = cmm(6,4) = _val[10];
+  cmm(4,7) = cmm(7,4) = _val[ 9];
+  cmm(4,8) = cmm(8,4) = _val[ 7];
+
+  cmm(5,5)            = _val[18];
+  cmm(5,6) = cmm(6,5) = _val[19];
+  cmm(5,7) = cmm(7,5) = _val[18];
+  cmm(5,8) = cmm(8,5) = _val[13];
+
+  cmm(6,6) =            _val[20];
+  cmm(6,7) = cmm(7,6) = _val[19];
+  cmm(6,8) = cmm(8,6) = _val[14];
+
+  cmm(7,7) =            _val[18];
+  cmm(7,8) = cmm(8,7) = _val[13];
+
+  cmm(8,8)            = _val[11];
+
+  return cmm;
+}
+
+
+std::ostream&
+operator<<(std::ostream & stream, const SymmElasticityTensor & obj)
+{
+  stream << "SymmElasticityTensor:\n"
+         << std::setprecision(6)
+         << std::setw(13) << obj._val[ 0] << "\t" << std::setw(13) << obj._val[ 1] << "\t" << std::setw(13) << obj._val[ 2] << "\t" << std::setw(13) << obj._val[ 3] << "\t" << std::setw(13) << obj._val[ 4] << "\t" << std::setw(13) << obj._val[ 5] << "\n"
+         << "\t\t" << std::setw(13) << obj._val[ 6] << "\t" << std::setw(13) << obj._val[ 7] << "\t" << std::setw(13) << obj._val[ 8] << "\t" << std::setw(13) << obj._val[ 9] << "\t" << std::setw(13) << obj._val[10] << "\n"
+         << "\t\t\t\t" << std::setw(13) << obj._val[11] << "\t" << std::setw(13) << obj._val[12] << "\t" << std::setw(13) << obj._val[13] << "\t" << std::setw(13) << obj._val[14] << "\n"
+         << "\t\t\t\t\t\t" << std::setw(13) << obj._val[15] << "\t" << std::setw(13) << obj._val[16] << "\t" << std::setw(13) << obj._val[17] << "\t" << "\n"
+         << "\t\t\t\t\t\t\t\t" << std::setw(13) << obj._val[18] << "\t" << std::setw(13) << obj._val[19] << "\n"
+         << "\t\t\t\t\t\t\t\t\t\t" << std::setw(13) << obj._val[20] << std::endl;
+  return stream;
+}
+
+SymmElasticityTensor
+SymmElasticityTensor::calculateDerivative(unsigned int /*qp*/, unsigned int /*i*/)
+{
+  return SymmElasticityTensor();
+}
+
+SymmElasticityTensor
+SymmElasticityTensor::operator*( Real x ) const
+{
+  SymmElasticityTensor fred(*this);
+  fred *= x;
+  return fred;
+}

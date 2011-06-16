@@ -4,6 +4,7 @@
 #include "AuxKernel.h"
 
 class MaterialTensorAux;
+class SymmTensor;
 
 template<>
 InputParameters validParams<MaterialTensorAux>();

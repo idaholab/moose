@@ -27,7 +27,7 @@ LinearIsotropicMaterialRZ::~LinearIsotropicMaterialRZ()
 void
 LinearIsotropicMaterialRZ::computeStress(const SymmTensor & total_strain,
                                          const SymmTensor & strain,
-                                         const ElasticityTensor & elasticity_tensor,
+                                         const SymmElasticityTensor & elasticity_tensor,
                                          SymmTensor & stress)
 {
 
@@ -39,12 +39,7 @@ LinearIsotropicMaterialRZ::computeStress(const SymmTensor & total_strain,
   _elastic_strain[_qp] = elastic_strain;
 
   // C * e
-  ColumnMajorMatrix el_strn( elastic_strain.columnMajorMatrix() );
-  el_strn.reshape( 9, 1 );
-  ColumnMajorMatrix stress_vector( elasticity_tensor * el_strn );
-
-  // Fill the material properties
-  stress = stress_vector;
+  stress = elasticity_tensor * elastic_strain;
 
   computeCracking( total_strain, stress );
 

@@ -44,27 +44,21 @@ void
 PLSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
                                    SymmTensor & elastic_strain)
 {
-  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
-
   _total_strain[_qp] = total_strain;
 
-  ColumnMajorMatrix etotal_strain(total_strain.columnMajorMatrix());
-  etotal_strain -= _total_strain_old[_qp].columnMajorMatrix();
+  SymmTensor etotal_strain(total_strain);
+  etotal_strain -= _total_strain_old[_qp];
 
 
-  ColumnMajorMatrix stress_old_b(_stress_old[_qp].columnMajorMatrix());
+  SymmTensor stress_old_b(_stress_old[_qp]);
 
-// convert total_strain from 3x3 to 9x1
-  etotal_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 // trial stress
-  ColumnMajorMatrix trial_stress = (*_local_elasticity_tensor) * etotal_strain;
-// Change 9x1 to a 3x3
-  trial_stress.reshape(LIBMESH_DIM, LIBMESH_DIM);
+  SymmTensor trial_stress = (*_local_elasticity_tensor) * etotal_strain;
   trial_stress += stress_old_b;
 
 // deviatoric trial stress
   SymmTensor dev_trial_stress(trial_stress);
-  dev_trial_stress.addDiag( -trial_stress.tr()/3.0 );
+  dev_trial_stress.addDiag( -trial_stress.trace()/3.0 );
 // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
   Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
@@ -155,70 +149,66 @@ PLSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
     unsigned int i, j, k, l;
     i = j = k = l = 0;
     double devdev[3][3][3][3];
-        for (l=0;l<3;l++)
-          for (k=0;k<3;k++)
-            for (j=0;j<3;j++)
-              for (i=0;i<3;i++)
-              {
-                devdev[i][j][k][l] = dev_trial_stress(i,j) * dev_trial_stress(k,l);
-              }
+    for (l=0;l<3;l++)
+      for (k=0;k<3;k++)
+        for (j=0;j<3;j++)
+          for (i=0;i<3;i++)
+          {
+            devdev[i][j][k][l] = dev_trial_stress(i,j) * dev_trial_stress(k,l);
+          }
 
  //define identity matrix
-     double xiden[3][3];
-         for (i=0;i<3;i++)
-           for (j=0;j<3;j++)
-           {
-             i==j ? xiden[i][j] = 1. : xiden[i][j] = 0.;
-           }
+    double xiden[3][3];
+    for (i=0;i<3;i++)
+      for (j=0;j<3;j++)
+      {
+        i==j ? xiden[i][j] = 1. : xiden[i][j] = 0.;
+      }
 
 //now the 3x3 identity X the 3x3 identity Iikjl
     double IIdent[3][3][3][3];
-        for (l=0;l<3;l++)
-          for (k=0;k<3;k++)
-            for (j=0;j<3;j++)
-              for (i=0;i<3;i++)
-              {
-               IIdent[i][j][k][l] = xiden[i][j]*xiden[k][l];
-              }
+    for (l=0;l<3;l++)
+      for (k=0;k<3;k++)
+        for (j=0;j<3;j++)
+          for (i=0;i<3;i++)
+          {
+            IIdent[i][j][k][l] = xiden[i][j]*xiden[k][l];
+          }
 
 //define bold I identity matrix
     double boldI[3][3][3][3];
-        for (l=0;l<3;l++)
-          for (k=0;k<3;k++)
-            for (j=0;j<3;j++)
-              for (i=0;i<3;i++)
-              {
-                i==k && j==l ? boldI[i][j][k][l] = 1. : boldI[i][j][k][l] = 0.;
-              }
+    for (l=0;l<3;l++)
+      for (k=0;k<3;k++)
+        for (j=0;j<3;j++)
+          for (i=0;i<3;i++)
+          {
+            i==k && j==l ? boldI[i][j][k][l] = 1. : boldI[i][j][k][l] = 0.;
+          }
 
 //the Jacobian partial del sig wrt partial del eps pds/pde
     double Jac[3][3][3][3];
-        for (l=0;l<3;l++)
-          for (k=0;k<3;k++)
-            for (j=0;j<3;j++)
-              for (i=0;i<3;i++)
-              {
-                Jac[i][j][k][l] = (2*_shear_modulus*Q/(effective_trial_stress*effective_trial_stress)) * devdev[i][j][k][l] + 2*_shear_modulus*R*boldI[i][j][k][l] + (_K - 2*_shear_modulus*R/3)*IIdent[i][j][k][l];
-              }
+    for (l=0;l<3;l++)
+      for (k=0;k<3;k++)
+        for (j=0;j<3;j++)
+          for (i=0;i<3;i++)
+          {
+            Jac[i][j][k][l] = (2*_shear_modulus*Q/(effective_trial_stress*effective_trial_stress)) * devdev[i][j][k][l] + 2*_shear_modulus*R*boldI[i][j][k][l] + (_K - 2*_shear_modulus*R/3)*IIdent[i][j][k][l];
+          }
 
 //now define _Jacobian_mult[_qp], which is a colummajormatrix, in terms of Jac[i][j][k][l]
-    double Jac9x9[9][9];
-    _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
-            for (l=0;l<3;l++)
-              for (k=0;k<3;k++)
-                for (j=0;j<3;j++)
-                  for (i=0;i<3;i++)
-                  {
-                    unsigned int n = l*3 + k;
-                    unsigned int m = j*3 + i;
-                    Jac9x9[n][m] = Jac[i][j][k][l];
-                    _Jacobian_mult[_qp](n,m) = Jac[i][j][k][l];
-                  }
-//    _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+    ColumnMajorMatrix Jac9x9(9,9);
+    for (l=0;l<3;l++)
+      for (k=0;k<3;k++)
+        for (j=0;j<3;j++)
+          for (i=0;i<3;i++)
+          {
+            unsigned int n = l*3 + k;
+            unsigned int m = j*3 + i;
+            Jac9x9(n,m) = Jac[i][j][k][l];
+          }
+    _Jacobian_mult[_qp].convertFrom9x9( Jac9x9 );
 
-//end of if
   }
-
   else
   {
     elastic_strain = etotal_strain;
@@ -246,11 +236,6 @@ PLSHPlasticMaterial::computeStress(const SymmTensor & strain,
 
 
   // C * e
-  ColumnMajorMatrix el_strn( elastic_strain.columnMajorMatrix() );
-  el_strn.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
-  ColumnMajorMatrix stress_vector(*_local_elasticity_tensor * el_strn);
-
-  // Fill the material properties
-  stress = stress_vector;
+  stress = (*_local_elasticity_tensor * elastic_strain);
   stress += _stress_old[_qp];
 }

@@ -2,13 +2,44 @@
 #define SYMMELASTICITYTENSOR_H
 
 #include "SymmTensor.h"
+
+#include "MaterialProperty.h"
+
 #include "vector_value.h"
 
 /**
  * This class defines a basic set of capabilities any elasticity tensor should have.
  *
  * The SymmElasticityTensor represents the C_ijkl 3x3x3x3 tensor by a symmetric
- * 6x6 matrix.
+ * 6x6 matrix.  21 entries are stored.
+ *
+ *   Entries:                  Indices:
+ *   C11 C12 C13 C14 C15 C16     0  1  2  3  4  5
+ *       C22 C23 C24 C25 C26        6  7  8  9 10
+ *           C33 C34 C35 C36          11 12 13 14
+ *               C44 C45 C46             15 16 17
+ *                   C55 C56                18 19
+ *                       C66                   20
+ *
+ *   Multiplication by the strain is done by:
+ *  |C11 C12 C13 C14 C15 C16| |  exx|   |Sxx|
+ *  |    C22 C23 C24 C25 C26| |  eyy|   |Syy|
+ *  |        C33 C34 C35 C36| |  ezz| = |Szz|
+ *  |            C44 C45 C46| |2*exy|   |Sxy|
+ *  |                C55 C56| |2*eyz|   |Syz|
+ *  |                    C66| |2*ezx|   |Szx|
+ *
+ *   If the elasticity matrix is taken as 9x9 (with a column-major
+ *     representation of the stress/strain), the relationship is:
+ *   C11 C14 C16 C14 C12 C15 C16 C15 C13
+ *       C44 C46 C44 C42 C45 C46 C45 C43
+ *           C66 C64 C62 C65 C66 C65 C63
+ *               C44 C42 C45 C46 C45 C43
+ *                   C22 C25 C26 C25 C23
+ *                       C55 C56 C55 C53
+ *                           C66 C65 C63
+ *                               C55 C53
+ *                                   C33
  *
  */
 class SymmElasticityTensor
@@ -22,19 +53,76 @@ public:
    */
   SymmElasticityTensor(const bool constant = false);
 
+  void copyValues( SymmElasticityTensor & rhs ) const
+  {
+    for (unsigned i(0); i < 21; ++i)
+    {
+      rhs._val[i] = _val[i];
+    }
+  }
+
   /**
    * Public function that will be called whenever the values for this matrix
    * need to be filled in.
    */
   void calculate(unsigned int qp);
 
-  virtual ColumnMajorMatrix calculateDerivative(unsigned int qp, unsigned int i);
-
-  virtual void multiply( const SymmTensor & x, SymmTensor & b );
+  virtual void multiply( const SymmTensor & x, SymmTensor & b ) const;
+  SymmTensor operator*( const SymmTensor & x ) const;
+  SymmElasticityTensor operator*( Real x ) const;
 
   virtual Real stiffness( const unsigned i, const unsigned j,
                           const RealGradient & test,
                           const RealGradient & phi );
+
+  void operator+=( const SymmElasticityTensor & rhs )
+  {
+    for (unsigned i(0); i < 21; ++i)
+    {
+      _val[i] += rhs._val[i];
+    }
+  }
+
+  void operator-=( const SymmElasticityTensor & rhs )
+  {
+    for (unsigned i(0); i < 21; ++i)
+    {
+      _val[i] -= rhs._val[i];
+    }
+  }
+
+  void operator*=( Real rhs )
+  {
+    for (unsigned i(0); i < 21; ++i)
+    {
+      _val[i] *= rhs;
+    }
+  }
+
+  void operator/=( Real rhs )
+  {
+    for (unsigned i(0); i < 21; ++i)
+    {
+      _val[i] /= rhs;
+    }
+  }
+
+  void zero()
+  {
+    for (unsigned i(0); i < 21; ++i)
+    {
+      _val[i] = 0;
+    }
+  }
+
+  void convertFrom9x9( const ColumnMajorMatrix & cmm );
+
+  ColumnMajorMatrix columnMajorMatrix9x9() const;
+  ColumnMajorMatrix columnMajorMatrix6x6() const;
+
+  virtual SymmElasticityTensor calculateDerivative(unsigned int qp,unsigned int i);
+
+  friend std::ostream & operator<<(std::ostream & stream, const SymmElasticityTensor & obj);
 
 protected:
 
@@ -49,14 +137,12 @@ protected:
   bool _values_computed;
 
   /**
-   * Pure virtual (must be overriden by derived class).
+   * Virtual (must be overriden by derived class).
    *
    * This method actually fills in the entries of the tensor... using whatever
    * information it has.
    */
-  virtual void calculateEntries(unsigned int qp) = 0;
-
-  void generalMultiply( const SymmTensor & x, SymmTensor & b );
+  virtual void calculateEntries(unsigned int qp);
 
   Real _val[21]; // 6 in first row (column)
                  // 5 in second
@@ -65,7 +151,5 @@ protected:
                  // 2 in fifth
                  // 1 in sixth
 };
-
-
 
 #endif //SYMMELASTICITYTENSOR_H

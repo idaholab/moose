@@ -1,5 +1,6 @@
 #include "MaterialTensorAux.h"
 
+#include "SymmTensor.h"
 
 template<>
 InputParameters validParams<MaterialTensorAux>()

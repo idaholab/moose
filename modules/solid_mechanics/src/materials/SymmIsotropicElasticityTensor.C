@@ -98,6 +98,12 @@ SymmIsotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
   const Real C44(_mu);
   const Real C11(2*C44+C12);
 
+  setEntries( C11, C12, C44 );
+}
+
+void
+SymmIsotropicElasticityTensor::setEntries( Real C11, Real C12, Real C44 )
+{
   _val[ 0] = _val[ 6] = _val[11] = C11;
   _val[ 1] = _val[ 2] = _val[ 7] = C12;
   _val[15] = _val[18] = _val[20] = C44;
@@ -158,3 +164,22 @@ SymmIsotropicElasticityTensor::stiffness( const unsigned ii, const unsigned jj,
   }
   return test * b;
 }
+
+void
+SymmIsotropicElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) const
+{
+  const Real xx = x.xx();
+  const Real yy = x.yy();
+  const Real zz = x.zz();
+  const Real xy = x.xy();
+  const Real yz = x.yz();
+  const Real zx = x.zx();
+
+  b.xx() = _val[ 0]*xx + _val[ 1]*yy + _val[ 2]*zz;
+  b.yy() = _val[ 1]*xx + _val[ 6]*yy + _val[ 7]*zz;
+  b.zz() = _val[ 2]*xx + _val[ 7]*yy + _val[11]*zz;
+  b.xy() = 2*_val[15]*xy;
+  b.yz() = 2*_val[18]*yz;
+  b.zx() = 2*_val[20]*zx;
+}
+

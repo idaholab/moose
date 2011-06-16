@@ -1,6 +1,6 @@
 #include "PLC_LSH.h"
 
-#include "IsotropicElasticityTensor.h"
+#include "SymmIsotropicElasticityTensor.h"
 
 template<>
 InputParameters validParams<PLC_LSH>()
@@ -74,20 +74,15 @@ PLC_LSH::computeStress()
   //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
-  const ColumnMajorMatrix stress_old(_stress_old[_qp].columnMajorMatrix());
+  const SymmTensor stress_old(_stress_old[_qp]);
 
-// compute trial stress
-//   _strain_increment.reshape(9, 1);
-  ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
-  str_inc.reshape(9,1);
-  ColumnMajorMatrix stress_new( *elasticityTensor() * str_inc );
-//   _strain_increment.reshape(3, 3);
-  stress_new.reshape(3, 3);
+  // compute trial stress
+  SymmTensor stress_new( *elasticityTensor() * _strain_increment );
   stress_new *= _dt;
   stress_new += stress_old;
 
   SymmTensor creep_strain_increment;
-  ColumnMajorMatrix stress_new_last( stress_new );
+  SymmTensor stress_new_last( stress_new );
   Real delS(_tolerance+1);
   unsigned int counter(0);
 
@@ -101,7 +96,7 @@ PLC_LSH::computeStress()
     computeLSH( stress_new, creep_strain_increment );
 
     // now check convergence
-    ColumnMajorMatrix deltaS(stress_new_last - stress_new);
+    SymmTensor deltaS(stress_new_last - stress_new);
     stress_new_last = stress_new;
     delS = deltaS.doubleContraction(deltaS);
   }
@@ -112,15 +107,15 @@ PLC_LSH::computeStress()
 }
 
 void
-PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
-                       ColumnMajorMatrix & stress_new,
+PLC_LSH::computeCreep( const SymmTensor & stress_old,
+                       SymmTensor & stress_new,
                        SymmTensor & creep_strain_increment )
 {
   creep_strain_increment.zero();
 
 // compute deviatoric trial stress
   SymmTensor dev_trial_stress(stress_new);
-  dev_trial_stress.addDiag( -stress_new.tr()/3.0 );
+  dev_trial_stress.addDiag( -stress_new.trace()/3.0 );
 
 // compute effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -132,8 +127,8 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
   Real delta_temp(_temperature[_qp]-_temperature_old[_qp]);
 
   Real phiTest( _coefficient*std::pow(effective_trial_stress, _exponent) );
-  ColumnMajorMatrix dev_strain(_total_strain[_qp].columnMajorMatrix());
-  dev_strain.addDiag( -dev_strain.tr()/3 );
+  SymmTensor dev_strain(_total_strain[_qp]);
+  dev_strain.addDiag( -dev_strain.trace()/3 );
   Real epsTotal( dev_strain.doubleContraction(dev_strain) );
   const Real ratio( epsTotal > 0 ? _dt * ( phiTest / ( _tau * epsTotal ) ) + 1 : 1 );
 
@@ -142,12 +137,12 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
 
   const Real fraction( 1./num_steps );
   const Real dt( _dt * fraction );
-  ColumnMajorMatrix delta_stress(stress_new);
+  SymmTensor delta_stress(stress_new);
   delta_stress -= stress_old;
   delta_stress *= 0.5*fraction;
-  ColumnMajorMatrix stress_last(stress_old);
-  ColumnMajorMatrix stress_ave(stress_last);
-  ColumnMajorMatrix stress_next;
+  SymmTensor stress_last(stress_old);
+  SymmTensor stress_ave(stress_last);
+  SymmTensor stress_next;
 
   Real del_p(0);
   if (_t_step > 1)
@@ -171,7 +166,7 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
 
 // compute deviatoric trial stress
     SymmTensor dev_trial_stress(stress_ave);
-    dev_trial_stress.addDiag( -stress_ave.tr()/3.0 );
+    dev_trial_stress.addDiag( -stress_ave.trace()/3.0 );
 
 // compute effective trial stress
     Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -219,14 +214,14 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
     SymmTensor creep_strain_sub_increment( dev_trial_stress );
     creep_strain_sub_increment *= (1.5*del_p/effective_trial_stress);
 
-    ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*dt - creep_strain_sub_increment.columnMajorMatrix());
+    SymmTensor elastic_strain_increment(_strain_increment);
+    elastic_strain_increment *= dt;
+    elastic_strain_increment -= creep_strain_sub_increment;
 
 // compute stress increment
-    elastic_strain_increment.reshape(9, 1);
     stress_next = *elasticityTensor() * elastic_strain_increment;
 
 // update stress and creep strain
-    stress_next.reshape(3, 3);
     stress_next += stress_last;
     stress_last = stress_next;
 
@@ -240,7 +235,7 @@ PLC_LSH::computeCreep( const ColumnMajorMatrix & stress_old,
 }
 
 void
-PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
+PLC_LSH::computeLSH( SymmTensor & stress_new,
                      const SymmTensor & creep_strain_increment )
 {
 
@@ -253,8 +248,8 @@ PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
   }
 
 // compute deviatoric trial stress
-  ColumnMajorMatrix dev_trial_stress_p(stress_new);
-  dev_trial_stress_p.addDiag( -stress_new.tr()/3.0 );
+  SymmTensor dev_trial_stress_p(stress_new);
+  dev_trial_stress_p.addDiag( -stress_new.trace()/3.0 );
 
 // effective trial stress
   Real dts_squared_p = dev_trial_stress_p.doubleContraction(dev_trial_stress_p);
@@ -296,18 +291,19 @@ PLC_LSH::computeLSH( ColumnMajorMatrix & stress_new,
 // JDH: If we are in this portion of the code, effective_trial_stress_p must be
 // non-zero.  The check is unnecessary.
     if (effective_trial_stress_p < 0.01) effective_trial_stress_p = 0.01;
-    ColumnMajorMatrix plastic_strain_increment(dev_trial_stress_p);
+    SymmTensor plastic_strain_increment(dev_trial_stress_p);
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress_p);
 
-    ColumnMajorMatrix elastic_strain_increment_p( _strain_increment.columnMajorMatrix()*_dt - plastic_strain_increment - creep_strain_increment.columnMajorMatrix() );
+    SymmTensor elastic_strain_increment_p( _strain_increment );
+    elastic_strain_increment_p *= _dt;
+    elastic_strain_increment_p -= plastic_strain_increment;
+    elastic_strain_increment_p -= creep_strain_increment;
 
 //compute stress increment
-    elastic_strain_increment_p.reshape(9, 1);
     stress_new = *elasticityTensor() * elastic_strain_increment_p;
 
 // update stress and plastic strain
-    stress_new.reshape(3, 3);
-    stress_new += _stress_old[_qp].columnMajorMatrix();
+    stress_new += _stress_old[_qp];
     _plastic_strain[_qp] = plastic_strain_increment;
     _plastic_strain[_qp] += _plastic_strain_old[_qp];
 

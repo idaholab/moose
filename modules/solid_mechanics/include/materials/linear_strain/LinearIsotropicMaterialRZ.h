@@ -17,7 +17,7 @@ class LinearIsotropicMaterialRZ : public SolidMechanicsMaterialRZ
 {
 public:
   LinearIsotropicMaterialRZ(const std::string & name,
-                                      InputParameters parameters);
+                            InputParameters parameters);
 
   virtual ~LinearIsotropicMaterialRZ();
 
@@ -25,7 +25,7 @@ protected:
 
   virtual void computeStress(const SymmTensor & total_strain,
                              const SymmTensor & strain,
-                             const ElasticityTensor & elasticity_tensor,
+                             const SymmElasticityTensor & elasticity_tensor,
                              SymmTensor & stress);
 
   /**

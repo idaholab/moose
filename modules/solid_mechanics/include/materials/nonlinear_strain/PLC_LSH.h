@@ -49,10 +49,10 @@ protected:
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress();
 
-  void computeCreep(const ColumnMajorMatrix & stress_old,
-                    ColumnMajorMatrix & stress_new,
+  void computeCreep(const SymmTensor & stress_old,
+                    SymmTensor & stress_new,
                     SymmTensor & creep_strain_increment);
-  void computeLSH( ColumnMajorMatrix & stress_new,
+  void computeLSH( SymmTensor & stress_new,
                    const SymmTensor & creep_strain_increment );
 
 private:

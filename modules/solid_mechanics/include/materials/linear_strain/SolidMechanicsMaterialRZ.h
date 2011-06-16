@@ -5,9 +5,10 @@
 
 
 //Forward Declarations
-class ElasticityTensor;
 class SolidMechanicsMaterialRZ;
+class SymmElasticityTensor;
 class VolumetricModel;
+class SymmTensor;
 
 template<>
 InputParameters validParams<SolidMechanicsMaterialRZ>();
@@ -29,7 +30,7 @@ protected:
 
   virtual void computeStress(const SymmTensor & total_strain,
                              const SymmTensor & strain,
-                             const ElasticityTensor & elasticity_tensor,
+                             const SymmElasticityTensor & elasticity_tensor,
                              SymmTensor & stress);
 
   virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain) = 0;
@@ -68,13 +69,13 @@ protected:
   MaterialProperty<SymmTensor> & _stress_old;
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
-  MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
-  MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
+  MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
+  MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
   MaterialProperty<SymmTensor> & _elastic_strain;
   MaterialProperty<SymmTensor> & _v_strain;
   MaterialProperty<SymmTensor> & _v_strain_old;
 
-  ElasticityTensor * _local_elasticity_tensor;
+  SymmElasticityTensor * _local_elasticity_tensor;
 
 };
 

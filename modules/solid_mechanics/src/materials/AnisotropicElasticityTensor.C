@@ -115,7 +115,8 @@ void AnisotropicElasticityTensor::form_transformation_t_matrix()
   // TransD6toD9 transfroms Dt[6][6] to Dmat[9][9]
   // TransD9toD6 transforms Dmat[9][9] to Dt[6][6]
 
-  const double a = pow(0.5,0.5);
+  const double sqrt2 = std::sqrt(2.0);
+  const double a = 1/sqrt2;
 
   _trans_d6_to_d9(0,0) = _trans_d6_to_d9(4,1) =  _trans_d6_to_d9(8,2) = 1.0;
   _trans_d6_to_d9(1,3) = _trans_d6_to_d9(3,3) = a;
@@ -127,7 +128,7 @@ void AnisotropicElasticityTensor::form_transformation_t_matrix()
       _transpose_trans_d6_to_d9(j,i) = _trans_d6_to_d9(i,j);
 
 
-  const double b = pow(2.0,0.5);
+  const double b = sqrt2;
 
    _trans_d9_to_d6(0,0) = _trans_d9_to_d6(1,4) =  _trans_d9_to_d6(2,8) = 1.0;
    _trans_d9_to_d6(3,3) = _trans_d9_to_d6(4,6) =  _trans_d9_to_d6(5,7) = b;
@@ -198,8 +199,6 @@ void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
     _values[count] = _qdmat(i,j);
     count = count + 1;
   }
-
-
 }
 
 

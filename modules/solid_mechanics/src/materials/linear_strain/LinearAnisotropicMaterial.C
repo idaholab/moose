@@ -1,9 +1,7 @@
 #include "LinearAnisotropicMaterial.h"
 
 // Elk Includes
-#include "ColumnMajorMatrix.h"
-#include "AnisotropicElasticityTensor.h"
-#include "LinearIsotropicMaterial.h"
+#include "SymmAnisotropicElasticityTensor.h"
 
 template<>
 InputParameters validParams<LinearAnisotropicMaterial>()
@@ -20,7 +18,7 @@ InputParameters validParams<LinearAnisotropicMaterial>()
 }
 
 LinearAnisotropicMaterial::LinearAnisotropicMaterial(const std::string & name,
-                                                 InputParameters parameters)
+                                                     InputParameters parameters)
   :LinearIsotropicMaterial(name, parameters),
    _material_constant_c11(getParam<Real>("material_constant_c11")),
    _material_constant_c12(getParam<Real>("material_constant_c12")),
@@ -29,7 +27,7 @@ LinearAnisotropicMaterial::LinearAnisotropicMaterial(const std::string & name,
    _euler_angle_2(getParam<Real>("euler_angle_2")),
    _euler_angle_3(getParam<Real>("euler_angle_3"))
 {
-  AnisotropicElasticityTensor * aniso_elasticity_tensor = new AnisotropicElasticityTensor;
+  SymmAnisotropicElasticityTensor * aniso_elasticity_tensor = new SymmAnisotropicElasticityTensor;
   aniso_elasticity_tensor->setMaterialConstantc11(_material_constant_c11);
   aniso_elasticity_tensor->setMaterialConstantc12(_material_constant_c12);
   aniso_elasticity_tensor->setMaterialConstantc44(_material_constant_c44);

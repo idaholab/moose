@@ -1,6 +1,7 @@
 #include "MaterialModel.h"
+
 #include "Problem.h"
-#include "IsotropicElasticityTensor.h"
+#include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
 
 template<>
@@ -66,9 +67,9 @@ MaterialModel::MaterialModel( const std::string & name,
    _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
    _crack_flags(NULL),
    _crack_flags_old(NULL),
-   _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
-   _d_strain_dT(3,3),
-   _d_stress_dT(declareProperty<RealTensorValue>("d_stress_dT")),
+   _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
+   _d_strain_dT(),
+   _d_stress_dT(declareProperty<SymmTensor>("d_stress_dT")),
    _total_strain_increment(0),
    _strain_increment(0),
    _incremental_rotation(3,3),
@@ -172,7 +173,7 @@ MaterialModel::MaterialModel( const std::string & name,
   _shear_modulus_set = true;
   _youngs_modulus_set = true;
 
-  IsotropicElasticityTensor * iso =  new IsotropicElasticityTensor;
+  SymmIsotropicElasticityTensor * iso =  new SymmIsotropicElasticityTensor;
   iso->setLambda( _lambda );
   iso->setShearModulus( _shear_modulus );
   iso->calculate(0);
@@ -216,7 +217,7 @@ MaterialModel::~MaterialModel()
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::elasticityTensor( ElasticityTensor * e )
+MaterialModel::elasticityTensor( SymmElasticityTensor * e )
 {
   delete _elasticity_tensor;
   _elasticity_tensor = e;
@@ -517,13 +518,8 @@ MaterialModel::computeStress()
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
 
-//   _strain_increment.reshape(9, 1);
-  ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
-  str_inc.reshape(9, 1);
-  ColumnMajorMatrix stress_new( *_elasticity_tensor * str_inc );
-//   _strain_increment.reshape(3, 3);
+  SymmTensor stress_new( *_elasticity_tensor * _strain_increment );
   stress_new *= _dt;
-//   stress_new.fill(_stress[_qp]);
   _stress[_qp] = stress_new;
   _stress[_qp] += _stress_old[_qp];
 
@@ -874,14 +870,11 @@ MaterialModel::delta(int i, int j)
 void
 MaterialModel::computePreconditioning()
 {
-  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
   _Jacobian_mult[_qp] = *_elasticity_tensor;
 
-  _d_strain_dT.reshape(9, 1);
-  ColumnMajorMatrix d_stress_dT( *_elasticity_tensor * _d_strain_dT );
-  _d_strain_dT.reshape(3, 3);
+  SymmTensor d_stress_dT( *_elasticity_tensor * _d_strain_dT );
   d_stress_dT *= _dt;
-  d_stress_dT.fill(_d_stress_dT[_qp]);
+  _d_stress_dT[_qp] = d_stress_dT;
 
 
 /*

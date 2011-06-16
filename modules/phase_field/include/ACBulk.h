@@ -14,7 +14,7 @@ class ACBulk : public KernelValue
 public:
 
   ACBulk(const std::string & name, InputParameters parameters);
-  
+
 protected:
   enum PFFunctionType
   {
@@ -25,11 +25,11 @@ protected:
   virtual Real precomputeQpJacobian();
   virtual Real computeDFDOP(PFFunctionType type);
   std::string _mob_name;
-  
+
 
 private:
-  
+
   MaterialProperty<Real> & _L;
-  
+
 };
 #endif //ACBulk_H

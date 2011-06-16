@@ -4,8 +4,10 @@
 #include "Kernel.h"
 
 //Forward Declarations
-class StressDivergence;
 class ColumnMajorMatrix;
+class StressDivergence;
+class SymmElasticityTensor;
+class SymmTensor;
 
 template<>
 InputParameters validParams<StressDivergence>();
@@ -24,8 +26,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   MaterialProperty<SymmTensor> & _stress;
-  MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
-  MaterialProperty<RealTensorValue> & _d_stress_dT;
+  MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
+  MaterialProperty<SymmTensor> & _d_stress_dT;
 
 private:
   const unsigned int _component;

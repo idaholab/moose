@@ -60,6 +60,9 @@ public:
   virtual Real stiffness( const unsigned i, const unsigned j,
                           const RealGradient & test,
                           const RealGradient & phi );
+
+  virtual void multiply( const SymmTensor & x, SymmTensor & b ) const;
+
 protected:
 
   bool _lambda_set, _mu_set, _E_set, _nu_set, _k_set;
@@ -70,6 +73,7 @@ protected:
    * Fill in the matrix.
    */
   virtual void calculateEntries(unsigned int qp);
+  void setEntries(Real C11, Real C12, Real C44);
 
   /**
    * Calculates lambda and mu based on what has been set.

@@ -1,6 +1,6 @@
 #include "SolidMechanicsMaterialRZ.h"
 
-#include "IsotropicElasticityTensorRZ.h"
+#include "SymmIsotropicElasticityTensorRZ.h"
 #include "MaterialModel.h"
 #include "Problem.h"
 #include "VolumetricModel.h"
@@ -43,14 +43,14 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _stress_old(declarePropertyOld<SymmTensor>("stress")),
    _crack_flags(NULL),
    _crack_flags_old(NULL),
-   _elasticity_tensor(declareProperty<ColumnMajorMatrix>("elasticity_tensor")),
-   _Jacobian_mult(declareProperty<ColumnMajorMatrix>("Jacobian_mult")),
+   _elasticity_tensor(declareProperty<SymmElasticityTensor>("elasticity_tensor")),
+   _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
    _elastic_strain(declareProperty<SymmTensor>("elastic_strain")),
    _v_strain(declareProperty<SymmTensor>("v_strain")),
    _v_strain_old(declarePropertyOld<SymmTensor>("v_strain")),
    _local_elasticity_tensor(NULL)
 {
-  IsotropicElasticityTensorRZ * t = new IsotropicElasticityTensorRZ;
+  SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ;
   t->setYoungsModulus(_youngs_modulus);
   t->setPoissonsRatio(_poissons_ratio);
 
@@ -170,7 +170,7 @@ SolidMechanicsMaterialRZ::computeProperties()
 void
 SolidMechanicsMaterialRZ::computeStress(const SymmTensor & total_strain,
                                         const SymmTensor & strain,
-                                        const ElasticityTensor & elasticity_tensor,
+                                        const SymmElasticityTensor & elasticity_tensor,
                                         SymmTensor & stress)
 {
   // Add in any extra strain components
@@ -182,12 +182,7 @@ SolidMechanicsMaterialRZ::computeStress(const SymmTensor & total_strain,
   _elastic_strain[_qp] = elastic_strain;
 
   // C * e
-  ColumnMajorMatrix el_strn( elastic_strain.columnMajorMatrix() );
-  el_strn.reshape( 9, 1 );
-  ColumnMajorMatrix stress_vector = elasticity_tensor * el_strn;
-
-  // Fill the material properties
-  stress = stress_vector;
+  stress = elasticity_tensor * elastic_strain;
   stress += _stress_old[_qp];
 
   computeCracking( total_strain, stress );

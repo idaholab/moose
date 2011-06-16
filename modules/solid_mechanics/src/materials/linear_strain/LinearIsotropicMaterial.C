@@ -2,8 +2,8 @@
 
 // Elk Includes
 #include "ColumnMajorMatrix.h"
-#include "IsotropicElasticityTensor.h"
 #include "SolidMechanicsMaterial.h"
+#include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
 
 template<>
@@ -28,7 +28,7 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(const std::string  & name,
    _input_thermal_conductivity(getParam<Real>("thermal_conductivity")),
    _local_elasticity_tensor(NULL)
 {
-  IsotropicElasticityTensor * iso_elasticity_tensor = new IsotropicElasticityTensor;
+  SymmIsotropicElasticityTensor * iso_elasticity_tensor = new SymmIsotropicElasticityTensor;
   iso_elasticity_tensor->setYoungsModulus(_youngs_modulus);
   iso_elasticity_tensor->setPoissonsRatio(_poissons_ratio);
 
@@ -41,42 +41,6 @@ LinearIsotropicMaterial::~LinearIsotropicMaterial()
 }
 
 void
-LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
-                                       SymmTensor & stress)
-{
-  // Add in any extra strain components
-  SymmTensor elastic_strain;
-
-  computeStrain(strain, elastic_strain);
-
-  // Save that off as the elastic strain
-  _elastic_strain[_qp] = elastic_strain;
-
-  // Create column vector
-  ColumnMajorMatrix el_strain( elastic_strain.columnMajorMatrix() );
-  el_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
-
-  // C * e
-  ColumnMajorMatrix stress_vector = (*_local_elasticity_tensor) * el_strain;
-
-  // Change 9x1 to a 3x3
-//   stress_vector.reshape(LIBMESH_DIM, LIBMESH_DIM);
-
-  // Fill the material properties
-//   stress_vector.fill(stress);
-  stress = stress_vector;
-}
-
-void
-LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
-{
-  elastic_strain = total_strain;
-  //Jacobian multiplier of the stress
-  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
-  _Jacobian_mult[_qp] = *_local_elasticity_tensor;
-}
-
-void
 LinearIsotropicMaterial::computeProperties()
 {
   for(_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -85,17 +49,15 @@ LinearIsotropicMaterial::computeProperties()
 
     _local_elasticity_tensor->calculate(_qp);
 
-    _elasticity_tensor[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
 
-    ColumnMajorMatrix strn(_grad_disp_x[_qp],
-                           _grad_disp_y[_qp],
-                           _grad_disp_z[_qp]);
-
-    // 1/2 * (strn + strn^T)
-    strn += strn.transpose();
-    strn *= 0.5;
+    SymmTensor strn( _grad_disp_x[_qp](0),
+                     _grad_disp_y[_qp](1),
+                     _grad_disp_z[_qp](2),
+                     0.5*(_grad_disp_x[_qp](1)+_grad_disp_y[_qp](0)),
+                     0.5*(_grad_disp_y[_qp](2)+_grad_disp_z[_qp](1)),
+                     0.5*(_grad_disp_z[_qp](0)+_grad_disp_x[_qp](2)) );
 
     // Add in Isotropic Thermal Strain
     if(_has_temp)
@@ -117,4 +79,30 @@ LinearIsotropicMaterial::computeProperties()
     computeStress(strain, _stress[_qp]);
 
   }
+}
+
+void
+LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
+                                       SymmTensor & stress)
+{
+  // Add in any extra strain components
+  SymmTensor elastic_strain;
+
+  computeStrain(strain, elastic_strain);
+
+  // Save that off as the elastic strain
+  _elastic_strain[_qp] = elastic_strain;
+
+  // Create column vector
+  // C * e
+  stress = (*_local_elasticity_tensor) * elastic_strain;
+
+}
+
+void
+LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
+{
+  elastic_strain = total_strain;
+  //Jacobian multiplier of the stress
+  _Jacobian_mult[_qp] = *_local_elasticity_tensor;
 }

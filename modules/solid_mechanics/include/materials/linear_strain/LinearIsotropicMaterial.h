@@ -5,7 +5,7 @@
 
 //Forward Declarations
 class LinearIsotropicMaterial;
-class ElasticityTensor;
+class SymmElasticityTensor;
 
 template<>
 InputParameters validParams<LinearIsotropicMaterial>();
@@ -48,7 +48,7 @@ protected:
 
   Real _input_density;
 
-  ElasticityTensor * _local_elasticity_tensor;
+  SymmElasticityTensor * _local_elasticity_tensor;
 };
 
 #endif //LINEARISOTROPICMATERIAL_H

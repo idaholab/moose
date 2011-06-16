@@ -1,6 +1,6 @@
 #include "LinearStrainHardening.h"
 
-#include "IsotropicElasticityTensor.h"
+#include "SymmIsotropicElasticityTensor.h"
 
 
 template<>
@@ -29,8 +29,7 @@ InputParameters validParams<LinearStrainHardening>()
 
 
 LinearStrainHardening::LinearStrainHardening( const std::string & name,
-
-                              InputParameters parameters )
+                                              InputParameters parameters )
   :MaterialModel( name, parameters ),
    _tolerance(parameters.get<Real>("tolerance")),
    _max_its(parameters.get<unsigned int>("max_its")),
@@ -45,31 +44,21 @@ LinearStrainHardening::LinearStrainHardening( const std::string & name,
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
 
-
-
 {
 }
 
 
 void
 LinearStrainHardening::computeStress()
-
 {
-  const ColumnMajorMatrix stress_old(_stress_old[_qp].columnMajorMatrix());
-
   // compute trial stress
-//   _strain_increment.reshape(9, 1);
-  ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
-  str_inc.reshape(9, 1);
-  ColumnMajorMatrix stress_new( *elasticityTensor() * str_inc );
-//   _strain_increment.reshape(3, 3);
-  stress_new.reshape(3, 3);
+  SymmTensor stress_new = *elasticityTensor() * _strain_increment;
   stress_new *= _dt;
-  stress_new += stress_old;
+  stress_new += _stress_old[_qp];
 
   // compute deviatoric trial stress
   SymmTensor dev_trial_stress(stress_new);
-  dev_trial_stress.addDiag( -stress_new.tr()/3.0 );
+  dev_trial_stress.addDiag( -stress_new.trace()/3.0 );
 
   // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -111,14 +100,14 @@ LinearStrainHardening::computeStress()
     SymmTensor plastic_strain_increment(dev_trial_stress);
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress);
 
-    ColumnMajorMatrix elastic_strain_increment( _strain_increment.columnMajorMatrix()*_dt - plastic_strain_increment.columnMajorMatrix() );
-
-    // compute stress increment
-    elastic_strain_increment.reshape(9, 1);
-    stress_new =  *elasticityTensor() * elastic_strain_increment;
+    SymmTensor elastic_strain_increment( _strain_increment );
+    elastic_strain_increment *= _dt;
+    elastic_strain_increment -= plastic_strain_increment;
 
     // update stress and plastic strain
-    _stress[_qp] = stress_new;
+    // compute stress increment
+    _stress[_qp] =  *elasticityTensor() * elastic_strain_increment;
+
     _stress[_qp] += _stress_old[_qp];
     _plastic_strain[_qp] = plastic_strain_increment;
     _plastic_strain[_qp] += _plastic_strain_old[_qp];
@@ -126,10 +115,10 @@ LinearStrainHardening::computeStress()
   } // end of if statement
   else
   {
-    ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*_dt);
+    SymmTensor elastic_strain_increment(_strain_increment);
+    elastic_strain_increment *= _dt;
 
     // compute stress increment
-    elastic_strain_increment.reshape(9, 1);
     stress_new =  *elasticityTensor() * elastic_strain_increment;
 
     // update stress and plastic strain

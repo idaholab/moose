@@ -44,8 +44,6 @@ public:
 
   void setMaterialConstantc44(const Real c44);
 
-  virtual void multiply( const SymmTensor & x, SymmTensor & b );
-
 protected:
 
   DenseMatrix<Real> _dmat; // 9 x 9 Material Matrix
@@ -66,7 +64,7 @@ protected:
   Real _c11, _c12, _c44; // Material Constants
 
   void form_r_matrix();
-  void intialize_material_dt_matrix();
+  void initialize_material_dt_matrix();
   void form_rotational_q_matrix();
   void form_transformation_t_matrix();
   void form_transformed_material_dmat_matrix();

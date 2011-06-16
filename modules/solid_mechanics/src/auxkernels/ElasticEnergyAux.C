@@ -1,5 +1,6 @@
 #include "ElasticEnergyAux.h"
 
+#include "SymmTensor.h"
 
 template<>
 InputParameters validParams<ElasticEnergyAux>()

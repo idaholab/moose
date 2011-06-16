@@ -2,6 +2,7 @@
 #define SOLIDMECHANICSMATERIAL_H
 
 #include "Material.h"
+#include "SymmElasticityTensor.h"
 
 //Forward Declarations
 class SolidMechanicsMaterial;
@@ -31,14 +32,14 @@ protected:
   std::vector<VolumetricModel*> _volumetric_models;
 
   MaterialProperty<SymmTensor> & _stress;
-  MaterialProperty<ColumnMajorMatrix> & _elasticity_tensor;
-  MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
+  MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
+  MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
 
   // Accumulate derivatives of strain tensors with respect to Temperature into this
   ColumnMajorMatrix _d_strain_dT;
 
   // The derivative of the stress with respect to Temperature
-  MaterialProperty<RealTensorValue> & _d_stress_dT;
+  MaterialProperty<SymmTensor> & _d_stress_dT;
 
   MaterialProperty<SymmTensor> & _elastic_strain;
 

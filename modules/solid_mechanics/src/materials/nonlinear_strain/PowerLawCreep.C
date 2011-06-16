@@ -1,6 +1,6 @@
 #include "PowerLawCreep.h"
 
-#include "IsotropicElasticityTensor.h"
+#include "SymmIsotropicElasticityTensor.h"
 
 template<>
 InputParameters validParams<PowerLawCreep>()
@@ -60,15 +60,10 @@ PowerLawCreep::computeStress()
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
 
-  const ColumnMajorMatrix stress_old(_stress_old[_qp].columnMajorMatrix());
-
   // compute trial stress
-  ColumnMajorMatrix str_inc( _strain_increment.columnMajorMatrix() );
-  str_inc.reshape(9, 1);
-  ColumnMajorMatrix stress_new( *elasticityTensor() * str_inc );
-  stress_new.reshape(3, 3);
+  SymmTensor stress_new( (*elasticityTensor()) * _strain_increment );
   stress_new *= _dt;
-  stress_new += stress_old;
+  stress_new += _stress_old[_qp];
 
   // compute deviatoric trial stress
   SymmTensor dev_trial_stress(stress_new);
@@ -122,11 +117,10 @@ PowerLawCreep::computeStress()
   SymmTensor creep_strain_increment(dev_trial_stress);
   creep_strain_increment *= (1.5*del_p/effective_trial_stress);
 
-  ColumnMajorMatrix elastic_strain_increment(_strain_increment.columnMajorMatrix()*_dt);
-  elastic_strain_increment -= creep_strain_increment.columnMajorMatrix();
+  SymmTensor elastic_strain_increment(_strain_increment.columnMajorMatrix()*_dt);
+  elastic_strain_increment -= creep_strain_increment;
 
   //  compute stress increment
-  elastic_strain_increment.reshape(9, 1);
   stress_new =  *elasticityTensor() * elastic_strain_increment;
 
   // update stress and creep strain

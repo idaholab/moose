@@ -1,6 +1,7 @@
 #include "StressDivergenceRZ.h"
 
 #include "Material.h"
+#include "SymmElasticityTensor.h"
 
 template<>
 InputParameters validParams<StressDivergenceRZ>()
@@ -19,7 +20,7 @@ InputParameters validParams<StressDivergenceRZ>()
 StressDivergenceRZ::StressDivergenceRZ(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
    _stress(getMaterialProperty<SymmTensor>("stress")),
-   _Jacobian_mult(getMaterialProperty<ColumnMajorMatrix>("Jacobian_mult")),
+   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
    _component(getParam<Real>("component")),
    _rdisp_coupled(isCoupled("disp_r")),
    _zdisp_coupled(isCoupled("disp_z")),
@@ -34,65 +35,56 @@ StressDivergenceRZ::computeQpResidual()
   if (_component == 0)
   {
     div =
-      _grad_test[_i][_qp](0)            * _stress[_qp](0,0)
-    + _grad_test[_i][_qp](1)            * _stress[_qp](1,0)
-    + _test[_i][_qp] / _q_point[_qp](0) * _stress[_qp](2,2);
+      _grad_test[_i][_qp](0)            * _stress[_qp].xx()
+    + _grad_test[_i][_qp](1)            * _stress[_qp].xy()
+    + _test[_i][_qp] / _q_point[_qp](0) * _stress[_qp].zz();
 // _stress[_qp].row(_component) * _grad_test[_i][_qp];
   }
   else if (_component == 1)
   {
     div =
-      _grad_test[_i][_qp](0) * _stress[_qp](0,1) +
-      _grad_test[_i][_qp](1) * _stress[_qp](1,1);
+      _grad_test[_i][_qp](0) * _stress[_qp].xy() +
+      _grad_test[_i][_qp](1) * _stress[_qp].yy();
 // _stress[_qp].row(_component) * _grad_test[_i][_qp];
 
-//     std::cout << "JDH DEBUG: "
-//               << _grad_test[_i][_qp](0) << " "
-//               << _stress[_qp](0,1) << std::endl;
   }
   else
   {
     mooseError("Invalid component");
   }
 
-//   return 2 * M_PI * _q_point[_qp](0) * div;
-//   std::cout << "JDH DEBUG: q_point: " << _q_point[_qp](0) << std::endl;
-  return 2 * M_PI * div * _q_point[_qp](0);
+  return 2 * M_PI * _q_point[_qp](0) * div;
 }
 
 Real
 StressDivergenceRZ::computeQpJacobian()
 {
-  ColumnMajorMatrix B(9,1);
-  ColumnMajorMatrix BT(9,1);
+//   ColumnMajorMatrix B(9,1);
+//   ColumnMajorMatrix BT(9,1);
+  SymmTensor test, phi;
   if (_component == 0)
   {
-    B(0,0) = _grad_phi[_j][_qp](0);
-    B(1,0) = 0.5*_grad_phi[_j][_qp](1);
-    B(3,0) = 0.5*_grad_phi[_j][_qp](1);
-    B(8,0) = _phi[_j][_qp] / _q_point[_qp](0);
-    BT(0,0) = _grad_test[_i][_qp](0);
-    BT(1,0) = 0.5*_grad_test[_i][_qp](1);
-    BT(3,0) = 0.5*_grad_test[_i][_qp](1);
-    BT(8,0) = _test[_i][_qp] / _q_point[_qp](0);
+    test.xx() = _grad_test[_i][_qp](0);
+    test.xy() = 0.5*_grad_test[_i][_qp](1);
+    test.zz() = _test[_i][_qp] / _q_point[_qp](0);
+
+    phi.xx()  = _grad_phi[_j][_qp](0);
+    phi.xy()  = 0.5*_grad_phi[_j][_qp](1);
+    phi.zz()  = _test[_j][_qp] / _q_point[_qp](0);
   }
   else
   {
-    B(1,0) = 0.5*_grad_phi[_j][_qp](0);
-    B(3,0) = 0.5*_grad_phi[_j][_qp](0);
-    B(4,0) = _grad_phi[_j][_qp](1);
-    BT(1,0) = 0.5*_grad_test[_i][_qp](0);
-    BT(3,0) = 0.5*_grad_test[_i][_qp](0);
-    BT(4,0) = _grad_test[_i][_qp](1);
+    test.xy() = 0.5*_grad_test[_i][_qp](0);
+    test.yy() = _grad_test[_i][_qp](1);
+
+    phi.xy()  = 0.5*_grad_phi[_j][_qp](0);
+    phi.yy()  = _grad_phi[_j][_qp](1);
   }
 
-  ColumnMajorMatrix temp(_Jacobian_mult[_qp] * B);
-  Real result(0);
-  for (unsigned i(0); i < 9; ++i)
-  {
-    result += BT(i,0) * temp(i,0);
-  }
-  return 2 * M_PI * _q_point[_qp](0) * result;
+  SymmTensor tmp( _Jacobian_mult[_qp] * test );
+  const Real val( phi.doubleContraction( tmp ) );
+
+  return 2 * M_PI * _q_point[_qp](0) * val;
 }
 
 Real

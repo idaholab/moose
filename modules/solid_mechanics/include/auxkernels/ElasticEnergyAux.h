@@ -4,6 +4,7 @@
 #include "AuxKernel.h"
 
 class ElasticEnergyAux;
+class SymmTensor;
 
 template<>
 InputParameters validParams<ElasticEnergyAux>();

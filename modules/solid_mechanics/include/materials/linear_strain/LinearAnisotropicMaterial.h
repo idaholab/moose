@@ -17,8 +17,8 @@ class LinearAnisotropicMaterial : public LinearIsotropicMaterial
 {
 public:
   LinearAnisotropicMaterial(const std::string & name,
-                          InputParameters parameters);
-  
+                            InputParameters parameters);
+
 protected:
 
   Real _material_constant_c11;
@@ -28,7 +28,6 @@ protected:
   Real _euler_angle_2;
   Real _euler_angle_3;
 
-//  ElasticityTensor * _local_elasticity_tensor;
 };
 
 #endif //LINEARANISOTROPICMATERIAL_H

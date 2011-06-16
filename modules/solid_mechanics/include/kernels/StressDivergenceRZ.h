@@ -5,7 +5,8 @@
 
 //Forward Declarations
 class StressDivergenceRZ;
-class ColumnMajorMatrix;
+class SymmElasticityTensor;
+class SymmTensor;
 
 template<>
 InputParameters validParams<StressDivergenceRZ>();
@@ -24,7 +25,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   MaterialProperty<SymmTensor> & _stress;
-  MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
+  MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
 
 private:
   const unsigned int _component;

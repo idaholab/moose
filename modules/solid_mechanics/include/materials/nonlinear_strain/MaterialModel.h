@@ -6,8 +6,8 @@
 #include "SymmTensor.h"
 
 // Forward declarations
-class ElasticityTensor;
 class MaterialModel;
+class SymmElasticityTensor;
 class VolumetricModel;
 
 template<>
@@ -82,13 +82,13 @@ protected:
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
 
-  MaterialProperty<ColumnMajorMatrix> & _Jacobian_mult;
+  MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
 
   // Accumulate derivatives of strain tensors with respect to Temperature into this
-  ColumnMajorMatrix _d_strain_dT;
+  SymmTensor _d_strain_dT;
 
   // The derivative of the stress with respect to Temperature
-  MaterialProperty<RealTensorValue> & _d_stress_dT;
+  MaterialProperty<SymmTensor> & _d_stress_dT;
 
   SymmTensor _total_strain_increment;
   SymmTensor _strain_increment;
@@ -132,9 +132,9 @@ protected:
                    ColumnMajorMatrix & A );
 
   void
-  elasticityTensor( ElasticityTensor * e );
+  elasticityTensor( SymmElasticityTensor * e );
 
-  ElasticityTensor *
+  SymmElasticityTensor *
   elasticityTensor() const
   {
     return _elasticity_tensor;
@@ -142,7 +142,7 @@ protected:
 
 
 private:
-  ElasticityTensor * _elasticity_tensor;
+  SymmElasticityTensor * _elasticity_tensor;
 
 };
 

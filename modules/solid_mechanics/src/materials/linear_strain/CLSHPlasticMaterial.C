@@ -48,27 +48,21 @@ void
 CLSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
                                    SymmTensor & elastic_strain)
 {
-  _Jacobian_mult[_qp].reshape(LIBMESH_DIM * LIBMESH_DIM, LIBMESH_DIM * LIBMESH_DIM);
-
   _total_strain[_qp] = total_strain;
 
-  ColumnMajorMatrix etotal_strain(total_strain.columnMajorMatrix());
-  etotal_strain -= _total_strain_old[_qp].columnMajorMatrix();
+  SymmTensor etotal_strain(total_strain);
+  etotal_strain -= _total_strain_old[_qp];
 
 
-  ColumnMajorMatrix stress_old_b(_stress_old[_qp].columnMajorMatrix());
+  SymmTensor stress_old_b(_stress_old[_qp].columnMajorMatrix());
 
-// convert total_strain from 3x3 to 9x1
-  etotal_strain.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
 // trial stress
-  ColumnMajorMatrix trial_stress = (*_local_elasticity_tensor) * etotal_strain;
-// Change 9x1 to a 3x3
-  trial_stress.reshape(LIBMESH_DIM, LIBMESH_DIM);
+  SymmTensor trial_stress = *_local_elasticity_tensor * etotal_strain;
   trial_stress += stress_old_b;
 
 // deviatoric trial stress
   SymmTensor dev_trial_stress(trial_stress);
-  dev_trial_stress.addDiag( -trial_stress.tr()/3.0 );
+  dev_trial_stress.addDiag( -trial_stress.trace()/3.0 );
 // effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
   Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
@@ -151,11 +145,8 @@ CLSHPlasticMaterial::computeStress(const SymmTensor & strain,
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
 
-
   // C * e
-  ColumnMajorMatrix el_strn( elastic_strain.columnMajorMatrix() );
-  el_strn.reshape(LIBMESH_DIM * LIBMESH_DIM, 1);
-  ColumnMajorMatrix stress_vector(*_local_elasticity_tensor * el_strn);
+  SymmTensor stress_vector(*_local_elasticity_tensor * elastic_strain);
 
   // Fill the material properties
   stress = stress_vector;

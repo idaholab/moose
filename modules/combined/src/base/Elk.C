@@ -106,6 +106,7 @@
 // thermal contact
 #include "ThermalContactAction.h"
 
+
 void
 Elk::registerObjects()
 {

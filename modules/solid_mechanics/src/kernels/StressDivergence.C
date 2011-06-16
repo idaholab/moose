@@ -1,6 +1,7 @@
 #include "StressDivergence.h"
 
 #include "Material.h"
+#include "SymmElasticityTensor.h"
 
 template<>
 InputParameters validParams<StressDivergence>()
@@ -21,8 +22,8 @@ InputParameters validParams<StressDivergence>()
 StressDivergence::StressDivergence(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
    _stress(getMaterialProperty<SymmTensor>("stress")),
-   _Jacobian_mult(getMaterialProperty<ColumnMajorMatrix>("Jacobian_mult")),
-   _d_stress_dT(getMaterialProperty<RealTensorValue>("d_stress_dT")),
+   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
+   _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT")),
    _component(getParam<Real>("component")),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
@@ -43,15 +44,7 @@ StressDivergence::computeQpResidual()
 Real
 StressDivergence::computeQpJacobian()
 {
-  RealVectorValue value;
-  for(unsigned int j = 0; j<LIBMESH_DIM; ++j)
-    for(unsigned int i = 0; i<LIBMESH_DIM; ++i)
-    {
-      value(i) += 1.0*_Jacobian_mult[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
-      //value(i) += 0.5*_Jacobian_mult[_qp]( _component+(i*LIBMESH_DIM),(LIBMESH_DIM*_component)+j) * _grad_phi[_j][_qp](j);
-    }
-
-  return value * _grad_test[_i][_qp];
+  return _Jacobian_mult[_qp].stiffness( _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp] );
 }
 
 Real
@@ -79,20 +72,13 @@ StressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
 
   if ( active )
   {
-    RealVectorValue value;
-    for(unsigned int j = 0; j<LIBMESH_DIM; ++j)
-    {
-      for(unsigned int i = 0; i<LIBMESH_DIM; ++i)
-      {
-        value(i) += _Jacobian_mult[_qp]( (LIBMESH_DIM*_component)+i,(LIBMESH_DIM*coupled_component)+j) * _grad_phi[_j][_qp](j);
-      }
-    }
-    return value * _grad_test[_i][_qp];
+    return _Jacobian_mult[_qp].stiffness( _component, coupled_component,
+                                          _grad_test[_i][_qp], _grad_phi[_j][_qp] );
   }
 
   if ( _temp_coupled && jvar == _temp_var )
   {
-    return ((_d_stress_dT[_qp] * _phi[_j][_qp]) * _grad_test[_i][_qp])(_component);
+    return _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
   }
 
   return 0;
