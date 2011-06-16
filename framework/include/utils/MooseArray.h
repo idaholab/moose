@@ -24,20 +24,36 @@ public:
   /**
    * Default constructor.  Doesn't initialize anything.
    */
-  MooseArray();
+  MooseArray() :
+    _data(NULL),
+    _size(0),
+    _allocated_size(0)
+  {}
 
   /**
    * @param size The initial size of the array.
    */
   explicit
-  MooseArray(const unsigned int size);
+  MooseArray(const unsigned int size) :
+    _data(NULL),
+    _allocated_size(0)
+  {
+    resize(size);
+  }
 
   /**
    * @param size The initial size of the array.
    * @param default_value The default value to set.
    */
   explicit
-  MooseArray(const unsigned int size, const T & default_value);
+  MooseArray(const unsigned int size, const T & default_value) :
+    _data(NULL),
+    _allocated_size(0)
+  {
+    resize(size);
+
+    setAllValues(default_value);
+  }
 
   /**
    * Sets all values of the array to the passed in value
@@ -48,8 +64,16 @@ public:
   /**
    * Manually deallocates the data pointer
    */
-  void release();
-  
+  void release()
+  {
+    if (_data != NULL)
+    {
+      delete [] _data;
+      _data = NULL;
+      _allocated_size = _size = 0;
+    }
+  }
+
   /**
    * Change the number of elements the array can store.
    *
@@ -121,7 +145,7 @@ private:
   /**
    * Number of allocated memory positions for storage.
    */
-  unsigned int _allocated_size;  
+  unsigned int _allocated_size;
 };
 
 template<typename T>
@@ -171,7 +195,7 @@ MooseArray<T>::resize(const unsigned int size, const T & default_value)
 
     for(unsigned int i=_size; i<size; i++)
       _data[i] = default_value;
-    
+
     _allocated_size = size;
     _size = size;
   }
@@ -191,7 +215,7 @@ T &
 MooseArray<T>::operator[](const unsigned int i)
 {
   mooseAssert(i < _size, "Access out of bounds in MooseArray!");
-  
+
   return _data[i];
 }
 
@@ -201,7 +225,7 @@ const T &
 MooseArray<T>::operator[](const unsigned int i) const
 {
   mooseAssert(i < _size, "Access out of bounds in MooseArray!");
-  
+
   return _data[i];
 }
 

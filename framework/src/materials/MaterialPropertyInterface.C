@@ -44,13 +44,3 @@ MaterialProperty<ColumnMajorMatrix>::init (int size)
   return copy;
 }
 
-template <>
-PropertyValue *
-MaterialProperty<SymmTensor>::init (int size)
-{
-  MaterialProperty<SymmTensor> *copy = new MaterialProperty<SymmTensor>;
-  copy->_value.resize(size);
-  for (unsigned int i(0); i < static_cast<unsigned>(size); ++i)
-    (*copy)[i].zero();
-  return copy;
-}
