@@ -128,7 +128,8 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 
 
     const Real gapL = gapLength();
-    // THIS IS NOT THE NORMAL WE WANT.
+
+    // THIS IS NOT THE NORMAL WE NEED.
     // WE NEED THE NORMAL FROM THE CONSTRAINT, THE NORMAL FROM THE
     // MASTER SURFACE.  HOWEVER, THIS IS TRICKY SINCE THE NORMAL
     // FROM THE MASTER SURFACE WAS COMPUTED FOR A POINT ASSOCIATED
@@ -136,9 +137,10 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
     //
     // HOW DO WE GET THE NORMAL WE NEED?
     //
-    // Until we have the normal we want,
-    //   we'll hope that the one we have is close to the negative of the one we want.
+    // Until we have the normal we need,
+    //   we'll hope that the one we have is close to the negative of the one we need.
     const Point & normal( _normals[_qp] );
+
     const Real dgap = dgapLength( -normal(coupled_component) );
     dRdx = -(_u[_qp]-_gap_temp[_qp])*gapK()/(gapL*gapL) * dgap;
   }
