@@ -284,7 +284,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
         {
           Point contact_ref;
           Point contact_phys;
-          Real distance;
+          //Real distance;
           RealGradient normal;
           bool contact_point_on_side(false);
           std::vector<std::vector<Real> > side_phi;

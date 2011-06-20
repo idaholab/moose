@@ -227,7 +227,7 @@ CoupledProblem::output()
 }
 
 void
-CoupledProblem::restartFromFile(const std::string & file_name)
+CoupledProblem::restartFromFile(const std::string & /*file_name*/)
 {
   mooseWarning("Restart of CoupledProblem is not implemented, doing nothing...");
 }
