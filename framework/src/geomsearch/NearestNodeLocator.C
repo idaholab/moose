@@ -90,7 +90,7 @@ NearestNodeLocator::findNodes()
                                                          my_box.second(2)+distance_z));
     }
 
-    // Data strcutres to hold the Nodal Boundary conditions
+    // Data structures to hold the Nodal Boundary conditions
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
     for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
     {
