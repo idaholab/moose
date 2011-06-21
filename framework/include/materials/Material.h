@@ -90,7 +90,7 @@ public:
   /**
    * Initialize stateful properties (if material has some)
    */
-  virtual void initStatefulProperties();
+  virtual void initStatefulProperties(unsigned int n_points);
 
   /**
    * Check for property named "prop_name"
@@ -152,6 +152,11 @@ protected:
 //  };
   
   enum QP_Data_Type { CURR, PREV };
+
+  /**
+   * Initialize stateful properties at quadrature points
+   */
+  virtual void initQpStatefulProperties();
 
   /**
    * Compute material properties in quadrature point

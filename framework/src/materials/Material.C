@@ -99,7 +99,14 @@ Material::computeProperties()
 }
 
 void
-Material::initStatefulProperties()
+Material::initStatefulProperties(unsigned int n_points)
+{
+  for (_qp = 0; _qp < n_points; ++_qp)
+    initQpStatefulProperties();
+}
+
+void
+Material::initQpStatefulProperties()
 {
 }
 

@@ -40,10 +40,14 @@ ExampleMaterial::ExampleMaterial(const std::string & name,
 {}
 
 void
+ExampleMaterial::initQpStatefulProperties()
+{
+  // init the diffusivity property (this will become _diffusivity_old in the first call of computeProperties)
+  _diffusivity[_qp] = _initial_diffusivity;
+}
+
+void
 ExampleMaterial::computeQpProperties()
 {
-  if(_t_step == 1)
-    _diffusivity[_qp] = _initial_diffusivity;
-  else
-    _diffusivity[_qp] = _diffusivity_old[_qp] * 2;
+  _diffusivity[_qp] = _diffusivity_old[_qp] * 2;
 }

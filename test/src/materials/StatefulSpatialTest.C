@@ -14,16 +14,14 @@ StatefulSpatialTest::StatefulSpatialTest(const std::string & name, InputParamete
 {}
 
 void
-StatefulSpatialTest::computeProperties()
+StatefulSpatialTest::computeQpProperties()
 {
   if (_t_step == 1)
   {
-    for(unsigned int qp=0; qp<_qrule->n_points(); qp++)
-      _thermal_conductivity[qp] = _t_step + (_q_point[qp](0) * _q_point[qp](1));
+    _thermal_conductivity[_qp] = _t_step + (_q_point[_qp](0) * _q_point[_qp](1));
   }
   else
   {
-    for(unsigned int qp=0; qp<_qrule->n_points(); qp++)
-      _thermal_conductivity[qp] = _thermal_conductivity_old[qp] + 1.;
+    _thermal_conductivity[_qp] = _thermal_conductivity_old[_qp] + 1.;
   }
 }

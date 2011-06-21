@@ -14,10 +14,13 @@ StatefulTest::StatefulTest(const std::string & name, InputParameters parameters)
 {}
 
 void
-StatefulTest::computeProperties()
+StatefulTest::initQpStatefulProperties()
 {
-  for(unsigned int qp=0; qp<_qrule->n_points(); qp++)
-  {    
-    _thermal_conductivity[qp] = _thermal_conductivity_old[qp] + 1;
-  }
+  _thermal_conductivity[_qp] = 0.;
+}
+
+void
+StatefulTest::computeQpProperties()
+{
+  _thermal_conductivity[_qp] = _thermal_conductivity_old[_qp] + 1;
 }

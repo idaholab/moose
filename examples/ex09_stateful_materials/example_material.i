@@ -89,7 +89,7 @@
   [./empty]
     type = ExampleMaterial
     block = 1
-    initial_diffusivity = 0.1
+    initial_diffusivity = 0.05
   [../]
 []
 

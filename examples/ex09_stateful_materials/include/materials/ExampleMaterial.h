@@ -33,6 +33,7 @@ public:
                   InputParameters parameters);
 
 protected:
+  virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
 private:
