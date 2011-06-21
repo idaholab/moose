@@ -35,6 +35,8 @@ HeatConduction::computeQpResidual()
   return _k[_qp]*Diffusion::computeQpResidual();
 }
 
+
+
 Real
 HeatConduction::computeQpJacobian()
 {

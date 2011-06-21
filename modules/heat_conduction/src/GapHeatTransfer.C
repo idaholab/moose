@@ -81,6 +81,7 @@ GapHeatTransfer::computeQpJacobian()
 {
   Real h_gap = h_conduction() + h_contact() + h_radiation();
   Real dh_gap = dh_conduction() + dh_contact() + dh_radiation();
+
   return _test[_i][_qp] * ((_u[_qp] - _gap_temp[_qp]) * dh_gap + h_gap) * _phi[_j][_qp];
 }
 
