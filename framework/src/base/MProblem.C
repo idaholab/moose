@@ -224,6 +224,7 @@ void MProblem::initialSetup()
 
   Moose::setup_perf_log.push("Initial computePostprocessors()","Setup");
   computePostprocessors();
+  computePostprocessors(EXEC_RESIDUAL);
   Moose::setup_perf_log.pop("Initial computePostprocessors()","Setup");
 
 
