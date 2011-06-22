@@ -127,6 +127,7 @@
 #include "InitProblemAction.h"
 #include "CopyNodalVarsAction.h"
 #include "SetupMeshAction.h"
+#include "AddExtraNodesetAction.h"
 #include "SetupOutputAction.h"
 #include "AddMaterialAction.h"
 #include "GlobalParamsAction.h"
@@ -272,6 +273,7 @@ addActionTypes()
   registerActionName("create_mesh", false);
   registerActionName("read_mesh", false);
   registerActionName("add_mesh_modifier", false);
+  registerActionName("add_extra_nodeset", false);
   registerActionName("add_material", false);
   registerActionName("add_function", false);
   registerActionName("add_aux_variable", false);
@@ -285,6 +287,7 @@ addActionTypes()
   registerActionName("add_periodic_bc", false);
   registerActionName("add_preconditioning", false);
   registerActionName("setup_adaptivity", false);
+  registerActionName("meta_action", false);
   registerActionName("meta_action", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
@@ -308,6 +311,7 @@ addActionTypes()
   action_warehouse.addDependencySets(
 "(meta_action)"
 "(create_mesh, read_mesh, set_global_params)"
+"(add_extra_nodeset)"
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
 "(setup_executioner)"
@@ -361,6 +365,9 @@ registerActions()
   registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
   registerAction(ReadMeshAction, "Mesh", "read_mesh");  
   registerAction(SetupMeshAction, "Mesh", "setup_mesh");
+  registerAction(EmptyAction, "Mesh/ExtraNodesets", "no_action");
+  registerAction(AddExtraNodesetAction, "Mesh/ExtraNodesets/*", "add_extra_nodeset");
+  
   registerAction(AddFunctionAction, "Functions/*", "add_function");
   registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");
   registerAction(SetupOutputAction, "Output", "setup_output");
