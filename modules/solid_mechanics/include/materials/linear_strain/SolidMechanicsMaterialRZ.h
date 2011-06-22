@@ -67,6 +67,8 @@ protected:
 
   MaterialProperty<SymmTensor> & _stress;
   MaterialProperty<SymmTensor> & _stress_old;
+  MaterialProperty<SymmTensor> & _total_strain;
+  MaterialProperty<SymmTensor> & _total_strain_old;
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;

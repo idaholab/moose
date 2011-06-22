@@ -41,6 +41,8 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _volumetric_models(0),
    _stress(declareProperty<SymmTensor>("stress")),
    _stress_old(declarePropertyOld<SymmTensor>("stress")),
+   _total_strain(declareProperty<SymmTensor>("total_strain")),
+   _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
    _crack_flags(NULL),
    _crack_flags_old(NULL),
    _elasticity_tensor(declareProperty<SymmElasticityTensor>("elasticity_tensor")),
@@ -119,26 +121,23 @@ SolidMechanicsMaterialRZ::computeProperties()
 
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
-    ColumnMajorMatrix tot_strain;
-    tot_strain(0,0) = _grad_disp_r[_qp](0);
-    tot_strain(1,1) = _grad_disp_z[_qp](1);
-    tot_strain(2,2) = _disp_r[_qp]/_q_point[_qp](0);
-    tot_strain(0,1) = 0.5*(_grad_disp_r[_qp](1) + _grad_disp_z[_qp](0));
+    SymmTensor strain;
+    strain.xx() = _grad_disp_r[_qp](0);
+    strain.yy() = _grad_disp_z[_qp](1);
+    strain.zz() = _disp_r[_qp]/_q_point[_qp](0);
+    strain.xy() = 0.5*(_grad_disp_r[_qp](1) + _grad_disp_z[_qp](0));
     if (_large_strain)
     {
-      tot_strain(0,0) += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](0) +
+      strain.xx() += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](0) +
                               _grad_disp_z[_qp](0)*_grad_disp_z[_qp](0));
-      tot_strain(1,1) += 0.5*(_grad_disp_r[_qp](1)*_grad_disp_r[_qp](1) +
+      strain.yy() += 0.5*(_grad_disp_r[_qp](1)*_grad_disp_r[_qp](1) +
                               _grad_disp_z[_qp](1)*_grad_disp_z[_qp](1));
-      tot_strain(2,2) += 0.5*(tot_strain(2,2)*tot_strain(2,2));
-      tot_strain(0,1) += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](1) +
+      strain.zz() += 0.5*(strain(2,2)*strain(2,2));
+      strain.xy() += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](1) +
                               _grad_disp_z[_qp](0)*_grad_disp_z[_qp](1));
     }
-    tot_strain(1,0) = tot_strain(0,1);
 
-    SymmTensor total_strain;
-    total_strain = tot_strain;
-    SymmTensor strain( total_strain );
+    _total_strain[_qp] = strain;
 
     // Add in Isotropic Thermal Strain
     if (_has_temp)
@@ -161,7 +160,7 @@ SolidMechanicsMaterialRZ::computeProperties()
       strain += _v_strain[_qp];
     }
 
-    computeStress(total_strain,
+    computeStress(_total_strain[_qp],
                   strain, *_local_elasticity_tensor, _stress[_qp]);
 
   }

@@ -39,8 +39,6 @@ protected:
   Real _ebulk3;
   Real _K;
 
-  MaterialProperty<SymmTensor> & _total_strain;
-  MaterialProperty<SymmTensor> & _total_strain_old;
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
   MaterialProperty<SymmTensor> & _plastic_strain;

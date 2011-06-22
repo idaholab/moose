@@ -23,8 +23,6 @@ LSHPlasticMaterialRZ::LSHPlasticMaterialRZ(std::string name,
    _tolerance(parameters.get<Real>("tolerance")),
    _max_its(parameters.get<unsigned int>("max_its")),
    _print_debug_info(getParam<bool>("print_debug_info")),
-   _total_strain(declareProperty<SymmTensor>("total_strain")),
-   _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
    _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
@@ -42,8 +40,6 @@ void
 LSHPlasticMaterialRZ::computeStrain(const SymmTensor & total_strain,
                                     SymmTensor & elastic_strain)
 {
-  _total_strain[_qp] = total_strain;
-
   SymmTensor etotal_strain(total_strain);
   etotal_strain -= _total_strain_old[_qp];
 
