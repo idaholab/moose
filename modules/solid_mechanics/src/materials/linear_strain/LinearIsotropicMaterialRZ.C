@@ -49,7 +49,5 @@ void
 LinearIsotropicMaterialRZ::computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
 {
   elastic_strain = total_strain;
-  //Jacobian multiplier of the stress
-  _Jacobian_mult[_qp] = *_local_elasticity_tensor;
 }
 

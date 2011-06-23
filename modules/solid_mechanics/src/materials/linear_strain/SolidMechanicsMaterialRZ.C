@@ -163,6 +163,8 @@ SolidMechanicsMaterialRZ::computeProperties()
     computeStress(_total_strain[_qp],
                   strain, *_local_elasticity_tensor, _stress[_qp]);
 
+    computePreconditioning();
+
   }
 }
 
@@ -185,6 +187,14 @@ SolidMechanicsMaterialRZ::computeStress(const SymmTensor & total_strain,
   stress += _stress_old[_qp];
 
   computeCracking( total_strain, stress );
+}
+
+void
+SolidMechanicsMaterialRZ::computePreconditioning()
+{
+  //Jacobian multiplier of the stress
+  mooseAssert(_local_elasticity_tensor, "null _local_elasticity_tensor");
+  _Jacobian_mult[_qp] = *_local_elasticity_tensor;
 }
 
 void

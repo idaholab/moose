@@ -33,6 +33,8 @@ protected:
                              const SymmElasticityTensor & elasticity_tensor,
                              SymmTensor & stress);
 
+  virtual void computePreconditioning();
+
   virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain) = 0;
 
   virtual void computeCracking(const SymmTensor & strain,
