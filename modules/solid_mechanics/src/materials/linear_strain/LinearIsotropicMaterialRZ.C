@@ -25,27 +25,6 @@ LinearIsotropicMaterialRZ::~LinearIsotropicMaterialRZ()
 }
 
 void
-LinearIsotropicMaterialRZ::computeStress(const SymmTensor & total_strain,
-                                         const SymmTensor & strain,
-                                         const SymmElasticityTensor & elasticity_tensor,
-                                         SymmTensor & stress)
-{
-
-  SymmTensor elastic_strain;
-
-  computeStrain(strain, elastic_strain);
-
-  // Save that off as the elastic strain
-  _elastic_strain[_qp] = elastic_strain;
-
-  // C * e
-  stress = elasticity_tensor * elastic_strain;
-
-  computeCracking( total_strain, stress );
-
-}
-
-void
 LinearIsotropicMaterialRZ::computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
 {
   elastic_strain = total_strain;

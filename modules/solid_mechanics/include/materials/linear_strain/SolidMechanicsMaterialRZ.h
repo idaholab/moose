@@ -35,7 +35,7 @@ protected:
 
   virtual void computePreconditioning();
 
-  virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain) = 0;
+  virtual void computeStrain(const SymmTensor & input_strain, SymmTensor & elastic_strain) = 0;
 
   virtual void computeCracking(const SymmTensor & strain,
                                SymmTensor & stress);
@@ -53,7 +53,6 @@ protected:
 
   const Real _cracking_strain;
 
-  const Real _t_ref;
   const Real _alpha;
 
   VariableValue & _disp_r;
@@ -64,6 +63,7 @@ protected:
 
   bool _has_temp;
   VariableValue & _temp;
+  VariableValue & _temp_old;
 
   std::vector<VolumetricModel*> _volumetric_models;
 

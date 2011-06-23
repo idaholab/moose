@@ -37,11 +37,10 @@ LSHPlasticMaterialRZ::LSHPlasticMaterialRZ(std::string name,
 }
 
 void
-LSHPlasticMaterialRZ::computeStrain(const SymmTensor & total_strain,
+LSHPlasticMaterialRZ::computeStrain(const SymmTensor & input_strain,
                                     SymmTensor & elastic_strain)
 {
-  SymmTensor etotal_strain(total_strain);
-  etotal_strain -= _total_strain_old[_qp];
+  SymmTensor etotal_strain(input_strain);
 
 
 // trial stress

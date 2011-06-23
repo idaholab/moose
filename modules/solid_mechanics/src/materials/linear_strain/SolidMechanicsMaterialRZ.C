@@ -11,7 +11,6 @@ InputParameters validParams<SolidMechanicsMaterialRZ>()
   InputParameters params = validParams<Material>();
   params.addRequiredParam<Real>("youngs_modulus", "Young's Modulus");
   params.addRequiredParam<Real>("poissons_ratio", "Poisson's Ratio");
-  params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addParam<bool>("large_strain", false, "Whether to include large strain terms");
   params.addRequiredCoupledVar("disp_r", "The r displacement");
@@ -30,7 +29,6 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _large_strain(getParam<bool>("large_strain")),
    _cracking_strain( parameters.isParamValid("cracking_strain") ?
                      (getParam<Real>("cracking_strain") > 0 ? getParam<Real>("cracking_strain") : -1) : -1 ),
-   _t_ref(getParam<Real>("t_ref")),
    _alpha(getParam<Real>("thermal_expansion")),
    _disp_r(coupledValue("disp_r")),
    _disp_z(coupledValue("disp_z")),
@@ -38,6 +36,7 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _grad_disp_z(coupledGradient("disp_z")),
    _has_temp(isCoupled("temp")),
    _temp(_has_temp ? coupledValue("temp") : _zero),
+   _temp_old(_has_temp ? coupledValueOld("temp") : _zero),
    _volumetric_models(0),
    _stress(declareProperty<SymmTensor>("stress")),
    _stress_old(declarePropertyOld<SymmTensor>("stress")),
@@ -132,17 +131,19 @@ SolidMechanicsMaterialRZ::computeProperties()
                               _grad_disp_z[_qp](0)*_grad_disp_z[_qp](0));
       strain.yy() += 0.5*(_grad_disp_r[_qp](1)*_grad_disp_r[_qp](1) +
                               _grad_disp_z[_qp](1)*_grad_disp_z[_qp](1));
-      strain.zz() += 0.5*(strain(2,2)*strain(2,2));
+      strain.zz() += 0.5*(strain.zz()*strain.zz());
       strain.xy() += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](1) +
                               _grad_disp_z[_qp](0)*_grad_disp_z[_qp](1));
     }
 
     _total_strain[_qp] = strain;
 
-    // Add in Isotropic Thermal Strain
+    strain -= _total_strain_old[_qp];
+
+    // Add in Isotropic Thermal Strain Increment
     if (_has_temp)
     {
-      Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
+      Real isotropic_strain = _alpha * (_temp[_qp] - _temp_old[_qp]);
 
       strain.addDiag( -isotropic_strain );
     }
@@ -156,12 +157,11 @@ SolidMechanicsMaterialRZ::computeProperties()
         _volumetric_models[i]->modifyStrain(_qp, _v_strain[_qp]);
       }
       _v_strain[_qp] *= _dt;
-      _v_strain[_qp] += _v_strain_old[_qp];
       strain += _v_strain[_qp];
+      _v_strain[_qp] += _v_strain_old[_qp];
     }
 
-    computeStress(_total_strain[_qp],
-                  strain, *_local_elasticity_tensor, _stress[_qp]);
+    computeStress(_total_strain[_qp], strain, *_local_elasticity_tensor, _stress[_qp]);
 
     computePreconditioning();
 
