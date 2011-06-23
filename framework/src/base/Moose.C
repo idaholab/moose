@@ -288,7 +288,6 @@ addActionTypes()
   registerActionName("add_preconditioning", false);
   registerActionName("setup_adaptivity", false);
   registerActionName("meta_action", false);
-  registerActionName("meta_action", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -358,6 +357,10 @@ addActionTypes()
  *                       /                   \
  * "add_aux_variable" <-                       -> [AuxVariables/ *]
  *
+ *
+ * Note: Placeholder "no_action" actions must be put in places where it is possible to match an object
+ *       with a star or a more specific parent later on. (i.e. where one needs to negate the '*' matching
+ *       prematurely)
  */
 void
 registerActions()
@@ -365,7 +368,6 @@ registerActions()
   registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
   registerAction(ReadMeshAction, "Mesh", "read_mesh");  
   registerAction(SetupMeshAction, "Mesh", "setup_mesh");
-  registerAction(EmptyAction, "Mesh/ExtraNodesets", "no_action");
   registerAction(AddExtraNodesetAction, "Mesh/ExtraNodesets/*", "add_extra_nodeset");
   
   registerAction(AddFunctionAction, "Functions/*", "add_function");
@@ -374,7 +376,7 @@ registerActions()
   registerAction(GlobalParamsAction, "GlobalParams", "set_global_params");
 
   /// MooseObjectActions
-  registerAction(AddMeshModifierAction, "Mesh/*", "add_mesh_modifier");
+  registerAction(AddMeshModifierAction, "Mesh/Modifier/*", "add_mesh_modifier");
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "Variables/*", "add_variable");

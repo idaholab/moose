@@ -1,5 +1,6 @@
 [Mesh]
-#  file = pellets.e
+  file = pellets.e
+  active = 'Modifier'
 
   [./Generation]
     dim = 3
@@ -14,9 +15,11 @@
     nz = 2
   [../]
 
-  [./element_deleter]
-    type = ElementDeleter
-    function = mesh_damage_sphere
+  [./Modifier]
+    [./deleter]
+      type = ElementDeleter
+      function = mesh_damage_sphere
+    [../]
   [../]
 []
 
