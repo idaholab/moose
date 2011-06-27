@@ -308,11 +308,14 @@ MooseVariable::computeElemValues()
   Real u_dot_local;
   Real du_dot_du_local;
 
+  Real phi_local;
+  RealGradient dphi_local;
+  RealTensor d2phi_local;
 
-  for (unsigned int i = 0; i < num_dofs; i++)
+  for (unsigned int i=0; i < num_dofs; i++)
   {
-    int idx = _dof_indices[i];
-    Real soln_local = current_solution(idx);
+    idx = _dof_indices[i];
+    soln_local = current_solution(idx);
 
     if (is_transient)
     {
@@ -326,11 +329,10 @@ MooseVariable::computeElemValues()
       }
     }
 
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (unsigned int qp=0; qp < nqp; qp++)
     {
-      Real phi_local = _phi[i][qp];
-      RealGradient dphi_local = _grad_phi[i][qp];
-      RealTensor d2phi_local;
+      phi_local = _phi[i][qp];
+      dphi_local = _grad_phi[i][qp];
 
       if (_has_second_derivatives)
         d2phi_local = _second_phi[i][qp];
@@ -365,12 +367,13 @@ MooseVariable::computeElemValues()
 void
 MooseVariable::computeElemValuesFace()
 {
+  bool is_transient = _problem.transient();
   unsigned int nqp = _qrule_face->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
   if (_has_second_derivatives)
     _second_u.resize(nqp);
-  if (_problem.transient())
+  if (is_transient)
   {
     if (_is_nl)
     {
@@ -415,24 +418,39 @@ MooseVariable::computeElemValuesFace()
   }
 
   unsigned int num_dofs = _dof_indices.size();
-  for (unsigned int i = 0; i < num_dofs; i++)
-  {
-    int idx = _dof_indices[i];
-    Real soln_local = (*_sys.currentSolution())(idx);
-    Real soln_old_local;
-    Real soln_older_local;
 
-    if (_problem.transient())
+  const NumericVector<Real> & current_solution = *_sys.currentSolution();
+  const NumericVector<Real> & solution_old     = _sys.solutionOld();
+  const NumericVector<Real> & solution_older   = _sys.solutionOlder();
+  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
+  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+
+  int idx;
+  Real soln_local;
+  Real soln_old_local;
+  Real soln_older_local;
+  Real u_dot_local;
+  Real du_dot_du_local;
+
+  Real phi_local;
+  RealGradient dphi_local;
+  RealTensor d2phi_local;
+
+  for (unsigned int i=0; i < num_dofs; ++i)
+  {
+    idx = _dof_indices[i];
+    soln_local = current_solution(idx);
+
+    if (is_transient)
     {
-      soln_old_local = _sys.solutionOld()(idx);
-      soln_older_local = _sys.solutionOlder()(idx);
+      soln_old_local = solution_old(idx);
+      soln_older_local = solution_older(idx);
     }
 
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (unsigned int qp=0; qp < nqp; ++qp)
     {
-      Real phi_local = _phi_face[i][qp];
-      RealGradient dphi_local = _grad_phi_face[i][qp];
-      RealTensor d2phi_local;
+      phi_local = _phi_face[i][qp];
+      dphi_local = _grad_phi_face[i][qp];
 
       if (_has_second_derivatives)
         d2phi_local = _second_phi_face[i][qp];
@@ -442,12 +460,12 @@ MooseVariable::computeElemValuesFace()
       if (_has_second_derivatives)
         _second_u[qp] += d2phi_local * soln_local;
 
-      if (_problem.transient())
+      if (is_transient)
       {
         if (_is_nl)
         {
-          _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
-          _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
+          _u_dot[qp]        += phi_local * u_dot(idx);
+          _du_dot_du[qp]    += phi_local * du_dot_du(idx);
         }
 
         _u_old[qp]        += phi_local * soln_old_local;
