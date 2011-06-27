@@ -309,8 +309,13 @@ MooseVariable::computeElemValues()
   Real du_dot_du_local;
 
   Real phi_local;
-  RealGradient dphi_local;
+  const Real * dphi_qp;
+  //RealGradient dphi_local;
   RealTensor d2phi_local;
+
+  Real * grad_u_qp;
+  Real * grad_u_old_qp;
+  Real * grad_u_older_qp;
 
   for (unsigned int i=0; i < num_dofs; i++)
   {
@@ -328,17 +333,24 @@ MooseVariable::computeElemValues()
         du_dot_du_local    = du_dot_du(idx);
       }
     }
-
+    
     for (unsigned int qp=0; qp < nqp; qp++)
     {
       phi_local = _phi[i][qp];
-      dphi_local = _grad_phi[i][qp];
+      dphi_qp = &_grad_phi[i][qp](0);
+      
+      grad_u_qp = &_grad_u[qp](0);
+      grad_u_old_qp = &_grad_u_old[qp](0);
+      grad_u_older_qp = &_grad_u_older[qp](0);
 
       if (_has_second_derivatives)
         d2phi_local = _second_phi[i][qp];
 
-      _u[qp]      += phi_local * soln_local;
-      _grad_u[qp] += dphi_local * soln_local;
+      _u[qp] += phi_local * soln_local;
+
+      for(unsigned int j=0; j < LIBMESH_DIM; ++j)
+        grad_u_qp[j] += dphi_qp[j] * soln_local;
+      
       if (_has_second_derivatives)
         _second_u[qp] += d2phi_local * soln_local;
 
@@ -352,8 +364,13 @@ MooseVariable::computeElemValues()
 
         _u_old[qp]        += phi_local * soln_old_local;
         _u_older[qp]      += phi_local * soln_older_local;
-        _grad_u_old[qp]   += dphi_local * soln_old_local;
-        _grad_u_older[qp] += dphi_local * soln_older_local;
+        //_grad_u_old[qp]   += dphi_local * soln_old_local;
+        for(unsigned int j=0; j < LIBMESH_DIM; ++j)
+          grad_u_old_qp[j] += dphi_qp[j] * soln_old_local;
+
+        //_grad_u_older[qp] += dphi_local * soln_older_local;
+        for(unsigned int j=0; j < LIBMESH_DIM; ++j)
+          grad_u_older_qp[j] += dphi_qp[j] * soln_older_local;
         if (_has_second_derivatives)
         {
           _second_u_old[qp] += d2phi_local * soln_old_local;
