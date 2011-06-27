@@ -27,10 +27,7 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, InputPa
    _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
    _d_strain_dT(3,3),
    _d_stress_dT(declareProperty<SymmTensor>("d_stress_dT")),
-   _elastic_strain(declareProperty<SymmTensor>("elastic_strain")),
-   _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-   _density(declareProperty<Real>("density")),
-   _specific_heat(declareProperty<Real>("specific_heat"))
+   _elastic_strain(declareProperty<SymmTensor>("elastic_strain"))
 {}
 
 void

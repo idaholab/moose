@@ -14,7 +14,6 @@ InputParameters validParams<LinearIsotropicMaterial>()
   params.addRequiredParam<Real>("poissons_ratio", "Poisson's Ratio");
   params.addParam<Real>("t_ref", 0.0, "The reference temperature at which this material has zero strain.");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
-  params.addParam<Real>("thermal_conductivity", 0.0, "The thermal conductivity coeffecient.");
   return params;
 }
 
@@ -25,7 +24,6 @@ LinearIsotropicMaterial::LinearIsotropicMaterial(const std::string  & name,
    _poissons_ratio(getParam<Real>("poissons_ratio")),
    _t_ref(getParam<Real>("t_ref")),
    _alpha(getParam<Real>("thermal_expansion")),
-   _input_thermal_conductivity(getParam<Real>("thermal_conductivity")),
    _local_elasticity_tensor(NULL)
 {
   SymmIsotropicElasticityTensor * iso_elasticity_tensor = new SymmIsotropicElasticityTensor;
@@ -43,9 +41,8 @@ LinearIsotropicMaterial::~LinearIsotropicMaterial()
 void
 LinearIsotropicMaterial::computeProperties()
 {
-  for(_qp=0; _qp<_qrule->n_points(); _qp++)
+  for(_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
-    _thermal_conductivity[_qp] = _input_thermal_conductivity;
 
     _local_elasticity_tensor->calculate(_qp);
 

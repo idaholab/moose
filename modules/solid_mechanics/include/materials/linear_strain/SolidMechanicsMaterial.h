@@ -43,9 +43,6 @@ protected:
 
   MaterialProperty<SymmTensor> & _elastic_strain;
 
-  MaterialProperty<Real> & _thermal_conductivity;
-  MaterialProperty<Real> & _density;
-  MaterialProperty<Real> & _specific_heat;
 };
 
 #endif //SOLIDMECHANICSMATERIAL_H
