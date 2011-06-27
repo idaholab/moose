@@ -239,12 +239,15 @@ MooseVariable::insert(NumericVector<Number> & residual)
 void
 MooseVariable::computeElemValues()
 {
+
+  bool is_transient = _problem.transient();
   unsigned int nqp = _qrule->n_points();
+  
   _u.resize(nqp);
   _grad_u.resize(nqp);
   if (_has_second_derivatives)
     _second_u.resize(nqp);
-  if (_problem.transient())
+  if (is_transient)
   {
     if (_is_nl)
     {
@@ -270,7 +273,7 @@ MooseVariable::computeElemValues()
     if (_has_second_derivatives)
       _second_u[i] = 0;
 
-    if (_problem.transient())
+    if (is_transient)
     {
       if (_is_nl)
       {
@@ -291,17 +294,36 @@ MooseVariable::computeElemValues()
   }
 
   unsigned int num_dofs = _dof_indices.size();
+
+  const NumericVector<Real> & current_solution = *_sys.currentSolution();
+  const NumericVector<Real> & solution_old     = _sys.solutionOld();
+  const NumericVector<Real> & solution_older   = _sys.solutionOlder();
+  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
+  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+
+  int idx;
+  Real soln_local;
+  Real soln_old_local;
+  Real soln_older_local;
+  Real u_dot_local;
+  Real du_dot_du_local;
+
+
   for (unsigned int i = 0; i < num_dofs; i++)
   {
     int idx = _dof_indices[i];
-    Real soln_local = (*_sys.currentSolution())(idx);
-    Real soln_old_local;
-    Real soln_older_local;
+    Real soln_local = current_solution(idx);
 
-    if (_problem.transient())
+    if (is_transient)
     {
-      soln_old_local = _sys.solutionOld()(idx);
-      soln_older_local = _sys.solutionOlder()(idx);
+      soln_old_local = solution_old(idx);
+      soln_older_local = solution_older(idx);
+
+      if (_is_nl)
+      {
+        u_dot_local        = u_dot(idx);
+        du_dot_du_local    = du_dot_du(idx);
+      }
     }
 
     for (unsigned int qp = 0; qp < nqp; qp++)
@@ -318,12 +340,12 @@ MooseVariable::computeElemValues()
       if (_has_second_derivatives)
         _second_u[qp] += d2phi_local * soln_local;
 
-      if (_problem.transient())
+      if (is_transient)
       {
         if (_is_nl)
         {
-          _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
-          _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
+          _u_dot[qp]        += phi_local * u_dot_local;
+          _du_dot_du[qp]    += phi_local * du_dot_du_local;
         }
 
         _u_old[qp]        += phi_local * soln_old_local;
