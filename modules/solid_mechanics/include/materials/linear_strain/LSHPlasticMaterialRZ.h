@@ -25,6 +25,9 @@ protected:
    */
   virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
 
+  // This class sets _Jacobian_mult in computeStrain
+  virtual void computePreconditioning() {}
+
   Real _yield_stress;
   Real _hardening_constant;
   Real _tolerance;
