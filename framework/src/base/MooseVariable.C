@@ -301,21 +301,21 @@ MooseVariable::computeElemValues()
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
   const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
 
-  int idx;
-  Real soln_local;
-  Real soln_old_local;
-  Real soln_older_local;
-  Real u_dot_local;
-  Real du_dot_du_local;
+  int idx = 0;
+  Real soln_local = 0;
+  Real soln_old_local = 0;
+  Real soln_older_local = 0;
+  Real u_dot_local = 0;
+  Real du_dot_du_local = 0;
 
-  Real phi_local;
-  const Real * dphi_qp;
+  Real phi_local = 0;
+  const Real * dphi_qp = NULL;
   //RealGradient dphi_local;
   RealTensor d2phi_local;
 
-  Real * grad_u_qp;
-  Real * grad_u_old_qp;
-  Real * grad_u_older_qp;
+  Real * grad_u_qp = NULL;
+  Real * grad_u_old_qp = NULL;
+  Real * grad_u_older_qp = NULL;
 
   for (unsigned int i=0; i < num_dofs; i++)
   {
@@ -340,8 +340,12 @@ MooseVariable::computeElemValues()
       dphi_qp = &_grad_phi[i][qp](0);
       
       grad_u_qp = &_grad_u[qp](0);
-      grad_u_old_qp = &_grad_u_old[qp](0);
-      grad_u_older_qp = &_grad_u_older[qp](0);
+
+      if(is_transient)
+      {
+        grad_u_old_qp = &_grad_u_old[qp](0);
+        grad_u_older_qp = &_grad_u_older[qp](0);
+      }
 
       if (_has_second_derivatives)
         d2phi_local = _second_phi[i][qp];
