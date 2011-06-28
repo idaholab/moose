@@ -71,7 +71,7 @@ public:
   SymmTensor operator*( const SymmTensor & x ) const;
   SymmElasticityTensor operator*( Real x ) const;
 
-  virtual Real stiffness( const unsigned i, const unsigned j,
+  virtual Real stiffness( const unsigned int i, const unsigned int j,
                           const RealGradient & test,
                           const RealGradient & phi );
 

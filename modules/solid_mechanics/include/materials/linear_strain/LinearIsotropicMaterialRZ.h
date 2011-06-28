@@ -29,8 +29,6 @@ protected:
    */
   virtual void computeStrain(const SymmTensor & input_strain, SymmTensor & elastic_strain);
 
-  Real _input_thermal_conductivity;
-
 };
 
 #endif //LINEARISOTROPICMATERIALRZ_H

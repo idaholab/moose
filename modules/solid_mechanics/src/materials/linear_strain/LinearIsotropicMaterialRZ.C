@@ -9,14 +9,12 @@ template<>
 InputParameters validParams<LinearIsotropicMaterialRZ>()
 {
   InputParameters params = validParams<SolidMechanicsMaterialRZ>();
-  params.addParam<Real>("thermal_conductivity", 0.0, "The thermal conductivity coeffecient.");
   return params;
 }
 
 LinearIsotropicMaterialRZ::LinearIsotropicMaterialRZ(const std::string  & name,
                                                      InputParameters parameters)
-  :SolidMechanicsMaterialRZ(name, parameters),
-   _input_thermal_conductivity(getParam<Real>("thermal_conductivity"))
+  :SolidMechanicsMaterialRZ(name, parameters)
 {
 }
 
