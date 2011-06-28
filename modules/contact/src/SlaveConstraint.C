@@ -40,21 +40,37 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
 void
 SlaveConstraint::jacobianSetup()
 {
+  updateContactSet();
+}
+
+void
+SlaveConstraint::timestepSetup()
+{
+  updateContactSet();
+}
+
+void
+SlaveConstraint::updateContactSet()
+{
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
-  for(; it!=end; ++it)
+  for (; it!=end; ++it)
   {
-    unsigned int slave_node_num = it->first;
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
 
-    if(!pinfo)
+    if (!pinfo)
+    {
       continue;
+    }
 
-    if(pinfo->_distance > 0)
+    if (pinfo->_distance > 0)
+    {
+      unsigned int slave_node_num = it->first;
       has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+    }
   }
 }
 
@@ -72,8 +88,10 @@ SlaveConstraint::addPoints()
     unsigned int slave_node_num = it->first;
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
 
-    if(!pinfo)
+    if (!pinfo)
+    {
       continue;
+    }
 
     const Node * node = pinfo->_node;
 

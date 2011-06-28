@@ -26,10 +26,13 @@ public:
   ContactMaster(const std::string & name, InputParameters parameters);
 
   virtual void jacobianSetup();
+  virtual void timestepSetup();
 
   virtual void addPoints();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+  virtual void updateContactSet();
 
 protected:
   const unsigned int _component;

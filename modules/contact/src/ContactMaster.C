@@ -42,43 +42,62 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
 void
 ContactMaster::jacobianSetup()
 {
+  updateContactSet();
+}
+
+void
+ContactMaster::timestepSetup()
+{
+  updateContactSet();
+}
+
+void
+ContactMaster::updateContactSet()
+{
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
-  for(; it!=end; ++it)
+  for (; it!=end; ++it)
   {
-    unsigned int slave_node_num = it->first;
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
 
-    if(!pinfo)
+    if (!pinfo)
+    {
       continue;
+    }
 
-    if(pinfo->_distance > 0)
+    if (pinfo->_distance > 0)
+    {
+      unsigned int slave_node_num = it->first;
       has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+    }
   }
 }
 
 void
 ContactMaster::addPoints()
 {
+
   _point_to_info.clear();
 
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
-  for(; it!=end; ++it)
+  for (; it!=end; ++it)
   {
-    unsigned int slave_node_num = it->first;
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
 
-    if(!pinfo)
+    if (!pinfo)
+    {
       continue;
+    }
 
+    unsigned int slave_node_num = it->first;
     std::map<unsigned int, bool>::iterator it( has_penetrated.find( slave_node_num ) );
-    if(it != has_penetrated.end() && it->second == true )
+    if ( it != has_penetrated.end() && it->second == true )
     {
       addPoint(pinfo->_elem, pinfo->_closest_point);
       _point_to_info[pinfo->_closest_point] = pinfo;
