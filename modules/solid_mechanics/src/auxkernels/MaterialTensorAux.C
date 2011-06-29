@@ -30,6 +30,10 @@ MaterialTensorAux::MaterialTensorAux( const std::string & name,
   {
     _quantity = MTA_VONMISES;
   }
+  else if ( _quantity_string == "plasticstrainmag" )
+  {
+    _quantity = MTA_PLASTICSTRAINMAG;
+  }
   else if ( _quantity_string == "hydrostatic" )
   {
     _quantity = MTA_HYDROSTATIC;
@@ -80,6 +84,10 @@ MaterialTensorAux::computeValue()
                            std::pow(tensor.xy(), 2) +
                            std::pow(tensor.yz(), 2) +
                            std::pow(tensor.zx(), 2))));
+  }
+  else if ( _quantity == MTA_PLASTICSTRAINMAG )
+  {
+    value = std::sqrt(2.0/3.0 * tensor.doubleContraction(tensor));
   }
   else if ( _quantity == MTA_HYDROSTATIC )
   {
