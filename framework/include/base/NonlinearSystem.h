@@ -212,6 +212,14 @@ public:
   void useFiniteDifferencedPreconditioner(bool use=true) { _use_finite_differenced_preconditioner = use; }
 
   /**
+   * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
+   * be related through the geometric search system.
+   *
+   * These entries are really only used by the Finite Difference Preconditioner right now.
+   */
+  void addImplicitGeometricCouplingEntriesToJacobian(bool add=true) { _add_implicit_geometric_coupling_entries_to_jacobian = add; }
+
+  /**
    * Setup damping stuff (called before we actually start)
    */
   void setupDampers();
@@ -298,6 +306,8 @@ protected:
   Preconditioner<Real> * _preconditioner;               ///< Preconditioner
 
   bool _use_finite_differenced_preconditioner;          /// Whether or not to use a finite differenced preconditioner
+
+  bool _add_implicit_geometric_coupling_entries_to_jacobian; /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
 
   bool _need_serialized_solution;                       ///< Whether or not a copy of the residual needs to be made
 

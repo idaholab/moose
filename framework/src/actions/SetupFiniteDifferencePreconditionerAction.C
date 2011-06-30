@@ -31,7 +31,9 @@ InputParameters validParams<SetupFiniteDifferencePreconditionerAction>()
   params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same possition in off_diag_row.");
 
   params.addParam<bool>("full", false, "Set to true if you want the full set of couplings.  Simply for convenience so you don't have to set every off_diag_row and off_diag_column combination.");
-  
+
+  params.addParam<bool>("implicit_geometric_coupling", false, "Set to true if you want to add entries into the matrix for degrees of freedom that might be coupled by inspection of the geometric search objects.");
+    
   return params;
 }
 
@@ -77,6 +79,10 @@ SetupFiniteDifferencePreconditionerAction::act()
   }
 
   nl.setCouplingMatrix(cm);
+
+  bool implicit_geometric_coupling = getParam<bool>("implicit_geometric_coupling");
+
+  nl.addImplicitGeometricCouplingEntriesToJacobian(implicit_geometric_coupling);
 
   // Set the jacobian to null so that libMesh won't override our finite differenced jacobian
   nl.useFiniteDifferencedPreconditioner(true);
