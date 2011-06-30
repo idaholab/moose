@@ -47,17 +47,10 @@ SymmElasticityTensor::operator*( const SymmTensor & x ) const
 }
 
 Real
-SymmElasticityTensor::stiffness( const unsigned int ii, const unsigned int jj,
+SymmElasticityTensor::stiffness( const unsigned int i, const unsigned int j,
                                  const RealGradient & test,
                                  const RealGradient & phi )
 {
-  unsigned i(ii);
-  unsigned j(jj);
-  if ( i > j )
-  {
-    i = jj;
-    j = ii;
-  }
   RealGradient b;
   if (0 == i && 0 == j)
   {
@@ -83,17 +76,35 @@ SymmElasticityTensor::stiffness( const unsigned int ii, const unsigned int jj,
     b(1) = _val[15]*phi(0) + _val[ 8]*phi(1) + _val[16]*phi(2);
     b(2) = _val[17]*phi(0) + _val[10]*phi(1) + _val[19]*phi(2);
   }
+  else if (1 == i && 0 == j)
+  {
+    b(0) = _val[ 3]*phi(0) + _val[15]*phi(1) + _val[17]*phi(2);
+    b(1) = _val[ 1]*phi(0) + _val[ 8]*phi(1) + _val[10]*phi(2);
+    b(2) = _val[ 4]*phi(0) + _val[16]*phi(1) + _val[19]*phi(2);
+  }
   else if (1 == i && 2 == j)
   {
     b(0) = _val[17]*phi(0) + _val[16]*phi(1) + _val[12]*phi(2);
     b(1) = _val[10]*phi(0) + _val[ 9]*phi(1) + _val[ 7]*phi(2);
     b(2) = _val[19]*phi(0) + _val[18]*phi(1) + _val[13]*phi(2);
   }
+  else if (2 == i && 1 == j)
+  {
+    b(0) = _val[17]*phi(0) + _val[10]*phi(1) + _val[19]*phi(2);
+    b(1) = _val[16]*phi(0) + _val[ 9]*phi(1) + _val[18]*phi(2);
+    b(2) = _val[12]*phi(0) + _val[ 7]*phi(1) + _val[13]*phi(2);
+  }
   else if (0 == i && 2 == j)
   {
     b(0) = _val[ 5]*phi(0) + _val[ 4]*phi(1) + _val[ 2]*phi(2);
     b(1) = _val[17]*phi(0) + _val[16]*phi(1) + _val[12]*phi(2);
     b(2) = _val[20]*phi(0) + _val[19]*phi(1) + _val[14]*phi(2);
+   }
+  else if (2 == i && 0 == j)
+  {
+    b(0) = _val[ 5]*phi(0) + _val[17]*phi(1) + _val[20]*phi(2);
+    b(1) = _val[ 4]*phi(0) + _val[16]*phi(1) + _val[19]*phi(2);
+    b(2) = _val[ 2]*phi(0) + _val[12]*phi(1) + _val[14]*phi(2);
   }
   else
   {

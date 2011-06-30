@@ -36,7 +36,7 @@ protected:
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
 
   // Accumulate derivatives of strain tensors with respect to Temperature into this
-  ColumnMajorMatrix _d_strain_dT;
+  SymmTensor _d_strain_dT;
 
   // The derivative of the stress with respect to Temperature
   MaterialProperty<SymmTensor> & _d_stress_dT;

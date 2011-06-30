@@ -62,6 +62,10 @@ LinearIsotropicMaterial::computeProperties()
       Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
 
       strn.addDiag( -isotropic_strain );
+
+      _d_strain_dT.zero();
+      _d_strain_dT.addDiag( -_alpha );
+
     }
 
     SymmTensor v_strain(0);
@@ -102,4 +106,9 @@ LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTens
   elastic_strain = total_strain;
   //Jacobian multiplier of the stress
   _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+
+  SymmTensor d_stress_dT( *_local_elasticity_tensor * _d_strain_dT );
+//   d_stress_dT *= _dt;
+  _d_stress_dT[_qp] = d_stress_dT;
+
 }

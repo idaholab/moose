@@ -110,17 +110,10 @@ SymmIsotropicElasticityTensor::setEntries( Real C11, Real C12, Real C44 )
 }
 
 Real
-SymmIsotropicElasticityTensor::stiffness( const unsigned int ii, const unsigned int jj,
+SymmIsotropicElasticityTensor::stiffness( const unsigned int i, const unsigned int j,
                                           const RealGradient & test,
                                           const RealGradient & phi )
 {
-  unsigned int i(ii);
-  unsigned int j(jj);
-  if ( i > j )
-  {
-    i = jj;
-    j = ii;
-  }
   RealGradient b;
   if (0 == i && 0 == j)
   {
@@ -146,17 +139,35 @@ SymmIsotropicElasticityTensor::stiffness( const unsigned int ii, const unsigned 
     b(1) = _val[15]*phi(0);
     b(2) = 0;
   }
+  else if (1 == i && 0 == j)
+  {
+    b(0) = _val[15]*phi(1);
+    b(1) = _val[ 1]*phi(0);
+    b(2) = 0;
+  }
   else if (1 == i && 2 == j)
   {
     b(0) = 0;
     b(1) = _val[ 7]*phi(2);
     b(2) = _val[18]*phi(1);
   }
+  else if (2 == i && 1 == j)
+  {
+    b(0) = 0;
+    b(1) = _val[18]*phi(2);
+    b(2) = _val[ 7]*phi(1);
+  }
   else if (0 == i && 2 == j)
   {
     b(0) = _val[ 2]*phi(2);
     b(1) = 0;
     b(2) = _val[20]*phi(0);
+  }
+  else if (2 == i && 0 == j)
+  {
+    b(0) = _val[20]*phi(2);
+    b(1) = 0;
+    b(2) = _val[ 2]*phi(0);
   }
   else
   {

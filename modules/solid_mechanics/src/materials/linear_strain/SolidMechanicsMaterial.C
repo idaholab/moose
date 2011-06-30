@@ -25,7 +25,7 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, InputPa
    _stress(declareProperty<SymmTensor>("stress")),
    _elasticity_tensor(declareProperty<SymmElasticityTensor>("elasticity_tensor")),
    _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
-   _d_strain_dT(3,3),
+   _d_strain_dT(),
    _d_stress_dT(declareProperty<SymmTensor>("d_stress_dT")),
    _elastic_strain(declareProperty<SymmTensor>("elastic_strain"))
 {}
