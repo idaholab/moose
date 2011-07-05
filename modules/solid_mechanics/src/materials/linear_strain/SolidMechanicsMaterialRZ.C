@@ -46,6 +46,8 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _crack_flags_old(NULL),
    _elasticity_tensor(declareProperty<SymmElasticityTensor>("elasticity_tensor")),
    _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
+   _d_strain_dT(),
+   _d_stress_dT(declareProperty<SymmTensor>("d_stress_dT")),
    _elastic_strain(declareProperty<SymmTensor>("elastic_strain")),
    _v_strain(declareProperty<SymmTensor>("v_strain")),
    _v_strain_old(declarePropertyOld<SymmTensor>("v_strain")),
@@ -146,6 +148,9 @@ SolidMechanicsMaterialRZ::computeProperties()
       Real isotropic_strain = _alpha * (_temp[_qp] - _temp_old[_qp]);
 
       strain.addDiag( -isotropic_strain );
+
+      _d_strain_dT.zero();
+      _d_strain_dT.addDiag( -_alpha );
     }
 
     const unsigned int num_vol_models(_volumetric_models.size());
@@ -195,6 +200,9 @@ SolidMechanicsMaterialRZ::computePreconditioning()
   //Jacobian multiplier of the stress
   mooseAssert(_local_elasticity_tensor, "null _local_elasticity_tensor");
   _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+  SymmTensor d_stress_dT( *_local_elasticity_tensor * _d_strain_dT );
+//   d_stress_dT *= _dt;
+  _d_stress_dT[_qp] = d_stress_dT;
 }
 
 void

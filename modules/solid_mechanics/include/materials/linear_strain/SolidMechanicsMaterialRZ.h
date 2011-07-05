@@ -2,13 +2,12 @@
 #define SOLIDMECHANICSMATERIALRZ_H
 
 #include "Material.h"
-
+#include "SymmTensor.h"
 
 //Forward Declarations
 class SolidMechanicsMaterialRZ;
 class SymmElasticityTensor;
 class VolumetricModel;
-class SymmTensor;
 
 template<>
 InputParameters validParams<SolidMechanicsMaterialRZ>();
@@ -75,6 +74,10 @@ protected:
   MaterialProperty<RealVectorValue> * _crack_flags_old;
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
+  // Accumulate derivatives of strain tensors with respect to Temperature into this
+  SymmTensor _d_strain_dT;
+  // The derivative of the stress with respect to Temperature
+  MaterialProperty<SymmTensor> & _d_stress_dT;
   MaterialProperty<SymmTensor> & _elastic_strain;
   MaterialProperty<SymmTensor> & _v_strain;
   MaterialProperty<SymmTensor> & _v_strain_old;
