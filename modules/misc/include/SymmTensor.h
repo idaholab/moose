@@ -15,6 +15,7 @@ public:
     _yz(0),
     _zx(0)
   {}
+  explicit
   SymmTensor(Real init) :
     _xx(init),
     _yy(init),

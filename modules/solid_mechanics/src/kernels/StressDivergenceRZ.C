@@ -120,7 +120,8 @@ StressDivergenceRZ::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if ( _temp_coupled && jvar == _temp_var )
   {
-    return _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
+    return 2 * M_PI * _q_point[_qp](0) *
+      _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
   }
 
   return 0;
