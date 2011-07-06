@@ -21,6 +21,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian( unsigned jvar );
 
   virtual Real computeSlaveFluxContribution(Real grad_t);
 };
