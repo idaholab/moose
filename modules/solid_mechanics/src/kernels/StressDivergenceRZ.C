@@ -120,8 +120,20 @@ StressDivergenceRZ::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if ( _temp_coupled && jvar == _temp_var )
   {
+    SymmTensor test;
+    if (_component == 0)
+    {
+      test.xx() = _grad_test[_i][_qp](0);
+      test.xy() = 0.5*_grad_test[_i][_qp](1);
+      test.zz() = _test[_i][_qp] / _q_point[_qp](0);
+    }
+    else
+    {
+      test.xy() = 0.5*_grad_test[_i][_qp](0);
+      test.yy() = _grad_test[_i][_qp](1);
+    }
     return 2 * M_PI * _q_point[_qp](0) *
-      _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
+      _d_stress_dT[_qp].doubleContraction(test) * _phi[_j][_qp];
   }
 
   return 0;

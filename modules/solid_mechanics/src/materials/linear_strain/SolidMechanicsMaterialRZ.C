@@ -130,12 +130,12 @@ SolidMechanicsMaterialRZ::computeProperties()
     if (_large_strain)
     {
       strain.xx() += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](0) +
-                              _grad_disp_z[_qp](0)*_grad_disp_z[_qp](0));
+                          _grad_disp_z[_qp](0)*_grad_disp_z[_qp](0));
       strain.yy() += 0.5*(_grad_disp_r[_qp](1)*_grad_disp_r[_qp](1) +
-                              _grad_disp_z[_qp](1)*_grad_disp_z[_qp](1));
+                          _grad_disp_z[_qp](1)*_grad_disp_z[_qp](1));
       strain.zz() += 0.5*(strain.zz()*strain.zz());
       strain.xy() += 0.5*(_grad_disp_r[_qp](0)*_grad_disp_r[_qp](1) +
-                              _grad_disp_z[_qp](0)*_grad_disp_z[_qp](1));
+                          _grad_disp_z[_qp](0)*_grad_disp_z[_qp](1));
     }
 
     _total_strain[_qp] = strain;
