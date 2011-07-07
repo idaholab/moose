@@ -20,8 +20,11 @@
 
 //Moose Includes
 #include "MooseInit.h"
-#include "Parser.h"
 #include "Executioner.h"
+
+// Parser
+#include "Parser.h"
+#include "MooseSyntax.h"
 
 // libMesh includes
 #include "perf_log.h"
@@ -41,10 +44,15 @@ int main (int argc, char** argv)
     input_filename = Moose::command_line->next(input_filename);
   else
     p.printUsage();
-
+  
+  // Associate Parser Syntax with specific MOOSE Actions
+  Moose::associateSyntax(p);
+  
   p.parse(input_filename);
   p.execute();
-
+  
   Executioner *e = p.getExecutioner();
   e->execute();
+
+  return 0;
 }

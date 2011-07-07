@@ -18,9 +18,12 @@
 
 //Moose Includes
 #include "MooseInit.h"
-#include "Parser.h"
 #include "Executioner.h"
 #include "Factory.h"
+
+// Parser
+#include "Parser.h"
+#include "MooseSyntax.h"
 
 // Example 18 Includes
 #include "Convection.h"
@@ -52,6 +55,9 @@ int main (int argc, char** argv)
   else
     p.printUsage();
 
+  // Associate Parser Syntax with specific MOOSE Actions
+  Moose::associateSyntax(p);
+  
   p.parse(input_filename);
   p.execute();
 

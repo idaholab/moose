@@ -36,8 +36,6 @@ ConvectionDiffusionAction::act()
 {
   std::vector<std::string> variables = getParam<std::vector<std::string> > ("variables");
   std::vector<std::string> vel_vec_variable;
-
-  std::cerr << "Acting on " << getParam<std::string>("built_by_action") << "\n\n";
   
   /**
    * We need to manually setup our Convection-Diffusion and Diffusion variables on our two

@@ -309,7 +309,6 @@ Parser::parse(const std::string &input_filename)
     {
       if (!is_parent)
       {
-        std::cerr << i->second._action << "\n";
         params = ActionFactory::instance()->getValidParams(i->second._action);
 
         // Before we build any objects we need to make sure that the section they are in is active

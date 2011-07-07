@@ -21,10 +21,13 @@
 
 //Moose Includes
 #include "MooseInit.h"
-#include "Parser.h"
 #include "Executioner.h"
 #include "Factory.h"
 #include "ActionFactory.h"  // <- Actions are special (they have their own factory)
+
+// Parser
+#include "Parser.h"
+#include "MooseSyntax.h"
 
 // Example 14 Includes
 #include "Convection.h"
@@ -45,13 +48,10 @@ int main (int argc, char** argv)
 
   /**
    * Registering an Action is a little different than registering the other MOOSE
-   * objects.  The name of what you register should match the fully qualified block
-   * name where this block is expected in the input file.  The wildcard character can
-   * also be used provided it replaces an entire "directory" (between parens) if
-   * your block should be matched for multiple cases.  One final thing to note is that you
-   * don't specify a leading slash ever in your registration names
+   * objects.  You register your Action class with an "action_name" that can be
+   * satisfied by executing the Action (running the "act" virtual method).  
    */
-  registerAction(ConvectionDiffusionAction, "ConvectionDiffusion", "add_kernel");
+  registerAction(ConvectionDiffusionAction, "add_kernel");
 
   Parser p;
   
@@ -61,6 +61,19 @@ int main (int argc, char** argv)
   else
     p.printUsage();
 
+  Moose::associateSyntax(p);
+
+  /**
+   * Now we need to tell the parser what new section name to look for and what
+   * Action object to build when it finds it.  This is done directly on the parser
+   * with the registerActionSyntax method.
+   *
+   * The section name should be the "full path" of the parsed section but should NOT
+   * contain a leading slash.  Wildcard characters can be used to replace a piece of the
+   * path.
+   */
+  p.registerActionSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
+  
   p.parse(input_filename);
   p.execute();
 

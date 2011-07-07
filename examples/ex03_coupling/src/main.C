@@ -22,8 +22,11 @@
 
 // Moose Includes
 #include "MooseInit.h"
-#include "Parser.h"
 #include "Executioner.h"
+
+// Parser
+#include "Parser.h"
+#include "MooseSyntax.h"
 
 // Example 3 Includes
 #include "Factory.h"
@@ -50,8 +53,11 @@ int main (int argc, char** argv)
   if ( Moose::command_line->search("-i") )
     input_filename = Moose::command_line->next(input_filename);
   else
-    mooseError("Must specify an input file using -i");      
+    p.printUsage();
 
+  // Associate Parser Syntax with specific MOOSE Actions
+  Moose::associateSyntax(p);
+  
   p.parse(input_filename);
   p.execute();
 
