@@ -41,7 +41,7 @@ PressureAction::act()
     ++dim;
   }
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("BCs/*");
+  InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
   action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
   action_params.set<std::string>("type") = _kernel_name;
   std::vector<std::string> vars;
@@ -58,7 +58,8 @@ PressureAction::act()
     name << short_name;
     name << "_";
     name << i;
-    Action *action = ActionFactory::instance()->create(name.str(), action_params);
+    action_params.set<std::string>("name") = name.str();
+    Action *action = ActionFactory::instance()->create("AddBCAction", action_params);
 
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");

@@ -177,20 +177,16 @@ Elk::registerObjects()
   registerMaterial(PowerLawCreep);
 
   registerBoundaryCondition(PlenumPressure);
-  registerAction(EmptyAction, "BCs/PlenumPressure", "no_action");
-  registerAction(PlenumPressureAction, "BCs/PlenumPressure/*", "meta_action");
+  registerAction(PlenumPressureAction, "meta_action");
 
   registerBoundaryCondition(PlenumPressureRZ);
-  registerAction(EmptyAction, "BCs/PlenumPressureRZ", "no_action");
-  registerAction(PlenumPressureRZAction, "BCs/PlenumPressureRZ/*", "meta_action");
+  registerAction(PlenumPressureRZAction, "meta_action");
 
   registerBoundaryCondition(Pressure);
-  registerAction(EmptyAction, "BCs/Pressure", "no_action");
-  registerAction(PressureAction, "BCs/Pressure/*", "meta_action");
+  registerAction(PressureAction, "meta_action");
 
   registerBoundaryCondition(PressureRZ);
-  registerAction(EmptyAction, "BCs/PressureRZ", "no_action");
-  registerAction(PressureRZAction, "BCs/PressureRZ/*", "meta_action");
+  registerAction(PressureRZAction, "meta_action");
 
   registerAux(ElasticEnergyAux);
   registerKernel(StressDivergence);
@@ -211,18 +207,18 @@ Elk::registerObjects()
   registerInitialCondition(RndBoundingBoxIC);
 
   // contact
-  registerAction(ContactAction, "Contact/*", "meta_action");
+  registerAction(ContactAction, "meta_action");
   registerDiracKernel(ContactMaster);
   registerDiracKernel(SlaveConstraint);
 
   // thermal contact
-  registerAction(ThermalContactAction, "ThermalContact/*", "meta_action");
+  registerAction(ThermalContactAction, "meta_action");
 
   // heat_conduction
   // This registers an action to add the "slave_flux" vector to the system at the right time
   registerActionName("add_slave_flux_vector", false);
   addActionNameDependency("add_slave_flux_vector", "ready_to_init");
   addActionNameDependency("init_problem", "add_slave_flux_vector");
-  registerNonParsedAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
+  registerAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
 
 }

@@ -47,10 +47,11 @@ ThermalContactAction::addBcs()
    * [../]
    */
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("BCs/*");
+  InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
   action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
   action_params.set<std::string>("type") = getParam<std::string>("type");
-  Action *action = ActionFactory::instance()->create("BCs/gap_bc_" + Moose::stringify(n), action_params);
+  action_params.set<std::string>("name") = "BCs/gap_bc_" + Moose::stringify(n);
+  Action *action = ActionFactory::instance()->create("AddBCAction", action_params);
   MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -107,22 +108,35 @@ ThermalContactAction::addAuxVariables()
   [../]
   */
 
-  std::vector<InputParameters> action_params = ActionFactory::instance()->getAllValidParams("AuxVariables/*");
-
-
   // We need to add the variables only once
   if (n == 0)
   {
-    for (unsigned int i=0; i<action_params.size(); ++i)
-    {
-      action_params[i].set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+      InputParameters action_params = ActionFactory::instance()->getValidParams("AddVariableAction");
+//    for (unsigned int i=0; i<action_params.size(); ++i)
+//    {
+      action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+      action_params.set<std::string>("action") = "add_aux_variable";
+      action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
       // gap_value
-      Action *action = ActionFactory::instance()->create("AuxVariables/" + GAP_VALUE_VAR_NAME, action_params[i]);
+      Action *action = ActionFactory::instance()->create("AddVariableAction", action_params);
       Moose::action_warehouse.addActionBlock(action);
       // penetration
-      action = ActionFactory::instance()->create("AuxVariables/" + PENETRATION_VAR_NAME, action_params[i]);
+      action_params.set<std::string>("name") = "AuxVariables/" + PENETRATION_VAR_NAME;
+      action = ActionFactory::instance()->create("AddVariableAction", action_params);
       Moose::action_warehouse.addActionBlock(action);
-    }
+//    }
+      
+      action_params = ActionFactory::instance()->getValidParams("CopyNodalVarsAction");
+      action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+      action_params.set<std::string>("action") = "copy_nodal_aux_vars";
+      action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
+      // gap_value
+      action = ActionFactory::instance()->create("CopyNodalVarsAction", action_params);
+      Moose::action_warehouse.addActionBlock(action);
+      // penetration
+      action_params.set<std::string>("name") = "AuxVariables/" + PENETRATION_VAR_NAME;
+      action = ActionFactory::instance()->create("CopyNodalVarsAction", action_params);
+      Moose::action_warehouse.addActionBlock(action);
   }
 }
 
@@ -145,12 +159,14 @@ ThermalContactAction::addAuxBcs()
   [../]
   */
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AuxBCs/*");
+  InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
   action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+  action_params.set<std::string>("action") = "add_aux_bc";
 
   {
     action_params.set<std::string>("type") = getParam<std::string>("gap_type");
-    Action *action = ActionFactory::instance()->create("AuxBCs/gap_value_" + Moose::stringify(n), action_params);
+    action_params.set<std::string>("name") = "AuxBCs/gap_value_" + Moose::stringify(n);
+    Action *action = ActionFactory::instance()->create("AddBCAction", action_params);
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -167,7 +183,8 @@ ThermalContactAction::addAuxBcs()
 
   {
     action_params.set<std::string>("type") = "PenetrationAux";
-    Action *action = ActionFactory::instance()->create("AuxBCs/penetration_" + Moose::stringify(n), action_params);
+    action_params.set<std::string>("name") = "AuxBCs/penetration_" + Moose::stringify(n);
+    Action *action = ActionFactory::instance()->create("AddBCAction", action_params);
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -193,10 +210,11 @@ ThermalContactAction::addDiracKernels()
   [../]
   */
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("DiracKernels/*");
+  InputParameters action_params = ActionFactory::instance()->getValidParams("AddDiracKernelAction");
   action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
   action_params.set<std::string>("type") = "GapHeatPointSourceMaster";
-  Action *action = ActionFactory::instance()->create("DiracKernels/thermal_master_" + Moose::stringify(n), action_params);
+  action_params.set<std::string>("name") = "DiracKernels/thermal_master_" + Moose::stringify(n);
+  Action *action = ActionFactory::instance()->create("AddDiracKernelAction", action_params);
   MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
 
@@ -217,7 +235,8 @@ ThermalContactAction::addVectors()
   {
     InputParameters action_params = validParams<AddSlaveFluxVectorAction>();
     action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
-    Action *action = ActionFactory::instance()->createNonParsed("add_slave_flux_vector", action_params);
+    action_params.set<std::string>("name") = "add_slave_flux_vector";
+    Action *action = ActionFactory::instance()->create("AddSlaveFluxVectorAction", action_params);
     // add it to the warehouse
     Moose::action_warehouse.addActionBlock(action);
   }

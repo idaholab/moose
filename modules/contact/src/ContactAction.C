@@ -41,7 +41,7 @@ ContactAction::act()
     ++dim;
   }
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("DiracKernels/*");
+  InputParameters action_params = ActionFactory::instance()->getValidParams("AddDiracKernelAction");
   action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
 
   // Create master objects
@@ -60,7 +60,8 @@ ContactAction::act()
     name << short_name;
     name << "_master_";
     name << i;
-    Action *action = ActionFactory::instance()->create(name.str(), action_params);
+    action_params.set<std::string>("name") = name.str();
+    Action *action = ActionFactory::instance()->create("AddDiracKernelAction", action_params);
 
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
@@ -98,7 +99,8 @@ ContactAction::act()
     name << short_name;
     name << "_slave_";
     name << i;
-    Action *action = ActionFactory::instance()->create(name.str(), action_params);
+    action_params.set<std::string>("name") = name.str();
+    Action *action = ActionFactory::instance()->create("AddDiracKernelAction", action_params);
 
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
