@@ -1,7 +1,11 @@
 #include "MooseInit.h"
-#include "Parser.h"
 #include "Executioner.h"
 #include "MooseTest.h"
+
+// Parser
+#include "Parser.h"
+#include "MooseSyntax.h"
+#include "MooseTestSyntax.h"
 
 // libMesh includes
 #include "perf_log.h"
@@ -12,9 +16,9 @@ PerfLog Moose::perf_log("Moose Test");
 int main(int argc, char *argv[])
 {
   MooseInit init(argc, argv);
-  MooseTest::registerObjects();
-
   Parser p;
+  
+  MooseTest::registerObjects();
 
   std::string input_filename = "";
   if (Moose::command_line->search("-i"))
@@ -22,6 +26,10 @@ int main(int argc, char *argv[])
   else
     p.printUsage();
 
+  // Associate Parser Syntax
+  Moose::associateSyntax(p);
+  MooseTest::associateSyntax(p);
+  
   p.parse(input_filename);
   p.execute();
 

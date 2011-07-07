@@ -27,10 +27,9 @@
 /**
  * Macros
  */
-#define stringifyName(name) #name
 #define registerActionName(name, is_required)   Moose::action_warehouse.registerName(name, is_required)
-#define registerAction(tplt, name, action)      ActionFactory::instance()->reg<tplt>(name, action)
-#define registerNonParsedAction(tplt, action)   ActionFactory::instance()->regNonParsed<tplt>(action)
+#define registerAction(tplt, action)      ActionFactory::instance()->reg<tplt>(stringifyName(tplt), action)
+//#define registerNonParsedAction(tplt, action)   ActionFactory::instance()->regNonParsed<tplt>(action)
 
 // TODO: This will change when action_warehouse is moved inside of some system
 #define addActionNameDependency(action, depends_on)       Moose::action_warehouse.addDependency(action, depends_on)
@@ -59,7 +58,7 @@ Action * buildAction(const std::string & name, InputParameters parameters)
 }
 
 /**
- * Specialized factory for generaric Action System objects
+ * Specialized factory for generic Action System objects
  */
 class ActionFactory
 {
@@ -80,33 +79,28 @@ public:
     build_info._unique_id = _unique_id++;
     _name_to_build_info.insert(std::make_pair(name, build_info));
     
-    //_name_to_build_pointer.insert(std::make_pair(name, &buildAction<T>));
-    //_name_to_params_pointer.insert(std::make_pair(name, &validParams<T>));
-    //_name_to_action_map.insert(std::make_pair(name, action_name));
     _action_to_name_map.insert(std::make_pair(action_name, name));
   }
 
-  template<typename T>
-  void regNonParsed(const std::string & action_name)
-  {
-    std::ostringstream name;
+//   // TODO: This will go away
+//   template<typename T>
+//   void regNonParsed(const std::string & action_name)
+//   {
+//     std::ostringstream name;
 
-    name << action_name << "_";
-    name.width(2);
-    name.fill('0');
-    name << _unique_id;
+//     name << action_name << "_";
+//     name.width(2);
+//     name.fill('0');
+//     name << _unique_id;
 
-    _non_parsed.insert(name.str());
-    reg<T>(name.str(), action_name);
-  }
+//     _non_parsed.insert(name.str());
+//     reg<T>(name.str(), action_name);
+//   }
   
-  Action * create(const std::string & name, InputParameters params);
-  Action * createNonParsed(const std::string & name, InputParameters params);
+  Action * create(const std::string & action, InputParameters params);
+//  Action * createNonParsed(const std::string & action, InputParameters params);
 
   InputParameters getValidParams(const std::string & name);
-  std::vector<InputParameters> getAllValidParams(const std::string & name);
-
-  std::string isRegistered(const std::string & real_id, bool * is_parent = NULL);
 
   /**
    * This method will build all Actions associated with the passed action_name
@@ -140,17 +134,13 @@ public:
   bool isParsed(const std::string & name) const;
   
   std::multimap<std::string, BuildInfo> _name_to_build_info;
-//  std::multimap<std::string, buildActionPtr>  _name_to_build_pointer;
-//  std::multimap<std::string, paramsActionPtr> _name_to_params_pointer;
-//  std::multimap<std::string, std::string> _name_to_action_map;
   
   std::set<std::string> _non_parsed;
   std::multimap<std::string, std::string> _action_to_name_map;
 
   std::vector<std::string> _registered_parser_block_names;
-//  std::vector<Action *> _active_parser_blocks;
 
-  
+  // TODO: I don't think we need this anymore
   static unsigned int _unique_id;        ///< Unique ID for identifing multiple registrations
   
   static ActionFactory *_instance;       ///< Pointer to the singleton instance

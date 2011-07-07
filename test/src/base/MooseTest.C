@@ -2,6 +2,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "Parser.h"
 
 #include "CoupledConvection.h"
 #include "ForcingFn.h"
@@ -111,7 +112,7 @@ void registerObjects()
   registerObject(StatefulSpatialTest);
   registerMaterial(CoupledMaterial);
 
-  registerAction(ConvDiffMetaAction, "ConvectionDiffusion", "meta_action");
+  registerAction(ConvDiffMetaAction, "meta_action");
 }
 
 } // namespace

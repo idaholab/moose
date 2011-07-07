@@ -365,62 +365,56 @@ addActionTypes()
 void
 registerActions()
 {
-  registerAction(CreateMeshAction, "Mesh/Generation", "create_mesh");
-  registerAction(ReadMeshAction, "Mesh", "read_mesh");  
-  registerAction(SetupMeshAction, "Mesh", "setup_mesh");
-  registerAction(AddExtraNodesetAction, "Mesh/ExtraNodesets/*", "add_extra_nodeset");
+  registerAction(CreateMeshAction, "create_mesh");
+  registerAction(ReadMeshAction, "read_mesh");  
+  registerAction(SetupMeshAction, "setup_mesh");
+  registerAction(AddExtraNodesetAction, "add_extra_nodeset");
   
-  registerAction(AddFunctionAction, "Functions/*", "add_function");
-  registerAction(CreateExecutionerAction, "Executioner", "setup_executioner");
-  registerAction(SetupOutputAction, "Output", "setup_output");
-  registerAction(GlobalParamsAction, "GlobalParams", "set_global_params");
+  registerAction(AddFunctionAction, "add_function");
+  registerAction(CreateExecutionerAction, "setup_executioner");
+  registerAction(SetupOutputAction, "setup_output");
+  registerAction(GlobalParamsAction, "set_global_params");
 
   /// MooseObjectActions
-  registerAction(AddMeshModifierAction, "Mesh/Modifier/*", "add_mesh_modifier");
+  registerAction(AddMeshModifierAction, "add_mesh_modifier");
 
   /// Variable/AuxVariable Actions
-  registerAction(AddVariableAction, "Variables/*", "add_variable");
-  registerAction(CopyNodalVarsAction, "Variables/*", "copy_nodal_vars");
-  registerAction(AddVariableAction, "AuxVariables/*", "add_aux_variable");
-  registerAction(CopyNodalVarsAction, "AuxVariables/*", "copy_nodal_aux_vars");
-
-  registerAction(AddICAction, "Variables/*/InitialCondition", "add_ic");
-  registerAction(AddICAction, "AuxVariables/*/InitialCondition", "add_ic");
-  registerAction(AddKernelAction, "Kernels/*", "add_kernel");
-  registerAction(AddKernelAction, "AuxKernels/*", "add_aux_kernel");
-  registerAction(AddBCAction, "BCs/*", "add_bc");
-  registerAction(EmptyAction, "BCs/Periodic", "no_action");  // placeholder
-  registerAction(AddPeriodicBCAction, "BCs/Periodic/*", "add_periodic_bc");
-  registerAction(AddBCAction, "AuxBCs/*", "add_aux_bc");
-  registerAction(AddMaterialAction, "Materials/*", "add_material");
-  registerAction(AddPostprocessorAction, "Postprocessors/*", "add_postprocessor");
-  registerAction(EmptyAction, "Postprocessors/Residual", "no_action");   // placeholder
-  registerAction(EmptyAction, "Postprocessors/Jacobian", "no_action");   // placeholder
-  registerAction(EmptyAction, "Postprocessors/NewtonIter", "no_action"); // placeholder
-  registerAction(AddPostprocessorAction, "Postprocessors/Residual/*", "add_postprocessor");
-  registerAction(AddPostprocessorAction, "Postprocessors/Jacobian/*", "add_postprocessor");
-  registerAction(AddPostprocessorAction, "Postprocessors/NewtonIter/*", "add_postprocessor");
-  registerAction(AddDamperAction, "Dampers/*", "add_damper");
-  registerAction(AddStabilizerAction, "Stabilizers/*", "add_stabilizer");
-  registerAction(SetupPBPAction, "Preconditioning/PBP", "add_preconditioning");
-  registerAction(SetupSMPAction, "Preconditioning/SMP", "add_preconditioning");
-  registerAction(SetupFiniteDifferencePreconditionerAction, "Preconditioning/FDP", "add_preconditioning");
-  registerAction(SetupQuadratureAction, "Executioner/Quadrature", "setup_quadrature");
+  registerAction(AddVariableAction, "add_variable");
+  registerAction(CopyNodalVarsAction, "copy_nodal_vars");
+  registerAction(AddVariableAction, "add_aux_variable");
+  registerAction(CopyNodalVarsAction, "copy_nodal_aux_vars");
+  
+  registerAction(AddICAction, "add_ic");
+  registerAction(AddKernelAction, "add_kernel");
+  registerAction(AddKernelAction, "add_aux_kernel");
+  registerAction(AddBCAction, "add_bc");
+  registerAction(EmptyAction, "no_action");  // placeholder
+  registerAction(AddPeriodicBCAction, "add_periodic_bc");
+  registerAction(AddBCAction, "add_aux_bc");
+  registerAction(AddMaterialAction, "add_material");
+  registerAction(AddPostprocessorAction, "add_postprocessor");
+  registerAction(AddDamperAction, "add_damper");
+  registerAction(AddStabilizerAction, "add_stabilizer");
+  registerAction(SetupPBPAction, "add_preconditioning");
+  registerAction(SetupSMPAction, "add_preconditioning");
+  registerAction(SetupFiniteDifferencePreconditionerAction, "add_preconditioning");
+  registerAction(SetupQuadratureAction, "setup_quadrature");
 
 #ifdef LIBMESH_ENABLE_AMR
-  registerAction(AdaptivityAction, "Executioner/Adaptivity", "setup_adaptivity");
+  registerAction(AdaptivityAction, "setup_adaptivity");
 #endif
 
-  registerAction(AddDiracKernelAction, "DiracKernels/*", "add_dirac_kernel");
+  registerAction(AddDiracKernelAction, "add_dirac_kernel");
 
   // NonParsedActions
-  registerNonParsedAction(SetupDampersAction, "setup_dampers");
-  registerNonParsedAction(EmptyAction, "ready_to_init");
-  registerNonParsedAction(InitProblemAction, "init_problem");
-  registerNonParsedAction(CheckIntegrityAction, "check_integrity");
+  registerAction(SetupDampersAction, "setup_dampers");
+  registerAction(EmptyAction, "ready_to_init");
+  registerAction(InitProblemAction, "init_problem");
+  registerAction(CheckIntegrityAction, "check_integrity");
 
+  // TODO: Why is this here?
   registerActionName("finish_input_file_output", false);
-  registerNonParsedAction(EmptyAction, "finish_input_file_output");
+  registerAction(EmptyAction, "finish_input_file_output");
 }
 
 void

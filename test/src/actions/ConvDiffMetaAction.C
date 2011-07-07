@@ -41,7 +41,7 @@ ConvDiffMetaAction::act()
   
   std::vector<std::string> variables = getParam<std::vector<std::string> > ("variables");
 
-  std::cerr << "Acting on " << getParam<std::string>("built_by_action") << "\n\n";
+//  std::cerr << "Acting on " << getParam<std::string>("built_by_action") << "\n\n";
   
   /**
    * We need to manually setup our Convection-Diffusion and Diffusion variables on our two
@@ -55,31 +55,34 @@ ConvDiffMetaAction::act()
   //*******************************************//
   //**************** Variables ****************//
   //*******************************************//  
-  std::vector<InputParameters> variable_params = ActionFactory::instance()->getAllValidParams("Variables/*");
+  InputParameters variable_params = ActionFactory::instance()->getValidParams("AddVariableAction");
 
-  for (unsigned int i=0; i<variable_params.size(); ++i)
-  {
-    variable_params[i].set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
+//  for (unsigned int i=0; i<variable_params.size(); ++i)
+//  {
+  variable_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
 
-    // Creat and Add First Variable Action
-    action = ActionFactory::instance()->create("Variables/" + variables[0], variable_params[i]);
-    Moose::action_warehouse.addActionBlock(action);
+  // Creat and Add First Variable Action
+  variable_params.set<std::string>("name") = "Variables/" + variables[0];
+  action = ActionFactory::instance()->create("AddVariableAction", variable_params);
+  Moose::action_warehouse.addActionBlock(action);
   
     // Create and Add Second Variable Action
-    action = ActionFactory::instance()->create("Variables/" + variables[1], variable_params[i]);
-    Moose::action_warehouse.addActionBlock(action);
-  }
-  
+  variable_params.set<std::string>("name") = "Variables/" + variables[1];
+  action = ActionFactory::instance()->create("AddVariableAction", variable_params);
+  Moose::action_warehouse.addActionBlock(action);
+//  }
+
 
   //*******************************************//
   //**************** Kernels ******************//
   //*******************************************//
-  InputParameters action_params = ActionFactory::instance()->getValidParams("Kernels/*");
+  InputParameters action_params = ActionFactory::instance()->getValidParams("AddKernelAction");
   action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
 
   // Setup our Diffusion Kernel on the "u" variable
   action_params.set<std::string>("type") = "Diffusion";
-  action = ActionFactory::instance()->create("Kernels/diff_u", action_params);
+  action_params.set<std::string>("name") = "Kernels/diff_u";
+  action = ActionFactory::instance()->create("AddKernelAction", action_params);
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
@@ -90,7 +93,9 @@ ConvDiffMetaAction::act()
   }
 
   // Setup our Diffusion Kernel on the "v" variable
-  action = ActionFactory::instance()->create("Kernels/diff_v", action_params);
+  action_params.set<std::string>("name") = "Kernels/diff_v";
+  action = ActionFactory::instance()->create("AddKernelAction", action_params);
+
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
@@ -102,7 +107,8 @@ ConvDiffMetaAction::act()
 
   // Setup our Convection Kernel on the "u" variable coupled to the diffusion variable "v"
   action_params.set<std::string>("type") = "Convection";
-  action = ActionFactory::instance()->create("Kernels/conv_u", action_params);
+  action_params.set<std::string>("name") = "Kernels/diff_u";
+  action = ActionFactory::instance()->create("AddKernelAction", action_params);
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
@@ -119,4 +125,3 @@ ConvDiffMetaAction::act()
   Moose::action_warehouse.addActionBlock(action);
 
 }
-

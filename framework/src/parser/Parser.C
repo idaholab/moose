@@ -80,7 +80,7 @@ Parser::Parser():
   }
   else
     printUsage();
-
+  
   Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
 }
 
@@ -89,6 +89,80 @@ Parser::~Parser()
   delete _exreader;
   if (_syntax_formatter)
     delete _syntax_formatter;
+}
+
+void
+Parser::registerActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name)
+{
+
+  ActionInfo action_info;
+  action_info._action = action;
+  action_info._action_name = action_name;
+  
+  _associated_actions.insert(std::make_pair(syntax, action_info));
+}
+
+std::string
+Parser::isAssociated(const std::string & real_id, bool * is_parent)
+{
+  /**
+   * This implementation assumes that wildcards can occur in the place of an entire token but not as part
+   * of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial* /InitialConditions'.
+   * Since maps are ordered, a reverse traversal through the registered list will always select a more
+   * specific match before a wildcard match ('*' == char(42))
+   */
+  bool local_is_parent;
+  if (is_parent == NULL)
+    is_parent = &local_is_parent;  // Just so we don't have to keep checking below when we want to set the value
+
+  std::multimap<std::string, ActionInfo>::reverse_iterator it;
+  std::vector<std::string> real_elements, reg_elements;
+  std::string return_value;
+
+  tokenize(real_id, real_elements);
+
+  *is_parent = false;
+  for (it=_associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
+  {
+    std::string reg_id = it->first;
+    if (reg_id == real_id)
+    {
+      *is_parent = false;
+      return reg_id;
+    }
+
+    reg_elements.clear();
+    tokenize(reg_id, reg_elements);
+    if (real_elements.size() <= reg_elements.size())
+    {
+      bool keep_going = true;
+      for (unsigned int j=0; keep_going && j<real_elements.size(); ++j)
+      {
+        if (real_elements[j] != reg_elements[j] && reg_elements[j] != std::string("*"))
+          keep_going = false;
+      }
+      if (keep_going)
+      {
+        if (real_elements.size() < reg_elements.size() && !*is_parent)
+        {
+          // We found a parent, the longest parent in fact but we need to keep
+          // looking to make sure that the real thing isn't registered
+          *is_parent = true;
+          return_value = reg_id;
+        }
+        else if (real_elements.size() == reg_elements.size())
+        {
+          *is_parent = false;
+          return reg_id;
+        }
+      }
+    }
+  }
+
+  if (*is_parent)
+    return return_value;
+  else
+    return std::string("");
 }
 
 void
@@ -171,7 +245,7 @@ Parser::isSectionActive(const std::string & s,
   // If this section is not active - then keep track of it for future checks
   if (!retValue)
     _inactive_strings.insert(s + "/");
-
+  
   return retValue;
 }
 
@@ -196,6 +270,7 @@ Parser::parse(const std::string &input_filename)
   std::map<std::string, std::vector<std::string> > active_lists;
   std::vector<std::string> section_names;
   InputParameters active_list_params = validParams<Action>();
+  InputParameters params = validParams<EmptyAction>();
 
   // Build Command Line Vars Vector
   buildCommandLineVarsVector();
@@ -215,46 +290,63 @@ Parser::parse(const std::string &input_filename)
 
   for (std::vector<std::string>::iterator i=section_names.begin(); i != section_names.end(); ++i)
   {
-    curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
+    curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash) 
     
     // Extract the block parameters before constructing the action
     // There may be more than one Action registered for a given section in which case we need to
     // build them all
-    std::vector<InputParameters> all_params = ActionFactory::instance()->getAllValidParams(*i);
+    bool is_parent;
+    std::string registered_identifier = isAssociated(*i, &is_parent);
 
-    // Before we build any objects we need to make sure that the section they are in is active
-    // and that they aren't an unregistered parent (signified by an empty parameters vector)
-    if (isSectionActive(curr_identifier, active_lists) && !all_params.empty())
+    // We need to retrieve a list of Actions associated with the current identifier
+    std::pair<std::multimap<std::string, ActionInfo>::iterator, std::multimap<std::string, ActionInfo>::iterator>
+      iters = _associated_actions.equal_range(registered_identifier);
+
+    if (iters.first == iters.second)
+      mooseError(std::string("A '") + curr_identifier + "' is not an associated Action\n\n");
+    
+    for (std::multimap<std::string, ActionInfo>::iterator i = iters.first; i != iters.second; ++i)
     {
-      for (std::vector<InputParameters>::iterator it = all_params.begin(); it != all_params.end(); ++it)
+      if (!is_parent)
       {
-        InputParameters params = *it;
-        params.set<Parser *>("parser_handle") = this;
+        params = ActionFactory::instance()->getValidParams(i->second._action);
+
+        // Before we build any objects we need to make sure that the section they are in is active
+        if (isSectionActive(curr_identifier, active_lists))
+        {
+          params.set<Parser *>("parser_handle") = this;
     
-        extractParams(curr_identifier, params);
+          extractParams(curr_identifier, params);
 
-        // Check Action Parameters Now
-        checkParams(curr_identifier, params);
+          // Check Action Parameters Now
+          checkParams(curr_identifier, params);
 
-        // Create the Action
-        Action * action = ActionFactory::instance()->create(curr_identifier, params);
+          // Add the parsed syntax to the parameters object for consumption by the Action
+          params.set<std::string>("name") = curr_identifier;
+          params.set<std::string>("build_by_action") = i->second._action_name;
+          params.set<std::string>("action") = i->second._action_name;
 
-        // extract the MooseObject params if necessary
-        MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-        if (moose_object_action)
-          extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
+          // Create the Action
+          Action * action = ActionFactory::instance()->create(i->second._action, params);
+          mooseAssert (action != NULL, std::string("Action") + i->second._action + " not created");
+
+          // extract the MooseObject params if necessary
+          MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+          if (moose_object_action)
+            extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
     
-        // add it to the warehouse
-        Moose::action_warehouse.addActionBlock(action);
+          // add it to the warehouse
+          Moose::action_warehouse.addActionBlock(action);
+        }
       }
     }
-
+    
     // Extract and save the current "active" list in the datastructure
     active_list_params.set<std::vector<std::string> >("active") = all;
     extractParams(curr_identifier, active_list_params);
     active_lists[curr_identifier] = active_list_params.get<std::vector<std::string> >("active");
   }
-
+  
   // Check to make sure that all sections in the input file that are explicitly listed are actually present
   checkActiveUsed(section_names, active_lists);
 
@@ -337,11 +429,13 @@ Parser::buildFullTree()
 
   for (std::vector<std::pair<std::string, std::string> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
   {
-    std::vector<InputParameters> all_action_params = ActionFactory::instance()->getAllValidParams(act_names->first);
+    std::string action;
+    
+    InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_names->first);
 
-    for (std::vector<InputParameters>::iterator it = all_action_params.begin(); it != all_action_params.end(); ++it)
-    {
-      InputParameters action_obj_params = *it;
+//    for (std::vector<InputParameters>::iterator it = all_action_params.begin(); it != all_action_params.end(); ++it)
+//    {
+//      InputParameters action_obj_params = *it;
       const std::string & action_name = act_names->second;
       std::string act_name = act_names->first;
       
@@ -394,7 +488,7 @@ Parser::buildFullTree()
         prev_name = act_name;
       }
 
-    }
+//    }
   }
   params_ptrs[0] = NULL;
   params_ptrs[1] = NULL;

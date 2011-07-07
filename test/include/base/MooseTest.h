@@ -1,11 +1,14 @@
-#ifndef MOOSE_TEST_H_
-#define MOOSE_TEST_H_
+#ifndef MOOSETEST_H
+#define MOOSETEST_H
+
+//Forward Declaration
+class Parser;
 
 namespace MooseTest
 {
+void registerObjects();
 
-  void registerObjects();
-
+void associateSyntax(Parser & p);
 }
 
-#endif /* MOOSE_TEST_H_ */
+#endif /* MOOSETEST_H */

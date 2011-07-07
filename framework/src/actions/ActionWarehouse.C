@@ -109,9 +109,9 @@ ActionWarehouse::printInputFile(std::ostream & out)
   // everything will get closed off without any odd tail calls.  Had to do delayed construction
   if (_empty_action == NULL)
   { 
-    InputParameters pars = validParams<EmptyAction>();
+    InputParameters pars = ActionFactory::instance()->getValidParams("EmptyAction");
     // no memory leak here, this action gets deleted in Actionfactory
-    _empty_action = ActionFactory::instance()->create("", pars);
+    _empty_action = ActionFactory::instance()->create("EmptyAction", pars);
   }
   _ordered_actions.push_back(_empty_action);
 
@@ -188,17 +188,9 @@ ActionWarehouse::printActionDependencySets()
     std::cout << ")\n";
     
     for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
-    {
-      // Check to see if this action_name is required and there are no blocks
-      // to satisfy it
-//      if (_registered_actions[*j] && _action_blocks[*j].size() == 0)
-        // See if the factory has any Actions it can build on the fly to satisfy this action_name
-//        if (!ActionFactory::instance()->buildAllBuildableActions(*j, p_ptr))
-//          unsatisfied_dependencies.insert(*j);
-      
+    {      
       for (std::vector<Action *>::const_iterator k = _action_blocks[*j].begin(); k != _action_blocks[*j].end(); ++k)
         std::cout << "\t" << (*k)->getAction() << "\n";
-
     }
   }
 }

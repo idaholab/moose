@@ -39,6 +39,10 @@ public:
 
   virtual ~Parser();
 
+  // Registration function for associating Moose Actions with syntax
+  void registerActionSyntax(const std::string & action, const std::string & syntax,
+                            const std::string & action_name = "");
+  
   /**
    * Determines whether a particular block is marked as active
    * in the input file
@@ -170,6 +174,11 @@ private:
    * Use MOOSE Factories to construct a full parse tree for documentation or echoing input. 
    */
   void buildFullTree();
+
+  /**
+   * Method for determining whether a piece of syntax is associated with an Action
+   */
+  std::string isAssociated(const std::string & real_id, bool * is_parent);
   
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
@@ -203,6 +212,12 @@ private:
     bool required;
   };
 
+  struct ActionInfo
+  {
+    std::string _action;
+    std::string _action_name;
+  };
+  
   SyntaxFormatterInterface * _syntax_formatter;
   
   std::map<std::string, CLIOption> _cli_options;
@@ -213,6 +228,11 @@ private:
   std::set<std::string> _command_line_vars;
   bool _getpot_initialized;
   GetPot _getpot_file;
+
+  /**
+   * Actions/Syntax association
+   */
+  std::multimap<std::string, ActionInfo> _associated_actions;
 };
 
 #endif //PARSER_H

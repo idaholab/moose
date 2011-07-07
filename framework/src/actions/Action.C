@@ -30,7 +30,6 @@ InputParameters validParams<Action>()
   return params;
 }
 
-
 Action::Action(const std::string & name, InputParameters params) :
     _name(name),
     _pars(params),

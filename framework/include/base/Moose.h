@@ -35,7 +35,7 @@ typedef Real                     PostprocessorValue;
 #define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; libmesh_error(); } while(0)
 #endif
 
-#ifdef NDEBUG
+#ifdef DEBUG
 #define mooseAssert(asserted, msg)
 #else
 #define mooseAssert(asserted, msg)  do { if (!(asserted)) { std::cerr << "\n\nAssertion `" #asserted "' failed\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << std::endl; libmesh_error(); } } while(0)
