@@ -272,7 +272,7 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 
   PetscNonlinearSolver<Number> & petsc_nonlinear_solver =
     dynamic_cast<PetscNonlinearSolver<Number>&>(*_sys.nonlinear_solver);
-    
+
   // Pointer to underlying PetscMatrix type
   PetscMatrix<Number>* petsc_mat =
     dynamic_cast<PetscMatrix<Number>*>(_sys.matrix);
@@ -282,17 +282,17 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
                           _sys);
 
   petsc_mat->close();
-    
+
   if (!petsc_mat)
   {
     std::cerr << "Could not convert to Petsc matrix." << std::endl;
     libmesh_error();
   }
-    
+
   PetscErrorCode ierr=0;
   ISColoring iscoloring;
   MatFDColoring fdcoloring;
-    
+
   ierr = MatGetColoring(petsc_mat->mat(), MATCOLORING_LF, &iscoloring);
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
@@ -786,7 +786,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       GeometricSearchData & geom_search_data = _mproblem.geomSearchData();
       std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
       unsigned int n_vars = _sys.n_vars();
-    
+
       for(std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator it = nearest_node_locators.begin();
           it != nearest_node_locators.end();
           ++it)
@@ -801,15 +801,15 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
           for(unsigned int j=0; j<n_vars; j++)
             slave_dof_indices[j] = _mesh.node(slave_node).dof_number(_sys.number(), j, 0);
-        
+
           std::vector<unsigned int> master_nodes = it->second->_neighbor_nodes[slave_node];
 
           for(unsigned int k=0; k<master_nodes.size(); k++)
           {
             unsigned int master_node = master_nodes[k];
-          
+
             std::vector<unsigned int> master_dof_indices(n_vars);
-          
+
             for(unsigned int j=0; j<n_vars; j++)
               master_dof_indices[j] = _mesh.node(master_node).dof_number(_sys.number(), j, 0);
 
@@ -820,10 +820,10 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
                 jacobian.set(slave_dof_indices[l], master_dof_indices[m], 0);
                 jacobian.set(master_dof_indices[m], slave_dof_indices[l], 0);
               }
-            }    
+            }
           }
         }
-      } 
+      }
     }
 
     if(_mproblem.getDisplacedProblem())
@@ -831,7 +831,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       GeometricSearchData & geom_search_data = _mproblem.getDisplacedProblem()->geomSearchData();
       std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
       unsigned int n_vars = _sys.n_vars();
-    
+
       for(std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator it = nearest_node_locators.begin();
           it != nearest_node_locators.end();
           ++it)
@@ -846,15 +846,15 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
           for(unsigned int j=0; j<n_vars; j++)
             slave_dof_indices[j] = _mesh.node(slave_node).dof_number(_sys.number(), j, 0);
-        
+
           std::vector<unsigned int> master_nodes = it->second->_neighbor_nodes[slave_node];
 
           for(unsigned int k=0; k<master_nodes.size(); k++)
           {
             unsigned int master_node = master_nodes[k];
-          
+
             std::vector<unsigned int> master_dof_indices(n_vars);
-          
+
             for(unsigned int j=0; j<n_vars; j++)
               master_dof_indices[j] = _mesh.node(master_node).dof_number(_sys.number(), j, 0);
 
@@ -865,10 +865,10 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
                 jacobian.set(slave_dof_indices[l], master_dof_indices[m], 0);
                 jacobian.set(master_dof_indices[m], slave_dof_indices[l], 0);
               }
-            }    
+            }
           }
         }
-      } 
+      }
     }
   }
 
