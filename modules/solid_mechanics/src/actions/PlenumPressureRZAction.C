@@ -11,4 +11,5 @@ PlenumPressureRZAction::PlenumPressureRZAction(const std::string & name, InputPa
   PlenumPressureAction(name, params)
 {
   _kernel_name = "PlenumPressureRZ";
+  _use_displaced_mesh = false;
 }

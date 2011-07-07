@@ -14,11 +14,10 @@ InputParameters validParams<StressDivergenceRZ>()
 
   // The material portion of the RZ formulation is based on original geometry.
   // Nonlinear effects are included through additional terms in the strain
-  // calculation.  The use of the displaced mesh in the divergence ensures that the
-  // conversion from stress to internal force occurs according to the current
-  // geomentry.  This is important since pressure, for instance, is also computed
-  // using current geometry.
-  params.set<bool>("use_displaced_mesh") = true;
+  // calculation.
+  // The pressure uses original geometry in RZ as well.
+  // Hence, we do not set the following to true.
+//   params.set<bool>("use_displaced_mesh") = true;
 
   return params;
 }

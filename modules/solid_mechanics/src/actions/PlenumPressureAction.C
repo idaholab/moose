@@ -42,7 +42,8 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
   _output_initial_moles(getParam<std::string>("output_initial_moles")),
   _output(getParam<std::string>("output")),
 
-  _kernel_name("PlenumPressure")
+  _kernel_name("PlenumPressure"),
+  _use_displaced_mesh(true)
 {
 }
 
@@ -92,7 +93,7 @@ PlenumPressureAction::act()
     params.set<std::string>("output_initial_moles") = _output_initial_moles;
     params.set<std::string>("output") = _output;
 
-    params.set<bool>("use_displaced_mesh") = true;
+    params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
     params.set<int>("component") = i;
     params.set<std::string>("variable") = vars[i];

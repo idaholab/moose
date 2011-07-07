@@ -67,6 +67,7 @@ GapHeatTransfer::computeQpResidual()
 //               << std::endl;
 //   }
 
+
   return _test[_i][_qp]*grad_t;
 }
 
@@ -145,7 +146,7 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
     const Real dgap = dgapLength( -normal(coupled_component) );
     dRdx = -(_u[_qp]-_gap_temp[_qp])*gapK()/(gapL*gapL) * dgap;
   }
-  return dRdx * _test[_i][_qp];
+  return _test[_i][_qp] * dRdx * _phi[_j][_qp];
 }
 
 

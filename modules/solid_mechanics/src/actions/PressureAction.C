@@ -27,7 +27,8 @@ PressureAction::PressureAction(const std::string & name, InputParameters params)
   _disp_z(getParam<std::string>("disp_z")),
   _factor(getParam<Real>("factor")),
   _function(getParam<std::string>("function")),
-  _kernel_name("Pressure")
+  _kernel_name("Pressure"),
+  _use_displaced_mesh(true)
 {
 }
 
@@ -70,7 +71,7 @@ PressureAction::act()
     params.set<Real>("factor") = _factor;
     params.set<std::string>("function") = _function;
 
-    params.set<bool>("use_displaced_mesh") = true;
+    params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
     params.set<int>("component") = i;
     params.set<std::string>("variable") = vars[i];

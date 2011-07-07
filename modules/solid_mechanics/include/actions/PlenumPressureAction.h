@@ -31,6 +31,7 @@ private:
 
 protected:
   std::string _kernel_name;
+  bool _use_displaced_mesh;
 };
 
 

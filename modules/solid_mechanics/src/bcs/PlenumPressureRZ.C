@@ -4,6 +4,7 @@ template<>
 InputParameters validParams<PlenumPressureRZ>()
 {
   InputParameters params = validParams<PlenumPressure>();
+  params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
 

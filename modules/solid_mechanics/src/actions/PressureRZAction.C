@@ -11,4 +11,5 @@ PressureRZAction::PressureRZAction(const std::string & name, InputParameters par
   PressureAction(name, params)
 {
   _kernel_name = "PressureRZ";
+  _use_displaced_mesh = false;
 }
