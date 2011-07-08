@@ -21,6 +21,7 @@
   active = 'PBP'
 
   [./PBP]
+    type = PBP
     solve_order = 'diffused forced'
     preconditioner  = 'LU LU'
     off_diag_row    = 'forced'

@@ -65,9 +65,9 @@ void associateSyntax(Parser & p)
   p.registerActionSyntax("AddPostprocessorAction", "Postprocessors/NewtonIter/*");
   p.registerActionSyntax("AddDamperAction", "Dampers/*");
   p.registerActionSyntax("AddStabilizerAction", "Stabilizers/*");
-  p.registerActionSyntax("SetupPBPAction", "Preconditioning/PBP");
-  p.registerActionSyntax("SetupSMPAction", "Preconditioning/SMP");
-  p.registerActionSyntax("SetupFiniteDifferencePreconditionerAction", "Preconditioning/FDP");
+
+  // Note: Preconditioner Actions will be built by this setup action
+  p.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");
   p.registerActionSyntax("SetupQuadratureAction", "Executioner/Quadrature");
 
 #ifdef LIBMESH_ENABLE_AMR

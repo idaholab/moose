@@ -23,7 +23,7 @@
 template<>
 InputParameters validParams<SetupSMPAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<SetupPreconditionerAction>();
   params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same possition in off_diag_colum.");
   params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same possition in off_diag_row.");
   params.addParam<bool>("full", false, "Set to true if you want the full set of couplings.  Simply for convenience so you don't have to set every off_diag_row and off_diag_column combination.");
@@ -32,7 +32,7 @@ return params;
 }
 
 SetupSMPAction::SetupSMPAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+    SetupPreconditionerAction(name, params)
 {
 }
 

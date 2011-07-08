@@ -81,6 +81,11 @@ InputParameters::operator+=(const InputParameters &rhs)
       ++it)
     this->_coupled_vars.insert(*it);
 
+  for(std::set<std::string>::const_iterator it = rhs._seen_in_input.begin();
+      it!=rhs._seen_in_input.end();
+      ++it)
+    this->_seen_in_input.insert(*it);
+
   return *this;
 }
 

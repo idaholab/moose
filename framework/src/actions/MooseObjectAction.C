@@ -26,7 +26,12 @@ InputParameters validParams<MooseObjectAction>()
 MooseObjectAction::MooseObjectAction(const std::string & name, InputParameters params) :
     Action(name, params),
     _type(getParam<std::string>("type")),
-    _moose_object_pars(Factory::instance()->getValidParams(_type))
+
+    // We will create a second parameters object from the main factory unless instructed otherwise
+    _moose_object_pars(!params.have_parameter<bool>("skip_param_construction") ||
+                       (params.have_parameter<bool>("skip_param_construction") &&
+                        !params.get<bool>("skip_param_construction"))
+                       ? Factory::instance()->getValidParams(_type) : validParams<MooseObject>())
 {
 }
 

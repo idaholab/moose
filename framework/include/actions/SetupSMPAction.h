@@ -15,7 +15,7 @@
 #ifndef SETUPSMPACTION_H
 #define SETUPSMPACTION_H
 
-#include "Action.h"
+#include "SetupPreconditionerAction.h"
 
 class SetupSMPAction;
 
@@ -26,7 +26,7 @@ InputParameters validParams<SetupSMPAction>();
  * Action to setup single matrix Jacobian (or Jacobian approximate)
  *
  */
-class SetupSMPAction: public Action
+class SetupSMPAction: public SetupPreconditionerAction
 {
 public:
   SetupSMPAction(const std::string & name, InputParameters params);

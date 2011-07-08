@@ -25,7 +25,7 @@
 template<>
 InputParameters validParams<SetupPBPAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<SetupPreconditionerAction>();
   params.addRequiredParam<std::vector<std::string> >("solve_order", "TODO: docstring");
   params.addRequiredParam<std::vector<std::string> >("preconditioner", "TODO: docstring");
   
@@ -35,7 +35,7 @@ InputParameters validParams<SetupPBPAction>()
 }
 
 SetupPBPAction::SetupPBPAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+    SetupPreconditionerAction(name, params)
 {}
 
 void

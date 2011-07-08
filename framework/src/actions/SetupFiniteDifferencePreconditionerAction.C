@@ -23,7 +23,7 @@
 template<>
 InputParameters validParams<SetupFiniteDifferencePreconditionerAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<SetupPreconditionerAction>();
   // TODO: Make this work with the preconditioner being passed here
 //  params.addRequiredParam<std::string>("preconditioner", "The type of preconditioner you want to use ie: LU, ILU, AMG, etc.");
   
@@ -38,7 +38,7 @@ InputParameters validParams<SetupFiniteDifferencePreconditionerAction>()
 }
 
 SetupFiniteDifferencePreconditionerAction::SetupFiniteDifferencePreconditionerAction(const std::string & name, InputParameters params) :
-    Action(name, params)
+    SetupPreconditionerAction(name, params)
 {
 }
 

@@ -12,20 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPPBPACTION_H
-#define SETUPPBPACTION_H
+#ifndef SETUPPRECONDITIONERACTION_H
+#define SETUPPRECONDITIONERACTION_H
 
-#include "SetupPreconditionerAction.h"
+#include "InputParameters.h"
+#include "Moose.h"
+#include "MooseObjectAction.h"
 
-class SetupPBPAction: public SetupPreconditionerAction
+#include <string>
+
+class SetupPreconditionerAction : public MooseObjectAction
 {
 public:
-  SetupPBPAction(const std::string & name, InputParameters params);
+  SetupPreconditionerAction(const std::string & name, InputParameters params);
 
   virtual void act();
+  
+protected:
+  static unsigned int _count;
+  static std::map<std::string, std::string> _type_to_action;
 };
 
 template<>
-InputParameters validParams<SetupPBPAction>();
+InputParameters validParams<SetupPreconditionerAction>();
 
-#endif //SETUPPBPACTION_H
+#endif // SETUPPRECONDITIONERACTION_H

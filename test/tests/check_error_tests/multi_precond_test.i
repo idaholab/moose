@@ -3,6 +3,24 @@
 #  init_unif_refine = 6
 []
 
+[Preconditioning]
+  active = 'PBP FDP'
+
+  [./PBP]
+    type = PBP
+    solve_order = 'u v'
+    preconditioner  = 'LU LU'
+    off_diag_row    = 'v'
+    off_diag_column = 'u'
+  [../]
+
+  [./FDP]
+    type = FDP
+    off_diag_row    = 'v'
+    off_diag_column = 'u'
+  [../]
+[]
+
 [Variables]
   active = 'u v'
 
@@ -14,18 +32,6 @@
   [./v]
     order = FIRST
     family = LAGRANGE
-  [../]
-[]
-
-[Preconditioning]
-  active = 'PBP'
-
-  [./PBP]
-    type = PBP
-    solve_order = 'u v'
-    preconditioner  = 'LU LU'
-    off_diag_row    = 'v'
-    off_diag_column = 'u'
   [../]
 []
 
@@ -91,7 +97,7 @@
 []
 
 [Output]
-  file_base = out
+  file_base = pbp_out
   output_initial = true
   interval = 1
   exodus = true

@@ -15,7 +15,7 @@
 #ifndef SETUPFINITEDIFFERENCEPRECONDITIONERACTION_H
 #define SETUPFINITEDIFFERENCEPRECONDITIONERACTION_H
 
-#include "Action.h"
+#include "SetupPreconditionerAction.h"
 
 class SetupFiniteDifferencePreconditionerAction;
 
@@ -26,7 +26,7 @@ InputParameters validParams<SetupFiniteDifferencePreconditionerAction>();
  * Action to setup single matrix Jacobian (or Jacobian approximate)
  *
  */
-class SetupFiniteDifferencePreconditionerAction: public Action
+class SetupFiniteDifferencePreconditionerAction: public SetupPreconditionerAction
 {
 public:
   SetupFiniteDifferencePreconditionerAction(const std::string & name, InputParameters params);

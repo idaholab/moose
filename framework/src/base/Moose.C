@@ -131,11 +131,12 @@
 #include "SetupOutputAction.h"
 #include "AddMaterialAction.h"
 #include "GlobalParamsAction.h"
-#include "SetupPBPAction.h"
 #include "AdaptivityAction.h"
 #include "SetupDampersAction.h"
 #include "CheckIntegrityAction.h"
 #include "SetupQuadratureAction.h"
+#include "SetupPreconditionerAction.h"
+#include "SetupPBPAction.h"
 #include "SetupSMPAction.h"
 #include "SetupFiniteDifferencePreconditionerAction.h"
 
@@ -285,6 +286,7 @@ addActionTypes()
   registerActionName("add_damper", false);
   registerActionName("add_stabilizer", false);
   registerActionName("add_periodic_bc", false);
+  registerActionName("preconditioning_meta_action", false);
   registerActionName("add_preconditioning", false);
   registerActionName("setup_adaptivity", false);
   registerActionName("meta_action", false);
@@ -320,6 +322,7 @@ addActionTypes()
 "(setup_variable_complete)"
 "(setup_adaptivity)"
 "(add_ic, add_periodic_bc)"
+"(preconditioning_meta_action)"
 "(add_preconditioning)"
 "(ready_to_init)"
 "(setup_quadrature)"
@@ -395,6 +398,7 @@ registerActions()
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddDamperAction, "add_damper");
   registerAction(AddStabilizerAction, "add_stabilizer");
+  registerAction(SetupPreconditionerAction, "preconditioning_meta_action");
   registerAction(SetupPBPAction, "add_preconditioning");
   registerAction(SetupSMPAction, "add_preconditioning");
   registerAction(SetupFiniteDifferencePreconditionerAction, "add_preconditioning");

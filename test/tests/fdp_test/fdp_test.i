@@ -20,6 +20,7 @@
   active = 'FDP'
 
   [./FDP]
+    type = FDP
 #    full = true
     off_diag_row    = 'v'
     off_diag_column = 'u'
