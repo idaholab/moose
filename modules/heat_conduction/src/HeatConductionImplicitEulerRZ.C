@@ -24,3 +24,9 @@ HeatConductionImplicitEulerRZ::computeQpJacobian()
 {
   return 2 * M_PI * _q_point[_qp](0) * HeatConductionImplicitEuler::computeQpJacobian();
 }
+
+Real
+HeatConductionImplicitEulerRZ::computeQpOffDiagJacobian( unsigned jvar )
+{
+  return 2 * M_PI * _q_point[_qp](0) * HeatConductionImplicitEuler::computeQpOffDiagJacobian( jvar );
+}

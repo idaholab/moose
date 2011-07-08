@@ -22,3 +22,9 @@ NeumannRZ::computeQpJacobian()
 {
   return 2 * M_PI * _q_point[_qp](0) * NeumannBC::computeQpJacobian();
 }
+
+Real
+NeumannRZ::computeQpOffDiagJacobian( unsigned jvar )
+{
+  return 2 * M_PI * _q_point[_qp](0) * NeumannBC::computeQpOffDiagJacobian( jvar );
+}

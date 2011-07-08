@@ -23,3 +23,9 @@ ConvectiveFluxRZ::computeQpJacobian()
 {
   return 2 * M_PI * _q_point[_qp](0) * ConvectiveFluxBC::computeQpJacobian();
 }
+
+Real
+ConvectiveFluxRZ::computeQpOffDiagJacobian( unsigned jvar )
+{
+  return 2 * M_PI * _q_point[_qp](0) * ConvectiveFluxBC::computeQpOffDiagJacobian( jvar );
+}
