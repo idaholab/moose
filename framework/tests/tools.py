@@ -30,7 +30,7 @@ def runTests(argv, app_name):
 
 
 class TestHarness:
-  
+
   def __init__(self, argv, app_name):
     self.test_table = []
 
@@ -53,7 +53,7 @@ class TestHarness:
               (len(self.tests) == 0 or len([item for item in self.tests if re.match(item, file)]) == 1)):
 
             module_name = file[:-3]
-            saved_cwd = os.getcwd()  
+            saved_cwd = os.getcwd()
             sys.path.append(os.path.abspath(dirpath))
             os.chdir(dirpath)
 
@@ -65,11 +65,11 @@ class TestHarness:
             for test_name, test_opts in inspect.getmembers(module):
               if isinstance(test_opts, types.DictType) and self.test_match.search(test_name):
                 pp = pprint.PrettyPrinter()
-                
+
                 # insert default values where none provided
                 testname = module_name + '.' + test_name
                 test = DEFAULTS.copy()
-         
+
                 # Now update all the base level keys
                 test.update(test_opts)
                 test.update( { TEST_NAME : testname, TEST_DIR : test_dir } )
@@ -85,7 +85,7 @@ class TestHarness:
                   # RunParallel will call self.testOutputAndFinish when the test has completed running
                   # This method will block when the maximum allowed parallel processes are running
                   self.runner.run(test, execute)
-                                
+
             os.chdir(saved_cwd)
             sys.path.pop()
 
@@ -95,7 +95,10 @@ class TestHarness:
 
   # Create the command line string to run
   def createCommand(self, test):
-    return self.executable + ' -i ' + test[INPUT]
+    if test[PARALLEL] > 1:
+      return 'mpiexec -n ' + test[PARALLEL] + ' ' + self.executable + ' -i ' + test[INPUT]
+    else:
+      return self.executable + ' -i ' + test[INPUT]
 
   ## Delete old output files
   def prepareTest(self, test):
@@ -128,7 +131,7 @@ class TestHarness:
 
     return True
 
-  ## Finish the test by inspecting the raw output 
+  ## Finish the test by inspecting the raw output
   def testOutputAndFinish(self, test, retcode, output):
     reason = ''
 
@@ -172,7 +175,7 @@ class TestHarness:
             reason = 'CSVDIFF'
 
     if reason == '':
-      result = 'OK' 
+      result = 'OK'
     else:
       result = 'FAILED (%s)' % reason
     self.handleTestResult(test, output, result)
@@ -249,7 +252,7 @@ class TestHarness:
 
     # Initialize the parallel runner with how many tests to run in parallel
     self.runner = RunParallel(self, self.options.jobs)
-    
+
     ## Save executable-under-test name to self.executable
     method = ''
     if self.options.method:
