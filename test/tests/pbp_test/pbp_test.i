@@ -26,6 +26,7 @@
     preconditioner  = 'LU LU'
     off_diag_row    = 'v'
     off_diag_column = 'u'
+    petsc_options = '-ksp_monitor'  # Test petsc options in PBP block
   [../]
 []
 
@@ -87,7 +88,8 @@
   l_max_its = 1
   nl_max_its = 1
 
-  petsc_options = '-snes_mf'
+  # This is setup automatically in MOOSE (SetupPBPAction.C)
+  # petsc_options = '-snes_mf'	
 []
 
 [Output]

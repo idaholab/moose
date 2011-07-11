@@ -21,6 +21,12 @@
 
 #include <string>
 
+/**
+ * Preconditioners are not normal "Moose Objects" but we are going to inherit from the
+ * MooseObjectAction class to take advantage of the second set of parser filled parameters
+ * afforded by that class.  We will then build the right Preconditioner "Action" to
+ * setup the preconditioner using that second set of parameters
+ */
 class SetupPreconditionerAction : public MooseObjectAction
 {
 public:
@@ -31,6 +37,14 @@ public:
 protected:
   static unsigned int _count;
   static std::map<std::string, std::string> _type_to_action;
+
+  /**
+   * This parameter tells us whether or not this instance is actually of this type or
+   * not (one of its derived classes).  We do not need RTTI for this as this class is
+   * responsible for creating instances of its derived classes so we can keep track of
+   * it through a parameter.
+   */
+  bool _is_base_instance;
 };
 
 template<>

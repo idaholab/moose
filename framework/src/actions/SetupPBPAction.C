@@ -19,6 +19,7 @@
 #include "MProblem.h"
 #include "NonlinearSystem.h"
 #include "PhysicsBasedPreconditioner.h"
+#include "PetscSupport.h"
 
 #include "string_to_enum.h"
 
@@ -76,5 +77,12 @@ SetupPBPAction::act()
 
     precond->setSolveOrder(solve_order);
     nl.setPreconditioner(precond);
+
+    // If using Petsc, us the right petsc option
+#ifdef LIBMESH_HAVE_PETSC
+    std::vector<std::string> petsc_options(1), petsc_inames, petsc_values;
+    petsc_options[0] = "-snes_mf";  // SNES Matrix Free
+    Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
+#endif
   }
 }  

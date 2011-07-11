@@ -85,14 +85,7 @@ CreateExecutionerAction::act()
   petsc_inames = getParam<std::vector<std::string> >("petsc_options_iname");
   petsc_values = getParam<std::vector<std::string> >("petsc_options_value");
 
-  if (petsc_inames.size() != petsc_values.size())
-    mooseError("Petsc names and options from input file are not the same length");
-
-  for (unsigned int i=0; i<petsc_options.size(); ++i)
-    PetscOptionsSetValue(petsc_options[i].c_str(), PETSC_NULL);
-
-  for (unsigned int i=0; i<petsc_inames.size(); ++i)
-    PetscOptionsSetValue(petsc_inames[i].c_str(), petsc_values[i].c_str());
+  Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
 #endif //LIBMESH_HAVE_PETSC
 
   _moose_object_pars.set<MooseMesh *>("_mesh") = _parser_handle._mesh;
