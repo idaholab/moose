@@ -69,11 +69,11 @@ StressDivergenceRZ::computeQpResidual()
 Real
 StressDivergenceRZ::computeQpJacobian()
 {
-  return computeJacobian( _component, _component );
+  return calculateJacobian( _component, _component );
 }
 
 Real
-StressDivergenceRZ::computeJacobian( unsigned int ivar, unsigned int jvar )
+StressDivergenceRZ::calculateJacobian( unsigned int ivar, unsigned int jvar )
 {
   SymmTensor test, phi;
   if (ivar == 0)
@@ -111,11 +111,11 @@ StressDivergenceRZ::computeQpOffDiagJacobian(unsigned int jvar)
 
   if ( _rdisp_coupled && jvar == _rdisp_var )
   {
-    return computeJacobian( _component, 0 );
+    return calculateJacobian( _component, 0 );
   }
   else if ( _zdisp_coupled && jvar == _zdisp_var )
   {
-    return computeJacobian( _component, 1 );
+    return calculateJacobian( _component, 1 );
   }
   else if ( _temp_coupled && jvar == _temp_var )
   {

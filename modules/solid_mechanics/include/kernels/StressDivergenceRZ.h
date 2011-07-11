@@ -24,7 +24,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  Real computeJacobian( unsigned int ivar, unsigned int jvar );
+  Real calculateJacobian( unsigned int ivar, unsigned int jvar );
 
   MaterialProperty<SymmTensor> & _stress;
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
