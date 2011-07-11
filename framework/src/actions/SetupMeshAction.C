@@ -18,6 +18,9 @@
 #include "MProblem.h"
 #include "ActionWarehouse.h"
 
+// libmesh includes
+#include "linear_partitioner.h"
+
 template<>
 InputParameters validParams<SetupMeshAction>()
 {
@@ -39,13 +42,11 @@ SetupMeshAction::SetupMeshAction(const std::string & name, InputParameters param
 void
 SetupMeshAction::setupMesh(MooseMesh *mesh)
 {
-  // FIXME: second order
-  //  if (getParam<bool>("second_order"))
-  //    mesh->all_second_order(true);
-	
-  // FIXME: usage of partitioners
-  //  if (getParam<std::string>("partitioner") == "linear")
-  //    mesh->partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+  if (getParam<bool>("second_order"))
+    mesh->_mesh.all_second_order(true);
+  
+  if (getParam<std::string>("partitioner") == "linear")
+    mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
   
   Moose::setup_perf_log.push("Prepare Mesh","Setup");
   mesh->prepare();
