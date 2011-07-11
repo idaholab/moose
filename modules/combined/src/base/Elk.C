@@ -5,6 +5,7 @@
 
 // misc
 #include "BodyForceRZ.h"
+#include "BodyForceVoid.h"
 #include "CoefDiffusion.h"
 #include "Convection.h"
 #include "InternalVolume.h"
@@ -112,6 +113,7 @@ Elk::registerObjects()
 {
   // misc
   registerKernel(BodyForceRZ);
+  registerKernel(BodyForceVoid);
   registerKernel(CoefDiffusion);
   registerKernel(Convection);
   registerPostprocessor(InternalVolume);
