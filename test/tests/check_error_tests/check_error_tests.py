@@ -62,3 +62,6 @@ nan_test = { INPUT : 'nan_test.i',
 
 multi_precond_test = { INPUT : 'multi_precond_test.i',
                        EXPECT_ERR : 'More than one active Preconditioner Action detected while building \S+' }
+
+bad_second_order_test = { INPUT : 'bad_second_order_test.i',
+                          EXPECT_ERR : 'Error in libMesh internal logic' }
