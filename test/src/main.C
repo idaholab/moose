@@ -19,17 +19,14 @@ int main(int argc, char *argv[])
   Parser p;
   
   MooseTest::registerObjects();
-
-  std::string input_filename = "";
-  if (Moose::command_line->search("-i"))
-    input_filename = Moose::command_line->next(input_filename);
-  else
-    p.printUsage();
-
   // Associate Parser Syntax
   Moose::associateSyntax(p);
   MooseTest::associateSyntax(p);
-  
+
+  // Parse commandline and return inputfile filename if appropriate
+  std::string input_filename = p.parseCommandLine();
+
+  // Parse the input file
   p.parse(input_filename);
   p.execute();
 

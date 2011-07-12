@@ -42,6 +42,9 @@ public:
   // Registration function for associating Moose Actions with syntax
   void registerActionSyntax(const std::string & action, const std::string & syntax,
                             const std::string & action_name = "");
+
+  // Retrieve the Syntax associated with the passed Action and action_name
+  std::string getSyntaxByAction(const std::string & action, const std::string & action_name);
   
   /**
    * Determines whether a particular block is marked as active
@@ -49,6 +52,14 @@ public:
    */
   bool isSectionActive(const std::string & section_name,
                        const std::map<std::string, std::vector<std::string> > & active_lists);
+
+  /**
+   * Parse the command line running any dump, usage, or other commands as encountered.
+   * If this is a normal run we'll return the input filename back.  This function takes
+   * no arguments but assumes that Moose::command_line exists from a previous creation
+   * of MooseInit
+   */
+  std::string parseCommandLine();
   
   /**
    * Parse an input file consisting of getpot syntax and setup objects
@@ -134,8 +145,7 @@ public:
     mooseAssert(_syntax_formatter != NULL, "Syntax Formatter is NULL in Parser");
     _syntax_formatter->print(name, prev_name, param_ptrs);
   }
-
-public:
+  
   // data created while running execute()
   MooseMesh *_mesh;
   MooseMesh *_displaced_mesh;
@@ -144,20 +154,6 @@ public:
 
   ExodusII_IO *_exreader;                               ///< auxiliary object for restart
   bool _loose;                                          ///< true if parsing input file with loose syntax
-
-  /// Functor for sorting input file syntax in MOOSE desired order
-  class InputFileSort 
-  {  
-  public: 
-    InputFileSort(); 
-    bool operator() (Action *a, Action *b) const; 
-    bool operator() (const std::pair<std::string, std::string> &a, const std::pair<std::string, std::string> &b) const;
-    
-  private:
-    int sorter(const std::string &a, const std::string &b) const;
-    std::vector<std::string> _o; 
-  }; 
-
 
 private:
   /**
@@ -233,6 +229,20 @@ private:
    * Actions/Syntax association
    */
   std::multimap<std::string, ActionInfo> _associated_actions;
+
+public:
+  /// Functor for sorting input file syntax in MOOSE desired order
+  class InputFileSort 
+  {  
+  public: 
+    InputFileSort(); 
+    bool operator() (Action *a, Action *b) const; 
+    bool operator() (const std::pair<std::string, ActionInfo> &a, const std::pair<std::string, ActionInfo> &b) const;
+    
+  private:
+    int sorter(const std::string &a, const std::string &b) const;
+    std::vector<std::string> _o; 
+  };
 };
 
 #endif //PARSER_H

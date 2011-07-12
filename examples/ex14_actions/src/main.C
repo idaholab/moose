@@ -41,6 +41,7 @@ PerfLog Moose::perf_log("Example 14: Custom Parser Block");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
+  Parser p;
 
   Moose::registerObjects();
 
@@ -52,15 +53,6 @@ int main (int argc, char** argv)
    * satisfied by executing the Action (running the "act" virtual method).  
    */
   registerAction(ConvectionDiffusionAction, "add_kernel");
-
-  Parser p;
-  
-  std::string input_filename = "";
-  if ( Moose::command_line->search("-i") )
-    input_filename = Moose::command_line->next(input_filename);
-  else
-    p.printUsage();
-
   Moose::associateSyntax(p);
 
   /**
@@ -73,6 +65,9 @@ int main (int argc, char** argv)
    * path.
    */
   p.registerActionSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
+
+  // Parse commandline and return inputfile filename if appropriate
+  std::string input_filename = p.parseCommandLine();
   
   p.parse(input_filename);
   p.execute();

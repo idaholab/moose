@@ -82,6 +82,8 @@ public:
     _action_to_name_map.insert(std::make_pair(action_name, name));
   }
 
+  std::string getActionName(const std::string & action);
+
 //   // TODO: This will go away
 //   template<typename T>
 //   void regNonParsed(const std::string & action_name)

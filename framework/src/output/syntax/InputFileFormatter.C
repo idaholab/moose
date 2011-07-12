@@ -160,8 +160,8 @@ InputFileFormatter::printCloseAndOpen(const std::string & name, const std::strin
       ++same_elements;
   
   // Executioner syntax is different - we'll hack it here!
-  if ((name == "Executioner" && *prev_name == "Executioner") ||
-      (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos)
+  if ((name == "Executioner" && *prev_name == "Executioner") //||
+//      (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos)
       || (name == "Executioner/Adaptivity" && *prev_name == "Executioner"))
   {
     num_to_open += 1;

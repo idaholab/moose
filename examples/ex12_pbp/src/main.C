@@ -34,19 +34,15 @@ PerfLog Moose::perf_log("Example12: Physics Based Preconditioning");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-
+  Parser p;
+  
   Moose::registerObjects();
 
-  Parser p;
-
-  std::string input_filename = "";
-  if ( Moose::command_line->search("-i") )
-    input_filename = Moose::command_line->next(input_filename);
-  else
-    p.printUsage();
-  
   // Associate Parser Syntax with specific MOOSE Actions
   Moose::associateSyntax(p);
+
+  // Parse commandline and return inputfile filename if appropriate
+  std::string input_filename = p.parseCommandLine();
   
   p.parse(input_filename);
   p.execute();

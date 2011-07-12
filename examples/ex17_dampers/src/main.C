@@ -35,19 +35,15 @@ PerfLog Moose::perf_log("Example 17 Dampers");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-
-  Moose::registerObjects();
-
   Parser p;
   
-  std::string input_filename = "";
-  if ( Moose::command_line->search("-i") )
-    input_filename = Moose::command_line->next(input_filename);
-  else
-    p.printUsage();
+  Moose::registerObjects();
 
   // Associate Parser Syntax with specific MOOSE Actions
   Moose::associateSyntax(p);
+
+  // Parse commandline and return inputfile filename if appropriate
+  std::string input_filename = p.parseCommandLine();
   
   p.parse(input_filename);
   p.execute();

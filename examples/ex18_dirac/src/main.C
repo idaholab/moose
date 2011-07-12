@@ -39,24 +39,19 @@ PerfLog Moose::perf_log("Example 18: DiracKernel");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-
+  Parser p;
+  
   Moose::registerObjects();
 
   // Register any custom objects you have built on the MOOSE Framework
   registerKernel(Convection);  
   registerDiracKernel(ExampleDirac);  // <- registration
 
-  // Create a parser object
-  Parser p;
-
-  std::string input_filename = "";
-  if ( Moose::command_line->search("-i") )
-    input_filename = Moose::command_line->next(input_filename);
-  else
-    p.printUsage();
-
   // Associate Parser Syntax with specific MOOSE Actions
   Moose::associateSyntax(p);
+
+  // Parse commandline and return inputfile filename if appropriate
+  std::string input_filename = p.parseCommandLine();
   
   p.parse(input_filename);
   p.execute();

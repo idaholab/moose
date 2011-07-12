@@ -145,3 +145,15 @@ ActionFactory::buildAllBuildableActions(const std::string & action, Parser * p_p
 
   return ret_value;
 }
+
+std::string
+ActionFactory::getActionName(const std::string & action)
+{
+  // We are returning only the first found instance here
+  std::multimap<std::string, BuildInfo>::iterator iter = _name_to_build_info.find(action);
+
+  if (iter != _name_to_build_info.end())
+    return iter->second._action_name;
+  else
+    return "";
+}

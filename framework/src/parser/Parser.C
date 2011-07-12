@@ -54,7 +54,21 @@ Parser::Parser():
 
   // Need to make sure that the parser pointer is set in the warehouse for various functions
   // TODO: Rip the Parser Pointer out of the warehouse
-  Moose::action_warehouse.setParserPointer(this);
+  Moose::action_warehouse.setParserPointer(this);  
+  Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
+}
+
+Parser::~Parser()
+{
+  delete _exreader;
+  if (_syntax_formatter)
+    delete _syntax_formatter;
+}
+
+std::string
+Parser::parseCommandLine()
+{
+  std::string input_filename;
   
   if (Moose::command_line != NULL)
   {
@@ -77,18 +91,15 @@ Parser::Parser():
       buildFullTree( /*&Parser::printYAMLParameterData*/ );
       exit(0);
     }
+    if (Moose::command_line->search("-i"))
+      input_filename = Moose::command_line->next(input_filename);
+    else
+      printUsage();
   }
   else
-    printUsage();
+    mooseError("Command Line object is NULL! Did you create a MooseInit object?");
   
-  Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
-}
-
-Parser::~Parser()
-{
-  delete _exreader;
-  if (_syntax_formatter)
-    delete _syntax_formatter;
+  return input_filename;
 }
 
 void
@@ -101,6 +112,27 @@ Parser::registerActionSyntax(const std::string & action, const std::string & syn
   
   _associated_actions.insert(std::make_pair(syntax, action_info));
 }
+
+std::string
+Parser::getSyntaxByAction(const std::string & action, const std::string & action_name)
+{
+  std::string syntax;
+  /**
+   * For now we don't have a data structure that maps Actions to Syntax but this routine
+   * is only used by the build full tree routine so it doesn't need to be fast.  We
+   * will do a linear search for each call to this routine
+   */
+  for (std::multimap<std::string, ActionInfo>::const_iterator iter = _associated_actions.begin();
+       iter != _associated_actions.end(); ++iter)
+  {
+    if (iter->second._action == action &&
+        (iter->second._action_name == action_name || iter->second._action_name == ""))
+      syntax = iter->first;
+  }
+  
+  return syntax;
+}
+
 
 std::string
 Parser::isAssociated(const std::string & real_id, bool * is_parent)
@@ -413,32 +445,56 @@ Parser::buildFullTree()
 {
   std::string prev_name = "";
   std::vector<InputParameters *> params_ptrs(2);
-  std::vector<std::pair<std::string, std::string> > all_names;
+  std::vector<std::pair<std::string, ActionInfo> > all_names;
 
   _syntax_formatter->preamble();
 
-  // Reserve a little space so we don't have to reallocate too many times
-  all_names.reserve(100);
-  for (ActionFactory::iterator act_obj = ActionFactory::instance()->begin();
-       act_obj != ActionFactory::instance()->end();
-       ++act_obj)
-    all_names.push_back(std::pair<std::string, std::string>(act_obj->first, act_obj->second._action_name));  
+  for (std::multimap<std::string, ActionInfo>::const_iterator iter = _associated_actions.begin();
+       iter != _associated_actions.end(); ++iter)
+  {
+    ActionInfo act_info = iter->second;
+    // If the action_name is NULL that means we need to figure out which action_name
+    // goes with this syntax for the purpose of building the Moose Object part of the tree.
+    // We will figure this out by asking the ActionFactory for the regstration info.
+    if (act_info._action_name == "")
+      act_info._action_name = ActionFactory::instance()->getActionName(act_info._action);
+      
+    all_names.push_back(std::pair<std::string, ActionInfo>(iter->first, act_info));
+  }
+  
+//   // Reserve a little space so we don't have to reallocate too many times
+//   all_names.reserve(100);
+//   for (ActionFactory::iterator act_obj = ActionFactory::instance()->begin();
+//        act_obj != ActionFactory::instance()->end();
+//        ++act_obj)
+//   {
+//     std::string syntax = getSyntaxByAction(act_obj->first, act_obj->second._action_name);
+//     if (syntax != "")
+//       all_names.push_back(std::pair<std::string, std::string>(syntax, act_obj->second._action_name));
+    
+// //      all_names.push_back(std::pair<std::string, std::string>(act_obj->first, act_obj->second._action_name));
+// //    std::cerr << act_obj->first << ": " << act_obj->second._action_name << "   " <<  << "\n";
+//   }
 
-  // Sort the Actions (well just the names and the action_name)
+  // Sort the Syntax
   std::sort(all_names.begin(), all_names.end(), InputFileSort());
 
-  for (std::vector<std::pair<std::string, std::string> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
+  for (std::vector<std::pair<std::string, ActionInfo> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
   {
+//    std::cerr << act_names->first << ": " << act_names->second._action << ": " << act_names->second._action_name << "\n";
+//    continue;
+    
     std::string action;
     
-    InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_names->first);
+    InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_names->second._action);
 
 //    for (std::vector<InputParameters>::iterator it = all_action_params.begin(); it != all_action_params.end(); ++it)
 //    {
 //      InputParameters action_obj_params = *it;
-      const std::string & action_name = act_names->second;
+      const std::string & action_name = act_names->second._action_name;
       std::string act_name = act_names->first;
-      
+
+//      std::cerr << "\n" << action_obj_params << "\n";
       params_ptrs[0] = &action_obj_params;
       
       bool print_once = false;
@@ -477,8 +533,8 @@ Parser::buildFullTree()
         }
       }
 
-      if (!print_once && action_obj_params.have_parameter<std::string>("built_by_action") &&
-          action_obj_params.get<std::string>("built_by_action") == action_name &&
+      if (!print_once && //action_obj_params.have_parameter<std::string>("built_by_action") &&
+//          action_obj_params.get<std::string>("built_by_action") == action_name &&
           ActionFactory::instance()->isParsed(act_name))
       {
         params_ptrs[1] = NULL;
@@ -873,7 +929,7 @@ Parser::InputFileSort::operator() (Action *a, Action *b) const
 }
 
 bool
-Parser::InputFileSort::operator() (const std::pair<std::string, std::string> &a, const std::pair<std::string, std::string> &b) const
+Parser::InputFileSort::operator() (const std::pair<std::string, ActionInfo> &a, const std::pair<std::string, ActionInfo> &b) const
 {
   std::vector<std::string> elements;
   std::string short_a, short_b;
