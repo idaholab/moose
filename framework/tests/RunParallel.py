@@ -56,7 +56,10 @@ class RunParallel:
     self.jobs[job_index] = (p, command, test, clock() + test[MAX_TIME], f)
 
   def startReadyJobs(self):
-    for i in range(0, self.queue.qsize()):
+    queue_items = self.queue.qsize()
+    for i in range(0, queue_items):
+      if self.queue.empty():
+        return
       (test, command, dirpath) = self.queue.get()
       saved_dir = os.getcwd()
       sys.path.append(os.path.abspath(dirpath))
@@ -87,14 +90,13 @@ class RunParallel:
       self.harness.testOutputAndFinish(test, p.returncode, output)
 
     self.jobs[job_index] = None
+    self.startReadyJobs()
 
   ## Don't return until one of the running processes exits.
   #
   # When a process exits (or times out) call returnToTestHarness and return from
   # this function.
   def spinwait(self):
-    self.startReadyJobs()
-
     test_completed = False
     while not test_completed:
       now = clock()
