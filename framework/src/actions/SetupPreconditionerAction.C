@@ -101,3 +101,15 @@ SetupPreconditionerAction::act()
 #endif //LIBMESH_HAVE_PETSC
   }
 }
+
+std::string
+SetupPreconditionerAction::getTypeString(const std::string & action)
+{ 
+  for (std::map<std::string, std::string>::const_iterator iter = _type_to_action.begin();
+       iter != _type_to_action.end();
+       ++iter)
+    if (iter->second == action)
+      return iter->first;
+
+  return std::string();
+}

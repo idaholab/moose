@@ -120,7 +120,7 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
       {
         std::vector<std::string> elements;
         std::string doc = param_ptrs[i]->getDocString(iter->first);
-        if (doc != "")
+        if (Parser::trim(doc) != "")
         {
           Parser::tokenize(doc, elements, 68, " \t");
           _out << std::right << std::setw(l_offset) << "# " << elements[0];
