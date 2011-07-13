@@ -18,13 +18,13 @@
 
 // Static member initialization
 unsigned int SetupPreconditionerAction::_count = 0;
-std::map<std::string, std::string> SetupPreconditionerAction::_type_to_action;
+std::map<std::string, std::string> SetupPreconditionerAction::_type_to_action = initMap();
 
 template<>
 InputParameters validParams<SetupPreconditionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  
+
   /**
    * This parameter is here to instruct the parent class not to look in the factory for
    * the right MooseObject to build.  It will not exist and fail so we will ask it to just
@@ -72,7 +72,7 @@ SetupPreconditionerAction::act()
   if (_is_base_instance)
   {
     Action *action;
-    
+
     // We are only allowed to have one instance of a preconditioner active at a time
     // TODO: We may need to reset this parameter to zero for loosely coupled systems
     if (++_count > 1)
@@ -81,7 +81,7 @@ SetupPreconditionerAction::act()
     // A bit of hackery here to get the right parameters into the new params object
     _moose_object_pars += _pars;
     _moose_object_pars.set<std::string>("action") = "add_preconditioning";
-  
+
     // Add Preconditioning Action to the warehouse on the fly
     action = ActionFactory::instance()->create(_type_to_action[_type], _moose_object_pars);
     Moose::action_warehouse.addActionBlock(action);
@@ -96,7 +96,7 @@ SetupPreconditionerAction::act()
     petsc_options = getParam<std::vector<std::string> >("petsc_options");
     petsc_inames = getParam<std::vector<std::string> >("petsc_options_iname");
     petsc_values = getParam<std::vector<std::string> >("petsc_options_value");
-    
+
     Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
 #endif //LIBMESH_HAVE_PETSC
   }
@@ -104,7 +104,7 @@ SetupPreconditionerAction::act()
 
 std::string
 SetupPreconditionerAction::getTypeString(const std::string & action)
-{ 
+{
   for (std::map<std::string, std::string>::const_iterator iter = _type_to_action.begin();
        iter != _type_to_action.end();
        ++iter)
@@ -112,4 +112,16 @@ SetupPreconditionerAction::getTypeString(const std::string & action)
       return iter->first;
 
   return std::string();
+}
+
+std::map<std::string, std::string>
+SetupPreconditionerAction::initMap()
+{
+  std::map<std::string, std::string> the_map;
+
+  the_map["FDP"] = "SetupFiniteDifferencePreconditionerAction";
+  the_map["PBP"] = "SetupPBPAction";
+  the_map["SMP"] = "SetupSMPAction";
+
+  return the_map;
 }

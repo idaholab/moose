@@ -529,20 +529,20 @@ Parser::buildFullTree()
         if (act_obj->second._action_name == "add_preconditioning")
         {
           InputParameters precond_params = ActionFactory::instance()->getValidParams(act_obj->first);
+          std::string block_name = SetupPreconditionerAction::getTypeString(act_obj->first);
 
-          precond_params.set<std::string>("type") =
-            SetupPreconditionerAction::getTypeString(act_obj->first);
+          precond_params.set<std::string>("type") = block_name;
           precond_params.seenInInputFile("type");
           params_ptrs[1] = &precond_params;
 
-          std::string name = act_name.substr(0, act_name.size()-1) + act_obj->first;
-          
+          std::string name = act_name.substr(0, act_name.size()-1) + block_name;
+
           _syntax_formatter->print(name, &act_name, params_ptrs);
 
           prev_name = name;
         }
     }
-    
+
   }
   params_ptrs[0] = NULL;
   params_ptrs[1] = NULL;

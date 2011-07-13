@@ -93,12 +93,7 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
 
       _out << "\n" << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
       size_t l_offset = 30;
-      if (_dump_mode && param_ptrs[i]->isParamRequired(iter->first))
-      {
-        _out << "(required)";
-        l_offset -= 10;
-      }
-      else if (!_dump_mode || param_ptrs[i]->isParamValid(iter->first))
+      if (!_dump_mode || param_ptrs[i]->isParamValid(iter->first))
       {
         // Print the parameter's value to a stringstream.
         ss.str("");
@@ -115,6 +110,12 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
         _out << quotes << value << quotes;
         l_offset -= value.size();
       }
+      else if (_dump_mode && param_ptrs[i]->isParamRequired(iter->first))
+      {
+        _out << "(required)";
+        l_offset -= 10;
+      }
+
       // Documentation string
       if (_dump_mode)
       {

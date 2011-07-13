@@ -35,11 +35,12 @@ public:
   virtual void act();
 
   static std::string getTypeString(const std::string & action);
-  
+
 protected:
   static unsigned int _count;
   static std::map<std::string, std::string> _type_to_action;
-  
+  static std::map<std::string, std::string> initMap();
+
   /**
    * This parameter tells us whether or not this instance is actually of this type or
    * not (one of its derived classes).  We do not need RTTI for this as this class is
