@@ -46,14 +46,6 @@ SetupPreconditionerAction::SetupPreconditionerAction(const std::string & name, I
   MooseObjectAction(name, params),
   _is_base_instance(getParam<std::string>("action") != "add_preconditioning" ? true : false)
 {
-  // Init static map
-  if (_type_to_action.size() == 0)
-  {
-    _type_to_action["FDP"] = "SetupFiniteDifferencePreconditionerAction";
-    _type_to_action["PBP"] = "SetupPBPAction";
-    _type_to_action["SMP"] = "SetupSMPAction";
-  }
-
   /**
    * This is actually an instance of THIS class an not a derived class so we need to construct
    * a parameters object that will be filled in and used by the derived class object.
