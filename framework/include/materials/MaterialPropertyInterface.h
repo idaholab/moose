@@ -45,7 +45,6 @@ public:
   template<typename T>
   MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
-
 protected:
   MaterialData & _material_data;
   MaterialProperties & _material_props;

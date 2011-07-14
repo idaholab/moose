@@ -38,6 +38,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
+    _displaced_subproblem(parameters.get<SubProblemInterface *>("_subproblem_displaced")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _bnd(parameters.get<bool>("_bnd")),
     _material_data(*parameters.get<MaterialData *>("_material_data")),

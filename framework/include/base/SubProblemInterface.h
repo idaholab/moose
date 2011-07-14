@@ -69,8 +69,15 @@ public:
   virtual GeometricSearchData & geomSearchData() = 0;
 
   virtual void meshChanged() { mooseError("This system does not support changing the mesh"); }
+
+  virtual void storeMatPropName(unsigned int block_id, const std::string & name);
+  virtual void checkMatProp(unsigned int block_id, const std::string & name);
+
 protected:
   DiracKernelInfo _dirac_kernel_info;
+
+  /// the map of material properties (block_id -> list of properties)
+  std::map<unsigned int, std::set<std::string> > _map_material_props;
 };
 
 #endif /* SUBPROBLEMINTERFACE_H */

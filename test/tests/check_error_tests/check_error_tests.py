@@ -27,6 +27,12 @@ bad_material_block_test = { INPUT : 'bad_material_block_test.i',
 missing_material_test = { INPUT : 'missing_material_test.i',
                           EXPECT_ERR : "The following blocks from your input mesh do not contain on active material: \d+" }
 
+missing_material_prop_test = { INPUT : 'missing_material_prop_test.i',
+                               EXPECT_ERR : "No material defined on block \d+" }
+
+missing_material_prop_test2 = { INPUT : 'missing_material_prop_test2.i',
+                               EXPECT_ERR : "Material property 'diff1' is not defined on block \d+" }
+
 bad_kernel_var_test = { INPUT : 'bad_kernel_var_test.i',
                         EXPECT_ERR : 'variable foo does not exist in this system' }
 

@@ -672,6 +672,7 @@ MProblem::addMaterial(const std::string & mat_name, const std::string & name, In
 {
   parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblemInterface *>("_subproblem") = this;
+  parameters.set<SubProblemInterface *>("_subproblem_displaced") = _displaced_problem;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;

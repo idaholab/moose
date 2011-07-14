@@ -122,6 +122,7 @@ public:
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;
+  SubProblemInterface * _displaced_subproblem;          // materials do not distinguish between non-displaced and displaced problems
   THREAD_ID _tid;
   bool _bnd;
   MaterialData & _material_data;
@@ -189,6 +190,9 @@ protected:
   template<typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name)
   {
+    _subproblem.storeMatPropName(_block_id, prop_name);
+    if (_displaced_subproblem != NULL)
+      _displaced_subproblem->storeMatPropName(_block_id, prop_name);
     return _material_data.declareProperty<T>(prop_name);
   }
 
@@ -200,6 +204,9 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name)
   {
+    _subproblem.storeMatPropName(_block_id, prop_name);
+    if (_displaced_subproblem != NULL)
+      _displaced_subproblem->storeMatPropName(_block_id, prop_name);
     return _material_data.declarePropertyOld<T>(prop_name);
   }
 
@@ -211,6 +218,9 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name)
   {
+    _subproblem.storeMatPropName(_block_id, prop_name);
+    if (_displaced_subproblem != NULL)
+      _displaced_subproblem->storeMatPropName(_block_id, prop_name);
     return _material_data.declarePropertyOlder<T>(prop_name);
   }
 

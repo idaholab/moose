@@ -24,6 +24,7 @@
 #include "GeometricSearchInterface.h"
 #include "AsmBlock.h"
 #include "MooseVariable.h"
+#include "SubProblem.h"
 
 // libMesh
 #include "fe.h"
@@ -74,6 +75,11 @@ public:
   Real stopTime();
 
   SubProblemInterface & subProblem() { return _subproblem; }
+
+  // materials
+  template<typename T>
+  MaterialProperty<T> & getMaterialProperty(const std::string & name);
+
 
 protected:
   Problem & _problem;
@@ -138,5 +144,28 @@ protected:
 
   virtual void precalculateResidual();
 };
+
+
+template<typename T>
+MaterialProperty<T> &
+Kernel::getMaterialProperty(const std::string & name)
+{
+  if (parameters().isParamValid("block"))
+  {
+    // check blocks where the kernel is defined
+    std::vector<unsigned int> blocks = parameters().get<std::vector<unsigned int> >("block");
+    for (std::vector<unsigned int>::iterator it = blocks.begin(); it != blocks.end(); ++it)
+      _subproblem.checkMatProp(*it, name);
+  }
+  else
+  {
+    // no kernel blocks specified, check all blocks that are in the mesh
+    const std::set<subdomain_id_type> & blocks = _mesh.meshSubdomains();
+    for (std::set<subdomain_id_type>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+      _subproblem.checkMatProp(*it, name);
+  }
+
+  return MaterialPropertyInterface::getMaterialProperty<T>(name);
+}
 
 #endif /* KERNEL_H */
