@@ -30,7 +30,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: exoII_read.C,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #include <iostream>
 
@@ -101,30 +100,33 @@ ExoII_Read::ExoII_Read(const char* fname)
 
 ExoII_Read::~ExoII_Read()
 {
-  SMART_ASSERT(Check_State());
+  try {
+    SMART_ASSERT(Check_State());
   
-  if (file_id >= 0)
-  {
-    string err = Close_File();
-    if (!err.empty())
-      std::cout << "ExoII_Read destructor()  ERROR closing file:"
-                << " \"" << err << "\"" << std::endl;
-  }
+    if (file_id >= 0)
+      {
+	string err = Close_File();
+	if (!err.empty())
+	  std::cout << "ExoII_Read destructor()  ERROR closing file:"
+		    << " \"" << err << "\"" << std::endl;
+      }
   
-  if (eblocks) delete [] eblocks;
-  if (nsets)   delete [] nsets;
-  if (ssets)   delete [] ssets;
-  if (nodes)   delete [] nodes;
-  if (times)   delete [] times;
-  if (results) {
-    for (unsigned i = 0; i < nodal_vars.size(); ++i)
-      if (results[i]) delete [] results[i];
-    delete [] results;
+    delete [] eblocks;
+    delete [] nsets;
+    delete [] ssets;
+    delete [] nodes;
+    delete [] times;
+    if (results) {
+      for (unsigned i = 0; i < nodal_vars.size(); ++i)
+	delete [] results[i];
+      delete [] results;
+    }
+    delete [] global_vals;
+    delete [] node_map;
+    delete [] elmt_map;
+    delete [] elmt_order;
+  } catch (...) {
   }
-  if (global_vals) delete [] global_vals;
-  if (node_map) delete [] node_map;
-  if (elmt_map) delete [] elmt_map;
-  if (elmt_order) delete [] elmt_order;
 }
 
 string ExoII_Read::Close_File()
@@ -192,6 +194,13 @@ const string& ExoII_Read::Elmt_Var_Name(int index) const
   return elmt_vars[index];
 }
 
+const string& ExoII_Read::Elmt_Att_Name(int index) const
+{
+  SMART_ASSERT(Check_State());
+  SMART_ASSERT(index >= 0 && (unsigned)index < elmt_atts.size());
+  return elmt_atts[index];
+}
+
 const string& ExoII_Read::NS_Var_Name(int index) const
 {
   SMART_ASSERT(Check_State());
@@ -224,55 +233,53 @@ Exo_Block* ExoII_Read::Get_Elmt_Block_by_Id(int id) const
   return NULL;
 }
 
-Exo_Entity* ExoII_Read::Get_Entity_by_Index(const char *type, int block_index) const
+Exo_Entity* ExoII_Read::Get_Entity_by_Index(EXOTYPE type, int block_index) const
 {
   SMART_ASSERT(Check_State());
   
-  switch (type[0]) {
-  case 'E':
-  case 'e':
+  switch (type) {
+  case EX_ELEM_BLOCK:
     SMART_ASSERT(block_index >= 0 && block_index < num_elmt_blocks);
     return &eblocks[block_index];
-  case 'M':
-  case 'm':
+  case EX_NODE_SET:
     SMART_ASSERT(block_index >= 0 && block_index < num_node_sets);
     return &nsets[block_index];
-  case 'S':
-  case 's':
+  case EX_SIDE_SET:
     SMART_ASSERT(block_index >= 0 && block_index < num_side_sets);
     return &ssets[block_index];
+  default:
+    return NULL;
   }
   return NULL;
 }
 
-Exo_Entity* ExoII_Read::Get_Entity_by_Id(const char *type, int id) const
+Exo_Entity* ExoII_Read::Get_Entity_by_Id(EXOTYPE type, int id) const
 {
   SMART_ASSERT(Check_State());
-  switch (type[0]) {
-  case 'E':
-  case 'e':
+  switch (type) {
+  case EX_ELEM_BLOCK:
     for (int i=0; i < num_elmt_blocks; i++) {
       if (eblocks[i].Id() == id) {
 	return &eblocks[i];
       }
     }
     break;
-  case 'M':
-  case 'm':
+  case EX_NODE_SET:
     for (int i=0; i < num_node_sets; i++) {
       if (nsets[i].Id() == id) {
 	return &nsets[i];
       }
     }
     break;
-  case 'S':
-  case 's':
+  case EX_SIDE_SET:
     for (int i=0; i < num_side_sets; i++) {
       if (ssets[i].Id() == id) {
 	return &ssets[i];
       }
     }
     break;
+  default:
+   return NULL;
   }
   return NULL;
 }
@@ -408,7 +415,7 @@ string ExoII_Read::Load_Node_Map()
   
   if (!Open()) return "WARNING:  File not open!";
   
-  if (node_map) delete [] node_map;
+  delete [] node_map;
   node_map = 0;
   
   if (num_nodes == 0) return "WARNING:  There are no nodes!";
@@ -434,7 +441,7 @@ string ExoII_Read::Free_Node_Map()
 {
   SMART_ASSERT(Check_State());
   
-  if (node_map) delete [] node_map;
+  delete [] node_map;
   node_map = 0;
   
   return "";
@@ -446,7 +453,7 @@ string ExoII_Read::Load_Elmt_Map()
   
   if (!Open()) return "WARNING:  File not open!";
   
-  if (elmt_map) delete [] elmt_map;
+  delete [] elmt_map;
   elmt_map = 0;
   
   if (num_elmts == 0) return "WARNING:  There are no elements!";
@@ -472,7 +479,7 @@ string ExoII_Read::Free_Elmt_Map()
 {
   SMART_ASSERT(Check_State());
   
-  if (elmt_map) delete [] elmt_map;
+  delete [] elmt_map;
   elmt_map = 0;
   
   return "";
@@ -484,7 +491,7 @@ string ExoII_Read::Load_Elmt_Order()
   
   if (!Open()) return "WARNING:  File not open!";
   
-  if (elmt_order) delete [] elmt_order;
+  delete [] elmt_order;
   elmt_order = 0;
   
   if (num_elmts == 0) return "WARNING:  There are no elements!";
@@ -510,7 +517,7 @@ string ExoII_Read::Free_Elmt_Order()
 {
   SMART_ASSERT(Check_State());
   
-  if (elmt_order) delete [] elmt_order;
+  delete [] elmt_order;
   elmt_order = 0;
   
   return "";
@@ -520,9 +527,9 @@ void ExoII_Read::Free_All_Maps()
 {
   SMART_ASSERT(Check_State());
   
-  if (node_map) delete [] node_map;      node_map = 0;
-  if (elmt_map) delete [] elmt_map;      elmt_map = 0;
-  if (elmt_order) delete [] elmt_order;  elmt_order = 0;
+  delete [] node_map;      node_map = 0;
+  delete [] elmt_map;      elmt_map = 0;
+  delete [] elmt_order;  elmt_order = 0;
 }
 
 
@@ -565,7 +572,7 @@ string ExoII_Read::Load_Nodal_Coordinates()
 void ExoII_Read::Free_Nodal_Coordinates()
 {
   SMART_ASSERT(Check_State());
-  if (nodes) delete [] nodes;  nodes = 0;
+  delete [] nodes;  nodes = 0;
 }
 
 string ExoII_Read::Load_Nodal_Results(int time_step_num, int var_index)
@@ -579,7 +586,7 @@ string ExoII_Read::Load_Nodal_Results(int time_step_num, int var_index)
   if (cur_time != time_step_num)
   {
     for (unsigned i = 0; i < nodal_vars.size(); ++i) {
-      if (results[i]) delete [] results[i];
+      delete [] results[i];
       results[i] = 0;
     }
     cur_time = time_step_num;
@@ -589,11 +596,12 @@ string ExoII_Read::Load_Nodal_Results(int time_step_num, int var_index)
   {
     results[var_index] = new double[ num_nodes ];
     
-    int err = ex_get_nodal_var(file_id,
-                               cur_time,
-                               var_index+1,
-                               num_nodes,
-                               results[var_index]);
+    int err = ex_get_var(file_id,
+			 cur_time,
+			 EX_NODAL,
+			 var_index+1,
+			 0, num_nodes,
+			 results[var_index]);
     if (err < 0) {
         std::cout << "ExoII_Read::Load_Nodal_Results(): ERROR: Failed to get "
              << "nodal variable values!  Aborting..." << std::endl;
@@ -605,7 +613,7 @@ string ExoII_Read::Load_Nodal_Results(int time_step_num, int var_index)
       ostringstream oss;
       oss << "ExoII_Read::Load_Nodal_Results(): WARNING:  "
           << "Exodus issued warning \"" << err
-          << "\" on call to ex_get_nodal_var()!"
+          << "\" on call to ex_get_var()!"
           << "  I'm not going to keep what it gave me for values.";
       return oss.str();
     }
@@ -621,7 +629,7 @@ void ExoII_Read::Free_Nodal_Results()
   SMART_ASSERT(Check_State());
   if (results)
     for (unsigned i = 0; i < nodal_vars.size(); ++i) {
-      if (results[i]) delete [] results[i];
+      delete [] results[i];
       results[i] = 0;
     }
 }
@@ -784,7 +792,7 @@ void ExoII_Read::Display_Stats(std::ostream& s) const
       s << "\t" << b << "   \t" << eblocks[b].Id()
         << "  \t"    << eblocks[b].Size()
         << "  \t\t"  << eblocks[b].num_nodes_per_elmt
-        << "  \t  "  << eblocks[b].num_attr
+        << "  \t  "  << eblocks[b].attr_count()
         << "  \t "   << eblocks[b].elmt_type << std::endl;
     }
   }
@@ -915,7 +923,7 @@ void ExoII_Read::Display(std::ostream& s) const
       s << "\t" << b << "   \t" << eblocks[b].Id()
         << "  \t"    << eblocks[b].Size()
         << "  \t\t"  << eblocks[b].num_nodes_per_elmt
-        << "  \t  "  << eblocks[b].num_attr
+        << "  \t  "  << eblocks[b].attr_count()
         << "  \t "   << eblocks[b].elmt_type << std::endl;
     }
   }
@@ -973,6 +981,10 @@ void ExoII_Read::Display(std::ostream& s) const
     s << separator << std::endl;
   }
   
+  if (!elmt_atts.empty()) {
+    s << "         number element attributes = " << elmt_atts.size()   << std::endl;
+  }
+
   if (num_times)  // Use this to indicate whether results data exists.
   {
     s << "\t\tRESULTS INFO" << std::endl << separator << std::endl;

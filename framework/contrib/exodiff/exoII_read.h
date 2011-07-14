@@ -30,13 +30,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: exoII_read.h,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #ifndef EXOII_READ_H
 #define EXOII_READ_H
 
 #include "exodusII.h"
 #include "netcdf.h"  
+#include "exo_entity.h"
 
 #include <iostream>
 #include <string>
@@ -61,8 +61,7 @@ class ExoII_Read {
 public:
   
   ExoII_Read();
-  ExoII_Read(const char* file_name);
-  ExoII_Read(const ExoII_Read&);  // Not written.
+  explicit ExoII_Read(const char* file_name);
   virtual ~ExoII_Read();
   const ExoII_Read& operator=(const ExoII_Read&);  // Not written.
   
@@ -98,16 +97,19 @@ public:
   int Num_Global_Vars() const { return global_vars.size(); }
   int Num_Nodal_Vars()  const { return nodal_vars.size();  }
   int Num_Elmt_Vars()   const { return elmt_vars.size();   }
+  int Num_Elmt_Atts()   const { return elmt_atts.size();   }
   int Num_NS_Vars()     const { return ns_vars.size();   }
   int Num_SS_Vars()     const { return ss_vars.size();   }
   const std::vector<std::string>& Global_Var_Names() const { return global_vars; }
   const std::vector<std::string>& Nodal_Var_Names()  const { return nodal_vars;  }
   const std::vector<std::string>& Elmt_Var_Names()   const { return elmt_vars;   }
+  const std::vector<std::string>& Elmt_Att_Names()   const { return elmt_atts;   }
   const std::vector<std::string>& NS_Var_Names()     const { return ns_vars;     }
   const std::vector<std::string>& SS_Var_Names()     const { return ss_vars;     }
   const std::string&      Global_Var_Name(int index) const;
   const std::string&      Nodal_Var_Name (int index) const;
   const std::string&      Elmt_Var_Name  (int index) const;
+  const std::string&      Elmt_Att_Name  (int index) const;
   const std::string&      NS_Var_Name    (int index) const;
   const std::string&      SS_Var_Name    (int index) const;
   
@@ -168,10 +170,8 @@ public:
   // Node/Side sets:
   
 
-  int        Index(const char *type, int id) const;
-  int        Id(const char *type, int index) const;
-  Exo_Entity* Get_Entity_by_Index(const char *type, int index) const;
-  Exo_Entity* Get_Entity_by_Id   (const char *type, int id)    const;
+  Exo_Entity* Get_Entity_by_Index(EXOTYPE type, int index) const;
+  Exo_Entity* Get_Entity_by_Id   (EXOTYPE type, int id)    const;
   
   int        Block_Index            (int block_id) const;  // Returns associated block index.
   int        Block_Id               (int block_index) const;  // Returns associated block id.
@@ -240,6 +240,7 @@ protected:
   std::vector<std::string> global_vars;
   std::vector<std::string> nodal_vars;
   std::vector<std::string> elmt_vars;
+  std::vector<std::string> elmt_atts;
   std::vector<std::string> ns_vars;
   std::vector<std::string> ss_vars;
   
@@ -260,6 +261,10 @@ protected:
   int SSet_Index(int side_set_id) const;      // Returns index of side set.
   
   int File_Exists(const char* fname);
+
+ private:
+  ExoII_Read(const ExoII_Read&);  // Not written.
+  
 };
 
 inline int ExoII_Read::Node_Map(int node_num) const

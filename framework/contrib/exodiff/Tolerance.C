@@ -49,14 +49,52 @@ bool Tolerance::Diff(double v1, double v2) const
       return false;
   }
 
-  if (type == RELATIVE)
-    {
-      if (v1 == 0.0 && v2 == 0.0) return 0;
-      double max = fabs(v1) < fabs(v2) ? fabs(v2): fabs(v1);
-      return fabs(v1 - v2)/max > value;
-    }
-  else  // absolute diff
+  if (type == RELATIVE) {
+    if (v1 == 0.0 && v2 == 0.0) return 0;
+    double max = fabs(v1) < fabs(v2) ? fabs(v2): fabs(v1);
+    return fabs(v1 - v2) > value * max;
+
+  } else if (type == ABSOLUTE) {
     return fabs(v1 - v2) > value;
+
+  } else if (type == COMBINED) {
+    // if (Abs(x - y) <= Max(absTol, relTol * Max(Abs(x), Abs(y))))
+    // In the current implementation, absTol == relTol;
+    // At some point, store both values...
+    // In summary, use abs tolerance if both values are less than 1.0;
+    // else use relative tolerance.
+
+    double max = fabs(v1) < fabs(v2) ? fabs(v2): fabs(v1);
+    double tol = 1.0 < max ? max : 1.0;
+    return fabs(v1 - v2) >= tol * value;
+
+    // EIGEN type diffs work on the absolute values. They are intended
+    // for diffing eigenvectors where one shape may be the inverse of
+    // the other and they should compare equal.  Eventually would like
+    // to do a better check to ensure that ratio of one shape to other
+    // is 1 or -1...
+  } else if (type == EIGEN_REL) {
+    if (v1 == 0.0 && v2 == 0.0) return 0;
+    double max = fabs(v1) < fabs(v2) ? fabs(v2): fabs(v1);
+    return fabs(fabs(v1) - fabs(v2)) > value * max;
+
+  } else if (type == EIGEN_ABS) {
+    return fabs(fabs(v1) - fabs(v2)) > value;
+
+  } else if (type == EIGEN_COM) {
+    // if (Abs(x - y) <= Max(absTol, relTol * Max(Abs(x), Abs(y))))
+    // In the current implementation, absTol == relTol;
+    // At some point, store both values...
+    // In summary, use abs tolerance if both values are less than 1.0;
+    // else use relative tolerance.
+
+    double max = fabs(v1) < fabs(v2) ? fabs(v2): fabs(v1);
+    double tol = 1.0 < max ? max : 1.0;
+    return fabs(fabs(v1) - fabs(v2)) >= tol * value;
+
+  } else {
+    return true;
+  }
 }
 
 const char* Tolerance::typestr() const
@@ -65,6 +103,14 @@ const char* Tolerance::typestr() const
     return "relative";
   else if (type == ABSOLUTE)
     return "absolute";
+  else if (type == COMBINED)
+    return "combined";
+  else if (type == EIGEN_REL)
+    return "eigenrel";
+  else if (type == EIGEN_ABS)
+    return "eigenabs";
+  else if (type == EIGEN_COM)
+    return "eigencom";
   else
     return "ignore";
 }
@@ -75,6 +121,14 @@ const char* Tolerance::abrstr() const
     return "rel";
   else if (type == ABSOLUTE)
     return "abs";
+  else if (type == COMBINED)
+    return "com";
+  else if (type == EIGEN_REL)
+    return "ere";
+  else if (type == EIGEN_ABS)
+    return "eab";
+  else if (type == EIGEN_COM)
+    return "eco";
   else
     return "ign";
 }

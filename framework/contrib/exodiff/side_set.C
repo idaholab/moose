@@ -30,7 +30,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: side_set.C,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #include <iostream>
 #include <cstdlib>
@@ -90,7 +89,7 @@ EXOTYPE Side_Set::exodus_type() const {return EX_SIDE_SET;}
 
 void Side_Set::entity_load_params()
 {
-  int err = ex_get_side_set_param(fileId, id_, &numEntity,&num_dist_factors);
+  int err = ex_get_set_param(fileId, EX_SIDE_SET, id_, &numEntity,&num_dist_factors);
   
   if (err < 0) {
     std::cout << "ERROR: Failed to get sideset parameters for sideset " << id_
@@ -119,7 +118,7 @@ void Side_Set::load_sides(const int *elmt_map) const
       sides = new int[numEntity];  SMART_ASSERT(sides != 0);
       sideIndex = new int[numEntity]; SMART_ASSERT(sideIndex != 0);
 
-      err = ex_get_side_set(fileId, id_, elmts, sides);
+      err = ex_get_set(fileId, EX_SIDE_SET, id_, elmts, sides);
     
       if (err < 0) {
 	std::cout << "Side_Set::Load_Set(): ERROR: Failed to read side set "
@@ -184,7 +183,7 @@ const double* Side_Set::Distribution_Factors() const
 {
   if (!dist_factors && num_dist_factors > 0) {
     dist_factors = new double[num_dist_factors];  SMART_ASSERT(dist_factors != 0);
-    ex_get_side_set_dist_fact(fileId, id_, dist_factors);
+    ex_get_set_dist_fact(fileId, EX_SIDE_SET, id_, dist_factors);
   }
   return dist_factors;
 }

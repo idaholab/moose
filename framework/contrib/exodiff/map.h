@@ -43,7 +43,7 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
 void Compute_FileId_Maps(int*& node_map, int*& elmt_map,
 			 ExoII_Read& file1, ExoII_Read& file2);
 void Dump_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1);
-bool Check_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1);
+bool Check_Maps(const int *node_map, const int *elmt_map, const ExoII_Read& file1, const ExoII_Read& file2);
 bool Compare_Maps(ExoII_Read& file1, ExoII_Read& file2, const int *node_map, const int *elmt_map, bool partial_flag);
 
 #endif

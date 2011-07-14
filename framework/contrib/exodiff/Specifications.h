@@ -54,6 +54,8 @@ public:
   
   // Program parameters.
   bool quiet_flag;        // By default, warnings and other info is produced
+  bool show_all_diffs;    // Be default, show only maximum diff for each variable;
+                          // if set, show all diff that exceeds tolerance.
   TOLERANCE_TYPE_enum output_type;  // By default, output file diffs are absolute.
   MAP_TYPE_enum map_flag;          // By default, no searching is done to match
                           // nodes & elements.
@@ -71,6 +73,9 @@ public:
   bool ignore_nans;       // Don't check for NaNs
   bool ignore_dups;       // If two elements/nodes in same location in map or partial map
                           // case, just return first match instead of aborting.
+
+  bool ignore_attributes; // Don't compare attributes...
+
   bool coord_sep;
   bool exit_status_switch;   
   bool dump_mapping;         // By default, mappings are not printed.
@@ -86,6 +91,9 @@ public:
   
   // Offset of timesteps between first and second databases.
   int time_step_offset; 
+  int time_step_start; // First step to compare (1-based)
+  int time_step_stop;  // Last step to compare
+  int time_step_increment;  // Step increment
   
   int max_number_of_names;
   
@@ -106,6 +114,11 @@ public:
   Tolerance                 elmt_var_default;
   Tolerance*                elmt_var;
   
+  std::vector<std::string>* elmt_att_names;
+  bool                      elmt_att_do_all_flag;
+  Tolerance                 elmt_att_default;
+  Tolerance*                elmt_att;
+  
   std::vector<std::string>* ns_var_names;
   bool                      ns_var_do_all_flag;
   Tolerance                 ns_var_default;
@@ -119,7 +132,12 @@ public:
   // time step exclusion data
   int  num_excluded_steps;
   int* exclude_steps;
+
+  std::string command_file_name;
   
+ private:
+  Specifications(const Specifications&); // don't implement
+  Specifications& operator=(const Specifications&); // don't implement
 };
 
 extern Specifications specs;

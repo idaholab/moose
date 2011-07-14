@@ -35,7 +35,17 @@
 
 #include <math.h>
 
-enum TOLERANCE_TYPE_enum { RELATIVE = 0, ABSOLUTE = 1, IGNORE = 2 };
+// See http://realtimecollisiondetection.net/blog/?p=89 for a
+// description of the COMBINED tolerance.  Basically:
+// The absolute tolerance test fails when x and y become large, and
+// the relative tolerance test fails when they become small. It is
+// therefore desired to combine these two tests together in a single
+// test. Over the years at GDC, as well as in my book, I've
+// suggested the following combined tolerance test:
+//
+// if (Abs(x - y) <= EPSILON * Max(1.0f, Abs(x), Abs(y)) ...
+
+enum TOLERANCE_TYPE_enum { RELATIVE = 0, ABSOLUTE = 1, COMBINED = 2, IGNORE = 3, EIGEN_REL = 4, EIGEN_ABS = 5, EIGEN_COM = 6 };
 
 class Tolerance
 {
@@ -88,8 +98,30 @@ inline double Tolerance::Delta(double v1, double v2) const
       double max = fabv1 < fabv2 ? fabv2: fabv1;
       return fabs(v1 - v2)/max;
     }
-    else {                    // absolute diff
+    else if (type == ABSOLUTE) {
       return fabs(v1 - v2);
+    }
+    else if (type == COMBINED) {
+      double max = fabv1 < fabv2 ? fabv2: fabv1;
+      if (max > 1.0)
+	return fabs(v1 - v2)/max;
+      else
+	return fabs(v1 - v2);
+    }
+    else if (type == EIGEN_REL) {
+      if (v1 == 0.0 && v2 == 0.0) return 0.0;
+      double max = fabv1 < fabv2 ? fabv2: fabv1;
+      return fabs(fabv1 - fabv2)/max;
+    }
+    else if (type == EIGEN_ABS) {
+      return fabs(fabv1 - fabv2);
+    }
+    else if (type == EIGEN_COM) {
+      double max = fabv1 < fabv2 ? fabv2: fabv1;
+      if (max > 1.0)
+	return fabs(fabv1 - fabv2)/max;
+      else
+	return fabs(fabv1 - fabv2);
     }
   }
   return 0.0;

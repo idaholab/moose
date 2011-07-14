@@ -30,7 +30,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: exo_block.h,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #ifndef EXO_BLOCK_H
 #define EXO_BLOCK_H
@@ -50,27 +49,22 @@ public:
   Exo_Block(int exo_file_id, int block_id,
             const char* type,
             int num_elmts,
-            int num_nodes_per_elmt,
-            int num_attr = 0);
+            int num_nodes_per_elmt);
  ~Exo_Block();
   
   std::string Load_Connectivity();
-  std::string Load_Attributes();
   std::string Free_Connectivity();
-  std::string Free_Attributes();
   
   // Access functions:
   
   const std::string& Elmt_Type()            const { return elmt_type;          }
   int                Num_Nodes_per_Elmt()   const { return num_nodes_per_elmt; }
-  int                Num_Attributes()       const { return num_attr;           }
   
   
   // Block description access functions:
   
   const int* Connectivity()  const { return conn; }  // 1-offset connectivity
   const int* Connectivity(int elmt_index) const;     // 1-offset connectivity
-  const double* Attributes() const { return attr; }
   
   std::string Give_Connectivity(int& num_e,       // Moves connectivity matrix
                                 int& npe,         // to conn pointer and sets
@@ -96,10 +90,8 @@ private:
 
   std::string elmt_type;
   int         num_nodes_per_elmt;
-  int         num_attr;
   
   int*    conn;          // Array; holds a matrix, num_elmts by num_nodes_per_elmt.
-  double* attr;          // Array; holds a matrix, num_elmts by num_attr;
   
   friend class ExoII_Read;
 };

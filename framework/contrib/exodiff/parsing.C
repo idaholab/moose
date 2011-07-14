@@ -47,8 +47,11 @@
 
 using namespace std;
 
-string cmd_file_name = "";
+extern void Print_Banner(const char *prefix);
 
+namespace {
+  void show_copyright();
+}
 
 int File_Exists(const string & fname)
 {
@@ -57,6 +60,61 @@ int File_Exists(const string & fname)
   if (file_check.fail()) return 0;
   file_check.close();
   return 1;
+}
+
+void Parse_Steps_Option(const string &option)
+{
+  //: The defined formats for the count attribute are:<br>
+  //:  <ul>
+  //:    <li><missing> -- default -- 1 <= count <= oo  (all steps)</li>
+  //:    <li>"X"                  -- X <= count <= X  (just step X)</li>
+  //:    <li>"X:Y"                -- X to Y by 1</li>
+  //:    <li>"X:"                 -- X to oo by 1</li>
+  //:    <li>":Y"                 -- 1 to Y by 1</li>
+  //:    <li>"::Z"                -- 1 to oo by Z</li>
+  //:  </ul>
+  //: The count and step must always be >= 0
+
+  // Break into tokens separated by ":"
+
+  // Default is given in constructor above...
+
+  const char *tokens = option.c_str();
+  if (tokens != NULL) {
+    if (strchr(tokens, ':') != NULL) {
+      // The string contains a separator
+
+      int vals[3];
+      vals[0] = specs.time_step_start;
+      vals[1] = specs.time_step_stop;
+      vals[2] = specs.time_step_increment;
+
+      int j=0;
+      for (int i=0; i < 3; i++) {
+        // Parse 'i'th field
+        char tmp_str[128];;
+        int k=0;
+
+        while (tokens[j] != '\0' && tokens[j] != ':') {
+          tmp_str[k++] = tokens[j++];
+        }
+
+        tmp_str[k] = '\0';
+        if (strlen(tmp_str) > 0)
+          vals[i] = strtol(tmp_str, NULL, 0);
+
+        if (tokens[j++] == '\0') {
+          break; // Reached end of string
+        }
+      }
+      specs.time_step_start     = vals[0];
+      specs.time_step_stop      = vals[1];
+      specs.time_step_increment = vals[2];
+    } else {
+      // Does not contain a separator, min == max
+      specs.time_step_start = specs.time_step_stop = strtol(tokens, NULL, 0);
+    }
+  }
 }
 
 double To_Double(const string & str_val)
@@ -166,7 +224,7 @@ void parseExcludeTimes(string exclude_arg)
     exclude_arg = arg_copy;
     num_excluded_steps = 0;
     
-    string tok = extract_token( exclude_arg, "," );
+    tok = extract_token( exclude_arg, "," );
     while (tok.size() > 0)
     {
       string subtok = extract_token( tok, "-" );
@@ -208,8 +266,12 @@ bool Parse_Token(string& tok, string& opt_arg)
     exit(0);
   }
   else if ( tok == "-H" || tok == "-Help" || tok == "-man" ) {
-    Echo_Help();
+    Echo_Help(opt_arg);
     exit(0);
+  }
+  else if ( tok == "-copyright" ) {
+    Print_Banner(" ");
+    show_copyright();
   }
   else if ( abbreviation(tok, "-summary", 4) ) {
     specs.summary_flag = true;
@@ -245,8 +307,15 @@ bool Parse_Token(string& tok, string& opt_arg)
   else if (tok == "-TM") {
     specs.time_step_offset =  -2; // Signifies automatic offset calculation -- closest match
   }
+  else if ( tok == "-steps") {
+    Parse_Steps_Option(opt_arg);
+    used_opt_arg = true;
+  }
   else if ( abbreviation(tok, "-quiet", 2) ) {
     specs.quiet_flag = true;
+  }
+  else if ( abbreviation(tok, "-show_all_diffs", 8) ) {
+    specs.show_all_diffs = true;
   }
   else if ( abbreviation(tok, "-partial", 2) ) {
     specs.map_flag = PARTIAL;
@@ -254,17 +323,29 @@ bool Parse_Token(string& tok, string& opt_arg)
   else if ( abbreviation(tok, "-match_ids", 9) ) {
     specs.map_flag = USE_FILE_IDS;
   }
+  else if ( abbreviation(tok, "-match_file_order", 9) ) {
+    specs.map_flag = FILE_ORDER;
+  }
   else if ( abbreviation(tok, "-map", 2) ) {
     specs.map_flag = DISTANCE;
   }
   else if ( tok == "-nsmap" ) {
     specs.nsmap_flag = true;
   }
+  else if ( tok == "-no_nsmap" ) {
+    specs.nsmap_flag = false;
+  }
   else if ( tok == "-ssmap" ) {
     specs.ssmap_flag = true;
   }
+  else if ( tok == "-no_ssmap" ) {
+    specs.ssmap_flag = false;
+  }
   else if ( abbreviation(tok, "-short", 2) ) {
     specs.short_block_check = true;
+  }
+  else if ( tok == "-no_short") {
+    specs.short_block_check = false;
   }
   else if ( tok == "-nosymm" ) {
     specs.noSymmetricNameCheck = true;
@@ -278,6 +359,9 @@ bool Parse_Token(string& tok, string& opt_arg)
   else if ( tok == "-i" || tok == "-ignore_case" ) {
     specs.nocase_var_names = true;
   }
+  else if ( tok == "-case_sensitive" ) {
+    specs.nocase_var_names = false;
+  }
   else if ( tok == "-ignore_maps" ) {
     specs.ignore_maps = true;
   }
@@ -287,8 +371,32 @@ bool Parse_Token(string& tok, string& opt_arg)
   else if ( tok == "-ignore_dups" ) {
     specs.ignore_dups = true;
   }
+  else if ( abbreviation(tok, "-ignore_attributes", 12) ) {
+    specs.ignore_attributes = true;
+  }
   else if ( abbreviation(tok, "-relative", 2) ) {
-    specs.output_type = RELATIVE;  // Change type to relative.
+    specs.output_type      = RELATIVE;  // Change type to relative.
+    specs.default_tol.type = RELATIVE;
+  }
+  else if ( abbreviation(tok, "-absolute", 2) ) {
+    specs.output_type      = ABSOLUTE;  // Change type to absolute
+    specs.default_tol.type = ABSOLUTE;
+  }
+  else if ( abbreviation(tok, "-combine", 3) ) {
+    specs.output_type      = COMBINED;  // Change type to combine
+    specs.default_tol.type = COMBINED;
+  }
+  else if ( abbreviation(tok, "-eigen_relative", 7) ) {
+    specs.output_type      = EIGEN_REL;  // Change type to relative.
+    specs.default_tol.type = EIGEN_REL;
+  }
+  else if ( abbreviation(tok, "-eigen_absolute", 7) ) {
+    specs.output_type      = EIGEN_ABS;  // Change type to absolute
+    specs.default_tol.type = EIGEN_ABS;
+  }
+  else if ( abbreviation(tok, "-eigen_combine", 7) ) {
+    specs.output_type      = EIGEN_COM;  // Change type to combine
+    specs.default_tol.type = EIGEN_COM;
   }
   else if ( tok == "-dumpmap" ) {
     specs.dump_mapping = true;
@@ -309,9 +417,9 @@ bool Parse_Token(string& tok, string& opt_arg)
     Tolerance::use_old_floor = true;  // Change type to relative.
   }
   else if ( abbreviation(tok, "-file", 2) ) {
-    cmd_file_name = opt_arg;
-    if (!specs.summary_flag && !File_Exists(cmd_file_name)) {
-      cout << "exodiff: Can't open file \"" << cmd_file_name << "\"." << endl;
+    specs.command_file_name = opt_arg;
+    if (!specs.summary_flag && !File_Exists(specs.command_file_name)) {
+      cout << "exodiff: Can't open file \"" << specs.command_file_name << "\"." << endl;
       exit(1);
     }
     used_opt_arg = true;
@@ -349,9 +457,13 @@ string Parse_Variables(string xline, ifstream& cmd_file,
   if (tok != "")
     {
       if (tok != "(all)" && tok != "all" &&
-          !abbreviation(tok, "relative", 3) &&
-          !abbreviation(tok, "absolute", 3) &&
-          !abbreviation(tok, "floor", 3) )
+          !abbreviation(tok, "relative",    3) &&
+          !abbreviation(tok, "absolute",    3) &&
+          !abbreviation(tok, "combine", 3) &&
+          !abbreviation(tok, "eigen_relative",    7) &&
+          !abbreviation(tok, "eigen_absolute",    7) &&
+          !abbreviation(tok, "eigen_combine", 7) &&
+          !abbreviation(tok, "floor",       3) )
         {
           cout << "exodiff: error in parsing command file: unrecognized "
                   "keyword \"" << tok << "\"" << endl;
@@ -388,6 +500,55 @@ string Parse_Variables(string xline, ifstream& cmd_file,
           def_tol.value = To_Double(tok);
           tok = extract_token( xline, " \n\t=," );  to_lower(tok);
         }
+      else if ( abbreviation(tok, "combine", 3) )
+        {
+          def_tol.type = COMBINED;
+          tok = extract_token( xline, " \n\t=," );
+          if (tok == "floor" || tok == "") {
+            cout << "exodiff: Input file specifies a tolerance type "
+                    "but no tolerance" << endl;
+            exit(1);
+          }
+          def_tol.value = To_Double(tok);
+          tok = extract_token( xline, " \n\t=," );  to_lower(tok);
+        }
+      else if ( abbreviation(tok, "eigen_relative", 7) )
+        {
+          def_tol.type = EIGEN_REL;
+          tok = extract_token( xline, " \n\t=," );
+          if (tok == "floor" || tok == "") {
+            cout << "exodiff: Input file specifies a tolerance type "
+                    "but no tolerance" << endl;
+            exit(1);
+          }
+          def_tol.value = To_Double(tok);
+          tok = extract_token( xline, " \n\t=," );  to_lower(tok);
+        }
+      else if ( abbreviation(tok, "eigen_absolute", 7) )
+        {
+          def_tol.type = EIGEN_ABS;
+          tok = extract_token( xline, " \n\t=," );
+          if (tok == "floor" || tok == "") {
+            cout << "exodiff: Input file specifies a tolerance type "
+                    "but no tolerance" << endl;
+            exit(1);
+          }
+          def_tol.value = To_Double(tok);
+          tok = extract_token( xline, " \n\t=," );  to_lower(tok);
+        }
+      else if ( abbreviation(tok, "eigen_combine", 7) )
+        {
+          def_tol.type = EIGEN_COM;
+          tok = extract_token( xline, " \n\t=," );
+          if (tok == "floor" || tok == "") {
+            cout << "exodiff: Input file specifies a tolerance type "
+                    "but no tolerance" << endl;
+            exit(1);
+          }
+          def_tol.value = To_Double(tok);
+          tok = extract_token( xline, " \n\t=," );  to_lower(tok);
+        }
+        
         
       if ( abbreviation(tok, "floor", 3) )
         {
@@ -455,6 +616,27 @@ string Parse_Variables(string xline, ifstream& cmd_file,
                   toler[idx].type = ABSOLUTE;
                   tok = extract_token(xline," \n\t=,");
                 }
+              else if ( abbreviation(tok, "combine", 3) )
+                {
+                  toler[idx].type = COMBINED;
+                  tok = extract_token(xline," \n\t=,");
+                }
+              else if ( abbreviation(tok, "eigen_relative", 7) )
+                {
+                  toler[idx].type = EIGEN_REL;
+                  tok = extract_token(xline," \n\t=,");
+                }
+              else if ( abbreviation(tok, "eigen_absolute", 7) )
+                {
+                  toler[idx].type = EIGEN_ABS;
+                  tok = extract_token(xline," \n\t=,");
+                }
+        
+              else if ( abbreviation(tok, "eigen_com", 7) )
+                {
+                  toler[idx].type = EIGEN_COM;
+                  tok = extract_token(xline," \n\t=,");
+                }
         
               if ( abbreviation(tok, "floor", 3) )
                 {
@@ -520,7 +702,7 @@ void Parse_Command_Line(int argc, char* argv[],
       string tok = extract_token( env_opts, delimiter );
       ++i;
       string pos_arg = "";
-      if ( i < arg_count && !env_opts.empty() && env_opts[0] != '-' ) {
+      if ( i < arg_count && !env_opts.empty() && (env_opts[0] != '-' || isdigit(env_opts[1]))) {
         pos_arg = extract_token( env_opts, delimiter );
         ++i;
       }
@@ -536,7 +718,7 @@ void Parse_Command_Line(int argc, char* argv[],
       string pos_arg = "";
       if (i < argc) { 
         pos_arg = argv[i];
-        if ( !pos_arg.empty() && pos_arg[0] == '-' ) {
+        if ( !pos_arg.empty() && (pos_arg[0] == '-' && !isdigit(pos_arg[1]))) {
           pos_arg = "";
         }
       }
@@ -565,6 +747,7 @@ void Parse_Command_Line(int argc, char* argv[],
   specs.glob_var_default = specs.default_tol;
   specs.node_var_default = specs.default_tol;
   specs.elmt_var_default = specs.default_tol;
+  specs.elmt_att_default = specs.default_tol;
   specs.ns_var_default   = specs.default_tol;
   specs.ss_var_default   = specs.default_tol;
 
@@ -573,6 +756,7 @@ void Parse_Command_Line(int argc, char* argv[],
       specs.glob_var[k] = specs.default_tol;
       specs.node_var[k] = specs.default_tol;
       specs.elmt_var[k] = specs.default_tol;
+      specs.elmt_att[k] = specs.default_tol;
       specs.ss_var[k]   = specs.default_tol;
       specs.ns_var[k]   = specs.default_tol;
     }
@@ -580,7 +764,7 @@ void Parse_Command_Line(int argc, char* argv[],
   specs.allocateNames();
   
   // Parse command file if it exists.
-  if (cmd_file_name != "")
+  if (specs.command_file_name != "")
     {
       int default_tol_specified = 0;
     
@@ -588,7 +772,7 @@ void Parse_Command_Line(int argc, char* argv[],
       specs.coord_tol.type = IGNORE;
       specs.time_tol.type  = IGNORE;
     
-      ifstream cmd_file(cmd_file_name.c_str(), ios::in);
+      ifstream cmd_file(specs.command_file_name.c_str(), ios::in);
       SMART_ASSERT(cmd_file.good());
     
       char line[256];
@@ -617,6 +801,26 @@ void Parse_Command_Line(int argc, char* argv[],
                   else if ( abbreviation(tok, "absolute", 3) )
                     {
                       specs.default_tol.type = ABSOLUTE;
+                      tok = extract_token( xline, " \n\t=," );
+                    }
+                  else if ( abbreviation(tok, "combine", 3) )
+                    {
+                      specs.default_tol.type = COMBINED;
+                      tok = extract_token( xline, " \n\t=," );
+                    }
+                  else if ( abbreviation(tok, "eigen_relative", 7) )
+                    {
+                      specs.default_tol.type = EIGEN_REL;
+                      tok = extract_token( xline, " \n\t=," );
+                    }
+                  else if ( abbreviation(tok, "eigen_absolute", 7) )
+                    {
+                      specs.default_tol.type = EIGEN_ABS;
+                      tok = extract_token( xline, " \n\t=," );
+                    }
+                  else if ( abbreviation(tok, "eigen_combine", 7) )
+                    {
+                      specs.default_tol.type = EIGEN_COM;
                       tok = extract_token( xline, " \n\t=," );
                     }
                   if (tok == "") Parse_Die(line);
@@ -686,10 +890,20 @@ void Parse_Command_Line(int argc, char* argv[],
                 {
                   specs.short_block_check = true;
                 }
+              else if ( tok1 == "no" &&
+                        abbreviation(tok2, "short", 3) )
+                {
+                  specs.short_block_check = false;
+                }
               else if ( abbreviation(tok1, "ignore", 3) &&
                         abbreviation(tok2, "case", 3) )
                 {
                   specs.nocase_var_names = true;
+                }
+              else if ( abbreviation(tok1, "case", 3) &&
+                        abbreviation(tok2, "sensitive", 3) )
+                {
+                  specs.nocase_var_names = false;
                 }
               else if ( abbreviation(tok1, "ignore", 3) &&
                         abbreviation(tok2, "maps", 3) )
@@ -705,6 +919,11 @@ void Parse_Command_Line(int argc, char* argv[],
                         abbreviation(tok2, "dups", 3) )
                 {
                   specs.ignore_dups = true;
+                }
+              else if ( abbreviation(tok1, "ignore", 3) &&
+                        abbreviation(tok2, "attributes", 3) )
+                {
+                  specs.ignore_attributes = true;
                 }
               else if ( tok1 == "step" && tok2 == "offset" )
                 {
@@ -747,6 +966,34 @@ void Parse_Command_Line(int argc, char* argv[],
                           if (tok2 == "") Parse_Die(line);
                           specs.coord_tol.value = To_Double(tok2);
                         }
+                      else if ( abbreviation(tok2, "combine", 3) )
+                        {
+                          specs.coord_tol.type = COMBINED;
+                          tok2 = extract_token( xline, " \n\t=" );
+                          if (tok2 == "") Parse_Die(line);
+                          specs.coord_tol.value = To_Double(tok2);
+                        }
+                      else if ( abbreviation(tok2, "eigen_relative", 7) )
+                        {
+                          specs.coord_tol.type = EIGEN_REL;
+                          tok2 = extract_token( xline, " \n\t=" );
+                          if (tok2 == "") Parse_Die(line);
+                          specs.coord_tol.value = To_Double(tok2);
+                        }
+                      else if ( abbreviation(tok2, "eigen_absolute", 7) )
+                        {
+                          specs.coord_tol.type = EIGEN_ABS;
+                          tok2 = extract_token( xline, " \n\t=" );
+                          if (tok2 == "") Parse_Die(line);
+                          specs.coord_tol.value = To_Double(tok2);
+                        }
+                      else if ( abbreviation(tok2, "eigen_combine", 7) )
+                        {
+                          specs.coord_tol.type = EIGEN_COM;
+                          tok2 = extract_token( xline, " \n\t=" );
+                          if (tok2 == "") Parse_Die(line);
+                          specs.coord_tol.value = To_Double(tok2);
+                        }
                       else if ( abbreviation(tok2, "floor", 3) )
                         {
                           tok2 = extract_token( xline, " \n\t=" );
@@ -782,6 +1029,13 @@ void Parse_Command_Line(int argc, char* argv[],
                       else if ( abbreviation(tok, "absolute", 3) )
                         {
                           specs.time_tol.type = ABSOLUTE;
+                          tok = extract_token( xline, " \n\t=" );
+                          if (tok == "") Parse_Die(line);
+                          specs.time_tol.value = To_Double(tok);
+                        }
+                      else if ( abbreviation(tok, "combine", 3) )
+                        {
+                          specs.time_tol.type = COMBINED;
                           tok = extract_token( xline, " \n\t=" );
                           if (tok == "") Parse_Die(line);
                           specs.time_tol.value = To_Double(tok);
@@ -882,6 +1136,22 @@ void Parse_Command_Line(int argc, char* argv[],
           
                   continue;
                 }
+              else if ( abbreviation(tok1, "element", 4) &&
+                        abbreviation(tok2, "attributes", 3) )
+                {
+                  xline = Parse_Variables(xline, cmd_file,
+                                          specs.elmt_att_do_all_flag,
+                                          specs.elmt_att_default,
+                                          specs.elmt_att_names,
+                                          specs.elmt_att);
+          
+                  Check_Parsed_Names(*specs.elmt_att_names, specs.elmt_att_do_all_flag);
+          
+                  if (!xline.empty()) strncpy(line, xline.c_str(), 255);
+                  else                strcpy(line, "");
+          
+                  continue;
+                }
               else
                 Parse_Die(line);
             }
@@ -893,7 +1163,47 @@ void Parse_Command_Line(int argc, char* argv[],
     specs.glob_var_do_all_flag = true;
     specs.node_var_do_all_flag = true;
     specs.elmt_var_do_all_flag = true;
+    specs.elmt_att_do_all_flag = true;
     specs.ns_var_do_all_flag = true;
     specs.ss_var_do_all_flag = true;
+  }
+}
+
+namespace {
+  void show_copyright()
+  {
+    cerr << "\n"
+	 << "Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract\n"
+	 << "DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains\n"
+	 << "certain rights in this software\n"
+	 << "\n"
+	 << "Redistribution and use in source and binary forms, with or without\n"
+	 << "modification, are permitted provided that the following conditions are\n"
+	 << "met:\n"
+	 << "\n"
+	 << "    * Redistributions of source code must retain the above copyright\n"
+	 << "      notice, this list of conditions and the following disclaimer.\n"
+	 << "\n"
+	 << "    * Redistributions in binary form must reproduce the above\n"
+	 << "      copyright notice, this list of conditions and the following\n"
+	 << "      disclaimer in the documentation and/or other materials provided\n"
+	 << "      with the distribution.\n"
+	 << "\n"
+	 << "    * Neither the name of Sandia Corporation nor the names of its\n"
+	 << "      contributors may be used to endorse or promote products derived\n"
+	 << "      from this software without specific prior written permission.\n"
+	 << "\n"
+	 << "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n"
+	 << "'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n"
+	 << "LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n"
+	 << "A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n"
+	 << "OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n"
+	 << "SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n"
+	 << "LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n"
+	 << "DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
+	 << "THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
+	 << "(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
+	 << "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n";
+    exit(EXIT_SUCCESS);
   }
 }

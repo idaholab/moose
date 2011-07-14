@@ -19,24 +19,25 @@ from CSVDiffer import CSVDiffer
 # testOutputAndFinish() - examine the output of the test to see if it passed or failed
 
 ## Called by ./run_tests in an application directory
-def runTests(argv, app_name):
+def runTests(argv, app_name, moose_dir):
   host_name = gethostname()
   if host_name == 'service0' or host_name == 'service1':
     print 'Testing not supported on Icestorm head node'
     sys.exit(0)
 
-  harness = TestHarness(argv, app_name)
+  harness = TestHarness(argv, app_name, moose_dir)
   harness.findAndRunTests()
 
 
 class TestHarness:
 
-  def __init__(self, argv, app_name):
+  def __init__(self, argv, app_name, moose_dir):
     self.test_table = []
 
     self.num_passed = 0
     self.num_failed = 0
     self.num_skipped = 0
+    self.moose_dir = os.path.abspath(moose_dir) + '/'
 
     self.file = None
 
@@ -157,7 +158,7 @@ class TestHarness:
           custom_cmp = ''
           if test[CUSTOM_CMP] != None:
              custom_cmp = ' -f ' + os.path.join(test[TEST_DIR], test[CUSTOM_CMP])
-          command = 'exodiff -m' + custom_cmp + ' -F ' + str(test[ABS_ZERO]) + ' -use_old_floor -t ' + str(test[REL_ERR]) \
+          command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F ' + str(test[ABS_ZERO]) + ' -use_old_floor -t ' + str(test[REL_ERR]) \
                     + ' ' + os.path.join(test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file)
           exo_output = runCommand(command)
           output += 'Running exodiff: ' + command + '\n' + exo_output

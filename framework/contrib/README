@@ -7,3 +7,19 @@ fparser/
   |* Copyright: Juha Nieminen, Joel Yliluoma                                 *|
   |* License: lgpl v3 (http://www.gnu.org/copyleft/lesser.html)              *|
   /***************************************************************************\
+
+mtwist-1.1/
+  /***************************************************************************\
+  |* Mersenne Twist Pseudorandom Number Generator Package                    *|
+  |*-------------------------------------------------------------------------*|
+  |* Copyright: Geoff Kuenning                                               *|
+  |* License: lgpl v3 (http://www.gnu.org/copyleft/lesser.html)              *|
+  /***************************************************************************\
+
+exodiff/
+  /***************************************************************************\
+  |* Exodus Differencing tool from the Seacas ACCESS package                 *|
+  |*-------------------------------------------------------------------------*|
+  |* Copyright: Sandia Corportation                                          *|
+  |* License: bsd http://www.linfo.org/bsdlicense.html                       *|
+  /***************************************************************************\

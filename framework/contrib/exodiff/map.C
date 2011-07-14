@@ -30,7 +30,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: map.C,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #include <cstdlib>
 #include <math.h>
@@ -51,9 +50,6 @@ namespace {
 	   double* x, double* y, double* z,
 	   int *id, int N, int dim, bool ignore_dups);
 
-  int FindSimple(double x0, double y0, double z0,
-		 double* x, double* y, double* z,
-		 int *id, int N, int dim);
   void Compute_Node_Map(int*& node_map, ExoII_Read& file1, ExoII_Read& file2);
 }
 
@@ -561,7 +557,7 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
 }
 
 namespace {
-  void internal_compute_maps(int *map, const int *file1_id_map, const int *file2_id_map,
+  bool internal_compute_maps(int *map, const int *file1_id_map, const int *file2_id_map,
 			     int count, const char *type)
   {
     std::vector<int> id1(count);
@@ -584,6 +580,16 @@ namespace {
 	exit(1);
       }
     }
+    
+    // See if there is any mapping happening...
+    bool mapped = false;
+    for (int i=0; i < count; i++) {
+      if (i != map[i]) {
+	mapped = true;
+	break;
+      }
+    }
+    return mapped;
   }
 }
 
@@ -608,7 +614,10 @@ void Compute_FileId_Maps(int*& node_map, int*& elmt_map,
     const int *node_id_map1 = file1.Get_Node_Map();
     const int *node_id_map2 = file2.Get_Node_Map();
     
-    internal_compute_maps(node_map, node_id_map1, node_id_map2, num_nodes, "node");
+    if (!internal_compute_maps(node_map, node_id_map1, node_id_map2, num_nodes, "node")) {
+      delete [] node_map;
+      node_map = 0;
+    }
   }
   
   {
@@ -620,14 +629,17 @@ void Compute_FileId_Maps(int*& node_map, int*& elmt_map,
     const int *elem_id_map1 = file1.Get_Elmt_Map();
     const int *elem_id_map2 = file2.Get_Elmt_Map();
 
-    internal_compute_maps(elmt_map, elem_id_map1, elem_id_map2, num_elmts, "element");
+    if (!internal_compute_maps(elmt_map, elem_id_map1, elem_id_map2, num_elmts, "element")) {
+      delete [] elmt_map;
+      elmt_map = 0;
+    }
   }
 }
 
 void Dump_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1)
 {
   int ijk;
-  std::cout << "\n=== node number map (file1 -> file2) \n";
+  std::cout << "\n=== node number map (file1 -> file2) local ids\n";
   bool one_to_one = true;
   for (ijk = 0; ijk < file1.Num_Nodes(); ++ijk) {
     if (ijk != node_map[ijk]) {
@@ -642,7 +654,7 @@ void Dump_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1)
     std::cout << " *** Node map is one-to-one\n";
   }
       
-  std::cout << "\n=== element number map (file1 -> file2) \n";
+  std::cout << "\n=== element number map (file1 -> file2) local ids\n";
   one_to_one = true;
   for (ijk = 0; ijk < file1.Num_Elmts(); ++ijk) {
     if (ijk != elmt_map[ijk]) {
@@ -659,18 +671,29 @@ void Dump_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1)
   std::cout << "===" << std::endl;
 }
 			    
-bool Check_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1)
+bool Check_Maps(const int *node_map, const int *elmt_map, const ExoII_Read& file1, const ExoII_Read& file2)
 {
-  int ijk;
-  for (ijk = 0; ijk < file1.Num_Nodes(); ++ijk) {
-    if (ijk != node_map[ijk]) {
-      return false;
+  if (file1.Num_Nodes() != file2.Num_Nodes()) {
+    return false;
+  }
+  
+  if (file1.Num_Elmts() != file2.Num_Elmts()) {
+    return false;
+  }
+  
+  if (node_map != NULL) {
+    for (int ijk = 0; ijk < file1.Num_Nodes(); ++ijk) {
+      if (ijk != node_map[ijk]) {
+	return false;
+      }
     }
   }
 
-  for (ijk = 0; ijk < file1.Num_Elmts(); ++ijk) {
-    if (ijk != elmt_map[ijk]) {
-      return false;
+  if (elmt_map != NULL) {
+    for (int ijk = 0; ijk < file1.Num_Elmts(); ++ijk) {
+      if (ijk != elmt_map[ijk]) {
+	return false;
+      }
     }
   }
   // All maps are one-to-one; Don't need to map nodes or elements...
@@ -863,44 +886,6 @@ namespace {
     return index;
   }
 
-  int FindSimple(double x0, double y0, double z0,
-		 double* x, double* y, double* z,
-		 int *id, int N, int dim)
-  {
-    SMART_ASSERT(x != 0);
-    SMART_ASSERT(N > 0);
-  
-    // Cannot ignore the comparisons, so make sure the coord_tol_type
-    // is not -1 which is "ignore"
-    TOLERANCE_TYPE_enum save_tolerance_type = specs.coord_tol.type;
-    if (save_tolerance_type == IGNORE)
-      specs.coord_tol.type = ABSOLUTE;
-
-  
-    // Search until tolerance between the x coordinate fails or a match is found.
-    // If a match is found, the loop continues in order to check for dups.
-  
-    for ( int i = 0; i < N; i ++)
-      {
-	if ((dim == 1
-	     && !specs.coord_tol.Diff(x[id[i]], x0))
-	    || (dim == 2 
-		&& !specs.coord_tol.Diff(x[id[i]], x0)
-		&& !specs.coord_tol.Diff(y[id[i]], y0))
-	    || (dim == 3 
-		&& !specs.coord_tol.Diff(x[id[i]], x0) 
-		&& !specs.coord_tol.Diff(y[id[i]], y0) 
-		&& !specs.coord_tol.Diff(z[id[i]], z0))
-	    ){
-	  specs.coord_tol.type = save_tolerance_type;
-	  return i;
-	}
-      }
-  
-    specs.coord_tol.type = save_tolerance_type;
-    return -1;
-  }
-
   inline double dist_sqrd(double x1, double x2)
   { return (x2 - x1)*(x2 - x1); }
 
@@ -1019,8 +1004,9 @@ double Find_Min_Coord_Sep(ExoII_Read& file)
 
 bool Compare_Maps(ExoII_Read& file1, ExoII_Read& file2, const int *node_map, const int *elmt_map, bool partial_flag)
 {
-  // Check whether the node and element number maps from both file1 and file2 match
-  // which indicates that we are comparing the same element and node in each file.
+  // Check whether the node and element number maps from both file1
+  // and file2 match which indicates that we are comparing the same
+  // element and node in each file.
 
   int num_nodes1 = file1.Num_Nodes();
   int num_elmts1 = file1.Num_Elmts();
@@ -1040,21 +1026,24 @@ bool Compare_Maps(ExoII_Read& file1, ExoII_Read& file2, const int *node_map, con
 
   bool diff = false;
   
-  if (!partial_flag) {
-    if (node_map != NULL) {
-      // There is a map between file1 and file2, but all nodes are used in both files.
-      for (int i=0; i < num_nodes1; i++) {
-	if (node_id_map1[i] != node_id_map2[node_map[i]]) {
+  if (node_map != NULL) {
+    // There is a map between file1 and file2, but all nodes are
+    // used in both files.
+    for (int i=0; i < num_nodes1; i++) {
+      if (node_id_map1[i] != node_id_map2[node_map[i]]) {
+	if (!(node_id_map2[node_map[i]] == 0 && partial_flag)) { // Don't output diff if non-matched and partial
 	  std::cout << "exodiff: WARNING .. The local node " << i+1 << " with global id " << node_id_map1[i]
 		    << " in file1 has the global id " << node_id_map2[node_map[i]]
 		    << " in file2.\n";
 	  diff = true;
 	}
       }
-    } else {
-      // No node mapping between file1 and file2 -- do a straight compare.
-      for (int i=0; i < num_nodes1; i++) {
-	if (node_id_map1[i] != node_id_map2[i]) {
+    }
+  } else {
+    // No node mapping between file1 and file2 -- do a straight compare.
+    for (int i=0; i < num_nodes1; i++) {
+      if (node_id_map1[i] != node_id_map2[i]) {
+	if (!(node_id_map2[i] == 0 && partial_flag)) { // Don't output diff if non-matched and partial
 	  std::cout << "exodiff: WARNING .. The local node " << i+1 << " with global id " << node_id_map1[i]
 		    << " in file1 has the global id " << node_id_map2[i]
 		    << " in file2.\n";
@@ -1062,21 +1051,26 @@ bool Compare_Maps(ExoII_Read& file1, ExoII_Read& file2, const int *node_map, con
 	}
       }
     }
+  }
 
-    if (elmt_map != NULL) {
-      // There is a map between file1 and file2, but all elements are used in both files.
-      for (int i=0; i < num_elmts1; i++) {
-	if (elem_id_map1[i] != elem_id_map2[elmt_map[i]]) {
+  if (elmt_map != NULL) {
+    // There is a map between file1 and file2, but all elements are
+    // used in both files.
+    for (int i=0; i < num_elmts1; i++) {
+      if (elem_id_map1[i] != elem_id_map2[elmt_map[i]]) {
+	if (!(elem_id_map2[elmt_map[i]] == 0 && partial_flag)) { // Don't output diff if non-matched and partial
 	  std::cout << "exodiff: WARNING .. The local element " << i+1 << " with global id " << elem_id_map1[i]
 		    << " in file1 has the global id " << elem_id_map2[elmt_map[i]]
 		    << " in file2.\n";
 	  diff = true;
 	}
       }
-    } else {
-      // No element mapping between file1 and file2 -- do a straight compare.
-      for (int i=0; i < num_elmts1; i++) {
-	if (elem_id_map1[i] != elem_id_map2[i]) {
+    }
+  } else {
+    // No element mapping between file1 and file2 -- do a straight compare.
+    for (int i=0; i < num_elmts1; i++) {
+      if (elem_id_map1[i] != elem_id_map2[i]) {
+	if (!(elem_id_map2[i] == 0 && partial_flag)) { // Don't output diff if non-matched and partial
 	  std::cout << "exodiff: WARNING .. The local element " << i+1 << " with global id " << elem_id_map1[i]
 		    << " in file1 has the global id " << elem_id_map2[i]
 		    << " in file2.\n";

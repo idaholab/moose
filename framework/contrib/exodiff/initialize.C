@@ -30,10 +30,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: initialize.C,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <set>
 
 #include <cstdlib>
 #include <cstdio>
@@ -47,14 +48,15 @@
 #include "exodusII.h"
 #include "stringx.h"
 #include "Specifications.h"
+#include "util.h"
 
 using namespace std;
 
 namespace {
-  int     inquire_int(int exo_file_id,    int request);
   float   inquire_float(int exo_file_id,  int request);
-  void read_vars(int file_id, const char *flag, const char *type,
-		 int num_vars, char** varnames, vector<string> &varlist);
+  void read_vars(int file_id, EXOTYPE flag, const char *type,
+		 int num_vars, vector<string> &varlist);
+
 }
     
 
@@ -102,6 +104,7 @@ string ExoII_Read::Open_File(const char* fname)
   
   file_id = err;
   io_word_size = ws;
+
   Get_Init_Data();
   
   return "";
@@ -111,6 +114,10 @@ void ExoII_Read::Get_Init_Data()
 {
   SMART_ASSERT(Check_State());
   SMART_ASSERT(file_id >= 0);
+  
+  // Determine max size of entity and variable names on the database
+  int name_length = ex_inquire_int(file_id, EX_INQ_DB_MAX_USED_NAME_LENGTH);
+  ex_set_max_name_length(file_id, name_length);
   
   char title_buff[MAX_LINE_LENGTH+1];
   
@@ -122,6 +129,7 @@ void ExoII_Read::Get_Init_Data()
 	      << " Error number = " << err << ".  Aborting..." << std::endl;
     exit(1);
   }
+  title = title_buff;
   if (err > 0 && !specs.quiet_flag)
     std::cout << "ExoII_Read::Get_Init_Data(): WARNING: was issued, number = "
 	      << err << std::endl;
@@ -142,8 +150,8 @@ void ExoII_Read::Get_Init_Data()
   
   db_version   = inquire_float(file_id, EX_INQ_DB_VERS);
   api_version  = inquire_float(file_id, EX_INQ_API_VERS);
-  int num_qa   = inquire_int(file_id,   EX_INQ_QA);
-  int num_info = inquire_int(file_id,   EX_INQ_INFO);
+  int num_qa   = ex_inquire_int(file_id,   EX_INQ_QA);
+  int num_info = ex_inquire_int(file_id,   EX_INQ_INFO);
   
   if (db_version < 0.0 || api_version < 0.0 || num_qa < 0 || num_info < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: inquire data appears corrupt:"
@@ -158,15 +166,8 @@ void ExoII_Read::Get_Init_Data()
   
   //                   Coordinate Names...
   
-  char* coords[3];
-  {for (int i = 0; i < dimension; ++i) {
-      coords[i] = new char[MAX_STR_LENGTH+1];
-      SMART_ASSERT(coords[i] != 0);
-      coords[i][0] = '\0';
-    }}
-  
+  char** coords = get_name_array(3, name_length);
   err = ex_get_coord_names(file_id, coords);
-  
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get coordinate"
 	      << " names!  Aborting..." << std::endl;
@@ -176,8 +177,8 @@ void ExoII_Read::Get_Init_Data()
   coord_names.clear();
   for (int i = 0; i < dimension; ++i) {
     coord_names.push_back(coords[i]);
-    delete [] coords[i];
   }
+  free_name_array(coords, 3);
   
   //                 Element Block Data...
   
@@ -212,6 +213,16 @@ void ExoII_Read::Get_Init_Data()
 		<< num_elmts << " does not equal the sum of the number of elements "
 		<< "in each block " << e_count << std::endl;
     }
+
+    // Gather the attribute names (even though not all attributes are on all blocks)
+    std::set<std::string> names;
+    for (int b = 0; b < num_elmt_blocks; ++b) {
+      for (int a = 0; a < eblocks[b].attr_count(); a++) {
+	names.insert(eblocks[b].Get_Attribute_Name(a));
+      }
+    }
+    elmt_atts.resize(names.size());
+    std::copy(names.begin(), names.end(), elmt_atts.begin());
   }
   
   //                     Node & Side sets...
@@ -270,35 +281,35 @@ void ExoII_Read::Get_Init_Data()
   
   int num_global_vars, num_nodal_vars, num_elmt_vars, num_ns_vars, num_ss_vars;
   
-  err = ex_get_var_param(file_id, "G", &num_global_vars);
+  err = ex_get_variable_param(file_id, EX_GLOBAL, &num_global_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " global variables!  Aborting..." << std::endl;
     exit(1);
   }
   
-  err = ex_get_var_param(file_id, "N", &num_nodal_vars);
+  err = ex_get_variable_param(file_id, EX_NODAL, &num_nodal_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " nodal variables!  Aborting..." << std::endl;
     exit(1);
   }
   
-  err = ex_get_var_param(file_id, "E", &num_elmt_vars);
+  err = ex_get_variable_param(file_id, EX_ELEM_BLOCK, &num_elmt_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " element variables!  Aborting..." << std::endl;
     exit(1);
   }
   
-  err = ex_get_var_param(file_id, "M", &num_ns_vars);
+  err = ex_get_variable_param(file_id, EX_NODE_SET, &num_ns_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " nodeset variables!  Aborting..." << std::endl;
     exit(1);
   }
   
-  err = ex_get_var_param(file_id, "S", &num_ss_vars);
+  err = ex_get_variable_param(file_id, EX_SIDE_SET, &num_ss_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " sideset variables!  Aborting..." << std::endl;
@@ -316,29 +327,14 @@ void ExoII_Read::Get_Init_Data()
     exit(1);
   }
   
-  int max = num_global_vars > num_nodal_vars ? num_global_vars: num_nodal_vars;
-  max = num_elmt_vars > max ? num_elmt_vars: max;
-  max = num_ns_vars   > max ? num_ns_vars: max;
-  max = num_ss_vars   > max ? num_ss_vars: max;
-
-  char** varnames = new char*[max];  SMART_ASSERT(varnames != 0);
-  for (int v = 0; v < max; ++v) {
-    varnames[v] = new char[MAX_STR_LENGTH+1];  SMART_ASSERT(varnames[v] != 0);
-  }
-  
-  read_vars(file_id, "G", "Global",  num_global_vars, varnames, global_vars);
-  read_vars(file_id, "N", "Nodal",   num_nodal_vars,  varnames, nodal_vars);
-  read_vars(file_id, "E", "Element", num_elmt_vars,   varnames, elmt_vars);
-  read_vars(file_id, "M", "Nodeset", num_ns_vars,     varnames, ns_vars);
-  read_vars(file_id, "S", "Sideset", num_ss_vars,     varnames, ss_vars);
-  
-  {for (int v = 0; v < max; ++v)
-      delete [] varnames[v];
-  }
-  delete [] varnames;
+  read_vars(file_id, EX_GLOBAL,     "Global",  num_global_vars, global_vars);
+  read_vars(file_id, EX_NODAL,      "Nodal",   num_nodal_vars,  nodal_vars);
+  read_vars(file_id, EX_ELEM_BLOCK, "Element", num_elmt_vars,   elmt_vars);
+  read_vars(file_id, EX_NODE_SET,   "Nodeset", num_ns_vars,     ns_vars);
+  read_vars(file_id, EX_SIDE_SET,   "Sideset", num_ss_vars,     ss_vars);
   
   // Times:
-  num_times = inquire_int(file_id, EX_INQ_TIME);
+  num_times = ex_inquire_int(file_id, EX_INQ_TIME);
   if (num_times < 0) {
     std::cout << "ExoII_Read::Get_Init_Data()  ERROR: Number of time steps came"
 	      << " back negative (" << num_times << ")!  Aborting..." << std::endl;
@@ -371,28 +367,6 @@ int ExoII_Read::File_Exists(const char* fname)
 }
 
 namespace {
-  int inquire_int(int exo_file_id, int request)
-  {
-    SMART_ASSERT(exo_file_id >= 0);
-    int   get_int = 0;
-    float get_flt = 0.0;
-    char  get_str[MAX_LINE_LENGTH+1];
-
-    int err = ex_inquire(exo_file_id, request, &get_int, &get_flt, get_str);
-
-    if (err < 0) {
-      std::cout << "ExoII_Read::inquire_int(): ERROR " << err
-		<< ": ex_inquire failed!  Aborting..." << std::endl;
-      exit(1);
-    }
-
-    if (err > 0)
-      std::cout << "ExoII_Read::inquire_int(): WARNING: " << err
-		<< " issued by ex_inquire call!" << std::endl;
-
-    return get_int;
-  }
-
   float inquire_float(int exo_file_id, int request)
   {
     SMART_ASSERT(exo_file_id >= 0);
@@ -415,11 +389,14 @@ namespace {
     return get_flt;
   }
 
-  void read_vars(int file_id, const char *flag, const char *type,
-		 int num_vars, char** varnames, vector<string> &varlist)
+  void read_vars(int file_id, EXOTYPE flag, const char *type,
+		 int num_vars, vector<string> &varlist)
   {
     if (num_vars) {
-      int err = ex_get_var_names(file_id, flag, num_vars, varnames);
+      int name_size = ex_inquire_int(file_id, EX_INQ_MAX_READ_NAME_LENGTH);
+      char **varnames = get_name_array(num_vars, name_size);
+      int err = ex_get_variable_names(file_id, flag, num_vars, varnames);
+
       if (err < 0) {
 	std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get " << type 
 		  << " variable names!  Aborting..." << std::endl;
@@ -430,14 +407,16 @@ namespace {
 		  << "\"" << err << "\" on call to ex_get_var_names()!" << std::endl;
       for (int vg = 0; vg < num_vars; ++vg) {
 	SMART_ASSERT(varnames[vg] != 0);
-	if (std::strlen(varnames[vg]) == 0 || std::strlen(varnames[vg]) > MAX_STR_LENGTH) {
-	  std::cout << "exodiff: ERROR: " << type << " variable names appear corrupt" << std::endl
+	if (std::strlen(varnames[vg]) == 0 ||
+	    std::strlen(varnames[vg]) > name_size) {
+	  std::cout << "exodiff: ERROR: " << type
+		    << " variable names appear corrupt\n"
 		    << "                A length is 0 or greater than "
-		    << "MAX_STR_LENGTH(" << MAX_STR_LENGTH << ")" << std::endl
+		    << "name_size(" << name_size << ")\n"
 		    << "                Here are the names that I received from"
-		    << " a call to ex_get_var_names(...):" << std::endl;
+		    << " a call to ex_get_var_names(...):\n";
 	  for (int k = 1; k <= num_vars; ++k)
-	    std::cout << "\t\t" << k << ") \"" << varnames[k-1] << "\"" << std::endl;
+	    std::cout << "\t\t" << k << ") \"" << varnames[k-1] << "\"\n";
 	  std::cout << "                 Aborting..." << std::endl;
 	  exit(1);
 	}
@@ -446,6 +425,7 @@ namespace {
         chop_whitespace(n);
 	varlist.push_back(n);
       }
+      free_name_array(varnames, num_vars);
     }
   }
 }

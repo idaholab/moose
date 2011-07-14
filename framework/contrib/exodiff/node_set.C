@@ -30,7 +30,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: node_set.C,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #include <iostream>
 #include <cstdlib>
@@ -132,7 +131,7 @@ void Node_Set::load_nodes(const int *node_map) const
   if (numEntity > 0) {
     nodes = new int[numEntity];  SMART_ASSERT(nodes != 0);
     nodeIndex = new int[numEntity];  SMART_ASSERT(nodeIndex != 0);
-    ex_get_node_set(fileId, id_, nodes);
+    ex_get_set(fileId, EX_NODE_SET, id_, nodes, 0);
     
     if (node_map != NULL) {
       for (int i=0; i < numEntity; i++) {
@@ -152,7 +151,7 @@ const double* Node_Set::Distribution_Factors() const
 {
   if (!dist_factors && num_dist_factors > 0) {
     dist_factors = new double[num_dist_factors];  SMART_ASSERT(dist_factors != 0);
-    ex_get_node_set_dist_fact(fileId, id_, dist_factors);
+    ex_get_set_dist_fact(fileId, EX_NODE_SET, id_, dist_factors);
   }
   return dist_factors;
 }
@@ -182,7 +181,7 @@ int Node_Set::Check_State() const
 
 void Node_Set::entity_load_params()
 {
-  int err = ex_get_node_set_param(fileId, id_, &numEntity, &num_dist_factors);
+  int err = ex_get_set_param(fileId, EX_NODE_SET, id_, &numEntity, &num_dist_factors);
   
   if (err < 0) {
     std::cout << "ERROR: Failed to get nodeset parameters for nodeset " << id_

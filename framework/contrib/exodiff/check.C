@@ -30,7 +30,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: check.C,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #include <cstdlib>
 #include <cstdio>
@@ -51,7 +50,6 @@
 using namespace std;
 
 namespace {
-  bool Check_Global(ExoII_Read& file1, ExoII_Read& file2);
   bool Check_Nodal(ExoII_Read& file1, ExoII_Read& file2, bool check_only);
   bool Check_Elmt_Block(ExoII_Read& file1, ExoII_Read& file2, bool check_only);
   bool Check_Nodeset(ExoII_Read& file1, ExoII_Read& file2, const int *node_map, bool check_only);
@@ -60,6 +58,43 @@ namespace {
   bool Check_Elmt_Block_Params(const Exo_Block*, const Exo_Block*);
   bool Check_Elmt_Block_Connectivity(Exo_Block*, Exo_Block*);
   bool close_compare(const string & st1, const string & st2);
+}
+
+bool Check_Global(ExoII_Read& file1, ExoII_Read& file2)
+{
+  bool is_same = true;
+  if (file1.Dimension() != file2.Dimension()) {
+    std::cout << "exodiff: ERROR .. Dimension doesn't agree." << std::endl;
+    is_same = false;
+  }
+  if (file1.Num_Nodes() != file2.Num_Nodes()) {
+    if(specs.map_flag != PARTIAL){
+      std::cout << "exodiff: ERROR .. Number of nodes don't agree." << std::endl;
+      is_same = false;
+    }
+  }
+  if (file1.Num_Elmts() != file2.Num_Elmts()) {
+    if(specs.map_flag != PARTIAL){
+      std::cout << "exodiff: ERROR .. Number of elements don't agree." << std::endl;
+      is_same = false;
+    }
+  }
+  if (!specs.map_flag && file1.Num_Elmt_Blocks() != file2.Num_Elmt_Blocks()) {
+    if(specs.map_flag != PARTIAL){
+      std::cout << "exodiff: ERROR .. Number of blocks don't agree." << std::endl;
+      is_same = false;
+    }
+  }
+  if (!specs.map_flag && file1.Num_Times() != file2.Num_Times() && !specs.quiet_flag) {
+    std::cout << "exodiff: WARNING First file has " << file1.Num_Times()
+	      << " result times while the second file has " << file2.Num_Times()
+	      << ".\n"
+	      << "         Will consider only "
+	      << (file1.Num_Times() < file2.Num_Times() ? file1.Num_Times()
+		  : file2.Num_Times())
+	      << " timesteps." << std::endl;
+  }
+  return is_same;
 }
 
 void Check_Compatible_Meshes(ExoII_Read& file1, ExoII_Read& file2, bool check_only,
@@ -75,11 +110,9 @@ void Check_Compatible_Meshes(ExoII_Read& file1, ExoII_Read& file2, bool check_on
     if (!Check_Elmt_Block(file1, file2, check_only))
       is_diff = true;
   }
-  SMART_ASSERT(!specs.map_flag || (specs.map_flag && node_map != NULL));
   if (!Check_Nodeset(file1, file2, node_map, check_only))
     is_diff = true;
 
-  SMART_ASSERT(!specs.map_flag || (specs.map_flag && elmt_map != NULL));
   if (!Check_Sideset(file1, file2, elmt_map, check_only))
     is_diff = true;
 
@@ -90,43 +123,6 @@ void Check_Compatible_Meshes(ExoII_Read& file1, ExoII_Read& file2, bool check_on
 }
 
 namespace {
-  bool Check_Global(ExoII_Read& file1, ExoII_Read& file2)
-  {
-    bool is_same = true;
-    if (file1.Dimension() != file2.Dimension()) {
-      std::cout << "exodiff: ERROR .. Dimension doesn't agree." << std::endl;
-      is_same = false;
-    }
-    if (file1.Num_Nodes() != file2.Num_Nodes()) {
-      if(specs.map_flag != PARTIAL){
-	std::cout << "exodiff: ERROR .. Number of nodes don't agree." << std::endl;
-	is_same = false;
-      }
-    }
-    if (file1.Num_Elmts() != file2.Num_Elmts()) {
-      if(specs.map_flag != PARTIAL){
-	std::cout << "exodiff: ERROR .. Number of elements don't agree." << std::endl;
-	is_same = false;
-      }
-    }
-    if (!specs.map_flag && file1.Num_Elmt_Blocks() != file2.Num_Elmt_Blocks()) {
-      if(specs.map_flag != PARTIAL){
-	std::cout << "exodiff: ERROR .. Number of blocks don't agree." << std::endl;
-	is_same = false;
-      }
-    }
-    if (!specs.map_flag && file1.Num_Times() != file2.Num_Times() && !specs.quiet_flag) {
-      std::cout << "exodiff: WARNING First file has " << file1.Num_Times()
-		<< " result times while the second file has " << file2.Num_Times()
-		<< ".\n"
-		<< "         Will consider only "
-		<< (file1.Num_Times() < file2.Num_Times() ? file1.Num_Times()
-		    : file2.Num_Times())
-		<< " timesteps." << std::endl;
-    }
-    return is_same;
-  }
-
   bool Check_Nodal(ExoII_Read& file1, ExoII_Read& file2, bool check_only)
   {
     bool is_same = true;
@@ -187,7 +183,7 @@ namespace {
     return is_same;
   }
 
-  bool Check_Elmt_Block(ExoII_Read& file1, ExoII_Read& file2, bool /*check_only*/)
+  bool Check_Elmt_Block(ExoII_Read& file1, ExoII_Read& file2, bool check_only)
   {
     bool is_same = true;
     // Verify that element blocks match in the two files...
@@ -205,10 +201,13 @@ namespace {
 	  }
 	}
 	if (block1 != NULL && block2 != NULL) {
-	  if (!Check_Elmt_Block_Params(block1, block2))
+	  if (!Check_Elmt_Block_Params(block1, block2)) {
 	    is_same = false;
-	  if (!Check_Elmt_Block_Connectivity(block1, block2))
-	    is_same = false;
+	  } else {
+	    // Only do this check if Check_Elmt_Block_Params does not fail.
+	    if (!Check_Elmt_Block_Connectivity(block1, block2))
+	      is_same = false;
+	  }
 	}
       }
     }
@@ -332,30 +331,36 @@ namespace {
     // Do the following check(s) only if there are nodeset varibles...
     // For each nodeset, check that the order of the nodeset nodes is the same.
     // Eventually need to be able to map the order...
-    for (int b = 0; b < file1.Num_Node_Sets(); ++b) {
-      Node_Set* set1 = file1.Get_Node_Set_by_Index(b);
-      Node_Set* set2 = file2.Get_Node_Set_by_Id(set1->Id());
-      if (set2 == NULL)
-	continue;
+    if (specs.ns_var_names->size() > 0) {
+      for (int b = 0; b < file1.Num_Node_Sets(); ++b) {
+	Node_Set* set1 = file1.Get_Node_Set_by_Index(b);
+	Node_Set* set2 = file2.Get_Node_Set_by_Id(set1->Id());
+	if (set2 == NULL)
+	  continue;
 
-      if (node_map != NULL)
-	set1->apply_map(node_map);
+	if (node_map != NULL)
+	  set1->apply_map(node_map);
 	
-      if (set1->var_count() > 0 && (set1->Size() == set2->Size())) {
-	int node_count = set1->Size();
-	int diff = -1;
-	for (int i=0; i < node_count; i++) {
-	  if (set1->Node_Id(i) != set2->Node_Id(i)) {
-	    diff = i;
-	    break;
+	if (set1->var_count() > 0 && (set1->Size() == set2->Size())) {
+	  int node_count = set1->Size();
+	  int diff = -1;
+	  for (int i=0; i < node_count; i++) {
+	    if (set1->Node_Id(i) != set2->Node_Id(i)) {
+	      diff = i;
+	      break;
+	    }
 	  }
-	}
-	if (diff >= 0) {
-	  std::cout << "exodiff: ERROR .. The nodelists for nodeset id " << set1->Id()
-		    << " are not the same in the two files.\n"
-		    << "\tThe first difference is at position " << set1->Node_Index(diff)+1
-		    << ": Node " << set1->Node_Id(diff) << " vs. Node " << set2->Node_Id(diff) <<".\n";
-	  is_same = false;
+	  if (diff >= 0) {
+	    std::cout << "exodiff: ERROR .. The nodelists for nodeset id " << set1->Id()
+		      << " are not the same in the two files.\n"
+		      << "\tThe first difference is at position " << set1->Node_Index(diff)+1
+		      << ": Node " << set1->Node_Id(diff) << " vs. Node " << set2->Node_Id(diff) <<".\n";
+	    if(specs.map_flag != PARTIAL){
+	      is_same = false;
+	    } else {
+	      std::cout << "exodiff: ERROR .. The nodelist differences are ignored for the partial_map case.\n";
+	    }
+	  }
 	}
       }
     }
@@ -401,35 +406,41 @@ namespace {
     // Do the following check(s) only if there are sideset varibles...
     // For each sideset, check that the order of the sideset sides is the same.
     // Eventually need to be able to map the order...
-    for (int b = 0; b < file1.Num_Side_Sets(); ++b) {
-      Side_Set* set1 = file1.Get_Side_Set_by_Index(b);
-      Side_Set* set2 = file2.Get_Side_Set_by_Id(set1->Id());
-      if (set2 == NULL)
-	continue;
+    if (specs.ss_var_names->size() > 0) {
+      for (int b = 0; b < file1.Num_Side_Sets(); ++b) {
+	Side_Set* set1 = file1.Get_Side_Set_by_Index(b);
+	Side_Set* set2 = file2.Get_Side_Set_by_Id(set1->Id());
+	if (set2 == NULL)
+	  continue;
 
-      if (elmt_map != NULL)
-	set1->apply_map(elmt_map);
+	if (elmt_map != NULL)
+	  set1->apply_map(elmt_map);
       
-      // Don't care if sidesets don't match if there are no variables...
-      if (set1->var_count() > 0 && (set1->Size() == set2->Size())) {
-	int side_count = set1->Size();
-	int diff = -1;
-	for (int i=0; i < side_count; i++) {
-	  if (set1->Side_Id(i) != set2->Side_Id(i)) {
-	    diff = i;
-	    break;
+	// Don't care if sidesets don't match if there are no variables...
+	if (set1->var_count() > 0 && (set1->Size() == set2->Size())) {
+	  int side_count = set1->Size();
+	  int diff = -1;
+	  for (int i=0; i < side_count; i++) {
+	    if (set1->Side_Id(i) != set2->Side_Id(i)) {
+	      diff = i;
+	      break;
+	    }
 	  }
-	}
-	if (diff >= 0) {
-	  std::cout << "exodiff: ERROR .. The sidelists for sideset id " << set1->Id()
-		    << " are not the same in the two files.\n"
-		    << "\tThe first difference is at position " << set1->Side_Index(diff)+1
-		    << ": Side "
-		    << set1->Side_Id(diff).first << "." << set1->Side_Id(diff).second
-		    << " .vs. Side "
-		    << set2->Side_Id(diff).first << "." << set2->Side_Id(diff).second
-		    << ".\n";
-	  is_same = false;
+	  if (diff >= 0) {
+	    std::cout << "exodiff: ERROR .. The sidelists for sideset id " << set1->Id()
+		      << " are not the same in the two files.\n"
+		      << "\tThe first difference is at position " << set1->Side_Index(diff)+1
+		      << ": Side "
+		      << set1->Side_Id(diff).first << "." << set1->Side_Id(diff).second
+		      << " .vs. Side "
+		      << set2->Side_Id(diff).first << "." << set2->Side_Id(diff).second
+		      << ".\n";
+	    if(specs.map_flag != PARTIAL){
+	      is_same = false;
+	    } else {
+	      std::cout << "exodiff: ERROR .. The sidelist differences are ignored for the partial_map case.\n";
+	    }
+	  }
 	}
       }
     }

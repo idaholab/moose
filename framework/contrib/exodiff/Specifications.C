@@ -39,16 +39,18 @@ using namespace std;
 
 Specifications::Specifications()
   : quiet_flag           (false),
+    show_all_diffs       (false),
     output_type          (ABSOLUTE),
-    map_flag             (FILE_ORDER),
-    nsmap_flag           (false),
-    ssmap_flag           (false),
-    short_block_check    (false),
-    nocase_var_names     (false),
+    map_flag             (USE_FILE_IDS),
+    nsmap_flag           (true),
+    ssmap_flag           (true),
+    short_block_check    (true),
+    nocase_var_names     (true),
     summary_flag         (false),
     ignore_maps          (false),
     ignore_nans          (false),
     ignore_dups          (false),
+    ignore_attributes    (false),
     coord_sep            (true),
     exit_status_switch   (false),
     dump_mapping         (false),
@@ -59,6 +61,9 @@ Specifications::Specifications()
     coord_tol            ( ABSOLUTE, 1.0e-6, 0.0 ),
     time_tol             ( RELATIVE, 1.0e-6, 1.0e-15 ),
     time_step_offset     (0),
+    time_step_start      (1),
+    time_step_stop       (-1),
+    time_step_increment  (1),
     max_number_of_names  (DEFAULT_MAX_NUMBER_OF_NAMES),
     default_tol          ( RELATIVE, 1.0e-6, 0.0 ),
     glob_var_names       (0),
@@ -70,6 +75,9 @@ Specifications::Specifications()
     elmt_var_names       (0),
     elmt_var_do_all_flag (false),
     elmt_var             (0),
+    elmt_att_names       (0),
+    elmt_att_do_all_flag (false),
+    elmt_att             (0),
     ns_var_names         (0),
     ns_var_do_all_flag   (false),
     ns_var               (0),
@@ -77,11 +85,13 @@ Specifications::Specifications()
     ss_var_do_all_flag   (false),
     ss_var               (0),
     num_excluded_steps   (0),
-    exclude_steps        (0)
+    exclude_steps        (0),
+    command_file_name("")
 {
   glob_var_default = default_tol;
   node_var_default = default_tol;
   elmt_var_default = default_tol;
+  elmt_att_default = default_tol;
   ns_var_default = default_tol;
   ss_var_default = default_tol;
 }
@@ -91,6 +101,7 @@ void Specifications::allocateNames()
   specs.glob_var_names = new vector<string>;
   specs.node_var_names = new vector<string>;
   specs.elmt_var_names = new vector<string>;
+  specs.elmt_att_names = new vector<string>;
   specs.ns_var_names   = new vector<string>;
   specs.ss_var_names   = new vector<string>;
 }
@@ -100,12 +111,14 @@ Specifications::~Specifications()
   if (glob_var_names != 0) delete glob_var_names;
   if (node_var_names != 0) delete node_var_names;
   if (elmt_var_names != 0) delete elmt_var_names;
+  if (elmt_att_names != 0) delete elmt_att_names;
   if (ns_var_names   != 0) delete ns_var_names;
   if (ss_var_names   != 0) delete ss_var_names;
   
   if (glob_var != 0) delete [] glob_var;
   if (node_var != 0) delete [] node_var;
   if (elmt_var != 0) delete [] elmt_var;
+  if (elmt_att != 0) delete [] elmt_att;
   if (ns_var   != 0) delete [] ns_var;
   if (ss_var   != 0) delete [] ss_var;
   
@@ -117,6 +130,7 @@ void Specifications::Set_Max_Names(int size)
   if (glob_var != 0) delete [] glob_var;
   if (node_var != 0) delete [] node_var;
   if (elmt_var != 0) delete [] elmt_var;
+  if (elmt_att != 0) delete [] elmt_att;
   if (ns_var   != 0) delete [] ns_var;
   if (ss_var   != 0) delete [] ss_var;
   
@@ -125,16 +139,18 @@ void Specifications::Set_Max_Names(int size)
   glob_var  = new Tolerance[max_number_of_names];
   node_var  = new Tolerance[max_number_of_names];
   elmt_var  = new Tolerance[max_number_of_names];
-  ns_var  = new Tolerance[max_number_of_names];
-  ss_var  = new Tolerance[max_number_of_names];
+  elmt_att  = new Tolerance[max_number_of_names];
+  ns_var    = new Tolerance[max_number_of_names];
+  ss_var    = new Tolerance[max_number_of_names];
   
   for (int r = 0; r < max_number_of_names; ++r)
   {
     glob_var[r] = default_tol;
     node_var[r] = default_tol;
     elmt_var[r] = default_tol;
-    ns_var[r] = default_tol;
-    ss_var[r] = default_tol;
+    elmt_att[r] = default_tol;
+    ns_var[r]   = default_tol;
+    ss_var[r]   = default_tol;
   }
 }
 

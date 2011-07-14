@@ -30,13 +30,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// $Id: exo_entity.h,v 1.1 2008/10/31 05:04:08 gdsjaar Exp $
 
 #ifndef EXO_ENTITY_H
 #define EXO_ENTITY_H
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <exodusII.h>
 
 #if defined(EX_API_VERS_NODOT)
@@ -76,6 +76,15 @@ class Exo_Entity {
   const double* Get_Results(int var_index) const;
   void          Free_Results();
 
+  int           attr_count() const {return numAttr;}
+  std::string   Load_Attributes(int attr_index);
+  const double* Get_Attributes(int attr_index) const;
+  void          Free_Attributes();
+
+  const std::string& Get_Attribute_Name(int attr_index) const;
+  const std::vector<std::string>& Attribute_Names() const {return attributeNames;}
+  int Find_Attribute_Index(const std::string &name) const;
+
  protected:
   int fileId;
   int id_;
@@ -90,9 +99,6 @@ class Exo_Entity {
   virtual void entity_load_params() = 0;
   void internal_load_params();
 
-  // Return "E", "N", "M", "S" depending on underlying type.
-  virtual const char* exodus_flag() const = 0;
-
   // Return "Element Block", "Nodeset", "Sideset, depending on underlying type.
   virtual const char* label() const = 0;
 
@@ -101,11 +107,15 @@ class Exo_Entity {
   
   void get_truth_table() const;
 
-  mutable int* truth_;           // Array; holds local truth table for this entity
-  int      currentStep;     // Time step number of the current results.
-  int      numVars;        // Total number of variables in the file.
-  double** results_;      // Array of pointers (length num_vars)
-                         // to arrays of results (length num_entity).
+  mutable int* truth_;        // Array; holds local truth table for this entity
+  int      currentStep;      // Time step number of the current results.
+  int      numVars;         // Total number of variables in the file.
+  double** results_;       // Array of pointers (length numVars)
+                          // to arrays of results (length num_entity).
+  int      numAttr;      // Total number of variables in the file.
+  std::vector<double*> attributes_; // Array of pointers (length numAttr)
+                                   // to arrays of attributes (length num_entity).
+  std::vector<std::string> attributeNames;
   
   friend class ExoII_Read;
 

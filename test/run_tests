@@ -17,4 +17,4 @@ import tools
 
 # create an instance of the test harness passing in the main arg vector
 # and the name of the application
-tools.runTests(sys.argv, app_name)
+tools.runTests(sys.argv, app_name, MOOSE_DIR)

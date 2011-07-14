@@ -41,7 +41,9 @@ class DiffData
       mm_nodal   = 3, // Only val, step, and id valid.
       mm_element = 4, // All fields valid for the rest.
       mm_sideset = 5,
-      mm_nodeset = 6};
+      mm_nodeset = 6,
+      mm_elematt = 7  // step not valid
+    };
   
   DiffData()
     : diff(0.0), val1(0.0), val2(0.0), id(-1), blk(-1), type(mm_unknown)
@@ -77,8 +79,9 @@ class MinMaxData
       mm_nodal   = 3, // Only val, step, and id valid.
       mm_element = 4, // All fields valid for the rest.
       mm_sideset = 5,
-      mm_nodeset = 6};
-
+      mm_nodeset = 6,
+      mm_elematt = 7  // step not valid
+    };
   MinMaxData()
     : min_val(DBL_MAX), min_step(-1), min_id(-1), min_blk(-1), 
     max_val(-1.0),    max_step(-1), max_id(-1), max_blk(-1),
