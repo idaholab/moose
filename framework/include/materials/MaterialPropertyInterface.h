@@ -45,6 +45,14 @@ public:
   template<typename T>
   MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
+  /**
+   * Check if the material property exists
+   * @param name - the name of the property to query
+   * @return true if the property exists, otherwise false
+   */
+  template<typename T>
+  bool hasMaterialProperty(const std::string & name);
+
 protected:
   MaterialData & _material_data;
   MaterialProperties & _material_props;
@@ -96,6 +104,18 @@ MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
   }
 
   mooseError("Material has no property named: " + name);
+}
+
+template<typename T>
+bool
+MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
+{
+  MaterialProperties::const_iterator it = _material_props.find(name);
+  if (it != _material_props.end())
+    if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
+      return true;
+
+  return false;
 }
 
 
