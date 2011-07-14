@@ -69,13 +69,17 @@ LinearIsotropicMaterial::computeProperties()
     }
 
     SymmTensor v_strain(0);
+    SymmTensor dv_strain_dT(0);
     for (unsigned int i(0); i < _volumetric_models.size(); ++i)
     {
-      _volumetric_models[i]->modifyStrain(_qp, v_strain);
+      _volumetric_models[i]->modifyStrain(_qp, v_strain, dv_strain_dT);
     }
     SymmTensor strain( v_strain );
     strain *= _dt;
     strain += strn;
+
+    dv_strain_dT *= _dt;
+    _d_strain_dT += dv_strain_dT;
 
     computeStress(strain, _stress[_qp]);
 

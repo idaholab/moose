@@ -157,13 +157,17 @@ SolidMechanicsMaterialRZ::computeProperties()
     if (num_vol_models)
     {
       _v_strain[_qp].zero();
-      for (unsigned int i(0); i < _volumetric_models.size(); ++i)
+      SymmTensor dv_strain_dT(0);
+      for (unsigned int i(0); i < num_vol_models; ++i)
       {
-        _volumetric_models[i]->modifyStrain(_qp, _v_strain[_qp]);
+        _volumetric_models[i]->modifyStrain(_qp, _v_strain[_qp], dv_strain_dT);
       }
       _v_strain[_qp] *= _dt;
       strain += _v_strain[_qp];
       _v_strain[_qp] += _v_strain_old[_qp];
+
+      dv_strain_dT *= _dt;
+      _d_strain_dT += dv_strain_dT;
     }
 
     computeStress(_total_strain[_qp], strain, *_local_elasticity_tensor, _stress[_qp]);

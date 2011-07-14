@@ -484,7 +484,7 @@ MaterialModel::modifyStrain()
   }
   for (unsigned int i(0); i < _volumetric_models.size(); ++i)
   {
-    _volumetric_models[i]->modifyStrain(_qp, _strain_increment);
+    _volumetric_models[i]->modifyStrain(_qp, _strain_increment, _d_strain_dT);
   }
 }
 
