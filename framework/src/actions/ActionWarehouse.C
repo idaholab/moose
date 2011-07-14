@@ -15,6 +15,7 @@
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
 #include "Parser.h"
+#include "MooseObjectAction.h"
 
 ActionWarehouse::ActionWarehouse() :
   _empty_action(NULL),
@@ -75,8 +76,25 @@ void
 ActionWarehouse::addActionBlock(Action * blk)
 {
   std::string action_name = blk->getAction();
+  
+  // Some error checking
   if (_registered_actions.find(action_name) == _registered_actions.end())
-    mooseError("A " << action_name << " is not a registered action name");
+    mooseError("A(n) " << action_name << " is not a registered action name");
+
+  // Make sure that the MooseObjectAction action_name and Action action_name are consistent
+  // otherwise that means that is action was built by the wrong type
+  MooseObjectAction * moa = dynamic_cast<MooseObjectAction *>(blk);
+  if (moa)
+  {
+    InputParameters mparams = moa->getMooseObjectParams();
+    if (mparams.have_parameter<std::string>("built_by_action"))
+    {
+      std::string moose_action_name = moa->getMooseObjectParams().get<std::string>("built_by_action");
+      if (moose_action_name != action_name &&
+          moose_action_name != "add_aux_bc" && moose_action_name != "add_aux_kernel") // The exception
+        mooseError("Inconsistent Action Name detected! Action that satisfies " + action_name + " is building a MOOSE Object that normally satisfies " + moose_action_name);
+    }
+  }
   
   _action_blocks[action_name].push_back(blk);
 }

@@ -356,7 +356,6 @@ Parser::parse(const std::string &input_filename)
 
           // Add the parsed syntax to the parameters object for consumption by the Action
           params.set<std::string>("name") = curr_identifier;
-          params.set<std::string>("build_by_action") = i->second._action_name;
           params.set<std::string>("action") = i->second._action_name;
 
           // Create the Action

@@ -33,7 +33,7 @@ InputParameters validParams<AuxKernel>()
   params.addParam<std::vector<unsigned int> >("boundary", "The list of variable names this Material is coupled to.");
   params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this aux kernel will be applied to");
 
-//  params.addPrivateParam<std::string>("built_by_action", "add_aux_kernel");
+  params.addPrivateParam<std::string>("built_by_action", "add_aux_kernel");
   return params;
 }
 
