@@ -482,7 +482,10 @@ Parser::buildFullTree()
       InputParameters moose_obj_params = (moose_obj->second)();
 
       if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
-          moose_obj_params.get<std::string>("built_by_action") == action_name)
+          (moose_obj_params.get<std::string>("built_by_action") == action_name ||
+           // Print out aux_bcs which are "built_by_action" add_aux_kernel
+           (action_name == "add_aux_bc" &&
+            moose_obj_params.get<std::string>("built_by_action") == "add_aux_kernel")))
       {
         print_once = true;
         std::string name;
