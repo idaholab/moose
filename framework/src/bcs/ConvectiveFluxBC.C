@@ -32,7 +32,7 @@ ConvectiveFluxBC::ConvectiveFluxBC(const std::string & name, InputParameters par
     _rate(getParam<Real>("rate")),
     _duration(getParam<Real>("duration"))
 {}
- 
+
 
 Real
 ConvectiveFluxBC::computeQpResidual()
@@ -43,10 +43,10 @@ ConvectiveFluxBC::computeQpResidual()
     value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
   else
     value = _final;
-    
+
   return -(_test[_i][_qp]*_rate*(value - _u[_qp]));
 }
-  
+
 Real
 ConvectiveFluxBC::computeQpJacobian()
 {
