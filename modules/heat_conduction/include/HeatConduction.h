@@ -16,12 +16,14 @@ public:
 
   HeatConduction(const std::string & name, InputParameters parameters);
 
-protected:  
+protected:
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
-  
+
 private:
   MaterialProperty<Real> & _k;
+  const bool _has_k_dT;
+  MaterialProperty<Real> * const _k_dT;
 };
 #endif //HEATCONDUCTION_H

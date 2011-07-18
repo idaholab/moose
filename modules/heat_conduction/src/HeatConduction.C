@@ -10,8 +10,10 @@ InputParameters validParams<HeatConduction>()
 
 HeatConduction::HeatConduction(const std::string & name, InputParameters parameters)
   :Diffusion(name, parameters),
-   _k(getMaterialProperty<Real>("thermal_conductivity"))
-  {}
+   _k(getMaterialProperty<Real>("thermal_conductivity")),
+   _has_k_dT(hasMaterialProperty<Real>("thermal_conductivity_dT")),
+   _k_dT(_has_k_dT ? &getMaterialProperty<Real>("thermal_conductivity_dT") : NULL)
+{}
 
 Real
 HeatConduction::computeQpResidual()
@@ -40,5 +42,10 @@ HeatConduction::computeQpResidual()
 Real
 HeatConduction::computeQpJacobian()
 {
-  return _k[_qp]*Diffusion::computeQpJacobian();
+  Real jac = _k[_qp] * Diffusion::computeQpJacobian();
+  if ( _has_k_dT )
+  {
+    jac += (*_k_dT)[_qp] * _phi[_j][_qp] * Diffusion::computeQpResidual();
+  }
+  return jac;
 }

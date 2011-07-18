@@ -25,6 +25,7 @@ HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputPa
     _my_density(getParam<Real>("density")),
 
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+    _thermal_conductivity_dT(declareProperty<Real>("thermal_conductivity_dT")),
     _specific_heat(declareProperty<Real>("specific_heat")),
     _density(declareProperty<Real>("density"))
 {}
@@ -36,6 +37,7 @@ HeatConductionMaterial::computeProperties()
   {
     _density[qp] = _my_density;
     _thermal_conductivity[qp] = _my_thermal_conductivity;
+    _thermal_conductivity_dT[qp] = 0;
     _specific_heat[qp] = _my_specific_heat;
   }
 }

@@ -32,6 +32,7 @@ private:
   Real _my_density;
 
   MaterialProperty<Real> & _thermal_conductivity;
+  MaterialProperty<Real> & _thermal_conductivity_dT;
   MaterialProperty<Real> & _specific_heat;
   MaterialProperty<Real> & _density;
 };
