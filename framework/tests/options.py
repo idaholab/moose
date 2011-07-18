@@ -8,6 +8,7 @@ MAX_TIME = 'max_time'           # Test will fail if it exceeds this time in seco
 TEST_NAME = 'testname'          # The name of the test as it appears in output, this is
                                 # set to module_name.dict_name by default
 PLATFORM = 'platform'           # set to 'ALL', 'DARWIN', 'LINUX' as appropriate
+CLI_ARGS = ''                   # Additional argument vector to pass to test
 
 # Types of tests
 EXODIFF      = 'exodiff'        # A list of files to exodiff
@@ -46,6 +47,7 @@ PREREQ = 'prereq'
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],
              CSVDIFF : [],
+             CLI_ARGS : [],
              ERRORS : ['ERROR', 'command not found', 'erminate called after throwing an instance of'],
              PLATFORM : 'ALL',
              SHOULD_CRASH : False,

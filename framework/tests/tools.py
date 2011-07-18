@@ -97,9 +97,9 @@ class TestHarness:
   # Create the command line string to run
   def createCommand(self, test):
     if test[PARALLEL] > 1:
-      return 'mpiexec -n ' + test[PARALLEL] + ' ' + self.executable + ' -i ' + test[INPUT]
+      return 'mpiexec -n ' + test[PARALLEL] + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
-      return self.executable + ' -i ' + test[INPUT]
+      return self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
 
   ## Delete old output files
   def prepareTest(self, test):
