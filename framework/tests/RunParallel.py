@@ -35,14 +35,19 @@ class RunParallel:
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
   def run(self, test, command):
 
-    # Wait for a job to finish if the jobs queue is full
-    if self.jobs.count(None) == 0:
-      self.spinwait()
-
     # Make sure the job doesn't have an unsatisfied prereq
     if test[PREREQ] != None and not test[PREREQ] in self.finished_jobs:
       self.queue.put([test, command, os.getcwd()])
       return
+
+    # Wait for a job to finish if the jobs queue is full
+    # Note: This needs to be a while statement, not an if statement.
+    #   "spinwait" calls "returnToTestHarness" which calls "startReadyJobs" which 
+    #   again calls "run" (this function).  That last call may start a previously queued
+    #   job which will preempt the open slot in the jobs array.  Upon unwinding the stack
+    #   another check of the jobs array is needed before launching the current test   
+    while self.jobs.count(None) == 0:
+      self.spinwait()
 
     job_index = self.jobs.index(None) # find an empty slot
     log( 'Command %d started: %s' % (job_index, command) )
@@ -58,8 +63,6 @@ class RunParallel:
   def startReadyJobs(self):
     queue_items = self.queue.qsize()
     for i in range(0, queue_items):
-      if self.queue.empty():
-        return
       (test, command, dirpath) = self.queue.get()
       saved_dir = os.getcwd()
       sys.path.append(os.path.abspath(dirpath))
@@ -97,19 +100,17 @@ class RunParallel:
   # When a process exits (or times out) call returnToTestHarness and return from
   # this function.
   def spinwait(self):
-    test_completed = False
-    while not test_completed:
-      now = clock()
-      job_index = 0
-      for tuple in self.jobs:
-        if tuple != None:
-          (p, command, test, time, f) = tuple
-          if p.poll() != None or now > time:
-            test_completed = True
-            self.returnToTestHarness(job_index)
-        job_index += 1
+    now = clock()
+    job_index = 0
+    for tuple in self.jobs:
+      if tuple != None:
+        (p, command, test, time, f) = tuple
+        if p.poll() != None or now > time:  
+          self.returnToTestHarness(job_index)
+          break
+      job_index += 1
 
-      sleep(0.05) # sleep for 50ms
+    sleep(0.05) # sleep for 50ms
 
   ## Wait until all processes are done, then return
   def join(self):
