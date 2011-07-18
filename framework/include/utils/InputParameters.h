@@ -112,7 +112,7 @@ public:
   /**
    * Returns the documentation string for the specified parameter name
    */
-  const std::string &getDocString(const std::string &name) const;
+  std::string getDocString(const std::string &name) const;
 
   /**
    * Returns a boolean indicating whether the specified parameter is required or not

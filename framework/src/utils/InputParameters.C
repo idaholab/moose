@@ -14,7 +14,6 @@
 
 #include "InputParameters.h"
 
-
 InputParameters::InputParameters(const InputParameters &rhs) : Parameters()
 {
   *this = rhs;
@@ -113,12 +112,20 @@ InputParameters::seenInInputFile(const std::string &name)
   _seen_in_input.insert(name);
 }
 
-const std::string &
+std::string
 InputParameters::getDocString(const std::string &name) const
 {
-  static std::string empty;
-  std::map<std::string, std::string>::const_iterator doc_string = _doc_string.find(name);
-  return doc_string != _doc_string.end() ? doc_string->second : empty;
+  std::string doc_string;
+  std::map<std::string, std::string>::const_iterator doc_string_it = _doc_string.find(name);
+  if (doc_string_it != _doc_string.end())
+    for (std::string::const_iterator it = (doc_string_it->second).begin();
+         it != (doc_string_it->second).end(); ++it)
+      if (*it == '\n')
+        doc_string += " ... ";
+      else
+        doc_string += *it;
+  
+  return doc_string;
 }
 
 bool
