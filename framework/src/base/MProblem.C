@@ -940,8 +940,28 @@ MProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
 {
   Moose::perf_log.push("compute_postprocessors()","Solve");
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _pps(type)[tid].residualSetup();
+  switch (type)
+  {
+  case EXEC_RESIDUAL:
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+      _pps(type)[tid].residualSetup();
+    break;
+
+  case EXEC_JACOBIAN:
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+      _pps(type)[tid].jacobianSetup();
+    break;
+
+  case EXEC_TIMESTEP:
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+      _pps(type)[tid].timestepSetup();
+    break;
+
+  case EXEC_INITIAL:
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+      _pps(type)[tid].initialSetup();
+    break;
+  }
   computePostprocessorsInternal(_pps(type));
 
   Moose::perf_log.pop("compute_postprocessors()","Solve");
