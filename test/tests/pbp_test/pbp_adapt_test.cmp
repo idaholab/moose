@@ -1,0 +1,9 @@
+# custom compare file
+#
+# Indent with TABs. ALWAYS! Or do not be surprised then 
+#
+
+NODAL VARIABLES absolute 1.E-10
+	u
+	v
+	

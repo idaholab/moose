@@ -8,6 +8,7 @@ check_petsc_options_test = { INPUT : 'pbp_test_options.i',
 
 pbp_adapt_test = {
   INPUT : 'pbp_adapt_test.i',
+  CUSTOM_CMP : 'pbp_adapt_test.cmp',
   EXODIFF : ['out_pbp_adapt_0003.e']
 }
                              
