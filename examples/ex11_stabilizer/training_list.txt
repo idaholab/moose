@@ -1,2 +1,0 @@
-Title: Stabilization
-example_stabilizer.i
