@@ -57,7 +57,7 @@ public:
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
-  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid);
+  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);

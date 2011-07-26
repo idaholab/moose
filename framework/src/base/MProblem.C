@@ -273,14 +273,14 @@ MProblem::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
-MProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid)
+MProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
-    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), ivar, jvar, tid);
+    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), ivar, jvar, dof_indices, tid);
 
-  _nl.prepareAssembly(elem, ivar, jvar, tid);
+  _nl.prepareAssembly(elem, ivar, jvar, dof_indices, tid);
   _nl.prepare(tid);
   _aux.prepare(tid);
 }

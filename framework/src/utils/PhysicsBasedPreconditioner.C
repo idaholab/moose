@@ -98,15 +98,13 @@ PhysicsBasedPreconditioner::init ()
     LinearImplicitSystem & u_system = *_systems[system_var];
 
     if(!_preconditioners[system_var])
-    {
       _preconditioners[system_var] = Preconditioner<Number>::build();
 
-      Preconditioner<Number> * preconditioner = _preconditioners[system_var];
-      preconditioner->set_matrix(*u_system.matrix);
-      preconditioner->set_type(_pre_type[system_var]);
-    }
-
+    // we have to explicitly set the matrix in the preconditioner, because h-adaptivity could have changed it and we have to work with the current one
     Preconditioner<Number> * preconditioner = _preconditioners[system_var];
+    preconditioner->set_matrix(*u_system.matrix);
+    preconditioner->set_type(_pre_type[system_var]);
+
     preconditioner->init();
 
     //Compute the diagonal block... storing the result in the system matrix

@@ -66,7 +66,7 @@ public:
   virtual void timestepSetup();
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
-  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid);
+  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
 
   virtual void addGhostedElem(unsigned int elem_id);
   virtual void addGhostedBoundary(unsigned int boundary_id);

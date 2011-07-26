@@ -35,7 +35,7 @@ public:
   void init();
 
   void prepare(const Elem * elem);
-  void prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar);
+  void prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
 
   void copyShapes(unsigned int var);
   void copyFaceShapes(unsigned int var);

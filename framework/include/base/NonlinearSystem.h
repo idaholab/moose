@@ -72,7 +72,7 @@ public:
   void setupFiniteDifferencedPreconditioner();
 
   virtual void prepareAssembly(const Elem * elem, THREAD_ID tid);
-  virtual void prepareAssembly(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid);
+  virtual void prepareAssembly(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);

@@ -193,9 +193,9 @@ NonlinearSystem::prepareAssembly(const Elem * elem, THREAD_ID tid)
 }
 
 void
-NonlinearSystem::prepareAssembly(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid)
+NonlinearSystem::prepareAssembly(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
-  _asm_block[tid]->prepareBlock(elem, ivar, jvar);
+  _asm_block[tid]->prepareBlock(elem, ivar, jvar, dof_indices);
 }
 
 void
@@ -926,13 +926,12 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
       const Elem* elem = *el;
       unsigned int cur_subdomain = elem->subdomain_id();
 
-      _problem.prepare(elem, ivar, jvar, tid);
-      _problem.reinitElem(elem, tid);
-
       dof_map.dof_indices(elem, dof_indices);
-
       if(dof_indices.size())
       {
+        _problem.prepare(elem, ivar, jvar, dof_indices, tid);
+        _problem.reinitElem(elem, tid);
+
         if(cur_subdomain != subdomain)
         {
           subdomain = cur_subdomain;

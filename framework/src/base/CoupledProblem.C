@@ -84,10 +84,10 @@ CoupledProblem::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
-CoupledProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid)
+CoupledProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
   for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
-    it->second->prepare(elem, ivar, jvar, tid);
+    it->second->prepare(elem, ivar, jvar, dof_indices, tid);
 }
 
 void

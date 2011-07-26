@@ -72,14 +72,12 @@ AsmBlock::prepare(const Elem * elem)
 }
 
 void
-AsmBlock::prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar)
+AsmBlock::prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices)
 {
-  _dof_map.dof_indices(elem, _sub_dof_indices[ivar], ivar);
-
-  _sub_Ke[ivar][jvar].resize(_sub_dof_indices[ivar].size(), _sub_dof_indices[jvar].size());
+  _sub_Ke[ivar][jvar].resize(dof_indices.size(), dof_indices.size());
   _sub_Ke[ivar][jvar].zero();
 
-  _sub_Re[ivar].resize(_sub_dof_indices[ivar].size());
+  _sub_Re[ivar].resize(dof_indices.size());
   _sub_Re[ivar].zero();
 }
 
@@ -161,6 +159,7 @@ void
 AsmBlock::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices)
 {
   DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar);
+
   // stick it into the matrix
   dof_map.constrain_element_matrix(ke, dof_indices, false);
 

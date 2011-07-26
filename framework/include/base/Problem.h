@@ -60,7 +60,7 @@ public:
   virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, THREAD_ID tid) = 0;
+  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid) = 0;
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
