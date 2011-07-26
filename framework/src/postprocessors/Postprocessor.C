@@ -22,6 +22,7 @@ InputParameters validParams<Postprocessor>()
 {
   InputParameters params = validParams<MooseObject>();
   
+  params.addParam<bool>("output", true, "If the postprocessor value is outputted or not (to screen and files)");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_postprocessor");
   return params;
@@ -31,7 +32,9 @@ Postprocessor::Postprocessor(const std::string & name, InputParameters parameter
     MooseObject(name, parameters),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
-    _tid(parameters.get<THREAD_ID>("_tid"))
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _output(parameters.get<bool>("output"))
+
 //   _local_name(name),
 //   _local_tid(parameters.get<THREAD_ID>("_tid")),
 {

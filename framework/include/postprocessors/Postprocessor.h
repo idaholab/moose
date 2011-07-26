@@ -26,8 +26,13 @@
 #include "libmesh_common.h"
 #include "parallel.h"
 
+class Postprocessor;
 class Problem;
 class SubProblemInterface;
+
+template<>
+InputParameters validParams<Postprocessor>();
+
 
 class Postprocessor : public MooseObject
 {
@@ -69,14 +74,18 @@ public:
 
   virtual void threadJoin(const Postprocessor & /*pps*/) { }
 
+  /**
+   * Is the postprocessor marked for output?
+   * @return true if it is outputted, otherwise false
+   */
+  bool getOutput() { return _output; }
 
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;
   THREAD_ID _tid;
-};
 
-template<>
-InputParameters validParams<Postprocessor>();
+  bool _output;                 ///< true if the postprocessor value is outputted or not
+};
 
 #endif

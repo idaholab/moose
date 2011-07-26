@@ -975,20 +975,30 @@ MProblem::outputPostprocessors()
       postprocessor_it != _pps(EXEC_TIMESTEP)[0].all().end();
       ++postprocessor_it)
   {
-    std::string name = (*postprocessor_it)->name();
-    Real value = _pps_data[0].getPostprocessorValue(name);
+    Postprocessor *pps = *postprocessor_it;
 
-    _pps_output_table.addData(name, value, _time);
+    if (pps->getOutput())
+    {
+      std::string name = pps->name();
+      Real value = _pps_data[0].getPostprocessorValue(name);
+
+      _pps_output_table.addData(name, value, _time);
+    }
   }
   // Add values of initial PPSes
   for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(EXEC_INITIAL)[0].all().begin();
       postprocessor_it != _pps(EXEC_INITIAL)[0].all().end();
       ++postprocessor_it)
   {
-    std::string name = (*postprocessor_it)->name();
-    Real value = _pps_data[0].getPostprocessorValue(name);
+    Postprocessor *pps = *postprocessor_it;
 
-    _pps_output_table.addData(name, value, _time);
+    if (pps->getOutput())
+    {
+      std::string name = pps->name();
+      Real value = _pps_data[0].getPostprocessorValue(name);
+
+      _pps_output_table.addData(name, value, _time);
+    }
   }
 
   if (_pps_output_table.empty())
