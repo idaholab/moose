@@ -57,4 +57,6 @@ int main (int argc, char** argv)
 
   Executioner *e = p.getExecutioner();
   e->execute();
+
+  return 0;
 }
