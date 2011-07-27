@@ -71,12 +71,6 @@ ComputeJacobianThread::onElement(const Elem *elem)
 
   _problem.reinitMaterials(subdomain, _tid);
   
-  //Stabilizers
-  for(std::vector<Stabilizer *>::const_iterator stabilizer_it = _sys._stabilizers[_tid].active().begin();
-      stabilizer_it != _sys._stabilizers[_tid].active().end();
-      stabilizer_it++)
-    (*stabilizer_it)->computeTestFunctions();
-
   computeJacobian();
 }
 

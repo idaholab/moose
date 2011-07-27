@@ -131,9 +131,6 @@ public:
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
 
-  // Stabilization /////
-  void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
-
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type = EXEC_TIMESTEP);
 

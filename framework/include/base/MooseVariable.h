@@ -104,8 +104,6 @@ public:
 
   void prepare();
   void prepare_aux();
-  void reinit();
-  void reinitFace();
   void reinit_node();
   void reinit_aux();
 
@@ -127,16 +125,10 @@ public:
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
   const std::vector<std::vector<RealTensor> > & secondPhi() { return _second_phi; }
-  std::vector<std::vector<Real> > & test() { return _test; }
-  std::vector<std::vector<RealGradient> > & gradTest() { return _grad_test; }
-  std::vector<std::vector<RealTensor> > & secondTest() { return _second_test; }
 
   const std::vector<std::vector<Real> > & phiFace() { return _phi_face; }
   const std::vector<std::vector<RealGradient> > & gradPhiFace() { return _grad_phi_face; }
   const std::vector<std::vector<RealTensor> > & secondPhiFace() { return _second_phi_face; }
-  std::vector<std::vector<Real> > & testFace() { return _test_face; }
-  std::vector<std::vector<RealGradient> > & gradTestFace() { return _grad_test_face; }
-  std::vector<std::vector<RealTensor> > & secondTestFace() { return _second_test_face; }
   const std::vector<Point> & normals() { return _normals; }
 
   // damping
@@ -212,29 +204,19 @@ protected:
   bool _is_nl;                                                  /// true if this varaible is non-linear
   bool _has_second_derivatives;                                 /// true if we need to compute second derivatives (if the variable is 3rd hermite, etc.)
 
-//  const std::vector<Point> & _qpoints;
-//  const std::vector<Point> & _qpoints_face;
-
-//  const std::vector<Real> & _JxW;
-//  const std::vector<Real> & _JxW_face;
-
   // Shape function values, gradients. second derivatives
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
   const std::vector<std::vector<RealTensor> > & _second_phi;
-  // Test function values, gradients. second derivatives
-  std::vector<std::vector<Real> > _test;
-  std::vector<std::vector<RealGradient> > _grad_test;
-  std::vector<std::vector<RealTensor> > _second_test;
 
   // Values, gradients and second derivatives of shape function on faces
   const std::vector<std::vector<Real> > & _phi_face;
   const std::vector<std::vector<RealGradient> > & _grad_phi_face;
   const std::vector<std::vector<RealTensor> > & _second_phi_face;
-  // Values, gradients and second derivatives of test functions on faces
-  std::vector<std::vector<Real> > _test_face;
-  std::vector<std::vector<RealGradient> > _grad_test_face;
-  std::vector<std::vector<RealTensor> > _second_test_face;
+
+  std::vector<std::vector<RealTensor> > _dummy_second_phi;            ///< if we are not using second derivatives, we point our reference here, so libmesh
+                                                                      ///< will not compute second derivatives for us
+
 
   const std::vector<Point> & _normals;                                  ///< Normals at QPs on faces
 

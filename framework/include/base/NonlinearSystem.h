@@ -18,7 +18,6 @@
 #include "SystemBase.h"
 #include "KernelWarehouse.h"
 #include "BCWarehouse.h"
-#include "StabilizerWarehouse.h"
 #include "DiracKernelWarehouse.h"
 #include "DamperWarehouse.h"
 // libMesh includes
@@ -108,14 +107,6 @@ public:
    * @param parameters Dirac kernel parameters
    */
   void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
-
-  /**
-   * Adds a stabilizer
-   * @param stabilizer_name The type of the stabilizer
-   * @param name The name of the stabilizer
-   * @param parameters Stabilizer parameters
-   */
-  void addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a damper
@@ -297,7 +288,6 @@ protected:
   // holders
   std::vector<KernelWarehouse> _kernels;                ///< Kernel storage for each thread
   std::vector<BCWarehouse> _bcs;                        ///< BC storage for each thread
-  std::vector<StabilizerWarehouse> _stabilizers;        ///< Stabilizers storage for each thread
   std::vector<DiracKernelWarehouse> _dirac_kernels;     ///< Dirac Kernel storage for each thread
   std::vector<DamperWarehouse> _dampers;                ///< Dampers for each thread
 

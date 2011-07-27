@@ -48,7 +48,6 @@ public:
 
 protected:
   AsmBlock & _asmb;
-  MooseVariable & _test_var;
 
   unsigned int _qp;                                                     ///< quadrature point index
   QBase * & _qrule;                                                     ///< active quadrature rule

@@ -103,7 +103,6 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
   _asm_block.resize(n_threads);
   _kernels.resize(n_threads);
   _bcs.resize(n_threads);
-  _stabilizers.resize(n_threads);
   _dirac_kernels.resize(libMesh::n_threads());
   _dampers.resize(n_threads);
 
@@ -402,23 +401,6 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
   }
 }
 
-
-void
-NonlinearSystem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
-
-    Stabilizer * stabilizer = static_cast<Stabilizer *>(Factory::instance()->create(stabilizer_name, name, parameters));
-    if (parameters.have_parameter<unsigned int>("block_id"))
-      _stabilizers[tid].addBlockStabilizer(parameters.get<unsigned int>("block_id"), stabilizer);
-    else
-      _stabilizers[tid].addStabilizer(stabilizer);
-  }
-}
-
 void
 NonlinearSystem::addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters)
 {
@@ -564,12 +546,6 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
   //Global Kernels
   for(std::vector<Kernel *>::const_iterator kernel_it = _kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
     (*kernel_it)->subdomainSetup();
-
-  //Stabilizers
-  for(std::vector<Stabilizer *>::const_iterator stabilizer_it = _stabilizers[tid].active().begin();
-      stabilizer_it != _stabilizers[tid].active().end();
-      stabilizer_it++)
-    (*stabilizer_it)->subdomainSetup();
 }
 
 void
@@ -940,12 +916,6 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
         }
 
         _problem.parent()->reinitMaterials(cur_subdomain, tid);
-
-        //Stabilizers
-        for(std::vector<Stabilizer *>::const_iterator stabilizer_it = _stabilizers[tid].active().begin();
-            stabilizer_it != _stabilizers[tid].active().end();
-            stabilizer_it++)
-          (*stabilizer_it)->computeTestFunctions();
 
         //Kernels
         for(std::vector<Kernel *>::const_iterator kernel_it=_kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)

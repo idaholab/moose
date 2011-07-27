@@ -905,7 +905,6 @@ Parser::InputFileSort::InputFileSort()
   _o.push_back("DiracKernels");
   _o.push_back("AuxKernels");
   _o.push_back("Dampers");
-  _o.push_back("Stabilizers");
   _o.push_back("BCs");
   _o.push_back("AuxBCs");
   _o.push_back("Materials");

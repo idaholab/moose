@@ -30,7 +30,6 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     BoundaryCondition(name, parameters),
     Coupleable(parameters, false),
     _asmb(_subproblem.asmBlock(_tid)),
-    _test_var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
 
     _qrule(_subproblem.qRuleFace(_tid)),
     _q_point(_subproblem.pointsFace(_tid)),
@@ -38,11 +37,11 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 
     _phi(_asmb.phiFace()),
     _grad_phi(_asmb.gradPhiFace()),
-    _second_phi(_asmb.secondPhi()),
+    _second_phi(_asmb.secondPhiFace()),
 
-    _test(_test_var.testFace()),
-    _grad_test(_test_var.gradTestFace()),
-    _second_test(_var.secondTest()),
+    _test(_var.phiFace()),
+    _grad_test(_var.gradPhiFace()),
+    _second_test(_var.secondPhiFace()),
 
     _u(_var.sln()),
     _grad_u(_var.gradSln()),

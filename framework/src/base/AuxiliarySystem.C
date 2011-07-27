@@ -176,7 +176,6 @@ AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
   for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
   {
     MooseVariable *var = it->second;
-    var->reinit();
     var->computeElemValues();
   }
 

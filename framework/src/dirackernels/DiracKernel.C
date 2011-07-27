@@ -61,9 +61,9 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _grad_phi(_asmb.gradPhi()),
     _second_phi(_asmb.secondPhi()),
 
-    _test(_var.test()),
-    _grad_test(_var.gradTest()),
-    _second_test(_var.secondTest()),
+    _test(_var.phi()),
+    _grad_test(_var.gradPhi()),
+    _second_test(_var.secondPhi()),
 
     _u(_var.sln()),
     _u_old(_var.slnOld()),

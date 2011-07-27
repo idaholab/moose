@@ -102,8 +102,6 @@
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
 #include "SideIntegral.h"
-// stabilizers
-#include "ConvectionDiffusionSUPG.h"
 // dampers
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
@@ -118,7 +116,6 @@
 #include "AddVariableAction.h"
 #include "AddPostprocessorAction.h"
 #include "AddDamperAction.h"
-#include "AddStabilizerAction.h"
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
 #include "CreateMeshAction.h"
@@ -236,8 +233,6 @@ registerObjects()
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
   registerPostprocessor(SideIntegral);
-  // stabilizers
-  registerStabilizer(ConvectionDiffusionSUPG);
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
@@ -284,7 +279,6 @@ addActionTypes()
   registerActionName("add_ic", false);
   registerActionName("add_postprocessor", false);
   registerActionName("add_damper", false);
-  registerActionName("add_stabilizer", false);
   registerActionName("add_periodic_bc", false);
   registerActionName("preconditioning_meta_action", false);
   registerActionName("add_preconditioning", false);
@@ -332,7 +326,7 @@ addActionTypes()
 "(add_material)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
-"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_stabilizer, setup_output)"
+"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, setup_output)"
 "(check_integrity)"
 );
 
@@ -397,7 +391,6 @@ registerActions()
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddDamperAction, "add_damper");
-  registerAction(AddStabilizerAction, "add_stabilizer");
   registerAction(SetupPreconditionerAction, "preconditioning_meta_action");
   registerAction(SetupPBPAction, "add_preconditioning");
   registerAction(SetupSMPAction, "add_preconditioning");

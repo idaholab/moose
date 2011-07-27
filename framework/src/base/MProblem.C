@@ -749,15 +749,6 @@ MProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID 
 }
 
 void
-MProblem::addStabilizer(const std::string & stabilizer_name, const std::string & name, InputParameters parameters)
-{
-  parameters.set<Problem *>("_problem") = this;
-  parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<SystemBase *>("_sys") = &_nl;
-  _nl.addStabilizer(stabilizer_name, name, parameters);
-}
-
-void
 MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type/* = EXEC_TIMESTEP*/)
 {
   parameters.set<Problem *>("_problem") = this;

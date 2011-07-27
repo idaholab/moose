@@ -129,11 +129,11 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
 
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi()),
-    _second_phi(_has_second_derivatives ? _fe->get_d2phi() : _second_test_face),
+    _second_phi(_has_second_derivatives ? _fe->get_d2phi() : _dummy_second_phi),
 
     _phi_face(_fe_face->get_phi()),
     _grad_phi_face(_fe_face->get_dphi()),
-    _second_phi_face(_has_second_derivatives ? _fe_face->get_d2phi() : _second_test),
+    _second_phi_face(_has_second_derivatives ? _fe_face->get_d2phi() : _dummy_second_phi),
     _normals(_fe_face->get_normals()),
 
     _node(_assembly.node()),
@@ -185,25 +185,6 @@ MooseVariable::prepare_aux()
 }
 
 void
-MooseVariable::reinit()
-{
-  // copy shape functions into test functions (so they can be modified by stabilizers)
-  _test = _phi;
-  _grad_test = _grad_phi;
-  if (_has_second_derivatives)
-    _second_test = _second_phi;
-}
-
-void
-MooseVariable::reinitFace()
-{
-  _test_face = _phi_face;
-  _grad_test_face = _grad_phi_face;
-  if (_has_second_derivatives)
-    _second_test_face = _second_phi_face;
-}
-
-void
 MooseVariable::reinit_node()
 {
   if (_node->n_dofs(_sys.number(), _var_num) > 0)
@@ -218,7 +199,6 @@ MooseVariable::reinit_node()
 void
 MooseVariable::reinit_aux()
 {
-  reinit();
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
   if (_elem->n_dofs(_sys.number(), _var_num) > 0)
   {

@@ -88,7 +88,6 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     MooseVariable *var = *it;
-    var->reinit();
     var->computeElemValues();
   }
 }
@@ -103,7 +102,6 @@ SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, unsigne
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     MooseVariable *var = *it;
-    var->reinitFace();
     var->computeElemValuesFace();
   }
 }
