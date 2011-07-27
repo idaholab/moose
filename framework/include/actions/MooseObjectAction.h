@@ -21,6 +21,12 @@
 
 #include <string>
 
+class MooseObjectAction;
+
+template<>
+InputParameters validParams<MooseObjectAction>();
+
+
 class MooseObjectAction : public Action
 {
 public:
@@ -36,8 +42,5 @@ protected:
   std::string _type;
   InputParameters _moose_object_pars;
 };
-
-template<>
-InputParameters validParams<MooseObjectAction>();
 
 #endif // MOOSEOBJECTACTION_H

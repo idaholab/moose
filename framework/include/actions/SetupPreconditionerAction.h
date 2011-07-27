@@ -21,6 +21,11 @@
 
 #include <string>
 
+class SetupPreconditionerAction;
+
+template<>
+InputParameters validParams<SetupPreconditionerAction>();
+
 /**
  * Preconditioners are not normal "Moose Objects" but we are going to inherit from the
  * MooseObjectAction class to take advantage of the second set of parser filled parameters
@@ -49,8 +54,5 @@ protected:
    */
   bool _is_base_instance;
 };
-
-template<>
-InputParameters validParams<SetupPreconditionerAction>();
 
 #endif // SETUPPRECONDITIONERACTION_H

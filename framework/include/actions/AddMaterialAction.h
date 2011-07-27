@@ -21,6 +21,12 @@
 
 #include <string>
 
+class AddMaterialAction;
+
+template<>
+InputParameters validParams<AddMaterialAction>();
+
+
 class AddMaterialAction : public MooseObjectAction
 {
 public:
@@ -28,8 +34,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<AddMaterialAction>();
 
 #endif // ADDMATERIALACTION_H

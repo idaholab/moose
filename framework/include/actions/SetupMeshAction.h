@@ -20,7 +20,12 @@
 #include "Action.h"
 
 //Forward Declaration
+class SetupMeshAction;
 class MooseMesh;
+
+template<>
+InputParameters validParams<SetupMeshAction>();
+
 
 class SetupMeshAction : public Action
 {
@@ -33,8 +38,5 @@ private:
 
   void setupMesh(MooseMesh *mesh);
 };
-
-template<>
-InputParameters validParams<SetupMeshAction>();
 
 #endif // SETUPMESHACTION_H

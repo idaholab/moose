@@ -21,6 +21,12 @@
 
 #include <string>
 
+class InitProblemAction;
+
+template<>
+InputParameters validParams<InitProblemAction>();
+
+
 class InitProblemAction : public Action
 {
 public:
@@ -28,8 +34,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<InitProblemAction>();
 
 #endif // INITPROBLEMACTION_H

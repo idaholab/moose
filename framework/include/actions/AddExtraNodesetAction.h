@@ -22,6 +22,12 @@
 //Forward Declaration
 class MooseMesh;
 
+class AddExtraNodesetAction;
+
+template<>
+InputParameters validParams<AddExtraNodesetAction>();
+
+
 class AddExtraNodesetAction : public Action
 {
 public:
@@ -29,8 +35,5 @@ public:
   
   virtual void act();
 };
-
-template<>
-InputParameters validParams<AddExtraNodesetAction>();
 
 #endif // ADDEXTRANODESETACTION_H

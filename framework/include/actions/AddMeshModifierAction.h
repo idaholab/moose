@@ -17,6 +17,12 @@
 
 #include "MooseObjectAction.h"
 
+class AddMeshModifierAction;
+
+template<>
+InputParameters validParams<AddMeshModifierAction>();
+
+
 class AddMeshModifierAction: public MooseObjectAction
 {
 public:
@@ -24,8 +30,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<AddMeshModifierAction>();
 
 #endif //ADDMESHMODIFIERACTION_H

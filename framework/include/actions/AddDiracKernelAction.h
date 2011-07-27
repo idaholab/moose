@@ -21,6 +21,12 @@
 
 #include <string>
 
+class AddDiracKernelAction;
+
+template<>
+InputParameters validParams<AddDiracKernelAction>();
+
+
 class AddDiracKernelAction : public MooseObjectAction
 {
 public:
@@ -31,8 +37,5 @@ public:
 private:
   bool is_kernels_action;
 };
-
-template<>
-InputParameters validParams<AddDiracKernelAction>();
 
 #endif // ADDDIRACKERNELACTION_H

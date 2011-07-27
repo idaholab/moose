@@ -21,6 +21,12 @@
 
 #include <string>
 
+class CheckIntegrityAction;
+
+template<>
+InputParameters validParams<CheckIntegrityAction>();
+
+
 class CheckIntegrityAction : public Action
 {
 public:
@@ -28,8 +34,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<CheckIntegrityAction>();
 
 #endif // CHECKINTEGRITYACTION_H

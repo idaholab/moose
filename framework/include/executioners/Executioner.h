@@ -22,6 +22,10 @@
 
 class MooseMesh;
 class Problem;
+class Executioner;
+
+template<>
+InputParameters validParams<Executioner>();
 
 /**
  * Executioners are objects that do the actual work of solving your problem.
@@ -90,9 +94,5 @@ protected:
    */
   virtual void postSolve();
 };
-
-
-template<>
-InputParameters validParams<Executioner>();
 
 #endif //EXECUTIONER_H

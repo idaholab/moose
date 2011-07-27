@@ -24,6 +24,11 @@
 // libMesh includes
 #include "periodic_boundaries.h"
 
+class AddPeriodicBCAction;
+
+template<>
+InputParameters validParams<AddPeriodicBCAction>();
+
 /**
  * This Action adds a periodic boundary to the problem. Note that Periodic Boundaries
  * are not MooseObjects so you need not specify a type for these boundaries.  If you
@@ -39,8 +44,5 @@ public:
 protected:
   void setPeriodicVars(PeriodicBoundary & p, const std::vector<std::string> & var_names);
 };
-
-template<>
-InputParameters validParams<AddPeriodicBCAction>();
 
 #endif // ADDPERIODICBCACTION_H

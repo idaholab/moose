@@ -17,6 +17,12 @@
 
 #include "SetupPreconditionerAction.h"
 
+class SetupPBPAction;
+
+template<>
+InputParameters validParams<SetupPBPAction>();
+
+
 class SetupPBPAction: public SetupPreconditionerAction
 {
 public:
@@ -24,8 +30,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<SetupPBPAction>();
 
 #endif //SETUPPBPACTION_H

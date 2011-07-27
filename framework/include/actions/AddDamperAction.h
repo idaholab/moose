@@ -17,6 +17,12 @@
 
 #include "MooseObjectAction.h"
 
+class AddDamperAction;
+
+template<>
+InputParameters validParams<AddDamperAction>();
+
+
 class AddDamperAction: public MooseObjectAction
 {
 public:
@@ -24,8 +30,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<AddDamperAction>();
 
 #endif //ADDDAMPERACTION_H

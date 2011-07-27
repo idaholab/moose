@@ -18,6 +18,12 @@
 #include "MooseObject.h"
 #include "MooseMesh.h"
 
+class MeshModifier;
+
+template<>
+InputParameters validParams<MeshModifier>();
+
+
 class MeshModifier : public MooseObject
 {
 public:
@@ -26,8 +32,5 @@ public:
   virtual void modifyMesh(Mesh & mesh) = 0;
   
 };
-
-template<>
-InputParameters validParams<MeshModifier>();
 
 #endif /* MESHMODIFIER_H */

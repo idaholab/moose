@@ -17,6 +17,12 @@
 
 #include "MooseObjectAction.h"
 
+class AddICAction;
+
+template<>
+InputParameters validParams<AddICAction>();
+
+
 class AddICAction : public MooseObjectAction
 {
 public:
@@ -24,8 +30,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<AddICAction>();
 
 #endif // ADDICACTION_H

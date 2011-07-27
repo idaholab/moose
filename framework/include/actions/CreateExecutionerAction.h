@@ -17,6 +17,12 @@
 
 #include "MooseObjectAction.h"
 
+class CreateExecutionerAction;
+
+template<>
+InputParameters validParams<CreateExecutionerAction>();
+
+
 class CreateExecutionerAction : public MooseObjectAction
 {
 public:
@@ -24,8 +30,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<CreateExecutionerAction>();
 
 #endif // CREATEEXECUTIONERACTION_H

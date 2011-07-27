@@ -20,6 +20,11 @@
 #include "vector_value.h"
 #include "point.h"
 
+class Function;
+
+template<>
+InputParameters validParams<Function>();
+
 /**
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
@@ -41,8 +46,5 @@ public:
    */
   virtual RealGradient gradient(Real t, const Point & p);
 };
-
-template<>
-InputParameters validParams<Function>();
 
 #endif //FUNCTION_H

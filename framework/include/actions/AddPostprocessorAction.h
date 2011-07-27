@@ -17,6 +17,12 @@
 
 #include "MooseObjectAction.h"
 
+class AddPostprocessorAction;
+
+template<>
+InputParameters validParams<AddPostprocessorAction>();
+
+
 class AddPostprocessorAction: public MooseObjectAction
 {
 public:
@@ -27,8 +33,5 @@ public:
 protected:
   ExecFlagType _pps_type;
 };
-
-template<>
-InputParameters validParams<AddPostprocessorAction>();  
 
 #endif //ADDPOSTPROCESSORACTION_H

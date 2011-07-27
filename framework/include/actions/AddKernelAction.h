@@ -21,6 +21,12 @@
 
 #include <string>
 
+class AddKernelAction;
+
+template<>
+InputParameters validParams<AddKernelAction>();
+
+
 class AddKernelAction : public MooseObjectAction
 {
 public:
@@ -31,8 +37,5 @@ public:
 private:
   bool is_kernels_action;
 };
-
-template<>
-InputParameters validParams<AddKernelAction>();
 
 #endif // ADDKERNELACTION_H

@@ -17,6 +17,12 @@
 
 #include "AddVariableAction.h"
 
+class CopyNodalVarsAction;
+
+template<>
+InputParameters validParams<CopyNodalVarsAction>();
+
+
 class CopyNodalVarsAction: public Action
 {
 public:
@@ -24,8 +30,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<CopyNodalVarsAction>();
 
 #endif //COPYNODALVARSACTION_H

@@ -23,6 +23,12 @@
 
 #include <string>
 
+class ReadMeshAction;
+
+template<>
+InputParameters validParams<ReadMeshAction>();
+
+
 class ReadMeshAction : public Action
 {
 public:
@@ -32,8 +38,5 @@ public:
 
   static const std::string no_file_supplied;
 };
-
-template<>
-InputParameters validParams<ReadMeshAction>();
 
 #endif // READMESHACTION_H

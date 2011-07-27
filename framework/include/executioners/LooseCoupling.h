@@ -19,6 +19,12 @@
 #include "MooseMesh.h"
 #include "CoupledProblem.h"
 
+class LooseCoupling;
+
+template<>
+InputParameters validParams<LooseCoupling>();
+
+
 class LooseCoupling : public Executioner
 {
 public:
@@ -57,8 +63,5 @@ protected:
 
   void executeBlocks(const std::string & name);
 };
-
-template<>
-InputParameters validParams<LooseCoupling>();
 
 #endif /* LOOSECOUPLING_H */

@@ -21,6 +21,12 @@
 
 #include <string>
 
+class SetupOutputAction;
+
+template<>
+InputParameters validParams<SetupOutputAction>();
+
+
 class SetupOutputAction : public Action
 {
 public:
@@ -28,8 +34,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<SetupOutputAction>();
 
 #endif // SETUPOUTPUTACTION_H

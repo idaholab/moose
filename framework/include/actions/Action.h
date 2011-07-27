@@ -22,6 +22,11 @@
 #include <string>
 #include <ostream>
 
+class Action;
+
+template<>
+InputParameters validParams<Action>();
+
 class Action
 {
 public:
@@ -72,8 +77,5 @@ private:
   /// Helper method for printing the parts of the InputFile Syntax
   //void printCloseAndOpen(const std::string * prev_name, const std::string & curr_name, std::ostream & out) const;
 };
-
-template<>
-InputParameters validParams<Action>();
 
 #endif // ACTION_H

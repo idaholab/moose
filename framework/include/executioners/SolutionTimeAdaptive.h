@@ -28,6 +28,7 @@
 
 // Forward Declarations
 class SolutionTimeAdaptive;
+
 template<>
 InputParameters validParams<SolutionTimeAdaptive>();
 

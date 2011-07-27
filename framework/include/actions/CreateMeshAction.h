@@ -21,6 +21,12 @@
 
 #include <string>
 
+class CreateMeshAction;
+
+template<>
+InputParameters validParams<CreateMeshAction>();
+
+
 class CreateMeshAction : public Action
 {
 public:
@@ -28,8 +34,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<CreateMeshAction>();
 
 #endif // CREATEMESHACTION_H

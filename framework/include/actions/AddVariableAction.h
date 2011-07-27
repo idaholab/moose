@@ -21,6 +21,12 @@
 
 #include <string>
 
+class AddVariableAction;
+
+template<>
+InputParameters validParams<AddVariableAction>();
+
+
 class AddVariableAction : public Action
 {
 public:
@@ -33,8 +39,5 @@ private:
   std::string _variable_to_read;
   unsigned int _timestep_to_read;
 };
-
-template<>
-InputParameters validParams<AddVariableAction>();
 
 #endif // ADDVARIABLEACTION_H

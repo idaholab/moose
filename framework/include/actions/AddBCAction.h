@@ -21,6 +21,12 @@
 
 #include <string>
 
+class AddBCAction;
+
+template<>
+InputParameters validParams<AddBCAction>();
+
+
 class AddBCAction : public MooseObjectAction
 {
 public:
@@ -28,8 +34,5 @@ public:
 
   virtual void act();
 };
-
-template<>
-InputParameters validParams<AddBCAction>();
 
 #endif // ADDBCACTION_H

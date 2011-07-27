@@ -28,6 +28,7 @@
 
 // Forward Declarations
 class DT2Transient;
+
 template<>
 InputParameters validParams<DT2Transient>();
 

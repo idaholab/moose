@@ -18,6 +18,12 @@
 #include "Action.h"
 #include "Moose.h"
 
+class GlobalParamsAction;
+
+template<>
+InputParameters validParams<GlobalParamsAction>();
+
+
 class GlobalParamsAction: public Action
 {
 public:
@@ -46,8 +52,5 @@ public:
     return parameters().set<std::vector<std::vector<T> > >(name);
   }
 };
-
-template<>
-InputParameters validParams<GlobalParamsAction>();
 
 #endif //GLOBALPARAMSACTION_H

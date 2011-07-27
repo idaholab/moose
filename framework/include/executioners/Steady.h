@@ -27,6 +27,10 @@
 // System includes
 #include <string>
 
+class Steady;
+
+template<>
+InputParameters validParams<Steady>();
 
 /**
  * Steady executioners usually only call "solve()" on the NonlinearSystem once.
@@ -67,8 +71,5 @@ protected:
    */
   void restartMe();
 };
-
-template<>
-InputParameters validParams<Steady>();
 
 #endif //STEADY_H
