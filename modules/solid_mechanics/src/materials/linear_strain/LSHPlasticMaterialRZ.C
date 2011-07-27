@@ -45,7 +45,7 @@ LSHPlasticMaterialRZ::computeStrain(const SymmTensor & input_strain,
 
 // trial stress
   SymmTensor trial_stress = (*_local_elasticity_tensor) * etotal_strain;
-  trial_stress += _stress_old[_qp];
+  trial_stress += _stress_old_temp;
 
 // deviatoric trial stress
   SymmTensor dev_trial_stress(trial_stress);

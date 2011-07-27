@@ -262,3 +262,68 @@ SymmElasticityTensor::operator*( Real x ) const
   fred *= x;
   return fred;
 }
+
+void
+SymmElasticityTensor::form9x9Rotation( const ColumnMajorMatrix & R_3x3,
+                                       ColumnMajorMatrix & R_9x9 ) const
+{
+  for(int i = 0; i < 3; ++i)
+  {
+    for(int j = 0; j < 3; ++j)
+    {
+      for (int k = 0; k < 3; ++k)
+      {
+        for(int l = 0; l < 3; ++l)
+        {
+          R_9x9(((i*3)+k),((j*3)+l)) = R_3x3(i,j) * R_3x3(k,l);
+        }
+      }
+    }
+  }
+}
+
+void
+SymmElasticityTensor::rotateFromLocalToGlobal( const ColumnMajorMatrix & R )
+{
+  ColumnMajorMatrix this_9x9( columnMajorMatrix9x9() );
+  convertFrom9x9( ( R * this_9x9 ) * R.transpose() );
+}
+
+void
+SymmElasticityTensor::rotateFromGlobalToLocal( const ColumnMajorMatrix & R )
+{
+  ColumnMajorMatrix this_9x9( columnMajorMatrix9x9() );
+  convertFrom9x9( R.transpose() * ( this_9x9 * R ) );
+}
+
+void
+SymmElasticityTensor::adjustForCracking( const RealVectorValue & crack_flags )
+{
+  const RealVectorValue & c( crack_flags );
+  _val[ 0] *= c(0) * c(0);
+  _val[ 1] *= c(0) * c(1);
+  _val[ 2] *= c(0) * c(2);
+  _val[ 3] *= c(0) * c(0) * c(1);
+  _val[ 4] *= c(0) * c(1) * c(2);
+  _val[ 5] *= c(0) * c(1) * c(0);
+
+  _val[ 6] *= c(1) * c(1);
+  _val[ 7] *= c(1) * c(2);
+  _val[ 8] *= c(1) * c(0) * c(1);
+  _val[ 9] *= c(1) * c(1) * c(2);
+  _val[10] *= c(1) * c(1) * c(0);
+
+  _val[11] *= c(2) * c(2);
+  _val[12] *= c(2) * c(0) * c(1);
+  _val[13] *= c(2) * c(1) * c(2);
+  _val[14] *= c(2) * c(1) * c(0);
+
+  _val[15] *= c(0) * c(1) * c(0) * c(1);
+  _val[16] *= c(0) * c(1) * c(1) * c(2);
+  _val[17] *= c(0) * c(1) * c(2) * c(1);
+
+  _val[18] *= c(1) * c(2) * c(1) * c(2);
+  _val[19] *= c(1) * c(2) * c(2) * c(1);
+
+  _val[20] *= c(2) * c(0) * c(2) * c(0);
+}

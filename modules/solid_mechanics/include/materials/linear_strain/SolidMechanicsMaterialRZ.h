@@ -28,8 +28,8 @@ protected:
   virtual void initialSetup();
 
   virtual void computeStress(const SymmTensor & total_strain,
-                             const SymmTensor & strain,
                              const SymmElasticityTensor & elasticity_tensor,
+                             SymmTensor & strain,
                              SymmTensor & stress);
 
   virtual void computePreconditioning();
@@ -38,6 +38,13 @@ protected:
 
   virtual void computeCracking(const SymmTensor & strain,
                                SymmTensor & stress);
+
+  /// Determine if cracking occurred.  If so, perform rotations, etc.
+  virtual void crackingStrainRotation( const SymmTensor & total_strain,
+                                       SymmTensor & strain_inc );
+
+  /// Rotate old and new stress to global, if cracking active
+  virtual void crackingStressRotation();
 
   /**
    * The current quadrature point.
@@ -51,6 +58,8 @@ protected:
   const bool _large_strain;
 
   const Real _cracking_strain;
+  bool _cracking_locally_active;
+  ColumnMajorMatrix _e_vec;
 
   const Real _alpha;
 
@@ -82,6 +91,7 @@ protected:
   MaterialProperty<SymmTensor> & _v_strain;
   MaterialProperty<SymmTensor> & _v_strain_old;
 
+  SymmTensor _stress_old_temp;
   SymmElasticityTensor * _local_elasticity_tensor;
 
 };

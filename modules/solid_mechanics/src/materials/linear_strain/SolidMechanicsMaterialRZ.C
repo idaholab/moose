@@ -29,6 +29,8 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _large_strain(getParam<bool>("large_strain")),
    _cracking_strain( parameters.isParamValid("cracking_strain") ?
                      (getParam<Real>("cracking_strain") > 0 ? getParam<Real>("cracking_strain") : -1) : -1 ),
+   _cracking_locally_active(false),
+   _e_vec(3,3),
    _alpha(getParam<Real>("thermal_expansion")),
    _disp_r(coupledValue("disp_r")),
    _disp_z(coupledValue("disp_z")),
@@ -51,6 +53,7 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _elastic_strain(declareProperty<SymmTensor>("elastic_strain")),
    _v_strain(declareProperty<SymmTensor>("v_strain")),
    _v_strain_old(declarePropertyOld<SymmTensor>("v_strain")),
+   _stress_old_temp(),
    _local_elasticity_tensor(NULL)
 {
   SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ;
@@ -170,7 +173,7 @@ SolidMechanicsMaterialRZ::computeProperties()
       _d_strain_dT += dv_strain_dT;
     }
 
-    computeStress(_total_strain[_qp], strain, *_local_elasticity_tensor, _stress[_qp]);
+    computeStress(_total_strain[_qp], _elasticity_tensor[_qp], strain, _stress[_qp]);
 
     computePreconditioning();
 
@@ -179,12 +182,14 @@ SolidMechanicsMaterialRZ::computeProperties()
 
 void
 SolidMechanicsMaterialRZ::computeStress(const SymmTensor & total_strain,
-                                        const SymmTensor & strain,
                                         const SymmElasticityTensor & elasticity_tensor,
+                                        SymmTensor & strain,
                                         SymmTensor & stress)
 {
   // Add in any extra strain components
   SymmTensor elastic_strain;
+
+  crackingStrainRotation( total_strain, strain );
 
   computeStrain(strain, elastic_strain);
 
@@ -193,9 +198,11 @@ SolidMechanicsMaterialRZ::computeStress(const SymmTensor & total_strain,
 
   // C * e
   stress = elasticity_tensor * elastic_strain;
-  stress += _stress_old[_qp];
+  stress += _stress_old_temp;
 
-  computeCracking( total_strain, stress );
+  crackingStressRotation();
+
+//   computeCracking( total_strain, stress );
 }
 
 void
@@ -203,10 +210,96 @@ SolidMechanicsMaterialRZ::computePreconditioning()
 {
   //Jacobian multiplier of the stress
   mooseAssert(_local_elasticity_tensor, "null _local_elasticity_tensor");
-  _Jacobian_mult[_qp] = *_local_elasticity_tensor;
-  SymmTensor d_stress_dT( *_local_elasticity_tensor * _d_strain_dT );
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+  SymmTensor d_stress_dT( _elasticity_tensor[_qp] * _d_strain_dT );
 //   d_stress_dT *= _dt;
   _d_stress_dT[_qp] = d_stress_dT;
+}
+
+void
+SolidMechanicsMaterialRZ::crackingStrainRotation( const SymmTensor & total_strain,
+                                                  SymmTensor & strain_increment )
+{
+  _stress_old_temp = _stress_old[_qp];
+  _cracking_locally_active = false;
+  RealVectorValue crack_flags;
+  if (_cracking_strain > 0)
+  {
+    // Compute whether cracking has occurred
+    ColumnMajorMatrix principal_strain(3,1);
+    total_strain.columnMajorMatrix().eigen( principal_strain, _e_vec );
+
+    const Real tiny(1e-8);
+    for (unsigned int i(0); i < 3; ++i)
+    {
+      if (principal_strain(i,0) > _cracking_strain)
+      {
+        (*_crack_flags)[_qp](i) = tiny;
+      }
+      else
+      {
+        (*_crack_flags)[_qp](i) = 1;
+      }
+      (*_crack_flags)[_qp](i) = std::min((*_crack_flags)[_qp](i), (*_crack_flags_old)[_qp](i));
+    }
+    for (unsigned int i(0); i < 3; ++i)
+    {
+      if (principal_strain(i,0) < 0)
+      {
+        crack_flags(i) = 1;
+      }
+      else
+      {
+        crack_flags(i) = (*_crack_flags)[_qp](i);
+        if (crack_flags(i) < 1)
+        {
+          _cracking_locally_active = true;
+        }
+      }
+    }
+  }
+  if (_cracking_locally_active)
+  {
+    // Adjust the elasticity matrix for cracking.  This must be used by the
+    // constitutive law.
+    _elasticity_tensor[_qp] = *_local_elasticity_tensor;
+    _elasticity_tensor[_qp].adjustForCracking( crack_flags );
+
+    ColumnMajorMatrix R_9x9(9,9);
+    _elasticity_tensor[_qp].form9x9Rotation( _e_vec, R_9x9 );
+    _elasticity_tensor[_qp].rotateFromLocalToGlobal( R_9x9 );
+
+    // Form transformation matrix R*E*R^T
+    ColumnMajorMatrix trans(3,3);
+    for (unsigned int j(0); j < 3; ++j)
+    {
+      for (unsigned int i(0); i < 3; ++i)
+      {
+        for (unsigned int k(0); k < 3; ++k)
+        {
+          trans(i,j) += _e_vec(i,k) * crack_flags(k) * _e_vec(j,k);
+        }
+      }
+    }
+    // Rotate the old stress to the principal orientation, zero out the stress in
+    // cracked directions, and rotate back.  This is done in one step since we have
+    // the transformation matrix R*E*R^T.
+    MaterialModel::rotateSymmetricTensor( trans, _stress_old_temp, _stress_old_temp );
+    MaterialModel::rotateSymmetricTensor( trans, strain_increment, strain_increment );
+
+  }
+}
+
+void
+SolidMechanicsMaterialRZ::crackingStressRotation()
+{
+  // If everything is already performed in the global frame, there is no need to
+  // rotate to global.
+//   if ( _cracking_locally_active )
+//   {
+//     MaterialModel::rotateSymmetricTensor( _e_vec, _stress_old[_qp], _stress_old[_qp] );
+//     MaterialModel::rotateSymmetricTensor( _e_vec, _stress[_qp], _stress[_qp] );
+//   }
 }
 
 void

@@ -120,6 +120,13 @@ public:
   ColumnMajorMatrix columnMajorMatrix9x9() const;
   ColumnMajorMatrix columnMajorMatrix6x6() const;
 
+  void form9x9Rotation( const ColumnMajorMatrix & R_3x3,
+                        ColumnMajorMatrix & R_9x9 ) const;
+  void rotateFromGlobalToLocal( const ColumnMajorMatrix & R );
+  void rotateFromLocalToGlobal( const ColumnMajorMatrix & R );
+
+  void adjustForCracking( const RealVectorValue & crack_flags );
+
   virtual SymmElasticityTensor calculateDerivative(unsigned int qp,unsigned int i);
 
   friend std::ostream & operator<<(std::ostream & stream, const SymmElasticityTensor & obj);
