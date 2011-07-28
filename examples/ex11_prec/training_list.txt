@@ -1,0 +1,6 @@
+Title: Preconditioning
+default.i
+smp.i
+fdp.i
+../../moose/include/kernels/CoupledForce.h
+../../moose/src/kernels/CoupledForce.C
