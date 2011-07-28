@@ -74,6 +74,13 @@ public:
     return _iteration_plot_start_time;
   }
 
+  /**
+   * Sets the variables to be output.
+   *
+   * Must be called before any outputers are added!
+   */
+  void setOutputVariables(std::vector<std::string> output_variables) { _output_variables = output_variables; }
+
 protected:
   std::string _file_base;
 
@@ -84,6 +91,8 @@ protected:
   Real _iteration_plot_start_time;
 
   std::vector<Outputter *> _outputters;
+
+  std::vector<std::string> _output_variables;           /// The variables to be output
 };
 
 #endif /* OUTPUTTER_H */

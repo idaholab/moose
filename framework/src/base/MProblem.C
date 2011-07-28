@@ -1353,3 +1353,20 @@ MProblem::restartFromFile(const std::string & file_name)
   _eq.read(file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
   _nl.update();
 }
+
+std::vector<std::string>
+MProblem::getVariableNames()
+{
+  std::vector<std::string> names;
+  
+  System & nl = _nl.sys();
+  System & aux = _aux.sys();
+
+  for(unsigned int i=0; i<nl.n_vars(); i++)
+    names.push_back(nl.variable_name(i));
+
+  for(unsigned int i=0; i<aux.n_vars(); i++)
+    names.push_back(aux.variable_name(i));
+
+  return names;
+}

@@ -62,6 +62,12 @@ public:
   virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid]->sideElem(); }
   virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid]->node(); }
 
+  /**
+   * Returns a list of all the variables in the problem (both from the NL and Aux systems.
+   */
+  std::vector<std::string> getVariableNames();
+
+
   virtual void initialSetup();
   virtual void timestepSetup();
 
@@ -252,6 +258,7 @@ protected:
 
   PerfLog _solve_only_perf_log;                         ///< Only times the solve
   bool _output_setup_log_early;                         ///< Determines if the setup log is printed before the first time step
+
 public:
   static unsigned int _n;                               ///< number of instances of MProblem (to distinguish Systems when coupling problems together)
 

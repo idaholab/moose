@@ -53,6 +53,7 @@ InputParameters validParams<SetupOutputAction>()
 
   params.addParam<bool>("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
+  params.addParam<std::vector<std::string> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
 
   return params;
 }
@@ -81,6 +82,17 @@ SetupOutputAction::act()
   Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
   output.fileBase(getParam<std::string>("file_base"));
+
+  if(isParamValid("output_variables"))
+    output.setOutputVariables(getParam<std::vector<std::string> >("output_variables"));
+  else
+  {
+    if(_parser_handle._problem != NULL)
+    {
+      MProblem & mproblem = *_parser_handle._problem;
+      output.setOutputVariables(mproblem.getVariableNames());
+    }
+  }
 
   if (getParam<bool>("exodus")) output.add(Output::EXODUS);
   if (getParam<bool>("nemesis")) output.add(Output::NEMESIS);
@@ -116,7 +128,6 @@ SetupOutputAction::act()
 
     output.interval(getParam<int>("interval"));
     output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
-
   }
 
 #ifdef LIBMESH_HAVE_PETSC

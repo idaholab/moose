@@ -72,6 +72,8 @@ Output::add(Output::Type type)
     mooseError("I do not know how to build and unknown outputter");
   }
 
+  o->setOutputVariables(_output_variables);
+
   _outputters.push_back(o);
 }
 

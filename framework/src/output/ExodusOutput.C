@@ -60,6 +60,7 @@ ExodusOutput::output(const std::string & file_base, Real time)
   if (_out == NULL)
   {
     _out = new ExodusII_IO(_es.get_mesh());
+    _out->set_output_variables(_output_variables);
     _file_num++;
   }
 

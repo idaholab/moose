@@ -39,8 +39,12 @@ public:
   virtual void meshChanged() = 0;
   virtual void sequence(bool state) = 0;
 
+  void setOutputVariables(std::vector<std::string> output_variables) { _output_variables = output_variables; }
+
 protected:
   EquationSystems & _es;
+
+  std::vector<std::string> _output_variables;           /// The variables to be output
 };
 
 #endif /* OUTPUTTER_H */
