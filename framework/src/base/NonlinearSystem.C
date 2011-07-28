@@ -186,15 +186,15 @@ NonlinearSystem::init()
 }
 
 void
-NonlinearSystem::prepareAssembly(const Elem * elem, THREAD_ID tid)
+NonlinearSystem::prepareAssembly(THREAD_ID tid)
 {
-  _asm_block[tid]->prepare(elem);
+  _asm_block[tid]->prepare();
 }
 
 void
-NonlinearSystem::prepareAssembly(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+NonlinearSystem::prepareAssembly(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
-  _asm_block[tid]->prepareBlock(elem, ivar, jvar, dof_indices);
+  _asm_block[tid]->prepareBlock(ivar, jvar, dof_indices);
 }
 
 void

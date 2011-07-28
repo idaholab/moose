@@ -34,8 +34,8 @@ public:
 
   void init();
 
-  void prepare(const Elem * elem);
-  void prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
+  void prepare();
+  void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
 
   void copyShapes(unsigned int var);
   void copyFaceShapes(unsigned int var);
@@ -64,7 +64,6 @@ protected:
   const DofMap & _dof_map;                                      ///< DOF map
   THREAD_ID _tid;                                               ///< Thread number (id)
 
-  std::vector<std::vector<unsigned int> > _sub_dof_indices;     ///< DOF indices for each variable
   std::vector<DenseVector<Number> > _sub_Re;                    ///< residual contributions for each variable
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Ke;      ///< jacobian contributions
 

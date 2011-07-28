@@ -214,9 +214,9 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
 
-  _asm_block[tid]->prepare(elem);
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
+  _asm_block[tid]->prepare();
 }
 
 void
@@ -224,9 +224,9 @@ DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jva
 {
   _asm_info[tid]->reinit(elem);
 
-  _asm_block[tid]->prepareBlock(elem, ivar, jvar, dof_indices);
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
+  _asm_block[tid]->prepareBlock(ivar, jvar, dof_indices);
 }
 
 bool
@@ -236,7 +236,6 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
   bool have_points = points_set.size();
 
-  _asm_block[tid]->prepare(elem);
   if(have_points)
   {
     std::vector<Point> points(points_set.size());
@@ -246,6 +245,7 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
     _displaced_nl.prepare(tid);
     _displaced_aux.prepare(tid);
+    _asm_block[tid]->prepare();
 
     reinitElem(elem, tid);
   }  

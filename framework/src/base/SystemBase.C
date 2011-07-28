@@ -16,6 +16,7 @@
 #include "Factory.h"
 #include "SubProblem.h"
 #include "MooseVariable.h"
+#include "Conversion.h"
 
 // libMesh
 #include "quadrature_gauss.h"
@@ -44,6 +45,15 @@ SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
   MooseVariable * var = _vars[tid].getVariable(var_name);
   if (var == NULL)
     mooseError("variable " + var_name + " does not exist in this system");
+  return *var;
+}
+
+MooseVariable &
+SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
+{
+  MooseVariable * var = _vars[tid].all()[var_number];
+  if (var == NULL)
+    mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
 

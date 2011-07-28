@@ -40,7 +40,6 @@ AsmBlock::init()
       if ((*_cm)(i, j) != 0)
         _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
 
-  _sub_dof_indices.resize(n_vars);
   _sub_Re.resize(n_vars);
 
   _sub_Ke.resize(n_vars);
@@ -49,30 +48,31 @@ AsmBlock::init()
 }
 
 void
-AsmBlock::prepare(const Elem * elem)
+AsmBlock::prepare()
 {
-  unsigned int n_vars = _sys.nVariables();
-  for (unsigned int ivar = 0; ivar < n_vars; ivar++)
-    _dof_map.dof_indices(elem, _sub_dof_indices[ivar], ivar);
-
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    unsigned int ivar = (*it).first;
-    unsigned int jvar = (*it).second;
+    unsigned int vi = (*it).first;
+    unsigned int vj = (*it).second;
 
-    _sub_Ke[ivar][jvar].resize(_sub_dof_indices[ivar].size(), _sub_dof_indices[jvar].size());
-    _sub_Ke[ivar][jvar].zero();
+    MooseVariable & ivar = _sys.getVariable(_tid, vi);
+    MooseVariable & jvar = _sys.getVariable(_tid, vj);
+
+    _sub_Ke[vi][vj].resize(ivar.dofIndices().size(), jvar.dofIndices().size());
+    _sub_Ke[vi][vj].zero();
   }
 
-  for (unsigned int ivar = 0; ivar < n_vars; ivar++)
+  unsigned int n_vars = _sys.nVariables();
+  for (unsigned int vi = 0; vi < n_vars; vi++)
   {
-    _sub_Re[ivar].resize(_sub_dof_indices[ivar].size());
-    _sub_Re[ivar].zero();
+    MooseVariable & ivar = _sys.getVariable(_tid, vi);
+    _sub_Re[vi].resize(ivar.dofIndices().size());
+    _sub_Re[vi].zero();
   }
 }
 
 void
-AsmBlock::prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices)
+AsmBlock::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices)
 {
   _sub_Ke[ivar][jvar].resize(dof_indices.size(), dof_indices.size());
   _sub_Ke[ivar][jvar].zero();
@@ -84,44 +84,43 @@ AsmBlock::prepareBlock(const Elem * elem, unsigned int ivar, unsigned jvar, cons
 void
 AsmBlock::copyShapes(unsigned int var)
 {
-  // FIXME: ugly
-  MooseVariable * v = _sys._vars[_tid].all()[var];
+  MooseVariable & v = _sys.getVariable(_tid, var);
 
-  _phi = v->phi();
-  _grad_phi = v->gradPhi();
-  _second_phi = v->secondPhi();
+  _phi = v.phi();
+  _grad_phi = v.gradPhi();
+  _second_phi = v.secondPhi();
 }
 
 void
 AsmBlock::copyFaceShapes(unsigned int var)
 {
-  // FIXME: ugly
-  MooseVariable * v = _sys._vars[_tid].all()[var];
+  MooseVariable & v = _sys.getVariable(_tid, var);
 
-  _phi_face = v->phiFace();
-  _grad_phi_face = v->gradPhiFace();
-  _second_phi_face = v->secondPhiFace();
+  _phi_face = v.phiFace();
+  _grad_phi_face = v.gradPhiFace();
+  _second_phi_face = v.secondPhiFace();
 }
 
 void
 AsmBlock::addResidual(NumericVector<Number> & residual)
 {
-  for (unsigned int var = 0; var < _sys.nVariables(); ++var)
+  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
   {
-    if (_sub_dof_indices[var].size() > 0)
-    {
-      _dof_map.constrain_element_vector(_sub_Re[var], _sub_dof_indices[var], false);
+    MooseVariable & var = _sys.getVariable(_tid, vn);
 
-      // FIXME: ugly
-      Real scaling_factor = _sys._vars[_tid].all()[var]->scalingFactor();
+    if (var.dofIndices().size() > 0)
+    {
+      _dof_map.constrain_element_vector(_sub_Re[vn], var.dofIndices(), false);
+
+      Real scaling_factor = var.scalingFactor();
       if (scaling_factor != 1.0)
       {
-        DenseVector<Number> re(_sub_Re[var]);
+        DenseVector<Number> re(_sub_Re[vn]);
         re.scale(scaling_factor);
-        residual.add_vector(re, _sub_dof_indices[var]);
+        residual.add_vector(re, var.dofIndices());
       }
       else
-        residual.add_vector(_sub_Re[var], _sub_dof_indices[var]);
+        residual.add_vector(_sub_Re[vn], var.dofIndices());
     }
   }
 }
@@ -129,26 +128,28 @@ AsmBlock::addResidual(NumericVector<Number> & residual)
 void
 AsmBlock::addJacobian(SparseMatrix<Number> & jacobian)
 {
-  for (unsigned int ivar = 0; ivar < _sys.nVariables(); ++ivar)
+  for (unsigned int vi = 0; vi < _sys.nVariables(); ++vi)
   {
-    for (unsigned int jvar = 0; jvar < _sys.nVariables(); ++jvar)
+    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
     {
-      if ((*_cm)(ivar, jvar) != 0)
+      if ((*_cm)(vi, vj) != 0)
       {
-        if ((_sub_dof_indices[ivar].size() > 0) && (_sub_dof_indices[jvar].size() > 0))
-        {
-          _dof_map.constrain_element_matrix(_sub_Ke[ivar][jvar], _sub_dof_indices[ivar], _sub_dof_indices[jvar], false);
+        MooseVariable & ivar = _sys.getVariable(_tid, vi);
+        MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-          // FIXME: ugly
-          Real scaling_factor = _sys._vars[_tid].all()[ivar]->scalingFactor();
+        if ((ivar.dofIndices().size() > 0) && (jvar.dofIndices().size() > 0))
+        {
+          _dof_map.constrain_element_matrix(_sub_Ke[vi][vj], ivar.dofIndices(), jvar.dofIndices(), false);
+
+          Real scaling_factor = ivar.scalingFactor();
           if (scaling_factor != 1.0)
           {
-            DenseMatrix<Number> ke(_sub_Ke[ivar][jvar]);
+            DenseMatrix<Number> ke(_sub_Ke[vi][vj]);
             ke.scale(scaling_factor);
-            jacobian.add_matrix(ke, _sub_dof_indices[ivar], _sub_dof_indices[jvar]);
+            jacobian.add_matrix(ke, ivar.dofIndices(), jvar.dofIndices());
           }
           else
-            jacobian.add_matrix(_sub_Ke[ivar][jvar], _sub_dof_indices[ivar], _sub_dof_indices[jvar]);
+            jacobian.add_matrix(_sub_Ke[vi][vj], ivar.dofIndices(), jvar.dofIndices());
         }
       }
     }
@@ -163,7 +164,7 @@ AsmBlock::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, u
   // stick it into the matrix
   dof_map.constrain_element_matrix(ke, dof_indices, false);
 
-  Real scaling_factor = _sys._vars[_tid].all()[ivar]->scalingFactor();
+  Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)
   {
     DenseMatrix<Number> scaled_ke(ke);

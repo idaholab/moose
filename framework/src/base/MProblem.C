@@ -264,12 +264,12 @@ MProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
 
-  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
-    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), tid);
-
-  _nl.prepareAssembly(elem, tid);
   _nl.prepare(tid);
   _aux.prepare(tid);
+  _nl.prepareAssembly(tid);
+
+  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), tid);
 }
 
 void
@@ -277,12 +277,12 @@ MProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const
 {
   _asm_info[tid]->reinit(elem);
 
-  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
-    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), ivar, jvar, dof_indices, tid);
-
-  _nl.prepareAssembly(elem, ivar, jvar, dof_indices, tid);
   _nl.prepare(tid);
   _aux.prepare(tid);
+  _nl.prepareAssembly(ivar, jvar, dof_indices, tid);
+
+  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), ivar, jvar, dof_indices, tid);
 }
 
 void
@@ -344,7 +344,6 @@ MProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
   bool have_points = points_set.size();
 
-  _nl.prepareAssembly(elem, tid);
   if(have_points)
   {
     std::vector<Point> points(points_set.size());
@@ -357,6 +356,7 @@ MProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
     reinitElem(elem, tid);
   }
+  _nl.prepareAssembly(tid);
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem))
     have_points = have_points || _displaced_problem->reinitDirac(_displaced_mesh->elem(elem->id()), tid);
