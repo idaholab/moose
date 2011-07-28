@@ -85,7 +85,7 @@
   type = Steady
   perf_log = true
 
-  petsc_options = '-snes_mf -ksp_monitor'
+  petsc_options = '-ksp_monitor'
 []
 
 [Output]
