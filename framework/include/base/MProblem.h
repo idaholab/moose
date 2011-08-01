@@ -182,7 +182,8 @@ public:
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
 
   // Restart //////
-  virtual void restartFromFile(const std::string & file_name);
+  virtual void setRestartFile(const std::string & file_name) { _restart = true; _restart_file_name = file_name; }
+  virtual void restartFromFile();
 
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
@@ -253,6 +254,9 @@ protected:
   bool _input_file_saved;                               ///< whether input file has been written
 
   bool _has_dampers;                                    ///< Whether or not this system has any Dampers associated with it.
+
+  bool _restart;                                        ///< true if restarting from a file, otherwise false
+  std::string _restart_file_name;                       ///< name of the file that we restart from
 
   std::set<unsigned int> _ghosted_elems;                ///< Elements that should have Dofs ghosted to the local processor
 

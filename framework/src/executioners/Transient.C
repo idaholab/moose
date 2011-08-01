@@ -98,6 +98,9 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   while (_remaining_sync_time && *_curr_sync_time_iter < _time)
     if (++_curr_sync_time_iter == _sync_times.end())
       _remaining_sync_time = false;
+
+  if (!_restart_sln_file_name.empty())
+    _problem.setRestartFile(_restart_sln_file_name);
 }
 
 Transient::~Transient()
@@ -107,8 +110,6 @@ Transient::~Transient()
 void
 Transient::execute()
 {
-  restartMe();
-
   _problem.initialSetup();
 
   preExecute();
@@ -349,13 +350,4 @@ void
 Transient::preExecute()
 {
   Executioner::preExecute();
-}
-
-
-void
-Transient::restartMe()
-{
-  if (_restart_sln_file_name.empty())
-    return;
-  _problem.restartFromFile(_restart_sln_file_name);
 }

@@ -145,6 +145,9 @@ MProblem::~MProblem()
 
 void MProblem::initialSetup()
 {
+  if (_restart)
+    restartFromFile();
+
   unsigned int n_threads = libMesh::n_threads();
 
   Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
@@ -663,8 +666,12 @@ MProblem::initialGradient (const Point& p,
 void
 MProblem::initialCondition(EquationSystems& es, const std::string& system_name)
 {
-  ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
-  system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
+  if (!_restart)
+  {
+    // do not project initial condition if we are restarting from a file
+    ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
+    system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
+  }
 }
 
 void
@@ -1348,9 +1355,9 @@ MProblem::serializeSolution()
 }
 
 void
-MProblem::restartFromFile(const std::string & file_name)
+MProblem::restartFromFile()
 {
-  _eq.read(file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
+  _eq.read(_restart_file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
   _nl.update();
 }
 

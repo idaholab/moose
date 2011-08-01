@@ -125,9 +125,6 @@ public:
   virtual void output() = 0;
   void outputInitial(bool out_init) { _output_initial = out_init; }
 
-  // Restart //////
-  virtual void restartFromFile(const std::string & file_name) = 0;
-
 public:
   /**
    * Convenience zeros

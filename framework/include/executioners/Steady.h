@@ -65,11 +65,6 @@ protected:
   // not a real time, but we need to distinguish between initial condition and the solution (which we do by faking time)
   // this is only for outputting purposes
   Real & _time;
-
-  /**
-   * Restart the problem if required by user
-   */
-  void restartMe();
 };
 
 #endif //STEADY_H
