@@ -130,13 +130,8 @@ ActionWarehouse::printInputFile(std::ostream & out)
   
   // We'll push one more "empty" action onto the end so that when we print the input syntax
   // everything will get closed off without any odd tail calls.  Had to do delayed construction
-  Action * empty_action;
-  if (empty_action == NULL)
-  { 
-    InputParameters pars = ActionFactory::instance()->getValidParams("EmptyAction");
-    // no memory leak here, this action gets deleted in Actionfactory
-    empty_action = ActionFactory::instance()->create("EmptyAction", pars);
-  }
+  InputParameters pars = ActionFactory::instance()->getValidParams("EmptyAction");
+  Action * empty_action = ActionFactory::instance()->create("EmptyAction", pars);
   ordered_actions.push_back(empty_action);
 
   mooseAssert (_parser_ptr != NULL, "Parser is NULL in ActionWarehouse");
