@@ -94,14 +94,9 @@ private:
   /// The dependency resolver
   DependencyResolver<std::string> _actions;
 
-  /// The vector of ordered actions out of the dependency resolver
-  std::vector<Action *> _ordered_actions;
-
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
   
-  Action * _empty_action;
-
   /// Use to store the current list of unsatisfied dependencies
   std::set<std::string> _unsatisfied_dependencies;
 

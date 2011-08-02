@@ -18,7 +18,6 @@
 #include "MooseObjectAction.h"
 
 ActionWarehouse::ActionWarehouse() :
-  _empty_action(NULL),
   _generator_valid(false),
   _parser_ptr(NULL)
 {
@@ -31,6 +30,11 @@ ActionWarehouse::~ActionWarehouse()
 void
 ActionWarehouse::clear()
 {
+  for (std::map<std::string, std::vector<Action *> >::iterator it = _action_blocks.begin(); it != _action_blocks.end(); ++it)
+  {
+    for (std::vector<Action *>::iterator jt = (*it).second.begin(); jt != (*it).second.end(); ++jt)
+      delete *jt;
+  }
   _action_blocks.clear();
   _generator_valid = false;
 }
@@ -116,22 +120,24 @@ ActionWarehouse::printInputFile(std::ostream & out)
 {
   std::map<std::string, std::vector<Action *> >::iterator iter;
 
-  _ordered_actions.clear();
+  std::vector<Action *> ordered_actions;
+  ordered_actions.clear();
   for (iter = _action_blocks.begin(); iter != _action_blocks.end(); ++iter)
     for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
-      _ordered_actions.push_back(*j);
+      ordered_actions.push_back(*j);
 
-  std::sort(_ordered_actions.begin(), _ordered_actions.end(), Parser::InputFileSort());
+  std::sort(ordered_actions.begin(), ordered_actions.end(), Parser::InputFileSort());
   
   // We'll push one more "empty" action onto the end so that when we print the input syntax
   // everything will get closed off without any odd tail calls.  Had to do delayed construction
-  if (_empty_action == NULL)
+  Action * empty_action;
+  if (empty_action == NULL)
   { 
     InputParameters pars = ActionFactory::instance()->getValidParams("EmptyAction");
     // no memory leak here, this action gets deleted in Actionfactory
-    _empty_action = ActionFactory::instance()->create("EmptyAction", pars);
+    empty_action = ActionFactory::instance()->create("EmptyAction", pars);
   }
-  _ordered_actions.push_back(_empty_action);
+  ordered_actions.push_back(empty_action);
 
   mooseAssert (_parser_ptr != NULL, "Parser is NULL in ActionWarehouse");
   _parser_ptr->initSyntaxFormatter(Parser::INPUT_FILE, false, out);
@@ -139,8 +145,8 @@ ActionWarehouse::printInputFile(std::ostream & out)
   // Print it out!
 
   std::string prev_name = "";
-  for (std::vector<Action* >::iterator i = _ordered_actions.begin();
-       i != _ordered_actions.end();
+  for (std::vector<Action* >::iterator i = ordered_actions.begin();
+       i != ordered_actions.end();
        ++i)
   {
     std::string name ((*i)->name());
@@ -153,6 +159,8 @@ ActionWarehouse::printInputFile(std::ostream & out)
       prev_name = name;
     }
   }
+
+  delete empty_action;
 }
 
 void

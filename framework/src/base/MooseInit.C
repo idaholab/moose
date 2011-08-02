@@ -23,7 +23,7 @@
 MooseInit::MooseInit(int argc, char *argv[]) :
 	LibMeshInit(argc, argv)
 {
-  PetscPushSignalHandler(NULL, NULL);           // get rid off Petsc error handler
+  PetscPopSignalHandler();           // get rid off Petsc error handler
   ParallelUniqueId::initialize();
 
   std::cout << "Using " << libMesh::n_threads() << " thread(s)" << std::endl;
@@ -35,6 +35,8 @@ MooseInit::MooseInit(int argc, char *argv[]) :
 
 MooseInit::~MooseInit()
 {
+  Moose::action_warehouse.clear();
+
   delete Moose::command_line;
   Factory::release();
   ActionFactory::release();

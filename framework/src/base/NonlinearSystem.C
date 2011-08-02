@@ -117,6 +117,9 @@ NonlinearSystem::~NonlinearSystem()
   delete _preconditioner;
   delete &_serialized_solution;
   delete &_residual_copy;
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    delete _asm_block[tid];
 }
 
 void
