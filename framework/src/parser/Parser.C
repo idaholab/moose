@@ -618,6 +618,7 @@ Parser::execute()
       checkParams(moose_obj_action->name(), moose_obj_action->getMooseObjectParams());
 
     // Act!
+    std::cout << (*i)->name() << "\n";
     (*i)->act();
   }
 }
