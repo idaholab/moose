@@ -62,8 +62,7 @@ public:
 protected:
   MProblem _problem;
 
-  // not a real time, but we need to distinguish between initial condition and the solution (which we do by faking time)
-  // this is only for outputting purposes
+  int & _time_step;
   Real & _time;
 };
 

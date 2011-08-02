@@ -26,6 +26,7 @@ InputParameters validParams<Steady>()
 Steady::Steady(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*_mesh),
+    _time_step(_problem.timeStep()),
     _time(_problem.time())
 {
   if (!_restart_sln_file_name.empty())
@@ -39,7 +40,7 @@ Steady::~Steady()
 void
 Steady::execute()
 {
-  std::cerr << "Time: " << _time << "\n";
+  std::cerr << "Time: " << _time_step << "\n";
   
   checkIntegrity();
 
@@ -47,7 +48,9 @@ Steady::execute()
   
   preExecute();
 
-  _time = 1.0;           // should be inside the previous if-statement, but to preserve backward compatible behavior, it has to be like this ;(
+  // first step in any steady state solve is always 1 (preserving backwards compatibility)
+  _time_step = 1;
+  _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -76,7 +79,9 @@ Steady::execute()
       _problem.adaptMesh();
       _problem.out().meshChanged();
     }
-    _time += 1.0;                       // change the "time" so we get the right output
+
+    _time_step++;
+    _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
   }
 #endif
 
