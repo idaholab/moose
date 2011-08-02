@@ -62,7 +62,7 @@ public:
   virtual Real & dtOld() { return _dt_old; }
 
   virtual void transient(bool trans) { _transient = trans; }
-  virtual bool transient() { return _transient; }
+  virtual bool isTransient() { return _transient; }
 
   virtual Order getQuadratureOrder() = 0;
 

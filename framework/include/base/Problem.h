@@ -109,7 +109,7 @@ public:
 
   // Transient /////
   virtual void transient(bool trans) = 0;
-  virtual bool transient() = 0;
+  virtual bool isTransient() = 0;
 
   virtual Real & time() = 0;
   virtual int & timeStep() = 0;

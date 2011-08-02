@@ -81,9 +81,7 @@ void
 Output::output()
 {
   for (unsigned int i = 0; i < _outputters.size(); i++)
-  {
     _outputters[i]->output(_file_base, _time);
-  }
 }
 
 void

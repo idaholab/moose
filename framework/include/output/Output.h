@@ -92,7 +92,7 @@ protected:
 
   std::vector<Outputter *> _outputters;
 
-  std::vector<std::string> _output_variables;           /// The variables to be output
+  std::vector<std::string> _output_variables;           ///< The variables to be output
 };
 
 #endif /* OUTPUTTER_H */

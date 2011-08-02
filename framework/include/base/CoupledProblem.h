@@ -89,7 +89,7 @@ public:
 
   // Transient /////
   virtual void transient(bool trans);
-  virtual bool transient() { return _transient; }
+  virtual bool isTransient() { return _transient; }
 
   virtual Real & time() { return _time; }
   virtual int & timeStep() { return _t_step; }

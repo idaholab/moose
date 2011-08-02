@@ -42,7 +42,7 @@ VariableData::computeValues()
   unsigned int nqp = _qrule->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
-  if (_problem.transient())
+  if (_problem.isTransient())
   {
     _u_dot.resize(nqp);
     _du_dot_du.resize(nqp);
@@ -59,7 +59,7 @@ VariableData::computeValues()
     _u[i] = 0;
     _grad_u[i] = 0;
 
-    if (_problem.transient())
+    if (_problem.isTransient())
     {
       _u_dot[i] = 0;
       _du_dot_du[i] = 0;
@@ -94,7 +94,7 @@ VariableData::computeValues()
       _u[qp]      += phi_local * soln_local;
       _grad_u[qp] += dphi_local * soln_local;
 
-      if (_problem.transient())
+      if (_problem.isTransient())
       {
         _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
         _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
@@ -220,7 +220,7 @@ void
 MooseVariable::computeElemValues()
 {
 
-  bool is_transient = _problem.transient();
+  bool is_transient = _problem.isTransient();
   unsigned int nqp = _qrule->n_points();
   
   _u.resize(nqp);
@@ -368,7 +368,7 @@ MooseVariable::computeElemValues()
 void
 MooseVariable::computeElemValuesFace()
 {
-  bool is_transient = _problem.transient();
+  bool is_transient = _problem.isTransient();
   unsigned int nqp = _qrule_face->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
@@ -398,7 +398,7 @@ MooseVariable::computeElemValuesFace()
     _u[i] = 0;
     _grad_u[i] = 0;
 
-    if (_problem.transient())
+    if (_problem.isTransient())
     {
       if (_is_nl)
       {
@@ -491,7 +491,7 @@ MooseVariable::computeNodalValues()
     _nodal_u.resize(1);
     _nodal_u[0] = (*_sys.currentSolution())(_nodal_dof_index);
 
-    if (_problem.transient())
+    if (_problem.isTransient())
     {
       _nodal_u_old.resize(1);
       _nodal_u_old[0] = _sys.solutionOld()(_nodal_dof_index);
