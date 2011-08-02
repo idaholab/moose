@@ -87,6 +87,7 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _output_displaced(false),
     _input_file_saved(false),
     _has_dampers(false),
+    _restart(false),
     _solve_only_perf_log("Solve Only"),
     _output_setup_log_early(false)
 {
