@@ -32,6 +32,8 @@ public:
    */
   Coupleable(InputParameters & parameters, bool nodal);
 
+  virtual ~Coupleable();
+
   /**
    * Get the list of coupled variables
    * @return The list of coupled variables

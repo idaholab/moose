@@ -46,6 +46,10 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
   }
 }
 
+Coupleable::~Coupleable()
+{
+}
+
 bool
 Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 {

@@ -89,6 +89,8 @@ public:
    */
   static Factory *instance();
 
+  virtual ~Factory();
+
   /**
    * Release the memory allocated by this factory
    */

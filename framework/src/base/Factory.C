@@ -24,6 +24,10 @@ Factory *Factory::instance()
   return _instance;
 }
 
+Factory::~Factory()
+{
+}
+
 void
 Factory::release()
 {

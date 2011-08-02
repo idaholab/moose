@@ -33,6 +33,8 @@ public:
 
   ThreadedElementLoop(ThreadedElementLoop & x, Threads::split split);
 
+  virtual ~ThreadedElementLoop();
+
   void operator() (const RangeType & range);
 
   /**
@@ -93,6 +95,11 @@ template<typename RangeType>
 ThreadedElementLoop<RangeType>::ThreadedElementLoop(ThreadedElementLoop & x, Threads::split /*split*/) :
     _system(x._system),
     _problem(x._problem)
+{
+}
+
+template<typename RangeType>
+ThreadedElementLoop<RangeType>::~ThreadedElementLoop()
 {
 }
 

@@ -29,7 +29,7 @@ class ArbitraryQuadrature : public QBase
   ArbitraryQuadrature (const unsigned int _dim,
                        const Order _order=INVALID_ORDER);
 
-  ~ArbitraryQuadrature();
+  virtual ~ArbitraryQuadrature();
 
   QuadratureType type() const { return INVALID_Q_RULE; }
 
@@ -41,7 +41,7 @@ class ArbitraryQuadrature : public QBase
 
   /**
    * These functions must be defined to fulfill the interface expected
-   * by the quadrature initilziation routines.  Please do not
+   * by the quadrature initialization routines.  Please do not
    * modify the function names or signatures.
    */
   void init_1D (const ElemType _type=INVALID_ELEM,
