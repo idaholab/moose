@@ -157,6 +157,9 @@ void MProblem::initialSetup()
   copySolutionsBackwards();
   Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
 
+  if (!_restart)
+    _aux.compute(EXEC_INITIAL);
+
   if (_material_props.hasStatefulProperties())
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
