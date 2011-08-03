@@ -63,8 +63,6 @@ SetupPreconditionerAction::act()
    */
   if (_is_base_instance)
   {
-    Action *action;
-
     // We are only allowed to have one instance of a preconditioner active at a time
     // TODO: We may need to reset this parameter to zero for loosely coupled systems
     if (++_count > 1)
@@ -75,7 +73,7 @@ SetupPreconditionerAction::act()
     _moose_object_pars.set<std::string>("action") = "add_preconditioning";
 
     // Add Preconditioning Action to the warehouse on the fly
-    action = ActionFactory::instance()->create(_type_to_action[_type], _moose_object_pars);
+    Action *action = ActionFactory::instance()->create(_type_to_action[_type], _moose_object_pars);
     Moose::action_warehouse.addActionBlock(action);
 
     /**

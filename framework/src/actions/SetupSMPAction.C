@@ -39,8 +39,7 @@ SetupSMPAction::SetupSMPAction(const std::string & name, InputParameters params)
 void
 SetupSMPAction::act()
 {
-  MProblem & subproblem = *_parser_handle._problem;
-  NonlinearSystem & nl = subproblem.getNonlinearSystem();
+  NonlinearSystem & nl = _problem->getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
 
   CouplingMatrix * cm = new CouplingMatrix(n_vars);
