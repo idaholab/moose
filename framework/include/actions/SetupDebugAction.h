@@ -34,7 +34,7 @@ public:
   virtual void act();
 
 protected:
-
+  unsigned int _top_residuals;
 };
 
 

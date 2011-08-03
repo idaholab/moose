@@ -1237,3 +1237,50 @@ NonlinearSystem::containsTimeKernel()
 
   return time_kernels;
 }
+
+// DEBUGGING --------------------------------------------------------------------------------------
+
+struct st
+{
+  unsigned int _var;
+  unsigned int _nd;
+  Real _residual;
+
+  st() { _var = 0; _nd = 0; _residual = 0.; }
+
+  st(unsigned int var, unsigned int nd, Real residual)
+  {
+    _var = var;
+    _nd = nd;
+    _residual = residual;
+  }
+};
+
+struct st_sort_res
+{
+  bool operator() (st i, st j) { return (fabs(i._residual) > fabs(j._residual)); }
+} dbg_sort_residuals;
+
+void
+NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsigned int n)
+{
+  std::vector<st> vec;
+  vec.resize(residual.size());
+  for (unsigned int nd = 0; nd < _mesh.n_nodes(); ++nd)
+  {
+    const Node & node = _mesh.node(nd);
+    for (unsigned int var = 0; var < node.n_vars(_sys.number()); ++var)
+    {
+      unsigned int dof_idx = node.dof_number(_sys.number(), var, 0);
+      vec[dof_idx] = st(var, nd, residual(dof_idx));
+    }
+  }
+  // sort vec by residuals
+  std::sort(vec.begin(), vec.end(), dbg_sort_residuals);
+  // print out
+  std::cerr << "[DBG] Max " << n << " residuals" << std::endl;
+  for (unsigned int i = 0; i < n; ++i)
+  {
+    fprintf(stderr, "[DBG]  % .15e '%s' at node %d\n", vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
+  }
+}

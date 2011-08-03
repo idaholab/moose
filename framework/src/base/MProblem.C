@@ -89,7 +89,9 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _has_dampers(false),
     _restart(false),
     _solve_only_perf_log("Solve Only"),
-    _output_setup_log_early(false)
+    _output_setup_log_early(false),
+    // debugging
+    _dbg_top_residuals(0)
 {
   _n++;
 
@@ -1186,8 +1188,10 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
 
   _aux.residualSetup();
   _aux.compute();
-
   _nl.computeResidual(residual);
+
+  if (_dbg_top_residuals)
+    _nl.printTopResiduals(residual, _dbg_top_residuals);
 }
 
 void

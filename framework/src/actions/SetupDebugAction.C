@@ -13,17 +13,19 @@
 /****************************************************************/
 
 #include "SetupDebugAction.h"
+#include "MProblem.h"
 
 template<>
 InputParameters validParams<SetupDebugAction>()
 {
   InputParameters params = validParams<Action>();
-
+  params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
   return params;
 }
 
 SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters)
+    Action(name, parameters),
+    _top_residuals(getParam<unsigned int>("show_top_residuals"))
 {
 }
 
@@ -34,6 +36,7 @@ SetupDebugAction::~SetupDebugAction()
 void
 SetupDebugAction::act()
 {
+  _problem->setDebugTopResiduals(_top_residuals);
 }
 
 

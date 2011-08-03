@@ -198,6 +198,12 @@ public:
 
   inline void setEarlyPerfLogPrint(bool val) { _output_setup_log_early = val; }
 
+  // debugging iface /////
+
+  /// Set the number of top residual to be printed out (0 = no output)
+  void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
+
+
 protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;
@@ -262,6 +268,9 @@ protected:
 
   PerfLog _solve_only_perf_log;                         ///< Only times the solve
   bool _output_setup_log_early;                         ///< Determines if the setup log is printed before the first time step
+
+  // DEBUGGING capabilities
+  unsigned int _dbg_top_residuals;                      ///< Number of top residual to print out
 
 public:
   static unsigned int _n;                               ///< number of instances of MProblem (to distinguish Systems when coupling problems together)

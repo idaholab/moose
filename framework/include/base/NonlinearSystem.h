@@ -235,6 +235,12 @@ public:
    */
   Real finalNonlinearResidual() { return _final_residual; }
 
+  /**
+   * Print n top residuals with variable name and node number
+   * @param residual The residual we work with
+   * @param n The number of residuals to print
+   */
+  void printTopResiduals(const NumericVector<Number> & residual, unsigned int n);
 
 public:
   MProblem & _mproblem;
