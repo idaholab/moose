@@ -34,6 +34,7 @@ void associateSyntax(Parser & p)
   p.registerActionSyntax("CreateExecutionerAction", "Executioner");
   p.registerActionSyntax("SetupOutputAction", "Output");
   p.registerActionSyntax("GlobalParamsAction", "GlobalParams");
+  p.registerActionSyntax("SetupDebugAction", "Debug");
 
   /// MooseObjectActions
   p.registerActionSyntax("AddMeshModifierAction", "Mesh/Modifier/*");

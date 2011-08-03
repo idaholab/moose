@@ -136,6 +136,7 @@
 #include "SetupPBPAction.h"
 #include "SetupSMPAction.h"
 #include "SetupFiniteDifferencePreconditionerAction.h"
+#include "SetupDebugAction.h"
 
 namespace Moose {
 
@@ -284,6 +285,7 @@ addActionTypes()
   registerActionName("add_preconditioning", false);
   registerActionName("setup_adaptivity", false);
   registerActionName("meta_action", false);
+  registerActionName("setup_debug", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -328,6 +330,7 @@ addActionTypes()
 "(setup_pps_complete)"
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, setup_output)"
 "(check_integrity)"
+"(setup_debug)"
 );
 
 }
@@ -408,6 +411,7 @@ registerActions()
   registerAction(EmptyAction, "ready_to_init");
   registerAction(InitProblemAction, "init_problem");
   registerAction(CheckIntegrityAction, "check_integrity");
+  registerAction(SetupDebugAction, "setup_debug");
 
   // TODO: Why is this here?
   registerActionName("finish_input_file_output", false);
