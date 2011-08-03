@@ -72,7 +72,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
 
   [./Adaptivity]
     steps = 5
@@ -99,4 +98,5 @@
   interval = 1
   exodus = true
   postprocessor_csv = true
+  perf_log = true
 []

@@ -59,7 +59,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
   petsc_options = '-snes_mf_operator'
 []
 
@@ -68,6 +67,7 @@
   output_initial = true
   interval = 1
   exodus = true
+  perf_log = true
 []
    
     

@@ -93,7 +93,6 @@
   # in subblocks.  Instead we just change the type inside the Executioner.
 
   type = TransientHalf   # Here we use our custom Executioner
-  perf_log = true
   petsc_options = '-snes_mf_operator'
 
   num_steps = 40
@@ -106,6 +105,7 @@
   file_base = out
   interval = 1
   exodus = true
+  perf_log = true
 []
    
     

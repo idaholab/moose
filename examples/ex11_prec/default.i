@@ -70,7 +70,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
 
   petsc_options = '-snes_mf_operator -ksp_monitor'
   petsc_options_iname = '-pc_type'
@@ -82,6 +81,7 @@
   output_initial = true
   interval = 1
   exodus = true
+  perf_log = true
 []
    
     

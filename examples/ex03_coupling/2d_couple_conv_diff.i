@@ -73,13 +73,13 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
 []
 
 [Output]
   file_base = out
   interval = 1
   exodus = true
+  perf_log = true
 []
    
     

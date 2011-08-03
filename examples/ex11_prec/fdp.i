@@ -107,7 +107,6 @@
 
 [Executioner]
   type = Steady
-  perf_log = true
 
   petsc_options = '-ksp_monitor'
 []
@@ -117,6 +116,7 @@
   output_initial = true
   interval = 1
   exodus = true
+  perf_log = true
 []
    
     

@@ -8,13 +8,13 @@
   file_base = out
   interval = 1
   exodus = true
+  perf_log = true
 []
 
 # Note: The executioner is out of it's normal place (should be just about the output block)
 [Executioner]
-	type = Steady
-	perf_log = true
-	petsc_options = '-snes_mf_operator'
+  type = Steady
+  petsc_options = '-snes_mf_operator'
 []
 
 [Materials]
