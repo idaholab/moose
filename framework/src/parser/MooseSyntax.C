@@ -28,7 +28,6 @@ void associateSyntax(Parser & p)
   p.registerActionSyntax("CreateMeshAction", "Mesh/Generation");
   p.registerActionSyntax("ReadMeshAction", "Mesh");
   p.registerActionSyntax("SetupMeshAction", "Mesh");
-  p.registerActionSyntax("InitialRefinementAction", "Mesh");
   p.registerActionSyntax("AddExtraNodesetAction", "Mesh/ExtraNodesets/*");
   
   p.registerActionSyntax("AddFunctionAction", "Functions/*");
