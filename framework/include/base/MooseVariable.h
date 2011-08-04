@@ -117,6 +117,8 @@ public:
   /// is this variable nodal
   bool isNodal();
 
+  // Read-only access to FE object used by this variable
+  FEBase * const & currentFE() const { return _fe; }
   /// Current element this variable is evaluated at
   const Elem * & currentElem() { return _elem; }
   /// Current side this variable is being evaluated on
