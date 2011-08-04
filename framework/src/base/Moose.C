@@ -137,6 +137,7 @@
 #include "SetupSMPAction.h"
 #include "SetupFiniteDifferencePreconditionerAction.h"
 #include "SetupDebugAction.h"
+#include "InitialRefinementAction.h"
 
 namespace Moose {
 
@@ -285,6 +286,7 @@ addActionTypes()
   registerActionName("add_preconditioning", false);
   registerActionName("setup_adaptivity", false);
   registerActionName("meta_action", false);
+  registerActionName("initial_mesh_refinement", false);
   registerActionName("setup_debug", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
@@ -323,6 +325,7 @@ addActionTypes()
 "(ready_to_init)"
 "(setup_quadrature)"
 "(setup_dampers)"
+"(initial_mesh_refinement)"
 "(init_problem)"
 "(copy_nodal_vars, copy_nodal_aux_vars)"
 "(add_material)"
@@ -402,6 +405,7 @@ registerActions()
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");
+  registerAction(InitialRefinementAction, "initial_mesh_refinement");
 #endif
 
   registerAction(AddDiracKernelAction, "add_dirac_kernel");
