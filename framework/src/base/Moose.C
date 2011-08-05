@@ -309,7 +309,8 @@ addActionTypes()
    */
   action_warehouse.addDependencySets(
 "(meta_action)"
-"(create_mesh, read_mesh, set_global_params)"
+"(set_global_params)"
+"(create_mesh, read_mesh)"
 "(add_extra_nodeset)"
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
