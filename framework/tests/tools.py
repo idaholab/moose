@@ -136,11 +136,15 @@ class TestHarness:
   def testOutputAndFinish(self, test, retcode, output):
     reason = ''
 
-    # Expected errors might do a lot of things including crash so we
+    # Expected errors and assertions might do a lot of things including crash so we
     # will handle them seperately
     if test[EXPECT_ERR] != None:
       if not self.checkExpectError(output, test[EXPECT_ERR]):
         reason = 'NO EXPECTED ERR'
+    elif test[EXPECT_ASSERT] != None:
+      if self.options.method == 'dbg':  # Only check asserts in debug mode
+        if not self.checkExpectError(output, test[EXPECT_ASSERT]):
+          reason = 'NO EXPECTED ASSERT'
     else:
       # Check the general error message and program crash possibilities
       if len( filter( lambda x: x in output, test[ERRORS] ) ) > 0:
@@ -255,14 +259,7 @@ class TestHarness:
     self.runner = RunParallel(self, self.options.jobs)
 
     ## Save executable-under-test name to self.executable
-    method = ''
-    if self.options.method:
-      method = self.options.method
-    elif os.environ.has_key('METHOD'):
-      method = os.environ['METHOD']
-    else:
-      method = 'opt'
-    self.executable = os.getcwd() + '/' + app_name + '-' + method
+    self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
 
     # Emulate the standard Nose RegEx for consistency
     self.test_match = re.compile(r"(?:^|\b|[_-])[Tt]est")
@@ -312,15 +309,21 @@ class TestHarness:
     parser.add_option_group(outputgroup)
 
     (self.options, self.tests) = parser.parse_args(argv[1:])
-    self.checkCLArgs()
+    self.checkAndUpdateCLArgs()
 
   ## Called after options are parsed from the command line
   # Exit if options don't make any sense, print warnings if they are merely weird
-  def checkCLArgs(self):
+  def checkAndUpdateCLArgs(self):
     opts = self.options
     if opts.output_dir and not (opts.file or opts.sep_files or opts.fail_files or opts.ok_files):
       print 'WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option'
 
+    # Update any keys from the environment as necessary
+    if not self.options.method:
+      if os.environ.has_key('METHOD'):
+        self.options.method = os.environ['METHOD']
+      else:
+        self.options.method = 'opt'
 
 # Notes:
 # SHOULD_CRASH returns > 0, cuz < 0 means process interrupted
