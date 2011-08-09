@@ -55,7 +55,7 @@ Exo_Block::Exo_Block(int file_id, int exo_block_id)
     conn(NULL)
 {
   SMART_ASSERT(file_id >= 0);
-  SMART_ASSERT(exo_block_id > 0);
+  SMART_ASSERT(exo_block_id > EX_INVALID_ID);
   
   initialize(file_id, exo_block_id);
 }
@@ -175,15 +175,15 @@ string Exo_Block::Give_Connectivity(int& num_e, int& npe, int*& recv_conn)
 
 int Exo_Block::Check_State() const
 {
-  SMART_ASSERT(id_ >= 0);
+  SMART_ASSERT(id_ >= EX_INVALID_ID);
   SMART_ASSERT(index_ >= -1);
   SMART_ASSERT(numEntity >= -1);
   SMART_ASSERT(num_nodes_per_elmt >= -1);
   
-  SMART_ASSERT( !( id_ == 0 && elmt_type != "" ) );
-  SMART_ASSERT( !( id_ == 0 && numEntity > -1 ) );
-  SMART_ASSERT( !( id_ == 0 && num_nodes_per_elmt > -1 ) );
-  SMART_ASSERT( !( id_ == 0 && conn ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && elmt_type != "" ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && numEntity > -1 ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && num_nodes_per_elmt > -1 ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && conn ) );
   
   SMART_ASSERT( !( conn && (numEntity <= 0 || num_nodes_per_elmt <= 0) ) );
   

@@ -57,7 +57,7 @@
  
 using namespace std;
 
-string Version() { return "2.45 (2011-07-01)"; }
+string Version() { return "2.46 (2011-07-11)"; }
 
 string Date() {
   char tbuf[32];

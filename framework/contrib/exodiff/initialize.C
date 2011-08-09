@@ -197,10 +197,10 @@ void ExoII_Read::Get_Init_Data()
     
     int e_count = 0;
     for (int b = 0; b < num_elmt_blocks; ++b) {
-      if (ids[b] <= 0) {
+      if (ids[b] <= EX_INVALID_ID) {
 	std::cout << "ExoII_Read::Get_Init_Data()  WARNING:  Element block Id "
 		  << "for block index " << b << " is " << ids[b]
-		  << " which is nonpositive. This was returned by call to ex_get_elem_blk_ids()."
+		  << " which is negative. This was returned by call to ex_get_elem_blk_ids()."
 		  << std::endl;
       }
       
@@ -241,10 +241,10 @@ void ExoII_Read::Get_Init_Data()
     }
 
     for (int nset = 0; nset < num_node_sets; ++nset) {
-      if (ids[nset] <= 0) {
+      if (ids[nset] <= EX_INVALID_ID) {
 	std::cout << "ExoII_Read::Get_Init_Data()  WARNING: Nodeset Id "
 		  << "for nodeset index " << nset << " is " << ids[nset]
-		  << " which is nonpositive.  This was returned by call to ex_get_ids()."
+		  << " which is negative.  This was returned by call to ex_get_ids()."
 		  << std::endl;
       }
 	
@@ -266,10 +266,10 @@ void ExoII_Read::Get_Init_Data()
     }
 
     for (int sset = 0; sset < num_side_sets; ++sset) {
-      if (ids[sset] <= 0) {
+      if (ids[sset] <= EX_INVALID_ID) {
 	std::cout << "ExoII_Read::Get_Init_Data()  WARNING:  Sideset Id "
 		  << "for sideset index " << sset << " is " << ids[sset]
-		  << " which is nonpositive. This was returned by call to ex_get_ids()."
+		  << " which is negative. This was returned by call to ex_get_ids()."
 		  << std::endl;
       }
       ssets[sset].initialize(file_id, ids[sset]);
@@ -408,7 +408,7 @@ namespace {
       for (int vg = 0; vg < num_vars; ++vg) {
 	SMART_ASSERT(varnames[vg] != 0);
 	if (std::strlen(varnames[vg]) == 0 ||
-	    std::strlen(varnames[vg]) > name_size) {
+	    (int)std::strlen(varnames[vg]) > name_size) {
 	  std::cout << "exodiff: ERROR: " << type
 		    << " variable names appear corrupt\n"
 		    << "                A length is 0 or greater than "
