@@ -106,10 +106,12 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
 
   _material_data.resize(n_threads);
   _bnd_material_data.resize(n_threads);
+  _neighbor_material_data.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; i++)
   {
     _material_data[i] = new MaterialData(_material_props);
     _bnd_material_data[i] = new MaterialData(_bnd_material_props);
+    _neighbor_material_data[i] = new MaterialData(_bnd_material_props);
   }
 
   _pps_data.resize(n_threads);
@@ -128,6 +130,7 @@ MProblem::~MProblem()
     {
       delete _material_data[i];
       delete _bnd_material_data[i];
+      delete _neighbor_material_data[i];
     }
   }
 
@@ -179,6 +182,7 @@ void MProblem::initialSetup()
         _asm_info[0]->reinit(elem, side);
         unsigned int n_points = _asm_info[0]->qRuleFace()->n_points();
         _bnd_material_data[0]->initStatefulProps(_materials[0].getBoundaryMaterials(blk_id), n_points, *elem, side);
+        // TODO:
       }
     }
   }
@@ -303,11 +307,27 @@ MProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
+MProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _nl.addResidualNeighbor(residual, tid);
+  if(_displaced_problem)
+    _displaced_problem->addResidualNeighbor(residual, tid);
+}
+
+void
 MProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _nl.addJacobian(jacobian, tid);
   if(_displaced_problem)
     _displaced_problem->addJacobian(jacobian, tid);
+}
+
+void
+MProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _nl.addJacobianNeighbor(jacobian, tid);
+  if(_displaced_problem)
+    _displaced_problem->addJacobianNeighbor(jacobian, tid);
 }
 
 void
@@ -328,6 +348,12 @@ void
 MProblem::prepareFaceShapes(unsigned int var, THREAD_ID tid)
 {
   _nl.asmBlock(tid).copyFaceShapes(var);
+}
+
+void
+MProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
+{
+  _nl.asmBlock(tid).copyNeighborShapes(var);
 }
 
 void
@@ -438,6 +464,24 @@ MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
   _nl.reinitNodeFace(node, bnd_id, tid);
   _aux.reinitNodeFace(node, bnd_id, tid);
 
+}
+
+void
+MProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
+{
+  const Elem * neighbor = elem->neighbor(side);
+  unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
+
+  _nl.prepareAssemblyNeighbor(tid);
+  _asm_info[tid]->reinit(elem, side, neighbor);
+  _nl.prepareNeighbor(tid);
+
+  unsigned int bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
+  _nl.reinitElemFace(elem, side, bnd_id, tid);
+  _aux.reinitElemFace(elem, side, bnd_id, tid);
+
+  _nl.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+  _aux.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
 }
 
 void
@@ -618,6 +662,26 @@ MProblem::addDiracKernel(const std::string & kernel_name, const std::string & na
   _nl.addDiracKernel(kernel_name, name, parameters);
 }
 
+// DGKernels ////
+
+void
+MProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    _reinit_displaced_face = true;
+  }
+  else
+  {
+    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_nl;
+  }
+  _nl.addDGKernel(dg_kernel_name, name, parameters);
+}
+
 // Initial Conditions /////
 void
 MProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name)
@@ -709,6 +773,13 @@ MProblem::addMaterial(const std::string & mat_name, const std::string & name, In
       mooseAssert(bnd_material != NULL, "Not a Material object");
       _materials[tid].addBoundaryMaterial(blocks[i], bnd_material);
 
+      // neighbor material
+      parameters.set<bool>("_bnd") = true;
+      parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
+      Material *neighbor_material = static_cast<Material *>(Factory::instance()->create(mat_name, name, parameters));
+      mooseAssert(neighbor_material != NULL, "Not a Material object");
+      _materials[tid].addNeighborMaterial(blocks[i], neighbor_material);
+
 //      _vars[tid].addBoundaryVars(blocks[i], bnd_material->getCoupledVars());
     }
   }
@@ -758,6 +829,18 @@ MProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID 
   {
     const Elem * & elem = _asm_info[tid]->elem();
     _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(blk_id), _asm_info[tid]->qRuleFace()->n_points(), *elem, side);
+  }
+}
+
+void
+MProblem::reinitMaterialsNeighbor(unsigned int blk_id, unsigned int side, THREAD_ID tid)
+{
+  if (_materials[tid].hasNeighborMaterials(blk_id))
+  {
+    // NOTE: this will not work with h-adaptivity
+    const Elem * & neighbor = _asm_info[tid]->neighbor();
+    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_asm_info[tid]->elem());
+    _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id), _asm_info[tid]->qRuleFace()->n_points(), *neighbor, neighbor_side);
   }
 }
 

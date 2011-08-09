@@ -1,18 +1,17 @@
 [Mesh]
-  dim = 2
-  generated = true
   [./Generation]
-   nx = 2
-   ny = 2
+    dim = 2
+    nx = 2
+    ny = 2
 #   xmin = -1
 #   xmax = 1
 #   ymin = -1
 #   ymax = 1
-   xmin = 0
-   xmax = 1
-   ymin = 0
-   ymax = 1
-   elem_type = QUAD4
+    xmin = 0
+    xmax = 1
+    ymin = 0
+    ymax = 1
+    elem_type = QUAD4
   [../]
 []
 
@@ -23,10 +22,10 @@
     order = FIRST
     family = MONOMIAL
 
-	[./InitialCondition]
+    [./InitialCondition]
       type = ConstantIC
       value = 1 
-	[../]
+    [../]
   [../]
 []
 
@@ -105,8 +104,8 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-	epsilon = -1
-	sigma = 6
+    epsilon = -1
+    sigma = 6
   [../]
 []
 
@@ -130,7 +129,7 @@
 #  petsc_options = '-snes_mf'
 #  max_r_steps = 2
   [./Adaptivity]
-    steps = 3
+    steps = 2
     refine_fraction = 1.0
     coarsen_fraction = 0
     max_h_level = 8
@@ -163,7 +162,7 @@
 
 [Output]
   file_base = out
-  output_initial = false
+  output_initial = true
   interval = 1
   exodus = true
   postprocessor_csv = true

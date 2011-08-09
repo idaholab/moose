@@ -49,6 +49,7 @@ ComputeResidualThread::onElement(const Elem *elem)
   {
     _problem.subdomainSetup(subdomain, _tid);
     _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
+    if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_problem.time(), _problem.dt());
   }
 
   _problem.reinitMaterials(subdomain, _tid);
@@ -73,6 +74,38 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, short int
 
     for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
       (*it)->computeResidual();
+  }
+}
+
+void
+ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
+{
+  // Pointer to the neighbor we are currently working on.
+  const Elem * neighbor = elem->neighbor(side);
+
+  // Get the global id of the element and the neighbor
+  const unsigned int elem_id = elem->id();
+  const unsigned int neighbor_id = neighbor->id();
+
+  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+  {
+    std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+    if (dgks.size() > 0)
+    {
+      _problem.reinitNeighbor(elem, side, _tid);
+
+      _problem.reinitMaterialsNeighbor(elem->subdomain_id(), side, _tid);
+      for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+      {
+        DGKernel * dg = *it;
+        dg->computeResidual();
+      }
+
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        _problem.addResidualNeighbor(_residual, _tid);
+      }
+    }
   }
 }
 

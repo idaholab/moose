@@ -105,6 +105,20 @@ enum CouplingType
   COUPLING_CUSTOM
 };
 
+enum DGResidualType
+{
+  Element,
+  Neighbor
+};
+
+enum DGJacobianType
+{
+  ElementElement,
+  ElementNeighbor,
+  NeighborElement,
+  NeighborNeighbor
+};
+
 const subdomain_id_type ANY_BLOCK_ID = (subdomain_id_type) -1;
 
 /* Wrappers for extern random number generator */

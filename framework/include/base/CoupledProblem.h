@@ -62,6 +62,7 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
 
   virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
   virtual void subdomainSetupSide(unsigned int subdomain, THREAD_ID tid);

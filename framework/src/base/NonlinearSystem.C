@@ -88,6 +88,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _need_serialized_solution(false),
     _need_residual_copy(false),
     _need_residual_ghosted(false),
+    _doing_dg(false),
     _n_iters(0),
     _final_residual(0.)
 {
@@ -103,7 +104,8 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
   _asm_block.resize(n_threads);
   _kernels.resize(n_threads);
   _bcs.resize(n_threads);
-  _dirac_kernels.resize(libMesh::n_threads());
+  _dirac_kernels.resize(n_threads);
+  _dg_kernels.resize(n_threads);
   _dampers.resize(n_threads);
 
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
@@ -118,7 +120,8 @@ NonlinearSystem::~NonlinearSystem()
   delete &_serialized_solution;
   delete &_residual_copy;
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  unsigned int n_threads = libMesh::n_threads();
+  for (THREAD_ID tid = 0; tid < n_threads; ++tid)
     delete _asm_block[tid];
 }
 
@@ -195,7 +198,19 @@ NonlinearSystem::prepareAssembly(THREAD_ID tid)
 }
 
 void
+NonlinearSystem::prepareAssemblyNeighbor(THREAD_ID tid)
+{
+  _asm_block[tid]->prepareNeighbor();
+}
+
+void
 NonlinearSystem::prepareAssembly(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+{
+  _asm_block[tid]->prepareBlock(ivar, jvar, dof_indices);
+}
+
+void
+NonlinearSystem::prepareAssemblyNeighbor(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
   _asm_block[tid]->prepareBlock(ivar, jvar, dof_indices);
 }
@@ -207,9 +222,21 @@ NonlinearSystem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
+NonlinearSystem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _asm_block[tid]->addResidualNeighbor(residual);
+}
+
+void
 NonlinearSystem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _asm_block[tid]->addJacobian(jacobian);
+}
+
+void
+NonlinearSystem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _asm_block[tid]->addJacobianNeighbor(jacobian);
 }
 
 void
@@ -252,6 +279,7 @@ NonlinearSystem::initialSetupKernels()
   {
     _kernels[i].initialSetup();
     _dirac_kernels[i].initialSetup();
+    if (_doing_dg) _dg_kernels[i].initialSetup();
   }
 }
 
@@ -263,6 +291,7 @@ NonlinearSystem::timestepSetup()
     _kernels[i].timestepSetup();
     _bcs[i].timestepSetup();
     _dirac_kernels[i].timestepSetup();
+    if (_doing_dg) _dg_kernels[i].timestepSetup();
   }
 }
 
@@ -402,6 +431,24 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
 
     _dirac_kernels[tid].addDiracKernel(kernel);
   }
+}
+
+void
+NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
+    parameters.set<MaterialData *>("_neighbor_material_data") = _mproblem._neighbor_material_data[tid];
+
+    DGKernel *dg_kernel = static_cast<DGKernel *>(Factory::instance()->create(dg_kernel_name, name, parameters));
+    mooseAssert(dg_kernel != NULL, "Not a DG Kernel object");
+
+    _dg_kernels[tid].addDGKernel(dg_kernel);
+  }
+
+  _doing_dg = true;
 }
 
 void
@@ -612,6 +659,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     _kernels[i].residualSetup();
     _bcs[i].residualSetup();
     _dirac_kernels[i].residualSetup();
+    if (_doing_dg) _dg_kernels[i].residualSetup();
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -711,6 +759,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
     _kernels[i].jacobianSetup();
     _bcs[i].jacobianSetup();
     _dirac_kernels[i].jacobianSetup();
+    if (_doing_dg) _dg_kernels[i].jacobianSetup();
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();

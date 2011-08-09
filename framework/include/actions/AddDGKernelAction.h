@@ -12,35 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTERESIDUALTHREAD_H
-#define COMPUTERESIDUALTHREAD_H
+#ifndef ADDDGKERNELACTION_H
+#define ADDDGKERNELACTION_H
 
-#include "ThreadedElementLoop.h"
+#include "InputParameters.h"
+#include "Moose.h"
+#include "MooseObjectAction.h"
 
-// libMesh includes
-#include "elem_range.h"
+#include <string>
 
-class NonlinearSystem;
+class AddDGKernelAction;
+
+template<>
+InputParameters validParams<AddDGKernelAction>();
 
 
-class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
+class AddDGKernelAction : public MooseObjectAction
 {
 public:
-  ComputeResidualThread(Problem & problem, NonlinearSystem & sys, NumericVector<Number> & residual);  
+  AddDGKernelAction(const std::string & name, InputParameters params);
 
-  // Splitting Constructor
-  ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
-
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void postElement(const Elem * /*elem*/);
-
-  void join(const ComputeResidualThread & /*y*/);
-
-protected:
-  NumericVector<Number> & _residual;
-  NonlinearSystem & _sys;
+  virtual void act();
 };
 
-#endif //COMPUTERESIDUALTHREAD_H
+#endif // ADDKERNELACTION_H

@@ -103,6 +103,7 @@ public:
   virtual ~MooseVariable();
 
   void prepare();
+  void prepareNeighbor();
   void prepare_aux();
   void reinit_node();
   void reinit_aux();
@@ -114,6 +115,9 @@ public:
   /// Get the type of finite element object
   const FEType feType() { return _fe->get_fe_type(); }
 
+  /// Get the order of this variable
+  Order getOrder() const { return _fe->get_order(); }
+
   /// is this variable nodal
   bool isNodal();
 
@@ -123,6 +127,8 @@ public:
   const Elem * & currentElem() { return _elem; }
   /// Current side this variable is being evaluated on
   unsigned int & currentSide() { return _current_side; }
+  /// Current neighboring element
+  const Elem * & neighbor() { return _neighbor; }
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
@@ -131,6 +137,11 @@ public:
   const std::vector<std::vector<Real> > & phiFace() { return _phi_face; }
   const std::vector<std::vector<RealGradient> > & gradPhiFace() { return _grad_phi_face; }
   const std::vector<std::vector<RealTensor> > & secondPhiFace() { return _second_phi_face; }
+
+  const std::vector<std::vector<Real> > & phiFaceNeighbor() { return _phi_face_neighbor; }
+  const std::vector<std::vector<RealGradient> > & gradPhiFaceNeighbor() { return _grad_phi_face_neighbor; }
+  const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
+
   const std::vector<Point> & normals() { return _normals; }
 
   // damping
@@ -155,10 +166,20 @@ public:
   VariableValue & nodalSlnOld() { return _nodal_u_old; }
   VariableValue & nodalSlnOlder() { return _nodal_u_older; }
 
+  VariableValue & slnNeighbor() { return _u_neighbor; }
+  VariableValue & slnOldNeighbor() { return _u_old_neighbor; }
+  VariableValue & slnOlderNeighbor() { return _u_older_neighbor; }
+  VariableGradient & gradSlnNeighbor() { return _grad_u_neighbor; }
+  VariableGradient & gradSlnOldNeighbor() { return _grad_u_old_neighbor; }
+  VariableGradient & gradSlnOlderNeighbor() { return _grad_u_older_neighbor; }
+  VariableSecond & secondSlnNeighbor() { return _second_u_neighbor; }
+
   /// Compute values at interior quadrature points
   void computeElemValues();
-  /// COmpute values at facial quadrature points
+  /// Compute values at facial quadrature points
   void computeElemValuesFace();
+  /// Compute values at facial quadrature points for the neighbor
+  void computeNeighborValuesFace();
   /// Compute nodal values of this variable
   void computeNodalValues();
   /// Set the nodal value for this variable (to keep everything up to date
@@ -168,6 +189,8 @@ public:
 
   /// get DOF indices for currently selected element
   std::vector<unsigned int> & dofIndices() { return _dof_indices; }
+  /// get DOF indices for currently selected element
+  std::vector<unsigned int> & dofIndicesNeighbor() { return _dof_indices_neighbor; }
 
   void insert(NumericVector<Number> & residual);
 
@@ -197,11 +220,15 @@ protected:
 
   FEBase * & _fe;                                               /// libMesh's FE object for this variable
   FEBase * & _fe_face;                                          /// libMesh's FE object for this variable on a face
+  FEBase * & _fe_face_neighbor;                                 /// libMesh's FE object for this variable on a face on the neighboring element
 
   const Elem * & _elem;                                         /// current element
   unsigned int & _current_side;                                 /// the side of the current element (valid when doing face assembly)
 
+  const Elem * & _neighbor;                                     /// neighboring element
+
   std::vector<unsigned int> _dof_indices;                       /// DOF indices
+  std::vector<unsigned int> _dof_indices_neighbor;              /// DOF indices (neighbor)
 
   bool _is_nl;                                                  /// true if this varaible is non-linear
   bool _has_second_derivatives;                                 /// true if we need to compute second derivatives (if the variable is 3rd hermite, etc.)
@@ -219,6 +246,10 @@ protected:
   std::vector<std::vector<RealTensor> > _dummy_second_phi;            ///< if we are not using second derivatives, we point our reference here, so libmesh
                                                                       ///< will not compute second derivatives for us
 
+  // Values, gradients and second derivatives of shape function on faces
+  const std::vector<std::vector<Real> > & _phi_face_neighbor;
+  const std::vector<std::vector<RealGradient> > & _grad_phi_face_neighbor;
+  const std::vector<std::vector<RealTensor> > & _second_phi_face_neighbor;
 
   const std::vector<Point> & _normals;                                  ///< Normals at QPs on faces
 
@@ -231,6 +262,14 @@ protected:
   VariableSecond _second_u;
   VariableSecond _second_u_old;
   VariableSecond _second_u_older;
+
+  VariableValue _u_neighbor;
+  VariableValue _u_old_neighbor;
+  VariableValue _u_older_neighbor;
+  VariableGradient _grad_u_neighbor;
+  VariableGradient _grad_u_old_neighbor;
+  VariableGradient _grad_u_older_neighbor;
+  VariableSecond _second_u_neighbor;
 
   // time derivatives
   VariableValue _u_dot;                                                 ///< u_dot (time derivative)

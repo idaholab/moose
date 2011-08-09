@@ -41,6 +41,7 @@ AssemblyData::AssemblyData(MooseMesh & mesh) :
     _current_elem(NULL),
     _current_side(0),
     _current_side_elem(NULL),
+    _neighbor_elem(NULL),
     _current_node(NULL)
 {
 }
@@ -50,6 +51,8 @@ AssemblyData::~AssemblyData()
   for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
     delete it->second;
   for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
+    delete it->second;
+  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor.begin(); it != _fe_neighbor.end(); ++it)
     delete it->second;
   delete _qrule_volume;
   delete _qrule_arbitrary;
@@ -73,6 +76,15 @@ AssemblyData::getFEFace(FEType type)
     _fe_face[type] = FEBase::build(_mesh.dimension(), type).release();
 
   return _fe_face[type];
+}
+
+FEBase * &
+AssemblyData::getFEFaceNeighbor(FEType type)
+{
+  if (!_fe_neighbor[type])
+    _fe_neighbor[type] = FEBase::build(_mesh.dimension(), type).release();
+
+  return _fe_neighbor[type];
 }
 
 void
@@ -182,4 +194,25 @@ AssemblyData::computeVolume()
 //    mooseError("geom_type must either be XYZ or CYLINDRICAL\n");
 
     return current_volume;
+}
+
+void
+AssemblyData::reinit(const Elem * elem, unsigned int side, const Elem * neighbor)
+{
+  // reinit this element
+  reinit(elem, side);
+
+  // reinit neighbor element
+  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor.begin(); it != _fe_neighbor.end(); ++it)
+  {
+    FEType fe_type = it->first;
+
+    // Find locations of quadrature points on the neighbor
+    std::vector<Point> qface_neighbor_point;
+    libMesh::FEInterface::inverse_map (elem->dim(), fe_type, neighbor, _q_points_face, qface_neighbor_point);
+    // Calculate the neighbor element shape functions at those locations
+    it->second->reinit(neighbor, &qface_neighbor_point);
+  }
+
+  _neighbor_elem = neighbor;
 }

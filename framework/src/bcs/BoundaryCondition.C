@@ -42,13 +42,16 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
+    _asm_data(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 
-    _current_elem(_var.currentElem()),
-    _current_side(_var.currentSide()),
+    _current_elem(_asm_data.elem()),
+    _current_side(_asm_data.side()),
+    _current_side_elem(_asm_data.sideElem()),
+
     _normals(_var.normals()),
 
     _real_zero(_problem._real_zero[_tid]),

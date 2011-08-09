@@ -74,6 +74,8 @@ public:
    */
   const std::vector<Real> & JxWFace() { return _JxW_face; }
 
+  FEBase * & getFEFaceNeighbor(FEType type);
+
   /**
    * Returns the array of normals for quadrature points on a current side
    */
@@ -93,6 +95,12 @@ public:
    * Returns the side element
    */
   const Elem * & sideElem() { return _current_side_elem; }
+
+  /**
+   * Return the neighbor element
+   */
+  const Elem * & neighbor() { return _neighbor_elem; }
+
 
   /**
    * Returns the reference to the node
@@ -141,6 +149,14 @@ public:
   void reinit(const Elem * elem, unsigned int side);
 
   /**
+   * Reinitialize element and its neighbor
+   * @param elem Element being reinitialized
+   * @param side Side of the element
+   * @param neighbor Neighbor facing the element on the side 'side'
+   */
+  void reinit(const Elem * elem, unsigned int side, const Elem * neighbor);
+
+  /**
    * Reinitialize assembly data for a node
    */
   void reinit(const Node * node);
@@ -171,10 +187,13 @@ protected:
   const std::vector<Real> & _JxW_face;          ///< reference to the transformed jacobian weights on a face
   const std::vector<Point> & _normals;          ///< Normal vectors at the quadrature points.
 
+  std::map<FEType, FEBase *> _fe_neighbor;      ///< types of finite elements
+  FEBase * _fe_neighbor_helper;                 ///< helper object for transforming coordinates
 
   const Elem * _current_elem;                   ///< The current "element" we are currently on.
   unsigned int _current_side;                   ///< The current side of the selected element (valid only when working with sides)
   const Elem * _current_side_elem;              ///< The current "element" making up the side we are currently on.
+  const Elem * _neighbor_elem;                  ///< The current neighbor "element"
 
   const Node * _current_node;                   ///< The current node we are working with
 

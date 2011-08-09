@@ -93,6 +93,17 @@ SystemBase::prepare(THREAD_ID tid)
 }
 
 void
+SystemBase::prepareNeighbor(THREAD_ID tid)
+{
+  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  {
+    MooseVariable *var = *it;
+    var->prepareNeighbor();
+  }
+}
+
+
+void
 SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
@@ -105,14 +116,25 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 void
 SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, unsigned int /*bnd_id*/, THREAD_ID tid)
 {
-/*  for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
-      it != _vars[tid].boundaryVars(bnd_id).end();
-       ++it)
+/*
+  for (std::set<MooseVariable *>::iterator it = _vars[tid].boundaryVars(bnd_id).begin();
+    it != _vars[tid].boundaryVars(bnd_id).end();
+     ++it)
 */
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
   {
     MooseVariable *var = *it;
     var->computeElemValuesFace();
+  }
+}
+
+void
+SystemBase::reinitNeighborFace(const Elem * /*elem*/, unsigned int /*side*/, unsigned int /*bnd_id*/, THREAD_ID tid)
+{
+  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  {
+    MooseVariable *var = *it;
+    var->computeNeighborValuesFace();
   }
 }
 

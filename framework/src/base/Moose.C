@@ -58,6 +58,8 @@
 
 // dirac kernels
 #include "ConstantPointSource.h"
+// DG kernels
+#include "DGDiffusion.h"
 // ics
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
@@ -105,6 +107,8 @@
 // dampers
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
+// DG
+#include "DGDiffusion.h"
 
 // Actions
 #include "AddMeshModifierAction.h"
@@ -112,6 +116,7 @@
 #include "AddDiracKernelAction.h"
 #include "AddICAction.h"
 #include "AddKernelAction.h"
+#include "AddDGKernelAction.h"
 #include "AddPeriodicBCAction.h"
 #include "AddVariableAction.h"
 #include "AddPostprocessorAction.h"
@@ -238,6 +243,8 @@ registerObjects()
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
+  // DG
+  registerDGKernel(DGDiffusion);
 
   addActionTypes();
   registerActions();
@@ -278,6 +285,7 @@ addActionTypes()
   registerActionName("add_aux_kernel", false);
   registerActionName("add_aux_bc", false);
   registerActionName("add_dirac_kernel", false);
+  registerActionName("add_dg_kernel", false);
   registerActionName("add_ic", false);
   registerActionName("add_postprocessor", false);
   registerActionName("add_damper", false);
@@ -332,7 +340,7 @@ addActionTypes()
 "(add_material)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
-"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, setup_output)"
+"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, setup_output)"
 "(check_integrity)"
 "(setup_debug)"
 );
@@ -391,6 +399,7 @@ registerActions()
   registerAction(AddICAction, "add_ic");
   registerAction(AddKernelAction, "add_kernel");
   registerAction(AddKernelAction, "add_aux_kernel");
+  registerAction(AddDGKernelAction, "add_dg_kernel");
   registerAction(AddBCAction, "add_bc");
   registerAction(EmptyAction, "no_action");  // placeholder
   registerAction(AddPeriodicBCAction, "add_periodic_bc");

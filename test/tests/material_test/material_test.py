@@ -3,9 +3,11 @@ from options import *
 test = { INPUT : 'material_test.i',
          EXODIFF : ['out.e'] }
 
-dg_test = { INPUT : 'material_test_dg.i',
-           EXODIFF : ['out_dg.e'],
-           SKIP : True }
+dg_test = {
+	INPUT : 'material_test_dg.i',
+  EXODIFF : ['out_dg.e'],
+  SKIP : False
+}
 
 coupled_material_test = { INPUT : 'coupled_material_test.i',
                         EXODIFF : ['out_coupled.e'] }

@@ -40,6 +40,7 @@
 #include "DirichletBCfuncXYZ0.h"
 #include "DirichletBCfuncXYZ1.h"
 #include "TEJumpBC.h"
+#include "DGFunctionDiffusionDirichletBC.h"
 
 #include "TEIC.h"
 
@@ -53,6 +54,8 @@
 #include "CoupledMaterial.h"
 
 #include "ConvDiffMetaAction.h"
+
+#include "EnhancedDGMatDiffusion.h"
 
 namespace MooseTest
 {
@@ -91,6 +94,9 @@ void registerObjects()
   registerObject(DoNothingAux);
   registerObject(MultipleUpdateAux);
 
+  // DG kernels
+  registerDGKernel(EnhancedDGMatDiffusion);
+
   // Boundary Conditions
   registerObject(MTBC);
   registerObject(PolyCoupledDirichletBC);
@@ -98,6 +104,7 @@ void registerObjects()
   registerObject(DirichletBCfuncXYZ0);
   registerObject(DirichletBCfuncXYZ1);
   registerObject(TEJumpBC);
+  registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
 
   // Initial conditions
   registerObject(TEIC);

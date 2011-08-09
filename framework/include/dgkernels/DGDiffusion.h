@@ -12,35 +12,39 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTERESIDUALTHREAD_H
-#define COMPUTERESIDUALTHREAD_H
+#ifndef DGDIFFUSION_H
+#define DGDIFFUSION_H
 
-#include "ThreadedElementLoop.h"
+#include "DGKernel.h"
 
-// libMesh includes
-#include "elem_range.h"
+//Forward Declarations
+class DGDiffusion;
 
-class NonlinearSystem;
+template<>
+InputParameters validParams<DGDiffusion>();
 
-
-class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
+/**
+ * DG kernel for diffusion
+ *
+ * General DG kernel that this class can handle is:
+ * { \grad u * n_e} [v] + epsilon { \grad v * n_e } [u] + (sigma / |e| * [u][v])
+ *
+ *  [a] = [ a_1 - a_2 ]
+ *  {a} = 0.5 * (a_1 + a_2)
+ *
+ */
+class DGDiffusion : public DGKernel
 {
 public:
-  ComputeResidualThread(Problem & problem, NonlinearSystem & sys, NumericVector<Number> & residual);  
-
-  // Splitting Constructor
-  ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
-
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void postElement(const Elem * /*elem*/);
-
-  void join(const ComputeResidualThread & /*y*/);
-
+  DGDiffusion(const std::string & name, InputParameters parameters);
+  
 protected:
-  NumericVector<Number> & _residual;
-  NonlinearSystem & _sys;
-};
+  virtual Real computeQpResidual(Moose::DGResidualType type);
+  virtual Real computeQpJacobian(Moose::DGJacobianType type);
 
-#endif //COMPUTERESIDUALTHREAD_H
+  Real _epsilon;
+  Real _sigma;
+  Real _coefficient;
+};
+ 
+#endif

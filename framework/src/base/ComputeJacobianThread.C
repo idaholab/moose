@@ -20,18 +20,18 @@
 #include "threads.h"
 
 ComputeJacobianThread::ComputeJacobianThread(Problem & problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
-  ThreadedElementLoop<ConstElemRange>(problem, sys),
-  _jacobian(jacobian),
-  _sys(sys),
-  _problem(problem)
+    ThreadedElementLoop<ConstElemRange>(problem, sys),
+    _jacobian(jacobian),
+    _sys(sys),
+    _problem(problem)
 {}
 
 // Splitting Constructor
 ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split) :
-  ThreadedElementLoop<ConstElemRange>(x, split),
-  _jacobian(x._jacobian),
-  _sys(x._sys),
-  _problem(x._problem)
+    ThreadedElementLoop<ConstElemRange>(x, split),
+    _jacobian(x._jacobian),
+    _sys(x._sys),
+    _problem(x._problem)
 {}
 
 void
@@ -89,6 +89,38 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, short int
     _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
 
     computeFaceJacobian(bnd_id);
+  }
+}
+
+void
+ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
+{
+  // Pointer to the neighbor we are currently working on.
+  const Elem * neighbor = elem->neighbor(side);
+
+  // Get the global id of the element and the neighbor
+  const unsigned int elem_id = elem->id();
+  const unsigned int neighbor_id = neighbor->id();
+
+  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+  {
+    std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+    if (dgks.size() > 0)
+    {
+      _problem.reinitNeighbor(elem, side, _tid);
+
+      _problem.reinitMaterialsNeighbor(elem->subdomain_id(), side, _tid);
+      for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+      {
+        DGKernel * dg = *it;
+        dg->computeJacobian();
+      }
+
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        _problem.addJacobianNeighbor(_jacobian, _tid);
+      }
+    }
   }
 }
 

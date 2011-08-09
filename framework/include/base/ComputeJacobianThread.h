@@ -32,6 +32,7 @@ public:
   
   virtual void onElement(const Elem *elem);
   virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
+  virtual void onInternalSide(const Elem *elem, unsigned int side);
   virtual void postElement(const Elem * /*elem*/);
   
   void join(const ComputeJacobianThread & /*y*/);

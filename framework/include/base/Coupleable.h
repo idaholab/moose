@@ -71,12 +71,11 @@ protected:
   virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
   virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
 
-private:
-  MooseVariable *getVar(const std::string & var_name, unsigned int comp);
-
 protected:
   std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;   ///< Coupled vars whose values we provide
   bool _nodal;                                                          ///< true if we provide coupling to nodal values
+
+  MooseVariable *getVar(const std::string & var_name, unsigned int comp);
 };
 
 #endif /* COUPLEABLE_H */

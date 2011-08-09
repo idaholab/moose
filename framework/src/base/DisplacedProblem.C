@@ -310,9 +310,21 @@ DisplacedProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
+DisplacedProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _asm_block[tid]->addResidualNeighbor(residual);
+}
+
+void
 DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _asm_block[tid]->addJacobian(jacobian);
+}
+
+void
+DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _asm_block[tid]->addJacobianNeighbor(jacobian);
 }
 
 void

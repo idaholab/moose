@@ -100,7 +100,7 @@ protected:
   QBase * & _qrule;
   const std::vector<Real> & _JxW;
 
-   unsigned int _i, _j;
+  unsigned int _i, _j;
   // shape functions
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;

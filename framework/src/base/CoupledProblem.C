@@ -119,6 +119,13 @@ CoupledProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID
 }
 
 void
+CoupledProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
+{
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+    it->second->reinitNeighbor(elem, side, tid);
+}
+
+void
 CoupledProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
 {
 }

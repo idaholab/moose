@@ -73,6 +73,7 @@ protected:
   SubProblemInterface & _subproblem;
   SystemBase & _sys;
   THREAD_ID _tid;                                       ///< thread id
+  AssemblyData & _asm_data;
   MooseVariable & _var;                                 ///< variable this BC works on
   MooseMesh & _mesh;                                    ///< Mesh this BC is defined on
   int _dim;                                             ///< dimension of the mesh
@@ -81,6 +82,7 @@ protected:
 
   const Elem * & _current_elem;                         ///< current element (valid only for integrated BCs)
   unsigned int & _current_side;                         ///< current side of the current element (valid only for integrated BCs)
+  const Elem * & _current_side_elem;                    ///< current side element
 
   const std::vector<Point> & _normals;                  ///< normals at quadrature points (valid only for integrated BCs)
 

@@ -82,6 +82,7 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);
@@ -120,6 +121,9 @@ public:
   // Dirac /////
   void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
+  // DG /////
+  void addDGKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
   // ICs /////
   void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name);
   void addInitialCondition(const std::string & var_name, Real value);
@@ -136,6 +140,7 @@ public:
   virtual void updateMaterials();
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
+  virtual void reinitMaterialsNeighbor(unsigned int blk_id, unsigned int side, THREAD_ID tid);
 
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type = EXEC_TIMESTEP);
@@ -163,10 +168,13 @@ public:
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void prepareShapes(unsigned int var, THREAD_ID tid);
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid);
+  virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
 
   // Displaced problem /////
   virtual void initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements);
@@ -221,6 +229,7 @@ protected:
 
   std::vector<MaterialData *> _material_data;
   std::vector<MaterialData *> _bnd_material_data;
+  std::vector<MaterialData *> _neighbor_material_data;
 
   // materials
   std::vector<MaterialWarehouse> _materials;

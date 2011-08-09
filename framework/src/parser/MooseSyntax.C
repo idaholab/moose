@@ -76,6 +76,7 @@ void associateSyntax(Parser & p)
 #endif
   
   p.registerActionSyntax("AddDiracKernelAction", "DiracKernels/*");
+  p.registerActionSyntax("AddDGKernelAction", "DGKernels/*");
 }
 
   

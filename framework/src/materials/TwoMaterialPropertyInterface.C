@@ -12,35 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTERESIDUALTHREAD_H
-#define COMPUTERESIDUALTHREAD_H
+#include "TwoMaterialPropertyInterface.h"
+#include "MaterialData.h"
 
-#include "ThreadedElementLoop.h"
-
-// libMesh includes
-#include "elem_range.h"
-
-class NonlinearSystem;
-
-
-class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
+TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(InputParameters & parameters) :
+    MaterialPropertyInterface(parameters),
+    _neighbor_material_data(*parameters.get<MaterialData *>("_neighbor_material_data")),
+    _neighbor_material_props(_neighbor_material_data.props()),
+    _neighbor_material_props_old(_neighbor_material_data.propsOld()),
+    _neighbor_material_props_older(_neighbor_material_data.propsOlder())
 {
-public:
-  ComputeResidualThread(Problem & problem, NonlinearSystem & sys, NumericVector<Number> & residual);  
-
-  // Splitting Constructor
-  ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
-
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, short int bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void postElement(const Elem * /*elem*/);
-
-  void join(const ComputeResidualThread & /*y*/);
-
-protected:
-  NumericVector<Number> & _residual;
-  NonlinearSystem & _sys;
-};
-
-#endif //COMPUTERESIDUALTHREAD_H
+}

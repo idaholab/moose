@@ -37,6 +37,7 @@
 #define registerInitialCondition(name)            registerObject(name)
 #define registerDamper(name)                      registerObject(name)
 #define registerDiracKernel(name)                 registerObject(name)
+#define registerDGKernel(name)                    registerObject(name)
 #define registerExecutioner(name)                 registerObject(name)
 #define registerFunction(name)                    registerObject(name)
 #define registerMeshModifier(name)                registerObject(name)
@@ -49,6 +50,7 @@
 #define registerNamedInitialCondition(obj, name)       registerNamedObject(obj, name)
 #define registerNamedDumper(obj, name)                 registerNamedObject(obj, name)
 #define registerNamedDiracKernel(obj, name)            registerNamedObject(obj, name)
+#define registerNamedDGKernel(obj, name)               registerNamedObject(obj, name)
 #define registerNamedExecutioner(obj, name)            registerNamedObject(obj, name)
 
 

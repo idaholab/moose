@@ -19,6 +19,7 @@
 #include "KernelWarehouse.h"
 #include "BCWarehouse.h"
 #include "DiracKernelWarehouse.h"
+#include "DGKernelWarehouse.h"
 #include "DamperWarehouse.h"
 // libMesh includes
 #include "transient_system.h"
@@ -71,9 +72,13 @@ public:
   void setupFiniteDifferencedPreconditioner();
 
   virtual void prepareAssembly(THREAD_ID tid);
+  virtual void prepareAssemblyNeighbor(THREAD_ID tid);
   virtual void prepareAssembly(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
+  virtual void prepareAssemblyNeighbor(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
 
   AsmBlock & asmBlock(THREAD_ID tid) { return *_asm_block[tid]; }
@@ -107,6 +112,14 @@ public:
    * @param parameters Dirac kernel parameters
    */
   void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a DG kernal
+   * @param dg_kernel_name The type of the DG kernel
+   * @param name The name of the DG kernel
+   * @param parameters DG kernel parameters
+   */
+  void addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a damper
@@ -295,6 +308,7 @@ protected:
   std::vector<KernelWarehouse> _kernels;                ///< Kernel storage for each thread
   std::vector<BCWarehouse> _bcs;                        ///< BC storage for each thread
   std::vector<DiracKernelWarehouse> _dirac_kernels;     ///< Dirac Kernel storage for each thread
+  std::vector<DGKernelWarehouse> _dg_kernels;           ///< DG Kernel storage for each thread
   std::vector<DamperWarehouse> _dampers;                ///< Dampers for each thread
 
   NumericVector<Number> * _increment_vec;               ///< increment vector
@@ -309,6 +323,8 @@ protected:
 
   bool _need_residual_copy;                             ///< Whether or not a copy of the residual needs to be made
   bool _need_residual_ghosted;                          ///< Whether or not a ghosted copy of the residual needs to be made
+
+  bool _doing_dg;                                       ///< true if DG is active (optimization reasons)
 
   std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;   ///< NumericVectors that will be zeroed before a residual computation
 

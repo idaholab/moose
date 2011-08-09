@@ -167,6 +167,12 @@ public:
   virtual void prepare(THREAD_ID tid);
 
   /**
+   * Prepare the system for use
+   * @param tid ID of the thread
+   */
+  virtual void prepareNeighbor(THREAD_ID tid);
+
+  /**
    * Reinit an element assembly info
    * @param elem Which element we are reinitializing for
    * @param tid ID of the thread
@@ -181,6 +187,8 @@ public:
    * @param tid Thread ID
    */
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
+
+  virtual void reinitNeighborFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
 
   /**
    * Reinit nodal assembly info
