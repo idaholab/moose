@@ -33,6 +33,7 @@ AsmBlock::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, u
 {
   switch (type)
   {
+  default:
   case Moose::ElementElement: return _sub_Kee[ivar][jvar];
   case Moose::ElementNeighbor: return _sub_Ken[ivar][jvar];
   case Moose::NeighborElement: return _sub_Kne[ivar][jvar];

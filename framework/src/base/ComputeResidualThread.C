@@ -94,7 +94,8 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
     {
       _problem.reinitNeighbor(elem, side, _tid);
 
-      _problem.reinitMaterialsNeighbor(elem->subdomain_id(), side, _tid);
+      _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
+      _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
       for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
       {
         DGKernel * dg = *it;

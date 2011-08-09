@@ -439,7 +439,7 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
+    parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
     parameters.set<MaterialData *>("_neighbor_material_data") = _mproblem._neighbor_material_data[tid];
 
     DGKernel *dg_kernel = static_cast<DGKernel *>(Factory::instance()->create(dg_kernel_name, name, parameters));
