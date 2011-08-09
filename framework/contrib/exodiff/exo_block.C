@@ -117,7 +117,7 @@ string Exo_Block::Load_Connectivity()
   SMART_ASSERT(Check_State());
   
   if (fileId < 0) return "ERROR:  Invalid file id!";
-  if (id_ == 0) return "ERROR:  Must initialize block parameters first!";
+  if (id_ == EX_INVALID_ID) return "ERROR:  Must initialize block parameters first!";
   
   if (conn) delete [] conn;  conn = 0;
   
