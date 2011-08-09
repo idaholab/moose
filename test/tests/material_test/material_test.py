@@ -6,7 +6,7 @@ test = { INPUT : 'material_test.i',
 dg_test = {
 	INPUT : 'material_test_dg.i',
   EXODIFF : ['out_dg.e'],
-  SKIP : False
+  SKIP : True
 }
 
 coupled_material_test = { INPUT : 'coupled_material_test.i',

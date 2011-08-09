@@ -55,7 +55,11 @@
 
 #include "ConvDiffMetaAction.h"
 
+#include "DGMatDiffusion.h"
 #include "EnhancedDGMatDiffusion.h"
+#include "DGMDDBC.h"
+#include "DGFunctionConvectionDirichletBC.h"
+
 
 namespace MooseTest
 {
@@ -95,6 +99,7 @@ void registerObjects()
   registerObject(MultipleUpdateAux);
 
   // DG kernels
+  registerDGKernel(DGMatDiffusion);
   registerDGKernel(EnhancedDGMatDiffusion);
 
   // Boundary Conditions
@@ -104,7 +109,10 @@ void registerObjects()
   registerObject(DirichletBCfuncXYZ0);
   registerObject(DirichletBCfuncXYZ1);
   registerObject(TEJumpBC);
+
   registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
+  registerBoundaryCondition(DGMDDBC);
+  registerBoundaryCondition(DGFunctionConvectionDirichletBC);
 
   // Initial conditions
   registerObject(TEIC);
