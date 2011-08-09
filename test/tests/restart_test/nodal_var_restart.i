@@ -57,7 +57,7 @@
   [./all]
     type = FunctionDirichletBC
     variable = u
-    boundary = '255 1 2 3'
+    boundary = '0 1 2 3'
     function = exact_fn 
   [../]
 
