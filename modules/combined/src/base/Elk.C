@@ -69,6 +69,7 @@
 #include "LSHPlasticMaterial.h"
 #include "LSHPlasticMaterialRZ.h"
 #include "MaterialTensorAux.h"
+#include "MaterialVectorAux.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreepMaterial.h"
 #include "PowerLawCreep.h"
@@ -173,6 +174,7 @@ Elk::registerObjects()
   registerMaterial(LSHPlasticMaterial);
   registerMaterial(LSHPlasticMaterialRZ);
   registerAux(MaterialTensorAux);
+  registerAux(MaterialVectorAux);
   registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreepMaterial);
