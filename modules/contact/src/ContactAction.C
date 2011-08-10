@@ -16,6 +16,7 @@ InputParameters validParams<ContactAction>()
   params.addParam<std::string>("disp_z", "", "The z displacement");
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
+  params.addParam<std::string>("order", "FIRST", "The finite element order");
   return params;
 }
 
@@ -27,7 +28,8 @@ ContactAction::ContactAction(const std::string & name, InputParameters params) :
   _disp_y(getParam<std::string>("disp_y")),
   _disp_z(getParam<std::string>("disp_z")),
   _penalty(getParam<Real>("penalty")),
-  _model(getParam<std::string>("model"))
+  _model(getParam<std::string>("model")),
+  _order(getParam<std::string>("order"))
 {
 }
 
@@ -69,6 +71,7 @@ ContactAction::act()
     InputParameters & params = moose_object_action->getMooseObjectParams();
 
     params.set<std::string>("model") = _model;
+    params.set<std::string>("order") = _order;
     params.set<unsigned int>("boundary") = _master;
     params.set<unsigned int>("slave") = _slave;
     params.set<Real>("penalty") = _penalty;
@@ -108,6 +111,7 @@ ContactAction::act()
     InputParameters & params = moose_object_action->getMooseObjectParams();
 
     params.set<std::string>("model") = _model;
+    params.set<std::string>("order") = _order;
     params.set<unsigned int>("boundary") = _slave;
     params.set<unsigned int>("master") = _master;
     params.set<Real>("penalty") = _penalty;

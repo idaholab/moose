@@ -22,6 +22,7 @@ InputParameters validParams<ThermalContactAction>()
   params.addParam<std::string>("disp_x", "The x displacement");
   params.addParam<std::string>("disp_y", "The y displacement");
   params.addParam<std::string>("disp_z", "The z displacement");
+  params.addParam<std::string>("order", "FIRST", "The finite element order");
 
   return params;
 }
@@ -117,6 +118,7 @@ ThermalContactAction::addAuxVariables()
       action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
       action_params.set<std::string>("action") = "add_aux_variable";
       action_params.set<std::string>("name") = "AuxVariables/" + GAP_VALUE_VAR_NAME;
+      action_params.set<std::string>("order") = getParam<std::string>("order");
       // gap_value
       Action *action = ActionFactory::instance()->create("AddVariableAction", action_params);
       Moose::action_warehouse.addActionBlock(action);
@@ -125,7 +127,7 @@ ThermalContactAction::addAuxVariables()
       action = ActionFactory::instance()->create("AddVariableAction", action_params);
       Moose::action_warehouse.addActionBlock(action);
 //    }
-      
+
       action_params = ActionFactory::instance()->getValidParams("CopyNodalVarsAction");
       action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
       action_params.set<std::string>("action") = "copy_nodal_aux_vars";
@@ -177,6 +179,7 @@ ThermalContactAction::addAuxBcs()
     params.set<unsigned int>("paired_boundary") = getParam<unsigned int>("master");
     std::vector<std::string> vars(1, getParam<std::string>("variable"));
     params.set<std::vector<std::string> >("paired_variable") = vars;
+    params.set<std::string>("order") = getParam<std::string>("order");
     // add it to the warehouse
     Moose::action_warehouse.addActionBlock(action);
   }

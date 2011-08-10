@@ -3,6 +3,7 @@
 
 // libmesh includes
 #include "sparse_matrix.h"
+#include "string_to_enum.h"
 
 template<>
 InputParameters validParams<ContactMaster>()
@@ -18,6 +19,7 @@ InputParameters validParams<ContactMaster>()
 
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<std::string>("order", "FIRST", "The finite element order");
   return params;
 }
 
@@ -25,7 +27,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   DiracKernel(name, parameters),
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
-  _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"))),
+  _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
   _penalty(getParam<Real>("penalty")),
   _residual_copy(_sys.residualGhosted()),
   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
