@@ -9,7 +9,10 @@ test_steady_adapt = { INPUT : 'steady-adapt.i',
 test_transient = { INPUT : 'transient.i',
                   EXODIFF : ['out_transient.e'] }
 
-test_sln_time_adapt = { INPUT : 'sln-time-adapt.i',
-                        EXODIFF : ['out_sta.e'] ,
-                        SKIP : True }
+# This test is invalid (permanently disabled)
+# The test varies the time step based on wall clock solve time
+# which is not consistent for testing
+#test_sln_time_adapt = { INPUT : 'sln-time-adapt.i',
+#                        EXODIFF : ['out_sta.e'] ,
+#                        SKIP : True }
 

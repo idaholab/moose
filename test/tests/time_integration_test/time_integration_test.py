@@ -26,6 +26,9 @@ test_cranic_adapt = { INPUT : 'cranic_adapt.i',
 testdt2 = { INPUT : 'dt2_adapt.i',
             EXODIFF : ['out_dt2_adapt_0037.e'] }
 
-test_solution_time_adaptive = { INPUT : 'time-adaptive.i',
-                                EXODIFF : ['out_time_adaptive.e'],
-                                SKIP : True }
+# This test is invalid (permanently disabled)
+# The test varies the time step based on wall clock solve time
+# which is not consistent for testing
+#test_solution_time_adaptive = { INPUT : 'time-adaptive.i',
+#                                EXODIFF : ['out_time_adaptive.e'],
+#                                SKIP : True }
