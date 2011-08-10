@@ -24,12 +24,12 @@
 #include "FindContactPoint.h"
 #include "PenetrationThread.h"
 
-PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, unsigned int master, unsigned int slave) :
+PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, unsigned int master, unsigned int slave, Order order) :
     _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master),
     _slave_boundary(slave),
-    _fe_type(),
+    _fe_type(order),
     _nearest_node(geom_search_data.getNearestNodeLocator(master, slave)),
     _update_location(true)
 {

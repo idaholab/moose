@@ -66,13 +66,13 @@ GeometricSearchData::update()
 }
 
 PenetrationLocator &
-GeometricSearchData::getPenetrationLocator(unsigned int master, unsigned int slave)
+GeometricSearchData::getPenetrationLocator(unsigned int master, unsigned int slave, Order order)
 {
   PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master, slave)];
 
   if(!pl)
   {
-    pl = new PenetrationLocator(_subproblem, *this, _mesh, master, slave);
+    pl = new PenetrationLocator(_subproblem, *this, _mesh, master, slave, order);
     _penetration_locators[std::pair<unsigned int, unsigned int>(master, slave)] = pl;
   }
 

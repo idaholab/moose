@@ -24,9 +24,9 @@ GeometricSearchInterface::GeometricSearchInterface(InputParameters & params) :
 }
 
 PenetrationLocator &
-GeometricSearchInterface::getPenetrationLocator(unsigned int master, unsigned int slave)
+GeometricSearchInterface::getPenetrationLocator(unsigned int master, unsigned int slave, Order order)
 {
-  return _geometric_search_data.getPenetrationLocator(master, slave);
+  return _geometric_search_data.getPenetrationLocator(master, slave, order);
 }
 
 NearestNodeLocator &

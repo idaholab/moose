@@ -17,6 +17,8 @@
 #include "MooseMesh.h"
 #include "SystemBase.h"
 
+#include "string_to_enum.h"
+
 template<>
 InputParameters validParams<GapValueAux>()
 {
@@ -24,12 +26,13 @@ InputParameters validParams<GapValueAux>()
   params.addRequiredParam<unsigned int>("paired_boundary", "The boundary on the other side of a gap.");
   params.addRequiredCoupledVar("paired_variable", "The variable to get the value of.");
   params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<std::string>("order", "FIRST", "The finite element order");
   return params;
 }
 
 GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _penetration_locator(getPenetrationLocator(parameters.get<unsigned int>("paired_boundary"), getParam<std::vector<unsigned int> >("boundary")[0])),
+    _penetration_locator(getPenetrationLocator(parameters.get<unsigned int>("paired_boundary"), getParam<std::vector<unsigned int> >("boundary")[0], parameters.isParamValid("order") ? Utility::string_to_enum<Order>(parameters.get<std::string>("order")) : FIRST)),
     _serialized_solution(_nl_sys.currentSolution()),
     _dof_map(_nl_sys.dofMap()),
     _paired_variable(coupled("paired_variable"))

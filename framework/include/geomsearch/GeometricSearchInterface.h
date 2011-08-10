@@ -17,6 +17,8 @@
 
 #include "InputParameters.h"
 
+#include "enum_order.h"
+
 // Forward Declarations
 class GeometricSearchData;
 class PenetrationLocator;
@@ -31,7 +33,7 @@ public:
   /**
    * Retrieve the PentrationLocator associated with the two sides.
    */
-  PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave);
+  PenetrationLocator & getPenetrationLocator(unsigned int master, unsigned int slave, Order order);
 
   /**
    * Retrieve the PentrationLocator associated with the two sides.
