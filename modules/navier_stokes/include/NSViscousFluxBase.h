@@ -44,13 +44,14 @@ protected:
   MaterialProperty<Real> & _dynamic_viscosity;
   
   // Coupled variable values.
-  VariableValue & _rho;
+  VariableValue& _rho;
   VariableValue& _rho_u;
   VariableValue& _rho_v;
   VariableValue& _rho_w;
+  VariableValue& _rho_e; // None of the child classes need this value, we only use it to get the correct variable number
 
   // Gradients
-  VariableGradient & _grad_rho;
+  VariableGradient& _grad_rho;
   VariableGradient& _grad_rho_u;
   VariableGradient& _grad_rho_v;
   VariableGradient& _grad_rho_w;
@@ -60,6 +61,7 @@ protected:
   unsigned _rhou_var_number;
   unsigned _rhov_var_number;
   unsigned _rhow_var_number;
+  unsigned _rhoe_var_number;
 };
  
 #endif //  NSVISCOUSFLUXBASE_H

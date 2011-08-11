@@ -183,8 +183,12 @@ NSMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
     return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
   }
 
-  // We shouldn't get here... jvar should have matched one of the if statements above!
-  mooseError("computeQpOffDiagJacobian called with invalid jvar.");
+  else
+  {
+    mooseError("computeQpOffDiagJacobian called with invalid jvar.");
+  }
 
+
+  // Won't get here!
   return 0;
 }

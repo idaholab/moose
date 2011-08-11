@@ -75,8 +75,21 @@ Real NSMomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     m = 2;
   else if (jvar == _rhow_var_number)
     m = 3;
-  else if (jvar == _rhow_var_number)
+  else if (jvar == _rhoe_var_number)
     m = 4;
+  else
+  {
+    std::ostringstream oss;
+    oss << "Invalid jvar=" << jvar << " requested!\n" 
+	<< "Did not match:\n"
+	<< " _rho_var_number =" << _rho_var_number  << "\n"
+	<< " _rhou_var_number=" << _rhou_var_number << "\n" 
+	<< " _rhov_var_number=" << _rhov_var_number << "\n"
+	<< " _rhow_var_number=" << _rhow_var_number << "\n"
+	<< " _rhoe_var_number=" << _rhoe_var_number
+	<< std::endl;
+    mooseError(oss.str());
+  }
 
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
     value += this->dtau(k, ell, m)*_grad_test[_i][_qp](ell);

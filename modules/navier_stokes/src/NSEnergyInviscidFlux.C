@@ -87,9 +87,6 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real V2 = vel.size_sq();
 
-  // TODO, make enthalpy a nodal aux?
-  // Real total_enthalpy = (_u[_qp] + _pressure[_qp]) / _p[_qp];
-  
   // Derivative wrt density
   if (jvar == _rho_var_number)
   {
@@ -117,7 +114,20 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
     return -(vel*_grad_test[_i][_qp]) * _phi[_j][_qp];
   }
 
-  // We shouldn't get here... jvar should have matched one of the if statements above!
+  else
+  {
+    std::ostringstream oss;
+    oss << "Invalid jvar=" << jvar << " requested!\n" 
+	<< "Did not match:\n"
+	<< " _rho_var_number =" << _rho_var_number  << "\n"
+	<< " _rhou_var_number=" << _rhou_var_number << "\n"  
+	<< " _rhov_var_number=" << _rhov_var_number << "\n" 
+	<< " _rhow_var_number=" << _rhow_var_number
+	<< std::endl;
+    mooseError(oss.str());
+  }
+
+  // Won't get here!
   return 0;
 }
 

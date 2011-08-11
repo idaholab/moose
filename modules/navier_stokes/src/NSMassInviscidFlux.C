@@ -76,21 +76,25 @@ NSMassInviscidFlux::computeQpJacobian()
 Real
 NSMassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _rhou_var_number)
+  if (jvar == _rhou_var_number)
   {
     RealVectorValue vec(_phi[_j][_qp],0,0);
     return -(vec*_grad_test[_i][_qp]);
   }
-  else if(jvar == _rhov_var_number)
+
+  else if (jvar == _rhov_var_number)
   {
     RealVectorValue vec(0,_phi[_j][_qp],0);
     return -(vec*_grad_test[_i][_qp]);
   }
-  else if(jvar == _rhow_var_number)
+
+  else if (jvar == _rhow_var_number)
   {
     RealVectorValue vec(0,0,_phi[_j][_qp]);
     return -(vec*_grad_test[_i][_qp]);
   }
 
-  return 0;
+  // For all other variables, return 0.
+  else
+    return 0.;
 }

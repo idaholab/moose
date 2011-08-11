@@ -58,9 +58,6 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
 
   
-  // Return value
-  Real value = 0.;
-
   // Map jvar into the variable m for our problem, regardless of
   // how Moose has numbered things. 
   unsigned m = 99;
@@ -73,6 +70,12 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     m = 2;
   else if (jvar == _rhow_var_number)
     m = 3;
+  else
+  {
+    std::ostringstream oss;
+    oss << "Invalid jvar=" << jvar << " requested!" << std::endl;
+    mooseError(oss.str());
+  }
 
 
   // Compute Jacobian terms based on the value of m
@@ -81,6 +84,9 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     
   case 0: // Density
   {
+    // Return value
+    Real value = 0.;
+
     for (unsigned k=0; k<LIBMESH_DIM; ++k)
     {
       Real intermediate_value = 0.;
@@ -99,6 +105,9 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   case 2:
   case 3:  // Momentums
   {
+    // Return value
+    Real value = 0.;
+    
     // "local" version of m, mapped to 0, 1, 2, for indexing
     // into Point objects.
     const unsigned m_local = m-1;
@@ -126,5 +135,5 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
 
   mooseError("Shouldn't get here...");
-  return value;
+  return 0.;
 }
