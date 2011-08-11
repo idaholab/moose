@@ -308,8 +308,9 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
 
 void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
 {
-  // Create storage at this qp for the strong residuals of all the equations
-  _strong_residuals[qp].resize(_dim+2);
+  // Create storage at this qp for the strong residuals of all the equations.
+  // In 2D, the value for the z-velocity equation will just be zero.
+  _strong_residuals[qp].resize(5);
   
   // The timestep is stored in the Problem object, which can be accessed through
   // the parent pointer of the SubProblemInterface
@@ -418,8 +419,9 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   // The z-momentum strong residual, viscous terms neglected.
   if (_dim == 3)
     _strong_residuals[qp][3] = drhow_dt + mom_sum(2);
-  
-  // The energy equation residual is always stored in index _dim+1
-  // regardless of 2 or 3D.
-  _strong_residuals[qp][_dim+1] = drhoe_dt + energy_resid;
+  else
+    _strong_residuals[qp][3] = 0.;
+
+  // The energy equation strong residual
+  _strong_residuals[qp][4] = drhoe_dt + energy_resid;
 }

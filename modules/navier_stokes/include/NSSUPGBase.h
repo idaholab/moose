@@ -31,21 +31,28 @@ protected:
   //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
   // Returns the value of the flow-aligned length scale "h_u"
-  Real h_supg();
+  // (material property) Real h_supg();
 
   // Computes and stores tau parameters in local variables _tauc, _taum, and _taue.
-  void compute_tau();
+  // (material property) void compute_tau();
 
   // Computes strong-form residuals for gov. equations at current quadrature point.
   // Currently assumes an implicit Euler discretization in time regardless of the 
   // time discretization used in the actual problem.
-  void compute_strong_residuals();
+  // (material property) void compute_strong_residuals();
 
   // Material properties
-  MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
-  MaterialProperty<Real> & _dynamic_viscosity;
-  MaterialProperty<Real> &_thermal_conductivity;
+  MaterialProperty<RealTensorValue>& _viscous_stress_tensor;
+  MaterialProperty<Real>& _dynamic_viscosity;
+  MaterialProperty<Real>& _thermal_conductivity;
   
+  // SUPG-related material properties.
+  MaterialProperty<Real> & _hsupg;
+  MaterialProperty<Real> & _tauc;
+  MaterialProperty<Real> & _taum;
+  MaterialProperty<Real> & _taue;
+  MaterialProperty<std::vector<Real> > & _strong_residuals;
+
   // Coupled variable values.
   VariableValue& _rho;
   VariableValue& _rho_u;
@@ -90,14 +97,15 @@ protected:
   Real _R;
   Real _cv;
 
-  // Computed via the compute_tau() function and available to
-  // derived kernels.
-  Real _tauc;
-  Real _taum;
-  Real _taue;
-
-  // The strong residual of the governing equations
-  std::vector<Real> _strong_residuals;
+  // Material properties
+//  // Computed via the compute_tau() function and available to
+//  // derived kernels.
+//  Real _tauc;
+//  Real _taum;
+//  Real _taue;
+//
+//  // The strong residual of the governing equations
+//  std::vector<Real> _strong_residuals;
 };
  
 #endif //  NSSUPGBASE_H

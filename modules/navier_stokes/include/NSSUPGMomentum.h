@@ -23,6 +23,10 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
+  // This kernel is to be used for the x, y, and z momentum equations.
+  // The _component parameter tells you which equation you are currently
+  // solving.
+  unsigned _component;
 };
 
 #endif // NSSUPGMOMENTUM_H
