@@ -4,7 +4,7 @@
 #include "NSViscousFluxBase.h"
 
 
-// ForwardDeclarations
+// Forward Declarations
 class NSEnergyViscousFlux;
 
 template<>

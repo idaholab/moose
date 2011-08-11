@@ -46,6 +46,9 @@
 #include "NSMomentumViscousFlux.h"
 #include "NSEnergyViscousFlux.h"
 #include "NSMomentumInviscidFluxWithGradP.h"
+#include "NSSUPGMomentum.h"
+#include "NSSUPGMass.h"
+#include "NSSUPGEnergy.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -152,6 +155,9 @@ Elk::registerObjects()
   registerKernel(NSMomentumViscousFlux);
   registerKernel(NSEnergyViscousFlux);
   registerKernel(NSMomentumInviscidFluxWithGradP);
+  registerKernel(NSSUPGMomentum);
+  registerKernel(NSSUPGMass);
+  registerKernel(NSSUPGEnergy);
 
   // linear_elasticity
   registerKernel(SolidMechX);
