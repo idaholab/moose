@@ -51,8 +51,6 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _d_strain_dT(),
    _d_stress_dT(declareProperty<SymmTensor>("d_stress_dT")),
    _elastic_strain(declareProperty<SymmTensor>("elastic_strain")),
-   _v_strain(declareProperty<SymmTensor>("v_strain")),
-   _v_strain_old(declarePropertyOld<SymmTensor>("v_strain")),
    _stress_old_temp(),
    _local_elasticity_tensor(NULL)
 {
@@ -159,15 +157,11 @@ SolidMechanicsMaterialRZ::computeProperties()
     const unsigned int num_vol_models(_volumetric_models.size());
     if (num_vol_models)
     {
-      _v_strain[_qp].zero();
       SymmTensor dv_strain_dT(0);
       for (unsigned int i(0); i < num_vol_models; ++i)
       {
-        _volumetric_models[i]->modifyStrain(_qp, _v_strain[_qp], dv_strain_dT);
+        _volumetric_models[i]->modifyStrain(_qp, strain, dv_strain_dT);
       }
-      _v_strain[_qp] *= _dt;
-      strain += _v_strain[_qp];
-      _v_strain[_qp] += _v_strain_old[_qp];
 
       dv_strain_dT *= _dt;
       _d_strain_dT += dv_strain_dT;

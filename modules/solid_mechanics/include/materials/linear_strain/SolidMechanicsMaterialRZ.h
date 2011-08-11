@@ -88,8 +88,6 @@ protected:
   // The derivative of the stress with respect to Temperature
   MaterialProperty<SymmTensor> & _d_stress_dT;
   MaterialProperty<SymmTensor> & _elastic_strain;
-  MaterialProperty<SymmTensor> & _v_strain;
-  MaterialProperty<SymmTensor> & _v_strain_old;
 
   SymmTensor _stress_old_temp;
   SymmElasticityTensor * _local_elasticity_tensor;
