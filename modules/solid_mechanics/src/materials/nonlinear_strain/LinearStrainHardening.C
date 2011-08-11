@@ -53,7 +53,6 @@ LinearStrainHardening::computeStress()
 {
   // compute trial stress
   SymmTensor stress_new = *elasticityTensor() * _strain_increment;
-  stress_new *= _dt;
   stress_new += _stress_old[_qp];
 
   // compute deviatoric trial stress
@@ -101,7 +100,6 @@ LinearStrainHardening::computeStress()
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress);
 
     SymmTensor elastic_strain_increment( _strain_increment );
-    elastic_strain_increment *= _dt;
     elastic_strain_increment -= plastic_strain_increment;
 
     // update stress and plastic strain
@@ -116,7 +114,6 @@ LinearStrainHardening::computeStress()
   else
   {
     SymmTensor elastic_strain_increment(_strain_increment);
-    elastic_strain_increment *= _dt;
 
     // compute stress increment
     stress_new =  *elasticityTensor() * elastic_strain_increment;

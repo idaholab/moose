@@ -62,7 +62,6 @@ PowerLawCreep::computeStress()
 
   // compute trial stress
   SymmTensor stress_new( (*elasticityTensor()) * _strain_increment );
-  stress_new *= _dt;
   stress_new += _stress_old[_qp];
 
   // compute deviatoric trial stress
@@ -117,7 +116,7 @@ PowerLawCreep::computeStress()
   SymmTensor creep_strain_increment(dev_trial_stress);
   creep_strain_increment *= (1.5*del_p/effective_trial_stress);
 
-  SymmTensor elastic_strain_increment(_strain_increment.columnMajorMatrix()*_dt);
+  SymmTensor elastic_strain_increment(_strain_increment.columnMajorMatrix());
   elastic_strain_increment -= creep_strain_increment;
 
   //  compute stress increment

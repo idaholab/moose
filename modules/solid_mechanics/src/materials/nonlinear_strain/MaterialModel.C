@@ -301,7 +301,7 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
     const int ND = 3;
 
     ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
-    ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND), logUhat(ND,ND);
+    ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND);
     ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
 
     ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
@@ -330,10 +330,7 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
 
     _incremental_rotation = Fhat * invUhat;
 
-    logUhat = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
-
-    const Real dt_inv = _dt ? 1 / _dt : 1;
-    _total_strain_increment = logUhat * dt_inv;
+    _total_strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
 
     /*
     n1 = _incremental_rotation * N1;
@@ -343,7 +340,7 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
 
     logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
 
-    _total_strain_increment = logVhat * (1.0 / _dt);*/
+    _total_strain_increment = logVhat;*/
   }
   else
   {
@@ -366,21 +363,19 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
   //
   //
   // We are looking for:
-  //     1/dt * log( Uhat )
-  //  =  1/dt * log( sqrt( Fhat^T*Fhat ) )
-  //  =  1/dt * log( sqrt( Chat ) )
+  //     log( Uhat )
+  //  =  log( sqrt( Fhat^T*Fhat ) )
+  //  =  log( sqrt( Chat ) )
   // A Taylor series expansion gives:
-  //     1/dt * ( Chat - 0.25 * Chat^T*Chat - 0.75 * I )
-  //  =  1/dt * ( - 0.25 * Chat^T*Chat + Chat - 0.75 * I )
-  //  = -1/dt * ( (0.25*Chat - 0.75*I) * (Chat - I) )
-  //  = -1/dt * ( B * A )
+  //     ( Chat - 0.25 * Chat^T*Chat - 0.75 * I )
+  //  =  ( - 0.25 * Chat^T*Chat + Chat - 0.75 * I )
+  //  =  ( (0.25*Chat - 0.75*I) * (Chat - I) )
+  //  =  ( B * A )
   //    B
   //  = 0.25*Chat - 0.75*I
   //  = 0.25*(Chat - I) - 0.5*I
   //  = 0.25*A - 0.5*I
   //
-
-  const Real dt_inv = _dt ? 1 / _dt : 1;
 
   const Real Uxx = Fhat(0,0);
   const Real Uxy = Fhat(0,1);
@@ -406,12 +401,12 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
   const Real Byz = 0.25 * Ayz;
   const Real Bzz = 0.25 * Azz - 0.5;
 
-  _total_strain_increment.xx( -(Bxx*Axx + Bxy*Axy + Bxz*Axz) * dt_inv );
-  _total_strain_increment.xy( -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) * dt_inv );
-  _total_strain_increment.zx( -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) * dt_inv );
-  _total_strain_increment.yy( -(Bxy*Axy + Byy*Ayy + Byz*Ayz) * dt_inv );
-  _total_strain_increment.yz( -(Bxy*Axz + Byy*Ayz + Byz*Azz) * dt_inv );
-  _total_strain_increment.zz( -(Bxz*Axz + Byz*Ayz + Bzz*Azz) * dt_inv );
+  _total_strain_increment.xx( -(Bxx*Axx + Bxy*Axy + Bxz*Axz) );
+  _total_strain_increment.xy( -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) );
+  _total_strain_increment.zx( -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) );
+  _total_strain_increment.yy( -(Bxy*Axy + Byy*Ayy + Byz*Ayz) );
+  _total_strain_increment.yz( -(Bxy*Axz + Byy*Ayz + Byz*Azz) );
+  _total_strain_increment.zz( -(Bxz*Axz + Byz*Ayz + Bzz*Azz) );
 
 }
 
@@ -470,17 +465,16 @@ void
 MaterialModel::modifyStrain()
 {
   _total_strain[_qp] = _total_strain_increment;
-  _total_strain[_qp] *= _dt;
   _total_strain[_qp] += _total_strain_old[_qp];
 
   _strain_increment = _total_strain_increment;
   if ( _has_temp && _t_step != 0 )
   {
-    const Real tStrain( _alpha/_dt * (_temperature[_qp] - _temperature_old[_qp]) );
+    const Real tStrain( _alpha * (_temperature[_qp] - _temperature_old[_qp]) );
     _strain_increment.addDiag( -tStrain );
 
     _d_strain_dT.zero();
-    _d_strain_dT.addDiag( -_alpha/_dt );
+    _d_strain_dT.addDiag( -_alpha );
   }
   for (unsigned int i(0); i < _volumetric_models.size(); ++i)
   {
@@ -501,25 +495,17 @@ MaterialModel::computeStress()
 //                      strain_increment(1,1) +
 //                      strain_increment(2,2) );
 //   const Real bulk_update = lamda * traceD;
-//   _stress[_qp](0,0) = _stress_old[_qp](0,0) + _dt * ( twoG * strain_increment(0,0) + bulk_update );
-//   _stress[_qp](1,1) = _stress_old[_qp](1,1) + _dt * ( twoG * strain_increment(1,1) + bulk_update );
-//   _stress[_qp](2,2) = _stress_old[_qp](2,2) + _dt * ( twoG * strain_increment(2,2) + bulk_update );
-//   _stress[_qp](0,1) = _stress_old[_qp](0,1) + _dt * ( twoG * strain_increment(0,1)               );
-//   _stress[_qp](0,2) = _stress_old[_qp](0,2) + _dt * ( twoG * strain_increment(0,2)               );
-//   _stress[_qp](1,2) = _stress_old[_qp](1,2) + _dt * ( twoG * strain_increment(1,2)               );
+//   _stress[_qp](0,0) = _stress_old[_qp](0,0) + ( twoG * strain_increment(0,0) + bulk_update );
+//   _stress[_qp](1,1) = _stress_old[_qp](1,1) + ( twoG * strain_increment(1,1) + bulk_update );
+//   _stress[_qp](2,2) = _stress_old[_qp](2,2) + ( twoG * strain_increment(2,2) + bulk_update );
+//   _stress[_qp](0,1) = _stress_old[_qp](0,1) + ( twoG * strain_increment(0,1)               );
+//   _stress[_qp](0,2) = _stress_old[_qp](0,2) + ( twoG * strain_increment(0,2)               );
+//   _stress[_qp](1,2) = _stress_old[_qp](1,2) + ( twoG * strain_increment(1,2)               );
 //   _stress[_qp](1,0) = _stress[_qp](0,1);
 //   _stress[_qp](2,0) = _stress[_qp](0,2);
 //   _stress[_qp](2,1) = _stress[_qp](1,2);
 
-  //
-  // This is more work than needs to be done.  The strain and stress tensors are symmetric, and so we are carrying
-  //   a third more memory than is required.  We are also running a 9x9 * 9x1 matrix-vector multiply when at most
-  //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
-  //   constants are needed and a matrix vector multiply can be avoided entirely.
-  //
-
   SymmTensor stress_new( *_elasticity_tensor * _strain_increment );
-  stress_new *= _dt;
   _stress[_qp] = stress_new;
   _stress[_qp] += _stress_old[_qp];
 
@@ -873,47 +859,7 @@ MaterialModel::computePreconditioning()
   _Jacobian_mult[_qp] = *_elasticity_tensor;
 
   SymmTensor d_stress_dT( *_elasticity_tensor * _d_strain_dT );
-  d_stress_dT *= _dt;
   _d_stress_dT[_qp] = d_stress_dT;
-
-
-/*
-   std::cout << " I am in material model " << std::endl;
-
-   const int ND = 3;
-
-   ColumnMajorMatrix Fdot, I, Finv;
-   ColumnMajorMatrix F(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
-   ColumnMajorMatrix Fbar(_grad_disp_x_old[_qp], _grad_disp_y_old[_qp], _grad_disp_z_old[_qp]);
-
-   Real term1, term2;
-
-   I.identity();
-
-   F = F.transpose() + I;
-   Fbar = Fbar.transpose() + I;
-
-   Fdot = (F - Fbar) * (1.0/ _dt);
-
-   invertMatrix(F,Finv);
-
-   _Jacobian_mult[_qp].zero();
-
-   for(int i = 0; i < ND; i++)
-     for(int j = 0; j < ND; j++)
-       for(int t = 0; t < ND; t++)
-         for(int S = 0; S < ND; S++)
-           for(int k = 0; k < ND; k++)
-             for(int l = 0; l < ND; l++)
-               for(int L = 0; L < ND; L++)
-               {
-                 term1 = delta(k,t) * delta(L,S) * Finv(L,l) * (1.0/_dt) - Fdot(k,L) * Finv(L,t) * Finv(S,l);
-                 term2 = delta(l,t) * delta(L,S) * Finv(L,k) * (1.0/_dt) - Fdot(l,L) * Finv(L,t) * Finv(S,k);
-
-                 _Jacobian_mult[_qp](j*ND+i,S*ND+t) = _Jacobian_mult[_qp](j*ND+i,S*ND+t) + (*_elasticity_tensor)(j*ND+i,l*ND+k) * (term1 + term2) * 0.5;
-                 }
-
-                 //_Jacobian_mult[_qp] =  _Jacobian_mult[_qp].transpose();*/
 
 
 }
