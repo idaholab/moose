@@ -33,37 +33,96 @@ protected:
    */
   virtual void computeProperties();
 
-  bool _has_u;
-  VariableValue  & _u;
   VariableGradient & _grad_u;
-
-  bool _has_v;
-  VariableValue  & _v;
   VariableGradient & _grad_v;
-
-  bool _has_w;
-  VariableValue  & _w;
   VariableGradient & _grad_w;
 
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   MaterialProperty<Real> & _thermal_conductivity;
-
-  MaterialProperty<Real> & _gamma;
-  MaterialProperty<Real> & _c_p;
-  MaterialProperty<Real> & _R;
-  MaterialProperty<Real> & _Pr;
-
   MaterialProperty<Real> & _dynamic_viscosity;
-  
-  Real _R_param;
-  Real _gamma_param;
-  Real _Pr_param;
 
   std::vector<VariableGradient *> _vel_grads;
 
   // Specific heat at constant volume, treated as a single
-  // constant value.
+  // constant values.
+  Real _R;
+  Real _gamma;
+  Real _Pr;
   Real _cv;
+
+  // Coupled values needed to compute strong form residuals
+  // for SUPG stabilization...
+  VariableValue & _u_vel;
+  VariableValue & _v_vel;
+  VariableValue & _w_vel;
+  
+  // Temperature is needed to compute speed of sound
+  VariableValue & _temperature;
+  
+  // Enthalpy is needed in computing energy equation strong residuals
+  VariableValue& _enthalpy;
+  
+  // Main solution variables are all needed for computing strong residuals
+  VariableValue& _rho;
+  VariableValue& _rho_u;
+  VariableValue& _rho_v;
+  VariableValue& _rho_w;
+  VariableValue& _rho_e;
+
+  // Also need "old" (from previous timestep) coupled variable values
+  // for approximating time derivatives in strong residuals.
+  VariableValue& _rho_old;
+  VariableValue& _rho_u_old;
+  VariableValue& _rho_v_old;
+  VariableValue& _rho_w_old;
+  VariableValue& _rho_e_old;
+
+  // Gradients
+  VariableGradient& _grad_rho;
+  VariableGradient& _grad_rho_u;
+  VariableGradient& _grad_rho_v;
+  VariableGradient& _grad_rho_w;
+  VariableGradient& _grad_rho_e;
+
+  // The real-valued material properties representing the element stabilization
+  // parameters for each of the equations.
+  MaterialProperty<Real> & _hsupg;
+  MaterialProperty<Real> & _tauc;
+  MaterialProperty<Real> & _taum;
+  MaterialProperty<Real> & _taue;
+  
+  // The (vector-valued) material property which is the strong-form
+  // residual at each quadrature point.
+  // FIXME: Can we resize this vector directly in computeProperties?
+  MaterialProperty<std::vector<Real> > & _strong_residuals;
+
+private:
+  // To be called from computeProperties() function to compute _hsupg
+  void compute_h_supg(unsigned qp);
+
+  // To be called from computeProperties() function to compute _tauc, _taum, _taue
+  void compute_tau(unsigned qp);
+
+  // To be called from computeProperties() function to compute the strong residual of each equation.
+  void compute_strong_residuals(unsigned qp);
+
+  // Reference to a pointer to an FEBase object.  Initialized in ctor.
+  FEBase*& _fe;
+
+  // Constant references to finite element mapping data
+  const std::vector<Real>& _dxidx;
+  const std::vector<Real>& _dxidy;
+  const std::vector<Real>& _dxidz;
+
+  const std::vector<Real>& _detadx;
+  const std::vector<Real>& _detady;
+  const std::vector<Real>& _detadz;
+
+  // In 2D, these vectors will be empty...
+  const std::vector<Real>& _dzetadx;
+  const std::vector<Real>& _dzetady;
+  const std::vector<Real>& _dzetadz;
+
 };
 
 #endif //NAVIERSTOKESMATERIAL_H

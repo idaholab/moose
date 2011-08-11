@@ -28,18 +28,18 @@ Real NSSUPGMass::computeQpResidual()
   // TODO
   
   // Compute tau values at current quadrature point.
-  this->compute_tau();
+  //this->compute_tau();
 
 //  std::cout << "tauc=" << this->_tauc 
 //	    << ", taum=" << this->_taum 
 //	    << ", taue=" << this->_taue << std::endl;
 
   // Compute the strong residual values (sans viscous parts) at the current quadrature point.
-  this->compute_strong_residuals();
+  //this->compute_strong_residuals();
 
-  for (unsigned i=0; i<_strong_residuals.size(); ++i)
-    std::cout << _strong_residuals[i] << ", ";
-  std::cout << std::endl;
+//  for (unsigned i=0; i<_strong_residuals.size(); ++i)
+//    std::cout << _strong_residuals[i] << ", ";
+//  std::cout << std::endl;
 
   return 0.;
 }
