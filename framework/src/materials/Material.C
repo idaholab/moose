@@ -116,24 +116,6 @@ Material::computeQpProperties()
 {
 }
 
-/**
- * Updates the old (first) material properties to the current/new material properties (second)
- */
-void
-Material::updateDataState()
-{
-  if (_qp_prev.size() != _qp_curr.size()) throw std::out_of_range("_qp_prev != _qp_curr");
-
-  std::map<unsigned int, std::vector<QpData *> >::iterator i_prev = _qp_prev.begin();
-  std::vector<QpData *>::iterator j_prev, j_curr;
-
-  while (i_prev != _qp_prev.end())
-    for (j_prev = i_prev->second.begin(), j_curr = i_prev->second.begin();
-         j_prev != i_prev->second.end();
-         ++j_prev, ++j_curr)
-      *j_prev = *j_curr;
-}
-
 void
 Material::timeStepSetup()
 {}
@@ -144,38 +126,3 @@ Material::createData()
   return NULL;
 }
 
-std::vector<QpData *> &
-Material::getData(QP_Data_Type qp_data_type)
-{
-  std::map<unsigned int, std::vector<QpData *> > *locMap;
-  std::map<unsigned int, std::vector<QpData *> >::iterator i_map;
-  unsigned int elemId = _current_elem->id();
-
-  switch (qp_data_type)
-  {
-  case CURR:
-    locMap = &_qp_curr;
-    break;
-  case PREV:
-    locMap = &_qp_prev;
-    break;
-  }
-
-  i_map = locMap->find(elemId);
-  if (i_map != locMap->end())
-    return i_map->second;
-  else
-  {
-    // If the vector doesn't already exist create it
-    std::vector<QpData *> *v;
-    v = new std::vector<QpData *>(_qrule->n_points());
-    std::vector<QpData *>::iterator i_vec = v->begin();
-
-    for (;i_vec != v->end();++i_vec)
-      *i_vec = createData();
-
-    (*locMap)[elemId] = *v;
-
-    return *v;
-  }
-}

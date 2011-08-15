@@ -167,7 +167,6 @@ void MaterialWarehouse::updateMaterialDataState()
   {
     for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
     {
-      (*jt)->updateDataState();
       (*jt)->timeStepSetup();
     }
   }
@@ -176,7 +175,6 @@ void MaterialWarehouse::updateMaterialDataState()
   {
     for (std::vector<Material *>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
     {
-      (*jt)->updateDataState();
       (*jt)->timeStepSetup();
     }
   }

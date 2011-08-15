@@ -60,20 +60,15 @@ class Material :
 {
 public:
   Material(const std::string & name, InputParameters parameters);
-  
+
   virtual ~Material();
 
-  /** 
+  /**
    * Block ID the Material is active on.
-   * 
+   *
    * @return The block ID.
    */
   unsigned int blockID();
-
-  /**
-   * Updates the old (first) material properties to the current/new material properties (second)
-   */
-  void updateDataState();
 
   /**
    * This function is called at the beginning of each timestep
@@ -100,10 +95,10 @@ public:
 
   inline bool have_property_name_old(const std::string & prop_name) const
   { return _material_data.have_property_name_old(prop_name); }
-  
+
   inline bool have_property_name_older(const std::string & prop_name) const
   { return _material_data.have_property_name_older(prop_name); }
-  
+
   /**
    * Retrieve the property named "name"
    */
@@ -118,7 +113,7 @@ public:
 
   const std::set<std::string> &
   getPropertyDependencies() const { return _depend_props; }
-  
+
 protected:
   Problem & _problem;
   SubProblemInterface & _subproblem;
@@ -127,7 +122,7 @@ protected:
   bool _bnd;
   MaterialData & _material_data;
 
-  unsigned int _qp; 
+  unsigned int _qp;
 
   QBase * & _qrule;
   const std::vector<Real> & _JxW;
@@ -137,10 +132,10 @@ protected:
 
   MooseMesh & _mesh;
   unsigned int _dim;
-  
+
   std::set<std::string> _depend_props;
 
-// struct DeleteFunctor 
+// struct DeleteFunctor
 //   {
 //     void operator()(const std::pair<const unsigned int, MooseMooseArray<QpData *> > & p) const
 //     {
@@ -151,7 +146,7 @@ protected:
 //       std::cerr << p.second[0] << std::endl;
 //     }
 //  };
-  
+
   enum QP_Data_Type { CURR, PREV };
 
   /**
@@ -170,12 +165,6 @@ protected:
    * with a quadrature point
    */
   virtual QpData * createData();
-
-  /**
-   * This function returns a reference to a standard vector of datastructures for all
-   * the quadrature points on the current element
-   */
-  virtual std::vector<QpData *> & getData(QP_Data_Type qp_data_type);
 
   /**
    * Block ID this material is active on.
