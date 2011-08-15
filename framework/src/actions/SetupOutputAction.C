@@ -41,7 +41,6 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("postprocessor_ensight", false, "Specifies that you would like a PostProcessor ensight output file");
   params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output");
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png");
-  params.addParam<bool>("print_out_info", false, "Specifies that you would like to see more verbose output information on STDOUT");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
   params.addParam<bool>("output_displaced", false, "Requests that displaced mesh files are written at each solve");
 
@@ -65,6 +64,23 @@ SetupOutputAction::SetupOutputAction(const std::string & name, InputParameters p
 }
 
 void
+SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
+{
+  output.fileBase(getParam<std::string>("file_base"));
+
+  mooseAssert(params.have_parameter<std::vector<std::string> >("output_variables"), "Output Variables are required");
+
+  output.setOutputVariables(params.get<std::vector<std::string> >("output_variables"));
+
+  if (params.get<bool>("exodus")) output.add(Output::EXODUS);
+  if (params.get<bool>("nemesis")) output.add(Output::NEMESIS);
+  if (params.get<bool>("gmv")) output.add(Output::GMV);
+  if (params.get<bool>("tecplot")) output.add(Output::TECPLOT);
+  if (params.get<bool>("tecplot_binary")) output.add(Output::TECPLOT_BIN);
+  if (params.get<bool>("xda")) output.add(Output::XDA);
+}
+
+void
 SetupOutputAction::act()
 {
   // Disable Perf Log if requested
@@ -73,7 +89,7 @@ SetupOutputAction::act()
     Moose::perf_log.disable_logging();
     Moose::setup_perf_log.disable_logging();
   }
-
+ 
   /// Determines whether we see the perf log early in a run or not
   _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
 
@@ -81,30 +97,15 @@ SetupOutputAction::act()
   Problem & problem = exec->problem();
   Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
-  output.fileBase(getParam<std::string>("file_base"));
-
-  if(isParamValid("output_variables"))
-    output.setOutputVariables(getParam<std::vector<std::string> >("output_variables"));
-  else
+  if(!_pars.isParamValid("output_variables") && _parser_handle._problem != NULL)
   {
-    if(_parser_handle._problem != NULL)
-    {
-      MProblem & mproblem = *_parser_handle._problem;
-      output.setOutputVariables(mproblem.getVariableNames());
-    }
+    MProblem & mproblem = *_parser_handle._problem;
+    _pars.set<std::vector<std::string> >("output_variables") = mproblem.getVariableNames();
   }
 
-  if (getParam<bool>("exodus")) output.add(Output::EXODUS);
-  if (getParam<bool>("nemesis")) output.add(Output::NEMESIS);
-  if (getParam<bool>("gmv")) output.add(Output::GMV);
-  if (getParam<bool>("tecplot")) output.add(Output::TECPLOT);
-  if (getParam<bool>("tecplot_binary")) output.add(Output::TECPLOT_BIN);
-  if (getParam<bool>("xda")) output.add(Output::XDA);
+  setupOutputObject(output, _pars);
 
-#if 0
-    _moose_system._print_out_info = getParam<bool>("print_out_info");
-#endif
-
+  // TODO: Really? We need to set this variable on two objects???
   exec->outputInitial(getParam<bool>("output_initial"));
   problem.outputInitial(getParam<bool>("output_initial"));
 

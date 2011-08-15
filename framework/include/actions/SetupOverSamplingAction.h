@@ -12,29 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPOUTPUTACTION_H
-#define SETUPOUTPUTACTION_H
+#ifndef SETUPOVERSAMPLINGACTION_H
+#define SETUPOVERSAMPLINGACTION_H
 
 #include "InputParameters.h"
 #include "Moose.h"
-#include "Action.h"
+#include "SetupOutputAction.h"
 
 #include <string>
 
-class SetupOutputAction;
+class SetupOverSamplingAction;
 class Output;
 
 template<>
-InputParameters validParams<SetupOutputAction>();
+InputParameters validParams<SetupOverSamplingAction>();
 
 
-class SetupOutputAction : public Action
+class SetupOverSamplingAction : public SetupOutputAction
 {
 public:
-  SetupOutputAction(const std::string & name, InputParameters params);
+  SetupOverSamplingAction(const std::string & name, InputParameters params);
 
   virtual void act();
-  void setupOutputObject(Output & output, InputParameters & params);
 };
 
-#endif // SETUPOUTPUTACTION_H
+#endif // SETUPOVERSAMPLINGACTION_H

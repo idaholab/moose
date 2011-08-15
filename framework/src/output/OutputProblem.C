@@ -1,0 +1,125 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "OutputProblem.h"
+#include "MooseMesh.h"
+
+#include "equation_systems.h"
+#include "explicit_system.h"
+#include "mesh_function.h"
+
+
+OutputProblem::OutputProblem(MProblem & mproblem, unsigned int refinements) :
+    Problem(),
+    _mproblem(mproblem),
+    _mesh(mproblem.mesh()),
+    _eq(_mesh),
+    _out(*this)
+{
+  // The mesh in this system will be finer than the nonlinear system mesh
+  MeshRefinement mesh_refinement(_mesh);
+  mesh_refinement.uniformly_refine(refinements);
+
+  EquationSystems & source_es = _mproblem.es();
+  
+  unsigned int num_systems = source_es.n_systems();
+
+  _mesh_functions.resize(num_systems);
+  
+  for(unsigned int sys_num=0; sys_num<num_systems; sys_num++)
+  {
+    System & source_sys = source_es.get_system(sys_num);
+
+    // Add the system to the es
+    ExplicitSystem & dest_sys = _eq.add_system<ExplicitSystem>(source_sys.name());
+
+    unsigned int num_vars = source_sys.n_vars();
+
+    _mesh_functions[sys_num].resize(num_vars);
+
+    _serialized_solution = NumericVector<Number>::build().release();
+    _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+
+    // Need to pull down a full copy of this vector on every processor so we can get values in parallel
+    source_sys.solution->localize(*_serialized_solution);
+
+    // Add the variables to the system... simultaneously creating MeshFunctions for them.
+    for(unsigned int var_num=0; var_num<num_vars; var_num++)
+    {
+      // Create a variable in the dest_sys to match... but of LINEAR LAGRANGE type
+      dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
+
+      _mesh_functions[sys_num][var_num] = new MeshFunction(source_es,
+                                                           *_serialized_solution,
+                                                           source_sys.get_dof_map(),
+                                                           var_num);
+      _mesh_functions[sys_num][var_num]->init();
+    }
+  }
+  _eq.init();
+  
+}
+
+OutputProblem::~OutputProblem()
+{
+  for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
+    for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
+      delete _mesh_functions[sys_num][var_num];
+  
+  delete _serialized_solution;
+}
+
+void
+OutputProblem::init()
+{
+  EquationSystems & source_es = _mproblem.es();
+  
+  for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
+  {
+    System & source_sys = source_es.get_system(sys_num);
+    System & dest_sys = _eq.get_system(sys_num);
+    
+    _serialized_solution->clear();
+    _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+    source_sys.solution->localize(*_serialized_solution);
+     
+    for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
+    {
+
+      delete _mesh_functions[sys_num][var_num];
+      // TODO: Why do we need to recreate these MeshFunctions each time?
+       _mesh_functions[sys_num][var_num] = new MeshFunction(source_es,
+                                                            *_serialized_solution,
+                                                            source_sys.get_dof_map(),
+                                                            var_num);
+      _mesh_functions[sys_num][var_num]->init();
+    }
+    
+    
+    MeshBase::const_node_iterator nd     = _mesh.local_nodes_begin();
+    MeshBase::const_node_iterator nd_end = _mesh.local_nodes_end();
+    
+    // Now loop over the nodes of the 'To' mesh setting values for each variable.
+    for(;nd != nd_end; ++nd)
+    {        
+        unsigned int num_vars = dest_sys.n_vars();
+        
+        for(unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
+        {
+          // 0 is for the value component
+          dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd));
+        }
+    }
+  }
+}

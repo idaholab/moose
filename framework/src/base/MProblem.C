@@ -15,6 +15,7 @@
 #include "MProblem.h"
 #include "Factory.h"
 #include "DisplacedProblem.h"
+#include "OutputProblem.h"
 #include "MaterialData.h"
 #include "ComputePostprocessorsThread.h"
 #include "ActionWarehouse.h"
@@ -76,6 +77,7 @@ MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
     _postprocessor_gnuplot_output(false),
     _gnuplot_format("ps"),
     _out(*this),
+    _out_problem(NULL),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
@@ -146,6 +148,9 @@ MProblem::~MProblem()
 
   delete _displaced_mesh;
   delete _displaced_problem;
+
+  if (_out_problem)
+    delete _out_problem;
 }
 
 
@@ -1354,6 +1359,14 @@ void
 MProblem::output()
 {
   _out.output();
+  
+  // if the OverSample problem is setup, output it's solution
+  if (_out_problem)
+  {
+    _out_problem->init();
+    _out_problem->out().output();
+  }
+  
   if (_displaced_problem != NULL && _output_displaced)
     _displaced_problem->output();
 
@@ -1364,6 +1377,16 @@ MProblem::output()
     _input_file_saved = true;
   }
 
+}
+
+OutputProblem & 
+MProblem::getOutputProblem(unsigned int refinements)
+{
+  // TODO: When do we build this?
+  if (!_out_problem)
+    _out_problem = new OutputProblem(*this, refinements);
+
+  return *_out_problem;
 }
 
 #ifdef LIBMESH_ENABLE_AMR

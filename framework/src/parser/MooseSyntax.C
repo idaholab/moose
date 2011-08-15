@@ -66,6 +66,7 @@ void associateSyntax(Parser & p)
   p.registerActionSyntax("AddPostprocessorAction", "Postprocessors/Jacobian/*");
   p.registerActionSyntax("AddPostprocessorAction", "Postprocessors/NewtonIter/*");
   p.registerActionSyntax("AddDamperAction", "Dampers/*");
+  p.registerActionSyntax("SetupOverSamplingAction", "Output/OverSampling");
 
   // Note: Preconditioner Actions will be built by this setup action
   p.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");

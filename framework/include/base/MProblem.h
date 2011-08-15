@@ -30,6 +30,7 @@
 #include "Adaptivity.h"
 
 class DisplacedProblem;
+class OutputProblem;
 
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
@@ -188,7 +189,8 @@ public:
   virtual Output & out() { return _out; }
   virtual void output();
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
-
+  OutputProblem & getOutputProblem(unsigned int refinements);
+  
   // Restart //////
   virtual void setRestartFile(const std::string & file_name) { _restart = true; _restart_file_name = file_name; }
   virtual void restartFromFile();
@@ -253,6 +255,7 @@ public:
 protected:
   // Output system
   Output _out;
+  OutputProblem * _out_problem;
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;

@@ -143,6 +143,7 @@
 #include "SetupFiniteDifferencePreconditionerAction.h"
 #include "SetupDebugAction.h"
 #include "InitialRefinementAction.h"
+#include "SetupOverSamplingAction.h"
 
 namespace Moose {
 
@@ -296,6 +297,7 @@ addActionTypes()
   registerActionName("meta_action", false);
   registerActionName("initial_mesh_refinement", false);
   registerActionName("setup_debug", false);
+  registerActionName("setup_oversampling", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -341,6 +343,7 @@ addActionTypes()
 "(add_postprocessor)"
 "(setup_pps_complete)"
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, setup_output)"
+"(setup_oversampling)"
 "(check_integrity)"
 "(setup_debug)"
 );
@@ -412,6 +415,7 @@ registerActions()
   registerAction(SetupSMPAction, "add_preconditioning");
   registerAction(SetupFiniteDifferencePreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
+  registerAction(SetupOverSamplingAction, "setup_oversampling");
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");
