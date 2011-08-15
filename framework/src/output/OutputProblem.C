@@ -46,25 +46,29 @@ OutputProblem::OutputProblem(MProblem & mproblem, unsigned int refinements) :
 
     unsigned int num_vars = source_sys.n_vars();
 
-    _mesh_functions[sys_num].resize(num_vars);
-
-    _serialized_solution = NumericVector<Number>::build().release();
-    _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
-
-    // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-    source_sys.solution->localize(*_serialized_solution);
-
-    // Add the variables to the system... simultaneously creating MeshFunctions for them.
-    for(unsigned int var_num=0; var_num<num_vars; var_num++)
+    // The system may be empty (auxiliary system is optional)
+    if (num_vars)
     {
-      // Create a variable in the dest_sys to match... but of LINEAR LAGRANGE type
-      dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
+      _mesh_functions[sys_num].resize(num_vars);
 
-      _mesh_functions[sys_num][var_num] = new MeshFunction(source_es,
-                                                           *_serialized_solution,
-                                                           source_sys.get_dof_map(),
-                                                           var_num);
-      _mesh_functions[sys_num][var_num]->init();
+      _serialized_solution = NumericVector<Number>::build().release();
+      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+
+      // Need to pull down a full copy of this vector on every processor so we can get values in parallel
+      source_sys.solution->localize(*_serialized_solution);
+
+      // Add the variables to the system... simultaneously creating MeshFunctions for them.
+      for(unsigned int var_num=0; var_num<num_vars; var_num++)
+      {
+        // Create a variable in the dest_sys to match... but of LINEAR LAGRANGE type
+        dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
+        
+        _mesh_functions[sys_num][var_num] = new MeshFunction(source_es,
+                                                             *_serialized_solution,
+                                                             source_sys.get_dof_map(),
+                                                             var_num);
+        _mesh_functions[sys_num][var_num]->init();
+      }
     }
   }
   _eq.init();
@@ -87,39 +91,36 @@ OutputProblem::init()
   
   for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
   {
-    System & source_sys = source_es.get_system(sys_num);
-    System & dest_sys = _eq.get_system(sys_num);
-    
-    _serialized_solution->clear();
-    _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
-    source_sys.solution->localize(*_serialized_solution);
-     
-    for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
+    if (_mesh_functions[sys_num].size())
     {
-
-      delete _mesh_functions[sys_num][var_num];
-      // TODO: Why do we need to recreate these MeshFunctions each time?
-       _mesh_functions[sys_num][var_num] = new MeshFunction(source_es,
-                                                            *_serialized_solution,
-                                                            source_sys.get_dof_map(),
-                                                            var_num);
-      _mesh_functions[sys_num][var_num]->init();
-    }
-    
-    
-    MeshBase::const_node_iterator nd     = _mesh.local_nodes_begin();
-    MeshBase::const_node_iterator nd_end = _mesh.local_nodes_end();
-    
-    // Now loop over the nodes of the 'To' mesh setting values for each variable.
-    for(;nd != nd_end; ++nd)
-    {        
-        unsigned int num_vars = dest_sys.n_vars();
+      System & source_sys = source_es.get_system(sys_num);
+      System & dest_sys = _eq.get_system(sys_num);
+      
+      _serialized_solution->clear();
+      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+      source_sys.solution->localize(*_serialized_solution);
+      
+      for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
+      {
         
+        delete _mesh_functions[sys_num][var_num];
+        // TODO: Why do we need to recreate these MeshFunctions each time?
+        _mesh_functions[sys_num][var_num] = new MeshFunction(source_es,
+                                                             *_serialized_solution,
+                                                             source_sys.get_dof_map(),
+                                                             var_num);
+        _mesh_functions[sys_num][var_num]->init();
+      }
+    
+    
+      MeshBase::const_node_iterator nd     = _mesh.local_nodes_begin();
+      MeshBase::const_node_iterator nd_end = _mesh.local_nodes_end();
+    
+      // Now loop over the nodes of the 'To' mesh setting values for each variable.
+      for(;nd != nd_end; ++nd)
         for(unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
-        {
           // 0 is for the value component
           dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd));
-        }
     }
   }
 }
