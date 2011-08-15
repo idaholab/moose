@@ -74,11 +74,10 @@ PLC_LSH::computeStress()
   //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
-  const SymmTensor stress_old(_stress_old[_qp]);
 
   // compute trial stress
   SymmTensor stress_new( *elasticityTensor() * _strain_increment );
-  stress_new += stress_old;
+  stress_new += _stress_old;
 
   SymmTensor creep_strain_increment;
   SymmTensor stress_new_last( stress_new );
@@ -87,7 +86,7 @@ PLC_LSH::computeStress()
 
   while (delS > _tolerance && counter++ < _max_its)
   {
-    computeCreep( stress_old, stress_new, creep_strain_increment );
+    computeCreep( stress_new, creep_strain_increment );
 
 // now use stress_new to calculate a new effective_trial_stress and determine if
 // yield has occured and if so, calculate the corresponding plastic strain
@@ -105,8 +104,7 @@ PLC_LSH::computeStress()
 }
 
 void
-PLC_LSH::computeCreep( const SymmTensor & stress_old,
-                       SymmTensor & stress_new,
+PLC_LSH::computeCreep( SymmTensor & stress_new,
                        SymmTensor & creep_strain_increment )
 {
   creep_strain_increment.zero();
@@ -136,9 +134,9 @@ PLC_LSH::computeCreep( const SymmTensor & stress_old,
   const Real fraction( 1./num_steps );
   const Real dt( _dt * fraction );
   SymmTensor delta_stress(stress_new);
-  delta_stress -= stress_old;
+  delta_stress -= _stress_old;
   delta_stress *= 0.5*fraction;
-  SymmTensor stress_last(stress_old);
+  SymmTensor stress_last(_stress_old);
   SymmTensor stress_ave(stress_last);
   SymmTensor stress_next;
 
@@ -300,7 +298,7 @@ PLC_LSH::computeLSH( SymmTensor & stress_new,
     stress_new = *elasticityTensor() * elastic_strain_increment_p;
 
 // update stress and plastic strain
-    stress_new += _stress_old[_qp];
+    stress_new += _stress_old;
     _plastic_strain[_qp] = plastic_strain_increment;
     _plastic_strain[_qp] += _plastic_strain_old[_qp];
 

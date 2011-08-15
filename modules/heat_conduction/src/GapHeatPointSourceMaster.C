@@ -33,13 +33,10 @@ GapHeatPointSourceMaster::addPoints()
 
   for(; it!=end; ++it)
   {
-    unsigned int slave_node_num = it->first;
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
 
     if(!pinfo)
       continue;
-
-    const Node * node = pinfo->_node;
 
     addPoint(pinfo->_elem, pinfo->_closest_point);
     point_to_info[pinfo->_closest_point] = pinfo;

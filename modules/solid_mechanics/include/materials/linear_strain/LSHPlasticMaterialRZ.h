@@ -23,7 +23,7 @@ protected:
    * Will always be passed to full symmetric strain tensor.
    * What should come out is a modified strain tensor.
    */
-  virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
+  virtual void computeNetElasticStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
 
   // This class sets _Jacobian_mult in computeStrain
   virtual void computePreconditioning() {}

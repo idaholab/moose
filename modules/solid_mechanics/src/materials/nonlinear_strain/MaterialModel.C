@@ -11,7 +11,7 @@ InputParameters validParams<MaterialModel>()
   //    and then set.  We don't want to set an initial value in addParam
   //    since that will also flag the parameter as having had a valid entry
   //    given.
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<SolidModel>();
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.set<Real>("bulk_modulus") = -7777;
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
@@ -36,143 +36,17 @@ InputParameters validParams<MaterialModel>()
 
 MaterialModel::MaterialModel( const std::string & name,
                               InputParameters parameters )
-  :Material( name, parameters ),
-   _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
-   _lambda_set( parameters.isParamValid("lambda") ),
-   _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
-   _shear_modulus_set( parameters.isParamValid("shear_modulus") ),
-   _youngs_modulus_set( parameters.isParamValid("youngs_modulus") ),
-   _bulk_modulus( _bulk_modulus_set ? getParam<Real>("bulk_modulus") : -1 ),
-   _lambda( _lambda_set ? getParam<Real>("lambda") : -1 ),
-   _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
-   _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
-   _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
-   _cracking_strain( parameters.isParamValid("cracking_strain") ?
-                     (getParam<Real>("cracking_strain") > 0 ? getParam<Real>("cracking_strain") : -1) : -1 ),
+  :SolidModel( name, parameters ),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(_dim > 1 ? coupledGradient("disp_y") : _grad_zero),
    _grad_disp_z(_dim > 2 ? coupledGradient("disp_z") : _grad_zero),
    _grad_disp_x_old(coupledGradientOld("disp_x")),
    _grad_disp_y_old(_dim > 1 ? coupledGradientOld("disp_y") : _grad_zero),
    _grad_disp_z_old(_dim > 2 ? coupledGradientOld("disp_z") : _grad_zero),
-   _has_temp(isCoupled("temp")),
-   _temperature(_has_temp ? coupledValue("temp") : _zero),
-   _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
-   _volumetric_models(0),
    _decomp_method( RashidApprox ),
-   _alpha(getParam<Real>("thermal_expansion")),
-   _stress(declareProperty<SymmTensor>("stress")),
-   _stress_old(declarePropertyOld<SymmTensor>("stress")),
-   _total_strain(declareProperty<SymmTensor>("total_strain")),
-   _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
-   _crack_flags(NULL),
-   _crack_flags_old(NULL),
-   _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
-   _d_strain_dT(),
-   _d_stress_dT(declareProperty<SymmTensor>("d_stress_dT")),
-   _total_strain_increment(0),
-   _strain_increment(0),
    _incremental_rotation(3,3),
-   _Uhat(3,3),
-   _elasticity_tensor(NULL)
+   _Uhat(3,3)
 {
-//   std::cout << "TESTING MaterialModel class..." << std::endl;
-//   testMe();
-  int num_elastic_constants =
-    _bulk_modulus_set + _lambda_set + _poissons_ratio_set + _shear_modulus_set + _youngs_modulus_set;
-
-  if ( num_elastic_constants != 2 )
-  {
-    std::string err("Exactly two elastic constants must be defined for material '");
-    err += name;
-    err += "'.";
-    mooseError(err);
-  }
-
-  if ( _bulk_modulus_set && _bulk_modulus <= 0 )
-  {
-    std::string err("Bulk modulus must be positive in material '");
-    err += name;
-    err += "'.";
-    mooseError(err);
-  }
-  if ( _poissons_ratio_set && (_poissons_ratio <= -1.0 || _poissons_ratio >= 0.5) )
-  {
-    std::string err("Poissons ratio must be greater than -1 and less than 0.5 in material '");
-    err += name;
-    err += "'.";
-    mooseError(err);
-  }
-  if ( _shear_modulus_set &&  _shear_modulus < 0 )
-  {
-    std::string err("Shear modulus must not be negative in material '");
-    err += name;
-    err += "'.";
-    mooseError(err);
-  }
-  if ( _youngs_modulus_set &&  _youngs_modulus <= 0 )
-  {
-    std::string err("Youngs modulus must be positive in material '");
-    err += name;
-    err += "'.";
-    mooseError(err);
-  }
-
-  // Calculate lambda, the shear modulus, and Young's modulus
-  if(_lambda_set && _shear_modulus_set) // First and second Lame
-  {
-    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
-  }
-  else if(_lambda_set && _poissons_ratio_set)
-  {
-    _shear_modulus = (_lambda * (1.0 - 2.0 * _poissons_ratio)) / (2.0 * _poissons_ratio);
-    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
-
-  }
-  else if(_lambda_set && _bulk_modulus_set)
-  {
-    _shear_modulus = 3.0 * (_bulk_modulus - _lambda) / 2.0;
-    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
-  }
-  else if(_lambda_set && _youngs_modulus_set)
-  {
-    _shear_modulus = ( (_youngs_modulus - 3.0*_lambda) / 4.0 ) + ( std::sqrt( (_youngs_modulus-3.0*_lambda)*(_youngs_modulus-3.0*_lambda) + 8.0*_lambda*_youngs_modulus ) / 4.0 );
-  }
-  else if(_shear_modulus_set && _poissons_ratio_set)
-  {
-    _lambda = ( 2.0 * _shear_modulus * _poissons_ratio ) / (1.0 - 2.0*_poissons_ratio);
-    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
-  }
-  else if(_shear_modulus_set && _bulk_modulus_set)
-  {
-    _lambda = _bulk_modulus - 2.0 * _shear_modulus / 3.0;
-    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
-  }
-  else if(_shear_modulus_set && _youngs_modulus_set)
-  {
-    _lambda = ((2.0*_shear_modulus - _youngs_modulus) * _shear_modulus) / (_youngs_modulus - 3.0*_shear_modulus);
-  }
-  else if(_poissons_ratio_set && _bulk_modulus_set)
-  {
-    _lambda = (3.0 * _bulk_modulus * _poissons_ratio) / (1.0 + _poissons_ratio);
-    _shear_modulus = (3.0 * _bulk_modulus * (1.0 - 2.0*_poissons_ratio)) / (2.0 * (1.0 + _poissons_ratio));
-    _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
-  }
-  else if(_youngs_modulus_set && _poissons_ratio_set) // Young's Modulus and Poisson's Ratio
-  {
-    _lambda = (_poissons_ratio * _youngs_modulus) / ( (1.0+_poissons_ratio) * (1-2.0*_poissons_ratio) );
-    _shear_modulus = _youngs_modulus / ( 2.0 * (1.0+_poissons_ratio));
-  }
-  else if(_youngs_modulus_set && _bulk_modulus_set)
-  {
-    _lambda = 3.0 * _bulk_modulus * (3.0 * _bulk_modulus - _youngs_modulus) / (9.0 * _bulk_modulus - _youngs_modulus);
-    _shear_modulus = 3.0 * _youngs_modulus * _bulk_modulus / (9.0 * _bulk_modulus - _youngs_modulus);
-  }
-
-  _lambda_set = true;
-  _shear_modulus_set = true;
-  _youngs_modulus_set = true;
-
   SymmIsotropicElasticityTensor * iso =  new SymmIsotropicElasticityTensor;
   iso->setLambda( _lambda );
   iso->setShearModulus( _shear_modulus );
@@ -195,32 +69,12 @@ MaterialModel::MaterialModel( const std::string & name,
     mooseError( "The options for the increment calculation are RashidApprox and Eigen.");
   }
 
-  if (_cracking_strain > 0)
-  {
-    _crack_flags = &declareProperty<RealVectorValue>("crack_flags");
-    _crack_flags_old = &declarePropertyOld<RealVectorValue>("crack_flags");
-  }
-
-  //   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
-  // _elasticity_tensor->print();
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 MaterialModel::~MaterialModel()
 {
-  delete _elasticity_tensor;
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void
-MaterialModel::elasticityTensor( SymmElasticityTensor * e )
-{
-  delete _elasticity_tensor;
-  _elasticity_tensor = e;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -464,10 +318,6 @@ MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 void
 MaterialModel::modifyStrain()
 {
-  _total_strain[_qp] = _total_strain_increment;
-  _total_strain[_qp] += _total_strain_old[_qp];
-
-  _strain_increment = _total_strain_increment;
   if ( _has_temp && _t_step != 0 )
   {
     const Real tStrain( _alpha * (_temperature[_qp] - _temperature_old[_qp]) );
@@ -505,9 +355,9 @@ MaterialModel::computeStress()
 //   _stress[_qp](2,0) = _stress[_qp](0,2);
 //   _stress[_qp](2,1) = _stress[_qp](1,2);
 
-  SymmTensor stress_new( *_elasticity_tensor * _strain_increment );
+  SymmTensor stress_new( _elasticity_tensor[_qp] * _strain_increment );
   _stress[_qp] = stress_new;
-  _stress[_qp] += _stress_old[_qp];
+  _stress[_qp] += _stress_old;
 
   //   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
   //  _elasticity_tensor->print();
@@ -531,59 +381,12 @@ MaterialModel::finalizeStress()
 {
   // Using the incremental rotation, update the stress to the current configuration (R*T*R^T)
   rotateSymmetricTensor( _incremental_rotation, _stress[_qp], _stress[_qp] );
+  rotateSymmetricTensor( _incremental_rotation, _total_strain[_qp], _total_strain[_qp] );
 
 //   std::cout << "STRESS: " << _qp << "\n"
 //             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
 //             << _stress[_qp](1,0) << " " << _stress[_qp](1,1) << " " << _stress[_qp](1,2) << std::endl
 //             << _stress[_qp](2,0) << " " << _stress[_qp](2,1) << " " << _stress[_qp](2,2) << std::endl;
-
-  if (_cracking_strain > 0)
-  {
-    // Adjust stress for a smeared crack
-    ColumnMajorMatrix e_vec(3,3);
-    ColumnMajorMatrix principal_strain(3,1);
-    ColumnMajorMatrix t_strain(_total_strain[_qp].columnMajorMatrix());
-    t_strain.eigen( principal_strain, e_vec );
-
-    const Real tiny(1e-8);
-    for (unsigned int i(0); i < 3; ++i)
-    {
-      if (principal_strain(i,0) > _cracking_strain)
-      {
-        (*_crack_flags)[_qp](i) = tiny;
-      }
-      else
-      {
-        (*_crack_flags)[_qp](i) = 1;
-      }
-      (*_crack_flags)[_qp](i) = std::min((*_crack_flags)[_qp](i), (*_crack_flags_old)[_qp](i));
-    }
-    RealVectorValue crack_flags( (*_crack_flags)[_qp] );
-    for (unsigned int i(0); i < 3; ++i)
-    {
-      if (principal_strain(i,0) < 0)
-      {
-        crack_flags(i) = 1;
-      }
-      else
-      {
-        crack_flags(i) = (*_crack_flags)[_qp](i);
-      }
-    }
-    // Form transformation matrix R*E*R^T
-    ColumnMajorMatrix trans(3,3);
-    for (unsigned int j(0); j < 3; ++j)
-    {
-      for (unsigned int i(0); i < 3; ++i)
-      {
-        for (unsigned int k(0); k < 3; ++k)
-        {
-          trans(i,j) += e_vec(i,k) * crack_flags(k) * e_vec(j,k);
-        }
-      }
-    }
-    rotateSymmetricTensor( trans, _stress[_qp], _stress[_qp] );
-  }
 
 }
 
@@ -664,43 +467,24 @@ MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeProperties()
+MaterialModel::computeStrain()
 {
-  if (_t_step == 1 && _cracking_strain > 0)
-  {
+  computeStrainAndRotationIncrement(_Fhat[_qp]);
 
-    // Initialize crack flags
-    for (unsigned int i(0); i < _qrule->n_points(); ++i)
-    {
-      (*_crack_flags)[i](0) =
-        (*_crack_flags)[i](1) =
-        (*_crack_flags)[i](2) =
-        (*_crack_flags_old)[i](0) =
-        (*_crack_flags_old)[i](1) =
-        (*_crack_flags_old)[i](2) = 1;
-    }
-  }
+  _total_strain[_qp] = _total_strain_increment;
+  _total_strain[_qp] += _total_strain_old[_qp];
 
-  // Compute the stretching to be handed to the constitutive evaluation
-  // Handle volumetric locking along the way
+  _strain_increment = _total_strain_increment;
+}
 
+////////////////////////////////////////////////////////////////////////
+
+void
+MaterialModel::elementInit()
+{
   _Fhat.resize(_qrule->n_points());
 
   computeIncrementalDeformationGradient(_Fhat);
-
-
-  for ( _qp = 0; _qp < _qrule->n_points(); ++_qp )
-  {
-
-    computeStrainAndRotationIncrement(_Fhat[_qp]);
-    modifyStrain();
-
-
-    computeStress();
-    finalizeStress();
-    computePreconditioning();
-
-  }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -852,29 +636,3 @@ MaterialModel::delta(int i, int j)
 }
 
 ////////////////////////////////////////////////////////////////////////
-
-void
-MaterialModel::computePreconditioning()
-{
-  _Jacobian_mult[_qp] = *_elasticity_tensor;
-
-  SymmTensor d_stress_dT( *_elasticity_tensor * _d_strain_dT );
-  _d_stress_dT[_qp] = d_stress_dT;
-
-
-}
-
-void
-MaterialModel::initialSetup()
-{
-  // Load in the volumetric models
-  const std::vector<Material*> & mats = _problem.getMaterials( _block_id, _tid );
-  for (unsigned int i(0); i < mats.size(); ++i)
-  {
-    VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
-    if (vm)
-    {
-      _volumetric_models.push_back( vm );
-    }
-  }
-}

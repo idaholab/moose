@@ -49,8 +49,7 @@ protected:
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress();
 
-  void computeCreep(const SymmTensor & stress_old,
-                    SymmTensor & stress_new,
+  void computeCreep(SymmTensor & stress_new,
                     SymmTensor & creep_strain_increment);
   void computeLSH( SymmTensor & stress_new,
                    const SymmTensor & creep_strain_increment );
