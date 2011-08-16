@@ -49,6 +49,7 @@ public:
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
+  virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
 
   virtual AssemblyData & assembly(THREAD_ID tid) = 0;
   virtual QBase * & qRule(THREAD_ID tid) = 0;

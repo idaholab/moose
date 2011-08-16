@@ -334,6 +334,12 @@ DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int
 }
 
 void
+DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
+{
+  _asm_block[tid]->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
+}
+
+void
 DisplacedProblem::prepareShapes(unsigned int var, THREAD_ID tid)
 {
   _asm_block[tid]->copyShapes(var);
@@ -343,6 +349,12 @@ void
 DisplacedProblem::prepareFaceShapes(unsigned int var, THREAD_ID tid)
 {
   _asm_block[tid]->copyFaceShapes(var);
+}
+
+void
+DisplacedProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
+{
+  _asm_block[tid]->copyNeighborShapes(var);
 }
 
 void

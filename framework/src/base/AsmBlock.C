@@ -276,3 +276,50 @@ AsmBlock::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, u
   else
     jacobian.add_matrix(ke, dof_indices);
 }
+
+void
+AsmBlock::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices)
+{
+  DenseMatrix<Number> & kee = jacobianBlock(ivar, jvar);
+  DenseMatrix<Number> & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivar, jvar);
+  DenseMatrix<Number> & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivar, jvar);
+  DenseMatrix<Number> & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivar, jvar);
+
+  // stick it into the matrix
+  dof_map.constrain_element_matrix(kee, dof_indices, false);
+  dof_map.constrain_element_matrix(ken, dof_indices, neighbor_dof_indices, false);
+  dof_map.constrain_element_matrix(kne, neighbor_dof_indices, dof_indices, false);
+  dof_map.constrain_element_matrix(knn, neighbor_dof_indices, false);
+
+  Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
+  if (scaling_factor != 1.0)
+  {
+    {
+      DenseMatrix<Number> scaled_ke(kee);
+      scaled_ke.scale(scaling_factor);
+      jacobian.add_matrix(scaled_ke, dof_indices);
+    }
+    {
+      DenseMatrix<Number> scaled_ke(ken);
+      scaled_ke.scale(scaling_factor);
+      jacobian.add_matrix(scaled_ke, dof_indices, neighbor_dof_indices);
+    }
+    {
+      DenseMatrix<Number> scaled_ke(kne);
+      scaled_ke.scale(scaling_factor);
+      jacobian.add_matrix(scaled_ke, neighbor_dof_indices, dof_indices);
+    }
+    {
+      DenseMatrix<Number> scaled_ke(knn);
+      scaled_ke.scale(scaling_factor);
+      jacobian.add_matrix(scaled_ke, neighbor_dof_indices);
+    }
+  }
+  else
+  {
+    jacobian.add_matrix(kee, dof_indices);
+    jacobian.add_matrix(ken, dof_indices, neighbor_dof_indices);
+    jacobian.add_matrix(kne, neighbor_dof_indices, dof_indices);
+    jacobian.add_matrix(knn, neighbor_dof_indices);
+  }
+}

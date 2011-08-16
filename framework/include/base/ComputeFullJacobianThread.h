@@ -37,6 +37,7 @@ public:
 protected:
   virtual void computeJacobian();
   virtual void computeFaceJacobian(short int bnd_id);
+  virtual void computeInternalFaceJacobian();
 };
   
 #endif //COMPUTEFULLJACOBIANTHREAD_H

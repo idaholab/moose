@@ -344,6 +344,14 @@ MProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, u
 }
 
 void
+MProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
+{
+  _nl.addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
+  if(_displaced_problem)
+    _displaced_problem->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
+}
+
+void
 MProblem::prepareShapes(unsigned int var, THREAD_ID tid)
 {
   _nl.asmBlock(tid).copyShapes(var);

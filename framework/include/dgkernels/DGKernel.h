@@ -58,6 +58,13 @@ public:
   virtual ~DGKernel();
 
   /**
+   * The variable number that this kernel operates on.
+   */
+  MooseVariable & variable() { return _var; }
+
+  SubProblemInterface & subProblem() { return _subproblem; }
+
+  /**
    * Computes the residual for the current side.
    */
   virtual void computeResidual();
@@ -66,6 +73,11 @@ public:
    * Computes the jacobian for the current side.
    */
   virtual void computeJacobian();
+
+  /**
+   * Computes d-residual / d-jvar...
+   */
+  virtual void computeOffDiagJacobian(unsigned int jvar);
 
 protected:
   Problem & _problem;
@@ -144,6 +156,11 @@ protected:
    * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
    */
   virtual Real computeQpJacobian(Moose::DGJacobianType type) = 0;
+
+  /**
+   * This is the virtual that derived classes should override for computing the off-diag Jacobian.
+   */
+  virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
 
   // Coupling of values from a neighboring element
 

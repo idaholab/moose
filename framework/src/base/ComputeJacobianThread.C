@@ -57,6 +57,19 @@ ComputeJacobianThread::computeFaceJacobian(short int bnd_id)
 }
 
 void
+ComputeJacobianThread::computeInternalFaceJacobian()
+{
+  std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+  for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+  {
+    DGKernel * dg = *it;
+    dg->subProblem().prepareNeighborShapes(dg->variable().number(), _tid);
+    dg->computeJacobian();
+  }
+}
+
+
+void
 ComputeJacobianThread::onElement(const Elem *elem)
 {
   _problem.prepare(elem, _tid);
@@ -111,11 +124,8 @@ ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
 
       _problem.reinitMaterialsFace(elem->subdomain_id(), side, _tid);
       _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, _tid);
-      for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
-      {
-        DGKernel * dg = *it;
-        dg->computeJacobian();
-      }
+
+      computeInternalFaceJacobian();
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

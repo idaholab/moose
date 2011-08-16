@@ -73,3 +73,25 @@ ComputeFullJacobianThread::computeFaceJacobian(short int bnd_id)
     }
   }
 }
+
+void
+ComputeFullJacobianThread::computeInternalFaceJacobian()
+{
+  std::vector<std::pair<unsigned int, unsigned int> > & ce = _sys.couplingEntries(_tid);
+  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
+  {
+    unsigned int ivar = (*it).first;
+    unsigned int jvar = (*it).second;
+
+    std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+    for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+    {
+      DGKernel * dg = *it;
+      if (dg->variable().number() == ivar)
+      {
+        dg->subProblem().prepareNeighborShapes(jvar, _tid);
+        dg->computeOffDiagJacobian(jvar);
+      }
+    }
+  }
+}

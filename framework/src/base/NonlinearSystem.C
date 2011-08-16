@@ -246,6 +246,12 @@ NonlinearSystem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int 
 }
 
 void
+NonlinearSystem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
+{
+  _asm_block[tid]->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
+}
+
+void
 NonlinearSystem::solve()
 {
   // Initialize the solution vector with known values from nodal bcs
@@ -1005,6 +1011,46 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                     bc->subProblem().prepareFaceShapes(jvar, tid);
                     bc->computeJacobianBlock(jvar);
                   }
+                }
+              }
+            }
+          }
+
+          if (elem->neighbor(side) != NULL)
+          {
+            // on internal edge
+            // Pointer to the neighbor we are currently working on.
+            const Elem * neighbor = elem->neighbor(side);
+
+            // Get the global id of the element and the neighbor
+            const unsigned int elem_id = elem->id();
+            const unsigned int neighbor_id = neighbor->id();
+
+            if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+            {
+              std::vector<DGKernel *> dgks = _dg_kernels[tid].active();
+              if (dgks.size() > 0)
+              {
+                _problem.reinitNeighbor(elem, side, tid);
+
+                _problem.reinitMaterialsFace(elem->subdomain_id(), side, tid);
+                _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), side, tid);
+
+                for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+                {
+                  DGKernel * dg = *it;
+                  if(dg->variable().number() == ivar)
+                  {
+                    dg->subProblem().prepareNeighborShapes(jvar, tid);
+                    dg->computeOffDiagJacobian(jvar);
+                  }
+                }
+
+                std::vector<unsigned int> neighbor_dof_indices;
+                dof_map.dof_indices(neighbor, neighbor_dof_indices);
+                {
+                  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+                  _problem.addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
                 }
               }
             }
