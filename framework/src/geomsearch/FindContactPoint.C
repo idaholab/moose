@@ -50,7 +50,7 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
   Point ref_point;
 
   if(start_with_centroid)
-    ref_point = FEInterface::inverse_map(dim-1, _fe_type, side, side->centroid());
+    ref_point = FEInterface::inverse_map(dim-1, _fe_type, side, side->centroid(), TOLERANCE, false);
   else
     ref_point = p_info._closest_point_ref;
 
