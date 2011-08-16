@@ -21,6 +21,8 @@
 #include "ColumnMajorMatrix.h"
 
 #include "libmesh_common.h"
+#include "tensor_value.h"
+
 
 
 /**
@@ -139,13 +141,31 @@ MaterialProperty<T>::init (int size)
   return copy;
 }
 
+// Specialization of init function for std::vector<Real>
+// See MaterialPropertyInterface.C for implementation.
 template <>
 PropertyValue *
 MaterialProperty<std::vector<Real> >::init (int size);
 
+// Specialization of init function for ColumnMajorMatrix
+// See MaterialPropertyInterface.C for implementation.
 template <>
 PropertyValue *
 MaterialProperty<ColumnMajorMatrix>::init (int size);
+
+// Specialization of init function for std::vector<ColumnMajorMatrix>
+// See MaterialPropertyInterface.C for implementation.
+template <>
+PropertyValue *
+MaterialProperty<std::vector<ColumnMajorMatrix> >::init (int size);
+
+// Specialization of init function for std::vector<RealTensorValue>
+// See MaterialPropertyInterface.C for implementation.
+template <>
+PropertyValue *
+MaterialProperty<std::vector<RealTensorValue> >::init (int size);
+
+
 
 template <typename T>
 inline void

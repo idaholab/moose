@@ -44,3 +44,36 @@ MaterialProperty<ColumnMajorMatrix>::init (int size)
   return copy;
 }
 
+template <>
+PropertyValue *
+MaterialProperty<std::vector<ColumnMajorMatrix> >::init (int size)
+{
+  typedef MaterialProperty<std::vector<ColumnMajorMatrix> > PropType;
+  PropType *copy = new PropType;
+  copy->_value.resize(size);
+
+  // We don't know the size of the underlying vector at each 
+  // quadrature point, the user will be responsible for resizing it
+  // and filling in the entries...
+
+  // Return the copy we allocated
+  return copy;
+}
+
+
+
+template <>
+PropertyValue *
+MaterialProperty<std::vector<RealTensorValue> >::init (int size)
+{
+  typedef MaterialProperty<std::vector<RealTensorValue> > PropType;
+  PropType *copy = new PropType;
+  copy->_value.resize(size);
+
+  // We don't know the size of the underlying vector at each 
+  // quadrature point, the user will be responsible for resizing it
+  // and filling in the entries...
+
+  // Return the copy we allocated
+  return copy;
+}
