@@ -142,7 +142,7 @@ DGKernel::computeJacobian()
   Moose::perf_log.push("computeJacobian()","DGKernel");
 
   DenseMatrix<Number> & Kee = _asmb.jacobianBlock(_var.number(), _var.number());
-  DenseMatrix<Number> & Ken = _asmb.jacobianBlockNeighbor(Moose::ElementElement, _var.number(), _var.number());
+  DenseMatrix<Number> & Ken = _asmb.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
   DenseMatrix<Number> & Kne = _asmb.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
   DenseMatrix<Number> & Knn = _asmb.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
