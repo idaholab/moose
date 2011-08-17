@@ -146,24 +146,16 @@ ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) con
 //   Real *buffer;
   int return_value = 0;
 
-  evec._n_rows = _n_rows;
-  evec._n_cols = _n_cols;
-  evec._n_entries = _n_entries;
-  evec._values.resize(_n_entries);
-
   eval._n_rows = _n_rows;
   eval._n_cols = 1;
   eval._n_entries = _n_rows;
   eval._values.resize(_n_rows);
 
+  evec = *this;
+
   Real * eval_data = eval.rawData();
   Real * evec_data = evec.rawData();
 
-  evec.zero();
-
-  for(int i = 0; i < n; i++)
-    for(int j = i; j < n; j++)
-      evec(i,j) = (*this)(i,j);
 
 /*
   dsyev_(&jobz, &uplo, &n, a_data, &n, w_data, &opt_buffer_size, &buffer_size, &return_value);
