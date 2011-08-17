@@ -77,3 +77,21 @@ MaterialProperty<std::vector<RealTensorValue> >::init (int size)
   // Return the copy we allocated
   return copy;
 }
+
+
+
+template <>
+PropertyValue *
+MaterialProperty<std::vector<std::vector<RealTensorValue> > >::init (int size)
+{
+  typedef MaterialProperty<std::vector<std::vector<RealTensorValue> > > PropType;
+  PropType *copy = new PropType;
+  copy->_value.resize(size);
+
+  // We don't know the size of the underlying vector<vector> at each 
+  // quadrature point, the user will be responsible for resizing it
+  // and filling in the entries...
+
+  // Return the copy we allocated
+  return copy;
+}

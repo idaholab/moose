@@ -165,6 +165,12 @@ template <>
 PropertyValue *
 MaterialProperty<std::vector<RealTensorValue> >::init (int size);
 
+// Specialization of init function for std::vector<std::vector<RealTensorValue> >
+// See MaterialPropertyInterface.C for implementation.
+template <>
+PropertyValue *
+MaterialProperty<std::vector<std::vector<RealTensorValue> > >::init (int size);
+
 
 
 template <typename T>
