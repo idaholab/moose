@@ -26,6 +26,8 @@ protected:
 
   virtual void computeStress();
 
+  virtual unsigned int getNumKnownCrackDirs() const;
+
   virtual void computeNetElasticStrain(const SymmTensor & input_strain, SymmTensor & elastic_strain) = 0;
 
 

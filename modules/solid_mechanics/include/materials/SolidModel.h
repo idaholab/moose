@@ -65,6 +65,8 @@ protected:
 
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
+  MaterialProperty<ColumnMajorMatrix> * _crack_rotation;
+  MaterialProperty<ColumnMajorMatrix> * _crack_rotation_old;
 
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
@@ -92,6 +94,8 @@ protected:
 
   /// Determine if cracking occurred.  If so, perform rotations, etc.
   virtual void crackingStrainRotation();
+
+  virtual unsigned int getNumKnownCrackDirs() const;
 
   /// Rotate old and new stress to global, if cracking active
 //   virtual void crackingStressRotation();
@@ -121,6 +125,8 @@ protected:
 
 
 private:
+  void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
+
   SymmElasticityTensor * _local_elasticity_tensor;
 
 };

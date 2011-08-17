@@ -71,3 +71,13 @@ SolidMechanicsMaterialRZ::computeStress()
 
 }
 
+unsigned int
+SolidMechanicsMaterialRZ::getNumKnownCrackDirs() const
+{
+  unsigned int retVal(1);
+  for (unsigned int i(0); i < 2; ++i)
+  {
+   retVal += ((*_crack_flags_old)[_qp](i) < 1);
+  }
+  return retVal;
+}
