@@ -27,6 +27,12 @@ protected:
   // The _component parameter tells you which equation you are currently
   // solving.
   unsigned _component;
+
+private:
+  // Single function for computing on and off-diagonal Jacobian
+  // entries in a single function.  The input index is in Moose 
+  // variable numbering.
+  Real compute_jacobian(unsigned var);
 };
 
 #endif // NSSUPGMOMENTUM_H

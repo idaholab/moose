@@ -23,6 +23,11 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
+private:
+  // Single function for computing on and off-diagonal Jacobian
+  // entries in a single function.  The input index is in Moose 
+  // variable numbering.
+  Real compute_jacobian(unsigned var);
 };
 
 #endif // NSSUPGMASS_H

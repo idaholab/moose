@@ -30,17 +30,6 @@ protected:
   //virtual Real computeQpJacobian();
   //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
-  // Returns the value of the flow-aligned length scale "h_u"
-  // (material property) Real h_supg();
-
-  // Computes and stores tau parameters in local variables _tauc, _taum, and _taue.
-  // (material property) void compute_tau();
-
-  // Computes strong-form residuals for gov. equations at current quadrature point.
-  // Currently assumes an implicit Euler discretization in time regardless of the 
-  // time discretization used in the actual problem.
-  // (material property) void compute_strong_residuals();
-
   // Material properties
   MaterialProperty<RealTensorValue>& _viscous_stress_tensor;
   MaterialProperty<Real>& _dynamic_viscosity;
@@ -52,6 +41,15 @@ protected:
   MaterialProperty<Real> & _taum;
   MaterialProperty<Real> & _taue;
   MaterialProperty<std::vector<Real> > & _strong_residuals;
+
+  // Momentum equation inviscid flux matrices
+  MaterialProperty<std::vector<RealTensorValue> >& _calA;
+
+  // "velocity column" matrices
+  MaterialProperty<std::vector<RealTensorValue> >& _calC;
+  
+  // Energy equation inviscid flux matrices
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > >& _calE;
 
   // Coupled variable values.
   VariableValue& _rho;
@@ -97,15 +95,9 @@ protected:
   Real _R;
   Real _cv;
 
-  // Material properties
-//  // Computed via the compute_tau() function and available to
-//  // derived kernels.
-//  Real _tauc;
-//  Real _taum;
-//  Real _taue;
-//
-//  // The strong residual of the governing equations
-//  std::vector<Real> _strong_residuals;
+  // Helper function for mapping Moose variable numberings into
+  // the "canonical" numbering for the compressible NS equations.
+  unsigned map_var_number(unsigned var);
 };
  
 #endif //  NSSUPGBASE_H

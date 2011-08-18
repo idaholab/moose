@@ -45,6 +45,15 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     // (See e.g. derived class, bighorn/include/materials/FluidTC1.h)
     _dynamic_viscosity(declareProperty<Real>("dynamic_viscosity")),
     
+    // The momentum components of the inviscid flux Jacobians.
+    _calA(declareProperty<std::vector<RealTensorValue> >("calA")),
+
+    // "Velocity column" matrices
+    _calC(declareProperty<std::vector<RealTensorValue> >("calC")),
+
+    // Energy equation inviscid flux matrices, "cal E_{kl}" in the notes.
+    _calE(declareProperty<std::vector<std::vector<RealTensorValue> > >("calE")),
+
     // Parameter values read in from input file
     _R(getParam<Real>("R")),
     _gamma(getParam<Real>("gamma")),
@@ -169,7 +178,6 @@ NavierStokesMaterial::computeProperties()
     // for (unsigned i=0; i<_strong_residuals[qp].size(); ++i)
     //   std::cout << _strong_residuals[qp][i] << " ";
     // std::cout << std::endl;
-
   }
 }
 
@@ -334,61 +342,114 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   Real drhow_dt = (_rho_w[qp] - _rho_w_old[qp]) / dt;
   Real drhoe_dt = (_rho_e[qp] - _rho_e_old[qp]) / dt;
   
+  // Debugging: How large are the time derivative parts of the strong residuals?
+//  std::cout << "drho_dt=" << drho_dt
+//	    << ", drhou_dt=" << drhou_dt
+//	    << ", drhov_dt=" << drhov_dt
+//	    << ", drhow_dt=" << drhow_dt
+//	    << ", drhoe_dt=" << drhoe_dt
+//	    << std::endl;
+
   // Momentum divergence
   Real divU = _grad_rho_u[qp](0) + _grad_rho_v[qp](1) + _grad_rho_w[qp](2);
 
-  // The set of _dim+2 3x3 matrices comprising the momentum equation
-  // inviscid residual component.  Note: the code is general enough for 3D, the
-  // z-components will just all be zero for 2D.
-  RealTensorValue calA_0, calA_1, calA_2, calA_3, calA_4;  
-
-  // The "velocity row" matrices.  The constructor takes TypeVector objects
-  // representing rows, so these are the "transpose" of the velocity columns...
-  RealTensorValue
-    calC_1T(vel, zero, zero),
-    calC_2T(zero, vel, zero),
-    calC_3T(zero, zero, vel);
-
-  // The "velocity column" matrices
-  RealTensorValue
-    calC_1 = calC_1T.transpose(), 
-    calC_2 = calC_2T.transpose(),
-    calC_3 = calC_3T.transpose();
+  // Enough space to hold three space dimensions of velocity components at each qp,
+  // regardless of what dimension we are actually running in.
+  _calC[qp].resize(3);
   
+  // x-column matrix
+  _calC[qp][0](0,0) = _u_vel[qp];
+  _calC[qp][0](1,0) = _v_vel[qp];
+  _calC[qp][0](2,0) = _w_vel[qp];
+
+  // y-column matrix
+  _calC[qp][1](0,1) = _u_vel[qp];
+  _calC[qp][1](1,1) = _v_vel[qp];
+  _calC[qp][1](2,1) = _w_vel[qp];
+
+  // z-column matrix (this assumes LIBMESH_DIM==3!)
+  _calC[qp][2](0,2) = _u_vel[qp];
+  _calC[qp][2](1,2) = _v_vel[qp];
+  _calC[qp][2](2,2) = _w_vel[qp];
+
   // The matrix S can be computed from any of the calC via calC_1*calC_1^T
-  RealTensorValue calS = calC_1 * calC_1T;
-  
-  // 0.) calA_0 = diag( (gam-1)/2*|u|^2 ) - S
-  calA_0(0,0) = calA_0(1,1) = calA_0(2,2) = 0.5*(_gamma-1.)*velmag2; // set diag. entries
-  calA_0 -= calS;
+  RealTensorValue calS = _calC[qp][0] * _calC[qp][0].transpose();
 
-  // 1.) calA_1 = C_1 + C_1^T + diag( (1.-gam)*u_1 )
-  calA_1(0,0) = calA_1(1,1) = calA_1(2,2) = (1.-_gamma)*vel(0); // set diag. entries
-  calA_1 += calC_1;
-  calA_1 += calC_1T;
-  
-  // 2.) calA_2 = C_2 + C_2^T + diag( (1.-gam)*u_2 )
-  calA_2(0,0) = calA_2(1,1) = calA_2(2,2) = (1.-_gamma)*vel(1); // set diag. entries
-  calA_2 += calC_2;
-  calA_2 += calC_2T;
+  // Enough space to hold five (=n_sd + 2) 3*3 calA matrices at this qp, regarless of dimension
+  _calA[qp].resize(5);
 
-  // 3.) calA_3 = C_3 + C_3^T + diag( (1.-gam)*u_3 )
-  calA_3(0,0) = calA_3(1,1) = calA_3(2,2) = (1.-_gamma)*vel(2); // set diag. entries
-  calA_3 += calC_3;
-  calA_3 += calC_3T;
+  // 0.) _calA_0 = diag( (gam-1)/2*|u|^2 ) - S
+  _calA[qp][0](0,0) = _calA[qp][0](1,1) = _calA[qp][0](2,2) = 0.5*(_gamma-1.)*velmag2; // set diag. entries
+  _calA[qp][0] -= calS;
+
+  for (unsigned m=1; m<=3; ++m)
+  {
+    // Use m_local when indexing into matrices and vectors
+    unsigned m_local = m-1;
+
+    // For m=1,2,3, calA_m = C_m + C_m^T + diag( (1.-gam)*u_m )
+    _calA[qp][m](0,0) = _calA[qp][m](1,1) = _calA[qp][m](2,2) = (1.-_gamma)*vel(m_local); // set diag. entries
+    _calA[qp][m] += _calC[qp][m_local];             // Note: use m_local for indexing into _calC!
+    _calA[qp][m] += _calC[qp][m_local].transpose(); // Note: use m_local for indexing into _calC!
+  }
+
+//  // 1.) calA_1 = C_1 + C_1^T + diag( (1.-gam)*u_1 )
+//  _calA[qp][1](0,0) = _calA[qp][1](1,1) = _calA[qp][1](2,2) = (1.-_gamma)*vel(0); // set diag. entries
+//  _calA[qp][1] += _calC[qp][0];
+//  _calA[qp][1] += _calC[qp][0].transpose();
+//  
+//  // 2.) calA_2 = C_2 + C_2^T + diag( (1.-gam)*u_2 )
+//  _calA[qp][2](0,0) = _calA[qp][2](1,1) = _calA[qp][2](2,2) = (1.-_gamma)*vel(1); // set diag. entries
+//  _calA[qp][2] += _calC[qp][1];
+//  _calA[qp][2] += _calC[qp][1].transpose();
+//
+//  // 3.) calA_3 = C_3 + C_3^T + diag( (1.-gam)*u_3 )
+//  _calA[qp][3](0,0) = _calA[qp][3](1,1) = _calA[qp][3](2,2) = (1.-_gamma)*vel(2); // set diag. entries
+//  _calA[qp][3] += _calC[qp][2];
+//  _calA[qp][3] += _calC[qp][2].transpose();
 
   // 4.) calA_4 = diag(gam-1)
-  calA_4(0,0) = calA_4(1,1) = calA_4(2,2) = (_gamma-1.);
+  _calA[qp][4](0,0) = _calA[qp][4](1,1) = _calA[qp][4](2,2) = (_gamma-1.);
 
+  // Enough space to hold the 3*5 "cal E" matrices which comprise the inviscid flux term
+  // of the energy equation.  See notes for additional details
+  _calE[qp].resize(3); // Three rows, 5 entries in each row
+
+  for (unsigned k=0; k<3; ++k)
+  {
+    // Make enough room to store all 5 E matrices for this k
+    _calE[qp][k].resize(5);
+
+    // Store and reuse the velocity column transpose matrix for the
+    // current value of k.
+    RealTensorValue Ck_T = _calC[qp][k].transpose();
+
+    // E_{k0} (density gradient term)
+    _calE[qp][k][0] = (0.5*(_gamma-1)*velmag2 - _enthalpy[qp]) * Ck_T;
+
+    for (unsigned m=1; m<=3; ++m)
+    {
+      // Use m_local when indexing into matrices and vectors
+      unsigned m_local = m-1;
+
+      // E_{km} (momentum gradient terms)
+      _calE[qp][k][m](k,m_local) = _enthalpy[qp];           // H * D_{km}
+      _calE[qp][k][m] += (1.-_gamma) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
+    }
+    
+    // E_{k4} (energy gradient term)
+    _calE[qp][k][4] = _gamma * Ck_T;
+  }
+  
   // Compute the sum over ell of: A_ell grad(U_ell), store in DenseVector or Gradient object?
   // The gradient object might be more useful, since we are multiplying by VariableGradient 
   // (which is a MooseArray of RealGradients) objects?
-  RealVectorValue mom_sum = 
-    calA_0*_grad_rho[qp] +
-    calA_1*_grad_rho_u[qp] +
-    calA_2*_grad_rho_v[qp] +
-    calA_3*_grad_rho_w[qp] +
-    calA_4*_grad_rho_e[qp];
+  RealVectorValue mom_resid = 
+    _calA[qp][0]*_grad_rho[qp] +
+    _calA[qp][1]*_grad_rho_u[qp] +
+    _calA[qp][2]*_grad_rho_v[qp] +
+    _calA[qp][3]*_grad_rho_w[qp] +
+    _calA[qp][4]*_grad_rho_e[qp];
   
   // No matrices/vectors for the energy residual strong form... just write it out like
   // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual" 
@@ -411,14 +472,14 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   // TODO: If we want to add viscous contributions back in, should this kernel
   // not inherit from NSViscousFluxBase so it can get tau values?  This would
   // also involve shape function second derivative values.
-  _strong_residuals[qp][1] = drhou_dt + mom_sum(0);
+  _strong_residuals[qp][1] = drhou_dt + mom_resid(0);
 
   // The y-momentum strong residual, viscous terms neglected.
-  _strong_residuals[qp][2] = drhov_dt + mom_sum(1);
+  _strong_residuals[qp][2] = drhov_dt + mom_resid(1);
 
   // The z-momentum strong residual, viscous terms neglected.
   if (_dim == 3)
-    _strong_residuals[qp][3] = drhow_dt + mom_sum(2);
+    _strong_residuals[qp][3] = drhow_dt + mom_resid(2);
   else
     _strong_residuals[qp][3] = 0.;
 

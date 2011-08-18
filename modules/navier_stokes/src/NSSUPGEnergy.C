@@ -5,11 +5,6 @@ InputParameters validParams<NSSUPGEnergy>()
 {
   // Initialize the params object from the base class
   InputParameters params = validParams<NSSUPGBase>();
-
-//  // Add extra required coupled variables
-//  params.addRequiredCoupledVar("u", "");
-//  params.addRequiredCoupledVar("v", "");
-//  params.addCoupledVar("w", ""); // only required in 3D
   
   return params;
 }
@@ -74,13 +69,81 @@ Real NSSUPGEnergy::computeQpResidual()
 
 Real NSSUPGEnergy::computeQpJacobian()
 {
-  // TODO
-  return 0.;
+  // This is the energy equation, so pass the on-diagonal variable number.
+  return this->compute_jacobian(_rhoe_var_number);
 }
 
 
-Real NSSUPGEnergy::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+Real NSSUPGEnergy::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // TODO
-  return 0;
+  return this->compute_jacobian(jvar);
+}
+
+
+
+
+Real NSSUPGEnergy::compute_jacobian(unsigned var)
+{
+  // Convert the Moose numbering to canonical NS variable numbering.
+  unsigned  mapped_var_number = this->map_var_number(var);
+
+  // Convenience vars
+  
+  // Velocity vector
+  RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+
+  // Velocity vector magnitude squared
+  Real velmag2 = vel.size_sq();
+
+  // Shortcuts for shape function gradients at current qp.
+  RealVectorValue grad_test_i = _grad_test[_i][_qp];
+  RealVectorValue grad_phi_j  = _grad_phi[_j][_qp];
+ 
+  // ...
+
+  // 1.) taum- and taue-proportional terms present for any variable:
+
+  //
+  // Art. Diffusion matrix for taum-proportional term = (diag(H) + (1-gam)*S) * A_{ell}
+  //
+  RealTensorValue mom_mat;
+  mom_mat(0,0) = mom_mat(1,1) = mom_mat(2,2) = _enthalpy[_qp];        // (diag(H)
+  mom_mat += (1.-_gamma) * _calC[_qp][0] * _calC[_qp][0].transpose(); //  + (1-gam)*S)
+  mom_mat = mom_mat * _calA[_qp][mapped_var_number];                  // * A_{ell}
+  Real mom_term = _taum[_qp] * grad_test_i * (mom_mat * grad_phi_j);
+ 
+  //
+  // Art. Diffusion matrix for taue-proportinal term = gam * E_{ell}, 
+  // where E_{ell} = C_k * E_{k ell} for any k, summation over k *not* implied.
+  //
+  RealTensorValue ene_mat = _gamma * _calC[_qp][0] * _calE[_qp][0][mapped_var_number];
+  Real ene_term = _taue[_qp] * grad_test_i * (ene_mat * grad_phi_j);
+
+  // 2.) Terms only present if the variable is one of the momentums
+  Real mass_term = 0.;
+  
+  switch (mapped_var_number)
+  {
+  // switch statement... we could also do this with an if-statement but this is less typing...
+  case 1:
+  case 2:
+  case 3:
+  {
+    // Variable for zero-based indexing into local matrices and vectors.
+    unsigned m_local = mapped_var_number-1;
+
+    //
+    // Art. Diffusion matrix for tauc-proportional term = (0.5*(_gamma-1.)*velmag2 - H)*C_m
+    //
+    RealTensorValue mass_mat = (0.5*(_gamma-1.)*velmag2 - _enthalpy[_qp]) * _calC[_qp][m_local];
+    mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j); 
+
+    // Don't even need to break, no other cases to fall through to...
+  }
+
+  // Nothing else to do if we are not a momentum...
+  }
+
+  // Sum up values and return
+  return mass_term + mom_term + ene_term;
 }
