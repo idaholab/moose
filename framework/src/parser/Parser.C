@@ -352,7 +352,7 @@ Parser::parse(const std::string &input_filename)
           extractParams(curr_identifier, params);
 
           // Check Action Parameters Now
-          checkParams(curr_identifier, params);
+          params.checkParams(curr_identifier);
 
           // Add the parsed syntax to the parameters object for consumption by the Action
           params.set<std::string>("name") = curr_identifier;
@@ -607,19 +607,7 @@ Parser::getExecutioner()
 void
 Parser::execute()
 {
-  for (ActionWarehouse::iterator i = Moose::action_warehouse.begin();
-       i != Moose::action_warehouse.end();
-       ++i)
-  {
-    // Delay the InputParameters check of MOOSE based objects until just before "acting"
-    // so that Meta-Actions can complete the build of parameters as necessary
-    MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*i);
-    if (moose_obj_action != NULL)
-      checkParams(moose_obj_action->name(), moose_obj_action->getMooseObjectParams());
-
-    // Act!
-    (*i)->act();
-  }
+  Moose::action_warehouse.executeAllActions();
 }
 
 void
@@ -775,34 +763,6 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setTensorParameter<int>(full_name, it->first, tensor_int_param, in_global, global_params_block);
       else if (tensor_bool_param)
         setTensorParameter<bool>(full_name, it->first, tensor_bool_param, in_global, global_params_block);
-    }
-  }
-}
-
-void
-Parser::checkParams(const std::string & prefix, InputParameters &p)
-{
-  static const std::string global_params_block_name = "GlobalParams";
-
-  static const std::string global_params_action_name = "set_global_params";
-  ActionIterator act_iter = Moose::action_warehouse.actionBlocksWithActionBegin(global_params_action_name);
-  GlobalParamsAction *global_params_block = NULL;
-
-  // We are grabbing only the first
-  if (act_iter != Moose::action_warehouse.actionBlocksWithActionEnd(global_params_action_name))
-    global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
-
-  for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
-  {
-    std::string orig_name = prefix + "/" + it->first;
-    std::string full_name = orig_name;
-
-    if (!p.wasSeenInInput(it->first) && p.isParamRequired(it->first))
-    {
-      // The parameter is required but missing
-      std::string doc = p.getDocString(it->first);
-      mooseError("The required parameter '" + orig_name + "' is missing\nDoc String: \"" +
-                 p.getDocString(it->first) + "\"");
     }
   }
 }

@@ -216,6 +216,29 @@ ActionWarehouse::printActionDependencySets()
   }
 }
 
+void
+ActionWarehouse::executeAllActions()
+{
+  for (iterator i = begin(); i != end(); ++i)
+  {
+     // Delay the InputParameters check of MOOSE based objects until just before "acting"
+     // so that Meta-Actions can complete the build of parameters as necessary
+     MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*i);
+     if (moose_obj_action != NULL)
+       moose_obj_action->getMooseObjectParams().checkParams(moose_obj_action->name());
+
+     // Act!
+     (*i)->act();
+   }
+}
+
+/*void
+ActionWarehouse::executeActionsWithAction(const std::string & name)
+{
+  
+}
+*/
+
 ActionWarehouse::iterator
 ActionWarehouse::begin()
 {

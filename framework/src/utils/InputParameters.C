@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "InputParameters.h"
+#include "Moose.h"
 
 InputParameters::InputParameters(const InputParameters &rhs) : Parameters()
 {
@@ -160,3 +161,21 @@ InputParameters::isPrivate(const std::string &name) const
 {
   return _private_params.find(name) != _private_params.end();
 }
+
+void
+InputParameters::checkParams(const std::string &prefix) const
+{
+  for (InputParameters::const_iterator it = this->begin(); it != this->end(); ++it)
+  {
+    std::string orig_name = prefix + "/" + it->first;
+
+    if (!wasSeenInInput(it->first) && isParamRequired(it->first))
+    {
+      // The parameter is required but missing
+      std::string doc = getDocString(it->first);
+      mooseError("The required parameter '" + orig_name + "' is missing\nDoc String: \"" +
+                 getDocString(it->first) + "\"");
+    }
+  }
+}
+

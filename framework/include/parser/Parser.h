@@ -125,11 +125,6 @@ public:
   void extractParams(const std::string & prefix, InputParameters &p);
 
   /**
-   * This function checks if all required params were filled/enter
-   */
-  void checkParams(const std::string & prefix, InputParameters &p);
-
-  /**
    * prints a standard cli usage message
    */
   void printUsage() const;

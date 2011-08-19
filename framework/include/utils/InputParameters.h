@@ -157,6 +157,14 @@ public:
   void seenInInputFile(const std::string &name);
 
   /**
+   * This function checks parameters stored in the object to make sure they are in the correct
+   * state as the user expects:
+   *   Required parameters are verified as valid meaning that they were either initialized when
+   *   they were created, or were read from an inputfile or some other valid source
+   */
+  void checkParams(const std::string & prefix) const;
+
+  /**
    * Methods returning iterators to the coupled variables names stored in this
    * InputParameters object
    */

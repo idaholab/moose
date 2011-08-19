@@ -29,7 +29,6 @@
  */
 #define registerActionName(name, is_required)   Moose::action_warehouse.registerName(name, is_required)
 #define registerAction(tplt, action)      ActionFactory::instance()->reg<tplt>(stringifyName(tplt), action)
-//#define registerNonParsedAction(tplt, action)   ActionFactory::instance()->regNonParsed<tplt>(action)
 
 // TODO: This will change when action_warehouse is moved inside of some system
 #define addActionNameDependency(action, depends_on)       Moose::action_warehouse.addDependency(action, depends_on)
@@ -84,23 +83,7 @@ public:
 
   std::string getActionName(const std::string & action);
 
-//   // TODO: This will go away
-//   template<typename T>
-//   void regNonParsed(const std::string & action_name)
-//   {
-//     std::ostringstream name;
-
-//     name << action_name << "_";
-//     name.width(2);
-//     name.fill('0');
-//     name << _unique_id;
-
-//     _non_parsed.insert(name.str());
-//     reg<T>(name.str(), action_name);
-//   }
-  
   Action * create(const std::string & action, InputParameters params);
-//  Action * createNonParsed(const std::string & action, InputParameters params);
 
   InputParameters getValidParams(const std::string & name);
 

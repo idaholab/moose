@@ -54,6 +54,12 @@ public:
   ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
 
   /**
+   * This method loops over all actions in the warehouse and executes them.  Meta-actions
+   * may add new actions to the warehouse on the fly and they will still be executed in order
+   */
+  void executeAllActions();
+  
+  /**
    * Iterator class for returning the Actions stored in this warehouse in order.
    * This class is necessary to support the Meta-action capability supported by the
    * ActionWarehouse.  Meta-Actions can add new Actions to the warehouse while

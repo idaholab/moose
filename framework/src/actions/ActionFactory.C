@@ -74,27 +74,6 @@ ActionFactory::create(const std::string & action, InputParameters params)
       
   return (*build_info->_build_pointer)(name, params);
 }
-/*  
-Action *
-ActionFactory::createNonParsed(const std::string & name, InputParameters params)
-{
-  std::multimap<std::string, std::string>::iterator it;
-  std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator> iters;
-
-  // First get the names of all the Actions for the given action_name so we can index into the other Factory maps
-  iters = _action_to_name_map.equal_range(name);
-
-  for (it = iters.first; it != iters.second; ++it)
-  {
-    InputParameters p = params;
-    if (p.areAllRequiredParamsValid())
-      return create(it->second, p);
-  }
-
-  return NULL;
-}
-*/
-
 
 InputParameters
 ActionFactory::getValidParams(const std::string & name)
