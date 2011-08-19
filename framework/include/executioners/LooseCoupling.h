@@ -61,7 +61,7 @@ protected:
   Real _num_steps;
   int _n_startup_steps;
 
-
+  ActionWarehouse & _act_wh;
 
   void executeBlocks(const std::string & name);
 };

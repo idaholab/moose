@@ -35,7 +35,7 @@ public:
     YAML
   };
 
-  Parser();
+  Parser(bool clearWarehouse = true);
 
   virtual ~Parser();
 

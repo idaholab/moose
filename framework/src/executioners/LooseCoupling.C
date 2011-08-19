@@ -14,10 +14,12 @@
 
 #include "LooseCoupling.h"
 #include "Parser.h"
+#include "MooseSyntax.h"
 #include "CoupledProblem.h"
 #include "SubProblem.h"
 #include "MProblem.h"
 #include "ProblemFactory.h"
+#include "ActionWarehouse.h"
 
 template<>
 InputParameters validParams<LooseCoupling>()
@@ -62,7 +64,8 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     _dtmin(getParam<Real>("dtmin")),
     _dtmax(getParam<Real>("dtmax")),
     _num_steps(getParam<Real>("num_steps")),
-    _n_startup_steps(getParam<int>("n_startup_steps"))
+    _n_startup_steps(getParam<int>("n_startup_steps")),
+    _act_wh(Moose::action_warehouse)
 {
   _t_step = 0;
   _dt = _input_dt;
@@ -70,12 +73,14 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
 
   unsigned int n_problems = _input_files.size();
   _slave_parser.resize(n_problems);
+  Moose::action_warehouse.clear();   // Clear the action warehouse
   for (unsigned int i = 0 ; i < n_problems; ++i)
   {
     std::string file_name = _input_files[i];
 
     std::cout << "  - parsing " << file_name << std::endl;
-    _slave_parser[i] = new Parser;
+    _slave_parser[i] = new Parser(false);
+    Moose::associateSyntax(*_slave_parser[i]);
     if (_shared_mesh)
     {
        InputParameters params = validParams<MProblem>();
@@ -94,28 +99,13 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
   _problem.transient(true);
 
   // need variables upfront
-  executeBlocks("Variables");
-  executeBlocks("AuxVariables");
+  executeBlocks("add_variable");
+  executeBlocks("add_aux_variable");
 
-  executeBlocks("Materials");
-  executeBlocks("Kernels");
-  executeBlocks("BCs");
-
-//  // execute the rest
-//  for (std::vector<Parser *>::iterator it = _slave_parser.begin(); it != _slave_parser.end(); ++it)
-//  {
-////    ParserBlock * root = (*it)->root();
-////    root->execute();
-//
-//    ParserBlock * blk;
-//
-//    blk = (*it)->root()->locateBlock("Materials");
-//    if (!blk) blk->execute();
-//    blk = (*it)->root()->locateBlock("Kernels");
-//    if (!blk) blk->execute();
-//    blk = (*it)->root()->locateBlock("BCs");
-//    if (!blk) blk->execute();
-//  }
+  // execute the rest
+  executeBlocks("add_material");
+  executeBlocks("add_kernel");
+  executeBlocks("add_bc");
 
   _problem.solveOrder(_solve_order);
   _problem.init();
@@ -128,15 +118,9 @@ LooseCoupling::~LooseCoupling()
 }
 
 void
-LooseCoupling::executeBlocks(const std::string & /*name*/)
+LooseCoupling::executeBlocks(const std::string & name)
 {
-//  for (std::vector<Parser *>::iterator it = _slave_parser.begin(); it != _slave_parser.end(); ++it)
-//  {
-//    ParserBlock * root = (*it)->root();
-//    ParserBlock *block = root->locateBlock(name);
-//    if (block != NULL)
-//      block->execute();
-//  }
+  _act_wh.executeActionsWithAction(name);
 }
 
 void

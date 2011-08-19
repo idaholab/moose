@@ -58,6 +58,12 @@ public:
    * may add new actions to the warehouse on the fly and they will still be executed in order
    */
   void executeAllActions();
+
+  /**
+   * This method executes only the actions in the warehouse that satisfy the action_name
+   * passed in
+   */
+  void executeActionsWithAction(const std::string & name);
   
   /**
    * Iterator class for returning the Actions stored in this warehouse in order.

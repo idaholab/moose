@@ -219,25 +219,36 @@ ActionWarehouse::printActionDependencySets()
 void
 ActionWarehouse::executeAllActions()
 {
-  for (iterator i = begin(); i != end(); ++i)
+  for (iterator act_iter = begin(); act_iter != end(); ++act_iter)
   {
      // Delay the InputParameters check of MOOSE based objects until just before "acting"
      // so that Meta-Actions can complete the build of parameters as necessary
-     MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*i);
+     MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*act_iter);
      if (moose_obj_action != NULL)
        moose_obj_action->getMooseObjectParams().checkParams(moose_obj_action->name());
 
      // Act!
-     (*i)->act();
+     (*act_iter)->act();
    }
 }
 
-/*void
+void
 ActionWarehouse::executeActionsWithAction(const std::string & name)
 {
-  
+  for (ActionIterator act_iter = actionBlocksWithActionBegin(name);
+       act_iter != actionBlocksWithActionEnd(name);
+       ++act_iter)
+  {
+    
+    // Delay the InputParameters check of MOOSE based objects until just before "acting"
+    // so that Meta-Actions can complete the build of parameters as necessary
+    MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*act_iter);
+    if (moose_obj_action != NULL)
+      moose_obj_action->getMooseObjectParams().checkParams(moose_obj_action->name());
+    
+    (*act_iter)->act();
+  }
 }
-*/
 
 ActionWarehouse::iterator
 ActionWarehouse::begin()

@@ -149,6 +149,8 @@ CoupledProblem::subdomainSetupSide(unsigned int /*subdomain*/, THREAD_ID /*tid*/
 void
 CoupledProblem::init()
 {
+  
+  
   _eq.init();
   _eq.print_info();
 

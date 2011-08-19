@@ -41,7 +41,7 @@
 // libMesh
 #include "getpot.h"
 
-Parser::Parser():
+Parser::Parser(bool clearWarehouse):
   _mesh(NULL),
   _displaced_mesh(NULL),
   _problem(NULL),
@@ -56,7 +56,8 @@ Parser::Parser():
   // Need to make sure that the parser pointer is set in the warehouse for various functions
   // TODO: Rip the Parser Pointer out of the warehouse
   Moose::action_warehouse.setParserPointer(this);
-  Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
+  if (clearWarehouse)
+    Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
 }
 
 Parser::~Parser()
