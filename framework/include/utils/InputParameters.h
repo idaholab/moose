@@ -171,11 +171,8 @@ public:
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters validParams<MooseObject>();
-  friend InputParameters validParams<GlobalParamsAction>();     // FIXME: has to be here, b/c validParams<GlobalParamsAction> does not call validParams<Action> even thou it inherits from Action (why?)
   friend InputParameters validParams<Action>();
   friend InputParameters validParams<Problem>();
-  friend class ActionFactory;
-  friend class Action;
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.

@@ -17,9 +17,9 @@
 template<>
 InputParameters validParams<GlobalParamsAction>()
 {
-  InputParameters params;
+  InputParameters params = validParams<Action>();
   std::vector<std::string> blocks(1);
-  blocks[0] = "__all__";
+  blocks[0] = "";
 
   /* GlobalParams should not have children or other standard public Action attributes */
   params.addPrivateParam<std::vector<std::string> >("active", blocks);
@@ -35,6 +35,4 @@ GlobalParamsAction::GlobalParamsAction(const std::string & name, InputParameters
 void
 GlobalParamsAction::act() 
 {
-}  
-
-  
+}
