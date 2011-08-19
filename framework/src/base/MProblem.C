@@ -14,6 +14,7 @@
 
 #include "MProblem.h"
 #include "Factory.h"
+#include "ProblemFactory.h"
 #include "DisplacedProblem.h"
 #include "OutputProblem.h"
 #include "MaterialData.h"
@@ -59,17 +60,23 @@ void initial_condition(EquationSystems & es, const std::string & system_name)
 
 
 static
-std::string name(const std::string & name, unsigned int n)
+std::string name_sys(const std::string & name, unsigned int n)
 {
   std::ostringstream os;
   os << name << n;
   return os.str();
 }
 
-MProblem::MProblem(MooseMesh & mesh, Problem * parent/* = NULL*/) :
-    SubProblem(mesh, parent),
-    _nl(*this, name("nl", _n)),
-    _aux(*this, name("aux", _n)),
+template<>
+InputParameters validParams<MProblem>()
+{
+  return validParams<SubProblem>();
+}
+
+MProblem::MProblem(const std::string & name, InputParameters parameters) :
+    SubProblem(name, parameters),
+    _nl(*this, name_sys("nl", _n)),
+    _aux(*this, name_sys("aux", _n)),
     _quadrature_order(CONSTANT),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
@@ -1392,8 +1399,13 @@ MProblem::getOutputProblem(unsigned int refinements)
 {
   // TODO: When do we build this?
   if (!_out_problem)
-    _out_problem = new OutputProblem(*this, refinements);
-
+  {
+    InputParameters params = validParams<OutputProblem>();
+    params.set<MProblem *>("mproblem") = this;
+    params.set<unsigned int>("refinements") = refinements;
+    params.set<MooseMesh *>("mesh") = &_mesh;
+    _out_problem = static_cast<OutputProblem *>(ProblemFactory::instance()->create("OutputProblem", "Output Problem", params));
+  }
   return *_out_problem;
 }
 

@@ -17,6 +17,7 @@
 // Moose includes
 #include "Moose.h"
 #include "MooseMesh.h"
+#include "MProblem.h"
 
 // C++ includes
 #include <vector>
@@ -68,4 +69,3 @@ void
 Executioner::postSolve()
 {
 }
-

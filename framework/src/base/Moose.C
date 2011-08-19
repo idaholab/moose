@@ -14,12 +14,18 @@
 
 #include "Moose.h"
 #include "Factory.h"
+#include "ProblemFactory.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
 
 // objects that can be created by MOOSE
+// problems
+#include "MProblem.h"
+#include "OutputProblem.h"
+#include "CoupledProblem.h"
+// kernels
 #include "TimeDerivative.h"
 #include "Diffusion.h"
 #include "CoupledForce.h"
@@ -44,7 +50,6 @@
 #include "SinNeumannBC.h"
 #include "VectorNeumannBC.h"
 #include "WeakGradientBC.h"
-
 // auxkernels
 #include "CoupledAux.h"
 #include "ConstantAux.h"
@@ -55,7 +60,6 @@
 #include "ProcessorIDAux.h"
 #include "GapValueAux.h"
 #include "MaterialRealAux.h"
-
 // dirac kernels
 #include "ConstantPointSource.h"
 // DG kernels
@@ -155,6 +159,11 @@ registerObjects()
   if (registered)
     return;
 
+  // problems
+  registerProblem(MProblem);
+  registerProblem(OutputProblem);
+  registerProblem(CoupledProblem);
+  
   // kernels
   registerKernel(TimeDerivative);
   registerKernel(Diffusion);
@@ -444,7 +453,9 @@ setSolverDefaults(MProblem & problem)
 #endif //LIBMESH_HAVE_PETSC
 }
 
+// TODO: Move this (perhaps into the problem_warehouse?)
 ActionWarehouse action_warehouse;
+
 
 PerfLog setup_perf_log("Setup");
 

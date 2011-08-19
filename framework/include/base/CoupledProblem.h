@@ -36,10 +36,15 @@ class MProblem;
 class MooseVariable;
 class MooseMesh;
 
+class CoupledProblem;
+
+template<>
+InputParameters validParams<CoupledProblem>();
+
 class CoupledProblem : public Problem
 {
 public:
-  CoupledProblem(MooseMesh * mesh);
+  CoupledProblem(const std::string & name, InputParameters parameters);
   virtual ~CoupledProblem();
 
   virtual EquationSystems & es() { return _eq; }

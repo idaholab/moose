@@ -32,6 +32,11 @@
 class DisplacedProblem;
 class OutputProblem;
 
+class MProblem;
+
+template<>
+InputParameters validParams<MProblem>();
+
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
@@ -40,7 +45,7 @@ class MProblem :
   public SubProblem
 {
 public:
-  MProblem(MooseMesh & mesh, Problem * parent = NULL);
+  MProblem(const std::string & name, InputParameters parameters);
   virtual ~MProblem();
 
   virtual bool hasVariable(const std::string & var_name);

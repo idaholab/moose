@@ -19,17 +19,27 @@
 #include "explicit_system.h"
 #include "mesh_function.h"
 
+template<>
+InputParameters validParams<OutputProblem>()
+{
+  InputParameters params = validParams<Problem>();
+  params.addRequiredParam<MProblem *>("mproblem", "The Moose problem containg this OutputProblem");
+  params.addParam<Problem *>("parent", NULL, "This problem's parent problem (if any)");
+  params.addRequiredParam<unsigned int>("refinements", "The number of refinements to use in the oversampled mesh");
+  return params;
+}
 
-OutputProblem::OutputProblem(MProblem & mproblem, unsigned int refinements) :
-    Problem(),
-    _mproblem(mproblem),
-    _mesh(mproblem.mesh()),
+
+OutputProblem::OutputProblem(const std::string & name, InputParameters parameters):
+    Problem(name, parameters),
+    _mproblem(*parameters.get<MProblem *>("mproblem")),
+    _mesh(_mproblem.mesh()),
     _eq(_mesh),
     _out(*this)
 {
   // The mesh in this system will be finer than the nonlinear system mesh
   MeshRefinement mesh_refinement(_mesh);
-  mesh_refinement.uniformly_refine(refinements);
+  mesh_refinement.uniformly_refine(parameters.get<unsigned int>("refinements"));
 
   EquationSystems & source_es = _mproblem.es();
   

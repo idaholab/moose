@@ -16,14 +16,23 @@
 #include "Factory.h"
 #include "MooseMesh.h"
 
+template<>
+InputParameters validParams<SubProblem>()
+{
+  InputParameters params = validParams<Problem>();
+  params.addRequiredParam<MooseMesh *>("mesh", "The Mesh");
+  params.addParam<Problem *>("parent", NULL, "This problem's parent problem (if any)");
+  return params;
+}
 
 // SubProblem /////
 
-SubProblem::SubProblem(MooseMesh & mesh, Problem * parent) :
+SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
+    Problem(name, parameters),
     SubProblemInterface(),
-    _parent(parent == NULL ? this : parent),
-    _mesh(mesh),
-    _eq(parent == NULL ? *new EquationSystems(_mesh) : parent->es()),
+    _parent(parameters.get<Problem *>("parent") == NULL ? this : parameters.get<Problem *>("parent")),
+    _mesh(*parameters.get<MooseMesh *>("mesh")),
+    _eq(_parent == this ? *new EquationSystems(_mesh) : _parent->es()),
     _transient(false),
     _time(_parent != this ? _parent->time() : _eq.parameters.set<Real>("time")),
     _t_step(_parent != this ? _parent->timeStep() : _eq.parameters.set<int>("t_step")),

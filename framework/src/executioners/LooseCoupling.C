@@ -17,6 +17,7 @@
 #include "CoupledProblem.h"
 #include "SubProblem.h"
 #include "MProblem.h"
+#include "ProblemFactory.h"
 
 template<>
 InputParameters validParams<LooseCoupling>()
@@ -48,8 +49,7 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     _shared_mesh(_mesh != NULL),
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _solve_order(getParam<std::vector<std::string> >("solve_order")),
-    _problem(_mesh),
-    //
+    _problem(*static_cast<CoupledProblem *>(ProblemFactory::instance()->create("CoupledProblem", "Coupled Problem", setupProblemParams("Coupled Problem", _mesh)))),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_time),
@@ -78,10 +78,16 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     _slave_parser[i] = new Parser;
     if (_shared_mesh)
     {
-      MProblem * subproblem = new MProblem(*_mesh, &_problem);
-      _problem.addSubProblem(file_name, subproblem);
-      _slave_parser[i]->_loose = true;
-      _slave_parser[i]->_problem = subproblem;
+       InputParameters params = validParams<MProblem>();
+       params.set<std::string>("name") = "Moose Probelm";
+       params.set<MooseMesh *>("mesh") = _mesh;
+       params.set<Problem *>("parent") = &_problem;
+       MProblem * subproblem = static_cast<MProblem *>
+         (ProblemFactory::instance()->create("MProblem", "Moose Problem", params));
+       //MProblem * subproblem = new MProblem(*_mesh, &_problem);
+       _problem.addSubProblem(file_name, subproblem);
+       _slave_parser[i]->_loose = true;
+       _slave_parser[i]->_problem = subproblem;
     }
     _slave_parser[i]->parse(file_name);
   }
@@ -117,6 +123,8 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
 
 LooseCoupling::~LooseCoupling()
 {
+  // This problem was built by the Factory and needs to be released by this destructor
+  delete &_problem;
 }
 
 void
@@ -194,3 +202,11 @@ LooseCoupling::execute()
 
 }
 
+InputParameters
+LooseCoupling::setupProblemParams(std::string name, MooseMesh * mesh)
+{
+  InputParameters params = validParams<MProblem>();
+  params.set<std::string>("name") = name;
+  params.set<MooseMesh *>("mesh") = mesh;
+  return params;
+}

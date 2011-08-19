@@ -23,11 +23,15 @@
 #include "mesh_function.h"
 
 class MooseMesh;
+class OutputProblem;
+
+template<>
+InputParameters validParams<OutputProblem>();
 
 class OutputProblem : public Problem
 {
 public:
-  OutputProblem(MProblem & mproblem, unsigned int refinements);
+  OutputProblem(const std::string & name, InputParameters parameters);
   virtual ~OutputProblem();
 
   virtual EquationSystems & es() { return _eq; }

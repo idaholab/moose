@@ -15,15 +15,26 @@
 #include "CoupledProblem.h"
 #include "MProblem.h"
 #include "MooseVariable.h"
+#include "InputParameters.h"
 
-CoupledProblem::CoupledProblem(MooseMesh * mesh) :
-    _mesh(mesh),
-    _eq(*mesh),
+template<>
+InputParameters validParams<CoupledProblem>()
+{
+  InputParameters params = validParams<Problem>();
+  params.addRequiredParam<MooseMesh *>("mesh", "The Mesh");
+  return params;
+}
+
+
+CoupledProblem::CoupledProblem(const std::string & name, InputParameters parameters) :
+    Problem(name, parameters),
+    _mesh(parameters.get<MooseMesh *>("mesh")),
+    _eq(*_mesh),
     _time(_eq.parameters.set<Real>("time")),
     _t_step(_eq.parameters.set<int>("t_step")),
     _dt(_eq.parameters.set<Real>("dt")),
     _out(*this)
-{
+{  
   _eq.parameters.set<Problem *>("_problem") = this;
 }
 

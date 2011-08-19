@@ -15,8 +15,18 @@
 #include "Problem.h"
 #include "Factory.h"
 
-Problem::Problem():
-    _output_initial(false)
+template<>
+InputParameters validParams<Problem>()
+{
+  InputParameters params;
+  params.addParam<std::string>("name", "Problem", "The name of the object");
+  return params;
+}
+
+Problem::Problem(const std::string & name, InputParameters parameters):
+  _name(name),
+  _pars(parameters),
+  _output_initial(false)
 {
   unsigned int n_threads = libMesh::n_threads();
 

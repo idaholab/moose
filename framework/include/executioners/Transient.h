@@ -93,7 +93,7 @@ public:
   virtual void endStep();
 
 protected:
-  MProblem _problem;
+  MProblem & _problem;
 
   int & _t_step;                        ///< Current timestep.
   Real & _time;                         ///< Current time

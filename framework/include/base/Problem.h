@@ -35,10 +35,15 @@ class MooseVariable;
 class Output;
 class Material;
 
+class Problem;
+
+template<>
+InputParameters validParams<Problem>();
+
 class Problem
 {
 public:
-  Problem();
+  Problem(const std::string & name, InputParameters parameters);
   virtual ~Problem();
 
   virtual EquationSystems & es() = 0;
@@ -140,8 +145,9 @@ public:
   MooseArray<MooseArray<RealTensor> > _second_zero;
 
 protected:
-  Parameters _pars;                                             ///< For storing all-purpose global params
-
+  std::string _name;                                     ///< The name of the problem
+  InputParameters _pars;                                 ///< Generic parameters object used during construction
+  
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
 

@@ -27,6 +27,7 @@ class MooseObject;
 class GlobalParamsAction;
 class Action;
 class Parser;
+class Problem;
 
 class InputParameters;
 
@@ -172,6 +173,7 @@ public:
   friend InputParameters validParams<MooseObject>();
   friend InputParameters validParams<GlobalParamsAction>();     // FIXME: has to be here, b/c validParams<GlobalParamsAction> does not call validParams<Action> even thou it inherits from Action (why?)
   friend InputParameters validParams<Action>();
+  friend InputParameters validParams<Problem>();
   friend class ActionFactory;
   friend class Action;
 

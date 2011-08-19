@@ -17,6 +17,7 @@
 #include "MooseMesh.h"
 #include "MProblem.h"
 #include "ActionWarehouse.h"
+#include "ProblemFactory.h"
 
 // libmesh includes
 #include "linear_partitioner.h"
@@ -92,7 +93,9 @@ SetupMeshAction::act()
       Moose::action_warehouse.actionBlocksWithActionEnd("setup_executioner"))
   {
     Moose::setup_perf_log.push("Create MProblem","Setup");
-    _parser_handle._problem = new MProblem(*_parser_handle._mesh);
+
+    // Use the Factory to build a normal MOOSE problem
+    _parser_handle._problem = ProblemFactory::instance()->createMProblem(_parser_handle._mesh);
     Moose::setup_perf_log.pop("Create MProblem","Setup");
   }
 }

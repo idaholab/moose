@@ -35,13 +35,15 @@ public:
 
   virtual Problem & problem() { return _problem; }
 
+  InputParameters setupProblemParams(std::string name, MooseMesh * mesh);
+  
 protected:
   bool _shared_mesh;
   std::vector<Parser *> _slave_parser;
   std::vector<std::string> _input_files;
   std::vector<std::string> _solve_order;
 
-  CoupledProblem _problem;
+  CoupledProblem & _problem;
 
   int & _t_step;                        ///< Current timestep.
   Real & _time;                         ///< Current time

@@ -28,6 +28,11 @@
 
 class MooseMesh;
 
+class SubProblem;
+
+template<>
+InputParameters validParams<SubProblem>();
+
 /**
  * Generic class for solving transient nonlinear problems
  *
@@ -37,7 +42,7 @@ class SubProblem :
   public SubProblemInterface
 {
 public:
-  SubProblem(MooseMesh & mesh, Problem * parent = NULL);
+  SubProblem(const std::string & name, InputParameters parameters);
   virtual ~SubProblem();
 
   virtual Problem * parent() { return _parent; }

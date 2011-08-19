@@ -60,7 +60,7 @@ public:
   virtual void checkIntegrity();
   
 protected:
-  MProblem _problem;
+  MProblem & _problem;
 
   int & _time_step;
   Real & _time;

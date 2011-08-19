@@ -18,6 +18,7 @@
 #include "Kernel.h"
 #include "Factory.h"
 #include "SubProblem.h"
+#include "ProblemFactory.h"
 
 //libMesh includes
 #include "implicit_system.h"
@@ -56,7 +57,7 @@ InputParameters validParams<Transient>()
 
 Transient::Transient(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
-    _problem(*_mesh),
+    _problem(*ProblemFactory::instance()->createMProblem(_mesh)),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_time),
@@ -80,7 +81,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _time_ipol(getParam<std::vector<Real> >("time_t"),
                getParam<std::vector<Real> >("time_dt")),
     _use_time_ipol(_time_ipol.getSampleSize() > 0)
-{
+{  
   _t_step = 0;
   _dt = 0;
   _time = getParam<Real>("start_time");
@@ -105,6 +106,8 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
 Transient::~Transient()
 {
+  // This problem was built by the Factory and needs to be released by this destructor
+  delete &_problem;
 }
 
 void

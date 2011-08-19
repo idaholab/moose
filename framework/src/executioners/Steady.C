@@ -15,6 +15,7 @@
 #include "Steady.h"
 
 #include "equation_systems.h"
+#include "ProblemFactory.h"
 
 template<>
 InputParameters validParams<Steady>()
@@ -25,16 +26,18 @@ InputParameters validParams<Steady>()
 
 Steady::Steady(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
-    _problem(*_mesh),
+    _problem(*ProblemFactory::instance()->createMProblem(_mesh)),
     _time_step(_problem.timeStep()),
     _time(_problem.time())
-{
+{ 
   if (!_restart_sln_file_name.empty())
     _problem.setRestartFile(_restart_sln_file_name);
 }
 
 Steady::~Steady()
 {
+  // This problem was built by the Factory and needs to be released by this destructor
+  delete &_problem;
 }
 
 void
