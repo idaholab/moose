@@ -59,7 +59,7 @@ Side_Set::Side_Set(int file_id, int id)
     sideIndex(0),
     dist_factors(0)
 {
-  SMART_ASSERT(id > 0);
+  SMART_ASSERT(id != EX_INVALID_ID);
 }
 
 Side_Set::Side_Set(int file_id, int id, int ns, int ndf)
@@ -200,7 +200,7 @@ void Side_Set::Display(std::ostream& s) const
 
 int Side_Set::Check_State() const
 {
-  SMART_ASSERT(id_ >= 0);
+  SMART_ASSERT(id_ >= EX_INVALID_ID);
   SMART_ASSERT(numEntity >= 0);
   SMART_ASSERT(num_dist_factors >= 0);
   

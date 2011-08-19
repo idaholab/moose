@@ -167,14 +167,14 @@ void Node_Set::Display(std::ostream& s)
 
 int Node_Set::Check_State() const
 {
-  SMART_ASSERT(id_ >= 0);
+  SMART_ASSERT(id_ >= EX_INVALID_ID);
   SMART_ASSERT(numEntity >= 0);
   SMART_ASSERT(num_dist_factors >= 0);
   
-  SMART_ASSERT( !( id_ == 0 && numEntity > 0 ) );
-  SMART_ASSERT( !( id_ == 0 && num_dist_factors > 0 ) );
-  SMART_ASSERT( !( id_ == 0 && nodes ) );
-  SMART_ASSERT( !( id_ == 0 && dist_factors ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && numEntity > 0 ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && num_dist_factors > 0 ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && nodes ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && dist_factors ) );
 
   return 1;
 }
