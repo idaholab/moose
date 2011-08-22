@@ -33,7 +33,7 @@ endif
 
 # gfortran
 ifneq (,$(findstring gfortran,$(mpif77_command)))
-	libmesh_FFLAGS += -fdefault-real-8
+	libmesh_FFLAGS += -fdefault-real-8 -fdefault-double-8
 endif
 
 # g95
