@@ -12,23 +12,10 @@ InputParameters validParams<MaterialModel>()
   //    since that will also flag the parameter as having had a valid entry
   //    given.
   InputParameters params = validParams<SolidModel>();
-  params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
-  params.set<Real>("bulk_modulus") = -7777;
-  params.addParam<Real>("lambda", "Lame's first parameter for the material.");
-  params.set<Real>("lambda") = -7777;
-  params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material");
-  params.set<Real>("poissons_ratio") = -7777;
-  params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
-  params.set<Real>("shear_modulus") = -7777;
-  params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
-  params.set<Real>("youngs_modulus") = -7777;
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen).");
-  params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
-  params.addCoupledVar("temp", "Coupled Temperature");
-  params.addParam<Real>("cracking_strain", "The strain threshold beyond which cracking occurs.  Must be positive.");
   return params;
 }
 
