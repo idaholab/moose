@@ -1,6 +1,5 @@
 #include "Elk.h"
 #include "Factory.h"
-#include "ActionWarehouse.h"
 #include "ActionFactory.h"
 
 // misc
@@ -187,16 +186,16 @@ Elk::registerObjects()
   registerMaterial(PowerLawCreep);
 
   registerBoundaryCondition(PlenumPressure);
-  registerAction(PlenumPressureAction, "meta_action");
+  registerAction(PlenumPressureAction, "add_bc");
 
   registerBoundaryCondition(PlenumPressureRZ);
-  registerAction(PlenumPressureRZAction, "meta_action");
+  registerAction(PlenumPressureRZAction, "add_bc");
 
   registerBoundaryCondition(Pressure);
-  registerAction(PressureAction, "meta_action");
+  registerAction(PressureAction, "add_bc");
 
   registerBoundaryCondition(PressureRZ);
-  registerAction(PressureRZAction, "meta_action");
+  registerAction(PressureRZAction, "add_bc");
 
   registerAux(ElasticEnergyAux);
   registerKernel(StressDivergence);

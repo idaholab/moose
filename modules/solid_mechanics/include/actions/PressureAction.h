@@ -3,11 +3,6 @@
 
 #include "Action.h"
 
-class PressureAction;
-
-template<>
-InputParameters validParams<PressureAction>();
-
 class PressureAction: public Action
 {
 public:
@@ -28,5 +23,7 @@ protected:
   bool _use_displaced_mesh;
 };
 
+template<>
+InputParameters validParams<PressureAction>();
 
 #endif // PRESSUREACTION_H

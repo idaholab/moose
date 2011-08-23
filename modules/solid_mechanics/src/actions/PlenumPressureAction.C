@@ -1,8 +1,6 @@
 #include "PlenumPressureAction.h"
 
-#include "ActionFactory.h"
-#include "MooseObjectAction.h"
-
+#include "Factory.h"
 #include "MProblem.h"
 #include "Parser.h"
 
@@ -57,9 +55,6 @@ PlenumPressureAction::act()
     ++dim;
   }
 
-  InputParameters action_params = ActionFactory::instance()->getValidParams("AddBCAction");
-  action_params.set<Parser *>("parser_handle") = getParam<Parser *>("parser_handle");
-  action_params.set<std::string>("type") = _kernel_name;
   std::vector<std::string> vars;
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
@@ -74,13 +69,8 @@ PlenumPressureAction::act()
     name << short_name;
     name << "_";
     name << i;
-    action_params.set<std::string>("name") = name.str();
-    Action *action = ActionFactory::instance()->create("AddBCAction", action_params);
 
-    MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-    mooseAssert (moose_object_action, "Dynamic Cast failed");
-
-    InputParameters & params = moose_object_action->getMooseObjectParams();
+    InputParameters params = Factory::instance()->getValidParams(_kernel_name);
 
     params.set<std::vector<unsigned int> >("boundary") = _boundary;
 
@@ -98,8 +88,7 @@ PlenumPressureAction::act()
     params.set<int>("component") = i;
     params.set<std::string>("variable") = vars[i];
 
-    // add it to the warehouse
-    Moose::action_warehouse.addActionBlock(action);
+    _parser_handle._problem->addBoundaryCondition(_kernel_name, name.str(), params);
   }
 
 }
