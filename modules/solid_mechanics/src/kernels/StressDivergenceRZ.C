@@ -7,7 +7,7 @@ template<>
 InputParameters validParams<StressDivergenceRZ>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<Real>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for r, 1 for z)");
+  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for r, 1 for z)");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
@@ -28,7 +28,7 @@ StressDivergenceRZ::StressDivergenceRZ(const std::string & name, InputParameters
    _stress(getMaterialProperty<SymmTensor>("stress")),
    _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
    _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT")),
-   _component(getParam<Real>("component")),
+   _component(getParam<unsigned int>("component")),
    _rdisp_coupled(isCoupled("disp_r")),
    _zdisp_coupled(isCoupled("disp_z")),
    _temp_coupled(isCoupled("temp")),

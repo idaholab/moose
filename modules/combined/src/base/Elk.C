@@ -84,6 +84,7 @@
 #include "PressureRZ.h"
 #include "PressureRZAction.h"
 #include "PLSHPlasticMaterial.h"
+#include "SolidMechanicsAction.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
 
@@ -200,6 +201,7 @@ Elk::registerObjects()
   registerAux(ElasticEnergyAux);
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
+  registerAction(SolidMechanicsAction, "add_kernel");
 
   // phase_field
   registerKernel(AC);

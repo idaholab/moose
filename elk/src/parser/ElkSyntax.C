@@ -25,7 +25,9 @@ void associateSyntax(Parser & p)
 
   p.registerActionSyntax("ContactAction", "Contact/*");
   p.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
+
+  p.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 }
 
-  
+
 } // namespace
