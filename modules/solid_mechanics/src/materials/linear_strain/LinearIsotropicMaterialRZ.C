@@ -23,8 +23,8 @@ LinearIsotropicMaterialRZ::~LinearIsotropicMaterialRZ()
 }
 
 void
-LinearIsotropicMaterialRZ::computeNetElasticStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
+LinearIsotropicMaterialRZ::computeNetElasticStrain(const SymmTensor & input_strain, SymmTensor & elastic_strain)
 {
-  elastic_strain = total_strain;
+  elastic_strain = input_strain;
 }
 
