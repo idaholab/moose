@@ -1,4 +1,3 @@
-#include "MooseSyntax.h"
 #include "Parser.h"
 
 namespace Elk
