@@ -16,21 +16,20 @@
     </style>
  </head>
     <body>
-    <h1>Moose Test Timing</h1>
+    <h1>Test Timing</h1>
 
     <!-- jquery tabs plugin. These will fetch data to display from the link provided -->
     <!-- IMPORTANT: these need to be in the same order as the TAB_NAMES variable -->
     <div id="testTabs">
       <ul>
-        <li><a href="moose_test/moose_test.html"><span>MOOSE Test</span></a></li>
-        <li><a href="bison/bison.html"><span>BISON</span></a></li>
         <li><a href="bighorn/bighorn.html"><span>BIGHORN</span></a></li>
-        <li><a href="marmot/marmot.html"><span>MARMOT</span></a></li>
-        <li><a href="rat/rat.html"><span>RAT</span></a></li>
-        <li><a href="falcon/falcon.html"><span>FALCON</span></a></li>
-        <li><a href="emu/emu.html"><span>EMU</span></a></li>
-        <li><a href="jackalope/jackalope.html"><span>JACKALOPE</span></a></li>
+        <li><a href="bison/bison.html"><span>BISON</span></a></li>
         <li><a href="elk/elk_test.html"><span>ELK Test</span></a></li>
+        <li><a href="falcon/falcon.html"><span>FALCON</span></a></li>
+        <li><a href="marmot/marmot.html"><span>MARMOT</span></a></li>
+        <li><a href="moose_test/moose_test.html"><span>MOOSE Test</span></a></li>
+        <li><a href="pronghorn/pronghorn.html"><span>PRONGHORN</span></a></li>
+        <li><a href="rat/rat.html"><span>RAT</span></a></li>
       </ul>
     </div>
     <br clear="all"/>
@@ -38,13 +37,13 @@
     <div style="float:left">
       <div id="mainplot" style="width:700px;height:300px"></div>
     </div>
-    
+
 
     <div id="miniature" style="float:left;margin-left:20px;margin-top:0px">
       <div id="minplot" style="width:300px;height:150px"></div>
       <p id="minplotLegend" style="margin-left:10px"></p>
     </div>
-    
+
     <br clear="all"/><br/>
     <button id="zoom"  type="button">Zoom Out</button>
     <button id="clear" type="button">Clear Plots</button>
@@ -65,7 +64,7 @@
     </div>
 
 <script id="source">
-var TAB_NAMES = ["moose_test", "bison", "bighorn", "marmot", "rat", "falcon", "emu", "jackalope", "elk_test"];
+var TAB_NAMES = ["bighorn", "bison", "elk_test", "falcon", "marmot", "moose_test", "pronghorn", "rat"];
 
 //holds the data currently to be plotted indexed by url (same info as global_data)
 var global_plots = {};
@@ -154,7 +153,7 @@ function redrawPlotData() {
   close_enough_x = 0.05 * (minplot.getAxes().xaxis.max - minplot.getAxes().xaxis.min )
   close_enough_y = 0.05 * (minplot.getAxes().yaxis.max - minplot.getAxes().yaxis.min )
   ignored = false;
-  if ( xaxis.min == -1 && xaxis.max == 1 || 
+  if ( xaxis.min == -1 && xaxis.max == 1 ||
        (xaxis.min - minplot.getAxes().xaxis.min < close_enough_x &&
         xaxis.max - minplot.getAxes().xaxis.max < close_enough_x &&
         yaxis.min - minplot.getAxes().yaxis.min < close_enough_y &&
@@ -164,13 +163,13 @@ function redrawPlotData() {
     ignored = true;
   //main_options = $.extend( main_options,
     main_options = $.extend(true, {}, main_options,
-                             { xaxis: { min: null, max: null }, 
+                             { xaxis: { min: null, max: null },
                                yaxis: { min: null, max: null } } );
   }
-  else 
+  else
   {
     main_options = $.extend(true, {}, main_options,
-                             { xaxis: { min: xaxis.min, max: xaxis.max }, 
+                             { xaxis: { min: xaxis.min, max: xaxis.max },
                                yaxis: { min: yaxis.min, max: yaxis.max } } );
   }
 
@@ -181,7 +180,7 @@ function redrawPlotData() {
   // because it is out of range of the user's zoom state
   if (!ignored)
   {
-    ranges = { xaxis: { from: xaxis.min, to: xaxis.max }, 
+    ranges = { xaxis: { from: xaxis.min, to: xaxis.max },
                yaxis: { from: yaxis.min, to: yaxis.max } };
     minplot.setSelection(ranges, true);
   }
@@ -246,14 +245,14 @@ $(function () {
           ranges.xaxis.to = ranges.xaxis.from + 0.00001;
       if (ranges.yaxis.to - ranges.yaxis.from < 0.00001)
           ranges.yaxis.to = ranges.yaxis.from + 0.00001;
-      
+
       // do the zooming
       plot = $.plot($("#mainplot"), global_data,
                     $.extend(true, {}, main_options, {
                         xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
                         yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
                     }));
-      
+
       // dont fire event on the minplot to prevent eternal loop
       minplot.setSelection(ranges, true);
   });
