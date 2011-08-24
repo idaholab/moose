@@ -4,10 +4,12 @@ SymmIsotropicElasticityTensor::SymmIsotropicElasticityTensor(const bool constant
   : SymmElasticityTensor(constant),
     _lambda_set(false),
     _mu_set(false),
+    _E_set(false),
     _nu_set(false),
     _k_set(false),
     _lambda(0),
     _mu(0),
+    _E(0),
     _nu(0),
     _k(0)
 {}

@@ -25,8 +25,11 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _grad_disp_z(coupledGradient("disp_z"))
 {
   SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ;
-  t->setYoungsModulus(_youngs_modulus);
-  t->setPoissonsRatio(_poissons_ratio);
+  mooseAssert(_lambda_set, "Internal error:  lambda not set");
+  t->setLambda(_lambda);
+  mooseAssert(_shear_modulus_set, "Internal error:  shear modulus not set");
+  t->setShearModulus(_shear_modulus);
+  t->calculate(0);
 
   elasticityTensor( t );
 }
