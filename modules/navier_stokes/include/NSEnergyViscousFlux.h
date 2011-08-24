@@ -2,6 +2,7 @@
 #define NSENERGYVISCOUSFLUX_H
 
 #include "NSViscousFluxBase.h"
+#include "NSViscStressTensorDerivs.h"
 
 
 // Forward Declarations
@@ -31,6 +32,13 @@ protected:
   VariableValue & _v_vel;
   VariableValue & _w_vel;
   
+  // An object for computing viscous stress tensor derivatives.
+  // Constructed via a reference to ourself
+  NSViscStressTensorDerivs<NSEnergyViscousFlux> _vst_derivs;
+
+  // Declare ourselves friend to the helper class.
+  template <class U>
+  friend class NSViscStressTensorDerivs;
 };
  
 #endif //  NSENERGYVISCOUSFLUX_H

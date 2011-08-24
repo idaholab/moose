@@ -2,6 +2,7 @@
 #define NSMOMENTUMVISCOUSFLUX_H
 
 #include "NSViscousFluxBase.h"
+#include "NSViscStressTensorDerivs.h"
 
 
 // ForwardDeclarations
@@ -28,6 +29,14 @@ protected:
 
   // Required parameter
   unsigned _component;
+
+  // An object for computing viscous stress tensor derivatives.
+  // Constructed via a reference to ourself
+  NSViscStressTensorDerivs<NSMomentumViscousFlux> _vst_derivs;
+
+  // Declare ourselves friend to the helper class.
+  template <class U>
+  friend class NSViscStressTensorDerivs;
 };
  
 #endif //  NSMOMENTUMVISCOUSFLUX_H

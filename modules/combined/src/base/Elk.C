@@ -48,6 +48,8 @@
 #include "NSSUPGMomentum.h"
 #include "NSSUPGMass.h"
 #include "NSSUPGEnergy.h"
+#include "NSMomentumBC.h"
+#include "NSEnergyBC.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -158,6 +160,8 @@ Elk::registerObjects()
   registerKernel(NSSUPGMomentum);
   registerKernel(NSSUPGMass);
   registerKernel(NSSUPGEnergy);
+  registerBoundaryCondition(NSMomentumBC);
+  registerBoundaryCondition(NSEnergyBC);
 
   // linear_elasticity
   registerKernel(SolidMechX);

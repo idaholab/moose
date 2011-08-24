@@ -20,9 +20,10 @@ InputParameters validParams<NSEnergyViscousFlux>()
 
 NSEnergyViscousFlux::NSEnergyViscousFlux(const std::string & name, InputParameters parameters)
     : NSViscousFluxBase(name, parameters),
-   _u_vel(coupledValue("u")),
-   _v_vel(coupledValue("v")),
-   _w_vel(_dim == 3 ? coupledValue("w") : _zero)
+      _u_vel(coupledValue("u")),
+      _v_vel(coupledValue("v")),
+      _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+      _vst_derivs(*this)
 {
 }
 
@@ -91,8 +92,11 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     {
       Real intermediate_value = 0.;
 
+//      for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
+//	intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + this->dtau(k,ell,0)) );
+
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-	intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + this->dtau(k,ell,0)) );
+	intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + _vst_derivs.dtau(k,ell,0)) );
       
       // Hit accumulated value with test function
       value += intermediate_value * _grad_test[_i][_qp](k);
@@ -116,8 +120,11 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     {
       Real intermediate_value = tau(k,m_local)*phij/rho;
       
+      // for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
+      // intermediate_value += this->dtau(k,ell,m)*U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
+
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-	intermediate_value += this->dtau(k,ell,m)*U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
+	intermediate_value += _vst_derivs.dtau(k,ell,m) * U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
 
       // Hit accumulated value with test function
       value += intermediate_value * _grad_test[_i][_qp](k);

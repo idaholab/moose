@@ -2,6 +2,7 @@
 #define NSENERGYTHERMALFLUX_H
 
 #include "Kernel.h"
+#include "NSTemperatureDerivs.h"
 
 // ForwardDeclarations
 class NSEnergyThermalFlux;
@@ -54,14 +55,15 @@ protected:
   // Parameters
   Real _cv;
 
+  // A helper object for computing temperature gradient and Hessians.
+  // Constructed via a reference to ourself so we can access all of our data.
+  NSTemperatureDerivs<NSEnergyThermalFlux> _temp_derivs;
+
+  // Declare ourselves a friend to the helper class
+  template <class U>
+  friend class NSTemperatureDerivs;
+
 private:
-  // Recomputes gradient and Hessian values (only the lower triangle,
-  // since its symmetric, of the temperature at the current quadrature point.
-  void recalculate_gradient_and_hessian();
-  
-  // Returns the (i,j) entry of the hessian matrix.  If
-  // j>i (upper triangle) returns (j,i) entry instead.
-  Real get_hess(unsigned i, unsigned j);
 
   // Computes the Jacobian value (on or off-diagonal) for
   // var_number, which has been mapped to 
@@ -71,12 +73,6 @@ private:
   // 3 = rho*w
   // 4 = rho*E
   Real compute_jacobian_value(unsigned var_number);
-
-  // dT/dU_m
-  Real _dTdU[5];
-
-  // d^2 T/ dU_m dU_n 
-  Real _hessian[5][5];
 
   // Single vector to refer to all gradients.  We have to store
   // pointers since you can't have a vector<Foo&>.  Initialized in

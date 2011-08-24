@@ -18,7 +18,8 @@ InputParameters validParams<NSMomentumViscousFlux>()
 
 NSMomentumViscousFlux::NSMomentumViscousFlux(const std::string & name, InputParameters parameters)
     : NSViscousFluxBase(name, parameters),
-      _component(getParam<unsigned>("component"))
+      _component(getParam<unsigned>("component")),
+      _vst_derivs(*this)
 {
 }
 
@@ -49,8 +50,13 @@ Real NSMomentumViscousFlux::computeQpJacobian()
   const unsigned k = _component;
   const unsigned m = _component+1; // _component = 0,1,2 -> m = 1,2,3 global variable number
   
+//  for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
+//    value += this->dtau(k, ell, m)*_grad_test[_i][_qp](ell);
+
+  // New style: use external templated friend class for common viscous stress 
+  // tensor derivative computations.
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-    value += this->dtau(k, ell, m)*_grad_test[_i][_qp](ell);
+    value += _vst_derivs.dtau(k, ell, m) * _grad_test[_i][_qp](ell);
 
   return value;
 }
@@ -91,8 +97,11 @@ Real NSMomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     mooseError(oss.str());
   }
 
+//  for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
+//    value += this->dtau(k, ell, m)*_grad_test[_i][_qp](ell);
+
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-    value += this->dtau(k, ell, m)*_grad_test[_i][_qp](ell);
+    value += _vst_derivs.dtau(k, ell, m)*_grad_test[_i][_qp](ell);
 
   return value;
 }

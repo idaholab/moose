@@ -52,16 +52,11 @@ NSEnergyThermalFlux::NSEnergyThermalFlux(const std::string & name, InputParamete
 
       // material properties and parameters
       _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
-      _cv(getParam<Real>("cv"))
-{
-  // Zero out the gradient and Hessian entries so we are never dealing with uninitialized memory
-  for (unsigned i=0; i<5; ++i)
-  {
-    _dTdU[i] = 0.;
-    for (unsigned j=0; j<5; ++j)
-      _hessian[i][j] = 0.;
-  }
+      _cv(getParam<Real>("cv")),
 
+      // Temperature derivative computing object
+      _temp_derivs(*this)
+{
   // Store pointers to all variable gradients in a single vector.
   _gradU.resize(5);
   _gradU[0] = &_grad_rho  ;
@@ -122,9 +117,6 @@ NSEnergyThermalFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
 Real NSEnergyThermalFlux::compute_jacobian_value(unsigned var_number)
 {
-  // Recompute gradient and Hessian data at this quadrature point.
-  this->recalculate_gradient_and_hessian();
-
   // The value to return
   Real result = 0.;
 
@@ -133,14 +125,14 @@ Real NSEnergyThermalFlux::compute_jacobian_value(unsigned var_number)
   for (unsigned int ell=0; ell<3; ++ell)
   {
     // Accumulate the first dot product term
-    Real intermediate_result = _dTdU[var_number] * _grad_phi[_j][_qp](ell);
+    Real intermediate_result = _temp_derivs.get_grad(var_number) * _grad_phi[_j][_qp](ell);
 
     // Now accumulate the Hessian term
     Real hess_term = 0.;
     for (unsigned n=0; n<5; ++n)
     {
       // hess_term += get_hess(m,n) * gradU[n](ell); // ideally... but you can't have a vector<VariableGradient&> :-(
-      hess_term += get_hess(var_number,n) * (*_gradU[n])[_qp](ell); // dereference pointer to get value
+      hess_term += _temp_derivs.get_hess(var_number,n) * (*_gradU[n])[_qp](ell); // dereference pointer to get value
     }
     
     // Accumulate the second dot product term
@@ -153,78 +145,6 @@ Real NSEnergyThermalFlux::compute_jacobian_value(unsigned var_number)
   // Return result, don't forget to multiply by "k"!
   return _thermal_conductivity[_qp] * result;
 }
-
-
-
-void NSEnergyThermalFlux::recalculate_gradient_and_hessian()
-{
-  // Convenience variables
-  Real U0 = _rho[_qp];
-  Real U1 = _rho_u[_qp];
-  Real U2 = _rho_v[_qp];
-  Real U3 = _rho_w[_qp];
-  Real U4 = _rho_e[_qp];
-  
-  Real mom2 = U1*U1 + U2*U2 + U3*U3;
-  Real U02 = U0*U0;  // rho^2
-  Real U03 = U02*U0; // rho^3
-  Real U04 = U03*U0; // rho^4
-  
-  // This temporary will be used several times in the Hessian
-  const Real tmp = -1./U02/_cv;
-
-  // ...
-
-
-
-  // Gradient entries...
-
-  _dTdU[0] =  (U4 - (mom2/U0))*tmp;
-  _dTdU[1] =  U1*tmp;               
-  _dTdU[2] =  U2*tmp;               
-  _dTdU[3] =  U3*tmp;               
-  _dTdU[4] = -U0*tmp;
-    
-  
-
-  // Hessian entries...
-
-  // Note: only the lower triangle is filled in, the matrix is symmetric.
-
-  // Row 0
-  _hessian[0][0] = 2.*U4/U03/_cv - 3.*mom2/U04/_cv;
-
-  // Row 1
-  _hessian[1][0] = 2.*U1/U03/_cv;
-  _hessian[1][1] = tmp;
-
-  // Row 2
-  _hessian[2][0] = 2.*U2/U03/_cv;
-  _hessian[2][2] = tmp;
-
-  // Row 3
-  _hessian[3][0] = 2.*U3/U03/_cv;
-  _hessian[3][3] = tmp;
-  
-  // Row 4
-  _hessian[4][0] = tmp;
-}
-
-
-
-
-
-Real NSEnergyThermalFlux::get_hess(unsigned i, unsigned j)
-{
-  // If in lower triangle, OK
-  if (i>=j)
-    return _hessian[i][j];
-
-  // Otherwise, convert passed in upper-triangular entry to
-  // lower-triangular.
-  return _hessian[j][i];
-}
-
 
 
 

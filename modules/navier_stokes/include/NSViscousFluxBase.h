@@ -35,10 +35,6 @@ protected:
   //virtual Real computeQpJacobian();
   //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  // Derived classes should use this function to request the derivative
-  // of tau_{k\ell} with respect to variable m
-  Real dtau(unsigned k, unsigned ell, unsigned m);
-  
   // Material properties
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   MaterialProperty<Real> & _dynamic_viscosity;
