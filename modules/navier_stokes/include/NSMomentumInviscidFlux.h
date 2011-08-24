@@ -28,7 +28,7 @@ protected:
   VariableValue & _pressure;
 
   // Parameters
-  int _component;
+  unsigned _component;
   Real _gamma;
 
   // Variable numbers
@@ -37,6 +37,13 @@ protected:
   unsigned _rhov_var_number;
   unsigned _rhow_var_number;
   unsigned _rhoe_var_number;
+
+private:
+  // To be used from both the on and off-diagonal
+  // computeQpJacobian functions.  Variable numbering
+  // should be in the canonical ordering regardless of
+  // Moose's numbering.
+  Real compute_jacobian(unsigned m);
 };
  
 #endif

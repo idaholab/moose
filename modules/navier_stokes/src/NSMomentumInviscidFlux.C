@@ -42,7 +42,7 @@ NSMomentumInviscidFlux::NSMomentumInviscidFlux(const std::string & name, InputPa
    _pressure(coupledValue("pressure")),
    
    // Parameters
-   _component(getParam<Real>("component")),
+   _component(getParam<unsigned>("component")),
    _gamma(getParam<Real>("gamma")),
 
    // Variable numbers
@@ -79,25 +79,8 @@ NSMomentumInviscidFlux::computeQpResidual()
 Real
 NSMomentumInviscidFlux::computeQpJacobian()
 {
-  RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-  
-  // Note: Contribution to Jacobian due to P, which depends on U:
-  //
-  // P(U) = (gamma-1) * (U_4 - (1/2)*(U_1^2 + U_2^2 + U_3^3)/U_0^2)
-  //
-  // For the on-diagonal Jacobian, we need only differentiate P wrt U_i, i=1,2,3.
-  // This gives:
-  //
-  // dP/dU_i = (1-gamma) * u_i
-  //
-  // where u_i is the i'th component of the velocity vector
-  
-  // The component'th entry of the on-diagonal Jacobian value is 2*u_i without the pressure
-  // contribution.  Then the pressure adds (1-gamma)*u_i as noted above, so we end up
-  // with (3-gamma)*u_i in the component'th position:
-  vec(_component) = (3. - _gamma)*vec(_component);
-
-  return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
+  // The on-diagonal entry corresponds to variable number _component+1.
+  return this->compute_jacobian(_component+1); 
 }
 
 
@@ -107,88 +90,64 @@ NSMomentumInviscidFlux::computeQpJacobian()
 Real
 NSMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  // Map jvar into the variable m for our problem, regardless of
+  // how Moose has numbered things. 
+  unsigned m = 99;
+ 
   if (jvar == _rho_var_number)
-  {
-    // std::cout << "Density: " << "_component=" << _component << ", jvar=" << jvar << std::endl;
-
-    // Derivative of inviscid flux kernel wrt density:
-    // x-mom: (-u_1^2 + (g-1)/2*V^2, -u_1*u_2            , -u_1*u_3            ) * grad(phi_i) * phi_j
-    // y-mom: (-u_2*u_1            , -u_2^2 + (g-1)/2*V^2, -u_2*u_3            ) * grad(phi_i) * phi_j
-    // z-mom: (-u_3*u_1            , -u_3*u_2            , -u_3^2 + (g-1)/2*V^2) * grad(phi_i) * phi_j
-    //
-    // In terms of the flux Jacobian entries from Ben's dissertation, these entries
-    // come from the first column, in particular:
-    //
-    // x-mom: (A_1(2,1), A_2(2,1), A_3(2,1)) * grad(phi_i) * phi_j
-    // y-mom: (A_1(3,1), A_2(3,1), A_3(3,1)) * grad(phi_i) * phi_j
-    // z-mom: (A_1(4,1), A_2(4,1), A_3(4,1)) * grad(phi_i) * phi_j
-    
-    // Start with the velocity vector
-    RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    
-    // Velocity vector magnitude, squared
-    Real V2 = vec.size_sq();
-    
-    // Scale velocity vector by -1 * vec(_component)
-    vec *= -vec(_component);
-
-    // Add to the _component'th entry the quantity (gamma-1)/2 * V2
-    vec(_component) += 0.5 * (_gamma-1.) * V2;
-
-    // Return  -1 * (vec*grad(phi)) * phi_j
-    return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
-  }
-
-  
-  // Handle off-diagonal derivatives wrt momentums
-  else if ((jvar == _rhou_var_number) || (jvar == _rhov_var_number) || (jvar == _rhow_var_number))
-  {
-    // Start with the velocity vector
-    RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-    // Map jvar into jlocal = {0,1,2}, regardless of how Moose has numbered things.
-    // Can't do a case statement here since _rhou_var_number, etc. are not constants...
-    unsigned jlocal = 0;
-    
-    if (jvar == _rhov_var_number)
-      jlocal = 1;
-    else if (jvar == _rhow_var_number)
-      jlocal = 2;
-
-    // Create a vector according to the following three rules:
-    RealVectorValue vec;
-    
-    // .) u_component is in entry jlocal
-    vec(jlocal) = vel(_component);
-    
-    // .) (1-gamma)*u_jlocal is in entry _component
-    vec(_component) = (1.-_gamma) * vel(jlocal);
-
-    // .) 0 is in the remaining component
-    // ...
-    
-    // Return -1*result * grad(phi_i) * phi_j
-    return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
-  }
-
+    m = 0;
+  else if (jvar == _rhou_var_number)
+    m = 1;
+  else if (jvar == _rhov_var_number)
+    m = 2;
+  else if (jvar == _rhow_var_number)
+    m = 3;
   else if (jvar == _rhoe_var_number)
-  {
-    // std::cout << "Total energy: " << "_component=" << _component << ", jvar=" << jvar << std::endl;
-    
-    // The derivative of P(U) wrt to rho*E is simply (gamma-1), a constant
-    RealVectorValue vec;
-    vec(_component) = _gamma - 1.;
-
-    // Return -1*result * grad(phi_i) * phi_j
-    return - (vec * _grad_test[_i][_qp]) * _phi[_j][_qp];
-  }
-
+    m = 4;
   else
+    mooseError("Invalid jvar!");
+
+  return this->compute_jacobian(m);
+}
+
+
+
+Real NSMomentumInviscidFlux::compute_jacobian(unsigned m)
+{
+  RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+
+  switch ( m )
   {
-    mooseError("computeQpOffDiagJacobian called with invalid jvar.");
+  case 0: // density
+  {
+    Real V2 = vel.size_sq();
+
+    return vel(_component) * (vel*_grad_test[_i][_qp]) - 0.5 * (_gamma-1.) * V2 * _grad_test[_i][_qp](_component);
   }
 
+  case 1:
+  case 2:
+  case 3: // momentums
+  {
+    // Map m into m_local = {0,1,2}
+    unsigned m_local = m - 1;
+
+    // Kronecker delta
+    Real delta_kl = (_component == m_local ? 1. : 0.);
+
+    return -1. * (vel(_component) * _grad_test[_i][_qp](m_local)
+		  + delta_kl * (vel * _grad_test[_i][_qp])
+		  + (1.-_gamma) * vel(m_local) *_grad_test[_i][_qp](_component)) * _phi[_j][_qp];
+  }
+
+  case 4: // energy
+    return -1. * (_gamma - 1.) * _phi[_j][_qp] * _grad_test[_i][_qp](_component);
+
+  default:
+    mooseError("Shouldn't get here!");
+  }
 
   // Won't get here!
   return 0;
+
 }
