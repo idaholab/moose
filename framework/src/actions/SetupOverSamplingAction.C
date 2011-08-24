@@ -31,7 +31,7 @@ InputParameters validParams<SetupOverSamplingAction>()
   // in this block for now.  We may make a common ancestor at some point to clean this up
   InputParameters params = validParams<Action>();
 
-  params.addParam<std::string>("file_base", "out_oversample", "The desired solution output name without an extension");
+  params.addParam<std::string>("file_base", "The desired oversampled solution output name without an extension.  If not supplied, the main file_base will be used with a '_oversample' suffix added.");
 
   params.addParam<unsigned int>("refinements", 1, "The number of refinements to output for the over sampled solution");
   
@@ -75,6 +75,9 @@ SetupOverSamplingAction::act()
     _pars.set<std::vector<std::string> >("output_variables") = mproblem.getVariableNames();
   }
 
+  // If no filebase was supplied in the parameters object - borrow the main problem's filebase
+  if (!_pars.isParamValid("file_base"))
+    _pars.set<std::string>("file_base") = problem->out().fileBase() + "_oversample";
   
   setupOutputObject(output, _pars);
 
