@@ -15,3 +15,5 @@ testtrapezoid = { INPUT : 'trapezoid.i',
 testlevel1 = { INPUT : 'periodic_level_1_test.i',
                EXODIFF : ['level1_0000.e', 'level1_0009.e', 'level1_0019.e'] }
 
+subdomain_restricted_vars_test = { INPUT : 'periodic_subdomain_restricted_test.i',
+                                   EXODIFF : ['out_restrict.e'] }
