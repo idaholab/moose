@@ -40,20 +40,7 @@ Real NSMassBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   // Map jvar into the variable m for our problem, regardless of
   // how Moose has numbered things. 
-  unsigned m = 99;
-  
-  if (jvar == _rho_var_number)
-    m = 0;
-  else if (jvar == _rhou_var_number)
-    m = 1;
-  else if (jvar == _rhov_var_number)
-    m = 2;
-  else if (jvar == _rhow_var_number)
-    m = 3;
-  else if (jvar == _rhoe_var_number)
-    m = 4;
-  else
-    mooseError("Invalid jvar!");
+  unsigned m = this->map_var_number(jvar);
 
   switch ( m )
   {

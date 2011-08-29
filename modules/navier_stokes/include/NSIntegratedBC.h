@@ -64,6 +64,10 @@ protected:
   // Integrated BC can use Mat. properties...
   MaterialProperty<Real> & _dynamic_viscosity; 
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor; // Includes _dynamic_viscosity
+
+  // Helper function for mapping Moose variable numberings into
+  // the "canonical" numbering for the compressible NS equations.
+  unsigned map_var_number(unsigned var);
 };
 
 

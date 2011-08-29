@@ -60,3 +60,26 @@ NSIntegratedBC::NSIntegratedBC(const std::string & name, InputParameters paramet
       _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor"))
 {
 }
+
+
+
+unsigned NSIntegratedBC::map_var_number(unsigned var)
+{
+  // Convert the Moose numbering to:
+  // 0 for rho
+  // 1 for rho*u
+  // 2 for rho*v
+  // 3 for rho*w
+  // 4 for rho*e
+  // regardless of the problem dimension, etc.
+  unsigned mapped_var_number = 99;
+  
+  if (var == _rho_var_number)       mapped_var_number = 0;
+  else if (var == _rhou_var_number) mapped_var_number = 1;
+  else if (var == _rhov_var_number) mapped_var_number = 2;
+  else if (var == _rhow_var_number) mapped_var_number = 3;
+  else if (var == _rhoe_var_number) mapped_var_number = 4;
+  else mooseError("Invalid var!");
+  
+  return mapped_var_number;
+}
