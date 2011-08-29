@@ -1,7 +1,7 @@
 #ifndef NSENERGYVISCOUSFLUX_H
 #define NSENERGYVISCOUSFLUX_H
 
-#include "NSViscousFluxBase.h"
+#include "NSKernel.h"
 #include "NSViscStressTensorDerivs.h"
 
 
@@ -13,10 +13,9 @@ InputParameters validParams<NSEnergyViscousFlux>();
 
 
 /**
- * Derived instance of the NSViscousFluxBase class
- * for the energy equations.
+ * Viscous flux terms in energy equation.
  */
-class NSEnergyViscousFlux : public NSViscousFluxBase
+class NSEnergyViscousFlux : public NSKernel
 {
 public:
 
@@ -26,11 +25,6 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
-  // Coupled variable values
-  VariableValue & _u_vel;
-  VariableValue & _v_vel;
-  VariableValue & _w_vel;
   
   // An object for computing viscous stress tensor derivatives.
   // Constructed via a reference to ourself

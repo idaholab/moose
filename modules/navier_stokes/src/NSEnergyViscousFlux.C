@@ -5,13 +5,8 @@ template<>
 InputParameters validParams<NSEnergyViscousFlux>()
 {
   // Initialize the params object from the base class
-  InputParameters params = validParams<NSViscousFluxBase>();
+  InputParameters params = validParams<NSKernel>();
 
-  // Add extra required coupled variables
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", ""); // only required in 3D
-  
   return params;
 }
 
@@ -19,10 +14,7 @@ InputParameters validParams<NSEnergyViscousFlux>()
 
 
 NSEnergyViscousFlux::NSEnergyViscousFlux(const std::string & name, InputParameters parameters)
-    : NSViscousFluxBase(name, parameters),
-      _u_vel(coupledValue("u")),
-      _v_vel(coupledValue("v")),
-      _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+    : NSKernel(name, parameters),
       _vst_derivs(*this)
 {
 }
@@ -41,11 +33,15 @@ Real NSEnergyViscousFlux::computeQpResidual()
 }
 
 
+
+
 Real NSEnergyViscousFlux::computeQpJacobian()
 {
   // No dependence of this term on U_4!
   return 0.;
 }
+
+
 
 
 Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
@@ -57,27 +53,9 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   Real phij = _phi[_j][_qp];
   RealVectorValue U(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
 
-
-  
   // Map jvar into the variable m for our problem, regardless of
   // how Moose has numbered things. 
-  unsigned m = 99;
- 
-  if (jvar == _rho_var_number)
-    m = 0;
-  else if (jvar == _rhou_var_number)
-    m = 1;
-  else if (jvar == _rhov_var_number)
-    m = 2;
-  else if (jvar == _rhow_var_number)
-    m = 3;
-  else
-  {
-    std::ostringstream oss;
-    oss << "Invalid jvar=" << jvar << " requested!" << std::endl;
-    mooseError(oss.str());
-  }
-
+  unsigned m = this->map_var_number(jvar);
 
   // Compute Jacobian terms based on the value of m
   switch (m)
@@ -91,9 +69,6 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     for (unsigned k=0; k<LIBMESH_DIM; ++k)
     {
       Real intermediate_value = 0.;
-
-//      for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-//	intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + this->dtau(k,ell,0)) );
 
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
 	intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + _vst_derivs.dtau(k,ell,0)) );
@@ -120,9 +95,6 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     {
       Real intermediate_value = tau(k,m_local)*phij/rho;
       
-      // for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-      // intermediate_value += this->dtau(k,ell,m)*U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
-
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
 	intermediate_value += _vst_derivs.dtau(k,ell,m) * U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
 

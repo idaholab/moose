@@ -21,17 +21,28 @@ NSGravityPower::NSGravityPower(const std::string & name, InputParameters paramet
     _acceleration(getParam<Real>("acceleration"))
   {}
 
+
+
 Real
 NSGravityPower::computeQpResidual()
 {
   // -(rho * U * g) * phi
-  return -_momentum[_qp]*_acceleration*_test[_i][_qp];
+  return -_momentum[_qp] * _acceleration * _test[_i][_qp];
 }
+
+
+
+Real NSGravityPower::computeQpJacobian()
+{
+  return 0.;
+}
+
+
 
 Real
 NSGravityPower::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _momentum_var)
+  if (jvar == _momentum_var)
   {
     return -_phi[_j][_qp] * _acceleration * _test[_i][_qp];
   }

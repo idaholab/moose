@@ -3,38 +3,42 @@
 template<>
 InputParameters validParams<NSGravityForce>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<NSKernel>();
 
-  // This term is coupled to the density
-  params.addRequiredCoupledVar("rho", "");
-
-  // Defaults to earth gravity
+  // The strength of the acceleration in the _component direction.  Make this
+  // value negative if you want force in the -_component direction.
   params.addRequiredParam<Real>("acceleration", "The body force vector component.");
 
   return params;
 }
 
 NSGravityForce::NSGravityForce(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
-    _rho_var(coupled("rho")),
-    _rho(coupledValue("rho")),
+  :NSKernel(name, parameters),
     _acceleration(getParam<Real>("acceleration"))
   {}
+
+
 
 Real
 NSGravityForce::computeQpResidual()
 {
   // -rho * g * phi
-  return -_rho[_qp]*_acceleration*_test[_i][_qp];
+  return -_rho[_qp] * _acceleration * _test[_i][_qp];
 }
+
+
+Real NSGravityForce::computeQpJacobian()
+{
+  return 0.;
+}
+
+
 
 Real
 NSGravityForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _rho_var)
-  {
-    return -_phi[_j][_qp]*_acceleration*_test[_i][_qp];
-  }
+  if (jvar == _rho_var_number)
+    return -_phi[_j][_qp] * _acceleration * _test[_i][_qp];
 
   return 0;
 }

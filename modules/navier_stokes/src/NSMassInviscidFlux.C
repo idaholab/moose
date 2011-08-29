@@ -3,38 +3,13 @@
 template<>
 InputParameters validParams<NSMassInviscidFlux>()
 {
-  InputParameters params = validParams<Kernel>();
-  
-  // Required variables
-  params.addRequiredCoupledVar("rhou", "");
-  params.addRequiredCoupledVar("rhov", "");
-  params.addCoupledVar("rhow", "");
-  
-  // When computing the Jacobian, we need velocities alone.  Let's be 
-  // consistent with other kernels that use Nodal Aux values for these
-  // variables...
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", "");
-
+  InputParameters params = validParams<NSKernel>();
   
   return params;
 }
 
 NSMassInviscidFlux::NSMassInviscidFlux(const std::string & name, InputParameters parameters)
-    :Kernel(name, parameters),
-     _rhou_var_number(coupled("rhou")),
-     _rhou(coupledValue("rhou")),
-     _rhov_var_number(coupled("rhov")),
-     _rhov(coupledValue("rhov")),
-     _rhow_var_number(_dim == 3 ? coupled("rhow") : std::numeric_limits<unsigned int>::max()),
-     _rhow(_dim == 3 ? coupledValue("rhow") : _zero),
-     _u_vel_var(coupled("u")),
-     _u_vel(coupledValue("u")),
-     _v_vel_var(coupled("v")),
-     _v_vel(coupledValue("v")),
-     _w_vel_var(_dim == 3 ? coupled("w") : std::numeric_limits<unsigned int>::max()),
-     _w_vel(_dim == 3 ? coupledValue("w") : _zero)
+    : NSKernel(name, parameters)
 {}
 
 
@@ -42,11 +17,10 @@ NSMassInviscidFlux::NSMassInviscidFlux(const std::string & name, InputParameters
 Real
 NSMassInviscidFlux::computeQpResidual()
 {
-  // vec = rho*U
-  RealVectorValue vec(_rhou[_qp],_rhov[_qp],_rhow[_qp]);
+  RealVectorValue mom(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
 
   // -(rho*U) * grad(phi), negative sign comes from integration-by-parts
-  return -(vec*_grad_test[_i][_qp]);
+  return -(mom * _grad_test[_i][_qp]);
 }
 
 
@@ -76,25 +50,29 @@ NSMassInviscidFlux::computeQpJacobian()
 Real
 NSMassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _rhou_var_number)
-  {
-    RealVectorValue vec(_phi[_j][_qp],0,0);
-    return -(vec*_grad_test[_i][_qp]);
-  }
+  // Map jvar into the variable m for our problem, regardless of
+  // how Moose has numbered things. 
+  unsigned m = this->map_var_number(jvar);
 
-  else if (jvar == _rhov_var_number)
+  switch ( m )
   {
-    RealVectorValue vec(0,_phi[_j][_qp],0);
-    return -(vec*_grad_test[_i][_qp]);
-  }
+    // Don't handle the on-diagonal case here
+    // case 0: // density
 
-  else if (jvar == _rhow_var_number)
+  case 1:
+  case 2:
+  case 3: // momentums
   {
-    RealVectorValue vec(0,0,_phi[_j][_qp]);
-    return -(vec*_grad_test[_i][_qp]);
+    return -_phi[_j][_qp] * _grad_test[_i][_qp](m-1);
   }
-
-  // For all other variables, return 0.
-  else
+  
+  case 4: // energy
     return 0.;
+
+  default:
+    mooseError("Should not get here!");
+  }
+  
+  // won't get here
+  return 0.;
 }

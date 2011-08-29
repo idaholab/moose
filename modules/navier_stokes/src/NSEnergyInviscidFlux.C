@@ -3,43 +3,16 @@
 template<>
 InputParameters validParams<NSEnergyInviscidFlux>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<NSKernel>();
 
-  // Required coupled nodal aux variables
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", "");
-  params.addRequiredCoupledVar("pressure", ""); // Now computed as an AuxKernel
-
-  // Required parameters
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
-
-  // Required "coupled" variables, only the numerical index of these
-  // variables is required, not their actual value.
-  params.addRequiredCoupledVar("rho", "");
-  params.addRequiredCoupledVar("rhou", "");
-  params.addRequiredCoupledVar("rhov", "");
-  params.addCoupledVar("rhow", ""); // only required in 3D
-  
-  // Require this *or* rho, but not both?
   params.addRequiredCoupledVar("enthalpy", "");
 
   return params;
 }
 
 NSEnergyInviscidFlux::NSEnergyInviscidFlux(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
-   _u_vel(coupledValue("u")),
-   _v_vel(coupledValue("v")),
-   _w_vel(_dim == 3 ? coupledValue("w") : _zero),
-   _pressure(coupledValue("pressure")),
-   _gamma(getParam<Real>("gamma")),
-   _rho_var_number( coupled("rho") ),
-   _rhou_var_number( coupled("rhou") ),
-   _rhov_var_number( coupled("rhov") ),
-   _rhow_var_number( _dim == 3 ? coupled("rhow") : libMesh::invalid_uint),
-   _rho(coupledValue("rho")),
-   _enthalpy(coupledValue("enthalpy"))
+  : NSKernel(name, parameters),
+    _enthalpy(coupledValue("enthalpy"))
 {}
 
 

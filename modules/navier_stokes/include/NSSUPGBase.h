@@ -1,7 +1,7 @@
 #ifndef NSSUPGBASE_H
 #define NSSUPGBASE_H
 
-#include "Kernel.h"
+#include "NSKernel.h"
 
 // Forward Declarations
 class NSSUPGBase;
@@ -15,7 +15,7 @@ InputParameters validParams<NSSUPGBase>();
  * This is useful because the stabilization kernels for different
  * equations share a lot of information...
  */
-class NSSUPGBase : public Kernel
+class NSSUPGBase : public NSKernel
 {
 public:
 
@@ -51,53 +51,18 @@ protected:
   // Energy equation inviscid flux matrices
   MaterialProperty<std::vector<std::vector<RealTensorValue> > >& _calE;
 
-  // Coupled variable values.
-  VariableValue& _rho;
-  VariableValue& _rho_u;
-  VariableValue& _rho_v;
-  VariableValue& _rho_w;
-  VariableValue& _rho_e;
-  
   // "Old" (from previous timestep) coupled variable values.
-  VariableValue& _rho_old;
-  VariableValue& _rho_u_old;
-  VariableValue& _rho_v_old;
-  VariableValue& _rho_w_old;
-  VariableValue& _rho_e_old;
-
-  // Velocities are used directly in computing h_supg and tau's.
-  VariableValue & _u_vel;
-  VariableValue & _v_vel;
-  VariableValue & _w_vel;
+//  VariableValue& _rho_old;
+//  VariableValue& _rho_u_old;
+//  VariableValue& _rho_v_old;
+//  VariableValue& _rho_w_old;
+//  VariableValue& _rho_e_old;
 
   // Temperature is need to compute speed of sound
   VariableValue & _temperature;
 
   // Enthalpy aux variable
   VariableValue& _enthalpy;
-
-  // Gradients
-  VariableGradient& _grad_rho;
-  VariableGradient& _grad_rho_u;
-  VariableGradient& _grad_rho_v;
-  VariableGradient& _grad_rho_w;
-  VariableGradient& _grad_rho_e;
-
-  // Variable numberings
-  unsigned _rho_var_number;
-  unsigned _rhou_var_number;
-  unsigned _rhov_var_number;
-  unsigned _rhow_var_number;
-  unsigned _rhoe_var_number;
-
-  // Global parameters
-  Real _gamma;
-  Real _R;
-  Real _cv;
-
-  // Helper function for mapping Moose variable numberings into
-  // the "canonical" numbering for the compressible NS equations.
-  unsigned map_var_number(unsigned var);
 };
  
 #endif //  NSSUPGBASE_H

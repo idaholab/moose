@@ -1,7 +1,7 @@
 #ifndef NSENERGYTHERMALFLUX_H
 #define NSENERGYTHERMALFLUX_H
 
-#include "Kernel.h"
+#include "NSKernel.h"
 #include "NSTemperatureDerivs.h"
 
 // ForwardDeclarations
@@ -16,7 +16,7 @@ InputParameters validParams<NSEnergyThermalFlux>();
  * terms for the k * grad(T) * grad(phi) term in the Navier-Stokes
  * energy equation.
  */
-class NSEnergyThermalFlux : public Kernel
+class NSEnergyThermalFlux : public NSKernel
 {
 public:
 
@@ -27,33 +27,11 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  // Coupled variable values
-  VariableValue& _rho;
-  VariableValue& _rho_u;
-  VariableValue& _rho_v;
-  VariableValue& _rho_w;
-  VariableValue& _rho_e;
-  
   // Gradients
   VariableGradient& _grad_temp;
-  VariableGradient& _grad_rho;
-  VariableGradient& _grad_rho_u;
-  VariableGradient& _grad_rho_v;
-  VariableGradient& _grad_rho_w;
-  VariableGradient& _grad_rho_e;
-
-  // Variable numberings 
-  unsigned _rho_var_number;
-  unsigned _rhou_var_number;
-  unsigned _rhov_var_number;
-  unsigned _rhow_var_number;
-  unsigned _rhoe_var_number;
   
   // Material properties
   MaterialProperty<Real> &_thermal_conductivity;
-
-  // Parameters
-  Real _cv;
 
   // A helper object for computing temperature gradient and Hessians.
   // Constructed via a reference to ourself so we can access all of our data.

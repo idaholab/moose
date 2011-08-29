@@ -1,7 +1,7 @@
 #ifndef NSMOMENTUMVISCOUSFLUX_H
 #define NSMOMENTUMVISCOUSFLUX_H
 
-#include "NSViscousFluxBase.h"
+#include "NSKernel.h"
 #include "NSViscStressTensorDerivs.h"
 
 
@@ -16,7 +16,7 @@ InputParameters validParams<NSMomentumViscousFlux>();
  * Derived instance of the NSViscousFluxBase class
  * for the momentum equations.
  */
-class NSMomentumViscousFlux : public NSViscousFluxBase
+class NSMomentumViscousFlux : public NSKernel
 {
 public:
 

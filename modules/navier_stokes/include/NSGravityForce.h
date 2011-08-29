@@ -1,17 +1,16 @@
 #ifndef NSGRAVITYFORCE_H
 #define NSGRAVITYFORCE_H
 
-#include "Kernel.h"
-#include "Material.h"
+#include "NSKernel.h"
 
 
-//Forward Declarations
+// Forward Declarations
 class NSGravityForce;
 
 template<>
 InputParameters validParams<NSGravityForce>();
 
-class NSGravityForce : public Kernel
+class NSGravityForce : public NSKernel
 {
 public:
 
@@ -19,11 +18,8 @@ public:
   
 protected:
   virtual Real computeQpResidual();
-  // virtual Real computeQpJacobian(); // on-diagonal Jacobian is zero
+  virtual Real computeQpJacobian(); 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
-  unsigned int _rho_var;
-  VariableValue & _rho;
 
   Real _acceleration;
 };

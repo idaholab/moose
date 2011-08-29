@@ -64,5 +64,6 @@ Real NSMassBC::computeQpOffDiagJacobian(unsigned jvar)
     mooseError("Should not get here!");
   }
 
+  // won't get here
   return 0.;
 }

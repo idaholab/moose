@@ -4,24 +4,13 @@
 template<>
 InputParameters validParams<NSMomentumInviscidFluxWithGradP>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<NSKernel>();
 
-  // Required coupled aux variables
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", "");
+  // Coupled variables
   params.addRequiredCoupledVar("pressure", "");
-
-  // Required coupled solution variables
-  params.addRequiredCoupledVar("rho", "");
-  params.addRequiredCoupledVar("rhou", "x-momentum");
-  params.addRequiredCoupledVar("rhov", "y-momentum");
-  params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
-  params.addRequiredCoupledVar("rhoe", "total energy");
 
   // Required parameters
   params.addRequiredParam<Real>("component", "");
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
 
   return params;
 }
@@ -31,31 +20,13 @@ InputParameters validParams<NSMomentumInviscidFluxWithGradP>()
 
 
 NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters),
-   // Coupled variables
-   _u_vel(coupledValue("u")),
-   _v_vel(coupledValue("v")),
-   _w_vel(_dim == 3 ? coupledValue("w") : _zero),
-   _rho(coupledValue("rho")),
-
+  : NSKernel(name, parameters),
+    
    // Coupled gradients
    _grad_p(coupledGradient("pressure")),
-   _grad_rho(coupledGradient("rho")),
-   _grad_rho_u(coupledGradient("rhou")),
-   _grad_rho_v(coupledGradient("rhov")),
-   _grad_rho_w( _dim == 3 ? coupledGradient("rhow") : _grad_zero),
-   _grad_rho_e(coupledGradient("rhoe")),
    
    // Parameters
-   _component(getParam<Real>("component")),
-   _gamma(getParam<Real>("gamma")),
-
-   // Variable numbers
-   _rho_var_number( coupled("rho") ),
-   _rhou_var_number( coupled("rhou") ),
-   _rhov_var_number( coupled("rhov") ),
-   _rhow_var_number( _dim == 3 ? coupled("rhow") : libMesh::invalid_uint),
-   _rhoe_var_number( coupled("rhoe") )
+   _component(getParam<Real>("component"))
 {
   // Zero out the gradient and Hessian entries so we are never dealing with uninitialized memory
   for (unsigned i=0; i<5; ++i)
@@ -127,21 +98,7 @@ Real
 NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Map jvar into the numbering expected by this->compute_pressure_jacobain_value()
-  unsigned var_number = 99; // invalid
-
-  if (jvar==_rho_var_number)
-    var_number = 0;
-  else if (jvar==_rhou_var_number)
-    var_number = 1;
-  else if (jvar==_rhov_var_number)
-    var_number = 2;
-  else if (jvar==_rhow_var_number)
-    var_number = 3;
-  else if (jvar==_rhoe_var_number)
-    var_number = 4;
-  else
-    mooseError("Invalid jvar!");
-  
+  unsigned var_number = this->map_var_number(jvar);
 
   // The Jacobian contribution due to differentiating the grad(p)
   // term wrt variable var_number.

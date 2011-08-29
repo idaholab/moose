@@ -1,7 +1,7 @@
 #ifndef NSMOMENTUMINVISCIDFLUXWITHGRADP_H
 #define NSMOMENTUMINVISCIDFLUXWITHGRADP_H
 
-#include "Kernel.h"
+#include "NSKernel.h"
 
 
 // ForwardDeclarations
@@ -10,7 +10,7 @@ class NSMomentumInviscidFluxWithGradP;
 template<>
 InputParameters validParams<NSMomentumInviscidFluxWithGradP>();
 
-class NSMomentumInviscidFluxWithGradP : public Kernel
+class NSMomentumInviscidFluxWithGradP : public NSKernel
 {
 public:
 
@@ -21,30 +21,11 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   
-  // Coupled variables
-  VariableValue& _u_vel;
-  VariableValue& _v_vel;
-  VariableValue& _w_vel;
-  VariableValue& _rho;
-  
   // Coupled gradients
   VariableGradient& _grad_p;
-  VariableGradient& _grad_rho;
-  VariableGradient& _grad_rho_u;
-  VariableGradient& _grad_rho_v;
-  VariableGradient& _grad_rho_w;
-  VariableGradient& _grad_rho_e;
 
   // Parameters
   int _component;
-  Real _gamma;
-
-  // Variable numbers
-  unsigned _rho_var_number;
-  unsigned _rhou_var_number;
-  unsigned _rhov_var_number;
-  unsigned _rhow_var_number;
-  unsigned _rhoe_var_number;
 
 private:
   // Recomputes gradient and Hessian values (only the lower triangle,

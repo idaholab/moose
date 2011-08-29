@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<NSMomentumViscousFlux>()
 {
   // Initialize the params object from the base class
-  InputParameters params = validParams<NSViscousFluxBase>();
+  InputParameters params = validParams<NSKernel>();
 
   // component is a required parameter, so make it so!
   params.addRequiredParam<unsigned>("component", "");
@@ -17,7 +17,7 @@ InputParameters validParams<NSMomentumViscousFlux>()
 
 
 NSMomentumViscousFlux::NSMomentumViscousFlux(const std::string & name, InputParameters parameters)
-    : NSViscousFluxBase(name, parameters),
+    : NSKernel(name, parameters),
       _component(getParam<unsigned>("component")),
       _vst_derivs(*this)
 {
@@ -50,10 +50,7 @@ Real NSMomentumViscousFlux::computeQpJacobian()
   const unsigned k = _component;
   const unsigned m = _component+1; // _component = 0,1,2 -> m = 1,2,3 global variable number
   
-//  for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-//    value += this->dtau(k, ell, m)*_grad_test[_i][_qp](ell);
-
-  // New style: use external templated friend class for common viscous stress 
+  // Use external templated friend class for common viscous stress 
   // tensor derivative computations.
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
     value += _vst_derivs.dtau(k, ell, m) * _grad_test[_i][_qp](ell);
@@ -71,34 +68,7 @@ Real NSMomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
   // Map jvar into the variable m for our problem, regardless of
   // how Moose has numbered things. 
-  unsigned m = 0;
-  
-  if (jvar == _rho_var_number)
-    m = 0;
-  else if (jvar == _rhou_var_number)
-    m = 1;
-  else if (jvar == _rhov_var_number)
-    m = 2;
-  else if (jvar == _rhow_var_number)
-    m = 3;
-  else if (jvar == _rhoe_var_number)
-    m = 4;
-  else
-  {
-    std::ostringstream oss;
-    oss << "Invalid jvar=" << jvar << " requested!\n" 
-	<< "Did not match:\n"
-	<< " _rho_var_number =" << _rho_var_number  << "\n"
-	<< " _rhou_var_number=" << _rhou_var_number << "\n" 
-	<< " _rhov_var_number=" << _rhov_var_number << "\n"
-	<< " _rhow_var_number=" << _rhow_var_number << "\n"
-	<< " _rhoe_var_number=" << _rhoe_var_number
-	<< std::endl;
-    mooseError(oss.str());
-  }
-
-//  for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-//    value += this->dtau(k, ell, m)*_grad_test[_i][_qp](ell);
+  unsigned m = this->map_var_number(jvar);
 
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
     value += _vst_derivs.dtau(k, ell, m)*_grad_test[_i][_qp](ell);
