@@ -263,6 +263,12 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
 
   // std::cout << "velmag=" << velmag << std::endl;
 
+  // Make sure temperature >= 0 before trying to take sqrt
+#ifdef DEBUG
+  if (_temperature[qp] < 0.)
+    mooseError("Negative temperature detected at quadrature point!");
+#endif
+
   // The speed of sound for an ideal gas, sqrt(gamma * R * T)
   Real soundspeed = std::sqrt(_gamma * _R * _temperature[qp]);
 
