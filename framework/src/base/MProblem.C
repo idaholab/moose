@@ -282,6 +282,8 @@ void MProblem::timestepSetup()
   _aux.timestepSetup();
   _nl.timestepSetup();
   _out.timestepSetup();
+  if (_out_problem)
+    _out_problem->out().timestepSetup();
 }
 
 void
@@ -1120,7 +1122,9 @@ MProblem::outputPostprocessors()
 
   // FIXME: if exodus output is enabled?
   _out.outputPps(_pps_output_table);
-
+  if (_out_problem)
+    _out_problem->out().outputPps(_pps_output_table);
+  
   if (_postprocessor_csv_output)
     _pps_output_table.printCSV(_out.fileBase() + ".csv");
 
@@ -1389,6 +1393,8 @@ MProblem::output()
   if (!_input_file_saved)
   {
     _out.outputInput();
+    if (_out_problem)
+      _out_problem->out().outputInput();
     _input_file_saved = true;
   }
 

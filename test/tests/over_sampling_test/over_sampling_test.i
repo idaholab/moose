@@ -60,6 +60,12 @@
   [../]
 []
 
+[Postprocessors]
+  [./dt]
+    type = PrintDT
+  [../]
+[]
+
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator'
