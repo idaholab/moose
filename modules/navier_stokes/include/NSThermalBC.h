@@ -2,10 +2,9 @@
 #define NSTHERMALBC_H
 
 #include "NodalBC.h"
-#include "Material.h"
 
 
-//Forward Declarations
+// Forward Declarations
 class NSThermalBC;
 
 template<>

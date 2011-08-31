@@ -51,6 +51,7 @@
 #include "NSMomentumBC.h"
 #include "NSEnergyBC.h"
 #include "NSMassBC.h"
+#include "NSInflowThermalBC.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -164,6 +165,7 @@ Elk::registerObjects()
   registerBoundaryCondition(NSMomentumBC);
   registerBoundaryCondition(NSEnergyBC);
   registerBoundaryCondition(NSMassBC);
+  registerBoundaryCondition(NSInflowThermalBC);
 
   // linear_elasticity
   registerKernel(SolidMechX);
