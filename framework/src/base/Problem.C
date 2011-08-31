@@ -72,6 +72,8 @@ Problem::addFunction(std::string type, const std::string & name, InputParameters
 Function &
 Problem::getFunction(const std::string & name, THREAD_ID tid)
 {
-  return *_functions[tid][name];
+  Function * function = _functions[tid][name];
+  mooseAssert(function, "Unable to find function " + name);
+  return *function;
 }
 
