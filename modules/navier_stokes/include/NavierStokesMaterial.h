@@ -90,13 +90,12 @@ protected:
   VariableValue& _rho_w;
   VariableValue& _rho_e;
 
-  // Also need "old" (from previous timestep) coupled variable values
-  // for approximating time derivatives in strong residuals.
-  VariableValue& _rho_old;
-  VariableValue& _rho_u_old;
-  VariableValue& _rho_v_old;
-  VariableValue& _rho_w_old;
-  VariableValue& _rho_e_old;
+  // Time derivative values for dependent variables
+  VariableValue& _drho_dt;
+  VariableValue& _drhou_dt;
+  VariableValue& _drhov_dt;
+  VariableValue& _drhow_dt;
+  VariableValue& _drhoe_dt;
 
   // Gradients
   VariableGradient& _grad_rho;

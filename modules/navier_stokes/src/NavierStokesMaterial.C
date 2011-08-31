@@ -75,12 +75,12 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _rho_w( _dim == 3 ? coupledValue("rhow") : _zero),
     _rho_e(coupledValue("rhoe")),
     
-    // Old coupled solution values
-    _rho_old(coupledValueOld("rho")),
-    _rho_u_old(coupledValueOld("rhou")),
-    _rho_v_old(coupledValueOld("rhov")),
-    _rho_w_old( _dim == 3 ? coupledValueOld("rhow") : _zero),
-    _rho_e_old(coupledValueOld("rhoe")),
+    // Time derivative values
+    _drho_dt(coupledDot("rho")),
+    _drhou_dt(coupledDot("rhou")),
+    _drhov_dt(coupledDot("rhov")),
+    _drhow_dt( _dim == 3 ? coupledDot("rhow") : _zero),
+    _drhoe_dt(coupledDot("rhoe")),
     
     // Gradients
     _grad_rho(coupledGradient("rho")),
@@ -327,8 +327,9 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   _strong_residuals[qp].resize(5);
   
   // The timestep is stored in the Problem object, which can be accessed through
-  // the parent pointer of the SubProblemInterface
-  Real dt = _subproblem.parent()->dt();
+  // the parent pointer of the SubProblemInterface.  Don't need this if we are not
+  // approximating time derivatives ourselves.
+  // Real dt = _subproblem.parent()->dt();
   //std::cout << "dt=" << dt << std::endl;
 
   // Vector object for the velocity
@@ -341,19 +342,12 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   // Velocity vector magnitude squared
   Real velmag2 = vel.size_sq();
 
-  // (Finite difference approximated) time derivative values
-  Real drho_dt  = (_rho[qp]   - _rho_old[qp]  ) / dt;
-  Real drhou_dt = (_rho_u[qp] - _rho_u_old[qp]) / dt;
-  Real drhov_dt = (_rho_v[qp] - _rho_v_old[qp]) / dt;
-  Real drhow_dt = (_rho_w[qp] - _rho_w_old[qp]) / dt;
-  Real drhoe_dt = (_rho_e[qp] - _rho_e_old[qp]) / dt;
-  
   // Debugging: How large are the time derivative parts of the strong residuals?
-//  std::cout << "drho_dt=" << drho_dt
-//	    << ", drhou_dt=" << drhou_dt
-//	    << ", drhov_dt=" << drhov_dt
-//	    << ", drhow_dt=" << drhow_dt
-//	    << ", drhoe_dt=" << drhoe_dt
+//  std::cout << "drho_dt=" << _drho_dt
+//	    << ", drhou_dt=" << _drhou_dt
+//	    << ", drhov_dt=" << _drhov_dt
+//	    << ", drhow_dt=" << _drhow_dt
+//	    << ", drhoe_dt=" << _drhoe_dt
 //	    << std::endl;
 
   // Momentum divergence
@@ -472,23 +466,23 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   // Now for the actual residual values...
 
   // The density strong-residual
-  _strong_residuals[qp][0] = drho_dt + divU;
+  _strong_residuals[qp][0] = _drho_dt[qp] + divU;
 
   // The x-momentum strong-residual, viscous terms neglected.
   // TODO: If we want to add viscous contributions back in, should this kernel
   // not inherit from NSViscousFluxBase so it can get tau values?  This would
   // also involve shape function second derivative values.
-  _strong_residuals[qp][1] = drhou_dt + mom_resid(0);
+  _strong_residuals[qp][1] = _drhou_dt[qp] + mom_resid(0);
 
   // The y-momentum strong residual, viscous terms neglected.
-  _strong_residuals[qp][2] = drhov_dt + mom_resid(1);
+  _strong_residuals[qp][2] = _drhov_dt[qp] + mom_resid(1);
 
   // The z-momentum strong residual, viscous terms neglected.
   if (_dim == 3)
-    _strong_residuals[qp][3] = drhow_dt + mom_resid(2);
+    _strong_residuals[qp][3] = _drhow_dt[qp] + mom_resid(2);
   else
     _strong_residuals[qp][3] = 0.;
 
   // The energy equation strong residual
-  _strong_residuals[qp][4] = drhoe_dt + energy_resid;
+  _strong_residuals[qp][4] = _drhoe_dt[qp] + energy_resid;
 }
