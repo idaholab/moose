@@ -80,4 +80,8 @@ assertion_test = { INPUT : 'assertion_test.i',
 
 wrong_object_test = { INPUT : 'nonexistent_pps_test.i',
                       EXPECT_ERR : "Postprocessor '\S+' requested but not specified in the input file." }
-                   
+              
+deprecated_block_test = {
+  INPUT : 'deprecated_block_test.i',
+  EXPECT_ERR : "Input file block '\S+' has been deprecated."
+}
