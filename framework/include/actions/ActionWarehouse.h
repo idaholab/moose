@@ -94,6 +94,8 @@ public:
 
   void printInputFile(std::ostream & stream);
 
+  void showActions(bool state = true) { _show_actions = state; }
+
 private:
   void buildBuildableActions(const std::string &action_name);
   
@@ -121,6 +123,9 @@ private:
 
   /// Pointer to the active parser for this Warehouse instance
   Parser * _parser_ptr;
+
+  // DEBUGGING
+  bool _show_actions;
 };
 
 #endif // ACTIONWAREHOUSE_H

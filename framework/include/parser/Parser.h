@@ -140,7 +140,7 @@ public:
     mooseAssert(_syntax_formatter != NULL, "Syntax Formatter is NULL in Parser");
     _syntax_formatter->print(name, prev_name, param_ptrs);
   }
-  
+
   // data created while running execute()
   MooseMesh *_mesh;
   MooseMesh *_displaced_mesh;

@@ -35,6 +35,7 @@ public:
 
 protected:
   unsigned int _top_residuals;
+  bool _show_actions;
 };
 
 

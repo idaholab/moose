@@ -19,7 +19,8 @@
 
 ActionWarehouse::ActionWarehouse() :
   _generator_valid(false),
-  _parser_ptr(NULL)
+  _parser_ptr(NULL),
+  _show_actions(false)
 {
 }
 
@@ -219,6 +220,9 @@ ActionWarehouse::printActionDependencySets()
 void
 ActionWarehouse::executeAllActions()
 {
+  if (_show_actions)
+    std::cerr << "[DBG][ACT] Executing actions:" << std::endl;
+
   for (iterator act_iter = begin(); act_iter != end(); ++act_iter)
   {
      // Delay the InputParameters check of MOOSE based objects until just before "acting"
@@ -227,6 +231,8 @@ ActionWarehouse::executeAllActions()
      if (moose_obj_action != NULL)
        moose_obj_action->getMooseObjectParams().checkParams(moose_obj_action->name());
 
+     if (_show_actions)
+       std::cerr << "[DBG][ACT] - " << (*act_iter)->name() << std::endl;
      // Act!
      (*act_iter)->act();
    }

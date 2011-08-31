@@ -14,19 +14,23 @@
 
 #include "SetupDebugAction.h"
 #include "MProblem.h"
+#include "ActionWarehouse.h"
 
 template<>
 InputParameters validParams<SetupDebugAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
+  params.addParam<bool>("show_actions", false, "Print out the actions being executed");
   return params;
 }
 
 SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
-    _top_residuals(getParam<unsigned int>("show_top_residuals"))
+    _top_residuals(getParam<unsigned int>("show_top_residuals")),
+    _show_actions(getParam<bool>("show_actions"))
 {
+  Moose::action_warehouse.showActions(_show_actions);
 }
 
 SetupDebugAction::~SetupDebugAction()

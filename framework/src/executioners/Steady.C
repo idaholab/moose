@@ -43,7 +43,7 @@ Steady::~Steady()
 void
 Steady::execute()
 {
-  std::cerr << "Time: " << _time_step << "\n";
+  std::cout << "Time: " << _time_step << "\n";
   
   checkIntegrity();
 
