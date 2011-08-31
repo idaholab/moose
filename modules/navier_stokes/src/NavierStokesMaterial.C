@@ -356,7 +356,11 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   // Enough space to hold three space dimensions of velocity components at each qp,
   // regardless of what dimension we are actually running in.
   _calC[qp].resize(3);
-  
+
+  // Explicitly zero the calC
+  for (unsigned i=0; i<3; ++i)
+    _calC[qp][i].zero();
+
   // x-column matrix
   _calC[qp][0](0,0) = _u_vel[qp];
   _calC[qp][0](1,0) = _v_vel[qp];
@@ -379,6 +383,7 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   _calA[qp].resize(5);
 
   // 0.) _calA_0 = diag( (gam-1)/2*|u|^2 ) - S
+  _calA[qp][0].zero(); // zero this calA entry
   _calA[qp][0](0,0) = _calA[qp][0](1,1) = _calA[qp][0](2,2) = 0.5*(_gamma-1.)*velmag2; // set diag. entries
   _calA[qp][0] -= calS;
 
@@ -388,27 +393,14 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
     unsigned m_local = m-1;
 
     // For m=1,2,3, calA_m = C_m + C_m^T + diag( (1.-gam)*u_m )
+    _calA[qp][m].zero(); // zero this calA entry
     _calA[qp][m](0,0) = _calA[qp][m](1,1) = _calA[qp][m](2,2) = (1.-_gamma)*vel(m_local); // set diag. entries
     _calA[qp][m] += _calC[qp][m_local];             // Note: use m_local for indexing into _calC!
     _calA[qp][m] += _calC[qp][m_local].transpose(); // Note: use m_local for indexing into _calC!
   }
 
-//  // 1.) calA_1 = C_1 + C_1^T + diag( (1.-gam)*u_1 )
-//  _calA[qp][1](0,0) = _calA[qp][1](1,1) = _calA[qp][1](2,2) = (1.-_gamma)*vel(0); // set diag. entries
-//  _calA[qp][1] += _calC[qp][0];
-//  _calA[qp][1] += _calC[qp][0].transpose();
-//  
-//  // 2.) calA_2 = C_2 + C_2^T + diag( (1.-gam)*u_2 )
-//  _calA[qp][2](0,0) = _calA[qp][2](1,1) = _calA[qp][2](2,2) = (1.-_gamma)*vel(1); // set diag. entries
-//  _calA[qp][2] += _calC[qp][1];
-//  _calA[qp][2] += _calC[qp][1].transpose();
-//
-//  // 3.) calA_3 = C_3 + C_3^T + diag( (1.-gam)*u_3 )
-//  _calA[qp][3](0,0) = _calA[qp][3](1,1) = _calA[qp][3](2,2) = (1.-_gamma)*vel(2); // set diag. entries
-//  _calA[qp][3] += _calC[qp][2];
-//  _calA[qp][3] += _calC[qp][2].transpose();
-
   // 4.) calA_4 = diag(gam-1)
+  _calA[qp][4].zero(); // zero this calA entry
   _calA[qp][4](0,0) = _calA[qp][4](1,1) = _calA[qp][4](2,2) = (_gamma-1.);
 
   // Enough space to hold the 3*5 "cal E" matrices which comprise the inviscid flux term
@@ -425,6 +417,7 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
     RealTensorValue Ck_T = _calC[qp][k].transpose();
 
     // E_{k0} (density gradient term)
+    _calE[qp][k][0].zero();
     _calE[qp][k][0] = (0.5*(_gamma-1)*velmag2 - _enthalpy[qp]) * Ck_T;
 
     for (unsigned m=1; m<=3; ++m)
@@ -433,11 +426,13 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
       unsigned m_local = m-1;
 
       // E_{km} (momentum gradient terms)
+      _calE[qp][k][m].zero();
       _calE[qp][k][m](k,m_local) = _enthalpy[qp];           // H * D_{km}
       _calE[qp][k][m] += (1.-_gamma) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
     }
     
     // E_{k4} (energy gradient term)
+    _calE[qp][k][4].zero();
     _calE[qp][k][4] = _gamma * Ck_T;
   }
   
