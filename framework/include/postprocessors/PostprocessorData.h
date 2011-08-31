@@ -31,7 +31,12 @@ public:
   PostprocessorValue & getPostprocessorValue(const std::string & name);
 
   void storeValue(const std::string & name, PostprocessorValue value);
-  
+
+  /**
+   * Get the map of names -> postprocessor values. Exposed for error checking.
+   */
+  const std::map<std::string, PostprocessorValue> & values() const { return _values; }
+
 protected:
   std::map<std::string, PostprocessorValue> _values;
 };

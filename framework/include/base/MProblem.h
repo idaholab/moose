@@ -259,6 +259,8 @@ public:
   std::string _gnuplot_format;
 
 protected:
+  void checkPPSs();
+
   // Output system
   Output _out;
   OutputProblem * _out_problem;

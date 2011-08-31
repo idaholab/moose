@@ -28,6 +28,7 @@
 #include "TEJumpFFN.h"
 #include "NanKernel.h"
 #include "MatConvection.h"
+#include "PPSDiffusion.h"
 
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
@@ -91,6 +92,7 @@ void registerObjects()
   registerObject(TEJumpFFN);
   registerObject(NanKernel);
   registerKernel(MatConvection);
+  registerKernel(PPSDiffusion);
 
   // Aux kernels
   registerObject(PolyConstantAux);

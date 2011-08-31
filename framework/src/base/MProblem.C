@@ -1485,6 +1485,28 @@ MProblem::checkProblemIntegrity()
 
   // Check that BCs used in your simulation exist in your mesh
   _nl.checkBCCoverage();
+
+  checkPPSs();
+}
+
+void
+MProblem::checkPPSs()
+{
+  // gather names of all postprocessors that were defined in the input file
+  std::set<std::string> names;
+  ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP };
+  for (unsigned int i = 0; i < sizeof(types)/sizeof(types[0]); i++)
+  {
+    for (std::vector<Postprocessor *>::const_iterator it = _pps(types[i])[0].all().begin(); it != _pps(types[i])[0].all().end(); ++it)
+      names.insert((*it)->name());
+  }
+
+  // check that all requested PPS were defined in the input file
+  for (std::map<std::string, PostprocessorValue>::const_iterator it = _pps_data[0].values().begin(); it != _pps_data[0].values().end(); ++it)
+  {
+    if (names.find(it->first) == names.end())
+      mooseError("Postprocessor '" + it->first + "' requested but not specified in the input file.");
+  }
 }
 
 void
