@@ -135,4 +135,7 @@ inline double rand()
 
 } // namespace Moose
 
+
+#define LENGTHOF(a) (sizeof(a)/sizeof(a[0]))
+
 #endif /* MOOSE_H */

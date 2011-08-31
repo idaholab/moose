@@ -261,6 +261,12 @@ public:
 protected:
   void checkPPSs();
 
+  /**
+   * Add postprocessor values to the output table
+   * @param type type of PPS to add to the table
+   */
+  void addPPSValuesToTable(ExecFlagType type);
+
   // Output system
   Output _out;
   OutputProblem * _out_problem;

@@ -21,6 +21,7 @@
 #include "ComputePostprocessorsThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
+#include "Moose.h"
 
 #include "ElementH1Error.h"
 
@@ -1077,11 +1078,11 @@ MProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
 }
 
 void
-MProblem::outputPostprocessors()
+MProblem::addPPSValuesToTable(ExecFlagType type)
 {
   // Store values into table
-  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(EXEC_TIMESTEP)[0].all().begin();
-      postprocessor_it != _pps(EXEC_TIMESTEP)[0].all().end();
+  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(type)[0].all().begin();
+      postprocessor_it != _pps(type)[0].all().end();
       ++postprocessor_it)
   {
     Postprocessor *pps = *postprocessor_it;
@@ -1094,21 +1095,14 @@ MProblem::outputPostprocessors()
       _pps_output_table.addData(name, value, _time);
     }
   }
-  // Add values of initial PPSes
-  for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(EXEC_INITIAL)[0].all().begin();
-      postprocessor_it != _pps(EXEC_INITIAL)[0].all().end();
-      ++postprocessor_it)
-  {
-    Postprocessor *pps = *postprocessor_it;
+}
 
-    if (pps->getOutput())
-    {
-      std::string name = pps->name();
-      Real value = _pps_data[0].getPostprocessorValue(name);
-
-      _pps_output_table.addData(name, value, _time);
-    }
-  }
+void
+MProblem::outputPostprocessors()
+{
+  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
+  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+    addPPSValuesToTable(types[i]);
 
   if (_pps_output_table.empty())
     return;
@@ -1495,7 +1489,7 @@ MProblem::checkPPSs()
   // gather names of all postprocessors that were defined in the input file
   std::set<std::string> names;
   ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP };
-  for (unsigned int i = 0; i < sizeof(types)/sizeof(types[0]); i++)
+  for (unsigned int i = 0; i < LENGTHOF(types); i++)
   {
     for (std::vector<Postprocessor *>::const_iterator it = _pps(types[i])[0].all().begin(); it != _pps(types[i])[0].all().end(); ++it)
       names.insert((*it)->name());
