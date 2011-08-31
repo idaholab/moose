@@ -1366,6 +1366,7 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
 {
   std::vector<st> vec;
   vec.resize(residual.size());
+  
   for (unsigned int nd = 0; nd < _mesh.n_nodes(); ++nd)
   {
     const Node & node = _mesh.node(nd);
@@ -1378,7 +1379,14 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
   // sort vec by residuals
   std::sort(vec.begin(), vec.end(), dbg_sort_residuals);
   // print out
-  std::cerr << "[DBG] Max " << n << " residuals" << std::endl;
+  std::cerr << "[DBG] Max " << n << " residuals";
+  if (vec.size() < n)
+  {
+    n = vec.size();
+    std::cerr << " (Only " << n << " available)";
+  }
+  std::cerr << std::endl;
+
   for (unsigned int i = 0; i < n; ++i)
   {
     fprintf(stderr, "[DBG]  % .15e '%s' at node %d\n", vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
