@@ -1365,21 +1365,24 @@ void
 NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsigned int n)
 {
   std::vector<st> vec;
-  vec.resize(residual.size());
+  vec.resize(residual.local_size());
   
-  for (unsigned int nd = 0; nd < _mesh.n_nodes(); ++nd)
+  unsigned int j = 0;
+  for (MeshBase::node_iterator it = _mesh._mesh.local_nodes_begin(); it != _mesh._mesh.local_nodes_end(); ++it, j++)
   {
-    const Node & node = _mesh.node(nd);
+    Node & node = *(*it);
+    unsigned int nd = node.id();
+
     for (unsigned int var = 0; var < node.n_vars(_sys.number()); ++var)
     {
       unsigned int dof_idx = node.dof_number(_sys.number(), var, 0);
-      vec[dof_idx] = st(var, nd, residual(dof_idx));
+      vec[j] = st(var, nd, residual(dof_idx));
     }
   }
   // sort vec by residuals
   std::sort(vec.begin(), vec.end(), dbg_sort_residuals);
   // print out
-  std::cerr << "[DBG] Max " << n << " residuals";
+  std::cerr << "[DBG][" << libMesh::processor_id() << "] Max " << n << " residuals";
   if (vec.size() < n)
   {
     n = vec.size();
@@ -1389,6 +1392,6 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
 
   for (unsigned int i = 0; i < n; ++i)
   {
-    fprintf(stderr, "[DBG]  % .15e '%s' at node %d\n", vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
+    fprintf(stderr, "[DBG][%d]  % .15e '%s' at node %d\n", libMesh::processor_id(), vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
   }
 }
