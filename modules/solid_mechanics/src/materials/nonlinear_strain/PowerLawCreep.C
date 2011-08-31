@@ -116,14 +116,12 @@ PowerLawCreep::computeStress()
   SymmTensor creep_strain_increment(dev_trial_stress);
   creep_strain_increment *= (1.5*del_p/effective_trial_stress);
 
-  SymmTensor elastic_strain_increment(_strain_increment.columnMajorMatrix());
-  elastic_strain_increment -= creep_strain_increment;
+  _strain_increment -= creep_strain_increment;
 
   //  compute stress increment
-  stress_new =  *elasticityTensor() * elastic_strain_increment;
+  _stress[_qp] = *elasticityTensor() * _strain_increment;
 
   // update stress and creep strain
-  _stress[_qp] = stress_new;
   _stress[_qp] += _stress_old;
   _creep_strain[_qp] = creep_strain_increment;
   _creep_strain[_qp] += _creep_strain_old[_qp];

@@ -80,18 +80,19 @@ PLC_LSH::computeStress()
   stress_new += _stress_old;
 
   SymmTensor creep_strain_increment;
+  SymmTensor elastic_strain_increment;
   SymmTensor stress_new_last( stress_new );
   Real delS(_tolerance+1);
   unsigned int counter(0);
 
   while (delS > _tolerance && counter++ < _max_its)
   {
-    computeCreep( stress_new, creep_strain_increment );
+    computeCreep( creep_strain_increment, stress_new );
 
 // now use stress_new to calculate a new effective_trial_stress and determine if
 // yield has occured and if so, calculate the corresponding plastic strain
 
-    computeLSH( stress_new, creep_strain_increment );
+    computeLSH( creep_strain_increment, elastic_strain_increment, stress_new );
 
     // now check convergence
     SymmTensor deltaS(stress_new_last - stress_new);
@@ -99,13 +100,14 @@ PLC_LSH::computeStress()
     stress_new_last = stress_new;
   }
 
+  _strain_increment = elastic_strain_increment;
   _stress[_qp] = stress_new;
 
 }
 
 void
-PLC_LSH::computeCreep( SymmTensor & stress_new,
-                       SymmTensor & creep_strain_increment )
+PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
+                       SymmTensor & stress_new )
 {
   creep_strain_increment.zero();
 
@@ -231,8 +233,9 @@ PLC_LSH::computeCreep( SymmTensor & stress_new,
 }
 
 void
-PLC_LSH::computeLSH( SymmTensor & stress_new,
-                     const SymmTensor & creep_strain_increment )
+PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
+                     SymmTensor & elastic_strain_increment,
+                     SymmTensor & stress_new )
 {
 
   if (_t_step == 1)
@@ -290,12 +293,12 @@ PLC_LSH::computeLSH( SymmTensor & stress_new,
     SymmTensor plastic_strain_increment(dev_trial_stress_p);
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress_p);
 
-    SymmTensor elastic_strain_increment_p( _strain_increment );
-    elastic_strain_increment_p -= plastic_strain_increment;
-    elastic_strain_increment_p -= creep_strain_increment;
+    elastic_strain_increment = _strain_increment;
+    elastic_strain_increment -= plastic_strain_increment;
+    elastic_strain_increment -= creep_strain_increment;
 
 //compute stress increment
-    stress_new = *elasticityTensor() * elastic_strain_increment_p;
+    stress_new = *elasticityTensor() * elastic_strain_increment;
 
 // update stress and plastic strain
     stress_new += _stress_old;

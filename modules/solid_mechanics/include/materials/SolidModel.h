@@ -45,7 +45,8 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
-  const Real _cracking_strain;
+  const Real _cracking_stress;
+  const unsigned int _max_cracks;
 
   const bool _has_temp;
   VariableValue & _temperature;
@@ -63,8 +64,12 @@ protected:
   MaterialProperty<SymmTensor> & _total_strain;
   MaterialProperty<SymmTensor> & _total_strain_old;
 
+  MaterialProperty<SymmTensor> & _elastic_strain;
+  MaterialProperty<SymmTensor> & _elastic_strain_old;
+
   MaterialProperty<RealVectorValue> * _crack_flags;
   MaterialProperty<RealVectorValue> * _crack_flags_old;
+  RealVectorValue _crack_flags_local;
   MaterialProperty<ColumnMajorMatrix> * _crack_rotation;
   MaterialProperty<ColumnMajorMatrix> * _crack_rotation_old;
 
@@ -92,22 +97,27 @@ protected:
   /// Modify increment for things like thermal strain
   virtual void modifyStrainIncrement();
 
-  /// Determine if cracking occurred.  If so, perform rotations, etc.
-  virtual void crackingStrainRotation();
+  /// Determine cracking directions.  Rotate elasticity tensor.
+  virtual void crackingStrainDirections();
 
   virtual unsigned int getNumKnownCrackDirs() const;
 
-  /// Rotate old and new stress to global, if cracking active
-//   virtual void crackingStressRotation();
-
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress() = 0;
+
+  /*
+   * Determine whether new cracks have formed.
+   * Rotate old and new stress to global, if cracking active
+   */
+  virtual void crackingStressRotation();
 
   /// Rotate stress to current configuration
   virtual void finalizeStress() {}
 
 
   virtual void computePreconditioning();
+
+  void applyCracksToTensor( SymmTensor & tensor );
 
   void fillMatrix( const VariableGradient & grad_x,
                    const VariableGradient & grad_y,
@@ -125,6 +135,7 @@ protected:
 
 
 private:
+
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
 
   SymmElasticityTensor * _local_elasticity_tensor;

@@ -40,11 +40,9 @@ void
 LSHPlasticMaterialRZ::computeNetElasticStrain(const SymmTensor & input_strain,
                                               SymmTensor & elastic_strain)
 {
-  SymmTensor etotal_strain(input_strain);
-
 
 // trial stress
-  SymmTensor trial_stress = _elasticity_tensor[_qp] * etotal_strain;
+  SymmTensor trial_stress = _elasticity_tensor[_qp] * input_strain;
   trial_stress += _stress_old;
 
 // deviatoric trial stress
@@ -90,7 +88,7 @@ LSHPlasticMaterialRZ::computeNetElasticStrain(const SymmTensor & input_strain,
     _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
     // calculate elastic strain
-    elastic_strain = etotal_strain;
+    elastic_strain = input_strain;
     elastic_strain -= matrix_plastic_strain_increment;
 
 
@@ -167,7 +165,7 @@ LSHPlasticMaterialRZ::computeNetElasticStrain(const SymmTensor & input_strain,
   }
   else
   {
-    elastic_strain = etotal_strain;
+    elastic_strain = input_strain;
     _hardening_variable[_qp] = 0.0;
     _plastic_strain[_qp].zero();
     _Jacobian_mult[_qp] = _elasticity_tensor[_qp];

@@ -57,7 +57,6 @@
 #include "SolidMechX.h"
 #include "SolidMechY.h"
 #include "SolidMechZ.h"
-#include "SolidMechImplicitEuler.h"
 #include "SolidMechTempCoupleX.h"
 #include "SolidMechTempCoupleY.h"
 #include "SolidMechTempCoupleZ.h"
@@ -89,6 +88,8 @@
 #include "PressureRZAction.h"
 #include "PLSHPlasticMaterial.h"
 #include "SolidMechanicsAction.h"
+#include "SolidMechImplicitEuler.h"
+#include "SolidMechImplicitEulerRZ.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
 
@@ -171,7 +172,6 @@ Elk::registerObjects()
   registerKernel(SolidMechX);
   registerKernel(SolidMechY);
   registerKernel(SolidMechZ);
-  registerKernel(SolidMechImplicitEuler);
   registerKernel(SolidMechTempCoupleX);
   registerKernel(SolidMechTempCoupleY);
   registerKernel(SolidMechTempCoupleZ);
@@ -206,7 +206,11 @@ Elk::registerObjects()
   registerBoundaryCondition(PressureRZ);
   registerAction(PressureRZAction, "add_bc");
 
+  registerKernel(SolidMechImplicitEuler);
+  registerKernel(SolidMechImplicitEulerRZ);
+
   registerAux(ElasticEnergyAux);
+
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
   registerAction(SolidMechanicsAction, "add_kernel");

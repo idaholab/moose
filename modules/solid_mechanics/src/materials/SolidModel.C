@@ -25,14 +25,15 @@ InputParameters validParams<SolidModel>()
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen).");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
-  params.addParam<Real>("cracking_strain", "The strain threshold beyond which cracking occurs.  Must be positive.");
+  params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
+  params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
   return params;
 }
 
 
 
 SolidModel::SolidModel( const std::string & name,
-                              InputParameters parameters )
+                        InputParameters parameters )
   :Material( name, parameters ),
    _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
    _lambda_set( parameters.isParamValid("lambda") ),
@@ -44,8 +45,9 @@ SolidModel::SolidModel( const std::string & name,
    _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
    _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
    _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
-   _cracking_strain( parameters.isParamValid("cracking_strain") ?
-                     (getParam<Real>("cracking_strain") > 0 ? getParam<Real>("cracking_strain") : -1) : -1 ),
+   _cracking_stress( parameters.isParamValid("cracking_stress") ?
+                     (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
+   _max_cracks( getParam<unsigned int>("max_cracks") ),
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
@@ -56,8 +58,13 @@ SolidModel::SolidModel( const std::string & name,
    _stress_old(0),
    _total_strain(declareProperty<SymmTensor>("total_strain")),
    _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
+   _elastic_strain(declareProperty<SymmTensor>("elastic_strain")),
+   _elastic_strain_old(declarePropertyOld<SymmTensor>("elastic_strain")),
    _crack_flags(NULL),
    _crack_flags_old(NULL),
+   _crack_flags_local(),
+   _crack_rotation(NULL),
+   _crack_rotation_old(NULL),
    _elasticity_tensor(declareProperty<SymmElasticityTensor>("elasticity_tensor")),
    _Jacobian_mult(declareProperty<SymmElasticityTensor>("Jacobian_mult")),
    _d_strain_dT(),
@@ -167,7 +174,7 @@ SolidModel::SolidModel( const std::string & name,
   iso->calculate(0);
   elasticityTensor( iso );
 
-  if (_cracking_strain > 0)
+  if (_cracking_stress > 0)
   {
     _crack_flags = &declareProperty<RealVectorValue>("crack_flags");
     _crack_flags_old = &declarePropertyOld<RealVectorValue>("crack_flags");
@@ -216,20 +223,6 @@ SolidModel::modifyStrainIncrement()
 ////////////////////////////////////////////////////////////////////////
 
 void
-SolidModel::computeStress()
-{
-  // Given the strain increment, compute the stress increment and add it to the old stress.
-  // stress = stressOld + stressIncrement
-
-  SymmTensor stress_new( _elasticity_tensor[_qp] * _strain_increment );
-  _stress[_qp] = stress_new;
-  _stress[_qp] += _stress_old;
-
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void
 SolidModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
                                    const SymmTensor & T,
                                    SymmTensor & result )
@@ -266,7 +259,7 @@ SolidModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 void
 SolidModel::computeProperties()
 {
-  if (_t_step == 1 && _cracking_strain > 0)
+  if (_t_step == 1 && _cracking_stress > 0)
   {
     // Initialize crack flags, rotation
     for (unsigned int i(0); i < _qrule->n_points(); ++i)
@@ -295,11 +288,13 @@ SolidModel::computeProperties()
 
     modifyStrainIncrement();
 
-    crackingStrainRotation();
+    crackingStrainDirections();
 
     computeStress();
 
-    //crackingStressRotation( ... );
+    _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment;
+
+    crackingStressRotation();
 
     finalizeStress();
     computePreconditioning();
@@ -311,9 +306,9 @@ SolidModel::computeProperties()
 
 void
 SolidModel::fillMatrix( const VariableGradient & grad_x,
-                           const VariableGradient & grad_y,
-                           const VariableGradient & grad_z,
-                           ColumnMajorMatrix & A )
+                        const VariableGradient & grad_y,
+                        const VariableGradient & grad_z,
+                        ColumnMajorMatrix & A )
 {
   A(0,0) = grad_x[_qp](0); A(0,1) = grad_x[_qp](1); A(0,2) = grad_x[_qp](2);
   A(1,0) = grad_y[_qp](0); A(1,1) = grad_y[_qp](1); A(1,2) = grad_y[_qp](2);
@@ -376,9 +371,12 @@ SolidModel::computePreconditioning()
 {
   mooseAssert(_local_elasticity_tensor, "null elasticity tensor");
 
-  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+//   _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 
-  _d_stress_dT[_qp] = _elasticity_tensor[_qp] * _d_strain_dT;
+//   _d_stress_dT[_qp] = _elasticity_tensor[_qp] * _d_strain_dT;
+
+  _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+  _d_stress_dT[_qp] = *_local_elasticity_tensor * _d_strain_dT;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -401,36 +399,27 @@ SolidModel::initialSetup()
 ////////////////////////////////////////////////////////////////////////
 
 void
-SolidModel::crackingStrainRotation()
+SolidModel::crackingStrainDirections()
 {
   _stress_old = _stress_old_prop[_qp];
+
   bool cracking_locally_active( false );
-  RealVectorValue crack_flags;
-  if (_cracking_strain > 0)
+  if (_cracking_stress > 0)
   {
     // Compute whether cracking has occurred
     ColumnMajorMatrix principal_strain(3,1);
     computeCrackStrainAndOrientation( principal_strain );
 
-    const Real tiny(1e-8);
-    for (unsigned int i(0); i < 3; ++i)
-    {
-      (*_crack_flags)[_qp](i) = (*_crack_flags_old)[_qp](i);
-      if (principal_strain(i,0) > _cracking_strain)
-      {
-        (*_crack_flags)[_qp](i) = tiny;
-      }
-    }
     for (unsigned int i(0); i < 3; ++i)
     {
       if (principal_strain(i,0) < 0)
       {
-        crack_flags(i) = 1;
+        _crack_flags_local(i) = 1;
       }
       else
       {
-        crack_flags(i) = (*_crack_flags)[_qp](i);
-        if (crack_flags(i) < 1)
+        _crack_flags_local(i) = (*_crack_flags_old)[_qp](i);
+        if (_crack_flags_local(i) < 1)
         {
           cracking_locally_active = true;
         }
@@ -441,33 +430,44 @@ SolidModel::crackingStrainRotation()
   {
     // Adjust the elasticity matrix for cracking.  This must be used by the
     // constitutive law.
-    _elasticity_tensor[_qp].adjustForCracking( crack_flags );
+    _elasticity_tensor[_qp].adjustForCracking( _crack_flags_local );
 
     ColumnMajorMatrix R_9x9(9,9);
     const ColumnMajorMatrix & R( (*_crack_rotation)[_qp] );
     _elasticity_tensor[_qp].form9x9Rotation( R, R_9x9 );
     _elasticity_tensor[_qp].rotateFromLocalToGlobal( R_9x9 );
 
-    // Form transformation matrix R*E*R^T
-    ColumnMajorMatrix trans(3,3);
-    for (unsigned int j(0); j < 3; ++j)
-    {
-      for (unsigned int i(0); i < 3; ++i)
-      {
-        for (unsigned int k(0); k < 3; ++k)
-        {
-          trans(i,j) += R(i,k) * crack_flags(k) * R(j,k);
-        }
-      }
-    }
-    // Rotate the old stress to the principal orientation, zero out the stress in
-    // cracked directions, and rotate back.  This is done in one step since we have
-    // the transformation matrix R*E*R^T.
-    rotateSymmetricTensor( trans, _stress_old, _stress_old );
-    rotateSymmetricTensor( trans, _strain_increment, _strain_increment );
+    // JDH DEBUG:  Perhaps this isn't needed?
+//     applyCracksToTensor( _stress_old );
 
   }
 }
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::applyCracksToTensor( SymmTensor & tensor )
+{
+  // Form transformation matrix R*E*R^T
+  const ColumnMajorMatrix & R( (*_crack_rotation)[_qp] );
+  ColumnMajorMatrix trans(3,3);
+  for (unsigned int j(0); j < 3; ++j)
+  {
+    for (unsigned int i(0); i < 3; ++i)
+    {
+      for (unsigned int k(0); k < 3; ++k)
+      {
+        trans(i,j) += R(i,k) * _crack_flags_local(k) * R(j,k);
+      }
+    }
+  }
+  // Rotate the old stress to the principal orientation, zero out the stress in
+  // cracked directions, and rotate back.  This is done in one step since we have
+  // the transformation matrix R*E*R^T.
+  rotateSymmetricTensor( trans, tensor, tensor );
+}
+
+////////////////////////////////////////////////////////////////////////
 
 void
 SolidModel::computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain )
@@ -480,34 +480,31 @@ SolidModel::computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_stra
   // ascending order.
   const unsigned int numKnownDirs = getNumKnownCrackDirs();
 
+  _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment;
 
   (*_crack_rotation)[_qp] = (*_crack_rotation_old)[_qp];
 
   if (numKnownDirs == 0)
   {
     ColumnMajorMatrix e_vec(3,3);
-    _total_strain[_qp].columnMajorMatrix().eigen( principal_strain, e_vec );
-    // If a principal strain is beyond the cracking strain, save the eigen vectors as
+    _elastic_strain[_qp].columnMajorMatrix().eigen( principal_strain, e_vec );
+    // If the elastic strain is beyond the cracking strain, save the eigen vectors as
     // the rotation tensor.
-    if (principal_strain(2,0) > _cracking_strain)
-    {
-      (*_crack_rotation)[_qp] = e_vec;
-    }
+    (*_crack_rotation)[_qp] = e_vec;
   }
   else if (numKnownDirs == 1)
   {
     // This is easily the most complicated case.
-    // 1.  Rotate the total strain to the orientation associated with the known
+    // 1.  Rotate the elastic strain to the orientation associated with the known
     //     crack.
     // 2.  Extract the upper 2x2 diagonal block into a separate tensor.
     // 3.  Run the eigen solver on the result.
-    // 4.  If the larger of the two eigen values is greater than the cracking strain,
-    //     update the rotation tensor to reflect the effect of the 2 eigenvectors.
+    // 4.  Update the rotation tensor to reflect the effect of the 2 eigenvectors.
 
     // 1.
     ColumnMajorMatrix RT( (*_crack_rotation)[_qp].transpose() );
     SymmTensor ePrime;
-    rotateSymmetricTensor( RT, _total_strain[_qp], ePrime );
+    rotateSymmetricTensor( RT, _elastic_strain[_qp], ePrime );
 
     // 2.
     ColumnMajorMatrix e2x2(2,2);
@@ -522,20 +519,17 @@ SolidModel::computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_stra
     e2x2.eigen( e_val2x1, e_vec2x2 );
 
     // 4.
-    if ( e_val2x1(1,0) > _cracking_strain )
-    {
-      ColumnMajorMatrix e_vec(3,3);
-      e_vec(0,0) = e_vec2x2(0,0);
-      e_vec(1,0) = e_vec2x2(1,0);
-      e_vec(2,0) = 0;
-      e_vec(0,1) = e_vec2x2(0,1);
-      e_vec(1,1) = e_vec2x2(1,1);
-      e_vec(2,1) = 0;
-      e_vec(2,0) = 0;
-      e_vec(2,1) = 0;
-      e_vec(2,2) = 1;
-      (*_crack_rotation)[_qp] = (*_crack_rotation_old)[_qp] * e_vec;
-    }
+    ColumnMajorMatrix e_vec(3,3);
+    e_vec(0,0) = e_vec2x2(0,0);
+    e_vec(1,0) = e_vec2x2(1,0);
+    e_vec(2,0) = 0;
+    e_vec(0,1) = e_vec2x2(0,1);
+    e_vec(1,1) = e_vec2x2(1,1);
+    e_vec(2,1) = 0;
+    e_vec(2,0) = 0;
+    e_vec(2,1) = 0;
+    e_vec(2,2) = 1;
+    (*_crack_rotation)[_qp] = (*_crack_rotation_old)[_qp] * e_vec;
 
     principal_strain(0,0) = e_val2x1(0,0);
     principal_strain(1,0) = e_val2x1(1,0);
@@ -549,7 +543,7 @@ SolidModel::computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_stra
     // coordinate directions.
     ColumnMajorMatrix RT( (*_crack_rotation)[_qp].transpose() );
     SymmTensor ePrime;
-    rotateSymmetricTensor( RT, _total_strain[_qp], ePrime );
+    rotateSymmetricTensor( RT, _elastic_strain[_qp], ePrime );
     principal_strain(0,0) = ePrime.xx();
     principal_strain(1,0) = ePrime.yy();
     principal_strain(2,0) = ePrime.zz();
@@ -557,6 +551,67 @@ SolidModel::computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_stra
   else
   {
     mooseError("Invalid number of known crack directions");
+  }
+
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::crackingStressRotation()
+{
+
+  if (_cracking_stress > 0)
+  {
+
+    // Check for new cracks.
+    // This must be done in the crack-local coordinate frame.
+
+    // Rotate stress to cracked orientation.
+    ColumnMajorMatrix RT( (*_crack_rotation)[_qp].transpose() );
+    SymmTensor sigmaPrime;
+    rotateSymmetricTensor( RT, _stress[_qp], sigmaPrime );
+
+    bool new_crack(false);
+    bool cracked(false);
+    const Real tiny(1e-8);
+    unsigned int num_cracks(0);
+    for (unsigned i(0); i < 3; ++i)
+    {
+      if ((*_crack_flags_old)[_qp](i) < 1)
+      {
+        ++num_cracks;
+      }
+    }
+    for (unsigned i(0); i < 3; ++i)
+    {
+      (*_crack_flags)[_qp](i) = (*_crack_flags_old)[_qp](i);
+      if (sigmaPrime(i,i) > _cracking_stress && num_cracks < _max_cracks)
+      {
+        new_crack = true;
+        ++num_cracks;
+        (*_crack_flags)[_qp](i) = tiny;
+        _crack_flags_local(i) = tiny;
+
+        // Also set the old value.  This helps tremendously with the nonlinear solve
+        // since the stress cannot bounce between just below the critical stress and
+        // effectively zero.
+        (*_crack_flags_old)[_qp](i) = tiny;
+      }
+      if ((*_crack_flags)[_qp](i) == tiny)
+      {
+        cracked = true;
+      }
+    }
+
+    if (!new_crack)
+    {
+      (*_crack_rotation)[_qp] = (*_crack_rotation_old)[_qp];
+    }
+    if (cracked)
+    {
+      applyCracksToTensor( _stress[_qp] );
+    }
   }
 }
 

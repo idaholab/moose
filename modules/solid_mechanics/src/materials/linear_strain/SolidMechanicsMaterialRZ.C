@@ -65,11 +65,11 @@ void
 SolidMechanicsMaterialRZ::computeStress()
 {
 
-  SymmTensor elastic_strain;
-  computeNetElasticStrain(_strain_increment, elastic_strain);
+  const SymmTensor input_strain(_strain_increment);
+  computeNetElasticStrain(input_strain, _strain_increment);
 
   // C * e
-  _stress[_qp] = _elasticity_tensor[_qp] * elastic_strain;
+  _stress[_qp] = _elasticity_tensor[_qp] * _strain_increment;
   _stress[_qp] += _stress_old;
 
 }
