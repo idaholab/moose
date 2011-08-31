@@ -68,65 +68,65 @@ namespace MooseTest
 void registerObjects()
 {
   // Kernels
-  registerObject(CoupledConvection);
-  registerObject(ForcingFn);
-  registerObject(MatDiffusion);
-  registerObject(DiffMKernel);
-  registerObject(GaussContForcing);
-  registerObject(CoefDiffusion);
-  registerObject(Convection);
-  registerObject(PolyDiffusion);
-  registerObject(PolyConvection);
-  registerObject(PolyForcing);
-  registerObject(PolyReaction);
-  registerObject(MMSImplicitEuler);
-  registerObject(MMSDiffusion);
-  registerObject(MMSConvection);
-  registerObject(MMSForcing);
-  registerObject(MMSReaction);
-  registerObject(Diffusion0);
-  registerObject(Advection0);
-  registerObject(AdvDiffReaction1);
-  registerObject(CN2AdvDiffReaction1);
-  registerObject(ForcingFunctionXYZ0);
-  registerObject(TEJumpFFN);
-  registerObject(NanKernel);
+  registerKernel(CoupledConvection);
+  registerKernel(ForcingFn);
+  registerKernel(MatDiffusion);
+  registerKernel(DiffMKernel);
+  registerKernel(GaussContForcing);
+  registerKernel(CoefDiffusion);
+  registerKernel(Convection);
+  registerKernel(PolyDiffusion);
+  registerKernel(PolyConvection);
+  registerKernel(PolyForcing);
+  registerKernel(PolyReaction);
+  registerKernel(MMSImplicitEuler);
+  registerKernel(MMSDiffusion);
+  registerKernel(MMSConvection);
+  registerKernel(MMSForcing);
+  registerKernel(MMSReaction);
+  registerKernel(Diffusion0);
+  registerKernel(Advection0);
+  registerKernel(AdvDiffReaction1);
+  registerKernel(CN2AdvDiffReaction1);
+  registerKernel(ForcingFunctionXYZ0);
+  registerKernel(TEJumpFFN);
+  registerKernel(NanKernel);
   registerKernel(MatConvection);
   registerKernel(PPSDiffusion);
 
   // Aux kernels
-  registerObject(PolyConstantAux);
-  registerObject(MMSConstantAux);
-  registerObject(DoNothingAux);
-  registerObject(MultipleUpdateAux);
+  registerAux(PolyConstantAux);
+  registerAux(MMSConstantAux);
+  registerAux(DoNothingAux);
+  registerAux(MultipleUpdateAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
   registerDGKernel(EnhancedDGMatDiffusion);
 
   // Boundary Conditions
-  registerObject(MTBC);
-  registerObject(PolyCoupledDirichletBC);
-  registerObject(MMSCoupledDirichletBC);
-  registerObject(DirichletBCfuncXYZ0);
-  registerObject(DirichletBCfuncXYZ1);
-  registerObject(TEJumpBC);
+  registerBoundaryCondition(MTBC);
+  registerBoundaryCondition(PolyCoupledDirichletBC);
+  registerBoundaryCondition(MMSCoupledDirichletBC);
+  registerBoundaryCondition(DirichletBCfuncXYZ0);
+  registerBoundaryCondition(DirichletBCfuncXYZ1);
+  registerBoundaryCondition(TEJumpBC);
 
   registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
   registerBoundaryCondition(DGMDDBC);
   registerBoundaryCondition(DGFunctionConvectionDirichletBC);
 
   // Initial conditions
-  registerObject(TEIC);
+  registerInitialCondition(TEIC);
 
   // Materials
-  registerObject(EmptyMaterial);
-  registerObject(MTMaterial);
-  registerObject(Diff1Material);
-  registerObject(Diff2Material);
-  registerObject(StatefulMaterial);
-  registerObject(StatefulTest);
-  registerObject(StatefulSpatialTest);
+  registerMaterial(EmptyMaterial);
+  registerMaterial(MTMaterial);
+  registerMaterial(Diff1Material);
+  registerMaterial(Diff2Material);
+  registerMaterial(StatefulMaterial);
+  registerMaterial(StatefulTest);
+  registerMaterial(StatefulSpatialTest);
   registerMaterial(CoupledMaterial);
 
   registerAction(ConvDiffMetaAction, "meta_action");
