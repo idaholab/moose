@@ -47,6 +47,14 @@ NSSUPGBase::NSSUPGBase(const std::string & name, InputParameters parameters)
 //      _rho_w_old( _dim == 3 ? coupledValueOld("rhow") : _zero),
 //      _rho_e_old(coupledValueOld("rhoe")),
 
+      // Time derivative derivatives (no, that's not a typo).  You can 
+      // just think of these as 1/dt for simplicity, they usually are...
+      _d_rhodot_du(coupledDotDu("rho")),
+      _d_rhoudot_du(coupledDotDu("rhou")),
+      _d_rhovdot_du(coupledDotDu("rhov")),
+      _d_rhowdot_du(_dim==3 ? coupledDotDu("") : _zero),
+      _d_rhoedot_du(coupledDotDu("rhoe")),
+
       // Coupled aux variables
       _temperature(coupledValue("temperature")),
       _enthalpy(coupledValue("enthalpy"))

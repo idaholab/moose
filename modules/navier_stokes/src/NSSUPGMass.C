@@ -58,7 +58,34 @@ Real NSSUPGMass::computeQpOffDiagJacobian(unsigned int jvar)
 Real NSSUPGMass::compute_jacobian(unsigned var)
 {
   // Convert the Moose numbering to canonical NS variable numbering.
-  unsigned  mapped_var_number = this->map_var_number(var);
+  unsigned m = this->map_var_number(var);
 
-  return _taum[_qp] * _grad_test[_i][_qp] * (_calA[_qp][mapped_var_number] * _grad_phi[_j][_qp]);
+  // Time derivative contributions only for momentum
+  Real time_part = 0.;
+
+  // The derivative of "udot" wrt u for each of the momentum variables.
+  // This is always 1/dt unless you are using BDF2...
+  Real d_udot_du[3] = {_d_rhoudot_du[_qp], _d_rhovdot_du[_qp], _d_rhowdot_du[_qp]};
+
+  switch ( m )
+  {
+  case 1:
+  case 2:
+  case 3:
+    // time_part = _grad_test[_i][_qp](m-1) * (_phi[_j][_qp]/_subproblem.parent()->dt());
+    time_part = _grad_test[_i][_qp](m-1) * (_phi[_j][_qp] * d_udot_du[m-1]);
+  }
+
+  // Debugging
+  // if (time_part != 0.0)
+  //   std::cout << "time_part=" << time_part << std::endl;
+
+  // Store result so we can print it before returning
+  Real result = _taum[_qp] * (time_part + _grad_test[_i][_qp] * (_calA[_qp][m] * _grad_phi[_j][_qp]));
+
+  // Debugging
+  // if (std::abs(result) > 0.0)
+  //   std::cout << "SUPG mass jacobian[qp=" << _qp << "] = " << result << std::endl;
+
+  return result;
 }

@@ -58,6 +58,14 @@ protected:
 //  VariableValue& _rho_w_old;
 //  VariableValue& _rho_e_old;
 
+  // The derivative of "udot" wrt u for each of the momentum variables.
+  // This is always 1/dt unless you are using BDF2...
+  VariableValue& _d_rhodot_du;
+  VariableValue& _d_rhoudot_du;
+  VariableValue& _d_rhovdot_du;
+  VariableValue& _d_rhowdot_du;
+  VariableValue& _d_rhoedot_du;
+
   // Temperature is need to compute speed of sound
   VariableValue & _temperature;
 
