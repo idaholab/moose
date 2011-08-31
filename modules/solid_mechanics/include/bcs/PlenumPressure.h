@@ -31,7 +31,7 @@ protected:
 
   const Real _initial_pressure;
 
-  const Real & _material_input;
+  PostprocessorValue * const _material_input;
 
   const Real _R;
 

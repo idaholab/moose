@@ -21,7 +21,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters paramet
    _n0(0),
    _component(getParam<int>("component")),
    _initial_pressure(getParam<Real>("initial_pressure")),
-   _material_input( getPostprocessorValue(getParam<std::string>("material_input")) ),
+   _material_input( getParam<std::string>("material_input") != "" ? &getPostprocessorValue(getParam<std::string>("material_input")) : NULL ),
    _R(getParam<Real>("R")),
    _temperature( getPostprocessorValue(getParam<std::string>("temperature"))),
    _volume( getPostprocessorValue(getParam<std::string>("volume"))),
@@ -76,7 +76,11 @@ void PlenumPressure::initialSetup()
 void
 PlenumPressure::residualSetup()
 {
-  const Real pressure = (_n0 + _material_input) * _R * _temperature / _volume;
+  Real n = _n0;
+  if (_material_input)
+    n += *_material_input;
+  const Real pressure = n * _R * _temperature / _volume;
+
   const Real factor = _t >= _startup_time ? 1.0 : _t / _startup_time;
   _my_value = factor * pressure;
   if (_output)
