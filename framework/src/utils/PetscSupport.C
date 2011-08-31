@@ -210,6 +210,16 @@ PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt /*step*/)
 }
 #endif
 
+void petscSetupDampers(NonlinearImplicitSystem& sys)
+{
+  MProblem * problem = static_cast<MProblem *>(sys.get_equation_systems().parameters.get<Problem *>("_problem"));
+  NonlinearSystem & nl = problem->getNonlinearSystem();
+  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  SNES snes = petsc_solver->snes();
+  
+  SNESLineSearchSetPostCheck(snes, dampedCheck, problem);
+}
+
 void petscSetDefaults(MProblem & problem)
 {
   // dig out Petsc solver
@@ -221,8 +231,8 @@ void petscSetDefaults(MProblem & problem)
   KSPSetPreconditionerSide(ksp, PC_RIGHT);
   SNESSetMaxLinearSolveFailures(snes, 1000000);
 
-  if (problem.hasDampers())
-    SNESLineSearchSetPostCheck(snes, dampedCheck, &problem);
+//  if (problem.hasDampers())
+//    SNESLineSearchSetPostCheck(snes, dampedCheck, &problem);
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
   KSPSetConvergenceTest(ksp, petscConverged, &nl);

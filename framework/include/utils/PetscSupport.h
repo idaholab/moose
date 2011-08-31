@@ -37,6 +37,8 @@ void petscSetOptions(const std::vector<std::string> & petsc_options,
   
 void petscSetDefaults(MProblem & problem);
 
+void petscSetupDampers(NonlinearImplicitSystem& sys);
+
 //    PetscErrorCode petscPhysicsBasedLineSearch(SNES snes,void *lsctx,Vec x,Vec f,Vec g,Vec y,Vec w, PetscReal fnorm,PetscReal *ynorm,PetscReal *gnorm,PetscTruth *flag);
 //    PetscErrorCode dampedCheck(SNES snes, Vec x, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * changed_w);
 }

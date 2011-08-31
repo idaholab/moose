@@ -1254,6 +1254,11 @@ NonlinearSystem::setPreconditioner(Preconditioner<Real> *pc)
 void
 NonlinearSystem::setupDampers()
 {
+  // Set the callback for user_final_solver_defaults in libMesh
+#ifdef LIBMESH_HAVE_PETSC
+  _sys.nonlinear_solver->user_presolve = Moose::PetscSupport::petscSetupDampers;
+#endif
+  
   _increment_vec = &_sys.add_vector("u_increment", true, GHOSTED);
 }
 
