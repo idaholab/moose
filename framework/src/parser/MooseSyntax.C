@@ -59,6 +59,12 @@ void associateSyntax(Parser & p)
   p.registerActionSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
   p.registerActionSyntax("AddMaterialAction", "Materials/*");
   p.registerActionSyntax("AddPostprocessorAction", "Postprocessors/*");
+  p.registerActionSyntax("EmptyAction", "Postprocessors/Residual");   // placeholder
+  p.registerActionSyntax("EmptyAction", "Postprocessors/Jacobian");   // placeholder
+  p.registerActionSyntax("EmptyAction", "Postprocessors/NewtonIter"); // placeholder
+  p.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual/*");
+  p.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian/*");
+  p.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter/*");
   p.registerActionSyntax("AddDamperAction", "Dampers/*");
   p.registerActionSyntax("SetupOverSamplingAction", "Output/OverSampling");
 

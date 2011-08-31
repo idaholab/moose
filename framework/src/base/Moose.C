@@ -148,6 +148,7 @@
 #include "SetupDebugAction.h"
 #include "InitialRefinementAction.h"
 #include "SetupOverSamplingAction.h"
+#include "DeprecatedBlockAction.h"
 
 namespace Moose {
 
@@ -307,6 +308,7 @@ addActionTypes()
   registerActionName("initial_mesh_refinement", false);
   registerActionName("setup_debug", false);
   registerActionName("setup_oversampling", false);
+  registerActionName("deprecated_block", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -425,6 +427,7 @@ registerActions()
   registerAction(SetupFiniteDifferencePreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(SetupOverSamplingAction, "setup_oversampling");
+  registerAction(DeprecatedBlockAction, "deprecated_block");
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");
