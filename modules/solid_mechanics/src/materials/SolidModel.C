@@ -622,6 +622,13 @@ SolidModel::crackingStressRotation()
       if ((*_crack_flags)[_qp](i) == tiny)
       {
         cracked = true;
+        // If cracked in this direction and the stress is positive (tension), we need
+        // to ensure that the stress is removed and not rely on _crack_flags_local
+        // having the correct value based on the estimate of the elastic strain.
+        if (sigmaPrime(i,i) > 0)
+        {
+          _crack_flags_local(i) = tiny;
+        }
       }
     }
 
