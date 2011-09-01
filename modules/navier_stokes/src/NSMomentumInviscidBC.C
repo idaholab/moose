@@ -1,7 +1,7 @@
-#include "NSMomentumBC.h"
+#include "NSMomentumInviscidBC.h"
 
 template<>
-InputParameters validParams<NSMomentumBC>()
+InputParameters validParams<NSMomentumInviscidBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
   
@@ -17,23 +17,20 @@ InputParameters validParams<NSMomentumBC>()
 
 
 
-NSMomentumBC::NSMomentumBC(const std::string & name, InputParameters parameters)
+NSMomentumInviscidBC::NSMomentumInviscidBC(const std::string & name, InputParameters parameters)
     : NSIntegratedBC(name, parameters),
       //_pressure(coupledValue("pressure")),
 
       // Parameters to be specified in input file block...
-      _component(getParam<unsigned>("component")),
-
-      // Derivative computing object
-      _vst_derivs(*this)
+      _component(getParam<unsigned>("component"))
 {
 }
 
 
 
-Real NSMomentumBC::computeQpResidual()
+Real NSMomentumInviscidBC::computeQpResidual()
 {
-  // n . (rho*uu + Ip - tau) . v
+  // n . (rho*uu + Ip) . v
   
   // Velocity vector object
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -53,16 +50,13 @@ Real NSMomentumBC::computeQpResidual()
   // The pressure contribution: p * n(component) * phi_i
   Real press_term = _specified_pressure * _normals[_qp](_component) * _test[_i][_qp];
 
-  // The viscous contribution: n . tau . v
-  Real visc_term = _normals[_qp] * (_viscous_stress_tensor[_qp] * v_test);
-
-  // Note: sign of viscous term is opposite from inviscid terms!
-  return conv_term + press_term - visc_term; 
+  // Sum up contributions and return
+  return conv_term + press_term;
 }
 
 
 
-Real NSMomentumBC::computeQpJacobian()
+Real NSMomentumInviscidBC::computeQpJacobian()
 {
   // Velocity vector object
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -70,35 +64,18 @@ Real NSMomentumBC::computeQpJacobian()
   // See Eqn. (69) from the notes for the inviscid boundary terms
   Real conv_term = ((vel * _normals[_qp]) + vel(_component)*_normals[_qp](_component)) * _phi[_j][_qp] * _test[_i][_qp];  
 
-  // See Eqns. (41)--(43) from the notes for the viscous boundary term contributions
-  Real visc_term = 0.;
-  
-  // Set variable names as in the notes
-  const unsigned k = _component;
-  const unsigned m = _component+1; // _component = 0,1,2 -> m = 1,2,3 global variable number
-  
-  // FIXME: attempt calling shared dtau function
-  for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-    visc_term += _vst_derivs.dtau(k, ell, m) * _normals[_qp](ell);
-  
-  // Multiply visc_term by test function
-  visc_term *= _test[_i][_qp];
-
-  // Finally, return the result, note the difference in sign for the convective and
-  // viscous terms.
-  return conv_term - visc_term;
+  // Return the result.  We could return it directly but this is
+  // convenient for printing...
+  return conv_term;
 }
 
 
 
-Real NSMomentumBC::computeQpOffDiagJacobian(unsigned jvar)
+Real NSMomentumInviscidBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   // See Eqns. (33), (34), and (35) from the notes for the inviscid
   // boundary terms (Be careful, they also include pressure
   // contributions which we do not need here!)
-  //
-  // See Eqns. (41)--(43) from the notes for the viscous boundary
-  // term contributions.
 
   // Map jvar into the variable m for our problem, regardless of
   // how Moose has numbered things. 
@@ -151,20 +128,7 @@ Real NSMomentumBC::computeQpOffDiagJacobian(unsigned jvar)
     mooseError("Shouldn't get here!");
   }
 
-  
-  // Now compute viscous contribution
-  Real visc_term = 0.;
-
-  // Set variable names as in the notes
-  const unsigned k = _component;
-  
-  for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-    visc_term += _vst_derivs.dtau(k, ell, m) * _normals[_qp](ell);
-
-  // Multiply visc_term by test function
-  visc_term *= _test[_i][_qp];
-
-  // Finally, return the result, note the difference in sign for the convective and
-  // viscous terms.
-  return conv_term - visc_term;
+  // Return the result.  We could return it directly but this is
+  // convenient for printing...
+  return conv_term;
 }

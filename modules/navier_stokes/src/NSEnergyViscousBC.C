@@ -1,7 +1,7 @@
-#include "NSEnergyBC.h"
+#include "NSEnergyViscousBC.h"
 
 template<>
-InputParameters validParams<NSEnergyBC>()
+InputParameters validParams<NSEnergyViscousBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
 
@@ -16,7 +16,7 @@ InputParameters validParams<NSEnergyBC>()
 
 
 
-NSEnergyBC::NSEnergyBC(const std::string & name, InputParameters parameters)
+NSEnergyViscousBC::NSEnergyViscousBC(const std::string & name, InputParameters parameters)
     : NSIntegratedBC(name, parameters),
       
       // Coupled gradients
@@ -46,15 +46,12 @@ NSEnergyBC::NSEnergyBC(const std::string & name, InputParameters parameters)
 
 
 
-Real NSEnergyBC::computeQpResidual()
+Real NSEnergyViscousBC::computeQpResidual()
 {
-  // n . (rho*H*u - k*grad(T) - tau*u) v
+  // n . (- k*grad(T) - tau*u) v
   
   // Velocity vector object
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-  // rho*H*u = (rho*E + p)*u
-  RealVectorValue conv_vec = (_rho_e[_qp] + _specified_pressure) * vel;
 
   // k*grad(T)
   RealVectorValue thermal_vec = _thermal_conductivity[_qp] * _grad_temperature[_qp];
@@ -63,20 +60,14 @@ Real NSEnergyBC::computeQpResidual()
   RealVectorValue visc_vec = _viscous_stress_tensor[_qp] * vel;
 
   // Add everything up, dot with normal, hit with test function.
-  return ((conv_vec - thermal_vec - visc_vec) * _normals[_qp]) * _test[_i][_qp];
+  return ((-thermal_vec - visc_vec) * _normals[_qp]) * _test[_i][_qp];
 }
 
 
 
 
-Real NSEnergyBC::computeQpJacobian()
+Real NSEnergyViscousBC::computeQpJacobian()
 {
-  // Velocity vector object
-  RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-  // Derivative of convective term (above) wrt U_4
-  Real conv_term = _phi[_j][_qp] * (vel * _normals[_qp]);
-
   // See notes for this term, involves temperature Hessian 
   Real thermal_term = 0.;
   
@@ -101,13 +92,13 @@ Real NSEnergyBC::computeQpJacobian()
   // Hit thermal_term with thermal conductivity
   thermal_term *= _thermal_conductivity[_qp];
 
-  return (conv_term - thermal_term) * _test[_i][_qp];
+  return (-thermal_term) * _test[_i][_qp];
 }
 
 
 
 
-Real NSEnergyBC::computeQpOffDiagJacobian(unsigned jvar)
+Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   // Note: This function requires both _vst_derivs *and* _temp_derivs
 
@@ -118,49 +109,13 @@ Real NSEnergyBC::computeQpOffDiagJacobian(unsigned jvar)
   Real phij = _phi[_j][_qp];
   RealVectorValue U(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
 
-  // H_bar = E + p_bar/rho, the enthalpy evaluated at the specified pressure
-  Real H_bar = (_rho_e[_qp] + _specified_pressure) / _rho[_qp];
-
   // Map jvar into the variable m for our problem, regardless of
   // how Moose has numbered things. 
   unsigned m = this->map_var_number(jvar);
 
-  // Velocity vector object
-  RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-
-  // 
-  // 1.) Convective term derivatives
-  //
-
-  // See notes for this term, specifically the specified-pressure subsonic outflow section
-  Real conv_term = 0.;
-
-  switch ( m )
-  {
-  case 0: // density
-  {
-    conv_term = -H_bar * (vel * _normals[_qp]) * _phi[_j][_qp];
-    break;
-  }
-
-  case 1:
-  case 2:
-  case 3: // momentums
-  {
-    conv_term = H_bar * _normals[_qp](m-1) * _phi[_j][_qp];
-    break;
-  }
-
-  case 4: // energy
-    mooseError("Shouldn't be computing on-diagonal component!");
-
-  default:
-    mooseError("Shouldn't get here!");
-  }
 
   //
-  // 2.) Thermal term derivatives
+  // 1.) Thermal term derivatives
   //
 
   // See notes for this term, involves temperature Hessian 
@@ -188,7 +143,7 @@ Real NSEnergyBC::computeQpOffDiagJacobian(unsigned jvar)
   thermal_term *= _thermal_conductivity[_qp];
 
   // 
-  // 3.) Viscous term derivatives
+  // 2.) Viscous term derivatives
   //
 
   // Compute viscous term derivatives
@@ -246,5 +201,5 @@ Real NSEnergyBC::computeQpOffDiagJacobian(unsigned jvar)
 
   // Finally, sum up the different contributions (with appropriate
   // sign) multiply by the test function, and return.
-  return (conv_term - thermal_term - visc_term) * _test[_i][_qp];
+  return (-thermal_term - visc_term) * _test[_i][_qp];
 }

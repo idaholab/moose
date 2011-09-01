@@ -1,38 +1,35 @@
-#ifndef NSENERGYBC_H
-#define NSENERGYBC_H
+#ifndef NSENERGYVISCOUSBC_H
+#define NSENERGYVISCOUSBC_H
 
 #include "NSIntegratedBC.h"
 #include "NSViscStressTensorDerivs.h"
 #include "NSTemperatureDerivs.h"
 
 // Forward Declarations
-class NSEnergyBC;
+class NSEnergyViscousBC;
 
 template<>
-InputParameters validParams<NSEnergyBC>();
+InputParameters validParams<NSEnergyViscousBC>();
 
 
 /**
- * This class corresponds to the "natural" boundary condition
- * for the energy equation, i.e. what you get if you integrate
- * both the invsicid and viscous flux terms by parts:
+ * This class corresponds to the viscous part of the "natural"
+ * boundary condition for the energy equation, i.e.
  *
- * int_{Gamma} n . (rho*Hu - k*grad(T) - tau*u) v
+ * int_{Gamma} n . (- k*grad(T) - tau*u) v
  *
  * A typical use for this kernel would be a subsonic outflow BC in
- * which one physical value must be specified.  In this case, the
+ * which the pressure is specified.  In this case, the
  * residual and Jacobian contrbutions of the k*grad(T) and
- * n.tau*u terms are computed and added to the matrix/rhs.  For the
- * enthalpy term, rho*H = rho*E + p, and the residual and Jacobian 
- * contributions are computed as normal except p is treated as given.
+ * n.tau*u terms are computed and added to the matrix/rhs.  
  */
-class NSEnergyBC : public NSIntegratedBC
+class NSEnergyViscousBC : public NSIntegratedBC
 {
 
 public:
-  NSEnergyBC(const std::string & name, InputParameters parameters);
+  NSEnergyViscousBC(const std::string & name, InputParameters parameters);
 
-  virtual ~NSEnergyBC(){}
+  virtual ~NSEnergyViscousBC(){}
 
 protected:
   
@@ -54,7 +51,7 @@ protected:
   
   // An object for computing viscous stress tensor derivatives.
   // Constructed via a reference to ourself so we can access all of our data.
-  NSViscStressTensorDerivs<NSEnergyBC> _vst_derivs;
+  NSViscStressTensorDerivs<NSEnergyViscousBC> _vst_derivs;
 
   // Declare ourselves friend to the helper class.
   template <class U>
@@ -62,7 +59,7 @@ protected:
 
   // A helper object for computing temperature gradient and Hessians.
   // Constructed via a reference to ourself so we can access all of our data.
-  NSTemperatureDerivs<NSEnergyBC> _temp_derivs;
+  NSTemperatureDerivs<NSEnergyViscousBC> _temp_derivs;
 
   // Declare ourselves a friend to the helper class
   template <class U>
@@ -74,4 +71,4 @@ protected:
 };
 
 
-#endif // NSENERGYBC_H
+#endif // NSENERGYVISCOUSBC_H
