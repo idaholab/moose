@@ -20,22 +20,17 @@ InputParameters validParams<NSMomentumInviscidFluxWithGradP>()
 
 
 NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const std::string & name, InputParameters parameters)
-  : NSKernel(name, parameters),
+    : NSKernel(name, parameters),
     
-   // Coupled gradients
-   _grad_p(coupledGradient("pressure")),
+      // Coupled gradients
+      _grad_p(coupledGradient("pressure")),
    
-   // Parameters
-   _component(getParam<Real>("component"))
+      // Parameters
+      _component(getParam<Real>("component")),
+    
+      // Derivative calculation helper object
+      _pressure_derivs(*this)
 {
-  // Zero out the gradient and Hessian entries so we are never dealing with uninitialized memory
-  for (unsigned i=0; i<5; ++i)
-  {
-    _dpdU[i] = 0.;
-    for (unsigned j=0; j<5; ++j)
-      _hessian[i][j] = 0.;
-  }
-
   // Store pointers to all variable gradients in a single vector.
   // This is needed for computing pressure Hessian values with a small 
   // amount of code.
@@ -175,69 +170,16 @@ Real NSMomentumInviscidFluxWithGradP::compute_pressure_jacobian_value(unsigned v
 {
   // Make sure our local gradient and Hessian data 
   // structures are up-to-date for this quadrature point
-  this->recalculate_gradient_and_hessian();
+  //  this->recalculate_gradient_and_hessian();
 
   Real hessian_sum = 0.;
   for (unsigned n=0; n<5; ++n)
-    hessian_sum += this->get_hess(var_number,n) * (*_gradU[n])[_qp](_component);
+    hessian_sum += _pressure_derivs.get_hess(var_number,n) * (*_gradU[n])[_qp](_component);
 
   // Hit hessian_sum with phij, then add to dp/dU_m * dphij/dx_k, finally return the result
-  return _dpdU[var_number]*_grad_phi[_j][_qp](_component) + hessian_sum*_phi[_j][_qp];
+  return _pressure_derivs.get_grad(var_number) * _grad_phi[_j][_qp](_component) + hessian_sum*_phi[_j][_qp];
 }
 
 
 
 
-void NSMomentumInviscidFluxWithGradP::recalculate_gradient_and_hessian()
-{
-  // Convenience variables
-  Real U0 = _rho[_qp];
-
-  Real u = _u_vel[_qp];
-  Real v = _v_vel[_qp];
-  Real w = _w_vel[_qp];
-  
-  Real vel2 = (u*u + v*v + w*w);
-
-
-  // Recompute gradient entries at the current qp.
-  _dpdU[0] = 0.5*(_gamma-1.) * vel2;
-  _dpdU[1] = (1.-_gamma) * u;
-  _dpdU[2] = (1.-_gamma) * v;
-  _dpdU[3] = (1.-_gamma) * w;
-  _dpdU[4] = _gamma - 1.;
-
-  // Recompute Hessian entries at the current qp.  Only the lower triangle is filled in,
-  // the matrix is symmetric.
-
-  const Real tmp = (1.-_gamma)/U0;
-  
-  // Row 0
-  _hessian[0][0] = tmp*vel2;
-
-  // Row 1
-  _hessian[1][0] = -tmp*u;
-  _hessian[1][1] = tmp;
-
-  // Row 2
-  _hessian[2][0] = -tmp*v;
-  _hessian[2][2] = tmp;
-
-  // Row 3
-  _hessian[3][0] = -tmp*w;
-  _hessian[3][3] = tmp;
-  
-  // Row 4 is all zeros
-}
-
-
-Real NSMomentumInviscidFluxWithGradP::get_hess(unsigned i, unsigned j)
-{
-  // If in lower triangle, OK, return value directly
-  if (i>=j)
-    return _hessian[i][j];
-
-  // Otherwise, convert passed in upper-triangular entry to
-  // lower-triangular.
-  return _hessian[j][i];
-}

@@ -1,8 +1,8 @@
 #ifndef NSPRESSURENEUMANNBC_H
 #define NSPRESSURENEUMANNBC_H
 
-#include "IntegratedBC.h"
-//#include "Material.h"
+#include "NSIntegratedBC.h"
+#include "NSPressureDerivs.h"
 
 
 // Forward Declarations
@@ -22,7 +22,7 @@ InputParameters validParams<NSPressureNeumannBC>();
  * is probably what you want instead of this... for that use
  * NSImposedVelocityBC instead.
  */
-class NSPressureNeumannBC : public IntegratedBC
+class NSPressureNeumannBC : public NSIntegratedBC
 {
 public:
 
@@ -32,20 +32,29 @@ public:
 
 protected:
 
-  /**
-   * This is here because materials don't yet work on boundaries!
-   * Pressure is now computed as an Aux var
-   */
-  //Real pressure();
-  
   virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned jvar);
   
-
-  VariableValue & _pressure; // Aux Var
+  // Coupled vars
+  VariableValue & _pressure; 
   
-  int _component;
+  // Required parameters
+  unsigned _component;
+  Real _gamma;
 
-  MaterialProperty<Real> & _gamma; // Integrated BC, so can use Mat. properties
+  // An object for computing pressure derivatives.
+  // Constructed via a reference to ourself
+  NSPressureDerivs<NSPressureNeumannBC> _pressure_derivs;
+
+  // Declare ourselves friend to the helper class.
+  template <class U>
+  friend class NSPressureDerivs;
+
+private:
+  // Computes the Jacobian value for this term for variable 'm'
+  // in the canonical ordering.
+  Real compute_jacobian(unsigned m);
 };
 
 #endif //PRESSURENEUMANNBC_H
