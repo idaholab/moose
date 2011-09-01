@@ -26,6 +26,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
+  params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
   return params;
 }
@@ -47,6 +48,7 @@ SolidModel::SolidModel( const std::string & name,
    _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
    _cracking_stress( parameters.isParamValid("cracking_stress") ?
                      (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
+   _active_crack_planes(3,1),
    _max_cracks( getParam<unsigned int>("max_cracks") ),
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
@@ -180,6 +182,23 @@ SolidModel::SolidModel( const std::string & name,
     _crack_flags_old = &declarePropertyOld<RealVectorValue>("crack_flags");
     _crack_rotation = &declareProperty<ColumnMajorMatrix>("crack_rotation");
     _crack_rotation_old = &declarePropertyOld<ColumnMajorMatrix>("crack_rotation");
+
+    if (parameters.isParamValid( "active_crack_planes" ))
+    {
+      const std::vector<unsigned int> & planes = getParam<std::vector<unsigned> >("active_crack_planes");
+      for (unsigned i(0); i < 3; ++i)
+      {
+        _active_crack_planes[i] = 0;
+      }
+      for (unsigned i(0); i < planes.size(); ++i)
+      {
+        if (planes[i] > 2)
+        {
+          mooseError("Active planes must be 0, 1, or 2");
+        }
+        _active_crack_planes[planes[i]] = 1;
+      }
+    }
   }
 
 }
@@ -586,7 +605,9 @@ SolidModel::crackingStressRotation()
     for (unsigned i(0); i < 3; ++i)
     {
       (*_crack_flags)[_qp](i) = (*_crack_flags_old)[_qp](i);
-      if (sigmaPrime(i,i) > _cracking_stress && num_cracks < _max_cracks)
+      if (sigmaPrime(i,i) > _cracking_stress &&
+          num_cracks < _max_cracks &&
+          _active_crack_planes[i] == 1)
       {
         new_crack = true;
         ++num_cracks;

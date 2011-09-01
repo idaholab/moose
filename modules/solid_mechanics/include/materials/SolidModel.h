@@ -46,6 +46,7 @@ protected:
   Real _youngs_modulus;
 
   const Real _cracking_stress;
+  std::vector<unsigned int> _active_crack_planes;
   const unsigned int _max_cracks;
 
   const bool _has_temp;
