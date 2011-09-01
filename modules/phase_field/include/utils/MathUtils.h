@@ -123,7 +123,42 @@ namespace MathUtils
     }
     return value;
   }
+  
+ inline Real poly4Log(Real x, Real tol, int order)
+  {
+    Real value = 0.0;
 
+    if(order==0)
+    {
+      if(x<tol)
+        value =  log(tol)+(x-tol)/tol-(x-tol)*(x-tol)/(2.0*tol*tol)+(x-tol)*(x-tol)*(x-tol)/(3.0*tol*tol*tol)-(x-tol)*(x-tol)*(x-tol)*(x-tol)/(4.0*tol*tol*tol*tol)+(x-tol)*(x-tol)*(x-tol)*(x-tol)*(x-tol)/(5.0*tol*tol*tol*tol*tol)-(x-tol)*(x-tol)*(x-tol)*(x-tol)*(x-tol)*(x-tol)/(6*tol*tol*tol*tol*tol*tol);
+      else
+        value =  std::log(x);
+    }
+    else if(order==1)
+    {
+      if(x<tol)
+        value =  1/tol-2.0*(x-tol)/(2.0*tol*tol)+3.0*(x-tol)*(x-tol)/(3.0*tol*tol*tol)-4.0*(x-tol)*(x-tol)*(x-tol)/(4.0*tol*tol*tol*tol)+5.0*(x-tol)*(x-tol)*(x-tol)*(x-tol)/(5.0*tol*tol*tol*tol*tol)-6*(x-tol)*(x-tol)*(x-tol)*(x-tol)*(x-tol)/(6*tol*tol*tol*tol*tol*tol);
+      else
+        value =  1.0/x;
+    }
+    else if(order==2)
+    {
+      if(x<tol)
+        value =  -2.0*1/(2.0*tol*tol)+3.0*2.0*(x-tol)/(3.0*tol*tol*tol)-4.0*3.0*(x-tol)*(x-tol)/(4.0*tol*tol*tol*tol)+5.0*4.0*(x-tol)*(x-tol)*(x-tol)/(5.0*tol*tol*tol*tol*tol)-6*5.0*(x-tol)*(x-tol)*(x-tol)*(x-tol)/(6*tol*tol*tol*tol*tol*tol);
+      else
+        value =  -1.0/(x*x);
+    }
+    else if(order==3)
+    {
+      if(x<tol)
+        value =  3.0*2.0*1/(3.0*tol*tol*tol)-4.0*3.0*2.0*(x-tol)/(4.0*tol*tol*tol*tol)+5.0*4.0*3.0*(x-tol)*(x-tol)/(5.0*tol*tol*tol*tol*tol)-6*5.0*4.0*(x-tol)*(x-tol)*(x-tol)/(6*tol*tol*tol*tol*tol*tol);
+      else
+        value =  2.0/(x*x*x);
+    }
+    return value;
+  }
+  
   inline Real TaylorLog(Real x)
   {
     Real y = (x-1)/(x+1);
@@ -136,7 +171,7 @@ namespace MathUtils
     }
     
 
-    val *= 2*y;
+    val *= 2.0*y;
 
     return val;
   }
