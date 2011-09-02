@@ -12,36 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SetupDebugAction.h"
-#include "MProblem.h"
-#include "ActionWarehouse.h"
-#include "Factory.h"
+#ifndef SETUPRESIDUALDEBUGACTION_H
+#define SETUPRESIDUALDEBUGACTION_H
+
+#include "Action.h"
+
+class SetupResidualDebugAction;
 
 template<>
-InputParameters validParams<SetupDebugAction>()
+InputParameters validParams<SetupResidualDebugAction>();
+
+/**
+ *
+ */
+class SetupResidualDebugAction : public Action
 {
-  InputParameters params = validParams<Action>();
-  params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
-  params.addParam<bool>("show_actions", false, "Print out the actions being executed");
-  return params;
-}
+public:
+  SetupResidualDebugAction(const std::string & name, InputParameters parameters);
+  virtual ~SetupResidualDebugAction();
 
-SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
-    _top_residuals(getParam<unsigned int>("show_top_residuals")),
-    _show_actions(getParam<bool>("show_actions"))
-{
-  Moose::action_warehouse.showActions(_show_actions);
-}
+  virtual void act();
 
-SetupDebugAction::~SetupDebugAction()
-{
-}
-
-void
-SetupDebugAction::act()
-{
-  _problem->setDebugTopResiduals(_top_residuals);
-}
+protected:
+  std::vector<std::string> _show_var_residual;
+};
 
 
+#endif /* SETUPRESIDUALDEBUGACTION_H */

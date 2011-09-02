@@ -12,36 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SetupDebugAction.h"
-#include "MProblem.h"
-#include "ActionWarehouse.h"
-#include "Factory.h"
+#ifndef DEBUGRESIDUALAUX_H
+#define DEBUGRESIDUALAUX_H
+
+#include "AuxKernel.h"
+
+class DebugResidualAux;
 
 template<>
-InputParameters validParams<SetupDebugAction>()
+InputParameters validParams<DebugResidualAux>();
+
+/**
+ * Auxiliary kernel for debugging convergence.
+ */
+class DebugResidualAux : public AuxKernel
 {
-  InputParameters params = validParams<Action>();
-  params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
-  params.addParam<bool>("show_actions", false, "Print out the actions being executed");
-  return params;
-}
+public:
+  DebugResidualAux(const std::string & name, InputParameters parameters);
+  virtual ~DebugResidualAux();
 
-SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
-    _top_residuals(getParam<unsigned int>("show_top_residuals")),
-    _show_actions(getParam<bool>("show_actions"))
-{
-  Moose::action_warehouse.showActions(_show_actions);
-}
+protected:
+  virtual Real computeValue();
 
-SetupDebugAction::~SetupDebugAction()
-{
-}
+  MooseVariable & _debug_var;
+  NumericVector<Number> & _residual_copy;
+};
 
-void
-SetupDebugAction::act()
-{
-  _problem->setDebugTopResiduals(_top_residuals);
-}
-
-
+#endif /* DEBUGRESIDUALAUX_H */

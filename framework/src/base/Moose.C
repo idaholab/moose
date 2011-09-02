@@ -60,6 +60,7 @@
 #include "ProcessorIDAux.h"
 #include "GapValueAux.h"
 #include "MaterialRealAux.h"
+#include "DebugResidualAux.h"
 // dirac kernels
 #include "ConstantPointSource.h"
 // DG kernels
@@ -146,6 +147,7 @@
 #include "SetupSMPAction.h"
 #include "SetupFiniteDifferencePreconditionerAction.h"
 #include "SetupDebugAction.h"
+#include "SetupResidualDebugAction.h"
 #include "InitialRefinementAction.h"
 #include "SetupOverSamplingAction.h"
 #include "DeprecatedBlockAction.h"
@@ -206,6 +208,7 @@ registerObjects()
   registerAux(ProcessorIDAux);
   registerAux(GapValueAux);
   registerAux(MaterialRealAux);
+  registerAux(DebugResidualAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -307,6 +310,7 @@ addActionTypes()
   registerActionName("meta_action", false);
   registerActionName("initial_mesh_refinement", false);
   registerActionName("setup_debug", false);
+  registerActionName("setup_residual_debug", false);
   registerActionName("setup_oversampling", false);
   registerActionName("deprecated_block", false);
 
@@ -348,6 +352,7 @@ addActionTypes()
 "(setup_quadrature)"
 "(setup_dampers)"
 "(initial_mesh_refinement)"
+"(setup_residual_debug)"
 "(init_problem)"
 "(copy_nodal_vars, copy_nodal_aux_vars)"
 "(add_material)"
@@ -435,13 +440,14 @@ registerActions()
 #endif
 
   registerAction(AddDiracKernelAction, "add_dirac_kernel");
+  registerAction(SetupDebugAction, "setup_debug");
+  registerAction(SetupResidualDebugAction, "setup_residual_debug");
 
   // NonParsedActions
   registerAction(SetupDampersAction, "setup_dampers");
   registerAction(EmptyAction, "ready_to_init");
   registerAction(InitProblemAction, "init_problem");
   registerAction(CheckIntegrityAction, "check_integrity");
-  registerAction(SetupDebugAction, "setup_debug");
 
   // TODO: Why is this here?
   registerActionName("finish_input_file_output", false);

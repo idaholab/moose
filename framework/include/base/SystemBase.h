@@ -59,6 +59,11 @@ public:
   virtual DofMap & dofMap() = 0;
 
   /**
+   * Get the reference to the libMesh system
+   */
+  virtual System & system() = 0;
+
+  /**
    * Initialize the system
    */
   virtual void init() = 0;
@@ -338,7 +343,7 @@ public:
 
   /**
    * Get a reference to libMesh system object
-   * @return the reference to th elibMesh object
+   * @return the reference to the libMesh object
    */
   T & sys() { return _sys; }
 
@@ -348,6 +353,7 @@ public:
    */
   virtual unsigned int number() { return _sys.number(); }
   virtual DofMap & dofMap() { return _sys.get_dof_map(); }
+  virtual System & system() { return _sys; }
 
 protected:
   T & _sys;

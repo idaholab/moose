@@ -12,36 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SetupDebugAction.h"
-#include "MProblem.h"
-#include "ActionWarehouse.h"
-#include "Factory.h"
+#include "DebugResidualAux.h"
+#include "NonlinearSystem.h"
 
 template<>
-InputParameters validParams<SetupDebugAction>()
+InputParameters validParams<DebugResidualAux>()
 {
-  InputParameters params = validParams<Action>();
-  params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
-  params.addParam<bool>("show_actions", false, "Print out the actions being executed");
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredParam<std::string>("debug_variable", "The variable that is being debugged.");
+
   return params;
 }
 
-SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
-    Action(name, parameters),
-    _top_residuals(getParam<unsigned int>("show_top_residuals")),
-    _show_actions(getParam<bool>("show_actions"))
+DebugResidualAux::DebugResidualAux(const std::string & name, InputParameters parameters) :
+    AuxKernel(name, parameters),
+    _debug_var(_nl_sys.getVariable(_tid, parameters.get<std::string>("debug_variable"))),
+    _residual_copy(_nl_sys.residualGhosted())
 {
-  Moose::action_warehouse.showActions(_show_actions);
+  mooseAssert(_nodal == true, "Cannot use DebugResidualAux on elemental variables");
 }
 
-SetupDebugAction::~SetupDebugAction()
+DebugResidualAux::~DebugResidualAux()
 {
 }
 
-void
-SetupDebugAction::act()
+Real
+DebugResidualAux::computeValue()
 {
-  _problem->setDebugTopResiduals(_top_residuals);
+  unsigned int dof = _current_node->dof_number(_nl_sys.number(), _debug_var.number(), 0);
+  return _residual_copy(dof);
 }
-
-

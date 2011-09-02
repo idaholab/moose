@@ -88,6 +88,7 @@ NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name
     _need_serialized_solution(false),
     _need_residual_copy(false),
     _need_residual_ghosted(false),
+    _debugging_residuals(false),
     _doing_dg(false),
     _n_iters(0),
     _final_residual(0.)
@@ -716,6 +717,16 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   Moose::perf_log.push("residual.close4()","Solve");
   residual.close();
   Moose::perf_log.pop("residual.close4()","Solve");
+
+  // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
+  if(_need_residual_ghosted && _debugging_residuals)
+  {
+    Moose::perf_log.push("residual.close5()","Solve");
+    residual.close();
+    Moose::perf_log.pop("residual.close5()","Solve");
+    _residual_ghosted = residual;
+    _residual_ghosted.close();
+  }
 }
 
 void
@@ -1368,24 +1379,28 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
   vec.resize(residual.local_size());
   
   unsigned int j = 0;
-  for (MeshBase::node_iterator it = _mesh._mesh.local_nodes_begin(); it != _mesh._mesh.local_nodes_end(); ++it, j++)
+  for (MeshBase::node_iterator it = _mesh._mesh.local_nodes_begin(); it != _mesh._mesh.local_nodes_end(); ++it)
   {
     Node & node = *(*it);
     unsigned int nd = node.id();
 
     for (unsigned int var = 0; var < node.n_vars(_sys.number()); ++var)
     {
-      unsigned int dof_idx = node.dof_number(_sys.number(), var, 0);
-      vec[j] = st(var, nd, residual(dof_idx));
+      if (node.n_dofs(_sys.number(), var) > 0)
+      {
+        unsigned int dof_idx = node.dof_number(_sys.number(), var, 0);
+        vec[j] = st(var, nd, residual(dof_idx));
+        j++;
+      }
     }
   }
   // sort vec by residuals
   std::sort(vec.begin(), vec.end(), dbg_sort_residuals);
   // print out
   std::cerr << "[DBG][" << libMesh::processor_id() << "] Max " << n << " residuals";
-  if (vec.size() < n)
+  if (j < n)
   {
-    n = vec.size();
+    n = j;
     std::cerr << " (Only " << n << " available)";
   }
   std::cerr << std::endl;

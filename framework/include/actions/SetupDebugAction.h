@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPDEBUGACTION_H_
-#define SETUPDEBUGACTION_H_
+#ifndef SETUPDEBUGACTION_H
+#define SETUPDEBUGACTION_H
 
 #include "Action.h"
 
@@ -39,4 +39,4 @@ protected:
 };
 
 
-#endif /* SETUPDEBUGACTION_H_ */
+#endif /* SETUPDEBUGACTION_H */

@@ -181,6 +181,18 @@ MooseVariable::~MooseVariable()
   _second_u_neighbor.release();
 }
 
+const std::string &
+MooseVariable::name()
+{
+  return _sys.system().variable(_var_num).name();
+}
+
+const std::set<subdomain_id_type> &
+MooseVariable::activeSubdomains()
+{
+  return _sys.system().variable(_var_num).active_subdomains();
+}
+
 bool
 MooseVariable::isNodal()
 {

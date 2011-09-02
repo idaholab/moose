@@ -256,6 +256,8 @@ public:
    */
   void printTopResiduals(const NumericVector<Number> & residual, unsigned int n);
 
+  void debuggingResiduals(bool state) { _debugging_residuals = state; }
+
 public:
   MProblem & _mproblem;
   // FIXME: make these protected and create getters/setters
@@ -324,6 +326,7 @@ protected:
 
   bool _need_residual_copy;                             ///< Whether or not a copy of the residual needs to be made
   bool _need_residual_ghosted;                          ///< Whether or not a ghosted copy of the residual needs to be made
+  bool _debugging_residuals;                            ///< true if debugging residuals
 
   bool _doing_dg;                                       ///< true if DG is active (optimization reasons)
 

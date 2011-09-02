@@ -112,6 +112,11 @@ public:
   unsigned int number() { return _var_num; }
 //  int dimension() { return _dim; }
 
+  /// Get the variable number
+  const std::string & name();
+
+  const std::set<subdomain_id_type> & activeSubdomains();
+
   /// Get the type of finite element object
   const FEType feType() { return _fe->get_fe_type(); }
 
@@ -207,13 +212,13 @@ public:
   Real scalingFactor() { return _scaling_factor; }
 
 protected:
-  THREAD_ID _tid;                                               /// Thread ID
-  unsigned int _var_num;                                        /// variable number (from libMesh)
-  Problem & _problem;                                           /// Problem this variable is part of
-  SystemBase & _sys;                                            /// System this variable is part of
+  THREAD_ID _tid;                                               ///< Thread ID
+  unsigned int _var_num;                                        ///< variable number (from libMesh)
+  Problem & _problem;                                           ///< Problem this variable is part of
+  SystemBase & _sys;                                            ///< System this variable is part of
 
-  const DofMap & _dof_map;                                      /// DOF map
-  AssemblyData & _assembly;                                     /// Assembly data
+  const DofMap & _dof_map;                                      ///< DOF map
+  AssemblyData & _assembly;                                     ///< Assembly data
 
   QBase * & _qrule;                                             /// Quadrature rule for interior
   QBase * & _qrule_face;                                        /// Quadrature rule for the face
