@@ -70,7 +70,12 @@ multi_precond_test = { INPUT : 'multi_precond_test.i',
                        EXPECT_ERR : 'More than one active Preconditioner Action detected while building \S+' }
 
 bad_second_order_test = { INPUT : 'bad_second_order_test.i',
-                          EXPECT_ERR : 'Error in libMesh internal logic' }
+                          EXPECT_ERR : 'Error in libMesh internal logic',
+                          PLATFORM : ['SL', 'LINUX'] }
+
+bad_second_order_test_lion = { INPUT : 'bad_second_order_test.i',
+                               EXPECT_ERR : 'Error in libMesh internal logic',
+                               PLATFORM : ['LION'] }
 
 wrong_object_test = { INPUT : 'wrong_moose_object_test.i',
                       EXPECT_ERR : 'Inconsistent Action Name detected!' }

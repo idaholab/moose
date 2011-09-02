@@ -109,6 +109,22 @@ class TestHarness:
       except:
         pass
 
+  def getPlatforms(self):
+    # We'll use uname to figure this out
+    # Supported platforms are LINUX, DARWIN, SL, LION or ALL
+    platforms = set()
+    platforms.add('ALL')
+    raw_uname = os.uname()
+    if raw_uname[0].upper() == 'DARWIN':
+      platforms.add('DARWIN')
+      if re.match("10\.", raw_uname[2]):
+        platforms.add('SL')
+      if re.match("11\.", raw_uname[2]):
+        platforms.add("LION")
+    else:
+      platforms.add(raw_uname[0].upper())
+    return platforms
+
   # If the test is not to be run for any reason, print skipped as the result and return False,
   # otherwise return True
   def checkIfRunTest(self, test):
@@ -118,10 +134,12 @@ class TestHarness:
       return False
 
     # Check for matching platform
-    platform = set()
-    platform.add('ALL')
-    platform.add((os.uname()[0]).upper())
-    if test[PLATFORM] not in platform:
+    platforms = self.getPlatforms()
+    test_platforms = set()
+    for x in test[PLATFORM]:
+      test_platforms.add(x)
+
+    if not len(test_platforms.intersection(platforms)):
       self.handleTestResult(test, '', 'skipped (PLATFORM)')
       return False
 
