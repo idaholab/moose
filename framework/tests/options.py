@@ -7,12 +7,12 @@ SKIP     = 'skip'               # Set to True to skip the test
 MAX_TIME = 'max_time'           # Test will fail if it exceeds this time in seconds (accuracy ~1s)
 TEST_NAME = 'testname'          # The name of the test as it appears in output, this is
                                 # set to module_name.dict_name by default
-PLATFORM = 'platform'           # set to 'ALL', 'DARWIN', 'LINUX' as appropriate
-CLI_ARGS = ''                   # Additional argument vector to pass to test
+PLATFORM = '[platform]'         # A list of platforms set to 'ALL', 'DARWIN', 'LINUX', 'SL', and/or 'LION'
+CLI_ARGS = '[]'                 # Additional argument vector to pass to test
 
 # Types of tests
-EXODIFF       = 'exodiff'        # A list of files to exodiff
-CSVDIFF       = 'csvdiff'        # A list of files to CSV diff
+EXODIFF       = '[exodiff]'      # A list of files to exodiff
+CSVDIFF       = '[csvdiff]'      # A list of files to CSV diff
 GOLD_DIR      = 'gold_dir'       # The directory where the "golden standard" files resides relative to TEST_DIR
 TEST_DIR      = 'test_dir'       # The directory where the test resides, this is populated automatically
 SHOULD_CRASH  = 'should_crash'   # Set to true if this test should crash

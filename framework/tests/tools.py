@@ -198,7 +198,17 @@ class TestHarness:
             reason = 'CSVDIFF'
 
     if reason == '':
-      result = 'OK'
+      # It ran OK but is this test set to be skipped on any platform?
+      all_ok = False
+      for x in test[PLATFORM]:
+        if x == 'ALL':
+          all_ok = True
+
+      if all_ok:
+        result = 'OK'
+      else:
+        result = '[' + ', '.join(test[PLATFORM]) + '] OK'
+
     else:
       result = 'FAILED (%s)' % reason
     self.handleTestResult(test, output, result)
@@ -211,12 +221,12 @@ class TestHarness:
       return True
 
   ## Update global variables and print output based on the test result
-  # OK means it passed, skipped means skipped, anything else means it failed
+  # Containing OK means it passed, skipped means skipped, anything else means it failed
   def handleTestResult(self, test, output, result):
     self.test_table.append( (test, output, result) )
     print printResult(test[TEST_NAME], result, self.options)
 
-    if result == 'OK':
+    if result.find('OK') != -1:
       self.num_passed += 1
     elif 'skipped' in result:
       self.num_skipped += 1
@@ -231,7 +241,7 @@ class TestHarness:
         self.file.write(printResult( test[TEST_NAME], result, self.options, color=False) + '\n')
         self.file.write(output)
 
-      if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result == 'OK'):
+      if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
         fname = os.path.join(test[TEST_DIR], test[TEST_NAME] + '.' + result[:6] + '.txt')
         f = open(fname, 'w')
         f.write(printResult( test[TEST_NAME], result, self.options, color=False) + '\n')

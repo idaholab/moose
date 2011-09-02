@@ -31,6 +31,7 @@ def colorify(str, options, html=False):
   BOLD   = '\033[1m'
   RED    = '\033[31m'
   GREEN  = '\033[32m'
+  CYAN   = '\033[36m'
   YELLOW = '\033[33m'
 
   if options.colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
@@ -42,10 +43,12 @@ def colorify(str, options, html=False):
       str = re.sub(r'</[rgyb]>', RESET, str)
     else:
       str = str.replace('OK', BOLD+GREEN+'OK'+RESET)
+      str = re.sub(r'(\[.*?\])', BOLD+CYAN+'\\1'+RESET, str)
       str = str.replace('skipped', BOLD+'skipped'+RESET)
-      str = re.sub(r'(FAILED \([A-Za-z ]*\))', BOLD+RED+'\\1'+RESET, str)
-      #str = str.replace('FAILED', BOLD+RED+'FAILED'+RESET)
-      #str = str.replace('FAILED (DIFF)', BOLD+YELLOW+'FAILED (DIFF)'+RESET)
+      if str.find('FAILED (EXODIFF)') != -1:
+        str = str.replace('FAILED (EXODIFF)', BOLD+YELLOW+'FAILED (EXODIFF)'+RESET)
+      else:
+        str = re.sub(r'(FAILED \([A-Za-z ]*\))', BOLD+RED+'\\1'+RESET, str)
   elif html:
     str = re.sub(r'</?[rgyb]>', '', str)    # strip all "html" tags
 
