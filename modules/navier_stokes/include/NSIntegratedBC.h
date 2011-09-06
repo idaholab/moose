@@ -32,10 +32,6 @@ protected:
   // virtual Real computeQpJacobian();
   // virtual Real computeQpOffDiagJacobian(unsigned jvar);
   
-  // The specified value of the pressure.  This is used in
-  // the subsonic outflow boundary condition.
-  Real _specified_pressure;
-
   // Coupled variables
   VariableValue& _u_vel;
   VariableValue& _v_vel;

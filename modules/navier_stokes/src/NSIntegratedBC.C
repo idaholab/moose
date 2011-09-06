@@ -5,9 +5,6 @@ InputParameters validParams<NSIntegratedBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   
-  // Required parameters
-  params.addRequiredParam<Real>("specified_pressure", "The specified pressure for this boundary");
-
   // Coupled variables
   params.addRequiredCoupledVar("u", "");
   params.addRequiredCoupledVar("v", "");
@@ -27,9 +24,6 @@ InputParameters validParams<NSIntegratedBC>()
 NSIntegratedBC::NSIntegratedBC(const std::string & name, InputParameters parameters)
     : IntegratedBC(name, parameters),
       
-      // Required parameters
-      _specified_pressure(getParam<Real>("specified_pressure")),
-
       // Coupled variables
       _u_vel(coupledValue("u")),
       _v_vel(coupledValue("v")),

@@ -5,13 +5,19 @@ InputParameters validParams<NSEnergyInviscidBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
 
+  // Required parameters
+  params.addRequiredParam<Real>("specified_pressure", "The specified pressure for this boundary");
+
   return params;
 }
 
 
 
 NSEnergyInviscidBC::NSEnergyInviscidBC(const std::string & name, InputParameters parameters)
-    : NSIntegratedBC(name, parameters)
+    : NSIntegratedBC(name, parameters),
+
+      // Required parameters
+      _specified_pressure(getParam<Real>("specified_pressure"))
 {
 }
 
