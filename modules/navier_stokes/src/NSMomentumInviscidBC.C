@@ -167,16 +167,12 @@ Real NSMomentumInviscidBC::pressure_qp_jacobian(unsigned var_number)
 
 
 
-Real NSMomentumInviscidBC::convective_qp_residual(RealVectorValue rhou_udotn)
+Real NSMomentumInviscidBC::convective_qp_residual(Real rhou_udotn)
 {
   // n . (rho*uu) . v = rho*(u.n)*(u.v) = (rho*u)(u.n) . v
-  
-  // Vector-valued test function
-  RealVectorValue v_test;
-  v_test(_component) = _test[_i][_qp];
 
   // The "inviscid" contribution: (rho*u)(u.n) . v
-  Real conv_term = rhou_udotn * v_test;
+  Real conv_term = rhou_udotn * _test[_i][_qp];
 
   // Return value, or print it first if debugging...
   return conv_term;

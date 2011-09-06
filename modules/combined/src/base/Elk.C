@@ -52,6 +52,7 @@
 #include "NSInflowThermalBC.h"
 //#include "NSMomentumInviscidBC.h"
 #include "NSMomentumInviscidSpecifiedPressureBC.h"
+#include "NSMomentumInviscidSpecifiedNormalFlowBC.h"
 #include "NSMomentumViscousBC.h"
 #include "NSEnergyInviscidBC.h"
 #include "NSEnergyViscousBC.h"
@@ -170,6 +171,7 @@ Elk::registerObjects()
   registerBoundaryCondition(NSInflowThermalBC);
   // registerBoundaryCondition(NSMomentumInviscidBC);
   registerBoundaryCondition(NSMomentumInviscidSpecifiedPressureBC);
+  registerBoundaryCondition(NSMomentumInviscidSpecifiedNormalFlowBC);
   registerBoundaryCondition(NSMomentumViscousBC);
   registerBoundaryCondition(NSEnergyInviscidBC);
   registerBoundaryCondition(NSEnergyViscousBC);

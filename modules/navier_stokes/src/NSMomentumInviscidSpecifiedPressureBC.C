@@ -38,7 +38,7 @@ Real NSMomentumInviscidSpecifiedPressureBC::computeQpResidual()
   
   return 
     this->pressure_qp_residual(_specified_pressure) +
-    this->convective_qp_residual(rhou_udotn);
+    this->convective_qp_residual( rhou_udotn(_component) );
 }
 
 

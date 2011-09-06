@@ -84,7 +84,8 @@ protected:
 
   // Depending on the passed-in vector, will compute the residual for either a specified
   // value of (rho*u)(u.n) or the residual at the current value of (rho*u)(u.n).
-  Real convective_qp_residual(RealVectorValue rhou_udotn);
+  // The passed-in value is the _component'th entry of the (rho*u)(u.n) vector.
+  Real convective_qp_residual(Real rhou_udotn);
 
   // If the value of (rho*u)(u.n) is fixed, the Jacobian of the
   // convective term is zero, otherwise we return the correct value
