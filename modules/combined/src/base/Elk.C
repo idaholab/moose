@@ -33,7 +33,7 @@
 #include "NSEnergyInviscidFlux.h"
 #include "NSGravityPower.h"
 #include "NSGravityForce.h"
-#include "NSPressureNeumannBC.h"
+//#include "NSPressureNeumannBC.h"
 #include "NSThermalBC.h"
 #include "NSVelocityAux.h"
 #include "NSImposedVelocityBC.h"
@@ -50,7 +50,6 @@
 #include "NSSUPGEnergy.h"
 #include "NSMassBC.h"
 #include "NSInflowThermalBC.h"
-//#include "NSMomentumInviscidBC.h"
 #include "NSMomentumInviscidSpecifiedPressureBC.h"
 #include "NSMomentumInviscidSpecifiedNormalFlowBC.h"
 #include "NSMomentumViscousBC.h"
@@ -153,7 +152,7 @@ Elk::registerObjects()
   registerKernel(NSGravityPower);
   registerKernel(NSGravityForce);
   registerKernel(NSTemperatureL2);
-  registerBoundaryCondition(NSPressureNeumannBC);
+  // registerBoundaryCondition(NSPressureNeumannBC);
   registerBoundaryCondition(NSThermalBC);
   registerAux(NSVelocityAux);
   registerBoundaryCondition(NSImposedVelocityBC);
@@ -169,7 +168,6 @@ Elk::registerObjects()
   registerKernel(NSSUPGEnergy);
   registerBoundaryCondition(NSMassBC);
   registerBoundaryCondition(NSInflowThermalBC);
-  // registerBoundaryCondition(NSMomentumInviscidBC);
   registerBoundaryCondition(NSMomentumInviscidSpecifiedPressureBC);
   registerBoundaryCondition(NSMomentumInviscidSpecifiedNormalFlowBC);
   registerBoundaryCondition(NSMomentumViscousBC);
