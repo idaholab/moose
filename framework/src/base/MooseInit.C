@@ -18,12 +18,16 @@
 #include "Factory.h"
 #include "ActionFactory.h"
 // PETSc
+#ifdef LIBMESH_HAVE_PETSC
 #include "petscsys.h"
+#endif
 
 MooseInit::MooseInit(int argc, char *argv[]) :
 	LibMeshInit(argc, argv)
 {
+#ifdef LIBMESH_HAVE_PETSC
   PetscPopSignalHandler();           // get rid off Petsc error handler
+#endif
   ParallelUniqueId::initialize();
 
   std::cout << "Using " << libMesh::n_threads() << " thread(s)" << std::endl;

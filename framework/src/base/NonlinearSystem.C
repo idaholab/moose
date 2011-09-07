@@ -305,6 +305,7 @@ NonlinearSystem::timestepSetup()
 void
 NonlinearSystem::setupFiniteDifferencedPreconditioner()
 {
+#ifdef LIBMESH_HAVE_PETSC
   // Make sure that libMesh isn't going to override our preconditioner
   _sys.nonlinear_solver->jacobian = NULL;
 
@@ -345,6 +346,7 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
                   petsc_mat->mat(),
                   SNESDefaultComputeJacobianColor,
                   fdcoloring);
+#endif
 }
 
 
