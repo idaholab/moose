@@ -17,13 +17,31 @@ InputParameters validParams<NSMomentumInviscidBC>();
  *
  * int_{Gamma} n . (rho*uu + Ip) . v
  *
- * A typical use for this kernel would be a subsonic outflow BC in the
- * Euler or Navier-Stokes equations in which one physical value (the
- * pressure) is specified.  In this case, the residual and Jacobian
- * contrbutions of the n.(rho*u)(u.v) term is computed and added to
- * the matrix/rhs.  For the pressure term, the residual contribution
- * due to the specified pressure is computed but there is no
- * corresponding Jacobian entry since the value is given.
+ * While this kernel implements the convective and pressure term
+ * residuals and jacobians, it does not itself implement any of
+ * the computeQp* functions.  For that, use one of the derived 
+ * classes:
+ * 1.) NSMomentumInviscidSpecifiedPressureBC
+ * 2.) NSMomentumInviscidSpecifiedNormalFlowBC
+ *
+ * The first kernel above would be used for a subsonic outflow BC in
+ * the Euler or Navier-Stokes equations in which one physical value
+ * (the pressure) is specified.  In this case, the residual and
+ * Jacobian contrbutions of the n.(rho*u)(u.v) term are computed and
+ * added to the matrix/rhs.  For the pressure term, the residual
+ * contribution due to the specified pressure is computed but there is
+ * no corresponding Jacobian entry since the value is given.
+ *
+ * The second kernel above would be used if, instead of the pressure,
+ * the value of the vector (rho*u)(u.n) is given.  This would be the
+ * case in the Euler equations along a free-slip boundary: in that 
+ * situation the pressure is an unknown and u.n = 0 would be imposed
+ * by the kernel.
+ *
+ * We note that other combinations are also theoretically possible
+ * (e.g. unspecified pressure and normal flow, fully-specified
+ * pressure and normal flow) however they have not yet been implemented
+ * since I'm not sure if they are physically-relevant.
  */
 class NSMomentumInviscidBC : public NSIntegratedBC
 {
@@ -42,22 +60,12 @@ protected:
 //  virtual Real computeQpJacobian();
 //  virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
-  // Aux Var - TODO: We may want this if the pressure is not specified... not sure what 
-  // type of boundary condition that would be (specified outflow would use a Dirichlet
-  // BC...)
-  // VariableValue & _pressure; 
-  
   // Which spatial component of the momentum equations (0,1, or 2) is this
   // kernel applied in?
   unsigned _component;
 
   // Ratio of specific heats
   Real _gamma;
-
-  // The specified value of the pressure.  This is used in
-  // the subsonic outflow boundary condition.
-  // FIXME: This should move down into classes where it is required.
-  // Real _specified_pressure;
 
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself
