@@ -48,12 +48,12 @@
 #include "NSSUPGMomentum.h"
 #include "NSSUPGMass.h"
 #include "NSSUPGEnergy.h"
-#include "NSMassBC.h"
+#include "NSMassSpecifiedNormalFlowBC.h"
+#include "NSMassUnspecifiedNormalFlowBC.h"
 #include "NSInflowThermalBC.h"
 #include "NSMomentumInviscidSpecifiedPressureBC.h"
 #include "NSMomentumInviscidSpecifiedNormalFlowBC.h"
 #include "NSMomentumViscousBC.h"
-//#include "NSEnergyInviscidBC.h"
 #include "NSEnergyInviscidSpecifiedPressureBC.h"
 #include "NSEnergyInviscidSpecifiedNormalFlowBC.h"
 #include "NSEnergyViscousBC.h"
@@ -168,12 +168,12 @@ Elk::registerObjects()
   registerKernel(NSSUPGMomentum);
   registerKernel(NSSUPGMass);
   registerKernel(NSSUPGEnergy);
-  registerBoundaryCondition(NSMassBC);
+  registerBoundaryCondition(NSMassSpecifiedNormalFlowBC);
+  registerBoundaryCondition(NSMassUnspecifiedNormalFlowBC);
   registerBoundaryCondition(NSInflowThermalBC);
   registerBoundaryCondition(NSMomentumInviscidSpecifiedPressureBC);
   registerBoundaryCondition(NSMomentumInviscidSpecifiedNormalFlowBC);
   registerBoundaryCondition(NSMomentumViscousBC);
-  //registerBoundaryCondition(NSEnergyInviscidBC);
   registerBoundaryCondition(NSEnergyInviscidSpecifiedPressureBC);
   registerBoundaryCondition(NSEnergyInviscidSpecifiedNormalFlowBC);
   registerBoundaryCondition(NSEnergyViscousBC);

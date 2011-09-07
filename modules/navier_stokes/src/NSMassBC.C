@@ -18,52 +18,87 @@ NSMassBC::NSMassBC(const std::string & name, InputParameters parameters)
 
 
 
-Real NSMassBC::computeQpResidual()
-{
-  // (rho*u.n) phi_i
-  RealVectorValue mom(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
 
-  return (mom*_normals[_qp]) * _test[_i][_qp];
+Real NSMassBC::qp_residual(Real rhoun)
+{
+  return rhoun * _test[_i][_qp];
 }
 
 
 
-Real NSMassBC::computeQpJacobian()
+
+Real NSMassBC::qp_jacobian(unsigned var_number)
 {
-  // The derivative wrt rho is zero!
-  return 0.;
-}
-
-
-
-Real NSMassBC::computeQpOffDiagJacobian(unsigned jvar)
-{
-  // Map jvar into the variable m for our problem, regardless of
-  // how Moose has numbered things. 
-  unsigned m = this->map_var_number(jvar);
-
-  switch ( m )
+  switch ( var_number )
   {
-    // Don't handle the on-diagonal case here
-    // case 0: // density
+  case 0: // density
+  case 4: // energy
+    return 0.;
 
   case 1:
   case 2:
-  case 3:
+  case 3: // momentums
   {
-    // If jvar is one of the momentums, the derivative is a mass
+    // If one of the momentums, the derivative is a mass
     // matrix times that normal component...
-    return _phi[_j][_qp] * _test[_i][_qp] * _normals[_qp](m-1);
+    return _phi[_j][_qp] * _test[_i][_qp] * _normals[_qp](var_number-1);
   }
-
-  
-  case 4: // energy
-    return 0.;
 
   default:
     mooseError("Should not get here!");
   }
-
-  // won't get here
-  return 0.;
+ 
+  // won't get here...
 }
+
+
+
+// Real NSMassBC::computeQpResidual()
+// {
+//   // (rho*u.n) phi_i
+//   RealVectorValue mom(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
+// 
+//   return (mom*_normals[_qp]) * _test[_i][_qp];
+// }
+// 
+// 
+// 
+// Real NSMassBC::computeQpJacobian()
+// {
+//   // The derivative wrt rho is zero!
+//   return 0.;
+// }
+// 
+// 
+// 
+// Real NSMassBC::computeQpOffDiagJacobian(unsigned jvar)
+// {
+//   // Map jvar into the variable m for our problem, regardless of
+//   // how Moose has numbered things. 
+//   unsigned m = this->map_var_number(jvar);
+// 
+//   switch ( m )
+//   {
+//     // Don't handle the on-diagonal case here
+//     // case 0: // density
+// 
+//   case 1:
+//   case 2:
+//   case 3:
+//   {
+//     // If jvar is one of the momentums, the derivative is a mass
+//     // matrix times that normal component...
+//     return _phi[_j][_qp] * _test[_i][_qp] * _normals[_qp](m-1);
+//   }
+// 
+//   
+//   case 4: // energy
+//     return 0.;
+// 
+//   default:
+//     mooseError("Should not get here!");
+//   }
+// 
+//   // won't get here
+//   return 0.;
+// }
