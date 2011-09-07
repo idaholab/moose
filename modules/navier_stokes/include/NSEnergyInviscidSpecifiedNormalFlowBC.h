@@ -11,7 +11,7 @@ InputParameters validParams<NSEnergyInviscidSpecifiedNormalFlowBC>();
 
 
 /**
- * The inviscid energy BC term with specified pressure.
+ * The inviscid energy BC term with specified normal flow.
  */
 class NSEnergyInviscidSpecifiedNormalFlowBC : public NSEnergyInviscidBC
 {

@@ -56,7 +56,7 @@ Real NSEnergyInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jv
 
 Real NSEnergyInviscidSpecifiedNormalFlowBC::compute_jacobian(unsigned var_number)
 {
-  // For specified pressure, term "A" is zero, see base class for details.
+  // For specified u.n, term "A" is zero, see base class for details.
   return 
     this->qp_jacobian_termB(var_number, _un) +
     this->qp_jacobian_termC(var_number, _un);
