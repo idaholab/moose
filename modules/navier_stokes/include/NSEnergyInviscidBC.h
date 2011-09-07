@@ -22,6 +22,8 @@ InputParameters validParams<NSEnergyInviscidBC>();
  * functions.  For that, use one of the derived classes:
  * 1.) NSEnergyInviscidSpecifiedPressureBC
  * 2.) NSEnergyInviscidSpecifiedNormalFlowBC
+ * 3.) NSEnergyInviscidUnspecifiedBC
+ * 4.) NSEnergyInviscidSpecifiedBC
  */
 class NSEnergyInviscidBC : public NSIntegratedBC
 {
@@ -39,10 +41,6 @@ protected:
 //  virtual Real computeQpResidual();
 //  virtual Real computeQpJacobian();
 //  virtual Real computeQpOffDiagJacobian(unsigned jvar);
-
-  // The specified value of the pressure.  This is used in
-  // the subsonic outflow boundary condition.
-  // Real _specified_pressure;
 
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself
