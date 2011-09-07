@@ -7,7 +7,7 @@ InputParameters validParams<NSMomentumInviscidBC>()
 
   // Required parameters
   params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
+  //params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
   
   return params;
 }
@@ -20,7 +20,7 @@ NSMomentumInviscidBC::NSMomentumInviscidBC(const std::string & name, InputParame
 
       // Parameters to be specified in input file block...
       _component(getParam<unsigned>("component")),
-      _gamma(getParam<Real>("gamma")),
+      //_gamma(getParam<Real>("gamma")),
 
       // Object for computing deriviatives of pressure
       _pressure_derivs(*this)

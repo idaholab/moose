@@ -16,6 +16,9 @@ InputParameters validParams<NSIntegratedBC>()
   params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
   params.addRequiredCoupledVar("rhoe", "energy");
   
+  // Required parameters
+  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
+  
   return params;
 }
 
@@ -51,7 +54,10 @@ NSIntegratedBC::NSIntegratedBC(const std::string & name, InputParameters paramet
       
       // Material properties
       _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity")), 
-      _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor"))
+      _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
+
+      // Required parameters
+      _gamma(getParam<Real>("gamma"))
 {
 }
 

@@ -65,7 +65,7 @@ protected:
   unsigned _component;
 
   // Ratio of specific heats
-  Real _gamma;
+  //Real _gamma;
 
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself

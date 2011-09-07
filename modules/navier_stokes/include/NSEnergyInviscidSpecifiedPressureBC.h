@@ -1,0 +1,37 @@
+#ifndef NSENERGYINVISCIDSPECIFIEDPRESSUREBC_H
+#define NSENERGYINVISCIDSPECIFIEDPRESSUREBC_H
+
+#include "NSEnergyInviscidBC.h"
+
+// Forward Declarations
+class NSEnergyInviscidSpecifiedPressureBC;
+
+template<>
+InputParameters validParams<NSEnergyInviscidSpecifiedPressureBC>();
+
+
+/**
+ * The inviscid energy BC term with specified pressure.
+ */
+class NSEnergyInviscidSpecifiedPressureBC : public NSEnergyInviscidBC
+{
+
+public:
+  NSEnergyInviscidSpecifiedPressureBC(const std::string & name, InputParameters parameters);
+
+  virtual ~NSEnergyInviscidSpecifiedPressureBC(){}
+
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned jvar);
+
+  // Required parameters
+  Real _specified_pressure;
+
+private:
+  // Helper Jacobian function
+  Real compute_jacobian(unsigned var_number);
+};
+
+#endif // NSENERGYINVISCIDSPECIFIEDPRESSUREBC_H 

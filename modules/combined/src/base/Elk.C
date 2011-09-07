@@ -53,7 +53,9 @@
 #include "NSMomentumInviscidSpecifiedPressureBC.h"
 #include "NSMomentumInviscidSpecifiedNormalFlowBC.h"
 #include "NSMomentumViscousBC.h"
-#include "NSEnergyInviscidBC.h"
+//#include "NSEnergyInviscidBC.h"
+#include "NSEnergyInviscidSpecifiedPressureBC.h"
+#include "NSEnergyInviscidSpecifiedNormalFlowBC.h"
 #include "NSEnergyViscousBC.h"
 
 // linear_elasticity
@@ -171,7 +173,9 @@ Elk::registerObjects()
   registerBoundaryCondition(NSMomentumInviscidSpecifiedPressureBC);
   registerBoundaryCondition(NSMomentumInviscidSpecifiedNormalFlowBC);
   registerBoundaryCondition(NSMomentumViscousBC);
-  registerBoundaryCondition(NSEnergyInviscidBC);
+  //registerBoundaryCondition(NSEnergyInviscidBC);
+  registerBoundaryCondition(NSEnergyInviscidSpecifiedPressureBC);
+  registerBoundaryCondition(NSEnergyInviscidSpecifiedNormalFlowBC);
   registerBoundaryCondition(NSEnergyViscousBC);
 
   // linear_elasticity
