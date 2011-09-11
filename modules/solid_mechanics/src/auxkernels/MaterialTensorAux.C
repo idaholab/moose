@@ -8,7 +8,7 @@ InputParameters validParams<MaterialTensorAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
   params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
-  params.addParam<std::string>("quantity", "", "A scalar quantity to compute: VonMises, Hydrostatic, FirstInvariant, SecondInvariant, ThirdInvariant.");
+  params.addParam<std::string>("quantity", "", "A scalar quantity to compute: VonMises, Hydrostatic, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality.");
   return params;
 }
 
@@ -49,6 +49,10 @@ MaterialTensorAux::MaterialTensorAux( const std::string & name,
   else if ( _quantity_string == "thirdinvariant" )
   {
     _quantity = MTA_THIRDINVARIANT;
+  }
+  else if ( _quantity_string == "triaxiality" )
+  {
+    _quantity = MTA_TRIAXIALITY;
   }
   else if ( _quantity_string != "" )
   {
@@ -91,7 +95,7 @@ MaterialTensorAux::computeValue()
   }
   else if ( _quantity == MTA_HYDROSTATIC )
   {
-    value = tensor.trace()/3;
+    value = tensor.trace()/3.0;
   }
   else if ( _quantity == MTA_FIRSTINVARIANT )
   {
@@ -116,6 +120,19 @@ MaterialTensorAux::computeValue()
       tensor.xy()*tensor.xy()*tensor.zz() +
       tensor.zx()*tensor.xy()*tensor.yz() -
       tensor.zx()*tensor.zx()*tensor.yy();
+  }
+  else if ( _quantity == MTA_TRIAXIALITY )
+  {
+    Real hydrostatic = tensor.trace()/3.0;
+    Real von_mises = std::sqrt(0.5*(
+                                 std::pow(tensor.xx() - tensor.yy(), 2) +
+                                 std::pow(tensor.yy() - tensor.zz(), 2) +
+                                 std::pow(tensor.zz() - tensor.xx(), 2) + 6 * (
+                                   std::pow(tensor.xy(), 2) +
+                                   std::pow(tensor.yz(), 2) +
+                                   std::pow(tensor.zx(), 2))));
+
+    value = std::abs(hydrostatic / von_mises);
   }
   else
   {
