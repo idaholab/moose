@@ -324,68 +324,6 @@ SolidModel::computeProperties()
 ////////////////////////////////////////////////////////////////////////
 
 void
-SolidModel::fillMatrix( const VariableGradient & grad_x,
-                        const VariableGradient & grad_y,
-                        const VariableGradient & grad_z,
-                        ColumnMajorMatrix & A )
-{
-  A(0,0) = grad_x[_qp](0); A(0,1) = grad_x[_qp](1); A(0,2) = grad_x[_qp](2);
-  A(1,0) = grad_y[_qp](0); A(1,1) = grad_y[_qp](1); A(1,2) = grad_y[_qp](2);
-  A(2,0) = grad_z[_qp](0); A(2,1) = grad_z[_qp](1); A(2,2) = grad_z[_qp](2);
-}
-
-////////////////////////////////////////////////////////////////////////
-
-Real
-SolidModel::detMatrix( const ColumnMajorMatrix & A )
-{
-  Real Axx = A(0,0);
-  Real Axy = A(0,1);
-  Real Axz = A(0,2);
-  Real Ayx = A(1,0);
-  Real Ayy = A(1,1);
-  Real Ayz = A(1,2);
-  Real Azx = A(2,0);
-  Real Azy = A(2,1);
-  Real Azz = A(2,2);
-
-  return   Axx*Ayy*Azz + Axy*Ayz*Azx + Axz*Ayx*Azy
-         - Azx*Ayy*Axz - Azy*Ayz*Axx - Azz*Ayx*Axy;
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void
-SolidModel::invertMatrix( const ColumnMajorMatrix & A,
-                             ColumnMajorMatrix & Ainv )
-{
-  Real Axx = A(0,0);
-  Real Axy = A(0,1);
-  Real Axz = A(0,2);
-  Real Ayx = A(1,0);
-  Real Ayy = A(1,1);
-  Real Ayz = A(1,2);
-  Real Azx = A(2,0);
-  Real Azy = A(2,1);
-  Real Azz = A(2,2);
-
-  mooseAssert( detMatrix( A ) > 0, "Matrix is not positive definite!" );
-  Real detInv = 1 / detMatrix( A );
-
-  Ainv(0,0) = +(Ayy*Azz-Azy*Ayz) * detInv;
-  Ainv(0,1) = -(Axy*Azz-Azy*Axz) * detInv;
-  Ainv(0,2) = +(Axy*Ayz-Ayy*Axz) * detInv;
-  Ainv(1,0) = -(Ayx*Azz-Azx*Ayz) * detInv;
-  Ainv(1,1) = +(Axx*Azz-Azx*Axz) * detInv;
-  Ainv(1,2) = -(Axx*Ayz-Ayx*Axz) * detInv;
-  Ainv(2,0) = +(Ayx*Azy-Azx*Ayy) * detInv;
-  Ainv(2,1) = -(Axx*Azy-Azx*Axy) * detInv;
-  Ainv(2,2) = +(Axx*Ayy-Ayx*Axy) * detInv;
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void
 SolidModel::computePreconditioning()
 {
   mooseAssert(_local_elasticity_tensor, "null elasticity tensor");

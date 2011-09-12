@@ -23,11 +23,6 @@ public:
                  InputParameters parameters );
   virtual ~SolidModel();
 
-  static Real detMatrix( const ColumnMajorMatrix & A );
-
-  static void invertMatrix( const ColumnMajorMatrix & A,
-                            ColumnMajorMatrix & Ainv );
-
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
                                      SymmTensor & result );
 
@@ -119,11 +114,6 @@ protected:
   virtual void computePreconditioning();
 
   void applyCracksToTensor( SymmTensor & tensor );
-
-  void fillMatrix( const VariableGradient & grad_x,
-                   const VariableGradient & grad_y,
-                   const VariableGradient & grad_z,
-                   ColumnMajorMatrix & A );
 
   void
   elasticityTensor( SymmElasticityTensor * e );
