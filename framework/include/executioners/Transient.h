@@ -65,7 +65,7 @@ public:
    * This should execute the solve for one timestep.
    */
   virtual void takeStep(Real input_dt = -1.0);
-  
+
   /**
    * @return The fully constrained dt for this timestep
    */
@@ -73,7 +73,7 @@ public:
 
   /**
    * Optional override.
-   * 
+   *
    * @return The dt to use for this timestep.
    */
   virtual Real computeDT();
@@ -89,7 +89,7 @@ public:
   virtual bool lastSolveConverged();
 
   virtual void preExecute();
-  
+
   virtual void endStep();
 
 protected:
@@ -104,7 +104,7 @@ protected:
 
   Real _prev_dt;
   bool _reset_dt;
-  
+
   Real _end_time;
   Real _dtmin;
   Real _dtmax;
@@ -118,7 +118,7 @@ protected:
   Real _ss_check_tol;
   Real _ss_tmin;
   Real _old_time_solution_norm;
-  
+
   /**
    * Whether or not the previous solve converged.
    */
@@ -130,6 +130,8 @@ protected:
 
   LinearInterpolation _time_ipol;               ///< Piecewise linear definition of time stepping
   bool _use_time_ipol;                          ///< true if we want to use piecewise-defined time stepping
+  Real _growth_factor;
+  bool _cutback_occurred;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

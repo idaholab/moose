@@ -51,6 +51,7 @@ InputParameters validParams<Transient>()
   params.addParam<std::vector<Real> >("sync_times", sync_times, "A list of times that will be solved for provided they are within the simulation time");
   params.addParam<std::vector<Real> >("time_t", "The values of t");
   params.addParam<std::vector<Real> >("time_dt", "The values of dt");
+  params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.  For use with 'time_t' and 'time_dt'.");
 
   return params;
 }
@@ -80,8 +81,10 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _remaining_sync_time(true),
     _time_ipol(getParam<std::vector<Real> >("time_t"),
                getParam<std::vector<Real> >("time_dt")),
-    _use_time_ipol(_time_ipol.getSampleSize() > 0)
-{  
+    _use_time_ipol(_time_ipol.getSampleSize() > 0),
+    _growth_factor(getParam<Real>("growth_factor")),
+    _cutback_occurred(false)
+{
   _t_step = 0;
   _dt = 0;
   _time = getParam<Real>("start_time");
@@ -116,9 +119,9 @@ Transient::execute()
   _problem.initialSetup();
 
   preExecute();
-  
+
   // Start time loop...
-  while(keepGoing()) 
+  while(keepGoing())
   {
     takeStep();
   }
@@ -157,14 +160,14 @@ Transient::takeStep(Real input_dt)
   std::cout << " Solving time step ";
   {
     OStringStream out;
-      
+
     OSSInt(out,2,_t_step);
     out << ", time=";
     OSSRealzeroleft(out,9,6,_time);
     out <<  "...";
     std::cout << out.str() << std::endl;
   }
-    
+
   preSolve();
 
   _problem.timestepSetup();
@@ -178,9 +181,9 @@ Transient::takeStep(Real input_dt)
 
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   bool last_solve_converged = lastSolveConverged();
-    
+
   // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
-  if (last_solve_converged) 
+  if (last_solve_converged)
   {
     _problem.computePostprocessors();
 
@@ -237,7 +240,7 @@ Transient::computeConstrainedDT()
   // Don't allow time step size to be smaller than minimum time step size
   if (dt_cur < _dtmin)
     dt_cur = _dtmin;
-          
+
   // Don't let time go beyond simulation end time
   if (_time + dt_cur > _end_time)
     dt_cur = _end_time - _time;
@@ -253,7 +256,7 @@ Transient::computeConstrainedDT()
 
     _reset_dt = true;
   }
-  else 
+  else
   {
     if (_reset_dt)
     {
@@ -266,7 +269,7 @@ Transient::computeConstrainedDT()
   }
 
   return dt_cur;
-  
+
 }
 
 Real
@@ -274,34 +277,34 @@ Transient::computeDT()
 {
   if (!lastSolveConverged())
   {
+    _cutback_occurred = true;
     //std::cout<<"Solve failed... cutting timestep"<<std::endl;
     //return _dt / 2.0;
 
     // Instead of blindly cutting timestep, respect dtmin.
     if (_dt <= _dtmin)
       mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
-    
+
     if (0.5 * _dt >= _dtmin)
       return 0.5 * _dt;
 
     else // (0.5 * _dt < _dtmin)
       return _dtmin;
   }
-  
+
+  Real dt = _dt;
   if (_use_time_ipol)
   {
-    return _time_ipol.sample(_time);
+    dt = _time_ipol.sample(_time);
+    if (_cutback_occurred &&
+        dt > _dt * _growth_factor)
+    {
+      dt = _dt * _growth_factor;
+    }
   }
-  else
-  {
-//    // If start up steps are needed
-//    if(_t_step == 1 && _n_startup_steps > 1)
-//      return _dt/(double)(_n_startup_steps);
-//    else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
-//      return _dt*(double)(_n_startup_steps);
-//    else
-      return _dt;
-  }
+
+  _cutback_occurred = false;
+  return dt;
 }
 
 bool
@@ -335,7 +338,7 @@ Transient::keepGoing()
   // Check for stop condition based upon number of simulation steps and/or solution end time:
   if(_t_step>_num_steps)
     return false;
-  
+
   if((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))
     return false;
 
@@ -347,7 +350,7 @@ bool
 Transient::lastSolveConverged()
 {
   return _converged;
-}  
+}
 
 void
 Transient::preExecute()
