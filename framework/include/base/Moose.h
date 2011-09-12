@@ -29,8 +29,8 @@ typedef Real                     PostprocessorValue;
 /**
  * MOOSE wrapped versions of useful libMesh macros (see libmesh_common.h)
  */
-#ifndef NDEBUG
-#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); libmesh_error(); } while(0)
+#ifdef GRACEFUL_ERROR
+#define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); exit(1); } while(0)
 #else
 #define mooseError(msg) do { std::cerr << "\n\n" << msg << "\n\n"; print_trace(); libmesh_error(); } while(0)
 #endif

@@ -44,7 +44,7 @@ endif
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
 	ifneq (,$(findstring gcc,$(GXX-VERSION)))
-		libmesh_CXXFLAGS += --coverage -fbranch-probabilities
+		libmesh_CXXFLAGS += --coverage -fprofile-arcs -ftest-coverage
 		libmesh_LDFLAGS += --coverage
 	endif
 endif
@@ -57,6 +57,11 @@ ifeq ($(linkcoverage),true)
 	ifneq (,$(findstring gcc,$(GXX-VERSION)))
 		libmesh_LDFLAGS += --coverage
 	endif
+endif
+
+# graceful error exiting
+ifeq ($(graceful),true)
+	libmesh_CXXFLAGS += -DGRACEFUL_ERROR
 endif
 
 ##############################################################################
