@@ -58,6 +58,7 @@
 #include "NSEnergyInviscidSpecifiedNormalFlowBC.h"
 #include "NSEnergyInviscidUnspecifiedBC.h"
 #include "NSEnergyInviscidSpecifiedBC.h"
+#include "NSEnergyInviscidSpecifiedDensityAndVelocityBC.h"
 #include "NSEnergyViscousBC.h"
 
 // linear_elasticity
@@ -180,6 +181,7 @@ Elk::registerObjects()
   registerBoundaryCondition(NSEnergyInviscidSpecifiedNormalFlowBC);
   registerBoundaryCondition(NSEnergyInviscidUnspecifiedBC);
   registerBoundaryCondition(NSEnergyInviscidSpecifiedBC);
+  registerBoundaryCondition(NSEnergyInviscidSpecifiedDensityAndVelocityBC);
   registerBoundaryCondition(NSEnergyViscousBC);
 
   // linear_elasticity

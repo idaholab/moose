@@ -5,6 +5,12 @@ InputParameters validParams<NSEnergyInviscidBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
 
+  // Coupled variables
+  params.addRequiredCoupledVar("temperature", "");
+
+  // Required parameters
+  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
+
   return params;
 }
 
@@ -13,6 +19,12 @@ InputParameters validParams<NSEnergyInviscidBC>()
 NSEnergyInviscidBC::NSEnergyInviscidBC(const std::string & name, InputParameters parameters)
     : NSIntegratedBC(name, parameters),
       
+      // Aux Variables
+      _temperature(coupledValue("temperature")),
+
+      // Required parameters
+      _cv(getParam<Real>("cv")),
+
       // Object for computing deriviatives of pressure
       _pressure_derivs(*this)
 {
@@ -25,6 +37,19 @@ Real NSEnergyInviscidBC::qp_residual(Real pressure, Real un)
 {
   return (_rho_e[_qp] + pressure) * un * _test[_i][_qp];
 }
+
+
+
+
+Real NSEnergyInviscidBC::qp_residual(Real rho, RealVectorValue u, Real /*pressure*/)
+{
+  // return (rho*(_cv*_temperature[_qp] + 0.5*u.size_sq()) + pressure) * (u*_normals[_qp]) * _test[_i][_qp];
+
+  // We can also expand pressure in terms of rho... does this make a difference?
+  // Then we don't use the input pressure value.
+  return rho * (_gamma * _cv * _temperature[_qp] + 0.5*u.size_sq()) * (u*_normals[_qp]) * _test[_i][_qp];
+}
+
 
 
 

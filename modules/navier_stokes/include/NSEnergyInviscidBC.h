@@ -24,6 +24,7 @@ InputParameters validParams<NSEnergyInviscidBC>();
  * 2.) NSEnergyInviscidSpecifiedNormalFlowBC
  * 3.) NSEnergyInviscidUnspecifiedBC
  * 4.) NSEnergyInviscidSpecifiedBC
+ * 5.) NSEnergyInviscidSpecifiedDensityAndVelocityBC
  */
 class NSEnergyInviscidBC : public NSIntegratedBC
 {
@@ -42,6 +43,12 @@ protected:
 //  virtual Real computeQpJacobian();
 //  virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
+  // Aux vars
+  VariableValue& _temperature; 
+
+  // Required parameters
+  Real _cv;
+
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself
   NSPressureDerivs<NSEnergyInviscidBC> _pressure_derivs;
@@ -55,6 +62,15 @@ protected:
   // responsible for determining whether the inputs are specified
   // values or come from the current solution.
   Real qp_residual(Real pressure, Real un);
+
+  // This was experimental code and did not really work out, do not use!
+  // New version, allows input of three variables to provide both:
+  // .) specified (rho, u) boundary residuals
+  // .) specified pressure boundary residuals
+  //
+  // The actual term implemented here is:
+  // rho*H*(u.n) = (rho*E + p)(u.n) = (rho*(cv*T + 0.5*|u|^2) + p)(u.n)
+  Real qp_residual(Real rho, RealVectorValue u, Real pressure);
 
   // The Jacobian of this term is given by the product rule, i.e.
   //
@@ -79,6 +95,14 @@ protected:
 
   // d(p)/dX * (u.n)
   Real qp_jacobian_termC(unsigned var_number, Real un);
+
+  // The residual term with rho*E expanded has 3 parts:
+  // rho*cv*T*(u.n) + rho*0.5*|u|^2*(u.n) + p*(u.n)
+  // Each of these terms, when differentiated, leads to
+  // multiple terms due to the product rule:
+  // (1) d/dX (rho*cv*T*(u.n))      = cv * (d(rho)/dX*T*(u.n) + rho*d(T)/dX*(u.n) + rho*T*d(u.n)/dX)
+  // (2) d/dX (rho*0.5*|u|^2*(u.n)) = 0.5 * (d(rho)/dX*|u|^2*(u.n) + rho*d(|u|^2)/dX*(u.n) + rho*|u|^2*d(u.n)/dX)
+  // (3) d/dX (p*(u.n)) = d(p)/dx*(u.n) + p*d(u.n)/dX
 };
 
 
