@@ -23,7 +23,9 @@ public:
 
 protected:
 
-  // Your BC should at least specialize the computeQpResidual function
+  // NodalBC's can (currently) only specialize the computeQpResidual function,
+  // the computeQpJacobian() function automatically assembles a "1" onto the main
+  // diagonal for this DoF.
   virtual Real computeQpResidual();
 
   // We need the density, since we are actually setting essential values of

@@ -60,6 +60,9 @@
 #include "NSEnergyInviscidSpecifiedBC.h"
 #include "NSEnergyInviscidSpecifiedDensityAndVelocityBC.h"
 #include "NSEnergyViscousBC.h"
+#include "NSStagnationPressureBC.h"
+#include "NSStagnationTemperatureBC.h"
+#include "NSImposedVelocityDirectionBC.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -183,6 +186,9 @@ Elk::registerObjects()
   registerBoundaryCondition(NSEnergyInviscidSpecifiedBC);
   registerBoundaryCondition(NSEnergyInviscidSpecifiedDensityAndVelocityBC);
   registerBoundaryCondition(NSEnergyViscousBC);
+  registerBoundaryCondition(NSStagnationPressureBC);
+  registerBoundaryCondition(NSStagnationTemperatureBC);
+  registerBoundaryCondition(NSImposedVelocityDirectionBC);
 
   // linear_elasticity
   registerKernel(SolidMechX);
