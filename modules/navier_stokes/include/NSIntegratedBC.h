@@ -63,6 +63,7 @@ protected:
 
   // Required parameters
   Real _gamma;
+  Real _R;
   
   // Helper function for mapping Moose variable numberings into
   // the "canonical" numbering for the compressible NS equations.

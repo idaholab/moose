@@ -15,7 +15,6 @@ InputParameters validParams<NSStagnationBC>()
 
   // Required parameters
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
-  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
   params.addRequiredParam<Real>("R", "Gas constant.");
   
   return params;
@@ -37,7 +36,6 @@ NSStagnationBC::NSStagnationBC(const std::string & name, InputParameters paramet
 
       // Required parameters
       _gamma(getParam<Real>("gamma")),
-      _cv(getParam<Real>("cv")),
       _R(getParam<Real>("R"))
 {}
 

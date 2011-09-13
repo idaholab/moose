@@ -46,9 +46,6 @@ protected:
   // Material properties
   MaterialProperty<Real>& _thermal_conductivity;
 
-  // Parameters
-  Real _cv;
-  
   // An object for computing viscous stress tensor derivatives.
   // Constructed via a reference to ourself so we can access all of our data.
   NSViscStressTensorDerivs<NSEnergyViscousBC> _vst_derivs;

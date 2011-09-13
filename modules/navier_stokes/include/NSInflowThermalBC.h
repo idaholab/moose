@@ -31,7 +31,8 @@ protected:
 
   // Specific heat at constant volume, treated as a single
   // constant value.
-  Real _cv;
+  Real _R;
+  Real _gamma;
 
   // The specified density for this inflow boundary
   Real _specified_rho;

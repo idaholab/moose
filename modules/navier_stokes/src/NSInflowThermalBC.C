@@ -6,7 +6,8 @@ InputParameters validParams<NSInflowThermalBC>()
   InputParameters params = validParams<NodalBC>();
 
   // Global constant parameters
-  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
+  params.addRequiredParam<Real>("R", "Gas constant.");
+  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
 
   // Boundary condition values, all required except for velocity which defaults to zero.
   params.addRequiredParam<Real>("specified_rho", "Density of incoming flow");
@@ -21,7 +22,8 @@ InputParameters validParams<NSInflowThermalBC>()
 
 NSInflowThermalBC::NSInflowThermalBC(const std::string & name, InputParameters parameters)
   :NodalBC(name, parameters),
-   _cv(getParam<Real>("cv")),
+   _R(getParam<Real>("R")),
+   _gamma(getParam<Real>("gamma")),
    _specified_rho(getParam<Real>("specified_rho")),
    _specified_temperature(getParam<Real>("specified_temperature")),
    _specified_velocity_magnitude(getParam<Real>("specified_velocity_magnitude"))
@@ -41,6 +43,7 @@ NSInflowThermalBC::computeQpResidual()
   //
   // ***at a no-slip wall*** this further reduces to (no coupling to velocity variables):
   // rho*E - rho*cv*T = 0
-
-  return _u[_qp] - _specified_rho * (_cv * _specified_temperature + 0.5*_specified_velocity_magnitude*_specified_velocity_magnitude);
+  
+  Real cv = _R / (_gamma-1.);
+  return _u[_qp] - _specified_rho * (cv * _specified_temperature + 0.5*_specified_velocity_magnitude*_specified_velocity_magnitude);
 }

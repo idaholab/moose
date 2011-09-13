@@ -42,7 +42,6 @@ protected:
 
   // Required paramters
   Real _gamma;
-  Real _cv;
   Real _R;
 };
 

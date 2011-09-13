@@ -39,8 +39,8 @@ protected:
 
   // Specific heat at constant volume, treated as a single
   // constant value.
-  Real _cv;
-
+  Real _R;
+  Real _gamma;
 };
 
 #endif // NSTEMPERATUREAUX_H

@@ -46,9 +46,6 @@ protected:
   // Aux vars
   VariableValue& _temperature; 
 
-  // Required parameters
-  Real _cv;
-
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself
   NSPressureDerivs<NSEnergyInviscidBC> _pressure_derivs;

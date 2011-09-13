@@ -13,7 +13,8 @@ InputParameters validParams<NSTemperatureAux>()
   params.addRequiredCoupledVar("rhoe", "");
 
   // Parameters with default values
-  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
+  params.addRequiredParam<Real>("R", "Gas constant.");
+  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
 
   return params;
 }
@@ -21,13 +22,14 @@ InputParameters validParams<NSTemperatureAux>()
 
 
 NSTemperatureAux::NSTemperatureAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _rho(coupledValue("rho")),
-   _u_vel(coupledValue("u")),
-   _v_vel(coupledValue("v")),
-   _w_vel(_dim == 3 ? coupledValue("w") : _zero),
-   _rhoe(coupledValue("rhoe")),
-   _cv(getParam<Real>("cv"))
+    : AuxKernel(name, parameters),
+      _rho(coupledValue("rho")),
+      _u_vel(coupledValue("u")),
+      _v_vel(coupledValue("v")),
+      _w_vel(_dim == 3 ? coupledValue("w") : _zero),
+      _rhoe(coupledValue("rhoe")),
+      _R(getParam<Real>("R")),
+      _gamma(getParam<Real>("gamma"))
 {}
 
 
@@ -42,6 +44,7 @@ NSTemperatureAux::computeValue()
   // Internal Energy = Total Energy - Kinetic 
   Real e_i = (_rhoe[_qp] / _rho[_qp]) - 0.5*V2;
 
-  // T = e_i / c_v
-  return e_i / _cv;
+  // T = e_i / cv
+  Real cv = _R / (_gamma-1.);
+  return e_i / cv;
 }

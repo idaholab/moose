@@ -8,9 +8,6 @@ InputParameters validParams<NSEnergyViscousBC>()
   // Required coupled variables for residual terms
   params.addRequiredCoupledVar("temperature", "");
 
-  // Parameters with default values
-  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
-  
   return params;
 }
 
@@ -24,9 +21,6 @@ NSEnergyViscousBC::NSEnergyViscousBC(const std::string & name, InputParameters p
 
       // Material properties
       _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
-      
-      // Parameters
-      _cv(getParam<Real>("cv")),
       
       // Viscous stress tensor derivative computing object
       _vst_derivs(*this),

@@ -18,6 +18,7 @@ InputParameters validParams<NSIntegratedBC>()
   
   // Required parameters
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
+  params.addRequiredParam<Real>("R", "Gas constant.");
   
   return params;
 }
@@ -57,7 +58,8 @@ NSIntegratedBC::NSIntegratedBC(const std::string & name, InputParameters paramet
       _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
 
       // Required parameters
-      _gamma(getParam<Real>("gamma"))
+      _gamma(getParam<Real>("gamma")),
+      _R(getParam<Real>("R"))
 {
 }
 

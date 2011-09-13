@@ -10,7 +10,6 @@ InputParameters validParams<NavierStokesMaterial>()
   params.addRequiredParam<Real>("R", "Gas constant.");
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
   params.addRequiredParam<Real>("Pr", "Prandtl number.");
-  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
 
   params.addRequiredCoupledVar("u", "");
   params.addRequiredCoupledVar("v", "");
@@ -58,7 +57,6 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _R(getParam<Real>("R")),
     _gamma(getParam<Real>("gamma")),
     _Pr(getParam<Real>("Pr")),
-    _cv(getParam<Real>("cv")),
     
     // Coupled solution values needed for computing SUPG stabilization terms
     _u_vel(coupledValue("u")),
@@ -158,7 +156,8 @@ NavierStokesMaterial::computeProperties()
     // 673      0.0515
 
     // Pr = (mu * cp) / k  ==>  k = (mu * cp) / Pr = (mu * gamma * cv) / Pr
-    _thermal_conductivity[qp] = (_dynamic_viscosity[qp] * _gamma * _cv) / _Pr;
+    Real cv = _R / (_gamma-1.);
+    _thermal_conductivity[qp] = (_dynamic_viscosity[qp] * _gamma * cv) / _Pr;
 
     // Compute stabilization parameters:
 
@@ -288,7 +287,8 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
     Real visc_term = _dynamic_viscosity[qp] / _rho[qp] / h2;
     
     // The thermal conductivity-based term, cp = gamma * cv
-    Real k_term = _thermal_conductivity[qp] / _rho[qp] / (_gamma*_cv) / h2;
+    Real cv = _R / (_gamma-1.);
+    Real k_term = _thermal_conductivity[qp] / _rho[qp] / (_gamma*cv) / h2;
 
     // Standard compressible flow tau.  Does not account for low Mach number
     // limit.

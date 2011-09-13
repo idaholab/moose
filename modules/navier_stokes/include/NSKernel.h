@@ -59,7 +59,6 @@ protected:
 
   // Required parameters
   Real _gamma;
-  Real _cv;
   Real _R;
 
   // Integrated BC can use Mat. properties...

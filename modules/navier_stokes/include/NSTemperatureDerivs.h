@@ -44,8 +44,9 @@ Real NSTemperatureDerivs<T>::get_grad(unsigned i)
 
   Real rho2 = U0 * U0;
   Real mom2 = U1*U1 + U2*U2 + U3*U3;
-
-  Real tmp = -1./rho2/_data._cv;
+  
+  Real cv = _data._R / (_data._gamma-1.);
+  Real tmp = -1./rho2/cv;
 
   switch ( i )
   {
@@ -86,7 +87,7 @@ Real NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
   Real rho4 = rho3 * U0;
   Real mom2 = U1*U1 + U2*U2 + U3*U3;
 
-  Real cv = _data._cv;
+  Real cv = _data._R / (_data._gamma-1.);
   Real tmp = -1./rho2/cv;
 
   // Only lower-triangle of matrix is defined, it is symmetric

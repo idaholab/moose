@@ -69,7 +69,6 @@ protected:
   Real _R;
   Real _gamma;
   Real _Pr;
-  Real _cv;
 
   // Coupled values needed to compute strong form residuals
   // for SUPG stabilization...

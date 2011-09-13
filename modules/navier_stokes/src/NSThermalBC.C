@@ -11,7 +11,8 @@ InputParameters validParams<NSThermalBC>()
   params.addRequiredParam<Real>("initial", "Initial temperature");
   params.addRequiredParam<Real>("final", "Final temperature");
   params.addRequiredParam<Real>("duration", "Time over which temperature ramps up from initial to final");
-  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
+  params.addRequiredParam<Real>("R", "Gas constant.");
+  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
 
   return params;
 }
@@ -23,7 +24,8 @@ NSThermalBC::NSThermalBC(const std::string & name, InputParameters parameters)
    _initial(getParam<Real>("initial")),
    _final(getParam<Real>("final")),
    _duration(getParam<Real>("duration")),
-   _cv(getParam<Real>("cv"))
+   _R(getParam<Real>("R")),
+   _gamma(getParam<Real>("gamma"))
   {}
   
 
@@ -58,5 +60,6 @@ NSThermalBC::computeQpResidual()
 // //std::cout << "_c_v[_qp]                    =" << _c_v[_qp] << std::endl;
 // std::cout.flags(flags);
 
-  return _u[_qp] - (_rho[_qp] * _cv * value);
+  Real cv = _R / (_gamma-1.);
+  return _u[_qp] - (_rho[_qp] * cv * value);
 }

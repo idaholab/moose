@@ -18,7 +18,6 @@ InputParameters validParams<NSKernel>()
   
   // Required parameters
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
-  params.addRequiredParam<Real>("cv", "Specific heat at constant volume");
   params.addRequiredParam<Real>("R", "Gas constant.");
 
   return params;
@@ -56,7 +55,6 @@ NSKernel::NSKernel(const std::string & name, InputParameters parameters)
       
       // Required parameters
       _gamma(getParam<Real>("gamma")),
-      _cv(getParam<Real>("cv")),
       _R(getParam<Real>("R")),
 
       // Material properties
