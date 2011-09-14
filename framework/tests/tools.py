@@ -214,7 +214,7 @@ class TestHarness:
     self.handleTestResult(test, output, result)
 
   def checkExpectError(self, output, expect_error):
-    if re.search(expect_error, output, re.IGNORECASE) == None:
+    if re.search(expect_error, output, re.MULTILINE) == None:
       #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
       return False
     else:

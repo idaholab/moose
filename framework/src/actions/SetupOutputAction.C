@@ -19,6 +19,7 @@
 #include "Executioner.h"
 #include "Output.h"
 #include "MProblem.h"
+#include "Conversion.h"
 
 #include "exodusII_io.h"
 #include "MooseMesh.h"
@@ -29,7 +30,8 @@ InputParameters validParams<SetupOutputAction>()
   InputParameters params = validParams<Action>();
 
   params.addParam<std::string>("file_base", "out", "The desired solution output name without an extension");
-  params.addParam<int>("interval", 1, "The iterval at which timesteps are output to the solution file");
+  params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
+  params.addParam<unsigned int>("screen_interval", 1, "The interval at which postprocessors are output to the screen. This value must evenly divide \"interval\" so that postprocessors are calculated at corresponding solution timesteps. In addition, if \"screen_interval\" is strictly greater than \"interval\", \"output_initial\" must be set to true");
   params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)");
   params.addParam<bool>("nemesis", false, "Specifies that you would like Nemesis output solution file(s)");
   params.addParam<bool>("gmv", false, "Specifies that you would like GMV output solution file(s)");
@@ -106,8 +108,9 @@ SetupOutputAction::act()
   setupOutputObject(output, _pars);
 
   // TODO: Really? We need to set this variable on two objects???
-  exec->outputInitial(getParam<bool>("output_initial"));
-  problem.outputInitial(getParam<bool>("output_initial"));
+  const bool output_initial = getParam<bool>("output_initial");
+  exec->outputInitial(output_initial);
+  problem.outputInitial(output_initial);
 
   if (_parser_handle._problem != NULL)
   {
@@ -127,7 +130,25 @@ SetupOutputAction::act()
       output.sequence(true);
 #endif //LIBMESH_ENABLE_AMR
 
-    output.interval(getParam<int>("interval"));
+    const unsigned int interval = getParam<unsigned int>("interval");
+    const unsigned int screen_interval = getParam<unsigned int>("screen_interval");
+    
+    // Error checks
+    if (interval < screen_interval)
+      mooseError("\"screen_interval (" + Moose::stringify(screen_interval) +
+                 ")\" must be greater than \"interval (" + Moose::stringify(interval) + ")\"");
+    else if (interval > screen_interval)
+    {
+      if (interval % screen_interval)
+        mooseError("\"screen_interval (" + Moose::stringify(screen_interval) +
+                   ")\" must evenly divide \"interval (" + Moose::stringify(interval) + ")\"");
+      else if (!output_initial)
+        mooseError("\"interval (" + Moose::stringify(interval) + ") is set greater than \"screen_interval (" +
+                   Moose::stringify(screen_interval) + ")\" and \"output_initial\" is set to false.");
+    }
+    
+    output.interval(getParam<unsigned int>("interval"));
+    output.screen_interval(getParam<unsigned int>("screen_interval"));
     output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
   }
 
@@ -139,7 +160,9 @@ SetupOutputAction::act()
  // Test to make sure that the user can write to the directory specified in file_base
   std::string base = "./" + getParam<std::string>("file_base");
   base = base.substr(0, base.find_last_of('/'));
+  
+  // TODO: We have a function that tests read/write in the Parser namespace.  We should probably
+  // use that instead of creating another one here
   if (access(base.c_str(), W_OK) == -1)
     mooseError("Can not write to directory: " + base + " for file base: " + getParam<std::string>("file_base"));
-
 }

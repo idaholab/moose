@@ -59,11 +59,15 @@ public:
   void fileBase(const std::string & file_base) { _file_base = file_base; }
   std::string & fileBase() { return _file_base; }
 
-  void interval(int interval) { _interval = interval; }
+  void interval(unsigned int interval) { _interval = interval; }
   int interval() { return _interval; }
+  void screen_interval(unsigned int screen_interval) { _screen_interval = screen_interval; }
+  int screen_interval() { return _screen_interval; }
 
   void meshChanged();
   void sequence(bool state);
+
+  bool isOutputterActive(Type type);
 
   void iterationPlotStartTime(Real t)
   {
@@ -87,10 +91,12 @@ protected:
   Problem & _problem;
   Real & _time;
   Real & _dt;
-  int _interval;
+  unsigned int _interval;
+  unsigned int _screen_interval;
   Real _iteration_plot_start_time;
 
   std::vector<Outputter *> _outputters;
+  std::set<Type> _outputter_types;
 
   std::vector<std::string> _output_variables;           ///< The variables to be output
 };

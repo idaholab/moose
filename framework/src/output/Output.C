@@ -28,6 +28,8 @@ Output::Output(Problem & problem) :
     _problem(problem),
     _time(_problem.time()),
     _dt(_problem.dt()),
+    _interval(1),
+    _screen_interval(1),
     _iteration_plot_start_time(std::numeric_limits<Real>::max())
 {
 }
@@ -72,6 +74,8 @@ Output::add(Output::Type type)
     mooseError("I do not know how to build and unknown outputter");
   }
 
+  _outputter_types.insert(type);
+  
   o->setOutputVariables(_output_variables);
 
   _outputters.push_back(o);
@@ -129,6 +133,12 @@ Output::iterationOutput(SNES, PetscInt its, PetscReal /*fnorm*/, void * _output)
   return 0;
 }
 #endif
+
+bool
+Output::isOutputterActive(Type type)
+{
+  return _outputter_types.find(type) != _outputter_types.end();
+}
 
 void
 Output::outputPps(const FormattedTable & table)

@@ -195,10 +195,10 @@ void
 Transient::endStep()
 {
   if (((_t_step + 1) % _problem.out().interval() == 0 || _reset_dt))
-  {
     _problem.output();
+
+  if (((_t_step + 1) % _problem.out().screen_interval() == 0 || _reset_dt))
     _problem.outputPostprocessors();
-  }
 
 #ifdef LIBMESH_ENABLE_AMR
   if (_problem.adaptivity().isOn())
