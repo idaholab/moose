@@ -19,7 +19,8 @@ template<>
 InputParameters validParams<SmoothCircleIC>();
 
 /**
- * SmoothcircleIC just returns a constant value.
+ * SmoothcircleIC creates a circle of a given radius centered at a given point in the domain.  If int_width > zero, the border of the circle with smoothly transition from
+ * the invalue to the outvalue.
  */
 class SmoothCircleIC : public InitialCondition
 {

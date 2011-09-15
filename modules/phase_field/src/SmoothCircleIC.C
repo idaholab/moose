@@ -11,7 +11,7 @@ InputParameters validParams<SmoothCircleIC>()
   params.addRequiredParam<Real>("invalue", "The variable value inside the circle");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the circle");
   params.addRequiredParam<Real>("radius", "The radius of a circle");
-  params.addParam<Real>("int_width",3.0,"The interfacial width of the void surface");
+  params.addParam<Real>("int_width",0.0,"The interfacial width of the void surface.  Defaults to sharp interface");
   
   return params;
 }
