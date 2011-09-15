@@ -1029,6 +1029,37 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     }
   }
 
+  // Fixme: Nodal processors need to be threaded
+  // init
+  for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
+       nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
+       ++nodal_postprocessor_it)
+    (*nodal_postprocessor_it)->initialize();
+
+  // compute
+  for (MeshBase::const_node_iterator node_it = _mesh.local_nodes_begin(); node_it != _mesh.local_nodes_end(); ++node_it)
+  {
+    reinitNode(*node_it, 0);
+    
+    for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
+         nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
+         ++nodal_postprocessor_it)
+    { 
+      (*nodal_postprocessor_it)->execute();
+    }
+  }
+  // gather
+  for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
+       nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
+       ++nodal_postprocessor_it)
+  {
+    std::string name = (*nodal_postprocessor_it)->name();
+    Real value = (*nodal_postprocessor_it)->getValue();
+    // store the value in each thread
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+      _pps_data[tid].storeValue(name, value);
+  }
+  
   // Compute and store generic postprocessors values
   for (std::vector<Postprocessor *>::const_iterator generic_postprocessor_it = pps[0].genericPostprocessors().begin();
       generic_postprocessor_it != pps[0].genericPostprocessors().end();

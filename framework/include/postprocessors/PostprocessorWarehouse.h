@@ -52,6 +52,13 @@ public:
   const std::vector<Postprocessor *> & sidePostprocessors(unsigned int boundary_id) { return _side_postprocessors[boundary_id]; }
 
   /**
+   * Get the list of nodal postprocessors
+   * @param block_id Block ID
+   * @return The list of all nodal postprocessors
+   */
+  const std::vector<Postprocessor *> & nodalPostprocessors() { return _nodal_postprocessors; }
+
+  /**
    * Get the list general postprocessors
    * @return The list of general postprocessors
    */
@@ -84,7 +91,8 @@ public:
 protected:
   std::map<unsigned int, std::vector<Postprocessor *> > _element_postprocessors;
   std::map<unsigned int, std::vector<Postprocessor *> > _side_postprocessors;
-
+  std::vector<Postprocessor *> _nodal_postprocessors;
+  
   std::vector<Postprocessor *> _generic_postprocessors;
   std::vector<Postprocessor *> _all_postprocessors;
 

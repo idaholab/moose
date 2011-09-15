@@ -15,6 +15,7 @@
 #include "PostprocessorWarehouse.h"
 #include "ElementPostprocessor.h"
 #include "SidePostprocessor.h"
+#include "NodalPostprocessor.h"
 
 PostprocessorWarehouse::PostprocessorWarehouse()
 {
@@ -43,6 +44,10 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
     }
   }
 
+  // delete nodal postprocessors
+  for (std::vector<Postprocessor *>::iterator i=_nodal_postprocessors.begin(); i!=_nodal_postprocessors.end(); ++i)
+    delete *i;
+  
   // delete generic postprocessors
   for (std::vector<Postprocessor *>::iterator i=_generic_postprocessors.begin(); i!=_generic_postprocessors.end(); ++i)
     delete *i;
@@ -93,6 +98,11 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     unsigned int boundary_id = dynamic_cast<SidePostprocessor*>(postprocessor)->boundaryID();
     _side_postprocessors[boundary_id].push_back(postprocessor);
     _boundary_ids_with_postprocessors.insert(boundary_id);
+  }
+  else if(dynamic_cast<NodalPostprocessor*>(postprocessor))
+  {
+    // FIXME: nodal pps multithreaded
+    _nodal_postprocessors.push_back(postprocessor);
   }
   else
   {
