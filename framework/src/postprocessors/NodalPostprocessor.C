@@ -30,13 +30,13 @@ NodalPostprocessor::NodalPostprocessor(const std::string & name, InputParameters
     Coupleable(parameters, false),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
-    _block_id(parameters.get<unsigned int>("block")),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
 //    _q_point(_subproblem.points(_tid)),
 //    _qrule(_subproblem.qRule(_tid)),
 //    _JxW(_subproblem.JxW(_tid)),
-    _current_node(_var.node())
-//    _u(_var.sln()),
+    _qp(0),
+    _current_node(_var.node()),
+    _u(_var.nodalSln())
 //    _u_old(_var.slnOld()),
 //    _u_older(_var.slnOlder()),
 //    _grad_u(_var.gradSln()),

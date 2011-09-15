@@ -109,6 +109,7 @@
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
 #include "SideIntegral.h"
+#include "NodalMaxValue.h"
 // dampers
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
@@ -254,6 +255,7 @@ registerObjects()
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
   registerPostprocessor(SideIntegral);
+  registerPostprocessor(NodalMaxValue);
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);

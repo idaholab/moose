@@ -12,3 +12,5 @@ test_avg_nodal_var_value = { INPUT : 'avg_nodal_var_value.i',
 test_inital = { INPUT : 'initial_pps.i',
                 EXODIFF : ['out_initial_pps.e'] }
 
+test_nodal_max = { INPUT : 'nodal_max_value_test.i',
+                   EXODIFF : ['out_nodal_max.e'] }
