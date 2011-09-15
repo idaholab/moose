@@ -50,6 +50,7 @@ protected:
   Real _invalue;
   Real _outvalue;
   Real _radius;
+  Real _int_width;
   Point _center;
 
 };

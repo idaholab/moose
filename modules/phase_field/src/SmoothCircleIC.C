@@ -11,6 +11,8 @@ InputParameters validParams<SmoothCircleIC>()
   params.addRequiredParam<Real>("invalue", "The variable value inside the circle");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the circle");
   params.addRequiredParam<Real>("radius", "The radius of a circle");
+  params.addParam<Real>("int_width",3.0,"The interfacial width of the void surface");
+  
   return params;
 }
 
@@ -23,6 +25,7 @@ SmoothCircleIC::SmoothCircleIC(const std::string & name,
    _invalue(parameters.get<Real>("invalue")),
    _outvalue(parameters.get<Real>("outvalue")),
    _radius(parameters.get<Real>("radius")),
+   _int_width(parameters.get<Real>("int_width")),
    _center(_x1,_y1,_z1)
 {}
 
@@ -38,10 +41,13 @@ SmoothCircleIC::value(const Point & p)
 
   rad = sqrt(rad);
   
-  if (rad <= _radius)
+  if (rad <= _radius - _int_width/2.0)
     value = _invalue;
-  else if (rad < 1.5*_radius)
-    value = _outvalue + (_invalue-_outvalue)*(1+cos((rad-_radius)/_radius*2.0*3.14159))/2.0;
+  else if (rad < _radius + _int_width/2.0)
+  {
+    Real int_pos = (rad - _radius + _int_width/2.0)/_int_width;
+    value = _outvalue + (_invalue-_outvalue)*(1+cos(int_pos*3.14159))/2.0;
+  }
   else
     value = _outvalue;
 
