@@ -99,19 +99,18 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     // be generalized if we start working with higher-order elements...
     _fe(_subproblem.assembly(_tid).getFE(FEType())),
     
-    // Grab references to FE object's mapping data
+    // Grab references to FE object's mapping data from the _subproblem's FE object
     _dxidx(_fe->get_dxidx()),
     _dxidy(_fe->get_dxidy()),
     _dxidz(_fe->get_dxidz()),
     _detadx(_fe->get_detadx()),
     _detady(_fe->get_detady()),
     _detadz(_fe->get_detadz()),
-    // In 2D, these last three vectors will be empty...
-    _dzetadx(_fe->get_dzetadx()),
-    _dzetady(_fe->get_dzetady()),
-    _dzetadz(_fe->get_dzetadz())
+    _dzetadx(_fe->get_dzetadx()), // Empty in 2D
+    _dzetady(_fe->get_dzetady()), // Empty in 2D
+    _dzetadz(_fe->get_dzetadz()) // Empty in 2D
   {
-    //Load these up in a vector for convenience
+    // Load the velocity gradients up into a single vector for convenience
     _vel_grads.resize(3);
 
     _vel_grads[0] = &_grad_u;
@@ -205,7 +204,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
   RealVectorValue U(_u_vel[qp],_v_vel[qp],_w_vel[qp]);
 
   // Pull out element inverse map values at the current qp into a little dense matrix
-  Real dxi_dx[LIBMESH_DIM][LIBMESH_DIM];
+  Real dxi_dx[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
   
   dxi_dx[0][0] = _dxidx[qp];  dxi_dx[0][1] = _dxidy[qp];
   dxi_dx[1][0] = _detadx[qp]; dxi_dx[1][1] = _detady[qp];
@@ -224,31 +223,28 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
     dxi_dx[2][0] = _dzetadx[qp];   dxi_dx[2][1] = _dzetady[qp];   dxi_dx[2][2] = _dzetadz[qp];
   }
 
-  // Zero value before computing...
-  _hsupg[qp]=0.;
+  // Construct the g_ij = d(xi_k)/d(x_j) * d(xi_k)/d(x_i) matrix 
+  // from Ben and Bova's paper by summing over k...
+  Real g[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
+  for (unsigned i=0; i<3; ++i)
+    for (unsigned j=0; j<3; ++j)
+      for (unsigned k=0; k<3; ++k)
+	g[i][j] += dxi_dx[k][j] * dxi_dx[k][i];
 
-  // Loop over k first, this is using the indexing as given in Bova and Ben's paper...
-  // Only loop up to _dim not LIBMESH_DIM
-  for (unsigned k=0; k<static_cast<unsigned>(_dim); ++k)
-  {
-    Real numer = U(k) * U(k);
-    
-    // Compute the denominator (fixed k)
-    Real denom=0.;
-    for (unsigned i=0; i<static_cast<unsigned>(_dim); ++i)
-      for (unsigned j=0; j<static_cast<unsigned>(_dim); ++j)
-	denom += U(j) * dxi_dx[k][j] * U(i) * dxi_dx[k][i];
+  // Compute the denominator of the h_supg term: U * (g) * U
+  Real denom = 0.;
+  for (unsigned i=0; i<3; ++i)
+    for (unsigned j=0; j<3; ++j)
+      denom += U(j) * g[i][j] * U(i);
 
-    // if the denom is identically zero, i.e. if U==0,
-    // we obviously can't divide by it...  Note, we could check
-    // for floating point equivalence to 0. instead of exact 0.0
-    if (denom != 0.0)
-      _hsupg[qp] += numer/denom;
-  }
-
-
-  // The constant 2 should be 1 if we are using triangular elements.
-  _hsupg[qp] = 2. * sqrt(_hsupg[qp]);
+  // Compute h_supg.  Some notes:
+  // .) The 2 coefficient in this term should be a 1 if we are using tets/triangles.  
+  // .) The denominator will be identically zero only if the velocity
+  //    is identically zero, in which case we can't divide by it.
+  if (denom != 0.0)
+    _hsupg[qp] = 2.* sqrt( U.size_sq() / denom );
+  else
+    _hsupg[qp] = 0.;
 }
 
 
