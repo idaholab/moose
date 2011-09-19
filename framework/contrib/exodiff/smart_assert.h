@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 // smart_assert.h
 //
 //////////////////////////////////////////////////////////////////////
@@ -74,14 +74,14 @@ enum {
     // default behavior - throws a smart_assert_error
     lvl_error = 300,
 
-    // default behavior - dumps all assert context to console, 
+    // default behavior - dumps all assert context to console,
     // and aborts
     lvl_fatal = 1000
 };
 
 
 
-/* 
+/*
     contains details about a failed assertion
 */
 class assert_context {
@@ -116,10 +116,10 @@ public:
     void set_level( int nLevel) { level_ = nLevel; }
     int get_level() const { return level_; }
 
-    // get/set (user-friendly) message 
-    void set_level_msg( const char * strMsg)  { 
+    // get/set (user-friendly) message
+    void set_level_msg( const char * strMsg)  {
         if ( strMsg)
-            msg_ = strMsg; 
+            msg_ = strMsg;
         else
             msg_.erase();
     }
@@ -198,8 +198,8 @@ struct Assert {
     Assert & SMART_ASSERT_A;
     Assert & SMART_ASSERT_B;
 
-    Assert( const char * expr) 
-        : SMART_ASSERT_A( *this), 
+    Assert( const char * expr)
+        : SMART_ASSERT_A( *this),
           SMART_ASSERT_B( *this),
           needs_handling_( true) {
         context_.set_expr( expr);
@@ -211,7 +211,7 @@ struct Assert {
     }
 
     Assert( const Assert & other)
-        : SMART_ASSERT_A( *this), 
+        : SMART_ASSERT_A( *this),
           SMART_ASSERT_B( *this),
           context_( other.context_),
           needs_handling_( true) {
@@ -219,7 +219,7 @@ struct Assert {
     }
 
     ~Assert() {
-        if ( needs_handling_) 
+        if ( needs_handling_)
             handle_assert();
     }
 
@@ -305,7 +305,7 @@ private:
         because you might use SMART_ASSERT before main().
 
         In this case, since they're statics, they might not
-        be initialized. However, making them functions 
+        be initialized. However, making them functions
         will make it work.
     */
 
@@ -316,7 +316,7 @@ private:
     }
 
     // the handler
-    typedef std::map< int, assert_func> handlers_collection; 
+    typedef std::map< int, assert_func> handlers_collection;
     static handlers_collection & handlers() {
         static handlers_collection inst;
         return inst;
@@ -354,9 +354,9 @@ namespace smart_assert {
 //
 // #define SMART_ASSERT_DEBUG_MODE instead
 
-#ifdef SMART_ASSERT_DEBUG_MODE 
+#ifdef SMART_ASSERT_DEBUG_MODE
     #if SMART_ASSERT_DEBUG_MODE == 1
-    #define SMART_ASSERT_DEBUG 
+    #define SMART_ASSERT_DEBUG
     #else
     #undef SMART_ASSERT_DEBUG
     #endif
@@ -365,7 +365,7 @@ namespace smart_assert {
 
 // defaults
     #ifndef NDEBUG
-    #define SMART_ASSERT_DEBUG 
+    #define SMART_ASSERT_DEBUG
     #else
     #undef SMART_ASSERT_DEBUG
     #endif
@@ -408,4 +408,4 @@ namespace smart_assert {
 #endif
 
 
-#endif 
+#endif

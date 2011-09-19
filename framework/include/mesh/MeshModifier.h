@@ -30,7 +30,7 @@ public:
   MeshModifier(const std::string & name, InputParameters parameters);
 
   virtual void modifyMesh(Mesh & mesh) = 0;
-  
+
 };
 
 #endif /* MESHMODIFIER_H */

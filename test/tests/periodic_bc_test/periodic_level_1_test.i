@@ -4,7 +4,7 @@
     nx = 4
     ny = 4
     nz = 0
-    
+
     xmax = 40
     ymax = 40
     zmax = 0
@@ -85,7 +85,7 @@
     max_h_level = 4
     error_estimator = KellyErrorEstimator
   [../]
-  nl_rel_tol = 1e-12	
+  nl_rel_tol = 1e-12
 []
 
 [Output]

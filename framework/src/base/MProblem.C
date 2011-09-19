@@ -1040,11 +1040,11 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
   for (MeshBase::const_node_iterator node_it = _mesh.local_nodes_begin(); node_it != _mesh.local_nodes_end(); ++node_it)
   {
     reinitNode(*node_it, 0);
-    
+
     for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
          nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
          ++nodal_postprocessor_it)
-    { 
+    {
       (*nodal_postprocessor_it)->execute();
     }
   }
@@ -1059,7 +1059,7 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
       _pps_data[tid].storeValue(name, value);
   }
-  
+
   // Compute and store generic postprocessors values
   for (std::vector<Postprocessor *>::const_iterator generic_postprocessor_it = pps[0].genericPostprocessors().begin();
       generic_postprocessor_it != pps[0].genericPostprocessors().end();
@@ -1149,7 +1149,7 @@ MProblem::outputPostprocessors()
   _out.outputPps(_pps_output_table);
   if (_out_problem)
     _out_problem->out().outputPps(_pps_output_table);
-  
+
   if (_postprocessor_csv_output)
     _pps_output_table.printCSV(_out.fileBase() + ".csv");
 
@@ -1403,14 +1403,14 @@ void
 MProblem::output()
 {
   _out.output();
-  
+
   // if the OverSample problem is setup, output it's solution
   if (_out_problem)
   {
     _out_problem->init();
     _out_problem->out().output();
   }
-  
+
   if (_displaced_problem != NULL && _output_displaced)
     _displaced_problem->output();
 
@@ -1425,7 +1425,7 @@ MProblem::output()
 
 }
 
-OutputProblem & 
+OutputProblem &
 MProblem::getOutputProblem(unsigned int refinements)
 {
   // TODO: When do we build this?
@@ -1552,7 +1552,7 @@ std::vector<std::string>
 MProblem::getVariableNames()
 {
   std::vector<std::string> names;
-  
+
   System & nl = _nl.sys();
   System & aux = _aux.sys();
 

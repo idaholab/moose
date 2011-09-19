@@ -27,9 +27,9 @@ class PrintNumElems : public GeneralPostprocessor
 {
 public:
   PrintNumElems(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize() {}
-  
+
   virtual void execute() {}
 
   /**

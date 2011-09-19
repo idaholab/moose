@@ -68,7 +68,7 @@
 
 [Materials]
   active = 'stateful'
-  
+
   [./stateful]
     type = StatefulSpatialTest
     block = 0
@@ -91,4 +91,4 @@
   exodus = true
   perf_log = true
 []
-    
+

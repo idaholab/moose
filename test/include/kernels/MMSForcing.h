@@ -15,7 +15,7 @@ public:
 
 protected:
   Real f();
-  
+
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
@@ -23,7 +23,7 @@ private:
   Real _x;
   Real _y;
   Real _z;
-  
+
 };
 
 #endif //MMSFORCING_H_

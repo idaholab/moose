@@ -12,7 +12,7 @@ InputParameters validParams<ForcingFunctionXYZ0>()
   params.set<Real>("Au")=1.;
   params.set<Real>("Bu")=1.;
   params.set<Real>("Cu")=1.;
-  
+
   params.set<Real>("Av")=1.;
   params.set<Real>("Bv")=1.;
   params.set<Real>("Cv")=1.;
@@ -22,7 +22,7 @@ InputParameters validParams<ForcingFunctionXYZ0>()
   params.set<Real>("Ck")=1.;
 
   params.set<Real>("omega0")=1.;
-  
+
   return params;
 }
 
@@ -32,15 +32,15 @@ ForcingFunctionXYZ0::ForcingFunctionXYZ0(const std::string & name, InputParamete
      _A0 = getParam<Real>("A0");
      _B0 = getParam<Real>("B0");
      _C0 = getParam<Real>("C0");
-     
+
      _Au = getParam<Real>("Au");
      _Bu = getParam<Real>("Bu");
-     _Cu = getParam<Real>("Cu");         
-     
+     _Cu = getParam<Real>("Cu");
+
      _Av = getParam<Real>("Av");
      _Bv = getParam<Real>("Bv");
-     _Cv = getParam<Real>("Cv");         
-     
+     _Cv = getParam<Real>("Cv");
+
      _Ak = getParam<Real>("Ak");
      _Bk = getParam<Real>("Bk");
      _Ck = getParam<Real>("Ck");

@@ -27,7 +27,7 @@
 
 [Functions] #Added so that we can use the Postprocessor
   active = 'solution'
-  
+
   [./solution]
     type = ParsedFunction
     value = sin(a*x*y*z*t)
@@ -46,11 +46,11 @@
 []
 
 [Kernels]
-  
-  active = 'diff implicit conv forcing reaction'  
-  
+
+  active = 'diff implicit conv forcing reaction'
+
   [./diff]
-    type = MMSDiffusion 
+    type = MMSDiffusion
     variable = u
   [../]
 
@@ -71,7 +71,7 @@
     type = MMSForcing
     variable = u
   [../]
-  
+
   [./reaction] #We got from MOOSE kernels
     type = MMSReaction
     variable = u
@@ -80,7 +80,7 @@
 
 [AuxKernels] #We created our own AuxKernel
   active = 'ConstantAux'
-   
+
   [./ConstantAux]
     type = MMSConstantAux
     variable = nodal_aux
@@ -104,9 +104,9 @@
   petsc_options = '-snes_mf_operator'
 []
 
-[Postprocessors] 
+[Postprocessors]
   active = 'l2_error dofs'
-  
+
   [./l2_error]
     type = ElementL2Error
     variable = u
@@ -118,13 +118,13 @@
     varaible = u
   [../]
 []
- 
+
 
 [Output]
   file_base = 3_d_postprocessor_out
   interval = 1
   exodus = false
   output_initial = true
-  postprocessor_csv = true 
+  postprocessor_csv = true
   perf_log = true
 []

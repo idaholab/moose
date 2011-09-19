@@ -37,7 +37,7 @@ class DGDiffusion : public DGKernel
 {
 public:
   DGDiffusion(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
@@ -46,5 +46,5 @@ protected:
   Real _sigma;
   Real _coefficient;
 };
- 
+
 #endif

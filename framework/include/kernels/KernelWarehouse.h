@@ -78,7 +78,7 @@ public:
    * the entire domain.
    */
   bool subdomains_covered(std::set<subdomain_id_type> & return_set) const;
-  
+
 protected:
   std::vector<Kernel *> _active_kernels;                                ///< Kernels active on a block and in specified time
   std::map<unsigned int, std::vector<Kernel *> > _active_var_kernels;   ///< Kernels active on a block and in specified time per variable

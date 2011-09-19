@@ -22,7 +22,7 @@ InputParameters validParams<InitialRefinementAction>()
   InputParameters params = validParams<Action>();
 
   params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
-  
+
   return params;
 }
 
@@ -36,7 +36,7 @@ InitialRefinementAction::act()
 {
 #ifdef LIBMESH_ENABLE_AMR
   mooseAssert(_parser_handle._mesh != NULL, "Mesh not setup");
-  
+
   unsigned int level = getParam<unsigned int>("uniform_refine");
   if (level)
   {
@@ -51,7 +51,7 @@ InitialRefinementAction::act()
       _parser_handle._mesh->uniformlyRefine(level);
       _parser_handle._mesh->meshChanged();
     }
-    
+
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
   }
 

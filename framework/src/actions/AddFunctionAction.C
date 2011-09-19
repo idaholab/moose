@@ -30,7 +30,7 @@ AddFunctionAction::AddFunctionAction(const std::string & name, InputParameters p
 }
 
 void
-AddFunctionAction::act() 
+AddFunctionAction::act()
 {
   _problem->addFunction(_type, getShortName(), _moose_object_pars);
 }

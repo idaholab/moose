@@ -26,7 +26,7 @@
 // Parser
 #include "Parser.h"
 #include "MooseSyntax.h"
- 
+
 // Example 2 Includes
 #include "Convection.h"           // <- New include for our custom kernel
 
@@ -50,10 +50,10 @@ int main (int argc, char** argv)
 
   // Associate Parser Syntax with specific MOOSE Actions
   Moose::associateSyntax(p);
-  
+
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();
-  
+
   p.parse(input_filename);
   p.execute();
 

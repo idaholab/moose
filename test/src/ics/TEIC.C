@@ -37,7 +37,7 @@ TEIC::value(const Point & /*p*/)
   return atan((t - _t_jump)*libMesh::pi * _slope);
 }
 
-  
 
 
-  
+
+

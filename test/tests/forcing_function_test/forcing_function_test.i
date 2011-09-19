@@ -14,7 +14,7 @@
 
 [Functions]
   active = 'forcing_func'
-  
+
   [./forcing_func]
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
@@ -49,7 +49,7 @@
   [../]
 
   [./right]
-    type = DirichletBC 
+    type = DirichletBC
     variable = u
     boundary = '2'
     value = 0

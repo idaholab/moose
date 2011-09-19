@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 
 #include <cstdlib>
 #include <math.h>
@@ -59,37 +59,37 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
 {
   SMART_ASSERT(file1.Open());
   SMART_ASSERT(file2.Open());
-  
+
   int num_nodes = file1.Num_Nodes();
   int num_elmts = file1.Num_Elmts();
   int dim = file1.Dimension();
-  
+
 //  ********************  elements  ********************  //
 
   // Load global ids (0-offset) into id array.
   int* id = new int[num_elmts];
   {for (int e = 0; e < num_elmts; ++e) id[e] = e;}
-  
+
   // Get map storage.
   node_map = new int[num_nodes];  SMART_ASSERT(node_map != 0);
   {for (int i = 0; i < num_nodes; ++i) node_map[i] = -1; }
   elmt_map = new int[num_elmts];  SMART_ASSERT(elmt_map != 0);
-  
+
   // Create storage for midpoints.
   double *x2 = 0, *y2 = 0, *z2 = 0;
   x2 = new double[num_elmts];  SMART_ASSERT(x2 != 0);
   if (dim > 1) { y2 = new double[num_elmts];  SMART_ASSERT(y2 != 0); }
   if (dim > 2) { z2 = new double[num_elmts];  SMART_ASSERT(z2 != 0); }
-  
+
   // Load coordinates for file 2 and get pointers to them.
   file2.Load_Nodal_Coordinates();
   const double* x2_f = (double*)file2.X_Coords();
   const double* y2_f = (double*)file2.Y_Coords();
   const double* z2_f = (double*)file2.Z_Coords();
-  
+
   // Load connectivities for all blocks in second file.
   file2.Load_Elmt_Block_Descriptions();
-  
+
   {
   // Compute midpoints of each element and place into x,y,z arrays.
   int num_blocks = file2.Num_Elmt_Blocks(),
@@ -114,15 +114,15 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
       x2[e] = sum_x / (double)num_nodes_per_elmt;
       if (dim > 1) y2[e] = sum_y / (double)num_nodes_per_elmt;
       if (dim > 2) z2[e] = sum_z / (double)num_nodes_per_elmt;
-      
+
       ++e;
     }
   }
   }
-  
+
   // Sort by x value.
   index_qsort(x2, id, num_elmts);
-  
+
 #if 0
   std::cout << "******************  elmts  ******************** " << std::endl;
   {for (int i = 0; i < num_elmts; ++i)
@@ -131,13 +131,13 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
 	      << y2[id[i]] << "\t"
 	      << z2[id[i]] << "\t" << id[i] << std::endl;}
   std::cout << "******************  elmts  ******************** " << std::endl;
-#endif  
+#endif
   //  Load and get nodal coordinates for first file.
   file1.Load_Nodal_Coordinates();
   const double* x1_f = (double*)file1.X_Coords();
   const double* y1_f = (double*)file1.Y_Coords();
   const double* z1_f = (double*)file1.Z_Coords();
-  
+
   // Cannot ignore the comparisons, so make sure the coord_tol_type
   // is not -1 which is "ignore"
   TOLERANCE_TYPE_enum save_tolerance_type = specs.coord_tol.type;
@@ -163,7 +163,7 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
     {
       // Connectivity for element i.
       const int* conn1 = block1->Connectivity(i);
-      
+
       // Compute midpoint.
       mid_x = 0.0; mid_y = 0.0; mid_z = 0.0;
 
@@ -176,7 +176,7 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
       mid_x /= (double)num_nodes_per_elmt;
       if (dim > 1) mid_y /= (double)num_nodes_per_elmt;
       if (dim > 2) mid_z /= (double)num_nodes_per_elmt;
-      
+
       // Locate midpoint in sorted array.
       sort_idx = Find(mid_x, mid_y, mid_z, x2, y2, z2, id, num_elmts, dim,
 		      specs.ignore_dups);
@@ -188,17 +188,17 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
         exit(1);
       }
       e2 = id[sort_idx];
-      
+
       // Assign element map for this element.
       elmt_map[e1] = e2;
-      
+
       {
         // Determine the block and elmt index of matched element.
         int b2, l2;  file2.Global_to_Block_Local(e2+1, b2, l2);
-        
+
         const Exo_Block* block2 = file2.Get_Elmt_Block_by_Index(b2);
         SMART_ASSERT(block2 != 0);
-        
+
         // Check that the element types are the same.
         if (num_nodes_per_elmt != block2->Num_Nodes_per_Elmt())
         {
@@ -209,10 +209,10 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
 		    << std::endl;
           exit(1);
         }
-        
+
         // Get connectivity for file2 element.
         const int* conn2 = block2->Connectivity(l2);
-        
+
         // Match each node in the first elmt with a node in the second
         // and assign node_map.
         for (int ln1 = 0; ln1 < num_nodes_per_elmt; ++ln1)
@@ -221,7 +221,7 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
           double x1_val = x1_f[ conn1[ln1] - 1 ];
           double y1_val = dim > 1 ? y1_f[ conn1[ln1] - 1 ] : 0.0;
           double z1_val = dim > 2 ? z1_f[ conn1[ln1] - 1 ] : 0.0;
-          
+
           int found = 0;
           for (int ln2 = 0; ln2 < num_nodes_per_elmt; ++ln2)
           {
@@ -229,7 +229,7 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
             double x2_val = x2_f[ conn2[ln2] - 1 ];
             double y2_val = dim > 1 ? y2_f[ conn2[ln2] - 1 ] : 0.0;
             double z2_val = dim > 2 ? z2_f[ conn2[ln2] - 1 ] : 0.0;
-            
+
             if (!specs.coord_tol.Diff(x1_val, x2_val) &&
 		!specs.coord_tol.Diff(y1_val, y2_val) &&
 		!specs.coord_tol.Diff(z1_val, z2_val) )
@@ -244,7 +244,7 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
 		double x1a = x1_f[node1-1];
 		double y1a = dim >= 2 ? y1_f[node1-1] : 0.0;
 		double z1a = dim >= 3 ? z1_f[node1-1] : 0.0;
-		
+
 		// Node in file 2 that was already mapped to node 1 in file 1
 		int n1 = node_map[conn1[ln1]-1]+1;
 		double x2a = x2_f[n1-1];
@@ -284,15 +284,15 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
           }
         }  // End of local node loop on file1's element.
       }  // End of local node search block.
-      
+
       ++e1;
-      
+
     }  // End of loop on elements in file1 element block.
-    
+
     file1.Free_Elmt_Block(b);
-    
+
   }  // End of loop on file1 blocks.
-  
+
   // Check that all nodes in the file have been matched...  If any
   // unmatched nodes are found, then perform a node-based matching
   // algorithm...
@@ -306,7 +306,7 @@ void Compute_Maps(int*& node_map, int*& elmt_map,
   file1.Free_Nodal_Coordinates();
   file2.Free_Nodal_Coordinates();
   file2.Free_Elmt_Blocks();
-  
+
   if (x2 != 0) delete [] x2;
   if (y2 != 0) delete [] y2;
   if (z2 != 0) delete [] z2;
@@ -320,7 +320,7 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
 {
   SMART_ASSERT(file1.Open());
   SMART_ASSERT(file2.Open());
-  
+
   int num_nodes1 = file1.Num_Nodes();
   int num_elmts1 = file1.Num_Elmts();
 
@@ -328,13 +328,13 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
   int num_elmts2 = file2.Num_Elmts();
   int dim = file1.Dimension();
   SMART_ASSERT(dim == file2.Dimension());
-  
+
 //  ********************  elements  ********************  //
 
   // Load global ids (0-offset) into id array.
   int* id2 = new int[num_elmts2];
   {for (int e = 0; e < num_elmts2; ++e) id2[e] = e;}
-  
+
   // Get map storage.
   node_map = new int[num_nodes1];  SMART_ASSERT(node_map != 0);
   {for (int i = 0; i < num_nodes1; ++i) node_map[i] = -1; }
@@ -346,16 +346,16 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
   x2 = new double[num_elmts2];  SMART_ASSERT(x2 != 0);
   if (dim > 1) { y2 = new double[num_elmts2];  SMART_ASSERT(y2 != 0); }
   if (dim > 2) { z2 = new double[num_elmts2];  SMART_ASSERT(z2 != 0); }
-  
+
   // Load coordinates for file 2 and get pointers to them.
   file2.Load_Nodal_Coordinates();
   const double* x2_f = (double*)file2.X_Coords();
   const double* y2_f = (double*)file2.Y_Coords();
   const double* z2_f = (double*)file2.Z_Coords();
-  
+
   // Load connectivities for all blocks in second file.
   file2.Load_Elmt_Block_Descriptions();
-  
+
   {
   // Compute midpoints of each element and place into x,y,z arrays.
   int num_blocks2 = file2.Num_Elmt_Blocks(),
@@ -380,15 +380,15 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
       x2[e] = sum_x / (double)num_nodes_per_elmt;
       if (dim > 1) y2[e] = sum_y / (double)num_nodes_per_elmt;
       if (dim > 2) z2[e] = sum_z / (double)num_nodes_per_elmt;
-      
+
       ++e;
     }
   }
   }
-  
+
   // Sort by x value.
   index_qsort(x2, id2, num_elmts2);
-  
+
 #if 0
   std::cout << "******************  elmts  ******************** " << std::endl;
   {for (int i = 0; i < num_elmts; ++i)
@@ -397,13 +397,13 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
 	      << y2[id[i]] << "\t"
 	      << z2[id[i]] << "\t" << id[i] << std::endl;}
   std::cout << "******************  elmts  ******************** " << std::endl;
-#endif  
+#endif
   //  Load and get nodal coordinates for first file.
   file1.Load_Nodal_Coordinates();
   const double* x1_f = (double*)file1.X_Coords();
   const double* y1_f = (double*)file1.Y_Coords();
   const double* z1_f = (double*)file1.Z_Coords();
-  
+
   // Cannot ignore the comparisons, so make sure the coord_tol_type
   // is not -1 which is "ignore"
   TOLERANCE_TYPE_enum save_tolerance_type = specs.coord_tol.type;
@@ -431,7 +431,7 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
     {
       // Connectivity for element i.
       const int* conn1 = block1->Connectivity(i);
-      
+
       // Compute midpoint.
       mid_x = 0.0; mid_y = 0.0; mid_z = 0.0;
 
@@ -444,7 +444,7 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
       mid_x /= (double)num_nodes_per_elmt;
       if (dim > 1) mid_y /= (double)num_nodes_per_elmt;
       if (dim > 2) mid_z /= (double)num_nodes_per_elmt;
-      
+
       // Locate midpoint in sorted array.
       sort_idx = Find(mid_x, mid_y, mid_z, x2, y2, z2, id2, num_elmts2, dim,
 		      specs.ignore_dups);
@@ -460,16 +460,16 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
       else{
 	e2 = id2[sort_idx];
 	elmt_map[e1] = e2;
-	
+
 	// Assign element map for this element.
-	
-	
+
+
         // Determine the block and elmt index of matched element.
         int b2, l2;  file2.Global_to_Block_Local(e2+1, b2, l2);
-        
+
         const Exo_Block* block2 = file2.Get_Elmt_Block_by_Index(b2);
         SMART_ASSERT(block2 != 0);
-        
+
         // Check that the element types are the same.
         if (num_nodes_per_elmt != block2->Num_Nodes_per_Elmt())
         {
@@ -480,10 +480,10 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
 		    << std::endl;
           exit(1);
         }
-        
+
         // Get connectivity for file2 element.
         const int* conn2 = block2->Connectivity(l2);
-        
+
         // Match each node in the first elmt with a node in the second
         // and assign node_map.
         for (int ln1 = 0; ln1 < num_nodes_per_elmt; ++ln1)
@@ -499,7 +499,7 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
             double x2_val =           x2_f[ conn2[ln2] - 1 ];
             double y2_val = dim > 1 ? y2_f[ conn2[ln2] - 1 ] : 0.0;
             double z2_val = dim > 2 ? z2_f[ conn2[ln2] - 1 ] : 0.0;
-            
+
             if (!specs.coord_tol.Diff(x1_val, x2_val) &&
 		!specs.coord_tol.Diff(y1_val, y2_val) &&
 		!specs.coord_tol.Diff(z1_val, z2_val) )
@@ -519,12 +519,12 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
           }
         }  // End of local node loop on file1's element.
       }  // End of local node search block.
-      
+
       ++e1;
-      
+
     }  // End of loop on elements in file1 element block.
     file1.Free_Elmt_Block(b);
-    
+
   }  // End of loop on file1 blocks.
   if (!first) {
     std::cout << "\nPartial Map selected -- " << unmatched << " elements unmatched\n";
@@ -532,8 +532,8 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
     if (num_elmts1 == num_elmts2)
       std::cout << "exodiff: INFO .. Partial Map was specfied, but not needed.  All elements matched.\n";
   }
-    
-  
+
+
   // Check that all nodes in the file have been matched...  If any
   // unmatched nodes are found, then perform a node-based matching
   // algorithm...
@@ -547,7 +547,7 @@ void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
   file1.Free_Nodal_Coordinates();
   file2.Free_Nodal_Coordinates();
   file2.Free_Elmt_Blocks();
-  
+
   if (x2 != 0) delete [] x2;
   if (y2 != 0) delete [] y2;
   if (z2 != 0) delete [] z2;
@@ -566,10 +566,10 @@ namespace {
       id1[i] = i;
       id2[i] = i;
     }
-  
+
     index_qsort(file1_id_map, &id1[0], count);
     index_qsort(file2_id_map, &id2[0], count);
-  
+
     for (int i=0; i < count; i++) {
       if (file1_id_map[id1[i]] == file2_id_map[id2[i]]) {
 	map[id1[i]] = id2[i];
@@ -580,7 +580,7 @@ namespace {
 	exit(1);
       }
     }
-    
+
     // See if there is any mapping happening...
     bool mapped = false;
     for (int i=0; i < count; i++) {
@@ -600,7 +600,7 @@ void Compute_FileId_Maps(int*& node_map, int*& elmt_map,
   // Use the internal exodus node and element number maps in file1 and file2 to
   // do the matching.  Currently assume (and verify) that number of nodes and
   // elements match in the two files.
-  
+
   SMART_ASSERT(file1.Open());
   SMART_ASSERT(file2.Open());
 
@@ -613,13 +613,13 @@ void Compute_FileId_Maps(int*& node_map, int*& elmt_map,
     file2.Load_Node_Map();
     const int *node_id_map1 = file1.Get_Node_Map();
     const int *node_id_map2 = file2.Get_Node_Map();
-    
+
     if (!internal_compute_maps(node_map, node_id_map1, node_id_map2, num_nodes, "node")) {
       delete [] node_map;
       node_map = 0;
     }
   }
-  
+
   {
     int num_elmts = file1.Num_Elmts();
     SMART_ASSERT(num_elmts == file2.Num_Elmts());
@@ -653,7 +653,7 @@ void Dump_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1)
   } else {
     std::cout << " *** Node map is one-to-one\n";
   }
-      
+
   std::cout << "\n=== element number map (file1 -> file2) local ids\n";
   one_to_one = true;
   for (ijk = 0; ijk < file1.Num_Elmts(); ++ijk) {
@@ -670,17 +670,17 @@ void Dump_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1)
   }
   std::cout << "===" << std::endl;
 }
-			    
+
 bool Check_Maps(const int *node_map, const int *elmt_map, const ExoII_Read& file1, const ExoII_Read& file2)
 {
   if (file1.Num_Nodes() != file2.Num_Nodes()) {
     return false;
   }
-  
+
   if (file1.Num_Elmts() != file2.Num_Elmts()) {
     return false;
   }
-  
+
   if (node_map != NULL) {
     for (int ijk = 0; ijk < file1.Num_Nodes(); ++ijk) {
       if (ijk != node_map[ijk]) {
@@ -699,7 +699,7 @@ bool Check_Maps(const int *node_map, const int *elmt_map, const ExoII_Read& file
   // All maps are one-to-one; Don't need to map nodes or elements...
   return true;
 }
-			    
+
 namespace {
   void Compute_Node_Map(int*& node_map, ExoII_Read& file1, ExoII_Read& file2)
   {
@@ -722,7 +722,7 @@ namespace {
     for (i=0; i < num_nodes; i++) {
       mapped_2[i] = -1;
     }
-  
+
     // Find unmapped nodes in file2; count the unmapped nodes in file_1.
     // The code below sets the 'mapped_2' entry to 1 for each node in
     // file2 which has been mapped to a node in file1
@@ -734,7 +734,7 @@ namespace {
 	count_1++;
       }
     }
-  
+
     // Get list of all unmapped nodes in file1 and file2. A file1
     // unmapped node will have a '-1' entry in 'node_map' and a file2
     // unmapped node will have a '-1' entry in 'mapped_2'.  Reuse the
@@ -750,7 +750,7 @@ namespace {
 	mapped_2[count_2++] = i;
       }
     }
-  
+
     // check that umnapped node counts are equal.  If not, output
     // message and exit.
     if (count_1 != count_2) {
@@ -820,16 +820,16 @@ namespace {
   {
     SMART_ASSERT(x != 0);
     SMART_ASSERT(N > 0);
-    
+
     // Cannot ignore the comparisons, so make sure the coord_tol_type
     // is not -1 which is "ignore"
     TOLERANCE_TYPE_enum save_tolerance_type = specs.coord_tol.type;
     if (save_tolerance_type == IGNORE)
       specs.coord_tol.type = ABSOLUTE;
-  
+
     // Find the index such that x0 > x[0,1,...,low-1] and x0 >= x[low]
     // where x[N] is infinity.
-  
+
     int mid, low = 0, high = N;
     while (low < high)
       {
@@ -837,15 +837,15 @@ namespace {
 	if (x[id[mid]] < x0) low = mid + 1;
 	else high = mid;
       }
-  
+
     int i = low == N ? N-1: low;  // Make sure index falls within array bounds.
-  
+
     // Drop to first index before which the tolerance fails.
     while (i > 0 && !specs.coord_tol.Diff(x[id[i-1]], x0)) --i;
-  
+
     // Search until tolerance between the x coordinate fails or a match is found.
     // If a match is found, the loop continues in order to check for dups.
-  
+
     int index = -1;
     do {
       if (    dim == 1
@@ -861,11 +861,11 @@ namespace {
 	      double x1 = x[id[i]];
 	      double y1 = dim > 1 ? y[id[i]] : 0.0;
 	      double z1 = dim > 2 ? z[id[i]] : 0.0;
-	  
+
 	      double x2 = x[id[index]];
 	      double y2 = dim > 1 ? y[id[index]] : 0.0;
 	      double z2 = dim > 2 ? z[id[index]] : 0.0;
-	  
+
 	      std::cout << "\nexodiff: ERROR - Two elements in file 2 have the "
 			<< "same midpoint (within tolerance).\n"
 			<< "\tElement " << id[i]+1
@@ -881,7 +881,7 @@ namespace {
 	}
     }
     while (++i < N && !specs.coord_tol.Diff(x[id[i]], x0));
-  
+
     specs.coord_tol.type = save_tolerance_type;
     return index;
   }
@@ -894,7 +894,7 @@ namespace {
     double d1 = x2-x1; d1 *= d1;
     double d2 = y2-y1; d2 *= d2;
     return (d1 + d2);
-  } 
+  }
 
   inline double dist_sqrd(double x1, double y1, double z1,
 			  double x2, double y2, double z2)
@@ -903,7 +903,7 @@ namespace {
     double d2 = y2-y1; d2 *= d2;
     double d3 = z2-z1; d3 *= d3;
     return (d1 + d2 + d3);
-  } 
+  }
 
   double find_range(const double *x, int num_nodes)
   {
@@ -921,12 +921,12 @@ double Find_Min_Coord_Sep(ExoII_Read& file)
 {
   int num_nodes = file.Num_Nodes();
   if (num_nodes < 2) return 0.0;
-  
+
   file.Load_Nodal_Coordinates();
   const double* x = (double*)file.X_Coords();
   const double* y = (double*)file.Y_Coords();
   const double* z = (double*)file.Z_Coords();
-  
+
   int *indx = new int[num_nodes];
   for (int i=0; i < num_nodes; i++) {
     indx[i] = i;
@@ -953,7 +953,7 @@ double Find_Min_Coord_Sep(ExoII_Read& file)
 
   // Sort based on coordinate with largest range...
   index_qsort(r, indx, num_nodes);
-  
+
   double min = DBL_MAX;;
   switch (file.Dimension()) {
   case 1: {
@@ -975,7 +975,7 @@ double Find_Min_Coord_Sep(ExoII_Read& file)
 	double delr = dist_sqrd(r[indx[i]], r[indx[j]]);
 	if (delr > min) {
 	  break;
-	} else {	  
+	} else {
 	  double tmp = dist_sqrd(x[indx[i]], y[indx[i]], x[indx[j]], y[indx[j]]);
 	  min = min < tmp ? min : tmp;
 	}
@@ -989,7 +989,7 @@ double Find_Min_Coord_Sep(ExoII_Read& file)
 	double delr = dist_sqrd(r[indx[i]], r[indx[j]]);
 	if (delr > min) {
 	  break;
-	} else {	  
+	} else {
 	  double tmp = dist_sqrd(x[indx[i]], y[indx[i]], z[indx[i]], x[indx[j]], y[indx[j]], z[indx[j]]);
 	  min = min < tmp ? min : tmp;
 	}
@@ -997,7 +997,7 @@ double Find_Min_Coord_Sep(ExoII_Read& file)
     }
     break;
   }
-  } 
+  }
   delete [] indx;
   return sqrt(min);
 }
@@ -1013,7 +1013,7 @@ bool Compare_Maps(ExoII_Read& file1, ExoII_Read& file2, const int *node_map, con
 
   //int num_nodes2 = file2.Num_Nodes();
   //int num_elmts2 = file2.Num_Elmts();
-  
+
   // NOTE: file1 maps are already loaded...
   file2.Load_Node_Map();
   file2.Load_Elmt_Map();
@@ -1025,7 +1025,7 @@ bool Compare_Maps(ExoII_Read& file1, ExoII_Read& file2, const int *node_map, con
   const int *elem_id_map2 = file2.Get_Elmt_Map();
 
   bool diff = false;
-  
+
   if (node_map != NULL) {
     // There is a map between file1 and file2, but all nodes are
     // used in both files.

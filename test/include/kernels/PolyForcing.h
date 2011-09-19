@@ -15,14 +15,14 @@ public:
 
 protected:
   Real f();
-  
+
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
   Real _x;
   Real _y;
   Real _z;
-  
+
 };
 
 #endif //POLYFORCING_H

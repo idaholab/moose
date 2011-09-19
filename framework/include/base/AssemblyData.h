@@ -23,7 +23,7 @@
 
 // MOOSE Forward Declares
 class MooseMesh;
-class ArbitraryQuadrature;  
+class ArbitraryQuadrature;
 
 /**
  * Keeps track of stuff related to assembling
@@ -142,7 +142,7 @@ public:
    * Reinitialize the assembly data at specific points in the reference element.
    */
   void reinit(const Elem * elem, const std::vector<Point> & reference_points);
-  
+
   /**
    * Reinitialize the assembly data on an side of an element
    */
@@ -176,7 +176,7 @@ protected:
   QBase * _qrule;                               ///< current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
   QBase * _qrule_volume;                        ///< volumetric quadrature for the element
   ArbitraryQuadrature * _qrule_arbitrary;       ///< arbitrary quadrature rule used within the element interior
-  
+
   const std::vector<Point> & _q_points;         ///< reference to the list of quadrature points
   const std::vector<Real> & _JxW;               ///< reference to the list of transformed jacobian weights
 

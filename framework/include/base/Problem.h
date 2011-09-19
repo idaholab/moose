@@ -147,7 +147,7 @@ public:
 protected:
   std::string _name;                                     ///< The name of the problem
   InputParameters _pars;                                 ///< Generic parameters object used during construction
-  
+
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
 

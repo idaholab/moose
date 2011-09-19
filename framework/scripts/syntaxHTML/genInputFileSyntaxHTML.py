@@ -61,7 +61,7 @@ def generateHTML( app_name, app_path, argv, moose_path = '../moose', autocopy = 
   data = data.split('**START YAML DATA**\n')[1]
   # ignore the last part of the file, after END YAML DATA
   data = data.split('**END YAML DATA**')[0]
-  
+
   # ignore root node, start displaying all it's child nodes
   data = yaml.load( data )
   #data = data[0]['subblocks']

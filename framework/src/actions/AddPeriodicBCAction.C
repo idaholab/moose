@@ -48,8 +48,8 @@ AddPeriodicBCAction::setPeriodicVars(PeriodicBoundary & p, const std::vector<std
 }
 
 void
-AddPeriodicBCAction::act() 
-{  
+AddPeriodicBCAction::act()
+{
   NonlinearSystem & nl = _problem->getNonlinearSystem();
 
   if (getParam<std::vector<Real> >("translation") != std::vector<Real>())
@@ -97,4 +97,4 @@ AddPeriodicBCAction::act()
   {
     mooseError("You have to specify either 'translation' or 'trans_func' in your period boundary section '" + _name + "'");
   }
-}  
+}

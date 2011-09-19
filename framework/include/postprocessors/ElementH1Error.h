@@ -37,7 +37,7 @@ class ElementH1Error :
 {
 public:
   ElementH1Error(const std::string & name, InputParameters parameters);
-  
+
   virtual Real getValue();
 
 protected:

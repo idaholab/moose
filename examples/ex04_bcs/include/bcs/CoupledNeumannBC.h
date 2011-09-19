@@ -36,7 +36,7 @@ public:
    * constructor.
    */
   CoupledNeumannBC(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
 

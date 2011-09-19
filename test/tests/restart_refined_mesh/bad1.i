@@ -5,7 +5,7 @@
 []
 
 [Variables]
-  active =  'pressure tracer ca2+ h+ hco3-'	
+  active =  'pressure tracer ca2+ h+ hco3-'
   [./pressure]
     order =  FIRST
     family =  LAGRANGE
@@ -89,11 +89,11 @@
 
 #            tracer_ie            tracer_pd           tracer_conv
 
-#            ca2+_ie              ca2+_pd             ca2+_conv 
+#            ca2+_ie              ca2+_pd             ca2+_conv
 #            ca2+_caco3(aq)_sub   ca2+_caco3(aq)_cd   ca2+_caco3(aq)_conv
 # 	   ca2+_cahco3+_sub     ca2+_cahco3+_cd     ca2+_cahco3+_conv
 # 	   ca2+_caoh+_sub       ca2+_caoh+_cd       ca2+_caoh+_conv
-#            ca2+_calcite 
+#            ca2+_calcite
 
 #            h+_ie                h+_pd               h+_conv
 # 	   h+_caco3(aq)_sub     h+_caco3(aq)_cd     h+_caco3(aq)_conv
@@ -114,10 +114,10 @@
 
            tracer_ie            tracer_pd           tracer_conv
 
-           ca2+_ie              ca2+_pd             ca2+_conv 
+           ca2+_ie              ca2+_pd             ca2+_conv
            ca2+_caco3(aq)_sub   ca2+_caco3(aq)_cd   ca2+_caco3(aq)_conv
 	   ca2+_cahco3+_sub     ca2+_cahco3+_cd     ca2+_cahco3+_conv
-           ca2+_calcite 
+           ca2+_calcite
 
            h+_ie                h+_pd               h+_conv
  	   h+_caco3(aq)_sub     h+_caco3(aq)_cd     h+_caco3(aq)_conv
@@ -176,9 +176,9 @@
   [./ca2+_caco3(aq)_sub]
     type =  CoupledBEEquilibriumSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  = -7.009
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = '-1.0 1.0'
     v =  'h+ hco3-'
     start_time = 1.0
@@ -187,9 +187,9 @@
   [./ca2+_caco3(aq)_cd]
     type =  CoupledDiffusionReactionSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  = -7.009
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = '-1.0 1.0'
     v =  'h+ hco3-'
     start_time = 1.0
@@ -198,9 +198,9 @@
   [./ca2+_caco3(aq)_conv]
     type =  CoupledConvectionReactionSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  = -7.009
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = '-1.0 1.0'
     v =  'h+ hco3-'
     p =  'pressure'
@@ -210,9 +210,9 @@
   [./ca2+_cahco3+_sub]
     type =  CoupledBEEquilibriumSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  =  1.043
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'hco3-'
   [../]
@@ -220,9 +220,9 @@
   [./ca2+_cahco3+_cd]
     type =  CoupledDiffusionReactionSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  =  1.043
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'hco3-'
   [../]
@@ -230,9 +230,9 @@
   [./ca2+_cahco3+_conv]
     type =  CoupledConvectionReactionSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  =  1.043
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'hco3-'
     p =  'pressure'
@@ -241,9 +241,9 @@
   [./ca2+_caoh+_sub]
     type =  CoupledBEEquilibriumSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  = -12.85
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = -1.0
     v =  'h+'
   [../]
@@ -251,9 +251,9 @@
   [./ca2+_caoh+_cd]
     type =  CoupledDiffusionReactionSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  = -12.85
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = -1.0
     v =  'h+'
   [../]
@@ -261,9 +261,9 @@
   [./ca2+_caoh+_conv]
     type =  CoupledConvectionReactionSub
     variable =  ca2+
-    weight =  1.0                
+    weight =  1.0
     log_k  = -12.85
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = -1.0
     v =  'h+'
     p =  'pressure'
@@ -297,9 +297,9 @@
   [./h+_caco3(aq)_sub]
     type =  CoupledBEEquilibriumSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -7.009
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  '1.0 1.0'
     v =  'ca2+ hco3-'
     start_time = 1.0
@@ -308,9 +308,9 @@
   [./h+_caco3(aq)_cd]
     type =  CoupledDiffusionReactionSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -7.009
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  '1.0 1.0'
     v =  'ca2+ hco3-'
     start_time = 1.0
@@ -319,9 +319,9 @@
   [./h+_caco3(aq)_conv]
     type =  CoupledConvectionReactionSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -7.009
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  '1.0 1.0'
     v =  'ca2+ hco3-'
     p =  'pressure'
@@ -331,9 +331,9 @@
   [./h+_caoh+_sub]
     type =  CoupledBEEquilibriumSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -12.85
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  1.0
     v =  'ca2+'
   [../]
@@ -341,9 +341,9 @@
   [./h+_caoh+_cd]
     type =  CoupledDiffusionReactionSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -12.85
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  1.0
     v =  'ca2+'
   [../]
@@ -351,9 +351,9 @@
   [./h+_caoh+_conv]
     type =  CoupledConvectionReactionSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -12.85
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  1.0
     v =  'ca2+'
     p =  'pressure'
@@ -362,9 +362,9 @@
   [./h+_co2(aq)_sub]
     type =  CoupledBEEquilibriumSub
     variable =  h+
-    weight =  1.0                
+    weight =  1.0
     log_k  =  6.341
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'hco3-'
   [../]
@@ -372,9 +372,9 @@
   [./h+_co2(aq)_cd]
     type =  CoupledDiffusionReactionSub
     variable =  h+
-    weight =  1.0                
+    weight =  1.0
     log_k  =  6.341
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'hco3-'
   [../]
@@ -382,9 +382,9 @@
   [./h+_co2(aq)_conv]
     type =  CoupledConvectionReactionSub
     variable =  h+
-    weight =  1.0                
+    weight =  1.0
     log_k  =  6.341
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'hco3-'
     p =  'pressure'
@@ -393,9 +393,9 @@
   [./h+_co32-_sub]
     type =  CoupledBEEquilibriumSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -10.325
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  1.0
     v =  'hco3-'
   [../]
@@ -403,9 +403,9 @@
   [./h+_co32-_cd]
     type =  CoupledDiffusionReactionSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -10.325
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  1.0
     v =  'hco3-'
   [../]
@@ -413,9 +413,9 @@
   [./h+_co32-_conv]
     type =  CoupledConvectionReactionSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -10.325
-    sto_u = -1.0 
+    sto_u = -1.0
     sto_v =  1.0
     v =  'hco3-'
     p =  'pressure'
@@ -424,35 +424,35 @@
   [./h+_oh-_sub]
     type =  CoupledBEEquilibriumSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -13.991
-    sto_u = -1.0 
-    sto_v = ' ' 
+    sto_u = -1.0
+    sto_v = ' '
   [../]
 
   [./h+_oh-_cd]
     type =  CoupledDiffusionReactionSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -13.991
-    sto_u = -1.0 
-    sto_v = ' ' 
+    sto_u = -1.0
+    sto_v = ' '
   [../]
 
   [./h+_oh-_conv]
     type =  CoupledConvectionReactionSub
     variable =  h+
-    weight = -1.0                
+    weight = -1.0
     log_k  = -13.991
-    sto_u = -1.0 
-    sto_v = ' ' 
+    sto_u = -1.0
+    sto_v = ' '
     p =  'pressure'
   [../]
 
   [./h+_calcite]
     type =  CoupledBEKinetic
     variable =  h+
-    weight =  -1.0 
+    weight =  -1.0
     v =  'caco3(s)'
     start_time = 1.0
   [../]
@@ -477,9 +477,9 @@
   [./hco3-_caco3(aq)_sub]
     type =  CoupledBEEquilibriumSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  = -7.009
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  '1.0  -1.0'
     v =  'ca2+ h+'
     start_time = 1.0
@@ -488,9 +488,9 @@
   [./hco3-_caco3(aq)_cd]
     type =  CoupledDiffusionReactionSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  = -7.009
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  '1.0  -1.0'
     v =  'ca2+ h+'
     start_time = 1.0
@@ -499,9 +499,9 @@
   [./hco3-_caco3(aq)_conv]
     type =  CoupledConvectionReactionSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  = -7.009
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  '1.0  -1.0'
     v =  'ca2+ h+'
     p =  'pressure'
@@ -511,9 +511,9 @@
   [./hco3-_cahco3+_sub]
     type =  CoupledBEEquilibriumSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  =  1.043
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'ca2+'
   [../]
@@ -521,9 +521,9 @@
   [./hco3-_cahco3+_cd]
     type =  CoupledDiffusionReactionSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  =  1.043
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'ca2+'
   [../]
@@ -531,9 +531,9 @@
   [./hco3-_cahco3+_conv]
     type =  CoupledConvectionReactionSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  =  1.043
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'ca2+'
     p =  'pressure'
@@ -542,9 +542,9 @@
   [./hco3-_co2(aq)_sub]
     type =  CoupledBEEquilibriumSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  =  6.341
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'h+'
   [../]
@@ -552,9 +552,9 @@
   [./hco3-_co2(aq)_cd]
     type =  CoupledDiffusionReactionSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  =  6.341
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v =  1.0
     v =  'h+'
   [../]
@@ -562,7 +562,7 @@
   [./hco3-_co2(aq)_conv]
     type =  CoupledConvectionReactionSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  =  6.341
     sto_u =  1.0
     sto_v =  1.0
@@ -573,9 +573,9 @@
   [./hco3-_co32-_sub]
     type =  CoupledBEEquilibriumSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  = -10.325
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = -1.0
     v =  'h+'
   [../]
@@ -583,9 +583,9 @@
   [./hco3-_co32-_cd]
     type =  CoupledDiffusionReactionSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  = -10.325
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = -1.0
     v =  'h+'
   [../]
@@ -593,9 +593,9 @@
   [./hco3-_co32-_conv]
     type =  CoupledConvectionReactionSub
     variable =  hco3-
-    weight =  1.0                
+    weight =  1.0
     log_k  = -10.325
-    sto_u =  1.0 
+    sto_u =  1.0
     sto_v = -1.0
     v =  'h+'
     p =  'pressure'
@@ -604,7 +604,7 @@
   [./hco3-_calcite]
     type =  CoupledBEKinetic
     variable =  hco3-
-    weight =  1.0 
+    weight =  1.0
     v =  'caco3(s)'
     start_time = 1.0
   [../]
@@ -794,6 +794,6 @@ active = ' '
 [Output]
   file_base = 2d_stoch_aperture_caco3_pe1.5_64_mesh_out
   output_initial =  true
-  interval = 1 
+  interval = 1
   exodus =  true
 []

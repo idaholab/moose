@@ -30,8 +30,8 @@ public:
                           const std::vector<unsigned int> & trial_master_nodes,
                           const std::vector<std::vector<unsigned int> > & node_to_elem_map,
                           const unsigned int patch_size);
-  
-  
+
+
   // Splitting Constructor
   SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split split);
 

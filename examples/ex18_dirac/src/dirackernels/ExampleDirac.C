@@ -29,7 +29,7 @@ ExampleDirac::ExampleDirac(const std::string & name, InputParameters parameters)
     _point_param(getParam<std::vector<Real> >("point"))
 {
   _p(0) = _point_param[0];
-  
+
   if(_point_param.size() > 1)
   {
     _p(1) = _point_param[1];
@@ -40,7 +40,7 @@ ExampleDirac::ExampleDirac(const std::string & name, InputParameters parameters)
     }
   }
 }
-           
+
 void
 ExampleDirac::addPoints()
 {

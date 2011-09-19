@@ -44,9 +44,9 @@ Real
 SideAverageValue::getValue()
 {
   Real integral = SideIntegral::getValue();
-  
+
   gatherSum(_volume);
-  
+
   return integral / _volume;
 }
 

@@ -6,7 +6,7 @@
    nx = 3
    ny = 3
    nz = 3
-   x min = 0 
+   x min = 0
    x max = 1
    y min = 0
    y max = 1
@@ -35,9 +35,9 @@
 []
 
 [Kernels]
-  
-  active = 'diff implicit conv forcing reaction'  
-  
+
+  active = 'diff implicit conv forcing reaction'
+
   [./diff]
     type = PolyDiffusion
     variable = u
@@ -60,7 +60,7 @@
     type = PolyForcing
     variable = u
   [../]
-  
+
   [./reaction] #We got from MOOSE kernels
     type = PolyReaction
     variable = u
@@ -68,7 +68,7 @@
 []
 [AuxKernels] #We created our own AuxKernel
   active = 'ConstantAux'
-   
+
   [./ConstantAux]
     type = PolyConstantAux
     variable = nodal_aux
@@ -107,5 +107,5 @@
   output_initial = true
   perf_log = true
 []
-   
-    
+
+

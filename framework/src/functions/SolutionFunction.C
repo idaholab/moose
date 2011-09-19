@@ -41,7 +41,7 @@ SolutionFunction::SolutionFunction(const std::string & name, InputParameters par
 {
   _mesh = new Mesh;
   _mesh->read(_mesh_file);
-  
+
   _es = new EquationSystems(*_mesh);
   _es->read(_es_file);
   _es->update();
@@ -54,7 +54,7 @@ SolutionFunction::SolutionFunction(const std::string & name, InputParameters par
 
   // Need to pull down a full copy of this vector on every processor so we can get values in parallel
   _system->solution->localize(*_serialized_solution);
-  
+
   _mesh_function = new MeshFunction(*_es, *_serialized_solution, _system->get_dof_map(), _system->variable_number(_var_name));
 
   _mesh_function->init();

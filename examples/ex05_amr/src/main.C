@@ -16,7 +16,7 @@
  * Example 5: Adaptive Mesh Refinement:
  * This example shows how to enable AMR in the input file.
  *
- * Note: This file contains no additional changes from the previous example 
+ * Note: This file contains no additional changes from the previous example
  */
 
 //Moose Includes
@@ -49,7 +49,7 @@ int main (int argc, char** argv)
 
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();
-  
+
   p.parse(input_filename);
   p.execute();
 

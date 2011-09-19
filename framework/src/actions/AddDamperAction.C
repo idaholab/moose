@@ -29,7 +29,7 @@ AddDamperAction::AddDamperAction(const std::string & name, InputParameters param
 }
 
 void
-AddDamperAction::act() 
+AddDamperAction::act()
 {
   _problem->addDamper(_type, getShortName(), _moose_object_pars);
 }

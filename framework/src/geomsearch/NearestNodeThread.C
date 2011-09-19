@@ -42,7 +42,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {
     unsigned int node_id = *nd;
-    
+
     const Node & node = _mesh.node(node_id);
 
     const Node * closest_node = NULL;
@@ -71,7 +71,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
 
     info._nearest_node = closest_node;
     info._distance = closest_distance;
-  }  
+  }
 }
 
 void

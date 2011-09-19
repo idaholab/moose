@@ -22,7 +22,7 @@
 //  * however it doesn't test it in parallel.
 //  */
 
-// class ParallelUniqueIdTest : public CppUnit::TestFixture 
+// class ParallelUniqueIdTest : public CppUnit::TestFixture
 // {
 //   CPPUNIT_TEST_SUITE( ParallelUniqueIdTest );
 
@@ -30,7 +30,7 @@
 //   CPPUNIT_TEST( testId );
 
 //   CPPUNIT_TEST_SUITE_END();
-  
+
 // public:
 //   void constructor();
 //   void testId();

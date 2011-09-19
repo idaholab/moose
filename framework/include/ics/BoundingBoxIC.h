@@ -57,12 +57,12 @@ public:
   virtual Real value(const Point & p);
 
 protected:
-  Real _x1; 
-  Real _y1; 
-  Real _z1; 
-  Real _x2; 
-  Real _y2; 
-  Real _z2; 
+  Real _x1;
+  Real _y1;
+  Real _z1;
+  Real _x2;
+  Real _y2;
+  Real _z2;
   Real _inside;
   Real _outside;
 

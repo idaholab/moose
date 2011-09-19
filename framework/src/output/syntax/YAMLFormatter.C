@@ -42,10 +42,10 @@ void
 YAMLFormatter::print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs)
 {
   std::string empty;
-  
+
   if (!prev_name)
     prev_name = &empty;
-  
+
   std::vector<std::string> elements, prev_elements;
   Parser::tokenize(name, elements);
   std::string spacing = "";
@@ -63,7 +63,7 @@ YAMLFormatter::print(const std::string & name, const std::string * prev_name, st
     for (unsigned int i=0; i<prev_elements.size(); ++i)
       prev_spacing += "  ";
     _out << prev_spacing << "  subblocks: \n";
-  } 
+  }
 */
   if (prev_name == NULL || *prev_name != name || *prev_name == "Executioner" || prev_name->find("InitialCondition") != std::string::npos)
   {
@@ -78,18 +78,18 @@ YAMLFormatter::print(const std::string & name, const std::string * prev_name, st
     _out << spacing << "- name: " << name << "\n";
     spacing += "  ";
 
-    
+
     std::string class_desc, type_str;
     if (param_ptrs[1] != NULL)
     {
       class_desc = param_ptrs[1]->getClassDescription();
       type_str = param_ptrs[1]->get<std::string>("type");
     }
-    
+
     //will print "" if there is no type or desc, which translates to None in python
     _out << spacing << "desc: !!str " << class_desc << "\n";
     _out << spacing << "type: " << type_str << "\n";
-    
+
     _out << spacing << "parameters:\n";
   }
   else
@@ -99,18 +99,18 @@ YAMLFormatter::print(const std::string & name, const std::string * prev_name, st
 //    for (unsigned int i=0; i<prev_elements.size(); ++i)
 //      prev_spacing += "  ";
 //    _out << prev_spacing << "  subblocks: \n";
-    
+
     spacing += "  ";
   }
-  
+
 
   for (unsigned int i=0; i<param_ptrs.size() && param_ptrs[i]; ++i)
   {
-    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter) 
+    for (InputParameters::iterator iter = param_ptrs[i]->begin(); iter != param_ptrs[i]->end(); ++iter)
     {
       std::string name = iter->first;
       // First make sure we want to see this parameter, also block active and type
-      if (param_ptrs[i]->isPrivate(iter->first) || name == "active" || name == "type") 
+      if (param_ptrs[i]->isPrivate(iter->first) || name == "active" || name == "type")
         continue;
 
       // Block params may be required and will have a doc string
@@ -128,7 +128,7 @@ YAMLFormatter::print(const std::string & name, const std::string * prev_name, st
                 << param_ptrs[i]->getDocString(iter->first) << "\n";
     }
   }
-  
+
 //  out << spacing << "subblocks: \n";
 }
 
@@ -137,10 +137,10 @@ YAMLFormatter::printCloseAndOpen(const std::string & name, const std::string * p
 {
   std::string empty;
   std::vector<std::string> prev_elements, curr_elements;
-  
+
   if (!prev_name)
     prev_name = &empty;
-  
+
   Parser::tokenize(*prev_name, prev_elements);
   Parser::tokenize(name, curr_elements);
 
@@ -158,7 +158,7 @@ YAMLFormatter::printCloseAndOpen(const std::string & name, const std::string * p
     }
     else
       ++same_elements;
-  
+
   // Executioner syntax is different - we'll hack it here!
   if ((name == "Executioner" && *prev_name == "Executioner") ||
       (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos) || name == "Executioner/Adaptivity")
@@ -178,12 +178,12 @@ YAMLFormatter::printCloseAndOpen(const std::string & name, const std::string * p
     spacing += "  ";
     if (i)
     {
-      
+
       partial_name += "/";
     }
     partial_name += curr_elements[i];
   }
-  
+
   for (unsigned int i=curr_elements.size()-num_to_open; i<curr_elements.size()-1 && !curr_elements.empty(); ++i)
   {
     spacing += "  ";
@@ -193,7 +193,7 @@ YAMLFormatter::printCloseAndOpen(const std::string & name, const std::string * p
       partial_name += "/";
     }
     partial_name += curr_elements[i];
-    
+
     ran_once = true;
     _out << spacing << "- name: " << partial_name << "\n";
     _out << spacing << "  desc: !!str\n";

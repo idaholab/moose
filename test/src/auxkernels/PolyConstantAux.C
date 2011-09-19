@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<PolyConstantAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  
+
   return params;
 }
 

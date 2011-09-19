@@ -41,7 +41,7 @@ int main (int argc, char** argv)
   // Create a parser object
   Parser p;
 
-  // Register a bunch of common objects that exist inside of Moose.  You will 
+  // Register a bunch of common objects that exist inside of Moose.  You will
   // generally create a registerObjects method of your own to register modules
   // that you create in your own application.
   Moose::registerObjects();
@@ -51,7 +51,7 @@ int main (int argc, char** argv)
 
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();
-  
+
   // Tell the parser to parse the given file to setup the simulation and execute
   p.parse(input_filename);
   p.execute();

@@ -34,7 +34,7 @@
     type = DirichletBC
     variable = u
     boundary = 5  # Check for bad bc number
-    value = 1  
+    value = 1
   [../]
 []
 
@@ -51,5 +51,5 @@
   print_linear_residuals = true
   perf_log = true
 []
-   
-    
+
+

@@ -16,10 +16,10 @@ class Diff2Material : public Material
 {
 public:
   Diff2Material(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual void computeQpProperties();
-  
+
   Real _diff;         // the value read from the input file
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<std::vector<Real> > & _vector_property;

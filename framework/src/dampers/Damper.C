@@ -21,7 +21,7 @@ InputParameters validParams<Damper>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this damper operates on");
-  
+
   params.addPrivateParam<std::string>("built_by_action", "add_damper");
   return params;
 }
@@ -57,7 +57,7 @@ Damper::computeDamping()
 {
   Real damping = 1.0;
   Real cur_damping = 1.0;
-  
+
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
   {
     cur_damping = computeQpDamping();

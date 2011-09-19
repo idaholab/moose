@@ -91,7 +91,7 @@ SetupOutputAction::act()
     Moose::perf_log.disable_logging();
     Moose::setup_perf_log.disable_logging();
   }
- 
+
   /// Determines whether we see the perf log early in a run or not
   _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
 
@@ -132,7 +132,7 @@ SetupOutputAction::act()
 
     const unsigned int interval = getParam<unsigned int>("interval");
     const unsigned int screen_interval = getParam<unsigned int>("screen_interval");
-    
+
     // Error checks
     if (interval < screen_interval)
       mooseError("\"screen_interval (" + Moose::stringify(screen_interval) +
@@ -146,7 +146,7 @@ SetupOutputAction::act()
         mooseError("\"interval (" + Moose::stringify(interval) + ") is set greater than \"screen_interval (" +
                    Moose::stringify(screen_interval) + ")\" and \"output_initial\" is set to false.");
     }
-    
+
     output.interval(getParam<unsigned int>("interval"));
     output.screen_interval(getParam<unsigned int>("screen_interval"));
     output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
@@ -160,7 +160,7 @@ SetupOutputAction::act()
  // Test to make sure that the user can write to the directory specified in file_base
   std::string base = "./" + getParam<std::string>("file_base");
   base = base.substr(0, base.find_last_of('/'));
-  
+
   // TODO: We have a function that tests read/write in the Parser namespace.  We should probably
   // use that instead of creating another one here
   if (access(base.c_str(), W_OK) == -1)

@@ -33,7 +33,7 @@ class ElementIntegral : public ElementPostprocessor
 {
 public:
   ElementIntegral(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize();
   virtual void execute();
   virtual void threadJoin(const Postprocessor & y);
@@ -44,5 +44,5 @@ protected:
 
   Real _integral_value;
 };
- 
+
 #endif

@@ -31,7 +31,7 @@ class SetupMeshAction : public Action
 {
 public:
   SetupMeshAction(const std::string & name, InputParameters params);
-  
+
   virtual void act();
 
 private:

@@ -18,17 +18,17 @@
 
 [Functions]
   active = 'force_fn exact_fn left_bc'
-  
+
   [./force_fn]
     type = ParsedFunction
     value = '1-x*x+2*t'
   [../]
-  
+
   [./exact_fn]
     type = ParsedFunction
     value = '(1-x*x)*t'
   [../]
-  
+
   [./left_bc]
     type = ParsedFunction
     value = t
@@ -49,7 +49,7 @@
     type = Diffusion
     variable = u
   [../]
-  
+
   [./ffn_u]
     type = UserForcingFunction
     variable = u
@@ -94,17 +94,17 @@
 
 [Postprocessors]
   active = 'l2 node1 node4'
-  
+
   [./l2]
     type = ElementL2Error
     variable = u
     function = exact_fn
   [../]
-  
+
   [./node1]
     type = NodalVariableValue
     variable = u
-    nodeid = 15 
+    nodeid = 15
   [../]
 
   [./node4]
@@ -117,7 +117,7 @@
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator'
-  
+
   dt = 0.1
   start_time = 0
   end_time = 1
@@ -133,5 +133,5 @@
   print_linear_residuals = false
   perf_log = true
 []
-   
-    
+
+

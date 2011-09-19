@@ -21,14 +21,14 @@ InputParameters validParams<ExampleMaterial>()
 
   params.addParam<Real>("diffusivity_baseline", 1.0, "This number will be added to the value of some_variable");
   params.addCoupledVar("some_variable", "The value of this variable will be added to diffusivity_baseline to determine the diffusivity");
-  
+
   return params;
 }
 
 ExampleMaterial::ExampleMaterial(const std::string & name,
                                  InputParameters parameters)
   :Material(name, parameters),
-   
+
    // Get a parameter
    _diffusivity_baseline(getParam<Real>("diffusivity_baseline")),
 

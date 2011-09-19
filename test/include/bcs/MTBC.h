@@ -17,12 +17,12 @@ class MTBC : public IntegratedBC
 {
 public:
   MTBC(const std::string & name, InputParameters parameters);
-  
+
   virtual ~MTBC() {}
 
 protected:
   virtual Real computeQpResidual();
-  
+
 private:
   /**
    * Value of grad(u) on the boundary.

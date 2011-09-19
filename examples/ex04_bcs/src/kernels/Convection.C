@@ -19,7 +19,7 @@ InputParameters validParams<Convection>()
 {
   InputParameters params = validParams<Kernel>();
 
-  params.addRequiredCoupledVar("some_variable", "The gradient of this variable will be used as the velocity vector.");  
+  params.addRequiredCoupledVar("some_variable", "The gradient of this variable will be used as the velocity vector.");
   return params;
 }
 

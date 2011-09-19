@@ -67,15 +67,15 @@ protected:
    * Percentage to change the timestep by either way.
    */
   Real _percent_change;
-  
+
   timeval _solve_start, _solve_end;
 
   Real _older_sol_time_vs_dt, _old_sol_time_vs_dt, _sol_time_vs_dt;
-  
+
   bool _adapt_log;
 
   std::ofstream _adaptive_log;
-  
+
 };
 
 #endif //SOLUTIONTIMEADAPTIVE_H

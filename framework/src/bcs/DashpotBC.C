@@ -24,7 +24,7 @@ InputParameters validParams<DashpotBC>()
   params.addCoupledVar("disp_z", "Displacement in the z direction");
 
   params.addParam<Real>("coefficient", 1.0, "The viscocity coefficient");
-  
+
   return params;
 }
 
@@ -45,7 +45,7 @@ Real
 DashpotBC::computeQpResidual()
 {
   RealVectorValue velocity(_disp_x_dot[_qp], _disp_y_dot[_qp], _disp_z_dot[_qp]);
-  
+
   return _test[_i][_qp]*_coefficient*_normals[_qp]*velocity;
 }
 
@@ -54,7 +54,7 @@ DashpotBC::computeQpJacobian()
 {
   RealVectorValue velocity;
   velocity(_component) = _phi[_j][_qp]/_dt;
-   
+
   return _test[_i][_qp]*_coefficient*_normals[_qp]*velocity;
 }
 
@@ -63,16 +63,16 @@ DashpotBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   RealVectorValue velocity;
   unsigned int component = 0;
-  
+
   if(jvar == _disp_x_var)
     component = 0;
   else if(jvar == _disp_y_var)
     component = 1;
   else if(jvar == _disp_z_var)
     component = 2;
-  
+
   velocity(component) = _phi[_j][_qp]/_dt;
-  
+
   return -_test[_i][_qp]*_normals[_qp]*velocity;
 }
 

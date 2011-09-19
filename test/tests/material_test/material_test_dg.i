@@ -8,22 +8,22 @@
   [./u]
     order = FIRST
     family = MONOMIAL
-    
+
     [./InitialCondition]
       type = ConstantIC
-      value = 1 
+      value = 1
     [../]
   [../]
 []
 
 [Functions]
   active = 'forcing_fn exact_fn'
-  
+
   [./forcing_fn]
     type = ParsedFunction
     value = (x*x*x)-6.0*x
   [../]
-  
+
   [./exact_fn]
     type = ParsedGradFunction
 
@@ -41,12 +41,12 @@
     variable = u
     prop_name = matp
   [../]
-  
+
   [./abs]
     type = Reaction
     variable = u
   [../]
-  
+
   [./forcing]
     type = UserForcingFunction
     variable = u
@@ -56,7 +56,7 @@
 
 [DGKernels]
   active = 'dgdiff'
-  
+
   [./dgdiff]
     type = DGMatDiffusion
     variable = u

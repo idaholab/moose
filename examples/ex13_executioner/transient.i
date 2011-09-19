@@ -84,7 +84,7 @@
     type = ExampleMaterial
     block = 1
     diffusivity = 0.5
-    time_coefficient = 20.0 
+    time_coefficient = 20.0
   [../]
 []
 
@@ -107,5 +107,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

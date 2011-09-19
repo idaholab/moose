@@ -62,7 +62,7 @@
     variable = convected
     boundary = '2'
     value = 2
-    
+
     some_var = diffused
   [../]
 
@@ -93,5 +93,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

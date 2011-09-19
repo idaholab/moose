@@ -43,7 +43,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
   Parser p;
-  
+
   Moose::registerObjects();
 
   registerKernel(Convection);

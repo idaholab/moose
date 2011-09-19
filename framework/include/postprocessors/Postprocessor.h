@@ -38,14 +38,14 @@ class Postprocessor : public MooseObject
 {
 public:
   Postprocessor(const std::string & name, InputParameters parameters);
-  
+
   virtual ~Postprocessor(){ }
-  
+
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
   virtual void initialize() = 0;
-  
+
   /**
    * This function will get called on each geometric object this postprocessor acts on
    * (ie Elements, Sides or Nodes).  This will most likely get called multiple times

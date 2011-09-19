@@ -32,11 +32,11 @@
 []
 
 [Kernels]
-  
-  active = 'diff implicit conv forcing reaction'  
-  
+
+  active = 'diff implicit conv forcing reaction'
+
   [./diff]
-    type = MMSDiffusion 
+    type = MMSDiffusion
     variable = u
   [../]
 
@@ -56,7 +56,7 @@
     type = MMSForcing
     variable = u
   [../]
-  
+
   [./reaction] #We got from MOOSE kernels
     type = MMSReaction
     variable = u
@@ -64,7 +64,7 @@
 []
 [AuxKernels] #We created our own AuxKernel
   active = 'ConstantAux'
-   
+
   [./ConstantAux]
     type = MMSConstantAux
     variable = nodal_aux

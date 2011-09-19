@@ -27,7 +27,7 @@ InputParameters validParams<SetupSMPAction>()
   params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same possition in off_diag_colum.");
   params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same possition in off_diag_row.");
   params.addParam<bool>("full", false, "Set to true if you want the full set of couplings.  Simply for convenience so you don't have to set every off_diag_row and off_diag_column combination.");
-  
+
 return params;
 }
 
@@ -44,13 +44,13 @@ SetupSMPAction::act()
 
   CouplingMatrix * cm = new CouplingMatrix(n_vars);
   bool full = getParam<bool>("full");
-  
+
   if(!full)
   {
     // put 1s on diagonal
     for (unsigned int i = 0; i < n_vars; i++)
       (*cm)(i, i) = 1;
-    
+
     // off-diagonal entries
     std::vector<std::vector<unsigned int> > off_diag(n_vars);
     for(unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
@@ -68,4 +68,4 @@ SetupSMPAction::act()
   }
 
   nl.setCouplingMatrix(cm);
-}  
+}

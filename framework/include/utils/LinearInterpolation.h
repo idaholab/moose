@@ -57,7 +57,7 @@ public:
    * This function returns the size of the array holding the points, i.e. the number of sample points
    */
   unsigned int getSampleSize();
-  
+
 private:
 
   std::vector<double> _x;
@@ -67,7 +67,7 @@ private:
 };
 
 #endif //LINEARINTERPOLATION_H
-  
-  
-  
-      
+
+
+
+

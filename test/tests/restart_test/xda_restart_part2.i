@@ -27,10 +27,10 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  
+
   [./v]
     order = FIRST
-    family = LAGRANGE  
+    family = LAGRANGE
   [../]
 []
 
@@ -57,14 +57,14 @@
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
-    function = exact_fn 
+    function = exact_fn
   [../]
 
   [./left_v]
     type = DirichletBC
     variable = v
     boundary = '3'
-    value = 0 
+    value = 0
   [../]
 
   [./right_v]
@@ -75,13 +75,13 @@
   [../]
 []
 
-[Preconditioning] 
-  [./PBP] 
+[Preconditioning]
+  [./PBP]
     type = PBP
-    solve_order = 'u v' 
+    solve_order = 'u v'
     preconditioner = 'amg amg'
-  [../] 
-[] 
+  [../]
+[]
 
 [Executioner]
   type = Steady

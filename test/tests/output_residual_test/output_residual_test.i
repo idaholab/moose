@@ -8,7 +8,7 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    
+
     [./InitialCondition]
       type = ConstantIC
       value = 0
@@ -51,7 +51,7 @@
     type = Diffusion
     variable = u
   [../]
-  
+
   [./ffn_u]
     type = UserForcingFunction
     variable = u
@@ -68,7 +68,7 @@
     type = Diffusion
     variable = v
   [../]
-  
+
 []
 
 [BCs]

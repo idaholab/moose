@@ -69,5 +69,5 @@ protected:
 
   virtual Real computeQpIntegral() = 0;
 };
- 
+
 #endif

@@ -23,7 +23,7 @@ class NearestNodeThread
 public:
   NearestNodeThread(const MeshBase & mesh,
                     std::map<unsigned int, std::vector<unsigned int> > & neighbor_nodes);
-  
+
   // Splitting Constructor
   NearestNodeThread(NearestNodeThread & x, Threads::split split);
 

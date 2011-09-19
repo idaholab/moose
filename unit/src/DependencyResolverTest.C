@@ -44,7 +44,7 @@ DependencyResolverTest::operatorParensTest()
   // Sort based on the dependency resolver
   // "bead" will come out after the independent items
   std::sort(unsorted.begin(), unsorted.end(), _strict_ordering);
-  
+
   CPPUNIT_ASSERT( unsorted[2] == "b");
   CPPUNIT_ASSERT( unsorted[3] == "e");
   CPPUNIT_ASSERT( unsorted[4] == "a");
@@ -56,7 +56,7 @@ DependencyResolverTest::resolverSets()
 {
   // First throw in an extra independent item
   _resolver.addItem("aa");
-  
+
   const std::vector<std::set<std::string> > & sets = _resolver.getSortedValuesSets();
 
   /*
@@ -68,16 +68,16 @@ DependencyResolverTest::resolverSets()
     std::cout << "\n";
   }
   */
-  
+
   CPPUNIT_ASSERT( sets.size() == 3 );
   CPPUNIT_ASSERT( sets[0].size() == 2);
   CPPUNIT_ASSERT( sets[0].find("a") != sets[0].end() );
   CPPUNIT_ASSERT( sets[0].find("aa") != sets[0].end() );
-  
+
   CPPUNIT_ASSERT( sets[1].size() == 2);
   CPPUNIT_ASSERT( sets[0].find("b") != sets[1].end() );
   CPPUNIT_ASSERT( sets[0].find("c") != sets[1].end() );
-  
+
   CPPUNIT_ASSERT( sets[2].size() == 1);
   CPPUNIT_ASSERT( sets[0].find("d") != sets[2].end() );
 }

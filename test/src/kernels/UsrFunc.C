@@ -31,11 +31,11 @@ Number ManSol4ADR1src(const Point& p, Real& A0, Real& B0, Real& C0,
            + 9.*B0*sin(3.*libMesh::pi*y)));
    else
       return libMesh::pi*(3.*A0*(Au + Bk + Bu*x + Cu*y)*cos(3.*libMesh::pi*x)
-           + 3.*B0*(Av + Ck + Bv*x + Cv*y)*cos(3.*libMesh::pi*y) 
+           + 3.*B0*(Av + Ck + Bv*x + Cv*y)*cos(3.*libMesh::pi*y)
            - 9.*A0*libMesh::pi*(Ak + Bk*x + Ck*y)*sin(3.*libMesh::pi*x)
-           + C0*(Au + Bk + Bu*x + Cu*y)*cos(libMesh::pi*x)*sin(libMesh::pi*y) 
+           + C0*(Au + Bk + Bu*x + Cu*y)*cos(libMesh::pi*x)*sin(libMesh::pi*y)
            + C0*sin(libMesh::pi*x)*((Av + Ck + Bv*x + Cv*y)*cos(libMesh::pi*y)
-           - 2.*libMesh::pi*(Ak + Bk*x + Ck*y)*sin(libMesh::pi*y)) 
+           - 2.*libMesh::pi*(Ak + Bk*x + Ck*y)*sin(libMesh::pi*y))
            - 9.*B0*libMesh::pi*(Ak + Bk*x + Ck*y)*sin(3.*libMesh::pi*y));
 }
 
@@ -45,7 +45,7 @@ Number ManSol4ADR1exv(const Point& p,
   		      const std::string&) // unk_name, not needed
 {
    Real A0=1.,B0=1.2,C0=0.8;
-   return A0*sin(3.*libMesh::pi*p(0))+B0*sin(3.*libMesh::pi*p(1))+C0*sin(libMesh::pi*p(0))*sin(libMesh::pi*p(1));    
+   return A0*sin(3.*libMesh::pi*p(0))+B0*sin(3.*libMesh::pi*p(1))+C0*sin(libMesh::pi*p(0))*sin(libMesh::pi*p(1));
 }
 
 Gradient ManSol4ADR1exd(const Point& p,
@@ -57,10 +57,10 @@ Gradient ManSol4ADR1exd(const Point& p,
    Gradient gradu;
 
    gradu(0) = 3.*libMesh::pi*A0*cos(3.*libMesh::pi*p(0))+C0*libMesh::pi*sin(libMesh::pi*p(1))*cos(libMesh::pi*p(0));
-   gradu(1) = 3.*libMesh::pi*B0*cos(3.*libMesh::pi*p(1))+C0*libMesh::pi*cos(libMesh::pi*p(1))*sin(libMesh::pi*p(0));   
-   gradu(2) = 0.;   
-   
-   return gradu;     
+   gradu(1) = 3.*libMesh::pi*B0*cos(3.*libMesh::pi*p(1))+C0*libMesh::pi*cos(libMesh::pi*p(1))*sin(libMesh::pi*p(0));
+   gradu(2) = 0.;
+
+   return gradu;
 }
 
 /**
@@ -115,7 +115,7 @@ Gradient ManSol4ADR2exd(const Point& p,
    Real t = parameters.get<Real>("time");
 
    Gradient gradu;
-   
+
    gradu(0) = 0.;
    gradu(1) = 0.;
    gradu(2) = 0.;
@@ -128,8 +128,8 @@ Gradient ManSol4ADR2exd(const Point& p,
       gradu(0) = (libMesh::pi*(A0-x)*pow(sin((libMesh::pi*t*w)/2.),2)*sin(2*libMesh::pi*(C0-sqrt(pow(A0-x,2)+pow(B0-y,2)))))/sqrt(pow(A0-x,2)+pow(B0-y,2));
       gradu(1) = (libMesh::pi*(B0-y)*pow(sin((libMesh::pi*t*w)/2.),2)*sin(2*libMesh::pi*(C0-sqrt(pow(A0-x,2)+pow(B0-y,2)))))/sqrt(pow(A0-x,2)+pow(B0-y,2));
    }
-   
-   return gradu;     
+
+   return gradu;
 }
 
 Number ManSolzeroV(const Point&,  // p not needed
@@ -147,9 +147,9 @@ Gradient ManSolzeroG(const Point&,  // p not needed
 {
    Gradient gradu;
 
-   gradu(0) = 0.;   
-   gradu(1) = 0.;   
-   gradu(2) = 0.;   
-   
-   return gradu;     
+   gradu(0) = 0.;
+   gradu(1) = 0.;
+   gradu(2) = 0.;
+
+   return gradu;
 }

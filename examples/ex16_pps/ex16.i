@@ -1,10 +1,10 @@
 [Mesh]
   [./Generation]
-    dim = 2	
+    dim = 2
 
     nx = 10
     ny = 10
-    
+
     x_min = 0.0
     x_max = 1.0
 
@@ -23,8 +23,8 @@
 []
 
 [Functions]
-  active = 'bc_func forcing_func'  
-  
+  active = 'bc_func forcing_func'
+
   # A ParsedFunction allows us to supply analytic expressions
   # directly in the input file
   [./bc_func]

@@ -36,7 +36,7 @@
     value = x+2
   [../]
 []
-    
+
 [Kernels]
   active = 'diff'
 
@@ -77,5 +77,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

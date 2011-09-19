@@ -12,7 +12,7 @@ class EmptyMaterial : public Material
 public:
   EmptyMaterial(const std::string & name,
                 InputParameters parameters);
-  
+
 protected:
   virtual void computeProperties();
 };

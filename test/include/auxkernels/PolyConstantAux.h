@@ -14,7 +14,7 @@ public:
   PolyConstantAux(const std::string & name, InputParameters parameters);
 
   virtual ~PolyConstantAux() {}
-  
+
 protected:
   virtual Real computeValue();
 };

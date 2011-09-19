@@ -26,7 +26,7 @@ class ExampleFunction : public Function
 {
 public:
   ExampleFunction(const std::string & name, InputParameters parameters);
-  
+
   virtual Real value(Real t, const Point & p);
 
 protected:

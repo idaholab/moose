@@ -3,7 +3,7 @@
 ##############################################################################
 # Parser for Perf Log
 #
-# The following dictionary is a list of expressions to find in the 
+# The following dictionary is a list of expressions to find in the
 # output file.  The corresponding value will be encoded in the data
 # file so that GNU plot can filter these lines for the right graphs
 expr_to_find = {'Solve Only':-1, 'compute_residual':-6, 'solve()':-6, 'residual.close3()':-6}
@@ -54,7 +54,7 @@ for expr, field_num in expr_to_find.items():
         threads            = m.group(4)
 
 	# Calculated Values
-	cores              = int(chunks) * int(mpi_procs_per_node) * int(threads)	
+	cores              = int(chunks) * int(mpi_procs_per_node) * int(threads)
         configuration      = mpi_procs_per_node + 'x' + threads
 
 	expr_store = re.sub(r'\W', '', expr.replace(' ', '_'))
@@ -63,11 +63,11 @@ for expr, field_num in expr_to_find.items():
 	value = values[field_num]          # Only grab the one value we need counting from the back
 
         # Ahhh, Autovivication at it's best...
-        data[expr_store][problem_size][chunks][mpi_procs_per_node][threads] = value 
+        data[expr_store][problem_size][chunks][mpi_procs_per_node][threads] = value
         data_cores[expr_store][problem_size][cores][configuration] = value
         data_strong[expr_store][problem_size][configuration][cores] = value
         data_weak[expr_store][configuration][problem_size][cores] = value
-	
+
 # Dump out all the raw data
 data_out = open('data/all_data.dat', 'w')
 data_out.write('problem_size chunks mpi_per_chunk threads perf_line timings\n')
@@ -81,17 +81,17 @@ data_out.close()
 
 for expr, level1 in data_cores.items():
     for problem_size, level2 in sorted(level1.items(), key=lambda (k,v): int(k)):
-	
+
 	configuration_set = {}
         for cores, level3 in sorted(level2.items(), key=lambda (k,v): int(k)):
             for configuration, level4 in level3.items():
                 configuration_set[configuration] = True
-	
+
         curr_file = open('data/' +  expr + '_' + str(problem_size) + '.dat', 'w')
         curr_file_norm = open('data/' + expr + '_' + str(problem_size) + '_norm.dat', 'w')
 	curr_gnu_file = open('data/' + expr + '_' + str(problem_size) + '_log_plot.plt', 'w')
         curr_gnu_file.write("set datafile missing '-'\nset logscale\nset size square\nset style line 1 lt 3 lc rgb 'black' lw 3\n")
-        curr_gnu_file.write("set title 'Log Log " + expr + ' ' + str(problem_size) + "'\n")        
+        curr_gnu_file.write("set title 'Log Log " + expr + ' ' + str(problem_size) + "'\n")
 
 	curr_gnu_file.write("plot 10000*(x/1000)**-1 ti 'Ideal slope' ls 1")
         filename = expr + '_' + str(problem_size) + '.dat'
@@ -101,10 +101,10 @@ for expr, level1 in data_cores.items():
 
 	curr_file.write(str('cores'))
 	curr_file_norm.write(str('cores'))
-	for configuration in sorted(configuration_set.keys(), key=lambda (k): int(k[0:k.index('x')])):	
+	for configuration in sorted(configuration_set.keys(), key=lambda (k): int(k[0:k.index('x')])):
             curr_file.write(' ' + configuration)
             curr_file_norm.write(' ' + configuration)
-	    
+
         for cores, level3 in sorted(level2.items(), key=lambda (k,v): int(k)):
             curr_file.write('\n' + str(cores))
             curr_file_norm.write('\n' + str(cores))
@@ -126,15 +126,15 @@ gnuplot_plotline = "'<filename>' index <i> using 1:3 title 1 with linespoints"
 for expr, problem_sizes in data_strong.items():
   for problem_size, configurations in sorted(problem_sizes.items(), key=lambda (k,v): int(k)):
     curr_file = open('data/' + expr + '_' + str(problem_size) + '_strong_scaling.dat', 'w')
-    curr_gnu_file = open('data/' + expr + '_' + str(problem_size) + '_strong_scaling.plt', 'w')    
+    curr_gnu_file = open('data/' + expr + '_' + str(problem_size) + '_strong_scaling.plt', 'w')
     curr_gnu_file.write(gnuplot_preamble)
     curr_gnu_file.write('set title "Strong Scaling (' + expr + ' ' + str(problem_size) + ')"\n')
 
     count = 0
     for configuration, core_sets in sorted(configurations.items(), key=lambda (k,v): int(k[0:k.index('x')])):
       curr_file.write(str(configuration) + '\n')
-      
-      rel_speedup = '-' 
+
+      rel_speedup = '-'
       rel_eff = 1
       prev_cores = 1
       prev_time = 1
@@ -145,7 +145,7 @@ for expr, problem_sizes in data_strong.items():
           first_time = time
         else:
           rel_speedup = first_time / time   #prev_time / time
-          rel_eff = (first_cores * first_time) / (cores * time)  #(prev_cores * prev_time) / (cores * time)  
+          rel_eff = (first_cores * first_time) / (cores * time)  #(prev_cores * prev_time) / (cores * time)
         curr_file.write(str(cores) + ' ' + str(rel_speedup) + ' ' + str(rel_eff) + '\n')
         prev_cores = cores
         prev_time = time
@@ -155,11 +155,11 @@ for expr, problem_sizes in data_strong.items():
         plotline = 'plot ' + gnuplot_plotline.replace('<filename>', expr + '_' + str(problem_size) + '_strong_scaling.dat')
       else:
         plotline = ', \\\n' + gnuplot_plotline.replace('<filename>', '')
-      plotline = plotline.replace('<i>', `count`)        
+      plotline = plotline.replace('<i>', `count`)
       count += 1
       curr_gnu_file.write(plotline)
       #curr_file.write('\n\n')
-            
+
     curr_file.close()
     curr_gnu_file.close()
 
@@ -179,7 +179,7 @@ for expr, configurations in data_weak.items():
         # For each problem size/core count see if we can find matches that keep the work load roughly the same
         #seen_it = set()
         new_set = True
-        for problem_size2, core_sets2 in sorted(problem_sizes.items(), key=lambda (k,v): int(k)):          
+        for problem_size2, core_sets2 in sorted(problem_sizes.items(), key=lambda (k,v): int(k)):
           for cores2, time2 in core_sets2.items():
             if (problem_size2, cores2) not in seen_it and \
                  int(problem_size2) > int(problem_size) and \

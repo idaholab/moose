@@ -4,7 +4,7 @@
 
     nx = 100
     ny = 100
-    
+
     xmin = 0.0
     xmax = 1.0
 
@@ -23,8 +23,8 @@
 []
 
 [Functions]
-  active = 'bc_func forcing_func'  
-  
+  active = 'bc_func forcing_func'
+
   # A ParsedFunction allows us to supply analytic expressions
   # directly in the input file
   [./bc_func]

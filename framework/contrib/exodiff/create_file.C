@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 
 #include "Tolerance.h"
 #include "smart_assert.h"
@@ -55,13 +55,13 @@ namespace {
 			    const Tolerance& default_tol, bool do_all_flag,
 			    const vector<string> &var_names1, const vector<string> &var_names2,
 			    bool *diff_found);
-  
+
   void build_truth_table(EXOTYPE type, const char *label, vector<string> *names, int num_entity,
 			 ExoII_Read& file1, ExoII_Read& file2,
 			 const vector<string> &var_names1, const vector<string> &var_names2,
 			 std::vector<int> &truth_tab, bool quiet_flag,
 			 bool *diff_found);
-  
+
   void output_exodus_names(int file_id, EXOTYPE type, const vector<string> *names);
   void output_diff_names(const char *type, const vector<string> *names);
   void output_compare_names(const char* type, const vector<string> *names, const Tolerance *tol,
@@ -79,19 +79,19 @@ void Build_Variable_Names(ExoII_Read& file1, ExoII_Read& file2, bool *diff_found
                        specs.glob_var_default, specs.glob_var_do_all_flag,
                        file1.Global_Var_Names(), file2.Global_Var_Names(),
 		       diff_found);
-  
+
   // Build (and compare) nodal variable names.
   build_variable_names("nodal", specs.node_var_names, specs.node_var,
                        specs.node_var_default, specs.node_var_do_all_flag,
                        file1.Nodal_Var_Names(),  file2.Nodal_Var_Names(),
 		       diff_found);
-  
+
   // Build (and compare) element variable names.
   build_variable_names("element", specs.elmt_var_names, specs.elmt_var,
                         specs.elmt_var_default, specs.elmt_var_do_all_flag,
                         file1.Elmt_Var_Names(),   file2.Elmt_Var_Names(),
 			diff_found);
-  
+
   // Build (and compare) element variable names.
   if (!specs.ignore_attributes) {
     build_variable_names("element attribute", specs.elmt_att_names, specs.elmt_att,
@@ -99,15 +99,15 @@ void Build_Variable_Names(ExoII_Read& file1, ExoII_Read& file2, bool *diff_found
 			 file1.Elmt_Att_Names(),   file2.Elmt_Att_Names(),
 			 diff_found);
   }
-  
+
   // Build (and compare) nodeset variable names.
-  build_variable_names("nodeset", specs.ns_var_names, specs.ns_var,  
+  build_variable_names("nodeset", specs.ns_var_names, specs.ns_var,
                        specs.ns_var_default, specs.ns_var_do_all_flag,
                        file1.NS_Var_Names(), file2.NS_Var_Names(),
                        diff_found);
-  
+
   // Build (and compare) sideset variable names.
-  build_variable_names("sideset", specs.ss_var_names, specs.ss_var,  
+  build_variable_names("sideset", specs.ss_var_names, specs.ss_var,
                        specs.ss_var_default, specs.ss_var_do_all_flag,
                        file1.SS_Var_Names(), file2.SS_Var_Names(),
                        diff_found);
@@ -120,7 +120,7 @@ int Create_File(ExoII_Read& file1, ExoII_Read& file2,
   // summary_flag == true   --> Single file, output summary and variable names, return
   // diffile_name == ""     --> Dual file, output summary, variable names, check compatability,
   // diffile_name != ""     --> Three files (2 in, 1 out)
-  //                            create output file which is diff of input. 
+  //                            create output file which is diff of input.
   //                            output summary, variable names, check compatability
   // quiet_flag == true     --> don't output summary information
 
@@ -132,12 +132,12 @@ int Create_File(ExoII_Read& file1, ExoII_Read& file2,
 
   int out_file_id = -1;
   if (!diffile_name.empty()) {
-    
+
     // Take minimum word size for output file.
     int iows = file1.IO_Word_Size() < file2.IO_Word_Size()
       ? file1.IO_Word_Size() : file2.IO_Word_Size();
     int compws = sizeof(double);
-    
+
     out_file_id = ex_create(diffile_name.c_str(), EX_CLOBBER, &compws, &iows);
     SMART_ASSERT(out_file_id >= 0);
     ex_copy(file1.File_ID(), out_file_id);
@@ -158,7 +158,7 @@ int Create_File(ExoII_Read& file1, ExoII_Read& file2,
       }
       else
 	std::cout << "Locations of nodes will not be considered.\n";
-      
+
       if (specs.time_tol.type != IGNORE) {
 	SMART_ASSERT(specs.time_tol.type == RELATIVE ||
                      specs.time_tol.type == ABSOLUTE ||
@@ -172,7 +172,7 @@ int Create_File(ExoII_Read& file1, ExoII_Read& file2,
       }
       else
 	std::cout << "Time step time values will not be differenced.\n";
-      
+
       output_diff_names("Global",  specs.glob_var_names);
       output_diff_names("Nodal",   specs.node_var_names);
       output_diff_names("Element", specs.elmt_var_names);
@@ -197,7 +197,7 @@ int Create_File(ExoII_Read& file1, ExoII_Read& file2,
       } else {
 	std::cout << "Locations of nodes will not be compared." << std::endl;
       }
-      
+
       if (specs.time_tol.type != IGNORE) {
 	SMART_ASSERT(specs.time_tol.type == RELATIVE ||
                      specs.time_tol.type == ABSOLUTE ||
@@ -211,7 +211,7 @@ int Create_File(ExoII_Read& file1, ExoII_Read& file2,
       } else {
 	std::cout << "Time step time values will not be compared." << std::endl;
       }
-	
+
       output_compare_names("Global",  specs.glob_var_names, specs.glob_var,
 			   file1.Num_Global_Vars(), file2.Num_Global_Vars());
 
@@ -234,20 +234,20 @@ int Create_File(ExoII_Read& file1, ExoII_Read& file2,
 
   std::vector<int> truth_tab;
   build_truth_table(EX_ELEM_BLOCK, "Element Block", specs.elmt_var_names, file1.Num_Elmt_Blocks(),
-		    file1, file2, file1.Elmt_Var_Names(), file2.Elmt_Var_Names(), 
+		    file1, file2, file1.Elmt_Var_Names(), file2.Elmt_Var_Names(),
 		    truth_tab, specs.quiet_flag, diff_found);
-    
+
   std::vector<int> ns_truth_tab;
   build_truth_table(EX_NODE_SET, "Nodeset", specs.ns_var_names, file1.Num_Node_Sets(),
-		    file1, file2, file1.NS_Var_Names(), file2.NS_Var_Names(), 
+		    file1, file2, file1.NS_Var_Names(), file2.NS_Var_Names(),
 		    ns_truth_tab, specs.quiet_flag, diff_found);
-    
+
   std::vector<int> ss_truth_tab;
   build_truth_table(EX_SIDE_SET, "Sideset", specs.ss_var_names, file1.Num_Side_Sets(),
-		    file1, file2, file1.SS_Var_Names(), file2.SS_Var_Names(), 
+		    file1, file2, file1.SS_Var_Names(), file2.SS_Var_Names(),
 		    ss_truth_tab, specs.quiet_flag, diff_found);
-    
-  
+
+
   // Put out the concatenated variable parameters here and then
   // put out the names....
   if (out_file_id >= 0) {
@@ -334,7 +334,7 @@ namespace {
       if (name[0] == '!')
 	x_list.push_back( extract_token(name, "!") ); // remove "!" & add
     }
-    
+
     if (do_all_flag) {
       int n;
       int name_length = var_names1.size();
@@ -360,7 +360,7 @@ namespace {
 	  tols[idx]  = default_tol;
 	}
       }
-      
+
       if (!specs.noSymmetricNameCheck) {
 	name_length = var_names2.size();
 	for (n = 0; n < name_length; ++n) {
@@ -379,12 +379,12 @@ namespace {
 	}
       }
     }
-    
+
     vector<string> tmp_list;
     for (unsigned n = 0; n < names->size(); ++n) {
       string name = (*names)[n];  chop_whitespace(name);
       if (name[0] == '!') continue;
-      
+
       if (find_string(var_names1, name, specs.nocase_var_names) >= 0) {
 	if (specs.summary_flag || find_string(var_names2, name, specs.nocase_var_names) >= 0)
 	  {
@@ -415,11 +415,11 @@ namespace {
   {
     if (names->size() > 0)	{
       int num_vars = names->size();
-      
+
       truth_tab.resize(num_vars * num_entity);
       for (int i = num_vars * num_entity - 1; i >= 0; --i)
 	truth_tab[i] = 0;
-      
+
       for (int b = 0; b < num_entity; ++b) {
 	Exo_Entity *set1 = file1.Get_Entity_by_Index(type, b);
 	Exo_Entity *set2 = file2.Get_Entity_by_Id(type, set1->Id());
@@ -456,4 +456,4 @@ namespace {
       }
     }
   }
-} // End of namespace 
+} // End of namespace

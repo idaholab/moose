@@ -25,7 +25,7 @@ InputParameters validParams<CopyNodalVarsAction>()
   InputParameters params = validParams<Action>();
   params.addParam<int>("initial_from_file_timestep", 2, "Gives the timestep for which to read a solution from a file for a given variable");
   params.addParam<std::string>("initial_from_file_var", "Gives the name of a variable for which to read an initial condition from a mesh file");
-  
+
   return params;
 }
 
@@ -35,10 +35,10 @@ CopyNodalVarsAction::CopyNodalVarsAction(const std::string & name, InputParamete
 }
 
 void
-CopyNodalVarsAction::act() 
+CopyNodalVarsAction::act()
 {
   SystemBase * system;
-  
+
   if (isParamValid("initial_from_file_var"))
   {
     // Is this a NonlinearSystem variable or an AuxiliarySystem variable?

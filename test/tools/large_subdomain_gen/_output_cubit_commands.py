@@ -17,7 +17,7 @@ ii.runcode(code.compile_command(new_program, '<string>', 'exec'))
 
 # TODO: Figure out how to capture the output from InteractiveInterpreter
 #       so we don't see all the Cubit BS
-#       
+#
 #       I found a way to do this using the context manager class
 #       and __future__ module but this doesn't exist in Python2.5
 

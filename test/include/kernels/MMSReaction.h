@@ -12,7 +12,7 @@ class MMSReaction : public Kernel
 {
 public:
   MMSReaction(const std::string & name, InputParameters parameters);
-           
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

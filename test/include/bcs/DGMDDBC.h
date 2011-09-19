@@ -43,7 +43,7 @@ public:
    * constructor.
    */
   DGMDDBC(const std::string & name, InputParameters parameters);
-    
+
   virtual ~DGMDDBC() {}
 
 protected:

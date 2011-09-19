@@ -50,7 +50,7 @@ int main (int argc, char** argv)
   /**
    * Registering an Action is a little different than registering the other MOOSE
    * objects.  You register your Action class with an "action_name" that can be
-   * satisfied by executing the Action (running the "act" virtual method).  
+   * satisfied by executing the Action (running the "act" virtual method).
    */
   registerAction(ConvectionDiffusionAction, "add_kernel");
   Moose::associateSyntax(p);
@@ -68,7 +68,7 @@ int main (int argc, char** argv)
 
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();
-  
+
   p.parse(input_filename);
   p.execute();
 

@@ -33,7 +33,7 @@ class ReadMeshAction : public Action
 {
 public:
   ReadMeshAction(const std::string & name, InputParameters params);
-  
+
   virtual void act();
 
   static const std::string no_file_supplied;

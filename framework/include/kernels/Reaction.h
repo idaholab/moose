@@ -27,7 +27,7 @@ class Reaction : public Kernel
 {
 public:
   Reaction(const std::string & name, InputParameters parameters);
-           
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

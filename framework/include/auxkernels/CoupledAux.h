@@ -24,7 +24,7 @@ class CoupledAux;
 template<>
 InputParameters validParams<CoupledAux>();
 
-/** 
+/**
  * Coupled auxiliary value
  */
 class CoupledAux : public AuxKernel
@@ -38,7 +38,7 @@ public:
   CoupledAux(const std::string & name, InputParameters parameters);
 
   virtual ~CoupledAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

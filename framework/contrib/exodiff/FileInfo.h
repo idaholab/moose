@@ -2,14 +2,14 @@
 // Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software.
-//         
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
@@ -17,7 +17,7 @@
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -39,7 +39,7 @@
 #include <string>
 #include <sys/types.h>
 
-  /*! \class FileInfo 
+  /*! \class FileInfo
    *  \author Greg Sjaardema
    *  \brief  Return information about the specified file.
    *
@@ -57,7 +57,7 @@ class FileInfo
  public:
   //! Empty class referring to no file.
   FileInfo();
-  
+
   //! Create object referring to file with name \a filename
   //! \param filename name of file
   explicit FileInfo(const std::string &filename);
@@ -73,7 +73,7 @@ class FileInfo
   //! \param dirpath Directory Path
   //! \param filename base filename
   FileInfo(const std::string &dirpath, const std::string &filename);
-  
+
   ~FileInfo();
 
   bool exists()        const; //!< returns True if file exists, false if nonexistant
@@ -84,13 +84,13 @@ class FileInfo
   bool is_file()       const; //!< Is a plain file
   bool is_dir()        const; //!< Is a directory
   bool is_symlink()    const; //!< Is a symbolic link to a file or directory
-  
+
   time_t modified()    const; //!< Time of last data modification. See 'man stat(2)'
   time_t accessed()    const; //!< Time of last access
   time_t created()     const; //!< Time of last status change. (creation, chmod, ...)
-  
+
   off_t  size()        const; //!< File size in bytes. Only if is_file() == true
-  
+
   const std::string filename()  const; //!< Complete filename including path
   const std::string basename()  const; //!< strip path and extension
   const std::string tailname()  const; //!< basename() + extension()
@@ -100,19 +100,19 @@ class FileInfo
 
   void  set_filename(const std::string &name);
   void  set_filename(const char *name);
-  
+
   bool  operator==(const FileInfo &other) const
   { return filename_ == other.filename_; }
-  
+
   bool  operator!=(const FileInfo &other) const
   { return filename_ != other.filename_; }
-  
+
   bool remove_file();
-    
+
  private:
   std::string filename_;
   bool exists_;   //<! this is used frequently, check on creation
   bool readable_; //<! this is used frequently, check on creation
 };
-#endif 
+#endif
 

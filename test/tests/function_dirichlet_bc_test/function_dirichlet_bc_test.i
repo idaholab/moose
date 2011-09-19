@@ -14,7 +14,7 @@
 
 [Functions]
   active = 'forcing_func bc_func'
-  
+
   [./forcing_func]
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)

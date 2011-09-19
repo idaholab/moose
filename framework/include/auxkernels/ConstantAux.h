@@ -24,7 +24,7 @@ class ConstantAux;
 template<>
 InputParameters validParams<ConstantAux>();
 
-/** 
+/**
  * Constant auxiliary value
  */
 class ConstantAux : public AuxKernel
@@ -38,7 +38,7 @@ public:
   ConstantAux(const std::string & name, InputParameters parameters);
 
   virtual ~ConstantAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 
 #include <iostream>
 #include <cstdlib>
@@ -132,13 +132,13 @@ void Node_Set::load_nodes(const int *node_map) const
     nodes = new int[numEntity];  SMART_ASSERT(nodes != 0);
     nodeIndex = new int[numEntity];  SMART_ASSERT(nodeIndex != 0);
     ex_get_set(fileId, EX_NODE_SET, id_, nodes, 0);
-    
+
     if (node_map != NULL) {
       for (int i=0; i < numEntity; i++) {
 	nodes[i] = 1+node_map[nodes[i]-1];
       }
     }
-    
+
     for (int i=0; i < numEntity; i++) {
       nodeIndex[i] = i;
     }
@@ -170,7 +170,7 @@ int Node_Set::Check_State() const
   SMART_ASSERT(id_ >= EX_INVALID_ID);
   SMART_ASSERT(numEntity >= 0);
   SMART_ASSERT(num_dist_factors >= 0);
-  
+
   SMART_ASSERT( !( id_ == EX_INVALID_ID && numEntity > 0 ) );
   SMART_ASSERT( !( id_ == EX_INVALID_ID && num_dist_factors > 0 ) );
   SMART_ASSERT( !( id_ == EX_INVALID_ID && nodes ) );
@@ -182,7 +182,7 @@ int Node_Set::Check_State() const
 void Node_Set::entity_load_params()
 {
   int err = ex_get_set_param(fileId, EX_NODE_SET, id_, &numEntity, &num_dist_factors);
-  
+
   if (err < 0) {
     std::cout << "ERROR: Failed to get nodeset parameters for nodeset " << id_
 	      << ". !  Aborting..." << std::endl;

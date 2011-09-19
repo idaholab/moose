@@ -67,11 +67,11 @@ CreateMeshAction::act()
     default:
       mooseError("Unable to generate mesh for unknown dimension");
     }
-  
+
   ElemType elem_type = Utility::string_to_enum<ElemType>(elem_type_str);
- 
+
    MooseMesh *mesh = new MooseMesh(mesh_dim);
-  
+
   switch (mesh_dim)
   {
   case 1:
@@ -105,7 +105,7 @@ CreateMeshAction::act()
                                       elem_type);
     break;
    }
-  
+
   _parser_handle._mesh = mesh;
 
 }

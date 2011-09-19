@@ -43,10 +43,10 @@ PiecewiseLinearFile::PiecewiseLinearFile(const std::string & name, InputParamete
 {
   std::vector<Real> x;
   std::vector<Real> y;
-  
+
   // Parse to get x, y
   parse( x, y );
-  
+
   _linear_interp = new LinearInterpolation( x, y );
 }
 
@@ -69,7 +69,7 @@ PiecewiseLinearFile::parse( std::vector<Real> & x, std::vector<Real> & y )
    unsigned int linenum = 0;
    unsigned int itemnum;
    std::vector<Real> data;
-     
+
    while (getline (file, line))
    {
      linenum++;
@@ -85,7 +85,7 @@ PiecewiseLinearFile::parse( std::vector<Real> & x, std::vector<Real> & y )
        i >> d;
        data.push_back( d );
 //       std::cout << "Item #" << itemnum << ": " << item << std::endl;
-             
+
      }
    }
 //   std::cout << " linenum " << linenum << std::endl;

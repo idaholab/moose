@@ -29,7 +29,7 @@ Steady::Steady(const std::string & name, InputParameters parameters) :
     _problem(*ProblemFactory::instance()->createMProblem(_mesh)),
     _time_step(_problem.timeStep()),
     _time(_problem.time())
-{ 
+{
   if (!_restart_sln_file_name.empty())
     _problem.setRestartFile(_restart_sln_file_name);
 }
@@ -44,11 +44,11 @@ void
 Steady::execute()
 {
   std::cout << "Time: " << _time_step << "\n";
-  
+
   checkIntegrity();
 
   _problem.initialSetup();
-  
+
   preExecute();
 
   // first step in any steady state solve is always 1 (preserving backwards compatibility)
@@ -60,7 +60,7 @@ Steady::execute()
   // Define the refinement loop
   unsigned int steps = _problem.adaptivity().getSteps();
   for(unsigned int r_step=0; r_step<=steps; r_step++)
-  { 
+  {
 #endif //LIBMESH_ENABLE_AMR
     preSolve();
     _problem.updateMaterials();
@@ -75,7 +75,7 @@ Steady::execute()
     _problem.getNonlinearSystem().printVarNorms();
 
     std::cout << "\n";
-    
+
 #ifdef LIBMESH_ENABLE_AMR
     if(r_step != steps)
     {
@@ -90,7 +90,7 @@ Steady::execute()
 
   postExecute();
 }
-  
+
 void
 Steady::checkIntegrity()
 {

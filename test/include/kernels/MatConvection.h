@@ -27,7 +27,7 @@ protected:
   Real _x;
   Real _y;
   Real _z;
-  
+
 };
 
 #endif // MATCONVECTION_H

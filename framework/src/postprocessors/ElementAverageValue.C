@@ -30,7 +30,7 @@ void
 ElementAverageValue::initialize()
 {
   ElementIntegral::initialize();
-  
+
   _volume = 0;
 }
 
@@ -46,9 +46,9 @@ Real
 ElementAverageValue::getValue()
 {
   Real integral = ElementIntegral::getValue();
-  
+
   gatherSum(_volume);
-  
+
   return integral / _volume;
 }
 

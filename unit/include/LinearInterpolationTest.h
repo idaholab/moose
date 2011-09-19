@@ -18,7 +18,7 @@
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-class LinearInterpolationTest : public CppUnit::TestFixture 
+class LinearInterpolationTest : public CppUnit::TestFixture
 {
   CPPUNIT_TEST_SUITE( LinearInterpolationTest );
 
@@ -27,11 +27,11 @@ class LinearInterpolationTest : public CppUnit::TestFixture
   CPPUNIT_TEST( getSampleSize );
 
   CPPUNIT_TEST_SUITE_END();
-  
+
 public:
   void setUp();
   void tearDown();
-  
+
   void constructor();
   void sample();
   void getSampleSize();

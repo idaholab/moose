@@ -40,10 +40,10 @@ public:
    * constructor.
    */
   VectorNeumannBC(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
-  
+
   VectorValue<Real> _value;                             ///< Vector to dot with the normal.
 };
 

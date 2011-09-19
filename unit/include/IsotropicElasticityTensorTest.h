@@ -20,7 +20,7 @@
 
 class IsotropicElasticityTensor;
 
-class IsotropicElasticityTensorTest : public CppUnit::TestFixture 
+class IsotropicElasticityTensorTest : public CppUnit::TestFixture
 {
   CPPUNIT_TEST_SUITE( IsotropicElasticityTensorTest );
 
@@ -38,7 +38,7 @@ class IsotropicElasticityTensorTest : public CppUnit::TestFixture
   CPPUNIT_TEST( calcEK );
 
   CPPUNIT_TEST_SUITE_END();
-  
+
 public:
   void constructor();
   void nonConstantConstructor();
@@ -53,14 +53,14 @@ public:
   void calcENu();
   void calcEK();
 
-  /** 
+  /**
    * Measures the computed tensor against a known data set. Return a bool
    * so that if a test fails we can use the return value to fail the assert
    * inside the actual test that's failing, instead of in testMatrix and
    * the user doesn't have a clue which function called testMatrix.
    */
   bool testMatrix( double values[9][9], IsotropicElasticityTensor & tensor );
-  
+
 private:
   /** Data to test against. */
   static double _lambdaMu[9][9], _lambdaNu[9][9], _lambdaK[9][9], _lambdaD[9][9],

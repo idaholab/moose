@@ -36,7 +36,7 @@ ConvectionDiffusionAction::act()
 {
   std::vector<std::string> variables = getParam<std::vector<std::string> > ("variables");
   std::vector<std::string> vel_vec_variable;
-  
+
   /**
    * We need to manually setup our Convection-Diffusion and Diffusion variables on our two
    * variables we are expecting from the input file.  Much of the syntax below is hidden by the

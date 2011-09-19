@@ -29,7 +29,7 @@ InputParameters validParams<SetupPBPAction>()
   InputParameters params = validParams<SetupPreconditionerAction>();
   params.addRequiredParam<std::vector<std::string> >("solve_order", "TODO: docstring");
   params.addRequiredParam<std::vector<std::string> >("preconditioner", "TODO: docstring");
-  
+
   params.addParam<std::vector<std::string> >("off_diag_row", "TODO: docstring");
   params.addParam<std::vector<std::string> >("off_diag_column", "TODO: docstring");
   return params;
@@ -40,7 +40,7 @@ SetupPBPAction::SetupPBPAction(const std::string & name, InputParameters params)
 {}
 
 void
-SetupPBPAction::act() 
+SetupPBPAction::act()
 {
   if (_parser_handle._problem != NULL)
   {
@@ -85,4 +85,4 @@ SetupPBPAction::act()
     Moose::PetscSupport::petscSetOptions(petsc_options, petsc_inames, petsc_values);
 #endif
   }
-}  
+}

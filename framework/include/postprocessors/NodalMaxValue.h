@@ -37,5 +37,5 @@ public:
 protected:
   Real _value;
 };
- 
+
 #endif

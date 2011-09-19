@@ -145,19 +145,19 @@ ExodusOutput::outputInput()
 {
   std::vector<std::string> input_file_record;
   std::string s;
-  
+
   if (_out == NULL)
     _out = new ExodusII_IO(_es.get_mesh());
-  
+
   input_file_record.push_back("####################");
   input_file_record.push_back("# Created by MOOSE #");
   input_file_record.push_back("####################");
 
   {
-    std::stringstream ss;   
+    std::stringstream ss;
     // Grab the command line arguments first
     Moose::command_line->print("", ss, 1);
-    
+
     input_file_record.push_back("### Command Line Arguments ###");
     while (std::getline(ss, s))
     {
@@ -165,9 +165,9 @@ ExodusOutput::outputInput()
       input_file_record.push_back(s);
     }
   }
-  
+
   {
-    std::stringstream ss;   
+    std::stringstream ss;
     // Save the input file into our string stream
     Moose::action_warehouse.printInputFile(ss);
 
@@ -202,7 +202,7 @@ ExodusOutput::outputInput()
       }
     }
   }
-  
+
 
   _out->write_information_records( input_file_record );
 }

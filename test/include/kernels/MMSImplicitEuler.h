@@ -12,7 +12,7 @@ class MMSImplicitEuler : public TimeKernel
 {
 public:
   MMSImplicitEuler(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

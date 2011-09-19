@@ -85,7 +85,7 @@
 
 [AuxBCs]
   active = 'five'
-  
+
   [./five]
     type = ConstantAux
     variable = five
@@ -106,5 +106,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

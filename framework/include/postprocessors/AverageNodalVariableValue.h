@@ -28,7 +28,7 @@ class AverageNodalVariableValue : public GeneralPostprocessor
 {
 public:
   AverageNodalVariableValue(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize() {}
   virtual void execute() {}
 

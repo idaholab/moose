@@ -30,7 +30,7 @@ class SinDirichletBC : public NodalBC
 public:
 
   SinDirichletBC(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
 
@@ -39,5 +39,5 @@ private:
   Real _final;
   Real _duration;
 };
- 
+
 #endif

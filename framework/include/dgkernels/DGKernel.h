@@ -34,10 +34,10 @@ class DGKernel;
 template<>
 InputParameters validParams<DGKernel>();
 
-/** 
+/**
  * The DGKernel class is responsible for calculating the residuals for various
  * physics on internal sides (edges/faces).
- * 
+ *
  */
 class DGKernel :
   public MooseObject,
@@ -46,15 +46,15 @@ class DGKernel :
 {
 public:
 
-  /** 
+  /**
    * Factory constructor initializes all internal references needed for residual computation.
-   * 
+   *
    *
    * @param name The name of this kernel.
    * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
   DGKernel(const std::string & name, InputParameters parameters);
-  
+
   virtual ~DGKernel();
 
   /**

@@ -34,8 +34,8 @@ class GeneralPostprocessor :
 {
 public:
   GeneralPostprocessor(const std::string & name, InputParameters parameters);
-  
+
   virtual ~GeneralPostprocessor() {}
 };
- 
+
 #endif

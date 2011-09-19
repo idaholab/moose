@@ -24,7 +24,7 @@ class FunctionAux;
 template<>
 InputParameters validParams<FunctionAux>();
 
-/** 
+/**
  * Function auxiliary value
  */
 class FunctionAux : public AuxKernel
@@ -37,7 +37,7 @@ public:
   FunctionAux(const std::string & name, InputParameters parameters);
 
   virtual ~FunctionAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

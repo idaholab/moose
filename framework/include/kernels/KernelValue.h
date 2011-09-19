@@ -24,24 +24,24 @@ class KernelValue;
 template<>
 InputParameters validParams<KernelValue>();
 
-/** 
+/**
  * The KernelValue class is responsible for calculating the residuals in form:
  *
  *  JxW[_qp] * _value[_qp] * _test[_i][_qp]
- * 
+ *
  */
 class KernelValue : public Kernel
 {
 public:
-  /** 
+  /**
    * Factory constructor initializes all internal references needed for residual computation.
-   * 
+   *
    * @param name The name of this kernel.
    * @param moose_system The moose_system this kernel is associated with
    * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
   KernelValue(const std::string & name, InputParameters parameters);
-  
+
   virtual ~KernelValue();
 
   /**
@@ -49,7 +49,7 @@ public:
    */
   virtual void computeResidual();
 
-  /** 
+  /**
    * Computes the jacobian for the current element.
    */
   virtual void computeJacobian();

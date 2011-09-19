@@ -31,7 +31,7 @@ class NodalVariableValue : public GeneralPostprocessor
 {
 public:
   NodalVariableValue(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize() {}
   virtual void execute() {}
 

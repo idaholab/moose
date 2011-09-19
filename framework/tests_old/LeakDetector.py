@@ -19,7 +19,7 @@ class LeakDetector(TestHarness):
     index = output.find('Memory leak detected!')
     if index >= 0:
       self.leakers.append(test)
-      
+
       # If it's a debug executable, find and parse the memory leaked objects
       if TestHarness.exec_name[-3:] == 'dbg':
         self.objects[test] = []

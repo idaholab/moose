@@ -22,7 +22,7 @@
 
 class ColumnMajorMatrix;
 
-class ColumnMajorMatrixTest : public CppUnit::TestFixture 
+class ColumnMajorMatrixTest : public CppUnit::TestFixture
 {
   CPPUNIT_TEST_SUITE( ColumnMajorMatrixTest );
 
@@ -59,11 +59,11 @@ class ColumnMajorMatrixTest : public CppUnit::TestFixture
   CPPUNIT_TEST( kronecker );
 
   CPPUNIT_TEST_SUITE_END();
-  
+
 public:
   void setUp();
   void tearDown();
-  
+
   void rowColConstructor();
   void copyConstructor();
   void tensorConstructor();
@@ -97,7 +97,7 @@ public:
   void kronecker();
 
 private:
-  ColumnMajorMatrix *a, *t, *two_mat; 
+  ColumnMajorMatrix *a, *t, *two_mat;
   ColumnMajorMatrix *add, *add_solution;
   ColumnMajorMatrix *sub, *sub_solution;
 };

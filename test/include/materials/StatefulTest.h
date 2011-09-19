@@ -18,7 +18,7 @@ class StatefulTest : public Material
 public:
   StatefulTest(const std::string & name,
                 InputParameters parameters);
-  
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();

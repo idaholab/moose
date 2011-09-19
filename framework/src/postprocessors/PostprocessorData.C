@@ -31,7 +31,7 @@ PostprocessorData::getPostprocessorValue(const std::string & name)
   if (_values.find(name) == _values.end())
     mooseError("No Data found for name: " + name);
   */
-  
+
   return _values[name];
 }
 

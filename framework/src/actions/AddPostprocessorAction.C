@@ -36,7 +36,7 @@ AddPostprocessorAction::AddPostprocessorAction(const std::string & name, InputPa
 }
 
 void
-AddPostprocessorAction::act() 
+AddPostprocessorAction::act()
 {
   _problem->addPostprocessor(_type, getShortName(), _moose_object_pars, _pps_type);
 }

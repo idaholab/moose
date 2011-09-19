@@ -49,7 +49,7 @@
     variable = u
     block = 1
   [../]
-  
+
   [./integral_right]
     type = ElementIntegral
     variable = u

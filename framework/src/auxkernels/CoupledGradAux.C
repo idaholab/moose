@@ -20,7 +20,7 @@ InputParameters validParams<CoupledGradAux>()
   InputParameters params = validParams<AuxKernel>();
 
   params.addRequiredCoupledVar("coupled", "Coupled gradient for calculation");
-  
+
   params.set<RealGradient>("value")=0.0;
   return params;
 }

@@ -34,7 +34,7 @@ public:
                     std::vector< unsigned int > & elem_list,
                     std::vector< unsigned short int > & side_list,
                     std::vector< short int > & id_list);
-  
+
   // Splitting Constructor
   PenetrationThread(PenetrationThread & x, Threads::split split);
 

@@ -25,8 +25,8 @@ InputParameters validParams<ExampleAux>()
 
 ExampleAux::ExampleAux(const std::string & name, InputParameters parameters)
   :AuxKernel(name, parameters),
-   
-   // We can couple in a value from one of our kernels with a call to coupledValueAux 
+
+   // We can couple in a value from one of our kernels with a call to coupledValueAux
    _coupled_val(coupledValue("coupled")),
 
    // Set our member scalar value from InputParameters (read from the input file)

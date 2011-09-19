@@ -7,7 +7,7 @@
   active = '
     tr_x tr_y
     itr_x itr_y'
-    
+
   [./tr_x]
     type = ParsedFunction
     value = -x*cos(pi/3)

@@ -38,11 +38,11 @@ ConvDiffMetaAction::act()
 {
   Action *action;
   MooseObjectAction *moose_object_action;
-  
+
   std::vector<std::string> variables = getParam<std::vector<std::string> > ("variables");
 
 //  std::cerr << "Acting on " << getParam<std::string>("built_by_action") << "\n\n";
-  
+
   /**
    * We need to manually setup our Convection-Diffusion and Diffusion variables on our two
    * variables we are expecting from the input file.  Much of the syntax below is hidden by the
@@ -54,7 +54,7 @@ ConvDiffMetaAction::act()
 
   //*******************************************//
   //**************** Variables ****************//
-  //*******************************************//  
+  //*******************************************//
   InputParameters variable_params = ActionFactory::instance()->getValidParams("AddVariableAction");
 
 //  for (unsigned int i=0; i<variable_params.size(); ++i)
@@ -65,7 +65,7 @@ ConvDiffMetaAction::act()
   variable_params.set<std::string>("name") = "Variables/" + variables[0];
   action = ActionFactory::instance()->create("AddVariableAction", variable_params);
   Moose::action_warehouse.addActionBlock(action);
-  
+
     // Create and Add Second Variable Action
   variable_params.set<std::string>("name") = "Variables/" + variables[1];
   action = ActionFactory::instance()->create("AddVariableAction", variable_params);

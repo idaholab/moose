@@ -65,7 +65,7 @@ public:
   static ActionFactory *instance();
 
   static void release();
-  
+
   virtual ~ActionFactory();
 
   template<typename T>
@@ -77,7 +77,7 @@ public:
     build_info._action_name = action_name;
     build_info._unique_id = _unique_id++;
     _name_to_build_info.insert(std::make_pair(name, build_info));
-    
+
     _action_to_name_map.insert(std::make_pair(action_name, name));
   }
 
@@ -103,7 +103,7 @@ public:
     std::string _action_name;
     unsigned int _unique_id;
   };
-  
+
   /**
    * Typedef for registered Action iterator
    **/
@@ -117,9 +117,9 @@ public:
   const_iterator end() const;
 
   bool isParsed(const std::string & name) const;
-  
+
   std::multimap<std::string, BuildInfo> _name_to_build_info;
-  
+
   std::set<std::string> _non_parsed;
   std::multimap<std::string, std::string> _action_to_name_map;
 
@@ -127,7 +127,7 @@ public:
 
   // TODO: I don't think we need this anymore
   static unsigned int _unique_id;        ///< Unique ID for identifing multiple registrations
-  
+
   static ActionFactory *_instance;       ///< Pointer to the singleton instance
 
 private:

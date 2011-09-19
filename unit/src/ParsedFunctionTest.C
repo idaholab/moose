@@ -39,7 +39,7 @@ ParsedFunctionTest::advancedConstructor()
   one_var[0] = "q";
 
   InputParameters params = validParams<ParsedFunction>();
-  
+
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
 

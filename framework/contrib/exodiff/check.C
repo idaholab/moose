@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 
 #include <cstdlib>
 #include <cstdio>
@@ -103,7 +103,7 @@ void Check_Compatible_Meshes(ExoII_Read& file1, ExoII_Read& file2, bool check_on
   bool is_diff = false;
   if (!Check_Global(file1, file2))
     is_diff = true;
-  
+
   if (!specs.map_flag) {
     if (!Check_Nodal(file1, file2, check_only))
       is_diff = true;
@@ -126,7 +126,7 @@ namespace {
   bool Check_Nodal(ExoII_Read& file1, ExoII_Read& file2, bool check_only)
   {
     bool is_same = true;
-  
+
     file1.Load_Nodal_Coordinates();
     file2.Load_Nodal_Coordinates();
 
@@ -134,12 +134,12 @@ namespace {
     double *y1 = x1, *z1 = x1;
     if (file1.Dimension() > 1) y1 = (double*)file1.Y_Coords();
     if (file1.Dimension() > 2) z1 = (double*)file1.Z_Coords();
-  
+
     double* x2 = (double*)file2.X_Coords();
     double *y2 = x2, *z2 = x2;
     if (file2.Dimension() > 1) y2 = (double*)file2.Y_Coords();
     if (file2.Dimension() > 2) z2 = (double*)file2.Z_Coords();
-  
+
     double max = 0.0, norm;
     for (int n = 0; n < file1.Num_Nodes() && is_same; ++n) {
       if (check_only) {
@@ -172,7 +172,7 @@ namespace {
       }
       max = max < norm ? norm: max;
     }
-  
+
     if (!specs.quiet_flag && !check_only) {
       max = sqrt(max);
       std::cout << "Maximum difference between Genesis nodal coordinates = "
@@ -218,7 +218,7 @@ namespace {
   {
     bool is_same = true;
     SMART_ASSERT(block1 && block2);
-  
+
     block1->Load_Connectivity();
     block2->Load_Connectivity();
     const int* conn1 = block1->Connectivity();
@@ -230,10 +230,10 @@ namespace {
     SMART_ASSERT( block2->Size() == 0 ||
 		  block2->Num_Nodes_per_Elmt() == 0 ||
 		  conn2 != NULL );
-  
+
     int node_count =  block1->Size() * block1->Num_Nodes_per_Elmt();
     SMART_ASSERT(node_count == block2->Size() * block2->Num_Nodes_per_Elmt());
-  
+
     for (int e = 0; e < node_count; ++e) {
       if (conn1[e] != conn2[e]) {
 	std::cout << "exodiff: ERROR .. Connectivities for block id " << block1->Id()
@@ -251,7 +251,7 @@ namespace {
   {
     bool is_same = true;
     SMART_ASSERT(block1 && block2);
-  
+
     if (block1->Id() != block2->Id()) {
       std::cout << "exodiff: ERROR .. Block ids don't agree (" << block1->Id()
 		<< " != " << block2->Id() << ")." << std::endl;
@@ -340,7 +340,7 @@ namespace {
 
 	if (node_map != NULL)
 	  set1->apply_map(node_map);
-	
+
 	if (set1->var_count() > 0 && (set1->Size() == set2->Size())) {
 	  int node_count = set1->Size();
 	  int diff = -1;
@@ -366,7 +366,7 @@ namespace {
     }
     return is_same;
   }
- 
+
   bool Check_Sideset(ExoII_Read& file1, ExoII_Read& file2, const int *elmt_map, bool)
   {
     // Currently don't set diff flag for most of these since we
@@ -415,7 +415,7 @@ namespace {
 
 	if (elmt_map != NULL)
 	  set1->apply_map(elmt_map);
-      
+
 	// Don't care if sidesets don't match if there are no variables...
 	if (set1->var_count() > 0 && (set1->Size() == set2->Size())) {
 	  int side_count = set1->Size();
@@ -446,12 +446,12 @@ namespace {
     }
     return is_same;
   }
- 
+
   bool close_compare(const string & st1, const string & st2)
   {
     unsigned len1 = st1.size();
     unsigned len2 = st2.size();
-  
+
     // Check that digits (if any) at end of names match
     while (isdigit(st1[len1-1]) && isdigit(st2[len2-1])) {
       if (st1[len1-1] != st2[len2-1])
@@ -465,11 +465,11 @@ namespace {
     while (isdigit(st1[len1-1])) {
       len1--;
     }
-  
+
     while (isdigit(st2[len2-1])) {
       len2--;
     }
-  
+
     unsigned length = (len1 < len2) ? len1 : len2;
     for (unsigned i = 0; i < length; ++i) {
       if (toupper(st1[i]) != toupper(st2[i]))

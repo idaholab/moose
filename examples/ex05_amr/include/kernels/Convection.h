@@ -36,7 +36,7 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  
+
   VariableGradient & _some_variable;
 };
 

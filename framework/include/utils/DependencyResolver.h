@@ -32,7 +32,7 @@ public:
   DependencyResolver() {}
 
   ~DependencyResolver() {}
-  
+
   /**
    * Insert a dependecy pair - the first value or the "key" depends on the second value or the "value"
    */
@@ -42,7 +42,7 @@ public:
    * Add an independent item to the set
    */
   void addItem(const T & value);
-  
+
   /**
    * Returns a vector of sets that represent dependency resolved values.  Items in the same
    * set have no dependence upon one and other.
@@ -67,7 +67,7 @@ private:
 
   template<typename map_type>
   class value_iterator;
-  
+
   /**
    * This is our main datastructure a multimap that contains any number of dependencies in a key = value format
    */
@@ -102,7 +102,7 @@ public:
   typedef typename map_iterator::value_type::first_type key_type;
 
   key_iterator(const map_iterator& other) : map_type::iterator(other) {} ;
-    
+
   key_type& operator *()
     {
       return map_type::iterator::operator*().first;
@@ -116,9 +116,9 @@ class DependencyResolver<T>::value_iterator : public map_type::iterator
 public:
   typedef typename map_type::iterator map_iterator;
   typedef typename map_iterator::value_type::second_type value_type;
-    
+
   value_iterator(const map_iterator& other) : map_type::iterator(other) {} ;
-    
+
   value_type& operator *()
     {
       return map_type::iterator::operator*().second;
@@ -151,7 +151,7 @@ DependencyResolver<T>::getSortedValuesSets()
   std::multimap<T, T> depends = _depends;
 
   T t; // empty
-  
+
   /* Add in the independent values */
   for (typename std::set<T>::iterator i = _independent_items.begin(); i != _independent_items.end(); ++i)
     depends.insert(std::make_pair(t, *i));
@@ -174,13 +174,13 @@ DependencyResolver<T>::getSortedValuesSets()
     std::copy(typename DependencyResolver<T>::template key_iterator<std::multimap<T, T> >(depends.begin()),
               typename DependencyResolver<T>::template key_iterator<std::multimap<T, T> >(depends.end()),
               std::inserter(keys, keys.end()));
-    
+
     std::copy(typename DependencyResolver<T>::template value_iterator<std::multimap<T, T> >(depends.begin()),
               typename DependencyResolver<T>::template value_iterator<std::multimap<T, T> >(depends.end()),
               std::inserter(values, values.end()));
 
     /* This set difference creates a set of items that have no dependencies in the depend map*/
-    std::set_difference(values.begin(), values.end(), keys.begin(), keys.end(), 
+    std::set_difference(values.begin(), values.end(), keys.begin(), keys.end(),
                         std::inserter(difference, difference.end()));
 
     /* If the last set difference was empty but there are still items that haven't come out then there is
@@ -194,8 +194,8 @@ DependencyResolver<T>::getSortedValuesSets()
         oss << j->first << " -> " << j->second << "\n";
       mooseError(oss.str());
     }
-    
-    
+
+
 
     /* Now remove items from the temporary map that have been "resolved" */
     for (typename std::multimap<T, T>::iterator iter = depends.begin(); iter != depends.end();)
@@ -219,7 +219,7 @@ const std::vector<T> &
 DependencyResolver<T>::getSortedValues()
 {
   _ordered_items_vector.clear();
-  
+
   getSortedValuesSets();
 
   typename std::vector<std::set<T> >::iterator iter = _ordered_items.begin();
@@ -245,7 +245,7 @@ DependencyResolver<T>::operator() (const T & a, const T & b)
     return true;
   else if (b_it == _ordered_items_vector.end())
     return false;
-  else 
+  else
     return a_it < b_it;  // Yes - compare the iterators...
 }
 

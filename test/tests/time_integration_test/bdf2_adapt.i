@@ -17,7 +17,7 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    
+
     [./InitialCondition]
       type = ConstantIC
       value = 0
@@ -50,7 +50,7 @@
     type = Diffusion
     variable = u
   [../]
-  
+
   [./ffn]
     type = UserForcingFunction
     variable = u
@@ -99,7 +99,7 @@
   start_time = 0.0
   num_steps = 5
   dt = 0.25
-  
+
   [./Adaptivity]
     refine_fraction = 0.2
     coarsen_fraction = 0.3

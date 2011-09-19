@@ -70,7 +70,7 @@ void BilinearInterpolation::GetNeigbourIndices(std::vector<Real> inArr, Real x ,
 	}
 }
 
-Real BilinearInterpolation::sample(Real xcoord, Real ycoord) 
+Real BilinearInterpolation::sample(Real xcoord, Real ycoord)
 {
 	//first find 4 neighbouring points
 	//int nx = xAxis->size;
@@ -91,7 +91,7 @@ Real BilinearInterpolation::sample(Real xcoord, Real ycoord)
 	Real fQ12 = _zSurface(uy-1, lx-1);
 	Real fQ22 = _zSurface(uy-1, ux-1);
 	//if point exactly found on a node do not interpolate
-	if ((lx == ux) && (ly == uy))  
+	if ((lx == ux) && (ly == uy))
 		return fQ11;
 	Real x = xcoord;
 	Real y = ycoord;
@@ -100,10 +100,10 @@ Real BilinearInterpolation::sample(Real xcoord, Real ycoord)
 	Real y1 = _yAxis[ly-1];
 	Real y2 = _yAxis[uy-1];
 	//if xcoord lies exactly on an xAxis node do linear interpolation
-	if (lx == ux) 
+	if (lx == ux)
 		return fQ11 + (fQ12 - fQ11) * (y - y1) / (y2 - y1);
 	//if ycoord lies exactly on an xAxis node do linear interpolation
-	if (ly == uy) 
+	if (ly == uy)
 		return fQ11 + (fQ22 - fQ11) * (x - x1) / (x2 - x1);
 	Real fxy = fQ11 * (x2 - x) * (y2 - y);
 	fxy = fxy + fQ21 * (x - x1) * (y2 - y);
@@ -117,7 +117,7 @@ Real BilinearInterpolation::sample(Real xcoord, Real ycoord)
   std::cout << _zSurface(0,1) << "z(0,1) from sample" << std::endl;
   std::cout << _zSurface(1,0) << "z(1,0) from sample" << std::endl;
   std::cout << _zSurface(1,1) << "z(0,0) from sample" << std::endl;
-*/  
+*/
 	return fxy;
         return 0;
 }

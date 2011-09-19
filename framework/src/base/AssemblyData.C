@@ -97,12 +97,12 @@ AssemblyData::createQRules(QuadratureType type, Order o)
   setVolumeQRule(_qrule_volume);
   setFaceQRule(_qrule_face);
 }
-  
+
 void
 AssemblyData::setVolumeQRule(QBase * qrule)
 {
   _qrule = qrule;
-  
+
   for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
     it->second->attach_quadrature_rule(_qrule);
 }
@@ -111,7 +111,7 @@ void
 AssemblyData::setFaceQRule(QBase * qrule)
 {
   _qrule_face = qrule;
-  
+
   for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
     it->second->attach_quadrature_rule(_qrule_face);
 }
@@ -149,7 +149,7 @@ AssemblyData::reinit(const Elem * elem, const std::vector<Point> & reference_poi
     setVolumeQRule(_qrule_arbitrary);
 
   _qrule_arbitrary->setPoints(reference_points);
-  
+
   _current_elem = elem;
   for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
     it->second->reinit(elem);

@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 
 #include "parsing.h"
 #include "smart_assert.h"
@@ -120,23 +120,23 @@ void Parse_Steps_Option(const string &option)
 double To_Double(const string & str_val)
 {
   SMART_ASSERT(str_val.size() > 0);
-  
+
   char* endptr; errno = 0;
   double val = strtod(str_val.c_str(), &endptr);
-  
+
   if (errno == ERANGE) {
     cout << "exodiff: ERROR:  Overflow or underflow occured when trying"
          << " to parse command line tolerance.  Aborting..." << endl;
     exit(1);
   }
   errno = 0;
-  
+
   if (val < 0.0) {
     cout << "exodiff: ERROR:  Parsed a negative value \""
          << val << "\".  Aborting..." << endl;
     exit(1);
   }
-  
+
   return val;
 }
 
@@ -167,40 +167,40 @@ void Check_Parsed_Names(vector<string>& names, bool& all_flag)
 void parseExcludeTimes(string exclude_arg)
 {
   string arg_copy = exclude_arg;
-  
+
   int num_excluded_steps = 0;
-  
+
   // first pass just counts the number of excluded time steps:
-  
+
   string tok = extract_token( exclude_arg, "," );
   while (tok.size() > 0)
   {
     string subtok = extract_token( tok, "-" );
     SMART_ASSERT(subtok.size() > 0);
-    
+
     errno = 0;
     int ival1 = atoi( subtok.c_str() );  SMART_ASSERT(errno == 0);
-    
+
     if (ival1 < 1) {
       cout << "exodiff: Error parsing exclusion times from command "
               "line .. value was less than 1" << endl;
       exit(1);
     }
-    
+
     ++num_excluded_steps;
-    
+
     subtok = extract_token( tok, "-" );
     if (subtok.size() > 0)
     {
       errno = 0;
       int ival2 = atoi( subtok.c_str() );  SMART_ASSERT(errno == 0);
-      
+
       if (ival2 < 1) {
         cout << "exodiff: Error parsing exclusion times from command "
                 "line .. value was less than 1" << endl;
         exit(1);
       }
-      
+
       if (ival1 < ival2) {
         for (int i = ival1+1; i <= ival2; ++i) ++num_excluded_steps;
       }
@@ -211,44 +211,44 @@ void parseExcludeTimes(string exclude_arg)
         exit(1);
       }
     }
-    
+
     tok = extract_token( exclude_arg, "," );
   }
-  
+
   if (num_excluded_steps > 0)
   {
     specs.allocateExcludeSteps( num_excluded_steps );
-    
+
     // second pass collects the excluded time steps
-    
+
     exclude_arg = arg_copy;
     num_excluded_steps = 0;
-    
+
     tok = extract_token( exclude_arg, "," );
     while (tok.size() > 0)
     {
       string subtok = extract_token( tok, "-" );
       SMART_ASSERT(subtok.size() > 0);
-      
+
       errno = 0;
       int ival1 = atoi( subtok.c_str() );  SMART_ASSERT(errno == 0);
-      
+
       specs.exclude_steps[num_excluded_steps++] = ival1;
-      
+
       subtok = extract_token( tok, "-" );
       if (subtok.size() > 0)
       {
         errno = 0;
         int ival2 = atoi( subtok.c_str() );  SMART_ASSERT(errno == 0);
-        
+
         for (int i = ival1+1; i <= ival2; ++i)
           specs.exclude_steps[num_excluded_steps++] = i;
       }
-      
+
       tok = extract_token( exclude_arg, "," );
     }
   }
-  
+
 //   cout << "Excluded steps:";
 //   for (int j = 0; j < num_excluded_steps; ++j)
 //     cout << " " << specs.exclude_steps[j];
@@ -258,7 +258,7 @@ void parseExcludeTimes(string exclude_arg)
 bool Parse_Token(string& tok, string& opt_arg)
 {
   bool used_opt_arg = false;
-  
+
   if ( tok.empty() ) {
   }
   else if ( tok == "-h" || tok == "-help" ) {
@@ -449,10 +449,10 @@ string Parse_Variables(string xline, ifstream& cmd_file,
                         Tolerance toler[])
 {
   char line[256];
-  
+
   def_tol = specs.default_tol;
   toler[0] = def_tol;
-  
+
   string tok = extract_token( xline, " \n\t=," );  to_lower(tok);
   if (tok != "")
     {
@@ -469,12 +469,12 @@ string Parse_Variables(string xline, ifstream& cmd_file,
                   "keyword \"" << tok << "\"" << endl;
           exit(1);
         }
-    
+
       if (tok == "(all)" || tok == "all") {
         all_flag = true;
         tok = extract_token( xline, " \n\t=," );
       }
-    
+
       // If rel or abs is specified, then the tolerance must be specified.
       if ( abbreviation(tok, "relative", 3) )
         {
@@ -548,8 +548,8 @@ string Parse_Variables(string xline, ifstream& cmd_file,
           def_tol.value = To_Double(tok);
           tok = extract_token( xline, " \n\t=," );  to_lower(tok);
         }
-        
-        
+
+
       if ( abbreviation(tok, "floor", 3) )
         {
           tok = extract_token( xline, " \n\t=," );
@@ -561,26 +561,26 @@ string Parse_Variables(string xline, ifstream& cmd_file,
           def_tol.floor = To_Double(tok);
         }
     }
-  
+
   for (int i = 0; i < specs.max_number_of_names; ++i) {
     toler[i] = def_tol;
   }
-  
+
   SMART_ASSERT(names_ptr != 0);
   vector<string>& names = *names_ptr;  // Make an alias.
-  
+
   cmd_file.getline(line, 256);  xline = line;
   while (!cmd_file.eof())
     {
       if (xline.empty() || (xline[0] != '\t' && first_character(xline) != '#'))
         break;
-    
+
       if ( first_character(xline) != '#' )
         {
           tok = extract_token(xline);
           chop_whitespace( tok );
           if (tok == "") continue;  // Found tab but no name given.
-      
+
           int idx = names.size();
           if (idx >= specs.max_number_of_names) {
             cout << "exodiff: Number of names in tabbed list is larger "
@@ -590,7 +590,7 @@ string Parse_Variables(string xline, ifstream& cmd_file,
                     "file.  Aborting..." << endl;
             exit(1);
           }
-      
+
           if (tok[0] == '!')
             {
               // A "!" in front of a name means to exclude the name so no
@@ -601,9 +601,9 @@ string Parse_Variables(string xline, ifstream& cmd_file,
               continue;
             }
           names.push_back(tok);
-      
+
           tok = extract_token(xline);  to_lower(tok);
-      
+
           if (tok != "" && tok[0] != '#')
             {
               if ( abbreviation(tok, "relative", 3) )
@@ -631,17 +631,17 @@ string Parse_Variables(string xline, ifstream& cmd_file,
                   toler[idx].type = EIGEN_ABS;
                   tok = extract_token(xline," \n\t=,");
                 }
-        
+
               else if ( abbreviation(tok, "eigen_com", 7) )
                 {
                   toler[idx].type = EIGEN_COM;
                   tok = extract_token(xline," \n\t=,");
                 }
-        
+
               if ( abbreviation(tok, "floor", 3) )
                 {
                   toler[idx].value = def_tol.value;
-          
+
                   tok = extract_token(xline," \n\t=,");
                   if (tok == "") Parse_Die(line);
                   toler[idx].floor = To_Double(tok);
@@ -650,7 +650,7 @@ string Parse_Variables(string xline, ifstream& cmd_file,
                 {
                   if (tok == "") Parse_Die(line);
                   toler[idx].value = To_Double(tok);
-          
+
                   tok = extract_token(xline," \n\t=,");  to_lower(tok);
                   if ( abbreviation(tok, "floor", 3) )
                     {
@@ -667,12 +667,12 @@ string Parse_Variables(string xline, ifstream& cmd_file,
               toler[idx] = def_tol;
             }
         }
-    
+
       cmd_file.getline(line, 256);  xline = line;
     }
-  
+
   if (names.size() == 0) all_flag = true;
-  
+
   return xline;
 }
 
@@ -716,7 +716,7 @@ void Parse_Command_Line(int argc, char* argv[],
     if ( !tok.empty() && tok[0] == '-' ) {
       i++;
       string pos_arg = "";
-      if (i < argc) { 
+      if (i < argc) {
         pos_arg = argv[i];
         if ( !pos_arg.empty() && (pos_arg[0] == '-' && !isdigit(pos_arg[1]))) {
           pos_arg = "";
@@ -736,12 +736,12 @@ void Parse_Command_Line(int argc, char* argv[],
       diffile_name = argv[i++];
     }
   }
-  
+
   if ( (file1_name == "" || file2_name == "") && !specs.summary_flag) {
     Echo_Usage();
     exit(1);
   }
-  
+
   // Reset default tolerances in case the -t flag was given.
   specs.time_tol         = specs.default_tol;
   specs.glob_var_default = specs.default_tol;
@@ -760,21 +760,21 @@ void Parse_Command_Line(int argc, char* argv[],
       specs.ss_var[k]   = specs.default_tol;
       specs.ns_var[k]   = specs.default_tol;
     }
-  
+
   specs.allocateNames();
-  
+
   // Parse command file if it exists.
   if (specs.command_file_name != "")
     {
       int default_tol_specified = 0;
-    
+
       // Set all types to inactive (ignore) by default.
       specs.coord_tol.type = IGNORE;
       specs.time_tol.type  = IGNORE;
-    
+
       ifstream cmd_file(specs.command_file_name.c_str(), ios::in);
       SMART_ASSERT(cmd_file.good());
-    
+
       char line[256];
       string xline, tok1, tok2;
       cmd_file.getline(line, 256);  xline = line;
@@ -786,13 +786,13 @@ void Parse_Command_Line(int argc, char* argv[],
             {
               to_lower( tok1 );  // Make case insensitive.
               tok2 = extract_token(xline, " \t");  to_lower(tok2);
-        
+
               if ( abbreviation(tok1, "default", 3) &&
                    abbreviation(tok2, "tolerance", 3) )
                 {
                   string tok = extract_token(xline, " \n\t=,");  to_lower(tok);
                   if (tok == "") Parse_Die(line);
-          
+
                   if ( abbreviation(tok, "relative", 3) )
                     {
                       specs.default_tol.type = RELATIVE;
@@ -824,9 +824,9 @@ void Parse_Command_Line(int argc, char* argv[],
                       tok = extract_token( xline, " \n\t=," );
                     }
                   if (tok == "") Parse_Die(line);
-          
+
                   specs.default_tol.value = To_Double(tok);
-    
+
                   tok = extract_token( xline, " \n\t=," );  to_lower(tok);
                   if ( abbreviation(tok, "floor", 3) )
                     {
@@ -947,7 +947,7 @@ void Parse_Command_Line(int argc, char* argv[],
                     specs.coord_tol.value = 1.e-6;   // the defaults at the top of
                     specs.coord_tol.floor = 0.0;     // this file.
                   }
-          
+
                   if (tok2 != "" && tok2[0] != '#')
                     {
                       // If rel or abs is specified, then the tolerance must
@@ -1000,7 +1000,7 @@ void Parse_Command_Line(int argc, char* argv[],
                           if (tok2 == "") Parse_Die(line);
                           specs.coord_tol.floor = To_Double(tok2);
                         }
-            
+
                       tok2 = extract_token( xline, " \n\t=," );  to_lower(tok2);
                       if ( abbreviation(tok2, "floor", 3) )
                         {
@@ -1013,7 +1013,7 @@ void Parse_Command_Line(int argc, char* argv[],
               else if (tok1 == "time" && abbreviation(tok2, "steps", 4) )
                 {
                   specs.time_tol = specs.default_tol;
-          
+
                   string tok = extract_token( xline, " \n\t=" );  to_lower(tok);
                   if (tok != "" && tok[0] != '#')
                     {
@@ -1046,7 +1046,7 @@ void Parse_Command_Line(int argc, char* argv[],
                           if (tok == "") Parse_Die(line);
                           specs.time_tol.floor = To_Double(tok);
                         }
-            
+
                       tok2 = extract_token( xline, " \n\t=," );  to_lower(tok2);
                       if ( abbreviation(tok2, "floor", 3) )
                         {
@@ -1064,12 +1064,12 @@ void Parse_Command_Line(int argc, char* argv[],
                                           specs.glob_var_default,
                                           specs.glob_var_names,
                                           specs.glob_var);
-          
+
                   Check_Parsed_Names(*specs.glob_var_names, specs.glob_var_do_all_flag);
-          
+
                   if (!xline.empty()) strncpy(line, xline.c_str(), 255);
                   else                strcpy(line, "");
-          
+
                   continue;
                 }
               else if ( abbreviation(tok1, "nodal", 4) &&
@@ -1080,12 +1080,12 @@ void Parse_Command_Line(int argc, char* argv[],
                                           specs.node_var_default,
                                           specs.node_var_names,
                                           specs.node_var);
-          
+
                   Check_Parsed_Names(*specs.node_var_names, specs.node_var_do_all_flag);
-          
+
                   if (!xline.empty()) strncpy(line, xline.c_str(), 255);
                   else                strcpy(line, "");
-          
+
                   continue;
                 }
               else if ( abbreviation(tok1, "element", 4) &&
@@ -1096,12 +1096,12 @@ void Parse_Command_Line(int argc, char* argv[],
                                           specs.elmt_var_default,
                                           specs.elmt_var_names,
                                           specs.elmt_var);
-          
+
                   Check_Parsed_Names(*specs.elmt_var_names, specs.elmt_var_do_all_flag);
-          
+
                   if (!xline.empty()) strncpy(line, xline.c_str(), 255);
                   else                strcpy(line, "");
-          
+
                   continue;
                 }
               else if ( tok1 == "nodeset" &&
@@ -1112,12 +1112,12 @@ void Parse_Command_Line(int argc, char* argv[],
                                           specs.ns_var_default,
                                           specs.ns_var_names,
                                           specs.ns_var);
-          
+
                   Check_Parsed_Names(*specs.ns_var_names, specs.ns_var_do_all_flag);
-          
+
                   if (!xline.empty()) strncpy(line, xline.c_str(), 255);
                   else                strcpy(line, "");
-          
+
                   continue;
                 }
               else if ( abbreviation(tok1, "sideset", 4) &&
@@ -1128,12 +1128,12 @@ void Parse_Command_Line(int argc, char* argv[],
                                           specs.ss_var_default,
                                           specs.ss_var_names,
                                           specs.ss_var);
-          
+
                   Check_Parsed_Names(*specs.ss_var_names, specs.ss_var_do_all_flag);
-          
+
                   if (!xline.empty()) strncpy(line, xline.c_str(), 255);
                   else                strcpy(line, "");
-          
+
                   continue;
                 }
               else if ( abbreviation(tok1, "element", 4) &&
@@ -1144,18 +1144,18 @@ void Parse_Command_Line(int argc, char* argv[],
                                           specs.elmt_att_default,
                                           specs.elmt_att_names,
                                           specs.elmt_att);
-          
+
                   Check_Parsed_Names(*specs.elmt_att_names, specs.elmt_att_do_all_flag);
-          
+
                   if (!xline.empty()) strncpy(line, xline.c_str(), 255);
                   else                strcpy(line, "");
-          
+
                   continue;
                 }
               else
                 Parse_Die(line);
             }
-      
+
           cmd_file.getline(line, 256);  xline = line;
         }
     }  // end parse command file

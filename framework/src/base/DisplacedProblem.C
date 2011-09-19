@@ -248,7 +248,7 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
     _asm_block[tid]->prepare();
 
     reinitElem(elem, tid);
-  }  
+  }
 
   return have_points;
 }

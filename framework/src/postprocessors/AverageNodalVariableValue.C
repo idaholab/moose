@@ -47,7 +47,7 @@ AverageNodalVariableValue::getValue()
       avg += _problem.getVariable(_tid, _var_name).getNodalValue(_mesh.node(nodeset[i]));
   }
 
-  gatherSum(avg);  
+  gatherSum(avg);
 
   return avg / n;
 }

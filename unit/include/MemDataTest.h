@@ -32,7 +32,7 @@ class MemDataTest : public CppUnit::TestFixture
    * that name, taking no arguments, in the class.
    */
   CPPUNIT_TEST( test );
-  
+
   /**
    * This macro is required at the end of the list of CppUnit
    * macros.  It sets class access back to "private" as well.

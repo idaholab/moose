@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 // smart_assert.cpp
 //
 //////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ namespace {
         std::ostream * out_;
         bool owns_;
     };
-    // information about the stream we write to, in case 
+    // information about the stream we write to, in case
     // we're using the default logger
     stream_holder default_logger_info;
 
@@ -95,7 +95,7 @@ namespace smart_assert {
 
     // helpers, for dumping the assertion context
     void dump_context_summary( const assert_context & context, std::ostream & out) {
-        out << "\n" << get_typeof_level( context.get_level() ) 
+        out << "\n" << get_typeof_level( context.get_level() )
             << " in " << context.get_context_file() << ":" << context.get_context_line() << '\n';
         if ( !context.get_level_msg().empty())
             // we have a user-friendly message
@@ -106,12 +106,12 @@ namespace smart_assert {
     }
 
     void dump_context_detail( const assert_context & context, std::ostream & out) {
-        out << "\n" << get_typeof_level( context.get_level() ) 
+        out << "\n" << get_typeof_level( context.get_level() )
             << " in " << context.get_context_file() << ":" << context.get_context_line() << '\n';
         if ( !context.get_level_msg().empty())
             out << "User-friendly msg: '" << context.get_level_msg() << "'\n";
         out << "\nExpression: '" << context.get_expr() << "'\n";
-        
+
         typedef assert_context::vals_array vals_array;
         const vals_array & aVals = context.get_vals_array();
         if ( !aVals.empty() ) {
@@ -143,7 +143,7 @@ namespace smart_assert {
 
     ///////////////////////////////////////////////////////
     // handlers
-    
+
     // warn : just dump summary to console
     void default_warn_handler( const assert_context & context) {
         dump_context_summary( context, std::cout);

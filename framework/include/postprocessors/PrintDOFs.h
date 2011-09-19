@@ -27,7 +27,7 @@ class PrintDOFs : public GeneralPostprocessor
 {
 public:
   PrintDOFs(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize() {}
   virtual void execute() {}
 

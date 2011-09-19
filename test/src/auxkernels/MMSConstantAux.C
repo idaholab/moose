@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<MMSConstantAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  
+
   return params;
 }
 

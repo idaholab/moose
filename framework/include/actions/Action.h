@@ -59,10 +59,10 @@ public:
   std::string getShortName() const;
 
   //void printInputFile(const std::string * prev_name, std::ostream & out);
-  
+
   /// Helper method for adding Params pointers to be printed out in syntax dumps
   virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
-  
+
 protected:
 
   std::string _name;

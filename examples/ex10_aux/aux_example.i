@@ -13,7 +13,7 @@
 []
 
 # Here is the AuxVariables section where we declare the variables that
-# will hold the AuxKernel calcuations.  The declaration syntax is very 
+# will hold the AuxKernel calcuations.  The declaration syntax is very
 # similar to that of the regular variables section
 [AuxVariables]
   active = 'nodal_aux element_aux'
@@ -28,7 +28,7 @@
     family = MONOMIAL
   [../]
 []
-  
+
 [Kernels]
   active = 'diff'
 
@@ -39,10 +39,10 @@
 []
 
 # Here is the AuxKernels section where we enable the AuxKernels, link
-# them to our AuxVariables, set coupling parameters, and set input parameters 
+# them to our AuxVariables, set coupling parameters, and set input parameters
 [AuxKernels]
   active = 'nodal_example element_example'
-  
+
   [./nodal_example]
     type = ExampleAux
     variable = nodal_aux
@@ -87,5 +87,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

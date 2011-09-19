@@ -36,7 +36,7 @@ public:
   virtual Problem & problem() { return _problem; }
 
   InputParameters setupProblemParams(std::string name, MooseMesh * mesh);
-  
+
 protected:
   bool _shared_mesh;
   std::vector<Parser *> _slave_parser;

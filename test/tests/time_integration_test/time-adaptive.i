@@ -22,7 +22,7 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    
+
     [./InitialCondition]
       type = TEIC
     [../]
@@ -60,7 +60,7 @@
 
 [Postprocessors]
   active = ''
-  
+
   [./dt]
     type = PrintDT
   [../]
@@ -68,7 +68,7 @@
 
 [Executioner]
   type = SolutionTimeAdaptive
-  
+
   petsc_options = '-snes_mf_operator'
 
   nl_abs_tol = 1e-15
@@ -77,7 +77,7 @@
   start_time = 0.0
   end_time = 5
   num_steps = 500000
-  
+
   dt = 0.15
   dtmax = 0.1
   dtmax = 0.25

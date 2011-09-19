@@ -37,7 +37,7 @@ class ElementH1SemiError :
 {
 public:
   ElementH1SemiError(const std::string & name, InputParameters parameters);
-  
+
   virtual Real getValue();
 
 protected:

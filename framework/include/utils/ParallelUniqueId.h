@@ -61,7 +61,7 @@ public:
     }
 #endif
   }
-  
+
   static void reinitialize()
   {
 #ifdef LIBMESH_HAVE_TBB_API
@@ -70,7 +70,7 @@ public:
     initialize();
 #endif
   }
-  
+
   THREAD_ID id;
 
 protected:

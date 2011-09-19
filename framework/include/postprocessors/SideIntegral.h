@@ -33,7 +33,7 @@ class SideIntegral : public SidePostprocessor
 {
 public:
   SideIntegral(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize();
   virtual void execute();
   virtual Real getValue();
@@ -44,5 +44,5 @@ protected:
 
   Real _integral_value;
 };
- 
+
 #endif

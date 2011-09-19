@@ -32,12 +32,12 @@ class SideFluxIntegral :
 {
 public:
   SideFluxIntegral(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpIntegral();
 
   std::string _diffusivity;
   MaterialProperty<Real> & _diffusion_coef;
 };
- 
+
 #endif // SIDEFLUXINTEGRAL_H

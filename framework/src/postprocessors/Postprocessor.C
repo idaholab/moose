@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<Postprocessor>()
 {
   InputParameters params = validParams<MooseObject>();
-  
+
   params.addParam<bool>("output", true, "If the postprocessor value is outputted or not (to screen and files)");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_postprocessor");

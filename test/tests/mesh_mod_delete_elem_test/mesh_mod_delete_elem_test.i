@@ -7,9 +7,9 @@
     xmin = 0
     xmax = 1
     ymin = 0
-    ymax = 1  
+    ymax = 1
     zmin = 0
-    zmax = 0.1  
+    zmax = 0.1
     nx = 4
     ny = 4
     nz = 2

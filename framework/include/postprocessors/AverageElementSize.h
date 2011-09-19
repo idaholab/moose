@@ -42,5 +42,5 @@ public:
 protected:
   int _elems;
 };
- 
+
 #endif // AVERAGEELEMENTSIZE_H

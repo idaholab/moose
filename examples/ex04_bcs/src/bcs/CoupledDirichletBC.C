@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<CoupledDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
-  
+
   // Here we are adding a parameter that will be extracted from the input file by the Parser
   params.addParam<Real>("value", 0.0, "Value multiplied by the coupled value on the boundary");
   params.addRequiredCoupledVar("some_var", "Value on the Boundary");
@@ -27,7 +27,7 @@ InputParameters validParams<CoupledDirichletBC>()
 
 CoupledDirichletBC::CoupledDirichletBC(const std::string & name, InputParameters parameters)
   :NodalBC(name, parameters),
-   
+
    /**
     * Grab the parameter for the multiplier.
     */

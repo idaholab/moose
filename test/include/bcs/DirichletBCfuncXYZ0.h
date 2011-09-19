@@ -23,22 +23,22 @@ public:
    * constructor.
    */
   DirichletBCfuncXYZ0(const std::string & name, InputParameters parameters);
-  
+
   virtual ~DirichletBCfuncXYZ0(){}
 
 protected:
-  
+
   virtual Real computeQpResidual();
-  
+
   virtual Real computeQpJacobian();
-  
+
 private:
-  
+
  /**
   *   Parameters for the manufactured solution used.
   */
   Real _A0,_B0,_C0,_omega0;
-  
+
 };
 
 #endif //DIRICHLETBCFUNCXYZ0_H

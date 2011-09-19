@@ -22,7 +22,7 @@
 
 #include <string>
 
-class DependencyResolverTest : public CppUnit::TestFixture 
+class DependencyResolverTest : public CppUnit::TestFixture
 {
   CPPUNIT_TEST_SUITE( DependencyResolverTest );
 
@@ -30,13 +30,13 @@ class DependencyResolverTest : public CppUnit::TestFixture
   CPPUNIT_TEST( resolverSets );
 
   CPPUNIT_TEST_SUITE_END();
-  
+
 public:
   void setUp();
 
   void operatorParensTest();
   void resolverSets();
-  
+
 private:
   DependencyResolver<std::string> _resolver;
   DependencyResolver<std::string> _strict_ordering;

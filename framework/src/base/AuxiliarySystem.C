@@ -220,7 +220,7 @@ AuxiliarySystem::augmentSendList(std::vector<unsigned int> & send_list)
       // Only need to ghost it if it's actually not on this processor
       if(dof_indices[i] < dof_map.first_dof() || dof_indices[i] >= dof_map.end_dof())
         send_list.push_back(dof_indices[i]);
-  }  
+  }
 }
 
 void

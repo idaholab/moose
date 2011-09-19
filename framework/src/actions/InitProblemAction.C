@@ -31,6 +31,6 @@ InitProblemAction::InitProblemAction(const std::string & name, InputParameters p
 
 void
 InitProblemAction::act()
-{  
+{
   _problem->init();
 }

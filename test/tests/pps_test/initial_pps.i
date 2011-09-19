@@ -35,17 +35,17 @@
 
 [Functions]
   active = 'force_fn exact_fn left_bc'
-  
+
   [./force_fn]
     type = ParsedFunction
     value = '1-x*x+2*t'
   [../]
-  
+
   [./exact_fn]
     type = ParsedFunction
     value = '(1-x*x)*t'
   [../]
-  
+
   [./left_bc]
     type = ParsedFunction
     value = t
@@ -66,7 +66,7 @@
     type = Diffusion
     variable = u
   [../]
-  
+
   [./ffn_u]
     type = UserForcingFunction
     variable = u
@@ -113,20 +113,20 @@
   [./initial_u]
     type = ElementIntegral
     variable = u
-    execute_on = initial 
+    execute_on = initial
   [../]
-  
+
   [./initial_v]
     type = ElementIntegral
     variable = v
-    execute_on = initial 
+    execute_on = initial
   [../]
 []
 
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator'
-  
+
   dt = 0.1
   start_time = 0
   end_time = 0.3
@@ -141,5 +141,5 @@
   print_linear_residuals = false
   perf_log = true
 []
-   
-    
+
+

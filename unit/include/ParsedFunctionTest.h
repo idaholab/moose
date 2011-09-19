@@ -21,7 +21,7 @@
 // Forward declarations
 class MooseInit;
 
-class ParsedFunctionTest : public CppUnit::TestFixture 
+class ParsedFunctionTest : public CppUnit::TestFixture
 {
 
   CPPUNIT_TEST_SUITE( ParsedFunctionTest );
@@ -30,7 +30,7 @@ class ParsedFunctionTest : public CppUnit::TestFixture
   CPPUNIT_TEST( advancedConstructor );
   CPPUNIT_TEST( testVariables );
   CPPUNIT_TEST( testConstants );
-  
+
   CPPUNIT_TEST_SUITE_END();
 
 public:

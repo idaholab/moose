@@ -53,7 +53,7 @@ public:
 
   /**
    * Optional override.
-   * 
+   *
    * @return The dt to use for this timestep.
    */
   virtual Real computeDT();
@@ -62,7 +62,7 @@ public:
    * Whether or not the last solve converged.
    */
   virtual bool lastSolveConverged();
-  
+
   virtual void preExecute();
 
 protected:

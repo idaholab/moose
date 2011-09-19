@@ -21,7 +21,7 @@ class HTMLGen:
     self.ex = self.cr.execute
 
     # used to find moose resources, assume we are in trunk right now
-    self.trunk_dir = '.' 
+    self.trunk_dir = '.'
     # the generated html goes here
     self.base_dir = os.path.join(self.trunk_dir, 'html')
     if not os.path.exists(self.base_dir):

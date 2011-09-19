@@ -33,9 +33,9 @@ MaxIncrement::computeQpDamping()
 {
   if(std::abs(_u_increment[_qp]) > _max_increment)
     return std::abs(_max_increment / _u_increment[_qp]);
-  
+
   return 1.0;
 }
 
 
-           
+

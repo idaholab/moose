@@ -42,7 +42,7 @@ InputParameters validParams<AdaptivityAction>()
 
   params.addParam<std::vector<std::string> > ("weight_names", "List of names of variables that will be associated with weight_values");
   params.addParam<std::vector<Real> > ("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by");
-  
+
   return params;
 }
 
@@ -52,10 +52,10 @@ AdaptivityAction::AdaptivityAction(const std::string & name, InputParameters par
 }
 
 void
-AdaptivityAction::act() 
+AdaptivityAction::act()
 {
   NonlinearSystem & system = _problem->getNonlinearSystem();
-  
+
   Adaptivity & adapt = _problem->adaptivity();
 
   _parser_handle._executioner->parameters().set<unsigned int>("steps") = getParam<unsigned int>("steps");
@@ -63,7 +63,7 @@ AdaptivityAction::act()
   adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_adaptivity"));
 
   adapt.setErrorEstimator(getParam<std::string>("error_estimator"));
-  
+
   adapt.setParam("refine fraction", getParam<Real>("refine_fraction"));
   adapt.setParam("coarsen fraction", getParam<Real>("coarsen_fraction"));
   adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));

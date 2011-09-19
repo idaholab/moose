@@ -32,7 +32,7 @@ class AddExtraNodesetAction : public Action
 {
 public:
   AddExtraNodesetAction(const std::string & name, InputParameters params);
-  
+
   virtual void act();
 };
 

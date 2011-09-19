@@ -3,7 +3,7 @@
     dim = 2
     nx = 5
     ny = 5
-    
+
     xmin = 0
     xmax = 2
 

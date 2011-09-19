@@ -44,7 +44,7 @@ public:
    *  Constructor. Initializes PhysicsBasedPreconditioner data structures
    */
   PhysicsBasedPreconditioner (MProblem & mproblem);
-    
+
   /**
    * Destructor.
    */
@@ -61,7 +61,7 @@ public:
    * Usually by solving Py=x to get the action of P^-1 x.
    */
   virtual void apply(const NumericVector<Number> & x, NumericVector<Number> & y);
-  
+
   /**
    * Release all memory and clear data structures.
    */
@@ -71,7 +71,7 @@ public:
    * Initialize data structures if not done so already.
    */
   virtual void init ();
-  
+
   /**
    * Set the order the block rows are solved for.  If not set then the solve happens in the order
    * the variables were added to the NonlinearSystem.
@@ -84,7 +84,7 @@ public:
   static void copyVarValues(MeshBase & mesh,
                      const unsigned int from_system, const unsigned int from_var, const NumericVector<Number> & from_vector,
                      const unsigned int to_system, const unsigned int to_var, NumericVector<Number> & to_vector);
-  
+
 protected:
   MProblem & _mproblem;                                         ///< Subproblem this preconditioner is part of
   NonlinearSystem & _nl;                                        ///< The nonlinear system this PBP is associated with (convenience reference)

@@ -64,7 +64,7 @@ public:
   long delta();
 
 private:
-  
+
   /**
    * This function has different meanings on different platforms...
    *
@@ -83,7 +83,7 @@ private:
    * Used on both linux and Mac to store the current memory usage in kilobytes.
    */
   long _mem_in_kB_at_start, _mem_in_kB_at_stop;
-  
+
   /**
    * Used only on Mac OS, but rusage struct should be at least defined everywhere...
    */

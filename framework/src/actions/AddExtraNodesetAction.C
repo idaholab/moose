@@ -25,7 +25,7 @@ InputParameters validParams<AddExtraNodesetAction>()
 
   params.addRequiredParam<unsigned int >("id", "The nodeset number you want to use.");
   params.addRequiredParam<std::vector<unsigned int> >("nodes", "The nodes you want to be in the nodeset.");
-  
+
   return params;
 }
 

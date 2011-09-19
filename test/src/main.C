@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 {
   MooseInit init(argc, argv);
   Parser p;
-  
+
   MooseTest::registerObjects();
   // Associate Parser Syntax
   Moose::associateSyntax(p);

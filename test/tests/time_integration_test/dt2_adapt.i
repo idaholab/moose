@@ -22,7 +22,7 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    
+
     [./InitialCondition]
       type = TEIC
     [../]
@@ -60,7 +60,7 @@
 
 [Postprocessors]
   active = 'dt'
-  
+
   [./dt]
     type = PrintDT
   [../]
@@ -68,7 +68,7 @@
 
 [Executioner]
   type = DT2Transient
-  
+
   petsc_options = '-snes_mf_operator'
 
   nl_rel_tol = 1e-7
@@ -83,10 +83,10 @@
   start_time = 0.0
   end_time = 5
   num_steps = 500000
-  
+
   dt = 0.1
   dtmax = 0.25
-  
+
   e_max = 3e-1
   e_tol = 1e-1
 []

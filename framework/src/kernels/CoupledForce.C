@@ -20,7 +20,7 @@ InputParameters validParams<CoupledForce>()
   InputParameters params = validParams<Kernel>();
 
   params.addRequiredCoupledVar("v", "");
-  
+
   return params;
 }
 
@@ -47,6 +47,6 @@ Real
 CoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _v_var)
-    return -_phi[_j][_qp]*_test[_i][_qp];    
+    return -_phi[_j][_qp]*_test[_i][_qp];
   return 0.0;
 }

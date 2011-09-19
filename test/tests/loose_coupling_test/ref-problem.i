@@ -44,7 +44,7 @@
     type = TimeDerivative
     variable = v
   [../]
-  
+
   [./diff_v]
     type = Diffusion
     variable = v
@@ -79,7 +79,7 @@
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator'
-  
+
   start_time = 0
   dt = 0.1
   end_time = 1

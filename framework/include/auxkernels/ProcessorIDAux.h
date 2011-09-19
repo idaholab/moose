@@ -24,7 +24,7 @@ class ProcessorIDAux;
 template<>
 InputParameters validParams<ProcessorIDAux>();
 
-/** 
+/**
  * ProcessorID auxiliary value (can be used only as an elemental kernel)
  *
  */
@@ -39,7 +39,7 @@ public:
   ProcessorIDAux(const std::string & name, InputParameters parameters);
 
   virtual ~ProcessorIDAux() {}
-  
+
 protected:
   virtual Real computeValue();
 };

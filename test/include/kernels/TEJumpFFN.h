@@ -29,7 +29,7 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-  
+
   virtual Real computeQpJacobian();
 
   Real _t_jump;

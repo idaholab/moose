@@ -196,7 +196,7 @@ public:
   virtual void output();
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
   OutputProblem & getOutputProblem(unsigned int refinements);
-  
+
   // Restart //////
   virtual void setRestartFile(const std::string & file_name) { _restart = true; _restart_file_name = file_name; }
   virtual void restartFromFile();

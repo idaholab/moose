@@ -18,7 +18,7 @@
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-class MooseArrayTest : public CppUnit::TestFixture 
+class MooseArrayTest : public CppUnit::TestFixture
 {
   CPPUNIT_TEST_SUITE( MooseArrayTest );
 
@@ -34,7 +34,7 @@ class MooseArrayTest : public CppUnit::TestFixture
   CPPUNIT_TEST( shallowCopy );
 
   CPPUNIT_TEST_SUITE_END();
-  
+
 public:
   void setUp();
   void tearDown();

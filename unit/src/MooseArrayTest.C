@@ -112,7 +112,7 @@ MooseArrayTest::resize()
 
   ma.resize( 4, 33 );
   CPPUNIT_ASSERT( ma.size() == 4 );
-  
+
   // These tests only pass if resize() sets default_value works when resizing
   // to a value still less than _allocated_size
   //CPPUNIT_ASSERT( ma[2] == 33 );

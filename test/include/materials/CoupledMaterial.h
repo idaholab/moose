@@ -15,7 +15,7 @@ class CoupledMaterial : public Material
 {
 public:
   CoupledMaterial(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual void computeProperties();
 

@@ -20,7 +20,7 @@
 
 // This macro declares a static variable whose construction
 // causes a test suite factory to be inserted in a global registry
-// of such factories. 
+// of such factories.
 CPPUNIT_TEST_SUITE_REGISTRATION( MemDataTest );
 
 
@@ -33,7 +33,7 @@ void MemDataTest::test()
 
   // Allocate memory
   unsigned array_size = 1024*1024; // 4 bytes/int * 1M = 4M
-  int* dummy_memory = new int[array_size]; 
+  int* dummy_memory = new int[array_size];
 
   // Just calling "new" alone does not register any change in the
   // operating system...you actually have to touch all the memory

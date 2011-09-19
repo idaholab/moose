@@ -119,7 +119,7 @@ class CSVDiffer:
   # every error is added through here, so it could also output in xml, etc.
   def addError(self, fname, message):
     self.msg += 'In ' + fname + ': ' + message + '\n'
-    
+
 
 # testing the test harness!
 if __name__ == '__main__':
@@ -151,7 +151,7 @@ if __name__ == '__main__':
   d.addCSVPair('out3.csv', 'col1,col2\n1,2\n1,2\n0,0', 'col1,col2\n1,2\n1,2\n1e-4,1e-13')
   print 'Should be 2 errors'
   print d.diff()
-  
+
   # Test relative tolerance
   d = CSVDiffer(None, [])
   d.addCSVPair('out1.csv', 'col1,col2\n1,2\n1,2', 'col1,col2\n1,2\n1,2.1')

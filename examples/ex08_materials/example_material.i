@@ -21,7 +21,7 @@
   active = 'example_diff conv diff'
 
   [./example_diff]
-    # This Kernel uses "diffusivity" from the active material 
+    # This Kernel uses "diffusivity" from the active material
     type = ExampleDiffusion
     variable = convected
   [../]
@@ -94,5 +94,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

@@ -24,7 +24,7 @@ def main():
   hexs = cubit.get_hex_count()
   for i in xrange(1, hexs+1):
     cubit.cmd('block ' + str(i) + ' hex ' + str(i))
-#      
+#
   cubit.cmd('export genesis "large_sub_cube.e" dimension 3 overwrite')
 
 # When running this command on the command line __name__ will equal __main__

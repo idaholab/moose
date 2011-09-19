@@ -55,7 +55,7 @@
   type = Transient
   dt = 1
   petsc_options = '-snes_mf_operator'
-  
+
   # Adaptivity is on
   [./Adaptivity]
   [../]
@@ -69,5 +69,5 @@
   print_linear_residuals = true
   perf_log = true
 []
-   
-    
+
+

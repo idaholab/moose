@@ -35,11 +35,11 @@ Real
 SinNeumannBC::computeQpResidual()
 {
   Real value;
-  
+
   if(_t < _duration)
     value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
   else
-    value = _final;  
+    value = _final;
 
   return -_test[_i][_qp]*value;
 }

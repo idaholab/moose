@@ -5,7 +5,7 @@
 
 [Functions]
   active = 'tr_x tr_y'
-  
+
   [./tr_x]
     type = ParsedFunction
     value = -x

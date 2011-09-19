@@ -37,7 +37,7 @@ DiracKernelData::init()
 {
 //  _arbitrary_qrule = new ArbitraryQuadrature(_moose_system.getDim(), _moose_system._max_quadrature_order);
 //  _qrule = _arbitrary_qrule;
-  
+
 //  QuadraturePointData::init();
 }
 

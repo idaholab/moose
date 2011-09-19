@@ -18,7 +18,7 @@ MMSConvection::MMSConvection(const std::string & name, InputParameters parameter
 {
   velocity(0)=_x;
   velocity(1)=_y;
-  velocity(2)=_z;  
+  velocity(2)=_z;
 }
 
 Real MMSConvection::computeQpResidual()

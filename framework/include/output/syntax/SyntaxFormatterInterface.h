@@ -29,7 +29,7 @@ public:
   virtual void preamble() {}
   virtual void print(const std::string & name, const std::string * prev_name, std::vector<InputParameters *> & param_ptrs) = 0;
   virtual void postscript() {}
-  
+
 protected:
   std::ostream & _out;
   bool _dump_mode;               ///< Indicates whether this is a full dump or input file based

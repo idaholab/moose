@@ -49,7 +49,7 @@ public:
   void checkUnsatisfiedActions() const;
 
   void printActionDependencySets();
-  
+
   ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
   ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
 
@@ -64,7 +64,7 @@ public:
    * passed in
    */
   void executeActionsWithAction(const std::string & name);
-  
+
   /**
    * Iterator class for returning the Actions stored in this warehouse in order.
    * This class is necessary to support the Meta-action capability supported by the
@@ -78,8 +78,8 @@ public:
     bool operator==(const iterator &rhs) const;
     bool operator!=(const iterator &rhs) const;
     iterator & operator++();
-    Action * operator*();  
-    
+    Action * operator*();
+
   private:
     ActionWarehouse & _act_wh;
     bool _first;
@@ -98,7 +98,7 @@ public:
 
 private:
   void buildBuildableActions(const std::string &action_name);
-  
+
   /// The list of registered actions and a flag indicating whether or not they are required
   std::map<std::string, bool> _registered_actions;
 
@@ -110,7 +110,7 @@ private:
 
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
-  
+
   /// Use to store the current list of unsatisfied dependencies
   std::set<std::string> _unsatisfied_dependencies;
 

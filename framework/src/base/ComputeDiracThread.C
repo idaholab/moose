@@ -34,7 +34,7 @@ ComputeDiracThread::ComputeDiracThread(Problem & problem,
     _jacobian(jacobian),
     _sys(system)
 {}
- 
+
 // Splitting Constructor
 ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split split) :
     ThreadedElementLoop<DistElemRange>(x, split),
@@ -63,7 +63,7 @@ ComputeDiracThread::onElement(const Elem * elem)
         ++dirac_kernel_it)
     {
       DiracKernel * dirac = *dirac_kernel_it;
-    
+
       if(dirac->hasPointsOnElem(elem))
       {
         if(_residual)

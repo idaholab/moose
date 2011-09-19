@@ -85,5 +85,5 @@ protected:
 
   VariableSecond & _second_u;                           ///< Holds the current solution second derivative at the current quadrature point
 };
- 
+
 #endif

@@ -55,9 +55,9 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
 
   EquationSystems & es = _subproblem.es();
   es.parameters.set<bool>("adaptivity") = true;
-  
+
   // TODO: Should steps be stored in the equation systems object?
-  es.parameters.set<unsigned int>("steps") = steps;  
+  es.parameters.set<unsigned int>("steps") = steps;
   _initial_steps = initial_steps;
   _mesh_refinement_on = true;
 
@@ -71,7 +71,7 @@ Adaptivity::getSteps() const
 {
   EquationSystems & es = _subproblem.es();
   return es.parameters.have_parameter<unsigned int>("steps") ? es.parameters.get<unsigned int>("steps") : 0;
-}    
+}
 
 void
 Adaptivity::setErrorEstimator(const std::string &error_estimator_name)

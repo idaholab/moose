@@ -39,7 +39,7 @@
     variable = u_aux
   [../]
 []
-    
+
 [Kernels]
   active = 'diff'
 
@@ -80,5 +80,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

@@ -81,7 +81,7 @@ EnhancedDGMatDiffusion::computeQpResidual(Moose::DGResidualType type)
       r += - _omega_neighbor * _diff_neighbor[_qp] * _grad_u_neighbor[_qp] * _normals[_qp] * _test[_i][_qp] - _omega * _epsilon * _diff[_qp] * _grad_test[_i][_qp] * _normals[_qp] * _u_neighbor[_qp];
       r += - _sigma / h_elem * _u_neighbor[_qp] * _test[_i][_qp];
       break;
-      
+
     case Moose::Neighbor:
       r += _omega_neighbor * _diff_neighbor[_qp] * _grad_u_neighbor[_qp] * _normals[_qp] * _test_neighbor[_i][_qp] - _omega_neighbor * _epsilon * _diff_neighbor[_qp] * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _u_neighbor[_qp];
       r += _sigma / h_elem * _u_neighbor[_qp] * _test_neighbor[_i][_qp];
@@ -110,10 +110,10 @@ EnhancedDGMatDiffusion::computeQpResidual(Moose::DGResidualType type)
         }
       }
     }
-    
-    
-    
-    
+
+
+
+
     if (_velocity*_normals[_qp] >= 0)
     {
       switch (type)
@@ -189,17 +189,17 @@ EnhancedDGMatDiffusion::computeQpJacobian(Moose::DGJacobianType type)
       r += - _omega * _diff[_qp] * _grad_test[_j][_qp] * _normals[_qp] *_test[_i][_qp] + _omega * _epsilon * _diff[_qp] * _grad_test[_i][_qp] * _normals[_qp] * _test[_j][_qp];
       r += _sigma / h_elem * _test[_j][_qp] * _test[_i][_qp];
       break;
-      
+
     case Moose::ElementNeighbor:
       r += - _omega_neighbor * _diff_neighbor[_qp] * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp] - _omega * _epsilon * _diff[_qp] * _grad_test[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp];
       r += - _sigma / h_elem * _test_neighbor[_j][_qp] * _test[_i][_qp];
       break;
-      
+
     case Moose::NeighborElement:
       r += _omega * _diff[_qp] * _grad_test[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp] + _omega_neighbor * _epsilon * _diff_neighbor[_qp] * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test[_j][_qp];
       r += - _sigma / h_elem * _test[_j][_qp] * _test_neighbor[_i][_qp];
       break;
-      
+
     case Moose::NeighborNeighbor:
       r += _omega_neighbor * _diff_neighbor[_qp] * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp] - _omega_neighbor * _epsilon * _diff_neighbor[_qp] * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp];
       r += _sigma / h_elem * _test_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
@@ -225,8 +225,8 @@ EnhancedDGMatDiffusion::computeQpJacobian(Moose::DGJacobianType type)
         }
       }
     }
-    
-    
+
+
     if (_velocity*_normals[_qp] >= 0)
     {
       switch (type)
@@ -241,7 +241,7 @@ EnhancedDGMatDiffusion::computeQpJacobian(Moose::DGJacobianType type)
       case Moose::ElementNeighbor:
         r += - _sigma / h_elem * _diff[_qp] * _test_neighbor[_j][_qp] * _test[_i][_qp];
         r += (1.0 - _theta) * (- _epsilon * _diff[_qp] * _grad_test[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp]);
-        
+
         r += _theta * (- _omega_neighbor * _diff_neighbor[_qp] * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp] - _epsilon * _omega * _diff[_qp] * _grad_test[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp]);
         break;
 
@@ -254,7 +254,7 @@ EnhancedDGMatDiffusion::computeQpJacobian(Moose::DGJacobianType type)
 
       case Moose::NeighborNeighbor:
         r += _sigma / h_elem * _diff[_qp] *  _test_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
-        
+
         r += _theta * (_omega_neighbor * _diff_neighbor[_qp] * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp] - _epsilon * _omega_neighbor * _diff_neighbor[_qp] * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp]);
         break;
       }
@@ -272,7 +272,7 @@ EnhancedDGMatDiffusion::computeQpJacobian(Moose::DGJacobianType type)
       case Moose::ElementNeighbor:
         r += - _sigma / h_elem * _diff_neighbor[_qp] * _test_neighbor[_j][_qp] * _test[_i][_qp];
         r += (1.0 - _theta) * (- _diff_neighbor[_qp] * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp]);
-        
+
         r += _theta * (- _omega_neighbor * _diff_neighbor[_qp] * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp] - _epsilon * _omega * _diff[_qp] * _grad_test[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp]);
         break;
 
@@ -286,7 +286,7 @@ EnhancedDGMatDiffusion::computeQpJacobian(Moose::DGJacobianType type)
       case Moose::NeighborNeighbor:
         r += _sigma / h_elem * _diff_neighbor[_qp] * _test_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
         r += (1.0 - _theta) * (_diff_neighbor[_qp] * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp] - _epsilon * _diff_neighbor[_qp] * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp]);
-        
+
         r += _theta * (_omega_neighbor * _diff_neighbor[_qp] * _grad_test_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp] - _epsilon * _omega_neighbor * _diff_neighbor[_qp] * _grad_test_neighbor[_i][_qp] * _normals[_qp] * _test_neighbor[_j][_qp]);
         break;
       }

@@ -21,7 +21,7 @@ class ExcelWriter:
     else:
       self.curr_ws = self.wb.add_sheet(sheet_name)
       self.sheets.append(sheet_name)
-      row, col = (0, 0)        
+      row, col = (0, 0)
     self.writeData(row, col, struct)
 
 

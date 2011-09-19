@@ -256,7 +256,7 @@ MooseVariable::computeElemValues()
 
   bool is_transient = _problem.isTransient();
   unsigned int nqp = _qrule->n_points();
-  
+
   _u.resize(nqp);
   _grad_u.resize(nqp);
   if (_has_second_derivatives)
@@ -347,12 +347,12 @@ MooseVariable::computeElemValues()
         du_dot_du_local    = du_dot_du(idx);
       }
     }
-    
+
     for (unsigned int qp=0; qp < nqp; qp++)
     {
       phi_local = _phi[i][qp];
       dphi_qp = &_grad_phi[i][qp](0);
-      
+
       grad_u_qp = &_grad_u[qp](0);
 
       if(is_transient)
@@ -368,7 +368,7 @@ MooseVariable::computeElemValues()
 
       for(unsigned int j=0; j < LIBMESH_DIM; ++j)
         grad_u_qp[j] += dphi_qp[j] * soln_local;
-      
+
       if (_has_second_derivatives)
         _second_u[qp] += d2phi_local * soln_local;
 

@@ -18,20 +18,20 @@
 [Variables]
   active = 'u'
 
-  [./u] 
+  [./u]
     order = FIRST
     family = MONOMIAL
 
     [./InitialCondition]
       type = ConstantIC
-      value = 1 
+      value = 1
     [../]
   [../]
 []
 
 [Functions]
   active = 'forcing_fn exact_fn'
-  
+
   [./forcing_fn]
     type = ParsedFunction
 #    function = -4.0+(x*x)+(y*y)
@@ -40,13 +40,13 @@
     value = 2*pow(e,-x-(y*y))*(1-2*y*y)
 #    function = (x*x*x)-6.0*x
   [../]
-  
+
   [./exact_fn]
     type = ParsedGradFunction
 #    function = x
 #    grad_x = 1
 #    grad_y = 0
-    
+
 #    function = (x*x)+(y*y)
 #    grad_x = 2*x
 #    grad_y = 2*y
@@ -72,12 +72,12 @@
     type = Diffusion
     variable = u
   [../]
-  
+
   [./abs]					# u * v
     type = Reaction
     variable = u
   [../]
-  
+
   [./forcing]
     type = UserForcingFunction
     variable = u
@@ -87,7 +87,7 @@
 
 [DGKernels]
   active = 'dg_diff'
-  
+
   [./dg_diff]
   	type = DGDiffusion
   	variable = u
@@ -125,7 +125,7 @@
 #  petsc_options = '-snes_mf'
 #  petsc_options_iname = '-pc_type -pc_hypre_type'
 #  petsc_options_value = 'hypre    boomeramg'
-  
+
 #  petsc_options = '-snes_mf'
 #  max_r_steps = 2
   [./Adaptivity]
@@ -136,7 +136,7 @@
   [../]
 
   nl_rel_tol = 1e-10
-  
+
 #  nl_rel_tol = 1e-12
 []
 
@@ -147,17 +147,17 @@
     type = AverageElementSize
     variable = u
   [../]
-  
+
   [./dofs]
     type = PrintDOFs
     variable = u
   [../]
-  
+
   [./l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]  
+  [../]
 []
 
 [Output]

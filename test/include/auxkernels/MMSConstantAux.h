@@ -25,11 +25,11 @@ InputParameters validParams<MMSConstantAux>();
 class MMSConstantAux : public AuxKernel
 {
 public:
-  
+
  MMSConstantAux(const std::string & name, InputParameters parameters);
 
   virtual ~MMSConstantAux() {}
-  
+
 protected:
   virtual Real computeValue();
 };

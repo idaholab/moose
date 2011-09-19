@@ -20,7 +20,7 @@ def fixupHeader():
       suffix = os.path.splitext(file)
       if suffix[-1] == '.py' and dirpath.find(r"tests/") != -1:
         checkAndUpdate(dirpath + '/' + file)
-         
+
 
 def checkAndUpdate(filename):
   found_try = False
@@ -41,7 +41,7 @@ def checkAndUpdate(filename):
         if match == None:
           match = re.match("^\s+", line)
           strip_len = len(match.group(0))
-          not_found = False  
+          not_found = False
 
     if found_try and line.find("except:") == -1 and line.find("pass") == -1:
       if len(line) > strip_len:

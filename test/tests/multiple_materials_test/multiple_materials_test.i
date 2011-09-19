@@ -1,4 +1,4 @@
-[Mesh]   
+[Mesh]
   [./Generation]
     dim = 2
     nx = 3
@@ -17,7 +17,7 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  
+
   [./v]
     order = FIRST
     family = LAGRANGE
@@ -45,7 +45,7 @@ active = 'diff1 diff2'
     variable = u
     mat_prop = diff1
   [../]
-  
+
   [./diff2]
     type = DiffMKernel
     variable = v

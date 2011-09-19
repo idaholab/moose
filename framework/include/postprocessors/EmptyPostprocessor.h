@@ -27,14 +27,14 @@ class EmptyPostprocessor : public GeneralPostprocessor
 {
 public:
   EmptyPostprocessor(const std::string & name, InputParameters parameters);
-  
+
   virtual ~EmptyPostprocessor(){ }
-  
+
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
   virtual void initialize(){};
-  
+
   /**
    * This function will get called on each geometric object this EmptyPostprocessor acts on
    * (ie Elements, Sides or Nodes).  This will most likely get called multiple times
@@ -49,5 +49,5 @@ public:
    */
   virtual Real getValue() { return 0; }
 };
- 
+
 #endif

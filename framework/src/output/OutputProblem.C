@@ -42,11 +42,11 @@ OutputProblem::OutputProblem(const std::string & name, InputParameters parameter
   mesh_refinement.uniformly_refine(parameters.get<unsigned int>("refinements"));
 
   EquationSystems & source_es = _mproblem.es();
-  
+
   unsigned int num_systems = source_es.n_systems();
 
   _mesh_functions.resize(num_systems);
-  
+
   for(unsigned int sys_num=0; sys_num<num_systems; sys_num++)
   {
     System & source_sys = source_es.get_system(sys_num);
@@ -72,7 +72,7 @@ OutputProblem::OutputProblem(const std::string & name, InputParameters parameter
       {
         // Create a variable in the dest_sys to match... but of LINEAR LAGRANGE type
         dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
-        
+
         _mesh_functions[sys_num][var_num] = new MeshFunction(source_es,
                                                              *_serialized_solution,
                                                              source_sys.get_dof_map(),
@@ -82,7 +82,7 @@ OutputProblem::OutputProblem(const std::string & name, InputParameters parameter
     }
   }
   _eq.init();
-  
+
 }
 
 OutputProblem::~OutputProblem()
@@ -90,7 +90,7 @@ OutputProblem::~OutputProblem()
   for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
     for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
       delete _mesh_functions[sys_num][var_num];
-  
+
   delete _serialized_solution;
 }
 
@@ -98,21 +98,21 @@ void
 OutputProblem::init()
 {
   EquationSystems & source_es = _mproblem.es();
-  
+
   for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
   {
     if (_mesh_functions[sys_num].size())
     {
       System & source_sys = source_es.get_system(sys_num);
       System & dest_sys = _eq.get_system(sys_num);
-      
+
       _serialized_solution->clear();
       _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
       source_sys.solution->localize(*_serialized_solution);
-      
+
       for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
       {
-        
+
         delete _mesh_functions[sys_num][var_num];
         // TODO: Why do we need to recreate these MeshFunctions each time?
         _mesh_functions[sys_num][var_num] = new MeshFunction(source_es,
@@ -121,11 +121,11 @@ OutputProblem::init()
                                                              var_num);
         _mesh_functions[sys_num][var_num]->init();
       }
-    
-    
+
+
       MeshBase::const_node_iterator nd     = _mesh.local_nodes_begin();
       MeshBase::const_node_iterator nd_end = _mesh.local_nodes_end();
-    
+
       // Now loop over the nodes of the 'To' mesh setting values for each variable.
       for(;nd != nd_end; ++nd)
         for(unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)

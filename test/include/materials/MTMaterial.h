@@ -18,10 +18,10 @@ class MTMaterial : public Material
 {
 public:
   MTMaterial(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual void computeQpProperties();
-  
+
   MaterialProperty<Real> & _mat_prop;
   Real _value;
 };

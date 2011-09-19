@@ -7,7 +7,7 @@
   active = 'diffused'
 
   [./diffused]
-    # Note that we do not have the 'active' parameter here.  Since it 
+    # Note that we do not have the 'active' parameter here.  Since it
     # is missing we will automatically pickup all nested blocks
     order = FIRST
     family = LAGRANGE
@@ -56,11 +56,11 @@
 [Output]
   # Request that we output the initial condition so we can inspect
   # the values with our visualization tool
-  output_initial = true  
+  output_initial = true
   file_base = out
   interval = 1
   exodus = true
   perf_log = true
 []
-   
-    
+
+

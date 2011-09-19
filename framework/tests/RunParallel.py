@@ -42,10 +42,10 @@ class RunParallel:
 
     # Wait for a job to finish if the jobs queue is full
     # Note: This needs to be a while statement, not an if statement.
-    #   "spinwait" calls "returnToTestHarness" which calls "startReadyJobs" which 
+    #   "spinwait" calls "returnToTestHarness" which calls "startReadyJobs" which
     #   again calls "run" (this function).  That last call may start a previously queued
     #   job which will preempt the open slot in the jobs array.  Upon unwinding the stack
-    #   another check of the jobs array is needed before launching the current test   
+    #   another check of the jobs array is needed before launching the current test
     while self.jobs.count(None) == 0:
       self.spinwait()
 
@@ -105,7 +105,7 @@ class RunParallel:
     for tuple in self.jobs:
       if tuple != None:
         (p, command, test, time, f) = tuple
-        if p.poll() != None or now > time:  
+        if p.poll() != None or now > time:
           self.returnToTestHarness(job_index)
           break
       job_index += 1

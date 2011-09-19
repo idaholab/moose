@@ -113,7 +113,7 @@ public:
 
   registeredProblemsIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
   registeredProblemsIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
-  
+
 protected:
   std::map<std::string, buildProbPtr>  _name_to_build_pointer;
   std::map<std::string, paramsPtr> _name_to_params_pointer;
@@ -123,7 +123,7 @@ protected:
 private:
   // Private constructor for singleton pattern
   ProblemFactory() {}
-  
+
 };
 
 #endif /* PROBLEMFACTORY_H */

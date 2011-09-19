@@ -30,7 +30,7 @@ void associateSyntax(Parser & p)
   p.registerActionSyntax("SetupMeshAction", "Mesh");
   p.registerActionSyntax("InitialRefinementAction", "Mesh");
   p.registerActionSyntax("AddExtraNodesetAction", "Mesh/ExtraNodesets/*");
-  
+
   p.registerActionSyntax("AddFunctionAction", "Functions/*");
   p.registerActionSyntax("CreateExecutionerAction", "Executioner");
   p.registerActionSyntax("SetupOutputAction", "Output");
@@ -46,16 +46,16 @@ void associateSyntax(Parser & p)
   p.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   p.registerActionSyntax("AddVariableAction", "AuxVariables/*", "add_aux_variable");
   p.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
-  
+
   p.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
   p.registerActionSyntax("AddICAction", "AuxVariables/*/InitialCondition");
-  
+
   p.registerActionSyntax("AddKernelAction", "Kernels/*", "add_kernel");
   p.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
-  
+
   p.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
   p.registerActionSyntax("AddBCAction", "AuxBCs/*", "add_aux_bc");
-  
+
   p.registerActionSyntax("EmptyAction", "BCs/Periodic");  // placeholder
   p.registerActionSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
   p.registerActionSyntax("AddMaterialAction", "Materials/*");
@@ -76,10 +76,10 @@ void associateSyntax(Parser & p)
 #ifdef LIBMESH_ENABLE_AMR
   p.registerActionSyntax("AdaptivityAction", "Executioner/Adaptivity");
 #endif
-  
+
   p.registerActionSyntax("AddDiracKernelAction", "DiracKernels/*");
   p.registerActionSyntax("AddDGKernelAction", "DGKernels/*");
 }
 
-  
+
 } // namespace

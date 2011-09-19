@@ -4,7 +4,7 @@
     nx = 50
     ny = 50
     nz = 0
-    
+
     xmax = 40
     ymax = 40
     zmax = 0

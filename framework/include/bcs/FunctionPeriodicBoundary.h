@@ -33,7 +33,7 @@ public:
    * Initialize the periodic boundary with three function
    */
   FunctionPeriodicBoundary(SubProblem & subproblem, std::vector<std::string> fn_names);
-  
+
   /**
    * Copy constructor for creating the periodic boundary and inverse periodic boundary
    *

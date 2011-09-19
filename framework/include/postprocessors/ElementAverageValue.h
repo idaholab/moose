@@ -42,5 +42,5 @@ public:
 protected:
   Real _volume;
 };
- 
+
 #endif

@@ -33,6 +33,6 @@ GlobalParamsAction::GlobalParamsAction(const std::string & name, InputParameters
 }
 
 void
-GlobalParamsAction::act() 
+GlobalParamsAction::act()
 {
 }

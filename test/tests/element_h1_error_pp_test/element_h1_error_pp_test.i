@@ -3,7 +3,7 @@
     dim = 2
     nx = 10
     ny = 10
-    
+
     xmin = 0
     xmax = 2
 
@@ -23,7 +23,7 @@
 
 [Functions]
   active = 'forcing_func u_func'
-  
+
   [./forcing_func]
     type = ParsedFunction
     #value = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))

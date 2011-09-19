@@ -29,7 +29,7 @@ class BodyForce : public Kernel
 public:
 
   BodyForce(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
 
@@ -37,5 +37,5 @@ protected:
   const bool _has_function;
   Function * const _function;
 };
- 
+
 #endif

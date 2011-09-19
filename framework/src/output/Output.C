@@ -49,7 +49,7 @@ Output::add(Output::Type type)
   case EXODUS:
     o = new ExodusOutput(_problem.es());
     break;
-    
+
   case NEMESIS:
     o = new NemesisOutput(_problem.es());
     break;
@@ -75,7 +75,7 @@ Output::add(Output::Type type)
   }
 
   _outputter_types.insert(type);
-  
+
   o->setOutputVariables(_output_variables);
 
   _outputters.push_back(o);

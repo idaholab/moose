@@ -18,10 +18,10 @@ class PerfLogParser:
       if m:
         for l in m.group(0).splitlines():
           v = l.strip().split('=', 2)
-          if len(v) == 1: 
+          if len(v) == 1:
             v.append('')
           self.general_info[v[0]] = v[1]
-      
+
 
   def getStartColumns(self, line):
     # Avoid any traps with whitespace by parsing from the performance data (digits and decimals)
@@ -53,8 +53,8 @@ class PerfLogParser:
 
       # Split the tables further on the rows of hyphens
       sections = re.split(r'\|?-+\|?', table.group(0))
-    
-      # Start with the second to last section since this will contain the routine runtimes and 
+
+      # Start with the second to last section since this will contain the routine runtimes and
       # a list of start columns can be determined then parse the last section next
       curr_subtitle = ''
       headers = []
@@ -67,17 +67,17 @@ class PerfLogParser:
           if re.match(r'^\s*$', l): continue
 
           # see if this is a subtitle line
-          m = re.match(r'^ (\S+)(.*)', l) 
+          m = re.match(r'^ (\S+)(.*)', l)
           if m:
             curr_subtitle = m.group(1)
             curr_handle = self.struct[section]['data'][curr_subtitle] = {}
             if (m.group(2).strip() == ''):
               continue # skip lines that have no more data to parse
-            
+
           data = []
           if not self.start_columns:
             self.getStartColumns(l)
-          
+
           # parse data by columns not by tokenizing!
           for i in range(1, len(self.start_columns)):
             data.append(l[self.start_columns[i-1]:self.start_columns[i]].strip())
@@ -85,7 +85,7 @@ class PerfLogParser:
           key = data.pop(0)
           if not key:
             key = curr_subtitle
-    
+
           # Glue the column data into our data structure but see if there is already
           # data in the structure under this key in case the data spans rows
           inserted = 0

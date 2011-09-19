@@ -34,20 +34,20 @@ InputParameters validParams<SetupOverSamplingAction>()
   params.addParam<std::string>("file_base", "The desired oversampled solution output name without an extension.  If not supplied, the main file_base will be used with a '_oversample' suffix added.");
 
   params.addParam<unsigned int>("refinements", 1, "The number of refinements to output for the over sampled solution");
-  
+
   params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)");
   params.addParam<bool>("nemesis", false, "Specifies that you would like Nemesis output solution file(s)");
   params.addParam<bool>("gmv", false, "Specifies that you would like GMV output solution file(s)");
   params.addParam<bool>("tecplot", false, "Specifies that you would like Tecplot output solution files(s)");
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
-  
+
   params.addParam<std::vector<std::string> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
 
   params.addParam<int>("interval", 1, "The iterval at which timesteps are output to the solution file");
   params.addParam<Real>("iteration_plot_start_time", std::numeric_limits<Real>::max(), "Specifies a time after which the solution will be written following each nonlinear iteration");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
-  
+
   return params;
 }
 
@@ -78,7 +78,7 @@ SetupOverSamplingAction::act()
   // If no filebase was supplied in the parameters object - borrow the main problem's filebase
   if (!_pars.isParamValid("file_base"))
     _pars.set<std::string>("file_base") = problem->out().fileBase() + "_oversample";
-  
+
   setupOutputObject(output, _pars);
 
   out_problem.outputInitial(getParam<bool>("output_initial"));

@@ -36,10 +36,10 @@ public:
    * constructor.
    */
   SinNeumannBC(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
-  
+
 private:
   Real _initial;
   Real _final;

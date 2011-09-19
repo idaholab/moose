@@ -45,7 +45,7 @@ public:
 
   // Retrieve the Syntax associated with the passed Action and action_name
   std::string getSyntaxByAction(const std::string & action, const std::string & action_name);
-  
+
   /**
    * Determines whether a particular block is marked as active
    * in the input file
@@ -60,7 +60,7 @@ public:
    * of MooseInit
    */
   std::string parseCommandLine();
-  
+
   /**
    * Parse an input file consisting of getpot syntax and setup objects
    * in the MOOSE derived application
@@ -89,13 +89,13 @@ public:
                        std::vector<std::string> & elements,
                        unsigned int min_len = 1,
                        const std::string &delims = "/");
-  
+
   /**
    * Standard scripting languague trim function
    */
   static std::string trim(std::string str,
                           const std::string &white_space = " \t\n\v\f\r");
-  
+
   /**
    * This function tokenizes a path and checks to see if it contains the string to look for
    */
@@ -104,9 +104,9 @@ public:
                            const std::string &delims = "/");
 
   static void checkFileReadable(const std::string & filename, bool check_line_endings = false);
-  
+
   static void checkFileWritable(const std::string & filename);
-  
+
   /**
    * Return a reference to the getpot object to extract options from the input file
    */
@@ -160,9 +160,9 @@ private:
    * Searches the command line for the given option name (multiple syntaxes supported)
    */
   bool searchCommandLine(const std::string &option_name);
-  
+
   /**
-   * Use MOOSE Factories to construct a full parse tree for documentation or echoing input. 
+   * Use MOOSE Factories to construct a full parse tree for documentation or echoing input.
    */
   void buildFullTree();
 
@@ -170,7 +170,7 @@ private:
    * Method for determining whether a piece of syntax is associated with an Action
    */
   std::string isAssociated(const std::string & real_id, bool * is_parent);
-  
+
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are colled only from this Object
@@ -181,14 +181,14 @@ private:
    * that the name should be fully qualified (i.e. BCs/left/value=10)
    */
   void buildCommandLineVarsVector();
-  
+
   template<typename T>
   void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
-  
-  
+
+
   template<typename T>
   void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
-  
+
 
   template<typename T>
   void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block);
@@ -208,9 +208,9 @@ private:
     std::string _action;
     std::string _action_name;
   };
-  
+
   SyntaxFormatterInterface * _syntax_formatter;
-  
+
   std::map<std::string, CLIOption> _cli_options;
 
   // Contains all of the sections that are not active during the parse phase so that blocks
@@ -227,16 +227,16 @@ private:
 
 public:
   /// Functor for sorting input file syntax in MOOSE desired order
-  class InputFileSort 
-  {  
-  public: 
-    InputFileSort(); 
-    bool operator() (Action *a, Action *b) const; 
+  class InputFileSort
+  {
+  public:
+    InputFileSort();
+    bool operator() (Action *a, Action *b) const;
     bool operator() (const std::pair<std::string, ActionInfo> &a, const std::pair<std::string, ActionInfo> &b) const;
-    
+
   private:
     int sorter(const std::string &a, const std::string &b) const;
-    std::vector<std::string> _o; 
+    std::vector<std::string> _o;
   };
 };
 

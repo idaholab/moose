@@ -37,7 +37,7 @@ void
 KernelGrad::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","KernelGrad");
-  
+
   DenseVector<Number> & re = _asmb.residualBlock(_var.number());
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -46,7 +46,7 @@ KernelGrad::computeResidual()
     for (_i=0; _i<_test.size(); _i++)
       re(_i) += _JxW[_qp]*_value*_grad_test[_i][_qp];
   }
-  
+
 //  Moose::perf_log.pop("computeResidual()","KernelGrad");
 }
 
@@ -66,7 +66,7 @@ KernelGrad::computeJacobian()
         ke(_i,_j) += _JxW[_qp]*_value*_grad_test[_i][_qp];
     }
   }
-  
+
 //  Moose::perf_log.pop("computeJacobian()",_name);
 }
 

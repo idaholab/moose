@@ -25,9 +25,9 @@ public:
   virtual void preamble();
   virtual void print(const std::string & name, const std::string * /*prev_name*/, std::vector<InputParameters *> & param_ptrs);
   virtual void postscript();
-  
+
 protected:
-  
+
   /// Helper method for printing the parts of the YAML Syntax
   void printCloseAndOpen(const std::string & name, const std::string * prev_name) const;
 

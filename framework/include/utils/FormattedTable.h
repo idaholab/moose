@@ -39,7 +39,7 @@ public:
    * Returns a boolean value based on whether the FormattedTable contains data or not
    */
   bool empty() const;
-  
+
   /**
    * Method for adding data to the output table.  The dependant variable is named "time"
    */
@@ -67,11 +67,11 @@ public:
   void printEnsight(const std::string & file_name);
   void writeExodus(ExodusII_IO * ex_out, Real time);
   void makeGnuplot(const std::string & base_file, const std::string & format);
-  
+
 protected:
-  
+
   void printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const;
-  
+
   /**
    * Data structure for the console table
    * The first map creates an association from the independent variable (normally time)
@@ -101,5 +101,5 @@ protected:
   Real _last_key;
 };
 
-  
+
 #endif //FORMATTEDTABLE_H

@@ -49,7 +49,7 @@ protected:
   std::string _es_file;
   std::string _system_name;
   std::string _var_name;
-  
+
   Mesh * _mesh;
   EquationSystems * _es;
   System * _system;

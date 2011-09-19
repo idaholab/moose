@@ -59,14 +59,14 @@
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
-    function = exact_fn 
+    function = exact_fn
   [../]
 []
 
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator'
-  
+
   dt = 0.2
   start_time = 0
   num_steps = 5

@@ -125,7 +125,7 @@ InputParameters::getDocString(const std::string &name) const
         doc_string += " ... ";
       else
         doc_string += *it;
-  
+
   return doc_string;
 }
 
@@ -141,11 +141,11 @@ InputParameters::isParamValid(const std::string &name) const
   return _valid_params.find(name) != _valid_params.end();
 }
 
-bool 
-InputParameters::wasSeenInInput(const std::string &name) const 
-{ 
-  return _seen_in_input.find(name) != _seen_in_input.end(); 
-} 
+bool
+InputParameters::wasSeenInInput(const std::string &name) const
+{
+  return _seen_in_input.find(name) != _seen_in_input.end();
+}
 
 bool
 InputParameters::areAllRequiredParamsValid() const

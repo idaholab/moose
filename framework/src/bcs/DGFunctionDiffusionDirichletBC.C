@@ -25,7 +25,7 @@ InputParameters validParams<DGFunctionDiffusionDirichletBC>()
   params.addRequiredParam<std::string>("function", "The forcing function.");
   params.addRequiredParam<Real>("epsilon", "Epsilon");
   params.addRequiredParam<Real>("sigma", "Sigma");
-  
+
   return params;
 }
 

@@ -1,11 +1,11 @@
 [Mesh]
   [./Generation]
-    dim = 2	
+    dim = 2
 
     xmin = 0.0
     xmax = 1.0
     nx = 10
-    
+
     ymin = 0.0
     ymax = 1.0
     ny = 10
@@ -69,5 +69,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

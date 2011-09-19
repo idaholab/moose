@@ -43,7 +43,7 @@ def fixupHeader():
       suffix = os.path.splitext(file)
       if suffix[-1] == '.C' or suffix[-1] == '.h':
         checkAndUpdate(dirpath + '/' + file)
-          
+
 
 def checkAndUpdate(filename):
   f = open(filename)
@@ -64,7 +64,7 @@ def checkAndUpdate(filename):
       f.write(text)
       f.close()
       os.rename(filename + '~tmp', filename)
-  
+
 if __name__ == '__main__':
   parser = OptionParser()
   parser.add_option("-u", "--update", action="store_true", dest="update", default=False)

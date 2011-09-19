@@ -34,7 +34,7 @@ FormattedTable::FormattedTable(const FormattedTable &o) :
     mooseError ("Copying a FormattedTable with an open stream is not supported");
 
   std::map<Real, std::map<std::string, Real> >::const_iterator it = o._data.begin();
-  
+
   for ( ; it != o._data.end(); ++it)
     _data[it->first] = it->second;
 }
@@ -80,7 +80,7 @@ void
 FormattedTable::printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const
 {
   bool needs_init = col_widths.empty();
-  
+
   out.fill('-');
   out << std::right << "+" << std::setw(_column_width+2) << "+";
   for (std::set<std::string>::iterator header = _column_names.begin(); header != _column_names.end(); ++header)
@@ -125,7 +125,7 @@ FormattedTable::printTable(std::ostream & out)
   }
   out << "\n";
   printRowDivider(out, col_widths);
-  
+
   for (i = _data.begin(); i != _data.end(); ++i)
   {
     out << "|" << std::right << std::setw(_column_width) << i->first << " |";
@@ -136,7 +136,7 @@ FormattedTable::printTable(std::ostream & out)
     }
     out << "\n";
   }
-  
+
   printRowDivider(out, col_widths);
 }
 
@@ -145,7 +145,7 @@ FormattedTable::printCSV(const std::string & file_name)
 {
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
-  
+
   if (!_stream_open)
   {
     _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
@@ -159,7 +159,7 @@ FormattedTable::printCSV(const std::string & file_name)
     _output_file << "," << *header;
   }
   _output_file << "\n";
-  
+
   for (i = _data.begin(); i != _data.end(); ++i)
   {
     _output_file << i->first;
@@ -216,23 +216,23 @@ FormattedTable::writeExodus(ExodusII_IO * ex_out, Real time)
 {
   // iterators
   std::map<Real, std::map<std::string, Real> >::iterator i(_data.end());
-  if ( i == _data.begin() ) 
+  if ( i == _data.begin() )
   {
     return;
   }
   --i;
   const Real TIME_TOL(1e-12);
-  if (std::abs((time - i->first)/time) > TIME_TOL) 
+  if (std::abs((time - i->first)/time) > TIME_TOL)
   {
     // Try to find a match
-    for ( i = _data.begin(); i != _data.end(); ++i ) 
+    for ( i = _data.begin(); i != _data.end(); ++i )
     {
-      if (std::abs((time - i->first)/time) < TIME_TOL) 
+      if (std::abs((time - i->first)/time) < TIME_TOL)
       {
         break;
       }
     }
-    if ( i == _data.end() ) 
+    if ( i == _data.end() )
     {
       --i;
       std::cerr << "Input time: " << time
@@ -250,11 +250,11 @@ FormattedTable::writeExodus(ExodusII_IO * ex_out, Real time)
     global_vars.push_back( ii->second );
   }
 
-  if (global_vars.size() != global_var_names.size()) 
+  if (global_vars.size() != global_var_names.size())
   {
     mooseError("Error in outputting global vars to exodus.");
-  } 
-      
+  }
+
   ex_out->write_global_data( global_vars, global_var_names );
 }
 

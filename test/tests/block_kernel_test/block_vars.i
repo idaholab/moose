@@ -8,9 +8,9 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    block = 1 
+    block = 1
   [../]
-  
+
   [./v]
     order = FIRST
     family = LAGRANGE

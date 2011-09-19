@@ -42,7 +42,7 @@
     type = Diffusion
     variable = u
   [../]
-  
+
   [./ffn]
     type = UserForcingFunction
     variable = u

@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 
 #include <iostream>
 #include <fstream>
@@ -58,31 +58,31 @@ namespace {
 		 int num_vars, vector<string> &varlist);
 
 }
-    
+
 
 string ExoII_Read::File_Name(const char* fname)
 {
   SMART_ASSERT(Check_State());
-  
+
   if (Open()) return  "ERROR: File is already open!";
   if (!fname || std::strlen(fname) == 0) return "ERROR: File name is empty!";
-  
+
   file_name = fname;
-  
+
   return "";
 }
 
 string ExoII_Read::Open_File(const char* fname)
 {
   SMART_ASSERT(Check_State());
-  
+
   if (Open()) return "ERROR: File already open!";
-  
+
   if (fname && std::strlen(fname) > 0)
     file_name = fname;
   else if (file_name == "")
     return "ERROR: No file name to open!";
-  
+
   int ws = 0, comp_ws = 8;
   float dum = 0.0;
   int err = ex_open(file_name.c_str(), EX_READ,
@@ -90,7 +90,7 @@ string ExoII_Read::Open_File(const char* fname)
   if (err < 0) {
     ostringstream oss;
     oss << "ERROR: Couldn't open file \"" << file_name << "\".";
-    
+
     // ExodusII library could not open file.  See if a file (exodusII
     // or not) exists with the specified name.
     FILE *fid = fopen(file_name.c_str(),"r");
@@ -101,12 +101,12 @@ string ExoII_Read::Open_File(const char* fname)
     }
     return oss.str();
   }
-  
+
   file_id = err;
   io_word_size = ws;
 
   Get_Init_Data();
-  
+
   return "";
 }
 
@@ -114,13 +114,13 @@ void ExoII_Read::Get_Init_Data()
 {
   SMART_ASSERT(Check_State());
   SMART_ASSERT(file_id >= 0);
-  
+
   // Determine max size of entity and variable names on the database
   int name_length = ex_inquire_int(file_id, EX_INQ_DB_MAX_USED_NAME_LENGTH);
   ex_set_max_name_length(file_id, name_length);
-  
+
   char title_buff[MAX_LINE_LENGTH+1];
-  
+
   int err = ex_get_init(file_id, title_buff, &dimension, &num_nodes,
                         &num_elmts, &num_elmt_blocks, &num_node_sets,
                         &num_side_sets);
@@ -147,12 +147,12 @@ void ExoII_Read::Get_Init_Data()
 	      << " ... Aborting..." << std::endl;
     exit(1);
   }
-  
+
   db_version   = inquire_float(file_id, EX_INQ_DB_VERS);
   api_version  = inquire_float(file_id, EX_INQ_API_VERS);
   int num_qa   = ex_inquire_int(file_id,   EX_INQ_QA);
   int num_info = ex_inquire_int(file_id,   EX_INQ_INFO);
-  
+
   if (db_version < 0.0 || api_version < 0.0 || num_qa < 0 || num_info < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: inquire data appears corrupt:"
 	      << std::endl
@@ -163,9 +163,9 @@ void ExoII_Read::Get_Init_Data()
 	      << " ... Aborting..." << std::endl;
     exit(1);
   }
-  
+
   //                   Coordinate Names...
-  
+
   char** coords = get_name_array(3, name_length);
   err = ex_get_coord_names(file_id, coords);
   if (err < 0) {
@@ -173,28 +173,28 @@ void ExoII_Read::Get_Init_Data()
 	      << " names!  Aborting..." << std::endl;
     exit(1);
   }
-  
+
   coord_names.clear();
   for (int i = 0; i < dimension; ++i) {
     coord_names.push_back(coords[i]);
   }
   free_name_array(coords, 3);
-  
+
   //                 Element Block Data...
-  
+
   if (eblocks) delete [] eblocks;  eblocks = 0;
   if (num_elmt_blocks > 0) {
     eblocks = new Exo_Block[num_elmt_blocks];    SMART_ASSERT(eblocks != 0);
     std::vector<int> ids(num_elmt_blocks);
-    
+
     err = ex_get_ids(file_id, EX_ELEM_BLOCK, &ids[0]);
-    
+
     if (err < 0) {
       std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get element"
 		<< " block ids!  Aborting..." << std::endl;
       exit(1);
     }
-    
+
     int e_count = 0;
     for (int b = 0; b < num_elmt_blocks; ++b) {
       if (ids[b] <= EX_INVALID_ID) {
@@ -203,11 +203,11 @@ void ExoII_Read::Get_Init_Data()
 		  << " which is negative. This was returned by call to ex_get_elem_blk_ids()."
 		  << std::endl;
       }
-      
+
       eblocks[b].initialize(file_id, ids[b]);
       e_count += eblocks[b].Size();
     }
-    
+
     if (e_count != num_elmts && !specs.quiet_flag) {
       std::cout << "ExoII_Read::Get_Init_Data(): WARNING: Total number of elements "
 		<< num_elmts << " does not equal the sum of the number of elements "
@@ -224,14 +224,14 @@ void ExoII_Read::Get_Init_Data()
     elmt_atts.resize(names.size());
     std::copy(names.begin(), names.end(), elmt_atts.begin());
   }
-  
+
   //                     Node & Side sets...
-  
+
   if (nsets) delete [] nsets;  nsets = 0;
   if (num_node_sets > 0) {
     nsets = new Node_Set[num_node_sets];         SMART_ASSERT(nsets != 0);
     std::vector<int> ids(num_node_sets);
-    
+
     err = ex_get_ids(file_id, EX_NODE_SET, &ids[0]);
 
     if (err < 0) {
@@ -247,16 +247,16 @@ void ExoII_Read::Get_Init_Data()
 		  << " which is negative.  This was returned by call to ex_get_ids()."
 		  << std::endl;
       }
-	
+
       nsets[nset].initialize(file_id, ids[nset]);
     }
   }
-  
+
   if (ssets) delete [] ssets;  ssets = 0;
   if (num_side_sets) {
     ssets = new Side_Set[num_side_sets];         SMART_ASSERT(ssets != 0);
     std::vector<int> ids(num_side_sets);
-    
+
     err = ex_get_ids(file_id, EX_SIDE_SET, &ids[0]);
 
     if (err < 0) {
@@ -275,47 +275,47 @@ void ExoII_Read::Get_Init_Data()
       ssets[sset].initialize(file_id, ids[sset]);
     }
   }
-  
-  
+
+
   //  **************  RESULTS info  ***************  //
-  
+
   int num_global_vars, num_nodal_vars, num_elmt_vars, num_ns_vars, num_ss_vars;
-  
+
   err = ex_get_variable_param(file_id, EX_GLOBAL, &num_global_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " global variables!  Aborting..." << std::endl;
     exit(1);
   }
-  
+
   err = ex_get_variable_param(file_id, EX_NODAL, &num_nodal_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " nodal variables!  Aborting..." << std::endl;
     exit(1);
   }
-  
+
   err = ex_get_variable_param(file_id, EX_ELEM_BLOCK, &num_elmt_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " element variables!  Aborting..." << std::endl;
     exit(1);
   }
-  
+
   err = ex_get_variable_param(file_id, EX_NODE_SET, &num_ns_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " nodeset variables!  Aborting..." << std::endl;
     exit(1);
   }
-  
+
   err = ex_get_variable_param(file_id, EX_SIDE_SET, &num_ss_vars);
   if (err < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get number of"
 	      << " sideset variables!  Aborting..." << std::endl;
     exit(1);
   }
-  
+
   if (num_global_vars < 0 || num_nodal_vars < 0 || num_elmt_vars < 0 ||
       num_ns_vars < 0 || num_ss_vars < 0) {
     std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Data appears corrupt for"
@@ -326,13 +326,13 @@ void ExoII_Read::Get_Init_Data()
 	      << " ... Aborting..." << std::endl;
     exit(1);
   }
-  
+
   read_vars(file_id, EX_GLOBAL,     "Global",  num_global_vars, global_vars);
   read_vars(file_id, EX_NODAL,      "Nodal",   num_nodal_vars,  nodal_vars);
   read_vars(file_id, EX_ELEM_BLOCK, "Element", num_elmt_vars,   elmt_vars);
   read_vars(file_id, EX_NODE_SET,   "Nodeset", num_ns_vars,     ns_vars);
   read_vars(file_id, EX_SIDE_SET,   "Sideset", num_ss_vars,     ss_vars);
-  
+
   // Times:
   num_times = ex_inquire_int(file_id, EX_INQ_TIME);
   if (num_times < 0) {
@@ -345,13 +345,13 @@ void ExoII_Read::Get_Init_Data()
     times = new double[num_times];  SMART_ASSERT(times != 0);
     err = ex_get_all_times(file_id, times);
   }
-  
+
   if (num_nodal_vars && num_times) {
     results = new double*[ num_nodal_vars ];
     for (int i = 0; i < num_nodal_vars; ++i)
       results[i] = 0;
   }
-  
+
 }  // End of ExoII_Read::Get_Init_Data()
 
 
@@ -398,7 +398,7 @@ namespace {
       int err = ex_get_variable_names(file_id, flag, num_vars, varnames);
 
       if (err < 0) {
-	std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get " << type 
+	std::cout << "ExoII_Read::Get_Init_Data(): ERROR: Failed to get " << type
 		  << " variable names!  Aborting..." << std::endl;
 	exit(1);
       }
@@ -420,7 +420,7 @@ namespace {
 	  std::cout << "                 Aborting..." << std::endl;
 	  exit(1);
 	}
-        
+
         string n(varnames[vg]);
         chop_whitespace(n);
 	varlist.push_back(n);

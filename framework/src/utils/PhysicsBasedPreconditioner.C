@@ -127,18 +127,18 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
   Moose::perf_log.push("apply()","PhysicsBasedPreconditioner");
 
   const unsigned int num_systems = _systems.size();
-  
+
   MooseMesh & mesh = _mproblem.mesh();
 
   //Zero out the solution vectors
   for(unsigned int sys=0; sys<num_systems; sys++)
     _systems[sys]->solution->zero();
-  
+
   //Loop over solve order
   for(unsigned int i=0; i<_solve_order.size(); i++)
   {
     unsigned int system_var = _solve_order[i];
-      
+
     LinearImplicitSystem & u_system = *_systems[system_var];
 
     //Copy rhs from the big system into the small one
@@ -206,7 +206,7 @@ PhysicsBasedPreconditioner::copyVarValues(MeshBase & mesh,
 {
   MeshBase::node_iterator it = mesh.local_nodes_begin();
   MeshBase::node_iterator it_end = mesh.local_nodes_end();
-  
+
   for(;it!=it_end;++it)
   {
     Node * node = *it;
@@ -216,11 +216,11 @@ PhysicsBasedPreconditioner::copyVarValues(MeshBase & mesh,
     mooseAssert(node->n_comp(from_system, from_var) == node->n_comp(to_system, to_var), "Number of components does not match in each system in PBP");
 
     for(unsigned int i=0; i<n_comp; i++)
-    { 
+    {
       unsigned int from_dof = node->dof_number(from_system,from_var,i);
       unsigned int to_dof = node->dof_number(to_system,to_var,i);
-    
+
       to_vector.set(to_dof,from_vector(from_dof));
     }
   }
-}  
+}

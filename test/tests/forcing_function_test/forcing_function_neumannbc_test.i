@@ -14,15 +14,15 @@
 
 [Functions]
   active = 'forcing_func exact_func'
-  
+
   [./forcing_func]
     type = ParsedGradFunction
     value = 2
   [../]
-  
+
   [./exact_func]
     type = ParsedFunction
-    value = x*x 
+    value = x*x
   [../]
 []
 
@@ -52,8 +52,8 @@
   [../]
 
   [./right]
-    type = FunctionNeumannBC 
-    function = exact_func 
+    type = FunctionNeumannBC
+    function = exact_func
     variable = u
     boundary = '2'
   [../]

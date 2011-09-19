@@ -27,7 +27,7 @@ class PrintNumNodes : public GeneralPostprocessor
 {
 public:
   PrintNumNodes(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize() {}
   virtual void execute() {}
 

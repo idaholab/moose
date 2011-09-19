@@ -5,7 +5,7 @@ InputParameters validParams<MMSCoupledDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addParam<Real>("value", 0.0, "Value multiplied by the coupled value on the boundary");
-  
+
   return params;
 }
 
@@ -18,7 +18,7 @@ MMSCoupledDirichletBC::MMSCoupledDirichletBC(const std::string & name, InputPara
 Real
 MMSCoupledDirichletBC::computeQpResidual()
 {
-  //We define all our variables here along with our function. 
+  //We define all our variables here along with our function.
   Real a = libMesh::pi;
   Real x = (*_current_node)(0);
   Real y = (*_current_node)(1);
@@ -37,5 +37,5 @@ MMSCoupledDirichletBC::computeQpResidual()
     //Our function gets added here.
     return _u[_qp]-u;
   }
-  
+
 }

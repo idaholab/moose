@@ -26,18 +26,18 @@ InputParameters validParams<MaterialRealAux>();
 class MaterialRealAux : public AuxKernel
 {
 public:
-  
+
   MaterialRealAux(const std::string & name, InputParameters parameters);
-  
+
 protected:
 
   virtual Real computeValue();
   std::string _matpro;
- 
+
 private:
-  
+
   MaterialProperty<Real> & _prop;
-  
+
 };
 
 #endif //MATERIALREALAUX_H

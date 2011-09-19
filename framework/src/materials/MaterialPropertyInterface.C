@@ -52,7 +52,7 @@ MaterialProperty<std::vector<ColumnMajorMatrix> >::init (int size)
   PropType *copy = new PropType;
   copy->_value.resize(size);
 
-  // We don't know the size of the underlying vector at each 
+  // We don't know the size of the underlying vector at each
   // quadrature point, the user will be responsible for resizing it
   // and filling in the entries...
 
@@ -70,7 +70,7 @@ MaterialProperty<std::vector<RealTensorValue> >::init (int size)
   PropType *copy = new PropType;
   copy->_value.resize(size);
 
-  // We don't know the size of the underlying vector at each 
+  // We don't know the size of the underlying vector at each
   // quadrature point, the user will be responsible for resizing it
   // and filling in the entries...
 
@@ -88,7 +88,7 @@ MaterialProperty<std::vector<std::vector<RealTensorValue> > >::init (int size)
   PropType *copy = new PropType;
   copy->_value.resize(size);
 
-  // We don't know the size of the underlying vector<vector> at each 
+  // We don't know the size of the underlying vector<vector> at each
   // quadrature point, the user will be responsible for resizing it
   // and filling in the entries...
 

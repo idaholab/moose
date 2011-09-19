@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 #include <math.h>
 #include <time.h>
 #include <iostream>
@@ -54,7 +54,7 @@
 #include "parsing.h"
 #include "FileInfo.h"
 
- 
+
 using namespace std;
 
 string Version() { return "2.47 (2011-08-15)"; }
@@ -420,7 +420,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    << ", Sidesets = " << file.Num_Side_Sets() << std::endl
 	    << prefix << "          Vars: Global = " << file.Num_Global_Vars()
 	    << ", Nodal = " << file.Num_Nodal_Vars()
-	    << ", Element = " << file.Num_Elmt_Vars() 
+	    << ", Element = " << file.Num_Elmt_Vars()
 	    << ", Nodeset = " << file.Num_NS_Vars()
 	    << ", Sideset = " << file.Num_SS_Vars()
 	    << ", Times = " << file.Num_Times()
@@ -434,7 +434,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
   {
     checking_invalid = false;
     invalid_data = false;
-  
+
     if (sigfillset(&(sigact.sa_mask)) == -1) perror("sigfillset failed");
     sigact.sa_handler = floating_point_exception_handler;
     if (sigaction(SIGFPE, &sigact, 0) == -1) perror("sigaction failed");
@@ -442,13 +442,13 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     // for GNU, this seems to be needed to turn on trapping
     feenableexcept(FE_DIVBYZERO | FE_OVERFLOW | FE_INVALID);
 #endif
-  
+
     specs.Set_Max_Names(DEFAULT_MAX_NUMBER_OF_NAMES);
-  
+
     string file1_name, file2_name, diffile_name;
-  
+
     Parse_Command_Line(argc, argv, file1_name, file2_name, diffile_name);
-  
+
     if (specs.summary_flag && file1_name == "")
       {
 	std::cout << "exodiff: ERROR: Summary option engaged but an exodus "
@@ -467,10 +467,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       specs.map_flag             = FILE_ORDER;
       specs.quiet_flag           = false;
     }
-  
+
     if (!specs.quiet_flag && !specs.summary_flag) Print_Banner(" ");
     if (specs.summary_flag) Print_Banner("#");
-  
+
     // Open input files.
     ExoII_Read file1(file1_name.c_str());
     ExoII_Read file2(file2_name.c_str());
@@ -489,7 +489,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	exit(1);
       }
     }
-  
+
     // Check that the maximum number of names has not been exceeded...
     if (file1.Num_Global_Vars() > specs.max_number_of_names ||
 	file1.Num_Nodal_Vars()  > specs.max_number_of_names ||
@@ -501,7 +501,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       if (file1.Num_NS_Vars()    > max) max = file1.Num_NS_Vars();
       if (file1.Num_SS_Vars()    > max) max = file1.Num_SS_Vars();
       if (file1.Num_Elmt_Vars()  > max) max = file1.Num_Elmt_Vars();
-      
+
       std::cout << "exodiff: Number of names in file 1 (" << max << ") is larger than "
 		<< "current limit of " << specs.max_number_of_names
 		<< ".  To increase, use \"-maxnames <int>\" on the command "
@@ -523,7 +523,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	if (file2.Num_NS_Vars()    > max) max = file2.Num_NS_Vars();
 	if (file2.Num_SS_Vars()    > max) max = file2.Num_SS_Vars();
 	if (file2.Num_Elmt_Vars()  > max) max = file2.Num_Elmt_Vars();
-	
+
 	std::cout << "exodiff: Number of names in file 2 (" << max << ") is larger than "
 		  << "current limit of " << specs.max_number_of_names
 		  << ".  To increase, use \"-maxnames <int>\" on the command "
@@ -533,7 +533,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	exit(1);
       }
     }
-    
+
     if (specs.summary_flag) {
       output_init(file1, 1, "#");
     } else {
@@ -546,7 +546,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	}
       }
     }
-  
+
     if (!specs.summary_flag) {
       bool is_same = Check_Global(file1, file2);
       if (!is_same) {
@@ -583,7 +583,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	}
 	specs.map_flag = FILE_ORDER;
       }
-    }  
+    }
 
     bool diff_flag = false; // Set to 'true' to indicate files contain diffs
     // Call this before checking for compatible meshes since it sets which variables
@@ -596,12 +596,12 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       Check_Compatible_Meshes( file1, file2, (diffile_name == ""),
 			       node_map, elmt_map );
       // Doesn't return if meshes are not compatible...
-      
+
       out_file_id = Create_File(file1, file2, diffile_name, &diff_flag);
     }
-  
+
     SMART_ASSERT( !( specs.summary_flag && out_file_id >= 0 ) );
-  
+
     if (!specs.quiet_flag && !specs.summary_flag) {
       std::cout << "\n  ==============================================================\n";
       if (!specs.ignore_maps)
@@ -616,7 +616,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       else
 	std::cout << "#  NOTE: All node and element ids are reported as local ids.\n\n";
     }
-  
+
     double* var_vals = 0;
     if (out_file_id >= 0) {
       int max_ent = specs.glob_var_names->size();
@@ -624,10 +624,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	max_ent = file1.Num_Nodes();
       if (file1.Num_Elmts() > max_ent)
 	max_ent = file1.Num_Elmts();
-    
+
       var_vals = new double[max_ent];
     }
- 
+
     // When mapping is in effect, it is efficient to grab pointers to all blocks.
     Exo_Block** blocks2 = 0;
     if (elmt_map != 0) {
@@ -635,9 +635,9 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       for (int b = 0; b < file2.Num_Elmt_Blocks(); ++b)
 	blocks2[b] = file2.Get_Elmt_Block_by_Index(b);
     }
-  
+
     int min_num_times = file1.Num_Times();
-  
+
     MinMaxData mm_time;   mm_time.type = MinMaxData::mm_time;
     MinMaxData *mm_glob = NULL;
     MinMaxData *mm_node = NULL;
@@ -645,7 +645,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     MinMaxData *mm_eatt = NULL;
     MinMaxData *mm_ns   = NULL;
     MinMaxData *mm_ss   = NULL;
-  
+
     if (specs.summary_flag) {
       int n;
       if (specs.glob_var_names && (n = specs.glob_var_names->size()) > 0) {
@@ -681,13 +681,13 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	min_num_times = specs.time_step_stop;
       }
     }
-  
+
     if (specs.time_step_start < 0) {
       specs.time_step_start = min_num_times;
     }
 
     // If time_step_offset == -1, then determine the offset automatically.
-    // Assumes file1 has more steps than file2 and that the last step(s) 
+    // Assumes file1 has more steps than file2 and that the last step(s)
     // on file2 match the last step(s) on file1.
     if (specs.time_step_offset == -1) {
       specs.time_step_offset = file1.Num_Times() - file2.Num_Times();
@@ -758,7 +758,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	tmp_map[i] = i+1;
       }
     }
-    
+
     // Diff attributes...
     if (!specs.ignore_attributes && elmt_map==NULL && !specs.summary_flag) {
       if (diff_element_attributes(file1, file2, elmt_map, elem_id_map, blocks2))
@@ -774,7 +774,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	 time_step += specs.time_step_increment)
       {
 	if (timeStepIsExcluded(time_step)) continue;
-    
+
 	int time_step1 = time_step + specs.time_step_offset;
 	int time_step2 = time_step;
 	SMART_ASSERT(time_step1 <= file1.Num_Times());
@@ -795,13 +795,13 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	else if (out_file_id < 0) {
 	  if (!specs.quiet_flag) {
 	    sprintf(buf, "  --------- Time step %d, %13.7e ~ %13.7e, %s diff: %12.5e",
-		    time_step1, 
+		    time_step1,
 		    file1.Time(time_step1), file2.Time(time_step2),
 		    specs.time_tol.abrstr(),
 		    FileDiff(file1.Time(time_step1), file2.Time(time_step2), specs.time_tol.type));
 	    std::cout << buf;;
 	  }
-      
+
 	  if (specs.time_tol.Diff(file1.Time(time_step1), file2.Time(time_step2))) {
 	    diff_flag = true;
 	    if (specs.quiet_flag) Die_TS(time_step1);
@@ -811,16 +811,16 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	  else if (!specs.quiet_flag)
 	    std::cout <<   " ---------" << std::endl;
 	}
-    
+
 	if (out_file_id >= 0) {
 	  double t = file1.Time(time_step1);
 	  ex_put_time(out_file_id, time_step2, &t);
 	}
-    
+
 	if ( diff_globals( file1, file2, time_step1, time_step2,
 			   out_file_id, mm_glob, var_vals ) )
 	  diff_flag = true;
-     
+
 	// Nodal variables.
 	if ( diff_nodals( file1, file2, time_step1, time_step2,
 			  out_file_id, node_map, node_id_map, mm_node, var_vals ) )
@@ -830,13 +830,13 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	if ( diff_element( file1, file2, time_step1, time_step2, out_file_id,
 			   elmt_map, elem_id_map, blocks2, mm_elmt, var_vals ) )
 	  diff_flag = true;
-        
+
 	if (specs.map_flag != PARTIAL) {
 	  // Nodeset variables.
 	  if ( diff_nodeset( file1, file2, time_step1, time_step2, out_file_id,
 			     node_id_map, mm_ns, var_vals ) )
 	    diff_flag = true;
-      
+
 	  // Sideset variables.
 	  if ( diff_sideset( file1, file2, time_step1, time_step2, out_file_id,
 			     elem_id_map, mm_ss, var_vals ) )
@@ -848,7 +848,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	  }
 	}
       }  // End of time step loop.
-  
+
     // Make sure there is an operation to perform (compare times, variables, ...)
     if ((min_num_times == 0 && specs.coord_tol.type == IGNORE) ||
 	(min_num_times >  0 && specs.time_tol.type == IGNORE &&
@@ -887,7 +887,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     } else {
       std::cout << "\nexodiff: Files are the same" << std::endl;
     }
-  
+
     if (!specs.ignore_maps) {
       file1.Free_Node_Map();
       file1.Free_Elmt_Map();
@@ -900,13 +900,13 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     if (blocks2        != 0) delete [] blocks2;
     if (node_map       != 0) delete [] node_map;
     if (elmt_map       != 0) delete [] elmt_map;
-  
+
     delete [] mm_glob;
     delete [] mm_node;
     delete [] mm_elmt;
     delete [] mm_ns;
     delete [] mm_ss;
-  
+
     file1.Close_File();
     if (!specs.summary_flag)
       file2.Close_File();
@@ -919,7 +919,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     code << "exodiff-" << Version();
     add_to_log( code.str().c_str() );
 #endif
-  
+
     if (specs.exit_status_switch && diff_flag)
       return 2;
     else
@@ -983,7 +983,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
   int global_elmt_num(ExoII_Read& file, int b_idx, int e_idx)
   {
     SMART_ASSERT(b_idx < file.Num_Elmt_Blocks());
-  
+
     int g = 0;
     for (int b = 0; b < file.Num_Elmt_Blocks(); ++b)
       if (b_idx == b) {
@@ -1014,15 +1014,15 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     if (!specs.ignore_nans) {
       checking_invalid = true;
       invalid_data = false;
-    
+
       SMART_ASSERT(values != NULL);
-    
-    
+
+
       for (int i=0; i < count; i++) {
 #if (defined(__GNUC__) && (__GNUC__ == 2 && __GNUC_MINOR__ == 96)) || (defined(linux) && __PGI) || (defined(linux) && __INTEL_COMPILER)
 	if (__isnan(values[i]))
 #elif defined(interix)
-	  if (values[i] != values[i]) 
+	  if (values[i] != values[i])
 #else
 	    if (isnan(values[i]))
 #endif
@@ -1035,10 +1035,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	  break;
 	}
       }
-    
+
       checking_invalid = false;
       invalid_data = false;
-    }  
+    }
     return !valid;
   }
 
@@ -1049,7 +1049,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       if (fno == 1 || !specs.summary_flag) {
 	filen.Load_Nodal_Results(time_step, idx);
 	vals = filen.Get_Nodal_Results(idx);
-    
+
 	if (vals != NULL) {
 	  if (Invalid_Values(vals, filen.Num_Nodes())) {
 	    std::cout << "\tERROR: NaN found for variable "
@@ -1065,7 +1065,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 		    int out_file_id, MinMaxData *mm_glob, double *gvals)
   {
     bool diff_flag = false;
-  
+
     // Global variables.
     file1.Load_Global_Results(step1);
     const double* vals1 = file1.Get_Global_Results();
@@ -1074,7 +1074,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       file2.Load_Global_Results(step2);
       vals2 = file2.Get_Global_Results();
     }
-    
+
     // ----------------------------------------------------------------------
     // Output file containing differences...
     if (out_file_id >= 0) {
@@ -1093,13 +1093,13 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     }
 
     // --------------------------------------------------------------------
-    // Summary output 
+    // Summary output
     if (specs.summary_flag) {
       for (unsigned out_idx = 0; out_idx < specs.glob_var_names->size(); ++out_idx) {
 	const string& name = (*specs.glob_var_names)[out_idx];
 	int idx1 = find_string(file1.Global_Var_Names(), name, specs.nocase_var_names);
 	SMART_ASSERT(idx1 >= 0);
-      
+
 	mm_glob[out_idx].spec_min_max(vals1[idx1], step1);
       }
       return diff_flag;
@@ -1110,13 +1110,13 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     int name_length = max_string_length(file1.Global_Var_Names())+1;
     if (!specs.quiet_flag && specs.glob_var_names->size() > 0)
       std::cout << "Global variables:" << std::endl;
-    
+
     for (unsigned out_idx = 0; out_idx < specs.glob_var_names->size(); ++out_idx) {
       const string& name = (*specs.glob_var_names)[out_idx];
       int idx1 = find_string(file1.Global_Var_Names(), name, specs.nocase_var_names);
       int idx2 = find_string(file2.Global_Var_Names(), name, specs.nocase_var_names);
       SMART_ASSERT(idx1 >= 0 && idx2 >= 0);
-      
+
       if (Invalid_Values(&vals1[idx1], 1)) {
 	std::cout << "\tERROR: NaN found for variable " << name << " in file 1\n";
 	diff_flag = true;
@@ -1129,10 +1129,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 
       if (specs.glob_var[out_idx].Diff(vals1[idx1], vals2[idx2])) {
 	diff_flag = true;
-          
+
 	if (!specs.quiet_flag) {
 	  sprintf(buf, "   %-*s %s diff: %14.7e ~ %14.7e =%12.5e (FAILED)",
-		  name_length, 
+		  name_length,
 		  name.c_str(), specs.glob_var[out_idx].abrstr(),
 		  vals1[idx1], vals2[idx2],
 		  specs.glob_var[out_idx].Delta(vals1[idx1], vals2[idx2]) );
@@ -1160,15 +1160,15 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	int idx1 = find_string(file1.Nodal_Var_Names(), name, specs.nocase_var_names);
 	int idx2 = find_string(file2.Nodal_Var_Names(), name, specs.nocase_var_names);
 	SMART_ASSERT(idx1 >= 0 && idx2 >= 0);
-      
+
 	const double* vals1 = get_nodal_values(file1, step1, idx1, 1,
 					       name, &diff_flag);
 	const double* vals2 = get_nodal_values(file2, step2, idx2, 2,
 					       name, &diff_flag);
-      
+
 	int ncount = file1.Num_Nodes();
 	for (int n = 0; n < ncount; ++n) {
-        
+
 	  // Should this node be processed...
 	  if (node_map == 0 || node_map[n]>=0){
 	    int n2 = node_map != 0 ? node_map[n] : n;
@@ -1183,9 +1183,9 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       file2.Free_Nodal_Results();
       return diff_flag;
     }
-  
+
     // -------------------------------------------------------------------
-    // Summary output 
+    // Summary output
     if (specs.summary_flag) {
       for (unsigned n_idx = 0; n_idx < specs.node_var_names->size(); ++n_idx) {
 	const string& name = (*specs.node_var_names)[n_idx];
@@ -1197,7 +1197,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	int ncount = file1.Num_Nodes();
 	for (int n = 0; n < ncount; ++n) {
 	  mm_node[n_idx].spec_min_max(vals1[n], step1, n);
-	} 
+	}
       }
       file1.Free_Nodal_Results();
       return diff_flag;
@@ -1209,13 +1209,13 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     if (!specs.quiet_flag && specs.node_var_names->size() > 0)
       std::cout << "Nodal variables:" << std::endl;
     int name_length = max_string_length(file1.Nodal_Var_Names())+1;
-    
+
     for (unsigned n_idx = 0; n_idx < specs.node_var_names->size(); ++n_idx) {
       const string& name = (*specs.node_var_names)[n_idx];
       int idx1 = find_string(file1.Nodal_Var_Names(), name, specs.nocase_var_names);
       int idx2 = find_string(file2.Nodal_Var_Names(), name, specs.nocase_var_names);
       SMART_ASSERT(idx1 >= 0 && idx2 >= 0);
-      
+
       const double* vals1 = get_nodal_values(file1, step1, idx1, 1,
 					     name, &diff_flag);
       const double* vals2 = get_nodal_values(file2, step2, idx2, 2,
@@ -1288,12 +1288,12 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 		    Exo_Block **blocks2, MinMaxData *mm_elmt, double *evals)
   {
     bool diff_flag = false;
-    
+
     if (out_file_id >= 0) {SMART_ASSERT(evals != 0);}
-  
+
     if (out_file_id < 0 && !specs.quiet_flag && !specs.summary_flag && specs.elmt_var_names->size() > 0)
       std::cout << "Element variables:" << std::endl;
-    
+
     int name_length = max_string_length(*specs.elmt_var_names)+1;
 
     for (unsigned e_idx = 0; e_idx < specs.elmt_var_names->size(); ++e_idx) {
@@ -1303,18 +1303,18 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       if (!specs.summary_flag)
 	vidx2 = find_string(file2.Elmt_Var_Names(), name, specs.nocase_var_names);
       SMART_ASSERT(vidx1 >= 0 && vidx2 >= 0);
-      
+
       double norm_d = 0.0;
       double norm_1 = 0.0;
       double norm_2 = 0.0;
-    
+
       if (elmt_map != 0) { // Load variable for all blocks in file 2.
 	for (int b = 0; b < file2.Num_Elmt_Blocks(); ++b) {
 	  Exo_Block * block2 = file2.Get_Elmt_Block_by_Index(b);
 	  block2->Load_Results(step2, vidx2);
 	}
       }
-      
+
       int global_elmt_index = 0;
       DiffData max_diff;
       int e2;
@@ -1324,7 +1324,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	  global_elmt_index += eblock1->Size();
 	  continue;
 	}
-        
+
 	Exo_Block* eblock2 = NULL;
 	int b2 = b;
 	if (elmt_map == 0 && !specs.summary_flag) {
@@ -1335,10 +1335,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    continue;
 	  }
 	}
-        
+
 	eblock1->Load_Results(step1, vidx1);
 	const double* vals1 = eblock1->Get_Results(vidx1);
-        
+
 	if (vals1 != NULL) {
 	  if (Invalid_Values(vals1, eblock1->Size())) {
 	    std::cout << "\tERROR: NaN found for variable "
@@ -1350,7 +1350,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 
 	double v2 = 0;
 	const double* vals2 = NULL;
-      
+
 	if (elmt_map == 0 && !specs.summary_flag) {
 	  // Without mapping, get result for this block.
 	  int id = eblock1->Id();
@@ -1367,7 +1367,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    }
 	  }
 	}
-        
+
 	int ecount =  eblock1->Size();
 	int block_id = eblock1->Id();
 	for (int e = 0; e < ecount; ++e) {
@@ -1390,7 +1390,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 		v2 = blocks2[b2]->Get_Results(vidx2)[e2]; // Get value from file 2.
 	      }
 	    }
-          
+
 	    if (specs.summary_flag) {
 	      mm_elmt[e_idx].spec_min_max(vals1[e], step1,
 					  global_elmt_index, block_id);
@@ -1422,18 +1422,18 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	  }
 	  ++global_elmt_index;
 	}
-        
+
 	if (out_file_id >= 0)
 	  ex_put_var(out_file_id, step2, EX_ELEM_BLOCK, e_idx+1,
 		     eblock1->Id(), eblock1->Size(), evals);
-        
+
 	eblock1->Free_Results();
 	if (!specs.summary_flag && elmt_map == 0) {
 	  eblock2->Free_Results();
 	}
-        
+
       }  // End of element block loop.
-    
+
       if (specs.doNorms && norm_d > 0.0) {
 	norm_d = sqrt(norm_d);
 	norm_1 = sqrt(norm_1);
@@ -1444,10 +1444,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 		norm_d, norm_1, norm_2, norm_d / max(norm_1, norm_2));
         std::cout << buf << std::endl;
       }
-      
+
       if (!specs.summary_flag && max_diff.diff > specs.elmt_var[e_idx].value) {
 	diff_flag = true;
-        
+
 	if (!specs.quiet_flag) {
 	  sprintf(buf,
 		  "   %-*s %s diff: %14.7e ~ %14.7e =%12.5e (block %d, elmt %d)",
@@ -1471,15 +1471,15 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
   {
     string serr;
     bool diff_flag = false;
-  
+
     if (out_file_id >= 0) {SMART_ASSERT(vals != 0);}
-  
+
     int name_length = max_string_length(file1.NS_Var_Names())+1;
-      
+
     if ( out_file_id < 0 && !specs.quiet_flag &&
 	 !specs.summary_flag && specs.ns_var_names->size() > 0 )
       std::cout << "Nodeset variables:" << std::endl;
-    
+
     for (unsigned e_idx = 0; e_idx < specs.ns_var_names->size(); ++e_idx) {
       const string& name = (*specs.ns_var_names)[e_idx];
       int vidx1 = find_string(file1.NS_Var_Names(), name, specs.nocase_var_names);
@@ -1487,7 +1487,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       if (!specs.summary_flag)
 	vidx2 = find_string(file2.NS_Var_Names(), name, specs.nocase_var_names);
       SMART_ASSERT(vidx1 >= 0 && vidx2 >= 0);
-      
+
       double norm_d = 0.0;
       double norm_1 = 0.0;
       double norm_2 = 0.0;
@@ -1498,7 +1498,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	if (!nset1->is_valid_var(vidx1)) {
 	  continue;
 	}
-        
+
 	Node_Set* nset2 = NULL;
 	if (!specs.summary_flag) {
 	  int id = nset1->Id();
@@ -1507,10 +1507,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	  SMART_ASSERT(nset2->Id() == nset1->Id());
 	  if (!nset2->is_valid_var(vidx2)) continue;
 	}
-        
+
 	nset1->Load_Results(step1, vidx1);
 	const double* vals1 = nset1->Get_Results(vidx1);
-        
+
 	if (vals1 != NULL) {
 	  if (Invalid_Values(vals1, nset1->Size())) {
 	    std::cout << "\tERROR: NaN found for variable "
@@ -1536,7 +1536,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    }
 	  }
 	}
-        
+
 	int ncount = nset1->Size();
 	for (int e = 0; e < ncount; ++e) {
 	  int idx1 = nset1->Node_Index(e);
@@ -1547,7 +1547,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    idx2 = nset2->Node_Index(e);
 	    v2 = vals2[idx2];
 	  }
-          
+
 	  if (specs.summary_flag) {
 	    mm_ns[e_idx].spec_min_max(vals1[idx1], step1, e, nset1->Id());
 	  }
@@ -1575,19 +1575,19 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    norm_2 += v2*v2;
 	  }
 	}
-        
+
 	if (out_file_id >= 0)
 	  ex_put_var(out_file_id, step2, EX_NODE_SET,
 		     e_idx+1, nset1->Id(),
 		     nset1->Size(), vals);
-        
+
 	nset1->Free_Results();
 	if (!specs.summary_flag) {
 	  nset2->Free_Results();
 	}
-        
+
       }  // End of nodeset loop.
-      
+
       if (specs.doNorms && norm_d > 0.0) {
         sprintf(buf,
                 "   %-*s L2 norm of diff=%14.7e (%11.5e ~ %11.5e)",
@@ -1595,10 +1595,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 		sqrt(norm_d), sqrt(norm_1), sqrt(norm_2));
         std::cout << buf << std::endl;
       }
-      
+
       if (!specs.summary_flag && max_diff.diff > specs.ns_var[e_idx].value) {
 	diff_flag = true;
-        
+
 	if (!specs.quiet_flag) {
 	  Node_Set *nset = file1.Get_Node_Set_by_Id(max_diff.blk);
 	  sprintf(buf,
@@ -1624,14 +1624,14 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
   {
     string serr;
     bool diff_flag = false;
-  
+
     if (out_file_id >= 0) {SMART_ASSERT(vals != 0);}
-  
+
     int name_length = max_string_length(file1.SS_Var_Names())+1;
-      
+
     if (out_file_id < 0 && !specs.quiet_flag && !specs.summary_flag && specs.ss_var_names->size() > 0)
       std::cout << "Sideset variables:" << std::endl;
-    
+
     double norm_d = 0.0;
     double norm_1 = 0.0;
     double norm_2 = 0.0;
@@ -1643,11 +1643,11 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
       if (!specs.summary_flag)
 	vidx2 = find_string(file2.SS_Var_Names(), name, specs.nocase_var_names);
       SMART_ASSERT(vidx1 >= 0 && vidx2 >= 0);
-      
+
       DiffData max_diff;
       for (int b = 0; b < file1.Num_Side_Sets(); ++b) {
 	Side_Set* sset1 = file1.Get_Side_Set_by_Index(b);
-	SMART_ASSERT(sset1 != NULL);	
+	SMART_ASSERT(sset1 != NULL);
 	if (!sset1->is_valid_var(vidx1)) {
 	  continue;
 	}
@@ -1658,10 +1658,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	  sset2 = file2.Get_Side_Set_by_Id(id);
 	  if (sset2 == NULL || !sset2->is_valid_var(vidx2)) continue;
 	}
-        
+
 	sset1->Load_Results(step1, vidx1);
 	const double* vals1 = sset1->Get_Results(vidx1);
-        
+
 	if (vals1 != NULL) {
 	  if (Invalid_Values(vals1, sset1->Size())) {
 	    std::cout << "\tERROR: NaN found for variable "
@@ -1686,7 +1686,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    }
 	  }
 	}
-        
+
 	int ecount = sset1->Size();
 	for (int e = 0; e < ecount; ++e) {
 	  int ind1 = sset1->Side_Index(e);
@@ -1696,7 +1696,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    ind2 = sset2->Side_Index(e);
 	    v2 = vals2[ind2];
 	  }
-          
+
 	  if (specs.summary_flag) {
 	    mm_ss[e_idx].spec_min_max(vals1[ind1], step1, e, sset1->Id());
 	  }
@@ -1727,7 +1727,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	    norm_2 += v2*v2;
 	  }
 	}
-        
+
 	if (out_file_id >= 0)
 	  ex_put_var(out_file_id, step2, EX_SIDE_SET,
 		     e_idx+1, sset1->Id(),
@@ -1737,10 +1737,10 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 	  sset2->Free_Results();
 	}
       }  // End of sideset loop.
-      
+
       if (!specs.summary_flag && max_diff.diff > specs.ss_var[e_idx].value) {
 	diff_flag = true;
-        
+
 	if (specs.doNorms && norm_d > 0.0) {
 	  sprintf(buf,
 		  "   %-*s L2 norm of diff=%14.7e (%11.5e ~ %11.5e)",
@@ -1748,7 +1748,7 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
 		  sqrt(norm_d), sqrt(norm_1), sqrt(norm_2));
 	  std::cout << buf << std::endl;
 	}
-      
+
 	if (!specs.quiet_flag) {
 	  Side_Set *sset = file1.Get_Side_Set_by_Id(max_diff.blk);
 	  sprintf(buf,
@@ -1770,35 +1770,35 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
     return diff_flag;
   }
 
-bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2, 
+bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
 			     int* elmt_map, const int *id_map,
 			     Exo_Block **blocks2)
 {
   bool diff_was_output = false;
   bool diff_flag = false;
-    
+
   int global_elmt_offset = 0;
   for (int b = 0; b < file1.Num_Elmt_Blocks(); ++b) {
     Exo_Block* eblock1 = file1.Get_Elmt_Block_by_Index(b);
     SMART_ASSERT(eblock1 != NULL);
-	
+
     int block_id = eblock1->Id();
-    
+
     Exo_Block *eblock2 = file2.Get_Elmt_Block_by_Id(block_id);
     SMART_ASSERT(eblock2 != NULL);
 
     if (!diff_was_output && (eblock1->attr_count() > 0 || eblock2->attr_count() > 0)) {
       diff_was_output = true;
       std::cout << "Element attributes:" << std::endl;
-    }      
+    }
 
     int name_length = max_string_length(eblock1->Attribute_Names())+1;
     for (int idx1=0; idx1 < eblock1->attr_count(); idx1++) {
       int global_elmt_index = global_elmt_offset;
-      
+
       DiffData max_diff;
       const std::string &name = eblock1->Get_Attribute_Name(idx1);
-	  
+
       // Find same attribute in eblock2...
       int idx2 = eblock2->Find_Attribute_Index(name);
       if (idx2 < 0) {
@@ -1820,10 +1820,10 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
       double norm_d = 0.0;
       double norm_1 = 0.0;
       double norm_2 = 0.0;
-    
+
       eblock1->Load_Attributes(idx1);
       const double* vals1 = eblock1->Get_Attributes(idx1);
-        
+
       if (vals1 != NULL) {
 	if (Invalid_Values(vals1, eblock1->Size())) {
 	  std::cout << "\tERROR: NaN found for attribute "
@@ -1832,7 +1832,7 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
 	  diff_flag = true;
 	}
       }
-      
+
       // Without mapping, get result for this block.
       eblock2->Load_Attributes(idx2);
       const double* vals2 = eblock2->Get_Attributes(idx2);
@@ -1845,10 +1845,10 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
 	  diff_flag = true;
 	}
       }
-        
+
       int ecount =  eblock1->Size();
       for (int e = 0; e < ecount; ++e) {
-          
+
 	if (specs.show_all_diffs) {
 	  double d = specs.elmt_att[tol_idx].Delta(vals1[e], vals2[e]);
 	  if (d > specs.elmt_att[tol_idx].value) {
@@ -1872,7 +1872,7 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
 	}
 	++global_elmt_index;
       }
-        
+
       if (specs.doNorms && norm_d > 0.0) {
 	norm_d = sqrt(norm_d);
 	norm_1 = sqrt(norm_1);
@@ -1883,10 +1883,10 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
 		norm_d, norm_1, norm_2, norm_d / max(norm_1, norm_2));
 	std::cout << buf << std::endl;
       }
-      
+
       if (!specs.summary_flag && max_diff.diff > specs.elmt_att[tol_idx].value) {
 	diff_flag = true;
-        
+
 	if (!specs.quiet_flag) {
 	  sprintf(buf,
 		  "   %-*s %s diff: %14.7e ~ %14.7e =%12.5e (block %d, elmt %d)",
@@ -1922,7 +1922,7 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
 	      << "#         - Element block numbers are the block ids.\n"
 	      << "#         - Node(n) and element(e) numbers are 1-offset."
 	      << std::endl;
-    
+
     if (specs.coord_sep) {
       double min_separation = Find_Min_Coord_Sep(file1);
       std::cout << "\nCOORDINATES absolute 1.e-6    # min separation = "
@@ -1931,7 +1931,7 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
       std::cout << "\nCOORDINATES absolute 1.e-6    # min separation "
 	"not calculated\n";
     }
-    
+
     if (file1.Num_Times() > 0) {
       std::cout << "\nTIME STEPS relative 1.e-6 floor 0.0     # min: ";
       sprintf(buf, "%15.8g @ t%d max: %15.8g @ t%d\n",
@@ -1956,7 +1956,7 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
     } else {
       std::cout << "\n# No GLOBAL VARIABLES\n";
     }
-    
+
     n = specs.node_var_names->size();
     if (n > 0) {
       std::cout << std::endl << "NODAL VARIABLES relative 1.e-6 floor 0.0\n";
@@ -1973,7 +1973,7 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
     } else {
       std::cout << "\n# No NODAL VARIABLES\n";
     }
-    
+
     n = specs.elmt_var_names->size();
     if (n > 0) {
       std::cout << std::endl << "ELEMENT VARIABLES relative 1.e-6 floor 0.0\n";
@@ -2003,14 +2003,14 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
 		name_length, ((*specs.ns_var_names)[i]).c_str(),
 		mm_ns[i].min_val, mm_ns[i].min_step, mm_ns[i].min_blk,
 		node_id_map[nsmin->Node_Id(mm_ns[i].min_id)-1],
-		mm_ns[i].max_val, mm_ns[i].max_step, mm_ns[i].max_blk, 
+		mm_ns[i].max_val, mm_ns[i].max_step, mm_ns[i].max_blk,
 		node_id_map[nsmax->Node_Id(mm_ns[i].max_id)-1]);
 	std::cout << buf;
       }
     } else {
       std::cout << "\n# No NODESET VARIABLES\n";
     }
-  
+
     n = specs.ss_var_names->size();
     if (n > 0) {
       std::cout << std::endl << "SIDESET VARIABLES relative 1.e-6 floor 0.0\n";
@@ -2040,6 +2040,6 @@ bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
     for (int i = 0; i < specs.num_excluded_steps; ++i)
       if (ts == specs.exclude_steps[i])
 	return 1;
-  
+
     return 0;
   }

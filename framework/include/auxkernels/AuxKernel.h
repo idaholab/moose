@@ -34,7 +34,7 @@ class SystemBase;
 template<>
 InputParameters validParams<AuxKernel>();
 
-/** 
+/**
  * Base class for creating new auxiliary kernels and auxiliary boundary conditions.
  *
  */

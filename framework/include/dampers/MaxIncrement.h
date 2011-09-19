@@ -40,5 +40,5 @@ protected:
    */
   Real _max_increment;
 };
- 
+
 #endif //MAXINCREMENT_H

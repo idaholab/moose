@@ -1,23 +1,23 @@
 // Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
 // certain rights in this software
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-// 
+//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,7 +29,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 #include <math.h>
 class DiffData
 {
@@ -44,11 +44,11 @@ class DiffData
       mm_nodeset = 6,
       mm_elematt = 7  // step not valid
     };
-  
+
   DiffData()
     : diff(0.0), val1(0.0), val2(0.0), id(-1), blk(-1), type(mm_unknown)
     {}
-    
+
     void set_max(double d, double val_1, double val_2, int id_=-1, int blk_=-1)
     {
       if (diff < d) {
@@ -59,13 +59,13 @@ class DiffData
 	if (blk_ != -1) blk = blk_;
       }
     }
-    
+
     double diff;
     double val1;
     double val2;
     int    id;
     int    blk;
-    
+
     Type   type;
 };
 
@@ -83,7 +83,7 @@ class MinMaxData
       mm_elematt = 7  // step not valid
     };
   MinMaxData()
-    : min_val(DBL_MAX), min_step(-1), min_id(-1), min_blk(-1), 
+    : min_val(DBL_MAX), min_step(-1), min_id(-1), min_blk(-1),
     max_val(-1.0),    max_step(-1), max_id(-1), max_blk(-1),
     type(mm_unknown)
       {}
@@ -96,7 +96,7 @@ class MinMaxData
 	if (id  != -1) min_id  = id;
 	if (blk != -1) min_blk = blk;
       }
-    
+
       if (fabs(val) > max_val) {
 	max_val = fabs(val);
 	max_step = step;

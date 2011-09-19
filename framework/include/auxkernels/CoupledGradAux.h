@@ -24,7 +24,7 @@ class CoupledGradAux;
 template<>
 InputParameters validParams<CoupledGradAux>();
 
-/** 
+/**
  * Coupled auxiliary gradient
  */
 class CoupledGradAux : public AuxKernel
@@ -38,7 +38,7 @@ public:
   CoupledGradAux(const std::string & name, InputParameters parameters);
 
   virtual ~CoupledGradAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

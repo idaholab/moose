@@ -17,7 +17,7 @@ GOLD_DIR      = 'gold_dir'       # The directory where the "golden standard" fil
 TEST_DIR      = 'test_dir'       # The directory where the test resides, this is populated automatically
 SHOULD_CRASH  = 'should_crash'   # Set to true if this test should crash
 EXPECT_ERR    = 'expect_err'     # string - This string must occur in the output for the test to pass
-EXPECT_ASSERT = 'expect_assert'  # string - This string must occur in DEBUG mode builds to pass  
+EXPECT_ASSERT = 'expect_assert'  # string - This string must occur in DEBUG mode builds to pass
 ERRORS        = 'errors'         # list[strings] - The test will fail if any string occurs in the output
 
 # Groups of tests

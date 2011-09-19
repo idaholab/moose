@@ -109,10 +109,10 @@ DT2Transient::postSolve()
     // save the solution (for time step with dt)
     *_u1 = *nl_sys.current_local_solution;
     _u1->close();
-    
+
     *_aux1 = *aux_sys.current_local_solution;
     _aux1->close();
-    
+
     // take two steps with dt/2
     std::cout << "Taking two dt/2 time steps" << std::endl;
 
@@ -128,11 +128,11 @@ DT2Transient::postSolve()
 
     // cut the time step in half
     _dt = _dt_full / 2;
-    
+
     // 1. step
     _problem.onTimestepBegin();
     _time += _dt;
-    
+
     std::cout << "  - 1. step" << std::endl;
     Moose::setSolverDefaults(_problem);
     nl_sys.solve();
@@ -147,15 +147,15 @@ DT2Transient::postSolve()
     // 2. step
     _problem.onTimestepBegin();
     _time += _dt;
-    
-    std::cout << "  - 2. step" << std::endl;   
+
+    std::cout << "  - 2. step" << std::endl;
     Moose::setSolverDefaults(_problem);
     nl_sys.solve();
 
     _converged = nl_sys.nonlinear_solver->converged;
     if (!_converged) return;
     nl_sys.update();
-    
+
     *_u2 = *nl_sys.current_local_solution;
     _u2->close();
 
@@ -163,7 +163,7 @@ DT2Transient::postSolve()
     *_u_diff = *_u2;
     *_u_diff -= *_u1;
     _u_diff->close();
-    
+
     _error = (_u_diff->l2_norm() / std::max(_u1->l2_norm(), _u2->l2_norm())) / _dt_full;
 
     _dt = _dt_full;
@@ -181,7 +181,7 @@ DT2Transient::lastSolveConverged()
     return true;
   else
     return false;
-}  
+}
 
 Real
 DT2Transient::computeDT()
@@ -200,7 +200,7 @@ DT2Transient::computeDT()
       _dt = _dt_full*_max_increase;
     else
       _dt = new_dt;
-    
+
     *nl_sys.current_local_solution= *_u1;
     *nl_sys.old_local_solution = *_u1;
     *nl_sys.older_local_solution = *_u_saved;

@@ -32,7 +32,7 @@
 
 [Functions]
   active = 'left_bc'
-  
+
   [./left_bc]
     type = ParsedFunction
     value = t
@@ -85,13 +85,13 @@
 
 [Postprocessors]
   active = 'node4v node4v1'
-  
+
   [./node4v]
     type = NodalVariableValue
     variable = v
     nodeid = 3
   [../]
-  
+
   [./node4v1]
     type = NodalVariableValue
     variable = v1
@@ -102,7 +102,7 @@
 [Executioner]
   type = Transient
   petsc_options = '-snes_mf_operator'
-  
+
   dt = 0.1
   start_time = 0
   end_time = 1
@@ -117,4 +117,4 @@
   print_linear_residuals = false
   perf_log = true
 []
-   
+

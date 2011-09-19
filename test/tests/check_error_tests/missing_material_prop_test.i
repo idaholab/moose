@@ -23,7 +23,7 @@
   [./body_force]
     type = BodyForce
     variable = u
-    block = 1 
+    block = 1
     value = 10
   [../]
 []
@@ -65,5 +65,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

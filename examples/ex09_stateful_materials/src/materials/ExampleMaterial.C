@@ -25,7 +25,7 @@ InputParameters validParams<ExampleMaterial>()
 ExampleMaterial::ExampleMaterial(const std::string & name,
                                  InputParameters parameters)
   :Material(name, parameters),
-   
+
    // Get a parameter value for the diffusivity
    _initial_diffusivity(getParam<Real>("initial_diffusivity")),
 

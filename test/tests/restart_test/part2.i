@@ -43,14 +43,14 @@
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
-    function = exact_fn 
+    function = exact_fn
   [../]
 []
 
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
-  
+
   restart_soln_file = out_part1_0005.xda
 []
 

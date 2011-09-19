@@ -63,7 +63,7 @@
     block = 0
     mat_prop = 'some_other_prop'
     coupled_mat_prop = 'some_prop'
-  [../]  
+  [../]
 []
 
 [Executioner]

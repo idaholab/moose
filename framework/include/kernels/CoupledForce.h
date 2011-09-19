@@ -30,10 +30,10 @@ class CoupledForce : public Kernel
 {
 public:
   CoupledForce(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
-  
+
   virtual Real computeQpJacobian();
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);

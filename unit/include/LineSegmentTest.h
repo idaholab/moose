@@ -21,7 +21,7 @@
 // Moose includes
 #include "LineSegment.h"
 
-class LineSegmentTest : public CppUnit::TestFixture 
+class LineSegmentTest : public CppUnit::TestFixture
 {
 
   CPPUNIT_TEST_SUITE( LineSegmentTest );
@@ -31,7 +31,7 @@ class LineSegmentTest : public CppUnit::TestFixture
   CPPUNIT_TEST( containsPointTest );
   CPPUNIT_TEST( planeIntersectTest );
   CPPUNIT_TEST( lineIntersectTest );
-  
+
   CPPUNIT_TEST_SUITE_END();
 
 public:

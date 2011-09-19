@@ -12,7 +12,7 @@ class PolyCoupledDirichletBC : public NodalBC
 {
 public:
   PolyCoupledDirichletBC(const std::string & name, InputParameters parameters);
-    
+
   virtual ~PolyCoupledDirichletBC(){}
 
 protected:

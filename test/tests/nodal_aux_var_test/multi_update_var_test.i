@@ -56,7 +56,7 @@
   [../]
 
   [./all]
-    variable = tt 
+    variable = tt
     type = MultipleUpdateAux
     u = u
     var1 = ten
@@ -94,5 +94,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

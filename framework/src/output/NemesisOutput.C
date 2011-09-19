@@ -57,12 +57,12 @@ NemesisOutput::output(const std::string & file_base, Real time)
 {
   if (_out == NULL)
   {
-#if LIBMESH_ENABLE_PARMESH    
+#if LIBMESH_ENABLE_PARMESH
     _out = new Nemesis_IO(libmesh_cast_ref<ParallelMesh&>(_es.get_mesh()));
     _file_num++;
 #else
-   mooseError("Nemesis not supported when compiled without --enable-parmesh");                      
-#endif                          
+   mooseError("Nemesis not supported when compiled without --enable-parmesh");
+#endif
   }
 
   _num++;
@@ -83,8 +83,8 @@ NemesisOutput::outputPps(const std::string & /*file_base*/, const FormattedTable
   // Search through the map, find a time in the table which matches the input time.
   // Note: search in reverse, since the input time is most likely to be the most recent time.
   const Real time_tol = 1.e-12;
-  
-  std::map<Real, std::map<std::string, Real> >::const_reverse_iterator 
+
+  std::map<Real, std::map<std::string, Real> >::const_reverse_iterator
     rit  = table.getData().rbegin(),
     rend = table.getData().rend();
 
@@ -93,11 +93,11 @@ NemesisOutput::outputPps(const std::string & /*file_base*/, const FormattedTable
       // Difference between input time and the time stored in the table
       Real time_diff = std::abs((time - (*rit).first));
 
-      // Get relative difference, but don't divide by zero!  
-      if ( std::abs(time) > 0.) 
+      // Get relative difference, but don't divide by zero!
+      if ( std::abs(time) > 0.)
 	time_diff /= std::abs(time);
 
-      // Break out of the loop if we found the right time 
+      // Break out of the loop if we found the right time
       if (time_diff < time_tol)
 	break;
     }
@@ -113,13 +113,13 @@ NemesisOutput::outputPps(const std::string & /*file_base*/, const FormattedTable
 
   // Otherwise, fill local vectors with name/value information and write to file.
   const std::map<std::string, Real> & tmp = (*rit).second;
-  
-  std::vector<Real> global_vars; 
-  std::vector<std::string> global_var_names; 
+
+  std::vector<Real> global_vars;
+  std::vector<std::string> global_var_names;
   global_vars.reserve(tmp.size());
   global_var_names.reserve(tmp.size());
 
-  for (std::map<std::string, Real>::const_iterator ii = tmp.begin(); 
+  for (std::map<std::string, Real>::const_iterator ii = tmp.begin();
        ii != tmp.end(); ++ii)
   {
     // Push back even though we know the exact size, saves us keeping

@@ -32,7 +32,7 @@ Function::~Function()
 {
 }
 
-RealGradient 
+RealGradient
 Function::gradient(Real /*t*/, const Point & /*p*/)
 {
   return RealGradient(0, 0, 0);

@@ -36,7 +36,7 @@ InputParameters validParams<ReadMeshAction>()
   params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
   params.addParam<bool>("skip_partitioning", false, "If true the mesh won't be partitioned.  Probably not a good idea to use it with a serial mesh!");
   params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
-  
+
   return params;
 }
 
@@ -47,15 +47,15 @@ ReadMeshAction::ReadMeshAction(const std::string & name, InputParameters params)
 
 void
 ReadMeshAction::act()
-{ 
+{
   std::string mesh_file = getParam<std::string>("file");
   if (mesh_file != no_file_supplied)
   {
     mooseAssert(_parser_handle._mesh == NULL, "Mesh already exists, and you are trying to read another");
-    
+
     // Create the mesh and save it off
     _parser_handle._mesh = new MooseMesh();
-    _parser_handle._mesh->setPatchSize(getParam<unsigned int>("patch_size"));    
+    _parser_handle._mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
     Parser::checkFileReadable(mesh_file);
 
@@ -89,7 +89,7 @@ ReadMeshAction::act()
       // Create the displaced mesh
       _parser_handle._displaced_mesh = new MooseMesh();
       _parser_handle._displaced_mesh->setPatchSize(getParam<unsigned int>("patch_size"));
-      
+
       Moose::setup_perf_log.push("Read Displaced Mesh","Setup");
 
       if (getParam<bool>("nemesis"))
@@ -105,31 +105,31 @@ ReadMeshAction::act()
       }
 
       Moose::setup_perf_log.pop("Read Displaced Mesh","Setup");
-      
+
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
       if (displacements.size() != _parser_handle._mesh->dimension())
         mooseError("Number of displacements and dimension of mesh MUST be the same!");
 
       _parser_handle._displaced_mesh->_mesh.skip_partitioning(getParam<bool>("skip_partitioning"));
-    }   
+    }
   }
 
   std::vector<unsigned int> ghosted_boundaries = getParam<std::vector<unsigned int > >("ghosted_boundaries");
-  
+
   for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
   {
     _parser_handle._mesh->addGhostedBoundary(ghosted_boundaries[i]);
     if (isParamValid("displacements"))
       _parser_handle._displaced_mesh->addGhostedBoundary(ghosted_boundaries[i]);
-  }    
+  }
 
   if(isParamValid("ghosted_boundaries_inflation"))
   {
     std::vector<Real> ghosted_boundaries_inflation = getParam<std::vector<Real> >("ghosted_boundaries_inflation");
     _parser_handle._mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
-    if (isParamValid("displacements"))    
+    if (isParamValid("displacements"))
       _parser_handle._displaced_mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);
   }
-  
+
   mooseAssert(_parser_handle._mesh != NULL, "Mesh hasn't been created");
 }

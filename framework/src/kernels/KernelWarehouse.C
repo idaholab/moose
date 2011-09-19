@@ -104,7 +104,7 @@ bool
 KernelWarehouse::subdomains_covered(std::set<subdomain_id_type> & return_set) const
 {
   return_set.clear();
-  
+
   if (!_global_kernels.empty())
     return true;
   else

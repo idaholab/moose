@@ -113,13 +113,13 @@ public:
   operator libMesh::Mesh &(void) { return _mesh; }
 
   MeshBase & getMesh() { return _mesh; }
-  
+
   // Mesh Modifiers /////
   void addMeshModifer(const std::string & mod_name, const std::string & name, InputParameters parameters);
   void applyMeshModifications();
 
   inline void printInfo(std::ostream &os=libMesh::out) { _mesh.print_info(os); }
-  
+
   std::set<subdomain_id_type> & getNodeBlockIds(const Node & node);
 
   std::vector<unsigned int> & getNodeList(short int nodeset_id) { return _node_set_nodes[nodeset_id]; }
@@ -130,7 +130,7 @@ protected:
   bool _is_changed;                   ///< true if mesh is changed (i.e. after adaptivity step)
 
   // bool _is_parallel;           /// True if using a TRUE parallel mesh (ie Nemesis)
-  
+
   /// Used for generating the semilocal node range
   std::set<Node *> _semilocal_node_list;
 
@@ -158,8 +158,8 @@ protected:
 
   /**
    * A set of boundary IDs currently present in the mesh.
-   * In serial, this is equivalent to the values returned 
-   * by _mesh.boundary_info->get_boundary_ids().  In parallel, 
+   * In serial, this is equivalent to the values returned
+   * by _mesh.boundary_info->get_boundary_ids().  In parallel,
    * it will contain off-processor boundary IDs as well.
    */
   std::set<short> _mesh_boundary_ids;
@@ -181,7 +181,7 @@ protected:
    * The number of nodes to consider in the NearestNode neighborhood.
    */
   unsigned int _patch_size;
-  
+
   void cacheInfo();
   void freeBndNodes();
 };

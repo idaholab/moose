@@ -83,7 +83,7 @@ def parse_gcov(fname):
 
   ifcheck = re.compile(r"^\s*\d+:\s*\d+:\s*if\s*\(") # matches " 12:  655: if ("
   branch = False      # boolean indicating that we just saw and if statement and are now looking for branch %s
-  branch_tuple = None # (num_executions, file, line, code, percentage) of the current bracnh 
+  branch_tuple = None # (num_executions, file, line, code, percentage) of the current bracnh
   branch_data = []    # array of all branch data in this file
   orig_file = fname.split('#')[-1][:-5] # change blah.blah##foo.C.gcov to foo.C
 

@@ -22,11 +22,11 @@ protected:
   const Real _x_center;
   const Real _y_center;
   const Real _z_center;
-  
+
   const Real _x_spread;
   const Real _y_spread;
   const Real _z_spread;
-  
+
   const Real _x_min;
   const Real _x_max;
   const Real _y_min;

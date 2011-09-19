@@ -39,7 +39,7 @@
 #include <private/kspimpl.h>
 #include <private/snesimpl.h>
 
-namespace Moose 
+namespace Moose
 {
 namespace PetscSupport
 {
@@ -50,26 +50,26 @@ void petscSetOptions(const std::vector<std::string> & petsc_options,
 {
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("Petsc names and options are not the same length");
-  
+
   for (unsigned int i=0; i<petsc_options.size(); ++i)
     PetscOptionsSetValue(petsc_options[i].c_str(), PETSC_NULL);
-    
+
   for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
 }
-  
+
 PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy)
 {
   NonlinearSystem *system = (NonlinearSystem *) dummy;      // C strikes
-    
+
   *reason = KSP_CONVERGED_ITERATING;
-    
+
   //If it's the beginning of a new set of iterations, reset last_rnorm
   if (!n)
     system->_last_rnorm = 1e99;
-    
+
   PetscReal norm_diff = std::fabs(rnorm - system->_last_rnorm);
-    
+
   if(norm_diff < system->_l_abs_step_tol)
   {
     *reason = KSP_CONVERGED_RTOL;
@@ -88,14 +88,14 @@ PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedRe
   // As of PETSc 3.0.0, you must call KSPDefaultConverged with a
   // non-NULL context pointer which must be created with
   // KSPDefaultConvergedCreate(), and destroyed with
-  // KSPDefaultConvergedDestroy().  
+  // KSPDefaultConvergedDestroy().
   /*PetscErrorCode ierr = */
   KSPDefaultConverged(ksp, n, rnorm, reason, dummy);
-    
+
   // Pop the Error handler we pushed on the stack to go back
   // to default PETSc error handling behavior.
   PetscPopErrorHandler();
-    
+
   // If we hit max its then we consider that converged
   if (n >= ksp->max_it) *reason = KSP_CONVERGED_ITS;
   return 0;
@@ -107,7 +107,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 
   // unused
   // TransientNonlinearImplicitSystem * system = dynamic_cast<TransientNonlinearImplicitSystem *>(&_equation_system->get_system("NonlinearSystem"));
-  
+
   //  for(unsigned int var = 0; var < system->n_vars(); var++)
   //    std::cout<<var<<": "<<system->calculate_norm(*system->rhs,var,DISCRETE_L2)<<std::endl;
 
@@ -138,7 +138,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   {
     PetscInfo2(snes,"Nonlinear solve was blowing up!",snes->nfuncs,snes->max_funcs);
     *reason = SNES_DIVERGED_LS_FAILURE;
-  } 
+  }
 
   if (it && !*reason)
   {
@@ -216,7 +216,7 @@ void petscSetupDampers(NonlinearImplicitSystem& sys)
   NonlinearSystem & nl = problem->getNonlinearSystem();
   PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
-  
+
   SNESLineSearchSetPostCheck(snes, dampedCheck, problem);
 }
 
@@ -251,9 +251,9 @@ void petscSetDefaults(MProblem & problem)
                                                 PETSC_NULL);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
-    
+
 #endif
-    
+
 //      SNESSetUpdate(snes, petscNewtonUpdate);
 //      SNESSetApplicationContext(snes, (void *) executioner);
 }

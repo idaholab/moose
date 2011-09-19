@@ -34,7 +34,7 @@ protected:
 private:
   /// Holds the names of the paramters we've seen for a parsed block so they don't get printed twice
   std::map<std::string, std::set<std::string> > _seen_it;
-  
+
 };
 
 #endif /* INPUTFILEFORMATTER_H */

@@ -55,4 +55,4 @@ BoundingBoxIC::value(const Point & p)
 
   return _inside;
 }
-  
+

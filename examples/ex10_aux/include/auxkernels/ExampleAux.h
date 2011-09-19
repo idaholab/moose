@@ -24,7 +24,7 @@ class ExampleAux;
 template<>
 InputParameters validParams<ExampleAux>();
 
-/** 
+/**
  * Coupled auxiliary value
  */
 class ExampleAux : public AuxKernel
@@ -41,7 +41,7 @@ protected:
   virtual Real computeValue();
 
   VariableValue & _coupled_val;
-  
+
   Real _value;
 };
 

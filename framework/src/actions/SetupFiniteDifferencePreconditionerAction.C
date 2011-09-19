@@ -26,14 +26,14 @@ InputParameters validParams<SetupFiniteDifferencePreconditionerAction>()
   InputParameters params = validParams<SetupPreconditionerAction>();
   // TODO: Make this work with the preconditioner being passed here
 //  params.addRequiredParam<std::string>("preconditioner", "The type of preconditioner you want to use ie: LU, ILU, AMG, etc.");
-  
+
   params.addParam<std::vector<std::string> >("off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated with an off diagonal column from the same possition in off_diag_colum.");
   params.addParam<std::vector<std::string> >("off_diag_column", "The off diagonal column you want to add into the matrix, it will be associated with an off diagonal row from the same possition in off_diag_row.");
 
   params.addParam<bool>("full", false, "Set to true if you want the full set of couplings.  Simply for convenience so you don't have to set every off_diag_row and off_diag_column combination.");
 
   params.addParam<bool>("implicit_geometric_coupling", false, "Set to true if you want to add entries into the matrix for degrees of freedom that might be coupled by inspection of the geometric search objects.");
-    
+
   return params;
 }
 
@@ -47,7 +47,7 @@ SetupFiniteDifferencePreconditionerAction::act()
 {
   if(libMesh::n_processors() > 1)
     mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");
-  
+
   MProblem & subproblem = *_parser_handle._problem;
   NonlinearSystem & nl = subproblem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
@@ -55,13 +55,13 @@ SetupFiniteDifferencePreconditionerAction::act()
   CouplingMatrix * cm = new CouplingMatrix(n_vars);
 
   bool full = getParam<bool>("full");
-  
+
   if(!full)
   {
     // put 1s on diagonal
     for (unsigned int i = 0; i < n_vars; i++)
       (*cm)(i, i) = 1;
-    
+
     // off-diagonal entries
     std::vector<std::vector<unsigned int> > off_diag(n_vars);
     for(unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
@@ -86,4 +86,4 @@ SetupFiniteDifferencePreconditionerAction::act()
 
   // Set the jacobian to null so that libMesh won't override our finite differenced jacobian
   nl.useFiniteDifferencedPreconditioner(true);
-}  
+}

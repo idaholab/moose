@@ -36,12 +36,12 @@ public:
    * constructor.
    */
   DashpotBC(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
 private:
   unsigned int _component;
   Real _coefficient;
@@ -49,7 +49,7 @@ private:
   unsigned int _disp_x_var;
   unsigned int _disp_y_var;
   unsigned int _disp_z_var;
-  
+
   VariableValue & _disp_x_dot;
   VariableValue & _disp_y_dot;
   VariableValue & _disp_z_dot;

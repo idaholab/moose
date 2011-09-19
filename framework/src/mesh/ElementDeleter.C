@@ -37,7 +37,7 @@ ElementDeleter::ElementDeleter(const std::string & name, InputParameters paramet
 {}
 
 void
-ElementDeleter::modifyMesh(Mesh & 
+ElementDeleter::modifyMesh(Mesh &
 #if 0
 mesh
 #endif
@@ -47,7 +47,7 @@ mesh
   // TODO: Move the initialization of the function to the contructor - this will require having
   // the problem and functions parsed earlier
   // Function & func = getFunction("function");
-  
+
   // For now lets just make up a function
   // We'll start with a small sphere located at 0.0043 0 0.025 with radius 0.0012
 
@@ -74,7 +74,7 @@ mesh
   mesh.boundary_info->build_side_list(elem_list, side_list, id_list);
 
   DependencyResolver<unsigned int> resolver;
-  
+
   MeshBase::const_element_iterator it = mesh.active_elements_begin();
   const MeshBase::const_element_iterator end = mesh.active_elements_end();
   for (; it != end; ++it)
@@ -85,7 +85,7 @@ mesh
 
     // Check the function to see which elements should be deleted
     // TODO: Get functions to work so this can be passed in!
-    if (std::pow(p(0)-center(0), 2) + std::pow(p(1)-center(1), 2) + std::pow(p(2)-center(2), 2) < radius_squard) 
+    if (std::pow(p(0)-center(0), 2) + std::pow(p(1)-center(1), 2) + std::pow(p(2)-center(2), 2) < radius_squard)
     {
       deleteable_elems.insert(elem);
       // Check the sidesets
@@ -99,14 +99,14 @@ mesh
           info_indices.insert(std::pair<unsigned int, unsigned int>(elem->id(), i));
           std::cout << neighbor->id()+1 << " -> " << elem->id()+1 << " on side " << side_list[i] << " id " << id_list[i] << " (index: " << i << ")\n";
         }
-      }  
+      }
     }
   }
 
   const std::vector<unsigned int> & sorted = resolver.getSortedValues();
   std::pair<std::multimap<unsigned int, unsigned int>::iterator, std::multimap<unsigned int, unsigned int>::iterator> ret;
   std::multimap<unsigned int, unsigned int>::iterator j;
-  
+
   for (unsigned int i=0; i<sorted.size(); ++i)
   {
     std::cout << sorted[i]+1 << "\n";
@@ -119,7 +119,7 @@ mesh
       if (neighbor != NULL && deleteable_elems.find(elem) != deleteable_elems.end())
       {
         std::vector<short int> ids = mesh.boundary_info->boundary_ids(elem, j);
-        for (unsigned int k=0; k<ids.size(); ++k) 
+        for (unsigned int k=0; k<ids.size(); ++k)
         {
           mesh.boundary_info->add_side(neighbor, j, ids[k]);
           std::cout << "Neighbor " << neighbor->id()+1 << " side " << j << " id " << ids[k] << "\n";
@@ -127,7 +127,7 @@ mesh
       }
     }
   }
-  
+
   // Now go through the list and delete the elements that were originally marked
   for (unsigned int i=0; i<sorted.size(); ++i)
   {
@@ -137,7 +137,7 @@ mesh
       removeAllElemBCs(mesh, elem);
       mesh.delete_elem(elem);
     }
-    
+
   }
 
   mesh.prepare_for_use();

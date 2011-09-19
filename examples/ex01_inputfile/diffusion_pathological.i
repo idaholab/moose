@@ -34,7 +34,7 @@
     family = LAGRANGE
   [../]
 
-# This variable is not active in the list above 
+# This variable is not active in the list above
 # therefore it is not used in the simulation
   [./diffused]
     order = FIRST
@@ -69,5 +69,5 @@
     value = 1
   [../]
 []
-  
-    
+
+

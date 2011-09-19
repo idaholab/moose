@@ -47,7 +47,7 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
   // delete nodal postprocessors
   for (std::vector<Postprocessor *>::iterator i=_nodal_postprocessors.begin(); i!=_nodal_postprocessors.end(); ++i)
     delete *i;
-  
+
   // delete generic postprocessors
   for (std::vector<Postprocessor *>::iterator i=_generic_postprocessors.begin(); i!=_generic_postprocessors.end(); ++i)
     delete *i;

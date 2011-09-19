@@ -42,7 +42,7 @@ public:
    * constructor.
    */
   DGFunctionDiffusionDirichletBC(const std::string & name, InputParameters parameters);
-    
+
   virtual ~DGFunctionDiffusionDirichletBC() {}
 
 protected:

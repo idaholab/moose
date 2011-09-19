@@ -92,7 +92,7 @@ protected:
   std::map<unsigned int, std::vector<Postprocessor *> > _element_postprocessors;
   std::map<unsigned int, std::vector<Postprocessor *> > _side_postprocessors;
   std::vector<Postprocessor *> _nodal_postprocessors;
-  
+
   std::vector<Postprocessor *> _generic_postprocessors;
   std::vector<Postprocessor *> _all_postprocessors;
 

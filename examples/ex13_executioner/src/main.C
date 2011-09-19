@@ -45,7 +45,7 @@ int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
   Parser p;
-  
+
   Moose::registerObjects();
 
   // Register our new executioner
@@ -60,7 +60,7 @@ int main (int argc, char** argv)
 
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();
-  
+
   p.parse(input_filename);
   p.execute();
 

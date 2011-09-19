@@ -50,7 +50,7 @@ public:
   Real sample(Real xcoord, Real ycoord);
 
   void GetNeigbourIndices(std::vector<Real> inArr, Real x ,int& lowerX ,int& upperX );
-  
+
 private:
 
   std::vector<Real> _xAxis;
@@ -60,7 +60,7 @@ private:
 };
 
 #endif //BILINEARINTERPOLATION_H
-  
-  
-  
-      
+
+
+
+

@@ -83,7 +83,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
   }
 
   _problem.reinitMaterials(subdomain, _tid);
-  
+
   computeJacobian();
 }
 

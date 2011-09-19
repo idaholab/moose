@@ -37,7 +37,7 @@ class DGMatDiffusion : public DGKernel
 {
 public:
   DGMatDiffusion(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
@@ -49,5 +49,5 @@ protected:
   MaterialProperty<Real> & _diff;               // diffusivity
   MaterialProperty<Real> & _diff_neighbor;      // diffusivity
 };
- 
+
 #endif

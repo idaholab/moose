@@ -60,10 +60,10 @@ PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters p
   std::vector<Real> x;
   std::vector<Real> y;
   ColumnMajorMatrix z;
-  
+
   // Parse to get x, y, z
   parse( x, y, z );
-  
+
   _bilinear_interp = new BilinearInterpolation( x, y, z );
 }
 
@@ -88,7 +88,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
    unsigned int linenum = 0;
    unsigned int itemnum = 0;
    std::vector<Real> data;
-     
+
    while (getline (file, line))
    {
      linenum++;
@@ -104,7 +104,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
        i >> d;
        data.push_back( d );
 //       std::cout << "Item #" << itemnum << ": " << item << std::endl;
-             
+
      }
    }
 //   std::cout << " linenum " << linenum << std::endl;
@@ -133,7 +133,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
        z(i,j) = data[offset];
        ++offset;
      }
-   }   
+   }
    if (data.size() != offset)
    {
      std::cerr << "ERROR! Data mismatch!" << std::endl;

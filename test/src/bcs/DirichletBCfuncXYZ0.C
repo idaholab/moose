@@ -9,7 +9,7 @@ InputParameters validParams<DirichletBCfuncXYZ0>()
   params.set<Real>("B0")=0.;
   params.set<Real>("C0")=0.;
   params.set<Real>("omega0")=1.;
-  
+
   params.set<bool>("_integrated") = false;
   return params;
 }

@@ -36,7 +36,7 @@ class ArbitraryQuadrature : public QBase
   void setPoints(const std::vector<Point> & points);
 
   virtual bool shapes_need_reinit() { return true; }
- 
+
  private:
 
   /**

@@ -25,8 +25,8 @@ PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & name)
 {
   return _pi_problem.getPostprocessorValue(name, _pi_tid);
-  
-  
+
+
   // std::map<std::string, Real>::iterator it = _postprocessor_data._values.find(name);
 
 //   if (it != _postprocessor_data._values.end())

@@ -49,7 +49,7 @@ protected:
 //  const std::vector<Real> & _JxW;
 
   const Node * & _current_node;
-  
+
   VariableValue & _u;                                   ///< Holds the solution at current quadrature points
 //  VariableValue & _u_old;                               ///< Holds the previous solution at the current quadrature point.
 //  VariableValue & _u_older;                             ///< Holds the t-2 solution at the current quadrature point.
@@ -60,5 +60,5 @@ protected:
 
 //  virtual Real doSomething();
 };
- 
+
 #endif

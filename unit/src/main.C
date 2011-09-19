@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   std::ofstream out;
 
   // If you run with --xml, output will be sent to an xml file instead of the screen
-  if (argc == 2 && std::string(argv[1]) == std::string("--xml")) 
+  if (argc == 2 && std::string(argv[1]) == std::string("--xml"))
   {
     runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), out ) );
     out.open("test_results.xml");
@@ -52,9 +52,9 @@ int main(int argc, char **argv)
     runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
   }
 
-  bool wasSucessful = runner.run(/*testPath=*/"", 
-				 /*doWait=*/false, 
-				 /*doPrintResult=*/true, 
+  bool wasSucessful = runner.run(/*testPath=*/"",
+				 /*doWait=*/false,
+				 /*doPrintResult=*/true,
 				 /*doPrintProgress=*/false);
 
   return wasSucessful ? 0 : 1;

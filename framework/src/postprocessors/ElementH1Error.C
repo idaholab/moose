@@ -41,6 +41,6 @@ ElementH1Error::computeQpIntegral()
 {
   RealGradient graddiff = _grad_u[_qp]-_func.gradient(_t, _q_point[_qp]);
   Real         funcdiff = _u[_qp]-_func.value(_t, _q_point[_qp]);
-  
+
   return graddiff*graddiff + funcdiff*funcdiff;
 }

@@ -34,7 +34,7 @@ CoupledProblem::CoupledProblem(const std::string & name, InputParameters paramet
     _t_step(_eq.parameters.set<int>("t_step")),
     _dt(_eq.parameters.set<Real>("dt")),
     _out(*this)
-{  
+{
   _eq.parameters.set<Problem *>("_problem") = this;
 }
 
@@ -149,8 +149,8 @@ CoupledProblem::subdomainSetupSide(unsigned int /*subdomain*/, THREAD_ID /*tid*/
 void
 CoupledProblem::init()
 {
-  
-  
+
+
   _eq.init();
   _eq.print_info();
 

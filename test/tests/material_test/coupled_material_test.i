@@ -63,7 +63,7 @@
     block = 0
     prop_names = 'mp1'
     prop_values = '2'
-  [../]  
+  [../]
 []
 
 [Executioner]

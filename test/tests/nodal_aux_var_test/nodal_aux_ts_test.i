@@ -7,7 +7,7 @@
     dim = 2
     xmin = 0
     xmax = 1
-    ymin = 0 
+    ymin = 0
     ymax = 1
     nx = 3
     ny = 3
@@ -98,11 +98,11 @@
 
 [Executioner]
   type = Transient
-  
+
   start_time = 0
   dt = 0.1
   num_steps = 2
-  
+
   petsc_options = '-snes_mf_operator'
 []
 

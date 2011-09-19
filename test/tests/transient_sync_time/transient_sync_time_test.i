@@ -3,7 +3,7 @@
     dim = 2
     nx = 20
     ny = 20
-    
+
     x_min = 0
     x_max = 1
 
@@ -69,7 +69,7 @@
   end_time = 40
   num_steps = 1000
 
-  # These times will be sync'd in the output 
+  # These times will be sync'd in the output
   sync_times = '10.5 20 30.5'
 []
 

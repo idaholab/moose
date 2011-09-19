@@ -24,7 +24,7 @@
 
 class MProblem;
 
-namespace Moose 
+namespace Moose
 {
 namespace PetscSupport
 {
@@ -34,7 +34,7 @@ void petscSetOptions(const std::vector<std::string> & petsc_options,
 
 //    PetscErrorCode petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedReason *reason,void *dummy);
 //    PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,PetscReal pnorm,PetscReal fnorm,SNESConvergedReason *reason,void *dummy);
-  
+
 void petscSetDefaults(MProblem & problem);
 
 void petscSetupDampers(NonlinearImplicitSystem& sys);

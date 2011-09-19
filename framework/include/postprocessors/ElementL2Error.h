@@ -32,7 +32,7 @@ class ElementL2Error :
 {
 public:
   ElementL2Error(const std::string & name, InputParameters parameters);
-  
+
   /**
    * Get the L2 Error.
    */

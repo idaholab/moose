@@ -25,7 +25,7 @@ class PenetrationAux;
 template<>
 InputParameters validParams<PenetrationAux>();
 
-/** 
+/**
  * Constant auxiliary value
  */
 class PenetrationAux : public AuxKernel

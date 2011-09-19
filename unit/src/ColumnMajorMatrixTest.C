@@ -29,7 +29,7 @@ ColumnMajorMatrixTest::setUp()
   // Define commonly used matrices for testing
   a = new ColumnMajorMatrix(3, 3);
   ColumnMajorMatrix & a_ref = *a;
-  
+
   a_ref(0, 0) = 1;
   a_ref(1, 0) = 2;
   a_ref(2, 0) = 3;
@@ -185,7 +185,7 @@ ColumnMajorMatrixTest::multMatrixScalarEquals()
 
   // Scalar multiply and update
   *a *= 2;
-  
+
   CPPUNIT_ASSERT(mult_solution == *a);
 }
 
@@ -237,14 +237,14 @@ ColumnMajorMatrixTest::reshapeMatrix()
   mat.reshape(2, 3);
 
   /** from:
-  * 1 4 
-  * 2 5 
-  * 3 6 
+  * 1 4
+  * 2 5
+  * 3 6
   *
   * to:
   *
-  * 1 3 5 
-  * 2 4 6 
+  * 1 3 5
+  * 2 4 6
   */
 
   CPPUNIT_ASSERT( mat(0,1) == 3 );

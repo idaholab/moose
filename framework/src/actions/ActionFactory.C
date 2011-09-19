@@ -27,7 +27,7 @@ ActionFactory *ActionFactory::instance()
     _instance = new ActionFactory;
 
   return _instance;
-} 
+}
 
 void
 ActionFactory::release()
@@ -45,7 +45,7 @@ ActionFactory::create(const std::string & action, InputParameters params)
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
   BuildInfo *build_info = NULL;
   std::string name = params.have_parameter<std::string>("name") ? params.get<std::string>("name") : "";
-  
+
   iters = _name_to_build_info.equal_range(action);
 
   // Find the Action that matches the one we have registered based on unique_id
@@ -63,7 +63,7 @@ ActionFactory::create(const std::string & action, InputParameters params)
   // matches - then it surely it must still be the correct one
   if (count == 1 && !build_info)
     build_info = &(iters.first->second);
-  
+
   if (!build_info)
     mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
 
@@ -71,7 +71,7 @@ ActionFactory::create(const std::string & action, InputParameters params)
     params.set<std::string>("action") = build_info->_action_name;
 
 //  std::cerr << "*** " << params.get<std::string>("name") << " " << params.get<std::string>("action") << " ***\n";
-      
+
   return (*build_info->_build_pointer)(name, params);
 }
 
@@ -94,7 +94,7 @@ ActionFactory::getValidParams(const std::string & name)
 
   // Add a default name which can be overriden by the parser or whatever other future driver
   params.addPrivateParam<std::string>("name", iter->second._action_name);
-      
+
   return params;
 }
 
@@ -104,7 +104,7 @@ ActionFactory::buildAllBuildableActions(const std::string & action, Parser * p_p
   bool ret_value = false;
   std::multimap<std::string, std::string>::iterator it;
   std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator> iters;
-  
+
   // First get the names of all the Actions for the given action_name so we can index into the other Factory maps
   iters = _action_to_name_map.equal_range(action);
 

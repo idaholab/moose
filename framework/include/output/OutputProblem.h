@@ -82,7 +82,7 @@ public:
   virtual int & timeStep() { return _mproblem.timeStep(); }
   virtual Real & dt() { return _mproblem.dt(); }
   virtual Real & dtOld() { return _mproblem.dtOld(); }
-  
+
   virtual void copySolutionsBackwards() {}
 
   // Output system /////

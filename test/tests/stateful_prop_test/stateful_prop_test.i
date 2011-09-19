@@ -58,7 +58,7 @@
 
 [Materials]
   active = 'stateful'
-  
+
   [./stateful]
     type = StatefulTest
     block = 1
@@ -83,4 +83,4 @@
   exodus = true
   perf_log = true
 []
-    
+

@@ -56,7 +56,7 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
     std::string block_name = name.substr(index);
     _out << "\n" << spacing << "[" << forward << block_name << "]";
   }
-  
+
   for (unsigned int i=0; i<param_ptrs.size(); ++i)
   {
     if (param_ptrs[i] == NULL) continue;
@@ -64,7 +64,7 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
     {
       if (_seen_it[name].find(iter->first) != _seen_it[name].end())
         continue;
-      
+
       // We only want non-private params unless we are in dump mode
       if ((_dump_mode && param_ptrs[i]->isPrivate(iter->first)) || ((!_dump_mode && !param_ptrs[i]->isParamValid(iter->first))))
         continue;
@@ -138,10 +138,10 @@ InputFileFormatter::printCloseAndOpen(const std::string & name, const std::strin
 {
   std::string empty;
   std::vector<std::string> prev_elements, curr_elements;
-  
+
   if (!prev_name)
     prev_name = &empty;
-  
+
   Parser::tokenize(*prev_name, prev_elements);
   Parser::tokenize(name, curr_elements);
 
@@ -159,7 +159,7 @@ InputFileFormatter::printCloseAndOpen(const std::string & name, const std::strin
     }
     else
       ++same_elements;
-  
+
   // Executioner syntax is different - we'll hack it here!
   if ((name == "Executioner" && *prev_name == "Executioner") //||
 //      (name.find("InitialCondition") != std::string::npos && prev_name->find("InitialCondition") != std::string::npos)
@@ -170,7 +170,7 @@ InputFileFormatter::printCloseAndOpen(const std::string & name, const std::strin
   }
 
   num_to_close = prev_elements.size() - same_elements;
-  
+
   // Close off previous blocks if necessary
   for (int i=1; i<=num_to_close; ++i)
   {

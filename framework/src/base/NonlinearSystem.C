@@ -1271,7 +1271,7 @@ NonlinearSystem::setupDampers()
 #ifdef LIBMESH_HAVE_PETSC
   _sys.nonlinear_solver->user_presolve = Moose::PetscSupport::petscSetupDampers;
 #endif
-  
+
   _increment_vec = &_sys.add_vector("u_increment", true, GHOSTED);
 }
 
@@ -1379,7 +1379,7 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
 {
   std::vector<st> vec;
   vec.resize(residual.local_size());
-  
+
   unsigned int j = 0;
   for (MeshBase::node_iterator it = _mesh._mesh.local_nodes_begin(); it != _mesh._mesh.local_nodes_end(); ++it)
   {

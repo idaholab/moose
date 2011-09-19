@@ -48,11 +48,11 @@ class LineSegment
    * Determines whether a point is in a line segment or not
    */
   bool contains_point (const Point & p) const;
-  
+
   bool intersect (const Plane & pl, Point & intersect_p) const;
 
   bool intersect (const LineSegment & l1, Point & intersect_p) const;
-    
+
  private:
   bool closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const;
 

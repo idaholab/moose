@@ -63,13 +63,13 @@ class DiracKernel :
 public:
   DiracKernel(const std::string & name, InputParameters parameters);
   virtual ~DiracKernel(){}
-  
-  /** 
+
+  /**
    * Computes the residual for the current element.
    */
   virtual void computeResidual();
 
-  /** 
+  /**
    * Computes the jacobian for the current element.
    */
   virtual void computeJacobian();
@@ -87,12 +87,12 @@ public:
    */
   virtual void addPoints() = 0;
 
-  /** 
+  /**
    * This is the virtual that derived classes should override for computing the residual.
    */
   virtual Real computeQpResidual()=0;
 
-  /** 
+  /**
    * This is the virtual that derived classes should override for computing the Jacobian.
    */
   virtual Real computeQpJacobian();
@@ -121,7 +121,7 @@ public:
    * Remove all of the current points and elements.
    */
   void clearPoints();
-  
+
 protected:
   /**
    * Add the physical x,y,z point located in the element "elem" to the list of points
@@ -135,7 +135,7 @@ protected:
    *
    * This spawns a search for the element containing that point!
    */
-  void addPoint(Point p);  
+  void addPoint(Point p);
 
   Problem & _problem;
   SubProblemInterface & _subproblem;
@@ -153,7 +153,7 @@ protected:
 
   std::set<const Elem *> _elements;                     ///< The list of elements that need distributions
   std::map<const Elem *, std::set<Point> > _points;     ///< The list of physical xyz Points that need to be evaluated in each element
-  
+
   //std::vector<Point> & _current_points;               ///< The points on the current element
 
   Point _current_point;                                 ///< The current point
@@ -197,5 +197,5 @@ protected:
   MooseArray<RealGradient> & _grad_zero;                ///< Zero gradient at QPs
   MooseArray<RealTensor> & _second_zero;                ///< Zero second derivative at QPs
 };
- 
+
 #endif

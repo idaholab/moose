@@ -32,11 +32,11 @@ public:
    * constructor.
    */
   ConvectiveFluxBC(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  
+
 private:
   /**
    * Ratio of u to du/dn

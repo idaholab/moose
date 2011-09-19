@@ -167,7 +167,7 @@ registerObjects()
   registerProblem(MProblem);
   registerProblem(OutputProblem);
   registerProblem(CoupledProblem);
-  
+
   // kernels
   registerKernel(TimeDerivative);
   registerKernel(Diffusion);
@@ -372,14 +372,14 @@ addActionTypes()
  * Multiple Action class can be associated with a single input file section, in which case all associated Actions
  * will be created and "acted" on when the associated inputfile section is seen.
  *
- * Example: 
+ * Example:
  * "setup_mesh" <---> SetupMeshAction <-
- *                                       \  
- *                                        [Mesh]      
+ *                                       \
+ *                                        [Mesh]
  *                                       /
  * "read_mesh"  <---> ReadMeshAction  <-
  *
- * 
+ *
  * Action classes can also be registered to act on more than one input file section for a different action_name
  * if similar logic can work in multiple cases
  *
@@ -399,10 +399,10 @@ void
 registerActions()
 {
   registerAction(CreateMeshAction, "create_mesh");
-  registerAction(ReadMeshAction, "read_mesh");  
+  registerAction(ReadMeshAction, "read_mesh");
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(AddExtraNodesetAction, "add_extra_nodeset");
-  
+
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");
   registerAction(SetupOutputAction, "setup_output");
@@ -416,7 +416,7 @@ registerActions()
   registerAction(CopyNodalVarsAction, "copy_nodal_vars");
   registerAction(AddVariableAction, "add_aux_variable");
   registerAction(CopyNodalVarsAction, "copy_nodal_aux_vars");
-  
+
   registerAction(AddICAction, "add_ic");
   registerAction(AddKernelAction, "add_kernel");
   registerAction(AddKernelAction, "add_aux_kernel");

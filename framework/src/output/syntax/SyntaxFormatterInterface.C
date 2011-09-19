@@ -17,7 +17,7 @@
 SyntaxFormatterInterface::SyntaxFormatterInterface(std::ostream & out, bool dump_mode)
   :_out(out),
    _dump_mode(dump_mode)
-   
+
 {
 }
 

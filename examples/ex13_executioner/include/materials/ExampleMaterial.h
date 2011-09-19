@@ -38,7 +38,7 @@ protected:
 private:
   Real _input_diffusivity;
   Real _input_time_coefficient;
-  
+
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<Real> & _time_coefficient;
 };

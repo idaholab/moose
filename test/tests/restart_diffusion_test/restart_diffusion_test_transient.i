@@ -52,7 +52,7 @@
 
   start_time = 0.0
   num_steps = 10
-  dt = .1  
+  dt = .1
 []
 
 [Output]
@@ -62,5 +62,5 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+

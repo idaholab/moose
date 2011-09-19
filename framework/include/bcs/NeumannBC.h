@@ -35,11 +35,11 @@ public:
    * constructor.
    */
   NeumannBC(const std::string & name, InputParameters parameters);
-  
+
 
 protected:
   virtual Real computeQpResidual();
-  
+
   Real _value;                                                  ///< Value of grad(u) on the boundary.
 };
 

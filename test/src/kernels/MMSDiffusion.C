@@ -33,7 +33,7 @@ MMSDiffusion::computeQpResidual()
     return _grad_test[_i][_qp]*(u*u-2*u+2)*_grad_u[_qp];
     //We multiplied by our k(u).
   }
-    
+
 }
 
 Real
@@ -57,4 +57,4 @@ MMSDiffusion::computeQpJacobian()
     return _grad_test[_i][_qp]*(u*u-2*u+2)*_grad_phi[_j][_qp];
     //We multiplied by our k(u).
   }
-} 
+}

@@ -39,4 +39,4 @@ PolyDiffusion::computeQpJacobian()
   Real u = a*x*x*x*y*t+b*y*y*z+e*x*y*z*z*z;
   return _grad_test[_i][_qp]*(u*u-2*u+2)*_grad_phi[_j][_qp];
   //We multiplied by our k(u)
-} 
+}

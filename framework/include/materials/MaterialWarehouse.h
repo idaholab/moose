@@ -44,7 +44,7 @@ public:
   std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);
 
   const std::vector<Material *> & active(unsigned int block_id) { return _active_materials[block_id]; }
-  
+
   void updateMaterialDataState();
 
   void addMaterial(int block_id, Material *material);
@@ -56,7 +56,7 @@ public:
    * @return The list of subdomain IDs
    */
   const std::set<int> & blocks() { return _blocks; }
-  
+
 protected:
   std::map<int, std::vector<Material *> > _active_materials;            ///< A list of material associated with the block (subdomain)
   std::map<int, std::vector<Material *> > _active_boundary_materials;   ///< A list of boundary materials associated with the block (subdomain)

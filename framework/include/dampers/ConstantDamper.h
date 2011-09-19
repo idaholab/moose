@@ -47,5 +47,5 @@ protected:
    */
   Real _damping;
 };
- 
+
 #endif //CONSTANTDAMPER_H

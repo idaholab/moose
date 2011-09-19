@@ -29,7 +29,7 @@ ConstantPointSource::ConstantPointSource(const std::string & name, InputParamete
     _point_param(getParam<std::vector<Real> >("point"))
 {
   _p(0) = _point_param[0];
-  
+
   if(_point_param.size() > 1)
   {
     _p(1) = _point_param[1];
@@ -40,7 +40,7 @@ ConstantPointSource::ConstantPointSource(const std::string & name, InputParamete
     }
   }
 }
-           
+
 void
 ConstantPointSource::addPoints()
 {

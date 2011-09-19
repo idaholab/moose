@@ -14,7 +14,7 @@
     type = TimeDerivative
     variable = v
   [../]
-  
+
   [./diff_v]
     type = Diffusion
     variable = v

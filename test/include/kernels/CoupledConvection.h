@@ -12,7 +12,7 @@ InputParameters validParams<CoupledConvection>();
  * Define the Kernel for a convection operator that looks like:
  *
  * grad_some_var dot u'
- * 
+ *
  */
 class CoupledConvection : public Kernel
 {

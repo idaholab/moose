@@ -1,5 +1,5 @@
 [Mesh]
-  # dim = 2  -> DEPRECATED 
+  # dim = 2  -> DEPRECATED
   file = square.e
 []
 
@@ -62,5 +62,5 @@
   print_linear_residuals = true
   perf_log = true
 []
-   
-    
+
+

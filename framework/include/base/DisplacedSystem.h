@@ -32,7 +32,7 @@ public:
   virtual void init();
 
   virtual NumericVector<Number> & getVector(std::string name);
-  
+
   virtual NumericVector<Number> & serializedSolution() { return _undisplaced_system.serializedSolution(); }
 
   virtual const NumericVector<Number> * & currentSolution() { return _undisplaced_system.currentSolution(); }
@@ -45,7 +45,7 @@ public:
 
   /// Return whether or not the NonlinearSystem is currently computing a Jacobian matrix
   virtual bool currentlyComputingJacobian() { return _undisplaced_system.currentlyComputingJacobian(); }
-  
+
 protected:
   SystemBase & _undisplaced_system;
 };
