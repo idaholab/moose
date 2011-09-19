@@ -47,8 +47,6 @@
 #include "dense_submatrix.h"
 #include "dof_map.h"
 
-#include "/Users/gastdr/Downloads/petsc-3.1-p8/src/mat/impls/aij/seq/aij.h"
-
 namespace Moose {
 
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
