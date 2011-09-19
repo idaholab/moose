@@ -271,9 +271,9 @@ Parser::isSectionActive(const std::string & s,
       retValue = std::find(active.begin(), active.end(), short_name) != active.end();
   }
 
-  // Finally see if any of the deactive strings are partially contained in this path
+  // Finally see if any of the deactive strings are partially contained in this path (matching from the beginning)
   for (std::set<std::string>::iterator i = _inactive_strings.begin(); i != _inactive_strings.end(); ++i)
-    if (s.find(*i) != std::string::npos)
+    if (s.find(*i) == 0)
       retValue = false;
 
   // If this section is not active - then keep track of it for future checks
