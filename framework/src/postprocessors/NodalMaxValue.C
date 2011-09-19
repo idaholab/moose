@@ -44,6 +44,7 @@ NodalMaxValue::execute()
 Real
 NodalMaxValue::getValue()
 {
+  gatherMax(_value);
   return _value;
 }
 

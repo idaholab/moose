@@ -72,6 +72,13 @@ public:
     Parallel::sum(value);
   }
 
+  template <typename T>
+  void gatherMax(T & value)
+  {
+    // TODO: Gather threaded values as well
+    Parallel::max(value);
+  }
+
   virtual void threadJoin(const Postprocessor & /*pps*/) { }
 
   /**
