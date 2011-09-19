@@ -137,6 +137,13 @@ CoupledProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID t
 }
 
 void
+CoupledProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
+{
+  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+    it->second->reinitNeighbor(neighbor, neighbor_side, physical_points, tid);
+}
+
+void
 CoupledProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
 {
 }

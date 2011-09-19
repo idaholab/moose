@@ -41,6 +41,12 @@ class MooseVariable;
 /// Free function used for a libMesh callback
 void extraSendList(std::vector<unsigned int> & send_list, void * context);
 
+/// Free function used for a libMesh callback
+void extraSparsity(SparsityPattern::Graph & sparsity,
+                   std::vector<unsigned int> & n_nz,
+                   std::vector<unsigned int> & n_oz,
+                   void * context);
+
 /**
  * Base class for a system (of equations)
  */
@@ -108,6 +114,11 @@ public:
 
   /// Will modify the send_list to add all of the extra ghosted dofs for this system
   virtual void augmentSendList(std::vector<unsigned int> & send_list) = 0;
+
+  /// Will modify the sparsity pattern to add logcial geometric connections
+  virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
+                               std::vector<unsigned int> & n_nz,
+                               std::vector<unsigned int> & n_oz) = 0;
 
   /// Returns true if we are currently computing Jacobian
   virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
@@ -193,6 +204,9 @@ public:
    */
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
 
+  /**
+   * Compute the values of the variables at all the current points.
+   */
   virtual void reinitNeighborFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
 
   /**

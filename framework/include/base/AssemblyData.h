@@ -157,6 +157,11 @@ public:
   void reinit(const Elem * elem, unsigned int side, const Elem * neighbor);
 
   /**
+   * Reinitializes the neighbor's face at the physical coordinates given.
+   */
+  void reinitNeighborAtPhysical(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points);
+
+  /**
    * Reinitialize assembly data for a node
    */
   void reinit(const Node * node);
@@ -176,7 +181,8 @@ protected:
   QBase * _qrule;                               ///< current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
   QBase * _qrule_volume;                        ///< volumetric quadrature for the element
   ArbitraryQuadrature * _qrule_arbitrary;       ///< arbitrary quadrature rule used within the element interior
-
+  ArbitraryQuadrature * _qface_arbitrary;       ///< arbitrary quadrature rule used on element faces
+  
   const std::vector<Point> & _q_points;         ///< reference to the list of quadrature points
   const std::vector<Real> & _JxW;               ///< reference to the list of transformed jacobian weights
 

@@ -34,6 +34,7 @@
 #include "ImplicitEuler.h"
 #include "Reaction.h"
 #include "RealPropertyOutput.h"
+
 // bcs
 #include "ConvectiveFluxBC.h"
 #include "DirichletBC.h"
@@ -63,21 +64,26 @@
 #include "DebugResidualAux.h"
 // dirac kernels
 #include "ConstantPointSource.h"
+
 // DG kernels
 #include "DGDiffusion.h"
+
 // ics
 #include "ConstantIC.h"
 #include "BoundingBoxIC.h"
 #include "FunctionIC.h"
 #include "RandomIC.h"
+
 // mesh modifiers
 #include "ElementDeleter.h"
+
 // executioners
 #include "Steady.h"
 #include "Transient.h"
 #include "LooseCoupling.h"
 #include "SolutionTimeAdaptive.h"
 #include "DT2Transient.h"
+
 // functions
 #include "ParsedFunction.h"
 #include "ParsedGradFunction.h"
@@ -86,8 +92,10 @@
 #include "SphereFunction.h"
 #include "PiecewiseBilinear.h"
 #include "PiecewiseLinearFile.h"
+
 // materials
 #include "GenericConstantMaterial.h"
+
 // PPS
 #include "AverageElementSize.h"
 #include "AverageNodalVariableValue.h"
@@ -104,17 +112,23 @@
 #include "PrintNumElems.h"
 #include "PrintNumNodes.h"
 #include "PrintNumNonlinearIters.h"
+#include "PrintNumLinearIters.h"
 #include "PrintResidual.h"
 #include "Reporter.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
 #include "SideIntegral.h"
 #include "NodalMaxValue.h"
+
 // dampers
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
+
 // DG
 #include "DGDiffusion.h"
+
+// Constraints
+#include "TiedValueConstraint.h"
 
 // Actions
 #include "AddMeshModifierAction.h"
@@ -152,6 +166,7 @@
 #include "InitialRefinementAction.h"
 #include "SetupOverSamplingAction.h"
 #include "DeprecatedBlockAction.h"
+#include "AddConstraintAction.h"
 
 namespace Moose {
 
@@ -250,6 +265,7 @@ registerObjects()
   registerPostprocessor(PrintNumElems);
   registerPostprocessor(PrintNumNodes);
   registerPostprocessor(PrintNumNonlinearIters);
+  registerPostprocessor(PrintNumLinearIters);
   registerPostprocessor(PrintResidual);
   registerPostprocessor(Reporter);
   registerPostprocessor(SideAverageValue);
@@ -261,6 +277,9 @@ registerObjects()
   registerDamper(MaxIncrement);
   // DG
   registerDGKernel(DGDiffusion);
+
+  // Constraints
+  registerConstraint(TiedValueConstraint);
 
   addActionTypes();
   registerActions();
@@ -315,6 +334,7 @@ addActionTypes()
   registerActionName("setup_residual_debug", false);
   registerActionName("setup_oversampling", false);
   registerActionName("deprecated_block", false);
+  registerActionName("add_constraint", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -349,7 +369,7 @@ addActionTypes()
 "(setup_adaptivity)"
 "(add_ic, add_periodic_bc)"
 "(preconditioning_meta_action)"
-"(add_preconditioning)"
+"(add_preconditioning, add_constraint)"
 "(ready_to_init)"
 "(setup_quadrature)"
 "(setup_dampers)"
@@ -435,6 +455,7 @@ registerActions()
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(SetupOverSamplingAction, "setup_oversampling");
   registerAction(DeprecatedBlockAction, "deprecated_block");
+  registerAction(AddConstraintAction, "add_constraint");
 
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");

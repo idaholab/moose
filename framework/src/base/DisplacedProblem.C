@@ -170,7 +170,8 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
   Threads::parallel_for(*_mesh.getActiveSemiLocalNodeRange(), UpdateDisplacedMeshThread(*this));
 
   // Update the geometric searches that depend on the displaced mesh
-  _geometric_search_data.update();
+//  if(_displaced_nl.currentlyComputingJacobian())
+    _geometric_search_data.update();
 
   Moose::perf_log.pop("updateDisplacedMesh()","Solve");
 }
@@ -227,6 +228,18 @@ DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jva
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
   _asm_block[tid]->prepareBlock(ivar, jvar, dof_indices);
+}
+
+void
+DisplacedProblem::prepareAssembly(THREAD_ID tid)
+{
+  _asm_block[tid]->prepare();
+}
+
+void
+DisplacedProblem::prepareAssemblyNeighbor(THREAD_ID tid)
+{
+  _asm_block[tid]->prepareNeighbor();
 }
 
 bool
@@ -286,6 +299,24 @@ DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_
 }
 
 void
+DisplacedProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
+{
+  // Reinit shape functions
+  _asm_info[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
+
+  // Set the neighbor dof indices
+  _displaced_nl.prepareNeighbor(tid);
+  _displaced_aux.prepareNeighbor(tid);
+
+  prepareAssemblyNeighbor(tid);
+
+  // Compute values at the points
+  unsigned int bnd_id = 0;
+  _displaced_nl.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+  _displaced_aux.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+}
+
+void
 DisplacedProblem::getDiracElements(std::set<const Elem *> & elems)
 {
   elems =_dirac_kernel_info._elements;
@@ -316,6 +347,36 @@ DisplacedProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_I
 }
 
 void
+DisplacedProblem::cacheResidual(THREAD_ID tid)
+{
+  _asm_block[tid]->cacheResidual();
+}
+
+void
+DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
+{
+  _asm_block[tid]->cacheResidualNeighbor();
+}
+
+void
+DisplacedProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _asm_block[tid]->addCachedResidual(residual);
+}
+
+void
+DisplacedProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _asm_block[tid]->setResidual(residual);
+}
+
+void
+DisplacedProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _asm_block[tid]->setResidualNeighbor(residual);
+}
+
+void
 DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _asm_block[tid]->addJacobian(jacobian);
@@ -325,6 +386,24 @@ void
 DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _asm_block[tid]->addJacobianNeighbor(jacobian);
+}
+
+void
+DisplacedProblem::cacheJacobian(THREAD_ID tid)
+{
+  _asm_block[tid]->cacheJacobian();
+}
+
+void
+DisplacedProblem::cacheJacobianNeighbor(THREAD_ID tid)
+{
+  _asm_block[tid]->cacheJacobianNeighbor();
+}
+
+void
+DisplacedProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _asm_block[tid]->addCachedJacobian(jacobian);
 }
 
 void

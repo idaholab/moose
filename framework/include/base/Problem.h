@@ -66,12 +66,14 @@ public:
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid) = 0;
+  virtual void prepareAssembly(THREAD_ID tid) = 0;
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+  virtual void reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid) = 0;
 
   // Materials /////
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid) = 0;
@@ -97,10 +99,22 @@ public:
 
   virtual void addResidual(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }
   virtual void addResidualNeighbor(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }
+
+  virtual void cacheResidual(THREAD_ID /*tid*/) {}
+  virtual void cacheResidualNeighbor(THREAD_ID /*tid*/) {}
+  virtual void addCachedResidual(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) {}
+
+  virtual void setResidual(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }
+  virtual void setResidualNeighbor(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }
+  
   virtual void addJacobian(SparseMatrix<Number> & /*jacobian*/, THREAD_ID /*tid*/) { }
   virtual void addJacobianNeighbor(SparseMatrix<Number> & /*jacobian*/, THREAD_ID /*tid*/) { }
   virtual void addJacobianBlock(SparseMatrix<Number> & /*jacobian*/, unsigned int /*ivar*/, unsigned int /*jvar*/, const DofMap & /*dof_map*/, std::vector<unsigned int> & /*dof_indices*/, THREAD_ID /*tid*/) { }
   virtual void addJacobianNeighbor(SparseMatrix<Number> & /*jacobian*/, unsigned int /*ivar*/, unsigned int /*jvar*/, const DofMap & /*dof_map*/, std::vector<unsigned int> & /*dof_indices*/, std::vector<unsigned int> & /*neighbor_dof_indices*/, THREAD_ID /*tid*/) { }
+
+  virtual void cacheJacobian(THREAD_ID /*tid*/) {}
+  virtual void cacheJacobianNeighbor(THREAD_ID /*tid*/) {}
+  virtual void addCachedJacobian(SparseMatrix<Number> & /*jacobian*/, THREAD_ID /*tid*/) {}
 
   // Initial conditions /////
   virtual Number initialValue (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name) = 0;

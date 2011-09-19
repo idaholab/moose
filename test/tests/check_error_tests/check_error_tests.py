@@ -74,7 +74,7 @@ bad_second_order_test = { INPUT : 'bad_second_order_test.i',
                           PLATFORM : ['SL', 'LINUX'] }
 
 bad_second_order_test_lion = { INPUT : 'bad_second_order_test.i',
-                               EXPECT_ERR : 'Error in libMesh internal logic',
+                               EXPECT_ERR : 'src\/fe\/fe_lagrange\.C',
                                PLATFORM : ['LION'] }
 
 wrong_object_test = { INPUT : 'wrong_moose_object_test.i',

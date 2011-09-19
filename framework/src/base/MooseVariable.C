@@ -224,6 +224,8 @@ MooseVariable::reinit_node()
   if (_node->n_dofs(_sys.number(), _var_num) > 0)
   {
     _nodal_dof_index = _node->dof_number(_sys.number(), _var_num, 0);
+    _dof_indices.resize(1);
+    _dof_indices[0] = _nodal_dof_index;
     _is_defined = true;
   }
   else

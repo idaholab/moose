@@ -97,6 +97,7 @@ MProblem::MProblem(const std::string & name, InputParameters parameters) :
     _output_displaced(false),
     _input_file_saved(false),
     _has_dampers(false),
+    _has_constraints(false),
     _restart(false),
     _solve_only_perf_log("Solve Only"),
     _output_setup_log_early(false),
@@ -232,6 +233,10 @@ void MProblem::initialSetup()
     Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
     // Call reinit to get the ghosted vectors correct now that some geometric search has been done
     _eq.reinit();
+
+    if(_displaced_mesh)
+      _displaced_problem->es().reinit();
+
     Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
   }
 
@@ -314,6 +319,15 @@ MProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const
 }
 
 void
+MProblem::prepareAssembly(THREAD_ID tid)
+{
+  _nl.prepareAssembly(tid);
+
+  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+    _displaced_problem->prepareAssembly(tid);
+}
+
+void
 MProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _nl.addResidual(residual, tid);
@@ -330,6 +344,46 @@ MProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
+MProblem::cacheResidual(THREAD_ID tid)
+{
+  _nl.cacheResidual(tid);
+  if(_displaced_problem)
+    _displaced_problem->cacheResidual(tid);
+}
+
+void
+MProblem::cacheResidualNeighbor(THREAD_ID tid)
+{
+  _nl.cacheResidualNeighbor(tid);
+  if(_displaced_problem)
+    _displaced_problem->cacheResidualNeighbor(tid);
+}
+
+void
+MProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _nl.addCachedResidual(residual, tid);
+  if(_displaced_problem)
+    _displaced_problem->addCachedResidual(residual, tid);
+}
+
+void
+MProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _nl.setResidual(residual, tid);
+  if(_displaced_problem)
+    _displaced_problem->setResidual(residual, tid);
+}
+
+void
+MProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _nl.setResidualNeighbor(residual, tid);
+  if(_displaced_problem)
+    _displaced_problem->setResidualNeighbor(residual, tid);
+}
+
+void
 MProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _nl.addJacobian(jacobian, tid);
@@ -343,6 +397,30 @@ MProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
   _nl.addJacobianNeighbor(jacobian, tid);
   if(_displaced_problem)
     _displaced_problem->addJacobianNeighbor(jacobian, tid);
+}
+
+void
+MProblem::cacheJacobian(THREAD_ID tid)
+{
+  _nl.cacheJacobian(tid);
+  if(_displaced_problem)
+    _displaced_problem->cacheJacobian(tid);
+}
+
+void
+MProblem::cacheJacobianNeighbor(THREAD_ID tid)
+{
+  _nl.cacheJacobianNeighbor(tid);
+  if(_displaced_problem)
+    _displaced_problem->cacheJacobianNeighbor(tid);
+}
+
+void
+MProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _nl.addCachedJacobian(jacobian, tid);
+  if(_displaced_problem)
+    _displaced_problem->addCachedJacobian(jacobian, tid);
 }
 
 void
@@ -495,9 +573,12 @@ MProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
   const Elem * neighbor = elem->neighbor(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
-  _nl.prepareAssemblyNeighbor(tid);
   _asm_info[tid]->reinit(elem, side, neighbor);
+  
   _nl.prepareNeighbor(tid);
+  _aux.prepareNeighbor(tid);
+
+  _nl.prepareAssemblyNeighbor(tid);
 
   unsigned int bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
   _nl.reinitElemFace(elem, side, bnd_id, tid);
@@ -505,6 +586,29 @@ MProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 
   _nl.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
   _aux.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+}
+
+void
+MProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
+{
+  // Reinits shape the functions at the physical points
+  _asm_info[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
+
+  // Sets the neighbor dof indices
+  _nl.prepareNeighbor(tid);
+  _aux.prepareNeighbor(tid);
+
+  // Resizes Re and Ke
+  _nl.prepareAssemblyNeighbor(tid);
+
+  // Compute the values of each variable at the points
+  unsigned int bnd_id = 0;
+  _nl.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+  _aux.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+
+  // Do the same for the displaced problem
+  if (_displaced_problem != NULL)
+    _displaced_problem->reinitNeighbor(_displaced_mesh->elem(neighbor->id()), neighbor_side, physical_points, tid);
 }
 
 void
@@ -616,6 +720,30 @@ MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & 
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addBoundaryCondition(bc_name, name, parameters);
+}
+
+void
+MProblem::addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters)
+{
+  _has_constraints = true;
+
+  parameters.set<Problem *>("_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    _reinit_displaced_face = true;
+  }
+  else
+  {
+    // It might _want_ to use a displaced mesh... but we're not so set it to false
+    if(parameters.have_parameter<bool>("use_displaced_mesh"))
+      parameters.set<bool>("use_displaced_mesh") = false;
+
+    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_nl;
+  }
+  _nl.addConstraint(c_name, name, parameters);
 }
 
 void

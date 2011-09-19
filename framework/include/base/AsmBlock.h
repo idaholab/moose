@@ -46,16 +46,54 @@ public:
   void addResidual(NumericVector<Number> & residual);
   void addResidualNeighbor(NumericVector<Number> & residual);
 
+  /**
+   * Takes the values that are currently in _sub_Re and appends them to the cached values.
+   */
+  void cacheResidual();
+
+  /**
+   * Takes the values that are currently in _sub_Ke and appends them to the cached values.
+   */
+  void cacheResidualNeighbor();
+
+  /**
+   * Adds the values that have been cached by calling cacheResidual() and or cacheResidualNeighbor() to the residual.
+   *
+   * Note that this will also clear the cache.
+   */
+  void addCachedResidual(NumericVector<Number> & residual);
+
+  void setResidual(NumericVector<Number> & residual);
+  void setResidualNeighbor(NumericVector<Number> & residual);
+
   void addJacobian(SparseMatrix<Number> & jacobian);
   void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices);
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian);
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices);
+
+  /**
+   * Takes the values that are currently in _sub_Kee and appends them to the cached values.
+   */
+  void cacheJacobian();
+
+  /**
+   * Takes the values that are currently in the neighbor Dense Matrices and appends them to the cached values.
+   */
+  void cacheJacobianNeighbor();
+
+  /**
+   * Adds the values that have been cached by calling cacheJacobian() and or cacheJacobianNeighbor() to the jacobian matrix.
+   *
+   * Note that this will also clear the cache.
+   */
+  void addCachedJacobian(SparseMatrix<Number> & jacobian);
 
   DenseVector<Number> & residualBlock(unsigned int var_num) { return _sub_Re[var_num]; }
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num) { return _sub_Rn[var_num]; }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar) { return _sub_Kee[ivar][jvar]; }
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
+  void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor);
 
   std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
 
@@ -73,6 +111,10 @@ public:
 
 protected:
   void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
+  void cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
+
+  void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
+
   void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor);
 
   SystemBase & _sys;
@@ -103,6 +145,16 @@ protected:
   std::vector<std::vector<RealGradient> > _grad_phi_face_neighbor;
   std::vector<std::vector<RealTensor> > _second_phi_face_neighbor;
 
+  std::vector<Real> _cached_residual_values;                     /// Values cached by calling cacheResidual()
+  std::vector<unsigned int> _cached_residual_rows;               /// Where the cached values should go
+
+  unsigned int _max_cached_residuals;
+
+  std::vector<Real> _cached_jacobian_values;                     /// Values cached by calling cacheJacobian()
+  std::vector<unsigned int> _cached_jacobian_rows;               /// Row where the corresponding cached value should go
+  std::vector<unsigned int> _cached_jacobian_cols;               /// Column where the corresponding cached value should go
+
+  unsigned int _max_cached_jacobians;
 };
 
 #endif /* ASMBLOCK_H */

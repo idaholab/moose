@@ -68,11 +68,15 @@ public:
 
   virtual void prepare(const Elem * elem, THREAD_ID tid);
   virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
+  virtual void prepareAssembly(THREAD_ID tid);
+  virtual void prepareAssemblyNeighbor(THREAD_ID tid);
+
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
+  virtual void reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);
@@ -81,10 +85,23 @@ public:
   virtual AsmBlock & asmBlock(THREAD_ID tid);
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
+
+  virtual void cacheResidual(THREAD_ID tid);
+  virtual void cacheResidualNeighbor(THREAD_ID tid);
+  virtual void addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid);
+
+  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
+
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid);
+
+  virtual void cacheJacobian(THREAD_ID tid);
+  virtual void cacheJacobianNeighbor(THREAD_ID tid);
+  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+
   virtual void prepareShapes(unsigned int var, THREAD_ID tid);
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid);
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);

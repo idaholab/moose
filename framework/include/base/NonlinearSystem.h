@@ -21,6 +21,8 @@
 #include "DiracKernelWarehouse.h"
 #include "DGKernelWarehouse.h"
 #include "DamperWarehouse.h"
+#include "ConstraintWarehouse.h"
+
 // libMesh includes
 #include "transient_system.h"
 #include "nonlinear_implicit_system.h"
@@ -77,10 +79,22 @@ public:
   virtual void prepareAssemblyNeighbor(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
+
+  virtual void cacheResidual(THREAD_ID tid);
+  virtual void cacheResidualNeighbor(THREAD_ID tid);
+  virtual void addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid);
+
+  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
+
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid);
+
+  virtual void cacheJacobian(THREAD_ID tid);
+  virtual void cacheJacobianNeighbor(THREAD_ID tid);
+  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
 
   AsmBlock & asmBlock(THREAD_ID tid) { return *_asm_block[tid]; }
 
@@ -105,6 +119,14 @@ public:
    * @param parameters Boundary condition parameters
    */
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a Constraint
+   * @param bc_name The type of the boundary condition
+   * @param name The name of the boundary condition
+   * @param parameters Boundary condition parameters
+   */
+  void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a Dirac kernal
@@ -136,10 +158,36 @@ public:
   void setInitialSolution();
 
   /**
+   * Add residual contributions from Constraints
+   *
+   * @param displaced Controls whether to do the displaced Constraints or non-displaced
+   */
+  void constraintResiduals(NumericVector<Number> & residual, bool displaced);
+
+  /**
    * Computes residual
    * @param residual Residual is formed in here
    */
   void computeResidual(NumericVector<Number> & residual);
+
+  /**
+   * Finds the implicit sparsity graph between geometrically related dofs.
+   */
+  void findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<unsigned int, std::vector<unsigned int> > & graph);
+
+  /**
+   * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being coupled that
+   * are related geometrically (ie near eachother across a gap).
+   */
+  void addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian, GeometricSearchData & geom_search_data);
+
+  /**
+   * Add jacobian contributions from Constraints
+   *
+   * @param displaced Controls whether to do the displaced Constraints or non-displaced
+   */
+  void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
+
   /**
    * Computes Jacobian
    * @param jacobian Jacobian is formed in here
@@ -202,7 +250,11 @@ public:
   virtual NumericVector<Number> & residualCopy();
   virtual NumericVector<Number> & residualGhosted();
 
-  void augmentSendList(std::vector<unsigned int> & send_list);
+  virtual void augmentSendList(std::vector<unsigned int> & send_list);
+
+  virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
+                               std::vector<unsigned int> & n_nz,
+                               std::vector<unsigned int> & n_oz);
 
   /**
    * Sets a preconditioner
@@ -243,6 +295,11 @@ public:
    * Return the number of non-linear iterations
    */
   unsigned int nNonlinearIterations() { return _n_iters; }
+
+  /**
+   * Return the number of linear iterations
+   */
+  unsigned int nLinearIterations() { return _n_linear_iters; }
 
   /**
    * Return the final nonlinear residual
@@ -313,6 +370,7 @@ protected:
   std::vector<DiracKernelWarehouse> _dirac_kernels;     ///< Dirac Kernel storage for each thread
   std::vector<DGKernelWarehouse> _dg_kernels;           ///< DG Kernel storage for each thread
   std::vector<DamperWarehouse> _dampers;                ///< Dampers for each thread
+  std::vector<ConstraintWarehouse> _constraints;        ///< Constraints for each thread
 
   NumericVector<Number> * _increment_vec;               ///< increment vector
 
@@ -333,6 +391,7 @@ protected:
   std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;   ///< NumericVectors that will be zeroed before a residual computation
 
   unsigned int _n_iters;
+  unsigned int _n_linear_iters;
   Real _final_residual;
 
   friend class ComputeResidualThread;

@@ -11,7 +11,6 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
 #include "ComputeResidualThread.h"
 
 #include "NonlinearSystem.h"

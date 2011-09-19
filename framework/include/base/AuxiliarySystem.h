@@ -73,6 +73,12 @@ public:
 
   void augmentSendList(std::vector<unsigned int> & send_list);
 
+  // This is an empty function since the Aux system doesn't have a matrix!
+  virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
+                               std::vector<unsigned int> & /*n_nz*/,
+                               std::vector<unsigned int> & /*n_oz*/)
+    {}
+
   /**
    * Compute auxiliary variables
    * @param type Time flag of which variables should be computed

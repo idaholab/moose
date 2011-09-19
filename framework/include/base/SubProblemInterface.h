@@ -66,6 +66,7 @@ public:
   virtual DiracKernelInfo & diracKernelInfo() { return _dirac_kernel_info; }
   virtual Real finalNonlinearResidual() { return 0; }
   virtual unsigned int nNonlinearIterations() { return 0; }
+  virtual unsigned int nLinearIterations() { return 0; }
 
   // Geom Search
   virtual void updateGeomSearch() = 0;

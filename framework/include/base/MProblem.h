@@ -80,6 +80,8 @@ public:
   virtual void prepare(const Elem * elem, THREAD_ID tid);
   virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
 
+  virtual void prepareAssembly(THREAD_ID tid);
+
   virtual void addGhostedElem(unsigned int elem_id);
   virtual void addGhostedBoundary(unsigned int boundary_id);
 
@@ -89,6 +91,7 @@ public:
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
+  virtual void reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);
@@ -102,6 +105,7 @@ public:
   virtual void solve();
   virtual bool converged();
   virtual unsigned int nNonlinearIterations() { return _nl.nNonlinearIterations(); }
+  virtual unsigned int nLinearIterations() { return _nl.nLinearIterations(); }
   virtual Real finalNonlinearResidual() { return _nl.finalNonlinearResidual(); }
 
   virtual void onTimestepBegin();
@@ -116,6 +120,7 @@ public:
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
+  void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
@@ -175,10 +180,23 @@ public:
 
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
+
+  virtual void cacheResidual(THREAD_ID tid);
+  virtual void cacheResidualNeighbor(THREAD_ID tid);
+  virtual void addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid);
+
+  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
+
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid);
+
+  virtual void cacheJacobian(THREAD_ID tid);
+  virtual void cacheJacobianNeighbor(THREAD_ID tid);
+  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+
   virtual void prepareShapes(unsigned int var, THREAD_ID tid);
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid);
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
@@ -286,6 +304,8 @@ protected:
   bool _input_file_saved;                               ///< whether input file has been written
 
   bool _has_dampers;                                    ///< Whether or not this system has any Dampers associated with it.
+
+  bool _has_constraints;                                /// Whether or not this system has any Constraints.
 
   bool _restart;                                        ///< true if restarting from a file, otherwise false
   std::string _restart_file_name;                       ///< name of the file that we restart from

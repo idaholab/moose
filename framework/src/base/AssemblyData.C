@@ -29,6 +29,7 @@ AssemblyData::AssemblyData(MooseMesh & mesh) :
     _qrule(NULL),
     _qrule_volume(NULL),
     _qrule_arbitrary(NULL),
+    _qface_arbitrary(NULL),
     _q_points(_fe_helper->get_xyz()),
     _JxW(_fe_helper->get_JxW()),
 
@@ -56,6 +57,7 @@ AssemblyData::~AssemblyData()
     delete it->second;
   delete _qrule_volume;
   delete _qrule_arbitrary;
+  delete _qface_arbitrary;
   delete _qrule_face;
   delete _current_side_elem;
 }
@@ -215,4 +217,30 @@ AssemblyData::reinit(const Elem * elem, unsigned int side, const Elem * neighbor
   }
 
   _neighbor_elem = neighbor;
+}
+
+void
+AssemblyData::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*neighbor_side*/, const std::vector<Point> & physical_points)
+{
+  std::vector<Point> reference_points;
+
+  // reinit neighbor element
+  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor.begin(); it != _fe_neighbor.end(); ++it)
+  {
+    FEType fe_type = it->first;
+    
+    FEInterface::inverse_map(_mesh.dimension(), fe_type, neighbor, physical_points, reference_points);
+    
+    it->second->reinit(neighbor, &reference_points);
+  }
+
+  // Save off the physical points
+  _current_physical_points = physical_points;
+
+  // Make sure the qrule is the right one
+  if(_qrule != _qrule_arbitrary)
+    setVolumeQRule(_qrule_arbitrary);
+
+  _qrule_arbitrary->setPoints(reference_points);  
+  _neighbor_elem = neighbor;  
 }

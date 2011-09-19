@@ -20,7 +20,9 @@ AsmBlock::AsmBlock(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _sys(sys),
     _cm(cm),
     _dof_map(_sys.dofMap()),
-    _tid(tid)
+    _tid(tid),
+    _max_cached_residuals(0),
+    _max_cached_jacobians(0)
 {
 }
 
@@ -118,7 +120,7 @@ AsmBlock::prepareNeighbor()
   for (unsigned int vi = 0; vi < n_vars; vi++)
   {
     MooseVariable & ivar = _sys.getVariable(_tid, vi);
-    _sub_Rn[vi].resize(ivar.dofIndices().size());
+    _sub_Rn[vi].resize(ivar.dofIndicesNeighbor().size());
     _sub_Rn[vi].zero();
   }
 }
@@ -177,7 +179,49 @@ AsmBlock::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
       residual.add_vector(re, dof_indices);
     }
     else
+    {
+//      for(unsigned int i=0; i<dof_indices.size(); i++)
+//      {
+//        std::cout<<"Dof: "<<dof_indices[i]<<" "<<res_block(i)<<std::endl;
+//      }
+/*
+      std::cout<<residual<<std::endl;
+      residual.close();
+*/
       residual.add_vector(res_block, dof_indices);
+//      residual.close();
+//      std::cout<<residual<<std::endl;
+
+    }
+  }
+}
+
+void
+AsmBlock::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor)
+{
+  if (dof_indices.size() > 0)
+  {
+    _dof_map.constrain_element_vector(res_block, dof_indices, false);
+
+    if (scaling_factor != 1.0)
+    {
+      DenseVector<Number> re(res_block);
+      re.scale(scaling_factor);
+
+      for(unsigned int i=0; i<re.size(); i++)
+      {
+        _cached_residual_values.push_back(re(i));
+        _cached_residual_rows.push_back(dof_indices[i]);
+      }
+    }
+    else
+    {
+      for(unsigned int i=0; i<res_block.size(); i++)
+      {
+        _cached_residual_values.push_back(res_block(i));
+        _cached_residual_rows.push_back(dof_indices[i]);
+      }
+    }
   }
 }
 
@@ -196,8 +240,99 @@ AsmBlock::addResidualNeighbor(NumericVector<Number> & residual)
 {
   for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);
+    MooseVariable & var = _sys.getVariable(_tid, vn);    
     addResidualBlock(residual, _sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
+  }
+}
+
+
+void
+AsmBlock::cacheResidual()
+{
+  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  {
+    MooseVariable & var = _sys.getVariable(_tid, vn);
+    cacheResidualBlock(_sub_Re[vn], var.dofIndices(), var.scalingFactor());
+  }
+}
+
+void
+AsmBlock::cacheResidualNeighbor()
+{
+  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  {
+    MooseVariable & var = _sys.getVariable(_tid, vn);
+    cacheResidualBlock(_sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
+  }
+}
+
+
+void
+AsmBlock::addCachedResidual(NumericVector<Number> & residual)
+{
+  mooseAssert(_cached_residual_values.size() == _cached_residual_rows.size(), "Number of cached residuals and number of rows must match!");
+
+//  residual.add_vector(_cached_residual_values, _cached_residual_rows);
+
+//  residual.print();
+
+  for(unsigned int i=0; i<_cached_residual_values.size(); i++)
+  {
+//    std::cerr<<_cached_residual_rows[i]<<std::endl;
+
+    residual.add(_cached_residual_rows[i], _cached_residual_values[i]);
+  }
+
+  if(_max_cached_residuals < _cached_residual_values.size())
+    _max_cached_residuals = _cached_residual_values.size();
+
+  // Try to be more efficient from now on
+  // The 2 is just a fudge factor to keep us from having to grow the vector during assembly
+  _cached_residual_values.clear();
+  _cached_residual_values.reserve(_max_cached_residuals*2);
+
+  _cached_residual_rows.clear();
+  _cached_residual_rows.reserve(_max_cached_residuals*2);
+}
+
+
+void
+AsmBlock::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor)
+{
+  if (dof_indices.size() > 0)
+  {
+    _dof_map.constrain_element_vector(res_block, dof_indices, false);
+
+    if (scaling_factor != 1.0)
+    {
+      DenseVector<Number> re(res_block);
+      re.scale(scaling_factor);
+      for(unsigned int i=0; i<dof_indices.size(); i++)
+        residual.set(dof_indices[i], res_block(i));
+    }
+    else
+      for(unsigned int i=0; i<dof_indices.size(); i++)
+        residual.set(dof_indices[i], res_block(i));
+  }
+}
+
+void
+AsmBlock::setResidual(NumericVector<Number> & residual)
+{
+  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  {
+    MooseVariable & var = _sys.getVariable(_tid, vn);
+    setResidualBlock(residual, _sub_Re[vn], var.dofIndices(), var.scalingFactor());
+  }
+}
+
+void
+AsmBlock::setResidualNeighbor(NumericVector<Number> & residual)
+{
+  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  {
+    MooseVariable & var = _sys.getVariable(_tid, vn);
+    setResidualBlock(residual, _sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
 
@@ -218,6 +353,64 @@ AsmBlock::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> 
     else
       jacobian.add_matrix(jac_block, idof_indices, jdof_indices);
   }
+}
+
+void
+AsmBlock::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor)
+{
+  if ((idof_indices.size() > 0) && (jdof_indices.size() > 0))
+  {
+    _dof_map.constrain_element_matrix(jac_block, idof_indices, jdof_indices, false);
+
+    if (scaling_factor != 1.0)
+    {
+      DenseMatrix<Number> ke(jac_block);
+      ke.scale(scaling_factor);
+
+      for(unsigned int i=0; i<idof_indices.size(); i++)
+        for(unsigned int j=0; j<jdof_indices.size(); j++)
+        {
+          _cached_jacobian_values.push_back(ke(i, j));
+          _cached_jacobian_rows.push_back(idof_indices[i]);
+          _cached_jacobian_cols.push_back(jdof_indices[j]);
+        }
+    }
+    else
+    {
+      for(unsigned int i=0; i<idof_indices.size(); i++)
+        for(unsigned int j=0; j<jdof_indices.size(); j++)
+        {
+          _cached_jacobian_values.push_back(jac_block(i, j));
+          _cached_jacobian_rows.push_back(idof_indices[i]);
+          _cached_jacobian_cols.push_back(jdof_indices[j]);
+        }
+    }
+  }
+}
+
+
+void
+AsmBlock::addCachedJacobian(SparseMatrix<Number> & jacobian)
+{
+  mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
+              "Error: Cached data sizes MUST be the same!");
+
+  for(unsigned int i=0; i<_cached_jacobian_rows.size(); i++)
+    jacobian.add(_cached_jacobian_rows[i], _cached_jacobian_cols[i], _cached_jacobian_values[i]);
+
+  if(_max_cached_jacobians < _cached_jacobian_values.size())
+    _max_cached_jacobians = _cached_jacobian_values.size();
+
+  // Try to be more efficient from now on
+  // The 2 is just a fudge factor to keep us from having to grow the vector during assembly
+  _cached_jacobian_values.clear();
+  _cached_jacobian_values.reserve(_max_cached_jacobians*2);
+
+  _cached_jacobian_rows.clear();
+  _cached_jacobian_rows.reserve(_max_cached_jacobians*2);
+
+  _cached_jacobian_cols.clear();
+  _cached_jacobian_cols.reserve(_max_cached_jacobians*2);
 }
 
 void
@@ -253,6 +446,44 @@ AsmBlock::addJacobianNeighbor(SparseMatrix<Number> & jacobian)
         addJacobianBlock(jacobian, _sub_Ken[vi][vj], ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
         addJacobianBlock(jacobian, _sub_Kne[vi][vj], ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
         addJacobianBlock(jacobian, _sub_Knn[vi][vj], ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+      }
+    }
+  }
+}
+
+void
+AsmBlock::cacheJacobian()
+{
+  for (unsigned int vi = 0; vi < _sys.nVariables(); ++vi)
+  {
+    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+    {
+      if ((*_cm)(vi, vj) != 0)
+      {
+        MooseVariable & ivar = _sys.getVariable(_tid, vi);
+        MooseVariable & jvar = _sys.getVariable(_tid, vj);
+
+        cacheJacobianBlock(_sub_Kee[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
+      }
+    }
+  }
+}
+
+void
+AsmBlock::cacheJacobianNeighbor()
+{
+  for (unsigned int vi = 0; vi < _sys.nVariables(); ++vi)
+  {
+    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+    {
+      if ((*_cm)(vi, vj) != 0)
+      {
+        MooseVariable & ivar = _sys.getVariable(_tid, vi);
+        MooseVariable & jvar = _sys.getVariable(_tid, vj);
+
+        cacheJacobianBlock(_sub_Ken[vi][vj], ivar.dofIndices(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
+        cacheJacobianBlock(_sub_Kne[vi][vj], ivar.dofIndicesNeighbor(), jvar.dofIndices(), ivar.scalingFactor());
+        cacheJacobianBlock(_sub_Knn[vi][vj], ivar.dofIndicesNeighbor(), jvar.dofIndicesNeighbor(), ivar.scalingFactor());
       }
     }
   }

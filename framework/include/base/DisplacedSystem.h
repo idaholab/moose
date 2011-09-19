@@ -43,6 +43,13 @@ public:
 
   virtual void augmentSendList(std::vector<unsigned int> & send_list){ _undisplaced_system.augmentSendList(send_list); }
 
+  // This is an empty function since the displaced system doesn't have a matrix!
+  // All sparsity pattern modification will be taken care of by the undisplaced system directly
+  virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
+                               std::vector<unsigned int> & /*n_nz*/,
+                               std::vector<unsigned int> & /*n_oz*/)
+    {}
+
   /// Return whether or not the NonlinearSystem is currently computing a Jacobian matrix
   virtual bool currentlyComputingJacobian() { return _undisplaced_system.currentlyComputingJacobian(); }
 

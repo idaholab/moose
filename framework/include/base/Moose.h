@@ -119,6 +119,20 @@ enum DGJacobianType
   NeighborNeighbor
 };
 
+enum ConstraintType
+{
+  Slave = Element,
+  Master = Neighbor
+};
+
+enum ConstraintJacobianType
+{
+  SlaveSlave = ElementElement,
+  SlaveMaster = ElementNeighbor,
+  MasterSlave = NeighborElement,
+  MasterMaster = NeighborNeighbor
+};
+
 const subdomain_id_type ANY_BLOCK_ID = (subdomain_id_type) -1;
 
 /* Wrappers for extern random number generator */

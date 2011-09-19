@@ -28,6 +28,16 @@ void extraSendList(std::vector<unsigned int> & send_list, void * context)
   sys->augmentSendList(send_list);
 }
 
+/// Free function used for a libMesh callback
+void extraSparsity(SparsityPattern::Graph & sparsity,
+                   std::vector<unsigned int> & n_nz,
+                   std::vector<unsigned int> & n_oz,
+                   void * context)
+{
+  SystemBase * sys = static_cast<SystemBase *>(context);
+  sys->augmentSparsity(sparsity, n_nz, n_oz);
+}
+
 SystemBase::SystemBase(SubProblemInterface & subproblem, const std::string & name) :
     _problem(*subproblem.parent()),
     _subproblem(subproblem),
