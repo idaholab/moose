@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<ElementPostprocessor>()
 {
   InputParameters params = validParams<Postprocessor>();
-  params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
+  params.addRequiredParam<std::string>("variable", "The name of the variable that this postprocessor operates on");
   params.addParam<unsigned int>("block", Moose::ANY_BLOCK_ID, "block ID where the postprocessor works");
   return params;
 }
