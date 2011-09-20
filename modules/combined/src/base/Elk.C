@@ -63,6 +63,9 @@
 #include "NSStagnationPressureBC.h"
 #include "NSStagnationTemperatureBC.h"
 #include "NSImposedVelocityDirectionBC.h"
+#include "NSMassWeakStagnationBC.h"
+#include "NSMomentumWeakStagnationBC.h"
+#include "NSEnergyWeakStagnationBC.h"
 
 // linear_elasticity
 #include "SolidMechX.h"
@@ -190,6 +193,9 @@ Elk::registerObjects()
   registerBoundaryCondition(NSStagnationPressureBC);
   registerBoundaryCondition(NSStagnationTemperatureBC);
   registerBoundaryCondition(NSImposedVelocityDirectionBC);
+  registerBoundaryCondition(NSMassWeakStagnationBC);
+  registerBoundaryCondition(NSMomentumWeakStagnationBC);
+  registerBoundaryCondition(NSEnergyWeakStagnationBC);
 
   // linear_elasticity
   registerKernel(SolidMechX);
