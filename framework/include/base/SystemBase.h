@@ -210,6 +210,11 @@ public:
   virtual void reinitNeighborFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
 
   /**
+   * Compute the values of the variables at all the current points.
+   */
+  virtual void reinitNeighbor(const Elem * elem, THREAD_ID tid);
+
+  /**
    * Reinit nodal assembly info
    * @param node Node to reinit for
    * @param tid Thread ID

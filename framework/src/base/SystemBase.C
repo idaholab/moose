@@ -149,6 +149,16 @@ SystemBase::reinitNeighborFace(const Elem * /*elem*/, unsigned int /*side*/, uns
 }
 
 void
+SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
+{
+  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  {
+    MooseVariable *var = *it;
+    var->computeNeighborValues();
+  }
+}
+
+void
 SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 {
   for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)

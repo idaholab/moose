@@ -106,7 +106,7 @@ public:
 
   virtual void setResidual(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }
   virtual void setResidualNeighbor(NumericVector<Number> & /*residual*/, THREAD_ID /*tid*/) { }
-  
+
   virtual void addJacobian(SparseMatrix<Number> & /*jacobian*/, THREAD_ID /*tid*/) { }
   virtual void addJacobianNeighbor(SparseMatrix<Number> & /*jacobian*/, THREAD_ID /*tid*/) { }
   virtual void addJacobianBlock(SparseMatrix<Number> & /*jacobian*/, unsigned int /*ivar*/, unsigned int /*jvar*/, const DofMap & /*dof_map*/, std::vector<unsigned int> & /*dof_indices*/, THREAD_ID /*tid*/) { }

@@ -574,7 +574,7 @@ MProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
   _asm_info[tid]->reinit(elem, side, neighbor);
-  
+
   _nl.prepareNeighbor(tid);
   _aux.prepareNeighbor(tid);
 
@@ -602,9 +602,8 @@ MProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, cons
   _nl.prepareAssemblyNeighbor(tid);
 
   // Compute the values of each variable at the points
-  unsigned int bnd_id = 0;
-  _nl.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
-  _aux.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+  _nl.reinitNeighbor(neighbor, tid);
+  _aux.reinitNeighbor(neighbor, tid);
 
   // Do the same for the displaced problem
   if (_displaced_problem != NULL)

@@ -511,7 +511,7 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
   NodeFaceConstraint * nfc = static_cast<NodeFaceConstraint *>(Factory::instance()->create(c_name, name, parameters));
 
   _constraints[0].addNodeFaceConstraint(slave, master, nfc);
-  
+
   /*
   std::vector<unsigned int> slaves = parameters.get<std::vector<unsigned int> >("slave");
   std::vector<unsigned int> masters = parameters.get<std::vector<unsigned int> >("master");

@@ -618,6 +618,104 @@ MooseVariable::computeNeighborValuesFace()
 }
 
 void
+MooseVariable::computeNeighborValues()
+{
+  bool is_transient = _problem.isTransient();
+  unsigned int nqp = _qrule->n_points();
+//  std::cerr << "nqp = " << nqp << std::endl;
+  _u_neighbor.resize(nqp);
+  _grad_u_neighbor.resize(nqp);
+  if (_has_second_derivatives)
+    _second_u_neighbor.resize(nqp);
+  if (is_transient)
+  {
+    _u_old_neighbor.resize(nqp);
+    _u_older_neighbor.resize(nqp);
+    _grad_u_old_neighbor.resize(nqp);
+  }
+
+  for (unsigned int i = 0; i < nqp; ++i)
+  {
+    _u_neighbor[i] = 0;
+    _grad_u_neighbor[i] = 0;
+
+    if (_problem.isTransient())
+    {
+      _u_old_neighbor[i] = 0;
+      _u_older_neighbor[i] = 0;
+      _grad_u_old_neighbor[i] = 0;
+    }
+  }
+
+  unsigned int num_dofs = _dof_indices_neighbor.size();
+//  std::cerr << "num_dofs = " << num_dofs << std::endl;
+
+  const NumericVector<Real> & current_solution = *_sys.currentSolution();
+  const NumericVector<Real> & solution_old     = _sys.solutionOld();
+  const NumericVector<Real> & solution_older   = _sys.solutionOlder();
+  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
+  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+
+  int idx;
+  Real soln_local;
+  Real soln_old_local;
+  Real soln_older_local;
+  Real u_dot_local;
+  Real du_dot_du_local;
+
+  Real phi_local;
+  RealGradient dphi_local;
+  RealTensor d2phi_local;
+
+  for (unsigned int i=0; i < num_dofs; ++i)
+  {
+    idx = _dof_indices_neighbor[i];
+    soln_local = current_solution(idx);
+
+//    std::cerr << idx << " " << ": ";
+
+    if (is_transient)
+    {
+      soln_old_local = solution_old(idx);
+      soln_older_local = solution_older(idx);
+    }
+
+    for (unsigned int qp=0; qp < nqp; ++qp)
+    {
+      phi_local = _phi_face_neighbor[i][qp];
+      dphi_local = _grad_phi_face_neighbor[i][qp];
+
+      if (_has_second_derivatives)
+        d2phi_local = _second_phi_face_neighbor[i][qp];
+
+//      std::cerr << phi_local << " * " << soln_local << ", ";
+      _u_neighbor[qp]      += phi_local * soln_local;
+      _grad_u_neighbor[qp] += dphi_local * soln_local;
+      if (_has_second_derivatives)
+        _second_u_neighbor[qp] += d2phi_local * soln_local;
+
+      if (is_transient)
+      {
+        _u_old_neighbor[qp]        += phi_local * soln_old_local;
+        _u_older_neighbor[qp]      += phi_local * soln_older_local;
+        _grad_u_old_neighbor[qp]   += dphi_local * soln_old_local;
+      }
+    }
+//    std::cerr << " => " << _u_neighbor[0] << std::endl;
+
+//    printf(" => % .25f", _u_neighbor[0]);
+//    std::cerr << std::endl;
+
+  }
+
+//  std::cerr << " _u_n = ";
+//  for (unsigned int qp=0; qp < nqp; ++qp)
+//    printf("% .25f ", _u_neighbor[qp]);
+////    std::cerr << _u_neighbor[qp] << " ";
+//  std::cerr << std::endl;
+}
+
+void
 MooseVariable::computeNodalValues()
 {
   if (_is_defined)

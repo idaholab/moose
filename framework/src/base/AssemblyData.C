@@ -228,9 +228,9 @@ AssemblyData::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*nei
   for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor.begin(); it != _fe_neighbor.end(); ++it)
   {
     FEType fe_type = it->first;
-    
+
     FEInterface::inverse_map(_mesh.dimension(), fe_type, neighbor, physical_points, reference_points);
-    
+
     it->second->reinit(neighbor, &reference_points);
   }
 
@@ -241,6 +241,6 @@ AssemblyData::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int /*nei
   if(_qrule != _qrule_arbitrary)
     setVolumeQRule(_qrule_arbitrary);
 
-  _qrule_arbitrary->setPoints(reference_points);  
-  _neighbor_elem = neighbor;  
+  _qrule_arbitrary->setPoints(reference_points);
+  _neighbor_elem = neighbor;
 }

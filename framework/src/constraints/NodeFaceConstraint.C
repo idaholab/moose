@@ -105,20 +105,20 @@ NodeFaceConstraint::computeResidual()
     // Only one of these because we are computing at _one_ node.
 //  std::cerr<<neighbor_re.size()<<std::endl;
   _qp=0;
-  
+
   for (_i=0; _i<_test_master.size(); _i++)
     neighbor_re(_i) += computeQpResidual(Moose::Master);
 
 //  std::cerr<<"Not Here!"<<std::endl;
 //  std::cout<<neighbor_re<<std::endl;
-  
+
   _i=0;
 
 
 //  std::cout<<re.size()<<std::endl;
 
   re(0) = computeQpResidual(Moose::Slave);
-  
+
 //  }
 }
 

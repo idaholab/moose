@@ -182,7 +182,7 @@ protected:
   QBase * _qrule_volume;                        ///< volumetric quadrature for the element
   ArbitraryQuadrature * _qrule_arbitrary;       ///< arbitrary quadrature rule used within the element interior
   ArbitraryQuadrature * _qface_arbitrary;       ///< arbitrary quadrature rule used on element faces
-  
+
   const std::vector<Point> & _q_points;         ///< reference to the list of quadrature points
   const std::vector<Real> & _JxW;               ///< reference to the list of transformed jacobian weights
 

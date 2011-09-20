@@ -185,6 +185,8 @@ public:
   void computeElemValuesFace();
   /// Compute values at facial quadrature points for the neighbor
   void computeNeighborValuesFace();
+  /// Compute values at quadrature points for the neighbor
+  void computeNeighborValues();
   /// Compute nodal values of this variable
   void computeNodalValues();
   /// Set the nodal value for this variable (to keep everything up to date

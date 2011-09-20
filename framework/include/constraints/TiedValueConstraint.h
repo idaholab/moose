@@ -33,13 +33,13 @@ class TiedValueConstraint :
 public:
   TiedValueConstraint(const std::string & name, InputParameters parameters);
   virtual ~TiedValueConstraint(){}
-  
+
   virtual Real computeQpResidual(Moose::ConstraintType type);
 
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 protected:
   NumericVector<Number> & _residual_copy;
 };
- 
+
 #endif
 

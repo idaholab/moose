@@ -240,7 +240,7 @@ AsmBlock::addResidualNeighbor(NumericVector<Number> & residual)
 {
   for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);    
+    MooseVariable & var = _sys.getVariable(_tid, vn);
     addResidualBlock(residual, _sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
