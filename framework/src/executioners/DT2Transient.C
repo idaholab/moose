@@ -180,7 +180,10 @@ DT2Transient::lastSolveConverged()
   if (_error < _e_max)
     return true;
   else
+  {
+    std::cout << "DT2Transient: Marking last solve not converged since |U2-U1|/max(|U2|,|U1|) >= e_max." << std::endl;
     return false;
+  }
 }
 
 Real
