@@ -24,7 +24,8 @@ enum ExecFlagType {
   EXEC_INITIAL,                 /// Object is evaluated only once at the beginning of the simulation
   EXEC_RESIDUAL,                /// Object is evaluated in every residual computation
   EXEC_JACOBIAN,                /// Object is evaluated in every jacobian computation
-  EXEC_TIMESTEP                 /// Object is evaluated every time step
+  EXEC_TIMESTEP,                /// Object is evaluated at the end of every time step
+  EXEC_TIMESTEP_BEGIN           /// Object is evaluated at the beginning of every time step
 };
 
 
@@ -41,7 +42,8 @@ public:
       _obj_init(libMesh::n_threads()),
       _obj_res(libMesh::n_threads()),
       _obj_jac(libMesh::n_threads()),
-      _obj_timestep(libMesh::n_threads())
+      _obj_timestep(libMesh::n_threads()),
+      _obj_ts_begin(libMesh::n_threads())
   {
   }
 
@@ -53,6 +55,7 @@ public:
     {
     case EXEC_INITIAL: return _obj_init;
     case EXEC_TIMESTEP: return _obj_timestep;
+    case EXEC_TIMESTEP_BEGIN: return _obj_ts_begin;
     case EXEC_JACOBIAN: return _obj_jac;
     case EXEC_RESIDUAL:
     default:
@@ -65,6 +68,7 @@ protected:
   std::vector<T> _obj_res;                      ///< executed every residual evaluation
   std::vector<T> _obj_jac;                      ///< executed every jacobian evaluation
   std::vector<T> _obj_timestep;                 ///< executed at the end of every time step
+  std::vector<T> _obj_ts_begin;                 ///< executed at the beginning of every time step
 };
 
 #endif /* EXECSTORE_H */

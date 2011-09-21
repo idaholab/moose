@@ -65,6 +65,7 @@ Steady::execute()
     preSolve();
     _problem.updateMaterials();
     _problem.timestepSetup();
+    _problem.computePostprocessors(EXEC_TIMESTEP_BEGIN);
     _problem.solve();
     postSolve();
 

@@ -249,6 +249,7 @@ void FEProblem::initialSetup()
     _pps(EXEC_RESIDUAL)[i].initialSetup();
     _pps(EXEC_JACOBIAN)[i].initialSetup();
     _pps(EXEC_TIMESTEP)[i].initialSetup();
+    _pps(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
   }
 
   _aux.initialSetup();
@@ -1158,33 +1159,41 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
 
   // Fixme: Nodal processors need to be threaded
   // init
+  bool have_nodal_pps = false;
   for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
        nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
        ++nodal_postprocessor_it)
-    (*nodal_postprocessor_it)->initialize();
-
-  // compute
-  for (MeshBase::const_node_iterator node_it = _mesh.local_nodes_begin(); node_it != _mesh.local_nodes_end(); ++node_it)
   {
-    reinitNode(*node_it, 0);
+    (*nodal_postprocessor_it)->initialize();
+    have_nodal_pps = true;
+  }
 
+  // Don't waste time looping over nodes if there aren't any nodal postprocessors to calculate
+  if (have_nodal_pps)
+  {
+    // compute
+    for (MeshBase::const_node_iterator node_it = _mesh.local_nodes_begin(); node_it != _mesh.local_nodes_end(); ++node_it)
+    {
+      reinitNode(*node_it, 0);
+
+      for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
+           nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
+           ++nodal_postprocessor_it)
+      {
+        (*nodal_postprocessor_it)->execute();
+      }
+    }
+    // gather
     for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
          nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
          ++nodal_postprocessor_it)
     {
-      (*nodal_postprocessor_it)->execute();
+      std::string name = (*nodal_postprocessor_it)->name();
+      Real value = (*nodal_postprocessor_it)->getValue();
+      // store the value in each thread
+      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+        _pps_data[tid].storeValue(name, value);
     }
-  }
-  // gather
-  for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
-       nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
-       ++nodal_postprocessor_it)
-  {
-    std::string name = (*nodal_postprocessor_it)->name();
-    Real value = (*nodal_postprocessor_it)->getValue();
-    // store the value in each thread
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-      _pps_data[tid].storeValue(name, value);
   }
 
   // Compute and store generic postprocessors values
@@ -1221,6 +1230,7 @@ FEProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
     break;
 
   case EXEC_TIMESTEP:
+  case EXEC_TIMESTEP_BEGIN:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
       _pps(type)[tid].timestepSetup();
     break;
@@ -1258,7 +1268,7 @@ FEProblem::addPPSValuesToTable(ExecFlagType type)
 void
 FEProblem::outputPostprocessors()
 {
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
+  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
     addPPSValuesToTable(types[i]);
 
@@ -1646,7 +1656,7 @@ FEProblem::checkPPSs()
 {
   // gather names of all postprocessors that were defined in the input file
   std::set<std::string> names;
-  ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP };
+  ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
   {
     for (std::vector<Postprocessor *>::const_iterator it = _pps(types[i])[0].all().begin(); it != _pps(types[i])[0].all().end(); ++it)

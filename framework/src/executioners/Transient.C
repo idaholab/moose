@@ -152,6 +152,9 @@ Transient::takeStep(Real input_dt)
     _problem.updateMaterials();
   }
 
+  // Compute TimestepBeginPostprocessors
+  _problem.computePostprocessors(EXEC_TIMESTEP_BEGIN);
+
   // Increment time
   _time = _time_old + _dt;
 
