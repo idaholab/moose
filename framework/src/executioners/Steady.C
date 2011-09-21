@@ -26,7 +26,7 @@ InputParameters validParams<Steady>()
 
 Steady::Steady(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
-    _problem(*ProblemFactory::instance()->createMProblem(_mesh)),
+    _problem(*ProblemFactory::instance()->createFEProblem(_mesh)),
     _time_step(_problem.timeStep()),
     _time(_problem.time())
 {

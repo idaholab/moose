@@ -15,7 +15,7 @@
 #ifndef OUTPUTPROBLEM_H
 #define OUTPUTPROBLEM_H
 
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "Output.h"
 // libMesh
 #include "equation_systems.h"
@@ -93,7 +93,7 @@ public:
   virtual void output() {}
 
 protected:
-  MProblem & _mproblem;
+  FEProblem & _mproblem;
   MooseMesh _mesh;
   EquationSystems _eq;
   Output _out;

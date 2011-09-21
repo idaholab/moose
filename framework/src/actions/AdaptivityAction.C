@@ -18,7 +18,7 @@
 
 #include "Moose.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "Adaptivity.h"
 #include "Executioner.h"

@@ -14,7 +14,7 @@
 
 #include "ProblemFactory.h"
 #include "MooseMesh.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 ProblemFactory * ProblemFactory::_instance = NULL;
 
@@ -55,13 +55,13 @@ ProblemFactory::create(const std::string & obj_name, const std::string & name, I
     mooseError("Problem '" + obj_name + "' was not registered.");
 }
 
-MProblem *
-ProblemFactory::createMProblem(MooseMesh *mesh)
+FEProblem *
+ProblemFactory::createFEProblem(MooseMesh *mesh)
 {
-  InputParameters params = validParams<MProblem>();
+  InputParameters params = validParams<FEProblem>();
   params.set<std::string>("name") = "Moose Problem";
   params.set<MooseMesh *>("mesh") = mesh;
-  return static_cast<MProblem *>(create("MProblem", "Moose Problem", params));
+  return static_cast<FEProblem *>(create("FEProblem", "Moose Problem", params));
 }
 
 

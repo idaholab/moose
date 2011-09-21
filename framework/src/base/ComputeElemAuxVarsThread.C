@@ -15,12 +15,12 @@
 #include "ComputeElemAuxVarsThread.h"
 
 #include "AuxiliarySystem.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 // libmesh includes
 #include "threads.h"
 
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(MProblem & mproblem,
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & mproblem,
                                                    AuxiliarySystem & sys,
                                                    std::vector<AuxWarehouse> & auxs) :
     _mproblem(mproblem),

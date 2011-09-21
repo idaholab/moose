@@ -17,7 +17,7 @@
 #ifdef LIBMESH_HAVE_PETSC
 
 #include "Moose.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 
 //libMesh Includes
@@ -166,7 +166,7 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, 
   int ierr = 0;
   Real damping = 1.0;
 
-  MProblem & problem = *static_cast<MProblem *>(lsctx);
+  FEProblem & problem = *static_cast<FEProblem *>(lsctx);
   TransientNonlinearImplicitSystem & system = problem.getNonlinearSystem().sys();
 
   // The whole deal here is that we need ghosted versions of vectors y and w (they are parallel, but not ghosted).
@@ -212,7 +212,7 @@ PetscErrorCode petscNewtonUpdate(SNES snes, PetscInt /*step*/)
 
 void petscSetupDampers(NonlinearImplicitSystem& sys)
 {
-  MProblem * problem = static_cast<MProblem *>(sys.get_equation_systems().parameters.get<Problem *>("_problem"));
+  FEProblem * problem = static_cast<FEProblem *>(sys.get_equation_systems().parameters.get<Problem *>("_problem"));
   NonlinearSystem & nl = problem->getNonlinearSystem();
   PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
@@ -220,7 +220,7 @@ void petscSetupDampers(NonlinearImplicitSystem& sys)
   SNESLineSearchSetPostCheck(snes, dampedCheck, problem);
 }
 
-void petscSetDefaults(MProblem & problem)
+void petscSetDefaults(FEProblem & problem)
 {
   // dig out Petsc solver
   NonlinearSystem & nl = problem.getNonlinearSystem();

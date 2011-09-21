@@ -15,7 +15,7 @@
 #include "ConvectionDiffusionAction.h"
 #include "Factory.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<ConvectionDiffusionAction>()

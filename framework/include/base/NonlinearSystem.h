@@ -31,17 +31,17 @@
 #include "preconditioner.h"
 #include "coupling_matrix.h"
 
-class MProblem;
+class FEProblem;
 
 /**
  * Nonlinear system to be solved
  *
- * It is a part of MProblem ;-)
+ * It is a part of FEProblem ;-)
  */
 class NonlinearSystem : public SystemTempl<TransientNonlinearImplicitSystem>
 {
 public:
-  NonlinearSystem(MProblem & problem, const std::string & name);
+  NonlinearSystem(FEProblem & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
   /**
@@ -316,7 +316,7 @@ public:
   void debuggingResiduals(bool state) { _debugging_residuals = state; }
 
 public:
-  MProblem & _mproblem;
+  FEProblem & _mproblem;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _l_abs_step_tol;

@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MPROBLEM_H
-#define MPROBLEM_H
+#ifndef FEPROBLEM_H
+#define FEPROBLEM_H
 
 #include "SubProblem.h"
 #include "SubProblemInterface.h"
@@ -32,21 +32,21 @@
 class DisplacedProblem;
 class OutputProblem;
 
-class MProblem;
+class FEProblem;
 
 template<>
-InputParameters validParams<MProblem>();
+InputParameters validParams<FEProblem>();
 
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
  */
-class MProblem :
+class FEProblem :
   public SubProblem
 {
 public:
-  MProblem(const std::string & name, InputParameters parameters);
-  virtual ~MProblem();
+  FEProblem(const std::string & name, InputParameters parameters);
+  virtual ~FEProblem();
 
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
@@ -319,10 +319,10 @@ protected:
   unsigned int _dbg_top_residuals;                      ///< Number of top residual to print out
 
 public:
-  static unsigned int _n;                               ///< number of instances of MProblem (to distinguish Systems when coupling problems together)
+  static unsigned int _n;                               ///< number of instances of FEProblem (to distinguish Systems when coupling problems together)
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;
 };
 
-#endif /* MPROBLEM_H */
+#endif /* FEPROBLEM_H */

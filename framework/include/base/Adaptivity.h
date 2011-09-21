@@ -27,7 +27,7 @@
 #include "error_vector.h"
 #include "error_estimator.h"
 
-class MProblem;
+class FEProblem;
 class MooseMesh;
 
 /**
@@ -37,7 +37,7 @@ class MooseMesh;
 class Adaptivity
 {
 public:
-  Adaptivity(MProblem & subproblem);
+  Adaptivity(FEProblem & subproblem);
   virtual ~Adaptivity();
 
   /**
@@ -108,7 +108,7 @@ public:
   void setTimeActive(Real start_time, Real stop_time);
 
 protected:
-  MProblem & _subproblem;
+  FEProblem & _subproblem;
   MooseMesh & _mesh;
 
   bool _mesh_refinement_on;                     ///< on/off flag reporting if the adaptivity is being used

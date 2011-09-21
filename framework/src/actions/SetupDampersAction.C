@@ -15,7 +15,7 @@
 #include "SetupDampersAction.h"
 #include "Moose.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "ActionWarehouse.h"
 
 template<>

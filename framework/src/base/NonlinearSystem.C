@@ -14,7 +14,7 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "MooseVariable.h"
 #include "PetscSupport.h"
 #include "Factory.h"
@@ -63,7 +63,7 @@ namespace Moose {
 
 } // namespace Moose
 
-NonlinearSystem::NonlinearSystem(MProblem & subproblem, const std::string & name) :
+NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(subproblem, name),
     _mproblem(subproblem),
     _last_rnorm(0),

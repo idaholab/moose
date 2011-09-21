@@ -18,7 +18,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "Output.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "Conversion.h"
 
 #include "exodusII_io.h"
@@ -101,7 +101,7 @@ SetupOutputAction::act()
 
   if(!_pars.isParamValid("output_variables") && _parser_handle._problem != NULL)
   {
-    MProblem & mproblem = *_parser_handle._problem;
+    FEProblem & mproblem = *_parser_handle._problem;
     _pars.set<std::vector<std::string> >("output_variables") = mproblem.getVariableNames();
   }
 
@@ -115,7 +115,7 @@ SetupOutputAction::act()
   if (_parser_handle._problem != NULL)
   {
     // TODO: handle this thru Problem interface
-    MProblem & mproblem = *_parser_handle._problem;
+    FEProblem & mproblem = *_parser_handle._problem;
     mproblem._postprocessor_screen_output = getParam<bool>("postprocessor_screen");
     mproblem._postprocessor_csv_output = getParam<bool>("postprocessor_csv");
     mproblem._postprocessor_ensight_output = getParam<bool>("postprocessor_ensight");

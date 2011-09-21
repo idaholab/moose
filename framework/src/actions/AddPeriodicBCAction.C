@@ -18,7 +18,7 @@
 #include "Moose.h"
 #include "FunctionPeriodicBoundary.h"
 #include "NonlinearSystem.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddPeriodicBCAction>()

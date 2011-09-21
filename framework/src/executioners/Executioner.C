@@ -17,7 +17,7 @@
 // Moose includes
 #include "Moose.h"
 #include "MooseMesh.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 // C++ includes
 #include <vector>

@@ -19,7 +19,7 @@
 #include "Moose.h"
 #include "Parser.h"
 #include "Executioner.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "ActionWarehouse.h"
 
 template<>
@@ -92,9 +92,9 @@ CreateExecutionerAction::act()
   Moose::setup_perf_log.push("Create Executioner","Setup");
   _parser_handle._executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
   Moose::setup_perf_log.pop("Create Executioner","Setup");
-  if (dynamic_cast<MProblem *>(&_parser_handle._executioner->problem()) != NULL)
+  if (dynamic_cast<FEProblem *>(&_parser_handle._executioner->problem()) != NULL)
   {
-    MProblem *mproblem = dynamic_cast<MProblem *>(&_parser_handle._executioner->problem());
+    FEProblem *mproblem = dynamic_cast<FEProblem *>(&_parser_handle._executioner->problem());
     _parser_handle._problem = mproblem;
 
 //    ParserBlock * blk;
@@ -139,7 +139,7 @@ CreateExecutionerAction::act()
       blk->execute();
 */
 
-// TODO: MProblem init action
+// TODO: FEProblem init action
 //    mproblem->init();
 
 // TODO: Copy nodal values action

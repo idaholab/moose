@@ -15,7 +15,7 @@
 #include "ReadMeshAction.h"
 #include "Parser.h"
 #include "MooseMesh.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "ActionWarehouse.h"
 
 // libMesh includes

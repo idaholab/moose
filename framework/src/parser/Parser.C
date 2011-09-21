@@ -28,7 +28,7 @@
 #include "ActionWarehouse.h"
 #include "SetupPreconditionerAction.h"
 
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Executioner.h"
 #include "Moose.h"

@@ -15,7 +15,7 @@
 #include "SetupSMPAction.h"
 #include "Moose.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 
 #include "string_to_enum.h"

@@ -14,7 +14,7 @@
 
 #include "AddKernelAction.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddKernelAction>()

@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "CheckIntegrityAction.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "Parser.h"
 
 template<>

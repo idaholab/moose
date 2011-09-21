@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "CoupledProblem.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "MooseVariable.h"
 #include "InputParameters.h"
 
@@ -43,13 +43,13 @@ CoupledProblem::~CoupledProblem()
 }
 
 void
-CoupledProblem::addSubProblem(const std::string & file_name, MProblem *subproblem)
+CoupledProblem::addSubProblem(const std::string & file_name, FEProblem *subproblem)
 {
   _subproblems[file_name] = subproblem;
   _map[subproblem->getNonlinearSystem().sys().name()] = subproblem;
 }
 
-MProblem *
+FEProblem *
 CoupledProblem::subProblem(const std::string & name)
 {
   return _subproblems[name];
@@ -64,9 +64,9 @@ CoupledProblem::solveOrder(const std::vector<std::string> & solve_order)
 bool
 CoupledProblem::hasVariable(const std::string & var_name)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
   {
-    MProblem * problem = it->second;
+    FEProblem * problem = it->second;
     if (problem->hasVariable(var_name))
       return true;
   }
@@ -77,9 +77,9 @@ CoupledProblem::hasVariable(const std::string & var_name)
 MooseVariable &
 CoupledProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
   {
-    MProblem * problem = it->second;
+    FEProblem * problem = it->second;
     if (problem->hasVariable(var_name))
       return problem->getVariable(tid, var_name);
   }
@@ -90,56 +90,56 @@ CoupledProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 void
 CoupledProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->prepare(elem, tid);
 }
 
 void
 CoupledProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->prepare(elem, ivar, jvar, dof_indices, tid);
 }
 
 void
 CoupledProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElem(elem, tid);
 }
 
 void
 CoupledProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitElemFace(elem, side, bnd_id, tid);
 }
 
 void
 CoupledProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNode(node, tid);
 }
 
 void
 CoupledProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNodeFace(node, bnd_id, tid);
 }
 
 void
 CoupledProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNeighbor(elem, side, tid);
 }
 
 void
 CoupledProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNeighbor(neighbor, neighbor_side, physical_points, tid);
 }
 
@@ -161,9 +161,9 @@ CoupledProblem::init()
   _eq.init();
   _eq.print_info();
 
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
   {
-    MProblem * sp = it->second;
+    FEProblem * sp = it->second;
     sp->init2();                        // obviously I ran out of proper names ;-)
   }
 }
@@ -229,21 +229,21 @@ void
 CoupledProblem::transient(bool trans)
 {
   _transient = trans;
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->transient(trans);
 }
 
 void
 CoupledProblem::copySolutionsBackwards()
 {
-  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->copySolutionsBackwards();
 }
 
 void
 CoupledProblem::dump()
 {
-//  for (std::map<std::string, MProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+//  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
 //    it->second->dump();
 }
 

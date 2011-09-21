@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "SetupResidualDebugAction.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
 

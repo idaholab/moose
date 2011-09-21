@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "Factory.h"
 #include "ProblemFactory.h"
 #include "DisplacedProblem.h"
@@ -25,7 +25,7 @@
 
 #include "ElementH1Error.h"
 
-unsigned int MProblem::_n = 0;
+unsigned int FEProblem::_n = 0;
 
 namespace Moose
 {
@@ -69,12 +69,12 @@ std::string name_sys(const std::string & name, unsigned int n)
 }
 
 template<>
-InputParameters validParams<MProblem>()
+InputParameters validParams<FEProblem>()
 {
   return validParams<SubProblem>();
 }
 
-MProblem::MProblem(const std::string & name, InputParameters parameters) :
+FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     SubProblem(name, parameters),
     _nl(*this, name_sys("nl", _n)),
     _aux(*this, name_sys("aux", _n)),
@@ -128,7 +128,7 @@ MProblem::MProblem(const std::string & name, InputParameters parameters) :
   _pps_data.resize(n_threads);
 }
 
-MProblem::~MProblem()
+FEProblem::~FEProblem()
 {
   bool stateful_props = _material_props.hasStatefulProperties();
 
@@ -163,7 +163,7 @@ MProblem::~MProblem()
 }
 
 
-void MProblem::initialSetup()
+void FEProblem::initialSetup()
 {
   if (_restart)
     restartFromFile();
@@ -276,7 +276,7 @@ void MProblem::initialSetup()
   _nl.initialSetup();
 }
 
-void MProblem::timestepSetup()
+void FEProblem::timestepSetup()
 {
   unsigned int n_threads = libMesh::n_threads();
 
@@ -293,7 +293,7 @@ void MProblem::timestepSetup()
 }
 
 void
-MProblem::prepare(const Elem * elem, THREAD_ID tid)
+FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
 
@@ -306,7 +306,7 @@ MProblem::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
-MProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+FEProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem);
 
@@ -319,7 +319,7 @@ MProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const
 }
 
 void
-MProblem::prepareAssembly(THREAD_ID tid)
+FEProblem::prepareAssembly(THREAD_ID tid)
 {
   _nl.prepareAssembly(tid);
 
@@ -328,7 +328,7 @@ MProblem::prepareAssembly(THREAD_ID tid)
 }
 
 void
-MProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _nl.addResidual(residual, tid);
   if(_displaced_problem)
@@ -336,7 +336,7 @@ MProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
-MProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _nl.addResidualNeighbor(residual, tid);
   if(_displaced_problem)
@@ -344,7 +344,7 @@ MProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
-MProblem::cacheResidual(THREAD_ID tid)
+FEProblem::cacheResidual(THREAD_ID tid)
 {
   _nl.cacheResidual(tid);
   if(_displaced_problem)
@@ -352,7 +352,7 @@ MProblem::cacheResidual(THREAD_ID tid)
 }
 
 void
-MProblem::cacheResidualNeighbor(THREAD_ID tid)
+FEProblem::cacheResidualNeighbor(THREAD_ID tid)
 {
   _nl.cacheResidualNeighbor(tid);
   if(_displaced_problem)
@@ -360,7 +360,7 @@ MProblem::cacheResidualNeighbor(THREAD_ID tid)
 }
 
 void
-MProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _nl.addCachedResidual(residual, tid);
   if(_displaced_problem)
@@ -368,7 +368,7 @@ MProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
-MProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _nl.setResidual(residual, tid);
   if(_displaced_problem)
@@ -376,7 +376,7 @@ MProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
-MProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _nl.setResidualNeighbor(residual, tid);
   if(_displaced_problem)
@@ -384,7 +384,7 @@ MProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
-MProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _nl.addJacobian(jacobian, tid);
   if(_displaced_problem)
@@ -392,7 +392,7 @@ MProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
-MProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _nl.addJacobianNeighbor(jacobian, tid);
   if(_displaced_problem)
@@ -400,7 +400,7 @@ MProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
-MProblem::cacheJacobian(THREAD_ID tid)
+FEProblem::cacheJacobian(THREAD_ID tid)
 {
   _nl.cacheJacobian(tid);
   if(_displaced_problem)
@@ -408,7 +408,7 @@ MProblem::cacheJacobian(THREAD_ID tid)
 }
 
 void
-MProblem::cacheJacobianNeighbor(THREAD_ID tid)
+FEProblem::cacheJacobianNeighbor(THREAD_ID tid)
 {
   _nl.cacheJacobianNeighbor(tid);
   if(_displaced_problem)
@@ -416,7 +416,7 @@ MProblem::cacheJacobianNeighbor(THREAD_ID tid)
 }
 
 void
-MProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _nl.addCachedJacobian(jacobian, tid);
   if(_displaced_problem)
@@ -424,7 +424,7 @@ MProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
-MProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+FEProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
   _nl.addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
   if(_displaced_problem)
@@ -432,7 +432,7 @@ MProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, u
 }
 
 void
-MProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
+FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
 {
   _nl.addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
   if(_displaced_problem)
@@ -440,32 +440,32 @@ MProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
 }
 
 void
-MProblem::prepareShapes(unsigned int var, THREAD_ID tid)
+FEProblem::prepareShapes(unsigned int var, THREAD_ID tid)
 {
   _nl.asmBlock(tid).copyShapes(var);
 }
 
 void
-MProblem::prepareFaceShapes(unsigned int var, THREAD_ID tid)
+FEProblem::prepareFaceShapes(unsigned int var, THREAD_ID tid)
 {
   _nl.asmBlock(tid).copyFaceShapes(var);
 }
 
 void
-MProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
+FEProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
 {
   _nl.asmBlock(tid).copyNeighborShapes(var);
 }
 
 void
-MProblem::addGhostedElem(unsigned int elem_id)
+FEProblem::addGhostedElem(unsigned int elem_id)
 {
   if(_mesh.elem(elem_id)->processor_id() != libMesh::processor_id())
     _ghosted_elems.insert(elem_id);
 }
 
 void
-MProblem::addGhostedBoundary(unsigned int boundary_id)
+FEProblem::addGhostedBoundary(unsigned int boundary_id)
 {
   _mesh.addGhostedBoundary(boundary_id);
 
@@ -474,7 +474,7 @@ MProblem::addGhostedBoundary(unsigned int boundary_id)
 }
 
 bool
-MProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
+FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 {
   std::set<Point> & points_set = _dirac_kernel_info._points[elem];
 
@@ -501,7 +501,7 @@ MProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 }
 
 void
-MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
+FEProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
   unsigned int n_points = _asm_info[tid]->qRule()->n_points();
   _zero[tid].resize(n_points, 0);
@@ -516,7 +516,7 @@ MProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
+FEProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(elem, side);
 
@@ -533,7 +533,7 @@ MProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_
 }
 
 void
-MProblem::reinitNode(const Node * node, THREAD_ID tid)
+FEProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
 
@@ -550,7 +550,7 @@ MProblem::reinitNode(const Node * node, THREAD_ID tid)
 }
 
 void
-MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
+FEProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
   _asm_info[tid]->reinit(node);
 
@@ -568,7 +568,7 @@ MProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 }
 
 void
-MProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
+FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 {
   const Elem * neighbor = elem->neighbor(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
@@ -589,7 +589,7 @@ MProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 }
 
 void
-MProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
+FEProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
 {
   // Reinits shape the functions at the physical points
   _asm_info[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
@@ -611,7 +611,7 @@ MProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, cons
 }
 
 void
-MProblem::getDiracElements(std::set<const Elem *> & elems)
+FEProblem::getDiracElements(std::set<const Elem *> & elems)
 {
   // First add in the undisplaced elements
   elems =_dirac_kernel_info._elements;
@@ -633,7 +633,7 @@ MProblem::getDiracElements(std::set<const Elem *> & elems)
 }
 
 void
-MProblem::clearDiracInfo()
+FEProblem::clearDiracInfo()
 {
   _dirac_kernel_info.clearPoints();
 
@@ -643,7 +643,7 @@ MProblem::clearDiracInfo()
 
 
 void
-MProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
+FEProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(subdomain))
   {
@@ -666,7 +666,7 @@ MProblem::subdomainSetup(unsigned int subdomain, THREAD_ID tid)
 }
 
 void
-MProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
+FEProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
 {
   if (_materials[tid].hasBoundaryMaterials(subdomain))
   {
@@ -678,7 +678,7 @@ MProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
 }
 
 void
-MProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
+FEProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
 {
   _nl.addVariable(var_name, type, scale_factor, active_subdomains);
   if (_displaced_problem)
@@ -686,7 +686,7 @@ MProblem::addVariable(const std::string & var_name, const FEType & type, Real sc
 }
 
 void
-MProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+FEProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -704,7 +704,7 @@ MProblem::addKernel(const std::string & kernel_name, const std::string & name, I
 }
 
 void
-MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
+FEProblem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -722,7 +722,7 @@ MProblem::addBoundaryCondition(const std::string & bc_name, const std::string & 
 }
 
 void
-MProblem::addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters)
+FEProblem::addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters)
 {
   _has_constraints = true;
 
@@ -746,7 +746,7 @@ MProblem::addConstraint(const std::string & c_name, const std::string & name, In
 }
 
 void
-MProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
+FEProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
 {
   _aux.addVariable(var_name, type, 1.0, active_subdomains);
   if (_displaced_problem)
@@ -754,7 +754,7 @@ MProblem::addAuxVariable(const std::string & var_name, const FEType & type, cons
 }
 
 void
-MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -774,7 +774,7 @@ MProblem::addAuxKernel(const std::string & kernel_name, const std::string & name
 }
 
 void
-MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
+FEProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -795,7 +795,7 @@ MProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::string
 }
 
 void
-MProblem::addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+FEProblem::addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -815,7 +815,7 @@ MProblem::addDiracKernel(const std::string & kernel_name, const std::string & na
 // DGKernels ////
 
 void
-MProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & name, InputParameters parameters)
+FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -834,7 +834,7 @@ MProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & na
 
 // Initial Conditions /////
 void
-MProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name)
+FEProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters, std::string var_name)
 {
   parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
@@ -843,13 +843,13 @@ MProblem::addInitialCondition(const std::string & ic_name, const std::string & n
 }
 
 void
-MProblem::addInitialCondition(const std::string & var_name, Real value)
+FEProblem::addInitialCondition(const std::string & var_name, Real value)
 {
   _pars.set<Real>("initial_" + var_name) = value;
 }
 
 Number
-MProblem::initialValue (const Point& p,
+FEProblem::initialValue (const Point& p,
                         const Parameters& /*parameters*/,
                         const std::string& /*sys_name*/,
                         const std::string& var_name)
@@ -868,7 +868,7 @@ MProblem::initialValue (const Point& p,
 }
 
 Gradient
-MProblem::initialGradient (const Point& p,
+FEProblem::initialGradient (const Point& p,
                            const Parameters& /*parameters*/,
                            const std::string& /*sys_name*/,
                            const std::string& var_name)
@@ -884,7 +884,7 @@ MProblem::initialGradient (const Point& p,
 }
 
 void
-MProblem::initialCondition(EquationSystems& es, const std::string& system_name)
+FEProblem::initialCondition(EquationSystems& es, const std::string& system_name)
 {
   if (!_restart)
   {
@@ -895,7 +895,7 @@ MProblem::initialCondition(EquationSystems& es, const std::string& system_name)
 }
 
 void
-MProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
+FEProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblemInterface *>("_subproblem") = this;
@@ -936,21 +936,21 @@ MProblem::addMaterial(const std::string & mat_name, const std::string & name, In
 }
 
 const std::vector<Material*> &
-MProblem::getMaterials(unsigned int block_id, THREAD_ID tid)
+FEProblem::getMaterials(unsigned int block_id, THREAD_ID tid)
 {
   mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
   return _materials[tid].getMaterials(block_id);
 }
 
 const std::vector<Material*> &
-MProblem::getFaceMaterials(unsigned int block_id, THREAD_ID tid)
+FEProblem::getFaceMaterials(unsigned int block_id, THREAD_ID tid)
 {
   mooseAssert( tid < _materials.size(), "Requesting a material warehouse that does not exist");
   return _materials[tid].getBoundaryMaterials(block_id);
 }
 
 void
-MProblem::updateMaterials()
+FEProblem::updateMaterials()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _materials[tid].updateMaterialDataState();
@@ -963,7 +963,7 @@ MProblem::updateMaterials()
 }
 
 void
-MProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
+FEProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(blk_id))
   {
@@ -973,7 +973,7 @@ MProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
 }
 
 void
-MProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid)
+FEProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid)
 {
   if (_materials[tid].hasBoundaryMaterials(blk_id))
   {
@@ -983,7 +983,7 @@ MProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID 
 }
 
 void
-MProblem::reinitMaterialsNeighbor(unsigned int blk_id, unsigned int side, THREAD_ID tid)
+FEProblem::reinitMaterialsNeighbor(unsigned int blk_id, unsigned int side, THREAD_ID tid)
 {
   if (_materials[tid].hasNeighborMaterials(blk_id))
   {
@@ -995,7 +995,7 @@ MProblem::reinitMaterialsNeighbor(unsigned int blk_id, unsigned int side, THREAD
 }
 
 void
-MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type/* = EXEC_TIMESTEP*/)
+FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type/* = EXEC_TIMESTEP*/)
 {
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -1056,13 +1056,13 @@ MProblem::addPostprocessor(std::string pp_name, const std::string & name, InputP
 }
 
 Real &
-MProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
+FEProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 {
   return _pps_data[tid].getPostprocessorValue(name);
 }
 
 void
-MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps)
+FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps)
 {
   if (pps[0].blocks().size() > 0 || pps[0].boundaryIds().size() > 0)
   {
@@ -1204,7 +1204,7 @@ MProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pp
 }
 
 void
-MProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
+FEProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
 {
   Moose::perf_log.push("compute_postprocessors()","Solve");
 
@@ -1236,7 +1236,7 @@ MProblem::computePostprocessors(ExecFlagType type/* = EXEC_TIMESTEP*/)
 }
 
 void
-MProblem::addPPSValuesToTable(ExecFlagType type)
+FEProblem::addPPSValuesToTable(ExecFlagType type)
 {
   // Store values into table
   for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(type)[0].all().begin();
@@ -1256,7 +1256,7 @@ MProblem::addPPSValuesToTable(ExecFlagType type)
 }
 
 void
-MProblem::outputPostprocessors()
+FEProblem::outputPostprocessors()
 {
   ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
@@ -1288,7 +1288,7 @@ MProblem::outputPostprocessors()
 }
 
 void
-MProblem::addDamper(std::string damper_name, const std::string & name, InputParameters parameters)
+FEProblem::addDamper(std::string damper_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblemInterface *>("_subproblem") = this;
@@ -1299,13 +1299,13 @@ MProblem::addDamper(std::string damper_name, const std::string & name, InputPara
 }
 
 void
-MProblem::setupDampers()
+FEProblem::setupDampers()
 {
   _nl.setupDampers();
 }
 
 bool
-MProblem::hasVariable(const std::string & var_name)
+FEProblem::hasVariable(const std::string & var_name)
 {
   if (_nl.hasVariable(var_name))
     return true;
@@ -1316,7 +1316,7 @@ MProblem::hasVariable(const std::string & var_name)
 }
 
 MooseVariable &
-MProblem::getVariable(THREAD_ID tid, const std::string & var_name)
+FEProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   if (_nl.hasVariable(var_name))
     return _nl.getVariable(tid, var_name);
@@ -1327,7 +1327,7 @@ MProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 void
-MProblem::createQRules(QuadratureType type, Order order)
+FEProblem::createQRules(QuadratureType type, Order order)
 {
   if (order == INVALID_ORDER)
   {
@@ -1347,13 +1347,13 @@ MProblem::createQRules(QuadratureType type, Order order)
 }
 
 AsmBlock &
-MProblem::asmBlock(THREAD_ID tid)
+FEProblem::asmBlock(THREAD_ID tid)
 {
   return _nl.asmBlock(tid);
 }
 
 void
-MProblem::init()
+FEProblem::init()
 {
   _nl.preInit();
 
@@ -1365,15 +1365,15 @@ MProblem::init()
   _mesh.applyMeshModifications();
   Moose::setup_perf_log.pop("mesh.applyMeshModifications()","Setup");
 
-  Moose::setup_perf_log.push("MProblem::init::meshChanged()","Setup");
+  Moose::setup_perf_log.push("FEProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();
-  Moose::setup_perf_log.pop("MProblem::init::meshChanged()","Setup");
+  Moose::setup_perf_log.pop("FEProblem::init::meshChanged()","Setup");
 
   init2();
 }
 
 void
-MProblem::init2()
+FEProblem::init2()
 {
   Moose::setup_perf_log.push("NonlinearSystem::update()","Setup");
   _nl.update();
@@ -1388,7 +1388,7 @@ MProblem::init2()
 }
 
 void
-MProblem::solve()
+FEProblem::solve()
 {
   Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
@@ -1400,40 +1400,40 @@ MProblem::solve()
 }
 
 bool
-MProblem::converged()
+FEProblem::converged()
 {
   return _nl.converged();
 }
 
 void
-MProblem::copySolutionsBackwards()
+FEProblem::copySolutionsBackwards()
 {
   _nl.copySolutionsBackwards();
   _aux.copySolutionsBackwards();
 }
 
 void
-MProblem::copyOldSolutions()
+FEProblem::copyOldSolutions()
 {
   _nl.copyOldSolutions();
   _aux.copyOldSolutions();
 }
 
 void
-MProblem::onTimestepBegin()
+FEProblem::onTimestepBegin()
 {
   _nl.onTimestepBegin();
 }
 
 void
-MProblem::onTimestepEnd()
+FEProblem::onTimestepEnd()
 {
   _aux.compute(EXEC_TIMESTEP);
   _nl.printVarNorms();
 }
 
 void
-MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
+FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, NumericVector<Number>& residual)
 {
   _nl.set_solution(soln);
   computePostprocessors(EXEC_RESIDUAL);
@@ -1457,7 +1457,7 @@ MProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector
 }
 
 void
-MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
+FEProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian)
 {
   _nl.set_solution(soln);
   computePostprocessors(EXEC_JACOBIAN);
@@ -1478,7 +1478,7 @@ MProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector
 }
 
 void
-MProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
 {
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
@@ -1488,7 +1488,7 @@ MProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System 
 }
 
 Real
-MProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
+FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
 {
   Moose::perf_log.push("compute_dampers()","Solve");
 
@@ -1508,7 +1508,7 @@ MProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<
 }
 
 void
-MProblem::initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements)
+FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements)
 {
   _displaced_mesh = displaced_mesh;
 
@@ -1518,7 +1518,7 @@ MProblem::initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std
 }
 
 void
-MProblem::updateGeomSearch()
+FEProblem::updateGeomSearch()
 {
   _geometric_search_data.update();
 
@@ -1527,7 +1527,7 @@ MProblem::updateGeomSearch()
 }
 
 void
-MProblem::output()
+FEProblem::output()
 {
   _out.output();
 
@@ -1553,13 +1553,13 @@ MProblem::output()
 }
 
 OutputProblem &
-MProblem::getOutputProblem(unsigned int refinements)
+FEProblem::getOutputProblem(unsigned int refinements)
 {
   // TODO: When do we build this?
   if (!_out_problem)
   {
     InputParameters params = validParams<OutputProblem>();
-    params.set<MProblem *>("mproblem") = this;
+    params.set<FEProblem *>("mproblem") = this;
     params.set<unsigned int>("refinements") = refinements;
     params.set<MooseMesh *>("mesh") = &_mesh;
     _out_problem = static_cast<OutputProblem *>(ProblemFactory::instance()->create("OutputProblem", "Output Problem", params));
@@ -1569,7 +1569,7 @@ MProblem::getOutputProblem(unsigned int refinements)
 
 #ifdef LIBMESH_ENABLE_AMR
 void
-MProblem::adaptMesh()
+FEProblem::adaptMesh()
 {
   _adaptivity.adaptMesh();
   meshChanged();
@@ -1577,7 +1577,7 @@ MProblem::adaptMesh()
 #endif //LIBMESH_ENABLE_AMR
 
 void
-MProblem::meshChanged()
+FEProblem::meshChanged()
 {
   // mesh changed
   _eq.reinit();
@@ -1589,7 +1589,7 @@ MProblem::meshChanged()
 }
 
 void
-MProblem::checkProblemIntegrity()
+FEProblem::checkProblemIntegrity()
 {
   // Check for unsatisfied actions
   const std::set<subdomain_id_type> & mesh_subdomains = _mesh.meshSubdomains();
@@ -1642,7 +1642,7 @@ MProblem::checkProblemIntegrity()
 }
 
 void
-MProblem::checkPPSs()
+FEProblem::checkPPSs()
 {
   // gather names of all postprocessors that were defined in the input file
   std::set<std::string> names;
@@ -1662,21 +1662,21 @@ MProblem::checkPPSs()
 }
 
 void
-MProblem::serializeSolution()
+FEProblem::serializeSolution()
 {
   _nl.serializeSolution();
   _aux.serializeSolution();
 }
 
 void
-MProblem::restartFromFile()
+FEProblem::restartFromFile()
 {
   _eq.read(_restart_file_name, libMeshEnums::READ, EquationSystems::READ_DATA);
   _nl.update();
 }
 
 std::vector<std::string>
-MProblem::getVariableNames()
+FEProblem::getVariableNames()
 {
   std::vector<std::string> names;
 

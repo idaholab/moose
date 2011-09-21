@@ -16,7 +16,7 @@
 
 #include "Moose.h"
 #include "MooseMesh.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 // libMesh
 #include "equation_systems.h"
@@ -25,7 +25,7 @@
 
 #ifdef LIBMESH_ENABLE_AMR
 
-Adaptivity::Adaptivity(MProblem & subproblem) :
+Adaptivity::Adaptivity(FEProblem & subproblem) :
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),

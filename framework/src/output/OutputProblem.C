@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<OutputProblem>()
 {
   InputParameters params = validParams<Problem>();
-  params.addRequiredParam<MProblem *>("mproblem", "The Moose problem containg this OutputProblem");
+  params.addRequiredParam<FEProblem *>("mproblem", "The Moose problem containg this OutputProblem");
   params.addParam<Problem *>("parent", NULL, "This problem's parent problem (if any)");
   params.addRequiredParam<unsigned int>("refinements", "The number of refinements to use in the oversampled mesh");
   return params;
@@ -32,7 +32,7 @@ InputParameters validParams<OutputProblem>()
 
 OutputProblem::OutputProblem(const std::string & name, InputParameters parameters):
     Problem(name, parameters),
-    _mproblem(*parameters.get<MProblem *>("mproblem")),
+    _mproblem(*parameters.get<FEProblem *>("mproblem")),
     _mesh(_mproblem.mesh()),
     _eq(_mesh),
     _out(*this)

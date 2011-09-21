@@ -18,7 +18,7 @@
 #include "Moose.h"
 #include "Executioner.h"
 #include "LinearInterpolation.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 #include "mesh_function.h"
 
@@ -93,7 +93,7 @@ public:
   virtual void endStep();
 
 protected:
-  MProblem & _problem;
+  FEProblem & _problem;
 
   int & _t_step;                        ///< Current timestep.
   Real & _time;                         ///< Current time

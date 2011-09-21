@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AuxiliarySystem.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "Factory.h"
 #include "AuxKernel.h"
 #include "MaterialData.h"
@@ -28,7 +28,7 @@
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(MProblem & subproblem, const std::string & name) :
+AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(subproblem, name),
     _mproblem(subproblem),
     _serialized_solution(*NumericVector<Number>::build().release()),

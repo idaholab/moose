@@ -14,7 +14,7 @@
 
 #include "PhysicsBasedPreconditioner.h"
 #include "Moose.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 
 //libMesh Includes
@@ -27,7 +27,7 @@
 #include "sparse_matrix.h"
 
 
-PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (MProblem & mproblem) :
+PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (FEProblem & mproblem) :
     Preconditioner<Number>(),
     _mproblem(mproblem),
     _nl(mproblem.getNonlinearSystem())

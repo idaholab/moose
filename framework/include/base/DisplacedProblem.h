@@ -21,7 +21,7 @@
 #include "DisplacedSystem.h"
 #include "AssemblyData.h"
 #include "GeometricSearchData.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 // libMesh
 #include "equation_systems.h"
@@ -36,7 +36,7 @@ class DisplacedProblem :
   public SubProblemInterface
 {
 public:
-  DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements);
+  DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements);
   virtual ~DisplacedProblem();
 
   virtual EquationSystems & es() { return _eq; }
@@ -125,7 +125,7 @@ public:
 
 protected:
   Problem & _problem;
-  MProblem & _mproblem;
+  FEProblem & _mproblem;
   MooseMesh & _mesh;
   EquationSystems _eq;
   MooseMesh & _ref_mesh;                               ///< reference mesh

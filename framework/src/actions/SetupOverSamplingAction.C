@@ -18,7 +18,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "Output.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "OutputProblem.h"
 
 #include "exodusII_io.h"
@@ -61,7 +61,7 @@ void
 SetupOverSamplingAction::act()
 {
   Executioner * exec = _parser_handle._executioner;
-  MProblem * problem = dynamic_cast<MProblem *>(&exec->problem());
+  FEProblem * problem = dynamic_cast<FEProblem *>(&exec->problem());
   if (!problem)
     mooseError("Can't get a handle to Mproblem");
 
@@ -71,7 +71,7 @@ SetupOverSamplingAction::act()
 
   if(!_pars.isParamValid("output_variables") && _parser_handle._problem != NULL)
   {
-    MProblem & mproblem = *_parser_handle._problem;
+    FEProblem & mproblem = *_parser_handle._problem;
     _pars.set<std::vector<std::string> >("output_variables") = mproblem.getVariableNames();
   }
 
@@ -86,7 +86,7 @@ SetupOverSamplingAction::act()
   if (_parser_handle._problem != NULL)
   {
     // TODO: handle this thru Problem interface
-    MProblem & mproblem = *_parser_handle._problem;
+    FEProblem & mproblem = *_parser_handle._problem;
 
 #ifdef LIBMESH_ENABLE_AMR
     Adaptivity & adapt = mproblem.adaptivity();

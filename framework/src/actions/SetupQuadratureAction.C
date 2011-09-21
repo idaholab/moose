@@ -14,7 +14,7 @@
 
 #include "SetupQuadratureAction.h"
 #include "Conversion.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<SetupQuadratureAction>()

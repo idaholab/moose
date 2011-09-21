@@ -15,7 +15,7 @@
 #include "SetupFiniteDifferencePreconditionerAction.h"
 #include "Moose.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 
 #include "string_to_enum.h"
@@ -48,7 +48,7 @@ SetupFiniteDifferencePreconditionerAction::act()
   if(libMesh::n_processors() > 1)
     mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");
 
-  MProblem & subproblem = *_parser_handle._problem;
+  FEProblem & subproblem = *_parser_handle._problem;
   NonlinearSystem & nl = subproblem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
 

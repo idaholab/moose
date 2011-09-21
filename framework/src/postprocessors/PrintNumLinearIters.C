@@ -14,7 +14,7 @@
 
 #include "PrintNumLinearIters.h"
 
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "SubProblem.h"
 
 template<>

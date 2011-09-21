@@ -32,7 +32,7 @@
 #include "transient_system.h"
 #include "nonlinear_implicit_system.h"
 
-class MProblem;
+class FEProblem;
 class MooseVariable;
 class MooseMesh;
 
@@ -52,8 +52,8 @@ public:
 
   virtual Problem * parent() { return NULL; }
 
-  void addSubProblem(const std::string & file_name, MProblem *subproblem);
-  MProblem *subProblem(const std::string & name);
+  void addSubProblem(const std::string & file_name, FEProblem *subproblem);
+  FEProblem *subProblem(const std::string & name);
 
   void solveOrder(const std::vector<std::string> & solve_order);
 
@@ -116,11 +116,11 @@ public:
   virtual void restartFromFile(const std::string & file_name);
 
 protected:
-  std::map<std::string, MProblem *> _subproblems;
+  std::map<std::string, FEProblem *> _subproblems;
   std::vector<std::string> _solve_order;
 
   /// Keep track of the correspondence between libMesh objects and Moose objects
-  std::map<std::string, MProblem *> _map;
+  std::map<std::string, FEProblem *> _map;
 
   MooseMesh * _mesh;
   EquationSystems _eq;

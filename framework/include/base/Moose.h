@@ -48,7 +48,7 @@ typedef Real                     PostprocessorValue;
 #define mooseDeprecated() mooseDoOnce(std::cout << "*** Warning, This code is deprecated, and likely to be removed in future library versions! " << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;)
 
 
-class MProblem;
+class FEProblem;
 class ActionWarehouse;
 
 typedef StoredRange<std::vector<unsigned int>::iterator, unsigned int> NodeIdRange;
@@ -76,7 +76,7 @@ void registerObjects();
 void addActionTypes();
 void registerActions();
 
-void setSolverDefaults(MProblem & problem);
+void setSolverDefaults(FEProblem & problem);
 
 /**
  * Framework-wide stuff

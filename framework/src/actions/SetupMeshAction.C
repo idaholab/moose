@@ -15,7 +15,7 @@
 #include "SetupMeshAction.h"
 #include "Parser.h"
 #include "MooseMesh.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "ProblemFactory.h"
 
@@ -92,11 +92,11 @@ SetupMeshAction::act()
   if (Moose::action_warehouse.actionBlocksWithActionBegin("setup_executioner") ==
       Moose::action_warehouse.actionBlocksWithActionEnd("setup_executioner"))
   {
-    Moose::setup_perf_log.push("Create MProblem","Setup");
+    Moose::setup_perf_log.push("Create FEProblem","Setup");
 
     // Use the Factory to build a normal MOOSE problem
-    _parser_handle._problem = ProblemFactory::instance()->createMProblem(_parser_handle._mesh);
-    Moose::setup_perf_log.pop("Create MProblem","Setup");
+    _parser_handle._problem = ProblemFactory::instance()->createFEProblem(_parser_handle._mesh);
+    Moose::setup_perf_log.pop("Create FEProblem","Setup");
   }
 }
 

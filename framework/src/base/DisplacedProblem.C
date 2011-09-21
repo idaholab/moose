@@ -94,7 +94,7 @@ protected:
 };
 
 
-DisplacedProblem::DisplacedProblem(MProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements) :
+DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements) :
     SubProblemInterface(),
     _problem(*mproblem.parent()),
     _mproblem(mproblem),

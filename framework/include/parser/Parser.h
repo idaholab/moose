@@ -23,7 +23,7 @@
 #include "exodusII_io.h"
 
 class MooseMesh;
-class MProblem;
+class FEProblem;
 class Executioner;
 
 class Parser
@@ -144,7 +144,7 @@ public:
   // data created while running execute()
   MooseMesh *_mesh;
   MooseMesh *_displaced_mesh;
-  MProblem * _problem;
+  FEProblem * _problem;
   Executioner *_executioner;
 
   ExodusII_IO *_exreader;                               ///< auxiliary object for restart

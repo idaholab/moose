@@ -14,7 +14,7 @@
 
 #include "CopyNodalVarsAction.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "ActionWarehouse.h"
 
 #include <map>

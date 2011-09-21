@@ -22,7 +22,7 @@
 
 // objects that can be created by MOOSE
 // problems
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "OutputProblem.h"
 #include "CoupledProblem.h"
 // kernels
@@ -179,7 +179,7 @@ registerObjects()
     return;
 
   // problems
-  registerProblem(MProblem);
+  registerProblem(FEProblem);
   registerProblem(OutputProblem);
   registerProblem(CoupledProblem);
 
@@ -478,7 +478,7 @@ registerActions()
 }
 
 void
-setSolverDefaults(MProblem & problem)
+setSolverDefaults(FEProblem & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::petscSetDefaults(problem);

@@ -17,7 +17,7 @@
 
 #include "Moose.h"
 #include "Executioner.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 // LibMesh includes
 #include <parameters.h>
@@ -60,7 +60,7 @@ public:
   virtual void checkIntegrity();
 
 protected:
-  MProblem & _problem;
+  FEProblem & _problem;
 
   int & _time_step;
   Real & _time;

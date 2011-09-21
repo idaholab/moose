@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "Output.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 
 #include "Outputter.h"
@@ -92,7 +92,7 @@ void
 Output::timestepSetup()
 {
 #ifdef LIBMESH_HAVE_PETSC
-  MProblem * mproblem( dynamic_cast<MProblem*>(&_problem) );
+  FEProblem * mproblem( dynamic_cast<FEProblem*>(&_problem) );
   if (_time >= _iteration_plot_start_time && mproblem)
   {
     NonlinearSystem & nl = mproblem->getNonlinearSystem();

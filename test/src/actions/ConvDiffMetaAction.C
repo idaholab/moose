@@ -17,7 +17,7 @@
 #include "ActionFactory.h"
 #include "MooseObjectAction.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<ConvDiffMetaAction>()

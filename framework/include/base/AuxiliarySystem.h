@@ -28,7 +28,7 @@
 #include "numeric_vector.h"
 
 class AuxKernel;
-class MProblem;
+class FEProblem;
 
 /**
  * A system that holds auxiliary variables
@@ -37,7 +37,7 @@ class MProblem;
 class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
-  AuxiliarySystem(MProblem & subproblem, const std::string & name);
+  AuxiliarySystem(FEProblem & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
   virtual void init();
@@ -89,7 +89,7 @@ protected:
   void computeNodalVars(std::vector<AuxWarehouse> & auxs);
   void computeElementalVars(std::vector<AuxWarehouse> & auxs);
 
-  MProblem & _mproblem;
+  FEProblem & _mproblem;
 
   const NumericVector<Number> * _current_solution;      ///< solution vector from nonlinear solver
   NumericVector<Number> & _serialized_solution;         ///< Serialized version of the solution vector

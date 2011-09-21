@@ -16,7 +16,7 @@
 #include "PhysicsBasedPreconditioner.h"
 #include "Moose.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "PhysicsBasedPreconditioner.h"
 #include "PetscSupport.h"
@@ -44,7 +44,7 @@ SetupPBPAction::act()
 {
   if (_parser_handle._problem != NULL)
   {
-    MProblem & subproblem = *_parser_handle._problem;
+    FEProblem & subproblem = *_parser_handle._problem;
     NonlinearSystem & nl = subproblem.getNonlinearSystem();
 
     unsigned int n_vars = nl.sys().n_vars();

@@ -20,14 +20,14 @@
 // libMesh includes
 #include "node_range.h"
 
-class MProblem;
+class FEProblem;
 class AuxiliarySystem;
 
 
 class ComputeElemAuxVarsThread
 {
 public:
-  ComputeElemAuxVarsThread(MProblem & mproblem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
+  ComputeElemAuxVarsThread(FEProblem & mproblem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
 
@@ -36,7 +36,7 @@ public:
   void join(const ComputeElemAuxVarsThread & /*y*/);
 
 protected:
-  MProblem & _mproblem;
+  FEProblem & _mproblem;
   AuxiliarySystem & _sys;
   THREAD_ID _tid;
 

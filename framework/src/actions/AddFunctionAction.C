@@ -16,7 +16,7 @@
 #include "Factory.h"
 #include "Moose.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddFunctionAction>()

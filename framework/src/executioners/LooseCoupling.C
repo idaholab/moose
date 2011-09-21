@@ -17,7 +17,7 @@
 #include "MooseSyntax.h"
 #include "CoupledProblem.h"
 #include "SubProblem.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "ProblemFactory.h"
 #include "ActionWarehouse.h"
 
@@ -83,13 +83,13 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     Moose::associateSyntax(*_slave_parser[i]);
     if (_shared_mesh)
     {
-       InputParameters params = validParams<MProblem>();
-       params.set<std::string>("name") = "Moose Probelm";
+       InputParameters params = validParams<FEProblem>();
+       params.set<std::string>("name") = "Moose Problem";
        params.set<MooseMesh *>("mesh") = _mesh;
        params.set<Problem *>("parent") = &_problem;
-       MProblem * subproblem = static_cast<MProblem *>
-         (ProblemFactory::instance()->create("MProblem", "Moose Problem", params));
-       //MProblem * subproblem = new MProblem(*_mesh, &_problem);
+       FEProblem * subproblem = static_cast<FEProblem *>
+         (ProblemFactory::instance()->create("FEProblem", "Moose Problem", params));
+       //FEProblem * subproblem = new FEProblem(*_mesh, &_problem);
        _problem.addSubProblem(file_name, subproblem);
        _slave_parser[i]->_loose = true;
        _slave_parser[i]->_problem = subproblem;
@@ -189,7 +189,7 @@ LooseCoupling::execute()
 InputParameters
 LooseCoupling::setupProblemParams(std::string name, MooseMesh * mesh)
 {
-  InputParameters params = validParams<MProblem>();
+  InputParameters params = validParams<FEProblem>();
   params.set<std::string>("name") = name;
   params.set<MooseMesh *>("mesh") = mesh;
   return params;
