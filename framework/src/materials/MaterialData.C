@@ -15,15 +15,17 @@
 #include "MaterialData.h"
 #include "Material.h"
 
-void shallowCopyData(const std::set<std::string> & names,
+void shallowCopyData(const std::set<unsigned int> & prop_ids,
                      MaterialProperties & data,
                      MaterialProperties & data_from)
 {
-  for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+  for (std::set<unsigned int>::const_iterator it = prop_ids.begin(); it != prop_ids.end(); ++it)
   {
-    std::string name = *it;
-    if (data[name] != NULL && data_from[name] != NULL)
-      data[name]->shallowCopy(data_from[name]);
+    unsigned int id = *it;
+    PropertyValue * prop = data[id];                  // do the look-up just once (OPT)
+    PropertyValue * prop_from = data_from[id];        // do the look-up just once (OPT)
+    if (prop != NULL && prop_from != NULL)
+      prop->shallowCopy(prop_from);
   }
 }
 
@@ -37,30 +39,32 @@ MaterialData::MaterialData(MaterialPropertyStorage & storage) :
 MaterialData::~MaterialData()
 {
   for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
-    delete it->second;
+    delete *it;
   for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-    delete it->second;
+    delete *it;
   for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-    delete it->second;
+    delete *it;
 }
 
 void
 MaterialData::size(unsigned int n_qpoints)
 {
   for (MaterialProperties::iterator it = _props.begin(); it != _props.end(); ++it)
-    if (it->second != NULL)
-      it->second->resize(n_qpoints);
+  {
+    if (*it != NULL)
+      (*it)->resize(n_qpoints);
+  }
 
   if (_storage.hasStatefulProperties())
   {
     for (MaterialProperties::iterator it = _props_old.begin(); it != _props_old.end(); ++it)
-      if (it->second != NULL)
-        it->second->resize(n_qpoints);
+      if (*it != NULL)
+        (*it)->resize(n_qpoints);
 
     if (_storage.hasStatefulProperties())
       for (MaterialProperties::iterator it = _props_older.begin(); it != _props_older.end(); ++it)
-        if (it->second != NULL)
-          it->second->resize(n_qpoints);
+        if (*it != NULL)
+          (*it)->resize(n_qpoints);
   }
   _sized = true;
 }
@@ -72,16 +76,20 @@ MaterialData::initStatefulProps(std::vector<Material *> & mats, unsigned int n_q
 
   size(n_qpoints);
 
+  if (_storage.props()[elem_id][side].size() == 0) _storage.props()[elem_id][side].resize(_props.size());
+  if (_storage.propsOld()[elem_id][side].size() == 0) _storage.propsOld()[elem_id][side].resize(_props_old.size());
+  if (_storage.propsOlder()[elem_id][side].size() == 0) _storage.propsOlder()[elem_id][side].resize(_props_older.size());
+
   // init properties (allocate memory. etc)
-  for (std::set<std::string>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
+  for (std::set<unsigned int>::const_iterator it = _stateful_props.begin(); it != _stateful_props.end(); ++it)
   {
-    std::string name = *it;
+    unsigned int prop_id = *it;
     // duplicate the stateful property in property storage (all three states - we will reuse the allocated memory there)
     // also allocating the right amount of memory, so we do not have to resize, etc.
-    if (_storage.props()[elem_id][side][name] == NULL) _storage.props()[elem_id][side][name] = _props[name]->init(n_qpoints);
-    if (_storage.propsOld()[elem_id][side][name] == NULL) _storage.propsOld()[elem_id][side][name] = _props_old[name]->init(n_qpoints);
+    if (_storage.props()[elem_id][side][prop_id] == NULL) _storage.props()[elem_id][side][prop_id] = _props[prop_id]->init(n_qpoints);
+    if (_storage.propsOld()[elem_id][side][prop_id] == NULL) _storage.propsOld()[elem_id][side][prop_id] = _props_old[prop_id]->init(n_qpoints);
     if (_storage.hasOlderProperties())
-      if (_storage.propsOlder()[elem_id][side][name] == NULL) _storage.propsOlder()[elem_id][side][name] = _props_old[name]->init(n_qpoints);
+      if (_storage.propsOlder()[elem_id][side][prop_id] == NULL) _storage.propsOlder()[elem_id][side][prop_id] = _props_old[prop_id]->init(n_qpoints);
   }
   // copy from storage to material data
   shallowCopyData(_stateful_props, _props, _storage.props()[elem_id][side]);
@@ -135,17 +143,18 @@ MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, con
 bool
 MaterialData::have_property_name(const std::string & prop_name) const
 {
-  return _props.find(prop_name) != _props.end();
+  std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
+  return (it != _prop_ids.end());
 }
 
 bool
 MaterialData::have_property_name_old(const std::string & prop_name) const
 {
-  return _props.find(prop_name) != _props.end();
+  return have_property_name(prop_name);
 }
 
 bool
 MaterialData::have_property_name_older(const std::string & prop_name) const
 {
-  return _props.find(prop_name) != _props.end();
+  return have_property_name(prop_name);
 }

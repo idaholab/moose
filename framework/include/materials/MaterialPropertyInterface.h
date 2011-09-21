@@ -21,9 +21,9 @@
 #include "Moose.h"
 #include "MaterialProperty.h"
 #include "InputParameters.h"
+#include "MaterialData.h"
 
 class SubProblem;
-class MaterialData;
 
 /**
  * Any object that needs material properties has to inherit this interface
@@ -65,57 +65,43 @@ template<typename T>
 MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
-  MaterialProperties::const_iterator it = _material_props.find(name);
-
-  if (it != _material_props.end())
-  {
-    mooseAssert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL, "");
-    return *dynamic_cast<MaterialProperty<T>*>(it->second);
-  }
-
-  mooseError("Material has no property named: " + name);
+  unsigned int prop_id = _material_data.getPropertyId(name);
+  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_material_props[prop_id]);
+  if (prop != NULL)
+    return *prop;
+  else
+    mooseError("Material has no property named: " + name);
 }
 
 template<typename T>
 MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
-  MaterialProperties::const_iterator it = _material_props_old.find(name);
-
-  if (it != _material_props_old.end())
-  {
-    mooseAssert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL, "");
-    return *dynamic_cast<MaterialProperty<T>*>(it->second);
-  }
-
-  mooseError("Material has no property named: " + name);
+  unsigned int prop_id = _material_data.getPropertyId(name);
+  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_material_props_old[prop_id]);
+  if (prop != NULL)
+    return *prop;
+  else
+    mooseError("Material has no property named: " + name);
 }
 
 template<typename T>
 MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
-  MaterialProperties::const_iterator it = _material_props_older.find(name);
-
-  if (it != _material_props_older.end())
-  {
-    mooseAssert (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL, "");
-    return *dynamic_cast<MaterialProperty<T>*>(it->second);
-  }
-
-  mooseError("Material has no property named: " + name);
+  unsigned int prop_id = _material_data.getPropertyId(name);
+  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_material_props_older[prop_id]);
+  if (prop != NULL)
+    return *prop;
+  else
+    mooseError("Material has no property named: " + name);
 }
 
 template<typename T>
 bool
 MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 {
-  MaterialProperties::const_iterator it = _material_props.find(name);
-  if (it != _material_props.end())
-    if (dynamic_cast<const MaterialProperty<T>*>(it->second) != NULL)
-      return true;
-
-  return false;
+  return _material_data.have_property<T>(name);
 }
 
 

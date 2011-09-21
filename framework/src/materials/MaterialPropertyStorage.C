@@ -38,33 +38,21 @@ MaterialPropertyStorage::releaseProperties()
   {
     HashMap<unsigned int, MaterialProperties>::iterator j;
     for (j = i->second.begin(); j != i->second.end(); ++j)
-    {
-      MaterialProperties::iterator k;
-      for (k = j->second.begin(); k != j->second.end(); ++k)
-        delete k->second;
-    }
+      j->second.destroy();
   }
 
   for (i = _props_elem_old->begin(); i != _props_elem_old->end(); ++i)
   {
     HashMap<unsigned int, MaterialProperties>::iterator j;
     for (j = i->second.begin(); j != i->second.end(); ++j)
-    {
-      MaterialProperties::iterator k;
-      for (k = j->second.begin(); k != j->second.end(); ++k)
-        delete k->second;
-    }
+      j->second.destroy();
   }
 
   for (i = _props_elem_older->begin(); i != _props_elem_older->end(); ++i)
   {
     HashMap<unsigned int, MaterialProperties>::iterator j;
     for (j = i->second.begin(); j != i->second.end(); ++j)
-    {
-      MaterialProperties::iterator k;
-      for (k = j->second.begin(); k != j->second.end(); ++k)
-        delete k->second;
-    }
+      j->second.destroy();
   }
 }
 

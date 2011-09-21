@@ -192,7 +192,7 @@ MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
 /**
  * Container for storing material properties
  */
-class MaterialProperties : public std::map<std::string, PropertyValue *>
+class MaterialProperties : public std::vector<PropertyValue *>
 {
 public:
   MaterialProperties() { }
@@ -200,12 +200,21 @@ public:
   /**
    * Parameter map iterator.
    */
-  typedef std::map<std::string, PropertyValue *>::iterator iterator;
+  typedef std::vector<PropertyValue *>::iterator iterator;
 
   /**
    * Constant parameter map iterator.
    */
-  typedef std::map<std::string, PropertyValue *>::const_iterator const_iterator;
+  typedef std::vector<PropertyValue *>::const_iterator const_iterator;
+
+  /**
+   * Deallocates the memory
+   */
+  void destroy()
+  {
+    for (iterator k = begin(); k != end(); ++k)
+      delete *k;
+  }
 };
 
 #endif
