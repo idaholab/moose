@@ -1,7 +1,7 @@
 #include "PressureAction.h"
 
 #include "Factory.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "Parser.h"
 
 template<>

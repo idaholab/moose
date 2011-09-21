@@ -1,6 +1,6 @@
 #include "ThermalContactAction.h"
 #include "Parser.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "AddSlaveFluxVectorAction.h"

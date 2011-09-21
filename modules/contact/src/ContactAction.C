@@ -2,7 +2,7 @@
 
 #include "ActionFactory.h"
 #include "MooseObjectAction.h"
-#include "MProblem.h"
+#include "FEProblem.h"
 #include "Parser.h"
 
 template<>
