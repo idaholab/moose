@@ -64,9 +64,6 @@ protected:
   // kernel applied in?
   unsigned _component;
 
-  // Ratio of specific heats
-  //Real _gamma;
-
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself
   NSPressureDerivs<NSMomentumInviscidBC> _pressure_derivs;
