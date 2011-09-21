@@ -23,6 +23,7 @@ InputParameters validParams<NSMomentumInviscidBC>();
  * classes:
  * 1.) NSMomentumInviscidSpecifiedPressureBC
  * 2.) NSMomentumInviscidSpecifiedNormalFlowBC
+ * 3.) NSMomentumInviscidNoPressureImplicitFlowBC
  *
  * The first kernel above would be used for a subsonic outflow BC in
  * the Euler or Navier-Stokes equations in which one physical value
@@ -33,10 +34,15 @@ InputParameters validParams<NSMomentumInviscidBC>();
  * no corresponding Jacobian entry since the value is given.
  *
  * The second kernel above would be used if, instead of the pressure,
- * the value of the vector (rho*u)(u.n) is given.  This would be the
- * case in the Euler equations along a free-slip boundary: in that 
- * situation the pressure is an unknown and u.n = 0 would be imposed
- * by the kernel.
+ * the value of the vector (rho*u)(u.n) is given.  This situation is
+ * not common, but a special case of it, u.n=0, is very common for
+ * implementing a free-slip boundary: in that situation the pressure
+ * is an unknown and u.n = 0 would be imposed by the kernel (though in
+ * this trivial case you could omit the term completely).
+ *
+ * The third kernel above would be used when the pressure term
+ * has *not* been integrated by parts in the momentum equations, and
+ * therefore there is no pressure in the boundary term at all.
  *
  * We note that other combinations are also theoretically possible
  * (e.g. unspecified pressure and normal flow, fully-specified
