@@ -185,7 +185,7 @@ inline void
 MaterialProperty<T>::shallowCopy (PropertyValue *rhs)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
-  _value.shallowCopy(dynamic_cast<const MaterialProperty<T>*>(rhs)->_value);
+  _value.shallowCopy(libmesh_cast_ptr<const MaterialProperty<T>*>(rhs)->_value);
 }
 
 
