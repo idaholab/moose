@@ -52,7 +52,7 @@ NSSUPGBase::NSSUPGBase(const std::string & name, InputParameters parameters)
       _d_rhodot_du(coupledDotDu("rho")),
       _d_rhoudot_du(coupledDotDu("rhou")),
       _d_rhovdot_du(coupledDotDu("rhov")),
-      _d_rhowdot_du(_dim==3 ? coupledDotDu("") : _zero),
+      _d_rhowdot_du(_dim==3 ? coupledDotDu("rhow") : _zero),
       _d_rhoedot_du(coupledDotDu("rhoe")),
 
       // Coupled aux variables

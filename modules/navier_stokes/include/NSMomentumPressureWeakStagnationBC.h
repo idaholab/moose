@@ -11,10 +11,9 @@ InputParameters validParams<NSMomentumPressureWeakStagnationBC>();
 
 
 /**
- * This class has been deprecated.  Use one or both of the
- * .) NSMomentumConvectiveWeakStagnationBC
- * .) NSMomentumPressureWeakStagnationBC
- * classes instead.
+ * This class implements the pressure term of the momentum
+ * equation boundary integral for use in weak stagnation
+ * boundary conditions.
  */
 class NSMomentumPressureWeakStagnationBC : public NSWeakStagnationBC
 {
