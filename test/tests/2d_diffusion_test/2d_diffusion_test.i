@@ -1,5 +1,4 @@
 [Mesh]
-  # dim = 2  -> DEPRECATED
   file = square.e
 []
 
@@ -54,7 +53,8 @@
 []
 
 [Output]
-  file_base = out
+  # Note: file_base is optional in which case it'll come out as the 
+  #       mesh's filename with "_out" appended ( # file_base = square_out.e )
   output_initial = true
   interval = 1
   exodus = true

@@ -63,7 +63,7 @@ SetupOverSamplingAction::act()
   Executioner * exec = _parser_handle._executioner;
   FEProblem * problem = dynamic_cast<FEProblem *>(&exec->problem());
   if (!problem)
-    mooseError("Can't get a handle to Mproblem");
+    mooseError("Can't get a handle to FEproblem");
 
   OutputProblem & out_problem = problem->getOutputProblem(getParam<unsigned int>("refinements"));
 
@@ -71,8 +71,8 @@ SetupOverSamplingAction::act()
 
   if(!_pars.isParamValid("output_variables") && _parser_handle._problem != NULL)
   {
-    FEProblem & mproblem = *_parser_handle._problem;
-    _pars.set<std::vector<std::string> >("output_variables") = mproblem.getVariableNames();
+    FEProblem & fe_problem = *_parser_handle._problem;
+    _pars.set<std::vector<std::string> >("output_variables") = fe_problem.getVariableNames();
   }
 
   // If no filebase was supplied in the parameters object - borrow the main problem's filebase
@@ -86,10 +86,10 @@ SetupOverSamplingAction::act()
   if (_parser_handle._problem != NULL)
   {
     // TODO: handle this thru Problem interface
-    FEProblem & mproblem = *_parser_handle._problem;
+    FEProblem & fe_problem = *_parser_handle._problem;
 
 #ifdef LIBMESH_ENABLE_AMR
-    Adaptivity & adapt = mproblem.adaptivity();
+    Adaptivity & adapt = fe_problem.adaptivity();
     if (adapt.isOn())
       output.sequence(true);
 #endif //LIBMESH_ENABLE_AMR

@@ -124,6 +124,10 @@ public:
 
   std::vector<unsigned int> & getNodeList(short int nodeset_id) { return _node_set_nodes[nodeset_id]; }
 
+  // Get/Set Filename (for meshes read from a file)
+  void setFileName(const std::string & file_name) { _file_name = file_name; }
+  const std::string & getFileName() const { return _file_name; }
+
   libMesh::Mesh _mesh;
 
 protected:
@@ -181,6 +185,8 @@ protected:
    * The number of nodes to consider in the NearestNode neighborhood.
    */
   unsigned int _patch_size;
+
+  std::string _file_name;                              ///< file_name iff this mesh was read from a file
 
   void cacheInfo();
   void freeBndNodes();

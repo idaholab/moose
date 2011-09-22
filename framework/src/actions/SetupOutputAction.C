@@ -29,7 +29,7 @@ InputParameters validParams<SetupOutputAction>()
 {
   InputParameters params = validParams<Action>();
 
-  params.addParam<std::string>("file_base", "out", "The desired solution output name without an extension");
+  params.addParam<std::string>("file_base", "The desired solution output name without an extension (Defaults to the mesh file name + '_out' or 'out' if generating the mesh by some other means)");
   params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
   params.addParam<unsigned int>("screen_interval", 1, "The interval at which postprocessors are output to the screen. This value must evenly divide \"interval\" so that postprocessors are calculated at corresponding solution timesteps. In addition, if \"screen_interval\" is strictly greater than \"interval\", \"output_initial\" must be set to true");
   params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)");
@@ -68,7 +68,7 @@ SetupOutputAction::SetupOutputAction(const std::string & name, InputParameters p
 void
 SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
 {
-  output.fileBase(getParam<std::string>("file_base"));
+  output.fileBase(params.get<std::string>("file_base"));
 
   mooseAssert(params.have_parameter<std::vector<std::string> >("output_variables"), "Output Variables are required");
 
@@ -99,11 +99,28 @@ SetupOutputAction::act()
   Problem & problem = exec->problem();
   Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
-  if(!_pars.isParamValid("output_variables") && _parser_handle._problem != NULL)
+  if (_parser_handle._problem != NULL)
   {
-    FEProblem & mproblem = *_parser_handle._problem;
-    _pars.set<std::vector<std::string> >("output_variables") = mproblem.getVariableNames();
+    FEProblem & fe_problem = *_parser_handle._problem;
+    if(!_pars.isParamValid("output_variables"))
+      _pars.set<std::vector<std::string> >("output_variables") = fe_problem.getVariableNames();
+
+    // If the user didn't provide a filename - see if the mesh has a filename that we can use as a base
+    if (!_pars.isParamValid("file_base"))
+    {
+      std::string mesh_file_name = fe_problem.mesh().getFileName();
+      if (mesh_file_name != "")
+      {
+        size_t pos = mesh_file_name.find_last_of('.');
+        mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
+        _pars.set<std::string>("file_base") = mesh_file_name.substr(0,pos) + "_out";
+      }
+      else // No filename anywhere - go with the default
+        _pars.set<std::string>("file_base") = "out";
+    }
   }
+  else
+    _pars.set<std::string>("file_base") = "out";
 
   setupOutputObject(output, _pars);
 
@@ -115,17 +132,17 @@ SetupOutputAction::act()
   if (_parser_handle._problem != NULL)
   {
     // TODO: handle this thru Problem interface
-    FEProblem & mproblem = *_parser_handle._problem;
-    mproblem._postprocessor_screen_output = getParam<bool>("postprocessor_screen");
-    mproblem._postprocessor_csv_output = getParam<bool>("postprocessor_csv");
-    mproblem._postprocessor_ensight_output = getParam<bool>("postprocessor_ensight");
-    mproblem._postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
-    mproblem._gnuplot_format = getParam<std::string>("gnuplot_format");
+    FEProblem & fe_problem = *_parser_handle._problem;
+    fe_problem._postprocessor_screen_output = getParam<bool>("postprocessor_screen");
+    fe_problem._postprocessor_csv_output = getParam<bool>("postprocessor_csv");
+    fe_problem._postprocessor_ensight_output = getParam<bool>("postprocessor_ensight");
+    fe_problem._postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
+    fe_problem._gnuplot_format = getParam<std::string>("gnuplot_format");
 
-    mproblem.outputDisplaced(getParam<bool>("output_displaced"));
+    fe_problem.outputDisplaced(getParam<bool>("output_displaced"));
 
 #ifdef LIBMESH_ENABLE_AMR
-    Adaptivity & adapt = mproblem.adaptivity();
+    Adaptivity & adapt = fe_problem.adaptivity();
     if (adapt.isOn())
       output.sequence(true);
 #endif //LIBMESH_ENABLE_AMR

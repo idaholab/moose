@@ -55,6 +55,7 @@ ReadMeshAction::act()
 
     // Create the mesh and save it off
     _parser_handle._mesh = new MooseMesh();
+    _parser_handle._mesh->setFileName(mesh_file);
     _parser_handle._mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
     Parser::checkFileReadable(mesh_file);
