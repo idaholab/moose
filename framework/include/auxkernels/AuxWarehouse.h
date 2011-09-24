@@ -41,6 +41,8 @@ public:
   void jacobianSetup();
 
   const std::vector<AuxKernel *> & all() { return _all_aux_kernels; }
+  const std::vector<AuxKernel *> & allElementKernels() { return _all_element_aux_kernels; }
+  const std::vector<AuxKernel *> & allNodalKernels() { return _all_nodal_aux_kernels; }
 
   const std::vector<AuxKernel *> & activeNodalKernels() { return _active_nodal_aux_kernels; }
   const std::vector<AuxKernel *> & activeElementKernels() { return _active_element_aux_kernels; }
@@ -65,7 +67,9 @@ public:
   void addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids);
 
 protected:
-  std::vector<AuxKernel *> _all_aux_kernels;                                                    ///< all aux kernels (kernels and BCs)
+  std::vector<AuxKernel *> _all_aux_kernels;                                                    ///< all aux kernels
+  std::vector<AuxKernel *> _all_element_aux_kernels;                                            ///< all element aux kernels
+  std::vector<AuxKernel *> _all_nodal_aux_kernels;                                              ///< all nodal aux kernels
 
   std::vector<AuxKernel *> _active_nodal_aux_kernels;                                           ///< nodal kernels active everywhere
   std::vector<AuxKernel *> _active_element_aux_kernels;                                         ///< elemental kernels active everywhere

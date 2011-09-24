@@ -66,9 +66,15 @@ AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids
   if (block_ids.empty())
   {
     if(aux->isNodal())
+    {
+      _all_nodal_aux_kernels.push_back(aux);
       _active_nodal_aux_kernels.push_back(aux);
+    }
     else
+    {
+      _all_element_aux_kernels.push_back(aux);
       _active_element_aux_kernels.push_back(aux);
+    }
   }
   else
   {
@@ -77,9 +83,15 @@ AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids
       subdomain_id_type id = *it;
 
       if(aux->isNodal())
+      {
+        _all_nodal_aux_kernels.push_back(aux);
         _active_block_nodal_aux_kernels[id].push_back(aux);
+      }
       else
+      {
+        _all_element_aux_kernels.push_back(aux);
         _active_block_element_aux_kernels[id].push_back(aux);
+      }
     }
   }
 }

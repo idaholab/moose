@@ -276,8 +276,17 @@ void
 AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
 {
   Moose::perf_log.push("update_aux_vars_elemental()","Solve");
-  ConstElemRange & range = *_mesh.getActiveLocalElementRange();
-  ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
-  Threads::parallel_reduce(range, eavt);
+  bool element_auxs_to_compute = false;
+
+  for(unsigned int i=0; i<auxs.size(); i++)
+    element_auxs_to_compute |= auxs[i].allElementKernels().size();
+
+  if(element_auxs_to_compute)
+  {
+    ConstElemRange & range = *_mesh.getActiveLocalElementRange();
+    ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
+    Threads::parallel_reduce(range, eavt);
+  }
+
   Moose::perf_log.pop("update_aux_vars_elemental()","Solve");
 }
