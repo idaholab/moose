@@ -64,6 +64,7 @@ AuxiliarySystem::initialSetup()
   {
     _auxs(EXEC_RESIDUAL)[i].initialSetup();
     _auxs(EXEC_TIMESTEP)[i].initialSetup();
+    _auxs(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
   }
 }
 

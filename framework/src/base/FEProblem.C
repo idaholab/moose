@@ -984,7 +984,7 @@ FEProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID
 }
 
 void
-FEProblem::reinitMaterialsNeighbor(unsigned int blk_id, unsigned int side, THREAD_ID tid)
+FEProblem::reinitMaterialsNeighbor(unsigned int blk_id, unsigned int /*side*/, THREAD_ID tid)
 {
   if (_materials[tid].hasNeighborMaterials(blk_id))
   {
@@ -1440,6 +1440,12 @@ FEProblem::onTimestepEnd()
 {
   _aux.compute(EXEC_TIMESTEP);
   _nl.printVarNorms();
+}
+
+void
+FEProblem::computeAuxiliaryKernels(ExecFlagType type)
+{
+  _aux.compute(type);
 }
 
 void

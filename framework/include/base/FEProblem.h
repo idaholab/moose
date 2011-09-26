@@ -161,6 +161,7 @@ public:
    */
   Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
   virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
+  virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
   virtual void outputPostprocessors();
 
   // Dampers /////

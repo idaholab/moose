@@ -152,11 +152,14 @@ Transient::takeStep(Real input_dt)
     _problem.updateMaterials();
   }
 
-  // Compute TimestepBeginPostprocessors
-  _problem.computePostprocessors(EXEC_TIMESTEP_BEGIN);
-
   // Increment time
   _time = _time_old + _dt;
+
+  // Compute TimestepBegin AuxKernels
+  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
+
+  // Compute TimestepBegin Postprocessors
+  _problem.computePostprocessors(EXEC_TIMESTEP_BEGIN);
 
   std::cout<<"DT: "<<_dt<<std::endl;
 
