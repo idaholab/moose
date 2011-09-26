@@ -3,7 +3,7 @@
 hostname=`hostname -s`
 ARCH=${ARCH:-intel}
 
-if [ $hostname == 'helios' ]
+if [ $hostname == 'flogin2' ]
 then
   if [ $ARCH == 'gnu' ]
   then
@@ -15,7 +15,7 @@ then
 
     # Check it in!
     svn ci --username moosetest stable-moose -m "Auto update at time `date`"
-  fi 
+  fi
 fi
 
 
