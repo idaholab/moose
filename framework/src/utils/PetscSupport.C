@@ -176,8 +176,10 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, 
 
   PetscVector<Number>  ghosted_y(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
   VecCopy(y, ghosted_y.vec());
+  ghosted_y.close();
   PetscVector<Number>  ghosted_w(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
   VecCopy(w, ghosted_w.vec());
+  ghosted_w.close();
 
   damping = problem.computeDamping(ghosted_w, ghosted_y);
   if(damping < 1.0)
