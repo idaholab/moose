@@ -311,7 +311,7 @@ DisplacedProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_si
   prepareAssemblyNeighbor(tid);
 
   // Compute values at the points
-  unsigned int bnd_id = 0;
+//  unsigned int bnd_id = 0;
   _displaced_nl.reinitNeighbor(neighbor, tid);
   _displaced_aux.reinitNeighbor(neighbor,tid);
 }

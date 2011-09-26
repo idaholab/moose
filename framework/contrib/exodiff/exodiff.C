@@ -1771,8 +1771,8 @@ void output_init(ExoII_Read& file, int count, const char *prefix)
   }
 
 bool diff_element_attributes(ExoII_Read& file1, ExoII_Read& file2,
-			     int* elmt_map, const int *id_map,
-			     Exo_Block **blocks2)
+			     int* /*elmt_map*/, const int *id_map,
+			     Exo_Block **/*blocks2*/)
 {
   bool diff_was_output = false;
   bool diff_flag = false;

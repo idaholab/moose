@@ -466,8 +466,8 @@ MooseVariable::computeElemValuesFace()
   Real soln_local;
   Real soln_old_local;
   Real soln_older_local;
-  Real u_dot_local;
-  Real du_dot_du_local;
+//  Real u_dot_local;
+//  Real du_dot_du_local;
 
   Real phi_local;
   RealGradient dphi_local;
@@ -555,15 +555,15 @@ MooseVariable::computeNeighborValuesFace()
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
-  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
-  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+//  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
+//  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
 
   int idx;
   Real soln_local;
   Real soln_old_local;
   Real soln_older_local;
-  Real u_dot_local;
-  Real du_dot_du_local;
+//  Real u_dot_local;
+//  Real du_dot_du_local;
 
   Real phi_local;
   RealGradient dphi_local;
@@ -653,15 +653,15 @@ MooseVariable::computeNeighborValues()
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
-  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
-  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+//  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
+//  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
 
   int idx;
   Real soln_local;
   Real soln_old_local;
   Real soln_older_local;
-  Real u_dot_local;
-  Real du_dot_du_local;
+//  Real u_dot_local;
+//  Real du_dot_du_local;
 
   Real phi_local;
   RealGradient dphi_local;

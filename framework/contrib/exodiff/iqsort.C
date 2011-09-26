@@ -128,8 +128,10 @@ void swap_(int v[], int i, int j)
     j = right - 1;
 
     for ( ; ; ) {
-      while (v[iv[++i]] < v[pivot]);
-      while (v[iv[--j]] > v[pivot]);
+      while (v[iv[++i]] < v[pivot])
+        ;
+      while (v[iv[--j]] > v[pivot])
+        ;
       if (i < j) {
         swap_(iv, i, j);
       } else {
@@ -171,14 +173,17 @@ void swap_(int v[], int i, int j)
 }
 
   template <typename T>
+#if defined(DEBUG_QSORT)
   void check(const T v[], int iv[], int N)
   {
-#if defined(DEBUG_QSORT)
   fprintf(stderr, "Checking sort of %d values\n", N+1);
   int i;
   for (i=1; i < N; i++) {
     SMART_ASSERT(v[iv[i-1]] <= v[iv[i]]);
   }
+#else
+  void check(const T /*v*/[], int /*iv*/[], int /*N*/)
+  {
 #endif
   }
 }

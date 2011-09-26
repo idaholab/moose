@@ -183,7 +183,7 @@ namespace {
     return is_same;
   }
 
-  bool Check_Elmt_Block(ExoII_Read& file1, ExoII_Read& file2, bool check_only)
+  bool Check_Elmt_Block(ExoII_Read& file1, ExoII_Read& file2, bool /*check_only*/)
   {
     bool is_same = true;
     // Verify that element blocks match in the two files...

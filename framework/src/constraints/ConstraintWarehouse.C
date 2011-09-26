@@ -78,7 +78,7 @@ ConstraintWarehouse::jacobianSetup()
 }
 
 void
-ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int master, NodeFaceConstraint *nfc)
+ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*master*/, NodeFaceConstraint *nfc)
 {
   bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") && nfc->getParam<bool>("use_displaced_mesh");
 

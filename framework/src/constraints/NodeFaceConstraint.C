@@ -149,7 +149,7 @@ NodeFaceConstraint::computeJacobian()
   DenseMatrix<Number> & Kee = _asmb.jacobianBlock(_var.number(), _var.number());
   DenseMatrix<Number> & Ken = _asmb.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
-  DenseMatrix<Number> & Kne = _asmb.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
+//  DenseMatrix<Number> & Kne = _asmb.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
   DenseMatrix<Number> & Knn = _asmb.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
   _Kne.resize(_test_master.size(), _connected_dof_indices.size());

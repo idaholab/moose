@@ -59,7 +59,7 @@ DGKernelWarehouse::addDGKernel(DGKernel *dg_kernel)
 }
 
 void
-DGKernelWarehouse::updateActiveDGKernels(Real t, Real dt)
+DGKernelWarehouse::updateActiveDGKernels(Real /*t*/, Real /*dt*/)
 {
   _active_dg_kernels.clear();
 
