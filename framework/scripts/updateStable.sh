@@ -3,7 +3,7 @@
 hostname=`hostname -s`
 ARCH=${ARCH:-intel}
 
-if [ $hostname == 'flogin2' ]
+if [ $hostname == 'quark' ]
 then
   if [ $ARCH == 'gnu' ]
   then
