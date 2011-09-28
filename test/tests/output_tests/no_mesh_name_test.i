@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./Generation]
+    dim = 2
+    nx = 2
+    ny = 2
+    elem_type = QUAD4
+  [../]
 []
 
 [Variables]
@@ -26,7 +31,7 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 0
     value = 0
   [../]
 
@@ -38,22 +43,14 @@
   [../]
 []
 
-[Materials]
-  active = empty
-
-  [./empty]
-    type = EmptyMaterial
-    block = 1
-  [../]
-[]
-
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
 []
 
 [Output]
-  file_base = out
+  # Note: file_base is optional in which case it'll come out as the 
+  #       mesh's filename with "_out" appended ( # file_base = square_out.e )
   output_initial = true
   interval = 1
   exodus = true

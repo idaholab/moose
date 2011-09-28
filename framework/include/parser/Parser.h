@@ -113,6 +113,11 @@ public:
   const GetPot * getPotHandle() const;
 
   /**
+   * Return the filename that was parsed
+   */
+  const std::string & getFileName() const { return _input_filename; }
+
+  /**
    * Get the executioner
    */
   Executioner * getExecutioner();
@@ -219,6 +224,7 @@ private:
   std::set<std::string> _command_line_vars;
   bool _getpot_initialized;
   GetPot _getpot_file;
+  std::string _input_filename;
 
   /**
    * Actions/Syntax association

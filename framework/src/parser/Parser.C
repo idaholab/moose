@@ -306,6 +306,9 @@ Parser::parse(const std::string &input_filename)
   InputParameters active_list_params = validParams<Action>();
   InputParameters params = validParams<EmptyAction>();
 
+  // Save off the input filename for future use
+  _input_filename = input_filename;
+
   // Build Command Line Vars Vector
   buildCommandLineVarsVector();
 

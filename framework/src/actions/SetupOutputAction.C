@@ -106,18 +106,14 @@ SetupOutputAction::act()
     if(!_pars.isParamValid("output_variables"))
       _pars.set<std::vector<std::string> >("output_variables") = fe_problem.getVariableNames();
 
-    // If the user didn't provide a filename - see if the mesh has a filename that we can use as a base
+    // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
     if (!_pars.isParamValid("file_base"))
     {
-      std::string mesh_file_name = fe_problem.mesh().getFileName();
-      if (mesh_file_name != "")
-      {
-        size_t pos = mesh_file_name.find_last_of('.');
-        mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
-        _pars.set<std::string>("file_base") = mesh_file_name.substr(0,pos) + "_out";
-      }
-      else // No filename anywhere - go with the default
-        _pars.set<std::string>("file_base") = "out";
+      std::string input_file_name = _parser_handle.getFileName();
+      mooseAssert(input_file_name != "", "Input Filename is NULL");
+      size_t pos = input_file_name.find_last_of('.');
+      mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
+      _pars.set<std::string>("file_base") = input_file_name.substr(0,pos) + "_out";
     }
   }
   else
