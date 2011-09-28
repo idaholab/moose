@@ -39,6 +39,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("tecplot_binary", false, "Specifies that you would like Tecplot binary output solution files(s)");
   params.addParam<bool>("xda", false, "Specifies that you would like xda output solution files(s)");
   params.addParam<bool>("postprocessor_screen", true, "Specifies that you would like PostProcessor output to the screen (stdout)");
+  params.addParam<unsigned int>("max_pps_rows_screen", 0, "The maximum number of postprocessor values displayed on screen during a timestep");
   params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma seperated values file");
   params.addParam<bool>("postprocessor_ensight", false, "Specifies that you would like a PostProcessor ensight output file");
   params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output");
@@ -138,6 +139,7 @@ SetupOutputAction::act()
     fe_problem._postprocessor_ensight_output = getParam<bool>("postprocessor_ensight");
     fe_problem._postprocessor_gnuplot_output = getParam<bool>("postprocessor_gnuplot");
     fe_problem._gnuplot_format = getParam<std::string>("gnuplot_format");
+    fe_problem.setMaxPPSRowsScreen(getParam<unsigned int>("max_pps_rows_screen"));
 
     fe_problem.outputDisplaced(getParam<bool>("output_displaced"));
 

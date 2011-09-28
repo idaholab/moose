@@ -54,9 +54,11 @@ public:
 
   /**
    * Methods for dumping the table to the stream - either by filename or by stream handle.  If
-   * a filename is supplied opening and closing of the file is properly handled
+   * a filename is supplied opening and closing of the file is properly handled.  In the
+   * screen version of the method, an optional parameters can be passed to print only the last
+   * "n" entries.  A value of zero means don't skip any rows
    */
-  void printTable(std::ostream & out);
+  void printTable(std::ostream & out, unsigned int last_n_entries=0);
   void printTable(const std::string & file_name);
 
   /**
@@ -70,7 +72,11 @@ public:
 
 protected:
 
+  void printOmittedRow(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const;
   void printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const;
+
+  void printNoDataRow(char intersect_char, char fill_char,
+                      std::ostream & out, std::map<std::string, unsigned short> & col_widths) const;
 
   /**
    * Data structure for the console table

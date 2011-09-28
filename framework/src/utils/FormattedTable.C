@@ -75,23 +75,37 @@ FormattedTable::getLastData(const std::string & name)
   mooseError("No Data found for name: " + name);
 }
 
+void
+FormattedTable::printOmittedRow(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const
+{
+  printNoDataRow(':', ' ', out, col_widths);
+}
 
 void
 FormattedTable::printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths) const
 {
+  printNoDataRow('+', '-', out, col_widths);
+}
+
+void
+FormattedTable::printNoDataRow(char intersect_char, char fill_char,
+                               std::ostream & out, std::map<std::string, unsigned short> & col_widths) const
+{
   bool needs_init = col_widths.empty();
 
-  out.fill('-');
-  out << std::right << "+" << std::setw(_column_width+2) << "+";
+  out.fill(fill_char);
+  out << std::right << intersect_char << std::setw(_column_width+2) << intersect_char;
   for (std::set<std::string>::iterator header = _column_names.begin(); header != _column_names.end(); ++header)
   {
     // If the actual column header is longer than the default column width
     // we can grow the column here
     if (needs_init)
       col_widths[*header] = header->length() > _column_width ? header->length()+1 : _column_width;
-    out << std::setw(col_widths[*header]+2) << "+";
+    out << std::setw(col_widths[*header]+2) << intersect_char;
   }
   out << "\n";
+
+  // Clear the fill character
   out.fill(' ');
 }
 
@@ -108,7 +122,7 @@ FormattedTable::printTable(const std::string & file_name)
 
 
 void
-FormattedTable::printTable(std::ostream & out)
+FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries)
 {
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
@@ -126,7 +140,23 @@ FormattedTable::printTable(std::ostream & out)
   out << "\n";
   printRowDivider(out, col_widths);
 
-  for (i = _data.begin(); i != _data.end(); ++i)
+  /**
+   * Skip over values that we don't want to see.
+   * This step may be able to optimized if the table gets really big.  We could
+   * iterate backwards from the end and create a new forward iterator from there.
+   */
+  i = _data.begin();
+  if (last_n_entries)
+  {
+    if (_data.size() > last_n_entries)
+      // Print a blank row to indicate that values have been ommited
+      printOmittedRow(out, col_widths);
+
+    for (int counter=0; counter < static_cast<int>(_data.size() - last_n_entries); ++counter)
+      ++i;
+  }
+  // Now print the remaining data rows
+  for ( ; i != _data.end(); ++i)
   {
     out << "|" << std::right << std::setw(_column_width) << i->first << " |";
     for (header = _column_names.begin(); header != _column_names.end(); ++header)

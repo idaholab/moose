@@ -215,6 +215,7 @@ public:
   virtual void output();
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
   OutputProblem & getOutputProblem(unsigned int refinements);
+  void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
 
   // Restart //////
   virtual void setRestartFile(const std::string & file_name) { _restart = true; _restart_file_name = file_name; }
@@ -265,6 +266,7 @@ protected:
   std::vector<PostprocessorData> _pps_data;
   ExecStore<PostprocessorWarehouse> _pps;
   FormattedTable _pps_output_table;
+  unsigned int _pps_output_table_max_rows;
 
   void computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps);
 

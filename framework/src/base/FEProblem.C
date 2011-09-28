@@ -79,6 +79,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _nl(*this, name_sys("nl", _n)),
     _aux(*this, name_sys("aux", _n)),
     _quadrature_order(CONSTANT),
+    _pps_output_table_max_rows(0),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
     _postprocessor_ensight_output(false),
@@ -1280,7 +1281,7 @@ FEProblem::outputPostprocessors()
   if (_postprocessor_screen_output)
   {
     std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
-    _pps_output_table.printTable(std::cout);
+    _pps_output_table.printTable(std::cout, _pps_output_table_max_rows);
     std::cout<<std::endl;
   }
 
