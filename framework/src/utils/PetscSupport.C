@@ -174,11 +174,19 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, 
   // Then stuff values into the duplicates
   // Then "close()" the vectors which updates their ghosted vaulues.
 
-  PetscVector<Number>  ghosted_y(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
+  // cls is a PetscVector wrapper around the Vec in current_local_solution
+  PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
+  // Create new NumericVectors with the right ghosting
+  AutoPtr<NumericVector<Number> > ghosted_y_aptr( cls.zero_clone() );
+  AutoPtr<NumericVector<Number> > ghosted_w_aptr( cls.zero_clone() );
+  // Create PetscVector wrappers around the Vecs
+  PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec() );
+  PetscVector<Number> ghosted_w( static_cast<PetscVector<Number> *>(ghosted_w_aptr.get())->vec() );
+
   VecCopy(y, ghosted_y.vec());
-  ghosted_y.close();
-  PetscVector<Number>  ghosted_w(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
   VecCopy(w, ghosted_w.vec());
+
+  ghosted_y.close();
   ghosted_w.close();
 
   damping = problem.computeDamping(ghosted_w, ghosted_y);
