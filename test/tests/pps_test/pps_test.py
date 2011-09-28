@@ -21,4 +21,4 @@ test_nodal_max = { INPUT : 'nodal_max_value_test.i',
 # The PPS tables should have only 2 rows of real data not counting the header or continuation line
 # This RegEx matches the continuation line and exactly 2 lines of output followed by the table closing line
 screen_output_test = { INPUT : 'screen_output_test.i',
-                       EXPECT_ERR : '^:\s+:.*\n(?:^\|\s+\d\.\d.*\n){2}^\+(-+\+)+\n' }
+                       EXPECT_OUT : '^:\s+:.*\n(?:^\|\s+\d\.\d.*\n){2}^\+(-+\+)+\n' }

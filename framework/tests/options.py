@@ -15,8 +15,10 @@ EXODIFF       = '[exodiff]'      # A list of files to exodiff
 CSVDIFF       = '[csvdiff]'      # A list of files to CSV diff
 GOLD_DIR      = 'gold_dir'       # The directory where the "golden standard" files resides relative to TEST_DIR
 TEST_DIR      = 'test_dir'       # The directory where the test resides, this is populated automatically
-SHOULD_CRASH  = 'should_crash'   # Set to true if this test should crash
+SHOULD_CRASH  = 'should_crash'   # Set to true if this test should crash and we don't really care what the error says
 EXPECT_ERR    = 'expect_err'     # string - This string must occur in the output for the test to pass
+                                 #          The program may crash if an error is expected and still be considered OK
+EXPECT_OUT    = 'expect_out'     # Similar to EXPECT_ERR except the program is expected not to crash
 EXPECT_ASSERT = 'expect_assert'  # string - This string must occur in DEBUG mode builds to pass
 ERRORS        = 'errors'         # list[strings] - The test will fail if any string occurs in the output
 
@@ -53,6 +55,7 @@ DEFAULTS = { EXODIFF : [],
              PLATFORM : ['ALL'],
              SHOULD_CRASH : False,
              EXPECT_ERR : None,
+             EXPECT_OUT : None,
              EXPECT_ASSERT : None,
              GROUP : [],
              HEAVY : False,

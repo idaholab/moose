@@ -159,6 +159,12 @@ class TestHarness:
     if test[EXPECT_ERR] != None:
       if not self.checkExpectError(output, test[EXPECT_ERR]):
         reason = 'NO EXPECTED ERR'
+    elif test[EXPECT_OUT] != None:
+      out_ok = self.checkExpectError(output, test[EXPECT_OUT])
+      if (out_ok and retcode != 0):
+        reason = 'OUT FOUND BUT CRASH'
+      elif (not out_ok):
+        reason = 'NO EXPECTED OUT'
     elif test[EXPECT_ASSERT] != None:
       if self.options.method == 'dbg':  # Only check asserts in debug mode
         if not self.checkExpectError(output, test[EXPECT_ASSERT]):

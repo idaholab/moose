@@ -5,7 +5,7 @@ test_interval = { INPUT : 'pps_out_interval.i',
 
 # An eleventh item (Initial condition + 10 time steps) PPS table should be in the output
 test_interval_verify = { INPUT : 'pps_out_interval.i',
-                         EXPECT_ERR : '(?:^\|\s+\d\.\d.*\n){11}',
+                         EXPECT_OUT : '(?:^\|\s+\d\.\d.*\n){11}',
                          PREREQ : 'test_interval' }
 
 test_bad_interval = { INPUT : 'pps_bad_interval.i',
