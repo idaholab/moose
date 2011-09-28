@@ -30,6 +30,7 @@
 
 [Preconditioning]
   [./SMP]
+    type = SMP
     off_diag_row    = 'u'
     off_diag_column = 'v'
   [../]
@@ -56,7 +57,7 @@
 []
 
 [BCs]
-  active = 'left_u right_u left_v'
+  active = 'left_u top_v bottom_v'
 
   [./left_u]
     type = DirichletBC
@@ -72,14 +73,14 @@
     value = 9
   [../]
 
-  [./left_v]
+  [./bottom_v]
     type = DirichletBC
     variable = v
-    boundary = 1
+    boundary = 0
     value = 5
   [../]
 
-  [./right_v]
+  [./top_v]
     type = DirichletBC
     variable = v
     boundary = 2
@@ -99,7 +100,6 @@
 []
 
 [Output]
-  file_base = out
   output_initial = true
   interval = 1
   exodus = true

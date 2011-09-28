@@ -12,3 +12,8 @@ pbp_adapt_test = {
   EXODIFF : ['out_pbp_adapt_0003.e']
 }
 
+single_test = {
+  INPUT : 'pbp_single_test.i',
+  EXODIFF : ['pbp_single_test_out.e']
+}
+
