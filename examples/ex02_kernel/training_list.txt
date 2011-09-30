@@ -1,5 +1,5 @@
 Title: Adding a Custom Kernel
-2d_convection_diffusion.i
+ex02.i
 include/kernels/Convection.h
 src/kernels/Convection.C
 src/main.C

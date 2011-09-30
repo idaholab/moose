@@ -1,5 +1,5 @@
 Title: Transient Analysis
-transient.i
+ex06.i
 include/kernels/ExampleDiffusion.h
 src/kernels/ExampleDiffusion.C
 include/kernels/ExampleTimeDerivative.h

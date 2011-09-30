@@ -1,5 +1,5 @@
 Title: Material Properties
-example_material.i
+ex08.i
 include/materials/ExampleMaterial.h
 src/materials/ExampleMaterial.C
 include/kernels/ExampleDiffusion.h

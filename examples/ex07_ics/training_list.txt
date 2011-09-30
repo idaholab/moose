@@ -1,5 +1,5 @@
 Title: Custom Initial Conditions
-ic_example.i
+ex07.i
 include/ics/ExampleIC.h
 src/ics/ExampleIC.C
 src/main.C

@@ -1,6 +1,5 @@
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  file = car.e
 []
 
 [Variables]
@@ -64,14 +63,14 @@
   [./left]
     type = DirichletBC
     variable = diffused
-    boundary = '1 3'
+    boundary = '1'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
     variable = diffused
-    boundary = '2 4'
+    boundary = '2'
     value = 1
   [../]
 []

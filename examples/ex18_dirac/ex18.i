@@ -1,28 +1,21 @@
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  file = 3-4-torus.e
 []
-[Variables]
-  active = 'convected'
 
-  [./convected]
+[Variables]
+  active = 'diffused'
+
+  [./diffused]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 [Kernels]
-  active = 'diff conv'
+  active = 'diff'
 
   [./diff]
     type = Diffusion
-    variable = convected
-  [../]
-
-  [./conv]
-    type = Convection
-    variable = convected
-    x = 2.0
-    y = 0.0
+    variable = diffused
   [../]
 []
 
@@ -31,9 +24,9 @@
 
   [./example_point_source]
     type = ExampleDirac
-    variable = convected
+    variable = diffused
     value = 1.0
-    point = '0.2 0.3'
+    point = '-2.1 -5.08 0.7'
   [../]
 []
 
@@ -42,14 +35,14 @@
 
   [./left]
     type = DirichletBC
-    variable = convected
+    variable = diffused
     boundary = '1'
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
-    variable = convected
+    variable = diffused
     boundary = '2'
     value = 1
   [../]
@@ -57,6 +50,7 @@
 
 [Executioner]
   type = Steady
+  petsc_options = '-snes_mf_operator'
 []
 
 [Output]

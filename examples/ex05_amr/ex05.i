@@ -1,9 +1,5 @@
 [Mesh]
-  file = square.e
-
-  # Start out with an initial refinement so we have the option to coarsen back
-  # if desired.  The mesh with not coarsen more than the initial mesh (after this step)
-  uniform_refine = 1
+  file = cube-hole.e
 []
 
 [Variables]
@@ -46,14 +42,14 @@
   [./left_convected]
     type = DirichletBC
     variable = convected
-    boundary = '1'
+    boundary = '5'
     value = 0
   [../]
 
   [./right_convected]
     type = DirichletBC
     variable = convected
-    boundary = '2'
+    boundary = '7'
     value = 1
 
     some_var = diffused
@@ -62,14 +58,14 @@
   [./left_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '1'
+    boundary = '5'
     value = 0
   [../]
 
   [./right_diffused]
     type = DirichletBC
     variable = diffused
-    boundary = '2'
+    boundary = '7'
     value = 10
   [../]
 
@@ -96,5 +92,3 @@
   exodus = true
   perf_log = true
 []
-
-

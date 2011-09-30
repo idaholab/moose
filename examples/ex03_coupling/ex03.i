@@ -1,6 +1,5 @@
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  file = mug.e
 []
 
 [Variables]
@@ -18,74 +17,61 @@
 []
 
 [Kernels]
-  active = 'example_diff conv diff'
+  active = 'diff_convected conv diff_diffused'
 
-  [./example_diff]
-    # This Kernel uses "diffusivity" from the active material
-    type = ExampleDiffusion
+  [./diff_convected]
+    type = Diffusion
     variable = convected
   [../]
 
   [./conv]
     type = Convection
     variable = convected
+
+    # Couple a variable into the convection kernel using local_name = simulationg_name syntax
     some_variable = diffused
   [../]
 
-  [./diff]
+  [./diff_diffused]
     type = Diffusion
     variable = diffused
   [../]
 []
 
 [BCs]
-  active = 'left_convected right_convected left_diffused right_diffused'
+  active = 'bottom_convected top_convected bottom_diffused top_diffused'
 
-  [./left_convected]
+  [./bottom_convected]
     type = DirichletBC
     variable = convected
     boundary = '1'
-    value = 0
-  [../]
-
-  [./right_convected]
-    type = DirichletBC
-    variable = convected
-    boundary = '2'
     value = 1
-
-    some_diffusedar = v
   [../]
 
-  [./left_diffused]
+  [./top_convected]
     type = DirichletBC
-    variable = diffused
-    boundary = '1'
+    variable = convected
+    boundary = '2'
     value = 0
   [../]
 
-  [./right_diffused]
+  [./bottom_diffused]
+    type = DirichletBC
+    variable = diffused
+    boundary = '1'
+    value = 2
+  [../]
+
+  [./top_diffused]
     type = DirichletBC
     variable = diffused
     boundary = '2'
-    value = 10
-  [../]
-[]
-
-[Materials]
-  active = example
-
-  [./example]
-    type = ExampleMaterial
-    block = 1
-    diffusivity_baseline = 1.0
-    some_variable = convected
+    value = 0
   [../]
 []
 
 [Executioner]
   type = Steady
-  petsc_options = '-snes_mf_operator'
 []
 
 [Output]

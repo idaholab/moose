@@ -1,4 +1,4 @@
 Title: Physics Based Preconditioning
-pbp_test.i
+ex12.i
 ../../moose/include/kernels/CoupledForce.h
 ../../moose/src/kernels/CoupledForce.C

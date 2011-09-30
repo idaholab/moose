@@ -1,5 +1,5 @@
 Title: Stateful Material Properties
-example_material.i
+ex09.i
 include/materials/ExampleMaterial.h
 src/materials/ExampleMaterial.C
 src/main.C

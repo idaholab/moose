@@ -1,5 +1,5 @@
 Title: Adding a DiracKernel
-dirac.i
+ex18.i
 include/dirackernels/ExampleDirac.h
 src/dirackernels/ExampleDirac.C
 src/main.C

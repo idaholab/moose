@@ -1,5 +1,5 @@
 Title: Multiphysics Coupling
-2d_couple_conv_diff.i
+ex03.i
 include/kernels/Convection.h
 src/kernels/Convection.C
 src/main.C

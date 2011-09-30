@@ -1,5 +1,5 @@
 Title: Auxiliary Variables
-aux_example.i
+ex10.i
 include/auxkernels/ExampleAux.h
 src/auxkernels/ExampleAux.C
 src/main.C

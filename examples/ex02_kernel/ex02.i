@@ -1,6 +1,5 @@
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  file = mug.e
 []
 
 [Variables]
@@ -23,8 +22,9 @@
   [./conv]
     type = Convection
     variable = convected
-    x = 2.0
+    x = 0.0
     y = 0.0
+    z = 1.0
   [../]
 []
 
@@ -35,14 +35,14 @@
     type = DirichletBC
     variable = convected
     boundary = '1'
-    value = 0
+    value = 1
   [../]
 
   [./right]
     type = DirichletBC
     variable = convected
     boundary = '2'
-    value = 1
+    value = 0
   [../]
 []
 

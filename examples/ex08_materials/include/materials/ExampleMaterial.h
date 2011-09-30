@@ -42,11 +42,6 @@ private:
   Real _diffusivity_baseline;
 
   /**
-   * Holds the values of a coupled variable.
-   */
-  VariableValue & _some_variable;
-
-  /**
    * This is the member reference that will hold the
    * computed values from this material class.
    */

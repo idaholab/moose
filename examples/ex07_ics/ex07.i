@@ -1,6 +1,5 @@
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  file = half-cone.e
 []
 
 [Variables]
@@ -36,15 +35,15 @@
   [./left]
     type = DirichletBC
     variable = diffused
-    boundary = '1 3'
-    value = 0
+    boundary = '1'
+    value = 2
   [../]
 
   [./right]
     type = DirichletBC
     variable = diffused
-    boundary = '2 4'
-    value = 1
+    boundary = '2'
+    value = 10
   [../]
 []
 

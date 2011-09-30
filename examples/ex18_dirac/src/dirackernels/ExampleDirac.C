@@ -48,7 +48,7 @@ ExampleDirac::addPoints()
   addPoint(_p);
 
   // Just add an arbitrary point
-  addPoint(Point(0.6, 0.1));
+  addPoint(Point(4.9, 0.9, 0.9));
 }
 
 Real

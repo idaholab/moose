@@ -1,5 +1,5 @@
 Title: As Simple As It Gets
-2d_diffusion.i
+ex01.i
 src/main.C
 ../../moose/include/kernels/Diffusion.h
 ../../moose/src/kernels/Diffusion.C
