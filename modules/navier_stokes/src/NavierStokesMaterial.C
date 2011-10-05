@@ -245,6 +245,9 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
     _hsupg[qp] = 2.* sqrt( U.size_sq() / denom );
   else
     _hsupg[qp] = 0.;
+
+  // Debugging: Just use hmin for the element!
+  _hsupg[qp] = _current_elem->hmin();
 }
 
 
@@ -259,20 +262,42 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
   // std::cout << "velmag=" << velmag << std::endl;
 
   // Make sure temperature >= 0 before trying to take sqrt
-#ifdef DEBUG
+  // #ifdef DEBUG
   if (_temperature[qp] < 0.)
-    mooseError("Negative temperature detected at quadrature point!");
-#endif
+  {
+    std::cerr << "Negative temperature "
+	      << _temperature[qp]
+	      << " found at quadrature point "
+	      << qp
+	      << ", element "
+	      << _current_elem->id()
+	      << std::endl;
+    mooseError("Can't continue, would be nice to throw an exception here?");
+  }
+  // #endif
 
-  // The speed of sound for an ideal gas, sqrt(gamma * R * T)
-  Real soundspeed = std::sqrt(_gamma * _R * _temperature[qp]);
+  // The speed of sound for an ideal gas, sqrt(gamma * R * T).  Not needed unless
+  // we want to use a form of Tau that requires it.
+  // Real soundspeed = std::sqrt(_gamma * _R * _temperature[qp]);
+  
+  // The timestep size, get this from the SubProblem reference we have.
+  Real dt = _subproblem.parent()->dt();
 
-  // If velmag == 0, then h should be zero as well. And we will return 0.
+  // If velmag == 0, then _hsupg should be zero as well.  Then tau
+  // will have only the time-derivative contribution (or zero, if we
+  // are not including dt terms in our taus!)  Note that using the
+  // time derivative contribution in this way assumes we are solving
+  // unsteady, and guarantees *some* stabilization is added even when
+  // u -> 0 in certain regions of the flow.
   if (velmag == 0.)
   {
-    _tauc[qp] = 0.;
-    _taum[qp] = 0.;
-    _taue[qp] = 0.;
+    // 1.) Tau without dt terms
+    // _tauc[qp] = 0.;
+    // _taum[qp] = 0.;
+    // _taue[qp] = 0.;
+
+    // 2.) Tau *with* dt terms
+    _tauc[qp] = _taum[qp] = _taue[qp] = 0.5 * dt;
   }
   else
   {
@@ -286,31 +311,42 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
     Real cv = _R / (_gamma-1.);
     Real k_term = _thermal_conductivity[qp] / _rho[qp] / (_gamma*cv) / h2;
 
-    // Standard compressible flow tau.  Does not account for low Mach number
+    // 1a.) Standard compressible flow tau.  Does not account for low Mach number
     // limit.
-    _tauc[qp] = _hsupg[qp] / (velmag + soundspeed);
+    //    _tauc[qp] = _hsupg[qp] / (velmag + soundspeed);
 
-    // Inspired by Hauke, the sum of the compressible and incompressible tauc.
-    // This seems to give relatively large values when u is small, e.g.
-    // h_supg=7.071068e-03, velmag=1.077553e-04 => tauc=6.562155e+01??
-//    _tauc =
-//      _hsupg[qp] / (velmag + soundspeed) + 
-//      _hsupg[qp] / (velmag);
+    // 1b.) Inspired by Hauke, the sum of the compressible and incompressible tauc.
+    //    _tauc[qp] =
+    //      _hsupg[qp] / (velmag + soundspeed) +
+    //      _hsupg[qp] / (velmag);
 
-    // From Wong 2001.  This tau is O(M^2) for small M.  At small M,
+    // 1c.) From Wong 2001.  This tau is O(M^2) for small M.  At small M,
     // tauc dominates the inverse square sums and basically makes
-    // taum=taue=tac.  However, all my flows occur at low Mach numbers,
+    // taum=taue=tauc.  However, all my flows occur at low Mach numbers,
     // so there would basically never be any stabilization...
-//    tauc = (_hsupg[qp] * velmag) / (velmag*velmag + soundspeed*soundspeed);
+    // _tauc[qp] = (_hsupg[qp] * velmag) / (velmag*velmag + soundspeed*soundspeed);
 
+    // For use with option "1", 
     // (tau_c)^{-2}
-    Real taucm2 = 1./_tauc[qp]/_tauc[qp];
+    //    Real taucm2 = 1./_tauc[qp]/_tauc[qp];
+    //    _taum[qp] = 1. / std::sqrt(taucm2 + visc_term*visc_term);
+    //    _taue[qp] = 1. / std::sqrt(taucm2 + k_term*k_term);
 
-    _taum[qp] = 1. / std::sqrt(taucm2 + visc_term*visc_term);
+    // 2.) Tau with timestep dependence (guarantees stabilization even
+    // in zero-velocity limit) incorporated via the "r-switch" method,
+    // with r=2.
+    Real sqrt_term = 4./dt/dt + velmag*velmag/h2;
 
-    _taue[qp] = 1. / std::sqrt(taucm2 + k_term*k_term);
+    // For use with option "2", i.e. the option that uses dt in the definition of tau
+    _tauc[qp] = 1. / std::sqrt(sqrt_term);
+    _taum[qp] = 1. / std::sqrt(sqrt_term + visc_term*visc_term);
+    _taue[qp] = 1. / std::sqrt(sqrt_term + k_term*k_term);
   }
-  
+
+  // Debugging
+  //std::cout << "_tauc[" << qp << "]=" << _tauc[qp] << std::endl;
+  //std::cout << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
+  //std::cout << "velmag[" << qp << "]=" << velmag << std::endl;
 }
 
 
