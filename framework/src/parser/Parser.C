@@ -674,7 +674,7 @@ Parser::printUsage() const
   std::string command((*Moose::command_line)[0]);
   command.substr(command.find_last_of("/\\")+1);
 
-  std::cout << "\nUsage: " << command << " [-i <input file> --show_tree | <Option>]\n\n"
+  std::cout << "\nUsage: " << command << " [-i <input file> --show-input | <Option>]\n\n"
             << "Options:\n" << std::left;
 
   for (std::map<std::string, CLIOption>::const_iterator i=_cli_options.begin(); i != _cli_options.end(); ++i)
