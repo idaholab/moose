@@ -65,6 +65,13 @@ Parser::~Parser()
   delete _exreader;
   if (_syntax_formatter)
     delete _syntax_formatter;
+
+  // FIXME: Right now the main program is responsible for deleting the executioner, an
+  // object not created by main.  The executioner asks the Action System to execute and
+  // which creates the executioner.  For now then, we will delete the executioner when
+  // the parser goes out of scope.
+  if (_executioner)
+    delete _executioner;
 }
 
 std::string
