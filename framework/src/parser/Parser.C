@@ -215,7 +215,7 @@ Parser::initOptions()
 
   syntax.clear();
   cli_opt.desc = "Shows the parsed input file before running the simulation";
-  syntax.push_back("--show_tree");
+  syntax.push_back("--show-input");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
   _cli_options["ShowTree"] = cli_opt;
