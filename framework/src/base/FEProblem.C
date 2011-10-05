@@ -100,7 +100,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _has_dampers(false),
     _has_constraints(false),
     _restart(false),
-    _solve_only_perf_log("Solve Only"),
+//    _solve_only_perf_log("Solve Only"),
     _output_setup_log_early(false),
     // debugging
     _dbg_top_residuals(0)
@@ -1405,9 +1405,9 @@ FEProblem::solve()
 {
   Moose::setSolverDefaults(*this);
   Moose::perf_log.push("solve()","Solve");
-  _solve_only_perf_log.push("solve");
+//  _solve_only_perf_log.push("solve");
   _nl.solve();
-  _solve_only_perf_log.pop("solve");
+//  _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");
   _nl.update();
 }

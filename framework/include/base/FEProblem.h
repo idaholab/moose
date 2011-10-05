@@ -315,7 +315,7 @@ protected:
 
   std::set<unsigned int> _ghosted_elems;                ///< Elements that should have Dofs ghosted to the local processor
 
-  PerfLog _solve_only_perf_log;                         ///< Only times the solve
+//  PerfLog _solve_only_perf_log;                         ///< Only times the solve
   bool _output_setup_log_early;                         ///< Determines if the setup log is printed before the first time step
 
   // DEBUGGING capabilities
