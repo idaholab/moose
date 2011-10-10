@@ -52,7 +52,7 @@
     type = CoupledDirichletBC
     variable = convected
     boundary = '2'
-    value = 2
+    alpha = 2
 
     some_var = diffused
   [../]
@@ -61,7 +61,7 @@
     type = CoupledNeumannBC
     variable = convected
     boundary = '2'
-    value = 2
+    alpha = 2
 
     some_var = diffused
   [../]
@@ -85,6 +85,8 @@
 [Executioner]
   type = Steady
   petsc_options = '-snes_mf_operator'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre    boomeramg'
 []
 
 [Output]

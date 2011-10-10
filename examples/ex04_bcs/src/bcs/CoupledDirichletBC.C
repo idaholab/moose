@@ -20,7 +20,7 @@ InputParameters validParams<CoupledDirichletBC>()
   InputParameters params = validParams<NodalBC>();
 
   // Here we are adding a parameter that will be extracted from the input file by the Parser
-  params.addParam<Real>("value", 0.0, "Value multiplied by the coupled value on the boundary");
+  params.addParam<Real>("alpha", 0.0, "Value multiplied by the coupled value on the boundary");
   params.addRequiredCoupledVar("some_var", "Value on the Boundary");
   return params;
 }
@@ -31,7 +31,7 @@ CoupledDirichletBC::CoupledDirichletBC(const std::string & name, InputParameters
    /**
     * Grab the parameter for the multiplier.
     */
-   _value(getParam<Real>("value")),
+   _alpha(getParam<Real>("alpha")),
 
    /**
     * Get a reference to the coupled variable's values.
@@ -42,5 +42,5 @@ CoupledDirichletBC::CoupledDirichletBC(const std::string & name, InputParameters
 Real
 CoupledDirichletBC::computeQpResidual()
 {
-  return _u[_qp]-(_value*_some_var_val[_qp]);
+  return _u[_qp]-(_alpha*_some_var_val[_qp]);
 }

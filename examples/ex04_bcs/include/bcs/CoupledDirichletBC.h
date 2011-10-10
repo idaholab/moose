@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<CoupledDirichletBC>();
 
 /**
- * Implements a coupled Dirichlet BC where u = value * some_var on the boundary.
+ * Implements a coupled Dirichlet BC where u = alpha * some_var on the boundary.
  */
 class CoupledDirichletBC : public NodalBC
 {
@@ -43,7 +43,7 @@ private:
   /**
    * Multiplier on the boundary.
    */
-  Real _value;
+  Real _alpha;
 
   /**
    * Holds the values at the quadrature points

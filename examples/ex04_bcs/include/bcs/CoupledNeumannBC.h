@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<CoupledNeumannBC>();
 
 /**
- * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
+ * Implements a simple constant Neumann BC where grad(u)=alpha * v on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
 class CoupledNeumannBC : public IntegratedBC
@@ -44,7 +44,7 @@ private:
   /**
    * Multiplier on the boundary.
    */
-  Real _value;
+  Real _alpha;
 
   /**
    * Holds the values at the quadrature points
