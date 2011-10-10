@@ -19,7 +19,7 @@ CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)/../../moose
 
 MAKE_LIBRARY := no
-APPLICATION_NAME := ex12
+APPLICATION_NAME := ex11app
 
 include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk
