@@ -59,6 +59,7 @@
 #include "NearestNodeValueAux.h"
 #include "PenetrationAux.h"
 #include "ProcessorIDAux.h"
+#include "SelfAux.h"
 #include "GapValueAux.h"
 #include "MaterialRealAux.h"
 #include "DebugResidualAux.h"
@@ -222,6 +223,7 @@ registerObjects()
   registerAux(NearestNodeValueAux);
   registerAux(PenetrationAux);
   registerAux(ProcessorIDAux);
+  registerAux(SelfAux);
   registerAux(GapValueAux);
   registerAux(MaterialRealAux);
   registerAux(DebugResidualAux);
