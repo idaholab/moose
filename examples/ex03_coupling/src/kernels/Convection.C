@@ -26,15 +26,15 @@ InputParameters validParams<Convection>()
 Convection::Convection(const std::string & name,
                        InputParameters parameters)
   :Kernel(name, parameters),
-   _some_variable(coupledGradient("some_variable"))
+   _grad_some_variable(coupledGradient("some_variable"))
 {}
 
 Real Convection::computeQpResidual()
 {
-  return _test[_i][_qp]*(_some_variable[_qp]*_grad_u[_qp]);
+  return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_u[_qp]);
 }
 
 Real Convection::computeQpJacobian()
 {
-  return _test[_i][_qp]*(_some_variable[_qp]*_grad_phi[_j][_qp]);
+  return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_phi[_j][_qp]);
 }

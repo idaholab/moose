@@ -37,7 +37,7 @@ protected:
 
 private:
 
-  VariableGradient & _some_variable;
+  VariableGradient & _grad_some_variable;
 };
 
 #endif //CONVECTION_H
