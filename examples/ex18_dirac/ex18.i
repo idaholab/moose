@@ -48,9 +48,20 @@
   [../]
 []
 
+# The Preconditioning block
+[Preconditioning]
+  active = 'pbp'
+
+  [./pbp]
+    type = PBP
+    solve_order = 'diffused'
+    preconditioner  = 'AMG'
+  [../]
+[]
+
 [Executioner]
   type = Steady
-  petsc_options = '-snes_mf_operator'
+  petsc_options = '-snes_mf'
 []
 
 [Output]
