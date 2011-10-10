@@ -50,6 +50,7 @@ typedef Real                     PostprocessorValue;
 
 class FEProblem;
 class ActionWarehouse;
+class Executioner;
 
 typedef StoredRange<std::vector<unsigned int>::iterator, unsigned int> NodeIdRange;
 
@@ -57,6 +58,8 @@ namespace Moose
 {
 
 extern ActionWarehouse action_warehouse;
+
+extern Executioner *executioner;
 
 /**
  * Perflog to be used by applications.

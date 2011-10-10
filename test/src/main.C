@@ -30,8 +30,7 @@ int main(int argc, char *argv[])
   p.parse(input_filename);
   p.execute();
 
-  Executioner *e = p.getExecutioner();
-  e->execute();
+  Moose::executioner->execute();
 
   return 0;
 }

@@ -118,11 +118,6 @@ public:
   const std::string & getFileName() const { return _input_filename; }
 
   /**
-   * Get the executioner
-   */
-  Executioner * getExecutioner();
-
-  /**
    * This function attempts to extract values from the input file based on the contents of
    * the passed parameters objects.  It handles a number of various types with dynamic casting
    * including vector types
@@ -150,7 +145,6 @@ public:
   MooseMesh *_mesh;
   MooseMesh *_displaced_mesh;
   FEProblem * _problem;
-  Executioner *_executioner;
 
   ExodusII_IO *_exreader;                               ///< auxiliary object for restart
   bool _loose;                                          ///< true if parsing input file with loose syntax

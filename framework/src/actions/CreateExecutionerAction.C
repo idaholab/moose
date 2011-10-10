@@ -90,11 +90,11 @@ CreateExecutionerAction::act()
 
   _moose_object_pars.set<MooseMesh *>("_mesh") = _parser_handle._mesh;
   Moose::setup_perf_log.push("Create Executioner","Setup");
-  _parser_handle._executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
+  Moose::executioner = static_cast<Executioner *>(Factory::instance()->create(_type, "Executioner", _moose_object_pars));
   Moose::setup_perf_log.pop("Create Executioner","Setup");
-  if (dynamic_cast<FEProblem *>(&_parser_handle._executioner->problem()) != NULL)
+  if (dynamic_cast<FEProblem *>(&Moose::executioner->problem()) != NULL)
   {
-    FEProblem *mproblem = dynamic_cast<FEProblem *>(&_parser_handle._executioner->problem());
+    FEProblem *mproblem = dynamic_cast<FEProblem *>(&Moose::executioner->problem());
     _parser_handle._problem = mproblem;
 
 //    ParserBlock * blk;

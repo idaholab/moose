@@ -60,7 +60,7 @@ SetupOverSamplingAction::SetupOverSamplingAction(const std::string & name, Input
 void
 SetupOverSamplingAction::act()
 {
-  Executioner * exec = _parser_handle._executioner;
+  Executioner * exec = Moose::executioner;
   FEProblem * problem = dynamic_cast<FEProblem *>(&exec->problem());
   if (!problem)
     mooseError("Can't get a handle to FEproblem");

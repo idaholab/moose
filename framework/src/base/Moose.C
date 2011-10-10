@@ -493,4 +493,6 @@ ActionWarehouse action_warehouse;
 
 PerfLog setup_perf_log("Setup");
 
+Executioner *executioner = NULL;
+
 } // namespace Moose

@@ -17,6 +17,8 @@
 #include "ParallelUniqueId.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "Executioner.h"
+
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
 #include "petscsys.h"
@@ -33,6 +35,7 @@ MooseInit::MooseInit(int argc, char *argv[]) :
   std::cout << "Using " << libMesh::n_threads() << " thread(s)" << std::endl;
 
   Moose::command_line = new GetPot(argc, argv);
+  Moose::executioner = NULL;
 
   Moose::registerObjects();
 }
@@ -42,6 +45,7 @@ MooseInit::~MooseInit()
   Moose::action_warehouse.clear();
 
   delete Moose::command_line;
+  delete Moose::executioner;
   Factory::release();
   ActionFactory::release();
 }

@@ -45,7 +45,6 @@ Parser::Parser(bool clearWarehouse):
   _mesh(NULL),
   _displaced_mesh(NULL),
   _problem(NULL),
-  _executioner(NULL),
   _exreader(NULL),
   _loose(false),
   _syntax_formatter(NULL),
@@ -65,13 +64,6 @@ Parser::~Parser()
   delete _exreader;
   if (_syntax_formatter)
     delete _syntax_formatter;
-
-  // FIXME: Right now the main program is responsible for deleting the executioner, an
-  // object not created by main.  The executioner asks the Action System to execute and
-  // which creates the executioner.  For now then, we will delete the executioner when
-  // the parser goes out of scope.
-  if (_executioner)
-    delete _executioner;
 }
 
 std::string
@@ -606,13 +598,6 @@ const GetPot *
 Parser::getPotHandle() const
 {
   return _getpot_initialized ? &_getpot_file : NULL;
-}
-
-Executioner *
-Parser::getExecutioner()
-{
-  mooseAssert(_executioner != NULL, "Executioner is NULL!");
-  return _executioner;
 }
 
 void

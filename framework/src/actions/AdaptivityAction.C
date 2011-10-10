@@ -58,7 +58,7 @@ AdaptivityAction::act()
 
   Adaptivity & adapt = _problem->adaptivity();
 
-  _parser_handle._executioner->parameters().set<unsigned int>("steps") = getParam<unsigned int>("steps");
+  Moose::executioner->parameters().set<unsigned int>("steps") = getParam<unsigned int>("steps");
 
   adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_adaptivity"));
 
