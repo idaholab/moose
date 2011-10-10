@@ -7,6 +7,7 @@
 #include "BodyForceVoid.h"
 #include "CoefDiffusion.h"
 #include "Convection.h"
+#include "ElementIntegralRZ.h"
 #include "InternalVolume.h"
 #include "InternalVolumeRZ.h"
 #include "NeumannRZ.h"
@@ -143,6 +144,7 @@ Elk::registerObjects()
   registerKernel(BodyForceVoid);
   registerKernel(CoefDiffusion);
   registerKernel(Convection);
+  registerPostprocessor(ElementIntegralRZ);
   registerPostprocessor(InternalVolume);
   registerPostprocessor(InternalVolumeRZ);
   registerBoundaryCondition(NeumannRZ);
