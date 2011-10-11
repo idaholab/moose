@@ -18,12 +18,12 @@
 #include "Kernel.h"
 
 /**
- * The forward declaration is so that we can declare the validParams function
+ * The forward declaration is so that we can declare the validParams() function
  * before we actually define the class... that way the definition isn't lost
  * at the bottom of the file.
  */
 
-//Forward Declarations
+// Forward Declarations
 class Convection;
 
 /**
@@ -36,27 +36,26 @@ InputParameters validParams<Convection>();
 /**
  * Define the Kernel for a convection operator that looks like:
  *
- * velocity dot u'
+ * V . grad(u)
  *
- * This first line is defining the name and inheriting from Kernel.
+ * where V is a given constant velocity field.
  */
 class Convection : public Kernel
 {
 public:
 
   /**
-   * This is the Constructor declaration AND definition.
-   * It is ok to have the definition in the .h if the function body
-   * is really small.  Otherwise it should be in the .C
+   * This is the constructor declaration.  This class takes a
+   * string and a InputParameters object, just like other 
+   * Kernel-derived classes.
    */
   Convection(const std::string & name,
              InputParameters parameters);
 
 protected:
   /**
-   * Responsible for computing the residual at one quadrature point
-   *
-   * This should always be defined in the .C
+   * Responsible for computing the residual at one quadrature point.
+   * This function should always be defined in the .C file.
    */
   virtual Real computeQpResidual();
 
@@ -68,13 +67,14 @@ protected:
    * Note that this can be an approximation or linearization.  In this case it's
    * not because the Jacobian of this operator is easy to calculate.
    *
-   * This should always be defined in the .C
+   * This function should always be defined in the .C file.
    */
   virtual Real computeQpJacobian();
 
 private:
   /**
-   * A velocity vector that supports a dot product.
+   * A vector object for storing the velocity.  Convenient for
+   * computing dot products.
    */
   RealVectorValue _velocity;
 
@@ -86,4 +86,4 @@ private:
   Real _z;
 };
 
-#endif //CONVECTION_H
+#endif // CONVECTION_H

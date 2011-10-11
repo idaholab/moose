@@ -29,16 +29,16 @@
 []
 
 [BCs]
-  active = 'left right'
+  active = 'bottom top'
 
-  [./left]
+  [./bottom]
     type = DirichletBC
     variable = convected
     boundary = '1'
     value = 1
   [../]
 
-  [./right]
+  [./top]
     type = DirichletBC
     variable = convected
     boundary = '2'

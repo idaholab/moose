@@ -31,8 +31,6 @@ InputParameters validParams<Convection>()
 Convection::Convection(const std::string & name,
                        InputParameters parameters)
   // You must call the constructor of the base class first
-  // The "true" here specifies that this Kernel is to be integrated
-  // over the domain.
   :Kernel(name, parameters),
 
    // This is the "Intialization List" it sets the values of class variables
@@ -45,9 +43,9 @@ Convection::Convection(const std::string & name,
   // We do this here so that it's only done once and then we just reuse it.
   // Note that RealVectorValues ALWAYS have 3 components... even when running in
   // 2D or 1D.  This makes the code simpler...
-  _velocity(0)=_x;
-  _velocity(1)=_y;
-  _velocity(2)=_z;
+  _velocity(0) = _x;
+  _velocity(1) = _y;
+  _velocity(2) = _z;
 }
 
 Real Convection::computeQpResidual()
