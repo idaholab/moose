@@ -33,8 +33,9 @@ Convection::Convection(const std::string & name,
   // You must call the constructor of the base class first
   :Kernel(name, parameters),
 
-   // This is the "Intialization List" it sets the values of class variables
-   // Here we are grabbing the values of Parameters to use for a velocity vector
+   // This is the rest of the "Intialization List".  It sets the
+   // values of class variables. Here we are grabbing the values of
+   // x, y, and z from the input file to use for a velocity vector.
    _x(getParam<Real>("x")),
    _y(getParam<Real>("y")),
    _z(getParam<Real>("z"))

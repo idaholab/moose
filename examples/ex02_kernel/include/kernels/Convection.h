@@ -36,7 +36,7 @@ InputParameters validParams<Convection>();
 /**
  * Define the Kernel for a convection operator that looks like:
  *
- * V . grad(u)
+ * (V . grad(u), test)
  *
  * where V is a given constant velocity field.
  */
