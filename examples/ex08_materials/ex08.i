@@ -18,14 +18,14 @@
 []
 
 [BCs]
-  [./left_diffused]
+  [./bottom_diffused]
     type = DirichletBC
     variable = diffused
     boundary = '10'
     value = 0
   [../]
 
-  [./right_diffused]
+  [./top_diffused]
     type = DirichletBC
     variable = diffused
     boundary = '11'
