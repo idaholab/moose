@@ -204,7 +204,7 @@ CoupledProblem::computePostprocessors(ExecFlagType /*type = EXEC_TIMESTEP*/)
 }
 
 void
-CoupledProblem::outputPostprocessors()
+CoupledProblem::outputPostprocessors(bool force)
 {
 }
 
@@ -248,7 +248,7 @@ CoupledProblem::dump()
 }
 
 void
-CoupledProblem::output()
+CoupledProblem::output(bool force)
 {
   _out.output();
 }

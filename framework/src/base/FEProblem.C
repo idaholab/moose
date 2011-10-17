@@ -1269,7 +1269,7 @@ FEProblem::addPPSValuesToTable(ExecFlagType type)
 }
 
 void
-FEProblem::outputPostprocessors()
+FEProblem::outputPostprocessors(bool force/* = false*/)
 {
   ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
@@ -1278,26 +1278,29 @@ FEProblem::outputPostprocessors()
   if (_pps_output_table.empty())
     return;
 
-  if (_postprocessor_screen_output)
+  if (force || (_postprocessor_screen_output && (_t_step % out().screen_interval() == 0)))
   {
     std::cout<<std::endl<<"Postprocessor Values:"<<std::endl;
     _pps_output_table.printTable(std::cout, _pps_output_table_max_rows);
     std::cout<<std::endl;
   }
 
-  // FIXME: if exodus output is enabled?
-  _out.outputPps(_pps_output_table);
-  if (_out_problem)
-    _out_problem->out().outputPps(_pps_output_table);
+  if (force || (_t_step % out().interval() == 0))
+  {
+    // FIXME: if exodus output is enabled?
+    _out.outputPps(_pps_output_table);
+    if (_out_problem)
+      _out_problem->out().outputPps(_pps_output_table);
 
-  if (_postprocessor_csv_output)
-    _pps_output_table.printCSV(_out.fileBase() + ".csv");
+    if (_postprocessor_csv_output)
+      _pps_output_table.printCSV(_out.fileBase() + ".csv");
 
-  if (_postprocessor_ensight_output)
-    _pps_output_table.printEnsight(_out.fileBase());
+    if (_postprocessor_ensight_output)
+      _pps_output_table.printEnsight(_out.fileBase());
 
-  if (_postprocessor_gnuplot_output)
-    _pps_output_table.makeGnuplot(_out.fileBase(), _gnuplot_format);
+    if (_postprocessor_gnuplot_output)
+      _pps_output_table.makeGnuplot(_out.fileBase(), _gnuplot_format);
+  }
 }
 
 void
@@ -1546,29 +1549,31 @@ FEProblem::updateGeomSearch()
 }
 
 void
-FEProblem::output()
+FEProblem::output(bool force/*= false*/)
 {
-  _out.output();
-
-  // if the OverSample problem is setup, output it's solution
-  if (_out_problem)
+  if ((_t_step % out().interval() == 0) || force)
   {
-    _out_problem->init();
-    _out_problem->out().output();
-  }
+    _out.output();
 
-  if (_displaced_problem != NULL && _output_displaced)
-    _displaced_problem->output();
-
-  // save the input file if we did not do so already
-  if (!_input_file_saved)
-  {
-    _out.outputInput();
+    // if the OverSample problem is setup, output it's solution
     if (_out_problem)
-      _out_problem->out().outputInput();
-    _input_file_saved = true;
-  }
+    {
+      _out_problem->init();
+      _out_problem->out().output();
+    }
 
+    if (_displaced_problem != NULL && _output_displaced)
+      _displaced_problem->output();
+
+    // save the input file if we did not do so already
+    if (!_input_file_saved)
+    {
+      _out.outputInput();
+      if (_out_problem)
+        _out_problem->out().outputInput();
+      _input_file_saved = true;
+    }
+  }
 }
 
 OutputProblem &

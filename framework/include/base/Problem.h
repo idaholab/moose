@@ -124,7 +124,7 @@ public:
 
   // Postprocessors /////
   virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP) = 0;
-  virtual void outputPostprocessors() = 0;
+  virtual void outputPostprocessors(bool force = false) = 0;
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0) = 0;
 
   // Function /////
@@ -146,7 +146,7 @@ public:
   // Output system /////
 
   virtual Output & out() = 0;
-  virtual void output() = 0;
+  virtual void output(bool force = false) = 0;
   void outputInitial(bool out_init) { _output_initial = out_init; }
 
 public:

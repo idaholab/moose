@@ -89,7 +89,7 @@ public:
 
   // Postprocessors /////
   virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors(bool force = false);
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
 
   // Materials /////
@@ -110,7 +110,7 @@ public:
   virtual void dump();
 
   virtual Output & out() { return _out; }
-  virtual void output();
+  virtual void output(bool force = false);
 
   // Restart //////
   virtual void restartFromFile(const std::string & file_name);

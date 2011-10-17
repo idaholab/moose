@@ -200,11 +200,9 @@ Transient::takeStep(Real input_dt)
 void
 Transient::endStep()
 {
-  if (((_t_step + 1) % _problem.out().interval() == 0 || _reset_dt))
-    _problem.output();
-
-  if (((_t_step + 1) % _problem.out().screen_interval() == 0 || _reset_dt))
-    _problem.outputPostprocessors();
+  // if _reset_dt is true, force the output no matter what
+  _problem.output(_reset_dt);
+  _problem.outputPostprocessors(_reset_dt);
 
 #ifdef LIBMESH_ENABLE_AMR
   if (_problem.adaptivity().isOn())

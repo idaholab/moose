@@ -162,7 +162,7 @@ public:
   Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
   virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
   virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors(bool force = false);
 
   // Dampers /////
   void addDamper(std::string damper_name, const std::string & name, InputParameters parameters);
@@ -212,7 +212,7 @@ public:
 
   // Output /////
   virtual Output & out() { return _out; }
-  virtual void output();
+  virtual void output(bool force = false);
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
   OutputProblem & getOutputProblem(unsigned int refinements);
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
