@@ -73,7 +73,7 @@ void
 ExodusOutput::outputPps(const std::string & /*file_base*/, const FormattedTable & table, Real time)
 {
   if (_out == NULL)
-    mooseError("Error attempting to write postprocessor information to uninitialized file!");
+    return;     // do nothing and safely return - we can write global vars (i.e. PPS only when output() occured)
 
   // Check to see if the FormattedTable is empty, if so, return
   if (table.getData().empty())
