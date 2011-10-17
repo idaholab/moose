@@ -31,8 +31,6 @@ public:
   AdaptivityAction(const std::string & name, InputParameters params);
 
   virtual void act();
-
-  unsigned int getSteps();
 };
 
 #endif //LIBMESH_ENABLE_AMR

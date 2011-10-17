@@ -16,7 +16,6 @@
 
 #include "Moose.h"
 #include "Parser.h"
-#include "Executioner.h"
 #include "Output.h"
 #include "FEProblem.h"
 #include "Conversion.h"
@@ -93,11 +92,12 @@ SetupOutputAction::act()
     Moose::setup_perf_log.disable_logging();
   }
 
+  // FIXME: _parser_handle._problem can be NULL !!!
+
   /// Determines whether we see the perf log early in a run or not
   _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
 
-  Executioner * exec = Moose::executioner;
-  Problem & problem = exec->problem();
+  Problem & problem = *_parser_handle._problem;
   Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
   if (_parser_handle._problem != NULL)
@@ -121,9 +121,7 @@ SetupOutputAction::act()
 
   setupOutputObject(output, _pars);
 
-  // TODO: Really? We need to set this variable on two objects???
   const bool output_initial = getParam<bool>("output_initial");
-  exec->outputInitial(output_initial);
   problem.outputInitial(output_initial);
 
   if (_parser_handle._problem != NULL)

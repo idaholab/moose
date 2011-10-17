@@ -128,8 +128,7 @@ LooseCoupling::execute()
 {
   _problem.initialSetup();
 
-  if (_output_initial)
-    _problem.output();
+  // TODO: output inital condition
 
   while (_time < _end_time)
   {

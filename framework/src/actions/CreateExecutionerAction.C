@@ -66,19 +66,6 @@ CreateExecutionerAction::act()
   // Steady and derived Executioners need to know the number of adaptivity steps to take.  This paramter
   // is held in the child block Adaptivity and needs to be pulled early
 
-  // TODO: Fix Adaptivity block
-/*
-  ParserBlock *adaptivity_block = locateBlock("Executioner/Adaptivity");
-  if (adaptivity_block != NULL)
-  {
-    AdaptivityBlock *a = dynamic_cast<AdaptivityBlock *>(adaptivity_block);
-    class_params.set<unsigned int>("steps") = a->getSteps();
-  }
-  else
-    class_params.set<unsigned int>("steps") = 0;
-*/
-  //_moose_object_pars.set<unsigned int>("steps") = 0;
-
 #ifdef LIBMESH_HAVE_PETSC
   std::vector<std::string> petsc_options,  petsc_inames, petsc_values;
   petsc_options = getParam<std::vector<std::string> >("petsc_options");

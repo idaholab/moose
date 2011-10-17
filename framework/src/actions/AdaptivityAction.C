@@ -58,8 +58,6 @@ AdaptivityAction::act()
 
   Adaptivity & adapt = _problem->adaptivity();
 
-  Moose::executioner->parameters().set<unsigned int>("steps") = getParam<unsigned int>("steps");
-
   adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_adaptivity"));
 
   adapt.setErrorEstimator(getParam<std::string>("error_estimator"));
@@ -100,14 +98,6 @@ AdaptivityAction::act()
   }
 
   adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
-}
-
-unsigned int
-AdaptivityAction::getSteps()
-{
-  InputParameters params = parameters();
-
-  return params.have_parameter<unsigned int>("steps") ? params.get<unsigned int>("steps") : 0;
 }
 
 #endif //LIBMESH_ENABLE_AMR

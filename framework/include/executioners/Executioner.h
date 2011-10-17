@@ -58,12 +58,8 @@ public:
 
   virtual Problem & problem() = 0;
 
-  void outputInitial(bool out_init) { _output_initial = out_init; }
-
 protected:
   MooseMesh * _mesh;
-
-  bool _output_initial;				///< output initial condition if true
 
   /**
    * Initial Residual Variables
