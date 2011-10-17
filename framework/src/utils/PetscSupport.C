@@ -137,7 +137,11 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   else if(fnorm >= system->_initial_residual * (1.0/snes->rtol))
   {
     PetscInfo2(snes,"Nonlinear solve was blowing up!",snes->nfuncs,snes->max_funcs);
+#if PETSC_VERSION_LESS_THAN(3,2,0)
     *reason = SNES_DIVERGED_LS_FAILURE;
+#else
+    *reason = SNES_DIVERGED_LINE_SEARCH;
+#endif
   }
 
   if (it && !*reason)
@@ -157,7 +161,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 }
 
 
-PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscTruth * changed_y, PetscTruth * /*changed_w*/)
+PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * /*changed_w*/)
 {
   //w = updated solution = x+ scaling*y
   //x = current solution
@@ -238,7 +242,11 @@ void petscSetDefaults(FEProblem & problem)
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);
+#if PETSC_VERSION_LESS_THAN(3,2,0)
   KSPSetPreconditionerSide(ksp, PC_RIGHT);
+#else
+  KSPSetPCSide(ksp, PC_RIGHT);
+#endif
   SNESSetMaxLinearSolveFailures(snes, 1000000);
 
 //  if (problem.hasDampers())

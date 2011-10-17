@@ -394,11 +394,19 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   ISColoring iscoloring;
   MatFDColoring fdcoloring;
 
+#if PETSC_VERSION_LESS_THAN(3,2,0)
   ierr = MatGetColoring(petsc_mat->mat(), MATCOLORING_LF, &iscoloring);
+#else
+  ierr = MatGetColoring(petsc_mat->mat(), MATCOLORINGLF, &iscoloring);
+#endif
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
 
   MatFDColoringCreate(petsc_mat->mat(),iscoloring,&fdcoloring);
+#if PETSC_VERSION_LESS_THAN(3,2,0)
   ISColoringDestroy(iscoloring);
+#else
+  ISColoringDestroy(&iscoloring);
+#endif
   MatFDColoringSetFromOptions(fdcoloring);
   MatFDColoringSetFunction(fdcoloring,
                            (PetscErrorCode (*)(void))&libMesh::__libmesh_petsc_snes_residual,
