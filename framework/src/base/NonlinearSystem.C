@@ -426,7 +426,7 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
                       &my_mat,
                       &my_struct);
 
-  std::cout<<*_sys.matrix<<std::endl;
+  //std::cout<<*_sys.matrix<<std::endl;
 #endif
 }
 
