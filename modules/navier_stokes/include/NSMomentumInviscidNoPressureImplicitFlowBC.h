@@ -11,8 +11,10 @@ template<>
 InputParameters validParams<NSMomentumInviscidNoPressureImplicitFlowBC>();
 
 /**
- * Momentum equation boundary condition in which pressure is specified (given)
- * and the value of the convective part is allowed to vary (is computed implicitly).
+ * Momentum equation boundary condition used when pressure *is not*
+ * integrated by parts, i.e. when there is "no pressure" term on the boundary.
+ * In this case the flow is not specified either, so that the entire term is
+ * handled implicitly.
  */
 class NSMomentumInviscidNoPressureImplicitFlowBC : public NSMomentumInviscidBC
 {
