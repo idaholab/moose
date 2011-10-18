@@ -25,5 +25,12 @@ APPLICATION_NAME := moose
 include build.mk
 
 ###############################################################################
+<<<<<<< HEAD
 # Additional special case targets should be added here
+<<<<<<< HEAD
 
+=======
+=======
+# Additional special case targets should be added here
+>>>>>>> 1cd1274... Skipping broken BISON test r6625, Dummy checkin to update stable #000
+>>>>>>> Skipping broken BISON test r6625, Dummy checkin to update stable #000
