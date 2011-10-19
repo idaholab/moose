@@ -1,4 +1,4 @@
-/****************************************************************/
+ /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
@@ -64,7 +64,7 @@ public:
   /**
    * Method for dumping the table to a csv file - opening and closing the file handle is handled
    */
-  void printCSV(const std::string & file_name);
+  void printCSV(const std::string & file_name, int interval=1);
 
   void printEnsight(const std::string & file_name);
   void writeExodus(ExodusII_IO * ex_out, Real time);

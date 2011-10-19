@@ -149,7 +149,7 @@ SetupOutputAction::act()
     // Error checks
     if (interval < screen_interval)
       mooseError("\"screen_interval (" + Moose::stringify(screen_interval) +
-                 ")\" must be greater than \"interval (" + Moose::stringify(interval) + ")\"");
+                 ")\" must be less than or equal to \"interval (" + Moose::stringify(interval) + ")\"");
     else if (interval > screen_interval)
     {
       if (interval % screen_interval)

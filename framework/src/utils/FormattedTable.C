@@ -171,7 +171,7 @@ FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries)
 }
 
 void
-FormattedTable::printCSV(const std::string & file_name)
+FormattedTable::printCSV(const std::string & file_name, int interval)
 {
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
@@ -190,15 +190,19 @@ FormattedTable::printCSV(const std::string & file_name)
   }
   _output_file << "\n";
 
+  int counter = 0;
   for (i = _data.begin(); i != _data.end(); ++i)
   {
-    _output_file << i->first;
-    for (header = _column_names.begin(); header != _column_names.end(); ++header)
+    if (counter++ % interval == 0)
     {
-      std::map<std::string, Real> &tmp = i->second;
-      _output_file << "," << tmp[*header];
+      _output_file << i->first;
+      for (header = _column_names.begin(); header != _column_names.end(); ++header)
+      {
+        std::map<std::string, Real> &tmp = i->second;
+        _output_file << "," << tmp[*header];
+      }
+      _output_file << "\n";
     }
-    _output_file << "\n";
   }
   _output_file << "\n";
 }

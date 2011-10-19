@@ -1293,7 +1293,7 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
       _out_problem->out().outputPps(_pps_output_table);
 
     if (_postprocessor_csv_output)
-      _pps_output_table.printCSV(_out.fileBase() + ".csv");
+      _pps_output_table.printCSV(_out.fileBase() + ".csv", out().screen_interval());
 
     if (_postprocessor_ensight_output)
       _pps_output_table.printEnsight(_out.fileBase());
