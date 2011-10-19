@@ -21,6 +21,9 @@ no_output_dir_test = { INPUT : 'no_output_dir_test.i',
 missing_mesh_test = { INPUT : 'missing_mesh_test.i',
                       EXPECT_ERR : "Unable to open file \S+" }
 
+missing_function_test = { INPUT : 'missing_function_test.i',
+                          EXPECT_ERR : "Unable to find function \S+" }
+
 bad_material_block_test = { INPUT : 'bad_material_block_test.i',
                             EXPECT_ERR : 'Material block \S+ specified in the input file does not exist' }
 
