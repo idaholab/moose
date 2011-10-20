@@ -25,10 +25,11 @@ protected:
   };
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
-  virtual RealGradient computeGradDFDCons(PFFunctionType type);
+  virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c);
 
 private:
   
   MaterialProperty<Real> & _M;
+  bool _implicit;
 };
 #endif //CHBulk_H
