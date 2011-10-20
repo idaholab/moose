@@ -29,5 +29,7 @@ private:
   
   std::string _mob_name;
   MaterialProperty<Real> & _M;
+  bool _implicit;
+  
 };
 #endif //CHSPLIT1_H

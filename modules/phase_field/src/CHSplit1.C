@@ -7,30 +7,36 @@ InputParameters validParams<CHSplit1>()
      
   params.addParam<std::string>("mob_name","M","The mobility used with the kernel");
   params.addRequiredCoupledVar("c","intermediate parameter--concentration");
+  params.addParam<bool>("implicit",true,"The time integration is implicit");
 
   return params;
 }
 
 CHSplit1::CHSplit1(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
-//  This _w_var is needed to compute off-diagonal Jacobian.
    _c_var(coupled("c")),
    _mob_name(getParam<std::string>("mob_name")),
-   _M(getMaterialProperty<Real>(_mob_name))
+   _M(getMaterialProperty<Real>(_mob_name)),
+   _implicit(getParam<bool>("implicit"))
 {}
 
 Real
 CHSplit1::computeQpResidual()
 {
- 
-  return  _M[_qp]*_grad_u[_qp] * _grad_test[_i][_qp];
+  RealGradient grad_w = _grad_u[_qp];
+  if (_implicit)
+    grad_w = _grad_u_old[_qp];
+  
+  return  _M[_qp]*grad_w*_grad_test[_i][_qp];
 }
 
 Real
 CHSplit1::computeQpJacobian()
 {
-
-  return _M[_qp]*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  if (_implicit)
+    return _M[_qp]*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  else
+    return 0.0;
   
 }
 
@@ -38,11 +44,6 @@ CHSplit1::computeQpJacobian()
 Real
 CHSplit1::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _c_var)
-  {
-    return 0.0;
-  }
-
   return 0.0;
 }
 

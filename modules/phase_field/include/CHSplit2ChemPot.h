@@ -32,6 +32,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   virtual Real computeDFDC(PFFunctionType type, Real c);
   
+  bool _implicit;
   unsigned int _w_var;
   VariableValue & _w;
   VariableGradient & _grad_w;

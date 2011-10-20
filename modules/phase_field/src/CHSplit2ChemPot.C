@@ -7,15 +7,17 @@ InputParameters validParams<CHSplit2ChemPot>()
   
   params.addRequiredCoupledVar("w","chem potential");
   params.addRequiredParam<std::string>("kappa_name","The kappa used with the kernel");
+  params.addParam<bool>("implicit",true,"The time integration is implicit");
 
   return params;
 }
 
 CHSplit2ChemPot::CHSplit2ChemPot(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
+   _implicit(getParam<bool>("implicit")),
    _w_var(coupled("w")),
-   _w(coupledValue("w")),
-   _grad_w(coupledGradient("w")),
+   _w(_implicit ? coupledValue("w") : coupledValueOld("w")),
+   _grad_w(_implicit ? coupledGradient("w") : coupledGradientOld("w")),
    _kappa_name(getParam<std::string>("kappa_name")),
    _kappa(getMaterialProperty<Real>(_kappa_name))
 {}
@@ -41,6 +43,11 @@ CHSplit2ChemPot::computeQpResidual()
 {
   Real c = _u[_qp];
   RealGradient grad_c = _grad_u[_qp];
+  if (_implicit == false)
+  {
+    c = _u_old[_qp];
+    grad_c = _grad_u_old[_qp];
+  }
   
   Real f_prime_zero = computeDFDC(Residual,c);
   
@@ -51,16 +58,23 @@ Real
 CHSplit2ChemPot::computeQpJacobian()
 {
   Real c = _u[_qp];
+  
   Real df_prime_zero_dc = computeDFDC(Jacobian,c);
 
-  return df_prime_zero_dc*_test[_i][_qp] + _kappa[_qp]*_grad_phi[_j][_qp]*_grad_test[_i][_qp];
+  Real value = df_prime_zero_dc*_test[_i][_qp] + _kappa[_qp]*_grad_phi[_j][_qp]*_grad_test[_i][_qp];
+  
+  if (_implicit == false)
+    value = 0.0;
+  
+  return value;
+  
 }
 
 Real
 CHSplit2ChemPot::computeQpOffDiagJacobian(unsigned int jvar)
 {
 
-  if(jvar == _w_var)
+  if(jvar == _w_var && _implicit)
   {
    return -_phi[_j][_qp]*_test[_i][_qp];
   }
