@@ -124,6 +124,8 @@ Transient::execute()
   while(keepGoing())
   {
     takeStep();
+    if (lastSolveConverged())
+      endStep();
   }
   postExecute();
 }
@@ -190,11 +192,7 @@ Transient::takeStep(Real input_dt)
 
   // If _reset_dt is true, the time step was synced to the user defined value and we dump the solution in an output file
   if (last_solve_converged)
-  {
     _problem.computePostprocessors();
-
-    endStep();
-  }
 }
 
 void
