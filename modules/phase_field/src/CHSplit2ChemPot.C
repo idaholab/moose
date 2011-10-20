@@ -21,15 +21,15 @@ CHSplit2ChemPot::CHSplit2ChemPot(const std::string & name, InputParameters param
 {}
 
 Real
-CHSplit2ChemPot::computeDFDC(PFFunctionType type)
+CHSplit2ChemPot::computeDFDC(PFFunctionType type, Real c)
 {
   switch (type)
   {
   case Residual:
-    return 4.0*(_u[_qp]*_u[_qp]*_u[_qp]-_u[_qp]); // return Residual value
+    return 4.0*(c*c*c-c); // return Residual value
     
   case Jacobian: 
-    return 4.0 * (3 * _u[_qp] * _u[_qp]  - 1.0)*_phi[_j][_qp]; //return Off-Diag Jacobian value
+    return 4.0 * (3.0*c*c - 1.0)*_phi[_j][_qp]; //return Off-Diag Jacobian value
     
   }
   
@@ -39,17 +39,21 @@ CHSplit2ChemPot::computeDFDC(PFFunctionType type)
 Real
 CHSplit2ChemPot::computeQpResidual()
 {
-  Real f_prime_zero = computeDFDC(Residual);
+  Real c = _u[_qp];
+  RealGradient grad_c = _grad_u[_qp];
   
-  return (-_w[_qp]+f_prime_zero) * _test[_i][_qp] + _kappa[_qp]*_grad_u[_qp] * _grad_test[_i][_qp];
+  Real f_prime_zero = computeDFDC(Residual,c);
+  
+  return (-_w[_qp]+f_prime_zero) * _test[_i][_qp] + _kappa[_qp]*grad_c*_grad_test[_i][_qp];
 }
 
 Real
 CHSplit2ChemPot::computeQpJacobian()
 {
-  Real df_prime_zero_dc = computeDFDC(Jacobian);
+  Real c = _u[_qp];
+  Real df_prime_zero_dc = computeDFDC(Jacobian,c);
 
-  return df_prime_zero_dc * _test[_i][_qp] + _kappa[_qp]*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return df_prime_zero_dc * _test[_i][_qp] + _kappa[_qp]*_grad_phi[_j][_qp]*_grad_test[_i][_qp];
 }
 
 Real

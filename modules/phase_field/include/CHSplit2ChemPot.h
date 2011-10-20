@@ -30,7 +30,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  virtual Real computeDFDC(PFFunctionType type);
+  virtual Real computeDFDC(PFFunctionType type, Real c);
   
   unsigned int _w_var;
   VariableValue & _w;
