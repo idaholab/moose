@@ -25,6 +25,7 @@ private:
   std::string _kappa_name;
   std::string _mob_name;
   std::string _grad_mob_name;
+  bool _implicit;
   
   MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _M;

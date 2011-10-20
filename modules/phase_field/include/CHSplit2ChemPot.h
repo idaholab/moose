@@ -25,15 +25,18 @@ protected:
   enum PFFunctionType
   {
     Residual,
-    OffDiag
+    Jacobian
   };
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   virtual Real computeDFDC(PFFunctionType type);
   
-  unsigned int _c_var;
-  VariableValue & _c;
+  unsigned int _w_var;
+  VariableValue & _w;
+  VariableGradient & _grad_w;
+  std::string _kappa_name;
+  MaterialProperty<Real> & _kappa;
 
 private:
 };

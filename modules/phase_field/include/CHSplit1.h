@@ -25,8 +25,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  unsigned int _w_var;
-  VariableGradient & _grad_w;
+  unsigned int _c_var;
   
   std::string _mob_name;
   MaterialProperty<Real> & _M;
