@@ -91,7 +91,7 @@ protected:
   AsmBlock & _asmb;
   MooseVariable & _var;
   MooseMesh & _mesh;
-  int _dim;
+  unsigned int _dim;
 
   const Elem * & _current_elem;
 

@@ -113,7 +113,7 @@ protected:
   AssemblyData & _asm_data;
   MooseVariable & _var;
   MooseMesh & _mesh;
-  int _dim;
+  unsigned int _dim;
 
   unsigned int _i, _j;
   unsigned int _qp;

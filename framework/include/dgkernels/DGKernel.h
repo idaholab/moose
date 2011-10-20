@@ -90,7 +90,7 @@ protected:
   AssemblyData & _asm_data;
   MooseVariable & _var;
   MooseMesh & _mesh;
-  int _dim;
+  unsigned int _dim;
 
   const Elem * & _current_elem;
   const Elem * & _neighbor_elem;        ///< The neighboring element

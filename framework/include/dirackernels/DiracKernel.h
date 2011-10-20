@@ -147,7 +147,7 @@ protected:
   MooseVariable & _var;                                 ///< Variable this kernel acts on
   MooseMesh & _mesh;                                    ///< Mesh this kernels acts on
 
-  int _dim;                                             ///< Dimension of the problem
+  unsigned int _dim;                                    ///< Dimension of the problem
 
   DiracKernelInfo & _dirac_kernel_info;
 

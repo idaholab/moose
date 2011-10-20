@@ -81,7 +81,7 @@ protected:
   MooseVariable & _var;                                 ///< Variable this kernel is acting on
   bool _nodal;                                          ///< true if the kernel nodal, false if it is elemental
   MooseMesh & _mesh;                                    ///< Mesh this kernel is active on
-  int _dim;                                             ///< Dimension of the problem being solved
+  unsigned int _dim;                                    ///< Dimension of the problem being solved
 
   const std::vector< Point > & _q_point;                ///< Active quadrature points
   QBase * & _qrule;                                     ///< Quadrature rule being used

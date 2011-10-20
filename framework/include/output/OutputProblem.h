@@ -73,7 +73,7 @@ public:
 
   // Postprocessors /////
   virtual void computePostprocessors(ExecFlagType /*type*/ = EXEC_TIMESTEP) {}
-  virtual void outputPostprocessors(bool force = false) {}
+  virtual void outputPostprocessors(bool /*force*/ = false) {}
   virtual Real & getPostprocessorValue(const std::string & /*name*/, THREAD_ID /*tid*/ = 0) { return _dummy; } // TODO
 
   // Transient /////
@@ -93,7 +93,7 @@ public:
   // Output system /////
 
   virtual Output & out() { return _out; }       // NOTE: don't like this -> remove and replace with better design
-  virtual void output(bool force = false) { _out.output(); }
+  virtual void output(bool /*force*/ = false) { _out.output(); }
 
   virtual void outputPps(const FormattedTable & table);
   virtual void outputInput();

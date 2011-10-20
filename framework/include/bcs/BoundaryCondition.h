@@ -76,7 +76,7 @@ protected:
   AssemblyData & _asm_data;
   MooseVariable & _var;                                 ///< variable this BC works on
   MooseMesh & _mesh;                                    ///< Mesh this BC is defined on
-  int _dim;                                             ///< dimension of the mesh
+  unsigned int _dim;                                    ///< dimension of the mesh
 
   unsigned int _boundary_id;                            ///< boundary ID this BC is active on
 
