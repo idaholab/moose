@@ -44,7 +44,7 @@ CHSplit2ChemPot::computeQpResidual()
   
   Real f_prime_zero = computeDFDC(Residual,c);
   
-  return (-_w[_qp]+f_prime_zero) * _test[_i][_qp] + _kappa[_qp]*grad_c*_grad_test[_i][_qp];
+  return (-_w[_qp] + f_prime_zero)*_test[_i][_qp] + _kappa[_qp]*grad_c*_grad_test[_i][_qp];
 }
 
 Real
@@ -53,7 +53,7 @@ CHSplit2ChemPot::computeQpJacobian()
   Real c = _u[_qp];
   Real df_prime_zero_dc = computeDFDC(Jacobian,c);
 
-  return df_prime_zero_dc * _test[_i][_qp] + _kappa[_qp]*_grad_phi[_j][_qp]*_grad_test[_i][_qp];
+  return df_prime_zero_dc*_test[_i][_qp] + _kappa[_qp]*_grad_phi[_j][_qp]*_grad_test[_i][_qp];
 }
 
 Real
@@ -62,7 +62,7 @@ CHSplit2ChemPot::computeQpOffDiagJacobian(unsigned int jvar)
 
   if(jvar == _w_var)
   {
-   return -_phi[_j][_qp] * _test[_i][_qp];
+   return -_phi[_j][_qp]*_test[_i][_qp];
   }
 
   return 0.0;

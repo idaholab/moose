@@ -70,5 +70,11 @@ CHBulk::precomputeQpJacobian()
     grad_c = _grad_u_old[_qp];
   }
 
-  return _M[_qp] * computeGradDFDCons(Jacobian, c, grad_c);
+  RealGradient value;
+  if (_implicit)
+    value = _M[_qp] * computeGradDFDCons(Jacobian, c, grad_c);
+  else
+    value = 0.0;
+
+  return value;
 }

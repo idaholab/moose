@@ -29,18 +29,18 @@ CHSplit1::computeQpResidual()
 Real
 CHSplit1::computeQpJacobian()
 {
+
   return _M[_qp]*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  
 }
+
 
 Real
 CHSplit1::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar == _c_var)
   {
-
     return 0.0;
-    
-
   }
 
   return 0.0;
