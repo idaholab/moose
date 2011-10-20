@@ -26,7 +26,7 @@ class NonlinearSystem;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(Problem & problem, NonlinearSystem & sys, NumericVector<Number> & residual);
+  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, NumericVector<Number> & residual);
 
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
@@ -40,6 +40,7 @@ public:
 
 protected:
   NumericVector<Number> & _residual;
+  FEProblem & _fe_problem;
   NonlinearSystem & _sys;
 };
 

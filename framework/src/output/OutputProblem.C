@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<OutputProblem>()
 {
   InputParameters params = validParams<Problem>();
-  params.addRequiredParam<FEProblem *>("mproblem", "The Moose problem containg this OutputProblem");
+  params.addRequiredParam<FEProblem *>("mproblem", "The FE problem containing this OutputProblem");
   params.addParam<Problem *>("parent", NULL, "This problem's parent problem (if any)");
   params.addRequiredParam<unsigned int>("refinements", "The number of refinements to use in the oversampled mesh");
   return params;
@@ -35,7 +35,7 @@ OutputProblem::OutputProblem(const std::string & name, InputParameters parameter
     _mproblem(*parameters.get<FEProblem *>("mproblem")),
     _mesh(_mproblem.mesh()),
     _eq(_mesh),
-    _out(*this)
+    _out(_mproblem, _eq)
 {
   // The mesh in this system will be finer than the nonlinear system mesh
   MeshRefinement mesh_refinement(_mesh);
@@ -133,4 +133,22 @@ OutputProblem::init()
           dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd));
     }
   }
+}
+
+void
+OutputProblem::timestepSetup()
+{
+  _out.timestepSetup();
+}
+
+void
+OutputProblem::outputPps(const FormattedTable & table)
+{
+  _out.outputPps(table);
+}
+
+void
+OutputProblem::outputInput()
+{
+  _out.outputInput();
 }

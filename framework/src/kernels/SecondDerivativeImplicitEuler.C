@@ -23,17 +23,18 @@ InputParameters validParams<SecondDerivativeImplicitEuler>()
 }
 
 SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(const std::string & name, InputParameters parameters) :
-    TimeKernel(name, parameters)
+    TimeKernel(name, parameters),
+    _dt(_subproblem.dt())
 {}
 
 Real
 SecondDerivativeImplicitEuler::computeQpResidual()
 {
-  return _test[_i][_qp]*((_u[_qp]-2*_u_old[_qp]+_u_older[_qp])/(_problem.dt()*_problem.dt()));
+  return _test[_i][_qp]*((_u[_qp]-2*_u_old[_qp]+_u_older[_qp])/(_dt*_dt));
 }
 
 Real
 SecondDerivativeImplicitEuler::computeQpJacobian()
 {
-  return _test[_i][_qp]*(_phi[_j][_qp]/(_problem.dt()*_problem.dt()));
+  return _test[_i][_qp]*(_phi[_j][_qp]/(_dt*_dt));
 }

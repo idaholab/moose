@@ -34,9 +34,9 @@ SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_parent == this ? *new EquationSystems(_mesh) : _parent->es()),
     _transient(false),
-    _time(_parent != this ? _parent->time() : _eq.parameters.set<Real>("time")),
-    _t_step(_parent != this ? _parent->timeStep() : _eq.parameters.set<int>("t_step")),
-    _dt(_parent != this ? _parent->dt() : _eq.parameters.set<Real>("dt"))
+    _time(_eq.parameters.set<Real>("time")),
+    _t_step(_eq.parameters.set<int>("t_step")),
+    _dt(_eq.parameters.set<Real>("dt"))
 {
   if (_parent == this)
   {

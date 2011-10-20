@@ -77,6 +77,17 @@ public:
   virtual void storeMatPropName(unsigned int block_id, const std::string & name);
   virtual void checkMatProp(unsigned int block_id, const std::string & name);
 
+  // Transient
+  virtual Real & time() = 0;
+  virtual int & timeStep() = 0;
+  virtual Real & dt() = 0;
+  virtual Real & dtOld() = 0;
+
+  virtual void transient(bool trans) = 0;
+  virtual bool isTransient() = 0;
+
+  virtual std::vector<Real> & timeWeights() = 0;
+
 protected:
   DiracKernelInfo _dirac_kernel_info;
 

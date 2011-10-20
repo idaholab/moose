@@ -69,6 +69,8 @@ public:
   virtual void transient(bool trans) { _transient = trans; }
   virtual bool isTransient() { return _transient; }
 
+  virtual std::vector<Real> & timeWeights() { return _time_weights; }
+
   virtual Order getQuadratureOrder() = 0;
 
   /// Will make sure that all dofs connected to elem_id are ghosted to this processor
@@ -87,6 +89,8 @@ protected:
   int & _t_step;
   Real & _dt;
   Real _dt_old;
+
+  std::vector<Real> _time_weights;
 };
 
 

@@ -29,5 +29,5 @@ PrintDT::PrintDT(const std::string & name, InputParameters parameters) :
 Real
 PrintDT::getValue()
 {
-  return _problem.dt();
+  return _subproblem.dt();
 }

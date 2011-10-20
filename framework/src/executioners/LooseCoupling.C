@@ -52,14 +52,6 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _solve_order(getParam<std::vector<std::string> >("solve_order")),
     _problem(*static_cast<CoupledProblem *>(ProblemFactory::instance()->create("CoupledProblem", "Coupled Problem", setupProblemParams("Coupled Problem", _mesh)))),
-    _t_step(_problem.timeStep()),
-    _time(_problem.time()),
-    _time_old(_time),
-    _input_dt(getParam<Real>("dt")),
-    _dt(_problem.dt()),
-    _dt_old(_problem.dtOld()),
-    _prev_dt(-1),
-    _reset_dt(false),
     _end_time(getParam<Real>("end_time")),
     _dtmin(getParam<Real>("dtmin")),
     _dtmax(getParam<Real>("dtmax")),
@@ -67,36 +59,30 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     _n_startup_steps(getParam<int>("n_startup_steps")),
     _act_wh(Moose::action_warehouse)
 {
-  _t_step = 0;
-  _dt = _input_dt;
-  _time = getParam<Real>("start_time");
-
-  unsigned int n_problems = _input_files.size();
-  _slave_parser.resize(n_problems);
-  Moose::action_warehouse.clear();   // Clear the action warehouse
-  for (unsigned int i = 0 ; i < n_problems; ++i)
-  {
-    std::string file_name = _input_files[i];
-
-    std::cout << "  - parsing " << file_name << std::endl;
-    _slave_parser[i] = new Parser(false);
-    Moose::associateSyntax(*_slave_parser[i]);
-    if (_shared_mesh)
-    {
-       InputParameters params = validParams<FEProblem>();
-       params.set<std::string>("name") = "Moose Problem";
-       params.set<MooseMesh *>("mesh") = _mesh;
-       params.set<Problem *>("parent") = &_problem;
-       FEProblem * subproblem = static_cast<FEProblem *>
-         (ProblemFactory::instance()->create("FEProblem", "Moose Problem", params));
-       //FEProblem * subproblem = new FEProblem(*_mesh, &_problem);
-       _problem.addSubProblem(file_name, subproblem);
-       _slave_parser[i]->_loose = true;
-       _slave_parser[i]->_problem = subproblem;
-    }
-    _slave_parser[i]->parse(file_name);
-  }
-  _problem.transient(true);
+//  unsigned int n_problems = _input_files.size();
+//  _slave_parser.resize(n_problems);
+//  Moose::action_warehouse.clear();   // Clear the action warehouse
+//  for (unsigned int i = 0 ; i < n_problems; ++i)
+//  {
+//    std::string file_name = _input_files[i];
+//
+//    std::cout << "  - parsing " << file_name << std::endl;
+//    _slave_parser[i] = new Parser(Moose::syntax);
+//    if (_shared_mesh)
+//    {
+//       InputParameters params = validParams<FEProblem>();
+//       params.set<std::string>("name") = "Moose Problem";
+//       params.set<MooseMesh *>("mesh") = _mesh;
+//       params.set<Problem *>("parent") = &_problem;
+//       FEProblem * subproblem = static_cast<FEProblem *>
+//         (ProblemFactory::instance()->create("FEProblem", "Moose Problem", params));
+//       //FEProblem * subproblem = new FEProblem(*_mesh, &_problem);
+//       _problem.addSubProblem(file_name, subproblem);
+//       _slave_parser[i]->_loose = true;
+//       _slave_parser[i]->_problem = subproblem;
+//    }
+//    _slave_parser[i]->parse(file_name);
+//  }
 
   // need variables upfront
   executeBlocks("add_variable");
@@ -128,8 +114,8 @@ LooseCoupling::execute()
 {
   _problem.initialSetup();
 
-  // TODO: output inital condition
-
+  // TODO: output initial condition
+#if 0
   while (_time < _end_time)
   {
     //
@@ -182,7 +168,7 @@ LooseCoupling::execute()
 
     _time = _time_old + _dt;
   }
-
+#endif
 }
 
 InputParameters

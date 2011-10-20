@@ -85,7 +85,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _postprocessor_ensight_output(false),
     _postprocessor_gnuplot_output(false),
     _gnuplot_format("ps"),
-    _out(*this),
+    _out(*this, _eq),
     _out_problem(NULL),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
@@ -293,7 +293,7 @@ void FEProblem::timestepSetup()
   _nl.timestepSetup();
   _out.timestepSetup();
   if (_out_problem)
-    _out_problem->out().timestepSetup();
+    _out_problem->timestepSetup();
 }
 
 void
@@ -1290,7 +1290,7 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
     // FIXME: if exodus output is enabled?
     _out.outputPps(_pps_output_table);
     if (_out_problem)
-      _out_problem->out().outputPps(_pps_output_table);
+      _out_problem->outputPps(_pps_output_table);
 
     if (_postprocessor_csv_output)
       _pps_output_table.printCSV(_out.fileBase() + ".csv", out().screen_interval());
@@ -1559,7 +1559,7 @@ FEProblem::output(bool force/*= false*/)
     if (_out_problem)
     {
       _out_problem->init();
-      _out_problem->out().output();
+      _out_problem->output(force);
     }
 
     if (_displaced_problem != NULL && _output_displaced)
@@ -1570,7 +1570,7 @@ FEProblem::output(bool force/*= false*/)
     {
       _out.outputInput();
       if (_out_problem)
-        _out_problem->out().outputInput();
+        _out_problem->outputInput();
       _input_file_saved = true;
     }
   }

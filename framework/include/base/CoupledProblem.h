@@ -96,20 +96,10 @@ public:
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
 
-  // Transient /////
-  virtual void transient(bool trans);
-  virtual bool isTransient() { return _transient; }
-
-  virtual Real & time() { return _time; }
-  virtual int & timeStep() { return _t_step; }
-  virtual Real & dt() { return _dt; }
-  virtual Real & dtOld() { return _dt_old; }
-
   virtual void copySolutionsBackwards();
 
   virtual void dump();
 
-  virtual Output & out() { return _out; }
   virtual void output(bool force = false);
 
   // Restart //////
@@ -124,15 +114,6 @@ protected:
 
   MooseMesh * _mesh;
   EquationSystems _eq;
-
-  bool _transient;
-  Real & _time;
-  int & _t_step;
-  Real & _dt;
-  Real _dt_old;
-
-  // Output system
-  Output _out;
 };
 
 #endif /* COUPLEDPROBLEM_H */

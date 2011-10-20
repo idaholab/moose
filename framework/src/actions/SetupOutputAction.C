@@ -97,7 +97,7 @@ SetupOutputAction::act()
   /// Determines whether we see the perf log early in a run or not
   _parser_handle._problem->setEarlyPerfLogPrint(getParam<bool>("show_setup_log_early"));
 
-  Problem & problem = *_parser_handle._problem;
+  FEProblem & problem = *_parser_handle._problem;
   Output & output = problem.out();                       // can't use use this with coupled problems on different meshes
 
   if (_parser_handle._problem != NULL)

@@ -13,16 +13,16 @@
 /****************************************************************/
 
 #include "TransientInterface.h"
-#include "Problem.h"
+#include "SubProblemInterface.h"
 
 TransientInterface::TransientInterface(InputParameters & parameters) :
-    _ti_problem(*parameters.get<Problem*>("_problem")),
-    _t(_ti_problem.time()),
-    _t_step(_ti_problem.timeStep()),
-    _dt(_ti_problem.dt()),
-    _dt_old(_ti_problem.dtOld()),
-    _time_weight(_ti_problem.timeWeights()),
-    _is_transient(_ti_problem.isTransient())
+    _ti_subproblem(*parameters.get<SubProblemInterface*>("_subproblem")),
+    _t(_ti_subproblem.time()),
+    _t_step(_ti_subproblem.timeStep()),
+    _dt(_ti_subproblem.dt()),
+    _dt_old(_ti_subproblem.dtOld()),
+    _time_weight(_ti_subproblem.timeWeights()),
+    _is_transient(_ti_subproblem.isTransient())
 {
 }
 

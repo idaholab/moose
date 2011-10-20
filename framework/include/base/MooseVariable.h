@@ -35,7 +35,7 @@ typedef MooseArray<RealTensor>         VariableSecond;
 
 
 class AssemblyData;
-class Problem;
+class SubProblemInterface;
 class SystemBase;
 
 #if 0
@@ -63,7 +63,7 @@ protected:
 
   void computeValues();
 
-  ProblemInterface & _problem;
+  ProblemInterface & _subproblem;
   SystemBase & _sys;
   FEBase * & _fe;
   QBase * & _qrule;
@@ -216,7 +216,7 @@ public:
 protected:
   THREAD_ID _tid;                                               ///< Thread ID
   unsigned int _var_num;                                        ///< variable number (from libMesh)
-  Problem & _problem;                                           ///< Problem this variable is part of
+  SubProblemInterface & _subproblem;                            ///< Problem this variable is part of
   SystemBase & _sys;                                            ///< System this variable is part of
 
   const DofMap & _dof_map;                                      ///< DOF map

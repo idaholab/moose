@@ -29,11 +29,7 @@ InputParameters validParams<CoupledProblem>()
 CoupledProblem::CoupledProblem(const std::string & name, InputParameters parameters) :
     Problem(name, parameters),
     _mesh(parameters.get<MooseMesh *>("mesh")),
-    _eq(*_mesh),
-    _time(_eq.parameters.set<Real>("time")),
-    _t_step(_eq.parameters.set<int>("t_step")),
-    _dt(_eq.parameters.set<Real>("dt")),
-    _out(*this)
+    _eq(*_mesh)
 {
   _eq.parameters.set<Problem *>("_problem") = this;
 }
@@ -156,8 +152,6 @@ CoupledProblem::subdomainSetupSide(unsigned int /*subdomain*/, THREAD_ID /*tid*/
 void
 CoupledProblem::init()
 {
-
-
   _eq.init();
   _eq.print_info();
 
@@ -226,14 +220,6 @@ CoupledProblem::reinitMaterialsFace(unsigned int /*blk_id*/, unsigned int /*side
 }
 
 void
-CoupledProblem::transient(bool trans)
-{
-  _transient = trans;
-  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
-    it->second->transient(trans);
-}
-
-void
 CoupledProblem::copySolutionsBackwards()
 {
   for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
@@ -250,7 +236,8 @@ CoupledProblem::dump()
 void
 CoupledProblem::output(bool force)
 {
-  _out.output();
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+    it->second->output(force);
 }
 
 void

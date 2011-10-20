@@ -87,10 +87,16 @@ public:
 
   virtual void copySolutionsBackwards() {}
 
+  // Setup /////
+  virtual void timestepSetup();
+
   // Output system /////
 
-  virtual Output & out() { return _out; }
-  virtual void output(bool force = false) {}
+  virtual Output & out() { return _out; }       // NOTE: don't like this -> remove and replace with better design
+  virtual void output(bool force = false) { _out.output(); }
+
+  virtual void outputPps(const FormattedTable & table);
+  virtual void outputInput();
 
 protected:
   FEProblem & _mproblem;

@@ -14,24 +14,26 @@
 
 #include "ComputeJacobianThread.h"
 #include "NonlinearSystem.h"
-#include "Problem.h"
+#include "FEProblem.h"
 
 // libmesh includes
 #include "threads.h"
 
-ComputeJacobianThread::ComputeJacobianThread(Problem & problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
+ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
+    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _jacobian(jacobian),
-    _sys(sys),
-    _problem(problem)
+    _problem(*fe_problem.parent()),
+    _fe_problem(fe_problem),
+    _sys(sys)
 {}
 
 // Splitting Constructor
 ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _jacobian(x._jacobian),
-    _sys(x._sys),
-    _problem(x._problem)
+    _problem(x._problem),
+    _fe_problem(x._fe_problem),
+    _sys(x._sys)
 {}
 
 void
@@ -79,7 +81,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
   if (subdomain != _subdomain)
   {
     _problem.subdomainSetup(subdomain, _tid);
-    _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
+    _sys._kernels[_tid].updateActiveKernels(_fe_problem.time(), _fe_problem.dt(), subdomain);
   }
 
   _problem.reinitMaterials(subdomain, _tid);

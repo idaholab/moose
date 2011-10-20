@@ -20,11 +20,12 @@
 // libmesh includes
 #include "threads.h"
 
-ComputeResidualThread::ComputeResidualThread(Problem & problem,
+ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem,
                                              NonlinearSystem & sys,
                                              NumericVector<Number> & residual) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
+    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _residual(residual),
+    _fe_problem(fe_problem),
     _sys(sys)
 {
 }
@@ -33,6 +34,7 @@ ComputeResidualThread::ComputeResidualThread(Problem & problem,
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _residual(x._residual),
+    _fe_problem(x._fe_problem),
     _sys(x._sys)
 {
 }
@@ -47,8 +49,8 @@ ComputeResidualThread::onElement(const Elem *elem)
   if (subdomain != _subdomain)
   {
     _problem.subdomainSetup(subdomain, _tid);
-    _sys._kernels[_tid].updateActiveKernels(_problem.time(), _problem.dt(), subdomain);
-    if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_problem.time(), _problem.dt());
+    _sys._kernels[_tid].updateActiveKernels(_fe_problem.time(), _fe_problem.dt(), subdomain);
+    if (_sys._doing_dg) _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
   }
 
   _problem.reinitMaterials(subdomain, _tid);

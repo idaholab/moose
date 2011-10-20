@@ -132,20 +132,10 @@ public:
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   // Transient /////
-  virtual void transient(bool trans) = 0;
-  virtual bool isTransient() = 0;
-
-  virtual Real & time() = 0;
-  virtual int & timeStep() = 0;
-  virtual Real & dt() = 0;
-  virtual Real & dtOld() = 0;
-  virtual std::vector<Real> & timeWeights() { return _time_weights; }
-
   virtual void copySolutionsBackwards() = 0;
 
   // Output system /////
 
-  virtual Output & out() = 0;
   virtual void output(bool force = false) = 0;
   void outputInitial(bool out_init) { _output_initial = out_init; }
 
@@ -164,8 +154,6 @@ protected:
 
   // functions
   std::vector<std::map<std::string, Function *> > _functions;
-
-  std::vector<Real> _time_weights;
 
   bool _output_initial;                                         ///< output initial condition if true
 };

@@ -19,8 +19,8 @@
 // libmesh includes
 #include "threads.h"
 
-ComputeFullJacobianThread::ComputeFullJacobianThread(Problem & problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
-    ComputeJacobianThread(problem, sys, jacobian)
+ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
+    ComputeJacobianThread(fe_problem, sys, jacobian)
 {
 }
 

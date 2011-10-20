@@ -23,11 +23,12 @@
 #include "XDAOutput.h"
 #include "TecplotOutput.h"
 
-Output::Output(Problem & problem) :
+Output::Output(FEProblem & fe_problem, EquationSystems & eq) :
     _file_base("out"),
-    _problem(problem),
-    _time(_problem.time()),
-    _dt(_problem.dt()),
+    _fe_problem(fe_problem),
+    _eq(eq),
+    _time(_fe_problem.time()),
+    _dt(_fe_problem.dt()),
     _interval(1),
     _screen_interval(1),
     _iteration_plot_start_time(std::numeric_limits<Real>::max())
@@ -47,27 +48,27 @@ Output::add(Output::Type type)
   switch (type)
   {
   case EXODUS:
-    o = new ExodusOutput(_problem.es());
+    o = new ExodusOutput(_eq);
     break;
 
   case NEMESIS:
-    o = new NemesisOutput(_problem.es());
+    o = new NemesisOutput(_eq);
     break;
 
   case GMV:
-    o = new GMVOutput(_problem.es());
+    o = new GMVOutput(_eq);
     break;
 
   case TECPLOT:
-    o = new TecplotOutput(_problem.es(), false);
+    o = new TecplotOutput(_eq, false);
     break;
 
   case TECPLOT_BIN:
-    o = new TecplotOutput(_problem.es(), true);
+    o = new TecplotOutput(_eq, true);
     break;
 
   case XDA:
-    o = new XDAOutput(_problem.es());
+    o = new XDAOutput(_eq);
     break;
 
   default:
@@ -92,10 +93,9 @@ void
 Output::timestepSetup()
 {
 #ifdef LIBMESH_HAVE_PETSC
-  FEProblem * mproblem( dynamic_cast<FEProblem*>(&_problem) );
-  if (_time >= _iteration_plot_start_time && mproblem)
+  if (_time >= _iteration_plot_start_time)
   {
-    NonlinearSystem & nl = mproblem->getNonlinearSystem();
+    NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
     PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
     SNES snes = petsc_solver->snes();
 #if PETSC_VERSION_LESS_THAN(2,3,3)

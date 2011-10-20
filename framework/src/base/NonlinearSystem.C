@@ -746,7 +746,7 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 void
 NonlinearSystem::computeTimeDeriv()
 {
-  if (!_problem.isTransient())
+  if (!_mproblem.isTransient())
     return;
 
   switch (_time_stepping_scheme)
@@ -898,7 +898,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeResidualThread cr(_problem, *this, residual);
+  ComputeResidualThread cr(_mproblem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
 
   if(_need_residual_copy)
@@ -1259,7 +1259,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   {
   case Moose::COUPLING_DIAG:
     {
-      ComputeJacobianThread cj(_problem, *this, jacobian);
+      ComputeJacobianThread cj(_mproblem, *this, jacobian);
       Threads::parallel_reduce(elem_range, cj);
     }
     break;
@@ -1267,7 +1267,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   default:
   case Moose::COUPLING_CUSTOM:
     {
-      ComputeFullJacobianThread cj(_problem, *this, jacobian);
+      ComputeFullJacobianThread cj(_mproblem, *this, jacobian);
       Threads::parallel_reduce(elem_range, cj);
     }
     break;

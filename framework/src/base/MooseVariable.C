@@ -26,10 +26,10 @@
 // VariableData /////
 
 VariableData::VariableData(THREAD_ID tid, const FEType & fe_type, SystemBase & sys) :
-    _problem(sys.problem()),
+    _subproblem(sys.problem()),
     _sys(sys),
-    _fe(_problem.getFE(tid, fe_type)),
-    _qrule(_problem.qRule(tid)),
+    _fe(_subproblem.getFE(tid, fe_type)),
+    _qrule(_subproblem.qRule(tid)),
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi())
 {
@@ -42,7 +42,7 @@ VariableData::computeValues()
   unsigned int nqp = _qrule->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
-  if (_problem.isTransient())
+  if (_subproblem.isTransient())
   {
     _u_dot.resize(nqp);
     _du_dot_du.resize(nqp);
@@ -59,7 +59,7 @@ VariableData::computeValues()
     _u[i] = 0;
     _grad_u[i] = 0;
 
-    if (_problem.isTransient())
+    if (_subproblem.isTransient())
     {
       _u_dot[i] = 0;
       _du_dot_du[i] = 0;
@@ -80,7 +80,7 @@ VariableData::computeValues()
     Real soln_old_local;
     Real soln_older_local;
 
-    if (_problem.transient())
+    if (_subproblem.transient())
     {
       soln_old_local = _sys.solutionOld()(idx);
       soln_older_local = _sys.solutionOlder()(idx);
@@ -94,7 +94,7 @@ VariableData::computeValues()
       _u[qp]      += phi_local * soln_local;
       _grad_u[qp] += dphi_local * soln_local;
 
-      if (_problem.isTransient())
+      if (_subproblem.isTransient())
       {
         _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
         _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
@@ -113,7 +113,7 @@ VariableData::computeValues()
 
 MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, AssemblyData & assembly_data) :
     _var_num(var_num),
-    _problem(*sys.subproblem().parent()),
+    _subproblem(sys.subproblem()),
     _sys(sys),
     _dof_map(sys.dofMap()),
     _assembly(assembly_data),
@@ -256,7 +256,7 @@ void
 MooseVariable::computeElemValues()
 {
 
-  bool is_transient = _problem.isTransient();
+  bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _qrule->n_points();
 
   _u.resize(nqp);
@@ -404,7 +404,7 @@ MooseVariable::computeElemValues()
 void
 MooseVariable::computeElemValuesFace()
 {
-  bool is_transient = _problem.isTransient();
+  bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _qrule_face->n_points();
   _u.resize(nqp);
   _grad_u.resize(nqp);
@@ -434,7 +434,7 @@ MooseVariable::computeElemValuesFace()
     _u[i] = 0;
     _grad_u[i] = 0;
 
-    if (_problem.isTransient())
+    if (_subproblem.isTransient())
     {
       if (_is_nl)
       {
@@ -522,7 +522,7 @@ MooseVariable::computeElemValuesFace()
 void
 MooseVariable::computeNeighborValuesFace()
 {
-  bool is_transient = _problem.isTransient();
+  bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _qrule_face->n_points();
 //  std::cerr << "nqp = " << nqp << std::endl;
   _u_neighbor.resize(nqp);
@@ -541,7 +541,7 @@ MooseVariable::computeNeighborValuesFace()
     _u_neighbor[i] = 0;
     _grad_u_neighbor[i] = 0;
 
-    if (_problem.isTransient())
+    if (_subproblem.isTransient())
     {
       _u_old_neighbor[i] = 0;
       _u_older_neighbor[i] = 0;
@@ -620,7 +620,7 @@ MooseVariable::computeNeighborValuesFace()
 void
 MooseVariable::computeNeighborValues()
 {
-  bool is_transient = _problem.isTransient();
+  bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _qrule->n_points();
 //  std::cerr << "nqp = " << nqp << std::endl;
   _u_neighbor.resize(nqp);
@@ -639,7 +639,7 @@ MooseVariable::computeNeighborValues()
     _u_neighbor[i] = 0;
     _grad_u_neighbor[i] = 0;
 
-    if (_problem.isTransient())
+    if (_subproblem.isTransient())
     {
       _u_old_neighbor[i] = 0;
       _u_older_neighbor[i] = 0;
@@ -723,7 +723,7 @@ MooseVariable::computeNodalValues()
     _nodal_u.resize(1);
     _nodal_u[0] = (*_sys.currentSolution())(_nodal_dof_index);
 
-    if (_problem.isTransient())
+    if (_subproblem.isTransient())
     {
       _nodal_u_old.resize(1);
       _nodal_u_old[0] = _sys.solutionOld()(_nodal_dof_index);

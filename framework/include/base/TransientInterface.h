@@ -18,7 +18,7 @@
 #include "InputParameters.h"
 
 
-class Problem;
+class SubProblemInterface;
 
 /**
  * Interface for objects that needs transient capabilities
@@ -31,7 +31,7 @@ public:
   virtual ~TransientInterface();
 
 private:
-  Problem & _ti_problem;
+  SubProblemInterface & _ti_subproblem;
 
 protected:
   Real & _t;                                            ///< Time

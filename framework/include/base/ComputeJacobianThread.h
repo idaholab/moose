@@ -25,7 +25,7 @@ class NonlinearSystem;
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeJacobianThread(Problem & problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
+  ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
@@ -39,8 +39,9 @@ public:
 
 protected:
   SparseMatrix<Number> & _jacobian;
-  NonlinearSystem & _sys;
   Problem & _problem;
+  FEProblem & _fe_problem;
+  NonlinearSystem & _sys;
 
   virtual void computeJacobian();
   virtual void computeFaceJacobian(short int bnd_id);

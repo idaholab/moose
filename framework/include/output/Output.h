@@ -24,7 +24,7 @@
 //PETSc includes
 #include "petsc_nonlinear_solver.h"
 
-class Problem;
+class FEProblem;
 class Outputter;
 
 class Output
@@ -39,11 +39,13 @@ public:
     XDA
   };
 
-  Output(Problem & problem);
+  // FIXME: this is not good - the whole Output class has to be refactored with respect to OutputProblem class
+  Output(FEProblem & problem, EquationSystems & eq);
   virtual ~Output();
 
   void add(Type type);
 
+  // TODO: move to OutputProblem
   void timestepSetup();
 
   void output();
@@ -88,7 +90,8 @@ public:
 protected:
   std::string _file_base;
 
-  Problem & _problem;
+  FEProblem & _fe_problem;
+  EquationSystems & _eq;
   Real & _time;
   Real & _dt;
   unsigned int _interval;

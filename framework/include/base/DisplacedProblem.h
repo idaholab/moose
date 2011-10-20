@@ -123,6 +123,17 @@ public:
   virtual void updateGeomSearch();
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
+  // Transient /////
+  virtual Real & time() { return _mproblem.time(); }
+  virtual int & timeStep() { return _mproblem.timeStep(); }
+  virtual Real & dt() { return _mproblem.dt(); }
+  virtual Real & dtOld() { return _mproblem.dtOld(); }
+
+  virtual void transient(bool trans) { _mproblem.transient(trans); }
+  virtual bool isTransient() { return _mproblem.isTransient(); }
+
+  virtual std::vector<Real> & timeWeights() { return _mproblem.timeWeights(); }
+
 protected:
   Problem & _problem;
   FEProblem & _mproblem;
