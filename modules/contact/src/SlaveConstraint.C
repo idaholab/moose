@@ -129,7 +129,7 @@ SlaveConstraint::computeQpResidual()
 
   RealVectorValue res_vec;
   // Build up residual vector
-  for(int i=0; i<_dim; ++i)
+  for(unsigned int i=0; i<_dim; ++i)
   {
     int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);

@@ -42,7 +42,7 @@ CHSplit1::computeQpJacobian()
 
 
 Real
-CHSplit1::computeQpOffDiagJacobian(unsigned int jvar)
+CHSplit1::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.0;
 }
