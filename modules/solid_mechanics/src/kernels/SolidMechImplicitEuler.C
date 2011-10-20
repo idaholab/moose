@@ -35,7 +35,7 @@ SolidMechImplicitEuler::scaling()
   Real factor(_artificial_scaling);
   if (_artificial_scaling_set)
   {
-    factor *= _problem.dt()*_problem.dt() / _density[_qp];
+    factor *= _dt*_dt / _density[_qp];
   }
   return factor;
 }

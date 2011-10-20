@@ -281,7 +281,7 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
   // Real soundspeed = std::sqrt(_gamma * _R * _temperature[qp]);
   
   // The timestep size, get this from the SubProblem reference we have.
-  Real dt = _subproblem.parent()->dt();
+  Real dt = _subproblem.dt();
 
   // If velmag == 0, then _hsupg should be zero as well.  Then tau
   // will have only the time-derivative contribution (or zero, if we
