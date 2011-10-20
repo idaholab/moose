@@ -29,6 +29,7 @@ InputParameters validParams<SetupMeshAction>()
 
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
   params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation");
+  params.addParam<bool>("construct_side_list_from_node_list", false, "If true, construct side lists from the nodesets in the mesh (i.e. if every node on a give side is in a nodeset then add that side to a sideset");
 //  params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
   return params;
 }
@@ -51,6 +52,9 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   Moose::setup_perf_log.push("Prepare Mesh","Setup");
   mesh->prepare();
   Moose::setup_perf_log.pop("Prepare Mesh","Setup");
+
+  if (getParam<bool>("construct_side_list_from_node_list"))
+    mesh->_mesh.boundary_info->build_side_list_from_node_list();
 
 // MOVED TO InitialRefinementAction
 //
