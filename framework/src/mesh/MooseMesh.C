@@ -214,13 +214,6 @@ MooseMesh::meshChanged()
   getLocalNodeRange();
   getBoundaryNodeRange();
 
-  // Print out information about the adapted mesh if requested
-//  if (_print_mesh_changed)
-//  {
-//    std::cout << "\nMesh Changed:\n";
-//    _mesh->print_info();
-//  }
-
   // Lets the output system know that the mesh has changed recently.
   _is_changed = true;
 }
