@@ -199,7 +199,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
       for (header = _column_names.begin(); header != _column_names.end(); ++header)
       {
         std::map<std::string, Real> &tmp = i->second;
-        _output_file << "," << tmp[*header];
+        _output_file << "," << std::setprecision(14) << tmp[*header];
       }
       _output_file << "\n";
     }
