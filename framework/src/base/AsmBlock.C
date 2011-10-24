@@ -170,13 +170,14 @@ AsmBlock::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 {
   if (dof_indices.size() > 0)
   {
-    _dof_map.constrain_element_vector(res_block, dof_indices, false);
+    std::vector<unsigned int> di(dof_indices);
+    _dof_map.constrain_element_vector(res_block, di, false);
 
     if (scaling_factor != 1.0)
     {
       DenseVector<Number> re(res_block);
       re.scale(scaling_factor);
-      residual.add_vector(re, dof_indices);
+      residual.add_vector(re, di);
     }
     else
     {
@@ -188,7 +189,7 @@ AsmBlock::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
       std::cout<<residual<<std::endl;
       residual.close();
 */
-      residual.add_vector(res_block, dof_indices);
+      residual.add_vector(res_block, di);
 //      residual.close();
 //      std::cout<<residual<<std::endl;
 
@@ -201,7 +202,8 @@ AsmBlock::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
 {
   if (dof_indices.size() > 0)
   {
-    _dof_map.constrain_element_vector(res_block, dof_indices, false);
+    std::vector<unsigned int> di(dof_indices);
+    _dof_map.constrain_element_vector(res_block, di, false);
 
     if (scaling_factor != 1.0)
     {
@@ -211,7 +213,7 @@ AsmBlock::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
       for(unsigned int i=0; i<re.size(); i++)
       {
         _cached_residual_values.push_back(re(i));
-        _cached_residual_rows.push_back(dof_indices[i]);
+        _cached_residual_rows.push_back(di[i]);
       }
     }
     else
@@ -219,7 +221,7 @@ AsmBlock::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
       for(unsigned int i=0; i<res_block.size(); i++)
       {
         _cached_residual_values.push_back(res_block(i));
-        _cached_residual_rows.push_back(dof_indices[i]);
+        _cached_residual_rows.push_back(di[i]);
       }
     }
   }
@@ -301,18 +303,19 @@ AsmBlock::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 {
   if (dof_indices.size() > 0)
   {
-    _dof_map.constrain_element_vector(res_block, dof_indices, false);
+    std::vector<unsigned int> di(dof_indices);
+    _dof_map.constrain_element_vector(res_block, di, false);
 
     if (scaling_factor != 1.0)
     {
       DenseVector<Number> re(res_block);
       re.scale(scaling_factor);
-      for(unsigned int i=0; i<dof_indices.size(); i++)
-        residual.set(dof_indices[i], res_block(i));
+      for(unsigned int i=0; i<di.size(); i++)
+        residual.set(di[i], res_block(i));
     }
     else
-      for(unsigned int i=0; i<dof_indices.size(); i++)
-        residual.set(dof_indices[i], res_block(i));
+      for(unsigned int i=0; i<di.size(); i++)
+        residual.set(di[i], res_block(i));
   }
 }
 
@@ -342,16 +345,18 @@ AsmBlock::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> 
 {
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0))
   {
-    _dof_map.constrain_element_matrix(jac_block, idof_indices, jdof_indices, false);
+    std::vector<unsigned int> di(idof_indices);
+    std::vector<unsigned int> dj(jdof_indices);
+    _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
     {
       DenseMatrix<Number> ke(jac_block);
       ke.scale(scaling_factor);
-      jacobian.add_matrix(ke, idof_indices, jdof_indices);
+      jacobian.add_matrix(ke, di, dj);
     }
     else
-      jacobian.add_matrix(jac_block, idof_indices, jdof_indices);
+      jacobian.add_matrix(jac_block, di, dj);
   }
 }
 
@@ -360,29 +365,31 @@ AsmBlock::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsign
 {
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0))
   {
-    _dof_map.constrain_element_matrix(jac_block, idof_indices, jdof_indices, false);
+    std::vector<unsigned int> di(idof_indices);
+    std::vector<unsigned int> dj(jdof_indices);
+    _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
     {
       DenseMatrix<Number> ke(jac_block);
       ke.scale(scaling_factor);
 
-      for(unsigned int i=0; i<idof_indices.size(); i++)
-        for(unsigned int j=0; j<jdof_indices.size(); j++)
+      for(unsigned int i=0; i<di.size(); i++)
+        for(unsigned int j=0; j<dj.size(); j++)
         {
           _cached_jacobian_values.push_back(ke(i, j));
-          _cached_jacobian_rows.push_back(idof_indices[i]);
-          _cached_jacobian_cols.push_back(jdof_indices[j]);
+          _cached_jacobian_rows.push_back(di[i]);
+          _cached_jacobian_cols.push_back(dj[j]);
         }
     }
     else
     {
-      for(unsigned int i=0; i<idof_indices.size(); i++)
-        for(unsigned int j=0; j<jdof_indices.size(); j++)
+      for(unsigned int i=0; i<di.size(); i++)
+        for(unsigned int j=0; j<dj.size(); j++)
         {
           _cached_jacobian_values.push_back(jac_block(i, j));
-          _cached_jacobian_rows.push_back(idof_indices[i]);
-          _cached_jacobian_cols.push_back(jdof_indices[j]);
+          _cached_jacobian_rows.push_back(di[i]);
+          _cached_jacobian_cols.push_back(dj[j]);
         }
     }
   }
@@ -495,17 +502,18 @@ AsmBlock::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, u
   DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar);
 
   // stick it into the matrix
-  dof_map.constrain_element_matrix(ke, dof_indices, false);
+  std::vector<unsigned int> di(dof_indices);
+  dof_map.constrain_element_matrix(ke, di, false);
 
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)
   {
     DenseMatrix<Number> scaled_ke(ke);
     scaled_ke.scale(scaling_factor);
-    jacobian.add_matrix(scaled_ke, dof_indices);
+    jacobian.add_matrix(scaled_ke, di);
   }
   else
-    jacobian.add_matrix(ke, dof_indices);
+    jacobian.add_matrix(ke, di);
 }
 
 void
@@ -516,11 +524,13 @@ AsmBlock::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
   DenseMatrix<Number> & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivar, jvar);
   DenseMatrix<Number> & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivar, jvar);
 
+  std::vector<unsigned int> di(dof_indices);
+  std::vector<unsigned int> dn(neighbor_dof_indices);
   // stick it into the matrix
-  dof_map.constrain_element_matrix(kee, dof_indices, false);
-  dof_map.constrain_element_matrix(ken, dof_indices, neighbor_dof_indices, false);
-  dof_map.constrain_element_matrix(kne, neighbor_dof_indices, dof_indices, false);
-  dof_map.constrain_element_matrix(knn, neighbor_dof_indices, false);
+  dof_map.constrain_element_matrix(kee, di, false);
+  dof_map.constrain_element_matrix(ken, di, dn, false);
+  dof_map.constrain_element_matrix(kne, dn, di, false);
+  dof_map.constrain_element_matrix(knn, dn, false);
 
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)
@@ -528,29 +538,29 @@ AsmBlock::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
     {
       DenseMatrix<Number> scaled_ke(kee);
       scaled_ke.scale(scaling_factor);
-      jacobian.add_matrix(scaled_ke, dof_indices);
+      jacobian.add_matrix(scaled_ke, di);
     }
     {
       DenseMatrix<Number> scaled_ke(ken);
       scaled_ke.scale(scaling_factor);
-      jacobian.add_matrix(scaled_ke, dof_indices, neighbor_dof_indices);
+      jacobian.add_matrix(scaled_ke, di, dn);
     }
     {
       DenseMatrix<Number> scaled_ke(kne);
       scaled_ke.scale(scaling_factor);
-      jacobian.add_matrix(scaled_ke, neighbor_dof_indices, dof_indices);
+      jacobian.add_matrix(scaled_ke, dn, di);
     }
     {
       DenseMatrix<Number> scaled_ke(knn);
       scaled_ke.scale(scaling_factor);
-      jacobian.add_matrix(scaled_ke, neighbor_dof_indices);
+      jacobian.add_matrix(scaled_ke, dn);
     }
   }
   else
   {
-    jacobian.add_matrix(kee, dof_indices);
-    jacobian.add_matrix(ken, dof_indices, neighbor_dof_indices);
-    jacobian.add_matrix(kne, neighbor_dof_indices, dof_indices);
-    jacobian.add_matrix(knn, neighbor_dof_indices);
+    jacobian.add_matrix(kee, di);
+    jacobian.add_matrix(ken, di, dn);
+    jacobian.add_matrix(kne, dn, di);
+    jacobian.add_matrix(knn, dn);
   }
 }
