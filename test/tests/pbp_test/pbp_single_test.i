@@ -5,14 +5,14 @@
 
 [Mesh]
   [./Generation]
-  	dim = 2
-  	xmin = 0
-  	xmax = 1
-  	ymin = 0
-  	ymax = 1
-  	nx = 10
-  	ny = 10
-  	elem_type = QUAD9
+    dim = 2
+    xmin = 0
+    xmax = 1
+    ymin = 0
+    ymax = 1
+    nx = 10
+    ny = 10
+    elem_type = QUAD4
   [../]
 []
 
@@ -23,7 +23,7 @@
   [../]
 
   [./v]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 []

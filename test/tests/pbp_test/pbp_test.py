@@ -13,7 +13,6 @@ pbp_adapt_test = {
 }
 
 single_test = {
-  SKIP : True,
   INPUT : 'pbp_single_test.i',
   EXODIFF : ['pbp_single_test_out.e']
 }
