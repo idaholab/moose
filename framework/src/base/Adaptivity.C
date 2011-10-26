@@ -32,6 +32,7 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _mesh_refinement(NULL),
     _error_estimator(NULL),
     _error(NULL),
+    _initial_steps(0),
     _steps(0),
     _print_mesh_changed(false),
     _t(_subproblem.time()),
@@ -48,7 +49,7 @@ Adaptivity::~Adaptivity()
 }
 
 void
-Adaptivity::init(unsigned int steps, unsigned int /*initial_steps*/)
+Adaptivity::init(unsigned int steps, unsigned int initial_steps)
 {
   if (!_mesh_refinement)
     _mesh_refinement = new MeshRefinement(_mesh);
@@ -56,6 +57,7 @@ Adaptivity::init(unsigned int steps, unsigned int /*initial_steps*/)
   EquationSystems & es = _subproblem.es();
   es.parameters.set<bool>("adaptivity") = true;
 
+  _initial_steps = initial_steps;
   _steps = steps;
   _mesh_refinement_on = true;
 

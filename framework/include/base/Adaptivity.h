@@ -75,6 +75,13 @@ public:
   void setPrintMeshChanged(bool state = true) { _print_mesh_changed = state; }
 
   /**
+   * Pull out the number of initial steps previously set by calling init()
+   *
+   * @return the number of initial steps
+   */
+  unsigned int getInitialSteps() const { return _initial_steps; }
+
+  /**
    * Pull out the number of steps previously set by calling init()
    *
    * @return the number of steps
@@ -114,6 +121,7 @@ protected:
   ErrorEstimator * _error_estimator;            ///< Error estimator to be used by the apps.
   ErrorVector * _error;                         ///< Error vector for use with the error estimator.
 
+  unsigned int _initial_steps;                  ///< the number of adaptivity steps to do at the beginning of simulation
   unsigned int _steps;                          ///< steps of adaptivity to perform
 
   bool _print_mesh_changed;                     ///< True if we want to print out info when mesh has changed

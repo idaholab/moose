@@ -208,6 +208,17 @@ void FEProblem::initialSetup()
   // RUN initial postprocessors
   computePostprocessors(EXEC_INITIAL);
 
+#ifdef LIBMESH_ENABLE_AMR
+  Moose::setup_perf_log.push("initial adaptivity","Setup");
+  for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
+  {
+    adaptMesh();
+    //reproject the initial condition
+    initialCondition(_eq, _nl.sys().name());
+  }
+  Moose::setup_perf_log.pop("initial adaptivity","Setup");
+#endif //LIBMESH_ENABLE_AMR
+
   Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
   //Update the geometric searches (has to be called after the problem is all set up)
   updateGeomSearch();
