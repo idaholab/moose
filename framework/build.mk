@@ -7,8 +7,22 @@
 # link with the library.
 include $(LIBMESH_DIR)/Make.common
 
-libmesh_CXXFLAGS     += -MD
-libmesh_CFLAGS       += -MD
+##################################
+# C++ rules                      #
+##################################
+
+%.$(obj-suffix) : %.C
+	@echo "Compiling C++ (in "$(mode)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+
+##################################
+# C rules                        #
+##################################
+
+%.$(obj-suffix) : %.c
+	@echo "Compiling C (in "$(mode)" mode) "$<"..."
+	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
+
 
 # treat these warnings as errors (This doesn't seem to be necessary for Intel)
 ifneq (,$(findstring gcc,$(GXX-VERSION)))
