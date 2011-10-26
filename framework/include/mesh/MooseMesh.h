@@ -106,10 +106,6 @@ public:
   void setPatchSize(const unsigned int patch_size) { _patch_size = patch_size; }
   unsigned int getPatchSize() { return _patch_size; }
 
-#ifdef LIBMESH_ENABLE_AMR
-  void uniformlyRefine(int level=0);
-#endif
-
   operator libMesh::Mesh &(void) { return _mesh; }
 
   MeshBase & getMesh() { return _mesh; }

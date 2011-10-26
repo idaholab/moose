@@ -32,8 +32,8 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _mesh_refinement(NULL),
     _error_estimator(NULL),
     _error(NULL),
+    _steps(0),
     _print_mesh_changed(false),
-    _initial_steps(0),
     _t(_subproblem.time()),
     _start_time(-std::numeric_limits<Real>::max()),
     _stop_time(std::numeric_limits<Real>::max())
@@ -48,7 +48,7 @@ Adaptivity::~Adaptivity()
 }
 
 void
-Adaptivity::init(unsigned int steps, unsigned int initial_steps)
+Adaptivity::init(unsigned int steps, unsigned int /*initial_steps*/)
 {
   if (!_mesh_refinement)
     _mesh_refinement = new MeshRefinement(_mesh);
@@ -56,21 +56,12 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   EquationSystems & es = _subproblem.es();
   es.parameters.set<bool>("adaptivity") = true;
 
-  // TODO: Should steps be stored in the equation systems object?
-  es.parameters.set<unsigned int>("steps") = steps;
-  _initial_steps = initial_steps;
+  _steps = steps;
   _mesh_refinement_on = true;
 
   _error = new ErrorVector;
 
   _mesh_refinement->set_periodic_boundaries_ptr(_subproblem.getNonlinearSystem().dofMap().get_periodic_boundaries());
-}
-
-unsigned int
-Adaptivity::getSteps() const
-{
-  EquationSystems & es = _subproblem.es();
-  return es.parameters.have_parameter<unsigned int>("steps") ? es.parameters.get<unsigned int>("steps") : 0;
 }
 
 void
@@ -92,18 +83,6 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 }
 
 void
-Adaptivity::initial()
-{
-  // NOTE: this might go eventually somewhere else
-  for(unsigned int i=0; i<_initial_steps; i++)
-  {
-    _subproblem.adaptMesh();
-    //reproject the initial condition
-    _subproblem.initialCondition(_subproblem.es(), _subproblem.getNonlinearSystem().sys().name());
-  }
-}
-
-void
 Adaptivity::adaptMesh()
 {
   if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time))
@@ -122,6 +101,19 @@ Adaptivity::adaptMesh()
       std::cout << "\nMesh Changed:\n";
       _mesh.printInfo();
     }
+  }
+}
+
+void
+Adaptivity::uniformRefine(unsigned int level)
+{
+  // NOTE: we are using a separate object here, since adaptivity may not be on, bu we need to be able to do refinements
+  MeshRefinement mesh_refinement(_mesh);
+  // we have to go step by step so EquationSystems::reinit() won't freak out
+  for (unsigned int i = 0; i < level; i++)
+  {
+    mesh_refinement.uniformly_refine(1);
+    _subproblem.meshChanged();
   }
 }
 

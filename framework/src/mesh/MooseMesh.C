@@ -20,7 +20,6 @@
 // libMesh
 #include "boundary_info.h"
 #include "mesh_tools.h"
-#include "mesh_refinement.h"
 #include "parallel.h"
 #include "mesh_communication.h"
 #include "parallel_mesh.h"
@@ -177,15 +176,6 @@ MooseMesh::update()
   buildNodeList();
   cacheInfo();
 }
-
-#ifdef LIBMESH_ENABLE_AMR
-void
-MooseMesh::uniformlyRefine(int level)
-{
-  MeshRefinement mesh_refinement(_mesh);
-  mesh_refinement.uniformly_refine(level);
-}
-#endif //LIBMESH_ENABLE_AMR
 
 void
 MooseMesh::meshChanged()

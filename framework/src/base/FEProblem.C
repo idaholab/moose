@@ -208,12 +208,6 @@ void FEProblem::initialSetup()
   // RUN initial postprocessors
   computePostprocessors(EXEC_INITIAL);
 
-#ifdef LIBMESH_ENABLE_AMR
-  Moose::setup_perf_log.push("adaptivity().initial()","Setup");
-  adaptivity().initial();
-  Moose::setup_perf_log.pop("adaptivity().initial()","Setup");
-#endif //LIBMESH_ENABLE_AMR
-
   Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
   //Update the geometric searches (has to be called after the problem is all set up)
   updateGeomSearch();
@@ -896,6 +890,13 @@ FEProblem::initialCondition(EquationSystems& es, const std::string& system_name)
     ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
     system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
   }
+}
+
+void
+FEProblem::projectSolution()
+{
+  _nl.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
+  _aux.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
 }
 
 void

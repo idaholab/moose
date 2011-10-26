@@ -15,6 +15,7 @@
 #include "InitialRefinementAction.h"
 #include "Parser.h"
 #include "MooseMesh.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<InitialRefinementAction>()
@@ -38,26 +39,18 @@ InitialRefinementAction::act()
   mooseAssert(_parser_handle._mesh != NULL, "Mesh not setup");
 
   unsigned int level = getParam<unsigned int>("uniform_refine");
-  if (level)
+  if (level > 0)
   {
     Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-    // uniformly refine mesh
-    _parser_handle._mesh->uniformlyRefine(level);
-    _parser_handle._mesh->meshChanged();
-
-    // Setup the displaced Mesh the same way
-    if (_parser_handle._displaced_mesh)
-    {
-      _parser_handle._mesh->uniformlyRefine(level);
-      _parser_handle._mesh->meshChanged();
-    }
-
+    _parser_handle._problem->adaptivity().uniformRefine(level);
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
-  }
 
-  // TOOD:
-  // - move the trigger for this action after "copy_nodal_vars"
-  // - figure out what is breaking with reinitializing the equation system
-  // - refactor into Adaptivity class
+    // initial condition was set by EquationsSystems::init() (which already happened)
+    // the mesh has changed and we need to set the initial condition again (because it
+    // was actually interpolated during the refining process)
+    Moose::setup_perf_log.push("Reproject solution","Setup");
+    _parser_handle._problem->projectSolution();
+    Moose::setup_perf_log.pop("Reproject solution","Setup");
+  }
 #endif //LIBMESH_ENABLE_AMR
 }

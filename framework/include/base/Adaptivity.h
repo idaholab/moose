@@ -75,23 +75,21 @@ public:
   void setPrintMeshChanged(bool state = true) { _print_mesh_changed = state; }
 
   /**
-   * Perform initial adaptivity steps
-   *
-   * FIXME: better name
-   */
-  void initial();
-
-  /**
    * Pull out the number of steps previously set by calling init()
    *
    * @return the number of steps
    */
-  unsigned int getSteps() const;
+  unsigned int getSteps() const { return _steps; }
 
   /**
    * Adapts the mesh based on the error estimator used
    */
   void adaptMesh();
+
+  /**
+   * Does 'level' levels of uniform refinements
+   */
+  void uniformRefine(unsigned int level);
 
   /**
    * Is adaptivity on?
@@ -116,9 +114,9 @@ protected:
   ErrorEstimator * _error_estimator;            ///< Error estimator to be used by the apps.
   ErrorVector * _error;                         ///< Error vector for use with the error estimator.
 
-  bool _print_mesh_changed;                     ///< True if we want to print out info when mesh has changed
+  unsigned int _steps;                          ///< steps of adaptivity to perform
 
-  unsigned int _initial_steps;                  ///< the number of adaptivity steps to do at the beginning of simulation
+  bool _print_mesh_changed;                     ///< True if we want to print out info when mesh has changed
 
   Real & _t;                                    ///< Time
   Real _start_time;                             ///< When adaptivity start
