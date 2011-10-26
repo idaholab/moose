@@ -22,6 +22,7 @@
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Moose.h"
+#include "ConstantIC.h"
 
 #include "ElementH1Error.h"
 
@@ -48,13 +49,6 @@ Gradient initial_gradient (const Point & p,
   Problem * problem = parameters.get<Problem *>("_problem");
   mooseAssert(problem != NULL, "Internal pointer to _problem was not set");
   return problem->initialGradient(p, parameters, sys_name, var_name);
-}
-
-void initial_condition(EquationSystems & es, const std::string & system_name)
-{
-  Problem * problem = es.parameters.get<Problem *>("_problem");
-  mooseAssert(problem != NULL, "Internal pointer to MooseSystem was not set");
-  problem->initialCondition(es, system_name);
 }
 
 } // namespace Moose
@@ -168,6 +162,9 @@ void FEProblem::initialSetup()
 {
   if (_restart)
     restartFromFile();
+  else if (_ics.size() > 0)
+    projectSolution();
+  //else: we might be using values from the mesh file (initial_from_file et al.) and then do nothing here
 
   unsigned int n_threads = libMesh::n_threads();
 
@@ -214,7 +211,7 @@ void FEProblem::initialSetup()
   {
     adaptMesh();
     //reproject the initial condition
-    initialCondition(_eq, _nl.sys().name());
+    _nl.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
   }
   Moose::setup_perf_log.pop("initial adaptivity","Setup");
 #endif //LIBMESH_ENABLE_AMR
@@ -854,7 +851,16 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
 void
 FEProblem::addInitialCondition(const std::string & var_name, Real value)
 {
-  _pars.set<Real>("initial_" + var_name) = value;
+  std::ostringstream oss;
+  oss << "initial_" + var_name;
+  std::string name = oss.str();
+
+  InputParameters parameters = validParams<ConstantIC>();
+  parameters.set<Problem *>("_problem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<std::string>("var_name") = var_name;
+  parameters.set<Real>("value") = value;
+  _ics[var_name] = static_cast<InitialCondition *>(Factory::instance()->create("ConstantIC", name, parameters));
 }
 
 Number
@@ -869,9 +875,6 @@ FEProblem::initialValue (const Point& p,
   // Try to grab an InitialCondition object for this variable.
   if (_ics.find(var_name) != _ics.end())
     return _ics[var_name]->value(p);
-
-  if (_pars.have_parameter<Real>("initial_"+var_name))
-    return _pars.get<Real>("initial_"+var_name);
 
   return 0;
 }
@@ -890,17 +893,6 @@ FEProblem::initialGradient (const Point& p,
     return _ics[var_name]->gradient(p);
 
   return RealGradient();
-}
-
-void
-FEProblem::initialCondition(EquationSystems& es, const std::string& system_name)
-{
-  if (!_restart)
-  {
-    // do not project initial condition if we are restarting from a file
-    ExplicitSystem & system = es.get_system<ExplicitSystem>(system_name);
-    system.project_solution(Moose::initial_value, Moose::initial_gradient, es.parameters);
-  }
 }
 
 void

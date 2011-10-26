@@ -142,7 +142,6 @@ public:
   Number initialValue (const Point & p, const Parameters & parameters, const std::string & /*sys_name*/, const std::string & var_name);
   Gradient initialGradient (const Point & p, const Parameters & /*parameters*/, const std::string & /*sys_name*/, const std::string & var_name);
 
-  void initialCondition(EquationSystems & es, const std::string & system_name);
   void projectSolution();
 
   // Materials /////

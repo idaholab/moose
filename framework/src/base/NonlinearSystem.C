@@ -99,8 +99,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & nam
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
 
-  _sys.attach_init_function(Moose::initial_condition);
-
   _time_weight.resize(3);
   timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
 

@@ -120,8 +120,6 @@ public:
   virtual Number initialValue (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name) = 0;
   virtual Gradient initialGradient (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name) = 0;
 
-  virtual void initialCondition(EquationSystems & es, const std::string & system_name) = 0;
-
   // Postprocessors /////
   virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP) = 0;
   virtual void outputPostprocessors(bool force = false) = 0;

@@ -44,13 +44,6 @@ InitialRefinementAction::act()
     Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
     _parser_handle._problem->adaptivity().uniformRefine(level);
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
-
-    // initial condition was set by EquationsSystems::init() (which already happened)
-    // the mesh has changed and we need to set the initial condition again (because it
-    // was actually interpolated during the refining process)
-    Moose::setup_perf_log.push("Reproject solution","Setup");
-    _parser_handle._problem->projectSolution();
-    Moose::setup_perf_log.pop("Reproject solution","Setup");
   }
 #endif //LIBMESH_ENABLE_AMR
 }

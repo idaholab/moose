@@ -187,12 +187,6 @@ CoupledProblem::initialGradient (const Point & p, const Parameters & parameters,
 }
 
 void
-CoupledProblem::initialCondition(EquationSystems & es, const std::string & system_name)
-{
-  _map[system_name]->initialCondition(es, system_name);
-}
-
-void
 CoupledProblem::computePostprocessors(ExecFlagType /*type = EXEC_TIMESTEP*/)
 {
 }

@@ -34,8 +34,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
     _serialized_solution(*NumericVector<Number>::build().release()),
     _need_serialized_solution(false)
 {
-  _sys.attach_init_function(Moose::initial_condition);
-
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
 
