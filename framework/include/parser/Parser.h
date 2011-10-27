@@ -16,6 +16,7 @@
 #define PARSER_H
 
 #include "GlobalParamsAction.h"
+#include "MooseSyntax.h"
 #include "SyntaxFormatterInterface.h"
 
 // libMesh
@@ -35,16 +36,12 @@ public:
     YAML
   };
 
-  Parser(bool clearWarehouse = true);
+  Parser(Syntax & syntax);
 
   virtual ~Parser();
 
-  // Registration function for associating Moose Actions with syntax
-  void registerActionSyntax(const std::string & action, const std::string & syntax,
-                            const std::string & action_name = "");
-
   // Retrieve the Syntax associated with the passed Action and action_name
-  std::string getSyntaxByAction(const std::string & action, const std::string & action_name);
+  std::string getSyntaxByAction(const std::string & action, const std::string & action_name) { return _syntax.getSyntaxByAction(action, action_name); }
 
   /**
    * Determines whether a particular block is marked as active
@@ -149,6 +146,9 @@ public:
   ExodusII_IO *_exreader;                               ///< auxiliary object for restart
   bool _loose;                                          ///< true if parsing input file with loose syntax
 
+protected:
+  Syntax & _syntax;
+
 private:
   /**
    * This function initializes the command line options recognized by MOOSE based applications
@@ -166,11 +166,6 @@ private:
   void buildFullTree();
 
   /**
-   * Method for determining whether a piece of syntax is associated with an Action
-   */
-  std::string isAssociated(const std::string & real_id, bool * is_parent);
-
-  /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are colled only from this Object
    */
@@ -182,15 +177,19 @@ private:
   void buildCommandLineVarsVector();
 
   template<typename T>
-  void setScalarParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
+  void setScalarParameter(const std::string & full_name, const std::string & short_name,
+                          InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
 
 
   template<typename T>
-  void setVectorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
+  void setVectorParameter(const std::string & full_name, const std::string & short_name,
+                          InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
 
 
   template<typename T>
-  void setTensorParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction *global_block);
+  void setTensorParameter(const std::string & full_name, const std::string & short_name,
+                          InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global,
+                          GlobalParamsAction *global_block);
 
   /************************************
    * Private Data Members
@@ -200,12 +199,6 @@ private:
     std::string desc;
     std::vector<std::string> cli_syntax;
     bool required;
-  };
-
-  struct ActionInfo
-  {
-    std::string _action;
-    std::string _action_name;
   };
 
   SyntaxFormatterInterface * _syntax_formatter;
@@ -220,11 +213,6 @@ private:
   GetPot _getpot_file;
   std::string _input_filename;
 
-  /**
-   * Actions/Syntax association
-   */
-  std::multimap<std::string, ActionInfo> _associated_actions;
-
 public:
   /// Functor for sorting input file syntax in MOOSE desired order
   class InputFileSort
@@ -232,7 +220,7 @@ public:
   public:
     InputFileSort();
     bool operator() (Action *a, Action *b) const;
-    bool operator() (const std::pair<std::string, ActionInfo> &a, const std::pair<std::string, ActionInfo> &b) const;
+    bool operator() (const std::pair<std::string, Syntax::ActionInfo> &a, const std::pair<std::string, Syntax::ActionInfo> &b) const;
 
   private:
     int sorter(const std::string &a, const std::string &b) const;

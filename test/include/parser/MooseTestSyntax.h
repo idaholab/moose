@@ -6,7 +6,7 @@ class Parser;
 
 namespace MooseTest
 {
-void associateSyntax(Parser & p);
+void associateSyntax();
 }
 
 #endif // MOOSETESTSYNTAX_H

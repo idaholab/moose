@@ -27,7 +27,7 @@ InputParameters validParams<LooseCoupling>()
   InputParameters params = validParams<Executioner>();
 
 //  params.addParam<std::string>("mesh_file", "Mesh file to read");
-  params.addRequiredParam<std::vector<std::string> >("input_files", "Input files to read");
+//  params.addRequiredParam<std::vector<std::string> >("input_files", "Input files to read");
   params.addRequiredParam<std::vector<std::string> >("solve_order", "Order of the solve");
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
@@ -49,7 +49,7 @@ InputParameters validParams<LooseCoupling>()
 LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _shared_mesh(_mesh != NULL),
-    _input_files(getParam<std::vector<std::string> >("input_files")),
+//    _input_files(getParam<std::vector<std::string> >("input_files")),
     _solve_order(getParam<std::vector<std::string> >("solve_order")),
     _problem(*static_cast<CoupledProblem *>(ProblemFactory::instance()->create("CoupledProblem", "Coupled Problem", setupProblemParams("Coupled Problem", _mesh)))),
     _end_time(getParam<Real>("end_time")),
@@ -59,42 +59,6 @@ LooseCoupling::LooseCoupling(const std::string & name, InputParameters parameter
     _n_startup_steps(getParam<int>("n_startup_steps")),
     _act_wh(Moose::action_warehouse)
 {
-//  unsigned int n_problems = _input_files.size();
-//  _slave_parser.resize(n_problems);
-//  Moose::action_warehouse.clear();   // Clear the action warehouse
-//  for (unsigned int i = 0 ; i < n_problems; ++i)
-//  {
-//    std::string file_name = _input_files[i];
-//
-//    std::cout << "  - parsing " << file_name << std::endl;
-//    _slave_parser[i] = new Parser(Moose::syntax);
-//    if (_shared_mesh)
-//    {
-//       InputParameters params = validParams<FEProblem>();
-//       params.set<std::string>("name") = "Moose Problem";
-//       params.set<MooseMesh *>("mesh") = _mesh;
-//       params.set<Problem *>("parent") = &_problem;
-//       FEProblem * subproblem = static_cast<FEProblem *>
-//         (ProblemFactory::instance()->create("FEProblem", "Moose Problem", params));
-//       //FEProblem * subproblem = new FEProblem(*_mesh, &_problem);
-//       _problem.addSubProblem(file_name, subproblem);
-//       _slave_parser[i]->_loose = true;
-//       _slave_parser[i]->_problem = subproblem;
-//    }
-//    _slave_parser[i]->parse(file_name);
-//  }
-
-  // need variables upfront
-  executeBlocks("add_variable");
-  executeBlocks("add_aux_variable");
-
-  // execute the rest
-  executeBlocks("add_material");
-  executeBlocks("add_kernel");
-  executeBlocks("add_bc");
-
-  _problem.solveOrder(_solve_order);
-  _problem.init();
 }
 
 LooseCoupling::~LooseCoupling()

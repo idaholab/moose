@@ -39,7 +39,6 @@ PerfLog Moose::perf_log("Example 7: Initial Condition");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  Parser p;
 
   Moose::registerObjects();
 
@@ -47,7 +46,8 @@ int main (int argc, char** argv)
   registerInitialCondition(ExampleIC);
 
   // Associate Parser Syntax with specific MOOSE Actions
-  Moose::associateSyntax(p);
+  Moose::associateSyntax();
+  Parser p(Moose::syntax);
 
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();

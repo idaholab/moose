@@ -16,12 +16,14 @@ PerfLog Moose::perf_log("Moose Test");
 int main(int argc, char *argv[])
 {
   MooseInit init(argc, argv);
-  Parser p;
 
   MooseTest::registerObjects();
+
   // Associate Parser Syntax
-  Moose::associateSyntax(p);
-  MooseTest::associateSyntax(p);
+  Moose::associateSyntax();
+  MooseTest::associateSyntax();
+
+  Parser p(Moose::syntax);
 
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();

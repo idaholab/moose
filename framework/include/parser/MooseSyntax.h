@@ -15,12 +15,57 @@
 #ifndef MOOSESYNTAX_H
 #define MOOSESYNTAX_H
 
-//forward declaration
-class Parser;
+#include <string>
+#include <map>
+
+/**
+ * Holding syntax for parsing input files
+ */
+class Syntax
+{
+public:
+  struct ActionInfo
+  {
+    std::string _action;
+    std::string _action_name;
+  };
+
+public:
+  Syntax();
+
+  // Registration function for associating Moose Actions with syntax
+  void registerActionSyntax(const std::string & action, const std::string & syntax,
+                            const std::string & action_name = "");
+
+  // Retrieve the Syntax associated with the passed Action and action_name
+  std::string getSyntaxByAction(const std::string & action, const std::string & action_name);
+
+  /**
+   * Method for determining whether a piece of syntax is associated with an Action
+   * TODO: I need a better name
+   */
+  std::string isAssociated(const std::string & real_id, bool * is_parent);
+
+  std::pair<std::multimap<std::string, ActionInfo>::iterator, std::multimap<std::string, ActionInfo>::iterator>
+  getActions(const std::string & name);
+
+  std::multimap<std::string, ActionInfo> & getAssociatedActions() { return _associated_actions; }
+
+protected:
+
+  /**
+   * Actions/Syntax association
+   */
+  std::multimap<std::string, ActionInfo> _associated_actions;
+
+};
+
 
 namespace Moose
 {
-void associateSyntax(Parser & p);
+void associateSyntax();
+
+extern Syntax syntax;
 }
 
 #endif // MOOSESYNTAX_H

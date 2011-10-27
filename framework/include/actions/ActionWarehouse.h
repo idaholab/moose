@@ -42,8 +42,8 @@ public:
   void addActionBlock(Action * blk);
 
   /**
-   * This method checks the actions stored in the warehouse against the list of required resgistered
-   * actions to see if all of them have been satisified.  It should be called before running
+   * This method checks the actions stored in the warehouse against the list of required registered
+   * actions to see if all of them have been satisfied.  It should be called before running
    * a MOOSE problem
    */
   void checkUnsatisfiedActions() const;

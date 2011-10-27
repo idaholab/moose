@@ -41,12 +41,13 @@
 // libMesh
 #include "getpot.h"
 
-Parser::Parser(bool clearWarehouse):
+Parser::Parser(Syntax & syntax):
   _mesh(NULL),
   _displaced_mesh(NULL),
   _problem(NULL),
   _exreader(NULL),
   _loose(false),
+  _syntax(syntax),
   _syntax_formatter(NULL),
   _getpot_initialized(false)
 {
@@ -55,15 +56,14 @@ Parser::Parser(bool clearWarehouse):
   // Need to make sure that the parser pointer is set in the warehouse for various functions
   // TODO: Rip the Parser Pointer out of the warehouse
   Moose::action_warehouse.setParserPointer(this);
-  if (clearWarehouse)
-    Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
+//  if (clearWarehouse)
+//    Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
 }
 
 Parser::~Parser()
 {
   delete _exreader;
-  if (_syntax_formatter)
-    delete _syntax_formatter;
+  delete _syntax_formatter;
 }
 
 std::string
@@ -103,100 +103,6 @@ Parser::parseCommandLine()
   return input_filename;
 }
 
-void
-Parser::registerActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name)
-{
-
-  ActionInfo action_info;
-  action_info._action = action;
-  action_info._action_name = action_name;
-
-  _associated_actions.insert(std::make_pair(syntax, action_info));
-}
-
-std::string
-Parser::getSyntaxByAction(const std::string & action, const std::string & action_name)
-{
-  std::string syntax;
-  /**
-   * For now we don't have a data structure that maps Actions to Syntax but this routine
-   * is only used by the build full tree routine so it doesn't need to be fast.  We
-   * will do a linear search for each call to this routine
-   */
-  for (std::multimap<std::string, ActionInfo>::const_iterator iter = _associated_actions.begin();
-       iter != _associated_actions.end(); ++iter)
-  {
-    if (iter->second._action == action &&
-        (iter->second._action_name == action_name || iter->second._action_name == ""))
-      syntax = iter->first;
-  }
-
-  return syntax;
-}
-
-
-std::string
-Parser::isAssociated(const std::string & real_id, bool * is_parent)
-{
-  /**
-   * This implementation assumes that wildcards can occur in the place of an entire token but not as part
-   * of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial* /InitialConditions'.
-   * Since maps are ordered, a reverse traversal through the registered list will always select a more
-   * specific match before a wildcard match ('*' == char(42))
-   */
-  bool local_is_parent;
-  if (is_parent == NULL)
-    is_parent = &local_is_parent;  // Just so we don't have to keep checking below when we want to set the value
-
-  std::multimap<std::string, ActionInfo>::reverse_iterator it;
-  std::vector<std::string> real_elements, reg_elements;
-  std::string return_value;
-
-  tokenize(real_id, real_elements);
-
-  *is_parent = false;
-  for (it=_associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
-  {
-    std::string reg_id = it->first;
-    if (reg_id == real_id)
-    {
-      *is_parent = false;
-      return reg_id;
-    }
-
-    reg_elements.clear();
-    tokenize(reg_id, reg_elements);
-    if (real_elements.size() <= reg_elements.size())
-    {
-      bool keep_going = true;
-      for (unsigned int j=0; keep_going && j<real_elements.size(); ++j)
-      {
-        if (real_elements[j] != reg_elements[j] && reg_elements[j] != std::string("*"))
-          keep_going = false;
-      }
-      if (keep_going)
-      {
-        if (real_elements.size() < reg_elements.size() && !*is_parent)
-        {
-          // We found a parent, the longest parent in fact but we need to keep
-          // looking to make sure that the real thing isn't registered
-          *is_parent = true;
-          return_value = reg_id;
-        }
-        else if (real_elements.size() == reg_elements.size())
-        {
-          *is_parent = false;
-          return reg_id;
-        }
-      }
-    }
-  }
-
-  if (*is_parent)
-    return return_value;
-  else
-    return std::string("");
-}
 
 void
 Parser::initOptions()
@@ -332,16 +238,16 @@ Parser::parse(const std::string &input_filename)
     // There may be more than one Action registered for a given section in which case we need to
     // build them all
     bool is_parent;
-    std::string registered_identifier = isAssociated(*i, &is_parent);
+    std::string registered_identifier = _syntax.isAssociated(*i, &is_parent);
 
     // We need to retrieve a list of Actions associated with the current identifier
-    std::pair<std::multimap<std::string, ActionInfo>::iterator, std::multimap<std::string, ActionInfo>::iterator>
-      iters = _associated_actions.equal_range(registered_identifier);
+    std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
+              std::multimap<std::string, Syntax::ActionInfo>::iterator> iters = Moose::syntax.getActions(registered_identifier);
 
     if (iters.first == iters.second)
       mooseError(std::string("A '") + curr_identifier + "' is not an associated Action\n\n");
 
-    for (std::multimap<std::string, ActionInfo>::iterator i = iters.first; i != iters.second; ++i)
+    for (std::multimap<std::string, Syntax::ActionInfo>::iterator i = iters.first; i != iters.second; ++i)
     {
       if (!is_parent)
       {
@@ -448,27 +354,27 @@ Parser::buildFullTree()
 {
   std::string prev_name = "";
   std::vector<InputParameters *> params_ptrs(2);
-  std::vector<std::pair<std::string, ActionInfo> > all_names;
+  std::vector<std::pair<std::string, Syntax::ActionInfo> > all_names;
 
   _syntax_formatter->preamble();
 
-  for (std::multimap<std::string, ActionInfo>::const_iterator iter = _associated_actions.begin();
-       iter != _associated_actions.end(); ++iter)
+  for (std::multimap<std::string, Syntax::ActionInfo>::const_iterator iter = _syntax.getAssociatedActions().begin();
+       iter != _syntax.getAssociatedActions().end(); ++iter)
   {
-    ActionInfo act_info = iter->second;
+    Syntax::ActionInfo act_info = iter->second;
     // If the action_name is NULL that means we need to figure out which action_name
     // goes with this syntax for the purpose of building the Moose Object part of the tree.
-    // We will figure this out by asking the ActionFactory for the regstration info.
+    // We will figure this out by asking the ActionFactory for the registration info.
     if (act_info._action_name == "")
       act_info._action_name = ActionFactory::instance()->getActionName(act_info._action);
 
-    all_names.push_back(std::pair<std::string, ActionInfo>(iter->first, act_info));
+    all_names.push_back(std::pair<std::string, Syntax::ActionInfo>(iter->first, act_info));
   }
 
   // Sort the Syntax
   std::sort(all_names.begin(), all_names.end(), InputFileSort());
 
-  for (std::vector<std::pair<std::string, ActionInfo> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
+  for (std::vector<std::pair<std::string, Syntax::ActionInfo> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
   {
     InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_names->second._action);
 
@@ -845,7 +751,6 @@ void Parser::setTensorParameter(const std::string & full_name, const std::string
   }
 }
 
-
 //--------------------------------------------------------------------------
 // Input File Sorter Functor methods
 
@@ -884,7 +789,7 @@ Parser::InputFileSort::operator() (Action *a, Action *b) const
 }
 
 bool
-Parser::InputFileSort::operator() (const std::pair<std::string, ActionInfo> &a, const std::pair<std::string, ActionInfo> &b) const
+Parser::InputFileSort::operator() (const std::pair<std::string, Syntax::ActionInfo> &a, const std::pair<std::string, Syntax::ActionInfo> &b) const
 {
   std::vector<std::string> elements;
   std::string short_a, short_b;

@@ -3,9 +3,10 @@
 
 namespace MooseTest
 {
-void associateSyntax(Parser & p)
+
+void associateSyntax()
 {
-  p.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
+  Moose::syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
 }
 
 } // namespace

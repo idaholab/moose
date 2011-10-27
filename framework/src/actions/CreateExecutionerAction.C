@@ -20,6 +20,7 @@
 #include "Parser.h"
 #include "Executioner.h"
 #include "FEProblem.h"
+#include "CoupledProblem.h"
 #include "ActionWarehouse.h"
 
 template<>
@@ -84,9 +85,6 @@ CreateExecutionerAction::act()
     FEProblem *mproblem = dynamic_cast<FEProblem *>(&Moose::executioner->problem());
     _parser_handle._problem = mproblem;
 
-//    ParserBlock * blk;
-
-
     // FIXME: HACK! Can initialize displaced problem after we have instance of problem
     // TODO: Make this into another action
     ActionIterator mesh_it = Moose::action_warehouse.actionBlocksWithActionBegin("read_mesh");
@@ -96,46 +94,6 @@ CreateExecutionerAction::act()
       std::vector<std::string> displacements = (*mesh_it)->getParam<std::vector<std::string> >("displacements");
       _parser_handle._problem->initDisplacedProblem(_parser_handle._displaced_mesh, displacements);
     }
-
-/*
-    // handle functions
-    blk = locateBlock("Functions");
-    if (blk)
-      blk->execute();
-*/
-
-/*
-    VariablesBlock * vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("Variables"));
-    if (vars!= NULL)
-      vars->execute();
-    VariablesBlock * aux_vars = dynamic_cast<VariablesBlock *>(_parser_handle.root()->locateBlock("AuxVariables"));
-    if (aux_vars!= NULL)
-      aux_vars->execute();
-*/
-
-
-// TODO: periodic BCs
-/*
-    // handle periodic BCs
-    blk = locateBlock("BCs/Periodic");
-    if (blk)
-      blk->execute();
-
-    blk = locateBlock("Preconditioning");
-    if (blk)
-      blk->execute();
-*/
-
-// TODO: FEProblem init action
-//    mproblem->init();
-
-// TODO: Copy nodal values action
-/*
-    if (vars != NULL)
-      vars->copyNodalValues(mproblem->getNonlinearSystem());
-    if (aux_vars != NULL)
-      aux_vars->copyNodalValues(mproblem->getAuxiliarySystem());
-*/
 
     // solver params
     EquationSystems & es = _parser_handle._problem->es();
@@ -173,45 +131,5 @@ CreateExecutionerAction::act()
 
     NonlinearSystem & nl = _parser_handle._problem->getNonlinearSystem();
     nl.timeSteppingScheme(Moose::stringToEnum<Moose::TimeSteppingScheme>(getParam<std::string>("scheme")));
-
-//------------------------------------------------------------
-
-/*
-    blk= locateBlock("GlobalParams");
-    if (blk)
-      blk->execute();
-
-    blk = locateBlock("Materials");
-    if (blk)
-      blk->execute();
-
-    blk = locateBlock("Kernels");
-    if (blk)
-      blk->execute();
-    blk = locateBlock("BCs");
-    if (blk)
-      blk->execute();
-    blk= locateBlock("DiracKernels");
-    if (blk)
-      blk->execute();
-    blk= locateBlock("Dampers");
-    if (blk)
-      blk->execute();
-    blk= locateBlock("Stabilizers");
-    if (blk)
-      blk->execute();
-
-    blk= locateBlock("AuxKernels");
-    if (blk)
-      blk->execute();
-    blk = locateBlock("AuxBCs");
-    if (blk)
-      blk->execute();
-
-    blk = locateBlock("Postprocessors");
-    if (blk)
-      blk->execute();
-*/
   }
-
 }

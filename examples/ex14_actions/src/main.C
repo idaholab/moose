@@ -41,7 +41,6 @@ PerfLog Moose::perf_log("Example 14: Custom Parser Block");
 int main (int argc, char** argv)
 {
   MooseInit init (argc, argv);
-  Parser p;
 
   Moose::registerObjects();
 
@@ -53,7 +52,8 @@ int main (int argc, char** argv)
    * satisfied by executing the Action (running the "act" virtual method).
    */
   registerAction(ConvectionDiffusionAction, "add_kernel");
-  Moose::associateSyntax(p);
+  Moose::associateSyntax();
+  Parser p(Moose::syntax);
 
   /**
    * Now we need to tell the parser what new section name to look for and what

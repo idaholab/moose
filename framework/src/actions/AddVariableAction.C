@@ -68,22 +68,22 @@ AddVariableAction::act()
     if (blocks.empty())
     {
       _problem->addVariable(var_name,
-                           FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
+                            FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
                                   Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
-                           scale_factor);
+                            scale_factor);
     }
     else
       _problem->addVariable(var_name,
-                           FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
+                            FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
                                   Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
-                           scale_factor,
-                           &blocks);
+                            scale_factor,
+                            &blocks);
   }
   else
   {
     _problem->addAuxVariable(var_name,
-                            FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                                   Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))));
+                             FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
+                                    Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))));
   }
 
   // Set initial condition
