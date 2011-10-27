@@ -3,29 +3,29 @@
 namespace Elk
 {
 
-void associateSyntax(Parser & p)
+void associateSyntax()
 {
   /**
    * Note: the optional third parameter is used to differentiate which action_name is
-   * satisified based on the syntax encountered for classes which are registered
+   * satisfied based on the syntax encountered for classes which are registered
    * to satisfy more than one action_name
    */
-  p.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
-  p.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");
+  Moose::syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
+  Moose::syntax.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");
 
-  p.registerActionSyntax("EmptyAction", "BCs/PlenumPressureRZ");
-  p.registerActionSyntax("PlenumPressureRZAction", "BCs/PlenumPressureRZ/*");
+  Moose::syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressureRZ");
+  Moose::syntax.registerActionSyntax("PlenumPressureRZAction", "BCs/PlenumPressureRZ/*");
 
-  p.registerActionSyntax("EmptyAction", "BCs/Pressure");
-  p.registerActionSyntax("PressureAction", "BCs/Pressure/*");
+  Moose::syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
+  Moose::syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
-  p.registerActionSyntax("EmptyAction", "BCs/PressureRZ");
-  p.registerActionSyntax("PressureRZAction", "BCs/PressureRZ/*");
+  Moose::syntax.registerActionSyntax("EmptyAction", "BCs/PressureRZ");
+  Moose::syntax.registerActionSyntax("PressureRZAction", "BCs/PressureRZ/*");
 
-  p.registerActionSyntax("ContactAction", "Contact/*");
-  p.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
+  Moose::syntax.registerActionSyntax("ContactAction", "Contact/*");
+  Moose::syntax.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
 
-  p.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
+  Moose::syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 }
 
 
