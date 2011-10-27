@@ -65,6 +65,11 @@ public:
   virtual ~NodeFaceConstraint(){}
 
   /**
+   * Compute the value the slave node should have at the beginning of a timestep.
+   */
+  void computeSlaveValue(NumericVector<Number> & current_solution);
+
+  /**
    * Computes the residual Nodal residual.
    */
   virtual void computeResidual();
@@ -80,6 +85,11 @@ public:
   MooseVariable & variable() { return _var; }
 
   SubProblemInterface & subProblem() { return _subproblem; }
+
+  /**
+   * Compute the value the slave node should have at the beginning of a timestep.
+   */
+  virtual Real computeQpSlaveValue() = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the residual on neighboring element.

@@ -32,6 +32,12 @@ TiedValueConstraint::TiedValueConstraint(const std::string & name, InputParamete
 {}
 
 Real
+TiedValueConstraint::computeQpSlaveValue()
+{
+  return _u_master[_qp];
+}
+
+Real
 TiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
 {
 //    std::cerr<<"slave: "<<_u_slave[_qp]<<", master:"<<_u_master[_qp]<<std::endl;

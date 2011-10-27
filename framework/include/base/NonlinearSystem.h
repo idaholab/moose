@@ -158,6 +158,11 @@ public:
   void setInitialSolution();
 
   /**
+   * Sets the value of constrained variables in the solution vector.
+   */
+  void setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced);
+
+  /**
    * Add residual contributions from Constraints
    *
    * @param displaced Controls whether to do the displaced Constraints or non-displaced

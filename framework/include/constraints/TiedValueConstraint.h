@@ -34,6 +34,8 @@ public:
   TiedValueConstraint(const std::string & name, InputParameters parameters);
   virtual ~TiedValueConstraint(){}
 
+  virtual Real computeQpSlaveValue();
+
   virtual Real computeQpResidual(Moose::ConstraintType type);
 
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);

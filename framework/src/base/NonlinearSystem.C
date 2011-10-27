@@ -731,6 +731,12 @@ NonlinearSystem::setInitialSolution()
 
   _sys.solution->close();
   update();
+
+  // Set constraint slave values
+  setConstraintSlaveValues(initial_solution, false);
+
+  if(_mproblem.getDisplacedProblem())
+    setConstraintSlaveValues(initial_solution, true);
 }
 
 void
@@ -789,6 +795,91 @@ NonlinearSystem::computeTimeDeriv()
 
   _solution_u_dot.close();
   _solution_du_dot_du.close();
+}
+
+void
+NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
+{
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
+
+  if(!displaced)
+  {
+    GeometricSearchData & geom_search_data = _mproblem.geomSearchData();
+    penetration_locators = &geom_search_data._penetration_locators;
+  }
+  else
+  {
+    GeometricSearchData & displaced_geom_search_data = _mproblem.getDisplacedProblem()->geomSearchData();
+    penetration_locators = &displaced_geom_search_data._penetration_locators;
+  }
+
+  bool constraints_applied = false;
+
+  for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+      it != penetration_locators->end();
+      ++it)
+  {
+    PenetrationLocator & pen_loc = *it->second;
+
+    std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+
+    unsigned int slave_boundary = pen_loc._slave_boundary;
+
+    std::vector<NodeFaceConstraint *> constraints;
+
+    if(!displaced)
+      constraints = _constraints[0].getNodeFaceConstraints(slave_boundary);
+    else
+      constraints = _constraints[0].getDisplacedNodeFaceConstraints(slave_boundary);
+
+    if(constraints.size())
+    {
+      for(unsigned int i=0; i<slave_nodes.size(); i++)
+      {
+        unsigned int slave_node_num = slave_nodes[i];
+        Node & slave_node = _mesh.node(slave_node_num);
+
+        if(slave_node.processor_id() == libMesh::processor_id())
+        {
+          PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+
+          Elem * master_elem = info._elem;
+          unsigned int master_side = info._side_num;
+
+          // reinit variables at the node
+          _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+
+          _problem.prepareAssembly(0);
+
+          std::vector<Point> points;
+          points.push_back(info._closest_point);
+
+          // reinit variables on the master element's face at the contact point
+          _problem.reinitNeighbor(master_elem, master_side, points, 0);
+
+          for(unsigned int c=0; c < constraints.size(); c++)
+          {
+            NodeFaceConstraint * nfc = constraints[c];
+
+            if(nfc->shouldApply())
+            {
+              constraints_applied = true;
+              nfc->computeSlaveValue(solution);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // See if constraints were applied anywhere
+  Parallel::max(constraints_applied);
+
+  if(constraints_applied)
+  {
+    solution.close();
+    update();
+  }
 }
 
 void
@@ -878,7 +969,6 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
     _problem.addCachedResidual(residual, 0);
   }
 }
-
 
 
 void
