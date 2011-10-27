@@ -128,6 +128,13 @@ class TestHarness:
   # If the test is not to be run for any reason, print skipped as the result and return False,
   # otherwise return True
   def checkIfRunTest(self, test):
+    # Are we running only tests in a specific group?
+    if self.options.group <> 'ALL' and self.options.group not in test[GROUP]:
+      return False
+
+    if self.options.not_group <> '' and self.options.not_group in test[GROUP]:
+      return False
+
     # Check for skipped tests
     if test[SKIP]:
       self.handleTestResult(test, '', 'skipped')
@@ -324,6 +331,11 @@ class TestHarness:
     parser.add_option('--dev', action='store_const', dest='method', const='dev', help='test the app_name-dev binary')
     parser.add_option('-j', '--jobs', action='store', type='int', dest='jobs', default=1, help='run test binaries in parallel')
     parser.add_option("-c", "--no-color", action="store_false", dest="colored", default=True, help="Do not show colored output")
+    parser.add_option('--heavy', action='store_true', dest='heavy_tests', default=False, help='Run normal tests and tests marked with HEAVY : True')
+    parser.add_option('-g', '--group', action='store', type='string', dest='group', default='ALL', help='Run only tests in the named group')
+    parser.add_option('--not_group', action='store', type='string', dest='not_group', default='', help='Run only tests NOT in the named group')
+    parser.add_option('--dofs', action='store', dest='dofs', default=0, help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
+
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
@@ -333,8 +345,6 @@ class TestHarness:
     outputgroup.add_option('-s', '--sep-files', action='store_true', dest='sep_files', default=False, metavar='FILE', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
     outputgroup.add_option('--sep-files-ok', action='store_true', dest='ok_files', default=False, metavar='FILE', help='Write the output of each passed test to a separate file')
     outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
-    outputgroup.add_option('--heavy', action='store_true', dest='heavy_tests', default=False, help='Run normal tests and tests marked with HEAVY : True')
-    outputgroup.add_option('--dofs', action='store', dest='dofs', default=0, help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
     outputgroup.add_option("--store-timing", action="store_true", dest="time", default=False, help="Store timing in the database (Currently not implemented)")
     outputgroup.add_option("-r", "--revision", action="store", dest="revision", help="REQUIRED: the current revision (Currently not implemented)")
 
@@ -351,6 +361,9 @@ class TestHarness:
     opts = self.options
     if opts.output_dir and not (opts.file or opts.sep_files or opts.fail_files or opts.ok_files):
       print 'WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option'
+    if opts.group == opts.not_group:
+      print 'ERROR: The group and not_group options cannot specify the same group'
+      sys.exit(1)
 
     # Update any keys from the environment as necessary
     if not self.options.method:
