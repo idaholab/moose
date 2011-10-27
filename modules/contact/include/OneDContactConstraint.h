@@ -39,6 +39,8 @@ public:
 
   virtual void updateContactSet();
 
+  virtual Real computeQpSlaveValue();
+  
   virtual Real computeQpResidual(Moose::ConstraintType type);
 
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);

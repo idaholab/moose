@@ -79,6 +79,19 @@ OneDContactConstraint::shouldApply()
 }
 
 Real
+OneDContactConstraint::computeQpSlaveValue()
+{
+  PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+  std::cerr<<std::endl
+           <<"Popping out node: "<<_current_node->id()<<std::endl
+           <<"Closest Point x: "<<pinfo->_closest_point(0)<<std::endl
+           <<"Current Node x: "<<(*_current_node)(0)<<std::endl
+           <<"Current Value: "<<_u_slave[_qp]<<std::endl<<std::endl;
+  
+  return pinfo->_closest_point(0) - ((*_current_node)(0) - _u_slave[_qp]);
+}
+
+Real
 OneDContactConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
