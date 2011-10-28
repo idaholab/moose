@@ -181,6 +181,7 @@ public:
   friend InputParameters validParams<MooseObject>();
   friend InputParameters validParams<Action>();
   friend InputParameters validParams<Problem>();
+  friend InputParameters emptyInputParameters();
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
@@ -261,6 +262,8 @@ InputParameters validParams()
   InputParameters params;
   return params;
 }
+
+InputParameters emptyInputParameters();
 
 namespace libMesh
 {

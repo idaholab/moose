@@ -15,6 +15,12 @@
 #include "InputParameters.h"
 #include "Moose.h"
 
+InputParameters emptyInputParameters()
+{
+  InputParameters params;
+  return params;
+}
+
 InputParameters::InputParameters(const InputParameters &rhs) : Parameters()
 {
   *this = rhs;
