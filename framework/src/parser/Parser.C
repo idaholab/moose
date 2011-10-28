@@ -56,8 +56,7 @@ Parser::Parser(Syntax & syntax):
   // Need to make sure that the parser pointer is set in the warehouse for various functions
   // TODO: Rip the Parser Pointer out of the warehouse
   Moose::action_warehouse.setParserPointer(this);
-//  if (clearWarehouse)
-//    Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
+  Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
 }
 
 Parser::~Parser()
