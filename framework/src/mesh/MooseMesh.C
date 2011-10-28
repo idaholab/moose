@@ -380,3 +380,55 @@ MooseMesh::bnd_nodes_end ()
   Predicates::NotNull<bnd_node_iterator_imp> p;
   return bnd_node_iterator(_bnd_nodes.end(), _bnd_nodes.end(), p);
 }
+
+const Node *
+MooseMesh::addUniqueNode(const Point & p, Real tol)
+{
+  /**
+   * Looping through the mesh nodes each time we add a point is very slow.  To speed things
+   * up we keep a local data structure
+   */
+  if (_mesh.n_nodes() != _node_map.size())
+  {
+    _node_map.clear();
+    _node_map.reserve(_mesh.n_nodes());
+    for (libMesh::MeshBase::node_iterator i=_mesh.nodes_begin(); i!=_mesh.nodes_end(); ++i)
+    {
+      _node_map.push_back(*i);
+    }
+  }
+
+  Node *node = NULL;
+  for (unsigned int i=0; i<_node_map.size(); ++i)
+  {
+    if (p.relative_fuzzy_equals(*_node_map[i], tol))
+    {
+      node = _node_map[i];
+      break;
+    }
+  }
+  if (node == NULL)
+  {
+    node = _mesh.add_node(new Node(p));
+    _node_map.push_back(node);
+  }
+
+/*  Alternative method
+  libMesh::MeshBase::node_iterator i = _mesh.nodes_begin();
+  libMesh::MeshBase::node_iterator i_end = _mesh.nodes_end();
+  Node *node = NULL;
+  for (; i != i_end; ++i)
+  {
+    if (p.relative_fuzzy_equals(**i, tol))
+    {
+      node = *i;
+      break;
+    }
+  }
+  if (node == NULL)
+    node = _mesh.add_node(new Node(p));
+*/
+
+  mooseAssert(node != NULL, "Node is NULL");
+  return node;
+}

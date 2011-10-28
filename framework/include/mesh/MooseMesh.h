@@ -124,6 +124,13 @@ public:
   void setFileName(const std::string & file_name) { _file_name = file_name; }
   const std::string & getFileName() const { return _file_name; }
 
+  /**
+   * Add a new node to the mesh.  If there is already a node located at the point passed
+   * then the node will not be added.  In either case a refernce to the node at that location
+   * will be returned
+   */
+  const Node * addUniqueNode(const Point & p, Real tol=1e-6);
+
   libMesh::Mesh _mesh;
 
 protected:
@@ -183,6 +190,11 @@ protected:
   unsigned int _patch_size;
 
   std::string _file_name;                              ///< file_name iff this mesh was read from a file
+
+  /**
+   * Vector of all the Nodes in the mesh for determining when to add a new point
+   */
+  std::vector<Node *> _node_map;
 
   void cacheInfo();
   void freeBndNodes();
