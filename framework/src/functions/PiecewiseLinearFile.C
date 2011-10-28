@@ -25,6 +25,7 @@
  **/
 
 #include "PiecewiseLinearFile.h"
+#include "Moose.h"
 
 template<>
 InputParameters validParams<PiecewiseLinearFile>()
@@ -65,6 +66,9 @@ void
 PiecewiseLinearFile::parse( std::vector<Real> & x, std::vector<Real> & y )
 {
   std::ifstream file(_file_name.c_str());
+  if (!file.good())
+    mooseError("Error opening file '" + _file_name + "' from PiecewiseLinearFile function.");
+
    std::string line;
    unsigned int linenum = 0;
    unsigned int itemnum;
