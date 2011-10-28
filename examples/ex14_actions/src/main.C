@@ -64,7 +64,7 @@ int main (int argc, char** argv)
    * contain a leading slash.  Wildcard characters can be used to replace a piece of the
    * path.
    */
-  p.registerActionSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
+  Moose::syntax.registerActionSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
 
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();
