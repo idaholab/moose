@@ -68,56 +68,55 @@ PiecewiseLinearFile::parse( std::vector<Real> & x, std::vector<Real> & y )
   std::ifstream file(_file_name.c_str());
   if (!file.good())
     mooseError("Error opening file '" + _file_name + "' from PiecewiseLinearFile function.");
+  std::string line;
+  unsigned int linenum = 0;
+  unsigned int itemnum;
+  std::vector<Real> data;
 
-   std::string line;
-   unsigned int linenum = 0;
-   unsigned int itemnum;
-   std::vector<Real> data;
-
-   while (getline (file, line))
-   {
-     linenum++;
+  while (getline (file, line))
+  {
+    linenum++;
 //     std::cout << "\nLine #" << linenum << ":" << std::endl;
-     std::istringstream linestream(line);
-     std::string item;
-     itemnum = 0;
-     while (getline (linestream, item, ','))
-     {
-       itemnum++;
-       std::istringstream i(item);
-       Real d;
-       i >> d;
-       data.push_back( d );
-//       std::cout << "Item #" << itemnum << ": " << item << std::endl;
+    std::istringstream linestream(line);
+    std::string item;
+    itemnum = 0;
+    while (getline (linestream, item, ','))
+    {
+      itemnum++;
+      std::istringstream i(item);
+      Real d;
+      i >> d;
+      data.push_back( d );
+      //       std::cout << "Item #" << itemnum << ": " << item << std::endl;
 
-     }
-   }
+    }
+  }
 //   std::cout << " linenum " << linenum << std::endl;
 //   std::cout << " itemnum " << itemnum << std::endl;
 
-   x.resize(itemnum);
-   y.resize(itemnum);
-   unsigned int offset(0);
-   // Extract the first line's data (the x axis data)
-   for (unsigned int i(0); i < itemnum; ++i)
-   {
-     x[i] = data[offset];
-     ++offset;
-/*     std::cout << " " << std::endl;
-     std::cout << " x " << x[i] << std::endl;
-     std::cout << " i " << i << std::endl;
-     std::cout << " " << std::endl;
+  x.resize(itemnum);
+  y.resize(itemnum);
+  unsigned int offset(0);
+  // Extract the first line's data (the x axis data)
+  for (unsigned int i(0); i < itemnum; ++i)
+  {
+    x[i] = data[offset];
+    ++offset;
+/*    std::cout << " " << std::endl;
+    std::cout << " x " << x[i] << std::endl;
+    std::cout << " i " << i << std::endl;
+    std::cout << " " << std::endl;
 */
-   }
-      for (unsigned int j(0); j < itemnum; ++j)
-   {
-     // Extract the y axis entry for this line
-     y[j] = data[offset];
-     ++offset;
-/*     std::cout << " " << std::endl;
-     std::cout << " y " << y[j] << std::endl;
-     std::cout << " j " << j << std::endl;
-     std::cout << " " << std::endl;
+  }
+  for (unsigned int j(0); j < itemnum; ++j)
+  {
+    // Extract the y axis entry for this line
+    y[j] = data[offset];
+    ++offset;
+/*    std::cout << " " << std::endl;
+    std::cout << " y " << y[j] << std::endl;
+    std::cout << " j " << j << std::endl;
+    std::cout << " " << std::endl;
 */
-   }
+  }
 }

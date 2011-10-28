@@ -24,6 +24,9 @@ missing_mesh_test = { INPUT : 'missing_mesh_test.i',
 missing_function_test = { INPUT : 'missing_function_test.i',
                           EXPECT_ERR : "Unable to find function \S+" }
 
+missing_function_file_test = { INPUT : 'missing_function_file_test.i',
+                               EXPECT_ERR : "Problem reading file \S+ for PiecewiseLinearFile function" }
+
 bad_material_block_test = { INPUT : 'bad_material_block_test.i',
                             EXPECT_ERR : 'Material block \S+ specified in the input file does not exist' }
 
