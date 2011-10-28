@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import sys, string, subprocess, re, socket
 
-checkout_moose_stable = ['svn', 'co', 'svn+ssh://hpcsc/svn/herd/branches/stable/moose', 'moose-stable']
-get_merged_revisions = ['svn', 'mergeinfo', 'svn+ssh://hpcsc/svn/herd/trunk/moose', '--show-revs', 'eligible', 'moose-stable']
+checkout_moose_stable = ['svn', 'co', 'https://hpcsc/svn/herd/branches/stable/moose', 'moose-stable']
+get_merged_revisions = ['svn', 'mergeinfo', 'https://hpcsc/svn/herd/trunk/moose', '--show-revs', 'eligible', 'moose-stable']
 get_revision_logs = ['svn', 'log']
 commit_moose_stable = ['svn', 'ci', '--username', 'moosetest', 'moose-stable', '-m']
 
@@ -10,9 +10,9 @@ def runCMD(cmd_opts):
   a_proc = subprocess.Popen(cmd_opts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   retstr = a_proc.communicate()
   if not a_proc.poll() == 0:
-    return [ False, retstr[1] ]
+    return ( False, retstr[1] )
   else:
-    return [ True, retstr[0] ]
+    return ( True, retstr[0] )
 
 def parseLOG(merge_log):
   svn_log = []
@@ -42,15 +42,29 @@ def clobberRevisions(revision_list):
 
 if __name__ == '__main__':
   if socket.gethostname().split('.')[0] == 'quark':
-    runCMD(checkout_moose_stable)
-    merged_revisions = runCMD(get_merged_revisions)
-    if merged_revisions[0]:
-      merged_revisions = string.split(merged_revisions[1], '\n')
+    # Checking out moose-stable
+    ( RetCode, data ) = runCMD(checkout_moose_stable)
+    if RetCode == False:
+      print 'Failed to check out moose stable:', data
+      sys.exit(1)
+    # Getting Merged version information
+    ( RetCode, data ) = runCMD(get_merged_revisions)
+    if RetCode:
+      merged_revisions = string.split(data, '\n')
+    else:
+      print 'Failed to obtain revision information:', data
+      sys.exit(1)
     for revision in merged_revisions:
       if revision != '':
         get_revision_logs.append('-' + revision)
-    get_revision_logs.append('svn+ssh://hpcsc/svn/herd/trunk/moose')
-    merge_log = runCMD(get_revision_logs)
-    final_log = parseLOG(merge_log[1])
+    get_revision_logs.append('https://hpcsc/svn/herd/trunk/moose')
+    ( RetCode, data ) = runCMD(get_revision_logs)
+    if RetCode == False:
+      print 'Failed to obtain log information:', data
+    final_log = parseLOG(data)
     commit_moose_stable.append('$\'' + final_log + '\'')
-    runCMD(commit_moost_stable)
+    ( RetCode, data ) = runCMD(commit_moost_stable)
+    if RetCode == False:
+      print 'Failed to checkin moose stable after merge:', data
+      sys.exit(1)
+  sys.exit(0)
