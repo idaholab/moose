@@ -45,3 +45,4 @@ run: $(wildcard examples/ex*/*.C)
 test:
 	@for dir in $(dirlist); do $(MAKE) -C "$${dir}" $(MAKECMDGOALS)||exit 1; done
 
+
