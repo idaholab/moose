@@ -360,6 +360,21 @@ public:
     _solution.close();
   }
 
+  virtual void projectSolution (Number fptr(const Point& p,
+                                             const Parameters& parameters,
+                                             const std::string& sys_name,
+                                             const std::string& unknown_name),
+                                 Gradient gptr(const Point& p,
+                                               const Parameters& parameters,
+                                               const std::string& sys_name,
+                                               const std::string& unknown_name),
+                                 Parameters& parameters) const
+  {
+    // project the solution only if we have dofs in this system (without this check, libMesh will freak out and crash on us)
+    if (_sys.n_dofs() > 0)
+      _sys.project_solution(fptr, gptr, parameters);
+  }
+
   /**
    * Get a reference to libMesh system object
    * @return the reference to the libMesh object

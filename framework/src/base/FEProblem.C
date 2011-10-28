@@ -898,8 +898,8 @@ FEProblem::initialGradient (const Point& p,
 void
 FEProblem::projectSolution()
 {
-  _nl.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
-  _aux.sys().project_solution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
+  _nl.projectSolution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
+  _aux.projectSolution(Moose::initial_value, Moose::initial_gradient, _eq.parameters);
 }
 
 void
