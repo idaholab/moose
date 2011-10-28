@@ -48,6 +48,7 @@ Parser::Parser(Syntax & syntax):
   _exreader(NULL),
   _loose(false),
   _syntax(syntax),
+  _action_wh(Moose::action_warehouse),
   _syntax_formatter(NULL),
   _getpot_initialized(false)
 {
@@ -55,9 +56,28 @@ Parser::Parser(Syntax & syntax):
 
   // Need to make sure that the parser pointer is set in the warehouse for various functions
   // TODO: Rip the Parser Pointer out of the warehouse
-  Moose::action_warehouse.setParserPointer(this);
-  Moose::action_warehouse.clear();                      // new parser run, get rid of old actions
+  _action_wh.setParserPointer(this);
+  _action_wh.clear();                      // new parser run, get rid of old actions
 }
+
+Parser::Parser(Syntax & syntax, ActionWarehouse & action_wh) :
+    _mesh(NULL),
+    _displaced_mesh(NULL),
+    _problem(NULL),
+    _exreader(NULL),
+    _loose(false),
+    _syntax(syntax),
+    _action_wh(action_wh),
+    _syntax_formatter(NULL),
+    _getpot_initialized(false)
+{
+  initOptions();
+
+  // Need to make sure that the parser pointer is set in the warehouse for various functions
+  // TODO: Rip the Parser Pointer out of the warehouse
+  _action_wh.setParserPointer(this);
+}
+
 
 Parser::~Parser()
 {
@@ -276,7 +296,7 @@ Parser::parse(const std::string &input_filename)
             extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
 
           // add it to the warehouse
-          Moose::action_warehouse.addActionBlock(action);
+          _action_wh.addActionBlock(action);
         }
       }
     }
@@ -293,7 +313,7 @@ Parser::parse(const std::string &input_filename)
   // Print the input file syntax if requested
   if (Moose::command_line && searchCommandLine("ShowTree"))
   {
-    Moose::action_warehouse.printInputFile(std::cout);
+    _action_wh.printInputFile(std::cout);
     std::cout << std::endl << std::endl;
   }
 }
@@ -508,7 +528,7 @@ Parser::getPotHandle() const
 void
 Parser::execute()
 {
-  Moose::action_warehouse.executeAllActions();
+  _action_wh.executeAllActions();
 }
 
 void
@@ -589,11 +609,11 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
   static const std::string global_params_block_name = "GlobalParams";
 
   static const std::string global_params_action_name = "set_global_params";
-  ActionIterator act_iter = Moose::action_warehouse.actionBlocksWithActionBegin(global_params_action_name);
+  ActionIterator act_iter = _action_wh.actionBlocksWithActionBegin(global_params_action_name);
   GlobalParamsAction *global_params_block = NULL;
 
   // We are grabbing only the first
-  if (act_iter != Moose::action_warehouse.actionBlocksWithActionEnd(global_params_action_name))
+  if (act_iter != _action_wh.actionBlocksWithActionEnd(global_params_action_name))
     global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
 
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)

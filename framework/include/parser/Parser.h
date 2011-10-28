@@ -37,6 +37,7 @@ public:
   };
 
   Parser(Syntax & syntax);
+  Parser(Syntax & syntax, ActionWarehouse & action_wh);
 
   virtual ~Parser();
 
@@ -148,6 +149,7 @@ public:
 
 protected:
   Syntax & _syntax;
+  ActionWarehouse & _action_wh;
 
 private:
   /**
