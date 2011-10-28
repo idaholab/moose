@@ -291,9 +291,9 @@ Parser::parse(const std::string &input_filename)
           mooseAssert (action != NULL, std::string("Action") + i->second._action + " not created");
 
           // extract the MooseObject params if necessary
-          MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
-          if (moose_object_action)
-            extractParams(curr_identifier, moose_object_action->getMooseObjectParams());
+          ObjectAction * object_action = dynamic_cast<ObjectAction *>(action);
+          if (object_action)
+            extractParams(curr_identifier, object_action->getObjectParams());
 
           // add it to the warehouse
           _action_wh.addActionBlock(action);

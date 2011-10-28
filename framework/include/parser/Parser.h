@@ -151,7 +151,6 @@ protected:
   Syntax & _syntax;
   ActionWarehouse & _action_wh;
 
-private:
   /**
    * This function initializes the command line options recognized by MOOSE based applications
    */

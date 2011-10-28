@@ -12,33 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEOBJECTACTION_H
-#define MOOSEOBJECTACTION_H
+#ifndef OBJECTACTION_H
+#define OBJECTACTION_H
 
 #include "InputParameters.h"
 #include "Moose.h"
-#include "ObjectAction.h"
+#include "Action.h"
 
 #include <string>
 
-class MooseObjectAction;
+class ObjectAction;
 
 template<>
-InputParameters validParams<MooseObjectAction>();
+InputParameters validParams<ObjectAction>();
 
 
-class MooseObjectAction : public ObjectAction
+class ObjectAction : public Action
 {
 public:
-  MooseObjectAction(const std::string & name, InputParameters params);
+  ObjectAction(const std::string & name, InputParameters params);
 
-  inline InputParameters & getObjectParams() { return _moose_object_pars; }
-
-  virtual void addParamsPtrs(std::vector<InputParameters *> & param_ptrs);
+  virtual InputParameters & getObjectParams() = 0;
 
 protected:
-  std::string _type;
-  InputParameters _moose_object_pars;
 };
 
-#endif // MOOSEOBJECTACTION_H
+#endif // OBJECTACTION_H

@@ -91,10 +91,10 @@ ActionWarehouse::addActionBlock(Action * blk)
   MooseObjectAction * moa = dynamic_cast<MooseObjectAction *>(blk);
   if (moa)
   {
-    InputParameters mparams = moa->getMooseObjectParams();
+    InputParameters mparams = moa->getObjectParams();
     if (mparams.have_parameter<std::string>("built_by_action"))
     {
-      std::string moose_action_name = moa->getMooseObjectParams().get<std::string>("built_by_action");
+      std::string moose_action_name = moa->getObjectParams().get<std::string>("built_by_action");
       if (moose_action_name != action_name &&
           moose_action_name != "add_aux_bc" && moose_action_name != "add_aux_kernel") // The exception
         mooseError("Inconsistent Action Name detected! Action that satisfies " + action_name + " is building a MOOSE Object that normally satisfies " + moose_action_name);
@@ -229,7 +229,7 @@ ActionWarehouse::executeAllActions()
      // so that Meta-Actions can complete the build of parameters as necessary
      MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*act_iter);
      if (moose_obj_action != NULL)
-       moose_obj_action->getMooseObjectParams().checkParams(moose_obj_action->name());
+       moose_obj_action->getObjectParams().checkParams(moose_obj_action->name());
 
      if (_show_actions)
        std::cerr << "[DBG][ACT] - " << (*act_iter)->name() << std::endl;
@@ -250,7 +250,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & name)
     // so that Meta-Actions can complete the build of parameters as necessary
     MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*act_iter);
     if (moose_obj_action != NULL)
-      moose_obj_action->getMooseObjectParams().checkParams(moose_obj_action->name());
+      moose_obj_action->getObjectParams().checkParams(moose_obj_action->name());
 
     (*act_iter)->act();
   }
