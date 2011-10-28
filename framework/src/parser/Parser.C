@@ -261,7 +261,7 @@ Parser::parse(const std::string &input_filename)
 
     // We need to retrieve a list of Actions associated with the current identifier
     std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
-              std::multimap<std::string, Syntax::ActionInfo>::iterator> iters = Moose::syntax.getActions(registered_identifier);
+              std::multimap<std::string, Syntax::ActionInfo>::iterator> iters = _syntax.getActions(registered_identifier);
 
     if (iters.first == iters.second)
       mooseError(std::string("A '") + curr_identifier + "' is not an associated Action\n\n");

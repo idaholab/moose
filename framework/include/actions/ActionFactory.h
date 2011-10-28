@@ -27,6 +27,7 @@
 /**
  * Macros
  */
+#define stringifyName(name) #name
 #define registerActionName(name, is_required)   Moose::action_warehouse.registerName(name, is_required)
 #define registerAction(tplt, action)      ActionFactory::instance()->reg<tplt>(stringifyName(tplt), action)
 
