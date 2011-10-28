@@ -85,9 +85,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
 {
   std::ifstream file(_file_name.c_str());
   if (!file.good())
-  {
-    mooseError("Problem reading file "+_file_name+" for PiecewiseBilinear function");
-  }
+    mooseError("Error opening file '" + _file_name + "' from PiecewiseBilinear function.");
    std::string line;
    unsigned int linenum = 0;
    unsigned int itemnum = 0;
