@@ -210,7 +210,6 @@ void associateSyntax()
 
   // Loose Coupling
   syntax.registerActionSyntax("EmptyAction", "SubProblems");
-  syntax.registerActionSyntax("AddSubProblemAction", "SubProblems/*");
 }
 
 
