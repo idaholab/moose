@@ -68,7 +68,7 @@ ContactAction::act()
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
-    InputParameters & params = moose_object_action->getMooseObjectParams();
+    InputParameters & params = moose_object_action->getObjectParams();
 
     params.set<std::string>("model") = _model;
     params.set<std::string>("order") = _order;
@@ -108,7 +108,7 @@ ContactAction::act()
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
-    InputParameters & params = moose_object_action->getMooseObjectParams();
+    InputParameters & params = moose_object_action->getObjectParams();
 
     params.set<std::string>("model") = _model;
     params.set<std::string>("order") = _order;

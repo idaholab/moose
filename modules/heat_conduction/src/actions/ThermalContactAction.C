@@ -56,7 +56,7 @@ ThermalContactAction::addBcs()
   MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
 
-  InputParameters & params = moose_object_action->getMooseObjectParams();
+  InputParameters & params = moose_object_action->getObjectParams();
 
   // get valid params for the BC specified in 'type' field
   InputParameters bc_params = Factory::instance()->getValidParams(getParam<std::string>("type"));
@@ -172,7 +172,7 @@ ThermalContactAction::addAuxBcs()
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
-    InputParameters & params = moose_object_action->getMooseObjectParams();
+    InputParameters & params = moose_object_action->getObjectParams();
     params.set<std::string>("variable") = GAP_VALUE_VAR_NAME;
     std::vector<unsigned int> bnds(1, getParam<unsigned int>("slave"));
     params.set<std::vector<unsigned int> >("boundary") = bnds;
@@ -191,7 +191,7 @@ ThermalContactAction::addAuxBcs()
     MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
     mooseAssert (moose_object_action, "Dynamic Cast failed");
 
-    InputParameters & params = moose_object_action->getMooseObjectParams();
+    InputParameters & params = moose_object_action->getObjectParams();
     params.set<std::string>("variable") = PENETRATION_VAR_NAME;
     std::vector<unsigned int> bnds(1, getParam<unsigned int>("slave"));
     params.set<std::vector<unsigned int> >("boundary") = bnds;
@@ -221,7 +221,7 @@ ThermalContactAction::addDiracKernels()
   MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
 
-  InputParameters & params = moose_object_action->getMooseObjectParams();
+  InputParameters & params = moose_object_action->getObjectParams();
   params.set<std::string>("variable") = getParam<std::string>("variable");
   params.set<unsigned int>("boundary") = getParam<unsigned int>("master");
   params.set<unsigned int>("slave") = getParam<unsigned int>("slave");
