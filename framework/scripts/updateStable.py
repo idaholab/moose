@@ -5,7 +5,7 @@ checkout_moose_stable = ['svn', 'co', '--quiet', 'https://hpcsc/svn/herd/branche
 get_merged_revisions = ['svn', 'mergeinfo', 'https://hpcsc/svn/herd/trunk/moose', '--show-revs', 'eligible', 'moose-stable']
 get_revision_logs = ['svn', 'log']
 merge_moose_trunk = ['svn', 'merge', 'https://hpcsc/svn/herd/trunk/moose', 'moose-stable' ]
-commit_moose_stable = ['svn', 'ci', '--username', 'moosetest', '-F', 'svn-log.log', 'moose-stable']
+commit_moose_stable = ['svn', 'ci', '--username', 'moosetest', '-F', 'svn_log.log', 'moose-stable']
 
 def runCMD(cmd_opts):
   a_proc = subprocess.Popen(cmd_opts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
