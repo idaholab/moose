@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import os, sys, string, subprocess, re, socket
-
+head_node = 'quark'
 checkout_moose_stable = ['svn', 'co', '--quiet', 'https://hpcsc/svn/herd/branches/stable/moose', 'moose-stable']
 get_merged_revisions = ['svn', 'mergeinfo', 'https://hpcsc/svn/herd/trunk/moose', '--show-revs', 'eligible', 'moose-stable']
 get_revision_logs = ['svn', 'log']
@@ -25,12 +25,12 @@ def parseLOG(merge_log):
     if re.match(r'(^-+)', item) is not None:
       svn_log.append('  ----\n')
     else:
-      for cmd_language in ['close #', 'closed #', 'closes #', 'fix #', 'fixed #', 'fixes #', 'references #', 'ref #', 'refs #', 'addresses #', 're #', 'see #']:
+      for cmd_language in ['close #', 'closed #', 'closes #', 'fix #', 'fixed #', 'fixes #', 'references #', 'refs #', 'addresses #', 're #', 'see #']:
         tmp_item = str.lower(item)
         if tmp_item.find(cmd_language) != -1:
-          pos_start = (int(tmp_item.find(cmd_language)))
-          pos_end = (int(tmp_item.find(cmd_language)) + (len(cmd_language) - 1))
-          item = str(item[:pos_start]) + str(item[pos_end:])
+          pos_start = (int(tmp_item.find(cmd_language)) + (len(cmd_language) - 2))
+          pos_end = (int(tmp_item.find(cmd_language)) + (len(cmd_language) - 2))
+          item = str(item[:pos_start]) + ':' + str(item[pos_end:])
       svn_log.append(item + '\n')
   for log_line in svn_log:
     final_log = final_log + str(log_line)
@@ -49,7 +49,7 @@ def clobberRevisions(revision_list):
   return tmp_list
 
 if __name__ == '__main__':
-  if socket.gethostname().split('.')[0] == 'quark':
+  if socket.gethostname().split('.')[0] == head_node:
     # Checking out moose-stable
     runCMD(checkout_moose_stable)
     # Get Merged version numbers
