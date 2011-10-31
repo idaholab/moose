@@ -63,7 +63,7 @@ if __name__ == '__main__':
       print 'Failed to obtain log information:', data
     final_log = parseLOG(data)
     commit_moose_stable.append('$\'' + final_log + '\'')
-    ( RetCode, data ) = runCMD(commit_moost_stable)
+    ( RetCode, data ) = runCMD(commit_moose_stable)
     if RetCode == False:
       print 'Failed to checkin moose stable after merge:', data
       sys.exit(1)
