@@ -86,7 +86,7 @@ ConvDiffMetaAction::act()
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
-    InputParameters & params = moose_object_action->getMooseObjectParams();
+    InputParameters & params = moose_object_action->getObjectParams();
     params.set<std::string>("variable") = variables[0];
   // add it to the warehouse
   Moose::action_warehouse.addActionBlock(action);
@@ -99,7 +99,7 @@ ConvDiffMetaAction::act()
   moose_object_action = dynamic_cast<MooseObjectAction *>(action);
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
-    InputParameters & params = moose_object_action->getMooseObjectParams();
+    InputParameters & params = moose_object_action->getObjectParams();
     params.set<std::string>("variable") = variables[1];
   }
   // add it to the warehouse
@@ -113,7 +113,7 @@ ConvDiffMetaAction::act()
   mooseAssert (moose_object_action, "Dynamic Cast failed");
   {
     std::vector<std::string> vel_vec_variable;
-    InputParameters & params = moose_object_action->getMooseObjectParams();
+    InputParameters & params = moose_object_action->getObjectParams();
     params.set<std::string>("variable") = variables[0];
     vel_vec_variable.push_back(variables[1]);
     params.set<std::vector<std::string> >("some_variable") = vel_vec_variable;
