@@ -269,7 +269,7 @@ class TestHarness:
   # Write the app_name to a file, if the tests passed
   def writeState(self, app_name):
     # If we encounter bitten_status_moose environment, build a line itemized list of applications which passed their tests
-    if os.environ.has_key("BITTEN_STATUS_MOOSE") or True:
+    if os.environ.has_key("BITTEN_STATUS_MOOSE"):
       result_file = open(os.path.join(self.moose_dir, 'test_results.log'), 'a')
       result_file.write(str(os.path.split(app_name)[1][:-4]) + '\n')
       result_file.close()
