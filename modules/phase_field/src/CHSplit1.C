@@ -24,7 +24,7 @@ Real
 CHSplit1::computeQpResidual()
 {
   RealGradient grad_w = _grad_u[_qp];
-  if (_implicit)
+  if (_implicit == false) // explicit
     grad_w = _grad_u_old[_qp];
   
   return  _M[_qp]*grad_w*_grad_test[_i][_qp];
@@ -42,8 +42,12 @@ CHSplit1::computeQpJacobian()
 
 
 Real
-CHSplit1::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+CHSplit1::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return 0.0;
+  if (jvar == _c_var && _implicit)
+    return 0.0;
+  else
+    return 0.0;
+  
 }
 

@@ -61,10 +61,10 @@ CHSplit2ChemPot::computeQpJacobian()
   
   Real df_prime_zero_dc = computeDFDC(Jacobian,c);
 
-  Real value = df_prime_zero_dc*_test[_i][_qp] + _kappa[_qp]*_grad_phi[_j][_qp]*_grad_test[_i][_qp];
+  Real value = 0.0;
   
-  if (_implicit == false)
-    value = 0.0;
+  if (_implicit)
+    value = df_prime_zero_dc*_test[_i][_qp] + _kappa[_qp]*_grad_phi[_j][_qp]*_grad_test[_i][_qp];
   
   return value;
   
@@ -73,12 +73,9 @@ CHSplit2ChemPot::computeQpJacobian()
 Real
 CHSplit2ChemPot::computeQpOffDiagJacobian(unsigned int jvar)
 {
-
   if(jvar == _w_var && _implicit)
-  {
-   return -_phi[_j][_qp]*_test[_i][_qp];
-  }
-
-  return 0.0;
+    return -_phi[_j][_qp]*_test[_i][_qp];
+  else
+    return 0.0;
 }
 

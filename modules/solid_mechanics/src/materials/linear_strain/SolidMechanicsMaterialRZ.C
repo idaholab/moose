@@ -12,6 +12,8 @@ InputParameters validParams<SolidMechanicsMaterialRZ>()
   params.addRequiredCoupledVar("disp_r", "The r displacement");
   params.addRequiredCoupledVar("disp_z", "The z displacement");
   params.addParam<bool>("large_strain", false, "Whether to include large strain terms");
+  params.addCoupledVar("c","variable that zeros out the stiffness");
+  
   return params;
 }
 
@@ -22,7 +24,9 @@ SolidMechanicsMaterialRZ::SolidMechanicsMaterialRZ(const std::string & name,
    _disp_z(coupledValue("disp_z")),
    _large_strain(getParam<bool>("large_strain")),
    _grad_disp_r(coupledGradient("disp_r")),
-   _grad_disp_z(coupledGradient("disp_z"))
+   _grad_disp_z(coupledGradient("disp_z")),
+   _has_c(isCoupled("c")),
+   _c( _has_c ? coupledValue("c") : _zero)
 {
   SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ;
   mooseAssert(_lambda_set, "Internal error:  lambda not set");
@@ -69,8 +73,25 @@ SolidMechanicsMaterialRZ::computeStress()
   computeNetElasticStrain(input_strain, _strain_increment);
 
   // C * e
-  _stress[_qp] = _elasticity_tensor[_qp] * _strain_increment;
+  if (_has_c)
+  {
+    Real h = (1.0 - _c[_qp]);//*(1.0 - _c[_qp]);
+    if (h < 0.0)
+      h = 0.00;
+    else if (h > 1.0)
+      h = 1.0;
+
+    if (h < 0.99)
+      std::cout << "h = " << h << std::endl;
+      
+    _stress[_qp] = _elasticity_tensor[_qp] * _strain_increment;
+    _stress[_qp] *= h;
+  }
+  else  
+    _stress[_qp] = _elasticity_tensor[_qp] * _strain_increment;
+  
   _stress[_qp] += _stress_old;
+  
 
 }
 

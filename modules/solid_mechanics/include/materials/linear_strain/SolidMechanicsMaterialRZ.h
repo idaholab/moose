@@ -39,6 +39,9 @@ protected:
   VariableGradient & _grad_disp_r;
   VariableGradient & _grad_disp_z;
 
+  bool _has_c;
+  VariableValue & _c;
+
 };
 
 #endif //SOLIDMECHANICSMATERIALRZ_H
