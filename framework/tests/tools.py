@@ -136,8 +136,13 @@ class TestHarness:
       return False
 
     # Check for skipped tests
-    if test[SKIP]:
-      self.handleTestResult(test, '', 'skipped')
+    if type(test[SKIP]) is bool:
+      # Backwards compatible (no reason)
+      if test[SKIP]:
+        self.handleTestResult(test, '', 'skipped')
+        return False
+    elif test[SKIP] != '':
+      self.handleTestResult(test, '', 'skipped (' + test[SKIP] + ')')
       return False
 
     # Check for matching platform

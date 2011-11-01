@@ -78,7 +78,7 @@ multi_precond_test = { INPUT : 'multi_precond_test.i',
 bad_second_order_test = { INPUT : 'bad_second_order_test.i',
                           EXPECT_ERR : 'Error in libMesh internal logic',
                           SHOULD_CRASH : True,
-                          SKIP : True}
+                          SKIP : 'Inconsistent Error'}
 
 wrong_object_test = { INPUT : 'wrong_moose_object_test.i',
                       EXPECT_ERR : 'Inconsistent Action Name detected!' }
