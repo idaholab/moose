@@ -261,6 +261,14 @@ class TestHarness:
         f.write(output)
         f.close()
 
+  # Write the app_name to a file, if the tests passed
+  def writeState(self, app_name):
+    # If we encounter bitten_status_moose environment, build a line itemized list of applications which passed their tests
+    if os.environ.has_key("BITTEN_STATUS_MOOSE") or True:
+      result_file = open(os.path.join(self.moose_dir, 'test_results.log'), 'a')
+      result_file.write(str(os.path.split(app_name)[1][:-4]) + '\n')
+      result_file.close()
+
   # Print final results, close open files, and exit with the correct error code
   def cleanupAndExit(self):
     # Print the results table again if a bunch of output was spewed to the screen between
@@ -289,6 +297,7 @@ class TestHarness:
       self.file.close()
 
     if self.num_failed == 0:
+      self.writeState(self.executable)
       sys.exit(0)
     else:
       sys.exit(1)
