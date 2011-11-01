@@ -177,6 +177,8 @@ protected:
    */
   void buildCommandLineVarsVector();
 
+  void checkUnidentifiedParams(std::vector<std::string> & all_vars);
+
   template<typename T>
   void setScalarParameter(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
@@ -213,6 +215,9 @@ protected:
   bool _getpot_initialized;
   GetPot _getpot_file;
   std::string _input_filename;
+
+  // The set of all variables extracted from the input file
+  std::set<std::string> _extracted_vars;
 
 public:
   /// Functor for sorting input file syntax in MOOSE desired order

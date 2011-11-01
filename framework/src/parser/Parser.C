@@ -165,6 +165,14 @@ Parser::initOptions()
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
   _cli_options["Threads"] = cli_opt;
+
+  syntax.clear();
+  cli_opt.desc = "Warn about unused input file options";
+  syntax.push_back("-w");
+  syntax.push_back("--warn_unused");
+  cli_opt.cli_syntax = syntax;
+  cli_opt.required = false;
+  _cli_options["WarnUnused"] = cli_opt;
 }
 
 bool
@@ -310,6 +318,13 @@ Parser::parse(const std::string &input_filename)
   // Check to make sure that all sections in the input file that are explicitly listed are actually present
   checkActiveUsed(section_names, active_lists);
 
+  // If the user has requested see if there are unidentified name/value pairs in the input file
+  if (searchCommandLine("WarnUnused"))
+  {
+    std::vector<std::string> all_vars = _getpot_file.get_variable_names();
+    checkUnidentifiedParams(all_vars);
+  }
+
   // Print the input file syntax if requested
   if (Moose::command_line && searchCommandLine("ShowTree"))
   {
@@ -348,6 +363,26 @@ Parser::checkActiveUsed(std::vector<std::string > & sections,
     mooseError(oss.str());
   }
 }
+
+void
+Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars)
+{
+  std::set<std::string> difference;
+
+  std::sort(all_vars.begin(), all_vars.end());
+
+  std::set_difference(all_vars.begin(), all_vars.end(), _extracted_vars.begin(), _extracted_vars.end(),
+                      std::inserter(difference, difference.end()));
+
+  if (!difference.empty())
+  {
+    std::cout << "*** WARNING: The following parameters were unused in your input file:\n";
+    for (std::set<std::string>::iterator i=difference.begin(); i != difference.end(); ++i)
+      std::cout << *i << "\n";
+    std::cout << "*** WARNING\n\n";
+  }
+}
+
 
 void
 Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out)
@@ -622,6 +657,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     bool in_global = false;
     std::string orig_name = prefix + "/" + it->first;
     std::string full_name = orig_name;
+    _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
 
     // Mark parameters appearing in the input file or command line
     if (_getpot_file.have_variable(full_name.c_str())

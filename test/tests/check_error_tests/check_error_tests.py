@@ -93,3 +93,10 @@ deprecated_block_test = {
   INPUT : 'deprecated_block_test.i',
   EXPECT_ERR : "Input file block '\S+' has been deprecated."
 }
+
+unused_param_test = {
+ INPUT : 'unused_param_test.i',
+ CLI_ARGS : ['--warn_unused'],
+ EXPECT_OUT : 'WARNING: The following parameters were unused in your input file'
+}
+
