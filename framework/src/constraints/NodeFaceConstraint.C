@@ -80,7 +80,9 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
 
   _second_u_master(_var.secondSlnNeighbor()),
   _dof_map(_sys.dofMap()),
-  _node_to_elem_map(_mesh.nodeToElemMap())
+  _node_to_elem_map(_mesh.nodeToElemMap()),
+
+  _overwrite_slave_residual(true)
 {
   // Put a "1" into phi_slave and test_slave
   // These will always only have one entry that is 1
@@ -101,8 +103,6 @@ NodeFaceConstraint::computeResidual()
 //  std::cerr<<"Here!"<<std::endl;
   DenseVector<Number> & re = _asmb.residualBlock(_var.number());
   DenseVector<Number> & neighbor_re = _asmb.residualBlockNeighbor(_var.number());
-//  neighbor_re.zero();
-//  re.zero();
 
 //  for (_qp = 0; _qp < _master_qrule->n_points(); _qp++)
 //  {

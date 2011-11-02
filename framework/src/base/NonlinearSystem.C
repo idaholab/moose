@@ -841,30 +841,33 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 
         if(slave_node.processor_id() == libMesh::processor_id())
         {
-          PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
-
-          Elem * master_elem = info._elem;
-          unsigned int master_side = info._side_num;
-
-          // reinit variables at the node
-          _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
-
-          _problem.prepareAssembly(0);
-
-          std::vector<Point> points;
-          points.push_back(info._closest_point);
-
-          // reinit variables on the master element's face at the contact point
-          _problem.reinitNeighbor(master_elem, master_side, points, 0);
-
-          for(unsigned int c=0; c < constraints.size(); c++)
+          if(pen_loc._penetration_info[slave_node_num])
           {
-            NodeFaceConstraint * nfc = constraints[c];
+            PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            if(nfc->shouldApply())
+            Elem * master_elem = info._elem;
+            unsigned int master_side = info._side_num;
+
+            // reinit variables at the node
+            _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+
+            _problem.prepareAssembly(0);
+
+            std::vector<Point> points;
+            points.push_back(info._closest_point);
+
+            // reinit variables on the master element's face at the contact point
+            _problem.reinitNeighbor(master_elem, master_side, points, 0);
+
+            for(unsigned int c=0; c < constraints.size(); c++)
             {
-              constraints_applied = true;
-              nfc->computeSlaveValue(solution);
+              NodeFaceConstraint * nfc = constraints[c];
+
+              if(nfc->shouldApply())
+              {
+                constraints_applied = true;
+                nfc->computeSlaveValue(solution);
+              }
             }
           }
         }
@@ -926,33 +929,39 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
         if(slave_node.processor_id() == libMesh::processor_id())
         {
-          PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
-
-          Elem * master_elem = info._elem;
-          unsigned int master_side = info._side_num;
-
-          // reinit variables at the node
-          _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
-
-          _problem.prepareAssembly(0);
-
-          std::vector<Point> points;
-          points.push_back(info._closest_point);
-
-          // reinit variables on the master element's face at the contact point
-          _problem.reinitNeighbor(master_elem, master_side, points, 0);
-
-          for(unsigned int c=0; c < constraints.size(); c++)
+          if(pen_loc._penetration_info[slave_node_num])
           {
-            NodeFaceConstraint * nfc = constraints[c];
+            PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            if(nfc->shouldApply())
+            Elem * master_elem = info._elem;
+            unsigned int master_side = info._side_num;
+
+            // reinit variables at the node
+            _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+
+            _problem.prepareAssembly(0);
+
+            std::vector<Point> points;
+            points.push_back(info._closest_point);
+
+            // reinit variables on the master element's face at the contact point
+            _problem.reinitNeighbor(master_elem, master_side, points, 0);
+
+            for(unsigned int c=0; c < constraints.size(); c++)
             {
-              constraints_applied = true;
-              nfc->computeResidual();
+              NodeFaceConstraint * nfc = constraints[c];
 
-              _problem.setResidual(residual, 0);
-              _problem.cacheResidualNeighbor(0);
+              if(nfc->shouldApply())
+              {
+                constraints_applied = true;
+                nfc->computeResidual();
+
+                if(nfc->overwriteSlaveResidual())
+                  _problem.setResidual(residual, 0);
+                else
+                  _problem.cacheResidual(0);
+                _problem.cacheResidualNeighbor(0);
+              }
             }
           }
         }
@@ -1229,44 +1238,50 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
         if(slave_node.processor_id() == libMesh::processor_id())
         {
-          PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
-
-          Elem * master_elem = info._elem;
-          unsigned int master_side = info._side_num;
-
-          // reinit variables at the node
-          _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
-
-          _problem.prepareAssembly(0);
-
-          std::vector<Point> points;
-          points.push_back(info._closest_point);
-
-          // reinit variables on the master element's face at the contact point
-          _problem.reinitNeighbor(master_elem, master_side, points, 0);
-          for(unsigned int c=0; c < constraints.size(); c++)
+          if(pen_loc._penetration_info[slave_node_num])
           {
-            NodeFaceConstraint * nfc = constraints[c];
+            PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            nfc->_jacobian = &jacobian;
+            Elem * master_elem = info._elem;
+            unsigned int master_side = info._side_num;
 
-            if(nfc->shouldApply())
+            // reinit variables at the node
+            _problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+
+            _problem.prepareAssembly(0);
+
+            std::vector<Point> points;
+            points.push_back(info._closest_point);
+
+            // reinit variables on the master element's face at the contact point
+            _problem.reinitNeighbor(master_elem, master_side, points, 0);
+            for(unsigned int c=0; c < constraints.size(); c++)
             {
-              constraints_applied = true;
+              NodeFaceConstraint * nfc = constraints[c];
 
-              nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
-              nfc->subProblem().prepareNeighborShapes(nfc->variable().number(), 0);
+              nfc->_jacobian = &jacobian;
 
-              nfc->computeJacobian();
+              if(nfc->shouldApply())
+              {
+                constraints_applied = true;
 
-              // Add this variable's dof's row to be zeroed
-              zero_rows.push_back(nfc->variable().nodalDofIndex());
+                nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
+                nfc->subProblem().prepareNeighborShapes(nfc->variable().number(), 0);
 
-              // Cache the jacobian block for the master side
-              _asm_block[0]->cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+                nfc->computeJacobian();
 
-              _problem.cacheJacobian(0);
-              _problem.cacheJacobianNeighbor(0);
+                if(nfc->overwriteSlaveResidual())
+                {
+                  // Add this variable's dof's row to be zeroed
+                  zero_rows.push_back(nfc->variable().nodalDofIndex());
+                }
+
+                // Cache the jacobian block for the master side
+                _asm_block[0]->cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+
+                _problem.cacheJacobian(0);
+                _problem.cacheJacobianNeighbor(0);
+              }
             }
           }
         }

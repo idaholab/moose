@@ -108,6 +108,14 @@ public:
    */
   virtual bool shouldApply() { return true; }
 
+  /**
+   * Whether or not the slave's residual should be overwritten.
+   *
+   * When this returns true the slave's residual as computed by the constraint will _replace_
+   * the residual previously at that node for that variable.
+   */
+  bool overwriteSlaveResidual() { return _overwrite_slave_residual; }
+
   SparseMatrix<Number> * _jacobian;
 protected:
   unsigned int _slave;  /// Boundary ID for the slave surface
@@ -163,6 +171,14 @@ protected:
   const DofMap & _dof_map;                                            /// DOF map
 
   std::vector<std::vector<unsigned int> > & _node_to_elem_map;
+
+  /**
+   * Whether or not the slave's residual should be overwritten.
+   *
+   * When this is true the slave's residual as computed by the constraint will _replace_
+   * the residual previously at that node for that variable.
+   */
+  bool _overwrite_slave_residual;
 
 public:
   std::vector<unsigned int> _connected_dof_indices;

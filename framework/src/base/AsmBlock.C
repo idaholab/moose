@@ -225,6 +225,8 @@ AsmBlock::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
       }
     }
   }
+
+  res_block.zero();
 }
 
 void
@@ -264,6 +266,7 @@ AsmBlock::cacheResidualNeighbor()
   for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
   {
     MooseVariable & var = _sys.getVariable(_tid, vn);
+
     cacheResidualBlock(_sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
@@ -393,6 +396,8 @@ AsmBlock::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsign
         }
     }
   }
+
+  jac_block.zero();
 }
 
 
