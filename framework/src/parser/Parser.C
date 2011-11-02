@@ -330,12 +330,12 @@ Parser::parse(const std::string &input_filename)
   if ((Moose::command_line && searchCommandLine("ErrorUnused")) || _enable_unused_check == ERROR_UNUSED)
   {
       std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-      checkUnidentifiedParams(all_vars, section_names, false);
+      checkUnidentifiedParams(all_vars, section_names, true);
   }
   else if ((Moose::command_line && searchCommandLine("WarnUnused")) || _enable_unused_check == WARN_UNUSED)
   {
     std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-    checkUnidentifiedParams(all_vars, section_names, true);
+    checkUnidentifiedParams(all_vars, section_names, false);
   }
 
   // Print the input file syntax if requested

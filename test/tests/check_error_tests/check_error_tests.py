@@ -96,7 +96,7 @@ deprecated_block_test = {
 
 unused_param_test = {
  INPUT : 'unused_param_test.i',
- CLI_ARGS : ['--warn_unused'],
+ CLI_ARGS : ['--warn-unused'],
  EXPECT_OUT : 'WARNING: The following parameters were unused in your input file'
 }
 
