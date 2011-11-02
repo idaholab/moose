@@ -72,6 +72,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & nam
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
     _current_solution(NULL),
+    _older_solution(solutionOlder()),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
     _solution_du_dot_du(_sys.add_vector("du_dot_du", false, GHOSTED)),
     _residual_old(NULL),
@@ -94,7 +95,9 @@ NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & nam
     _doing_dg(false),
     _n_iters(0),
     _n_linear_iters(0),
-    _final_residual(0.)
+    _final_residual(0.),
+    _use_predictor(false),
+    _predictor_scale(0.0)
 {
   _sys.nonlinear_solver->residual = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian = Moose::compute_jacobian;
@@ -307,7 +310,14 @@ NonlinearSystem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned i
 void
 NonlinearSystem::solve()
 {
-  // Initialize the solution vector with known values from nodal bcs
+  //Calculate the initial residual for use in the convergence criterion.  The initial
+  //residual
+  _mproblem.computeResidual(_sys, *_current_solution, *_sys.rhs);
+  _initial_residual = _sys.rhs->l2_norm();
+  std::cout <<std::scientific<<std::setprecision(6);
+  std::cout << "  Initial |residual|_2 = "<<_initial_residual<<"\n";
+
+  // Initialize the solution vector using a predictor and known values from nodal bcs
   setInitialSolution();
 
   if(_use_finite_differenced_preconditioner)
@@ -711,6 +721,9 @@ NonlinearSystem::setInitialSolution()
 
   NumericVector<Number> & initial_solution( solution() );
 
+  if (_use_predictor)
+    applyPredictor(initial_solution,_older_solution);
+
   // do nodal BC
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
@@ -737,6 +750,42 @@ NonlinearSystem::setInitialSolution()
 
   if(_mproblem.getDisplacedProblem())
     setConstraintSlaveValues(initial_solution, true);
+}
+
+void
+NonlinearSystem::applyPredictor(NumericVector<Number> & initial_solution,
+                                NumericVector<Number> & previous_solution)
+{
+  // A Predictor is an algorithm that will predict the next solution based on
+  // previous solutions.  Basically, it works like:
+  //
+  //             sol - prev_sol
+  // sol = sol + -------------- * dt * scale_factor
+  //                 dt_old
+  //
+  // The scale factor can be set to 1 for times when the solution is expected
+  // to change linearly or smoothly.  If the solution is less continuous over
+  // time, it may be better to set to to 0.
+  //   In the ideal case of a linear model with linearly changing bcs, the Predictor
+  // can determine the solution before the solver is invoked (a solution is computed
+  // in zero solver iterations).  Even outside the ideal case, a good Predictor
+  // significantly reduces the number of solver iterations required.
+  //   It is important to compute the initial residual to be used as a relative
+  // convergence criterion before applying the predictor.  If this is not done,
+  // the residual is likely to be much lower after applying the predictor, which would
+  // result in a much more stringent criterion for convergence than would have been
+  // used if the predictor were not enabled.
+
+  if (_dt_old > 0)
+  {
+    std::streamsize cur_precision(std::cout.precision());
+    std::cout << "  Applying predictor with scale factor = "<<std::fixed<<std::setprecision(2)<<_predictor_scale<<"\n";
+    std::cout << std::scientific << std::setprecision(cur_precision);
+    Real dt_adjusted_scale_factor = _predictor_scale * _dt / _dt_old;
+    initial_solution *= 1 + dt_adjusted_scale_factor;
+    previous_solution *= dt_adjusted_scale_factor;
+    initial_solution -= previous_solution;
+  }
 }
 
 void

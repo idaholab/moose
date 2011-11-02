@@ -163,6 +163,13 @@ public:
   void setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced);
 
   /**
+   * Modify the initial solution vector to apply a predictor
+   * @param initial_solution The initial solution vector
+   */
+  void applyPredictor(NumericVector<Number> & initial_solution,
+                      NumericVector<Number> & initial_solution);
+
+  /**
    * Add residual contributions from Constraints
    *
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
@@ -320,10 +327,17 @@ public:
 
   void debuggingResiduals(bool state) { _debugging_residuals = state; }
 
+  void setPredictorScale(Real scale)
+  {
+    _use_predictor = true;
+    _predictor_scale = scale;
+  }
+
 public:
   FEProblem & _mproblem;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
+  Real _last_nl_rnorm;
   Real _l_abs_step_tol;
   Real _initial_residual;
 
@@ -351,6 +365,7 @@ protected:
   CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.
 
   const NumericVector<Number> * _current_solution;      ///< solution vector from nonlinear solver
+  NumericVector<Number> & _older_solution;              ///< solution vector from step prior to previous step
   NumericVector<Number> & _solution_u_dot;              ///< solution vector for u^dot
   NumericVector<Number> & _solution_du_dot_du;          ///< solution vector for {du^dot}\over{du}
   NumericVector<Number> * _residual_old;                ///< residual evaluated at the old time step (need for Crank-Nicolson)
@@ -398,6 +413,9 @@ protected:
   unsigned int _n_iters;
   unsigned int _n_linear_iters;
   Real _final_residual;
+
+  bool _use_predictor;                                   ///< true if predictor is active
+  Real _predictor_scale;                                 ///< Scale factor to use with predictor
 
   friend class ComputeResidualThread;
   friend class ComputeJacobianThread;

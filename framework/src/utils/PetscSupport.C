@@ -116,12 +116,13 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   if (!it)
   {
     /* set parameter for default relative tolerance convergence test */
-    snes->ttol = fnorm*snes->rtol;
-    system->_initial_residual = fnorm;
+    /* _initial_residual has already been computed by the NonlinearSystem at this point */
+    snes->ttol = system->_initial_residual*snes->rtol;
+    system->_last_nl_rnorm = system->_initial_residual;
   }
   if (fnorm != fnorm)
   {
-    PetscInfo(snes,"Failed to converged, function norm is NaN\n");
+    PetscInfo(snes,"Failed to converge, function norm is NaN\n");
     *reason = SNES_DIVERGED_FNORM_NAN;
   }
   else if (fnorm < snes->abstol)
@@ -134,7 +135,9 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
     PetscInfo2(snes,"Exceeded maximum number of function evaluations: %D > %D\n",snes->nfuncs,snes->max_funcs);
     *reason = SNES_DIVERGED_FUNCTION_COUNT;
   }
-  else if(fnorm >= system->_initial_residual * (1.0/snes->rtol))
+  else if(it &&
+          snes->rtol > system->_last_nl_rnorm &&
+          fnorm >= system->_initial_residual * (1.0/snes->rtol))
   {
     PetscInfo2(snes,"Nonlinear solve was blowing up!",snes->nfuncs,snes->max_funcs);
 #if PETSC_VERSION_LESS_THAN(3,2,0)
@@ -157,6 +160,10 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
       *reason = SNES_CONVERGED_PNORM_RELATIVE;
     }
   }
+
+  if (it)
+    system->_last_nl_rnorm = snes->rtol;
+
   return(0);
 }
 
@@ -267,6 +274,11 @@ void petscSetDefaults(FEProblem & problem)
                                                 petscConverged,
                                                 &nl,
                                                 PETSC_NULL);
+    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    ierr = SNESSetConvergenceTest(snes,
+                                  petscNonlinearConverged,
+                                  &nl,
+                                  PETSC_NULL);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
 
