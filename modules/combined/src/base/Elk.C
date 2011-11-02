@@ -131,6 +131,7 @@
 #include "ContactMaster.h"
 #include "SlaveConstraint.h"
 #include "OneDContactConstraint.h"
+#include "MultiDContactConstraint.h"
 
 // thermal contact
 #include "ThermalContactAction.h"
@@ -271,6 +272,7 @@ Elk::registerObjects()
   registerDiracKernel(ContactMaster);
   registerDiracKernel(SlaveConstraint);
   registerConstraint(OneDContactConstraint);
+  registerConstraint(MultiDContactConstraint);
 
   // thermal contact
   registerAction(ThermalContactAction, "meta_action");
