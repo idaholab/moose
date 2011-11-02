@@ -313,6 +313,7 @@ NonlinearSystem::solve()
   //Calculate the initial residual for use in the convergence criterion.  The initial
   //residual
   _mproblem.computeResidual(_sys, *_current_solution, *_sys.rhs);
+  _sys.rhs->close();
   _initial_residual = _sys.rhs->l2_norm();
   std::cout <<std::scientific<<std::setprecision(6);
   std::cout << "  Initial |residual|_2 = "<<_initial_residual<<"\n";
