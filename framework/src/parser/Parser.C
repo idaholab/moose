@@ -161,7 +161,7 @@ Parser::initOptions()
 
   syntax.clear();
   cli_opt.desc = "Runs the specified number of threads (Intel TBB) per process";
-  syntax.push_back("--n_threads");
+  syntax.push_back("--n-threads");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
   _cli_options["Threads"] = cli_opt;
@@ -169,10 +169,18 @@ Parser::initOptions()
   syntax.clear();
   cli_opt.desc = "Warn about unused input file options";
   syntax.push_back("-w");
-  syntax.push_back("--warn_unused");
+  syntax.push_back("--warn-unused");
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
   _cli_options["WarnUnused"] = cli_opt;
+
+  syntax.clear();
+  cli_opt.desc = "Error when encounting unused input file options";
+  syntax.push_back("-e");
+  syntax.push_back("--error-unused");
+  cli_opt.cli_syntax = syntax;
+  cli_opt.required = false;
+  _cli_options["ErrorUnused"] = cli_opt;
 }
 
 bool
@@ -318,11 +326,16 @@ Parser::parse(const std::string &input_filename)
   // Check to make sure that all sections in the input file that are explicitly listed are actually present
   checkActiveUsed(section_names, active_lists);
 
-  // If the user has requested see if there are unidentified name/value pairs in the input file
-  if (searchCommandLine("WarnUnused"))
+  // If requested, see if there are unidentified name/value pairs in the input file
+  if ((Moose::command_line && searchCommandLine("ErrorUnused")) || _enable_unused_check == ERROR_UNUSED)
+  {
+      std::vector<std::string> all_vars = _getpot_file.get_variable_names();
+      checkUnidentifiedParams(all_vars, section_names, false);
+  }
+  else if ((Moose::command_line && searchCommandLine("WarnUnused")) || _enable_unused_check == WARN_UNUSED)
   {
     std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-    checkUnidentifiedParams(all_vars);
+    checkUnidentifiedParams(all_vars, section_names, true);
   }
 
   // Print the input file syntax if requested
@@ -365,24 +378,41 @@ Parser::checkActiveUsed(std::vector<std::string > & sections,
 }
 
 void
-Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars)
+Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, const std::vector<std::string > & sections,
+                                bool error_on_warn)
 {
   std::set<std::string> difference;
+  std::string message_indicator(error_on_warn ? "*** ERROR" : "*** WARNING");
 
   std::sort(all_vars.begin(), all_vars.end());
 
   std::set_difference(all_vars.begin(), all_vars.end(), _extracted_vars.begin(), _extracted_vars.end(),
                       std::inserter(difference, difference.end()));
 
+  // Remove unparsed parameters that were located in an inactive sections
+  for (std::set<std::string>::iterator i=_inactive_strings.begin(); i != _inactive_strings.end(); ++i)
+    for (std::set<std::string>::iterator j=difference.begin(); j != difference.end(); /*no increment*/)
+    {
+      std::set<std::string>::iterator curr = j++;
+      if (curr->find(*i) != std::string::npos)
+        difference.erase(curr);
+    }
+
   if (!difference.empty())
   {
-    std::cout << "*** WARNING: The following parameters were unused in your input file:\n";
+    std::ostringstream oss;
+
+    oss << message_indicator << ": The following parameters were unused in your input file:\n";
     for (std::set<std::string>::iterator i=difference.begin(); i != difference.end(); ++i)
-      std::cout << *i << "\n";
-    std::cout << "*** WARNING\n\n";
+      oss << *i << "\n";
+    oss << message_indicator << "\n\n";
+
+    if (error_on_warn)
+      mooseError(oss.str());
+    else
+      std::cout << oss.str();
   }
 }
-
 
 void
 Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out)

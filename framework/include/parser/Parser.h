@@ -111,6 +111,15 @@ public:
   const GetPot * getPotHandle() const;
 
   /**
+   * Set a flag so that the parser will either warn or error when unused variables are seen after
+   * parsing is complete.
+   */
+  inline void setCheckUnusedFlag(bool warn_is_error=false)
+  {
+    _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
+  }
+
+  /**
    * Return the filename that was parsed
    */
   const std::string & getFileName() const { return _input_filename; }
@@ -167,6 +176,13 @@ protected:
   void buildFullTree();
 
   /**
+   * This function checks to see if there are unindentified variables in the input file (i.e. unused)
+   * If the warn_is_error is set, then the program will abort if unidentified parameters are found
+   */
+  void checkUnidentifiedParams(std::vector<std::string> & all_vars, const std::vector<std::string > & sections,
+                               bool error_on_warn);
+
+  /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are colled only from this Object
    */
@@ -176,8 +192,6 @@ protected:
    * that the name should be fully qualified (i.e. BCs/left/value=10)
    */
   void buildCommandLineVarsVector();
-
-  void checkUnidentifiedParams(std::vector<std::string> & all_vars);
 
   template<typename T>
   void setScalarParameter(const std::string & full_name, const std::string & short_name,
@@ -218,6 +232,7 @@ protected:
 
   // The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
+  enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
 
 public:
   /// Functor for sorting input file syntax in MOOSE desired order
