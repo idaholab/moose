@@ -5,11 +5,11 @@
     nx = 10
     ny = 10
 
-    x_min = 0.0
-    x_max = 1.0
+    xmin = 0.0
+    xmax = 1.0
 
-    y_min = 0.0
-    y_max = 1.0
+    ymin = 0.0
+    ymax = 1.0
   [../]
 []
 
