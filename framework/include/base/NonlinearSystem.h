@@ -167,7 +167,7 @@ public:
    * @param initial_solution The initial solution vector
    */
   void applyPredictor(NumericVector<Number> & initial_solution,
-                      NumericVector<Number> & initial_solution);
+                      NumericVector<Number> & previous_solution);
 
   /**
    * Add residual contributions from Constraints
