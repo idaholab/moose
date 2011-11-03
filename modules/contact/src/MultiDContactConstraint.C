@@ -103,9 +103,12 @@ MultiDContactConstraint::computeQpSlaveValue()
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   std::cerr<<std::endl
            <<"Popping out node: "<<_current_node->id()<<std::endl
-           <<"Closest Point x: "<<pinfo->_closest_point(_component)<<std::endl
-           <<"Current Node x: "<<(*_current_node)(_component)<<std::endl
-           <<"Current Value: "<<_u_slave[_qp]<<std::endl<<std::endl;
+           <<"Closest Point "<<_component<<": "<<pinfo->_closest_point(_component)<<std::endl
+           <<"Current Node "<<_component<<": "<<(*_current_node)(_component)<<std::endl
+           <<"Current Value: "<<_u_slave[_qp]<<std::endl
+           <<"New Value: "<<pinfo->_closest_point(_component) - ((*_current_node)(_component) - _u_slave[_qp])<<std::endl
+           <<"Change: "<<_u_slave[_qp] - (pinfo->_closest_point(_component) - ((*_current_node)(_component) - _u_slave[_qp]))<<std::endl<<std::endl;
+  
   
   return pinfo->_closest_point(_component) - ((*_current_node)(_component) - _u_slave[_qp]);
 }
@@ -178,106 +181,58 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   const Node * node = pinfo->_node;
 
-  RealVectorValue normal(pinfo->_normal);
-  
-  Real term = 0;
+  if(_name != "contact_x")
+    return 0;
   
   double slave_jac = 0;
   switch(type)
   {
   case Moose::SlaveSlave:
-
-    if ( CM_FRICTIONLESS == _model )
+    switch(_model)
     {
-      const Real nnTDiag = normal(_component) * normal(_component);
-      term =  _penalty * nnTDiag;
+    case CM_FRICTIONLESS:
+      
+      slave_jac = pinfo->_normal(_component) * pinfo->_normal(_component) * ( _penalty*_phi_slave[_j][_qp] - (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]) );
+      break;
 
-      const RealGradient & A1( pinfo->_dxyzdxi [0] );
-      RealGradient A2;
-      RealGradient d2;
-      if ( _dim == 3 )
-      {
-        A2 = pinfo->_dxyzdeta[0];
-        d2 = pinfo->_d2xyzdxideta[0];
-      }
-      else
-      {
-        A2.zero();
-        d2.zero();
-      }
-
-      const RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
-      const Real ATA11( A1 * A1 );
-      const Real ATA12( A1 * A2 );
-      const Real ATA22( A2 * A2 );
-      const Real D11( -ATA11 );
-      const Real D12( -ATA12 + d2 * distance_vec );
-      const Real D22( -ATA22 );
-
-      Real invD11(0);
-      Real invD12(0);
-      Real invD22(0);
-      if ( _dim == 3)
-      {
-        const Real detD( D11*D22 - D12*D12 );
-        invD11 =  D22/detD;
-        invD12 = -D12/detD;
-        invD22 =  D11/detD;
-      }
-      else
-      {
-        invD11 = 1 / D11;
-      }
-
-      const Real AinvD11( A1(0)*invD11 + A2(0)*invD12 );
-      const Real AinvD12( A1(0)*invD12 + A2(0)*invD22 );
-      const Real AinvD21( A1(1)*invD11 + A2(1)*invD12 );
-      const Real AinvD22( A1(1)*invD12 + A2(1)*invD22 );
-      const Real AinvD31( A1(2)*invD11 + A2(2)*invD12 );
-      const Real AinvD32( A1(2)*invD12 + A2(2)*invD22 );
-
-      const Real AinvDAT11( AinvD11*A1(0) + AinvD12*A2(0) );
-//     const Real AinvDAT12( AinvD11*A1(1) + AinvD12*A2(1) );
-//     const Real AinvDAT13( AinvD11*A1(2) + AinvD12*A2(2) );
-//     const Real AinvDAT21( AinvD21*A1(0) + AinvD22*A2(0) );
-      const Real AinvDAT22( AinvD21*A1(1) + AinvD22*A2(1) );
-//     const Real AinvDAT23( AinvD21*A1(2) + AinvD22*A2(2) );
-//     const Real AinvDAT31( AinvD31*A1(0) + AinvD32*A2(0) );
-//     const Real AinvDAT32( AinvD31*A1(1) + AinvD32*A2(1) );
-      const Real AinvDAT33( AinvD31*A1(2) + AinvD32*A2(2) );
-
-      if ( _component == 0 )
-      {
-        term += _penalty * ( 1 - nnTDiag + AinvDAT11 );
-      }
-      else if ( _component == 1 )
-      {
-        term += _penalty * ( 1 - nnTDiag + AinvDAT22 );
-      }
-      else
-      {
-        term += _penalty * ( 1 - nnTDiag + AinvDAT33 );
-      }
-    }
-    else if ( CM_GLUED == _model ||
-              CM_TIED == _model )
-    {
-      normal.zero();
-      normal(_component) = 1;
-      term = _penalty;
-    }
-    else
-    {
+    case CM_GLUED:
+    case CM_TIED:
+/*
+      resid = pen_force(_component)
+        - res_vec(_component)
+        ;
+*/
+      break;
+      
+    default:
       mooseError("Invalid or unavailable contact model");
     }
-
-    return _test_slave[_i][_qp] * term * _phi_slave[_j][_qp];
-    break;
+    return _test_slave[_i][_qp] * slave_jac;
   case Moose::SlaveMaster:
-    return 0;
-    return -_phi_master[_j][_qp]*_test_slave[_i][_qp];
+    switch(_model)
+    {
+    case CM_FRICTIONLESS:
+      
+      slave_jac = pinfo->_normal(_component) * pinfo->_normal(_component) * ( -_penalty*_phi_master[_j][_qp] );
+      break;
+
+    case CM_GLUED:
+    case CM_TIED:
+/*
+      resid = pen_force(_component)
+        - res_vec(_component)
+        ;
+*/
+      break;
+      
+    default:
+      mooseError("Invalid or unavailable contact model");
+    }
+    return _test_slave[_i][_qp] * slave_jac;
+
+
+//    return -_phi_master[_j][_qp]*_test_slave[_i][_qp];
   case Moose::MasterSlave:
-    return 0;
     slave_jac = (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
     return slave_jac*_test_master[_i][_qp];
   case Moose::MasterMaster:
