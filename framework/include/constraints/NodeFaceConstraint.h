@@ -184,6 +184,7 @@ public:
   std::vector<unsigned int> _connected_dof_indices;
 
   DenseMatrix<Number> _Kne;
+  DenseMatrix<Number> _Kee;
 };
 
 #endif

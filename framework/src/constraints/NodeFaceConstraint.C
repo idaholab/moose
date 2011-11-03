@@ -84,9 +84,8 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
 
   _overwrite_slave_residual(true)
 {
-  // Put a "1" into phi_slave and test_slave
-  // These will always only have one entry that is 1
-  _phi_slave[0].push_back(1);
+  // Put a "1" into test_slave
+  // will always only have one entry that is 1
   _test_slave[0].push_back(1);
 }
 void
@@ -153,19 +152,35 @@ NodeFaceConstraint::computeJacobian()
   for(std::set<unsigned int>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
     _connected_dof_indices.push_back(*sit);
 
-  DenseMatrix<Number> & Kee = _asmb.jacobianBlock(_var.number(), _var.number());
+  //DenseMatrix<Number> & Kee = _asmb.jacobianBlock(_var.number(), _var.number());
   DenseMatrix<Number> & Ken = _asmb.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
 //  DenseMatrix<Number> & Kne = _asmb.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
   DenseMatrix<Number> & Knn = _asmb.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
+  _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
   _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+
+  _phi_slave.resize(_connected_dof_indices.size());
 
   _qp = 0;
 
+  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
+  // This corresponds to evaluating all of the connected shape functions at _this_ node
+  for(unsigned int j=0; j<_connected_dof_indices.size(); j++)
+  {
+    _phi_slave[j].resize(1);
+
+    if(_connected_dof_indices[j] == _var.nodalDofIndex())
+      _phi_slave[j][_qp] = 1.0;
+    else
+      _phi_slave[j][_qp] = 0.0;
+  }
+
   for (_i = 0; _i < _test_slave.size(); _i++)
-    for (_j=0; _j<_phi_slave.size(); _j++)
-      Kee(_i,_j) += computeQpJacobian(Moose::SlaveSlave);
+//    for (_j=0; _j<_phi_slave.size(); _j++)
+    for (_j=0; _j<_connected_dof_indices.size(); _j++)
+      _Kee(_i,_j) += computeQpJacobian(Moose::SlaveSlave);
 
   for (_i=0; _i<_test_slave.size(); _i++)
     for (_j=0; _j<_phi_master.size(); _j++)

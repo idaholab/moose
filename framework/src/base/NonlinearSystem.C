@@ -435,7 +435,7 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
                       &my_mat,
                       &my_struct);
 
-  //std::cout<<*_sys.matrix<<std::endl;
+//  std::cout<<*_sys.matrix<<std::endl;
 #endif
 }
 
@@ -1326,6 +1326,11 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
                   zero_rows.push_back(nfc->variable().nodalDofIndex());
                 }
 
+                std::vector<unsigned int> slave_dofs(1,nfc->variable().nodalDofIndex());
+
+                // Cache the jacobian block for the slave size
+                _asm_block[0]->cacheJacobianBlock(nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+
                 // Cache the jacobian block for the master side
                 _asm_block[0]->cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
@@ -1477,6 +1482,8 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   }
 
   _currently_computing_jacobian = false;
+
+//  std::cout<<jacobian<<std::endl;
 
   Moose::enableFPE(false);
 
