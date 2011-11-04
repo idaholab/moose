@@ -68,5 +68,7 @@ SetupResidualDebugAction::act()
     params.set<std::string>("debug_variable") = var.name();
     params.set<std::string>("execute_on") = "residual";
     _problem->addAuxKernel("DebugResidualAux", kern_name, params);
+    params.set<std::string>("execute_on") = "timestep";
+    _problem->addAuxKernel("DebugResidualAux", kern_name, params);
   }
 }
