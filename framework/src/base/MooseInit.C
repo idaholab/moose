@@ -17,6 +17,7 @@
 #include "ParallelUniqueId.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "ProblemFactory.h"
 #include "Executioner.h"
 
 // PETSc
