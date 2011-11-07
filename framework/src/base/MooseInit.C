@@ -48,6 +48,7 @@ MooseInit::~MooseInit()
   delete Moose::executioner;
   Factory::release();
   ActionFactory::release();
+  ProblemFactory::release();
 }
 
 namespace Moose
