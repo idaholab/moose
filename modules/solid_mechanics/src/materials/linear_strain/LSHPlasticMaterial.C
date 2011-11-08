@@ -52,9 +52,12 @@ LSHPlasticMaterial::computeStress(const SymmTensor & strain,
 
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
+  
+  // Multiplier that zeros out stiffness
+  Real h = (1.0 - _c[_qp]*_c[_qp]);
 
   // C * e
-  stress = (*_local_elasticity_tensor) * elastic_strain;
+  stress = (*_local_elasticity_tensor)*h*elastic_strain;
   stress += _stress_old[_qp];
 }
 

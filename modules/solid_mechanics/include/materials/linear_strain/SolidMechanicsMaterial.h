@@ -29,6 +29,9 @@ protected:
   bool _has_temp;
   VariableValue & _temp;
 
+  bool _has_c;
+  VariableValue & _c;
+
   std::vector<VolumetricModel*> _volumetric_models;
 
   MaterialProperty<SymmTensor> & _stress;

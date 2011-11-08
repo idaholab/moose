@@ -98,18 +98,27 @@ LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
 
+  // Multiplier that zeros out stiffness
+  Real h = (1.0 - _c[_qp]*_c[_qp]);
+  
+  
   // Create column vector
   // C * e
-  stress = (*_local_elasticity_tensor) * elastic_strain;
+  stress = (*_local_elasticity_tensor)*h*elastic_strain;
 
 }
 
 void
 LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
 {
+
+  // Multiplier that zeros out stiffness
+  Real h = (1.0 - _c[_qp]*_c[_qp]);
+  
+  
   elastic_strain = total_strain;
   //Jacobian multiplier of the stress
-  _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+  _Jacobian_mult[_qp] = *_local_elasticity_tensor*h;
 
   SymmTensor d_stress_dT( *_local_elasticity_tensor * _d_strain_dT );
 //   d_stress_dT *= _dt;
