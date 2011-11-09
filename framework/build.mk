@@ -23,6 +23,43 @@ include $(LIBMESH_DIR)/Make.common
 	@echo "Compiling C (in "$(mode)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
+##################################
+# Fortran77 rules                #
+##################################
+
+%.$(obj-suffix) : %.f
+	@echo "Compiling Fortan (in "$(mode)" mode) "$<"..."
+	@$(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
+
+##################################
+# Fortran90 rules                #
+##################################
+
+mpif90_command := $(libmesh_F90)
+
+# If $(libmesh_f90) is an mpiXXX compiler script, use -show
+# to determine the base compiler
+ifneq (,$(findstring mpi,$(mpif90_command)))
+	mpif90_command = $(shell $(libmesh_F90) -show)
+endif
+
+# module_dir_flag is a flag that, if defined, instructs the compiler
+# to put any .mod files in the directory where the obect files are put.
+
+#ifort
+ifneq (,$(findstring ifort,$(mpif90_command)))
+	module_dir_flag = -module ${@D}
+endif
+
+#gfortran
+ifneq (,$(findstring gfortran,$(mpif90_command)))
+	module_dir_flag = -J${@D}
+endif
+
+%.$(obj-suffix) : %.f90
+	@echo "Compiling Fortan90 (in "$(mode)" mode) "$<"..."
+	@$(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+
 
 # treat these warnings as errors (This doesn't seem to be necessary for Intel)
 ifneq (,$(findstring gcc,$(GXX-VERSION)))
@@ -189,8 +226,8 @@ doc:
 clean::
 	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
 	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
-                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" | xargs rm
-	@rm -fr *.mod
+                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \
+                -or -name "*.mod" | xargs rm
 
 # Clean only the opt intermediate files
 cleanopt::
