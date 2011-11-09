@@ -16,13 +16,13 @@
 # Note: Make sure that there is no whitespace after the word 'yes' if enabling
 # an application
 ###############################################################################
+all::
+
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)
 
-MAKE_LIBRARY	:= yes
-APPLICATION_NAME := moose
-
 include build.mk
+include moose.mk
 
 ###############################################################################
 # Additional special case targets should be added here

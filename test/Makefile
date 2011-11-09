@@ -20,13 +20,8 @@ CURR_DIR  ?= $(shell pwd)
 ROOT_DIR  ?= $(shell dirname `pwd`)
 MOOSE_DIR ?= $(ROOT_DIR)/moose
 
-
-MAKE_LIBRARY := no
 APPLICATION_NAME := moose_test
+
 include $(MOOSE_DIR)/build.mk
-
-# Include the MOOSE Export file
 include $(MOOSE_DIR)/moose.mk
-
-###############################################################################
-# Additional special case targets should be added here
+include $(MOOSE_DIR)/app.mk

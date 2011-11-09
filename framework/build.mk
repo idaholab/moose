@@ -5,35 +5,38 @@
 # include the library options determined by configure.  This will
 # set the variables INCLUDE and LIBS that we will need to build and
 # link with the library.
+
 include $(LIBMESH_DIR)/Make.common
 
-##################################
-# C++ rules                      #
-##################################
+all::
+
+#
+# C++ rules
+#
 
 %.$(obj-suffix) : %.C
 	@echo "Compiling C++ (in "$(mode)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
-##################################
-# C rules                        #
-##################################
+#
+# C rules
+#
 
 %.$(obj-suffix) : %.c
 	@echo "Compiling C (in "$(mode)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -MMD -MF $@.d $(libmesh_INCLUDE) -c $< -o $@
 
-##################################
-# Fortran77 rules                #
-##################################
+#
+# Fortran77 rules
+#
 
 %.$(obj-suffix) : %.f
 	@echo "Compiling Fortan (in "$(mode)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
 
-##################################
-# Fortran90 rules                #
-##################################
+#
+# Fortran90 rules
+#
 
 mpif90_command := $(libmesh_F90)
 
@@ -66,7 +69,9 @@ ifneq (,$(findstring gcc,$(GXX-VERSION)))
   libmesh_CXXFLAGS     += -Werror=return-type -Werror=reorder
 endif
 
+#
 # Fortran baggage
+#
 mpif77_command := $(libmesh_F77)
 
 # If $(libmesh_f77) is an mpiXXX compiler script, use -show
@@ -115,149 +120,28 @@ ifeq ($(graceful),true)
 	libmesh_CXXFLAGS += -DGRACEFUL_ERROR
 endif
 
-##############################################################################
-######################### Application Variables ##############################
-##############################################################################
 #
-# source files
-SRC_DIRS    := $(CURR_DIR)/src
-ifneq ($(wildcard $(CURR_DIR)/contrib),)
-	SRC_DIRS  += $(CURR_DIR)/contrib
-endif
-
-srcfiles    := $(shell find $(SRC_DIRS) -name *.C)
-csrcfiles   := $(shell find $(SRC_DIRS) -name *.c)
-
-# Contrib packages that should not be compiled into Moose
-ifeq ($(CURR_DIR),$(MOOSE_DIR))
-	exodiffsrc  := $(shell find $(CURR_DIR)/contrib/exodiff -name *.C)
-	exodiffobj  := $(patsubst %.C, %.$(obj-suffix), $(exodiffsrc))
-	srcfiles    := $(filter-out $(exodiffsrc), $(srcfiles))
-	exodiff	    := $(CURR_DIR)/contrib/exodiff/exodiff
-endif
-
-ifeq ($(MAKE_LIBRARY),yes)
-# THIS LINE SHOULD BE MADE MORE GENERIC
-srcfiles    := $(filter-out ./src/main.C, $(srcfiles))
-endif
-
-fsrcfiles   := $(shell find $(SRC_DIRS) -name *.f)
-f90srcfiles := $(shell find $(SRC_DIRS) -name *.f90)
-
+# Variables
 #
-# object files
-objects	    := $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
-cobjects	:= $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
-fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
-f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
-#
-# header files
-
-# Note: libMesh contains a Factory and Transient class which are "hidden"
-#       by the order of includes here on case insensitive filesystems.
-#       If we need to use either of these classes from libMesh directly
-#       in Moose, we will have problems until one of them is renamed or
-#       resolved in some other fashion
-app_DIRS	+= $(shell find $(CURR_DIR) -type d | grep -v .svn)
-moose_INCLUDE   := $(foreach i, $(app_DIRS), -I$(i)) $(ADDITIONAL_INCLUDES)
-libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
-.PHONY: clean doc
-
-###############################################################################
-# Target:
-#
-ifeq ($(MAKE_LIBRARY),yes)
-APPLICATION_NAME := lib$(APPLICATION_NAME)
-target := $(CURR_DIR)/$(APPLICATION_NAME)-$(METHOD)$(static_libext)
-
+# library type sets different options
 ifeq ($(enable-shared),yes)
-	target := $(CURR_DIR)/$(APPLICATION_NAME)-$(METHOD)$(shared_libext)
-endif
+  libext := $(shared_libext)
+	LIBS += -Wl,-rpath,$(MOOSE_DIR)
 else
-target	:= ./$(APPLICATION_NAME)-$(METHOD)
+  libext := $(static_libext)
 endif
 
-###############################################################################
-# Build Rules:
 #
-all:: $(target) $(exodiff)
+# Maintenance
+#
+.PHONY: cleanall clean doc
 
-$(exodiff): $(exodiffobj)
-	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(exodiffobj) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS)
-
-ifeq ($(MAKE_LIBRARY),yes)
-ifeq ($(enable-shared),yes)
-# Build dynamic library
-$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
-	@echo "Linking "$@"..."
-	@$(libmesh_CC) $(libmesh_CXXSHAREDFLAG) -o $@ $(fobjects) $(f90objects) $(objects) $(cobjects) $(libmesh_LDFLAGS)
-else
-# Build static library
-ifeq ($(findstring darwin,$(hostos)),darwin)
-$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
-	@echo "Linking "$@"..."
-	@libtool -static -o $@ $(fobjects) $(f90objects) $(objects) $(cobjects)
-else
-$(target): $(fobjects) $(f90objects) $(objects) $(cobjects)
-	@echo "Linking "$@"..."
-	@$(AR) rv $@ $(fobjects) $(f90objects) $(objects) $(cobjects)
-endif
-endif
-else
-
-# Normal Executable
-$(target): $(fobjects) $(f90objects) $(objects) $(cobjects) $(mesh_library) $(ADDITIONAL_DEPS)
-	@echo "Linking "$@"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(objects) $(cobjects) $(fobjects) $(f90objects) -o $@ $(LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_INCLUDES) $(ADDITIONAL_LIBS)
-
-endif
-
-libonly:
-	@$(MAKE) MAKE_LIBRARY=yes
-
-lib:
-	@$(MAKE) MAKE_LIBRARY=yes
+#
+# Misc
+#
+syntax:
+	python scripts/generate_input_syntax.py
 
 doc:
 	doxygen doc/Doxyfile
-
-clean::
-	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
-	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
-                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \
-                -or -name "*.mod" | xargs rm
-
-# Clean only the opt intermediate files
-cleanopt::
-	@rm -fr $(APPLICATION_NAME)-opt* lib$(APPLICATION_NAME)-opt*
-	@find . -name "*opt.o" -or -name "*opt.d" | xargs rm
-
-# Clean only the dbg intermediate files
-cleandbg::
-	@rm -fr $(APPLICATION_NAME)-dbg* lib$(APPLICATION_NAME)-dbg*
-	@find . -name "*dbg.o" -or -name "*dbg.d" | xargs rm
-
-# Clean only the prof intermediate files
-cleanpro::
-	@rm -fr $(APPLICATION_NAME)-pro* lib$(APPLICATION_NAME)-pro*
-	@find . -name "*pro.o" -or -name "*pro.d" | xargs rm
-
-
-cleanall::
-	$(MAKE) clean
-
-syntax:
-	python scripts/generate_input_syntax.py
-#
-# Dependencies
-#
-
-# include the dependency list
--include src/*.d
--include src/*/*.d
--include src/*/*/*.d
--include src/*/*/*/*.d
-
-

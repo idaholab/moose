@@ -17,11 +17,10 @@
 # Note: Make sure that there is no whitespace after the word 'yes' if enabling
 # an application
 ###############################################################################
-CURR_DIR	?= $(shell pwd)
-MOOSE_DIR	?= $(shell pwd)/../moose
-ELK_DIR 	?= $(shell pwd)/../elk
+CURR_DIR  ?= $(shell pwd)
+MOOSE_DIR ?= $(shell pwd)/../moose
+ELK_DIR   ?= $(shell pwd)/../elk
 
-MAKE_LIBRARY := no
 APPLICATION_NAME := elk_unit
 
 # Extra stuff for CPPUNIT
@@ -33,8 +32,9 @@ ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit
 libmesh_CXXFLAGS	+= -DELK_TEST
 
 include $(MOOSE_DIR)/build.mk
-include $(ELK_DIR)/elk.mk
 include $(MOOSE_DIR)/moose.mk
+include $(ELK_DIR)/elk.mk
+include $(MOOSE_DIR)/app.mk
 
 ###############################################################################
 # Additional special case targets should be added here

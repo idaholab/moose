@@ -18,11 +18,11 @@
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)/../../moose
 
-MAKE_LIBRARY := no
 APPLICATION_NAME := ex18
 
 include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk
+include $(MOOSE_DIR)/app.mk
 include ../test.mk
 
 ###############################################################################
