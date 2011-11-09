@@ -8,6 +8,9 @@ MAX_TIME = 'max_time'           # Test will fail if it exceeds this time in seco
 TEST_NAME = 'testname'          # The name of the test as it appears in output, this is
                                 # set to module_name.dict_name by default
 PLATFORM = '[platform]'         # A list of platforms set to 'ALL', 'DARWIN', 'LINUX', 'SL', and/or 'LION'
+COMPILER = '[compiler]'         # A test that runs only on a given compiler set to 'ALL', 'GCC', and/or 'INTEL'
+PETSC_VERSION = '[version]'     # A test that runs only on the matching PETSC version
+
 CLI_ARGS = '[]'                 # Additional argument vector to pass to test
 
 # Types of tests
@@ -53,6 +56,8 @@ DEFAULTS = { EXODIFF : [],
              CLI_ARGS : [],
              ERRORS : ['ERROR', 'command not found', 'erminate called after throwing an instance of'],
              PLATFORM : ['ALL'],
+             COMPILER : ['ALL'],
+             PETSC_VERSION : ['ALL'],
              SHOULD_CRASH : False,
              EXPECT_ERR : None,
              EXPECT_OUT : None,

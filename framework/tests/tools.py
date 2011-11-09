@@ -125,6 +125,43 @@ class TestHarness:
       platforms.add(raw_uname[0].upper())
     return platforms
 
+  def getCompilers(self):
+    # We'll use the GXX-VERSION string from $LIBMESH_DIR/Make.common
+    # to figure this out
+    # Supported compilers are GCC, INTEL or ALL
+    compilers = set()
+    compilers.add('ALL')
+    f = open(os.environ['LIBMESH_DIR'] + '/Make.common')
+    for line in f.readlines():
+      if line.find('GXX-VERSION') != -1:
+        m = re.search(r'=\s*(\S+)', line)
+        if m != None:
+          raw_compiler = m.group(1)
+          if re.search('intel', raw_compiler, re.I) != None:
+            compilers.add("INTEL")
+          elif re.search('gcc', raw_compiler, re.I) != None:
+            compilers.add("GCC")
+          break
+    f.close()
+    return compilers
+
+  def getPetscVersion(self):
+    # We'll use the petsc-major string from $LIBMESH_DIR/Make.common
+    # to figure this out
+    # Supported versions are 2, 3
+    petsc_version = set()
+    petsc_version.add('ALL')
+    f = open(os.environ['LIBMESH_DIR'] + '/Make.common')
+    for line in f.readlines():
+      if line.find('petsc-version') != -1:
+        m = re.search(r'=\s*(\S+)', line)
+        if m != None:
+          raw_version = m.group(1)
+          petsc_version.add(raw_version)
+          break
+    f.close()
+    return petsc_version
+
   # If the test is not to be run for any reason, print skipped as the result and return False,
   # otherwise return True
   def checkIfRunTest(self, test):
@@ -150,10 +187,30 @@ class TestHarness:
     test_platforms = set()
     for x in test[PLATFORM]:
       test_platforms.add(x)
-
     if not len(test_platforms.intersection(platforms)):
       self.handleTestResult(test, '', 'skipped (PLATFORM)')
       return False
+
+    # Check for matching compiler
+    compilers = self.getCompilers()
+    test_compilers = set()
+    for x in test[COMPILER]:
+      test_compilers.add(x)
+    if not len(test_compilers.intersection(compilers)):
+      self.handleTestResult(test, '', 'skipped (COMPILER)')
+      return False
+
+    # Check for petsc version
+    petsc_version = self.getPetscVersion()
+    if 'ALL' not in test[PETSC_VERSION]:
+      found_it = False
+      for x in petsc_version:
+        for y in test[PETSC_VERSION]:
+          if x.find(y) != -1:
+            found_it = True
+      if not found_it:
+        self.handleTestResult(test, '', 'skipped (PETSC VERSION)')
+        return False
 
     # Check for heavy tests
     if test[HEAVY] and not self.options.heavy_tests:
@@ -216,16 +273,41 @@ class TestHarness:
             reason = 'CSVDIFF'
 
     if reason == '':
-      # It ran OK but is this test set to be skipped on any platform?
-      all_ok = False
+      # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
+
+# TODO: Refactor this mess
+      platform_ok = False
       for x in test[PLATFORM]:
         if x == 'ALL':
-          all_ok = True
+          platform_ok = True
+      platform_result = ''
+      if not platform_ok:
+        platform_result = ', '.join(test[PLATFORM])
 
-      if all_ok:
+      compiler_ok = False
+      for x in test[COMPILER]:
+        if x == 'ALL':
+          compiler_ok = True
+      compiler_result = ''
+      if not compiler_ok:
+        if platform_result != '':
+          platform_result += ', '
+        compiler_result = ', '.join(test[COMPILER])
+
+      petsc_version_ok = False
+      for x in test[PETSC_VERSION]:
+        if x == 'ALL':
+          petsc_version_ok = True
+      petsc_version_result = ''
+      if not petsc_version_ok:
+        if compiler_result != '' or (compiler_ok and platform_result != ''):
+          compiler_result += ', '
+        petsc_version_result = ', '.join(test[PETSC_VERSION])
+
+      if platform_ok and compiler_ok and petsc_version_ok:
         result = 'OK'
       else:
-        result = '[' + ', '.join(test[PLATFORM]) + '] OK'
+        result = '[' + platform_result + compiler_result + petsc_version_result + '] OK'
 
     else:
       result = 'FAILED (%s)' % reason
