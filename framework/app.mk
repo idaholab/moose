@@ -66,23 +66,23 @@ clean::
 	@rm -fr $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-* $(exodiff)
 	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
                 -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \
-                -or -name "*.mod" | xargs rm
+                -or -name "*.mod" -exec rm {} \;
 	@rm -fr *.mod
 
 # Clean only the opt intermediate files
 cleanopt::
 	@rm -fr $(APPLICATION_NAME)-opt* lib$(APPLICATION_NAME)-opt*
-	@find . -name "*opt.o" -or -name "*opt.d" | xargs rm
+	@find . -name "*opt.o" -or -name "*opt.d" -exec rm {} \;
 
 # Clean only the dbg intermediate files
 cleandbg::
 	@rm -fr $(APPLICATION_NAME)-dbg* lib$(APPLICATION_NAME)-dbg*
-	@find . -name "*dbg.o" -or -name "*dbg.d" | xargs rm
+	@find . -name "*dbg.o" -or -name "*dbg.d" -exec rm {} \;
 
 # Clean only the prof intermediate files
 cleanpro::
 	@rm -fr $(APPLICATION_NAME)-pro* lib$(APPLICATION_NAME)-pro*
-	@find . -name "*pro.o" -or -name "*pro.d" | xargs rm
+	@find . -name "*pro.o" -or -name "*pro.d" -exec rm {} \;
 
 
 cleanall::

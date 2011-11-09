@@ -81,7 +81,7 @@ $(exodiff_APP): $(exodiff_objfiles)
 clean::
 	@rm -fr $(moose_LIB)
 	@find . -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" \
-                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" | xargs rm
+                -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -exec rm {} \;
 	@rm -fr *.mod
 
 cleanall::
