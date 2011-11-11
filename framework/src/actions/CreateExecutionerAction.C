@@ -84,6 +84,7 @@ CreateExecutionerAction::act()
   {
     FEProblem *mproblem = dynamic_cast<FEProblem *>(&Moose::executioner->problem());
     _parser_handle._problem = mproblem;
+    _parser_handle._problem->_ex_reader = _parser_handle._exreader;               // FIXME: do not access members directly
 
     // FIXME: HACK! Can initialize displaced problem after we have instance of problem
     // TODO: Make this into another action

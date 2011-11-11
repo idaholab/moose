@@ -225,6 +225,7 @@ public:
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
   virtual void adaptMesh();
+  virtual void setUniformRefineLevel(unsigned int level) { _uniform_refine_level = level; }
 #endif //LIBMESH_ENABLE_AMR
   virtual void meshChanged();
 
@@ -279,6 +280,8 @@ public:
   bool _postprocessor_gnuplot_output;
   std::string _gnuplot_format;
 
+  ExodusII_IO * _ex_reader; // indirect ptr to ex_reader used for copying nodal values
+
 protected:
   void checkPPSs();
 
@@ -294,6 +297,7 @@ protected:
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
+  unsigned int _uniform_refine_level;
 #endif
 
   // Displaced mesh /////

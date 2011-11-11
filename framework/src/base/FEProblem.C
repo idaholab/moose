@@ -79,6 +79,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _postprocessor_ensight_output(false),
     _postprocessor_gnuplot_output(false),
     _gnuplot_format("ps"),
+    _ex_reader(NULL),
     _out(*this, _eq),
     _out_problem(NULL),
 #ifdef LIBMESH_ENABLE_AMR
@@ -162,9 +163,25 @@ void FEProblem::initialSetup()
 {
   if (_restart)
     restartFromFile();
-  else if (_ics.size() > 0)
+
+  // uniform refine
+  if (_uniform_refine_level > 0)
+  {
+    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
+    adaptivity().uniformRefine(_uniform_refine_level);
+    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+  }
+
+  if (!_restart)
+  {
     projectSolution();
-  //else: we might be using values from the mesh file (initial_from_file et al.) and then do nothing here
+
+    if (_ex_reader != NULL)
+    {
+      _nl.copyVars(*_ex_reader);
+      _aux.copyVars(*_ex_reader);
+    }
+  }
 
   unsigned int n_threads = libMesh::n_threads();
 
@@ -876,7 +893,7 @@ FEProblem::initialValue (const Point& p,
   if (_ics.find(var_name) != _ics.end())
     return _ics[var_name]->value(p);
 
-  return 0;
+  return 0.;
 }
 
 Gradient

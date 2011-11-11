@@ -57,7 +57,7 @@ public:
   virtual Real value(const Point & p) = 0;
 
   /**
-   * The graident of the variable at a point.
+   * The gradient of the variable at a point.
    *
    * This is optional.  Note that if you are using C1 continuous elements you will
    * want to use an initial condition that defines this!

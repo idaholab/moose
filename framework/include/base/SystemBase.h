@@ -230,13 +230,12 @@ public:
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
 
   /**
-   * Copy nodal values of this system (internal usage)
+   * Add info about variable that will be copied
    *
-   * @param io Exodus IO object (libMesh object)
-   * @param nodal_var_name Name of the nodal variable being used for copying (name is from hte exodusII file)
+   * @param name Name of the nodal variable being used for copying (name is from the exodusII file)
    * @param timestep Timestep in the file being used
    */
-  virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep) = 0;
+  virtual void addVariableToCopy(const std::string & name, unsigned int timestep) = 0;
 
 protected:
   Problem & _problem;
@@ -252,6 +251,19 @@ protected:
 
   // FIXME: remove this!
   friend class AsmBlock;
+};
+
+/**
+ * Information about variables that will be copied
+ */
+struct VarCopyInfo {
+  VarCopyInfo(const std::string & name, unsigned int timestep) :
+    _name(name),
+    _timestep(timestep)
+  {}
+
+  std::string _name;
+  unsigned int _timestep;
 };
 
 /**
@@ -354,12 +366,6 @@ public:
     *_sys.solution = *_sys.old_local_solution;
   }
 
-  virtual void copyNodalValues(ExodusII_IO & io, const std::string & nodal_var_name, unsigned int timestep)
-  {
-    io.copy_nodal_solution(_sys, nodal_var_name, timestep);
-    _solution.close();
-  }
-
   virtual void projectSolution (Number fptr(const Point& p,
                                              const Parameters& parameters,
                                              const std::string& sys_name,
@@ -389,6 +395,23 @@ public:
   virtual DofMap & dofMap() { return _sys.get_dof_map(); }
   virtual System & system() { return _sys; }
 
+  virtual void addVariableToCopy(const std::string & name, unsigned int timestep)
+  {
+    _var_to_copy.push_back(VarCopyInfo(name, timestep));
+  }
+
+  void copyVars(ExodusII_IO & io)
+  {
+    for (std::vector<VarCopyInfo>::iterator it = _var_to_copy.begin();
+        it != _var_to_copy.end();
+        ++it)
+    {
+      VarCopyInfo & vci = *it;
+      io.copy_nodal_solution(_sys, vci._name, vci._timestep);
+    }
+    _solution.close();
+  }
+
 protected:
   T & _sys;
 
@@ -397,6 +420,9 @@ protected:
   NumericVector<Number> & _solution_older;
 
   NumericVector<Number> * _dummy_sln;                     // to satisfy the interface
+
+  std::vector<VarCopyInfo> _var_to_copy;
 };
+
 
 #endif /* SYSTEMBASE_H */

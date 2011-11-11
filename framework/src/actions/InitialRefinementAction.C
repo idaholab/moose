@@ -39,11 +39,6 @@ InitialRefinementAction::act()
   mooseAssert(_parser_handle._mesh != NULL, "Mesh not setup");
 
   unsigned int level = getParam<unsigned int>("uniform_refine");
-  if (level > 0)
-  {
-    Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
-    _parser_handle._problem->adaptivity().uniformRefine(level);
-    Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
-  }
+  _parser_handle._problem->setUniformRefineLevel(level);
 #endif //LIBMESH_ENABLE_AMR
 }
