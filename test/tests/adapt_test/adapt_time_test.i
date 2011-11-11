@@ -29,6 +29,7 @@
   [./uconv]
     type = Convection
     variable = u
+    velocity = '10 1 0'
     x = 10
     y = 1
   [../]
@@ -46,8 +47,7 @@
   [./vconv]
     type = Convection
     variable = v
-    x = -10
-    y = 1
+    velocity = '-10 1 0'
   [../]
 
   [./vie]

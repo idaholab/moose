@@ -19,6 +19,8 @@
 #include "Parser.h"
 #include "FEProblem.h"
 
+#include "vector_value.h"
+
 template<>
 InputParameters validParams<ConvDiffMetaAction>()
 {
@@ -118,8 +120,7 @@ ConvDiffMetaAction::act()
     vel_vec_variable.push_back(variables[1]);
     params.set<std::vector<std::string> >("some_variable") = vel_vec_variable;
 
-    params.set<Real>("x") = 0;
-    params.set<Real>("y") = 0;
+    params.set<RealVectorValue>("velocity") = RealVectorValue(0, 0, 0);
   }
   // add it to the warehouse
   Moose::action_warehouse.addActionBlock(action);

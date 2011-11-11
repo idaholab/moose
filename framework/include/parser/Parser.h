@@ -22,6 +22,7 @@
 // libMesh
 #include "getpot.h"
 #include "exodusII_io.h"
+#include "vector_value.h"
 
 class MooseMesh;
 class FEProblem;
@@ -179,8 +180,7 @@ protected:
    * This function checks to see if there are unindentified variables in the input file (i.e. unused)
    * If the warn_is_error is set, then the program will abort if unidentified parameters are found
    */
-  void checkUnidentifiedParams(std::vector<std::string> & all_vars, const std::vector<std::string > & sections,
-                               bool error_on_warn);
+  void checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn);
 
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
@@ -197,6 +197,10 @@ protected:
   void setScalarParameter(const std::string & full_name, const std::string & short_name,
                           InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
 
+
+  void setRealVectorValue(const std::string & full_name, const std::string & short_name,
+                          InputParameters::Parameter<RealVectorValue>* param,
+                          bool in_global, GlobalParamsAction *global_block);
 
   template<typename T>
   void setVectorParameter(const std::string & full_name, const std::string & short_name,

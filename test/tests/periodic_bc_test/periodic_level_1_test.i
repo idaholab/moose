@@ -35,8 +35,7 @@
   [./conv]
     type = Convection
     variable = u
-    x = -0.4
-    y = 0
+    velocity = '-0.4 0 0'
   [../]
 
   [./forcing]

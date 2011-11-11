@@ -330,12 +330,12 @@ Parser::parse(const std::string &input_filename)
   if ((Moose::command_line && searchCommandLine("ErrorUnused")) || _enable_unused_check == ERROR_UNUSED)
   {
       std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-      checkUnidentifiedParams(all_vars, section_names, true);
+      checkUnidentifiedParams(all_vars, true);
   }
   else if ((Moose::command_line && searchCommandLine("WarnUnused")) || _enable_unused_check == WARN_UNUSED)
   {
     std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-    checkUnidentifiedParams(all_vars, section_names, false);
+    checkUnidentifiedParams(all_vars, false);
   }
 
   // Print the input file syntax if requested
@@ -378,8 +378,7 @@ Parser::checkActiveUsed(std::vector<std::string > & sections,
 }
 
 void
-Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, const std::vector<std::string > & sections,
-                                bool error_on_warn)
+Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn)
 {
   std::set<std::string> difference;
   std::string message_indicator(error_on_warn ? "*** ERROR" : "*** WARNING");
@@ -714,6 +713,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       InputParameters::Parameter<int>  * int_param  = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
       InputParameters::Parameter<unsigned int>  * uint_param  = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
       InputParameters::Parameter<bool> * bool_param = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
+      InputParameters::Parameter<RealVectorValue> * real_vec_val_param = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(it->second);
       InputParameters::Parameter<std::string> * string_param = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
       InputParameters::Parameter<std::vector<Real> > * vec_real_param = dynamic_cast<InputParameters::Parameter<std::vector<Real> >*>(it->second);
       InputParameters::Parameter<std::vector<int>  > * vec_int_param  = dynamic_cast<InputParameters::Parameter<std::vector<int> >*>(it->second);
@@ -732,6 +732,9 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setScalarParameter<unsigned int>(full_name, it->first, uint_param, in_global, global_params_block);
       else if (bool_param)
         setScalarParameter<bool>(full_name, it->first, bool_param, in_global, global_params_block);
+      // Real Vector Param
+      else if (real_vec_val_param)
+        setRealVectorValue(full_name, it->first, real_vec_val_param, in_global, global_params_block);
       else if (string_param)
         setScalarParameter<std::string>(full_name, it->first, string_param, in_global, global_params_block);
       else if (vec_real_param)
@@ -752,6 +755,32 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
         setTensorParameter<bool>(full_name, it->first, tensor_bool_param, in_global, global_params_block);
     }
   }
+}
+
+void Parser::setRealVectorValue(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<RealVectorValue>* param, bool in_global, GlobalParamsAction *global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line (and previously stored in the CLI vars vector)
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_command_line_vars.find(full_name) != _command_line_vars.end())
+    gp = Moose::command_line;
+  else
+    gp = &_getpot_file;
+
+  int vec_size = gp->vector_variable_size(full_name.c_str());
+
+  if (vec_size != LIBMESH_DIM)
+    mooseError(std::string("Error in RealVectorValue parmeter ") + full_name + ": size is " << vec_size
+               << ", should be " << LIBMESH_DIM);
+
+  RealVectorValue value;
+  for (int i=0; i<vec_size; ++i)
+    value(i) = Real((*gp)(full_name.c_str(), 0.0, i));
+
+  param->set() = value;
+  if (in_global)
+    global_block->setScalarParam<RealVectorValue>(short_name) = value;
 }
 
 template<typename T>
