@@ -30,6 +30,13 @@ Syntax::registerActionSyntax(const std::string & action, const std::string & syn
   _associated_actions.insert(std::make_pair(syntax, action_info));
 }
 
+void
+Syntax::replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name)
+{
+  _associated_actions.erase(syntax);
+  registerActionSyntax(action, syntax, action_name);
+}
+
 std::string
 Syntax::getSyntaxByAction(const std::string & action, const std::string & action_name)
 {

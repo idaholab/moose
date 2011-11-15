@@ -37,6 +37,13 @@ public:
   void registerActionSyntax(const std::string & action, const std::string & syntax,
                             const std::string & action_name = "");
 
+  /**
+   *  Registration function that replaces existing Moose Actions with a completely new action
+   *  Note: This function will remove all actions associated with this piece of syntax _NOT_ just
+   *        a single match of some kind
+   */
+  void replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name);
+
   // Retrieve the Syntax associated with the passed Action and action_name
   std::string getSyntaxByAction(const std::string & action, const std::string & action_name);
 
