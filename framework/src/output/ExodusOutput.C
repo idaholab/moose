@@ -61,6 +61,7 @@ ExodusOutput::output(const std::string & file_base, Real time)
   {
     _out = new ExodusII_IO(_es.get_mesh());
     _out->set_output_variables(_output_variables);
+    _out->use_mesh_dimension_instead_of_spatial_dimension(true);  //Skip output of z coordinates for 2D meshes
     _file_num++;
   }
 
