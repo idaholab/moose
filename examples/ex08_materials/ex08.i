@@ -41,11 +41,10 @@
              100 101 102 103 104 105 106 107 108 109
              110 111 112 113 114 115 116 117 118 119
              120 121 122 123 124 125 126 127 128 129
-             130 131 132'             
+             130 131 132'
     diffusivity_baseline = 1e-7
-    some_variable = diffused
   [../]
-  
+
   [./example1]
     type = ExampleMaterial
     block = '1 2 3 4 5 6 7 8 9
@@ -69,7 +68,6 @@
              220 221 222 223 224 225 226 227 228 229
              230 231 232'
     diffusivity_baseline = 1e5
-    some_variable = diffused
   [../]
 []
 

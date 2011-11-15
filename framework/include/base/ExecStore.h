@@ -21,11 +21,11 @@
 
 /// Execution flags - when is the oject executed/evaluated
 enum ExecFlagType {
-  EXEC_INITIAL,                 /// Object is evaluated only once at the beginning of the simulation
-  EXEC_RESIDUAL,                /// Object is evaluated in every residual computation
-  EXEC_JACOBIAN,                /// Object is evaluated in every jacobian computation
-  EXEC_TIMESTEP,                /// Object is evaluated at the end of every time step
-  EXEC_TIMESTEP_BEGIN           /// Object is evaluated at the beginning of every time step
+  EXEC_INITIAL,                 ///< Object is evaluated only once at the beginning of the simulation
+  EXEC_RESIDUAL,                ///< Object is evaluated in every residual computation
+  EXEC_JACOBIAN,                ///< Object is evaluated in every jacobian computation
+  EXEC_TIMESTEP,                ///< Object is evaluated at the end of every time step
+  EXEC_TIMESTEP_BEGIN           ///< Object is evaluated at the beginning of every time step
 };
 
 
