@@ -46,6 +46,7 @@ TIME_GOLD = 'time_gold'         # The gold file to exodiff output for timing run
 ABS_ZERO    = 'abs_zero'        # Absolute zero value passed to the exodiff tool
 REL_ERR     = 'rel_err'         # Relative error value passed to the exodiff tool
 CUSTOM_CMP  = 'custom_cmp'      # Custom comparison file
+USE_OLD_FLOOR = 'True|False'    # Use Exodiff old floor option
 
 # Test Ordering
 PREREQ = 'prereq'
@@ -72,9 +73,10 @@ DEFAULTS = { EXODIFF : [],
              TIME : False,
              TIME_DOFS : 4000,
              TIME_GOLD : None,
-             ABS_ZERO : 1e-11,   # Exodiff option
-             REL_ERR : 5.5e-6,   # Exodiff option
-             CUSTOM_CMP : None,  # Exodiff option
+             ABS_ZERO : 1e-10,      # Exodiff option
+             REL_ERR : 5.5e-6,      # Exodiff option
+             CUSTOM_CMP : None,     # Exodiff option
+             USE_OLD_FLOOR : False, # Exodiff option
              GOLD_DIR : 'gold',
              PREREQ : None
              # TEST_DIR is automatically populated to the location of the py file

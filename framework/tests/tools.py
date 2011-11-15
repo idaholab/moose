@@ -253,9 +253,12 @@ class TestHarness:
       else:  # Now test more involved things like CSV and EXODIFF
         for file in test[EXODIFF]:
           custom_cmp = ''
+          old_floor = ''
           if test[CUSTOM_CMP] != None:
              custom_cmp = ' -f ' + os.path.join(test[TEST_DIR], test[CUSTOM_CMP])
-          command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F ' + str(test[ABS_ZERO]) + ' -use_old_floor -t ' + str(test[REL_ERR]) \
+          if test[USE_OLD_FLOOR]:
+             old_floor = ' -use_old_floor'
+          command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F ' + str(test[ABS_ZERO]) + old_floor +  ' -t ' + str(test[REL_ERR]) \
                     + ' ' + os.path.join(test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file)
           exo_output = runCommand(command)
           output += 'Running exodiff: ' + command + '\n' + exo_output
