@@ -33,6 +33,7 @@ InputParameters validParams<Material>()
 Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     Coupleable(parameters, false),
+    FunctionInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
