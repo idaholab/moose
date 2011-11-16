@@ -50,7 +50,8 @@ Parser::Parser(Syntax & syntax):
   _syntax(syntax),
   _action_wh(Moose::action_warehouse),
   _syntax_formatter(NULL),
-  _getpot_initialized(false)
+  _getpot_initialized(false),
+  _enable_unused_check(OFF)
 {
   initOptions();
 
@@ -69,7 +70,8 @@ Parser::Parser(Syntax & syntax, ActionWarehouse & action_wh) :
     _syntax(syntax),
     _action_wh(action_wh),
     _syntax_formatter(NULL),
-    _getpot_initialized(false)
+    _getpot_initialized(false),
+    _enable_unused_check(OFF)
 {
   initOptions();
 
@@ -329,8 +331,8 @@ Parser::parse(const std::string &input_filename)
   // If requested, see if there are unidentified name/value pairs in the input file
   if ((Moose::command_line && searchCommandLine("ErrorUnused")) || _enable_unused_check == ERROR_UNUSED)
   {
-      std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-      checkUnidentifiedParams(all_vars, true);
+    std::vector<std::string> all_vars = _getpot_file.get_variable_names();
+    checkUnidentifiedParams(all_vars, true);
   }
   else if ((Moose::command_line && searchCommandLine("WarnUnused")) || _enable_unused_check == WARN_UNUSED)
   {
@@ -686,13 +688,13 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
     bool in_global = false;
     std::string orig_name = prefix + "/" + it->first;
     std::string full_name = orig_name;
-    _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
 
     // Mark parameters appearing in the input file or command line
     if (_getpot_file.have_variable(full_name.c_str())
       || (Moose::command_line && Moose::command_line->have_variable(full_name.c_str())))
     {
       p.seenInInputFile(it->first);
+      _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
       found = true;
     }
     // Wait! Check the GlobalParams section
@@ -702,6 +704,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       if (_getpot_file.have_variable(full_name.c_str()))
       {
         p.seenInInputFile(it->first);
+        _extracted_vars.insert(full_name);  // Keep track of all variables extracted from the input file
         found = true;
         in_global = true;
       }
