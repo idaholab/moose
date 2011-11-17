@@ -52,7 +52,7 @@ public:
   /**
    * Get reference to all-purpose parameters
    */
-  Parameters & parameters() { return _pars; }
+  InputParameters & parameters() { return _pars; }
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
