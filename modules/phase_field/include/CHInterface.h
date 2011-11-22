@@ -33,7 +33,8 @@ private:
   bool _has_MJac;
   MaterialProperty<Real> * _DM;
   MaterialProperty<RealGradient> & _grad_M;
-  MaterialProperty<RealGradient> * _Dgrad_M;
+  MaterialProperty<RealGradient> * _Dgrad_Mnp;
+  MaterialProperty<Real> * _Dgrad_Mngp;
   
 };
 #endif //CHInterface_H

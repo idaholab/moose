@@ -26,7 +26,8 @@ CHInterface::CHInterface(const std::string & name, InputParameters parameters)
    _has_MJac(getParam<bool>("has_MJac")),
    _DM(_has_MJac ? &getMaterialProperty<Real>(_Dmob_name) : NULL),
    _grad_M(getMaterialProperty<RealGradient>(_grad_mob_name)),
-   _Dgrad_M(_has_MJac ? &getMaterialProperty<RealGradient>("Dgrad_M") : NULL)
+   _Dgrad_Mnp(_has_MJac ? &getMaterialProperty<RealGradient>("Dgrad_Mnp") : NULL),
+   _Dgrad_Mngp(_has_MJac ? &getMaterialProperty<Real>("Dgrad_Mngp") : NULL)
 {
 }
 
@@ -60,8 +61,10 @@ CHInterface::computeQpJacobian()
     value = _kappa[_qp]*_second_phi[_j][_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]);
 
     if (_has_MJac)
-      value += _kappa[_qp]*second_c.tr()*((*_DM)[_qp]*_phi[_j][_qp]*_second_test[_i][_qp].tr() + (*_Dgrad_M)[_qp]*_grad_test[_i][_qp]);
-    
+    {
+      RealGradient full_Dgrad_M = _grad_phi[_j][_qp]*(*_Dgrad_Mngp)[_qp] + _phi[_j][_qp]*(*_Dgrad_Mnp)[_qp];
+      value += _kappa[_qp]*second_c.tr()*((*_DM)[_qp]*_phi[_j][_qp]*_second_test[_i][_qp].tr() + full_Dgrad_M*_grad_test[_i][_qp]);
+    }
   }
 
   return value;
