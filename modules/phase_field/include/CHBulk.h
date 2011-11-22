@@ -17,6 +17,7 @@ public:
   
 protected:
   std::string _mob_name;
+  std::string _Dmob_name;
   
   enum PFFunctionType
   {
@@ -30,6 +31,8 @@ protected:
 private:
   
   MaterialProperty<Real> & _M;
+  bool _has_MJac;
+  MaterialProperty<Real> * _DM;
   bool _implicit;
 };
 #endif //CHBulk_H

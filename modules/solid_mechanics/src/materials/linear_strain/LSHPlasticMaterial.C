@@ -66,6 +66,9 @@ LSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
                                   SymmTensor & elastic_strain)
 {
   _total_strain[_qp] = total_strain;
+  
+  // Multiplier that zeros out stiffness
+  Real h = (1.0 - _c[_qp]*_c[_qp]);
 
   SymmTensor etotal_strain(total_strain);
   etotal_strain -= _total_strain_old[_qp];
@@ -192,6 +195,8 @@ LSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
             unsigned int m = j*3 + i;
             Jac9x9(n,m) = Jac[i][j][k][l];
           }
+    Jac9x9 *= h;
+    
     _Jacobian_mult[_qp].convertFrom9x9( Jac9x9 );
 
   }
@@ -201,7 +206,7 @@ LSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
     _hardening_variable[_qp] = 0.0;
     _plastic_strain[_qp].zero();
 
-    _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+    _Jacobian_mult[_qp] = *_local_elasticity_tensor*h;
   }
 
 

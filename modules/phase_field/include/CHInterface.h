@@ -24,12 +24,16 @@ private:
   
   std::string _kappa_name;
   std::string _mob_name;
+  std::string _Dmob_name;
   std::string _grad_mob_name;
   bool _implicit;
   
   MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _M;
+  bool _has_MJac;
+  MaterialProperty<Real> * _DM;
   MaterialProperty<RealGradient> & _grad_M;
+  MaterialProperty<RealGradient> * _Dgrad_M;
   
 };
 #endif //CHInterface_H

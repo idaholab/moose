@@ -6,8 +6,10 @@ InputParameters validParams<CHInterface>()
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<std::string>("kappa_name","The kappa used with the kernel");
   params.addRequiredParam<std::string>("mob_name","The mobility used with the kernel");
+  params.addParam<std::string>("Dmob_name","DM","The D mobility used with the kernel");
   params.addRequiredParam<std::string>("grad_mob_name","The gradient of the mobility used with the kernel");
   params.addParam<bool>("implicit",true,"The kernel will be run with implicit time integration");
+  params.addParam<bool>("has_MJac",false,"Jacobian information for the mobility is defined");
   
   return params;
 }
@@ -16,11 +18,15 @@ CHInterface::CHInterface(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
    _kappa_name(getParam<std::string>("kappa_name")),
    _mob_name(getParam<std::string>("mob_name")),
+   _Dmob_name(getParam<std::string>("Dmob_name")),
    _grad_mob_name(getParam<std::string>("grad_mob_name")),
    _implicit(getParam<bool>("implicit")),
    _kappa(getMaterialProperty<Real>(_kappa_name)),
    _M(getMaterialProperty<Real>(_mob_name)),
-   _grad_M(getMaterialProperty<RealGradient>(_grad_mob_name))
+   _has_MJac(getParam<bool>("has_MJac")),
+   _DM(_has_MJac ? &getMaterialProperty<Real>(_Dmob_name) : NULL),
+   _grad_M(getMaterialProperty<RealGradient>(_grad_mob_name)),
+   _Dgrad_M(_has_MJac ? &getMaterialProperty<RealGradient>("Dgrad_M") : NULL)
 {
 }
 
@@ -49,11 +55,15 @@ CHInterface::computeQpJacobian()
   Real value = 0.0;
 
   if (_implicit)
+  {
+    RealTensor second_c = _second_u[_qp];
     value = _kappa[_qp]*_second_phi[_j][_qp].tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]);
-  else
-    value = 0.0;
-  
-  
+
+    if (_has_MJac)
+      value += _kappa[_qp]*second_c.tr()*((*_DM)[_qp]*_phi[_j][_qp]*_second_test[_i][_qp].tr() + (*_Dgrad_M)[_qp]*_grad_test[_i][_qp]);
+    
+  }
+
   return value;
 }
   
