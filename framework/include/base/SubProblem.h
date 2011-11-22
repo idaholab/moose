@@ -79,6 +79,11 @@ public:
   /// Will make sure that all necessary elements from boundary_id are ghosted to this processor
   virtual void addGhostedBoundary(unsigned int boundary_id) = 0;
 
+  /***
+   * Get a vector containing the block ids the material property is defined on.
+   */
+  virtual std::vector<unsigned int> getMaterialPropertyBlocks(const std::string prop_name);
+
 protected:
   Problem * _parent;
   MooseMesh & _mesh;

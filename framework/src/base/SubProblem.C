@@ -60,3 +60,36 @@ SubProblem::init()
   _eq.init();
   _eq.print_info();
 }
+
+std::vector<unsigned int>
+SubProblem::getMaterialPropertyBlocks(const std::string prop_name)
+{
+  std::set<unsigned int> blocks;
+  std::vector<unsigned int> blocks_vec;
+
+  for(std::map<unsigned int, std::set<std::string> >::iterator it = _map_material_props.begin();
+      it != _map_material_props.end();
+      ++it)
+  {
+    std::set<std::string> & prop_names = it->second;
+    int block = it->first;
+
+    for(std::set<std::string>::iterator name_it = prop_names.begin();
+        name_it != prop_names.end();
+        ++name_it)
+    {
+      if(*name_it == prop_name)
+        blocks.insert(block);
+    }
+  }
+
+  // Copy it out to a vector for convenience
+  blocks_vec.reserve(blocks.size());
+
+  for(std::set<unsigned int>::iterator it = blocks.begin();
+      it != blocks.end();
+      ++it)
+    blocks_vec.push_back(*it);
+
+  return blocks_vec;
+}
