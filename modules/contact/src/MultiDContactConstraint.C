@@ -179,7 +179,7 @@ Real
 MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-  const Node * node = pinfo->_node;
+  //const Node * node = pinfo->_node;
 
   if(_name != "contact_x")
     return 0;
