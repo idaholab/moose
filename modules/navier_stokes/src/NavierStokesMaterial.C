@@ -359,7 +359,7 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   _strong_residuals[qp].resize(5);
   
   // The timestep is stored in the Problem object, which can be accessed through
-  // the parent pointer of the SubProblemInterface.  Don't need this if we are not
+  // the parent pointer of the SubProblem.  Don't need this if we are not
   // approximating time derivatives ourselves.
   // Real dt = _subproblem.parent()->dt();
   //std::cout << "dt=" << dt << std::endl;
