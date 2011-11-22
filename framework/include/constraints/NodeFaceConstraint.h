@@ -26,7 +26,7 @@
 #include "TransientInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 #include "MooseMesh.h"
 
 //libMesh includes
@@ -84,7 +84,7 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
-  SubProblemInterface & subProblem() { return _subproblem; }
+  SubProblem & subProblem() { return _subproblem; }
 
   /**
    * Compute the value the slave node should have at the beginning of a timestep.
@@ -122,7 +122,7 @@ protected:
   unsigned int _master; /// Boundary ID for the master surface
 
   Problem & _problem;
-  SubProblemInterface & _subproblem;
+  SubProblem & _subproblem;
   SystemBase & _sys;
 
   THREAD_ID _tid;

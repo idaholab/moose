@@ -39,7 +39,7 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
-    _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _asm_data(_subproblem.assembly(_tid)),

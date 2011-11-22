@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "KernelValue.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 
 template<>
 InputParameters validParams<KernelValue>()

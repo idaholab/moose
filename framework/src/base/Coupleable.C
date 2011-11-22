@@ -15,12 +15,12 @@
 #include "Coupleable.h"
 #include "Moose.h"
 #include "Problem.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 
 Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
     _nodal(nodal)
 {
-  SubProblemInterface & problem = *parameters.get<SubProblemInterface *>("_subproblem");
+  SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
   Problem & topproblem = *problem.parent();
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");

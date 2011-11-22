@@ -94,8 +94,8 @@ protected:
 };
 
 
-DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements) :
-    SubProblemInterface(),
+DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements, InputParameters params) :
+    SubProblem("disp", params),
     _problem(*mproblem.parent()),
     _mproblem(mproblem),
     _mesh(displaced_mesh),
@@ -299,7 +299,26 @@ DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_
 }
 
 void
-DisplacedProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
+DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
+{
+  const Elem * neighbor = elem->neighbor(side);
+  unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
+
+  _asm_info[tid]->reinit(elem, side, neighbor);
+
+  _displaced_nl.prepareNeighbor(tid);
+  _displaced_aux.prepareNeighbor(tid);
+
+  unsigned int bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
+  _displaced_nl.reinitElemFace(elem, side, bnd_id, tid);
+  _displaced_aux.reinitElemFace(elem, side, bnd_id, tid);
+
+  _displaced_nl.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+  _displaced_aux.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+}
+
+void
+DisplacedProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
 {
   // Reinit shape functions
   _asm_info[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
@@ -443,7 +462,7 @@ DisplacedProblem::updateGeomSearch()
 }
 
 void
-DisplacedProblem::output()
+DisplacedProblem::output(bool /*force*/)
 {
   // FIXME: use proper file_base
   _ex.output("out_displaced", _mproblem.time());
@@ -459,3 +478,42 @@ DisplacedProblem::meshChanged()
   _geometric_search_data.update();
 }
 
+Number
+DisplacedProblem::initialValue (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name)
+{
+  return _mproblem.initialValue(p, parameters, sys_name, var_name);
+}
+
+Gradient
+DisplacedProblem::initialGradient (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name)
+{
+  return _mproblem.initialGradient(p, parameters, sys_name, var_name);
+}
+
+void
+DisplacedProblem::computePostprocessors(ExecFlagType)
+{
+}
+
+void
+DisplacedProblem::outputPostprocessors(bool)
+{
+}
+
+Real &
+DisplacedProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
+{
+  return _mproblem.getPostprocessorValue(name, tid);
+}
+
+void
+DisplacedProblem::addGhostedElem(unsigned int elem_id)
+{
+  _mproblem.addGhostedElem(elem_id);
+}
+
+void
+DisplacedProblem::addGhostedBoundary(unsigned int boundary_id)
+{
+  _mproblem.addGhostedBoundary(boundary_id);
+}

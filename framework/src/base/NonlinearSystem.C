@@ -907,7 +907,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
-            _problem.reinitNeighbor(master_elem, master_side, points, 0);
+            _problem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
             for(unsigned int c=0; c < constraints.size(); c++)
             {
@@ -995,7 +995,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
-            _problem.reinitNeighbor(master_elem, master_side, points, 0);
+            _problem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
             for(unsigned int c=0; c < constraints.size(); c++)
             {
@@ -1304,7 +1304,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
-            _problem.reinitNeighbor(master_elem, master_side, points, 0);
+            _problem.reinitNeighborPhys(master_elem, master_side, points, 0);
             for(unsigned int c=0; c < constraints.size(); c++)
             {
               NodeFaceConstraint * nfc = constraints[c];

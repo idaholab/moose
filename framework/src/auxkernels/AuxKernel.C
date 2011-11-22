@@ -46,7 +46,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
-    _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),
     _aux_sys(*parameters.get<AuxiliarySystem *>("_aux_sys")),

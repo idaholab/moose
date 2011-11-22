@@ -38,7 +38,7 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
   sys->augmentSparsity(sparsity, n_nz, n_oz);
 }
 
-SystemBase::SystemBase(SubProblemInterface & subproblem, const std::string & name) :
+SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
     _problem(*subproblem.parent()),
     _subproblem(subproblem),
     _mesh(subproblem.mesh()),

@@ -26,7 +26,7 @@
 #include "VariableWarehouse.h"
 #include "AssemblyData.h"
 #include "ParallelUniqueId.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 
 // libMesh
 #include "equation_systems.h"
@@ -53,11 +53,11 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
 class SystemBase
 {
 public:
-  SystemBase(SubProblemInterface & subproblem, const std::string & name);
+  SystemBase(SubProblem & subproblem, const std::string & name);
 
   virtual unsigned int number() = 0;
   virtual MooseMesh & mesh() { return _mesh; }
-  virtual SubProblemInterface & subproblem() { return _subproblem; }
+  virtual SubProblem & subproblem() { return _subproblem; }
 
   /**
    * Gets the dof map
@@ -239,7 +239,7 @@ public:
 
 protected:
   Problem & _problem;
-  SubProblemInterface & _subproblem;
+  SubProblem & _subproblem;
   MooseMesh & _mesh;
   std::string _name;                                                    ///< The name of this system
 
@@ -273,7 +273,7 @@ template<typename T>
 class SystemTempl : public SystemBase
 {
 public:
-  SystemTempl(SubProblemInterface & subproblem, const std::string & name) :
+  SystemTempl(SubProblem & subproblem, const std::string & name) :
       SystemBase(subproblem, name),
       _sys(subproblem.es().add_system<T>(_name)),
       _solution(*_sys.solution),

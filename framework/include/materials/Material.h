@@ -25,6 +25,7 @@
 #include "MaterialData.h"
 #include "ParallelUniqueId.h"
 #include "Problem.h"
+#include "SubProblem.h"
 
 // libMesh includes
 #include "quadrature_gauss.h"
@@ -33,7 +34,6 @@
 // forward declarations
 class Material;
 class MooseMesh;
-class SubProblemInterface;
 
 /**
  * Holds a data structure used to compute material properties at a Quadrature point
@@ -118,8 +118,8 @@ public:
 
 protected:
   Problem & _problem;
-  SubProblemInterface & _subproblem;
-  SubProblemInterface * _displaced_subproblem;          // materials do not distinguish between non-displaced and displaced problems
+  SubProblem & _subproblem;
+  SubProblem * _displaced_subproblem;          // materials do not distinguish between non-displaced and displaced problems
   THREAD_ID _tid;
   bool _bnd;
   MaterialData & _material_data;

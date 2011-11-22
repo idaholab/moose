@@ -32,7 +32,7 @@
 
 class MooseMesh;
 class Problem;
-class SubProblemInterface;
+class SubProblem;
 
 
 class Kernel;
@@ -74,7 +74,7 @@ public:
    */
   Real stopTime();
 
-  SubProblemInterface & subProblem() { return _subproblem; }
+  SubProblem & subProblem() { return _subproblem; }
 
   // materials
   template<typename T>
@@ -83,7 +83,7 @@ public:
 
 protected:
   Problem & _problem;
-  SubProblemInterface & _subproblem;
+  SubProblem & _subproblem;
   SystemBase & _sys;
 
   THREAD_ID _tid;

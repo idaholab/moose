@@ -32,7 +32,7 @@
 class MooseVariable;
 class MooseMesh;
 class Problem;
-class SubProblemInterface;
+class SubProblem;
 class SystemBase;
 class BoundaryCondition;
 
@@ -66,11 +66,11 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
-  SubProblemInterface & subProblem() { return _subproblem; }
+  SubProblem & subProblem() { return _subproblem; }
 
 protected:
   Problem & _problem;
-  SubProblemInterface & _subproblem;
+  SubProblem & _subproblem;
   SystemBase & _sys;
   THREAD_ID _tid;                                       ///< thread id
   AssemblyData & _asm_data;

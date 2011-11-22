@@ -19,7 +19,7 @@
 #include "SystemBase.h"
 
 GeometricSearchInterface::GeometricSearchInterface(InputParameters & params) :
-    _geometric_search_data(params.get<SubProblemInterface *>("_subproblem")->geomSearchData())
+    _geometric_search_data(params.get<SubProblem *>("_subproblem")->geomSearchData())
 {
 }
 

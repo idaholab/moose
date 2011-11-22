@@ -28,7 +28,7 @@
 
 class Postprocessor;
 class Problem;
-class SubProblemInterface;
+class SubProblem;
 
 template<>
 InputParameters validParams<Postprocessor>();
@@ -89,7 +89,7 @@ public:
 
 protected:
   Problem & _problem;
-  SubProblemInterface & _subproblem;
+  SubProblem & _subproblem;
   THREAD_ID _tid;
 
   bool _output;                 ///< true if the postprocessor value is outputted or not

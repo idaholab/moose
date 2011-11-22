@@ -28,15 +28,14 @@
 #include "explicit_system.h"
 #include "numeric_vector.h"
 
-class SubProblemInterface;
+class SubProblem;
 class MooseVariable;
 class AssemblyData;
 
-class DisplacedProblem :
-  public SubProblemInterface
+class DisplacedProblem : public SubProblem
 {
 public:
-  DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements);
+  DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements, InputParameters params);
   virtual ~DisplacedProblem();
 
   virtual EquationSystems & es() { return _eq; }
@@ -49,6 +48,8 @@ public:
 
   virtual void createQRules(QuadratureType type, Order order);
   virtual void init();
+  virtual void solve() {}
+  virtual bool converged() { return _mproblem.converged(); }
 
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
 
@@ -59,10 +60,13 @@ public:
   virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
   // Output /////
-  virtual void output();
+  virtual void output(bool force = false);
 
   // Adaptivity /////
   virtual void meshChanged();
+
+  virtual void subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/) {}
+  virtual void subdomainSetupSide(unsigned int /*subdomain*/, THREAD_ID /*tid*/) {}
 
   // reinit /////
 
@@ -76,13 +80,21 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
-  virtual void reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
+  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
+  virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
+
+  virtual void reinitMaterials(unsigned int /*blk_id*/, THREAD_ID /*tid*/) { }
+  virtual void reinitMaterialsFace(unsigned int /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { }
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);
   virtual void clearDiracInfo();
 
   virtual AsmBlock & asmBlock(THREAD_ID tid);
+
+  virtual void computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, NumericVector<Number> & /*residual*/) {}
+  virtual void computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, SparseMatrix<Number> & /*jacobian*/) {}
+
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
 
@@ -124,6 +136,11 @@ public:
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
   // Transient /////
+  virtual void copySolutionsBackwards() {}
+
+  virtual void onTimestepBegin() {}
+  virtual void onTimestepEnd() {}
+
   virtual Real & time() { return _mproblem.time(); }
   virtual int & timeStep() { return _mproblem.timeStep(); }
   virtual Real & dt() { return _mproblem.dt(); }
@@ -133,6 +150,22 @@ public:
   virtual bool isTransient() { return _mproblem.isTransient(); }
 
   virtual std::vector<Real> & timeWeights() { return _mproblem.timeWeights(); }
+
+  virtual Order getQuadratureOrder() { return _mproblem.getQuadratureOrder(); }
+
+  // Initial conditions /////
+  virtual Number initialValue (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name);
+  virtual Gradient initialGradient (const Point & p, const Parameters & parameters, const std::string & sys_name, const std::string & var_name);
+
+  // Postprocessors /////
+  virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
+  virtual void outputPostprocessors(bool force = false);
+  virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
+
+  /// Will make sure that all dofs connected to elem_id are ghosted to this processor
+  virtual void addGhostedElem(unsigned int elem_id);
+  /// Will make sure that all necessary elements from boundary_id are ghosted to this processor
+  virtual void addGhostedBoundary(unsigned int boundary_id);
 
 protected:
   Problem & _problem;

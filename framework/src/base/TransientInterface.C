@@ -13,10 +13,10 @@
 /****************************************************************/
 
 #include "TransientInterface.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 
 TransientInterface::TransientInterface(InputParameters & parameters) :
-    _ti_subproblem(*parameters.get<SubProblemInterface*>("_subproblem")),
+    _ti_subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _t(_ti_subproblem.time()),
     _t_step(_ti_subproblem.timeStep()),
     _dt(_ti_subproblem.dt()),

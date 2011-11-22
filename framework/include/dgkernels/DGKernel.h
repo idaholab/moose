@@ -26,7 +26,7 @@
 
 class MooseMesh;
 class Problem;
-class SubProblemInterface;
+class SubProblem;
 
 //Forward Declarations
 class DGKernel;
@@ -62,7 +62,7 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
-  SubProblemInterface & subProblem() { return _subproblem; }
+  SubProblem & subProblem() { return _subproblem; }
 
   /**
    * Computes the residual for the current side.
@@ -81,7 +81,7 @@ public:
 
 protected:
   Problem & _problem;
-  SubProblemInterface & _subproblem;
+  SubProblem & _subproblem;
   SystemBase & _sys;
 
   THREAD_ID _tid;

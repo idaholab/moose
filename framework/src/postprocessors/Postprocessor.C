@@ -31,7 +31,7 @@ InputParameters validParams<Postprocessor>()
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     _problem(*parameters.get<Problem *>("_problem")),
-    _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _output(parameters.get<bool>("output"))
 

@@ -49,7 +49,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     TwoMaterialPropertyInterface(parameters),
 
     _problem(*parameters.get<Problem *>("_problem")),
-    _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _asmb(_subproblem.asmBlock(_tid)),

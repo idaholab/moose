@@ -612,7 +612,7 @@ FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 }
 
 void
-FEProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
+FEProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
 {
   // Reinits shape the functions at the physical points
   _asm_info[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
@@ -630,7 +630,7 @@ FEProblem::reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, con
 
   // Do the same for the displaced problem
   if (_displaced_problem != NULL)
-    _displaced_problem->reinitNeighbor(_displaced_mesh->elem(neighbor->id()), neighbor_side, physical_points, tid);
+    _displaced_problem->reinitNeighborPhys(_displaced_mesh->elem(neighbor->id()), neighbor_side, physical_points, tid);
 }
 
 void
@@ -714,13 +714,13 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_elem = true;
   }
   else
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addKernel(kernel_name, name, parameters);
@@ -732,13 +732,13 @@ FEProblem::addBoundaryCondition(const std::string & bc_name, const std::string &
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_face = true;
   }
   else
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addBoundaryCondition(bc_name, name, parameters);
@@ -752,7 +752,7 @@ FEProblem::addConstraint(const std::string & c_name, const std::string & name, I
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_face = true;
   }
@@ -762,7 +762,7 @@ FEProblem::addConstraint(const std::string & c_name, const std::string & name, I
     if(parameters.have_parameter<bool>("use_displaced_mesh"))
       parameters.set<bool>("use_displaced_mesh") = false;
 
-    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addConstraint(c_name, name, parameters);
@@ -782,14 +782,14 @@ FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & nam
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
     parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_elem = true;
   }
   else
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
     parameters.set<SystemBase *>("_nl_sys") = &_nl;
   }
@@ -803,14 +803,14 @@ FEProblem::addAuxBoundaryCondition(const std::string & bc_name, const std::strin
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
 
-    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
     parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_face = true;
   }
   else
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
     parameters.set<SystemBase *>("_nl_sys") = &_nl;
   }
@@ -823,13 +823,13 @@ FEProblem::addDiracKernel(const std::string & kernel_name, const std::string & n
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_elem = true;
   }
   else
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addDiracKernel(kernel_name, name, parameters);
@@ -843,13 +843,13 @@ FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & n
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
     _reinit_displaced_face = true;
   }
   else
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addDGKernel(dg_kernel_name, name, parameters);
@@ -923,8 +923,8 @@ void
 FEProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
-  parameters.set<SubProblemInterface *>("_subproblem") = this;
-  parameters.set<SubProblemInterface *>("_subproblem_displaced") = _displaced_problem;
+  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SubProblem *>("_subproblem_displaced") = _displaced_problem;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -1025,11 +1025,11 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
   parameters.set<Problem *>("_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = _displaced_problem;
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
   }
   else
   {
-    parameters.set<SubProblemInterface *>("_subproblem") = this;
+    parameters.set<SubProblem *>("_subproblem") = this;
   }
 
   // Parameter 'execute_on' needs to override the 'type' arg
@@ -1328,7 +1328,7 @@ void
 FEProblem::addDamper(std::string damper_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
-  parameters.set<SubProblemInterface *>("_subproblem") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SystemBase *>("_sys") = &_nl;
 
   _has_dampers = true;
@@ -1556,7 +1556,8 @@ FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<st
   _displaced_mesh = displaced_mesh;
 
   Moose::setup_perf_log.push("Create DisplacedProblem","Setup");
-  _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, displacements);
+  InputParameters params = parameters();
+  _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, displacements, params);
   Moose::setup_perf_log.pop("Create DisplacedProblem","Setup");
 }
 

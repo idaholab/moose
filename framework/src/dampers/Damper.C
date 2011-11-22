@@ -14,7 +14,7 @@
 
 #include "Damper.h"
 #include "SystemBase.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 
 template<>
 InputParameters validParams<Damper>()
@@ -30,7 +30,7 @@ Damper::Damper(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     MaterialPropertyInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
-    _subproblem(*parameters.get<SubProblemInterface *>("_subproblem")),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),

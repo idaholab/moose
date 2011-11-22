@@ -28,7 +28,7 @@
 #include "TransientInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 #include "MooseMesh.h"
 
 //libMesh includes
@@ -79,7 +79,7 @@ public:
    */
   MooseVariable & variable() { return _var; }
 
-  SubProblemInterface & subProblem() { return _subproblem; }
+  SubProblem & subProblem() { return _subproblem; }
 
   /**
    * This is where the DiracKernel should call addPoint() for each point it needs to have a
@@ -138,7 +138,7 @@ protected:
   void addPoint(Point p);
 
   Problem & _problem;
-  SubProblemInterface & _subproblem;
+  SubProblem & _subproblem;
   SystemBase & _sys;
 
   THREAD_ID _tid;

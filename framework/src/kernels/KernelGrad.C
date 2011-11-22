@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "KernelGrad.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 #include "Moose.h"
 
 template<>

@@ -26,7 +26,7 @@
 
 //forward declarations
 class Problem;
-class SubProblemInterface;
+class SubProblem;
 class AuxKernel;
 class AuxiliarySystem;
 class SystemBase;
@@ -73,7 +73,7 @@ protected:
   virtual Real computeValue() = 0;
 
   Problem & _problem;                                   ///< Problem this kernel is part of
-  SubProblemInterface & _subproblem;                    ///< Subproblem this kernel is part of
+  SubProblem & _subproblem;                             ///< Subproblem this kernel is part of
   SystemBase & _sys;                                    ///< System this kernel is part of
   SystemBase & _nl_sys;
   AuxiliarySystem & _aux_sys;

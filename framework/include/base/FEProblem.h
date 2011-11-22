@@ -16,7 +16,7 @@
 #define FEPROBLEM_H
 
 #include "SubProblem.h"
-#include "SubProblemInterface.h"
+#include "SubProblem.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
@@ -91,7 +91,7 @@ public:
   virtual void reinitNode(const Node * node, THREAD_ID tid);
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
-  virtual void reinitNeighbor(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
+  virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);

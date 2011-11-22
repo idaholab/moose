@@ -28,7 +28,7 @@
 //Forward Declarations
 class Damper;
 class Problem;
-class SubProblemInterface;
+class SubProblem;
 class SystemBase;
 class MooseVariable;
 
@@ -60,7 +60,7 @@ protected:
   virtual Real computeQpDamping() = 0;
 
   Problem & _problem;
-  SubProblemInterface & _subproblem;
+  SubProblem & _subproblem;
   SystemBase & _sys;
 
   THREAD_ID _tid;                                       ///< Thread ID
