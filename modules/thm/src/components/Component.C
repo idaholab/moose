@@ -22,7 +22,7 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _problem(_sim.problem()),
 
     _input_file_name(getParam<std::string>("physics_input_file")),
-    _parser(Moose::syntax)
+    _parser(_id, Moose::syntax)
 {
 }
 

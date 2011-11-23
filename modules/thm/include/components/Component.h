@@ -3,7 +3,7 @@
 
 #include "R7Object.h"
 #include "R7Mesh.h"
-#include "Parser.h"
+#include "ComponentParser.h"
 #include "ActionWarehouse.h"
 
 class Simulation;
@@ -44,7 +44,7 @@ protected:
   FEProblem & _problem;
 
   std::string _input_file_name;
-  Parser _parser;
+  ComponentParser _parser;
 };
 
 #endif /* COMPONENT_H */
