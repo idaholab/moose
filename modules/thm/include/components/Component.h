@@ -2,9 +2,11 @@
 #define COMPONENT_H
 
 #include "R7Object.h"
-#include "MooseMesh.h"
+#include "R7Mesh.h"
 
+class Simulation;
 class Component;
+class FEProblem;
 
 template<>
 InputParameters validParams<Component>();
@@ -28,6 +30,10 @@ public:
    */
   virtual void buildMesh() = 0;
 
+  virtual void addVariables() = 0;
+
+  virtual void addKernels() = 0;
+
 
   template<typename T>
   const T & getParam(const std::string & name);
@@ -35,7 +41,9 @@ public:
 protected:
   unsigned int _id;                     ///< Unique ID of this component
 
-  MooseMesh & _mesh;                    ///< Global mesh this component works on
+  Simulation & _sim;                    ///< Simulation this component is part of
+  R7Mesh & _mesh;                       ///< Global mesh this component works on
+  FEProblem * & _problem;
 };
 
 
