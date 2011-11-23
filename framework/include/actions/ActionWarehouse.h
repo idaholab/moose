@@ -35,6 +35,8 @@ public:
 
   void clear();
 
+  bool empty() { return _action_blocks.empty(); }
+
   void setParserPointer(Parser * p_ptr) { _parser_ptr = p_ptr; }
   void registerName(std::string action, bool is_required);
   void addDependency(std::string action, std::string pre_req);

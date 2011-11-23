@@ -144,6 +144,10 @@ ExodusOutput::meshChanged()
 void
 ExodusOutput::outputInput()
 {
+  // parser/action system are not mandatory subsystems to use, thus empty action system -> no input output
+  if (Moose::action_warehouse.empty())
+    return;
+
   std::vector<std::string> input_file_record;
   std::string s;
 
