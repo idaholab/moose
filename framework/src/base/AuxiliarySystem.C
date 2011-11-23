@@ -17,7 +17,7 @@
 #include "Factory.h"
 #include "AuxKernel.h"
 #include "MaterialData.h"
-#include "AssemblyData.h"
+#include "Assembly.h"
 #include "GeometricSearchData.h"
 #include "ComputeNodalAuxVarsThread.h"
 #include "ComputeNodalAuxBcsThread.h"

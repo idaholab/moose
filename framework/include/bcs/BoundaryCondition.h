@@ -24,6 +24,7 @@
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
+#include "Assembly.h"
 // libMesh
 #include "elem.h"
 #include "vector_value.h"
@@ -73,7 +74,7 @@ protected:
   SubProblem & _subproblem;
   SystemBase & _sys;
   THREAD_ID _tid;                                       ///< thread id
-  AssemblyData & _asm_data;
+  Assembly & _assembly;
   MooseVariable & _var;                                 ///< variable this BC works on
   MooseMesh & _mesh;                                    ///< Mesh this BC is defined on
   unsigned int _dim;                                    ///< dimension of the mesh

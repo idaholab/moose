@@ -15,7 +15,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "AssemblyData.h"
+#include "Assembly.h"
 #include "NonlinearSystem.h"
 
 // libMesh
@@ -111,12 +111,12 @@ VariableData::computeValues()
 
 // Variable /////
 
-MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, AssemblyData & assembly_data) :
+MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly) :
     _var_num(var_num),
     _subproblem(sys.subproblem()),
     _sys(sys),
     _dof_map(sys.dofMap()),
-    _assembly(assembly_data),
+    _assembly(assembly),
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
     _fe(_assembly.getFE(fe_type)),

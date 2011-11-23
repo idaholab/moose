@@ -19,7 +19,7 @@
 #include "MooseMesh.h"
 #include "ExodusOutput.h"
 #include "DisplacedSystem.h"
-#include "AssemblyData.h"
+#include "Assembly.h"
 #include "GeometricSearchData.h"
 #include "FEProblem.h"
 
@@ -91,8 +91,6 @@ public:
   virtual void getDiracElements(std::set<const Elem *> & elems);
   virtual void clearDiracInfo();
 
-  virtual AsmBlock & asmBlock(THREAD_ID tid);
-
   virtual void computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, NumericVector<Number> & /*residual*/) {}
   virtual void computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & /*soln*/, SparseMatrix<Number> & /*jacobian*/) {}
 
@@ -119,19 +117,19 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid);
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
 
-  virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
-  virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
-  virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
-  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) { return _asm_info[tid]->physicalPoints(); }
-  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _asm_info[tid]->JxW(); }
-  virtual QBase * & qRuleFace(THREAD_ID tid) { return _asm_info[tid]->qRuleFace(); }
-  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _asm_info[tid]->qPointsFace(); }
-  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _asm_info[tid]->JxWFace(); }
-  virtual const Elem * & elem(THREAD_ID tid) { return _asm_info[tid]->elem(); }
-  virtual unsigned int & side(THREAD_ID tid) { return _asm_info[tid]->side(); }
-  virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid]->sideElem(); }
-  virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid]->node(); }
-  virtual const Node * & nodeNeighbor(THREAD_ID tid) { return _asm_info[tid]->nodeNeighbor(); }
+  virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
+  virtual QBase * & qRule(THREAD_ID tid) { return _assembly[tid]->qRule(); }
+  virtual const std::vector<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
+  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
+  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
+  virtual QBase * & qRuleFace(THREAD_ID tid) { return _assembly[tid]->qRuleFace(); }
+  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }
+  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _assembly[tid]->JxWFace(); }
+  virtual const Elem * & elem(THREAD_ID tid) { return _assembly[tid]->elem(); }
+  virtual unsigned int & side(THREAD_ID tid) { return _assembly[tid]->side(); }
+  virtual const Elem * & sideElem(THREAD_ID tid) { return _assembly[tid]->sideElem(); }
+  virtual const Node * & node(THREAD_ID tid) { return _assembly[tid]->node(); }
+  virtual const Node * & nodeNeighbor(THREAD_ID tid) { return _assembly[tid]->nodeNeighbor(); }
 
   // Geom Search /////
   virtual void updateGeomSearch();
@@ -183,8 +181,7 @@ protected:
   const NumericVector<Number> * _nl_solution;
   const NumericVector<Number> * _aux_solution;
 
-  std::vector<AsmBlock *> _asm_block;                   ///<
-  std::vector<AssemblyData *> _asm_info;
+  std::vector<Assembly *> _assembly;
 
   GeometricSearchData _geometric_search_data;
 

@@ -37,7 +37,7 @@
 //#include "ValidParams.h"
 
 //Forward Declarations
-class AsmBlock;
+class Assembly;
 
 class NodeFaceConstraint;
 
@@ -127,8 +127,7 @@ protected:
 
   THREAD_ID _tid;
 
-  AsmBlock & _asmb;
-  AssemblyData & _asm_data;
+  Assembly & _assembly;
   MooseVariable & _var;
   MooseMesh & _mesh;
   unsigned int _dim;

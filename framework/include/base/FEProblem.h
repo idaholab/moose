@@ -20,7 +20,7 @@
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
-#include "AssemblyData.h"
+#include "Assembly.h"
 #include "GeometricSearchData.h"
 #include "MaterialWarehouse.h"
 #include "MaterialPropertyStorage.h"
@@ -48,26 +48,44 @@ public:
   FEProblem(const std::string & name, InputParameters parameters);
   virtual ~FEProblem();
 
+  /**
+   * Set the coupling between variables
+   * TODO: allow user-defined coupling
+   * @param type Type of coupling
+   */
+  void setCoupling(Moose::CouplingType type);
+
+  Moose::CouplingType coupling() { return _coupling; }
+
+  /**
+   * Set custom coupling matrix
+   * @param cm coupling matrix to be set
+   */
+  void setCouplingMatrix(CouplingMatrix * cm);
+  CouplingMatrix * & couplingMatrix() { return _cm; }
+
+  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries(THREAD_ID tid) { return _assembly[tid]->couplingEntries(); }
+
+
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
 
   virtual void createQRules(QuadratureType type, Order order);
   virtual Order getQuadratureOrder() { return _quadrature_order; }
-  virtual AsmBlock & asmBlock(THREAD_ID tid);
-  virtual AssemblyData & assembly(THREAD_ID tid) { return *_asm_info[tid]; }
-  virtual QBase * & qRule(THREAD_ID tid) { return _asm_info[tid]->qRule(); }
-  virtual const std::vector<Point> & points(THREAD_ID tid) { return _asm_info[tid]->qPoints(); }
-  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) { return _asm_info[tid]->physicalPoints(); }
-  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _asm_info[tid]->JxW(); }
-  virtual QBase * & qRuleFace(THREAD_ID tid) { return _asm_info[tid]->qRuleFace(); }
-  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _asm_info[tid]->qPointsFace(); }
-  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _asm_info[tid]->JxWFace(); }
+  virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
+  virtual QBase * & qRule(THREAD_ID tid) { return _assembly[tid]->qRule(); }
+  virtual const std::vector<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
+  virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
+  virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
+  virtual QBase * & qRuleFace(THREAD_ID tid) { return _assembly[tid]->qRuleFace(); }
+  virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }
+  virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _assembly[tid]->JxWFace(); }
 
-  virtual const Elem * & elem(THREAD_ID tid) { return _asm_info[tid]->elem(); }
-  virtual unsigned int & side(THREAD_ID tid) { return _asm_info[tid]->side(); }
-  virtual const Elem * & sideElem(THREAD_ID tid) { return _asm_info[tid]->sideElem(); }
-  virtual const Node * & node(THREAD_ID tid) { return _asm_info[tid]->node(); }
-  virtual const Node * & nodeNeighbor(THREAD_ID tid) { return _asm_info[tid]->nodeNeighbor(); }
+  virtual const Elem * & elem(THREAD_ID tid) { return _assembly[tid]->elem(); }
+  virtual unsigned int & side(THREAD_ID tid) { return _assembly[tid]->side(); }
+  virtual const Elem * & sideElem(THREAD_ID tid) { return _assembly[tid]->sideElem(); }
+  virtual const Node * & node(THREAD_ID tid) { return _assembly[tid]->node(); }
+  virtual const Node * & nodeNeighbor(THREAD_ID tid) { return _assembly[tid]->nodeNeighbor(); }
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
@@ -247,9 +265,12 @@ protected:
   NonlinearSystem _nl;
   AuxiliarySystem _aux;
 
+  Moose::CouplingType _coupling;                        ///< Type of variable coupling
+  CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.
+
   // quadrature
   Order _quadrature_order;                              ///< Quadrature order required by all variables to integrated over them.
-  std::vector<AssemblyData *> _asm_info;
+  std::vector<Assembly *> _assembly;
 
   // Initial conditions
   std::map<std::string, InitialCondition *> _ics;

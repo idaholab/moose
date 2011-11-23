@@ -110,36 +110,29 @@ DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_m
   _ex.sequence(true);
 
   unsigned int n_threads = libMesh::n_threads();
-  _asm_info.resize(n_threads);
-  _asm_block.resize(n_threads);
+  _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
-  {
-    _asm_info[i] = new AssemblyData(_mesh);
-    _asm_block[i] = new AsmBlock(_displaced_nl, _mproblem.getNonlinearSystem().couplingMatrix(), i);
-  }
+    _assembly[i] = new Assembly(_displaced_nl, _mproblem.couplingMatrix(), i);
 }
 
 DisplacedProblem::~DisplacedProblem()
 {
   for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
-  {
-    delete _asm_info[i];
-    delete _asm_block[i];
-  }
+    delete _assembly[i];
 }
 
 void
 DisplacedProblem::createQRules(QuadratureType type, Order order)
 {
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _asm_info[tid]->createQRules(type, order);
+    _assembly[tid]->createQRules(type, order);
 }
 
 void
 DisplacedProblem::init()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _asm_block[tid]->init();
+    _assembly[tid]->init();
 
   _displaced_nl.init();
   _displaced_aux.init();
@@ -213,33 +206,33 @@ DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & ty
 void
 DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(elem);
+  _assembly[tid]->reinit(elem);
 
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
-  _asm_block[tid]->prepare();
+  _assembly[tid]->prepare();
 }
 
 void
 DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(elem);
+  _assembly[tid]->reinit(elem);
 
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
-  _asm_block[tid]->prepareBlock(ivar, jvar, dof_indices);
+  _assembly[tid]->prepareBlock(ivar, jvar, dof_indices);
 }
 
 void
 DisplacedProblem::prepareAssembly(THREAD_ID tid)
 {
-  _asm_block[tid]->prepare();
+  _assembly[tid]->prepare();
 }
 
 void
 DisplacedProblem::prepareAssemblyNeighbor(THREAD_ID tid)
 {
-  _asm_block[tid]->prepareNeighbor();
+  _assembly[tid]->prepareNeighbor();
 }
 
 bool
@@ -254,11 +247,11 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
     std::vector<Point> points(points_set.size());
     std::copy(points_set.begin(), points_set.end(), points.begin());
 
-    _asm_info[tid]->reinitAtPhysical(elem, points);
+    _assembly[tid]->reinitAtPhysical(elem, points);
 
     _displaced_nl.prepare(tid);
     _displaced_aux.prepare(tid);
-    _asm_block[tid]->prepare();
+    _assembly[tid]->prepare();
 
     reinitElem(elem, tid);
   }
@@ -277,7 +270,7 @@ DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 DisplacedProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(elem, side);
+  _assembly[tid]->reinit(elem, side);
   _displaced_nl.reinitElemFace(elem, side, bnd_id, tid);
   _displaced_aux.reinitElemFace(elem, side, bnd_id, tid);
 }
@@ -285,7 +278,7 @@ DisplacedProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned 
 void
 DisplacedProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(node);
+  _assembly[tid]->reinit(node);
   _displaced_nl.reinitNode(node, tid);
   _displaced_aux.reinitNode(node, tid);
 }
@@ -293,7 +286,7 @@ DisplacedProblem::reinitNode(const Node * node, THREAD_ID tid)
 void
 DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(node);
+  _assembly[tid]->reinit(node);
   _displaced_nl.reinitNodeFace(node, bnd_id, tid);
   _displaced_aux.reinitNodeFace(node, bnd_id, tid);
 }
@@ -304,7 +297,7 @@ DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID
   const Elem * neighbor = elem->neighbor(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
-  _asm_info[tid]->reinit(elem, side, neighbor);
+  _assembly[tid]->reinit(elem, side, neighbor);
 
   _displaced_nl.prepareNeighbor(tid);
   _displaced_aux.prepareNeighbor(tid);
@@ -321,7 +314,7 @@ void
 DisplacedProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
 {
   // Reinit shape functions
-  _asm_info[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
+  _assembly[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
 
   // Set the neighbor dof indices
   _displaced_nl.prepareNeighbor(tid);
@@ -338,7 +331,7 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbo
 void
 DisplacedProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
 {
-  _asm_info[tid]->reinitNodeNeighbor(node);
+  _assembly[tid]->reinitNodeNeighbor(node);
   _displaced_nl.reinitNodeNeighbor(node, tid);
   _displaced_aux.reinitNodeNeighbor(node, tid);
 }
@@ -355,112 +348,106 @@ DisplacedProblem::clearDiracInfo()
   _dirac_kernel_info.clearPoints();
 }
 
-AsmBlock &
-DisplacedProblem::asmBlock(THREAD_ID tid)
-{
-  return *_asm_block[tid];
-}
-
 void
 DisplacedProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _asm_block[tid]->addResidual(residual);
+  _assembly[tid]->addResidual(residual);
 }
 
 void
 DisplacedProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _asm_block[tid]->addResidualNeighbor(residual);
+  _assembly[tid]->addResidualNeighbor(residual);
 }
 
 void
 DisplacedProblem::cacheResidual(THREAD_ID tid)
 {
-  _asm_block[tid]->cacheResidual();
+  _assembly[tid]->cacheResidual();
 }
 
 void
 DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _asm_block[tid]->cacheResidualNeighbor();
+  _assembly[tid]->cacheResidualNeighbor();
 }
 
 void
 DisplacedProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _asm_block[tid]->addCachedResidual(residual);
+  _assembly[tid]->addCachedResidual(residual);
 }
 
 void
 DisplacedProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _asm_block[tid]->setResidual(residual);
+  _assembly[tid]->setResidual(residual);
 }
 
 void
 DisplacedProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _asm_block[tid]->setResidualNeighbor(residual);
+  _assembly[tid]->setResidualNeighbor(residual);
 }
 
 void
 DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
-  _asm_block[tid]->addJacobian(jacobian);
+  _assembly[tid]->addJacobian(jacobian);
 }
 
 void
 DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
-  _asm_block[tid]->addJacobianNeighbor(jacobian);
+  _assembly[tid]->addJacobianNeighbor(jacobian);
 }
 
 void
 DisplacedProblem::cacheJacobian(THREAD_ID tid)
 {
-  _asm_block[tid]->cacheJacobian();
+  _assembly[tid]->cacheJacobian();
 }
 
 void
 DisplacedProblem::cacheJacobianNeighbor(THREAD_ID tid)
 {
-  _asm_block[tid]->cacheJacobianNeighbor();
+  _assembly[tid]->cacheJacobianNeighbor();
 }
 
 void
 DisplacedProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
-  _asm_block[tid]->addCachedJacobian(jacobian);
+  _assembly[tid]->addCachedJacobian(jacobian);
 }
 
 void
 DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
-  _asm_block[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
+  _assembly[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
 }
 
 void
 DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
 {
-  _asm_block[tid]->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
+  _assembly[tid]->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
 }
 
 void
 DisplacedProblem::prepareShapes(unsigned int var, THREAD_ID tid)
 {
-  _asm_block[tid]->copyShapes(var);
+  _assembly[tid]->copyShapes(var);
 }
 
 void
 DisplacedProblem::prepareFaceShapes(unsigned int var, THREAD_ID tid)
 {
-  _asm_block[tid]->copyFaceShapes(var);
+  _assembly[tid]->copyFaceShapes(var);
 }
 
 void
 DisplacedProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
 {
-  _asm_block[tid]->copyNeighborShapes(var);
+  _assembly[tid]->copyNeighborShapes(var);
 }
 
 void

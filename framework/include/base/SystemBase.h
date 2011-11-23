@@ -24,7 +24,7 @@
 
 #include "MooseMesh.h"
 #include "VariableWarehouse.h"
-#include "AssemblyData.h"
+#include "Assembly.h"
 #include "ParallelUniqueId.h"
 #include "SubProblem.h"
 
@@ -254,10 +254,6 @@ protected:
 
   std::vector<VariableWarehouse> _vars;                                 ///< Variable warehouses (one for each thread)
   std::map<unsigned int, std::set<subdomain_id_type> > _var_map;        ///< Map of variables (variable id -> array of subdomains where it lives)
-
-
-  // FIXME: remove this!
-  friend class AsmBlock;
 };
 
 /**

@@ -44,24 +44,6 @@ public:
   NonlinearSystem(FEProblem & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
-  /**
-   * Set the coupling between variables
-   * TODO: allow user-defined coupling
-   * @param type Type of coupling
-   */
-  void setCoupling(Moose::CouplingType type);
-
-  /**
-   * Set custom coupling matrix
-   * @param cm coupling matrix to be set
-   */
-  void setCouplingMatrix(CouplingMatrix * cm);
-  CouplingMatrix * & couplingMatrix() { return _cm; }
-
-  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries(THREAD_ID tid) { return _asm_block[tid]->couplingEntries(); }
-
-  /// Should be called before EquationSystems::init()
-  virtual void preInit();
   virtual void init();
   virtual void solve();
 
@@ -72,31 +54,6 @@ public:
   virtual void timestepSetup();
 
   void setupFiniteDifferencedPreconditioner();
-
-  virtual void prepareAssembly(THREAD_ID tid);
-  virtual void prepareAssemblyNeighbor(THREAD_ID tid);
-  virtual void prepareAssembly(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
-  virtual void prepareAssemblyNeighbor(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid);
-  virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
-  virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
-
-  virtual void cacheResidual(THREAD_ID tid);
-  virtual void cacheResidualNeighbor(THREAD_ID tid);
-  virtual void addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid);
-
-  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid);
-  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
-
-  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid);
-  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid);
-
-  virtual void cacheJacobian(THREAD_ID tid);
-  virtual void cacheJacobianNeighbor(THREAD_ID tid);
-  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
-
-  AsmBlock & asmBlock(THREAD_ID tid) { return *_asm_block[tid]; }
 
   /**
    * Returns the convergence state
@@ -367,9 +324,6 @@ protected:
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
 
-  Moose::CouplingType _coupling;                        ///< Type of variable coupling
-  CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.
-
   const NumericVector<Number> * _current_solution;      ///< solution vector from nonlinear solver
   NumericVector<Number> & _older_solution;              ///< solution vector from step prior to previous step
   NumericVector<Number> & _solution_u_dot;              ///< solution vector for u^dot
@@ -389,7 +343,6 @@ protected:
   Moose::TimeSteppingScheme _time_stepping_scheme;      ///< Time stepping scheme used for time discretization
   Real _time_stepping_order;                            ///< The order of the time stepping scheme
 
-  std::vector<AsmBlock *> _asm_block;                   ///<
   // holders
   std::vector<KernelWarehouse> _kernels;                ///< Kernel storage for each thread
   std::vector<BCWarehouse> _bcs;                        ///< BC storage for each thread

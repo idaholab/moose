@@ -45,8 +45,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _subproblem(*parameters.get<SubProblem *>("_subproblem")),
   _sys(*parameters.get<SystemBase *>("_sys")),
   _tid(parameters.get<THREAD_ID>("_tid")),
-  _asmb(_subproblem.asmBlock(_tid)),
-  _asm_data(_subproblem.assembly(_tid)),
+  _assembly(_subproblem.assembly(_tid)),
   _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
   _mesh(_subproblem.mesh()),
   _dim(_mesh.dimension()),
@@ -62,9 +61,9 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _phi_slave(1),  // One entry
   _test_slave(1),  // One entry
 
-  _phi_master(_asmb.phiFaceNeighbor()),
-  _grad_phi_master(_asmb.gradPhiFaceNeighbor()),
-  _second_phi_master(_asmb.secondPhiFaceNeighbor()),
+  _phi_master(_assembly.phiFaceNeighbor()),
+  _grad_phi_master(_assembly.gradPhiFaceNeighbor()),
+  _second_phi_master(_assembly.secondPhiFaceNeighbor()),
 
   _test_master(_var.phiFaceNeighbor()),
   _grad_test_master(_var.gradPhiFaceNeighbor()),
@@ -100,8 +99,8 @@ void
 NodeFaceConstraint::computeResidual()
 {
 //  std::cerr<<"Here!"<<std::endl;
-  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
-  DenseVector<Number> & neighbor_re = _asmb.residualBlockNeighbor(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_var.number());
 
 //  for (_qp = 0; _qp < _master_qrule->n_points(); _qp++)
 //  {
@@ -152,11 +151,11 @@ NodeFaceConstraint::computeJacobian()
   for(std::set<unsigned int>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
     _connected_dof_indices.push_back(*sit);
 
-  //DenseMatrix<Number> & Kee = _asmb.jacobianBlock(_var.number(), _var.number());
-  DenseMatrix<Number> & Ken = _asmb.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
+  //DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
+  DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
-//  DenseMatrix<Number> & Kne = _asmb.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
-  DenseMatrix<Number> & Knn = _asmb.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
+//  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
   _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
   _Kne.resize(_test_master.size(), _connected_dof_indices.size());

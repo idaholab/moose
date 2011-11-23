@@ -72,6 +72,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     SubProblem(name, parameters),
     _nl(*this, name_sys("nl", _n)),
     _aux(*this, name_sys("aux", _n)),
+    _coupling(Moose::COUPLING_DIAG),
+    _cm(NULL),
     _quadrature_order(CONSTANT),
     _pps_output_table_max_rows(0),
     _postprocessor_screen_output(true),
@@ -104,9 +106,9 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   unsigned int n_threads = libMesh::n_threads();
 
-  _asm_info.resize(n_threads);
+  _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
-    _asm_info[i] = new AssemblyData(_mesh);
+    _assembly[i] = new Assembly(_nl, couplingMatrix(), i);
 
   _functions.resize(n_threads);
   _materials.resize(n_threads);
@@ -126,12 +128,14 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
 FEProblem::~FEProblem()
 {
+  delete _cm;
+
   bool stateful_props = _material_props.hasStatefulProperties();
 
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; i++)
   {
-    delete _asm_info[i];
+    delete _assembly[i];
 
     if (!stateful_props)
     {
@@ -201,15 +205,15 @@ void FEProblem::initialSetup()
       subdomain_id_type blk_id = elem->subdomain_id();
 
       mooseAssert(_materials[0].hasMaterials(blk_id), "No materials on subdomain block " + elem->id());
-      _asm_info[0]->reinit(elem);
-      unsigned int n_points = _asm_info[0]->qRule()->n_points();
+      _assembly[0]->reinit(elem);
+      unsigned int n_points = _assembly[0]->qRule()->n_points();
       _material_data[0]->initStatefulProps(_materials[0].getMaterials(blk_id), n_points, *elem);
 
       for (unsigned int side=0; side<elem->n_sides(); side++)
       {
         mooseAssert(_materials[0].hasBoundaryMaterials(blk_id), "No face materials on subdomain block " + elem->id());
-        _asm_info[0]->reinit(elem, side);
-        unsigned int n_points = _asm_info[0]->qRuleFace()->n_points();
+        _assembly[0]->reinit(elem, side);
+        unsigned int n_points = _assembly[0]->qRuleFace()->n_points();
         _bnd_material_data[0]->initStatefulProps(_materials[0].getBoundaryMaterials(blk_id), n_points, *elem, side);
         // TODO:
       }
@@ -318,11 +322,11 @@ void FEProblem::timestepSetup()
 void
 FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(elem);
+  _assembly[tid]->reinit(elem);
 
   _nl.prepare(tid);
   _aux.prepare(tid);
-  _nl.prepareAssembly(tid);
+  _assembly[tid]->prepare();
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
     _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), tid);
@@ -331,11 +335,11 @@ FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 void
 FEProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(elem);
+  _assembly[tid]->reinit(elem);
 
   _nl.prepare(tid);
   _aux.prepare(tid);
-  _nl.prepareAssembly(ivar, jvar, dof_indices, tid);
+  _assembly[tid]->prepareBlock(ivar, jvar, dof_indices);
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
     _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), ivar, jvar, dof_indices, tid);
@@ -344,7 +348,7 @@ FEProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, cons
 void
 FEProblem::prepareAssembly(THREAD_ID tid)
 {
-  _nl.prepareAssembly(tid);
+  _assembly[tid]->prepare();
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
     _displaced_problem->prepareAssembly(tid);
@@ -353,7 +357,7 @@ FEProblem::prepareAssembly(THREAD_ID tid)
 void
 FEProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _nl.addResidual(residual, tid);
+  _assembly[tid]->addResidual(residual);
   if(_displaced_problem)
     _displaced_problem->addResidual(residual, tid);
 }
@@ -361,7 +365,7 @@ FEProblem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
 void
 FEProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _nl.addResidualNeighbor(residual, tid);
+  _assembly[tid]->addResidualNeighbor(residual);
   if(_displaced_problem)
     _displaced_problem->addResidualNeighbor(residual, tid);
 }
@@ -369,7 +373,7 @@ FEProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 void
 FEProblem::cacheResidual(THREAD_ID tid)
 {
-  _nl.cacheResidual(tid);
+  _assembly[tid]->cacheResidual();
   if(_displaced_problem)
     _displaced_problem->cacheResidual(tid);
 }
@@ -377,7 +381,7 @@ FEProblem::cacheResidual(THREAD_ID tid)
 void
 FEProblem::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _nl.cacheResidualNeighbor(tid);
+  _assembly[tid]->cacheResidualNeighbor();
   if(_displaced_problem)
     _displaced_problem->cacheResidualNeighbor(tid);
 }
@@ -385,7 +389,7 @@ FEProblem::cacheResidualNeighbor(THREAD_ID tid)
 void
 FEProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _nl.addCachedResidual(residual, tid);
+  _assembly[tid]->addCachedResidual(residual);
   if(_displaced_problem)
     _displaced_problem->addCachedResidual(residual, tid);
 }
@@ -393,7 +397,7 @@ FEProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
 void
 FEProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _nl.setResidual(residual, tid);
+  _assembly[tid]->setResidual(residual);
   if(_displaced_problem)
     _displaced_problem->setResidual(residual, tid);
 }
@@ -401,7 +405,7 @@ FEProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 void
 FEProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _nl.setResidualNeighbor(residual, tid);
+  _assembly[tid]->setResidualNeighbor(residual);
   if(_displaced_problem)
     _displaced_problem->setResidualNeighbor(residual, tid);
 }
@@ -409,7 +413,7 @@ FEProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 void
 FEProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
-  _nl.addJacobian(jacobian, tid);
+  _assembly[tid]->addJacobian(jacobian);
   if(_displaced_problem)
     _displaced_problem->addJacobian(jacobian, tid);
 }
@@ -417,7 +421,7 @@ FEProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 void
 FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
-  _nl.addJacobianNeighbor(jacobian, tid);
+  _assembly[tid]->addJacobianNeighbor(jacobian);
   if(_displaced_problem)
     _displaced_problem->addJacobianNeighbor(jacobian, tid);
 }
@@ -425,7 +429,7 @@ FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 void
 FEProblem::cacheJacobian(THREAD_ID tid)
 {
-  _nl.cacheJacobian(tid);
+  _assembly[tid]->cacheJacobian();
   if(_displaced_problem)
     _displaced_problem->cacheJacobian(tid);
 }
@@ -433,7 +437,7 @@ FEProblem::cacheJacobian(THREAD_ID tid)
 void
 FEProblem::cacheJacobianNeighbor(THREAD_ID tid)
 {
-  _nl.cacheJacobianNeighbor(tid);
+  _assembly[tid]->cacheJacobianNeighbor();
   if(_displaced_problem)
     _displaced_problem->cacheJacobianNeighbor(tid);
 }
@@ -441,7 +445,7 @@ FEProblem::cacheJacobianNeighbor(THREAD_ID tid)
 void
 FEProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
-  _nl.addCachedJacobian(jacobian, tid);
+  _assembly[tid]->addCachedJacobian(jacobian);
   if(_displaced_problem)
     _displaced_problem->addCachedJacobian(jacobian, tid);
 }
@@ -449,7 +453,7 @@ FEProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 void
 FEProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
 {
-  _nl.addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
+  _assembly[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
   if(_displaced_problem)
     _displaced_problem->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
 }
@@ -457,7 +461,7 @@ FEProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, 
 void
 FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
 {
-  _nl.addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
+  _assembly[tid]->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
   if(_displaced_problem)
     _displaced_problem->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
 }
@@ -465,19 +469,19 @@ FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int iva
 void
 FEProblem::prepareShapes(unsigned int var, THREAD_ID tid)
 {
-  _nl.asmBlock(tid).copyShapes(var);
+  _assembly[tid]->copyShapes(var);
 }
 
 void
 FEProblem::prepareFaceShapes(unsigned int var, THREAD_ID tid)
 {
-  _nl.asmBlock(tid).copyFaceShapes(var);
+  _assembly[tid]->copyFaceShapes(var);
 }
 
 void
 FEProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
 {
-  _nl.asmBlock(tid).copyNeighborShapes(var);
+  _assembly[tid]->copyNeighborShapes(var);
 }
 
 void
@@ -508,14 +512,14 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
     std::vector<Point> points(points_set.size());
     std::copy(points_set.begin(), points_set.end(), points.begin());
 
-    _asm_info[tid]->reinitAtPhysical(elem, points);
+    _assembly[tid]->reinitAtPhysical(elem, points);
 
     _nl.prepare(tid);
     _aux.prepare(tid);
 
     reinitElem(elem, tid);
   }
-  _nl.prepareAssembly(tid);
+  _assembly[tid]->prepare();
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem))
     have_points = have_points || _displaced_problem->reinitDirac(_displaced_mesh->elem(elem->id()), tid);
@@ -526,7 +530,7 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 void
 FEProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
-  unsigned int n_points = _asm_info[tid]->qRule()->n_points();
+  unsigned int n_points = _assembly[tid]->qRule()->n_points();
   _zero[tid].resize(n_points, 0);
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
@@ -541,9 +545,9 @@ FEProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 FEProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd_id, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(elem, side);
+  _assembly[tid]->reinit(elem, side);
 
-  unsigned int n_points = _asm_info[tid]->qRule()->n_points();
+  unsigned int n_points = _assembly[tid]->qRule()->n_points();
   _zero[tid].resize(n_points, 0);
   _grad_zero[tid].resize(n_points, 0);
   _second_zero[tid].resize(n_points, 0);
@@ -558,7 +562,7 @@ FEProblem::reinitElemFace(const Elem * elem, unsigned int side, unsigned int bnd
 void
 FEProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(node);
+  _assembly[tid]->reinit(node);
 
   unsigned int n_points = 1;
   _zero[tid].resize(n_points, 0);
@@ -575,7 +579,7 @@ FEProblem::reinitNode(const Node * node, THREAD_ID tid)
 void
 FEProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 {
-  _asm_info[tid]->reinit(node);
+  _assembly[tid]->reinit(node);
 
   unsigned int n_points = 1;
   _zero[tid].resize(n_points, 0);
@@ -593,7 +597,7 @@ FEProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 void
 FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
 {
-  _asm_info[tid]->reinitNodeNeighbor(node);
+  _assembly[tid]->reinitNodeNeighbor(node);
 
   unsigned int n_points = 1;
   _zero[tid].resize(n_points, 0);
@@ -614,12 +618,12 @@ FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
   const Elem * neighbor = elem->neighbor(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
-  _asm_info[tid]->reinit(elem, side, neighbor);
+  _assembly[tid]->reinit(elem, side, neighbor);
 
   _nl.prepareNeighbor(tid);
   _aux.prepareNeighbor(tid);
 
-  _nl.prepareAssemblyNeighbor(tid);
+  _assembly[tid]->prepareNeighbor();
 
   unsigned int bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
   _nl.reinitElemFace(elem, side, bnd_id, tid);
@@ -633,14 +637,14 @@ void
 FEProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid)
 {
   // Reinits shape the functions at the physical points
-  _asm_info[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
+  _assembly[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
 
   // Sets the neighbor dof indices
   _nl.prepareNeighbor(tid);
   _aux.prepareNeighbor(tid);
 
   // Resizes Re and Ke
-  _nl.prepareAssemblyNeighbor(tid);
+  _assembly[tid]->prepareNeighbor();
 
   // Compute the values of each variable at the points
   _nl.reinitNeighbor(neighbor, tid);
@@ -1010,8 +1014,8 @@ FEProblem::reinitMaterials(unsigned int blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(blk_id))
   {
-    const Elem * & elem = _asm_info[tid]->elem();
-    _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id), _asm_info[tid]->qRule()->n_points(), *elem, 0);
+    const Elem * & elem = _assembly[tid]->elem();
+    _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id), _assembly[tid]->qRule()->n_points(), *elem, 0);
   }
 }
 
@@ -1020,8 +1024,8 @@ FEProblem::reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID
 {
   if (_materials[tid].hasBoundaryMaterials(blk_id))
   {
-    const Elem * & elem = _asm_info[tid]->elem();
-    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(blk_id), _asm_info[tid]->qRuleFace()->n_points(), *elem, side);
+    const Elem * & elem = _assembly[tid]->elem();
+    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(blk_id), _assembly[tid]->qRuleFace()->n_points(), *elem, side);
   }
 }
 
@@ -1031,9 +1035,9 @@ FEProblem::reinitMaterialsNeighbor(unsigned int blk_id, unsigned int /*side*/, T
   if (_materials[tid].hasNeighborMaterials(blk_id))
   {
     // NOTE: this will not work with h-adaptivity
-    const Elem * & neighbor = _asm_info[tid]->neighbor();
-    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_asm_info[tid]->elem());
-    _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id), _asm_info[tid]->qRuleFace()->n_points(), *neighbor, neighbor_side);
+    const Elem * & neighbor = _assembly[tid]->neighbor();
+    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+    _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id), _assembly[tid]->qRuleFace()->n_points(), *neighbor, neighbor_side);
   }
 }
 
@@ -1395,22 +1399,56 @@ FEProblem::createQRules(QuadratureType type, Order order)
     _quadrature_order = order;
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _asm_info[tid]->createQRules(type, _quadrature_order);
+    _assembly[tid]->createQRules(type, _quadrature_order);
 
   if (_displaced_problem)
     _displaced_problem->createQRules(type, _quadrature_order);
 }
 
-AsmBlock &
-FEProblem::asmBlock(THREAD_ID tid)
+void
+FEProblem::setCoupling(Moose::CouplingType type)
 {
-  return _nl.asmBlock(tid);
+  _coupling = type;
 }
+
+void
+FEProblem::setCouplingMatrix(CouplingMatrix * cm)
+{
+  _coupling = Moose::COUPLING_CUSTOM;
+  delete _cm;
+  _cm = cm;
+}
+
 
 void
 FEProblem::init()
 {
-  _nl.preInit();
+  unsigned int n_vars = _nl.nVariables();
+  switch (_coupling)
+  {
+  case Moose::COUPLING_DIAG:
+    _cm = new CouplingMatrix(n_vars);
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
+        (*_cm)(i, j) = (i == j ? 1 : 0);
+    break;
+
+  // for full jacobian
+  case Moose::COUPLING_FULL:
+    _cm = new CouplingMatrix(n_vars);
+    for (unsigned int i = 0; i < n_vars; i++)
+      for (unsigned int j = 0; j < n_vars; j++)
+        (*_cm)(i, j) = 1;
+    break;
+
+  case Moose::COUPLING_CUSTOM:
+    // do nothing, _cm was already set through couplingMatrix() call
+    break;
+  }
+
+  _nl.dofMap()._dof_coupling = _cm;
+  _nl.dofMap().attach_extra_sparsity_function(&extraSparsity, &_nl);
+
 
   Moose::setup_perf_log.push("eq.init()","Setup");
   SubProblem::init();
@@ -1433,6 +1471,9 @@ FEProblem::init2()
   Moose::setup_perf_log.push("NonlinearSystem::update()","Setup");
   _nl.update();
   Moose::setup_perf_log.pop("NonlinearSystem::update()","Setup");
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    _assembly[tid]->init();
 
   _nl.init();
 

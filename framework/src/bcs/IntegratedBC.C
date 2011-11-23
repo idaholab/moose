@@ -16,7 +16,6 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariable.h"
-#include "AsmBlock.h"
 
 
 template<>
@@ -29,21 +28,19 @@ InputParameters validParams<IntegratedBC>()
 IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
     Coupleable(parameters, false),
-    _current_elem(_asm_data.elem()),
-    _current_side(_asm_data.side()),
-    _current_side_elem(_asm_data.sideElem()),
+    _current_elem(_assembly.elem()),
+    _current_side(_assembly.side()),
+    _current_side_elem(_assembly.sideElem()),
 
     _normals(_var.normals()),
-
-    _asmb(_subproblem.asmBlock(_tid)),
 
     _qrule(_subproblem.qRuleFace(_tid)),
     _q_point(_subproblem.pointsFace(_tid)),
     _JxW(_subproblem.JxWFace(_tid)),
 
-    _phi(_asmb.phiFace()),
-    _grad_phi(_asmb.gradPhiFace()),
-    _second_phi(_asmb.secondPhiFace()),
+    _phi(_assembly.phiFace()),
+    _grad_phi(_assembly.gradPhiFace()),
+    _second_phi(_assembly.secondPhiFace()),
 
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
@@ -58,7 +55,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 void
 IntegratedBC::computeResidual()
 {
-  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
@@ -70,7 +67,7 @@ IntegratedBC::computeResidual()
 void
 IntegratedBC::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), _var.number());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -87,7 +84,7 @@ IntegratedBC::computeJacobianBlock(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeJacobianBlock()","IntegratedBC");
 
-  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), jvar);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     for (_i=0; _i<_test.size(); _i++)

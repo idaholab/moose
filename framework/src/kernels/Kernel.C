@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "Kernel.h"
-#include "AsmBlock.h"
+#include "Assembly.h"
 #include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
@@ -47,7 +47,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _asmb(_subproblem.asmBlock(_tid)),
+    _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
@@ -57,9 +57,9 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
 
-    _phi(_asmb.phi()),
-    _grad_phi(_asmb.gradPhi()),
-    _second_phi(_asmb.secondPhi()),
+    _phi(_assembly.phi()),
+    _grad_phi(_assembly.gradPhi()),
+    _second_phi(_assembly.secondPhi()),
 
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
@@ -103,7 +103,7 @@ Kernel::stopTime()
 void
 Kernel::computeResidual()
 {
-  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
@@ -116,7 +116,7 @@ Kernel::computeResidual()
 void
 Kernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), _var.number());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
@@ -131,7 +131,7 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
 
-  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), jvar);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
   for (_i=0; _i<_test.size(); _i++)
     for (_j=0; _j<_phi.size(); _j++)

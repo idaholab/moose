@@ -78,7 +78,7 @@ SetupFiniteDifferencePreconditionerAction::act()
         (*cm)(i,j) = 1;
   }
 
-  nl.setCouplingMatrix(cm);
+  subproblem.setCouplingMatrix(cm);
 
   bool implicit_geometric_coupling = getParam<bool>("implicit_geometric_coupling");
 

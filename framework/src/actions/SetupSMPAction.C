@@ -67,5 +67,5 @@ SetupSMPAction::act()
         (*cm)(i,j) = 1;
   }
 
-  nl.setCouplingMatrix(cm);
+  _problem->setCouplingMatrix(cm);
 }

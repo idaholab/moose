@@ -37,7 +37,7 @@ KernelSecond::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","KernelSecond");
 
-  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
   _value.resize(_qrule->n_points());
   precalculateResidual();

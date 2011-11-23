@@ -22,7 +22,7 @@
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
-#include "AsmBlock.h"
+#include "Assembly.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
 
@@ -88,7 +88,7 @@ protected:
 
   THREAD_ID _tid;
 
-  AsmBlock & _asmb;
+  Assembly & _assembly;
   MooseVariable & _var;
   MooseMesh & _mesh;
   unsigned int _dim;

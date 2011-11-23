@@ -39,7 +39,7 @@
 //#include "ValidParams.h"
 
 //Forward Declarations
-class AsmBlock;
+class Assembly;
 class DiracKernel;
 
 template<>
@@ -143,7 +143,7 @@ protected:
 
   THREAD_ID _tid;
 
-  AsmBlock & _asmb;
+  Assembly & _assembly;
   MooseVariable & _var;                                 ///< Variable this kernel acts on
   MooseMesh & _mesh;                                    ///< Mesh this kernels acts on
 

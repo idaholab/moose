@@ -14,7 +14,7 @@
 
 #include "DGKernel.h"
 #include "Moose.h"
-#include "AsmBlock.h"
+#include "Assembly.h"
 #include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
@@ -52,17 +52,16 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _asmb(_subproblem.asmBlock(_tid)),
-    _asm_data(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 
-    _current_elem(_asm_data.elem()),
-    _neighbor_elem(_asm_data.neighbor()),
+    _current_elem(_assembly.elem()),
+    _neighbor_elem(_assembly.neighbor()),
 
-    _current_side(_asm_data.side()),
-    _current_side_elem(_asm_data.sideElem()),
+    _current_side(_assembly.side()),
+    _current_side_elem(_assembly.sideElem()),
 
     _q_point(_subproblem.pointsFace(_tid)),
     _qrule(_subproblem.qRuleFace(_tid)),
@@ -82,9 +81,9 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _second_u_old(_var.secondSlnOld()),
     _second_u_older(_var.secondSlnOlder()),
 
-    _phi(_asmb.phiFace()),
-    _grad_phi(_asmb.gradPhiFace()),
-    _second_phi(_asmb.secondPhiFace()),
+    _phi(_assembly.phiFace()),
+    _grad_phi(_assembly.gradPhiFace()),
+    _second_phi(_assembly.secondPhiFace()),
 
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
@@ -92,9 +91,9 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
 
     _normals(_var.normals()),
 
-    _phi_neighbor(_asmb.phiFaceNeighbor()),
-    _grad_phi_neighbor(_asmb.gradPhiFaceNeighbor()),
-    _second_phi_neighbor(_asmb.secondPhiFaceNeighbor()),
+    _phi_neighbor(_assembly.phiFaceNeighbor()),
+    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()),
+    _second_phi_neighbor(_assembly.secondPhiFaceNeighbor()),
 
     _test_neighbor(_var.phiFaceNeighbor()),
     _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
@@ -121,8 +120,8 @@ DGKernel::computeResidual()
 {
   Moose::perf_log.push("computeResidual()","DGKernel");
 
-  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
-  DenseVector<Number> & neighbor_re = _asmb.residualBlockNeighbor(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_var.number());
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
   {
@@ -141,11 +140,11 @@ DGKernel::computeJacobian()
 {
   Moose::perf_log.push("computeJacobian()","DGKernel");
 
-  DenseMatrix<Number> & Kee = _asmb.jacobianBlock(_var.number(), _var.number());
-  DenseMatrix<Number> & Ken = _asmb.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
+  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
+  DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
-  DenseMatrix<Number> & Kne = _asmb.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
-  DenseMatrix<Number> & Knn = _asmb.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
+  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
   {
@@ -174,11 +173,11 @@ DGKernel::computeOffDiagJacobian(unsigned int jvar)
 {
   Moose::perf_log.push("computeOffDiagJacobian()","DGKernel");
 
-  DenseMatrix<Number> & Kee = _asmb.jacobianBlock(_var.number(), jvar);
-  DenseMatrix<Number> & Ken = _asmb.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), jvar);
+  DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
 
-  DenseMatrix<Number> & Kne = _asmb.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), jvar);
-  DenseMatrix<Number> & Knn = _asmb.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), jvar);
+  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), jvar);
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), jvar);
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
   {

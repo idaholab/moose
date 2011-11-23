@@ -22,7 +22,7 @@
 #include "MooseVariable.h"
 #include "Coupleable.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "AsmBlock.h"
+#include "Assembly.h"
 
 class MooseMesh;
 class Problem;
@@ -86,8 +86,7 @@ protected:
 
   THREAD_ID _tid;
 
-  AsmBlock & _asmb;
-  AssemblyData & _asm_data;
+  Assembly & _assembly;
   MooseVariable & _var;
   MooseMesh & _mesh;
   unsigned int _dim;

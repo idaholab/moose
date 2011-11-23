@@ -14,6 +14,7 @@
 
 #include "ComputeFullJacobianThread.h"
 #include "NonlinearSystem.h"
+#include "FEProblem.h"
 #include "Problem.h"
 
 // libmesh includes
@@ -33,7 +34,7 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread &
 void
 ComputeFullJacobianThread::computeJacobian()
 {
-  std::vector<std::pair<unsigned int, unsigned int> > & ce = _sys.couplingEntries(_tid);
+  std::vector<std::pair<unsigned int, unsigned int> > & ce = _fe_problem.couplingEntries(_tid);
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
     unsigned int ivar = (*it).first;
@@ -55,7 +56,7 @@ ComputeFullJacobianThread::computeJacobian()
 void
 ComputeFullJacobianThread::computeFaceJacobian(short int bnd_id)
 {
-  std::vector<std::pair<unsigned int, unsigned int> > & ce = _sys.couplingEntries(_tid);
+  std::vector<std::pair<unsigned int, unsigned int> > & ce = _fe_problem.couplingEntries(_tid);
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
     unsigned int ivar = (*it).first;
@@ -77,7 +78,7 @@ ComputeFullJacobianThread::computeFaceJacobian(short int bnd_id)
 void
 ComputeFullJacobianThread::computeInternalFaceJacobian()
 {
-  std::vector<std::pair<unsigned int, unsigned int> > & ce = _sys.couplingEntries(_tid);
+  std::vector<std::pair<unsigned int, unsigned int> > & ce = _fe_problem.couplingEntries(_tid);
   for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
     unsigned int ivar = (*it).first;

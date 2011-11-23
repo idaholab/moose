@@ -70,8 +70,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & nam
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),
     _initial_residual(0),
-    _coupling(Moose::COUPLING_DIAG),
-    _cm(NULL),
     _current_solution(NULL),
     _older_solution(solutionOlder()),
     _solution_u_dot(_sys.add_vector("u_dot", false, GHOSTED)),
@@ -107,72 +105,19 @@ NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & nam
   timeSteppingScheme(Moose::IMPLICIT_EULER);                   // default time stepping scheme
 
   unsigned int n_threads = libMesh::n_threads();
-  _asm_block.resize(n_threads);
   _kernels.resize(n_threads);
   _bcs.resize(n_threads);
   _dirac_kernels.resize(n_threads);
   _dg_kernels.resize(n_threads);
   _dampers.resize(n_threads);
   _constraints.resize(n_threads);
-
-  for (THREAD_ID tid = 0; tid < n_threads; ++tid)
-    _asm_block[tid] = new AsmBlock(*this, couplingMatrix(), tid);
 }
 
 NonlinearSystem::~NonlinearSystem()
 {
-  delete _cm;
-
   delete _preconditioner;
   delete &_serialized_solution;
   delete &_residual_copy;
-
-  unsigned int n_threads = libMesh::n_threads();
-  for (THREAD_ID tid = 0; tid < n_threads; ++tid)
-    delete _asm_block[tid];
-}
-
-void
-NonlinearSystem::setCoupling(Moose::CouplingType type)
-{
-  _coupling = type;
-}
-
-void NonlinearSystem::setCouplingMatrix(CouplingMatrix * cm)
-{
-  _coupling = Moose::COUPLING_CUSTOM;
-  delete _cm;
-  _cm = cm;
-}
-
-void
-NonlinearSystem::preInit()
-{
-  unsigned int n_vars = _sys.n_vars();
-  switch (_coupling)
-  {
-  case Moose::COUPLING_DIAG:
-    _cm = new CouplingMatrix(n_vars);
-    for (unsigned int i = 0; i < n_vars; i++)
-      for (unsigned int j = 0; j < n_vars; j++)
-        (*_cm)(i, j) = (i == j ? 1 : 0);
-    break;
-
-  // for full jacobian
-  case Moose::COUPLING_FULL:
-    _cm = new CouplingMatrix(n_vars);
-    for (unsigned int i = 0; i < n_vars; i++)
-      for (unsigned int j = 0; j < n_vars; j++)
-        (*_cm)(i, j) = 1;
-    break;
-
-  case Moose::COUPLING_CUSTOM:
-    // do nothing, _cm was already set through couplingMatrix() call
-    break;
-  }
-
-  _sys.get_dof_map()._dof_coupling = _cm;
-  _sys.get_dof_map().attach_extra_sparsity_function(&extraSparsity, this);
 }
 
 void
@@ -195,117 +140,6 @@ NonlinearSystem::init()
     _residual_copy.init(_sys.n_dofs(), false, SERIAL);
     Moose::setup_perf_log.pop("Init residual_copy","Setup");
   }
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _asm_block[tid]->init();
-}
-
-void
-NonlinearSystem::prepareAssembly(THREAD_ID tid)
-{
-  _asm_block[tid]->prepare();
-}
-
-void
-NonlinearSystem::prepareAssemblyNeighbor(THREAD_ID tid)
-{
-  _asm_block[tid]->prepareNeighbor();
-}
-
-void
-NonlinearSystem::prepareAssembly(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
-{
-  _asm_block[tid]->prepareBlock(ivar, jvar, dof_indices);
-}
-
-void
-NonlinearSystem::prepareAssemblyNeighbor(unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
-{
-  _asm_block[tid]->prepareBlock(ivar, jvar, dof_indices);
-}
-
-void
-NonlinearSystem::addResidual(NumericVector<Number> & residual, THREAD_ID tid)
-{
-  _asm_block[tid]->addResidual(residual);
-}
-
-void
-NonlinearSystem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
-{
-  _asm_block[tid]->addResidualNeighbor(residual);
-}
-
-void
-NonlinearSystem::cacheResidual(THREAD_ID tid)
-{
-  _asm_block[tid]->cacheResidual();
-}
-
-void
-NonlinearSystem::cacheResidualNeighbor(THREAD_ID tid)
-{
-  _asm_block[tid]->cacheResidualNeighbor();
-}
-
-void
-NonlinearSystem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
-{
-  _asm_block[tid]->addCachedResidual(residual);
-}
-
-void
-NonlinearSystem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
-{
-  _asm_block[tid]->setResidual(residual);
-}
-
-void
-NonlinearSystem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
-{
-  _asm_block[tid]->setResidualNeighbor(residual);
-}
-
-void
-NonlinearSystem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
-{
-  _asm_block[tid]->addJacobian(jacobian);
-}
-
-void
-NonlinearSystem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
-{
-  _asm_block[tid]->addJacobianNeighbor(jacobian);
-}
-
-void
-NonlinearSystem::cacheJacobian(THREAD_ID tid)
-{
-  _asm_block[tid]->cacheJacobian();
-}
-
-void
-NonlinearSystem::cacheJacobianNeighbor(THREAD_ID tid)
-{
-  _asm_block[tid]->cacheJacobianNeighbor();
-}
-
-void
-NonlinearSystem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
-{
-  _asm_block[tid]->addCachedJacobian(jacobian);
-}
-
-void
-NonlinearSystem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
-{
-  _asm_block[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
-}
-
-void
-NonlinearSystem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
-{
-  _asm_block[tid]->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
 }
 
 void
@@ -1356,10 +1190,10 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
                 std::vector<unsigned int> slave_dofs(1,nfc->variable().nodalDofIndex());
 
                 // Cache the jacobian block for the slave size
-                _asm_block[0]->cacheJacobianBlock(nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+                _subproblem.assembly(0).cacheJacobianBlock(nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                 // Cache the jacobian block for the master side
-                _asm_block[0]->cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+                _subproblem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                 _problem.cacheJacobian(0);
                 _problem.cacheJacobianNeighbor(0);
@@ -1440,7 +1274,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   }
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  switch (_coupling)
+  switch (_mproblem.coupling())
   {
   case Moose::COUPLING_DIAG:
     {

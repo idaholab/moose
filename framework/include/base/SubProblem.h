@@ -18,7 +18,7 @@
 #include "ParallelUniqueId.h"
 #include "Problem.h"
 #include "DiracKernelInfo.h"
-#include "AsmBlock.h"
+#include "Assembly.h"
 #include "GeometricSearchData.h"
 
 // libMesh include
@@ -68,12 +68,11 @@ public:
 
   virtual Order getQuadratureOrder() = 0;
 
-  virtual AsmBlock & asmBlock(THREAD_ID tid) = 0;
+  virtual Assembly & assembly(THREAD_ID tid) = 0;
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
 
-  virtual AssemblyData & assembly(THREAD_ID tid) = 0;
   virtual QBase * & qRule(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & points(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) = 0;

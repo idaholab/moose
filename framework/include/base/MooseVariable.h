@@ -34,7 +34,7 @@ typedef MooseArray<RealGradient>       VariableGradient;
 typedef MooseArray<RealTensor>         VariableSecond;
 
 
-class AssemblyData;
+class Assembly;
 class SubProblem;
 class SystemBase;
 
@@ -99,7 +99,7 @@ protected:
 class MooseVariable
 {
 public:
-  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, AssemblyData & assembly_data);
+  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly);
   virtual ~MooseVariable();
 
   void prepare();
@@ -229,7 +229,7 @@ protected:
   SystemBase & _sys;                                            ///< System this variable is part of
 
   const DofMap & _dof_map;                                      ///< DOF map
-  AssemblyData & _assembly;                                     ///< Assembly data
+  Assembly & _assembly;                                         ///< Assembly data
 
   QBase * & _qrule;                                             /// Quadrature rule for interior
   QBase * & _qrule_face;                                        /// Quadrature rule for the face

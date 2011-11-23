@@ -17,7 +17,6 @@
 
 #include "BoundaryCondition.h"
 #include "Coupleable.h"
-#include "AsmBlock.h"
 #include "MooseVariable.h"
 
 // libMesh
@@ -52,8 +51,6 @@ protected:
   const Elem * & _current_side_elem;                                    ///< current side element
 
   const std::vector<Point> & _normals;                                  ///< normals at quadrature points
-
-  AsmBlock & _asmb;
 
   unsigned int _qp;                                                     ///< quadrature point index
   QBase * & _qrule;                                                     ///< active quadrature rule

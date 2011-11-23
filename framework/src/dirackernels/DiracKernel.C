@@ -45,7 +45,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _asmb(_subproblem.asmBlock(_tid)),
+    _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
@@ -57,9 +57,9 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
 
-    _phi(_asmb.phi()),
-    _grad_phi(_asmb.gradPhi()),
-    _second_phi(_asmb.secondPhi()),
+    _phi(_assembly.phi()),
+    _grad_phi(_assembly.gradPhi()),
+    _second_phi(_assembly.secondPhi()),
 
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
@@ -88,7 +88,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
 void
 DiracKernel::computeResidual()
 {
-  DenseVector<Number> & re = _asmb.residualBlock(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -104,7 +104,7 @@ DiracKernel::computeResidual()
 void
 DiracKernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _asmb.jacobianBlock(_var.number(), _var.number());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
