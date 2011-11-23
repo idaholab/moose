@@ -31,6 +31,7 @@
 #include "DisplacedProblem.h"
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
+#include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
 
 // libMesh
@@ -520,56 +521,26 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
 void
 NonlinearSystem::addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters)
 {
-  unsigned int slave = parameters.get<unsigned int>("slave");
-  unsigned int master = parameters.get<unsigned int>("master");
-
   parameters.set<THREAD_ID>("_tid") = 0;
 
-  NodeFaceConstraint * nfc = static_cast<NodeFaceConstraint *>(Factory::instance()->create(c_name, name, parameters));
+  MooseObject * obj = Factory::instance()->create(c_name, name, parameters);
 
-  _constraints[0].addNodeFaceConstraint(slave, master, nfc);
-
-  /*
-  std::vector<unsigned int> slaves = parameters.get<std::vector<unsigned int> >("slave");
-  std::vector<unsigned int> masters = parameters.get<std::vector<unsigned int> >("master");
-
-  for (unsigned int i=0; i<slaves.size(); ++i)
+  NodalConstraint    * nc = dynamic_cast<NodalConstraint *>(obj);
+  NodeFaceConstraint * nfc = dynamic_cast<NodeFaceConstraint *>(obj);
+  if (nfc != NULL)
   {
-    parameters.set<unsigned int>("slave") = slaves[i];
-    parameters.set<unsigned int>("master") = masters[i];
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      parameters.set<THREAD_ID>("_tid") = tid;
-//      parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
-
-      BoundaryCondition * bc = static_cast<Constraint *>(Factory::instance()->create(c_name, name, parameters));
-      mooseAssert(bc != NULL, "Not a BoundaryCondition object");
-
-      if (dynamic_cast<PresetNodalBC*>(bc) != NULL)
-      {
-        PresetNodalBC * pnbc = dynamic_cast<PresetNodalBC*>(bc);
-        _bcs[tid].addPresetNodalBC(boundaries[i], pnbc);
-      }
-
-      if (dynamic_cast<NodalBC *>(bc) != NULL)
-      {
-        NodalBC * nbc = dynamic_cast<NodalBC *>(bc);
-        _bcs[tid].addNodalBC(boundaries[i], nbc);
-        _vars[tid].addBoundaryVars(boundaries[i], nbc->getCoupledVars());
-      }
-      else if (dynamic_cast<IntegratedBC *>(bc) != NULL)
-      {
-        IntegratedBC * ibc = dynamic_cast<IntegratedBC *>(bc);
-        _bcs[tid].addBC(boundaries[i], ibc);
-        _vars[tid].addBoundaryVars(boundaries[i], ibc->getCoupledVars());
-      }
-      else
-        mooseError("Unknown type of BoudaryCondition object");
-
-      _vars[tid].addBoundaryVar(boundaries[i], &bc->variable());
-    }
+    unsigned int slave = parameters.get<unsigned int>("slave");
+    unsigned int master = parameters.get<unsigned int>("master");
+    _constraints[0].addNodeFaceConstraint(slave, master, nfc);
   }
-  */
+  else if (nc != NULL)
+  {
+    _constraints[0].addNodalConstraint(nc);
+  }
+  else
+  {
+    mooseError("Unknown type of Constraint object");
+  }
 }
 
 void
@@ -848,6 +819,62 @@ NonlinearSystem::computeTimeDeriv()
 }
 
 void
+NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residual)
+{
+  THREAD_ID tid = 0;                            // constraints are going to be done single-threaded
+  // loop over nodes with nodal constraints
+  std::vector<NodalConstraint *> & ncs = _constraints[0].getNodalConstraints();
+  for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
+  {
+    NodalConstraint * nc = (*it);
+
+    Node & master_node = _mesh.node(nc->getMasterNodeId());
+    // reinit variables at the master node
+    _problem.reinitNode(&master_node, tid);
+    _problem.prepareAssembly(tid);
+
+    // go over slave nodes
+    std::vector<unsigned int> slave_nodes = nc->getSlaveNodeId();
+    for (std::vector<unsigned int>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
+    {
+      Node & slave_node = _mesh.node(*it);
+      // reinit variables on the slave node
+      _problem.reinitNodeNeighbor(&slave_node, tid);
+      // compute residual
+      nc->computeResidual(residual);
+    }
+  }
+}
+
+void
+NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
+{
+  THREAD_ID tid = 0;                            // constraints are going to be done single-threaded
+  // loop over nodes with nodal constraints
+  std::vector<NodalConstraint *> & ncs = _constraints[0].getNodalConstraints();
+  for (std::vector<NodalConstraint *>::iterator it = ncs.begin(); it != ncs.end(); ++it)
+  {
+    NodalConstraint * nc = (*it);
+
+    Node & master_node = _mesh.node(nc->getMasterNodeId());
+    // reinit variables at the master node
+    _problem.reinitNode(&master_node, tid);
+    _problem.prepareAssembly(tid);
+
+    // go over slave nodes
+    std::vector<unsigned int> slave_nodes = nc->getSlaveNodeId();
+    for (std::vector<unsigned int>::iterator it = slave_nodes.begin(); it != slave_nodes.end(); ++it)
+    {
+      Node & slave_node = _mesh.node(*it);
+      // reinit variables on the slave node
+      _problem.reinitNodeNeighbor(&slave_node, tid);
+      // compute residual
+      nc->computeJacobian(jacobian);
+    }
+  }
+}
+
+void
 NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
 {
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
@@ -1073,8 +1100,8 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
 
   if(_mproblem._has_constraints)
   {
+    enforceNodalConstraintsResidual(residual);
   }
-
   residual.close();
 
   // do nodal BC
@@ -1473,6 +1500,9 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   // Add in Jacobian contributions from Constraints
   if(_mproblem._has_constraints)
   {
+    // Nodal Constraints
+    enforceNodalConstraintsJacobian(jacobian);
+
     // Undisplaced Constraints
     constraintJacobians(jacobian, false);
 

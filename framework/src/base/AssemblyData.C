@@ -43,7 +43,8 @@ AssemblyData::AssemblyData(MooseMesh & mesh) :
     _current_side(0),
     _current_side_elem(NULL),
     _neighbor_elem(NULL),
-    _current_node(NULL)
+    _current_node(NULL),
+    _current_neighbor_node(NULL)
 {
 }
 
@@ -175,6 +176,12 @@ void
 AssemblyData::reinit(const Node * node)
 {
   _current_node = node;
+}
+
+void
+AssemblyData::reinitNodeNeighbor(const Node * node)
+{
+  _current_neighbor_node = node;
 }
 
 Real

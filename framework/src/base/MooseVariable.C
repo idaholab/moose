@@ -144,6 +144,7 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _normals(_fe_face->get_normals()),
 
     _node(_assembly.node()),
+    _node_neighbor(_assembly.nodeNeighbor()),
     _scaling_factor(1.0)
 {
 }
@@ -168,6 +169,10 @@ MooseVariable::~MooseVariable()
   _nodal_u.release();
   _nodal_u_old.release();
   _nodal_u_older.release();
+
+  _nodal_u_neighbor.release();
+  _nodal_u_old_neighbor.release();
+  _nodal_u_older_neighbor.release();
 
   _increment.release();
 
@@ -231,6 +236,21 @@ MooseVariable::reinit_node()
   else
     _is_defined = false;
 }
+
+void
+MooseVariable::reinit_nodeNeighbor()
+{
+  if (_node_neighbor->n_dofs(_sys.number(), _var_num) > 0)
+  {
+    _nodal_dof_index_neighbor = _node_neighbor->dof_number(_sys.number(), _var_num, 0);
+    _dof_indices_neighbor.resize(1);
+    _dof_indices_neighbor[0] = _nodal_dof_index_neighbor;
+    _is_defined_neighbor = true;
+  }
+  else
+    _is_defined_neighbor = false;
+}
+
 
 void
 MooseVariable::reinit_aux()
@@ -730,6 +750,25 @@ MooseVariable::computeNodalValues()
 
       _nodal_u_older.resize(1);
       _nodal_u_older[0] = _sys.solutionOlder()(_nodal_dof_index);
+    }
+  }
+}
+
+void
+MooseVariable::computeNodalNeighborValues()
+{
+  if (_is_defined_neighbor)
+  {
+    _nodal_u_neighbor.resize(1);
+    _nodal_u_neighbor[0] = (*_sys.currentSolution())(_nodal_dof_index_neighbor);
+
+    if (_subproblem.isTransient())
+    {
+      _nodal_u_old_neighbor.resize(1);
+      _nodal_u_old_neighbor[0] = _sys.solutionOld()(_nodal_dof_index_neighbor);
+
+      _nodal_u_older_neighbor.resize(1);
+      _nodal_u_older_neighbor[0] = _sys.solutionOlder()(_nodal_dof_index_neighbor);
     }
   }
 }

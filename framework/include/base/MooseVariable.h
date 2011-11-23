@@ -106,6 +106,7 @@ public:
   void prepareNeighbor();
   void prepare_aux();
   void reinit_node();
+  void reinit_nodeNeighbor();
   void reinit_aux();
 
   /// Get the variable number
@@ -179,6 +180,12 @@ public:
   VariableGradient & gradSlnOlderNeighbor() { return _grad_u_older_neighbor; }
   VariableSecond & secondSlnNeighbor() { return _second_u_neighbor; }
 
+  const Node * & nodeNeighbor() { return _node_neighbor; }
+  unsigned int & nodalDofIndexNeighbor() { return _nodal_dof_index_neighbor; }
+  VariableValue & nodalSlnNeighbor() { return _nodal_u_neighbor; }
+  VariableValue & nodalSlnOldNeighbor() { return _nodal_u_old_neighbor; }
+  VariableValue & nodalSlnOlderNeighbor() { return _nodal_u_older_neighbor; }
+
   /// Compute values at interior quadrature points
   void computeElemValues();
   /// Compute values at facial quadrature points
@@ -189,6 +196,8 @@ public:
   void computeNeighborValues();
   /// Compute nodal values of this variable
   void computeNodalValues();
+  /// Compute nodal values of this variable in the neighbor
+  void computeNodalNeighborValues();
   /// Set the nodal value for this variable (to keep everything up to date
   void setNodalValue(Number value);
   /// Compute damping for this variable based on increment_vec
@@ -290,6 +299,13 @@ protected:
   VariableValue _nodal_u;
   VariableValue _nodal_u_old;
   VariableValue _nodal_u_older;
+
+  bool _is_defined_neighbor;                                            ///< If the variable is defined at the neighbor node (used in compute nodal values)
+  const Node * & _node_neighbor;
+  unsigned int _nodal_dof_index_neighbor;
+  VariableValue _nodal_u_neighbor;
+  VariableValue _nodal_u_old_neighbor;
+  VariableValue _nodal_u_older_neighbor;
 
   // damping
   VariableValue _increment;

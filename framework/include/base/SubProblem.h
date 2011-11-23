@@ -85,6 +85,7 @@ public:
   virtual unsigned int & side(THREAD_ID tid) = 0;
   virtual const Elem * & sideElem(THREAD_ID tid) = 0;
   virtual const Node * & node(THREAD_ID tid) = 0;
+  virtual const Node * & nodeNeighbor(THREAD_ID tid) = 0;
   virtual DiracKernelInfo & diracKernelInfo() { return _dirac_kernel_info; }
   virtual Real finalNonlinearResidual() { return 0; }
   virtual unsigned int nNonlinearIterations() { return 0; }

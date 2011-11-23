@@ -108,6 +108,11 @@ public:
   const Node * & node() { return _current_node; }
 
   /**
+   * Returns the reference to the neighboring node
+   */
+  const Node * & nodeNeighbor() { return _current_neighbor_node; }
+
+  /**
    * Creates the volume, face and arbitrary qrules based on the Order passed in.
    */
   void createQRules(QuadratureType type, Order o);
@@ -167,6 +172,11 @@ public:
   void reinit(const Node * node);
 
   /**
+   * Reinitialize assembly data for a neighbor node
+   */
+  void reinitNodeNeighbor(const Node * node);
+
+  /**
    * Compute the volume of currently selected element
    *
    * @return the volume of the element
@@ -202,6 +212,7 @@ protected:
   const Elem * _neighbor_elem;                  ///< The current neighbor "element"
 
   const Node * _current_node;                   ///< The current node we are working with
+  const Node * _current_neighbor_node;          ///< The current neighboring node we are working with
 
   std::vector<Point> _current_physical_points;  ///< This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
 };

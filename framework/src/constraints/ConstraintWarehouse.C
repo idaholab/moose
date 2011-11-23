@@ -27,11 +27,17 @@ ConstraintWarehouse::~ConstraintWarehouse()
   for (std::map<unsigned int, std::vector<NodeFaceConstraint *> >::iterator i = _displaced_node_face_constraints.begin(); i != _displaced_node_face_constraints.end(); ++i)
     for (std::vector<NodeFaceConstraint *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
       delete *k;
+
+  for (std::vector<NodalConstraint *>::iterator i = _nodal_constraints.begin(); i != _nodal_constraints.end(); ++i)
+    delete *i;
 }
 
 void
 ConstraintWarehouse::initialSetup()
 {
+  for (std::vector<NodalConstraint *>::const_iterator curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
+    (*curr)->initialSetup();
+
   for (std::map<unsigned int, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
     for(unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->initialSetup();
@@ -44,6 +50,9 @@ ConstraintWarehouse::initialSetup()
 void
 ConstraintWarehouse::timestepSetup()
 {
+  for (std::vector<NodalConstraint *>::const_iterator curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
+    (*curr)->timestepSetup();
+
   for (std::map<unsigned int, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
     for(unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->timestepSetup();
@@ -56,6 +65,9 @@ ConstraintWarehouse::timestepSetup()
 void
 ConstraintWarehouse::residualSetup()
 {
+  for (std::vector<NodalConstraint *>::const_iterator curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
+    (*curr)->residualSetup();
+
   for (std::map<unsigned int, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
     for(unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->residualSetup();
@@ -68,6 +80,9 @@ ConstraintWarehouse::residualSetup()
 void
 ConstraintWarehouse::jacobianSetup()
 {
+  for (std::vector<NodalConstraint *>::const_iterator curr = _nodal_constraints.begin(); curr != _nodal_constraints.end(); ++curr)
+    (*curr)->jacobianSetup();
+
   for (std::map<unsigned int, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
     for(unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
@@ -75,6 +90,12 @@ ConstraintWarehouse::jacobianSetup()
   for (std::map<unsigned int, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
     for(unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
+}
+
+void
+ConstraintWarehouse::addNodalConstraint(NodalConstraint * nc)
+{
+  _nodal_constraints.push_back(nc);
 }
 
 void
@@ -86,6 +107,12 @@ ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*ma
     _displaced_node_face_constraints[slave].push_back(nfc);
   else
     _node_face_constraints[slave].push_back(nfc);
+}
+
+std::vector<NodalConstraint *> &
+ConstraintWarehouse::getNodalConstraints()
+{
+  return _nodal_constraints;
 }
 
 std::vector<NodeFaceConstraint *> &

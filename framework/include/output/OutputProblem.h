@@ -54,6 +54,7 @@ public:
   virtual void reinitNodeFace(const Node * /*node*/, unsigned int /*bnd_id*/, THREAD_ID /*tid*/) {}
   virtual void reinitNeighbor(const Elem * /*elem*/, unsigned int /*side*/, THREAD_ID /*tid*/) {}
   virtual void reinitNeighborPhys(const Elem * /*neighbor*/, unsigned int /*neighbor_side*/, const std::vector<Point> & /*physical_points*/, THREAD_ID /*tid*/) {}
+  virtual void reinitNodeNeighbor(const Node * /*node*/, THREAD_ID /*tid*/) {}
 
   // Materials /////
   virtual void reinitMaterials(unsigned int /*blk_id*/, THREAD_ID /*tid*/) {}

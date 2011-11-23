@@ -336,6 +336,14 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbo
 }
 
 void
+DisplacedProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
+{
+  _asm_info[tid]->reinitNodeNeighbor(node);
+  _displaced_nl.reinitNodeNeighbor(node, tid);
+  _displaced_aux.reinitNodeNeighbor(node, tid);
+}
+
+void
 DisplacedProblem::getDiracElements(std::set<const Elem *> & elems)
 {
   elems =_dirac_kernel_info._elements;

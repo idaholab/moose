@@ -230,6 +230,13 @@ public:
   virtual void reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid);
 
   /**
+   * Reinit nodal assembly info for neighbor node
+   * @param node Node to reinit for
+   * @param tid Thread ID
+   */
+  virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
+
+  /**
    * Add info about variable that will be copied
    *
    * @param name Name of the nodal variable being used for copying (name is from the exodusII file)

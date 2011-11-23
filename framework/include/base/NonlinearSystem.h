@@ -361,6 +361,12 @@ protected:
 
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
+  /**
+   * Enforce nodal constraints
+   */
+  void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
+  void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
+
   Moose::CouplingType _coupling;                        ///< Type of variable coupling
   CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.
 

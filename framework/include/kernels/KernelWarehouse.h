@@ -71,7 +71,7 @@ public:
    */
   void updateActiveKernels(Real t, Real dt, unsigned int subdomain_id);
 
- /**
+  /**
    * This returns a boolean to indicate whether this warehouse contains kernels
    * representing all of the subdomains, if not then the supplied set is filled in
    * with the complete set of subdomains represented which may or may not represent

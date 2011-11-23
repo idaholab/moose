@@ -591,6 +591,24 @@ FEProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 }
 
 void
+FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
+{
+  _asm_info[tid]->reinitNodeNeighbor(node);
+
+  unsigned int n_points = 1;
+  _zero[tid].resize(n_points, 0);
+  _grad_zero[tid].resize(n_points, 0);
+  _second_zero[tid].resize(n_points, 0);
+
+  if (_displaced_problem != NULL && _reinit_displaced_elem)
+    _displaced_problem->reinitNodeNeighbor(&_displaced_mesh->node(node->id()), tid);
+
+  _nl.reinitNodeNeighbor(node, tid);
+  _aux.reinitNodeNeighbor(node, tid);
+}
+
+
+void
 FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 {
   const Elem * neighbor = elem->neighbor(side);

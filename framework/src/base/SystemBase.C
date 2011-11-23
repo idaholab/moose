@@ -190,3 +190,17 @@ SystemBase::reinitNodeFace(const Node * /*node*/, unsigned int /*bnd_id*/, THREA
   }
 }
 
+void
+SystemBase::reinitNodeNeighbor(const Node * /*node*/, THREAD_ID tid)
+{
+  for (std::vector<MooseVariable *>::iterator it = _vars[tid].all().begin(); it != _vars[tid].all().end(); ++it)
+  {
+    MooseVariable *var = *it;
+    if (var->isNodal())
+    {
+      var->reinit_nodeNeighbor();
+      var->computeNodalNeighborValues();
+    }
+  }
+}
+

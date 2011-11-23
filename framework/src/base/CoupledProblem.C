@@ -140,6 +140,14 @@ CoupledProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_
 }
 
 void
+CoupledProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
+{
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+    it->second->reinitNodeNeighbor(node, tid);
+}
+
+
+void
 CoupledProblem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/)
 {
 }
