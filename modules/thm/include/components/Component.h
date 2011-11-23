@@ -34,28 +34,17 @@ public:
 
   virtual void addVariables() = 0;
 
-  virtual void addKernels() = 0;
-
-
-  template<typename T>
-  const T & getParam(const std::string & name);
+  virtual void parseInput();
 
 protected:
   unsigned int _id;                     ///< Unique ID of this component
 
   Simulation & _sim;                    ///< Simulation this component is part of
   R7Mesh & _mesh;                       ///< Global mesh this component works on
-  FEProblem * & _problem;
+  FEProblem & _problem;
 
   std::string _input_file_name;
   Parser _parser;
 };
-
-
-template<typename T>
-const T & Component::getParam(const std::string & name)
-{
-  return _pars.get<T>(name);
-}
 
 #endif /* COMPONENT_H */
