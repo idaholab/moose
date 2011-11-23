@@ -34,6 +34,8 @@ public:
 
   virtual void addVariables() = 0;
 
+  virtual void addMooseObjects() { }
+
   virtual void parseInput();
 
 protected:
