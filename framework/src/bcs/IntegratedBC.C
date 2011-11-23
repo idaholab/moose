@@ -29,6 +29,12 @@ InputParameters validParams<IntegratedBC>()
 IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
     Coupleable(parameters, false),
+    _current_elem(_asm_data.elem()),
+    _current_side(_asm_data.side()),
+    _current_side_elem(_asm_data.sideElem()),
+
+    _normals(_var.normals()),
+
     _asmb(_subproblem.asmBlock(_tid)),
 
     _qrule(_subproblem.qRuleFace(_tid)),

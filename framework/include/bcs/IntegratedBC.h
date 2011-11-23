@@ -47,6 +47,12 @@ public:
   void computeJacobianBlock(unsigned int jvar);
 
 protected:
+  const Elem * & _current_elem;                                         ///< current element
+  unsigned int & _current_side;                                         ///< current side of the current element
+  const Elem * & _current_side_elem;                                    ///< current side element
+
+  const std::vector<Point> & _normals;                                  ///< normals at quadrature points
+
   AsmBlock & _asmb;
 
   unsigned int _qp;                                                     ///< quadrature point index

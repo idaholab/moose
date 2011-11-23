@@ -80,12 +80,6 @@ protected:
 
   unsigned int _boundary_id;                            ///< boundary ID this BC is active on
 
-  const Elem * & _current_elem;                         ///< current element (valid only for integrated BCs)
-  unsigned int & _current_side;                         ///< current side of the current element (valid only for integrated BCs)
-  const Elem * & _current_side_elem;                    ///< current side element
-
-  const std::vector<Point> & _normals;                  ///< normals at quadrature points (valid only for integrated BCs)
-
   // Single Instance Variables
   Real & _real_zero;
   MooseArray<Real> & _zero;

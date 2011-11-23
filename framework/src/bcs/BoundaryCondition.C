@@ -48,12 +48,6 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _dim(_mesh.dimension()),
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 
-    _current_elem(_asm_data.elem()),
-    _current_side(_asm_data.side()),
-    _current_side_elem(_asm_data.sideElem()),
-
-    _normals(_var.normals()),
-
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),
     _grad_zero(_problem._grad_zero[_tid]),
