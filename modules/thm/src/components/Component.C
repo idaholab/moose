@@ -6,6 +6,9 @@ InputParameters validParams<Component>()
 {
   InputParameters params = validParams<R7Object>();
   params.addPrivateParam<Simulation *>("_sim");
+
+  params.addParam<std::string>("physics_input_file", "Input file with physics");
+
   return params;
 }
 
@@ -16,7 +19,10 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _id(comp_id++),
     _sim(*getParam<Simulation *>("_sim")),
     _mesh(_sim.mesh()),
-    _problem(_sim.problem())
+    _problem(_sim.problem()),
+
+    _input_file_name(getParam<std::string>("physics_input_file")),
+    _parser(Moose::syntax)
 {
 }
 
@@ -27,6 +33,9 @@ Component::~Component()
 void
 Component::init()
 {
+  // setup parser
+  _parser._mesh = &_mesh;
+  _parser._problem = _problem;
+
+  _parser.parse(_input_file_name);
 }
-
-

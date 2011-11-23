@@ -3,6 +3,8 @@
 
 #include "R7Object.h"
 #include "R7Mesh.h"
+#include "Parser.h"
+#include "ActionWarehouse.h"
 
 class Simulation;
 class Component;
@@ -44,6 +46,9 @@ protected:
   Simulation & _sim;                    ///< Simulation this component is part of
   R7Mesh & _mesh;                       ///< Global mesh this component works on
   FEProblem * & _problem;
+
+  std::string _input_file_name;
+  Parser _parser;
 };
 
 
