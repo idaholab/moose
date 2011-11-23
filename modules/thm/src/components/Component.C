@@ -1,6 +1,8 @@
 #include "Component.h"
 #include "Simulation.h"
 
+unsigned int Component::bc_ids = 0;
+
 template<>
 InputParameters validParams<Component>()
 {

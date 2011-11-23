@@ -45,6 +45,8 @@ protected:
 
   std::string _input_file_name;
   ComponentParser _parser;
+
+  static unsigned int bc_ids;
 };
 
 #endif /* COMPONENT_H */
