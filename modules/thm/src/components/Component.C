@@ -38,9 +38,12 @@ Component::init()
 void
 Component::parseInput()
 {
-  // setup parser
-  _parser._mesh = &_mesh;
-  _parser._problem = &_problem;
+  if (!_input_file_name.empty())
+  {
+    // setup parser
+    _parser._mesh = &_mesh;
+    _parser._problem = &_problem;
 
-  _parser.parse(_input_file_name);
+    _parser.parse(_input_file_name);
+  }
 }
