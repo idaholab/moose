@@ -20,6 +20,7 @@
 // libMesh
 #include "enum_order.h"
 #include "enum_quadrature_type.h"
+#include "point.h"
 
 namespace Moose {
 
@@ -49,5 +50,12 @@ namespace Moose {
   }
 
 }
+
+/**
+ * Convert point represented as std::vector into Point
+ * @param pt Point represented as a vector
+ * @return Converted point
+ */
+Point toPoint(const std::vector<Real> & pos);
 
 #endif //CONVERSION_H

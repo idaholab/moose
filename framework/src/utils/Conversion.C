@@ -117,3 +117,9 @@ namespace Moose {
   }
 
 }
+
+Point toPoint(const std::vector<Real> & pos)
+{
+  mooseAssert(pos.size() == LIBMESH_DIM, "Wrong array size while converting into a point");
+  return Point(pos[0], pos[1], pos[2]);
+}
