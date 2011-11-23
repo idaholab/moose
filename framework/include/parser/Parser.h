@@ -152,7 +152,7 @@ public:
   // data created while running execute()
   MooseMesh *_mesh;
   MooseMesh *_displaced_mesh;
-  FEProblem * _problem;
+  FEProblem *_problem;
 
   ExodusII_IO *_exreader;                               ///< auxiliary object for restart
   bool _loose;                                          ///< true if parsing input file with loose syntax
