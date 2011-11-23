@@ -1,5 +1,5 @@
 #include "NavierStokesMaterial.h"
-#include "AssemblyData.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<NavierStokesMaterial>()
