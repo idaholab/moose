@@ -69,6 +69,12 @@ public:
 
   SubProblem & subProblem() { return _subproblem; }
 
+  /**
+   * Hook for turning the boundary condition on and off.
+   * @return true if the boundary condition should be applied, otherwise false
+   */
+  virtual bool shouldApply();
+
 protected:
   Problem & _problem;
   SubProblem & _subproblem;

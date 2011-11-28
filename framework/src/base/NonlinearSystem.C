@@ -952,7 +952,11 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
       _problem.reinitNodeFace(node, boundary_id, 0);
 
       for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
-        (*it)->computeResidual(residual);
+      {
+        NodalBC * bc = *it;
+        if (bc->shouldApply())
+          bc->computeResidual(residual);
+      }
     }
   }
 
@@ -1323,7 +1327,11 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
       _problem.reinitNodeFace(node, boundary_id, 0);
 
       for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
-        zero_rows.push_back((*it)->variable().nodalDofIndex());
+      {
+        NodalBC * bc = *it;
+        if (bc->shouldApply())
+          zero_rows.push_back(bc->variable().nodalDofIndex());
+      }
     }
   }
 
@@ -1449,8 +1457,11 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
                   IntegratedBC * bc = *it;
                   if(bc->variable().number() == ivar)
                   {
-                    bc->subProblem().prepareFaceShapes(jvar, tid);
-                    bc->computeJacobianBlock(jvar);
+                    if (bc->shouldApply())
+                    {
+                      bc->subProblem().prepareFaceShapes(jvar, tid);
+                      bc->computeJacobianBlock(jvar);
+                    }
                   }
                 }
               }
@@ -1524,10 +1535,11 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
 
         for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
         {
-          //The first zero is for the variable number... there is only one variable in each mini-system
-          //The second zero only works with Lagrange elements!
-          if((*it)->variable().number() == ivar)
+          NodalBC * bc = *it;
+          if (bc->variable().number() == ivar && bc->shouldApply())
           {
+            //The first zero is for the variable number... there is only one variable in each mini-system
+            //The second zero only works with Lagrange elements!
             zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
           }
         }

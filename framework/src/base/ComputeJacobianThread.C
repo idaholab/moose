@@ -53,8 +53,11 @@ ComputeJacobianThread::computeFaceJacobian(short int bnd_id)
   for (std::vector<IntegratedBC *>::iterator it = _sys._bcs[_tid].getBCs(bnd_id).begin(); it != _sys._bcs[_tid].getBCs(bnd_id).end(); ++it)
   {
     IntegratedBC * bc = *it;
-    bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
-    bc->computeJacobian();
+    if (bc->shouldApply())
+    {
+      bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
+      bc->computeJacobian();
+    }
   }
 }
 

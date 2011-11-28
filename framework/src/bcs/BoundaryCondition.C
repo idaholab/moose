@@ -54,3 +54,9 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     _second_zero(_problem._second_zero[_tid])
 {
 }
+
+bool
+BoundaryCondition::shouldApply()
+{
+  return true;
+}
