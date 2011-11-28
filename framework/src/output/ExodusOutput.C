@@ -61,7 +61,13 @@ ExodusOutput::output(const std::string & file_base, Real time)
   {
     _out = new ExodusII_IO(_es.get_mesh());
     _out->set_output_variables(_output_variables);
-    _out->use_mesh_dimension_instead_of_spatial_dimension(true);  //Skip output of z coordinates for 2D meshes
+
+    // Skip output of z coordinates for 2D meshes, but still
+    // write 1D meshes as 3D, otherwise Paraview has trouble
+    // viewing them for some reason.
+    if (_es.get_mesh().mesh_dimension() != 1)
+      _out->use_mesh_dimension_instead_of_spatial_dimension(true);
+
     _file_num++;
   }
 
