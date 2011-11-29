@@ -86,6 +86,7 @@
 #include "DT2Transient.h"
 
 // functions
+#include "Composite.h"
 #include "ParsedFunction.h"
 #include "ParsedGradFunction.h"
 #include "PiecewiseLinear.h"
@@ -242,6 +243,7 @@ registerObjects()
   registerExecutioner(SolutionTimeAdaptive);
   registerExecutioner(DT2Transient);
   // functions
+  registerFunction(Composite);
   registerFunction(ParsedFunction);
   registerFunction(ParsedGradFunction);
   registerFunction(PiecewiseLinear);

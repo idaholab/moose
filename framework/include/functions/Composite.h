@@ -12,25 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionInterface.h"
+#ifndef COMPOSITE_H
+#define COMPOSITE_H
+
 #include "Function.h"
-#include "Problem.h"
+#include "FunctionInterface.h"
 
-FunctionInterface::FunctionInterface(InputParameters & params) :
-    _problem(*params.get<Problem *>("_problem")),
-    _tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
-    _params(params)
+/**
+ * Base class for function objects.  Functions override value to supply a
+ * value at a point.
+ */
+class Composite : public Function, FunctionInterface
 {
-}
+public:
+  Composite(const std::string & name, InputParameters parameters);
+  virtual ~Composite();
 
-Function &
-FunctionInterface::getFunction(const std::string & name)
-{
-  return _problem.getFunction(_params.get<std::string>(name), _tid);
-}
+  virtual Real value(Real t, const Point & pt);
 
-Function &
-FunctionInterface::getFunctionByName(const std::string & name)
-{
-  return _problem.getFunction(name, _tid);
-}
+private:
+  const Real _scale_factor;
+  std::vector<Function *> _f;
+
+};
+
+template<>
+InputParameters validParams<Composite>();
+
+#endif //COMPOSITE_H

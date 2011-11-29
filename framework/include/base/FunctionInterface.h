@@ -40,10 +40,17 @@ public:
 
   /**
    * Get a function with a given name
+   * @param name The name of the parameter key of the function to retrieve
+   * @return The function with name associated with the parameter 'name'
+   */
+  Function & getFunction(const std::string & name);
+
+  /**
+   * Get a function with a given name
    * @param name The name of the function to retrieve
    * @return The function with name 'name'
    */
-  Function & getFunction(const std::string & name);
+  Function & getFunctionByName(const std::string & name);
 
 private:
   Problem & _problem;

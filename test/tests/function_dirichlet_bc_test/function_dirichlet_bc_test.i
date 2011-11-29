@@ -13,13 +13,25 @@
 []
 
 [Functions]
-  active = 'forcing_func bc_func'
+  active = 'ff_1 ff_2 forcing_func bc_func'
 
-  [./forcing_func]
+  [./ff_1]
     type = ParsedFunction
-    value = alpha*alpha*pi*pi*sin(alpha*pi*x)
+    value = alpha*alpha*pi
     vars = 'alpha'
     vals = '16'
+  [../]
+
+  [./ff_2]
+    type = ParsedFunction
+    value = pi*sin(alpha*pi*x)
+    vars = 'alpha'
+    vals = '16'
+  [../]
+
+  [./forcing_func]
+    type = Composite
+    functions = 'ff_1 ff_2'
   [../]
 
   [./bc_func]
