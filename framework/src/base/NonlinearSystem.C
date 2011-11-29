@@ -1738,7 +1738,7 @@ NonlinearSystem::printVarNorms()
 {
   TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);
 
-  std::cout << "Norm of each nonlinear variable:" << std::endl;
+  std::cout << "Norm of each nonlinear variable's residual:" << std::endl;
   for (unsigned int var_num = 0; var_num < _sys.n_vars(); var_num++)
   {
     std::cout << s.variable_name(var_num) << ": "
