@@ -41,6 +41,8 @@ public:
 private:
   LinearInterpolation _linear_interp;
   Real _scale_factor;
+  int _axis;
+  bool _has_axis;
 
 };
 

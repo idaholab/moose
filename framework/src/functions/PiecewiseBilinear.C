@@ -45,7 +45,7 @@ InputParameters validParams<PiecewiseBilinear>()
 {
   InputParameters params = validParams<Function>();
   params.addRequiredParam<std::string>("yourFileName", "File holding your csv data for use with PiecewiseBilinear");
-  params.addParam<int>("axis", 2, "The axis used (0, 1, or 2 for x, y, or z).");
+  params.addRequiredParam<int>("axis", "The axis used (0, 1, or 2 for x, y, or z).");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the axis values");
   return params;
 }
@@ -54,9 +54,12 @@ PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters p
   Function(name, parameters),
   _bilinear_interp( NULL ),
   _file_name( getParam<std::string>("yourFileName") ),
-  _axis(parameters.get<int>("axis")),
+  _axis(getParam<int>("axis")),
   _scale_factor( getParam<Real>("scale_factor") )
 {
+  if (_axis < 0 || _axis > 2)
+    mooseError("In PiecewiseBilinear function axis="<<_axis<<" outside allowable range (0-2).");
+
   std::vector<Real> x;
   std::vector<Real> y;
   ColumnMajorMatrix z;
