@@ -61,7 +61,7 @@ public:
   template<typename T >
   T & set (const std::string & name)
   {
-    _seen_in_input.insert(name);
+    _valid_params.insert(name);
     return Parameters::set<T>(name);
   }
 

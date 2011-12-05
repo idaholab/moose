@@ -175,7 +175,7 @@ InputParameters::checkParams(const std::string &prefix) const
   {
     std::string orig_name = prefix + "/" + it->first;
 
-    if (!wasSeenInInput(it->first) && isParamRequired(it->first))
+    if (!isParamValid(it->first) && isParamRequired(it->first))
     {
       // The parameter is required but missing
       std::string doc = getDocString(it->first);
