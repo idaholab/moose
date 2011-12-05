@@ -11,17 +11,18 @@ InputParameters validParams<SolidModel>()
   //    and then set.  We don't want to set an initial value in addParam
   //    since that will also flag the parameter as having had a valid entry
   //    given.
+  // Note: Setting these values shouldn't be required anymore
   InputParameters params = validParams<Material>();
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
-  params.set<Real>("bulk_modulus") = -7777;
+//  params.set<Real>("bulk_modulus") = -7777;
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
-  params.set<Real>("lambda") = -7777;
+//  params.set<Real>("lambda") = -7777;
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material");
-  params.set<Real>("poissons_ratio") = -7777;
+//  params.set<Real>("poissons_ratio") = -7777;
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
-  params.set<Real>("shear_modulus") = -7777;
+//  params.set<Real>("shear_modulus") = -7777;
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
-  params.set<Real>("youngs_modulus") = -7777;
+//  params.set<Real>("youngs_modulus") = -7777;
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen).");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
