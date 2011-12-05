@@ -169,6 +169,7 @@
 #include "SetupOverSamplingAction.h"
 #include "DeprecatedBlockAction.h"
 #include "AddConstraintAction.h"
+#include "InitDisplacedProblemAction.h"
 
 namespace Moose {
 
@@ -302,6 +303,7 @@ addActionTypes()
   registerActionName("add_variable", true);
   registerActionName("add_kernel", true);
   registerActionName("setup_executioner", true);
+  registerActionName("init_displaced_problem", false);
   registerActionName("setup_output", true);
   registerActionName("init_problem", true);
   registerActionName("copy_nodal_vars", true);
@@ -366,6 +368,7 @@ addActionTypes()
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
 "(setup_executioner)"
+"(init_displaced_problem)"
 "(add_function)"
 "(setup_function_complete)"
 "(add_aux_variable, add_variable)"
@@ -429,6 +432,7 @@ registerActions()
 
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");
+  registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(SetupOutputAction, "setup_output");
   registerAction(GlobalParamsAction, "set_global_params");
 

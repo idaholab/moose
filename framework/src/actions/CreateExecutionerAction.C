@@ -86,16 +86,6 @@ CreateExecutionerAction::act()
     _parser_handle._problem = mproblem;
     _parser_handle._problem->_ex_reader = _parser_handle._exreader;               // FIXME: do not access members directly
 
-    // FIXME: HACK! Can initialize displaced problem after we have instance of problem
-    // TODO: Make this into another action
-    ActionIterator mesh_it = Moose::action_warehouse.actionBlocksWithActionBegin("read_mesh");
-    mooseAssert (mesh_it != Moose::action_warehouse.actionBlocksWithActionEnd("read_mesh"), "No Mesh Block Found!");
-    if ((*mesh_it)->isParamValid("displacements"))
-    {
-      std::vector<std::string> displacements = (*mesh_it)->getParam<std::vector<std::string> >("displacements");
-      _parser_handle._problem->initDisplacedProblem(_parser_handle._displaced_mesh, displacements);
-    }
-
     // solver params
     EquationSystems & es = _parser_handle._problem->es();
     es.parameters.set<Real> ("linear solver tolerance")
