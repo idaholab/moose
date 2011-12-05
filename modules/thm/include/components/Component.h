@@ -43,7 +43,7 @@ protected:
 
   Simulation & _sim;                    ///< Simulation this component is part of
   R7Mesh & _mesh;                       ///< Global mesh this component works on
-  FEProblem & _problem;
+  FEProblem * & _problem;
 
   std::string _input_file_name;
   ComponentParser _parser;

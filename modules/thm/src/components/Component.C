@@ -44,7 +44,7 @@ Component::parseInput()
   {
     // setup parser
     _parser._mesh = &_mesh;
-    _parser._problem = &_problem;
+    _parser._problem = _problem;
 
     _parser.parse(_input_file_name);
   }
