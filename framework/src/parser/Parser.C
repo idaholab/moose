@@ -328,18 +328,6 @@ Parser::parse(const std::string &input_filename)
   // Check to make sure that all sections in the input file that are explicitly listed are actually present
   checkActiveUsed(section_names, active_lists);
 
-  // If requested, see if there are unidentified name/value pairs in the input file
-  if ((Moose::command_line && searchCommandLine("ErrorUnused")) || _enable_unused_check == ERROR_UNUSED)
-  {
-    std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-    checkUnidentifiedParams(all_vars, true);
-  }
-  else if ((Moose::command_line && searchCommandLine("WarnUnused")) || _enable_unused_check == WARN_UNUSED)
-  {
-    std::vector<std::string> all_vars = _getpot_file.get_variable_names();
-    checkUnidentifiedParams(all_vars, false);
-  }
-
   // Print the input file syntax if requested
   if (Moose::command_line && searchCommandLine("ShowTree"))
   {
@@ -595,6 +583,18 @@ void
 Parser::execute()
 {
   _action_wh.executeAllActions();
+
+  // If requested, see if there are unidentified name/value pairs in the input file
+  if ((Moose::command_line && searchCommandLine("ErrorUnused")) || _enable_unused_check == ERROR_UNUSED)
+  {
+    std::vector<std::string> all_vars = _getpot_file.get_variable_names();
+    checkUnidentifiedParams(all_vars, true);
+  }
+  else if ((Moose::command_line && searchCommandLine("WarnUnused")) || _enable_unused_check == WARN_UNUSED)
+  {
+    std::vector<std::string> all_vars = _getpot_file.get_variable_names();
+    checkUnidentifiedParams(all_vars, false);
+  }
 }
 
 void
