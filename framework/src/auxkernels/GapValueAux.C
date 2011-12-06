@@ -37,6 +37,15 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     _dof_map(_nl_sys.dofMap()),
     _paired_variable(coupled("paired_variable"))
 {
+  MooseVariable & pv(*getVar("paired_variable",0));
+  Order pairedVarOrder(pv.getOrder());
+  Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<std::string>("order")));
+  if (pairedVarOrder != gvaOrder)
+  {
+    mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)
+               <<") does not match order for paired_variable \""<<pv.name()<<"\" ("
+               <<Utility::enum_to_string<Order>(pairedVarOrder)<<")");
+  }
 }
 
 Real
