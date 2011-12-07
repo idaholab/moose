@@ -67,8 +67,8 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
   Real nu = mu / rho;
   
   RealVectorValue U(_data._rho_u[_data._qp], 
-		    _data._rho_v[_data._qp], 
-		    _data._rho_w[_data._qp]);
+                    _data._rho_v[_data._qp], 
+                    _data._rho_w[_data._qp]);
   
   Real divU = 
     _data._grad_rho_u[_data._qp](0) +
@@ -122,10 +122,10 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
 
     return nu * 
       (
-	/*     */ delta_km   * (grad_phij(ell)     - (phij/rho)*grad_rho(ell)) +
-	/*     */ delta_ellm * (grad_phij(k)       - (phij/rho)*grad_rho(k)) -
-	(2./3.) * delta_kell * (grad_phij(m_local) - (phij/rho)*grad_rho(m_local))
-	);
+       /*     */ delta_km   * (grad_phij(ell)     - (phij/rho)*grad_rho(ell)) +
+       /*     */ delta_ellm * (grad_phij(k)       - (phij/rho)*grad_rho(k)) -
+       (2./3.) * delta_kell * (grad_phij(m_local) - (phij/rho)*grad_rho(m_local))
+      );
   } // end case 1,2,3
 
   case 4:

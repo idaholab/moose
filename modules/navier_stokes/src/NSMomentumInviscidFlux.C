@@ -39,8 +39,8 @@ NSMomentumInviscidFlux::computeQpResidual()
   
   // (rho*u) * u_k = (rho*u_k) * u <- we write it this way
   RealVectorValue vec(_u[_qp]*_u_vel[_qp],   // (U_k) * u_1
-		      _u[_qp]*_v_vel[_qp],   // (U_k) * u_2
-		      _u[_qp]*_w_vel[_qp]);  // (U_k) * u_3
+                      _u[_qp]*_v_vel[_qp],   // (U_k) * u_2
+                      _u[_qp]*_w_vel[_qp]);  // (U_k) * u_3
 
   // (rho*u_k) * u + e_k * P [ e_k = unit vector in k-direction ]
   vec(_component) += _pressure[_qp];
@@ -99,8 +99,8 @@ Real NSMomentumInviscidFlux::compute_jacobian(unsigned m)
     Real delta_kl = (_component == m_local ? 1. : 0.);
 
     return -1. * (vel(_component) * _grad_test[_i][_qp](m_local)
-		  + delta_kl * (vel * _grad_test[_i][_qp])
-		  + (1.-_gamma) * vel(m_local) *_grad_test[_i][_qp](_component)) * _phi[_j][_qp];
+                  + delta_kl * (vel * _grad_test[_i][_qp])
+                  + (1.-_gamma) * vel(m_local) *_grad_test[_i][_qp](_component)) * _phi[_j][_qp];
   }
 
   case 4: // energy

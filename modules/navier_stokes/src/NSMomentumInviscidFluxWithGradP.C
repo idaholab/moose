@@ -52,8 +52,8 @@ NSMomentumInviscidFluxWithGradP::computeQpResidual()
   
   // (rho*u) * u_k = (rho*u_k) * u <- we write it this way
   RealVectorValue vec(_u[_qp]*_u_vel[_qp],   // (U_k) * u_1
-		      _u[_qp]*_v_vel[_qp],   // (U_k) * u_2
-		      _u[_qp]*_w_vel[_qp]);  // (U_k) * u_3
+                      _u[_qp]*_v_vel[_qp],   // (U_k) * u_2
+                      _u[_qp]*_w_vel[_qp]);  // (U_k) * u_3
 
   // -((rho*u_k) * u) * grad(phi) + dp/dx_k * phi
   return -(vec*_grad_test[_i][_qp]) + _grad_p[_qp](_component)*_test[_i][_qp];

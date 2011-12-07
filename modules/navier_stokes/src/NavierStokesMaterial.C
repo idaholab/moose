@@ -229,7 +229,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
   for (unsigned i=0; i<3; ++i)
     for (unsigned j=0; j<3; ++j)
       for (unsigned k=0; k<3; ++k)
-	g[i][j] += dxi_dx[k][j] * dxi_dx[k][i];
+        g[i][j] += dxi_dx[k][j] * dxi_dx[k][i];
 
   // Compute the denominator of the h_supg term: U * (g) * U
   Real denom = 0.;
@@ -256,8 +256,8 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
 void NavierStokesMaterial::compute_tau(unsigned qp)
 {
   Real velmag = std::sqrt(_u_vel[qp]*_u_vel[qp] + 
-			  _v_vel[qp]*_v_vel[qp] + 
-			  _w_vel[qp]*_w_vel[qp]);
+                          _v_vel[qp]*_v_vel[qp] + 
+                          _w_vel[qp]*_w_vel[qp]);
 
   // std::cout << "velmag=" << velmag << std::endl;
 
@@ -266,12 +266,12 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
   if (_temperature[qp] < 0.)
   {
     std::cerr << "Negative temperature "
-	      << _temperature[qp]
-	      << " found at quadrature point "
-	      << qp
-	      << ", element "
-	      << _current_elem->id()
-	      << std::endl;
+              << _temperature[qp]
+              << " found at quadrature point "
+              << qp
+              << ", element "
+              << _current_elem->id()
+              << std::endl;
     mooseError("Can't continue, would be nice to throw an exception here?");
   }
   // #endif
@@ -376,11 +376,11 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
 
   // Debugging: How large are the time derivative parts of the strong residuals?
 //  std::cout << "drho_dt=" << _drho_dt
-//	    << ", drhou_dt=" << _drhou_dt
-//	    << ", drhov_dt=" << _drhov_dt
-//	    << ", drhow_dt=" << _drhow_dt
-//	    << ", drhoe_dt=" << _drhoe_dt
-//	    << std::endl;
+//            << ", drhou_dt=" << _drhou_dt
+//            << ", drhov_dt=" << _drhov_dt
+//            << ", drhow_dt=" << _drhow_dt
+//            << ", drhoe_dt=" << _drhoe_dt
+//            << std::endl;
 
   // Momentum divergence
   Real divU = _grad_rho_u[qp](0) + _grad_rho_v[qp](1) + _grad_rho_w[qp](2);
@@ -485,8 +485,8 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
     (0.5*(_gamma-1.)*velmag2 - _enthalpy[qp])*(vel * _grad_rho[qp]) +
     _enthalpy[qp]*divU +
     (1.-_gamma)*(vel(0)*(vel*_grad_rho_u[qp]) +
-		 vel(1)*(vel*_grad_rho_v[qp]) +
-		 vel(2)*(vel*_grad_rho_w[qp])) +
+                 vel(1)*(vel*_grad_rho_v[qp]) +
+                 vel(2)*(vel*_grad_rho_w[qp])) +
     _gamma*(vel*_grad_rho_e[qp])
     ;
 

@@ -40,8 +40,8 @@ Real NSSUPGEnergy::computeQpResidual()
 
     // Vector object of momentum equation strong residuals
     RealVectorValue Ru (_strong_residuals[_qp][1],
-			_strong_residuals[_qp][2],
-			_strong_residuals[_qp][3]);
+                        _strong_residuals[_qp][2],
+                        _strong_residuals[_qp][3]);
 
     // 1.) The mass-residual term:
     Real mass_coeff = 

@@ -34,8 +34,8 @@ Real NSMomentumViscousFlux::computeQpResidual()
   
   // _component'th column of vst...
   RealVectorValue vec(vst(0,_component),
-		      vst(1,_component),
-		      vst(2,_component));
+                      vst(1,_component),
+                      vst(2,_component));
 
   // ... dotted with grad(phi), note: sign is positive as this term was -div(tau) on the lhs
   return vec*_grad_test[_i][_qp];

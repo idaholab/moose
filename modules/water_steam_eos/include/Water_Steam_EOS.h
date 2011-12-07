@@ -20,7 +20,7 @@ namespace Water_Steam_EOS
     
     //subroutine  wateos_noderiv(T, p, dw)  this one is faster, no derivatives calculated
     void wateos_noderiv1_( double&, double&, double&);
-	  
+
     //subroutine  VISW_noderiv1 (rho_s,tc,vs)  
     void viss_noderiv1_( double&, double&, double&);  
 

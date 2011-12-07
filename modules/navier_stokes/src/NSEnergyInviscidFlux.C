@@ -91,12 +91,12 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
   {
     std::ostringstream oss;
     oss << "Invalid jvar=" << jvar << " requested!\n" 
-	<< "Did not match:\n"
-	<< " _rho_var_number =" << _rho_var_number  << "\n"
-	<< " _rhou_var_number=" << _rhou_var_number << "\n"  
-	<< " _rhov_var_number=" << _rhov_var_number << "\n" 
-	<< " _rhow_var_number=" << _rhow_var_number
-	<< std::endl;
+        << "Did not match:\n"
+        << " _rho_var_number =" << _rho_var_number  << "\n"
+        << " _rhou_var_number=" << _rhou_var_number << "\n"  
+        << " _rhov_var_number=" << _rhov_var_number << "\n" 
+        << " _rhow_var_number=" << _rhow_var_number
+        << std::endl;
     mooseError(oss.str());
   }
 

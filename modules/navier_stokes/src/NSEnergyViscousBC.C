@@ -154,7 +154,7 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
       Real intermediate_value = 0.;
 
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-	intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + _vst_derivs.dtau(k,ell,m)) );
+        intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + _vst_derivs.dtau(k,ell,m)) );
       
       // Hit accumulated value with normal component k.  We will multiply by test function at 
       // the end of this routine...
@@ -177,7 +177,7 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
       Real intermediate_value = tau(k,m_local)*phij/rho;
       
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-	intermediate_value += _vst_derivs.dtau(k,ell,m) * U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
+        intermediate_value += _vst_derivs.dtau(k,ell,m) * U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
 
       // Hit accumulated value with normal component k.
       visc_term += intermediate_value * _normals[_qp](k);

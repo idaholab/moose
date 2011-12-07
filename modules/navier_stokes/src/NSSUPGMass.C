@@ -27,8 +27,8 @@ Real NSSUPGMass::computeQpResidual()
   // in entries 1,2,3 of the "_strong_residuals" vector, regardless
   // of what dimension we're solving in.
   RealVectorValue Ru (_strong_residuals[_qp][1],
-		      _strong_residuals[_qp][2],
-		      _strong_residuals[_qp][3]);
+                      _strong_residuals[_qp][2],
+                      _strong_residuals[_qp][3]);
 
   // Separate variable just for printing purposes...
   Real result = _taum[_qp] * (Ru * _grad_test[_i][_qp]);
