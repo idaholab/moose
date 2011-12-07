@@ -13,20 +13,17 @@
 /****************************************************************/
 
 #include "MooseObject.h"
-#include "Conversion.h"
 
 template<>
 InputParameters validParams<MooseObject>()
 {
   InputParameters params;
-  params.addParam<std::string>("execute_on", "residual", "Set to (residual|timestep) to execute only at that moment");
   return params;
 }
 
 
 MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
     _name(name),
-    _pars(parameters),
-    _exec_flags(Moose::stringToEnum<ExecFlagType>(getParam<std::string>("execute_on")))
+    _pars(parameters)
 {
 }

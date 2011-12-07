@@ -22,6 +22,7 @@ template<>
 InputParameters validParams<NodeFaceConstraint>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this constraint is applied to.");
   params.addRequiredParam<unsigned int>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<unsigned int>("master", "The boundary ID associated with the master side");
@@ -33,6 +34,7 @@ InputParameters validParams<NodeFaceConstraint>()
 
 NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters parameters) :
   MooseObject(name, parameters),
+  SetupInterface(parameters),
   Coupleable(parameters, true),
   FunctionInterface(parameters),
   TransientInterface(parameters),

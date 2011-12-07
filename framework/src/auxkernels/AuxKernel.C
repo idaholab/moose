@@ -27,6 +27,7 @@ template<>
 InputParameters validParams<AuxKernel>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this object applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   // For use on the boundary only
@@ -39,6 +40,7 @@ InputParameters validParams<AuxKernel>()
 
 AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    SetupInterface(parameters),
     Coupleable(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<std::string>("variable")).feType().family == LAGRANGE), // horrible
     FunctionInterface(parameters),
     TransientInterface(parameters),

@@ -17,6 +17,7 @@
 
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
+#include "ExecStore.h"
 #include "MooseMesh.h"
 #include "MooseArray.h"
 #include "Function.h"

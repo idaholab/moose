@@ -20,6 +20,7 @@
 #include "DiracKernelData.h"
 #include "DiracKernelInfo.h"
 #include "MooseObject.h"
+#include "SetupInterface.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -55,6 +56,7 @@ InputParameters validParams<NodeFaceConstraint>();
  */
 class NodeFaceConstraint :
   public MooseObject,
+  public SetupInterface,
   public Coupleable,
   public FunctionInterface,
   public TransientInterface,

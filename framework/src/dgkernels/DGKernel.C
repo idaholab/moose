@@ -35,6 +35,7 @@ template<>
 InputParameters validParams<DGKernel>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<unsigned int>("_boundary_id", DGKernel::InternalBndId);
 
@@ -45,6 +46,7 @@ InputParameters validParams<DGKernel>()
 
 DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    SetupInterface(parameters),
     Coupleable(parameters, false),
     TwoMaterialPropertyInterface(parameters),
 

@@ -18,6 +18,7 @@
 //MOOSE includes
 #include "Moose.h"
 #include "MooseObject.h"
+#include "SetupInterface.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -44,6 +45,7 @@ InputParameters validParams<NodalConstraint>();
  */
 class NodalConstraint :
   public MooseObject,
+  public SetupInterface,
   public Coupleable,
   public FunctionInterface,
   public TransientInterface,

@@ -16,6 +16,7 @@
 #define MATERIAL_H
 
 #include "MooseObject.h"
+#include "SetupInterface.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
@@ -54,6 +55,7 @@ InputParameters validParams<Material>();
  */
 class Material :
   public MooseObject,
+  public SetupInterface,
   public Coupleable,
   public FunctionInterface,
   public TransientInterface,

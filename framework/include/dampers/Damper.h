@@ -17,6 +17,7 @@
 
 // Moose Includes
 #include "MooseObject.h"
+#include "SetupInterface.h"
 #include "ParallelUniqueId.h"
 #include "MooseVariable.h"
 #include "MaterialPropertyInterface.h"
@@ -41,6 +42,7 @@ InputParameters validParams<Damper>();
  */
 class Damper :
   public MooseObject,
+  public SetupInterface,
   protected MaterialPropertyInterface
 {
 public:

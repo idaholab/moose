@@ -20,6 +20,7 @@
 //MOOSE includes
 #include "Moose.h"
 #include "MooseObject.h"
+#include "SetupInterface.h"
 #include "ParallelUniqueId.h"
 
 //libMesh includes
@@ -34,7 +35,9 @@ template<>
 InputParameters validParams<Postprocessor>();
 
 
-class Postprocessor : public MooseObject
+class Postprocessor :
+  public MooseObject,
+  public SetupInterface
 {
 public:
   Postprocessor(const std::string & name, InputParameters parameters);

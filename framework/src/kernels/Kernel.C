@@ -23,6 +23,7 @@ template<>
 InputParameters validParams<Kernel>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this kernel will be applied to");
   params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that this kernel will be active after.");
@@ -37,6 +38,7 @@ InputParameters validParams<Kernel>()
 
 Kernel::Kernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    SetupInterface(parameters),
     Coupleable(parameters, false),
     FunctionInterface(parameters),
     TransientInterface(parameters),

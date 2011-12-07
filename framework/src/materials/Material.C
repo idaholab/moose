@@ -23,6 +23,7 @@ template<>
 InputParameters validParams<Material>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
   params.addRequiredParam<std::vector<unsigned int> >("block", "The id of the block (subdomain) that this material represents.");
 
   params.addPrivateParam<std::string>("built_by_action", "add_material");
@@ -32,6 +33,7 @@ InputParameters validParams<Material>()
 
 Material::Material(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    SetupInterface(parameters),
     Coupleable(parameters, false),
     FunctionInterface(parameters),
     TransientInterface(parameters),

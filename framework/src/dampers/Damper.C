@@ -20,6 +20,7 @@ template<>
 InputParameters validParams<Damper>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this damper operates on");
 
   params.addPrivateParam<std::string>("built_by_action", "add_damper");
@@ -28,6 +29,7 @@ InputParameters validParams<Damper>()
 
 Damper::Damper(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    SetupInterface(parameters),
     MaterialPropertyInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

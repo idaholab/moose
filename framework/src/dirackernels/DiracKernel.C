@@ -27,6 +27,7 @@ template<>
 InputParameters validParams<DiracKernel>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
 
   params.addPrivateParam<bool>("use_displaced_mesh", false);
@@ -36,6 +37,7 @@ InputParameters validParams<DiracKernel>()
 
 DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    SetupInterface(parameters),
     Coupleable(parameters, false),
     FunctionInterface(parameters),
     TransientInterface(parameters),

@@ -16,6 +16,7 @@
 #define KERNEL_H
 
 #include "MooseObject.h"
+#include "SetupInterface.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
@@ -42,6 +43,7 @@ InputParameters validParams<Kernel>();
 
 class Kernel :
   public MooseObject,
+  public SetupInterface,
   public Coupleable,
   public FunctionInterface,
   public TransientInterface,

@@ -16,6 +16,7 @@
 #define AUXKERNEL_H
 
 #include "MooseObject.h"
+#include "SetupInterface.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
@@ -40,6 +41,7 @@ InputParameters validParams<AuxKernel>();
  */
 class AuxKernel :
   public MooseObject,
+  public SetupInterface,
   public Coupleable,
   public FunctionInterface,
   public TransientInterface,

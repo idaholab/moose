@@ -16,6 +16,7 @@
 #define BOUNDARYCONDITION_H
 
 #include "MooseObject.h"
+#include "SetupInterface.h"
 #include "MooseVariable.h"
 #include "ParallelUniqueId.h"
 #include "MooseArray.h"
@@ -46,6 +47,7 @@ InputParameters validParams<BoundaryCondition>();
  */
 class BoundaryCondition :
   public MooseObject,
+  public SetupInterface,
   public FunctionInterface,
   public TransientInterface,
   public MaterialPropertyInterface,

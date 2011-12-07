@@ -12,27 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDPOSTPROCESSORACTION_H
-#define ADDPOSTPROCESSORACTION_H
-
-#include "MooseObjectAction.h"
-#include "ExecStore.h"
-
-class AddPostprocessorAction;
+#include "SetupInterface.h"
+#include "Conversion.h"
 
 template<>
-InputParameters validParams<AddPostprocessorAction>();
-
-
-class AddPostprocessorAction: public MooseObjectAction
+InputParameters validParams<SetupInterface>()
 {
-public:
-  AddPostprocessorAction(const std::string & name, InputParameters params);
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>("execute_on", "residual", "Set to (residual|timestep) to execute only at that moment");
+  return params;
+}
 
-  virtual void act();
+SetupInterface::SetupInterface(InputParameters & params) :
+    _exec_flags(Moose::stringToEnum<ExecFlagType>(params.get<std::string>("execute_on")))
+{
+}
 
-protected:
-  ExecFlagType _pps_type;
-};
+SetupInterface::~SetupInterface()
+{
+}
 
-#endif //ADDPOSTPROCESSORACTION_H
