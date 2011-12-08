@@ -8,13 +8,13 @@ head_node = 'quark'
 excluded_applications = set(['r7_moose', 'rattlesnake'])
 
 # The checkout command
-checkout_moose_stable = ['svn', 'co', '--quiet', 'https://hpcsc/svn/herd/branches/stable/moose', 'moose-stable']
+checkout_moose_stable = ['svn', 'co', '--quiet', 'https://hpcsc/svn/herd/trunk/moose', 'moose-stable']
 
 # The mergeinfo command
-get_merged_revisions = ['svn', 'mergeinfo', 'https://hpcsc/svn/herd/trunk/moose', '--show-revs', 'eligible', 'moose-stable']
+get_merged_revisions = ['svn', 'mergeinfo', 'https://hpcsc/svn/herd/trunk/devel/moose', '--show-revs', 'eligible', 'moose-stable']
 
 # The merge command
-merge_moose_trunk = ['svn', 'merge', 'https://hpcsc/svn/herd/trunk/moose', 'moose-stable' ]
+merge_moose_trunk = ['svn', 'merge', 'https://hpcsc/svn/herd/trunk/devel/moose', 'moose-stable' ]
 
 # The final stable checkin command
 commit_moose_stable = ['svn', 'ci', '--username', 'moosetest', '-F', 'svn_log.log', 'moose-stable']
@@ -100,7 +100,7 @@ if __name__ == '__main__':
       else:
         print 'I detect no merge information... strange.'
         sys.exit(1)
-      get_revision_logs.append('https://hpcsc/svn/herd/trunk/moose')
+      get_revision_logs.append('https://hpcsc/svn/herd/trunk/devel/moose')
       # Get each revision log
       print 'Getting each log for revision merged...'
       log_data = runCMD(get_revision_logs)
