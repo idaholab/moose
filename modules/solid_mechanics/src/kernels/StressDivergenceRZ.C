@@ -63,7 +63,7 @@ StressDivergenceRZ::computeQpResidual()
     mooseError("Invalid component");
   }
 
-  return 2 * M_PI * _q_point[_qp](0) * div;
+  return div;
 }
 
 Real
@@ -102,7 +102,7 @@ StressDivergenceRZ::calculateJacobian( unsigned int ivar, unsigned int jvar )
   SymmTensor tmp( _Jacobian_mult[_qp] * phi );
   const Real val( test.doubleContraction( tmp ) );
 
-  return 2 * M_PI * _q_point[_qp](0) * val;
+  return val;
 }
 
 Real
@@ -131,8 +131,7 @@ StressDivergenceRZ::computeQpOffDiagJacobian(unsigned int jvar)
       test.xy() = 0.5*_grad_test[_i][_qp](0);
       test.yy() = _grad_test[_i][_qp](1);
     }
-    return 2 * M_PI * _q_point[_qp](0) *
-      _d_stress_dT[_qp].doubleContraction(test) * _phi[_j][_qp];
+    return _d_stress_dT[_qp].doubleContraction(test) * _phi[_j][_qp];
   }
 
   return 0;

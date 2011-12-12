@@ -14,12 +14,12 @@ SolidMechImplicitEulerRZ::SolidMechImplicitEulerRZ(const std::string & name, Inp
 Real
 SolidMechImplicitEulerRZ::computeQpResidual()
 {
-  return 2 * M_PI * _q_point[_qp](0) * SolidMechImplicitEuler::computeQpResidual();
+  return SolidMechImplicitEuler::computeQpResidual();
 }
 
 Real
 SolidMechImplicitEulerRZ::computeQpJacobian()
 {
-  return 2 * M_PI * _q_point[_qp](0) * SolidMechImplicitEuler::computeQpJacobian();
+  return SolidMechImplicitEuler::computeQpJacobian();
 }
 

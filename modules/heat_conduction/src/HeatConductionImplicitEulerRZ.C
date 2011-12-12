@@ -16,17 +16,17 @@ HeatConductionImplicitEulerRZ::HeatConductionImplicitEulerRZ(const std::string &
 Real
 HeatConductionImplicitEulerRZ::computeQpResidual()
 {
-  return 2 * M_PI * _q_point[_qp](0) * HeatConductionImplicitEuler::computeQpResidual();
+  return HeatConductionImplicitEuler::computeQpResidual();
 }
 
 Real
 HeatConductionImplicitEulerRZ::computeQpJacobian()
 {
-  return 2 * M_PI * _q_point[_qp](0) * HeatConductionImplicitEuler::computeQpJacobian();
+  return HeatConductionImplicitEuler::computeQpJacobian();
 }
 
 Real
 HeatConductionImplicitEulerRZ::computeQpOffDiagJacobian( unsigned jvar )
 {
-  return 2 * M_PI * _q_point[_qp](0) * HeatConductionImplicitEuler::computeQpOffDiagJacobian( jvar );
+  return HeatConductionImplicitEuler::computeQpOffDiagJacobian( jvar );
 }

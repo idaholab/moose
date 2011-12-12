@@ -15,11 +15,11 @@ HeatConductionRZ::HeatConductionRZ(const std::string & name, InputParameters par
 Real
 HeatConductionRZ::computeQpResidual()
 {
-  return 2 * M_PI * _q_point[_qp](0) * HeatConduction::computeQpResidual();
+  return HeatConduction::computeQpResidual();
 }
 
 Real
 HeatConductionRZ::computeQpJacobian()
 {
-  return 2 * M_PI * _q_point[_qp](0) * HeatConduction::computeQpJacobian();
+  return HeatConduction::computeQpJacobian();
 }

@@ -35,12 +35,8 @@ SolidMechanicsAction::act()
   std::vector<std::string> keys;
   std::vector<std::string> vars;
   std::string type("StressDivergence");
-  if (_disp_r != "")
+  if (_problem->coordSystem() == Moose::COORD_RZ)
   {
-    if (_disp_z == "")
-    {
-      mooseError("disp_r set but disp_z not set");
-    }
     rz = true;
     dim = 2;
     keys.push_back("disp_r");

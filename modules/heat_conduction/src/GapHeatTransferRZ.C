@@ -15,23 +15,23 @@ GapHeatTransferRZ::GapHeatTransferRZ(const std::string & name, InputParameters p
 Real
 GapHeatTransferRZ::computeQpResidual()
 {
-  return 2 * M_PI * _q_point[_qp](0) * GapHeatTransfer::computeQpResidual();
+  return GapHeatTransfer::computeQpResidual();
 }
 
 Real
 GapHeatTransferRZ::computeQpJacobian()
 {
-  return 2 * M_PI * _q_point[_qp](0) * GapHeatTransfer::computeQpJacobian();
+  return GapHeatTransfer::computeQpJacobian();
 }
 
 Real
 GapHeatTransferRZ::computeQpOffDiagJacobian( unsigned jvar )
 {
-  return 2 * M_PI * _q_point[_qp](0) * GapHeatTransfer::computeQpOffDiagJacobian( jvar );
+  return GapHeatTransfer::computeQpOffDiagJacobian( jvar );
 }
 
 Real
 GapHeatTransferRZ::computeSlaveFluxContribution(Real grad_t)
 {
-  return 2 * M_PI * _q_point[_qp](0) * GapHeatTransfer::computeSlaveFluxContribution( grad_t );
+  return  2 * M_PI * _q_point[_qp](0) * GapHeatTransfer::computeSlaveFluxContribution( grad_t );
 }

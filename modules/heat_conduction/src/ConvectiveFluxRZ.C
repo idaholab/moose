@@ -15,17 +15,17 @@ ConvectiveFluxRZ::ConvectiveFluxRZ(const std::string & name, InputParameters par
 Real
 ConvectiveFluxRZ::computeQpResidual()
 {
-  return 2 * M_PI * _q_point[_qp](0) * ConvectiveFluxBC::computeQpResidual();
+  return ConvectiveFluxBC::computeQpResidual();
 }
 
 Real
 ConvectiveFluxRZ::computeQpJacobian()
 {
-  return 2 * M_PI * _q_point[_qp](0) * ConvectiveFluxBC::computeQpJacobian();
+  return ConvectiveFluxBC::computeQpJacobian();
 }
 
 Real
 ConvectiveFluxRZ::computeQpOffDiagJacobian( unsigned jvar )
 {
-  return 2 * M_PI * _q_point[_qp](0) * ConvectiveFluxBC::computeQpOffDiagJacobian( jvar );
+  return ConvectiveFluxBC::computeQpOffDiagJacobian( jvar );
 }

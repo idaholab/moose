@@ -13,18 +13,18 @@ NeumannRZ::NeumannRZ(const std::string & name, InputParameters parameters)
 Real
 NeumannRZ::computeQpResidual()
 {
-  return 2 * M_PI * _q_point[_qp](0) * NeumannBC::computeQpResidual();
+  return NeumannBC::computeQpResidual();
 }
 
 
 Real
 NeumannRZ::computeQpJacobian()
 {
-  return 2 * M_PI * _q_point[_qp](0) * NeumannBC::computeQpJacobian();
+  return NeumannBC::computeQpJacobian();
 }
 
 Real
 NeumannRZ::computeQpOffDiagJacobian( unsigned jvar )
 {
-  return 2 * M_PI * _q_point[_qp](0) * NeumannBC::computeQpOffDiagJacobian( jvar );
+  return NeumannBC::computeQpOffDiagJacobian( jvar );
 }
