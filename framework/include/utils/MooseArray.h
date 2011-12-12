@@ -190,7 +190,11 @@ MooseArray<T>::resize(const unsigned int size, const T & default_value)
     mooseAssert(new_pointer, "Failed to allocate MooseArray memory!");
 
     if (_data != NULL)
+    {
+      for (unsigned int i=0; i<_size; i++)
+        new_pointer[i] = _data[i];
       delete [] _data;
+    }
     _data = new_pointer;
 
     for(unsigned int i=_size; i<size; i++)
