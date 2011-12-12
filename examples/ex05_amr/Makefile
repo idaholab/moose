@@ -17,6 +17,7 @@
 ###############################################################################
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)/../../moose
+LIBMESH_DIR	?= $(shell pwd)/../../libmesh
 
 APPLICATION_NAME := ex05
 

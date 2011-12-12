@@ -19,6 +19,7 @@
 CURR_DIR  ?= $(shell pwd)
 ROOT_DIR  ?= $(shell dirname `pwd`)
 MOOSE_DIR ?= $(ROOT_DIR)/moose
+LIBMESH_DIR ?= $(ROOT_DIR)/libmesh
 
 APPLICATION_NAME := moose_test
 

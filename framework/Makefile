@@ -21,6 +21,9 @@ all::
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)
 
+#Note: If you are a developer this will not work
+# This line assumes that moose and libmesh are peer dirs
+LIBMESH_DIR     ?= $(shell pwd)/../libmesh
 include build.mk
 include moose.mk
 

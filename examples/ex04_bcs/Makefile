@@ -17,8 +17,9 @@
 ###############################################################################
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)/../../moose
+LIBMESH_DIR	?= $(shell pwd)/../../libmesh
 
-APPLICATION_NAME := ex04app
+APPLICATION_NAME := ex04
 
 include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk

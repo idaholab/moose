@@ -20,6 +20,7 @@
 CURR_DIR  ?= $(shell pwd)
 MOOSE_DIR ?= $(shell pwd)/../moose
 ELK_DIR   ?= $(shell pwd)/../elk
+LIBMESH_DIR ?= $(shell pwd)/../libmesh
 
 APPLICATION_NAME := elk_unit
 
