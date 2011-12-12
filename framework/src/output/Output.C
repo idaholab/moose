@@ -31,7 +31,8 @@ Output::Output(FEProblem & fe_problem, EquationSystems & eq) :
     _dt(_fe_problem.dt()),
     _interval(1),
     _screen_interval(1),
-    _iteration_plot_start_time(std::numeric_limits<Real>::max())
+    _iteration_plot_start_time(std::numeric_limits<Real>::max()),
+    _last_iteration_output_time(0.0)
 {
 }
 
@@ -117,13 +118,23 @@ Output::iterationOutput(SNES, PetscInt its, PetscReal /*fnorm*/, void * _output)
 {
   Output * output = static_cast<Output*>(_output);
   mooseAssert(output, "Error in iterationOutput");
-  if (output->_time >= output->_iteration_plot_start_time && its )
+  if (output->_time >= output->_iteration_plot_start_time)
   {
     // Create an output time.  The time will be larger than the time of the previous
     // solution, and it will increase with each iteration.  Using 1e-3 indicates that
     // after 1000 nonlinear iterations, we'll overrun the next solution time.  That
     // should be more than enough.
-    Real iteration_time( (output->_time-output->_dt) + its * output->_dt * 1e-3 );
+
+    Real last_time = output->_time - output->_dt;
+
+    // If the last iteration output time happened before the last solve finished then advance to after that time
+    // if not just keep incrementing time
+    if(output->_last_iteration_output_time <= last_time)
+      output->_last_iteration_output_time = last_time + output->_dt*1e-2;
+    else
+      output->_last_iteration_output_time += output->_dt*1e-2;
+
+    Real iteration_time = output->_last_iteration_output_time;
     std::cout << "  Writing iteration plot for NL step " << its << " at time " << iteration_time << std::endl;
     for (unsigned int i(0); i < output->_outputters.size(); ++i)
     {

@@ -102,6 +102,8 @@ protected:
   std::set<Type> _outputter_types;
 
   std::vector<std::string> _output_variables;           ///< The variables to be output
+
+  Real _last_iteration_output_time;
 };
 
 #endif /* OUTPUTTER_H */
