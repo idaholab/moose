@@ -47,6 +47,8 @@ public:
   virtual ~InputParameters()
     {}
 
+  virtual void clear();
+
   /**
    * This method adds a description of the class that will be displayed
    * in the input file syntax dump
@@ -58,12 +60,15 @@ public:
    */
   std::string getClassDescription() const;
 
+  /*
   template<typename T >
   T & set (const std::string & name)
   {
     _valid_params.insert(name);
     return Parameters::set<T>(name);
   }
+  */
+  virtual void set_attributes(const std::string & name, bool inserted_only);
 
   /**
    * This method adds a parameter and documentation string to the InputParameters
@@ -147,6 +152,8 @@ public:
   /**
    * Copy and Copy/Add operators for the InputParameters object
    */
+  using Parameters::operator=;
+  using Parameters::operator+=;
   InputParameters & operator=(const InputParameters &rhs);
   InputParameters & operator+=(const InputParameters &rhs);
 
@@ -217,7 +224,7 @@ private:
 template <typename T>
 void InputParameters::addRequiredParam(const std::string &name, const std::string &doc_string)
 {
-  Parameters::set<T>(name) = T();                       // initialize the value
+  Parameters::insert<T>(name);
   _required_params.insert(name);
   _doc_string[name] = doc_string;
 }
@@ -226,22 +233,21 @@ void InputParameters::addRequiredParam(const std::string &name, const std::strin
 template <typename T>
 void InputParameters::addParam(const std::string &name, const T &value, const std::string &doc_string)
 {
-  Parameters::set<T>(name) = value;
-  _valid_params.insert(name);
+  Parameters::set<T>(name) = value;                    // valid parameter is set by set_attributes
   _doc_string[name] = doc_string;
 }
 
 template <typename T>
 void InputParameters::addParam(const std::string &name, const std::string &doc_string)
 {
-  Parameters::set<T>(name) = T();                       // initialize the value
+  Parameters::insert<T>(name);
   _doc_string[name] = doc_string;
 }
 
 template <typename T>
 void InputParameters::addPrivateParam(const std::string &name)
 {
-  Parameters::set<T>(name) = T();                       // initialize the value
+  Parameters::insert<T>(name);
   _private_params.insert(name);
 }
 

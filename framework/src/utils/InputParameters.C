@@ -32,9 +32,28 @@ InputParameters::InputParameters(const Parameters &rhs)
 }
 
 void
+InputParameters::clear()
+{
+  Parameters::clear();
+  _doc_string.clear();
+  _required_params.clear();
+  _valid_params.clear();
+  _private_params.clear();
+  _seen_in_input.clear();
+  _coupled_vars.clear();
+}
+
+void
 InputParameters::addClassDescription(const std::string &doc_string)
 {
   _doc_string["_class"] = doc_string;
+}
+
+void
+InputParameters::set_attributes(const std::string & name, bool inserted_only)
+{
+  if (!inserted_only)
+    _valid_params.insert(name);
 }
 
 std::string
@@ -46,6 +65,22 @@ InputParameters::getClassDescription() const
   else
     return std::string();
 }
+
+/*
+Parameters &
+InputParameters::operator=(const Parameters &rhs)
+{
+  Parameters::operator=(rhs);
+  return *this;
+}
+
+Parameters &
+InputParameters::operator+=(const Parameters &rhs)
+{
+  Parameters::operator+=(rhs);
+  return *this;
+}
+*/
 
 InputParameters &
 InputParameters::operator=(const InputParameters &rhs)
