@@ -22,7 +22,6 @@
 #include "GapHeatTransfer.h"
 #include "GapHeatTransferRZ.h"
 #include "HeatConduction.h"
-#include "HeatConductionRZ.h"
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionImplicitEulerRZ.h"
 #include "HeatConductionMaterial.h"
@@ -157,7 +156,6 @@ Elk::registerObjects()
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(GapHeatTransferRZ);
   registerKernel(HeatConduction);
-  registerKernel(HeatConductionRZ);
   registerKernel(HeatConductionImplicitEuler);
   registerKernel(HeatConductionImplicitEulerRZ);
   registerMaterial(HeatConductionMaterial);
