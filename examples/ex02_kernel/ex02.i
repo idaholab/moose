@@ -22,9 +22,7 @@
   [./conv]
     type = Convection
     variable = convected
-    x = 0.0
-    y = 0.0
-    z = 1.0
+    velocity = '0.0 0.0 1.0'
   [../]
 []
 

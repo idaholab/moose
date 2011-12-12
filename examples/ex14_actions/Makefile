@@ -29,4 +29,4 @@ include ../test.mk
 # Additional special case targets should be added here
 
 test: $(APPLICATION_NAME)-$(METHOD)
-	$(call TEST_exodiff,conv_vect_custom.i,out.e)
+	$(call TEST_exodiff,ex14.i,out.e)

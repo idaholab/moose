@@ -29,4 +29,4 @@ include ../test.mk
 # Additional special case targets should be added here
 
 test: $(APPLICATION_NAME)-$(METHOD)
-	$(call TEST_exodiff,pbp_test.i,out.e)
+	$(call TEST_exodiff,ex11-default.i,out.e)

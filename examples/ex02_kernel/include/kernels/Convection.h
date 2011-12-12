@@ -77,13 +77,6 @@ private:
    * computing dot products.
    */
   RealVectorValue _velocity;
-
-  /**
-   * Class variables to hold the components of velocity coming from the input parameters.
-   */
-  Real _x;
-  Real _y;
-  Real _z;
 };
 
 #endif // CONVECTION_H

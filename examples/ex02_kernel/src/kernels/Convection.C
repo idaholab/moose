@@ -22,9 +22,7 @@ template<>
 InputParameters validParams<Convection>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<Real>("x", "Component of velocity in the x direction");
-  params.addRequiredParam<Real>("y", "Component of velocity in the y direction");
-  params.addParam<Real>("z", 0.0, "Component of velocity in the z direction");
+  params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   return params;
 }
 
@@ -32,22 +30,8 @@ Convection::Convection(const std::string & name,
                        InputParameters parameters)
   // You must call the constructor of the base class first
   :Kernel(name, parameters),
-
-   // This is the rest of the "Intialization List".  It sets the
-   // values of class variables. Here we are grabbing the values of
-   // x, y, and z from the input file to use for a velocity vector.
-   _x(getParam<Real>("x")),
-   _y(getParam<Real>("y")),
-   _z(getParam<Real>("z"))
-{
-  // Build a velocity vector to use in the residual / jacobian computations.
-  // We do this here so that it's only done once and then we just reuse it.
-  // Note that RealVectorValues ALWAYS have 3 components... even when running in
-  // 2D or 1D.  This makes the code simpler...
-  _velocity(0) = _x;
-  _velocity(1) = _y;
-  _velocity(2) = _z;
-}
+   _velocity(getParam<RealVectorValue>("velocity"))
+{}
 
 Real Convection::computeQpResidual()
 {
