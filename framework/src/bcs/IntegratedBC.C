@@ -37,6 +37,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     _qrule(_subproblem.qRuleFace(_tid)),
     _q_point(_subproblem.pointsFace(_tid)),
     _JxW(_subproblem.JxWFace(_tid)),
+    _coord(_subproblem.coords(_tid)),
 
     _phi(_assembly.phiFace()),
     _grad_phi(_assembly.gradPhiFace()),
@@ -60,7 +61,7 @@ IntegratedBC::computeResidual()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
     {
-      re(_i) += _JxW[_qp]*computeQpResidual();
+      re(_i) += _JxW[_qp]*_coord[_qp]*computeQpResidual();
     }
 }
 
@@ -74,7 +75,7 @@ IntegratedBC::computeJacobian()
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
       {
-        ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
+        ke(_i, _j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
       }
   }
 }
@@ -91,9 +92,9 @@ IntegratedBC::computeJacobianBlock(unsigned int jvar)
       for (_j=0; _j<_phi.size(); _j++)
       {
         if (_var.number() == jvar)
-          ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
         else
-          ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);
+          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(jvar);
       }
 
 //  Moose::perf_log.pop("computeJacobianBlock()","IntegratedBC");

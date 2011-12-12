@@ -873,7 +873,8 @@ void Parser::setTensorParameter(const std::string & full_name, const std::string
 
 Parser::InputFileSort::InputFileSort()
 {
-  _o.reserve(13);
+  _o.reserve(16);
+  _o.push_back("Problem");
   _o.push_back("Mesh");
   _o.push_back("Functions");
   _o.push_back("Preconditioning");

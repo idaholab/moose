@@ -150,6 +150,7 @@ protected:
   MooseMesh & _mesh;                                    ///< Mesh this kernels acts on
 
   unsigned int _dim;                                    ///< Dimension of the problem
+  Moose::CoordinateSystemType & _coord_sys;             ///< Coordinate system
 
   DiracKernelInfo & _dirac_kernel_info;
 

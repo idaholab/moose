@@ -22,6 +22,7 @@ namespace Moose {
   std::map<std::string, TimeSteppingScheme> timesteppingscheme_type_to_enum;
   std::map<std::string, ExecFlagType> execstore_type_to_enum;
   std::map<std::string, QuadratureType> quadrature_type_to_enum;
+  std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
 
   void initTimeSteppingMap()
   {
@@ -60,6 +61,14 @@ namespace Moose {
     }
   }
 
+  void initCoordinateSystemType()
+  {
+    if (coordinate_system_type_to_enum.empty())
+    {
+      coordinate_system_type_to_enum["XYZ"] = COORD_XYZ;
+      coordinate_system_type_to_enum["RZ"]  = COORD_RZ;
+    }
+  }
 
   template<>
   TimeSteppingScheme stringToEnum(const std::string & s)
@@ -116,6 +125,19 @@ namespace Moose {
       return Utility::string_to_enum<Order>(upper);
   }
 
+  template<>
+  CoordinateSystemType stringToEnum<CoordinateSystemType>(const std::string & s)
+  {
+    initCoordinateSystemType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!coordinate_system_type_to_enum.count(upper))
+      mooseError("Unknown coordinate system type");
+
+    return coordinate_system_type_to_enum[upper];
+  }
 }
 
 Point toPoint(const std::vector<Real> & pos)

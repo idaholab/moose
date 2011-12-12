@@ -137,6 +137,21 @@ Assembly::reinit(const Elem * elem)
   _current_elem = elem;
   for (std::map<FEType, FEBase *>::iterator it = _fe.begin(); it != _fe.end(); ++it)
     it->second->reinit(elem);
+
+  // set the coord transformation
+  _coord.resize(_qrule->n_points());
+  switch (_sys.subproblem().coordSystem())
+  {
+  case Moose::COORD_XYZ:
+    for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+      _coord[qp] = 1.;
+    break;
+
+  case Moose::COORD_RZ:
+    for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+      _coord[qp] = 2 * M_PI * _q_points[qp](0);
+    break;
+  }
 }
 
 void
@@ -178,6 +193,21 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   for (std::map<FEType, FEBase *>::iterator it = _fe_face.begin(); it != _fe_face.end(); ++it)
     it->second->reinit(elem, side);
+
+  // set the coord transformation
+  _coord.resize(_qrule_face->n_points());
+  switch (_sys.subproblem().coordSystem())
+  {
+  case Moose::COORD_XYZ:
+    for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
+      _coord[qp] = 1.;
+    break;
+
+  case Moose::COORD_RZ:
+    for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
+      _coord[qp] = 2 * M_PI * _q_points_face[qp](0);
+    break;
+  }
 }
 
 void

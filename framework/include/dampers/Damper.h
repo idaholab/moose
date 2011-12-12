@@ -67,6 +67,8 @@ protected:
 
   THREAD_ID _tid;                                       ///< Thread ID
 
+  Moose::CoordinateSystemType & _coord_sys;             ///< Coordinate system
+
   MooseVariable & _var;                                 ///< Non-linear variable this damper works on
 
   const Elem * & _current_elem;                         ///< Current element

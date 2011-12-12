@@ -15,6 +15,7 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
+#include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
 #include "ExecStore.h"

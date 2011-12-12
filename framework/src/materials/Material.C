@@ -47,10 +47,12 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _material_data(*parameters.get<MaterialData *>("_material_data")),
     _qrule(_bnd ? _subproblem.qRuleFace(_tid) : _subproblem.qRule(_tid)),
     _JxW(_bnd ? _subproblem.JxWFace(_tid) : _subproblem.JxW(_tid)),
+    _coord(_subproblem.coords(_tid)),
     _q_point(_bnd ? _subproblem.pointsFace(_tid) : _subproblem.points(_tid)),
     _current_elem(_subproblem.elem(_tid)),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
+    _coord_sys(_subproblem.coordSystem()),
     _block_id(parameters.get<unsigned int>("block_id")),
 
     _real_zero(_problem._real_zero[_tid]),

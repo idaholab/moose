@@ -44,7 +44,7 @@ KernelGrad::computeResidual()
   {
     _value = precomputeQpResidual();
     for (_i=0; _i<_test.size(); _i++)
-      re(_i) += _JxW[_qp]*_value*_grad_test[_i][_qp];
+      re(_i) += _JxW[_qp]*_coord[_qp]*_value*_grad_test[_i][_qp];
   }
 
 //  Moose::perf_log.pop("computeResidual()","KernelGrad");
@@ -63,7 +63,7 @@ KernelGrad::computeJacobian()
     {
       _value = precomputeQpJacobian();
       for (_i=0; _i<_test.size(); _i++)
-        ke(_i,_j) += _JxW[_qp]*_value*_grad_test[_i][_qp];
+        ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value*_grad_test[_i][_qp];
     }
   }
 
@@ -90,9 +90,9 @@ KernelGrad::computeOffDiagJacobian(unsigned int jvar)
       for (_i=0; _i<_test.size(); _i++)
       {
         if(jvar == _var.number())
-          Ke(_i,_j) += _JxW[_qp]*_value*_grad_test[_i][_qp];
+          Ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value*_grad_test[_i][_qp];
         else
-          Ke(_i,_j) += _JxW[_qp]*off_diag_value;
+          Ke(_i,_j) += _JxW[_qp]*_coord[_qp]*off_diag_value;
       }
     }
 

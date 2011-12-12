@@ -99,10 +99,12 @@ protected:
   unsigned int & _current_side;         ///< Current side
   const Elem * & _current_side_elem;    ///< Current side element
 
+  Moose::CoordinateSystemType & _coord_sys;                     ///< Coordinate system
   unsigned int _qp;
   const std::vector< Point > & _q_point;
   QBase * & _qrule;
   const std::vector<Real> & _JxW;
+  const std::vector<Real> & _coord;
 
   unsigned int _i, _j;
 

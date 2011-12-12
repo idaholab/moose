@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "InitialCondition.h"
+#include "SubProblem.h"
 
 template<>
 InputParameters validParams<InitialCondition>()
@@ -27,7 +28,8 @@ InputParameters validParams<InitialCondition>()
 InitialCondition::InitialCondition(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     FunctionInterface(parameters),
-    _var_name(getParam<std::string>("var_name"))
+    _var_name(getParam<std::string>("var_name")),
+    _coord_sys(getParam<SubProblem *>("_subproblem")->coordSystem())
 {
 }
 

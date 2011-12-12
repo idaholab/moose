@@ -32,6 +32,7 @@ SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters p
     _q_point(_subproblem.pointsFace(_tid)),
     _qrule(_subproblem.qRuleFace(_tid)),
     _JxW(_subproblem.JxWFace(_tid)),
+    _coord(_subproblem.coords(_tid)),
     _normals(_var.normals()),
     _current_elem(_subproblem.elem(_tid)),
     _current_side_elem(_subproblem.sideElem(_tid)),

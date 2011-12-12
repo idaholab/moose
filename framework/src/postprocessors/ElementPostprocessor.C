@@ -36,6 +36,7 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     _q_point(_subproblem.points(_tid)),
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
+    _coord(_subproblem.coords(_tid)),
     _current_elem(_subproblem.elem(_tid)),
     _u(_var.sln()),
     _u_old(_var.slnOld()),

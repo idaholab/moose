@@ -58,6 +58,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _q_point(_subproblem.points(_tid)),
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
+    _coord(_subproblem.coords(_tid)),
 
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
@@ -111,7 +112,7 @@ Kernel::computeResidual()
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      re(_i) += _JxW[_qp]*computeQpResidual();
+      re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
     }
 }
 
@@ -124,7 +125,7 @@ Kernel::computeJacobian()
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
-        ke(_i, _j) += _JxW[_qp]*computeQpJacobian();
+        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
       }
 }
 
@@ -140,9 +141,9 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
       {
         if(jvar == _var.number())
-          ke(_i,_j) += _JxW[_qp]*computeQpJacobian();
+          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
         else
-          ke(_i,_j) += _JxW[_qp]*computeQpOffDiagJacobian(jvar);
+          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(jvar);
       }
 
 //  Moose::perf_log.pop("computeOffDiagJacobian()",_name);

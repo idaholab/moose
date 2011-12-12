@@ -77,6 +77,7 @@ public:
   virtual const std::vector<Point> & points(THREAD_ID tid) { return _assembly[tid]->qPoints(); }
   virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) { return _assembly[tid]->physicalPoints(); }
   virtual const std::vector<Real> & JxW(THREAD_ID tid) { return _assembly[tid]->JxW(); }
+  virtual const std::vector<Real> & coords(THREAD_ID tid) { return _assembly[tid]->coordTransformation(); }
   virtual QBase * & qRuleFace(THREAD_ID tid) { return _assembly[tid]->qRuleFace(); }
   virtual const std::vector<Point> & pointsFace(THREAD_ID tid) { return _assembly[tid]->qPointsFace(); }
   virtual const std::vector<Real> & JxWFace(THREAD_ID tid) { return _assembly[tid]->JxWFace(); }

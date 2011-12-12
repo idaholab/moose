@@ -15,6 +15,7 @@
 #ifndef SUBPROBLEM_H
 #define SUBPROBLEM_H
 
+#include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "Problem.h"
 #include "DiracKernelInfo.h"
@@ -49,6 +50,9 @@ public:
   virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
 
+  Moose::CoordinateSystemType & coordSystem() { return _coord_sys; }
+  void coordSystem(Moose::CoordinateSystemType type) { _coord_sys = type; }
+
   virtual void init();
   virtual void solve() = 0;
   virtual bool converged() = 0;
@@ -77,6 +81,7 @@ public:
   virtual const std::vector<Point> & points(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) = 0;
   virtual const std::vector<Real> & JxW(THREAD_ID tid) = 0;
+  virtual const std::vector<Real> & coords(THREAD_ID tid) = 0;
   virtual QBase * & qRuleFace(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & pointsFace(THREAD_ID tid) = 0;
   virtual const std::vector<Real> & JxWFace(THREAD_ID tid) = 0;
@@ -114,6 +119,8 @@ protected:
   Problem * _parent;
   MooseMesh & _mesh;
   EquationSystems & _eq;
+
+  Moose::CoordinateSystemType _coord_sys;                      ///< Type of coordinate system
 
   bool _transient;
   Real & _time;

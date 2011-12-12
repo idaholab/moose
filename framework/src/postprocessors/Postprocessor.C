@@ -35,6 +35,7 @@ Postprocessor::Postprocessor(const std::string & name, InputParameters parameter
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
+    _coord_sys(_subproblem.coordSystem()),
     _output(parameters.get<bool>("output"))
 {
   // Initialize the postprocessor data for this PP

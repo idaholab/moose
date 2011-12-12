@@ -35,6 +35,7 @@ Damper::Damper(const std::string & name, InputParameters parameters) :
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
+    _coord_sys(_subproblem.coordSystem()),
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
 
     _current_elem(_var.currentElem()),

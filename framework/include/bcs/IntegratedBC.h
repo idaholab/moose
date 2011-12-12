@@ -56,6 +56,7 @@ protected:
   QBase * & _qrule;                                                     ///< active quadrature rule
   const std::vector< Point > & _q_point;                                ///< active quadrature points
   const std::vector<Real> & _JxW;                                       ///< transformed Jacobian weights
+  const std::vector<Real> & _coord;                                     ///< coordinate transformation
   unsigned int _i, _j;                                                  ///< i-th, j-th index for enumerating test and shape functions
 
   // shape functions

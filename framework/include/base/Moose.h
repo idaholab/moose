@@ -136,6 +136,12 @@ enum ConstraintJacobianType
   MasterMaster = NeighborNeighbor
 };
 
+enum CoordinateSystemType
+{
+  COORD_XYZ,
+  COORD_RZ
+};
+
 const subdomain_id_type ANY_BLOCK_ID = (subdomain_id_type) -1;
 
 /* Wrappers for extern random number generator */

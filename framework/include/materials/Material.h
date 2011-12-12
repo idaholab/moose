@@ -130,12 +130,14 @@ protected:
 
   QBase * & _qrule;
   const std::vector<Real> & _JxW;
+  const std::vector<Real> & _coord;
   const std::vector< Point > & _q_point;
 
   const Elem * & _current_elem;
 
   MooseMesh & _mesh;
   unsigned int _dim;
+  Moose::CoordinateSystemType & _coord_sys;                 ///< Coordinate system
 
   std::set<std::string> _depend_props;
 

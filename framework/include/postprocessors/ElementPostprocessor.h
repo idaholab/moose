@@ -56,6 +56,7 @@ protected:
   const std::vector< Point > & _q_point;
   QBase * & _qrule;
   const std::vector<Real> & _JxW;
+  const std::vector<Real> & _coord;
 
   const Elem * & _current_elem;
 

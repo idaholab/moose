@@ -12,44 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "KernelSecond.h"
-#include "SubProblem.h"
+#include "SetupSubProblemAction.h"
+#include "Moose.h"
+#include "FEProblem.h"
+#include "Parser.h"
+#include "Conversion.h"
 
 template<>
-InputParameters validParams<KernelSecond>()
+InputParameters validParams<SetupSubProblemAction>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<Action>();
+  params.addParam<std::string>("coord_type", "XYZ", "Type of the coordinate system");
   return params;
 }
 
-
-KernelSecond::KernelSecond(const std::string & name, InputParameters parameters):
-  Kernel(name, parameters)
+SetupSubProblemAction::SetupSubProblemAction(const std::string & name, InputParameters parameters) :
+    Action(name, parameters),
+    _coord_sys(getParam<std::string>("coord_type"))
 {
 }
 
-KernelSecond::~KernelSecond()
+SetupSubProblemAction::~SetupSubProblemAction()
 {
 }
 
 void
-KernelSecond::computeResidual()
+SetupSubProblemAction::act()
 {
-//  Moose::perf_log.push("computeResidual()","KernelSecond");
-
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-
-  _value.resize(_qrule->n_points());
-  precalculateResidual();
-  for (_i=0; _i<_test.size(); _i++)
-    for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      re(_i) += _JxW[_qp]*_coord[_qp]*(_value[_qp]*_second_test[_i][_qp].tr());
-
-//  Moose::perf_log.pop("computeResidual()","KernelSecond");
-}
-
-Real
-KernelSecond::computeQpResidual()
-{
-  return 0;
+  if (_parser_handle._problem != NULL)
+  {
+    SubProblem & subproblem = *_parser_handle._problem;
+    subproblem.coordSystem(Moose::stringToEnum<Moose::CoordinateSystemType>(_coord_sys));
+  }
 }

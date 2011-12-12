@@ -15,6 +15,7 @@
 #ifndef INITIALCONDITION_H
 #define INITIALCONDITION_H
 
+#include "Moose.h"
 #include "MooseObject.h"
 #include "FunctionInterface.h"
 
@@ -66,6 +67,7 @@ public:
 
 protected:
   std::string _var_name;
+  Moose::CoordinateSystemType _coord_sys;
 };
 
 #endif //INITIALCONDITION_H

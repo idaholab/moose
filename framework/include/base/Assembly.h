@@ -66,6 +66,11 @@ public:
    */
   const std::vector<Real> & JxW() { return _JxW; }
 
+  /**
+   * Returns the reference to the coordinate transformation coefficients
+   */
+  const std::vector<Real> & coordTransformation() { return _coord; }
+
   FEBase * & getFEFace(FEType type);
 
   /**
@@ -295,6 +300,7 @@ protected:
 
   const std::vector<Point> & _q_points;         ///< reference to the list of quadrature points
   const std::vector<Real> & _JxW;               ///< reference to the list of transformed jacobian weights
+  std::vector<Real> _coord;                     ///< reference to the coordinate transformation coefficients
 
   std::map<FEType, FEBase *> _fe_face;          ///< types of finite elements
   FEBase * _fe_face_helper;                     ///< helper object for transforming coordinates

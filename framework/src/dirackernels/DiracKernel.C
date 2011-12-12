@@ -51,6 +51,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _var(_sys.getVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
+    _coord_sys(_subproblem.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
 
     _current_elem(_var.currentElem()),

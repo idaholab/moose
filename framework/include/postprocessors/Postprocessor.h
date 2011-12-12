@@ -94,7 +94,7 @@ protected:
   Problem & _problem;
   SubProblem & _subproblem;
   THREAD_ID _tid;
-
+  Moose::CoordinateSystemType & _coord_sys;                 ///< Coordinate system
   bool _output;                 ///< true if the postprocessor value is outputted or not
 };
 

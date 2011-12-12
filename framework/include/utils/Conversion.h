@@ -39,6 +39,9 @@ namespace Moose {
   template<>
   Order stringToEnum<Order>(const std::string & s);
 
+  template<>
+  CoordinateSystemType stringToEnum<CoordinateSystemType>(const std::string & s);
+
   // conversion to string
   template<typename T>
   std::string
