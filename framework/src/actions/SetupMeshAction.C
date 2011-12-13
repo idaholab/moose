@@ -21,6 +21,7 @@
 
 // libmesh includes
 #include "linear_partitioner.h"
+#include "centroid_partitioner.h"
 
 template<>
 InputParameters validParams<SetupMeshAction>()
@@ -28,7 +29,8 @@ InputParameters validParams<SetupMeshAction>()
   InputParameters params = validParams<Action>();
 
   params.addParam<bool>("second_order", false, "Turns on second order elements for the input mesh");
-  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation");
+  params.addParam<std::string>("partitioner", "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation. Available options: linear, centroid");
+  params.addParam<std::string>("centroid_partitioner_direction", "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
   params.addParam<bool>("construct_side_list_from_node_list", false, "If true, construct side lists from the nodesets in the mesh (i.e. if every node on a give side is in a nodeset then add that side to a sideset");
 //  params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
   return params;
@@ -48,6 +50,27 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
 
   if (getParam<std::string>("partitioner") == "linear")
     mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new LinearPartitioner);
+
+  if (getParam<std::string>("partitioner") == "centroid")
+  {
+    if(!isParamValid("centroid_partitioner_direction"))
+      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+
+    std::string direction = getParam<std::string>("centroid_partitioner_direction");
+
+    std::cout<<"Direction: "<<direction;
+
+    if(direction == "x")
+      mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+    else if(direction == "y")
+      mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+    else if(direction == "z")
+      mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+    else if(direction == "radial")
+      mesh->_mesh.partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+    else
+      mooseError("Invalid centroid_partitioner_direction!");
+  }
 
   Moose::setup_perf_log.push("Prepare Mesh","Setup");
   mesh->prepare();
