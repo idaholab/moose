@@ -55,6 +55,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
   params.addParam<std::vector<std::string> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
+  params.addParam<bool>("exodus_inputfile_output", true, "Determines whether or not the input file is output to exodus - default (true)");
 
   return params;
 }
@@ -74,7 +75,13 @@ SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
 
   output.setOutputVariables(params.get<std::vector<std::string> >("output_variables"));
 
-  if (params.get<bool>("exodus")) output.add(Output::EXODUS);
+  if (params.get<bool>("exodus"))
+  {
+    if (params.have_parameter<bool>("exodus_inputfile_output") && !params.get<bool>("exodus_inputfile_output"))
+      output.add(Output::EXODUS, false);
+    else
+      output.add(Output::EXODUS, true);
+  }
   if (params.get<bool>("nemesis")) output.add(Output::NEMESIS);
   if (params.get<bool>("gmv")) output.add(Output::GMV);
   if (params.get<bool>("tecplot")) output.add(Output::TECPLOT);

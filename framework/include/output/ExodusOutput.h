@@ -25,7 +25,7 @@
 class ExodusOutput : public Outputter
 {
 public:
-  ExodusOutput(EquationSystems & es);
+  ExodusOutput(EquationSystems & es, bool output_input=true);
   virtual ~ExodusOutput();
 
   virtual void output(const std::string & file_base, Real time);
@@ -41,6 +41,8 @@ protected:
   bool _seq;
   int _file_num;                        ///< number of the file
   int _num;                             ///< the number of timestep within the file
+
+  bool _output_input;
   std::string getFileName(const std::string & file_base);
 };
 

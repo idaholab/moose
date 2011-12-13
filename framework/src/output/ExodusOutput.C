@@ -24,12 +24,13 @@
 #include "exodusII.h"
 #include "exodusII_io.h"
 
-ExodusOutput::ExodusOutput(EquationSystems & es) :
+ExodusOutput::ExodusOutput(EquationSystems & es, bool output_input) :
     Outputter(es),
     _out(NULL),
     _seq(false),
     _file_num(-1),
-    _num(0)
+    _num(0),
+    _output_input(output_input)
 {
 }
 
@@ -180,7 +181,9 @@ ExodusOutput::outputInput()
   {
     std::stringstream ss;
     // Save the input file into our string stream
-    Moose::action_warehouse.printInputFile(ss);
+    // TODO: This reference to the global warehouse needs to be removed.  See ticket #777
+    if (_output_input)
+      Moose::action_warehouse.printInputFile(ss);
 
     input_file_record.push_back("### Input File ###");
     while (std::getline(ss, s))

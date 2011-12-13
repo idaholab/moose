@@ -43,13 +43,13 @@ Output::~Output()
 }
 
 void
-Output::add(Output::Type type)
+Output::add(Output::Type type, bool output_input)
 {
   Outputter *o = NULL;
   switch (type)
   {
   case EXODUS:
-    o = new ExodusOutput(_eq);
+    o = new ExodusOutput(_eq, output_input);
     break;
 
   case NEMESIS:

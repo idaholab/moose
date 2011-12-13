@@ -43,7 +43,7 @@ public:
   Output(FEProblem & problem, EquationSystems & eq);
   virtual ~Output();
 
-  void add(Type type);
+  void add(Type type, bool output_input=true);
 
   // TODO: move to OutputProblem
   void timestepSetup();
