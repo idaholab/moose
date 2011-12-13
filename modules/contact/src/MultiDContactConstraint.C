@@ -57,19 +57,27 @@ MultiDContactConstraint::MultiDContactConstraint(const std::string & name, Input
 void
 MultiDContactConstraint::timestepSetup()
 {
-  updateContactSet();
+  if(_component == 0)
+  {
+    _penetration_locator._unlocked_this_step.clear();
+    _penetration_locator._locked_this_step.clear();
+    updateContactSet();
+  }
 }
 
 void
 MultiDContactConstraint::jacobianSetup()
 {
-  updateContactSet();
+  if(_component == 0)
+    updateContactSet();
 }
 
 void
 MultiDContactConstraint::updateContactSet()
 {
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+  std::map<unsigned int, bool> & unlocked_this_step = _penetration_locator._unlocked_this_step;
+  std::map<unsigned int, bool> & locked_this_step = _penetration_locator._unlocked_this_step;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -77,16 +85,59 @@ MultiDContactConstraint::updateContactSet()
   for (; it!=end; ++it)
   {
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
+    const Node * node = pinfo->_node;
 
     if (!pinfo)
     {
       continue;
+    }    
+
+    unsigned int slave_node_num = it->first;
+
+    RealVectorValue res_vec;
+    // Build up residual vector
+    for(unsigned int i=0; i<_dim; ++i)
+    {
+      int dof_number = node->dof_number(0, _vars(i), 0);
+      res_vec(i) = _residual_copy(dof_number);
+    }
+    
+    Real resid = 0;
+    switch(_model)
+    {
+    case CM_FRICTIONLESS:
+      
+      resid = pinfo->_normal * res_vec;
+      break;
+      
+    case CM_GLUED:
+    case CM_TIED:
+        
+      resid = pinfo->_normal * res_vec;
+      break;
+      
+    default:
+      mooseError("Invalid or unavailable contact model");
     }
 
-    if (pinfo->_distance > 0)
+//    if(has_penetrated[slave_node_num] && resid < 0)
+//      std::cerr<<resid<<std::endl;
+/*    
+    if(has_penetrated[slave_node_num] == true && resid < -.15)
     {
-      unsigned int slave_node_num = it->first;
+      std::cerr<<std::endl<<"Unlocking node "<<node->id()<<" because resid: "<<resid<<std::endl<<std::endl;
+      
+      has_penetrated[slave_node_num] = false;
+      unlocked_this_step[slave_node_num] = true;
+    }
+    else*/
+    if (pinfo->_distance > 0 && !has_penetrated[slave_node_num])// && !unlocked_this_step[slave_node_num])
+    {
+//      std::cerr<<std::endl<<"Locking node "<<node->id()<<" because distance: "<<pinfo->_distance<<std::endl<<std::endl;
+//      libMesh::print_trace();
+      
       has_penetrated[slave_node_num] = true;
+      locked_this_step[slave_node_num] = true;
     }
   }
 }
@@ -100,7 +151,11 @@ MultiDContactConstraint::shouldApply()
 Real
 MultiDContactConstraint::computeQpSlaveValue()
 {
+//  if(_name != "contact_x")
+//    return _u_slave[_qp];
+  
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+/*
   std::cerr<<std::endl
            <<"Popping out node: "<<_current_node->id()<<std::endl
            <<"Closest Point "<<_component<<": "<<pinfo->_closest_point(_component)<<std::endl
@@ -108,9 +163,8 @@ MultiDContactConstraint::computeQpSlaveValue()
            <<"Current Value: "<<_u_slave[_qp]<<std::endl
            <<"New Value: "<<pinfo->_closest_point(_component) - ((*_current_node)(_component) - _u_slave[_qp])<<std::endl
            <<"Change: "<<_u_slave[_qp] - (pinfo->_closest_point(_component) - ((*_current_node)(_component) - _u_slave[_qp]))<<std::endl<<std::endl;
-  
-  
-  return pinfo->_closest_point(_component) - ((*_current_node)(_component) - _u_slave[_qp]);
+*/
+  return  pinfo->_closest_point(_component) - ((*_current_node)(_component) - _u_slave[_qp]);
 }
 
 Real
@@ -181,8 +235,8 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   //const Node * node = pinfo->_node;
 
-  if(_name != "contact_x")
-    return 0;
+//  if(_name != "contact_x")
+//    return 0;
   
   double slave_jac = 0;
   switch(type)
