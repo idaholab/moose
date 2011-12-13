@@ -100,7 +100,6 @@
 #include "PLSHPlasticMaterial.h"
 #include "SolidMechanicsAction.h"
 #include "SolidMechImplicitEuler.h"
-#include "SolidMechImplicitEulerRZ.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
 
@@ -229,7 +228,6 @@ Elk::registerObjects()
   registerAction(PressureAction, "add_bc");
 
   registerKernel(SolidMechImplicitEuler);
-  registerKernel(SolidMechImplicitEulerRZ);
 
   registerAux(ElasticEnergyAux);
 
