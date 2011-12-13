@@ -3,14 +3,12 @@
 #include "ActionFactory.h"
 
 // misc
-#include "BodyForceRZ.h"
 #include "BodyForceVoid.h"
 #include "CoefDiffusion.h"
 #include "Convection.h"
 #include "ElementIntegralRZ.h"
 #include "InternalVolume.h"
 #include "InternalVolumeRZ.h"
-#include "NeumannRZ.h"
 #include "SideAverageValueRZ.h"
 #include "SideFluxIntegralRZ.h"
 #include "SideIntegralRZ.h"
@@ -131,14 +129,12 @@ void
 Elk::registerObjects()
 {
   // misc
-  registerKernel(BodyForceRZ);
   registerKernel(BodyForceVoid);
   registerKernel(CoefDiffusion);
   registerKernel(Convection);
   registerPostprocessor(ElementIntegralRZ);
   registerPostprocessor(InternalVolume);
   registerPostprocessor(InternalVolumeRZ);
-  registerBoundaryCondition(NeumannRZ);
   registerPostprocessor(SideAverageValueRZ);
   registerPostprocessor(SideFluxIntegralRZ);
   registerPostprocessor(SideIntegralRZ);
