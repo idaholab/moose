@@ -99,8 +99,6 @@
 #include "PlenumPressureRZAction.h"
 #include "Pressure.h"
 #include "PressureAction.h"
-#include "PressureRZ.h"
-#include "PressureRZAction.h"
 #include "PLSHPlasticMaterial.h"
 #include "SolidMechanicsAction.h"
 #include "SolidMechImplicitEuler.h"
@@ -234,9 +232,6 @@ Elk::registerObjects()
 
   registerBoundaryCondition(Pressure);
   registerAction(PressureAction, "add_bc");
-
-  registerBoundaryCondition(PressureRZ);
-  registerAction(PressureRZAction, "add_bc");
 
   registerKernel(SolidMechImplicitEuler);
   registerKernel(SolidMechImplicitEulerRZ);
