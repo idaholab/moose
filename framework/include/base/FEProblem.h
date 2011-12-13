@@ -135,6 +135,7 @@ public:
   virtual void copySolutionsBackwards();
   // Update backward time solution vectors
   virtual void copyOldSolutions();
+  virtual void restoreSolutions();
 
   // NL /////
   NonlinearSystem & getNonlinearSystem() { return _nl; }

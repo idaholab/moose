@@ -147,7 +147,7 @@ Transient::takeStep(Real input_dt)
     _problem.copyOldSolutions();
   }
   else
-    _problem.getNonlinearSystem().restoreSolutions();
+    _problem.restoreSolutions();
   _problem.getNonlinearSystem().update();
 
   _dt_old = _dt;

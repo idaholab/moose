@@ -1515,6 +1515,20 @@ FEProblem::copyOldSolutions()
   _aux.copyOldSolutions();
 }
 
+void FEProblem::restoreSolutions()
+{
+  _nl.restoreSolutions();
+  _aux.restoreSolutions();
+
+  _nl.update();
+  _aux.update();
+
+  _nl.set_solution(*_nl.sys().solution);
+
+  if (_displaced_problem != NULL)
+    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+}
+
 void
 FEProblem::onTimestepBegin()
 {
