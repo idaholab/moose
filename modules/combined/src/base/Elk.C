@@ -95,8 +95,6 @@
 #include "PowerLawCreep.h"
 #include "PlenumPressure.h"
 #include "PlenumPressureAction.h"
-#include "PlenumPressureRZ.h"
-#include "PlenumPressureRZAction.h"
 #include "Pressure.h"
 #include "PressureAction.h"
 #include "PLSHPlasticMaterial.h"
@@ -226,9 +224,6 @@ Elk::registerObjects()
 
   registerBoundaryCondition(PlenumPressure);
   registerAction(PlenumPressureAction, "add_bc");
-
-  registerBoundaryCondition(PlenumPressureRZ);
-  registerAction(PlenumPressureRZAction, "add_bc");
 
   registerBoundaryCondition(Pressure);
   registerAction(PressureAction, "add_bc");

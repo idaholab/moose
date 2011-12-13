@@ -48,6 +48,11 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
 void
 PlenumPressureAction::act()
 {
+  if ( _problem->coordSystem() == Moose::COORD_RZ )
+  {
+    _use_displaced_mesh = false;
+  }
+
   // Determine number of dimensions
   unsigned int dim(2);
   if (_disp_z != "")
