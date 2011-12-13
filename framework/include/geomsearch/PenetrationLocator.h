@@ -93,6 +93,8 @@ public:
   std::map<unsigned int, PenetrationInfo *> _penetration_info;
 
   std::map<unsigned int, bool> _has_penetrated;
+  std::map<unsigned int, bool> _locked_this_step;
+  std::map<unsigned int, bool> _unlocked_this_step;
 
   void setUpdate(bool update);
 

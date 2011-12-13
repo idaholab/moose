@@ -18,7 +18,11 @@
 
 #include "Moose.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
+#include "DisplacedProblem.h"
+#include "PenetrationLocator.h"
+#include "NearestNodeLocator.h"
 
 //libMesh Includes
 #include "libmesh_common.h"
@@ -105,6 +109,8 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 {
   NonlinearSystem *system = (NonlinearSystem *) dummy;      // C strikes
 
+//  std::cout<<"Is converged!"<<std::endl;
+
   // unused
   // TransientNonlinearImplicitSystem * system = dynamic_cast<TransientNonlinearImplicitSystem *>(&_equation_system->get_system("NonlinearSystem"));
 
@@ -117,6 +123,9 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   {
     /* set parameter for default relative tolerance convergence test */
     /* _initial_residual has already been computed by the NonlinearSystem at this point */
+
+//    snes->ttol = fnorm*snes->rtol;
+//    system->_initial_residual = fnorm;
     snes->ttol = system->_initial_residual*snes->rtol;
     system->_last_nl_rnorm = system->_initial_residual;
   }
@@ -164,13 +173,112 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
   if (it)
     system->_last_nl_rnorm = snes->rtol;
 
+
+/*
+  {
+    Vec w = snes->vec_sol;
+
+  // cls is a PetscVector wrapper around the Vec in current_local_solution
+    PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system->system().current_local_solution.get())->vec());
+  // Create new NumericVectors with the right ghosting
+  AutoPtr<NumericVector<Number> > ghosted_y_aptr( cls.zero_clone() );
+  AutoPtr<NumericVector<Number> > ghosted_w_aptr( cls.zero_clone() );
+  // Create PetscVector wrappers around the Vecs
+  PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec() );
+  PetscVector<Number> ghosted_w( static_cast<PetscVector<Number> *>(ghosted_w_aptr.get())->vec() );
+  //VecCopy(y, ghosted_y.vec());
+  VecCopy(w, ghosted_w.vec());
+
+  //ghosted_y.close();
+  ghosted_w.close();
+
+  Real max_pen = 0.0;
+
+
+  damping = problem.computeDamping(ghosted_w, ghosted_y);
+  if(damping < 1.0)
+  {
+    VecScale(y, damping);
+    *changed_y = PETSC_TRUE;
+  }
+
+//  problem.getNonlinearSystem().set_solution(ghosted_w);
+  const NumericVector<Number> * saved_solution = system->currentSolution();
+
+  system->set_solution(ghosted_w);
+
+  FEProblem & problem = static_cast<FEProblem &>(system->subproblem());
+  DisplacedProblem & displaced_problem = *problem.getDisplacedProblem();
+
+  if(problem.getDisplacedProblem())
+  {
+    problem.getDisplacedProblem()->updateMesh(ghosted_w, *problem.getAuxiliarySystem().sys().solution);
+
+    GeometricSearchData & displaced_geom_search_data = displaced_problem.geomSearchData();
+    std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = &displaced_geom_search_data._penetration_locators;
+
+    for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+      it != penetration_locators->end();
+      ++it)
+    {
+      PenetrationLocator & pen_loc = *it->second;
+      if(pen_loc._master_boundary == 10)
+      {
+        std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+
+        unsigned int slave_boundary = pen_loc._slave_boundary;
+
+        for(unsigned int i=0; i<slave_nodes.size(); i++)
+        {
+          unsigned int slave_node_num = slave_nodes[i];
+
+          if(pen_loc._penetration_info[slave_node_num])
+          {
+            PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+            if(pen_loc.penetrationDistance(slave_node_num) > 0)
+            {
+//              std::cerr<<"Distance: "<<pen_loc.penetrationDistance(slave_node_num)<<std::endl;
+              max_pen = std::max(max_pen, pen_loc.penetrationDistance(slave_node_num));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  libMesh::Parallel::max(max_pen);
+
+//  problem.computePostprocessors(EXEC_RESIDUAL);
+
+//  Real max_pen = problem.getPostprocessorValue("max_penetration");
+//  std::cout<<std::endl<<"Max Pen: "<<max_pen<<std::endl<<std::endl;
+
+  if(max_pen > 1e-8)
+  {
+    std::cout<<std::endl<<"Overpenetration of "<<max_pen<<"  Failing step..."<<std::endl<<std::endl;
+#if PETSC_VERSION_LESS_THAN(3,2,0)
+    *reason = SNES_DIVERGED_LS_FAILURE;
+#else
+    *reason = SNES_DIVERGED_LINE_SEARCH;
+#endif
+  }
+
+  system->set_solution(*saved_solution);
+
+
+  }
+
+//  if(it)
+//    *reason = SNES_DIVERGED_LS_FAILURE;
+*/
+
   return(0);
 }
 
 
-PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * /*changed_w*/)
+PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * changed_w)
 {
-  //w = updated solution = x+ scaling*y
+  //w = updated solution = x- scaling*y
   //x = current solution
   //y = updates.
 
@@ -178,12 +286,16 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, 
   Real damping = 1.0;
 
   FEProblem & problem = *static_cast<FEProblem *>(lsctx);
+  DisplacedProblem & displaced_problem = *problem.getDisplacedProblem();
+
   TransientNonlinearImplicitSystem & system = problem.getNonlinearSystem().sys();
 
   // The whole deal here is that we need ghosted versions of vectors y and w (they are parallel, but not ghosted).
   // So to do that I'm going to duplicate current_local_solution (which has the ghosting we want).
   // Then stuff values into the duplicates
   // Then "close()" the vectors which updates their ghosted vaulues.
+
+  {
 
   // cls is a PetscVector wrapper around the Vec in current_local_solution
   PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
@@ -206,6 +318,110 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, 
     VecScale(y, damping);
     *changed_y = PETSC_TRUE;
   }
+  }
+
+/*
+  Real max_pen = 0.0;
+
+  problem.getNonlinearSystem().set_solution(ghosted_w);
+
+  if(problem.getDisplacedProblem())
+  {
+    problem.getDisplacedProblem()->updateMesh(ghosted_w, *problem.getAuxiliarySystem().sys().solution);
+
+    GeometricSearchData & displaced_geom_search_data = displaced_problem.geomSearchData();
+    std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = &displaced_geom_search_data._penetration_locators;
+
+    for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+      it != penetration_locators->end();
+      ++it)
+    {
+      PenetrationLocator & pen_loc = *it->second;
+
+      if(pen_loc._master_boundary == 10)
+      {
+
+
+        std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+
+        unsigned int slave_boundary = pen_loc._slave_boundary;
+
+        for(unsigned int i=0; i<slave_nodes.size(); i++)
+        {
+          unsigned int slave_node_num = slave_nodes[i];
+
+          if(pen_loc._penetration_info[slave_node_num])
+          {
+            PenetrationLocator::PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+            if(pen_loc.penetrationDistance(slave_node_num) > 0)
+            {
+              max_pen = std::max(max_pen, pen_loc.penetrationDistance(slave_node_num));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  libMesh::Parallel::max(max_pen);
+
+//  problem.computePostprocessors(EXEC_RESIDUAL);
+
+//  Real max_pen = problem.getPostprocessorValue("max_penetration");
+//  std::cout<<std::endl<<"Max Pen: "<<max_pen<<std::endl<<std::endl;
+
+  if(max_pen > 1e-8)
+  {
+    std::cerr<<"Damping because max_pen "<<max_pen<<std::endl;
+    VecWAXPY(w, -0.098, y, x);
+  }
+  }
+  */
+  /*
+  {
+
+
+  PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec());
+  // Create new NumericVectors with the right ghosting
+  AutoPtr<NumericVector<Number> > ghosted_y_aptr( cls.zero_clone() );
+  AutoPtr<NumericVector<Number> > ghosted_w_aptr( cls.zero_clone() );
+  // Create PetscVector wrappers around the Vecs
+  PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec() );
+  PetscVector<Number> ghosted_w( static_cast<PetscVector<Number> *>(ghosted_w_aptr.get())->vec() );
+
+  VecCopy(y, ghosted_y.vec());
+  VecCopy(w, ghosted_w.vec());
+
+  ghosted_y.close();
+  ghosted_w.close();
+
+//   damping = problem.computeDamping(ghosted_w, ghosted_y);
+//   if(damping < 1.0)
+//   {
+//     VecScale(y, damping);
+//     *changed_y = PETSC_TRUE;
+//   }
+
+  problem.getNonlinearSystem().set_solution(ghosted_w);
+
+  if(problem.getDisplacedProblem())
+    problem.getDisplacedProblem()->updateMesh(ghosted_w, *problem.getAuxiliarySystem().sys().solution);
+
+
+  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+    problem.getNonlinearSystem()._constraints[i].jacobianSetup();
+
+  PetscVector<Number> w_pvec(w);
+
+  problem.getNonlinearSystem().setConstraintSlaveValues(w_pvec, false);
+
+  if(problem.getDisplacedProblem())
+    problem.getNonlinearSystem().setConstraintSlaveValues(w_pvec, true);
+  }
+  *
+  *changed_w = PETSC_TRUE;
+
+  */
 
   return(ierr);
 }

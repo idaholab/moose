@@ -349,8 +349,11 @@ protected:
   std::vector<DiracKernelWarehouse> _dirac_kernels;     ///< Dirac Kernel storage for each thread
   std::vector<DGKernelWarehouse> _dg_kernels;           ///< DG Kernel storage for each thread
   std::vector<DamperWarehouse> _dampers;                ///< Dampers for each thread
+
+public:
   std::vector<ConstraintWarehouse> _constraints;        ///< Constraints for each thread
 
+protected:
   NumericVector<Number> * _increment_vec;               ///< increment vector
 
   Preconditioner<Real> * _preconditioner;               ///< Preconditioner

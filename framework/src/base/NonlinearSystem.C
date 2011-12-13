@@ -125,6 +125,8 @@ NonlinearSystem::init()
 {
   dofMap().attach_extra_send_list_function(&extraSendList, this);
 
+  setupDampers();
+
   _current_solution = _sys.current_local_solution.get();
 
   if(_need_serialized_solution)
@@ -964,7 +966,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   residual.close();
   Moose::perf_log.pop("residual.close4()","Solve");
 
-  // Add in Jacobian contributions from Constraints
+  // Add in Residual contributions from Constraints
   if(_mproblem._has_constraints)
   {
     // Undisplaced Constraints
