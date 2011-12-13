@@ -17,7 +17,6 @@
 
 // heat_conduction
 #include "AddSlaveFluxVectorAction.h"
-#include "ConvectiveFluxRZ.h"
 #include "GapHeatPointSourceMaster.h"
 #include "GapHeatTransfer.h"
 #include "HeatConduction.h"
@@ -144,7 +143,6 @@ Elk::registerObjects()
   registerPostprocessor(SideFluxIntegralRZ);
   registerPostprocessor(SideIntegralRZ);
 
-  registerBoundaryCondition(ConvectiveFluxRZ);
   registerBoundaryCondition(GapHeatTransfer);
   registerKernel(HeatConduction);
   registerKernel(HeatConductionImplicitEuler);
