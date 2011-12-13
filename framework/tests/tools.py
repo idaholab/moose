@@ -38,7 +38,11 @@ class TestHarness:
     self.num_failed = 0
     self.num_skipped = 0
     self.moose_dir = os.path.abspath(moose_dir) + '/'
-
+    #Assume libmesh is a peer directory to MOOSE if not defined
+    if os.environ.has_key("LIBMESH_DIR"):
+      self.libmesh_dir = os.environ['LIBMESH_DIR']
+    else:
+      self.libmesh_dir = self.moose_dir + '../libmesh'
     self.file = None
 
     self.initialize(argv, app_name)
@@ -126,12 +130,12 @@ class TestHarness:
     return platforms
 
   def getCompilers(self):
-    # We'll use the GXX-VERSION string from $LIBMESH_DIR/Make.common
+    # We'll use the GXX-VERSION string from LIBMESH's Make.common
     # to figure this out
     # Supported compilers are GCC, INTEL or ALL
     compilers = set()
     compilers.add('ALL')
-    f = open(os.environ['LIBMESH_DIR'] + '/Make.common')
+    f = open(self.libmesh_dir + '/Make.common')
     for line in f.readlines():
       if line.find('GXX-VERSION') != -1:
         m = re.search(r'=\s*(\S+)', line)
@@ -151,7 +155,7 @@ class TestHarness:
     # Supported versions are 2, 3
     petsc_version = set()
     petsc_version.add('ALL')
-    f = open(os.environ['LIBMESH_DIR'] + '/Make.common')
+    f = open(self.libmesh_dir + '/Make.common')
     for line in f.readlines():
       if line.find('petsc-version') != -1:
         m = re.search(r'=\s*(\S+)', line)
