@@ -28,7 +28,6 @@ public:
 
 protected:
   Real _area;
-  Real _current_element_area;
 };
 
 #endif

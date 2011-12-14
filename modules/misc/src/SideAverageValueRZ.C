@@ -9,8 +9,7 @@ InputParameters validParams<SideAverageValueRZ>()
 
 SideAverageValueRZ::SideAverageValueRZ(const std::string & name, InputParameters parameters) :
     SideIntegralRZ(name, parameters),
-    _area(0),
-    _current_element_area(0)
+    _area(0)
 {}
 
 void
@@ -24,7 +23,7 @@ void
 SideAverageValueRZ::execute()
 {
   SideIntegral::execute();
-  _area += _current_element_area;
+  _area += _current_side_volume;
 }
 
 Real
@@ -50,12 +49,7 @@ Real
 SideAverageValueRZ::computeIntegral()
 {
   Real sum(0);
-  _current_element_area = 0;
-
   for (_qp=0; _qp< _qrule->n_points(); _qp++)
-  {
-    sum += _JxW[_qp]*computeQpIntegral();
-    _current_element_area += 2 * M_PI * _q_point[_qp](0) * _JxW[_qp];
-  }
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
   return sum;
 }

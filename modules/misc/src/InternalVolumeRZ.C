@@ -44,5 +44,5 @@ InternalVolumeRZ::InternalVolumeRZ(const std::string & name,
 Real
 InternalVolumeRZ::computeQpIntegral()
 {
-  return 2 * M_PI * _q_point[_qp](0) * InternalVolume::computeQpIntegral();
+  return InternalVolume::computeQpIntegral();
 }

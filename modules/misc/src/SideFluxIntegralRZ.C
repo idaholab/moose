@@ -15,5 +15,5 @@ SideFluxIntegralRZ::SideFluxIntegralRZ(const std::string & name,
 Real
 SideFluxIntegralRZ::computeQpIntegral()
 {
-  return 2 * M_PI * _q_point[_qp](0) * SideFluxIntegral::computeQpIntegral();
+  return SideFluxIntegral::computeQpIntegral();
 }
