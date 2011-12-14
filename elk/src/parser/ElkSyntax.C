@@ -13,14 +13,8 @@ void associateSyntax()
   Moose::syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
   Moose::syntax.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");
 
-  Moose::syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressureRZ");
-  Moose::syntax.registerActionSyntax("PlenumPressureRZAction", "BCs/PlenumPressureRZ/*");
-
   Moose::syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   Moose::syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
-
-  Moose::syntax.registerActionSyntax("EmptyAction", "BCs/PressureRZ");
-  Moose::syntax.registerActionSyntax("PressureRZAction", "BCs/PressureRZ/*");
 
   Moose::syntax.registerActionSyntax("ContactAction", "Contact/*");
   Moose::syntax.registerActionSyntax("ThermalContactAction", "ThermalContact/*");
