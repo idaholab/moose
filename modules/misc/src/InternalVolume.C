@@ -4,7 +4,7 @@ template <>
 InputParameters validParams<InternalVolume>()
 {
   InputParameters params = validParams<SideIntegral>();
-  params.addParam<unsigned int>("component", 0, "The component to use in the integration");
+  params.addParam<unsigned int>("component", 1, "The component to use in the integration");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
