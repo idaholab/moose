@@ -18,7 +18,7 @@
 template<>
 InputParameters validParams<MooseObjectAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<ObjectAction>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose Object that will be built by this Action");
   return params;
 }
