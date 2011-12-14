@@ -51,7 +51,7 @@ public:
   virtual MooseMesh & mesh() { return _mesh; }
 
   Moose::CoordinateSystemType & coordSystem() { return _coord_sys; }
-  void coordSystem(Moose::CoordinateSystemType type) { _coord_sys = type; }
+  virtual void setCoordSystem(Moose::CoordinateSystemType type) { _coord_sys = type; }
 
   virtual void init();
   virtual void solve() = 0;
@@ -81,10 +81,12 @@ public:
   virtual const std::vector<Point> & points(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & physicalPoints(THREAD_ID tid) = 0;
   virtual const std::vector<Real> & JxW(THREAD_ID tid) = 0;
+  virtual const Real & elemVolume(THREAD_ID tid) = 0;
   virtual const std::vector<Real> & coords(THREAD_ID tid) = 0;
   virtual QBase * & qRuleFace(THREAD_ID tid) = 0;
   virtual const std::vector<Point> & pointsFace(THREAD_ID tid) = 0;
   virtual const std::vector<Real> & JxWFace(THREAD_ID tid) = 0;
+  virtual const Real & sideElemVolume(THREAD_ID tid) = 0;
   virtual const Elem * & elem(THREAD_ID tid) = 0;
   virtual unsigned int & side(THREAD_ID tid) = 0;
   virtual const Elem * & sideElem(THREAD_ID tid) = 0;

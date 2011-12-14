@@ -66,9 +66,6 @@ ComputeElemAuxVarsThread::operator() (const ConstElemRange & range)
       _mproblem.reinitElem(elem, _tid);
       _mproblem.reinitMaterials(elem->subdomain_id(), _tid);
 
-      //Compute the area of the element
-      _sys._data[_tid]._current_volume = _mproblem.assembly(_tid).computeVolume();
-
       if(cur_subdomain != subdomain)
       {
         subdomain = cur_subdomain;

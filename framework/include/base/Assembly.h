@@ -101,6 +101,11 @@ public:
   const Elem * & elem() { return _current_elem; }
 
   /**
+   * Returns the reference to the current element volume
+   */
+  const Real & elemVolume() { return _current_elem_volume; }
+
+  /**
    * Returns the current side
    */
   unsigned int & side() { return _current_side; }
@@ -109,6 +114,11 @@ public:
    * Returns the side element
    */
   const Elem * & sideElem() { return _current_side_elem; }
+
+  /**
+   * Returns the reference to the volume of current side element
+   */
+  const Real & sideElemVolume() { return _current_side_volume; }
 
   /**
    * Return the neighbor element
@@ -189,13 +199,6 @@ public:
    * Reinitialize assembly data for a neighbor node
    */
   void reinitNodeNeighbor(const Node * node);
-
-  /**
-   * Compute the volume of currently selected element
-   *
-   * @return the volume of the element
-   */
-  Real computeVolume();
 
   ///
 
@@ -313,8 +316,10 @@ protected:
   FEBase * _fe_neighbor_helper;                 ///< helper object for transforming coordinates
 
   const Elem * _current_elem;                   ///< The current "element" we are currently on.
+  Real _current_elem_volume;                    ///< Volume of the current element
   unsigned int _current_side;                   ///< The current side of the selected element (valid only when working with sides)
   const Elem * _current_side_elem;              ///< The current "element" making up the side we are currently on.
+  Real _current_side_volume;                    ///< Volume of the current side element
   const Elem * _neighbor_elem;                  ///< The current neighbor "element"
 
   const Node * _current_node;                   ///< The current node we are working with

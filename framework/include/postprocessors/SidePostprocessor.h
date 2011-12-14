@@ -50,6 +50,7 @@ protected:
 
   const Elem * & _current_elem;
   const Elem * & _current_side_elem;
+  const Real & _current_side_volume;
 
   // unknown
   const VariableValue & _u;

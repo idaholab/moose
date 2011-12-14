@@ -39,7 +39,7 @@ ElementAverageValue::execute()
 {
   ElementIntegral::execute();
 
-  _volume += _current_elem->volume();
+  _volume += _current_elem_volume;
 }
 
 Real

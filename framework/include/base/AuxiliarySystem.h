@@ -102,16 +102,6 @@ protected:
 
   ExecStore<AuxWarehouse> _auxs;
 
-  // data
-  struct AuxData
-  {
-    Real _current_volume;                               ///< Volume of the current element
-
-    friend class AuxKernel;
-  };
-
-  std::vector<AuxData> _data;                           ///< Place-holder for AuxData
-
   friend class AuxKernel;
   friend class ComputeNodalAuxVarsThread;
   friend class ComputeNodalAuxBcsThread;

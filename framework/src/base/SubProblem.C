@@ -33,7 +33,7 @@ SubProblem::SubProblem(const std::string & name, InputParameters parameters) :
     _parent(parameters.get<Problem *>("parent") == NULL ? this : parameters.get<Problem *>("parent")),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_parent == this ? *new EquationSystems(_mesh) : _parent->es()),
-    _coord_sys(Moose::COORD_RZ),
+    _coord_sys(Moose::COORD_XYZ),
     _transient(false),
     _time(_eq.parameters.set<Real>("time")),
     _t_step(_eq.parameters.set<int>("t_step")),

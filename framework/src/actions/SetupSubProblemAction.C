@@ -42,6 +42,6 @@ SetupSubProblemAction::act()
   if (_parser_handle._problem != NULL)
   {
     SubProblem & subproblem = *_parser_handle._problem;
-    subproblem.coordSystem(Moose::stringToEnum<Moose::CoordinateSystemType>(_coord_sys));
+    subproblem.setCoordSystem(Moose::stringToEnum<Moose::CoordinateSystemType>(_coord_sys));
   }
 }

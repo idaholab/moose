@@ -88,15 +88,16 @@ protected:
   const std::vector< Point > & _q_point;                ///< Active quadrature points
   QBase * & _qrule;                                     ///< Quadrature rule being used
   const std::vector<Real> & _JxW;                       ///< Transformed Jacobian weights
+  const std::vector<Real> & _coord;
 
   VariableValue & _u;                                   ///< Holds the solution at current quadrature points
   VariableValue & _u_old;                               ///< Holds the previous solution at the current quadrature point.
   VariableValue & _u_older;                             ///< Holds the t-2 solution at the current quadrature point.
 
   const Elem * & _current_elem;                         ///< Current element (valid only for elemental kernels)
-  const Node * & _current_node;                         ///< Current node (valid only for nodal kernels)
+  const Real & _current_elem_volume;                    ///< Volume of the current element
 
-  Real & _current_volume;                               ///< Volume of the current element
+  const Node * & _current_node;                         ///< Current node (valid only for nodal kernels)
 
   NumericVector<Number> & _solution;                    ///< reference to the solution vector of auxiliary system
 

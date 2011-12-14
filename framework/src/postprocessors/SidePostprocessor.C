@@ -36,6 +36,7 @@ SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters p
     _normals(_var.normals()),
     _current_elem(_subproblem.elem(_tid)),
     _current_side_elem(_subproblem.sideElem(_tid)),
+    _current_side_volume(_subproblem.sideElemVolume(_tid)),
     _u(_var.sln()),
     _grad_u(_var.gradSln())
 {}
@@ -44,8 +45,7 @@ Real
 SidePostprocessor::computeIntegral()
 {
   Real sum = 0;
-
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      sum += _JxW[_qp]*computeQpIntegral();
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
   return sum;
 }

@@ -59,6 +59,7 @@ protected:
   const std::vector<Real> & _coord;
 
   const Elem * & _current_elem;
+  const Real & _current_elem_volume;
 
   VariableValue & _u;                                   ///< Holds the solution at current quadrature points
   VariableValue & _u_old;                               ///< Holds the previous solution at the current quadrature point.

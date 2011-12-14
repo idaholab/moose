@@ -162,6 +162,12 @@ FEProblem::~FEProblem()
     delete _out_problem;
 }
 
+void FEProblem::setCoordSystem(Moose::CoordinateSystemType type)
+{
+  SubProblem::setCoordSystem(type);
+  if (_displaced_problem)
+    _displaced_problem->setCoordSystem(type);
+}
 
 void FEProblem::initialSetup()
 {

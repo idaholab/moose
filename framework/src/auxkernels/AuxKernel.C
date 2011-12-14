@@ -63,14 +63,16 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _q_point(_subproblem.points(_tid)),
     _qrule(_subproblem.qRule(_tid)),
     _JxW(_subproblem.JxW(_tid)),
+    _coord(_subproblem.coords(_tid)),
 
     _u(_nodal ? _var.nodalSln() : _var.sln()),
     _u_old(_nodal ? _var.nodalSlnOld() : _var.slnOld()),
     _u_older(_nodal ? _var.nodalSlnOlder() : _var.slnOlder()),
 
     _current_elem(_var.currentElem()),
+    _current_elem_volume(_subproblem.elemVolume(_tid)),
+
     _current_node(_var.node()),
-    _current_volume(_aux_sys._data[_tid]._current_volume),
 
     _solution(_aux_sys.solution()),
 
@@ -94,8 +96,8 @@ AuxKernel::compute()
   else
   {
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      value += _JxW[_qp]*computeValue();
-    value /= _current_volume;
+      value += _JxW[_qp]*_coord[_qp]*computeValue();
+    value /= _current_elem_volume;
     _var.setNodalValue(value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
   }
 }

@@ -38,6 +38,7 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     _JxW(_subproblem.JxW(_tid)),
     _coord(_subproblem.coords(_tid)),
     _current_elem(_subproblem.elem(_tid)),
+    _current_elem_volume(_subproblem.elemVolume(_tid)),
     _u(_var.sln()),
     _u_old(_var.slnOld()),
     _u_older(_var.slnOlder()),
@@ -53,6 +54,6 @@ ElementPostprocessor::computeIntegral()
   Real sum = 0;
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      sum += _JxW[_qp]*computeQpIntegral();
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
   return sum;
 }

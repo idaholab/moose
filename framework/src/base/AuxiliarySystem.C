@@ -36,8 +36,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
 {
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
-
-  _data.resize(libMesh::n_threads());
 }
 
 AuxiliarySystem::~AuxiliarySystem()
