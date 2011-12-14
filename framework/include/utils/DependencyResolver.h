@@ -150,25 +150,56 @@ DependencyResolver<T>::getSortedValuesSets()
   /* Make a copy of the map to work on since we will remove values from the map*/
   std::multimap<T, T> depends = _depends;
 
-  T t; // empty
+  //Build up a set of all keys in depends that have nothing depending on them,
+  //and put it in the nodepends set.  These are the leaves of the dependency tree.
+  std::set<T> nodepends;
+  for (typename std::multimap<T, T>::iterator i = depends.begin(); i != depends.end(); ++i)
+  {
+    T key=i->first;
+    bool founditem=false;
+    for (typename std::multimap<T, T>::iterator i2 = depends.begin(); i2 != depends.end(); ++i2)
+    {
+      if (i2->second == key)
+      {
+        founditem = true;
+        break;
+      }
+    }
+    if (!founditem)
+      nodepends.insert(key);
+  }
 
-  /* Add in the independent values */
-  for (typename std::set<T>::iterator i = _independent_items.begin(); i != _independent_items.end(); ++i)
-    depends.insert(std::make_pair(t, *i));
-
-  /* Add in the key values to make sure we have all values in our starting set */
-  for (typename std::multimap<T, T>::iterator i = _depends.begin(); i != _depends.end(); ++i)
-    depends.insert(std::make_pair(t, i->first));
+  //Remove items from _independent_items if they actually appear in depends
+  for (typename std::set<T>::iterator siter = _independent_items.begin(); siter != _independent_items.end();)
+  {
+    T key=*siter;
+    bool founditem=false;
+    for (typename std::multimap<T, T>::iterator i2 = depends.begin(); i2 != depends.end(); ++i2)
+    {
+      if (i2->first == key || i2->second == key)
+      {
+        founditem = true;
+        break;
+      }
+    }
+    if (founditem)
+      _independent_items.erase(siter++); // post increment to maintain a valid iterator
+    else
+      ++siter;
+  }
 
   /* Clear the ordered items vector */
   _ordered_items.clear();
 
+  //Put the independent items into the first set in _ordered_items
+  std::set<T> next_set = _independent_items;
+
   /* Topological Sort */
   while (!depends.empty())
   {
-    std::set<T> keys, values, difference;
+    std::set<T> keys, values, difference, current_set;
 
-    /* We have to work with sets since the set_difference algorithm doesn't always work properly with multi_map due
+    /* Work with sets since set_difference doesn't always work properly with multi_map due
      * to duplicate keys
      */
     std::copy(typename DependencyResolver<T>::template key_iterator<std::multimap<T, T> >(depends.begin()),
@@ -179,36 +210,57 @@ DependencyResolver<T>::getSortedValuesSets()
               typename DependencyResolver<T>::template value_iterator<std::multimap<T, T> >(depends.end()),
               std::inserter(values, values.end()));
 
+    current_set.clear();
+    current_set.insert(next_set.begin(), next_set.end());
+    next_set.clear();
+
     /* This set difference creates a set of items that have no dependencies in the depend map*/
     std::set_difference(values.begin(), values.end(), keys.begin(), keys.end(),
                         std::inserter(difference, difference.end()));
 
+    /* Now remove items from the temporary map that have been "resolved" */
+    if (!difference.empty())
+    {
+      for (typename std::multimap<T, T>::iterator iter = depends.begin(); iter != depends.end();)
+      {
+        if (difference.find(iter->second) != difference.end())
+        {
+          if (nodepends.find(iter->first) != nodepends.end()) //Item is at end of dependency chain
+            next_set.insert(iter->first);
+          depends.erase(iter++);   // post increment to maintain a valid iterator
+        }
+        else
+          ++iter;
+      }
+      /* Add the current set of resolved items to the ordered vector */
+      current_set.insert(difference.begin(), difference.end());
+      _ordered_items.push_back(current_set);
+    }
+    else
+    {
+
     /* If the last set difference was empty but there are still items that haven't come out then there is
      * a cyclic dependency somewhere in the map
      */
-    if (difference.empty())
-    {
-      std::ostringstream oss;
-      oss << "Cyclic dependency detected in the Dependency Resolver.  Remaining items are:\n";
-      for (typename std::multimap<T, T>::iterator j = depends.begin(); j != depends.end(); ++j)
-        oss << j->first << " -> " << j->second << "\n";
-      mooseError(oss.str());
+      if (!depends.empty())
+      {
+        std::ostringstream oss;
+        oss << "Cyclic dependency detected in the Dependency Resolver.  Remaining items are:\n";
+        for (typename std::multimap<T, T>::iterator j = depends.begin(); j != depends.end(); ++j)
+          oss << j->first << " -> " << j->second << "\n";
+        mooseError(oss.str());
+      }
     }
+  }
 
-
-
-    /* Now remove items from the temporary map that have been "resolved" */
-    for (typename std::multimap<T, T>::iterator iter = depends.begin(); iter != depends.end();)
-    {
-      if (difference.find(iter->second) != difference.end())
-        depends.erase(iter++);   // post increment is required here to maintain a valid iterator
-      else
-        ++iter;
-    }
-
-    /* Add the current set of resolved items to the ordered vector */
-    _ordered_items.push_back(difference);
-    //std::copy(difference.begin(), difference.end(), std::back_inserter(_ordered_items));
+  if (next_set.empty())
+  {
+    if (!_independent_items.empty() || !depends.empty())
+      mooseError("DependencyResolver error: next_set shouldn't be empty!");
+  }
+  else
+  {
+    _ordered_items.push_back(next_set);
   }
 
   return _ordered_items;
