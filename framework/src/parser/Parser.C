@@ -779,7 +779,7 @@ void Parser::setRealVectorValue(const std::string & full_name, const std::string
 
   RealVectorValue value;
   for (int i=0; i<vec_size; ++i)
-    value(i) = Real((*gp)(full_name.c_str(), 0.0, i));
+    value(i) = Real(gp->get_value_no_default(full_name.c_str(), (Real)0.0, i));
 
   param->set() = value;
   if (in_global)
@@ -798,7 +798,7 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
   else
     gp = &_getpot_file;
 
-  T value = (*gp)(full_name.c_str(), param->get());
+  T value = gp->get_value_no_default(full_name.c_str(), param->get());
 
   param->set() = value;
   if (in_global)
@@ -823,7 +823,7 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
     param->set().resize(vec_size);
 
   for (int i=0; i<vec_size; ++i)
-    param->set()[i] = (*gp)(full_name.c_str(), param->get()[i], i);
+    param->set()[i] = gp->get_value_no_default(full_name.c_str(), param->get()[i], i);
 
   if (in_global)
   {
@@ -853,7 +853,7 @@ void Parser::setTensorParameter(const std::string & full_name, const std::string
   {
     param->set()[i].resize(one_dim);
     for (int j=0; j<one_dim; ++j)
-      param->set()[i][j] = (*gp)(full_name.c_str(), param->get()[i][j], i*one_dim+j);
+      param->set()[i][j] = gp->get_value_no_default(full_name.c_str(), param->get()[i][j], i*one_dim+j);
   }
 
   if (in_global)
