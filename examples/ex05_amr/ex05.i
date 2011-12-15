@@ -20,8 +20,9 @@
   active = 'example_diff conv diff'
 
   [./example_diff]
-    type = Diffusion
+    type = ExampleCoefDiffusion
     variable = convected
+    coef = 0.125
   [../]
 
   [./conv]
@@ -37,22 +38,21 @@
 []
 
 [BCs]
-  active = 'left_convected right_convected left_diffused right_diffused'
+  active = 'cylinder_convected exterior_convected left_diffused right_diffused'
 
-  [./left_convected]
+  [./cylinder_convected]
     type = DirichletBC
     variable = convected
-    boundary = '5'
-    value = 0
+    boundary = '4'
+    value = 1
   [../]
 
-  [./right_convected]
+  # convected=0 on all vertical sides except the right (x-max)
+  [./exterior_convected]
     type = DirichletBC
     variable = convected
-    boundary = '7'
-    value = 1
-
-    some_var = diffused
+    boundary = '5 6 8'
+    value = 0
   [../]
 
   [./left_diffused]
@@ -75,14 +75,20 @@
   type = Steady
   petsc_options = '-snes_mf_operator'
 
+  l_tol = 1e-3
+  nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-9
+
   # The adapativity block
   [./Adaptivity]
-    steps = 7
-    refine_fraction = 0.3
+    steps = 2
+    refine_fraction = 0.5 # flags by error fraction
     coarsen_fraction = 0
     max_h_level = 10
     error_estimator = KellyErrorEstimator
     print_changed_info = true
+    weight_names = 'convected diffused'
+    weight_values = '1.0 0.0'
   [../]
 []
 

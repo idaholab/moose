@@ -30,6 +30,7 @@
 
 // Example 5 Registration
 #include "Convection.h"
+#include "ExampleCoefDiffusion.h"
 
 // libMesh includes
 #include "perf_log.h"
@@ -43,6 +44,7 @@ int main (int argc, char** argv)
   Moose::registerObjects();
 
   registerKernel(Convection);
+  registerKernel(ExampleCoefDiffusion);
   // Associate Parser Syntax with specific MOOSE Actions
   Moose::associateSyntax();
   Parser p(Moose::syntax);

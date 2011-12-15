@@ -12,36 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EXAMPLEDIFFUSION_H
-#define EXAMPLEDIFFUSION_H
+#include "ExampleCoefDiffusion.h"
 
-#include "Diffusion.h"
-
-//Forward Declarations
-class ExampleDiffusion;
-
-/**
- * validParams returns the parameters that this Kernel accepts / needs
- * The actual body of the function MUST be in the .C file.
- */
 template<>
-InputParameters validParams<ExampleDiffusion>();
-
-/**
- * This Kernel inherits from Diffusion not directly
- * from Kernel.
- */
-class ExampleDiffusion : public Diffusion
+InputParameters validParams<ExampleCoefDiffusion>()
 {
-public:
+  InputParameters params = validParams<Kernel>();
+  params.set<Real>("coef")=0.0;
+  return params;
+}
 
-  ExampleDiffusion(const std::string & name,
-                   InputParameters parameters);
+ExampleCoefDiffusion::ExampleCoefDiffusion(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters),
+   _coef(getParam<Real>("coef"))
+{}
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+Real
+ExampleCoefDiffusion::computeQpResidual()
+{
+  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
+}
 
-  MaterialProperty<Real> & _diffusivity;
-};
-#endif //EXAMPLEDIFFUSION_H
+Real
+ExampleCoefDiffusion::computeQpJacobian()
+{
+  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
+}
