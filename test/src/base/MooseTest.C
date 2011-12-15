@@ -41,7 +41,6 @@
 #include "DirichletBCfuncXYZ0.h"
 #include "DirichletBCfuncXYZ1.h"
 #include "TEJumpBC.h"
-#include "DGFunctionDiffusionDirichletBC.h"
 #include "OnOffDirichletBC.h"
 #include "OnOffNeumannBC.h"
 
@@ -116,7 +115,6 @@ void registerObjects()
   registerBoundaryCondition(OnOffDirichletBC);
   registerBoundaryCondition(OnOffNeumannBC);
 
-  registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
   registerBoundaryCondition(DGMDDBC);
   registerBoundaryCondition(DGFunctionConvectionDirichletBC);
 

@@ -128,6 +128,7 @@
 
 // DG
 #include "DGDiffusion.h"
+#include "DGFunctionDiffusionDirichletBC.h"
 
 // Constraints
 #include "TiedValueConstraint.h"
@@ -283,6 +284,7 @@ registerObjects()
   registerDamper(MaxIncrement);
   // DG
   registerDGKernel(DGDiffusion);
+  registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
 
   // Constraints
   registerConstraint(TiedValueConstraint);
