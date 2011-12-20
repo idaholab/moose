@@ -329,10 +329,6 @@ SolidModel::computePreconditioning()
 {
   mooseAssert(_local_elasticity_tensor, "null elasticity tensor");
 
-//   _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
-
-//   _d_stress_dT[_qp] = _elasticity_tensor[_qp] * _d_strain_dT;
-
   _Jacobian_mult[_qp] = *_local_elasticity_tensor;
   _d_stress_dT[_qp] = *_local_elasticity_tensor * _d_strain_dT;
 }

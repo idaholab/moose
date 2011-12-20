@@ -14,7 +14,7 @@ template<>
 InputParameters validParams<SolidModel>();
 
 /**
- * MaterialModel is the base class for all solid mechanics material models in Elk.
+ * SolidModel is the base class for all solid mechanics material models in Elk.
  */
 class SolidModel : public Material
 {

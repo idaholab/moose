@@ -7,10 +7,6 @@
 template<>
 InputParameters validParams<MaterialModel>()
 {
-  //  In order to avoid an uninitialized memory warning, we first addParam
-  //    and then set.  We don't want to set an initial value in addParam
-  //    since that will also flag the parameter as having had a valid entry
-  //    given.
   InputParameters params = validParams<SolidModel>();
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
