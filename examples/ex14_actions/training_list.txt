@@ -1,6 +1,6 @@
 Title: Custom Action
 ex14.i
-include/action/ConvectionDiffusionAction.h
-src/action/ConvectionDiffusionAction.C
+include/actions/ConvectionDiffusionAction.h
+src/actions/ConvectionDiffusionAction.C
 src/main.C
 
