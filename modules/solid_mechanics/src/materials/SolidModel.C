@@ -334,6 +334,7 @@ SolidModel::computeProperties()
                              _total_strain_old[_qp],
                              _total_strain[_qp],
                              _strain_increment );
+    _total_strain_increment = _strain_increment;
 
     modifyStrainIncrement();
 

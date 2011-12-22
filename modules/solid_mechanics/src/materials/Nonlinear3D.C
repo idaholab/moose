@@ -301,8 +301,6 @@ Nonlinear3D::computeStrain( const unsigned qp,
 
   total_strain_new = strain_increment;
   total_strain_new += total_strain_old;
-
-  // DOESN'T SET A TOTAL STRAIN INCREMENT
 }
 
 ////////////////////////////////////////////////////////////////////////
