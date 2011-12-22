@@ -96,8 +96,6 @@ protected:
 
   virtual void elementInit() {}
 
-  virtual void computeStrain() = 0;
-
   /// Modify increment for things like thermal strain
   virtual void modifyStrainIncrement();
 
