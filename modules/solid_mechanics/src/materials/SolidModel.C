@@ -369,7 +369,17 @@ void
 SolidModel::initialSetup()
 {
   // Load in the volumetric models
-  const std::vector<Material*> & mats = _problem.getMaterials( _block_id, _tid );
+   const std::vector<Material*> * mats_p;
+   if(_bnd)
+   {
+     mats_p = &_problem.getFaceMaterials( _block_id, _tid );
+   }
+   else
+   {
+     mats_p = &_problem.getMaterials( _block_id, _tid );
+   }
+
+  const std::vector<Material*> & mats = *mats_p;
   for (unsigned int i(0); i < mats.size(); ++i)
   {
     VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));

@@ -12,7 +12,7 @@ InputParameters validParams<SolidMechanicsMaterial>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature if you want thermal expansion.");
   params.addCoupledVar("c","variable that zeros out the stiffness");
-  
+
   return params;
 }
 
@@ -34,23 +34,3 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const std::string & name, InputPa
    _elastic_strain(declareProperty<SymmTensor>("elastic_strain"))
 {}
 
-void
-SolidMechanicsMaterial::initialSetup()
-{
-  // Load in the volumetric models
-  const std::vector<Material*> * mats_p;
-  if(_bnd)
-    mats_p = &_problem.getFaceMaterials( _block_id, _tid );
-  else
-    mats_p = &_problem.getMaterials( _block_id, _tid );
-
-  const std::vector<Material*> & mats = *mats_p;
-  for (unsigned int i(0); i < mats.size(); ++i)
-  {
-    VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[i]));
-    if (vm)
-    {
-      _volumetric_models.push_back( vm );
-    }
-  }
-}

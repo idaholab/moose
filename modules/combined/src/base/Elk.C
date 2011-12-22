@@ -80,7 +80,6 @@
 #include "MaterialTensorAux.h"
 #include "MaterialVectorAux.h"
 #include "PLC_LSH.h"
-#include "PowerLawCreepMaterial.h"
 #include "PowerLawCreep.h"
 #include "PlenumPressure.h"
 #include "PlenumPressureAction.h"
@@ -196,7 +195,6 @@ Elk::registerObjects()
   registerAux(MaterialVectorAux);
   registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);
-  registerMaterial(PowerLawCreepMaterial);
   registerMaterial(PowerLawCreep);
 
   registerBoundaryCondition(PlenumPressure);

@@ -20,7 +20,6 @@ public:
   SolidMechanicsMaterial(const std::string & name, InputParameters parameters);
 
 protected:
-  virtual void initialSetup();
 
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;
