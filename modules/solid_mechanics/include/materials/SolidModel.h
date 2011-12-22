@@ -114,7 +114,7 @@ protected:
   virtual void crackingStressRotation();
 
   /// Rotate stress to current configuration
-  virtual void finalizeStress() {}
+  virtual void finalizeStress();
 
 
   virtual void computePreconditioning();

@@ -346,11 +346,20 @@ SolidModel::computeProperties()
 
     crackingStressRotation();
 
-    _element->finalizeStress(_total_strain[_qp],
-                             _stress[_qp]);
+    finalizeStress();
+
     computePreconditioning();
 
   }
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::finalizeStress()
+{
+  _element->finalizeStress(_total_strain[_qp],
+                           _stress[_qp]);
 }
 
 ////////////////////////////////////////////////////////////////////////
