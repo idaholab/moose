@@ -1,12 +1,12 @@
 #include "CLSHPlasticMaterial.h"
 
-#include "ElasticityTensor.h"
+#include "SymmIsotropicElasticityTensor.h"
 #include <cmath>
 
 template<>
 InputParameters validParams<CLSHPlasticMaterial>()
 {
-   InputParameters params = validParams<LinearIsotropicMaterial>();
+   InputParameters params = validParams<SolidModel>();
    params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
    params.addRequiredParam<Real>("hardening_constant", "Hardening slope");
    params.addRequiredParam<Real>("c_alpha", "creep constant");
@@ -18,8 +18,8 @@ InputParameters validParams<CLSHPlasticMaterial>()
 }
 
 CLSHPlasticMaterial::CLSHPlasticMaterial(std::string name,
-                                             InputParameters parameters)
-  :LinearIsotropicMaterial(name, parameters),
+                                         InputParameters parameters)
+  :SolidModel(name, parameters),
    _yield_stress(parameters.get<Real>("yield_stress")),
    _hardening_constant(parameters.get<Real>("hardening_constant")),
    _c_alpha(parameters.get<Real>("c_alpha")),
@@ -27,10 +27,6 @@ CLSHPlasticMaterial::CLSHPlasticMaterial(std::string name,
    _tolerance(parameters.get<Real>("tolerance")),
    _max_its(parameters.get<unsigned int>("max_its")),
    _print_debug_info(getParam<bool>("print_debug_info")),
-   _total_strain(declareProperty<SymmTensor>("total_strain")),
-   _total_strain_old(declarePropertyOld<SymmTensor>("total_strain")),
-   _stress(declareProperty<SymmTensor>("stress")),
-   _stress_old(declarePropertyOld<SymmTensor>("stress")),
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
    _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
@@ -45,20 +41,11 @@ CLSHPlasticMaterial::CLSHPlasticMaterial(std::string name,
 }
 
 void
-CLSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
-                                   SymmTensor & elastic_strain)
+CLSHPlasticMaterial::computeStress()
 {
-  _total_strain[_qp] = total_strain;
-
-  SymmTensor etotal_strain(total_strain);
-  etotal_strain -= _total_strain_old[_qp];
-
-
-  SymmTensor stress_old_b(_stress_old[_qp].columnMajorMatrix());
-
 // trial stress
-  SymmTensor trial_stress = *_local_elasticity_tensor * etotal_strain;
-  trial_stress += stress_old_b;
+  SymmTensor trial_stress = *elasticityTensor() * _strain_increment;
+  trial_stress += _stress_old;
 
 // deviatoric trial stress
   SymmTensor dev_trial_stress(trial_stress);
@@ -107,48 +94,33 @@ CLSHPlasticMaterial::computeStrain(const SymmTensor & total_strain,
     SymmTensor matrix_plastic_strain_increment(dev_trial_stress);
     matrix_plastic_strain_increment *= (1.5*plastic_strain_increment/effective_trial_stress);
 
+    _strain_increment -= matrix_plastic_strain_increment;
+
+    // update stress and plastic strain
+    // compute stress increment
+    _stress[_qp] =  *elasticityTensor() * _strain_increment;
+    _stress[_qp] += _stress_old;
+
     // update plastic strain
     _plastic_strain[_qp] = matrix_plastic_strain_increment;
     _plastic_strain[_qp] += _plastic_strain_old[_qp];
 
-    // calculate elastic strain
-    elastic_strain = etotal_strain;
-    elastic_strain -= matrix_plastic_strain_increment;
-
-    _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+    _Jacobian_mult[_qp] = *elasticityTensor();
 
 //end of if
   }
 
   else
   {
-    elastic_strain = etotal_strain;
+    // update stress and plastic strain
+    _stress[_qp] = *elasticityTensor() * _strain_increment;
+    _stress[_qp] += _stress_old;
+
     _hardening_variable[_qp] = 0.0;
     _plastic_strain[_qp].zero();
-    _Jacobian_mult[_qp] = *_local_elasticity_tensor;
+    _Jacobian_mult[_qp] = *elasticityTensor();
   }
 
 
-//end of computeStrain
 }
 
-//computeStress
-void
-CLSHPlasticMaterial::computeStress(const SymmTensor & strain,
-                                   SymmTensor & stress)
-{
-  // Add in any extra strain components
-  SymmTensor elastic_strain;
-
-  computeStrain(strain, elastic_strain);
-
-  // Save that off as the elastic strain
-  _elastic_strain[_qp] = elastic_strain;
-
-  // C * e
-  SymmTensor stress_vector(*_local_elasticity_tensor * elastic_strain);
-
-  // Fill the material properties
-  stress = stress_vector;
-  stress += _stress_old[_qp];
-}
