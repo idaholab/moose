@@ -36,14 +36,6 @@ PowerLawCreep::PowerLawCreep( const std::string & name,
    _creep_strain(declareProperty<SymmTensor>("creep_strain")),
    _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain"))
 {
-
-/*  Below lines are only needed if defining a different elasticity tensor
-  IsotropicElasticityTensor * iso =  new IsotropicElasticityTensor;
-  iso->setLambda( _lambda );
-  iso->setShearModulus( _shear_modulus );
-  iso->calculate(0);
-  elasticityTensor( iso );
-*/
 }
 
 void
@@ -52,13 +44,6 @@ PowerLawCreep::computeStress()
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
   // creep_strain = creep_strainOld + creep_strainIncrement
-  //
-  //
-  // This is more work than needs to be done.  The strain and stress tensors are symmetric, and so we are carrying
-  //   a third more memory than is required.  We are also running a 9x9 * 9x1 matrix-vector multiply when at most
-  //   a 6x6 * 6x1 matrix vector multiply is needed.  For the most common case, isotropic elasticity, only two
-  //   constants are needed and a matrix vector multiply can be avoided entirely.
-  //
 
   // compute trial stress
   SymmTensor stress_new( (*elasticityTensor()) * _strain_increment );

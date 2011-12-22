@@ -76,7 +76,6 @@
 #include "LinearAnisotropicMaterial.h"
 #include "LinearIsotropicMaterial.h"
 #include "LinearStrainHardening.h"
-#include "LSHPlasticMaterial.h"
 #include "MaterialTensorAux.h"
 #include "MaterialVectorAux.h"
 #include "PLC_LSH.h"
@@ -190,7 +189,6 @@ Elk::registerObjects()
   registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(LinearIsotropicMaterial);
   registerMaterial(LinearStrainHardening);
-  registerMaterial(LSHPlasticMaterial);
   registerAux(MaterialTensorAux);
   registerAux(MaterialVectorAux);
   registerMaterial(PLC_LSH);
