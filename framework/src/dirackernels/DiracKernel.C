@@ -138,12 +138,13 @@ DiracKernel::addPoint(const Elem * elem, Point p)
   _points[elem].insert(p);
 }
 
-void
+const Elem *
 DiracKernel::addPoint(Point p)
 {
   AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, _mesh);
   const Elem * elem = (*pl)(p);
   addPoint(elem, p);
+  return elem;
 }
 
 bool

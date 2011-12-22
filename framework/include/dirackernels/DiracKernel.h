@@ -137,7 +137,7 @@ protected:
    *
    * This spawns a search for the element containing that point!
    */
-  void addPoint(Point p);
+  const Elem * addPoint(Point p);
 
   Problem & _problem;
   SubProblem & _subproblem;
