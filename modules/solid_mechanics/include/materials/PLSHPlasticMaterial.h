@@ -1,7 +1,7 @@
 #ifndef PLSHPLASTICMATERIAL_H
 #define PLSHPLASTICMATERIAL_H
 
-#include "LinearIsotropicMaterial.h"
+#include "SolidModel.h"
 
 //Forward Declarations
 class PLSHPlasticMaterial;
@@ -12,21 +12,14 @@ InputParameters validParams<PLSHPlasticMaterial>();
 /**
  * Plastic material
  */
-class PLSHPlasticMaterial : public LinearIsotropicMaterial
+class PLSHPlasticMaterial : public SolidModel
 {
 public:
   PLSHPlasticMaterial(std::string name,
-                  InputParameters parameters);
+                      InputParameters parameters);
 
 protected:
-  /**
-   * Will always be passed to full symmetric strain tensor.
-   * What should come out is a modified strain tensor.
-   */
-  virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
-  virtual void computeStress(const SymmTensor & strain,
-                             SymmTensor & stress);
-
+  virtual void computeStress();
 
   Real _yield_stress;
   Real _hardening_constant;
@@ -42,10 +35,6 @@ protected:
   Real _ebulk3;
   Real _K;
 
-  MaterialProperty<SymmTensor> & _total_strain;
-  MaterialProperty<SymmTensor> & _total_strain_old;
-  MaterialProperty<SymmTensor> & _stress;
-  MaterialProperty<SymmTensor> & _stress_old;
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
   MaterialProperty<SymmTensor> & _plastic_strain;
