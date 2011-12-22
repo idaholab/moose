@@ -135,6 +135,11 @@ protected:
     return _element;
   }
 
+  int delta(int i, int j) const
+  {
+    return i == j;
+  }
+
 private:
 
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );

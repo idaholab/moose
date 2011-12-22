@@ -23,14 +23,6 @@ public:
 
   virtual ~Nonlinear3D();
 
-  static Real detMatrix( const ColumnMajorMatrix & A );
-
-  static void invertMatrix( const ColumnMajorMatrix & A,
-                            ColumnMajorMatrix & Ainv );
-
-  static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const RealTensorValue & T,
-                                     RealTensorValue & result );
-
   const ColumnMajorMatrix & incrementalRotation() const
   {
     return _incremental_rotation;
@@ -80,7 +72,6 @@ protected:
   void computeStrainIncrement( const ColumnMajorMatrix & Fhat,
                                SymmTensor & strain_increment );
   void computePolarDecomposition( const ColumnMajorMatrix & Fhat);
-  int delta(int i, int j);
 
   void computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat,
                                           SymmTensor & strain_increment );

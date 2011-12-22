@@ -1,7 +1,7 @@
 #ifndef POWERLAWCREEP_H
 #define POWERLAWCREEP_H
 
-#include "MaterialModel.h"
+#include "SolidModel.h"
 
 // Forward declarations
 class PowerLawCreep;
@@ -14,7 +14,7 @@ InputParameters validParams<PowerLawCreep>();
  * edot = A(sigma)**n * exp(-Q/(RT))
  */
 
-class PowerLawCreep : public MaterialModel
+class PowerLawCreep : public SolidModel
 {
 public:
   PowerLawCreep( const std::string & name,

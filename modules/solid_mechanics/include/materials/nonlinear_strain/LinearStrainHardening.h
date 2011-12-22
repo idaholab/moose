@@ -1,7 +1,7 @@
 #ifndef LINEARSTRAINHARDENING_H
 #define LINEARSTRAINHARDENING_H
 
-#include "MaterialModel.h"
+#include "SolidModel.h"
 
 // Forward declarations
 class LinearStrainHardening;
@@ -14,7 +14,7 @@ InputParameters validParams<LinearStrainHardening>();
  * edot = A(sigma)**n * exp(-Q/(RT))
  */
 
-class LinearStrainHardening : public MaterialModel
+class LinearStrainHardening : public SolidModel
 {
 public:
   LinearStrainHardening( const std::string & name,

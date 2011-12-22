@@ -1,16 +1,9 @@
 #ifndef ELASTIC_H
 #define ELASTIC_H
 
-#include "MaterialModel.h"
+#include "SolidModel.h"
 
-// Forward declarations
-class ElasticityTensor;
-class Elastic;
-
-template<>
-InputParameters validParams<Elastic>();
-
-class Elastic : public MaterialModel
+class Elastic : public SolidModel
 {
 public:
   Elastic( const std::string & name,
@@ -23,6 +16,9 @@ protected:
   virtual void computeStress();
 
 };
+
+template<>
+InputParameters validParams<Elastic>();
 
 
 #endif

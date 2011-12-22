@@ -1,7 +1,7 @@
 #ifndef PLC_LSH_H
 #define PLC_LSH_H
 
-#include "MaterialModel.h"
+#include "SolidModel.h"
 
 // Forward declarations
 class PLC_LSH;
@@ -14,7 +14,7 @@ InputParameters validParams<PLC_LSH>();
  * edot = A(sigma)**n * exp(-Q/(RT))
  */
 
-class PLC_LSH : public MaterialModel
+class PLC_LSH : public SolidModel
 {
 public:
   PLC_LSH( const std::string & name,

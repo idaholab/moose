@@ -1,7 +1,6 @@
 #include "AxisymmetricRZ.h"
 
 #include "SymmIsotropicElasticityTensorRZ.h"
-#include "MaterialModel.h"
 #include "Problem.h"
 #include "VolumetricModel.h"
 

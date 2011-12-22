@@ -6,7 +6,7 @@
 template<>
 InputParameters validParams<LinearStrainHardening>()
 {
-  InputParameters params = validParams<MaterialModel>();
+  InputParameters params = validParams<SolidModel>();
    /*
     Iteration control parameters
    */
@@ -28,7 +28,7 @@ InputParameters validParams<LinearStrainHardening>()
 
 LinearStrainHardening::LinearStrainHardening( const std::string & name,
                                               InputParameters parameters )
-  :MaterialModel( name, parameters ),
+  :SolidModel( name, parameters ),
    _tolerance(parameters.get<Real>("tolerance")),
    _max_its(parameters.get<unsigned int>("max_its")),
 

@@ -1,11 +1,6 @@
 #include "Element.h"
 
-
-
 #include "Nonlinear3D.h"
-
-#include "Problem.h"
-
 
 namespace Elk
 {
@@ -23,6 +18,95 @@ Element::Element( const std::string & name,
 
 Element::~Element()
 {
+}
+
+////////////////////////////////////////////////////////////////////////
+
+Real
+Element::detMatrix( const ColumnMajorMatrix & A )
+{
+  Real Axx = A(0,0);
+  Real Axy = A(0,1);
+  Real Axz = A(0,2);
+  Real Ayx = A(1,0);
+  Real Ayy = A(1,1);
+  Real Ayz = A(1,2);
+  Real Azx = A(2,0);
+  Real Azy = A(2,1);
+  Real Azz = A(2,2);
+
+  return   Axx*Ayy*Azz + Axy*Ayz*Azx + Axz*Ayx*Azy
+         - Azx*Ayy*Axz - Azy*Ayz*Axx - Azz*Ayx*Axy;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+Element::invertMatrix( const ColumnMajorMatrix & A,
+                             ColumnMajorMatrix & Ainv )
+{
+  Real Axx = A(0,0);
+  Real Axy = A(0,1);
+  Real Axz = A(0,2);
+  Real Ayx = A(1,0);
+  Real Ayy = A(1,1);
+  Real Ayz = A(1,2);
+  Real Azx = A(2,0);
+  Real Azy = A(2,1);
+  Real Azz = A(2,2);
+
+  mooseAssert( detMatrix( A ) > 0, "Matrix is not positive definite!" );
+  Real detInv = 1 / detMatrix( A );
+
+  Ainv(0,0) = +(Ayy*Azz-Azy*Ayz) * detInv;
+  Ainv(0,1) = -(Axy*Azz-Azy*Axz) * detInv;
+  Ainv(0,2) = +(Axy*Ayz-Ayy*Axz) * detInv;
+  Ainv(1,0) = -(Ayx*Azz-Azx*Ayz) * detInv;
+  Ainv(1,1) = +(Axx*Azz-Azx*Axz) * detInv;
+  Ainv(1,2) = -(Axx*Ayz-Ayx*Axz) * detInv;
+  Ainv(2,0) = +(Ayx*Azy-Azx*Ayy) * detInv;
+  Ainv(2,1) = -(Axx*Azy-Azx*Axy) * detInv;
+  Ainv(2,2) = +(Axx*Ayy-Ayx*Axy) * detInv;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+Element::rotateSymmetricTensor( const ColumnMajorMatrix & R,
+                                    const RealTensorValue & T,
+                                    RealTensorValue & result )
+{
+
+  //     R           T         Rt
+  //  00 01 02   00 01 02   00 10 20
+  //  10 11 12 * 10 11 12 * 01 11 21
+  //  20 21 22   20 21 22   02 12 22
+  //
+  const Real T00 = R(0,0)*T(0,0) + R(0,1)*T(1,0) + R(0,2)*T(2,0);
+  const Real T01 = R(0,0)*T(0,1) + R(0,1)*T(1,1) + R(0,2)*T(2,1);
+  const Real T02 = R(0,0)*T(0,2) + R(0,1)*T(1,2) + R(0,2)*T(2,2);
+
+  const Real T10 = R(1,0)*T(0,0) + R(1,1)*T(1,0) + R(1,2)*T(2,0);
+  const Real T11 = R(1,0)*T(0,1) + R(1,1)*T(1,1) + R(1,2)*T(2,1);
+  const Real T12 = R(1,0)*T(0,2) + R(1,1)*T(1,2) + R(1,2)*T(2,2);
+
+  const Real T20 = R(2,0)*T(0,0) + R(2,1)*T(1,0) + R(2,2)*T(2,0);
+  const Real T21 = R(2,0)*T(0,1) + R(2,1)*T(1,1) + R(2,2)*T(2,1);
+  const Real T22 = R(2,0)*T(0,2) + R(2,1)*T(1,2) + R(2,2)*T(2,2);
+
+  result = RealTensorValue(
+    T00 * R(0,0) + T01 * R(0,1) + T02 * R(0,2),
+    T00 * R(1,0) + T01 * R(1,1) + T02 * R(1,2),
+    T00 * R(2,0) + T01 * R(2,1) + T02 * R(2,2),
+
+    T10 * R(0,0) + T11 * R(0,1) + T12 * R(0,2),
+    T10 * R(1,0) + T11 * R(1,1) + T12 * R(1,2),
+    T10 * R(2,0) + T11 * R(2,1) + T12 * R(2,2),
+
+    T20 * R(0,0) + T21 * R(0,1) + T22 * R(0,2),
+    T20 * R(1,0) + T21 * R(1,1) + T22 * R(1,2),
+    T20 * R(2,0) + T21 * R(2,1) + T22 * R(2,2) );
+
 }
 
 ////////////////////////////////////////////////////////////////////////

@@ -37,6 +37,14 @@ public:
            InputParameters parameters );
   virtual ~Element();
 
+  static Real detMatrix( const ColumnMajorMatrix & A );
+
+  static void invertMatrix( const ColumnMajorMatrix & A,
+                            ColumnMajorMatrix & Ainv );
+
+  static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const RealTensorValue & T,
+                                     RealTensorValue & result );
+
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
                                      SymmTensor & result );
 
