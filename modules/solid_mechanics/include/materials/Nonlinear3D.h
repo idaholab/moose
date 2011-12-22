@@ -7,9 +7,9 @@
 class MaterialModel;
 class VolumetricModel;
 
-namespace elk
+namespace Elk
 {
-namespace solid_mechanics
+namespace SolidMechanics
 {
 
 /**
@@ -30,6 +30,16 @@ public:
 
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const RealTensorValue & T,
                                      RealTensorValue & result );
+
+  const ColumnMajorMatrix & incrementalRotation() const
+  {
+    return _incremental_rotation;
+  }
+
+  const std::vector<ColumnMajorMatrix> & Fhat() const
+  {
+    return _Fhat;
+  }
 
 protected:
 

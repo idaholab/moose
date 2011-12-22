@@ -5,9 +5,9 @@
 
 //Forward Declarations
 class SymmElasticityTensor;
-namespace elk
+namespace Elk
 {
-namespace solid_mechanics
+namespace SolidMechanics
 {
 
 class Linear : public Element

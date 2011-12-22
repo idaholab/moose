@@ -620,11 +620,11 @@ SolidModel::getNumKnownCrackDirs() const
   return retVal+fromElement;
 }
 
-elk::solid_mechanics::Element *
+Elk::SolidMechanics::Element *
 SolidModel::createElement( const std::string & name,
                            InputParameters & parameters )
 {
-  elk::solid_mechanics::Element * element(NULL);
+  Elk::SolidMechanics::Element * element(NULL);
 
   std::string formulation = getParam<std::string>("formulation");
   std::transform( formulation.begin(), formulation.end(),
@@ -645,7 +645,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("Nonlinear3D formulation requested for coord_type = RZ problem");
     }
-    element = new elk::solid_mechanics::Nonlinear3D(name, parameters);
+    element = new Elk::SolidMechanics::Nonlinear3D(name, parameters);
   }
   else if ( formulation == "axisymmetricrz" )
   {
@@ -654,7 +654,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("AxisymmetricRZ must define disp_r and disp_z");
     }
-    element = new elk::solid_mechanics::AxisymmetricRZ(name, parameters);
+    element = new Elk::SolidMechanics::AxisymmetricRZ(name, parameters);
   }
   else if ( formulation == "linear" )
   {
@@ -666,7 +666,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("Linear formulation requested for coord_type = RZ problem");
     }
-    element = new elk::solid_mechanics::Linear(name, parameters);
+    element = new Elk::SolidMechanics::Linear(name, parameters);
   }
   else if ( formulation != "" )
   {
@@ -680,7 +680,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("RZ coord sys requires disp_r and disp_z for AxisymmetricRZ formulation");
     }
-    element = new elk::solid_mechanics::AxisymmetricRZ(name, parameters);
+    element = new Elk::SolidMechanics::AxisymmetricRZ(name, parameters);
   }
 
   if (!element)
@@ -693,7 +693,7 @@ SolidModel::createElement( const std::string & name,
       {
         mooseError("Error with displacement specification in material " + name);
       }
-      element = new elk::solid_mechanics::Nonlinear3D(name, parameters);
+      element = new Elk::SolidMechanics::Nonlinear3D(name, parameters);
     }
     else if (isCoupled("disp_r") &&
              isCoupled("disp_z"))
@@ -702,11 +702,11 @@ SolidModel::createElement( const std::string & name,
       {
         mooseError("RZ coord system not specified, but disp_r and disp_z are");
       }
-      element = new elk::solid_mechanics::AxisymmetricRZ( name, parameters );
+      element = new Elk::SolidMechanics::AxisymmetricRZ( name, parameters );
     }
     else if (isCoupled("disp_x"))
     {
-      element = new elk::solid_mechanics::Linear( name, parameters );
+      element = new Elk::SolidMechanics::Linear( name, parameters );
     }
     else
     {

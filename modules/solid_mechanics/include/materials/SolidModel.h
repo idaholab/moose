@@ -9,9 +9,9 @@
 class SolidModel;
 class SymmElasticityTensor;
 class VolumetricModel;
-namespace elk
+namespace Elk
 {
-namespace solid_mechanics
+namespace SolidMechanics
 {
 class Element;
 }
@@ -28,7 +28,7 @@ class SolidModel : public Material
 {
 public:
   SolidModel( const std::string & name,
-                 InputParameters parameters );
+              InputParameters parameters );
   virtual ~SolidModel();
 
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
@@ -130,17 +130,21 @@ protected:
     return _local_elasticity_tensor;
   }
 
+  const Elk::SolidMechanics::Element * element() const
+  {
+    return _element;
+  }
 
 private:
 
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
 
-  elk::solid_mechanics::Element * createElement( const std::string & name,
-                                                 InputParameters & parameters );
+  Elk::SolidMechanics::Element * createElement( const std::string & name,
+                                                InputParameters & parameters );
 
   void createElasticityTensor();
 
-  elk::solid_mechanics::Element * _element;
+  Elk::SolidMechanics::Element * _element;
 
   SymmElasticityTensor * _local_elasticity_tensor;
 

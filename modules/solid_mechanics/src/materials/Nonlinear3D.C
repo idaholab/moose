@@ -6,9 +6,9 @@
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
 
-namespace elk
+namespace Elk
 {
-namespace solid_mechanics
+namespace SolidMechanics
 {
 
 Nonlinear3D::Nonlinear3D( const std::string & name,

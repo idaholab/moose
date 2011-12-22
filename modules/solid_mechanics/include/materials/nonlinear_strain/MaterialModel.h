@@ -21,8 +21,6 @@ public:
                  InputParameters parameters );
   virtual ~MaterialModel();
 
-  void testMe();
-
   static Real detMatrix( const ColumnMajorMatrix & A );
 
   static void invertMatrix( const ColumnMajorMatrix & A,

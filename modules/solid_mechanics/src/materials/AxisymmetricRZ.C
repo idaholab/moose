@@ -5,20 +5,9 @@
 #include "Problem.h"
 #include "VolumetricModel.h"
 
-// template<>
-// InputParameters validParams<SolidMechanicsMaterialRZ>()
-// {
-//   InputParameters params = validParams<SolidModel>();
-//   params.addRequiredCoupledVar("disp_r", "The r displacement");
-//   params.addRequiredCoupledVar("disp_z", "The z displacement");
-//   params.addParam<bool>("large_strain", false, "Whether to include large strain terms");
-
-//   return params;
-// }
-
-namespace elk
+namespace Elk
 {
-namespace solid_mechanics
+namespace SolidMechanics
 {
 
 AxisymmetricRZ::AxisymmetricRZ(const std::string & name,

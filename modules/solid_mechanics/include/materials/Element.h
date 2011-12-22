@@ -8,9 +8,9 @@
 // Forward declarations
 class SolidModel;
 
-namespace elk
+namespace Elk
 {
-namespace solid_mechanics
+namespace SolidMechanics
 {
 
 /**

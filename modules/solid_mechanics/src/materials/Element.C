@@ -7,9 +7,9 @@
 #include "Problem.h"
 
 
-namespace elk
+namespace Elk
 {
-namespace solid_mechanics
+namespace SolidMechanics
 {
 
 
