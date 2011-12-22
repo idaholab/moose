@@ -31,7 +31,7 @@ InputParameters validParams<AuxKernel>()
   params.addRequiredParam<std::string>("variable", "The name of the variable that this object applies to");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   // For use on the boundary only
-  params.addParam<std::vector<unsigned int> >("boundary", "The list of variable names this Material is coupled to.");
+  params.addParam<std::vector<unsigned int> >("boundary", "The list of boundary IDs from the mesh where this AuxBC applies");
   params.addParam<std::vector<unsigned int> >("block", "The list of ids of the blocks (subdomain) that this aux kernel will be applied to");
 
   params.addPrivateParam<std::string>("built_by_action", "add_aux_kernel");

@@ -102,30 +102,12 @@ InputParameters::operator+=(const InputParameters &rhs)
 {
   Parameters::operator+=(rhs);
 
-  for(std::map<std::string, std::string>::const_iterator it = rhs._doc_string.begin();
-      it!=rhs._doc_string.end();
-      ++it)
-    this->_doc_string[it->first] = it->second;
-
-  for(std::set<std::string>::const_iterator it = rhs._required_params.begin();
-      it!=rhs._required_params.end();
-      ++it)
-    this->_required_params.insert(*it);
-
-  for(std::set<std::string>::const_iterator it = rhs._private_params.begin();
-      it!=rhs._private_params.end();
-      ++it)
-    this->_private_params.insert(*it);
-
-  for(std::set<std::string>::const_iterator it = rhs._coupled_vars.begin();
-      it!=rhs._coupled_vars.end();
-      ++it)
-    this->_coupled_vars.insert(*it);
-
-  for(std::set<std::string>::const_iterator it = rhs._seen_in_input.begin();
-      it!=rhs._seen_in_input.end();
-      ++it)
-    this->_seen_in_input.insert(*it);
+  _doc_string.insert(rhs._doc_string.begin(), rhs._doc_string.end());
+  _required_params.insert(rhs._required_params.begin(), rhs._required_params.end());
+  _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
+  _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
+  _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
+  _seen_in_input.insert(rhs._seen_in_input.begin(), rhs._seen_in_input.end());
 
   return *this;
 }

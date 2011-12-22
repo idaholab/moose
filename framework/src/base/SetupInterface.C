@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<SetupInterface>()
 {
   InputParameters params = emptyInputParameters();
-  params.addParam<std::string>("execute_on", "residual", "Set to (residual|timestep) to execute only at that moment");
+  params.addParam<std::string>("execute_on", "residual", "Set to (residual|timestep|timestep_begin) to execute only at that moment");
   return params;
 }
 
