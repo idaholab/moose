@@ -1,25 +1,19 @@
-#include "MaterialModel.h"
+#include "Nonlinear3D.h"
+
+#include "SolidModel.h"
 
 #include "Problem.h"
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
 
-template<>
-InputParameters validParams<MaterialModel>()
+namespace elk
 {
-  InputParameters params = validParams<SolidModel>();
-  params.addRequiredCoupledVar("disp_x", "The x displacement");
-  params.addRequiredCoupledVar("disp_y", "The y displacement");
-  params.addRequiredCoupledVar("disp_z", "The z displacement");
-  params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen).");
-  return params;
-}
+namespace solid_mechanics
+{
 
-
-
-MaterialModel::MaterialModel( const std::string & name,
-                              InputParameters parameters )
-  :SolidModel( name, parameters ),
+Nonlinear3D::Nonlinear3D( const std::string & name,
+                          InputParameters parameters )
+  :Element( name, parameters ),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y")),
    _grad_disp_z(coupledGradient("disp_z")),
@@ -30,11 +24,6 @@ MaterialModel::MaterialModel( const std::string & name,
    _incremental_rotation(3,3),
    _Uhat(3,3)
 {
-  SymmIsotropicElasticityTensor * iso =  new SymmIsotropicElasticityTensor;
-  iso->setLambda( _lambda );
-  iso->setShearModulus( _shear_modulus );
-  iso->calculate(0);
-  elasticityTensor( iso );
 
   std::string increment_calculation = getParam<std::string>("increment_calculation");
   std::transform( increment_calculation.begin(), increment_calculation.end(),
@@ -56,14 +45,14 @@ MaterialModel::MaterialModel( const std::string & name,
 
 ////////////////////////////////////////////////////////////////////////
 
-MaterialModel::~MaterialModel()
+Nonlinear3D::~Nonlinear3D()
 {
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatrix> & Fhat )
+Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatrix> & Fhat )
 {
   // A = grad(u(k+1) - u(k))
   // Fbar = 1 + grad(u(k))
@@ -124,12 +113,13 @@ MaterialModel::computeIncrementalDeformationGradient( std::vector<ColumnMajorMat
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat)
+Nonlinear3D::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat,
+                                                SymmTensor & strain_increment )
 {
   if ( _decomp_method == RashidApprox )
   {
-    computeStrainIncrement(Fhat);
-    computePolarDecomposition( Fhat);
+    computeStrainIncrement( Fhat, strain_increment );
+    computePolarDecomposition( Fhat );
   }
 
   else if ( _decomp_method == Eigen )
@@ -167,17 +157,8 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
 
     _incremental_rotation = Fhat * invUhat;
 
-    _total_strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
+    strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
 
-    /*
-    n1 = _incremental_rotation * N1;
-    n2 = _incremental_rotation * N2;
-    n3 = _incremental_rotation * N3;
-
-
-    logVhat = n1 * n1.transpose() * log1 +  n2 * n2.transpose() * log2 +  n3 * n3.transpose() * log3;
-
-    _total_strain_increment = logVhat;*/
   }
   else
   {
@@ -188,7 +169,8 @@ MaterialModel::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
+Nonlinear3D::computeStrainIncrement( const ColumnMajorMatrix & Fhat,
+                                     SymmTensor & strain_increment )
 {
 
   //
@@ -238,19 +220,19 @@ MaterialModel::computeStrainIncrement( const ColumnMajorMatrix & Fhat)
   const Real Byz = 0.25 * Ayz;
   const Real Bzz = 0.25 * Azz - 0.5;
 
-  _total_strain_increment.xx( -(Bxx*Axx + Bxy*Axy + Bxz*Axz) );
-  _total_strain_increment.xy( -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) );
-  _total_strain_increment.zx( -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) );
-  _total_strain_increment.yy( -(Bxy*Axy + Byy*Ayy + Byz*Ayz) );
-  _total_strain_increment.yz( -(Bxy*Axz + Byy*Ayz + Byz*Azz) );
-  _total_strain_increment.zz( -(Bxz*Axz + Byz*Ayz + Bzz*Azz) );
+  strain_increment.xx( -(Bxx*Axx + Bxy*Axy + Bxz*Axz) );
+  strain_increment.xy( -(Bxx*Axy + Bxy*Ayy + Bxz*Ayz) );
+  strain_increment.zx( -(Bxx*Axz + Bxy*Ayz + Bxz*Azz) );
+  strain_increment.yy( -(Bxy*Axy + Byy*Ayy + Byz*Ayz) );
+  strain_increment.yz( -(Bxy*Axz + Byy*Ayz + Byz*Azz) );
+  strain_increment.zz( -(Bxz*Axz + Byz*Ayz + Bzz*Azz) );
 
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
+Nonlinear3D::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 {
 
   // From Rashid, 1993.
@@ -295,88 +277,22 @@ MaterialModel::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
 
 }
 
-
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::modifyStrain()
-{
-  if ( _has_temp && _t_step != 0 )
-  {
-    const Real tStrain( _alpha * (_temperature[_qp] - _temperature_old[_qp]) );
-    _strain_increment.addDiag( -tStrain );
-
-    _d_strain_dT.zero();
-    _d_strain_dT.addDiag( -_alpha );
-  }
-  for (unsigned int i(0); i < _volumetric_models.size(); ++i)
-  {
-    _volumetric_models[i]->modifyStrain(_qp, _strain_increment, _d_strain_dT);
-  }
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void
-MaterialModel::computeStress()
-{
-  // Given the stretching, compute the stress increment and add it to the old stress.
-  // stress = stressOld + stressIncrement
-//   const Real lamda( 0 );
-//   const Real twoG( 10e6 );
-//   const Real traceD( strain_increment(0,0) +
-//                      strain_increment(1,1) +
-//                      strain_increment(2,2) );
-//   const Real bulk_update = lamda * traceD;
-//   _stress[_qp](0,0) = _stress_old[_qp](0,0) + ( twoG * strain_increment(0,0) + bulk_update );
-//   _stress[_qp](1,1) = _stress_old[_qp](1,1) + ( twoG * strain_increment(1,1) + bulk_update );
-//   _stress[_qp](2,2) = _stress_old[_qp](2,2) + ( twoG * strain_increment(2,2) + bulk_update );
-//   _stress[_qp](0,1) = _stress_old[_qp](0,1) + ( twoG * strain_increment(0,1)               );
-//   _stress[_qp](0,2) = _stress_old[_qp](0,2) + ( twoG * strain_increment(0,2)               );
-//   _stress[_qp](1,2) = _stress_old[_qp](1,2) + ( twoG * strain_increment(1,2)               );
-//   _stress[_qp](1,0) = _stress[_qp](0,1);
-//   _stress[_qp](2,0) = _stress[_qp](0,2);
-//   _stress[_qp](2,1) = _stress[_qp](1,2);
-
-  SymmTensor stress_new( _elasticity_tensor[_qp] * _strain_increment );
-  _stress[_qp] = stress_new;
-  _stress[_qp] += _stress_old;
-
-  //   std::cout << "ELASTICITY TENSOR: " << " at time " << _t << "\n";
-  //  _elasticity_tensor->print();
-
-//   std::cout << "STRAIN INCREMENT: " << _qp << "\n"
-//             << _strain_increment(0,0) << " " << _strain_increment(0,1) << " " << _strain_increment(0,2) << std::endl
-//             << _strain_increment(1,0) << " " << _strain_increment(1,1) << " " << _strain_increment(1,2) << std::endl
-//             << _strain_increment(2,0) << " " << _strain_increment(2,1) << " " << _strain_increment(2,2) << std::endl;
-
-//   std::cout << "STRESS: " << _qp << " at time " << _t << "\n"
-//             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
-//             << _stress[_qp](1,0) << " " << _stress[_qp](1,1) << " " << _stress[_qp](1,2) << std::endl
-//             << _stress[_qp](2,0) << " " << _stress[_qp](2,1) << " " << _stress[_qp](2,2) << std::endl;
-
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void
-MaterialModel::finalizeStress()
+Nonlinear3D::finalizeStress( SymmTensor & strain,
+                             SymmTensor & stress )
 {
   // Using the incremental rotation, update the stress to the current configuration (R*T*R^T)
-  rotateSymmetricTensor( _incremental_rotation, _stress[_qp], _stress[_qp] );
-  rotateSymmetricTensor( _incremental_rotation, _total_strain[_qp], _total_strain[_qp] );
-
-//   std::cout << "STRESS: " << _qp << "\n"
-//             << _stress[_qp](0,0) << " " << _stress[_qp](0,1) << " " << _stress[_qp](0,2) << std::endl
-//             << _stress[_qp](1,0) << " " << _stress[_qp](1,1) << " " << _stress[_qp](1,2) << std::endl
-//             << _stress[_qp](2,0) << " " << _stress[_qp](2,1) << " " << _stress[_qp](2,2) << std::endl;
+  Element::rotateSymmetricTensor( _incremental_rotation, stress, stress );
+  Element::rotateSymmetricTensor( _incremental_rotation, strain, strain );
 
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
+Nonlinear3D::rotateSymmetricTensor( const ColumnMajorMatrix & R,
                                       const RealTensorValue & T,
                                       RealTensorValue & result )
 {
@@ -416,54 +332,23 @@ MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
-                                      const SymmTensor & T,
-                                      SymmTensor & result )
+Nonlinear3D::computeStrain( const unsigned qp,
+                            const SymmTensor & total_strain_old,
+                            SymmTensor & total_strain_new,
+                            SymmTensor & strain_increment )
 {
+  computeStrainAndRotationIncrement(_Fhat[qp], strain_increment);
 
-  //     R           T         Rt
-  //  00 01 02   00 01 02   00 10 20
-  //  10 11 12 * 10 11 12 * 01 11 21
-  //  20 21 22   20 21 22   02 12 22
-  //
-  const Real T00 = R(0,0)*T.xx() + R(0,1)*T.xy() + R(0,2)*T.zx();
-  const Real T01 = R(0,0)*T.xy() + R(0,1)*T.yy() + R(0,2)*T.yz();
-  const Real T02 = R(0,0)*T.zx() + R(0,1)*T.yz() + R(0,2)*T.zz();
+  total_strain_new = strain_increment;
+  total_strain_new += total_strain_old;
 
-  const Real T10 = R(1,0)*T.xx() + R(1,1)*T.xy() + R(1,2)*T.zx();
-  const Real T11 = R(1,0)*T.xy() + R(1,1)*T.yy() + R(1,2)*T.yz();
-  const Real T12 = R(1,0)*T.zx() + R(1,1)*T.yz() + R(1,2)*T.zz();
-
-  const Real T20 = R(2,0)*T.xx() + R(2,1)*T.xy() + R(2,2)*T.zx();
-  const Real T21 = R(2,0)*T.xy() + R(2,1)*T.yy() + R(2,2)*T.yz();
-  const Real T22 = R(2,0)*T.zx() + R(2,1)*T.yz() + R(2,2)*T.zz();
-
-  result.xx( T00 * R(0,0) + T01 * R(0,1) + T02 * R(0,2) );
-  result.yy( T10 * R(1,0) + T11 * R(1,1) + T12 * R(1,2) );
-  result.zz( T20 * R(2,0) + T21 * R(2,1) + T22 * R(2,2) );
-  result.xy( T00 * R(1,0) + T01 * R(1,1) + T02 * R(1,2) );
-  result.yz( T10 * R(2,0) + T11 * R(2,1) + T12 * R(2,2) );
-  result.zx( T00 * R(2,0) + T01 * R(2,1) + T02 * R(2,2) );
-
+  // DOESN'T SET A TOTAL STRAIN INCREMENT
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::computeStrain()
-{
-  computeStrainAndRotationIncrement(_Fhat[_qp]);
-
-  _total_strain[_qp] = _total_strain_increment;
-  _total_strain[_qp] += _total_strain_old[_qp];
-
-  _strain_increment = _total_strain_increment;
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void
-MaterialModel::elementInit()
+Nonlinear3D::init()
 {
   _Fhat.resize(_qrule->n_points());
 
@@ -473,10 +358,10 @@ MaterialModel::elementInit()
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::fillMatrix( const VariableGradient & grad_x,
-                           const VariableGradient & grad_y,
-                           const VariableGradient & grad_z,
-                           ColumnMajorMatrix & A )
+Nonlinear3D::fillMatrix( const VariableGradient & grad_x,
+                         const VariableGradient & grad_y,
+                         const VariableGradient & grad_z,
+                         ColumnMajorMatrix & A )
 {
   A(0,0) = grad_x[_qp](0); A(0,1) = grad_x[_qp](1); A(0,2) = grad_x[_qp](2);
   A(1,0) = grad_y[_qp](0); A(1,1) = grad_y[_qp](1); A(1,2) = grad_y[_qp](2);
@@ -486,7 +371,7 @@ MaterialModel::fillMatrix( const VariableGradient & grad_x,
 ////////////////////////////////////////////////////////////////////////
 
 Real
-MaterialModel::detMatrix( const ColumnMajorMatrix & A )
+Nonlinear3D::detMatrix( const ColumnMajorMatrix & A )
 {
   Real Axx = A(0,0);
   Real Axy = A(0,1);
@@ -505,7 +390,7 @@ MaterialModel::detMatrix( const ColumnMajorMatrix & A )
 ////////////////////////////////////////////////////////////////////////
 
 void
-MaterialModel::invertMatrix( const ColumnMajorMatrix & A,
+Nonlinear3D::invertMatrix( const ColumnMajorMatrix & A,
                              ColumnMajorMatrix & Ainv )
 {
   Real Axx = A(0,0);
@@ -535,7 +420,7 @@ MaterialModel::invertMatrix( const ColumnMajorMatrix & A,
 ////////////////////////////////////////////////////////////////////////
 #if 0
 void
-MaterialModel::testMe()
+Nonlinear3D::testMe()
 {
   ColumnMajorMatrix fred;
 //  const Real s = std::sin(3*M_PI/180);
@@ -609,7 +494,7 @@ MaterialModel::testMe()
 #endif
 
 int
-MaterialModel::delta(int i, int j)
+Nonlinear3D::delta(int i, int j)
 {
 
   if(i == j)
@@ -619,3 +504,6 @@ MaterialModel::delta(int i, int j)
 }
 
 ////////////////////////////////////////////////////////////////////////
+
+}
+}

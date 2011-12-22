@@ -1,5 +1,9 @@
 #include "SolidModel.h"
 
+#include "Nonlinear3D.h"
+#include "Linear.h"
+#include "AxisymmetricRZ.h"
+
 #include "Problem.h"
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
@@ -7,28 +11,24 @@
 template<>
 InputParameters validParams<SolidModel>()
 {
-  //  In order to avoid an uninitialized memory warning, we first addParam
-  //    and then set.  We don't want to set an initial value in addParam
-  //    since that will also flag the parameter as having had a valid entry
-  //    given.
-  // Note: Setting these values shouldn't be required anymore
   InputParameters params = validParams<Material>();
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
-//  params.set<Real>("bulk_modulus") = -7777;
   params.addParam<Real>("lambda", "Lame's first parameter for the material.");
-//  params.set<Real>("lambda") = -7777;
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material");
-//  params.set<Real>("poissons_ratio") = -7777;
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
-//  params.set<Real>("shear_modulus") = -7777;
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
-//  params.set<Real>("youngs_modulus") = -7777;
-  params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen).");
   params.addParam<Real>("thermal_expansion", 0.0, "The thermal expansion coefficient.");
   params.addCoupledVar("temp", "Coupled Temperature");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
+  params.addParam<std::string>("formulation", "Element formulation.  Choices are \"Nonlinear3D\", \"AxisymmetricRZ\", and \"Linear\".  (Case insensitive.)");
+  params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D formulation.");
+  params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ formulation.");
+  params.addCoupledVar("disp_r", "The r displacement");
+  params.addCoupledVar("disp_x", "The x displacement");
+  params.addCoupledVar("disp_y", "The y displacement");
+  params.addCoupledVar("disp_z", "The z displacement");
   return params;
 }
 
@@ -74,6 +74,7 @@ SolidModel::SolidModel( const std::string & name,
    _d_stress_dT(declareProperty<SymmTensor>("d_stress_dT")),
    _total_strain_increment(0),
    _strain_increment(0),
+   _element(createElement(name, parameters)),
    _local_elasticity_tensor(NULL)
 {
   int num_elastic_constants =
@@ -209,6 +210,7 @@ SolidModel::SolidModel( const std::string & name,
 SolidModel::~SolidModel()
 {
   delete _local_elasticity_tensor;
+  delete _element;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -225,7 +227,7 @@ SolidModel::elasticityTensor( SymmElasticityTensor * e )
 void
 SolidModel::modifyStrainIncrement()
 {
-  if ( _has_temp )
+  if ( _has_temp && _t_step != 0 )
   {
     const Real tStrain( _alpha * (_temperature[_qp] - _temperature_old[_qp]) );
     _strain_increment.addDiag( -tStrain );
@@ -297,6 +299,7 @@ SolidModel::computeProperties()
   }
 
   elementInit();
+  _element->init();
 
   for ( _qp = 0; _qp < _qrule->n_points(); ++_qp )
   {
@@ -304,7 +307,10 @@ SolidModel::computeProperties()
 
     _elasticity_tensor[_qp] = *_local_elasticity_tensor;
 
-    computeStrain();
+    _element->computeStrain( _qp,
+                             _total_strain_old[_qp],
+                             _total_strain[_qp],
+                             _strain_increment );
 
     modifyStrainIncrement();
 
@@ -316,7 +322,8 @@ SolidModel::computeProperties()
 
     crackingStressRotation();
 
-    finalizeStress();
+    _element->finalizeStress(_total_strain[_qp],
+                             _stress[_qp]);
     computePreconditioning();
 
   }
@@ -581,10 +588,112 @@ SolidModel::crackingStressRotation()
 unsigned int
 SolidModel::getNumKnownCrackDirs() const
 {
+  const unsigned fromElement = _element->getNumKnownCrackDirs();
   unsigned int retVal(0);
-  for (unsigned int i(0); i < 3; ++i)
+  for (unsigned int i(0); i < 3-fromElement; ++i)
   {
     retVal += ((*_crack_flags_old)[_qp](i) < 1);
   }
-  return retVal;
+  return retVal+fromElement;
 }
+
+elk::solid_mechanics::Element *
+SolidModel::createElement( const std::string & name,
+                           InputParameters & parameters )
+{
+  elk::solid_mechanics::Element * element(NULL);
+
+  std::string formulation = getParam<std::string>("formulation");
+  std::transform( formulation.begin(), formulation.end(),
+                  formulation.begin(), ::tolower );
+  if ( formulation == "nonlinear3d" )
+  {
+    if (!isCoupled("disp_x") ||
+        !isCoupled("disp_y") ||
+        !isCoupled("disp_z"))
+    {
+      mooseError("Nonlinear3D requires all three displacements");
+    }
+    if ( isCoupled("disp_r") )
+    {
+      mooseError("Linear must not define disp_r");
+    }
+    if ( _coord_sys == Moose::COORD_RZ )
+    {
+      mooseError("Nonlinear3D formulation requested for coord_type = RZ problem");
+    }
+    element = new elk::solid_mechanics::Nonlinear3D(name, parameters);
+  }
+  else if ( formulation == "axisymmetricrz" )
+  {
+    if ( !isCoupled("disp_r") ||
+         !isCoupled("disp_z") )
+    {
+      mooseError("AxisymmetricRZ must define disp_r and disp_z");
+    }
+    element = new elk::solid_mechanics::AxisymmetricRZ(name, parameters);
+  }
+  else if ( formulation == "linear" )
+  {
+    if ( isCoupled("disp_r") )
+    {
+      mooseError("Linear must not define disp_r");
+    }
+    if ( _coord_sys == Moose::COORD_RZ )
+    {
+      mooseError("Linear formulation requested for coord_type = RZ problem");
+    }
+    element = new elk::solid_mechanics::Linear(name, parameters);
+  }
+  else if ( formulation != "" )
+  {
+    mooseError("Unknown formulation: " + formulation);
+  }
+
+  if ( !element && _coord_sys == Moose::COORD_RZ )
+  {
+    if ( !isCoupled("disp_r") ||
+         !isCoupled("disp_z") )
+    {
+      mooseError("RZ coord sys requires disp_r and disp_z for AxisymmetricRZ formulation");
+    }
+    element = new elk::solid_mechanics::AxisymmetricRZ(name, parameters);
+  }
+
+  if (!element)
+  {
+    if (isCoupled("disp_x") &&
+        isCoupled("disp_y") &&
+        isCoupled("disp_z"))
+    {
+      if (isCoupled("disp_r"))
+      {
+        mooseError("Error with displacement specification in material " + name);
+      }
+      element = new elk::solid_mechanics::Nonlinear3D(name, parameters);
+    }
+    else if (isCoupled("disp_r") &&
+             isCoupled("disp_z"))
+    {
+      if ( _coord_sys != Moose::COORD_RZ )
+      {
+        mooseError("RZ coord system not specified, but disp_r and disp_z are");
+      }
+      element = new elk::solid_mechanics::AxisymmetricRZ( name, parameters );
+    }
+    else if (isCoupled("disp_x"))
+    {
+      element = new elk::solid_mechanics::Linear( name, parameters );
+    }
+    else
+    {
+      mooseError("Unable to determine formulation for material " + name );
+    }
+
+  }
+
+  mooseAssert( element, "No Element created for material " + name );
+
+  return element;
+}
+

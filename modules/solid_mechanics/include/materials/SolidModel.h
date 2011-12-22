@@ -9,6 +9,14 @@
 class SolidModel;
 class SymmElasticityTensor;
 class VolumetricModel;
+namespace elk
+{
+namespace solid_mechanics
+{
+class Element;
+}
+}
+
 
 template<>
 InputParameters validParams<SolidModel>();
@@ -128,6 +136,11 @@ protected:
 private:
 
   void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
+
+  elk::solid_mechanics::Element * createElement( const std::string & name,
+                                                 InputParameters & parameters );
+
+  elk::solid_mechanics::Element * _element;
 
   SymmElasticityTensor * _local_elasticity_tensor;
 
