@@ -11,8 +11,6 @@ InputParameters validParams<LinearStrainHardening>()
     Iteration control parameters
    */
    params.addParam<Real>("tolerance", 1e-5, "Convergence tolerance for sub-newtion iteration");
-   params.addParam<unsigned int>("max_its", 10, "Maximum number of sub-newton iterations");
-   params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
 
 
    /*
@@ -33,7 +31,6 @@ LinearStrainHardening::LinearStrainHardening( const std::string & name,
   :MaterialModel( name, parameters ),
    _tolerance(parameters.get<Real>("tolerance")),
    _max_its(parameters.get<unsigned int>("max_its")),
-   _output_iteration_info(getParam<bool>("output_iteration_info")),
 
    _yield_stress(parameters.get<Real>("yield_stress")),
    _hardening_constant(parameters.get<Real>("hardening_constant")),

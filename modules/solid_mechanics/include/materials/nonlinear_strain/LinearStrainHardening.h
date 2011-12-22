@@ -23,12 +23,11 @@ public:
 protected:
 
 
-  Real _tolerance;
-  unsigned int _max_its;
-  bool _output_iteration_info;
+  const Real _tolerance;
+  const unsigned int _max_its;
 
-  Real _yield_stress;
-  Real _hardening_constant;
+  const Real _yield_stress;
+  const Real _hardening_constant;
 
   MaterialProperty<SymmTensor> & _plastic_strain;
   MaterialProperty<SymmTensor> & _plastic_strain_old;
