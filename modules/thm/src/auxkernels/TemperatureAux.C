@@ -26,5 +26,8 @@ TemperatureAux::TemperatureAux(const std::string & name, InputParameters paramet
 
 Real TemperatureAux::computeValue()
 {
+	//std::cout<<"_rhoE[_qp]: "<<_rhoE[_qp]<< " _rho[_qp]: "<<_rho[_qp]<<std::endl;
+	//std::cout<<"_vel[_qp]: "<<_vel[_qp]<<std::endl;
   return (_rhoE[_qp] / _rho[_qp] - 0.5 * _vel[_qp] * _vel[_qp]) / _cv;
+  //return (_rhoE[_qp] / _rho[_qp] - 0.) / _cv;
 }
