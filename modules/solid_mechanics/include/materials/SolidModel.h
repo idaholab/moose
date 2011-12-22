@@ -138,6 +138,8 @@ private:
   elk::solid_mechanics::Element * createElement( const std::string & name,
                                                  InputParameters & parameters );
 
+  void createElasticityTensor();
+
   elk::solid_mechanics::Element * _element;
 
   SymmElasticityTensor * _local_elasticity_tensor;

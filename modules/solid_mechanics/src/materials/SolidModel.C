@@ -6,6 +6,7 @@
 
 #include "Problem.h"
 #include "SymmIsotropicElasticityTensor.h"
+#include "SymmIsotropicElasticityTensorRZ.h"
 #include "VolumetricModel.h"
 
 template<>
@@ -172,11 +173,7 @@ SolidModel::SolidModel( const std::string & name,
   _shear_modulus_set = true;
   _youngs_modulus_set = true;
 
-  SymmIsotropicElasticityTensor * iso = new SymmIsotropicElasticityTensor(true);
-  iso->setLambda( _lambda );
-  iso->setShearModulus( _shear_modulus );
-  iso->calculate(0);
-  elasticityTensor( iso );
+  createElasticityTensor();
 
   if (_cracking_stress > 0)
   {
@@ -211,6 +208,32 @@ SolidModel::~SolidModel()
 {
   delete _local_elasticity_tensor;
   delete _element;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::createElasticityTensor()
+{
+  // The IsoRZ and Iso are actually the same...
+  if (_coord_sys == Moose::COORD_RZ)
+  {
+    SymmIsotropicElasticityTensorRZ * t = new SymmIsotropicElasticityTensorRZ;
+    mooseAssert(_lambda_set, "Internal error:  lambda not set");
+    t->setLambda(_lambda);
+    mooseAssert(_shear_modulus_set, "Internal error:  shear modulus not set");
+    t->setShearModulus(_shear_modulus);
+    t->calculate(0);
+    elasticityTensor( t );
+  }
+  else
+  {
+    SymmIsotropicElasticityTensor * iso = new SymmIsotropicElasticityTensor(true);
+    iso->setLambda( _lambda );
+    iso->setShearModulus( _shear_modulus );
+    iso->calculate(0);
+    elasticityTensor( iso );
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////

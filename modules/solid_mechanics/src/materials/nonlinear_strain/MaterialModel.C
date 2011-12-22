@@ -21,12 +21,6 @@ MaterialModel::MaterialModel( const std::string & name,
                               InputParameters parameters )
   :SolidModel( name, parameters )
 {
-  SymmIsotropicElasticityTensor * iso =  new SymmIsotropicElasticityTensor;
-  iso->setLambda( _lambda );
-  iso->setShearModulus( _shear_modulus );
-  iso->calculate(0);
-  elasticityTensor( iso );
-
 }
 
 ////////////////////////////////////////////////////////////////////////
