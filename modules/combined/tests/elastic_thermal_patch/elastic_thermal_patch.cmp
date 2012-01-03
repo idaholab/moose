@@ -1,0 +1,11 @@
+# custom compare file
+#
+# Indent with TABs. ALWAYS! Or do not be surprised then
+#
+# This example exercises the ability to print out NL steps to the solution file as time steps
+
+DEFAULT TOLERANCE relative 5.5e-6 floor 1.e-9
+COORDINATES
+TIME STEPS
+EXCLUDE TIMES 1-3
+NODAL VARIABLES (all)
