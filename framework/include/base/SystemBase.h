@@ -367,6 +367,7 @@ public:
   {
     *_sys.current_local_solution = *_sys.old_local_solution;
     *_sys.solution = *_sys.old_local_solution;
+    _sys.update();
   }
 
   virtual void projectSolution (Number fptr(const Point& p,

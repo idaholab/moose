@@ -46,6 +46,7 @@ public:
 
   virtual void init();
   virtual void solve();
+  virtual void restoreSolutions();
 
   // Setup Functions ////
   virtual void initialSetup();

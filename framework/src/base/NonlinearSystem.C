@@ -172,6 +172,15 @@ NonlinearSystem::solve()
 }
 
 void
+NonlinearSystem::restoreSolutions()
+{
+  // call parent
+  SystemTempl<TransientNonlinearImplicitSystem>::restoreSolutions();
+  // and update _current_solution
+  _current_solution = _sys.current_local_solution.get();
+}
+
+void
 NonlinearSystem::initialSetup()
 {
 }

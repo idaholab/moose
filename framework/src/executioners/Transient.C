@@ -143,12 +143,9 @@ void
 Transient::takeStep(Real input_dt)
 {
   if (_converged)
-  {
     _problem.copyOldSolutions();
-  }
   else
     _problem.restoreSolutions();
-  _problem.getNonlinearSystem().update();
 
   _dt_old = _dt;
   if (input_dt == -1.0)
