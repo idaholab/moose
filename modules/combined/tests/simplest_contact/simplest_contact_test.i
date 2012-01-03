@@ -40,22 +40,7 @@
   [../]
 []
 
-[Contact]
-  active = ' '
-  [./dummy_name]
-    master = 3
-    slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    penalty = 1e6
-  [../]
-[]
-
 [Constraints]
-#  active = ' '
-  active = 'contact_x contact_y'
-#  active = 'contact_x'
-#  active = 'contact_one_d'
   [./contact_x]
     type = MultiDContactConstraint
     variable = disp_x
@@ -77,21 +62,7 @@
     disp_y = disp_y
     penalty = 1e6
   [../]
-
-  [./contact_one_d]
-    type = OneDContactConstraint
-    variable = disp_x
-    component = 0
-    slave = 2
-    master = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    penalty = 1e6
-  [../]
 []
-
-[AuxKernels]
-[] # AuxKernels
 
 [BCs]
   [./left_x]
@@ -135,17 +106,6 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-#   [./stiffStuff2]
-#     type = Elastic
-#     block = 2
-
-#     disp_x = disp_x
-#     disp_y = disp_y
-#     disp_z = disp_z
-
-#     youngs_modulus = 1e6
-#     poissons_ratio = 0.3
-#   [../]
 [] # Materials
 
 # [Preconditioning]
