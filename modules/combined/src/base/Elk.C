@@ -104,6 +104,7 @@
 #include "SmoothCircleIC.h"
 #include "RndSmoothCircleIC.h"
 #include "RndBoundingBoxIC.h"
+#include "PFMobility.h"
 
 // contact
 #include "ContactAction.h"
@@ -222,7 +223,8 @@ Elk::registerObjects()
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
-
+  registerMaterial(PFMobility);
+  
   // contact
   registerAction(ContactAction, "meta_action");
   registerDiracKernel(ContactMaster);
