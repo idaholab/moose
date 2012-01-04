@@ -27,6 +27,5 @@ LIBMESH_DIR     ?= $(shell pwd)/../libmesh
 include build.mk
 include moose.mk
 
-
 ###############################################################################
 # Additional special case targets should be added here
