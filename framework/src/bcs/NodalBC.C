@@ -34,9 +34,12 @@ NodalBC::NodalBC(const std::string & name, InputParameters parameters) :
 void
 NodalBC::computeResidual(NumericVector<Number> & residual)
 {
-  unsigned int & dof_idx = _var.nodalDofIndex();
-  _qp = 0;
-  residual.set(dof_idx, computeQpResidual());
+  if (_var.isNodalDefined())
+  {
+    unsigned int & dof_idx = _var.nodalDofIndex();
+    _qp = 0;
+    residual.set(dof_idx, computeQpResidual());
+  }
 }
 
 void

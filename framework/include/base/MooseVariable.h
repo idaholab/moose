@@ -168,6 +168,7 @@ public:
 
   const Node * & node() { return _node; }
   unsigned int & nodalDofIndex() { return _nodal_dof_index; }
+  bool isNodalDefined() { return _is_defined; }
   VariableValue & nodalSln() { return _nodal_u; }
   VariableValue & nodalSlnOld() { return _nodal_u_old; }
   VariableValue & nodalSlnOlder() { return _nodal_u_older; }
@@ -182,6 +183,7 @@ public:
 
   const Node * & nodeNeighbor() { return _node_neighbor; }
   unsigned int & nodalDofIndexNeighbor() { return _nodal_dof_index_neighbor; }
+  bool isNodalNeighborDefined() { return _is_defined_neighbor; }
   VariableValue & nodalSlnNeighbor() { return _nodal_u_neighbor; }
   VariableValue & nodalSlnOldNeighbor() { return _nodal_u_old_neighbor; }
   VariableValue & nodalSlnOlderNeighbor() { return _nodal_u_older_neighbor; }

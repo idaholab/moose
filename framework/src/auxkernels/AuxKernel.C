@@ -89,9 +89,12 @@ AuxKernel::compute()
   Real value = 0;
   if (isNodal())
   {
-    _qp = 0;
-    value = computeValue();
-    _var.setNodalValue(value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
+    if (_var.isNodalDefined())
+    {
+      _qp = 0;
+      value = computeValue();
+      _var.setNodalValue(value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
+    }
   }
   else
   {
