@@ -86,7 +86,7 @@ DT2Transient::preSolve()
   *_u_saved = *nl_sys.current_local_solution;
   *_u_older_saved = *nl_sys.older_local_solution;
 
-  *_aux_saved = *aux_sys.solution;
+  *_aux_saved = *aux_sys.current_local_solution;
   *_aux_older_saved = *aux_sys.older_local_solution;
 
   _u_saved->close();
@@ -181,7 +181,8 @@ DT2Transient::lastSolveConverged()
     return true;
   else
   {
-    std::cout << "DT2Transient: Marking last solve not converged since |U2-U1|/max(|U2|,|U1|) >= e_max." << std::endl;
+    std::cout << "DT2Transient: Marking last solve not converged since |U2-U1|/max(|U2|,|U1|) = "
+              << _error << " >= e_max." << std::endl;
     return false;
   }
 }
