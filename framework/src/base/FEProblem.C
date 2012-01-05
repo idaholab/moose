@@ -1469,6 +1469,8 @@ FEProblem::init()
   Moose::setup_perf_log.pop("FEProblem::init::meshChanged()","Setup");
 
   init2();
+
+  _out.init();
 }
 
 void

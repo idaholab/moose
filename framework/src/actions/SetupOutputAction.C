@@ -55,6 +55,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("perf_log",        false,    "Specifies whether or not the Performance log should be printed");
   params.addParam<bool>("show_setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled in ""perf_log"" is false");
   params.addParam<std::vector<std::string> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
+  params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables also as nodal");
   params.addParam<bool>("exodus_inputfile_output", true, "Determines whether or not the input file is output to exodus - default (true)");
 
   return params;
@@ -72,8 +73,6 @@ SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
   output.fileBase(params.get<std::string>("file_base"));
 
   mooseAssert(params.have_parameter<std::vector<std::string> >("output_variables"), "Output Variables are required");
-
-  output.setOutputVariables(params.get<std::vector<std::string> >("output_variables"));
 
   if (params.get<bool>("exodus"))
   {
@@ -110,8 +109,18 @@ SetupOutputAction::act()
   if (_parser_handle._problem != NULL)
   {
     FEProblem & fe_problem = *_parser_handle._problem;
-    if(!_pars.isParamValid("output_variables"))
-      _pars.set<std::vector<std::string> >("output_variables") = fe_problem.getVariableNames();
+    if(_pars.isParamValid("output_variables"))
+    {
+      output.setOutputVariables(getParam<std::vector<std::string> >("output_variables"));
+    }
+    else
+    {
+      if (getParam<bool>("elemental_as_nodal"))
+      {
+        // output all variables in the system
+        output.setOutputVariables(fe_problem.getVariableNames());
+      }
+    }
 
     // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
     if (!_pars.isParamValid("file_base"))

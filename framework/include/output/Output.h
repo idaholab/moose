@@ -43,6 +43,8 @@ public:
   Output(FEProblem & problem, EquationSystems & eq);
   virtual ~Output();
 
+  void init();
+
   void add(Type type, bool output_input=true);
 
   // TODO: move to OutputProblem

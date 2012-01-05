@@ -43,6 +43,19 @@ Output::~Output()
 }
 
 void
+Output::init()
+{
+  // put nodal variables into _output_vars
+  std::vector<std::string> vars = _fe_problem.getVariableNames();
+  for (unsigned int i = 0; i < vars.size(); ++i)
+  {
+    MooseVariable & v = _fe_problem.getVariable(0, vars[i]);
+    if (v.isNodal())
+      _output_variables.push_back(vars[i]);
+  }
+}
+
+void
 Output::add(Output::Type type, bool output_input)
 {
   Outputter *o = NULL;
