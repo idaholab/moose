@@ -151,9 +151,6 @@ MultiDContactConstraint::shouldApply()
 Real
 MultiDContactConstraint::computeQpSlaveValue()
 {
-//  if(_name != "contact_x")
-//    return _u_slave[_qp];
-  
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 /*
   std::cerr<<std::endl
@@ -233,10 +230,6 @@ Real
 MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-  //const Node * node = pinfo->_node;
-
-//  if(_name != "contact_x")
-//    return 0;
   
   double slave_jac = 0;
   switch(type)
@@ -283,9 +276,6 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
       mooseError("Invalid or unavailable contact model");
     }
     return _test_slave[_i][_qp] * slave_jac;
-
-
-//    return -_phi_master[_j][_qp]*_test_slave[_i][_qp];
   case Moose::MasterSlave:
     slave_jac = (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
     return slave_jac*_test_master[_i][_qp];
