@@ -100,33 +100,17 @@ NodeFaceConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
 void
 NodeFaceConstraint::computeResidual()
 {
-//  std::cerr<<"Here!"<<std::endl;
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_var.number());
 
-//  for (_qp = 0; _qp < _master_qrule->n_points(); _qp++)
-//  {
-//    _current_point=_physical_point[_qp];
-//    if(isActiveAtPoint(_current_elem, _current_point))
-//    {
-    // Only one of these because we are computing at _one_ node.
-//  std::cerr<<neighbor_re.size()<<std::endl;
   _qp=0;
 
   for (_i=0; _i<_test_master.size(); _i++)
     neighbor_re(_i) += computeQpResidual(Moose::Master);
 
-//  std::cerr<<"Not Here!"<<std::endl;
-//  std::cout<<neighbor_re<<std::endl;
 
   _i=0;
-
-
-//  std::cout<<re.size()<<std::endl;
-
   re(0) = computeQpResidual(Moose::Slave);
-
-//  }
 }
 
 void
@@ -138,7 +122,6 @@ NodeFaceConstraint::computeJacobian()
   std::set<unsigned int> unique_dof_indices;
 
   // Get the dof indices from each elem connected to the node
-  //
   for(unsigned int el=0; el < elems.size(); ++el)
   {
     unsigned int cur_elem = elems[el];
@@ -153,10 +136,10 @@ NodeFaceConstraint::computeJacobian()
   for(std::set<unsigned int>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
     _connected_dof_indices.push_back(*sit);
 
-  //DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
+  //  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
   DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
-//  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
+  //  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
   DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
   _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
@@ -179,7 +162,7 @@ NodeFaceConstraint::computeJacobian()
   }
 
   for (_i = 0; _i < _test_slave.size(); _i++)
-//    for (_j=0; _j<_phi_slave.size(); _j++)
+    // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j=0; _j<_connected_dof_indices.size(); _j++)
       _Kee(_i,_j) += computeQpJacobian(Moose::SlaveSlave);
 
@@ -188,7 +171,6 @@ NodeFaceConstraint::computeJacobian()
       Ken(_i,_j) += computeQpJacobian(Moose::SlaveMaster);
 
   for (_i=0; _i<_test_master.size(); _i++)
-//    for (_j=0; _j<_phi_slave.size(); _j++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j=0; _j<_connected_dof_indices.size(); _j++)
       _Kne(_i,_j) += computeQpJacobian(Moose::MasterSlave);

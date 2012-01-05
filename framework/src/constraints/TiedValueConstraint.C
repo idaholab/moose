@@ -40,15 +40,12 @@ TiedValueConstraint::computeQpSlaveValue()
 Real
 TiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
 {
-//    std::cerr<<"slave: "<<_u_slave[_qp]<<", master:"<<_u_master[_qp]<<std::endl;
-//  _u_master[_qp] = 0.5;
   switch(type)
   {
   case Moose::Slave:
     return (_u_slave[_qp] - _u_master[_qp])*_test_slave[_i][_qp];
   case Moose::Master:
     double slave_resid = _residual_copy(_current_node->dof_number(0, _var.number(), 0));
-//    std::cerr<<"slave_resid: "<<slave_resid<<std::endl;
     return slave_resid*_test_master[_i][_qp];
   }
   return 0;
