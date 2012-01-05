@@ -268,6 +268,7 @@
 [Output]
   interval = 1
   output_initial = true
+  elemental_as_nodal = true
   exodus = true
 #  perf_log = true
 [] # Output

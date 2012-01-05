@@ -238,6 +238,7 @@
   file_base = out
   interval = 1
   output_initial = true
+  elemental_as_nodal = true
   exodus = true
   postprocessor_csv = true
   perf_log = true
