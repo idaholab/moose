@@ -224,7 +224,7 @@ Elk::registerObjects()
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerMaterial(PFMobility);
-  
+
   // contact
   registerAction(ContactAction, "meta_action");
   registerDiracKernel(ContactMaster);
