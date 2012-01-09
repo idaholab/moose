@@ -1705,9 +1705,13 @@ FEProblem::meshChanged()
   _eq.reinit();
   _mesh.meshChanged();
   _geometric_search_data.update();
+  _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
 
   if(_displaced_problem != NULL)
+  {
     _displaced_problem->meshChanged();
+    _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
+  }
 }
 
 void

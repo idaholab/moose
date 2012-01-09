@@ -29,6 +29,7 @@
 
 class FEProblem;
 class MooseMesh;
+class DisplacedProblem;
 
 /**
  * Takes care of everything related to mesh adaptivity
@@ -121,6 +122,9 @@ protected:
   ErrorEstimator * _error_estimator;            ///< Error estimator to be used by the apps.
   ErrorVector * _error;                         ///< Error vector for use with the error estimator.
 
+  DisplacedProblem * & _displaced_problem;
+  MeshRefinement * _displaced_mesh_refinement;  ///< A mesh refinement object for displaced mesh
+
   unsigned int _initial_steps;                  ///< the number of adaptivity steps to do at the beginning of simulation
   unsigned int _steps;                          ///< steps of adaptivity to perform
 
@@ -138,14 +142,20 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
   if (param_name == "refine fraction")
   {
     _mesh_refinement->refine_fraction() = param_value;
+    if (_displaced_mesh_refinement)
+      _displaced_mesh_refinement->refine_fraction() = param_value;
   }
   else if (param_name == "coarsen fraction")
   {
     _mesh_refinement->coarsen_fraction() = param_value;
+    if (_displaced_mesh_refinement)
+      _displaced_mesh_refinement->coarsen_fraction() = param_value;
   }
   else if (param_name == "max h-level")
   {
     _mesh_refinement->max_h_level() = param_value;
+    if (_displaced_mesh_refinement)
+      _displaced_mesh_refinement->max_h_level() = param_value;
   }
   else
   {

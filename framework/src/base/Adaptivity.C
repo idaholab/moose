@@ -18,6 +18,7 @@
 #include "MooseMesh.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
+#include "DisplacedProblem.h"
 // libMesh
 #include "equation_systems.h"
 #include "kelly_error_estimator.h"
@@ -32,6 +33,8 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _mesh_refinement(NULL),
     _error_estimator(NULL),
     _error(NULL),
+    _displaced_problem(_subproblem.getDisplacedProblem()),
+    _displaced_mesh_refinement(NULL),
     _initial_steps(0),
     _steps(0),
     _print_mesh_changed(false),
@@ -46,6 +49,8 @@ Adaptivity::~Adaptivity()
   delete _mesh_refinement;
   delete _error;
   delete _error_estimator;
+
+  delete _displaced_mesh_refinement;
 }
 
 void
@@ -64,6 +69,17 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   _error = new ErrorVector;
 
   _mesh_refinement->set_periodic_boundaries_ptr(_subproblem.getNonlinearSystem().dofMap().get_periodic_boundaries());
+
+  // displaced problem
+  if (_displaced_problem != NULL)
+  {
+    EquationSystems & displaced_es = _displaced_problem->es();
+    displaced_es.parameters.set<bool>("adaptivity") = true;
+
+    if (!_displaced_mesh_refinement)
+      _displaced_mesh_refinement = new MeshRefinement(_displaced_problem->mesh());
+    _displaced_mesh_refinement->set_periodic_boundaries_ptr(_subproblem.getNonlinearSystem().dofMap().get_periodic_boundaries());
+  }
 }
 
 void
@@ -94,9 +110,15 @@ Adaptivity::adaptMesh()
 
     // Flag elements to be refined and coarsened
     _mesh_refinement->flag_elements_by_error_fraction (*_error);
-
     // Perform refinement and coarsening
     _mesh_refinement->refine_and_coarsen_elements();
+
+    if (_displaced_problem)
+    {
+      // Reuse the error vector and refine the displaced mesh
+      _displaced_mesh_refinement->flag_elements_by_error_fraction (*_error);
+      _displaced_mesh_refinement->refine_and_coarsen_elements();
+    }
 
     if (_print_mesh_changed)
     {
@@ -109,12 +131,16 @@ Adaptivity::adaptMesh()
 void
 Adaptivity::uniformRefine(unsigned int level)
 {
-  // NOTE: we are using a separate object here, since adaptivity may not be on, bu we need to be able to do refinements
+  // NOTE: we are using a separate object here, since adaptivity may not be on, but we need to be able to do refinements
   MeshRefinement mesh_refinement(_mesh);
+  MeshRefinement displaced_mesh_refinement(_displaced_problem ? _displaced_problem->mesh() : _mesh);
+
   // we have to go step by step so EquationSystems::reinit() won't freak out
   for (unsigned int i = 0; i < level; i++)
   {
     mesh_refinement.uniformly_refine(1);
+    if (_displaced_problem)
+      displaced_mesh_refinement.uniformly_refine(1);
     _subproblem.meshChanged();
   }
 }
