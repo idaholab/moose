@@ -102,8 +102,8 @@ DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_m
     _eq(displaced_mesh),
     _ref_mesh(_mproblem.mesh()),
     _displacements(displacements),
-    _displaced_nl(*this, _mproblem.getNonlinearSystem(), "DisplacedSystem"),
-    _displaced_aux(*this, _mproblem.getAuxiliarySystem(), "DisplacedAuxSystem"),
+    _displaced_nl(*this, _mproblem.getNonlinearSystem(), "DisplacedSystem", Moose::VAR_NONLINEAR),
+    _displaced_aux(*this, _mproblem.getAuxiliarySystem(), "DisplacedAuxSystem", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh),
     _ex(_eq)
 {

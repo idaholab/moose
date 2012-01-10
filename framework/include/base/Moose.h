@@ -85,6 +85,12 @@ void setSolverDefaults(FEProblem & problem);
  * Framework-wide stuff
  */
 
+enum VarKindType
+{
+  VAR_NONLINEAR,
+  VAR_AUXILIARY
+};
+
 enum TimeSteppingScheme
 {
   IMPLICIT_EULER,

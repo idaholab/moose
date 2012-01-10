@@ -12,31 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DisplacedSystem.h"
-#include "DisplacedProblem.h"
+#include "DotCouplingKernel.h"
 
-DisplacedSystem::DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name, Moose::VarKindType var_kind) :
-    SystemTempl<TransientExplicitSystem>(problem, name, var_kind),
-    _undisplaced_system(undisplaced_system)
+template<>
+InputParameters validParams<DotCouplingKernel>()
+{
+  InputParameters params = validParams<Kernel>();
+  params.addCoupledVar("v", "Variable being coupled");
+  return params;
+}
+
+DotCouplingKernel::DotCouplingKernel(const std::string & name, InputParameters parameters) :
+    Kernel(name, parameters),
+    _v_dot(coupledDot("v"))
 {
 }
 
-DisplacedSystem::~DisplacedSystem()
+DotCouplingKernel::~DotCouplingKernel()
 {
 }
 
-void
-DisplacedSystem::init()
+Real
+DotCouplingKernel::computeQpResidual()
 {
-  dofMap().attach_extra_send_list_function(&extraSendList, this);
+  return _v_dot[_qp];
 }
-
-NumericVector<Number> &
-DisplacedSystem::getVector(std::string name)
-{
-  if(_sys.have_vector(name))
-    return _sys.get_vector(name);
-  else
-    return _undisplaced_system.getVector(name);
-}
-

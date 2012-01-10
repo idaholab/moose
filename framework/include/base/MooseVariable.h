@@ -15,6 +15,7 @@
 #ifndef MOOSEVARIABLE_H
 #define MOOSEVARIABLE_H
 
+#include "Moose.h"
 #include "MooseArray.h"
 #include "ParallelUniqueId.h"
 
@@ -99,7 +100,7 @@ protected:
 class MooseVariable
 {
 public:
-  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly);
+  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariable();
 
   void prepare();
@@ -115,6 +116,9 @@ public:
 
   /// Get the variable number
   const std::string & name();
+
+  /// Kind of the variable (Nonlinear, Auxiliary, ...)
+  Moose::VarKindType kind() { return _var_kind; }
 
   const std::set<subdomain_id_type> & activeSubdomains();
 
@@ -227,6 +231,7 @@ public:
 protected:
   THREAD_ID _tid;                                               ///< Thread ID
   unsigned int _var_num;                                        ///< variable number (from libMesh)
+  Moose::VarKindType _var_kind;
   SubProblem & _subproblem;                                     ///< Problem this variable is part of
   SystemBase & _sys;                                            ///< System this variable is part of
 

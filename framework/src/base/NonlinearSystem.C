@@ -65,7 +65,7 @@ namespace Moose {
 } // namespace Moose
 
 NonlinearSystem::NonlinearSystem(FEProblem & subproblem, const std::string & name) :
-    SystemTempl<TransientNonlinearImplicitSystem>(subproblem, name),
+    SystemTempl<TransientNonlinearImplicitSystem>(subproblem, name, Moose::VAR_NONLINEAR),
     _mproblem(subproblem),
     _last_rnorm(0),
     _l_abs_step_tol(1e-10),

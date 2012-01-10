@@ -29,6 +29,7 @@
 #include "NanKernel.h"
 #include "MatConvection.h"
 #include "PPSDiffusion.h"
+#include "DotCouplingKernel.h"
 
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
@@ -94,6 +95,7 @@ void registerObjects()
   registerKernel(NanKernel);
   registerKernel(MatConvection);
   registerKernel(PPSDiffusion);
+  registerKernel(DotCouplingKernel);
 
   // Aux kernels
   registerAux(PolyConstantAux);

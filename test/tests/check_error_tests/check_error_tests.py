@@ -100,3 +100,7 @@ unused_param_test = {
  EXPECT_OUT : 'WARNING: The following parameters were unused in your input file'
 }
 
+coupled_dot_aux_var_test = {
+  INPUT : 'coupled_dot_aux_var_test.i',
+	EXPECT_ERR : 'Coupling time derivative of an auxiliary variable is not allowed.'
+}

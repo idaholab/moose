@@ -111,8 +111,9 @@ VariableData::computeValues()
 
 // Variable /////
 
-MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly) :
+MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),
+    _var_kind(var_kind),
     _subproblem(sys.subproblem()),
     _sys(sys),
     _dof_map(sys.dofMap()),

@@ -116,6 +116,9 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 {
+  if (getVar(var_name, comp)->kind() == Moose::VAR_AUXILIARY)
+    mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
+
   if (_nodal)
     mooseError("Nodal variables do not have u_dot defined");
   else
@@ -125,6 +128,9 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
+  if (getVar(var_name, comp)->kind() == Moose::VAR_AUXILIARY)
+    mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
+
   if (_nodal)
     mooseError("Nodal variables do not have du_dot_du defined");
   else

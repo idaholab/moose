@@ -15,6 +15,7 @@
 #ifndef DISPLACEDSYSTEM_H
 #define DISPLACEDSYSTEM_H
 
+#include "Moose.h"
 #include "SystemBase.h"
 // libMesh include
 #include "explicit_system.h"
@@ -26,7 +27,7 @@ class DisplacedProblem;
 class DisplacedSystem : public SystemTempl<TransientExplicitSystem>
 {
 public:
-  DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name);
+  DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name, Moose::VarKindType var_kind);
   virtual ~DisplacedSystem();
 
   virtual void init();

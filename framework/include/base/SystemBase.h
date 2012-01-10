@@ -276,9 +276,10 @@ template<typename T>
 class SystemTempl : public SystemBase
 {
 public:
-  SystemTempl(SubProblem & subproblem, const std::string & name) :
+  SystemTempl(SubProblem & subproblem, const std::string & name, Moose::VarKindType var_kind) :
       SystemBase(subproblem, name),
       _sys(subproblem.es().add_system<T>(_name)),
+      _var_kind(var_kind),
       _solution(*_sys.solution),
       _solution_old(*_sys.old_local_solution),
       _solution_older(*_sys.older_local_solution),
@@ -295,7 +296,7 @@ public:
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid));
+      MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
 
@@ -418,6 +419,7 @@ public:
 
 protected:
   T & _sys;
+  Moose::VarKindType _var_kind;                                      ///< default kind of variables in this system
 
   NumericVector<Number> & _solution;
   NumericVector<Number> & _solution_old;

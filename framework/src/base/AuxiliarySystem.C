@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "AuxiliarySystem.h"
+#include "Moose.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "AuxKernel.h"
@@ -29,7 +30,7 @@
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & name) :
-    SystemTempl<TransientExplicitSystem>(subproblem, name),
+    SystemTempl<TransientExplicitSystem>(subproblem, name, Moose::VAR_AUXILIARY),
     _mproblem(subproblem),
     _serialized_solution(*NumericVector<Number>::build().release()),
     _need_serialized_solution(false)
@@ -94,7 +95,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
   unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid));
+    MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
     if (var->feType().family == LAGRANGE)
