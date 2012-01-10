@@ -15,7 +15,7 @@
 #include "HeatConduction.h"
 #include "HeatConductionImplicitEuler.h"
 #include "HeatConductionMaterial.h"
-
+#include "BulkCoolantBC.h"
 
 // navier_stokes
 #include "NSMassInviscidFlux.h"
@@ -127,6 +127,7 @@ Elk::registerObjects()
   registerPostprocessor(InternalVolume);
 
   registerBoundaryCondition(GapHeatTransfer);
+  registerBoundaryCondition(BulkCoolantBC);
   registerKernel(HeatConduction);
   registerKernel(HeatConductionImplicitEuler);
   registerMaterial(HeatConductionMaterial);
