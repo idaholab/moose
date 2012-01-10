@@ -22,7 +22,7 @@ InputParameters validParams<CoupledAux>()
   params.addRequiredCoupledVar("coupled", "Coupled Value for Calculation");
 
   params.addParam<Real>("value", 0.0, "A value to use in the binary arithmetic operation of this coupled auxkernel");
-  params.addParam<std::string>("operator", '+', "The binary operator to use in the calculation");
+  params.addParam<std::string>("operator", "+", "The binary operator to use in the calculation");
   return params;
 }
 

@@ -103,6 +103,7 @@ unused_param_test = {
 coupled_dot_aux_var_test = {
   INPUT : 'coupled_dot_aux_var_test.i',
   EXPECT_ERR : 'Coupling time derivative of an auxiliary variable is not allowed.'
+}
 
 invalid_elemental_to_nodal_couple_test = {
     INPUT : 'invalid_aux_coupling_test.i',
