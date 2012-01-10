@@ -28,6 +28,7 @@ InputParameters validParams<IntegratedBC>()
 IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters) :
     BoundaryCondition(name, parameters),
     Coupleable(parameters, false),
+    MaterialPropertyInterface(parameters),
     _current_elem(_assembly.elem()),
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),

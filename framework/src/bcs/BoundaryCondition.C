@@ -37,7 +37,6 @@ BoundaryCondition::BoundaryCondition(const std::string & name, InputParameters p
     SetupInterface(parameters),
     FunctionInterface(parameters),
     TransientInterface(parameters),
-    MaterialPropertyInterface(parameters),
     PostprocessorInterface(parameters),
     GeometricSearchInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),

@@ -72,7 +72,12 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
   if (_coupled_vars.find(var_name) != _coupled_vars.end())
   {
     if (comp < _coupled_vars[var_name].size())
+    {
+      // Error check - don't couple elemental to nodal
+      if (!(_coupled_vars[var_name][comp])->isNodal() && _nodal)
+        mooseError("You cannot couple an elemental variable to a nodal variable");
       return _coupled_vars[var_name][comp];
+    }
     else
       mooseError("Trying to get a non-existent component of variable '" + var_name + "'");
   }

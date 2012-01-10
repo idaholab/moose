@@ -22,7 +22,6 @@
 #include "MooseArray.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
-#include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "Assembly.h"
@@ -50,7 +49,6 @@ class BoundaryCondition :
   public SetupInterface,
   public FunctionInterface,
   public TransientInterface,
-  public MaterialPropertyInterface,
   public PostprocessorInterface,
   public GeometricSearchInterface
 {

@@ -52,7 +52,6 @@
 #include "VectorNeumannBC.h"
 #include "WeakGradientBC.h"
 // auxkernels
-#include "CoupledAux.h"
 #include "ConstantAux.h"
 #include "FunctionAux.h"
 #include "NearestNodeDistanceAux.h"
@@ -220,7 +219,6 @@ registerObjects()
   registerDiracKernel(ConstantPointSource);
 
   // aux kernels
-  registerAux(CoupledAux);
   registerAux(ConstantAux);
   registerAux(FunctionAux);
   registerAux(NearestNodeDistanceAux);

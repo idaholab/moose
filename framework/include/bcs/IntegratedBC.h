@@ -18,6 +18,7 @@
 #include "BoundaryCondition.h"
 #include "Coupleable.h"
 #include "MooseVariable.h"
+#include "MaterialPropertyInterface.h"
 
 // libMesh
 #include "fe.h"
@@ -33,7 +34,8 @@ InputParameters validParams<IntegratedBC>();
  */
 class IntegratedBC :
   public BoundaryCondition,
-  public Coupleable
+  public Coupleable,
+  public MaterialPropertyInterface
 {
 public:
   IntegratedBC(const std::string & name, InputParameters parameters);

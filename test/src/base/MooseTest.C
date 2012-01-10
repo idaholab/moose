@@ -31,6 +31,7 @@
 #include "PPSDiffusion.h"
 #include "DotCouplingKernel.h"
 
+#include "CoupledAux.h"
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
 #include "DoNothingAux.h"
@@ -98,6 +99,7 @@ void registerObjects()
   registerKernel(DotCouplingKernel);
 
   // Aux kernels
+  registerAux(CoupledAux);
   registerAux(PolyConstantAux);
   registerAux(MMSConstantAux);
   registerAux(DoNothingAux);
