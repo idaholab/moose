@@ -7,7 +7,7 @@ app_path = os.path.abspath(os.path.dirname(sys.argv[0]))
 app_path += '/..'
 
 # Set the name of the application here and moose directory relative to the application
-app_name = 'elk_test'
+app_name = 'elk'
 MOOSE_DIR = app_path + '/../moose'
 # See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
