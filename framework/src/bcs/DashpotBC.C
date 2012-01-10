@@ -23,7 +23,7 @@ InputParameters validParams<DashpotBC>()
   params.addCoupledVar("disp_y", "Displacement in the y direction");
   params.addCoupledVar("disp_z", "Displacement in the z direction");
 
-  params.addParam<Real>("coefficient", 1.0, "The viscocity coefficient");
+  params.addParam<Real>("coefficient", 1.0, "The viscosity coefficient");
 
   return params;
 }
@@ -36,7 +36,7 @@ DashpotBC::DashpotBC(const std::string & name, InputParameters parameters) :
     _disp_y_var(isCoupled("disp_y") ? coupled("disp_y") : 0),
     _disp_z_var(isCoupled("disp_z") ? coupled("disp_z") : 0),
 
-    _disp_x_dot(coupledValue("disp_x")),
+    _disp_x_dot(coupledDot("disp_x")),
     _disp_y_dot(isCoupled("disp_y") ? coupledDot("disp_y") : _zero),
     _disp_z_dot(isCoupled("disp_z") ? coupledDot("disp_z") : _zero)
 {}
