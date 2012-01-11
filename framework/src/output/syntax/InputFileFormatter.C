@@ -55,6 +55,9 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
       index = 0;
     std::string block_name = name.substr(index);
     _out << "\n" << spacing << "[" << forward << block_name << "]";
+
+    // selectively clear the parameter cache for these hacked sections
+    _seen_it[name].clear();
   }
 
   for (unsigned int i=0; i<param_ptrs.size(); ++i)
@@ -89,7 +92,7 @@ InputFileFormatter::print(const std::string & name, const std::string * prev_nam
 
       // Insert it into our set so we know not to print the same paramter again if this block is registered
       // multiple times
-//      _seen_it[name].insert(iter->first);
+      _seen_it[name].insert(iter->first);
 
       _out << "\n" << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
       size_t l_offset = 30;
