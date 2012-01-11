@@ -5,7 +5,7 @@ InputParameters validParams<BulkCoolantBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<Real>("heat_transfer_coefficient",2E3, "heat transfer coefficient W/m^2-K"); //should be optionally a material property
-  params.addParam<Real>("bulk_temparature",800., "Bulk fluid temperature K");
+  params.addParam<Real>("bulk_temperature",800., "Bulk fluid temperature K");
   params.addParam<std::string>("function", "function describing bulk temperature");
   return params;
 }
