@@ -451,50 +451,59 @@ Parser::buildFullTree()
   {
     InputParameters action_obj_params = ActionFactory::instance()->getValidParams(act_names->second._action);
 
+    // DEBUG
+    std::cout << std::endl;
     const std::string & action_name = act_names->second._action_name;
     std::string act_name = act_names->first;
 
     params_ptrs[0] = &action_obj_params;
 
     bool print_once = false;
-    for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
-         moose_obj != Factory::instance()->registeredObjectsEnd();
-         ++moose_obj)
+
+    // We need to see if this action is inherited from MooseObjectAction
+    // If it is, then we will loop over all the Objects in MOOSE's Factory object to print them out
+    // if they have matching "built_by_action" tags.
+    if (action_obj_params.have_parameter<bool>("isMooseObjectAction") && action_obj_params.get<bool>("isMooseObjectAction"))
     {
-      InputParameters moose_obj_params = (moose_obj->second)();
-
-      if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
-          (moose_obj_params.get<std::string>("built_by_action") == action_name ||
-           // Print out aux_bcs which are "built_by_action" add_aux_kernel
-           (action_name == "add_aux_bc" &&
-            moose_obj_params.get<std::string>("built_by_action") == "add_aux_kernel")))
+      for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
+           moose_obj != Factory::instance()->registeredObjectsEnd();
+           ++moose_obj)
       {
-        print_once = true;
-        std::string name;
-        size_t pos = 0;
-        if (act_name[act_name.size()-1] == '*')
-          pos = act_name.size()-1;
-        else
-          pos = act_name.size();
+        InputParameters moose_obj_params = (moose_obj->second)();
 
-        // Executioner and Initial Condition syntax is non standard - we'll hack it here
-        if (act_name == "Executioner")
-          name = "Executioner";
-        else if (act_name.find("InitialCondition") != std::string::npos)
-          name = act_name;
-        else
-          name = act_name.substr(0, pos) + moose_obj->first;
+        if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
+            (moose_obj_params.get<std::string>("built_by_action") == action_name ||
+             // Print out aux_bcs which are "built_by_action" add_aux_kernel
+             (action_name == "add_aux_bc" &&
+              moose_obj_params.get<std::string>("built_by_action") == "add_aux_kernel")))
+        {
+          print_once = true;
+          std::string name;
+          size_t pos = 0;
+          if (act_name[act_name.size()-1] == '*')
+            pos = act_name.size()-1;
+          else
+            pos = act_name.size();
 
-        moose_obj_params.set<std::string>("type") = moose_obj->first;
-        moose_obj_params.seenInInputFile("type");
-        params_ptrs[1] = &moose_obj_params;
+          // Executioner and Initial Condition syntax is non standard - we'll hack it here
+          if (act_name == "Executioner")
+            name = "Executioner";
+          else if (act_name.find("InitialCondition") != std::string::npos)
+            name = act_name;
+          else
+            name = act_name.substr(0, pos) + moose_obj->first;
 
-        _syntax_formatter->print(name, &prev_name, params_ptrs);
+          moose_obj_params.set<std::string>("type") = moose_obj->first;
+          moose_obj_params.seenInInputFile("type");
+          params_ptrs[1] = &moose_obj_params;
 
-        prev_name = name;
+          _syntax_formatter->print(name, &prev_name, params_ptrs);
+
+          prev_name = name;
+        }
       }
     }
-
+    // Not a MOOSE Object Action
     if (!print_once && ActionFactory::instance()->isParsed(act_name))
     {
       params_ptrs[1] = NULL;

@@ -20,6 +20,7 @@ InputParameters validParams<DeprecatedBlockAction>()
 {
   InputParameters params = validParams<Action>();
 
+  params.addParam<bool>("DEPRECATED", "*** WARNING: This block is deprecated - DO NOT USE ***");
   return params;
 }
 

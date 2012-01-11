@@ -185,9 +185,10 @@ void associateSyntax()
 
   syntax.registerActionSyntax("EmptyAction", "Postprocessors");
   syntax.registerActionSyntax("AddPostprocessorAction", "Postprocessors/*");
-  syntax.registerActionSyntax("EmptyAction", "Postprocessors/Residual");   // placeholder
-  syntax.registerActionSyntax("EmptyAction", "Postprocessors/Jacobian");   // placeholder
-  syntax.registerActionSyntax("EmptyAction", "Postprocessors/NewtonIter"); // placeholder
+
+  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual");
+  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian");
+  syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter");
   syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Residual/*");
   syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/Jacobian/*");
   syntax.registerActionSyntax("DeprecatedBlockAction", "Postprocessors/NewtonIter/*");
