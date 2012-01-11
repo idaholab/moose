@@ -18,13 +18,16 @@ class RunParallel:
   ## Return this return code if the process must be killed because of timeout
   TIMEOUT = -999999
 
-  def __init__(self, harness, max_processes=1):
+  def __init__(self, harness, max_processes=1, average_load=64.0):
     ## The test harness to run callbacks on
     self.harness = harness
 
     ## List of currently running jobs as (Popen instance, command, test, time when expires) tuples
     # None means no job is running in this slot
     self.jobs = [None] * max_processes
+
+    # Requested average load level to stay below
+    self.average_load = average_load
 
     # Queue for jobs needing a prereq
     self.queue = Queue()
@@ -34,6 +37,9 @@ class RunParallel:
 
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
   def run(self, test, command):
+
+    # Make sure we are complying with the requested load average
+    self.satisfyLoad()
 
     # Make sure the job doesn't have an unsatisfied prereq
     if test[PREREQ] != None and not test[PREREQ] in self.finished_jobs:
@@ -99,7 +105,7 @@ class RunParallel:
   #
   # When a process exits (or times out) call returnToTestHarness and return from
   # this function.
-  def spinwait(self):
+  def spinwait(self, time_to_wait=0.05):
     now = clock()
     job_index = 0
     for tuple in self.jobs:
@@ -110,7 +116,14 @@ class RunParallel:
           break
       job_index += 1
 
-    sleep(0.05) # sleep for 50ms
+    sleep(time_to_wait)
+
+  def satisfyLoad(self):
+    # We'll always run at least one job regardless of load or we'll starve!
+    while self.jobs.count(None) < len(self.jobs) and os.getloadavg()[0] >= self.average_load:
+#      print "DEBUG: Sleeping... ", len(self.jobs) - self.jobs.count(None), " jobs running (load average: ", os.getloadavg()[0], ")\n"
+      self.spinwait(0.5) # If the load average is high we'll sleep longer here to let things clear out
+#    print "DEBUG: Ready to run (load average: ", os.getloadavg()[0], ")\n"
 
   ## Wait until all processes are done, then return
   def join(self):

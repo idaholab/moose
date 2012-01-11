@@ -401,7 +401,7 @@ class TestHarness:
     self.parseCLArgs(argv)
 
     # Initialize the parallel runner with how many tests to run in parallel
-    self.runner = RunParallel(self, self.options.jobs)
+    self.runner = RunParallel(self, self.options.jobs, self.options.load)
 
     ## Save executable-under-test name to self.executable
     self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
@@ -433,13 +433,20 @@ class TestHarness:
     parser.add_option('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
     parser.add_option('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
     parser.add_option('--dev', action='store_const', dest='method', const='dev', help='test the app_name-dev binary')
-    parser.add_option('-j', '--jobs', action='store', type='int', dest='jobs', default=1, help='run test binaries in parallel')
-    parser.add_option("-c", "--no-color", action="store_false", dest="colored", default=True, help="Do not show colored output")
-    parser.add_option('--heavy', action='store_true', dest='heavy_tests', default=False, help='Run normal tests and tests marked with HEAVY : True')
-    parser.add_option('-g', '--group', action='store', type='string', dest='group', default='ALL', help='Run only tests in the named group')
-    parser.add_option('--not_group', action='store', type='string', dest='not_group', default='', help='Run only tests NOT in the named group')
-    parser.add_option('--dofs', action='store', dest='dofs', default=0, help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
-
+    parser.add_option('-j', '--jobs', action='store', type='int', dest='jobs', default=1,
+                      help='run test binaries in parallel')
+    parser.add_option("-c", "--no-color", action="store_false", dest="colored", default=True,
+                      help="Do not show colored output")
+    parser.add_option('--heavy', action='store_true', dest='heavy_tests', default=False,
+                      help='Run normal tests and tests marked with HEAVY : True')
+    parser.add_option('-g', '--group', action='store', type='string', dest='group', default='ALL',
+                      help='Run only tests in the named group')
+    parser.add_option('--not_group', action='store', type='string', dest='not_group', default='',
+                      help='Run only tests NOT in the named group')
+    parser.add_option('--dofs', action='store', dest='dofs', default=0,
+                      help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
+    parser.add_option('-l', '--load-average', action='store', type='float', dest='load', default=64.0,
+                      help='Do not run additional tests if the load average is at least LOAD')
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
@@ -451,7 +458,6 @@ class TestHarness:
     outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
     outputgroup.add_option("--store-timing", action="store_true", dest="time", default=False, help="Store timing in the database (Currently not implemented)")
     outputgroup.add_option("-r", "--revision", action="store", dest="revision", help="REQUIRED: the current revision (Currently not implemented)")
-
 
 
     parser.add_option_group(outputgroup)
