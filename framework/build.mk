@@ -8,6 +8,9 @@
 
 include $(LIBMESH_DIR)/Make.common
 
+# Number of JOBS to run in parallel used in run_tests
+JOBS ?= 1
+
 all::
 
 #
@@ -132,6 +135,22 @@ else
   libext := $(static_libext)
 endif
 
+# Build appliations up the tree
+up: all
+	@echo ====== Building the following applications: $(DEP_APPS) ======
+	@for app in $(DEP_APPS); \
+	do \
+		echo ====== Making in $${app} ====== ; \
+		(cd $(ROOT_DIR)/$$app && $(MAKE)) ; \
+	done
+
+test_up: all up
+	@echo ====== Testing the following applications: $(DEP_APPS) ======
+	@for app in $(DEP_APPS); \
+	do \
+		echo ====== Testing in $${app} ====== ; \
+		(cd $(ROOT_DIR)/$$app && ./run_tests -j $(JOBS)) ; \
+	done
 #
 # Maintenance
 #

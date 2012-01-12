@@ -20,6 +20,8 @@ all::
 
 CURR_DIR	?= $(shell pwd)
 MOOSE_DIR	?= $(shell pwd)
+ROOT_DIR        ?= $(shell scripts/find_dep_apps.py ROOT)
+DEP_APPS	?= $(shell scripts/find_dep_apps.py MOOSE)
 
 #Note: If you are a developer this will not work
 # This line assumes that moose and libmesh are peer dirs

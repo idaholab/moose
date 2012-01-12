@@ -23,6 +23,10 @@ LIBMESH_DIR ?= $(ROOT_DIR)/libmesh
 
 APPLICATION_NAME := moose_test
 
+# Note: There are no applications that depend on moose_test so the test_up and up
+# targets are not very useful here.  Instead we will test up like this is MOOSE
+DEP_APPS    ?= $(shell $(MOOSE_DIR)/scripts/find_dep_apps.py MOOSE)
+
 include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk
 include $(MOOSE_DIR)/app.mk

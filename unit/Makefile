@@ -24,6 +24,8 @@ LIBMESH_DIR ?= $(ROOT_DIR)/libmesh
 
 APPLICATION_NAME := moose_unit
 
+DEP_APPS    ?= $(shell $(MOOSE_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+
 # Extra stuff for CPPUNIT
 CPPUNIT_DIR 		?= $(PACKAGES_DIR)/cppunit
 ADDITIONAL_INCLUDES 	:= -I$(CPPUNIT_DIR)/include
