@@ -45,8 +45,10 @@ InputParameters validParams<PiecewiseBilinear>()
 {
   InputParameters params = validParams<Function>();
   params.addRequiredParam<std::string>("yourFileName", "File holding your csv data for use with PiecewiseBilinear");
-  params.addRequiredParam<int>("axis", "The axis used (0, 1, or 2 for x, y, or z).");
-  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the axis values");
+  params.addParam<int>("axis", -1, "The axis used (0, 1, or 2 for x, y, or z).");
+  params.addParam<int>("xaxis", -1, "The coordinate used for x-axis data (0, 1, or 2 for x, y, or z).");
+  params.addParam<int>("yaxis", -1, "The coordinate used for y-axis data (0, 1, or 2 for x, y, or z).");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the axis, yaxis, or xaxis values");
   return params;
 }
 
@@ -55,10 +57,21 @@ PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters p
   _bilinear_interp( NULL ),
   _file_name( getParam<std::string>("yourFileName") ),
   _axis(getParam<int>("axis")),
+  _yaxis(getParam<int>("yaxis")),
+  _xaxis(getParam<int>("xaxis")),
+  _axisValid( _axis > -1 && _axis < 3 ),
+  _yaxisValid( _yaxis > -1 && _yaxis < 3 ),
+  _xaxisValid( _xaxis > -1 && _xaxis < 3 ),
   _scale_factor( getParam<Real>("scale_factor") )
 {
-  if (_axis < 0 || _axis > 2)
-    mooseError("In PiecewiseBilinear function axis="<<_axis<<" outside allowable range (0-2).");
+  if (!_axisValid && !_yaxisValid && !_xaxisValid)
+  {
+    mooseError("Error in " << _name << ". None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
+  }
+  if (_axisValid && (_yaxisValid || _xaxisValid))
+  {
+    mooseError("Error in " << _name << ". Cannot define axis with either yaxis or xaxis");
+  }
 
   std::vector<Real> x;
   std::vector<Real> y;
@@ -78,7 +91,28 @@ PiecewiseBilinear::~PiecewiseBilinear()
 Real
 PiecewiseBilinear::value( Real t, const Point & p)
 {
-  return  _bilinear_interp->sample( _scale_factor*p(_axis), t );
+  Real retVal(0);
+  if (_axisValid)
+  {
+    retVal = _bilinear_interp->sample( _scale_factor*p(_axis), t );
+  }
+  else if (_yaxisValid)
+  {
+    if (_xaxisValid)
+    {
+      retVal = _bilinear_interp->sample( _scale_factor*p(_xaxis), _scale_factor*p(_yaxis) );
+    }
+    else
+    {
+      retVal = _bilinear_interp->sample( t, _scale_factor*p(_yaxis) );
+    }
+  }
+  else
+  {
+    retVal = _bilinear_interp->sample( _scale_factor*p(_xaxis), t );
+  }
+
+  return retVal;
 }
 
 void

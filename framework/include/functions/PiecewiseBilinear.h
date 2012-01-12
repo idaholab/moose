@@ -45,7 +45,12 @@ private:
   BilinearInterpolation * _bilinear_interp;
   const std::string _file_name;
   const int _axis;
-  Real _scale_factor;
+  const int _yaxis;
+  const int _xaxis;
+  const bool _axisValid;
+  const bool _yaxisValid;
+  const bool _xaxisValid;
+  const Real _scale_factor;
 
 
   void parse( std::vector<Real> & x,
