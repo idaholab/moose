@@ -123,7 +123,9 @@ protected:
 
   unsigned int _master_node_id;                                         ///< master node id
 
+  const Node * & _master_node;                                          ///< Holds the reference to the master node
   VariableValue & _u_master;                                            ///< Holds the current solution at the current quadrature point
+  const Node * & _slave_node;                                           ///< Holds the reference to the current slave node
   VariableValue & _u_slave;                                             ///< Value of the unknown variable this BC is action on
 
   std::vector<unsigned int> _connected_nodes;                           ///< node IDs connected to the master node (slave nodes)
