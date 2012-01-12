@@ -78,4 +78,40 @@ protected:
   MooseVariable *getVar(const std::string & var_name, unsigned int comp);
 };
 
+
+/**
+ * For coupling the values from neighbor elements
+ *
+ * This is in a separated class because not all subsystems need it
+ */
+class NeighborCoupleable
+{
+public:
+  /**
+   * Constructing the object
+   * @param parameters Parameters that come from constructing the object
+   * @param nodal true if we need to couple with nodal values, otherwise false
+   */
+  NeighborCoupleable(InputParameters & parameters, bool nodal);
+
+  virtual ~NeighborCoupleable();
+
+  // neighbor
+  virtual VariableValue & coupledNeighborValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledNeighborValueOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledNeighborValueOlder(const std::string & var_name, unsigned int comp = 0);
+
+  virtual VariableGradient & coupledNeighborGradient(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledNeighborGradientOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableGradient & coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
+
+  virtual VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int i = 0);
+
+protected:
+  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;   ///< Coupled vars whose values we provide
+  bool _nodal;                                                          ///< true if we provide coupling to nodal values
+
+  MooseVariable *getVar(const std::string & var_name, unsigned int comp);
+};
+
 #endif /* COUPLEABLE_H */

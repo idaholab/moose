@@ -196,3 +196,122 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
   else
     return getVar(var_name, comp)->secondSlnOlder();
 }
+
+// Neighbor values
+
+NeighborCoupleable::NeighborCoupleable(InputParameters & parameters, bool nodal) :
+    _nodal(nodal)
+{
+  SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
+  Problem & topproblem = *problem.parent();
+
+  THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
+
+  // Coupling
+  for (std::set<std::string>::const_iterator iter = parameters.coupledVarsBegin();
+       iter != parameters.coupledVarsEnd();
+       ++iter)
+  {
+    std::string name = *iter;
+    if (parameters.get<std::vector<std::string> >(*iter) != std::vector<std::string>())
+    {
+      std::vector<std::string> vars = parameters.get<std::vector<std::string> >(*iter);
+      for (unsigned int i = 0; i < vars.size(); i++)
+      {
+        std::string coupled_var_name = vars[i];
+        if (topproblem.hasVariable(coupled_var_name))
+          _coupled_vars[name].push_back(&topproblem.getVariable(tid, coupled_var_name));
+        else
+          mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
+      }
+    }
+  }
+}
+
+NeighborCoupleable::~NeighborCoupleable()
+{
+}
+
+MooseVariable *
+NeighborCoupleable::getVar(const std::string & var_name, unsigned int comp)
+{
+  if (_coupled_vars.find(var_name) != _coupled_vars.end())
+  {
+    if (comp < _coupled_vars[var_name].size())
+    {
+      // Error check - don't couple elemental to nodal
+      if (!(_coupled_vars[var_name][comp])->isNodal() && _nodal)
+        mooseError("You cannot couple an elemental variable to a nodal variable");
+      return _coupled_vars[var_name][comp];
+    }
+    else
+      mooseError("Trying to get a non-existent component of variable '" + var_name + "'");
+  }
+  else
+    mooseError("Trying to get a non-existent variable '" + var_name + "'");
+}
+
+
+VariableValue &
+NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned int comp)
+{
+  if (_nodal)
+    return getVar(var_name, comp)->nodalSlnNeighbor();
+  else
+    return getVar(var_name, comp)->slnNeighbor();
+}
+
+
+VariableValue &
+NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsigned int comp)
+{
+  if (_nodal)
+    return getVar(var_name, comp)->nodalSlnOldNeighbor();
+  else
+    return getVar(var_name, comp)->slnOldNeighbor();
+}
+
+VariableValue &
+NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsigned int comp)
+{
+  if (_nodal)
+    return getVar(var_name, comp)->nodalSlnOlderNeighbor();
+  else
+    return getVar(var_name, comp)->slnOlderNeighbor();
+}
+
+VariableGradient &
+NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsigned int comp)
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+  else
+    return getVar(var_name, comp)->gradSlnNeighbor();
+}
+
+VariableGradient &
+NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, unsigned int comp)
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+  else
+    return getVar(var_name, comp)->gradSlnOldNeighbor();
+}
+
+VariableGradient &
+NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp)
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+  else
+    return getVar(var_name, comp)->gradSlnOlderNeighbor();
+}
+
+VariableSecond &
+NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned int comp)
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+  else
+    return getVar(var_name, comp)->secondSlnNeighbor();
+}

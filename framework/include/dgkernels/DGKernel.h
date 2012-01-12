@@ -44,6 +44,7 @@ class DGKernel :
   public MooseObject,
   public SetupInterface,
   public Coupleable,
+  public NeighborCoupleable,
   protected TwoMaterialPropertyInterface
 {
 public:
@@ -164,21 +165,6 @@ protected:
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
    */
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
-
-  // Coupling of values from a neighboring element
-
-  VariableValue & coupledNeighborValue(const std::string & var_name, unsigned int comp = 0);
-
-  VariableValue & coupledNeighborValueOld(const std::string & var_name, unsigned int comp = 0);
-
-  VariableValue & coupledNeighborValueOlder(const std::string & var_name, unsigned int comp = 0);
-
-  VariableGradient & coupledNeighborGradient(const std::string & var_name, unsigned int comp = 0);
-
-  VariableGradient & coupledNeighborGradientOld(const std::string & var_name, unsigned int comp = 0);
-
-  VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int comp = 0);
-
 
 public:
   // boundary id used for internal edges (all DG kernels lives on this boundary id)

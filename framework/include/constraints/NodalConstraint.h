@@ -47,6 +47,7 @@ class NodalConstraint :
   public MooseObject,
   public SetupInterface,
   public Coupleable,
+  public NeighborCoupleable,
   public FunctionInterface,
   public TransientInterface,
   protected GeometricSearchInterface

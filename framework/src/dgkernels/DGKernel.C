@@ -48,6 +48,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
     Coupleable(parameters, false),
+    NeighborCoupleable(parameters, false),
     TwoMaterialPropertyInterface(parameters),
 
     _problem(*parameters.get<Problem *>("_problem")),
@@ -209,41 +210,4 @@ Real
 DGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType /*type*/, unsigned int /*jvar*/)
 {
   return 0.;
-}
-
-VariableValue &
-DGKernel::coupledNeighborValue(const std::string & var_name, unsigned int comp)
-{
-  return getVar(var_name, comp)->slnNeighbor();
-}
-
-
-VariableValue &
-DGKernel::coupledNeighborValueOld(const std::string & var_name, unsigned int comp)
-{
-  return getVar(var_name, comp)->slnOldNeighbor();
-}
-
-VariableValue &
-DGKernel::coupledNeighborValueOlder(const std::string & var_name, unsigned int comp)
-{
-  return getVar(var_name, comp)->slnOlderNeighbor();
-}
-
-VariableGradient &
-DGKernel::coupledNeighborGradient(const std::string & var_name, unsigned int comp)
-{
-  return getVar(var_name, comp)->gradSlnNeighbor();
-}
-
-VariableGradient &
-DGKernel::coupledNeighborGradientOld(const std::string & var_name, unsigned int comp)
-{
-  return getVar(var_name, comp)->gradSlnOldNeighbor();
-}
-
-VariableSecond &
-DGKernel::coupledNeighborSecond(const std::string & var_name, unsigned int comp)
-{
-  return getVar(var_name, comp)->secondSlnNeighbor();
 }
