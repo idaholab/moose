@@ -51,7 +51,8 @@ Parser::Parser(Syntax & syntax):
   _action_wh(Moose::action_warehouse),
   _syntax_formatter(NULL),
   _getpot_initialized(false),
-  _enable_unused_check(OFF)
+  _enable_unused_check(OFF),
+  _sort_alpha(false)
 {
   initOptions();
 
@@ -71,7 +72,8 @@ Parser::Parser(Syntax & syntax, ActionWarehouse & action_wh) :
     _action_wh(action_wh),
     _syntax_formatter(NULL),
     _getpot_initialized(false),
-    _enable_unused_check(OFF)
+    _enable_unused_check(OFF),
+    _sort_alpha(false)
 {
   initOptions();
 
@@ -445,7 +447,7 @@ Parser::buildFullTree()
   }
 
   // Sort the Syntax
-  std::sort(all_names.begin(), all_names.end(), InputFileSort());
+  std::sort(all_names.begin(), all_names.end(), InputFileSort(_sort_alpha));
 
   for (std::vector<std::pair<std::string, Syntax::ActionInfo> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
   {
@@ -650,6 +652,24 @@ Parser::buildCommandLineVarsVector()
     tokenize(var, name_value_pairs, 0, "=");
     _command_line_vars.insert(name_value_pairs[0]);
   }
+}
+
+void
+Parser::setCheckUnusedFlag(bool warn_is_error)
+{
+  _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
+}
+
+void
+Parser::setSortAlpha(bool sort_alpha_flag)
+{
+  _sort_alpha = sort_alpha_flag;
+}
+
+bool
+Parser::getSortFlag() const
+{
+  return _sort_alpha;
 }
 
 void
@@ -880,9 +900,11 @@ void Parser::setTensorParameter(const std::string & full_name, const std::string
 //--------------------------------------------------------------------------
 // Input File Sorter Functor methods
 
-Parser::InputFileSort::InputFileSort()
+Parser::InputFileSort::InputFileSort(bool sort_alpha):
+    _sort_alpha(sort_alpha)
 {
   _o.reserve(16);
+  _o.push_back("GlobalParams");
   _o.push_back("Problem");
   _o.push_back("Mesh");
   _o.push_back("Functions");
@@ -890,6 +912,7 @@ Parser::InputFileSort::InputFileSort()
   _o.push_back("Variables");
   _o.push_back("AuxVariables");
   _o.push_back("Kernels");
+  _o.push_back("DGKernels");
   _o.push_back("DiracKernels");
   _o.push_back("AuxKernels");
   _o.push_back("Dampers");
@@ -936,5 +959,8 @@ Parser::InputFileSort::operator() (const std::pair<std::string, Syntax::ActionIn
 int
 Parser::InputFileSort::sorter(const std::string &a, const std::string &b) const
 {
-  return std::find(_o.begin(), _o.end(), a) - std::find(_o.begin(), _o.end(), b);
+  if (_sort_alpha)
+    return a < b ? -1 : 1;
+  else
+    return std::find(_o.begin(), _o.end(), a) - std::find(_o.begin(), _o.end(), b);
 }

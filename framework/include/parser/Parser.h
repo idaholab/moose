@@ -115,10 +115,13 @@ public:
    * Set a flag so that the parser will either warn or error when unused variables are seen after
    * parsing is complete.
    */
-  inline void setCheckUnusedFlag(bool warn_is_error=false)
-  {
-    _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
-  }
+  void setCheckUnusedFlag(bool warn_is_error=false);
+
+  /**
+   * Set/Get a flag so that synax dumped from the system is in alphabetical order
+   */
+  void setSortAlpha(bool sort_alpha_flag);
+  bool getSortFlag() const;
 
   /**
    * Return the filename that was parsed
@@ -213,7 +216,7 @@ protected:
                           GlobalParamsAction *global_block);
 
   /************************************
-   * Private Data Members
+   * Protected Data Members
    ************************************/
   struct CLIOption
   {
@@ -237,19 +240,21 @@ protected:
   // The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
+  bool _sort_alpha;
 
 public:
   /// Functor for sorting input file syntax in MOOSE desired order
   class InputFileSort
   {
   public:
-    InputFileSort();
+    InputFileSort(bool sort_alpha=false);
     bool operator() (Action *a, Action *b) const;
     bool operator() (const std::pair<std::string, Syntax::ActionInfo> &a, const std::pair<std::string, Syntax::ActionInfo> &b) const;
 
   private:
     int sorter(const std::string &a, const std::string &b) const;
     std::vector<std::string> _o;
+    bool _sort_alpha;
   };
 };
 
