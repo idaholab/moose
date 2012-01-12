@@ -86,6 +86,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _out_problem(NULL),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
+    _uniform_refine_level(0),
 #endif
     _displaced_mesh(NULL),
     _displaced_problem(NULL),
