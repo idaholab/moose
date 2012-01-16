@@ -38,13 +38,13 @@ class RunParallel:
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
   def run(self, test, command):
 
-    # Make sure we are complying with the requested load average
-    self.satisfyLoad()
-
     # Make sure the job doesn't have an unsatisfied prereq
     if test[PREREQ] != None and not test[PREREQ] in self.finished_jobs:
       self.queue.put([test, command, os.getcwd()])
       return
+
+    # Make sure we are complying with the requested load average
+    self.satisfyLoad()
 
     # Wait for a job to finish if the jobs queue is full
     # Note: This needs to be a while statement, not an if statement.
