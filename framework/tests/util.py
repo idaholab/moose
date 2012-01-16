@@ -15,12 +15,19 @@ def runCommand(cmd):
 # 1) options.colored is False,
 # 2) the environment variable BITTEN_NOCOLOR is true, or
 # 3) the color parameter is False.
-def printResult(test_name, result, options, color=True):
+def printResult(test_name, result, timing, options, color=True):
+  f_result = ''
+
   cnt = 79 - len(test_name + result)
   if color:
-    return test_name + '.'*cnt + ' ' + colorify(result, options)
+    f_result = test_name + '.'*cnt + ' ' + colorify(result, options)
   else:
-    return test_name + '.'*cnt + ' ' + result
+    f_result = test_name + '.'*cnt + ' ' + result
+
+  # Tack on the timing if it exists
+  if timing:
+    f_result += ' [' + '%0.2f' % float(timing) + 's]'
+  return f_result
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.

@@ -321,6 +321,12 @@ class TestHarness:
       result = 'FAILED (%s)' % reason
     self.handleTestResult(test, output, result)
 
+  def getTiming(self, output):
+    time = ''
+    m = re.search(r"Active time=(\S+)", output)
+    if m != None:
+      return m.group(1)
+
   def checkExpectError(self, output, expect_error):
     if re.search(expect_error, output, re.MULTILINE) == None:
       #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
@@ -331,8 +337,13 @@ class TestHarness:
   ## Update global variables and print output based on the test result
   # Containing OK means it passed, skipped means skipped, anything else means it failed
   def handleTestResult(self, test, output, result):
-    self.test_table.append( (test, output, result) )
-    print printResult(test[TEST_NAME], result, self.options)
+    timing = ''
+
+    if self.options.timing:
+      timing = self.getTiming(output)
+
+    self.test_table.append( (test, output, result, timing) )
+    print printResult(test[TEST_NAME], result, timing, self.options)
 
     if result.find('OK') != -1:
       self.num_passed += 1
@@ -346,13 +357,13 @@ class TestHarness:
 
     if not 'skipped' in result:
       if self.options.file:
-        self.file.write(printResult( test[TEST_NAME], result, self.options, color=False) + '\n')
+        self.file.write(printResult( test[TEST_NAME], result, timing, self.options, color=False) + '\n')
         self.file.write(output)
 
       if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
         fname = os.path.join(test[TEST_DIR], test[TEST_NAME] + '.' + result[:6] + '.txt')
         f = open(fname, 'w')
-        f.write(printResult( test[TEST_NAME], result, self.options, color=False) + '\n')
+        f.write(printResult( test[TEST_NAME], result, timing, self.options, color=False) + '\n')
         f.write(output)
         f.close()
 
@@ -370,8 +381,8 @@ class TestHarness:
     # tests as they were running
     if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
       print '\n\nFinal Test Results:\n' + ('-' * 80)
-      for (test, output, result) in self.test_table:
-        print printResult(test[TEST_NAME], result, self.options)
+      for (test, output, result, timing) in self.test_table:
+        print printResult(test[TEST_NAME], result, timing, self.options)
 
     time = clock() - self.start_time
     print '-' * 80
@@ -447,6 +458,8 @@ class TestHarness:
                       help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
     parser.add_option('-l', '--load-average', action='store', type='float', dest='load', default=64.0,
                       help='Do not run additional tests if the load average is at least LOAD')
+    parser.add_option('-t', '--timing', action='store_true', dest='timing', default=False,
+                      help="Report Timing information for passing tests")
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
