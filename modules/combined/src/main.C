@@ -26,12 +26,13 @@ int main (int argc, char** argv)
   MooseInit init (argc, argv);
 
   Elk::registerObjects();
-  
+
   // Associate Parser Syntax
   Moose::associateSyntax();
   Elk::associateSyntax();
   Parser p(Moose::syntax);
   p.setCheckUnusedFlag( true );
+  p.setSortAlpha( true );
 
   // Parse commandline and return inputfile filename if appropriate
   std::string input_filename = p.parseCommandLine();
