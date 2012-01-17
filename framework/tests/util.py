@@ -26,7 +26,7 @@ def printResult(test_name, result, timing, options, color=True):
 
   # Tack on the timing if it exists
   if timing:
-    f_result += ' [' + '%0.2f' % float(timing) + 's]'
+    f_result += ' [' + '%0.3f' % float(timing) + 's]'
   return f_result
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because

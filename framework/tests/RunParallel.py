@@ -53,7 +53,7 @@ class RunParallel:
     #   job which will preempt the open slot in the jobs array.  Upon unwinding the stack
     #   another check of the jobs array is needed before launching the current test
     while self.jobs.count(None) == 0:
-      self.spinwait()
+      self.spinwait(True)
 
     job_index = self.jobs.index(None) # find an empty slot
     log( 'Command %d started: %s' % (job_index, command) )
@@ -78,7 +78,7 @@ class RunParallel:
       sys.path.pop()
 
   ## Return control the the test harness by finalizing the test output and calling the callback
-  def returnToTestHarness(self, job_index):
+  def returnToTestHarness(self, job_index, start_new):
     (p, command, test, time, f) = self.jobs[job_index]
 
     self.finished_jobs.add(test[TEST_NAME])
@@ -99,20 +99,26 @@ class RunParallel:
       self.harness.testOutputAndFinish(test, p.returncode, output)
 
     self.jobs[job_index] = None
-    self.startReadyJobs()
+
+    # If requested we can start new jobs from here (this is how we get our queued jobs to run)
+    if start_new:
+#      print "DEBUG: Starting new jobs"
+      self.startReadyJobs()
+#    else:
+#      print "DEBUG: NOT starting new jobs"
 
   ## Don't return until one of the running processes exits.
   #
   # When a process exits (or times out) call returnToTestHarness and return from
   # this function.
-  def spinwait(self, time_to_wait=0.05):
+  def spinwait(self, start_new, time_to_wait=0.05):
     now = clock()
     job_index = 0
     for tuple in self.jobs:
       if tuple != None:
         (p, command, test, time, f) = tuple
         if p.poll() != None or now > time:
-          self.returnToTestHarness(job_index)
+          self.returnToTestHarness(job_index, start_new)
           break
       job_index += 1
 
@@ -122,13 +128,13 @@ class RunParallel:
     # We'll always run at least one job regardless of load or we'll starve!
     while self.jobs.count(None) < len(self.jobs) and os.getloadavg()[0] >= self.average_load:
 #      print "DEBUG: Sleeping... ", len(self.jobs) - self.jobs.count(None), " jobs running (load average: ", os.getloadavg()[0], ")\n"
-      self.spinwait(0.5) # If the load average is high we'll sleep longer here to let things clear out
-#    print "DEBUG: Ready to run (load average: ", os.getloadavg()[0], ")\n"
+      self.spinwait(False, 0.5) # If the load average is high we'll sleep longer here to let things clear out
+#      print "DEBUG: Ready to run (load average: ", os.getloadavg()[0], ")\n"
 
   ## Wait until all processes are done, then return
   def join(self):
     while self.jobs.count(None) != len(self.jobs):
-      self.spinwait()
+      self.spinwait(True)
 
 
 ## Static logging string for debugging
