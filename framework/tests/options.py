@@ -2,16 +2,16 @@
 # so typos will crash instead of just producing weird output
 
 # General options
-INPUT    = 'input'              # The input.i file to use
-SKIP     = 'reason'             # Give a reason to skip the test
-MAX_TIME = 'max_time'           # Test will fail if it exceeds this time in seconds (accuracy ~1s)
-TEST_NAME = 'testname'          # The name of the test as it appears in output, this is
-                                # set to module_name.dict_name by default
-PLATFORM = '[platform]'         # A list of platforms set to 'ALL', 'DARWIN', 'LINUX', 'SL', and/or 'LION'
-COMPILER = '[compiler]'         # A test that runs only on a given compiler set to 'ALL', 'GCC', and/or 'INTEL'
-PETSC_VERSION = '[version]'     # A test that runs only on the matching PETSC version
+INPUT         = 'input'          # The input.i file to use
+SKIP	      = 'reason'         # Give a reason to skip the test
+MAX_TIME      = 'max_time'       # Test will fail if it exceeds this time in seconds (accuracy ~1s)
+TEST_NAME     = 'testname'       # The name of the test as it appears in output, this is
+                                 # set to module_name.dict_name by default
+PLATFORM      = '[platform]'     # A list of platforms set to 'ALL', 'DARWIN', 'LINUX', 'SL', and/or 'LION'
+COMPILER      = '[compiler]'     # A test that runs only on a given compiler set to 'ALL', 'GCC', and/or 'INTEL'
+PETSC_VERSION = '[version]'      # A test that runs only on the matching PETSC version
 
-CLI_ARGS = '[]'                 # Additional argument vector to pass to test
+CLI_ARGS      = '[]'             # Additional argument vector to pass to test
 
 # Types of tests
 EXODIFF       = '[exodiff]'      # A list of files to exodiff
@@ -26,27 +26,28 @@ EXPECT_ASSERT = 'expect_assert'  # string - This string must occur in DEBUG mode
 ERRORS        = 'errors'         # list[strings] - The test will fail if any string occurs in the output
 
 # Groups of tests
-GROUP = 'group'                 # Specify a single group or a list of groups that this test belongs to
-HEAVY = 'heavy'                 # Set to true if this test should only be run when the --heavy option is used
+GROUP         = 'group'          # Specify a single group or a list of groups that this test belongs to
+HEAVY         = 'heavy'          # Set to true if this test should only be run when the --heavy option is used
 
 # Scaling options
-SCALE    = 'scale'              # Set to True to scale?
-DOFS     = 'dofs'               # Default number of DOFS to use when --scale is specified
-DOF_GOLD = 'dof_gold'           # A dictionary specifying which gold files to use for higher numbers of dofs
-                                # for example: { 1000 : 'out1k.e', 2000 : 'out2k.e' }
-PARALLEL = 'parallel'           # Number of processes to use
-THREADS  = 'threads'            # Number of threads to use
+PARALLEL      = 'parallel'       # Number of processes to use
+SCALE_REFINE  = '<n>'            # The number of refinements to do when scaling
 
-# Test Timing Options
-TIME      = 'time'              # Set to True to time this test
-TIME_DOFS = 'time_dofs'         # The number of dofs to run the problem at for timeing purposes
-TIME_GOLD = 'time_gold'         # The gold file to exodiff output for timing runs, default no exodiff
+# These options are not currently implemented.  Please contact the MOOSE Team if you are ready to use them.
+#SCALE    = 'scale'              # Set to True to scale?
+#DOFS     = 'dofs'               # Default number of DOFS to use when --scale is specified
+#DOF_GOLD = 'dof_gold'           # A dictionary specifying which gold files to use for higher numbers of dofs
+#                                # for example: { 1000 : 'out1k.e', 2000 : 'out2k.e' }
+#THREADS  = 'threads'            # Number of threads to use
+
+#TIME_DOFS = 'time_dofs'         # The number of dofs to run the problem at for timeing purposes
+#TIME_GOLD = 'time_gold'         # The gold file to exodiff output for timing runs, default no exodiff
 
 # EXODIFF options
-ABS_ZERO    = 'abs_zero'        # Absolute zero value passed to the exodiff tool
-REL_ERR     = 'rel_err'         # Relative error value passed to the exodiff tool
-CUSTOM_CMP  = 'custom_cmp'      # Custom comparison file
-USE_OLD_FLOOR = 'True|False'    # Use Exodiff old floor option
+ABS_ZERO      = 'abs_zero'       # Absolute zero value passed to the exodiff tool
+REL_ERR       = 'rel_err'        # Relative error value passed to the exodiff tool
+CUSTOM_CMP    = 'custom_cmp'     # Custom comparison file
+USE_OLD_FLOOR = 'True|False'     # Use Exodiff old floor option
 
 # Test Ordering
 PREREQ = 'prereq'
@@ -65,14 +66,15 @@ DEFAULTS = { EXODIFF : [],
              EXPECT_ASSERT : None,
              GROUP : [],
              HEAVY : False,
-             DOFS : 0,
+             SCALE_REFINE : 0,
+#             DOFS : 0,
              PARALLEL : 0,
-             THREADS : 0,
+#             THREADS : 0,
              MAX_TIME : 300,
              SKIP : '',
-             TIME : False,
-             TIME_DOFS : 4000,
-             TIME_GOLD : None,
+#             TIME : False,
+#             TIME_DOFS : 4000,
+#             TIME_GOLD : None,
              ABS_ZERO : 1e-10,      # Exodiff option
              REL_ERR : 5.5e-6,      # Exodiff option
              CUSTOM_CMP : None,     # Exodiff option

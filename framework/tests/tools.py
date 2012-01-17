@@ -101,10 +101,15 @@ class TestHarness:
 
   # Create the command line string to run
   def createCommand(self, test):
+    command = ''
+
     if test[PARALLEL] > 1:
-      return 'mpiexec -n ' + test[PARALLEL] + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
+      command = 'mpiexec -n ' + test[PARALLEL] + ' -host ' + self.host_name + ' ' + self.executable + ' -i ' + test[INPUT] + ' ' +  ' '.join(test[CLI_ARGS])
     else:
-      return self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
+      command = self.executable + ' -i ' + test[INPUT] + ' ' + ' '.join(test[CLI_ARGS])
+    if self.options.scaling and test[SCALE_REFINE] > 0:
+      command += ' -r ' + str(test[SCALE_REFINE])
+    return command
 
   ## Delete old output files
   def prepareTest(self, test):
@@ -227,6 +232,7 @@ class TestHarness:
   ## Finish the test by inspecting the raw output
   def testOutputAndFinish(self, test, retcode, output):
     reason = ''
+    caveats = []
 
     # Expected errors and assertions might do a lot of things including crash so we
     # will handle them seperately
@@ -256,67 +262,47 @@ class TestHarness:
       elif retcode > 0 and test[SHOULD_CRASH]:
         reason = 'NO CRASH'
       else:  # Now test more involved things like CSV and EXODIFF
-        for file in test[EXODIFF]:
-          custom_cmp = ''
-          old_floor = ''
-          if test[CUSTOM_CMP] != None:
-             custom_cmp = ' -f ' + os.path.join(test[TEST_DIR], test[CUSTOM_CMP])
-          if test[USE_OLD_FLOOR]:
-             old_floor = ' -use_old_floor'
-          command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F ' + str(test[ABS_ZERO]) + old_floor +  ' -t ' + str(test[REL_ERR]) \
-                    + ' ' + os.path.join(test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file)
-          exo_output = runCommand(command)
-          output += 'Running exodiff: ' + command + '\n' + exo_output
+        # There may be other reasons we don't run exodiff (this is the only one for now
+        if self.options.scaling and test[SCALE_REFINE]:
+          caveats.append('SCALED')
+        else:
+          for file in test[EXODIFF]:
+            custom_cmp = ''
+            old_floor = ''
+            if test[CUSTOM_CMP] != None:
+               custom_cmp = ' -f ' + os.path.join(test[TEST_DIR], test[CUSTOM_CMP])
+            if test[USE_OLD_FLOOR]:
+               old_floor = ' -use_old_floor'
+            command = self.moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F ' + str(test[ABS_ZERO]) + old_floor +  ' -t ' + str(test[REL_ERR]) \
+                      + ' ' + os.path.join(test[TEST_DIR], file) + ' ' + os.path.join(test[TEST_DIR], test[GOLD_DIR], file)
+            exo_output = runCommand(command)
+            output += 'Running exodiff: ' + command + '\n' + exo_output
 
-          if 'different' in exo_output or 'ERROR' in exo_output:
-            reason = 'EXODIFF'
-            break;
+            if 'different' in exo_output or 'ERROR' in exo_output:
+              reason = 'EXODIFF'
+              break;
 
-        # if still no errors, diff CSVs
-        if reason == '' and len(test[CSVDIFF]) > 0:
-          differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF] )
-          msg = differ.diff()
-          output += 'Running CSVDiffer.py\n' + msg
-          if msg != '':
-            reason = 'CSVDIFF'
+          # if still no errors, diff CSVs
+          if reason == '' and len(test[CSVDIFF]) > 0:
+            differ = CSVDiffer( test[TEST_DIR], test[CSVDIFF] )
+            msg = differ.diff()
+            output += 'Running CSVDiffer.py\n' + msg
+            if msg != '':
+              reason = 'CSVDIFF'
 
     if reason == '':
       # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
-
 # TODO: Refactor this mess
-      platform_ok = False
-      for x in test[PLATFORM]:
-        if x == 'ALL':
-          platform_ok = True
-      platform_result = ''
-      if not platform_ok:
-        platform_result = ', '.join(test[PLATFORM])
-
-      compiler_ok = False
-      for x in test[COMPILER]:
-        if x == 'ALL':
-          compiler_ok = True
-      compiler_result = ''
-      if not compiler_ok:
-        if platform_result != '':
-          platform_result += ', '
-        compiler_result = ', '.join(test[COMPILER])
-
-      petsc_version_ok = False
-      for x in test[PETSC_VERSION]:
-        if x == 'ALL':
-          petsc_version_ok = True
-      petsc_version_result = ''
-      if not petsc_version_ok:
-        if compiler_result != '' or (compiler_ok and platform_result != ''):
-          compiler_result += ', '
-        petsc_version_result = ', '.join(test[PETSC_VERSION])
-
-      if platform_ok and compiler_ok and petsc_version_ok:
-        result = 'OK'
+      if not 'ALL' in test[PLATFORM]:
+        caveats.append(', '.join(test[PLATFORM]))
+      if not 'ALL' in test[COMPILER]:
+        caveats.append(', '.join(test[COMPILER]))
+      if not 'ALL' in test[PETSC_VERSION]:
+        caveats.append(', '.join(test[PETSC_VERSION]))
+      if len(caveats):
+        result = '[' + ', '.join(caveats) + '] OK'
       else:
-        result = '[' + platform_result + compiler_result + petsc_version_result + '] OK'
-
+        result = 'OK'
     else:
       result = 'FAILED (%s)' % reason
     self.handleTestResult(test, output, result)
@@ -460,13 +446,15 @@ class TestHarness:
                       help='Do not run additional tests if the load average is at least LOAD')
     parser.add_option('-t', '--timing', action='store_true', dest='timing', default=False,
                       help="Report Timing information for passing tests")
+    parser.add_option('-s', '--scale', action='store_true', dest='scaling', default=False,
+                      help="Scale problems that have SCALE_REFINE set")
 
     outputgroup = OptionGroup(parser, 'Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_option('-v', '--verbose', action='store_true', dest='verbose', default=False, help='show the output of every test that fails')
     outputgroup.add_option('-q', '--quiet', action='store_true', dest='quiet', default=False, help='only show the result of every test, don\'t show test output even if it fails')
     outputgroup.add_option('-o', '--output-dir', action='store', dest='output_dir', default='', metavar='DIR', help='Save all output files in the directory, and create it if necessary')
     outputgroup.add_option('-f', '--file', action='store', dest='file', default=None, metavar='FILE', help='Write verbose output of each test to FILE and quiet output to terminal')
-    outputgroup.add_option('-s', '--sep-files', action='store_true', dest='sep_files', default=False, metavar='FILE', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
+    outputgroup.add_option('-x', '--sep-files', action='store_true', dest='sep_files', default=False, metavar='FILE', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
     outputgroup.add_option('--sep-files-ok', action='store_true', dest='ok_files', default=False, metavar='FILE', help='Write the output of each passed test to a separate file')
     outputgroup.add_option('-a', '--sep-files-fail', action='store_true', dest='fail_files', default=False, metavar='FILE', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
     outputgroup.add_option("--store-timing", action="store_true", dest="time", default=False, help="Store timing in the database (Currently not implemented)")

@@ -185,6 +185,14 @@ Parser::initOptions()
   cli_opt.cli_syntax = syntax;
   cli_opt.required = false;
   _cli_options["ErrorUnused"] = cli_opt;
+
+  /* This option is used in InitialRefinementAction directly - Do we need a better API? */
+  syntax.clear();
+  cli_opt.desc = "Specify additional initial uniform refinements for automatic scaling";
+  syntax.push_back("-r <refinements>");
+  cli_opt.cli_syntax = syntax;
+  cli_opt.required = false;
+  _cli_options["REFINE"] = cli_opt;
 }
 
 bool
