@@ -45,7 +45,7 @@ CHBulk::precomputeQpResidual()
 {
   Real c;
   RealGradient grad_c;
-  if (_implicit)
+  if (_implicit) // Changes values of c and grad_c depending on integration type
   {
     c = _u[_qp];
     grad_c = _grad_u[_qp];
@@ -56,7 +56,7 @@ CHBulk::precomputeQpResidual()
     grad_c = _grad_u_old[_qp];
   }
   
-  return _M[_qp] * computeGradDFDCons(Residual, c, grad_c);
+  return _M[_qp] * computeGradDFDCons(Residual, c, grad_c);//Return residual
 }
 
 RealGradient
@@ -64,7 +64,7 @@ CHBulk::precomputeQpJacobian()
 {
   Real c;
   RealGradient grad_c;
-  if (_implicit)
+  if (_implicit) // Changes values of c and grad_c depending on integration type
   {
     c = _u[_qp];
     grad_c = _grad_u[_qp];
@@ -87,5 +87,5 @@ CHBulk::precomputeQpJacobian()
     
   }
 
-  return grad_value;
+  return grad_value; //Return jacobian
 }
