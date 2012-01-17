@@ -11,13 +11,15 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor()
     _qt(9,9),
     _euler_angle(3),
     _trans_d6_to_d9(9,6),
-    _transpose_trans_d6_to_d9(6,9),
+    //_transpose_trans_d6_to_d9(6,9),
     _trans_d9_to_d6(6,9),
-    _transpose_trans_d9_to_d6(9,6),
+    //_transpose_trans_d9_to_d6(9,6),
     _c11(0),
     _c12(0),
     _c44(0)
-{}
+{
+  form_transformation_t_matrix();
+}
 
 
 void SymmAnisotropicElasticityTensor::setFirstEulerAngle(const Real a1)
@@ -52,17 +54,17 @@ void SymmAnisotropicElasticityTensor::setMaterialConstantc44(const Real c44)
 
 void SymmAnisotropicElasticityTensor::form_r_matrix()
 {
-  const double phi1 = _euler_angle[0] * (M_PI/180.0);
-  const double phi = _euler_angle[1] * (M_PI/180.0);
-  const double phi2 = _euler_angle[2] * (M_PI/180.0);
+  Real phi1 = _euler_angle[0] * (M_PI/180.0);
+  Real phi = _euler_angle[1] * (M_PI/180.0);
+  Real phi2 = _euler_angle[2] * (M_PI/180.0);
 
-  const double cp1 = cos(phi1);
-  const double cp2 = cos(phi2);
-  const double cp = cos(phi);
+  Real cp1 = cos(phi1);
+  Real cp2 = cos(phi2);
+  Real cp = cos(phi);
 
-  const double sp1 = sin(phi1);
-  const double sp2 = sin(phi2);
-  const double sp = sin(phi);
+  Real sp1 = sin(phi1);
+  Real sp2 = sin(phi2);
+  Real sp = sin(phi);
 
   _r(0,0) = cp1 * cp2 - sp1 * sp2 * cp;
   _r(0,1) = sp1 * cp2 + cp1 * sp2 * cp;
@@ -94,27 +96,17 @@ SymmAnisotropicElasticityTensor::form_rotational_q_matrix()
 {
 
   for(int i = 0; i < 3; ++i)
-  {
     for(int j = 0; j < 3; ++j)
-    {
       for (int k = 0; k < 3; ++k)
-      {
         for(int l = 0; l < 3; ++l)
-        {
           _q(((i*3)+k),((j*3)+l)) = _r(i,j) * _r(k,l);
-        }
-      }
-    }
-  }
 
 
-  for(int p = 0; p < 9; ++p)
-  {
+  /*for(int p = 0; p < 9; ++p)
     for(int q = 0; q < 9; ++q)
-    {
-      _qt(q,p) = _q(p,q);
-    }
-  }
+    _qt(q,p) = _q(p,q);*/
+  
+  
 
 }
 
@@ -126,35 +118,33 @@ SymmAnisotropicElasticityTensor::form_transformation_t_matrix()
   // TransD6toD9 transfroms Dt[6][6] to Dmat[9][9]
   // TransD9toD6 transforms Dmat[9][9] to Dt[6][6]
 
-  const double sqrt2 = std::sqrt(2.0);
-  const double a = 1/sqrt2;
+  Real sqrt2 = std::sqrt(2.0);
+  Real a = 1/sqrt2;
 
   _trans_d6_to_d9(0,0) = _trans_d6_to_d9(4,1) =  _trans_d6_to_d9(8,2) = 1.0;
   _trans_d6_to_d9(1,3) = _trans_d6_to_d9(3,3) = a;
   _trans_d6_to_d9(5,4) = _trans_d6_to_d9(7,4) = a;
   _trans_d6_to_d9(2,5) = _trans_d6_to_d9(6,5) = a;
 
-  for(int i = 0; i < 9; ++i)
+  /*for(int i = 0; i < 9; ++i)
   {
     for(int j = 0; j < 6; ++j)
     {
       _transpose_trans_d6_to_d9(j,i) = _trans_d6_to_d9(i,j);
     }
-  }
-
-  const double b = sqrt2;
+    }*/
 
   _trans_d9_to_d6(0,0) = _trans_d9_to_d6(1,4) =  _trans_d9_to_d6(2,8) = 1.0;
-  _trans_d9_to_d6(3,3) = _trans_d9_to_d6(4,7) =  _trans_d9_to_d6(5,6) = b;
+  _trans_d9_to_d6(3,3) = _trans_d9_to_d6(4,7) =  _trans_d9_to_d6(5,6) = sqrt2;
 
 
-  for(int i = 0; i < 6; ++i)
+  /*for(int i = 0; i < 6; ++i)
   {
     for(int j = 0; j < 9; ++j)
     {
       _transpose_trans_d9_to_d6(j,i) =  _trans_d9_to_d6(i,j);
     }
-  }
+    }*/
 
 }
 
@@ -175,7 +165,7 @@ void SymmAnisotropicElasticityTensor::form_transformed_material_dmat_matrix()
   outputMatrix.right_multiply(_dt);
 
   _dmat = outputMatrix;
-  _dmat.right_multiply(_transpose_trans_d6_to_d9);
+  _dmat.right_multiply_transpose(_trans_d6_to_d9);
 
 }
 
@@ -229,7 +219,7 @@ SymmAnisotropicElasticityTensor::form_rotated_material_qdmat_matrix()
 
   DenseMatrix<Real> outputMatrix(9,9);
 
-  outputMatrix = _qt;
+  _q.get_transpose(outputMatrix);
   outputMatrix.right_multiply(_dmat);
 
   _qdmat = outputMatrix;
@@ -244,7 +234,7 @@ SymmAnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
   form_r_matrix();
   initialize_material_dt_matrix();
   form_rotational_q_matrix();
-  form_transformation_t_matrix();
+  // form_transformation_t_matrix();
   form_transformed_material_dmat_matrix();
   form_rotated_material_qdmat_matrix();
   form_transformed_material_dt_matrix();

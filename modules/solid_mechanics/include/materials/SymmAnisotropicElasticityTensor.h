@@ -55,10 +55,10 @@ protected:
   DenseMatrix<Real> _qt; // Q Transpose
   std::vector<Real> _euler_angle; // Stores Euler angeles
 
-  DenseMatrix<Real> _trans_d6_to_d9, _transpose_trans_d6_to_d9;
+  DenseMatrix<Real> _trans_d6_to_d9;
   // Transformation matrix from a 6 x 6 to 9 to 9
 
-  DenseMatrix<Real> _trans_d9_to_d6, _transpose_trans_d9_to_d6;
+  DenseMatrix<Real> _trans_d9_to_d6;
   // Transformation matrix from a 9 x 9 to 6 x 6
 
   Real _c11, _c12, _c44; // Material Constants
