@@ -51,7 +51,7 @@ class RunParallel:
     self.satisfyLoad()
 
     # Wait for a job to finish if the jobs queue is full
-    if self.jobs.count(None) == 0:
+    while self.jobs.count(None) == 0:
       self.spinwait()
 
     job_index = self.jobs.index(None) # find an empty slot
