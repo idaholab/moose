@@ -37,9 +37,12 @@ class RunParallel:
     self.finished_jobs = set()
 
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
-  def run(self, test, command):
+  def run(self, test, command, recurse=True):
+    # First see if any of the queued jobs can be run but only if recursion is allowed on this run
+    if recurse:
+      self.startReadyJobs()
 
-    # Make sure the job doesn't have an unsatisfied prereq
+    # Now make sure that this job doesn't have an unsatisfied prereq
     if test[PREREQ] != None and not test[PREREQ] in self.finished_jobs:
       self.queue.append([test, command, os.getcwd()])
       return
@@ -48,13 +51,8 @@ class RunParallel:
     self.satisfyLoad()
 
     # Wait for a job to finish if the jobs queue is full
-    # Note: This needs to be a while statement, not an if statement.
-    #   "spinwait" calls "returnToTestHarness" which calls "startReadyJobs" which
-    #   again calls "run" (this function).  That last call may start a previously queued
-    #   job which will preempt the open slot in the jobs array.  Upon unwinding the stack
-    #   another check of the jobs array is needed before launching the current test
-    while self.jobs.count(None) == 0:
-      self.spinwait(True)
+    if self.jobs.count(None) == 0:
+      self.spinwait()
 
     job_index = self.jobs.index(None) # find an empty slot
     log( 'Command %d started: %s' % (job_index, command) )
@@ -62,7 +60,6 @@ class RunParallel:
     # It seems that using PIPE doesn't work very well when launching multiple jobs.
     # It deadlocks rather easy.  Instead we will use temporary files
     # to hold the output as it is produced
-
     try:
       f = TemporaryFile()
       p = Popen([command],stdout=f,stderr=STDOUT,close_fds=False, shell=True)
@@ -79,12 +76,13 @@ class RunParallel:
       saved_dir = os.getcwd()
       sys.path.append(os.path.abspath(dirpath))
       os.chdir(dirpath)
-      self.run(test, command)
+      # We want to avoid "dual" recursion so pass a False flag here
+      self.run(test, command, False)
       os.chdir(saved_dir)
       sys.path.pop()
 
   ## Return control the the test harness by finalizing the test output and calling the callback
-  def returnToTestHarness(self, job_index, start_new):
+  def returnToTestHarness(self, job_index):
     (p, command, test, time, f) = self.jobs[job_index]
 
     self.finished_jobs.add(test[TEST_NAME])
@@ -107,25 +105,18 @@ class RunParallel:
 
     self.jobs[job_index] = None
 
-    # If requested we can start new jobs from here (this is how we get our queued jobs to run)
-    if start_new:
-#      print "DEBUG: Starting new jobs"
-      self.startReadyJobs()
-#    else:
-#      print "DEBUG: NOT starting new jobs"
-
   ## Don't return until one of the running processes exits.
   #
   # When a process exits (or times out) call returnToTestHarness and return from
   # this function.
-  def spinwait(self, start_new, time_to_wait=0.05):
+  def spinwait(self, time_to_wait=0.05):
     now = clock()
     job_index = 0
     for tuple in self.jobs:
       if tuple != None:
         (p, command, test, time, f) = tuple
         if p.poll() != None or now > time:
-          self.returnToTestHarness(job_index, start_new)
+          self.returnToTestHarness(job_index)
           break
       job_index += 1
 
@@ -135,13 +126,13 @@ class RunParallel:
     # We'll always run at least one job regardless of load or we'll starve!
     while self.jobs.count(None) < len(self.jobs) and os.getloadavg()[0] >= self.average_load:
 #      print "DEBUG: Sleeping... ", len(self.jobs) - self.jobs.count(None), " jobs running (load average: ", os.getloadavg()[0], ")\n"
-      self.spinwait(False, 0.5) # If the load average is high we'll sleep longer here to let things clear out
+      self.spinwait(0.5) # If the load average is high we'll sleep longer here to let things clear out
 #      print "DEBUG: Ready to run (load average: ", os.getloadavg()[0], ")\n"
 
   ## Wait until all processes are done, then return
   def join(self):
     while self.jobs.count(None) != len(self.jobs):
-      self.spinwait(True)
+      self.spinwait()
 
 
 ## Static logging string for debugging
