@@ -135,22 +135,25 @@ else
   libext := $(static_libext)
 endif
 
+CURRENT_APP ?= $(shell basename `pwd`)
+
 # Build appliations up the tree
 up: all
-	@echo ====== Building the following applications: $(DEP_APPS) ======
-	@for app in $(DEP_APPS); \
+	@echo ====== Building the following applications: $(CURRENT_APP) $(DEP_APPS) ======
+	@for app in $(CURRENT_APP) $(DEP_APPS); \
 	do \
 		echo ====== Making in $${app} ====== ; \
 		(cd $(ROOT_DIR)/$$app && $(MAKE)) ; \
 	done
 
 test_up: all up
-	@echo ====== Testing the following applications: $(DEP_APPS) ======
-	@for app in $(DEP_APPS); \
+	@echo ====== Testing the following applications: $(CURRENT_APP) $(DEP_APPS) ======
+	@for app in $(CURRENT_APP) $(DEP_APPS); \
 	do \
 		echo ====== Testing in $${app} ====== ; \
 		(cd $(ROOT_DIR)/$$app && ./run_tests -j $(JOBS)) ; \
 	done
+
 #
 # Maintenance
 #
