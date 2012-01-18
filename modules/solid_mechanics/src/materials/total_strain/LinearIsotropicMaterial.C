@@ -44,9 +44,12 @@ LinearIsotropicMaterial::computeProperties()
   for(_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
 
+    // Multiplier that zeros out stiffness
+    Real h = (1.0 - _c[_qp]*_c[_qp]);
+
     _local_elasticity_tensor->calculate(_qp);
 
-    _elasticity_tensor[_qp] = *_local_elasticity_tensor;
+    _elasticity_tensor[_qp] = *_local_elasticity_tensor * h;
 
 
     SymmTensor strn( _grad_disp_x[_qp](0),
@@ -59,7 +62,7 @@ LinearIsotropicMaterial::computeProperties()
     // Add in Isotropic Thermal Strain
     if(_has_temp)
     {
-      Real isotropic_strain = _alpha * (_temp[_qp] - _t_ref);
+      Real isotropic_strain = _alpha * h * (_temp[_qp] - _t_ref);
 
       strn.addDiag( -isotropic_strain );
 
@@ -97,28 +100,20 @@ LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
 
   // Save that off as the elastic strain
   _elastic_strain[_qp] = elastic_strain;
-
-  // Multiplier that zeros out stiffness
-  Real h = (1.0 - _c[_qp]*_c[_qp]);
-  
   
   // Create column vector
   // C * e
-  stress = (*_local_elasticity_tensor)*h*elastic_strain;
+  stress = (*_local_elasticity_tensor)*elastic_strain;
 
 }
 
 void
 LinearIsotropicMaterial::computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain)
 {
-
-  // Multiplier that zeros out stiffness
-  Real h = (1.0 - _c[_qp]*_c[_qp]);
-  
   
   elastic_strain = total_strain;
   //Jacobian multiplier of the stress
-  _Jacobian_mult[_qp] = *_local_elasticity_tensor*h;
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 
   SymmTensor d_stress_dT( *_local_elasticity_tensor * _d_strain_dT );
 //   d_stress_dT *= _dt;
