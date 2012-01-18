@@ -40,11 +40,18 @@ KernelGrad::computeResidual()
 
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  unsigned int n_qp = _qrule->n_points();
+  unsigned int n_test = _test.size();
+
+  for (_qp=0; _qp<n_qp; _qp++)
   {
     _value = precomputeQpResidual();
-    for (_i=0; _i<_test.size(); _i++)
-      re(_i) += _JxW[_qp]*_coord[_qp]*_value*_grad_test[_i][_qp];
+
+    Real jxw = _JxW[_qp];
+    Real coord = _coord[_qp];
+
+    for (_i=0; _i<n_test; _i++)
+      re(_i) += jxw*coord*_value*_grad_test[_i][_qp];
   }
 
 //  Moose::perf_log.pop("computeResidual()","KernelGrad");
@@ -57,13 +64,21 @@ KernelGrad::computeJacobian()
 
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  unsigned int n_qp = _qrule->n_points();
+  unsigned int n_phi = _phi.size();
+  unsigned int n_test = _test.size();
+
+  for (_qp=0; _qp<n_qp; _qp++)
   {
-    for (_j=0; _j<_phi.size(); _j++)
+    Real jxw = _JxW[_qp];
+    Real coord = _coord[_qp];
+
+    for (_j=0; _j<n_phi; _j++)
     {
       _value = precomputeQpJacobian();
-      for (_i=0; _i<_test.size(); _i++)
-        ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value*_grad_test[_i][_qp];
+
+      for (_i=0; _i<n_test; _i++)
+        ke(_i,_j) += jxw*coord*_value*_grad_test[_i][_qp];
     }
   }
 
@@ -77,22 +92,30 @@ KernelGrad::computeOffDiagJacobian(unsigned int jvar)
 
   DenseMatrix<Number> & Ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-  for (_j=0; _j<_phi.size(); _j++)
-    for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  unsigned int n_qp = _qrule->n_points();
+  unsigned int n_phi = _phi.size();
+  unsigned int n_test = _test.size();
+  unsigned int var_num = _var.number();
+
+  for (_j=0; _j<n_phi; _j++)
+    for (_qp=0; _qp<n_qp; _qp++)
     {
       Real off_diag_value;
 
-      if(jvar == _var.number())
+      Real jxw = _JxW[_qp];
+      Real coord = _coord[_qp];
+
+      if(jvar == var_num)
         _value = precomputeQpJacobian();
       else
         off_diag_value = computeQpOffDiagJacobian(jvar);
 
-      for (_i=0; _i<_test.size(); _i++)
+      for (_i=0; _i<n_test; _i++)
       {
-        if(jvar == _var.number())
-          Ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value*_grad_test[_i][_qp];
+        if(jvar == var_num)
+          Ke(_i,_j) += jxw*coord*_value*_grad_test[_i][_qp];
         else
-          Ke(_i,_j) += _JxW[_qp]*_coord[_qp]*off_diag_value;
+          Ke(_i,_j) += jxw*coord*off_diag_value;
       }
     }
 
