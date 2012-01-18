@@ -4,7 +4,8 @@ from timeit import default_timer as clock
 
 from options import *
 from tempfile import TemporaryFile
-from Queue import Queue
+#from Queue import Queue
+from collections import deque
 import os, sys
 
 ## This class provides an interface to run commands in parallel
@@ -29,8 +30,8 @@ class RunParallel:
     # Requested average load level to stay below
     self.average_load = average_load
 
-    # Queue for jobs needing a prereq
-    self.queue = Queue()
+    # queue for jobs needing a prereq
+    self.queue = deque()
 
     # Jobs that have been finished
     self.finished_jobs = set()
@@ -40,7 +41,7 @@ class RunParallel:
 
     # Make sure the job doesn't have an unsatisfied prereq
     if test[PREREQ] != None and not test[PREREQ] in self.finished_jobs:
-      self.queue.put([test, command, os.getcwd()])
+      self.queue.append([test, command, os.getcwd()])
       return
 
     # Make sure we are complying with the requested load average
@@ -61,15 +62,20 @@ class RunParallel:
     # It seems that using PIPE doesn't work very well when launching multiple jobs.
     # It deadlocks rather easy.  Instead we will use temporary files
     # to hold the output as it is produced
-    f = TemporaryFile()
-    p = Popen([command],stdout=f,stderr=STDOUT,close_fds=False, shell=True)
+
+    try:
+      f = TemporaryFile()
+      p = Popen([command],stdout=f,stderr=STDOUT,close_fds=False, shell=True)
+    except:
+      print "Error in launching a new task"
+      raise
 
     self.jobs[job_index] = (p, command, test, clock() + test[MAX_TIME], f)
 
   def startReadyJobs(self):
-    queue_items = self.queue.qsize()
+    queue_items = len(self.queue)
     for i in range(0, queue_items):
-      (test, command, dirpath) = self.queue.get()
+      (test, command, dirpath) = self.queue.popleft()
       saved_dir = os.getcwd()
       sys.path.append(os.path.abspath(dirpath))
       os.chdir(dirpath)
@@ -89,6 +95,7 @@ class RunParallel:
       data += '\n###########################################################################\n' + \
           'Process terminated by test harness' + \
           '\n###########################################################################\n'
+      f.close()
       p.terminate()
       self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, data)
     else:
