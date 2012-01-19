@@ -33,7 +33,6 @@ InputParameters validParams<NodalConstraint>()
 NodalConstraint::NodalConstraint(const std::string & name, InputParameters parameters) :
   MooseObject(name, parameters),
   SetupInterface(parameters),
-  Coupleable(parameters, true),
   NeighborCoupleable(parameters, true),
   FunctionInterface(parameters),
   TransientInterface(parameters),

@@ -43,7 +43,6 @@ InputParameters validParams<DGKernel>();
 class DGKernel :
   public MooseObject,
   public SetupInterface,
-  public Coupleable,
   public NeighborCoupleable,
   protected TwoMaterialPropertyInterface
 {

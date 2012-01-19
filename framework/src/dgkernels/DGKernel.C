@@ -47,7 +47,6 @@ InputParameters validParams<DGKernel>()
 DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    Coupleable(parameters, false),
     NeighborCoupleable(parameters, false),
     TwoMaterialPropertyInterface(parameters),
 

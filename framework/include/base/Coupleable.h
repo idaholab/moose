@@ -80,11 +80,10 @@ protected:
 
 
 /**
- * For coupling the values from neighbor elements
+ * Enhances Coupleable interface to also couple the values from neighbor elements
  *
- * This is in a separated class because not all subsystems need it
  */
-class NeighborCoupleable
+class NeighborCoupleable : public Coupleable
 {
 public:
   /**
@@ -106,12 +105,6 @@ public:
   virtual VariableGradient & coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
   virtual VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int i = 0);
-
-protected:
-  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;   ///< Coupled vars whose values we provide
-  bool _nodal;                                                          ///< true if we provide coupling to nodal values
-
-  MooseVariable *getVar(const std::string & var_name, unsigned int comp);
 };
 
 #endif /* COUPLEABLE_H */
