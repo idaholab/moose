@@ -16,6 +16,7 @@
 #define MOOSEMESH_H
 
 #include "InputParameters.h"
+#include "MooseObject.h"
 #include "BndNode.h"
 
 // libMesh
@@ -29,12 +30,17 @@ class MeshModifier;
 
 typedef StoredRange<std::set<Node *>::iterator, Node*> SemiLocalNodeRange;
 
+class MooseMesh;
+
+template<>
+InputParameters validParams<MooseMesh>();
+
 // NOTE: maybe inheritance would be better here
 //
-class MooseMesh
+class MooseMesh : public MooseObject
 {
 public:
-  MooseMesh(int mesh_dim = 1);
+  MooseMesh(const std::string & name, InputParameters parameters);
   MooseMesh(const MooseMesh & other_mesh);
   virtual ~MooseMesh();
 

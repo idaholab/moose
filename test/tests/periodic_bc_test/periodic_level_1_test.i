@@ -1,15 +1,14 @@
 [Mesh]
-  [./Generation]
-    dim = 2
-    nx = 4
-    ny = 4
-    nz = 0
+  type = GeneratedMesh
+  dim = 2
+  nx = 4
+  ny = 4
+  nz = 0
 
-    xmax = 40
-    ymax = 40
-    zmax = 0
-    elem_type = QUAD4
-  [../]
+  xmax = 40
+  ymax = 40
+  zmax = 0
+  elem_type = QUAD4
 
   uniform_refine = 4
 []

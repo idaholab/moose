@@ -1,19 +1,18 @@
 #mms_sine_posprocessor_test.i
 #This is for u = sin(a*x*y*z*t)
 [Mesh]
- [./Generation] #We are generating our own Mesh
-   dim = 3
-   nx = 4
-   ny = 4
-   nz = 4
-   x min = 0
-   x max = 1
-   y min = 0
-   y max = 1
-   z min = 0
-   z max = 1
-   elem_type = HEX8
-  [../]
+  type = GeneratedMesh
+  dim = 3
+  nx = 4
+  ny = 4
+  nz = 4
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  zmin = 0
+  zmax = 1
+  elem_type = HEX8
 []
 
 [Variables]

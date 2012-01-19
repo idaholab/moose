@@ -1,12 +1,11 @@
 [Mesh]
-  [./Generation]
-    dim = 2
-    nx = 50
-    ny = 50
+  type = GeneratedMesh
+  dim = 2
+  nx = 50
+  ny = 50
 
-    nz = 0
-    zmax = 0
-  [../]
+  nz = 0
+  zmax = 0
 []
 
 [Variables]

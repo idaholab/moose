@@ -21,6 +21,8 @@
 #include "ActionFactory.h"
 
 // objects that can be created by MOOSE
+#include "MooseMesh.h"
+#include "GeneratedMesh.h"
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
@@ -145,7 +147,6 @@
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
-#include "CreateMeshAction.h"
 #include "ReadMeshAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
@@ -181,6 +182,10 @@ registerObjects()
 {
   if (registered)
     return;
+
+  // mesh
+  registerObject(MooseMesh);
+  registerObject(GeneratedMesh);
 
   // problems
   registerProblem(FEProblem);
@@ -318,7 +323,6 @@ addActionTypes()
   /// Additional Actions
   registerActionName("no_action", false);  // Used for Empty Action placeholders
   registerActionName("set_global_params", false);
-  registerActionName("create_mesh", false);
   registerActionName("read_mesh", false);
   registerActionName("add_mesh_modifier", false);
   registerActionName("add_extra_nodeset", false);
@@ -365,7 +369,7 @@ addActionTypes()
   action_warehouse.addDependencySets(
 "(meta_action)"
 "(set_global_params)"
-"(create_mesh, read_mesh)"
+"(read_mesh)"
 "(add_extra_nodeset)"
 "(setup_mesh)"
 "(add_mesh_modifier, setup_mesh_complete)"
@@ -428,7 +432,6 @@ addActionTypes()
 void
 registerActions()
 {
-  registerAction(CreateMeshAction, "create_mesh");
   registerAction(ReadMeshAction, "read_mesh");
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(AddExtraNodesetAction, "add_extra_nodeset");

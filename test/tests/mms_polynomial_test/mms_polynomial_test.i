@@ -1,19 +1,18 @@
 #MMS.i
 #This is for u = a*x^3*y*t+b*y^2*z+e*x*y*z^4
 [Mesh]
- [./Generation] #We are generating our own Mesh
-   dim = 3
-   nx = 3
-   ny = 3
-   nz = 3
-   x min = 0
-   x max = 1
-   y min = 0
-   y max = 1
-   z min = 0
-   z max = 1
-   elem_type = HEX8
-  [../]
+  type = GeneratedMesh
+  dim = 3
+  nx = 3
+  ny = 3
+  nz = 3
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  zmin = 0
+  zmax = 1
+  elem_type = HEX8
 []
 
 [Variables]

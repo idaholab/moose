@@ -83,9 +83,6 @@ bad_second_order_test = { INPUT : 'bad_second_order_test.i',
 wrong_object_test = { INPUT : 'wrong_moose_object_test.i',
                       EXPECT_ERR : 'Inconsistent Action Name detected!' }
 
-assertion_test = { INPUT : 'assertion_test.i',
-                   EXPECT_ASSERT : "Assertion `_parser_handle._mesh == NULL' failed" }
-
 wrong_object_test = { INPUT : 'nonexistent_pps_test.i',
                       EXPECT_ERR : "Postprocessor '\S+' requested but not specified in the input file." }
 

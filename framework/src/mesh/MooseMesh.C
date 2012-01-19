@@ -26,9 +26,20 @@
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
+template<>
+InputParameters validParams<MooseMesh>()
+{
+  InputParameters params = validParams<MooseObject>();
 
-MooseMesh::MooseMesh(int mesh_dim) :
-    _mesh(mesh_dim),
+  params.addParam<int>("_dimension", 1, "Dimension of the mesh");
+
+  return params;
+}
+
+
+MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
+    MooseObject(name, parameters),
+    _mesh(getParam<int>("_dimension")),
     _is_changed(false),
     //_is_parallel(false),
     _active_local_elem_range(NULL),
@@ -41,6 +52,7 @@ MooseMesh::MooseMesh(int mesh_dim) :
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
+    MooseObject(other_mesh._name, other_mesh._pars),
     _mesh(other_mesh._mesh),
     _is_changed(false),
     //_is_parallel(false),

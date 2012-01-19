@@ -12,27 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CREATEMESHACTION_H
-#define CREATEMESHACTION_H
+#ifndef GENERATEDMESH_H
+#define GENERATEDMESH_H
 
-#include "InputParameters.h"
-#include "Moose.h"
-#include "Action.h"
+#include "MooseMesh.h"
 
-#include <string>
-
-class CreateMeshAction;
+class GeneratedMesh;
 
 template<>
-InputParameters validParams<CreateMeshAction>();
+InputParameters validParams<GeneratedMesh>();
 
-
-class CreateMeshAction : public Action
+/**
+ * Mesh generated from parameters
+ */
+class GeneratedMesh : public MooseMesh
 {
 public:
-  CreateMeshAction(const std::string & name, InputParameters params);
-
-  virtual void act();
+  GeneratedMesh(const std::string & name, InputParameters parameters);
+  virtual ~GeneratedMesh();
 };
 
-#endif // CREATEMESHACTION_H
+#endif /* GENERATEDMESH_H */

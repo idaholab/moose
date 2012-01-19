@@ -1,10 +1,9 @@
 [Mesh]
-  [./Generation]
-    dim = 2
-    nx = 2
-    ny = 2
-    elem_type = QUAD4
-  [../]
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
+  elem_type = QUAD4
 []
 
 [Variables]

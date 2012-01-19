@@ -1,13 +1,12 @@
 [Mesh]
-  [./Generation]
-    dim = 2
-    xmin = -1
-    xmax = 1
-    ymin = -1
-    ymax = 1
-    nx = 20
-    ny = 20
-  [../]
+  type = GeneratedMesh
+  dim = 2
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  nx = 20
+  ny = 20
 []
 
 [Functions]

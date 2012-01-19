@@ -2,15 +2,14 @@
 # In part2, we load the solution and solve a steady problem. The test check, that the initial state in part 2 is the same as the last state from part1
 
 [Mesh]
-  [./Generation]
-    dim = 2
-    xmin = -1
-    xmax = 1
-    ymin = -1
-    ymax = 1
-    nx = 20
-    ny = 20
-  [../]
+  type = GeneratedMesh
+  dim = 2
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  nx = 20
+  ny = 20
 []
 
 [Functions]

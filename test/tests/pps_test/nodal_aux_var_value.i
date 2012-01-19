@@ -1,14 +1,13 @@
 [Mesh]
-  [./Generation]
-    dim = 2
-    nx = 2
-    ny = 2
-    xmin = 0
-    xmax = 1
-    ymin = 0
-    ymax = 1
-    elem_type = QUAD4
-  [../]
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  elem_type = QUAD4
 []
 
 [Variables]

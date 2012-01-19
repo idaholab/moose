@@ -60,6 +60,8 @@ public:
   template <typename T>
   const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
 
+  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+
 protected:
   std::string _name;                            ///< the name of the object
   InputParameters _pars;                        ///< parameters
