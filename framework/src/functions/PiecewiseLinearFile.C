@@ -33,6 +33,7 @@ InputParameters validParams<PiecewiseLinearFile>()
   InputParameters params = validParams<Function>();
   params.addRequiredParam<std::string>("yourFileName", "File holding your csv data for use with PiecewiseLilinearFile");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the axis values");
+  params.addParam<std::string>("format", "rows" ,"Format of csv data file that is in either in columns or rows");
   return params;
 }
 
@@ -40,13 +41,26 @@ PiecewiseLinearFile::PiecewiseLinearFile(const std::string & name, InputParamete
   Function(name, parameters),
   _linear_interp( NULL ),
   _file_name( getParam<std::string>("yourFileName") ),
-  _scale_factor( getParam<Real>("scale_factor") )
+  _scale_factor( getParam<Real>("scale_factor") ),
+  _format( getParam<std::string>("format") )
 {
   std::vector<Real> x;
   std::vector<Real> y;
 
   // Parse to get x, y
-  parse( x, y );
+  if (strncmp(_format.c_str(),"rows",4))
+  {
+    parseRows( x, y );
+  }
+  else if (strncmp(_format.c_str(),"columns",7))
+  {
+    parseColumns( x, y);
+  }
+  else
+  {
+    mooseError("Invalid option for format: "+_format+" Valid options are rows and columns.");
+  }
+
 
   _linear_interp = new LinearInterpolation( x, y );
 }
@@ -62,61 +76,88 @@ PiecewiseLinearFile::value(Real t, const Point &)
   return  _linear_interp->sample( t );
 }
 
+bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
+{
+  std::string line;
+  myvec.clear();
+  bool gotline(false);
+  if (getline(ifs,line))
+  {
+    gotline=true;
+
+    //Replace all commas with spaces
+    while(size_t pos=line.find(','))
+    {
+      if (pos == line.npos)
+        break;
+      line.replace(pos,1,1,' ');
+    }
+
+    //Harvest floats separated by whitespace
+    std::istringstream iss(line);
+    Real f;
+    while (iss>>f)
+    {
+      myvec.push_back(f);
+    }
+  }
+  return gotline;
+}
+
 void
-PiecewiseLinearFile::parse( std::vector<Real> & x, std::vector<Real> & y )
+PiecewiseLinearFile::parseRows( std::vector<Real> & x, std::vector<Real> & y )
 {
   std::ifstream file(_file_name.c_str());
   if (!file.good())
     mooseError("Error opening file '" + _file_name + "' from PiecewiseLinearFile function.");
   std::string line;
-  unsigned int linenum = 0;
   unsigned int itemnum;
-  std::vector<Real> data;
 
-  while (getline (file, line))
+  while(parseNextLineReals(file, x))
   {
-    linenum++;
-//     std::cout << "\nLine #" << linenum << ":" << std::endl;
-    std::istringstream linestream(line);
-    std::string item;
-    itemnum = 0;
-    while (getline (linestream, item, ','))
-    {
-      itemnum++;
-      std::istringstream i(item);
-      Real d;
-      i >> d;
-      data.push_back( d );
-      //       std::cout << "Item #" << itemnum << ": " << item << std::endl;
+    if (x.size() >0)
+      break;
+  }
 
+  if (x.size() == 0)
+    mooseError("File '" + _file_name + "' contains no numbers for PiecewiseLinearFile function.");
+
+  while(parseNextLineReals(file, y))
+  {
+    if (y.size() >0)
+      break;
+  }
+
+  if (y.size() == 0)
+    mooseError("File '" + _file_name + "' contains no y values for PiecewiseLinearFile function.");
+  else if (y.size() != x.size())
+    mooseError("Lengths of x and y data do not match in file '" + _file_name + "' for PiecewiseLinearFile function.");
+
+  std::vector<Real> scratch;
+  while(parseNextLineReals(file, scratch)){
+    if (scratch.size() > 0)
+      mooseError("Read more than two rows of data '" + _file_name + "' for PiecewiseLinearFile function.  Did you mean to use \"format = columns\"?");
+  }
+
+}
+
+void
+PiecewiseLinearFile::parseColumns( std::vector<Real> & x, std::vector<Real> & y )
+{
+  std::ifstream file(_file_name.c_str());
+  if (!file.good())
+    mooseError("Error opening file '" + _file_name + "' from PiecewiseLinearFile function.");
+  std::string line;
+  unsigned int itemnum;
+
+  std::vector<Real> scratch;
+  while(parseNextLineReals(file, scratch))
+  {
+    if (scratch.size() > 0){
+      if (scratch.size() != 2)
+        mooseError("Read more than 2 columns of data from file '" + _file_name + "' for PiecewiseLinearFile function.  Did you mean to use \"format = rows\"?");
+      x.push_back(scratch[0]);
+      y.push_back(scratch[1]);
     }
-  }
-//   std::cout << " linenum " << linenum << std::endl;
-//   std::cout << " itemnum " << itemnum << std::endl;
-
-  x.resize(itemnum);
-  y.resize(itemnum);
-  unsigned int offset(0);
-  // Extract the first line's data (the x axis data)
-  for (unsigned int i(0); i < itemnum; ++i)
-  {
-    x[i] = data[offset];
-    ++offset;
-/*    std::cout << " " << std::endl;
-    std::cout << " x " << x[i] << std::endl;
-    std::cout << " i " << i << std::endl;
-    std::cout << " " << std::endl;
-*/
-  }
-  for (unsigned int j(0); j < itemnum; ++j)
-  {
-    // Extract the y axis entry for this line
-    y[j] = data[offset];
-    ++offset;
-/*    std::cout << " " << std::endl;
-    std::cout << " y " << y[j] << std::endl;
-    std::cout << " j " << j << std::endl;
-    std::cout << " " << std::endl;
-*/
   }
 }

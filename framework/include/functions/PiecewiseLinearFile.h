@@ -42,7 +42,9 @@ private:
   LinearInterpolation * _linear_interp;
   const std::string _file_name;
   Real _scale_factor;
-  void parse( std::vector<Real> & x, std::vector<Real> & y );
+  const std::string _format;
+  void parseRows( std::vector<Real> & x, std::vector<Real> & y );
+  void parseColumns( std::vector<Real> & x, std::vector<Real> & y);
 
 };
 
