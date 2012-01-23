@@ -442,18 +442,7 @@ Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
     }
     else
     {
-//      for(unsigned int i=0; i<dof_indices.size(); i++)
-//      {
-//        std::cout<<"Dof: "<<dof_indices[i]<<" "<<res_block(i)<<std::endl;
-//      }
-/*
-      std::cout<<residual<<std::endl;
-      residual.close();
-*/
       residual.add_vector(res_block, di);
-//      residual.close();
-//      std::cout<<residual<<std::endl;
-
     }
   }
 }
@@ -538,14 +527,8 @@ Assembly::addCachedResidual(NumericVector<Number> & residual)
 {
   mooseAssert(_cached_residual_values.size() == _cached_residual_rows.size(), "Number of cached residuals and number of rows must match!");
 
-//  residual.add_vector(_cached_residual_values, _cached_residual_rows);
-
-//  residual.print();
-
   for(unsigned int i=0; i<_cached_residual_values.size(); i++)
   {
-//    std::cerr<<_cached_residual_rows[i]<<std::endl;
-
     residual.add(_cached_residual_rows[i], _cached_residual_values[i]);
   }
 
