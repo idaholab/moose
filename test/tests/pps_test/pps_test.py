@@ -23,6 +23,11 @@ test_elem_multi_block = {
   EXODIFF : ['elem_pps_multi_block_test_out.e']
 }
 
+test_side_multi_bnd = {
+  INPUT : 'side_pps_multi_bnd_test.i',
+  EXODIFF : ['side_pps_multi_bnd_test_out.e']
+}
+
 # The PPS tables should have only 2 rows of real data not counting the header or continuation line
 # This RegEx matches the continuation line and exactly 2 lines of output followed by the table closing line
 screen_output_test = { INPUT : 'screen_output_test.i',

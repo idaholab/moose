@@ -23,23 +23,7 @@ PostprocessorWarehouse::PostprocessorWarehouse()
 
 PostprocessorWarehouse::~PostprocessorWarehouse()
 {
-  // delete side postprocessors
-  {
-    std::map<unsigned int, std::vector<Postprocessor *> >::iterator j;
-    for (j=_side_postprocessors.begin(); j!=_side_postprocessors.end(); ++j)
-    {
-      std::vector<Postprocessor *>::iterator k;
-      for (k=j->second.begin(); k!=j->second.end(); ++k)
-        delete *k;
-    }
-  }
-
-  // delete nodal postprocessors
-  for (std::vector<Postprocessor *>::iterator i=_nodal_postprocessors.begin(); i!=_nodal_postprocessors.end(); ++i)
-    delete *i;
-
-  // delete generic postprocessors
-  for (std::vector<Postprocessor *>::iterator i=_generic_postprocessors.begin(); i!=_generic_postprocessors.end(); ++i)
+  for (std::vector<Postprocessor *>::iterator i=_all_postprocessors.begin(); i!=_all_postprocessors.end(); ++i)
     delete *i;
 }
 
@@ -82,16 +66,20 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     const std::vector<unsigned int> & block_ids = dynamic_cast<ElementPostprocessor*>(postprocessor)->blockIDs();
     for (std::vector<unsigned int>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
     {
-      subdomain_id_type block_id = *it;
+      unsigned int block_id = *it;
       _element_postprocessors[block_id].push_back(postprocessor);
       _block_ids_with_postprocessors.insert(block_id);
     }
   }
   else if(dynamic_cast<SidePostprocessor*>(postprocessor))
   {
-    unsigned int boundary_id = dynamic_cast<SidePostprocessor*>(postprocessor)->boundaryID();
-    _side_postprocessors[boundary_id].push_back(postprocessor);
-    _boundary_ids_with_postprocessors.insert(boundary_id);
+    const std::vector<unsigned int> & bnd_ids = dynamic_cast<SidePostprocessor*>(postprocessor)->boundaryIDs();
+    for (std::vector<unsigned int>::const_iterator it = bnd_ids.begin(); it != bnd_ids.end(); ++it)
+    {
+      unsigned int boundary_id = *it;
+      _side_postprocessors[boundary_id].push_back(postprocessor);
+      _boundary_ids_with_postprocessors.insert(boundary_id);
+    }
   }
   else if(dynamic_cast<NodalPostprocessor*>(postprocessor))
   {

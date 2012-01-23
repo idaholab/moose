@@ -1070,23 +1070,17 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
+    // distinguish between side and the rest of PPs to provide the right material object
     if(parameters.have_parameter<std::vector<unsigned int> >("boundary"))
     {
       if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
         _reinit_displaced_face = true;
 
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-
-      const std::vector<unsigned int> & boundaries = parameters.get<std::vector<unsigned int> >("boundary");
-
 //      if (!_pps_data[tid].hasPostprocessor(name))
 //      {
-        for (unsigned int i=0; i<boundaries.size(); ++i)
-        {
-          parameters.set<unsigned int>("_boundary_id") = boundaries[i];
-          Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
-          _pps(type)[tid].addPostprocessor(pp);
-        }
+        Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
+        _pps(type)[tid].addPostprocessor(pp);
 //      }
 //      else
 //        mooseError("Duplicate postprocessor name '" + name + "'");
@@ -1101,7 +1095,6 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 //      {
         Postprocessor * pp = static_cast<Postprocessor *>(Factory::instance()->create(pp_name, name, parameters));
         _pps(type)[tid].addPostprocessor(pp);
-
 //      }
 //      else
 //        mooseError("Duplicate postprocessor name '" + name + "'");

@@ -28,7 +28,7 @@ SidePostprocessor::SidePostprocessor(const std::string & name, InputParameters p
     Postprocessor(name, parameters),
     MaterialPropertyInterface(parameters),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
-    _boundary_id(parameters.get<unsigned int>("_boundary_id")),
+    _boundary_ids(parameters.get<std::vector<unsigned int> >("boundary")),
     _q_point(_subproblem.pointsFace(_tid)),
     _qrule(_subproblem.qRuleFace(_tid)),
     _JxW(_subproblem.JxWFace(_tid)),
