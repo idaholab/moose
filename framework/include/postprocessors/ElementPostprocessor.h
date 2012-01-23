@@ -40,7 +40,7 @@ class ElementPostprocessor :
 public:
   ElementPostprocessor(const std::string & name, InputParameters parameters);
 
-  unsigned int blockID() { return _block_id; }
+  const std::vector<unsigned int> & blockIDs() { return _block_ids; }
 
   virtual Real computeIntegral();
 
@@ -48,7 +48,7 @@ protected:
   /**
    * The block ID this postprocessor works on
    */
-  unsigned int _block_id;
+  std::vector<unsigned int> _block_ids;
 
   MooseVariable & _var;
 

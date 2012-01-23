@@ -23,16 +23,6 @@ PostprocessorWarehouse::PostprocessorWarehouse()
 
 PostprocessorWarehouse::~PostprocessorWarehouse()
 {
-  {
-    std::map<unsigned int, std::vector<Postprocessor *> >::iterator j;
-    for (j=_element_postprocessors.begin(); j!=_element_postprocessors.end(); ++j)
-    {
-      std::vector<Postprocessor *>::iterator k;
-      for (k=j->second.begin(); k!=j->second.end(); ++k)
-        delete *k;
-    }
-  }
-
   // delete side postprocessors
   {
     std::map<unsigned int, std::vector<Postprocessor *> >::iterator j;
@@ -89,9 +79,13 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 
   if(dynamic_cast<ElementPostprocessor*>(postprocessor))
   {
-    unsigned int block_id = dynamic_cast<ElementPostprocessor*>(postprocessor)->blockID();
-    _element_postprocessors[block_id].push_back(postprocessor);
-    _block_ids_with_postprocessors.insert(block_id);
+    const std::vector<unsigned int> & block_ids = dynamic_cast<ElementPostprocessor*>(postprocessor)->blockIDs();
+    for (std::vector<unsigned int>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+    {
+      subdomain_id_type block_id = *it;
+      _element_postprocessors[block_id].push_back(postprocessor);
+      _block_ids_with_postprocessors.insert(block_id);
+    }
   }
   else if(dynamic_cast<SidePostprocessor*>(postprocessor))
   {

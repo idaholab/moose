@@ -64,6 +64,9 @@
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
 
+// meshes
+#include "StripeMesh.h"
+
 
 namespace MooseTest
 {
@@ -136,6 +139,9 @@ void registerObjects()
   registerMaterial(CoupledMaterial);
 
   registerAction(ConvDiffMetaAction, "meta_action");
+
+  // meshes
+  registerObject(StripeMesh);
 }
 
 } // namespace
