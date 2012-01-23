@@ -48,11 +48,11 @@ PiecewiseLinearFile::PiecewiseLinearFile(const std::string & name, InputParamete
   std::vector<Real> y;
 
   // Parse to get x, y
-  if (strncmp(_format.c_str(),"rows",4))
+  if (strncmp(_format.c_str(),"rows",4)==0)
   {
     parseRows( x, y );
   }
-  else if (strncmp(_format.c_str(),"columns",7))
+  else if (strncmp(_format.c_str(),"columns",7)==0)
   {
     parseColumns( x, y);
   }
