@@ -58,7 +58,7 @@ PiecewiseLinearFile::PiecewiseLinearFile(const std::string & name, InputParamete
   }
   else
   {
-    mooseError("Invalid option for format: "+_format+" Valid options are rows and columns.");
+    mooseError("Invalid option for format: "+_format+" in PiecewiseLinearFile.  Valid options are rows and columns.");
   }
 
 
@@ -120,7 +120,7 @@ PiecewiseLinearFile::parseRows( std::vector<Real> & x, std::vector<Real> & y )
   }
 
   if (x.size() == 0)
-    mooseError("File '" + _file_name + "' contains no numbers for PiecewiseLinearFile function.");
+    mooseError("File '" + _file_name + "' contains no data for PiecewiseLinearFile function.");
 
   while(parseNextLineReals(file, y))
   {
@@ -129,14 +129,14 @@ PiecewiseLinearFile::parseRows( std::vector<Real> & x, std::vector<Real> & y )
   }
 
   if (y.size() == 0)
-    mooseError("File '" + _file_name + "' contains no y values for PiecewiseLinearFile function.");
+    mooseError("File '" + _file_name + "' contains no y data for PiecewiseLinearFile function.");
   else if (y.size() != x.size())
     mooseError("Lengths of x and y data do not match in file '" + _file_name + "' for PiecewiseLinearFile function.");
 
   std::vector<Real> scratch;
   while(parseNextLineReals(file, scratch)){
     if (scratch.size() > 0)
-      mooseError("Read more than two rows of data '" + _file_name + "' for PiecewiseLinearFile function.  Did you mean to use \"format = columns\"?");
+      mooseError("Read more than two rows of data from file '" + _file_name + "' for PiecewiseLinearFile function.  Did you mean to use \"format = columns\"?");
   }
 
 }
