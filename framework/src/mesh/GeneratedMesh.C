@@ -42,15 +42,24 @@ InputParameters validParams<GeneratedMesh>()
 }
 
 GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameters) :
-    MooseMesh(name, parameters)
+    MooseMesh(name, parameters),
+    _dim(getParam<int>("dim")),
+    _nx(getParam<int>("nx")),
+    _ny(getParam<int>("ny")),
+    _nz(getParam<int>("nz")),
+    _xmin(getParam<Real>("xmin")),
+    _xmax(getParam<Real>("xmax")),
+    _ymin(getParam<Real>("ymin")),
+    _ymax(getParam<Real>("ymax")),
+    _zmin(getParam<Real>("zmin")),
+    _zmax(getParam<Real>("zmax"))
 {
-  int mesh_dim = getParam<int>("dim");
   std::string elem_type_str;
 
   if (isParamValid("elem_type"))
     elem_type_str = getParam<std::string>("elem_type");
   else
-    switch (mesh_dim)
+    switch (_dim)
     {
     case 1: elem_type_str = "EDGE2"; break;
     case 2: elem_type_str = "QUAD4"; break;
@@ -61,37 +70,16 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
 
   ElemType elem_type = Utility::string_to_enum<ElemType>(elem_type_str);
 
-  switch (mesh_dim)
+  switch (_dim)
   {
   case 1:
-    MeshTools::Generation::build_line(_mesh,
-                                      getParam<int>("nx"),
-                                      getParam<Real>("xmin"),
-                                      getParam<Real>("xmax"),
-                                      elem_type);
+    MeshTools::Generation::build_line(_mesh, _nx, _xmin, _xmax, elem_type);
     break;
   case 2:
-    MeshTools::Generation::build_square(_mesh,
-                                        getParam<int>("nx"),
-                                        getParam<int>("ny"),
-                                        getParam<Real>("xmin"),
-                                        getParam<Real>("xmax"),
-                                        getParam<Real>("ymin"),
-                                        getParam<Real>("ymax"),
-                                        elem_type);
+    MeshTools::Generation::build_square(_mesh, _nx, _ny, _xmin, _xmax, _ymin, _ymax, elem_type);
     break;
   case 3:
-    MeshTools::Generation::build_cube(_mesh,
-                                      getParam<int>("nx"),
-                                      getParam<int>("ny"),
-                                      getParam<int>("nz"),
-                                      getParam<Real>("xmin"),
-                                      getParam<Real>("xmax"),
-                                      getParam<Real>("ymin"),
-                                      getParam<Real>("ymax"),
-                                      getParam<Real>("zmin"),
-                                      getParam<Real>("zmax"),
-                                      elem_type);
+    MeshTools::Generation::build_cube(_mesh, _nx, _ny, _nz, _xmin, _xmax, _ymin, _ymax, _zmin, _zmax, elem_type);
     break;
   }
 }

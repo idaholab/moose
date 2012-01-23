@@ -30,6 +30,13 @@ class GeneratedMesh : public MooseMesh
 public:
   GeneratedMesh(const std::string & name, InputParameters parameters);
   virtual ~GeneratedMesh();
+
+protected:
+  int _dim;                                     ///< The dimension of the mesh
+  int _nx, _ny, _nz;                            ///< Number of elements in x, y, z direction
+  Real _xmin, _xmax;                            ///< Min and max in x direction
+  Real _ymin, _ymax;                            ///< Min and max in y direction
+  Real _zmin, _zmax;                            ///< Min and max in z direction
 };
 
 #endif /* GENERATEDMESH_H */
