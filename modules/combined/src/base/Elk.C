@@ -96,9 +96,6 @@
 #include "ACBulk.h"
 #include "ACInterface.h"
 #include "CHBulk.h"
-#include "CHSplit1.h"
-#include "CHSplit2LaPl.h"
-#include "CHSplit2ChemPot.h"
 #include "CHInterface.h"
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
@@ -216,9 +213,6 @@ Elk::registerObjects()
   registerKernel(ACBulk);
   registerKernel(ACInterface);
   registerKernel(CHBulk);
-  registerKernel(CHSplit1);
-  registerKernel(CHSplit2LaPl);
-  registerKernel(CHSplit2ChemPot);
   registerKernel(CHInterface);
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
