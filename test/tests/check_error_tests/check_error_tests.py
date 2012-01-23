@@ -57,6 +57,9 @@ missing_req_par_moose_obj_test = { INPUT : 'missing_req_par_moose_obj_test.i',
 missing_req_par_action_obj_test = { INPUT : 'missing_req_par_action_obj_test.i',
                                     EXPECT_ERR : "The required parameter '\S+' is missing" }
 
+missing_req_par_mesh_block_test = { INPUT : 'missing_req_par_mesh_block_test.i',
+                                    EXPECT_ERR : "The required parameter '\S+' is missing" }
+
 missing_active_section_test = { INPUT : 'missing_active_section.i',
                                 EXPECT_ERR : "One or more active lists in the input file are missing a referenced section" }
 

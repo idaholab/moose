@@ -17,7 +17,7 @@
 
 #include "InputParameters.h"
 #include "Moose.h"
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 #include "MooseMesh.h"
 
@@ -29,7 +29,7 @@ template<>
 InputParameters validParams<ReadMeshAction>();
 
 
-class ReadMeshAction : public Action
+class ReadMeshAction : public MooseObjectAction
 {
 public:
   ReadMeshAction(const std::string & name, InputParameters params);
