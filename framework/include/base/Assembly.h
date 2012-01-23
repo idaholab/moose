@@ -329,12 +329,14 @@ protected:
 
   std::vector<DenseVector<Number> > _sub_Re;                     ///< residual contributions for each variable from the element
   std::vector<DenseVector<Number> > _sub_Rn;                     ///< residual contributions for each variable from the neighbor
+  DenseVector<Number> _tmp_Re;                                   ///< auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
 
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Kee;      ///< jacobian contributions
 
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Ken;      ///< jacobian contributions from the element and neighbor
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Kne;      ///< jacobian contributions from the neighbor and element
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Knn;      ///< jacobian contributions from the neighbor
+  DenseMatrix<Number> _tmp_Ke;                                   ///< auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)
 
   // Shape function values, gradients. second derivatives
   std::vector<std::vector<Real> > _phi;

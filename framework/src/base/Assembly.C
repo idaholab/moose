@@ -436,9 +436,9 @@ Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 
     if (scaling_factor != 1.0)
     {
-      DenseVector<Number> re(res_block);
-      re.scale(scaling_factor);
-      residual.add_vector(re, di);
+      _tmp_Re = res_block;
+      _tmp_Re *= scaling_factor;
+      residual.add_vector(_tmp_Re, di);
     }
     else
     {
@@ -457,12 +457,12 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
 
     if (scaling_factor != 1.0)
     {
-      DenseVector<Number> re(res_block);
-      re.scale(scaling_factor);
+      _tmp_Re = res_block;
+      _tmp_Re *= scaling_factor;
 
-      for(unsigned int i=0; i<re.size(); i++)
+      for(unsigned int i=0; i<_tmp_Re.size(); i++)
       {
-        _cached_residual_values.push_back(re(i));
+        _cached_residual_values.push_back(_tmp_Re(i));
         _cached_residual_rows.push_back(di[i]);
       }
     }
@@ -555,10 +555,10 @@ Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 
     if (scaling_factor != 1.0)
     {
-      DenseVector<Number> re(res_block);
-      re.scale(scaling_factor);
+      _tmp_Re = res_block;
+      _tmp_Re *= scaling_factor;
       for(unsigned int i=0; i<di.size(); i++)
-        residual.set(di[i], res_block(i));
+        residual.set(di[i], _tmp_Re(i));
     }
     else
       for(unsigned int i=0; i<di.size(); i++)
@@ -598,9 +598,9 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> 
 
     if (scaling_factor != 1.0)
     {
-      DenseMatrix<Number> ke(jac_block);
-      ke.scale(scaling_factor);
-      jacobian.add_matrix(ke, di, dj);
+      _tmp_Ke = jac_block;
+      _tmp_Ke *= scaling_factor;
+      jacobian.add_matrix(_tmp_Ke, di, dj);
     }
     else
       jacobian.add_matrix(jac_block, di, dj);
@@ -618,13 +618,13 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsign
 
     if (scaling_factor != 1.0)
     {
-      DenseMatrix<Number> ke(jac_block);
-      ke.scale(scaling_factor);
+      _tmp_Ke = jac_block;
+      _tmp_Ke *= scaling_factor;
 
       for(unsigned int i=0; i<di.size(); i++)
         for(unsigned int j=0; j<dj.size(); j++)
         {
-          _cached_jacobian_values.push_back(ke(i, j));
+          _cached_jacobian_values.push_back(_tmp_Ke(i, j));
           _cached_jacobian_rows.push_back(di[i]);
           _cached_jacobian_cols.push_back(dj[j]);
         }
@@ -757,9 +757,9 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, u
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)
   {
-    DenseMatrix<Number> scaled_ke(ke);
-    scaled_ke.scale(scaling_factor);
-    jacobian.add_matrix(scaled_ke, di);
+    _tmp_Ke = ke;
+    _tmp_Ke *= scaling_factor;
+    jacobian.add_matrix(_tmp_Ke, di);
   }
   else
     jacobian.add_matrix(ke, di);
@@ -784,26 +784,21 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)
   {
-    {
-      DenseMatrix<Number> scaled_ke(kee);
-      scaled_ke.scale(scaling_factor);
-      jacobian.add_matrix(scaled_ke, di);
-    }
-    {
-      DenseMatrix<Number> scaled_ke(ken);
-      scaled_ke.scale(scaling_factor);
-      jacobian.add_matrix(scaled_ke, di, dn);
-    }
-    {
-      DenseMatrix<Number> scaled_ke(kne);
-      scaled_ke.scale(scaling_factor);
-      jacobian.add_matrix(scaled_ke, dn, di);
-    }
-    {
-      DenseMatrix<Number> scaled_ke(knn);
-      scaled_ke.scale(scaling_factor);
-      jacobian.add_matrix(scaled_ke, dn);
-    }
+    _tmp_Ke = kee;
+    _tmp_Ke *= scaling_factor;
+    jacobian.add_matrix(_tmp_Ke, di);
+
+    _tmp_Ke = ken;
+    _tmp_Ke *= scaling_factor;
+    jacobian.add_matrix(_tmp_Ke, di, dn);
+
+    _tmp_Ke = kne;
+    _tmp_Ke *= scaling_factor;
+    jacobian.add_matrix(_tmp_Ke, dn, di);
+
+    _tmp_Ke = knn;
+    _tmp_Ke *= scaling_factor;
+    jacobian.add_matrix(_tmp_Ke, dn);
   }
   else
   {
