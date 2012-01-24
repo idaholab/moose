@@ -154,6 +154,14 @@ test_up: all up
 		(cd $(ROOT_DIR)/$$app && ./run_tests -j $(JOBS)) ; \
 	done
 
+clean_up:
+	@echo ====== Cleaning the following applications: $(CURRENT_APP) $(DEP_APPS) ======
+	@for app in $(CURRENT_APP) $(DEP_APPS); \
+	do \
+		echo ====== Cleaning $${app} ====== ; \
+		make -C $(ROOT_DIR)/$$app clean; \
+	done
+
 #
 # Maintenance
 #
