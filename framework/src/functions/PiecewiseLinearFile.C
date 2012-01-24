@@ -111,7 +111,6 @@ PiecewiseLinearFile::parseRows( std::vector<Real> & x, std::vector<Real> & y )
   if (!file.good())
     mooseError("Error opening file '" + _file_name + "' from PiecewiseLinearFile function.");
   std::string line;
-  unsigned int itemnum;
 
   while(parseNextLineReals(file, x))
   {
@@ -148,7 +147,6 @@ PiecewiseLinearFile::parseColumns( std::vector<Real> & x, std::vector<Real> & y 
   if (!file.good())
     mooseError("Error opening file '" + _file_name + "' from PiecewiseLinearFile function.");
   std::string line;
-  unsigned int itemnum;
 
   std::vector<Real> scratch;
   while(parseNextLineReals(file, scratch))
