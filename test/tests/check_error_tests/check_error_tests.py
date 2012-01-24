@@ -27,6 +27,18 @@ missing_function_test = { INPUT : 'missing_function_test.i',
 missing_function_file_test = { INPUT : 'missing_function_file_test.i',
                                EXPECT_ERR : "Error opening file \S+ from PiecewiseLinearFile function" }
 
+function_file_test1 = { INPUT : 'function_file_test1.i',
+                        EXPECT_ERR : "Read more than two rows of data from file '\S+' for PiecewiseLinearFile function.  Did you mean to use \"format = columns\"?" }
+
+function_file_test2 = { INPUT : 'function_file_test2.i',
+                        EXPECT_ERR : "Read more than 2 columns of data from file '\S+' for PiecewiseLinearFile function.  Did you mean to use \"format = rows\"?" }
+
+function_file_test3 = { INPUT : 'function_file_test3.i',
+                        EXPECT_ERR : "Lengths of x and y data do not match in file '\S+' for PiecewiseLinearFile function." }
+
+function_file_test4 = { INPUT : 'function_file_test4.i',
+                        EXPECT_ERR : "Invalid option for format: \S+ in PiecewiseLinearFile.  Valid options are rows and columns." }
+
 bad_material_block_test = { INPUT : 'bad_material_block_test.i',
                             EXPECT_ERR : 'Material block \S+ specified in the input file does not exist' }
 
