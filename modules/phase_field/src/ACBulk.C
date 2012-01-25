@@ -16,7 +16,7 @@ ACBulk::ACBulk(const std::string & name, InputParameters parameters)
 { 
 }
 
-Real
+/*Real  //Use this as an example of how to create the function
 ACBulk::computeDFDOP(PFFunctionType type)
 {
   switch (type)
@@ -29,7 +29,7 @@ ACBulk::computeDFDOP(PFFunctionType type)
   }
 
   mooseError("Invalid type passed in");
-}
+  }*/
 
 Real
 ACBulk::precomputeQpResidual()

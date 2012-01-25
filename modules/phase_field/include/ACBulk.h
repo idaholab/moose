@@ -23,7 +23,7 @@ protected:
   };
   virtual Real precomputeQpResidual();
   virtual Real precomputeQpJacobian();
-  virtual Real computeDFDOP(PFFunctionType type);
+  virtual Real computeDFDOP(PFFunctionType type) = 0;
   std::string _mob_name;
 
 

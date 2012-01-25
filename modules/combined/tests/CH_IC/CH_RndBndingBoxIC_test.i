@@ -44,7 +44,7 @@
   [../]
 
   [./CHSolid]
-    type = CHBulk
+    type = CHMath
     variable = c
     mob_name = M
   [../]

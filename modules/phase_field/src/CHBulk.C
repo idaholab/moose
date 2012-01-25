@@ -23,7 +23,7 @@ CHBulk::CHBulk(const std::string & name, InputParameters parameters)
 {  
 }
 
-RealGradient
+/*RealGradient  //Use This an example of the the function should look like
 CHBulk::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
 {
   switch (type)
@@ -39,6 +39,7 @@ CHBulk::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
   
   mooseError("Invalid type passed in");
 }
+*/
 
 RealGradient
 CHBulk::precomputeQpResidual()

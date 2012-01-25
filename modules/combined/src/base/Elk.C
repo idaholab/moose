@@ -93,9 +93,8 @@
 
 // phase_field
 #include "AC.h"
-#include "ACBulk.h"
 #include "ACInterface.h"
-#include "CHBulk.h"
+#include "CHMath.h"
 #include "CHInterface.h"
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
@@ -210,9 +209,8 @@ Elk::registerObjects()
 
   // phase_field
   registerKernel(AC);
-  registerKernel(ACBulk);
   registerKernel(ACInterface);
-  registerKernel(CHBulk);
+  registerKernel(CHMath);
   registerKernel(CHInterface);
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);

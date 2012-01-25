@@ -26,7 +26,7 @@ protected:
   };
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
-  virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c);
+  virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c) = 0;
 
 private:
   
