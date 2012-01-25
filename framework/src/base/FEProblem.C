@@ -1687,8 +1687,13 @@ FEProblem::getOutputProblem(unsigned int refinements)
 void
 FEProblem::adaptMesh()
 {
-  _adaptivity.adaptMesh();
-  meshChanged();
+  unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
+  for (unsigned int i=0; i < cycles_per_step; ++i)
+  {
+    std::cout << "Adapting...\n";
+    _adaptivity.adaptMesh();
+    meshChanged();
+  }
 }
 #endif //LIBMESH_ENABLE_AMR
 

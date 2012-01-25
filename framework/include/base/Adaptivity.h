@@ -90,6 +90,13 @@ public:
   unsigned int getSteps() const { return _steps; }
 
   /**
+   * Pull out the number of cycles_per_step previously set through the AdaptivityAction
+   *
+   * @return the number of cycles per step
+   */
+  unsigned int getCyclesPerStep() const { return _cycles_per_step; }
+
+  /**
    * Adapts the mesh based on the error estimator used
    */
   void adaptMesh();
@@ -133,6 +140,7 @@ protected:
   Real & _t;                                    ///< Time
   Real _start_time;                             ///< When adaptivity start
   Real _stop_time;                              ///< When adaptivity stops
+  unsigned int _cycles_per_step;                ///< The number of adapativity cycles per step
 };
 
 template<typename T>
@@ -157,10 +165,10 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
     if (_displaced_mesh_refinement)
       _displaced_mesh_refinement->max_h_level() = param_value;
   }
+  else if (param_name == "cycles_per_step")
+    _cycles_per_step = param_value;
   else
-  {
-    // TODO: spit out some warning/error
-  }
+    mooseError("Invalid Param in adaptivity object");
 }
 #endif //LIBMESH_ENABLE_AMR
 

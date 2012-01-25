@@ -39,9 +39,9 @@ InputParameters validParams<AdaptivityAction>()
   params.addParam<bool> ("print_changed_info",                 false, "Determines whether information about the mesh is printed when adapativity occurs");
   params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that adaptivity will be active after.");
   params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which adaptivity will no longer be active.");
-
   params.addParam<std::vector<std::string> > ("weight_names", "List of names of variables that will be associated with weight_values");
   params.addParam<std::vector<Real> > ("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by");
+  params.addParam<unsigned int>("cycles_per_step", 1, "The number of adaptivity cycles per step");
 
   return params;
 }
@@ -62,6 +62,7 @@ AdaptivityAction::act()
 
   adapt.setErrorEstimator(getParam<std::string>("error_estimator"));
 
+  adapt.setParam("cycles_per_step", getParam<unsigned int>("cycles_per_step"));
   adapt.setParam("refine fraction", getParam<Real>("refine_fraction"));
   adapt.setParam("coarsen fraction", getParam<Real>("coarsen_fraction"));
   adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));
