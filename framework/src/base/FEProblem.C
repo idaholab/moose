@@ -1560,8 +1560,8 @@ FEProblem::computeResidual(NonlinearImplicitSystem & /*sys*/, const NumericVecto
   {
     _materials[i].residualSetup();
   }
-
   _aux.residualSetup();
+
   _aux.compute();
   _nl.computeResidual(residual);
 

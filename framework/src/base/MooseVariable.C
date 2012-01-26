@@ -170,6 +170,7 @@ MooseVariable::~MooseVariable()
   _nodal_u.release();
   _nodal_u_old.release();
   _nodal_u_older.release();
+  _nodal_u_dot.release();
 
   _nodal_u_neighbor.release();
   _nodal_u_old_neighbor.release();
@@ -751,6 +752,15 @@ MooseVariable::computeNodalValues()
 
       _nodal_u_older.resize(1);
       _nodal_u_older[0] = _sys.solutionOlder()(_nodal_dof_index);
+
+      if (_is_nl)
+      {
+        _nodal_u_dot.resize(1);
+        _nodal_u_dot[0] = _sys.solutionUDot()(_nodal_dof_index);
+
+        _nodal_du_dot_du.resize(1);
+        _nodal_du_dot_du[0] = _sys.solutionDuDotDu()(_nodal_dof_index);
+      }
     }
   }
 }

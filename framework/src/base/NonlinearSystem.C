@@ -456,7 +456,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
       ++it)
     (*it)->zero();
 
-  computeTimeDeriv();
+  computeTimeDerivatives();
   computeResidualInternal(residual);
   finishResidual(residual);
 
@@ -614,7 +614,7 @@ NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 }
 
 void
-NonlinearSystem::computeTimeDeriv()
+NonlinearSystem::computeTimeDerivatives()
 {
   if (!_mproblem.isTransient())
     return;

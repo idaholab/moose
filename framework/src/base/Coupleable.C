@@ -125,7 +125,7 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
     mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
 
   if (_nodal)
-    mooseError("Nodal variables do not have u_dot defined");
+    return getVar(var_name, comp)->nodalSlnDot();
   else
     return getVar(var_name, comp)->uDot();
 }
@@ -137,7 +137,7 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
     mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
 
   if (_nodal)
-    mooseError("Nodal variables do not have du_dot_du defined");
+    return getVar(var_name, comp)->nodalSlnDuDotDu();
   else
     return getVar(var_name, comp)->duDotDu();
 }

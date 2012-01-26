@@ -176,6 +176,8 @@ public:
   VariableValue & nodalSln() { return _nodal_u; }
   VariableValue & nodalSlnOld() { return _nodal_u_old; }
   VariableValue & nodalSlnOlder() { return _nodal_u_older; }
+  VariableValue & nodalSlnDot() { return _nodal_u_dot; }
+  VariableValue & nodalSlnDuDotDu() { return _nodal_du_dot_du; }
 
   VariableValue & slnNeighbor() { return _u_neighbor; }
   VariableValue & slnOldNeighbor() { return _u_old_neighbor; }
@@ -306,6 +308,8 @@ protected:
   VariableValue _nodal_u;
   VariableValue _nodal_u_old;
   VariableValue _nodal_u_older;
+  VariableValue _nodal_u_dot;                                           ///< nodal values of u_dot
+  VariableValue _nodal_du_dot_du;                                       ///< nodal values of derivative of u_dot wrt u
 
   bool _is_defined_neighbor;                                            ///< If the variable is defined at the neighbor node (used in compute nodal values)
   const Node * & _node_neighbor;

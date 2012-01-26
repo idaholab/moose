@@ -303,7 +303,7 @@ protected:
   /**
    * Computes the time derivative vector
    */
-  void computeTimeDeriv();
+  void computeTimeDerivatives();
 
   /**
    * Compute the residual
