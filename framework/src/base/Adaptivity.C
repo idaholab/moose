@@ -22,6 +22,7 @@
 // libMesh
 #include "equation_systems.h"
 #include "kelly_error_estimator.h"
+#include "patch_recovery_error_estimator.h"
 #include "fourth_error_estimators.h"
 
 #ifdef LIBMESH_ENABLE_AMR
@@ -87,8 +88,10 @@ Adaptivity::setErrorEstimator(const std::string &error_estimator_name)
 {
   if (error_estimator_name == "KellyErrorEstimator")
     _error_estimator = new KellyErrorEstimator;
-  else if(error_estimator_name == "LaplacianErrorEstimator")
+  else if (error_estimator_name == "LaplacianErrorEstimator")
     _error_estimator = new LaplacianErrorEstimator;
+  else if (error_estimator_name == "PatchRecoveryErrorEstimator")
+    _error_estimator = new PatchRecoveryErrorEstimator;
   else
     mooseError("Unknown error_estimator selection: " + error_estimator_name);
 }

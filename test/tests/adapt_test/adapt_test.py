@@ -15,3 +15,7 @@ adapt_cycles_test = {
         INPUT : 'adapt_test_cycles.i',
         EXODIFF : ['out_cycles_0000.e', 'out_cycles_0001.e']
 }
+
+patch_test = { INPUT : 'patch_recovery_test.i',
+         EXODIFF : ['patch_out_0001.e']
+}

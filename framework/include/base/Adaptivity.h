@@ -61,7 +61,7 @@ public:
   /**
    * Set the error estimator
    *
-   * @param error_estimator_name the name of the error estimator (currently: Laplacian and Kelly)
+   * @param error_estimator_name the name of the error estimator (currently: Laplacian, Kelly, and PatchRecovery)
    */
   void setErrorEstimator(const std::string & error_estimator_name);
 
