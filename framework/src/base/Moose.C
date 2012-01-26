@@ -23,6 +23,7 @@
 // objects that can be created by MOOSE
 #include "MooseMesh.h"
 #include "GeneratedMesh.h"
+#include "MeshExtruder.h"
 // problems
 #include "FEProblem.h"
 #include "OutputProblem.h"
@@ -186,6 +187,7 @@ registerObjects()
   // mesh
   registerObject(MooseMesh);
   registerObject(GeneratedMesh);
+  registerObject(MeshExtruder);
 
   // problems
   registerProblem(FEProblem);
