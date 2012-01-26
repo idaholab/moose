@@ -1654,6 +1654,9 @@ FEProblem::output(bool force/*= false*/)
       _out_problem->output(force);
     }
 
+    if(_output_solution_history)
+      _out.outputSolutionHistory();
+
     if (_displaced_problem != NULL && _output_displaced)
       _displaced_problem->output();
 

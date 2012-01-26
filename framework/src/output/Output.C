@@ -179,6 +179,21 @@ Output::outputInput()
 }
 
 void
+Output::outputSolutionHistory()
+{
+  NonlinearSystem & nl_sys = _fe_problem.getNonlinearSystem();
+
+  std::ofstream slh_file;
+  slh_file.open((_file_base + ".slh").c_str(), std::ios::app);
+  slh_file << nl_sys._current_nl_its;
+
+  for(unsigned int i=0; i<nl_sys._current_l_its.size(); i++)
+    slh_file << " " << nl_sys._current_l_its[i];
+
+  slh_file<<std::endl;
+}
+
+void
 Output::meshChanged()
 {
   for (unsigned int i = 0; i < _outputters.size(); i++)

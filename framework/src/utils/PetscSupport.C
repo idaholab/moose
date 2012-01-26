@@ -102,6 +102,10 @@ PetscErrorCode  petscConverged(KSP ksp,PetscInt n,PetscReal rnorm,KSPConvergedRe
 
   // If we hit max its then we consider that converged
   if (n >= ksp->max_it) *reason = KSP_CONVERGED_ITS;
+
+  if(*reason == KSP_CONVERGED_ITS || *reason == KSP_CONVERGED_RTOL)
+    system->_current_l_its.push_back(n);
+
   return 0;
 }
 
@@ -271,6 +275,9 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 //  if(it)
 //    *reason = SNES_DIVERGED_LS_FAILURE;
 */
+
+  if(*reason == SNES_CONVERGED_PNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_RELATIVE || *reason == SNES_CONVERGED_FNORM_ABS)
+    system->_current_nl_its = it;
 
   return(0);
 }

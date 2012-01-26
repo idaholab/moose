@@ -239,6 +239,7 @@ public:
   virtual Output & out() { return _out; }
   virtual void output(bool force = false);
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
+  virtual void outputSolutionHistory(bool state = true) { _output_solution_history = state; }
   OutputProblem & getOutputProblem(unsigned int refinements);
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
 
@@ -336,6 +337,7 @@ protected:
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
   bool _output_displaced;                               ///< true for outputting displaced problem
+  bool _output_solution_history;                        ///< true for outputting solution history
   bool _input_file_saved;                               ///< whether input file has been written
 
   bool _has_dampers;                                    ///< Whether or not this system has any Dampers associated with it.

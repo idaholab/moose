@@ -155,6 +155,10 @@ NonlinearSystem::solve()
   std::cout <<std::scientific<<std::setprecision(6);
   std::cout << "  Initial |residual|_2 = "<<_initial_residual<<"\n";
 
+  // Clear the iteration counters
+  _current_l_its.clear();
+  _current_nl_its = 0;
+
   // Initialize the solution vector using a predictor and known values from nodal bcs
   setInitialSolution();
 

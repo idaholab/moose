@@ -45,6 +45,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
   params.addParam<bool>("output_displaced", false, "Requests that displaced mesh files are written at each solve");
+  params.addParam<bool>("output_solution_history", false, "Requests that the 'solution history' is output, the solution history is the number of nonlinear / linear solves that are done for each step.");
 
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<bool>("print_linear_residuals", false, "Specifies whether the linear residuals are printed during the solve");
@@ -152,6 +153,7 @@ SetupOutputAction::act()
     fe_problem.setMaxPPSRowsScreen(getParam<unsigned int>("max_pps_rows_screen"));
 
     fe_problem.outputDisplaced(getParam<bool>("output_displaced"));
+    fe_problem.outputSolutionHistory(getParam<bool>("output_solution_history"));
 
 #ifdef LIBMESH_ENABLE_AMR
     Adaptivity & adapt = fe_problem.adaptivity();
