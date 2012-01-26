@@ -359,7 +359,7 @@ MooseMesh::applyMeshModifications()
 void
 MooseMesh::cacheInfo()
 {
-  for (MeshBase::element_iterator el = _mesh.local_elements_begin(); el != _mesh.local_elements_end(); ++el)
+  for (MeshBase::element_iterator el = _mesh.elements_begin(); el != _mesh.elements_end(); ++el)
   {
     Elem * elem = *el;
     for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
