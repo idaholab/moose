@@ -69,6 +69,8 @@ Steady::execute()
     _problem.solve();
     postSolve();
 
+    _problem.onTimestepEnd();
+
     _problem.computePostprocessors();
     _problem.output();
     _problem.outputPostprocessors();
