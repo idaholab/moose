@@ -1,14 +1,11 @@
 #!/usr/bin/python
-import os, sys, string, subprocess, re, socket
+import os, sys, string, subprocess, re, socket, getopt
 
 # If hostname equals head_node, this script will run
 head_node = 'quark'
 
 # We exclude these applications:
 excluded_applications = set(['r7_moose', 'rattlesnake'])
-
-# The checkout command
-checkout_moose_stable = ['svn', 'co', '--quiet', 'https://hpcsc/svn/herd/trunk/moose', 'moose-stable']
 
 # The mergeinfo command
 get_merged_revisions = ['svn', 'mergeinfo', 'https://hpcsc/svn/herd/trunk/devel/moose', '--show-revs', 'eligible', 'moose-stable']
@@ -21,6 +18,13 @@ commit_moose_stable = ['svn', 'ci', '--username', 'moosetest', '-F', 'svn_log.lo
 
 # Ignor this line. It is just needed to build the initial command. More is appended to it later
 get_revision_logs = ['svn', 'log']
+
+_USAGE = """
+updateStable.py repo_revision
+
+Where repo_revision is the target merge revision.
+
+"""
 
 def buildStatus():
   tmp_apps = []
@@ -61,11 +65,12 @@ def parseLOG(merge_log):
       svn_log.append('  ----\n')
     else:
       tmp_item = str.lower(item)
-      for cmd_language in ['close #', 'closed #', 'closes #', 'fix #', 'fixed #', 'fixes #', 'references #', 'refs #', 'addresses #', 're #', 'see #']:
+      # Remove Trac ticket comment command langauge.
+      for cmd_language in ['close #', 'closed #', 'closes #', 'fix #', 'fixed #', 'fixes #', 'references #', 'ref #', 'refs #', 'addresses #', 're #', 'see #', 'close: #', 'closed: #', 'closes: #', 'fix: #', 'fixed: #', 'fixes: #', 'references: #', 'ref: #', 'refs: #', 'addresses: #', 're: #', 'see: #']:
         if tmp_item.find(cmd_language) != -1:
           pos_start = (int(tmp_item.find(cmd_language)) + (len(cmd_language) - 2))
           pos_end = (int(tmp_item.find(cmd_language)) + (len(cmd_language) - 2))
-          item = str(item[:pos_start]) + ':' + str(item[pos_end:])
+          item = str(item[:pos_start]) + '-' + str(item[pos_end:])
       svn_log.append(item + '\n')
   for log_line in svn_log:
     final_log = final_log + str(log_line)
@@ -83,10 +88,32 @@ def clobberRevisions(revision_list):
       tmp_list = tmp_list + ' -' + item
   return tmp_list
 
+def printUsage(message):
+  sys.stderr.write(_USAGE)
+  if message:
+    sys.exit('\nFATAL ERROR: ' + message)
+  else:
+    sys.exit(1)
+
+def process_args():
+  try:
+    placeholder, opts = getopt.getopt(sys.argv[1:], '', ['help'])
+  except getopt.GetoptError:
+    printUsage('Invalid arguments.')
+  if not opts:
+    printUsage('No options specified')
+  try:
+    if (opts[0] == ''):
+      printUsage('Invalid arguments.')
+  except:
+    printUsage('Invalid arguments.')
+  return opts[0]
+
 if __name__ == '__main__':
   if socket.gethostname().split('.')[0] == head_node:
     if buildStatus():
       # Checking out moose-stable
+      checkout_moose_stable = ['svn', 'co', '-r', str(process_args()), '--quiet', 'https://hpcsc/svn/herd/trunk/moose', 'moose-stable']
       runCMD(checkout_moose_stable)
       # Get Merged version numbers
       print 'Get revisions merged...'
