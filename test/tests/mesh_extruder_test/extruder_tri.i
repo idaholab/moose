@@ -1,9 +1,9 @@
 [Mesh]
   type = MeshExtruder
-  file = chimney_tri.e
+  file = ellipse_tri.e
   num_layers = 20
-  height = 1e-2
-  extrusion_axis = 1 # Y
+  height = 5
+  extrusion_axis = 2 # Z
   bottom_sidesets = '2'
   top_sidesets = '4'
 []
