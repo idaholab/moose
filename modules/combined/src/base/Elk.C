@@ -96,6 +96,9 @@
 #include "ACInterface.h"
 #include "CHMath.h"
 #include "CHInterface.h"
+#include "SplitCHWRes.h"
+#include "SplitCHMath.h"
+#include "CoupledImplicitEuler.h"
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
 #include "RndSmoothCircleIC.h"
@@ -212,6 +215,9 @@ Elk::registerObjects()
   registerKernel(ACInterface);
   registerKernel(CHMath);
   registerKernel(CHInterface);
+  registerKernel(SplitCHWRes);
+  registerKernel(SplitCHMath);
+  registerKernel(CoupledImplicitEuler);
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);

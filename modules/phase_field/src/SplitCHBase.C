@@ -1,0 +1,60 @@
+#include "SplitCHBase.h"
+// The couple, SplitCHBase and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
+template<>
+InputParameters validParams<SplitCHBase>()
+{
+  InputParameters params = validParams<Kernel>();
+
+  return params;
+}
+
+SplitCHBase::SplitCHBase(const std::string & name, InputParameters parameters)
+  :Kernel(name, parameters)
+{
+}
+
+/*Real //Example of what the virtual function should look like
+SplitCHBase::computeDFDC(PFFunctionType type)
+{
+  switch (type)
+  {
+  case Residual:
+    return _u[_qp]*_u[_qp]*_u[_qp] - _u[_qp]; // return Residual value
+    
+  case Jacobian: 
+    return (3.0*_u[_qp]*_u[_qp] - 1.0)*_phi[_j][_qp]; //return Jacobian value
+    
+  }
+  
+  mooseError("Invalid type passed in");
+  }*/
+
+Real
+SplitCHBase::computeQpResidual()
+{
+  Real f_prime_zero = computeDFDC(Residual);
+
+  Real residual = f_prime_zero*_test[_i][_qp];
+ 
+  return residual;
+  
+}
+
+Real
+SplitCHBase::computeQpJacobian()
+{
+  Real df_prime_zero_dc = computeDFDC(Jacobian);
+
+  Real jacobian = df_prime_zero_dc*_test[_i][_qp];
+
+  return jacobian;
+
+}
+
+Real
+SplitCHBase::computeQpOffDiagJacobian(unsigned int jvar)
+{
+
+  return 0.0;
+}
+
