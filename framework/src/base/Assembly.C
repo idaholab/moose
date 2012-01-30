@@ -145,24 +145,21 @@ Assembly::reinit(const Elem * elem)
   case Moose::COORD_XYZ:
     for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
       _coord[qp] = 1.;
-
-    //Compute the area of the element
-    _current_elem_volume = _current_elem->volume();
     break;
 
   case Moose::COORD_RZ:
     for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
       _coord[qp] = 2 * M_PI * _q_points[qp](0);
-
-    //Compute the area of the element
-    _current_elem_volume = 0.;
-    for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
-      _current_elem_volume += _JxW[qp] * _coord[qp];
     break;
 
   default:
     mooseError("Unknown coordinate system");
   }
+
+  //Compute the area of the element
+  _current_elem_volume = 0.;
+  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+    _current_elem_volume += _JxW[qp] * _coord[qp];
 }
 
 void
@@ -212,24 +209,21 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   case Moose::COORD_XYZ:
     for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
       _coord[qp] = 1.;
-
-    //Compute the area of the element
-    _current_side_volume = _current_side_elem->volume();
     break;
 
   case Moose::COORD_RZ:
     for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
       _coord[qp] = 2 * M_PI * _q_points_face[qp](0);
-
-    //Compute the area of the element
-    _current_side_volume = 0.;
-    for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
-      _current_side_volume += _JxW_face[qp] * _coord[qp];
     break;
 
   default:
     mooseError("Unknown coordinate system");
   }
+
+  //Compute the area of the element
+  _current_side_volume = 0.;
+  for (unsigned int qp = 0; qp < _qrule_face->n_points(); qp++)
+    _current_side_volume += _JxW_face[qp] * _coord[qp];
 }
 
 void
