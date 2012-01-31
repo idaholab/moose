@@ -1,17 +1,22 @@
 from options import *
 
 circleIC_test = { INPUT : 'CH_CircleIC_test.i',
-                  EXODIFF : ['circle_0001.e']}
+                  EXODIFF : ['circle.e-s002'],
+                  GROUP : 'adaptive'}
 
 crossIC_test = { INPUT : 'CH_CrossIC_test.i',
-                 EXODIFF : ['cross_0001.e']}
+                 EXODIFF : ['cross.e-s002'],
+                 GROUP : 'adaptive'}
 
 rndcircleIC_test = { INPUT : 'CH_RndCircleIC_test.i',
-                     EXODIFF : ['rnd_circle_0001.e']}
+                     EXODIFF : ['rnd_circle.e-s002'],
+                     GROUP : 'adaptive'}
 
 boxIC_test = { INPUT : 'CH_BndingBoxIC_test.i',
-               EXODIFF : ['box_0001.e']}
+               EXODIFF : ['box.e-s002'],
+               GROUP : 'adaptive'}
 
 rndboxIC_test = { INPUT : 'CH_RndBndingBoxIC_test.i',
-                  EXODIFF : ['rndbox_0001.e']}
+                  EXODIFF : ['rndbox.e-s002'],
+                  GROUP : 'adaptive'}
 
