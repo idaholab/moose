@@ -44,14 +44,22 @@ ExodusOutput::getFileName(const std::string & file_base)
 {
   OStringStream exodus_stream_file_base;
 
-  exodus_stream_file_base << file_base;
+  exodus_stream_file_base << file_base << ".e";
   if (_seq)
   {
-    exodus_stream_file_base << "_";
-    OSSRealzeroright(exodus_stream_file_base, 4, 0, _file_num);
+    /** Legacy output format
+     * exodus_stream_file_base << "_";
+     * OSSRealzeroright(exodus_stream_file_base, 4, 0, _file_num);
+     * return exodus_stream_file_base.str() + ".e";
+     */
+    if (_file_num)
+    {
+      exodus_stream_file_base << "-s";
+      OSSRealzeroright(exodus_stream_file_base, 3, 0, _file_num+1);
+    }
   }
 
-  return exodus_stream_file_base.str() + ".e";
+  return exodus_stream_file_base.str();
 }
 
 

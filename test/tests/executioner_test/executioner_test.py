@@ -4,7 +4,8 @@ test_steady = { INPUT : 'steady.i',
                EXODIFF : ['out_steady.e'] }
 
 test_steady_adapt = { INPUT : 'steady-adapt.i',
-                    EXODIFF : ['out_steady_adapt_0003.e'] }
+                      EXODIFF : ['out_steady_adapt.e-s004'],
+                      GROUP : 'adaptive'}
 
 test_transient = { INPUT : 'transient.i',
                   EXODIFF : ['out_transient.e'] }
