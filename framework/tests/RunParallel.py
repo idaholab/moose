@@ -135,8 +135,8 @@ class RunParallel:
       self.spinwait()
       self.startReadyJobs()
     if len(self.queue) != 0:
-      print "Cyclic Dependency Detected!"
-      sys.exit(1)
+      print "Cyclic Dependency Detected! ", self.queue
+#      sys.exit(1)
 
 ## Static logging string for debugging
 LOG = []
