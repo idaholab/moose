@@ -10,6 +10,7 @@ TEST_NAME     = 'testname'       # The name of the test as it appears in output,
 PLATFORM      = '[platform]'     # A list of platforms set to 'ALL', 'DARWIN', 'LINUX', 'SL', and/or 'LION'
 COMPILER      = '[compiler]'     # A test that runs only on a given compiler set to 'ALL', 'GCC', and/or 'INTEL'
 PETSC_VERSION = '[version]'      # A test that runs only on the matching PETSC version
+MESH_MODE     = '[mesh_mode]'    # A test that only runs on a given set of mesh modes 'ALL', 'SERIAL', and/or 'PARALLEL'
 
 CLI_ARGS      = '[]'             # Additional argument vector to pass to test
 
@@ -50,7 +51,7 @@ CUSTOM_CMP    = 'custom_cmp'     # Custom comparison file
 USE_OLD_FLOOR = 'True|False'     # Use Exodiff old floor option
 
 # Test Ordering
-PREREQ = 'prereq'
+PREREQ        = '[prereq]'
 
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],
@@ -60,6 +61,7 @@ DEFAULTS = { EXODIFF : [],
              PLATFORM : ['ALL'],
              COMPILER : ['ALL'],
              PETSC_VERSION : ['ALL'],
+             MESH_MODE : ['ALL'],
              SHOULD_CRASH : False,
              EXPECT_ERR : None,
              EXPECT_OUT : None,

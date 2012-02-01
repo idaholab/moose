@@ -1,6 +1,8 @@
 import os, re
 from subprocess import *
 
+TERM_COLS = 90
+
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd):
   p = Popen([cmd],stdout=PIPE,stderr=STDOUT, close_fds=True, shell=True)
@@ -18,7 +20,7 @@ def runCommand(cmd):
 def printResult(test_name, result, timing, options, color=True):
   f_result = ''
 
-  cnt = 79 - len(test_name + result)
+  cnt = (TERM_COLS-2) - len(test_name + result)
   if color:
     f_result = test_name + '.'*cnt + ' ' + colorify(result, options)
   else:
@@ -60,3 +62,78 @@ def colorify(str, options, html=False):
     str = re.sub(r'</?[rgyb]>', '', str)    # strip all "html" tags
 
   return str
+
+
+def getPlatforms():
+  # We'll use uname to figure this out
+  # Supported platforms are LINUX, DARWIN, SL, LION or ALL
+  platforms = set()
+  platforms.add('ALL')
+  raw_uname = os.uname()
+  if raw_uname[0].upper() == 'DARWIN':
+    platforms.add('DARWIN')
+    if re.match("10\.", raw_uname[2]):
+      platforms.add('SL')
+    if re.match("11\.", raw_uname[2]):
+      platforms.add("LION")
+  else:
+    platforms.add(raw_uname[0].upper())
+  return platforms
+
+def getCompilers(libmesh_dir):
+  # We'll use the GXX-VERSION string from LIBMESH's Make.common
+  # to figure this out
+  # Supported compilers are GCC, INTEL or ALL
+  compilers = set()
+  compilers.add('ALL')
+  f = open(libmesh_dir + '/Make.common')
+  for line in f.readlines():
+    if line.find('GXX-VERSION') != -1:
+      m = re.search(r'=\s*(\S+)', line)
+      if m != None:
+        raw_compiler = m.group(1)
+        if re.search('intel', raw_compiler, re.I) != None:
+          compilers.add("INTEL")
+        elif re.search('gcc', raw_compiler, re.I) != None:
+          compilers.add("GCC")
+        break
+  f.close()
+  return compilers
+
+def getPetscVersion(libmesh_dir):
+  # We'll use the petsc-major string from $LIBMESH_DIR/Make.common
+  # to figure this out
+  # Supported versions are 2, 3
+  petsc_version = set()
+  petsc_version.add('ALL')
+  f = open(libmesh_dir + '/Make.common')
+  for line in f.readlines():
+    if line.find('petsc-version') != -1:
+      m = re.search(r'=\s*(\S+)', line)
+      if m != None:
+        raw_version = m.group(1)
+        petsc_version.add(raw_version)
+        break
+  f.close()
+  return petsc_version
+
+def getParmeshOption(libmesh_dir):
+  # Some tests work differently with parallel mesh enabled
+  # We need to detect this condition
+  parmesh = set()
+  f = open(libmesh_dir + '/include/base/libmesh_config.h')
+  for line in f.readlines():
+    m = re.search(r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)', line)
+    if m != None:
+      if m.group(1) == '1':
+        parmesh.add('PARALLEL')
+      else:
+        parmesh.add('SERIAL')
+      break
+  # If we didn't find the #define indicated by having no entries in our set, then parmesh is off
+  if not len(parmesh):
+    parmesh.add('SERIAL')
+  parmesh.add('ALL')
+  f.close()
+  return parmesh
+

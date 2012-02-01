@@ -46,6 +46,12 @@ class TestHarness:
       self.libmesh_dir = self.moose_dir + '../libmesh'
     self.file = None
 
+    self.checks = {}
+    self.checks[PLATFORM] = getPlatforms()
+    self.checks[COMPILER] = getCompilers(self.libmesh_dir)
+    self.checks[PETSC_VERSION] = getPetscVersion(self.libmesh_dir)
+    self.checks[MESH_MODE] = getParmeshOption(self.libmesh_dir)
+
     self.initialize(argv, app_name)
 
   def findAndRunTests(self):
@@ -119,59 +125,6 @@ class TestHarness:
       except:
         pass
 
-  def getPlatforms(self):
-    # We'll use uname to figure this out
-    # Supported platforms are LINUX, DARWIN, SL, LION or ALL
-    platforms = set()
-    platforms.add('ALL')
-    raw_uname = os.uname()
-    if raw_uname[0].upper() == 'DARWIN':
-      platforms.add('DARWIN')
-      if re.match("10\.", raw_uname[2]):
-        platforms.add('SL')
-      if re.match("11\.", raw_uname[2]):
-        platforms.add("LION")
-    else:
-      platforms.add(raw_uname[0].upper())
-    return platforms
-
-  def getCompilers(self):
-    # We'll use the GXX-VERSION string from LIBMESH's Make.common
-    # to figure this out
-    # Supported compilers are GCC, INTEL or ALL
-    compilers = set()
-    compilers.add('ALL')
-    f = open(self.libmesh_dir + '/Make.common')
-    for line in f.readlines():
-      if line.find('GXX-VERSION') != -1:
-        m = re.search(r'=\s*(\S+)', line)
-        if m != None:
-          raw_compiler = m.group(1)
-          if re.search('intel', raw_compiler, re.I) != None:
-            compilers.add("INTEL")
-          elif re.search('gcc', raw_compiler, re.I) != None:
-            compilers.add("GCC")
-          break
-    f.close()
-    return compilers
-
-  def getPetscVersion(self):
-    # We'll use the petsc-major string from $LIBMESH_DIR/Make.common
-    # to figure this out
-    # Supported versions are 2, 3
-    petsc_version = set()
-    petsc_version.add('ALL')
-    f = open(self.libmesh_dir + '/Make.common')
-    for line in f.readlines():
-      if line.find('petsc-version') != -1:
-        m = re.search(r'=\s*(\S+)', line)
-        if m != None:
-          raw_version = m.group(1)
-          petsc_version.add(raw_version)
-          break
-    f.close()
-    return petsc_version
-
   # If the test is not to be run for any reason, print skipped as the result and return False,
   # otherwise return True
   def checkIfRunTest(self, test):
@@ -189,37 +142,22 @@ class TestHarness:
         self.handleTestResult(test, '', 'skipped')
         return False
     elif test[SKIP] != '':
-      self.handleTestResult(test, '', 'skipped (' + test[SKIP] + ')')
+      # We might want to trim the string so it formats nicely
+      if len(test[SKIP]) >= TERM_COLS - (len(test)+21):
+        test_reason = (test[SKIP])[:(TERM_COLS - (len(test)+24))] + '...'
+      else:
+        test_reason = test[SKIP]
+      self.handleTestResult(test, '', 'skipped (' + test_reason + ')')
       return False
 
-    # Check for matching platform
-    platforms = self.getPlatforms()
-    test_platforms = set()
-    for x in test[PLATFORM]:
-      test_platforms.add(x)
-    if not len(test_platforms.intersection(platforms)):
-      self.handleTestResult(test, '', 'skipped (PLATFORM)')
-      return False
-
-    # Check for matching compiler
-    compilers = self.getCompilers()
-    test_compilers = set()
-    for x in test[COMPILER]:
-      test_compilers.add(x)
-    if not len(test_compilers.intersection(compilers)):
-      self.handleTestResult(test, '', 'skipped (COMPILER)')
-      return False
-
-    # Check for petsc version
-    petsc_version = self.getPetscVersion()
-    if 'ALL' not in test[PETSC_VERSION]:
-      found_it = False
-      for x in petsc_version:
-        for y in test[PETSC_VERSION]:
-          if x.find(y) != -1:
-            found_it = True
-      if not found_it:
-        self.handleTestResult(test, '', 'skipped (PETSC VERSION)')
+    checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE]
+    for check in checks:
+      test_platforms = set()
+      for x in test[check]:
+        test_platforms.add(x)
+      if not len(test_platforms.intersection(self.checks[check])):
+        self.handleTestResult(test, '', 'skipped (' + \
+          re.sub(r'\[|\]', '', check).upper() + '!=' + ', '.join(test[check]) + ')')
         return False
 
     # Check for heavy tests
@@ -299,6 +237,8 @@ class TestHarness:
         caveats.append(', '.join(test[COMPILER]))
       if not 'ALL' in test[PETSC_VERSION]:
         caveats.append(', '.join(test[PETSC_VERSION]))
+      if not 'ALL' in test[MESH_MODE]:
+        caveats.append(', '.join(test[MESH_MODE]))
       if len(caveats):
         result = '[' + ', '.join(caveats) + '] OK'
       else:
@@ -366,12 +306,12 @@ class TestHarness:
     # Print the results table again if a bunch of output was spewed to the screen between
     # tests as they were running
     if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
-      print '\n\nFinal Test Results:\n' + ('-' * 80)
+      print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
       for (test, output, result, timing) in self.test_table:
         print printResult(test[TEST_NAME], result, timing, self.options)
 
     time = clock() - self.start_time
-    print '-' * 80
+    print '-' * (TERM_COLS-1)
     print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
 
     if self.num_passed:
