@@ -30,6 +30,6 @@ include ../test.mk
 # Additional special case targets should be added here
 
 test: $(APPLICATION_NAME)-$(METHOD)
-	$(call TEST_exodiff,ex04-dirichlet_bc.i,out_coupled_dirichlet.e)
-	$(call TEST_exodiff,ex04-neumann_bc.i,out_coupled_neumann.e)
+	$(call TEST_exodiff,dirichlet_bc.i,out_coupled_dirichlet.e)
+	$(call TEST_exodiff,neumann_bc.i,out_coupled_neumann.e)
 
