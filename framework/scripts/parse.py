@@ -92,7 +92,7 @@ for expr, level1 in data_cores.items():
 	curr_gnu_file = open('data/' + expr + '_' + str(problem_size) + '_log_plot.plt', 'w')
         curr_gnu_file.write("set datafile missing '-'\nset logscale\nset size square\nset style line 1 lt 3 lc rgb 'black' lw 3\n")
         curr_gnu_file.write("set title 'Log Log " + expr + ' ' + str(problem_size) + "'\n")
-
+        curr_gnu_file.write("set yrange[1:1000]\n")
 	curr_gnu_file.write("plot 10000*(x/1000)**-1 ti 'Ideal slope' ls 1")
         filename = expr + '_' + str(problem_size) + '.dat'
         for i in xrange(2, len(configuration_set)+2):
@@ -120,9 +120,17 @@ for expr, level1 in data_cores.items():
 
 gnuplot_preamble = """
 set yrange [0:1.5]
+set terminal postscript enhanced color
+set style line 1 lt 1 lw 2 lc rgb "red"
+set style line 2 lt 1 lw 2 lc rgb "orange"
+set style line 3 lt 1 lw 2 lc rgb "green"
+set style line 4 lt 1 lw 2 lc rgb "blue"
+set style line 5 lt 1 lw 2 lc rgb "purple"
+set style line 6 lt 1 lw 2 lc rgb "brown"
+set style increment user
 """
 #strong scaling data
-gnuplot_plotline = "'<filename>' index <i> using 1:3 title 1 with linespoints"
+gnuplot_plotline = "'<filename>' index <i> using 1:3 title columnheader(1) with linespoints"
 for expr, problem_sizes in data_strong.items():
   for problem_size, configurations in sorted(problem_sizes.items(), key=lambda (k,v): int(k)):
     curr_file = open('data/' + expr + '_' + str(problem_size) + '_strong_scaling.dat', 'w')
@@ -164,7 +172,7 @@ for expr, problem_sizes in data_strong.items():
     curr_gnu_file.close()
 
 ##weak scaling data
-gnuplot_plotline = "'<filename>' index <i> using 1:3 title 1 with linespoints"
+gnuplot_plotline = "'<filename>' index <i> using 1:3 title columnheader(1) with linespoints"
 for expr, configurations in data_weak.items():
   for configuration, problem_sizes in configurations.items():
     curr_file = open('data/' + expr + '_' + str(configuration) + '_weak_scaling.dat', 'w')
