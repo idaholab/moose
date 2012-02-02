@@ -107,6 +107,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   unsigned int n_threads = libMesh::n_threads();
 
+  _ics.resize(n_threads);
+
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i] = new Assembly(_nl, couplingMatrix(), i);
@@ -153,8 +155,9 @@ FEProblem::~FEProblem()
   }
 
   // ICS
-  for (std::map<std::string, InitialCondition *>::iterator it = _ics.begin(); it != _ics.end(); ++it)
-    delete it->second;
+  for(unsigned int i=0; i<n_threads; i++)
+    for (std::map<std::string, InitialCondition *>::iterator it = _ics[i].begin(); it != _ics[i].end(); ++it)
+      delete it->second;
 
   delete _displaced_mesh;
   delete _displaced_problem;
@@ -891,7 +894,11 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
   parameters.set<Problem *>("_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<std::string>("var_name") = var_name;
-  _ics[var_name] = static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters));
+
+  for(unsigned int i=0; i < libMesh::n_threads(); i++)
+  {
+    _ics[i][var_name] = static_cast<InitialCondition *>(Factory::instance()->create(ic_name, name, parameters));
+  }
 }
 
 void
@@ -906,7 +913,11 @@ FEProblem::addInitialCondition(const std::string & var_name, Real value)
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<std::string>("var_name") = var_name;
   parameters.set<Real>("value") = value;
-  _ics[var_name] = static_cast<InitialCondition *>(Factory::instance()->create("ConstantIC", name, parameters));
+
+  for(unsigned int i=0; i < libMesh::n_threads(); i++)
+  {
+    _ics[i][var_name] = static_cast<InitialCondition *>(Factory::instance()->create("ConstantIC", name, parameters));
+  }
 }
 
 Number
@@ -915,12 +926,12 @@ FEProblem::initialValue (const Point& p,
                         const std::string& /*sys_name*/,
                         const std::string& var_name)
 {
-//  ParallelUniqueId puid;
-//  unsigned int tid = puid.id;
+  ParallelUniqueId puid;
+  unsigned int tid = puid.id;
 
   // Try to grab an InitialCondition object for this variable.
-  if (_ics.find(var_name) != _ics.end())
-    return _ics[var_name]->value(p);
+  if (_ics[tid].find(var_name) != _ics[tid].end())
+    return _ics[tid][var_name]->value(p);
 
   return 0.;
 }
@@ -931,12 +942,12 @@ FEProblem::initialGradient (const Point& p,
                            const std::string& /*sys_name*/,
                            const std::string& var_name)
 {
-//  ParallelUniqueId puid;
-//  unsigned int tid = puid.id;
+  ParallelUniqueId puid;
+  unsigned int tid = puid.id;
 
   // Try to grab an InitialCondition object for this variable.
-  if (_ics.find(var_name) != _ics.end())
-    return _ics[var_name]->gradient(p);
+  if (_ics[tid].find(var_name) != _ics[tid].end())
+    return _ics[tid][var_name]->gradient(p);
 
   return RealGradient();
 }

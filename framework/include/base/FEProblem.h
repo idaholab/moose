@@ -279,7 +279,7 @@ protected:
   std::vector<Assembly *> _assembly;
 
   // Initial conditions
-  std::map<std::string, InitialCondition *> _ics;
+  std::vector<std::map<std::string, InitialCondition *> > _ics;
 
   // material properties
   MaterialPropertyStorage _material_props;
