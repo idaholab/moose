@@ -36,6 +36,9 @@ class RunParallel:
     # Jobs that have been finished
     self.finished_jobs = set()
 
+    # List of skipped jobs to resolve prereq issues for tests that never run
+    self.skipped_jobs = set()
+
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
   def run(self, test, command, recurse=True):
     # First see if any of the queued jobs can be run but only if recursion is allowed on this run
@@ -134,9 +137,31 @@ class RunParallel:
     while self.jobs.count(None) != len(self.jobs):
       self.spinwait()
       self.startReadyJobs()
+
     if len(self.queue) != 0:
-      print "Cyclic Dependency Detected! ", self.queue
-#      sys.exit(1)
+      # See if there are any tests left in the queue simply because their dependencies where skipped
+      keep_going = True
+      while keep_going:
+        keep_going = False
+        queue_items = len(self.queue)
+        for i in range(0, queue_items):
+          (test, command, dirpath) = self.queue.popleft()
+          if test[PREREQ] in self.skipped_jobs:
+            self.harness.handleTestResult(test, '', 'skipped (skipped dependency)')
+            self.skipped_jobs.add(test[TEST_NAME])
+            keep_going = True
+          else:
+            self.queue.append([test, command, dirpath])
+      # Anything left is a cyclic dependency
+      if len(self.queue) != 0:
+        print "Cyclic or Invalid Dependency Detected!"
+        for (test, command, dirpath) in self.queue:
+          print test[TEST_NAME]
+        sys.exit(1)
+
+  # Add a skipped job to the list
+  def jobSkipped(self, name):
+    self.skipped_jobs.add(name)
 
 ## Static logging string for debugging
 LOG = []

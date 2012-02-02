@@ -97,6 +97,8 @@ class TestHarness:
                   # RunParallel will call self.testOutputAndFinish when the test has completed running
                   # This method will block when the maximum allowed parallel processes are running
                   self.runner.run(test, execute)
+                else: # This job is skipped - notify the runner
+                  self.runner.jobSkipped(test[TEST_NAME])
 
             os.chdir(saved_cwd)
             sys.path.pop()
