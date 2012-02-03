@@ -204,26 +204,18 @@ PenetrationThread::operator() (const NodeIdRange & range)
           Moose::findContactPoint(*pen_info, _fe, _fe_type, node,
                                   true, contact_point_on_side);
 
-          if(contact_point_on_side && info &&
-             (
-               (std::abs(info->_distance) > std::abs(distance)) ||
-               (info->_distance < 0 && distance > 0)
-               )
-            )
+          if (contact_point_on_side)
           {
-            delete info;
-            info = NULL;
-          }
-
-          if(contact_point_on_side && (!info ||
-                                       (
-                                         (std::abs(info->_distance) > std::abs(distance)) ||
-                                         (info->_distance < 0 && distance > 0)
-                                         )
-               )
-            )
-          {
-            info = pen_info;
+            if (!info)
+            {
+              info = pen_info;
+            }
+            else if ((std::abs(info->_distance) > std::abs(pen_info->_distance)) ||
+                     (info->_distance < 0 && pen_info->_distance > 0))
+            {
+              delete info;
+              info = pen_info;
+            }
           }
           else
           {
@@ -240,6 +232,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
       // No face is clearly above/below this node.
       // See if we need to force a match.
 
+      //TODO:  This won't work for tet/tri elements
       // Restrict the parametric coordinates to the domain of the face
       for ( unsigned int j(0); j < p_info.size(); ++j )
       {
@@ -249,7 +242,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
           {
             p_info[j]->_closest_point_ref(k) = -1;
           }
-          if ( p_info[j]->_closest_point_ref(k) > 1 )
+          else if ( p_info[j]->_closest_point_ref(k) > 1 )
           {
             p_info[j]->_closest_point_ref(k) = 1;
           }
