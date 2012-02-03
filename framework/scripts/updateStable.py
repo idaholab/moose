@@ -4,20 +4,12 @@ import os, sys, string, subprocess, re, socket, getopt
 # If hostname equals head_node, this script will run
 head_node = 'quark'
 
+# Moose stable and devel checkout locations
+moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
+moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
+
 # We exclude these applications:
 excluded_applications = set(['r7_moose', 'rattlesnake'])
-
-# The mergeinfo command
-get_merged_revisions = ['svn', 'mergeinfo', 'https://hpcsc/svn/herd/trunk/devel/moose', '--show-revs', 'eligible', 'moose-stable']
-
-# The merge command
-merge_moose_trunk = ['svn', 'merge', 'https://hpcsc/svn/herd/trunk/devel/moose', 'moose-stable' ]
-
-# The final stable checkin command
-commit_moose_stable = ['svn', 'ci', '--username', 'moosetest', '-F', 'svn_log.log', 'moose-stable']
-
-# Ignor this line. It is just needed to build the initial command. More is appended to it later
-get_revision_logs = ['svn', 'log']
 
 _USAGE = """
 updateStable.py repo_revision
@@ -65,11 +57,10 @@ def parseLOG(merge_log):
       svn_log.append('  ----\n')
     else:
       tmp_item = str.lower(item)
-      # Remove Trac ticket comment command langauge.
-      for cmd_language in ['close #', 'closed #', 'closes #', 'fix #', 'fixed #', 'fixes #', 'references #', 'ref #', 'refs #', 'addresses #', 're #', 'see #', 'close: #', 'closed: #', 'closes: #', 'fix: #', 'fixed: #', 'fixes: #', 'references: #', 'ref: #', 'refs: #', 'addresses: #', 're: #', 'see: #']:
+      for cmd_language in ['close #', 'closed #', 'closes #', 'fix #', 'fixed #', 'fixes #', 'references #', 'refs #', 'addresses #', 're #', 'see #', 'close: #', 'closed: #', 'closes: #', 'fix: #', 'fixed: #', 'fixes: #', 'references: #', 'refs: #', 'addresses: #', 're: #', 'see: #']:
         if tmp_item.find(cmd_language) != -1:
           pos_start = (int(tmp_item.find(cmd_language)) + (len(cmd_language) - 2))
-          pos_end = (int(tmp_item.find(cmd_language)) + (len(cmd_language) - 2))
+          pos_end = (int(tmp_item.find(cmd_language)) + (len(cmd_language) - 1))
           item = str(item[:pos_start]) + '-' + str(item[pos_end:])
       svn_log.append(item + '\n')
   for log_line in svn_log:
@@ -111,33 +102,38 @@ def process_args():
 
 if __name__ == '__main__':
   if socket.gethostname().split('.')[0] == head_node:
+    arg_revision = process_args()
     if buildStatus():
       # Checking out moose-stable
-      checkout_moose_stable = ['svn', 'co', '-r', str(process_args()), '--quiet', 'https://hpcsc/svn/herd/trunk/moose', 'moose-stable']
+      checkout_moose_stable = ['svn', 'co', '--quiet', moose_stable, 'moose-stable']
       runCMD(checkout_moose_stable)
       # Get Merged version numbers
       print 'Get revisions merged...'
+      get_merged_revisions = ['svn', 'mergeinfo', moose_devel, '--show-revs', 'eligible', 'moose-stable']
       log_versions = runCMD(get_merged_revisions)
       # Group the revisions together and build our 'svn log -r' command
+      get_revision_logs = ['svn', 'log' ]
       merged_revisions = string.split(log_versions, '\n')
       if merged_revisions[0] != '':
         for revision in merged_revisions:
-          if revision != '':
+          if revision != '' and int(revision.split('r')[1]) <= int(arg_revision) and int(revision.split('r')[1]) != 1:
             get_revision_logs.append('-' + revision)
       else:
         print 'I detect no merge information... strange.'
         sys.exit(1)
-      get_revision_logs.append('https://hpcsc/svn/herd/trunk/devel/moose')
       # Get each revision log
       print 'Getting each log for revision merged...'
+      get_revision_logs.append(moose_devel)
       log_data = runCMD(get_revision_logs)
       # Parse through and write the log file with out any command langauge present
       writeLog(parseLOG(log_data))
       # Merge our local created moose-stable with moose-trunk
-      print 'Merging moose-stable'
+      print 'Merging moose-stable from moose-devel only to the revision at which bitten was commanded to checkout'
+      merge_moose_trunk = ['svn', 'merge', '-r1:' + str(arg_revision), moose_devel, 'moose-stable' ]
       runCMD(merge_moose_trunk)
       # Commit the changes!
       print 'Commiting merged moose-stable'
+      commit_moose_stable = ['svn', 'ci', '--username', 'moosetest', '-F', 'svn_log.log', 'moose-stable']
       runCMD(commit_moose_stable)
     else:
       # This is the system 'head_node', but buildStatus() returned False... so exit as an error
