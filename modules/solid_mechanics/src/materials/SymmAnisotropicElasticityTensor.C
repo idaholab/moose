@@ -1,4 +1,5 @@
 #include "SymmAnisotropicElasticityTensor.h"
+#include <cmath>
 
 SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor()
   : SymmElasticityTensor(false),
@@ -20,6 +21,42 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor()
 {
   form_transformation_t_matrix();
 }
+
+SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Real> & init_list)
+    : SymmElasticityTensor(true)
+{
+// test the length to make sure it's 9 long
+  if(init_list.size() != 9)
+  mooseError("please enter a vector with 9 entries for the stiffness.");
+  
+  _val[0] = init_list[0];   //C1111
+  _val[1] = init_list[1];   //C1122
+  _val[2] = init_list[2];   //C1133
+  _val[6] = init_list[3];   //C2222
+  _val[7] = init_list[4];   //C2233
+  _val[11] = init_list[5];  //C3333
+  _val[15] = init_list[6];  //C2323
+  _val[18] = init_list[7];  //C1313
+  _val[20] = init_list[8];  //C1212
+}
+
+SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool /*all_21*/)
+    : SymmElasticityTensor(true)
+{
+// test the length to make sure it's 21 long
+  if(init_list.size() != 21)
+  mooseError("please enter a vector with 21 entries for the stiffness.");
+
+  for (int i = 0; i < 21; i++)
+    _val[i] = init_list[i];
+}
+
+
+// SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a)
+//     : SymmElasticityTensor(true)
+// {
+//   *this = a;
+// }
 
 
 void SymmAnisotropicElasticityTensor::setFirstEulerAngle(const Real a1)
@@ -52,19 +89,32 @@ void SymmAnisotropicElasticityTensor::setMaterialConstantc44(const Real c44)
   _c44 = c44;
 }
 
+void
+SymmAnisotropicElasticityTensor::rotate(const Real a1)
+{
+  setFirstEulerAngle(a1);
+  setSecondEulerAngle(0.0);
+  setThirdEulerAngle(0.0);
+
+  unsigned int dummy;
+  
+ calculateEntries(dummy);
+}
+
+
 void SymmAnisotropicElasticityTensor::form_r_matrix()
 {
   Real phi1 = _euler_angle[0] * (M_PI/180.0);
   Real phi = _euler_angle[1] * (M_PI/180.0);
   Real phi2 = _euler_angle[2] * (M_PI/180.0);
 
-  Real cp1 = cos(phi1);
-  Real cp2 = cos(phi2);
-  Real cp = cos(phi);
+  Real cp1 = std::cos(phi1);
+  Real cp2 = std::cos(phi2);
+  Real cp = std::cos(phi);
 
-  Real sp1 = sin(phi1);
-  Real sp2 = sin(phi2);
-  Real sp = sin(phi);
+  Real sp1 = std::sin(phi1);
+  Real sp2 = std::sin(phi2);
+  Real sp = std::sin(phi);
 
   _r(0,0) = cp1 * cp2 - sp1 * sp2 * cp;
   _r(0,1) = sp1 * cp2 + cp1 * sp2 * cp;

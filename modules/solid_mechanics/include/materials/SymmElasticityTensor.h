@@ -7,6 +7,8 @@
 
 #include "vector_value.h"
 
+#include <vector>
+
 /**
  * This class defines a basic set of capabilities any elasticity tensor should have.
  *
@@ -131,6 +133,8 @@ public:
 
   friend std::ostream & operator<<(std::ostream & stream, const SymmElasticityTensor & obj);
 
+  void fillFromInputVector(std::vector<Real> input, bool all);
+  
 protected:
 
   /**

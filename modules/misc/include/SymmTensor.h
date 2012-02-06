@@ -3,6 +3,8 @@
 
 #include "ColumnMajorMatrix.h"
 #include "MaterialProperty.h"
+#include <cmath>
+#include "libmesh.h"
 
 class SymmTensor
 {
@@ -46,6 +48,27 @@ public:
       mooseError("Cannot create SymmTensor from ColumnMajorMatrix.  Wrong number of entries.");
     }
   }
+
+  explicit
+  SymmTensor(std::vector<Real> &init_list) :
+      _xx(init_list[0]),
+      _yy(init_list[1]),
+      _zz(init_list[2]),
+      _xy(init_list[5]), //e_12
+      _yz(init_list[3]), //e_23
+      _zx(init_list[4])  //e_13
+
+    {
+      // test the length to make sure it's 6 long
+      if(init_list.size() != 6)
+        mooseError("please enter a vector with 6 entries.");
+    }
+  
+  // SymmTensor(const SymmTensor &a) :
+  //   {
+  //     *this = a;
+  //   }
+  
 
   ~SymmTensor() {}
 
@@ -347,6 +370,19 @@ public:
     return r_val;
   }
 
+  SymmTensor operator*(Real t) const 
+  {
+    SymmTensor r_val;
+    
+    r_val._xx = _xx * t;
+    r_val._yy = _yy * t;
+    r_val._zz = _zz * t;
+    r_val._xy = _xy * t;
+    r_val._yz = _yz * t;
+    r_val._zx = _zx * t;
+    return r_val;
+  }
+
   SymmTensor operator-(const SymmTensor & t) const
   {
     SymmTensor r_val;
@@ -438,6 +474,24 @@ public:
 
   friend std::ostream & operator<<(std::ostream & stream, const SymmTensor & obj);
 
+
+/**
+ * Rotate the strain around the c-axis
+ */
+void rotate(const Real a)
+{
+  Real angle = a*pi/180.0;
+  Real s = std::sin(angle);
+  Real c = std::cos(angle);
+  
+  _xx = _xx*c*c + _yy*s*s + 2.0*_xy*s*c;
+  _yy = _xx*s*s + _yy*c*c - 2.0*_xy*s*c;
+  _zz = _zz;
+  _xy = -2.0*(_xx - _yy)*s*c + 2.0*_xy*(c*c - s*s);
+  _yz = _yz;
+  _zx = _zx;
+}
+  
 private:
   Real _xx;
   Real _yy;
@@ -446,7 +500,6 @@ private:
   Real _yz;
   Real _zx;
 };
-
 
 template <>
 PropertyValue *

@@ -3,10 +3,13 @@
 
 #include "SymmElasticityTensor.h"
 
+
 class SymmAnisotropicElasticityTensor : public SymmElasticityTensor
 {
 public:
   SymmAnisotropicElasticityTensor();
+  SymmAnisotropicElasticityTensor(std::vector<Real> & init_list);
+  SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool);
 
   /**
    * Set the first euler angle
@@ -43,6 +46,12 @@ public:
    */
 
   void setMaterialConstantc44(const Real c44);
+
+  /**
+   * Perform rotation around one axis (c-axis)
+   */
+
+virtual void rotate(const Real a1);
 
 protected:
 
