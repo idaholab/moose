@@ -19,6 +19,7 @@
 #include "Moose.h"
 #include "ParallelUniqueId.h"
 #include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 // libMesh
 #include "dof_map.h"
 #include "dense_matrix.h"
@@ -207,6 +208,7 @@ public:
   void prepare();
   void prepareNeighbor();
   void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
+  void prepareScalar(MooseVariableScalar & var, MooseVariable & ced_var);
 
   void copyShapes(unsigned int var);
   void copyFaceShapes(unsigned int var);
@@ -214,6 +216,7 @@ public:
 
   void addResidual(NumericVector<Number> & residual);
   void addResidualNeighbor(NumericVector<Number> & residual);
+  void addResidualScalar(NumericVector<Number> & residual);
 
   /**
    * Takes the values that are currently in _sub_Re and appends them to the cached values.
@@ -239,6 +242,7 @@ public:
   void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices);
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian);
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices);
+  void addJacobianScalar(SparseMatrix<Number> & jacobian);
 
   /**
    * Takes the values that are currently in _sub_Kee and appends them to the cached values.
@@ -259,9 +263,13 @@ public:
 
   DenseVector<Number> & residualBlock(unsigned int var_num) { return _sub_Re[var_num]; }
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num) { return _sub_Rn[var_num]; }
+  DenseVector<Number> & residualBlockScalar() { return _scalar_Re; }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar) { return _sub_Kee[ivar][jvar]; }
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
+  DenseMatrix<Number> & jacobianBlockScalar() { return _scalar_Kee; }
+  // FIXME: UGLY!!!
+  DenseMatrix<Number> & jacobianBlockScalarOffdiag(int type) { return (type == 0) ? _scalar_Ken : _scalar_Kne; }
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor);
 
   std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
@@ -279,12 +287,12 @@ public:
   const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
 
 protected:
-  void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
+  void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<unsigned int> & dof_indices, Real scaling_factor);
   void cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
 
   void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
 
-  void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor);
+  void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<unsigned int> & idof_indices, const std::vector<unsigned int> & jdof_indices, Real scaling_factor);
 
   SystemBase & _sys;
   CouplingMatrix * & _cm;                                        ///< Reference to coupling matrix
@@ -327,8 +335,12 @@ protected:
 
   std::vector<Point> _current_physical_points;  ///< This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
 
+  MooseVariableScalar * _scalar_var;                 ///< scalar variable number
+  MooseVariable * _ced_var;                          ///< constrained variable number
+
   std::vector<DenseVector<Number> > _sub_Re;                     ///< residual contributions for each variable from the element
   std::vector<DenseVector<Number> > _sub_Rn;                     ///< residual contributions for each variable from the neighbor
+  DenseVector<Number> _scalar_Re;                                ///< residual for scalar variable
   DenseVector<Number> _tmp_Re;                                   ///< auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
 
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Kee;      ///< jacobian contributions
@@ -336,6 +348,11 @@ protected:
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Ken;      ///< jacobian contributions from the element and neighbor
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Kne;      ///< jacobian contributions from the neighbor and element
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Knn;      ///< jacobian contributions from the neighbor
+
+  DenseMatrix<Number> _scalar_Kee;   ///< jacobian contributions for scalar variable
+  DenseMatrix<Number> _scalar_Ken;   ///< jacobian contributions
+  DenseMatrix<Number> _scalar_Kne;   ///< jacobian contributions
+
   DenseMatrix<Number> _tmp_Ke;                                   ///< auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)
 
   // Shape function values, gradients. second derivatives

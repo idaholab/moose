@@ -51,6 +51,8 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _current_node(NULL),
     _current_neighbor_node(NULL),
 
+    _scalar_var(NULL),
+
     _max_cached_residuals(0),
     _max_cached_jacobians(0)
 {
@@ -391,6 +393,34 @@ Assembly::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsig
 }
 
 void
+Assembly::prepareScalar(MooseVariableScalar & var, MooseVariable & ced_var)
+{
+  _scalar_var = &var;
+  _ced_var = &ced_var;
+
+  unsigned int lm_dofs = var.dofIndices().size();
+  unsigned int ced_dofs = ced_var.dofIndices().size();
+  unsigned int ced_var_num = ced_var.number();                  // number of CED variable
+
+  // residuals blocks
+  _scalar_Re.resize(lm_dofs);
+  _scalar_Re.zero();
+
+  _sub_Re[ced_var_num].resize(ced_dofs);
+  _sub_Re[ced_var_num].zero();
+
+  // Jacobian blocks
+  _scalar_Kee.resize(lm_dofs, lm_dofs);
+  _scalar_Kee.zero();
+
+  _scalar_Ken.resize(lm_dofs, ced_dofs);
+  _scalar_Ken.zero();
+
+  _scalar_Kne.resize(ced_dofs, lm_dofs);
+  _scalar_Kne.zero();
+}
+
+void
 Assembly::copyShapes(unsigned int var)
 {
   MooseVariable & v = _sys.getVariable(_tid, var);
@@ -421,7 +451,7 @@ Assembly::copyNeighborShapes(unsigned int var)
 }
 
 void
-Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor)
+Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<unsigned int> & dof_indices, Real scaling_factor)
 {
   if (dof_indices.size() > 0)
   {
@@ -491,6 +521,15 @@ Assembly::addResidualNeighbor(NumericVector<Number> & residual)
     MooseVariable & var = _sys.getVariable(_tid, vn);
     addResidualBlock(residual, _sub_Rn[vn], var.dofIndicesNeighbor(), var.scalingFactor());
   }
+}
+
+void
+Assembly::addResidualScalar(NumericVector<Number> & residual)
+{
+  // add the scalar variable residual
+  addResidualBlock(residual, _scalar_Re, _scalar_var->dofIndices(), 1.); //_scalar_var->scalingFactor());
+  // add the constrained variable residual
+  addResidualBlock(residual, _sub_Re[_ced_var->number()], _ced_var->dofIndices(), _ced_var->scalingFactor());
 }
 
 
@@ -582,7 +621,7 @@ Assembly::setResidualNeighbor(NumericVector<Number> & residual)
 
 
 void
-Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor)
+Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<unsigned int> & idof_indices, const std::vector<unsigned int> & jdof_indices, Real scaling_factor)
 {
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0))
   {
@@ -802,3 +841,13 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
     jacobian.add_matrix(knn, dn);
   }
 }
+
+void
+Assembly::addJacobianScalar(SparseMatrix<Number> & jacobian)
+{
+  addJacobianBlock(jacobian, _scalar_Kee, _scalar_var->dofIndices(), _scalar_var->dofIndices(), _scalar_var->scalingFactor());
+
+  addJacobianBlock(jacobian, _scalar_Ken, _scalar_var->dofIndices(), _ced_var->dofIndices(), _scalar_var->scalingFactor());
+  addJacobianBlock(jacobian, _scalar_Kne, _ced_var->dofIndices(), _scalar_var->dofIndices(), _ced_var->scalingFactor());
+}
+

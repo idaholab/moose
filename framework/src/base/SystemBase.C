@@ -67,6 +67,15 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
   return *var;
 }
 
+MooseVariableScalar &
+SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
+{
+  MooseVariableScalar * var = _vars[tid].getScalarVariable(var_name);
+  if (var == NULL)
+    mooseError("variable " + var_name + " does not exist in this system");
+  return *var;
+}
+
 const std::set<subdomain_id_type> *
 SystemBase::getVariableBlocks(unsigned int var_number)
 {

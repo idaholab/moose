@@ -32,6 +32,14 @@ VariableWarehouse::add(const std::string & var_name, MooseVariable *var)
 }
 
 void
+VariableWarehouse::add(const std::string & var_name, MooseVariableScalar * var)
+{
+  _scalar_var_map[var_name] = var;
+  _scalar_vars.push_back(var);
+}
+
+
+void
 VariableWarehouse::addBoundaryVar(unsigned int bnd, MooseVariable *var)
 {
   _boundary_vars[bnd].insert(var);
@@ -51,10 +59,22 @@ VariableWarehouse::getVariable(const std::string & var_name)
   return _var_name[var_name];
 }
 
+MooseVariableScalar *
+VariableWarehouse::getScalarVariable(const std::string & var_name)
+{
+  return _scalar_var_map[var_name];
+}
+
 std::vector<MooseVariable *> &
 VariableWarehouse::all()
 {
   return _vars;
+}
+
+std::vector<MooseVariableScalar *> &
+VariableWarehouse::scalars()
+{
+  return _scalar_vars;
 }
 
 std::set<MooseVariable *> &

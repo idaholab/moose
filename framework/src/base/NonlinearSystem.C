@@ -33,6 +33,7 @@
 #include "PenetrationLocator.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
+#include "ScalarKernel.h"
 
 // libMesh
 #include "nonlinear_solver.h"
@@ -297,6 +298,18 @@ NonlinearSystem::converged()
 }
 
 void
+NonlinearSystem::addScalarVariable(const std::string & var_name, Order order)
+{
+  FEType type(order, SCALAR);
+  unsigned int var_num = _sys.add_variable(var_name, type);
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid));
+    _vars[tid].add(var_name, var);
+  }
+}
+
+void
 NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -322,6 +335,20 @@ NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string &
       }
     }
     _kernels[tid].addKernel(kernel, blk_ids);
+  }
+}
+
+void
+NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    ScalarKernel *kernel = static_cast<ScalarKernel *>(Factory::instance()->create(kernel_name, name, parameters));
+    mooseAssert(kernel != NULL, "Not a Kernel object");
+
+    _kernels[tid].addScalarKernel(kernel);
   }
 }
 
@@ -923,6 +950,18 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeResidualThread cr(_mproblem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
+  // do scalar kernels (not sure how to thread this)
+  {
+    const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
+    for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+    {
+      ScalarKernel * kernel = *it;
+
+      kernel->reinit();
+      kernel->computeResidual();
+      _mproblem.addResidualScalar(residual);
+    }
+  }
 
   if(_need_residual_copy)
   {
@@ -989,6 +1028,10 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
     if(_mproblem.getDisplacedProblem())
       constraintResiduals(residual, true);
   }
+
+
+  std::cerr << "--" << std::endl;
+  residual.print(std::cerr);
 
 
   // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
@@ -1313,6 +1356,19 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
   computeDiracContributions(NULL, &jacobian);
 
+  // do scalar kernels (not sure how to thread this)
+  {
+    const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
+    for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+    {
+      ScalarKernel * kernel = *it;
+
+      kernel->reinit();
+      kernel->computeJacobian();
+      _mproblem.addJacobianScalar(jacobian);
+    }
+  }
+
   static bool first = true;
 
   // This adds zeroes into geometric coupling entries to ensure they stay in the matrix
@@ -1369,8 +1425,6 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   }
 
   _currently_computing_jacobian = false;
-
-//  std::cout<<jacobian<<std::endl;
 
   Moose::enableFPE(false);
 

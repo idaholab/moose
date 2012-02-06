@@ -20,6 +20,7 @@
 #include <set>
 
 #include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 
 
 /**
@@ -37,6 +38,14 @@ public:
    * @param var Variable
    */
   void add(const std::string & var_name, MooseVariable *var);
+
+  /**
+   * Add a scalar variable
+   * @param var_num The number of the variable
+   * @param var Scalar variable
+   */
+  void add(const std::string & var_name, MooseVariableScalar * var);
+
   /**
    * Add a boundary variable
    * @param bnd The boundary id where this variable is defined
@@ -54,6 +63,13 @@ public:
   MooseVariable * getVariable(const std::string & var_name);
 
   /**
+   * Get a scalar variable from the warehouse
+   * @param var_num The number of the scalar variable to retrieve
+   * @return The retrieved variable
+   */
+  MooseVariableScalar * getScalarVariable(const std::string & var_name);
+
+  /**
    * Get the list of all variables
    * @return The list of variables
    */
@@ -65,10 +81,19 @@ public:
    */
   std::set<MooseVariable *> & boundaryVars(unsigned int bnd);
 
+  /**
+   * Get the list of scalar variables
+   * @return The list of scalar variables
+   */
+  std::vector<MooseVariableScalar *> & scalars();
+
 protected:
   std::vector<MooseVariable *> _vars;                                        ///< list of all variables
   std::map<std::string, MooseVariable *> _var_name;                          ///< Name to variable mapping
   std::map<unsigned int, std::set<MooseVariable *> > _boundary_vars;         ///< Map to variables that need to be evaluated on a boundary
+
+  std::map<std::string, MooseVariableScalar *> _scalar_var_map;             ///< variable number to variable mapping
+  std::vector<MooseVariableScalar *> _scalar_vars;                           ///< list of all variables
 };
 
 #endif // VARIABLEWAREHOUSE_H

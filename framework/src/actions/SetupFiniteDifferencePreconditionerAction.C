@@ -51,15 +51,16 @@ SetupFiniteDifferencePreconditionerAction::act()
   FEProblem & subproblem = *_parser_handle._problem;
   NonlinearSystem & nl = subproblem.getNonlinearSystem();
   unsigned int n_vars = nl.nVariables();
+  unsigned int n_scalar_vars = nl.nScalarVariables();
 
-  CouplingMatrix * cm = new CouplingMatrix(n_vars);
+  CouplingMatrix * cm = new CouplingMatrix(n_vars+n_scalar_vars);
 
   bool full = getParam<bool>("full");
 
   if(!full)
   {
     // put 1s on diagonal
-    for (unsigned int i = 0; i < n_vars; i++)
+    for (unsigned int i = 0; i < n_vars+n_scalar_vars; i++)
       (*cm)(i, i) = 1;
 
     // off-diagonal entries
@@ -70,11 +71,13 @@ SetupFiniteDifferencePreconditionerAction::act()
       unsigned int column = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_column")[i]).number();
       (*cm)(row, column) = 1;
     }
+
+    // TODO: handle coupling entries between NL-vars and SCALAR-vars
   }
   else
   {
-    for(unsigned int i=0; i<n_vars; i++)
-      for(unsigned int j=0; j<n_vars; j++)
+    for(unsigned int i=0; i<n_vars+n_scalar_vars; i++)
+      for(unsigned int j=0; j<n_vars+n_scalar_vars; j++)
         (*cm)(i,j) = 1;
   }
 

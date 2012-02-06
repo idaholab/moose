@@ -143,7 +143,9 @@ public:
   // NL /////
   NonlinearSystem & getNonlinearSystem() { return _nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+  void addScalarVariable(const std::string & var_name, Order order);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
   void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
@@ -206,6 +208,7 @@ public:
 
   virtual void addResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void addResidualScalar(NumericVector<Number> & residual, THREAD_ID tid = 0);
 
   virtual void cacheResidual(THREAD_ID tid);
   virtual void cacheResidualNeighbor(THREAD_ID tid);
@@ -218,6 +221,7 @@ public:
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid);
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid);
+  virtual void addJacobianScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid = 0);
 
   virtual void cacheJacobian(THREAD_ID tid);
   virtual void cacheJacobianNeighbor(THREAD_ID tid);

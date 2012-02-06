@@ -268,6 +268,22 @@ MooseVariable::reinit_aux()
 }
 
 void
+MooseVariable::reinitNodes(const std::vector<unsigned int> & nodes)
+{
+  _dof_indices.resize(nodes.size());
+  for (unsigned int i = 0; i < nodes.size(); i++)
+  {
+    Node & nd = _subproblem.mesh().node(nodes[i]);
+    if (nd.n_dofs(_sys.number(), _var_num) > 0)
+    {
+      unsigned int dof = nd.dof_number(_sys.number(), _var_num, 0);
+      _dof_indices[i] = dof;
+    }
+  }
+  _is_defined = true;
+}
+
+void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
@@ -742,24 +758,34 @@ MooseVariable::computeNodalValues()
 {
   if (_is_defined)
   {
-    _nodal_u.resize(1);
-    _nodal_u[0] = (*_sys.currentSolution())(_nodal_dof_index);
+    unsigned int n = _dof_indices.size();
 
+    _nodal_u.resize(n);
     if (_subproblem.isTransient())
     {
-      _nodal_u_old.resize(1);
-      _nodal_u_old[0] = _sys.solutionOld()(_nodal_dof_index);
-
-      _nodal_u_older.resize(1);
-      _nodal_u_older[0] = _sys.solutionOlder()(_nodal_dof_index);
-
+      _nodal_u_old.resize(n);
+      _nodal_u_older.resize(n);
       if (_is_nl)
       {
-        _nodal_u_dot.resize(1);
-        _nodal_u_dot[0] = _sys.solutionUDot()(_nodal_dof_index);
+        _nodal_u_dot.resize(n);
+        _nodal_du_dot_du.resize(n);
+      }
+    }
 
-        _nodal_du_dot_du.resize(1);
-        _nodal_du_dot_du[0] = _sys.solutionDuDotDu()(_nodal_dof_index);
+    for (unsigned int i = 0; i < n; i++)
+    {
+      _nodal_u[i] = (*_sys.currentSolution())(_dof_indices[i]);
+
+      if (_subproblem.isTransient())
+      {
+        _nodal_u_old[i] = _sys.solutionOld()(_dof_indices[i]);
+        _nodal_u_older[i] = _sys.solutionOlder()(_dof_indices[i]);
+
+        if (_is_nl)
+        {
+          _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
+          _nodal_du_dot_du[i] = _sys.solutionDuDotDu()(_dof_indices[i]);
+        }
       }
     }
   }
@@ -770,16 +796,23 @@ MooseVariable::computeNodalNeighborValues()
 {
   if (_is_defined_neighbor)
   {
-    _nodal_u_neighbor.resize(1);
-    _nodal_u_neighbor[0] = (*_sys.currentSolution())(_nodal_dof_index_neighbor);
+    unsigned int n = _dof_indices_neighbor.size();
 
+    _nodal_u_neighbor.resize(n);
     if (_subproblem.isTransient())
     {
-      _nodal_u_old_neighbor.resize(1);
-      _nodal_u_old_neighbor[0] = _sys.solutionOld()(_nodal_dof_index_neighbor);
+      _nodal_u_old_neighbor.resize(n);
+      _nodal_u_older_neighbor.resize(n);
+    }
 
-      _nodal_u_older_neighbor.resize(1);
-      _nodal_u_older_neighbor[0] = _sys.solutionOlder()(_nodal_dof_index_neighbor);
+    for (unsigned int i = 0; i < n; i++)
+    {
+      _nodal_u_neighbor[i] = (*_sys.currentSolution())(_dof_indices_neighbor[i]);
+      if (_subproblem.isTransient())
+      {
+        _nodal_u_old_neighbor[i] = _sys.solutionOld()(_dof_indices_neighbor[i]);
+        _nodal_u_older_neighbor[i] = _sys.solutionOlder()(_dof_indices_neighbor[i]);
+      }
     }
   }
 }

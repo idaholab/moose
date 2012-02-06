@@ -20,6 +20,7 @@
 #include <set>
 
 #include "Kernel.h"
+#include "ScalarKernel.h"
 
 
 /**
@@ -57,11 +58,23 @@ public:
   const std::vector<Kernel *> & activeVar(unsigned int var) { return _active_var_kernels[var]; }
 
   /**
+   * Get list of scalar kernels
+   * @return The list of scalar active kernels
+   */
+  const std::vector<ScalarKernel *> & scalars() { return _scalar_kernels; }
+
+  /**
    * Add a kernels
    * @param kernel Kernel being added
    * @param block_ids Set of active domain where the kernel is defined
    */
   void addKernel(Kernel *kernel, const std::set<subdomain_id_type> & block_ids);
+
+  /**
+   * Add a scalar kernels
+   * @param kernel Scalar kernel being added
+   */
+  void addScalarKernel(ScalarKernel *kernel);
 
   /**
    * Update the list of active kernels
@@ -85,6 +98,8 @@ protected:
   std::vector<Kernel *> _all_kernels;                                   ///< All instances of kernels
   std::vector<Kernel *> _global_kernels;                                ///< Kernels that live everywhere (on the whole domain)
   std::map<unsigned int, std::vector<Kernel *> > _block_kernels;        ///< Kernels that live on a specified block
+
+  std::vector<ScalarKernel *> _scalar_kernels;                          ///< Scalar kernels
 };
 
 #endif // KERNELWAREHOUSE_H

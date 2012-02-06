@@ -63,12 +63,27 @@ public:
   virtual bool converged();
 
   /**
+   * Adds a scalar variable
+   * @param var_name The name of the variable
+   * @param order The order of the variable
+   */
+  virtual void addScalarVariable(const std::string & var_name, Order order);
+
+  /**
    * Adds a kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Adds a scalar kernel
+   * @param kernel_name The type of the kernel
+   * @param name The name of the kernel
+   * @param parameters Kernel parameters
+   */
+  void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a boundary condition

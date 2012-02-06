@@ -109,6 +109,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
       for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
         _var_map[var_num].insert(*it);
   }
+  _var_names.push_back(var_name);
 }
 
 void

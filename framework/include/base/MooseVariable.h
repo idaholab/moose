@@ -109,6 +109,7 @@ public:
   void reinit_node();
   void reinit_nodeNeighbor();
   void reinit_aux();
+  void reinitNodes(const std::vector<unsigned int> & nodes);
 
   /// Get the variable number
   unsigned int number() { return _var_num; }

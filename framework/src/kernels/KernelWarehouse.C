@@ -22,6 +22,9 @@ KernelWarehouse::~KernelWarehouse()
 {
   for (std::vector<Kernel *>::const_iterator i = _all_kernels.begin(); i != _all_kernels.end(); ++i)
     delete *i;
+
+  for (std::vector<ScalarKernel *>::const_iterator i = _scalar_kernels.begin(); i != _scalar_kernels.end(); ++i)
+    delete *i;
 }
 
 void
@@ -69,6 +72,12 @@ KernelWarehouse::addKernel(Kernel *kernel, const std::set<subdomain_id_type> & b
       _block_kernels[blk_id].push_back(kernel);
     }
   }
+}
+
+void
+KernelWarehouse::addScalarKernel(ScalarKernel *kernel)
+{
+  _scalar_kernels.push_back(kernel);
 }
 
 void

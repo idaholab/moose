@@ -381,6 +381,12 @@ FEProblem::addResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
+FEProblem::addResidualScalar(NumericVector<Number> & residual, THREAD_ID tid/* = 0*/)
+{
+  _assembly[tid]->addResidualScalar(residual);
+}
+
+void
 FEProblem::cacheResidual(THREAD_ID tid)
 {
   _assembly[tid]->cacheResidual();
@@ -434,6 +440,12 @@ FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
   _assembly[tid]->addJacobianNeighbor(jacobian);
   if(_displaced_problem)
     _displaced_problem->addJacobianNeighbor(jacobian, tid);
+}
+
+void
+FEProblem::addJacobianScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid/* = 0*/)
+{
+  _assembly[tid]->addJacobianScalar(jacobian);
 }
 
 void
@@ -741,6 +753,12 @@ FEProblem::addVariable(const std::string & var_name, const FEType & type, Real s
 }
 
 void
+FEProblem::addScalarVariable(const std::string & var_name, Order order)
+{
+  _nl.addScalarVariable(var_name, order);
+}
+
+void
 FEProblem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
@@ -756,6 +774,16 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
   _nl.addKernel(kernel_name, name, parameters);
+}
+
+void
+FEProblem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  // TODO: ScalarKernels on displaced meshes
+  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<NonlinearSystem *>("_sys") = &_nl;
+  _nl.addScalarKernel(kernel_name, name, parameters);
 }
 
 void
@@ -1435,20 +1463,21 @@ void
 FEProblem::init()
 {
   unsigned int n_vars = _nl.nVariables();
+  unsigned int n_scalar_vars = _nl.nScalarVariables();
   switch (_coupling)
   {
   case Moose::COUPLING_DIAG:
-    _cm = new CouplingMatrix(n_vars);
-    for (unsigned int i = 0; i < n_vars; i++)
-      for (unsigned int j = 0; j < n_vars; j++)
+    _cm = new CouplingMatrix(n_vars + n_scalar_vars);
+    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
+      for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
         (*_cm)(i, j) = (i == j ? 1 : 0);
     break;
 
   // for full jacobian
   case Moose::COUPLING_FULL:
-    _cm = new CouplingMatrix(n_vars);
-    for (unsigned int i = 0; i < n_vars; i++)
-      for (unsigned int j = 0; j < n_vars; j++)
+    _cm = new CouplingMatrix(n_vars + n_scalar_vars);
+    for (unsigned int i = 0; i < n_vars + n_scalar_vars; i++)
+      for (unsigned int j = 0; j < n_vars + n_scalar_vars; j++)
         (*_cm)(i, j) = 1;
     break;
 
@@ -1818,14 +1847,11 @@ FEProblem::getVariableNames()
 {
   std::vector<std::string> names;
 
-  System & nl = _nl.sys();
-  System & aux = _aux.sys();
+  std::vector<std::string> & nl_var_names = _nl.getVariableNames();
+  names.insert(names.end(), nl_var_names.begin(), nl_var_names.end());
 
-  for(unsigned int i=0; i<nl.n_vars(); i++)
-    names.push_back(nl.variable_name(i));
-
-  for(unsigned int i=0; i<aux.n_vars(); i++)
-    names.push_back(aux.variable_name(i));
+  std::vector<std::string> & aux_var_names = _aux.getVariableNames();
+  names.insert(names.end(), aux_var_names.begin(), aux_var_names.end());
 
   return names;
 }

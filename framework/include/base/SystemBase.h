@@ -160,6 +160,15 @@ public:
   virtual MooseVariable & getVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
+   * Gets a reference to a scalar variable with specified number
+   *
+   * @param tid Thread id
+   * @param var_number varaible number
+   * @return reference the variable (class)
+   */
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
+
+  /**
    * Get the block where a variable of this system is defined
    *
    * @param var_number The number of the variable
@@ -172,6 +181,8 @@ public:
    * @return the number of variables
    */
   virtual unsigned int nVariables() = 0;
+
+  virtual unsigned int nScalarVariables() = 0;
 
   /// Get minimal quadrature order needed for integrating variables in this system
   virtual Order getMinQuadratureOrder();
@@ -306,6 +317,7 @@ public:
         for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
           _var_map[var_num].insert(*it);
     }
+    _var_names.push_back(var_name);
   }
 
   virtual bool hasVariable(const std::string & var_name)
@@ -313,7 +325,11 @@ public:
     return _sys.has_variable(var_name);
   }
 
-  virtual unsigned int nVariables() { return _sys.n_vars(); }
+  virtual unsigned int nVariables() { return _vars[0].all().size(); }
+
+  virtual unsigned int nScalarVariables() { return _vars[0].scalars().size(); }
+
+  std::vector<std::string> & getVariableNames() { return _var_names; }
 
   virtual void computeVariables(const NumericVector<Number>& /*soln*/)
   {
@@ -420,6 +436,7 @@ public:
 protected:
   T & _sys;
   Moose::VarKindType _var_kind;                                      ///< default kind of variables in this system
+  std::vector<std::string> _var_names;
 
   NumericVector<Number> & _solution;
   NumericVector<Number> & _solution_old;
