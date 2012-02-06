@@ -1030,8 +1030,8 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   }
 
 
-  std::cerr << "--" << std::endl;
-  residual.print(std::cerr);
+  //std::cerr << "--" << std::endl;
+  //residual.print(std::cerr);
 
 
   // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
