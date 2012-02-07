@@ -208,7 +208,7 @@ public:
   void prepare();
   void prepareNeighbor();
   void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
-  void prepareScalar(MooseVariableScalar & var, MooseVariable & ced_var);
+  void prepareScalar(MooseVariableScalar & var);
 
   void copyShapes(unsigned int var);
   void copyFaceShapes(unsigned int var);
@@ -268,8 +268,8 @@ public:
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar) { return _sub_Kee[ivar][jvar]; }
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockScalar() { return _scalar_Kee; }
-  // FIXME: UGLY!!!
-  DenseMatrix<Number> & jacobianBlockScalarOffdiag(int type) { return (type == 0) ? _scalar_Ken : _scalar_Kne; }
+  DenseMatrix<Number> & jacobianBlockScalarLM(unsigned int ivar) { return _scalar_Ken[ivar]; }
+  DenseMatrix<Number> & jacobianBlockScalarCED(unsigned int ivar) { return _scalar_Kne[ivar]; }
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor);
 
   std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
@@ -336,7 +336,6 @@ protected:
   std::vector<Point> _current_physical_points;  ///< This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
 
   MooseVariableScalar * _scalar_var;                 ///< scalar variable number
-  MooseVariable * _ced_var;                          ///< constrained variable number
 
   std::vector<DenseVector<Number> > _sub_Re;                     ///< residual contributions for each variable from the element
   std::vector<DenseVector<Number> > _sub_Rn;                     ///< residual contributions for each variable from the neighbor
@@ -349,9 +348,9 @@ protected:
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Kne;      ///< jacobian contributions from the neighbor and element
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Knn;      ///< jacobian contributions from the neighbor
 
-  DenseMatrix<Number> _scalar_Kee;   ///< jacobian contributions for scalar variable
-  DenseMatrix<Number> _scalar_Ken;   ///< jacobian contributions
-  DenseMatrix<Number> _scalar_Kne;   ///< jacobian contributions
+  DenseMatrix<Number> _scalar_Kee;                               ///< jacobian contributions for scalar variable
+  std::vector<DenseMatrix<Number> > _scalar_Ken;                 ///< jacobian contributions
+  std::vector<DenseMatrix<Number> > _scalar_Kne;                 ///< jacobian contributions
 
   DenseMatrix<Number> _tmp_Ke;                                   ///< auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)
 
