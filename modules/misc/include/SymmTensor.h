@@ -63,11 +63,11 @@ public:
       if(init_list.size() != 6)
         mooseError("please enter a vector with 6 entries.");
     }
-  
-  // SymmTensor(const SymmTensor &a) :
-  //   {
-  //     *this = a;
-  //   }
+
+ SymmTensor(const SymmTensor &a)
+    {
+      *this = a;
+    }
   
 
   ~SymmTensor() {}
@@ -478,19 +478,32 @@ public:
 /**
  * Rotate the strain around the c-axis
  */
-void rotate(const Real a)
-{
-  Real angle = a*pi/180.0;
-  Real s = std::sin(angle);
-  Real c = std::cos(angle);
+  void rotate(const Real a)
+    {
+      Real angle = a*pi/180.0;
+      Real s = std::sin(angle);
+      Real c = std::cos(angle);
+      
+      _xx = _xx*c*c + _yy*s*s + 2.0*_xy*s*c;
+      _yy = _xx*s*s + _yy*c*c - 2.0*_xy*s*c;
+      _zz = _zz;
+      _xy = -2.0*(_xx - _yy)*s*c + 2.0*_xy*(c*c - s*s);
+      _yz = _yz;
+      _zx = _zx;
+    }
+
+  void fillFromInputVector(std::vector<Real> input)
+    {
+      if (input.size() != 6)
+        mooseError("Please check the number of entries in the eigenstrain input vector");
+      _xx = input[0];
+      _yy = input[1];
+      _zz = input[2];
+      _xy = input[5];
+      _yz = input[3];
+      _zx = input[4];
+    }
   
-  _xx = _xx*c*c + _yy*s*s + 2.0*_xy*s*c;
-  _yy = _xx*s*s + _yy*c*c - 2.0*_xy*s*c;
-  _zz = _zz;
-  _xy = -2.0*(_xx - _yy)*s*c + 2.0*_xy*(c*c - s*s);
-  _yz = _yz;
-  _zx = _zx;
-}
   
 private:
   Real _xx;

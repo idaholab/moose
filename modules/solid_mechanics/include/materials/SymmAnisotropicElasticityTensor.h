@@ -10,6 +10,7 @@ public:
   SymmAnisotropicElasticityTensor();
   SymmAnisotropicElasticityTensor(std::vector<Real> & init_list);
   SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool);
+  SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a);
 
   /**
    * Set the first euler angle

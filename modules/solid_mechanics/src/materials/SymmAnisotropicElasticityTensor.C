@@ -52,11 +52,11 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Rea
 }
 
 
-// SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a)
-//     : SymmElasticityTensor(true)
-// {
-//   *this = a;
-// }
+ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a)
+     : SymmElasticityTensor(true)
+ {
+   *this = a;
+ }
 
 
 void SymmAnisotropicElasticityTensor::setFirstEulerAngle(const Real a1)
