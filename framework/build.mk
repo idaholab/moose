@@ -34,7 +34,7 @@ all::
 #
 
 %.$(obj-suffix) : %.f
-	@echo "Compiling Fortan (in "$(mode)" mode) "$<"..."
+	@echo "Compiling Fortran (in "$(mode)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
 
 #
@@ -63,7 +63,7 @@ ifneq (,$(findstring gfortran,$(mpif90_command)))
 endif
 
 %.$(obj-suffix) : %.f90
-	@echo "Compiling Fortan90 (in "$(mode)" mode) "$<"..."
+	@echo "Compiling Fortran90 (in "$(mode)" mode) "$<"..."
 	@$(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
 
