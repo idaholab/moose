@@ -45,6 +45,10 @@ protected:
   Real _alpha;
 
   SymmElasticityTensor * _local_elasticity_tensor;
+
+  Real _pi;
+  Real _tol;
+  
 };
 
 #endif //LINEARISOTROPICMATERIAL_H
