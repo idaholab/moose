@@ -9,8 +9,9 @@
 
 /**
  * LinearGeneralAnisotropicMaterial handles a fully anisotropic, single-crystal material's elastic
- * constants.  It takes all 21 independent stiffness tensor inputs.  This can be extended or
- * simplified to specify HCP, monoclinic, cubic, etc as needed.
+ * constants.  It takes all 21 independent stiffness tensor inputs, or only 9, depending on the
+ * boolean input value given.  This can be extended or simplified to specify HCP, monoclinic,
+ * cubic, etc as needed.
  */
 
 //Forward declaration
@@ -34,7 +35,7 @@ private:
   // bool to indicate if using 9 stiffness values or all 21
   bool _all_21;
 
-  // Pointers for the individual material information
+  //Individual material information
   SymmElasticityTensor _Cijkl_matrix;
   MaterialProperty<SymmElasticityTensor > &_Cijkl_matrix_MP;
   
