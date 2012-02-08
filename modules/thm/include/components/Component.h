@@ -22,6 +22,8 @@ public:
   Component(const std::string & name, InputParameters parameters);
   virtual ~Component();
 
+  unsigned int id() { return _id; }
+
   /**
    * Initialize the component
    */
@@ -37,6 +39,11 @@ public:
   virtual void addMooseObjects() { }
 
   virtual void parseInput();
+
+  // Location
+  virtual Point getPosition() = 0;
+
+  virtual RealVectorValue getDirection() = 0;
 
 protected:
   unsigned int _id;                     ///< Unique ID of this component
