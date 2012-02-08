@@ -77,6 +77,16 @@ public:
                           const RealGradient & test,
                           const RealGradient & phi );
 
+  SymmElasticityTensor operator+(const SymmElasticityTensor & rhs) const
+    {
+      SymmElasticityTensor t = *this;
+
+      t += rhs;
+
+      return t;
+    }
+  
+  
   void operator+=( const SymmElasticityTensor & rhs )
   {
     for (unsigned i(0); i < 21; ++i)
