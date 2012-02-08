@@ -27,10 +27,11 @@ protected:
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
   virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c) = 0;
+  
+  MaterialProperty<Real> & _M;
 
 private:
   
-  MaterialProperty<Real> & _M;
   bool _has_MJac;
   MaterialProperty<Real> * _DM;
   bool _implicit;
