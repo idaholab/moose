@@ -1,5 +1,6 @@
 #include "SymmAnisotropicElasticityTensor.h"
 #include <cmath>
+#include <ostream>
 
 SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor()
   : SymmElasticityTensor(false),
@@ -22,42 +23,54 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor()
   form_transformation_t_matrix();
 }
 
-SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Real> & init_list)
-    : SymmElasticityTensor(true)
+SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool all_21)
+    : SymmElasticityTensor(true),
+      _dmat(9,9),
+      _qdmat(9,9),
+      _dt(6,6),
+      _qdt(6,6),
+      _r(3,3),
+      _q(9,9),
+      _qt(9,9),
+      _euler_angle(3),
+      _trans_d6_to_d9(9,6),
+      //_transpose_trans_d6_to_d9(6,9),
+      _trans_d9_to_d6(6,9),
+      //_transpose_trans_d9_to_d6(9,6),
+      _c11(0),
+      _c12(0),
+      _c44(0)
 {
-// test the length to make sure it's 9 long
-  if(init_list.size() != 9)
-  mooseError("please enter a vector with 9 entries for the stiffness.");
+// test the input vector length to make sure it's correct
+  if ((all_21==true && init_list.size()!=21) ||(all_21==false && init_list.size()!=9) )
+    mooseError("Please correct the number of entries in the stiffness input.");
   
-  _val[0] = init_list[0];   //C1111
-  _val[1] = init_list[1];   //C1122
-  _val[2] = init_list[2];   //C1133
-  _val[6] = init_list[3];   //C2222
-  _val[7] = init_list[4];   //C2233
-  _val[11] = init_list[5];  //C3333
-  _val[15] = init_list[6];  //C2323
-  _val[18] = init_list[7];  //C1313
-  _val[20] = init_list[8];  //C1212
+  if(all_21 == true)
+  {
+    for (int i = 0; i < 21; i++)
+      _val[i] = init_list[i];
+  }
+  else
+  {
+    _val[0] = init_list[0];   //C1111
+    _val[1] = init_list[1];   //C1122
+    _val[2] = init_list[2];   //C1133
+    _val[6] = init_list[3];   //C2222
+    _val[7] = init_list[4];   //C2233
+    _val[11] = init_list[5];  //C3333
+    _val[15] = init_list[6];  //C2323
+    _val[18] = init_list[7];  //C1313
+    _val[20] = init_list[8];  //C1212
+  }
+  
+  form_transformation_t_matrix();
 }
 
-SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool /*all_21*/)
-    : SymmElasticityTensor(true)
-{
-// test the length to make sure it's 21 long
-  if(init_list.size() != 21)
-  mooseError("please enter a vector with 21 entries for the stiffness.");
-
-  for (int i = 0; i < 21; i++)
-    _val[i] = init_list[i];
-}
-
-
- SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a)
+SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a)
      : SymmElasticityTensor(true)
  {
    *this = a;
  }
-
 
 void SymmAnisotropicElasticityTensor::setFirstEulerAngle(const Real a1)
 {
@@ -96,9 +109,25 @@ SymmAnisotropicElasticityTensor::rotate(const Real a1)
   setSecondEulerAngle(0.0);
   setThirdEulerAngle(0.0);
 
-  unsigned int dummy;
-  
- calculateEntries(dummy);
+// pulled from calculateEntries to sub in the
+// initialize_anisotropic_material_dt_matrix() call
+  form_r_matrix();
+  initialize_anisotropic_material_dt_matrix();
+  form_rotational_q_matrix();
+  // form_transformation_t_matrix();
+  form_transformed_material_dmat_matrix();
+  form_rotated_material_qdmat_matrix();
+  form_transformed_material_dt_matrix();
+
+  unsigned count(0);
+
+  for (int j(0); j < 6; ++j)
+  {
+    for(int i(j); i < 6; ++i)
+    {
+      _val[count++] = _dt(i,j);
+    }
+  }
 }
 
 
@@ -140,6 +169,20 @@ SymmAnisotropicElasticityTensor::initialize_material_dt_matrix()
 
 }
 
+void
+SymmAnisotropicElasticityTensor::initialize_anisotropic_material_dt_matrix()
+{
+// This function initializes the 6 x 6 material Dt matrix for an anisotropic material
+
+  int k = 0;
+  for (int i=0; i<6; i++)
+  {
+    for (int j=i; j<6; j++)
+    {
+      _dt(i,j) = _dt(j,i) = _val[k];
+    }
+  }
+}
 
 void
 SymmAnisotropicElasticityTensor::form_rotational_q_matrix()

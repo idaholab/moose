@@ -8,8 +8,7 @@ class SymmAnisotropicElasticityTensor : public SymmElasticityTensor
 {
 public:
   SymmAnisotropicElasticityTensor();
-  SymmAnisotropicElasticityTensor(std::vector<Real> & init_list);
-  SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool);
+  SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool all_21);
   SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a);
 
   /**
@@ -75,6 +74,7 @@ protected:
 
   void form_r_matrix();
   void initialize_material_dt_matrix();
+  void initialize_anisotropic_material_dt_matrix();
   void form_rotational_q_matrix();
   void form_transformation_t_matrix();
   void form_transformed_material_dmat_matrix();
