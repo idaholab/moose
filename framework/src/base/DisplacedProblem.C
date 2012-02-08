@@ -151,12 +151,18 @@ DisplacedProblem::init()
 }
 
 void
+DisplacedProblem::syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
+{
+  (*_displaced_nl.sys().solution) = soln;
+  (*_displaced_aux.sys().solution) = aux_soln;
+}
+
+void
 DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
 {
   Moose::perf_log.push("updateDisplacedMesh()","Solve");
 
-  (*_displaced_nl.sys().solution) = soln;
-  (*_displaced_aux.sys().solution) = aux_soln;
+  syncSolutions(soln, aux_soln);
 
   _nl_solution = &soln;
   _aux_solution = &aux_soln;

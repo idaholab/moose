@@ -1544,6 +1544,10 @@ FEProblem::solve()
 //  _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");
   _nl.update();
+
+  // sync solutions in displaced problem
+  if (_displaced_problem)
+    _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
 }
 
 bool

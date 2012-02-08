@@ -51,6 +51,7 @@ public:
   virtual void solve() {}
   virtual bool converged() { return _mproblem.converged(); }
 
+  virtual void syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
 
   // Variables /////
