@@ -100,9 +100,7 @@ LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
 
   computeStrain(strain, elastic_strain);
 
-  // Save that off as the elastic strain
-  _elastic_strain[_qp] = elastic_strain;
-
+  
   // Multiplier that zeros out stiffness
   //Real h = (1.0 - _c[_qp]*_c[_qp]);
   /*Real vl = -0.05 + _c[_qp]*1.1;
@@ -114,6 +112,10 @@ LinearIsotropicMaterial::computeStress(const SymmTensor & strain,
   Real h = (1.0 + std::cos(_pi*_c[_qp]))/2.0;
   if (h < _tol)
     h = _tol;
+
+  // Save that off as the elastic strain
+  _elastic_strain[_qp] = elastic_strain;
+
 
   // Create column vector
   // C * e
