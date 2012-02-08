@@ -22,19 +22,10 @@
 
 // libMesh
 #include "dof_map.h"
-//#include "fe.h"
-//#include "quadrature.h"
-//#include "dense_vector.h"
-//#include "dense_matrix.h"
-//#include "numeric_vector.h"
-//#include "sparse_matrix.h"
-//#include "elem.h"
-//#include "node.h"
-
 
 class Assembly;
 class SubProblem;
-class NonlinearSystem;
+class SystemBase;
 
 
 /**
@@ -44,7 +35,7 @@ class NonlinearSystem;
 class MooseVariableScalar
 {
 public:
-  MooseVariableScalar(unsigned int var_num, NonlinearSystem & sys, Assembly & assembly);
+  MooseVariableScalar(unsigned int var_num, SystemBase & sys, Assembly & assembly);
   virtual ~MooseVariableScalar();
 
   void reinit();
@@ -68,7 +59,7 @@ public:
 protected:
   unsigned int _var_num;                                        ///< variable number (from libMesh)
   SubProblem & _subproblem;                                     ///< Problem this variable is part of
-  NonlinearSystem & _sys;                                       ///< Nonlinear system this variable is part of
+  SystemBase & _sys;                                            ///< System this variable is part of
 
   Assembly & _assembly;                                         ///< Assembly data
   const DofMap & _dof_map;                                      ///< DOF map

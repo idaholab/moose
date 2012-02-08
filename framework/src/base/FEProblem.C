@@ -756,6 +756,8 @@ void
 FEProblem::addScalarVariable(const std::string & var_name, Order order)
 {
   _nl.addScalarVariable(var_name, order);
+  if (_displaced_problem)
+    _displaced_problem->addScalarVariable(var_name, order);
 }
 
 void
@@ -780,9 +782,16 @@ void
 FEProblem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
-  // TODO: ScalarKernels on displaced meshes
-  parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<NonlinearSystem *>("_sys") = &_nl;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_nl;
+  }
   _nl.addScalarKernel(kernel_name, name, parameters);
 }
 

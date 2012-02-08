@@ -320,6 +320,22 @@ public:
     _var_names.push_back(var_name);
   }
 
+  /**
+   * Adds a scalar variable
+   * @param var_name The name of the variable
+   * @param order The order of the variable
+   */
+  virtual void addScalarVariable(const std::string & var_name, Order order)
+  {
+    FEType type(order, SCALAR);
+    unsigned int var_num = _sys.add_variable(var_name, type);
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid));
+      _vars[tid].add(var_name, var);
+    }
+  }
+
   virtual bool hasVariable(const std::string & var_name)
   {
     return _sys.has_variable(var_name);

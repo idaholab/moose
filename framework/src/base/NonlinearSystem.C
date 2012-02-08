@@ -298,18 +298,6 @@ NonlinearSystem::converged()
 }
 
 void
-NonlinearSystem::addScalarVariable(const std::string & var_name, Order order)
-{
-  FEType type(order, SCALAR);
-  unsigned int var_num = _sys.add_variable(var_name, type);
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid));
-    _vars[tid].add(var_name, var);
-  }
-}
-
-void
 NonlinearSystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)

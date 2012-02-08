@@ -147,6 +147,7 @@ DisplacedProblem::init()
   _mesh.meshChanged();
   Moose::setup_perf_log.pop("DisplacedProblem::init::meshChanged()","Setup");
 
+  _ex.setOutputVariables(_mproblem.getVariableNames());
 }
 
 void
@@ -201,6 +202,12 @@ void
 DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains)
 {
   _displaced_aux.addVariable(var_name, type, 1.0, active_subdomains);
+}
+
+void
+DisplacedProblem::addScalarVariable(const std::string & var_name, Order order)
+{
+  _displaced_nl.addScalarVariable(var_name, order);
 }
 
 void

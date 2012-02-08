@@ -63,13 +63,6 @@ public:
   virtual bool converged();
 
   /**
-   * Adds a scalar variable
-   * @param var_name The name of the variable
-   * @param order The order of the variable
-   */
-  virtual void addScalarVariable(const std::string & var_name, Order order);
-
-  /**
    * Adds a kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel

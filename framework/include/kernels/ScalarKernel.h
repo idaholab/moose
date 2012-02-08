@@ -70,7 +70,7 @@ public:
 protected:
   Problem & _problem;
   SubProblem & _subproblem;
-  NonlinearSystem & _sys;
+  SystemBase & _sys;
 
   THREAD_ID _tid;
 

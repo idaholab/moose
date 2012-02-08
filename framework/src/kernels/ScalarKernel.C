@@ -26,7 +26,10 @@ InputParameters validParams<ScalarKernel>()
   InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
   params.addRequiredParam<std::string>("ced_variable", "The name of the variable this kernel is constraining");
+
+  params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_kernel");
+
   return params;
 }
 
@@ -37,7 +40,7 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
     TransientInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _sys(*parameters.get<NonlinearSystem *>("_sys")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
 
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),

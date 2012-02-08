@@ -16,13 +16,13 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "Assembly.h"
-#include "NonlinearSystem.h"
+#include "SystemBase.h"
 
 // libMesh
 #include "numeric_vector.h"
 #include "dof_map.h"
 
-MooseVariableScalar::MooseVariableScalar(unsigned int var_num, NonlinearSystem & sys, Assembly & assembly) :
+MooseVariableScalar::MooseVariableScalar(unsigned int var_num, SystemBase & sys, Assembly & assembly) :
     _var_num(var_num),
     _subproblem(sys.subproblem()),
     _sys(sys),
