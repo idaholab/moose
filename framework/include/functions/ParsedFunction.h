@@ -16,7 +16,7 @@
 #define PARSEDFUNCTION_H
 
 #include "Function.h"
-#include "fparser.hh"
+#include "fparser.h"
 
 #include <iostream>
 #include <string>
