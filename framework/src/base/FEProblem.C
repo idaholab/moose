@@ -233,8 +233,8 @@ void FEProblem::initialSetup()
   {
   }
 
-  // RUN initial postprocessors
-  computePostprocessors(EXEC_INITIAL);
+//  // RUN initial postprocessors
+//  computePostprocessors(EXEC_INITIAL);
 
 #ifdef LIBMESH_ENABLE_AMR
   Moose::setup_perf_log.push("initial adaptivity","Setup");
@@ -246,6 +246,8 @@ void FEProblem::initialSetup()
   }
   Moose::setup_perf_log.pop("initial adaptivity","Setup");
 #endif //LIBMESH_ENABLE_AMR
+
+  _nl.set_solution(*(_nl.sys().current_local_solution.get()));
 
   Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
   //Update the geometric searches (has to be called after the problem is all set up)
@@ -291,6 +293,7 @@ void FEProblem::initialSetup()
 
   Moose::setup_perf_log.push("Initial computePostprocessors()","Setup");
   computePostprocessors();
+  computePostprocessors(EXEC_INITIAL);
   computePostprocessors(EXEC_TIMESTEP_BEGIN);
   computePostprocessors(EXEC_RESIDUAL);
   Moose::setup_perf_log.pop("Initial computePostprocessors()","Setup");

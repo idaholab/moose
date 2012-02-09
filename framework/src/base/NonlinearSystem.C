@@ -1786,6 +1786,9 @@ NonlinearSystem::set_solution(const NumericVector<Number> & soln)
 NumericVector<Number> &
 NonlinearSystem::serializedSolution()
 {
+  if (!_serialized_solution.initialized())
+    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+
   _need_serialized_solution = true;
   return _serialized_solution;
 }
