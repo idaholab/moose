@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 7
+  ny = 7
   nz = 0
   xmin = 0
   xmax = 50
@@ -12,7 +12,7 @@
   zmax = 50
   elem_type = QUAD4
 
-  uniform_refine = 2
+  uniform_refine = 1
 []
 
 [Variables]
@@ -83,14 +83,17 @@ active = 'Periodic'
 
 [Executioner]
   type = Transient
-  scheme = 'crank-nicolson'
-  petsc_options = '-snes_mf_operator -ksp_monitor'
+  scheme = 'bdf2'
+  petsc_options = '-snes_mf_operator -snes_ksp_ew'
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 101'
 
-  l_max_its = 15
+  l_max_its = 10
+  l_tol = 1.0e-4
+
   nl_max_its = 10
+  nl_rel_tol = 1.0e-8
   nl_abs_tol = 1.0e-13
 
   start_time = 0.0
@@ -98,10 +101,10 @@ active = 'Periodic'
   dt = 1.0
  
   [./Adaptivity]
-    initial_adaptivity = 2	
+    initial_adaptivity = 1	
     error_estimator = LaplacianErrorEstimator
-    refine_fraction = 0.2
-   coarsen_fraction = 0.25
+    refine_fraction = 0.7
+   coarsen_fraction = 0.05
     max_h_level = 2
   [../]
 []

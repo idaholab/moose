@@ -42,6 +42,8 @@ public:
    * This must be overriden by derived classes.
    */
   virtual Real value(const Point & p);
+  
+  virtual RealGradient gradient(const Point & p);
 
 protected:
 
