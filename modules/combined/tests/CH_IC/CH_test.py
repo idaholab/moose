@@ -6,11 +6,13 @@ circleIC_test = { INPUT : 'CH_CircleIC_test.i',
 
 crossIC_test = { INPUT : 'CH_CrossIC_test.i',
                  EXODIFF : ['cross.e-s002'],
-                 GROUP : 'adaptive'}
+                 GROUP : 'adaptive',
+                 SKIP : 'Temp Re-verify'}
 
 rndcircleIC_test = { INPUT : 'CH_RndCircleIC_test.i',
                      EXODIFF : ['rnd_circle.e-s002'],
-                     GROUP : 'adaptive'}
+                     GROUP : 'adaptive',
+                     SKIP : 'Temp Re-verify'}
 
 boxIC_test = { INPUT : 'CH_BndingBoxIC_test.i',
                EXODIFF : ['box.e-s002'],
@@ -18,5 +20,6 @@ boxIC_test = { INPUT : 'CH_BndingBoxIC_test.i',
 
 rndboxIC_test = { INPUT : 'CH_RndBndingBoxIC_test.i',
                   EXODIFF : ['rndbox.e-s002'],
-                  GROUP : 'adaptive'}
+                  GROUP : 'adaptive',
+                  SKIP : 'Temp Re-verify'}
 
