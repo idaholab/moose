@@ -617,6 +617,21 @@ FEProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID tid)
 }
 
 void
+FEProblem::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
+{
+  unsigned int n_points = nodes.size();
+  _zero[tid].resize(n_points, 0);
+  _grad_zero[tid].resize(n_points, 0);
+  _second_zero[tid].resize(n_points, 0);
+
+  if (_displaced_problem != NULL && _reinit_displaced_elem)
+    _displaced_problem->reinitNodes(nodes, tid);
+
+  _nl.reinitNodes(nodes, tid);
+  _aux.reinitNodes(nodes, tid);
+}
+
+void
 FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
 {
   _assembly[tid]->reinitNodeNeighbor(node);

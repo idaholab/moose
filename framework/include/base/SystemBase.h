@@ -248,6 +248,13 @@ public:
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
 
   /**
+   * Reinit variables at a set of nodes
+   * @param nodes List of node ids to reinit
+   * @param tid Thread ID
+   */
+  virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
+
+  /**
    * Add info about variable that will be copied
    *
    * @param name Name of the nodal variable being used for copying (name is from the exodusII file)

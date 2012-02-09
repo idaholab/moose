@@ -305,6 +305,13 @@ DisplacedProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_
 }
 
 void
+DisplacedProblem::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
+{
+  _displaced_nl.reinitNodes(nodes, tid);
+  _displaced_aux.reinitNodes(nodes, tid);
+}
+
+void
 DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 {
   const Elem * neighbor = elem->neighbor(side);

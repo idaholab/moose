@@ -126,6 +126,13 @@ CoupledProblem::reinitNodeFace(const Node * node, unsigned int bnd_id, THREAD_ID
 }
 
 void
+CoupledProblem::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
+{
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+    it->second->reinitNodes(nodes, tid);
+}
+
+void
 CoupledProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 {
   for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
