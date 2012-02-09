@@ -16,6 +16,14 @@ InputParameters validParams<Component>()
 
 static unsigned int comp_id = 0;
 
+std::string
+Component::genName(const std::string & prefix, unsigned int id, const std::string & suffix)
+{
+  std::stringstream ss;
+  ss << prefix << id << suffix;
+  return ss.str();
+}
+
 Component::Component(const std::string & name, InputParameters parameters) :
     R7Object(name, parameters),
     _id(comp_id++),

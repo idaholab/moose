@@ -56,6 +56,7 @@ protected:
   ComponentParser _parser;
 
   static unsigned int bc_ids;
+  static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
 };
 
 #endif /* COMPONENT_H */
