@@ -27,8 +27,8 @@
       y1 = 25.0
       radius = 6.0
       invalue = 1.0
-      outvalue = -0.9
-      int_width = 6.0
+      outvalue = -0.8
+      int_width = 4.0
     [../]
   [../]
 []	     
@@ -84,14 +84,17 @@
 
 [Executioner]
   type = Transient
-  scheme = 'crank-nicolson'
+  scheme = 'bdf2'
   petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 101'
 
   l_max_its = 15
+  l_tol = 1.0e-4
+
   nl_max_its = 10
+  nl_rel_tol = 1.0e-10
 
   start_time = 0.0
   num_steps = 2
@@ -110,8 +113,16 @@
   file_base = circle
   output_initial = true
   interval = 1
-  exodus = true
+  exodus = false
   perf_log = true
+
+  [./OverSampling]
+    exodus = true
+    refinements = 3
+    output_initial = true
+    interval = 1
+  [../]
+
 []
    
     

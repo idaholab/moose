@@ -1,7 +1,7 @@
 from options import *
 
 circleIC_test = { INPUT : 'CH_CircleIC_test.i',
-                  EXODIFF : ['circle.e-s002'],
+                  EXODIFF : ['circle_oversample.e'],
                   GROUP : 'adaptive'}
 
 crossIC_test = { INPUT : 'CH_CrossIC_test.i',
