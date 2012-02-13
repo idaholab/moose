@@ -275,6 +275,12 @@ public:
   unsigned int nNonlinearIterations() { return _n_iters; }
 
   /**
+   * Returns the current nonlinear iteration number.  In libmesh, this is
+   * updated during the nonlinear solve, so it should be up-to-date.
+   */
+  unsigned int getCurrentNonlinearIterationNumber() { return _sys.get_current_nonlinear_iteration_number(); }
+
+  /**
    * Return the number of linear iterations
    */
   unsigned int nLinearIterations() { return _n_linear_iters; }
