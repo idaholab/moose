@@ -41,6 +41,7 @@ public:
 
 protected:
   virtual Real computeQpIntegral();
+  virtual Real computeIntegral();
 
   Real _integral_value;
 };

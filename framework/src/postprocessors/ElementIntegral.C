@@ -57,3 +57,13 @@ ElementIntegral::computeQpIntegral()
 {
   return _u[_qp];
 }
+
+Real
+ElementIntegral::computeIntegral()
+{
+  Real sum = 0;
+
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  return sum;
+}

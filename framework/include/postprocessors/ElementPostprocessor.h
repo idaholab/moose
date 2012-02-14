@@ -42,8 +42,6 @@ public:
 
   const std::vector<unsigned int> & blockIDs() { return _block_ids; }
 
-  virtual Real computeIntegral();
-
 protected:
   /**
    * The block ID this postprocessor works on
@@ -68,8 +66,6 @@ protected:
   VariableGradient & _grad_u;                           ///< Holds the solution gradient at the current quadrature points
   VariableGradient & _grad_u_old;                       ///< Holds the previous solution gradient at the current quadrature point.
   VariableGradient & _grad_u_older;                     ///< Holds the t-2 solution gradient at the current quadrature point.
-
-  virtual Real computeQpIntegral() = 0;
 };
 
 #endif
