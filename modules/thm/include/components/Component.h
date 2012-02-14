@@ -45,6 +45,8 @@ public:
 
   virtual RealVectorValue getDirection() = 0;
 
+  virtual const std::vector<unsigned int> & getSubdomainIds() { return _subdomain_ids; }
+
 protected:
   unsigned int _id;                     ///< Unique ID of this component
 
@@ -54,9 +56,16 @@ protected:
 
   std::string _input_file_name;
   ComponentParser _parser;
+  std::vector<unsigned int> _subdomain_ids;     ///< List of subdomain IDs this components owns
+
+  virtual unsigned int getNextSubdomainId();
 
   static unsigned int bc_ids;
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
+
+private:
+  // Do not want users to touch this, they _must_ use the API
+  static unsigned int subdomain_ids;
 };
 
 #endif /* COMPONENT_H */

@@ -1,6 +1,7 @@
 #include "Component.h"
 #include "Simulation.h"
 
+unsigned int Component::subdomain_ids = 0;
 unsigned int Component::bc_ids = 0;
 
 template<>
@@ -56,4 +57,12 @@ Component::parseInput()
 
     _parser.parse(_input_file_name);
   }
+}
+
+unsigned int
+Component::getNextSubdomainId()
+{
+  unsigned int sd_id = subdomain_ids++;
+  _subdomain_ids.push_back(sd_id);
+  return sd_id;
 }
