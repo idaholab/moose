@@ -3,6 +3,7 @@
 
 #include "R7Object.h"
 #include "R7Mesh.h"
+#include "R7_Moose.h"
 #include "ComponentParser.h"
 #include "ActionWarehouse.h"
 
