@@ -104,6 +104,7 @@
 #include "RndSmoothCircleIC.h"
 #include "RndBoundingBoxIC.h"
 #include "PFMobility.h"
+#include "NodalFloodCount.h"
 
 // contact
 #include "ContactAction.h"
@@ -223,6 +224,7 @@ Elk::registerObjects()
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerMaterial(PFMobility);
+  registerPostprocessor(NodalFloodCount);
 
   // contact
   registerAction(ContactAction, "meta_action");
