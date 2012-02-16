@@ -771,11 +771,11 @@ FEProblem::addVariable(const std::string & var_name, const FEType & type, Real s
 }
 
 void
-FEProblem::addScalarVariable(const std::string & var_name, Order order)
+FEProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
 {
-  _nl.addScalarVariable(var_name, order);
+  _nl.addScalarVariable(var_name, order, scale_factor);
   if (_displaced_problem)
-    _displaced_problem->addScalarVariable(var_name, order);
+    _displaced_problem->addScalarVariable(var_name, order, scale_factor);
 }
 
 void

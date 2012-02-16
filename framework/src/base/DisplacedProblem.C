@@ -211,9 +211,9 @@ DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & ty
 }
 
 void
-DisplacedProblem::addScalarVariable(const std::string & var_name, Order order)
+DisplacedProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
 {
-  _displaced_nl.addScalarVariable(var_name, order);
+  _displaced_nl.addScalarVariable(var_name, order, scale_factor);
 }
 
 void

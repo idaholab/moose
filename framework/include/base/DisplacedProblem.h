@@ -59,7 +59,7 @@ public:
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
-  virtual void addScalarVariable(const std::string & var_name, Order order);
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
 
   // Output /////
   virtual void output(bool force = false);

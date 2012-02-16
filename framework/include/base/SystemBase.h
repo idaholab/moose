@@ -332,13 +332,14 @@ public:
    * @param var_name The name of the variable
    * @param order The order of the variable
    */
-  virtual void addScalarVariable(const std::string & var_name, Order order)
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
   {
     FEType type(order, SCALAR);
     unsigned int var_num = _sys.add_variable(var_name, type);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid));
+      var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
   }
