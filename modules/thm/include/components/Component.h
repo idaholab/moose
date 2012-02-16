@@ -6,8 +6,9 @@
 #include "R7_Moose.h"
 #include "ComponentParser.h"
 #include "ActionWarehouse.h"
+#include "Simulation.h"
 
-class Simulation;
+
 class Component;
 class FEProblem;
 
@@ -24,6 +25,14 @@ public:
   virtual ~Component();
 
   unsigned int id() { return _id; }
+
+  /**
+   * Get parameter from simulation (global one)
+   * @param name The name on the parameter
+   * @return The value of the parameter
+   */
+  template<typename T>
+  const T & getSimParam(const std::string & name);
 
   /**
    * Initialize the component
@@ -68,5 +77,12 @@ private:
   // Do not want users to touch this, they _must_ use the API
   static unsigned int subdomain_ids;
 };
+
+
+template<typename T>
+const T & Component::getSimParam(const std::string & name)
+{
+  return _sim.params().get<T>(name);
+}
 
 #endif /* COMPONENT_H */
