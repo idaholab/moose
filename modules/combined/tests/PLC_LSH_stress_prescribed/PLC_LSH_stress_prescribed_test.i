@@ -171,7 +171,7 @@
     youngs_modulus = 2.8e7
     poissons_ratio = .3
     coefficient = 3.0e-24
-    exponent = 4
+    n_exponent = 4
     activation_energy = 0
     tolerance = 1.e-5
     max_its = 100

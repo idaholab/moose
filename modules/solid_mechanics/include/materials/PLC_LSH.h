@@ -23,7 +23,8 @@ public:
 protected:
 
   Real _coefficient;
-  Real _exponent;
+  Real _n_exponent;
+  Real _m_exponent;
   Real _activation_energy;
   Real _gas_constant;
   Real _tau;
@@ -52,7 +53,7 @@ protected:
   void computeCreep(SymmTensor & creep_strain_increment,
                     SymmTensor & stress_new );
   void computeLSH( const SymmTensor & creep_strain_increment,
-                   SymmTensor & elastic_strain_increment,
+                   SymmTensor & plastic_strain_increment,
                    SymmTensor & stress_new );
 
 private:

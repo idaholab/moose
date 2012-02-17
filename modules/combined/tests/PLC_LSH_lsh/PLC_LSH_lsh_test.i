@@ -49,6 +49,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./elastic_strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 
@@ -98,6 +102,13 @@
     index = 2
   [../]
 
+  [./elastic_strain_yy]
+    type = MaterialTensorAux
+    tensor = elastic_strain
+    variable = elastic_strain_yy
+    index = 1
+  [../]
+
  []
 
 
@@ -138,7 +149,7 @@
     yield_stress = 2.4e2
     hardening_constant = 1206.
     coefficient = 0.0
-    exponent = 1.0
+    n_exponent = 1.0
     activation_energy = 0.0
     tolerance = 1.e-8
     disp_x = disp_x

@@ -9,7 +9,8 @@ InputParameters validParams<PLC_LSH>()
 
    // Power-law creep material parameters
    params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
-   params.addRequiredParam<Real>("exponent", "Exponent in power-law equation");
+   params.addRequiredParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
+   params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
    params.addRequiredParam<Real>("activation_energy", "Activation energy");
    params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
    params.addParam<Real>("tau", 0.01, "Creep sub-iteration control parameter");
@@ -35,7 +36,8 @@ PLC_LSH::PLC_LSH( const std::string & name,
                   InputParameters parameters )
   :SolidModel( name, parameters ),
    _coefficient(parameters.get<Real>("coefficient")),
-   _exponent(parameters.get<Real>("exponent")),
+   _n_exponent(parameters.get<Real>("n_exponent")),
+   _m_exponent(parameters.get<Real>("m_exponent")),
    _activation_energy(parameters.get<Real>("activation_energy")),
    _gas_constant(parameters.get<Real>("gas_constant")),
    _tau(parameters.get<Real>("tau")),
@@ -80,6 +82,7 @@ PLC_LSH::computeStress()
   stress_new += _stress_old;
 
   SymmTensor creep_strain_increment;
+  SymmTensor plastic_strain_increment;
   SymmTensor elastic_strain_increment;
   SymmTensor stress_new_last( stress_new );
   Real delS(_tolerance+1);
@@ -87,12 +90,20 @@ PLC_LSH::computeStress()
 
   while (delS > _tolerance && counter++ < _max_its)
   {
+    elastic_strain_increment = _strain_increment;
+    elastic_strain_increment -= plastic_strain_increment;
+    stress_new = *elasticityTensor() * elastic_strain_increment;
+    stress_new += _stress_old;
     computeCreep( creep_strain_increment, stress_new );
 
 // now use stress_new to calculate a new effective_trial_stress and determine if
 // yield has occured and if so, calculate the corresponding plastic strain
 
-    computeLSH( creep_strain_increment, elastic_strain_increment, stress_new );
+    computeLSH( creep_strain_increment, plastic_strain_increment, stress_new );
+
+    elastic_strain_increment = _strain_increment;
+    elastic_strain_increment -= plastic_strain_increment;
+    elastic_strain_increment -= creep_strain_increment;
 
     // now check convergence
     SymmTensor deltaS(stress_new_last - stress_new);
@@ -113,7 +124,7 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
 
 // compute deviatoric trial stress
   SymmTensor dev_trial_stress(stress_new);
-  dev_trial_stress.addDiag( -stress_new.trace()/3.0 );
+  dev_trial_stress.addDiag( -dev_trial_stress.trace()/3.0 );
 
 // compute effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -122,73 +133,35 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
 // Use Newton sub-iteration to determine effective creep strain increment
 
   Real exponential(1);
-  Real delta_temp(_temperature[_qp]-_temperature_old[_qp]);
-
-  Real phiTest( _coefficient*std::pow(effective_trial_stress, _exponent) );
-  SymmTensor dev_strain(_total_strain[_qp]);
-  dev_strain.addDiag( -dev_strain.trace()/3 );
-  Real epsTotal( dev_strain.doubleContraction(dev_strain) );
-  const Real ratio( epsTotal > 0 ? _dt * ( phiTest / ( _tau * epsTotal ) ) + 1 : 1 );
-
-  unsigned int num_steps( std::floor(ratio) );
-  num_steps = std::min( num_steps, unsigned(10) );
-
-  const Real fraction( 1./num_steps );
-  const Real dt( _dt * fraction );
-  SymmTensor delta_stress(stress_new);
-  delta_stress -= _stress_old;
-  delta_stress *= 0.5*fraction;
   SymmTensor stress_last(_stress_old);
-  SymmTensor stress_ave(stress_last);
   SymmTensor stress_next;
 
   Real del_p(0);
-  if (_t_step > 1)
-  {
-    del_p = fraction * _del_p[_qp] * _dt / (_dt_old > 0 ? _dt_old : 1) ;
-  }
-  _del_p[_qp] = 0;
-
-  for ( unsigned int i_step(0); i_step < num_steps; ++i_step )
-  {
-    const Real factor(Real(i_step+1) * fraction);
-
-    if (_has_temp)
-    {
-      exponential = std::exp(-_activation_energy/(_gas_constant *
-                                                  (_temperature_old[_qp] + factor*delta_temp)));
-    }
-
-    stress_ave = stress_last;
-    stress_ave += delta_stress;
-
-// compute deviatoric trial stress
-    SymmTensor dev_trial_stress(stress_ave);
-    dev_trial_stress.addDiag( -stress_ave.trace()/3.0 );
-
-// compute effective trial stress
-    Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
-    Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
 
     unsigned int it(0);
     Real creep_residual(10);
     while(std::abs(creep_residual) > _tolerance && it++ < _max_its)
     {
 
-      Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*del_p, _exponent)*
-        exponential;
-      creep_residual = phi -  del_p/dt;
+      if (_has_temp)
+      {
+        exponential = std::exp(-_activation_energy/(_gas_constant *_temperature[_qp]));
+      }
 
-      Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_exponent*
-        std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _exponent-1.)*
-        exponential;
-      del_p = del_p + (creep_residual / (1/dt - dphi_ddelp));
+      Real phi = _coefficient*std::pow(effective_trial_stress - 3.*_shear_modulus*del_p, _n_exponent)*
+        exponential*std::pow(_t,_m_exponent);
+      creep_residual = phi -  del_p/_dt;
+
+      Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_n_exponent*
+        std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _n_exponent-1.)*
+        exponential*std::pow(_t,_m_exponent);
+      del_p = del_p + (creep_residual / (1/_dt - dphi_ddelp));
 
       // iteration output
       if (_output_iteration_info == true)
         std::cout
           << " it=" << it
-          << " temperature=" << _temperature_old[_qp] + factor*delta_temp
+          << " temperature=" << _temperature[_qp]
           << " trial stress=" << effective_trial_stress
           << " phi=" << phi
           << " dphi=" << dphi_ddelp
@@ -196,7 +169,6 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
           << " del_p=" << del_p
           << std::endl;
 
-      ++it;
     }
 
     if(it == _max_its)
@@ -209,11 +181,11 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
     {
       effective_trial_stress = 0.01;
     }
+
     SymmTensor creep_strain_sub_increment( dev_trial_stress );
-    creep_strain_sub_increment *= (1.5*del_p/effective_trial_stress);
+     creep_strain_sub_increment *= (1.5*del_p/effective_trial_stress);
 
     SymmTensor elastic_strain_increment(_strain_increment);
-    elastic_strain_increment *= fraction;
     elastic_strain_increment -= creep_strain_sub_increment;
 
 // compute stress increment
@@ -225,16 +197,16 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
 
     creep_strain_increment += creep_strain_sub_increment;
     _del_p[_qp] += del_p;
-  }
-  _creep_strain[_qp] = creep_strain_increment;
-  _creep_strain[_qp] += _creep_strain_old[_qp];
 
-  stress_new = stress_next;
+    _creep_strain[_qp] = creep_strain_increment;
+    _creep_strain[_qp] += _creep_strain_old[_qp];
+    stress_new = stress_next;
+
 }
 
 void
 PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
-                     SymmTensor & elastic_strain_increment,
+                     SymmTensor & plastic_strain_increment,
                      SymmTensor & stress_new )
 {
 
@@ -245,6 +217,7 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
     _plastic_strain[_qp] =
       _plastic_strain_old[_qp] = 0;
   }
+
 
 // compute deviatoric trial stress
   SymmTensor dev_trial_stress_p(stress_new);
@@ -290,10 +263,10 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
 // JDH: If we are in this portion of the code, effective_trial_stress_p must be
 // non-zero.  The check is unnecessary.
     if (effective_trial_stress_p < 0.01) effective_trial_stress_p = 0.01;
-    SymmTensor plastic_strain_increment(dev_trial_stress_p);
+    plastic_strain_increment = dev_trial_stress_p;
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress_p);
 
-    elastic_strain_increment = _strain_increment;
+    SymmTensor elastic_strain_increment(_strain_increment);
     elastic_strain_increment -= plastic_strain_increment;
     elastic_strain_increment -= creep_strain_increment;
 

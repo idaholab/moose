@@ -132,6 +132,7 @@
     index = 1
   [../]
 
+
   [./creep_strain_zz]
     type = MaterialTensorAux
     tensor = creep_strain
@@ -202,12 +203,14 @@
   active = 'creep thermal'
 
   [./creep]
-    type = PowerLawCreep
+    type = PLC_LSH
     block = 1
     youngs_modulus = 2.e11
     poissons_ratio = .3
+    yield_stress = 20e6
+    hardening_constant = 10000
     coefficient = 1.0e-15
-    exponent = 4
+    n_exponent = 4
     activation_energy = 3.0e5
     tolerance = 1.e-5
     max_its = 100
@@ -230,20 +233,20 @@
 
 [Executioner]
   type = Transient
-#  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
+ # petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
   petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp'
   petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart'
   petsc_options_value = 'ls         basic    101'
 
-  l_max_its = 100
-  nl_max_its = 100
+  l_max_its = 10
+  nl_max_its = 10
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6
   l_tol = 1e-5
   start_time = 0.0
   end_time = 1.0
   num_steps = 10
-  dt = 1.e-1
+  dt = 0.1
 []
 
 [Output]

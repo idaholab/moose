@@ -61,6 +61,16 @@
     family = MONOMIAL
   [../]
 
+  [./elastic_strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./plastic_strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
   [./creep_strain_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -70,8 +80,8 @@
 [Functions]
   [./top_pull]
     type = PiecewiseLinear
-    x = '0 20'
-    y = '0 1'
+    x = '  0   1   1.5'
+    y = '-20 -40   -20'
   [../]
 []
 
@@ -103,6 +113,20 @@
     index = 1
   [../]
 
+  [./elastic_strain_yy]
+    type = MaterialTensorAux
+    variable = elastic_strain_yy
+    tensor = elastic_strain
+    index = 1
+  [../]
+
+  [./plastic_strain_yy]
+    type = MaterialTensorAux
+    variable = plastic_strain_yy
+    tensor = plastic_strain
+    index = 1
+  [../]
+
   [./creep_strain_yy]
     type = MaterialTensorAux
     variable = creep_strain_yy
@@ -114,10 +138,12 @@
 
 [BCs]
   [./u_top_pull]
-    type = PresetBC
+    type = Pressure
     variable = disp_y
+    component = 1
     boundary = 5
-    value = 0.01
+    factor = 1
+    function = top_pull
   [../]
   [./u_bottom_fix]
     type = PresetBC
@@ -156,19 +182,22 @@
   [./creep_plas]
     type = PLC_LSH
     block = 1
-    youngs_modulus = 2.8e7
+    youngs_modulus = 1e3
     poissons_ratio = .3
-    coefficient = 3.0e-26
-    n_exponent = 4
+    coefficient = 0.5e-7
+    n_exponent = 5
+    m_exponent = -0.5
     activation_energy = 0
-    tolerance = 1.e-5
-    max_its = 100
-    hardening_constant = 1
-    yield_stress = 1e30
+    tolerance = 1.e-7
+    max_its = 20
+    hardening_constant = 100
+    yield_stress = 20
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
     temp = temp
+    formulation = nonlinear3D
+  #  formulation = linear
     output_iteration_info = false
   [../]
 
@@ -184,25 +213,22 @@
 [Executioner]
 #  type = SolutionTimeAdaptive
   type = Transient
-  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
+
+  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp'
   petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart -pc_type -sub_pc_type'
   petsc_options_value = 'ls         basic    101           asm      lu'
 
-  l_max_its = 100
-  nl_max_its = 100
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
+  l_max_its = 20
+  nl_max_its = 6
+  nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-10
   l_tol = 1e-5
   start_time = 0.0
-#  end_time = 2160000
-  end_time = 21600
-#  num_steps = 50
-#  dt = 1.e-3
-#  dtmax = 1.e-4
-  dt = 1e-2
-  time_dt = '1e-2 1e-1 1e0 1e1 1e2'
-  time_t  = '0    7e-1 7e0 7e1 1e2'
-[]
+  end_time = 1.4999999999
+  dt = 0.001
+  time_t  = '0        0.5    1.0    1.5'
+  time_dt = '0.015  0.015  0.005  0.005'
+ []
 
 [Postprocessors]
   [./timestep]
