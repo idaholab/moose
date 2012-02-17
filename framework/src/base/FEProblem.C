@@ -1219,6 +1219,7 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
     // Store element postprocessors values
+    std::set<Postprocessor *> already_gathered;
     for (std::set<unsigned int>::const_iterator block_ids_it = pps[0].blocks().begin();
         block_ids_it != pps[0].blocks().end();
         ++block_ids_it)
@@ -1233,17 +1234,24 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
         std::string name = ps->name();
 
         // join across the threads (gather the value in thread #0)
-        for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-          ps->threadJoin(*pps[tid].elementPostprocessors(block_id)[i]);
+        if (already_gathered.find(ps) == already_gathered.end())
+        {
+          for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+            ps->threadJoin(*pps[tid].elementPostprocessors(block_id)[i]);
 
-        Real value = ps->getValue();
-        // store the value in each thread
-        for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-          _pps_data[tid].storeValue(name, value);
+          Real value = ps->getValue();
+          // store the value in each thread
+
+          for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+            _pps_data[tid].storeValue(name, value);
+
+          already_gathered.insert(ps);
+        }
       }
     }
 
     // Store side postprocessors values
+    already_gathered.clear();
     for (std::set<unsigned int>::const_iterator boundary_ids_it = pps[0].boundaryIds().begin();
         boundary_ids_it != pps[0].boundaryIds().end();
         ++boundary_ids_it)
@@ -1257,14 +1265,19 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
         std::string name = ps->name();
 
         // join across the threads (gather the value in thread #0)
-        for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-          ps->threadJoin(*pps[tid].sidePostprocessors(boundary_id)[i]);
+        if (already_gathered.find(ps) == already_gathered.end())
+        {
+          for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+            ps->threadJoin(*pps[tid].sidePostprocessors(boundary_id)[i]);
 
-        Real value = ps->getValue();
+          Real value = ps->getValue();
 
-        // store the value in each thread
-        for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-          _pps_data[tid].storeValue(name, value);
+          // store the value in each thread
+          for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+            _pps_data[tid].storeValue(name, value);
+
+          already_gathered.insert(ps);
+        }
       }
     }
   }
