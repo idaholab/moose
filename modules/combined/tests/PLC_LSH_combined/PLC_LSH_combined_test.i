@@ -188,8 +188,10 @@
     n_exponent = 5
     m_exponent = -0.5
     activation_energy = 0
-    tolerance = 1.e-7
-    max_its = 20
+    relative_tolerance = 1.e-5
+#    tolerance = 1.e-5
+    stress_tolerance = 1e-5
+    max_its = 30
     hardening_constant = 100
     yield_stress = 20
     disp_x = disp_x

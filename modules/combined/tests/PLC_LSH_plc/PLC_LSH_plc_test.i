@@ -1,5 +1,45 @@
-# 1x1x1 unit cube with uniform pressure on top face
-
+#
+# Simple power law creep example (without instantaneous plasticity)
+#
+# The mesh is a 1x1x1 cube with a constant pressure of 10 MPa on the top face.
+#   Symmetry boundary conditions on three planes provide a uniaxial stress
+#   field. The temperature is held constant at 1000. The yield stress is set
+#   at twice the load pressure, thus there is no plasticity.  The solution is
+#   advanced through ten time steps of 0.1 for a total time of 1. 
+#
+#   The total strain at time 1 can be computed as:
+#
+#    e_tot = e_elas + e_creep
+#
+#           = P/E   + A * sigma**n * exp(-Q/(RT)) * t**m * dt
+#        
+#              where P = pressure load        
+#                    E = Young's modulus
+#                    A = material parameter
+#                    sigma = stress
+#                    n = power law exponent
+#                    Q = activation energy
+#	             R = gas constant
+#                    T = temperature
+#                    t = time
+#                    m = time hardening exponent
+#                    dt = problem time
+#
+# For this test, the analytical solutuon is:
+#
+#   e_tot = (10e6/2e11) + 1e-15 * (10e6)**4 * exp(-3e5/(8.3143*1000) * t**0 * 1
+#         = 5e-5        + 2.136031e-3
+#         = 2.186031e-3
+#
+#
+#  For either linear (formulation = linear) or nonlinear (formulation = nonlinear3d)
+#    kinematics, BISON gets:
+#
+#  e_elas = 5e-5
+#  e_creep = 2.13600e-3
+#  e_tot = 2.18600e-3
+#
+#
 [Mesh]
   file = 1x1x1_cube.e
   displacements = 'x_disp y_disp z_disp'
@@ -211,8 +251,10 @@
     hardening_constant = 10000
     coefficient = 1.0e-15
     n_exponent = 4
+    m_exponent = 0
     activation_energy = 3.0e5
-    tolerance = 1.e-5
+    relative_tolerance = 1.e-5
+    formulation = nonlinear3d
     max_its = 100
     disp_x = x_disp
     disp_y = y_disp

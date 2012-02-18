@@ -173,7 +173,7 @@
     coefficient = 3.0e-24
     n_exponent = 4
     activation_energy = 0
-    tolerance = 1.e-5
+    relative_tolerance = 1.e-5
     max_its = 100
     hardening_constant = 1
     yield_stress = 1e30

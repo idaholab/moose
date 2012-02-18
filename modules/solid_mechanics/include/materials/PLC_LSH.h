@@ -10,8 +10,9 @@ template<>
 InputParameters validParams<PLC_LSH>();
 
 /**
- * Power-law creep material
- * edot = A(sigma)**n * exp(-Q/(RT))
+ * Combined power-law creep and linear strain hardening material
+ * Power law creep is specified by the time-hardening form
+ * edot = A(sigma)**n * exp(-Q/(RT)) * t**m
  */
 
 class PLC_LSH : public SolidModel
@@ -27,13 +28,16 @@ protected:
   Real _m_exponent;
   Real _activation_energy;
   Real _gas_constant;
-  Real _tau;
-  Real _tolerance;
+  
   Real _yield_stress;
   Real _hardening_constant;
 
   unsigned int _max_its;
   bool _output_iteration_info;
+  Real _relative_tolerance;
+  Real _absolute_tolerance;
+
+  Real _stress_tolerance;
 
   MaterialProperty<SymmTensor> & _creep_strain;
   MaterialProperty<SymmTensor> & _creep_strain_old;

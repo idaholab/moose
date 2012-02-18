@@ -151,7 +151,7 @@
     coefficient = 0.0
     n_exponent = 1.0
     activation_energy = 0.0
-    tolerance = 1.e-8
+    relative_tolerance = 1.e-8
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
