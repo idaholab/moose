@@ -22,8 +22,9 @@
 #include "numeric_vector.h"
 #include "dof_map.h"
 
-MooseVariableScalar::MooseVariableScalar(unsigned int var_num, SystemBase & sys, Assembly & assembly) :
+MooseVariableScalar::MooseVariableScalar(unsigned int var_num, unsigned int mvn, SystemBase & sys, Assembly & assembly) :
     _var_num(var_num),
+    _moose_var_num(mvn),
     _subproblem(sys.subproblem()),
     _sys(sys),
     _assembly(assembly),

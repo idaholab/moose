@@ -100,7 +100,7 @@ protected:
 class MooseVariable
 {
 public:
-  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariable(unsigned int var_num, unsigned int mvn, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariable();
 
   void prepare();
@@ -112,7 +112,7 @@ public:
   void reinitNodes(const std::vector<unsigned int> & nodes);
 
   /// Get the variable number
-  unsigned int number() { return _var_num; }
+  unsigned int number() { return _moose_var_num; }
 //  int dimension() { return _dim; }
 
   /// Get the variable number
@@ -234,6 +234,7 @@ public:
 protected:
   THREAD_ID _tid;                                               ///< Thread ID
   unsigned int _var_num;                                        ///< variable number (from libMesh)
+  unsigned int _moose_var_num;                                  ///< variable number (MOOSE)
   Moose::VarKindType _var_kind;
   SubProblem & _subproblem;                                     ///< Problem this variable is part of
   SystemBase & _sys;                                            ///< System this variable is part of

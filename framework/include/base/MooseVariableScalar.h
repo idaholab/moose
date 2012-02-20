@@ -35,13 +35,13 @@ class SystemBase;
 class MooseVariableScalar
 {
 public:
-  MooseVariableScalar(unsigned int var_num, SystemBase & sys, Assembly & assembly);
+  MooseVariableScalar(unsigned int var_num, unsigned int mvn, SystemBase & sys, Assembly & assembly);
   virtual ~MooseVariableScalar();
 
   void reinit();
 
   /// Get the variable number
-  unsigned int number() { return _var_num; }
+  unsigned int number() { return _moose_var_num; }
 
   /// Get the variable number
   const std::string & name();
@@ -58,6 +58,7 @@ public:
 
 protected:
   unsigned int _var_num;                                        ///< variable number (from libMesh)
+  unsigned int _moose_var_num;                                  ///<
   SubProblem & _subproblem;                                     ///< Problem this variable is part of
   SystemBase & _sys;                                            ///< System this variable is part of
 

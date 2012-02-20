@@ -312,9 +312,10 @@ public:
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL)
   {
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
+    unsigned int mvn = nVariables();                                      // MOOSE variable number
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      MooseVariable * var = new MooseVariable(var_num, mvn, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
 
@@ -336,9 +337,10 @@ public:
   {
     FEType type(order, SCALAR);
     unsigned int var_num = _sys.add_variable(var_name, type);
+    unsigned int msvn = nScalarVariables();                                      // MOOSE scalar variable number
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid));
+      MooseVariableScalar * var = new MooseVariableScalar(var_num, msvn, *this, _subproblem.assembly(tid));
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
