@@ -76,8 +76,8 @@ void
 MultiDContactConstraint::updateContactSet()
 {
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
-  std::map<unsigned int, bool> & unlocked_this_step = _penetration_locator._unlocked_this_step;
-  std::map<unsigned int, bool> & locked_this_step = _penetration_locator._unlocked_this_step;
+  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
+  std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._unlocked_this_step;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -90,7 +90,7 @@ MultiDContactConstraint::updateContactSet()
     if (!pinfo)
     {
       continue;
-    }    
+    }
 
     unsigned int slave_node_num = it->first;
 
@@ -101,32 +101,32 @@ MultiDContactConstraint::updateContactSet()
       int dof_number = node->dof_number(0, _vars(i), 0);
       res_vec(i) = _residual_copy(dof_number);
     }
-    
+
     Real resid = 0;
     switch(_model)
     {
     case CM_FRICTIONLESS:
-      
+
       resid = pinfo->_normal * res_vec;
       break;
-      
+
     case CM_GLUED:
     case CM_TIED:
-        
+
       resid = pinfo->_normal * res_vec;
       break;
-      
+
     default:
       mooseError("Invalid or unavailable contact model");
     }
 
 //    if(has_penetrated[slave_node_num] && resid < 0)
 //      std::cerr<<resid<<std::endl;
-/*    
+/*
     if(has_penetrated[slave_node_num] == true && resid < -.15)
     {
       std::cerr<<std::endl<<"Unlocking node "<<node->id()<<" because resid: "<<resid<<std::endl<<std::endl;
-      
+
       has_penetrated[slave_node_num] = false;
       unlocked_this_step[slave_node_num] = true;
     }
@@ -135,7 +135,7 @@ MultiDContactConstraint::updateContactSet()
     {
 //      std::cerr<<std::endl<<"Locking node "<<node->id()<<" because distance: "<<pinfo->_distance<<std::endl<<std::endl;
 //      libMesh::print_trace();
-      
+
       has_penetrated[slave_node_num] = true;
       locked_this_step[slave_node_num] = true;
     }
@@ -188,7 +188,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
     switch(_model)
     {
     case CM_FRICTIONLESS:
-      
+
       resid = pinfo->_normal(_component) * (pinfo->_normal * ( pen_force - res_vec ));
       break;
 
@@ -200,7 +200,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
         ;
 
       break;
-      
+
     default:
       mooseError("Invalid or unavailable contact model");
     }
@@ -230,7 +230,7 @@ Real
 MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-  
+
   double slave_jac = 0;
   switch(type)
   {
@@ -238,7 +238,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     switch(_model)
     {
     case CM_FRICTIONLESS:
-      
+
       slave_jac = pinfo->_normal(_component) * pinfo->_normal(_component) * ( _penalty*_phi_slave[_j][_qp] - (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]) );
       break;
 
@@ -250,7 +250,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
         ;
 */
       break;
-      
+
     default:
       mooseError("Invalid or unavailable contact model");
     }
@@ -259,7 +259,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     switch(_model)
     {
     case CM_FRICTIONLESS:
-      
+
       slave_jac = pinfo->_normal(_component) * pinfo->_normal(_component) * ( -_penalty*_phi_master[_j][_qp] );
       break;
 
@@ -271,7 +271,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
         ;
 */
       break;
-      
+
     default:
       mooseError("Invalid or unavailable contact model");
     }

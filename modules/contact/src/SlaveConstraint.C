@@ -40,43 +40,6 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
 {}
 
 void
-SlaveConstraint::jacobianSetup()
-{
-  updateContactSet();
-}
-
-void
-SlaveConstraint::timestepSetup()
-{
-  updateContactSet();
-}
-
-void
-SlaveConstraint::updateContactSet()
-{
-  std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
-
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
-
-  for (; it!=end; ++it)
-  {
-    PenetrationLocator::PenetrationInfo * pinfo = it->second;
-
-    if (!pinfo)
-    {
-      continue;
-    }
-
-    if (pinfo->_distance > 0)
-    {
-      unsigned int slave_node_num = it->first;
-      has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
-    }
-  }
-}
-
-void
 SlaveConstraint::addPoints()
 {
   _point_to_info.clear();
@@ -87,13 +50,14 @@ SlaveConstraint::addPoints()
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
   for(; it!=end; ++it)
   {
-    unsigned int slave_node_num = it->first;
     PenetrationLocator::PenetrationInfo * pinfo = it->second;
 
     if (!pinfo)
     {
       continue;
     }
+
+    unsigned int slave_node_num = it->first;
 
     const Node * node = pinfo->_node;
 
@@ -141,6 +105,7 @@ SlaveConstraint::computeQpResidual()
   switch(_model)
   {
   case CM_FRICTIONLESS:
+  case CM_EXPERIMENTAL:
 
     resid = pinfo->_normal(_component) * (pinfo->_normal * ( pen_force - res_vec ));
 
@@ -194,7 +159,8 @@ SlaveConstraint::computeQpJacobian()
 
   Real term(0);
 
-  if ( CM_FRICTIONLESS == _model )
+  if ( CM_FRICTIONLESS == _model ||
+       CM_EXPERIMENTAL == _model )
   {
 
     const Real nnTDiag = normal(_component) * normal(_component);

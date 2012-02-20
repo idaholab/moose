@@ -17,7 +17,8 @@ enum ContactModel
   CM_FRICTIONLESS,
   CM_GLUED,
   CM_COULOMB,
-  CM_TIED
+  CM_TIED,
+  CM_EXPERIMENTAL
 };
 
 class ContactMaster : public DiracKernel
@@ -40,6 +41,7 @@ protected:
   PenetrationLocator & _penetration_locator;
 
   Real _penalty;
+  bool _updateContactSet;
 
   NumericVector<Number> & _residual_copy;
 

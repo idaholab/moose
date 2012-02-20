@@ -29,6 +29,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   _model(contactModel(getParam<std::string>("model"))),
   _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
   _penalty(getParam<Real>("penalty")),
+   _updateContactSet(true),
   _residual_copy(_sys.residualGhosted()),
   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
   _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
@@ -44,19 +45,34 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
 void
 ContactMaster::jacobianSetup()
 {
-  updateContactSet();
+  if (_component == 0)
+  {
+    if (_updateContactSet)
+    {
+      updateContactSet();
+    }
+    _updateContactSet = true;
+  }
 }
 
 void
 ContactMaster::timestepSetup()
 {
-  updateContactSet();
+  if (_component == 0)
+  {
+    _penetration_locator._unlocked_this_step.clear();
+    _penetration_locator._locked_this_step.clear();
+    updateContactSet();
+    _updateContactSet = false;
+  }
 }
 
 void
 ContactMaster::updateContactSet()
 {
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
+  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
+  std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -70,10 +86,64 @@ ContactMaster::updateContactSet()
       continue;
     }
 
-    if (pinfo->_distance > 0)
+    if (_model == CM_EXPERIMENTAL)
     {
+      const Node * node = pinfo->_node;
+
+      // Build up residual vector
+      RealVectorValue res_vec;
+      for(unsigned int i=0; i<_dim; ++i)
+      {
+        int dof_number = node->dof_number(0, _vars(i), 0);
+        res_vec(i) = _residual_copy(dof_number);
+      }
+
+      Real resid(0);
+      switch(_model)
+      {
+      case CM_FRICTIONLESS:
+      case CM_EXPERIMENTAL:
+
+        resid = pinfo->_normal * res_vec;
+        break;
+
+      case CM_GLUED:
+      case CM_TIED:
+
+        resid = pinfo->_normal * res_vec;
+        break;
+
+      default:
+        mooseError("Invalid or unavailable contact model");
+      }
+
       unsigned int slave_node_num = it->first;
+
+      // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
+
+      if (has_penetrated[slave_node_num] && resid < 0 && locked_this_step[slave_node_num] < 2)
+      {
+        std::cout << "Releasing node " << node->id() << " " << resid << std::endl;
+        has_penetrated[slave_node_num] = false;
+        ++unlocked_this_step[slave_node_num];
+      }
+      else if (pinfo->_distance > 0)
+      {
+        if (!has_penetrated[slave_node_num])
+        {
+          std::cout << "Capturing node " << node->id() << " " << pinfo->_distance << " " << unlocked_this_step[slave_node_num] <<  std::endl;
+          ++locked_this_step[slave_node_num];
+        }
+        has_penetrated[slave_node_num] = true;
+      }
+    }
+    else
+    {
+      if (pinfo->_distance > 0)
+      {
+        unsigned int slave_node_num = it->first;
       has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+      }
     }
   }
 }
@@ -98,6 +168,8 @@ ContactMaster::addPoints()
     }
 
     unsigned int slave_node_num = it->first;
+
+
     std::map<unsigned int, bool>::iterator it( has_penetrated.find( slave_node_num ) );
     if ( it != has_penetrated.end() && it->second == true )
     {
@@ -131,6 +203,7 @@ ContactMaster::computeQpResidual()
   switch(_model)
   {
   case CM_FRICTIONLESS:
+  case CM_EXPERIMENTAL:
 
     resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
     break;
@@ -198,6 +271,10 @@ contactModel(const std::string & the_name)
   else if ("tied" == name)
   {
     model = CM_TIED;
+  }
+  else if ("experimental" == name)
+  {
+    model = CM_EXPERIMENTAL;
   }
   else
   {
