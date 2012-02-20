@@ -103,4 +103,3 @@ protected:
 };
 
 #endif //PENETRATIONLOCATOR_H
-
