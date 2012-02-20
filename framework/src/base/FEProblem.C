@@ -94,6 +94,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _output_displaced(false),
+    _output_solution_history(false),
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
