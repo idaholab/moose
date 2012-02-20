@@ -71,6 +71,7 @@ protected:
   virtual unsigned int getNextSubdomainId();
 
   static unsigned int bc_ids;
+  static unsigned int subdomain_ids;
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
 
 private:
