@@ -27,14 +27,6 @@ public:
   unsigned int id() { return _id; }
 
   /**
-   * Get parameter from simulation (global one)
-   * @param name The name on the parameter
-   * @return The value of the parameter
-   */
-  template<typename T>
-  const T & getSimParam(const std::string & name);
-
-  /**
    * Initialize the component
    */
   virtual void init();
@@ -55,35 +47,26 @@ public:
 
   virtual RealVectorValue getDirection() = 0;
 
-  virtual const std::vector<unsigned int> & getSubdomainIds() { return _subdomain_ids; }
+  virtual const std::vector<unsigned int> & getSubdomainIds() { return _subdomains; }
 
 protected:
   unsigned int _id;                     ///< Unique ID of this component
 
   Simulation & _sim;                    ///< Simulation this component is part of
   R7Mesh & _mesh;                       ///< Global mesh this component works on
-  FEProblem * & _problem;
 
   std::string _input_file_name;
   ComponentParser _parser;
-  std::vector<unsigned int> _subdomain_ids;     ///< List of subdomain IDs this components owns
+  std::vector<unsigned int> _subdomains;     ///< List of subdomain IDs this components owns
 
   virtual unsigned int getNextSubdomainId();
 
   static unsigned int bc_ids;
-  static unsigned int subdomain_ids;
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
 
 private:
   // Do not want users to touch this, they _must_ use the API
   static unsigned int subdomain_ids;
 };
-
-
-template<typename T>
-const T & Component::getSimParam(const std::string & name)
-{
-  return _sim.params().get<T>(name);
-}
 
 #endif /* COMPONENT_H */

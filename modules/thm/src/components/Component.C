@@ -30,7 +30,6 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _id(comp_id++),
     _sim(*getParam<Simulation *>("_sim")),
     _mesh(_sim.mesh()),
-    _problem(_sim.problem()),
 
     _input_file_name(getParam<std::string>("physics_input_file")),
     _parser(_id, Moose::syntax)
@@ -53,7 +52,7 @@ Component::parseInput()
   {
     // setup parser
     _parser._mesh = &_mesh;
-    _parser._problem = _problem;
+//    _parser._problem = _sim.problem();
 
     _parser.parse(_input_file_name);
   }
@@ -63,6 +62,6 @@ unsigned int
 Component::getNextSubdomainId()
 {
   unsigned int sd_id = subdomain_ids++;
-  _subdomain_ids.push_back(sd_id);
+  _subdomains.push_back(sd_id);
   return sd_id;
 }
