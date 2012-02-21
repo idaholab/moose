@@ -1,6 +1,7 @@
 #
-# Simple linear strain hardening example.
-#
+# Test considers only linear strain hardening by setting the power-law
+#   creep coefficient to zero.
+##
 # The mesh is a 1x1x1 cube pulled in the y direction.  Young's
 #    modulus is 2.4e5, and the yield stress is 2.4e2.  This gives
 #    a strain at yield of 0.001.  This strain is reached after 5
