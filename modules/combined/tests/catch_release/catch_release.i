@@ -143,9 +143,9 @@
   l_max_its = 100
 #  nl_max_its = 10
   nl_max_its = 20
-  dt = 0.2
+  dt = 1.0
   end_time = 4.0
-  predictor_scale = 1.0
+#  predictor_scale = 1.0
 [] # Executioner
 
 [Output]
