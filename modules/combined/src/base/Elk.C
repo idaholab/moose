@@ -89,7 +89,7 @@
 #include "SolidMechImplicitEuler.h"
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
-
+#include "LinearGeneralAnisotropicMaterial.h"
 
 // phase_field
 #include "AC.h"
@@ -196,6 +196,7 @@ Elk::registerObjects()
   registerMaterial(PLC_LSH);
   registerMaterial(PLSHPlasticMaterial);
   registerMaterial(PowerLawCreep);
+  registerMaterial(LinearGeneralAnisotropicMaterial);
 
   registerBoundaryCondition(PlenumPressure);
   registerAction(PlenumPressureAction, "add_bc");
