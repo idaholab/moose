@@ -260,7 +260,7 @@ ActionWarehouse::iterator
 ActionWarehouse::begin()
 {
   if (_generator_valid)
-    mooseError("Cannont create two active iterators on ActionWarehouse at the same time");
+    mooseError("Cannot create two active iterators on ActionWarehouse at the same time");
 
   return iterator (*this);
 }
