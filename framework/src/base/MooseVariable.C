@@ -172,6 +172,7 @@ MooseVariable::~MooseVariable()
   _nodal_u_old.release();
   _nodal_u_older.release();
   _nodal_u_dot.release();
+  _nodal_du_dot_du.release();
 
   _nodal_u_neighbor.release();
   _nodal_u_old_neighbor.release();
