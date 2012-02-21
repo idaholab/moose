@@ -103,8 +103,11 @@ Assembly::getFEFaceNeighbor(FEType type)
 void
 Assembly::createQRules(QuadratureType type, Order o)
 {
+  delete _qrule_volume;
   _qrule_volume = QBase::build(type, _mesh.dimension(), o).release();
+  delete _qrule_face;
   _qrule_face = QBase::build(type, _mesh.dimension() - 1, o).release();
+  delete _qrule_arbitrary;
   _qrule_arbitrary = new ArbitraryQuadrature(_mesh.dimension(), o);
 
   setVolumeQRule(_qrule_volume);
