@@ -28,6 +28,7 @@
 #include "nonlinear_implicit_system.h"
 #include "numeric_vector.h"
 #include "sparse_matrix.h"
+#include "petsc_matrix.h"
 #include "preconditioner.h"
 #include "coupling_matrix.h"
 
@@ -376,6 +377,9 @@ protected:
   Preconditioner<Real> * _preconditioner;               ///< Preconditioner
 
   bool _use_finite_differenced_preconditioner;          /// Whether or not to use a finite differenced preconditioner
+#ifdef LIBMESH_HAVE_PETSC
+  MatFDColoring _fdcoloring;
+#endif
 
   bool _add_implicit_geometric_coupling_entries_to_jacobian; /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
 
