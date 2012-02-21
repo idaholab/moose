@@ -36,7 +36,7 @@ NODAL VARIABLES relative 1.e-5 floor 1e-6
 	disp_y  # min:               0 @ t1,n1	max:           0.505 @ t11,n9
 	disp_z  # min:               0 @ t1,n1	max:   0.00059672597 @ t11,n117
 
-ELEMENT VARIABLES relative 1.e-5 floor 0.1
+ELEMENT VARIABLES relative 1.e-4 floor 1.0
 	stress_yy  # min:               0 @ t1,b1,e1	max:       6670.0057 @ t11,b2,e49
 
 # No NODESET VARIABLES
