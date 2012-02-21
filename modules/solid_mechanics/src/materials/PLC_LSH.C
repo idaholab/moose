@@ -47,7 +47,7 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _output_iteration_info(getParam<bool>("output_iteration_info")),
    _relative_tolerance(parameters.get<Real>("relative_tolerance")),
    _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
-  
+
    _stress_tolerance(parameters.get<Real>("stress_tolerance")),
 
    _creep_strain(declareProperty<SymmTensor>("creep_strain")),
@@ -110,14 +110,14 @@ PLC_LSH::computeStress()
     SymmTensor deltaS(stress_new_last - stress_new);
     delS = deltaS.doubleContraction(deltaS);
     stress_new_last = stress_new;
-  
+
   }
-  
+
   if(counter++ == _max_its)
   {
     mooseError("Max stress iteration hit during plasticity-creep solve!");
   }
- 
+
   _strain_increment = elastic_strain_increment;
   _stress[_qp] = stress_new;
 
@@ -148,7 +148,7 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
   Real creep_residual(10);
   Real norm_creep_residual = 10.;
   Real first_norm_creep_residual = 10.;
- 
+
   while(it < _max_its && norm_creep_residual > _absolute_tolerance && (norm_creep_residual/first_norm_creep_residual) > _relative_tolerance)
   {
 
@@ -161,7 +161,7 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
       exponential*std::pow(_t,_m_exponent);
     Real dphi_ddelp = -3.*_coefficient*_shear_modulus*_n_exponent*
       std::pow(effective_trial_stress-3.*_shear_modulus*del_p, _n_exponent-1.)*exponential*std::pow(_t,_m_exponent);
-    
+
     creep_residual = phi -  del_p/_dt;
     norm_creep_residual = std::abs(creep_residual);
     if(it==0) first_norm_creep_residual = norm_creep_residual;
@@ -171,7 +171,7 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
     // iteration output
     if (_output_iteration_info == true)
     {
-      
+
       std::cout
         << " it=" << it
         << " temperature=" << _temperature[_qp]
@@ -184,10 +184,10 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
         <<" absolute tolerance=" << _absolute_tolerance
       << std::endl;
     }
-    
+
   it++;
   }
-  
+
 
   if(it == _max_its && (norm_creep_residual/first_norm_creep_residual) > _relative_tolerance && norm_creep_residual > _absolute_tolerance)
   {
@@ -255,8 +255,6 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
     Real norm_plas_residual = 10.;
     Real first_norm_plas_residual = 10.;
     Real scalar_plastic_strain_increment = 0.;
-    Real norm_residual = 10.;
-
 
     _hardening_variable[_qp] = _hardening_variable_old[_qp];
     while(jt < _max_its && norm_plas_residual > _absolute_tolerance && (norm_plas_residual/first_norm_plas_residual) > _relative_tolerance)
@@ -269,7 +267,7 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
       scalar_plastic_strain_increment = scalar_plastic_strain_increment + ((plastic_residual) / (3. * _shear_modulus + _hardening_constant));
 
       _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_constant * scalar_plastic_strain_increment);
-      
+
       ++jt;
 
     }

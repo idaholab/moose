@@ -189,7 +189,6 @@
     m_exponent = -0.5
     activation_energy = 0
     relative_tolerance = 1.e-5
-#    tolerance = 1.e-5
     stress_tolerance = 1e-5
     max_its = 30
     hardening_constant = 100

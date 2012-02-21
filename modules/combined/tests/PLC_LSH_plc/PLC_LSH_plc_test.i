@@ -5,15 +5,15 @@
 #   Symmetry boundary conditions on three planes provide a uniaxial stress
 #   field. The temperature is held constant at 1000. The yield stress is set
 #   at twice the load pressure, thus there is no plasticity.  The solution is
-#   advanced through ten time steps of 0.1 for a total time of 1. 
+#   advanced through ten time steps of 0.1 for a total time of 1.
 #
 #   The total strain at time 1 can be computed as:
 #
 #    e_tot = e_elas + e_creep
 #
 #           = P/E   + A * sigma**n * exp(-Q/(RT)) * t**m * dt
-#        
-#              where P = pressure load        
+#
+#              where P = pressure load
 #                    E = Young's modulus
 #                    A = material parameter
 #                    sigma = stress
@@ -33,7 +33,7 @@
 #
 #
 #  For either linear (formulation = linear) or nonlinear (formulation = nonlinear3d)
-#    kinematics, BISON gets:
+#    kinematics, PLC_LSH gets:
 #
 #  e_elas = 5e-5
 #  e_creep = 2.13600e-3
@@ -275,7 +275,6 @@
 
 [Executioner]
   type = Transient
- # petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
   petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp'
   petsc_options_iname = '-snes_type -snes_ls -ksp_gmres_restart'
   petsc_options_value = 'ls         basic    101'
