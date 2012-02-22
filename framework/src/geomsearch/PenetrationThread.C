@@ -330,3 +330,4 @@ PenetrationThread::operator() (const NodeIdRange & range)
 void
 PenetrationThread::join(const PenetrationThread & /*other*/)
 {}
+
