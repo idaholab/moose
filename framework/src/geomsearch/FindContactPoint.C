@@ -148,7 +148,7 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
   if(nit == 12 && update_size > TOLERANCE*TOLERANCE)
     std::cerr<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
 */
-  bool contained_in_elem = master_elem->contains_point(slave_point);
+  bool contained_in_elem = master_elem->contains_point(slave_point,100*TOLERANCE);
 
   p_info._closest_point_ref = ref_point;
   p_info._closest_point = phys_point[0];
