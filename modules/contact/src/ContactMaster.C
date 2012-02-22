@@ -121,7 +121,7 @@ ContactMaster::updateContactSet()
 
       // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
 
-      if (has_penetrated[slave_node_num] && resid < 0 && locked_this_step[slave_node_num] < 2)
+      if (has_penetrated[slave_node_num] && resid < 0 && locked_this_step[slave_node_num] < 3)
       {
         std::cout << "Releasing node " << node->id() << " " << resid << std::endl;
         has_penetrated[slave_node_num] = false;
