@@ -5,19 +5,14 @@
 
 // Forward Declarations
 class PressureAux;
+class Function;
+class EquationOfState;
 
 template<>
 InputParameters validParams<PressureAux>();
 
 /** 
- * Nodal auxiliary variable, for computing pressure at the nodes
- * based on the linear approximation:
- *
- * rho = rho_0 + (drho/dp)|_0 * (p - p_0) + (drho/dT)|_0 * (T - T_0)
- *
- * The values rho_0, p_0, (drho/dp)|_0, (drho/dT)|_0 and T_0 are parameters which 
- * must be given.
- * FIXME later: this should be part of EOS
+ * Nodal auxiliary variable for pressure.
  */
 class PressureAux : public AuxKernel
 {
@@ -36,19 +31,13 @@ protected:
 
   // Coupled variables
   VariableValue & _rho;
-  VariableValue & _T;  
-  
-  // Parameters
-  Real _rho_0;   // kg/m^3
-  Real _p_0;     // Pa
-  Real _drho_dp; // density/pressure = s^2 / m^2 (after cancellation)
-  Real _T_0;  // reference temperature
-  Real _drho_dT; 
+  VariableValue & _rhou;
+  VariableValue & _rhoE;
 
-  // Typical parameter values
-  // rho_0 = 1000.; // kg/m^3
-  // p_0 = 1.e5; // Pa
-  // drho_dp = 1.e-7; // density/pressure = s^2 / m^2 (after cancellation)
+  // Reference to base Function class.  Must be cast to an EquationOfState in the
+  // constructor so that we can properly call its extended interface...
+  Function& _func;
+  EquationOfState& _eos;
 };
 
 #endif 

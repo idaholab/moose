@@ -1,39 +1,35 @@
 #include "PressureAux.h"
+#include "EquationOfState.h"
 
 template<>
 InputParameters validParams<PressureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   
-  // Coupled variables
-  params.addRequiredCoupledVar("rho", "");
-  params.addRequiredCoupledVar("T", "");
+  // Required coupled variables.  We assume that pressure always at least depends on density...
+  params.addRequiredCoupledVar("rho", "density");
+
+  // Optional coupled variables.  Pressure may or may not also depend on momentum and total energy.
+  params.addCoupledVar("rhou", "momentum");
+  params.addCoupledVar("rhoE", "total energy");
   
-  // Parameters
-  params.addRequiredParam<Real>("rho_0", "Reference density");
-  params.addRequiredParam<Real>("p_0", "Reference pressure");
-  params.addRequiredParam<Real>("drho_dp", "Change in density wrt pressure, at reference state");
-  params.addRequiredParam<Real>("T_0", "Reference temperature");
-  params.addRequiredParam<Real>("drho_dT", "Change in density wrt temperature, at reference state");
-  
+  // The EOS function is a required parameter.
+  params.addRequiredParam<std::string>("eos_function", "The EOS function object");
+
   return params;
 }
 
-PressureAux::PressureAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _rho(coupledValue("rho")),
-   _T(coupledValue("T")),
-   _rho_0(getParam<Real>("rho_0")),
-   _p_0(getParam<Real>("p_0")),
-   _drho_dp(getParam<Real>("drho_dp")),
-   _T_0(getParam<Real>("T_0")),
-   _drho_dT(getParam<Real>("drho_dT"))   
+PressureAux::PressureAux(const std::string & name, InputParameters parameters) :
+    AuxKernel(name, parameters),
+    _rho(coupledValue("rho")),
+    _rhou(isCoupled("rhou") ? coupledValue("rhou") : _zero),
+    _rhoE(isCoupled("rhoE") ? coupledValue("rhoE") : _zero),
+    _func(getFunction("eos_function")),
+    _eos( dynamic_cast<EquationOfState&>(_func))
 {}
 
 Real
 PressureAux::computeValue()
 {
-  // Inversion of the linear approimxation: rho = rho_0 + (drho/dp)|_0 * (p - p_0) + (drho/dT)|_0 * (T - T_0)
-  // to obtain pressure
-  return _p_0 + ( (_rho[_qp] - _rho_0) - _drho_dT * (_T[_qp] - _T_0 ) ) / _drho_dp;
+  return _eos.pressure(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
 }

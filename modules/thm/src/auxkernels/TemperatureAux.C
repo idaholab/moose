@@ -1,33 +1,47 @@
 #include "TemperatureAux.h"
+#include "EquationOfState.h"
 
 template<>
 InputParameters validParams<TemperatureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   
-  // Coupled variables
-  params.addRequiredCoupledVar("rho", "");
-  params.addRequiredCoupledVar("rhoE", "");
-  params.addRequiredCoupledVar("u", "");
-  
-  // Parameters
-  params.addRequiredParam<Real>("cv", "Specific heat at constant volume, J/kg-K");
+  // Coupled variables.  We assume that temperature is always a function of rho, rhou, and rhoE...
+  params.addRequiredCoupledVar("rho", "density");
+  params.addRequiredCoupledVar("rhou", "momentum");
+  params.addRequiredCoupledVar("rhoE", "total energy");
+
+  // The EOS function is a required parameter.
+  params.addRequiredParam<std::string>("eos_function", "The EOS function object");
   
   return params;
 }
 
-TemperatureAux::TemperatureAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _rho(coupledValue("rho")),
-   _rhoE(coupledValue("rhoE")),
-   _vel(coupledValue("u")),
-   _cv(getParam<Real>("cv"))   
+
+
+
+TemperatureAux::~TemperatureAux()
+{
+  // Destructor, empty
+}
+
+
+
+
+TemperatureAux::TemperatureAux(const std::string & name, InputParameters parameters) :
+    AuxKernel(name, parameters),
+    _rho(coupledValue("rho")),
+    _rhou(coupledValue("rhou")),
+    _rhoE(coupledValue("rhoE")),
+    _func(getFunction("eos_function")),
+    _eos( dynamic_cast<EquationOfState&>(_func))
 {}
+
+
+
+
 
 Real TemperatureAux::computeValue()
 {
-	//std::cout<<"_rhoE[_qp]: "<<_rhoE[_qp]<< " _rho[_qp]: "<<_rho[_qp]<<std::endl;
-	//std::cout<<"_vel[_qp]: "<<_vel[_qp]<<std::endl;
-  return (_rhoE[_qp] / _rho[_qp] - 0.5 * _vel[_qp] * _vel[_qp]) / _cv;
-  //return (_rhoE[_qp] / _rho[_qp] - 0.) / _cv;
+  return _eos.temperature(_rho[_qp], _rhou[_qp], _rhoE[_qp]);
 }
