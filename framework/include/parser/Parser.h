@@ -126,7 +126,7 @@ public:
   /**
    * Return the filename that was parsed
    */
-  const std::string & getFileName() const { return _input_filename; }
+  std::string getFileName(bool stripLeadingPath=true) const;
 
   /**
    * This function attempts to extract values from the input file based on the contents of

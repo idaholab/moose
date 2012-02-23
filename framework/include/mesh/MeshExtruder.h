@@ -19,7 +19,6 @@
 #include "libmesh.h"
 
 class MeshExtruder;
-class libMesh::MeshBase;
 
 template<>
 InputParameters validParams<MeshExtruder>();

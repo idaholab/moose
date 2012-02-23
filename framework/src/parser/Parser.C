@@ -413,6 +413,23 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
   }
 }
 
+std::string
+Parser::getFileName(bool stripLeadingPath) const
+{
+  if (!stripLeadingPath)
+    return _input_filename;
+
+  std::string filename;
+  size_t pos = _input_filename.find_last_of('/');
+  if (pos != std::string::npos)
+    filename = _input_filename.substr(pos+1);
+  else
+    filename = _input_filename;
+
+  return filename;
+}
+
+
 void
 Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostream & out)
 {
