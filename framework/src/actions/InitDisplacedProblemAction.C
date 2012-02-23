@@ -15,6 +15,7 @@
 #include "InitDisplacedProblemAction.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 
 template<>
 InputParameters validParams<InitDisplacedProblemAction>()
@@ -39,7 +40,8 @@ InitDisplacedProblemAction::act()
 {
   if (isParamValid("displacements"))
   {
-    std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
-    _parser_handle._problem->initDisplacedProblem(_parser_handle._displaced_mesh, displacements);
+    InputParameters params = validParams<DisplacedProblem>();
+    params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
+    _parser_handle._problem->initDisplacedProblem(_parser_handle._displaced_mesh, params);
   }
 }

@@ -16,6 +16,16 @@
 #include "Problem.h"
 #include "SubProblem.h"
 
+
+template<>
+InputParameters validParams<DisplacedProblem>()
+{
+  InputParameters params = validParams<SubProblem>();
+  params.addPrivateParam<std::vector<std::string> >("displacements");
+  params.addPrivateParam<bool>("sequence", true);
+  return params;
+}
+
 class UpdateDisplacedMeshThread
 {
 public:
@@ -94,20 +104,21 @@ protected:
 };
 
 
-DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements, InputParameters params) :
+DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params) :
     SubProblem("disp", params),
     _problem(*mproblem.parent()),
     _mproblem(mproblem),
     _mesh(displaced_mesh),
     _eq(displaced_mesh),
     _ref_mesh(_mproblem.mesh()),
-    _displacements(displacements),
+    _displacements(params.get<std::vector<std::string> >("displacements")),
     _displaced_nl(*this, _mproblem.getNonlinearSystem(), "DisplacedSystem", Moose::VAR_NONLINEAR),
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), "DisplacedAuxSystem", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh),
-    _ex(_eq)
+    _ex(_eq),
+    _seq(params.get<bool>("sequence"))
 {
-  _ex.sequence(true);
+  _ex.sequence(_seq);
 
   unsigned int n_threads = libMesh::n_threads();
   _assembly.resize(n_threads);
@@ -481,7 +492,8 @@ DisplacedProblem::output(bool /*force*/)
 {
   // FIXME: use proper file_base
   _ex.output("out_displaced", _mproblem.time());
-  _ex.meshChanged();
+  if (_seq)
+    _ex.meshChanged();
 }
 
 void

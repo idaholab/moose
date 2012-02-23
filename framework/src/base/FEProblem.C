@@ -1706,13 +1706,13 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
 }
 
 void
-FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, const std::vector<std::string> & displacements)
+FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters params)
 {
   _displaced_mesh = displaced_mesh;
 
   Moose::setup_perf_log.push("Create DisplacedProblem","Setup");
-  InputParameters params = parameters();
-  _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, displacements, params);
+  params += parameters();
+  _displaced_problem = new DisplacedProblem(*this, *_displaced_mesh, params);
   Moose::setup_perf_log.pop("Create DisplacedProblem","Setup");
 }
 

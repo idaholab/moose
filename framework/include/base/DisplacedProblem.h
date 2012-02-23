@@ -31,11 +31,16 @@
 class SubProblem;
 class MooseVariable;
 class AssemblyData;
+class DisplacedProblem;
+
+template<>
+InputParameters validParams<DisplacedProblem>();
+
 
 class DisplacedProblem : public SubProblem
 {
 public:
-  DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, const std::vector<std::string> & displacements, InputParameters params);
+  DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_mesh, InputParameters params);
   virtual ~DisplacedProblem();
 
   virtual EquationSystems & es() { return _eq; }
@@ -192,6 +197,7 @@ protected:
   GeometricSearchData _geometric_search_data;
 
   ExodusOutput _ex;
+  bool _seq;
 
 
   friend class UpdateDisplacedMeshThread;
