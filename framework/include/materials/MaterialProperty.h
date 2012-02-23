@@ -22,7 +22,7 @@
 
 #include "libmesh_common.h"
 #include "tensor_value.h"
-
+#include "vector_value.h"
 
 
 /**
@@ -170,6 +170,12 @@ MaterialProperty<std::vector<RealTensorValue> >::init (int size);
 template <>
 PropertyValue *
 MaterialProperty<std::vector<std::vector<RealTensorValue> > >::init (int size);
+
+// Specialization of init function for std::vector<RealVectorValue>
+// See MaterialPropertyInterface.C for implementation.
+template <>
+PropertyValue *
+MaterialProperty<std::vector<RealVectorValue> >::init (int size);
 
 
 

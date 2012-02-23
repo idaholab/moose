@@ -95,3 +95,14 @@ MaterialProperty<std::vector<std::vector<RealTensorValue> > >::init (int size)
   // Return the copy we allocated
   return copy;
 }
+
+
+
+template <>
+PropertyValue *
+MaterialProperty<std::vector<RealVectorValue> >::init (int size)
+{
+  MaterialProperty<std::vector<RealVectorValue> > *copy = new MaterialProperty<std::vector<RealVectorValue> >;
+  copy->_value.resize(size);
+  return copy;
+}
