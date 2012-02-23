@@ -7,6 +7,7 @@
 #include "CoefDiffusion.h"
 #include "Convection.h"
 #include "InternalVolume.h"
+#include "MaterialRealScaledAux.h"
 
 // heat_conduction
 #include "AddSlaveFluxVectorAction.h"
@@ -124,6 +125,7 @@ Elk::registerObjects()
   registerKernel(BodyForceVoid);
   registerKernel(CoefDiffusion);
   registerKernel(Convection);
+  registerAux(MaterialRealScaledAux);
   registerPostprocessor(InternalVolume);
 
   registerBoundaryCondition(GapHeatTransfer);
