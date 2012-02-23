@@ -3,8 +3,8 @@ from options import *
 # In addition to testing the checks in the harness
 # we will stress the dependencies a bit here too
 
-test_compiler_check= { INPUT : '2d_diffusion_test.i',
-                       EXODIFF : ['out.e'],
+test_compiler_check= { INPUT : '2d_diffusion_test2.i',
+                       EXODIFF : ['out2.e'],
                        COMPILER : ['GCC'],
  }
 
