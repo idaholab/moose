@@ -292,7 +292,7 @@ Parser::parse(const std::string &input_filename)
               std::multimap<std::string, Syntax::ActionInfo>::iterator> iters = _syntax.getActions(registered_identifier);
 
     if (iters.first == iters.second)
-      mooseError(std::string("A '") + curr_identifier + "' is not an associated Action\n\n");
+      mooseError(std::string("A '") + curr_identifier + "' does not have an associated \"Action\".\nDid you leave off a leading \"./\" in one of your nested blocks?\n");
 
     for (std::multimap<std::string, Syntax::ActionInfo>::iterator i = iters.first; i != iters.second; ++i)
     {
