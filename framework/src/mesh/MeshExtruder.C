@@ -63,22 +63,22 @@ MeshExtruder::extrude(libMesh::MeshBase &dest_mesh)
 {
   const Real layer_ht = _height/_num_layers;
 
-  MeshBase::const_node_iterator nd_end = _src_mesh.local_nodes_end();
-  MeshBase::const_element_iterator el_end = _src_mesh.local_elements_end();
+  MeshBase::const_node_iterator nd_end = _src_mesh.active_nodes_end();
+  MeshBase::const_element_iterator el_end = _src_mesh.active_elements_end();
 
-  unsigned int n_local_nodes = _src_mesh.n_local_nodes();
+  unsigned int n_active_nodes = _src_mesh.n_nodes();
   mooseAssert(_src_mesh.mesh_dimension() == 2, "Can only extrude 2D meshes (right now)");
   dest_mesh.set_mesh_dimension(_src_mesh.mesh_dimension()+1);
   for (unsigned int layer_n = 0; layer_n <= _num_layers; ++layer_n)
   {
     // Add the extruded nodes to the new mesh
-    MeshBase::const_node_iterator nd     = _src_mesh.local_nodes_begin();
+    MeshBase::const_node_iterator nd     = _src_mesh.active_nodes_begin();
 
     for ( ; nd != nd_end; ++nd)
     {
       Node *new_node = new Node(**nd);
 
-      new_node->set_id(new_node->id() + layer_n * n_local_nodes);
+      new_node->set_id((*nd)->id() + layer_n * n_active_nodes);
 
       // Update the extruded coordinate
       (*new_node)(_extrusion_axis) = (*new_node)(_extrusion_axis) + layer_n * layer_ht;
@@ -90,7 +90,7 @@ MeshExtruder::extrude(libMesh::MeshBase &dest_mesh)
   for (unsigned int layer_n = 0; layer_n <= _num_layers; ++layer_n)
   {
     // Add the extruded elements to the new mesh
-    MeshBase::const_element_iterator el = _src_mesh.local_elements_begin();
+    MeshBase::const_element_iterator el = _src_mesh.active_elements_begin();
 
     // We have one less layer of elements than layers of nodes
     if (layer_n < _num_layers)
@@ -109,13 +109,13 @@ MeshExtruder::extrude(libMesh::MeshBase &dest_mesh)
           // The first four nodes are on the current level
           for (unsigned int node_num = 0; node_num < 4; node_num++)
           {
-            unsigned int dest_node_id = (*el)->get_node(node_num)->id() + layer_n * n_local_nodes;
+            unsigned int dest_node_id = (*el)->get_node(node_num)->id() + layer_n * n_active_nodes;
             elem->set_node(node_num) = dest_mesh.node_ptr(dest_node_id);
           }
           // The next four nodes are on the next level
           for (unsigned int node_num = 4; node_num < 8; node_num++)
           {
-            unsigned int dest_node_id = (*el)->get_node(node_num-4)->id() + (layer_n+1) * n_local_nodes;
+            unsigned int dest_node_id = (*el)->get_node(node_num-4)->id() + (layer_n+1) * n_active_nodes;
             elem->set_node(node_num) = dest_mesh.node_ptr(dest_node_id);
           }
 
@@ -136,13 +136,13 @@ MeshExtruder::extrude(libMesh::MeshBase &dest_mesh)
           // The first thre nodes are on the current level
           for (unsigned int node_num = 0; node_num < 3; node_num++)
           {
-            unsigned int dest_node_id = (*el)->get_node(node_num)->id() + layer_n * n_local_nodes;
+            unsigned int dest_node_id = (*el)->get_node(node_num)->id() + layer_n * n_active_nodes;
             elem->set_node(node_num) = dest_mesh.node_ptr(dest_node_id);
           }
           // The next three nodes are on the next level
           for (unsigned int node_num = 3; node_num < 6; node_num++)
           {
-            unsigned int dest_node_id = (*el)->get_node(node_num-3)->id() + (layer_n+1) * n_local_nodes;
+            unsigned int dest_node_id = (*el)->get_node(node_num-3)->id() + (layer_n+1) * n_active_nodes;
             elem->set_node(node_num) = dest_mesh.node_ptr(dest_node_id);
           }
 
