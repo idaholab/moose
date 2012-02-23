@@ -38,6 +38,7 @@ void
  {
    // Fill in the matrix stiffness material property
    _Cijkl_matrix_MP[_qp] = _Cijkl_matrix;
+   _Jacobian_mult[_qp] = _Cijkl_matrix;
 
    //debugging
    //std::cout << _Cijkl_matrix, std::cout << std::endl;
