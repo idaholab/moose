@@ -88,8 +88,8 @@ class RunParallel:
   def returnToTestHarness(self, job_index):
     (p, command, test, time, f) = self.jobs[job_index]
 
-    self.finished_jobs.add(test[TEST_NAME])
     log( 'Command %d done:    %s' % (job_index, command) )
+    did_pass = True
     if p.poll() == None: # process has not completed, it timed out
       f.seek(0)
       data = f.read()
@@ -98,13 +98,21 @@ class RunParallel:
           '\n###########################################################################\n'
       f.close()
       p.terminate()
-      self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, data)
+
+      if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, data):
+        did_pass = False
     else:
       output = 'Running command: ' + command + '\n'
       f.seek(0)
       output += f.read()
       f.close()
-      self.harness.testOutputAndFinish(test, p.returncode, output)
+      if not self.harness.testOutputAndFinish(test, p.returncode, output):
+        did_pass = False
+
+    if did_pass:
+      self.finished_jobs.add(test[TEST_NAME])
+    else:
+      self.skipped_jobs.add(test[TEST_NAME])
 
     self.jobs[job_index] = None
 

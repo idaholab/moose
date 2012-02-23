@@ -230,6 +230,7 @@ class TestHarness:
             if msg != '':
               reason = 'CSVDIFF'
 
+    did_pass = True
     if reason == '':
       # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
 # TODO: Refactor this mess
@@ -247,7 +248,9 @@ class TestHarness:
         result = 'OK'
     else:
       result = 'FAILED (%s)' % reason
+      did_pass = False
     self.handleTestResult(test, output, result)
+    return did_pass
 
   def getTiming(self, output):
     time = ''
