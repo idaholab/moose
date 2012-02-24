@@ -55,7 +55,7 @@ SmoothCircleIC::value(const Point & p)
   
 }
 
-RealGradient
+/*RealGradient
 SmoothCircleIC::gradient(const Point & p)
 {
   Point pxminus = p, pxplus = p, pyminus = p, pyplus = p;
@@ -69,6 +69,34 @@ SmoothCircleIC::gradient(const Point & p)
     uyplus  = value(pyplus);
   return Gradient((uxplus-uxminus)/2./TOLERANCE,
                   (uyplus-uyminus)/2./TOLERANCE);
+                  }*/
+
+RealGradient
+SmoothCircleIC::gradient(const Point & p)
+{
+  Real DvalueDr = 0.0;
+  
+  Real rad = 0.0;
+  
+  for(unsigned int i=0; i<LIBMESH_DIM; i++) 
+    rad += (p(i)-_center(i)) * (p(i)-_center(i));
+
+  rad = sqrt(rad);
+  
+  if (rad < _radius + _int_width/2.0 && rad > _radius - _int_width/2.0)
+  {
+    Real int_pos = (rad - _radius + _int_width/2.0)/_int_width;
+    Real Dint_posDr = 1.0/_int_width;
+    DvalueDr = Dint_posDr*(_invalue-_outvalue)*(-sin(int_pos*3.14159)*3.14159)/2.0;
+  }
+
+  if (rad != 0.0)
+    return Gradient((p(0) - _center(0))*DvalueDr/rad,
+                    (p(1) - _center(1))*DvalueDr/rad,
+                    (p(2) - _center(2))*DvalueDr/rad);
+  else
+    return Gradient(0.0,0.0,0.0);
+  
 }
 
   
