@@ -23,9 +23,10 @@ InputParameters validParams<PLC_LSH>()
    params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
    params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
    params.addParam<Real>("absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
+   params.addParam<std::string>("output", "", "The reporting postprocessor to use for the max_iterations value.");
 
    // Control of combined plasticity-creep iterarion
-   params.addParam<Real>("stress_tolerance", 1e-5, "Convergence tolerance for combined plasticity-creep stress iteration");
+   params.addParam<Real>("absolute_stress_tolerance", 1e-5, "Convergence tolerance for combined plasticity-creep stress iteration");
 
   return params;
 }
@@ -48,7 +49,7 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _relative_tolerance(parameters.get<Real>("relative_tolerance")),
    _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
 
-   _stress_tolerance(parameters.get<Real>("stress_tolerance")),
+   _absolute_stress_tolerance(parameters.get<Real>("absolute_stress_tolerance")),
 
    _creep_strain(declareProperty<SymmTensor>("creep_strain")),
    _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain")),
@@ -59,7 +60,9 @@ PLC_LSH::PLC_LSH( const std::string & name,
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
 
-   _del_p(declareProperty<Real>("del_p"))
+   _del_p(declareProperty<Real>("del_p")),
+
+   _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL )
 
 {
 }
@@ -78,6 +81,19 @@ PLC_LSH::computeStress()
   //   constants are needed and a matrix vector multiply can be avoided entirely.
   //
 
+  if(_t_step == 0) return;
+
+  if (_output_iteration_info == true)
+  {
+    std::cout
+      << std::endl
+      << "iteration output for combined creep-plasticity solve:"
+      << " time=" <<_t
+      << " temperature=" << _temperature[_qp]
+      << " int_pt=" << _qp
+      << std::endl;
+  }
+
   // compute trial stress
   SymmTensor stress_new( *elasticityTensor() * _strain_increment );
   stress_new += _stress_old;
@@ -86,10 +102,11 @@ PLC_LSH::computeStress()
   SymmTensor plastic_strain_increment;
   SymmTensor elastic_strain_increment;
   SymmTensor stress_new_last( stress_new );
-  Real delS(_stress_tolerance+1);
+  Real delS(_absolute_stress_tolerance+1);
+  Real first_delS(delS);
   unsigned int counter(0);
 
-  while (delS > _stress_tolerance && counter++ < _max_its)
+  while(counter < _max_its && delS > _absolute_stress_tolerance && (delS/first_delS) > _relative_tolerance)
   {
     elastic_strain_increment = _strain_increment;
     elastic_strain_increment -= plastic_strain_increment;
@@ -108,14 +125,27 @@ PLC_LSH::computeStress()
 
     // now check convergence
     SymmTensor deltaS(stress_new_last - stress_new);
-    delS = deltaS.doubleContraction(deltaS);
+    delS = std::sqrt(deltaS.doubleContraction(deltaS));
+    if(counter==0) first_delS = delS;
     stress_new_last = stress_new;
 
-  }
+   if (_output_iteration_info == true)
+    {
+      std::cout
+        << "stress_it=" << counter
+        << " rel_delS=" << delS/first_delS
+        << " rel_tol=" << _relative_tolerance
+        << " abs_delS=" << delS
+        << " abs_tol=" << _absolute_stress_tolerance
+        << std::endl;
+    }
 
-  if(counter++ == _max_its)
-  {
-    mooseError("Max stress iteration hit during plasticity-creep solve!");
+    if(counter == _max_its)
+    {
+      mooseError("Max stress iteration hit during plasticity-creep solve!");
+    }
+
+    counter++;
   }
 
   _strain_increment = elastic_strain_increment;
@@ -168,20 +198,18 @@ PLC_LSH::computeCreep( SymmTensor & creep_strain_increment,
 
     del_p = del_p + (creep_residual / (1/_dt - dphi_ddelp));
 
-    // iteration output
     if (_output_iteration_info == true)
     {
-
       std::cout
-        << " it=" << it
-        << " temperature=" << _temperature[_qp]
-        << " trial stress=" << effective_trial_stress
-        << " phi=" << phi
-        << " dphi=" << dphi_ddelp
-        << " creep_res=" << norm_creep_residual
-        << " del_p=" << del_p
-        <<" relative tolerance=" << _relative_tolerance
-        <<" absolute tolerance=" << _absolute_tolerance
+      << "crp_it=" << it
+      << " trl_strs=" << effective_trial_stress
+      << " phi=" << phi
+      << " dphi=" << dphi_ddelp
+      << " del_p=" << del_p
+      << " rel_res=" << norm_creep_residual/first_norm_creep_residual
+      << " rel_tol=" << _relative_tolerance
+      << " abs_res=" << norm_creep_residual
+      << " abs_tol=" << _absolute_tolerance
       << std::endl;
     }
 
@@ -268,7 +296,21 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
 
       _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_constant * scalar_plastic_strain_increment);
 
-      ++jt;
+      if (_output_iteration_info == true)
+      {
+        std::cout
+          << "pls_it=" << jt
+          << " trl_strs=" << effective_trial_stress_p
+          << " del_p=" << scalar_plastic_strain_increment
+          << " harden=" <<_hardening_variable[_qp]
+          << " rel_res=" << norm_plas_residual/first_norm_plas_residual
+          << " rel_tol=" << _relative_tolerance
+          << " abs_res=" << norm_plas_residual
+          << " abs_tol=" << _absolute_tolerance
+          << std::endl;
+      }
+
+      jt++;
 
     }
 
@@ -277,11 +319,6 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
       mooseError("Max sub-newton iteration hit during plasticity increment solve!");
     }
 
-
-// compute plastic and elastic strain increments (avoid potential divide by zero -
-// how should this be done)?
-// JDH: If we are in this portion of the code, effective_trial_stress_p must be
-// non-zero.  The check is unnecessary.
     if (effective_trial_stress_p < 0.01) effective_trial_stress_p = 0.01;
     plastic_strain_increment = dev_trial_stress_p;
     plastic_strain_increment *= (1.5*scalar_plastic_strain_increment/effective_trial_stress_p);

@@ -28,7 +28,7 @@ protected:
   Real _m_exponent;
   Real _activation_energy;
   Real _gas_constant;
-  
+
   Real _yield_stress;
   Real _hardening_constant;
 
@@ -37,7 +37,7 @@ protected:
   Real _relative_tolerance;
   Real _absolute_tolerance;
 
-  Real _stress_tolerance;
+  Real _absolute_stress_tolerance;
 
   MaterialProperty<SymmTensor> & _creep_strain;
   MaterialProperty<SymmTensor> & _creep_strain_old;
@@ -50,6 +50,7 @@ protected:
 
   MaterialProperty<Real> & _del_p;
 
+  PostprocessorValue * const _output;
 
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress();

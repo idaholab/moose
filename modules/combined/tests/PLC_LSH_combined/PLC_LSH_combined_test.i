@@ -54,8 +54,8 @@
 #
 #   The numerically computed solution is:
 #
-#    e_tot(1) = 2.41220         (~0.6% error)
-#    e_tot(1.5) = 3.17058       (~0.08% error)
+#    e_tot(1) = 2.39826         (~0.04% error)
+#    e_tot(1.5) = 3.15663       (~0.36% error)
 #
 #
 #   Note that this test is not a completely correct representation of the analytical problem
@@ -228,8 +228,9 @@
     n_exponent = 5
     m_exponent = -0.5
     activation_energy = 0
-    relative_tolerance = 1.e-5
-    stress_tolerance = 1e-5
+    relative_tolerance = 1e-5
+    absolute_tolerance = 1e-20
+    absolute_stress_tolerance = 1e-5
     max_its = 30
     hardening_constant = 100
     yield_stress = 20
@@ -238,7 +239,6 @@
     disp_z = disp_z
     temp = temp
     formulation = nonlinear3D
-  #  formulation = linear
     output_iteration_info = false
   [../]
 
@@ -252,7 +252,6 @@
 []
 
 [Executioner]
-#  type = SolutionTimeAdaptive
   type = Transient
 
   petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp'
