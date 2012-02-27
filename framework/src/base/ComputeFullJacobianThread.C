@@ -40,14 +40,19 @@ ComputeFullJacobianThread::computeJacobian()
     unsigned int ivar = (*it).first;
     unsigned int jvar = (*it).second;
 
-    const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeVar(ivar);
-    for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
+    MooseVariable & var = _sys.getVariable(_tid, jvar);
+    if (var.dofIndices().size() > 0)
     {
-      Kernel * kernel = *kt;
-      if (kernel->variable().number() == ivar)
+      // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
+      const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeVar(ivar);
+      for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
       {
-        kernel->subProblem().prepareShapes(jvar, _tid);
-        kernel->computeOffDiagJacobian(jvar);
+        Kernel * kernel = *kt;
+        if (kernel->variable().number() == ivar)
+        {
+          kernel->subProblem().prepareShapes(jvar, _tid);
+          kernel->computeOffDiagJacobian(jvar);
+        }
       }
     }
   }
@@ -62,14 +67,19 @@ ComputeFullJacobianThread::computeFaceJacobian(short int bnd_id)
     unsigned int ivar = (*it).first;
     unsigned int jvar = (*it).second;
 
-    std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
-    for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
+    MooseVariable & var = _sys.getVariable(_tid, jvar);
+    if (var.dofIndices().size() > 0)
     {
-      IntegratedBC * bc = *jt;
-      if (bc->variable().number() == ivar)
+      // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
+      std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
+      for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
-        bc->subProblem().prepareFaceShapes(jvar, _tid);
-        bc->computeJacobianBlock(jvar);
+        IntegratedBC * bc = *jt;
+        if (bc->variable().number() == ivar)
+        {
+          bc->subProblem().prepareFaceShapes(jvar, _tid);
+          bc->computeJacobianBlock(jvar);
+        }
       }
     }
   }
