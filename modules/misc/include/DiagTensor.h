@@ -226,7 +226,7 @@ public:
   DiagTensor  inverse(const DiagTensor & t) const
   {
     DiagTensor r_val;
-    mooseAssert(  ( _xx==0 || _yy==0 || _zz==0), "Cannot invert singular DiagTensor.");
+    mooseAssert(  ( _xx!=0 && _yy!=0 && _zz!=0), "Cannot invert singular DiagTensor.");
     r_val._xx = 1./_xx;
     r_val._yy = 1./_yy ;
     r_val._zz = 1./_zz ;
@@ -266,7 +266,7 @@ public:
 
   DiagTensor & operator-=(const ColumnMajorMatrix & cmm)
   {
-    mooseAssert(cmm.numEntries() == 9, "Cannot add ColumnMajorMatrix to DiagTensor.  Wrong number of entries.");
+    mooseAssert(cmm.numEntries() == 9, "Cannot subtract ColumnMajorMatrix to DiagTensor.  Wrong number of entries.");
     const Real * data = cmm.rawData();
     _xx -= data[0];
     _yy -= data[4];
