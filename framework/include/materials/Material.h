@@ -92,18 +92,6 @@ public:
   virtual void initStatefulProperties(unsigned int n_points);
 
   /**
-   * Check for property named "prop_name"
-   */
-  inline bool have_property_name(const std::string & prop_name) const
-  { return _material_data.have_property_name(prop_name); }
-
-  inline bool have_property_name_old(const std::string & prop_name) const
-  { return _material_data.have_property_name_old(prop_name); }
-
-  inline bool have_property_name_older(const std::string & prop_name) const
-  { return _material_data.have_property_name_older(prop_name); }
-
-  /**
    * Retrieve the property named "name"
    */
   template<typename T>
@@ -117,6 +105,9 @@ public:
 
   const std::set<std::string> &
   getPropertyDependencies() const { return _depend_props; }
+
+  const std::set<std::string> &
+  getSuppliedPropertiesList() const { return _supplied_props; }
 
 protected:
   Problem & _problem;
@@ -140,6 +131,7 @@ protected:
   Moose::CoordinateSystemType & _coord_sys;                 ///< Coordinate system
 
   std::set<std::string> _depend_props;
+  std::set<std::string> _supplied_props;
 
 // struct DeleteFunctor
 //   {
@@ -185,6 +177,7 @@ protected:
   template<typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name)
   {
+    _supplied_props.insert(prop_name);
     _subproblem.storeMatPropName(_block_id, prop_name);
     if (_displaced_subproblem != NULL)
       _displaced_subproblem->storeMatPropName(_block_id, prop_name);
@@ -199,6 +192,7 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name)
   {
+    _supplied_props.insert(prop_name);
     _subproblem.storeMatPropName(_block_id, prop_name);
     if (_displaced_subproblem != NULL)
       _displaced_subproblem->storeMatPropName(_block_id, prop_name);
@@ -213,6 +207,7 @@ protected:
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name)
   {
+    _supplied_props.insert(prop_name);
     _subproblem.storeMatPropName(_block_id, prop_name);
     if (_displaced_subproblem != NULL)
       _displaced_subproblem->storeMatPropName(_block_id, prop_name);

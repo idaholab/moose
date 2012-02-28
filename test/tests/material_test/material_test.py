@@ -11,6 +11,9 @@ dg_test = {
 coupled_material_test = { INPUT : 'coupled_material_test.i',
                         EXODIFF : ['out_coupled.e'] }
 
+three_coupled_mat_test = { INPUT : 'three_coupled_mat_test.i',
+                           EXODIFF : ['out_three.e'] }
+
 adv_mat_couple_test = { INPUT : 'adv_mat_couple_test.i',
                      EXODIFF : ['out_adv_coupled.e'] }
 

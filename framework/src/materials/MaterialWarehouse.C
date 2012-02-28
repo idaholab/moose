@@ -199,17 +199,21 @@ MaterialWarehouse::sortMaterials(std::map<int, std::vector<Material *> > & mater
     {
       const std::set<std::string> & depend_props = (*mat_iter)->getPropertyDependencies();
 
-      for (std::set<std::string>::const_iterator prop_iter=depend_props.begin(); prop_iter != depend_props.end(); ++prop_iter)
+      // See if any of the active materials supply this property
+      for (std::vector<Material *>::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
       {
-        // Ask each active material if they supply this property
-        for (std::vector<Material *>::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
-        {
-          // Don't check THIS material for a coupled property
-          if (mat_iter == mat_iter2) continue;
+        // Don't check THIS material for a coupled property
+        if (mat_iter == mat_iter2) continue;
 
-          if ((*mat_iter2)->have_property_name(*prop_iter))
-            resolver.insertDependency(*mat_iter, *mat_iter2);
-        }
+        const std::set<std::string> & supplied_props = (*mat_iter2)->getSuppliedPropertiesList();
+
+        std::set<std::string> intersect;
+        std::set_intersection(depend_props.begin(), depend_props.end(), supplied_props.begin(),
+                              supplied_props.end(), std::inserter(intersect, intersect.end()));
+
+        // If the intersection isn't empty then there is a dependency here
+        if (!intersect.empty())
+          resolver.insertDependency(*mat_iter, *mat_iter2);
       }
     }
 
