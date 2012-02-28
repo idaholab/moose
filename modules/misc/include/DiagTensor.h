@@ -81,6 +81,16 @@ public:
     return 0;
   }
 
+  libMesh::TypeVector<Real> operator*(const libMesh::TypeVector<Real> & v) const 
+  {
+    libMesh::TypeVector<Real> r_val(v);
+    
+   r_val(0) = _xx * v(0);
+   r_val(1) = _yy * v(1);
+   r_val(2) = _zz * v(2);
+    return r_val;
+  }
+  
   Real trace() const
   {
     return _xx + _yy + _zz;
@@ -155,7 +165,6 @@ public:
   }
 
 
-
   void xx( Real xx )
   {
     _xx = xx;
@@ -168,7 +177,6 @@ public:
   {
     _zz = zz;
   }
-
 
   void zero()
   {
@@ -196,8 +204,6 @@ public:
     return !operator==(rhs);
   }
 
-
-  
   DiagTensor & operator+=(const DiagTensor & t)
   {
     _xx += t._xx;
@@ -226,14 +232,12 @@ public:
   DiagTensor  inverse(const DiagTensor & t) const
   {
     DiagTensor r_val;
-    mooseAssert(  ( _xx!=0 && _yy!=0 && _zz!=0), "Cannot invert singular DiagTensor.");
+    mooseAssert(  ( _xx==0 || _yy==0 || _zz==0), "Cannot invert singular DiagTensor.");
     r_val._xx = 1./_xx;
     r_val._yy = 1./_yy ;
     r_val._zz = 1./_zz ;
     return r_val;
   }
-
-  
 
   DiagTensor operator*(Real t) const 
   {
@@ -244,7 +248,7 @@ public:
     r_val._zz = _zz * t;
     return r_val;
   }
-
+  
   DiagTensor operator-(const DiagTensor & t) const
   {
     DiagTensor r_val;
@@ -266,7 +270,7 @@ public:
 
   DiagTensor & operator-=(const ColumnMajorMatrix & cmm)
   {
-    mooseAssert(cmm.numEntries() == 9, "Cannot subtract ColumnMajorMatrix to DiagTensor.  Wrong number of entries.");
+    mooseAssert(cmm.numEntries() == 9, "Cannot add ColumnMajorMatrix to DiagTensor.  Wrong number of entries.");
     const Real * data = cmm.rawData();
     _xx -= data[0];
     _yy -= data[4];
@@ -340,7 +344,6 @@ public:
       _yy = input[1];
       _zz = input[2];
     }
-  
   
 private:
   Real _xx;
