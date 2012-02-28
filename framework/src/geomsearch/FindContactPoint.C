@@ -107,7 +107,7 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
   // Newton Loop
   for(; nit<12 && update_size > TOLERANCE*TOLERANCE; nit++)
   {
-    RealGradient d = slave_point - phys_point[0];
+    d = slave_point - phys_point[0];
 
     DenseMatrix<Real> jac(dim-1, dim-1);
 
