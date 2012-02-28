@@ -20,88 +20,72 @@
 
 MaterialWarehouse::MaterialWarehouse()
 {
+  _master_list.reserve(3);
+  _master_list.push_back(&_active_materials);
+  _master_list.push_back(&_active_boundary_materials);
+  _master_list.push_back(&_active_neighbor_materials);
 }
+
+MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs)
+{
+  _active_materials = rhs._active_materials;
+  _active_boundary_materials = rhs._active_boundary_materials;
+  _active_neighbor_materials = rhs._active_neighbor_materials;
+  _blocks = rhs._blocks;
+
+  _master_list.reserve(3);
+  _master_list.push_back(&_active_materials);
+  _master_list.push_back(&_active_boundary_materials);
+  _master_list.push_back(&_active_neighbor_materials);
+}
+
 
 MaterialWarehouse::~MaterialWarehouse()
 {
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      delete (*k);
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      delete (*k);
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      delete (*k);
+  for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+        delete (*k);
 }
 
 
 void
 MaterialWarehouse::initialSetup()
 {
-  sortMaterials();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->initialSetup();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->initialSetup();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->initialSetup();
+    for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    {
+      sortMaterials(**i);
+      for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+        for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+          (*k)->initialSetup();
+    }
 }
 
 void
 MaterialWarehouse::timestepSetup()
 {
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->timestepSetup();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->timestepSetup();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->timestepSetup();
+  for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+        (*k)->timestepSetup();
 }
 
 void
 MaterialWarehouse::residualSetup()
 {
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->residualSetup();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->residualSetup();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->residualSetup();
+  for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+        (*k)->residualSetup();
 }
 
 void
 MaterialWarehouse::jacobianSetup()
 {
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->jacobianSetup();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->jacobianSetup();
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_neighbor_materials.begin(); j != _active_neighbor_materials.end(); ++j)
-    for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
-      (*k)->jacobianSetup();
+  for (std::vector<std::map<int, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<int, std::vector<Material *> >::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+      for (std::vector<Material *>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+        (*k)->jacobianSetup();
 }
 
 bool
@@ -200,23 +184,9 @@ void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
 }
 
 void
-MaterialWarehouse::sortMaterials()
+MaterialWarehouse::sortMaterials(std::map<int, std::vector<Material *> > & materials_map)
 {
-#ifdef DEBUG
-  // Sanity check that all three containers contain the same keys (well almost we aren't checking "every" case)
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin();
-       j != _active_materials.end(); ++j)
-  {
-    mooseAssert(_active_boundary_materials.find(j->first) != _active_boundary_materials.end(),
-                "active_boundary_materials is different then active_materials");
-
-    // TODO: Enable this check when doing DG
-    //mooseAssert(_active_neighbor_materials.find(j->first) != _active_neighbor_materials.end(),
-    //             "active_neighbor_materials is different then active_materials");
-  }
-#endif
-
-  for (std::map<int, std::vector<Material *> >::iterator j = _active_materials.begin(); j != _active_materials.end(); ++j)
+  for (std::map<int, std::vector<Material *> >::iterator j = materials_map.begin(); j != materials_map.end(); ++j)
   {
     DependencyResolver<Material *> resolver;
 
@@ -243,13 +213,7 @@ MaterialWarehouse::sortMaterials()
       }
     }
 
-    // Sort based on dependencies - Can we use the same resolver for all three material data structures? I think so!
+    // Sort based on dependencies
     std::sort(j->second.begin(), j->second.end(), resolver);
-
-    std::sort(_active_boundary_materials[j->first].begin(), _active_boundary_materials[j->first].end(), resolver);
-
-    // TODO: Sort this list when doing DG
-    //std::sort(_active_neighbor_materials[j->first].begin(), _active_neighbor_materials[j->first].end(), resolver);
   }
-
 }

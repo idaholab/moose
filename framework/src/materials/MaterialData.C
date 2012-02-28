@@ -124,8 +124,7 @@ MaterialData::reinit(std::vector<Material *> & mats, unsigned int n_qpoints, con
       shallowCopyData(_stateful_props, _props_older, _storage.propsOlder()[elem_id][side]);
   }
 
-  // TODO: use the dep resolver to iterate over this vector in the right order
-  // iterate over materials and compute their properties
+
   for (std::vector<Material *>::iterator it = mats.begin(); it != mats.end(); ++it)
     (*it)->computeProperties();
 

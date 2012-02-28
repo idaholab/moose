@@ -27,6 +27,10 @@ class MaterialWarehouse
 {
 public:
   MaterialWarehouse();
+
+  // Copy Constructor
+  MaterialWarehouse(const MaterialWarehouse &rhs);
+
   virtual ~MaterialWarehouse();
 
   // Setup /////
@@ -64,8 +68,12 @@ protected:
 
   std::set<int> _blocks;                                                ///< Set of blocks where materials are defined
 
+  std::vector<std::map<int, std::vector<Material *> > *> _master_list;  ///< A convenience list of all the maps
 private:
-  void sortMaterials();
+
+  // This routine uses the Dependency Resolver to sort Materials based on dependencies they
+  // might have on coupled values
+  void sortMaterials(std::map<int, std::vector<Material *> > & materials_map);
 };
 
 #endif // MATERIALWAREHOUSE_H
