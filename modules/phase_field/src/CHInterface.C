@@ -42,7 +42,10 @@ CHInterface::computeQpResidual()
   if (_implicit)
     second_c = _second_u[_qp];
   else
-    second_c = _second_u_old[_qp];
+  {
+    mooseError("Old values of second derivatives no longer supported.  Go see Derek about it!");
+//    second_c = _second_u_old[_qp];
+  }
 
   value = _kappa[_qp]*second_c.tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]);
   

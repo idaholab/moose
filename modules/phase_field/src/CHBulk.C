@@ -53,8 +53,10 @@ CHBulk::precomputeQpResidual()
   }
   else
   {
-    c = _u_old[_qp];
-    grad_c = _grad_u_old[_qp];
+    mooseError("Grad u old no longer available.  Go talk to Derek about it.");
+    
+//    c = _u_old[_qp];
+//    grad_c = _grad_u_old[_qp];
   }
   
   return _M[_qp] * computeGradDFDCons(Residual, c, grad_c);//Return residual
@@ -72,8 +74,10 @@ CHBulk::precomputeQpJacobian()
   }
   else
   {
-    c = _u_old[_qp];
-    grad_c = _grad_u_old[_qp];
+    mooseError("Grad u old no longer available.  Go talk to Derek about it.");
+
+//    c = _u_old[_qp];
+//    grad_c = _grad_u_old[_qp];
   }
 
   RealGradient grad_value = 0.0;
