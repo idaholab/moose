@@ -78,12 +78,8 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _u_older(_var.slnOlder()),
 
     _grad_u(_var.gradSln()),
-    _grad_u_old(_var.gradSlnOld()),
-    _grad_u_older(_var.gradSlnOlder()),
 
     _second_u(_var.secondSln()),
-    _second_u_old(_var.secondSlnOld()),
-    _second_u_older(_var.secondSlnOlder()),
 
     _phi(_assembly.phiFace()),
     _grad_phi(_assembly.gradPhiFace()),
@@ -108,8 +104,6 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _u_older_neighbor(_var.slnOlderNeighbor()),
 
     _grad_u_neighbor(_var.gradSlnNeighbor()),
-    _grad_u_old_neighbor(_var.gradSlnOldNeighbor()),
-    _grad_u_older_neighbor(_var.gradSlnOlderNeighbor()),
 
     _second_u_neighbor(_var.secondSlnNeighbor())
 {

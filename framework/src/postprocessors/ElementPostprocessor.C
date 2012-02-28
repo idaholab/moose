@@ -44,8 +44,6 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     _u(_var.sln()),
     _u_old(_var.slnOld()),
     _u_older(_var.slnOlder()),
-    _grad_u(_var.gradSln()),
-    _grad_u_old(_var.gradSlnOld()),
-    _grad_u_older(_var.gradSlnOlder())
+    _grad_u(_var.gradSln())
 {
 }

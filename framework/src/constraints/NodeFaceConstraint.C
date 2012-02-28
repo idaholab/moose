@@ -76,8 +76,6 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   _u_older_master(_var.slnOlderNeighbor()),
 
   _grad_u_master(_var.gradSlnNeighbor()),
-  _grad_u_old_master(_var.gradSlnOldNeighbor()),
-  _grad_u_older_master(_var.gradSlnOlderNeighbor()),
 
   _second_u_master(_var.secondSlnNeighbor()),
   _dof_map(_sys.dofMap()),

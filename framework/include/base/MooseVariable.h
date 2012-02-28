@@ -39,59 +39,6 @@ class Assembly;
 class SubProblem;
 class SystemBase;
 
-#if 0
-class VariableData
-{
-public:
-  VariableData(THREAD_ID tid, const FEType & fe_type, SystemBase & sys);
-
-  const std::vector<std::vector<Real> > & phi() { return _phi; }
-  const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
-  std::vector<std::vector<Real> > & test() { return _test; }
-  std::vector<std::vector<RealGradient> > & gradTest() { return _grad_test; }
-
-  VariableValue & sln() { return _u; }
-  VariableValue & slnOld() { return _u_old; }
-  VariableValue & slnOlder() { return _u_older; }
-  VariableGradient  & gradSln() { return _grad_u; }
-  VariableGradient  & gradSlnOld() { return _grad_u_old; }
-  VariableGradient  & gradSlnOlder() { return _grad_u_older; }
-
-  VariableValue & uDot() { return _u_dot; }
-  VariableValue & duDotDu() { return _du_dot_du; }
-
-protected:
-
-  void computeValues();
-
-  ProblemInterface & _subproblem;
-  SystemBase & _sys;
-  FEBase * & _fe;
-  QBase * & _qrule;
-
-  std::vector<unsigned int> _dof_indices;
-
-  const std::vector<std::vector<Real> > & _phi;
-  const std::vector<std::vector<RealGradient> > & _grad_phi;
-
-  std::vector<std::vector<Real> > _test;
-  std::vector<std::vector<RealGradient> > _grad_test;
-
-  VariableValue _u;
-  VariableValue _u_old;
-  VariableValue _u_older;
-  VariableGradient  _grad_u;
-  VariableGradient  _grad_u_old;
-  VariableGradient  _grad_u_older;
-  VariableValue _u_update;
-
-  // time derivatives
-  VariableValue _u_dot;
-  VariableValue _du_dot_du;
-};
-#endif
-
-
 /**
  * Class for stuff related to variables
  *
@@ -162,8 +109,8 @@ public:
   VariableValue & slnOld() { return _u_old; }
   VariableValue & slnOlder() { return _u_older; }
   VariableGradient  & gradSln() { return _grad_u; }
-  VariableGradient  & gradSlnOld() { return _grad_u_old; }
-  VariableGradient  & gradSlnOlder() { return _grad_u_older; }
+  VariableGradient  & gradSlnOld() { _need_grad_old = true; return _grad_u_old; }
+  VariableGradient  & gradSlnOlder() { _need_grad_older = true; return _grad_u_older; }
   VariableSecond & secondSln() { return _second_u; }
   VariableSecond & secondSlnOld() { return _second_u_old; }
   VariableSecond & secondSlnOlder() { return _second_u_older; }
@@ -259,6 +206,12 @@ protected:
 
   bool _is_nl;                                                  /// true if this varaible is non-linear
   bool _has_second_derivatives;                                 /// true if we need to compute second derivatives (if the variable is 3rd hermite, etc.)
+
+  bool _need_grad_old;
+  bool _need_grad_older;
+
+  bool _need_second_old;
+  bool _need_second_older;
 
   // Shape function values, gradients. second derivatives
   const std::vector<std::vector<Real> > & _phi;

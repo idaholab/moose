@@ -115,12 +115,7 @@ protected:
   VariableValue & _u_older;                                     ///< Holds the t-2 solution at the current quadrature point.
 
   VariableGradient & _grad_u;                                   ///< Holds the current solution gradient at the current quadrature point on the face.
-  VariableGradient & _grad_u_old;                               ///< Holds the previous solution gradient at the current quadrature point.
-  VariableGradient & _grad_u_older;                             ///< Holds the t-2 solution gradient at the current quadrature point.
-
   VariableSecond & _second_u;                                   ///< Holds the current solution second derivative at the current quadrature point on the face
-  VariableSecond & _second_u_old;
-  VariableSecond & _second_u_older;
   // shape functions
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
@@ -144,9 +139,6 @@ protected:
   VariableValue & _u_older_neighbor;                                    ///< Holds the t-2 solution at the current quadrature point.
 
   VariableGradient & _grad_u_neighbor;                                  ///< Holds the current solution gradient at the current quadrature point
-  VariableGradient & _grad_u_old_neighbor;                              ///< Holds the previous solution gradient at the current quadrature point
-  VariableGradient & _grad_u_older_neighbor;                            ///< Holds the t-2 solution gradient at the current quadrature point
-
   VariableSecond  & _second_u_neighbor;                                 ///< Holds the current solution second derivative at the current quadrature point
 
 

@@ -22,7 +22,6 @@
 #include "MMSReaction.h"
 #include "AdvDiffReaction1.h"
 #include "Advection0.h"
-#include "CN2AdvDiffReaction1.h"
 #include "Diffusion0.h"
 #include "ForcingFunctionXYZ0.h"
 #include "TEJumpFFN.h"
@@ -93,7 +92,6 @@ void registerObjects()
   registerKernel(Diffusion0);
   registerKernel(Advection0);
   registerKernel(AdvDiffReaction1);
-  registerKernel(CN2AdvDiffReaction1);
   registerKernel(ForcingFunctionXYZ0);
   registerKernel(TEJumpFFN);
   registerKernel(NanKernel);

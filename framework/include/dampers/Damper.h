@@ -84,9 +84,6 @@ protected:
   VariableValue & _u_older;                             ///< Holds the t-2 solution at the current quadrature point
 
   VariableGradient & _grad_u;                           ///< Holds the current solution gradient at the current quadrature point
-  VariableGradient & _grad_u_old;                       ///< Holds the previous solution gradient at the current quadrature point
-  VariableGradient & _grad_u_older;                     ///< Holds the t-2 solution gradient at the current quadrature point
-
   VariableSecond & _second_u;                           ///< Holds the current solution second derivative at the current quadrature point
 };
 

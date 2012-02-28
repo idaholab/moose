@@ -72,11 +72,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _u_old(_var.slnOld()),
     _u_older(_var.slnOlder()),
     _grad_u(_var.gradSln()),
-    _grad_u_old(_var.gradSlnOld()),
-    _grad_u_older(_var.gradSlnOlder()),
     _second_u(_var.secondSln()),
-    _second_u_old(_var.secondSlnOld()),
-    _second_u_older(_var.secondSlnOlder()),
 
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu()),

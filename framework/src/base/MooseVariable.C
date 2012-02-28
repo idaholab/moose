@@ -22,95 +22,6 @@
 #include "numeric_vector.h"
 #include "dof_map.h"
 
-#if 0
-// VariableData /////
-
-VariableData::VariableData(THREAD_ID tid, const FEType & fe_type, SystemBase & sys) :
-    _subproblem(sys.problem()),
-    _sys(sys),
-    _fe(_subproblem.getFE(tid, fe_type)),
-    _qrule(_subproblem.qRule(tid)),
-    _phi(_fe->get_phi()),
-    _grad_phi(_fe->get_dphi())
-{
-
-}
-
-void
-VariableData::computeValues()
-{
-  unsigned int nqp = _qrule->n_points();
-  _u.resize(nqp);
-  _grad_u.resize(nqp);
-  if (_subproblem.isTransient())
-  {
-    _u_dot.resize(nqp);
-    _du_dot_du.resize(nqp);
-
-    _u_old.resize(nqp);
-    _u_older.resize(nqp);
-
-    _grad_u_old.resize(nqp);
-    _grad_u_older.resize(nqp);
-  }
-
-  for (unsigned int i = 0; i < nqp; ++i)
-  {
-    _u[i] = 0;
-    _grad_u[i] = 0;
-
-    if (_subproblem.isTransient())
-    {
-      _u_dot[i] = 0;
-      _du_dot_du[i] = 0;
-
-      _u_old[i] = 0;
-      _u_older[i] = 0;
-
-      _grad_u_old[i] = 0;
-      _grad_u_older[i] = 0;
-    }
-  }
-
-  unsigned int num_dofs = _dof_indices.size();
-  for (unsigned int i = 0; i < num_dofs; i++)
-  {
-    int idx = _dof_indices[i];
-    Real soln_local = (*_sys.currentSolution())(idx);
-    Real soln_old_local;
-    Real soln_older_local;
-
-    if (_subproblem.transient())
-    {
-      soln_old_local = _sys.solutionOld()(idx);
-      soln_older_local = _sys.solutionOlder()(idx);
-    }
-
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      Real phi_local = _phi[i][qp];
-      RealGradient dphi_local = _grad_phi[i][qp];
-
-      _u[qp]      += phi_local * soln_local;
-      _grad_u[qp] += dphi_local * soln_local;
-
-      if (_subproblem.isTransient())
-      {
-        _u_dot[qp]        += phi_local * _sys.solutionUDot()(idx);
-        _du_dot_du[qp]    += phi_local * _sys.solutionDuDotDu()(idx);
-
-        _u_old[qp]        += phi_local * soln_old_local;
-        _u_older[qp]      += phi_local * soln_older_local;
-        _grad_u_old[qp]   += dphi_local * soln_old_local;
-        _grad_u_older[qp] += dphi_local * soln_older_local;
-      }
-    }
-  }
-}
-#endif
-
-// Variable /////
-
 MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),
     _moose_var_num(mvn),
@@ -130,6 +41,12 @@ MooseVariable::MooseVariable(unsigned int var_num, unsigned int mvn, const FETyp
 
     _is_nl(dynamic_cast<NonlinearSystem *>(&sys) != NULL),
     _has_second_derivatives(fe_type.family == CLOUGH || fe_type.family == HERMITE),
+
+    _need_grad_old(false),
+    _need_grad_older(false),
+
+    _need_second_old(false),
+    _need_second_older(false),
 
     _phi(_fe->get_phi()),
     _grad_phi(_fe->get_dphi()),
@@ -313,13 +230,19 @@ MooseVariable::computeElemValues()
 
     _u_old.resize(nqp);
     _u_older.resize(nqp);
-    _grad_u_old.resize(nqp);
-    _grad_u_older.resize(nqp);
+
+    if(_need_grad_old)
+      _grad_u_old.resize(nqp);
+
+    if(_need_grad_older)
+      _grad_u_older.resize(nqp);
+    /*
     if (_has_second_derivatives)
     {
       _second_u_old.resize(nqp);
       _second_u_older.resize(nqp);
     }
+    */
   }
 
   for (unsigned int i = 0; i < nqp; ++i)
@@ -339,13 +262,19 @@ MooseVariable::computeElemValues()
 
       _u_old[i] = 0;
       _u_older[i] = 0;
-      _grad_u_old[i] = 0;
-      _grad_u_older[i] = 0;
+
+      if(_need_grad_old)
+        _grad_u_old[i] = 0;
+
+      if(_need_grad_older)
+        _grad_u_older[i] = 0;
+      /*
       if (_has_second_derivatives)
       {
         _second_u_old[i] = 0;
         _second_u_older[i] = 0;
       }
+      */
     }
   }
 
@@ -365,13 +294,19 @@ MooseVariable::computeElemValues()
   Real du_dot_du_local = 0;
 
   Real phi_local = 0;
-  const Real * dphi_qp = NULL;
-  //RealGradient dphi_local;
-  RealTensor d2phi_local;
+  const RealGradient * dphi_qp = NULL;
+  const RealTensor * d2phi_local;
 
-  Real * grad_u_qp = NULL;
-  Real * grad_u_old_qp = NULL;
-  Real * grad_u_older_qp = NULL;
+  RealGradient * grad_u_qp = NULL;
+
+  RealGradient * grad_u_old_qp = NULL;
+  RealGradient * grad_u_older_qp = NULL;
+
+  RealTensor * second_u_qp = NULL;
+  /*
+  RealTensor * second_u_old_qp = NULL;
+  RealTensor * second_u_older_qp = NULL;
+  */
 
   for (unsigned int i=0; i < num_dofs; i++)
   {
@@ -393,26 +328,38 @@ MooseVariable::computeElemValues()
     for (unsigned int qp=0; qp < nqp; qp++)
     {
       phi_local = _phi[i][qp];
-      dphi_qp = &_grad_phi[i][qp](0);
+      dphi_qp = &_grad_phi[i][qp];
 
-      grad_u_qp = &_grad_u[qp](0);
+      grad_u_qp = &_grad_u[qp];
 
       if(is_transient)
       {
-        grad_u_old_qp = &_grad_u_old[qp](0);
-        grad_u_older_qp = &_grad_u_older[qp](0);
+        if(_need_grad_old)
+          grad_u_old_qp = &_grad_u_old[qp];
+
+        if(_need_grad_older)
+          grad_u_older_qp = &_grad_u_older[qp];
       }
 
       if (_has_second_derivatives)
-        d2phi_local = _second_phi[i][qp];
+      {
+        d2phi_local = &_second_phi[i][qp];
+        second_u_qp = &_second_u[qp];
+/*
+        if(is_transient)
+        {
+          second_u_old_qp = &_second_u_old[qp];
+          second_u_older_qp = &_second_u_older[qp];
+        }
+*/
+      }
 
       _u[qp] += phi_local * soln_local;
 
-      for(unsigned int j=0; j < LIBMESH_DIM; ++j)
-        grad_u_qp[j] += dphi_qp[j] * soln_local;
+      grad_u_qp->add_scaled(*dphi_qp, soln_local);
 
       if (_has_second_derivatives)
-        _second_u[qp] += d2phi_local * soln_local;
+        second_u_qp->add_scaled(*d2phi_local, soln_local);
 
       if (is_transient)
       {
@@ -424,18 +371,19 @@ MooseVariable::computeElemValues()
 
         _u_old[qp]        += phi_local * soln_old_local;
         _u_older[qp]      += phi_local * soln_older_local;
-        //_grad_u_old[qp]   += dphi_local * soln_old_local;
-        for(unsigned int j=0; j < LIBMESH_DIM; ++j)
-          grad_u_old_qp[j] += dphi_qp[j] * soln_old_local;
 
-        //_grad_u_older[qp] += dphi_local * soln_older_local;
-        for(unsigned int j=0; j < LIBMESH_DIM; ++j)
-          grad_u_older_qp[j] += dphi_qp[j] * soln_older_local;
+        if(_need_grad_old)
+          grad_u_old_qp->add_scaled(*dphi_qp, soln_old_local);
+
+        if(_need_grad_older)
+          grad_u_older_qp->add_scaled(*dphi_qp, soln_older_local);
+/*
         if (_has_second_derivatives)
         {
-          _second_u_old[qp] += d2phi_local * soln_old_local;
-          _second_u_older[qp] += d2phi_local * soln_older_local;
+          second_u_old_qp->add_scaled(*d2phi_local, soln_old_local);
+          second_u_older_qp->add_scaled(*d2phi_local, soln_older_local);
         }
+*/
       }
     }
   }
@@ -460,13 +408,19 @@ MooseVariable::computeElemValuesFace()
 
     _u_old.resize(nqp);
     _u_older.resize(nqp);
-    _grad_u_old.resize(nqp);
-    _grad_u_older.resize(nqp);
+
+    if(_need_grad_old)
+      _grad_u_old.resize(nqp);
+
+    if(_need_grad_older)
+      _grad_u_older.resize(nqp);
+    /*
     if (_has_second_derivatives)
     {
       _second_u_old.resize(nqp);
       _second_u_older.resize(nqp);
     }
+    */
   }
 
   for (unsigned int i = 0; i < nqp; ++i)
@@ -484,13 +438,19 @@ MooseVariable::computeElemValuesFace()
 
       _u_old[i] = 0;
       _u_older[i] = 0;
-      _grad_u_old[i] = 0;
-      _grad_u_older[i] = 0;
+
+      if(_need_grad_old)
+        _grad_u_old[i] = 0;
+
+      if(_need_grad_older)
+        _grad_u_older[i] = 0;
+      /*
       if (_has_second_derivatives)
       {
         _second_u_old[i] = 0;
         _second_u_older[i] = 0;
       }
+      */
     }
   }
 
@@ -547,13 +507,20 @@ MooseVariable::computeElemValuesFace()
 
         _u_old[qp]        += phi_local * soln_old_local;
         _u_older[qp]      += phi_local * soln_older_local;
-        _grad_u_old[qp]   += dphi_local * soln_old_local;
-        _grad_u_older[qp] += dphi_local * soln_older_local;
+
+        if(_need_grad_old)
+          _grad_u_old[qp]   += dphi_local * soln_old_local;
+
+        if(_need_grad_older)
+          _grad_u_older[qp] += dphi_local * soln_older_local;
+
+        /*
         if (_has_second_derivatives)
         {
           _second_u_old[qp] += d2phi_local * soln_old_local;
           _second_u_older[qp] += d2phi_local * soln_older_local;
         }
+        */
       }
     }
   }
@@ -573,7 +540,7 @@ MooseVariable::computeNeighborValuesFace()
   {
     _u_old_neighbor.resize(nqp);
     _u_older_neighbor.resize(nqp);
-    _grad_u_old_neighbor.resize(nqp);
+//    _grad_u_old_neighbor.resize(nqp);
   }
 
   for (unsigned int i = 0; i < nqp; ++i)
@@ -585,7 +552,7 @@ MooseVariable::computeNeighborValuesFace()
     {
       _u_old_neighbor[i] = 0;
       _u_older_neighbor[i] = 0;
-      _grad_u_old_neighbor[i] = 0;
+//      _grad_u_old_neighbor[i] = 0;
     }
   }
 
@@ -640,7 +607,7 @@ MooseVariable::computeNeighborValuesFace()
       {
         _u_old_neighbor[qp]        += phi_local * soln_old_local;
         _u_older_neighbor[qp]      += phi_local * soln_older_local;
-        _grad_u_old_neighbor[qp]   += dphi_local * soln_old_local;
+//        _grad_u_old_neighbor[qp]   += dphi_local * soln_old_local;
       }
     }
 //    std::cerr << " => " << _u_neighbor[0] << std::endl;
@@ -671,7 +638,7 @@ MooseVariable::computeNeighborValues()
   {
     _u_old_neighbor.resize(nqp);
     _u_older_neighbor.resize(nqp);
-    _grad_u_old_neighbor.resize(nqp);
+//    _grad_u_old_neighbor.resize(nqp);
   }
 
   for (unsigned int i = 0; i < nqp; ++i)
@@ -683,7 +650,7 @@ MooseVariable::computeNeighborValues()
     {
       _u_old_neighbor[i] = 0;
       _u_older_neighbor[i] = 0;
-      _grad_u_old_neighbor[i] = 0;
+//      _grad_u_old_neighbor[i] = 0;
     }
   }
 
@@ -738,7 +705,7 @@ MooseVariable::computeNeighborValues()
       {
         _u_old_neighbor[qp]        += phi_local * soln_old_local;
         _u_older_neighbor[qp]      += phi_local * soln_older_local;
-        _grad_u_old_neighbor[qp]   += dphi_local * soln_old_local;
+//        _grad_u_old_neighbor[qp]   += dphi_local * soln_old_local;
       }
     }
 //    std::cerr << " => " << _u_neighbor[0] << std::endl;
