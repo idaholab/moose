@@ -41,7 +41,7 @@
 #define registerExecutioner(name)                   registerObject(name)
 #define registerFunction(name)                      registerObject(name)
 #define registerMeshModifier(name)                  registerObject(name)
-#define registerConstraint(name)                  registerObject(name)
+#define registerConstraint(name)                    registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
@@ -49,10 +49,14 @@
 #define registerNamedMaterial(obj, name)            registerNamedObject(obj, name)
 #define registerNamedPostprocessor(obj, name)       registerNamedObject(obj, name)
 #define registerNamedInitialCondition(obj, name)    registerNamedObject(obj, name)
-#define registerNamedDumper(obj, name)              registerNamedObject(obj, name)
+#define registerNamedDamper(obj, name)              registerNamedObject(obj, name)
 #define registerNamedDiracKernel(obj, name)         registerNamedObject(obj, name)
 #define registerNamedDGKernel(obj, name)            registerNamedObject(obj, name)
 #define registerNamedExecutioner(obj, name)         registerNamedObject(obj, name)
+#define registerNamedFunction(obj, name)            registerNamedObject(obj, name)
+#define registerNamedMeshModifier(obj, name)        registerNamedObject(obj, name)
+#define registerNamedConstraint(obj, name)          registerNamedObject(obj, name)
+
 
 /**
  * Typedef for function to build objects

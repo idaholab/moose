@@ -12,38 +12,46 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ParsedGradFunction.h"
+#include "MooseParsedGradFunction.h"
 
 template<>
-InputParameters validParams<ParsedGradFunction>()
+InputParameters validParams<MooseParsedGradFunction>()
 {
-  InputParameters params = validParams<ParsedFunction>();
+  InputParameters params = validParams<MooseParsedFunction>();
   params.addParam<std::string>("grad_x", "0", "Partial with respect to x.");
   params.addParam<std::string>("grad_y", "0", "Partial with respect to y.");
   params.addParam<std::string>("grad_z", "0", "Partial with respect to z.");
   return params;
 }
 
-ParsedGradFunction::ParsedGradFunction(const std::string & name, InputParameters parameters) :
-    ParsedFunction(name, parameters)
-{
-  std::vector<std::string> vars = parameters.get<std::vector<std::string> >("vars");
-  std::vector<Real>        vals = parameters.get<std::vector<Real> >("vals");
+MooseParsedGradFunction::MooseParsedGradFunction(const std::string & name, InputParameters parameters) :
+    MooseParsedFunction(name, parameters),
+    _grad_function(new ParsedFunction<Real>(std::string("{") + getParam<std::string>("grad_x") + "}{" +
+                                            getParam<std::string>("grad_y") + "}{" +
+                                            getParam<std::string>("grad_z") + "}",
+                                            &getParam<std::vector<std::string> >("vars"),
+                                            &getParam<std::vector<Real> >("vals")))
+{}
 
-  initializeParser(_parserx, parameters.get<std::string>("grad_x"), vars, vals);
-  initializeParser(_parsery, parameters.get<std::string>("grad_y"), vars, vals);
-  initializeParser(_parserz, parameters.get<std::string>("grad_z"), vars, vals);
+MooseParsedGradFunction::~MooseParsedGradFunction()
+{
+  delete _grad_function;
 }
 
-RealGradient
-ParsedGradFunction::gradient(Real t, const Point & pt)
-{
-  _vals[0] = t;
-  _vals[1] = pt(0);
-  _vals[2] = pt(1);
-  _vals[3] = pt(2);
 
-  return RealGradient(_parserx.Eval(&(_vals[0])),
-                      _parsery.Eval(&(_vals[0])),
-                      _parserz.Eval(&(_vals[0])));
+RealGradient
+MooseParsedGradFunction::gradient(Real t, const Point & pt)
+{
+  DenseVector<Real> output(LIBMESH_DIM);
+
+  (*_grad_function)(pt, t, output);
+
+  return RealGradient(output(0)
+#if LIBMESH_DIM > 1
+                      , output(1)
+#endif
+#if LIBMESH_DIM > 2
+                      , output(2)
+#endif
+    );
 }

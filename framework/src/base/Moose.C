@@ -89,8 +89,8 @@
 
 // functions
 #include "Composite.h"
-#include "ParsedFunction.h"
-#include "ParsedGradFunction.h"
+#include "MooseParsedFunction.h"
+#include "MooseParsedGradFunction.h"
 #include "PiecewiseLinear.h"
 #include "SolutionFunction.h"
 #include "SphereFunction.h"
@@ -252,8 +252,8 @@ registerObjects()
   registerExecutioner(DT2Transient);
   // functions
   registerFunction(Composite);
-  registerFunction(ParsedFunction);
-  registerFunction(ParsedGradFunction);
+  registerNamedFunction(MooseParsedFunction, "ParsedFunction");
+  registerNamedFunction(MooseParsedGradFunction, "ParsedGradFunction");
   registerFunction(PiecewiseLinear);
   registerFunction(SolutionFunction);
   registerFunction(SphereFunction);

@@ -15,12 +15,14 @@
 #ifndef PARSEDGRADFUNCTION_H
 #define PARSEDGRADFUNCTION_H
 
-#include "ParsedFunction.h"
+#include "Function.h"
 
-class ParsedGradFunction;
+#include "MooseParsedFunction.h"
+
+class MooseParsedGradFunction;
 
 template<>
-InputParameters validParams<ParsedGradFunction>();
+InputParameters validParams<MooseParsedGradFunction>();
 
 /**
  * This class is similar to ParsedFunction except it also supports returning the
@@ -29,17 +31,18 @@ InputParameters validParams<ParsedGradFunction>();
  * Documentation for the Function Parser can be found at:
  * http://warp.povusers.org/FunctionParser/fparser.html
  */
-class ParsedGradFunction : public ParsedFunction
+class MooseParsedGradFunction : public MooseParsedFunction
 {
 public:
-  ParsedGradFunction(const std::string & name, InputParameters parameters);
+  MooseParsedGradFunction(const std::string & name, InputParameters parameters);
+
+  virtual ~MooseParsedGradFunction();
 
   virtual RealGradient gradient(Real t, const Point & pt);
 
-private:
-  FunctionParser _parserx;
-  FunctionParser _parsery;
-  FunctionParser _parserz;
+protected:
+  FunctionBase<Real> *_grad_function;
 };
 
 #endif //PARSEDGRADFUNCTION_H
+
