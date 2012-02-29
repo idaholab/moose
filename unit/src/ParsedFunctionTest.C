@@ -14,9 +14,10 @@
 
 #include "ParsedFunctionTest.h"
 
+#if 0
 //Moose includes
 #include "InputParameters.h"
-#include "ParsedFunction.h"
+#include "MooseParsedFunction.h"
 #include "Moose.h"
 CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 
@@ -156,3 +157,4 @@ ParsedFunctionTest::testConstants()
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 1, f2.value(0,0.5), 0.0000001 );
   CPPUNIT_ASSERT_DOUBLES_EQUAL( -1, f2.value(0,1.5), 0.0000001 );
 }
+#endif
