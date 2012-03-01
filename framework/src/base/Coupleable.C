@@ -148,8 +148,8 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
-  else
-    return getVar(var_name, comp)->gradSln();
+
+  return getVar(var_name, comp)->gradSln();
 }
 
 VariableGradient &
@@ -157,8 +157,8 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
-  else
-    return getVar(var_name, comp)->gradSlnOld();
+
+  return getVar(var_name, comp)->gradSlnOld();
 }
 
 VariableGradient &
@@ -166,8 +166,8 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
 {
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
-  else
-    return getVar(var_name, comp)->gradSlnOlder();
+
+  return getVar(var_name, comp)->gradSlnOlder();
 }
 
 VariableSecond &
@@ -175,8 +175,8 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
-  else
-    return getVar(var_name, comp)->secondSln();
+
+  return getVar(var_name, comp)->secondSln();
 }
 
 VariableSecond &
@@ -184,8 +184,8 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
-  else
-    return getVar(var_name, comp)->secondSlnOld();
+
+  return getVar(var_name, comp)->secondSlnOld();
 }
 
 VariableSecond &
@@ -193,8 +193,8 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
-  else
-    return getVar(var_name, comp)->secondSlnOlder();
+
+  return getVar(var_name, comp)->secondSlnOlder();
 }
 
 // Neighbor values
@@ -241,8 +241,8 @@ NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsign
 {
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
-  else
-    return getVar(var_name, comp)->gradSlnNeighbor();
+
+  return getVar(var_name, comp)->gradSlnNeighbor();
 }
 
 VariableGradient &
@@ -250,8 +250,8 @@ NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, uns
 {
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
-  else
-    return getVar(var_name, comp)->gradSlnOldNeighbor();
+
+  return getVar(var_name, comp)->gradSlnOldNeighbor();
 }
 
 VariableGradient &
@@ -259,8 +259,8 @@ NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, u
 {
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
-  else
-    return getVar(var_name, comp)->gradSlnOlderNeighbor();
+
+  return getVar(var_name, comp)->gradSlnOlderNeighbor();
 }
 
 VariableSecond &
@@ -268,6 +268,6 @@ NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
-  else
-    return getVar(var_name, comp)->secondSlnNeighbor();
+
+  return getVar(var_name, comp)->secondSlnNeighbor();
 }
