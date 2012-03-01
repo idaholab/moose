@@ -31,6 +31,8 @@ class AnisotropicElasticityTensor : public ElasticityTensor
 public:
   AnisotropicElasticityTensor();
 
+  virtual ~AnisotropicElasticityTensor() {}
+
   /**
    * Set the first euler angle
    */

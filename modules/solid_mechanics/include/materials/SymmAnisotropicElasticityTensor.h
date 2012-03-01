@@ -11,6 +11,8 @@ public:
   SymmAnisotropicElasticityTensor(std::vector<Real> & init_list, bool all_21);
   SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a);
 
+  virtual ~SymmAnisotropicElasticityTensor() {}
+
   /**
    * Set the first euler angle
    */
@@ -51,7 +53,7 @@ public:
    * Perform rotation around one axis (c-axis)
    */
 
-virtual void rotate(const Real a1);
+  virtual void rotate(const Real a1);
 
 protected:
 

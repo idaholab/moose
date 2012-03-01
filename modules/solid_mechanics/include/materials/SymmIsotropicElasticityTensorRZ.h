@@ -27,6 +27,8 @@ class SymmIsotropicElasticityTensorRZ : public SymmIsotropicElasticityTensor
 public:
   SymmIsotropicElasticityTensorRZ(const bool constant = true);
 
+  virtual ~SymmIsotropicElasticityTensorRZ() {}
+
 protected:
 
   /**

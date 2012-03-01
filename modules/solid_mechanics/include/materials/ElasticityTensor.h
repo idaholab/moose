@@ -23,12 +23,14 @@ public:
    */
   ElasticityTensor(const bool constant = false);
 
+  virtual ~ElasticityTensor() {}
+
   /**
    * Public function that will be called whenever the values for this matrix
    * need to be filled in.
    */
   void calculate(unsigned int qp);
-  
+
   virtual ColumnMajorMatrix calculateDerivative(unsigned int qp,unsigned int i);
 
 protected:

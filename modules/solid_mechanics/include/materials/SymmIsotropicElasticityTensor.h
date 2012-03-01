@@ -27,6 +27,8 @@ class SymmIsotropicElasticityTensor : public SymmElasticityTensor
 public:
   SymmIsotropicElasticityTensor(const bool constant = true);
 
+  virtual ~SymmIsotropicElasticityTensor() {}
+
   /**
    * Set the first Lame Coefficient.
    */

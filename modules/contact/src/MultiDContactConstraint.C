@@ -118,6 +118,7 @@ MultiDContactConstraint::updateContactSet()
 
     default:
       mooseError("Invalid or unavailable contact model");
+      break;
     }
 
 //    if(has_penetrated[slave_node_num] && resid < 0)
@@ -203,6 +204,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
 
     default:
       mooseError("Invalid or unavailable contact model");
+      break;
     }
     return _test_slave[_i][_qp] * resid;
   case Moose::Master:
@@ -220,6 +222,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
 
     default:
       mooseError("Invalid or unavailable contact model");
+      break;
     }
     return _test_master[_i][_qp] * resid;
   }
@@ -253,6 +256,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 
     default:
       mooseError("Invalid or unavailable contact model");
+      break;
     }
     return _test_slave[_i][_qp] * slave_jac;
   case Moose::SlaveMaster:
@@ -274,6 +278,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 
     default:
       mooseError("Invalid or unavailable contact model");
+      break;
     }
     return _test_slave[_i][_qp] * slave_jac;
   case Moose::MasterSlave:

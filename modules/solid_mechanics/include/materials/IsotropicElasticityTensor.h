@@ -57,6 +57,8 @@ public:
    */
   void setShearModulus(const Real k);
 
+  virtual ~IsotropicElasticityTensor() {}
+
 protected:
 
   bool _lambda_set, _mu_set, _E_set, _nu_set, _k_set;

@@ -115,6 +115,7 @@ ContactMaster::updateContactSet()
 
       default:
         mooseError("Invalid or unavailable contact model");
+        break;
       }
 
       unsigned int slave_node_num = it->first;
@@ -216,6 +217,7 @@ ContactMaster::computeQpResidual()
 
   default:
     mooseError("Invalid or unavailable contact model");
+    break;
   }
 
   return _test[_i][_qp] * resid;

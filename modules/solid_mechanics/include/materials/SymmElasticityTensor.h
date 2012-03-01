@@ -55,6 +55,8 @@ public:
    */
   SymmElasticityTensor(const bool constant = false);
 
+  virtual ~SymmElasticityTensor() {}
+
   void copyValues( SymmElasticityTensor & rhs ) const
   {
     for (unsigned i(0); i < 21; ++i)
@@ -85,8 +87,8 @@ public:
 
       return t;
     }
-  
-  
+
+
   void operator+=( const SymmElasticityTensor & rhs )
   {
     for (unsigned i(0); i < 21; ++i)
@@ -144,7 +146,7 @@ public:
   friend std::ostream & operator<<(std::ostream & stream, const SymmElasticityTensor & obj);
 
   void fillFromInputVector(std::vector<Real> input, bool all);
-  
+
 protected:
 
   /**

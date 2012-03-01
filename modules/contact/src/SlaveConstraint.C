@@ -122,6 +122,7 @@ SlaveConstraint::computeQpResidual()
 
   default:
     mooseError("Invalid or unavailable contact model");
+    break;
   }
 
 //  std::cout<<node->id()<<":: "<<constraint_mag<<std::endl;
