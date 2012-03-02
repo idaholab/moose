@@ -56,7 +56,6 @@ protected:
   R7Mesh & _mesh;                       ///< Global mesh this component works on
 
   std::string _input_file_name;
-  ComponentParser _parser;
   std::vector<unsigned int> _subdomains;     ///< List of subdomain IDs this components owns
 
   virtual unsigned int getNextSubdomainId();

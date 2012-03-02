@@ -31,8 +31,7 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _sim(*getParam<Simulation *>("_sim")),
     _mesh(_sim.mesh()),
 
-    _input_file_name(getParam<std::string>("physics_input_file")),
-    _parser(_id, Moose::syntax)
+    _input_file_name(getParam<std::string>("physics_input_file"))
 {
 }
 
@@ -50,11 +49,7 @@ Component::parseInput()
 {
   if (!_input_file_name.empty())
   {
-    // setup parser
-    _parser._mesh = &_mesh;
-//    _parser._problem = _sim.problem();
-
-    _parser.parse(_input_file_name);
+    // TODO: parse local input file
   }
 }
 
