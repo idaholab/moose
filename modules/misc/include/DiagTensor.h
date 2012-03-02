@@ -167,6 +167,26 @@ public:
     }
   
 
+  void assign( unsigned int i, Real val ) 
+    {
+      if (0 == i)
+      {
+        _xx= val;
+      }
+      else if (1 == i)
+      {
+        _yy=val;
+      }
+      else if (2 == i)
+      {
+         _zz=val;
+      }
+      else
+      {
+        mooseError( "Invalid entry requested for DiagTensor" );
+      }
+    }
+  
   void xyz( Real xx, Real yy,Real zz )
     {
       _xx = xx;
