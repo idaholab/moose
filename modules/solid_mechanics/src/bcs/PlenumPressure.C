@@ -30,23 +30,16 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters paramet
    _output( getParam<std::string>("output") != "" ? &getPostprocessorValue(getParam<std::string>("output")) : NULL ),
    _my_value(0)
 {
-  if(_component < 0)
+  if(_component < 0 || _component > 2 )
   {
-    std::cout << "Must select a component for "
-              << name
-              << "." << std::endl;
-    libmesh_error();
-  }
-  else if ( _component > 2 )
-  {
+    std::stringstream errMsg;
+    errMsg << "Invalid component given for "
+           << name
+           << ": "
+           << _component
+           << "." << std::endl;
 
-    std::cout << "Invalid component given ("
-              << _component
-              << ") for "
-              << name
-              << "." << std::endl;
-
-    libmesh_error();
+    mooseError( errMsg );
   }
 
 }

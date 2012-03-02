@@ -18,5 +18,7 @@ youngs_modulus_test = { INPUT : 'youngs_modulus_test.i',
 increment_options_test = { INPUT : 'increment_options_test.i',
                            EXPECT_ERR : "The options for the increment calculation are RashidApprox and Eigen."}
 
+pressure_component_test = { INPUT : 'pressure_component.i',
+                            EXPECT_ERR : "Invalid component given for fred: 123456789."}
 
 

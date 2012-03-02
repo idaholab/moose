@@ -18,33 +18,21 @@ Pressure::Pressure(const std::string & name, InputParameters parameters)
   :IntegratedBC(name, parameters),
    _component(getParam<int>("component")),
    _factor(getParam<Real>("factor")),
-   _has_function(getParam<std::string>("function") != ""),
-   _function( _has_function ? &getFunction("function") : NULL )
+   _function( getParam<std::string>("function") != "" ? &getFunction("function") : NULL )
 {
-  if(_component < 0)
+  if(_component < 0 || _component > 2)
   {
-    std::cout << "Must select a component for "
-              << name
-              << "." << std::endl;
-    libmesh_error();
-  }
-  else if ( _component > 2 )
-  {
+    std::stringstream errMsg;
+    errMsg << "Invalid component given for "
+           << name
+           << ": "
+           << _component
+           << "." << std::endl;
 
-    std::cout << "Invalid component given ("
-              << _component
-              << ") for "
-              << name
-              << "." << std::endl;
-
-    libmesh_error();
+    mooseError( errMsg );
   }
 
-  if (_has_function && !_function)
-  {
-    std::cout << "Unable to find function in pressure bc." << std::endl;
-    libmesh_error();
-  }
+  mooseAssert( getParam<std::string>("function") == "" || _function, "Function not found" );
 }
 
 Real
@@ -52,7 +40,7 @@ Pressure::computeQpResidual()
 {
   Real factor = _factor;
 
-  if (_has_function)
+  if (_function)
   {
     factor *= _function->value(_t, _q_point[_qp]);
   }

@@ -22,13 +22,11 @@ protected:
 
   virtual Real computeQpResidual();
 
-  int _component;
+  const int _component;
 
-  Real _factor;
+  const Real _factor;
 
-  bool _has_function;
-
-  Function * _function;
+  Function * const _function;
 
 };
 
