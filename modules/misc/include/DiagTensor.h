@@ -372,7 +372,7 @@ public:
       
       _xx = _xx*c*c + _yy*s*s ;
       _yy = _xx*s*s + _yy*c*c ;
-      _zz = _zz;
+      //_zz = _zz;
     }
   
   void fillFromInputVector(std::vector<Real> input)

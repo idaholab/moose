@@ -68,7 +68,7 @@ public:
     {
       *this = a;
     }
-  
+
 
   ~SymmTensor() {}
 
@@ -370,10 +370,10 @@ public:
     return r_val;
   }
 
-  SymmTensor operator*(Real t) const 
+  SymmTensor operator*(Real t) const
   {
     SymmTensor r_val;
-    
+
     r_val._xx = _xx * t;
     r_val._yy = _yy * t;
     r_val._zz = _zz * t;
@@ -483,13 +483,13 @@ public:
       Real angle = a*pi/180.0;
       Real s = std::sin(angle);
       Real c = std::cos(angle);
-      
+
       _xx = _xx*c*c + _yy*s*s + 2.0*_xy*s*c;
       _yy = _xx*s*s + _yy*c*c - 2.0*_xy*s*c;
-      _zz = _zz;
+      //_zz = _zz;
       _xy = -2.0*(_xx - _yy)*s*c + 2.0*_xy*(c*c - s*s);
-      _yz = _yz;
-      _zx = _zx;
+      //_yz = _yz;
+      //_zx = _zx;
     }
 
   void fillFromInputVector(std::vector<Real> input)
@@ -503,8 +503,8 @@ public:
       _yz = input[3];
       _zx = input[4];
     }
-  
-  
+
+
 private:
   Real _xx;
   Real _yy;
