@@ -4,7 +4,7 @@
 # thay may be built with an "up" target.  If passed the value ROOT it will simply
 # return the root directory
 
-import os, sys
+import os, sys, re
 
 def findDepApps(app_name):
   apps_file = '.build_apps'
@@ -32,6 +32,7 @@ def findDepApps(app_name):
 
   # See which apps in this file are children or dependents of this app
   dep_apps = []
+  appNameDirRE=re.compile("^\s*"+app_name.upper()+"_DIR",re.MULTILINE)
   for app in apps:
     if os.path.exists(apps_dir + app + '/Makefile'):
       f = open(apps_dir + app + '/Makefile')
@@ -39,7 +40,7 @@ def findDepApps(app_name):
       f.close()
 
       # See if this app is listed in the Makefile
-      if app_name != app and lines.find(app_name.upper() + "_DIR") > -1:
+      if app_name != app and appNameDirRE.search(lines):
         dep_apps.append(app)
 
   return ' '.join(dep_apps)
