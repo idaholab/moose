@@ -490,7 +490,7 @@ Parser::buildFullTree()
     // We need to see if this action is inherited from MooseObjectAction
     // If it is, then we will loop over all the Objects in MOOSE's Factory object to print them out
     // if they have matching "built_by_action" tags.
-    if (action_obj_params.have_parameter<bool>("isMooseObjectAction") && action_obj_params.get<bool>("isMooseObjectAction"))
+    if (action_obj_params.have_parameter<bool>("isObjectAction") && action_obj_params.get<bool>("isObjectAction"))
     {
       for (registeredMooseObjectIterator moose_obj = Factory::instance()->registeredObjectsBegin();
            moose_obj != Factory::instance()->registeredObjectsEnd();

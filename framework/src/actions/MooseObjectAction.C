@@ -20,7 +20,6 @@ InputParameters validParams<MooseObjectAction>()
 {
   InputParameters params = validParams<ObjectAction>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose Object that will be built by this Action");
-  params.addPrivateParam<bool>("isMooseObjectAction", true);
   return params;
 }
 

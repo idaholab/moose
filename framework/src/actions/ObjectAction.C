@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<ObjectAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addPrivateParam<bool>("isObjectAction", true);
   return params;
 }
 

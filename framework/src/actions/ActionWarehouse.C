@@ -86,9 +86,9 @@ ActionWarehouse::addActionBlock(Action * blk)
   if (_registered_actions.find(action_name) == _registered_actions.end())
     mooseError("A(n) " << action_name << " is not a registered action name");
 
-  // Make sure that the MooseObjectAction action_name and Action action_name are consistent
+  // Make sure that the ObjectAction action_name and Action action_name are consistent
   // otherwise that means that is action was built by the wrong type
-  MooseObjectAction * moa = dynamic_cast<MooseObjectAction *>(blk);
+  ObjectAction * moa = dynamic_cast<ObjectAction *>(blk);
   if (moa)
   {
     InputParameters mparams = moa->getObjectParams();
@@ -227,9 +227,9 @@ ActionWarehouse::executeAllActions()
   {
      // Delay the InputParameters check of MOOSE based objects until just before "acting"
      // so that Meta-Actions can complete the build of parameters as necessary
-     MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*act_iter);
-     if (moose_obj_action != NULL)
-       moose_obj_action->getObjectParams().checkParams(moose_obj_action->name());
+     ObjectAction * obj_action = dynamic_cast<ObjectAction *>(*act_iter);
+     if (obj_action != NULL)
+       obj_action->getObjectParams().checkParams(obj_action->name());
 
      if (_show_actions)
        std::cerr << "[DBG][ACT] - " << (*act_iter)->name() << std::endl;
@@ -245,12 +245,11 @@ ActionWarehouse::executeActionsWithAction(const std::string & name)
        act_iter != actionBlocksWithActionEnd(name);
        ++act_iter)
   {
-
     // Delay the InputParameters check of MOOSE based objects until just before "acting"
     // so that Meta-Actions can complete the build of parameters as necessary
-    MooseObjectAction * moose_obj_action = dynamic_cast<MooseObjectAction *>(*act_iter);
-    if (moose_obj_action != NULL)
-      moose_obj_action->getObjectParams().checkParams(moose_obj_action->name());
+    ObjectAction * obj_action = dynamic_cast<ObjectAction *>(*act_iter);
+    if (obj_action != NULL)
+      obj_action->getObjectParams().checkParams(obj_action->name());
 
     (*act_iter)->act();
   }
