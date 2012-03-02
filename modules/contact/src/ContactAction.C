@@ -15,6 +15,7 @@ InputParameters validParams<ContactAction>()
   params.addRequiredParam<std::string>("disp_y", "The y displacement");
   params.addParam<std::string>("disp_z", "", "The z displacement");
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
   return params;
@@ -28,6 +29,7 @@ ContactAction::ContactAction(const std::string & name, InputParameters params) :
   _disp_y(getParam<std::string>("disp_y")),
   _disp_z(getParam<std::string>("disp_z")),
   _penalty(getParam<Real>("penalty")),
+  _tension_release(getParam<Real>("tension_release")),
   _model(getParam<std::string>("model")),
   _order(getParam<std::string>("order"))
 {
@@ -75,6 +77,7 @@ ContactAction::act()
     params.set<unsigned int>("boundary") = _master;
     params.set<unsigned int>("slave") = _slave;
     params.set<Real>("penalty") = _penalty;
+    params.set<Real>("tension_release") = _tension_release;
     params.addCoupledVar("disp_x", "The x displacement");
     params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
     params.addCoupledVar("disp_y", "The y displacement");

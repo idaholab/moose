@@ -40,7 +40,8 @@ protected:
   const ContactModel _model;
   PenetrationLocator & _penetration_locator;
 
-  Real _penalty;
+  const Real _penalty;
+  const Real _tension_release;
   bool _updateContactSet;
 
   NumericVector<Number> & _residual_copy;

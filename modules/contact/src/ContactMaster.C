@@ -20,6 +20,8 @@ InputParameters validParams<ContactMaster>()
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
+
+  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
   return params;
 }
 
@@ -29,7 +31,8 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   _model(contactModel(getParam<std::string>("model"))),
   _penetration_locator(getPenetrationLocator(getParam<unsigned int>("boundary"), getParam<unsigned int>("slave"), Utility::string_to_enum<Order>(getParam<std::string>("order")))),
   _penalty(getParam<Real>("penalty")),
-   _updateContactSet(true),
+  _tension_release(getParam<Real>("tension_release")),
+  _updateContactSet(true),
   _residual_copy(_sys.residualGhosted()),
   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
   _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
@@ -39,6 +42,10 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   if (_model == CM_GLUED)
   {
     _penetration_locator.setUpdate(false);
+  }
+  if (_tension_release < 0)
+  {
+    mooseError("The parameter 'tension_release' must be non-negative");
   }
 }
 
@@ -122,7 +129,7 @@ ContactMaster::updateContactSet()
 
       // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
 
-      if (has_penetrated[slave_node_num] && resid < 0 && locked_this_step[slave_node_num] < 3)
+      if (has_penetrated[slave_node_num] && resid < _tension_release && locked_this_step[slave_node_num] < 3)
       {
         std::cout << "Releasing node " << node->id() << " " << resid << std::endl;
         has_penetrated[slave_node_num] = false;

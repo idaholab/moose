@@ -22,6 +22,7 @@ private:
   const std::string _disp_y;
   const std::string _disp_z;
   const Real _penalty;
+  const Real _tension_release;
   const std::string _model;
   const std::string _order;
 };
