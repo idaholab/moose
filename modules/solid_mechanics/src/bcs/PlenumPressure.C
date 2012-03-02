@@ -39,7 +39,7 @@ PlenumPressure::PlenumPressure(const std::string & name, InputParameters paramet
            << _component
            << "." << std::endl;
 
-    mooseError( errMsg );
+    mooseError( errMsg.str() );
   }
 
 }

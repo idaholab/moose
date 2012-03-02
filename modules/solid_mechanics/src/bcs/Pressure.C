@@ -29,7 +29,7 @@ Pressure::Pressure(const std::string & name, InputParameters parameters)
            << _component
            << "." << std::endl;
 
-    mooseError( errMsg );
+    mooseError( errMsg.str() );
   }
 
   mooseAssert( getParam<std::string>("function") == "" || _function, "Function not found" );
