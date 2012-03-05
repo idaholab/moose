@@ -10,7 +10,7 @@ test_time   = { INPUT : 'adapt_time_test.i',
 
 displaced_test = {
 	INPUT : 'displaced_adapt_test.i',
-	EXODIFF : ['out_displaced.e-s003' , 'displaced_adapt_test_out.e-s002'],
+	EXODIFF : ['displaced_adapt_test_out.e-s002' , 'displaced_adapt_test_out.e-s002'],
         GROUP : 'adaptive'}
 
 adapt_cycles_test = {

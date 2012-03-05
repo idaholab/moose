@@ -490,8 +490,7 @@ DisplacedProblem::updateGeomSearch()
 void
 DisplacedProblem::output(bool /*force*/)
 {
-  // FIXME: use proper file_base
-  _ex.output("out_displaced", _mproblem.time());
+  _ex.output(_mproblem.out().fileBase() + "_displaced", _mproblem.time());
   if (_seq)
     _ex.meshChanged();
 }
