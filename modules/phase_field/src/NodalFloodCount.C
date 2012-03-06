@@ -60,12 +60,22 @@ NodalFloodCount::initialize()
   // Build a new node to element map
   _nodes_to_elem_map.clear();
   MeshTools::build_nodes_to_elem_map(_mesh._mesh, _nodes_to_elem_map);
+
+  //DEBUG
+//   for (unsigned int i=0; i<_nodes_to_elem_map.size(); ++i)
+//   {
+//     std::cout << "node_id: " << i << "\n";
+//     for (unsigned int j=0; j<_nodes_to_elem_map[i].size(); ++j)
+//       std::cout << _nodes_to_elem_map[i][j]->id() << " ";
+//     std::cout << "\n";
+//  }
+  //DEBUG
 }
 
 void
 NodalFloodCount::execute()
 {
-  unsigned int n_nodes = _current_elem->n_nodes();
+  unsigned int n_nodes = _current_elem->n_vertices();
   for (unsigned int i=0; i < n_nodes; ++i)
   {
     const Node *node = _current_elem->get_node(i);
@@ -77,39 +87,82 @@ NodalFloodCount::execute()
 Real
 NodalFloodCount::getValue()
 {
+  //DEBUG
+//  pack(_packed_data);
+//  unpack(_packed_data);
+//  std::cout << "\n\n*********** PROCESSOR " << libMesh::processor_id() << " DATA ************\n";
+// 
+//  for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
+//  {
+//    for (std::set<unsigned int>::iterator it = li->begin(); it != li->end(); ++it)
+//    {
+//      std::cout << *it << " ";
+//      //      if (--counter == 0) break;
+//    }
+//    std::cout << "\n";
+//  }
+  //DEBUG
+  
   // Exchange data in parallel
   pack(_packed_data);
   Parallel::allgather(_packed_data, false);
   unpack(_packed_data);
 
+
+  //DEBUG
+//  std::cout << "\n\n************* BEFORE MERGE ********************\n";
+// 
+//  for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
+//  {
+//    for (std::set<unsigned int>::iterator it = li->begin(); it != li->end(); ++it)
+//    {
+//      std::cout << *it << " ";
+//      //      if (--counter == 0) break;
+//    }
+//    std::cout << "\n";
+//  }
+  //DEBUG
+
+  
   // Now we need to merge the sets to remove bubbles that were partially counted by multiple processors
   // This call consolidates _bubble_sets
   mergeSets();
 
   //DEBUG
- //  std::cout << "\n\n************* AFTER MERGE ********************\n";
-//   unsigned int ret_value = _bubble_sets.size();
-//   while (!_bubble_sets.empty())
-//   {
-//     std::list<std::set<unsigned int> >::iterator low;
-//     unsigned int min = std::numeric_limits<unsigned int>::max();
-//     for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
-//     {
-//       if (*(li->begin()) < min)
-//       {
-//         min = *(li->begin());
-//         low = li;
-//       }
-//     }
-//     std::cout << "\nL " << low->size() << "\n";
-//     unsigned int counter=5;
-//     for (std::set<unsigned int>::iterator it = low->begin(); it != low->end(); ++it)
-//     {
-//       std::cout << *it << " ";
-// //      if (--counter == 0) break;
-//     }
-//     _bubble_sets.erase(low);
+//  std::cout << "\n\n************* AFTER MERGE ********************\n";
+//  for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
+//  {
+//    for (std::set<unsigned int>::iterator it = li->begin(); it != li->end(); ++it)
+//    {
+//      std::cout << *it << " ";
+//      //      if (--counter == 0) break;
+//    }
+//    std::cout << "\n";
 //  }
+
+  
+  //unsigned int ret_value = _bubble_sets.size();
+  //while (!_bubble_sets.empty())
+  //{
+  //  std::list<std::set<unsigned int> >::iterator low;
+  //  unsigned int min = std::numeric_limits<unsigned int>::max();
+  //  for (std::list<std::set<unsigned int> >::iterator li = _bubble_sets.begin(); li != _bubble_sets.end(); ++li)
+  //  {
+  //    if (*(li->begin()) < min)
+  //    {
+  //      min = *(li->begin());
+  //      low = li;
+  //    }
+  //  }
+  //  std::cout << "\nL " << low->size() << "\n";
+  //  unsigned int counter=5;
+  //  for (std::set<unsigned int>::iterator it = low->begin(); it != low->end(); ++it)
+  //  {
+  //    std::cout << *it << " ";
+  //    //      if (--counter == 0) break;
+  //  }
+  //  _bubble_sets.erase(low);
+  //}
   //DEBUG
 
   // Finally return the number of bubbles (count of unique sets)
@@ -296,16 +349,33 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
     return;
   }
 
-  // Mark it! (If region is zero that signifies that this is a new bubble)
-  _bubble_map[node_id] = region ? region : ++_region_count;
-
   // Yay! A bubble
   std::vector< const Node * > neighbors;
   MeshTools::find_nodal_neighbors(_mesh._mesh, *node, _nodes_to_elem_map, neighbors);
+  // Important!  If this node doesn't have any neighbors (i.e. floating node in the center
+  // of an element) we need to just unmark it for now since it can't be easiliy flooded
+  if (neighbors.size() == 0)
+  {
+    _bubble_map[node_id] = 0;
+    return;
+  }
+
+  //DEBUG
+//  std::cout << "node_id: " << node->id() << "\n";
+//  for (unsigned int i=0; i<neighbors.size(); ++i)
+//  {
+//    std::cout << neighbors[i]->id() << " ";
+//  }
+//  std::cout << "\n";
+  //DEBUG
+  
+  // Mark it! (If region is zero that signifies that this is a new bubble)
+  _bubble_map[node_id] = region ? region : ++_region_count;
+  
   for (unsigned int i=0; i<neighbors.size(); ++i)
   {
     // Only recurse one nodes this processor owns
-    if (!region || neighbors[i]->processor_id() == libMesh::processor_id())
+    if (!region || isNodeValueValid(neighbors[i]->id()))
     {
       //DEBUG
 //       std::vector<unsigned int> dof_indices(1);
@@ -318,4 +388,14 @@ NodalFloodCount::flood(const Node *node, unsigned int region)
 //      std::cout << "Not recursing on Node: " << node_id << " since we do not own it\n";
     }
   }
+}
+
+bool
+NodalFloodCount::isNodeValueValid(unsigned int node_id) const
+{
+  for (unsigned int j=0; j < _nodes_to_elem_map[node_id].size(); ++j)
+    if (_nodes_to_elem_map[node_id][j]->processor_id() == libMesh::processor_id())
+      return true;
+
+  return false;
 }

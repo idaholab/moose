@@ -60,6 +60,12 @@ protected:
    */
   void mergeSets();
 
+  /**
+   * This routine returns whether or not a nodal value is valid on a particular processor
+   * (i.e. includes values owned by this processor and ghost nodes)
+   */
+  bool isNodeValueValid(unsigned int node_id) const;
+
   Real _threshold;
   MooseMesh & _mesh;
   MooseVariable & _moose_var;
