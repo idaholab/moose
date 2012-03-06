@@ -257,7 +257,7 @@ public:
       return r_val;
     }
   
-  DiagTensor  inverse(const DiagTensor & t) const
+  DiagTensor  inverse() const
     {
       DiagTensor r_val;
       mooseAssert(  ( _xx==0 || _yy==0 || _zz==0), "Cannot invert singular DiagTensor.");
@@ -265,7 +265,7 @@ public:
       r_val._yy = 1./_yy ;
       r_val._zz = 1./_zz ;
       return r_val;
-  }
+    }
   
   DiagTensor operator*(Real t) const 
     {
@@ -372,8 +372,7 @@ public:
       
       _xx = _xx*c*c + _yy*s*s ;
       _yy = _xx*s*s + _yy*c*c ;
-      //_zz = _zz;
-    }
+     }
   
   void fillFromInputVector(std::vector<Real> input)
     {
