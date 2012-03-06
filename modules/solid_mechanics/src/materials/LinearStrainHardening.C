@@ -63,13 +63,15 @@ LinearStrainHardening::computeStress()
   // determine if yield condition is satisfied
   Real yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
 
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+
   if (yield_condition > 0.)  //then use newton iteration to determine effective plastic strain increment
   {
     unsigned int it = 0;
     Real scalar_plastic_strain_increment = 0.;
     Real norm_residual = 10.;
 
-    _hardening_variable[_qp] = _hardening_variable_old[_qp];
     while(it < _max_its && norm_residual > _tolerance)
     {
       Real plastic_residual = effective_trial_stress - (3. * _shear_modulus * scalar_plastic_strain_increment) - _hardening_variable[_qp] - _yield_stress;
@@ -103,17 +105,14 @@ LinearStrainHardening::computeStress()
     _stress[_qp] =  *elasticityTensor() * _strain_increment;
 
     _stress[_qp] += _stress_old;
-    _plastic_strain[_qp] = plastic_strain_increment;
-    _plastic_strain[_qp] += _plastic_strain_old[_qp];
+    _plastic_strain[_qp] += plastic_strain_increment;
 
   } // end of if statement
   else
   {
-    // compute stress increment
-    stress_new =  *elasticityTensor() * _strain_increment;
 
-    // update stress and plastic strain
-    _stress[_qp] = stress_new;
+    // update stress
+    _stress[_qp] = *elasticityTensor() * _strain_increment;
     _stress[_qp] += _stress_old;
 
   } // end of else
