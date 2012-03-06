@@ -9,7 +9,7 @@ moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
 moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
 
 # We exclude these applications:
-excluded_applications = set(['r7_moose', 'rattlesnake'])
+excluded_applications = set(['r7_moose', 'rattlesnake', 'moose_unit'])
 
 _USAGE = """
 updateStable.py repo_revision
@@ -62,7 +62,7 @@ def getCoverage():
   runCMD(coverage_cmd, True)
   # Generate the moose.info (a filtered list of actual code coverage were after)
   coverage_results = runCMD(filter_cmd, True)
-  # Find the percentage graciously giving to us by our lines_cmd:
+  # Find the percentage graciously givin to us by our filter_cmd:
   coverage_score = coverage_results[(coverage_results.find('lines......: ') + 13):coverage_results.find('% ')]
   # Return the results
   if float(coverage_score) <= 80.0:
