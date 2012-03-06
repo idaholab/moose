@@ -38,14 +38,50 @@ def buildStatus():
   else:
     return True
 
-def runCMD(cmd_opts):
+def getCoverage():
+  # A list of stuff we don't want to include in code coverage. Add more here if needed (wild cards accepted).
+  filter_out = [ 'contrib/mtwist*',
+                 '/usr/include*',
+                 '*/openmpi/*',
+                 '*/libmesh/*'
+                 ]
+  # Use the same commands from the coverage_html script to generate the raw.info file
+  coverage_cmd = [ 'lcov',
+                   '--base-directory', 'moose',
+                   '--directory', 'moose/src/',
+                   '--capture',
+                   '--ignore-errors', 'gcov,source',
+                   '--output-file', 'raw.info'
+                   ]
+  # Put the lcov filtering command together
+  filter_cmd = ['lcov']
+  for sgl_filter in filter_out:
+    filter_cmd.extend(['-r', 'raw.info', sgl_filter])
+  filter_cmd.extend(['-o', 'moose.info'])
+  # Generate the raw.info
+  runCMD(coverage_cmd, True)
+  # Generate the moose.info (a filtered list of actual code coverage were after)
+  coverage_results = runCMD(filter_cmd, True)
+  # Find the percentage graciously giving to us by our lines_cmd:
+  coverage_score = coverage_results[(coverage_results.find('lines......: ') + 13):coverage_results.find('% ')]
+  # Return the results
+  if float(coverage_score) <= 80.0:
+    print 'Failed Coverage: ' + str(coverage_score)
+    return False
+  else:
+    print 'Succeeded Coverage: ' + str(coverage_score)
+    return True
+
+
+def runCMD(cmd_opts, quiet=False):
   a_proc = subprocess.Popen(cmd_opts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   retstr = a_proc.communicate()
   if not a_proc.poll() == 0:
     print 'Error:', retstr[1]
     sys.exit(1)
   else:
-    print retstr[0]
+    if not quiet:
+      print retstr[0]
     return retstr[0]
 
 def parseLOG(merge_log):
@@ -103,7 +139,7 @@ def process_args():
 if __name__ == '__main__':
   if socket.gethostname().split('.')[0] == head_node:
     arg_revision = process_args()
-    if buildStatus():
+    if buildStatus() and getCoverage():
       # Checking out moose-stable
       checkout_moose_stable = ['svn', 'co', '--quiet', moose_stable, 'moose-stable']
       runCMD(checkout_moose_stable)
