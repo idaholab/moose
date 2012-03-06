@@ -27,6 +27,13 @@ public:
 
 protected:
   virtual void computeQpProperties();
+
+  virtual void computeQpElasticityTensor();
+
+  virtual void computeQpStrain();
+
+  virtual void computeQpStress();
+  
   
 private:
   // vectors to get the input values

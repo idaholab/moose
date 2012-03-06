@@ -34,13 +34,32 @@ LinearGeneralAnisotropicMaterial::LinearGeneralAnisotropicMaterial(const std::st
 }
 
 void
- LinearGeneralAnisotropicMaterial::computeQpProperties()
- {
-   // Fill in the matrix stiffness material property
-   _Cijkl_matrix_MP[_qp] = _Cijkl_matrix;
-   _Jacobian_mult[_qp] = _Cijkl_matrix;
+LinearGeneralAnisotropicMaterial::computeQpProperties()
+{
+  computeQpElasticityTensor();
+  computeQpStrain();
+  computeQpStress();
+}
 
-   //debugging
-   //std::cout << _Cijkl_matrix, std::cout << std::endl;
-   //std::cout <<  _Cijkl_matrix_MP[_qp], std::cout << std::endl;
- }
+void LinearGeneralAnisotropicMaterial::computeQpElasticityTensor()
+{
+  // Fill in the matrix stiffness material property
+  _Cijkl_matrix_MP[_qp] = _Cijkl_matrix;
+  _Jacobian_mult[_qp] = _Cijkl_matrix;
+}
+
+void LinearGeneralAnisotropicMaterial::computeQpStrain()
+{
+ _elastic_strain[_qp] = SymmTensor ( _grad_disp_x[_qp](0),
+                                     _grad_disp_y[_qp](1),
+                                     _grad_disp_z[_qp](2),
+                                     0.5*(_grad_disp_x[_qp](1)+ _grad_disp_y[_qp](0)),
+                                     0.5*(_grad_disp_y[_qp](2)+ _grad_disp_z[_qp](1)),
+                                     0.5*(_grad_disp_z[_qp](0)+ _grad_disp_x[_qp](2)) );
+}
+
+void LinearGeneralAnisotropicMaterial::computeQpStress()
+{
+  // stress = C * e
+  _stress[_qp] = _elasticity_tensor[_qp]*_elastic_strain[_qp];
+}
