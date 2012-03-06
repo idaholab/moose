@@ -20,12 +20,12 @@ SplitCHBase::computeDFDC(PFFunctionType type)
   {
   case Residual:
     return _u[_qp]*_u[_qp]*_u[_qp] - _u[_qp]; // return Residual value
-    
-  case Jacobian: 
+
+  case Jacobian:
     return (3.0*_u[_qp]*_u[_qp] - 1.0)*_phi[_j][_qp]; //return Jacobian value
-    
+
   }
-  
+
   mooseError("Invalid type passed in");
   }*/
 
@@ -35,9 +35,9 @@ SplitCHBase::computeQpResidual()
   Real f_prime_zero = computeDFDC(Residual);
 
   Real residual = f_prime_zero*_test[_i][_qp];
- 
+
   return residual;
-  
+
 }
 
 Real
@@ -52,7 +52,7 @@ SplitCHBase::computeQpJacobian()
 }
 
 Real
-SplitCHBase::computeQpOffDiagJacobian(unsigned int jvar)
+SplitCHBase::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
 
   return 0.0;

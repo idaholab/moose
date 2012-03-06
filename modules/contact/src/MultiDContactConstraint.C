@@ -76,7 +76,7 @@ void
 MultiDContactConstraint::updateContactSet()
 {
   std::map<unsigned int, bool> & has_penetrated = _penetration_locator._has_penetrated;
-  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
+//  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
   std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._unlocked_this_step;
 
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
