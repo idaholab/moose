@@ -128,18 +128,19 @@ ContactMaster::updateContactSet()
       unsigned int slave_node_num = it->first;
 
       // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
+      const Real distance( pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id())));
 
-      if (has_penetrated[slave_node_num] && resid < -_tension_release && locked_this_step[slave_node_num] < 3)
+      if (has_penetrated[slave_node_num] && resid < -_tension_release && locked_this_step[slave_node_num] < 2)
       {
         std::cout << "Releasing node " << node->id() << " " << resid << std::endl;
         has_penetrated[slave_node_num] = false;
         ++unlocked_this_step[slave_node_num];
       }
-      else if (pinfo->_distance > 0)
+      else if (distance > 0)
       {
         if (!has_penetrated[slave_node_num])
         {
-          std::cout << "Capturing node " << node->id() << " " << pinfo->_distance << " " << unlocked_this_step[slave_node_num] <<  std::endl;
+          std::cout << "Capturing node " << node->id() << " " << distance << " " << unlocked_this_step[slave_node_num] <<  std::endl;
           ++locked_this_step[slave_node_num];
         }
         has_penetrated[slave_node_num] = true;
@@ -150,7 +151,7 @@ ContactMaster::updateContactSet()
       if (pinfo->_distance > 0)
       {
         unsigned int slave_node_num = it->first;
-      has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
+        has_penetrated.insert(std::make_pair<unsigned int, bool>(slave_node_num, true));
       }
     }
   }
