@@ -56,6 +56,7 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
 
   default:
     mooseError("Unsupported dimension");
+    break;
   }
 
   return pt;

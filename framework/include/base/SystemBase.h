@@ -54,6 +54,7 @@ class SystemBase
 {
 public:
   SystemBase(SubProblem & subproblem, const std::string & name);
+  virtual ~SystemBase() {}
 
   virtual unsigned int number() = 0;
   virtual MooseMesh & mesh() { return _mesh; }

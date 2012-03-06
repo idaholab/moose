@@ -49,10 +49,10 @@ ProblemFactory::getValidParams(const std::string & name)
 Problem *
 ProblemFactory::create(const std::string & obj_name, const std::string & name, InputParameters parameters)
 {
-  if (_name_to_build_pointer.find(obj_name) != _name_to_build_pointer.end())
-    return (*_name_to_build_pointer[obj_name])(name, parameters);
-  else
+  if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
     mooseError("Problem '" + obj_name + "' was not registered.");
+
+  return (*_name_to_build_pointer[obj_name])(name, parameters);
 }
 
 FEProblem *

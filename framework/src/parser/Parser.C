@@ -446,6 +446,7 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode, std::ostre
     break;
   default:
     mooseError("Unrecognized Syntax Formatter requested");
+    break;
   }
 }
 

@@ -69,10 +69,10 @@ FormattedTable::getLastData(const std::string & name)
   mooseAssert(_last_key != -1, "No Data stored in the FormattedTable");
 
   std::map<std::string, Real>::iterator it = (_data[_last_key]).find(name);
-  if (it != (_data[_last_key]).end())
-    return it->second;
+  if (it == (_data[_last_key]).end())
+    mooseError("No Data found for name: " + name);
 
-  mooseError("No Data found for name: " + name);
+  return it->second;
 }
 
 void

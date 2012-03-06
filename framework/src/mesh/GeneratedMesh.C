@@ -66,6 +66,7 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
     case 3: elem_type_str = "HEX8"; break;
     default:
       mooseError("Unable to generate mesh for unknown dimension");
+      break;
     }
 
   ElemType elem_type = Utility::string_to_enum<ElemType>(elem_type_str);

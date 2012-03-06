@@ -1459,10 +1459,10 @@ FEProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   if (_nl.hasVariable(var_name))
     return _nl.getVariable(tid, var_name);
-  else if (_aux.hasVariable(var_name))
-    return _aux.getVariable(tid, var_name);
-  else
+  else if (!_aux.hasVariable(var_name))
     mooseError("Unknown variable " + var_name);
+
+  return _aux.getVariable(tid, var_name);
 }
 
 void

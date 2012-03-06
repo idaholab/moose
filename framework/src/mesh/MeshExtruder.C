@@ -159,6 +159,7 @@ MeshExtruder::extrude(libMesh::MeshBase &dest_mesh)
           std::cout << ((*el)->type());
 
           mooseError("Element type not setup");
+          break;
         }
 
         // bottom sidesets

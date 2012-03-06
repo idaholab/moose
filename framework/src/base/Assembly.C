@@ -159,6 +159,7 @@ Assembly::reinit(const Elem * elem)
 
   default:
     mooseError("Unknown coordinate system");
+    break;
   }
 
   //Compute the area of the element
@@ -223,6 +224,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   default:
     mooseError("Unknown coordinate system");
+    break;
   }
 
   //Compute the area of the element

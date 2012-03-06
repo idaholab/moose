@@ -85,7 +85,7 @@ public:
   virtual const std::vector<Material*> & getFaceMaterials(unsigned int /*block_id*/, THREAD_ID /*tid*/) { mooseError("Not implemented yet."); }
 
   /// Returns true if the Problem has Dirac kernels it needs to compute on elem.
-  virtual bool reinitDirac(const Elem * /*elem*/, THREAD_ID /*tid*/){ mooseError("Cannot reinit this Problem with arbitrary quadrature points!"); };
+  virtual bool reinitDirac(const Elem * /*elem*/, THREAD_ID /*tid*/){ mooseError("Cannot reinit this Problem with arbitrary quadrature points!"); return false; };
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & /*elems*/){ mooseError("Cannot retrieve Dirac elements from this problem!"); };

@@ -87,6 +87,7 @@ Output::add(Output::Type type, bool output_input)
 
   default:
     mooseError("I do not know how to build and unknown outputter");
+    break;
   }
 
   _outputter_types.insert(type);

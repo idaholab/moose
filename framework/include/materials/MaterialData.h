@@ -106,10 +106,10 @@ inline unsigned int
 MaterialData::getPropertyId (const std::string & prop_name) const
 {
   std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
-  if (it != _prop_ids.end())
-    return it->second;
-  else
+  if (it == _prop_ids.end())
     mooseError("No property name mapping for '" + prop_name + "'");
+
+  return it->second;
 }
 
 inline unsigned int
