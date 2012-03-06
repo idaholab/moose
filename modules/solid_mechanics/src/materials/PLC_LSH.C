@@ -276,6 +276,8 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
 // determine if yield condition is satisfied
   Real yield_condition = effective_trial_stress_p - _hardening_variable_old[_qp] - _yield_stress;
 
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
+
   if (yield_condition > 0.)  //then use newton iteration to determine effective plastic strain increment
   {
     unsigned int jt = 0;
@@ -332,8 +334,7 @@ PLC_LSH::computeLSH( const SymmTensor & creep_strain_increment,
 
 // update stress and plastic strain
     stress_new += _stress_old;
-    _plastic_strain[_qp] = plastic_strain_increment;
-    _plastic_strain[_qp] += _plastic_strain_old[_qp];
+    _plastic_strain[_qp] += plastic_strain_increment;
 
   }//end of if statement
 
