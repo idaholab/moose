@@ -11,7 +11,7 @@ APP=`echo $app | tr "[:lower:]" "[:upper:]"`
 mkdir coverage
 lcov --base-directory $app --directory $app/src/ --capture --output-file raw.info --ignore-errors gcov,source
 echo "Removing unecessary folders"
-lcov -r raw.info "/usr/include/c++/*" -r raw.info "*/libmesh/*" -r raw.info "*/utils/fparser*" -o $app.info
+lcov -r raw.info "/usr/include*" -r raw.info "*/openmpi/*" -r raw.info "/usr/include/c++/*" -r raw.info "*/libmesh/*" -o $app.info
 echo "Generating html"
 genhtml $app.info -t "$APP Test Coverage" --num-spaces 2 --legend -o coverage
 echo "rsyncing html"

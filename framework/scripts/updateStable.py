@@ -9,7 +9,7 @@ moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
 moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
 
 # We exclude these applications:
-excluded_applications = set(['r7_moose', 'rattlesnake', 'moose_unit'])
+excluded_applications = set(['r7_moose', 'rattlesnake'])
 
 _USAGE = """
 updateStable.py repo_revision
