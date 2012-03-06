@@ -283,7 +283,7 @@ PetscErrorCode petscNonlinearConverged(SNES snes,PetscInt it,PetscReal xnorm,Pet
 }
 
 
-PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * changed_w)
+PetscErrorCode dampedCheck(SNES /*snes*/, Vec /*x*/, Vec y, Vec w, void *lsctx, PetscBool * changed_y, PetscBool * /*changed_w*/)
 {
   //w = updated solution = x- scaling*y
   //x = current solution
@@ -293,7 +293,6 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
   Real damping = 1.0;
 
   FEProblem & problem = *static_cast<FEProblem *>(lsctx);
-  DisplacedProblem & displaced_problem = *problem.getDisplacedProblem();
 
   TransientNonlinearImplicitSystem & system = problem.getNonlinearSystem().sys();
 
