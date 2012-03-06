@@ -2,10 +2,10 @@
 #define NSPRESSUREDERIVS_H
 
 /**
- * Class outside the Moose hierarchy that contains common 
+ * Class outside the Moose hierarchy that contains common
  * functionality for computing derivatives of the pressure
  * variable.
- * 
+ *
  * This class is templated so that it can be used by either
  * a Kernel object or a BC object.
  */
@@ -39,7 +39,7 @@ Real NSPressureDerivs<T>::get_grad(unsigned i)
   Real u = _data._u_vel[_data._qp];
   Real v = _data._v_vel[_data._qp];
   Real w = _data._w_vel[_data._qp];
-  
+
   Real vel2 = (u*u + v*v + w*w);
   Real gam = _data._gamma;
 
@@ -62,6 +62,7 @@ Real NSPressureDerivs<T>::get_grad(unsigned i)
 
   default:
     mooseError("Should not get here!");
+    break;
   } // end switch
 }
 
@@ -96,7 +97,7 @@ Real NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
     // Row 0
   case 0: // rho, rho derivative
     return tmp*vel2;
-    
+
     // Row 1
   case 5: // rho*u, rho
     return -tmp*u;
@@ -115,7 +116,7 @@ Real NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
   case 15: // rho*w, rho
     return -tmp*w;
 
-  case 18: // rho*w, rho*w 
+  case 18: // rho*w, rho*w
     return tmp;
 
   case 11:
@@ -130,6 +131,7 @@ Real NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
 
   default:
     mooseError("Should not get here!");
+    break;
   }
 
   return 0.;

@@ -5,7 +5,7 @@ InputParameters validParams<NSSUPGEnergy>()
 {
   // Initialize the params object from the base class
   InputParameters params = validParams<NSSUPGBase>();
-  
+
   return params;
 }
 
@@ -21,9 +21,9 @@ NSSUPGEnergy::NSSUPGEnergy(const std::string & name, InputParameters parameters)
 Real NSSUPGEnergy::computeQpResidual()
 {
   // See "Component SUPG contributions" section of notes for details.
-  
+
   // Values to be summed up and returned
-  Real 
+  Real
     mass_term = 0.,
     mom_term = 0.,
     energy_term = 0.;
@@ -31,7 +31,7 @@ Real NSSUPGEnergy::computeQpResidual()
   {
     // Velocity vector
     RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    
+
     // Velocity vector magnitude squared
     Real velmag2 = vel.size_sq();
 
@@ -44,7 +44,7 @@ Real NSSUPGEnergy::computeQpResidual()
                         _strong_residuals[_qp][3]);
 
     // 1.) The mass-residual term:
-    Real mass_coeff = 
+    Real mass_coeff =
       (0.5*(_gamma-1.)*velmag2 - _enthalpy[_qp]) * U_grad_phi;
 
     mass_term = _tauc[_qp] * mass_coeff * _strong_residuals[_qp][0];
@@ -88,7 +88,7 @@ Real NSSUPGEnergy::compute_jacobian(unsigned var)
   unsigned  mapped_var_number = this->map_var_number(var);
 
   // Convenience vars
-  
+
   // Velocity vector
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
@@ -98,7 +98,7 @@ Real NSSUPGEnergy::compute_jacobian(unsigned var)
   // Shortcuts for shape function gradients at current qp.
   RealVectorValue grad_test_i = _grad_test[_i][_qp];
   RealVectorValue grad_phi_j  = _grad_phi[_j][_qp];
- 
+
   // ...
 
   // 1.) taum- and taue-proportional terms present for any variable:
@@ -111,9 +111,9 @@ Real NSSUPGEnergy::compute_jacobian(unsigned var)
   mom_mat += (1.-_gamma) * _calC[_qp][0] * _calC[_qp][0].transpose(); //  + (1-gam)*S)
   mom_mat = mom_mat * _calA[_qp][mapped_var_number];                  // * A_{ell}
   Real mom_term = _taum[_qp] * grad_test_i * (mom_mat * grad_phi_j);
- 
+
   //
-  // Art. Diffusion matrix for taue-proportinal term = gam * E_{ell}, 
+  // Art. Diffusion matrix for taue-proportinal term = gam * E_{ell},
   // where E_{ell} = C_k * E_{k ell} for any k, summation over k *not* implied.
   //
   RealTensorValue ene_mat = _gamma * _calC[_qp][0] * _calE[_qp][0][mapped_var_number];
@@ -121,7 +121,7 @@ Real NSSUPGEnergy::compute_jacobian(unsigned var)
 
   // 2.) Terms only present if the variable is one of the momentums
   Real mass_term = 0.;
-  
+
   switch (mapped_var_number)
   {
   // switch statement... we could also do this with an if-statement but this is less typing...
@@ -136,9 +136,10 @@ Real NSSUPGEnergy::compute_jacobian(unsigned var)
     // Art. Diffusion matrix for tauc-proportional term = (0.5*(_gamma-1.)*velmag2 - H)*C_m
     //
     RealTensorValue mass_mat = (0.5*(_gamma-1.)*velmag2 - _enthalpy[_qp]) * _calC[_qp][m_local];
-    mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j); 
+    mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j);
 
     // Don't even need to break, no other cases to fall through to...
+    break;
   }
 
   // Nothing else to do if we are not a momentum...

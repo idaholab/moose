@@ -4,8 +4,8 @@ template<>
 InputParameters validParams<NSMassBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-  
-  
+
+
   return params;
 }
 
@@ -46,9 +46,11 @@ Real NSMassBC::qp_jacobian(unsigned var_number)
 
   default:
     mooseError("Should not get here!");
+    break;
   }
- 
+
   // won't get here...
+  return 0;
 }
 
 
@@ -57,31 +59,31 @@ Real NSMassBC::qp_jacobian(unsigned var_number)
 // {
 //   // (rho*u.n) phi_i
 //   RealVectorValue mom(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
-// 
+//
 //   return (mom*_normals[_qp]) * _test[_i][_qp];
 // }
-// 
-// 
-// 
+//
+//
+//
 // Real NSMassBC::computeQpJacobian()
 // {
 //   // The derivative wrt rho is zero!
 //   return 0.;
 // }
-// 
-// 
-// 
+//
+//
+//
 // Real NSMassBC::computeQpOffDiagJacobian(unsigned jvar)
 // {
 //   // Map jvar into the variable m for our problem, regardless of
-//   // how Moose has numbered things. 
+//   // how Moose has numbered things.
 //   unsigned m = this->map_var_number(jvar);
-// 
+//
 //   switch ( m )
 //   {
 //     // Don't handle the on-diagonal case here
 //     // case 0: // density
-// 
+//
 //   case 1:
 //   case 2:
 //   case 3:
@@ -90,15 +92,15 @@ Real NSMassBC::qp_jacobian(unsigned var_number)
 //     // matrix times that normal component...
 //     return _phi[_j][_qp] * _test[_i][_qp] * _normals[_qp](m-1);
 //   }
-// 
-//   
+//
+//
 //   case 4: // energy
 //     return 0.;
-// 
+//
 //   default:
 //     mooseError("Should not get here!");
 //   }
-// 
+//
 //   // won't get here
 //   return 0.;
 // }

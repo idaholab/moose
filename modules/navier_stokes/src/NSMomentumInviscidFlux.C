@@ -1,5 +1,5 @@
 #include "NSMomentumInviscidFlux.h"
- 
+
 
 template<>
 InputParameters validParams<NSMomentumInviscidFlux>()
@@ -21,7 +21,7 @@ InputParameters validParams<NSMomentumInviscidFlux>()
 
 NSMomentumInviscidFlux::NSMomentumInviscidFlux(const std::string & name, InputParameters parameters)
     : NSKernel(name, parameters),
-      
+
       // Coupled variables
       _pressure(coupledValue("pressure")),
 
@@ -36,7 +36,7 @@ Real
 NSMomentumInviscidFlux::computeQpResidual()
 {
   // For _component = k,
-  
+
   // (rho*u) * u_k = (rho*u_k) * u <- we write it this way
   RealVectorValue vec(_u[_qp]*_u_vel[_qp],   // (U_k) * u_1
                       _u[_qp]*_v_vel[_qp],   // (U_k) * u_2
@@ -56,7 +56,7 @@ Real
 NSMomentumInviscidFlux::computeQpJacobian()
 {
   // The on-diagonal entry corresponds to variable number _component+1.
-  return this->compute_jacobian(_component+1); 
+  return this->compute_jacobian(_component+1);
 }
 
 
@@ -67,7 +67,7 @@ Real
 NSMomentumInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Map jvar into the variable m for our problem, regardless of
-  // how Moose has numbered things. 
+  // how Moose has numbered things.
   unsigned m = this->map_var_number(jvar);
 
   return this->compute_jacobian(m);
@@ -108,6 +108,7 @@ Real NSMomentumInviscidFlux::compute_jacobian(unsigned m)
 
   default:
     mooseError("Shouldn't get here!");
+    break;
   }
 
   // Won't get here!

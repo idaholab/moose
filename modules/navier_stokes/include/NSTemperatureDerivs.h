@@ -2,10 +2,10 @@
 #define NSTEMPERATUREDERIVS_H
 
 /**
- * Class outside the Moose hierarchy that contains common 
+ * Class outside the Moose hierarchy that contains common
  * functionality for computing derivatives of the temperature
  * variable.
- * 
+ *
  * This class is templated so that it can be used by either
  * a Kernel object or a BC object.
  */
@@ -44,7 +44,7 @@ Real NSTemperatureDerivs<T>::get_grad(unsigned i)
 
   Real rho2 = U0 * U0;
   Real mom2 = U1*U1 + U2*U2 + U3*U3;
-  
+
   Real cv = _data._R / (_data._gamma-1.);
   Real tmp = -1./rho2/cv;
 
@@ -67,6 +67,7 @@ Real NSTemperatureDerivs<T>::get_grad(unsigned i)
 
   default:
     mooseError("Should not get here!");
+    break;
   } // end switch
 }
 
@@ -102,7 +103,7 @@ Real NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
     // Row 0
   case 0: // rho, rho derivative
     return 2.*U4/rho3/cv - 3.*mom2/rho4/cv;
-    
+
     // Row 1
   case 5: // rho*u, rho
     return 2.*U1/rho3/cv;
@@ -121,7 +122,7 @@ Real NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
   case 15: // rho*w, rho
     return 2.*U3/rho3/cv;
 
-  case 18: // rho*w, rho*w 
+  case 18: // rho*w, rho*w
     return tmp;
 
     // Row 4
@@ -139,6 +140,7 @@ Real NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
 
   default:
     mooseError("Should not get here!");
+    break;
   }
 
   return 0.;

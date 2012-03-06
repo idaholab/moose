@@ -7,7 +7,7 @@ InputParameters validParams<NSMomentumInviscidBC>()
 
   // Required parameters
   params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
-  
+
   return params;
 }
 
@@ -32,7 +32,7 @@ NSMomentumInviscidBC::NSMomentumInviscidBC(const std::string & name, InputParame
 Real NSMomentumInviscidBC::pressure_qp_residual(Real pressure)
 {
   // n . (Ip) . v
-  
+
   // The pressure contribution: p * n(component) * phi_i
   Real press_term = pressure * _normals[_qp](_component) * _test[_i][_qp];
 
@@ -46,7 +46,7 @@ Real NSMomentumInviscidBC::pressure_qp_residual(Real pressure)
 
 Real NSMomentumInviscidBC::pressure_qp_jacobian(unsigned var_number)
 {
-  return _normals[_qp](_component) * _pressure_derivs.get_grad(var_number) * _phi[_j][_qp] * _test[_i][_qp];  
+  return _normals[_qp](_component) * _pressure_derivs.get_grad(var_number) * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 
@@ -93,7 +93,7 @@ Real NSMomentumInviscidBC::convective_qp_jacobian(unsigned var_number)
     if (var_number-1 == _component)
     {
       // See Eqn. (68) from the notes for the inviscid boundary terms
-      conv_term = ((vel * _normals[_qp]) + vel(_component)*_normals[_qp](_component)) * _phi[_j][_qp] * _test[_i][_qp];  
+      conv_term = ((vel * _normals[_qp]) + vel(_component)*_normals[_qp](_component)) * _phi[_j][_qp] * _test[_i][_qp];
     }
     else
     {
@@ -112,6 +112,7 @@ Real NSMomentumInviscidBC::convective_qp_jacobian(unsigned var_number)
 
   default:
     mooseError("Shouldn't get here!");
+    break;
   }
 
   // Return the result.  We could return it directly from the switch statement, but this is

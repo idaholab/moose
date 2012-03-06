@@ -1,5 +1,5 @@
 #include "NSEnergyViscousFlux.h"
- 
+
 
 template<>
 InputParameters validParams<NSEnergyViscousFlux>()
@@ -48,19 +48,19 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Convenience variables
   RealTensorValue & tau = _viscous_stress_tensor[_qp];
-  
+
   Real rho  = _rho[_qp];
   Real phij = _phi[_j][_qp];
   RealVectorValue U(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
 
   // Map jvar into the variable m for our problem, regardless of
-  // how Moose has numbered things. 
+  // how Moose has numbered things.
   unsigned m = this->map_var_number(jvar);
 
   // Compute Jacobian terms based on the value of m
   switch (m)
   {
-    
+
   case 0: // Density
   {
     // Return value
@@ -72,11 +72,11 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
         intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + _vst_derivs.dtau(k,ell,0)) );
-      
+
       // Hit accumulated value with test function
       value += intermediate_value * _grad_test[_i][_qp](k);
     } // end for k
-    
+
     return value;
   }
 
@@ -86,7 +86,7 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   {
     // Return value
     Real value = 0.;
-    
+
     // "local" version of m, mapped to 0, 1, 2, for indexing
     // into Point objects.
     const unsigned m_local = m-1;
@@ -94,7 +94,7 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     for (unsigned k=0; k<LIBMESH_DIM; ++k)
     {
       Real intermediate_value = tau(k,m_local)*phij/rho;
-      
+
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
         intermediate_value += _vst_derivs.dtau(k,ell,m) * U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
 
@@ -108,6 +108,7 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   default:
   {
     mooseError("Invalid variable!");
+    break;
   }
 
   } // end switch(m)

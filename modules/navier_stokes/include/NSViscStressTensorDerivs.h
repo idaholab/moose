@@ -2,10 +2,10 @@
 #define NSVISCSTRESSTENSORDERIVS_H
 
 /**
- * Class outside the Moose hierarchy that contains common 
+ * Class outside the Moose hierarchy that contains common
  * functionality for computing derivatives of the viscous
  * stress tensor.
- * 
+ *
  * This class is templated so that it can be used by either
  * a Kernel object or a BC object.
  */
@@ -37,7 +37,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
   //  std::cout << "k=" << k << ", ell=" << ell << ", m=" << m << std::endl;
 
   // Try to access underlying data.  Since this class is a friend, we can
-  // directly access _qp and other protected data.  This only works if the 
+  // directly access _qp and other protected data.  This only works if the
   // individual variables have the **same names** in all types T which may
   // be used to construct this class.
 
@@ -54,7 +54,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
   // 0 <= m <= 4
   if (m >= 5)
     mooseError("Error, m <= 4 violated!");
-  
+
   //
   // Convenience variables
   //
@@ -65,14 +65,14 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
 
   Real mu = _data._dynamic_viscosity[_data._qp];
   Real nu = mu / rho;
-  
-  RealVectorValue U(_data._rho_u[_data._qp], 
-                    _data._rho_v[_data._qp], 
+
+  RealVectorValue U(_data._rho_u[_data._qp],
+                    _data._rho_v[_data._qp],
                     _data._rho_w[_data._qp]);
-  
-  Real divU = 
+
+  Real divU =
     _data._grad_rho_u[_data._qp](0) +
-    _data._grad_rho_v[_data._qp](1) + 
+    _data._grad_rho_v[_data._qp](1) +
     _data._grad_rho_w[_data._qp](2);
 
   // This makes a copy...but the resulting code is cleaner
@@ -100,7 +100,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
       term3 = -4./3./rho2 * (U*grad_rho) * phij;
       term4 = 2./3./rho * (U*grad_phij + divU*phij);
     }
-    
+
     //std::cout << term1 << ", " << term2 << ", " << term3 << ", " << term4 << std::endl;
 
     // Sum up result and return
@@ -111,7 +111,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
   case 2:
   case 3:
   {
-    // note: when comparing m to k or ell, or indexing into Points, 
+    // note: when comparing m to k or ell, or indexing into Points,
     // must map m -> 0, 1, 2 by subtracting 1.
     const unsigned m_local = m-1;
 
@@ -120,7 +120,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
     Real delta_ellm = (ell == m_local ? 1. : 0.);
     Real delta_kell = (k   == ell     ? 1. : 0.);
 
-    return nu * 
+    return nu *
       (
        /*     */ delta_km   * (grad_phij(ell)     - (phij/rho)*grad_rho(ell)) +
        /*     */ delta_ellm * (grad_phij(k)       - (phij/rho)*grad_rho(k)) -
@@ -137,6 +137,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
   default:
   {
     mooseError("Invalid variable requested.");
+    break;
   }
 
   } // end switch(m)

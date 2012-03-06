@@ -32,11 +32,11 @@ Real NSSUPGMass::computeQpResidual()
 
   // Separate variable just for printing purposes...
   Real result = _taum[_qp] * (Ru * _grad_test[_i][_qp]);
-  
+
   // Debugging: Print results only if they are nonzero
 //  if (std::abs(result) > 0.)
 //    std::cout << "SUPGMass[" << _qp << "]=" << result << std::endl;
-  
+
   return result;
 }
 
@@ -74,6 +74,7 @@ Real NSSUPGMass::compute_jacobian(unsigned var)
   case 3:
     // time_part = _grad_test[_i][_qp](m-1) * (_phi[_j][_qp]/_subproblem.parent()->dt());
     time_part = _grad_test[_i][_qp](m-1) * (_phi[_j][_qp] * d_udot_du[m-1]);
+    break;
   }
 
   // Debugging

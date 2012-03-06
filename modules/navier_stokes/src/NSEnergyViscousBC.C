@@ -15,13 +15,13 @@ InputParameters validParams<NSEnergyViscousBC>()
 
 NSEnergyViscousBC::NSEnergyViscousBC(const std::string & name, InputParameters parameters)
     : NSIntegratedBC(name, parameters),
-      
+
       // Coupled gradients
       _grad_temperature(coupledGradient("temperature")),
 
       // Material properties
       _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
-      
+
       // Viscous stress tensor derivative computing object
       _vst_derivs(*this),
 
@@ -43,7 +43,7 @@ NSEnergyViscousBC::NSEnergyViscousBC(const std::string & name, InputParameters p
 Real NSEnergyViscousBC::computeQpResidual()
 {
   // n . (- k*grad(T) - tau*u) v
-  
+
   // Velocity vector object
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
@@ -62,9 +62,9 @@ Real NSEnergyViscousBC::computeQpResidual()
 
 Real NSEnergyViscousBC::computeQpJacobian()
 {
-  // See notes for this term, involves temperature Hessian 
+  // See notes for this term, involves temperature Hessian
   Real thermal_term = 0.;
-  
+
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
   {
     Real intermediate_result = 0.;
@@ -75,7 +75,7 @@ Real NSEnergyViscousBC::computeQpJacobian()
 
     // Hit Hessian contribution with test function
     intermediate_result *= _phi[_j][_qp];
-    
+
     // Add in the temperature gradient contribution
     intermediate_result += _temp_derivs.get_grad(/*rhoe=*/4) * _grad_phi[_j][_qp](ell);
 
@@ -98,13 +98,13 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
 
   // Convenience variables
   RealTensorValue& tau = _viscous_stress_tensor[_qp];
-  
+
   Real rho  = _rho[_qp];
   Real phij = _phi[_j][_qp];
   RealVectorValue U(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
 
   // Map jvar into the variable m for our problem, regardless of
-  // how Moose has numbered things. 
+  // how Moose has numbered things.
   unsigned m = this->map_var_number(jvar);
 
 
@@ -112,9 +112,9 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
   // 1.) Thermal term derivatives
   //
 
-  // See notes for this term, involves temperature Hessian 
+  // See notes for this term, involves temperature Hessian
   Real thermal_term = 0.;
-  
+
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
   {
     Real intermediate_result = 0.;
@@ -125,7 +125,7 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
 
     // Hit Hessian contribution with test function
     intermediate_result *= _phi[_j][_qp];
-    
+
     // Add in the temperature gradient contribution
     intermediate_result += _temp_derivs.get_grad(m) * _grad_phi[_j][_qp](ell);
 
@@ -136,7 +136,7 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
   // Hit thermal_term with thermal conductivity
   thermal_term *= _thermal_conductivity[_qp];
 
-  // 
+  //
   // 2.) Viscous term derivatives
   //
 
@@ -145,7 +145,7 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
 
   switch ( m )
   {
-    
+
   case 0: // density
   {
     // Loop over k and ell as in the notes...
@@ -155,8 +155,8 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
 
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
         intermediate_value += ( (U(ell)/rho)*(-tau(k,ell)*phij/rho + _vst_derivs.dtau(k,ell,m)) );
-      
-      // Hit accumulated value with normal component k.  We will multiply by test function at 
+
+      // Hit accumulated value with normal component k.  We will multiply by test function at
       // the end of this routine...
       visc_term += intermediate_value * _normals[_qp](k);
     } // end for k
@@ -170,27 +170,29 @@ Real NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
   {
     // Map m -> 0,1,2 as usual...
     unsigned m_local = m-1;
-    
+
     // Loop over k and ell as in the notes...
     for (unsigned k=0; k<LIBMESH_DIM; ++k)
     {
       Real intermediate_value = tau(k,m_local)*phij/rho;
-      
+
       for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
         intermediate_value += _vst_derivs.dtau(k,ell,m) * U(ell)/rho; // Note: pass 'm' to dtau, it will convert it internally
 
       // Hit accumulated value with normal component k.
       visc_term += intermediate_value * _normals[_qp](k);
     } // end for k
-    
+
     break;
   } // end case 1,2,3
 
   case 4: // energy
     mooseError("Shouldn't get here, this is the on-diagonal entry!");
+    break;
 
   default:
     mooseError("Invalid m value.");
+    break;
   }
 
   // Finally, sum up the different contributions (with appropriate

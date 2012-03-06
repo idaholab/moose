@@ -26,15 +26,15 @@ Real NSSUPGMomentum::computeQpResidual()
   // See "Component SUPG contributions" section of notes for details.
 
   // Values to be summed up and returned
-  Real 
+  Real
     mass_term = 0.,
     mom_term = 0.,
     energy_term = 0.;
-  
+
   {
     // Velocity vector
     RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    
+
     // Velocity vector magnitude squared
     Real velmag2 = vel.size_sq();
 
@@ -50,7 +50,7 @@ Real NSSUPGMomentum::computeQpResidual()
                         _strong_residuals[_qp][3]);
 
     // 1.) The mass-residual term:
-    Real mass_coeff = 
+    Real mass_coeff =
       0.5*(_gamma-1.)*velmag2*dphi_dxk -
       vel(_component) * U_grad_phi;
 
@@ -69,7 +69,7 @@ Real NSSUPGMomentum::computeQpResidual()
     energy_term = _taue[_qp] * (_gamma-1.) * dphi_dxk * _strong_residuals[_qp][4];
     //std::cout << "energy_term[" << _qp << "]=" << energy_term << std::endl;
   }
-  
+
   // For printing purposes only
   Real result = mass_term + mom_term + energy_term;
   // std::cout << "result[" << _qp << "]=" << result << std::endl;
@@ -106,7 +106,7 @@ Real NSSUPGMomentum::compute_jacobian(unsigned var)
   unsigned  mapped_var_number = this->map_var_number(var);
 
   // Convenience vars
-  
+
   // Velocity vector
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
@@ -130,7 +130,7 @@ Real NSSUPGMomentum::compute_jacobian(unsigned var)
   mom_mat += (1.-_gamma) * _calC[_qp][_component].transpose();  //  + (1-_gamma)*C_k^T)
   mom_mat = mom_mat * _calA[_qp][mapped_var_number];            // * calA_{ell}
   Real mom_term = _taum[_qp] * grad_test_i * (mom_mat * grad_phi_j); // taum * grad(phi_i) * (M*grad(phi_j))
-  
+
   //
   // Art. Diffusion matrix for taue-proportional term = (_gamma-1) * calE_km
   //
@@ -139,7 +139,7 @@ Real NSSUPGMomentum::compute_jacobian(unsigned var)
 
   // 2.) Terms only present if the variable is one of the momentums
   Real mass_term = 0.;
-  
+
   switch (mapped_var_number)
   {
   // switch statement... we could also do this with an if-statement but this is less typing...
@@ -159,6 +159,7 @@ Real NSSUPGMomentum::compute_jacobian(unsigned var)
     mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j); // tauc * grad(phi_i) * (M*grad(phi_j))
 
     // Don't even need to break, no other cases to fall through to...
+    break;
   }
 
   // Nothing else to do if we are not a momentum...
