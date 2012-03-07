@@ -1,5 +1,4 @@
 from options import *
 
 test = { INPUT : 'random_ic_test.i',
-         EXODIFF : ['out.e'],
-         SKIP : 'Temp Re-verify'}
+         EXODIFF : ['out.e']}
