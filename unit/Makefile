@@ -19,7 +19,12 @@
 ###############################################################################
 CURR_DIR  ?= $(shell pwd)
 ROOT_DIR  ?= $(shell dirname `pwd`)
-MOOSE_DIR ?= $(ROOT_DIR)/moose
+
+ifeq ($(MOOSE_DEV),true)
+	MOOSE_DIR ?= $(ROOT_DIR)/devel/moose
+else
+	MOOSE_DIR ?= $(ROOT_DIR)/moose
+endif
 LIBMESH_DIR ?= $(ROOT_DIR)/libmesh
 
 APPLICATION_NAME := moose_unit
