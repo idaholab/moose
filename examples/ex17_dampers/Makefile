@@ -16,8 +16,14 @@
 # an application
 ###############################################################################
 CURR_DIR	?= $(shell pwd)
-MOOSE_DIR	?= $(shell pwd)/../../moose
-LIBMESH_DIR	?= $(shell pwd)/../../libmesh
+ROOT_DIR        ?= $(shell pwd)/../..
+
+ifeq ($(MOOSE_DEV),true)
+	MOOSE_DIR ?= $(ROOT_DIR)/devel/moose
+else
+	MOOSE_DIR ?= $(ROOT_DIR)/moose
+endif
+LIBMESH_DIR	?= $(ROOT_DIR)/libmesh
 
 APPLICATION_NAME := ex17
 

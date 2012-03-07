@@ -10,6 +10,8 @@ MOOSE_DIR = '../moose'
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
+elif os.environ.has_key("MOOSE_DEV"):
+  MOOSE_DIR = '../devel/moose'
 
 # Import the TestHarness and Helper functions from the MOOSE toolkit
 sys.path.append(MOOSE_DIR + '/tests')
