@@ -12,15 +12,3 @@ pbp_adapt_test = {
   EXODIFF : ['out_pbp_adapt.e-s004'],
   GROUP : 'adaptive'
 }
-
-single_test = {
-  INPUT : 'pbp_single_test.i',
-  EXODIFF : ['pbp_single_test_out.e']
-}
-
-single_adapt_test = {
-  INPUT : 'pbp_single_adapt_test.i',
-  EXODIFF : ['pbp_single_adapt_test_out.e-s004'],
-  GROUP : 'adaptive'
-}
-
