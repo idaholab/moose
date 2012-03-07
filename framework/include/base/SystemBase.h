@@ -141,6 +141,7 @@ public:
    * @return true if the variable exists
    */
   virtual bool hasVariable(const std::string & var_name) = 0;
+  virtual bool hasScalarVariable(const std::string & var_name) = 0;
 
   /**
    * Gets a reference to a variable of with specified name
@@ -168,6 +169,15 @@ public:
    * @return reference the variable (class)
    */
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
+
+  /**
+   * Gets a reference to a variable with specified number
+   *
+   * @param tid Thread id
+   * @param var_number varaible number
+   * @return reference the variable (class)
+   */
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
    * Get the block where a variable of this system is defined
@@ -256,6 +266,12 @@ public:
   virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
 
   /**
+   * Reinit scalar varaibles
+   * @param tid Thread ID
+   */
+  virtual void reinitScalars(THREAD_ID tid);
+
+  /**
    * Add info about variable that will be copied
    *
    * @param name Name of the nodal variable being used for copying (name is from the exodusII file)
@@ -341,15 +357,27 @@ public:
     unsigned int msvn = nScalarVariables();                                      // MOOSE scalar variable number
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      MooseVariableScalar * var = new MooseVariableScalar(var_num, msvn, *this, _subproblem.assembly(tid));
+      MooseVariableScalar * var = new MooseVariableScalar(var_num, msvn, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
+    _var_names.push_back(var_name);
   }
 
   virtual bool hasVariable(const std::string & var_name)
   {
-    return _sys.has_variable(var_name);
+    if (_sys.has_variable(var_name))
+      return _sys.variable_type(var_name).family != SCALAR;
+    else
+      return false;
+  }
+
+  virtual bool hasScalarVariable(const std::string & var_name)
+  {
+    if (_sys.has_variable(var_name))
+      return _sys.variable_type(var_name).family == SCALAR;
+    else
+      return false;
   }
 
   virtual unsigned int nVariables() { return _vars[0].all().size(); }

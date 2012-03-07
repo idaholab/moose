@@ -49,9 +49,13 @@ Output::init()
   std::vector<std::string> vars = _fe_problem.getVariableNames();
   for (unsigned int i = 0; i < vars.size(); ++i)
   {
-    MooseVariable & v = _fe_problem.getVariable(0, vars[i]);
-    if (v.isNodal())
-      _output_variables.push_back(vars[i]);
+    std::string var_name = vars[i];
+    if (_fe_problem.hasVariable(var_name))
+    {
+      MooseVariable & v = _fe_problem.getVariable(0, var_name);
+      if (v.isNodal())
+        _output_variables.push_back(var_name);
+    }
   }
 }
 

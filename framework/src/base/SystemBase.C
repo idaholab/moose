@@ -76,6 +76,15 @@ SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
   return *var;
 }
 
+MooseVariableScalar &
+SystemBase::getScalarVariable(THREAD_ID tid, unsigned int var_number)
+{
+  MooseVariableScalar * var = _vars[tid].scalars()[var_number];
+  if (var == NULL)
+    mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
+  return *var;
+}
+
 const std::set<subdomain_id_type> *
 SystemBase::getVariableBlocks(unsigned int var_number)
 {
@@ -221,5 +230,15 @@ SystemBase::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
     MooseVariable *var = *it;
     var->reinitNodes(nodes);
     var->computeNodalValues();
+  }
+}
+
+void
+SystemBase::reinitScalars(THREAD_ID tid)
+{
+  for (std::vector<MooseVariableScalar *>::iterator it = _vars[tid].scalars().begin(); it != _vars[tid].scalars().end(); ++it)
+  {
+    MooseVariableScalar *var = *it;
+    var->reinit();
   }
 }

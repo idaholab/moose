@@ -32,6 +32,7 @@
 #include "nonlinear_implicit_system.h"
 
 class MooseVariable;
+class MooseVariableScalar;
 class Output;
 class Material;
 
@@ -57,6 +58,8 @@ public:
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual bool hasScalarVariable(const std::string & var_name) = 0;
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
   virtual void initialSetup() {};
   virtual void timestepSetup() {};
@@ -76,6 +79,7 @@ public:
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid) = 0;
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid) = 0;
+  virtual void reinitScalars(THREAD_ID tid) = 0;
 
   // Materials /////
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid) = 0;

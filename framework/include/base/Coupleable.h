@@ -16,7 +16,9 @@
 #define COUPLEABLE_H
 
 #include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 #include "InputParameters.h"
+
 
 /**
  * Interface for objects that needs coupling capabilities
@@ -105,6 +107,38 @@ public:
   virtual VariableGradient & coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
   virtual VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int i = 0);
+};
+
+/**
+ * Interface for objects that needs coupling capabilities
+ *
+ */
+class ScalarCoupleable
+{
+public:
+  ScalarCoupleable(InputParameters & parameters);
+  virtual ~ScalarCoupleable();
+
+protected:
+  /**
+   * Returns true if a variables has been coupled_as name.
+   *
+   * @param name The name the kernel wants to refer to the variable as.
+   */
+  virtual bool isCoupledScalar(const std::string & var_name, unsigned int i = 0);
+
+  virtual unsigned int coupledScalar(const std::string & var_name, unsigned int comp = 0);
+
+  virtual VariableValue & coupledScalarValue(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledScalarValueOld(const std::string & var_name, unsigned int comp = 0);
+
+  virtual VariableValue & coupledScalarDot(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledScalarDotDu(const std::string & var_name, unsigned int comp = 0);
+
+protected:
+  std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;   ///< Coupled vars whose values we provide
+
+  MooseVariableScalar *getScalarVar(const std::string & var_name, unsigned int comp);
 };
 
 #endif /* COUPLEABLE_H */

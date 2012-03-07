@@ -118,11 +118,14 @@
 #include "PrintNumNonlinearIters.h"
 #include "PrintNumLinearIters.h"
 #include "PrintResidual.h"
+#include "PrintScalarVariable.h"
 #include "Reporter.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
 #include "SideIntegral.h"
 #include "NodalMaxValue.h"
+#include "PlotFunction.h"
+#include "ScalarL2Error.h"
 
 // dampers
 #include "ConstantDamper.h"
@@ -135,12 +138,16 @@
 // Constraints
 #include "TiedValueConstraint.h"
 
+// ScalarKernels
+#include "ODETimeDerivative.h"
+
 // Actions
 #include "AddMeshModifierAction.h"
 #include "AddBCAction.h"
 #include "AddDiracKernelAction.h"
 #include "AddICAction.h"
 #include "AddKernelAction.h"
+#include "AddScalarKernelAction.h"
 #include "AddDGKernelAction.h"
 #include "AddPeriodicBCAction.h"
 #include "AddVariableAction.h"
@@ -269,6 +276,7 @@ registerObjects()
   registerPostprocessor(ElementH1SemiError);
   registerPostprocessor(ElementIntegral);
   registerPostprocessor(ElementL2Error);
+  registerPostprocessor(ScalarL2Error);
   registerPostprocessor(EmptyPostprocessor);
   registerPostprocessor(NodalVariableValue);
   registerPostprocessor(PrintDOFs);
@@ -279,6 +287,8 @@ registerObjects()
   registerPostprocessor(PrintNumNonlinearIters);
   registerPostprocessor(PrintNumLinearIters);
   registerPostprocessor(PrintResidual);
+  registerPostprocessor(PrintScalarVariable);
+  registerPostprocessor(PlotFunction);
   registerPostprocessor(Reporter);
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);
@@ -293,6 +303,9 @@ registerObjects()
 
   // Constraints
   registerConstraint(TiedValueConstraint);
+
+  // Scalar kernels
+  registerScalarKernel(ODETimeDerivative);
 
   addActionTypes();
   registerActions();
@@ -334,6 +347,8 @@ addActionTypes()
   registerActionName("add_aux_kernel", false);
   registerActionName("add_aux_bc", false);
   registerActionName("add_dirac_kernel", false);
+  registerActionName("add_scalar_kernel", false);
+  registerActionName("add_aux_scalar_kernel", false);
   registerActionName("add_dg_kernel", false);
   registerActionName("add_ic", false);
   registerActionName("add_postprocessor", false);
@@ -396,7 +411,7 @@ addActionTypes()
 "(add_material)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
-"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, setup_output)"
+"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, setup_output)"
 "(setup_oversampling)"
 "(check_integrity)"
 "(setup_debug)"
@@ -457,6 +472,8 @@ registerActions()
   registerAction(AddICAction, "add_ic");
   registerAction(AddKernelAction, "add_kernel");
   registerAction(AddKernelAction, "add_aux_kernel");
+  registerAction(AddScalarKernelAction, "add_scalar_kernel");
+  registerAction(AddScalarKernelAction, "add_aux_scalar_kernel");
   registerAction(AddDGKernelAction, "add_dg_kernel");
   registerAction(AddBCAction, "add_bc");
   registerAction(EmptyAction, "no_action");  // placeholder

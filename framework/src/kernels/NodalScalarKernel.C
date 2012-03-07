@@ -13,11 +13,13 @@
 /****************************************************************/
 
 #include "NodalScalarKernel.h"
+#include "SystemBase.h"
 
 template<>
 InputParameters validParams<NodalScalarKernel>()
 {
   InputParameters params = validParams<ScalarKernel>();
+  params.addRequiredParam<std::string>("ced_variable", "The name of the variable this kernel is constraining");
   params.addRequiredParam<std::vector<unsigned int> >("nodes", "Node ids");
   return params;
 }
@@ -25,6 +27,9 @@ InputParameters validParams<NodalScalarKernel>()
 NodalScalarKernel::NodalScalarKernel(const std::string & name, InputParameters parameters) :
     ScalarKernel(name, parameters),
     Coupleable(parameters, true),
+    _ced_var(_sys.getVariable(_tid, parameters.get<std::string>("ced_variable"))),
+    _u_ced(_ced_var.nodalSln()),
+
     _node_ids(getParam<std::vector<unsigned int> >("nodes"))
 {
 }
@@ -36,7 +41,5 @@ NodalScalarKernel::~NodalScalarKernel()
 void
 NodalScalarKernel::reinit()
 {
-  _lm_var.reinit();                             // compute LM values
   _problem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
-  _assembly.prepareScalar(_lm_var);             // prepare assembly
 }

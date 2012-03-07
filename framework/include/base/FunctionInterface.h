@@ -53,9 +53,9 @@ public:
   Function & getFunctionByName(const std::string & name);
 
 private:
-  Problem & _problem;
-  THREAD_ID _tid;                               ///< Thread ID
-  InputParameters _params;                      ///< Parameters of the object with this interface
+  Problem & _fni_problem;
+  THREAD_ID _fni_tid;                               ///< Thread ID
+  InputParameters _fni_params;                      ///< Parameters of the object with this interface
 };
 
 #endif //FUNCTIONINTERFACE_H

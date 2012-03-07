@@ -83,6 +83,32 @@ CoupledProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   mooseError("Unknown variable " + var_name);
 }
 
+bool
+CoupledProblem::hasScalarVariable(const std::string & var_name)
+{
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  {
+    FEProblem * problem = it->second;
+    if (problem->hasScalarVariable(var_name))
+      return true;
+  }
+
+  return false;
+}
+
+MooseVariableScalar &
+CoupledProblem::getScalarVariable(THREAD_ID tid, const std::string & var_name)
+{
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+  {
+    FEProblem * problem = it->second;
+    if (problem->hasVariable(var_name))
+      return problem->getScalarVariable(tid, var_name);
+  }
+
+  mooseError("Unknown variable " + var_name);
+}
+
 void
 CoupledProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
@@ -151,6 +177,13 @@ CoupledProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
 {
   for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
     it->second->reinitNodeNeighbor(node, tid);
+}
+
+void
+CoupledProblem::reinitScalars(THREAD_ID tid)
+{
+  for (std::map<std::string, FEProblem *>::iterator it = _subproblems.begin(); it != _subproblems.end(); ++it)
+    it->second->reinitScalars(tid);
 }
 
 

@@ -51,8 +51,6 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _current_node(NULL),
     _current_neighbor_node(NULL),
 
-    _scalar_var(NULL),
-
     _max_cached_residuals(0),
     _max_cached_jacobians(0)
 {
@@ -332,8 +330,21 @@ Assembly::init()
     _sub_Knn[i].resize(n_vars);
   }
 
-  _scalar_Ken.resize(n_vars);
+  unsigned int n_scalar_vars = _sys.nScalarVariables();
+  _scalar_Re.resize(n_scalar_vars);
+
+  _scalar_Kee.resize(n_scalar_vars);
+  _scalar_Ken.resize(n_scalar_vars);
   _scalar_Kne.resize(n_vars);
+
+  for (unsigned int i = 0; i < n_scalar_vars; ++i)
+  {
+    _scalar_Kee[i].resize(n_scalar_vars);
+    _scalar_Ken[i].resize(n_vars);
+  }
+
+  for (unsigned int i = 0; i < n_vars; ++i)
+    _scalar_Kne[i].resize(n_scalar_vars);
 }
 
 void
@@ -401,32 +412,49 @@ Assembly::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsig
 }
 
 void
-Assembly::prepareScalar(MooseVariableScalar & var)
+Assembly::prepareScalar()
 {
-  _scalar_var = &var;
-
-  unsigned int lm_dofs = var.dofIndices().size();
-
-  // LM residual/jacobian blocks
-  _scalar_Re.resize(lm_dofs);
-  _scalar_Re.zero();
-
-  _scalar_Kee.resize(lm_dofs, lm_dofs);
-  _scalar_Kee.zero();
-
   unsigned int n_vars = _sys.nVariables();
-  for (unsigned int vi = 0; vi < n_vars; vi++)
+  unsigned int n_scalar_vars = _sys.nScalarVariables();
+
+  for (unsigned int vj = 0; vj < n_vars; vj++)
   {
-    MooseVariable & ivar = _sys.getVariable(_tid, vi);
-    unsigned int ced_dofs = ivar.dofIndices().size();
+    MooseVariable & jvar = _sys.getVariable(_tid, vj);
+    unsigned int ced_dofs = jvar.dofIndices().size();
 
-    _sub_Re[vi].resize(ced_dofs);
-    _sub_Re[vi].zero();
+    _sub_Re[vj].resize(ced_dofs);
+    _sub_Re[vj].zero();
+  }
 
-    _scalar_Ken[vi].resize(lm_dofs, ced_dofs);
-    _scalar_Ken[vi].zero();
-    _scalar_Kne[vi].resize(ced_dofs, lm_dofs);
-    _scalar_Kne[vi].zero();
+  for (unsigned int vi = 0; vi < n_scalar_vars; vi++)
+  {
+    MooseVariableScalar & ivar = _sys.getScalarVariable(_tid, vi);
+    unsigned int lm_dofs = ivar.dofIndices().size();
+
+    // LM residual/jacobian blocks
+    _scalar_Re[vi].resize(lm_dofs);
+    _scalar_Re[vi].zero();
+
+    for (unsigned int vj = 0; vj < n_scalar_vars; vj++)
+    {
+      MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, vj);
+      unsigned int jlm_dofs = jvar.dofIndices().size();
+
+      _scalar_Kee[vi][vj].resize(lm_dofs, jlm_dofs);
+      _scalar_Kee[vi][vj].zero();
+    }
+
+    for (unsigned int vj = 0; vj < n_vars; vj++)
+    {
+      MooseVariable & jvar = _sys.getVariable(_tid, vj);
+      unsigned int ced_dofs = jvar.dofIndices().size();
+
+      _scalar_Ken[vi][vj].resize(lm_dofs, ced_dofs);
+      _scalar_Ken[vi][vj].zero();
+
+      _scalar_Kne[vj][vi].resize(ced_dofs, lm_dofs);
+      _scalar_Kne[vj][vi].zero();
+    }
   }
 }
 
@@ -536,9 +564,13 @@ Assembly::addResidualNeighbor(NumericVector<Number> & residual)
 void
 Assembly::addResidualScalar(NumericVector<Number> & residual)
 {
-  // add the scalar variable residual
-  addResidualBlock(residual, _scalar_Re, _scalar_var->dofIndices(), _scalar_var->scalingFactor());
-  // add the constrained variable residual
+  // add the scalar variables residuals
+  for (unsigned int vn = 0; vn < _sys.nScalarVariables(); ++vn)
+  {
+    MooseVariableScalar & var = _sys.getScalarVariable(_tid, vn);
+    addResidualBlock(residual, _scalar_Re[vn], var.dofIndices(), var.scalingFactor());
+  }
+  // add the other variables residuals
   for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
   {
     MooseVariable & var = _sys.getVariable(_tid, vn);
@@ -859,14 +891,22 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar
 void
 Assembly::addJacobianScalar(SparseMatrix<Number> & jacobian)
 {
-  addJacobianBlock(jacobian, _scalar_Kee, _scalar_var->dofIndices(), _scalar_var->dofIndices(), _scalar_var->scalingFactor());
-
-  for (unsigned int vi = 0; vi < _sys.nVariables(); ++vi)
+  for (unsigned int vi = 0; vi < _sys.nScalarVariables(); ++vi)
   {
-    MooseVariable & ivar = _sys.getVariable(_tid, vi);
+    MooseVariableScalar & ivar = _sys.getScalarVariable(_tid, vi);
+    for (unsigned int vj = 0; vj < _sys.nScalarVariables(); ++vj)
+    {
+      MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, vj);
+      addJacobianBlock(jacobian, _scalar_Kee[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
+    }
 
-    addJacobianBlock(jacobian, _scalar_Ken[vi], _scalar_var->dofIndices(), ivar.dofIndices(), _scalar_var->scalingFactor());
-    addJacobianBlock(jacobian, _scalar_Kne[vi], ivar.dofIndices(), _scalar_var->dofIndices(), ivar.scalingFactor());
+    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+    {
+      MooseVariable & jvar = _sys.getVariable(_tid, vj);
+
+      addJacobianBlock(jacobian, _scalar_Ken[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
+      addJacobianBlock(jacobian, _scalar_Kne[vj][vi], jvar.dofIndices(), ivar.dofIndices(), jvar.scalingFactor());
+    }
   }
 }
 

@@ -39,6 +39,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
     Coupleable(parameters, false),
+    ScalarCoupleable(parameters),
     FunctionInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),

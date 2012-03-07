@@ -48,6 +48,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
     NeighborCoupleable(parameters, false),
+    ScalarCoupleable(parameters),
     TwoMaterialPropertyInterface(parameters),
 
     _problem(*parameters.get<Problem *>("_problem")),

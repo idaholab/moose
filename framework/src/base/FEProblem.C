@@ -652,6 +652,18 @@ FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
   _aux.reinitNodeNeighbor(node, tid);
 }
 
+void
+FEProblem::reinitScalars(THREAD_ID tid)
+{
+  if (_displaced_problem != NULL && _reinit_displaced_elem)
+    _displaced_problem->reinitScalars(tid);
+
+  _nl.reinitScalars(tid);
+  _aux.reinitScalars(tid);
+
+  _assembly[tid]->prepareScalar();
+}
+
 
 void
 FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
@@ -865,6 +877,14 @@ FEProblem::addAuxVariable(const std::string & var_name, const FEType & type, con
 }
 
 void
+FEProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+{
+  _aux.addScalarVariable(var_name, order, scale_factor);
+  if (_displaced_problem)
+    _displaced_problem->addAuxScalarVariable(var_name, order, scale_factor);
+}
+
+void
 FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<Problem *>("_problem") = this;
@@ -882,6 +902,23 @@ FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & nam
     parameters.set<SystemBase *>("_nl_sys") = &_nl;
   }
   _aux.addKernel(kernel_name, name, parameters);
+}
+
+void
+FEProblem::addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<Problem *>("_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_aux;
+  }
+  _aux.addScalarKernel(kernel_name, name, parameters);
 }
 
 void
@@ -1463,6 +1500,28 @@ FEProblem::getVariable(THREAD_ID tid, const std::string & var_name)
     mooseError("Unknown variable " + var_name);
 
   return _aux.getVariable(tid, var_name);
+}
+
+bool
+FEProblem::hasScalarVariable(const std::string & var_name)
+{
+  if (_nl.hasScalarVariable(var_name))
+    return true;
+  else if (_aux.hasScalarVariable(var_name))
+    return true;
+  else
+    return false;
+}
+
+MooseVariableScalar &
+FEProblem::getScalarVariable(THREAD_ID tid, const std::string & var_name)
+{
+  if (_nl.hasScalarVariable(var_name))
+    return _nl.getScalarVariable(tid, var_name);
+  else if (_aux.hasScalarVariable(var_name))
+    return _aux.getScalarVariable(tid, var_name);
+  else
+    mooseError("Unknown variable " + var_name);
 }
 
 void

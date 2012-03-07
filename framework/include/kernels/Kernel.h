@@ -45,6 +45,7 @@ class Kernel :
   public MooseObject,
   public SetupInterface,
   public Coupleable,
+  public ScalarCoupleable,
   public FunctionInterface,
   public TransientInterface,
   public PostprocessorInterface,

@@ -24,6 +24,9 @@ class NodalScalarKernel;
 template<>
 InputParameters validParams<NodalScalarKernel>();
 
+/**
+ *
+ */
 class NodalScalarKernel :
   public ScalarKernel,
   public Coupleable
@@ -34,7 +37,16 @@ public:
 
   virtual void reinit();
 
+  /**
+   * The variable this kernel is constraining.
+   */
+  MooseVariable & cedVariable() { return _ced_var; }
+
 protected:
+  MooseVariable & _ced_var;                             ///< Constrained variable (i.e. variable which the LM is constraining)
+
+  VariableValue & _u_ced;                               ///< Holds the solution of CED variable
+
   std::vector<unsigned int> _node_ids;                  ///< List of node IDs
 };
 

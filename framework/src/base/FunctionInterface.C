@@ -17,20 +17,20 @@
 #include "Problem.h"
 
 FunctionInterface::FunctionInterface(InputParameters & params) :
-    _problem(*params.get<Problem *>("_problem")),
-    _tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
-    _params(params)
+    _fni_problem(*params.get<Problem *>("_problem")),
+    _fni_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
+    _fni_params(params)
 {
 }
 
 Function &
 FunctionInterface::getFunction(const std::string & name)
 {
-  return _problem.getFunction(_params.get<std::string>(name), _tid);
+  return _fni_problem.getFunction(_fni_params.get<std::string>(name), _fni_tid);
 }
 
 Function &
 FunctionInterface::getFunctionByName(const std::string & name)
 {
-  return _problem.getFunction(name, _tid);
+  return _fni_problem.getFunction(name, _fni_tid);
 }

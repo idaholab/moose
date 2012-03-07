@@ -948,6 +948,7 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   Threads::parallel_reduce(elem_range, cr);
   // do scalar kernels (not sure how to thread this)
   {
+    _mproblem.reinitScalars(0);
     const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
     for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
     {
@@ -955,8 +956,8 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
 
       kernel->reinit();
       kernel->computeResidual();
-      _mproblem.addResidualScalar(residual);
     }
+    _mproblem.addResidualScalar(residual);
   }
 
   if(_need_residual_copy)
@@ -1293,7 +1294,21 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
   }
 }
 
+void
+NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
+{
+  // do scalar kernels (not sure how to thread this)
+  _mproblem.reinitScalars(0);
+  const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
+  for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+  {
+    ScalarKernel * kernel = *it;
 
+    kernel->reinit();
+    kernel->computeJacobian();
+  }
+  _mproblem.addJacobianScalar(jacobian);
+}
 
 void
 NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
@@ -1351,19 +1366,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
   }
 
   computeDiracContributions(NULL, &jacobian);
-
-  // do scalar kernels (not sure how to thread this)
-  {
-    const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
-    for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
-    {
-      ScalarKernel * kernel = *it;
-
-      kernel->reinit();
-      kernel->computeJacobian();
-      _mproblem.addJacobianScalar(jacobian);
-    }
-  }
+  computeScalarKernelsJacobians(jacobian);
 
   static bool first = true;
 

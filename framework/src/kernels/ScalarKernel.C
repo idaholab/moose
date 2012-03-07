@@ -24,11 +24,11 @@ template<>
 InputParameters validParams<ScalarKernel>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
   params.addRequiredParam<std::string>("variable", "The name of the variable that this kernel operates on");
-  params.addRequiredParam<std::string>("ced_variable", "The name of the variable this kernel is constraining");
 
   params.addPrivateParam<bool>("use_displaced_mesh", false);
-  params.addPrivateParam<std::string>("built_by_action", "add_kernel");
+  params.addPrivateParam<std::string>("built_by_action", "add_scalar_kernel");
 
   return params;
 }
@@ -36,7 +36,10 @@ InputParameters validParams<ScalarKernel>()
 
 ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
+    ScalarCoupleable(parameters),
+    SetupInterface(parameters),
     FunctionInterface(parameters),
+    PostprocessorInterface(parameters),
     TransientInterface(parameters),
     _problem(*parameters.get<Problem *>("_problem")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
@@ -44,13 +47,14 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
 
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _lm_var(_sys.getScalarVariable(_tid, parameters.get<std::string>("variable"))),
-    _ced_var(_sys.getVariable(_tid, parameters.get<std::string>("ced_variable"))),
+    _var(_sys.getScalarVariable(_tid, parameters.get<std::string>("variable"))),
     _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 
-    _u_lm(_lm_var.sln()),
-    _u_ced(_ced_var.nodalSln()),
+    _u(_var.sln()),
+    _u_old(_var.slnOld()),
+    _u_dot(_var.uDot()),
+    _du_dot_du(_var.duDotDu()),
 
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),

@@ -21,6 +21,7 @@
 #include <list>
 
 #include "AuxKernel.h"
+#include "AuxScalarKernel.h"
 
 
 /**
@@ -53,6 +54,12 @@ public:
   const std::vector<AuxKernel *> & activeBCs(unsigned int boundary_id) { return _active_bcs[boundary_id]; }
 
   /**
+   * Get list of scalar kernels
+   * @return The list of scalar active kernels
+   */
+  const std::vector<AuxScalarKernel *> & scalars() { return _scalar_kernels; }
+
+  /**
    * Adds a boundary condition aux kernel
    * @param boundary_id Boundary ID this kernel works on
    * @param aux BC kernel being added
@@ -66,6 +73,12 @@ public:
    */
   void addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids);
 
+  /**
+   * Add a scalar kernels
+   * @param kernel Scalar kernel being added
+   */
+  void addScalarKernel(AuxScalarKernel *kernel);
+
 protected:
   std::vector<AuxKernel *> _all_aux_kernels;                                                    ///< all aux kernels
   std::vector<AuxKernel *> _all_element_aux_kernels;                                            ///< all element aux kernels
@@ -77,6 +90,8 @@ protected:
   std::map<unsigned int, std::vector<AuxKernel *> > _active_block_element_aux_kernels;          ///< elemental kernels active on a block
 
   std::map<unsigned int, std::vector<AuxKernel *> > _active_bcs;                                ///< aux boundary conditions
+
+  std::vector<AuxScalarKernel *> _scalar_kernels;                                                  ///< Scalar kernels
 };
 
 #endif // AUXWAREHOUSE_H

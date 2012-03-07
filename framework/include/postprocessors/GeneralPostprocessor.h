@@ -16,6 +16,8 @@
 #define GENERALPOSTPROCESSOR_H
 
 #include "Postprocessor.h"
+#include "TransientInterface.h"
+#include "FunctionInterface.h"
 #include "PostprocessorInterface.h"
 #include "Problem.h"
 
@@ -30,6 +32,8 @@ InputParameters validParams<GeneralPostprocessor>();
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
 class GeneralPostprocessor :
   public Postprocessor,
+  public TransientInterface,
+  public FunctionInterface,
   protected PostprocessorInterface
 {
 public:

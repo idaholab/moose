@@ -16,7 +16,10 @@
 #define SCALARKERNEL_H
 
 #include "MooseObject.h"
+#include "Coupleable.h"
+#include "SetupInterface.h"
 #include "FunctionInterface.h"
+#include "PostprocessorInterface.h"
 #include "TransientInterface.h"
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
@@ -39,7 +42,10 @@ InputParameters validParams<ScalarKernel>();
 
 class ScalarKernel :
   public MooseObject,
+  public ScalarCoupleable,
+  public SetupInterface,
   public FunctionInterface,
+  public PostprocessorInterface,
   public TransientInterface
 {
 public:
@@ -52,12 +58,7 @@ public:
   /**
    * The variable that this kernel operates on.
    */
-  MooseVariableScalar & variable() { return _lm_var; }
-
-  /**
-   * The variable this kernel is constraining.
-   */
-  MooseVariable & cedVariable() { return _ced_var; }
+  MooseVariableScalar & variable() { return _var; }
 
   SubProblem & subProblem() { return _subproblem; }
 
@@ -75,15 +76,16 @@ protected:
   THREAD_ID _tid;
 
   Assembly & _assembly;
-  MooseVariableScalar & _lm_var;                        ///< Lagrange multiplier variable
-  MooseVariable & _ced_var;                             ///< Constrained variable (i.e. variable which the LM is constraining)
+  MooseVariableScalar & _var;                           ///< Scalar variable
   MooseMesh & _mesh;
   unsigned int _dim;
 
   unsigned int _i, _j;
 
-  VariableValue & _u_lm;                                ///< Lagrange multiplier value
-  VariableValue & _u_ced;                               ///< Holds the solution of CED variable
+  VariableValue & _u;                                    ///< Value(s) of the scalar variable
+  VariableValue & _u_old;                                ///< Old value(s) of the scalar varaible
+  VariableValue & _u_dot;
+  VariableValue & _du_dot_du;
 
   // Single Instance Variables
   Real & _real_zero;

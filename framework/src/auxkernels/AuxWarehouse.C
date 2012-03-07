@@ -22,6 +22,9 @@ AuxWarehouse::~AuxWarehouse()
 {
   for (std::vector<AuxKernel *>::const_iterator j = all().begin(); j != all().end(); ++j)
     delete *j;
+
+  for (std::vector<AuxScalarKernel *>::const_iterator i = _scalar_kernels.begin(); i != _scalar_kernels.end(); ++i)
+    delete *i;
 }
 
 void
@@ -94,4 +97,10 @@ AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<subdomain_id_type> block_ids
       }
     }
   }
+}
+
+void
+AuxWarehouse::addScalarKernel(AuxScalarKernel *kernel)
+{
+  _scalar_kernels.push_back(kernel);
 }

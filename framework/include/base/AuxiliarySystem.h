@@ -50,12 +50,26 @@ public:
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
 
   /**
+   * Adds a scalar variable
+   * @param var_name The name of the variable
+   * @param order The order of the variable
+   */
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor);
+
+  /**
    * Adds an auxiliary kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
    * @param parameters Parameters for this kernel
    */
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  /**
+   * Adds a scalar kernel
+   * @param kernel_name The type of the kernel
+   * @param name The name of the kernel
+   * @param parameters Kernel parameters
+   */
+  void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   /**
    * Adds an auxiliary boundary condition
    * @param bc_name The type of the BC
@@ -86,6 +100,7 @@ public:
   virtual void compute(ExecFlagType type = EXEC_RESIDUAL);
 
 protected:
+  void computeScalarVars(std::vector<AuxWarehouse> & auxs);
   void computeNodalVars(std::vector<AuxWarehouse> & auxs);
   void computeElementalVars(std::vector<AuxWarehouse> & auxs);
 
@@ -99,6 +114,7 @@ protected:
   // Variables
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
+  std::vector<std::map<std::string, MooseVariableScalar *> > _scalar_vars;
 
   ExecStore<AuxWarehouse> _auxs;
 

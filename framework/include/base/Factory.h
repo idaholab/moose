@@ -42,6 +42,7 @@
 #define registerFunction(name)                      registerObject(name)
 #define registerMeshModifier(name)                  registerObject(name)
 #define registerConstraint(name)                    registerObject(name)
+#define registerScalarKernel(name)                  registerObject(name)
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)

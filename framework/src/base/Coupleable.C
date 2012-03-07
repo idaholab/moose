@@ -39,6 +39,8 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
         std::string coupled_var_name = vars[i];
         if (topproblem.hasVariable(coupled_var_name))
           _coupled_vars[name].push_back(&topproblem.getVariable(tid, coupled_var_name));
+        else if (topproblem.hasScalarVariable(coupled_var_name))
+          ; // ignore scalar variables
         else
           mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
       }
@@ -197,6 +199,7 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
   return getVar(var_name, comp)->secondSlnOlder();
 }
 
+
 // Neighbor values
 
 NeighborCoupleable::NeighborCoupleable(InputParameters & parameters, bool nodal) :
@@ -270,4 +273,103 @@ NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned
     mooseError("Nodal variables do not have second derivatives");
 
   return getVar(var_name, comp)->secondSlnNeighbor();
+}
+
+
+// Scalar
+
+ScalarCoupleable::ScalarCoupleable(InputParameters & parameters)
+{
+  SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
+  Problem & topproblem = *problem.parent();
+
+  THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
+
+  // Coupling
+  for (std::set<std::string>::const_iterator iter = parameters.coupledVarsBegin();
+       iter != parameters.coupledVarsEnd();
+       ++iter)
+  {
+    std::string name = *iter;
+    if (parameters.get<std::vector<std::string> >(*iter) != std::vector<std::string>())
+    {
+      std::vector<std::string> vars = parameters.get<std::vector<std::string> >(*iter);
+      for (unsigned int i = 0; i < vars.size(); i++)
+      {
+        std::string coupled_var_name = vars[i];
+        if (topproblem.hasScalarVariable(coupled_var_name))
+          _coupled_scalar_vars[name].push_back(&topproblem.getScalarVariable(tid, coupled_var_name));
+        else if (topproblem.hasVariable(coupled_var_name))
+          ; // ignore normal variables
+        else
+          mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
+      }
+    }
+  }
+}
+
+ScalarCoupleable::~ScalarCoupleable()
+{
+}
+
+bool
+ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
+{
+  std::map<std::string, std::vector<MooseVariableScalar *> >::iterator it = _coupled_scalar_vars.find(var_name);
+  if (it != _coupled_scalar_vars.end())
+    return (i < it->second.size());
+  else
+    return false;
+}
+
+unsigned int
+ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
+{
+  return getScalarVar(var_name, comp)->number();
+}
+
+
+VariableValue &
+ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int comp)
+{
+  return getScalarVar(var_name, comp)->sln();
+}
+
+VariableValue &
+ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned int comp)
+{
+  return getScalarVar(var_name, comp)->slnOld();
+}
+
+VariableValue &
+ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int comp)
+{
+  if (getScalarVar(var_name, comp)->kind() == Moose::VAR_AUXILIARY)
+    mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
+
+  return getScalarVar(var_name, comp)->uDot();
+}
+
+VariableValue &
+ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int comp)
+{
+  if (getScalarVar(var_name, comp)->kind() == Moose::VAR_AUXILIARY)
+    mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
+
+  return getScalarVar(var_name, comp)->duDotDu();
+}
+
+
+MooseVariableScalar *
+ScalarCoupleable::getScalarVar(const std::string & var_name, unsigned int comp)
+{
+  if (_coupled_scalar_vars.find(var_name) != _coupled_scalar_vars.end())
+  {
+    if (comp < _coupled_scalar_vars[var_name].size())
+      return _coupled_scalar_vars[var_name][comp];
+    else
+      mooseError("Trying to get a non-existent component of variable '" + var_name + "'");
+  }
+  else
+    mooseError("Trying to get a non-existent variable '" + var_name + "'");
 }

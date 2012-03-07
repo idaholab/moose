@@ -70,6 +70,8 @@ public:
 
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual bool hasScalarVariable(const std::string & var_name);
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
 
   virtual void createQRules(QuadratureType type, Order order);
   virtual Order getQuadratureOrder() { return _quadrature_order; }
@@ -117,6 +119,7 @@ public:
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
+  virtual void reinitScalars(THREAD_ID tid);
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems);
@@ -152,7 +155,9 @@ public:
 
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
+  void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
   void addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  void addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   AuxiliarySystem & getAuxiliarySystem() { return _aux; }

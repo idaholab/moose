@@ -35,7 +35,7 @@ class SystemBase;
 class MooseVariableScalar
 {
 public:
-  MooseVariableScalar(unsigned int var_num, unsigned int mvn, SystemBase & sys, Assembly & assembly);
+  MooseVariableScalar(unsigned int var_num, unsigned int mvn, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariableScalar();
 
   void reinit();
@@ -46,8 +46,18 @@ public:
   /// Get the variable number
   const std::string & name();
 
+  /// Kind of the variable (Nonlinear, Auxiliary, ...)
+  Moose::VarKindType kind() { return _var_kind; }
+
+ /// Get the order of this variable
+  unsigned int order() const;
+
   //
-  VariableValue & sln() { return _u; }                  ///< The value of Lagrange multiplier
+  VariableValue & sln() { return _u; }
+  VariableValue & slnOld() { return _u_old; }
+
+  VariableValue & uDot() { return _u_dot; }
+  VariableValue & duDotDu() { return _du_dot_du; }
 
   const std::vector<unsigned int> & dofIndices() { return _dof_indices; }
 
@@ -56,9 +66,15 @@ public:
   /// Get the scaling factor for this variable
   Real scalingFactor() { return _scaling_factor; }
 
+  /// Set the nodal value for this variable (to keep everything up to date
+  void setValue(unsigned int i, Number value);
+
+  void insert(NumericVector<Number> & soln);
+
 protected:
   unsigned int _var_num;                                        ///< variable number (from libMesh)
   unsigned int _moose_var_num;                                  ///<
+  Moose::VarKindType _var_kind;
   SubProblem & _subproblem;                                     ///< Problem this variable is part of
   SystemBase & _sys;                                            ///< System this variable is part of
 
@@ -66,9 +82,16 @@ protected:
   const DofMap & _dof_map;                                      ///< DOF map
   std::vector<unsigned int> _dof_indices;                       ///< DOF indices
 
-  VariableValue _u;                                             ///< The value of Lagrange multiplier
+  bool _has_value;
+  VariableValue _u;                                             ///< The value of scalar variable
+  VariableValue _u_old;                                         ///< The old value of scalar variable
 
-  Real _scaling_factor;                                                 ///< scaling factor for this variable
+  VariableValue _u_dot;
+  VariableValue _du_dot_du;
+
+  Real _scaling_factor;                                         ///< scaling factor for this variable
+
+  bool _is_nl;                                                  /// true if this variable is non-linear
 };
 
 #endif /* MOOSEVARIABLESCALAR_H */

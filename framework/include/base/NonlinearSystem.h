@@ -336,6 +336,8 @@ protected:
 
   void computeDiracContributions(NumericVector<Number> * residual, SparseMatrix<Number> * jacobian = NULL);
 
+  void computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian);
+
   /**
    * Enforce nodal constraints
    */

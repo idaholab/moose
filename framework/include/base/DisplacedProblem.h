@@ -62,9 +62,12 @@ public:
   // Variables /////
   virtual bool hasVariable(const std::string & var_name);
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
+  virtual bool hasScalarVariable(const std::string & var_name);
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< subdomain_id_type > * const active_subdomains = NULL);
   virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
+  virtual void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
 
   // Output /////
   virtual void output(bool force = false);
@@ -91,6 +94,7 @@ public:
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
+  virtual void reinitScalars(THREAD_ID tid);
 
   virtual void reinitMaterials(unsigned int /*blk_id*/, THREAD_ID /*tid*/) { }
   virtual void reinitMaterialsFace(unsigned int /*blk_id*/, unsigned int /*side*/, THREAD_ID /*tid*/) { }

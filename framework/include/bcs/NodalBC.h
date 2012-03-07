@@ -33,7 +33,8 @@ InputParameters validParams<NodalBC>();
  */
 class NodalBC :
   public BoundaryCondition,
-  public Coupleable
+  public Coupleable,
+  public ScalarCoupleable
 {
 public:
   NodalBC(const std::string & name, InputParameters parameters);

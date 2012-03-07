@@ -209,6 +209,28 @@ DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   return _displaced_aux.getVariable(tid, var_name);
 }
 
+bool
+DisplacedProblem::hasScalarVariable(const std::string & var_name)
+{
+  if (_displaced_nl.hasScalarVariable(var_name))
+    return true;
+  else if (_displaced_aux.hasScalarVariable(var_name))
+    return true;
+  else
+    return false;
+}
+
+MooseVariableScalar &
+DisplacedProblem::getScalarVariable(THREAD_ID tid, const std::string & var_name)
+{
+  if (_displaced_nl.hasScalarVariable(var_name))
+    return _displaced_nl.getScalarVariable(tid, var_name);
+  else if (_displaced_aux.hasScalarVariable(var_name))
+    return _displaced_aux.getScalarVariable(tid, var_name);
+  else
+    mooseError("No variable with name '" + var_name + "'");
+}
+
 void
 DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains)
 {
@@ -225,6 +247,12 @@ void
 DisplacedProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
 {
   _displaced_nl.addScalarVariable(var_name, order, scale_factor);
+}
+
+void
+DisplacedProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+{
+  _displaced_aux.addScalarVariable(var_name, order, scale_factor);
 }
 
 void
@@ -365,6 +393,13 @@ DisplacedProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
   _assembly[tid]->reinitNodeNeighbor(node);
   _displaced_nl.reinitNodeNeighbor(node, tid);
   _displaced_aux.reinitNodeNeighbor(node, tid);
+}
+
+void
+DisplacedProblem::reinitScalars(THREAD_ID tid)
+{
+  _displaced_nl.reinitScalars(tid);
+  _displaced_aux.reinitScalars(tid);
 }
 
 void

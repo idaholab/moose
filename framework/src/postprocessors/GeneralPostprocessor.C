@@ -23,5 +23,7 @@ InputParameters validParams<GeneralPostprocessor>()
 
 GeneralPostprocessor::GeneralPostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
+    TransientInterface(parameters),
+    FunctionInterface(parameters),
     PostprocessorInterface(parameters)
 {}

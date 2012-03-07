@@ -35,6 +35,7 @@ InputParameters validParams<IntegratedBC>();
 class IntegratedBC :
   public BoundaryCondition,
   public Coupleable,
+  public ScalarCoupleable,
   public MaterialPropertyInterface
 {
 public:

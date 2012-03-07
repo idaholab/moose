@@ -40,6 +40,8 @@ public:
   // Variables /////
   virtual bool hasVariable(const std::string & /*var_name*/) { return false; } // TODO
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) { return _mproblem.getVariable(tid, var_name); } // TODO
+  virtual bool hasScalarVariable(const std::string & var_name) { return false; } // TODO
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) { return _mproblem.getScalarVariable(tid, var_name); } // TODO
 
   virtual void subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/) {}
   virtual void subdomainSetupSide(unsigned int /*subdomain*/, THREAD_ID /*tid*/) {}
@@ -56,6 +58,7 @@ public:
   virtual void reinitNeighbor(const Elem * /*elem*/, unsigned int /*side*/, THREAD_ID /*tid*/) {}
   virtual void reinitNeighborPhys(const Elem * /*neighbor*/, unsigned int /*neighbor_side*/, const std::vector<Point> & /*physical_points*/, THREAD_ID /*tid*/) {}
   virtual void reinitNodeNeighbor(const Node * /*node*/, THREAD_ID /*tid*/) {}
+  virtual void reinitScalars(THREAD_ID /*tid*/) {}
 
   // Materials /////
   virtual void reinitMaterials(unsigned int /*blk_id*/, THREAD_ID /*tid*/) {}

@@ -26,6 +26,7 @@
 #include "nonlinear_implicit_system.h"
 #include "explicit_system.h"
 #include "string_to_enum.h"
+#include "fe.h"
 
 // class static initializiation
 const Real AddVariableAction::_abs_zero_tol = 1e-12;
@@ -56,6 +57,8 @@ void
 AddVariableAction::act()
 {
   std::string var_name = getShortName();
+  FEType fe_type(Utility::string_to_enum<Order>(getParam<std::string>("order")),
+                 Utility::string_to_enum<FEFamily>(getParam<std::string>("family")));
   bool is_variables_block = Parser::pathContains(_name, "Variables");
   if (is_variables_block)
   {
@@ -63,27 +66,27 @@ AddVariableAction::act()
     std::vector<unsigned int> block_param = getParam<std::vector<unsigned int> >("block");
     for (std::vector<unsigned int>::iterator it = block_param.begin(); it != block_param.end(); ++it)
       blocks.insert(*it);
+
     Real scale_factor = getParam<Real>("scaling");
 
-    if (blocks.empty())
+    if (fe_type.family == SCALAR)
     {
-      _problem->addVariable(var_name,
-                            FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                                  Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
-                            scale_factor);
+      _problem->addScalarVariable(var_name, fe_type.order, scale_factor);
     }
     else
-      _problem->addVariable(var_name,
-                            FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                                  Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),
-                            scale_factor,
-                            &blocks);
+    {
+      if (blocks.empty())
+          _problem->addVariable(var_name, fe_type, scale_factor);
+      else
+        _problem->addVariable(var_name, fe_type, scale_factor, &blocks);
+    }
   }
   else
   {
-    _problem->addAuxVariable(var_name,
-                             FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
-                                    Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))));
+    if (fe_type.family == SCALAR)
+      _problem->addAuxScalarVariable(var_name, fe_type.order);
+    else
+      _problem->addAuxVariable(var_name, fe_type);
   }
 
   // Set initial condition

@@ -63,6 +63,10 @@
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
 
+#include "ExplicitODE.h"
+#include "ImplicitODEx.h"
+#include "ImplicitODEy.h"
+
 // meshes
 #include "StripeMesh.h"
 
@@ -135,6 +139,10 @@ void registerObjects()
   registerMaterial(StatefulTest);
   registerMaterial(StatefulSpatialTest);
   registerMaterial(CoupledMaterial);
+
+  registerScalarKernel(ExplicitODE);
+  registerScalarKernel(ImplicitODEx);
+  registerScalarKernel(ImplicitODEy);
 
   registerAction(ConvDiffMetaAction, "meta_action");
 

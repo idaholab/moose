@@ -37,6 +37,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
 {
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
+  _scalar_vars.resize(libMesh::n_threads());
 }
 
 AuxiliarySystem::~AuxiliarySystem()
@@ -114,6 +115,21 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
 }
 
 void
+AuxiliarySystem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+{
+  FEType type(order, SCALAR);
+  unsigned int var_num = _sys.add_variable(var_name, type);
+  unsigned int msvn = nScalarVariables();                                      // MOOSE scalar variable number
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    MooseVariableScalar * var = new MooseVariableScalar(var_num, msvn, *this, _subproblem.assembly(tid), _var_kind);
+    var->scalingFactor(scale_factor);
+    _vars[tid].add(var_name, var);
+    _scalar_vars[tid][var_name] = var;
+  }
+}
+
+void
 AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<AuxiliarySystem *>("_aux_sys") = this;
@@ -141,6 +157,20 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
     }
 
     _auxs(kernel->execFlag())[tid].addAuxKernel(kernel, blk_ids);
+  }
+}
+
+void
+AuxiliarySystem::addScalarKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+
+    AuxScalarKernel *kernel = static_cast<AuxScalarKernel *>(Factory::instance()->create(kernel_name, name, parameters));
+    mooseAssert(kernel != NULL, "Not a AuxScalarKernel object");
+
+    _auxs(kernel->execFlag())[tid].addScalarKernel(kernel);
   }
 }
 
@@ -226,20 +256,52 @@ AuxiliarySystem::augmentSendList(std::vector<unsigned int> & send_list)
 void
 AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
 {
-  //If there aren't any auxiliary variables just return
-  if(_sys.n_vars() == 0)
-    return;
+  if (nScalarVariables() > 0)
+  {
+    computeScalarVars(_auxs(type));
+    solution().close();
+    _sys.update();
+  }
 
-  computeNodalVars(_auxs(type));
-  solution().close();
-  _sys.update();
+  if (nVariables() > 0)
+  {
+    computeNodalVars(_auxs(type));
+    solution().close();
+    _sys.update();
 
-  computeElementalVars(_auxs(type));
-  solution().close();
-  _sys.update();
+    computeElementalVars(_auxs(type));
+    solution().close();
+    _sys.update();
 
-  if(_need_serialized_solution)
-    serializeSolution();
+    if(_need_serialized_solution)
+      serializeSolution();
+  }
+}
+
+void
+AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
+{
+  // FIXME: run multi-threaded
+  THREAD_ID tid = 0;
+  Moose::perf_log.push("update_aux_vars_scalar()","Solve");
+  if (auxs[tid].scalars().size() > 0)
+  {
+    _mproblem.reinitScalars(tid);
+
+    const std::vector<AuxScalarKernel *> & scalars = auxs[tid].scalars();
+    for (std::vector<AuxScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+    {
+      AuxScalarKernel * kernel = *it;
+      kernel->compute();
+    }
+
+    for (std::map<std::string, MooseVariableScalar *>::iterator it = _scalar_vars[tid].begin(); it != _scalar_vars[0].end(); ++it)
+    {
+      MooseVariableScalar * var = it->second;
+      var->insert(solution());
+    }
+  }
+  Moose::perf_log.pop("update_aux_vars_scalar()","Solve");
 }
 
 void

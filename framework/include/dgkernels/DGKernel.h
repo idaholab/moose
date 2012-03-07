@@ -44,6 +44,7 @@ class DGKernel :
   public MooseObject,
   public SetupInterface,
   public NeighborCoupleable,
+  public ScalarCoupleable,
   protected TwoMaterialPropertyInterface
 {
 public:

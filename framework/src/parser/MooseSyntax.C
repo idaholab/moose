@@ -172,6 +172,12 @@ void associateSyntax()
   syntax.registerActionSyntax("EmptyAction", "AuxKernels");
   syntax.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
+  syntax.registerActionSyntax("EmptyAction", "ScalarKernels");
+  syntax.registerActionSyntax("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
+
+  syntax.registerActionSyntax("EmptyAction", "AuxScalarKernels");
+  syntax.registerActionSyntax("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
+
   syntax.registerActionSyntax("EmptyAction", "BCs");
   syntax.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
   syntax.registerActionSyntax("EmptyAction", "BCs/Periodic");  // placeholder
