@@ -101,6 +101,12 @@ wrong_object_test = { INPUT : 'wrong_moose_object_test.i',
 wrong_object_test = { INPUT : 'nonexistent_pps_test.i',
                       EXPECT_ERR : "Postprocessor '\S+' requested but not specified in the input file." }
 
+subdomain_restricted_auxkernel_test = { INPUT : 'subdomain_restricted_auxkernel_mismatch.i',
+                                        EXPECT_ERR : "AuxKernel \(\w+\): block outside of the domain of the variable" }
+
+subdomain_restricted_kernel_test = { INPUT : 'subdomain_restricted_kernel_mismatch.i',
+                                     EXPECT_ERR : "Kernel \(\w+\): block outside of the domain of the variable" }
+
 deprecated_block_test = {
   INPUT : 'deprecated_block_test.i',
   EXPECT_ERR : "Input file block '\S+' has been deprecated."

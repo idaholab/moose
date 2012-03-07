@@ -36,7 +36,7 @@ test_combined= { INPUT : '2d_diffusion_test.i',
 
 # This test should always be skipped
 test_always_skipped = { INPUT : 'no_filename.i',
-                        SKIP : 'Dependency Skip Test'
+                        SKIP : 'Dependency Skip Test OK'
 }
 
 # This test won't run because of the failed depenedency

@@ -60,15 +60,16 @@ AddVariableAction::act()
   FEType fe_type(Utility::string_to_enum<Order>(getParam<std::string>("order")),
                  Utility::string_to_enum<FEFamily>(getParam<std::string>("family")));
   bool is_variables_block = Parser::pathContains(_name, "Variables");
+
+  std::set<subdomain_id_type> blocks;
+  std::vector<unsigned int> block_param = getParam<std::vector<unsigned int> >("block");
+  for (std::vector<unsigned int>::iterator it = block_param.begin(); it != block_param.end(); ++it)
+    blocks.insert(*it);
+
+  Real scale_factor = getParam<Real>("scaling");
+
   if (is_variables_block)
   {
-    std::set<subdomain_id_type> blocks;
-    std::vector<unsigned int> block_param = getParam<std::vector<unsigned int> >("block");
-    for (std::vector<unsigned int>::iterator it = block_param.begin(); it != block_param.end(); ++it)
-      blocks.insert(*it);
-
-    Real scale_factor = getParam<Real>("scaling");
-
     if (fe_type.family == SCALAR)
     {
       _problem->addScalarVariable(var_name, fe_type.order, scale_factor);
@@ -83,10 +84,15 @@ AddVariableAction::act()
   }
   else
   {
+    if (scale_factor != 1.0)
+      mooseWarning("Currently the Auxiliary System ignores scaling factors - please contact the MOOSE team");
+
     if (fe_type.family == SCALAR)
       _problem->addAuxScalarVariable(var_name, fe_type.order);
-    else
+    else if (blocks.empty())
       _problem->addAuxVariable(var_name, fe_type);
+    else
+      _problem->addAuxVariable(var_name, fe_type, &blocks);
   }
 
   // Set initial condition
