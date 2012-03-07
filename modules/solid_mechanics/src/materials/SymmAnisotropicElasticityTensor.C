@@ -180,6 +180,7 @@ SymmAnisotropicElasticityTensor::initialize_anisotropic_material_dt_matrix()
     for (int j=i; j<6; j++)
     {
       _dt(i,j) = _dt(j,i) = _val[k];
+      k++;
     }
   }
 }

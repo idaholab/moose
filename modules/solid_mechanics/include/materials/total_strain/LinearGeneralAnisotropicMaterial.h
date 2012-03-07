@@ -44,7 +44,7 @@ private:
 
   //Individual material information
   SymmElasticityTensor _Cijkl_matrix;
-  MaterialProperty<SymmElasticityTensor > &_Cijkl_matrix_MP;
+  //MaterialProperty<SymmElasticityTensor > &_Cijkl_matrix_MP;
   
 };
 

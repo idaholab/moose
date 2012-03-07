@@ -26,8 +26,8 @@ LinearGeneralAnisotropicMaterial::LinearGeneralAnisotropicMaterial(const std::st
     : SolidMechanicsMaterial(name, parameters),
       _Cijkl_matrix_vector(getParam<std::vector<Real> >("C_matrix")),
       _all_21(getParam<bool>("all_21")),
-      _Cijkl_matrix(true),
-      _Cijkl_matrix_MP(declareProperty<SymmElasticityTensor >("Cijkl_matrix_MP"))
+      _Cijkl_matrix(true)
+      //_Cijkl_matrix_MP(declareProperty<SymmElasticityTensor >("Cijkl_matrix_MP"))
 {
   // fill in the local tensors from the input vector information
   _Cijkl_matrix.fillFromInputVector(_Cijkl_matrix_vector, _all_21);
@@ -44,7 +44,7 @@ LinearGeneralAnisotropicMaterial::computeQpProperties()
 void LinearGeneralAnisotropicMaterial::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
-  _Cijkl_matrix_MP[_qp] = _Cijkl_matrix;
+  _elasticity_tensor[_qp] = _Cijkl_matrix;
   _Jacobian_mult[_qp] = _Cijkl_matrix;
 }
 
