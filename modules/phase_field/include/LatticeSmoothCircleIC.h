@@ -1,0 +1,46 @@
+#ifndef LATTICESMOOTHCIRCLEIC_H
+#define LATTICESMOOTHCIRCLEIC_H
+
+#include "Kernel.h"
+#include "MultiSmoothCircleIC.h"
+
+// LibMesh includes
+#include <parameters.h>
+#include <point.h>
+#include <vector_value.h>
+
+// System includes
+#include <string>
+
+// Forward Declarations
+class LatticeSmoothCircleIC;
+
+template<>
+InputParameters validParams<LatticeSmoothCircleIC>();
+
+/**
+ * SmoothcircleIC just returns a constant value.
+ */
+class LatticeSmoothCircleIC : public MultiSmoothCircleIC
+{
+public:
+
+  /**
+   * Constructor
+   *
+   * @param name The name given to the initial condition in the input file.
+   * @param parameters The parameters object holding data for the class to use.
+   * @param var_name The variable this InitialCondtion is supposed to provide values for.
+   */
+  LatticeSmoothCircleIC(const std::string & name,
+                         InputParameters parameters);
+
+protected:
+  Real _Rnd_variation;
+  unsigned int _circles_per_side;
+  
+// private:
+  
+};
+
+#endif //LATTICESMOOTHCIRCLEIC_H

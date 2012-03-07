@@ -93,6 +93,7 @@
 #include "LinearGeneralAnisotropicMaterial.h"
 
 // phase_field
+#include "MatDiffusion.h"
 #include "AC.h"
 #include "ACInterface.h"
 #include "CHMath.h"
@@ -103,6 +104,8 @@
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
 #include "RndSmoothCircleIC.h"
+#include "MultiSmoothCircleIC.h"
+#include "LatticeSmoothCircleIC.h"
 #include "RndBoundingBoxIC.h"
 #include "PFMobility.h"
 #include "NodalFloodCount.h"
@@ -215,6 +218,7 @@ Elk::registerObjects()
   registerAction(SolidMechanicsAction, "add_kernel");
 
   // phase_field
+  registerKernel(MatDiffusion);
   registerKernel(AC);
   registerKernel(ACInterface);
   registerKernel(CHMath);
@@ -225,6 +229,8 @@ Elk::registerObjects()
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);
+  registerInitialCondition(MultiSmoothCircleIC);
+  registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerMaterial(PFMobility);
   registerPostprocessor(NodalFloodCount);
