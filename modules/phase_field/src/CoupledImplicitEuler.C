@@ -13,6 +13,7 @@ InputParameters validParams<CoupledImplicitEuler>()
 CoupledImplicitEuler::CoupledImplicitEuler(const std::string & name, InputParameters parameters)
   :Kernel(name, parameters),
    _v_dot(coupledDot("v")),
+   _dv_dot(coupledDotDu("v")),
    _v_var(coupled("v"))
 {}
 
@@ -32,7 +33,7 @@ Real
 CoupledImplicitEuler::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
-    return _test[_i][_qp]*_phi[_j][_qp]/_dt;
+    return _test[_i][_qp]*_phi[_j][_qp]*_dv_dot[_qp];
 
   return 0.0;
 }

@@ -34,13 +34,19 @@
 []
 
 [Preconditioning]
-
+active = 'SMP'
   [./PBP]
    type = PBP
    solve_order = 'w c'
    preconditioner = 'AMG ASM'
    off_diag_row = 'c '
    off_diag_column = 'w '
+  [../]
+
+  [./SMP]
+   type = SMP
+   off_diag_row = 'w c'
+   off_diag_column = 'c w'
   [../]
 []
 
@@ -97,7 +103,10 @@
 [Executioner]
    type = Transient
    scheme = 'BDF2' 
-   petsc_options = '-snes_mf'
+   #petsc_options = '-snes_mf'
+   petsc_options = '-snes_mf_operator -ksp_monitor'
+   petsc_options_iname = '-pc_type'
+   petsc_options_value = 'lu'
   
   l_max_its = 30
   l_tol = 1.0e-3

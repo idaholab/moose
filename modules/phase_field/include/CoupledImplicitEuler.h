@@ -22,6 +22,7 @@ protected:
 
 private:
   VariableValue & _v_dot;
+  VariableValue & _dv_dot;
   unsigned int _v_var;
   
 
