@@ -15,7 +15,7 @@
 # Note: Make sure that there is no whitespace after the word 'yes' if enabling
 # an application
 ###############################################################################
-CCURR_DIR	?= $(shell pwd)
+CURR_DIR	?= $(shell pwd)
 ROOT_DIR        ?= $(shell pwd)/../..
 
 ifeq ($(MOOSE_DEV),true)
