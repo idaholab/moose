@@ -1449,6 +1449,8 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
   {
     // FIXME: if exodus output is enabled?
     _out.outputPps(_pps_output_table);
+    if (_displaced_problem)
+      _displaced_problem->outputPps(_pps_output_table);
     if (_out_problem)
       _out_problem->outputPps(_pps_output_table);
 

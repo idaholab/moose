@@ -176,6 +176,7 @@ public:
   virtual void computePostprocessors(ExecFlagType type = EXEC_TIMESTEP);
   virtual void outputPostprocessors(bool force = false);
   virtual Real & getPostprocessorValue(const std::string & name, THREAD_ID tid = 0);
+  virtual void outputPps(const FormattedTable & table);
 
   /// Will make sure that all dofs connected to elem_id are ghosted to this processor
   virtual void addGhostedElem(unsigned int elem_id);

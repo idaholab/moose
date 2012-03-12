@@ -561,6 +561,12 @@ DisplacedProblem::outputPostprocessors(bool)
 {
 }
 
+void
+DisplacedProblem::outputPps(const FormattedTable & table)
+{
+  _ex.outputPps(_mproblem.out().fileBase() + "_displaced", table, _mproblem.time());
+}
+
 Real &
 DisplacedProblem::getPostprocessorValue(const std::string & name, THREAD_ID tid)
 {
