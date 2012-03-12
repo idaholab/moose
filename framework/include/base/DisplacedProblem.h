@@ -73,6 +73,7 @@ public:
   virtual void output(bool force = false);
 
   // Adaptivity /////
+  virtual void initAdaptivity();
   virtual void meshChanged();
 
   virtual void subdomainSetup(unsigned int /*subdomain*/, THREAD_ID /*tid*/) {}

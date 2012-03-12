@@ -80,6 +80,8 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
     if (!_displaced_mesh_refinement)
       _displaced_mesh_refinement = new MeshRefinement(_displaced_problem->mesh());
     _displaced_mesh_refinement->set_periodic_boundaries_ptr(_subproblem.getNonlinearSystem().dofMap().get_periodic_boundaries());
+
+    _displaced_problem->initAdaptivity();
   }
 }
 

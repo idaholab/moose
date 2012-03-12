@@ -162,6 +162,14 @@ DisplacedProblem::init()
 }
 
 void
+DisplacedProblem::initAdaptivity()
+{
+  // with adaptivity, each time step must go into a separate file
+  _seq = true;
+  _ex.sequence(_seq);
+}
+
+void
 DisplacedProblem::syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
 {
   (*_displaced_nl.sys().solution) = soln;
