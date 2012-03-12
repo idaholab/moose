@@ -91,20 +91,16 @@ class RunParallel:
     log( 'Command %d done:    %s' % (job_index, command) )
     did_pass = True
     if p.poll() == None: # process has not completed, it timed out
-      f.seek(0)
-      data = f.read()
-      data += '\n###########################################################################\n' + \
-          'Process terminated by test harness' + \
-          '\n###########################################################################\n'
+      output = self.readOutput(f)
+      output += '\n' + "#"*80 + '\nProcess terminated by test harness\n' + "#"*80 + '\n'
       f.close()
       p.terminate()
 
-      if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, data):
+      if not self.harness.testOutputAndFinish(test, RunParallel.TIMEOUT, output):
         did_pass = False
     else:
       output = 'Running command: ' + command + '\n'
-      f.seek(0)
-      output += f.read()
+      output += self.readOutput(f)
       f.close()
       if not self.harness.testOutputAndFinish(test, p.returncode, output):
         did_pass = False
@@ -166,6 +162,26 @@ class RunParallel:
         for (test, command, dirpath) in self.queue:
           print test[TEST_NAME]
         sys.exit(1)
+
+  # This function reads output from the file (i.e. the test output)
+  # but trims it down to the specified size.  It'll save the first two thirds
+  # of the requested size and the last third trimming from the middle
+  def readOutput(self, f, max_size=1048576):
+    first_part = int(max_size*(2.0/3.0))
+    second_part = int(max_size*(1.0/3.0))
+
+    f.seek(0)
+    output = f.read(first_part)     # Limit the output to 1MB
+    if len(output) == first_part:   # This means we didn't read the whole file yet
+      output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
+      f.seek(-second_part, 2)       # Skip the middle part of the file
+
+      if (f.tell() <= first_part):  # Don't re-read some of what you've already read
+        f.seek(first_part+1, 0)
+
+    output += f.read()              # Now read the rest
+    return output
+
 
   # Add a skipped job to the list
   def jobSkipped(self, name):
