@@ -209,6 +209,7 @@ public:
   void prepareNeighbor();
   void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
   void prepareScalar();
+  void prepareOffDiagScalar();
 
   void copyShapes(unsigned int var);
   void copyFaceShapes(unsigned int var);

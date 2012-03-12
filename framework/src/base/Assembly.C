@@ -417,15 +417,6 @@ Assembly::prepareScalar()
   unsigned int n_vars = _sys.nVariables();
   unsigned int n_scalar_vars = _sys.nScalarVariables();
 
-  for (unsigned int vj = 0; vj < n_vars; vj++)
-  {
-    MooseVariable & jvar = _sys.getVariable(_tid, vj);
-    unsigned int ced_dofs = jvar.dofIndices().size();
-
-    _sub_Re[vj].resize(ced_dofs);
-    _sub_Re[vj].zero();
-  }
-
   for (unsigned int vi = 0; vi < n_scalar_vars; vi++)
   {
     MooseVariableScalar & ivar = _sys.getScalarVariable(_tid, vi);
@@ -443,6 +434,28 @@ Assembly::prepareScalar()
       _scalar_Kee[vi][vj].resize(lm_dofs, jlm_dofs);
       _scalar_Kee[vi][vj].zero();
     }
+  }
+}
+
+void
+Assembly::prepareOffDiagScalar()
+{
+  unsigned int n_vars = _sys.nVariables();
+  unsigned int n_scalar_vars = _sys.nScalarVariables();
+
+  for (unsigned int vj = 0; vj < n_vars; vj++)
+  {
+    MooseVariable & jvar = _sys.getVariable(_tid, vj);
+    unsigned int ced_dofs = jvar.dofIndices().size();
+
+    _sub_Re[vj].resize(ced_dofs);
+    _sub_Re[vj].zero();
+  }
+
+  for (unsigned int vi = 0; vi < n_scalar_vars; vi++)
+  {
+    MooseVariableScalar & ivar = _sys.getScalarVariable(_tid, vi);
+    unsigned int lm_dofs = ivar.dofIndices().size();
 
     for (unsigned int vj = 0; vj < n_vars; vj++)
     {
