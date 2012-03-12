@@ -62,3 +62,8 @@ ScalarKernel::ScalarKernel(const std::string & name, InputParameters parameters)
     _second_zero(_problem._second_zero[_tid])
 {
 }
+
+void
+ScalarKernel::computeOffDiagJacobian(unsigned int jvar)
+{
+}

@@ -361,7 +361,6 @@ public:
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
-    _var_names.push_back(var_name);
   }
 
   virtual bool hasVariable(const std::string & var_name)

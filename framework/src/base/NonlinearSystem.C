@@ -1297,17 +1297,34 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 void
 NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 {
-  // do scalar kernels (not sure how to thread this)
+  std::vector<MooseVariableScalar *> scalar_vars = _vars[0].scalars();
+
   _mproblem.reinitScalars(0);
+
   const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
   for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
   {
     ScalarKernel * kernel = *it;
-
     kernel->reinit();
-    kernel->computeJacobian();
   }
+
+  // do full jacobian for ODEs
+  for (unsigned int ivar = 0; ivar < scalar_vars.size(); ivar++)
+  {
+    for (unsigned int jvar = 0; jvar < scalar_vars.size(); jvar++)
+    {
+      std::cerr << "i = " << ivar << ", j = " << jvar << std::endl;
+      for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+      {
+        ScalarKernel * kernel = *it;
+        if (kernel->variable().number() == ivar)
+          kernel->computeOffDiagJacobian(jvar);
+      }
+    }
+  }
+
   _mproblem.addJacobianScalar(jacobian);
+
 }
 
 void

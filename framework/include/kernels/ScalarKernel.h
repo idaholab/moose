@@ -54,6 +54,7 @@ public:
   virtual void reinit() = 0;
   virtual void computeResidual() = 0;
   virtual void computeJacobian() = 0;
+  virtual void computeOffDiagJacobian(unsigned int jvar);
 
   /**
    * The variable that this kernel operates on.

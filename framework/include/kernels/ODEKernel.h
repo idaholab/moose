@@ -35,6 +35,7 @@ public:
   virtual void reinit();
   virtual void computeResidual();
   virtual void computeJacobian();
+  virtual void computeOffDiagJacobian(unsigned int jvar);
 
 protected:
   virtual Real computeQpResidual() = 0;
