@@ -1313,7 +1313,6 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
   {
     for (unsigned int jvar = 0; jvar < scalar_vars.size(); jvar++)
     {
-      std::cerr << "i = " << ivar << ", j = " << jvar << std::endl;
       for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
       {
         ScalarKernel * kernel = *it;
