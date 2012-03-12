@@ -414,6 +414,8 @@ Assembly::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsig
 void
 Assembly::prepareScalar()
 {
+  _scalar_has_off_diag_contributions = false;
+
   unsigned int n_vars = _sys.nVariables();
   unsigned int n_scalar_vars = _sys.nScalarVariables();
 
@@ -440,6 +442,8 @@ Assembly::prepareScalar()
 void
 Assembly::prepareOffDiagScalar()
 {
+  _scalar_has_off_diag_contributions = true;
+
   unsigned int n_vars = _sys.nVariables();
   unsigned int n_scalar_vars = _sys.nScalarVariables();
 
@@ -583,11 +587,14 @@ Assembly::addResidualScalar(NumericVector<Number> & residual)
     MooseVariableScalar & var = _sys.getScalarVariable(_tid, vn);
     addResidualBlock(residual, _scalar_Re[vn], var.dofIndices(), var.scalingFactor());
   }
-  // add the other variables residuals
-  for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+  if (_scalar_has_off_diag_contributions)
   {
-    MooseVariable & var = _sys.getVariable(_tid, vn);
-    addResidualBlock(residual, _sub_Re[vn], var.dofIndices(), var.scalingFactor());
+    // add the other variables residuals
+    for (unsigned int vn = 0; vn < _sys.nVariables(); ++vn)
+    {
+      MooseVariable & var = _sys.getVariable(_tid, vn);
+      addResidualBlock(residual, _sub_Re[vn], var.dofIndices(), var.scalingFactor());
+    }
   }
 }
 
@@ -913,12 +920,15 @@ Assembly::addJacobianScalar(SparseMatrix<Number> & jacobian)
       addJacobianBlock(jacobian, _scalar_Kee[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
     }
 
-    for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+    if (_scalar_has_off_diag_contributions)
     {
-      MooseVariable & jvar = _sys.getVariable(_tid, vj);
+      for (unsigned int vj = 0; vj < _sys.nVariables(); ++vj)
+      {
+        MooseVariable & jvar = _sys.getVariable(_tid, vj);
 
-      addJacobianBlock(jacobian, _scalar_Ken[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
-      addJacobianBlock(jacobian, _scalar_Kne[vj][vi], jvar.dofIndices(), ivar.dofIndices(), jvar.scalingFactor());
+        addJacobianBlock(jacobian, _scalar_Ken[vi][vj], ivar.dofIndices(), jvar.dofIndices(), ivar.scalingFactor());
+        addJacobianBlock(jacobian, _scalar_Kne[vj][vi], jvar.dofIndices(), ivar.dofIndices(), jvar.scalingFactor());
+      }
     }
   }
 }

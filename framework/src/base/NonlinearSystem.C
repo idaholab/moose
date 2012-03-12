@@ -947,9 +947,10 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   ComputeResidualThread cr(_mproblem, *this, residual);
   Threads::parallel_reduce(elem_range, cr);
   // do scalar kernels (not sure how to thread this)
+  const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
+  if (scalars.size() > 0)
   {
     _mproblem.reinitScalars(0);
-    const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
     for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
     {
       ScalarKernel * kernel = *it;

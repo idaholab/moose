@@ -350,6 +350,7 @@ protected:
   std::vector<std::vector<DenseMatrix<Number> > > _scalar_Kee;   ///< jacobian contributions for scalar variable
   std::vector<std::vector<DenseMatrix<Number> > > _scalar_Ken;   ///< jacobian contributions
   std::vector<std::vector<DenseMatrix<Number> > > _scalar_Kne;   ///< jacobian contributions
+  bool _scalar_has_off_diag_contributions;
 
   DenseMatrix<Number> _tmp_Ke;                                   ///< auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)
 
