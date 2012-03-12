@@ -143,8 +143,9 @@ up: all
 	@for app in $(CURRENT_APP) $(DEP_APPS); \
 	do \
 		echo ====== Making in $${app} ====== ; \
-		(cd $(ROOT_DIR)/$$app && $(MAKE)) ; \
+		$(MAKE) -C $(ROOT_DIR)/$$app || break; \
 	done
+
 
 test_up: all up
 	@echo ====== Testing the following applications: $(CURRENT_APP) $(DEP_APPS) ======
@@ -159,7 +160,7 @@ clean_up:
 	@for app in $(CURRENT_APP) $(DEP_APPS); \
 	do \
 		echo ====== Cleaning $${app} ====== ; \
-		make -C $(ROOT_DIR)/$$app clean; \
+		$(MAKE) -C $(ROOT_DIR)/$$app clean; \
 	done
 
 #
