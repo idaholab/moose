@@ -17,6 +17,7 @@ CLI_ARGS      = '[]'             # Additional argument vector to pass to test
 # Types of tests
 EXODIFF       = '[exodiff]'      # A list of files to exodiff
 CSVDIFF       = '[csvdiff]'      # A list of files to CSV diff
+CHECK_FILES   = '[testfiles]'    # A list of files to check for existence
 GOLD_DIR      = 'gold_dir'       # The directory where the "golden standard" files resides relative to TEST_DIR
 TEST_DIR      = 'test_dir'       # The directory where the test resides, this is populated automatically
 SHOULD_CRASH  = 'should_crash'   # Set to true if this test should crash and we don't really care what the error says
@@ -56,6 +57,7 @@ PREREQ        = '[prereq]'
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],
              CSVDIFF : [],
+             CHECK_FILES : [],
              CLI_ARGS : [],
              ERRORS : ['ERROR', 'command not found', 'erminate called after throwing an instance of'],
              PLATFORM : ['ALL'],

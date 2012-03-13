@@ -230,6 +230,13 @@ class TestHarness:
             if msg != '':
               reason = 'CSVDIFF'
 
+          # if still no errors, check other files (just for existence)
+          if reason == '':
+            for file in test[CHECK_FILES]:
+              if not os.path.isfile(os.path.join(test[TEST_DIR], file)):
+                reason = 'MISSING FILES'
+                break
+
     did_pass = True
     if reason == '':
       # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
