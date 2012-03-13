@@ -55,6 +55,7 @@
 #include "StatefulTest.h"
 #include "StatefulSpatialTest.h"
 #include "CoupledMaterial.h"
+#include "LinearInterpolationMaterial.h"
 
 #include "ConvDiffMetaAction.h"
 
@@ -139,6 +140,7 @@ void registerObjects()
   registerMaterial(StatefulTest);
   registerMaterial(StatefulSpatialTest);
   registerMaterial(CoupledMaterial);
+  registerMaterial(LinearInterpolationMaterial);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
