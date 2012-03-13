@@ -12,37 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GENERALPOSTPROCESSOR_H
-#define GENERALPOSTPROCESSOR_H
+#ifndef COMPUTENODALPPSTHREAD_H
+#define COMPUTENODALPPSTHREAD_H
 
-#include "Postprocessor.h"
-#include "TransientInterface.h"
-#include "FunctionInterface.h"
-#include "PostprocessorInterface.h"
-#include "Problem.h"
+#include "ParallelUniqueId.h"
+#include "PostprocessorWarehouse.h"
+// libMesh includes
+#include "node_range.h"
 
+class Problem;
 
-//Forward Declarations
-class GeneralPostprocessor;
-
-template<>
-InputParameters validParams<GeneralPostprocessor>();
-
-/* This class is here to combine the Postprocessor interface and the
- * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
-class GeneralPostprocessor :
-  public Postprocessor,
-  public TransientInterface,
-  public FunctionInterface,
-  protected PostprocessorInterface
+class ComputeNodalPPSThread
 {
 public:
-  GeneralPostprocessor(const std::string & name, InputParameters parameters);
+  ComputeNodalPPSThread(Problem & problem, std::vector<PostprocessorWarehouse> & pps);
+  // Splitting Constructor
+  ComputeNodalPPSThread(ComputeNodalPPSThread & x, Threads::split split);
 
-  virtual ~GeneralPostprocessor() {}
+  void operator() (const ConstNodeRange & range);
 
-  // General Postprocessors are not threaded
-  virtual void threadJoin(const Postprocessor & /*pps*/) {}
+  void join(const ComputeNodalPPSThread & /*y*/);
+
+protected:
+  Problem & _problem;
+  THREAD_ID _tid;
+
+  std::vector<PostprocessorWarehouse> & _pps;
 };
 
-#endif
+#endif //COMPUTENODALPPSTHREAD_H

@@ -19,6 +19,7 @@
 #include "OutputProblem.h"
 #include "MaterialData.h"
 #include "ComputePostprocessorsThread.h"
+#include "ComputeNodalPPSThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Moose.h"
@@ -1323,39 +1324,48 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
   // Fixme: Nodal processors need to be threaded
   // init
   bool have_nodal_pps = false;
-  for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
-       nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
-       ++nodal_postprocessor_it)
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    (*nodal_postprocessor_it)->initialize();
-    have_nodal_pps = true;
+    for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[tid].nodalPostprocessors().begin();
+         nodal_postprocessor_it != pps[tid].nodalPostprocessors().end();
+         ++nodal_postprocessor_it)
+    {
+      (*nodal_postprocessor_it)->initialize();
+      have_nodal_pps = true;
+    }
   }
 
   // Don't waste time looping over nodes if there aren't any nodal postprocessors to calculate
   if (have_nodal_pps)
   {
-    // compute
-    for (MeshBase::const_node_iterator node_it = _mesh.local_nodes_begin(); node_it != _mesh.local_nodes_end(); ++node_it)
-    {
-      reinitNode(*node_it, 0);
+    ComputeNodalPPSThread cnppt(*this, pps);
+    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
 
-      for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
-           nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
-           ++nodal_postprocessor_it)
-      {
-        (*nodal_postprocessor_it)->execute();
-      }
-    }
-    // gather
-    for (std::vector<Postprocessor *>::const_iterator nodal_postprocessor_it = pps[0].nodalPostprocessors().begin();
-         nodal_postprocessor_it != pps[0].nodalPostprocessors().end();
-         ++nodal_postprocessor_it)
+    // Store nodal postprocessors values
+    std::set<Postprocessor *> already_gathered;
+
+    const std::vector<Postprocessor *> & nodal_postprocessors = pps[0].nodalPostprocessors();
+
+    for (unsigned int i = 0; i < nodal_postprocessors.size(); ++i)
     {
-      std::string name = (*nodal_postprocessor_it)->name();
-      Real value = (*nodal_postprocessor_it)->getValue();
-      // store the value in each thread
-      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-        _pps_data[tid].storeValue(name, value);
+      Postprocessor *ps = nodal_postprocessors[i];
+      std::string name = ps->name();
+
+      // join across the threads (gather the value in thread #0)
+      if (already_gathered.find(ps) == already_gathered.end())
+      {
+        for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+          ps->threadJoin(*pps[tid].nodalPostprocessors()[i]);
+
+        Real value = ps->getValue();
+        // store the value in each thread
+
+        for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+          _pps_data[tid].storeValue(name, value);
+
+        already_gathered.insert(ps);
+      }
     }
   }
 

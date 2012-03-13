@@ -82,7 +82,7 @@ public:
     Parallel::max(value);
   }
 
-  virtual void threadJoin(const Postprocessor & /*pps*/) { }
+  virtual void threadJoin(const Postprocessor & /*pps*/) = 0;
 
   /**
    * Is the postprocessor marked for output?
