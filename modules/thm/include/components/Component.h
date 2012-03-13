@@ -1,9 +1,9 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include "RELAP7.h"
 #include "R7Object.h"
 #include "R7Mesh.h"
-#include "R7_Moose.h"
 #include "ComponentParser.h"
 #include "ActionWarehouse.h"
 #include "Simulation.h"
