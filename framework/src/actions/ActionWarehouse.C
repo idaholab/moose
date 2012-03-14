@@ -195,16 +195,16 @@ ActionWarehouse::checkUnsatisfiedActions() const
 void
 ActionWarehouse::printActionDependencySets()
 {
-  std::cout << "Ordered Actions:\n";
+  std::cerr << "[DBG][ACT] Ordered Actions:\n";
 
   std::vector<std::set<std::string> > _ordered_names = _actions.getSortedValuesSets();
   for (std::vector<std::set<std::string> >::const_iterator i = _ordered_names.begin(); i != _ordered_names.end(); ++i)
   {
-    std::cout << "(";
+    std::cerr << "[DBG][ACT] (";
     unsigned int jj = 0;
     for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
     {
-      if (jj++) std::cout << ", ";
+      if (jj++) std::cerr << ", ";
       std::cout << *j;
     }
     std::cout << ")\n";
@@ -212,7 +212,7 @@ ActionWarehouse::printActionDependencySets()
     for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
     {
       for (std::vector<Action *>::const_iterator k = _action_blocks[*j].begin(); k != _action_blocks[*j].end(); ++k)
-        std::cout << "\t" << (*k)->getAction() << "\n";
+        std::cerr << "[DBG][ACT]" << "\t" << (*k)->getAction() << "\n";
     }
   }
 }
@@ -221,7 +221,11 @@ void
 ActionWarehouse::executeAllActions()
 {
   if (_show_actions)
+  {
+    std::cerr << "[DBG][ACT] Action Dependency Sets:\n";
+    printActionDependencySets();
     std::cerr << "[DBG][ACT] Executing actions:" << std::endl;
+  }
 
   for (iterator act_iter = begin(); act_iter != end(); ++act_iter)
   {
