@@ -92,6 +92,20 @@ public:
       r_val(2) = _zz * v(2);
       return r_val;
     }
+
+ libMesh::VectorValue<Real> operator*(const libMesh::VectorValue<Real> & v) const 
+    {
+     libMesh::VectorValue<Real> r_val(v);
+     if(v.size() != 3)
+       mooseError("please enter a vector with 3 entries.");
+       
+      r_val(0) = _xx * v(0);
+      r_val(1) = _yy * v(1);
+      r_val(2) = _zz * v(2);
+      return r_val;
+    }
+
+
   
   Real trace() const
   {
