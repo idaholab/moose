@@ -315,7 +315,6 @@ protected:
 public:
   bool _postprocessor_screen_output;
   bool _postprocessor_csv_output;
-  bool _postprocessor_ensight_output;
   bool _postprocessor_gnuplot_output;
   std::string _gnuplot_format;
 

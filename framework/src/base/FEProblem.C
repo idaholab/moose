@@ -79,7 +79,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _pps_output_table_max_rows(0),
     _postprocessor_screen_output(true),
     _postprocessor_csv_output(false),
-    _postprocessor_ensight_output(false),
     _postprocessor_gnuplot_output(false),
     _gnuplot_format("ps"),
     _ex_reader(NULL),
@@ -1469,9 +1468,6 @@ FEProblem::outputPostprocessors(bool force/* = false*/)
 
     if (_postprocessor_csv_output)
       _pps_output_table.printCSV(_out.fileBase() + ".csv", out().screen_interval());
-
-    if (_postprocessor_ensight_output)
-      _pps_output_table.printEnsight(_out.fileBase());
 
     if (_postprocessor_gnuplot_output)
       _pps_output_table.makeGnuplot(_out.fileBase(), _gnuplot_format);

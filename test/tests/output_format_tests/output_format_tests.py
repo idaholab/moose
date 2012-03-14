@@ -17,3 +17,22 @@ nemesis_out_check_test = { INPUT : 'output_test_nemesis.i',
                            EXPECT_ERR : 'Nemesis not supported when compiled without --enable-parmesh',
                            MESH_MODE : ['SERIAL'] }
 
+# Note that for these tests
+# we are supplying one of the parameters via CLI
+gnuplot_ps_out_test = { INPUT : 'output_test_gnuplot.i',
+                        CLI_ARGS : ['Output/gnuplot_format=ps'],
+                        CHECK_FILES : ['out.gp', 'out.dat'] }
+
+gnuplot_png_out_test = { INPUT : 'output_test_gnuplot.i',
+                         CLI_ARGS : ['Output/gnuplot_format=png'],
+                         CHECK_FILES : ['out.gp', 'out.dat'],
+                         PREREQ : 'gnuplot_ps_out_test' }
+
+gnuplot_gif_out_test = { INPUT : 'output_test_gnuplot.i',
+                         CLI_ARGS : ['Output/gnuplot_format=gif'],
+                         CHECK_FILES : ['out.gp', 'out.dat'],
+                         PREREQ : 'gnuplot_png_out_test' }
+
+gnuplot_bad_out_test = { INPUT : 'output_test_gnuplot.i',
+                         CLI_ARGS : ['Output/gnuplot_format=magic'],
+                         EXPECT_ERR : 'gnuplot format .*? is not supported' }

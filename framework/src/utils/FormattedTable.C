@@ -216,83 +216,6 @@ namespace gnuplot
 }
 
 void
-FormattedTable::printEnsight(const std::string & file_base)
-{
-  // setup output file
-  std::string file_name = file_base + ".ens";  //TODO not sure what the extension should be
-  std::ofstream ensfile;
-  ensfile.open(file_name.c_str(), std::ios::trunc | std::ios::out);
-
-  // iterators
-  std::map<Real, std::map<std::string, Real> >::iterator i;
-  std::set<std::string>::iterator varnames;
-
-  ensfile << _column_names.size() << std::endl;
-  for (varnames = _column_names.begin(); varnames != _column_names.end(); ++varnames)
-  {
-    ensfile << *varnames << " vs Time for ???" << std::endl;
-    ensfile << "Time" << std::endl;
-    ensfile << *varnames << std::endl;
-    ensfile << "1" << std::endl;
-
-    ensfile << _data.size() << std::endl;
-    for (i = _data.begin(); i != _data.end(); ++i)
-    {
-      ensfile << i->first << " ";
-      std::map<std::string, Real> &tmp = i->second;
-      ensfile << tmp[*varnames] << std::endl;
-    }
-  }
-}
-
-void
-FormattedTable::writeExodus(ExodusII_IO * ex_out, Real time)
-{
-  // iterators
-  std::map<Real, std::map<std::string, Real> >::iterator i(_data.end());
-  if ( i == _data.begin() )
-  {
-    return;
-  }
-  --i;
-  const Real TIME_TOL(1e-12);
-  if (std::abs((time - i->first)/time) > TIME_TOL)
-  {
-    // Try to find a match
-    for ( i = _data.begin(); i != _data.end(); ++i )
-    {
-      if (std::abs((time - i->first)/time) < TIME_TOL)
-      {
-        break;
-      }
-    }
-    if ( i == _data.end() )
-    {
-      --i;
-      std::cerr << "Input time: " << time
-                << "\nTable time: " << i->first << std::endl;
-      mooseError("Time mismatch in outputting Exodus global variables\n"
-                 "Have the postprocessor values been computed with the correct time?");
-    }
-  }
-  std::map<std::string, Real> & tmp = i->second;
-  std::vector<Real> global_vars;
-  std::vector<std::string> global_var_names;
-  for (std::map<std::string, Real>::iterator ii(tmp.begin()); ii != tmp.end(); ++ii)
-  {
-    global_var_names.push_back( ii->first );
-    global_vars.push_back( ii->second );
-  }
-
-  if (global_vars.size() != global_var_names.size())
-  {
-    mooseError("Error in outputting global vars to exodus.");
-  }
-
-  ex_out->write_global_data( global_vars, global_var_names );
-}
-
-void
 FormattedTable::makeGnuplot(const std::string & base_file, const std::string & format)
 {
   // TODO: run this once at end of simulation, right now it runs every iteration
@@ -375,10 +298,13 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   gpfile.close();
 
   // Run the gnuplot script
+/* We aren't going to run gnuplot automatically
+
   if (!system(NULL))
     mooseError("No way to run gnuplot on this computer");
 
   std::string command = "gnuplot " + gp_name;
   if (system(command.c_str()))
     mooseError("gnuplot command failed");
+*/
 }
