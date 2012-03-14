@@ -779,6 +779,9 @@ FEProblem::subdomainSetupSide(unsigned int subdomain, THREAD_ID tid)
 void
 FEProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< subdomain_id_type > * const active_subdomains/* = NULL*/)
 {
+  if (hasVariable(var_name))
+    mooseError("Variable with name '" << var_name << "' already exists.");
+
   _nl.addVariable(var_name, type, scale_factor, active_subdomains);
   if (_displaced_problem)
     _displaced_problem->addVariable(var_name, type, scale_factor, active_subdomains);

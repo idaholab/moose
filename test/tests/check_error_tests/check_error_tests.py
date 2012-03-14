@@ -127,3 +127,8 @@ invalid_elemental_to_nodal_couple_test = {
     INPUT : 'invalid_aux_coupling_test.i',
     EXPECT_ERR : "You cannot couple an elemental variable to a nodal variable"
 }
+
+same_name_variable2_test = {
+  INPUT : 'same_name_variable2_test.i',
+  EXPECT_ERR : "Variable with name '\S+' already exist."
+}
