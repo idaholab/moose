@@ -128,7 +128,13 @@ invalid_elemental_to_nodal_couple_test = {
     EXPECT_ERR : "You cannot couple an elemental variable to a nodal variable"
 }
 
-same_name_variable2_test = {
-  INPUT : 'same_name_variable2_test.i',
+same_name_variable_test = {
+  INPUT : 'same_name_variable_test.i',
   EXPECT_ERR : "Variable with name '\S+' already exist."
+}
+
+override_name_variable_test = {
+  INPUT : 'override_name_variable_test.i',
+  EXPECT_OUT : "The following variables were overridden or supplied multiple times:",
+  SKIP : 'Awaiting libMesh update'
 }
