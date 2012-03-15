@@ -99,6 +99,7 @@ protected:
   unsigned int _dim;
 
   const Elem * & _current_elem;
+  const Real & _current_elem_volume;                    ///< Volume of the current element
 
   unsigned int _qp;
   const std::vector< Point > & _q_point;
