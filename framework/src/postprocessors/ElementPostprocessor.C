@@ -31,6 +31,7 @@ InputParameters validParams<ElementPostprocessor>()
 ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
     Coupleable(parameters, false),
+    MooseVariableInterface(parameters, false),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     _block_ids(parameters.get<std::vector<unsigned int> >("block")),
@@ -42,8 +43,6 @@ ElementPostprocessor::ElementPostprocessor(const std::string & name, InputParame
     _current_elem(_subproblem.elem(_tid)),
     _current_elem_volume(_subproblem.elemVolume(_tid)),
     _u(_var.sln()),
-    _u_old(_var.slnOld()),
-    _u_older(_var.slnOlder()),
     _grad_u(_var.gradSln())
 {
 }

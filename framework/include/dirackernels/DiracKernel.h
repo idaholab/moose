@@ -24,6 +24,7 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "Coupleable.h"
+#include "MooseVariableInterface.h"
 #include "FunctionInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
@@ -58,6 +59,7 @@ class DiracKernel :
   public SetupInterface,
   public Coupleable,
   public ScalarCoupleable,
+  public MooseVariableInterface,
   public FunctionInterface,
   public TransientInterface,
   public MaterialPropertyInterface,
@@ -181,12 +183,7 @@ protected:
   const std::vector<std::vector<RealTensor> > & _second_test;   ///< Second derivatives of shape functions at QPs
 
   VariableValue & _u;                                   ///< Holds the solution at current quadrature points
-  VariableValue & _u_old;                               ///< Holds the previous solution at the current quadrature point.
-  VariableValue & _u_older;                             ///< Holds the t-2 solution at the current quadrature point.
-
   VariableGradient & _grad_u;                           ///< Holds the solution gradient at the current quadrature points
-
-  VariableSecond & _second_u;                           ///< Second derivatives of the solution at QPs
 
   VariableValue & _u_dot;                               ///< Time derivative of the solution
   VariableValue & _du_dot_du;                           ///< Derivative of u_dot wrt u

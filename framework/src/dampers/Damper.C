@@ -46,10 +46,7 @@ Damper::Damper(const std::string & name, InputParameters parameters) :
     _u_increment(_var.increment()),
 
     _u(_var.sln()),
-    _u_old(_var.slnOld()),
-    _u_older(_var.slnOlder()),
-    _grad_u(_var.gradSln()),
-    _second_u(_var.secondSln())
+    _grad_u(_var.gradSln())
 {
 }
 

@@ -22,6 +22,7 @@
 #include "SetupInterface.h"
 #include "MooseVariable.h"
 #include "Coupleable.h"
+#include "MooseVariableInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "Assembly.h"
 
@@ -45,6 +46,7 @@ class DGKernel :
   public SetupInterface,
   public NeighborCoupleable,
   public ScalarCoupleable,
+  public NeighborMooseVariableInterface,
   protected TwoMaterialPropertyInterface
 {
 public:
@@ -112,11 +114,8 @@ protected:
   unsigned int _boundary_id;                                    ///<
 
   VariableValue & _u;                                           ///< Holds the current solution at the current quadrature point on the face.
-  VariableValue & _u_old;                                       ///< Holds the previous solution at the current quadrature point.
-  VariableValue & _u_older;                                     ///< Holds the t-2 solution at the current quadrature point.
 
   VariableGradient & _grad_u;                                   ///< Holds the current solution gradient at the current quadrature point on the face.
-  VariableSecond & _second_u;                                   ///< Holds the current solution second derivative at the current quadrature point on the face
   // shape functions
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
@@ -136,12 +135,7 @@ protected:
   const std::vector<std::vector<RealTensor> > & _second_test_neighbor;  ///< Second derivative of side shape function
 
   VariableValue & _u_neighbor;                                          ///< Holds the current solution at the current quadrature point
-  VariableValue & _u_old_neighbor;                                      ///< Holds the previous solution at the current quadrature point.
-  VariableValue & _u_older_neighbor;                                    ///< Holds the t-2 solution at the current quadrature point.
-
   VariableGradient & _grad_u_neighbor;                                  ///< Holds the current solution gradient at the current quadrature point
-  VariableSecond  & _second_u_neighbor;                                 ///< Holds the current solution second derivative at the current quadrature point
-
 
   /**
    * This is the virtual that derived classes should override for computing the residual on neighboring element.

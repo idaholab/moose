@@ -34,6 +34,7 @@ NodalConstraint::NodalConstraint(const std::string & name, InputParameters param
   MooseObject(name, parameters),
   SetupInterface(parameters),
   NeighborCoupleable(parameters, true),
+  NeighborMooseVariableInterface(parameters, true),
   FunctionInterface(parameters),
   TransientInterface(parameters),
   GeometricSearchInterface(parameters),

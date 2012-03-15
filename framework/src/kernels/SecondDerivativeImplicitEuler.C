@@ -24,7 +24,9 @@ InputParameters validParams<SecondDerivativeImplicitEuler>()
 
 SecondDerivativeImplicitEuler::SecondDerivativeImplicitEuler(const std::string & name, InputParameters parameters) :
     TimeKernel(name, parameters),
-    _dt(_subproblem.dt())
+    _dt(_subproblem.dt()),
+    _u_old(valueOld()),
+    _u_older(valueOlder())
 {}
 
 Real

@@ -49,6 +49,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     SetupInterface(parameters),
     NeighborCoupleable(parameters, false),
     ScalarCoupleable(parameters),
+    NeighborMooseVariableInterface(parameters, false),
     TwoMaterialPropertyInterface(parameters),
 
     _problem(*parameters.get<Problem *>("_problem")),
@@ -75,12 +76,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _boundary_id(parameters.get<unsigned int>("_boundary_id")),
 
     _u(_var.sln()),
-    _u_old(_var.slnOld()),
-    _u_older(_var.slnOlder()),
-
     _grad_u(_var.gradSln()),
-
-    _second_u(_var.secondSln()),
 
     _phi(_assembly.phiFace()),
     _grad_phi(_assembly.gradPhiFace()),
@@ -101,12 +97,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     _second_test_neighbor(_var.secondPhiFaceNeighbor()),
 
     _u_neighbor(_var.slnNeighbor()),
-    _u_old_neighbor(_var.slnOldNeighbor()),
-    _u_older_neighbor(_var.slnOlderNeighbor()),
-
-    _grad_u_neighbor(_var.gradSlnNeighbor()),
-
-    _second_u_neighbor(_var.secondSlnNeighbor())
+    _grad_u_neighbor(_var.gradSlnNeighbor())
 {
 }
 

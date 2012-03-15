@@ -18,6 +18,7 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "Coupleable.h"
+#include "MooseVariableInterface.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -46,6 +47,7 @@ class Kernel :
   public SetupInterface,
   public Coupleable,
   public ScalarCoupleable,
+  public MooseVariableInterface,
   public FunctionInterface,
   public TransientInterface,
   public PostprocessorInterface,
@@ -115,12 +117,7 @@ protected:
   const std::vector<std::vector<RealTensor> > & _second_test;
 
   VariableValue & _u;                                   ///< Holds the solution at current quadrature points
-  VariableValue & _u_old;                               ///< Holds the previous solution at the current quadrature point.
-  VariableValue & _u_older;                             ///< Holds the t-2 solution at the current quadrature point.
-
   VariableGradient & _grad_u;                           ///< Holds the solution gradient at the current quadrature points
-
-  VariableSecond & _second_u;
 
   VariableValue & _u_dot;                               ///< Time derivative of u
   VariableValue & _du_dot_du;                           ///< Derivative of u_dot wrt u

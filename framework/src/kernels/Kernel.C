@@ -41,6 +41,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     SetupInterface(parameters),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),
+    MooseVariableInterface(parameters, false),
     FunctionInterface(parameters),
     TransientInterface(parameters),
     PostprocessorInterface(parameters),
@@ -70,11 +71,7 @@ Kernel::Kernel(const std::string & name, InputParameters parameters) :
     _second_test(_var.secondPhi()),
 
     _u(_var.sln()),
-    _u_old(_var.slnOld()),
-    _u_older(_var.slnOlder()),
     _grad_u(_var.gradSln()),
-    _second_u(_var.secondSln()),
-
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu()),
 

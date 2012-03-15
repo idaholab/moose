@@ -43,6 +43,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     SetupInterface(parameters),
     Coupleable(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<std::string>("variable")).feType().family == LAGRANGE), // horrible
     ScalarCoupleable(parameters),
+    MooseVariableInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<std::string>("variable")).feType().family == LAGRANGE), // horrible
     FunctionInterface(parameters),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),

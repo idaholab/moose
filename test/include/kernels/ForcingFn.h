@@ -11,7 +11,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  virtual Real value();
+  virtual Real funcValue();
 };
 
 template<>

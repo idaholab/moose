@@ -90,15 +90,15 @@ public:
 
   const std::vector<std::vector<Real> > & phi() { return _phi; }
   const std::vector<std::vector<RealGradient> > & gradPhi() { return _grad_phi; }
-  const std::vector<std::vector<RealTensor> > & secondPhi() { return _second_phi; }
+  const std::vector<std::vector<RealTensor> > & secondPhi() { _second_phi = &_fe->get_d2phi(); return *_second_phi; }
 
   const std::vector<std::vector<Real> > & phiFace() { return _phi_face; }
   const std::vector<std::vector<RealGradient> > & gradPhiFace() { return _grad_phi_face; }
-  const std::vector<std::vector<RealTensor> > & secondPhiFace() { return _second_phi_face; }
+  const std::vector<std::vector<RealTensor> > & secondPhiFace() { _second_phi_face = &_fe_face->get_d2phi(); return *_second_phi_face; }
 
   const std::vector<std::vector<Real> > & phiFaceNeighbor() { return _phi_face_neighbor; }
   const std::vector<std::vector<RealGradient> > & gradPhiFaceNeighbor() { return _grad_phi_face_neighbor; }
-  const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
+  const std::vector<std::vector<RealTensor> > & secondPhiFaceNeighbor() { _second_phi_face_neighbor = &_fe_face_neighbor->get_d2phi(); return *_second_phi_face_neighbor; }
 
   const std::vector<Point> & normals() { return _normals; }
 
@@ -106,14 +106,14 @@ public:
   VariableValue & increment() { return _increment; }
 
   VariableValue & sln() { return _u; }
-  VariableValue & slnOld() { return _u_old; }
-  VariableValue & slnOlder() { return _u_older; }
+  VariableValue & slnOld() { _need_u_old = true; return _u_old; }
+  VariableValue & slnOlder() { _need_u_older = true;return _u_older; }
   VariableGradient  & gradSln() { return _grad_u; }
   VariableGradient  & gradSlnOld() { _need_grad_old = true; return _grad_u_old; }
   VariableGradient  & gradSlnOlder() { _need_grad_older = true; return _grad_u_older; }
-  VariableSecond & secondSln() { return _second_u; }
-  VariableSecond & secondSlnOld() { return _second_u_old; }
-  VariableSecond & secondSlnOlder() { return _second_u_older; }
+  VariableSecond & secondSln() { _need_second = true; secondPhi(); secondPhiFace(); return _second_u; }
+  VariableSecond & secondSlnOld() { _need_second_old = true; secondPhi(); secondPhiFace(); return _second_u_old; }
+  VariableSecond & secondSlnOlder() { _need_second_older = true; secondPhi(); secondPhiFace(); return _second_u_older; }
 
   VariableValue & uDot() { return _u_dot; }
   VariableValue & duDotDu() { return _du_dot_du; }
@@ -128,12 +128,14 @@ public:
   VariableValue & nodalSlnDuDotDu() { return _nodal_du_dot_du; }
 
   VariableValue & slnNeighbor() { return _u_neighbor; }
-  VariableValue & slnOldNeighbor() { return _u_old_neighbor; }
-  VariableValue & slnOlderNeighbor() { return _u_older_neighbor; }
+  VariableValue & slnOldNeighbor() { _need_u_old_neighbor = true; return _u_old_neighbor; }
+  VariableValue & slnOlderNeighbor() { _need_u_older_neighbor = true; return _u_older_neighbor; }
   VariableGradient & gradSlnNeighbor() { return _grad_u_neighbor; }
-  VariableGradient & gradSlnOldNeighbor() { return _grad_u_old_neighbor; }
-  VariableGradient & gradSlnOlderNeighbor() { return _grad_u_older_neighbor; }
-  VariableSecond & secondSlnNeighbor() { return _second_u_neighbor; }
+  VariableGradient & gradSlnOldNeighbor() { _need_grad_old_neighbor = true; return _grad_u_old_neighbor; }
+  VariableGradient & gradSlnOlderNeighbor() { _need_grad_older_neighbor = true; return _grad_u_older_neighbor; }
+  VariableSecond & secondSlnNeighbor() { _need_second_neighbor = true; secondPhiFaceNeighbor(); return _second_u_neighbor; }
+  VariableSecond & secondSlnOldNeighbor() { _need_second_old_neighbor = true; secondPhiFaceNeighbor(); return _second_u_old_neighbor; }
+  VariableSecond & secondSlnOlderNeighbor() { _need_second_older_neighbor = true; secondPhiFaceNeighbor(); return _second_u_older_neighbor; }
 
   const Node * & nodeNeighbor() { return _node_neighbor; }
   unsigned int & nodalDofIndexNeighbor() { return _nodal_dof_index_neighbor; }
@@ -178,6 +180,25 @@ public:
   /// Get the scaling factor for this variable
   Real scalingFactor() { return _scaling_factor; }
 
+  /**
+   * Whether or not this variable is actually using the shape function value.
+   *
+   * Currently hardcoded to true because we always compute the value.
+   */
+  bool usesPhi() { return true; }
+
+  /**
+   * Whether or not this variable is actually using the shape function gradient.
+   *
+   * Currently hardcoded to true because we always compute the value.
+   */
+  bool usesGradPhi() { return true; }
+
+  /**
+   * Whether or not this variable is actually using the shape function second derivative.
+   */
+  bool usesSecondPhi() { return _need_second || _need_second_old || _need_second_older; }
+
 protected:
   THREAD_ID _tid;                                               ///< Thread ID
   unsigned int _var_num;                                        ///< variable number (from libMesh)
@@ -205,31 +226,43 @@ protected:
   std::vector<unsigned int> _dof_indices_neighbor;              /// DOF indices (neighbor)
 
   bool _is_nl;                                                  /// true if this varaible is non-linear
-  bool _has_second_derivatives;                                 /// true if we need to compute second derivatives (if the variable is 3rd hermite, etc.)
+
+
+  bool _need_u_old;
+  bool _need_u_older;
 
   bool _need_grad_old;
   bool _need_grad_older;
 
+  bool _need_second;
   bool _need_second_old;
   bool _need_second_older;
+
+
+  bool _need_u_old_neighbor;
+  bool _need_u_older_neighbor;
+
+  bool _need_grad_old_neighbor;
+  bool _need_grad_older_neighbor;
+
+  bool _need_second_neighbor;
+  bool _need_second_old_neighbor;
+  bool _need_second_older_neighbor;
 
   // Shape function values, gradients. second derivatives
   const std::vector<std::vector<Real> > & _phi;
   const std::vector<std::vector<RealGradient> > & _grad_phi;
-  const std::vector<std::vector<RealTensor> > & _second_phi;
+  const std::vector<std::vector<RealTensor> > * _second_phi;
 
   // Values, gradients and second derivatives of shape function on faces
   const std::vector<std::vector<Real> > & _phi_face;
   const std::vector<std::vector<RealGradient> > & _grad_phi_face;
-  const std::vector<std::vector<RealTensor> > & _second_phi_face;
-
-  std::vector<std::vector<RealTensor> > _dummy_second_phi;            ///< if we are not using second derivatives, we point our reference here, so libmesh
-                                                                      ///< will not compute second derivatives for us
+  const std::vector<std::vector<RealTensor> > * _second_phi_face;
 
   // Values, gradients and second derivatives of shape function on faces
   const std::vector<std::vector<Real> > & _phi_face_neighbor;
   const std::vector<std::vector<RealGradient> > & _grad_phi_face_neighbor;
-  const std::vector<std::vector<RealTensor> > & _second_phi_face_neighbor;
+  const std::vector<std::vector<RealTensor> > * _second_phi_face_neighbor;
 
   const std::vector<Point> & _normals;                                  ///< Normals at QPs on faces
 
@@ -250,6 +283,8 @@ protected:
   VariableGradient _grad_u_old_neighbor;
   VariableGradient _grad_u_older_neighbor;
   VariableSecond _second_u_neighbor;
+  VariableSecond _second_u_old_neighbor;
+  VariableSecond _second_u_older_neighbor;
 
   // time derivatives
   VariableValue _u_dot;                                                 ///< u_dot (time derivative)

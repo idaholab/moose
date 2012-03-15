@@ -17,6 +17,7 @@
 
 #include "BoundaryCondition.h"
 #include "Coupleable.h"
+#include "MooseVariableInterface.h"
 #include "MooseVariable.h"
 #include "MaterialPropertyInterface.h"
 
@@ -36,6 +37,7 @@ class IntegratedBC :
   public BoundaryCondition,
   public Coupleable,
   public ScalarCoupleable,
+  public MooseVariableInterface,
   public MaterialPropertyInterface
 {
 public:

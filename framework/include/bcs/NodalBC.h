@@ -17,6 +17,7 @@
 
 #include "BoundaryCondition.h"
 #include "Coupleable.h"
+#include "MooseVariableInterface.h"
 
 // libMesh
 #include "numeric_vector.h"
@@ -34,7 +35,8 @@ InputParameters validParams<NodalBC>();
 class NodalBC :
   public BoundaryCondition,
   public Coupleable,
-  public ScalarCoupleable
+  public ScalarCoupleable,
+  public MooseVariableInterface
 {
 public:
   NodalBC(const std::string & name, InputParameters parameters);

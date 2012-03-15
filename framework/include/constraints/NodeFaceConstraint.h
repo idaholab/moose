@@ -22,6 +22,7 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "Coupleable.h"
+#include "MooseVariableInterface.h"
 #include "FunctionInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
@@ -58,6 +59,7 @@ class NodeFaceConstraint :
   public MooseObject,
   public SetupInterface,
   public Coupleable,
+  public MooseVariableInterface,
   public FunctionInterface,
   public TransientInterface,
   private GeometricSearchInterface
@@ -153,18 +155,12 @@ protected:
 
   const std::vector<std::vector<Real> > & _phi_master;                /// Side shape function.
   const std::vector<std::vector<RealGradient> > & _grad_phi_master;   /// Gradient of side shape function
-  const std::vector<std::vector<RealTensor> > & _second_phi_master;   /// Second derivative of side shape function
 
   const std::vector<std::vector<Real> > & _test_master;               /// Side test function
   const std::vector<std::vector<RealGradient> > & _grad_test_master;  /// Gradient of side shape function
-  const std::vector<std::vector<RealTensor> > & _second_test_master;  /// Second derivative of side shape function
 
   VariableValue & _u_master;                                          /// Holds the current solution at the current quadrature point
-  VariableValue & _u_old_master;                                      /// Holds the previous solution at the current quadrature point.
-  VariableValue & _u_older_master;                                    /// Holds the t-2 solution at the current quadrature point.
-
   VariableGradient & _grad_u_master;                                  /// Holds the current solution gradient at the current quadrature point
-  VariableSecond  & _second_u_master;                                 /// Holds the current solution second derivative at the current quadrature point
 
   const DofMap & _dof_map;                                            /// DOF map
 

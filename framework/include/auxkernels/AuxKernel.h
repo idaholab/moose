@@ -18,6 +18,7 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "Coupleable.h"
+#include "MooseVariableInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
 #include "TransientInterface.h"
@@ -44,6 +45,7 @@ class AuxKernel :
   public SetupInterface,
   public Coupleable,
   public ScalarCoupleable,
+  public MooseVariableInterface,
   public FunctionInterface,
   public TransientInterface,
   public MaterialPropertyInterface,

@@ -29,6 +29,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
     BoundaryCondition(name, parameters),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),
+    MooseVariableInterface(parameters, false),
     MaterialPropertyInterface(parameters),
     _current_elem(_assembly.elem()),
     _current_side(_assembly.side()),

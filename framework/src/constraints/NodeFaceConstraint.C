@@ -36,6 +36,7 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
   MooseObject(name, parameters),
   SetupInterface(parameters),
   Coupleable(parameters, true),
+  MooseVariableInterface(parameters, true),
   FunctionInterface(parameters),
   TransientInterface(parameters),
   GeometricSearchInterface(parameters),
@@ -65,19 +66,13 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
 
   _phi_master(_assembly.phiFaceNeighbor()),
   _grad_phi_master(_assembly.gradPhiFaceNeighbor()),
-  _second_phi_master(_assembly.secondPhiFaceNeighbor()),
 
   _test_master(_var.phiFaceNeighbor()),
   _grad_test_master(_var.gradPhiFaceNeighbor()),
-  _second_test_master(_var.secondPhiFaceNeighbor()),
 
   _u_master(_var.slnNeighbor()),
-  _u_old_master(_var.slnOldNeighbor()),
-  _u_older_master(_var.slnOlderNeighbor()),
-
   _grad_u_master(_var.gradSlnNeighbor()),
 
-  _second_u_master(_var.secondSlnNeighbor()),
   _dof_map(_sys.dofMap()),
   _node_to_elem_map(_mesh.nodeToElemMap()),
 

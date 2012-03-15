@@ -52,7 +52,7 @@ missing_material_prop_test2 = { INPUT : 'missing_material_prop_test2.i',
                                EXPECT_ERR : "Material property 'diff1' is not defined on block \d+" }
 
 bad_kernel_var_test = { INPUT : 'bad_kernel_var_test.i',
-                        EXPECT_ERR : 'variable foo does not exist in this system' }
+                        EXPECT_ERR : 'Unknown variable' }
 
 bad_bc_var_test = { INPUT : 'bad_bc_var_test.i',
                     EXPECT_ERR : 'variable foo does not exist in this system' }

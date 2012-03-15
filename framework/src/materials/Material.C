@@ -56,7 +56,6 @@ Material::Material(const std::string & name, InputParameters parameters) :
     _dim(_mesh.dimension()),
     _coord_sys(_subproblem.coordSystem()),
     _block_id(parameters.get<unsigned int>("block_id")),
-
     _real_zero(_problem._real_zero[_tid]),
     _zero(_problem._zero[_tid]),
     _grad_zero(_problem._grad_zero[_tid]),

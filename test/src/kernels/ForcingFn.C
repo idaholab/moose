@@ -13,7 +13,7 @@ ForcingFn::ForcingFn(const std::string & name, InputParameters parameters) :
 }
 
 Real
-ForcingFn::value()
+ForcingFn::funcValue()
 {
 //  Point pt = _qrule->get_points()[_qp];
   Point pt = _q_point[_qp];
@@ -28,5 +28,5 @@ ForcingFn::value()
 Real
 ForcingFn::computeQpResidual()
 {
-  return -value() * _test[_i][_qp];
+  return -funcValue() * _test[_i][_qp];
 }

@@ -27,9 +27,9 @@ InputParameters validParams<NodalScalarKernel>()
 NodalScalarKernel::NodalScalarKernel(const std::string & name, InputParameters parameters) :
     ScalarKernel(name, parameters),
     Coupleable(parameters, true),
+    MooseVariableInterface(parameters, true),
     _ced_var(_sys.getVariable(_tid, parameters.get<std::string>("ced_variable"))),
     _u_ced(_ced_var.nodalSln()),
-
     _node_ids(getParam<std::vector<unsigned int> >("nodes"))
 {
 }

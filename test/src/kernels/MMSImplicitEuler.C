@@ -8,7 +8,8 @@ InputParameters validParams<MMSImplicitEuler>()
 }
 
 MMSImplicitEuler::MMSImplicitEuler(const std::string & name, InputParameters parameters) :
-    TimeKernel(name, parameters)
+    TimeKernel(name, parameters),
+    _u_old(valueOld())
 {}
 
 Real

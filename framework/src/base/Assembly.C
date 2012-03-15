@@ -500,9 +500,12 @@ Assembly::copyNeighborShapes(unsigned int var)
 {
   MooseVariable & v = _sys.getVariable(_tid, var);
 
-  _phi_face_neighbor = v.phiFaceNeighbor();
-  _grad_phi_face_neighbor = v.gradPhiFaceNeighbor();
-  _second_phi_face_neighbor = v.secondPhiFaceNeighbor();
+  if(v.usesPhi())
+    _phi_face_neighbor = v.phiFaceNeighbor();
+  if(v.usesGradPhi())
+    _grad_phi_face_neighbor = v.gradPhiFaceNeighbor();
+  if(v.usesSecondPhi())
+    _second_phi_face_neighbor = v.secondPhiFaceNeighbor();
 }
 
 void

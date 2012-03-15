@@ -28,6 +28,7 @@ InputParameters validParams<NodalPostprocessor>()
 NodalPostprocessor::NodalPostprocessor(const std::string & name, InputParameters parameters) :
     Postprocessor(name, parameters),
     Coupleable(parameters, false),
+    MooseVariableInterface(parameters, false),
     TransientInterface(parameters),
     MaterialPropertyInterface(parameters),
     _var(_problem.getVariable(_tid, parameters.get<std::string>("variable"))),
