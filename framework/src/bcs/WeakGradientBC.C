@@ -18,13 +18,11 @@ template<>
 InputParameters validParams<WeakGradientBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.set<Real>("value")=0.0;
   return params;
 }
 
 WeakGradientBC::WeakGradientBC(const std::string & name, InputParameters parameters) :
-    IntegratedBC(name, parameters),
-    _value(getParam<Real>("value"))
+    IntegratedBC(name, parameters)
 {}
 
 Real
