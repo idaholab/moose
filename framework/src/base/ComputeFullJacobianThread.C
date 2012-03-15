@@ -75,7 +75,7 @@ ComputeFullJacobianThread::computeFaceJacobian(short int bnd_id)
       for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
         IntegratedBC * bc = *jt;
-        if (bc->variable().number() == ivar)
+        if (bc->shouldApply() && bc->variable().number() == ivar)
         {
           bc->subProblem().prepareFaceShapes(jvar, _tid);
           bc->computeJacobianBlock(jvar);

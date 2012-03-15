@@ -44,3 +44,10 @@ NodalScalarKernel::reinit()
   _problem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
   _assembly.prepareOffDiagScalar();
 }
+
+void
+NodalScalarKernel::computeOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _var.number())
+    computeJacobian();
+}

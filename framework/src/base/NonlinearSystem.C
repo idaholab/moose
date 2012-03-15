@@ -950,15 +950,15 @@ NonlinearSystem::computeResidualInternal(NumericVector<Number> & residual)
   const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
   if (scalars.size() > 0)
   {
-    _mproblem.reinitScalars(0);
     for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
     {
       ScalarKernel * kernel = *it;
 
+      _mproblem.reinitScalars(0);
       kernel->reinit();
       kernel->computeResidual();
+      _mproblem.addResidualScalar(residual);
     }
-    _mproblem.addResidualScalar(residual);
   }
 
   if(_need_residual_copy)
@@ -1300,15 +1300,7 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 {
   std::vector<MooseVariableScalar *> scalar_vars = _vars[0].scalars();
 
-  _mproblem.reinitScalars(0);
-
   const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
-  for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
-  {
-    ScalarKernel * kernel = *it;
-    kernel->reinit();
-  }
-
   // do full jacobian for ODEs
   for (unsigned int ivar = 0; ivar < scalar_vars.size(); ivar++)
   {
@@ -1318,7 +1310,12 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
       {
         ScalarKernel * kernel = *it;
         if (kernel->variable().number() == ivar)
+        {
+          _mproblem.reinitScalars(0);
+          kernel->reinit();
           kernel->computeOffDiagJacobian(jvar);
+          _mproblem.addJacobianScalar(jacobian);
+        }
       }
     }
   }

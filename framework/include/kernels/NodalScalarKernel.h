@@ -36,6 +36,7 @@ public:
   virtual ~NodalScalarKernel();
 
   virtual void reinit();
+  virtual void computeOffDiagJacobian(unsigned int jvar);
 
   /**
    * The variable this kernel is constraining.
