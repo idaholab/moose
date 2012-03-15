@@ -17,6 +17,8 @@ CHBulk::CHBulk(const std::string & name, InputParameters parameters)
    _mob_name(getParam<std::string>("mob_name")),
    _Dmob_name(getParam<std::string>("Dmob_name")),
    _M(getMaterialProperty<Real>(_mob_name)),
+   _u_old(valueOld()),
+   _grad_u_old(_implicit ? _grad_zero : gradientOld()),
    _has_MJac(getParam<bool>("has_MJac")),
    _DM(_has_MJac ? &getMaterialProperty<Real>(_Dmob_name) : NULL),
    _implicit(getParam<bool>("implicit"))
@@ -53,10 +55,8 @@ CHBulk::precomputeQpResidual()
   }
   else
   {
-    mooseError("Grad u old no longer available.  Go talk to Derek about it.");
-    
-//    c = _u_old[_qp];
-//    grad_c = _grad_u_old[_qp];
+    c = _u_old[_qp];
+    grad_c = _grad_u_old[_qp];
   }
   
   return _M[_qp] * computeGradDFDCons(Residual, c, grad_c);//Return residual
@@ -74,10 +74,8 @@ CHBulk::precomputeQpJacobian()
   }
   else
   {
-    mooseError("Grad u old no longer available.  Go talk to Derek about it.");
-
-//    c = _u_old[_qp];
-//    grad_c = _grad_u_old[_qp];
+    c = _u_old[_qp];
+    grad_c = _grad_u_old[_qp];
   }
 
   RealGradient grad_value = 0.0;

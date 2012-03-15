@@ -27,7 +27,9 @@ CHInterface::CHInterface(const std::string & name, InputParameters parameters)
    _DM(_has_MJac ? &getMaterialProperty<Real>(_Dmob_name) : NULL),
    _grad_M(getMaterialProperty<RealGradient>(_grad_mob_name)),
    _Dgrad_Mnp(_has_MJac ? &getMaterialProperty<RealGradient>("Dgrad_Mnp") : NULL),
-   _Dgrad_Mngp(_has_MJac ? &getMaterialProperty<Real>("Dgrad_Mngp") : NULL)
+   _Dgrad_Mngp(_has_MJac ? &getMaterialProperty<Real>("Dgrad_Mngp") : NULL),
+   _second_u(second()),
+   _second_u_old(_implicit ? _second_zero : secondOld())
 {
 }
 
@@ -42,10 +44,7 @@ CHInterface::computeQpResidual()
   if (_implicit)
     second_c = _second_u[_qp];
   else
-  {
-    mooseError("Old values of second derivatives no longer supported.  Go see Derek about it!");
-//    second_c = _second_u_old[_qp];
-  }
+    second_c = _second_u_old[_qp];
 
   value = _kappa[_qp]*second_c.tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]);
   

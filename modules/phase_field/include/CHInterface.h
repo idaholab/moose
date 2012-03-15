@@ -35,6 +35,8 @@ private:
   MaterialProperty<RealGradient> & _grad_M;
   MaterialProperty<RealGradient> * _Dgrad_Mnp;
   MaterialProperty<Real> * _Dgrad_Mngp;
-  
+
+  VariableSecond & _second_u;
+  VariableSecond & _second_u_old;
 };
 #endif //CHInterface_H

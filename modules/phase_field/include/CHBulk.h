@@ -30,6 +30,9 @@ protected:
   
   MaterialProperty<Real> & _M;
 
+  VariableValue & _u_old;
+  VariableGradient & _grad_u_old;
+
 private:
   
   bool _has_MJac;
