@@ -1,0 +1,7 @@
+~ RULE_4_1_B_locate_each_enum_item_in_seperate_line
+~ RULE_3_2_B_do_not_use_same_filename_more_than_once
+~ RULE_4_1_A_B_use_space_for_indentation
+~ RULE_4_5_A_braces_for_function_definition_should_be_located_in_seperate_line
+~ RULE_9_1_A_do_not_use_hardcorded_include_path
+~ RULE_6_1_E_do_not_use_more_than_5_paramters_in_function
+- contrib
