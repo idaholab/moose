@@ -1,0 +1,374 @@
+﻿= Release Note=
+
+* 0.2.2.13 (2010.10.06)
+   - Bug Fix
+     * When running on multiple target directory, the problem which shows incorrect analyzed file count is fixed.
+          
+* 0.2.2.12 (2010.09.05)
+   - Bug Fix
+     * RULE_3_3_A_start_function_name_with_upperrcase_windows.py
+       The false alarm which occurs "_tWinMain", "_tmain" is fixed.
+     
+* 0.2.2.11 (2010.07.14)
+   - Bug Fix
+     * RULE_7_1_B_A_do_not_use_double_assignment.py 
+       The false alarm which occurs when string contains = = is fixed.
+     
+* 0.2.2.10 (2010.07.06)
+   - Bug Fix
+     * 0.2.2.8의 버그 Fix
+    
+* 0.2.2.8 (2010.07.06)
+   - Bug Fix
+     * "" 를 스트링으로 인식하지 못해 그 뒤의 " 까지를 스트링으로 처리하는 문제 해결
+     
+* 0.2.2.7 (2010.07.05)
+   - Bug Fix
+     * 멀티 라인 스트링이 인식되지 않아 False Alarm을 일으키는 문제 해결
+     
+* 0.2.2.6 (2010.05.31)
+   - Bug Fix
+     * 클래스 정의시 클래스 앞에 매크로를 넣을 경우 매크로를 클래스명으로 인식하는 버그 수정
+     
+     #define __declspec(dllexport) DLLEXPORT
+     
+     class DLLEXPORT CCamRecorderFactory
+     {
+     }
+                
+* 0.2.2.5 (2010.05.28)
+   - Bug Fix
+     * Enum 블럭에서 ( ) 를 사용할 경우 RULE_4_1_B_locate_each_enum_item_in_seperate_line.py 오류가 발생하는 문제 해결
+     * 객체 배열을 구성할 경우, RULE_6_1_A_do_not_omit_function_parameter_names.py 오류가 발생하는 문제 해결 
+              예)
+     
+     CPoint BtnTeamPos[]    = { CPoint(BTN_SINGLE_POS_X, BTN_SINGLE_POS_Y), 
+                             CPoint(BTN_TEAM_A_POS_X, BTN_TEAM_A_POS_Y), 
+                            CPoint(BTN_TEAM_B_POS_X, BTN_TEAM_B_POS_Y), 
+                            CPoint(BTN_TEAM_C_POS_X, BTN_TEAM_C_POS_Y) 
+                        };
+     
+* 0.2.2.4 (2010.05.20)
+   - Bug Fix
+     * "이 아닌 \로 여러라인에 걸쳐 스트링을 작성하는 경우 라인 위치를 잘못 판단하는 문제 해결
+     
+* 0.2.2.3 (2010.05.19)
+   - Bug Fix
+     * Visual C++의 일부 키워드들을 클래스 명으로 오검출 문제 해결 (__declspec 등)
+     * Managed C++의 이벤트 키워드들을 함수 명으로 오검출 문제 해결
+     * 매크로 함수에 대해 함수 선언으로 오검출 문제 해결 - 전체 명칭이 대문자로 구성되었을때 매크로 함수로 인식하도록 처리
+     * RULE_4_2_A_A_space_around_operator - 후위 증감연산자는 단항연산자임에도 공백을 두도록 오검출하는 문제 해결
+
+* 0.2.2.0 (2010.05.18)
+   - Bug Fix
+     * 업데이트 불가 문제 해결
+     
+* 0,2.1.3 (2010.05.03)
+   - Bug fix
+     * RULE_4_2_A_A_space_around_operator.py 에서
+       #include <magic++.h> 와 같은 구문에서 오류를 출력하는 문제 해결
+     
+* 0.2.1.2 (2010.04.06)
+   - Bug fix 
+     * operator() 정의 구문을 함수로 인식못하는 문제 해결
+
+* 0.2.1.1 (2010.03.27)
+   - Bug fix 
+     * RULE_3_2_B_do_not_use_same_filename_more_than_once.py
+     	stdafx 파일의 경우 파일명 중복 사용을 허용함
+     	
+* 0.2.1.0 (2010.03.27)
+   - 기능 개선
+     * basefilelist.txt 를 강제로 사용하지 않게 하는 --noBase 옵션 추가
+   - Bug fix 
+     * Window Message Macro가 함수로 인식되는 문제 해결
+     * UnitTest++ 분석시 메모리 사용이 과도하여 Crash 되는 문제 해결
+
+* 0.2.0.7 (2010.02.05)
+   - Bug Fix
+     * fo 라는 ID사용시 Crash 되는 문제 해결
+     
+* 0.2.0.6 (2010.01.24)
+   - Bug Fix
+     * 옵션을 잘못 넣었을때 에러 메시지를 찍지 못하고 Crash 하는 버그 수정
+     
+* 0.2.0.5 (2009.12.28)
+   - Bug Fix
+     * 다음과 같은 코드에서 std::string("XXX") 원소들을 모두 함수 이름으로 처리하는 오류 해결
+const std::string seasons = { 
+std::string("Spring"), 
+std::string("Summer"), 
+}; 
+
+* 0.2.0.4 (2009.12.23)
+   - Bug Fix
+     * 1개 파일을 분석할때 Script 오류가 발생하는 문제 해결
+     
+* 0.2.0.3 (2009.11.25)
+   - 기능 개선
+     * 외부 서버도 사용가능하도록 빌드 스크립트 수정
+   - Bug Fix
+     * 없음
+========================================================================================
+* 0.2.0.2 (2009.11.19)
+   - 기능 개선
+     * 없음
+   - Bug Fix
+     * RULE_4_2_A_B_space_around_word.py
+       - #include <boost/preprocessor/repetition/for.hpp> 구문에서 false alarm 발생 문제 해결
+
+========================================================================================
+* 0.2.0.1 (2009.11.18)
+   - 기능 개선
+     * 없음
+   - Bug Fix
+     * -f -o 옵션 파일명에 " 가 있을 경우, 상대패스로 해석되는 문제 해결
+     
+========================================================================================
+* 0.2.0.0 (2009.11.18)
+   - 기능 개선
+     * FileFilter에 룰이 기재되지 않을 경우, 에러 메시지를 출력하고 프로그램이 종료되도록 수정
+     * 출력을 최소화한 CI 모드 추가 --ci
+     * 코드 정리 (Unused Variable 등)
+     * CheckStyle 결과와 호환되는 XML 결과 출력 - 기존 CheckStyle HudsonPlugin 류 사용 가능
+     * 업데이트 버젼 검출에서 Version 스트링이 다를 경우 단순히 업데이트 했던 것을 변경하여, 
+       Version이 낮을 경우에만 업데이트하도록 수정
+   - Bug Fix
+     * 기존에 동작하지 않던 force-lang 옵션 삭제
+    
+========================================================================================
+* 0.1.3.4 (2009.10.14)
+   - 기능 개선
+     * 없음
+   - Bug Fix
+     * RULE_3_3_B_start_private_function_name_with_underbar.py 의 메시지 오탈자 수정
+    
+========================================================================================
+* 0.1.3.3 (2009.10.06)
+   - 기능 개선
+     * 없음
+   - Bug Fix
+     * RULE_3_3_B_start_private_function_name_with_underbar.py 가 operator에는 동작하지 않도록 변경
+     
+     
+========================================================================================
+* 0.1.3.2 (2009.09.30)
+   - 기능 개선
+     * 없음
+   - Bug Fix
+     * Function Name 룰 실행이  함수 호출에 대해서도 실행되는 문제 수정
+     
+========================================================================================
+* 0.1.3.1 (2009.09.29)
+   - 기능 개선
+     * 없음
+   - Bug Fix
+     * RULE_3_3_B_start_private_function_name_with_underbar.py 가 생성자도 검출하는 문제 해결
+
+========================================================================================
+* 0.1.3.0 (2009.09.24)
+   - 기능 개선
+     * XML Output 기능 추가 (--output=xml)
+     
+   - Bug Fix
+     * operator 재정의시 이를 함수로 인식하지 않는 문제 해결
+     * RULE_3_3_A_start_function_name_with_lowercase_unix.py False Alarm 생성자/파괴자에서 해결
+
+========================================================================================
+* 0.1.2.1 (2009.08.28)
+   - Bug Fix
+     * exe 파일에 대한 업데이트를 하지 않도록 수정
+     * 1번째 라인에서 column 이 잘못 계산되는 문제 해걸
+     * 룰 수정
+       - RULE_4_1_C_align_long_function_parameter_list.py 에서 메시지가 잘못 나오는 문제 해결
+
+========================================================================================
+* 0.1.2.0 (2009.08.28)
+   - 기능 개선
+     * Function Rule / Type Rule 이 Prepressor 구문에서는 동작하지 않도록 수정
+    
+   - Bug Fix
+     * 파서 수정
+      - #, ## 키워드를 인식하도록 수정
+      
+     * 룰 수정
+      - RULE_3_2_F_use_representitive_classname_for_cpp_filename
+        * struct도 기준으로 삼도록 변경
+      - RULE_3_3_A_start_function_name_with_is_or_has_when_return_bool
+        * Prev Token을 뒤져 bool 을 리턴하는 지 확인할 때, ; 를 먼저 만나면 룰을 중단하도록 수정
+      - RULE_3_3_A_start_function_name_with_lowercase_unix
+        * 생성자, 소멸자의 경우 적용하지 않도록 수정
+      - RULE_4_1_C_align_long_function_parameter_list
+        * TC 추가
+      - RULE_4_2_A_A_space_around_operator
+        * Preprocess 구문에서도 동작하도록 수정. \ 가 뒤에 있을 경우 에러 미출력
+      - RULE_4_2_A_B_space_around_word
+        * Preprocess 구문에서도 동작하도록 수정. \ 가 뒤에 있을 경우 에러 미출력
+      - RULE_6_1_A_do_not_omit_function_parameter_names
+        * TC 추가
+      - RULE_6_5_B_do_not_use_lowercase_for_macro_constants
+        * TC 추가
+      - RULE_7_1_C_do_not_use_question_keyword
+        * Macro 구문에서도 동작 하도록 수정
+      - RULE_7_2_B_do_not_use_goto_statement
+        * Macro 구문에서도 동작 하도록 수정
+      - RULE_9_2_D_use_reentrant_function
+        * toupper의 경우 사용자가 에러 출력 여부를 결정할 수 있도록 수정
+        
+========================================================================================
+
+* 0.1.1.0 (2009.08.27)
+   - 기능 개선
+     * { } 쌍이 ifdef 문에 의해 서로 쌍이 맞지 않은 경우, 강제로 제일 마지막 매칭 쌍을 대입하도록 처리
+     * verbose 모드에서 발생한 에러의 function stack trace 출력
+     * 외부 변수을 입력 받을 수 있도록 수정
+       - 프로그램 실행시 --var=key:value 또는 filefilter.txt에 % key:value,key,value 형식으로 변수 전달 가능
+       - 현재 사용중인 변수는 tabsize:4 임.
+     
+     
+   - Bug Fix
+   * filefilter에 설정한 절대패스(//로 시작)를 인식하지 못하는 문제 해결
+   * auto 키워드 인식
+   * Multiline Preprocess 구문 미인식 문제 해결
+
+   * 룰 수정
+     * RULE_3_3_A_start_function_name_with_upperrcase_windows.py
+     * RULE_4_1_B_indent_each_enum_item_in_enum_block.py
+     * RULE_4_1_B_locate_each_enum_item_in_seperate_line.py
+     * RULE_4_2_A_A_space_around_operator.py
+     * RULE_4_5_A_brace_for_namespace_should_be_located_in_seperate_line.py
+     * RULE_4_5_A_braces_for_function_definition_should_be_located_in_seperate_line.py
+     * RULE_4_5_A_braces_for_type_definition_should_be_located_in_seperate_line.py
+     * RULE_4_5_A_matching_braces_inside_of_function_should_be_located_same_column.py
+     * RULE_5_2_C_provide_doxygen_class_comment_on_class_def.py
+     * RULE_5_2_C_provide_doxygen_namespace_comment_on_namespace_def.py
+     * RULE_5_2_C_provide_doxygen_struct_comment_on_struct_def.py
+     * RULE_5_3_A_provide_doxygen_function_comment_on_function_in_impl.py
+     * RULE_6_1_A_do_not_omit_function_parameter_names.py
+     * RULE_6_1_G_write_less_than_200_lines_for_function.py
+     * RULE_6_4_B_initialize_first_item_of_enum.py
+     * RULE_4_5_A_matching_braces_inside_of_function_should_be_located_same_column.py
+     * RULE_A_3_avoid_too_deep_blocks.py
+     * RULE_4_1_B_indent_each_enum_item_in_enum_block.py
+     * RULE_3_3_B_start_private_function_name_with_underbar.py
+     * RULE_4_1_B_locate_each_enum_item_in_seperate_line.py
+     * RULE_4_5_A_indent_blocks_inside_of_function.py
+     * RULE_8_1_A_provide_file_info_comment.py
+
+
+========================================================================================
+* 0.1.0.1 (2009.08.25)
+   - Bug Fix
+     * RULE_6_1_A_do_not_omit_function_parameter_names 룰 오류 수정
+
+* 0.1.0 (2009.08.21)
+  
+  - 전면 재 개발. google cpplint 를 더이상 사용하지 않음. 신규 개발한 룰엔진 / 룰 구조로 변경    (룰 동적 추가 용이)
+  
+  - 추가된 기능
+    
+    * C/C++용 룰 46개 지원.가용 룰은 아래 가용 룰 리스트 참조.
+      - 룰 리스트 출력 : -r 옵션
+      
+    * 레가시 파일의 측정 제외를 위한 basefilelist.txt 파일 인식
+      - basefilelist.txt는 특정 시점의 Code Snapshot(파일명+사이즈쌍)를 포함하는 파일임
+      - basefilelist.txt가 분석하려는 폴더 내에 있을 경우, 이 파일을 읽어서 현재 파일과 
+        비교하여,  파일명이 없거나 또는 사이즈가 변경되는 경우에만 코드를 분석함.
+      - nsiqcppstyle은 이 파일의 생성을 지원하지 않으며, 자매 도구인 nsiqcollector 를 
+        사용하여 생성.(-g 옵션)
+    
+    * 자동 업데이트. 매번 툴을 실행시마다 서버에서 신규 버젼 체크하여, 신규 버젼이 존재시      
+      변경 / 신규 파일의 자동 업데이트
+      - 이 기능을 원하지 않을 경우 프로그램 실행시 --no-update 옵션을 지정
+    
+    * 룰 위반 Suppression 기능
+      - 소스 코드내의 각 위반 발생 라인의 뒤쪽에 // NS 추가하여 해당 라인에서 발생한 모든 
+         위반 Suppression
+      - 소스 코드내의 첫번째 커멘트에 -- RULE명 을 추가하여, 해당 룰에서 발생한 모든 위반
+         Suppression (반드시 첫번째 Comment여야 함.)
+      
+    * 룰 위반 별로 Rule Doc URL 출력 가능 (--show-url 옵션)
+      - 룰 Doc 서버 제공 http://nsiqcppstyle.nsiq.nhncorp.com:8080/rule_doc
+    
+    * 위반 결과 출력 방법 추가
+      - Eclipse : --output=eclipse 옵션 
+      - CSV     : --output=csv 옵션
+      - 코딩 스탠다드 도구 특성상 출력 결과가 방대하기 때문에, 데이터 사이즈 제한이 큰 
+         HTML / Excel 출력은 미지원함.
+    
+    * Summary Report 출력 개선
+      - Quality Practice의 요구사항인 Build Quality 결과 바로 출력
+      - 파일별로 위반한 룰 개수 출력
+   
+    * 윈도우 : Binary 제공. 윈도우에서는 더 이상 Python 을 별도로 설치할 필요 없음
+    
+    * 리눅스/맥 : Python 2.3 ~ Python 2.6 지원. Python 3.0은 지원하지 않음.
+
+  - 버그 Fix
+  
+    * 전면 재개발에 따라 기존 버그 없음.
+    
+  - 가용 룰 리스트
+    
+    ~ RULE_10_1_A_do_not_use_bufferoverflow_risky_function_for_unix
+    ~ RULE_10_1_B_do_not_use_bufferoverflow_risky_function_for_windows
+    ~ RULE_3_1_A_do_not_start_filename_with_underbar
+    ~ RULE_3_2_B_do_not_use_same_filename_more_than_once
+    ~ RULE_3_2_CD_do_not_use_special_characters_in_filename
+    ~ RULE_3_2_F_use_representitive_classname_for_cpp_filename
+    ~ RULE_3_2_H_do_not_use_underbars_for_cpp_filename
+    ~ RULE_3_2_H_do_not_use_uppercase_for_c_filename
+    ~ RULE_3_3_A_start_function_name_with_is_or_has_when_return_bool
+    ~ RULE_3_3_A_start_function_name_with_lowercase_unix
+    ~ RULE_3_3_A_start_function_name_with_upperrcase_windows
+    ~ RULE_3_3_B_start_private_function_name_with_underbar
+    ~ RULE_4_1_A_A_use_tab_for_indentation
+    ~ RULE_4_1_A_B_use_space_for_indentation
+    ~ RULE_4_1_B_indent_each_enum_item_in_enum_block
+    ~ RULE_4_1_B_locate_each_enum_item_in_seperate_line
+    ~ RULE_4_1_C_align_long_function_parameter_list
+    ~ RULE_4_1_E_align_conditions
+    ~ RULE_4_2_A_A_space_around_operator
+    ~ RULE_4_2_A_B_space_around_word
+    ~ RULE_4_4_A_do_not_write_over_120_columns_per_line
+    ~ RULE_4_5_A_braces_for_function_definition_should_be_located_in_seperate_line
+    ~ RULE_4_5_A_braces_for_type_definition_should_be_located_in_seperate_line
+    ~ RULE_4_5_A_braces_inside_of_function_should_be_located_in_end_of_line
+    ~ RULE_4_5_A_indent_blocks_inside_of_function
+    ~ RULE_4_5_A_matching_braces_inside_of_function_should_be_located_same_column
+    ~ RULE_4_5_B_use_braces_even_for_one_statement
+    ~ RULE_5_2_C_provide_doxygen_class_comment_on_class_def
+    ~ RULE_5_2_C_provide_doxygen_namespace_comment_on_namespace_def
+    ~ RULE_5_2_C_provide_doxygen_struct_comment_on_struct_def
+    ~ RULE_5_3_A_provide_doxygen_function_comment_on_function_in_header
+    ~ RULE_5_3_A_provide_doxygen_function_comment_on_function_in_impl
+    ~ RULE_6_1_A_do_not_omit_function_parameter_names
+    ~ RULE_6_1_E_do_not_use_more_than_5_paramters_in_function
+    ~ RULE_6_1_G_write_less_than_200_lines_for_function
+    ~ RULE_6_2_A_do_not_use_system_dependent_type
+    ~ RULE_6_4_B_initialize_first_item_of_enum
+    ~ RULE_6_5_B_do_not_use_lowercase_for_macro_constants
+    ~ RULE_6_5_B_do_not_use_macro_for_constants
+    ~ RULE_7_1_B_A_do_not_use_double_assignment
+    ~ RULE_7_1_C_do_not_use_question_keyword
+    ~ RULE_7_2_B_do_not_use_goto_statement
+    ~ RULE_8_1_A_provide_file_info_comment
+    ~ RULE_9_1_A_do_not_use_hardcorded_include_path
+    ~ RULE_9_2_D_use_reentrant_function
+    ~ RULE_A_3_avoid_too_deep_blocks
+ 
+  
+========================================================================================
+* 0.0.2 (2009.07.27)
+  - filefilter 가 적용되지 않는 문제 해결
+  - 마지막 리포팅 시에 룰별 위반 개수 출력하도록 개선
+  - 툴 이름 변경 nsiqcppcheck ==> nsiqcppstyle
+
+
+========================================================================================  
+* 0.0.1 (2009.07.24)
+  - 초기버젼 릴리즈
+  - 기능 리스트
+    * nsiqcollector의 filefilter 사용하여 분석할 파일 범위 / 룰 범위 셋팅
+      - nsiqcollector에서 사용하는 filefilter.txt내에 사용할 룰을 "~"를 붙여 기록함
+    * 분석 결과를 console로 출력함.

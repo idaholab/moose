@@ -11,6 +11,10 @@ moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
 # We exclude these applications:
 excluded_applications = set(['r7_moose', 'rattlesnake', 'moose_unit'])
 
+# Comment Syntax Coverage command:
+comment_syntax_cmd = [ 'moose/contrib/nsiqcppstyle/nsiqcppstyle', '--quiet', '--basedir=moose', '-f', 'moose/contrib/nsiqcppstyle/syntax_style', '--output=html', '--url=https://hpcsc.inl.gov/moose/browser/trunk', '-o', 'output.html', 'moose']
+rsync_comment_syntax_cmd = ['/usr/bin/rsync', '-av', '--delete', 'output.html', os.getenv('TRAC_SERVER') + ':/srv/www/ssl/MOOSE/coverage/' ]
+
 _USAGE = """
 updateStable.py repo_revision
 
@@ -138,6 +142,8 @@ def process_args():
 
 if __name__ == '__main__':
   if socket.gethostname().split('.')[0] == head_node:
+    runCMD(comment_syntax_cmd)
+    runCMD(rsync_comment_syntax_cmd)
     arg_revision = process_args()
     if buildStatus() and getCoverage():
       # Checking out moose-stable
