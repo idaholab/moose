@@ -82,8 +82,11 @@ Usage : nsiqcppstyle [Options]
                 that each tool recognizes.
                 csv and xml outputs the result on the file "nsiqcppstyle_result.csv"
                 "nsiqcppstyle_result.xml" respectively, if you don't provide -o option.
-  --url=        Specify a base url path. To be used in conjunction with --output=html
-                targetfilepath with be appended to url path.
+  --url=        (optional) Specify a base url path. To be used in conjunction with --output=html
+  --basedir=    (optional) Specify a base directory path. To be used in conjunction with --url:
+                URL links will result in: url/basedir/(stripped targetfilepath up to basedir)
+                exp: /tmp/bitten334df22/some/location/trunk/<basedir>/src/  will result in:
+                https://url/basedir/src/
   --ci          Continuous Integration mode. If this mode is on, this tool only report summary.
 
 * nsiqcppstyle reports coding standard violations on C/C++ source code.
@@ -432,7 +435,7 @@ class Filter :
     def to_string(self) :
         template = """Filter Scope "%s" is applied.
 Current Filter Setting (Following is applied sequentially)
-%
+%s
 Current File extension and Language Setting
 %s"""
         s = ""

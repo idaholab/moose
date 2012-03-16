@@ -70,7 +70,12 @@ def ReportSummaryToScreen(analyzedFiles, nsiqcppstyle_state, filter, ciMode) :
             buildQuality = 0
             if fileCount != 0 :
                 buildQuality = (fileCount - violatedFileCount) * 100.0 / fileCount
-            writer.write("""<hr /><br>================================== Summary Report ===================================<br> ** Total Available Rules     : %d<br> ** Total Applied Rules       : %d<br> ** Total Violated Rules      : %d<br> ** Total Errors Occurs       : %d<br> ** Total Analyzed Files      : %d<br> ** Total Violated Files Count: %d<br> ** Build Quality             : %.2f%%<br><hr />""" % (nsiqcppstyle_rulemanager.ruleManager.availRuleCount, len(nsiqcppstyle_state.checkers), len(nsiqcppstyle_state.errorPerChecker.keys()), nsiqcppstyle_state.error_count, len(analyzedFiles), violatedFileCount, buildQuality))
+            writer.write("""<hr /><br>================================== Summary Report ===================================<br> ** Total Available Rules     : %d<br> ** Total Applied Rules       : %d<br> ** Total Violated Rules      : %d<br> ** Total Errors Occurs       : %d<br> ** Total Analyzed Files      : %d<br> ** Total Violated Files Count: %d<br> ** Build Quality             : %.2f%%<br>""" % (nsiqcppstyle_rulemanager.ruleManager.availRuleCount, len(nsiqcppstyle_state.checkers), len(nsiqcppstyle_state.errorPerChecker.keys()), nsiqcppstyle_state.error_count, len(analyzedFiles), violatedFileCount, buildQuality))
+
+            writer.write("""<br>================================== Applied  Rules ===================================<br>\n""")
+            for checker in nsiqcppstyle_state.errorPerChecker.keys() :
+                writer.write(""" ** Rule violated: %s: %d times<br>\n""" % (checker, nsiqcppstyle_state.errorPerChecker[checker]))
+            print 'Syntax Comment Coverage: ' + str(buildQuality)[:4] + '%'
     else:
         fileCount = len(analyzedFiles)
         violatedFileCount = len(nsiqcppstyle_state.errorPerFile.keys())
@@ -220,9 +225,9 @@ def ErrorInternal(t, ruleName, message):
             writer.write("""<error line='%d' col='%d' severity='warning' message='%s' source='%s'/>\n""" % (t.lineno, t.column, escape(message).replace("'", "\""), ruleName))
         elif _nsiqcppstyle_state.output_format == 'html':
             if _nsiqcppstyle_state.baseURL != '':
-                writer.write("""<li><a href=%s/%s>%s</a><ul><li>Line: %d - Column: %d</li><li>Rule: %s</li></ul>\n""" % (_nsiqcppstyle_state.baseURL, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):], t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):].split('/').pop(), t.lineno, t.column, escape(message).replace("'", "\"")))
+                writer.write("""<li><a href=%s/%s#L%d>%s</a><ul><li>Line: %d - Column: %d</li><li>Rule: %s</li></ul>\n""" % (_nsiqcppstyle_state.baseURL, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):], t.lineno, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):].split('/').pop(), t.lineno, t.column, escape(message).replace("'", "\"")))
             else:
-                writer.write("""<li><a href=%s/%s>%s</a><ul><li>Line: %d - Column: %d</li><li>Rule: %s</li></ul>\n""" % (_nsiqcppstyle_state.baseURL, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):], t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):].split('/').pop(), t.lineno, t.column, escape(message).replace("'", "\"")))
+                writer.write("""<li><a href=%s/%s#L%d>%s</a><ul><li>Line: %d - Column: %d</li><li>Rule: %s</li></ul>\n""" % (_nsiqcppstyle_state.baseURL, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):], t.lineno, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):].split('/').pop(), t.lineno, t.column, escape(message).replace("'", "\"")))
 
 Error = ErrorInternal
 

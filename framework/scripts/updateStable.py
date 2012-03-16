@@ -70,10 +70,10 @@ def getCoverage():
   coverage_score = coverage_results[(coverage_results.find('lines......: ') + 13):coverage_results.find('% ')]
   # Return the results
   if float(coverage_score) <= 80.0:
-    print 'Failed Coverage: ' + str(coverage_score)
+    print 'Failed Code Coverage: ' + str(coverage_score)
     return False
   else:
-    print 'Succeeded Coverage: ' + str(coverage_score)
+    print 'Succeeded Code Coverage: ' + str(coverage_score)
     return True
 
 
