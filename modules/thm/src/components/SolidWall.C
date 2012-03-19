@@ -36,9 +36,9 @@ SolidWall::buildMesh()
   RELAP7::getConnectionInfo(_input, comp_name, end_type);
 
   Component * comp = _sim.getComponentByName(comp_name);
-  if (dynamic_cast<Pipe *>(comp) != NULL)
+  if (dynamic_cast<PipeBase *>(comp) != NULL)
   {
-    Pipe * pipe = dynamic_cast<Pipe *>(comp);
+    PipeBase * pipe = dynamic_cast<PipeBase *>(comp);
     _boundary_id = pipe->getBoundaryId(end_type);
   }
   else
