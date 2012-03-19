@@ -61,13 +61,14 @@ protected:
   std::vector<unsigned int> _subdomains;     ///< List of subdomain IDs this components owns
 
   virtual unsigned int getNextSubdomainId();
+  virtual unsigned int getNextBCId();
 
-  static unsigned int bc_ids;
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
 
 private:
-  // Do not want users to touch this, they _must_ use the API
+  // Do not want users to touch these, they _must_ use the API
   static unsigned int subdomain_ids;
+  static unsigned int bc_ids;
 };
 
 #endif /* COMPONENT_H */

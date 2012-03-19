@@ -61,3 +61,10 @@ Component::getNextSubdomainId()
   _subdomains.push_back(sd_id);
   return sd_id;
 }
+
+unsigned int
+Component::getNextBCId()
+{
+  unsigned int id = bc_ids++;
+  return id;
+}
