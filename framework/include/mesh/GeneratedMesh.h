@@ -31,6 +31,11 @@ public:
   GeneratedMesh(const std::string & name, InputParameters parameters);
   virtual ~GeneratedMesh();
 
+  /**
+   * Returns the width of the requested dimension
+   */
+  Real dimensionWidth(unsigned int dim) const;
+
 protected:
   int _dim;                                     ///< The dimension of the mesh
   int _nx, _ny, _nz;                            ///< Number of elements in x, y, z direction

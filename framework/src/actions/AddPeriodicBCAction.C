@@ -19,16 +19,20 @@
 #include "FunctionPeriodicBoundary.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "GeneratedMesh.h"
 
 template<>
 InputParameters validParams<AddPeriodicBCAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<unsigned int>("primary", "Boundary ID associated with the primary boundary.");
-  params.addRequiredParam<unsigned int>("secondary", "Boundary ID associated with the secondary boundary.");
+  params.addParam<std::vector<std::string> >("auto_direction", "If using a generated mesh, you can specifiy just the dimension(s) you want to mark as periodic");
+
+  params.addParam<unsigned int>("primary", "Boundary ID associated with the primary boundary.");
+  params.addParam<unsigned int>("secondary", "Boundary ID associated with the secondary boundary.");
   params.addParam<std::vector<Real> >("translation", "Vector that translates coordinates on the primary boundary to coordinates on the secondary boundary.");
   params.addParam<std::vector<std::string> >("transform_func", "Functions that specify the transformation");
   params.addParam<std::vector<std::string> >("inv_transform_func", "Functions that specify the inverse transformation");
+
   params.addParam<std::vector<std::string> >("variable", "Variable for the periodic boundary");
   return params;
 }
@@ -47,10 +51,60 @@ AddPeriodicBCAction::setPeriodicVars(PeriodicBoundary & p, const std::vector<std
     p.set_variable(nl.getVariable(0, (*it)).number());
 }
 
+bool
+AddPeriodicBCAction::autoTranslationBoundaries()
+{
+  if (isParamValid("auto_direction"))
+  {
+    GeneratedMesh *gen_mesh = dynamic_cast<GeneratedMesh *>(&_problem->mesh());
+    if (!gen_mesh)
+      mooseError("\"auto_direction\" is only supported for type \"GeneratedMesh\"");
+
+    NonlinearSystem & nl = _problem->getNonlinearSystem();
+    std::vector<std::string> auto_dirs = getParam<std::vector<std::string> >("auto_direction");
+
+    unsigned int dim_offset = gen_mesh->dimension() - 2;
+    for (unsigned int i=0; i<auto_dirs.size(); ++i)
+    {
+      if (auto_dirs[i] == "X" || auto_dirs[i] == "x")
+      {
+        PeriodicBoundary p(RealVectorValue(gen_mesh->dimensionWidth(0), 0, 0));
+        p.myboundary = _paired_boundary_map[0][dim_offset][0];
+        p.pairedboundary = _paired_boundary_map[0][dim_offset][1];
+        setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
+        nl.dofMap().add_periodic_boundary(p);
+      }
+      else if (auto_dirs[i] == "Y" || auto_dirs[i] == "y")
+      {
+        PeriodicBoundary p(RealVectorValue(0, gen_mesh->dimensionWidth(1), 0));
+        p.myboundary = _paired_boundary_map[1][dim_offset][0];
+        p.pairedboundary = _paired_boundary_map[1][dim_offset][1];
+        setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
+        nl.dofMap().add_periodic_boundary(p);
+      }
+      else if (auto_dirs[i] == "Z" || auto_dirs[i] == "z")
+      {
+        if (dim_offset == 0)
+          mooseError("Cannot wrap 'Z' direction when using a 2D mesh");
+        PeriodicBoundary p(RealVectorValue(0, 0, gen_mesh->dimensionWidth(2)));
+        p.myboundary = _paired_boundary_map[2][dim_offset][0];
+        p.pairedboundary = _paired_boundary_map[2][dim_offset][1];
+        setPeriodicVars(p, getParam<std::vector<std::string> >("variable"));
+        nl.dofMap().add_periodic_boundary(p);
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 void
 AddPeriodicBCAction::act()
 {
   NonlinearSystem & nl = _problem->getNonlinearSystem();
+
+  if (autoTranslationBoundaries())
+    return;
 
   if (getParam<std::vector<Real> >("translation") != std::vector<Real>())
   {
@@ -95,6 +149,16 @@ AddPeriodicBCAction::act()
   }
   else
   {
-    mooseError("You have to specify either 'translation' or 'trans_func' in your period boundary section '" + _name + "'");
+    mooseError("You have to specify either 'auto_direction', 'translation' or 'trans_func' in your period boundary section '" + _name + "'");
   }
 }
+
+const Real AddPeriodicBCAction::_paired_boundary_map[3][2][2] =
+{
+  // X mappings (2D and 3D)
+  {{3, 1}, {4, 2}},
+  // Y mappings (2D and 3D)
+  {{0, 2}, {1, 3}},
+  // Z mappings (3D)
+  {{-1, -1}, {0, 5}}
+};

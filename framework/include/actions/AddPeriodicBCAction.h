@@ -42,7 +42,16 @@ public:
   virtual void act();
 
 protected:
+  /**
+   * This function will automatically add the correct translation vectors for
+   * each requested dimension when using GeneratedMesh
+   * @returns a boolean indicating whether or not these boundaries were automatically added
+   */
+  bool autoTranslationBoundaries();
+
   void setPeriodicVars(PeriodicBoundary & p, const std::vector<std::string> & var_names);
+
+  static const Real _paired_boundary_map[3][2][2];
 };
 
 #endif // ADDPERIODICBCACTION_H

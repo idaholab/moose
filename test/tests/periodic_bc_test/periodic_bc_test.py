@@ -18,3 +18,9 @@ testlevel1 = { INPUT : 'periodic_level_1_test.i',
 
 subdomain_restricted_vars_test = { INPUT : 'periodic_subdomain_restricted_test.i',
                                    EXODIFF : ['out_restrict.e'] }
+
+auto_wrap_2d_test = { INPUT : 'auto_periodic_bc_test.i',
+                 EXODIFF : ['out_auto.e'] }
+
+auto_wrap_3d_test = { INPUT : 'auto_periodic_bc_test_3d.i',
+                      EXODIFF : ['out_auto_3d.e'] }

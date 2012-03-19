@@ -88,3 +88,22 @@ GeneratedMesh::GeneratedMesh(const std::string & name, InputParameters parameter
 GeneratedMesh::~GeneratedMesh()
 {
 }
+
+Real
+GeneratedMesh::dimensionWidth(unsigned int dim) const
+{
+  switch (dim)
+  {
+  case 0:
+    return _xmax - _xmin;
+    break;
+  case 1:
+    return _ymax - _ymin;
+    break;
+  case 2:
+    return _zmax - _zmin;
+    break;
+  default:
+    mooseError("Requested dimension out of bounds");
+  }
+}
