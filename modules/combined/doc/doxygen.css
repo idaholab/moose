@@ -1,21 +1,21 @@
-/* The standard CSS for doxygen 
+/* The standard CSS for doxygen
 
         modified by RossCairns.com
 */
 
 body, table, div, p, dl {
         font-family: Lucida Grande, Verdana, Geneva, Arial, sans-serif;
-        font-size: 12px;
+        font-size: 13px;
 }
 
 p, div, dl {
         color:#3E3E3E;
+        font-size: 12px;
 }
 
 div.contents p {
-        
         font-family:Monaco, courier;
-        
+        font-size: 11px;
 }
 
 /* @group Heading Levels */
@@ -24,7 +24,6 @@ h1 {
         margin-bottom: 10px;
         font-size: 30px;
         padding: 0px 0px 20px 0px ;
-        
         border-bottom:1px dotted #E0E0E0;
 }
 
@@ -165,7 +164,7 @@ pre.fragment {
         margin: 4px 8px 4px 2px;
         overflow: auto;
         word-wrap: break-word;
-        font-size:  9pt;
+        font-size:  11pt;
         line-height: 125%;
 }
 
@@ -220,7 +219,7 @@ p.formulaDsp {
 }
 
 img.formulaDsp {
-        
+
 }
 
 img.formulaInl {
@@ -273,20 +272,20 @@ span.charliteral {
         color: #008080
 }
 
-span.vhdldigit { 
-        color: #ff00ff 
+span.vhdldigit {
+        color: #ff00ff
 }
 
-span.vhdlchar { 
-        color: #000000 
+span.vhdlchar {
+        color: #000000
 }
 
-span.vhdlkeyword { 
-        color: #700070 
+span.vhdlkeyword {
+        color: #700070
 }
 
-span.vhdllogic { 
-        color: #ff0000 
+span.vhdllogic {
+        color: #ff0000
 }
 
 /* @end */
