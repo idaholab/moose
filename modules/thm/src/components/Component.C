@@ -30,6 +30,7 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _id(comp_id++),
     _sim(*getParam<Simulation *>("_sim")),
     _mesh(_sim.mesh()),
+    _model_type(_sim.getParam<Model::EModelType>("model_type")),
 
     _input_file_name(getParam<std::string>("physics_input_file"))
 {

@@ -7,6 +7,7 @@
 #include "ComponentParser.h"
 #include "ActionWarehouse.h"
 #include "Simulation.h"
+#include "Model.h"
 
 
 class Component;
@@ -54,6 +55,7 @@ protected:
 
   Simulation & _sim;                    ///< Simulation this component is part of
   R7Mesh & _mesh;                       ///< Global mesh this component works on
+  Model::EModelType _model_type;        ///< Convenience variable that stores model type
 
   std::string _input_file_name;
   std::vector<unsigned int> _subdomains;     ///< List of subdomain IDs this components owns
