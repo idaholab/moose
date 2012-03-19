@@ -335,13 +335,12 @@ public:
       MooseVariable * var = new MooseVariable(var_num, mvn, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
-
-      if (active_subdomains == NULL)
-        _var_map[var_num] = std::set<subdomain_id_type>();
-      else
-        for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
-          _var_map[var_num].insert(*it);
     }
+    if (active_subdomains == NULL)
+      _var_map[mvn] = std::set<subdomain_id_type>();
+    else
+      for (std::set<subdomain_id_type>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+        _var_map[mvn].insert(*it);
     _var_names.push_back(var_name);
   }
 
