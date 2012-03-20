@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "Function.h"
+#include "Moose.h"
 
 template<>
 InputParameters validParams<Function>()
@@ -36,4 +37,22 @@ RealGradient
 Function::gradient(Real /*t*/, const Point & /*p*/)
 {
   return RealGradient(0, 0, 0);
+}
+
+Real
+Function::integral()
+{
+  std::string errorMsg("Integral method not defined for function ");
+  errorMsg += _name;
+  mooseError( errorMsg );
+  return 0;
+}
+
+Real
+Function::average()
+{
+  std::string errorMsg("Average method not defined for function ");
+  errorMsg += _name;
+  mooseError( errorMsg );
+  return 0;
 }

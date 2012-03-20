@@ -45,6 +45,10 @@ public:
    * this returns 0, you must override it.
    */
   virtual RealGradient gradient(Real t, const Point & p);
+
+  virtual Real integral();
+
+  virtual Real average();
 };
 
 #endif //FUNCTION_H

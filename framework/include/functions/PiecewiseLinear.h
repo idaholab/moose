@@ -38,6 +38,10 @@ public:
    */
   virtual Real value(Real t, const Point & pt);
 
+  virtual Real integral();
+
+  virtual Real average();
+
 private:
   LinearInterpolation _linear_interp;
   Real _scale_factor;

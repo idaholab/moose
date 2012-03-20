@@ -76,6 +76,18 @@ PiecewiseLinearFile::value(Real t, const Point &)
   return  _linear_interp->sample( t );
 }
 
+Real
+PiecewiseLinearFile::integral()
+{
+  return _linear_interp->integrate();
+}
+
+Real
+PiecewiseLinearFile::average()
+{
+  return integral()/(_linear_interp->domain(_linear_interp->getSampleSize()-1)-_linear_interp->domain(0));
+}
+
 bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
 {
   std::string line;

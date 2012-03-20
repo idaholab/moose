@@ -31,13 +31,10 @@ public:
   virtual void initialize() {}
   virtual void execute() {}
 
-  /**
-   * This will return the degrees of freedom in the system.
-   */
   virtual Real getValue();
 
 protected:
-  const PostprocessorValue & _my_value;
+  PostprocessorValue & _my_value;
 };
 
 #endif //REPORTER_H

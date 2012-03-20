@@ -18,13 +18,16 @@ template<>
 InputParameters validParams<Reporter>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+  params.addParam<Real>("default", 0, "Default value");
   return params;
 }
 
-Reporter::Reporter(const std::string & name, InputParameters parameters) :
-    GeneralPostprocessor(name, parameters),
+Reporter::Reporter(const std::string & name, InputParameters params) :
+    GeneralPostprocessor(name, params),
     _my_value(getPostprocessorValue(name))
-{}
+{
+  _my_value = getParam<Real>("default");
+}
 
 Real
 Reporter::getValue()

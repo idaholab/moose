@@ -38,6 +38,9 @@ public:
    */
   virtual Real value(Real t, const Point & pt);
 
+  virtual Real integral();
+  virtual Real average();
+
 private:
   LinearInterpolation * _linear_interp;
   const std::string _file_name;

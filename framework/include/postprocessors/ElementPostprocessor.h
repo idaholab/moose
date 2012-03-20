@@ -24,8 +24,6 @@
 // libMesh
 #include "elem.h"
 
-class MooseVariable;
-
 //Forward Declarations
 class ElementPostprocessor;
 

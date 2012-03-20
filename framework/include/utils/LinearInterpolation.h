@@ -22,17 +22,14 @@
 
 
 /**
- * This class applies the Least Squares algorithm to a set of points to provide a smooth curve for
- * sampling values.
- *
- * Requires: LAPACK
+ * This class interpolates values given a set of data pairs and an abscissa.
  */
 class LinearInterpolation
 {
 public:
 
   /* Constructor, Takes two vectors of points for which to apply the fit.  One should be of the
-   * independent variable while the other should be of the dependent varible.  These values should
+   * independent variable while the other should be of the dependent variable.  These values should
    * correspond to one and other in the same position.
    */
   LinearInterpolation(const std::vector<double> & X,
@@ -57,6 +54,14 @@ public:
    * This function returns the size of the array holding the points, i.e. the number of sample points
    */
   unsigned int getSampleSize();
+
+  /**
+   * This function returns the integral of the function
+   */
+  double integrate();
+
+  double domain(int i) {return _x[i];}
+  double range(int i) {return _y[i];}
 
 private:
 

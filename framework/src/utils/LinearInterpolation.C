@@ -60,6 +60,18 @@ LinearInterpolation::sample(double x)
   return 0;
 }
 
+double
+LinearInterpolation::integrate()
+{
+  double answer(0);
+  for (unsigned int i(1); i < _x.size(); ++i)
+  {
+    answer += 0.5*(_y[i]+_y[i-1])*(_x[i]-_x[i-1]);
+  }
+
+  return answer;
+}
+
 void
 LinearInterpolation::dumpSampleFile(std::string base_name, std::string x_label, std::string y_label, float xmin, float xmax, float ymin, float ymax)
 {

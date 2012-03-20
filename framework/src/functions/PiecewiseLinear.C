@@ -60,3 +60,15 @@ PiecewiseLinear::value(Real t, const Point & p)
   }
   return _scale_factor * func_value;
 }
+
+Real
+PiecewiseLinear::integral()
+{
+  return _linear_interp.integrate();
+}
+
+Real
+PiecewiseLinear::average()
+{
+  return integral()/(_linear_interp.domain(_linear_interp.getSampleSize())-_linear_interp.domain(0));
+}
