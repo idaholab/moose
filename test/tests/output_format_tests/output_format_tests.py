@@ -36,3 +36,8 @@ gnuplot_gif_out_test = { INPUT : 'output_test_gnuplot.i',
 gnuplot_bad_out_test = { INPUT : 'output_test_gnuplot.i',
                          CLI_ARGS : ['Output/gnuplot_format=magic'],
                          EXPECT_ERR : 'gnuplot format .*? is not supported' }
+
+# Test that YAML dumps are working
+yaml_dump_test = { INPUT : 'IGNORED',
+                   CLI_ARGS : ['--yaml'],
+                   EXPECT_OUT : 'START YAML DATA.*END YAML DATA'}

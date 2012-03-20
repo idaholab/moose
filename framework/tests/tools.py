@@ -266,7 +266,7 @@ class TestHarness:
       return m.group(1)
 
   def checkExpectError(self, output, expect_error):
-    if re.search(expect_error, output, re.MULTILINE) == None:
+    if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:
       #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
       return False
     else:
