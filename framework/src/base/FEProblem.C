@@ -186,6 +186,7 @@ void FEProblem::initialSetup()
     adaptivity().uniformRefine(_uniform_refine_level);
     Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
   }
+  _eq.print_info();
 
   if (!_restart)
   {

@@ -59,7 +59,6 @@ void
 SubProblem::init()
 {
   _eq.init();
-  _eq.print_info();
 }
 
 std::vector<unsigned int>
