@@ -22,3 +22,8 @@ patch_test = { INPUT : 'patch_recovery_test.i',
                EXODIFF : ['patch_out.e-s002'],
                GROUP : 'adaptive'}
 
+initial_adaptivity_test = {
+  INPUT : 'initial_adaptivity_test.i',
+  EXODIFF : ['initial_adaptivity_test_out.e'],
+  GROUP : 'adaptive'
+}
