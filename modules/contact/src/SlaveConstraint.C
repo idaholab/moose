@@ -22,6 +22,7 @@ InputParameters validParams<SlaveConstraint>()
 
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
   return params;
 }
@@ -37,7 +38,12 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
    _vars(_x_var, _y_var, _z_var)
-{}
+{
+  if (parameters.isParamValid("tangential_tolerance"))
+  {
+    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
+  }
+}
 
 void
 SlaveConstraint::addPoints()

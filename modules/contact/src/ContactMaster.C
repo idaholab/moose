@@ -19,6 +19,7 @@ InputParameters validParams<ContactMaster>()
 
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
 
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
@@ -39,6 +40,10 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
   _vars(_x_var, _y_var, _z_var)
 {
+  if (parameters.isParamValid("tangential_tolerance"))
+  {
+    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
+  }
   if (_model == CM_GLUED)
   {
     _penetration_locator.setUpdate(false);

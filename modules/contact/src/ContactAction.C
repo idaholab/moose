@@ -17,6 +17,7 @@ InputParameters validParams<ContactAction>()
   params.addParam<Real>("penalty", 1e8, "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
+  params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
   return params;
 }
@@ -78,6 +79,10 @@ ContactAction::act()
     params.set<unsigned int>("slave") = _slave;
     params.set<Real>("penalty") = _penalty;
     params.set<Real>("tension_release") = _tension_release;
+    if (isParamValid("tangential_tolerance"))
+    {
+      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+    }
     params.addCoupledVar("disp_x", "The x displacement");
     params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
     params.addCoupledVar("disp_y", "The y displacement");
@@ -118,6 +123,10 @@ ContactAction::act()
     params.set<unsigned int>("boundary") = _slave;
     params.set<unsigned int>("master") = _master;
     params.set<Real>("penalty") = _penalty;
+    if (isParamValid("tangential_tolerance"))
+    {
+      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+    }
     params.addCoupledVar("disp_x", "The x displacement");
     params.set<std::vector<std::string> >("disp_x") = std::vector<std::string>(1, _disp_x);
     params.addCoupledVar("disp_y", "The y displacement");

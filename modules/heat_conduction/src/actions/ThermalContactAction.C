@@ -22,6 +22,7 @@ InputParameters validParams<ThermalContactAction>()
   params.addParam<std::string>("disp_x", "The x displacement");
   params.addParam<std::string>("disp_y", "The y displacement");
   params.addParam<std::string>("disp_z", "The z displacement");
+  params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
 
   return params;
@@ -180,6 +181,10 @@ ThermalContactAction::addAuxBcs()
     std::vector<std::string> vars(1, getParam<std::string>("variable"));
     params.set<std::vector<std::string> >("paired_variable") = vars;
     params.set<std::string>("order") = getParam<std::string>("order");
+    if (isParamValid("tangential_tolerance"))
+    {
+      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+    }
     // add it to the warehouse
     Moose::action_warehouse.addActionBlock(action);
   }
@@ -196,6 +201,10 @@ ThermalContactAction::addAuxBcs()
     std::vector<unsigned int> bnds(1, getParam<unsigned int>("slave"));
     params.set<std::vector<unsigned int> >("boundary") = bnds;
     params.set<unsigned int>("paired_boundary") = getParam<unsigned int>("master");
+    if (isParamValid("tangential_tolerance"))
+    {
+      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+    }
     // add it to the warehouse
     Moose::action_warehouse.addActionBlock(action);
   }
@@ -225,6 +234,11 @@ ThermalContactAction::addDiracKernels()
   params.set<std::string>("variable") = getParam<std::string>("variable");
   params.set<unsigned int>("boundary") = getParam<unsigned int>("master");
   params.set<unsigned int>("slave") = getParam<unsigned int>("slave");
+  if (isParamValid("tangential_tolerance"))
+  {
+    params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+  }
+
 
   // add it to the warehouse
   Moose::action_warehouse.addActionBlock(action);
