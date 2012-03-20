@@ -91,6 +91,7 @@
 #include "StressDivergence.h"
 #include "StressDivergenceRZ.h"
 #include "LinearGeneralAnisotropicMaterial.h"
+#include "DashpotBC.h"
 
 // phase_field
 #include "MatDiffusion.h"
@@ -203,6 +204,7 @@ Elk::registerObjects()
   registerMaterial(PowerLawCreep);
   registerMaterial(LinearGeneralAnisotropicMaterial);
 
+  registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PlenumPressure);
   registerAction(PlenumPressureAction, "add_bc");
 
