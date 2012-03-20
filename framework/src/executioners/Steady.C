@@ -74,10 +74,6 @@ Steady::execute()
     _problem.output();
     _problem.outputPostprocessors();
 
-    _problem.getNonlinearSystem().printVarNorms();
-
-    std::cout << "\n";
-
 #ifdef LIBMESH_ENABLE_AMR
     if(r_step != steps)
     {
