@@ -14,6 +14,7 @@
 #include "NodeFaceConstraint.h"
 
 #include "SystemBase.h"
+#include "PenetrationLocator.h"
 
 // libMesh includes
 #include "string_to_enum.h"
@@ -26,6 +27,7 @@ InputParameters validParams<NodeFaceConstraint>()
   params.addRequiredParam<std::string>("variable", "The name of the variable that this constraint is applied to.");
   params.addRequiredParam<unsigned int>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<unsigned int>("master", "The boundary ID associated with the master side");
+  params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order used for projections");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_constraint");
@@ -78,6 +80,10 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
 
   _overwrite_slave_residual(true)
 {
+  if (parameters.isParamValid("tangential_tolerance"))
+  {
+    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
+  }
   // Put a "1" into test_slave
   // will always only have one entry that is 1
   _test_slave[0].push_back(1);

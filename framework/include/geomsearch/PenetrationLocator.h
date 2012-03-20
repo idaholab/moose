@@ -50,7 +50,7 @@ public:
   class PenetrationInfo
   {
   public:
-    PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta);
+    PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance, const Point & closest_point, const Point & closest_point_ref, std::vector<Node*> off_edge_nodes, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta);
 
     PenetrationInfo(const PenetrationInfo & p);
 
@@ -60,9 +60,11 @@ public:
     Elem * _side;
     unsigned int _side_num;
     RealVectorValue _normal;
-    Real _distance;
+    Real _distance;  //Positive distance means the node has penetrated
+    Real _tangential_distance;
     Point _closest_point;
     Point _closest_point_ref;
+    std::vector<Node*> _off_edge_nodes;
     std::vector<std::vector<Real> > _side_phi;
     std::vector<RealGradient> _dxyzdxi;
     std::vector<RealGradient> _dxyzdeta;
@@ -97,9 +99,11 @@ public:
   std::map<unsigned int, unsigned> _unlocked_this_step;
 
   void setUpdate(bool update);
+  void setTangentialTolerance(Real tangential_tolerance);
 
 protected:
   bool _update_location; // Update the penetration location for nodes found last time
+  Real _tangential_tolerance; // Tangential distance a node can be from a face and still be in contact
 };
 
 #endif //PENETRATIONLOCATOR_H

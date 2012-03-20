@@ -26,6 +26,7 @@ InputParameters validParams<GapValueAux>()
   params.addRequiredParam<unsigned int>("paired_boundary", "The boundary on the other side of a gap.");
   params.addRequiredCoupledVar("paired_variable", "The variable to get the value of.");
   params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
   return params;
 }
@@ -38,6 +39,10 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     _paired_variable(coupled("paired_variable"))
 {
   MooseVariable & pv(*getVar("paired_variable",0));
+  if (parameters.isParamValid("tangential_tolerance"))
+  {
+    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
+  }
   Order pairedVarOrder(pv.getOrder());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<std::string>("order")));
   if (pairedVarOrder != gvaOrder)

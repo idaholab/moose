@@ -21,7 +21,6 @@
 #include "MooseMesh.h"
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
-#include "FindContactPoint.h"
 #include "PenetrationThread.h"
 
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, unsigned int master, unsigned int slave, Order order) :
@@ -31,7 +30,8 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _slave_boundary(slave),
     _fe_type(order),
     _nearest_node(geom_search_data.getNearestNodeLocator(master, slave)),
-    _update_location(true)
+    _update_location(true),
+    _tangential_tolerance(0.0)
 {
   // Preconstruct an FE object for each thread we're going to use
   // This is a time savings so that the thread objects don't do this themselves multiple times
@@ -70,6 +70,7 @@ PenetrationLocator::detectPenetration()
                        _slave_boundary,
                        _penetration_info,
                        _update_location,
+                       _tangential_tolerance,
                        _fe,
                        _fe_type,
                        _nearest_node,
@@ -112,16 +113,24 @@ PenetrationLocator::setUpdate( bool update )
   _update_location = update;
 }
 
+void
+PenetrationLocator::setTangentialTolerance(Real tangential_tolerance)
+{
+  _tangential_tolerance = tangential_tolerance;
+}
 
-PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, const Point & closest_point, const Point & closest_point_ref, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta)
+
+PenetrationLocator::PenetrationInfo::PenetrationInfo(const Node * node, Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance, const Point & closest_point, const Point & closest_point_ref, std::vector<Node*> off_edge_nodes, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta)
   :_node(node),
    _elem(elem),
    _side(side),
    _side_num(side_num),
    _normal(norm),
    _distance(norm_distance),
+   _tangential_distance(tangential_distance),
    _closest_point(closest_point),
    _closest_point_ref(closest_point_ref),
+   _off_edge_nodes(off_edge_nodes),
    _side_phi(side_phi),
    _dxyzdxi(dxyzdxi),
    _dxyzdeta(dxyzdeta),
@@ -137,8 +146,10 @@ PenetrationLocator::PenetrationInfo::PenetrationInfo(const PenetrationInfo & p) 
     _side_num(p._side_num),
     _normal(p._normal),
     _distance(p._distance),
+    _tangential_distance(p._tangential_distance),
     _closest_point(p._closest_point),
     _closest_point_ref(p._closest_point_ref),
+    _off_edge_nodes(p._off_edge_nodes),
     _side_phi(p._side_phi),
     _dxyzdxi(p._dxyzdxi),
     _dxyzdeta(p._dxyzdeta),

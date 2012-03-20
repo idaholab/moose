@@ -29,7 +29,8 @@ namespace Moose
 void
 findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
                  FEBase * _fe, FEType & _fe_type, const Point & slave_point,
-                 bool start_with_centroid, bool & contact_point_on_side)
+                 bool start_with_centroid, const Real tangential_tolerance,
+                 bool & contact_point_on_side)
 {
   const Elem * master_elem = p_info._elem;
 
@@ -148,15 +149,10 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
   if(nit == 12 && update_size > TOLERANCE*TOLERANCE)
     std::cerr<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
 */
-  bool contained_in_elem = master_elem->contains_point(slave_point,100*TOLERANCE);
 
   p_info._closest_point_ref = ref_point;
   p_info._closest_point = phys_point[0];
   p_info._distance = d.size();
-
-  // If the point is outside the element the distance is negative
-  if(!contained_in_elem)
-    p_info._distance = -p_info._distance;
 
   if(dim-1 == 2)
   {
@@ -169,70 +165,32 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
     p_info._normal /= p_info._normal.size();
   }
 
+  // If the point has not penetrated the face, make the distance negative
+  const Real dot(d * p_info._normal);
+  if (dot > 0.0)
+    p_info._distance = -p_info._distance;
+
   contact_point_on_side = FEInterface::on_reference_element(ref_point, side->type());
 
-  // This can happen if the element is distorted
-  if(contained_in_elem && !contact_point_on_side)
+  p_info._tangential_distance = 0.0;
+
+  if (!contact_point_on_side)
   {
-    Point closest_point;
-    Real closest_distance = 999999;
+    Point closest_point_on_face_ref(ref_point);
+    restrictPointToFace(closest_point_on_face_ref,side,p_info._off_edge_nodes);
 
-    if(dim-1 == 2)
+    points[0] = closest_point_on_face_ref;
+    _fe->reinit(side, &points);
+    Point closest_point_on_face(phys_point[0]);
+
+    RealGradient off_face = closest_point_on_face - p_info._closest_point;
+    Real tangential_distance = off_face.size();
+    p_info._tangential_distance = tangential_distance;
+    if (tangential_distance <= tangential_tolerance)
     {
-      for(unsigned int ss=0; ss<side->n_sides(); ss++)
-      {
-        AutoPtr<Elem> sideside = side->build_side(ss,false);
-
-        std::vector<Point> vertices;
-        vertices.reserve(2);
-
-        for(unsigned int ssn=0; ssn<sideside->n_nodes(); ssn++)
-        {
-          if(sideside->is_vertex(ssn))
-            vertices.push_back(*(sideside->get_node(ssn)));
-        }
-
-        LineSegment ls(vertices[0], vertices[1]);
-
-        Point cur_closest_point;
-
-        bool on_segment = ls.closest_normal_point(slave_point, cur_closest_point);
-
-        if(on_segment && (cur_closest_point - slave_point).size() < closest_distance)
-        {
-          closest_distance = (cur_closest_point - slave_point).size();
-          closest_point = cur_closest_point;
-        }
-      }
+      contact_point_on_side = true;
     }
-    else if(dim-1 == 1)
-    {
-      for(unsigned int sn=0; sn<side->n_nodes(); sn++)
-      {
-        Node * node = side->get_node(sn);
-
-        if((slave_point-*node).size() < closest_distance)
-        {
-          closest_distance = (slave_point-*node).size();
-          closest_point = *node;
-        }
-      }
-    }
-
-    p_info._closest_point_ref = FEInterface::inverse_map(dim-1, _fe_type, side, closest_point);
-    p_info._closest_point = closest_point;
-    p_info._distance = closest_distance;
-    p_info._normal =  closest_point - slave_point;
-    p_info._normal /= p_info._normal.size();
-    contact_point_on_side = true;
   }
-
-  // This happens if the point is behind the face, but through the element
-  if(!contained_in_elem && ((p_info._closest_point - slave_point) * p_info._normal) > 0)
-  {
-    contact_point_on_side = false;
-  }
-
 
   const std::vector<std::vector<Real> > & phi = _fe->get_phi();
 
@@ -245,6 +203,156 @@ findContactPoint(PenetrationLocator::PenetrationInfo & p_info,
   p_info._d2xyzdxideta = d2xyz_dxieta;
 
 }
+
+void restrictPointToFace(Point& p,
+                         const Elem* side,
+                         std::vector<Node*> &off_edge_nodes)
+{
+  const ElemType t(side->type());
+  off_edge_nodes.clear();
+  Real &xi   = p(0);
+  Real &eta  = p(1);
+
+  switch (t)
+  {
+    case EDGE2:
+    case EDGE3:
+    case EDGE4:
+    {
+      // The reference 1D element is [-1,1].
+      if (xi < -1.0)
+      {
+        xi = -1.0;
+        off_edge_nodes.push_back(side->get_node(0));
+      }
+      else if (xi > 1.0)
+      {
+        xi = 1.0;
+        off_edge_nodes.push_back(side->get_node(1));
+      }
+      break;
+    }
+
+    case TRI3:
+    case TRI6:
+    {
+      // The reference triangle is isosceles
+      // and is bound by xi=0, eta=0, and xi+eta=1.
+
+      if (xi <= 0.0 && eta <= 0.0)
+      {
+        xi = 0.0;
+        eta = 0.0;
+        off_edge_nodes.push_back(side->get_node(0));
+      }
+      else if (xi > 0.0 && xi < 1.0
+               && eta < 0.0)
+      {
+        eta = 0.0;
+        off_edge_nodes.push_back(side->get_node(0));
+        off_edge_nodes.push_back(side->get_node(1));
+      }
+      else if (eta > 0.0 && eta < 1.0
+               && xi < 0.0)
+      {
+        xi = 0.0;
+        off_edge_nodes.push_back(side->get_node(2));
+        off_edge_nodes.push_back(side->get_node(0));
+      }
+      else if (xi >= 1.0
+               && (eta - xi) <= -1.0)
+      {
+        xi = 1.0;
+        eta = 0.0;
+        off_edge_nodes.push_back(side->get_node(1));
+      }
+      else if (eta >= 1.0
+               && (eta - xi) >= 1.0)
+      {
+        xi = 0.0;
+        eta = 1.0;
+        off_edge_nodes.push_back(side->get_node(2));
+      }
+      else if ((xi + eta) > 1.0)
+      {
+        Real delta = (xi+eta-1.0)/2.0;
+        xi -= delta;
+        eta -= delta;
+        off_edge_nodes.push_back(side->get_node(1));
+        off_edge_nodes.push_back(side->get_node(2));
+      }
+      break;
+    }
+
+    case QUAD4:
+    case QUAD8:
+    case QUAD9:
+    {
+      // The reference quadrilateral element is [-1,1]^2.
+      if (xi < -1.0)
+      {
+        xi = -1.0;
+        if (eta < -1.0)
+        {
+          eta = -1.0;
+          off_edge_nodes.push_back(side->get_node(0));
+        }
+        else if (eta > 1.0)
+        {
+          eta = 1.0;
+          off_edge_nodes.push_back(side->get_node(3));
+        }
+        else
+        {
+          off_edge_nodes.push_back(side->get_node(3));
+          off_edge_nodes.push_back(side->get_node(0));
+        }
+      }
+      else if (xi > 1.0)
+      {
+        xi = 1.0;
+        if (eta < -1.0)
+        {
+          eta = -1.0;
+          off_edge_nodes.push_back(side->get_node(1));
+        }
+        else if (eta > 1.0)
+        {
+          eta = 1.0;
+          off_edge_nodes.push_back(side->get_node(2));
+        }
+        else
+        {
+          off_edge_nodes.push_back(side->get_node(1));
+          off_edge_nodes.push_back(side->get_node(2));
+        }
+      }
+      else
+      {
+        if (eta < -1.0)
+        {
+          eta = -1.0;
+          off_edge_nodes.push_back(side->get_node(0));
+          off_edge_nodes.push_back(side->get_node(1));
+        }
+        else if (eta > 1.0)
+        {
+          eta = 1.0;
+          off_edge_nodes.push_back(side->get_node(2));
+          off_edge_nodes.push_back(side->get_node(3));
+        }
+      }
+      break;
+    }
+
+    default:
+    {
+      mooseError("Unsupported face type: "<<t);
+      break;
+    }
+  }
+}
+
 
 } //namespace Moose
 

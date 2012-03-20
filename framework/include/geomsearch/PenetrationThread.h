@@ -27,6 +27,7 @@ public:
                     unsigned int slave_boundary,
                     std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & penetration_info,
                     bool update_location,
+                    Real tangential_tolerance,
                     std::vector<FEBase * > & fes,
                     FEType & fe_type,
                     NearestNodeLocator & nearest_node,
@@ -52,6 +53,7 @@ protected:
   std::map<unsigned int, PenetrationLocator::PenetrationInfo *> & _penetration_info;
 
   bool _update_location;
+  Real _tangential_tolerance;
 
   std::vector<FEBase * > & _fes;
 
@@ -68,6 +70,45 @@ protected:
   unsigned int _n_elems;
 
   THREAD_ID _tid;
+
+  enum CompeteInteractionResult
+  {
+    FIRST_WINS,
+    SECOND_WINS,
+    NEITHER_WINS
+  };
+
+  enum CommonEdgeResult
+  {
+    NO_COMMON,
+    COMMON_EDGE,
+    COMMON_NODE,
+    EDGE_AND_COMMON_NODE
+  };
+
+  CompeteInteractionResult
+  competeInteractions(PenetrationLocator::PenetrationInfo * pi1,
+                      PenetrationLocator::PenetrationInfo * pi2);
+
+  CommonEdgeResult
+  interactionsOffCommonEdge(PenetrationLocator::PenetrationInfo * pi1,
+                            PenetrationLocator::PenetrationInfo * pi2);
+
+  bool
+  findRidgeContactPoint(Point &contact_point,
+                       PenetrationLocator::PenetrationInfo * pi1,
+                       PenetrationLocator::PenetrationInfo * pi2,
+                       int & interaction_to_keep);
+
+  void
+  getSideCornerNodes(Elem* side,
+                     std::vector<Node*> &corner_nodes);
+
+  bool
+  restrictPointToSpecifiedEdgeOfFace(Point& p,
+                                     Node* closest_node,
+                                     const Elem* side,
+                                     const std::vector<Node*> &edge_nodes);
 };
 
 #endif //PENETRATIONTHREAD_H
