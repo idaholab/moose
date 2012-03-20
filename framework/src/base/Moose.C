@@ -48,8 +48,6 @@
 #include "FunctionNeumannBC.h"
 #include "MatchedValueBC.h"
 #include "VacuumBC.h"
-#include "DashpotBC.h"
-#include "DirichletPostprocessorBC.h"
 #include "SinDirichletBC.h"
 #include "SinNeumannBC.h"
 #include "VectorNeumannBC.h"
@@ -222,8 +220,6 @@ registerObjects()
   registerBoundaryCondition(MatchedValueBC);
   registerBoundaryCondition(VacuumBC);
 
-  registerBoundaryCondition(DashpotBC);
-  registerBoundaryCondition(DirichletPostprocessorBC);
   registerBoundaryCondition(SinDirichletBC);
   registerBoundaryCondition(SinNeumannBC);
   registerBoundaryCondition(VectorNeumannBC);

@@ -9,5 +9,5 @@ vector_neumann_test = { INPUT : 'vector_neumann_bc_test.i',
 weak_gradient_bc_test = { INPUT : 'weak_gradient_bc_test.i',
                           EXODIFF : ['weak_gradient_bc_test_out.e'] }
 
-
-
+convective_flux_bc_test = { INPUT : 'convective_flux_bc.i',
+                            EXODIFF : ['convective_flux_bc_out.e'] }
