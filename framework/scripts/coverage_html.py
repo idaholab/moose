@@ -29,7 +29,7 @@ def buildFilter(directory_list):
 # build the lcov filter command:
   coverage_filter_cmd = [ 'lcov' ]
   for single_filter in directory_list:
-    coverage_filter_cmd.extend([ '-e', 'raw.info', '*/' + single_filter.lower() + '/*' ])
+    coverage_filter_cmd.extend([ '-e', 'raw.info', '/*' + single_filter.lower() + '/src*', '-e', 'raw.info', '/*' + single_filter.lower() + '/include*' ])
   coverage_filter_cmd.extend([ '-o', 'extracted.info' ])
 # build the genhtml command (builds a coverage directory containing the HTML):
   genhtml_cmd = [ 'genhtml', 'extracted.info', '-t', str(directory_list[0].upper()) + " Test Coverage", '--num-spaces', '2', '--legend', '-o', 'coverage' ]
@@ -38,10 +38,10 @@ def buildFilter(directory_list):
 
 # Actually do stuff:
 # run lcov:
-  runCMD(coverage_cmd)
-  runCMD(coverage_filter_cmd)
+  runCMD(coverage_cmd, True)
+  runCMD(coverage_filter_cmd, True)
 # run genhtml:
-  runCMD(genhtml_cmd)
+  runCMD(genhtml_cmd, True)
 # move coverage into place
   runCMD(rsync_cmd)
 
