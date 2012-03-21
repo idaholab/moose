@@ -607,7 +607,7 @@ PenetrationThread::getSideCornerNodes(Elem* side,
 
 bool
 PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
-                                                      Node* closest_node,
+                                                      Node* &closest_node,
                                                       const Elem* side,
                                                       const std::vector<Node*> &edge_nodes)
 {
