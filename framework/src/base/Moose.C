@@ -105,6 +105,7 @@
 #include "ElementH1Error.h"
 #include "ElementH1SemiError.h"
 #include "ElementIntegral.h"
+#include "ElementIntegralMaterialProperty.h"
 #include "ElementL2Error.h"
 #include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
@@ -271,6 +272,7 @@ registerObjects()
   registerPostprocessor(ElementH1Error);
   registerPostprocessor(ElementH1SemiError);
   registerPostprocessor(ElementIntegral);
+  registerPostprocessor(ElementIntegralMaterialProperty);
   registerPostprocessor(ElementL2Error);
   registerPostprocessor(ScalarL2Error);
   registerPostprocessor(EmptyPostprocessor);
