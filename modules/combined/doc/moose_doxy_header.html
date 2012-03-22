@@ -5,7 +5,8 @@ function toggleNext(el) {
 }
 function toggleNextClick(classname) {
   elementlist=document.getElementsByClassName(classname.className);
-  elementlist[1].style.display=((elementlist[1].style.display=="none") ? "block" : "none");
+  elementlist[1].style.display="block";
+  elementlist[0].onclick="";
 }
 function getElementsByTagAndClassName(tag,cname) {
  var tags=document.getElementsByTagName(tag);
@@ -28,7 +29,10 @@ function toggleNextByTagAndClassName(tag,cname) {
   clickers[i].onclick=function() {toggleNextClick(this)}
   toggleNext(viewers[i]);
  }
- if (document.getElementsByTagName('pre').length==1) {document.getElementsByClassName('clicker')[1].style.display="block"}
+ if (document.getElementsByTagName('pre').length==1) {
+  document.getElementsByClassName('clicker')[1].style.display="block"
+  document.getElementsByClassName('clicker')[0].onclick=""
+ }
 }
 window.onload=function(){toggleNextByTagAndClassName('div','fragment')}
 
