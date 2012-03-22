@@ -56,7 +56,7 @@ def PrepareReport(outputPath, format) :
         if os.path.isdir(outputPath) :
             outputPath = os.path.join(outputPath, "nsiqcppstyle_report.html")
         writer = file(outputPath, "wb")
-        writer.write("<!DOCTYPE html><html><head><font size=2><ul>\n")
+        writer.write("<!DOCTYPE html><html><body><head><font size=2><ul>\n")
 
 def ReportSummaryToScreen(analyzedFiles, nsiqcppstyle_state, filter, ciMode) :
     """
@@ -109,7 +109,7 @@ def CloseReport(format) :
         writer.write("</checkstyle>\n")
         writer.close()
     if format == "html" :
-        writer.write("</ul></font></head></html>\n")
+        writer.write("</ul></font></head></body></html>\n")
         writer.close()
 ####################################################################################################
 
@@ -225,9 +225,9 @@ def ErrorInternal(t, ruleName, message):
             writer.write("""<error line='%d' col='%d' severity='warning' message='%s' source='%s'/>\n""" % (t.lineno, t.column, escape(message).replace("'", "\""), ruleName))
         elif _nsiqcppstyle_state.output_format == 'html':
             if _nsiqcppstyle_state.baseURL != '':
-                writer.write("""<li><a href=%s/%s#L%d>%s</a><ul><li>Line: %d - Column: %d</li><li>Rule: %s</li></ul>\n""" % (_nsiqcppstyle_state.baseURL, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):], t.lineno, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):].split('/').pop(), t.lineno, t.column, escape(message).replace("'", "\"")))
+                writer.write("""<li><a href=%s/%s#L%d>%s</a><ul id="detail"><li id="line">Line: %d - Column: %d</li><li id="rule">Rule: %s</li></ul>\n""" % (_nsiqcppstyle_state.baseURL, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):], t.lineno, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):].split('/').pop(), t.lineno, t.column, escape(message).replace("'", "\"")))
             else:
-                writer.write("""<li><a href=%s/%s#L%d>%s</a><ul><li>Line: %d - Column: %d</li><li>Rule: %s</li></ul>\n""" % (_nsiqcppstyle_state.baseURL, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):], t.lineno, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):].split('/').pop(), t.lineno, t.column, escape(message).replace("'", "\"")))
+                writer.write("""<li><a href=%s/%s#L%d>%s</a><ul id="detail"><li id="line">Line: %d - Column: %d</li><li id="rule">Rule: %s</li></ul>\n""" % (_nsiqcppstyle_state.baseURL, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):], t.lineno, t.filename[t.filename.find(_nsiqcppstyle_state.base_dir):].split('/').pop(), t.lineno, t.column, escape(message).replace("'", "\"")))
 
 Error = ErrorInternal
 
