@@ -22,6 +22,8 @@ VariableWarehouse::~VariableWarehouse()
 {
   for (std::vector<MooseVariable *>::iterator it = _vars.begin(); it != _vars.end(); ++it)
     delete *it;
+  for (std::vector<MooseVariableScalar *>::iterator it = _scalar_vars.begin(); it != _scalar_vars.end(); ++it)
+    delete *it;
 }
 
 void

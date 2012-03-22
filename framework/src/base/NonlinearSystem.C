@@ -119,15 +119,6 @@ NonlinearSystem::~NonlinearSystem()
   delete _preconditioner;
   delete &_serialized_solution;
   delete &_residual_copy;
-
-#ifdef LIBMESH_HAVE_PETSC
-  if (_use_finite_differenced_preconditioner)
-#if PETSC_VERSION_LESS_THAN(3,2,0)
-    MatFDColoringDestroy(_fdcoloring);
-#else
-    MatFDColoringDestroy(&_fdcoloring);
-#endif
-#endif
 }
 
 void
@@ -182,6 +173,15 @@ NonlinearSystem::solve()
 
 #ifdef LIBMESH_HAVE_PETSC
   _n_linear_iters = static_cast<PetscNonlinearSolver<Real> &>(*_sys.nonlinear_solver).get_total_linear_iterations();
+#endif
+
+#ifdef LIBMESH_HAVE_PETSC
+  if (_use_finite_differenced_preconditioner)
+#if PETSC_VERSION_LESS_THAN(3,2,0)
+    MatFDColoringDestroy(_fdcoloring);
+#else
+    MatFDColoringDestroy(&_fdcoloring);
+#endif
 #endif
 }
 
