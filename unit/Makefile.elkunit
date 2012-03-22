@@ -32,6 +32,11 @@ ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit
 # ELK Compile FLAGS
 libmesh_CXXFLAGS	+= -DELK_TEST
 
+################################## ELK MODULES ################################
+ALL_ELK_MODULES   := yes
+###############################################################################
+
+
 include $(MOOSE_DIR)/build.mk
 include $(MOOSE_DIR)/moose.mk
 include $(ELK_DIR)/elk.mk
