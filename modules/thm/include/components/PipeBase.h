@@ -43,6 +43,7 @@ protected:
   RealVectorValue _dir;                         ///< Direction this pipe is going to
   Real _length;                                 ///< Length of the pipe
   unsigned int _n_elems;                        ///< Number of elements this pipe is divided into
+
   Real _A;                                      ///< Pipe area (A_i)
   Real _aw;					///< Heat transfer surface density
 						///< Physical meaning:
@@ -54,6 +55,8 @@ protected:
 
 
   unsigned int _subdomain_id;                   ///< Subdomain id this pipe defined
+
+  std::vector<unsigned int> node_ids;		
 
   std::map<RELAP7::EEndType, Node *> _bnd_nodes;        ///< Boundary nodes of this pipe (indexing: local "node id" => Node).
                                                         ///< Local node IDs are used by other components for connecting
