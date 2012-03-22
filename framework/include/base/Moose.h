@@ -148,6 +148,14 @@ enum CoordinateSystemType
   COORD_RZ
 };
 
+enum PPSOutputType
+{
+  PPS_OUTPUT_NONE,
+  PPS_OUTPUT_SCREEN,
+  PPS_OUTPUT_FILE,
+  PPS_OUTPUT_BOTH
+};
+
 const subdomain_id_type ANY_BLOCK_ID = (subdomain_id_type) -1;
 
 /* Wrappers for extern random number generator */

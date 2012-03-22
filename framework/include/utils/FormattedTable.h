@@ -81,7 +81,7 @@ protected:
   /**
    * Data structure for the console table
    * The first map creates an association from the independent variable (normally time)
-   * to a map of dependant variables and their associated values if they exist
+   * to a map of dependent variables and their associated values if they exist
    */
   std::map<Real, std::map<std::string, Real> > _data;
 

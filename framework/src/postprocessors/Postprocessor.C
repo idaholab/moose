@@ -14,6 +14,7 @@
 
 #include "Postprocessor.h"
 #include "SubProblem.h"
+#include "Conversion.h"
 
 // libMesh includes
 
@@ -23,7 +24,7 @@ InputParameters validParams<Postprocessor>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
 
-  params.addParam<bool>("output", true, "If the postprocessor value is outputted or not (to screen and files)");
+  params.addParam<std::string>("output", "both", "The values are: none, screen, file, both (no output, output to screen only, output to files only, output both to screen and files)");
   params.addPrivateParam<bool>("use_displaced_mesh", false);
   params.addPrivateParam<std::string>("built_by_action", "add_postprocessor");
   return params;
@@ -36,7 +37,7 @@ Postprocessor::Postprocessor(const std::string & name, InputParameters parameter
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _coord_sys(_subproblem.coordSystem()),
-    _output(parameters.get<bool>("output"))
+    _output(Moose::stringToEnum<Moose::PPSOutputType>(parameters.get<std::string>("output")))
 {
   // Initialize the postprocessor data for this PP
   // FIXME: PPS::init()

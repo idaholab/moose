@@ -305,7 +305,10 @@ protected:
   // postprocessors
   std::vector<PostprocessorData> _pps_data;
   ExecStore<PostprocessorWarehouse> _pps;
-  FormattedTable _pps_output_table;
+  /// Table with postprocessors that will go into files
+  FormattedTable _pps_output_table_file;
+  /// Table with postprocessors that will go on screen
+  FormattedTable _pps_output_table_screen;
   unsigned int _pps_output_table_max_rows;
 
   void computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & pps);

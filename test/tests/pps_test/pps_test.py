@@ -32,3 +32,8 @@ test_side_multi_bnd = {
 # This RegEx matches the continuation line and exactly 2 lines of output followed by the table closing line
 screen_output_test = { INPUT : 'screen_output_test.i',
                        EXPECT_OUT : '^:\s+:.*\n(?:^\|\s+\d\.\d.*\n){2}^\+(-+\+)+\n' }
+
+pps_output_test = {
+  INPUT : 'pps_output_test.i',
+  EXODIFF : ['pps_output_test_out.e']
+}

@@ -23,6 +23,7 @@ namespace Moose {
   std::map<std::string, ExecFlagType> execstore_type_to_enum;
   std::map<std::string, QuadratureType> quadrature_type_to_enum;
   std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
+  std::map<std::string, PPSOutputType> pps_output_type_to_enum;
 
   void initTimeSteppingMap()
   {
@@ -67,6 +68,17 @@ namespace Moose {
     {
       coordinate_system_type_to_enum["XYZ"] = COORD_XYZ;
       coordinate_system_type_to_enum["RZ"]  = COORD_RZ;
+    }
+  }
+
+  void initPPSOutputType()
+  {
+    if (pps_output_type_to_enum.empty())
+    {
+      pps_output_type_to_enum["NONE"]   = PPS_OUTPUT_NONE;
+      pps_output_type_to_enum["SCREEN"] = PPS_OUTPUT_SCREEN;
+      pps_output_type_to_enum["FILE"]   = PPS_OUTPUT_FILE;
+      pps_output_type_to_enum["BOTH"]   = PPS_OUTPUT_BOTH;
     }
   }
 
@@ -137,6 +149,20 @@ namespace Moose {
       mooseError("Unknown coordinate system type");
 
     return coordinate_system_type_to_enum[upper];
+  }
+
+  template<>
+  PPSOutputType stringToEnum<PPSOutputType>(const std::string & s)
+  {
+    initPPSOutputType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!pps_output_type_to_enum.count(upper))
+      mooseError("Unknown PPS output type");
+
+    return pps_output_type_to_enum[upper];
   }
 }
 

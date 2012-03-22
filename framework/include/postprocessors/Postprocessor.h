@@ -85,17 +85,20 @@ public:
   virtual void threadJoin(const Postprocessor & /*pps*/) = 0;
 
   /**
-   * Is the postprocessor marked for output?
-   * @return true if it is outputted, otherwise false
+   * Get the postprocessor output type
+   * @return postprocessor output type
    */
-  bool getOutput() { return _output; }
+  Moose::PPSOutputType getOutput() { return _output; }
 
 protected:
   Problem & _problem;
   SubProblem & _subproblem;
+  /// Thread ID of this postprocessor
   THREAD_ID _tid;
-  Moose::CoordinateSystemType & _coord_sys;                 ///< Coordinate system
-  bool _output;                 ///< true if the postprocessor value is outputted or not
+  /// Coordinate system
+  Moose::CoordinateSystemType & _coord_sys;
+  /// If and where is the postprocessor output
+  Moose::PPSOutputType _output;
 };
 
 #endif
