@@ -25,7 +25,6 @@
 class NodalFloodCount;
 class MooseMesh;
 class MooseVariable;
-class libMesh::DofMap;
 
 template<>
 InputParameters validParams<NodalFloodCount>();
