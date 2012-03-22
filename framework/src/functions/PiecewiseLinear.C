@@ -70,5 +70,5 @@ PiecewiseLinear::integral()
 Real
 PiecewiseLinear::average()
 {
-  return integral()/(_linear_interp.domain(_linear_interp.getSampleSize())-_linear_interp.domain(0));
+  return integral()/(_linear_interp.domain(_linear_interp.getSampleSize()-1)-_linear_interp.domain(0));
 }
