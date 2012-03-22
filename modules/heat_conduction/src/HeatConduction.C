@@ -1,14 +1,14 @@
 #include "HeatConduction.h"
 
 template<>
-InputParameters validParams<HeatConduction>()
+InputParameters validParams<HeatConductionKernel>()
 {
   InputParameters params = validParams<Diffusion>();
   params.addClassDescription("TODO"); // Add a description of what this kernel does
   return params;
 }
 
-HeatConduction::HeatConduction(const std::string & name, InputParameters parameters)
+HeatConductionKernel::HeatConductionKernel(const std::string & name, InputParameters parameters)
   :Diffusion(name, parameters),
    _k(getMaterialProperty<Real>("thermal_conductivity")),
    _has_k_dT(hasMaterialProperty<Real>("thermal_conductivity_dT")),
@@ -16,7 +16,7 @@ HeatConduction::HeatConduction(const std::string & name, InputParameters paramet
 {}
 
 Real
-HeatConduction::computeQpResidual()
+HeatConductionKernel::computeQpResidual()
 {
 //   const Real r = _k[_qp]*Diffusion::computeQpResidual();
 //   if (!libmesh_isnan(r))
@@ -40,7 +40,7 @@ HeatConduction::computeQpResidual()
 
 
 Real
-HeatConduction::computeQpJacobian()
+HeatConductionKernel::computeQpJacobian()
 {
   Real jac = _k[_qp] * Diffusion::computeQpJacobian();
   if ( _has_k_dT )

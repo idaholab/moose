@@ -1,20 +1,26 @@
-#ifndef HEATCONDUCTION_H
-#define HEATCONDUCTION_H
+#ifndef HEATCONDUCTIONKERNEL_H
+#define HEATCONDUCTIONKERNEL_H
 
 #include "Diffusion.h"
 #include "Material.h"
 
+/**
+ * Note: This class is named HeatConductionKernel instead of HeatConduction
+ * to avoid a class with the namespace HeatConduction.  It is registered
+ * as HeatConduction, which means it can be used by that name in the input
+ * file.
+ */
 //Forward Declarations
-class HeatConduction;
+class HeatConductionKernel;
 
 template<>
-InputParameters validParams<HeatConduction>();
+InputParameters validParams<HeatConductionKernel>();
 
-class HeatConduction : public Diffusion
+class HeatConductionKernel : public Diffusion
 {
 public:
 
-  HeatConduction(const std::string & name, InputParameters parameters);
+  HeatConductionKernel(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -26,4 +32,4 @@ private:
   const bool _has_k_dT;
   MaterialProperty<Real> * const _k_dT;
 };
-#endif //HEATCONDUCTION_H
+#endif //HEATCONDUCTIONKERNEL_H
