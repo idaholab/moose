@@ -63,6 +63,8 @@
 #include "GapValueAux.h"
 #include "MaterialRealAux.h"
 #include "DebugResidualAux.h"
+#include "BoundsAux.h"
+
 // dirac kernels
 #include "ConstantPointSource.h"
 
@@ -136,6 +138,7 @@
 
 // Constraints
 #include "TiedValueConstraint.h"
+#include "AddBoundsVectorsAction.h"
 
 // ScalarKernels
 #include "ODETimeDerivative.h"
@@ -240,6 +243,7 @@ registerObjects()
   registerAux(GapValueAux);
   registerAux(MaterialRealAux);
   registerAux(DebugResidualAux);
+  registerAux(BoundsAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -362,6 +366,7 @@ addActionTypes()
   registerActionName("setup_oversampling", false);
   registerActionName("deprecated_block", false);
   registerActionName("add_constraint", false);
+  registerActionName("add_bounds_vectors", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerActionName("setup_mesh_complete", false);
@@ -403,6 +408,7 @@ addActionTypes()
 "(setup_quadrature)"
 "(setup_dampers)"
 "(setup_residual_debug)"
+"(add_bounds_vectors)"
 "(init_problem)"
 "(copy_nodal_vars, copy_nodal_aux_vars)"
 "(initial_mesh_refinement)"
@@ -497,6 +503,8 @@ registerActions()
   registerAction(AddDiracKernelAction, "add_dirac_kernel");
   registerAction(SetupDebugAction, "setup_debug");
   registerAction(SetupResidualDebugAction, "setup_residual_debug");
+
+  registerAction(AddBoundsVectorsAction, "add_bounds_vectors");
 
   // NonParsedActions
   registerAction(SetupDampersAction, "setup_dampers");

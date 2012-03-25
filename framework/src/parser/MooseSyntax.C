@@ -224,6 +224,11 @@ void associateSyntax()
   syntax.registerActionSyntax("EmptyAction", "Constraints");
   syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
 
+  syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds", "add_bounds_vectors");
+
+  // This works because the AddKernelAction will build AuxKernels if the path doesn't contain Kernels!
+  syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
+
   // Loose Coupling
   syntax.registerActionSyntax("EmptyAction", "SubProblems");
 }
