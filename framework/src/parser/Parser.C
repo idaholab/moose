@@ -277,6 +277,20 @@ Parser::parse(const std::string &input_filename)
 
   section_names = _getpot_file.get_section_names();
 
+  std::set<std::string> overridden_vars = _getpot_file.get_overridden_variables();
+
+  if (!overridden_vars.empty())
+  {
+    std::ostringstream oss;
+
+    for (std::set<std::string>::const_iterator i=overridden_vars.begin();
+         i != overridden_vars.end(); ++i)
+      oss << *i << "\n";
+
+    mooseWarning(std::string("The following variables were overridden or supplied multiple times:\n"
+                             + oss.str()));
+  }
+
   for (std::vector<std::string>::iterator i=section_names.begin(); i != section_names.end(); ++i)
   {
     curr_identifier = i->erase(i->size()-1);  // Chop off the last character (the trailing slash)
