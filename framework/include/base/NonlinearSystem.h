@@ -119,7 +119,18 @@ public:
    */
   void addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
 
-  /// Adds a vector to the system
+  /**
+   * Adds a solution length vector to the system.
+   *
+   * @param vector_name The name of the vector.
+   * @param project Whether or not to project this vector when doing mesh refinement.
+   *                If the vector is just going to be recomputed then there is no need to project it.
+   * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
+   *                                            GHOSTED is needed if you are going to be accessing off-processor entries.
+   *                                            The ghosting pattern is the same as the solution vector.
+   * @param zero_for_residual Whether or not to zero this vector at the beginning of computeResidual.  Useful when
+   *                          you are going to accumulate something into this vector during computeResidual
+   */
   void addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual);
 
   void setInitialSolution();
