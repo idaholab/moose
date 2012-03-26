@@ -136,5 +136,4 @@ same_name_variable_test = {
 override_name_variable_test = {
   INPUT : 'override_name_variable_test.i',
   EXPECT_OUT : "The following variables were overridden or supplied multiple times:",
-  SKIP : 'Awaiting libMesh update'
 }
