@@ -20,42 +20,21 @@ InputParameters validParams<MooseParsedFunction>()
 {
   InputParameters params = validParams<Function>();
   params.addRequiredParam<std::string>("value", "The user defined function.");
-  params.addParam<std::vector<std::string> >("vars", std::vector<std::string>(0), "The constant variables (excluding t,x,y,z) in the forcing function.");
-  params.addParam<std::vector<Real> >("vals", std::vector<Real>(0), "The values that correspond to the variables");
+  params.addParam<std::vector<std::string> >("vars", "The constant variables (excluding t,x,y,z) in the forcing function.");
+  params.addParam<std::vector<Real> >("vals", "The initial_vals of the variables (optional)");
+
   return params;
 }
 
 MooseParsedFunction::MooseParsedFunction(const std::string & name, InputParameters parameters) :
     Function(name, parameters),
-    _function(new ParsedFunction<Real>(getParam<std::string>("value"),
-                                       &getParam<std::vector<std::string> >("vars"),
-                                       &getParam<std::vector<Real> >("vals")))
+    _function(getParam<std::string>("value"),
+              isParamValid("vars") ? &getParam<std::vector<std::string> >("vars") : NULL,
+              isParamValid("vals") ? &getParam<std::vector<Real> >("vals") : NULL)
 {}
-
-MooseParsedFunction::~MooseParsedFunction()
-{
-  delete _function;
-}
-
-/* TODO: Currently not implemented however 'pi' and 'e' are defined in the libMesh base class
-void
-MooseParsedFunction::defineConstants(FunctionParser & fp)
-{
-  fp.AddConstant("pi", 3.14159265358979323846);
-  fp.AddConstant("e", 2.71828182845904523536);
-}
-
-Real &
-MooseParsedFunction::getVarAddr(std::string var)
-{
-  //TODO is this the best syntax?
-  Real * v = _var_map[var];
-  return *v;
-}
-*/
 
 Real
 MooseParsedFunction::value(Real t, const Point & pt)
 {
-  return (*_function)(pt, t);
+  return _function(pt, t);
 }

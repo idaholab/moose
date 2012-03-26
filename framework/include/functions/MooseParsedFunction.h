@@ -48,7 +48,7 @@ public:
    */
   MooseParsedFunction(const std::string & name, InputParameters parameters);
 
-  virtual ~MooseParsedFunction();
+  virtual ~MooseParsedFunction() {};
 
   /**
    * Get the address to stick the value of the specified variable in. When you
@@ -63,8 +63,7 @@ public:
    * @param var the name of the variable passed in the constructor.
    */
 
-  // TODO: This currently is not implemented
-  // Real & getVarAddr(std::string var);
+  inline Real & getVarAddr(const std::string & var) { return _function.getVarAddress(var); }
 
   /**
    * Evaluate the equation at the given location. For 1-D and 2-D equations
@@ -79,12 +78,12 @@ protected:
    * defined. This method is called when the FunctionParser object is being
    * initialized in initializeParser before the function is parsed.
    */
-  // TODO: This currently is not implemented
+  // TODO: This function is currently not implemented
   // void defineConstants(FunctionParser & fp);
 
   std::vector<Real> _vals;
 
-  FunctionBase<Real> *_function;
+  ParsedFunction<Real> _function;
 
 private:
   std::map<std::string, Real*> _var_map;

@@ -26,25 +26,19 @@ InputParameters validParams<MooseParsedGradFunction>()
 
 MooseParsedGradFunction::MooseParsedGradFunction(const std::string & name, InputParameters parameters) :
     MooseParsedFunction(name, parameters),
-    _grad_function(new ParsedFunction<Real>(std::string("{") + getParam<std::string>("grad_x") + "}{" +
-                                            getParam<std::string>("grad_y") + "}{" +
-                                            getParam<std::string>("grad_z") + "}",
-                                            &getParam<std::vector<std::string> >("vars"),
-                                            &getParam<std::vector<Real> >("vals")))
+    _grad_function(std::string("{") + getParam<std::string>("grad_x") + "}{" +
+                   getParam<std::string>("grad_y") + "}{" +
+                   getParam<std::string>("grad_z") + "}",
+                   isParamValid("vars") ? &getParam<std::vector<std::string> >("vars") : NULL,
+                   isParamValid("vals") ? &getParam<std::vector<Real> >("vals") : NULL)
 {}
-
-MooseParsedGradFunction::~MooseParsedGradFunction()
-{
-  delete _grad_function;
-}
-
 
 RealGradient
 MooseParsedGradFunction::gradient(Real t, const Point & pt)
 {
   DenseVector<Real> output(LIBMESH_DIM);
 
-  (*_grad_function)(pt, t, output);
+  _grad_function(pt, t, output);
 
   return RealGradient(output(0)
 #if LIBMESH_DIM > 1

@@ -21,7 +21,6 @@
 // Forward declarations
 class MooseInit;
 
-#if 0
 class ParsedFunctionTest : public CppUnit::TestFixture
 {
 
@@ -43,6 +42,5 @@ public:
 private:
   MooseInit *init;
 };
-#endif
 
 #endif  // USERFUNCTIONTEST_H

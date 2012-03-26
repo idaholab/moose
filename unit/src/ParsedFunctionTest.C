@@ -14,7 +14,6 @@
 
 #include "ParsedFunctionTest.h"
 
-#if 0
 //Moose includes
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
@@ -24,11 +23,11 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ParsedFunctionTest );
 void
 ParsedFunctionTest::basicConstructor()
 {
-  InputParameters params = validParams<ParsedFunction>();
+  InputParameters params = validParams<MooseParsedFunction>();
 
   //test constructor with no additional variables
   params.set<std::string>("value") = std::string("x + 1.5*y + 2 * z + t/4");
-  ParsedFunction f("test", params);
+  MooseParsedFunction f("test", params);
   CPPUNIT_ASSERT(f.value(4, Point(1,2,3)) == 11);
 }
 
@@ -39,12 +38,12 @@ ParsedFunctionTest::advancedConstructor()
   std::vector<std::string> one_var(1);
   one_var[0] = "q";
 
-  InputParameters params = validParams<ParsedFunction>();
+  InputParameters params = validParams<MooseParsedFunction>();
 
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
 
-  ParsedFunction f("test", params);
+  MooseParsedFunction f("test", params);
   f.getVarAddr("q") = 4;
   CPPUNIT_ASSERT( f.value(0, Point(1,2)) == 7 );
 
@@ -54,11 +53,11 @@ ParsedFunctionTest::advancedConstructor()
   three_vars[1] = "w";
   three_vars[2] = "r";
 
-  InputParameters params2 = validParams<ParsedFunction>();
+  InputParameters params2 = validParams<MooseParsedFunction>();
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
 
-  ParsedFunction f2("test", params2);
+  MooseParsedFunction f2("test", params2);
   f2.getVarAddr("q") = 4;
   f2.getVarAddr("w") = 2;
   f2.getVarAddr("r") = 1.5;
@@ -68,12 +67,12 @@ ParsedFunctionTest::advancedConstructor()
   std::vector<Real> one_val(1);
   one_val[0] = 2.5;
 
-  InputParameters params3 = validParams<ParsedFunction>();
+  InputParameters params3 = validParams<MooseParsedFunction>();
   params3.set<std::string>("value") = "q*x";
   params3.set<std::vector<std::string> >("vars") = one_var;
   params3.set<std::vector<Real> >("vals") = one_val;
 
-  ParsedFunction f3("test", params3);
+  MooseParsedFunction f3("test", params3);
   CPPUNIT_ASSERT( f3.value(0,2) == 5 );
 
   //test the constructor with three variables, two that are set
@@ -81,12 +80,12 @@ ParsedFunctionTest::advancedConstructor()
   two_vals[0] = 1.5;
   two_vals[1] = 1;
 
-  InputParameters params4 = validParams<ParsedFunction>();
+  InputParameters params4 = validParams<MooseParsedFunction>();
   params4.set<std::string>("value") = "q*x + y/r + w";
   params4.set<std::vector<std::string> >("vars") = three_vars;
   params4.set<std::vector<Real> >("vals") = two_vals;
 
-  ParsedFunction f4("test", params4);
+  MooseParsedFunction f4("test", params4);
   f4.getVarAddr("r") = 2;
   CPPUNIT_ASSERT( f4.value(0, Point(2, 4)) == 6 );
   f4.getVarAddr("r") = 4;
@@ -101,11 +100,11 @@ ParsedFunctionTest::testVariables()
   std::vector<std::string> one_var(1);
   one_var[0] = "q";
 
-  InputParameters params = validParams<ParsedFunction>();
+  InputParameters params = validParams<MooseParsedFunction>();
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string> >("vars") = one_var;
 
-  ParsedFunction f("test", params);
+  MooseParsedFunction f("test", params);
   Real & q = f.getVarAddr("q");
   q = 4;
   CPPUNIT_ASSERT( f.value(0, Point(1, 2)) == 7 );
@@ -120,11 +119,11 @@ ParsedFunctionTest::testVariables()
   three_vars[1] = "w";
   three_vars[2] = "r";
 
-  InputParameters params2 = validParams<ParsedFunction>();
+  InputParameters params2 = validParams<MooseParsedFunction>();
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string> >("vars") = three_vars;
 
-  ParsedFunction f2("test", params2);
+  MooseParsedFunction f2("test", params2);
   Real & q2 = f2.getVarAddr("q");
   Real & w2 = f2.getVarAddr("w");
   Real & r2 = f2.getVarAddr("r");
@@ -143,18 +142,17 @@ ParsedFunctionTest::testConstants()
 {
   //this functions tests that pi and e get correctly substituted
   //it also tests built in functions of the function parser
-  InputParameters params = validParams<ParsedFunction>();
+  InputParameters params = validParams<MooseParsedFunction>();
   params.set<std::string>("value") = "log(e) + x";
 
-  ParsedFunction f("test", params);
+  MooseParsedFunction f("test", params);
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 2, f.value(0,1), 0.0000001 );
 
-  InputParameters params2 = validParams<ParsedFunction>();
+  InputParameters params2 = validParams<MooseParsedFunction>();
   params2.set<std::string>("value") = "sin(pi*x)";
 
-  ParsedFunction f2("test", params2);
+  MooseParsedFunction f2("test", params2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 0, f2.value(0,1), 0.0000001 );
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 1, f2.value(0,0.5), 0.0000001 );
   CPPUNIT_ASSERT_DOUBLES_EQUAL( -1, f2.value(0,1.5), 0.0000001 );
 }
-#endif

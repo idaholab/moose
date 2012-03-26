@@ -36,12 +36,12 @@ class MooseParsedGradFunction : public MooseParsedFunction
 public:
   MooseParsedGradFunction(const std::string & name, InputParameters parameters);
 
-  virtual ~MooseParsedGradFunction();
+  virtual ~MooseParsedGradFunction() {}
 
   virtual RealGradient gradient(Real t, const Point & pt);
 
 protected:
-  FunctionBase<Real> *_grad_function;
+    ParsedFunction<Real> _grad_function;
 };
 
 #endif //PARSEDGRADFUNCTION_H
