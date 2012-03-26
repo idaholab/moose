@@ -31,7 +31,11 @@ MooseParsedFunction::MooseParsedFunction(const std::string & name, InputParamete
     _function(getParam<std::string>("value"),
               isParamValid("vars") ? &getParam<std::vector<std::string> >("vars") : NULL,
               isParamValid("vals") ? &getParam<std::vector<Real> >("vals") : NULL)
-{}
+{
+  // Error Checking
+  if (getParam<std::string>("value").find("\"") != std::string::npos)
+    mooseError("The value in ParsedFunction \"" + name + "\" contains quotes(\") which cannot be properly parsed");
+}
 
 Real
 MooseParsedFunction::value(Real t, const Point & pt)
