@@ -50,6 +50,19 @@ public:
 
   virtual const std::vector<unsigned int> & getSubdomainIds() { return _subdomains; }
 
+  /**
+   * Get the ids associated with the component.  These can either be subdomain ids or boundary ids depending
+   * on what you are asking for.
+   *
+   * @param piece The name of the piece of the component you are intersted in.
+   */
+  virtual std::vector<unsigned int> getIDs(std::string piece) { return std::vector<unsigned int>(); }
+
+  /**
+   * Returns the variable associated with that part of the component.
+   */
+  virtual std::string variableName(std::string piece) { return std::string(); }
+
 protected:
   unsigned int _id;                     ///< Unique ID of this component
 
