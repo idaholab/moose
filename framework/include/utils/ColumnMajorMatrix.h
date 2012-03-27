@@ -188,6 +188,12 @@ public:
 
 
   /**
+   * Returns inverse of a general matrix
+   */
+  void inverse(ColumnMajorMatrix & invA) const;
+
+
+  /**
    * Returns a reference to the raw data pointer
    */
   Real * rawData();

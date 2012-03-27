@@ -14,6 +14,8 @@
 
 #include "ColumnMajorMatrix.h"
 extern "C" void dsyev_ ( ... );
+extern "C" void dgetri_ ( ... );
+extern "C" void dgetrf_ ( ... );
 
 ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols)
   : _n_rows(rows),
@@ -183,5 +185,38 @@ ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) con
   if (return_value)
     mooseError("error in lapack eigen solve");
 
+
+}
+
+
+
+
+void
+ColumnMajorMatrix::inverse(ColumnMajorMatrix & invA) const
+{
+  mooseAssert(_n_rows == _n_cols, "Cannot solve for inverse of a non-square matrix!");
+  mooseAssert(_n_rows == invA._n_cols && _n_cols == invA._n_rows, "Matrices must be the same shape for matrix inverse!");
+
+  int n = _n_rows;
+  int buffer_size = -1;
+  int return_value = 0;
+
+  invA = *this;
+
+  std::vector<int> ipiv(n);
+
+
+  Real * invA_data = invA.rawData();
+
+  buffer_size = n * 64;
+  ColumnMajorMatrix buffer(buffer_size,1);
+  Real * b_data = buffer.rawData();
+
+  dgetrf_(&n, &n, invA_data, &n, &ipiv[0], &return_value);
+
+  dgetri_(&n, invA_data, &n, &ipiv[0], b_data, &buffer_size, &return_value);
+
+  if (return_value)
+    mooseError("error in lapack inverse solve");
 
 }

@@ -547,3 +547,39 @@ ColumnMajorMatrixTest::kronecker()
   CPPUNIT_ASSERT( ans(3,2) == 24 );
   CPPUNIT_ASSERT( ans(3,3) == 28 );
 }
+
+void
+ColumnMajorMatrixTest::inverse()
+{
+  ColumnMajorMatrix matrix(3,3), matrix_inverse(3,3);
+
+  matrix(0,0) = 1.0;
+  matrix(0,1) = 3.0;
+  matrix(0,2) = 3.0;
+  
+  matrix(1,0) = 1.0;
+  matrix(1,1) = 4.0;
+  matrix(1,2) = 3.0;
+
+  matrix(2,0) = 1.0;
+  matrix(2,1) = 3.0;
+  matrix(2,2) = 4.0;
+
+  matrix.inverse(matrix_inverse);
+
+
+  CPPUNIT_ASSERT( matrix_inverse(0,0) == 7.0 );
+  CPPUNIT_ASSERT( matrix_inverse(0,1) == -3.0 );
+  CPPUNIT_ASSERT( matrix_inverse(0,2) == -3.0 );
+  
+  CPPUNIT_ASSERT( matrix_inverse(1,0) == -1.0 );
+  CPPUNIT_ASSERT( matrix_inverse(1,1) == 1.0 );
+  CPPUNIT_ASSERT( matrix_inverse(1,2) == 0.0 );
+  
+  CPPUNIT_ASSERT( matrix_inverse(2,0) == -1.0 );
+  CPPUNIT_ASSERT( matrix_inverse(2,1) == 0.0 );
+  CPPUNIT_ASSERT( matrix_inverse(2,2) == 1.0 );
+  
+}
+
+
