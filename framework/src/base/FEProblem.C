@@ -1231,11 +1231,11 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
     // init
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      for (std::set<unsigned int>::const_iterator block_it = pps[tid].blocks().begin();
+      for (std::set<subdomain_id_type>::const_iterator block_it = pps[tid].blocks().begin();
           block_it != pps[tid].blocks().end();
           ++block_it)
       {
-        unsigned int block_id = *block_it;
+        subdomain_id_type block_id = *block_it;
 
         for (std::vector<Postprocessor *>::const_iterator postprocessor_it = pps[tid].elementPostprocessors(block_id).begin();
             postprocessor_it != pps[tid].elementPostprocessors(block_id).end();
@@ -1262,11 +1262,11 @@ FEProblem::computePostprocessorsInternal(std::vector<PostprocessorWarehouse> & p
 
     // Store element postprocessors values
     std::set<Postprocessor *> already_gathered;
-    for (std::set<unsigned int>::const_iterator block_ids_it = pps[0].blocks().begin();
+    for (std::set<subdomain_id_type>::const_iterator block_ids_it = pps[0].blocks().begin();
         block_ids_it != pps[0].blocks().end();
         ++block_ids_it)
     {
-      unsigned int block_id = *block_ids_it;
+      subdomain_id_type block_id = *block_ids_it;
 
       const std::vector<Postprocessor *> & element_postprocessors = pps[0].elementPostprocessors(block_id);
       // Store element postprocessors values
@@ -1945,13 +1945,35 @@ FEProblem::checkProblemIntegrity()
 void
 FEProblem::checkPPSs()
 {
+  // Check pps block coverage
+  std::set<subdomain_id_type> mesh_subdomains = _mesh.meshSubdomains();
+  std::set<subdomain_id_type> pps_blocks;
+
   // gather names of all postprocessors that were defined in the input file
+  // and the blocks that they are defined on
   std::set<std::string> names;
   ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
   {
     for (std::vector<Postprocessor *>::const_iterator it = _pps(types[i])[0].all().begin(); it != _pps(types[i])[0].all().end(); ++it)
       names.insert((*it)->name());
+
+    pps_blocks.insert(_pps(types[i])[0].blocks().begin(), _pps(types[i])[0].blocks().end());
+  }
+
+  // See if all referenced blocks are covered
+  mesh_subdomains.insert(Moose::ANY_BLOCK_ID);
+  std::set<subdomain_id_type> difference;
+  std::set_difference(pps_blocks.begin(), pps_blocks.end(), mesh_subdomains.begin(), mesh_subdomains.end(),
+                      std::inserter(difference, difference.end()));
+
+  if (!difference.empty())
+  {
+    std::ostringstream oss;
+    oss << "One or more Postprocessors is referencing a nonexistent block:\n";
+    for (std::set<subdomain_id_type>::iterator i = difference.begin(); i != difference.end();  ++i)
+      oss << *i << "\n";
+    mooseError(oss.str());
   }
 
   // check that all requested PPS were defined in the input file

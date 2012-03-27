@@ -12,9 +12,6 @@ bad_material_test = { INPUT : 'bad_material_test.i',
 bad_executioner_test = { INPUT : 'bad_executioner_test.i',
                          EXPECT_ERR : "A '\w+' is not a registered object" }
 
-bad_executioner_test = { INPUT : 'bad_executioner_test.i',
-                         EXPECT_ERR : "A '\w+' is not a registered object" }
-
 no_output_dir_test = { INPUT : 'no_output_dir_test.i',
                        EXPECT_ERR : "Can not write to directory: \S+ for file base: \S+" }
 
@@ -98,8 +95,8 @@ bad_second_order_test = { INPUT : 'bad_second_order_test.i',
 wrong_object_test = { INPUT : 'wrong_moose_object_test.i',
                       EXPECT_ERR : 'Inconsistent Action Name detected!' }
 
-wrong_object_test = { INPUT : 'nonexistent_pps_test.i',
-                      EXPECT_ERR : "Postprocessor '\S+' requested but not specified in the input file." }
+wrong_object_test2 = { INPUT : 'nonexistent_pps_test.i',
+                       EXPECT_ERR : "Postprocessor '\S+' requested but not specified in the input file." }
 
 subdomain_restricted_auxkernel_test = { INPUT : 'subdomain_restricted_auxkernel_mismatch.i',
                                         EXPECT_ERR : "AuxKernel \(\w+\): block outside of the domain of the variable" }
@@ -137,3 +134,6 @@ override_name_variable_test = {
   INPUT : 'override_name_variable_test.i',
   EXPECT_OUT : "The following variables were overridden or supplied multiple times:",
 }
+
+pps_bad_block_test = { INPUT : 'pps_bad_block_test.i',
+                       EXPECT_ERR : "One or more Postprocessors is referencing a nonexistent block" }
