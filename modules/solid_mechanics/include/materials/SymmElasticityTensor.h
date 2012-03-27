@@ -130,7 +130,8 @@ public:
   }
 
   void convertFrom9x9( const ColumnMajorMatrix & cmm );
-
+  void convertFrom6x6( const ColumnMajorMatrix & cmm );
+  
   ColumnMajorMatrix columnMajorMatrix9x9() const;
   ColumnMajorMatrix columnMajorMatrix6x6() const;
 

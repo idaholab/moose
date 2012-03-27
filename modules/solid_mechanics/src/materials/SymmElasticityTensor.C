@@ -159,6 +159,44 @@ SymmElasticityTensor::convertFrom9x9( const ColumnMajorMatrix & input )
   _val[20] = input(2,2);
 }
 
+
+void
+SymmElasticityTensor::convertFrom6x6( const ColumnMajorMatrix & input )
+{
+  if ( input.numEntries() != 36 )
+  {
+    mooseError( "Cannot convert from ColumnMajorMatrix (wrong size)" );
+  }
+
+  _val[ 0] = input(0,0);
+  _val[ 1] = input(0,1);
+  _val[ 2] = input(0,2);
+  _val[ 3] = input(0,3);
+  _val[ 4] = input(0,4);
+  _val[ 5] = input(0,5);
+
+  _val[ 6] = input(1,1);
+  _val[ 7] = input(1,2);
+  _val[ 8] = input(1,3);
+  _val[ 9] = input(1,4);
+  _val[10] = input(1,5);
+
+  _val[11] = input(2,2);
+  _val[12] = input(2,3);
+  _val[13] = input(2,4);
+  _val[14] = input(2,5);
+
+  _val[15] = input(3,3);
+  _val[16] = input(3,4);
+  _val[17] = input(3,5);
+
+  _val[18] = input(4,4);
+  _val[19] = input(4,5);
+
+  _val[20] = input(5,5);
+}
+
+
 ColumnMajorMatrix
 SymmElasticityTensor::columnMajorMatrix6x6() const
 {
