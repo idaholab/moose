@@ -481,7 +481,10 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual)
   for(std::vector<NumericVector<Number> *>::iterator it = _vecs_to_zero_for_residual.begin();
       it != _vecs_to_zero_for_residual.end();
       ++it)
+  {
+    (*it)->close();
     (*it)->zero();
+  }
 
   computeTimeDerivatives();
   computeResidualInternal(residual);
