@@ -24,6 +24,7 @@ InputParameters validParams<ThermalContactAction>()
   params.addParam<std::string>("disp_z", "The z displacement");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
+  params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
 
   return params;
 }
@@ -185,6 +186,7 @@ ThermalContactAction::addAuxBcs()
     {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
     }
+    params.set<bool>("warnings") = getParam<bool>("warnings");
     // add it to the warehouse
     Moose::action_warehouse.addActionBlock(action);
   }
