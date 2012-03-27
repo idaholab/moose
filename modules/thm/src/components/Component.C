@@ -25,6 +25,14 @@ Component::genName(const std::string & prefix, unsigned int id, const std::strin
   return ss.str();
 }
 
+std::string
+Component::genName(const std::string & prefix, const std::string & suffix)
+{
+  std::stringstream ss;
+  ss << prefix << ":" << suffix;
+  return ss.str();
+}
+
 Component::Component(const std::string & name, InputParameters parameters) :
     R7Object(name, parameters),
     _id(comp_id++),

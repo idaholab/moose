@@ -64,6 +64,7 @@ protected:
   virtual unsigned int getNextBCId();
 
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
+  static std::string genName(const std::string & prefix, const std::string & suffix);
 
 private:
   // Do not want users to touch these, they _must_ use the API
