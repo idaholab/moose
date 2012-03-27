@@ -28,6 +28,7 @@ InputParameters validParams<GapValueAux>()
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<std::string>("order", "FIRST", "The finite element order");
+  params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   return params;
 }
 
@@ -36,7 +37,8 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     _penetration_locator(getPenetrationLocator(parameters.get<unsigned int>("paired_boundary"), getParam<std::vector<unsigned int> >("boundary")[0], parameters.isParamValid("order") ? Utility::string_to_enum<Order>(parameters.get<std::string>("order")) : FIRST)),
     _serialized_solution(_nl_sys.currentSolution()),
     _dof_map(_nl_sys.dofMap()),
-    _paired_variable(coupled("paired_variable"))
+    _paired_variable(coupled("paired_variable")),
+    _warnings(getParam<bool>("warnings"))
 {
   MooseVariable & pv(*getVar("paired_variable",0));
   if (parameters.isParamValid("tangential_tolerance"))
@@ -58,7 +60,7 @@ GapValueAux::computeValue()
 {
   PenetrationLocator::PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
-  Real gap_temp = 0.0;
+  Real gap_temp(0.0);
 
   if (pinfo)
   {
@@ -76,12 +78,15 @@ GapValueAux::computeValue()
   }
   else
   {
-    std::stringstream msg;
-    msg << "No penetration information found for node ";
-    msg << _current_node->id();
-    msg << " on processor ";
-    msg << libMesh::processor_id();
-    mooseWarning( msg.str() );
+    if (_warnings)
+    {
+      std::stringstream msg;
+      msg << "No gap value information found for node ";
+      msg << _current_node->id();
+      msg << " on processor ";
+      msg << libMesh::processor_id();
+      mooseWarning( msg.str() );
+    }
   }
   return gap_temp;
 }

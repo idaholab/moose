@@ -42,6 +42,7 @@ protected:
   DofMap & _dof_map;
 
   unsigned int _paired_variable;
+  const bool _warnings;
 };
 
 #endif //GAPVALUEAUX_H
