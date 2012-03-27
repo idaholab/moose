@@ -179,12 +179,20 @@ public:
 
   // Materials /////
   void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  /**
+   * Get list of materials with specified name
+   * @param name The name of the material
+   * @param tid Thread ID
+   * @return The list of materials with the name 'name'
+   */
+  virtual const std::vector<Material *> & getMaterialsByName(const std::string & name, THREAD_ID tid);
   virtual const std::vector<Material*> & getMaterials(unsigned int block_id, THREAD_ID tid);
   virtual const std::vector<Material*> & getFaceMaterials(unsigned int block_id, THREAD_ID tid);
   virtual void updateMaterials();
   virtual void reinitMaterials(unsigned int blk_id, THREAD_ID tid);
   virtual void reinitMaterialsFace(unsigned int blk_id, unsigned int side, THREAD_ID tid);
   virtual void reinitMaterialsNeighbor(unsigned int blk_id, unsigned int side, THREAD_ID tid);
+
 
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters, ExecFlagType type = EXEC_TIMESTEP);

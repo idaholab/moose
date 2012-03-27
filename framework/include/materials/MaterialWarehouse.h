@@ -43,6 +43,8 @@ public:
   bool hasBoundaryMaterials(unsigned int boundary_id);
   bool hasNeighborMaterials(unsigned int boundary_id);
 
+  std::vector<Material *> & getMaterialsByName(const std::string & name);
+
   std::vector<Material *> & getMaterials(unsigned int block_id);
   std::vector<Material *> & getBoundaryMaterials(unsigned int boundary_id);
   std::vector<Material *> & getNeighborMaterials(unsigned int boundary_id);
@@ -69,8 +71,11 @@ protected:
   std::set<int> _blocks;                                                ///< Set of blocks where materials are defined
 
   std::vector<std::map<int, std::vector<Material *> > *> _master_list;  ///< A convenience list of all the maps
-private:
 
+  /// list of materials by name
+  std::map<std::string, std::vector<Material *> > _mat_by_name;
+
+private:
   // This routine uses the Dependency Resolver to sort Materials based on dependencies they
   // might have on coupled values
   void sortMaterials(std::map<int, std::vector<Material *> > & materials_map);

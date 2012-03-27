@@ -1097,6 +1097,12 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   }
 }
 
+const std::vector<Material *> &
+FEProblem::getMaterialsByName(const std::string & name, THREAD_ID tid)
+{
+  return _materials[tid].getMaterialsByName(name);
+}
+
 const std::vector<Material*> &
 FEProblem::getMaterials(unsigned int block_id, THREAD_ID tid)
 {

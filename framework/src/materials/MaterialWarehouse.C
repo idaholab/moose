@@ -169,18 +169,21 @@ MaterialWarehouse::addMaterial(int block_id, Material *material)
 {
   _blocks.insert(block_id);
   _active_materials[block_id].push_back(material);
+  _mat_by_name[material->name()].push_back(material);
 }
 
 void MaterialWarehouse::addBoundaryMaterial(int block_id, Material *material)
 {
   _blocks.insert(block_id);
   _active_boundary_materials[block_id].push_back(material);
+  _mat_by_name[material->name()].push_back(material);
 }
 
 void MaterialWarehouse::addNeighborMaterial(int block_id, Material *material)
 {
   _blocks.insert(block_id);
   _active_neighbor_materials[block_id].push_back(material);
+  _mat_by_name[material->name()].push_back(material);
 }
 
 void
@@ -220,4 +223,12 @@ MaterialWarehouse::sortMaterials(std::map<int, std::vector<Material *> > & mater
     // Sort based on dependencies
     std::sort(j->second.begin(), j->second.end(), resolver);
   }
+}
+
+std::vector<Material *> &
+MaterialWarehouse::getMaterialsByName(const std::string & name)
+{
+  if (_mat_by_name.find(name) == _mat_by_name.end())
+    mooseError("Could not find material with name '" << name << "'");
+  return _mat_by_name[name];
 }
