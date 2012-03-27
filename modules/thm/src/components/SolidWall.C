@@ -5,6 +5,7 @@
 //
 #include "OneDMassSolidWallBC.h"
 #include "OneDMomentumSolidWallBC.h"
+#include "OneDEnergySolidWallBC.h"
 
 template<>
 InputParameters validParams<SolidWall>()
@@ -75,5 +76,18 @@ SolidWall::addMooseObjects()
     params.set<std::vector<std::string> >("p") = cv_p;
     params.set<std::vector<std::string> >("rho") = cv_rho;
     _sim.addBoundaryCondition("OneDMomentumSolidWallBC", genName("bc", _id, "rhou"), params);
+  }
+
+  if (_model_type == Model::EQ_MODEL_3)
+  {
+    InputParameters params = validParams<OneDEnergySolidWallBC>();
+    params.set<std::string>("variable") = Model::RHOE;
+    params.set<std::vector<unsigned int> >("boundary") = bnd_id;
+    params.set<std::string>("eos_function") = Model::EOS_FUNCTION;
+
+    // There is no coupling for the energy equation solid wall BC.
+    // It simply returns zero...
+
+    _sim.addBoundaryCondition("OneDEnergySolidWallBC", genName("bc", _id, "rhoE"), params);
   }
 }
