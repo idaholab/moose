@@ -28,17 +28,23 @@ InputParameters validParams<MooseParsedFunction>()
 
 MooseParsedFunction::MooseParsedFunction(const std::string & name, InputParameters parameters) :
     Function(name, parameters),
-    _function(getParam<std::string>("value"),
+    _function(verifyInput(name, getParam<std::string>("value")) ? getParam<std::string>("value") : "",
               isParamValid("vars") ? &getParam<std::vector<std::string> >("vars") : NULL,
               isParamValid("vals") ? &getParam<std::vector<Real> >("vals") : NULL)
-{
-  // Error Checking
-  if (getParam<std::string>("value").find("\"") != std::string::npos)
-    mooseError("The value in ParsedFunction \"" + name + "\" contains quotes(\") which cannot be properly parsed");
-}
+{}
 
 Real
 MooseParsedFunction::value(Real t, const Point & pt)
 {
   return _function(pt, t);
 }
+
+bool
+MooseParsedFunction::verifyInput(const std::string & name, const std::string & value)
+{
+  // Error Checking
+  if (value.find("\"") != std::string::npos)
+    mooseError("The value in ParsedFunction \"" + name + "\" contains quotes(\") which cannot be properly parsed");
+  return true;
+}
+

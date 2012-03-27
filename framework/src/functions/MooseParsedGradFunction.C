@@ -26,9 +26,10 @@ InputParameters validParams<MooseParsedGradFunction>()
 
 MooseParsedGradFunction::MooseParsedGradFunction(const std::string & name, InputParameters parameters) :
     MooseParsedFunction(name, parameters),
-    _grad_function(std::string("{") + getParam<std::string>("grad_x") + "}{" +
+    _grad_function(verifyInput(name, getParam<std::string>("value")) ?
+                   std::string("{") + getParam<std::string>("grad_x") + "}{" +
                    getParam<std::string>("grad_y") + "}{" +
-                   getParam<std::string>("grad_z") + "}",
+                   getParam<std::string>("grad_z") + "}" : "",
                    isParamValid("vars") ? &getParam<std::vector<std::string> >("vars") : NULL,
                    isParamValid("vals") ? &getParam<std::vector<Real> >("vals") : NULL)
 {}

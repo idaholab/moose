@@ -81,6 +81,11 @@ protected:
   // TODO: This function is currently not implemented
   // void defineConstants(FunctionParser & fp);
 
+  /**
+   * This method just checks to see if the function value contains quotes
+   */
+  static bool verifyInput(const std::string & name, const std::string & value);
+
   std::vector<Real> _vals;
 
   ParsedFunction<Real> _function;
