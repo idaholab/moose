@@ -27,7 +27,7 @@ private:
   bool _has_temp;
   VariableValue & _temp;
 
-  Real _my_thermal_conductivity;
+  const Real & _my_thermal_conductivity;
   Real _my_specific_heat;
   Real _my_density;
 
