@@ -212,11 +212,11 @@ GapHeatTransfer::gapLength() const
 Real
 GapHeatTransfer::dgapLength( Real normalComponent ) const
 {
-  Real gap_L = -(_gap_distance[_qp]);
+  const Real gap_L = gapLength();
 
   Real dgap(0);
 
-  if ( _min_gap < gap_L && gap_L < _max_gap)
+  if ( _min_gap <= gap_L && gap_L <= _max_gap)
   {
     dgap = normalComponent;
   }
