@@ -13,6 +13,7 @@ InputParameters validParams<SolidMechanicsAction>()
   params.addParam<std::string>("disp_z", "", "The z displacement");
   params.addParam<std::string>("disp_r", "", "The r displacement");
   params.addParam<std::string>("temp", "", "The temperature");
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
@@ -90,7 +91,7 @@ SolidMechanicsAction::act()
   }
   if (!rz)
   {
-    params.set<bool>("use_displaced_mesh") = true;
+    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
   }
 
   for (unsigned int i(0); i < dim; ++i)
